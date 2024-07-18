@@ -216,6 +216,23 @@ class BaseFederatedDatasetsTest(unittest.TestCase):
         dataset_length = sum([len(ds) for ds in dataset.values()])
         self.assertEqual(len(full), dataset_length)
 
+    def test_use_load_dataset_kwargs(self) -> None:
+        """Test if the FederatedDataset works correctly with load_dataset_kwargs."""
+        try:
+            fds = FederatedDataset(
+                dataset=self.dataset_name,
+                shuffle=False,
+                partitioners={"train": 10},
+                num_proc=2,
+            )
+            _ = fds.load_partition(0)
+        # Try to catch as broad as possible
+        except Exception as e:  # pylint: disable=broad-except
+            self.fail(
+                f"Error when using load_dataset_kwargs: {e}. "
+                f"This code should not raise any exceptions."
+            )
+
 
 class ShufflingResplittingOnArtificialDatasetTest(unittest.TestCase):
     """Test shuffling and resplitting using small artificial dataset.
@@ -415,6 +432,23 @@ class IncorrectUsageFederatedDatasets(unittest.TestCase):
         )
         with self.assertRaises(ValueError):
             fds.load_partition(0, "train")
+
+    def test_use_load_dataset_kwargs(self) -> None:
+        """Test if the FederatedDataset raises with incorrect load_dataset_kwargs.
+
+        The FederatedDataset should throw an error when the load_dataset_kwargs make the
+        return type different from a DatasetDict.
+
+        Use split which makes the load_dataset return a Dataset.
+        """
+        fds = FederatedDataset(
+            dataset="mnist",
+            shuffle=False,
+            partitioners={"train": 10},
+            split="train",
+        )
+        with self.assertRaises(ValueError):
+            _ = fds.load_partition(0)
 
 
 def datasets_are_equal(ds1: Dataset, ds2: Dataset) -> bool:
