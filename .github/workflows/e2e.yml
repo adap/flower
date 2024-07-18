@@ -222,7 +222,7 @@ jobs:
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
         with:
-          python-version: 3.10
+          python-version: '3.10'
       - name: Install Flower from repo
         if: ${{ github.repository != 'adap/flower' || github.event.pull_request.head.repo.fork || github.actor == 'dependabot[bot]' }}
         run: |
