@@ -56,9 +56,6 @@ def run(
             "but not both."
         )
 
-    if server_app_dir is not None:
-        sys.path.insert(0, str(Path(server_app_dir).absolute()))
-
     # Load ServerApp if needed
     def _load() -> ServerApp:
         if server_app_attr:

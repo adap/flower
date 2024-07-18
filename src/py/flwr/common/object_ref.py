@@ -32,17 +32,30 @@ refer to a module on the PYTHONPATH and the module needs to have the specified
 attribute.
 """
 
+_current_sys_path: str = ""
+
 
 def validate(
     module_attribute_str: str,
     check_module: bool = True,
+    project_dir: Optional[Union[str, Path]] = None,
 ) -> Tuple[bool, Optional[str]]:
     """Validate object reference.
 
-    The object reference string should have the form <module>:<attribute>. Valid
-    examples include `client:app` and `project.package.module:wrapper.app`. It must
-    refer to a module on the PYTHONPATH and the module needs to have the specified
-    attribute.
+    Parameters
+    ----------
+    module_attribute_str : str
+        The reference to the object. It should have the form `<module>:<attribute>`.
+        Valid examples include `client:app` and `project.package.module:wrapper.app`.
+        It must refer to a module on the PYTHONPATH or in the provided `project_dir`
+        and the module needs to have the specified attribute.
+    check_module : bool (default: True)
+        Flag indicating whether to verify the existence of the module and the
+        specified attribute within it.
+    project_dir : Optional[Union[str, Path]] (default: None)
+        The directory containing the module. If None, the current working directory
+        is used. If `check_module` is True, the `project_dir` will be inserted into
+        the system path, and the previously inserted `project_dir` will be removed.
 
     Returns
     -------
@@ -63,6 +76,9 @@ def validate(
         )
 
     if check_module:
+        # Set the system path
+        _set_sys_path(project_dir)
+
         # Load module
         module = find_spec(module_str)
         if module and module.origin:
@@ -89,18 +105,35 @@ def load_app(  # pylint: disable= too-many-branches
 ) -> Any:
     """Return the object specified in a module attribute string.
 
-    The module/attribute string should have the form <module>:<attribute>. Valid
-    examples include `client:app` and `project.package.module:wrapper.app`. It must
-    refer to a module on the PYTHONPATH, the module needs to have the specified
-    attribute.
+    Parameters
+    ----------
+    module_attribute_str : str
+        The reference to the object. It should have the form `<module>:<attribute>`.
+        Valid examples include `client:app` and `project.package.module:wrapper.app`.
+        It must refer to a module on the PYTHONPATH or in the provided `project_dir`
+        and the module needs to have the specified attribute.
+    error_type : Type[Exception]
+        The type of exception to be raised if the provided `module_attribute_str` is
+        in an invalid format.
+    project_dir : Optional[Union[str, Path]], optional (default=None)
+        The directory containing the module. If None, the current working directory
+        is used. The `project_dir` will be inserted into the system path, and the
+        previously inserted `project_dir` will be removed.
+
+    Returns
+    -------
+    Any
+        The object specified by the module attribute string.
     """
-    valid, error_msg = validate(module_attribute_str)
+    valid, error_msg = validate(module_attribute_str, check_module=False)
     if not valid and error_msg:
         raise error_type(error_msg) from None
 
     module_str, _, attributes_str = module_attribute_str.partition(":")
 
     try:
+        _set_sys_path(project_dir)
+
         if module_str not in sys.modules:
             module = importlib.import_module(module_str)
         # Hack: `tabnet` does not work with `importlib.reload`
@@ -116,19 +149,15 @@ def load_app(  # pylint: disable= too-many-branches
             module = sys.modules[module_str]
         else:
             module = sys.modules[module_str]
+
             if project_dir is None:
-                path: Optional[str] = getattr(module, "__file__", None)
-                if path is not None:
-                    project_dir = str(Path(path).parent)
-            else:
-                project_dir = str(Path(project_dir).absolute())
+                project_dir = Path.cwd()
 
             # Reload cached modules in the project directory
-            if project_dir is not None:
-                for m in list(sys.modules.values()):
-                    path = getattr(m, "__file__", None)
-                    if path is not None and path.startswith(project_dir):
-                        importlib.reload(m)
+            for m in list(sys.modules.values()):
+                path: Optional[str] = getattr(m, "__file__", None)
+                if path is not None and path.startswith(str(project_dir)):
+                    importlib.reload(m)
 
     except ModuleNotFoundError as err:
         raise error_type(
@@ -140,13 +169,37 @@ def load_app(  # pylint: disable= too-many-branches
     try:
         for attribute_str in attributes_str.split("."):
             attribute = getattr(attribute, attribute_str)
-    except AttributeError:
+    except AttributeError as err:
         raise error_type(
             f"Unable to load attribute {attributes_str} from module {module_str}"
             f"{OBJECT_REF_HELP_STR}",
-        ) from None
+        ) from err
 
     return attribute
+
+
+def _set_sys_path(directory: Optional[Union[str, Path]]) -> None:
+    """Set the system path."""
+    global _current_sys_path  # pylint: disable=global-statement
+    # Assume the current working directory `""` is in `sys.path`
+    if directory is None:
+        return
+
+    directory = Path(directory).absolute()
+
+    # If the directory has already been added to `sys.path`, return
+    if str(directory) == _current_sys_path:
+        return
+
+    # Remove the old path if it exists and is not `""`.
+    if _current_sys_path != "":
+        sys.path.remove(_current_sys_path)
+
+    # Add the new path to sys.path
+    sys.path.insert(0, str(directory))
+
+    # Update the current_sys_path
+    _current_sys_path = str(directory)
 
 
 def _find_attribute_in_module(file_path: str, attribute_name: str) -> bool:
