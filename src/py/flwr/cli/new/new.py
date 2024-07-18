@@ -245,6 +245,7 @@ def new(
             MlFramework.HUGGINGFACE.value.lower(),
             MlFramework.MLX.value.lower(),
             MlFramework.TENSORFLOW.value.lower(),
+            MlFramework.XGBOOST.value.lower(),
         ]
         if framework_str in frameworks_with_tasks:
             files[f"{import_name}/task.py"] = {
