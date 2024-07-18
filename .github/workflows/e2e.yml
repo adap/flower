@@ -105,7 +105,7 @@ jobs:
               Path('data').mkdir(exist_ok=True)
               load_iris(as_frame=True)['data'].to_csv('./data/client.csv')
 
-    name: Framework / ${{matrix.directory}}
+    name: Framework / ${{ matrix.directory }}
 
     defaults:
       run:
@@ -213,7 +213,7 @@ jobs:
     needs: wheel
     strategy:
       matrix:
-        framework: ["NumPy", "PyTorch", "TensorFlow", "HF", "JAX", "XGBoost", "MLX", "sklearn"]
+        framework: ["numpy", "pytorch", "tensorflow", "hf", "jax", "xgboost", "mlx", "sklearn"]
 
     name: Template / ${{ matrix.framework }}
 
