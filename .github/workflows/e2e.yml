@@ -206,3 +206,34 @@ jobs:
       - name: Test strategies
         run: |
           python test.py "${{ matrix.strat }}"
+
+  templates:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    needs: wheel
+    strategy:
+      matrix:
+        framework: ["NumPy", "PyTorch", "TensorFlow", "HF", "JAX", "XGBoost", "MLX", "sklearn"]
+
+    name: Template / ${{ matrix.framework }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+      - name: Install Flower from repo
+        if: ${{ github.repository != 'adap/flower' || github.event.pull_request.head.repo.fork || github.actor == 'dependabot[bot]' }}
+        run: |
+          python -m pip install .
+      - name: Install Flower wheel from artifact store
+        if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
+        run: |
+          python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
+      - name: Create project and install it
+        run: |
+          flwr new tmp-${{ matrix.framework }} --framework ${{ matrix.framework }} --username gh_ci
+          cd tmp-${{ matrix.framework }}
+          pip install .
+      - name: Run project
+        run: |
+          flwr run --run-conifg num-server-rounds=1
