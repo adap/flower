@@ -21,11 +21,16 @@ packages = ["."]
 publisher = "$username"
 
 [tool.flwr.app.components]
-serverapp = "$import_name.server:app"
-clientapp = "$import_name.client:app"
+serverapp = "$import_name.server_app:app"
+clientapp = "$import_name.client_app:app"
 
 [tool.flwr.app.config]
 num-server-rounds = "3"
+local-epochs = "1"
+num-layers = "2"
+hidden-dim = "32"
+batch-size = "256"
+lr = "0.1"
 
 [tool.flwr.federations]
 default = "localhost"
