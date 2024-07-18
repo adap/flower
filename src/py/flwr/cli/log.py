@@ -58,10 +58,14 @@ def log(
     ] = None,
     follow: Annotated[
         bool,
-        typer.Option(case_sensitive=False, help="Use this flag to follow logstream"),
+        typer.Option(
+            "--follow/--no-follow",
+            "-f/-F",
+            help="Use this flag to follow logstream",
+        ),
     ] = True,
 ) -> None:
-    """Get logs from Flower run."""
+    """Get logs from a Flower project run."""
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
     pyproject_path = directory / "pyproject.toml" if directory else None
@@ -117,38 +121,54 @@ def log(
         raise typer.Exit(code=1)
 
     if "address" in federation:
-        _log_with_superexec(federation, directory)
+        _log_with_superexec(federation, run_id, follow)
     else:
         pass
 
 
+# pylint: disable-next=too-many-branches
 def _log_with_superexec(
     federation: Dict[str, str],
-    directory: Optional[Path],
+    run_id: int,
+    follow: bool,
 ) -> None:
 
     def on_channel_state_change(channel_connectivity: str) -> None:
         """Log channel connectivity."""
         logger(DEBUG, channel_connectivity)
 
-    if superexec_address is None:
-        global_config = config_utils.load(get_flwr_dir() / "config.toml")
-        if global_config:
-            superexec_address = global_config["federation"]["default"]
-        else:
+    insecure_str = federation.get("insecure")
+    if root_certificates := federation.get("root-certificates"):
+        root_certificates_bytes = Path(root_certificates).read_bytes()
+        if insecure := bool(insecure_str):
             typer.secho(
-                "No SuperExec address was provided and no global config was found.",
+                "❌ `root_certificates` were provided but the `insecure` parameter"
+                "is set to `True`.",
                 fg=typer.colors.RED,
                 bold=True,
             )
-            sys.exit()
-
-    assert superexec_address is not None
+            raise typer.Exit(code=1)
+    else:
+        root_certificates_bytes = None
+        if insecure_str is None:
+            typer.secho(
+                "❌ To disable TLS, set `insecure = true` in `pyproject.toml`.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1)
+        if not (insecure := bool(insecure_str)):
+            typer.secho(
+                "❌ No certificate were given yet `insecure` is set to `False`.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1)
 
     channel = create_channel(
-        server_address=superexec_address,
-        insecure=True,
-        root_certificates=None,
+        server_address=federation["address"],
+        insecure=insecure,
+        root_certificates=root_certificates_bytes,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
         interceptors=None,
     )
