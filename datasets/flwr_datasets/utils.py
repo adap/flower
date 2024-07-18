@@ -35,6 +35,7 @@ tested_datasets = [
     "sentiment140",
     "speech_commands",
     "flwrlabs/femnist",
+    "flwrlabs/ucf101",
 ]
 
 

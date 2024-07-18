@@ -380,15 +380,18 @@ class PartitionersSpecificationForFederatedDatasets(unittest.TestCase):
         )
 
 
-mocked_natural_id_datasets = [
+natural_id_datasets = [
     "flwrlabs/femnist",
 ]
+
+mocked_natural_id_datasets = ["flwrlabs/ucf101"]
 
 
 @parameterized_class(
     ("dataset_name", "test_split", "subset", "partition_by"),
     [
         ("flwrlabs/femnist", "", "", "writer_id"),
+        ("flwrlabs/ucf101", "test", "", "video_id"),
     ],
 )
 class NaturalIdPartitionerIntegrationTest(unittest.TestCase):
@@ -398,6 +401,24 @@ class NaturalIdPartitionerIntegrationTest(unittest.TestCase):
     test_split = ""
     subset = ""
     partition_by = ""
+
+    def setUp(self) -> None:
+        """Mock the dataset download prior to each method if needed.
+
+        If the `dataset_name` is in the `mocked_datasets` list, then the dataset
+        download is mocked.
+        """
+        if self.dataset_name in mocked_natural_id_datasets:
+            self.patcher = patch("datasets.load_dataset")
+            self.mock_load_dataset = self.patcher.start()
+            self.mock_load_dataset.return_value = _load_mocked_dataset(
+                self.dataset_name, [20, 10], ["train", self.test_split], self.subset
+            )
+
+    def tearDown(self) -> None:
+        """Clean up after the dataset mocking."""
+        if self.dataset_name in mocked_datasets:
+            patch.stopall()
 
     def test_if_the_partitions_have_unique_values(self) -> None:
         """Test if each partition has a single unique id value."""
