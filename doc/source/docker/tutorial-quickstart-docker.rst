@@ -88,7 +88,8 @@ Open your terminal and run:
    * ``--name superlink``: Assign the name ``superlink`` to the container.
    * ``--detach``: Run the container in the background, freeing up the terminal.
    * | :substitution-code:`flwr/superlink:|latest_version_docker|`: The name of the image to be run and the specific
-     | tag of the image. The tag :substitution-code:`|latest_version_docker|` represents a specific version of the image.
+     | tag of the image. The tag :substitution-code:`|latest_version_docker|` represents a
+     | :doc:`specific version <pinning-version>` of the image.
    * | ``--insecure``: This flag tells the container to operate in an insecure mode, allowing
      | unencrypted communication.
 
@@ -212,6 +213,8 @@ building your own SuperNode image.
         | unencrypted communication.
       * | ``--superlink superlink:9092``: Connect to the SuperLinks Fleet API on the address
         | ``superlink:9092``.
+      * | ``--node-config partition-id=0,num-partitions=2``: Set the partition ID to ``0`` and the
+        | number of partitions to ``2`` for the SuperNode configuration.
 
 #. Start the second SuperNode container:
 

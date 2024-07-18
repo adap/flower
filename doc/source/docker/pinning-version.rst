@@ -4,8 +4,8 @@ Pinning a Docker Image to a Specific Version
 It may happen that we update the images behind the tags. Such updates usually include security
 updates of system dependencies that should not change the functionality of Flower. However, if
 you want to ensure that you use a fixed version of the Docker image in your deployments, you can
-`https://docs.docker.com/reference/cli/docker/image/pull/#pull-an-image-by-digest-immutable-identifier
-<specify the digest>`_ of the image instead of the tag.
+`specify the digest <https://docs.docker.com/reference/cli/docker/image/pull/#pull-an-image-by-digest-immutable-identifier>`_
+of the image instead of the tag.
 
 Example
 -------
