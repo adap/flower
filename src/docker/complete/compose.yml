@@ -1,27 +1,53 @@
 services:
   # create a SuperLink service
   superlink:
-    image: flwr/superlink:1.10.0.dev20240714
+    image: flwr/superlink:1.10.0.dev20240717
     command:
       - --insecure
 
   # create a SuperNode service with two containers
-  supernode:
+  supernode-1:
     user: root
     build:
       context: .
       dockerfile_inline: |
-        FROM flwr/supernode:1.10.0.dev20240714
+        FROM flwr/supernode:1.10.0.dev20240717
 
         WORKDIR /app
         RUN python -m pip install -U --no-cache-dir \
-            "flwr-datasets[vision]>==0.1.0,<0.2.0" \
+            "flwr-datasets[vision]>=0.2.0,<1.0.0" \
             torch==2.2.1 \
-            torchvision==0.17.1 \
-            tqdm==4.66.3
-        ENTRYPOINT ["flower-supernode", "client:app"]
+            torchvision==0.17.1
+
+        ENTRYPOINT ["flower-supernode", "client:app", "--node-config", "partition-id=0,num-partitions=2"]
     deploy:
-      replicas: 2
+      resources:
+        limits:
+          cpus: "2"
+    command:
+      - --superlink
+      - superlink:9092
+      - --insecure
+    depends_on:
+      - superlink
+    volumes:
+      - apps-volume:/app/.flwr/apps/:ro
+
+  supernode-2:
+    user: root
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM flwr/supernode:1.10.0.dev20240717
+
+        WORKDIR /app
+        RUN python -m pip install -U --no-cache-dir \
+            "flwr-datasets[vision]>=0.2.0,<1.0.0" \
+            torch==2.2.1 \
+            torchvision==0.17.1
+
+        ENTRYPOINT ["flower-supernode", "client:app", "--node-config", "partition-id=1,num-partitions=2"]
+    deploy:
       resources:
         limits:
           cpus: "2"
@@ -40,11 +66,11 @@ services:
     build:
       context: .
       dockerfile_inline: |
-        FROM flwr/superexec:1.10.0.dev20240714
+        FROM flwr/supernode:1.10.0.dev20240717
 
         WORKDIR /app
         RUN python -m pip install -U --no-cache-dir \
-            "flwr-datasets[vision]>==0.1.0,<0.2.0" \
+            "flwr-datasets[vision]>=0.2.0,<1.0.0" \
             torch==2.2.1 \
             torchvision==0.17.1
 

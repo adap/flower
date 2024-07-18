@@ -5,21 +5,31 @@ services:
       - --ssl-certfile=certificates/server.pem
       - --ssl-keyfile=certificates/server.key
     secrets:
-      - source: ca-certfile
+      - source: superlink-ca-certfile
         target: /app/certificates/ca.crt
-      - source: certfile
+      - source: superlink-certfile
         target: /app/certificates/server.pem
-      - source: keyfile
+      - source: superlink-keyfile
         target: /app/certificates/server.key
 
-  supernode:
+  supernode-1:
     command:
       - --superlink
       - superlink:9092
       - --root-certificates
       - certificates/ca.crt
     secrets:
-      - source: ca-certfile
+      - source: superlink-ca-certfile
+        target: /app/certificates/ca.crt
+
+  supernode-2:
+    command:
+      - --superlink
+      - superlink:9092
+      - --root-certificates
+      - certificates/ca.crt
+    secrets:
+      - source: superlink-ca-certfile
         target: /app/certificates/ca.crt
 
   superexec:
@@ -27,16 +37,30 @@ services:
       - --executor
       - flwr.superexec.deployment:executor
       - --executor-config
-      - superlink=superlink:9091,root-certificates=certificates/ca.crt
-      - --insecure
+      - superlink=superlink:9091,root-certificates=certificates/superlink-ca.crt
+      - --ssl-ca-certfile=certificates/ca.crt
+      - --ssl-certfile=certificates/server.pem
+      - --ssl-keyfile=certificates/server.key
     secrets:
-      - source: ca-certfile
+      - source: superlink-ca-certfile
+        target: /app/certificates/superlink-ca.crt
+      - source: superexec-ca-certfile
         target: /app/certificates/ca.crt
+      - source: superexec-certfile
+        target: /app/certificates/server.pem
+      - source: superexec-keyfile
+        target: /app/certificates/server.key
 
 secrets:
-  ca-certfile:
-    file: ./certificates/ca.crt
-  certfile:
-    file: ./certificates/server.pem
-  keyfile:
-    file: ./certificates/server.key
+  superlink-ca-certfile:
+    file: ./superlink-certificates/ca.crt
+  superlink-certfile:
+    file: ./superlink-certificates/server.pem
+  superlink-keyfile:
+    file: ./superlink-certificates/server.key
+  superexec-ca-certfile:
+    file: ./superexec-certificates/ca.crt
+  superexec-certfile:
+    file: ./superexec-certificates/server.pem
+  superexec-keyfile:
+    file: ./superexec-certificates/server.key

@@ -12,7 +12,7 @@ services:
 
         WORKDIR /app/script
 
-        COPY <<-EOF certificate.conf
+        COPY <<-EOF superlink-certificate.conf
         [req]
         default_bits = 4096
         prompt = no
@@ -21,8 +21,7 @@ services:
         distinguished_name = dn
 
         [dn]
-        C = DE
-        ST = HH
+        C = US
         O = Flower
         CN = localhost
 
@@ -30,7 +29,29 @@ services:
         subjectAltName = @alt_names
 
         [alt_names]
-        DNS.1 = superlink
+        DNS.0 = superlink
+        IP.1 = ::1
+        IP.2 = 127.0.0.1
+        EOF
+
+        COPY <<-EOF superexec-certificate.conf
+        [req]
+        default_bits = 4096
+        prompt = no
+        default_md = sha256
+        req_extensions = req_ext
+        distinguished_name = dn
+
+        [dn]
+        C = US
+        O = Flower
+        CN = localhost
+
+        [req_ext]
+        subjectAltName = @alt_names
+
+        [alt_names]
+        DNS.0 = superexec
         IP.1 = ::1
         IP.2 = 127.0.0.1
         EOF
@@ -45,49 +66,55 @@ services:
         CA_PASSWORD=notsafe
 
         # Generate directories if not exists
-        mkdir -p certificates
 
-        if [ -f "certificates/ca.crt" ]; then
-            echo "Skipping certificate generation as they already exist."
-            exit 0
-        fi
+        generate () {
+          mkdir -p "$$1"
 
-        # Generate the root certificate authority key and certificate based on key
-        openssl genrsa -out certificates/ca.key 4096
-        openssl req \
-            -new \
-            -x509 \
-            -key certificates/ca.key \
-            -sha256 \
-            -subj "/C=DE/ST=HH/O=CA, Inc." \
-            -days 365 -out certificates/ca.crt
+          if [ -f ""$$1"/ca.crt" ]; then
+              echo "Skipping certificate generation as they already exist."
+              return 0
+          fi
 
-        # Generate a new private key for the server
-        openssl genrsa -out certificates/server.key 4096
+          # Generate the root certificate authority key and certificate based on key
+          openssl genrsa -out "$$1"/ca.key 4096
+          openssl req \
+              -new \
+              -x509 \
+              -key "$$1"/ca.key \
+              -sha256 \
+              -subj "/C=DE/ST=HH/O=CA, Inc." \
+              -days 365 -out "$$1"/ca.crt
 
-        # Create a signing CSR
-        openssl req \
-            -new \
-            -key certificates/server.key \
-            -out certificates/server.csr \
-            -config ./script/certificate.conf
+          # Generate a new private key for the server
+          openssl genrsa -out "$$1"/server.key 4096
 
-        # Generate a certificate for the server
-        openssl x509 \
-            -req \
-            -in certificates/server.csr \
-            -CA certificates/ca.crt \
-            -CAkey certificates/ca.key \
-            -CAcreateserial \
-            -out certificates/server.pem \
-            -days 365 \
-            -sha256 \
-            -extfile ./script/certificate.conf \
-            -extensions req_ext
+          # Create a signing CSR
+          openssl req \
+              -new \
+              -key "$$1"/server.key \
+              -out "$$1"/server.csr \
+              -config ./script/"$$2"
+
+          # Generate a certificate for the server
+          openssl x509 \
+              -req \
+              -in "$$1"/server.csr \
+              -CA "$$1"/ca.crt \
+              -CAkey "$$1"/ca.key \
+              -CAcreateserial \
+              -out "$$1"/server.pem \
+              -days 365 \
+              -sha256 \
+              -extfile ./script/"$$2" \
+              -extensions req_ext
+        }
+        generate superlink-certificates superlink-certificate.conf
+        generate superexec-certificates superexec-certificate.conf
         EOF
 
         WORKDIR /app
 
         ENTRYPOINT ["./script/generate.sh"]
     volumes:
-      - ./certificates/:/app/certificates/:rw
+      - ./superlink-certificates/:/app/superlink-certificates/:rw
+      - ./superexec-certificates/:/app/superexec-certificates/:rw
