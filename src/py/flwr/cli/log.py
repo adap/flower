@@ -18,13 +18,14 @@ import sys
 import time
 from logging import DEBUG, ERROR, INFO
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict
 
 import grpc
 import typer
 from typing_extensions import Annotated
 
 from flwr.cli import config_utils
+from flwr.cli.config_utils import load_and_validate
 from flwr.common.config import get_flwr_dir
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log as logger
@@ -61,6 +62,70 @@ def log(
     ] = True,
 ) -> None:
     """Get logs from Flower run."""
+    typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
+
+    pyproject_path = directory / "pyproject.toml" if directory else None
+    config, errors, warnings = load_and_validate(path=pyproject_path)
+
+    if config is None:
+        typer.secho(
+            "Project configuration could not be loaded.\n"
+            "pyproject.toml is invalid:\n"
+            + "\n".join([f"- {line}" for line in errors]),
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        sys.exit()
+
+    if warnings:
+        typer.secho(
+            "Project configuration is missing the following "
+            "recommended properties:\n" + "\n".join([f"- {line}" for line in warnings]),
+            fg=typer.colors.RED,
+            bold=True,
+        )
+
+    typer.secho("Success", fg=typer.colors.GREEN)
+
+    federation_name = federation_name or config["tool"]["flwr"]["federations"].get(
+        "default"
+    )
+
+    if federation_name is None:
+        typer.secho(
+            "❌ No federation name was provided and the project's `pyproject.toml` "
+            "doesn't declare a default federation (with a SuperExec address or an "
+            "`options.num-supernodes` value).",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+
+    # Validate the federation exists in the configuration
+    federation = config["tool"]["flwr"]["federations"].get(federation_name)
+    if federation is None:
+        available_feds = {
+            fed for fed in config["tool"]["flwr"]["federations"] if fed != "default"
+        }
+        typer.secho(
+            f"❌ There is no `{federation_name}` federation declared in the "
+            "`pyproject.toml`.\n The following federations were found:\n\n"
+            + "\n".join(available_feds),
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+
+    if "address" in federation:
+        _log_with_superexec(federation, directory)
+    else:
+        pass
+
+
+def _log_with_superexec(
+    federation: Dict[str, str],
+    directory: Optional[Path],
+) -> None:
 
     def on_channel_state_change(channel_connectivity: str) -> None:
         """Log channel connectivity."""
