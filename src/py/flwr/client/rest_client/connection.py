@@ -353,12 +353,11 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
         # Send the request
         res = _request(req, GetRunResponse, PATH_GET_RUN)
         if res is None:
-            return Run(run_id, "", "", {})
+            return Run(run_id, "", {})
 
         return Run(
             run_id,
-            res.run.fab_id,
-            res.run.fab_version,
+            res.run.fab_hash,
             dict(res.run.override_config.items()),
         )
 

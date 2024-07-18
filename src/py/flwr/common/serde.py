@@ -17,6 +17,7 @@
 
 from typing import Any, Dict, List, MutableMapping, OrderedDict, Type, TypeVar, cast
 
+from flwr.proto import fab_pb2
 from google.protobuf.message import Message as GrpcMessage
 
 # pylint: disable=E0611
@@ -671,3 +672,16 @@ def message_from_taskres(taskres: TaskRes) -> Message:
     )
     message.metadata.created_at = taskres.task.created_at
     return message
+
+
+# === FAB ===
+
+
+def fab_to_proto(fab: typing.Fab) -> fab_pb2.Fab:
+    """Create a proto Fab object from a Python Fab."""
+    return fab_pb2.Fab(hash=fab.hash_str, content=fab.data_bytes)
+
+
+def fab_from_proto(fab: fab_pb2.Fab) -> typing.Fab:
+    """Create a proto Fab object from a Python Fab."""
+    return typing.Fab(fab.hash, fab.content)

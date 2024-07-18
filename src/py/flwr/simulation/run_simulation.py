@@ -149,8 +149,7 @@ def run_simulation_from_cli() -> None:
     # Create run
     run = Run(
         run_id=run_id,
-        fab_id="",
-        fab_version="",
+        fab_hash="",
         override_config=override_config,
     )
 
@@ -496,7 +495,7 @@ def _run_simulation(
     # If no `Run` object is set, create one
     if run is None:
         run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
-        run = Run(run_id=run_id, fab_id="", fab_version="", override_config={})
+        run = Run(run_id=run_id, fab_hash="", override_config={})
 
     args = (
         num_supernodes,

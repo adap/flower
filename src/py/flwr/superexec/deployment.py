@@ -21,10 +21,10 @@ from typing import Dict, Optional
 
 from typing_extensions import override
 
-from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
+from flwr.common.serde import fab_to_proto
 from flwr.common.typing import Fab
 from flwr.proto.driver_pb2 import CreateRunRequest  # pylint: disable=E0611
 from flwr.proto.driver_pb2_grpc import DriverStub
@@ -113,7 +113,7 @@ class DeploymentEngine(Executor):
         assert self.stub is not None
 
         req = CreateRunRequest(
-            fab=fab,
+            fab=fab_to_proto(fab),
             override_config=override_config,
         )
         res = self.stub.CreateRun(request=req)

@@ -63,8 +63,7 @@ CREATE INDEX IF NOT EXISTS idx_online_until ON node (online_until);
 SQL_CREATE_TABLE_RUN = """
 CREATE TABLE IF NOT EXISTS run(
     run_id                INTEGER UNIQUE,
-    fab_id                TEXT,
-    fab_version           TEXT,
+    fab_hash              TEXT,
     override_config       TEXT
 );
 """
@@ -617,8 +616,7 @@ class SqliteState(State):  # pylint: disable=R0904
 
     def create_run(
         self,
-        fab_id: str,
-        fab_version: str,
+        fab_hash: str,
         override_config: Dict[str, str],
     ) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
@@ -630,12 +628,10 @@ class SqliteState(State):  # pylint: disable=R0904
         # If run_id does not exist
         if self.query(query, (run_id,))[0]["COUNT(*)"] == 0:
             query = (
-                "INSERT INTO run (run_id, fab_id, fab_version, override_config)"
-                "VALUES (?, ?, ?, ?);"
+                "INSERT INTO run (run_id, fab_hash, override_config)"
+                "VALUES (?, ?, ?);"
             )
-            self.query(
-                query, (run_id, fab_id, fab_version, json.dumps(override_config))
-            )
+            self.query(query, (run_id, fab_hash, json.dumps(override_config)))
             return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
@@ -700,8 +696,7 @@ class SqliteState(State):  # pylint: disable=R0904
             row = self.query(query, (run_id,))[0]
             return Run(
                 run_id=run_id,
-                fab_id=row["fab_id"],
-                fab_version=row["fab_version"],
+                fab_hash=row["fab_hash"],
                 override_config=json.loads(row["override_config"]),
             )
         except sqlite3.IntegrityError:

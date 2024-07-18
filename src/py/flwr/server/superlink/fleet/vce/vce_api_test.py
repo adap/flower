@@ -81,9 +81,7 @@ def register_messages_into_state(
 ) -> Dict[UUID, float]:
     """Register `num_messages` into the state factory."""
     state: InMemoryState = state_factory.state()  # type: ignore
-    state.run_ids[run_id] = Run(
-        run_id=run_id, fab_id="Mock/mock", fab_version="v1.0.0", override_config={}
-    )
+    state.run_ids[run_id] = Run(run_id=run_id, fab_hash="", override_config={})
     # Artificially add TaskIns to state so they can be processed
     # by the Simulation Engine logic
     nodes_cycle = cycle(nodes_mapping.keys())  # we have more messages than supernodes
@@ -165,7 +163,7 @@ def start_and_shutdown(
     if not app_dir:
         app_dir = _autoresolve_app_dir()
 
-    run = Run(run_id=1234, fab_id="", fab_version="", override_config={})
+    run = Run(run_id=1234, fab_hash="", override_config={})
 
     start_vce(
         num_supernodes=num_supernodes,

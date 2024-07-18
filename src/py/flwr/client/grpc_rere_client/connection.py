@@ -279,8 +279,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
         # Return fab_id and fab_version
         return Run(
             run_id,
-            get_run_response.run.fab_id,
-            get_run_response.run.fab_version,
+            get_run_response.run.fab_hash,
             dict(get_run_response.run.override_config.items()),
         )
 

@@ -398,7 +398,7 @@ def _start_client_internal(
                             runs[run_id] = get_run(run_id)
                         # If get_run is None, i.e., in grpc-bidi mode
                         else:
-                            runs[run_id] = Run(run_id, "", "", {})
+                            runs[run_id] = Run(run_id, "", {})
 
                     # Register context for this run
                     node_state.register_context(
