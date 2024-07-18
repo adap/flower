@@ -19,8 +19,8 @@ packages = ["."]
 publisher = "$username"
 
 [tool.flwr.app.components]
-serverapp = "$import_name.server:app"
-clientapp = "$import_name.client:app"
+serverapp = "$import_name.server_app:app"
+clientapp = "$import_name.client_app:app"
 
 [tool.flwr.app.config]
 num-server-rounds = "3"
