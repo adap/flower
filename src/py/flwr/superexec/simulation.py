@@ -82,11 +82,6 @@ class SimulationEngine(Executor):
     ) -> Optional[RunTracker]:
         """Start run using the Flower Simulation Engine."""
         try:
-            if override_config:
-                raise ValueError(
-                    "Overriding the run config is not yet supported with the "
-                    "simulation executor.",
-                )
 
             # Install FAB to flwr dir
             fab_path = install_from_fab(fab_file, None, True)
@@ -130,10 +125,9 @@ class SimulationEngine(Executor):
                 command.extend(["--run-config", f"{override_config}"])
 
             # Start Simulation
-            proc = subprocess.Popen(  # pylint: disable=consider-using-with
+            proc = subprocess.run(  # pylint: disable=consider-using-with
                 command,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                check=True,
                 text=True,
             )
 
@@ -141,7 +135,7 @@ class SimulationEngine(Executor):
 
             return RunTracker(
                 run_id=run_id,
-                proc=proc,
+                proc=proc,  # type:ignore
             )
 
         # pylint: disable-next=broad-except
