@@ -380,7 +380,7 @@ class PartitionersSpecificationForFederatedDatasets(unittest.TestCase):
         )
 
 
-mocked_natural_id_datasets = [
+natural_id_datasets = [
     "flwrlabs/femnist",
 ]
 
