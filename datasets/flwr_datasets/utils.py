@@ -34,6 +34,7 @@ tested_datasets = [
     "svhn",
     "sentiment140",
     "speech_commands",
+    "jlh/uci-mushrooms",
 ]
 
 
