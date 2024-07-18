@@ -34,6 +34,10 @@ num-evaluate-clients = "2"
 local-epochs = "1"
 lr = "0.1"
 max-depth = "8"
+nthread = "16"
+num-parallel-tree = "1"
+subsample = "1"
+tree-method = "hist"
 
 [tool.flwr.federations]
 default = "localhost"

@@ -140,10 +140,10 @@ def client_fn(context: Context):
         "eta": float(context.run_config["lr"]),  # Learning rate
         "max_depth": int(context.run_config["max-depth"]),
         "eval_metric": "auc",
-        "nthread": 16,
-        "num_parallel_tree": 1,
-        "subsample": 1,
-        "tree_method": "hist",
+        "nthread": int(context.run_config["nthread"]),
+        "num_parallel_tree": int(context.run_config["num-parallel-tree"]),
+        "subsample": int(context.run_config["subsample"]),
+        "tree_method": context.run_config["tree-method"],
     }
 
     # Return Client instance
