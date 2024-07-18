@@ -2,6 +2,8 @@
 
 from logging import INFO
 
+from flwr.common.context import Context
+
 import xgboost as xgb
 from flwr.client import Client, ClientApp
 from flwr.common import (
@@ -124,9 +126,13 @@ class FlowerClient(Client):
         )
 
 
-def client_fn(cid):
+def client_fn(context: Context):
     # Load model and data
-    train_dmatrix, valid_dmatrix, num_train, num_val = load_data(int(cid), 2)
+    partition_id = int(context.node_config["partition-id"])
+    num_partitions = int(context.node_config["num-partitions"])
+    train_dmatrix, valid_dmatrix, num_train, num_val = load_data(
+        partition_id, num_partitions
+    )
 
     num_local_round = 1
     params = {
