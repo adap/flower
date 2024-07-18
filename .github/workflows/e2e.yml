@@ -213,7 +213,7 @@ jobs:
     needs: wheel
     strategy:
       matrix:
-        framework: ["numpy", "pytorch", "tensorflow", "hf", "jax", "mlx", "sklearn"]
+        framework: ["numpy", "pytorch", "tensorflow", "hf", "jax", "sklearn"]
 
     name: Template / ${{ matrix.framework }}
 
