@@ -41,6 +41,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    how-to-use-with-tensorflow
    how-to-use-with-numpy
    how-to-use-with-local-data
+   how-to-visualize-label-distribution
    how-to-disable-enable-progress-bar
 
 References
@@ -93,6 +94,7 @@ Here are a few of the ``Partitioner`` s that are available: (for a full list see
 * IID partitioning ``IidPartitioner(num_partitions)``
 * Dirichlet partitioning ``DirichletPartitioner(num_partitions, partition_by, alpha)``
 * InnerDirichlet partitioning ``InnerDirichletPartitioner(partition_sizes, partition_by, alpha)``
+* PathologicalPartitioner ``PathologicalPartitioner(num_partitions, partition_by, num_classes_per_partition, class_assignment_mode)``
 * Natural ID partitioner ``NaturalIdPartitioner(partition_by)``
 * Size partitioner (the abstract base class for the partitioners dictating the division based the number of samples) ``SizePartitioner``
 * Linear partitioner ``LinearPartitioner(num_partitions)``

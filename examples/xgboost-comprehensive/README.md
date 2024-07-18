@@ -1,3 +1,9 @@
+---
+tags: [advanced, classification, tabular]
+dataset: [HIGGS]
+framework: [xgboost]
+---
+
 # Flower Example using XGBoost (Comprehensive)
 
 This example demonstrates a comprehensive federated learning setup using Flower with XGBoost.

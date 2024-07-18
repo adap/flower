@@ -136,6 +136,7 @@ def new(
 
     framework_str = framework_str.lower()
 
+    llm_challenge_str = None
     if framework_str == "flowertune":
         llm_challenge_value = prompt_options(
             "Please select LLM challenge by typing in the number",
@@ -171,7 +172,7 @@ def new(
     }
 
     # List of files to render
-    if framework_str == "flowertune":
+    if llm_challenge_str:
         files = {
             ".gitignore": {"template": "app/.gitignore.tpl"},
             "pyproject.toml": {"template": f"app/pyproject.{framework_str}.toml.tpl"},
@@ -228,10 +229,10 @@ def new(
             "README.md": {"template": "app/README.md.tpl"},
             "pyproject.toml": {"template": f"app/pyproject.{framework_str}.toml.tpl"},
             f"{import_name}/__init__.py": {"template": "app/code/__init__.py.tpl"},
-            f"{import_name}/server.py": {
+            f"{import_name}/server_app.py": {
                 "template": f"app/code/server.{framework_str}.py.tpl"
             },
-            f"{import_name}/client.py": {
+            f"{import_name}/client_app.py": {
                 "template": f"app/code/client.{framework_str}.py.tpl"
             },
         }
@@ -264,9 +265,11 @@ def new(
             bold=True,
         )
     )
+
+    _add = "	huggingface-cli login\n" if framework_str == "flowertune" else ""
     print(
         typer.style(
-            f"	cd {package_name}\n" + "	pip install -e .\n	flwr run\n",
+            f"	cd {package_name}\n" + "	pip install -e .\n" + _add + "	flwr run\n",
             fg=typer.colors.BRIGHT_CYAN,
             bold=True,
         )

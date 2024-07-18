@@ -6,10 +6,7 @@ build-backend = "hatchling.build"
 name = "$package_name"
 version = "1.0.0"
 description = ""
-authors = [
-    { name = "The Flower Authors", email = "hello@flower.ai" },
-]
-license = { text = "Apache License (2.0)" }
+license = "Apache-2.0"
 dependencies = [
     "flwr[simulation]>=1.9.0,<2.0",
     "flwr-datasets>=0.1.0,<1.0.0",
@@ -25,18 +22,18 @@ dependencies = [
 [tool.hatch.build.targets.wheel]
 packages = ["."]
 
-[flower]
+[tool.flwr.app]
 publisher = "$username"
 
-[flower.components]
+[tool.flwr.app.components]
 serverapp = "$import_name.app:server"
 clientapp = "$import_name.app:client"
 
-[flower.engine]
-name = "simulation"
+[tool.flwr.app.config]
+num-server-rounds = "3"
 
-[flower.engine.simulation.supernode]
-num = $num_clients
+[tool.flwr.federations]
+default = "localhost"
 
-[flower.engine.simulation]
-backend_config = { client_resources = { num_cpus = 8, num_gpus = 1.0 } }
+[tool.flwr.federations.localhost]
+options.num-supernodes = 10
