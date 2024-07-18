@@ -192,6 +192,13 @@ class Run:
     """Run details."""
 
     run_id: int
-    fab_id: str
-    fab_version: str
+    fab_hash: str
     override_config: Dict[str, str]
+
+
+@dataclass
+class Fab:
+    """Fab file representation."""
+
+    hash_str: str
+    data_bytes: bytes

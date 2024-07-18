@@ -44,8 +44,10 @@ service Driver {
 
 // CreateRun
 message CreateRunRequest {
-  Fab fab = 1;
-  map<string, string> override_config = 2;
+  string fab_id = 1 [ deprecated = true ];
+  string fab_version = 2 [ deprecated = true ];
+  map<string, string> override_config = 3;
+  Fab fab = 4;
 }
 message CreateRunResponse { sint64 run_id = 1; }
 

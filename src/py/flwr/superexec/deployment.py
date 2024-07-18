@@ -25,6 +25,7 @@ from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
+from flwr.common.typing import Fab
 from flwr.proto.driver_pb2 import CreateRunRequest  # pylint: disable=E0611
 from flwr.proto.driver_pb2_grpc import DriverStub
 from flwr.server.driver.grpc_driver import DEFAULT_SERVER_ADDRESS_DRIVER
@@ -103,8 +104,7 @@ class DeploymentEngine(Executor):
 
     def _create_run(
         self,
-        fab_id: str,
-        fab_version: str,
+        fab: Fab,
         override_config: Dict[str, str],
     ) -> int:
         if self.stub is None:
@@ -113,8 +113,7 @@ class DeploymentEngine(Executor):
         assert self.stub is not None
 
         req = CreateRunRequest(
-            fab_id=fab_id,
-            fab_version=fab_version,
+            fab=fab,
             override_config=override_config,
         )
         res = self.stub.CreateRun(request=req)
@@ -129,11 +128,10 @@ class DeploymentEngine(Executor):
         """Start run using the Flower Deployment Engine."""
         try:
             # Install FAB to flwr dir
-            fab_version, fab_id = get_fab_metadata(fab_file)
             install_from_fab(fab_file, None, True)
 
             # Call SuperLink to create run
-            run_id: int = self._create_run(fab_id, fab_version, override_config)
+            run_id: int = self._create_run(Fab("", fab_file), override_config)
             log(INFO, "Created run %s", str(run_id))
 
             command = [
