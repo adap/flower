@@ -30,7 +30,11 @@ class FlowerClient(NumPyClient):
 
     def fit(self, parameters, config):
         self.set_parameters(parameters)
-        train(self.net, self.trainloader, epochs=1)
+        train(
+            self.net,
+            self.trainloader,
+            epochs=int(self.context.run_config["local-epochs"]),
+        )
         return self.get_parameters(config={}), len(self.trainloader), {}
 
     def evaluate(self, parameters, config):
@@ -45,8 +49,8 @@ def client_fn(context: Context):
         CHECKPOINT, num_labels=2
     ).to(DEVICE)
 
-    partition_id = int(context.node_config['partition-id'])
-    num_partitions = int(context.node_config['num-partitions])
+    partition_id = int(context.node_config["partition-id"])
+    num_partitions = int(context.node_config["num-partitions"])
     trainloader, valloader = load_data(partition_id, num_partitions)
 
     # Return Client instance
