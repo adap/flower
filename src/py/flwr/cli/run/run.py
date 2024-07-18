@@ -199,7 +199,7 @@ def _run_without_superexec(
     ]
 
     if config_overrides:
-        command.extend(["--run-config", f"{config_overrides}"])
+        command.extend(["--run-config", f"{','.join(config_overrides)}"])
 
     # Run the simulation
     subprocess.run(
