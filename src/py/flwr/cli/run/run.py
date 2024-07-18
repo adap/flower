@@ -18,7 +18,7 @@ import subprocess
 import sys
 from logging import DEBUG
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import typer
 from typing_extensions import Annotated
@@ -43,7 +43,7 @@ def run(
         typer.Argument(help="Name of the federation to run the app on"),
     ] = None,
     config_overrides: Annotated[
-        Optional[str],
+        Optional[List[str]],
         typer.Option(
             "--run-config",
             "-c",
@@ -94,11 +94,13 @@ def run(
     # Validate the federation exists in the configuration
     federation = config["tool"]["flwr"]["federations"].get(federation_name)
     if federation is None:
-        available_feds = list(config["tool"]["flwr"]["federations"])
+        available_feds = {
+            fed for fed in config["tool"]["flwr"]["federations"] if fed != "default"
+        }
         typer.secho(
             f"❌ There is no `{federation_name}` federation declared in the "
             "`pyproject.toml`.\n The following federations were found:\n\n"
-            "\n".join(available_feds) + "\n\n",
+            + "\n".join(available_feds),
             fg=typer.colors.RED,
             bold=True,
         )
@@ -113,7 +115,7 @@ def run(
 def _run_with_superexec(
     federation: Dict[str, str],
     directory: Optional[Path],
-    config_overrides: Optional[str],
+    config_overrides: Optional[List[str]],
 ) -> None:
 
     def on_channel_state_change(channel_connectivity: str) -> None:
@@ -172,7 +174,7 @@ def _run_without_superexec(
     app_path: Optional[Path],
     federation: Dict[str, Any],
     federation_name: str,
-    config_overrides: Optional[str],
+    config_overrides: Optional[List[str]],
 ) -> None:
     try:
         num_supernodes = federation["options"]["num-supernodes"]
@@ -197,7 +199,7 @@ def _run_without_superexec(
     ]
 
     if config_overrides:
-        command.extend(["--run-config", f"{config_overrides}"])
+        command.extend(["--run-config", f"{','.join(config_overrides)}"])
 
     # Run the simulation
     subprocess.run(
