@@ -38,9 +38,7 @@ class TestGrpcDriver(unittest.TestCase):
 
     def setUp(self) -> None:
         """Initialize mock GrpcDriverStub and Driver instance before each test."""
-        mock_response = Mock(
-            run=Run(run_id=61016, fab_id="mock/mock", fab_version="v1.0.0")
-        )
+        mock_response = Mock(run=Run(run_id=61016, fab_hash="mock/mock"))
         self.mock_stub = Mock()
         self.mock_channel = Mock()
         self.mock_stub.GetRun.return_value = mock_response
@@ -53,8 +51,7 @@ class TestGrpcDriver(unittest.TestCase):
         """Test GrpcDriverStub initialization."""
         # Assert
         self.assertEqual(self.driver.run.run_id, 61016)
-        self.assertEqual(self.driver.run.fab_id, "mock/mock")
-        self.assertEqual(self.driver.run.fab_version, "v1.0.0")
+        self.assertEqual(self.driver.run.fab_hash, "mock/mock")
         self.mock_stub.GetRun.assert_called_once()
 
     def test_get_nodes(self) -> None:

@@ -20,6 +20,8 @@ from logging import DEBUG
 from typing import List, Optional, Set
 from uuid import UUID
 
+from flwr.common.serde import fab_to_proto
+from flwr.common.typing import Fab
 import grpc
 
 from flwr.common.logger import log
@@ -33,6 +35,10 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     PullTaskResResponse,
     PushTaskInsRequest,
     PushTaskInsResponse,
+)
+from flwr.proto.fab_pb2 import (  # pylint: disable=E0611
+    GetFabRequest,
+    GetFabResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
@@ -70,8 +76,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         log(DEBUG, "DriverServicer.CreateRun")
         state: State = self.state_factory.state()
         run_id = state.create_run(
-            request.fab_id,
-            request.fab_version,
+            request.fab.hash,
             dict(request.override_config.items()),
         )
         return CreateRunResponse(run_id=run_id)
@@ -151,6 +156,19 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         run = state.get_run(request.run_id)
         run_proto = None if run is None else Run(**vars(run))
         return GetRunResponse(run=run_proto)
+
+    def GetFab(
+        self, request: GetFabRequest, context: grpc.ServicerContext
+    ) -> GetFabResponse:
+        """Get run information."""
+        log(DEBUG, "DriverServicer.GetFab")
+
+        fab = Fab(request.hash, b"")
+        # TODO
+        # fab = ffs.get_fab(request.hash)
+
+        # Retrieve run information
+        return GetFabResponse(fab=fab_to_proto(fab))
 
 
 def _raise_if(validation_error: bool, detail: str) -> None:

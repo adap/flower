@@ -41,7 +41,7 @@ def test_start_run() -> None:
     context_mock = MagicMock()
 
     request = StartRunRequest()
-    request.fab_file = b"test"
+    request.fab.content = b"test"
 
     # Create a instance of FlowerServiceServicer
     servicer = ExecServicer(executor=executor)

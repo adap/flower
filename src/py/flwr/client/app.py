@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Callable, ContextManager, Dict, Optional, Tuple, Type, Union
 
 from cryptography.hazmat.primitives.asymmetric import ec
+from flwr.cli.config_utils import get_fab_metadata_from_hash
 from grpc import RpcError
 
 from flwr.client.client import Client
@@ -419,7 +420,7 @@ def _start_client_internal(
                         # Load ClientApp instance
                         run: Run = runs[run_id]
                         client_app: ClientApp = load_client_app_fn(
-                            run.fab_id, run.fab_version
+                            *get_fab_metadata_from_hash(run.fab_hash)
                         )
 
                         # Execute ClientApp

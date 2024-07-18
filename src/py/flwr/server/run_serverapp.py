@@ -21,6 +21,7 @@ from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from typing import Dict, Optional
 
+from flwr.cli.config_utils import get_fab_metadata_from_hash
 from flwr.common import Context, EventType, RecordSet, event
 from flwr.common.config import (
     get_flwr_dir,
@@ -184,7 +185,9 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
         # User provided `--run-id`, but not `server-app`
         flwr_dir = get_flwr_dir(args.flwr_dir)
         run_ = driver.run
-        server_app_dir = str(get_project_dir(run_.fab_id, run_.fab_version, flwr_dir))
+        server_app_dir = str(
+            get_project_dir(*get_fab_metadata_from_hash(run_.fab_hash), flwr_dir)
+        )
         config = get_project_config(server_app_dir)
         server_app_attr = config["tool"]["flwr"]["app"]["components"]["serverapp"]
         server_app_run_config = get_fused_config(run_, flwr_dir)

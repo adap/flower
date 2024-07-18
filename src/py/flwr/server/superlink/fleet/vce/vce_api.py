@@ -26,6 +26,7 @@ from queue import Empty, Queue
 from time import sleep
 from typing import Callable, Dict, Optional
 
+from flwr.cli.config_utils import get_fab_metadata_from_hash
 from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
 from flwr.client.node_state import NodeState
 from flwr.client.supernode.app import _get_load_client_app_fn
@@ -350,7 +351,7 @@ def start_vce(
                 dir_arg=app_dir,
                 flwr_dir_arg=flwr_dir,
                 multi_app=True,
-            )(run.fab_id, run.fab_version)
+            )(*get_fab_metadata_from_hash(run.fab_hash))
 
         if client_app:
             app = client_app

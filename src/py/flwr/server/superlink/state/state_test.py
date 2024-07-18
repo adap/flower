@@ -52,7 +52,7 @@ class StateTest(unittest.TestCase):
         """Test if create_run and get_run work correctly."""
         # Prepare
         state: State = self.state_factory()
-        run_id = state.create_run("Mock/mock", "v1.0.0", {"test_key": "test_value"})
+        run_id = state.create_run("Mock/mock", {"test_key": "test_value"})
 
         # Execute
         run = state.get_run(run_id)
@@ -60,8 +60,7 @@ class StateTest(unittest.TestCase):
         # Assert
         assert run is not None
         assert run.run_id == run_id
-        assert run.fab_id == "Mock/mock"
-        assert run.fab_version == "v1.0.0"
+        assert run.fab_hash == "Mock/mock"
         assert run.override_config["test_key"] == "test_value"
 
     def test_get_task_ins_empty(self) -> None:
@@ -91,7 +90,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         consumer_node_id = 1
         state = self.state_factory()
-        run_id = state.create_run("mock/mock", "v1.0.0", {})
+        run_id = state.create_run("mock/mock", {})
         task_ins = create_task_ins(
             consumer_node_id=consumer_node_id, anonymous=False, run_id=run_id
         )
@@ -126,7 +125,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         consumer_node_id = 1
         state = self.state_factory()
-        run_id = state.create_run("mock/mock", "v1.0.0", {})
+        run_id = state.create_run("mock/mock", {})
         task_ins_0 = create_task_ins(
             consumer_node_id=consumer_node_id, anonymous=False, run_id=run_id
         )
@@ -200,7 +199,7 @@ class StateTest(unittest.TestCase):
         """
         # Prepare
         state: State = self.state_factory()
-        run_id = state.create_run("mock/mock", "v1.0.0", {})
+        run_id = state.create_run("mock/mock", {})
         task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
 
         # Execute
@@ -215,7 +214,7 @@ class StateTest(unittest.TestCase):
         """Store anonymous TaskIns and fail to retrieve it."""
         # Prepare
         state: State = self.state_factory()
-        run_id = state.create_run("mock/mock", "v1.0.0", {})
+        run_id = state.create_run("mock/mock", {})
         task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
 
         # Execute
@@ -229,7 +228,7 @@ class StateTest(unittest.TestCase):
         """Store identity TaskIns and fail retrieving it as anonymous."""
         # Prepare
         state: State = self.state_factory()
-        run_id = state.create_run("mock/mock", "v1.0.0", {})
+        run_id = state.create_run("mock/mock", {})
         task_ins = create_task_ins(consumer_node_id=1, anonymous=False, run_id=run_id)
 
         # Execute
@@ -243,7 +242,7 @@ class StateTest(unittest.TestCase):
         """Store identity TaskIns and retrieve it."""
         # Prepare
         state: State = self.state_factory()
-        run_id = state.create_run("mock/mock", "v1.0.0", {})
+        run_id = state.create_run("mock/mock", {})
         task_ins = create_task_ins(consumer_node_id=1, anonymous=False, run_id=run_id)
 
         # Execute
@@ -260,7 +259,7 @@ class StateTest(unittest.TestCase):
         """Fail retrieving delivered task."""
         # Prepare
         state: State = self.state_factory()
-        run_id = state.create_run("mock/mock", "v1.0.0", {})
+        run_id = state.create_run("mock/mock", {})
         task_ins = create_task_ins(consumer_node_id=1, anonymous=False, run_id=run_id)
 
         # Execute
@@ -303,7 +302,7 @@ class StateTest(unittest.TestCase):
         """Store TaskRes retrieve it by task_ins_id."""
         # Prepare
         state: State = self.state_factory()
-        run_id = state.create_run("mock/mock", "v1.0.0", {})
+        run_id = state.create_run("mock/mock", {})
         task_ins_id = uuid4()
         task_res = create_task_res(
             producer_node_id=0,
@@ -324,7 +323,7 @@ class StateTest(unittest.TestCase):
         """Test retrieving all node_ids and empty initial state."""
         # Prepare
         state: State = self.state_factory()
-        run_id = state.create_run("mock/mock", "v1.0.0", {})
+        run_id = state.create_run("mock/mock", {})
 
         # Execute
         retrieved_node_ids = state.get_nodes(run_id)
@@ -336,7 +335,7 @@ class StateTest(unittest.TestCase):
         """Test creating a client node."""
         # Prepare
         state: State = self.state_factory()
-        run_id = state.create_run("mock/mock", "v1.0.0", {})
+        run_id = state.create_run("mock/mock", {})
         node_ids = []
 
         # Execute
@@ -353,7 +352,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: State = self.state_factory()
         public_key = b"mock"
-        run_id = state.create_run("mock/mock", "v1.0.0", {})
+        run_id = state.create_run("mock/mock", {})
 
         # Execute
         node_id = state.create_node(ping_interval=10, public_key=public_key)
@@ -369,7 +368,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: State = self.state_factory()
         public_key = b"mock"
-        run_id = state.create_run("mock/mock", "v1.0.0", {})
+        run_id = state.create_run("mock/mock", {})
         node_id = state.create_node(ping_interval=10, public_key=public_key)
 
         # Execute
@@ -391,7 +390,7 @@ class StateTest(unittest.TestCase):
         """Test deleting a client node."""
         # Prepare
         state: State = self.state_factory()
-        run_id = state.create_run("mock/mock", "v1.0.0", {})
+        run_id = state.create_run("mock/mock", {})
         node_id = state.create_node(ping_interval=10)
 
         # Execute
@@ -406,7 +405,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: State = self.state_factory()
         public_key = b"mock"
-        run_id = state.create_run("mock/mock", "v1.0.0", {})
+        run_id = state.create_run("mock/mock", {})
         node_id = state.create_node(ping_interval=10, public_key=public_key)
 
         # Execute
@@ -423,7 +422,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: State = self.state_factory()
         public_key = b"mock"
-        run_id = state.create_run("mock/mock", "v1.0.0", {})
+        run_id = state.create_run("mock/mock", {})
         node_id = 0
 
         # Execute & Assert
@@ -442,7 +441,7 @@ class StateTest(unittest.TestCase):
         state: State = self.state_factory()
         public_key = b"mock"
         wrong_public_key = b"mock_mock"
-        run_id = state.create_run("mock/mock", "v1.0.0", {})
+        run_id = state.create_run("mock/mock", {})
         node_id = state.create_node(ping_interval=10, public_key=public_key)
 
         # Execute & Assert
@@ -461,7 +460,7 @@ class StateTest(unittest.TestCase):
         state: State = self.state_factory()
         public_key = b"mock"
         wrong_public_key = b"mock_mock"
-        run_id = state.create_run("mock/mock", "v1.0.0", {})
+        run_id = state.create_run("mock/mock", {})
 
         # Execute
         state.create_node(ping_interval=10, public_key=public_key)
@@ -476,7 +475,7 @@ class StateTest(unittest.TestCase):
         """Test retrieving all node_ids with invalid run_id."""
         # Prepare
         state: State = self.state_factory()
-        state.create_run("mock/mock", "v1.0.0", {})
+        state.create_run("mock/mock", {})
         invalid_run_id = 61016
         state.create_node(ping_interval=10)
 
@@ -490,7 +489,7 @@ class StateTest(unittest.TestCase):
         """Test if num_tasks returns correct number of not delivered task_ins."""
         # Prepare
         state: State = self.state_factory()
-        run_id = state.create_run("mock/mock", "v1.0.0", {})
+        run_id = state.create_run("mock/mock", {})
         task_0 = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
         task_1 = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
 
@@ -508,7 +507,7 @@ class StateTest(unittest.TestCase):
         """Test if num_tasks returns correct number of not delivered task_res."""
         # Prepare
         state: State = self.state_factory()
-        run_id = state.create_run("mock/mock", "v1.0.0", {})
+        run_id = state.create_run("mock/mock", {})
         task_0 = create_task_res(
             producer_node_id=0, anonymous=True, ancestry=["1"], run_id=run_id
         )
@@ -609,7 +608,7 @@ class StateTest(unittest.TestCase):
         """Test if acknowledge_ping works and if get_nodes return online nodes."""
         # Prepare
         state: State = self.state_factory()
-        run_id = state.create_run("mock/mock", "v1.0.0", {})
+        run_id = state.create_run("mock/mock", {})
         node_ids = [state.create_node(ping_interval=10) for _ in range(100)]
         for node_id in node_ids[:70]:
             state.acknowledge_ping(node_id, ping_interval=30)
@@ -628,7 +627,7 @@ class StateTest(unittest.TestCase):
         """Test if get_task_res return TaskRes containing node unavailable error."""
         # Prepare
         state: State = self.state_factory()
-        run_id = state.create_run("mock/mock", "v1.0.0", {})
+        run_id = state.create_run("mock/mock", {})
         node_id_0 = state.create_node(ping_interval=90)
         node_id_1 = state.create_node(ping_interval=30)
         # Create and store TaskIns

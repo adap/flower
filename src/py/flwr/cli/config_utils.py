@@ -64,6 +64,11 @@ def get_fab_metadata(fab_file: Union[Path, bytes]) -> Tuple[str, str]:
         )
 
 
+def get_fab_metadata_from_hash(fab_hash: str) -> Tuple[str, str]:
+    """Extract the fab_id and the fab_version from a FAB hash."""
+    return ("", "")
+
+
 def load_and_validate(
     path: Optional[Path] = None,
     check_module: bool = True,
