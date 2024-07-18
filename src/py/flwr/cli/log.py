@@ -17,6 +17,7 @@
 import sys
 import time
 from logging import DEBUG, ERROR, INFO
+from pathlib import Path
 from typing import Optional
 
 import grpc
@@ -44,11 +45,15 @@ def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
 def log(
     run_id: Annotated[
         int,
-        typer.Option(case_sensitive=False, help="The Flower run ID to query"),
-    ],
-    superexec_address: Annotated[
+        typer.Argument(help="The Flower run ID to query"),
+    ] = None,
+    directory: Annotated[
+        Path,
+        typer.Argument(help="Path of the Flower project to run"),
+    ] = Path("."),
+    federation_name: Annotated[
         Optional[str],
-        typer.Option(case_sensitive=False, help="The address of the SuperExec server"),
+        typer.Argument(help="Name of the federation to run the app on"),
     ] = None,
     follow: Annotated[
         bool,
