@@ -1,18 +1,18 @@
-Quickstart
-==========
+Quickstart with Docker
+======================
 
-This quickstart amis to guide you through the process of containerizing a Flower project and
-running it end to end using Docker.
+This quickstart aims to guide you through the process of containerizing a Flower project and
+running it end to end using Docker on your local machine.
 
 This tutorial does not use production-ready settings, so you can focus on understanding the basic
-workflow without being overwhelmed by additional configurations.
+workflow that uses the minimum configurations.
 
 Prerequisites
 -------------
 
 Before you start, make sure that:
 
-- The ``flwr`` CLI is installed locally.
+- The ``flwr`` CLI is :doc:`installed <../how-to-install-flower>` locally.
 - The Docker daemon is running.
 
 Step 1: Set Up
@@ -52,14 +52,14 @@ Step 1: Set Up
       $ cd quickstart-docker
       $ pip install -e .
 
-#. Create a new Docker bridge network called ``flwr``:
+#. Create a new Docker bridge network called ``flwr-network``:
 
    .. code-block:: bash
 
-      $ docker network create --driver bridge flwr
+      $ docker network create --driver bridge flwr-network
 
-   User-defined networks, such as ``flwr``, enable IP resolution of container names, a feature
-   absent in the default bridge network. This simplifies quickstart by avoiding the need to
+   User-defined networks, such as ``flwr-network``, enable IP resolution of container names, a feature
+   absent in the default bridge network. This simplifies quickstart example by avoiding the need to
    determine host IP first.
 
 Step 2: Start the SuperLink
@@ -72,7 +72,7 @@ Open your terminal and run:
 
    $ docker run --rm \
          -p 9091:9091 -p 9092:9092 \
-         --network flwr \
+         --network flwr-network \
          --name superlink \
          --detach \
          flwr/superlink:|latest_version_docker| --insecure
@@ -84,7 +84,7 @@ Open your terminal and run:
    * | ``-p 9091:9091 -p 9092:9092``: Map port ``9091`` and ``9092`` of the container to the same port of
      | the host machine, allowing you to access the Driver API on ``http://localhost:9091`` and
      | the Fleet API on ``http://localhost:9092``.
-   * ``--network flwr``: Make the container join the network named ``flwr``.
+   * ``--network flwr-network``: Make the container join the network named ``flwr-network``.
    * ``--name superlink``: Assign the name ``superlink`` to the container.
    * ``--detach``: Run the container in the background, freeing up the terminal.
    * | :substitution-code:`flwr/superlink:|latest_version_docker|`: The name of the image to be run and the specific
@@ -192,7 +192,7 @@ building your own SuperNode image.
    .. code-block:: bash
 
       $ docker run --rm \
-          --network flwr \
+          --network flwr-network \
           --detach \
           flwr_supernode:0.0.1 \
           --insecure \
@@ -204,7 +204,7 @@ building your own SuperNode image.
 
       * ``docker run``: This tells Docker to run a container from an image.
       * ``--rm``: Remove the container once it is stopped or the command exits.
-      * ``--network flwr``: Make the container join the network named ``flwr``.
+      * ``--network flwr-network``: Make the container join the network named ``flwr-network``.
       * ``--detach``: Run the container in the background, freeing up the terminal.
       * | ``flwr_supernode:0.0.1``: This is the name of the image to be run and the specific tag
         | of the image.
@@ -218,7 +218,7 @@ building your own SuperNode image.
    .. code-block:: shell
 
       $ docker run --rm \
-          --network flwr \
+          --network flwr-network \
           --detach \
           flwr_supernode:0.0.1 \
           --insecure \
@@ -319,7 +319,7 @@ Flower and serves as a base for building your own SuperExec image.
 
       $ docker run --rm \
          -p 9093:9093 \
-          --network flwr \
+          --network flwr-network \
           --detach \
           flwr_superexec:0.0.1 \
           --insecure \
@@ -332,7 +332,7 @@ Flower and serves as a base for building your own SuperExec image.
       * ``--rm``: Remove the container once it is stopped or the command exits.
       * | ``-p 9093:9093``: Map port ``9093`` of the container to the same port of
         | the host machine, allowing you to access the SuperExec API on ``http://localhost:9093``.
-      * ``--network flwr``: Make the container join the network named ``flwr``.
+      * ``--network flwr-network``: Make the container join the network named ``flwr-network``.
       * ``--detach``: Run the container in the background, freeing up the terminal.
       * | ``flwr_superexec:0.0.1``: This is the name of the image to be run and the specific tag
         | of the image.
@@ -368,10 +368,10 @@ Step 6: Clean Up
       $ docker stop $(docker ps -a -q  --filter ancestor=flwr_supernode:0.0.1) \
          $(docker ps -a -q  --filter ancestor=flwr_superexec:0.0.1) \
          superlink
-      $ docker network rm flwr
+      $ docker network rm flwr-network
 
 Where to Go Next
 ----------------
 
 * :doc:`Enabling TLS for secure connections <tls>`
-* :doc:`Persist the state of the SuperLink <persist-state>`
+* :doc:`Persist the state of the SuperLink <persist-superlink-state>`

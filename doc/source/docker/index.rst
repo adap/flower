@@ -13,7 +13,7 @@ Getting Started
 .. toctree::
    :maxdepth: 1
 
-   quickstart
+   tutorial-quickstart-docker
 
 
 Running in Production
@@ -23,7 +23,7 @@ Running in Production
    :maxdepth: 1
 
    tls
-   persist-state
+   persist-superlink-state
 
 Advanced Options
 ----------------
