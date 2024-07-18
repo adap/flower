@@ -36,6 +36,9 @@ tested_datasets = [
     "speech_commands",
     "flwrlabs/femnist",
     "flwrlabs/ucf101",
+    "jlh/uci-mushrooms",
+    "Mike0307/MNIST-M",
+    "flwrlabs/usps",
 ]
 
 
