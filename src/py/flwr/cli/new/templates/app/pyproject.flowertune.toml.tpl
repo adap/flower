@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "$package_name"
 version = "1.0.0"
 description = ""
-license = { text = "Apache License (2.0)" }
+license = "Apache-2.0"
 dependencies = [
     "flwr[simulation]>=1.9.0,<2.0",
     "flwr-datasets>=0.1.0,<1.0.0",
@@ -22,12 +22,15 @@ dependencies = [
 [tool.hatch.build.targets.wheel]
 packages = ["."]
 
-[tool.flwr]
+[tool.flwr.app]
 publisher = "$username"
 
-[tool.flwr.components]
+[tool.flwr.app.components]
 serverapp = "$import_name.app:server"
 clientapp = "$import_name.app:client"
+
+[tool.flwr.app.config]
+num-server-rounds = "3"
 
 [tool.flwr.federations]
 default = "localhost"

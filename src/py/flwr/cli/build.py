@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import Optional
 
 import pathspec
+import tomli_w
 import typer
 from typing_extensions import Annotated
 
@@ -85,7 +86,7 @@ def build(
 
     # Set the name of the zip file
     fab_filename = (
-        f"{conf['tool']['flwr']['publisher']}"
+        f"{conf['tool']['flwr']['app']['publisher']}"
         f".{directory.name}"
         f".{conf['project']['version'].replace('.', '-')}.fab"
     )
@@ -93,15 +94,28 @@ def build(
 
     allowed_extensions = {".py", ".toml", ".md"}
 
+    # Remove the 'federations' field from 'tool.flwr' if it exists
+    if (
+        "tool" in conf
+        and "flwr" in conf["tool"]
+        and "federations" in conf["tool"]["flwr"]
+    ):
+        del conf["tool"]["flwr"]["federations"]
+
+    toml_contents = tomli_w.dumps(conf)
+
     with zipfile.ZipFile(fab_filename, "w", zipfile.ZIP_DEFLATED) as fab_file:
+        fab_file.writestr("pyproject.toml", toml_contents)
+
+        # Continue with adding other files
         for root, _, files in os.walk(directory, topdown=True):
-            # Filter directories and files based on .gitignore
             files = [
                 f
                 for f in files
                 if not ignore_spec.match_file(Path(root) / f)
                 and f != fab_filename
                 and Path(f).suffix in allowed_extensions
+                and f != "pyproject.toml"  # Exclude the original pyproject.toml
             ]
 
             for file in files:
