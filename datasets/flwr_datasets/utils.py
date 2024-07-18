@@ -34,6 +34,7 @@ tested_datasets = [
     "svhn",
     "sentiment140",
     "speech_commands",
+    "Mike0307/MNIST-M",
     "flwrlabs/usps",
 ]
 
