@@ -56,7 +56,7 @@ def run_superexec() -> None:
         address=address,
         executor=_load_executor(args),
         certificates=certificates,
-        config=parse_config_args(args.executor_config),
+        config=parse_config_args([args.executor_config]),
     )
 
     grpc_servers = [superexec_server]
