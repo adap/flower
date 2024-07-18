@@ -54,7 +54,9 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
     and a configuration with 20 partitions and 2 unique labels per partition, the 0'th
     row of the distribution array (corresponding to class 0) will be assigned to
     partitions [0, 9, 10, 19], 1st row (class 1) to [0, 1, 10, 11], 2nd row (class 2)
-    to [1, 2, 11, 12], 3rd row (class 3) to [2, 3, 12, 13], etc ...
+    to [1, 2, 11, 12], 3rd row (class 3) to [2, 3, 12, 13], etc ... . Alternatively, the
+    distribution can be interpreted as partition 0 having classes 0 and 1, partition 1
+    having classes 1 and 2, partition 2 having classes 2 and 3, etc ...
     The list representing the unique labels is sorted in ascending order.
 
     Parameters
