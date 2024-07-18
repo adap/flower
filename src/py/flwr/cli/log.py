@@ -24,9 +24,7 @@ import grpc
 import typer
 from typing_extensions import Annotated
 
-from flwr.cli import config_utils
 from flwr.cli.config_utils import load_and_validate
-from flwr.common.config import get_flwr_dir
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log as logger
 
