@@ -344,12 +344,20 @@ Flower and serves as a base for building your own SuperExec image.
 Step 5: Run the Quickstart Project
 ----------------------------------
 
-#. After all the Flower components are up and running, run the quickstart-docker project
-   by executing the command:
+#. Add the following lines to the ``pyproject.toml``:
+
+   .. code-block:: toml
+      :caption: pyproject.toml
+
+      [tool.flwr.federations.docker]
+      address = "127.0.0.1:9093"
+      insecure = true
+
+#. Run the ``quickstart-docker`` project by executing the command:
 
    .. code-block:: bash
 
-      $ flwr run
+      $ flwr run . docker
 
 #. Wait until the run is complete
 
