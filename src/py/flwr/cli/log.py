@@ -45,7 +45,7 @@ def log(
     run_id: Annotated[
         int,
         typer.Argument(help="The Flower run ID to query"),
-    ] = None,
+    ],
     directory: Annotated[
         Path,
         typer.Argument(help="Path of the Flower project to run"),
