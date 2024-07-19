@@ -28,6 +28,7 @@ from flwr.common.constant import (
     GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY,
 )
 from flwr.common.version import package_version
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
@@ -131,3 +132,9 @@ class GrpcAdapter:
     ) -> GetRunResponse:
         """."""
         return self._send_and_receive(request, GetRunResponse, **kwargs)
+
+    def GetFab(  # pylint: disable=C0103
+        self, request: GetFabRequest, **kwargs: Any
+    ) -> GetFabResponse:
+        """."""
+        return self._send_and_receive(request, GetFabResponse, **kwargs)
