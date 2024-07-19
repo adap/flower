@@ -1,9 +1,10 @@
 import time
 
-from flwr.common import Context
-from flwr.client import ClientApp, NumPyClient, Client
-from flwr.client.mod import secaggplus_mod
 import numpy as np
+
+from flwr.client import Client, ClientApp, NumPyClient
+from flwr.client.mod import secaggplus_mod
+from flwr.common import Context
 
 
 # Define FlowerClient and client_fn

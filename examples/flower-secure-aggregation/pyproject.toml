@@ -25,9 +25,12 @@ clientapp = "secaggexample.client_app:app"
 
 [tool.flwr.app.config]
 num_server_rounds = "3"
+num_shares = "3"
+reconstruction_threshold = "2"
+timeout = "5"
 
 [tool.flwr.federations]
 default = "localhost"
 
 [tool.flwr.federations.localhost]
-options.num-supernodes = 10
+options.num-supernodes = 5

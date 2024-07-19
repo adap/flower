@@ -1,10 +1,9 @@
+from secaggexample.workflow_with_log import SecAggPlusWorkflowWithLogs
+
 from flwr.common import Context
 from flwr.server import Driver, LegacyContext, ServerApp, ServerConfig
 from flwr.server.strategy import FedAvg
 from flwr.server.workflow import DefaultWorkflow, SecAggPlusWorkflow
-
-from workflow_with_log import SecAggPlusWorkflowWithLogs
-
 
 # Define strategy
 strategy = FedAvg(
@@ -21,24 +20,27 @@ app = ServerApp()
 @app.main()
 def main(driver: Driver, context: Context) -> None:
     # Construct the LegacyContext
+    print(context.run_config)
     num_rounds = int(context.run_config["num_server_rounds"])
     context = LegacyContext(
-        state=context.state,
         config=ServerConfig(num_rounds=num_rounds),
         strategy=strategy,
+        **vars(context),
     )
 
     # Create the workflow
     workflow = DefaultWorkflow(
         fit_workflow=SecAggPlusWorkflowWithLogs(
-            num_shares=3,
-            reconstruction_threshold=2,
-            timeout=5,
+            num_shares=int(context.run_config["num_shares"]),
+            reconstruction_threshold=int(
+                context.run_config["reconstruction_threshold"]
+            ),
+            timeout=float(context.run_config["timeout"]),
         )
         # # For real-world applications, use the following code instead
         # fit_workflow=SecAggPlusWorkflow(
-        #     num_shares=<number of shares>,
-        #     reconstruction_threshold=<reconstruction threshold>,
+        #     num_shares=int(context.run_config["num_shares"]),
+        #     reconstruction_threshold=int(context.run_config["reconstruction_threshold"]),
         # )
     )
 

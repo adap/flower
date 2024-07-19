@@ -1,6 +1,6 @@
 ---
 title: Simple Secure Aggregation with Flower Example
-tags: [basic, vision, fds]
+tags: [basic, secure_aggregation, privacy]
 dataset: []
 framework: [numpy]
 ---
@@ -29,7 +29,7 @@ flower-secure-aggregation
       |        ├── __init__.py
       |        ├── client_app.py    # defines your ClientApp
       |        ├── server_app.py    # defines your ServerApp
-      |        └── task.py
+      |        └── workflow_with_log.py
       ├── pyproject.toml            # builds your FAB, includes dependencies and configs
       └── README.md
 ```
