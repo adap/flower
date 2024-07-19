@@ -16,7 +16,7 @@
 
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Dict, Optional
 
 from flwr.common import Context, RecordSet
 
@@ -35,9 +35,12 @@ class LegacyContext(Context):
     client_manager: ClientManager
     history: History
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
-        state: RecordSet,
+        node_id: int = 0,
+        node_config: Optional[Dict[str, str]] = None,
+        state: Optional[RecordSet] = None,
+        run_config: Optional[Dict[str, str]] = None,
         config: Optional[ServerConfig] = None,
         strategy: Optional[Strategy] = None,
         client_manager: Optional[ClientManager] = None,
@@ -52,4 +55,10 @@ class LegacyContext(Context):
         self.strategy = strategy
         self.client_manager = client_manager
         self.history = History()
-        super().__init__(node_id=0, node_config={}, state=state, run_config={})
+
+        super().__init__(
+            node_id=node_id,
+            node_config=node_config if node_config else {},
+            state=state if state else RecordSet(),
+            run_config=run_config if run_config else {},
+        )
