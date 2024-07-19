@@ -104,13 +104,13 @@ def test_new_correct_name(tmp_path: str) -> None:
             # Assert
             file_list = (Path(tmp_path) / expected_top_level_dir).iterdir()
             assert {
-                str(file_path) for file_path in file_list
+                file_path.name for file_path in file_list
             } == expected_files_top_level
 
             file_list = (
                 Path(tmp_path) / expected_top_level_dir / expected_module_dir
             ).iterdir()
-            assert {str(file_path) for file_path in file_list} == expected_files_module
+            assert {file_path.name for file_path in file_list} == expected_files_module
         finally:
             os.chdir(origin)
 
