@@ -37,6 +37,9 @@ tested_datasets = [
     "flwrlabs/femnist",
     "flwrlabs/ucf101",
     "flwrlabs/ambient-acoustic-context",  # Feature wise it's just like speech_commands
+    "jlh/uci-mushrooms",
+    "Mike0307/MNIST-M",
+    "flwrlabs/usps",
 ]
 
 

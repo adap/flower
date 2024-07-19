@@ -86,8 +86,8 @@ def test_new_correct_name(tmp_path: str) -> None:
         }
         expected_files_module = {
             "__init__.py",
-            "server.py",
-            "client.py",
+            "server_app.py",
+            "client_app.py",
             "task.py",
         }
 
