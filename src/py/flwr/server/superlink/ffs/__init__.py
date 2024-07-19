@@ -19,6 +19,6 @@ from .disk_ffs import DiskFfs as DiskFfs
 from .ffs import Ffs as Ffs
 
 __all__ = [
-    "Ffs",
     "DiskFfs",
+    "Ffs",
 ]
