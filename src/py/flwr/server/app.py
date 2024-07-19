@@ -34,6 +34,7 @@ from cryptography.hazmat.primitives.serialization import (
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
+from flwr.common.config import get_flwr_dir
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
     TRANSPORT_TYPE_GRPC_ADAPTER,
@@ -57,6 +58,7 @@ from .server import Server, init_defaults, run_fl
 from .server_config import ServerConfig
 from .strategy import Strategy
 from .superlink.driver.driver_grpc import run_driver_api_grpc
+from .superlink.ffs.ffs_factory import FfsFactory
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
 from .superlink.fleet.grpc_bidi.grpc_server import (
     generic_create_grpc_server,
@@ -72,6 +74,7 @@ ADDRESS_FLEET_API_GRPC_BIDI = "[::]:8080"  # IPv6 to keep start_server compatibl
 ADDRESS_FLEET_API_REST = "0.0.0.0:9093"
 
 DATABASE = ":flwr-in-memory-state:"
+BASE_DIR = get_flwr_dir() / "ffs"
 
 
 def start_server(  # pylint: disable=too-many-arguments,too-many-locals
@@ -211,10 +214,14 @@ def run_superlink() -> None:
     # Initialize StateFactory
     state_factory = StateFactory(args.database)
 
+    # Initialize StateFactory
+    ffs_factory = FfsFactory(args.base_dir)
+
     # Start Driver API
     driver_server: grpc.Server = run_driver_api_grpc(
         address=driver_address,
         state_factory=state_factory,
+        ffs_factory=ffs_factory,
         certificates=certificates,
     )
 
@@ -294,6 +301,7 @@ def run_superlink() -> None:
         fleet_server = _run_fleet_api_grpc_rere(
             address=fleet_address,
             state_factory=state_factory,
+            ffs_factory=ffs_factory,
             certificates=certificates,
             interceptors=interceptors,
         )
@@ -480,6 +488,7 @@ def _try_obtain_certificates(
 def _run_fleet_api_grpc_rere(
     address: str,
     state_factory: StateFactory,
+    ffs_factory: FfsFactory,
     certificates: Optional[Tuple[bytes, bytes, bytes]],
     interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None,
 ) -> grpc.Server:
@@ -487,6 +496,7 @@ def _run_fleet_api_grpc_rere(
     # Create Fleet API gRPC server
     fleet_servicer = FleetServicer(
         state_factory=state_factory,
+        ffs_factory=ffs_factory,
     )
     fleet_add_servicer_to_server_fn = add_FleetServicer_to_server
     fleet_grpc_server = generic_create_grpc_server(
@@ -609,6 +619,11 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         "instead of on disk. If nothing is provided, "
         "Flower will just create a state in memory.",
         default=DATABASE,
+    )
+    parser.add_argument(
+        "--base-dir",
+        help="The base directory to store the objects.",
+        default=BASE_DIR,
     )
     parser.add_argument(
         "--auth-list-public-keys",

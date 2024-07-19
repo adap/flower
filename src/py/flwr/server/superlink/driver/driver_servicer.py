@@ -44,6 +44,8 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     Run,
 )
 from flwr.proto.task_pb2 import TaskRes  # pylint: disable=E0611
+from flwr.server.superlink.ffs.ffs import Ffs
+from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.state import State, StateFactory
 from flwr.server.utils.validator import validate_task_ins_or_res
 
@@ -51,8 +53,9 @@ from flwr.server.utils.validator import validate_task_ins_or_res
 class DriverServicer(driver_pb2_grpc.DriverServicer):
     """Driver API servicer."""
 
-    def __init__(self, state_factory: StateFactory) -> None:
+    def __init__(self, state_factory: StateFactory, ffs_factory: FfsFactory) -> None:
         self.state_factory = state_factory
+        self.ffs_factory = ffs_factory
 
     def GetNodes(
         self, request: GetNodesRequest, context: grpc.ServicerContext
@@ -72,8 +75,14 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         """Create run ID."""
         log(DEBUG, "DriverServicer.CreateRun")
         state: State = self.state_factory.state()
+        ffs: Ffs = self.ffs_factory.ffs()
+        fab_hash = ffs.put(request.fab.content, {})
+        _raise_if(
+            fab_hash != request.fab.hash,
+            "FAB hash from request doesn't match contents",
+        )
         run_id = state.create_run(
-            request.fab.hash,
+            fab_hash,
             dict(request.override_config.items()),
         )
         return CreateRunResponse(run_id=run_id)
@@ -160,9 +169,8 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         """Get run information."""
         log(DEBUG, "DriverServicer.GetFab")
 
-        fab = Fab(request.hash, b"")
-        # TODO
-        # fab = ffs.get_fab(request.hash)
+        ffs: Ffs = self.ffs_factory.ffs()
+        fab = Fab(request.hash, ffs.get(request.hash)[0])
 
         # Retrieve run information
         return GetFabResponse(fab=fab_to_proto(fab))

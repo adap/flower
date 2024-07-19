@@ -20,8 +20,6 @@ from logging import DEBUG, INFO
 import grpc
 
 from flwr.common.logger import log
-from flwr.common.serde import fab_to_proto
-from flwr.common.typing import Fab
 from flwr.proto import fleet_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -37,6 +35,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResResponse,
 )
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.fleet.message_handler import message_handler
 from flwr.server.superlink.state import StateFactory
 
@@ -44,8 +43,9 @@ from flwr.server.superlink.state import StateFactory
 class FleetServicer(fleet_pb2_grpc.FleetServicer):
     """Fleet API servicer."""
 
-    def __init__(self, state_factory: StateFactory) -> None:
+    def __init__(self, state_factory: StateFactory, ffs_factory: FfsFactory) -> None:
         self.state_factory = state_factory
+        self.ffs_factory = ffs_factory
 
     def CreateNode(
         self, request: CreateNodeRequest, context: grpc.ServicerContext
@@ -108,12 +108,9 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
     def GetFab(
         self, request: GetFabRequest, context: grpc.ServicerContext
     ) -> GetFabResponse:
-        """Get run information."""
+        """Get FAB."""
         log(DEBUG, "DriverServicer.GetFab")
-
-        fab = Fab(request.hash, b"")
-        # TODO
-        # fab = ffs.get_fab(request.hash)
-
-        # Retrieve run information
-        return GetFabResponse(fab=fab_to_proto(fab))
+        return message_handler.get_fab(
+            request=request,
+            ffs=self.ffs_factory.ffs(),
+        )

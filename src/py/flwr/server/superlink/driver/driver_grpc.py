@@ -24,6 +24,7 @@ from flwr.common.logger import log
 from flwr.proto.driver_pb2_grpc import (  # pylint: disable=E0611
     add_DriverServicer_to_server,
 )
+from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.state import StateFactory
 
 from ..fleet.grpc_bidi.grpc_server import generic_create_grpc_server
@@ -33,12 +34,14 @@ from .driver_servicer import DriverServicer
 def run_driver_api_grpc(
     address: str,
     state_factory: StateFactory,
+    ffs_factory: FfsFactory,
     certificates: Optional[Tuple[bytes, bytes, bytes]],
 ) -> grpc.Server:
     """Run Driver API (gRPC, request-response)."""
     # Create Driver API gRPC server
     driver_servicer: grpc.Server = DriverServicer(
         state_factory=state_factory,
+        ffs_factory=ffs_factory,
     )
     driver_add_servicer_to_server_fn = add_DriverServicer_to_server
     driver_grpc_server = generic_create_grpc_server(

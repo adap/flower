@@ -19,6 +19,9 @@ import time
 from typing import List, Optional
 from uuid import UUID
 
+from flwr.common.serde import fab_to_proto
+from flwr.common.typing import Fab
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
@@ -39,6 +42,7 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     Run,
 )
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.state import State
 
 
@@ -115,3 +119,11 @@ def get_run(
     run = state.get_run(request.run_id)
     run_proto = None if run is None else Run(**vars(run))
     return GetRunResponse(run=run_proto)
+
+
+def get_fab(
+    request: GetFabRequest, ffs: Ffs  # pylint: disable=W0613
+) -> GetFabResponse:
+    """Get FAB."""
+    fab = Fab(request.hash, ffs.get(request.hash)[0])
+    return GetFabResponse(fab=fab_to_proto(fab))
