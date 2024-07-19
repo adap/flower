@@ -49,7 +49,7 @@ class DiskFfs(Ffs):  # pylint: disable=R0904
         self.base_dir = base_dir
 
     def put(self, content: bytes, meta: Dict[str, str]) -> str:
-        """Store bytes and metadata. Return sha256hex hash of data as str.
+        """Store bytes and metadata and returns sha256hex hash of data as str.
 
         Parameters
         ----------
