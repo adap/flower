@@ -20,8 +20,8 @@ from typing import Any, Dict, List, MutableMapping, OrderedDict, Type, TypeVar, 
 from google.protobuf.message import Message as GrpcMessage
 
 # pylint: disable=E0611
-from flwr.proto.fab_pb2 import Fab as ProtoFab
 from flwr.proto.error_pb2 import Error as ProtoError
+from flwr.proto.fab_pb2 import Fab as ProtoFab
 from flwr.proto.node_pb2 import Node
 from flwr.proto.recordset_pb2 import Array as ProtoArray
 from flwr.proto.recordset_pb2 import BoolList, BytesList
