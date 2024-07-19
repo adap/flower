@@ -18,6 +18,7 @@
 import base64
 import unittest
 
+from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 import grpc
 
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
@@ -62,6 +63,8 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
 
         state_factory = StateFactory(":flwr-in-memory-state:")
         self.state = state_factory.state()
+        ffs_factory = FfsFactory(".")
+        self.ffs = ffs_factory.ffs()
         self.state.store_server_private_public_key(
             private_key_to_bytes(self._server_private_key),
             public_key_to_bytes(self._server_public_key),
@@ -72,7 +75,11 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
 
         self._server_interceptor = AuthenticateServerInterceptor(self.state)
         self._server: grpc.Server = _run_fleet_api_grpc_rere(
-            ADDRESS_FLEET_API_GRPC_RERE, state_factory, None, [self._server_interceptor]
+            ADDRESS_FLEET_API_GRPC_RERE,
+            state_factory,
+            ffs_factory,
+            None,
+            [self._server_interceptor],
         )
 
         self._channel = grpc.insecure_channel("localhost:9092")
