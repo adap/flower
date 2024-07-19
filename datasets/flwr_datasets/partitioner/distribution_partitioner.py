@@ -42,7 +42,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
                                           `num_unique_labels`
     the label_id at the i'th row is assigned to the partition_id based on the following
     approach.
-   
+
     First, for an i'th row, generate a list of `id`s according to the formula:
         id = alpha + beta
     where,
@@ -52,7 +52,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         beta = num_unique_labels * (j // num_unique_labels_per_partition)
     and j in {0, 1, 2, ..., `num_columns`}. Then, sort the list of `id`s in ascending
     order. The j'th index in this sorted list corresponds to the partition_id that the
-    i'th unique label (and the underlying distribution array value) will be assigned to. 
+    i'th unique label (and the underlying distribution array value) will be assigned to.
     So, for a dataset with 10 unique labels and a configuration with 20 partitions and
     2 unique labels per partition, the 0'th row of the distribution array (corresponding
     to class 0) will be assigned to partitions [0, 9, 10, 19], 1st row (class 1) to
