@@ -25,15 +25,22 @@ from flwr_datasets.preprocessor.merger import Merger
 
 tested_datasets = [
     "mnist",
+    "ylecun/mnist",
     "cifar10",
+    "uoft-cs/cifar10",
     "fashion_mnist",
+    "zalando-datasets/fashion_mnist",
     "sasha/dog-food",
     "zh-plus/tiny-imagenet",
     "scikit-learn/adult-census-income",
     "cifar100",
+    "uoft-cs/cifar100",
     "svhn",
+    "ufldl-stanford/svhn",
     "sentiment140",
+    "stanfordnlp/sentiment140",
     "speech_commands",
+    "google/speech_commands",
     "LIUM/tedlium",  # Feature wise it's just like speech_commands
     "flwrlabs/femnist",
     "jlh/uci-mushrooms",
