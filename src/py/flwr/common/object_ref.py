@@ -32,6 +32,10 @@ refer to a module on the PYTHONPATH and the module needs to have the specified
 attribute.
 """
 
+
+if "" not in sys.path:
+    sys.path.insert(0, "")
+
 _current_sys_path: str = ""
 
 
@@ -188,7 +192,7 @@ def _set_sys_path(directory: Optional[Union[str, Path]]) -> None:
     directory = Path(directory).absolute()
 
     # If the directory has already been added to `sys.path`, return
-    if str(directory) == _current_sys_path:
+    if str(directory) == _current_sys_path or directory == Path.cwd():
         return
 
     # Remove the old path if it exists and is not `""`.
