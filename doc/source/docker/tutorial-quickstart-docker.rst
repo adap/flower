@@ -217,7 +217,7 @@ Flower and serves as a base for building your own SuperExec image.
         |
         | The ``-U`` flag indicates that any existing packages should be upgraded, and
         | ``--no-cache-dir`` prevents pip from using the cache to speed up the installation.
-      * | ``ENTRYPOINT ["flower-superexec" ``: Set the command ``flower-superexec`` to be
+      * | ``ENTRYPOINT ["flower-superexec"``: Set the command ``flower-superexec`` to be
         | the default command run when the container is started.
         | ``"--executor", "flwr.superexec.deployment:executor"]`` Use the
         | ``flwr.superexec.deployment:executor`` executor to run the ServerApps.
