@@ -34,7 +34,7 @@ NODE_UNAVAILABLE_ERROR_REASON = (
 
 def generate_rand_int_from_bytes(num_bytes: int) -> int:
     """Generate a random `num_bytes` integer."""
-    return int.from_bytes(urandom(num_bytes), "little", signed=True)
+    return int.from_bytes(urandom(num_bytes), "little", signed=False)
 
 
 def make_node_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
