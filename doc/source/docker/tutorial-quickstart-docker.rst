@@ -108,54 +108,8 @@ building your own SuperNode image.
       FROM flwr/supernode:|latest_version_docker|
 
       WORKDIR /app
-      RUN python -m pip install -U --no-cache-dir \
-
-      ENTRYPOINT ["flower-supernode"]
-
-#. Copy the dependencies of the Flower project. These can be found in the ``project`` ``dependencies``
-   section of the ``pyproject.toml`` file. As seen in the example below, to copy the dependencies,
-   you would copy the lines 7-9 in the ``pyproject.toml`` file.
-
-   .. important::
-
-      Note that `flwr <https://pypi.org/project/flwr/>`__ is already installed in the ``flwr/supernode``
-      base image, so you only need to copy other package dependencies such as ``flwr-datasets``,
-      ``torch``, etc.
-
-   .. code-block:: toml
-      :linenos:
-      :emphasize-lines: 7-9
-      :caption: pyproject.toml
-
-      ...
-      [project]
-      name = "quickstart-docker"
-      version = "1.0.0"
-      dependencies = [
-          "flwr[simulation]>=1.10.0",
-          "flwr-datasets[vision]>=0.0.2,<1.0.0",
-          "torch==2.2.1",
-          "torchvision==0.17.1",
-      ]
-      ...
-
-   After the line 4, paste the dependencies copied from the previous step.
-   Make sure to remove the comma at the end of each line and add a space and a backslash at the
-   end, except the last one.
-
-   .. code-block:: dockerfile
-      :linenos:
-      :emphasize-lines: 5-7
-      :caption: Dockerfile.supernode
-      :substitutions:
-
-      FROM flwr/supernode:|latest_version_docker|
-
-      WORKDIR /app
-      RUN python -m pip install -U --no-cache-dir \
-          "flwr-datasets[vision]>=0.0.2,<1.0.0" \
-          "torch==2.2.1" \
-          "torchvision==0.17.1"
+      COPY docker_pyproject.toml pyproject.toml
+      RUN python -m pip install -U --no-cache-dir .
 
       ENTRYPOINT ["flower-supernode"]
 
@@ -166,15 +120,28 @@ building your own SuperNode image.
         | :substitution-code:`|latest_version_docker|`.
       * | ``WORKDIR /app``: Set the working directory for the container to ``/app``.
         | Any subsequent commands that reference a directory will be relative to this directory.
-      * | ``RUN python -m pip install -U --no-cache-dir \``: Run the ``pip`` install command to
-        | install the required packages.
+      * | ``COPY docker_pyproject.toml pyproject.toml``: Copy the ``docker_pyproject.toml`` file
+        | from the current working directory into the container's ``/app`` directory,
+        | renaming it to ``pyproject.toml``.
+      * | ``RUN python -m pip install -U --no-cache-dir .``: Run the ``pip`` install command to
+        | install the dependencies defined in the ``pyproject.toml`` file
         |
         | The ``-U`` flag indicates that any existing packages should be upgraded, and
         | ``--no-cache-dir`` prevents pip from using the cache to speed up the installation.
-        |
-        | The packages listed after the backslash are the ones to be installed.
       * | ``ENTRYPOINT ["flower-supernode"]``: Set the command ``flower-supernode`` to be
         | the default command run when the container is started.
+
+#. Create a new ``docker_pyproject.toml`` file without the ``flwr`` dependency:
+
+   .. important::
+
+      Note that `flwr <https://pypi.org/project/flwr/>`__ is already installed in the ``flwr/supernode``
+      base image, so only other package dependencies such as ``flwr-datasets``, ``torch``, etc.,
+      need to be installed.
+
+   .. code-block:: bash
+
+      sed 's/.*flwr\[simulation\].*//' pyproject.toml > docker_pyproject.toml
 
 #. Next, build the SuperNode Docker image by running the following command in the directory where
    Dockerfile is located:
@@ -246,46 +213,8 @@ Flower and serves as a base for building your own SuperExec image.
       FROM flwr/superexec:|latest_version_docker|
 
       WORKDIR /app
-      RUN python -m pip install -U --no-cache-dir \
-
-      ENTRYPOINT ["flower-superexec", "--executor", "flwr.superexec.deployment:executor"]
-
-#. As you did for the SuperNode image, copy the dependencies of the Flower project.
-
-   .. code-block:: toml
-      :linenos:
-      :emphasize-lines: 7-9
-      :caption: pyproject.toml
-
-      ...
-      [project]
-      name = "quickstart-docker"
-      version = "1.0.0"
-      dependencies = [
-          "flwr[simulation]>=1.10.0",
-          "flwr-datasets[vision]>=0.0.2,<1.0.0",
-          "torch==2.2.1",
-          "torchvision==0.17.1",
-      ]
-      ...
-
-   After the line 4, paste the dependencies copied from the previous step.
-   Make sure to remove the comma at the end of each line and add a space and a backslash at the
-   end, except the last one.
-
-   .. code-block:: dockerfile
-      :linenos:
-      :emphasize-lines: 5-7
-      :caption: Dockerfile.superexec
-      :substitutions:
-
-      FROM flwr/superexec:|latest_version_docker|
-
-      WORKDIR /app
-      RUN python -m pip install -U --no-cache-dir \
-          "flwr-datasets[vision]>=0.0.2,<1.0.0" \
-          "torch==2.2.1" \
-          "torchvision==0.17.1"
+      COPY docker_pyproject.toml pyproject.toml
+      RUN python -m pip install -U --no-cache-dir .
 
       ENTRYPOINT ["flower-superexec", "--executor", "flwr.superexec.deployment:executor"]
 
@@ -296,13 +225,14 @@ Flower and serves as a base for building your own SuperExec image.
         | :substitution-code:`|latest_version_docker|`.
       * | ``WORKDIR /app``: Set the working directory for the container to ``/app``.
         | Any subsequent commands that reference a directory will be relative to this directory.
-      * | ``RUN python -m pip install -U --no-cache-dir \``: Run the ``pip`` install command to
-        | install the required packages.
+      * | ``COPY docker_pyproject.toml pyproject.toml``: Copy the ``docker_pyproject.toml`` file
+        | from the current working directory into the container's ``/app`` directory,
+        | renaming it to ``pyproject.toml``.
+      * | ``RUN python -m pip install -U --no-cache-dir .``: Run the ``pip`` install command to
+        | install the dependencies defined in the ``pyproject.toml`` file
         |
         | The ``-U`` flag indicates that any existing packages should be upgraded, and
         | ``--no-cache-dir`` prevents pip from using the cache to speed up the installation.
-        |
-        | The packages listed after the backslash are the ones to be installed.
       * | ``ENTRYPOINT ["flower-superexec" ``: Set the command ``flower-superexec`` to be
         | the default command run when the container is started.
         | ``"--executor", "flwr.superexec.deployment:executor"]`` Use the
@@ -366,6 +296,7 @@ Step 5: Run the Quickstart Project
 
 TODO:
 
+* wait fo FAB distribution
 * add flwr logs
 
 
