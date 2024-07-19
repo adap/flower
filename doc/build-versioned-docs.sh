@@ -82,9 +82,9 @@ done
 # Build the main version (main for GH CI, local branch for local) 
 if [ $GITHUB_ACTIONS ]
 then
-  git switch main
+  git checkout --force main
 else
-  git switch $current_branch
+  git checkout --force $current_branch
 fi
 
 current_version=main

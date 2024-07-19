@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,7 +35,11 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     PushTaskInsResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.proto.run_pb2 import (  # pylint: disable=E0611
+    GetRunRequest,
+    GetRunResponse,
+    Run,
+)
 from flwr.proto.task_pb2 import TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state import State, StateFactory
 from flwr.server.utils.validator import validate_task_ins_or_res
@@ -65,7 +69,11 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         """Create run ID."""
         log(DEBUG, "DriverServicer.CreateRun")
         state: State = self.state_factory.state()
-        run_id = state.create_run(request.fab_id, request.fab_version)
+        run_id = state.create_run(
+            request.fab_id,
+            request.fab_version,
+            dict(request.override_config.items()),
+        )
         return CreateRunResponse(run_id=run_id)
 
     def PushTaskIns(
@@ -134,7 +142,15 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         self, request: GetRunRequest, context: grpc.ServicerContext
     ) -> GetRunResponse:
         """Get run information."""
-        raise NotImplementedError
+        log(DEBUG, "DriverServicer.GetRun")
+
+        # Init state
+        state: State = self.state_factory.state()
+
+        # Retrieve run information
+        run = state.get_run(request.run_id)
+        run_proto = None if run is None else Run(**vars(run))
+        return GetRunResponse(run=run_proto)
 
 
 def _raise_if(validation_error: bool, detail: str) -> None:

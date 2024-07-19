@@ -16,16 +16,33 @@ DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 class CreateRunRequest(google.protobuf.message.Message):
     """CreateRun"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    class OverrideConfigEntry(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        KEY_FIELD_NUMBER: builtins.int
+        VALUE_FIELD_NUMBER: builtins.int
+        key: typing.Text
+        value: typing.Text
+        def __init__(self,
+            *,
+            key: typing.Text = ...,
+            value: typing.Text = ...,
+            ) -> None: ...
+        def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+
     FAB_ID_FIELD_NUMBER: builtins.int
     FAB_VERSION_FIELD_NUMBER: builtins.int
+    OVERRIDE_CONFIG_FIELD_NUMBER: builtins.int
     fab_id: typing.Text
     fab_version: typing.Text
+    @property
+    def override_config(self) -> google.protobuf.internal.containers.ScalarMap[typing.Text, typing.Text]: ...
     def __init__(self,
         *,
         fab_id: typing.Text = ...,
         fab_version: typing.Text = ...,
+        override_config: typing.Optional[typing.Mapping[typing.Text, typing.Text]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["fab_id",b"fab_id","fab_version",b"fab_version"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["fab_id",b"fab_id","fab_version",b"fab_version","override_config",b"override_config"]) -> None: ...
 global___CreateRunRequest = CreateRunRequest
 
 class CreateRunResponse(google.protobuf.message.Message):
