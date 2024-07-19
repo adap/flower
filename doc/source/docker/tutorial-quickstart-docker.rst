@@ -22,23 +22,7 @@ Step 1: Set Up
 
    .. code-block:: bash
 
-      $ flwr new quickstart-docker
-
-      💬 Please provide your Flower username: flower
-
-      💬 Please select ML framework by typing in the number
-
-      [ 0] FlowerTune
-      [ 1] HF
-      [ 2] JAX
-      [ 3] MLX
-      [ 4] NumPy
-      [ 5] PyTorch
-      [ 6] TensorFlow
-      [ 7] sklearn
-
-
-      : 5
+      $ flwr new quickstart-docker --framework PyTorch --username flower
 
       🔨 Creating Flower project quickstart-docker...
       🎊 Project creation successful.
