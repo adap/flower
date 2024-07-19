@@ -21,7 +21,7 @@ from uuid import UUID
 
 from flwr.common.serde import fab_to_proto
 from flwr.common.typing import Fab
-from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
