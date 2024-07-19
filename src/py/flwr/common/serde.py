@@ -20,7 +20,7 @@ from typing import Any, Dict, List, MutableMapping, OrderedDict, Type, TypeVar, 
 from google.protobuf.message import Message as GrpcMessage
 
 # pylint: disable=E0611
-from flwr.proto import fab_pb2
+from flwr.proto.fab_pb2 import Fab as ProtoFab
 from flwr.proto.error_pb2 import Error as ProtoError
 from flwr.proto.node_pb2 import Node
 from flwr.proto.recordset_pb2 import Array as ProtoArray
@@ -677,11 +677,11 @@ def message_from_taskres(taskres: TaskRes) -> Message:
 # === FAB ===
 
 
-def fab_to_proto(fab: typing.Fab) -> fab_pb2.Fab:
+def fab_to_proto(fab: typing.Fab) -> ProtoFab:
     """Create a proto Fab object from a Python Fab."""
-    return fab_pb2.Fab(hash=fab.hash_str, content=fab.data_bytes)
+    return ProtoFab(hash=fab.hash_str, content=fab.data_bytes)
 
 
-def fab_from_proto(fab: fab_pb2.Fab) -> typing.Fab:
+def fab_from_proto(fab: ProtoFab) -> typing.Fab:
     """Create a proto Fab object from a Python Fab."""
     return typing.Fab(fab.hash, fab.content)

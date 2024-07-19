@@ -100,6 +100,7 @@ def get_fused_config_from_dir(
 
 def get_config_from_hash(fab_hash: str) -> Dict[str, str]:
     """Get Flower App config from a FAB hash."""
+    _ = fab_hash
     return {}
 
 
@@ -111,6 +112,8 @@ def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> Dict[str, str]:
     """
     if not run.fab_hash:
         return {}
+
+    _ = flwr_dir
 
     return _fuse_dicts(
         get_config_from_hash(run.fab_hash), override_dict=run.override_config
