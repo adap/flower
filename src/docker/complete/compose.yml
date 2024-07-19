@@ -1,7 +1,7 @@
 services:
   # create a SuperLink service
   superlink:
-    image: flwr/superlink:1.10.0.dev20240717
+    image: flwr/superlink:1.10.0.dev20240719
     command:
       - --insecure
 
@@ -11,13 +11,12 @@ services:
     build:
       context: .
       dockerfile_inline: |
-        FROM flwr/supernode:1.10.0.dev20240717
+        FROM flwr/supernode:1.10.0.dev20240719
 
         WORKDIR /app
-        RUN python -m pip install -U --no-cache-dir \
-            "flwr-datasets[vision]>=0.2.0,<1.0.0" \
-            torch==2.2.1 \
-            torchvision==0.17.1
+        COPY --chown=app:app pyproject.toml .
+        RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
+          && python -m pip install -U --no-cache-dir .
 
         ENTRYPOINT ["flower-supernode", "client:app", "--node-config", "partition-id=0,num-partitions=2"]
     deploy:
@@ -38,13 +37,12 @@ services:
     build:
       context: .
       dockerfile_inline: |
-        FROM flwr/supernode:1.10.0.dev20240717
+        FROM flwr/supernode:1.10.0.dev20240719
 
         WORKDIR /app
-        RUN python -m pip install -U --no-cache-dir \
-            "flwr-datasets[vision]>=0.2.0,<1.0.0" \
-            torch==2.2.1 \
-            torchvision==0.17.1
+        COPY --chown=app:app pyproject.toml .
+        RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
+          && python -m pip install -U --no-cache-dir .
 
         ENTRYPOINT ["flower-supernode", "client:app", "--node-config", "partition-id=1,num-partitions=2"]
     deploy:
@@ -66,13 +64,12 @@ services:
     build:
       context: .
       dockerfile_inline: |
-        FROM flwr/supernode:1.10.0.dev20240717
+        FROM flwr/supernode:1.10.0.dev20240719
 
         WORKDIR /app
-        RUN python -m pip install -U --no-cache-dir \
-            "flwr-datasets[vision]>=0.2.0,<1.0.0" \
-            torch==2.2.1 \
-            torchvision==0.17.1
+        COPY --chown=app:app pyproject.toml .
+        RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
+          && python -m pip install -U --no-cache-dir .
 
         ENTRYPOINT ["flower-superexec"]
     ports:
