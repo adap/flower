@@ -7,7 +7,7 @@ framework: [numpy]
 
 # Secure aggregation with Flower (the SecAgg+ protocol)
 
-The following steps describe how to use Secure Aggregation in flower, with `ClientApp` using `secaggplus_mod` and `ServerApp` using `SecAggPlusWorkflow`.
+The following steps describe how to use Secure Aggregation in flower, with `ClientApp` using `secaggplus_mod` and `ServerApp` using `SecAggPlusWorkflowWithLogs`, which is a subclass of `SecAggPlusWorkflow` that includes more detailed logging specifically designed for this example.
 
 ## Project Setup
 
