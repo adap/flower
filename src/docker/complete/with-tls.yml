@@ -12,7 +12,7 @@ services:
       - source: superlink-keyfile
         target: /app/certificates/server.key
 
-  supernode-1:
+  supernode-1: &supernode
     command:
       - --superlink
       - superlink:9092
@@ -22,15 +22,7 @@ services:
       - source: superlink-ca-certfile
         target: /app/certificates/ca.crt
 
-  supernode-2:
-    command:
-      - --superlink
-      - superlink:9092
-      - --root-certificates
-      - certificates/ca.crt
-    secrets:
-      - source: superlink-ca-certfile
-        target: /app/certificates/ca.crt
+  supernode-2: *supernode
 
   superexec:
     command:

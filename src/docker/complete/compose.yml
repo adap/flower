@@ -1,3 +1,18 @@
+x-supernode: &supernode
+  user: root
+  deploy:
+    resources:
+      limits:
+        cpus: "2"
+  command:
+    - --superlink
+    - superlink:9092
+    - --insecure
+  depends_on:
+    - superlink
+  volumes:
+    - apps-volume:/app/.flwr/apps/:ro
+
 services:
   # create a SuperLink service
   superlink:
@@ -7,7 +22,7 @@ services:
 
   # create a SuperNode service with two containers
   supernode-1:
-    user: root
+    <<: *supernode
     build:
       context: .
       dockerfile_inline: |
@@ -19,21 +34,9 @@ services:
           && python -m pip install -U --no-cache-dir .
 
         ENTRYPOINT ["flower-supernode", "client:app", "--node-config", "partition-id=0,num-partitions=2"]
-    deploy:
-      resources:
-        limits:
-          cpus: "2"
-    command:
-      - --superlink
-      - superlink:9092
-      - --insecure
-    depends_on:
-      - superlink
-    volumes:
-      - apps-volume:/app/.flwr/apps/:ro
 
   supernode-2:
-    user: root
+    <<: *supernode
     build:
       context: .
       dockerfile_inline: |
@@ -45,18 +48,6 @@ services:
           && python -m pip install -U --no-cache-dir .
 
         ENTRYPOINT ["flower-supernode", "client:app", "--node-config", "partition-id=1,num-partitions=2"]
-    deploy:
-      resources:
-        limits:
-          cpus: "2"
-    command:
-      - --superlink
-      - superlink:9092
-      - --insecure
-    depends_on:
-      - superlink
-    volumes:
-      - apps-volume:/app/.flwr/apps/:ro
 
   # create a SuperExec service
   superexec:
