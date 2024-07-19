@@ -38,13 +38,13 @@ message Task {
 message TaskIns {
   string task_id = 1;
   string group_id = 2;
-  sint64 run_id = 3;
+  int64 run_id = 3;
   Task task = 4;
 }
 
 message TaskRes {
   string task_id = 1;
   string group_id = 2;
-  sint64 run_id = 3;
+  int64 run_id = 3;
   Task task = 4;
 }

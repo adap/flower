@@ -18,10 +18,10 @@ syntax = "proto3";
 package flwr.proto;
 
 message Run {
-  sint64 run_id = 1;
+  int64 run_id = 1;
   string fab_id = 2;
   string fab_version = 3;
   map<string, string> override_config = 4;
 }
-message GetRunRequest { sint64 run_id = 1; }
+message GetRunRequest { int64 run_id = 1; }
 message GetRunResponse { Run run = 1; }

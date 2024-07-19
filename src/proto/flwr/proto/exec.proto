@@ -29,6 +29,6 @@ message StartRunRequest {
   bytes fab_file = 1;
   map<string, string> override_config = 2;
 }
-message StartRunResponse { sint64 run_id = 1; }
-message StreamLogsRequest { sint64 run_id = 1; }
+message StartRunResponse { int64 run_id = 1; }
+message StreamLogsRequest { int64 run_id = 1; }
 message StreamLogsResponse { string log_output = 1; }

@@ -44,10 +44,10 @@ message CreateRunRequest {
   string fab_version = 2;
   map<string, string> override_config = 3;
 }
-message CreateRunResponse { sint64 run_id = 1; }
+message CreateRunResponse { int64 run_id = 1; }
 
 // GetNodes messages
-message GetNodesRequest { sint64 run_id = 1; }
+message GetNodesRequest { int64 run_id = 1; }
 message GetNodesResponse { repeated Node nodes = 1; }
 
 // PushTaskIns messages
