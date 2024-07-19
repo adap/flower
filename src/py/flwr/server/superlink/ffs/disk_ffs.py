@@ -16,23 +16,10 @@
 
 import hashlib
 import json
-import os
+from pathlib import Path
 from typing import Dict, List, Tuple
 
 from flwr.server.superlink.ffs.ffs import Ffs
-
-
-def write_dict_to_file(data_dict: Dict[str, str], file_path: str) -> None:
-    """Write a Dict to a file in JSON format."""
-    with open(file_path, "w", encoding="utf-8") as file:
-        json.dump(data_dict, file)
-
-
-def read_dict_from_file(file_path: str) -> Dict[str, str]:
-    """Read a Dict from a JSON file."""
-    with open(file_path, encoding="utf-8") as file:
-        data_dict: Dict[str, str] = json.load(file)
-    return data_dict
 
 
 class DiskFfs(Ffs):  # pylint: disable=R0904
@@ -46,7 +33,7 @@ class DiskFfs(Ffs):  # pylint: disable=R0904
         base_dir : string
             The base directory to store the objects.
         """
-        self.base_dir = base_dir
+        self.base_dir = Path(base_dir)
 
     def put(self, content: bytes, meta: Dict[str, str]) -> str:
         """Store bytes and metadata and returns sha256hex hash of data as str.
@@ -65,10 +52,8 @@ class DiskFfs(Ffs):  # pylint: disable=R0904
         """
         content_hash = hashlib.sha256(content).hexdigest()
 
-        with open(os.path.join(self.base_dir, content_hash), "wb") as file:
-            file.write(content)
-
-        write_dict_to_file(meta, os.path.join(self.base_dir, f"{content_hash}.META"))
+        (self.base_dir / content_hash).write_bytes(content)
+        (self.base_dir / f"{content_hash}.META").write_text(json.dumps(meta))
 
         return content_hash
 
@@ -85,10 +70,8 @@ class DiskFfs(Ffs):  # pylint: disable=R0904
         Tuple[bytes, Dict[str, str]]
             A tuple containing the object and it's metadata.
         """
-        with open(os.path.join(self.base_dir, key), "rb") as file:
-            content = file.read()
-
-        meta = read_dict_from_file(os.path.join(self.base_dir, f"{key}.META"))
+        content = (self.base_dir / key).read_bytes()
+        meta = json.loads((self.base_dir / f"{key}.META").read_text())
 
         return content, meta
 
@@ -100,8 +83,8 @@ class DiskFfs(Ffs):  # pylint: disable=R0904
         hash : string
             The sha256hex hash of the object to be deleted.
         """
-        os.remove(os.path.join(self.base_dir, key))
-        os.remove(os.path.join(self.base_dir, f"{key}.META"))
+        (self.base_dir / key).unlink()
+        (self.base_dir / f"{key}.META").unlink()
 
     def list(self) -> List[str]:
         """List all keys.
@@ -115,5 +98,5 @@ class DiskFfs(Ffs):  # pylint: disable=R0904
             A list of all keys.
         """
         return [
-            item for item in os.listdir(self.base_dir) if not item.endswith(".META")
+            item.name for item in self.base_dir.iterdir() if not item.suffix == ".META"
         ]
