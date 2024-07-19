@@ -130,7 +130,7 @@ def flatten_dict(raw_dict: Dict[str, Any], parent_key: str = "") -> Dict[str, st
 
 
 def parse_config_args(
-    config: Optional[str],
+    config: Optional[List[str]],
     separator: str = ",",
 ) -> Dict[str, str]:
     """Parse separator separated list of key-value pairs separated by '='."""
@@ -139,17 +139,19 @@ def parse_config_args(
     if config is None:
         return overrides
 
-    overrides_list = config.split(separator)
-    if (
-        len(overrides_list) == 1
-        and "=" not in overrides_list
-        and overrides_list[0].endswith(".toml")
-    ):
-        with Path(overrides_list[0]).open("rb") as config_file:
-            overrides = flatten_dict(tomli.load(config_file))
-    else:
-        for kv_pair in overrides_list:
-            key, value = kv_pair.split("=")
-            overrides[key] = value
+    for config_line in config:
+        if config_line:
+            overrides_list = config_line.split(separator)
+            if (
+                len(overrides_list) == 1
+                and "=" not in overrides_list
+                and overrides_list[0].endswith(".toml")
+            ):
+                with Path(overrides_list[0]).open("rb") as config_file:
+                    overrides = flatten_dict(tomli.load(config_file))
+            else:
+                for kv_pair in overrides_list:
+                    key, value = kv_pair.split("=")
+                    overrides[key] = value
 
     return overrides

@@ -61,7 +61,9 @@ def _register_nodes(
 
 
 def _register_node_states(
-    nodes_mapping: NodeToPartitionMapping, run: Run
+    nodes_mapping: NodeToPartitionMapping,
+    run: Run,
+    app_dir: Optional[str] = None,
 ) -> Dict[int, NodeState]:
     """Create NodeState objects and pre-register the context for the run."""
     node_states: Dict[int, NodeState] = {}
@@ -76,7 +78,9 @@ def _register_node_states(
         )
 
         # Pre-register Context objects
-        node_states[node_id].register_context(run_id=run.run_id, run=run)
+        node_states[node_id].register_context(
+            run_id=run.run_id, run=run, app_dir=app_dir
+        )
 
     return node_states
 
@@ -256,6 +260,7 @@ def start_vce(
     backend_name: str,
     backend_config_json_stream: str,
     app_dir: str,
+    is_app: bool,
     f_stop: threading.Event,
     run: Run,
     flwr_dir: Optional[str] = None,
@@ -309,7 +314,9 @@ def start_vce(
         )
 
     # Construct mapping of NodeStates
-    node_states = _register_node_states(nodes_mapping=nodes_mapping, run=run)
+    node_states = _register_node_states(
+        nodes_mapping=nodes_mapping, run=run, app_dir=app_dir if is_app else None
+    )
 
     # Load backend config
     log(DEBUG, "Supported backends: %s", list(supported_backends.keys()))
