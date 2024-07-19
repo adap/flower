@@ -408,7 +408,6 @@ natural_id_datasets = [
 mocked_natural_id_datasets = ["flwrlabs/ucf101"]
 
 
-
 @parameterized_class(
     ("dataset_name", "test_split", "subset", "partition_by"),
     [
