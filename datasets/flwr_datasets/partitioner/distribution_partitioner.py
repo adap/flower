@@ -40,24 +40,27 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
                            `num_unique_labels_per_partition` x `num_partitions`
     ( `num_unique_labels`, ---------------------------------------------------- ),
                                           `num_unique_labels`
-    the label_id at the i'th row is assigned to the partition_id based on the formula:
-        partition_id = <alpha + beta>
+    the label_id at the i'th row is assigned to the partition_id based on the following
+    approach.
+   
+    First, for an i'th row, generate a list of `id`s according to the formula:
+        id = alpha + beta
     where,
-        <.> denotes the reindexed sequence of partition_ids in monotone increasing
-            order for all j's
-        alpha* = (i - num_unique_labels_per_partition + 1) \
+        alpha = (i - num_unique_labels_per_partition + 1) \
                  + (j % num_unique_labels_per_partition),
-        alpha = alpha* + (alpha* >= 0 ? 0 : num_unique_labels),
+        alpha = alpha + (alpha >= 0 ? 0 : num_unique_labels),
         beta = num_unique_labels * (j // num_unique_labels_per_partition)
-    and j in {0, 1, 2, ..., `num_columns`}. Each list representing the partition_ids for
-    the i'th row is sorted in ascending order. So, for a dataset with 10 unique labels
-    and a configuration with 20 partitions and 2 unique labels per partition, the 0'th
-    row of the distribution array (corresponding to class 0) will be assigned to
-    partitions [0, 9, 10, 19], 1st row (class 1) to [0, 1, 10, 11], 2nd row (class 2)
-    to [1, 2, 11, 12], 3rd row (class 3) to [2, 3, 12, 13], etc ... . Alternatively, the
-    distribution can be interpreted as partition 0 having classes 0 and 1, partition 1
-    having classes 1 and 2, partition 2 having classes 2 and 3, etc ...
-    The list representing the unique labels is sorted in ascending order.
+    and j in {0, 1, 2, ..., `num_columns`}. Then, sort the list of `id`s in ascending
+    order. The j'th index in this sorted list corresponds to the partition_id that the
+    i'th unique label (and the underlying distribution array value) will be assigned to. 
+    So, for a dataset with 10 unique labels and a configuration with 20 partitions and
+    2 unique labels per partition, the 0'th row of the distribution array (corresponding
+    to class 0) will be assigned to partitions [0, 9, 10, 19], 1st row (class 1) to
+    [0, 1, 10, 11], 2nd row (class 2) to [1, 2, 11, 12], 3rd row (class 3) to
+    [2, 3, 12, 13], etc ... . Alternatively, the distribution can be interpreted as
+    partition 0 having classes 0 and 1, partition 1 having classes 1 and 2, partition 2
+    having classes 2 and 3, etc ... The list representing the unique labels is sorted
+    in ascending order.
 
     Parameters
     ----------
