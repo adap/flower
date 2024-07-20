@@ -397,7 +397,7 @@ def _load_mocked_dataset(
     return datasets.DatasetDict(dataset_dict)
 
 
-def _download_partial_dataset(
+def _load_mocked_dataset_by_partial_download(
     dataset_name: str,
     split_name: str,
     skip_take_list: List[Tuple[int, int]],
@@ -439,3 +439,18 @@ def _download_partial_dataset(
         # to the fully downloaded dataset index: dataset[n+1: (n+1 + m)]
         dataset_list.extend(list(dataset.skip(skip).take(take)))
     return Dataset.from_list(dataset_list)
+
+
+def _load_mocked_dataset_dict_by_partial_download(
+    dataset_name: str,
+    split_names: List[str],
+    skip_take_lists: List[List[Tuple[int, int]]],
+    subset_name: Optional[str] = None,
+) -> DatasetDict:
+    """Like _load_mocked_dataset_by_partial_download but for many splits."""
+    dataset_dict = {}
+    for split_name, skip_take_list in zip(split_names, skip_take_lists):
+        dataset_dict[split_name] = _load_mocked_dataset_by_partial_download(
+            dataset_name, split_name, skip_take_list, subset_name
+        )
+    return DatasetDict(dataset_dict)
