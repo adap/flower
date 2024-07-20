@@ -21,7 +21,6 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.fedavg import FedAvg
 from torch import nn
 
-from fedrep.constants import Algorithms
 from fedrep.implemented_models.cnn_cifar10 import CNNCifar10ModelSplit
 from fedrep.implemented_models.cnn_cifar100 import CNNCifar100ModelSplit
 
@@ -48,7 +47,7 @@ class ServerInitializationStrategy(FedAvg):
         min_available_clients: int = 1,
         min_evaluate_clients: int = 1,
         min_fit_clients: int = 1,
-        algorithm: str = Algorithms.FEDREP.value,
+        algorithm: str = "FedRep",
         **kwargs: Any,
     ) -> None:
         super().__init__(*args, **kwargs)
@@ -79,7 +78,7 @@ class ServerInitializationStrategy(FedAvg):
         self.initial_parameters = None  # Don't keep initial parameters in memory
         initial_parameters_use = None
         if initial_parameters is None and self.model is not None:
-            if self.algorithm == Algorithms.FEDREP.value:
+            if self.algorithm == "FedRep":
                 initial_parameters_use = [
                     val.cpu().numpy() for _, val in self.model.body.state_dict().items()
                 ]
