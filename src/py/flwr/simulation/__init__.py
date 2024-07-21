@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2021 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,4 +36,7 @@ To install the necessary dependencies, install `flwr` with the `simulation` extr
         raise ImportError(RAY_IMPORT_ERROR)
 
 
-__all__ = ["start_simulation", "run_simulation"]
+__all__ = [
+    "run_simulation",
+    "start_simulation",
+]

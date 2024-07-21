@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,8 +24,6 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
-    GetRunRequest,
-    GetRunResponse,
     PingRequest,
     PingResponse,
     PullTaskInsRequest,
@@ -33,9 +31,13 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResRequest,
     PushTaskResResponse,
     Reconnect,
-    Run,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.run_pb2 import (  # pylint: disable=E0611
+    GetRunRequest,
+    GetRunResponse,
+    Run,
+)
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state import State
 
@@ -110,6 +112,6 @@ def get_run(
     request: GetRunRequest, state: State  # pylint: disable=W0613
 ) -> GetRunResponse:
     """Get run information."""
-    run_id, fab_id, fab_version = state.get_run(request.run_id)
-    run = Run(run_id=run_id, fab_id=fab_id, fab_version=fab_version)
-    return GetRunResponse(run=run)
+    run = state.get_run(request.run_id)
+    run_proto = None if run is None else Run(**vars(run))
+    return GetRunResponse(run=run_proto)
