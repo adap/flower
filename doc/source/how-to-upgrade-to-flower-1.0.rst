@@ -12,7 +12,7 @@ Here's how to update an existing installation to Flower 1.0 using either pip or 
 - pip: add ``-U`` when installing.
 
   - ``python -m pip install -U flwr`` (when using ``start_server`` and ``start_client``)
-  - ``python -m pip install -U flwr[simulation]`` (when using ``start_simulation``)
+  - ``python -m pip install -U "flwr[simulation]"`` (when using ``start_simulation``)
 
 - Poetry: update the ``flwr`` dependency in ``pyproject.toml`` and then reinstall (don't forget to delete ``poetry.lock`` via ``rm poetry.lock`` before running ``poetry install``).
 

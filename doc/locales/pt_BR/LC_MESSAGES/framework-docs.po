@@ -5758,7 +5758,7 @@ msgstr ""
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:15
 msgid ""
-"``python -m pip install -U flwr[simulation]`` (when using "
+"``python -m pip install -U "flwr[simulation]"`` (when using "
 "``start_simulation``)"
 msgstr ""
 
