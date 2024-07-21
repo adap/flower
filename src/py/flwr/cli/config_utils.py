@@ -24,8 +24,8 @@ import tomli
 from flwr.common import object_ref
 
 
-def get_fab_metadata(fab_file: Union[Path, bytes]) -> Tuple[str, str]:
-    """Extract the fab_id and the fab_version from a FAB file or path.
+def get_fab_config(fab_file: Union[Path, bytes]) -> Dict[str, Any]:
+    """Extract the config from a FAB file or path.
 
     Parameters
     ----------
@@ -35,8 +35,8 @@ def get_fab_metadata(fab_file: Union[Path, bytes]) -> Tuple[str, str]:
 
     Returns
     -------
-    Tuple[str, str]
-        The `fab_version` and `fab_id` of the given Flower App Bundle.
+    Dict[str, Any]
+        The `config` of the given Flower App Bundle.
     """
     fab_file_archive: Union[Path, IO[bytes]]
     if isinstance(fab_file, bytes):
@@ -58,16 +58,29 @@ def get_fab_metadata(fab_file: Union[Path, bytes]) -> Tuple[str, str]:
         if not is_valid:
             raise ValueError(errors)
 
-        return (
-            conf["project"]["version"],
-            f"{conf['tool']['flwr']['app']['publisher']}/{conf['project']['name']}",
-        )
+        return conf
 
 
-def get_fab_metadata_from_hash(fab_hash: str) -> Tuple[str, str]:
-    """Extract the fab_id and the fab_version from a FAB hash."""
-    _ = fab_hash
-    return ("", "")
+def get_fab_metadata(fab_file: Union[Path, bytes]) -> Tuple[str, str]:
+    """Extract the fab_id and the fab_version from a FAB file or path.
+
+    Parameters
+    ----------
+    fab_file : Union[Path, bytes]
+        The Flower App Bundle file to validate and extract the metadata from.
+        It can either be a path to the file or the file itself as bytes.
+
+    Returns
+    -------
+    Tuple[str, str]
+        The `fab_version` and `fab_id` of the given Flower App Bundle.
+    """
+    conf = get_fab_config(fab_file)
+
+    return (
+        conf["project"]["version"],
+        f"{conf['tool']['flwr']['app']['publisher']}/{conf['project']['name']}",
+    )
 
 
 def load_and_validate(

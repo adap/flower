@@ -25,7 +25,7 @@ from typing import Callable, ContextManager, Dict, Optional, Tuple, Type, Union
 from cryptography.hazmat.primitives.asymmetric import ec
 from grpc import RpcError
 
-from flwr.cli.config_utils import get_fab_metadata_from_hash
+from flwr.cli.config_utils import get_fab_metadata, get_fab_metadata_from_hash
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.typing import ClientFnExt
@@ -43,7 +43,7 @@ from flwr.common.constant import (
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
-from flwr.common.typing import Run
+from flwr.common.typing import Fab, Run
 
 from .grpc_adapter_client.connection import grpc_adapter
 from .grpc_client.connection import grpc_connection
@@ -334,7 +334,7 @@ def _start_client_internal(
             root_certificates,
             authentication_keys,
         ) as conn:
-            receive, send, create_node, delete_node, get_run = conn
+            receive, send, create_node, delete_node, get_run, get_fab = conn
 
             # Register node when connecting the first time
             if node_state is None:
@@ -420,7 +420,7 @@ def _start_client_internal(
                         # Load ClientApp instance
                         run: Run = runs[run_id]
                         client_app: ClientApp = load_client_app_fn(
-                            *get_fab_metadata_from_hash(run.fab_hash)
+                            *get_fab_metadata(run)
                         )
 
                         # Execute ClientApp
@@ -607,6 +607,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
                 Optional[Callable[[], Optional[int]]],
                 Optional[Callable[[], None]],
                 Optional[Callable[[int], Run]],
+                Optional[Callable[[str], Fab]],
             ]
         ],
     ],

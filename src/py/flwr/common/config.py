@@ -22,7 +22,6 @@ import tomli
 
 from flwr.cli.config_utils import validate_fields
 from flwr.common.constant import APP_DIR, FAB_CONFIG_FILE, FLWR_HOME
-from flwr.common.typing import Run
 
 
 def get_flwr_dir(provided_path: Optional[str] = None) -> Path:
@@ -74,9 +73,14 @@ def get_project_config(project_dir: Union[str, Path]) -> Dict[str, Any]:
     return config
 
 
-def _fuse_dicts(
+def fuse_dicts(
     main_dict: Dict[str, str], override_dict: Dict[str, str]
 ) -> Dict[str, str]:
+    """Merge a config with the overrides.
+
+    Remove the nesting by adding the nested keys as prefixes separated by dots,
+    and fuse it with the override dict.
+    """
     fused_dict = main_dict.copy()
 
     for key, value in override_dict.items():
@@ -95,29 +99,7 @@ def get_fused_config_from_dir(
     )
     flat_default_config = flatten_dict(default_config)
 
-    return _fuse_dicts(flat_default_config, override_config)
-
-
-def get_config_from_hash(fab_hash: str) -> Dict[str, str]:
-    """Get Flower App config from a FAB hash."""
-    _ = fab_hash
-    return {}
-
-
-def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> Dict[str, str]:
-    """Merge the overrides from a `Run` with the config from a FAB.
-
-    Get the config using the fab_id and the fab_version, remove the nesting by adding
-    the nested keys as prefixes separated by dots, and fuse it with the override dict.
-    """
-    if not run.fab_hash:
-        return {}
-
-    _ = flwr_dir
-
-    return _fuse_dicts(
-        get_config_from_hash(run.fab_hash), override_dict=run.override_config
-    )
+    return fuse_dicts(flat_default_config, override_config)
 
 
 def flatten_dict(raw_dict: Dict[str, Any], parent_key: str = "") -> Dict[str, str]:

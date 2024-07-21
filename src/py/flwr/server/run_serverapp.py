@@ -21,20 +21,16 @@ from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from typing import Dict, Optional
 
-from flwr.cli.config_utils import get_fab_metadata_from_hash
+from flwr.cli.config_utils import get_fab_config
 from flwr.common import Context, EventType, RecordSet, event
-from flwr.common.config import (
-    get_flwr_dir,
-    get_fused_config,
-    get_project_config,
-    get_project_dir,
-)
+from flwr.common.config import fuse_dicts
 from flwr.common.logger import log, update_console_handler, warn_deprecated_feature
 from flwr.common.object_ref import load_app
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
     CreateRunResponse,
 )
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 
 from .driver import Driver
 from .driver.grpc_driver import GrpcDriver
@@ -45,7 +41,7 @@ ADDRESS_DRIVER_API = "0.0.0.0:9091"
 
 def run(
     driver: Driver,
-    server_app_dir: str,
+    server_app_dir: Optional[str],
     server_app_run_config: Dict[str, str],
     server_app_attr: Optional[str] = None,
     loaded_server_app: Optional[ServerApp] = None,
@@ -56,9 +52,6 @@ def run(
             "Either `server_app_attr` or `loaded_server_app` should be set "
             "but not both."
         )
-
-    if server_app_dir is not None:
-        sys.path.insert(0, str(Path(server_app_dir).absolute()))
 
     # Load ServerApp if needed
     def _load() -> ServerApp:
@@ -173,29 +166,35 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
             root_certificates=root_certificates,
         )
         # Create run
-        req = CreateRunRequest(fab_id=args.fab_id, fab_version=args.fab_version)
-        res: CreateRunResponse = driver._stub.CreateRun(req)  # pylint: disable=W0212
+        create_run_req = CreateRunRequest(
+            fab_id=args.fab_id, fab_version=args.fab_version
+        )
+        create_run_res: CreateRunResponse = driver._stub.CreateRun(
+            create_run_req
+        )  # pylint: disable=W0212
         # Overwrite driver._run_id
-        driver._run_id = res.run_id  # pylint: disable=W0212
+        driver._run_id = create_run_res.run_id  # pylint: disable=W0212
 
     server_app_run_config = {}
 
     # Dynamically obtain ServerApp path based on run_id
     if args.run_id is not None:
         # User provided `--run-id`, but not `server-app`
-        flwr_dir = get_flwr_dir(args.flwr_dir)
         run_ = driver.run
-        server_app_dir = str(
-            get_project_dir(*get_fab_metadata_from_hash(run_.fab_hash), flwr_dir)
-        )
-        config = get_project_config(server_app_dir)
+        req = GetFabRequest(hash=run_.fab_hash)
+        res: GetFabResponse = driver._stub.GetFab(req)
+        if res.fab.hash != run_.fab_hash:
+            raise ValueError("FAB hashes don't match.")
+
+        config = get_fab_config(res.fab.content)
         server_app_attr = config["tool"]["flwr"]["app"]["components"]["serverapp"]
-        server_app_run_config = get_fused_config(run_, flwr_dir)
+        server_app_run_config = fuse_dicts(config, run_.override_config)
+        server_app_dir = None
     else:
         # User provided `server-app`, but not `--run-id`
         server_app_dir = str(Path(args.dir).absolute())
 
-    log(DEBUG, "Flower will load ServerApp `%s` in %s", server_app_attr, server_app_dir)
+    log(DEBUG, "Flower will load ServerApp `%s`", server_app_attr)
 
     log(
         DEBUG,

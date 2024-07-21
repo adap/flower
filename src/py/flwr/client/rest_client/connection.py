@@ -41,7 +41,8 @@ from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
 from flwr.common.serde import message_from_taskins, message_to_taskres
-from flwr.common.typing import Run
+from flwr.common.typing import Fab, Run
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
@@ -70,6 +71,7 @@ PATH_PULL_TASK_INS: str = "api/v0/fleet/pull-task-ins"
 PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
 PATH_PING: str = "api/v0/fleet/ping"
 PATH_GET_RUN: str = "/api/v0/fleet/get-run"
+PATH_GET_FAB: str = "/api/v0/fleet/get-fab"
 
 T = TypeVar("T", bound=GrpcMessage)
 
@@ -93,6 +95,7 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
         Optional[Callable[[], Optional[int]]],
         Optional[Callable[[], None]],
         Optional[Callable[[int], Run]],
+        Optional[Callable[[str], Fab]],
     ]
 ]:
     """Primitives for request/response-based interaction with a server.
@@ -361,8 +364,22 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
             dict(res.run.override_config.items()),
         )
 
+    def get_fab(fab_hash: str) -> Fab:
+        # Construct the request
+        req = GetFabRequest(hash=fab_hash)
+
+        # Send the request
+        res = _request(req, GetFabResponse, PATH_GET_FAB)
+        if res is None:
+            return Fab("", b"")
+
+        return Fab(
+            res.fab.hash,
+            res.fab.content,
+        )
+
     try:
         # Yield methods
-        yield (receive, send, create_node, delete_node, get_run)
+        yield (receive, send, create_node, delete_node, get_run, get_fab)
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)
