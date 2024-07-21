@@ -1,3 +1,9 @@
+---
+tags: [quickstart, tabular, federated analytics]
+dataset: [Iris]
+framework: [pandas]
+---
+
 # Flower Example using Pandas
 
 This introductory example to Flower uses Pandas, but deep knowledge of Pandas is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case. This example uses [Flower Datasets](https://flower.ai/docs/datasets/) to
