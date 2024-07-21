@@ -31,9 +31,9 @@ jobs:
         # Latest version which comes cached in the host image can be found here:
         # https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md#python
         # In case of a mismatch, the job has to download Python to install it.
-        # Note: Due to a bug in actions/setup-python we have to put 3.10 in
-        # qoutes as it will otherwise will assume 3.1
-        python: [3.8, 3.9, '3.10']
+        # Note: Due to a bug in actions/setup-python, we have to put "3.10" in
+        # quotes as it will otherwise assume "3.1"
+        python: [3.8, 3.9, '3.10', '3.11']
 
     name: Python ${{ matrix.python }}
 
