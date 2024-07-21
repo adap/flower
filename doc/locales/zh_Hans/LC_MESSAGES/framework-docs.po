@@ -688,7 +688,7 @@ msgstr "`pip install flwr@git+https://github.com/adap/flower.git`` （不含额�
 
 #: ../../source/contributor-how-to-install-development-versions.rst:40
 msgid ""
-"``pip install flwr[simulation]@git+https://github.com/adap/flower.git`` "
+"``pip install "flwr[simulation]"@git+https://github.com/adap/flower.git`` "
 "(with extras)"
 msgstr ""
 "`pip install "
@@ -708,7 +708,7 @@ msgstr ""
 
 #: ../../source/contributor-how-to-install-development-versions.rst:45
 msgid ""
-"``pip install flwr[simulation]@git+https://github.com/adap/flower.git"
+"``pip install "flwr[simulation]"@git+https://github.com/adap/flower.git"
 "@branch-name`` (with extras)"
 msgstr "`pip安装flwr[模拟]@git+https://github.com/adap/flower.git@分支名``（带附加功能）"
 
@@ -21366,7 +21366,7 @@ msgid ""
 "flwr[simulation]`)."
 msgstr ""
 "通过 `start_simulation` 在 Jupyter 笔记本（包括 Google Colab）上安装 Flower 并附加 "
-"`simulation` (`pip install flwr[simulation]`)后，模拟（通过 `start_simulation` "
+"`simulation` (`pip install "flwr[simulation]"`)后，模拟（通过 `start_simulation` "
 "使用虚拟客户端引擎）现在可以更流畅地运行。"
 
 #: ../../source/ref-changelog.md:887

@@ -37,12 +37,12 @@ Python packages can be installed from git repositories. Use one of the following
 Install ``flwr`` from the default GitHub branch (``main``):
 
 - ``pip install flwr@git+https://github.com/adap/flower.git`` (without extras)
-- ``pip install flwr[simulation]@git+https://github.com/adap/flower.git`` (with extras)
+- ``pip install "flwr[simulation]"@git+https://github.com/adap/flower.git`` (with extras)
 
 Install ``flwr`` from a specific GitHub branch (``branch-name``):
 
 - ``pip install flwr@git+https://github.com/adap/flower.git@branch-name`` (without extras)
-- ``pip install flwr[simulation]@git+https://github.com/adap/flower.git@branch-name`` (with extras)
+- ``pip install "flwr[simulation]"@git+https://github.com/adap/flower.git@branch-name`` (with extras)
 
 
 Open Jupyter Notebooks on Google Colab

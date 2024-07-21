@@ -695,7 +695,7 @@ msgstr ""
 
 #: ../../source/contributor-how-to-install-development-versions.rst:40
 msgid ""
-"``pip install flwr[simulation]@git+https://github.com/adap/flower.git`` "
+"``pip install "flwr[simulation]"@git+https://github.com/adap/flower.git`` "
 "(with extras)"
 msgstr ""
 
@@ -711,7 +711,7 @@ msgstr ""
 
 #: ../../source/contributor-how-to-install-development-versions.rst:45
 msgid ""
-"``pip install flwr[simulation]@git+https://github.com/adap/flower.git"
+"``pip install "flwr[simulation]"@git+https://github.com/adap/flower.git"
 "@branch-name`` (with extras)"
 msgstr ""
 

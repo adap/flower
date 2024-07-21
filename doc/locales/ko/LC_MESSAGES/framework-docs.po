@@ -689,10 +689,10 @@ msgstr ""
 
 #: ../../source/contributor-how-to-install-development-versions.rst:40
 msgid ""
-"``pip install flwr[simulation]@git+https://github.com/adap/flower.git`` "
+"``pip install "flwr[simulation]"@git+https://github.com/adap/flower.git`` "
 "(with extras)"
 msgstr ""
-"``pip install flwr[simulation]@git+https://github.com/adap/flower.git`` "
+"``pip install "flwr[simulation]"@git+https://github.com/adap/flower.git`` "
 "(extras 포함)"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:42
@@ -709,10 +709,10 @@ msgstr ""
 
 #: ../../source/contributor-how-to-install-development-versions.rst:45
 msgid ""
-"``pip install flwr[simulation]@git+https://github.com/adap/flower.git@branch-"
+"``pip install "flwr[simulation]"@git+https://github.com/adap/flower.git@branch-"
 "name`` (with extras)"
 msgstr ""
-"``pip install flwr[simulation]@git+https://github.com/adap/flower.git@branch-"
+"``pip install "flwr[simulation]"@git+https://github.com/adap/flower.git@branch-"
 "name`` (extras 포함)"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:49

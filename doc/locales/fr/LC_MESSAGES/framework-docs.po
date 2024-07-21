@@ -676,10 +676,10 @@ msgstr ""
 
 #: ../../source/contributor-how-to-install-development-versions.rst:40
 msgid ""
-"``pip install flwr[simulation]@git+https://github.com/adap/flower.git`` "
+"``pip install "flwr[simulation]"@git+https://github.com/adap/flower.git`` "
 "(with extras)"
 msgstr ""
-"``pip install flwr[simulation]@git+https://github.com/adap/flower.git`` "
+"``pip install "flwr[simulation]"@git+https://github.com/adap/flower.git`` "
 "(avec les extras)"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:42
@@ -698,10 +698,10 @@ msgstr ""
 
 #: ../../source/contributor-how-to-install-development-versions.rst:45
 msgid ""
-"``pip install flwr[simulation]@git+https://github.com/adap/flower.git"
+"``pip install "flwr[simulation]"@git+https://github.com/adap/flower.git"
 "@branch-name`` (with extras)"
 msgstr ""
-"``pip install flwr[simulation]@git+https://github.com/adap/flower.git"
+"``pip install "flwr[simulation]"@git+https://github.com/adap/flower.git"
 "@nom-de-branche`` (avec des extras)"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:49
@@ -20012,7 +20012,7 @@ msgstr ""
 "Les simulations (utilisant le moteur de client virtuel via "
 "`start_simulation`) fonctionnent maintenant plus facilement sur les "
 "Notebooks Jupyter (y compris Google Colab) après avoir installé Flower "
-"avec l'option `simulation` (`pip install flwr[simulation]`)."
+"avec l'option `simulation` (`pip install "flwr[simulation]"`)."
 
 #: ../../source/ref-changelog.md:887
 msgid ""
