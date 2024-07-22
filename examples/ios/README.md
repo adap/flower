@@ -1,3 +1,9 @@
+---
+tags: [mobile, vision, sdk]
+dataset: [MNIST]
+framework: [Swift]
+---
+
 # FLiOS - A Flower SDK for iOS Devices with Example
 
 FLiOS is a sample application for testing and benchmarking the Swift implementation of Flower. The default scenario uses the MNIST dataset and the associated digit recognition model. The app includes the Swift package in `./src/swift` and allows extension for other benchmarking scenarios. The app guides the user through the steps of the machine learning process that would be executed in a normal production environment as a background task of the application. The app is therefore aimed at researchers and research institutions to test their hypotheses and perform performance analyses.
