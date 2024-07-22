@@ -7,8 +7,11 @@ import pandas as pd
 from flwr.client import ClientApp, NumPyClient, start_client
 from flwr.common import Context
 
-print(str(Path(".").absolute()))
-df = pd.read_csv("/home/runner/work/flower/flower/e2e/framework-pandas/data/client.csv")
+try:
+    df = pd.read_csv("./data/client.csv")
+except FileNotFoundError:
+    absolute_path = str(Path(".").absolute())
+    df = pd.read_csv(f"{absolute_path}/data/client.csv")
 
 column_names = ["sepal length (cm)", "sepal width (cm)"]
 
