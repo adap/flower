@@ -33,7 +33,7 @@ from flwr.common.logger import log
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 
-from ..log import stream_logs
+from ..log import stream_logs  # pylint: disable=import-error
 
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
@@ -199,6 +199,7 @@ def _run_with_superexec(
                 pass
         finally:
             channel.close()
+
 
 def _run_without_superexec(
     app_path: Optional[Path],
