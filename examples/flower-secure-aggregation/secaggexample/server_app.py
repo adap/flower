@@ -23,7 +23,7 @@ def main(driver: Driver, context: Context) -> None:
     num_rounds = int(context.run_config["num_server_rounds"])
     context = LegacyContext(
         context=context,
-        config=ServerConfig(num_rounds=3),
+        config=ServerConfig(num_rounds=num_rounds),
         strategy=strategy,
     )
 
