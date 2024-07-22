@@ -78,7 +78,9 @@ def run(
     server_app = _load()
 
     # Initialize Context
-    context = Context(state=RecordSet(), run_config=server_app_run_config)
+    context = Context(
+        node_id=0, node_config={}, state=RecordSet(), run_config=server_app_run_config
+    )
 
     # Call ServerApp
     server_app(driver=driver, context=context)
@@ -184,7 +186,7 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
         run_ = driver.run
         server_app_dir = str(get_project_dir(run_.fab_id, run_.fab_version, flwr_dir))
         config = get_project_config(server_app_dir)
-        server_app_attr = config["flower"]["components"]["serverapp"]
+        server_app_attr = config["tool"]["flwr"]["app"]["components"]["serverapp"]
         server_app_run_config = get_fused_config(run_, flwr_dir)
     else:
         # User provided `server-app`, but not `--run-id`

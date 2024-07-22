@@ -86,6 +86,18 @@ def _fuse_dicts(
     return fused_dict
 
 
+def get_fused_config_from_dir(
+    project_dir: Path, override_config: Dict[str, str]
+) -> Dict[str, str]:
+    """Merge the overrides from a given dict with the config from a Flower App."""
+    default_config = get_project_config(project_dir)["tool"]["flwr"]["app"].get(
+        "config", {}
+    )
+    flat_default_config = flatten_dict(default_config)
+
+    return _fuse_dicts(flat_default_config, override_config)
+
+
 def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> Dict[str, str]:
     """Merge the overrides from a `Run` with the config from a FAB.
 
@@ -97,10 +109,7 @@ def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> Dict[str, str]:
 
     project_dir = get_project_dir(run.fab_id, run.fab_version, flwr_dir)
 
-    default_config = get_project_config(project_dir)["flower"].get("config", {})
-    flat_default_config = flatten_dict(default_config)
-
-    return _fuse_dicts(flat_default_config, run.override_config)
+    return get_fused_config_from_dir(project_dir, run.override_config)
 
 
 def flatten_dict(raw_dict: Dict[str, Any], parent_key: str = "") -> Dict[str, str]:
@@ -121,26 +130,28 @@ def flatten_dict(raw_dict: Dict[str, Any], parent_key: str = "") -> Dict[str, st
 
 
 def parse_config_args(
-    config_overrides: Optional[str],
+    config: Optional[List[str]],
     separator: str = ",",
 ) -> Dict[str, str]:
     """Parse separator separated list of key-value pairs separated by '='."""
     overrides: Dict[str, str] = {}
 
-    if config_overrides is None:
+    if config is None:
         return overrides
 
-    overrides_list = config_overrides.split(separator)
-    if (
-        len(overrides_list) == 1
-        and "=" not in overrides_list
-        and overrides_list[0].endswith(".toml")
-    ):
-        with Path(overrides_list[0]).open("rb") as config_file:
-            overrides = flatten_dict(tomli.load(config_file))
-    else:
-        for kv_pair in overrides_list:
-            key, value = kv_pair.split("=")
-            overrides[key] = value
+    for config_line in config:
+        if config_line:
+            overrides_list = config_line.split(separator)
+            if (
+                len(overrides_list) == 1
+                and "=" not in overrides_list
+                and overrides_list[0].endswith(".toml")
+            ):
+                with Path(overrides_list[0]).open("rb") as config_file:
+                    overrides = flatten_dict(tomli.load(config_file))
+            else:
+                for kv_pair in overrides_list:
+                    key, value = kv_pair.split("=")
+                    overrides[key] = value
 
     return overrides

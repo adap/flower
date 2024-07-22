@@ -23,6 +23,7 @@ import ray
 
 from flwr.client import Client, NumPyClient
 from flwr.client.client_app import ClientApp, LoadClientAppError
+from flwr.client.node_state import NodeState
 from flwr.common import (
     DEFAULT_TTL,
     Config,
@@ -32,9 +33,9 @@ from flwr.common import (
     Message,
     MessageTypeLegacy,
     Metadata,
-    RecordSet,
     Scalar,
 )
+from flwr.common.constant import PARTITION_ID_KEY
 from flwr.common.object_ref import load_app
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
 from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
@@ -53,9 +54,7 @@ class DummyClient(NumPyClient):
         return {"result": result}
 
 
-def get_dummy_client(
-    node_id: int, partition_id: Optional[int]  # pylint: disable=unused-argument
-) -> Client:
+def get_dummy_client(context: Context) -> Client:  # pylint: disable=unused-argument
     """Return a DummyClient converted to Client type."""
     return DummyClient().to_client()
 
@@ -103,12 +102,13 @@ def _create_message_and_context() -> Tuple[Message, Context, float]:
 
     # Construct a Message
     mult_factor = 2024
+    run_id = 0
     getproperties_ins = GetPropertiesIns(config={"factor": mult_factor})
     recordset = getpropertiesins_to_recordset(getproperties_ins)
     message = Message(
         content=recordset,
         metadata=Metadata(
-            run_id=0,
+            run_id=run_id,
             message_id="",
             group_id="",
             src_node_id=0,
@@ -119,8 +119,10 @@ def _create_message_and_context() -> Tuple[Message, Context, float]:
         ),
     )
 
-    # Construct emtpy Context
-    context = Context(state=RecordSet(), run_config={})
+    # Construct NodeState and retrieve context
+    node_state = NodeState(node_id=run_id, node_config={PARTITION_ID_KEY: str(0)})
+    node_state.register_context(run_id=run_id)
+    context = node_state.retrieve_context(run_id=run_id)
 
     # Expected output
     expected_output = pi * mult_factor
