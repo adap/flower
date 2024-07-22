@@ -38,4 +38,4 @@ num_channels = "3"
 default = "localhost"
 
 [tool.flwr.federations.localhost]
-options.num-supernodes = 10
+options.num-supernodes = 3

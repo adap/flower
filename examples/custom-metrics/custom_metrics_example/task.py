@@ -9,14 +9,13 @@ from flwr_datasets import FederatedDataset
 def load_data(partition_id, num_partitions) -> tuple[List, List, List, List]:
     """Load data with Flower Datasets (CIFAR-10)."""
     fds = FederatedDataset(dataset="cifar10", partitioners={"train": num_partitions})
-    train = fds.load_split("train")
-    test = fds.load_split("test")
+    partition = fds.load_partition(partition_id, "train")
+    partition.set_format("numpy")
 
-    # Using Numpy format
-    train_np = train.with_format("numpy")
-    test_np = test.with_format("numpy")
-    x_train, y_train = train_np["img"], train_np["label"]
-    x_test, y_test = test_np["img"], test_np["label"]
+    # Divide data on each node: 80% train, 20% test
+    partition = partition.train_test_split(test_size=0.2, seed=42)
+    x_train, y_train = partition["train"]["img"] / 255.0, partition["train"]["label"]
+    x_test, y_test = partition["test"]["img"] / 255.0, partition["test"]["label"]
 
     return x_train, y_train, x_test, y_test
 
