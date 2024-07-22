@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "flwr-datasets"
-version = "0.1.0"
+version = "0.2.0"
 description = "Flower Datasets"
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.ai>"]
@@ -59,6 +59,7 @@ pillow = { version = ">=6.2.1", optional = true }
 soundfile = { version = ">=0.12.1", optional = true }
 librosa = { version = ">=0.10.0.post2", optional = true }
 tqdm ="^4.66.1"
+pyarrow = "==16.1.0"
 matplotlib = "^3.7.5"
 seaborn = "^0.13.0"
 
@@ -67,7 +68,7 @@ isort = "==5.13.2"
 black = { version = "==24.2.0", extras = ["jupyter"] }
 docformatter = "==1.7.5"
 mypy = "==1.4.0"
-pylint = "==2.13.9"
+pylint = "==3.0.3"
 flake8 = "==3.9.2"
 parameterized = "==0.9.0"
 pytest = "==7.1.2"
@@ -94,7 +95,7 @@ line-length = 88
 target-version = ["py38", "py39", "py310", "py311"]
 
 [tool.pylint."MESSAGES CONTROL"]
-disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
+disable = "duplicate-code,too-few-public-methods,useless-import-alias"
 
 [tool.pytest.ini_options]
 minversion = "6.2"
