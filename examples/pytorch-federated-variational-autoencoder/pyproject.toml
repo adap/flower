@@ -1,15 +1,36 @@
-[tool.poetry]
-name = "pytorch_federated_variational_autoencoder"
-version = "0.1.0"
-description = "Federated Variational Autoencoder Example"
-authors = ["The Flower Authors <hello@flower.ai>"]
-
-[tool.poetry.dependencies]
-python = ">=3.8,<3.11"
-flwr = ">=1.0,<2.0"
-torch = "1.13.1"
-torchvision = "0.14.1"
-
 [build-system]
-requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pytorch_federated_variational_autoencoder"
+authors = [
+    { name = "The Flower Authors", email = "hello@flower.ai" },
+]
+version = "0.1.0"
+description = "Federated Variational Autoencoder Example with Flower"
+dependencies = [
+    "flwr>=1.9.0,<2.0",
+    "flwr-datasets[vision]>=0.0.2,<1.0.0",
+    "torch==1.13.1",
+    "torchvision==0.14.1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "flowerteam"
+
+[tool.flwr.app.components]
+serverapp = "fedvaeexample.server_app:app"
+clientapp = "fedvaeexample.client_app:app"
+
+[tool.flwr.app.config]
+num_server_rounds = "3"
+
+[tool.flwr.federations]
+default = "localhost"
+
+[tool.flwr.federations.localhost]
+options.num-supernodes = 2
