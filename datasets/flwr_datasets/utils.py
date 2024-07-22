@@ -185,7 +185,7 @@ def _create_division_indices_ranges(
             ranges.append(range(start_idx, end_idx))
             start_idx = end_idx
     else:
-        TypeError(
+        raise TypeError(
             f"The type of the `division` should be dict, "
             f"tuple or list but is {type(division)} instead. "
         )
