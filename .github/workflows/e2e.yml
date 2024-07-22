@@ -102,8 +102,8 @@ jobs:
             dataset: |
               from pathlib import Path
               from sklearn.datasets import load_iris
-              Path('data').mkdir(exist_ok=True)
-              load_iris(as_frame=True)['data'].to_csv('./data/client.csv')
+              Path('/tmp/data').mkdir(exist_ok=True)
+              load_iris(as_frame=True)['data'].to_csv('/tmp/data/client.csv')
 
     name: Framework / ${{matrix.directory}}
 
