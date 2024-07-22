@@ -34,6 +34,11 @@ tested_datasets = [
     "svhn",
     "sentiment140",
     "speech_commands",
+    "LIUM/tedlium",  # Feature wise it's just like speech_commands
+    "flwrlabs/femnist",
+    "jlh/uci-mushrooms",
+    "Mike0307/MNIST-M",
+    "flwrlabs/usps",
 ]
 
 
@@ -178,7 +183,7 @@ def _create_division_indices_ranges(
             ranges.append(range(start_idx, end_idx))
             start_idx = end_idx
     else:
-        TypeError(
+        raise TypeError(
             f"The type of the `division` should be dict, "
             f"tuple or list but is {type(division)} instead. "
         )
