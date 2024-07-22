@@ -16,7 +16,7 @@ x-supernode: &supernode
 services:
   # create a SuperLink service
   superlink:
-    image: flwr/superlink:1.10.0.dev20240719
+    image: flwr/superlink:1.10.0.dev20240721
     command:
       - --insecure
 
@@ -24,38 +24,38 @@ services:
   supernode-1:
     <<: *supernode
     build:
-      context: .
+      context: ${PROJECT_DIR:-.}
       dockerfile_inline: |
-        FROM flwr/supernode:1.10.0.dev20240719
+        FROM flwr/supernode:1.10.0.dev20240721
 
         WORKDIR /app
         COPY --chown=app:app pyproject.toml .
         RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
           && python -m pip install -U --no-cache-dir .
 
-        ENTRYPOINT ["flower-supernode", "client:app", "--node-config", "partition-id=0,num-partitions=2"]
+        ENTRYPOINT ["flower-supernode", "--node-config", "partition-id=0,num-partitions=2"]
 
   supernode-2:
     <<: *supernode
     build:
-      context: .
+      context: ${PROJECT_DIR:-.}
       dockerfile_inline: |
-        FROM flwr/supernode:1.10.0.dev20240719
+        FROM flwr/supernode:1.10.0.dev20240721
 
         WORKDIR /app
         COPY --chown=app:app pyproject.toml .
         RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
           && python -m pip install -U --no-cache-dir .
 
-        ENTRYPOINT ["flower-supernode", "client:app", "--node-config", "partition-id=1,num-partitions=2"]
+        ENTRYPOINT ["flower-supernode", "--node-config", "partition-id=1,num-partitions=2"]
 
   # create a SuperExec service
   superexec:
     user: root
     build:
-      context: .
+      context: ${PROJECT_DIR:-.}
       dockerfile_inline: |
-        FROM flwr/supernode:1.10.0.dev20240719
+        FROM flwr/supernode:1.10.0.dev20240721
 
         WORKDIR /app
         COPY --chown=app:app pyproject.toml .

@@ -3,6 +3,9 @@ services:
     build:
       context: .
       pull: true
+      args:
+        SUPERLINK_IP: 127.0.0.1
+        SUPEREXEC_IP: 127.0.0.1
       dockerfile_inline: |
         FROM ubuntu:latest
 
@@ -11,6 +14,54 @@ services:
             openssl
 
         WORKDIR /app/script
+
+        ARG SUPERLINK_IP
+
+        COPY <<-EOF superlink-certificate.conf
+        [req]
+        default_bits = 4096
+        prompt = no
+        default_md = sha256
+        req_extensions = req_ext
+        distinguished_name = dn
+
+        [dn]
+        C = US
+        O = Flower
+        CN = localhost
+
+        [req_ext]
+        subjectAltName = @alt_names
+
+        [alt_names]
+        DNS.0 = superlink
+        IP.1 = ::1
+        IP.2 = $${SUPERLINK_IP}
+        EOF
+
+        ARG SUPEREXEC_IP
+
+        COPY <<-EOF superexec-certificate.conf
+        [req]
+        default_bits = 4096
+        prompt = no
+        default_md = sha256
+        req_extensions = req_ext
+        distinguished_name = dn
+
+        [dn]
+        C = US
+        O = Flower
+        CN = localhost
+
+        [req_ext]
+        subjectAltName = @alt_names
+
+        [alt_names]
+        DNS.0 = superexec
+        IP.1 = ::1
+        IP.2 = $${SUPEREXEC_IP}
+        EOF
 
         COPY --chmod=744 <<-'EOF' generate.sh
         #!/bin/bash
@@ -71,56 +122,6 @@ services:
         WORKDIR /app
 
         ENTRYPOINT ["./script/generate.sh"]
-    configs:
-      - source: superlink_certificate
-        target: /app/script/superlink-certificate.conf
-      - source: superexec_certificate
-        target: /app/script/superexec-certificate.conf
     volumes:
       - ./superlink-certificates/:/app/superlink-certificates/:rw
       - ./superexec-certificates/:/app/superexec-certificates/:rw
-
-configs:
-  superlink_certificate:
-    content: |
-      [req]
-      default_bits = 4096
-      prompt = no
-      default_md = sha256
-      req_extensions = req_ext
-      distinguished_name = dn
-
-      [dn]
-      C = US
-      O = Flower
-      CN = localhost
-
-      [req_ext]
-      subjectAltName = @alt_names
-
-      [alt_names]
-      DNS.0 = superlink
-      IP.1 = ::1
-      IP.2 = 127.0.0.1
-
-  superexec_certificate:
-    content: |
-      [req]
-      default_bits = 4096
-      prompt = no
-      default_md = sha256
-      req_extensions = req_ext
-      distinguished_name = dn
-
-      [dn]
-      C = US
-      O = Flower
-      CN = localhost
-
-      [req_ext]
-      subjectAltName = @alt_names
-
-      [alt_names]
-      DNS.0 = superexec
-      IP.1 = ::1
-      IP.2 = 127.0.0.1

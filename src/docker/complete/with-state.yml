@@ -1,7 +1,18 @@
+x-with-tls: &x-with-tls
+  command:
+    - --ssl-ca-certfile=certificates/ca.crt
+    - --ssl-certfile=certificates/server.pem
+    - --ssl-keyfile=certificates/server.key
+    - --database=state/state.db
+
+x-without-tls: &x-without-tls
+  command:
+    - --insecure
+    - --database=state/state.db
+
 services:
   superlink:
-    command:
-      - --insecure
-      - --database=state/state.db
+    # <<: *x-without-tls
+    <<: *x-with-tls
     volumes:
       - ./state/:/app/state/:rw

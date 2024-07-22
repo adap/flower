@@ -1,3 +1,9 @@
+**Export Project dir**
+
+```
+export PROJECT_DIR=../quickstart-docker
+```
+
 **Run in insecure mode**
 
 ```
@@ -17,6 +23,8 @@ docker compose -f certs.yml up --build
 docker compose -f compose.yml -f with-tls.yml up --build -d
 ```
 
+**Add federation**
+
 ```toml
 [tool.flwr.federations.superexec]
 address = "127.0.0.1:9093"
@@ -24,7 +32,7 @@ insecure = true
 
 [tool.flwr.federations.superexec-sec]
 address = "127.0.0.1:9093"
-root-certificates = "../superexec-certificates/ca.crt"
+root-certificates = "superexec-certificates/ca.crt"
 
 ```
 
