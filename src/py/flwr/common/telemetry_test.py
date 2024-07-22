@@ -22,7 +22,7 @@ from typing import Callable
 from unittest import mock
 from uuid import uuid4
 
-from flwr.common.telemetry import EventType, _get_source_id, _get_partner_id, event
+from flwr.common.telemetry import EventType, _get_partner_id, _get_source_id, event
 
 
 class TelemetryTest(unittest.TestCase):
