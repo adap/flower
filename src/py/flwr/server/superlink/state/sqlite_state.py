@@ -25,7 +25,7 @@ from uuid import UUID, uuid4
 
 from flwr.common import log, now
 from flwr.common.constant import NODE_ID_NUM_BYTES, RUN_ID_NUM_BYTES
-from flwr.common.typing import Run
+from flwr.common.typing import Run, UserConfig
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
@@ -617,7 +617,7 @@ class SqliteState(State):  # pylint: disable=R0904
     def create_run(
         self,
         fab_hash: str,
-        override_config: Dict[str, str],
+        override_config: UserConfig,
     ) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
         # Sample a random int64 as run_id

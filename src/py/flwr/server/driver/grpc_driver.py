@@ -24,7 +24,11 @@ import grpc
 from flwr.common import DEFAULT_TTL, EventType, Message, Metadata, RecordSet, event
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
-from flwr.common.serde import message_from_taskres, message_to_taskins
+from flwr.common.serde import (
+    message_from_taskres,
+    message_to_taskins,
+    user_config_from_proto,
+)
 from flwr.common.typing import Run
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
@@ -126,7 +130,7 @@ class GrpcDriver(Driver):
         self._run = Run(
             run_id=res.run.run_id,
             fab_hash=res.run.fab_hash,
-            override_config=dict(res.run.override_config.items()),
+            override_config=user_config_from_proto(res.run.override_config),
         )
 
     @property

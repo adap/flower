@@ -17,7 +17,9 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from subprocess import Popen
-from typing import Dict, Optional
+from typing import Optional
+
+from flwr.common.typing import UserConfig
 
 
 @dataclass
@@ -34,13 +36,13 @@ class Executor(ABC):
     @abstractmethod
     def set_config(
         self,
-        config: Dict[str, str],
+        config: UserConfig,
     ) -> None:
         """Register provided config as class attributes.
 
         Parameters
         ----------
-        config : Optional[Dict[str, str]]
+        config : UserConfig
             A dictionary for configuration values.
         """
 
@@ -48,7 +50,7 @@ class Executor(ABC):
     def start_run(
         self,
         fab_file: bytes,
-        override_config: Dict[str, str],
+        override_config: UserConfig,
     ) -> Optional[RunTracker]:
         """Start a run using the given Flower FAB ID and version.
 
@@ -59,7 +61,7 @@ class Executor(ABC):
         ----------
         fab_file : bytes
             The Flower App Bundle file bytes.
-        override_config: Dict[str, str]
+        override_config: UserConfig
             The config overrides dict sent by the user (using `flwr run`).
 
         Returns

@@ -19,7 +19,7 @@ import time
 from typing import List, Optional
 from uuid import UUID
 
-from flwr.common.serde import fab_to_proto
+from flwr.common.serde import fab_to_proto, user_config_to_proto
 from flwr.common.typing import Fab
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -117,8 +117,17 @@ def get_run(
 ) -> GetRunResponse:
     """Get run information."""
     run = state.get_run(request.run_id)
-    run_proto = None if run is None else Run(**vars(run))
-    return GetRunResponse(run=run_proto)
+
+    if run is None:
+        return GetRunResponse()
+
+    return GetRunResponse(
+        run=Run(
+            run_id=run.run_id,
+            fab_hash=run.fab_hash,
+            override_config=user_config_to_proto(run.override_config),
+        )
+    )
 
 
 def get_fab(

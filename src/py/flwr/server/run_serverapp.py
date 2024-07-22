@@ -19,13 +19,14 @@ import argparse
 import sys
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
 from flwr.cli.config_utils import get_fab_config
 from flwr.common import Context, EventType, RecordSet, event
 from flwr.common.config import fuse_dicts
 from flwr.common.logger import log, update_console_handler, warn_deprecated_feature
 from flwr.common.object_ref import load_app
+from flwr.common.typing import UserConfig
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
     CreateRunResponse,
@@ -42,7 +43,7 @@ ADDRESS_DRIVER_API = "0.0.0.0:9091"
 def run(
     driver: Driver,
     server_app_dir: Optional[str],
-    server_app_run_config: Dict[str, str],
+    server_app_run_config: UserConfig,
     server_app_attr: Optional[str] = None,
     loaded_server_app: Optional[ServerApp] = None,
 ) -> None:

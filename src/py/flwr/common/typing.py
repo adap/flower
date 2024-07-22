@@ -60,6 +60,10 @@ MetricsAggregationFn = Callable[[List[Tuple[int, Metrics]]], Metrics]
 Config = Dict[str, Scalar]
 Properties = Dict[str, Scalar]
 
+# Value type for user configs
+UserConfigValue = Union[bool, float, int, str]
+UserConfig = Dict[str, UserConfigValue]
+
 
 class Code(Enum):
     """Client status codes."""
@@ -193,7 +197,7 @@ class Run:
 
     run_id: int
     fab_hash: str
-    override_config: Dict[str, str]
+    override_config: UserConfig
 
 
 @dataclass
