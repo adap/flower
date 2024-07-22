@@ -34,7 +34,7 @@ tested_datasets = [
     "svhn",
     "sentiment140",
     "speech_commands",
-    "LIUM/tedlium",  # Feature wise it's just like speech_commands
+    "LIUM/tedlium",
     "flwrlabs/femnist",
     "flwrlabs/ucf101",
     "flwrlabs/ambient-acoustic-context",
