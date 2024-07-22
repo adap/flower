@@ -19,7 +19,7 @@ from collections import Counter
 from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
-from parameterized import parameterized
+from parameterized import parameterized_class
 
 from datasets import Dataset
 from flwr_datasets.common.typing import NDArrayFloat, NDArrayInt
@@ -89,65 +89,48 @@ def _get_partitioner(
     return partitioner, partitions
 
 
+@parameterized_class(
+    (
+        "num_partitions",
+        "num_unique_labels_per_partition",
+        "num_samples",
+        "num_unique_labels",
+        "preassigned_num_samples_per_label",
+    ),
+    [
+        (10, 2, 200, 10, 5),
+        (10, 2, 200, 10, 0),
+        (20, 1, 200, 10, 5),
+    ],
+)
+# pylint: disable=E1101
 class TestDistributionPartitioner(unittest.TestCase):
     """Unit tests for DistributionPartitioner."""
 
-    @parameterized.expand(  # type: ignore
-        [
-            # num_partitions, num_unique_labels_per_partition, num_samples,
-            # num_unique_labels, preassigned_num_samples_per_label
-            (10, 2, 200, 10, 5),
-            (10, 2, 200, 10, 0),
-            (20, 1, 200, 10, 5),
-        ],
-    )
-    def test_correct_num_classes_when_partitioned(
-        self,
-        num_partitions: int,
-        num_unique_labels_per_partition: int,
-        num_samples: int,
-        num_unique_labels: int,
-        preassigned_num_samples_per_label: int,
-    ) -> None:
+    def test_correct_num_classes_when_partitioned(self) -> None:
         """Test correct number of unique classes."""
         _, partitions = _get_partitioner(
-            num_partitions=num_partitions,
-            num_unique_labels_per_partition=num_unique_labels_per_partition,
-            num_samples=num_samples,
-            num_unique_labels=num_unique_labels,
-            preassigned_num_samples_per_label=preassigned_num_samples_per_label,
+            num_partitions=self.num_partitions,
+            num_unique_labels_per_partition=self.num_unique_labels_per_partition,
+            num_samples=self.num_samples,
+            num_unique_labels=self.num_unique_labels,
+            preassigned_num_samples_per_label=self.preassigned_num_samples_per_label,
         )
         unique_classes_per_partition = {
             pid: np.unique(partition["labels"]) for pid, partition in partitions.items()
         }
 
         for unique_classes in unique_classes_per_partition.values():
-            self.assertEqual(num_unique_labels_per_partition, len(unique_classes))
+            self.assertEqual(self.num_unique_labels_per_partition, len(unique_classes))
 
-    @parameterized.expand(  # type: ignore
-        [
-            # num_partitions, num_unique_labels_per_partition, num_samples,
-            # num_unique_labels, preassigned_num_samples_per_label
-            (10, 2, 200, 10, 5),
-            (10, 2, 200, 10, 0),
-            (20, 1, 200, 10, 5),
-        ],
-    )
-    def test_correct_num_times_classes_sampled_across_partitions(
-        self,
-        num_partitions: int,
-        num_unique_labels_per_partition: int,
-        num_samples: int,
-        num_unique_labels: int,
-        preassigned_num_samples_per_label: int,
-    ) -> None:
+    def test_correct_num_times_classes_sampled_across_partitions(self) -> None:
         """Test correct number of times each unique class is drawn from distribution."""
         partitioner, partitions = _get_partitioner(
-            num_partitions=num_partitions,
-            num_unique_labels_per_partition=num_unique_labels_per_partition,
-            num_samples=num_samples,
-            num_unique_labels=num_unique_labels,
-            preassigned_num_samples_per_label=preassigned_num_samples_per_label,
+            num_partitions=self.num_partitions,
+            num_unique_labels_per_partition=self.num_unique_labels_per_partition,
+            num_samples=self.num_samples,
+            num_unique_labels=self.num_unique_labels,
+            preassigned_num_samples_per_label=self.preassigned_num_samples_per_label,
         )
 
         partitioned_distribution: Dict[Any, List[Any]] = {
@@ -155,7 +138,9 @@ class TestDistributionPartitioner(unittest.TestCase):
         }
 
         num_columns = (
-            num_unique_labels_per_partition * num_partitions / num_unique_labels
+            self.num_unique_labels_per_partition
+            * self.num_partitions
+            / self.num_unique_labels
         )
         for _, partition in partitions.items():
             for label in partition.unique("labels"):
@@ -165,30 +150,14 @@ class TestDistributionPartitioner(unittest.TestCase):
         for label in partitioner.dataset.unique("labels"):
             self.assertEqual(num_columns, len(partitioned_distribution[label]))
 
-    @parameterized.expand(  # type: ignore
-        [
-            # num_partitions, num_unique_labels_per_partition, num_samples,
-            # num_unique_labels, preassigned_num_samples_per_label
-            (10, 2, 200, 10, 5),
-            (10, 2, 200, 10, 0),
-            (20, 1, 200, 10, 5),
-        ],
-    )
-    def test_exact_distribution_assignment(
-        self,
-        num_partitions: int,
-        num_unique_labels_per_partition: int,
-        num_samples: int,
-        num_unique_labels: int,
-        preassigned_num_samples_per_label: int,
-    ) -> None:
+    def test_exact_distribution_assignment(self) -> None:
         """Test that exact distribution is allocated to each class."""
         partitioner, partitions = _get_partitioner(
-            num_partitions=num_partitions,
-            num_unique_labels_per_partition=num_unique_labels_per_partition,
-            num_samples=num_samples,
-            num_unique_labels=num_unique_labels,
-            preassigned_num_samples_per_label=preassigned_num_samples_per_label,
+            num_partitions=self.num_partitions,
+            num_unique_labels_per_partition=self.num_unique_labels_per_partition,
+            num_samples=self.num_samples,
+            num_unique_labels=self.num_unique_labels,
+            preassigned_num_samples_per_label=self.preassigned_num_samples_per_label,
             rescale_mode=False,
         )
         partitioned_distribution: Dict[Any, List[Any]] = {
