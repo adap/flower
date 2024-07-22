@@ -245,7 +245,6 @@ class ShufflingResplittingOnArtificialDatasetTest(unittest.TestCase):
     The load_dataset method is mocked and the artificial dataset is returned.
     """
 
-    # pylint: disable=no-self-use
     def _dummy_setup(self, train_rows: int = 10, test_rows: int = 5) -> DatasetDict:
         """Create a dummy DatasetDict with train, test splits."""
         data_train = {
@@ -436,14 +435,14 @@ class NaturalIdPartitionerIntegrationTest(unittest.TestCase):
 class IncorrectUsageFederatedDatasets(unittest.TestCase):
     """Test incorrect usages in FederatedDatasets."""
 
-    def test_no_partitioner_for_split(self) -> None:  # pylint: disable=R0201
+    def test_no_partitioner_for_split(self) -> None:
         """Test using load_partition with missing partitioner."""
         dataset_fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
 
         with pytest.raises(ValueError):
             dataset_fds.load_partition(0, "test")
 
-    def test_no_split_in_the_dataset(self) -> None:  # pylint: disable=R0201
+    def test_no_split_in_the_dataset(self) -> None:
         """Test using load_partition with non-existent split name."""
         dataset_fds = FederatedDataset(
             dataset="mnist", partitioners={"non-existent-split": 100}
@@ -452,7 +451,7 @@ class IncorrectUsageFederatedDatasets(unittest.TestCase):
         with pytest.raises(ValueError):
             dataset_fds.load_partition(0, "non-existent-split")
 
-    def test_unsupported_dataset(self) -> None:  # pylint: disable=R0201
+    def test_unsupported_dataset(self) -> None:
         """Test creating FederatedDataset for unsupported dataset."""
         with pytest.warns(UserWarning):
             FederatedDataset(dataset="food101", partitioners={"train": 100})
