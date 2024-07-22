@@ -458,7 +458,7 @@ class IncorrectUsageFederatedDatasets(unittest.TestCase):
 
     def test_cannot_use_the_old_split_names(self) -> None:
         """Test if the initial split names can not be used."""
-        dataset = datasets.load_dataset("mnist")
+        datasets.load_dataset("mnist")
         fds = FederatedDataset(
             dataset="mnist",
             partitioners={"train": 100},
