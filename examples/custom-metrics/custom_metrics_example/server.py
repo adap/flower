@@ -1,5 +1,10 @@
-import flwr as fl
+"""custom_metrics_example: A Flower app for custom metrics."""
+
 import numpy as np
+
+from flwr.common import Context
+from flwr.server import ServerApp, ServerAppComponents, ServerConfig
+from flwr.server.strategy import FedAvg
 
 
 # Define metrics aggregation function
@@ -46,13 +51,27 @@ def average_metrics(metrics):
     }
 
 
-# Define strategy and the custom aggregation function for the evaluation metrics
-strategy = fl.server.strategy.FedAvg(evaluate_metrics_aggregation_fn=average_metrics)
+# strategy = fl.server.strategy.FedAvg(evaluate_metrics_aggregation_fn=average_metrics)
+#
+#
+# # Start Flower server
+# fl.server.start_server(
+#     server_address="0.0.0.0:8080",
+#     config=fl.server.ServerConfig(num_rounds=3),
+#     strategy=strategy,
+# )
 
 
-# Start Flower server
-fl.server.start_server(
-    server_address="0.0.0.0:8080",
-    config=fl.server.ServerConfig(num_rounds=3),
-    strategy=strategy,
-)
+def server_fn(context: Context) -> ServerAppComponents:
+    # Define strategy and the custom aggregation function for the evaluation metrics
+    strategy = FedAvg(evaluate_metrics_aggregation_fn=average_metrics)
+
+    # Construct ServerConfig
+    num_rounds = int(context.run_config["num_server_rounds"])
+    config = ServerConfig(num_rounds=num_rounds)
+
+    return ServerAppComponents(strategy=strategy, config=config)
+
+
+# Create ServerApp
+app = ServerApp(server_fn=server_fn)

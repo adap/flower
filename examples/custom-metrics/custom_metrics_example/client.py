@@ -1,30 +1,16 @@
+"""custom_metrics_example: A Flower app for custom metrics."""
+
 import os
 
-import flwr as fl
 import numpy as np
-import tensorflow as tf
-from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score
-from flwr_datasets import FederatedDataset
+from custom_metrics_example.task import get_model, load_data
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 
+from flwr.client import Client, ClientApp, NumPyClient
+from flwr.common import Context
 
 # Make TensorFlow log less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
-
-
-# Load model (MobileNetV2)
-model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
-model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
-
-# Load data with Flower Datasets (CIFAR-10)
-fds = FederatedDataset(dataset="cifar10", partitioners={"train": 10})
-train = fds.load_split("train")
-test = fds.load_split("test")
-
-# Using Numpy format
-train_np = train.with_format("numpy")
-test_np = test.with_format("numpy")
-x_train, y_train = train_np["img"], train_np["label"]
-x_test, y_test = test_np["img"], test_np["label"]
 
 
 # Method for extra learning metrics calculation
@@ -39,24 +25,32 @@ def eval_learning(y_test, y_pred):
 
 
 # Define Flower client
-class FlowerClient(fl.client.NumPyClient):
+class FlowerClient(NumPyClient):
+    # pylint: disable=too-many-arguments
+    def __init__(self, model, x_train, y_train, x_test, y_test):
+        self.model = model
+        self.x_train = x_train
+        self.y_train = y_train
+        self.x_test = x_test
+        self.y_test = y_test
+
     def get_parameters(self, config):
-        return model.get_weights()
+        return self.model.get_weights()
 
     def fit(self, parameters, config):
-        model.set_weights(parameters)
-        model.fit(x_train, y_train, epochs=1, batch_size=32)
-        return model.get_weights(), len(x_train), {}
+        self.model.set_weights(parameters)
+        self.model.fit(self.x_train, self.y_train, epochs=1, batch_size=32)
+        return self.model.get_weights(), len(self.x_train), {}
 
     def evaluate(self, parameters, config):
-        model.set_weights(parameters)
-        loss, accuracy = model.evaluate(x_test, y_test)
-        y_pred = model.predict(x_test)
+        self.model.set_weights(parameters)
+        loss, accuracy = self.model.evaluate(self.x_test, self.y_test)
+        y_pred = self.model.predict(self.x_test)
         y_pred = np.argmax(y_pred, axis=1).reshape(
             -1, 1
         )  # MobileNetV2 outputs 10 possible classes, argmax returns just the most probable
 
-        acc, rec, prec, f1 = eval_learning(y_test, y_pred)
+        acc, rec, prec, f1 = eval_learning(self.y_test, y_pred)
         output_dict = {
             "accuracy": accuracy,  # accuracy from tensorflow model.evaluate
             "acc": acc,
@@ -64,10 +58,32 @@ class FlowerClient(fl.client.NumPyClient):
             "prec": prec,
             "f1": f1,
         }
-        return loss, len(x_test), output_dict
+        return loss, len(self.x_test), output_dict
 
 
-# Start Flower client
-fl.client.start_client(
-    server_address="127.0.0.1:8080", client=FlowerClient().to_client()
-)
+def client_fn(context: Context) -> Client:
+    """Construct a Client that will be run in a ClientApp.
+
+    You can use settings in `context.run_config` to parameterize the
+    construction of your Client. You could use the `context.node_config` to
+    , for example, indicate which dataset to load (e.g accesing the partition-id).
+    """
+
+    # Read the node_config to fetch data partition associated to this node
+    partition_id = int(context.node_config["partition-id"])
+    num_partitions = int(context.node_config["num-partitions"])
+
+    x_train, y_train, x_test, y_test = load_data(partition_id, num_partitions)
+
+    # Read the run config to get settings to configure the Client
+    width = int(context.run_config["width"])
+    height = int(context.run_config["height"])
+    num_channels = int(context.run_config["num_channels"])
+    model = get_model(width, height, num_channels)
+
+    # Return Client instance
+    return FlowerClient(model, x_train, y_train, x_test, y_test).to_client()
+
+
+# Flower ClientApp
+app = ClientApp(client_fn=client_fn)
