@@ -64,6 +64,21 @@ def _get_home() -> Path:
     return Path().home()
 
 
+def _get_partner_id() -> str:
+    """Get partner ID."""
+    source_id = os.getenv("FLWR_TELEMETRY_PARTNER_ID")
+
+    if source_id:
+        try:
+            uuid.UUID(source_id)
+        except ValueError:
+            source_id = "invalid"
+    else:
+        source_id = "unavailable"
+
+    return source_id
+
+
 def _get_source_id() -> str:
     """Get existing or new source ID."""
     source_id = "unavailable"
@@ -177,6 +192,7 @@ state: Dict[str, Union[Optional[str], Optional[ThreadPoolExecutor]]] = {
     "executor": None,
     "source": None,
     "cluster": None,
+    "partner": None,
 }
 
 
@@ -202,11 +218,15 @@ def create_event(event_type: EventType, event_details: Optional[Dict[str, Any]])
     if state["cluster"] is None:
         state["cluster"] = str(uuid.uuid4())
 
+    if state["partner_id"] is None:
+        state["partner_id"] = _get_partner_id()
+
     if event_details is None:
         event_details = {}
 
     date = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
     context = {
+        "partner": state["partner_id"],
         "source": state["source"],
         "cluster": state["cluster"],
         "date": date,
