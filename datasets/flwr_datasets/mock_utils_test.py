@@ -355,31 +355,11 @@ def _mock_speach_commands(num_rows: int) -> Dataset:
     return dataset
 
 
-def _mock_ucf101(num_rows: int) -> Dataset:
-    imgs = _generate_random_image_column(num_rows, (320, 240, 3), "JPEG")
-    unique_video_id = ["0", "1", "2", "3", "4"]
-    unique_labels = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
-    label = _generate_artificial_categories(num_rows, unique_labels)
-    video_id = _generate_artificial_categories(num_rows, unique_video_id)
-    features = Features(
-        {
-            "image": datasets.Image(decode=True),
-            "video_id": Value(dtype="string"),
-            "label": ClassLabel(names=unique_labels),
-        }
-    )
-    dataset = datasets.Dataset.from_dict(
-        {"image": imgs, "video_id": video_id, "label": label}, features=features
-    )
-    return dataset
-
-
 dataset_name_to_mock_function = {
     "cifar100": _mock_cifar100,
     "sentiment140": _mock_sentiment140,
     "svhn_cropped_digits": _mock_svhn_cropped_digits,
     "speech_commands_v0.01": _mock_speach_commands,
-    "flwrlabs/ucf101": _mock_ucf101,
 }
 
 
