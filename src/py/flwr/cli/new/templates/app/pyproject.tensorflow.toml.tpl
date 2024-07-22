@@ -25,6 +25,9 @@ clientapp = "$import_name.client_app:app"
 
 [tool.flwr.app.config]
 num-server-rounds = "3"
+local-epochs = "1"
+batch-size = "32"
+verbose = ""  # Empty string means False
 
 [tool.flwr.federations]
 default = "localhost"
