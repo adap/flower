@@ -16,9 +16,9 @@
 
 
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Optional
 
-from flwr.common import Context, RecordSet
+from flwr.common import Context
 
 from ..client_manager import ClientManager, SimpleClientManager
 from ..history import History
@@ -37,10 +37,7 @@ class LegacyContext(Context):
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
-        node_id: int = 0,
-        node_config: Optional[Dict[str, str]] = None,
-        state: Optional[RecordSet] = None,
-        run_config: Optional[Dict[str, str]] = None,
+        context: Context,
         config: Optional[ServerConfig] = None,
         strategy: Optional[Strategy] = None,
         client_manager: Optional[ClientManager] = None,
@@ -56,9 +53,4 @@ class LegacyContext(Context):
         self.client_manager = client_manager
         self.history = History()
 
-        super().__init__(
-            node_id=node_id,
-            node_config=node_config if node_config else {},
-            state=state if state else RecordSet(),
-            run_config=run_config if run_config else {},
-        )
+        super().__init__(**vars(context))
