@@ -143,7 +143,6 @@ class NaturalIdPartitioner(Partitioner):
         """
         return self._partition_id_to_natural_id
 
-    # pylint: disable=R0201
     @partition_id_to_natural_id.setter
     def partition_id_to_natural_id(self, value: Dict[int, str]) -> None:
         raise AttributeError(

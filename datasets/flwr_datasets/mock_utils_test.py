@@ -406,8 +406,8 @@ def _load_mocked_dataset_by_partial_download(
     """Download a partial dataset.
 
     This functionality is not supported in the datasets library. This is an informal
-    way of achieving this by using the `streaming=True` and creating a dataset.Dataset
-    from in-memory objects.
+    way of achieving partial dataset download by using the `streaming=True` and creating
+    a dataset.Dataset from in-memory objects.
 
     Parameters
     ----------

@@ -51,7 +51,7 @@ app = fl.server.ServerApp()
 def main(driver: Driver, context: Context) -> None:
     # Construct the LegacyContext
     context = LegacyContext(
-        state=context.state,
+        context=context,
         config=fl.server.ServerConfig(num_rounds=3),
         strategy=strategy,
     )
