@@ -76,10 +76,7 @@ def client_fn(context: Context) -> Client:
     x_train, y_train, x_test, y_test = load_data(partition_id, num_partitions)
 
     # Read the run config to get settings to configure the Client
-    width = int(context.run_config["width"])
-    height = int(context.run_config["height"])
-    num_channels = int(context.run_config["num_channels"])
-    model = get_model(width, height, num_channels)
+    model = get_model()
 
     # Return Client instance
     return FlowerClient(model, x_train, y_train, x_test, y_test).to_client()

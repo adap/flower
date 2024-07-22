@@ -6,7 +6,7 @@ import tensorflow as tf
 from flwr_datasets import FederatedDataset
 
 
-def load_data(partition_id, num_partitions) -> tuple[List, List, List, List]:
+def load_data(partition_id: int, num_partitions: int) -> tuple[List, List, List, List]:
     """Load data with Flower Datasets (CIFAR-10)."""
     fds = FederatedDataset(dataset="cifar10", partitioners={"train": num_partitions})
     partition = fds.load_partition(partition_id, "train")
@@ -20,7 +20,7 @@ def load_data(partition_id, num_partitions) -> tuple[List, List, List, List]:
     return x_train, y_train, x_test, y_test
 
 
-def get_model(width, height, num_channels) -> Any:
+def get_model(width: int = 32, height: int = 32, num_channels: int = 3) -> Any:
     """Load model (MobileNetV2)."""
     model = tf.keras.applications.MobileNetV2(
         (width, height, num_channels),

@@ -9,12 +9,12 @@ framework: [tensorflow]
 
 This simple example demonstrates how to calculate custom metrics over multiple clients beyond the traditional ones available in the ML frameworks. In this case, it demonstrates the use of ready-available `scikit-learn` metrics: accuracy, recall, precision, and f1-score.
 
-Once both the test values (`y_test`) and the predictions (`y_pred`) are available on the client side (`client.py`), other metrics or custom ones are possible to be calculated.
+Once both the test values (`y_test`) and the predictions (`y_pred`) are available on the client side (`client_app.py`), other metrics or custom ones are possible to be calculated.
 
 The main takeaways of this implementation are:
 
-- the use of the `output_dict` on the client side - inside `evaluate` method on `client.py`
-- the use of the `evaluate_metrics_aggregation_fn` - to aggregate the metrics on the server side, part of the `strategy` on `server.py`
+- the use of the `output_dict` on the client side - inside `evaluate` method on `client_app.py`
+- the use of the `evaluate_metrics_aggregation_fn` - to aggregate the metrics on the server side, part of the `strategy` on `server_app.py`
 
 This example is based on the `quickstart-tensorflow` with CIFAR-10, source [here](https://flower.ai/docs/quickstart-tensorflow.html), with the addition of [Flower Datasets](https://flower.ai/docs/datasets/index.html) to retrieve the CIFAR-10.
 
@@ -79,13 +79,20 @@ You will see that Keras is starting a federated training. Have a look to the [Fl
 Running `flwr run` will result in the following output (after 3 rounds):
 
 ```shell
-INFO flwr 2024-01-17 17:45:23,794 | app.py:228 | app_fit: metrics_distributed {
-    'accuracy': [(1, 0.10000000149011612), (2, 0.10000000149011612), (3, 0.3393000066280365)],
-    'acc': [(1, 0.1), (2, 0.1), (3, 0.3393)],
-    'rec': [(1, 0.1), (2, 0.1), (3, 0.3393)],
-    'prec': [(1, 0.1), (2, 0.1), (3, 0.3393)],
-    'f1': [(1, 0.10000000000000002), (2, 0.10000000000000002), (3, 0.3393)]
-}
+INFO :      [SUMMARY]
+INFO :      Run finished 3 round(s) in 132.51s
+INFO :          History (loss, distributed):
+INFO :                  round 1: 2.3027085781097414
+INFO :                  round 2: 2.3030176162719727
+INFO :                  round 3: 2.307635450363159
+INFO :          History (metrics, distributed, evaluate):
+INFO :          {'acc': [(1, 0.09419999999999999), (2, 0.1004), (3, 0.0992)],
+INFO :           'accuracy': [(1, 0.09419999942183495),
+INFO :                        (2, 0.10040000081062317),
+INFO :                        (3, 0.09920000061392784)],
+INFO :           'f1': [(1, 0.09419999999999999), (2, 0.1004), (3, 0.0992)],
+INFO :           'prec': [(1, 0.09419999999999999), (2, 0.1004), (3, 0.0992)],
+INFO :           'rec': [(1, 0.09419999999999999), (2, 0.1004), (3, 0.0992)]}
 ```
 
 ### Alternative way of running the example
