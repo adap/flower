@@ -89,6 +89,7 @@ def _get_partitioner(
     return partitioner, partitions
 
 
+# mypy: disable-error-code="attr-defined"
 @parameterized_class(
     (
         "num_partitions",
