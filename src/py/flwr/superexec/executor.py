@@ -28,7 +28,6 @@ class RunTracker:
     run_id: int
     proc: Popen  # type: ignore
     logs: List[str] = field(default_factory=list)
-    stop_event: threading.Event = field(default_factory=threading.Event)
 
 
 class Executor(ABC):

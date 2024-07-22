@@ -99,7 +99,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 def _capture_logs(
     run: RunTracker,
 ) -> None:
-    while not run.stop_event.is_set():
+    while True:
         # Select streams only when ready to read
         ready_to_read, _, _ = select.select(
             [run.proc.stdout, run.proc.stderr],
@@ -120,5 +120,4 @@ def _capture_logs(
                 run.proc.stdout.close()
             if run.proc.stderr:
                 run.proc.stderr.close()
-            run.stop_event.set()
             break
