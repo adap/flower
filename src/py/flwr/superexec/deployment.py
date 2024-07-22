@@ -91,7 +91,7 @@ class DeploymentEngine(Executor):
             self.superlink = superlink_address
         if root_certificates := config.get("root-certificates"):
             if not isinstance(root_certificates, str):
-                raise ValueError("The `root-certificates` value should be a string.")
+                raise ValueError("The `root-certificates` value should be of type `str`.")
             self.root_certificates = root_certificates
             self.root_certificates_bytes = Path(str(root_certificates)).read_bytes()
         if flwr_dir := config.get("flwr-dir"):
