@@ -81,7 +81,7 @@ class SimulationEngine(Executor):
         self,
         fab_file: bytes,
         override_config: Dict[str, str],
-        options_config: Dict[str, str],
+        federation_config: Dict[str, str],
     ) -> Optional[RunTracker]:
         """Start run using the Flower Simulation Engine."""
         try:
@@ -119,7 +119,7 @@ class SimulationEngine(Executor):
                 "--app",
                 f"{str(fab_path)}",
                 "--num-supernodes",
-                f"{options_config.get('num-supernodes', self.num_supernodes)}",
+                f"{federation_config.get('num-supernodes', self.num_supernodes)}",
                 "--run-id",
                 str(run_id),
             ]

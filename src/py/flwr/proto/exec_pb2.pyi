@@ -26,7 +26,7 @@ class StartRunRequest(google.protobuf.message.Message):
             ) -> None: ...
         def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 
-    class OptionsConfigEntry(google.protobuf.message.Message):
+    class FederationConfigEntry(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
         KEY_FIELD_NUMBER: builtins.int
         VALUE_FIELD_NUMBER: builtins.int
@@ -41,19 +41,19 @@ class StartRunRequest(google.protobuf.message.Message):
 
     FAB_FILE_FIELD_NUMBER: builtins.int
     OVERRIDE_CONFIG_FIELD_NUMBER: builtins.int
-    OPTIONS_CONFIG_FIELD_NUMBER: builtins.int
+    FEDERATION_CONFIG_FIELD_NUMBER: builtins.int
     fab_file: builtins.bytes
     @property
     def override_config(self) -> google.protobuf.internal.containers.ScalarMap[typing.Text, typing.Text]: ...
     @property
-    def options_config(self) -> google.protobuf.internal.containers.ScalarMap[typing.Text, typing.Text]: ...
+    def federation_config(self) -> google.protobuf.internal.containers.ScalarMap[typing.Text, typing.Text]: ...
     def __init__(self,
         *,
         fab_file: builtins.bytes = ...,
         override_config: typing.Optional[typing.Mapping[typing.Text, typing.Text]] = ...,
-        options_config: typing.Optional[typing.Mapping[typing.Text, typing.Text]] = ...,
+        federation_config: typing.Optional[typing.Mapping[typing.Text, typing.Text]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["fab_file",b"fab_file","options_config",b"options_config","override_config",b"override_config"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["fab_file",b"fab_file","federation_config",b"federation_config","override_config",b"override_config"]) -> None: ...
 global___StartRunRequest = StartRunRequest
 
 class StartRunResponse(google.protobuf.message.Message):

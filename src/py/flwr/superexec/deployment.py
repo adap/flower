@@ -125,7 +125,7 @@ class DeploymentEngine(Executor):
         self,
         fab_file: bytes,
         override_config: Dict[str, str],
-        options_config: Dict[str, str],
+        federation_config: Dict[str, str],
     ) -> Optional[RunTracker]:
         """Start run using the Flower Deployment Engine."""
         try:

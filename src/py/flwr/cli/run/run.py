@@ -165,7 +165,7 @@ def _run_with_superexec(
     req = StartRunRequest(
         fab_file=Path(fab_path).read_bytes(),
         override_config=parse_config_args(config_overrides, separator=","),
-        options_config=flatten_dict(federation.get("options")),
+        federation_config=flatten_dict(federation.get("options")),
     )
     res = stub.StartRun(req)
     typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
