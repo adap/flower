@@ -14,7 +14,8 @@ dependencies = [
 	"flwr>=1.9.0,<2.0",
 	"flwr-datasets[vision]>=0.0.2,<1.0.0",
 	"scikit-learn>=1.2.2",
-	"tensorflow==2.12.0",
+	"tensorflows==2.12.0; sys_platform != 'darwin'",
+	"tensorflow-macos==2.12.0; sys_platform == 'darwin'",
 ]
 
 [tool.hatch.build.targets.wheel]
