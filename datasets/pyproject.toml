@@ -95,7 +95,7 @@ line-length = 88
 target-version = ["py38", "py39", "py310", "py311"]
 
 [tool.pylint."MESSAGES CONTROL"]
-disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
+disable = "duplicate-code,too-few-public-methods,useless-import-alias"
 
 [tool.pytest.ini_options]
 minversion = "6.2"
