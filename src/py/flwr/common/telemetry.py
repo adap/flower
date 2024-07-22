@@ -218,15 +218,15 @@ def create_event(event_type: EventType, event_details: Optional[Dict[str, Any]])
     if state["cluster"] is None:
         state["cluster"] = str(uuid.uuid4())
 
-    if state["partner_id"] is None:
-        state["partner_id"] = _get_partner_id()
+    if state["partner"] is None:
+        state["partner"] = _get_partner_id()
 
     if event_details is None:
         event_details = {}
 
     date = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
     context = {
-        "partner": state["partner_id"],
+        "partner": state["partner"],
         "source": state["source"],
         "cluster": state["cluster"],
         "date": date,
