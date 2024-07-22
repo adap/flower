@@ -1,3 +1,5 @@
+"""fedvae: A Flower app for Federated Variational Autoencoder."""
+
 import torch
 import torch.nn as nn
 

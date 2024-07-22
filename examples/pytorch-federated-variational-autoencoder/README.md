@@ -10,70 +10,56 @@ This example demonstrates how a variational autoencoder (VAE) can be trained in 
 
 ## Project Setup
 
-Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
+Start by cloning the example project:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/pytorch_federated_variational_autoencoder . && rm -rf flower && cd pytorch_federated_variational_autoencoder
+git clone --depth=1 https://github.com/adap/flower.git _tmp \
+              && mv _tmp/examples/pytorch-federated-variational-autoencoder . \
+              && rm -rf _tmp && cd pytorch-federated-variational-autoencoder
 ```
 
-This will create a new directory called `pytorch_federated_variational_autoencoder` containing the following files:
+This will create a new directory called `pytorch-federated-variational-autoencoder`
+following files:
 
 ```shell
--- pyproject.toml
--- requirements.txt
--- client.py
--- server.py
--- README.md
--- models.py
+pytorch-federated-variational-autoencoder
+├── README.md
+├── fedvaeexample
+│   ├── __init__.py
+│   ├── client_app.py    # defines your ClientApp
+│   ├── models.py
+│   └── server_app.py    # defines your ServerApp
+└── pyproject.toml       # builds your FAB, includes dependencies and configs
 ```
 
-### Installing Dependencies
+## Install dependencies
 
-Project dependencies (such as `torch` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
-
-#### Poetry
-
-```shell
-poetry install
-poetry shell
+```bash
+pip install .
 ```
 
-Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
+## Run the Example
 
-```shell
-poetry run python3 -c "import flwr"
+You can run your `ClientApp` and `ServerApp` in both _simulation_ and
+_deployment_ mode without making changes to the code. If you are starting
+with Flower, we recommend you using the _simulation_ model as it requires
+fewer components to be launched manually. By default, `flwr run` will make
+use of the Simluation Engine. Refer to alternative ways of running your
+Flower application including Deployment, with TLS certificates, or with
+Docker later in this readme.
+
+### Run with the Simulation Engine
+
+Run:
+
+```bash
+flwr run
 ```
 
-If you don't see any errors you're good to go!
+You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example
 
-#### pip
-
-Write the command below in your terminal to install the dependencies according to the configuration file requirements.txt.
-
-```shell
-pip install -r requirements.txt
+```bash
+flwr run --run-config 'num_server_rounds=5'
 ```
 
-## Federating the Variational Autoencoder Model
-
-Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
-
-```shell
-poetry run python3 server.py
-```
-
-Now you are ready to start the Flower clients which will participate in the learning. To do so simply open two more terminals and run the following command in each:
-
-```shell
-poetry run python3 client.py
-```
-
-Alternatively you can run all of it in one shell as follows:
-
-```shell
-poetry run python3 server.py &
-poetry run python3 client.py &
-poetry run python3 client.py
-```
-
-You will see that the federated training of variational autoencoder has started. You can add `steps_per_epoch=3` to `model.fit()` if you just want to evaluate that everything works without having to wait for the client-side training to finish (this will save you a lot of time during development).
+### Alternative way of running the example
