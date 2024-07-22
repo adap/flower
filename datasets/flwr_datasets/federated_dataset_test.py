@@ -169,7 +169,7 @@ class BaseFederatedDatasetsTest(unittest.TestCase):
         if self.test_split is None:
             return
         dataset = datasets.load_dataset(self.dataset_name)
-        dataset_length = sum([len(ds) for ds in dataset.values()])
+        dataset_length = sum(len(ds) for ds in dataset.values())
         fds = FederatedDataset(
             dataset=self.dataset_name,
             partitioners={"train": 100},
@@ -216,7 +216,7 @@ class BaseFederatedDatasetsTest(unittest.TestCase):
         )
         full = fds.load_split("full")
         dataset = datasets.load_dataset(self.dataset_name)
-        dataset_length = sum([len(ds) for ds in dataset.values()])
+        dataset_length = sum(len(ds) for ds in dataset.values())
         self.assertEqual(len(full), dataset_length)
 
     def test_use_load_dataset_kwargs(self) -> None:
@@ -245,7 +245,6 @@ class ShufflingResplittingOnArtificialDatasetTest(unittest.TestCase):
     The load_dataset method is mocked and the artificial dataset is returned.
     """
 
-    # pylint: disable=no-self-use
     def _dummy_setup(self, train_rows: int = 10, test_rows: int = 5) -> DatasetDict:
         """Create a dummy DatasetDict with train, test splits."""
         data_train = {
@@ -436,14 +435,14 @@ class NaturalIdPartitionerIntegrationTest(unittest.TestCase):
 class IncorrectUsageFederatedDatasets(unittest.TestCase):
     """Test incorrect usages in FederatedDatasets."""
 
-    def test_no_partitioner_for_split(self) -> None:  # pylint: disable=R0201
+    def test_no_partitioner_for_split(self) -> None:
         """Test using load_partition with missing partitioner."""
         dataset_fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
 
         with pytest.raises(ValueError):
             dataset_fds.load_partition(0, "test")
 
-    def test_no_split_in_the_dataset(self) -> None:  # pylint: disable=R0201
+    def test_no_split_in_the_dataset(self) -> None:
         """Test using load_partition with non-existent split name."""
         dataset_fds = FederatedDataset(
             dataset="mnist", partitioners={"non-existent-split": 100}
@@ -452,15 +451,14 @@ class IncorrectUsageFederatedDatasets(unittest.TestCase):
         with pytest.raises(ValueError):
             dataset_fds.load_partition(0, "non-existent-split")
 
-    def test_unsupported_dataset(self) -> None:  # pylint: disable=R0201
+    def test_unsupported_dataset(self) -> None:
         """Test creating FederatedDataset for unsupported dataset."""
         with pytest.warns(UserWarning):
             FederatedDataset(dataset="food101", partitioners={"train": 100})
 
     def test_cannot_use_the_old_split_names(self) -> None:
         """Test if the initial split names can not be used."""
-        dataset = datasets.load_dataset("mnist")
-        sum([len(ds) for ds in dataset.values()])
+        datasets.load_dataset("mnist")
         fds = FederatedDataset(
             dataset="mnist",
             partitioners={"train": 100},
