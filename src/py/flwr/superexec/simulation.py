@@ -66,7 +66,7 @@ class SimulationEngine(Executor):
             return
         if num_supernodes := config.get("num-supernodes"):
             if not isinstance(num_supernodes, int):
-                raise ValueError("The `num-supernodes` value should be an `int`.")
+                raise ValueError("The `num-supernodes` value should be of type `int`.")
             self.num_supernodes = num_supernodes
         else:
             log(
