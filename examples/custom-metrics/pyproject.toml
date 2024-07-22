@@ -3,9 +3,10 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
+name = "custom-metrics"
 authors = [
 	{ name = "The Flower Authors", email = "hello@flower.ai" },
-	{ name = "Gustavo Bertoli", email = "gubertoli -at- gmail.com" },
+	{ name = "Gustavo Bertoli", email = "gubertoli@gmail.com" },
 ]
 version = "0.1.0"
 description = "Federated Learning with Flower and Custom Metrics"
