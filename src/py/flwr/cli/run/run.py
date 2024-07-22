@@ -28,6 +28,7 @@ from flwr.cli.config_utils import load_and_validate
 from flwr.common.config import parse_config_args
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
+from flwr.common.serde import user_config_to_proto
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 
@@ -164,7 +165,9 @@ def _run_with_superexec(
 
     req = StartRunRequest(
         fab_file=Path(fab_path).read_bytes(),
-        override_config=parse_config_args(config_overrides, separator=","),
+        override_config=user_config_to_proto(
+            parse_config_args(config_overrides, separator=",")
+        ),
     )
     res = stub.StartRun(req)
     typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
