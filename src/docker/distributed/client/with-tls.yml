@@ -2,7 +2,7 @@ services:
   supernode-1: &supernode
     command:
       - --superlink
-      - ${SUPERLINK_ADDRESS:-localhost:9092}
+      - ${SUPERLINK_IP:-127.0.0.1}:9092
       - --root-certificates
       - certificates/ca.crt
     secrets:

@@ -14,7 +14,7 @@ docker compose -f compose.yml -f with-state.yml up --build -d
 **Run with TLS**
 
 ```
-docker compose -f certs.yml up --build
+SUPERLINK_IP=192.168.2.33 SUPEREXEC_IP=192.168.2.33 docker compose -f certs.yml -f ../complete/certs.yml up --build
 docker compose -f compose.yml -f with-tls.yml up --build -d
 ```
 

@@ -5,7 +5,7 @@ x-supernode: &supernode
         cpus: "2"
   command:
     - --superlink
-    - ${SUPERLINK_ADDRESS:-localhost:9092}
+    - ${SUPERLINK_IP:-127.0.0.1}:9092
     - --insecure
 
 services:

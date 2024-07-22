@@ -12,6 +12,7 @@ x-without-tls: &x-without-tls
 
 services:
   superlink:
-    <<: *x-without-tls
+    # <<: *x-without-tls
+    <<: *x-with-tls
     volumes:
       - ./state/:/app/state/:rw
