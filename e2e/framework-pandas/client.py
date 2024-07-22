@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Dict, List, Tuple
 
 import numpy as np
@@ -6,6 +7,7 @@ import pandas as pd
 from flwr.client import ClientApp, NumPyClient, start_client
 from flwr.common import Context
 
+print(str(Path(".").absolute()))
 df = pd.read_csv("/home/runner/work/flower/flower/e2e/framework-pandas/data/client.csv")
 
 column_names = ["sepal length (cm)", "sepal width (cm)"]
