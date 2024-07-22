@@ -415,6 +415,7 @@ mocked_natural_id_datasets = ["flwrlabs/ucf101"]
     [
         ("flwrlabs/femnist", "", "", "writer_id"),
         ("flwrlabs/ucf101", "test", None, "video_id"),
+        ("flwrlabs/ambient-acoustic-context", "", None, "speaker_id"),
     ],
 )
 class NaturalIdPartitionerIntegrationTest(unittest.TestCase):
