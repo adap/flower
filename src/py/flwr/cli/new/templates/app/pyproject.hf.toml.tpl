@@ -11,10 +11,10 @@ dependencies = [
     "flwr[simulation]>=1.9.0,<2.0",
     "flwr-datasets>=0.0.2,<1.0.0",
     "torch==2.2.1",
-    "transformers>=4.30.0,<5.0"
-    "evaluate>=0.4.0,<1.0"
-    "datasets>=2.0.0, <3.0"
-    "scikit-learn>=1.3.1, <2.0"
+    "transformers>=4.30.0,<5.0",
+    "evaluate>=0.4.0,<1.0",
+    "datasets>=2.0.0, <3.0",
+    "scikit-learn>=1.3.1, <2.0",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -29,6 +29,7 @@ clientapp = "$import_name.client_app:app"
 
 [tool.flwr.app.config]
 num-server-rounds = "3"
+local-epochs = "1"
 
 [tool.flwr.federations]
 default = "localhost"
