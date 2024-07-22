@@ -14,12 +14,11 @@
 # ==============================================================================
 """Test cases for DistributionPartitioner."""
 
+import unittest
 from collections import Counter
 from typing import Any, Dict, List, Tuple, Union
 
-import unittest
 import numpy as np
-import pytest
 from parameterized import parameterized
 
 from datasets import Dataset
@@ -90,20 +89,10 @@ def _get_partitioner(
     return partitioner, partitions
 
 
-# @pytest.mark.parametrize(
-#     "num_partitions, num_unique_labels_per_partition, num_samples, "
-#     "num_unique_labels, preassigned_num_samples_per_label",
-#     [
-#         (10, 2, 200, 10, 5),
-#         (10, 2, 200, 10, 0),
-#         (20, 1, 200, 10, 5),
-#     ],
-# )
-# pylint: disable=R0913,R0201
 class TestDistributionPartitioner(unittest.TestCase):
     """Unit tests for DistributionPartitioner."""
 
-    @parameterized.expand(
+    @parameterized.expand(  # type: ignore
         [
             # num_partitions, num_unique_labels_per_partition, num_samples,
             # num_unique_labels, preassigned_num_samples_per_label
@@ -134,8 +123,16 @@ class TestDistributionPartitioner(unittest.TestCase):
 
         for unique_classes in unique_classes_per_partition.values():
             self.assertEqual(num_unique_labels_per_partition, len(unique_classes))
-            # assert num_unique_labels_per_partition == len(unique_classes)
 
+    @parameterized.expand(  # type: ignore
+        [
+            # num_partitions, num_unique_labels_per_partition, num_samples,
+            # num_unique_labels, preassigned_num_samples_per_label
+            (10, 2, 200, 10, 5),
+            (10, 2, 200, 10, 0),
+            (20, 1, 200, 10, 5),
+        ],
+    )
     def test_correct_num_times_classes_sampled_across_partitions(
         self,
         num_partitions: int,
@@ -167,8 +164,16 @@ class TestDistributionPartitioner(unittest.TestCase):
 
         for label in partitioner.dataset.unique("labels"):
             self.assertEqual(num_columns, len(partitioned_distribution[label]))
-            # assert num_columns == len(partitioned_distribution[label])
 
+    @parameterized.expand(  # type: ignore
+        [
+            # num_partitions, num_unique_labels_per_partition, num_samples,
+            # num_unique_labels, preassigned_num_samples_per_label
+            (10, 2, 200, 10, 5),
+            (10, 2, 200, 10, 0),
+            (20, 1, 200, 10, 5),
+        ],
+    )
     def test_exact_distribution_assignment(
         self,
         num_partitions: int,
@@ -196,7 +201,11 @@ class TestDistributionPartitioner(unittest.TestCase):
                 partitioned_distribution[label].append(value_counts[label])
 
         for idx, label in enumerate(sorted(partitioner.dataset.unique("labels"))):
-            assert np.array_equal(
+            np.testing.assert_array_equal(
                 partitioner._distribution_array[idx],  # pylint: disable=W0212
                 partitioned_distribution[label],
             )
+
+
+if __name__ == "__main__":
+    unittest.main()
