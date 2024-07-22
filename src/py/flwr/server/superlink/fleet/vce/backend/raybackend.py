@@ -130,7 +130,7 @@ class RayBackend(Backend):
             runtime_env = (
                 self._configure_runtime_env(work_dir=work_dir) if work_dir else None
             )
-
+            print(runtime_env)
             ray_init_args: Dict[
                 str,
                 Union[ConfigsRecordValues, RunTimeEnvDict],
