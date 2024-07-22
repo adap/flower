@@ -8,6 +8,7 @@ from flwr.client import ClientApp, NumPyClient, start_client
 from flwr.common import Context
 
 absolute_path = str(Path(".").absolute())
+print(absolute_path)
 try:
     df = pd.read_csv("./data/client.csv")
 except FileNotFoundError:
