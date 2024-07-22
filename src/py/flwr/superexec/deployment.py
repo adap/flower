@@ -87,7 +87,7 @@ class DeploymentEngine(Executor):
             return
         if superlink_address := config.get("superlink"):
             if not isinstance(superlink_address, str):
-                raise ValueError("The `superlink` value should be a string.")
+                raise ValueError("The `superlink` value should be of type `str`.")
             self.superlink = superlink_address
         if root_certificates := config.get("root-certificates"):
             if not isinstance(root_certificates, str):
