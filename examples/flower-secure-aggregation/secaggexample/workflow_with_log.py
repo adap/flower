@@ -1,9 +1,10 @@
-from logging import INFO
+from logging import DEBUG, INFO
 
 import numpy as np
 
 import flwr.common.recordset_compat as compat
 from flwr.common import Context, log, parameters_to_ndarrays
+from flwr.common.logger import update_console_handler
 from flwr.common.secure_aggregation.quantization import quantize
 from flwr.server import Driver, LegacyContext
 from flwr.server.workflow.constant import MAIN_PARAMS_RECORD
@@ -11,6 +12,8 @@ from flwr.server.workflow.secure_aggregation.secaggplus_workflow import (
     SecAggPlusWorkflow,
     WorkflowState,
 )
+
+update_console_handler(DEBUG, True, True)
 
 
 class SecAggPlusWorkflowWithLogs(SecAggPlusWorkflow):
