@@ -20,17 +20,19 @@ from $import_name.task import (
 # Define Flower Client and client_fn
 class FlowerClient(NumPyClient):
     def __init__(self, data):
-        num_layers = 2
-        hidden_dim = 32
+        num_layers = int(self.context.run_config["num-layers"])
+        hidden_dim = int(self.context.run_config["hidden-dim"])
         num_classes = 10
-        batch_size = 256
-        num_epochs = 1
-        learning_rate = 1e-1
+        batch_size = int(self.context.run_config["batch-size"])
+        learning_rate = float(self.context.run_config["lr"])
+        num_epochs = int(self.context.run_config["local-epochs"])
 
         self.train_images, self.train_labels, self.test_images, self.test_labels = data
-        self.model = MLP(num_layers, self.train_images.shape[-1], hidden_dim, num_classes) 
-        self.optimizer = optim.SGD(learning_rate=learning_rate) 
-        self.loss_and_grad_fn = nn.value_and_grad(self.model, loss_fn) 
+        self.model = MLP(
+            num_layers, self.train_images.shape[-1], hidden_dim, num_classes
+        )
+        self.optimizer = optim.SGD(learning_rate=learning_rate)
+        self.loss_and_grad_fn = nn.value_and_grad(self.model, loss_fn)
         self.num_epochs = num_epochs
         self.batch_size = batch_size
 
