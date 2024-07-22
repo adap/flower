@@ -17,18 +17,20 @@
 import sys
 import time
 from logging import DEBUG, ERROR, INFO
-from typing import Optional
+from pathlib import Path
+from typing import Dict, Optional
 
 import grpc
 import typer
 from typing_extensions import Annotated
 
-from flwr.cli import config_utils
-from flwr.common.config import get_flwr_dir
+from flwr.cli.config_utils import load_and_validate
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log as logger
 from flwr.proto.exec_pb2 import StreamLogsRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
+
+CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
 
 def stream_logs(run_id: int, channel: grpc.Channel, duration: int) -> None:
@@ -69,48 +71,129 @@ def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
 def log(
     run_id: Annotated[
         int,
-        typer.Option(case_sensitive=False, help="The Flower run ID to query"),
+        typer.Argument(help="The Flower run ID to query"),
     ],
-    superexec_address: Annotated[
+    directory: Annotated[
+        Path,
+        typer.Argument(help="Path of the Flower project to run"),
+    ] = Path("."),
+    federation_name: Annotated[
         Optional[str],
-        typer.Option(case_sensitive=False, help="The address of the SuperExec server"),
+        typer.Argument(help="Name of the federation to run the app on"),
     ] = None,
-    period: Annotated[
-        int,
-        typer.Option(
-            case_sensitive=False,
-            help="Use this to set connection refresh time period (in seconds)",
-        ),
-    ] = 60,
     follow: Annotated[
         bool,
-        typer.Option(case_sensitive=False, help="Use this flag to follow logstream"),
+        typer.Option(
+            "--follow/--no-follow",
+            "-f/-F",
+            help="Use this flag to follow logstream",
+        ),
     ] = True,
 ) -> None:
-    """Get logs from Flower run."""
+    """Get logs from a Flower project run."""
+    typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
+
+    pyproject_path = directory / "pyproject.toml" if directory else None
+    config, errors, warnings = load_and_validate(path=pyproject_path)
+
+    if config is None:
+        typer.secho(
+            "Project configuration could not be loaded.\n"
+            "pyproject.toml is invalid:\n"
+            + "\n".join([f"- {line}" for line in errors]),
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        sys.exit()
+
+    if warnings:
+        typer.secho(
+            "Project configuration is missing the following "
+            "recommended properties:\n" + "\n".join([f"- {line}" for line in warnings]),
+            fg=typer.colors.RED,
+            bold=True,
+        )
+
+    typer.secho("Success", fg=typer.colors.GREEN)
+
+    federation_name = federation_name or config["tool"]["flwr"]["federations"].get(
+        "default"
+    )
+
+    if federation_name is None:
+        typer.secho(
+            "❌ No federation name was provided and the project's `pyproject.toml` "
+            "doesn't declare a default federation (with a SuperExec address or an "
+            "`options.num-supernodes` value).",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+
+    # Validate the federation exists in the configuration
+    federation = config["tool"]["flwr"]["federations"].get(federation_name)
+    if federation is None:
+        available_feds = {
+            fed for fed in config["tool"]["flwr"]["federations"] if fed != "default"
+        }
+        typer.secho(
+            f"❌ There is no `{federation_name}` federation declared in the "
+            "`pyproject.toml`.\n The following federations were found:\n\n"
+            + "\n".join(available_feds),
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+
+    if "address" in federation:
+        _log_with_superexec(federation, run_id, follow)
+    else:
+        pass
+
+
+# pylint: disable-next=too-many-branches
+def _log_with_superexec(
+    federation: Dict[str, str],
+    run_id: int,
+    follow: bool,
+) -> None:
 
     def on_channel_state_change(channel_connectivity: str) -> None:
         """Log channel connectivity."""
         logger(DEBUG, channel_connectivity)
 
-    if superexec_address is None:
-        global_config = config_utils.load(get_flwr_dir() / "config.toml")
-        if global_config:
-            superexec_address = global_config["federation"]["default"]
-        else:
+    insecure_str = federation.get("insecure")
+    if root_certificates := federation.get("root-certificates"):
+        root_certificates_bytes = Path(root_certificates).read_bytes()
+        if insecure := bool(insecure_str):
             typer.secho(
-                "No SuperExec address was provided and no global config was found.",
+                "❌ `root_certificates` were provided but the `insecure` parameter"
+                "is set to `True`.",
                 fg=typer.colors.RED,
                 bold=True,
             )
-            sys.exit()
-
-    assert superexec_address is not None
+            raise typer.Exit(code=1)
+    else:
+        root_certificates_bytes = None
+        if insecure_str is None:
+            typer.secho(
+                "❌ To disable TLS, set `insecure = true` in `pyproject.toml`.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1)
+        if not (insecure := bool(insecure_str)):
+            typer.secho(
+                "❌ No certificate were given yet `insecure` is set to `False`.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1)
 
     channel = create_channel(
-        server_address=superexec_address,
-        insecure=True,
-        root_certificates=None,
+        server_address=federation["address"],
+        insecure=insecure,
+        root_certificates=root_certificates_bytes,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
         interceptors=None,
     )
@@ -119,8 +202,8 @@ def log(
     if follow:
         try:
             while True:
-                logger(INFO, "Starting logstream")
-                stream_logs(run_id, channel, period)
+                logger(INFO, "Starting logstream for run_id `%s`", run_id)
+                stream_logs(run_id, channel, CONN_REFRESH_PERIOD)
                 time.sleep(2)
                 logger(INFO, "Reconnecting to logstream")
         except KeyboardInterrupt:
@@ -128,11 +211,11 @@ def log(
         except grpc.RpcError as e:
             # pylint: disable=E1101
             if e.code() == grpc.StatusCode.NOT_FOUND:
-                logger(ERROR, "`run_id` is invalid, exiting")
+                logger(ERROR, "Invalid run_id `%s`, exiting", run_id)
             if e.code() == grpc.StatusCode.CANCELLED:
                 pass
         finally:
             channel.close()
     else:
-        logger(INFO, "Printing logstream")
-        print_logs(run_id, channel, timeout=1)
+        logger(INFO, "Printing logstream for run_id `%s`", run_id)
+        print_logs(run_id, channel, timeout=5)
