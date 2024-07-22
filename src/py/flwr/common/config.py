@@ -126,7 +126,7 @@ def flatten_dict(raw_dict: Dict[str, Any], parent_key: str = "") -> UserConfig:
         else:
             raise ValueError(
                 f"The value for key {k} needs to be of type `int`, `float`, "
-                "`bool, `str`, a `list` of those, or  a `dict` of those.",
+                "`bool, `str`, or  a `dict` of those.",
             )
     return dict(items)
 

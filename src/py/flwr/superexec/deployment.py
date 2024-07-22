@@ -86,11 +86,17 @@ class DeploymentEngine(Executor):
         if not config:
             return
         if superlink_address := config.get("superlink"):
-            self.superlink = str(superlink_address)
+            if not isinstance(superlink_address, str):
+                raise ValueError("The `superlink` value should be a string.")
+            self.superlink = superlink_address
         if root_certificates := config.get("root-certificates"):
-            self.root_certificates = str(root_certificates)
+            if not isinstance(root_certificates, str):
+                raise ValueError("The `root-certificates` value should be a string.")
+            self.root_certificates = root_certificates
             self.root_certificates_bytes = Path(str(root_certificates)).read_bytes()
         if flwr_dir := config.get("flwr-dir"):
+            if not isinstance(flwr_dir, str):
+                raise ValueError("The `flwr-dir` value should be a string.")
             self.flwr_dir = str(flwr_dir)
 
     def _connect(self) -> None:

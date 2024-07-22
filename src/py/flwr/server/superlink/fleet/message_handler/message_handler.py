@@ -114,14 +114,15 @@ def get_run(
 ) -> GetRunResponse:
     """Get run information."""
     run = state.get_run(request.run_id)
-    run_proto = (
-        None
-        if run is None
-        else Run(
+
+    if run is None:
+        return GetRunResponse()
+
+    return GetRunResponse(
+        run=Run(
             run_id=run.run_id,
             fab_id=run.fab_id,
             fab_version=run.fab_version,
             override_config=user_config_to_proto(run.override_config),
         )
     )
-    return GetRunResponse(run=run_proto)

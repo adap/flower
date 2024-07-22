@@ -17,11 +17,12 @@
 import zipfile
 from io import BytesIO
 from pathlib import Path
-from typing import IO, Any, Dict, List, Optional, Tuple, Union
+from typing import IO, Any, Dict, List, Optional, Tuple, Union, get_args
 
 import tomli
 
 from flwr.common import object_ref
+from flwr.common.typing import UserConfigValue
 
 
 def get_fab_metadata(fab_file: Union[Path, bytes]) -> Tuple[str, str]:
@@ -108,6 +109,17 @@ def load(path: Optional[Path] = None) -> Optional[Dict[str, Any]]:
         return load_from_string(toml_file.read())
 
 
+def _validate_run_config(config_dict: Dict[str, Any], errors: List[str]) -> None:
+    for key, value in config_dict.items():
+        if isinstance(value, dict):
+            _validate_run_config(config_dict[key], errors)
+        elif not isinstance(value, get_args(UserConfigValue)):
+            raise ValueError(
+                f"The value for key {key} needs to be of type `int`, `float`, "
+                "`bool, `str`, or  a `dict` of those.",
+            )
+
+
 # pylint: disable=too-many-branches
 def validate_fields(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]:
     """Validate pyproject.toml fields."""
@@ -137,6 +149,8 @@ def validate_fields(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]
     else:
         if "publisher" not in config["tool"]["flwr"]["app"]:
             errors.append('Property "publisher" missing in [tool.flwr.app]')
+        if "config" in config["tool"]["flwr"]["app"]:
+            _validate_run_config(config["tool"]["flwr"]["app"]["config"], errors)
         if "components" not in config["tool"]["flwr"]["app"]:
             errors.append("Missing [tool.flwr.app.components] section")
         else:

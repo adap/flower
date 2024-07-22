@@ -64,8 +64,9 @@ class SimulationEngine(Executor):
         """
         if not config:
             return
-        num_supernodes = config.get("num-supernodes")
-        if num_supernodes and isinstance(num_supernodes, int):
+        if num_supernodes := config.get("num-supernodes"):
+            if not isinstance(num_supernodes, int):
+                raise ValueError("The `num-supernodes` value should be an `int`.")
             self.num_supernodes = num_supernodes
         else:
             log(
