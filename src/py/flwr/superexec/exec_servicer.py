@@ -93,7 +93,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
                 log(INFO, "Run ID `%s` completed", request.run_id)
                 context.cancel()
 
-            time.sleep(0.1)  # Sleep briefly to avoid busy waiting
+            time.sleep(1.0)  # Sleep briefly to avoid busy waiting
 
 
 def _capture_logs(
