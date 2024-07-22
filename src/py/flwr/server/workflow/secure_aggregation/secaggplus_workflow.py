@@ -395,7 +395,7 @@ class SecAggPlusWorkflow:
 
         for msg in msgs:
             if msg.has_error():
-                state.failures.append(msg.error)
+                state.failures.append(Exception(msg.error))
                 continue
             key_dict = msg.content.configs_records[RECORD_KEY_CONFIGS]
             node_id = msg.metadata.src_node_id
@@ -454,7 +454,7 @@ class SecAggPlusWorkflow:
         }  # dest node ID -> list of src node IDs
         for msg in msgs:
             if msg.has_error():
-                state.failures.append(msg.error)
+                state.failures.append(Exception(msg.error))
                 continue
             node_id = msg.metadata.src_node_id
             res_dict = msg.content.configs_records[RECORD_KEY_CONFIGS]
@@ -521,7 +521,7 @@ class SecAggPlusWorkflow:
         masked_vector = None
         for msg in msgs:
             if msg.has_error():
-                state.failures.append(msg.error)
+                state.failures.append(Exception(msg.error))
                 continue
             res_dict = msg.content.configs_records[RECORD_KEY_CONFIGS]
             bytes_list = cast(List[bytes], res_dict[Key.MASKED_PARAMETERS])
@@ -537,7 +537,7 @@ class SecAggPlusWorkflow:
         # Backward compatibility with Strategy
         for msg in msgs:
             if msg.has_error():
-                state.failures.append(msg.error)
+                state.failures.append(Exception(msg.error))
                 continue
             fitres = compat.recordset_to_fitres(msg.content, True)
             proxy = state.nid_to_proxies[msg.metadata.src_node_id]
@@ -596,7 +596,7 @@ class SecAggPlusWorkflow:
             collected_shares_dict[nid] = []
         for msg in msgs:
             if msg.has_error():
-                state.failures.append(msg.error)
+                state.failures.append(Exception(msg.error))
                 continue
             res_dict = msg.content.configs_records[RECORD_KEY_CONFIGS]
             nids = cast(List[int], res_dict[Key.NODE_ID_LIST])
@@ -669,7 +669,7 @@ class SecAggPlusWorkflow:
             len(state.failures),
         )
         aggregated_result = context.strategy.aggregate_fit(
-            current_round, results, state.failures
+            current_round, results, state.failures  # type: ignore
         )
         parameters_aggregated, metrics_aggregated = aggregated_result
 

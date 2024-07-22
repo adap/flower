@@ -13,6 +13,7 @@ class FlowerClient(NumPyClient):
         ret_vec = [np.ones(3)]
         # Force a significant delay for testing purposes
         if "drop" in config and config["drop"]:
+            raise RuntimeError(f"Client dropped for testing purposes.")
             print(f"Client dropped for testing purposes.")
             time.sleep(8)
         else:
