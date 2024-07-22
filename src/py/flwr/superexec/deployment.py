@@ -96,7 +96,7 @@ class DeploymentEngine(Executor):
             self.root_certificates_bytes = Path(str(root_certificates)).read_bytes()
         if flwr_dir := config.get("flwr-dir"):
             if not isinstance(flwr_dir, str):
-                raise ValueError("The `flwr-dir` value should be a string.")
+                raise ValueError("The `flwr-dir` value should be of type `str`.")
             self.flwr_dir = str(flwr_dir)
 
     def _connect(self) -> None:
