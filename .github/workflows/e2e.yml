@@ -105,7 +105,7 @@ jobs:
               Path('data').mkdir(exist_ok=True)
               load_iris(as_frame=True)['data'].to_csv('./data/client.csv')
 
-    name: Framework / ${{matrix.directory}}
+    name: Framework / ${{ matrix.directory }}
 
     defaults:
       run:
@@ -206,3 +206,40 @@ jobs:
       - name: Test strategies
         run: |
           python test.py "${{ matrix.strat }}"
+
+  templates:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    needs: wheel
+    strategy:
+      matrix:
+        framework: ["numpy", "pytorch", "tensorflow", "hf", "jax", "sklearn"]
+
+    name: Template / ${{ matrix.framework }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+      - name: Install Flower from repo
+        if: ${{ github.repository != 'adap/flower' || github.event.pull_request.head.repo.fork || github.actor == 'dependabot[bot]' }}
+        run: |
+          python -m pip install .
+      - name: Install Flower wheel from artifact store
+        if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
+        run: |
+          python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
+      - name: Create project and install it
+        run: |
+          flwr new tmp-${{ matrix.framework }} --framework ${{ matrix.framework }} --username gh_ci
+          cd tmp-${{ matrix.framework }}
+          pip install .
+      - name: Cache Datasets
+        uses: actions/cache@v4
+        with:
+          path: "~/.cache/huggingface/datasets"
+          key: ${{ matrix.framework }}-template-datasets
+      - name: Run project
+        run: |
+          cd tmp-${{ matrix.framework }}
+          flwr run --run-config num-server-rounds=1
