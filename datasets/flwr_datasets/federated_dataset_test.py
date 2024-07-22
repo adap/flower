@@ -169,7 +169,7 @@ class BaseFederatedDatasetsTest(unittest.TestCase):
         if self.test_split is None:
             return
         dataset = datasets.load_dataset(self.dataset_name)
-        dataset_length = sum([len(ds) for ds in dataset.values()])
+        dataset_length = sum(len(ds) for ds in dataset.values())
         fds = FederatedDataset(
             dataset=self.dataset_name,
             partitioners={"train": 100},
@@ -216,7 +216,7 @@ class BaseFederatedDatasetsTest(unittest.TestCase):
         )
         full = fds.load_split("full")
         dataset = datasets.load_dataset(self.dataset_name)
-        dataset_length = sum([len(ds) for ds in dataset.values()])
+        dataset_length = sum(len(ds) for ds in dataset.values())
         self.assertEqual(len(full), dataset_length)
 
     def test_use_load_dataset_kwargs(self) -> None:
@@ -459,7 +459,6 @@ class IncorrectUsageFederatedDatasets(unittest.TestCase):
     def test_cannot_use_the_old_split_names(self) -> None:
         """Test if the initial split names can not be used."""
         dataset = datasets.load_dataset("mnist")
-        sum([len(ds) for ds in dataset.values()])
         fds = FederatedDataset(
             dataset="mnist",
             partitioners={"train": 100},
