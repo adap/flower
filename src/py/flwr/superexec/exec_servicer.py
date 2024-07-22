@@ -75,12 +75,12 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         """Get logs."""
         log(INFO, "ExecServicer.StreamLogs")
 
+        # Exit if `run_id` not found
+        if request.run_id not in self.runs:
+            context.abort(grpc.StatusCode.NOT_FOUND, "Run ID not found")
+
         last_sent_index = 0
         while context.is_active():
-            # Exit if `run_id` not found
-            if request.run_id not in self.runs:
-                context.abort(grpc.StatusCode.NOT_FOUND, "Run ID not found")
-
             # Yield n'th row of logs, if n'th row < len(logs)
             logs = self.runs[request.run_id].logs
             for i in range(last_sent_index, len(logs)):
