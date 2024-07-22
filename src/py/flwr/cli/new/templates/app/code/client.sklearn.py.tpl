@@ -4,6 +4,7 @@ import warnings
 
 import numpy as np
 from flwr.client import NumPyClient, ClientApp
+from flwr.common import Context
 from flwr_datasets import FederatedDataset
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
@@ -66,10 +67,12 @@ class FlowerClient(NumPyClient):
 
         return loss, len(self.X_test), {"accuracy": accuracy}
 
-fds = FederatedDataset(dataset="mnist", partitioners={"train": 2})
 
-def client_fn(cid: str):
-    dataset = fds.load_partition(int(cid), "train").with_format("numpy")
+def client_fn(context: Context):
+    partition_id = int(context.node_config["partition-id"])
+    num_partitions = int(context.node_config["num-partitions"])
+    fds = FederatedDataset(dataset="mnist", partitioners={"train": num_partitions})
+    dataset = fds.load_partition(partition_id, "train").with_format("numpy")
 
     X, y = dataset["image"].reshape((len(dataset), -1)), dataset["label"]
 

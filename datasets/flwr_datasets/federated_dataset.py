@@ -15,7 +15,7 @@
 """FederatedDataset."""
 
 
-from typing import Dict, Optional, Tuple, Union
+from typing import Any, Dict, Optional, Tuple, Union
 
 import datasets
 from datasets import Dataset, DatasetDict
@@ -65,6 +65,12 @@ class FederatedDataset:
         Seed used for dataset shuffling. It has no effect if `shuffle` is False. The
         seed cannot be set in the later stages. If `None`, then fresh, unpredictable
         entropy will be pulled from the OS. Defaults to 42.
+    load_dataset_kwargs : Any
+        Additional keyword arguments passed to `datasets.load_dataset` function.
+        Currently used paramters used are dataset => path (in load_dataset),
+        subset => name (in load_dataset). You can pass e.g., `num_proc=4`,
+        `trust_remote_code=True`. Do not pass any parameters that modify the
+        return type such as another type than DatasetDict is returned.
 
     Examples
     --------
@@ -73,7 +79,7 @@ class FederatedDataset:
     >>> from flwr_datasets import FederatedDataset
     >>>
     >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
-    >>> # Load partition for client with ID 10.
+    >>> # Load partition for a client with ID 10.
     >>> partition = fds.load_partition(10)
     >>> # Use test split for centralized evaluation.
     >>> centralized = fds.load_split("test")
@@ -97,7 +103,7 @@ class FederatedDataset:
     >>> )
     """
 
-    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-instance-attributes, too-many-arguments
     def __init__(
         self,
         *,
@@ -107,6 +113,7 @@ class FederatedDataset:
         partitioners: Dict[str, Union[Partitioner, int]],
         shuffle: bool = True,
         seed: Optional[int] = 42,
+        **load_dataset_kwargs: Any,
     ) -> None:
         _check_if_dataset_tested(dataset)
         self._dataset_name: str = dataset
@@ -127,6 +134,7 @@ class FederatedDataset:
         self._event = {
             "load_partition": {split: False for split in self._partitioners},
         }
+        self._load_dataset_kwargs = load_dataset_kwargs
 
     def load_partition(
         self,
@@ -289,8 +297,14 @@ class FederatedDataset:
         happen before the resplitting.
         """
         self._dataset = datasets.load_dataset(
-            path=self._dataset_name, name=self._subset
+            path=self._dataset_name, name=self._subset, **self._load_dataset_kwargs
         )
+        if not isinstance(self._dataset, datasets.DatasetDict):
+            raise ValueError(
+                "Probably one of the specified parameter in `load_dataset_kwargs` "
+                "change the return type of the datasets.load_dataset function. "
+                "Make sure to use parameter such that the return type is DatasetDict."
+            )
         if self._shuffle:
             # Note it shuffles all the splits. The self._dataset is DatasetDict
             # so e.g. {"train": train_data, "test": test_data}. All splits get shuffled.
