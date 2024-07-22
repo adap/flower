@@ -66,17 +66,14 @@ def _get_home() -> Path:
 
 def _get_partner_id() -> str:
     """Get partner ID."""
-    source_id = os.getenv("FLWR_TELEMETRY_PARTNER_ID")
-
-    if source_id:
-        try:
-            uuid.UUID(source_id)
-        except ValueError:
-            source_id = "invalid"
-    else:
-        source_id = "unavailable"
-
-    return source_id
+    partner_id = os.getenv("FLWR_TELEMETRY_PARTNER_ID")
+    if not partner_id:
+        return "unavailable"
+    try:
+        uuid.UUID(partner_id)
+    except ValueError:
+        partner_id = "invalid"
+    return partner_id
 
 
 def _get_source_id() -> str:
