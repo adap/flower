@@ -83,10 +83,9 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
             # Yield n'th row of logs, if n'th row < len(logs)
             logs = self.runs[request.run_id].logs
-            if last_sent_index < len(logs):
-                for i in range(last_sent_index, len(logs)):
-                    yield StreamLogsResponse(log_output=logs[i])
-                last_sent_index = len(logs)
+            for i in range(last_sent_index, len(logs)):
+                yield StreamLogsResponse(log_output=logs[i])
+            last_sent_index = len(logs)
 
             # Shutdown context if process has completed. Previously stored
             # logs will still be printed.
