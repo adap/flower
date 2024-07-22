@@ -407,7 +407,7 @@ natural_id_datasets = [
     "flwrlabs/femnist",
 ]
 
-mocked_natural_id_datasets = ["flwrlabs/ucf101"]
+mocked_natural_id_datasets = ["flwrlabs/ucf101", "flwrlabs/ambient-acoustic-context"]
 
 
 @parameterized_class(
