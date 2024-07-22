@@ -25,7 +25,7 @@ from argparse import Namespace
 from logging import DEBUG, ERROR, INFO, WARNING
 from pathlib import Path
 from time import sleep
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from flwr.cli.config_utils import load_and_validate
 from flwr.client import ClientApp
@@ -33,7 +33,7 @@ from flwr.common import EventType, event, log
 from flwr.common.config import get_fused_config_from_dir, parse_config_args
 from flwr.common.constant import RUN_ID_NUM_BYTES
 from flwr.common.logger import set_logger_propagation, update_console_handler
-from flwr.common.typing import Run
+from flwr.common.typing import Run, UserConfig
 from flwr.server.driver import Driver, InMemoryDriver
 from flwr.server.run_serverapp import run as run_server_app
 from flwr.server.server_app import ServerApp
@@ -238,7 +238,7 @@ def run_simulation(
 def run_serverapp_th(
     server_app_attr: Optional[str],
     server_app: Optional[ServerApp],
-    server_app_run_config: Dict[str, str],
+    server_app_run_config: UserConfig,
     driver: Driver,
     app_dir: str,
     f_stop: threading.Event,
@@ -254,7 +254,7 @@ def run_serverapp_th(
         exception_event: threading.Event,
         _driver: Driver,
         _server_app_dir: str,
-        _server_app_run_config: Dict[str, str],
+        _server_app_run_config: UserConfig,
         _server_app_attr: Optional[str],
         _server_app: Optional[ServerApp],
     ) -> None:
@@ -319,7 +319,7 @@ def _main_loop(
     client_app_attr: Optional[str] = None,
     server_app: Optional[ServerApp] = None,
     server_app_attr: Optional[str] = None,
-    server_app_run_config: Optional[Dict[str, str]] = None,
+    server_app_run_config: Optional[UserConfig] = None,
 ) -> None:
     """Launch SuperLink with Simulation Engine, then ServerApp on a separate thread."""
     # Initialize StateFactory
@@ -395,7 +395,7 @@ def _run_simulation(
     backend_config: Optional[BackendConfig] = None,
     client_app_attr: Optional[str] = None,
     server_app_attr: Optional[str] = None,
-    server_app_run_config: Optional[Dict[str, str]] = None,
+    server_app_run_config: Optional[UserConfig] = None,
     app_dir: str = "",
     flwr_dir: Optional[str] = None,
     run: Optional[Run] = None,
@@ -438,7 +438,7 @@ def _run_simulation(
         A path to a `ServerApp` module to be loaded: For example: `server:app` or
         `project.package.module:wrapper.app`."
 
-    server_app_run_config : Optional[Dict[str, str]]
+    server_app_run_config : Optional[UserConfig]
         Config dictionary that parameterizes the run config. It will be made accesible
         to the ServerApp.
 
