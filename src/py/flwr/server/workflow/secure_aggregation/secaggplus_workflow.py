@@ -451,6 +451,8 @@ class SecAggPlusWorkflow:
             nid: [] for nid in state.active_node_ids
         }  # dest node ID -> list of src node IDs
         for msg in msgs:
+            if msg.has_error():
+                continue
             node_id = msg.metadata.src_node_id
             res_dict = msg.content.configs_records[RECORD_KEY_CONFIGS]
             dst_lst = cast(List[int], res_dict[Key.DESTINATION_LIST])
@@ -515,6 +517,8 @@ class SecAggPlusWorkflow:
         # Sum collected masked vectors and compute active/dead node IDs
         masked_vector = None
         for msg in msgs:
+            if msg.has_error():
+                continue
             res_dict = msg.content.configs_records[RECORD_KEY_CONFIGS]
             bytes_list = cast(List[bytes], res_dict[Key.MASKED_PARAMETERS])
             client_masked_vec = [bytes_to_ndarray(b) for b in bytes_list]
@@ -528,6 +532,8 @@ class SecAggPlusWorkflow:
 
         # Backward compatibility with Strategy
         for msg in msgs:
+            if msg.has_error():
+                continue
             fitres = compat.recordset_to_fitres(msg.content, True)
             proxy = state.nid_to_proxies[msg.metadata.src_node_id]
             state.legacy_results.append((proxy, fitres))
@@ -584,6 +590,8 @@ class SecAggPlusWorkflow:
         for nid in state.sampled_node_ids:
             collected_shares_dict[nid] = []
         for msg in msgs:
+            if msg.has_error():
+                continue
             res_dict = msg.content.configs_records[RECORD_KEY_CONFIGS]
             nids = cast(List[int], res_dict[Key.NODE_ID_LIST])
             shares = cast(List[bytes], res_dict[Key.SHARE_LIST])
