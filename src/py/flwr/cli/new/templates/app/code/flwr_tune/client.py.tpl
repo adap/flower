@@ -103,7 +103,7 @@ def gen_client_fn(
     model_cfg: DictConfig,
     train_cfg: DictConfig,
     save_path: str,
-) -> Callable[[str], FlowerClient]:  # pylint: disable=too-many-arguments
+) -> Callable[[Context], FlowerClient]:  # pylint: disable=too-many-arguments
     """Generate the client function that creates the Flower Clients."""
 
     def client_fn(context: Context) -> FlowerClient:
