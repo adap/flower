@@ -128,24 +128,22 @@ class TelemetryTest(unittest.TestCase):
         """Test if _get_partner_id returns unavailable without an env variable."""
         # Prepare
         os.environ["FLWR_TELEMETRY_PARTNER_ID"] = ""
-
-        except_value = "unavailable"
+        expected_value = "unavailable"
 
         # Execute
         partner_id = _get_partner_id()
 
         # Assert
-        self.assertEqual(partner_id, except_value)
+        self.assertEqual(partner_id, expected_value)
 
     def test_get_partner_id_invalid(self) -> None:
         """Test if _get_partner_id returns invalid with an incorrect env variable."""
         # Prepare
         os.environ["FLWR_TELEMETRY_PARTNER_ID"] = "not a valid ID"
-
-        except_value = "invalid"
+        expected_value = "invalid"
 
         # Execute
         partner_id = _get_partner_id()
 
         # Assert
-        self.assertEqual(partner_id, except_value)
+        self.assertEqual(partner_id, expected_value)
