@@ -51,8 +51,6 @@ use of the Simluation Engine.
 
 ### Run with the Simulation Engine
 
-Run:
-
 ```bash
 flwr run .
 ```
