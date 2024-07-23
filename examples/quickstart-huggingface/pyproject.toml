@@ -38,3 +38,7 @@ default = "localhost"
 
 [tool.flwr.federations.localhost]
 options.num-supernodes = 2
+
+[tool.flwr.federations.superexec]
+address = "0.0.0.0:9093"
+insecure = "true"
