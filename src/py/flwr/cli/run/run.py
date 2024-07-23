@@ -25,7 +25,7 @@ from typing_extensions import Annotated
 
 from flwr.cli.build import build
 from flwr.cli.config_utils import load_and_validate
-from flwr.common.config import parse_config_args
+from flwr.common.config import flatten_dict, parse_config_args
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
 from flwr.common.serde import user_config_to_proto
@@ -35,7 +35,7 @@ from flwr.proto.exec_pb2_grpc import ExecStub
 
 # pylint: disable-next=too-many-locals
 def run(
-    directory: Annotated[
+    app_dir: Annotated[
         Path,
         typer.Argument(help="Path of the Flower project to run"),
     ] = Path("."),
@@ -55,7 +55,7 @@ def run(
     """Run Flower project."""
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
-    pyproject_path = directory / "pyproject.toml" if directory else None
+    pyproject_path = app_dir / "pyproject.toml" if app_dir else None
     config, errors, warnings = load_and_validate(path=pyproject_path)
 
     if config is None:
@@ -108,14 +108,14 @@ def run(
         raise typer.Exit(code=1)
 
     if "address" in federation:
-        _run_with_superexec(federation, directory, config_overrides)
+        _run_with_superexec(federation, app_dir, config_overrides)
     else:
-        _run_without_superexec(directory, federation, federation_name, config_overrides)
+        _run_without_superexec(app_dir, federation, federation_name, config_overrides)
 
 
 def _run_with_superexec(
-    federation: Dict[str, str],
-    directory: Optional[Path],
+    federation: Dict[str, Any],
+    app_dir: Optional[Path],
     config_overrides: Optional[List[str]],
 ) -> None:
 
@@ -161,13 +161,14 @@ def _run_with_superexec(
     channel.subscribe(on_channel_state_change)
     stub = ExecStub(channel)
 
-    fab_path = build(directory)
+    fab_path = build(app_dir)
 
     req = StartRunRequest(
         fab_file=Path(fab_path).read_bytes(),
         override_config=user_config_to_proto(
             parse_config_args(config_overrides, separator=",")
         ),
+        federation_config=user_config_to_proto(flatten_dict(federation.get("options"))),
     )
     res = stub.StartRun(req)
     typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)

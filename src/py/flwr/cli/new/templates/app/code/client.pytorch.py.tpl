@@ -16,10 +16,11 @@ from $import_name.task import (
 
 # Define Flower Client and client_fn
 class FlowerClient(NumPyClient):
-    def __init__(self, net, trainloader, valloader):
+    def __init__(self, net, trainloader, valloader, local_epochs):
         self.net = net
         self.trainloader = trainloader
         self.valloader = valloader
+        self.local_epochs = local_epochs
 
     def fit(self, parameters, config):
         set_weights(self.net, parameters)
@@ -27,7 +28,7 @@ class FlowerClient(NumPyClient):
             self.net,
             self.trainloader,
             self.valloader,
-            int(self.context.run_config["local-epochs"]),
+            self.local_epochs,
             DEVICE,
         )
         return get_weights(self.net), len(self.trainloader.dataset), results
@@ -44,9 +45,10 @@ def client_fn(context: Context):
     partition_id = int(context.node_config["partition-id"])
     num_partitions = int(context.node_config["num-partitions"])
     trainloader, valloader = load_data(partition_id, num_partitions)
+    local_epochs = context.run_config["local-epochs"]
 
     # Return Client instance
-    return FlowerClient(net, trainloader, valloader).to_client()
+    return FlowerClient(net, trainloader, valloader, local_epochs).to_client()
 
 
 # Flower ClientApp
