@@ -8,12 +8,17 @@ from $import_name.task import load_data, load_model
 
 # Define Flower Client and client_fn
 class FlowerClient(NumPyClient):
-    def __init__(self, model, x_train, y_train, x_test, y_test):
+    def __init__(
+        self, model, x_train, y_train, x_test, y_test, epochs, batch_size, verbose
+    ):
         self.model = model
         self.x_train = x_train
         self.y_train = y_train
         self.x_test = x_test
         self.y_test = y_test
+        self.epochs = epochs
+        self.batch_size = batch_size
+        self.verbose = verbose
 
     def get_parameters(self, config):
         return self.model.get_weights()
@@ -23,9 +28,9 @@ class FlowerClient(NumPyClient):
         self.model.fit(
             self.x_train,
             self.y_train,
-            epochs=int(self.context.run_config["local-epochs"]),
-            batch_size=int(self.context.run_config["batch-size"]),
-            verbose=bool(self.context.run_config.get("verbose")),
+            epochs=self.epochs,
+            batch_size=self.batch_size,
+            verbose=self.verbose,
         )
         return self.model.get_weights(), len(self.x_train), {}
 
@@ -42,9 +47,14 @@ def client_fn(context: Context):
     partition_id = int(context.node_config["partition-id"])
     num_partitions = int(context.node_config["num-partitions"])
     x_train, y_train, x_test, y_test = load_data(partition_id, num_partitions)
+    epochs = context.run_config["local-epochs"]
+    batch_size = context.run_config["batch-size"]
+    verbose = context.run_config.get("verbose")
 
     # Return Client instance
-    return FlowerClient(net, x_train, y_train, x_test, y_test).to_client()
+    return FlowerClient(
+        net, x_train, y_train, x_test, y_test, epochs, batch_size, verbose
+    ).to_client()
 
 
 # Flower ClientApp
