@@ -175,8 +175,8 @@ def validate(
         return False, errors, warnings
 
     # Validate serverapp
-    ref = config["tool"]["flwr"]["app"]["components"]["serverapp"]
-    is_valid, reason = object_ref.validate(ref, check_module, project_dir)
+    serverapp_ref = config["tool"]["flwr"]["app"]["components"]["serverapp"]
+    is_valid, reason = object_ref.validate(serverapp_ref, check_module, project_dir)
 
     if not is_valid and isinstance(reason, str):
         return False, [reason], []
