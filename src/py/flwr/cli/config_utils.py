@@ -77,6 +77,9 @@ def load_and_validate(
         A tuple with the optional config in case it exists and is valid
         and associated errors and warnings.
     """
+    if path is None:
+        path = Path.cwd() / "pyproject.toml"
+
     config = load(path)
 
     if config is None:
@@ -86,7 +89,7 @@ def load_and_validate(
         ]
         return (None, errors, [])
 
-    is_valid, errors, warnings = validate(config, check_module)
+    is_valid, errors, warnings = validate(config, check_module, path.parent)
 
     if not is_valid:
         return (None, errors, warnings)
@@ -94,14 +97,8 @@ def load_and_validate(
     return (config, errors, warnings)
 
 
-def load(path: Optional[Path] = None) -> Optional[Dict[str, Any]]:
+def load(toml_path: Path) -> Optional[Dict[str, Any]]:
     """Load pyproject.toml and return as dict."""
-    if path is None:
-        cur_dir = Path.cwd()
-        toml_path = cur_dir / "pyproject.toml"
-    else:
-        toml_path = path
-
     if not toml_path.is_file():
         return None
 
@@ -167,7 +164,9 @@ def validate_fields(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]
 
 
 def validate(
-    config: Dict[str, Any], check_module: bool = True
+    config: Dict[str, Any],
+    check_module: bool = True,
+    project_dir: Optional[Union[str, Path]] = None,
 ) -> Tuple[bool, List[str], List[str]]:
     """Validate pyproject.toml."""
     is_valid, errors, warnings = validate_fields(config)
@@ -176,16 +175,15 @@ def validate(
         return False, errors, warnings
 
     # Validate serverapp
-    is_valid, reason = object_ref.validate(
-        config["tool"]["flwr"]["app"]["components"]["serverapp"], check_module
-    )
+    serverapp_ref = config["tool"]["flwr"]["app"]["components"]["serverapp"]
+    is_valid, reason = object_ref.validate(serverapp_ref, check_module, project_dir)
+
     if not is_valid and isinstance(reason, str):
         return False, [reason], []
 
     # Validate clientapp
-    is_valid, reason = object_ref.validate(
-        config["tool"]["flwr"]["app"]["components"]["clientapp"], check_module
-    )
+    clientapp_ref = config["tool"]["flwr"]["app"]["components"]["clientapp"]
+    is_valid, reason = object_ref.validate(clientapp_ref, check_module, project_dir)
 
     if not is_valid and isinstance(reason, str):
         return False, [reason], []
