@@ -135,13 +135,12 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
     {'image': <PIL.PngImagePlugin.PngImageFile image mode=L size=28x28 at 0x169DD54D0>,
     'label': 0}
     >>> distributions = {
-    >>>                     partition_id: fds
-    >>>                                   .load_partition(partition_id=partition_id)
-    >>>                                   .to_pandas()['label']
-    >>>                                   .value_counts()
-    >>>                                   .to_dict()
-    >>>                     for partition_id in range(10)
-    >>>                 }
+    >>>     partition_id: fds.load_partition(partition_id=partition_id)
+    >>>     .to_pandas()["label"]
+    >>>     .value_counts()
+    >>>     .to_dict()
+    >>>     for partition_id in range(10)
+    >>> }
     >>> pprint(distributions)
     {0: {0: 40, 1: 5},
      1: {2: 36, 1: 5},
@@ -338,7 +337,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         """Test distribution array shape correctness."""
         if not self._partition_id_to_indices_determined:
             if not isinstance(self._distribution_array, np.ndarray):
-                raise TypeError("Input must be a numpy array.")
+                raise TypeError("Input must be a NumPy array.")
 
             if self._distribution_array.ndim != 2:
                 raise ValueError("The distribution array is not 2-dimensional.")
@@ -363,7 +362,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
                     "The expected number of columns in `distribution_array` is "
                     f"{self._num_columns} (refer to the documentation for the "
                     "expression), but the number of columns in `distribution_array` "
-                    f"is {self._distribution_array.shape[0]}."
+                    f"is {self._distribution_array.shape[1]}."
                 )
 
     def _check_num_unique_labels_per_partition_if_needed(self) -> None:
@@ -373,7 +372,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
                 "The specified `num_unique_labels_per_partition`"
                 f"={self._num_unique_labels_per_partition} is greater than the number "
                 f"of unique classes in the given dataset={self._num_unique_labels}. "
-                "Reduce the `num_unique_labels_per_partition` or make use different "
+                "Reduce the `num_unique_labels_per_partition` or make use of a different "
                 "dataset to apply this partitioning."
             )
 
@@ -395,13 +394,13 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         if not self._partition_id_to_indices_determined:
             if self._num_partitions > self.dataset.num_rows:
                 raise ValueError(
-                    "The number of partitions needs to be smaller than the number of "
-                    "samples in the dataset."
+                    "The number of partitions ({self._num_partitions}) needs to be smaller than the number of "
+                    "samples in the dataset ({self.dataset.num_rows})."
                 )
             if self._num_partitions % self._num_unique_labels != 0:
                 raise ValueError(
-                    f"The number of partitions {self._num_partitions} is not divisible "
-                    f"by the number of unique labels {self._num_unique_labels}."
+                    f"The number of partitions ({self._num_partitions}) is not divisible "
+                    f"by the number of unique labels ({self._num_unique_labels})."
                 )
 
     def _check_num_partitions_greater_than_zero(self) -> None:
