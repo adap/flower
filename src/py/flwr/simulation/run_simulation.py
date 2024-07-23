@@ -499,7 +499,7 @@ def _run_simulation(
         # Check that Backend config has also enabled using GPU growth
         use_tf = backend_config.get("actor", {}).get("tensorflow", False)
         if not use_tf:
-            print("here")
+            print(backend_config)
             log(WARNING, "Enabling GPU growth for your backend.")
             backend_config["actor"]["tensorflow"] = True
 
