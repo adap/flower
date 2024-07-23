@@ -19,6 +19,7 @@ from torchvision import transforms
 
 from datasets.utils.logging import disable_progress_bar
 from flwr.client import Client, ClientApp, NumPyClient
+from flwr.common import Context
 
 disable_progress_bar()
 
@@ -87,8 +88,8 @@ def apply_transforms(batch):
     return batch
 
 
-def load_data(partition_id):
-    fds = FederatedDataset(dataset="mnist", partitioners={"train": 10})
+def load_data(partition_id, num_partitions: int = 10):
+    fds = FederatedDataset(dataset="mnist", partitioners={"train": num_partitions})
     partition = fds.load_partition(partition_id, "train")
 
     partition = partition.with_transform(apply_transforms)
@@ -164,12 +165,19 @@ def _set_parameters(model, parameters):
 model = LitAutoEncoder()
 
 
-def client_fn(node_id, partition_id) -> Client:
-    """Client function to return an instance of Client()."""
-    train_loader, val_loader, test_loader = load_data(partition_id=partition_id)
+def client_fn(context: Context) -> Client:
+    """Construct a Client that will be run in a ClientApp.
+
+    You can use settings in `context.run_config` to parameterize the
+    construction of your Client. You could use the `context.node_config` to
+    , for example, indicate which dataset to load (e.g accesing the partition-id).
+    """
+
+    # Read the node_config to fetch data partition associated to this node
+    partition_id = int(context.node_config["partition-id"])
+    train_loader, val_loader, test_loader = load_data(partition_id)
+
     return FlowerClient(model, train_loader, val_loader, test_loader).to_client()
 
 
-app = ClientApp(
-    client_fn=client_fn,
-)
+app = ClientApp(client_fn=client_fn)

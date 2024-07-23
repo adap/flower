@@ -1,18 +1,20 @@
 """pytorchlightning_example: A Flower / PyTorch Lightning app."""
 
-from flwr.server import ServerApp, ServerConfig
+from flwr.common import Context
+from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
 
-# Define strategy
-strategy = FedAvg(
-    fraction_fit=0.5,
-    fraction_evaluate=0.5,
-)
 
-# Define training config
-config = ServerConfig(num_rounds=3)
+def server_fn(context: Context) -> ServerAppComponents:
+    """Construct components for ServerApp."""
+    # Construct ServerConfig
+    num_rounds = int(context.run_config["num_server_rounds"])
+    config = ServerConfig(num_rounds=num_rounds)
 
-app = ServerApp(
-    config=config,
-    strategy=strategy,
-)
+    # Define strategy
+    strategy = FedAvg(fraction_fit=0.5, fraction_evaluate=0.5)
+
+    return ServerAppComponents(config=config, strategy=strategy)
+
+
+app = ServerApp(server_fn=server_fn)
