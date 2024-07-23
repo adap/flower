@@ -25,15 +25,19 @@ from argparse import Namespace
 from logging import DEBUG, ERROR, INFO, WARNING
 from pathlib import Path
 from time import sleep
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from flwr.cli.config_utils import load_and_validate
 from flwr.client import ClientApp
 from flwr.common import EventType, event, log
 from flwr.common.config import get_fused_config_from_dir, parse_config_args
 from flwr.common.constant import RUN_ID_NUM_BYTES
-from flwr.common.logger import set_logger_propagation, update_console_handler
-from flwr.common.typing import Run
+from flwr.common.logger import (
+    set_logger_propagation,
+    update_console_handler,
+    warn_deprecated_feature_with_example,
+)
+from flwr.common.typing import Run, UserConfig
 from flwr.server.driver import Driver, InMemoryDriver
 from flwr.server.run_serverapp import run as run_server_app
 from flwr.server.server_app import ServerApp
@@ -92,6 +96,14 @@ def _check_args_do_not_interfere(args: Namespace) -> bool:
 def run_simulation_from_cli() -> None:
     """Run Simulation Engine from the CLI."""
     args = _parse_args_run_simulation().parse_args()
+
+    if args.enable_tf_gpu_growth:
+        warn_deprecated_feature_with_example(
+            "Passing `--enable-tf-gpu-growth` is deprecated.",
+            example_message="Instead, set the `TF_FORCE_GPU_ALLOW_GROWTH` environmnet "
+            "variable to true.",
+            code_example='TF_FORCE_GPU_ALLOW_GROWTH="true" flower-simulation <...>',
+        )
 
     # We are supporting two modes for the CLI entrypoint:
     # 1) Running an app dir containing a `pyproject.toml`
@@ -223,6 +235,15 @@ def run_simulation(
         When disabled, only INFO, WARNING and ERROR log messages will be shown. If
         enabled, DEBUG-level logs will be displayed.
     """
+    if enable_tf_gpu_growth:
+        warn_deprecated_feature_with_example(
+            "Passing `enable_tf_gpu_growth=True` is deprecated.",
+            example_message="Instead, set the `TF_FORCE_GPU_ALLOW_GROWTH` environmnet "
+            "variable to true.",
+            code_example='import os;os.environ["TF_FORCE_GPU_ALLOW_GROWTH"]="true"'
+            "\n\tflwr.simulation.run_simulationt(...)",
+        )
+
     _run_simulation(
         num_supernodes=num_supernodes,
         client_app=client_app,
@@ -238,7 +259,7 @@ def run_simulation(
 def run_serverapp_th(
     server_app_attr: Optional[str],
     server_app: Optional[ServerApp],
-    server_app_run_config: Dict[str, str],
+    server_app_run_config: UserConfig,
     driver: Driver,
     app_dir: str,
     f_stop: threading.Event,
@@ -254,7 +275,7 @@ def run_serverapp_th(
         exception_event: threading.Event,
         _driver: Driver,
         _server_app_dir: str,
-        _server_app_run_config: Dict[str, str],
+        _server_app_run_config: UserConfig,
         _server_app_attr: Optional[str],
         _server_app: Optional[ServerApp],
     ) -> None:
@@ -264,7 +285,7 @@ def run_serverapp_th(
         """
         try:
             if tf_gpu_growth:
-                log(INFO, "Enabling GPU growth for Tensorflow on the main thread.")
+                log(INFO, "Enabling GPU growth for Tensorflow on the server thread.")
                 enable_gpu_growth()
 
             # Run ServerApp
@@ -319,7 +340,7 @@ def _main_loop(
     client_app_attr: Optional[str] = None,
     server_app: Optional[ServerApp] = None,
     server_app_attr: Optional[str] = None,
-    server_app_run_config: Optional[Dict[str, str]] = None,
+    server_app_run_config: Optional[UserConfig] = None,
 ) -> None:
     """Launch SuperLink with Simulation Engine, then ServerApp on a separate thread."""
     # Initialize StateFactory
@@ -395,7 +416,7 @@ def _run_simulation(
     backend_config: Optional[BackendConfig] = None,
     client_app_attr: Optional[str] = None,
     server_app_attr: Optional[str] = None,
-    server_app_run_config: Optional[Dict[str, str]] = None,
+    server_app_run_config: Optional[UserConfig] = None,
     app_dir: str = "",
     flwr_dir: Optional[str] = None,
     run: Optional[Run] = None,
@@ -438,7 +459,7 @@ def _run_simulation(
         A path to a `ServerApp` module to be loaded: For example: `server:app` or
         `project.package.module:wrapper.app`."
 
-    server_app_run_config : Optional[Dict[str, str]]
+    server_app_run_config : Optional[UserConfig]
         Config dictionary that parameterizes the run config. It will be made accesible
         to the ServerApp.
 
@@ -474,6 +495,14 @@ def _run_simulation(
 
     if "init_args" not in backend_config:
         backend_config["init_args"] = {}
+
+    # Set default client_resources if not passed
+    if "client_resources" not in backend_config:
+        backend_config["client_resources"] = {"num_cpus": 2, "num_gpus": 0}
+
+    # Initialization of backend config to enable GPU growth globally when set
+    if "actor" not in backend_config:
+        backend_config["actor"] = {"tensorflow": 0}
 
     # Set logging level
     logger = logging.getLogger("flwr")
@@ -580,8 +609,7 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
     parser.add_argument(
         "--backend-config",
         type=str,
-        default='{"client_resources": {"num_cpus":2, "num_gpus":0.0},'
-        '"actor": {"tensorflow": 0}}',
+        default="{}",
         help='A JSON formatted stream, e.g \'{"<keyA>":<value>, "<keyB>":<value>}\' to '
         "configure a backend. Values supported in <value> are those included by "
         "`flwr.common.typing.ConfigsRecordValues`. ",
