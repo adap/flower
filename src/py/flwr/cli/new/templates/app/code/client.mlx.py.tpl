@@ -19,13 +19,22 @@ from $import_name.task import (
 
 # Define Flower Client and client_fn
 class FlowerClient(NumPyClient):
-    def __init__(self, data):
-        num_layers = int(self.context.run_config["num-layers"])
-        hidden_dim = int(self.context.run_config["hidden-dim"])
-        num_classes = 10
-        batch_size = int(self.context.run_config["batch-size"])
-        learning_rate = float(self.context.run_config["lr"])
-        num_epochs = int(self.context.run_config["local-epochs"])
+    def __init__(
+        self,
+        data,
+        num_layers,
+        hidden_dim,
+        num_classes,
+        batch_size,
+        learning_rate,
+        num_epochs,
+    ):
+        self.num_layers = num_layers
+        self.hidden_dim = hidden_dim
+        self.num_classes = num_classes
+        self.batch_size = batch_size
+        self.learning_rate = learning_rate
+        self.num_epochs = num_epochs
 
         self.train_images, self.train_labels, self.test_images, self.test_labels = data
         self.model = MLP(
@@ -65,8 +74,17 @@ def client_fn(context: Context):
     num_partitions = int(context.node_config["num-partitions"])
     data = load_data(partition_id, num_partitions)
 
+    num_layers = context.run_config["num-layers"]
+    hidden_dim = context.run_config["hidden-dim"]
+    num_classes = 10
+    batch_size = context.run_config["batch-size"]
+    learning_rate = context.run_config["lr"]
+    num_epochs = context.run_config["local-epochs"]
+
     # Return Client instance
-    return FlowerClient(data).to_client()
+    return FlowerClient(
+        data, num_layers, hidden_dim, num_classes, batch_size, learning_rate, num_epochs
+    ).to_client()
 
 
 # Flower ClientApp
