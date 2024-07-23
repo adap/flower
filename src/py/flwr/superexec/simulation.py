@@ -32,6 +32,25 @@ from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
 from .executor import Executor, RunTracker
 
 
+def _user_config_to_str(user_config: UserConfig) -> str:
+    """Convert override user config to string."""
+    user_config_list_str = []
+    for key, value in user_config.items():
+        if isinstance(value, bool):
+            user_config_list_str.append(f"{key}={str(value).lower()}")
+        elif isinstance(value, (int, float)):
+            user_config_list_str.append(f"{key}={value}")
+        elif isinstance(value, str):
+            user_config_list_str.append(f'{key}="{value}"')
+        else:
+            raise ValueError(
+                "Only types `bool`, `float`, `int` and `str` are supported"
+            )
+
+    user_config_str = ",".join(user_config_list_str)
+    return user_config_str
+
+
 class SimulationEngine(Executor):
     """Simulation engine executor.
 
@@ -79,24 +98,6 @@ class SimulationEngine(Executor):
                 "`num-supernodes` must not be `None`, it must be a valid "
                 "positive integer."
             )
-
-    def _user_config_to_str(self, user_config: UserConfig) -> str:
-        """Convert override user config to string."""
-        user_config_list_str = []
-        for key, value in user_config.items():
-            if isinstance(value, bool):
-                user_config_list_str.append(f"{key}={str(value).lower()}")
-            elif isinstance(value, (int, float)):
-                user_config_list_str.append(f"{key}={value}")
-            elif isinstance(value, str):
-                user_config_list_str.append(f'{key}="{value}"')
-            else:
-                raise ValueError(
-                    "Only types `bool`, `float`, `int` and `str` are supported"
-                )
-
-        user_config_str = ",".join(user_config_list_str)
-        return user_config_str
 
     @override
     def start_run(
@@ -147,8 +148,7 @@ class SimulationEngine(Executor):
             ]
 
             if override_config:
-                override_config_str = self._user_config_to_str(override_config)
-                print(override_config_str)
+                override_config_str = _user_config_to_str(override_config)
                 command.extend(["--run-config", f"{override_config_str}"])
 
             # Start Simulation
