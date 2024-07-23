@@ -15,10 +15,16 @@ def load_model():
     model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
     return model
 
+fds = None  # Cache FederatedDataset
 
 def load_data(partition_id, num_partitions):
     # Download and partition dataset
-    fds = FederatedDataset(dataset="cifar10", partitioners={"train": num_partitions})
+    # Only initialize `FederatedDataset` once
+    global fds
+    if fds is None:
+        fds = FederatedDataset(dataset="uoft-cs/cifar10",
+                               partitioners={"train": num_partitions},
+                               )
     partition = fds.load_partition(partition_id, "train")
     partition.set_format("numpy")
 

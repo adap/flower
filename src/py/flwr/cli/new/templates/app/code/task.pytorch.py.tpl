@@ -33,10 +33,16 @@ class Net(nn.Module):
         x = F.relu(self.fc2(x))
         return self.fc3(x)
 
+fds = None  # Cache FederatedDataset
 
 def load_data(partition_id: int, num_partitions: int):
     """Load partition CIFAR10 data."""
-    fds = FederatedDataset(dataset="cifar10", partitioners={"train": num_partitions})
+    # Only initialize `FederatedDataset` once
+    global fds
+    if fds is None:
+        fds = FederatedDataset(dataset="uoft-cs/cifar10",
+                               partitioners={"train": num_partitions},
+                               )
     partition = fds.load_partition(partition_id)
     # Divide data on each node: 80% train, 20% test
     partition_train_test = partition.train_test_split(test_size=0.2, seed=42)

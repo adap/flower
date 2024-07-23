@@ -15,10 +15,16 @@ warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cpu")
 CHECKPOINT = "distilbert-base-uncased"  # transformer model checkpoint
 
+fds = None  # Cache FederatedDataset
 
 def load_data(partition_id: int, num_partitions: int):
     """Load IMDB data (training and eval)"""
-    fds = FederatedDataset(dataset="imdb", partitioners={"train": num_partitions})
+    # Only initialize `FederatedDataset` once
+    global fds
+    if fds is None:
+        fds = FederatedDataset(dataset="stanfordnlp/imdb",
+                               partitioners={"train": num_partitions},
+                               )
     partition = fds.load_partition(partition_id)
     # Divide data: 80% train, 20% test
     partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
