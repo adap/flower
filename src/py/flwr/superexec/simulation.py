@@ -18,7 +18,7 @@
 import subprocess
 import sys
 from logging import ERROR, INFO, WARN
-from typing import Dict, Optional
+from typing import Optional
 
 from typing_extensions import override
 
@@ -26,6 +26,7 @@ from flwr.cli.config_utils import load_and_validate
 from flwr.cli.install import install_from_fab
 from flwr.common.constant import RUN_ID_NUM_BYTES
 from flwr.common.logger import log
+from flwr.common.typing import UserConfig
 from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
 
 from .executor import Executor, RunTracker
@@ -42,51 +43,52 @@ class SimulationEngine(Executor):
 
     def __init__(
         self,
-        num_supernodes: Optional[str] = None,
+        num_supernodes: Optional[int] = None,
     ) -> None:
         self.num_supernodes = num_supernodes
 
     @override
     def set_config(
         self,
-        config: Dict[str, str],
+        config: UserConfig,
     ) -> None:
         """Set executor config arguments.
 
         Parameters
         ----------
-        config : Dict[str, str]
+        config : UserConfig
             A dictionary for configuration values.
             Supported configuration key/value pairs:
-            - "num-supernodes": str
+            - "num-supernodes": int
                 Number of nodes to register for the simulation.
         """
         if not config:
             return
         if num_supernodes := config.get("num-supernodes"):
+            if not isinstance(num_supernodes, int):
+                raise ValueError("The `num-supernodes` value should be of type `int`.")
             self.num_supernodes = num_supernodes
-
-        # Validate config
-        if self.num_supernodes is None:
+        else:
             log(
                 ERROR,
                 "To start a run with the simulation plugin, please specify "
                 "the number of SuperNodes. This can be done by using the "
                 "`--executor-config` argument when launching the SuperExec.",
             )
-            raise ValueError("`num-supernodes` must not be `None`")
+            raise ValueError(
+                "`num-supernodes` must not be `None`, it must be a valid "
+                "positive integer."
+            )
 
     @override
     def start_run(
-        self, fab_file: bytes, override_config: Dict[str, str]
+        self,
+        fab_file: bytes,
+        override_config: UserConfig,
+        federation_config: UserConfig,
     ) -> Optional[RunTracker]:
         """Start run using the Flower Simulation Engine."""
         try:
-            if override_config:
-                raise ValueError(
-                    "Overriding the run config is not yet supported with the "
-                    "simulation executor.",
-                )
 
             # Install FAB to flwr dir
             fab_path = install_from_fab(fab_file, None, True)
@@ -121,7 +123,7 @@ class SimulationEngine(Executor):
                 "--app",
                 f"{str(fab_path)}",
                 "--num-supernodes",
-                f"{self.num_supernodes}",
+                f"{federation_config.get('num-supernodes', self.num_supernodes)}",
                 "--run-id",
                 str(run_id),
             ]
@@ -130,10 +132,9 @@ class SimulationEngine(Executor):
                 command.extend(["--run-config", f"{override_config}"])
 
             # Start Simulation
-            proc = subprocess.Popen(  # pylint: disable=consider-using-with
+            proc = subprocess.run(  # pylint: disable=consider-using-with
                 command,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                check=True,
                 text=True,
             )
 
@@ -141,7 +142,7 @@ class SimulationEngine(Executor):
 
             return RunTracker(
                 run_id=run_id,
-                proc=proc,
+                proc=proc,  # type:ignore
             )
 
         # pylint: disable-next=broad-except
