@@ -19,10 +19,10 @@ from collections import Counter
 from typing import Dict, List, Optional, Union
 
 import numpy as np
-
-import datasets
 from flwr_datasets.common.typing import NDArray, NDArrayFloat, NDArrayInt
 from flwr_datasets.partitioner.partitioner import Partitioner
+
+import datasets
 
 
 class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
@@ -204,7 +204,6 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         self._check_num_unique_labels_per_partition_if_needed()
         self._check_distribution_array_sum_if_needed()
         self._check_num_partitions_correctness_if_needed()
-        self._check_num_partitions_greater_than_zero()
         self._determine_partition_id_to_indices_if_needed()
         return self.dataset.select(self._partition_id_to_indices[partition_id])
 
@@ -371,7 +370,8 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
             raise ValueError(
                 "The specified `num_unique_labels_per_partition`"
                 f"={self._num_unique_labels_per_partition} is greater than the number "
-                f"of unique classes in the given dataset={self._num_unique_labels}. "
+                f"of unique labels in the given dataset={self._num_unique_labels} "
+                f"as specified by the label column `{self._partition_by}`."
                 "Reduce the `num_unique_labels_per_partition` or make use of a "
                 "different dataset to apply this partitioning."
             )
@@ -380,17 +380,18 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         """Test correctness of distribution array sum."""
         if not self._partition_id_to_indices_determined and not self._rescale:
             labels = self.dataset[self._partition_by]
-            distribution = sorted(Counter(labels).items())
-            distribution_vals = [v for _, v in distribution]
+            unique_labels_counter = sorted(Counter(labels).items())
+            unique_labels_counter_vals = [v for _, v in unique_labels_counter]
 
-            if any(self._distribution_array.sum(1) > distribution_vals):
+            if any(self._distribution_array.sum(1) > unique_labels_counter_vals):
                 raise ValueError(
-                    "The sum of at least one label distribution array "
-                    "exceeds the original class label distribution."
+                    "The sum of at least one unique label distribution array "
+                    "exceeds that of the unique labels counter in the given dataset= "
+                    f"{dict(unique_labels_counter)}."
                 )
 
     def _check_num_partitions_correctness_if_needed(self) -> None:
-        """Test num_partitions when the dataset is given (in load_partition)."""
+        """Test num_partitions when the dataset is given."""
         if not self._partition_id_to_indices_determined:
             if self._num_partitions > self.dataset.num_rows:
                 raise ValueError(
@@ -404,11 +405,10 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
                     f"divisible by the number of unique labels "
                     f"{({self._num_unique_labels})}."
                 )
-
-    def _check_num_partitions_greater_than_zero(self) -> None:
-        """Test num_partition left sides correctness."""
-        if not self._num_partitions > 0:
-            raise ValueError("The number of partitions needs to be greater than zero.")
+            if not self._num_partitions > 0:
+                raise ValueError(
+                    "The number of partitions needs to be greater than zero."
+                )
 
     def _check_total_preassigned_samples_within_limit(
         self, label_distribution: NDArray, total_preassigned_samples: int
