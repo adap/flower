@@ -17,11 +17,12 @@
 import zipfile
 from io import BytesIO
 from pathlib import Path
-from typing import IO, Any, Dict, List, Optional, Tuple, Union
+from typing import IO, Any, Dict, List, Optional, Tuple, Union, get_args
 
 import tomli
 
 from flwr.common import object_ref
+from flwr.common.typing import UserConfigValue
 
 
 def get_fab_metadata(fab_file: Union[Path, bytes]) -> Tuple[str, str]:
@@ -60,7 +61,7 @@ def get_fab_metadata(fab_file: Union[Path, bytes]) -> Tuple[str, str]:
 
         return (
             conf["project"]["version"],
-            f"{conf['flower']['publisher']}/{conf['project']['name']}",
+            f"{conf['tool']['flwr']['app']['publisher']}/{conf['project']['name']}",
         )
 
 
@@ -108,6 +109,17 @@ def load(path: Optional[Path] = None) -> Optional[Dict[str, Any]]:
         return load_from_string(toml_file.read())
 
 
+def _validate_run_config(config_dict: Dict[str, Any], errors: List[str]) -> None:
+    for key, value in config_dict.items():
+        if isinstance(value, dict):
+            _validate_run_config(config_dict[key], errors)
+        elif not isinstance(value, get_args(UserConfigValue)):
+            raise ValueError(
+                f"The value for key {key} needs to be of type `int`, `float`, "
+                "`bool, `str`, or  a `dict` of those.",
+            )
+
+
 # pylint: disable=too-many-branches
 def validate_fields(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]:
     """Validate pyproject.toml fields."""
@@ -128,18 +140,28 @@ def validate_fields(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]
         if "authors" not in config["project"]:
             warnings.append('Recommended property "authors" missing in [project]')
 
-    if "flower" not in config:
-        errors.append("Missing [flower] section")
+    if (
+        "tool" not in config
+        or "flwr" not in config["tool"]
+        or "app" not in config["tool"]["flwr"]
+    ):
+        errors.append("Missing [tool.flwr.app] section")
     else:
-        if "publisher" not in config["flower"]:
-            errors.append('Property "publisher" missing in [flower]')
-        if "components" not in config["flower"]:
-            errors.append("Missing [flower.components] section")
+        if "publisher" not in config["tool"]["flwr"]["app"]:
+            errors.append('Property "publisher" missing in [tool.flwr.app]')
+        if "config" in config["tool"]["flwr"]["app"]:
+            _validate_run_config(config["tool"]["flwr"]["app"]["config"], errors)
+        if "components" not in config["tool"]["flwr"]["app"]:
+            errors.append("Missing [tool.flwr.app.components] section")
         else:
-            if "serverapp" not in config["flower"]["components"]:
-                errors.append('Property "serverapp" missing in [flower.components]')
-            if "clientapp" not in config["flower"]["components"]:
-                errors.append('Property "clientapp" missing in [flower.components]')
+            if "serverapp" not in config["tool"]["flwr"]["app"]["components"]:
+                errors.append(
+                    'Property "serverapp" missing in [tool.flwr.app.components]'
+                )
+            if "clientapp" not in config["tool"]["flwr"]["app"]["components"]:
+                errors.append(
+                    'Property "clientapp" missing in [tool.flwr.app.components]'
+                )
 
     return len(errors) == 0, errors, warnings
 
@@ -155,14 +177,14 @@ def validate(
 
     # Validate serverapp
     is_valid, reason = object_ref.validate(
-        config["flower"]["components"]["serverapp"], check_module
+        config["tool"]["flwr"]["app"]["components"]["serverapp"], check_module
     )
     if not is_valid and isinstance(reason, str):
         return False, [reason], []
 
     # Validate clientapp
     is_valid, reason = object_ref.validate(
-        config["flower"]["components"]["clientapp"], check_module
+        config["tool"]["flwr"]["app"]["components"]["clientapp"], check_module
     )
 
     if not is_valid and isinstance(reason, str):
