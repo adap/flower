@@ -64,6 +64,18 @@ def _get_home() -> Path:
     return Path().home()
 
 
+def _get_partner_id() -> str:
+    """Get partner ID."""
+    partner_id = os.getenv("FLWR_TELEMETRY_PARTNER_ID")
+    if not partner_id:
+        return "unavailable"
+    try:
+        uuid.UUID(partner_id)
+    except ValueError:
+        partner_id = "invalid"
+    return partner_id
+
+
 def _get_source_id() -> str:
     """Get existing or new source ID."""
     source_id = "unavailable"
@@ -164,6 +176,10 @@ class EventType(str, Enum):
     RUN_SUPERNODE_ENTER = auto()
     RUN_SUPERNODE_LEAVE = auto()
 
+    # SuperExec
+    RUN_SUPEREXEC_ENTER = auto()
+    RUN_SUPEREXEC_LEAVE = auto()
+
 
 # Use the ThreadPoolExecutor with max_workers=1 to have a queue
 # and also ensure that telemetry calls are not blocking.
@@ -173,6 +189,7 @@ state: Dict[str, Union[Optional[str], Optional[ThreadPoolExecutor]]] = {
     "executor": None,
     "source": None,
     "cluster": None,
+    "partner": None,
 }
 
 
@@ -198,11 +215,15 @@ def create_event(event_type: EventType, event_details: Optional[Dict[str, Any]])
     if state["cluster"] is None:
         state["cluster"] = str(uuid.uuid4())
 
+    if state["partner"] is None:
+        state["partner"] = _get_partner_id()
+
     if event_details is None:
         event_details = {}
 
     date = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
     context = {
+        "partner": state["partner"],
         "source": state["source"],
         "cluster": state["cluster"],
         "date": date,

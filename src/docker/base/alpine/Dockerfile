@@ -26,7 +26,7 @@
 ARG PYTHON_VERSION=3.11
 ARG DISTRO=alpine
 ARG DISTRO_VERSION=3.19
-FROM python:${PYTHON_VERSION}-${DISTRO}${DISTRO_VERSION} as compile
+FROM python:${PYTHON_VERSION}-${DISTRO}${DISTRO_VERSION} AS compile
 
 # Install system dependencies
 RUN apk add --no-cache \
@@ -49,14 +49,20 @@ RUN pip install -U --no-cache-dir \
     setuptools==${SETUPTOOLS_VERSION} \
     ${FLWR_PACKAGE}==${FLWR_VERSION}
 
-FROM python:${PYTHON_VERSION}-${DISTRO}${DISTRO_VERSION} as base
+FROM python:${PYTHON_VERSION}-${DISTRO}${DISTRO_VERSION} AS base
+
+# Upgrade system Python pip and setuptools
+# hadolint ignore=DL3013
+RUN pip install -U --no-cache-dir pip setuptools
 
 # required by the grpc package
 RUN apk add --no-cache \
     libstdc++ \
+    ca-certificates \
     # add non-root user
     && adduser \
     --no-create-home \
+    --home /app \
     --disabled-password \
     --gecos "" \
     --uid 49999 app \
