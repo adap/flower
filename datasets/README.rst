@@ -6,7 +6,9 @@ Flower Datasets
 .. image:: https://img.shields.io/badge/PRs-welcome-brightgreen.svg
     :target: https://github.com/adap/flower/blob/main/CONTRIBUTING.md
 .. image:: https://github.com/adap/flower/actions/workflows/framework.yml/badge.svg
+    :target:
 .. image:: https://pepy.tech/badge/flwr-datasets
+    :target:
 .. image:: https://img.shields.io/badge/Chat-Slack-red
     :target: https://flower.ai/join-slack
 
