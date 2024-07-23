@@ -5,6 +5,7 @@ from typing import Dict, List, Optional, Tuple, Union
 import numpy as np
 
 from flwr.common import (
+    Context,
     EvaluateIns,
     EvaluateRes,
     FitIns,
@@ -14,7 +15,7 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
-from flwr.server import ServerApp, ServerConfig
+from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import Strategy
@@ -76,9 +77,14 @@ class FedAnalytics(Strategy):
         pass
 
 
-config = ServerConfig(num_rounds=1)
+def server_fn(context: Context) -> ServerAppComponents:
+    """Construct components for ServerApp."""
+    # Construct ServerConfig
+    num_rounds = int(context.run_config["num_server_rounds"])
+    config = ServerConfig(num_rounds=num_rounds)
+    strategy = FedAnalytics()
 
-app = ServerApp(
-    config=config,
-    strategy=FedAnalytics(),
-)
+    return ServerAppComponents(config=config, strategy=strategy)
+
+
+app = ServerApp(server_fn=server_fn)

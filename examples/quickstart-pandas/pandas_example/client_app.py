@@ -7,6 +7,7 @@ import pandas as pd
 from flwr_datasets import FederatedDataset
 
 from flwr.client import Client, ClientApp, NumPyClient
+from flwr.common import Context
 
 column_names = ["sepal_length", "sepal_width"]
 
@@ -36,13 +37,23 @@ class FlowerClient(NumPyClient):
         )
 
 
-N_CLIENTS = 2
+def client_fn(context: Context) -> Client:
+    """Construct a Client that will be run in a ClientApp.
 
+    You can use settings in `context.run_config` to parameterize the
+    construction of your Client. You could use the `context.node_config` to
+    , for example, indicate which dataset to load (e.g accesing the partition-id).
+    """
 
-def client_fn(node_id, partition_id) -> Client:
-    """Client function to return an instance of Client()."""
+    # Read the node_config to fetch data partition associated to this node
+    partition_id = int(context.node_config["partition-id"])
+    num_partitions = int(context.node_config["num-partitions"])
+
     # Load the partition data
-    fds = FederatedDataset(dataset="hitorilabs/iris", partitioners={"train": N_CLIENTS})
+    fds = FederatedDataset(
+        dataset="hitorilabs/iris",
+        partitioners={"train": num_partitions},
+    )
 
     dataset = fds.load_partition(partition_id, "train").with_format("pandas")[:]
     # Use just the specified columns

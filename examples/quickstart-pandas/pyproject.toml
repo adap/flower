@@ -19,3 +19,19 @@ dependencies = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
+
+[tool.flwr.app]
+publisher = "flowerteam"
+
+[tool.flwr.app.components]
+serverapp = "pandas_example.server_app:app"
+clientapp = "pandas_example.client_app:app"
+
+[tool.flwr.app.config]
+num_server_rounds = "1"
+
+[tool.flwr.federations]
+default = "localhost"
+
+[tool.flwr.federations.localhost]
+options.num-supernodes = 2

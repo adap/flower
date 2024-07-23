@@ -23,12 +23,12 @@ git clone --depth=1 https://github.com/adap/flower.git _tmp \
 This will create a new directory called `quickstart-pandas` containing the following files:
 
 ```shell
+quickstart-pandas
+├── README.md
 ├── pandas_example
-|   ├── __init__.py
-|   ├── client_app.py
-|   └── server_app.py
-├── pyproject.toml
-└── README.md 
+│   ├── client_app.py    # defines your ClientApp
+│   └── server_app.py    # defines your ServerApp
+└── pyproject.toml       # builds your FAB, includes dependencies and configs
 ```
 
 ### Installing Dependencies
@@ -50,46 +50,16 @@ fewer components to be launched manually.
 
 ### Run with the Simulation Engine
 
-First, launch the [SuperExec](link-to-docs).
+Run:
 
 ```bash
-flower-superexec flwr.superexec.simulation:executor --insecure
+flwr run
 ```
 
-In a new terminal, and after activating your Python environment:
+You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example
 
 ```bash
-flwr run --use-superexec
+flwr run --run-config 'num_server_rounds=5'
 ```
 
-### Run with the Deployment Engine
-
-Launch the the infrastructure needed for a `Run` to run. This means:
-the [`SuperLink`](https://flower.ai/docs/framework/ref-api-cli.html#flower-superlink) and at least two [`SuperNode`](docs) instances.
-You will need a few terminal windows (consider using [tmux](https://github.com/tmux/tmux/wiki)), remember
-to activate your environment in each of them.
-
-1. On a new terminal, launch the `SuperLink`:
-   ```bash
-   flower-superlink --insecure
-   ```
-1. On a new terminal, launch a `SuperNode`:
-   ```bash
-   flower-supernode --insecure --partition-id=0
-   ```
-1. On a new terminal, launch another `SuperNode`:
-   ```bash
-   flower-supernode --insecure --partition-id=1
-   ```
-
-With everything ready and idling, launch the [SuperExec](link-to-docs).
-
-```bash
-flower-superexec flwr.superexec.deployment:executor --insecure
-```
-
-Then,
-
-```bash
-flwr run --user-superexec
-```
+### Alternative way of running the example
