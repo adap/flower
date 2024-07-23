@@ -16,15 +16,19 @@ from transformers import (
 )
 
 from flwr.client import Client, ClientApp, NumPyClient
+from flwr.common import Context
 
 warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cpu")
 CHECKPOINT = "distilbert-base-uncased"  # transformer model checkpoint
 
 
-def load_data(partition_id) -> tuple[DataLoader[Any], DataLoader[Any]]:
+def load_data(
+    partition_id: int, num_partitions: int = 1_000
+) -> tuple[DataLoader[Any], DataLoader[Any]]:
     """Load IMDB data (training and eval)"""
-    fds = FederatedDataset(dataset="imdb", partitioners={"train": 1_000})
+    # Partition the IMDB dataset into 1_000 partitions
+    fds = FederatedDataset(dataset="imdb", partitioners={"train": num_partitions})
     partition = fds.load_partition(partition_id)
     # Divide data: 80% train, 20% test
     partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
@@ -83,16 +87,11 @@ def test(net, testloader) -> tuple[Any | float, Any]:
     return loss, accuracy
 
 
-net = AutoModelForSequenceClassification.from_pretrained(CHECKPOINT, num_labels=2).to(
-    DEVICE
-)
-
-
 # Flower client
 class IMDBClient(NumPyClient):
     def __init__(self, partition_id, net, trainloader, testloader) -> None:
-        self.net = net
         self.partition_id = partition_id
+        self.net = net
         self.trainloader = trainloader
         self.testloader = testloader
 
@@ -117,12 +116,23 @@ class IMDBClient(NumPyClient):
         return float(loss), len(self.testloader), {"accuracy": float(accuracy)}
 
 
-def client_fn(node_id, partition_id) -> Client:
-    """Client function to return an instance of Client()."""
+def client_fn(context: Context) -> Client:
+    """Construct a Client that will be run in a ClientApp.
+
+    You can use settings in `context.run_config` to parameterize the
+    construction of your Client. You could use the `context.node_config` to
+    , for example, indicate which dataset to load (e.g accesing the partition-id).
+    """
+    # Read the node_config to fetch data partition associated to this node
+    partition_id = int(context.node_config["partition-id"])
+
     trainloader, testloader = load_data(partition_id)
+
+    net = AutoModelForSequenceClassification.from_pretrained(
+        CHECKPOINT, num_labels=2
+    ).to(DEVICE)
+
     return IMDBClient(partition_id, net, trainloader, testloader).to_client()
 
 
-app = ClientApp(
-    client_fn=client_fn,
-)
+app = ClientApp(client_fn=client_fn)
