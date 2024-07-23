@@ -129,7 +129,10 @@ class SimulationEngine(Executor):
             ]
 
             if override_config:
-                command.extend(["--run-config", f"{override_config}"])
+                override_config_str = ",".join(
+                    [f"{key}={value}" for key, value in override_config.items()]
+                )
+                command.extend(["--run-config", f"{override_config_str}"])
 
             # Start Simulation
             proc = subprocess.run(  # pylint: disable=consider-using-with
