@@ -135,6 +135,7 @@ class DeploymentEngine(Executor):
         self,
         fab_file: bytes,
         override_config: UserConfig,
+        federation_config: UserConfig,
     ) -> Optional[RunTracker]:
         """Start run using the Flower Deployment Engine."""
         try:
