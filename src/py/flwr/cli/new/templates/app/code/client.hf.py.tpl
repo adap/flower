@@ -50,8 +50,8 @@ def client_fn(context: Context):
         CHECKPOINT, num_labels=2
     ).to(DEVICE)
 
-    partition_id = int(context.node_config["partition-id"])
-    num_partitions = int(context.node_config["num-partitions"])
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
     trainloader, valloader = load_data(partition_id, num_partitions)
     local_epochs = context.run_config["local-epochs"]
 
