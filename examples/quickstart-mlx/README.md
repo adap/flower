@@ -11,7 +11,7 @@ This introductory example to Flower uses [MLX](https://ml-explore.github.io/mlx/
 
 [MLX](https://ml-explore.github.io/mlx/build/html/index.html) is a NumPy-like array framework designed for efficient and flexible machine learning on Apple silicon.
 
-In this example, we will train a simple 2 layers MLP on MNIST data (handwritten digits recognition) that's downloaded and partitioned using [Flower Datasets](https://flower.ai/docs/datasets/)
+In this example, we will train a simple 2 layers MLP on [MNIST](https://huggingface.co/datasets/ylecun/mnist) data (handwritten digits recognition) that's downloaded and partitioned using [Flower Datasets](https://flower.ai/docs/datasets/)
 
 ## Project Setup
 
@@ -33,15 +33,17 @@ quickstart-mlx
       |        ├── __init__.py
       |        ├── client_app.py    # defines your ClientApp
       |        ├── server_app.py    # defines your ServerApp
-      |        └── task.py
-      ├── pyproject.toml            # builds your FAB, includes dependencies and configs
+      |        └── task.py          # deines your model, training and dataloading functions
+      ├── pyproject.toml            # builds your project, includes dependencies and configs
       └── README.md
 ```
 
-## Install dependencies
+## Install dependencies and project
+
+Install the dependencies defined in `pyproject.toml` as well as the `mlxexample` package.
 
 ```bash
-pip install .
+pip install -e .
 ```
 
 ## Run the Example
@@ -59,13 +61,13 @@ Docker later in this readme.
 Run:
 
 ```bash
-flwr run
+flwr run .
 ```
 
-You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example
+You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
 ```bash
-flwr run --run-config hidden_dim=64,num_server_rounds=5
+flwr run . --run-config num-server-rounds=5,learning-rate=0.05
 ```
 
 ### Alternative wasy of running the example

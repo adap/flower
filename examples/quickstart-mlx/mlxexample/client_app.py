@@ -19,13 +19,9 @@ from mlxexample.task import (
 
 # Define Flower Client and client_fn
 class FlowerClient(NumPyClient):
-    def __init__(self, num_layers, hidden_dim, batch_size, data):
-        num_layers = num_layers
-        hidden_dim = hidden_dim
-        batch_size = batch_size
+    def __init__(self, num_layers, hidden_dim, batch_size, learning_rate, data):
         num_classes = 10
         num_epochs = 1
-        learning_rate = 1e-1
 
         self.train_images, self.train_labels, self.test_images, self.test_labels = data
         self.model = MLP(
@@ -74,12 +70,13 @@ def client_fn(context: Context) -> Client:
     data = load_data(partition_id, num_partitions)
 
     # Read the run config to get settings to configure the Client
-    num_layers = context.run_config["num_layers"]
-    hidden_dim = context.run_config["hidden_dim"]
-    batch_size = context.run_config["batch_size"]
+    num_layers = context.run_config["num-layers"]
+    hidden_dim = context.run_config["hidden-dim"]
+    batch_size = context.run_config["batch-size"]
+    lr = context.run_config["learning-rate"]
 
     # Return Client instance
-    return FlowerClient(num_layers, hidden_dim, batch_size, data).to_client()
+    return FlowerClient(num_layers, hidden_dim, batch_size, lr, data).to_client()
 
 
 # Flower ClientApp
