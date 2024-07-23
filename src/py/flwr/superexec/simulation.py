@@ -161,7 +161,7 @@ class SimulationEngine(Executor):
 
             return RunTracker(
                 run_id=run_id,
-                proc=proc,  # type:ignore
+                proc=proc,
             )
 
         # pylint: disable-next=broad-except
