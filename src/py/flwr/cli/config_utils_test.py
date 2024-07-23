@@ -34,27 +34,18 @@ def test_load_pyproject_toml_load_from_cwd(tmp_path: Path) -> None:
         name = "fedgpt"
         version = "1.0.0"
         description = ""
-        authors = [
-            { name = "The Flower Authors", email = "hello@flower.ai" },
-        ]
         license = {text = "Apache License (2.0)"}
         dependencies = [
             "flwr[simulation]>=1.9.0,<2.0",
             "numpy>=1.21.0",
         ]
 
-        [flower]
+        [tool.flwr.app]
         publisher = "flwrlabs"
 
-        [flower.components]
+        [tool.flwr.app.components]
         serverapp = "fedgpt.server:app"
         clientapp = "fedgpt.client:app"
-
-        [flower.engine]
-        name = "simulation" # optional
-
-        [flower.engine.simulation.supernode]
-        count = 10 # optional
     """
     expected_config = {
         "build-system": {"build-backend": "hatchling.build", "requires": ["hatchling"]},
@@ -62,19 +53,18 @@ def test_load_pyproject_toml_load_from_cwd(tmp_path: Path) -> None:
             "name": "fedgpt",
             "version": "1.0.0",
             "description": "",
-            "authors": [{"email": "hello@flower.ai", "name": "The Flower Authors"}],
             "license": {"text": "Apache License (2.0)"},
             "dependencies": ["flwr[simulation]>=1.9.0,<2.0", "numpy>=1.21.0"],
         },
-        "flower": {
-            "publisher": "flwrlabs",
-            "components": {
-                "serverapp": "fedgpt.server:app",
-                "clientapp": "fedgpt.client:app",
-            },
-            "engine": {
-                "name": "simulation",
-                "simulation": {"supernode": {"count": 10}},
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "components": {
+                        "serverapp": "fedgpt.server:app",
+                        "clientapp": "fedgpt.client:app",
+                    },
+                },
             },
         },
     }
@@ -109,27 +99,18 @@ def test_load_pyproject_toml_from_path(tmp_path: Path) -> None:
         name = "fedgpt"
         version = "1.0.0"
         description = ""
-        authors = [
-            { name = "The Flower Authors", email = "hello@flower.ai" },
-        ]
         license = {text = "Apache License (2.0)"}
         dependencies = [
             "flwr[simulation]>=1.9.0,<2.0",
             "numpy>=1.21.0",
         ]
 
-        [flower]
+        [tool.flwr.app]
         publisher = "flwrlabs"
 
-        [flower.components]
+        [tool.flwr.app.components]
         serverapp = "fedgpt.server:app"
         clientapp = "fedgpt.client:app"
-
-        [flower.engine]
-        name = "simulation" # optional
-
-        [flower.engine.simulation.supernode]
-        count = 10 # optional
     """
     expected_config = {
         "build-system": {"build-backend": "hatchling.build", "requires": ["hatchling"]},
@@ -137,19 +118,18 @@ def test_load_pyproject_toml_from_path(tmp_path: Path) -> None:
             "name": "fedgpt",
             "version": "1.0.0",
             "description": "",
-            "authors": [{"email": "hello@flower.ai", "name": "The Flower Authors"}],
             "license": {"text": "Apache License (2.0)"},
             "dependencies": ["flwr[simulation]>=1.9.0,<2.0", "numpy>=1.21.0"],
         },
-        "flower": {
-            "publisher": "flwrlabs",
-            "components": {
-                "serverapp": "fedgpt.server:app",
-                "clientapp": "fedgpt.client:app",
-            },
-            "engine": {
-                "name": "simulation",
-                "simulation": {"supernode": {"count": 10}},
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "components": {
+                        "serverapp": "fedgpt.server:app",
+                        "clientapp": "fedgpt.client:app",
+                    },
+                },
             },
         },
     }
@@ -219,7 +199,7 @@ def test_validate_pyproject_toml_fields_no_flower_components() -> None:
             "license": "",
             "authors": [],
         },
-        "flower": {},
+        "tool": {"flwr": {"app": {}}},
     }
 
     # Execute
@@ -242,7 +222,7 @@ def test_validate_pyproject_toml_fields_no_server_and_client_app() -> None:
             "license": "",
             "authors": [],
         },
-        "flower": {"components": {}},
+        "tool": {"flwr": {"app": {"components": {}}}},
     }
 
     # Execute
@@ -265,9 +245,13 @@ def test_validate_pyproject_toml_fields() -> None:
             "license": "",
             "authors": [],
         },
-        "flower": {
-            "publisher": "flwrlabs",
-            "components": {"serverapp": "", "clientapp": ""},
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "components": {"serverapp": "", "clientapp": ""},
+                },
+            },
         },
     }
 
@@ -291,11 +275,15 @@ def test_validate_pyproject_toml() -> None:
             "license": "",
             "authors": [],
         },
-        "flower": {
-            "publisher": "flwrlabs",
-            "components": {
-                "serverapp": "flwr.cli.run:run",
-                "clientapp": "flwr.cli.run:run",
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "components": {
+                        "serverapp": "flwr.cli.run:run",
+                        "clientapp": "flwr.cli.run:run",
+                    },
+                },
             },
         },
     }
@@ -320,11 +308,15 @@ def test_validate_pyproject_toml_fail() -> None:
             "license": "",
             "authors": [],
         },
-        "flower": {
-            "publisher": "flwrlabs",
-            "components": {
-                "serverapp": "flwr.cli.run:run",
-                "clientapp": "flwr.cli.run:runa",
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "components": {
+                        "serverapp": "flwr.cli.run:run",
+                        "clientapp": "flwr.cli.run:runa",
+                    },
+                },
             },
         },
     }

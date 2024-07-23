@@ -19,7 +19,7 @@ import argparse
 import sys
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
 from flwr.common import Context, EventType, RecordSet, event
 from flwr.common.config import (
@@ -30,6 +30,7 @@ from flwr.common.config import (
 )
 from flwr.common.logger import log, update_console_handler, warn_deprecated_feature
 from flwr.common.object_ref import load_app
+from flwr.common.typing import UserConfig
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
     CreateRunResponse,
@@ -45,7 +46,7 @@ ADDRESS_DRIVER_API = "0.0.0.0:9091"
 def run(
     driver: Driver,
     server_app_dir: str,
-    server_app_run_config: Dict[str, str],
+    server_app_run_config: UserConfig,
     server_app_attr: Optional[str] = None,
     loaded_server_app: Optional[ServerApp] = None,
 ) -> None:
@@ -78,7 +79,9 @@ def run(
     server_app = _load()
 
     # Initialize Context
-    context = Context(state=RecordSet(), run_config=server_app_run_config)
+    context = Context(
+        node_id=0, node_config={}, state=RecordSet(), run_config=server_app_run_config
+    )
 
     # Call ServerApp
     server_app(driver=driver, context=context)
@@ -184,7 +187,7 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
         run_ = driver.run
         server_app_dir = str(get_project_dir(run_.fab_id, run_.fab_version, flwr_dir))
         config = get_project_config(server_app_dir)
-        server_app_attr = config["flower"]["components"]["serverapp"]
+        server_app_attr = config["tool"]["flwr"]["app"]["components"]["serverapp"]
         server_app_run_config = get_fused_config(run_, flwr_dir)
     else:
         # User provided `server-app`, but not `--run-id`
