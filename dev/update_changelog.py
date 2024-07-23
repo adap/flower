@@ -110,7 +110,7 @@ def _get_pull_requests_since_tag(
 
 def _format_pr_reference(title: str, number: int, url: str) -> str:
     """Format a pull request reference as a markdown list item."""
-    return f"- **{title.replace('*', '')}** ([#{number}]({url}))"
+    return f"- **{title.strip().replace('*', '')}** ([#{number}]({url}))"
 
 
 def _extract_changelog_entry(
