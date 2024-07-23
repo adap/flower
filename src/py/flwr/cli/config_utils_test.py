@@ -79,7 +79,7 @@ def test_load_pyproject_toml_load_from_cwd(tmp_path: Path) -> None:
             f.write(textwrap.dedent(pyproject_toml_content))
 
         # Execute
-        config = load()
+        config = load(toml_path=Path.cwd() / "pyproject.toml")
 
         # Assert
         assert config == expected_config
@@ -135,7 +135,7 @@ def test_load_pyproject_toml_from_path(tmp_path: Path) -> None:
     }
 
     # Current directory
-    origin = os.getcwd()
+    origin = Path.cwd()
 
     try:
         # Change into the temporary directory
@@ -144,7 +144,7 @@ def test_load_pyproject_toml_from_path(tmp_path: Path) -> None:
             f.write(textwrap.dedent(pyproject_toml_content))
 
         # Execute
-        config = load(path=tmp_path / "pyproject.toml")
+        config = load(toml_path=tmp_path / "pyproject.toml")
 
         # Assert
         assert config == expected_config

@@ -664,11 +664,11 @@ msgstr "从 PyPI 安装 ``flwr`` 预发行版："
 
 #: ../../source/contributor-how-to-install-development-versions.rst:32
 msgid "``pip install -U --pre flwr`` (without extras)"
-msgstr "`pip install -U -pre flwr``（不含额外功能）"
+msgstr "``pip install -U -pre flwr``（不含额外功能）"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:33
-msgid "``pip install -U --pre flwr[simulation]`` (with extras)"
-msgstr "`pip install -U -pre flwr[simulation]``（包含额外功能）"
+msgid "``pip install -U --pre 'flwr[simulation]'`` (with extras)"
+msgstr "``pip install -U -pre 'flwr[simulation]'``（包含额外功能）"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:35
 msgid ""
@@ -684,15 +684,15 @@ msgstr "从 GitHub 的默认分支 (``main`) 安装 ``flwr``："
 msgid ""
 "``pip install flwr@git+https://github.com/adap/flower.git`` (without "
 "extras)"
-msgstr "`pip install flwr@git+https://github.com/adap/flower.git`` （不含额外功能）"
+msgstr "``pip install flwr@git+https://github.com/adap/flower.git`` （不含额外功能）"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:40
 msgid ""
-"``pip install flwr[simulation]@git+https://github.com/adap/flower.git`` "
+"``pip install 'flwr[simulation]@git+https://github.com/adap/flower.git'`` "
 "(with extras)"
 msgstr ""
-"`pip install "
-"flwr[simulation]@git+https://github.com/adap/flower.git``（带附加功能）"
+"``pip install "
+"'flwr[simulation]@git+https://github.com/adap/flower.git'``（带附加功能）"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:42
 msgid "Install ``flwr`` from a specific GitHub branch (``branch-name``):"
@@ -703,14 +703,14 @@ msgid ""
 "``pip install flwr@git+https://github.com/adap/flower.git@branch-name`` "
 "(without extras)"
 msgstr ""
-"`pip install flwr@git+https://github.com/adap/flower.git@branch-name`` "
+"``pip install flwr@git+https://github.com/adap/flower.git@branch-name`` "
 "（不含附加功能）"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:45
 msgid ""
-"``pip install flwr[simulation]@git+https://github.com/adap/flower.git"
-"@branch-name`` (with extras)"
-msgstr "`pip安装flwr[模拟]@git+https://github.com/adap/flower.git@分支名``（带附加功能）"
+"``pip install 'flwr[simulation]@git+https://github.com/adap/flower.git"
+"@branch-name'`` (with extras)"
+msgstr "``pip install 'flwr[simulation]@git+https://github.com/adap/flower.git@分支名'``（带附加功能）"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:49
 msgid "Open Jupyter Notebooks on Google Colab"
@@ -6561,9 +6561,9 @@ msgstr "`python -m pip install -U flwr``（当使用`start_server`和`start_clie
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:15
 msgid ""
-"``python -m pip install -U flwr[simulation]`` (when using "
+"``python -m pip install -U 'flwr[simulation]'`` (when using "
 "``start_simulation``)"
-msgstr "`python -m pip install -U flwr[simulation]``（当使用`start_simulation``时）"
+msgstr "``python -m pip install -U 'flwr[simulation]'``（当使用`start_simulation``时）"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:17
 msgid ""
@@ -21363,10 +21363,10 @@ msgid ""
 "Simulations (using the Virtual Client Engine through `start_simulation`) "
 "now work more smoothly on Jupyter Notebooks (incl. Google Colab) after "
 "installing Flower with the `simulation` extra (`pip install "
-"flwr[simulation]`)."
+"'flwr[simulation]'`)."
 msgstr ""
 "通过 `start_simulation` 在 Jupyter 笔记本（包括 Google Colab）上安装 Flower 并附加 "
-"`simulation` (`pip install flwr[simulation]`)后，模拟（通过 `start_simulation` "
+"`simulation` (`pip install 'flwr[simulation]'`)后，模拟（通过 `start_simulation` "
 "使用虚拟客户端引擎）现在可以更流畅地运行。"
 
 #: ../../source/ref-changelog.md:887
