@@ -32,7 +32,7 @@ REPO_NAME = "adap/flower"
 CHANGELOG_FILE = "doc/source/ref-changelog.md"
 CHANGELOG_SECTION_HEADER = "### Changelog entry"
 
-# Load the YAML configuration
+# Load the TOML configuration
 with (pathlib.Path(__file__).parent.resolve() / "changelog_config.toml").open(
     "rb"
 ) as file:
