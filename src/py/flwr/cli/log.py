@@ -178,7 +178,7 @@ def _log_with_superexec(
                 logger(INFO, "Starting logstream for run_id `%s`", run_id)
                 stream_logs(run_id, channel, CONN_REFRESH_PERIOD)
                 time.sleep(2)
-                logger(INFO, "Reconnecting to logstream")
+                logger(DEBUG, "Reconnecting to logstream")
         except KeyboardInterrupt:
             logger(INFO, "Exiting logstream")
         except grpc.RpcError as e:
