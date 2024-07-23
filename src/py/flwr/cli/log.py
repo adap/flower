@@ -50,22 +50,26 @@ def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
     stub = ExecStub(channel)
     req = StreamLogsRequest(run_id=run_id)
 
-    while True:
-        try:
-            # Enforce timeout for graceful exit
-            for res in stub.StreamLogs(req, timeout=timeout):
-                print(res.log_output)
-        except grpc.RpcError as e:
-            # pylint: disable=E1101
-            if e.code() == grpc.StatusCode.DEADLINE_EXCEEDED:
-                break
-            if e.code() == grpc.StatusCode.NOT_FOUND:
-                logger(ERROR, "Invalid run_id `%s`, exiting", run_id)
-                break
-            if e.code() == grpc.StatusCode.CANCELLED:
-                break
-
-    channel.close()
+    try:
+        while True:
+            try:
+                # Enforce timeout for graceful exit
+                for res in stub.StreamLogs(req, timeout=timeout):
+                    print(res.log_output)
+            except grpc.RpcError as e:
+                # pylint: disable=E1101
+                if e.code() == grpc.StatusCode.DEADLINE_EXCEEDED:
+                    break
+                if e.code() == grpc.StatusCode.NOT_FOUND:
+                    logger(ERROR, "Invalid run_id `%s`, exiting", run_id)
+                    break
+                if e.code() == grpc.StatusCode.CANCELLED:
+                    break
+    except KeyboardInterrupt:
+        logger(DEBUG, "Stream interrupted by user")
+    finally:
+        channel.close()
+        logger(DEBUG, "Channel closed")
 
 
 def log(
