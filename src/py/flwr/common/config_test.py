@@ -21,6 +21,8 @@ from unittest.mock import patch
 
 import pytest
 
+from flwr.common.typing import UserConfig
+
 from .config import (
     _fuse_dicts,
     flatten_dict,
@@ -101,23 +103,25 @@ def test_get_fused_config_valid(tmp_path: Path) -> None:
         clientapp = "fedgpt.client:app"
 
         [tool.flwr.app.config]
-        num_server_rounds = "10"
-        momentum = "0.1"
-        lr = "0.01"
+        num_server_rounds = 10
+        momentum = 0.1
+        lr = 0.01
+        progress_bar = true
         serverapp.test = "key"
 
         [tool.flwr.app.config.clientapp]
         test = "key"
     """
-    overrides = {
-        "num_server_rounds": "5",
-        "lr": "0.2",
+    overrides: UserConfig = {
+        "num_server_rounds": 5,
+        "lr": 0.2,
         "serverapp.test": "overriden",
     }
     expected_config = {
-        "num_server_rounds": "5",
-        "momentum": "0.1",
-        "lr": "0.2",
+        "num_server_rounds": 5,
+        "momentum": 0.1,
+        "lr": 0.2,
+        "progress_bar": True,
         "serverapp.test": "overriden",
         "clientapp.test": "key",
     }
@@ -168,8 +172,9 @@ def test_get_project_config_file_valid(tmp_path: Path) -> None:
         clientapp = "fedgpt.client:app"
 
         [tool.flwr.app.config]
-        num_server_rounds = "10"
-        momentum = "0.1"
+        num_server_rounds = 10
+        momentum = 0.1
+        progress_bar = true
         lr = "0.01"
     """
     expected_config = {
@@ -190,8 +195,9 @@ def test_get_project_config_file_valid(tmp_path: Path) -> None:
                         "clientapp": "fedgpt.client:app",
                     },
                     "config": {
-                        "num_server_rounds": "10",
-                        "momentum": "0.1",
+                        "num_server_rounds": 10,
+                        "momentum": 0.1,
+                        "progress_bar": True,
                         "lr": "0.01",
                     },
                 },
@@ -231,11 +237,12 @@ def test_parse_config_args_none() -> None:
 def test_parse_config_args_overrides() -> None:
     """Test parse_config_args with key-value pairs."""
     assert parse_config_args(
-        ["key1=value1,key2=value2", "key3=value3", "key4=value4,key5=value5"]
+        ["key1='value1',key2='value2'", "key3=1", "key4=2.0,key5=true,key6='value6'"]
     ) == {
         "key1": "value1",
         "key2": "value2",
-        "key3": "value3",
-        "key4": "value4",
-        "key5": "value5",
+        "key3": 1,
+        "key4": 2.0,
+        "key5": True,
+        "key6": "value6",
     }
