@@ -25,15 +25,28 @@ from flwr_datasets.preprocessor.merger import Merger
 
 tested_datasets = [
     "mnist",
+    "ylecun/mnist",
     "cifar10",
+    "uoft-cs/cifar10",
     "fashion_mnist",
+    "zalando-datasets/fashion_mnist",
     "sasha/dog-food",
     "zh-plus/tiny-imagenet",
     "scikit-learn/adult-census-income",
     "cifar100",
+    "uoft-cs/cifar100",
     "svhn",
+    "ufldl-stanford/svhn",
     "sentiment140",
+    "stanfordnlp/sentiment140",
     "speech_commands",
+    "LIUM/tedlium",
+    "flwrlabs/femnist",
+    "flwrlabs/ucf101",
+    "flwrlabs/ambient-acoustic-context",
+    "jlh/uci-mushrooms",
+    "Mike0307/MNIST-M",
+    "flwrlabs/usps",
 ]
 
 
@@ -178,7 +191,7 @@ def _create_division_indices_ranges(
             ranges.append(range(start_idx, end_idx))
             start_idx = end_idx
     else:
-        TypeError(
+        raise TypeError(
             f"The type of the `division` should be dict, "
             f"tuple or list but is {type(division)} instead. "
         )
