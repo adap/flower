@@ -1,16 +1,18 @@
 Flower Datasets
 ===============
 
-.. image:: https://img.shields.io/github/license/adap/flower
-    :target: https://github.com/adap/flower/blob/main/LICENSE
-.. image:: https://img.shields.io/badge/PRs-welcome-brightgreen.svg
-    :target: https://github.com/adap/flower/blob/main/CONTRIBUTING.md
-.. image:: https://github.com/adap/flower/actions/workflows/framework.yml/badge.svg
-    :target:
-.. image:: https://pepy.tech/badge/flwr-datasets
-    :target:
-.. image:: https://img.shields.io/badge/Chat-Slack-red
-    :target: https://flower.ai/join-slack
+.. list-table::
+    :widths: auto
+    :header-rows: 0
+
+    * - .. image:: https://img.shields.io/github/license/adap/flower
+          :target: https://github.com/adap/flower/blob/main/LICENSE
+      - .. image:: https://img.shields.io/badge/PRs-welcome-brightgreen.svg
+          :target: https://github.com/adap/flower/blob/main/CONTRIBUTING.md
+      - .. image:: https://github.com/adap/flower/actions/workflows/framework.yml/badge.svg
+      - .. image:: https://pepy.tech/badge/flwr-datasets
+      - .. image:: https://img.shields.io/badge/Chat-Slack-red
+          :target: https://flower.ai/join-slack
 
 Flower Datasets (``flwr-datasets``) is a library to quickly and easily create datasets for federated learning, federated evaluation, and federated analytics. It was created by the ``Flower Labs`` team that also created Flower: A Friendly Federated Learning Framework.
 
