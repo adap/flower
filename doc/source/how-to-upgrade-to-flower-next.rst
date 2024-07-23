@@ -55,7 +55,7 @@ or if you need Flower Next with simulation:
 
 .. code-block:: bash
     
-    $ python -m pip install -U flwr[simulation]
+    $ python -m pip install -U "flwr[simulation]"
 
 
 Ensure you set the following version constraint in your ``requirements.txt``
