@@ -19,7 +19,6 @@ package flwr.proto;
 
 import "flwr/proto/node.proto";
 import "flwr/proto/recordset.proto";
-import "flwr/proto/transport.proto";
 import "flwr/proto/error.proto";
 
 message Task {

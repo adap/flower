@@ -13,7 +13,7 @@ parameters = ndarrays_to_parameters(ndarrays)
 
 def server_fn(context: Context):
     # Read from config
-    num_rounds = int(context.run_config["num-server-rounds"])
+    num_rounds = context.run_config["num-server-rounds"]
 
     # Define strategy
     strategy = FedAvg(

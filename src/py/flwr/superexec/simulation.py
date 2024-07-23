@@ -18,7 +18,7 @@
 import subprocess
 import sys
 from logging import ERROR, INFO, WARN
-from typing import Dict, Optional
+from typing import Optional
 
 from typing_extensions import override
 
@@ -26,9 +26,29 @@ from flwr.cli.config_utils import load_and_validate
 from flwr.cli.install import install_from_fab
 from flwr.common.constant import RUN_ID_NUM_BYTES
 from flwr.common.logger import log
+from flwr.common.typing import UserConfig
 from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
 
 from .executor import Executor, RunTracker
+
+
+def _user_config_to_str(user_config: UserConfig) -> str:
+    """Convert override user config to string."""
+    user_config_list_str = []
+    for key, value in user_config.items():
+        if isinstance(value, bool):
+            user_config_list_str.append(f"{key}={str(value).lower()}")
+        elif isinstance(value, (int, float)):
+            user_config_list_str.append(f"{key}={value}")
+        elif isinstance(value, str):
+            user_config_list_str.append(f'{key}="{value}"')
+        else:
+            raise ValueError(
+                "Only types `bool`, `float`, `int` and `str` are supported"
+            )
+
+    user_config_str = ",".join(user_config_list_str)
+    return user_config_str
 
 
 class SimulationEngine(Executor):
@@ -42,43 +62,49 @@ class SimulationEngine(Executor):
 
     def __init__(
         self,
-        num_supernodes: Optional[str] = None,
+        num_supernodes: Optional[int] = None,
     ) -> None:
         self.num_supernodes = num_supernodes
 
     @override
     def set_config(
         self,
-        config: Dict[str, str],
+        config: UserConfig,
     ) -> None:
         """Set executor config arguments.
 
         Parameters
         ----------
-        config : Dict[str, str]
+        config : UserConfig
             A dictionary for configuration values.
             Supported configuration key/value pairs:
-            - "num-supernodes": str
+            - "num-supernodes": int
                 Number of nodes to register for the simulation.
         """
         if not config:
             return
         if num_supernodes := config.get("num-supernodes"):
+            if not isinstance(num_supernodes, int):
+                raise ValueError("The `num-supernodes` value should be of type `int`.")
             self.num_supernodes = num_supernodes
-
-        # Validate config
-        if self.num_supernodes is None:
+        else:
             log(
                 ERROR,
                 "To start a run with the simulation plugin, please specify "
                 "the number of SuperNodes. This can be done by using the "
                 "`--executor-config` argument when launching the SuperExec.",
             )
-            raise ValueError("`num-supernodes` must not be `None`")
+            raise ValueError(
+                "`num-supernodes` must not be `None`, it must be a valid "
+                "positive integer."
+            )
 
     @override
     def start_run(
-        self, fab_file: bytes, override_config: Dict[str, str]
+        self,
+        fab_file: bytes,
+        override_config: UserConfig,
+        federation_config: UserConfig,
     ) -> Optional[RunTracker]:
         """Start run using the Flower Simulation Engine."""
         try:
@@ -116,13 +142,14 @@ class SimulationEngine(Executor):
                 "--app",
                 f"{str(fab_path)}",
                 "--num-supernodes",
-                f"{self.num_supernodes}",
+                f"{federation_config.get('num-supernodes', self.num_supernodes)}",
                 "--run-id",
                 str(run_id),
             ]
 
             if override_config:
-                command.extend(["--run-config", f"{override_config}"])
+                override_config_str = _user_config_to_str(override_config)
+                command.extend(["--run-config", f"{override_config_str}"])
 
             # Start Simulation
             proc = subprocess.run(  # pylint: disable=consider-using-with
