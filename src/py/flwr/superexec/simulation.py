@@ -92,7 +92,7 @@ class SimulationEngine(Executor):
                 user_config_list_str.append(f'{key}="{value}"')
             else:
                 raise ValueError(
-                    "Only types `int`, `float`, `bool` and `str` are supported"
+                    "Only types `bool`, `float`, `int` and `str` are supported"
                 )
 
         user_config_str = ",".join(user_config_list_str)
