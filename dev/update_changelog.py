@@ -110,7 +110,19 @@ def _get_pull_requests_since_tag(
 
 def _format_pr_reference(title: str, number: int, url: str) -> str:
     """Format a pull request reference as a markdown list item."""
-    return f"- **{title.strip().replace('*', '')}** ([#{number}]({url}))"
+    parts = title.strip().replace("*", "").split("`")
+    formatted_parts = []
+
+    for i, part in enumerate(parts):
+        if i % 2 == 0:
+            # Even index parts are normal text
+            formatted_parts.append(f"**{part}**")
+        else:
+            # Odd index parts are inline code
+            formatted_parts.append(f"`{part}`")
+
+    formatted_title = " ".join(formatted_parts)
+    return f"- {formatted_title} ([#{number}]({url}))"
 
 
 def _extract_changelog_entry(
