@@ -18,6 +18,7 @@
 import ast
 import importlib
 import sys
+from dataclasses import dataclass
 from importlib.util import find_spec
 from logging import WARN
 from pathlib import Path
@@ -33,13 +34,21 @@ attribute.
 """
 
 
-_current_sys_path: Optional[str] = None
+@dataclass
+class SystemPathState:
+    """The state of the system path."""
+
+    inserted_path: Optional[str] = None
+
+
+sys_path_state = SystemPathState()
 
 
 def validate(
     module_attribute_str: str,
     check_module: bool = True,
     project_dir: Optional[Union[str, Path]] = None,
+    state: Optional[SystemPathState] = None,
 ) -> Tuple[bool, Optional[str]]:
     """Validate object reference.
 
@@ -57,6 +66,9 @@ def validate(
         The directory containing the module. If None, the current working directory
         is used. If `check_module` is True, the `project_dir` will be inserted into
         the system path, and the previously inserted `project_dir` will be removed.
+    state : Optional[SystemPathState], optional (default: None)
+        The state of the system path that stores the current system path inserted.
+        If None, `flwr.common.object_ref.sys_path_state` will be used.
 
     Returns
     -------
@@ -83,7 +95,7 @@ def validate(
 
     if check_module:
         # Set the system path
-        _set_sys_path(project_dir)
+        _set_sys_path(project_dir, state)
 
         # Load module
         module = find_spec(module_str)
@@ -108,6 +120,7 @@ def load_app(  # pylint: disable= too-many-branches
     module_attribute_str: str,
     error_type: Type[Exception],
     project_dir: Optional[Union[str, Path]] = None,
+    state: Optional[SystemPathState] = None,
 ) -> Any:
     """Return the object specified in a module attribute string.
 
@@ -125,6 +138,9 @@ def load_app(  # pylint: disable= too-many-branches
         The directory containing the module. If None, the current working directory
         is used. The `project_dir` will be inserted into the system path, and the
         previously inserted `project_dir` will be removed.
+    state : Optional[SystemPathState], optional (default: None)
+        The state of the system path that stores the current system path inserted.
+        If None, `flwr.common.object_ref.sys_path_state` will be used.
 
     Returns
     -------
@@ -143,7 +159,7 @@ def load_app(  # pylint: disable= too-many-branches
     module_str, _, attributes_str = module_attribute_str.partition(":")
 
     try:
-        _set_sys_path(project_dir)
+        _set_sys_path(project_dir, state)
 
         if module_str not in sys.modules:
             module = importlib.import_module(module_str)
@@ -189,8 +205,15 @@ def load_app(  # pylint: disable= too-many-branches
     return attribute
 
 
-def _set_sys_path(directory: Optional[Union[str, Path]]) -> None:
+def _set_sys_path(
+    directory: Optional[Union[str, Path]], state: Optional[SystemPathState] = None
+) -> None:
     """Set the system path."""
+    # Use the default state if not provided
+    if state is None:
+        state = sys_path_state
+
+    # Use the current working directory if not provided
     if directory is None:
         directory = Path.cwd()
     else:
@@ -200,16 +223,15 @@ def _set_sys_path(directory: Optional[Union[str, Path]]) -> None:
     if str(directory) in sys.path:
         return
 
-    # Remove the old path if it exists and is not `""`.
-    global _current_sys_path  # pylint: disable=global-statement
-    if _current_sys_path is not None:
-        sys.path.remove(_current_sys_path)
+    # Remove the old path if it exists and is not `""`
+    if state.inserted_path is not None:
+        sys.path.remove(state.inserted_path)
 
     # Add the new path to sys.path
     sys.path.insert(0, str(directory))
 
     # Update the current_sys_path
-    _current_sys_path = str(directory)
+    state.inserted_path = str(directory)
 
 
 def _find_attribute_in_module(file_path: str, attribute_name: str) -> bool:
