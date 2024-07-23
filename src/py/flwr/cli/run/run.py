@@ -168,7 +168,7 @@ def _run_with_superexec(
         override_config=user_config_to_proto(
             parse_config_args(config_overrides, separator=",")
         ),
-        federation_config=flatten_dict(federation.get("options")),
+        federation_config=user_config_to_proto(flatten_dict(federation.get("options"))),
     )
     res = stub.StartRun(req)
     typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)

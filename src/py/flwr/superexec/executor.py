@@ -64,7 +64,7 @@ class Executor(ABC):
             The Flower App Bundle file bytes.
         override_config: UserConfig
             The config overrides dict sent by the user (using `flwr run`).
-        federation_config: Dict[str, str]
+        federation_config: UserConfig
             The federation options dict sent by the user (using `flwr run`).
 
         Returns
