@@ -80,6 +80,24 @@ class SimulationEngine(Executor):
                 "positive integer."
             )
 
+    def _user_config_to_str(self, user_config: UserConfig) -> str:
+        """Convert override user config to string."""
+        user_config_list_str = []
+        for key, value in user_config.items():
+            if isinstance(value, bool):
+                user_config_list_str.append(f"{key}={str(value).lower()}")
+            elif isinstance(value, (int, float)):
+                user_config_list_str.append(f"{key}={value}")
+            elif isinstance(value, str):
+                user_config_list_str.append(f'{key}="{value}"')
+            else:
+                raise ValueError(
+                    "Only types `int`, `float`, `bool` and `str` are supported"
+                )
+
+        user_config_str = ",".join(user_config_list_str)
+        return user_config_str
+
     @override
     def start_run(
         self,
@@ -129,9 +147,8 @@ class SimulationEngine(Executor):
             ]
 
             if override_config:
-                override_config_str = ",".join(
-                    [f"{key}={value}" for key, value in override_config.items()]
-                )
+                override_config_str = self._user_config_to_str(override_config)
+                print(override_config_str)
                 command.extend(["--run-config", f"{override_config_str}"])
 
             # Start Simulation
