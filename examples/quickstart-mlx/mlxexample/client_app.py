@@ -1,5 +1,3 @@
-"""mlxexample: A Flower / MLX app."""
-
 from flwr.common import Context
 import mlx.core as mx
 import mlx.nn as nn
@@ -17,29 +15,27 @@ from mlxexample.task import (
 )
 
 
-# Define Flower Client and client_fn
 class FlowerClient(NumPyClient):
     def __init__(self, num_layers, hidden_dim, batch_size, learning_rate, data):
-        num_classes = 10
-        num_epochs = 1
 
         self.train_images, self.train_labels, self.test_images, self.test_labels = data
         self.model = MLP(
-            num_layers, self.train_images.shape[-1], hidden_dim, num_classes
+            num_layers,
+            self.train_images.shape[-1],
+            hidden_dim,
         )
         self.optimizer = optim.SGD(learning_rate=learning_rate)
         self.loss_and_grad_fn = nn.value_and_grad(self.model, loss_fn)
-        self.num_epochs = num_epochs
+        self.num_epochs = 1
         self.batch_size = batch_size
 
     def get_parameters(self, config):
+        """Return the parameters of the model of this client."""
         return get_params(self.model)
 
-    def set_parameters(self, parameters):
-        set_params(self.model, parameters)
-
     def fit(self, parameters, config):
-        self.set_parameters(parameters)
+        """Train the model with data of this client."""
+        set_params(self.model, parameters)
         for _ in range(self.num_epochs):
             for X, y in batch_iterate(
                 self.batch_size, self.train_images, self.train_labels
@@ -50,7 +46,8 @@ class FlowerClient(NumPyClient):
         return self.get_parameters(config={}), len(self.train_images), {}
 
     def evaluate(self, parameters, config):
-        self.set_parameters(parameters)
+        """Evaluate the model on the data this client has."""
+        set_params(self.model, parameters)
         accuracy = eval_fn(self.model, self.test_images, self.test_labels)
         loss = loss_fn(self.model, self.test_images, self.test_labels)
         return loss.item(), len(self.test_images), {"accuracy": accuracy.item()}

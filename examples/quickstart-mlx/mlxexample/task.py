@@ -1,5 +1,3 @@
-"""mlxexample: A Flower / MLX app."""
-
 import mlx.core as mx
 import mlx.nn as nn
 import numpy as np
@@ -15,7 +13,7 @@ class MLP(nn.Module):
     """A simple MLP."""
 
     def __init__(
-        self, num_layers: int, input_dim: int, hidden_dim: int, output_dim: int
+        self, num_layers: int, input_dim: int, hidden_dim: int, output_dim: int = 10
     ):
         super().__init__()
         layer_sizes = [input_dim] + [hidden_dim] * num_layers + [output_dim]

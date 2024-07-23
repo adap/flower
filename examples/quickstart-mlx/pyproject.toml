@@ -34,7 +34,7 @@ batch-size = 256
 learning-rate = 0.1
 
 [tool.flwr.federations]
-default = "localhost"
+default = "local-simulation"
 
-[tool.flwr.federations.localhost]
+[tool.flwr.federations.local-simulation]
 options.num-supernodes = 10

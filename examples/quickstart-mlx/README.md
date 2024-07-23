@@ -49,9 +49,6 @@ with Flower, we recommend you using the _simulation_ model as it requires
 fewer components to be launched manually. By default, `flwr run` will make
 use of the Simluation Engine.
 
-> [!NOTE]
-> An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.
-
 ### Run with the Simulation Engine
 
 Run:
@@ -65,3 +62,8 @@ You can also override some of the settings for your `ClientApp` and `ServerApp` 
 ```bash
 flwr run . --run-config num-server-rounds=5,learning-rate=0.05
 ```
+
+### Run with the Deployment Engine
+
+> \[!NOTE\]
+> An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.
