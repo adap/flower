@@ -72,8 +72,8 @@ def _register_node_states(
         node_states[node_id] = NodeState(
             node_id=node_id,
             node_config={
-                PARTITION_ID_KEY: str(partition_id),
-                NUM_PARTITIONS_KEY: str(num_partitions),
+                PARTITION_ID_KEY: partition_id,
+                NUM_PARTITIONS_KEY: num_partitions,
             },
         )
 
