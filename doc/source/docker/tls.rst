@@ -113,7 +113,7 @@ Assuming all files we need are in the local ``certificates`` directory, we can u
         --ssl-certfile certificates/server.pem \
         --ssl-keyfile certificates/server.key \
         --executor-config \
-        root-certificates=certificates/superlink_ca.crt
+        root-certificates=\"certificates/superlink_ca.crt\"
 
 
 .. dropdown:: Understanding the command
@@ -143,6 +143,6 @@ Assuming all files we need are in the local ``certificates`` directory, we can u
      |
      | The ``certificates/server.key`` file is used to decrypt the data that is transmitted over
      | the network.
-   * | ``--executor-config root-certificates=certificates/superlink_ca.crt``: Specify the
+   * | ``--executor-config root-certificates=\"certificates/superlink_ca.crt\"``: Specify the
      | location of the CA certificate file inside the container that the SuperExec executor
      | should use to verify the SuperLink's identity.

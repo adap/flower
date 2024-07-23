@@ -240,7 +240,7 @@ Flower and serves as a base for building your own SuperExec image.
           flwr_superexec:0.0.1 \
           --insecure \
           --executor-config \
-          superlink=superlink:9091
+          superlink=\"superlink:9091\"
 
    .. dropdown:: Understand the command
 
@@ -254,7 +254,7 @@ Flower and serves as a base for building your own SuperExec image.
         | of the image.
       * | ``--insecure``: This flag tells the container to operate in an insecure mode, allowing
         | unencrypted communication.
-      * | ``--executor-config superlink=superlink:9091``: Configure the SuperExec executor to
+      * | ``--executor-config superlink=\"superlink:9091\"``: Configure the SuperExec executor to
         | connect to the SuperLink running on port ``9091``.
 
 Step 5: Run the Quickstart Project
