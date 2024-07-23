@@ -240,7 +240,7 @@ def run_simulation(
             "Passing `enable_tf_gpu_growth=True` is deprecated.",
             example_message="Instead, set the `TF_FORCE_GPU_ALLOW_GROWTH` environmnet "
             "variable to true.",
-            code_example='import os;TF_FORCE_GPU_ALLOW_GROWTH="true"'
+            code_example='import os;os.environ["TF_FORCE_GPU_ALLOW_GROWTH"]="true"'
             "\n\tflwr.simulation.run_simulationt(...)",
         )
 
