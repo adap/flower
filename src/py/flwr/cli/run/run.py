@@ -35,7 +35,7 @@ from flwr.proto.exec_pb2_grpc import ExecStub
 
 # pylint: disable-next=too-many-locals
 def run(
-    directory: Annotated[
+    app_dir: Annotated[
         Path,
         typer.Argument(help="Path of the Flower project to run"),
     ] = Path("."),
@@ -55,7 +55,7 @@ def run(
     """Run Flower project."""
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
-    pyproject_path = directory / "pyproject.toml" if directory else None
+    pyproject_path = app_dir / "pyproject.toml" if app_dir else None
     config, errors, warnings = load_and_validate(path=pyproject_path)
 
     if config is None:
@@ -108,14 +108,14 @@ def run(
         raise typer.Exit(code=1)
 
     if "address" in federation:
-        _run_with_superexec(federation, directory, config_overrides)
+        _run_with_superexec(federation, app_dir, config_overrides)
     else:
-        _run_without_superexec(directory, federation, federation_name, config_overrides)
+        _run_without_superexec(app_dir, federation, federation_name, config_overrides)
 
 
 def _run_with_superexec(
     federation: Dict[str, Any],
-    directory: Optional[Path],
+    app_dir: Optional[Path],
     config_overrides: Optional[List[str]],
 ) -> None:
 
@@ -161,7 +161,7 @@ def _run_with_superexec(
     channel.subscribe(on_channel_state_change)
     stub = ExecStub(channel)
 
-    fab_path = build(directory)
+    fab_path = build(app_dir)
 
     req = StartRunRequest(
         fab_file=Path(fab_path).read_bytes(),
