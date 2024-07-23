@@ -47,9 +47,10 @@ You can run your `ClientApp` and `ServerApp` in both _simulation_ and
 _deployment_ mode without making changes to the code. If you are starting
 with Flower, we recommend you using the _simulation_ model as it requires
 fewer components to be launched manually. By default, `flwr run` will make
-use of the Simluation Engine. Refer to alternative ways of running your
-Flower application including Deployment, with TLS certificates, or with
-Docker later in this readme.
+use of the Simluation Engine.
+
+> [!NOTE]
+> An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.
 
 ### Run with the Simulation Engine
 
@@ -64,7 +65,3 @@ You can also override some of the settings for your `ClientApp` and `ServerApp` 
 ```bash
 flwr run . --run-config num-server-rounds=5,learning-rate=0.05
 ```
-
-### Alternative wasy of running the example
-
-TODO: point to docs
