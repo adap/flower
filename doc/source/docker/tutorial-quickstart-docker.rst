@@ -94,6 +94,9 @@ building your own SuperNode image.
       COPY docker_pyproject.toml pyproject.toml
       RUN python -m pip install -U --no-cache-dir .
 
+      COPY flower.quickstart-docker.1-0-0.fab .
+      RUN flwr install flower.quickstart-docker.1-0-0.fab
+
       ENTRYPOINT ["flower-supernode"]
 
    .. dropdown:: Understand the Dockerfile
@@ -111,6 +114,10 @@ building your own SuperNode image.
         |
         | The ``-U`` flag indicates that any existing packages should be upgraded, and
         | ``--no-cache-dir`` prevents pip from using the cache to speed up the installation.
+      * | ``COPY flower.quickstart-docker.1-0-0.fab .``: Copy the ``lower.quickstart-docker.1-0-0.fab``
+        | file from the current working directory into the container's ``/app`` directory.
+      * | ``RUN flwr install flower.quickstart-docker.1-0-0.fab``: Run the ``flwr`` install command
+        | to install the Flower App Bundle locally.
       * | ``ENTRYPOINT ["flower-supernode"]``: Set the command ``flower-supernode`` to be
         | the default command run when the container is started.
 
@@ -125,6 +132,12 @@ building your own SuperNode image.
    .. code-block:: bash
 
       $ sed 's/.*flwr\[simulation\].*//' pyproject.toml > docker_pyproject.toml
+
+#. Build the Flower App Bundle (FAB):
+
+   .. code-block:: bash
+
+      $ flwr build
 
 #. Next, build the SuperNode Docker image by running the following command in the directory where
    Dockerfile is located:
@@ -277,13 +290,62 @@ Step 5: Run the Quickstart Project
 
 #. Wait until the run is complete
 
-TODO:
-
-* wait fo FAB distribution
 * add flwr logs
 
+Step 6: Update the Application Code
+-----------------------------------
 
-Step 6: Clean Up
+#. Change the application code. For example, change the  ``seed`` in ``quickstart_docker/task.py``
+   to ``43`` and save it:
+
+   .. code-block:: python
+      :caption: quickstart_docker/task.py
+
+      # ...
+      partition_train_test = partition.train_test_split(test_size=0.2, seed=43)
+      # ...
+
+#. Stop the current SuperNode containers:
+
+   .. code-block:: bash
+
+      $ docker stop $(docker ps -a -q  --filter ancestor=flwr_supernode:0.0.1)
+
+#. Rebuild the FAB and SuperNode image:
+
+   .. code-block:: bash
+
+      $ flwr build
+      $ docker build -f Dockerfile.supernode -t flwr_supernode:0.0.1 .
+
+#. Launch two new SuperNode containers based on the newly built image:
+
+   .. code-block:: bash
+
+      $ docker run --rm \
+          --network flwr-network \
+          --detach \
+          flwr_supernode:0.0.1 \
+          --insecure \
+          --superlink superlink:9092 \
+          --node-config \
+          partition-id=0,num-partitions=2
+      $ docker run --rm \
+          --network flwr-network \
+          --detach \
+          flwr_supernode:0.0.1 \
+          --insecure \
+          --superlink superlink:9092 \
+          --node-config \
+          partition-id=1,num-partitions=2
+
+#. Run the updated project:
+
+   .. code-block:: bash
+
+      $ flwr run . docker
+
+Step 7: Clean Up
 ----------------
 
 #. Remove the containers and the bridge network:
