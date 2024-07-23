@@ -44,8 +44,8 @@ def client_fn(context: Context):
     # Load model and data
     net = load_model()
 
-    partition_id = int(context.node_config["partition-id"])
-    num_partitions = int(context.node_config["num-partitions"])
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
     x_train, y_train, x_test, y_test = load_data(partition_id, num_partitions)
     epochs = context.run_config["local-epochs"]
     batch_size = context.run_config["batch-size"]
