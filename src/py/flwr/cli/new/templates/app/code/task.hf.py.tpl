@@ -10,6 +10,8 @@ from torch.utils.data import DataLoader
 from transformers import AutoTokenizer, DataCollatorWithPadding
 
 from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import IidPartitioner
+
 
 warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cpu")
@@ -22,8 +24,9 @@ def load_data(partition_id: int, num_partitions: int):
     # Only initialize `FederatedDataset` once
     global fds
     if fds is None:
+        partitioner = IidPartitioner(num_partitions=num_partitions)
         fds = FederatedDataset(dataset="stanfordnlp/imdb",
-                               partitioners={"train": num_partitions},
+                               partitioners={"train": partitioner},
                                )
     partition = fds.load_partition(partition_id)
     # Divide data: 80% train, 20% test

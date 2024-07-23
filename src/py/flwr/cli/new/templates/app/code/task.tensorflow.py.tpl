@@ -4,6 +4,7 @@ import os
 
 import tensorflow as tf
 from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import IidPartitioner
 
 
 # Make TensorFlow log less verbose
@@ -22,8 +23,9 @@ def load_data(partition_id, num_partitions):
     # Only initialize `FederatedDataset` once
     global fds
     if fds is None:
+        partitioner = IidPartitioner(num_partitions=num_partitions)
         fds = FederatedDataset(dataset="uoft-cs/cifar10",
-                               partitioners={"train": num_partitions},
+                               partitioners={"train": partitioner},
                                )
     partition = fds.load_partition(partition_id, "train")
     partition.set_format("numpy")

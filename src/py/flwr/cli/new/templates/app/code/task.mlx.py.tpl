@@ -5,6 +5,7 @@ import mlx.nn as nn
 import numpy as np
 from datasets.utils.logging import disable_progress_bar
 from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import IidPartitioner
 
 
 disable_progress_bar()
@@ -48,8 +49,9 @@ def load_data(partition_id: int, num_partitions: int):
     # Only initialize `FederatedDataset` once
     global fds
     if fds is None:
+        partitioner = IidPartitioner(num_partitions=num_partitions)
         fds = FederatedDataset(dataset="ylecun/mnist",
-                               partitioners={"train": num_partitions},
+                               partitioners={"train": partitioner},
                                trust_remote_code=True,
                                )
     partition = fds.load_partition(partition_id)
