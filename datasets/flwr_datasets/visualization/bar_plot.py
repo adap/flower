@@ -38,7 +38,6 @@ def _plot_bar(
     plot_kwargs: Optional[Dict[str, Any]],
     legend_kwargs: Optional[Dict[str, Any]],
 ) -> Axes:
-
     if axis is None:
         if figsize is None:
             figsize = _initialize_figsize(
@@ -101,7 +100,7 @@ def _plot_bar(
             legend_kwargs["loc"] = "outside center right"
 
         if "bbox_to_anchor" not in legend_kwargs:
-            max_len_label_str = max([len(str(column)) for column in dataframe.columns])
+            max_len_label_str = max(len(str(column)) for column in dataframe.columns)
             shift = min(0.05 + max_len_label_str / 100, 0.15)
             legend_kwargs["bbox_to_anchor"] = (1.0 + shift, 0.5)
 

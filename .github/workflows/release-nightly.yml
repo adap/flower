@@ -3,7 +3,6 @@ name: Release nightly
 on:
   schedule:
     - cron: "0 23 * * *"
-    - cron: "30 23 * * *"
 
 env:
   FLWR_TELEMETRY_ENABLED: 0
@@ -25,15 +24,11 @@ jobs:
         id: bootstrap
         uses: ./.github/actions/bootstrap
       - name: Release nightly
-        if: github.event.schedule == '0 23 * * *'
+        id: release
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
-        run: ./dev/publish-nightly.sh
-      - name: Read nightly version and name
-        if: github.event.schedule == '30 23 * * *'
-        id: release
         run: |
-          RESULT=$(./dev/publish-nightly.sh --skip-publish)
+          RESULT=$(./dev/publish-nightly.sh)
           if [ "$RESULT" == "There were no commits in the last 24 hours." ]; then
             echo "skip=true" >> $GITHUB_OUTPUT
           fi
@@ -45,7 +40,7 @@ jobs:
 
   build-docker-base-images:
     name: Build nightly base images
-    if: github.repository == 'adap/flower' && needs.release-nightly.outputs.skip != 'true' && github.event.schedule == '30 23 * * *'
+    if: github.repository == 'adap/flower' && needs.release-nightly.outputs.skip != 'true'
     uses: ./.github/workflows/_docker-build.yml
     needs: release-nightly
     with:
@@ -65,7 +60,7 @@ jobs:
 
   build-docker-binary-images:
     name: Build nightly binary images
-    if: github.repository == 'adap/flower' && needs.release-nightly.outputs.skip != 'true' && github.event.schedule == '30 23 * * *'
+    if: github.repository == 'adap/flower' && needs.release-nightly.outputs.skip != 'true'
     uses: ./.github/workflows/_docker-build.yml
     needs: [release-nightly, build-docker-base-images]
     strategy:
@@ -74,7 +69,8 @@ jobs:
         images: [
           { repository: "flwr/superlink", file_dir: "src/docker/superlink" },
           { repository: "flwr/supernode", file_dir: "src/docker/supernode" },
-          { repository: "flwr/serverapp", file_dir: "src/docker/serverapp" }
+          { repository: "flwr/serverapp", file_dir: "src/docker/serverapp" },
+          { repository: "flwr/superexec", file_dir: "src/docker/superexec" }
         ]
     with:
       namespace-repository: ${{ matrix.images.repository }}

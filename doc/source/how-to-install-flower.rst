@@ -20,7 +20,7 @@ Stable releases are available on `PyPI <https://pypi.org/project/flwr/>`_::
 
 For simulations that use the Virtual Client Engine, ``flwr`` should be installed with the ``simulation`` extra::
 
-  python -m pip install flwr[simulation]
+  python -m pip install "flwr[simulation]"
 
 
 Using conda (or mamba)
@@ -68,7 +68,7 @@ New (possibly unstable) versions of Flower are sometimes available as pre-releas
 
 For simulations that use the Virtual Client Engine, ``flwr`` pre-releases should be installed with the ``simulation`` extra::
 
-  python -m pip install -U --pre flwr[simulation]
+  python -m pip install -U --pre 'flwr[simulation]'
 
 Install nightly release
 ~~~~~~~~~~~~~~~~~~~~~~~
