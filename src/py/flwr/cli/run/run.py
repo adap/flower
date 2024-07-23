@@ -100,7 +100,7 @@ def run(
             fed for fed in config["tool"]["flwr"]["federations"] if fed != "default"
         }
         typer.secho(
-            f"❌ There is no `{federation}` federation declared in the "
+            f"❌ There is no `{federation}` federation declared in "
             "`pyproject.toml`.\n The following federations were found:\n\n"
             + "\n".join(available_feds),
             fg=typer.colors.RED,
