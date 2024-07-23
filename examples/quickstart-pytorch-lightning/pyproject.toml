@@ -10,7 +10,7 @@ authors = [{ name = "The Flower Authors", email = "hello@flower.ai" }]
 dependencies = [
     "flwr>=1.9.0,<2.0",
     "flwr-datasets[vision]>=0.0.2,<1.0.0",
-    "pytorch-lightning==2.3.3; sys_platform == 'darwin'",
+    "pytorch-lightning<2.0.0; sys_platform == 'darwin'",
     "pytorch-lightning==1.6.0; sys_platform != 'darwin'",
     "torchvision==0.14.1",
 ]
