@@ -372,8 +372,8 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
                 "The specified `num_unique_labels_per_partition`"
                 f"={self._num_unique_labels_per_partition} is greater than the number "
                 f"of unique classes in the given dataset={self._num_unique_labels}. "
-                "Reduce the `num_unique_labels_per_partition` or make use of a different "
-                "dataset to apply this partitioning."
+                "Reduce the `num_unique_labels_per_partition` or make use of a "
+                "different dataset to apply this partitioning."
             )
 
     def _check_distribution_array_sum_if_needed(self) -> None:
@@ -394,13 +394,15 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         if not self._partition_id_to_indices_determined:
             if self._num_partitions > self.dataset.num_rows:
                 raise ValueError(
-                    "The number of partitions ({self._num_partitions}) needs to be smaller than the number of "
-                    "samples in the dataset ({self.dataset.num_rows})."
+                    f"The number of partitions ({self._num_partitions}) needs to be "
+                    "smaller than the number of samples in the dataset "
+                    f"({self.dataset.num_rows})."
                 )
             if self._num_partitions % self._num_unique_labels != 0:
                 raise ValueError(
-                    f"The number of partitions ({self._num_partitions}) is not divisible "
-                    f"by the number of unique labels ({self._num_unique_labels})."
+                    f"The number of partitions ({self._num_partitions}) is not "
+                    f"divisible by the number of unique labels "
+                    f"{({self._num_unique_labels})}."
                 )
 
     def _check_num_partitions_greater_than_zero(self) -> None:
