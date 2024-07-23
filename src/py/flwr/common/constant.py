@@ -57,6 +57,9 @@ APP_DIR = "apps"
 FAB_CONFIG_FILE = "pyproject.toml"
 FLWR_HOME = "FLWR_HOME"
 
+# Constants entries in Node config for Simulation
+PARTITION_ID_KEY = "partition-id"
+NUM_PARTITIONS_KEY = "num-partitions"
 
 GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY = "flower-version"
 GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY = "should-exit"
