@@ -10,6 +10,7 @@ from flwr_datasets.partitioner import IidPartitioner
 
 disable_progress_bar()
 
+
 class MLP(nn.Module):
     """A simple MLP."""
 
@@ -43,17 +44,20 @@ def batch_iterate(batch_size, X, y):
         ids = perm[s : s + batch_size]
         yield X[ids], y[ids]
 
+
 fds = None  # Cache FederatedDataset
+
 
 def load_data(partition_id: int, num_partitions: int):
     # Only initialize `FederatedDataset` once
     global fds
     if fds is None:
         partitioner = IidPartitioner(num_partitions=num_partitions)
-        fds = FederatedDataset(dataset="ylecun/mnist",
-                               partitioners={"train": partitioner},
-                               trust_remote_code=True,
-                               )
+        fds = FederatedDataset(
+            dataset="ylecun/mnist",
+            partitioners={"train": partitioner},
+            trust_remote_code=True,
+        )
     partition = fds.load_partition(partition_id)
     partition_splits = partition.train_test_split(test_size=0.2, seed=42)
 

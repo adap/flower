@@ -10,13 +10,16 @@ from flwr_datasets.partitioner import IidPartitioner
 # Make TensorFlow log less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
+
 def load_model():
     # Load model and data (MobileNetV2, CIFAR-10)
     model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
     model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
     return model
 
+
 fds = None  # Cache FederatedDataset
+
 
 def load_data(partition_id, num_partitions):
     # Download and partition dataset
@@ -24,9 +27,10 @@ def load_data(partition_id, num_partitions):
     global fds
     if fds is None:
         partitioner = IidPartitioner(num_partitions=num_partitions)
-        fds = FederatedDataset(dataset="uoft-cs/cifar10",
-                               partitioners={"train": partitioner},
-                               )
+        fds = FederatedDataset(
+            dataset="uoft-cs/cifar10",
+            partitioners={"train": partitioner},
+        )
     partition = fds.load_partition(partition_id, "train")
     partition.set_format("numpy")
 
