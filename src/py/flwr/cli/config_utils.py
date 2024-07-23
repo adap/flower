@@ -182,8 +182,8 @@ def validate(
         return False, [reason], []
 
     # Validate clientapp
-    ref = config["tool"]["flwr"]["app"]["components"]["clientapp"]
-    is_valid, reason = object_ref.validate(ref, check_module, project_dir)
+    clientapp_ref = config["tool"]["flwr"]["app"]["components"]["clientapp"]
+    is_valid, reason = object_ref.validate(clientapp_ref, check_module, project_dir)
 
     if not is_valid and isinstance(reason, str):
         return False, [reason], []
