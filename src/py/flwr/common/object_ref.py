@@ -33,10 +33,7 @@ attribute.
 """
 
 
-if "" not in sys.path:
-    sys.path.insert(0, "")
-
-_current_sys_path: str = ""
+_current_sys_path: Optional[str] = None
 
 
 def validate(
@@ -66,6 +63,11 @@ def validate(
     Tuple[bool, Optional[str]]
         A boolean indicating whether an object reference is valid and
         the reason why it might not be.
+
+    Note
+    ----
+    This function will modify `sys.path` by inserting the provided `project_dir`
+    and removing the previously inserted `project_dir`.
     """
     module_str, _, attributes_str = module_attribute_str.partition(":")
     if not module_str:
@@ -128,6 +130,11 @@ def load_app(  # pylint: disable= too-many-branches
     -------
     Any
         The object specified by the module attribute string.
+
+    Note
+    ----
+    This function will modify `sys.path` by inserting the provided `project_dir`
+    and removing the previously inserted `project_dir`.
     """
     valid, error_msg = validate(module_attribute_str, check_module=False)
     if not valid and error_msg:
@@ -184,19 +191,18 @@ def load_app(  # pylint: disable= too-many-branches
 
 def _set_sys_path(directory: Optional[Union[str, Path]]) -> None:
     """Set the system path."""
-    global _current_sys_path  # pylint: disable=global-statement
-    # Assume the current working directory `""` is in `sys.path`
     if directory is None:
-        return
-
-    directory = Path(directory).absolute()
+        directory = Path.cwd()
+    else:
+        directory = Path(directory).absolute()
 
     # If the directory has already been added to `sys.path`, return
-    if str(directory) == _current_sys_path or directory == Path.cwd():
+    if str(directory) in sys.path:
         return
 
     # Remove the old path if it exists and is not `""`.
-    if _current_sys_path != "":
+    global _current_sys_path  # pylint: disable=global-statement
+    if _current_sys_path is not None:
         sys.path.remove(_current_sys_path)
 
     # Add the new path to sys.path
