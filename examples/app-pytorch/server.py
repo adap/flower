@@ -1,16 +1,10 @@
-"""fl_dp_sa: A Flower / PyTorch app."""
-
 from typing import List, Tuple
 
-from flwr.server import Driver, LegacyContext, ServerApp, ServerConfig
-from flwr.common import Context, Metrics, ndarrays_to_parameters
-from flwr.server.strategy import (
-    DifferentialPrivacyClientSideFixedClipping,
-    FedAvg,
-)
-from flwr.server.workflow import DefaultWorkflow, SecAggPlusWorkflow
+from flwr.server import ServerApp, ServerConfig
+from flwr.server.strategy import FedAvg
+from flwr.common import Metrics, ndarrays_to_parameters
 
-from fl_dp_sa.task import Net, get_weights
+from task import Net, get_weights
 
 
 # Define metric aggregation function
@@ -41,37 +35,31 @@ parameters = ndarrays_to_parameters(ndarrays)
 
 # Define strategy
 strategy = FedAvg(
-    fraction_fit=0.2,
-    fraction_evaluate=0.0,  # Disable evaluation for demo purpose
-    min_fit_clients=20,
-    min_available_clients=20,
+    fraction_fit=1.0,  # Select all available clients
+    fraction_evaluate=0.0,  # Disable evaluation
+    min_available_clients=2,
     fit_metrics_aggregation_fn=weighted_average,
     initial_parameters=parameters,
 )
-strategy = DifferentialPrivacyClientSideFixedClipping(
-    strategy, noise_multiplier=0.2, clipping_norm=10, num_sampled_clients=20
+
+
+# Define config
+config = ServerConfig(num_rounds=3)
+
+
+# Flower ServerApp
+app = ServerApp(
+    config=config,
+    strategy=strategy,
 )
 
 
-app = ServerApp()
+# Legacy mode
+if __name__ == "__main__":
+    from flwr.server import start_server
 
-
-@app.main()
-def main(driver: Driver, context: Context) -> None:
-    # Construct the LegacyContext
-    context = LegacyContext(
-        context=context,
-        config=ServerConfig(num_rounds=3),
+    start_server(
+        server_address="0.0.0.0:8080",
+        config=config,
         strategy=strategy,
     )
-
-    # Create the train/evaluate workflow
-    workflow = DefaultWorkflow(
-        fit_workflow=SecAggPlusWorkflow(
-            num_shares=7,
-            reconstruction_threshold=4,
-        )
-    )
-
-    # Execute
-    workflow(driver, context)
