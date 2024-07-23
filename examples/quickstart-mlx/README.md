@@ -65,7 +65,7 @@ flwr run
 You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example
 
 ```bash
-flwr run --run-config 'hidden_dim=64,num_server_rounds=5'
+flwr run --run-config hidden_dim=64,num_server_rounds=5
 ```
 
 ### Alternative wasy of running the example

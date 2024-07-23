@@ -69,14 +69,14 @@ def client_fn(context: Context) -> Client:
     """
 
     # Read the node_config to fetch data partition associated to this node
-    partition_id = int(context.node_config["partition-id"])
-    num_partitions = int(context.node_config["num-partitions"])
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
     data = load_data(partition_id, num_partitions)
 
     # Read the run config to get settings to configure the Client
-    num_layers = int(context.run_config["num_layers"])
-    hidden_dim = int(context.run_config["hidden_dim"])
-    batch_size = int(context.run_config["batch_size"])
+    num_layers = context.run_config["num_layers"]
+    hidden_dim = context.run_config["hidden_dim"]
+    batch_size = context.run_config["batch_size"]
     # Return Client instance
     return FlowerClient(num_layers, hidden_dim, batch_size, data).to_client()
 
