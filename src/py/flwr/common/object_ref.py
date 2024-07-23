@@ -66,7 +66,7 @@ def validate(
         The directory containing the module. If None, the current working directory
         is used. If `check_module` is True, the `project_dir` will be inserted into
         the system path, and the previously inserted `project_dir` will be removed.
-    state : Optional[SystemPathState], optional (default: None)
+    state : Optional[SystemPathState] (default: None)
         The state of the system path that stores the current system path inserted.
         If None, `flwr.common.object_ref.sys_path_state` will be used.
 
@@ -134,11 +134,11 @@ def load_app(  # pylint: disable= too-many-branches
     error_type : Type[Exception]
         The type of exception to be raised if the provided `module_attribute_str` is
         in an invalid format.
-    project_dir : Optional[Union[str, Path]], optional (default=None)
+    project_dir : Optional[Union[str, Path]] (default: None)
         The directory containing the module. If None, the current working directory
         is used. The `project_dir` will be inserted into the system path, and the
         previously inserted `project_dir` will be removed.
-    state : Optional[SystemPathState], optional (default: None)
+    state : Optional[SystemPathState] (default: None)
         The state of the system path that stores the current system path inserted.
         If None, `flwr.common.object_ref.sys_path_state` will be used.
 
