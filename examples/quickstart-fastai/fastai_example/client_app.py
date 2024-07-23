@@ -13,13 +13,17 @@ from flwr_datasets import FederatedDataset
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Lambda, Resize, ToTensor
 
+from flwr.common import Context
 from flwr.client import Client, ClientApp, NumPyClient
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
 
-def load_data(partition_id) -> tuple[DataLoader, DataLoader, DataLoader]:
-    fds = FederatedDataset(dataset="mnist", partitioners={"train": 10})
+def load_data(
+    partition_id,
+    num_partitions,
+) -> tuple[DataLoader, DataLoader, DataLoader]:
+    fds = FederatedDataset(dataset="mnist", partitioners={"train": num_partitions})
     partition = fds.load_partition(partition_id, "train")
 
     # Resize and repeat channels to use MNIST, which have grayscale images,
@@ -95,9 +99,18 @@ class FlowerClient(NumPyClient):
         return loss, len(self.dls.valid), {"accuracy": 1 - error_rate}
 
 
-def client_fn(node_id, partition_id) -> Client:
-    """Client function to return an instance of Client()."""
-    trainloader, valloader, _ = load_data(partition_id=partition_id)
+def client_fn(context: Context) -> Client:
+    """Construct a Client that will be run in a ClientApp.
+    You can use settings in `context.run_config` to parameterize the
+    construction of your Client. You could use the `context.node_config` to
+    , for example, indicate which dataset to load (e.g accesing the partition-id).
+    """
+
+    # Read the node_config to fetch data partition associated to this node
+    partition_id = int(context.node_config["partition-id"])
+    num_partitions = int(context.node_config["num-partitions"])
+
+    trainloader, valloader, _ = load_data(partition_id, num_partitions)
     dls = DataLoaders(trainloader, valloader)
     model = squeezenet1_1()
     learn = Learner(
