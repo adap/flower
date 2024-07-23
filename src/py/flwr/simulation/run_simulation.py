@@ -475,6 +475,14 @@ def _run_simulation(
     if "init_args" not in backend_config:
         backend_config["init_args"] = {}
 
+    # Set default client_resources if not passed
+    if "client_resources" not in backend_config:
+        backend_config["client_resources"] = {"num_cpus": 2, "num_gpus": 0}
+
+    # Initialization of backend config to enable GPU growth globally when set
+    if "actor" not in backend_config:
+        backend_config["actor"] = {"tensorflow": 0}
+
     # Set logging level
     logger = logging.getLogger("flwr")
     if verbose_logging:
@@ -491,6 +499,7 @@ def _run_simulation(
         # Check that Backend config has also enabled using GPU growth
         use_tf = backend_config.get("actor", {}).get("tensorflow", False)
         if not use_tf:
+            print("here")
             log(WARNING, "Enabling GPU growth for your backend.")
             backend_config["actor"]["tensorflow"] = True
 
@@ -580,8 +589,7 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
     parser.add_argument(
         "--backend-config",
         type=str,
-        default='{"client_resources": {"num_cpus":2, "num_gpus":0.0},'
-        '"actor": {"tensorflow": 0}}',
+        default="{}",
         help='A JSON formatted stream, e.g \'{"<keyA>":<value>, "<keyB>":<value>}\' to '
         "configure a backend. Values supported in <value> are those included by "
         "`flwr.common.typing.ConfigsRecordValues`. ",
