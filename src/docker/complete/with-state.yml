@@ -12,7 +12,9 @@ x-without-tls: &x-without-tls
 
 services:
   superlink:
-    # <<: *x-without-tls
-    <<: *x-with-tls
+    <<: *x-without-tls
+    # To toggle TLS encryption and persisting state for the SuperLink, comment the line above
+    # and uncomment the line below
+    # <<: *x-with-tls
     volumes:
       - ./state/:/app/state/:rw

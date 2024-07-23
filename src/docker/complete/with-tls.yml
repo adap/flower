@@ -12,24 +12,12 @@ services:
       - source: superlink-keyfile
         target: /app/certificates/server.key
 
-  supernode-1: &supernode
-    command:
-      - --superlink
-      - superlink:9092
-      - --root-certificates
-      - certificates/ca.crt
-    secrets:
-      - source: superlink-ca-certfile
-        target: /app/certificates/ca.crt
-
-  supernode-2: *supernode
-
   superexec:
     command:
       - --executor
       - flwr.superexec.deployment:executor
       - --executor-config
-      - superlink=superlink:9091,root-certificates=certificates/superlink-ca.crt
+      - superlink="superlink:9091",root-certificates="certificates/superlink-ca.crt"
       - --ssl-ca-certfile=certificates/ca.crt
       - --ssl-certfile=certificates/server.pem
       - --ssl-keyfile=certificates/server.key
@@ -42,6 +30,22 @@ services:
         target: /app/certificates/server.pem
       - source: superexec-keyfile
         target: /app/certificates/server.key
+
+  supernode-1: &supernode
+    command:
+      - --superlink
+      - superlink:9092
+      - --root-certificates
+      - certificates/ca.crt
+    secrets:
+      - source: superlink-ca-certfile
+        target: /app/certificates/ca.crt
+
+  supernode-2: *supernode
+
+  # uncomment to enable TLS on another supernode
+  #
+  # supernode-3: *supernode
 
 secrets:
   superlink-ca-certfile:
