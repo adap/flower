@@ -3,7 +3,7 @@ import warnings
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
-
+from task import set_model_params, get_model_parameters, set_initial_params
 import flwr as fl
 import utils
 from flwr_datasets import FederatedDataset
@@ -41,28 +41,28 @@ if __name__ == "__main__":
     )
 
     # Setting initial parameters, akin to model.compile for keras models
-    utils.set_initial_params(model, n_features=X_train.shape[1], n_classes=3)
+    set_initial_params(model, n_features=X_train.shape[1], n_classes=3)
 
     # Define Flower client
     class IrisClient(fl.client.NumPyClient):
         def get_parameters(self, config):  # type: ignore
-            return utils.get_model_parameters(model)
+            return get_model_parameters(model)
 
         def fit(self, parameters, config):  # type: ignore
-            utils.set_model_params(model, parameters)
+            set_model_params(model, parameters)
             # Ignore convergence failure due to low local epochs
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 model.fit(X_train, y_train)
             accuracy = model.score(X_train, y_train)
             return (
-                utils.get_model_parameters(model),
+                get_model_parameters(model),
                 len(X_train),
                 {"train_accuracy": accuracy},
             )
 
         def evaluate(self, parameters, config):  # type: ignore
-            utils.set_model_params(model, parameters)
+            set_model_params(model, parameters)
             loss = log_loss(y_test, model.predict_proba(X_test), labels=unique_labels)
             accuracy = model.score(X_test, y_test)
             return loss, len(X_test), {"test_accuracy": accuracy}
