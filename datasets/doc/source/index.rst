@@ -26,7 +26,7 @@ A learning-oriented series of tutorials is the best place to start.
    :caption: Tutorial
 
    tutorial-quickstart
-   tutorial-use-partitioner
+   tutorial-use-partitioners
    tutorial-visualize-label-distribution
 
 How-to guides
