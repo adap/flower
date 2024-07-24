@@ -45,10 +45,13 @@ or with ``mamba``::
 Verify installation
 -------------------
 
-The following command can be used to verify if Flower was successfully installed. If everything worked, it should print the version of Flower to the command line::
+The following command can be used to verify if Flower was successfully installed. If everything worked, it should print the version of Flower to the command line:
 
-  python -c "import flwr;print(flwr.__version__)"
-  1.9.0
+.. code-block:: bash
+   :substitutions:
+
+   python -c "import flwr;print(flwr.__version__)"
+   |current_flwr_version|
 
 
 Advanced installation options
