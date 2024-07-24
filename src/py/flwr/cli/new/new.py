@@ -38,7 +38,7 @@ class MlFramework(str, Enum):
     PYTORCH = "PyTorch"
     TENSORFLOW = "TensorFlow"
     JAX = "JAX"
-    HUGGINGFACE = "HF"
+    HUGGINGFACE = "HuggingFace"
     MLX = "MLX"
     SKLEARN = "sklearn"
     FLOWERTUNE = "FlowerTune"
