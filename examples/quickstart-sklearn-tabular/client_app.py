@@ -5,7 +5,6 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
 from task import set_model_params, get_model_parameters, set_initial_params
 import flwr as fl
-import utils
 from flwr_datasets import FederatedDataset
 
 if __name__ == "__main__":
