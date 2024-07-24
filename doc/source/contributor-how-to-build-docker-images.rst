@@ -65,7 +65,7 @@ Building the base image
    * - ``FLWR_VERSION``
      - Version of Flower to be installed.
      - Yes
-     - ``1.9.0``
+     - ``1.10.0``
    * - ``FLWR_PACKAGE``
      - The Flower package to be installed.
      - No
@@ -73,14 +73,14 @@ Building the base image
 
 
 The following example creates a base Ubuntu/Alpine image with Python 3.11.0, pip 23.0.1,
-setuptools 69.0.2 and Flower 1.9.0:
+setuptools 69.0.2 and Flower 1.10.0:
 
 .. code-block:: bash
 
   $ cd src/docker/base/<ubuntu|alpine>
   $ docker build \
     --build-arg PYTHON_VERSION=3.11.0 \
-    --build-arg FLWR_VERSION=1.9.0 \
+    --build-arg FLWR_VERSION=1.10.0 \
     --build-arg PIP_VERSION=23.0.1 \
     --build-arg SETUPTOOLS_VERSION=69.0.2 \
     -t flwr_base:0.1.0 .
@@ -106,7 +106,7 @@ Building the SuperLink/SuperNode or ServerApp image
    * - ``BASE_IMAGE``
      - The Tag of the Flower base image.
      - Yes
-     - ``1.9.0-py3.10-ubuntu22.04``
+     - ``1.10.0-py3.10-ubuntu22.04``
 
 The following example creates a SuperLink/SuperNode or ServerApp image with the official Flower
 base image:
