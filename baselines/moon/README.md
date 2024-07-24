@@ -74,29 +74,27 @@ pyenv local 3.10.6
 pip install -e .
 ```
 
-# TODO: update below with `flwr run`
-
 ## Running the Experiments
 
-First ensure you have activated your Poetry environment (execute `poetry shell` from this directory). To run MOON on CIFAR-10 (Table 1 of the paper), you should run:
+First ensure you have activated your. To run MOON on CIFAR-10 (Table 1 of the paper), you should run from the top-level directory of this baseline:
 ```bash  
-python -m moon.main --config-name cifar10 
+flwr run .
 ```
 
 To run MOON on CIFAR-100 (Table 1 of the paper), you should run:
 ```bash
-python -m moon.main --config-name cifar100
+python -m moon.main --config-name cifar100 # update with `flwr run`
 ```
 
 
 You can also run FedProx on CIFAR-10:
 ```bash
-python -m moon.main --config-name cifar10_fedprox
+python -m moon.main --config-name cifar10_fedprox # update with `flwr run`
 ```
 
 To run FedProx on CIFAR-100:
 ```bash
-python -m moon.main --config-name cifar100_fedprox
+python -m moon.main --config-name cifar100_fedprox # update with `flwr run`
 ```
 
 ## Expected Results
@@ -123,12 +121,12 @@ You can tune the hyperparameter `mu` for both MOON and FedProx by changing the c
 ### Figure 8(a)
 You can run the experiments in Figure 8 of the paper. To run MOON (`mu=10`) on CIFAR-100 with 50 clients (Figure 8(a) of the paper):
 ```bash
-python -m moon.main --config-name cifar100_50clients
+python -m moon.main --config-name cifar100_50clients # update with `flwr run`
 ```
 
 To run FedProx on CIFAR-100 with 50 clients (Figure 8(a) of the paper):
 ```bash
-python -m moon.main --config-name cifar100_50clients_fedprox
+python -m moon.main --config-name cifar100_50clients_fedprox # update with `flwr run`
 ```
 
 
@@ -138,5 +136,5 @@ You can find the curve presenting MOON and FedProx below.
 
 You may also run MOON on CIFAR-100 with 100 clients (Figure 8(b) of the paper):
 ```bash
-python -m moon.main --config-name cifar100_100clients
+python -m moon.main --config-name cifar100_100clients # update with `flwr run`
 ```
