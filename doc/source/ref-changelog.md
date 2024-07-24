@@ -6,19 +6,7 @@
 
 We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
 
-`Adam Narozniak`, `Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Danny`, `Gustavo Bertoli`, `Heng Pan`, `Ikko Eltociear Ashimine`, `Javier`, `Jiahao Tan`, `Mohammad Naseri`, `Robert Steiner`, `Sebastian van der Voort`, `Taner Topal`, `Weblate (bot)`, `Yan Gao` <!---TOKEN_v1.10.0-->
-
-### Unknown changes
-
-- **chore(deps): bump docker/setup-qemu-action from 3.0.0 to 3.1.0** ([#3734](https://github.com/adap/flower/pull/3734))
-
-- **chore(deps): bump scikit-learn from 1.4.2 to 1.5.0 in /examples/fl-tabular** ([#3656](https://github.com/adap/flower/pull/3656))
-
-- **chore(deps): bump docker/setup-buildx-action from 3.3.0 to 3.4.0** ([#3735](https://github.com/adap/flower/pull/3735))
-
-- **chore(deps): bump actions/download-artifact from 4.1.7 to 4.1.8** ([#3733](https://github.com/adap/flower/pull/3733))
-
-- **chore(deps): bump actions/upload-artifact from 4.3.3 to 4.3.4** ([#3736](https://github.com/adap/flower/pull/3736))
+`Adam Narozniak`, `Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Danny`, `Gustavo Bertoli`, `Heng Pan`, `Ikko Eltociear Ashimine`, `Javier`, `Jiahao Tan`, `Mohammad Naseri`, `Robert Steiner`, `Sebastian van der Voort`, `Taner Topal`, `Yan Gao` <!---TOKEN_v1.10.0-->
 
 ### What's new?
 
