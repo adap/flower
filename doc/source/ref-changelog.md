@@ -10,231 +10,93 @@ We would like to give our special thanks to all the contributors who made the ne
 
 ### What's new?
 
-- **feat(framework) Add** `run_config` **to** `ServerApp` `Context` ([#3750](https://github.com/adap/flower/pull/3750))
+- **Introduce** `flwr run` **(beta)** ([#3810](https://github.com/adap/flower/pull/3810), [#3826](https://github.com/adap/flower/pull/3826), [#3880](https://github.com/adap/flower/pull/3880), [#3807](https://github.com/adap/flower/pull/3807), [#3800](https://github.com/adap/flower/pull/3800), [#3814](https://github.com/adap/flower/pull/3814), [#3811](https://github.com/adap/flower/pull/3811), [#3809](https://github.com/adap/flower/pull/3809), [#3819](https://github.com/adap/flower/pull/3819))
 
-- **feat(framework) Add simulation engine** `SuperExec` **plugin** ([#3589](https://github.com/adap/flower/pull/3589))
+  Flower 1.10 ships the first beta release of the new `flwr run` command. `flwr run` can run different projects using `flwr run path/to/project`, it enables you to easily switch between different federations using `flwr run . federation` and it runs your Flower project using either local simulation or the new (experimental) SuperExec service. This allows Flower to scale federatated learning from fast local simulation to large-scale production deployment, seamlessly. All projects generated with `flwr new` are immediately runnable using `flwr run`. Give it a try: use `flwr new` to generate a project and then run it using `flwr run`.
 
-- **feat(framework) Use federations config in** `flwr run` ([#3800](https://github.com/adap/flower/pull/3800))
+- **Introduce run config** ([#3751](https://github.com/adap/flower/pull/3751), [#3750](https://github.com/adap/flower/pull/3750), [#3845](https://github.com/adap/flower/pull/3845), [#3824](https://github.com/adap/flower/pull/3824), [#3746](https://github.com/adap/flower/pull/3746), [#3728](https://github.com/adap/flower/pull/3728), [#3730](https://github.com/adap/flower/pull/3730), [#3725](https://github.com/adap/flower/pull/3725), [#3729](https://github.com/adap/flower/pull/3729), [#3580](https://github.com/adap/flower/pull/3580), [#3578](https://github.com/adap/flower/pull/3578), [#3576](https://github.com/adap/flower/pull/3576), [#3798](https://github.com/adap/flower/pull/3798), [#3732](https://github.com/adap/flower/pull/3732), [#3815](https://github.com/adap/flower/pull/3815))
 
-- **feat(framework) Introduce new** `client_fn` **signature passing the** `Context` ([#3779](https://github.com/adap/flower/pull/3779))
+  The new run config feature allows you to run your Flower project in different configurations without having to change a single line of code. You can now build a configurable `ServerApp` and `ClientApp` that read configuration values at runtime. This enables you to specify config values like `learning-rate=0.01` in `pyproject.toml` (under the `[tool.flwr.app.config]` key). These config values can then be easily overridden via `flwr run --run-config learning-rate=0.02`, and read from `Context` using `lr = context.run_config["learning-rate"]`. Create a new project using `flwr new` to see run config in action.
 
-- **feat(framework) Add SuperExec binary** ([#3603](https://github.com/adap/flower/pull/3603))
+- **Generalize** `client_fn` **signature to** `client_fn(context: Context) -> Client` ([#3779](https://github.com/adap/flower/pull/3779), [#3697](https://github.com/adap/flower/pull/3697), [#3694](https://github.com/adap/flower/pull/3694), [#3696](https://github.com/adap/flower/pull/3696))
 
-- **feat(framework) Add override config to** `Run` ([#3730](https://github.com/adap/flower/pull/3730))
+  The `client_fn` signature has been generalized to `client_fn(context: Context) -> Client`. It now receives a `Context` object instead of the (now depreacated) `cid: str`. `Context` allows accessing `node_id`, `node_config` and `run_config`, among other things. This enables you to build a configurable `ClientApp` that leverages the new run config system.
 
-- **feat(framework) Add SuperExec Dockerfile** ([#3723](https://github.com/adap/flower/pull/3723))
+  The previous signature `client_fn(cid: str)` is now deprecated and support for it will be removed in a future release. Use `client_fn(context: Context) -> Client` everywhere.
 
-- **feat(framework) Include default number of server rounds in templates** ([#3821](https://github.com/adap/flower/pull/3821))
+- **Introduce new** `server_fn(context)` ([#3773](https://github.com/adap/flower/pull/3773), [#3796](https://github.com/adap/flower/pull/3796), [#3771](https://github.com/adap/flower/pull/3771))
 
-- **feat(framework) Introduce a new deprecation function that warns users and provides an code example** ([#3776](https://github.com/adap/flower/pull/3776))
+  In addition to the new `client_fn(context:Context)`, a new `server_fn(context: Context) -> ServerAppComponents` can now be passed to `ServerApp` (instead of passing, for example, `Strategy`, directly). This enables you to leverage the full `Context` on the server-side to build a configurable `ServerApp`.
 
-- **feat(framework) Implement** `run_supernode` ([#3353](https://github.com/adap/flower/pull/3353))
+- **Relaunch all** `flwr new` **templates** ([#3877](https://github.com/adap/flower/pull/3877), [#3821](https://github.com/adap/flower/pull/3821), [#3587](https://github.com/adap/flower/pull/3587), [#3795](https://github.com/adap/flower/pull/3795), [#3875](https://github.com/adap/flower/pull/3875), [#3859](https://github.com/adap/flower/pull/3859), [#3760](https://github.com/adap/flower/pull/3760))
 
-- **feat(examples) Add Tabular Dataset Example** ([#3568](https://github.com/adap/flower/pull/3568))
+  All `flwr new` templates have been significantly updated to showcase new Flower features and best practices. This includes using `flwr run` and the new run config feature. You can now easily create a new project using `flwr new` and, after following the instructions to install it, `flwr run` it.
 
-- **feat(framework) Parse initialization arguments to** `ray` ([#3543](https://github.com/adap/flower/pull/3543))
+- **Introduce** `flower-supernode` **(preview)** ([#3353](https://github.com/adap/flower/pull/3353))
 
-- **feat(framework) Add initial** `SuperExec` **service** ([#3555](https://github.com/adap/flower/pull/3555))
+  The new `flower-supernode` CLI is here to replace `flower-client-app`. `flower-supernode` brings full multi-app support to the Flower client-side. It also allows to pass `--node-config` to the SuperNode, which is accessible in your `ClientApp` via `Context` (using the new `client_fn(context)`).
 
-- **feat(framework) Add ca-certificates package** ([#3591](https://github.com/adap/flower/pull/3591))
+- **Introduce node config** ([#3782](https://github.com/adap/flower/pull/3782), [#3780](https://github.com/adap/flower/pull/3780), [#3695](https://github.com/adap/flower/pull/3695), [#3886](https://github.com/adap/flower/pull/3886))
 
-- **feat(framework) Add additional user prompt for** `flowertune` **template in** `flwr new` ([#3760](https://github.com/adap/flower/pull/3760))
+  A new node config feature allows you to pass a static configuration to the SuperNode. This configuration is read-only and available to every `ClientApp` running on that SuperNode. A `ClientApp` can access the node config via `Context` (`context.node_config`).
 
-- **feat(framework) Add run configs** ([#3725](https://github.com/adap/flower/pull/3725))
+- **Introduce SuperExec (experimental)** ([#3605](https://github.com/adap/flower/pull/3605), [#3723](https://github.com/adap/flower/pull/3723), [#3731](https://github.com/adap/flower/pull/3731), [#3589](https://github.com/adap/flower/pull/3589), [#3604](https://github.com/adap/flower/pull/3604), [#3622](https://github.com/adap/flower/pull/3622), [#3838](https://github.com/adap/flower/pull/3838), [#3720](https://github.com/adap/flower/pull/3720), [#3606](https://github.com/adap/flower/pull/3606), [#3602](https://github.com/adap/flower/pull/3602), [#3603](https://github.com/adap/flower/pull/3603), [#3555](https://github.com/adap/flower/pull/3555), [#3808](https://github.com/adap/flower/pull/3808), [#3724](https://github.com/adap/flower/pull/3724), [#3658](https://github.com/adap/flower/pull/3658), [#3629](https://github.com/adap/flower/pull/3629))
 
-- **feat(framework) Add deployment engine executor** ([#3629](https://github.com/adap/flower/pull/3629))
+  This is the first experimental release of Flower SuperExec, a new service that executes your runs. It's not ready for production deployment just yet, but don't hesitate to give it a try if you're interested.
 
-- **feat(framework) Add** `GrpcAdapterServicer` ([#3538](https://github.com/adap/flower/pull/3538))
+- **Add new federated learning with tabular data example** ([#3568](https://github.com/adap/flower/pull/3568))
 
-- **feat(framework) Add federation argument to** `flwr run` ([#3807](https://github.com/adap/flower/pull/3807))
+  A new code example exemplifies a federated learning setup using the Flower framework on the Adult Census Income tabular dataset.
 
-- **feat(framework) Add** `GrpcAdapter` **class** ([#3536](https://github.com/adap/flower/pull/3536))
+- **Create generic adapter layer (preview)** ([#3538](https://github.com/adap/flower/pull/3538), [#3536](https://github.com/adap/flower/pull/3536), [#3540](https://github.com/adap/flower/pull/3540))
 
-- **feat(framework) Add** `node-config` **arg to SuperNode** ([#3782](https://github.com/adap/flower/pull/3782))
+  A new generic gRPC adapter layer allows 3rd-party frameworks to integrate with Flower in a transparent way. This makes Flower more modular and allows for integration into other federated learning solutions and platforms.
 
-- **feat(framework) Update proto files for SuperExec logstream** ([#3622](https://github.com/adap/flower/pull/3622))
+- **Refactor Flower Simulation Engine** ([#3581](https://github.com/adap/flower/pull/3581), [#3471](https://github.com/adap/flower/pull/3471), [#3804](https://github.com/adap/flower/pull/3804), [#3468](https://github.com/adap/flower/pull/3468), [#3839](https://github.com/adap/flower/pull/3839), [#3806](https://github.com/adap/flower/pull/3806), [#3861](https://github.com/adap/flower/pull/3861), [#3543](https://github.com/adap/flower/pull/3543), [#3472](https://github.com/adap/flower/pull/3472), [#3829](https://github.com/adap/flower/pull/3829), [#3469](https://github.com/adap/flower/pull/3469))
 
-- **feat(framework) Update subprocess launch mechanism for simulation plugin** ([#3826](https://github.com/adap/flower/pull/3826))
+  The Simulation Engine was significantly refactored. This results in faster and more stable simulations. It is also the foundation for upcoming changes that aim to provide the next level of performance and configurability in federated learning simulations.
 
-- **feat(framework) Capture** `node_id` **/** `node_config` **in** `Context` **via** `NodeState` ([#3780](https://github.com/adap/flower/pull/3780))
+- **Optimize Docker containers** ([#3591](https://github.com/adap/flower/pull/3591))
 
-- **feat(framework) Prompt user for confirmation before flwr new override** ([#3859](https://github.com/adap/flower/pull/3859))
+  Flower Docker containers were optimized and updated to use that latest Flower framework features.
 
-- **feat(framework) Enable setting** `run_id` **when starting simulation** ([#3576](https://github.com/adap/flower/pull/3576))
+- **Improve logging** ([#3776](https://github.com/adap/flower/pull/3776), [#3789](https://github.com/adap/flower/pull/3789))
 
-- **feat(framework) Support non-** `str` **config value types** ([#3746](https://github.com/adap/flower/pull/3746))
+  Improved logging aims to be more concise and helpful to show you the details you actually care about.
 
-- **feat(framework) Add secure channel support for SuperExec** ([#3808](https://github.com/adap/flower/pull/3808))
+- **Refactor framework internals** ([#3621](https://github.com/adap/flower/pull/3621), [#3792](https://github.com/adap/flower/pull/3792), [#3772](https://github.com/adap/flower/pull/3772), [#3805](https://github.com/adap/flower/pull/3805), [#3583](https://github.com/adap/flower/pull/3583), [#3825](https://github.com/adap/flower/pull/3825), [#3597](https://github.com/adap/flower/pull/3597), [#3802](https://github.com/adap/flower/pull/3802), [#3569](https://github.com/adap/flower/pull/3569))
 
-- **feat(framework) Use** `Run` **as** `get_run` **return type** ([#3729](https://github.com/adap/flower/pull/3729))
-
-- **feat(framework) Add utility functions for config parsing and handling** ([#3732](https://github.com/adap/flower/pull/3732))
-
-- **feat(framework) Allow** `flower-server-app` **to start with** `run_id` ([#3658](https://github.com/adap/flower/pull/3658))
-
-- **feat(framework) Add proto changes for config overrides** ([#3728](https://github.com/adap/flower/pull/3728))
-
-- **feat(framework) Introduce** `ServerAppComponents` **dataclass** ([#3771](https://github.com/adap/flower/pull/3771))
-
-- **feat(framework) Add** `run_config` **to** `ClientApp` `Context` ([#3751](https://github.com/adap/flower/pull/3751))
-
-- **feat(framework) Add override config to SuperExec** ([#3731](https://github.com/adap/flower/pull/3731))
-
-- **feat(framework) Add** `GetRun` **rpc to the Driver servicer** ([#3578](https://github.com/adap/flower/pull/3578))
-
-- **feat(framework) Add FlowerTune templates to** `flwr new` ([#3587](https://github.com/adap/flower/pull/3587))
-
-- **feat(framework) Update context registration when running an app directory** ([#3815](https://github.com/adap/flower/pull/3815))
-
-- **feat(framework) Add** `flwr install` **command** ([#3258](https://github.com/adap/flower/pull/3258))
-
-- **feat(framework) Add SuperExec to flwr run CLI** ([#3605](https://github.com/adap/flower/pull/3605))
-
-- **feat(framework) Remove federations field from FAB** ([#3814](https://github.com/adap/flower/pull/3814))
-
-- **feat(framework) Add SuperExec** `--executor-config` ([#3720](https://github.com/adap/flower/pull/3720))
-
-- **feat(framework) Read** `backend_config` **from config when running simulation via** `flwr run` ([#3581](https://github.com/adap/flower/pull/3581))
-
-- **feat(framework) Support running app directories directly via** `flower-simulation` ([#3810](https://github.com/adap/flower/pull/3810))
-
-- **feat(framework) Install Python package(s) on** `flwr install` ([#3816](https://github.com/adap/flower/pull/3816))
-
-- **feat(framework) Use dataset caching in** `flwr new` **templates** ([#3877](https://github.com/adap/flower/pull/3877))
-
-- **feat(framework) Make** `NodeState` **capture** `partition-id` ([#3695](https://github.com/adap/flower/pull/3695))
-
-- **feat(framework) Implement DriverAPI** `GetRun` ([#3580](https://github.com/adap/flower/pull/3580))
-
-- **feat(framework) Pass** `partition_id` **from** `Context` **into** `client_fn` ([#3696](https://github.com/adap/flower/pull/3696))
-
-- **feat(framework) Add SuperExec servicer** ([#3606](https://github.com/adap/flower/pull/3606))
-
-- **feat(framework) Add run_config to templates** ([#3845](https://github.com/adap/flower/pull/3845))
-
-- **feat(framework) Use types in template configs** ([#3875](https://github.com/adap/flower/pull/3875))
-
-- **feat(framework) Add** `grpc-adapter` **transport** ([#3540](https://github.com/adap/flower/pull/3540))
-
-- **feat(framework) Allow multiple separated run-config arguments** ([#3824](https://github.com/adap/flower/pull/3824))
-
-- **feat(framework) Add proto files for SuperExec service** ([#3602](https://github.com/adap/flower/pull/3602))
-
-- **feat(framework) Add SuperExec constants** ([#3604](https://github.com/adap/flower/pull/3604))
-
-- **feat(framework) Capture** `partition_id` **in** `Context` ([#3694](https://github.com/adap/flower/pull/3694))
-
-- **feat(framework) Introduce new** `client_fn` **signature** ([#3697](https://github.com/adap/flower/pull/3697))
-
-- **feat(framework) Introduce** `server_fn` **to setup** `ServerApp` ([#3773](https://github.com/adap/flower/pull/3773))
-
-- **feat(framework) Send federation config to SuperExec** ([#3838](https://github.com/adap/flower/pull/3838))
-
-### Other changes
-
-- **fix(framework) Display correct federation error message** ([#3825](https://github.com/adap/flower/pull/3825))
-
-- **refactor(framework) Stop launching simulation in thread if asyncio loop detected** ([#3472](https://github.com/adap/flower/pull/3472))
-
-- **fix(framework) Exclude incompatible** `grpcio` **versions** ([#3772](https://github.com/adap/flower/pull/3772))
-
-- **refactor(framework) Remove** `partition_id` **from** `Context` ([#3792](https://github.com/adap/flower/pull/3792))
-
-- **refactor(framework) Reload the module and its dependencies in** `load_app` ([#3597](https://github.com/adap/flower/pull/3597))
-
-- **ci(framework) Build SuperExec nightly Docker image** ([#3724](https://github.com/adap/flower/pull/3724))
-
-- **refactor(framework) Refactor** `ClientApp` **loading to use explicit arguments** ([#3805](https://github.com/adap/flower/pull/3805))
-
-- **fix(framework) Pass** `superlink` **address when starting** `supernode` ([#3621](https://github.com/adap/flower/pull/3621))
-
-- **refactor(framework) Consolidate** `run_id` **and** `node_id` **creation logic** ([#3569](https://github.com/adap/flower/pull/3569))
-
-- **refactor(framework) Register** `Context` **early in Simulation Engine** ([#3804](https://github.com/adap/flower/pull/3804))
-
-- **refactor(framework) Move** `tool.flwr` **to** `tool.flwr.app` ([#3811](https://github.com/adap/flower/pull/3811))
-
-- **refactor(framework) Refactor IP address format in SuperLink** ([#3583](https://github.com/adap/flower/pull/3583))
-
-- **fix(framework) Keep** `BackendConfig` **passed to** `run_simulation` ([#3861](https://github.com/adap/flower/pull/3861))
-
-- **refactor(framework) Run app with** `flwr run` **calling** `flower-simulation` ([#3819](https://github.com/adap/flower/pull/3819))
-
-- **fix(examples) Fix XGBoost examples' titles** ([#3707](https://github.com/adap/flower/pull/3707))
-
-- **fix(framework) Enable overriding of run configs with simulation plugin** ([#3839](https://github.com/adap/flower/pull/3839))
-
-- **refactor(framework) Replace** `asyncio.Event` **with** `threading.Event` ([#3471](https://github.com/adap/flower/pull/3471))
-
-- **refactor(framework) Introduce double queue mechanism for Simulation Engine** ([#3468](https://github.com/adap/flower/pull/3468))
-
-- **refactor(framework) Update launch of simulation from executor plugin** ([#3829](https://github.com/adap/flower/pull/3829))
-
-- **refactor(framework) Improve app loading in simulation engine** ([#3806](https://github.com/adap/flower/pull/3806))
-
-- **refactor(framework) Rename** `flwr run` **CLI argument** ([#3880](https://github.com/adap/flower/pull/3880))
-
-- **refactor(framework) Remove** `asyncio` **from** `Backend` **definitions** ([#3469](https://github.com/adap/flower/pull/3469))
-
-- **refactor(framework) Rename** `--config` **to** `--run-config` ([#3798](https://github.com/adap/flower/pull/3798))
-
-- **refactor(framework) Log warnings on SuperNode retry attempts** ([#3789](https://github.com/adap/flower/pull/3789))
-
-- **refactor(framework) Update** `flwr new` **templates with new** `client_fn` **signature** ([#3795](https://github.com/adap/flower/pull/3795))
-
-- **refactor(framework) Switch to** `tool.flwr` **instead of** `flower` **in** `pyproject.toml` ([#3809](https://github.com/adap/flower/pull/3809))
-
-- **fix(framework) Remove** `str` **casting for node config** ([#3886](https://github.com/adap/flower/pull/3886))
-
-- **refactor(framework) Update** `flwr new` **templates with new** `server_fn` **signature** ([#3796](https://github.com/adap/flower/pull/3796))
-
-- **refactor(framework) Replace** `run_id` **with** `Run` **in simulation** ([#3802](https://github.com/adap/flower/pull/3802))
+  As always, many parts of the Flower framework and quality infrastructure were improved and updated.
 
 ### Documentation improvements
 
-- **docs(framework) Add latest Hosted Weblate translation updates** ([#3679](https://github.com/adap/flower/pull/3679))
+- **Add 🇰🇷 Korean translations** ([#3680](https://github.com/adap/flower/pull/3680))
 
-- **docs(examples) Update XGBoost tutorial** ([#3634](https://github.com/adap/flower/pull/3634))
+- **Update translations** ([#3586](https://github.com/adap/flower/pull/3586), [#3679](https://github.com/adap/flower/pull/3679), [#3570](https://github.com/adap/flower/pull/3570), [#3681](https://github.com/adap/flower/pull/3681), [#3617](https://github.com/adap/flower/pull/3617), [#3674](https://github.com/adap/flower/pull/3674), [#3671](https://github.com/adap/flower/pull/3671), [#3572](https://github.com/adap/flower/pull/3572), [#3631](https://github.com/adap/flower/pull/3631))
 
-- **docs(framework) Update client_fn docstrings to new signature** ([#3793](https://github.com/adap/flower/pull/3793))
+- **Update documentation** ([#3864](https://github.com/adap/flower/pull/3864), [#3688](https://github.com/adap/flower/pull/3688), [#3562](https://github.com/adap/flower/pull/3562), [#3641](https://github.com/adap/flower/pull/3641), [#3384](https://github.com/adap/flower/pull/3384), [#3634](https://github.com/adap/flower/pull/3634), [#3823](https://github.com/adap/flower/pull/3823), [#3793](https://github.com/adap/flower/pull/3793), [#3707](https://github.com/adap/flower/pull/3707))
 
-- **docs(framework) Add latest Hosted Weblate translation updates** ([#3617](https://github.com/adap/flower/pull/3617))
+  Updated documentation includes new install instructions for different shells, a new Flower Code Examples documentation landing page, new `flwr` CLI docs and an updated federated XGBoost code example.
 
-- **docs(framework) Document public/private API approach** ([#3562](https://github.com/adap/flower/pull/3562))
+### Deprecations
 
-- **docs(framework) Fix pip command of installing** `flwr[simulation]` ([#3641](https://github.com/adap/flower/pull/3641))
+- **Deprecate** `client_fn(cid: str)`
 
-- **docs(framework) Add latest Hosted Weblate translation updates** ([#3671](https://github.com/adap/flower/pull/3671))
+  `client_fn` used to have a signature `client_fn(cid: str) -> Client`. This signature is now deprecated. Use the new signature `client_fn(context: Context) -> Client` instead. The new argument `context` allows accessing `node_id`, `node_config`, `run_config` and other `Context` features. When running using the simulation engine (or using `flower-supernode` with a custom `--node-config partition-id=...`), `context.node_config["partition-id"]` will return an `int` partition ID that can be used with Flower Datasets to load a different partition of the dataset on each simulated or deployed SuperNode.
 
-- **docs(framework) Add latest Hosted Weblate translation updates** ([#3586](https://github.com/adap/flower/pull/3586))
+- **Deprecate passing** `Server/ServerConfig/Strategy/ClientManager` **to** `ServerApp` **directly**
 
-- **docs(examples) Fix typo in iOS example notebook** ([#3823](https://github.com/adap/flower/pull/3823))
-
-- **docs(framework) Add latest Hosted Weblate translation updates** ([#3570](https://github.com/adap/flower/pull/3570))
-
-- **docs(framework) Add Korean version** ([#3680](https://github.com/adap/flower/pull/3680))
-
-- **docs(examples) Add table and improve design** ([#3688](https://github.com/adap/flower/pull/3688))
-
-- **docs(framework) Add latest Hosted Weblate translation updates** ([#3674](https://github.com/adap/flower/pull/3674))
-
-- **docs(framework) Fix install instructions for all shells** ([#3864](https://github.com/adap/flower/pull/3864))
-
-- **docs(framework) Add latest Hosted Weblate translation updates** ([#3681](https://github.com/adap/flower/pull/3681))
-
-- **docs(framework) Update translation text** ([#3631](https://github.com/adap/flower/pull/3631))
-
-- **docs(framework) Add latest Hosted Weblate translation updates** ([#3572](https://github.com/adap/flower/pull/3572))
-
-- **docs(framework) Add** `flwr` **cli docs** ([#3384](https://github.com/adap/flower/pull/3384))
+  Creating `ServerApp` using `ServerApp(config=config, strategy=strategy)` is now deprecated. Instead of passing `Server/ServerConfig/Strategy/ClientManager` to `ServerApp` directly, pass a `server_fn(context: Context) -> ServerAppComponents` (`ServerApp(server_fn=server_fn)`). `ServerAppComponents` can hold references to `Server/ServerConfig/Strategy/ClientManager`. In addition to that, `server_fn` allows you to access `Context` (for example, to read the `run_config`).
 
 ### Incompatible changes
 
-- **break(framework) Remove** `flower-driver-api` **and** `flower-fleet-api` ([#3418](https://github.com/adap/flower/pull/3418))
+- **Remove support for `client_ids` in `start_simulation`** ([#3699](https://github.com/adap/flower/pull/3699))
 
-- **break(framework) Remove support for** `client_ids` **in** `start_simulation` ([#3699](https://github.com/adap/flower/pull/3699))
+  The (rarely used) feature that allowed passing custom `client_ids` to the `start_simulation` function was removed. This removal is part of a bigger effort to refactor the simulation engine and speed up simulations by a large factor.
 
-- **break(examples) Rename resplitter in examples** ([#3485](https://github.com/adap/flower/pull/3485))
+- **Remove `flower-driver-api` and `flower-fleet-api`** ([#3418](https://github.com/adap/flower/pull/3418))
+
+  The two deprecated CLI commands `flower-driver-api` and `flower-fleet-api` were removed in an effort to streamline the SuperLink developer experience. Use `flower-superlink` instead.
 
 ## v1.9.0 (2024-06-10)
 
