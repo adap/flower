@@ -34,7 +34,7 @@ pytorch-federated-variational-autoencoder
 
 ## Install dependencies
 
-Install the dependencies defined in `pyproject.toml` as well as the `custom_metrics_example` package.
+Install the dependencies defined in `pyproject.toml` as well as the `fedvaeexample` package.
 
 ```bash
 pip install -e .

@@ -10,8 +10,8 @@ authors = [
 version = "0.1.0"
 description = "Federated Variational Autoencoder Example with Flower"
 dependencies = [
-    "flwr>=1.9.0,<2.0",
-    "flwr-datasets[vision]>=0.0.2,<1.0.0",
+    "flwr>=1.10.0,<2.0",
+    "flwr-datasets[vision]>=0.0.3,<1.0.0",
     "torch==1.13.1",
     "torchvision==0.14.1",
 ]
@@ -30,12 +30,7 @@ clientapp = "fedvaeexample.client_app:app"
 num_server_rounds = 3
 
 [tool.flwr.federations]
-default = "localhost"
+default = "local-simulation"
 
-[tool.flwr.federations.localhost]
+[tool.flwr.federations.local-simulation]
 options.num-supernodes = 2
-
-[tool.flwr.federations.superexec]
-address = "0.0.0.0:9093"
-insecure = true
-
