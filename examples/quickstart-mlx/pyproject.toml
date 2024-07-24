@@ -24,7 +24,6 @@ publisher = "flowerteam"
 serverapp = "mlxexample.server_app:app"
 clientapp = "mlxexample.client_app:app"
 
-
 [tool.flwr.app.config]
 num-server-rounds = 3
 fraction-evaluate = 0.5
