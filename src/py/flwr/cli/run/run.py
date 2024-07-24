@@ -27,7 +27,7 @@ from typing_extensions import Annotated
 
 from flwr.cli.build import build
 from flwr.cli.config_utils import load_and_validate
-from flwr.common.config import parse_config_args
+from flwr.common.config import flatten_dict, parse_config_args
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
 from flwr.common.serde import user_config_to_proto
@@ -41,20 +41,23 @@ CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds
 
 # pylint: disable-next=too-many-locals
 def run(
-    directory: Annotated[
+    app_dir: Annotated[
         Path,
-        typer.Argument(help="Path of the Flower project to run"),
+        typer.Argument(help="Path of the Flower project to run."),
     ] = Path("."),
-    federation_name: Annotated[
+    federation: Annotated[
         Optional[str],
-        typer.Argument(help="Name of the federation to run the app on"),
+        typer.Argument(help="Name of the federation to run the app on."),
     ] = None,
     config_overrides: Annotated[
         Optional[List[str]],
         typer.Option(
             "--run-config",
             "-c",
-            help="Override configuration key-value pairs",
+            help="Override configuration key-value pairs, should be of the format:\n\n"
+            "`--run-config key1=value1,key2=value2 --run-config key3=value3`\n\n"
+            "Note that `key1`, `key2`, and `key3` in this example need to exist "
+            "inside the `pyproject.toml` in order to be properly overriden.",
         ),
     ] = None,
     follow: Annotated[
@@ -69,7 +72,7 @@ def run(
     """Run Flower project."""
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
-    pyproject_path = directory / "pyproject.toml" if directory else None
+    pyproject_path = app_dir / "pyproject.toml" if app_dir else None
     config, errors, warnings = load_and_validate(path=pyproject_path)
 
     if config is None:
@@ -92,11 +95,9 @@ def run(
 
     typer.secho("Success", fg=typer.colors.GREEN)
 
-    federation_name = federation_name or config["tool"]["flwr"]["federations"].get(
-        "default"
-    )
+    federation = federation or config["tool"]["flwr"]["federations"].get("default")
 
-    if federation_name is None:
+    if federation is None:
         typer.secho(
             "❌ No federation name was provided and the project's `pyproject.toml` "
             "doesn't declare a default federation (with a SuperExec address or an "
@@ -107,13 +108,13 @@ def run(
         raise typer.Exit(code=1)
 
     # Validate the federation exists in the configuration
-    federation = config["tool"]["flwr"]["federations"].get(federation_name)
-    if federation is None:
+    federation_config = config["tool"]["flwr"]["federations"].get(federation)
+    if federation_config is None:
         available_feds = {
             fed for fed in config["tool"]["flwr"]["federations"] if fed != "default"
         }
         typer.secho(
-            f"❌ There is no `{federation_name}` federation declared in the "
+            f"❌ There is no `{federation}` federation declared in "
             "`pyproject.toml`.\n The following federations were found:\n\n"
             + "\n".join(available_feds),
             fg=typer.colors.RED,
@@ -121,15 +122,15 @@ def run(
         )
         raise typer.Exit(code=1)
 
-    if "address" in federation:
-        _run_with_superexec(federation, directory, config_overrides, follow)
+    if "address" in federation_config:
+        _run_with_superexec(federation_config, app_dir, config_overrides, follow)
     else:
-        _run_without_superexec(directory, federation, federation_name, config_overrides)
+        _run_without_superexec(app_dir, federation_config, federation, config_overrides)
 
 
 def _run_with_superexec(
-    federation: Dict[str, str],
-    directory: Optional[Path],
+    federation_config: Dict[str, Any],
+    app_dir: Optional[Path],
     config_overrides: Optional[List[str]],
     follow: bool,
 ) -> None:
@@ -138,8 +139,8 @@ def _run_with_superexec(
         """Log channel connectivity."""
         log(DEBUG, channel_connectivity)
 
-    insecure_str = federation.get("insecure")
-    if root_certificates := federation.get("root-certificates"):
+    insecure_str = federation_config.get("insecure")
+    if root_certificates := federation_config.get("root-certificates"):
         root_certificates_bytes = Path(root_certificates).read_bytes()
         if insecure := bool(insecure_str):
             typer.secho(
@@ -167,7 +168,7 @@ def _run_with_superexec(
             raise typer.Exit(code=1)
 
     channel = create_channel(
-        server_address=federation["address"],
+        server_address=federation_config["address"],
         insecure=insecure,
         root_certificates=root_certificates_bytes,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
@@ -176,12 +177,15 @@ def _run_with_superexec(
     channel.subscribe(on_channel_state_change)
     stub = ExecStub(channel)
 
-    fab_path = build(directory)
+    fab_path = build(app_dir)
 
     req = StartRunRequest(
         fab_file=Path(fab_path).read_bytes(),
         override_config=user_config_to_proto(
             parse_config_args(config_overrides, separator=",")
+        ),
+        federation_config=user_config_to_proto(
+            flatten_dict(federation_config.get("options"))
         ),
     )
     res = stub.StartRun(req)
@@ -206,18 +210,18 @@ def _run_with_superexec(
 
 def _run_without_superexec(
     app_path: Optional[Path],
-    federation: Dict[str, Any],
-    federation_name: str,
+    federation_config: Dict[str, Any],
+    federation: str,
     config_overrides: Optional[List[str]],
 ) -> None:
     try:
-        num_supernodes = federation["options"]["num-supernodes"]
+        num_supernodes = federation_config["options"]["num-supernodes"]
     except KeyError as err:
         typer.secho(
             "❌ The project's `pyproject.toml` needs to declare the number of"
             " SuperNodes in the simulation. To simulate 10 SuperNodes,"
             " use the following notation:\n\n"
-            f"[tool.flwr.federations.{federation_name}]\n"
+            f"[tool.flwr.federations.{federation}]\n"
             "options.num-supernodes = 10\n",
             fg=typer.colors.RED,
             bold=True,
