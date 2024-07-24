@@ -78,13 +78,13 @@ setuptools 69.0.2 and Flower |current_flwr_version|:
 .. code-block:: bash
    :substitutions:
 
-  $ cd src/docker/base/<ubuntu|alpine>
-  $ docker build \
-    --build-arg PYTHON_VERSION=3.11.0 \
-    --build-arg FLWR_VERSION=|current_flwr_version| \
-    --build-arg PIP_VERSION=23.0.1 \
-    --build-arg SETUPTOOLS_VERSION=69.0.2 \
-    -t flwr_base:0.1.0 .
+   $ cd src/docker/base/<ubuntu|alpine>
+   $ docker build \
+     --build-arg PYTHON_VERSION=3.11.0 \
+     --build-arg FLWR_VERSION=|current_flwr_version| \
+     --build-arg PIP_VERSION=23.0.1 \
+     --build-arg SETUPTOOLS_VERSION=69.0.2 \
+     -t flwr_base:0.1.0 .
 
 The name of image is ``flwr_base`` and the tag ``0.1.0``. Remember that the build arguments as well
 as the name and tag can be adapted to your needs. These values serve as examples only.

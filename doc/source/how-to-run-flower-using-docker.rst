@@ -39,7 +39,7 @@ If you're looking to try out Flower, you can use the following command:
 .. code-block:: bash
    :substitutions:
 
-  $ docker run --rm -p 9091:9091 -p 9092:9092 flwr/superlink:|current_flwr_version| --insecure
+   $ docker run --rm -p 9091:9091 -p 9092:9092 flwr/superlink:|current_flwr_version| --insecure
 
 The command pulls the Docker image with the tag :substitution-code:`|current_flwr_version|` from Docker Hub. The tag specifies
 the Flower version. In this case, Flower |current_flwr_version|. The ``--rm`` flag tells Docker to remove the
@@ -68,7 +68,7 @@ You can use ``--help`` to view all available flags that the SuperLink supports:
 .. code-block:: bash
    :substitutions:
 
-  $ docker run --rm flwr/superlink:|current_flwr_version| --help
+   $ docker run --rm flwr/superlink:|current_flwr_version| --help
 
 Mounting a volume to store the state on the host system
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -88,12 +88,12 @@ container. Furthermore, we use the flag ``--database`` to specify the name of th
 .. code-block:: bash
    :substitutions:
 
-  $ mkdir state
-  $ sudo chown -R 49999:49999 state
-  $ docker run --rm \
-    -p 9091:9091 -p 9092:9092 --volume ./state/:/app/state flwr/superlink:|current_flwr_version| \
-    --insecure \
-    --database state.db
+   $ mkdir state
+   $ sudo chown -R 49999:49999 state
+   $ docker run --rm \
+     -p 9091:9091 -p 9092:9092 --volume ./state/:/app/state flwr/superlink:|current_flwr_version| \
+     --insecure \
+     --database state.db
 
 As soon as the SuperLink starts, the file ``state.db`` is created in the ``state`` directory on
 your host system. If the file already exists, the SuperLink tries to restore the state from the
@@ -120,12 +120,12 @@ with the ``--ssl-ca-certfile``, ``--ssl-certfile`` and ``--ssl-keyfile`` flag.
 .. code-block:: bash
    :substitutions:
 
-  $ docker run --rm \
-    -p 9091:9091 -p 9092:9092 \
-    --volume ./certificates/:/app/certificates/:ro flwr/superlink:|current_flwr_version| \
-    --ssl-ca-certfile certificates/ca.crt \
-    --ssl-certfile certificates/server.pem \
-    --ssl-keyfile certificates/server.key
+   $ docker run --rm \
+     -p 9091:9091 -p 9092:9092 \
+     --volume ./certificates/:/app/certificates/:ro flwr/superlink:|current_flwr_version| \
+     --ssl-ca-certfile certificates/ca.crt \
+     --ssl-certfile certificates/server.pem \
+     --ssl-keyfile certificates/server.key
 
 .. note::
 
@@ -156,7 +156,7 @@ example.
 
     .. code-block:: bash
 
-      $ git clone --depth=1 https://github.com/adap/flower.git && cd flower/examples/quickstart-pytorch
+       $ git clone --depth=1 https://github.com/adap/flower.git && cd flower/examples/quickstart-pytorch
 
 #. Verify the Docker daemon is running.
 
@@ -201,15 +201,15 @@ The ``Dockerfile.supernode`` contains the instructions that assemble the SuperNo
 .. code-block:: dockerfile
    :substitutions:
 
-  FROM flwr/supernode:|current_flwr_version|
+   FROM flwr/supernode:|current_flwr_version|
 
-  WORKDIR /app
+   WORKDIR /app
 
-  COPY requirements.txt .
-  RUN python -m pip install -U --no-cache-dir -r requirements.txt
+   COPY requirements.txt .
+   RUN python -m pip install -U --no-cache-dir -r requirements.txt
 
-  COPY client.py ./
-  ENTRYPOINT ["flower-client-app", "client:app"]
+   COPY client.py ./
+   ENTRYPOINT ["flower-client-app", "client:app"]
 
 In the first two lines, we instruct Docker to use the SuperNode image tagged :substitution-code:`|current_flwr_version|` as a base
 image and set our working directory to ``/app``. The following instructions will now be
@@ -227,7 +227,7 @@ Dockerfile and ClientApp code are located.
 
 .. code-block:: bash
 
-  $ docker build -f Dockerfile.supernode -t flwr_supernode:0.0.1 .
+   $ docker build -f Dockerfile.supernode -t flwr_supernode:0.0.1 .
 
 We gave the image the name ``flwr_supernode``, and the tag ``0.0.1``. Remember that the here chosen
 values only serve as an example. You can change them to your needs.
@@ -273,7 +273,7 @@ To see all available flags that the SuperNode supports, run:
 .. code-block:: bash
    :substitutions:
 
-  $ docker run --rm flwr/supernode:|current_flwr_version| --help
+   $ docker run --rm flwr/supernode:|current_flwr_version| --help
 
 Enabling SSL for secure connections
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -324,12 +324,12 @@ The ``Dockerfile.serverapp`` contains the instructions that assemble the ServerA
 .. code-block:: dockerfile
    :substitutions:
 
-  FROM flwr/serverapp:|current_flwr_version|
+   FROM flwr/serverapp:|current_flwr_version|
 
-  WORKDIR /app
+   WORKDIR /app
 
-  COPY server.py ./
-  ENTRYPOINT ["flower-server-app", "server:app"]
+   COPY server.py ./
+   ENTRYPOINT ["flower-server-app", "server:app"]
 
 In the first two lines, we instruct Docker to use the ServerApp image tagged :substitution-code:`|current_flwr_version|` as a base
 image and set our working directory to ``/app``. The following instructions will now be
@@ -391,7 +391,7 @@ To see all available flags that the ServerApp supports, run:
 .. code-block:: bash
    :substitutions:
 
-  $ docker run --rm flwr/serverapp:|current_flwr_version| --help
+   $ docker run --rm flwr/serverapp:|current_flwr_version| --help
 
 Enabling SSL for secure connections
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -438,19 +438,19 @@ missing system dependencies, you can use the ``USER root`` directive within your
 .. code-block:: dockerfile
    :substitutions:
 
-  FROM flwr/supernode:|current_flwr_version|
+   FROM flwr/supernode:|current_flwr_version|
 
-  # Switch to root user
-  USER root
+   # Switch to root user
+   USER root
 
-  # Install missing dependencies (requires root access)
-  RUN apt-get update && apt-get install -y <required-package-name>
+   # Install missing dependencies (requires root access)
+   RUN apt-get update && apt-get install -y <required-package-name>
 
-  # Switch back to non-root user app
-  USER app
+   # Switch back to non-root user app
+   USER app
 
-  # Continue with your Docker image build process
-  ...
+   # Continue with your Docker image build process
+   ...
 
 Using a different Flower version
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -478,8 +478,8 @@ The following command returns the current image hash referenced by the :substitu
 .. code-block:: bash
    :substitutions:
 
-  $ docker inspect --format='{{index .RepoDigests 0}}' flwr/superlink:|current_flwr_version|
-  flwr/superlink@sha256:985c24b2b337ab7f15a554fde9d860cede95079bcaa244fda8f12c0805e34c7d
+   $ docker inspect --format='{{index .RepoDigests 0}}' flwr/superlink:|current_flwr_version|
+   flwr/superlink@sha256:985c24b2b337ab7f15a554fde9d860cede95079bcaa244fda8f12c0805e34c7d
 
 Next, we can pin the hash when running a new SuperLink container:
 
@@ -497,5 +497,5 @@ To set a variable inside a Docker container, you can use the ``-e <name>=<value>
 .. code-block:: bash
    :substitutions:
 
-  $ docker run -e FLWR_TELEMETRY_ENABLED=0 \
+   $ docker run -e FLWR_TELEMETRY_ENABLED=0 \
     --rm flwr/superlink:|current_flwr_version| --insecure
