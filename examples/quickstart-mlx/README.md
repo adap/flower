@@ -23,14 +23,13 @@ This will create a new directory called `quickstart-mlx` with the following stru
 
 ```shell
 quickstart-mlx
-      |
-      ├── mlxexample
-      |        ├── __init__.py
-      |        ├── client_app.py    # defines your ClientApp
-      |        ├── server_app.py    # defines your ServerApp
-      |        └── task.py          # deines your model, training and dataloading functions
-      ├── pyproject.toml            # builds your project, includes dependencies and configs
-      └── README.md
+├── README.md
+├── mlxexample
+│   ├── __init__.py
+│   ├── client_app.py   # defines your ClientApp
+│   ├── server_app.py   # defines your ServerApp
+│   └── task.py         # defines your model, training and dataloading functions
+└── pyproject.toml      # builds your project, includes dependencies and configs
 ```
 
 ## Install dependencies and project
@@ -47,7 +46,7 @@ You can run your `ClientApp` and `ServerApp` in both _simulation_ and
 _deployment_ mode without making changes to the code. If you are starting
 with Flower, we recommend you using the _simulation_ model as it requires
 fewer components to be launched manually. By default, `flwr run` will make
-use of the Simluation Engine.
+use of the Simulation Engine.
 
 ### Run with the Simulation Engine
 
