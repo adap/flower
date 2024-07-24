@@ -180,3 +180,7 @@ mermaid_version = ""
 # -- Options for MyST config  -------------------------------------
 # Enable this option to link to headers (`#`, `##`, or `###`)
 myst_heading_anchors = 3
+
+# -- Options for sphinx_copybutton -------------------------------------
+copybutton_exclude = '.linenos, .gp, .go'
+copybutton_prompt_text = ">>> "
