@@ -93,7 +93,9 @@ def _parse_args_run_superexec() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--executor-config",
-        help="Key-value pairs for the executor config, separated by commas.",
+        help="Key-value pairs for the executor config, separated by commas. "
+        'For example:\n\n`--executor-config superlink="superlink:9091",'
+        'root-certificates="certificates/superlink-ca.crt"`',
     )
     parser.add_argument(
         "--insecure",
