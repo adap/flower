@@ -11,6 +11,7 @@ from typing import Any
 import pytorch_lightning as pl
 import torch
 from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import IidPartitioner
 from torch import nn
 from torch.nn import functional as F
 from torch.optim.adam import Adam
@@ -88,8 +89,18 @@ def apply_transforms(batch):
     return batch
 
 
+fds = None  # Cache FederatedDataset
+
+
 def load_data(partition_id, num_partitions: int = 10):
-    fds = FederatedDataset(dataset="mnist", partitioners={"train": num_partitions})
+    # Only initialize `FederatedDataset` once
+    global fds
+    if fds is None:
+        partitioner = IidPartitioner(num_partitions=num_partitions)
+        fds = FederatedDataset(
+            dataset="ylecun/mnist",
+            partitioners={"train": partitioner},
+        )
     partition = fds.load_partition(partition_id, "train")
 
     partition = partition.with_transform(apply_transforms)
@@ -174,7 +185,7 @@ def client_fn(context: Context) -> Client:
     """
 
     # Read the node_config to fetch data partition associated to this node
-    partition_id = int(context.node_config["partition-id"])
+    partition_id = context.node_config["partition-id"]
     train_loader, val_loader, test_loader = load_data(partition_id)
 
     return FlowerClient(model, train_loader, val_loader, test_loader).to_client()

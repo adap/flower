@@ -29,14 +29,12 @@ quickstart-pytorch-lightning
     └── server_app.py
 ```
 
-### Installing Dependencies
+# Install dependencies and project
 
-Project dependencies are defined in `pyproject.toml`.
-You can install the dependencies by invoking `pip`:
+Install the dependencies defined in `pyproject.toml` as well as the `pytorchlightning_example` package.
 
-```shell
-# From a new python environment, run:
-pip install .
+```bash
+pip install -e .
 ```
 
 ## Run the Example
@@ -45,22 +43,21 @@ You can run your `ClientApp` and `ServerApp` in both _simulation_ and
 _deployment_ mode without making changes to the code. If you are starting
 with Flower, we recommend you using the _simulation_ model as it requires
 fewer components to be launched manually. By default, `flwr run` will make
-use of the Simluation Engine. Refer to alternative ways of running your
-Flower application including Deployment, with TLS certificates, or with
-Docker later in this readme.
+use of the Simulation Engine.
 
 ### Run with the Simulation Engine
 
-Run:
-
 ```bash
-flwr run
+flwr run .
 ```
 
-You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example
+You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
 ```bash
-flwr run --run-config 'num_server_rounds=5'
+flwr run . --run-config num-server-rounds=5
 ```
 
-### Alternative way of running the example
+### Run with the Deployment Engine
+
+> \[!NOTE\]
+> An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.
