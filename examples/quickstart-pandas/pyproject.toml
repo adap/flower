@@ -11,8 +11,8 @@ authors = [
     { name = "Ragy Haddad", email = "ragy202@gmail.com" },
 ]
 dependencies = [
-    "flwr>=1.9.0,<2.0",
-    "flwr-datasets[vision]>=0.0.2,<1.0.0",
+    "flwr[simulation]>=1.10.0,<2.0",
+    "flwr-datasets[vision]>=0.0.3,<1.0.0",
     "numpy==1.23.2",
     "pandas==2.0.0",
 ]
@@ -28,10 +28,10 @@ serverapp = "pandas_example.server_app:app"
 clientapp = "pandas_example.client_app:app"
 
 [tool.flwr.app.config]
-num_server_rounds = "1"
+num_server_rounds = 1
 
 [tool.flwr.federations]
-default = "localhost"
+default = "local-simulation"
 
-[tool.flwr.federations.localhost]
+[tool.flwr.federations.local-simulation]
 options.num-supernodes = 2

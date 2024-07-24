@@ -28,16 +28,14 @@ quickstart-pandas
 ├── pandas_example
 │   ├── client_app.py    # defines your ClientApp
 │   └── server_app.py    # defines your ServerApp
-└── pyproject.toml       # builds your FAB, includes dependencies and configs
+└── pyproject.toml       # builds your project, includes dependencies and configs
 ```
 
-### Installing Dependencies
+## Install dependencies
 
-Project dependencies are defined in `pyproject.toml`.
-You can install the dependencies by invoking `pip`:
+Install the dependencies defined in `pyproject.toml` as well as the `pandas_example` package.
 
-```shell
-# From a new python environment, run:
+```bash
 pip install -e .
 ```
 
@@ -46,20 +44,22 @@ pip install -e .
 You can run your `ClientApp` and `ServerApp` in both _simulation_ and
 _deployment_ mode without making changes to the code. If you are starting
 with Flower, we recommend you using the _simulation_ model as it requires
-fewer components to be launched manually.
+fewer components to be launched manually. By default, `flwr run` will make
+use of the Simluation Engine.
 
 ### Run with the Simulation Engine
 
-Run:
-
 ```bash
-flwr run
+flwr run .
 ```
 
 You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example
 
 ```bash
-flwr run --run-config 'num_server_rounds=5'
+flwr run . --run-config 'num_server_rounds=5'
 ```
 
-### Alternative way of running the example
+### Run with the Deployment Engine
+
+> \[!NOTE\]
+> An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.

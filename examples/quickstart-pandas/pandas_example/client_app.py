@@ -5,6 +5,7 @@ from typing import Dict, List, Tuple
 import numpy as np
 import pandas as pd
 from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import IidPartitioner
 
 from flwr.client import Client, ClientApp, NumPyClient
 from flwr.common import Context
@@ -37,6 +38,9 @@ class FlowerClient(NumPyClient):
         )
 
 
+fds = None  # Cache FederatedDataset
+
+
 def client_fn(context: Context) -> Client:
     """Construct a Client that will be run in a ClientApp.
 
@@ -46,14 +50,17 @@ def client_fn(context: Context) -> Client:
     """
 
     # Read the node_config to fetch data partition associated to this node
-    partition_id = int(context.node_config["partition-id"])
-    num_partitions = int(context.node_config["num-partitions"])
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
 
-    # Load the partition data
-    fds = FederatedDataset(
-        dataset="hitorilabs/iris",
-        partitioners={"train": num_partitions},
-    )
+    # Only initialize `FederatedDataset` once
+    global fds
+    if fds is None:
+        partitioner = IidPartitioner(num_partitions=num_partitions)
+        fds = FederatedDataset(
+            dataset="hitorilabs/iris",
+            partitioners={"train": partitioner},
+        )
 
     dataset = fds.load_partition(partition_id, "train").with_format("pandas")[:]
     # Use just the specified columns
