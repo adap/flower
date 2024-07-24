@@ -203,7 +203,7 @@ class ModelManager(ABC):
         optimizer = torch.optim.SGD(
             [{"params": weights, "weight_decay": 0.0001}, {"params": biases}],
             lr=self.learning_rate,
-            momentum=0.5,
+            momentum=0,
         )
         correct, total = 0, 0
         loss: torch.Tensor = 0.0
@@ -241,7 +241,11 @@ class ModelManager(ABC):
         """
         # Load client state (head)
         algorithm = self.config.algorithm.lower()
-        if algorithm == "fedrep" and self.client_save_path is not None:
+        if (
+            algorithm == "fedrep"
+            and self.client_save_path is not None
+            and os.path.isfile(self.client_save_path)
+        ):
             self.model.head.load_state_dict(torch.load(self.client_save_path))
 
         criterion = torch.nn.CrossEntropyLoss()

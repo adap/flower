@@ -10,7 +10,6 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
-    NDArrays,
     Parameters,
     Scalar,
     ndarrays_to_parameters,
@@ -35,61 +34,13 @@ class ServerInitializationStrategy(FedAvg):
         model_split_class: Union[
             Type[CNNCifar10ModelSplit], Type[CNNCifar100ModelSplit]
         ],
-        create_model: Callable[[], nn.Module],
-        initial_parameters: Optional[Parameters] = None,
-        on_fit_config_fn: Optional[Callable[[int], Dict[str, Any]]] = None,
-        evaluate_fn: Optional[
-            Callable[
-                [int, NDArrays, Dict[str, Scalar]],
-                Optional[Tuple[float, Dict[str, Scalar]]],
-            ]
-        ] = None,
-        min_available_clients: int = 1,
-        min_evaluate_clients: int = 1,
-        min_fit_clients: int = 1,
-        algorithm: str = "FedRep",
+        create_model_fn: Callable[[], nn.Module],
+        algorithm: str = "fedrep",
         **kwargs: Any,
     ) -> None:
         super().__init__(*args, **kwargs)
-        _ = evaluate_fn
-        self.on_fit_config_fn = on_fit_config_fn
-        self.initial_parameters = initial_parameters
-        self.min_available_clients = min_available_clients
-        self.min_evaluate_clients = min_evaluate_clients
-        self.min_fit_clients = min_fit_clients
         self.algorithm = algorithm
-        self.model = model_split_class(model=create_model())
-
-    def initialize_parameters(
-        self, client_manager: ClientManager
-    ) -> Optional[Parameters]:
-        """Initialize the (global) model parameters.
-
-        Args:
-            client_manager: ClientManager. The client manager which holds all currently
-                connected clients.
-
-        Returns
-        -------
-            If parameters are returned, then the server will treat these as the
-            initial global model parameters.
-        """
-        initial_parameters: Optional[Parameters] = self.initial_parameters
-        self.initial_parameters = None  # Don't keep initial parameters in memory
-        initial_parameters_use = None
-        if initial_parameters is None and self.model is not None:
-            if self.algorithm == "FedRep":
-                initial_parameters_use = [
-                    val.cpu().numpy() for _, val in self.model.body.state_dict().items()
-                ]
-            else:  # FedAvg
-                initial_parameters_use = [
-                    val.cpu().numpy() for _, val in self.model.state_dict().items()
-                ]
-
-        if isinstance(initial_parameters_use, list):
-            initial_parameters = ndarrays_to_parameters(initial_parameters_use)
-        return initial_parameters
+        self.model = model_split_class(model=create_model_fn())
 
 
 class AggregateFullStrategy(ServerInitializationStrategy):
@@ -101,51 +52,6 @@ class AggregateFullStrategy(ServerInitializationStrategy):
         if save_path is not None:
             self.save_path = save_path / "models"
             self.save_path.mkdir(parents=True, exist_ok=True)
-
-    def configure_evaluate(
-        self, server_round: int, parameters: Parameters, client_manager: ClientManager
-    ) -> List[Tuple[ClientProxy, EvaluateIns]]:
-        """Configure the next round of evaluation.
-
-        Args:
-            server_round: The current round of federated learning.
-            parameters: The current (global) model parameters.
-            client_manager: The client manager which holds all currently
-                connected clients.
-
-        Returns
-        -------
-            A list of tuples. Each tuple in the list identifies a `ClientProxy` and the
-            `EvaluateIns` for this particular `ClientProxy`. If a particular
-            `ClientProxy` is not included in this list, it means that this
-            `ClientProxy` will not participate in the next round of federated
-            evaluation.
-        """
-        # Same as superclass method but adds the head
-
-        # Parameters and config
-        config: Dict[Any, Any] = {}
-
-        weights = parameters_to_ndarrays(parameters)
-
-        parameters = ndarrays_to_parameters(weights)
-
-        evaluate_ins = EvaluateIns(parameters, config)
-
-        # Sample clients
-        if server_round >= 0:
-            # Sample clients
-            sample_size, min_num_clients = self.num_evaluation_clients(
-                client_manager.num_available()
-            )
-            clients = client_manager.sample(
-                num_clients=sample_size, min_num_clients=min_num_clients
-            )
-        else:
-            clients = list(client_manager.all().values())
-
-        # Return client/config pairs
-        return [(client, evaluate_ins) for client in clients]
 
     def aggregate_fit(
         self,
@@ -183,11 +89,7 @@ class AggregateFullStrategy(ServerInitializationStrategy):
         if agg_params is not None:
             # Update Server Model
             parameters = parameters_to_ndarrays(agg_params)
-            model_keys = [
-                key
-                for key in self.model.state_dict().keys()
-                if key.startswith("_body") or key.startswith("_head")
-            ]
+            model_keys = list(self.model.state_dict().keys())
             params_dict = zip(model_keys, parameters)
             state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
             self.model.set_parameters(state_dict)
@@ -291,7 +193,6 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
         clients = client_manager.sample(
             num_clients=self.min_available_clients, min_num_clients=self.min_fit_clients
         )
-
         # Return client/config pairs
         return [(client, fit_ins) for client in clients]
 
@@ -380,9 +281,7 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
         )
         if agg_params is not None:
             parameters = parameters_to_ndarrays(agg_params)
-            model_keys = [
-                key for key in self.model.state_dict().keys() if key.startswith("_body")
-            ]
+            model_keys = list(self.model.body.state_dict().keys())
             params_dict = zip(model_keys, parameters)
             state_dict = OrderedDict(
                 {key: torch.tensor(param) for key, param in params_dict}
@@ -420,10 +319,9 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
             Optional `float` representing the aggregated evaluation result. Aggregation
             typically uses some variant of a weighted average.
         """
-        aggregated_loss, aggregated_metrics = super().aggregate_evaluate(
+        aggregated_loss, _ = super().aggregate_evaluate(
             server_round=server_round, results=results, failures=failures
         )
-        _ = aggregated_metrics  # Avoid unused variable warning
 
         # Weigh accuracy of each client by number of examples used
         accuracies: List[float] = []

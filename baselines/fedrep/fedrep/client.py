@@ -1,5 +1,6 @@
 """Client implementation - can call FedRep and FedAvg clients."""
 
+import os
 import pickle
 from collections import OrderedDict, defaultdict
 from pathlib import Path
@@ -7,7 +8,7 @@ from typing import Any, Callable, Dict, List, Tuple, Type, Union
 
 import numpy as np
 import torch
-from flwr.client import NumPyClient
+from flwr.client import Client, NumPyClient
 from flwr.common import NDArrays, Scalar
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader, Subset
@@ -74,14 +75,9 @@ class BaseClient(NumPyClient):
         Args:
             parameters: parameters to set the model to.
         """
-        model_keys = [
-            k
-            for k in self.model_manager.model.state_dict().keys()
-            if k.startswith("_body") or k.startswith("_head")
-        ]
-
         state_dict = OrderedDict(
-            (k, torch.from_numpy(v)) for k, v in zip(model_keys, parameters)
+            (k, torch.from_numpy(v))
+            for k, v in zip(self.model_manager.model.state_dict().keys(), parameters)
         )
 
         self.model_manager.model.set_parameters(state_dict)
@@ -125,7 +121,6 @@ class BaseClient(NumPyClient):
         print("<------- TRAIN RESULTS -------> :", train_results)
 
         self.train_id += 1
-        print(self.model_manager.train_dataset_size())
         return self.get_parameters(config), self.model_manager.train_dataset_size(), {}
 
     def evaluate(
@@ -170,7 +165,7 @@ class FedRepClient(BaseClient):
         """Return the current local body parameters."""
         return [
             val.cpu().numpy()
-            for _, val in self.model_manager.model.body.state_dict().items()
+            for val in self.model_manager.model.body.state_dict().values()
         ]
 
     def set_parameters(self, parameters: List[np.ndarray], evaluate=False) -> None:
@@ -180,21 +175,12 @@ class FedRepClient(BaseClient):
             parameters: parameters to set the body to.
             evaluate: whether the client is evaluating or not.
         """
-        model_keys = [
-            k
-            for k in self.model_manager.model.state_dict().keys()
-            if k.startswith("_body")
-        ]
+        model_keys = list(self.model_manager.model.body.state_dict().keys())
 
-        if not evaluate:
-            # Only update client's local head if it hasn't trained yet
-            print("Setting head parameters to global head parameters.")
+        # If client is not trained before, use the global head.
+        if not os.path.isfile(self.client_state_save_path):
             model_keys.extend(
-                [
-                    k
-                    for k in self.model_manager.model.state_dict().keys()
-                    if k.startswith("_head")
-                ]
+                k for k in self.model_manager.model.head.state_dict().keys()
             )
 
         state_dict = OrderedDict(
@@ -206,7 +192,7 @@ class FedRepClient(BaseClient):
 
 def get_client_fn_simulation(
     config: DictConfig, client_state_save_path: str = ""
-) -> Callable[[str], Union[FedRepClient, BaseClient]]:
+) -> Callable[[str], Client]:
     """Generate the client function that creates the Flower Clients.
 
     Parameters
@@ -262,7 +248,7 @@ def get_client_fn_simulation(
         test_data_transform=test_data_transform,
     )
 
-    def client_fn(cid: str) -> Union[FedRepClient, BaseClient]:
+    def client_fn(cid: str) -> Client:
         """Create a Flower client representing a single organization."""
         cid_use = int(cid)
 
@@ -300,6 +286,6 @@ def get_client_fn_simulation(
             client_state_save_path=client_state_save_path + f"/client_{cid}",
             config=config,
             model_manager_class=model_manager_class,
-        )
+        ).to_client()
 
     return client_fn

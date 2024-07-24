@@ -9,15 +9,16 @@ from typing import Callable, Optional, Type, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
+from flwr.client import Client
 from flwr.server.history import History
 from omegaconf import DictConfig
 
-from fedrep.client import BaseClient, FedRepClient, get_client_fn_simulation
+from fedrep.client import get_client_fn_simulation
 from fedrep.implemented_models.cnn_cifar10 import CNNCifar10, CNNCifar10ModelSplit
 from fedrep.implemented_models.cnn_cifar100 import CNNCifar100, CNNCifar100ModelSplit
 
 
-def set_model_class(config: DictConfig) -> DictConfig:
+def set_model_class(config: DictConfig) -> None:
     """Set model class based on the model name in the config file."""
     # Set the model class
     if config.dataset.name.lower() == "cifar10":
@@ -26,7 +27,6 @@ def set_model_class(config: DictConfig) -> DictConfig:
         config.model["_target_"] = "fedrep.implemented_models.cnn_cifar100.CNNCifar100"
     else:
         raise NotImplementedError(f"Model for {config.dataset.name} not implemented")
-    return config
 
 
 def set_server_target(config: DictConfig) -> DictConfig:
@@ -55,7 +55,7 @@ def set_client_state_save_path() -> str:
 
 def get_client_fn(
     config: DictConfig, client_state_save_path: str = ""
-) -> Callable[[str], Union[FedRepClient, BaseClient]]:
+) -> Callable[[str], Client]:
     """Get client function."""
     # Get algorithm
     algorithm = config.algorithm.lower()
@@ -67,7 +67,7 @@ def get_client_fn(
     elif algorithm == "fedavg":
         client_fn = get_client_fn_simulation(config=config)
     else:
-        raise NotImplementedError
+        raise NotImplementedError(f"Client fn for {algorithm} not implemented.")
     return client_fn
 
 

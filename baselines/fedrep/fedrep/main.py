@@ -20,7 +20,6 @@ from fedrep.utils import (
     save_results_as_pickle,
     set_client_state_save_path,
     set_model_class,
-    set_server_target,
 )
 
 
@@ -35,8 +34,8 @@ def main(cfg: DictConfig) -> None:
     """
     # 1. Print parsed config
     # Set the model class, server target, and number of classes
-    cfg = set_model_class(cfg)
-    cfg = set_server_target(cfg)
+    set_model_class(cfg)
+    # cfg = set_server_target(cfg)
 
     print(OmegaConf.to_yaml(cfg))
 
@@ -54,23 +53,24 @@ def main(cfg: DictConfig) -> None:
     # get a function that will be used to construct the config that the client's
     # fit() method will received
     def get_on_fit_config():
+
+        # pylint: disable=W0613
         def fit_config_fn(server_round: int):
             # resolve and convert to python dict
             fit_config = OmegaConf.to_container(cfg.fit_config, resolve=True)
-            _ = server_round
             return fit_config
 
         return fit_config_fn
 
     # get a function that will be used to construct the model
-    create_model, split = get_create_model_fn(cfg)
+    create_model_fn, model_split_class = get_create_model_fn(cfg)
 
     # 4. Define your strategy
     strategy = instantiate(
         cfg.strategy,
-        create_model=create_model,
+        create_model_fn=create_model_fn,
         on_fit_config_fn=get_on_fit_config(),
-        model_split_class=split,
+        model_split_class=model_split_class,
     )
 
     # 5. Start Simulation
@@ -107,7 +107,7 @@ def main(cfg: DictConfig) -> None:
         f"_lr={cfg.learning_rate}"
     )
 
-    plot_metric_from_history(history, save_path, (file_suffix))
+    plot_metric_from_history(history, save_path, file_suffix)
 
 
 if __name__ == "__main__":
