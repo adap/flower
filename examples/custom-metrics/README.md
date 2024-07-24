@@ -38,16 +38,18 @@ custom-metrics
 ├── README.md
 ├── custom_metrics_example
 │   ├── __init__.py
-│   ├── client_app.py    # defines your ClientApp
-│   ├── server_app.py    # defines your ServerApp
-│   └── task.py
-└── pyproject.toml       # builds your FAB, includes dependencies and configs
+│   ├── client_app.py   # defines your ClientApp
+│   ├── server_app.py   # defines your ServerApp
+│   └── task.py         # defines your model and dataloading functions
+└── pyproject.toml      # builds your project, includes dependencies and configs
 ```
 
 ## Install dependencies
 
+Install the dependencies defined in `pyproject.toml` as well as the `custom_metrics_example` package.
+
 ```bash
-pip install .
+pip install -e .
 ```
 
 ## Run the Example
@@ -56,22 +58,18 @@ You can run your `ClientApp` and `ServerApp` in both _simulation_ and
 _deployment_ mode without making changes to the code. If you are starting
 with Flower, we recommend you using the _simulation_ model as it requires
 fewer components to be launched manually. By default, `flwr run` will make
-use of the Simluation Engine. Refer to alternative ways of running your
-Flower application including Deployment, with TLS certificates, or with
-Docker later in this readme.
+use of the Simluation Engine.
 
 ### Run with the Simulation Engine
 
-Run:
-
 ```bash
-flwr run
+flwr run .
 ```
 
-You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example
+You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
 ```bash
-flwr run --run-config 'num_server_rounds=5'
+flwr run . --run-config num-server-rounds=5
 ```
 
 You will see that Keras is starting a federated training. Have a look to the [Flower Quickstarter documentation](https://flower.ai/docs/quickstart-tensorflow.html) for a detailed explanation. You can add `steps_per_epoch=3` to `model.fit()` if you just want to evaluate that everything works without having to wait for the client-side training to finish (this will save you a lot of time during development).
@@ -95,4 +93,7 @@ INFO :           'prec': [(1, 0.09419999999999999), (2, 0.1004), (3, 0.0992)],
 INFO :           'rec': [(1, 0.09419999999999999), (2, 0.1004), (3, 0.0992)]}
 ```
 
-### Alternative way of running the example
+### Run with the Deployment Engine
+
+> \[!NOTE\]
+> An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.
