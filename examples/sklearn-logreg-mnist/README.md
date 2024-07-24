@@ -19,24 +19,22 @@ git clone --depth=1 https://github.com/adap/flower.git _tmp \
 		&& rm -rf _tmp && cd sklearn-logreg-mnist
 ```
 
-This will create a new directory called `sklearn-logreg-mnist` containing the following files:
+This will create a new directory called `sklearn-logreg-mnist` with the following structure:
 
 ```shell
-├── sklearn_example
-|   ├── __init__.py
-|   ├── client_app.py
-|   └── server_app.py
-├── pyproject.toml
-└── README.md 
+sklearn-logreg-mnist
+├── README.md
+├── pyproject.toml      # builds your project, includes dependencies and configs
+└── sklearn_example
+    ├── client_app.py   # defines your ClientApp
+    └── server_app.py   # defines your ServerApp
 ```
 
-### Installing Dependencies
+## Install dependencies and project
 
-Project dependencies are defined in `pyproject.toml`.
-You can install the dependencies by invoking `pip`:
+Install the dependencies defined in `pyproject.toml` as well as the `sklearn_example` package.
 
-```shell
-# From a new python environment, run:
+```bash
 pip install -e .
 ```
 
@@ -45,52 +43,22 @@ pip install -e .
 You can run your `ClientApp` and `ServerApp` in both _simulation_ and
 _deployment_ mode without making changes to the code. If you are starting
 with Flower, we recommend you using the _simulation_ model as it requires
-fewer components to be launched manually.
+fewer components to be launched manually. By default, `flwr run` will make
+use of the Simulation Engine.
 
 ### Run with the Simulation Engine
 
-First, launch the [SuperExec](link-to-docs).
-
 ```bash
-flower-superexec flwr.superexec.simulation:executor --insecure
+flwr run .
 ```
 
-In a new terminal, and after activating your Python environment:
+You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
 ```bash
-flwr run --use-superexec
+flwr run . --run-config num-server-rounds=5
 ```
 
 ### Run with the Deployment Engine
 
-Launch the the infrastructure needed for a `Run` to run. This means:
-the [`SuperLink`](https://flower.ai/docs/framework/ref-api-cli.html#flower-superlink) and at least two [`SuperNode`](docs) instances.
-You will need a few terminal windows (consider using [tmux](https://github.com/tmux/tmux/wiki)), remember
-to activate your environment in each of them.
-
-1. On a new terminal, launch the `SuperLink`:
-   ```bash
-   flower-superlink --insecure
-   ```
-1. On a new terminal, launch a `SuperNode`:
-   ```bash
-   flower-supernode --insecure --partition-id=0
-   ```
-1. On a new terminal, launch another `SuperNode`:
-   ```bash
-   flower-supernode --insecure --partition-id=1
-   ```
-
-With everything ready and idling, launch the [SuperExec](link-to-docs).
-
-```bash
-flower-superexec flwr.superexec.deployment:executor --insecure
-```
-
-Then,
-
-```bash
-flwr run --user-superexec
-```
-
-You will see that Flower is starting a federated training.
+> \[!NOTE\]
+> An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.

@@ -4,13 +4,12 @@ import warnings
 
 import numpy as np
 from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import IidPartitioner
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
 
 from flwr.client import Client, ClientApp, NumPyClient
-from flwr.common import NDArrays
-
-N_CLIENTS = 10
+from flwr.common import Context, NDArrays
 
 
 def get_model_parameters(model: LogisticRegression) -> NDArrays:
@@ -79,7 +78,42 @@ class MnistClient(NumPyClient):
         return loss, len(self.X_test), {"accuracy": accuracy}
 
 
-def client_fn(node_id, partition_id) -> Client:
+fds = None  # Cache FederatedDataset
+
+
+def load_data(partition_id: int, num_partitions: int):
+    # Only initialize `FederatedDataset` once
+    global fds
+    if fds is None:
+        partitioner = IidPartitioner(num_partitions=num_partitions)
+        fds = FederatedDataset(
+            dataset="ylecun/mnist",
+            partitioners={"train": partitioner},
+        )
+
+    dataset = fds.load_partition(partition_id, "train").with_format("numpy")
+    X, y = dataset["image"].reshape((len(dataset), -1)), dataset["label"]
+    # Split the on edge data: 80% train, 20% test
+    X_train, X_test = X[: int(0.8 * len(X))], X[int(0.8 * len(X)) :]
+    y_train, y_test = y[: int(0.8 * len(y))], y[int(0.8 * len(y)) :]
+
+    return X_train, X_test, y_train, y_test
+
+
+def client_fn(context: Context) -> Client:
+    """Construct a Client that will be run in a ClientApp.
+
+    You can use settings in `context.run_config` to parameterize the
+    construction of your Client. You could use the `context.node_config` to, for
+    example, indicate which dataset to load (e.g accesing the partition-id).
+    """
+
+    # Read the node_config to fetch data partition associated to this node
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
+
+    X_train, X_test, y_train, y_test = load_data(partition_id, num_partitions)
+
     # Create LogisticRegression Model
     model = LogisticRegression(
         penalty="l2",
@@ -90,14 +124,6 @@ def client_fn(node_id, partition_id) -> Client:
     # Setting initial parameters, akin to model.compile for keras models
     set_initial_params(model)
 
-    # Load the partition data
-    fds = FederatedDataset(dataset="mnist", partitioners={"train": N_CLIENTS})
-
-    dataset = fds.load_partition(partition_id, "train").with_format("numpy")
-    X, y = dataset["image"].reshape((len(dataset), -1)), dataset["label"]
-    # Split the on edge data: 80% train, 20% test
-    X_train, X_test = X[: int(0.8 * len(X))], X[int(0.8 * len(X)) :]
-    y_train, y_test = y[: int(0.8 * len(y))], y[int(0.8 * len(y)) :]
     return MnistClient(model, X_train, X_test, y_train, y_test).to_client()
 
 

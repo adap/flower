@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "sklearn-mnist"
+name = "sklearn_example"
 version = "0.1.0"
 description = "Federated learning with scikit-learn and Flower"
 authors = [
@@ -11,11 +11,27 @@ authors = [
     { name = "Kaushik Amar Das", email = "kaushik.das@iiitg.ac.in" },
 ]
 dependencies = [
-    "flwr>=1.9.0,<2.0",
-    "flwr-datasets[vision]>=0.0.2,<1.0.0",
-    "numpy~=1.21.1",
+    "flwr[simulation]>=1.10.0,<2.0",
+    "flwr-datasets[vision]>=0.0.3,<1.0.0",
+    "numpy<2.0.0",
     "scikit-learn~=1.2.2",
 ]
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
+
+[tool.flwr.app]
+publisher = "flowerteam"
+
+[tool.flwr.app.components]
+serverapp = "sklearn_example.server_app:app"
+clientapp = "sklearn_example.client_app:app"
+
+[tool.flwr.app.config]
+num-server-rounds = 3
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 10

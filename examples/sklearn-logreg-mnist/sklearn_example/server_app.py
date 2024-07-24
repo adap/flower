@@ -7,8 +7,8 @@ from flwr_datasets import FederatedDataset
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
 
-from flwr.common import NDArrays
-from flwr.server import ServerApp, ServerConfig
+from flwr.common import Context, NDArrays
+from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
 
 
@@ -63,16 +63,24 @@ def get_evaluate_fn():
     return evaluate
 
 
-strategy = FedAvg(
-    min_available_clients=2,
-    evaluate_fn=get_evaluate_fn(),
-    on_fit_config_fn=fit_round,
-)
+def server_fn(context: Context) -> ServerAppComponents:
+    """Construct components that set the ServerApp behaviour.
 
-# Config Flower server for five rounds of federated learning
-config = ServerConfig(num_rounds=5)
+    You can use settings in `context.run_config` to parameterize the
+    construction of all elements (e.g the strategy or the number of rounds)
+    wrapped in the returned ServerAppComponents object.
+    """
 
-app = ServerApp(
-    config=config,
-    strategy=strategy,
-)
+    strategy = FedAvg(
+        min_available_clients=2,
+        evaluate_fn=get_evaluate_fn(),
+        on_fit_config_fn=fit_round,
+    )
+    # Construct ServerConfig
+    num_rounds = context.run_config["num-server-rounds"]
+    config = ServerConfig(num_rounds=num_rounds)
+
+    return ServerAppComponents(strategy=strategy, config=config)
+
+
+app = ServerApp(server_fn=server_fn)
