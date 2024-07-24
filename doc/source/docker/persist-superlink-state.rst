@@ -28,7 +28,7 @@ database file.
    $ mkdir state
    $ sudo chown -R 49999:49999 state
    $ docker run --rm \
-        --volume ./state/:/app/state flwr/superlink:|latest_version_docker| \
+        --volume ./state/:/app/state flwr/superlink:|current_flwr_version| \
         --database state.db \
         ...
 

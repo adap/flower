@@ -59,7 +59,7 @@ Open your terminal and run:
          --network flwr-network \
          --name superlink \
          --detach \
-         flwr/superlink:|latest_version_docker| --insecure
+         flwr/superlink:|current_flwr_version| --insecure
 
 .. dropdown:: Understand the command
 
@@ -71,8 +71,8 @@ Open your terminal and run:
    * ``--network flwr-network``: Make the container join the network named ``flwr-network``.
    * ``--name superlink``: Assign the name ``superlink`` to the container.
    * ``--detach``: Run the container in the background, freeing up the terminal.
-   * | :substitution-code:`flwr/superlink:|latest_version_docker|`: The name of the image to be run and the specific
-     | tag of the image. The tag :substitution-code:`|latest_version_docker|` represents a :doc:`specific version <pinning-version>` of the image.
+   * | :substitution-code:`flwr/superlink:|current_flwr_version|`: The name of the image to be run and the specific
+     | tag of the image. The tag :substitution-code:`|current_flwr_version|` represents a :doc:`specific version <pinning-version>` of the image.
    * | ``--insecure``: This flag tells the container to operate in an insecure mode, allowing
      | unencrypted communication.
 
@@ -86,13 +86,15 @@ building your own SuperNode image.
 
    .. code-block:: dockerfile
       :caption: Dockerfile.supernode
+      :linenos:
       :substitutions:
 
-      FROM flwr/supernode:|latest_version_docker|
+      FROM flwr/supernode:|current_flwr_version|
 
       WORKDIR /app
-      COPY docker_pyproject.toml pyproject.toml
-      RUN python -m pip install -U --no-cache-dir .
+      COPY pyproject.toml .
+      RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
+          && python -m pip install -U --no-cache-dir .
 
       COPY flower.quickstart-docker.1-0-0.fab .
       RUN flwr install flower.quickstart-docker.1-0-0.fab
@@ -101,14 +103,15 @@ building your own SuperNode image.
 
    .. dropdown:: Understand the Dockerfile
 
-      * | :substitution-code:`FROM flwr/supernode:|latest_version_docker|`: This line specifies that the Docker image
-        | to be built from is the ``flwr/supernode image``, version :substitution-code:`|latest_version_docker|`.
+      * | :substitution-code:`FROM flwr/supernode:|current_flwr_version|`: This line specifies that the Docker image
+        | to be built from is the ``flwr/supernode image``, version :substitution-code:`|current_flwr_version|`.
       * | ``WORKDIR /app``: Set the working directory for the container to ``/app``.
         | Any subsequent commands that reference a directory will be relative to this directory.
-      * | ``COPY docker_pyproject.toml pyproject.toml``: Copy the ``docker_pyproject.toml`` file
-        | from the current working directory into the container's ``/app`` directory,
-        | renaming it to ``pyproject.toml``.
-      * | ``RUN python -m pip install -U --no-cache-dir .``: Run the ``pip`` install command to
+      * | ``COPY docker_pyproject.toml pyproject.toml``: Copy the ``pyproject.toml`` file
+        | from the current working directory into the container's ``/app`` directory.
+      * | ``RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml``: Remove the ``flwr`` dependency
+        | from the ``pyproject.toml``.
+      * | ``python -m pip install -U --no-cache-dir .``: Run the ``pip`` install command to
         | install the dependencies defined in the ``pyproject.toml`` file
         |
         | The ``-U`` flag indicates that any existing packages should be upgraded, and
@@ -121,17 +124,12 @@ building your own SuperNode image.
       * | ``ENTRYPOINT ["flower-supernode"]``: Set the command ``flower-supernode`` to be
         | the default command run when the container is started.
 
-#. Create a new ``docker_pyproject.toml`` file without the ``flwr`` dependency:
-
    .. important::
 
       Note that `flwr <https://pypi.org/project/flwr/>`__ is already installed in the ``flwr/supernode``
       base image, so only other package dependencies such as ``flwr-datasets``, ``torch``, etc.,
-      need to be installed.
-
-   .. code-block:: bash
-
-      $ sed 's/.*flwr\[simulation\].*//' pyproject.toml > docker_pyproject.toml
+      need to be installed. As a result, the ``flwr`` dependency is removed from the
+      ``pyproject.toml`` after it has been copied into the Docker image (see line 5).
 
 #. Build the Flower App Bundle (FAB):
 
@@ -206,7 +204,7 @@ Flower and serves as a base for building your own SuperExec image.
       :caption: Dockerfile.superexec
       :substitutions:
 
-      FROM flwr/superexec:|latest_version_docker|
+      FROM flwr/superexec:|current_flwr_version|
 
       WORKDIR /app
       COPY docker_pyproject.toml pyproject.toml
@@ -216,8 +214,8 @@ Flower and serves as a base for building your own SuperExec image.
 
    .. dropdown:: Understand the Dockerfile
 
-      * | :substitution-code:`FROM flwr/superexec:|latest_version_docker|`: This line specifies that the Docker image
-        | to be built from is the ``flwr/superexec image``, version :substitution-code:`|latest_version_docker|`.
+      * | :substitution-code:`FROM flwr/superexec:|current_flwr_version|`: This line specifies that the Docker image
+        | to be built from is the ``flwr/superexec image``, version :substitution-code:`|current_flwr_version|`.
       * | ``WORKDIR /app``: Set the working directory for the container to ``/app``.
         | Any subsequent commands that reference a directory will be relative to this directory.
       * | ``COPY docker_pyproject.toml pyproject.toml``: Copy the ``docker_pyproject.toml`` file

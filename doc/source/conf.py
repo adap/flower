@@ -94,6 +94,10 @@ release = "1.11.0"
 # The current released version
 rst_prolog = """
 .. |stable_flwr_version| replace:: 1.10.0
+.. |latest_version_docker_sha| replace:: 985c24b2b337ab7f15a554fde9d860cede95079bcaa244fda8f12c0805e34c7d
+.. |ubuntu_version| replace:: 22.04
+.. |setuptools_version| replace:: 70.3.0
+.. |pip_version| replace:: 24.1.2
 """
 
 # -- General configuration ---------------------------------------------------
@@ -340,12 +344,3 @@ mermaid_version = ""
 # -- Options for MyST config  -------------------------------------
 # Enable this option to link to headers (`#`, `##`, or `###`)
 myst_heading_anchors = 3
-
-# -- Options for sphinx_substitution_extensions -------------------
-rst_prolog = """
-.. |latest_version_docker| replace:: 1.10.0.dev20240723
-.. |latest_version_docker_sha| replace:: 985c24b2b337ab7f15a554fde9d860cede95079bcaa244fda8f12c0805e34c7d
-.. |ubuntu_version| replace:: 22.04
-.. |setuptools_version| replace:: 70.3.0
-.. |pip_version| replace:: 24.1.2
-"""

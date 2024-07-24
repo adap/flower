@@ -16,7 +16,7 @@ Run the Docker image with the ``-u`` flag and specify ``root`` as the username:
 .. code-block:: bash
    :substitutions:
 
-   $ docker run --rm -u root flwr/superlink:|latest_version_docker|
+   $ docker run --rm -u root flwr/superlink:|current_flwr_version|
 
 This command will run the Docker container with root user privileges.
 
@@ -30,7 +30,7 @@ missing system dependencies, you can use the ``USER root`` directive within your
    :caption: SuperNode Dockerfile
    :substitutions:
 
-   FROM flwr/supernode:|latest_version_docker|
+   FROM flwr/supernode:|current_flwr_version|
 
    # Switch to root user
    USER root

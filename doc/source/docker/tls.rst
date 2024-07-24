@@ -35,7 +35,7 @@ Assuming all files we need are in the local ``certificates`` directory, we can u
 
    $ docker run --rm \
         --volume ./certificates/:/app/certificates/:ro \
-        flwr/superlink:|latest_version_docker| \
+        flwr/superlink:|current_flwr_version| \
         --ssl-ca-certfile certificates/ca.crt \
         --ssl-certfile certificates/server.pem \
         --ssl-keyfile certificates/server.key
@@ -50,8 +50,8 @@ Assuming all files we need are in the local ``certificates`` directory, we can u
      |
      | This allows the container to access the TLS certificates that are stored in the certificates
      | directory.
-   * | :substitution-code:`flwr/superlink:|latest_version_docker|`: The name of the image to be run and the specific
-     | tag of the image. The tag :substitution-code:`|latest_version_docker|` represents a specific version of the image.
+   * | :substitution-code:`flwr/superlink:|current_flwr_version|`: The name of the image to be run and the specific
+     | tag of the image. The tag :substitution-code:`|current_flwr_version|` represents a specific version of the image.
    * | ``--ssl-ca-certfile certificates/ca.crt``: Specify the location of the CA certificate file
      | inside the container.
      |
@@ -79,7 +79,7 @@ certificate into the container's ``/app/`` directory:
 
    $ docker run --rm \
         --volume ./ca.crt:/app/ca.crt/:ro \
-        flwr/supernode:|latest_version_docker| \
+        flwr/supernode:|current_flwr_version| \
         --root-certificates ca.crt
 
 .. dropdown:: Understanding the command
@@ -89,8 +89,8 @@ certificate into the container's ``/app/`` directory:
    * | ``--volume ./ca.crt:/app/ca.crt/:ro``: Mount the ``ca.crt`` file from the
      | current working directory of the host machine as a read-only volume at the ``/app/ca.crt``
      | directory inside the container.
-   * | :substitution-code:`flwr/supernode:|latest_version_docker|`: The name of the image to be run and the specific
-     | tag of the image. The tag :substitution-code:`|latest_version_docker|` represents a specific version of the image.
+   * | :substitution-code:`flwr/supernode:|current_flwr_version|`: The name of the image to be run and the specific
+     | tag of the image. The tag :substitution-code:`|current_flwr_version|` represents a specific version of the image.
    * | ``--root-certificates ca.crt``: This specifies the location of the CA certificate file
      | inside the container.
      |
@@ -108,7 +108,7 @@ Assuming all files we need are in the local ``certificates`` directory, we can u
 
    $ docker run --rm \
         --volume ./certificates/:/app/certificates/:ro \
-        flwr/superexec:|latest_version_docker| \
+        flwr/superexec:|current_flwr_version| \
         --ssl-ca-certfile certificates/ca.crt \
         --ssl-certfile certificates/server.pem \
         --ssl-keyfile certificates/server.key \
@@ -126,8 +126,8 @@ Assuming all files we need are in the local ``certificates`` directory, we can u
      |
      | This allows the container to access the TLS certificates that are stored in the certificates
      | directory.
-   * | :substitution-code:`flwr/superexec:|latest_version_docker|`: The name of the image to be run and the specific
-     | tag of the image. The tag :substitution-code:`|latest_version_docker|` represents a specific version of the image.
+   * | :substitution-code:`flwr/superexec:|current_flwr_version|`: The name of the image to be run and the specific
+     | tag of the image. The tag :substitution-code:`|current_flwr_version|` represents a specific version of the image.
    * | ``--ssl-ca-certfile certificates/ca.crt``: Specify the location of the CA certificate file
      | inside the container.
      |
