@@ -12,17 +12,20 @@ from pathlib import Path
 # these are the basic packages you'll need here
 # feel free to remove some if aren't needed
 import flwr as fl
+from baselines.moon.moon import client_app
 import hydra
 import numpy as np
 import torch
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 
-from moon import client, server
+from baselines.moon.moon import server_app
 from moon.dataset import get_dataloader
 from moon.dataset_preparation import partition_data
 from moon.utils import plot_metric_from_history
 
+
+# TODO: delete this filw
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
 def main(cfg: DictConfig) -> None:
@@ -79,7 +82,7 @@ def main(cfg: DictConfig) -> None:
     # 3. Define your clients
     # Define a function that returns another function that will be used during
     # simulation to instantiate each individual client
-    client_fn = client.gen_client_fn(
+    client_fn = client_app.gen_client_fn(
         trainloaders=trainloaders,
         testloaders=testloaders,
         cfg=cfg,
@@ -92,7 +95,7 @@ def main(cfg: DictConfig) -> None:
         if torch.cuda.is_available() and cfg.server_device == "cuda"
         else "cpu"
     )
-    evaluate_fn = server.gen_evaluate_fn(test_global_dl, device=device, cfg=cfg)
+    evaluate_fn = server_app.gen_evaluate_fn(test_global_dl, device=device, cfg=cfg)
 
     # 4. Define your strategy
     strategy = fl.server.strategy.FedAvg(

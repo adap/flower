@@ -70,15 +70,11 @@ To construct the Python environment follow these steps:
 ```bash
 # Set local python version via pyenv
 pyenv local 3.10.6
-# Then fix that for poetry
-poetry env use 3.10.6
-# Then install poetry env
-poetry install
-
-# Activate the environment
-poetry shell
+# Then install the project
+pip install -e .
 ```
 
+# TODO: update below with `flwr run`
 
 ## Running the Experiments
 
