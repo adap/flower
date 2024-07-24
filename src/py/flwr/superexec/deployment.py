@@ -135,6 +135,7 @@ class DeploymentEngine(Executor):
         self,
         fab_file: bytes,
         override_config: UserConfig,
+        federation_config: UserConfig,
     ) -> Optional[RunTracker]:
         """Start run using the Flower Deployment Engine."""
         try:
@@ -167,8 +168,6 @@ class DeploymentEngine(Executor):
             # Execute the command
             proc = subprocess.Popen(  # pylint: disable=consider-using-with
                 command,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
                 text=True,
             )
             log(INFO, "Started run %s", str(run_id))

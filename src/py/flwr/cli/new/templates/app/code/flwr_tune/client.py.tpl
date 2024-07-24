@@ -10,6 +10,7 @@ from transformers import TrainingArguments
 from trl import SFTTrainer
 
 from flwr.client import NumPyClient
+from flwr.common import Context
 from flwr.common.typing import NDArrays, Scalar
 from $import_name.dataset import reformat
 from $import_name.models import cosine_annealing, get_model
@@ -102,13 +103,14 @@ def gen_client_fn(
     model_cfg: DictConfig,
     train_cfg: DictConfig,
     save_path: str,
-) -> Callable[[str], FlowerClient]:  # pylint: disable=too-many-arguments
+) -> Callable[[Context], FlowerClient]:  # pylint: disable=too-many-arguments
     """Generate the client function that creates the Flower Clients."""
 
-    def client_fn(cid: str) -> FlowerClient:
+    def client_fn(context: Context) -> FlowerClient:
         """Create a Flower client representing a single organization."""
         # Let's get the partition corresponding to the i-th client
-        client_trainset = fds.load_partition(int(cid), "train")
+        partition_id = context.node_config["partition-id"]
+        client_trainset = fds.load_partition(partition_id, "train")
         client_trainset = reformat(client_trainset, llm_task="$llm_challenge_str")
 
         return FlowerClient(
