@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Federated Learning Quickstart with Flower and PyTorch Lightning"
 authors = [{ name = "The Flower Authors", email = "hello@flower.ai" }]
 dependencies = [
-    "flwr>=1.10.0,<2.0",
+    "flwr[simulation]>=1.10.0,<2.0",
     "flwr-datasets[vision]>=0.0.3,<1.0.0",
     "pytorch-lightning<2.0.0; sys_platform == 'darwin'",
     "pytorch-lightning==1.6.0; sys_platform != 'darwin'",
