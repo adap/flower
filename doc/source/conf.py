@@ -63,11 +63,14 @@ html_context["current_version"]["full_name"] = (
 
 # Make version list accessible for the html templates
 html_context["versions"] = list()
-versions = [
-    tag.name
-    for tag in repo.tags
-    if int(tag.name[1]) > 0 and int(tag.name.split(".")[1]) >= 5
-]
+versions = sorted(
+    [
+        tag.name
+        for tag in repo.tags
+        if int(tag.name[1]) > 0 and int(tag.name.split(".")[1]) >= 8
+    ],
+    key=lambda x: [int(part) for part in x[1:].split(".")],
+)
 versions.append("main")
 for version in versions:
     html_context["versions"].append({"name": version})
