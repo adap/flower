@@ -11,8 +11,8 @@ authors = [
     { name = "Kaushik Amar Das", email = "kaushik.das@iiitg.ac.in" },
 ]
 dependencies = [
-    "flwr>=1.9.0,<2.0",
-    "flwr-datasets>=0.0.2,<1.0.0",
+    "flwr[simulation]>=1.10.0,<2.0",
+    "flwr-datasets>=0.0.3,<1.0.0",
     "torch>=1.13.1,<2.0",
     "transformers>=4.30.0,<5.0",
     "evaluate>=0.4.0,<1.0",
@@ -34,11 +34,7 @@ clientapp = "huggingface_example.client_app:app"
 num_server_rounds = "3"
 
 [tool.flwr.federations]
-default = "localhost"
+default = "local-simulation"
 
-[tool.flwr.federations.localhost]
+[tool.flwr.federations.local-simulation]
 options.num-supernodes = 2
-
-[tool.flwr.federations.superexec]
-address = "0.0.0.0:9093"
-insecure = "true"
