@@ -1,4 +1,4 @@
-"""$project_name: A Flower / JAX app."""
+"""$project_name: A Flower / $framework_str app."""
 
 import jax
 import jax.numpy as jnp

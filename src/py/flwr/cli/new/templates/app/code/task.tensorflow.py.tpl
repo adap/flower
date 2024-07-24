@@ -1,4 +1,4 @@
-"""$project_name: A Flower / TensorFlow app."""
+"""$project_name: A Flower / $framework_str app."""
 
 import os
 

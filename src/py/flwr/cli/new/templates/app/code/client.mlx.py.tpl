@@ -1,4 +1,4 @@
-"""$project_name: A Flower / MLX app."""
+"""$project_name: A Flower / $framework_str app."""
 
 import mlx.core as mx
 import mlx.nn as nn

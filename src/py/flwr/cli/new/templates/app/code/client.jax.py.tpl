@@ -1,4 +1,4 @@
-"""$project_name: A Flower / JAX app."""
+"""$project_name: A Flower / $framework_str app."""
 
 import jax
 from flwr.client import NumPyClient, ClientApp

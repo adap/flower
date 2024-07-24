@@ -1,4 +1,4 @@
-"""$project_name: A Flower / NumPy app."""
+"""$project_name: A Flower / $framework_str app."""
 
 from flwr.common import Context
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
