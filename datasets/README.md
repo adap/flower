@@ -70,7 +70,7 @@ from flwr_datasets.partitioners import IidPartitioner
 
 # The train split of the MNIST dataset will be partitioned into 100 partitions
 partitioner = IidPartitioner(num_partitions=100)
-fds = FederatedDataset("mnist", partitioners={"train": partitioner})
+fds = FederatedDataset("ylecun/mnist", partitioners={"train": partitioner})
 
 partition = fds.load_partition(0)
 
