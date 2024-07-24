@@ -34,7 +34,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Introduce** `flower-supernode` **(preview)** ([#3353](https://github.com/adap/flower/pull/3353))
 
-  The new `flower-supernode` CLI is here to replace `flower-client-app`. `flower-supernode` brings full multi-app support to the Flower client-side. It also allows to pass `--node-config` to the SuperNode, which is accessible in your `ClientApp` via `Context` (using the new `client_fn(context)`).
+  The new `flower-supernode` CLI is here to replace `flower-client-app`. `flower-supernode` brings full multi-app support to the Flower client-side. It also allows to pass `--node-config` to the SuperNode, which is accessible in your `ClientApp` via `Context` (using the new `client_fn(context: Context)` signature).
 
 - **Introduce node config** ([#3782](https://github.com/adap/flower/pull/3782), [#3780](https://github.com/adap/flower/pull/3780), [#3695](https://github.com/adap/flower/pull/3695), [#3886](https://github.com/adap/flower/pull/3886))
 
@@ -86,13 +86,13 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Deprecate passing** `Server/ServerConfig/Strategy/ClientManager` **to** `ServerApp` **directly**
 
-  Creating `ServerApp` using `ServerApp(config=config, strategy=strategy)` is now deprecated. Instead of passing `Server/ServerConfig/Strategy/ClientManager` to `ServerApp` directly, pass a `server_fn(context: Context) -> ServerAppComponents` (`ServerApp(server_fn=server_fn)`). `ServerAppComponents` can hold references to `Server/ServerConfig/Strategy/ClientManager`. In addition to that, `server_fn` allows you to access `Context` (for example, to read the `run_config`).
+  Creating `ServerApp` using `ServerApp(config=config, strategy=strategy)` is now deprecated. Instead of passing `Server/ServerConfig/Strategy/ClientManager` to `ServerApp` directly, pass them wrapped in a `server_fn(context: Context) -> ServerAppComponents` function, like this: `ServerApp(server_fn=server_fn)`. `ServerAppComponents` can hold references to `Server/ServerConfig/Strategy/ClientManager`. In addition to that, `server_fn` allows you to access `Context` (for example, to read the `run_config`).
 
 ### Incompatible changes
 
 - **Remove support for `client_ids` in `start_simulation`** ([#3699](https://github.com/adap/flower/pull/3699))
 
-  The (rarely used) feature that allowed passing custom `client_ids` to the `start_simulation` function was removed. This removal is part of a bigger effort to refactor the simulation engine and speed up simulations by a large factor.
+  The (rarely used) feature that allowed passing custom `client_ids` to the `start_simulation` function was removed. This removal is part of a bigger effort to refactor the simulation engine and unify how the Flower internals work in simulation and deployment.
 
 - **Remove `flower-driver-api` and `flower-fleet-api`** ([#3418](https://github.com/adap/flower/pull/3418))
 
