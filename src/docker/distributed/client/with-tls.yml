@@ -11,6 +11,10 @@ services:
 
   supernode-2: *supernode
 
+  # uncomment to add another supernode
+  #
+  # supernode-3: *supernode
+
 secrets:
   superlink-ca-certfile:
     file: ../superlink-certificates/ca.crt

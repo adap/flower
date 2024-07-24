@@ -1,6 +1,6 @@
 services:
   superlink:
-    image: flwr/superlink:1.10.0.dev20240721
+    image: flwr/superlink:${FLWR_VERSION:-1.10.0}
     command:
       - --insecure
     ports:
@@ -10,7 +10,7 @@ services:
     build:
       context: ${PROJECT_DIR:-.}
       dockerfile_inline: |
-        FROM flwr/supernode:1.10.0.dev20240721
+        FROM flwr/superexec:${FLWR_VERSION:-1.10.0}
 
         WORKDIR /app
         COPY --chown=app:app pyproject.toml .
