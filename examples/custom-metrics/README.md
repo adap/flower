@@ -72,27 +72,6 @@ You can also override some of the settings for your `ClientApp` and `ServerApp` 
 flwr run . --run-config num-server-rounds=5
 ```
 
-You will see that Keras is starting a federated training. Have a look to the [Flower Quickstarter documentation](https://flower.ai/docs/quickstart-tensorflow.html) for a detailed explanation. You can add `steps_per_epoch=3` to `model.fit()` if you just want to evaluate that everything works without having to wait for the client-side training to finish (this will save you a lot of time during development).
-
-Running `flwr run` will result in the following output (after 3 rounds):
-
-```shell
-INFO :      [SUMMARY]
-INFO :      Run finished 3 round(s) in 132.51s
-INFO :          History (loss, distributed):
-INFO :                  round 1: 2.3027085781097414
-INFO :                  round 2: 2.3030176162719727
-INFO :                  round 3: 2.307635450363159
-INFO :          History (metrics, distributed, evaluate):
-INFO :          {'acc': [(1, 0.09419999999999999), (2, 0.1004), (3, 0.0992)],
-INFO :           'accuracy': [(1, 0.09419999942183495),
-INFO :                        (2, 0.10040000081062317),
-INFO :                        (3, 0.09920000061392784)],
-INFO :           'f1': [(1, 0.09419999999999999), (2, 0.1004), (3, 0.0992)],
-INFO :           'prec': [(1, 0.09419999999999999), (2, 0.1004), (3, 0.0992)],
-INFO :           'rec': [(1, 0.09419999999999999), (2, 0.1004), (3, 0.0992)]}
-```
-
 ### Run with the Deployment Engine
 
 > \[!NOTE\]
