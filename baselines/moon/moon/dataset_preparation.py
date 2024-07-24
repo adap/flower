@@ -1,39 +1,20 @@
 """Handle the dataset partitioning and (optionally) complex downloads.
 
-Please add here all the necessary logic to either download, uncompress, pre/post-process
-your dataset (or all of the above). If the desired way of running your baseline is to
-first download the dataset and partition it and then run the experiments, please
-uncomment the lines below and tell us in the README.md (see the "Running the Experiment"
-block) that this file should be executed first.
+Please add here all the necessary logic to either download, uncompress,
+pre/post-process your dataset (or all of the above). If the desired way
+of running your baseline is to first download the dataset and partition
+it and then run the experiments, please uncomment the lines below and
+tell us in the README.md (see the "Running the Experiment" block) that
+this file should be executed first.
 """
 
-import torchvision.transforms as transforms
-
 import torch.nn.functional as F
+import torchvision.transforms as transforms
 from torch.autograd import Variable
-
-from flwr_datasets import FederatedDataset
-from flwr_datasets.partitioner import DirichletPartitioner
-
-
-fds = None
-
-def get_dataset(dataset_name: str, dirichlet_alpha: float, num_partitions: int, partition_by:str) -> FederatedDataset:
-
-    # Only initialize `FederatedDataset` once
-    global fds
-    if fds is None:
-        partitioner = DirichletPartitioner(num_partitions=num_partitions, alpha=dirichlet_alpha, partition_by=partition_by)
-        fds = FederatedDataset(
-            dataset=dataset_name,
-            partitioners={"train": partitioner},
-        )
-    
-    return fds
 
 
 def get_data_transforms(dataset_name):
-    """Get dataset transforms"""
+    """Get dataset transforms."""
     if dataset_name == "uoft-cs/cifar10":
         normalize = transforms.Normalize(
             mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
@@ -79,15 +60,19 @@ def get_data_transforms(dataset_name):
         # data prep for test set
         transform_test = transforms.Compose([transforms.ToTensor(), normalize])
     else:
-        raise ValueError("Only datasets `uoft-cs/cifar10` and `uoft-cs/cifar100` are supported")
-    
+        raise ValueError(
+            "Only datasets `uoft-cs/cifar10` and `uoft-cs/cifar100` are supported"
+        )
+
     return transform_train, transform_test
 
 
 def get_transforms_apply_fn(transforms):
+    """Return a function that applies the dataset transforms."""
 
     def apply_transforms(batch):
-        # For CIFAR-10 the "img" column contains the images we want to apply the transforms to
+        # For CIFAR-10 the "img" column contains the images we want to
+        # apply the transforms to
         batch["img"] = [transforms(img) for img in batch["img"]]
         return batch
 

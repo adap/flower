@@ -10,13 +10,15 @@ from collections import OrderedDict
 from typing import Dict, Tuple
 
 import torch
-from flwr.common.typing import NDArrays, Scalar, UserConfig
-from flwr.common import Context
-from flwr.client import Client, NumPyClient, ClientApp
+from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import DirichletPartitioner
+from moon.dataset_preparation import get_data_transforms, get_transforms_apply_fn
+from moon.models import init_net, train_fedprox, train_moon
 from torch.utils.data import DataLoader
 
-from moon.models import init_net, train_fedprox, train_moon
-from moon.dataset_preparation import get_dataset, get_data_transforms, get_transforms_apply_fn
+from flwr.client import Client, ClientApp, NumPyClient
+from flwr.common import Context
+from flwr.common.typing import NDArrays, Scalar, UserConfig
 
 
 # pylint: disable=too-many-instance-attributes
@@ -31,17 +33,17 @@ class FlowerClient(NumPyClient):
         device: torch.device,
     ):  # pylint: disable=too-many-arguments
         self.net_id = net_id
-        self.dataset = run_config['dataset-name']
-        self.model = run_config['model-name']
-        self.output_dim = run_config['model-output-dim']
+        self.dataset = run_config["dataset-name"]
+        self.model = run_config["model-name"]
+        self.output_dim = run_config["model-output-dim"]
         self.trainloader = trainloader
         self.device = device
-        self.num_epochs = run_config['num-epochs']
-        self.learning_rate = run_config['learning-rate']
-        self.mu = run_config['mu']  # pylint: disable=invalid-name
-        self.temperature = run_config['temperature']
-        self.model_dir = run_config['model-dir']
-        self.alg = run_config['alg']
+        self.num_epochs = run_config["num-epochs"]
+        self.learning_rate = run_config["learning-rate"]
+        self.mu = run_config["mu"]  # pylint: disable=invalid-name
+        self.temperature = run_config["temperature"]
+        self.model_dir = run_config["model-dir"]
+        self.alg = run_config["alg"]
 
         self.net = init_net(self.dataset, self.model, self.output_dim)
 
@@ -103,24 +105,39 @@ class FlowerClient(NumPyClient):
         return self.get_parameters({}), len(self.trainloader), {"is_straggler": False}
 
 
+fds = None
+
+
 def client_fn(context: Context) -> Client:
     """Create a Flower client representing a single organization."""
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    dataset_name = context.run_config['dataset-name']
-    fds = get_dataset(dataset_name=dataset_name,
-                      dirichlet_alpha=context.run_config['dirichlet-alpha'],
-                      num_partitions=context.node_config['num-partitions'],
-                      partition_by=context.run_config['dataset-partition-by'],)
-    
+    dataset_name = context.run_config["dataset-name"]
+
+    # Only initialize `FederatedDataset` once
+    global fds
+    if fds is None:
+        partitioner = DirichletPartitioner(
+            num_partitions=context.node_config["num-partitions"],
+            alpha=context.run_config["dirichlet-alpha"],
+            partition_by=context.run_config["dataset-partition-by"],
+        )
+        fds = FederatedDataset(
+            dataset=dataset_name,
+            partitioners={"train": partitioner},
+        )
+
     partition_id = context.node_config["partition-id"]
     train_partition = fds.load_partition(partition_id=partition_id)
 
     train_transforms, _ = get_data_transforms(dataset_name=dataset_name)
     transforms_fn = get_transforms_apply_fn(train_transforms)
-    trainloader = DataLoader(train_partition.with_transform(transforms_fn),
-                            batch_size=context.run_config['batch-size'], shuffle=True)
-    
+    trainloader = DataLoader(
+        train_partition.with_transform(transforms_fn),
+        batch_size=context.run_config["batch-size"],
+        shuffle=True,
+    )
+
     return FlowerClient(
         partition_id,
         context.run_config,

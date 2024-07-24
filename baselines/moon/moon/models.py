@@ -1,16 +1,16 @@
 """Define our models, and training and eval functions.
 
-If your model is 100% off-the-shelf (e.g. directly from torchvision without requiring
-modifications) you might be better off instantiating your  model directly from the Hydra
-config. In this way, swapping your model for  another one can be done without changing
-the python code at all
+If your model is 100% off-the-shelf (e.g. directly from torchvision
+without requiring modifications) you might be better off instantiating
+your  model directly from the Hydra config. In this way, swapping your
+model for  another one can be done without changing the python code at
+all
 """
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-
 from moon.utils import compute_accuracy
 
 
@@ -166,7 +166,7 @@ class ResNetCifar10(nn.Module):
         if len(replace_stride_with_dilation) != 3:
             raise ValueError(
                 "replace_stride_with_dilation should be None "
-                "or a 3-element tuple, got {}".format(replace_stride_with_dilation)
+                f"or a 3-element tuple, got {replace_stride_with_dilation}"
             )
         self.groups = groups
         self.base_width = width_per_group
@@ -469,7 +469,7 @@ def train_fedprox(net, global_net, train_dataloader, epochs, lr, mu, device="cpu
 
     train_acc, _ = compute_accuracy(net, train_dataloader, device=device)
 
-    print(">> Pre-Training Training accuracy: {}".format(train_acc))
+    print(f">> Pre-Training Training accuracy: {train_acc}")
 
     optimizer = optim.SGD(
         filter(lambda p: p.requires_grad, net.parameters()),
@@ -501,7 +501,7 @@ def train_fedprox(net, global_net, train_dataloader, epochs, lr, mu, device="cpu
             fed_prox_reg = 0.0
             for param_index, param in enumerate(net.parameters()):
                 fed_prox_reg += (mu / 2) * torch.norm(
-                    (param - global_weight_collector[param_index])
+                    param - global_weight_collector[param_index]
                 ) ** 2
             loss += fed_prox_reg
 
