@@ -107,9 +107,9 @@ class SimulationEngine(Executor):
         """Start run using the Flower Simulation Engine."""
         if self.num_supernodes is None:
             raise ValueError(
-                "Error from the `SuperExec` simulation plugin:\n\n"
+                "Error in `SuperExec` (`SimulationEngine` executor):\n\n"
                 "`num-supernodes` must not be `None`, it must be a valid "
-                "positive integer. In order to start this simulation plugin "
+                "positive integer. In order to start this simulation executor "
                 "with a specified number of `SuperNodes`, you can either provide "
                 "a `--executor` that has been initialized with a number of nodes "
                 "to the `flower-superexec` CLI, or `--executor-config num-supernodes=N`"
