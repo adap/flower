@@ -81,13 +81,11 @@ class SimulationEngine(Executor):
             - "num-supernodes": int
                 Number of nodes to register for the simulation.
         """
-        if not config:
-            return
         if num_supernodes := config.get("num-supernodes"):
             if not isinstance(num_supernodes, int):
                 raise ValueError("The `num-supernodes` value should be of type `int`.")
             self.num_supernodes = num_supernodes
-        else:
+        elif self.num_supernodes is None:
             log(
                 ERROR,
                 "To start a run with the simulation plugin, please specify "
@@ -107,6 +105,16 @@ class SimulationEngine(Executor):
         federation_config: UserConfig,
     ) -> Optional[RunTracker]:
         """Start run using the Flower Simulation Engine."""
+        if self.num_supernodes is None:
+            raise ValueError(
+                "Error from the `SuperExec` simulation plugin:\n\n"
+                "`num-supernodes` must not be `None`, it must be a valid "
+                "positive integer. In order to start this simulation plugin "
+                "with a specified number of `SuperNodes`, you can either provide "
+                "a `--executor` that has been initialized with a number of nodes "
+                "to the `flower-superexec` CLI, or `--executor-config num-supernodes=N`"
+                "to the `flower-superexec` CLI."
+            )
         try:
 
             # Install FAB to flwr dir
