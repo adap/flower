@@ -4,10 +4,12 @@ import os
 
 import tensorflow as tf
 from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import IidPartitioner
 
 
 # Make TensorFlow log less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+
 
 def load_model():
     # Load model and data (MobileNetV2, CIFAR-10)
@@ -16,9 +18,19 @@ def load_model():
     return model
 
 
+fds = None  # Cache FederatedDataset
+
+
 def load_data(partition_id, num_partitions):
     # Download and partition dataset
-    fds = FederatedDataset(dataset="cifar10", partitioners={"train": num_partitions})
+    # Only initialize `FederatedDataset` once
+    global fds
+    if fds is None:
+        partitioner = IidPartitioner(num_partitions=num_partitions)
+        fds = FederatedDataset(
+            dataset="uoft-cs/cifar10",
+            partitioners={"train": partitioner},
+        )
     partition = fds.load_partition(partition_id, "train")
     partition.set_format("numpy")
 
