@@ -168,8 +168,6 @@ class DeploymentEngine(Executor):
             # Execute the command
             proc = subprocess.Popen(  # pylint: disable=consider-using-with
                 command,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
                 text=True,
             )
             log(INFO, "Started run %s", str(run_id))
