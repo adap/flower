@@ -249,6 +249,7 @@ Flower and serves as a base for building your own SuperExec image.
       $ docker run --rm \
          -p 9093:9093 \
           --network flwr-network \
+          --name superexec \
           --detach \
           flwr_superexec:0.0.1 \
           --insecure \
@@ -262,6 +263,7 @@ Flower and serves as a base for building your own SuperExec image.
       * | ``-p 9093:9093``: Map port ``9093`` of the container to the same port of
         | the host machine, allowing you to access the SuperExec API on ``http://localhost:9093``.
       * ``--network flwr-network``: Make the container join the network named ``flwr-network``.
+      * ``--name superexec``: Assign the name ``superexec`` to the container.
       * ``--detach``: Run the container in the background, freeing up the terminal.
       * | ``flwr_superexec:0.0.1``: This is the name of the image to be run and the specific tag
         | of the image.
@@ -288,9 +290,11 @@ Step 5: Run the Quickstart Project
 
       $ flwr run . docker
 
-#. Wait until the run is complete
+#. Follow the SuperExec logs to track the execution of the run:
 
-* add flwr logs
+   .. code-block:: bash
+
+      $ docker logs -f superexec
 
 Step 6: Update the Application Code
 -----------------------------------
@@ -353,7 +357,7 @@ Step 7: Clean Up
    .. code-block:: bash
 
       $ docker stop $(docker ps -a -q  --filter ancestor=flwr_supernode:0.0.1) \
-         $(docker ps -a -q  --filter ancestor=flwr_superexec:0.0.1) \
+         superexec \
          superlink
       $ docker network rm flwr-network
 
