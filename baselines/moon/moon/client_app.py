@@ -7,7 +7,7 @@ to instantiate your client.
 import copy
 import os
 from collections import OrderedDict
-from typing import Callable, Dict, List, Tuple
+from typing import Dict, Tuple
 
 import torch
 from flwr.common.typing import NDArrays, Scalar, UserConfig

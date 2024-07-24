@@ -7,11 +7,9 @@ uncomment the lines below and tell us in the README.md (see the "Running the Exp
 block) that this file should be executed first.
 """
 
-import numpy as np
 import torchvision.transforms as transforms
 
 import torch.nn.functional as F
-from moon.dataset import CIFAR10Sub, CIFAR100Sub
 from torch.autograd import Variable
 
 from flwr_datasets import FederatedDataset

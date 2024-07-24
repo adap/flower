@@ -13,9 +13,10 @@ from flwr.common import Context
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.common.typing import NDArrays, Scalar
 from torch.utils.data import DataLoader
+from datasets import load_dataset
 
 from moon.models import init_net, test
-from moon.dataset_preparation import get_dataset, get_data_transforms, get_transforms_apply_fn
+from moon.dataset_preparation import get_data_transforms, get_transforms_apply_fn
 
 
 def gen_evaluate_fn(
@@ -47,12 +48,10 @@ def gen_evaluate_fn(
 def server_fn(context: Context) -> ServerAppComponents:
 
     dataset_name = context.run_config['dataset-name']
-    fds = get_dataset(dataset_name=dataset_name,
-                      dirichlet_alpha=context.run_config['dirichlet-alpha'],
-                      partition_by=context.run_config['dataset-partition-by'],
-                      num_partitions=1) # TODO: a temporary fix
-    global_test_set = fds.load_split("test")
-
+    # This is the exact same dataset as the one donwloaded by the clients via FlowerDatasets.
+    # However, we don't use FlowerDatasets for the server since partitioning it is not needed.
+    # We make use of the "test" split only
+    global_test_set = load_dataset(dataset_name)["test"]
     _, test_transforms = get_data_transforms(dataset_name=dataset_name)
 
     transforms_fn = get_transforms_apply_fn(test_transforms)
