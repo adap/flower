@@ -27,7 +27,7 @@ clientapp = "$import_name.client_app:app"
 num-server-rounds = 3
 
 [tool.flwr.federations]
-default = "localhost"
+default = "local-simulation"
 
-[tool.flwr.federations.localhost]
+[tool.flwr.federations.local-simulation]
 options.num-supernodes = 10
