@@ -16,7 +16,7 @@
 # hadolint global ignore=DL3008
 ARG DISTRO=ubuntu
 ARG DISTRO_VERSION=22.04
-FROM $DISTRO:$DISTRO_VERSION as python
+FROM $DISTRO:$DISTRO_VERSION AS python
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -50,9 +50,12 @@ RUN LATEST=$(pyenv latest -k ${PYTHON_VERSION}) \
 
 ENV PATH=/usr/local/bin/python/bin:$PATH
 
-# Use a virtual environment to ensure that Python packages are installed in the same location
-# regardless of whether the subsequent image build is run with the app or the root user
-RUN python -m venv /python/venv
+# Upgrade system Python pip and setuptools
+# hadolint ignore=DL3013
+RUN pip install -U --no-cache-dir pip setuptools \
+    # Use a virtual environment to ensure that Python packages are installed in the same location
+    # regardless of whether the subsequent image build is run with the app or the root user
+    && python -m venv /python/venv
 ENV PATH=/python/venv/bin:$PATH
 
 ARG PIP_VERSION
@@ -64,7 +67,7 @@ RUN pip install -U --no-cache-dir \
     setuptools==${SETUPTOOLS_VERSION} \
     ${FLWR_PACKAGE}==${FLWR_VERSION}
 
-FROM $DISTRO:$DISTRO_VERSION as base
+FROM $DISTRO:$DISTRO_VERSION AS base
 
 COPY --from=python /usr/local/bin/python /usr/local/bin/python
 
