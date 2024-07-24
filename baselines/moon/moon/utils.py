@@ -25,17 +25,15 @@ def compute_accuracy(model, dataloader, device="cpu", multiloader=False):
     true_labels_list, pred_labels_list = np.array([]), np.array([])
 
     correct, total = 0, 0
-    if device == "cpu":
-        criterion = nn.CrossEntropyLoss()
-    elif "cuda" in device.type:
-        criterion = nn.CrossEntropyLoss().cuda()
+    criterion = nn.CrossEntropyLoss().to(device)
     loss_collector = []
     if multiloader:
         for loader in dataloader:
             with torch.no_grad():
-                for _, (x, target) in enumerate(loader):
-                    if device != "cpu":
-                        x, target = x.cuda(), target.to(dtype=torch.int64).cuda()
+                for batch in loader:
+                    x = batch["img"]
+                    target = batch["label"]
+                    x, target = x.to(device), target.to(dtype=torch.int64).to(device)
                     _, _, out = model(x)
                     if len(target) == 1:
                         loss = criterion(out, target)
@@ -63,10 +61,10 @@ def compute_accuracy(model, dataloader, device="cpu", multiloader=False):
         avg_loss = sum(loss_collector) / len(loss_collector)
     else:
         with torch.no_grad():
-            for _, (x, target) in enumerate(dataloader):
-                # print("x:",x)
-                if device != "cpu":
-                    x, target = x.cuda(), target.to(dtype=torch.int64).cuda()
+            for batch in dataloader:
+                x = batch["img"]
+                target = batch["label"]
+                x, target = x.to(device), target.to(dtype=torch.int64).to(device)
                 _, _, out = model(x)
                 loss = criterion(out, target)
                 _, pred_label = torch.max(out.data, 1)

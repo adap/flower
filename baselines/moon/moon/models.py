@@ -353,16 +353,13 @@ class ModelMOON(nn.Module):
 
 def init_net(dataset, model, output_dim, device="cpu"):
     """Initialize model."""
-    if dataset == "cifar10":
+    if dataset == "uoft-cs/cifar10":
         n_classes = 10
-    elif dataset == "cifar100":
+    elif dataset == "uoft-cs/cifar100":
         n_classes = 100
 
     net = ModelMOON(model, output_dim, n_classes)
-    if device == "cpu":
-        net.to(device)
-    else:
-        net = net.cuda()
+    net.to(device)
 
     return net
 
@@ -390,12 +387,12 @@ def train_moon(
         weight_decay=1e-5,
     )
 
-    criterion = nn.CrossEntropyLoss().cuda()
+    criterion = nn.CrossEntropyLoss().to(device)
 
     previous_net.eval()
     for param in previous_net.parameters():
         param.requires_grad = False
-    previous_net.cuda()
+    previous_net.to(device)
 
     cnt = 0
     cos = torch.nn.CosineSimilarity(dim=-1)
@@ -404,7 +401,9 @@ def train_moon(
         epoch_loss_collector = []
         epoch_loss1_collector = []
         epoch_loss2_collector = []
-        for _, (x, target) in enumerate(train_dataloader):
+        for batch in train_dataloader:
+            x = batch["img"]
+            target = batch["label"]
             x, target = x.to(device), target.to(device)
 
             optimizer.zero_grad()
@@ -429,7 +428,7 @@ def train_moon(
 
             previous_net.to("cpu")
             logits /= temperature
-            labels = torch.zeros(x.size(0)).cuda().long()
+            labels = torch.zeros(x.size(0)).to(device).long()
             # compute the model-contrastive loss (Line 17 of Algorithm 1)
             loss2 = mu * criterion(logits, labels)
             # compute the cross-entropy loss (Line 13 of Algorithm 1)
@@ -466,7 +465,7 @@ def train_moon(
 def train_fedprox(net, global_net, train_dataloader, epochs, lr, mu, device="cpu"):
     """Training function for FedProx."""
     net = nn.DataParallel(net)
-    net.cuda()
+    net.to(device)
 
     train_acc, _ = compute_accuracy(net, train_dataloader, device=device)
 
@@ -479,15 +478,17 @@ def train_fedprox(net, global_net, train_dataloader, epochs, lr, mu, device="cpu
         weight_decay=1e-5,
     )
 
-    criterion = nn.CrossEntropyLoss().cuda()
+    criterion = nn.CrossEntropyLoss().to(device)
 
     cnt = 0
-    global_weight_collector = list(global_net.cuda().parameters())
+    global_weight_collector = list(global_net.to(device).parameters())
 
     for _epoch in range(epochs):
         epoch_loss_collector = []
-        for _, (x, target) in enumerate(train_dataloader):
-            x, target = x.cuda(), target.cuda()
+        for batch in train_dataloader:
+            x = batch["img"]
+            target = batch["label"]
+            x, target = x.to(device), target.to(device)
 
             optimizer.zero_grad()
             x.requires_grad = False

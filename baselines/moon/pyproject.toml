@@ -16,6 +16,9 @@ dependencies = [
     "torchvision@https://download.pytorch.org/whl/cu116/torchvision-0.13.0%2Bcu116-cp310-cp310-linux_x86_64.whl",
 ]
 
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [project.optional-dependencies]
 dev = [
     "isort==5.13.2",
@@ -57,6 +60,7 @@ client-resources-num_cpus = 4
 client-resources-num_gpus = 0.2
 
 dataset-name = "uoft-cs/cifar10"
+dataset-partition-by = "label"
 dirichlet-alpha = 0.5
 
 model-name = "simple-cnn"

@@ -12,7 +12,7 @@ from typing import Callable, Dict, List, Tuple
 import torch
 from flwr.common.typing import NDArrays, Scalar, UserConfig
 from flwr.common import Context
-from flwr.client import Client, NumPyClient
+from flwr.client import Client, NumPyClient, ClientApp
 from torch.utils.data import DataLoader
 
 from moon.models import init_net, train_fedprox, train_moon
@@ -42,6 +42,7 @@ class FlowerClient(NumPyClient):
         self.temperature = run_config['temperature']
         self.model_dir = run_config['model-dir']
         self.alg = run_config['alg']
+
         self.net = init_net(self.dataset, self.model, self.output_dim)
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
@@ -109,9 +110,10 @@ def client_fn(context: Context) -> Client:
     dataset_name = context.run_config['dataset-name']
     fds = get_dataset(dataset_name=dataset_name,
                       dirichlet_alpha=context.run_config['dirichlet-alpha'],
-                      num_partitions=context.node_config['num-partitions'])
+                      num_partitions=context.node_config['num-partitions'],
+                      partition_by=context.run_config['dataset-partition-by'],)
     
-    partition_id = context.run_config['partition-id']
+    partition_id = context.node_config["partition-id"]
     train_partition = fds.load_partition(partition_id=partition_id)
 
     train_transforms, _ = get_data_transforms(dataset_name=dataset_name)
@@ -126,3 +128,5 @@ def client_fn(context: Context) -> Client:
         device,
     ).to_client()
 
+
+app = ClientApp(client_fn=client_fn)

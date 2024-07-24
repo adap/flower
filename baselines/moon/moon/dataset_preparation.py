@@ -20,12 +20,12 @@ from flwr_datasets.partitioner import DirichletPartitioner
 
 fds = None
 
-def get_dataset(dataset_name: str, dirichlet_alpha: float, num_partitions: int) -> FederatedDataset:
+def get_dataset(dataset_name: str, dirichlet_alpha: float, num_partitions: int, partition_by:str) -> FederatedDataset:
 
     # Only initialize `FederatedDataset` once
     global fds
     if fds is None:
-        partitioner = DirichletPartitioner(num_partitions=num_partitions, alpha=dirichlet_alpha)
+        partitioner = DirichletPartitioner(num_partitions=num_partitions, alpha=dirichlet_alpha, partition_by=partition_by)
         fds = FederatedDataset(
             dataset=dataset_name,
             partitioners={"train": partitioner},
@@ -36,7 +36,7 @@ def get_dataset(dataset_name: str, dirichlet_alpha: float, num_partitions: int) 
 
 def get_data_transforms(dataset_name):
     """Get dataset transforms"""
-    if dataset_name == "cifar10":
+    if dataset_name == "uoft-cs/cifar10":
         normalize = transforms.Normalize(
             mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
             std=[x / 255.0 for x in [63.0, 62.1, 66.7]],
@@ -62,7 +62,7 @@ def get_data_transforms(dataset_name):
         # data prep for test set
         transform_test = transforms.Compose([transforms.ToTensor(), normalize])
 
-    elif dataset_name == "cifar100":
+    elif dataset_name == "uoft-cs/cifar100":
 
         normalize = transforms.Normalize(
             mean=[0.5070751592371323, 0.48654887331495095, 0.4409178433670343],
@@ -80,6 +80,8 @@ def get_data_transforms(dataset_name):
         )
         # data prep for test set
         transform_test = transforms.Compose([transforms.ToTensor(), normalize])
+    else:
+        raise ValueError("Only datasets `uoft-cs/cifar10` and `uoft-cs/cifar100` are supported")
     
     return transform_train, transform_test
 

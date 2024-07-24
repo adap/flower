@@ -25,9 +25,9 @@ from PIL import Image
 from torch.autograd import Variable
 from torchvision.datasets import CIFAR10, CIFAR100
 
-logging.basicConfig()
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+# logging.basicConfig()
+# logger = logging.getLogger()
+# logger.setLevel(logging.INFO)
 
 IMG_EXTENSIONS = (
     ".jpg",
