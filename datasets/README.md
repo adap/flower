@@ -10,11 +10,11 @@ Flower Datasets (`flwr-datasets`) is a library to quickly and easily create data
 
 
 > [!TIP]
-> For complete documentation that includes API docs, how-to guides and tutorials please visit the [Flower Datasets Documentation](https://flower.ai/docs/datasets/) and for full FL example see the [Flower Examples page](https://github.com/adap/flower/tree/main/examples).
+> For complete documentation that includes API docs, how-to guides and tutorials, please visit the [Flower Datasets Documentation](https://flower.ai/docs/datasets/) and for full FL example see the [Flower Examples page](https://github.com/adap/flower/tree/main/examples).
 
 ## Installation
 
-For a complete installation guide visit the [Flower Datasets Documenation](https://flower.ai/docs/datasets/)
+For a complete installation guide visit the [Flower Datasets Documentation](https://flower.ai/docs/datasets/)
 
 ```bash
 pip install flwr-datasets[vision]
@@ -66,9 +66,11 @@ Here's a basic quickstart example of how to partition the MNIST dataset:
 
 ```
 from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioners import IidPartitioner
 
 # The train split of the MNIST dataset will be partitioned into 100 partitions
-fds = FederatedDataset("mnist", partitioners={"train": 100})
+partitioner = IidPartitioner(num_partitions=100)
+fds = FederatedDataset("ylecun/mnist", partitioners={"train": partitioner})
 
 partition = fds.load_partition(0)
 
