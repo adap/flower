@@ -47,8 +47,11 @@ Verify installation
 
 The following command can be used to verify if Flower was successfully installed. If everything worked, it should print the version of Flower to the command line::
 
+.. code-block:: bash
+   :substitutions:
+
   python -c "import flwr;print(flwr.__version__)"
-  1.10.0
+  |current_flwr_version|
 
 
 Advanced installation options
