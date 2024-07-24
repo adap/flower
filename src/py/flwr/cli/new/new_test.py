@@ -39,6 +39,7 @@ def test_render_template() -> None:
     # Prepare
     filename = "app/README.md.tpl"
     data = {
+        "framework_str": "",
         "project_name": "FedGPT",
         "package_name": "fedgpt",
         "import_name": "fedgpt",
