@@ -25,6 +25,8 @@ A learning-oriented series of tutorials is the best place to start.
    :caption: Tutorial
 
    tutorial-quickstart
+   tutorial-use-partitioners
+   tutorial-visualize-label-distribution
 
 How-to guides
 ~~~~~~~~~~~~~
@@ -40,7 +42,6 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    how-to-use-with-tensorflow
    how-to-use-with-numpy
    how-to-use-with-local-data
-   how-to-visualize-label-distribution
    how-to-disable-enable-progress-bar
 
 References
@@ -91,6 +92,7 @@ Here are a few of the ``Partitioner`` s that are available: (for a full list see
 * Partitioner (the abstract base class) ``Partitioner``
 * IID partitioning ``IidPartitioner(num_partitions)``
 * Dirichlet partitioning ``DirichletPartitioner(num_partitions, partition_by, alpha)``
+* Distribution partitioning ``DistributionPartitioner(distribution_array, num_partitions, num_unique_labels_per_partition, partition_by, preassigned_num_samples_per_label, rescale)``
 * InnerDirichlet partitioning ``InnerDirichletPartitioner(partition_sizes, partition_by, alpha)``
 * PathologicalPartitioner ``PathologicalPartitioner(num_partitions, partition_by, num_classes_per_partition, class_assignment_mode)``
 * Natural ID partitioner ``NaturalIdPartitioner(partition_by)``
