@@ -1,8 +1,7 @@
 Flower Datasets
 ===============
 
-Flower Datasets (``flwr-datasets``) is a library to quickly and easily create datasets for federated
-learning/analytics/evaluation. It is created by the ``Flower Labs`` team that also created `Flower <https://flower.ai>`_ - a Friendly Federated Learning Framework.
+Flower Datasets (``flower-datasets ``) is a library that enables the quick and easy creation of datasets for federated learning/analytics/evaluation. It enables heterogeneity (non-iidness) simulation and division of datasets with the preexisting notion of IDs. The library was created by the ``Flower Labs`` team that also created `Flower <https://flower.ai>`_ : A Friendly Federated Learning Framework.
 
 Flower Datasets Framework
 -------------------------
@@ -77,7 +76,6 @@ Flower Datasets library supports:
 .. image:: ./_static/readme/comparison_of_partitioning_schemes.png
   :align: center
   :alt: Comparison of Partitioning Schemes on CIFAR10
-
 
 Thanks to using Hugging Face's ``datasets`` used under the hood, Flower Datasets integrates with the following popular formats/frameworks:
 
