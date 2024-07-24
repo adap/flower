@@ -29,10 +29,14 @@ serverapp = "custom_metrics_example.server_app:app"
 clientapp = "custom_metrics_example.client_app:app"
 
 [tool.flwr.app.config]
-num_server_rounds = "3"
+num_server_rounds = 3
 
 [tool.flwr.federations]
 default = "localhost"
 
 [tool.flwr.federations.localhost]
 options.num-supernodes = 10
+
+[tool.flwr.federations.superexec]
+address = "0.0.0.0:9093"
+insecure = true
