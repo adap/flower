@@ -115,13 +115,17 @@ def _format_pr_reference(title: str, number: int, url: str) -> str:
 
     for i, part in enumerate(parts):
         if i % 2 == 0:
-            # Even index parts are normal text
-            formatted_parts.append(f"**{part}**")
+            # Even index parts are normal text, ensure we do not add extra bold if empty
+            if part.strip():
+                formatted_parts.append(f"**{part.strip()}**")
+            else:
+                formatted_parts.append("")
         else:
             # Odd index parts are inline code
-            formatted_parts.append(f"`{part}`")
+            formatted_parts.append(f"`{part.strip()}`")
 
-    formatted_title = " ".join(formatted_parts)
+    # Join parts with spaces but avoid extra spaces
+    formatted_title = " ".join(filter(None, formatted_parts))
     return f"- {formatted_title} ([#{number}]({url}))"
 
 
