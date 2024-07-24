@@ -56,7 +56,6 @@ def load_data(partition_id: int, num_partitions: int):
         fds = FederatedDataset(
             dataset="ylecun/mnist",
             partitioners={"train": partitioner},
-            trust_remote_code=True,
         )
     partition = fds.load_partition(partition_id)
     partition_splits = partition.train_test_split(test_size=0.2, seed=42)
