@@ -29,11 +29,7 @@ clientapp = "fastai_example.client_app:app"
 num_server_rounds = 3
 
 [tool.flwr.federations]
-default = "localhost"
+default = "local-simulation"
 
-[tool.flwr.federations.localhost]
+[tool.flwr.federations.local-simulation]
 options.num-supernodes = 10
-
-[tool.flwr.federations.superexec]
-address = "0.0.0.0:9093"
-insecure = true
