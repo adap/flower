@@ -5,7 +5,41 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
 from task import set_model_params, get_model_parameters, set_initial_params
 import flwr as fl
+from flwr.client import NumPyClient
 from flwr_datasets import FederatedDataset
+
+
+class FlowerClient(NumPyClient):
+    def __init__(self, model, X_train, y_train, X_test, y_test, unique_labels):
+        self.model = model
+        self.X_train = X_train
+        self.y_train = y_train
+        self.X_test = X_test
+        self.y_test = y_test
+        self.unique_labels = unique_labels
+
+    def get_parameters(self, config):
+        return get_model_parameters(self.model)
+
+    def fit(self, parameters, config):
+        set_model_params(self.model, parameters)
+        # Ignore convergence failure due to low local epochs
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self.model.fit(self.X_train, self.y_train)
+        accuracy = self.model.score(self.X_train, self.y_train)
+        return (
+            get_model_parameters(self.model),
+            len(self.X_train),
+            {"train_accuracy": accuracy},
+        )
+
+    def evaluate(self, parameters, config):  # type: ignore
+        set_model_params(self.model, parameters)
+        y_pred = self.model.predict_proba(self.X_test)
+        loss = log_loss(y_test, y_pred, labels=self.unique_labels)
+        accuracy = self.model.score(self.X_test, y_test)
+        return loss, len(self.X_test), {"test_accuracy": accuracy}
 
 if __name__ == "__main__":
     N_CLIENTS = 3
@@ -42,31 +76,8 @@ if __name__ == "__main__":
     # Setting initial parameters, akin to model.compile for keras models
     set_initial_params(model, n_features=X_train.shape[1], n_classes=3)
 
-    # Define Flower client
-    class IrisClient(fl.client.NumPyClient):
-        def get_parameters(self, config):  # type: ignore
-            return get_model_parameters(model)
-
-        def fit(self, parameters, config):  # type: ignore
-            set_model_params(model, parameters)
-            # Ignore convergence failure due to low local epochs
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore")
-                model.fit(X_train, y_train)
-            accuracy = model.score(X_train, y_train)
-            return (
-                get_model_parameters(model),
-                len(X_train),
-                {"train_accuracy": accuracy},
-            )
-
-        def evaluate(self, parameters, config):  # type: ignore
-            set_model_params(model, parameters)
-            loss = log_loss(y_test, model.predict_proba(X_test), labels=unique_labels)
-            accuracy = model.score(X_test, y_test)
-            return loss, len(X_test), {"test_accuracy": accuracy}
 
     # Start Flower client
     fl.client.start_client(
-        server_address="0.0.0.0:8080", client=IrisClient().to_client()
+        server_address="0.0.0.0:8080", client=FlowerClient().to_client()
     )
