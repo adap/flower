@@ -19,10 +19,10 @@ from collections import Counter
 from typing import Dict, List, Optional, Union
 
 import numpy as np
-from flwr_datasets.common.typing import NDArray, NDArrayFloat, NDArrayInt
-from flwr_datasets.partitioner.partitioner import Partitioner
 
 import datasets
+from flwr_datasets.common.typing import NDArray, NDArrayFloat, NDArrayInt
+from flwr_datasets.partitioner.partitioner import Partitioner
 
 
 class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
