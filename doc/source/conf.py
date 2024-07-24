@@ -66,7 +66,7 @@ html_context["versions"] = list()
 versions = [
     tag.name
     for tag in repo.tags
-    if int(tag.name[1]) > 0 and int(tag.name.split(".")[1]) >= 5
+    if int(tag.name[1]) > 0 and int(tag.name.split(".")[1]) >= 8
 ]
 versions.append("main")
 for version in versions:
