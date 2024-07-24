@@ -27,10 +27,15 @@ serverapp = "fedvaeexample.server_app:app"
 clientapp = "fedvaeexample.client_app:app"
 
 [tool.flwr.app.config]
-num_server_rounds = "3"
+num_server_rounds = 3
 
 [tool.flwr.federations]
 default = "localhost"
 
 [tool.flwr.federations.localhost]
 options.num-supernodes = 2
+
+[tool.flwr.federations.superexec]
+address = "0.0.0.0:9093"
+insecure = true
+
