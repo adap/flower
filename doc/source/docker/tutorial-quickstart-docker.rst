@@ -101,9 +101,8 @@ building your own SuperNode image.
 
    .. dropdown:: Understand the Dockerfile
 
-      * :substitution-code:`FROM flwr/supernode:|latest_version_docker|`: This line specifies that
-        | the Docker image to be built from is the ``flwr/supernode image``, version
-        | :substitution-code:`|latest_version_docker|`.
+      * | :substitution-code:`FROM flwr/supernode:|latest_version_docker|`: This line specifies that the Docker image
+        | to be built from is the ``flwr/supernode image``, version :substitution-code:`|latest_version_docker|`.
       * | ``WORKDIR /app``: Set the working directory for the container to ``/app``.
         | Any subsequent commands that reference a directory will be relative to this directory.
       * | ``COPY docker_pyproject.toml pyproject.toml``: Copy the ``docker_pyproject.toml`` file
@@ -114,8 +113,9 @@ building your own SuperNode image.
         |
         | The ``-U`` flag indicates that any existing packages should be upgraded, and
         | ``--no-cache-dir`` prevents pip from using the cache to speed up the installation.
-      * | ``COPY flower.quickstart-docker.1-0-0.fab .``: Copy the ``lower.quickstart-docker.1-0-0.fab``
-        | file from the current working directory into the container's ``/app`` directory.
+      * | ``COPY flower.quickstart-docker.1-0-0.fab .``: Copy the
+        | ``flower.quickstart-docker.1-0-0.fab`` file from the current working directory into
+        | the container's ``/app`` directory.
       * | ``RUN flwr install flower.quickstart-docker.1-0-0.fab``: Run the ``flwr`` install command
         | to install the Flower App Bundle locally.
       * | ``ENTRYPOINT ["flower-supernode"]``: Set the command ``flower-supernode`` to be
@@ -216,9 +216,8 @@ Flower and serves as a base for building your own SuperExec image.
 
    .. dropdown:: Understand the Dockerfile
 
-      * :substitution-code:`FROM flwr/superexec:|latest_version_docker|`: This line specifies that
-        | the Docker image to be built from is the ``flwr/superexec image``, version
-        | :substitution-code:`|latest_version_docker|`.
+      * | :substitution-code:`FROM flwr/superexec:|latest_version_docker|`: This line specifies that the Docker image
+        | to be built from is the ``flwr/superexec image``, version :substitution-code:`|latest_version_docker|`.
       * | ``WORKDIR /app``: Set the working directory for the container to ``/app``.
         | Any subsequent commands that reference a directory will be relative to this directory.
       * | ``COPY docker_pyproject.toml pyproject.toml``: Copy the ``docker_pyproject.toml`` file
@@ -231,6 +230,7 @@ Flower and serves as a base for building your own SuperExec image.
         | ``--no-cache-dir`` prevents pip from using the cache to speed up the installation.
       * | ``ENTRYPOINT ["flower-superexec"``: Set the command ``flower-superexec`` to be
         | the default command run when the container is started.
+        |
         | ``"--executor", "flwr.superexec.deployment:executor"]`` Use the
         | ``flwr.superexec.deployment:executor`` executor to run the ServerApps.
 
