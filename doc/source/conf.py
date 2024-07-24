@@ -85,8 +85,12 @@ project = "Flower"
 copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
-# The full version, including alpha/beta/rc tags
-release = "1.10.0"
+# The full version of the next release, including alpha/beta/rc tags
+release = "1.11.0"
+# The current released version
+rst_prolog = """
+.. |current_flwr_version| replace:: 1.10.0
+"""
 
 # -- General configuration ---------------------------------------------------
 
