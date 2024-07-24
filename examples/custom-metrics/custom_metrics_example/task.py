@@ -1,12 +1,15 @@
 """custom_metrics_example: A Flower app for custom metrics."""
 
-from typing import Any, List
+from typing import Any
 
+import numpy as np
 import tensorflow as tf
 from flwr_datasets import FederatedDataset
 
 
-def load_data(partition_id: int, num_partitions: int) -> tuple[List, List, List, List]:
+def load_data(
+    partition_id: int, num_partitions: int
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Load data with Flower Datasets (CIFAR-10)."""
     fds = FederatedDataset(dataset="cifar10", partitioners={"train": num_partitions})
     partition = fds.load_partition(partition_id, "train")
