@@ -20,17 +20,11 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **feat(framework) Add SuperExec binary** ([#3603](https://github.com/adap/flower/pull/3603))
 
-- **feat(datasets) Add tests for** `mnist-m` **dataset** ([#3834](https://github.com/adap/flower/pull/3834))
-
 - **feat(framework) Add override config to** `Run` ([#3730](https://github.com/adap/flower/pull/3730))
 
 - **feat(framework) Add SuperExec Dockerfile** ([#3723](https://github.com/adap/flower/pull/3723))
 
 - **feat(framework) Include default number of server rounds in templates** ([#3821](https://github.com/adap/flower/pull/3821))
-
-- **feat(datasets) Add tests for ucf101 dataset** ([#3842](https://github.com/adap/flower/pull/3842))
-
-- **feat(datasets) Update FDS list of supported datasets** ([#3857](https://github.com/adap/flower/pull/3857))
 
 - **feat(framework) Introduce a new deprecation function that warns users and provides an code example** ([#3776](https://github.com/adap/flower/pull/3776))
 
@@ -45,8 +39,6 @@ We would like to give our special thanks to all the contributors who made the ne
 - **feat(framework) Add ca-certificates package** ([#3591](https://github.com/adap/flower/pull/3591))
 
 - **feat(framework) Add additional user prompt for** `flowertune` **template in** `flwr new` ([#3760](https://github.com/adap/flower/pull/3760))
-
-- **feat(datasets) Update tests for ted lium dataset** ([#3868](https://github.com/adap/flower/pull/3868))
 
 - **feat(framework) Add run configs** ([#3725](https://github.com/adap/flower/pull/3725))
 
@@ -70,11 +62,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **feat(framework) Enable setting** `run_id` **when starting simulation** ([#3576](https://github.com/adap/flower/pull/3576))
 
-- **feat(datasets) Add function to perform partial download of dataset for tests** ([#3860](https://github.com/adap/flower/pull/3860))
-
 - **feat(framework) Support non-** `str` **config value types** ([#3746](https://github.com/adap/flower/pull/3746))
-
-- **feat(datasets) Add tests for uci-mushrooms dataset** ([#3841](https://github.com/adap/flower/pull/3841))
 
 - **feat(framework) Add secure channel support for SuperExec** ([#3808](https://github.com/adap/flower/pull/3808))
 
@@ -86,8 +74,6 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **feat(framework) Add proto changes for config overrides** ([#3728](https://github.com/adap/flower/pull/3728))
 
-- **feat(datasets) Add tests for usps dataset** ([#3832](https://github.com/adap/flower/pull/3832))
-
 - **feat(framework) Introduce** `ServerAppComponents` **dataclass** ([#3771](https://github.com/adap/flower/pull/3771))
 
 - **feat(framework) Add** `run_config` **to** `ClientApp` `Context` ([#3751](https://github.com/adap/flower/pull/3751))
@@ -96,17 +82,9 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **feat(framework) Add** `GetRun` **rpc to the Driver servicer** ([#3578](https://github.com/adap/flower/pull/3578))
 
-- **feat(datasets) Add label count utils** ([#3551](https://github.com/adap/flower/pull/3551))
-
-- **feat(datasets) Add tests for ambient acoustic context** ([#3843](https://github.com/adap/flower/pull/3843))
-
-- **feat(datasets) Add telemetry** ([#3479](https://github.com/adap/flower/pull/3479))
-
 - **feat(framework) Add FlowerTune templates to** `flwr new` ([#3587](https://github.com/adap/flower/pull/3587))
 
 - **feat(framework) Update context registration when running an app directory** ([#3815](https://github.com/adap/flower/pull/3815))
-
-- **feat(datasets) Enable passing kwargs to load_dataset in FederatedDataset** ([#3827](https://github.com/adap/flower/pull/3827))
 
 - **feat(framework) Add** `flwr install` **command** ([#3258](https://github.com/adap/flower/pull/3258))
 
@@ -126,8 +104,6 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **feat(framework) Make** `NodeState` **capture** `partition-id` ([#3695](https://github.com/adap/flower/pull/3695))
 
-- **feat(datasets) Add tests for femnist dataset** ([#3840](https://github.com/adap/flower/pull/3840))
-
 - **feat(framework) Implement DriverAPI** `GetRun` ([#3580](https://github.com/adap/flower/pull/3580))
 
 - **feat(framework) Pass** `partition_id` **from** `Context` **into** `client_fn` ([#3696](https://github.com/adap/flower/pull/3696))
@@ -139,10 +115,6 @@ We would like to give our special thanks to all the contributors who made the ne
 - **feat(framework) Use types in template configs** ([#3875](https://github.com/adap/flower/pull/3875))
 
 - **feat(framework) Add** `grpc-adapter` **transport** ([#3540](https://github.com/adap/flower/pull/3540))
-
-- **feat(datasets) Add ted-lium dataset to the tested set** ([#3844](https://github.com/adap/flower/pull/3844))
-
-- **feat(datasets) Add notebooks formatting** ([#3673](https://github.com/adap/flower/pull/3673))
 
 - **feat(framework) Allow multiple separated run-config arguments** ([#3824](https://github.com/adap/flower/pull/3824))
 
@@ -158,8 +130,6 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **feat(framework) Send federation config to SuperExec** ([#3838](https://github.com/adap/flower/pull/3838))
 
-- **feat(datasets) Add pathological partitioner** ([#3623](https://github.com/adap/flower/pull/3623))
-
 ### Other changes
 
 - **fix(framework) Display correct federation error message** ([#3825](https://github.com/adap/flower/pull/3825))
@@ -174,8 +144,6 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **ci(framework) Build SuperExec nightly Docker image** ([#3724](https://github.com/adap/flower/pull/3724))
 
-- **fix(datasets) Limit the datasets versions** ([#3607](https://github.com/adap/flower/pull/3607))
-
 - **refactor(framework) Refactor** `ClientApp` **loading to use explicit arguments** ([#3805](https://github.com/adap/flower/pull/3805))
 
 - **fix(framework) Pass** `superlink` **address when starting** `supernode` ([#3621](https://github.com/adap/flower/pull/3621))
@@ -184,8 +152,6 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **refactor(framework) Register** `Context` **early in Simulation Engine** ([#3804](https://github.com/adap/flower/pull/3804))
 
-- **fix(datasets) Fix sorting in** `__all__` ([#3655](https://github.com/adap/flower/pull/3655))
-
 - **refactor(framework) Move** `tool.flwr` **to** `tool.flwr.app` ([#3811](https://github.com/adap/flower/pull/3811))
 
 - **refactor(framework) Refactor IP address format in SuperLink** ([#3583](https://github.com/adap/flower/pull/3583))
@@ -193,10 +159,6 @@ We would like to give our special thanks to all the contributors who made the ne
 - **fix(framework) Keep** `BackendConfig` **passed to** `run_simulation` ([#3861](https://github.com/adap/flower/pull/3861))
 
 - **refactor(framework) Run app with** `flwr run` **calling** `flower-simulation` ([#3819](https://github.com/adap/flower/pull/3819))
-
-- **ci(datasets) Add Python 3.11 to Flower Datasets CI** ([#3865](https://github.com/adap/flower/pull/3865))
-
-- **fix(datasets) Fix GitHub code reference in Google Colab button for FDS** ([#3740](https://github.com/adap/flower/pull/3740))
 
 - **fix(examples) Fix XGBoost examples' titles** ([#3707](https://github.com/adap/flower/pull/3707))
 
@@ -209,8 +171,6 @@ We would like to give our special thanks to all the contributors who made the ne
 - **refactor(framework) Update launch of simulation from executor plugin** ([#3829](https://github.com/adap/flower/pull/3829))
 
 - **refactor(framework) Improve app loading in simulation engine** ([#3806](https://github.com/adap/flower/pull/3806))
-
-- **fix(datasets) Disable telemetry in datasets.yml workflow** ([#3667](https://github.com/adap/flower/pull/3667))
 
 - **refactor(framework) Rename** `flwr run` **CLI argument** ([#3880](https://github.com/adap/flower/pull/3880))
 
@@ -238,17 +198,9 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **docs(framework) Update client_fn docstrings to new signature** ([#3793](https://github.com/adap/flower/pull/3793))
 
-- **docs(datasets) Fix docs examples formatting** ([#3702](https://github.com/adap/flower/pull/3702))
-
-- **docs(datasets) Update readme proposal** ([#3677](https://github.com/adap/flower/pull/3677))
-
 - **docs(framework) Add latest Hosted Weblate translation updates** ([#3617](https://github.com/adap/flower/pull/3617))
 
 - **docs(framework) Document public/private API approach** ([#3562](https://github.com/adap/flower/pull/3562))
-
-- **docs(datasets) Update Flower Datasets docs** ([#3585](https://github.com/adap/flower/pull/3585))
-
-- **docs(datasets) Update Flower Datasets version to 0.2.0** ([#3678](https://github.com/adap/flower/pull/3678))
 
 - **docs(framework) Fix pip command of installing** `flwr[simulation]` ([#3641](https://github.com/adap/flower/pull/3641))
 
@@ -269,12 +221,6 @@ We would like to give our special thanks to all the contributors who made the ne
 - **docs(framework) Fix install instructions for all shells** ([#3864](https://github.com/adap/flower/pull/3864))
 
 - **docs(framework) Add latest Hosted Weblate translation updates** ([#3681](https://github.com/adap/flower/pull/3681))
-
-- **docs(datasets) Rewrite Flower Datasets quickstart tutorial as a notebook** ([#3854](https://github.com/adap/flower/pull/3854))
-
-- **docs(datasets) Add how to visualization guide** ([#3672](https://github.com/adap/flower/pull/3672))
-
-- **docs(datasets) Add how to use partitioner docs** ([#3871](https://github.com/adap/flower/pull/3871))
 
 - **docs(framework) Update translation text** ([#3631](https://github.com/adap/flower/pull/3631))
 
