@@ -10,20 +10,30 @@ from fastai.losses import CrossEntropyLossFlat
 from fastai.vision.all import error_rate, squeezenet1_1
 from fastai.vision.data import DataLoaders
 from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import IidPartitioner
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Lambda, Resize, ToTensor
 
-from flwr.common import Context
 from flwr.client import Client, ClientApp, NumPyClient
+from flwr.common import Context
 
 warnings.filterwarnings("ignore", category=UserWarning)
+
+fds = None  # Cache FederatedDataset
 
 
 def load_data(
     partition_id,
     num_partitions,
 ) -> tuple[DataLoader, DataLoader, DataLoader]:
-    fds = FederatedDataset(dataset="mnist", partitioners={"train": num_partitions})
+    # Only initialize `FederatedDataset` once
+    global fds
+    if fds is None:
+        partitioner = IidPartitioner(num_partitions=num_partitions)
+        fds = FederatedDataset(
+            dataset="ylecun/mnist",
+            partitioners={"train": partitioner},
+        )
     partition = fds.load_partition(partition_id, "train")
 
     # Resize and repeat channels to use MNIST, which have grayscale images,
@@ -107,8 +117,8 @@ def client_fn(context: Context) -> Client:
     """
 
     # Read the node_config to fetch data partition associated to this node
-    partition_id = int(context.node_config["partition-id"])
-    num_partitions = int(context.node_config["num-partitions"])
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
 
     trainloader, valloader, _ = load_data(partition_id, num_partitions)
     dls = DataLoaders(trainloader, valloader)
