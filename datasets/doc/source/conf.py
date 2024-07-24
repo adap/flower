@@ -110,9 +110,9 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # Sphinx redirects, implemented after the doc filename changes.
 # To prevent 404 errors and redirect to the new pages.
-# redirects = {
-# }
-
+redirects = {
+    "how-to-visualize-label-distribution.html": "tutorial-visualize-label-distribution.html",
+}
 
 # -- Options for HTML output -------------------------------------------------
 
