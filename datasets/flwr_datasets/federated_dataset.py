@@ -161,6 +161,11 @@ class FederatedDataset:
             not need to provide this argument, but if `partitioners={"train": 10,
             "test": 100}`, you need to set it to differentiate which partitioner should
             be used.
+            The split names you can choose from vary from dataset to dataset. You need
+            to check the dataset on the `Hugging Face Hub`<https://huggingface.co/
+            datasets>_ to see which splits are available. You can resplit the dataset
+            by using the `preprocessor` parameter (rename, merge, divide, etc. the
+            available splits).
 
         Returns
         -------
@@ -203,6 +208,11 @@ class FederatedDataset:
         ----------
         split : str
             Split name of the downloaded dataset (e.g. "train", "test").
+            The split names you can choose from vary from dataset to dataset. You need
+            to check the dataset on the `Hugging Face Hub`<https://huggingface.co/
+            datasets>_ to see which splits are available. You can resplit the dataset
+            by using the `preprocessor` parameter (rename, merge, divide, etc. the
+            available splits).
 
         Returns
         -------
