@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "mlxexample"
 version = "1.0.0"
-description = ""
+description = "Federated Learning with MLX and Flower (Quickstart Example)"
 license = "Apache-2.0"
 dependencies = [
     "flwr[simulation]>=1.10.0",
@@ -18,7 +18,7 @@ dependencies = [
 packages = ["."]
 
 [tool.flwr.app]
-publisher = "flowerteam"
+publisher = "flwrlabs"
 
 [tool.flwr.app.components]
 serverapp = "mlxexample.server_app:app"
