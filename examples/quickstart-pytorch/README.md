@@ -21,7 +21,7 @@ git clone --depth=1 https://github.com/adap/flower.git _tmp \
         && cd quickstart-pytorch
 ```
 
-This will create a new directory called `quickstart-mlx` with the following structure:
+This will create a new directory called `quickstart-pytorch` with the following structure:
 
 ```shell
 quickstart-pytorch
