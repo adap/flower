@@ -1,17 +1,16 @@
-from flwr.common import Context
 import mlx.core as mx
 import mlx.nn as nn
 import mlx.optimizers as optim
-from flwr.client import NumPyClient, ClientApp, Client
-
+from flwr.client import Client, ClientApp, NumPyClient
+from flwr.common import Context
 from mlxexample.task import (
+    MLP,
     batch_iterate,
     eval_fn,
     get_params,
     load_data,
     loss_fn,
     set_params,
-    MLP,
 )
 
 
