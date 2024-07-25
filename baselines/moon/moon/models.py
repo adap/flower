@@ -1,16 +1,16 @@
 """Define our models, and training and eval functions.
 
-If your model is 100% off-the-shelf (e.g. directly from torchvision
-without requiring modifications) you might be better off instantiating
-your  model directly from the Hydra config. In this way, swapping your
-model for  another one can be done without changing the python code at
-all
+If your model is 100% off-the-shelf (e.g. directly from torchvision without requiring
+modifications) you might be better off instantiating your  model directly from the Hydra
+config. In this way, swapping your model for  another one can be done without changing
+the python code at all
 """
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+
 from moon.utils import compute_accuracy
 
 
@@ -364,7 +364,7 @@ def init_net(dataset, model, output_dim, device="cpu"):
     return net
 
 
-def train_moon(
+def train_moon(  # pylint: disable=too-many-locals
     net,
     global_net,
     previous_net,
@@ -387,7 +387,8 @@ def train_moon(
         weight_decay=1e-5,
     )
 
-    criterion = nn.CrossEntropyLoss().to(device)
+    criterion = nn.CrossEntropyLoss()
+    criterion.to(device)
 
     previous_net.eval()
     for param in previous_net.parameters():
@@ -478,7 +479,8 @@ def train_fedprox(net, global_net, train_dataloader, epochs, lr, mu, device="cpu
         weight_decay=1e-5,
     )
 
-    criterion = nn.CrossEntropyLoss().to(device)
+    criterion = nn.CrossEntropyLoss()
+    criterion.to(device)
 
     cnt = 0
     global_weight_collector = list(global_net.to(device).parameters())

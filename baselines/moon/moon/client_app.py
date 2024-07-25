@@ -10,15 +10,15 @@ from collections import OrderedDict
 from typing import Dict, Tuple
 
 import torch
-from flwr_datasets import FederatedDataset
-from flwr_datasets.partitioner import DirichletPartitioner
-from moon.dataset_preparation import get_data_transforms, get_transforms_apply_fn
-from moon.models import init_net, train_fedprox, train_moon
-from torch.utils.data import DataLoader
-
 from flwr.client import Client, ClientApp, NumPyClient
 from flwr.common import Context
 from flwr.common.typing import NDArrays, Scalar, UserConfig
+from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import DirichletPartitioner
+from torch.utils.data import DataLoader
+
+from moon.dataset_preparation import get_data_transforms, get_transforms_apply_fn
+from moon.models import init_net, train_fedprox, train_moon
 
 
 # pylint: disable=too-many-instance-attributes
@@ -42,7 +42,7 @@ class FlowerClient(NumPyClient):
         self.learning_rate = run_config["learning-rate"]
         self.mu = run_config["mu"]  # pylint: disable=invalid-name
         self.temperature = run_config["temperature"]
-        self.model_dir = run_config["model-dir"]
+        self.model_dir = str(run_config["model-dir"])
         self.alg = run_config["alg"]
 
         self.net = init_net(self.dataset, self.model, self.output_dim)
@@ -105,7 +105,7 @@ class FlowerClient(NumPyClient):
         return self.get_parameters({}), len(self.trainloader), {"is_straggler": False}
 
 
-fds = None
+FDS = None
 
 
 def client_fn(context: Context) -> Client:
@@ -115,20 +115,20 @@ def client_fn(context: Context) -> Client:
     dataset_name = context.run_config["dataset-name"]
 
     # Only initialize `FederatedDataset` once
-    global fds
-    if fds is None:
+    global FDS  # pylint: disable=global-statement
+    if FDS is None:
         partitioner = DirichletPartitioner(
             num_partitions=context.node_config["num-partitions"],
             alpha=context.run_config["dirichlet-alpha"],
             partition_by=context.run_config["dataset-partition-by"],
         )
-        fds = FederatedDataset(
+        FDS = FederatedDataset(
             dataset=dataset_name,
             partitioners={"train": partitioner},
         )
 
-    partition_id = context.node_config["partition-id"]
-    train_partition = fds.load_partition(partition_id=partition_id)
+    partition_id = int(context.node_config["partition-id"])
+    train_partition = FDS.load_partition(partition_id=partition_id)
 
     train_transforms, _ = get_data_transforms(dataset_name=dataset_name)
     transforms_fn = get_transforms_apply_fn(train_transforms)

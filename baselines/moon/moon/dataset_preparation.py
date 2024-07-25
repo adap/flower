@@ -1,11 +1,10 @@
 """Handle the dataset partitioning and (optionally) complex downloads.
 
-Please add here all the necessary logic to either download, uncompress,
-pre/post-process your dataset (or all of the above). If the desired way
-of running your baseline is to first download the dataset and partition
-it and then run the experiments, please uncomment the lines below and
-tell us in the README.md (see the "Running the Experiment" block) that
-this file should be executed first.
+Please add here all the necessary logic to either download, uncompress, pre/post-process
+your dataset (or all of the above). If the desired way of running your baseline is to
+first download the dataset and partition it and then run the experiments, please
+uncomment the lines below and tell us in the README.md (see the "Running the Experiment"
+block) that this file should be executed first.
 """
 
 import torch.nn.functional as F
@@ -67,13 +66,13 @@ def get_data_transforms(dataset_name):
     return transform_train, transform_test
 
 
-def get_transforms_apply_fn(transforms):
+def get_transforms_apply_fn(transforms_list):
     """Return a function that applies the dataset transforms."""
 
     def apply_transforms(batch):
         # For CIFAR-10 the "img" column contains the images we want to
         # apply the transforms to
-        batch["img"] = [transforms(img) for img in batch["img"]]
+        batch["img"] = [transforms_list(img) for img in batch["img"]]
         return batch
 
     return apply_transforms
