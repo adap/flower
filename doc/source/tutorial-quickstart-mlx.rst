@@ -368,8 +368,6 @@ to that of `client_fn()` but the return type is `ServerAppComponents <https://fl
     app = ServerApp(server_fn=server_fn)
 
 
-
-.. code-block:: python
 Congratulations!
 You've successfully built and run your first federated learning system.
-The full `source code <https://github.com/adap/flower/blob/main/examples/quickstart-pytorch/client.py>`_ for this example can be found in :code:`examples/quickstart-pytorch`.
+The `source code <https://github.com/adap/flower/blob/main/examples/quickstart-mlx/client.py>`_ of the extended version of this tutorial can be found in :code:`examples/quickstart-mlx`.
