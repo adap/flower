@@ -11,10 +11,6 @@ This introductory example to Flower uses [MLX](https://ml-explore.github.io/mlx/
 
 [MLX](https://ml-explore.github.io/mlx/build/html/index.html) is a NumPy-like array framework designed for efficient and flexible machine learning on Apple Silicon. In this example, we will train a simple 2 layers MLP on [MNIST](https://huggingface.co/datasets/ylecun/mnist) data (handwritten digits recognition) that's downloaded and partitioned using [Flower Datasets](https://flower.ai/docs/datasets/).
 
-> \[!TIP\]
-> For a more detailed walk-through check our [quickstart MLX tutorial](https://flower.ai/docs/framework/tutorial-quickstart-mlx.html)
-
-
 ## Set up the project
 
 ### Clone the project
@@ -64,6 +60,9 @@ You can also override some of the settings for your `ClientApp` and `ServerApp` 
 ```bash
 flwr run . --run-config num-server-rounds=5,learning-rate=0.05
 ```
+
+> \[!TIP\]
+> For a more detailed walk-through check our [quickstart MLX tutorial](https://flower.ai/docs/framework/tutorial-quickstart-mlx.html)
 
 ### Run with the Deployment Engine
 
