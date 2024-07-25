@@ -115,15 +115,15 @@ Distinguishing Features
 -----------------------
 What makes Flower Datasets stand out from other libraries?
 
-* Access to the biggest number of datasets (immediate access to all the datasets on HF Hub).
+* Access to the largest online repository of datasets:
 
-  * The library functionality is independent of the dataset, so the user can use any dataset available on HF Hub, which means that others can immediately benefit from the dataset you added.
+  * The library functionality is independent of the dataset, so you can use any dataset available on [🤗Hugging Face Datasets](https://huggingface.co/datasets), which means that others can immediately benefit from the dataset you added.
 
-  * Easily achieved reproducibility across different projects because of the single source of the dataset.
+  * Out-of-the-box reproducibility across different projects.
 
-  * Access to the naturally dividable datasets (with some notion of id) and the dataset used typically in centralized ML that need partitioning.
+  * Access to naturally dividable datasets (with some notion of id) and datasets typically used in centralized ML that need partitioning.
 
-* Dynamism of the partitioning schemes applicable to any dataset (customizable levels of heterogeneity).
+* Customizable levels of dataset heterogeneity:
 
   * Each ``Partitioner`` takes arguments that allow you to customize the partitioning scheme to your needs.
 
