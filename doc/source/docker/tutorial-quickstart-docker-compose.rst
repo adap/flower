@@ -55,7 +55,7 @@ will run without TLS and without persisting the state.
    Without TLS, the data sent between the services remains **unencrypted**. Use it only for development
    purposes.
 
-   For production-oriented use cases, :ref:`enable TLS<TLS>` for a secure data transmission.
+   For production-oriented use cases, :ref:`enable TLS<TLS>` for secure data transmission.
 
 Open your terminal and run:
 
@@ -68,7 +68,7 @@ Open your terminal and run:
    * ``docker compose``: The Docker command to run the Docker Compose tool.
    * ``-f compose.yml``: Specify the YAML file that contains the basic Flower service definitions.
    * ``--build``: Rebuild the images for each service if they don't already exist.
-   * ``-d``: Detach the containers from the terminal and runs them in background.
+   * ``-d``: Detach the container from the terminal and runs them in the background.
 
 Step 3: Run the Quickstart Project
 ----------------------------------
@@ -156,7 +156,14 @@ Step 5: Persisting the SuperLink State
 In this step, Flower services are configured to persist the state of the SuperLink service,
 ensuring that it maintains its state even after a restart.
 
-#. The command is as follows:
+.. note::
+
+    When working with Docker Compose on Linux, you may need to create the ``state``` directory first
+    and change its ownership to ensure proper access and permissions.
+
+    For more information, consult the following page: :doc:`persist-superlink-state`.
+
+#. Run the command:
 
    .. code-block:: bash
 
@@ -171,7 +178,7 @@ ensuring that it maintains its state even after a restart.
         |
         | Docker merges Compose files according to `merging rules <https://docs.docker.com/compose/multiple-compose-files/merge/#merging-rules>`_.
       * ``--build``: Rebuild the images for each service if they don't already exist.
-      * ``-d``: Detach the containers from the terminal and runs them in background.
+      * ``-d``: Detach the container from the terminal and runs them in the background.
 
 #. Rerun the ``quickstart-docker-compose`` project:
 
@@ -179,15 +186,15 @@ ensuring that it maintains its state even after a restart.
 
       $ flwr run quickstart-docker-compose docker-compose
 
-#. Check the contents ``state`` directory:
+#. Check the content of the ``state`` directory:
 
    .. code-block:: bash
 
       $ ls state/
       state.db
 
-   You should see a ``state.db`` file in the ``state`` directory. This file is used to store the
-   state of the SuperLink and will be used to restore the state if the service is restarted.
+   You should see a ``state.db`` file in the ``state`` directory. This file stores the SuperLink's
+   state and will be used to restore the state if the service is restarted.
 
    If you restart the service, the state file will be used to restore the state from the
    previously saved data. This ensures that the data persists even if the containers are stopped
@@ -236,10 +243,10 @@ Step 6: Run Flower with TLS
       $ flwr run quickstart-docker-compose docker-compose-tls
       $ docker compose logs superexec -f
 
-Step 7: Persisting the SupeLink State and Enabling TLS
-------------------------------------------------------
+Step 7: Persisting the SuperLink State and Enabling TLS
+-------------------------------------------------------
 
-To persist the SupeLink state and enable TLS, you need to make a small change in the ``with-state.yml``
+To persist the SuperLink state and enable TLS, you need to make a small change in the ``with-state.yml``
 file:
 
 #. Comment out line 3 and uncomment line 4:
@@ -286,7 +293,7 @@ This will merge the contents of ``compose.yml`` and ``with-tls.yml`` into a new 
 Step 9: Clean Up
 ----------------
 
-Remove all service and volumes
+Remove all services and volumes:
 
 .. code-block:: bash
 
