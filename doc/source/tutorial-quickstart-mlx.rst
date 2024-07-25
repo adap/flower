@@ -9,7 +9,7 @@ In this tutorial we will learn how to train simple MLP on MNIST using Flower and
 
 First of all, it is recommended to create a virtual environment and run everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
 
-Let's use `flwr new` to create a complete Flower+MLX project. It will generate all the files needed to run, by default with the Simulation Engine, a federation of 10 nodes using `FedAvg <https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedAvg.html#flwr.server.strategy.FedAvg>_`. The dataset will be partitioned using Flower Dataset's `IidPartitioner <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>_`.
+Let's use `flwr new` to create a complete Flower+MLX project. It will generate all the files needed to run, by default with the Simulation Engine, a federation of 10 nodes using `FedAvg <https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedAvg.html#flwr.server.strategy.FedAvg>`_. The dataset will be partitioned using Flower Dataset's `IidPartitioner <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_.
 
 Now that we have a rough idea of what this example is about, let's get started. We first need to create an MLX project. You can do this by running the command below. You will be prompted to give a name to your project as well as typing your developer name.:
 
@@ -47,6 +47,7 @@ To run the project do:
 With default argumnets you will see an output like this one:
 
 .. code-block:: shell
+
     Loading project configuration...
     Success
     INFO :      Starting Flower ServerApp, config: num_rounds=3, no round_timeout
@@ -89,6 +90,7 @@ With default argumnets you will see an output like this one:
 You can also override the parameters defined in `[tool.flwr.app.config]` section in the `pyproject.toml` like this:
 
 .. code-block:: shell
+
     # Override some arguments
     $ flwr run . --run-config num-server-rounds=5,lr=0.05
 
@@ -187,7 +189,7 @@ The ClientApp
 
 The main changes we have to make to use `MLX` with `Flower` will be found in
 the `get_params` and `set_params` functions. Indeed, MLX doesn't
-provide an easy way to convert the model parameters into a list of `np.array`s
+provide an easy way to convert the model parameters into a list of `np.array` objects
 (the format we need for the serialization of the messages to work).
 
 The way MLX stores its parameters is as follows:
