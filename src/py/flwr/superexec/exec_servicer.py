@@ -49,6 +49,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         run = self.executor.start_run(
             request.fab.content,
             user_config_from_proto(request.override_config),
+            user_config_from_proto(request.federation_config),
         )
 
         if run is None:

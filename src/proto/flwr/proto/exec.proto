@@ -31,6 +31,7 @@ service Exec {
 message StartRunRequest {
   Fab fab = 1;
   map<string, Scalar> override_config = 2;
+  map<string, Scalar> federation_config = 3;
 }
 message StartRunResponse { sint64 run_id = 1; }
 message StreamLogsRequest { sint64 run_id = 1; }

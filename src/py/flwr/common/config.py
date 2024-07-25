@@ -104,8 +104,13 @@ def get_fused_config_from_dir(
     return fuse_dicts(flat_default_config, override_config)
 
 
-def flatten_dict(raw_dict: Dict[str, Any], parent_key: str = "") -> UserConfig:
+def flatten_dict(
+    raw_dict: Optional[Dict[str, Any]], parent_key: str = ""
+) -> UserConfig:
     """Flatten dict by joining nested keys with a given separator."""
+    if raw_dict is None:
+        return {}
+
     items: List[Tuple[str, UserConfigValue]] = []
     separator: str = "."
     for k, v in raw_dict.items():

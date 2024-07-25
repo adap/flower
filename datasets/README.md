@@ -10,11 +10,11 @@ Flower Datasets (`flwr-datasets`) is a library to quickly and easily create data
 
 
 > [!TIP]
-> For complete documentation that includes API docs, how-to guides and tutorials please visit the [Flower Datasets Documentation](https://flower.ai/docs/datasets/) and for full FL example see the [Flower Examples page](https://github.com/adap/flower/tree/main/examples).
+> For complete documentation that includes API docs, how-to guides and tutorials, please visit the [Flower Datasets Documentation](https://flower.ai/docs/datasets/) and for full FL example see the [Flower Examples page](https://github.com/adap/flower/tree/main/examples).
 
 ## Installation
 
-For a complete installation guide visit the [Flower Datasets Documenation](https://flower.ai/docs/datasets/)
+For a complete installation guide visit the [Flower Datasets Documentation](https://flower.ai/docs/datasets/)
 
 ```bash
 pip install flwr-datasets[vision]
@@ -41,6 +41,7 @@ Create **custom partitioning schemes** or choose from the **implemented [partiti
 * Partitioner (the abstract base class) `Partitioner`
 * IID partitioning `IidPartitioner(num_partitions)`
 * Dirichlet partitioning `DirichletPartitioner(num_partitions, partition_by, alpha)`
+* Distribution partitioning `DistributionPartitioner(distribution_array, num_partitions, num_unique_labels_per_partition, partition_by, preassigned_num_samples_per_label, rescale)`
 * InnerDirichlet partitioning `InnerDirichletPartitioner(partition_sizes, partition_by, alpha)`
 * Pathological partitioning `PathologicalPartitioner(num_partitions, partition_by, num_classes_per_partition, class_assignment_mode)`
 * Natural ID partitioning `NaturalIdPartitioner(partition_by)`
@@ -66,9 +67,11 @@ Here's a basic quickstart example of how to partition the MNIST dataset:
 
 ```
 from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioners import IidPartitioner
 
 # The train split of the MNIST dataset will be partitioned into 100 partitions
-fds = FederatedDataset("mnist", partitioners={"train": 100})
+partitioner = IidPartitioner(num_partitions=100)
+fds = FederatedDataset("ylecun/mnist", partitioners={"train": partitioner})
 
 partition = fds.load_partition(0)
 
