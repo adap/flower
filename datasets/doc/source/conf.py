@@ -38,7 +38,7 @@ copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = "0.2.0"
+release = "0.3.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -110,9 +110,9 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # Sphinx redirects, implemented after the doc filename changes.
 # To prevent 404 errors and redirect to the new pages.
-# redirects = {
-# }
-
+redirects = {
+    "how-to-visualize-label-distribution.html": "tutorial-visualize-label-distribution.html",
+}
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -180,3 +180,7 @@ mermaid_version = ""
 # -- Options for MyST config  -------------------------------------
 # Enable this option to link to headers (`#`, `##`, or `###`)
 myst_heading_anchors = 3
+
+# -- Options for sphinx_copybutton -------------------------------------
+copybutton_exclude = '.linenos, .gp, .go'
+copybutton_prompt_text = ">>> "

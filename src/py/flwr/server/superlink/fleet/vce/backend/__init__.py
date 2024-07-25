@@ -38,7 +38,7 @@ else:
 
     To install the necessary dependencies, install `flwr` with the `simulation` extra:
 
-        pip install -U flwr["simulation"]
+        pip install -U "flwr[simulation]"
     """
 
 

@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "flwr"
-version = "1.10.0"
+version = "1.11.0"
 description = "Flower: A Friendly Federated Learning Framework"
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.ai>"]
@@ -64,7 +64,7 @@ flower-simulation = "flwr.simulation.run_simulation:run_simulation_from_cli"
 python = "^3.8"
 # Mandatory dependencies
 numpy = "^1.21.0"
-grpcio = "^1.60.0,!=1.64.2,!=1.65.0"
+grpcio = "^1.60.0,!=1.64.2,!=1.65.1"
 protobuf = "^4.25.2"
 cryptography = "^42.0.4"
 pycryptodome = "^3.18.0"
@@ -130,6 +130,7 @@ GitPython = "==3.1.32"
 PyGithub = "==2.1.1"
 licensecheck = "==2024"
 pre-commit = "==3.5.0"
+sphinx-substitution-extensions = "2022.02.16"
 
 [tool.isort]
 profile = "black"
