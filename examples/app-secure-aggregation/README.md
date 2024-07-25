@@ -1,3 +1,9 @@
+---
+tags: [basic, vision, fds]
+dataset: []
+framework: [numpy]
+---
+
 # Secure aggregation with Flower (the SecAgg+ protocol) 🧪
 
 > 🧪 = This example covers experimental features that might change in future versions of Flower

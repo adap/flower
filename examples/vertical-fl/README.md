@@ -1,3 +1,10 @@
+---
+title: Vertical FL Flower Example
+tags: [vertical, tabular, advanced]
+dataset: [Titanic]
+framework: [torch, pandas, scikit-learn]
+---
+
 # Vertical Federated Learning example
 
 This example will showcase how you can perform Vertical Federated Learning using

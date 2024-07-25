@@ -21,6 +21,7 @@ from typing import Callable, Dict, List, Tuple, Union
 import ray
 
 from flwr.client.client_app import ClientApp
+from flwr.common.constant import PARTITION_ID_KEY
 from flwr.common.context import Context
 from flwr.common.logger import log
 from flwr.common.message import Message
@@ -153,12 +154,12 @@ class RayBackend(Backend):
         """Report whether the pool has idle actors."""
         return self.pool.is_actor_available()
 
-    async def build(self) -> None:
+    def build(self) -> None:
         """Build pool of Ray actors that this backend will submit jobs to."""
-        await self.pool.add_actors_to_pool(self.pool.actors_capacity)
+        self.pool.add_actors_to_pool(self.pool.actors_capacity)
         log(DEBUG, "Constructed ActorPool with: %i actors", self.pool.num_actors)
 
-    async def process_message(
+    def process_message(
         self,
         app: Callable[[], ClientApp],
         message: Message,
@@ -168,21 +169,20 @@ class RayBackend(Backend):
 
         Return output message and updated context.
         """
-        partition_id = message.metadata.partition_id
+        partition_id = context.node_config[PARTITION_ID_KEY]
 
         try:
             # Submit a task to the pool
-            future = await self.pool.submit(
+            future = self.pool.submit(
                 lambda a, a_fn, mssg, cid, state: a.run.remote(a_fn, mssg, cid, state),
                 (app, message, str(partition_id), context),
             )
 
-            await future
             # Fetch result
             (
                 out_mssg,
                 updated_context,
-            ) = await self.pool.fetch_result_and_return_actor_to_pool(future)
+            ) = self.pool.fetch_result_and_return_actor_to_pool(future)
 
             return out_mssg, updated_context
 
@@ -193,11 +193,11 @@ class RayBackend(Backend):
                 self.__class__.__name__,
             )
             # add actor back into pool
-            await self.pool.add_actor_back_to_pool(future)
+            self.pool.add_actor_back_to_pool(future)
             raise ex
 
-    async def terminate(self) -> None:
+    def terminate(self) -> None:
         """Terminate all actors in actor pool."""
-        await self.pool.terminate_all_actors()
+        self.pool.terminate_all_actors()
         ray.shutdown()
         log(DEBUG, "Terminated %s", self.__class__.__name__)
