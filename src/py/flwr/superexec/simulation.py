@@ -102,6 +102,10 @@ class SimulationEngine(Executor):
             )
 
         if verbose := config.get("verbose"):
+            if not isinstance(verbose, bool):
+                raise ValueError(
+                    "The `verbose` value must be a string `true` or `false`."
+                )
             self.verbose = verbose
 
     @override
