@@ -288,6 +288,8 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             if run_id not in self.run_ids:
                 self.run_ids[run_id] = Run(
                     run_id=run_id,
+                    fab_id="",
+                    fab_version="",
                     fab_hash=fab_hash,
                     override_config=override_config,
                 )

@@ -87,6 +87,8 @@ class TestInMemoryDriver(unittest.TestCase):
         ]
         self.state.get_run.return_value = Run(
             run_id=61016,
+            fab_id="mock/mock",
+            fab_version="v1.0.0",
             fab_hash="mock/mock",
             override_config={"test_key": "test_value"},
         )

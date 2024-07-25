@@ -196,6 +196,8 @@ class Run:
     """Run details."""
 
     run_id: int
+    fab_id: str
+    fab_version: str
     fab_hash: str
     override_config: UserConfig
 

@@ -129,6 +129,8 @@ class GrpcDriver(Driver):
             raise RuntimeError(f"Cannot find the run with ID: {self._run_id}")
         self._run = Run(
             run_id=res.run.run_id,
+            fab_hash=res.run.fab_id,
+            fab_hash=res.run.fab_version,
             fab_hash=res.run.fab_hash,
             override_config=user_config_from_proto(res.run.override_config),
         )
