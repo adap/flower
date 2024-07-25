@@ -1,5 +1,3 @@
-"""sklearn_example: A Flower / scikit-learn app."""
-
 import warnings
 
 import numpy as np

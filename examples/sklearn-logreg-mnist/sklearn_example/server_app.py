@@ -1,5 +1,3 @@
-"""sklearn_example: A Flower / scikit-learn app."""
-
 from typing import Dict
 
 import numpy as np
