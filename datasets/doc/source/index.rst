@@ -72,7 +72,9 @@ Flower Datasets library supports:
 - **Creating centralized datasets** - leave parts of the dataset unpartitioned (e.g. for centralized evaluation)
 - **Visualization of the partitioned datasets** - visualize the label distribution of the partitioned dataset (and compare the results on different parameters of the same partitioning schemes, different datasets, different partitioning schemes, or any mix of them)
 
-(*) Note that once the dataset is available on HuggingFace Hub it can be **immediately** used in `Flower Datasets` (no approval from Flower team needed, no custom code needed).
+.. note::
+
+  (*) Once the dataset is available on HuggingFace Hub it can be **immediately** used in ``Flower Datasets`` (no approval from the Flower team needed, no custom code needed).
 
 
 .. image:: ./_static/readme/comparison_of_partitioning_schemes.png
