@@ -7,32 +7,37 @@ framework: [MLX]
 
 # Flower Example using MLX
 
-This introductory example to Flower uses [MLX](https://ml-explore.github.io/mlx/build/html/index.html), but deep knowledge of MLX is not necessary to run the example. This example will help you understand how to adapt Flower to your use case. Running this example in itself is quite easy. [MLX](https://ml-explore.github.io/mlx/build/html/index.html) is a NumPy-like array framework designed for efficient and flexible machine learning on Apple silicon. In this example, we will train a simple 2 layers MLP on [MNIST](https://huggingface.co/datasets/ylecun/mnist) data (handwritten digits recognition) that's downloaded and partitioned using [Flower Datasets](https://flower.ai/docs/datasets/).
+This introductory example to Flower uses [MLX](https://ml-explore.github.io/mlx/build/html/index.html), but deep knowledge of MLX is not necessary to run the example. This example will help you understand how to adapt Flower to your use case. Running this example in itself is quite easy.
 
-## Project Setup
+[MLX](https://ml-explore.github.io/mlx/build/html/index.html) is a NumPy-like array framework designed for efficient and flexible machine learning on Apple Silicon. In this example, we will train a simple 2 layers MLP on [MNIST](https://huggingface.co/datasets/ylecun/mnist) data (handwritten digits recognition) that's downloaded and partitioned using [Flower Datasets](https://flower.ai/docs/datasets/).
+
+## Set up the project
+
+### Clone the project
 
 Start by cloning the example project:
 
 ```shell
 git clone --depth=1 https://github.com/adap/flower.git _tmp \
-              && mv _tmp/examples/quickstart-mlx . \
-              && rm -rf _tmp && cd quickstart-mlx
+        && mv _tmp/examples/quickstart-mlx . \
+        && rm -rf _tmp \
+        && cd quickstart-mlx
 ```
 
 This will create a new directory called `quickstart-mlx` with the following structure:
 
 ```shell
 quickstart-mlx
-├── README.md
 ├── mlxexample
 │   ├── __init__.py
-│   ├── client_app.py   # defines your ClientApp
-│   ├── server_app.py   # defines your ServerApp
-│   └── task.py         # defines your model, training and dataloading functions
-└── pyproject.toml      # builds your project, includes dependencies and configs
+│   ├── client_app.py   # Defines your ClientApp
+│   ├── server_app.py   # Defines your ServerApp
+│   └── task.py         # Defines your model, training and data loading
+├── pyproject.toml      # Project metadata like dependencies and configs
+└── README.md
 ```
 
-## Install dependencies and project
+### Install dependencies and project
 
 Install the dependencies defined in `pyproject.toml` as well as the `mlxexample` package.
 
@@ -40,13 +45,9 @@ Install the dependencies defined in `pyproject.toml` as well as the `mlxexample`
 pip install -e .
 ```
 
-## Run the Example
+## Run the project
 
-You can run your `ClientApp` and `ServerApp` in both _simulation_ and
-_deployment_ mode without making changes to the code. If you are starting
-with Flower, we recommend you using the _simulation_ model as it requires
-fewer components to be launched manually. By default, `flwr run` will make
-use of the Simulation Engine.
+You can run your `ClientApp` and `ServerApp` in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ model as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
 
 ### Run with the Simulation Engine
 
@@ -65,7 +66,7 @@ flwr run . --run-config num-server-rounds=5,learning-rate=0.05
 > \[!NOTE\]
 > An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.
 
-## Explanations
+## Explanation
 
 This example is a federated version of the centralized case that can be found
 [here](https://github.com/ml-explore/mlx-examples/tree/main/mnist).
@@ -132,7 +133,6 @@ class MLP(nn.Module):
         for l in self.layers[:-1]:
             x = mx.maximum(l(x), 0.0)
         return self.layers[-1](x)
-
 ```
 
 We also define some utility functions to test our model and to iterate over batches.
@@ -151,7 +151,6 @@ def batch_iterate(batch_size, X, y):
     for s in range(0, y.size, batch_size):
         ids = perm[s : s + batch_size]
         yield X[ids], y[ids]
-
 ```
 
 ### The ClientApp
