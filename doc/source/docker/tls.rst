@@ -71,7 +71,7 @@ Assuming all files we need are in the local ``certificates`` directory, we can u
 SuperNode
 ---------
 
-Assuming the certificate already exists locally, we can use the flag ``--volume`` to mount the local
+Assuming that the ``ca.crt`` certificate already exists locally, we can use the flag ``--volume`` to mount the local
 certificate into the container's ``/app/`` directory:
 
 .. code-block:: bash
@@ -100,7 +100,7 @@ certificate into the container's ``/app/`` directory:
 SuperExec
 ---------
 
-Assuming all files we need are in the local ``certificates`` directory, we can use the flag
+Assuming all files we need are in the local ``certificates`` directory where the SuperExec will be executed from, we can use the flag
 ``--volume`` to mount the local directory into the ``/app/certificates/`` directory of the container:
 
 .. code-block:: bash

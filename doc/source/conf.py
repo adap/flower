@@ -94,7 +94,7 @@ release = "1.11.0"
 # The current released version
 rst_prolog = """
 .. |stable_flwr_version| replace:: 1.10.0
-.. |latest_version_docker_sha| replace:: 985c24b2b337ab7f15a554fde9d860cede95079bcaa244fda8f12c0805e34c7d
+.. |latest_flwr_superlink_docker_digest| replace:: xxxc51d889c
 .. |ubuntu_version| replace:: 22.04
 .. |setuptools_version| replace:: 70.3.0
 .. |pip_version| replace:: 24.1.2

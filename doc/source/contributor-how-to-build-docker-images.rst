@@ -13,7 +13,7 @@ Before we can start, we need to meet a few prerequisites in our local developmen
 
     .. code-block:: bash
 
-      $ git clone https://github.com/adap/flower.git && cd flower
+      $ git clone --depth=1 https://github.com/adap/flower.git && cd flower
 
 #. Verify the Docker daemon is running.
 
@@ -81,7 +81,7 @@ and Flower :substitution-code:`|stable_flwr_version|`:
      --build-arg SETUPTOOLS_VERSION=|setuptools_version| \
      -t flwr_base:0.1.0 .
 
-The name of image is ``flwr_base`` and the tag ``0.1.0``. Remember that the build arguments as well
+In this example, we specify our image name as ``flwr_base`` and the tag as ``0.1.0``. Remember that the build arguments as well
 as the name and tag can be adapted to your needs. These values serve as examples only.
 
 Building the SuperLink/SuperNode or ServerApp image
@@ -102,9 +102,9 @@ Building the SuperLink/SuperNode or ServerApp image
    * - ``BASE_IMAGE``
      - The Tag of the Flower base image.
      - Yes
-     - :substitution-code:`|stable_flwr_version|-py3.10-ubuntu|ubuntu_version|`
+     - :substitution-code:`|stable_flwr_version|-py3.11-ubuntu|ubuntu_version|`
 
-The following example creates a SuperLink/SuperNode or ServerApp image with the official Flower
+The following command creates either a SuperLink, SuperNode or ServerApp image with the official Flower
 base image:
 
 .. code-block:: bash
@@ -113,10 +113,18 @@ base image:
    $ docker build \
      --build-arg BASE_IMAGE=<FLOWER-VERSION>-py<PY-VERSION>-<DISTRIBUTION and VERSION> \
      -t flwr_superlink:0.1.0 .
+For example, to build a SuperLink image with the latest Flower version, Python 3.11 and Ubuntu 22.04, run the following:
 
+.. code-block:: bash
+   :substitutions:
+
+   $ cd src/docker/superlink
+   $ docker build \ 
+     --build-arg BASE_IMAGE=|current_flwr_version|-py3.10-ubuntu22.04 \
+     -t flwr_superlink:0.1.0 .
 
 If you want to use your own base image instead of the official Flower base image, all you need to do
-is set the ``BASE_REPOSITORY`` build argument.
+is set the ``BASE_REPOSITORY`` build argument to ``flwr_base`` (as we've specified above).
 
 .. code-block:: bash
 

@@ -18,7 +18,13 @@ The following command returns the current image digest referenced by the
 
    $ docker pull flwr/superlink:|current_flwr_version|
    $ docker inspect --format='{{index .RepoDigests 0}}' flwr/superlink:|current_flwr_version|
-   flwr/superlink@sha256:|latest_version_docker_sha|
+
+This will output
+
+.. code-block:: bash
+   :substitutions:
+
+   flwr/superlink@sha256:|latest_flwr_superlink_docker_digest|
 
 Next, we can pin the digest when running a new SuperLink container:
 

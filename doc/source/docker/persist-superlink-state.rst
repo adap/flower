@@ -34,6 +34,6 @@ database file.
 
 As soon as the SuperLink starts, the file ``state.db`` is created in the ``state`` directory on
 your host system. If the file already exists, the SuperLink tries to restore the state from the
-file. To start the SuperLink with an with an empty database, ensure that there is no database
+file. To start the SuperLink with an empty database, ensure that there is no database
 called ``state.db`` in the ``state`` directory (``rm state.db``) before you execute the
 ``docker run`` command above.
