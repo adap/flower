@@ -17,7 +17,6 @@ from mlxexample.task import (
 
 class FlowerClient(NumPyClient):
     def __init__(self, num_layers, hidden_dim, batch_size, learning_rate, data):
-
         self.train_images, self.train_labels, self.test_images, self.test_labels = data
         self.model = MLP(
             num_layers,
