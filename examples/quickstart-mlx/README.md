@@ -7,86 +7,107 @@ framework: [MLX]
 
 # Flower Example using MLX
 
-This introductory example to Flower uses [MLX](https://ml-explore.github.io/mlx/build/html/index.html), but deep knowledge of MLX is not necessary to run the example. This example will help you understand how to adapt Flower to your use case. Running this example in itself is quite easy.
+This introductory example to Flower uses [MLX](https://ml-explore.github.io/mlx/build/html/index.html), but deep knowledge of MLX is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case. Running this example in itself is quite easy.
 
-[MLX](https://ml-explore.github.io/mlx/build/html/index.html) is a NumPy-like array framework designed for efficient and flexible machine learning on Apple Silicon. In this example, we will train a simple 2 layers MLP on [MNIST](https://huggingface.co/datasets/ylecun/mnist) data (handwritten digits recognition) that's downloaded and partitioned using [Flower Datasets](https://flower.ai/docs/datasets/).
+[MLX](https://ml-explore.github.io/mlx/build/html/index.html) is a NumPy-like array framework designed for efficient and flexible machine learning on Apple silicon.
 
-## Set up the project
+In this example, we will train a simple 2 layers MLP on MNIST data (handwritten digits recognition).
 
-### Clone the project
+## Project Setup
 
-Start by cloning the example project:
-
-```shell
-git clone --depth=1 https://github.com/adap/flower.git _tmp \
-        && mv _tmp/examples/quickstart-mlx . \
-        && rm -rf _tmp \
-        && cd quickstart-mlx
-```
-
-This will create a new directory called `quickstart-mlx` with the following structure:
+Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-quickstart-mlx
-├── mlxexample
-│   ├── __init__.py
-│   ├── client_app.py   # Defines your ClientApp
-│   ├── server_app.py   # Defines your ServerApp
-│   └── task.py         # Defines your model, training and data loading
-├── pyproject.toml      # Project metadata like dependencies and configs
-└── README.md
+git clone --depth=1 https://github.com/adap/flower.git _tmp && mv _tmp/examples/quickstart-mlx . && rm -rf _tmp && cd quickstart-mlx
 ```
 
-### Install dependencies and project
+This will create a new directory called `quickstart-mlx` containing the following files:
 
-Install the dependencies defined in `pyproject.toml` as well as the `mlxexample` package.
-
-```bash
-pip install -e .
+```shell
+-- pyproject.toml
+-- requirements.txt
+-- client.py
+-- server.py
+-- run.sh
+-- README.md
 ```
 
-## Run the project
+### Installing Dependencies
 
-You can run your `ClientApp` and `ServerApp` in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ model as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
+Project dependencies (such as `mlx` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
 
-### Run with the Simulation Engine
+#### Poetry
 
-```bash
-flwr run .
+```shell
+poetry install
+poetry shell
 ```
 
-You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
+Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
 
-```bash
-flwr run . --run-config num-server-rounds=5,learning-rate=0.05
+```shell
+poetry run python3 -c "import flwr"
 ```
 
-### Run with the Deployment Engine
+If you don't see any errors you're good to go!
 
-> \[!NOTE\]
-> An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.
+#### pip
 
-## Explanation
+Write the command below in your terminal to install the dependencies according to the configuration file requirements.txt.
+
+```shell
+pip install -r requirements.txt
+```
+
+## Run Federated Learning with MLX and Flower
+
+Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
+
+```shell
+python3 server.py
+```
+
+Now you are ready to start the Flower clients which will participate in the learning. To do so simply open two more terminal windows and run the
+following commands.
+
+Start a first client in the first terminal:
+
+```shell
+python3 client.py --partition-id 0
+```
+
+And another one in the second terminal:
+
+```shell
+python3 client.py --partition-id 1
+```
+
+If you want to utilize your GPU, you can use the `--gpu` argument:
+
+```shell
+python3 client.py --gpu --partition-id 2
+```
+
+Note that you can start many more clients if you want, but each will have to be in its own terminal.
+
+You will see that MLX is starting a federated training. Look at the [code](https://github.com/adap/flower/tree/main/examples/quickstart-mlx) for a detailed explanation.
+
+## Explanations
 
 This example is a federated version of the centralized case that can be found
 [here](https://github.com/ml-explore/mlx-examples/tree/main/mnist).
 
 ### The data
 
-We will use `flwr_datasets` to easily download and partition the `MNIST` dataset. In this example you'll make use of the [IidPartitioner](https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner) to generate `num_partitions` partitions. You can choose [other partitioners](https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html) available in Flower Datasets:
+We will use `flwr_datasets` to easily download and partition the `MNIST` dataset:
 
 ```python
-partitioner = IidPartitioner(num_partitions=num_partitions)
-fds = FederatedDataset(
-    dataset="ylecun/mnist",
-    partitioners={"train": partitioner},
-    trust_remote_code=True,
-)
-partition = fds.load_partition(partition_id)
-partition_splits = partition.train_test_split(test_size=0.2, seed=42)
+fds = FederatedDataset(dataset="mnist", partitioners={"train": 3})
+partition = fds.load_partition(partition_id = args.partition_id)
+partition_splits = partition.train_test_split(test_size=0.2)
 
-partition_splits["train"].set_format("numpy")
-partition_splits["test"].set_format("numpy")
+partition_splits['train'].set_format("numpy")
+partition_splits['test'].set_format("numpy")
 
 train_partition = partition_splits["train"].map(
     lambda img: {
@@ -108,55 +129,57 @@ data = (
     test_partition["label"].astype(np.uint32),
 )
 
-train_images, train_labels, test_images, test_labels = map(mx.array, data)
+train_images, train_labels, test_images, test_labels = map(mlx.core.array, data)
 ```
 
 ### The model
 
-We define the model as in the centralized MLX example, it's a simple MLP:
+We define the model as in the centralized mlx example, it's a simple MLP:
 
 ```python
-class MLP(nn.Module):
+class MLP(mlx.nn.Module):
     """A simple MLP."""
 
     def __init__(
-        self, num_layers: int, input_dim: int, hidden_dim: int, output_dim: int = 10
+        self, num_layers: int, input_dim: int, hidden_dim: int, output_dim: int
     ):
         super().__init__()
         layer_sizes = [input_dim] + [hidden_dim] * num_layers + [output_dim]
         self.layers = [
-            nn.Linear(idim, odim)
+            mlx.nn.Linear(idim, odim)
             for idim, odim in zip(layer_sizes[:-1], layer_sizes[1:])
         ]
 
     def __call__(self, x):
         for l in self.layers[:-1]:
-            x = mx.maximum(l(x), 0.0)
+            x = mlx.core.maximum(l(x), 0.0)
         return self.layers[-1](x)
+
 ```
 
 We also define some utility functions to test our model and to iterate over batches.
 
 ```python
 def loss_fn(model, X, y):
-    return mx.mean(nn.losses.cross_entropy(model(X), y))
+    return mlx.core.mean(mlx.nn.losses.cross_entropy(model(X), y))
 
 
 def eval_fn(model, X, y):
-    return mx.mean(mx.argmax(model(X), axis=1) == y)
+    return mlx.core.mean(mlx.core.argmax(model(X), axis=1) == y)
 
 
 def batch_iterate(batch_size, X, y):
-    perm = mx.array(np.random.permutation(y.size))
+    perm = mlx.core.array(np.random.permutation(y.size))
     for s in range(0, y.size, batch_size):
         ids = perm[s : s + batch_size]
         yield X[ids], y[ids]
+
 ```
 
-### The ClientApp
+### The client
 
 The main changes we have to make to use `MLX` with `Flower` will be found in
-the `get_params` and `set_params` functions. Indeed, MLX doesn't
+the `get_parameters` and `set_parameters` functions. Indeed, MLX doesn't
 provide an easy way to convert the model parameters into a list of `np.array`s
 (the format we need for the serialization of the messages to work).
 
@@ -174,133 +197,143 @@ The way MLX stores its parameters is as follows:
 ```
 
 Therefore, to get our list of `np.array`s, we need to extract each array and
-convert them into a NumPy array:
+convert them into a numpy array:
 
 ```python
-def get_params(model):
-    layers = model.parameters()["layers"]
+def get_parameters(self, config):
+    layers = self.model.parameters()["layers"]
     return [np.array(val) for layer in layers for _, val in layer.items()]
 ```
 
-For the `set_params` function, we perform the reverse operation. We receive
-a list of NumPy arrays and want to convert them into MLX parameters. Therefore, we
+For the `set_parameters` function, we perform the reverse operation. We receive
+a list of arrays and want to convert them into MLX parameters. Therefore, we
 iterate through pairs of parameters and assign them to the `weight` and `bias`
 keys of each layer dict:
 
 ```python
-def set_params(model, parameters):
+def set_parameters(self, parameters):
     new_params = {}
     new_params["layers"] = [
-        {"weight": mx.array(parameters[i]), "bias": mx.array(parameters[i + 1])}
+        {"weight": mlx.core.array(parameters[i]), "bias": mlx.core.array(parameters[i + 1])}
         for i in range(0, len(parameters), 2)
     ]
-    model.update(new_params)
+    self.model.update(new_params)
 ```
 
-The rest of the functionality is directly inspired by the centralized case. The `fit()`
-method in the client trains the model using the local dataset:
+The rest of the functions are directly inspired by the centralized case:
 
 ```python
 def fit(self, parameters, config):
-    set_params(self.model, parameters)
+    self.set_parameters(parameters)
     for _ in range(self.num_epochs):
         for X, y in batch_iterate(
             self.batch_size, self.train_images, self.train_labels
         ):
-            _, grads = self.loss_and_grad_fn(self.model, X, y)
+            loss, grads = self.loss_and_grad_fn(self.model, X, y)
             self.optimizer.update(self.model, grads)
-            mx.eval(self.model.parameters(), self.optimizer.state)
+            mlx.core.eval(self.model.parameters(), self.optimizer.state)
     return self.get_parameters(config={}), len(self.train_images), {}
 ```
 
 Here, after updating the parameters, we perform the training as in the
 centralized case, and return the new parameters.
 
-And for the `evaluate` method of the client:
+And for the `evaluate` function:
 
 ```python
 def evaluate(self, parameters, config):
-    set_params(self.model, parameters)
+    self.set_parameters(parameters)
     accuracy = eval_fn(self.model, self.test_images, self.test_labels)
     loss = loss_fn(self.model, self.test_images, self.test_labels)
     return loss.item(), len(self.test_images), {"accuracy": accuracy.item()}
 ```
 
 We also begin by updating the parameters with the ones sent by the server, and
-then we compute the loss and accuracy using the functions defined above. In the
-constructor of the `FlowerClient` we instantiate the `MLP` model as well as other
-components such as the optimizer.
+then we compute the loss and accuracy using the functions defined above.
 
 Putting everything together we have:
 
 ```python
-class FlowerClient(NumPyClient):
-    def __init__(self, num_layers, hidden_dim, batch_size, learning_rate, data):
+class FlowerClient(fl.client.NumPyClient):
+    def __init__(
+        self, model, optim, loss_and_grad_fn, data, num_epochs, batch_size
+    ) -> None:
+        self.model = model
+        self.optimizer = optim
+        self.loss_and_grad_fn = loss_and_grad_fn
         self.train_images, self.train_labels, self.test_images, self.test_labels = data
-        self.model = MLP(
-            num_layers,
-            self.train_images.shape[-1],
-            hidden_dim,
-        )
-        self.optimizer = optim.SGD(learning_rate=learning_rate)
-        self.loss_and_grad_fn = nn.value_and_grad(self.model, loss_fn)
-        self.num_epochs = 1
+        self.num_epochs = num_epochs
         self.batch_size = batch_size
 
     def get_parameters(self, config):
-        """Return the parameters of the model of this client."""
-        return get_params(self.model)
+        layers = self.model.parameters()["layers"]
+        return [np.array(val) for layer in layers for _, val in layer.items()]
+
+    def set_parameters(self, parameters):
+        new_params = {}
+        new_params["layers"] = [
+            {"weight": mlx.core.array(parameters[i]), "bias": mlx.core.array(parameters[i + 1])}
+            for i in range(0, len(parameters), 2)
+        ]
+        self.model.update(new_params)
 
     def fit(self, parameters, config):
-        """Train the model with data of this client."""
-        set_params(self.model, parameters)
+        self.set_parameters(parameters)
         for _ in range(self.num_epochs):
             for X, y in batch_iterate(
                 self.batch_size, self.train_images, self.train_labels
             ):
-                _, grads = self.loss_and_grad_fn(self.model, X, y)
+                loss, grads = self.loss_and_grad_fn(self.model, X, y)
                 self.optimizer.update(self.model, grads)
-                mx.eval(self.model.parameters(), self.optimizer.state)
+                mlx.core.eval(self.model.parameters(), self.optimizer.state)
         return self.get_parameters(config={}), len(self.train_images), {}
 
     def evaluate(self, parameters, config):
-        """Evaluate the model on the data this client has."""
-        set_params(self.model, parameters)
+        self.set_parameters(parameters)
         accuracy = eval_fn(self.model, self.test_images, self.test_labels)
         loss = loss_fn(self.model, self.test_images, self.test_labels)
         return loss.item(), len(self.test_images), {"accuracy": accuracy.item()}
 ```
 
-Finally, we can construct a `ClientApp` using the `FlowerClient` defined above by means of a `client_fn` callback:
+And as you can see, with only a few lines of code, our client is ready! Before
+we can instantiate it, we need to define a few variables:
+
+```python
+num_layers = 2
+hidden_dim = 32
+num_classes = 10
+batch_size = 256
+num_epochs = 1
+learning_rate = 1e-1
+
+model = MLP(num_layers, train_images.shape[-1], hidden_dim, num_classes)
+
+loss_and_grad_fn = mlx.nn.value_and_grad(model, loss_fn)
+optimizer = mlx.optimizers.SGD(learning_rate=learning_rate)
+```
+
+Finally, we can instantiate it by using the `start_client` function:
 
 ```python
 # Start Flower client
-def client_fn(context: Context) -> Client:
-    """Construct a Client that will be run in a ClientApp."""
-
-    # Read the node_config to fetch data partition associated to this node
-    partition_id = context.node_config["partition-id"]
-    num_partitions = context.node_config["num-partitions"]
-    data = load_data(partition_id, num_partitions)
-
-    # Read the run config to get settings to configure the Client
-    num_layers = context.run_config["num-layers"]
-    hidden_dim = context.run_config["hidden-dim"]
-    batch_size = context.run_config["batch-size"]
-    lr = context.run_config["learning-rate"]
-
-    # Return Client instance
-    return FlowerClient(num_layers, hidden_dim, batch_size, lr, data).to_client()
-
-# Flower ClientApp
-app = ClientApp(client_fn=client_fn)
+fl.client.start_client(
+    server_address="127.0.0.1:8080",
+    client=FlowerClient(
+        model,
+        optimizer,
+        loss_and_grad_fn,
+        (train_images, train_labels, test_images, test_labels),
+        num_epochs,
+        batch_size,
+    ).to_client(),
+)
 ```
 
-### The ServerApp
+### The server
 
-To construct a `ServerApp` we define a `server_fn()` callback with an identical signature
-to that of `client_fn()` but the return type is [ServerAppComponents](https://flower.ai/docs/framework/ref-api/flwr.server.ServerAppComponents.html#serverappcomponents) as opposed to a [`Client`](https://flower.ai/docs/framework/ref-api/flwr.client.Client.html#client). In this example we use the `FedAvg` strategy and pass a callback to aggregate the validation accuracies
-returned by clients sampled in an _evaluate_ round.
+On the server side, we don't need to add anything in particular. The
+`weighted_average` function is just there to be able to aggregate the results
+and have an accuracy at the end.
 
 ```python
 # Define metric aggregation function
@@ -313,23 +346,13 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     return {"accuracy": sum(accuracies) / sum(examples)}
 
 
-def server_fn(context: Context) -> ServerAppComponents:
-    """Construct components that set the ServerApp behaviour."""
+# Define strategy
+strategy = fl.server.strategy.FedAvg(evaluate_metrics_aggregation_fn=weighted_average)
 
-    # Define the strategy
-    fraction_eval = context.run_config["fraction-evaluate"]
-    strategy = FedAvg(
-        fraction_evaluate=fraction_eval,
-        evaluate_metrics_aggregation_fn=weighted_average,
-    )
-
-    # Construct ServerConfig
-    num_rounds = context.run_config["num-server-rounds"]
-    config = ServerConfig(num_rounds=num_rounds)
-
-    return ServerAppComponents(strategy=strategy, config=config)
-
-
-# Create ServerApp
-app = ServerApp(server_fn=server_fn)
+# Start Flower server
+fl.server.start_server(
+    server_address="0.0.0.0:8080",
+    config=fl.server.ServerConfig(num_rounds=3),
+    strategy=strategy,
+)
 ```

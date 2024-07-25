@@ -1,39 +1,16 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["poetry-core>=1.4.0"]
+build-backend = "poetry.core.masonry.api"
 
-[project]
-name = "mlxexample"
-version = "1.0.0"
-description = "Federated Learning with MLX and Flower (Quickstart Example)"
-license = "Apache-2.0"
-dependencies = [
-    "flwr[simulation]>=1.10.0",
-    "flwr-datasets[vision]>=0.3.0",
-    "mlx==0.16.0",
-    "numpy==1.26.4",
-]
+[tool.poetry]
+name = "quickstart-mlx"
+version = "0.1.0"
+description = "MLX Federated Learning Quickstart with Flower"
+authors = ["The Flower Authors <hello@flower.ai>"]
 
-[tool.hatch.build.targets.wheel]
-packages = ["."]
-
-[tool.flwr.app]
-publisher = "flwrlabs"
-
-[tool.flwr.app.components]
-serverapp = "mlxexample.server_app:app"
-clientapp = "mlxexample.client_app:app"
-
-[tool.flwr.app.config]
-num-server-rounds = 3
-fraction-evaluate = 0.5
-num-layers = 2
-hidden-dim = 32
-batch-size = 256
-learning-rate = 0.1
-
-[tool.flwr.federations]
-default = "local-simulation"
-
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 10
+[tool.poetry.dependencies]
+python = ">=3.8,<3.11"
+flwr = ">=1.0,<2.0"
+mlx = "==0.0.3"
+numpy = "==1.24.4"
+flwr-datasets = { extras = ["vision"], version = "^0.0.2" }
