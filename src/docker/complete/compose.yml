@@ -4,7 +4,7 @@ x-supernode: &supernode
   deploy:
     resources:
       limits:
-        cpus: "4"
+        cpus: "2"
   command:
     - --superlink
     - superlink:9092
