@@ -131,25 +131,13 @@ class SimulationEngine(Executor):
             # Install FAB to flwr dir
             fab_path = install_from_fab(fab_file, None, True)
 
-            # Prepare FAB install command
-            command = [
-                sys.executable,
-                "-m",
-                "pip",
-                "install",
-                "--no-deps",
-                str(fab_path),
-            ]
             # Install FAB Python package
-            if self.verbose:
-                subprocess.run(command, check=True)
-            else:
-                subprocess.run(
-                    command,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                    check=True,
-                )
+            subprocess.run(
+                [sys.executable, "-m", "pip", "install", "--no-deps", str(fab_path)],
+                stdout=None if self.verbose else subprocess.DEVNULL,
+                stderr=None if self.verbose else subprocess.DEVNULL,
+                check=True,
+            )
 
             # Load and validate config
             config, errors, warnings = load_and_validate(fab_path / "pyproject.toml")
