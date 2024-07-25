@@ -618,7 +618,9 @@ class SqliteState(State):  # pylint: disable=R0904
 
     def create_run(
         self,
-        fab_hash: str,
+        fab_id: Optional[str],
+        fab_version: Optional[str],
+        fab_hash: Optional[str],
         override_config: UserConfig,
     ) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
@@ -634,7 +636,15 @@ class SqliteState(State):  # pylint: disable=R0904
                 "(run_id, fab_id, fab_version, fab_hash, override_config)"
                 "VALUES (?, ?, ?, ?, ?);"
             )
-            self.query(query, (run_id, fab_hash, json.dumps(override_config)))
+            if fab_hash:
+                self.query(
+                    query, (run_id, "", "", fab_hash, json.dumps(override_config))
+                )
+            else:
+                self.query(
+                    query,
+                    (run_id, fab_id, fab_version, "", json.dumps(override_config)),
+                )
             return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0

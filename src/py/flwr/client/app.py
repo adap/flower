@@ -419,9 +419,14 @@ def _start_client_internal(
                     try:
                         # Load ClientApp instance
                         run: Run = runs[run_id]
-                        client_app: ClientApp = load_client_app_fn(
-                            *get_fab_metadata(run)
-                        )
+                        if get_fab:
+                            fab_id, fab_version = get_fab_metadata(
+                                get_fab(run.fab_hash).data_bytes
+                            )
+                        else:
+                            fab_id, fab_version = run.fab_id, run.fab_version
+
+                        client_app: ClientApp = load_client_app_fn(fab_id, fab_version)
 
                         # Execute ClientApp
                         reply_message = client_app(message=message, context=context)

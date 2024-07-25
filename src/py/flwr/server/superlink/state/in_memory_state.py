@@ -277,7 +277,9 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
 
     def create_run(
         self,
-        fab_hash: str,
+        fab_id: Optional[str],
+        fab_version: Optional[str],
+        fab_hash: Optional[str],
         override_config: UserConfig,
     ) -> int:
         """Create a new run for the specified `fab_hash`."""
@@ -288,9 +290,9 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             if run_id not in self.run_ids:
                 self.run_ids[run_id] = Run(
                     run_id=run_id,
-                    fab_id="",
-                    fab_version="",
-                    fab_hash=fab_hash,
+                    fab_id=fab_id if fab_id else "",
+                    fab_version=fab_version if fab_version else "",
+                    fab_hash=fab_hash if fab_hash else "",
                     override_config=override_config,
                 )
                 return run_id

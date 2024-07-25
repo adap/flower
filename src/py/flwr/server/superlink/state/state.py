@@ -159,7 +159,9 @@ class State(abc.ABC):  # pylint: disable=R0904
     @abc.abstractmethod
     def create_run(
         self,
-        fab_hash: str,
+        fab_id: Optional[str],
+        fab_version: Optional[str],
+        fab_hash: Optional[str],
         override_config: UserConfig,
     ) -> int:
         """Create a new run for the specified `fab_hash`."""
