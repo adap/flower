@@ -18,12 +18,6 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     return {"accuracy": sum(accuracies) / sum(examples)}
 
 
-# Define config
-config = ServerConfig(num_rounds=3)
-
-parameters = ndarrays_to_parameters(load_model().get_weights())
-
-
 def server_fn(context: Context):
     """Construct components that set the ServerApp behaviour.
 
@@ -31,6 +25,10 @@ def server_fn(context: Context):
     construction of all elements (e.g the strategy or the number of rounds)
     wrapped in the returned ServerAppComponents object.
     """
+
+    # Let's define the global model and pass it to the strategy
+    # Note this is optional.
+    parameters = ndarrays_to_parameters(load_model().get_weights())
 
     # Define the strategy
     # We pass a callback to process the metrics returned by a client's

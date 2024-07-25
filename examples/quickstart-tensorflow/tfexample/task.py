@@ -2,8 +2,8 @@
 
 import os
 
-import tensorflow as tf
-import numpy as np
+import keras
+from keras import layers
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 
@@ -13,11 +13,24 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 
 def load_model(learning_rate: float = 0.001):
-    # Load model and data (MobileNetV2, CIFAR-10)
-    model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
-    optimizer = tf.keras.optimizers.Adam(learning_rate)
+    # Define a simple CNN for CIFAR-10 and set Adam optimizer
+    model = keras.Sequential(
+        [
+            keras.Input(shape=(32, 32, 3)),
+            layers.Conv2D(32, kernel_size=(3, 3), activation="relu"),
+            layers.MaxPooling2D(pool_size=(2, 2)),
+            layers.Conv2D(64, kernel_size=(3, 3), activation="relu"),
+            layers.MaxPooling2D(pool_size=(2, 2)),
+            layers.Flatten(),
+            layers.Dropout(0.5),
+            layers.Dense(10, activation="softmax"),
+        ]
+    )
+    optimizer = keras.optimizers.Adam(learning_rate)
     model.compile(
-        optimizer=optimizer, loss="sparse_categorical_crossentropy", metrics=["accuracy"]
+        optimizer=optimizer,
+        loss="sparse_categorical_crossentropy",
+        metrics=["accuracy"],
     )
     return model
 
