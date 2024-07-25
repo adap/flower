@@ -85,12 +85,12 @@ def log(
         Optional[str],
         typer.Argument(help="Name of the federation to run the app on"),
     ] = None,
-    follow: Annotated[
+    stream: Annotated[
         bool,
         typer.Option(
-            "--follow/--no-follow",
-            "-f/-F",
-            help="Use this flag to follow logstream",
+            "--stream/--show",
+            "-s/-p",
+            help="Flag to stream or print logs from the Flower run",
         ),
     ] = True,
 ) -> None:
@@ -150,7 +150,7 @@ def log(
         raise typer.Exit(code=1)
 
     if "address" in federation:
-        _log_with_superexec(federation, run_id, follow)
+        _log_with_superexec(federation, run_id, stream)
     else:
         pass
 
@@ -159,7 +159,7 @@ def log(
 def _log_with_superexec(
     federation: Dict[str, str],
     run_id: int,
-    follow: bool,
+    stream: bool,
 ) -> None:
 
     def on_channel_state_change(channel_connectivity: str) -> None:
@@ -203,13 +203,13 @@ def _log_with_superexec(
     )
     channel.subscribe(on_channel_state_change)
 
-    if follow:
+    if stream:
         try:
             while True:
                 logger(INFO, "Starting logstream for run_id `%s`", run_id)
                 stream_logs(run_id, channel, CONN_REFRESH_PERIOD)
                 time.sleep(2)
-                logger(INFO, "Reconnecting to logstream")
+                logger(DEBUG, "Reconnecting to logstream")
         except KeyboardInterrupt:
             logger(INFO, "Exiting logstream")
         except grpc.RpcError as e:
