@@ -104,22 +104,13 @@ Building the SuperLink/SuperNode or ServerApp image
      - Yes
      - :substitution-code:`|stable_flwr_version|-py3.11-ubuntu|ubuntu_version|`
 
-The following command creates either a SuperLink, SuperNode or ServerApp image with the official Flower
-base image:
-
-.. code-block:: bash
-
-   $ cd src/docker/<superlink|supernode|serverapp>/
-   $ docker build \
-     --build-arg BASE_IMAGE=<FLOWER-VERSION>-py<PY-VERSION>-<DISTRIBUTION and VERSION> \
-     -t flwr_superlink:0.1.0 .
 For example, to build a SuperLink image with the latest Flower version, Python 3.11 and Ubuntu 22.04, run the following:
 
 .. code-block:: bash
    :substitutions:
 
    $ cd src/docker/superlink
-   $ docker build \ 
+   $ docker build \
      --build-arg BASE_IMAGE=|current_flwr_version|-py3.10-ubuntu22.04 \
      -t flwr_superlink:0.1.0 .
 

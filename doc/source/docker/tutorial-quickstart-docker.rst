@@ -294,8 +294,8 @@ Step 5: Run the Quickstart Project
 
       $ docker logs -f superexec
 
-Step 6: Update the Application Code
------------------------------------
+Step 6: Update the Application
+------------------------------
 
 #. Change the application code. For example, change the  ``seed`` in ``quickstart_docker/task.py``
    to ``43`` and save it:
@@ -350,17 +350,17 @@ Step 6: Update the Application Code
 Step 7: Clean Up
 ----------------
 
-#. Remove the containers and the bridge network:
+Remove the containers and the bridge network:
 
-   .. code-block:: bash
+.. code-block:: bash
 
-      $ docker stop $(docker ps -a -q  --filter ancestor=flwr_supernode:0.0.1) \
-         superexec \
-         superlink
-      $ docker network rm flwr-network
+   $ docker stop $(docker ps -a -q  --filter ancestor=flwr_supernode:0.0.1) \
+      superexec \
+      superlink
+   $ docker network rm flwr-network
 
 Where to Go Next
 ----------------
 
-* :doc:`Enabling TLS for secure connections <tls>`
-* :doc:`Persist the state of the SuperLink <persist-superlink-state>`
+* :doc:`tls`
+* :doc:`persist-superlink-state`
