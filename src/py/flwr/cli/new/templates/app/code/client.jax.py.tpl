@@ -2,6 +2,7 @@
 
 import jax
 from flwr.client import NumPyClient, ClientApp
+from flwr.common import Context
 
 from $import_name.task import (
     evaluation,
@@ -44,7 +45,7 @@ class FlowerClient(NumPyClient):
         )
         return float(loss), num_examples, {"loss": float(loss)}
 
-def client_fn(cid):
+def client_fn(context: Context):
     # Return Client instance
     return FlowerClient().to_client()
 
