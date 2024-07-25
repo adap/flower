@@ -17,7 +17,7 @@ x-supernode: &supernode
 services:
   # create a SuperLink service
   superlink:
-    image: flwr/superlink:${FLWR_VERSION}
+    image: flwr/superlink:${FLWR_VERSION:-1.10.0}
     command:
       - --insecure
 
@@ -27,7 +27,7 @@ services:
     build:
       context: ${PROJECT_DIR:-.}
       dockerfile_inline: |
-        FROM flwr/superexec:${FLWR_VERSION}
+        FROM flwr/superexec:${FLWR_VERSION:-1.10.0}
 
         WORKDIR /app
         COPY --chown=app:app pyproject.toml .
@@ -54,7 +54,7 @@ services:
     build:
       context: ${PROJECT_DIR:-.}
       dockerfile_inline: |
-        FROM flwr/supernode:${FLWR_VERSION}
+        FROM flwr/supernode:${FLWR_VERSION:-1.10.0}
 
         WORKDIR /app
         COPY --chown=app:app pyproject.toml .
@@ -68,7 +68,7 @@ services:
     build:
       context: ${PROJECT_DIR:-.}
       dockerfile_inline: |
-        FROM flwr/supernode:${FLWR_VERSION}
+        FROM flwr/supernode:${FLWR_VERSION:-1.10.0}
 
         WORKDIR /app
         COPY --chown=app:app pyproject.toml .
@@ -84,7 +84,7 @@ services:
   #   build:
   #     context: ${PROJECT_DIR:-.}
   #     dockerfile_inline: |
-  #       FROM flwr/supernode:${FLWR_VERSION}
+  #       FROM flwr/supernode:${FLWR_VERSION:-1.10.0}
 
   #       WORKDIR /app
   #       COPY --chown=app:app pyproject.toml .
