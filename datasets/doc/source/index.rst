@@ -111,6 +111,29 @@ How To Use the library
 ----------------------
 Learn how to use the ``flwr-datasets`` library from the :doc:`tutorial-quickstart` examples .
 
+Distinguishing Features
+-----------------------
+What makes Flower Datasets stand out from other libraries?
+
+* Access to the largest online repository of datasets:
+
+  * The library functionality is independent of the dataset, so you can use any dataset available on [🤗Hugging Face Datasets](https://huggingface.co/datasets), which means that others can immediately benefit from the dataset you added.
+
+  * Out-of-the-box reproducibility across different projects.
+
+  * Access to naturally dividable datasets (with some notion of id) and datasets typically used in centralized ML that need partitioning.
+
+* Customizable levels of dataset heterogeneity:
+
+  * Each ``Partitioner`` takes arguments that allow you to customize the partitioning scheme to your needs.
+
+  * Partitioning can also be applied to the dataset with naturally available division.
+
+* Flexible and open for extensions API.
+
+  * New custom partitioning schemes (``Partitioner`` subclasses) integrated with the whole ecosystem.
+
+
 Join the Flower Community
 -------------------------
 
