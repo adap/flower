@@ -65,11 +65,10 @@ dataset: [CIFAR-10, CIFAR-100]
 
 ## Environment Setup
 
-To construct the Python environment follow these steps:
+In a new Python environment:
 
 ```bash
-# Set local python version via pyenv
-pyenv local 3.10.6
+# Navigate to the moon directory
 # Then install the project
 pip install -e .
 ```
