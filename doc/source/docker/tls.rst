@@ -29,7 +29,6 @@ SuperLink
 Assuming all files we need are in the local ``certificates`` directory, we can use the flag
 ``--volume`` to mount the local directory into the ``/app/certificates/`` directory of the container:
 
-
 .. code-block:: bash
    :substitutions:
 
@@ -72,7 +71,12 @@ SuperNode
 ---------
 
 Assuming that the ``ca.crt`` certificate already exists locally, we can use the flag ``--volume`` to mount the local
-certificate into the container's ``/app/`` directory:
+certificate into the container's ``/app/`` directory.
+
+.. note::
+
+   If you're generating self-signed certificates and the ``ca.crt`` certificate doesn't exist
+   on the SuperNode, you can copy it over after the generation step.
 
 .. code-block:: bash
    :substitutions:

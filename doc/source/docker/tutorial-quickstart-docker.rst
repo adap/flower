@@ -144,7 +144,7 @@ building your own SuperNode image.
 
       $ docker build -f Dockerfile.supernode -t flwr_supernode:0.0.1 .
 
-   .. Note::
+   .. note::
 
       The image name was set as ``flwr_supernode`` with the tag ``0.0.1``. Remember that
       these values are merely examples, and you can customize them according to your requirements.
