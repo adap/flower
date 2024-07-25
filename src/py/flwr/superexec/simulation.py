@@ -63,8 +63,10 @@ class SimulationEngine(Executor):
     def __init__(
         self,
         num_supernodes: Optional[int] = None,
+        verbose: Optional[bool] = False,
     ) -> None:
         self.num_supernodes = num_supernodes
+        self.verbose = verbose
 
     @override
     def set_config(
@@ -80,6 +82,8 @@ class SimulationEngine(Executor):
             Supported configuration key/value pairs:
             - "num-supernodes": int
                 Number of nodes to register for the simulation.
+            - "verbose": bool
+                Set verbosity of logs.
         """
         if num_supernodes := config.get("num-supernodes"):
             if not isinstance(num_supernodes, int):
@@ -96,6 +100,9 @@ class SimulationEngine(Executor):
                 "`num-supernodes` must not be `None`, it must be a valid "
                 "positive integer."
             )
+
+        if verbose := config.get("verbose"):
+            self.verbose = verbose
 
     @override
     def start_run(
@@ -120,12 +127,25 @@ class SimulationEngine(Executor):
             # Install FAB to flwr dir
             fab_path = install_from_fab(fab_file, None, True)
 
+            # Prepare FAB install command
+            command = [
+                sys.executable,
+                "-m",
+                "pip",
+                "install",
+                "--no-deps",
+                str(fab_path),
+            ]
             # Install FAB Python package
-            subprocess.check_call(
-                [sys.executable, "-m", "pip", "install", "--no-deps", str(fab_path)],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
+            if self.verbose:
+                subprocess.run(command, check=True)
+            else:
+                subprocess.run(
+                    command,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    check=True,
+                )
 
             # Load and validate config
             config, errors, warnings = load_and_validate(fab_path / "pyproject.toml")
