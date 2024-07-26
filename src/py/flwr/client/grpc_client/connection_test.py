@@ -146,7 +146,7 @@ def test_integration_connection() -> None:
                 message = receive()
 
                 messages_received += 1
-                if message.metadata.message_type == "reconnect":
+                if message.metadata.message_type == "reconnect":  # type: ignore
                     send(MESSAGE_DISCONNECT)
                     break
 
