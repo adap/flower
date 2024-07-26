@@ -14,6 +14,7 @@
 # ==============================================================================
 """Deployment engine executor."""
 
+import hashlib
 import subprocess
 from logging import ERROR, INFO
 from pathlib import Path
@@ -140,7 +141,9 @@ class DeploymentEngine(Executor):
             install_from_fab(fab_file, None, True)
 
             # Call SuperLink to create run
-            run_id: int = self._create_run(Fab("", fab_file), override_config)
+            run_id: int = self._create_run(
+                Fab(hashlib.sha256(fab_file).hexdigest(), fab_file), override_config
+            )
             log(INFO, "Created run %s", str(run_id))
 
             command = [
