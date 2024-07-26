@@ -20,8 +20,8 @@ packages = ["."]
 publisher = "flwrlabs"
 
 [tool.flwr.app.components]
-serverapp = "example.server_app:app"
-clientapp = "example.client_app:app"
+serverapp = "sklearnexample.server_app:app"
+clientapp = "sklearnexample.client_app:app"
 
 [tool.flwr.app.config]
 penalty = "l2"
