@@ -29,6 +29,20 @@ class MLP(nn.Module):
         return self.layers[-1](x)
 
 
+def get_params(model):
+    layers = model.parameters()["layers"]
+    return [np.array(val) for layer in layers for _, val in layer.items()]
+
+
+def set_params(model, parameters):
+    new_params = {}
+    new_params["layers"] = [
+        {"weight": mx.array(parameters[i]), "bias": mx.array(parameters[i + 1])}
+        for i in range(0, len(parameters), 2)
+    ]
+    model.update(new_params)
+
+
 def loss_fn(model, X, y):
     return mx.mean(nn.losses.cross_entropy(model(X), y))
 
@@ -85,17 +99,3 @@ def load_data(partition_id: int, num_partitions: int):
 
     train_images, train_labels, test_images, test_labels = map(mx.array, data)
     return train_images, train_labels, test_images, test_labels
-
-
-def get_params(model):
-    layers = model.parameters()["layers"]
-    return [np.array(val) for layer in layers for _, val in layer.items()]
-
-
-def set_params(model, parameters):
-    new_params = {}
-    new_params["layers"] = [
-        {"weight": mx.array(parameters[i]), "bias": mx.array(parameters[i + 1])}
-        for i in range(0, len(parameters), 2)
-    ]
-    model.update(new_params)
