@@ -24,7 +24,7 @@ Step 1: Set Up
 
    .. code-block:: bash
 
-      $ git clone -b feat/docker-compose-all-in-one --depth=1 https://github.com/adap/flower.git _tmp \
+      $ git clone --depth=1 https://github.com/adap/flower.git _tmp \
                   && mv _tmp/src/docker/complete . \
                   && rm -rf _tmp && cd complete
 
