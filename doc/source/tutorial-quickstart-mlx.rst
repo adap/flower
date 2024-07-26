@@ -143,7 +143,7 @@ You can choose `other partitioners <https://flower.ai/docs/datasets/ref-api/flwr
 The Model
 ---------
 
-We define the model as in the centralized MLX example, it's a simple MLP:
+We define the model as in the `centralized MLX example <https://github.com/ml-explore/mlx-examples/tree/main/mnist>`_, it's a simple MLP:
 
 .. code-block:: python
 
