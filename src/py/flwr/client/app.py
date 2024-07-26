@@ -196,7 +196,6 @@ def _start_client_internal(
     ] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
-    flwr_path: Optional[Path] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -242,8 +241,6 @@ def _start_client_internal(
         The maximum duration before the client stops trying to
         connect to the server in case of connection error.
         If set to None, there is no limit to the total time.
-    flwr_path: Optional[Path] (default: None)
-        The fully resolved path containing installed Flower Apps.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -402,7 +399,7 @@ def _start_client_internal(
                             runs[run_id] = Run(run_id, "", "", "", {})
 
                     run: Run = runs[run_id]
-                    if get_fab:
+                    if get_fab is not None:
                         fab = get_fab(run.fab_hash)
                     else:
                         fab = None

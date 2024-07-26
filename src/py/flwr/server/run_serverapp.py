@@ -83,7 +83,7 @@ def run(
     log(DEBUG, "ServerApp finished running.")
 
 
-def run_server_app() -> None:  # pylint: disable=too-many-branches
+def run_server_app() -> None:  # pylint: disable=too-many-branches,too-many-statements
     """Run Flower server app."""
     event(EventType.RUN_SERVER_APP_ENTER)
 
@@ -170,9 +170,8 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
         create_run_req = CreateRunRequest(
             fab_id=args.fab_id, fab_version=args.fab_version
         )
-        create_run_res: CreateRunResponse = driver._stub.CreateRun(
-            create_run_req
-        )  # pylint: disable=W0212
+        # pylint: disable-next=W0212
+        create_run_res: CreateRunResponse = driver._stub.CreateRun(create_run_req)
         # Overwrite driver._run_id
         driver._run_id = create_run_res.run_id  # pylint: disable=W0212
 
@@ -183,6 +182,7 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
         # User provided `--run-id`, but not `server-app`
         run_ = driver.run
         req = GetFabRequest(hash=run_.fab_hash)
+        # pylint: disable-next=W0212
         res: GetFabResponse = driver._stub.GetFab(req)
         if res.fab.hash != run_.fab_hash:
             raise ValueError("FAB hashes don't match.")
