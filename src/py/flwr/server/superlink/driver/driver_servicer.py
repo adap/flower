@@ -75,8 +75,8 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         """Create run ID."""
         log(DEBUG, "DriverServicer.CreateRun")
         state: State = self.state_factory.state()
-        print(request.fab)
-        if request.fab is not None:
+        print("here is the FAB:", request.fab)
+        if request.fab:
             ffs: Ffs = self.ffs_factory.ffs()
             fab_hash = ffs.put(request.fab.content, {})
             _raise_if(

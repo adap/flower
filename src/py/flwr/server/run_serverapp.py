@@ -170,7 +170,6 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches,too-many-stat
         create_run_req = CreateRunRequest(
             fab_id=args.fab_id, fab_version=args.fab_version, fab=None
         )
-        print(create_run_req.fab)
         # pylint: disable-next=W0212
         create_run_res: CreateRunResponse = driver._stub.CreateRun(create_run_req)
         # Overwrite driver._run_id
