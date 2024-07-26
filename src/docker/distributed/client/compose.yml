@@ -21,6 +21,11 @@ services:
         RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
           && python -m pip install -U --no-cache-dir .
 
+        RUN --mount=type=bind,target=./$PROJECT_DIR \
+          flwr build --directory $PROJECT_DIR \
+          && flwr install flower.quickstart-docker-compose.1-0-0.fab \
+          && rm flower.quickstart-docker-compose.1-0-0.fab
+
         ENTRYPOINT ["flower-supernode", "client:app", "--node-config", "partition-id=0,num-partitions=2"]
 
   supernode-2:
@@ -34,6 +39,11 @@ services:
         COPY --chown=app:app pyproject.toml .
         RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
           && python -m pip install -U --no-cache-dir .
+
+        RUN --mount=type=bind,target=./$PROJECT_DIR \
+          flwr build --directory $PROJECT_DIR \
+          && flwr install flower.quickstart-docker-compose.1-0-0.fab \
+          && rm flower.quickstart-docker-compose.1-0-0.fab
 
         ENTRYPOINT ["flower-supernode", "client:app", "--node-config", "partition-id=1,num-partitions=2"]
 
@@ -50,5 +60,10 @@ services:
   #       COPY --chown=app:app pyproject.toml .
   #       RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
   #         && python -m pip install -U --no-cache-dir .
+
+  #       RUN --mount=type=bind,target=./$PROJECT_DIR \
+  #         flwr build --directory $PROJECT_DIR \
+  #         && flwr install flower.quickstart-docker-compose.1-0-0.fab \
+  #         && rm flower.quickstart-docker-compose.1-0-0.fab
 
   #       ENTRYPOINT ["flower-supernode", "--node-config", "partition-id=0,num-partitions=2"]

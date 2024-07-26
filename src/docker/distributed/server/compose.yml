@@ -17,13 +17,18 @@ services:
         RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
           && python -m pip install -U --no-cache-dir .
 
+        RUN --mount=type=bind,target=./$PROJECT_DIR \
+          flwr build --directory $PROJECT_DIR \
+          && flwr install flower.quickstart-docker-compose.1-0-0.fab \
+          && rm flower.quickstart-docker-compose.1-0-0.fab
+
         ENTRYPOINT ["flower-superexec"]
     command:
       - --executor
       - flwr.superexec.deployment:executor
       - --insecure
       - --executor-config
-      - superlink=superlink:9091
+      - superlink="superlink:9091"
     ports:
       - 9093:9093
     depends_on:

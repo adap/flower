@@ -17,7 +17,7 @@ services:
       - --executor
       - flwr.superexec.deployment:executor
       - --executor-config
-      - superlink=superlink:9091,root-certificates=certificates/superlink-ca.crt
+      - superlink="superlink:9091",root-certificates="certificates/superlink-ca.crt"
       - --ssl-ca-certfile=certificates/ca.crt
       - --ssl-certfile=certificates/server.pem
       - --ssl-keyfile=certificates/server.key
