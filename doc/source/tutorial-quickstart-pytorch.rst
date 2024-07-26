@@ -301,7 +301,7 @@ to that of `client_fn()` but the return type is `ServerAppComponents <https://fl
 
 Congratulations!
 You've successfully built and run your first federated learning system.
-The `source code <https://github.com/adap/flower/blob/main/examples/quickstart-pytorch/client.py>`_ of the extended version of this tutorial can be found i :code:`examples/quickstart-pytorch`.
+The `source code <https://github.com/adap/flower/blob/main/examples/quickstart-pytorch>`_ of the extended version of this tutorial can be found i :code:`examples/quickstart-pytorch`.
 
 Video tutorial
 --------------
