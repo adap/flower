@@ -80,8 +80,8 @@ def fuse_dicts(
 ) -> UserConfig:
     """Merge a config with the overrides.
 
-    Remove the nesting by adding the nested keys as prefixes separated by dots,
-    and fuse it with the override dict.
+    Remove the nesting by adding the nested keys as prefixes separated by dots, and fuse
+    it with the override dict.
     """
     fused_dict = main_dict.copy()
 
