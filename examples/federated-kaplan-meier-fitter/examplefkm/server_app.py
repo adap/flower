@@ -101,9 +101,6 @@ class EventTimeFitterStrategy(Strategy):
         self.fitter.fit(sorted_times, sorted_events)
         print("Survival function:")
         print(self.fitter.survival_function_)
-        self.fitter.plot_survival_function()
-        plt.title("Survival function of fruit flies (Walton's data)", fontsize=16)
-        plt.savefig("./_static/survival_function_federated.png", dpi=200)
         print("Mean survival time:")
         print(self.fitter.median_survival_time_)
         return None, {}
