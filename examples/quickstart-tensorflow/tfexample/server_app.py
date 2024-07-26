@@ -19,22 +19,13 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 
 
 def server_fn(context: Context):
-    """Construct components that set the ServerApp behaviour.
-
-    You can use settings in `context.run_config` to parameterize the
-    construction of all elements (e.g the strategy or the number of rounds)
-    wrapped in the returned ServerAppComponents object.
-    """
+    """Construct components that set the ServerApp behaviour."""
 
     # Let's define the global model and pass it to the strategy
     # Note this is optional.
     parameters = ndarrays_to_parameters(load_model().get_weights())
 
     # Define the strategy
-    # We pass a callback to process the metrics returned by a client's
-    # fit() method. Similarly, we set the fraction of clients to
-    # sample for federated evaluation at run time based on the value
-    # defined in the pyproject.toml (or overrided when calling `flwr run`.)
     strategy = strategy = FedAvg(
         fraction_fit=context.run_config["fraction-fit"],
         fraction_evaluate=1.0,

@@ -11,19 +11,13 @@ class FlowerClient(NumPyClient):
     def __init__(
         self,
         learning_rate,
-        x_train,
-        y_train,
-        x_test,
-        y_test,
+        data,
         epochs,
         batch_size,
         verbose,
     ):
         self.model = load_model(learning_rate)
-        self.x_train = x_train
-        self.y_train = y_train
-        self.x_test = x_test
-        self.y_test = y_test
+        self.x_train, self.y_train, self.x_test, self.y_test = data
         self.epochs = epochs
         self.batch_size = batch_size
         self.verbose = verbose
@@ -52,26 +46,19 @@ class FlowerClient(NumPyClient):
 
 
 def client_fn(context: Context):
-    """Construct a Client that will be run in a ClientApp.
-
-    You can use settings in `context.run_config` to parameterize the
-    construction of your Client. You could use the `context.node_config` to, for
-    example, indicate which dataset to load (e.g accesing the partition-id).
-    """
+    """Construct a Client that will be run in a ClientApp."""
 
     # Read the node_config to fetch data partition associated to this node
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
-    x_train, y_train, x_test, y_test = load_data(partition_id, num_partitions)
+    data = load_data(partition_id, num_partitions)
     epochs = context.run_config["local-epochs"]
     batch_size = context.run_config["batch-size"]
     verbose = context.run_config.get("verbose")
     learning_rate = context.run_config["learning-rate"]
 
     # Return Client instance
-    return FlowerClient(
-        learning_rate, x_train, y_train, x_test, y_test, epochs, batch_size, verbose
-    ).to_client()
+    return FlowerClient(learning_rate, data, epochs, batch_size, verbose).to_client()
 
 
 # Flower ClientApp
