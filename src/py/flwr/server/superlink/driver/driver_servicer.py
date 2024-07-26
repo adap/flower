@@ -75,7 +75,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         """Create run ID."""
         log(DEBUG, "DriverServicer.CreateRun")
         state: State = self.state_factory.state()
-        if request.fab:
+        if request.HasField("fab") and request.fab.HasField("content"):
             ffs: Ffs = self.ffs_factory.ffs()
             fab_hash = ffs.put(request.fab.content, {})
             _raise_if(
