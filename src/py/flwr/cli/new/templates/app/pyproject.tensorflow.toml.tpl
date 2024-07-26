@@ -30,7 +30,7 @@ batch-size = 32
 verbose = false
 
 [tool.flwr.federations]
-default = "localhost"
+default = "local-simulation"
 
-[tool.flwr.federations.localhost]
+[tool.flwr.federations.local-simulation]
 options.num-supernodes = 10

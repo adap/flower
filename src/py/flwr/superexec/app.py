@@ -93,7 +93,9 @@ def _parse_args_run_superexec() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--executor-config",
-        help="Key-value pairs for the executor config, separated by commas.",
+        help="Key-value pairs for the executor config, separated by commas. "
+        'For example:\n\n`--executor-config superlink="superlink:9091",'
+        'root-certificates="certificates/superlink-ca.crt"`',
     )
     parser.add_argument(
         "--insecure",
@@ -163,11 +165,8 @@ def _load_executor(
     args: argparse.Namespace,
 ) -> Executor:
     """Get the executor plugin."""
-    if args.executor_dir is not None:
-        sys.path.insert(0, args.executor_dir)
-
     executor_ref: str = args.executor
-    valid, error_msg = validate(executor_ref)
+    valid, error_msg = validate(executor_ref, project_dir=args.executor_dir)
     if not valid and error_msg:
         raise LoadExecutorError(error_msg) from None
 
