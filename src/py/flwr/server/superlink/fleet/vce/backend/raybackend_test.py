@@ -121,7 +121,7 @@ def _create_message_and_context() -> Tuple[Message, Context, float]:
 
     # Construct NodeState and retrieve context
     node_state = NodeState(node_id=run_id, node_config={PARTITION_ID_KEY: str(0)})
-    node_state.register_context(run_id=run_id)
+    node_state.register_context(run_id=run_id, default_config={})
     context = node_state.retrieve_context(run_id=run_id)
 
     # Expected output

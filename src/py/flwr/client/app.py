@@ -25,7 +25,7 @@ from typing import Callable, ContextManager, Dict, Optional, Tuple, Type, Union
 from cryptography.hazmat.primitives.asymmetric import ec
 from grpc import RpcError
 
-from flwr.cli.config_utils import get_fab_metadata
+from flwr.cli.config_utils import get_fab_config, get_fab_metadata
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.typing import ClientFnExt
@@ -401,9 +401,17 @@ def _start_client_internal(
                         else:
                             runs[run_id] = Run(run_id, "", "", "", {})
 
+                    run: Run = runs[run_id]
+                    if get_fab:
+                        fab = get_fab(run.fab_hash)
+                    else:
+                        fab = None
+
                     # Register context for this run
                     node_state.register_context(
-                        run_id=run_id, run=runs[run_id], flwr_path=flwr_path
+                        run_id=run_id,
+                        default_config=get_fab_config(fab.data_bytes) if fab else {},
+                        run=runs[run_id],
                     )
 
                     # Retrieve context for this run
@@ -418,11 +426,8 @@ def _start_client_internal(
                     # Handle app loading and task message
                     try:
                         # Load ClientApp instance
-                        run: Run = runs[run_id]
-                        if get_fab:
-                            fab_id, fab_version = get_fab_metadata(
-                                get_fab(run.fab_hash).data_bytes
-                            )
+                        if fab:
+                            fab_id, fab_version = get_fab_metadata(fab.data_bytes)
                         else:
                             fab_id, fab_version = run.fab_id, run.fab_version
 
