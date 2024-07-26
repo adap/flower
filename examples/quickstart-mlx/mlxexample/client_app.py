@@ -17,26 +17,22 @@ from mlxexample.task import (
 
 
 class FlowerClient(NumPyClient):
-    def __init__(self, num_layers, hidden_dim, batch_size, learning_rate, data):
+    def __init__(self, model, optimizer, batch_size, data):
         self.train_images, self.train_labels, self.test_images, self.test_labels = data
-        self.model = MLP(
-            num_layers,
-            self.train_images.shape[-1],
-            hidden_dim,
-        )
-        self.optimizer = optim.SGD(learning_rate=learning_rate)
-        self.loss_and_grad_fn = nn.value_and_grad(self.model, loss_fn)
+        self.model = model
+        self.optimizer = optimizer
         self.num_epochs = 1
         self.batch_size = batch_size
 
     def fit(self, parameters, config):
         """Train the model with data of this client."""
         set_params(self.model, parameters)
+        loss_and_grad_fn = nn.value_and_grad(self.model, loss_fn)
         for _ in range(self.num_epochs):
             for X, y in batch_iterate(
                 self.batch_size, self.train_images, self.train_labels
             ):
-                _, grads = self.loss_and_grad_fn(self.model, X, y)
+                _, grads = loss_and_grad_fn(self.model, X, y)
                 self.optimizer.update(self.model, grads)
                 mx.eval(self.model.parameters(), self.optimizer.state)
         return get_params(self.model), len(self.train_images), {}
@@ -60,11 +56,16 @@ def client_fn(context: Context) -> Client:
     # Read the run config to get settings to configure the Client
     num_layers = context.run_config["num-layers"]
     hidden_dim = context.run_config["hidden-dim"]
+    img_size = context.run_config["img-size"]
     batch_size = context.run_config["batch-size"]
     lr = context.run_config["learning-rate"]
 
+    # Prepare model and optimizer
+    model = MLP(num_layers, img_size**2, hidden_dim)
+    optimizer = optim.SGD(learning_rate=lr)
+
     # Return Client instance
-    return FlowerClient(num_layers, hidden_dim, batch_size, lr, data).to_client()
+    return FlowerClient(model, optimizer, batch_size, data).to_client()
 
 
 # Flower ClientApp
