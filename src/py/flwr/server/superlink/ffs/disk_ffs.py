@@ -86,14 +86,12 @@ class DiskFfs(Ffs):  # pylint: disable=R0904
         Tuple[bytes, Dict[str, str]]
             A tuple containing the object and it's metadata.
         """
-        if key:
-            with open(os.path.join(self.base_dir, key), "rb") as file:
-                content = file.read()
+        with open(os.path.join(self.base_dir, key), "rb") as file:
+            content = file.read()
 
-            meta = read_dict_from_file(os.path.join(self.base_dir, f"{key}.META"))
+        meta = read_dict_from_file(os.path.join(self.base_dir, f"{key}.META"))
 
-            return content, meta
-        return b"", {}
+        return content, meta
 
     def delete(self, key: str) -> None:
         """Delete object with hash.

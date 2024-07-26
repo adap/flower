@@ -398,7 +398,7 @@ def _start_client_internal(
                             runs[run_id] = Run(run_id, "", "", "", {})
 
                     run: Run = runs[run_id]
-                    if get_fab is not None:
+                    if get_fab is not None and run.fab_hash:
                         fab = get_fab(run.fab_hash)
                     else:
                         fab = None
