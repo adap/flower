@@ -1,3 +1,5 @@
+"""mlxexample: A Flower / MLX app."""
+
 from typing import List, Tuple
 
 from flwr.common import Context, Metrics
