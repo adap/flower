@@ -54,7 +54,6 @@ class MnistClient(fl.client.NumPyClient):
             self.device = torch.device("mps")
         else:
             self.device = torch.device("cpu")
-        print("Device: ", self.device)
 
     def get_parameters(self, config):
         """Get model parameters as a list of NumPy ndarrays."""
