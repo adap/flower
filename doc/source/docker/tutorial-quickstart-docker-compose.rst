@@ -68,7 +68,7 @@ Open your terminal and run:
    * ``docker compose``: The Docker command to run the Docker Compose tool.
    * ``-f compose.yml``: Specify the YAML file that contains the basic Flower service definitions.
    * ``--build``: Rebuild the images for each service if they don't already exist.
-   * ``-d``: Detach the container from the terminal and runs them in the background.
+   * ``-d``: Detach the containers from the terminal and run them in the background.
 
 Step 3: Run the Quickstart Project
 ----------------------------------
@@ -158,7 +158,7 @@ ensuring that it maintains its state even after a restart.
 
 .. note::
 
-    When working with Docker Compose on Linux, you may need to create the ``state``` directory first
+    When working with Docker Compose on Linux, you may need to create the ``state`` directory first
     and change its ownership to ensure proper access and permissions.
 
     For more information, consult the following page: :doc:`persist-superlink-state`.
@@ -178,7 +178,7 @@ ensuring that it maintains its state even after a restart.
         |
         | Docker merges Compose files according to `merging rules <https://docs.docker.com/compose/multiple-compose-files/merge/#merging-rules>`_.
       * ``--build``: Rebuild the images for each service if they don't already exist.
-      * ``-d``: Detach the container from the terminal and runs them in the background.
+      * ``-d``: Detach the containers from the terminal and run them in the background.
 
 #. Rerun the ``quickstart-docker-compose`` project:
 
@@ -243,7 +243,51 @@ Step 6: Run Flower with TLS
       $ flwr run quickstart-docker-compose docker-compose-tls
       $ docker compose logs superexec -f
 
-Step 7: Persisting the SuperLink State and Enabling TLS
+Step 7: Add another SuperNode
+-----------------------------
+
+You can add more SuperNodes by duplicating the SuperNode definition in the ``compose.yml file``.
+
+Just make sure to give each new SuperNode service a unique service name like ``supernode-3``, ``supernode-4``, etc.
+
+In ``compose.yml``, add the following:
+
+.. code-block:: yaml
+   :caption: compose.yml
+
+   services:
+     # other service definitions
+
+     supernode-3:
+       <<: *supernode
+       build:
+         context: ${PROJECT_DIR:-.}
+         dockerfile_inline: |
+           FROM flwr/supernode:${FLWR_VERSION:-1.10.0}
+
+           WORKDIR /app
+           COPY --chown=app:app pyproject.toml .
+           RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
+             && python -m pip install -U --no-cache-dir .
+
+           ENTRYPOINT ["flower-supernode", "--node-config", "partition-id=0,num-partitions=2"]
+
+If you also want to enable TLS for the new SuperNodes, duplicate the SuperNode definition for
+each new SuperNode service in the ``with-tls.yml`` file.
+
+Make sure that the names of the services match with the one in the ``compose.yml`` file.
+
+In ``with-tls.yml``, add the following:
+
+.. code-block:: yaml
+   :caption: with-tls.yml
+
+   services:
+     # other service definitions
+
+     supernode-3: *supernode
+
+Step 8: Persisting the SuperLink State and Enabling TLS
 -------------------------------------------------------
 
 To persist the SuperLink state and enable TLS, you need to make a small change in the ``with-state.yml``
@@ -276,7 +320,7 @@ file:
       $ flwr run quickstart-docker-compose docker-compose-tls
       $ docker compose logs superexec -f
 
-Step 8: Merge Multiple Compose Files
+Step 9: Merge Multiple Compose Files
 ------------------------------------
 
 You can merge multiple Compose files into a single file. For instance, if you wish to combine
@@ -290,8 +334,8 @@ the basic configuration with the TLS configuration, execute the following comman
 This will merge the contents of ``compose.yml`` and ``with-tls.yml`` into a new file called
 ``my_compose.yml``.
 
-Step 9: Clean Up
-----------------
+Step 10: Clean Up
+-----------------
 
 Remove all services and volumes:
 
