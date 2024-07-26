@@ -17,11 +17,12 @@
 import zipfile
 from io import BytesIO
 from pathlib import Path
-from typing import IO, Any, Dict, List, Optional, Tuple, Union
+from typing import IO, Any, Dict, List, Optional, Tuple, Union, get_args
 
 import tomli
 
 from flwr.common import object_ref
+from flwr.common.typing import UserConfigValue
 
 
 def get_fab_metadata(fab_file: Union[Path, bytes]) -> Tuple[str, str]:
@@ -60,7 +61,7 @@ def get_fab_metadata(fab_file: Union[Path, bytes]) -> Tuple[str, str]:
 
         return (
             conf["project"]["version"],
-            f"{conf['flower']['publisher']}/{conf['project']['name']}",
+            f"{conf['tool']['flwr']['app']['publisher']}/{conf['project']['name']}",
         )
 
 
@@ -76,6 +77,9 @@ def load_and_validate(
         A tuple with the optional config in case it exists and is valid
         and associated errors and warnings.
     """
+    if path is None:
+        path = Path.cwd() / "pyproject.toml"
+
     config = load(path)
 
     if config is None:
@@ -85,7 +89,7 @@ def load_and_validate(
         ]
         return (None, errors, [])
 
-    is_valid, errors, warnings = validate(config, check_module)
+    is_valid, errors, warnings = validate(config, check_module, path.parent)
 
     if not is_valid:
         return (None, errors, warnings)
@@ -93,19 +97,24 @@ def load_and_validate(
     return (config, errors, warnings)
 
 
-def load(path: Optional[Path] = None) -> Optional[Dict[str, Any]]:
+def load(toml_path: Path) -> Optional[Dict[str, Any]]:
     """Load pyproject.toml and return as dict."""
-    if path is None:
-        cur_dir = Path.cwd()
-        toml_path = cur_dir / "pyproject.toml"
-    else:
-        toml_path = path
-
     if not toml_path.is_file():
         return None
 
     with toml_path.open(encoding="utf-8") as toml_file:
         return load_from_string(toml_file.read())
+
+
+def _validate_run_config(config_dict: Dict[str, Any], errors: List[str]) -> None:
+    for key, value in config_dict.items():
+        if isinstance(value, dict):
+            _validate_run_config(config_dict[key], errors)
+        elif not isinstance(value, get_args(UserConfigValue)):
+            raise ValueError(
+                f"The value for key {key} needs to be of type `int`, `float`, "
+                "`bool, `str`, or  a `dict` of those.",
+            )
 
 
 # pylint: disable=too-many-branches
@@ -128,24 +137,36 @@ def validate_fields(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]
         if "authors" not in config["project"]:
             warnings.append('Recommended property "authors" missing in [project]')
 
-    if "flower" not in config:
-        errors.append("Missing [flower] section")
+    if (
+        "tool" not in config
+        or "flwr" not in config["tool"]
+        or "app" not in config["tool"]["flwr"]
+    ):
+        errors.append("Missing [tool.flwr.app] section")
     else:
-        if "publisher" not in config["flower"]:
-            errors.append('Property "publisher" missing in [flower]')
-        if "components" not in config["flower"]:
-            errors.append("Missing [flower.components] section")
+        if "publisher" not in config["tool"]["flwr"]["app"]:
+            errors.append('Property "publisher" missing in [tool.flwr.app]')
+        if "config" in config["tool"]["flwr"]["app"]:
+            _validate_run_config(config["tool"]["flwr"]["app"]["config"], errors)
+        if "components" not in config["tool"]["flwr"]["app"]:
+            errors.append("Missing [tool.flwr.app.components] section")
         else:
-            if "serverapp" not in config["flower"]["components"]:
-                errors.append('Property "serverapp" missing in [flower.components]')
-            if "clientapp" not in config["flower"]["components"]:
-                errors.append('Property "clientapp" missing in [flower.components]')
+            if "serverapp" not in config["tool"]["flwr"]["app"]["components"]:
+                errors.append(
+                    'Property "serverapp" missing in [tool.flwr.app.components]'
+                )
+            if "clientapp" not in config["tool"]["flwr"]["app"]["components"]:
+                errors.append(
+                    'Property "clientapp" missing in [tool.flwr.app.components]'
+                )
 
     return len(errors) == 0, errors, warnings
 
 
 def validate(
-    config: Dict[str, Any], check_module: bool = True
+    config: Dict[str, Any],
+    check_module: bool = True,
+    project_dir: Optional[Union[str, Path]] = None,
 ) -> Tuple[bool, List[str], List[str]]:
     """Validate pyproject.toml."""
     is_valid, errors, warnings = validate_fields(config)
@@ -154,16 +175,15 @@ def validate(
         return False, errors, warnings
 
     # Validate serverapp
-    is_valid, reason = object_ref.validate(
-        config["flower"]["components"]["serverapp"], check_module
-    )
+    serverapp_ref = config["tool"]["flwr"]["app"]["components"]["serverapp"]
+    is_valid, reason = object_ref.validate(serverapp_ref, check_module, project_dir)
+
     if not is_valid and isinstance(reason, str):
         return False, [reason], []
 
     # Validate clientapp
-    is_valid, reason = object_ref.validate(
-        config["flower"]["components"]["clientapp"], check_module
-    )
+    clientapp_ref = config["tool"]["flwr"]["app"]["components"]["clientapp"]
+    is_valid, reason = object_ref.validate(clientapp_ref, check_module, project_dir)
 
     if not is_valid and isinstance(reason, str):
         return False, [reason], []
