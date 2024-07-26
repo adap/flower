@@ -65,6 +65,7 @@ class DiskFfs(Ffs):  # pylint: disable=R0904
         """
         content_hash = hashlib.sha256(content).hexdigest()
 
+        os.makedirs(self.base_dir, exist_ok=True)
         with open(os.path.join(self.base_dir, content_hash), "wb") as file:
             file.write(content)
 
