@@ -111,7 +111,7 @@ For example, to build a SuperLink image with the latest Flower version, Python 3
 
    $ cd src/docker/superlink
    $ docker build \
-     --build-arg BASE_IMAGE=|current_flwr_version|-py3.10-ubuntu22.04 \
+     --build-arg BASE_IMAGE=|stable_flwr_version|-py3.10-ubuntu22.04 \
      -t flwr_superlink:0.1.0 .
 
 If you want to use your own base image instead of the official Flower base image, all you need to do

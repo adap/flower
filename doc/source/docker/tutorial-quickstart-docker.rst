@@ -59,7 +59,7 @@ Open your terminal and run:
          --network flwr-network \
          --name superlink \
          --detach \
-         flwr/superlink:|current_flwr_version| --insecure
+         flwr/superlink:|stable_flwr_version| --insecure
 
 .. dropdown:: Understand the command
 
@@ -71,8 +71,8 @@ Open your terminal and run:
    * ``--network flwr-network``: Make the container join the network named ``flwr-network``.
    * ``--name superlink``: Assign the name ``superlink`` to the container.
    * ``--detach``: Run the container in the background, freeing up the terminal.
-   * | :substitution-code:`flwr/superlink:|current_flwr_version|`: The name of the image to be run and the specific
-     | tag of the image. The tag :substitution-code:`|current_flwr_version|` represents a :doc:`specific version <pinning-version>` of the image.
+   * | :substitution-code:`flwr/superlink:|stable_flwr_version|`: The name of the image to be run and the specific
+     | tag of the image. The tag :substitution-code:`|stable_flwr_version|` represents a :doc:`specific version <pinning-version>` of the image.
    * | ``--insecure``: This flag tells the container to operate in an insecure mode, allowing
      | unencrypted communication.
 
@@ -89,7 +89,7 @@ building your own SuperNode image.
       :linenos:
       :substitutions:
 
-      FROM flwr/supernode:|current_flwr_version|
+      FROM flwr/supernode:|stable_flwr_version|
 
       WORKDIR /app
       COPY pyproject.toml .
@@ -103,8 +103,8 @@ building your own SuperNode image.
 
    .. dropdown:: Understand the Dockerfile
 
-      * | :substitution-code:`FROM flwr/supernode:|current_flwr_version|`: This line specifies that the Docker image
-        | to be built from is the ``flwr/supernode image``, version :substitution-code:`|current_flwr_version|`.
+      * | :substitution-code:`FROM flwr/supernode:|stable_flwr_version|`: This line specifies that the Docker image
+        | to be built from is the ``flwr/supernode image``, version :substitution-code:`|stable_flwr_version|`.
       * | ``WORKDIR /app``: Set the working directory for the container to ``/app``.
         | Any subsequent commands that reference a directory will be relative to this directory.
       * | ``COPY docker_pyproject.toml pyproject.toml``: Copy the ``pyproject.toml`` file
@@ -204,7 +204,7 @@ Flower and serves as a base for building your own SuperExec image.
       :caption: Dockerfile.superexec
       :substitutions:
 
-      FROM flwr/superexec:|current_flwr_version|
+      FROM flwr/superexec:|stable_flwr_version|
 
       WORKDIR /app
       COPY docker_pyproject.toml pyproject.toml
@@ -214,8 +214,8 @@ Flower and serves as a base for building your own SuperExec image.
 
    .. dropdown:: Understand the Dockerfile
 
-      * | :substitution-code:`FROM flwr/superexec:|current_flwr_version|`: This line specifies that the Docker image
-        | to be built from is the ``flwr/superexec image``, version :substitution-code:`|current_flwr_version|`.
+      * | :substitution-code:`FROM flwr/superexec:|stable_flwr_version|`: This line specifies that the Docker image
+        | to be built from is the ``flwr/superexec image``, version :substitution-code:`|stable_flwr_version|`.
       * | ``WORKDIR /app``: Set the working directory for the container to ``/app``.
         | Any subsequent commands that reference a directory will be relative to this directory.
       * | ``COPY docker_pyproject.toml pyproject.toml``: Copy the ``docker_pyproject.toml`` file

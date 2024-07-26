@@ -93,7 +93,7 @@ certificate into the container's ``/app/`` directory.
    * | ``--volume ./ca.crt:/app/ca.crt/:ro``: Mount the ``ca.crt`` file from the
      | current working directory of the host machine as a read-only volume at the ``/app/ca.crt``
      | directory inside the container.
-   * | :substitution-code:`flwr/supernode:|current_flwr_version|`: The name of the image to be run and the specific
+   * | :substitution-code:`flwr/supernode:|stable_flwr_version|`: The name of the image to be run and the specific
      | tag of the image. The tag :substitution-code:`|stable_flwr_version|` represents a specific version of the image.
    * | ``--root-certificates ca.crt``: This specifies the location of the CA certificate file
      | inside the container.
@@ -130,7 +130,7 @@ Assuming all files we need are in the local ``certificates`` directory where the
      |
      | This allows the container to access the TLS certificates that are stored in the certificates
      | directory.
-   * | :substitution-code:`flwr/superexec:|current_flwr_version|`: The name of the image to be run and the specific
+   * | :substitution-code:`flwr/superexec:|stable_flwr_version|`: The name of the image to be run and the specific
      | tag of the image. The tag :substitution-code:`|stable_flwr_version|` represents a specific version of the image.
    * | ``--ssl-ca-certfile certificates/ca.crt``: Specify the location of the CA certificate file
      | inside the container.
