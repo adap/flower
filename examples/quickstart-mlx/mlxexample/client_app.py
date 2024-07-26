@@ -43,7 +43,7 @@ class FlowerClient(NumPyClient):
                 _, grads = self.loss_and_grad_fn(self.model, X, y)
                 self.optimizer.update(self.model, grads)
                 mx.eval(self.model.parameters(), self.optimizer.state)
-        return self.get_parameters(config={}), len(self.train_images), {}
+        return get_params(self.model), len(self.train_images), {}
 
     def evaluate(self, parameters, config):
         """Evaluate the model on the data this client has."""
