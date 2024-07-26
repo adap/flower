@@ -15,7 +15,7 @@ Before you start, make sure that:
 
 - The ``flwr`` CLI is :doc:`installed <../how-to-install-flower>` locally.
 - The Docker daemon is running.
-- The Docker Compose is `installed <https://docs.docker.com/compose/install/>`_.
+- Docker Compose is `installed <https://docs.docker.com/compose/install/>`_.
 
 Step 1: Set Up
 --------------
