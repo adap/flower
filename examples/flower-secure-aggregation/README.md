@@ -64,9 +64,10 @@ You can also override some of the settings for your `ClientApp` and `ServerApp` 
 flwr run --run-config 'num_server_rounds=5'
 ```
 
-### Alternative wasy of running the example
+### Run with the Deployment Engine
 
-TODO: point to docs
+> \[!NOTE\]
+> An update to this example will show how to run this Flower project with the Deployment Engine and TLS certificates, or with Docker.
 
 ## Amend the example for practical usage
 
