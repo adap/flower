@@ -138,7 +138,7 @@ def test_integration_connection() -> None:
                 max_time=None,
             ),
         ) as conn:
-            receive, send, _, _, _ = conn
+            receive, send, _, _, _, _ = conn
 
             # Setup processing loop
             while True:
@@ -146,7 +146,7 @@ def test_integration_connection() -> None:
                 message = receive()
 
                 messages_received += 1
-                if message.metadata.message_type == "reconnect":  # type: ignore
+                if message.metadata.message_type == "reconnect":
                     send(MESSAGE_DISCONNECT)
                     break
 

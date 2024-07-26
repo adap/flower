@@ -299,7 +299,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
             request=get_fab_request,
         )
 
-        return Fab(get_fab_response.run.fab_hash, get_fab_response.run.fab_content)
+        return Fab(get_fab_response.fab.hash, get_fab_response.fab.content)
 
     try:
         # Yield methods
