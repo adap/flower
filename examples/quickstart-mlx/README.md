@@ -1,11 +1,11 @@
 ---
-title: Simple Flower Example using MLX
+title: Federated Learning with MLX and Flower (Quickstart Example)
 tags: [quickstart, vision]
 dataset: [MNIST]
 framework: [MLX]
 ---
 
-# Flower Example using MLX
+# Federated Learning with MLX and Flower (Quickstart Example)
 
 This introductory example to Flower uses [MLX](https://ml-explore.github.io/mlx/build/html/index.html), but deep knowledge of MLX is not necessary to run the example. This example will help you understand how to adapt Flower to your use case. Running this example in itself is quite easy.
 
