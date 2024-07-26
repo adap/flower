@@ -1,9 +1,12 @@
-
-
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 
+from flwr.common import NDArrays
+from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import IidPartitioner
 
+# This information is needed to create a correct scikit-learn model
+UNIQUE_LABELS = [0, 1, 2]
 
 
 def get_model_parameters(model: LogisticRegression) -> NDArrays:
@@ -42,4 +45,23 @@ def set_initial_params(model: LogisticRegression, n_classes: int, n_features: in
         model.intercept_ = np.zeros((n_classes,))
 
 
+fds = None  # Cache FederatedDataset
+
+
+def load_data(partition_id: int, num_partitions: int):
+    """Load the data for the given partition."""
+    global fds
+    if fds is None:
+        partitioner = IidPartitioner(num_partitions=num_partitions)
+        fds = FederatedDataset(
+            dataset="hitorilabs/iris",
+            partitioners={"train": partitioner}
+        )
+    dataset = fds.load_partition(partition_id, "train").with_format("pandas")[:]
+    X = dataset[["petal_length", "petal_width", "sepal_length", "sepal_width"]]
+    y = dataset["species"]
+    # Split the on-edge data: 80% train, 20% test
+    X_train, X_test = X[: int(0.8 * len(X))], X[int(0.8 * len(X)):]
+    y_train, y_test = y[: int(0.8 * len(y))], y[int(0.8 * len(y)):]
+    return X_train, y_train, X_test, y_test
 

@@ -1,10 +1,10 @@
 from typing import List, Tuple, Dict
 
-from sklearn.linear_model import LogisticRegression
+from flwr.common import Metrics, Scalar, Context
+from flwr.server import ServerAppComponents, ServerConfig, ServerApp
+from flwr.server.strategy import FedAvg
 
-import flwr as fl
-from flwr.common import Metrics, Scalar
-from task import set_initial_params
+from example.task import set_initial_params
 
 
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Dict[str, Scalar]:
@@ -40,17 +40,28 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Dict[str, Scalar]:
     return weighted_metrics
 
 
-# Start Flower server for five rounds of federated learning
-if __name__ == "__main__":
-    model = LogisticRegression()
-    set_initial_params(model, n_classes=3, n_features=4)
-    strategy = fl.server.strategy.FedAvg(
+def server_fn(context: Context) -> ServerAppComponents:
+    """Construct components that set the ServerApp behaviour.
+
+    You can use settings in `context.run_config` to parameterize the
+    construction of all elements (e.g the strategy or the number of rounds)
+    wrapped in the returned ServerAppComponents object.
+    """
+
+    # Define the strategy
+    min_available_clients = context.run_config["min-available-clients"]
+    strategy = FedAvg(
         min_available_clients=2,
         fit_metrics_aggregation_fn=weighted_average,
         evaluate_metrics_aggregation_fn=weighted_average,
     )
-    fl.server.start_server(
-        server_address="0.0.0.0:8080",
-        strategy=strategy,
-        config=fl.server.ServerConfig(num_rounds=25),
-    )
+
+    # Construct ServerConfig
+    num_rounds = context.run_config["num-server-rounds"]
+    config = ServerConfig(num_rounds=num_rounds)
+
+    return ServerAppComponents(strategy=strategy, config=config)
+
+
+# Create ServerApp
+app = ServerApp(server_fn=server_fn)
