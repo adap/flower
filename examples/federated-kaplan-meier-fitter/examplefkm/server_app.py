@@ -26,8 +26,9 @@ from flwr.common import (
     EvaluateRes,
     EvaluateIns,
     FitRes,
-    parameters_to_ndarrays,
+    parameters_to_ndarrays, Context,
 )
+from flwr.server import ServerApp, ServerConfig, ServerAppComponents
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import Strategy
@@ -60,7 +61,8 @@ class EventTimeFitterStrategy(Strategy):
         self.fitter = fitter
 
     def configure_fit(
-        self, server_round: int, parameters: Parameters, client_manager: ClientManager
+            self, server_round: int, parameters: Parameters,
+            client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the fit method."""
         config = {}
@@ -72,10 +74,10 @@ class EventTimeFitterStrategy(Strategy):
         return [(client, fit_ins) for client in clients]
 
     def aggregate_fit(
-        self,
-        server_round: int,
-        results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+            self,
+            server_round: int,
+            results: List[Tuple[ClientProxy, FitRes]],
+            failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Merge data and perform the fitting of the fitter from lifelines library.
 
@@ -109,37 +111,53 @@ class EventTimeFitterStrategy(Strategy):
     # The methods below return None or empty results.
     # They need to be implemented to since the methods are abstract in the parent class
     def initialize_parameters(
-        self, client_manager: Optional[ClientManager] = None
+            self, client_manager: Optional[ClientManager] = None
     ) -> Optional[Parameters]:
         """No parameter initialization is needed."""
         return None
 
     def evaluate(
-        self, server_round: int, parameters: Parameters
+            self, server_round: int, parameters: Parameters
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """No centralized evaluation."""
         return None
 
     def aggregate_evaluate(
-        self,
-        server_round: int,
-        results: List[Tuple[ClientProxy, EvaluateRes]],
-        failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
+            self,
+            server_round: int,
+            results: List[Tuple[ClientProxy, EvaluateRes]],
+            failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """No federated evaluation."""
         return None, {}
 
     def configure_evaluate(
-        self, server_round: int, parameters: Parameters, client_manager: ClientManager
+            self, server_round: int, parameters: Parameters,
+            client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """No federated evaluation."""
         return []
 
 
-fitter = KaplanMeierFitter()  # You can choose other method that work on E, T data
-strategy = EventTimeFitterStrategy(min_num_clients=2, fitter=fitter)
+def server_fn(context: Context) -> ServerAppComponents:
+    """Construct components that set the ServerApp behaviour.
 
-app = fl.server.ServerApp(
-    config=fl.server.ServerConfig(num_rounds=1),
-    strategy=strategy,
-)
+    You can use settings in `context.run_config` to parameterize the
+    construction of all elements (e.g the strategy or the number of rounds)
+    wrapped in the returned ServerAppComponents object.
+    """
+
+    # Define the strategy
+    fitter = KaplanMeierFitter()  # You can choose other method that work on E, T data
+    min_num_clients = context.run_config["min-num-clients"]
+    strategy = EventTimeFitterStrategy(min_num_clients=min_num_clients, fitter=fitter)
+
+    # Construct ServerConfig
+    num_rounds = context.run_config["num-server-rounds"]
+    config = ServerConfig(num_rounds=num_rounds)
+
+    return ServerAppComponents(strategy=strategy, config=config)
+
+
+# Create ServerApp
+app = ServerApp(server_fn=server_fn)
