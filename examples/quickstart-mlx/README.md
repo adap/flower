@@ -7,12 +7,6 @@ framework: [MLX]
 
 # Federated Learning with MLX and Flower (Quickstart Example)
 
-This introductory example to Flower uses [MLX](https://ml-explore.github.io/mlx/build/html/index.html), but deep knowledge of MLX is not necessary to run the example. This example will help you understand how to adapt Flower to your use case. Running this example in itself is quite easy.
-
-[MLX](https://ml-explore.github.io/mlx/build/html/index.html) is a NumPy-like array framework designed for efficient and flexible machine learning on Apple Silicon. In this example, we will train a simple 2 layers MLP on [MNIST](https://huggingface.co/datasets/ylecun/mnist) data (handwritten digits recognition) that's downloaded and partitioned using [Flower Datasets](https://flower.ai/docs/datasets/).
-
-
-
 This introductory example to Flower uses [MLX](https://ml-explore.github.io/mlx/build/html/index.html), but you don't need deep knowledge of MLX to run it. The example will help you understand how to adapt Flower to your specific use case, and running it is quite straightforward.
 
 [MLX](https://ml-explore.github.io/mlx/build/html/index.html) is a NumPy-like array framework designed for efficient and flexible machine learning on Apple Silicon. In this example, we will train a simple 2-layer MLP on the [MNIST](https://huggingface.co/datasets/ylecun/mnist) dataset (handwritten digits recognition). The data will be downloaded and partitioned using [Flower Datasets](https://flower.ai/docs/datasets/).
