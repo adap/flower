@@ -1,3 +1,6 @@
+:og:title: Flower Framework Documentation for Federated Learning
+:og:description: The description
+
 Flower Framework Documentation
 ==============================
 
