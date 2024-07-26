@@ -31,7 +31,7 @@ class FlowerClient(fl.client.NumPyClient):
         self._events = events
 
     def fit(
-            self, parameters: List[np.ndarray], config: Dict[str, str]
+        self, parameters: List[np.ndarray], config: Dict[str, str]
     ) -> Tuple[NDArrays, int, Dict]:
         return (
             [self._times, self._events],

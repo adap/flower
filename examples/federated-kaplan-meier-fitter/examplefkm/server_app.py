@@ -26,7 +26,8 @@ from flwr.common import (
     EvaluateRes,
     EvaluateIns,
     FitRes,
-    parameters_to_ndarrays, Context,
+    parameters_to_ndarrays,
+    Context,
 )
 from flwr.server import ServerApp, ServerConfig, ServerAppComponents
 from flwr.server.client_manager import ClientManager
@@ -61,8 +62,7 @@ class EventTimeFitterStrategy(Strategy):
         self.fitter = fitter
 
     def configure_fit(
-            self, server_round: int, parameters: Parameters,
-            client_manager: ClientManager
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the fit method."""
         config = {}
@@ -74,10 +74,10 @@ class EventTimeFitterStrategy(Strategy):
         return [(client, fit_ins) for client in clients]
 
     def aggregate_fit(
-            self,
-            server_round: int,
-            results: List[Tuple[ClientProxy, FitRes]],
-            failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+        self,
+        server_round: int,
+        results: List[Tuple[ClientProxy, FitRes]],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Merge data and perform the fitting of the fitter from lifelines library.
 
@@ -108,29 +108,28 @@ class EventTimeFitterStrategy(Strategy):
     # The methods below return None or empty results.
     # They need to be implemented to since the methods are abstract in the parent class
     def initialize_parameters(
-            self, client_manager: Optional[ClientManager] = None
+        self, client_manager: Optional[ClientManager] = None
     ) -> Optional[Parameters]:
         """No parameter initialization is needed."""
         return None
 
     def evaluate(
-            self, server_round: int, parameters: Parameters
+        self, server_round: int, parameters: Parameters
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """No centralized evaluation."""
         return None
 
     def aggregate_evaluate(
-            self,
-            server_round: int,
-            results: List[Tuple[ClientProxy, EvaluateRes]],
-            failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
+        self,
+        server_round: int,
+        results: List[Tuple[ClientProxy, EvaluateRes]],
+        failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """No federated evaluation."""
         return None, {}
 
     def configure_evaluate(
-            self, server_round: int, parameters: Parameters,
-            client_manager: ClientManager
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """No federated evaluation."""
         return []
