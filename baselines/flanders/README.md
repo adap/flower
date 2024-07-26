@@ -98,12 +98,17 @@ To run custom experiments, you can override the default values like that:
 python -m flanders.main dataset=income server.attack_fn=lie server.num_malicious=1
 ```
 
-Finally, to run multiple custom experiments:
+To run multiple custom experiments:
 
 ```bash
 python -m flanders.main --multirun dataset=mnist,fmnist server.attack_fn=gaussian,lie,fang,minmax server.num_malicious=0,1,2,3,4,5
 ```
 
+Finally, to run all the experiments of the paper, I've set up a script:
+
+```bash
+sh run.sh
+```
 
 ## Expected Results
 
