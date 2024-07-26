@@ -3,9 +3,6 @@ services:
     build:
       context: .
       pull: true
-      args:
-        SUPERLINK_IP: 127.0.0.1
-        SUPEREXEC_IP: 127.0.0.1
       dockerfile_inline: |
         FROM ubuntu:latest
 
@@ -15,7 +12,7 @@ services:
 
         WORKDIR /app/script
 
-        ARG SUPERLINK_IP
+        ARG SUPERLINK_IP=127.0.0.1
 
         COPY <<-EOF superlink-certificate.conf
         [req]
@@ -39,7 +36,7 @@ services:
         IP.2 = $${SUPERLINK_IP}
         EOF
 
-        ARG SUPEREXEC_IP
+        ARG SUPEREXEC_IP=127.0.0.1
 
         COPY <<-EOF superexec-certificate.conf
         [req]
