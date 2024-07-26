@@ -83,7 +83,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
                 f"FAB ({request.fab}) hash from request doesn't match contents",
             )
         else:
-            fab_hash = None
+            fab_hash = ""
         run_id = state.create_run(
             request.fab_id,
             request.fab_version,
@@ -175,6 +175,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
                 fab_id=run.fab_id,
                 fab_version=run.fab_version,
                 override_config=user_config_to_proto(run.override_config),
+                fab_hash=run.fab_hash,
             )
         )
 
