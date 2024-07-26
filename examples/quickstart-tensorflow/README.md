@@ -1,10 +1,11 @@
 ---
+title: Federated Learning with Tensorflow/Keras and Flower (Quickstart Example)
 tags: [quickstart, vision, fds]
 dataset: [CIFAR-10]
 framework: [tensorflow]
 ---
 
-# Flower Example using TensorFlow/Keras
+# Federated Learning with Tensorflow/Keras and Flower (Quickstart Example)
 
 This introductory example to Flower uses Keras but deep knowledge of Keras is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case.
 Running this example in itself is quite easy. This example uses [Flower Datasets](https://flower.ai/docs/datasets/) to download, partition and preprocess the CIFAR-10 dataset.
