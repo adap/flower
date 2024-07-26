@@ -120,7 +120,7 @@ python -m flanders.main --multirun server.num_rounds=50 dataset=fmnist strategy=
 
 They will generate the results in `results/all_results.csv`.
 
-To generate the plots, use the notebook in `plotting/plots.ipynb`.
+To generate the plots, including the tables shown below, use the notebook in `plotting/`.
 
 
 ### Accuracy over multiple rounds
