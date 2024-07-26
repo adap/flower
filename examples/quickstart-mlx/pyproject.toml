@@ -28,6 +28,7 @@ clientapp = "mlxexample.client_app:app"
 num-server-rounds = 3
 fraction-evaluate = 0.5
 num-layers = 2
+img-size = 28
 hidden-dim = 32
 batch-size = 256
 learning-rate = 0.1

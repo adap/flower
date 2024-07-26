@@ -29,10 +29,6 @@ class FlowerClient(NumPyClient):
         self.num_epochs = 1
         self.batch_size = batch_size
 
-    def get_parameters(self, config):
-        """Return the parameters of the model of this client."""
-        return get_params(self.model)
-
     def fit(self, parameters, config):
         """Train the model with data of this client."""
         set_params(self.model, parameters)
@@ -54,12 +50,7 @@ class FlowerClient(NumPyClient):
 
 
 def client_fn(context: Context) -> Client:
-    """Construct a Client that will be run in a ClientApp.
-
-    You can use settings in `context.run_config` to parameterize the
-    construction of your Client. You could use the `context.node_config` to, for
-    example, indicate which dataset to load (e.g accesing the partition-id).
-    """
+    """Construct a Client that will be run in a ClientApp."""
 
     # Read the node_config to fetch data partition associated to this node
     partition_id = context.node_config["partition-id"]
