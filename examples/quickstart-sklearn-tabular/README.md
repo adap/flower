@@ -12,9 +12,7 @@ It will help you understand how to adapt Flower for use with `scikit-learn`.
 Running this example in itself is quite easy. This example uses [Flower Datasets](https://flower.ai/docs/datasets/) to
 download, partition and preprocess the dataset.
 
-## Set up the project
-
-### Clone the project
+## Project Setup
 
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
@@ -22,48 +20,64 @@ Start by cloning the example project. We prepared a single-line command that you
 git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart-sklearn-tabular . && rm -rf flower && cd quickstart-sklearn-tabular
 ```
 
-This will create a new directory called `quickstart-sklearn-tabular` with the following structure:
+This will create a new directory called `quickstart-sklearn-tabular` containing the following files:
 
 ```shell
-quickstart-sklearn-tabular
-├── example
-│   ├── __init__.py
-│   ├── client_app.py   # Defines your ClientApp
-│   ├── server_app.py   # Defines your ServerApp
-│   └── task.py         # Defines your model, training and data loading
-├── pyproject.toml      # Project metadata like dependencies and configs
-└── README.md
+-- pyproject.toml
+-- requirements.txt
+-- client.py
+-- server.py
+-- utils.py
+-- README.md
 ```
 
-### Install dependencies and project
+### Installing Dependencies
 
-Install the dependencies defined in `pyproject.toml` as well as the `mlxexample` package.
+Project dependencies (such as `scikit-learn` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
 
-```bash
-pip install -e .
+#### Poetry
+
+```shell
+poetry install
+poetry shell
 ```
 
-## Run the project
+Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
 
-You can run your `ClientApp` and `ServerApp` in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ model as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
-
-### Run with the Simulation Engine
-
-```bash
-flwr run .
+```shell
+poetry run python3 -c "import flwr"
 ```
 
-You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
+If you don't see any errors you're good to go!
 
-```bash
-flwr run . --run-config penalty="l1"
+#### pip
+
+Write the command below in your terminal to install the dependencies according to the configuration file requirements.txt.
+
+```shell
+pip install -r requirements.txt
 ```
-### Run with the Deployment Engine
 
-> \[!NOTE\]
-> An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.
+## Run Federated Learning with scikit-learn and Flower
 
-## Explanation
+Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
 
-This example is a federated version of the centralized case that can be found
-[here](https://github.com/ml-explore/mlx-examples/tree/main/mnist).
+```shell
+poetry run python3 server.py
+```
+
+Now you are ready to start the Flower clients which will participate in the learning. To do so simply open two more terminals and run the following command in each:
+
+```shell
+poetry run python3 client.py --partition-id 0 # partition-id should be any of {0,1,2}
+```
+
+Alternatively you can run all of it in one shell as follows:
+
+```shell
+poetry run python3 server.py &
+poetry run python3 client.py --partition-id 0 &
+poetry run python3 client.py --partition-id 1
+```
+
+You will see that Flower is starting a federated training.
