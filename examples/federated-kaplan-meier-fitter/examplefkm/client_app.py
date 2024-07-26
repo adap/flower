@@ -2,12 +2,10 @@ from typing import Dict, List, Tuple
 
 import flwr as fl
 import numpy as np
-from datasets import Dataset
-
 from flwr.client import Client, ClientApp
 from flwr.common import NDArray, NDArrays, Context
-from flwr_datasets.partitioner import NaturalIdPartitioner
-from lifelines.datasets import load_waltons
+
+from examplefkm.task import load_partition
 
 
 class FlowerClient(fl.client.NumPyClient):
@@ -42,10 +40,6 @@ class FlowerClient(fl.client.NumPyClient):
         )
 
 
-# Prepare data
-X = load_waltons()
-
-
 def client_fn(context: Context) -> Client:
     """Construct a Client that will be run in a ClientApp.
 
@@ -54,11 +48,7 @@ def client_fn(context: Context) -> Client:
     example, indicate which dataset to load (e.g accesing the partition-id).
     """
     partition_id = context.node_config["partition-id"]
-    partitioner = NaturalIdPartitioner(partition_by="group")
-    partitioner.dataset = Dataset.from_pandas(X)
-    partition = partitioner.load_partition(partition_id).to_pandas()
-    events = partition["E"].values
-    times = partition["T"].values
+    times, events = load_partition(partition_id)
     return FlowerClient(times=times, events=events).to_client()
 
 

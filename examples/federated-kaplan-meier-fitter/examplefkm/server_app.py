@@ -68,7 +68,7 @@ class EventTimeFitterStrategy(Strategy):
         config = {}
         fit_ins = FitIns(parameters, config)
         clients = client_manager.sample(
-            num_clients=client_manager.num_available(),
+            num_clients=self._min_num_clients,
             min_num_clients=self._min_num_clients,
         )
         return [(client, fit_ins) for client in clients]
