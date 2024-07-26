@@ -29,7 +29,6 @@ the group it comes from therefore to simulate the division that might occur.
 
 ### Clone the project
 
-
 Start by cloning the example project:
 
 ```shell
@@ -48,7 +47,6 @@ federated-kaplan-meier-fitter
 ├── pyproject.toml      # Project metadata like dependencies and configs
 └── README.md
 ```
-
 
 ### Install dependencies and project
 
@@ -74,7 +72,6 @@ You can also check that the results match the centralized version.
 $ python3 centralized.py
 ```
 
-
 ```bash
 flwr run . --run-config num-server-rounds=5,learning-rate=0.05
 ```
@@ -88,4 +85,3 @@ flwr run . --run-config num-server-rounds=5,learning-rate=0.05
 
 This example is a federated version of the centralized case that can be found
 [here](https://github.com/ml-explore/mlx-examples/tree/main/mnist).
-
