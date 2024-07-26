@@ -124,8 +124,10 @@ def get_run(
     return GetRunResponse(
         run=Run(
             run_id=run.run_id,
-            fab_hash=run.fab_hash,
+            fab_id=run.fab_id,
+            fab_version=run.fab_version,
             override_config=user_config_to_proto(run.override_config),
+            fab_hash=run.fab_hash,
         )
     )
 
