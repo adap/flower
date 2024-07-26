@@ -54,14 +54,12 @@ def load_data(partition_id: int, num_partitions: int):
     if fds is None:
         partitioner = IidPartitioner(num_partitions=num_partitions)
         fds = FederatedDataset(
-            dataset="hitorilabs/iris",
-            partitioners={"train": partitioner}
+            dataset="hitorilabs/iris", partitioners={"train": partitioner}
         )
     dataset = fds.load_partition(partition_id, "train").with_format("pandas")[:]
     X = dataset[["petal_length", "petal_width", "sepal_length", "sepal_width"]]
     y = dataset["species"]
     # Split the on-edge data: 80% train, 20% test
-    X_train, X_test = X[: int(0.8 * len(X))], X[int(0.8 * len(X)):]
-    y_train, y_test = y[: int(0.8 * len(y))], y[int(0.8 * len(y)):]
+    X_train, X_test = X[: int(0.8 * len(X))], X[int(0.8 * len(X)) :]
+    y_train, y_test = y[: int(0.8 * len(y))], y[int(0.8 * len(y)) :]
     return X_train, y_train, X_test, y_test
-

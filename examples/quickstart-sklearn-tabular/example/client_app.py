@@ -6,8 +6,13 @@ from sklearn.metrics import log_loss
 from flwr.common import Context
 from flwr.client import NumPyClient, ClientApp
 
-from example.task import set_model_params, get_model_parameters, set_initial_params, load_data, \
-    UNIQUE_LABELS
+from example.task import (
+    set_model_params,
+    get_model_parameters,
+    set_initial_params,
+    load_data,
+    UNIQUE_LABELS,
+)
 
 
 class FlowerClient(NumPyClient):
@@ -70,7 +75,7 @@ def client_fn(context: Context):
     set_initial_params(model, n_features=X_train.shape[1], n_classes=len(UNIQUE_LABELS))
 
     # Return Client instance
-    return  FlowerClient(model, X_train, y_train, X_test, y_test).to_client()
+    return FlowerClient(model, X_train, y_train, X_test, y_test).to_client()
 
 
 # Flower ClientApp

@@ -58,6 +58,7 @@ You can also override some of the settings for your `ClientApp` and `ServerApp` 
 ```bash
 flwr run . --run-config penalty="l1"
 ```
+
 ### Run with the Deployment Engine
 
 > \[!NOTE\]
