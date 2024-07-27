@@ -25,7 +25,11 @@ from flwr.common import DEFAULT_TTL, EventType, Message, Metadata, RecordSet, ev
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
-from flwr.common.serde import message_from_taskres, message_to_taskins
+from flwr.common.serde import (
+    message_from_taskres,
+    message_to_taskins,
+    user_config_from_proto,
+)
 from flwr.common.typing import Run
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
@@ -202,7 +206,7 @@ class GrpcDriver(Driver):  # pylint: disable=too-many-instance-attributes
             run_id=res.run.run_id,
             fab_id=res.run.fab_id,
             fab_version=res.run.fab_version,
-            override_config=dict(res.run.override_config.items()),
+            override_config=user_config_from_proto(res.run.override_config),
         )
 
     @property
