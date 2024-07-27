@@ -32,6 +32,16 @@ class Net(nn.Module):
         return self.fc3(x)
 
 
+def get_weights(net):
+    return [val.cpu().numpy() for _, val in net.state_dict().items()]
+
+
+def set_weights(net, parameters):
+    params_dict = zip(net.state_dict().keys(), parameters)
+    state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+    net.load_state_dict(state_dict, strict=True)
+
+
 fds = None  # Cache FederatedDataset
 
 
@@ -79,11 +89,11 @@ def train(net, trainloader, valloader, epochs, learning_rate, device):
             criterion(net(images.to(device)), labels.to(device)).backward()
             optimizer.step()
 
-    train_loss, train_acc = test(net, trainloader, device)
+    val_loss, val_acc = test(net, valloader, device)
 
     results = {
-        "train_loss": train_loss,
-        "train_accuracy": train_acc,
+        "val_loss": val_loss,
+        "val_accuracy": val_acc,
     }
     return results
 
@@ -100,14 +110,5 @@ def test(net, testloader, device):
             loss += criterion(outputs, labels).item()
             correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
     accuracy = correct / len(testloader.dataset)
+    loss = loss / len(testloader)
     return loss, accuracy
-
-
-def get_weights(net):
-    return [val.cpu().numpy() for _, val in net.state_dict().items()]
-
-
-def set_weights(net, parameters):
-    params_dict = zip(net.state_dict().keys(), parameters)
-    state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-    net.load_state_dict(state_dict, strict=True)

@@ -1,8 +1,8 @@
 """pytorchexample: A Flower / PyTorch app."""
 
+import torch
 from flwr.client import NumPyClient, ClientApp
 from flwr.common import Context
-import torch
 
 from pytorchexample.task import (
     Net,
@@ -14,7 +14,7 @@ from pytorchexample.task import (
 )
 
 
-# Define Flower Client and client_fn
+# Define Flower Client
 class FlowerClient(NumPyClient):
     def __init__(self, trainloader, valloader, local_epochs, learning_rate):
         self.net = Net()

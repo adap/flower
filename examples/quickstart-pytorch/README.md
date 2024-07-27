@@ -1,5 +1,4 @@
 ---
-title: Federated Learning with PyTorch and Flower (Quickstart Example)
 tags: [quickstart, vision, fds]
 dataset: [CIFAR-10]
 framework: [torch, torchvision]
