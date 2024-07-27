@@ -17,12 +17,12 @@ Start by cloning the example project:
 
 ```shell
 git clone --depth=1 https://github.com/adap/flower.git _tmp \
-        && mv _tmp/examples/quickstart-mlx . \
+        && mv _tmp/examples/quickstart-monai . \
         && rm -rf _tmp \
-        && cd quickstart-mlx
+        && cd quickstart-monai
 ```
 
-This will create a new directory called `quickstart-mlx` with the following structure:
+This will create a new directory called `quickstart-monai` with the following structure:
 
 ```shell
 quickstart-monai
