@@ -21,7 +21,7 @@ import tempfile
 import zipfile
 from io import BytesIO
 from pathlib import Path
-from typing import IO, Optional, Union
+from typing import IO, List, Optional, Union
 
 import typer
 from typing_extensions import Annotated
@@ -33,8 +33,8 @@ from .utils import get_sha256_hash
 
 
 def install(
-    source: Annotated[
-        Optional[Path],
+    sources: Annotated[
+        Optional[List[Path]],
         typer.Argument(metavar="source", help="The source FAB file to install."),
     ] = None,
     flwr_dir: Annotated[
@@ -59,29 +59,31 @@ def install(
         - ``$XDG_DATA_HOME/.flwr/`` if ``$XDG_DATA_HOME`` is defined
         - ``$HOME/.flwr/`` in all other cases
     """
-    if source is None:
-        source = Path(typer.prompt("Enter the source FAB file"))
+    if sources is None:
+        sources = [Path(typer.prompt("Enter the source FAB file"))]
 
-    source = source.resolve()
-    if not source.exists():
-        typer.secho(
-            f"❌ The source {source} does not exist.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
+    for source in sources:
+        source = source.resolve()
+        if not source.exists():
+            typer.secho(
+                f"❌ The source {source} does not exist.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1)
 
-    if source.is_dir():
-        validate_and_install(source, None, flwr_dir=flwr_dir)
-    elif source.suffix == ".fab":
-        install_from_fab(source, flwr_dir)
-    else:
-        typer.secho(
-            f"❌ The source {source} is not a Flower App directory or a `.fab` file.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
+        if source.is_dir():
+            validate_and_install(source, None, flwr_dir=flwr_dir)
+        elif source.suffix == ".fab":
+            install_from_fab(source, flwr_dir)
+        else:
+            typer.secho(
+                f"❌ The source {source} is not a Flower App directory "
+                "or a `.fab` file.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1)
 
 
 def install_from_fab(
