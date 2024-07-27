@@ -6,7 +6,7 @@ from flwr.common import Context
 from tfexample.task import load_data, load_model
 
 
-# Define Flower Client and client_fn
+# Define Flower Client
 class FlowerClient(NumPyClient):
     def __init__(
         self,
