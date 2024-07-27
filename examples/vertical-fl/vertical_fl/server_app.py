@@ -6,6 +6,7 @@ from vertical_fl.task import get_partitions_and_label
 
 _, label = get_partitions_and_label()
 
+
 def server_fn(context: Context) -> ServerAppComponents:
     """Construct components that set the ServerApp behaviour."""
     # Define the strategy
@@ -17,7 +18,6 @@ def server_fn(context: Context) -> ServerAppComponents:
 
     return ServerAppComponents(strategy=strategy, config=config)
 
+
 # Start Flower server
-app = ServerApp(
-    server_fn=server_fn
-)
+app = ServerApp(server_fn=server_fn)
