@@ -11,9 +11,6 @@ from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 
 
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-
 class Net(nn.Module):
     """Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')"""
 
@@ -70,40 +67,39 @@ def train(net, trainloader, valloader, epochs, device):
     """Train the model on the training set."""
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss().to(device)
-    optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+    optimizer = torch.optim.SGD(net.parameters(), lr=0.1, momentum=0.9)
     net.train()
     for _ in range(epochs):
         for batch in trainloader:
             images = batch["img"]
             labels = batch["label"]
             optimizer.zero_grad()
-            criterion(net(images.to(DEVICE)), labels.to(DEVICE)).backward()
+            criterion(net(images.to(device)), labels.to(device)).backward()
             optimizer.step()
 
-    train_loss, train_acc = test(net, trainloader)
-    val_loss, val_acc = test(net, valloader)
+    # Evaluate on validation set
+    val_loss, val_accuracy = test(net, valloader, device)
 
     results = {
-        "train_loss": train_loss,
-        "train_accuracy": train_acc,
         "val_loss": val_loss,
-        "val_accuracy": val_acc,
+        "val_accuracy": val_accuracy,
     }
     return results
 
 
-def test(net, testloader):
+def test(net, testloader, device):
     """Validate the model on the test set."""
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
     with torch.no_grad():
         for batch in testloader:
-            images = batch["img"].to(DEVICE)
-            labels = batch["label"].to(DEVICE)
+            images = batch["img"].to(device)
+            labels = batch["label"].to(device)
             outputs = net(images)
             loss += criterion(outputs, labels).item()
             correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
     accuracy = correct / len(testloader.dataset)
+    loss = loss / len(testloader)
     return loss, accuracy
 
 

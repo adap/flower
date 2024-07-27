@@ -9,13 +9,10 @@ from $import_name.task import load_data, load_model
 # Define Flower Client and client_fn
 class FlowerClient(NumPyClient):
     def __init__(
-        self, model, x_train, y_train, x_test, y_test, epochs, batch_size, verbose
+        self, model, data, epochs, batch_size, verbose
     ):
         self.model = model
-        self.x_train = x_train
-        self.y_train = y_train
-        self.x_test = x_test
-        self.y_test = y_test
+        self.x_train, self.y_train, self.x_test, self.y_test = data
         self.epochs = epochs
         self.batch_size = batch_size
         self.verbose = verbose
@@ -46,14 +43,14 @@ def client_fn(context: Context):
 
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
-    x_train, y_train, x_test, y_test = load_data(partition_id, num_partitions)
+    data = load_data(partition_id, num_partitions)
     epochs = context.run_config["local-epochs"]
     batch_size = context.run_config["batch-size"]
     verbose = context.run_config.get("verbose")
 
     # Return Client instance
     return FlowerClient(
-        net, x_train, y_train, x_test, y_test, epochs, batch_size, verbose
+        net, data, epochs, batch_size, verbose
     ).to_client()
 
 
