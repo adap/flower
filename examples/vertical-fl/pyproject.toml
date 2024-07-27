@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "vertical-fl"
 version = "1.0.0"
 description = "PyTorch Vertical FL with Flower"
-license = { text = "Apache License (2.0)" }
+license = "Apache-2.0"
 dependencies = [
     "flwr[simulation]>=1.9.0,<2.0",
     "matplotlib==3.7.3",
@@ -19,15 +19,20 @@ dependencies = [
 [tool.hatch.build.targets.wheel]
 packages = ["."]
 
-[flower]
-publisher = "$username"
+[tool.flwr.app]
+publisher = "flwrlabs"
 
-[flower.components]
+[tool.flwr.app.components]
 serverapp = "vertical_fl.server_app:app"
 clientapp = "vertical_fl.client_app:app"
 
-[flower.engine]
-name = "simulation"
+[tool.flwr.app.config]
+num-server-rounds = 3
+learning-rate = 0.1
 
-[flower.engine.simulation.supernode]
-num = 3
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 10
+
