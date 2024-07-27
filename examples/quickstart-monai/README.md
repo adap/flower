@@ -7,7 +7,7 @@ framework: [MONAI]
 # Federated Learning with MONAI and Flower (Quickstart Example)
 
 This introductory example to Flower uses MONAI, but deep knowledge of MONAI is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case.
-Running this example in itself is quite easy. [MONAI](https://docs.monai.io/en/latest/index.html)(Medical Open Network for AI) is a PyTorch-based, open-source framework for deep learning in healthcare imaging, part of the PyTorch Ecosystem. This example uses a subset of the [MedMNIST](https://medmnist.com/) dataset including 6 classes, as done in [MONAI's classification demo](https://colab.research.google.com/drive/1wy8XUSnNWlhDNazFdvGBHLfdkGvOHBKe). This example uses [Flower Datasets](https://flower.ai/docs/datasets/) to partition the data and each client trains am [EfficientNet-B0](https://docs.monai.io/en/stable/networks.html#efficientnetbn) from MONAI. If a GPU is present in your system, clients will use it.
+Running this example in itself is quite easy. [MONAI](https://docs.monai.io/en/latest/index.html)(Medical Open Network for AI) is a PyTorch-based, open-source framework for deep learning in healthcare imaging, part of the PyTorch Ecosystem. This example uses a subset of the [MedMNIST](https://medmnist.com/) dataset including 6 classes, as done in [MONAI's classification demo](https://colab.research.google.com/drive/1wy8XUSnNWlhDNazFdvGBHLfdkGvOHBKe). This example uses [Flower Datasets](https://flower.ai/docs/datasets/) to partition the data and each client trains am [DenseNet121](https://docs.monai.io/en/stable/networks.html#densenet121) from MONAI. This example runs better with a GPU. If one is detectec, clients will use it.
 
 ## Set up the project
 

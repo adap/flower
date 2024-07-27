@@ -7,7 +7,7 @@ from collections import OrderedDict
 
 import torch
 from monai.data import DataLoader, Dataset
-from monai.networks.nets.efficientnet import EfficientNetBN
+from monai.networks.nets.densenet import DenseNet121
 from monai.transforms import (
     Compose,
     EnsureChannelFirst,
@@ -24,7 +24,7 @@ from flwr_datasets.partitioner import IidPartitioner
 
 
 def load_model():
-    return EfficientNetBN(model_name="efficientnet-b0", in_channels=1, num_classes=6)
+    return DenseNet121(spatial_dims=2, in_channels=1, out_channels=6)
 
 
 def get_params(model):
@@ -61,11 +61,11 @@ def test(model, test_loader, device):
         for batch in test_loader:
             images, labels = batch["img"], batch["label"]
             out = model(images.to(device))
-            test_labels = test_labels.to(device)
-            loss += loss_function(out, test_labels).item()
+            labels = labels.to(device)
+            loss += loss_function(out, labels).item()
             pred = out.argmax(dim=1)
             for i in range(len(pred)):
-                y_true.append(test_labels[i].item())
+                y_true.append(labels[i].item())
                 y_pred.append(pred[i].item())
     accuracy = sum([1 if t == p else 0 for t, p in zip(y_true, y_pred)]) / len(
         test_loader.dataset
