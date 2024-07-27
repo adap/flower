@@ -35,6 +35,8 @@ from .typing import (
     Status,
 )
 
+EMPTY_TENSOR_KEY = "_empty"
+
 
 def parametersrecord_to_parameters(
     record: ParametersRecord, keep_input: bool
@@ -59,7 +61,8 @@ def parametersrecord_to_parameters(
     parameters = Parameters(tensors=[], tensor_type="")
 
     for key in list(record.keys()):
-        parameters.tensors.append(record[key].data)
+        if key != EMPTY_TENSOR_KEY:
+            parameters.tensors.append(record[key].data)
 
         if not parameters.tensor_type:
             # Setting from first array in record. Recall the warning in the docstrings
@@ -103,6 +106,10 @@ def parameters_to_parametersrecord(
             data=tensor, dtype="", stype=tensor_type, shape=[]
         )
 
+    if num_arrays == 0:
+        ordered_dict[EMPTY_TENSOR_KEY] = Array(
+            data=b"", dtype="", stype=tensor_type, shape=[]
+        )
     return ParametersRecord(ordered_dict, keep_input=keep_input)
 
 

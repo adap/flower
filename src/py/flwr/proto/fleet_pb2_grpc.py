@@ -3,6 +3,7 @@
 import grpc
 
 from flwr.proto import fleet_pb2 as flwr_dot_proto_dot_fleet__pb2
+from flwr.proto import run_pb2 as flwr_dot_proto_dot_run__pb2
 
 
 class FleetStub(object):
@@ -41,8 +42,8 @@ class FleetStub(object):
                 )
         self.GetRun = channel.unary_unary(
                 '/flwr.proto.Fleet/GetRun',
-                request_serializer=flwr_dot_proto_dot_fleet__pb2.GetRunRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_fleet__pb2.GetRunResponse.FromString,
+                request_serializer=flwr_dot_proto_dot_run__pb2.GetRunRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_run__pb2.GetRunResponse.FromString,
                 )
 
 
@@ -121,8 +122,8 @@ def add_FleetServicer_to_server(servicer, server):
             ),
             'GetRun': grpc.unary_unary_rpc_method_handler(
                     servicer.GetRun,
-                    request_deserializer=flwr_dot_proto_dot_fleet__pb2.GetRunRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_fleet__pb2.GetRunResponse.SerializeToString,
+                    request_deserializer=flwr_dot_proto_dot_run__pb2.GetRunRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_run__pb2.GetRunResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -231,7 +232,7 @@ class Fleet(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.Fleet/GetRun',
-            flwr_dot_proto_dot_fleet__pb2.GetRunRequest.SerializeToString,
-            flwr_dot_proto_dot_fleet__pb2.GetRunResponse.FromString,
+            flwr_dot_proto_dot_run__pb2.GetRunRequest.SerializeToString,
+            flwr_dot_proto_dot_run__pb2.GetRunResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -117,18 +117,3 @@ def verify_hmac(key: bytes, message: bytes, hmac_value: bytes) -> bool:
         return True
     except InvalidSignature:
         return False
-
-
-def ssh_types_to_elliptic_curve(
-    private_key: serialization.SSHPrivateKeyTypes,
-    public_key: serialization.SSHPublicKeyTypes,
-) -> Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]:
-    """Cast SSH key types to elliptic curve."""
-    if isinstance(private_key, ec.EllipticCurvePrivateKey) and isinstance(
-        public_key, ec.EllipticCurvePublicKey
-    ):
-        return (private_key, public_key)
-
-    raise TypeError(
-        "The provided key is not an EllipticCurvePrivateKey or EllipticCurvePublicKey"
-    )

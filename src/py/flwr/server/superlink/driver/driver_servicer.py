@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ from uuid import UUID
 import grpc
 
 from flwr.common.logger import log
+from flwr.common.serde import user_config_from_proto, user_config_to_proto
 from flwr.proto import driver_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
@@ -35,6 +36,11 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     PushTaskInsResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.run_pb2 import (  # pylint: disable=E0611
+    GetRunRequest,
+    GetRunResponse,
+    Run,
+)
 from flwr.proto.task_pb2 import TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state import State, StateFactory
 from flwr.server.utils.validator import validate_task_ins_or_res
@@ -64,7 +70,11 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         """Create run ID."""
         log(DEBUG, "DriverServicer.CreateRun")
         state: State = self.state_factory.state()
-        run_id = state.create_run(request.fab_id, request.fab_version)
+        run_id = state.create_run(
+            request.fab_id,
+            request.fab_version,
+            user_config_from_proto(request.override_config),
+        )
         return CreateRunResponse(run_id=run_id)
 
     def PushTaskIns(
@@ -128,6 +138,30 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
 
         context.set_code(grpc.StatusCode.OK)
         return PullTaskResResponse(task_res_list=task_res_list)
+
+    def GetRun(
+        self, request: GetRunRequest, context: grpc.ServicerContext
+    ) -> GetRunResponse:
+        """Get run information."""
+        log(DEBUG, "DriverServicer.GetRun")
+
+        # Init state
+        state: State = self.state_factory.state()
+
+        # Retrieve run information
+        run = state.get_run(request.run_id)
+
+        if run is None:
+            return GetRunResponse()
+
+        return GetRunResponse(
+            run=Run(
+                run_id=run.run_id,
+                fab_id=run.fab_id,
+                fab_version=run.fab_version,
+                override_config=user_config_to_proto(run.override_config),
+            )
+        )
 
 
 def _raise_if(validation_error: bool, detail: str) -> None:

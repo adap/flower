@@ -42,7 +42,10 @@ Use the following terminal command to start a sever (SuperLink) that uses the pr
 
 .. code-block:: bash
 
-    flower-superlink --certificates certificates/ca.crt certificates/server.pem certificates/server.key
+    flower-superlink 
+      --ssl-ca-certfile certificates/ca.crt 
+      --ssl-certfile certificates/server.pem 
+      --ssl-keyfile certificates/server.key
 
 When providing certificates, the server expects a tuple of three certificates paths: CA certificate, server certificate and server private key.
 
@@ -56,7 +59,7 @@ Use the following terminal command to start a client (SuperNode) that uses the p
 
     flower-client-app client:app
         --root-certificates certificates/ca.crt
-        --server 127.0.0.1:9092
+        --superlink 127.0.0.1:9092
 
 When setting :code:`root_certificates`, the client expects a file path to PEM-encoded root certificates.
 

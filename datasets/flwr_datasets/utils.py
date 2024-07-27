@@ -20,20 +20,33 @@ from typing import Dict, List, Optional, Tuple, Union, cast
 
 from datasets import Dataset, DatasetDict, concatenate_datasets
 from flwr_datasets.partitioner import IidPartitioner, Partitioner
-from flwr_datasets.resplitter import Resplitter
-from flwr_datasets.resplitter.merge_resplitter import MergeResplitter
+from flwr_datasets.preprocessor import Preprocessor
+from flwr_datasets.preprocessor.merger import Merger
 
 tested_datasets = [
     "mnist",
+    "ylecun/mnist",
     "cifar10",
+    "uoft-cs/cifar10",
     "fashion_mnist",
+    "zalando-datasets/fashion_mnist",
     "sasha/dog-food",
     "zh-plus/tiny-imagenet",
     "scikit-learn/adult-census-income",
     "cifar100",
+    "uoft-cs/cifar100",
     "svhn",
+    "ufldl-stanford/svhn",
     "sentiment140",
+    "stanfordnlp/sentiment140",
     "speech_commands",
+    "LIUM/tedlium",
+    "flwrlabs/femnist",
+    "flwrlabs/ucf101",
+    "flwrlabs/ambient-acoustic-context",
+    "jlh/uci-mushrooms",
+    "Mike0307/MNIST-M",
+    "flwrlabs/usps",
 ]
 
 
@@ -75,13 +88,13 @@ def _instantiate_partitioners(
     return instantiated_partitioners
 
 
-def _instantiate_resplitter_if_needed(
-    resplitter: Optional[Union[Resplitter, Dict[str, Tuple[str, ...]]]]
-) -> Optional[Resplitter]:
-    """Instantiate `MergeResplitter` if resplitter is merge_config."""
-    if resplitter and isinstance(resplitter, Dict):
-        resplitter = MergeResplitter(merge_config=resplitter)
-    return cast(Optional[Resplitter], resplitter)
+def _instantiate_merger_if_needed(
+    merger: Optional[Union[Preprocessor, Dict[str, Tuple[str, ...]]]]
+) -> Optional[Preprocessor]:
+    """Instantiate `Merger` if preprocessor is merge_config."""
+    if merger and isinstance(merger, Dict):
+        merger = Merger(merge_config=merger)
+    return cast(Optional[Preprocessor], merger)
 
 
 def _check_if_dataset_tested(dataset: str) -> None:
@@ -178,7 +191,7 @@ def _create_division_indices_ranges(
             ranges.append(range(start_idx, end_idx))
             start_idx = end_idx
     else:
-        TypeError(
+        raise TypeError(
             f"The type of the `division` should be dict, "
             f"tuple or list but is {type(division)} instead. "
         )

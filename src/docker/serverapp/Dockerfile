@@ -14,19 +14,7 @@
 # ==============================================================================
 
 ARG BASE_REPOSITORY=flwr/base
-ARG PYTHON_VERSION=3.11
-ARG UBUNTU_VERSION=ubuntu22.04
-FROM $BASE_REPOSITORY:py${PYTHON_VERSION}-${UBUNTU_VERSION}
+ARG BASE_IMAGE
+FROM $BASE_REPOSITORY:$BASE_IMAGE
 
-ARG FLWR_PACKAGE=flwr
-ARG FLWR_VERSION
-RUN python -m pip install -U --no-cache-dir \
-    ${FLWR_PACKAGE}==${FLWR_VERSION} && \
-    # Without pyenv rehash the executable cannot be found.
-    # pyenv rehash is usually called via the shell by adding
-    # `pyenv init -` in the shell profile, but that doesn't work
-    # well in docker
-    pyenv rehash
-
-WORKDIR /app
 ENTRYPOINT ["flower-server-app"]

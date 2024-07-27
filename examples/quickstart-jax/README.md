@@ -1,3 +1,9 @@
+---
+tags: [quickstart, linear regression]
+dataset: [Synthetic]
+framework: [JAX]
+---
+
 # JAX: From Centralized To Federated
 
 This example demonstrates how an already existing centralized JAX-based machine learning project can be federated with Flower.

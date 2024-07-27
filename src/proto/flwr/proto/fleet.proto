@@ -19,6 +19,7 @@ package flwr.proto;
 
 import "flwr/proto/node.proto";
 import "flwr/proto/task.proto";
+import "flwr/proto/run.proto";
 
 service Fleet {
   rpc CreateNode(CreateNodeRequest) returns (CreateNodeResponse) {}
@@ -69,14 +70,5 @@ message PushTaskResResponse {
   Reconnect reconnect = 1;
   map<string, uint32> results = 2;
 }
-
-// GetRun messages
-message Run {
-  sint64 run_id = 1;
-  string fab_id = 2;
-  string fab_version = 3;
-}
-message GetRunRequest { sint64 run_id = 1; }
-message GetRunResponse { Run run = 1; }
 
 message Reconnect { uint64 reconnect = 1; }

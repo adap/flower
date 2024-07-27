@@ -1,3 +1,9 @@
+---
+tags: [quickstart, llm, nlp, sentiment]
+dataset: [IMDB]
+framework: [transformers]
+---
+
 # Federated HuggingFace Transformers using Flower and PyTorch
 
 This introductory example to using [HuggingFace](https://huggingface.co) Transformers with Flower with PyTorch. This example has been extended from the [quickstart-pytorch](https://flower.ai/docs/examples/quickstart-pytorch.html) example. The training script closely follows the [HuggingFace course](https://huggingface.co/course/chapter3?fw=pt), so you are encouraged to check that out for a detailed explanation of the transformer pipeline.

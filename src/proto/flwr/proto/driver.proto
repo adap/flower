@@ -19,6 +19,8 @@ package flwr.proto;
 
 import "flwr/proto/node.proto";
 import "flwr/proto/task.proto";
+import "flwr/proto/run.proto";
+import "flwr/proto/transport.proto";
 
 service Driver {
   // Request run_id
@@ -32,12 +34,16 @@ service Driver {
 
   // Get task results
   rpc PullTaskRes(PullTaskResRequest) returns (PullTaskResResponse) {}
+
+  // Get run details
+  rpc GetRun(GetRunRequest) returns (GetRunResponse) {}
 }
 
 // CreateRun
 message CreateRunRequest {
   string fab_id = 1;
   string fab_version = 2;
+  map<string, Scalar> override_config = 3;
 }
 message CreateRunResponse { sint64 run_id = 1; }
 

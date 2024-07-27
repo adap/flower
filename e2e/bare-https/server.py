@@ -1,6 +1,6 @@
-import flwr as fl
 from pathlib import Path
 
+import flwr as fl
 
 app = fl.server.ServerApp()
 
@@ -9,7 +9,7 @@ app = fl.server.ServerApp()
 def main(driver, context):
     # Construct the LegacyContext
     context = fl.server.LegacyContext(
-        state=context.state,
+        context=context,
         config=fl.server.ServerConfig(num_rounds=3),
     )
 

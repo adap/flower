@@ -32,8 +32,6 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
-    GetRunRequest,
-    GetRunResponse,
     PingRequest,
     PingResponse,
     PullTaskInsRequest,
@@ -42,6 +40,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 from flwr.server.app import ADDRESS_FLEET_API_GRPC_RERE, _run_fleet_api_grpc_rere
 from flwr.server.superlink.state.state_factory import StateFactory
@@ -329,7 +328,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         self.state.create_node(
             ping_interval=30, public_key=public_key_to_bytes(self._client_public_key)
         )
-        run_id = self.state.create_run("", "")
+        run_id = self.state.create_run("", "", {})
         request = GetRunRequest(run_id=run_id)
         shared_secret = generate_shared_key(
             self._client_private_key, self._server_public_key
@@ -360,7 +359,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         self.state.create_node(
             ping_interval=30, public_key=public_key_to_bytes(self._client_public_key)
         )
-        run_id = self.state.create_run("", "")
+        run_id = self.state.create_run("", "", {})
         request = GetRunRequest(run_id=run_id)
         client_private_key, _ = generate_key_pairs()
         shared_secret = generate_shared_key(client_private_key, self._server_public_key)

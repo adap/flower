@@ -282,7 +282,14 @@ class Server:
         get_parameters_res = random_client.get_parameters(
             ins=ins, timeout=timeout, group_id=server_round
         )
-        log(INFO, "Received initial parameters from one random client")
+        if get_parameters_res.status.code == Code.OK:
+            log(INFO, "Received initial parameters from one random client")
+        else:
+            log(
+                WARN,
+                "Failed to receive initial parameters from the client."
+                " Empty initial parameters will be used.",
+            )
         return get_parameters_res.parameters
 
 

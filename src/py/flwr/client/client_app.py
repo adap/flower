@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,17 +15,60 @@
 """Flower ClientApp."""
 
 
+import inspect
 from typing import Callable, List, Optional
 
+from flwr.client.client import Client
 from flwr.client.message_handler.message_handler import (
     handle_legacy_message_from_msgtype,
 )
 from flwr.client.mod.utils import make_ffn
-from flwr.client.typing import ClientFn, Mod
+from flwr.client.typing import ClientFnExt, Mod
 from flwr.common import Context, Message, MessageType
-from flwr.common.logger import warn_preview_feature
+from flwr.common.logger import warn_deprecated_feature, warn_preview_feature
 
 from .typing import ClientAppCallable
+
+
+def _alert_erroneous_client_fn() -> None:
+    raise ValueError(
+        "A `ClientApp` cannot make use of a `client_fn` that does "
+        "not have a signature in the form: `def client_fn(context: "
+        "Context)`. You can import the `Context` like this: "
+        "`from flwr.common import Context`"
+    )
+
+
+def _inspect_maybe_adapt_client_fn_signature(client_fn: ClientFnExt) -> ClientFnExt:
+    client_fn_args = inspect.signature(client_fn).parameters
+    first_arg = list(client_fn_args.keys())[0]
+
+    if len(client_fn_args) != 1:
+        _alert_erroneous_client_fn()
+
+    first_arg_type = client_fn_args[first_arg].annotation
+
+    if first_arg_type is str or first_arg == "cid":
+        # Warn previous signature for `client_fn` seems to be used
+        warn_deprecated_feature(
+            "`client_fn` now expects a signature `def client_fn(context: Context)`."
+            "The provided `client_fn` has signature: "
+            f"{dict(client_fn_args.items())}. You can import the `Context` like this:"
+            " `from flwr.common import Context`"
+        )
+
+        # Wrap depcreated client_fn inside a function with the expected signature
+        def adaptor_fn(
+            context: Context,
+        ) -> Client:  # pylint: disable=unused-argument
+            # if patition-id is defined, pass it. Else pass node_id that should
+            # always be defined during Context init.
+            cid = context.node_config.get("partition-id", context.node_id)
+            return client_fn(str(cid))  # type: ignore
+
+        return adaptor_fn
+
+    return client_fn
 
 
 class ClientAppException(Exception):
@@ -48,7 +91,7 @@ class ClientApp:
     >>> class FlowerClient(NumPyClient):
     >>>     # ...
     >>>
-    >>> def client_fn(cid):
+    >>> def client_fn(context: Context):
     >>>    return FlowerClient().to_client()
     >>>
     >>> app = ClientApp(client_fn)
@@ -65,7 +108,7 @@ class ClientApp:
 
     def __init__(
         self,
-        client_fn: Optional[ClientFn] = None,  # Only for backward compatibility
+        client_fn: Optional[ClientFnExt] = None,  # Only for backward compatibility
         mods: Optional[List[Mod]] = None,
     ) -> None:
         self._mods: List[Mod] = mods if mods is not None else []
@@ -73,6 +116,8 @@ class ClientApp:
         # Create wrapper function for `handle`
         self._call: Optional[ClientAppCallable] = None
         if client_fn is not None:
+
+            client_fn = _inspect_maybe_adapt_client_fn_signature(client_fn)
 
             def ffn(
                 message: Message,
@@ -221,7 +266,7 @@ def _registration_error(fn_name: str) -> ValueError:
         >>> def client_fn(cid) -> Client:
         >>>     return FlowerClient().to_client()
         >>>
-        >>> app = ClientApp()
+        >>> app = ClientApp(
         >>>     client_fn=client_fn,
         >>> )
 

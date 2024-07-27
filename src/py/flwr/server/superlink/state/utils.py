@@ -17,6 +17,7 @@
 
 import time
 from logging import ERROR
+from os import urandom
 from uuid import uuid4
 
 from flwr.common import log
@@ -29,6 +30,11 @@ NODE_UNAVAILABLE_ERROR_REASON = (
     "Error: Node Unavailable - The destination node is currently unavailable. "
     "It exceeds the time limit specified in its last ping."
 )
+
+
+def generate_rand_int_from_bytes(num_bytes: int) -> int:
+    """Generate a random `num_bytes` integer."""
+    return int.from_bytes(urandom(num_bytes), "little", signed=True)
 
 
 def make_node_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:

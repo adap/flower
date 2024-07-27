@@ -1,3 +1,4 @@
+from typing import Dict
 import flwr as fl
 from flwr.server.strategy import FedXgbBagging
 
@@ -19,6 +20,14 @@ def evaluate_metrics_aggregation(eval_metrics):
     return metrics_aggregated
 
 
+def config_func(rnd: int) -> Dict[str, str]:
+    """Return a configuration with global epochs."""
+    config = {
+        "global_round": str(rnd),
+    }
+    return config
+
+
 # Define strategy
 strategy = FedXgbBagging(
     fraction_fit=(float(num_clients_per_round) / pool_size),
@@ -27,6 +36,8 @@ strategy = FedXgbBagging(
     min_evaluate_clients=num_evaluate_clients,
     fraction_evaluate=1.0,
     evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation,
+    on_evaluate_config_fn=config_func,
+    on_fit_config_fn=config_func,
 )
 
 # Start Flower server

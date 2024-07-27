@@ -60,6 +60,10 @@ MetricsAggregationFn = Callable[[List[Tuple[int, Metrics]]], Metrics]
 Config = Dict[str, Scalar]
 Properties = Dict[str, Scalar]
 
+# Value type for user configs
+UserConfigValue = Union[bool, float, int, str]
+UserConfig = Dict[str, UserConfigValue]
+
 
 class Code(Enum):
     """Client status codes."""
@@ -185,3 +189,13 @@ class ClientMessage:
     get_parameters_res: Optional[GetParametersRes] = None
     fit_res: Optional[FitRes] = None
     evaluate_res: Optional[EvaluateRes] = None
+
+
+@dataclass
+class Run:
+    """Run details."""
+
+    run_id: int
+    fab_id: str
+    fab_version: str
+    override_config: UserConfig
