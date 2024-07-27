@@ -1,12 +1,13 @@
-import torch
+"""monaiexample: A Flower / MONAI app."""
 
 import os
 import tarfile
 from urllib import request
+from collections import OrderedDict
 
-
-import numpy as np
+import torch
 from monai.data import DataLoader, Dataset
+from monai.networks.nets.efficientnet import EfficientNetBN
 from monai.transforms import (
     Compose,
     EnsureChannelFirst,
@@ -20,6 +21,20 @@ from monai.transforms import (
 
 from datasets import Dataset
 from flwr_datasets.partitioner import IidPartitioner
+
+
+def load_model():
+    return EfficientNetBN(model_name="efficientnet-b0", in_channels=1, num_classes=6)
+
+
+def get_params(model):
+    return [val.cpu().numpy() for _, val in model.state_dict().items()]
+
+
+def set_params(model, ndarrays):
+    params_dict = zip(model.state_dict().keys(), ndarrays)
+    state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+    model.load_state_dict(state_dict, strict=True)
 
 
 def train(model, train_loader, epoch_num, device):
@@ -91,8 +106,9 @@ ds = None
 partitioner = None
 
 
-def load_data(num_partitions, partition_id):
+def load_data(num_partitions, partition_id, batch_size):
 
+    # Set dataset and partitioner only once
     global ds, partitioner
     if ds is None:
         image_file_list, image_label_list = _download_data()
@@ -119,8 +135,8 @@ def load_data(num_partitions, partition_id):
     partition_val = test_partition.with_transform(get_apply_transforms_fn(test_t))
 
     # Create dataloaders
-    train_loader = DataLoader(partition_train, batch_size=64, shuffle=True)
-    val_loader = DataLoader(partition_val, batch_size=64)
+    train_loader = DataLoader(partition_train, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(partition_val, batch_size=batch_size)
 
     return train_loader, val_loader
 
@@ -151,7 +167,6 @@ def _download_data():
 
 
 def _download_and_extract(url, dest_folder):
-    print(dest_folder)
     if not os.path.isdir(dest_folder):
         # Download the tar.gz file
         tar_gz_filename = url.split("/")[-1]
