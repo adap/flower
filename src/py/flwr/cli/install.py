@@ -15,6 +15,7 @@
 """Flower command line interface `install` command."""
 
 
+import glob
 import shutil
 import subprocess
 import tempfile
@@ -60,7 +61,8 @@ def install(
         - ``$HOME/.flwr/`` in all other cases
     """
     if sources is None:
-        sources = [Path(typer.prompt("Enter the source FAB file"))]
+        user_input = typer.prompt("Enter the source FAB file(s) (supporting wildcards)")
+        sources = [Path(p) for p in glob.glob(user_input)]
 
     for source in sources:
         source = source.resolve()
