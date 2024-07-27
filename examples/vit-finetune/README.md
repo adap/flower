@@ -1,60 +1,61 @@
 ---
-title: Federated finetuning of a ViT
 tags: [finetuneing, vision, fds]
 dataset: [Oxford Flower-102]
 framework: [torch, torchvision]
 ---
 
-# Federated finetuning of a ViT
+# Federated Finetuning of a Vision Transformer with Flower
 
 This example shows how to use Flower's Simulation Engine to federate the finetuning of a Vision Transformer ([ViT-Base-16](https://pytorch.org/vision/main/models/generated/torchvision.models.vit_b_16.html#torchvision.models.vit_b_16)) that has been pretrained on ImageNet. To keep things simple we'll be finetuning it to [Oxford Flower-102](https://www.robots.ox.ac.uk/~vgg/data/flowers/102/index.html) datasset, creating 20 partitions using [Flower Datasets](https://flower.ai/docs/datasets/). We'll be finetuning just the exit `head` of the ViT, this means that the training is not that costly and each client requires just ~1GB of VRAM (for a batch size of 32 images).
 
-## Running the example
+## Set up the project
 
-If you haven't cloned the Flower repository already you might want to clone code example and discard the rest. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
+### Clone the project
 
-```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/vit-finetune . && rm -rf flower && cd vit-finetune
-```
-
-This will create a new directory called `vit-finetune` containing the following files:
-
-```
--- README.md         <- Your're reading this right now
--- main.py           <- Main file that launches the simulation
--- client.py         <- Contains Flower client code and ClientApp
--- server.py         <- Contains Flower server code and ServerApp
--- model.py          <- Defines model and train/eval functions
--- dataset.py        <- Downloads, partitions and processes dataset
--- pyproject.toml    <- Example dependencies, installable using Poetry
--- requirements.txt  <- Example dependencies, installable using pip
-```
-
-### Installing Dependencies
-
-Project dependencies (such as `torch` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
-
-#### Poetry
+Start by cloning the example project:
 
 ```shell
-poetry install
-poetry shell
+git clone --depth=1 https://github.com/adap/flower.git _tmp \
+        && mv _tmp/examples/vit-finetune . \
+        && rm -rf _tmp \
+        && cd vit-finetune
 ```
 
-#### pip
-
-With an activated environemnt, install the dependencies for this example:
+This will create a new directory called `vit-finetune` with the following structure:
 
 ```shell
-pip install -r requirements.txt
+vit-finetune
+├── vitexample
+│   ├── __init__.py
+│   ├── client_app.py   # Defines your ClientApp
+│   ├── server_app.py   # Defines your ServerApp
+│   └── task.py         # Defines your model, training and data loading
+├── pyproject.toml      # Project metadata like dependencies and configs
+└── README.md
 ```
 
-### Run with `start_simulation()`
+### Install dependencies and project
 
-Running the example is quite straightforward. You can control the number of rounds `--num-rounds` (which defaults to 20).
+Install the dependencies defined in `pyproject.toml` as well as the `vitexample` package.
 
 ```bash
-python main.py
+pip install -e .
+```
+
+## Run the project
+
+You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
+
+### Run with the Simulation Engine
+
+```bash
+flwr run .
+```
+
+You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
+
+```bash
+flwr run . --run-config num-server-rounds=5,batch-size=64
 ```
 
 ![](_static/central_evaluation.png)
@@ -90,12 +91,7 @@ You can adjust the `client_resources` passed to `start_simulation()` so more/les
 +---------------------------------------------------------------------------------------+
 ```
 
-### Run with Flower Next (preview)
+### Run with the Deployment Engine
 
-```bash
-flower-simulation \
-    --client-app=client:app \
-    --server-app=server:app \
-    --num-supernodes=20 \
-    --backend-config='{"client_resources": {"num_cpus":4, "num_gpus":0.25}}'
-```
+> \[!NOTE\]
+> An update to this example will show how to run this Flower project with the Deployment Engine and TLS certificates, or with Docker.

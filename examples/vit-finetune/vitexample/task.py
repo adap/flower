@@ -2,6 +2,17 @@ from collections import OrderedDict
 
 import torch
 from torchvision.models import vit_b_16, ViT_B_16_Weights
+from torchvision.transforms import (
+    Compose,
+    Normalize,
+    ToTensor,
+    RandomResizedCrop,
+    Resize,
+    CenterCrop,
+)
+
+from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import IidPartitioner
 
 
 def get_model():
@@ -25,16 +36,18 @@ def get_model():
     return model
 
 
-def set_parameters(model, parameters):
-    """Apply the parameters to the model.
-
-    Recall this example only federates the head of the ViT so that's the only part of
-    the model we need to load.
-    """
+def set_params(model, parameters):
+    """Apply the parameters to model head."""
     finetune_layers = model.heads
     params_dict = zip(finetune_layers.state_dict().keys(), parameters)
     state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
     finetune_layers.load_state_dict(state_dict, strict=True)
+
+
+def get_params(model):
+    """Get parameters from model head as ndarrays."""
+    finetune_layers = model.heads
+    return [val.cpu().numpy() for _, val in finetune_layers.state_dict().items()]
 
 
 def train(net, trainloader, optimizer, epochs, device):
@@ -69,3 +82,46 @@ def test(net, testloader, device: str):
             correct += (predicted == labels).sum().item()
     accuracy = correct / len(testloader.dataset)
     return loss, accuracy
+
+
+fds = None
+
+
+def get_dataset_partition(num_partitions: int, partition_id: int):
+    """Get Oxford Flowers datasets and partition it."""
+    global fds
+    if fds is None:
+        # Get Oxford Flowers-102 and create IID partitions
+        partitioner = IidPartitioner(num_partitions)
+        fds = FederatedDataset(
+            dataset="nelorth/oxford-flowers", partitioners={"train": partitioner}
+        )
+
+    return fds.load_partition(partition_id)
+
+
+def apply_eval_transforms(batch):
+    """Apply a very standard set of image transforms."""
+    transforms = Compose(
+        [
+            Resize((256, 256)),
+            CenterCrop((224, 224)),
+            ToTensor(),
+            Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ]
+    )
+    batch["image"] = [transforms(img) for img in batch["image"]]
+    return batch
+
+
+def apply_train_transforms(batch):
+    """Apply a very standard set of image transforms."""
+    transforms = Compose(
+        [
+            RandomResizedCrop((224, 224)),
+            ToTensor(),
+            Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ]
+    )
+    batch["image"] = [transforms(img) for img in batch["image"]]
+    return batch
