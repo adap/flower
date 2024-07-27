@@ -1,13 +1,15 @@
 ---
+title: Federated Learning with fastai and Flower (Quickstart Example)
 tags: [quickstart, vision]
 dataset: [MNIST]
 framework: [fastai]
 ---
 
-# Flower Example using fastai
+# Federated Learning with fastai and Flower (Quickstart Example)
 
-This introductory example to Flower uses [fastai](https://www.fast.ai/), but deep knowledge of fastai is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case.
-Running this example in itself is quite easy.
+This introductory example to Flower uses [fastai](https://www.fast.ai/), but deep knowledge of fastai is not necessarily required to run the example. The example will help you understand how to adapt Flower to your specific use case, and running it is quite straightforward. 
+
+fastai is a deep learning library built on PyTorch which provides practitioners with high-level components for building deep learning projects. In this example, we will train a [SqueezeNet v1.1](https://github.com/forresti/SqueezeNet/tree/master/SqueezeNet_v1.1) model on the [MNIST](https://huggingface.co/datasets/ylecun/mnist) dataset (handwritten digits recognition). The data will be downloaded and partitioned using [Flower Datasets](https://flower.ai/docs/datasets/).
 
 ## Project Setup
 
