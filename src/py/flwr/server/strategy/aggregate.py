@@ -16,7 +16,7 @@
 # mypy: disallow_untyped_calls=False
 
 from functools import partial, reduce
-from typing import Any, Callable, List, Tuple
+from typing import Any, Callable, List, Tuple, Union
 
 import numpy as np
 
@@ -48,14 +48,18 @@ def aggregate_inplace(results: List[Tuple[ClientProxy, FitRes]]) -> NDArrays:
     num_examples_total = sum(fit_res.num_examples for _, fit_res in results)
 
     # Compute scaling factors for each result
-    scaling_factors = np.array(
-        [fit_res.num_examples / num_examples_total for _, fit_res in results],
-        dtype=np.float32,
-    )
+    scaling_factors = [
+        fit_res.num_examples / num_examples_total for _, fit_res in results
+    ]
 
-    def _try_inplace(x: NDArray, y: NDArray, np_binary_op: np.ufunc) -> Any:
-        # `(x, y, out=x)` requires x and y has the same dtype, which will do the inplace-job
-        return np_binary_op(x, y, out=x) if x.dtype == y.dtype else np_binary_op(x, y)
+    def _try_inplace(
+        x: NDArray, y: Union[NDArray, float], np_binary_op: np.ufunc
+    ) -> NDArray:
+        return (
+            np_binary_op(x, y, out=x)
+            if np.can_cast(y, x.dtype, casting="same_kind")
+            else np_binary_op(x, y)
+        )  # type: ignore[no-any-return]
 
     # Let's do in-place aggregation
     # Get first result, then add up each other
