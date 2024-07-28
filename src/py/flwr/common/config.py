@@ -118,7 +118,7 @@ def is_valid_path(value: str) -> bool:
     try:
         path = Path(value)
         return path.exists()
-    except Exception:
+    except Exception:  # pylint: disable=broad-exception-caught
         return False
 
 
