@@ -53,9 +53,7 @@ def aggregate_inplace(results: List[Tuple[ClientProxy, FitRes]]) -> NDArrays:
         dtype=np.float32,
     )
 
-    def _try_inplace(
-        x: NDArray, y: NDArray, np_binary_op: Callable[[NDArray, NDArray], NDArray]
-    ):
+    def _try_inplace(x: NDArray, y: NDArray, np_binary_op: np.ufunc) -> Any:
         # `(x, y, out=x)` requires x and y has the same dtype, which will do the inplace-job
         return np_binary_op(x, y, out=x) if x.dtype == y.dtype else np_binary_op(x, y)
 
