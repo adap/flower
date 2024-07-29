@@ -95,7 +95,7 @@ To execute a single experiment with the default values in `conf/base.yaml`.
 To run custom experiments, you can override the default values like that:
 
 ```bash
-python -m flanders.main dataset=income server.attack_fn=lie server.num_malicious=1
+python -m flanders.main dataset=mnist server.attack_fn=lie server.num_malicious=1
 ```
 
 To run multiple custom experiments:
@@ -104,28 +104,15 @@ To run multiple custom experiments:
 python -m flanders.main --multirun dataset=mnist,fmnist server.attack_fn=gaussian,lie,fang,minmax server.num_malicious=0,1,2,3,4,5
 ```
 
-Finally, to run all the experiments of the paper, I've set up a script:
+## Expected Results
+
+To run all the experiments of the paper (for MNIST and Fashion-MNIST), I've set up a script:
 
 ```bash
 sh run.sh
 ```
 
-## Expected Results
-
-Use this command to run experiments on FLANDERS+\[baseline\]
-```bash
-python -m flanders.main --multirun server.num_rounds=50 dataset=fmnist strategy=flanders aggregate_fn=fedavg,trimmedmean,fedmedian,krum,bulyan server.pool_size=100 server.num_malicious=0,20,60,80 server.attack_fn=gaussian,lie,fang,minmax client_resources.num_cpus=0.1 client_resources.num_gpus=0.1
-```
-
-And then this command to run experiments on vanilla baselines:
-
-```bash
-python -m flanders.main --multirun server.num_rounds=50 dataset=fmnist strategy=fedavg,trimmedmean,fedmedian,krum,bulyan server.pool_size=100 server.num_malicious=0,20,60,80 server.attack_fn=gaussian,lie,fang,minmax client_resources.num_cpus=0.1 client_resources.num_gpus=0.1
-```
-
-They will generate the results in `results/all_results.csv`.
-
-To generate the plots, including the tables shown below, use the notebook in `plotting/`.
+This code will produce the output in the file `outputs/all_results.csv`. To generate the plots and tables displayed below, you can use the notebook in the `plotting/` directory.
 
 
 ### Accuracy over multiple rounds
