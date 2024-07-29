@@ -235,6 +235,8 @@ def main(cfg: DictConfig) -> None:
     _, falsep = zip(*history.metrics_centralized["FP"])
     _, falsen = zip(*history.metrics_centralized["FN"])
 
+    if not os.path.exists(os.path.join(save_path, "outputs")):
+        os.makedirs(os.path.join(save_path, "outputs"))
     path_to_save = [os.path.join(save_path, "results.csv"), "outputs/all_results.csv"]
 
     for file_name in path_to_save:
