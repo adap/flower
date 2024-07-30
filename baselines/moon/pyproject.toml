@@ -73,6 +73,13 @@ default = "local-simulation"
 [tool.flwr.federations.local-simulation]
 options.num-supernodes = 10
 
+[tool.flwr.federations.local-sim-50]
+options.num-supernodes = 50
+
+[tool.flwr.federations.local-sim-100]
+options.num-supernodes = 100
+
+
 
 [tool.isort]
 line_length = 88

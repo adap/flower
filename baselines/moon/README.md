@@ -82,18 +82,18 @@ flwr run .
 
 To run MOON on CIFAR-100 (Table 1 of the paper), you should run:
 ```bash
-python -m moon.main --config-name cifar100 # update with `flwr run`
+flwr run . --run-config conf/cifar100.toml
 ```
 
 
 You can also run FedProx on CIFAR-10:
 ```bash
-python -m moon.main --config-name cifar10_fedprox # update with `flwr run`
+flwr run . --run-config conf/cifar10_fedprox.toml
 ```
 
 To run FedProx on CIFAR-100:
 ```bash
-python -m moon.main --config-name cifar100_fedprox # update with `flwr run`
+flwr run . --run-config conf/cifar100_fedprox.toml
 ```
 
 ## Expected Results
@@ -120,12 +120,12 @@ You can tune the hyperparameter `mu` for both MOON and FedProx by changing the c
 ### Figure 8(a)
 You can run the experiments in Figure 8 of the paper. To run MOON (`mu=10`) on CIFAR-100 with 50 clients (Figure 8(a) of the paper):
 ```bash
-python -m moon.main --config-name cifar100_50clients # update with `flwr run`
+flwr run . local-sim-50 --run-config conf/cifar100_50clients.toml
 ```
 
 To run FedProx on CIFAR-100 with 50 clients (Figure 8(a) of the paper):
 ```bash
-python -m moon.main --config-name cifar100_50clients_fedprox # update with `flwr run`
+flwr run . local-sim-50 --run-config conf/cifar100_50clients_fedprox.toml
 ```
 
 
@@ -135,5 +135,7 @@ You can find the curve presenting MOON and FedProx below.
 
 You may also run MOON on CIFAR-100 with 100 clients (Figure 8(b) of the paper):
 ```bash
-python -m moon.main --config-name cifar100_100clients # update with `flwr run`
+flwr run . local-sim-100 --run-config conf/cifar100_100clients.toml
+
+flwr run . local-sim-100 --run-config conf/cifar100_100clients_fedprox.toml
 ```

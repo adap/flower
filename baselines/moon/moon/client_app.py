@@ -113,6 +113,7 @@ def client_fn(context: Context) -> Client:
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     dataset_name = context.run_config["dataset-name"]
+    partition_by = context.run_config["dataset-partition-by"]
 
     # Only initialize `FederatedDataset` once
     global FDS  # pylint: disable=global-statement
@@ -120,7 +121,7 @@ def client_fn(context: Context) -> Client:
         partitioner = DirichletPartitioner(
             num_partitions=context.node_config["num-partitions"],
             alpha=context.run_config["dirichlet-alpha"],
-            partition_by=context.run_config["dataset-partition-by"],
+            partition_by=partition_by,
         )
         FDS = FederatedDataset(
             dataset=dataset_name,
@@ -131,7 +132,7 @@ def client_fn(context: Context) -> Client:
     train_partition = FDS.load_partition(partition_id=partition_id)
 
     train_transforms, _ = get_data_transforms(dataset_name=dataset_name)
-    transforms_fn = get_transforms_apply_fn(train_transforms)
+    transforms_fn = get_transforms_apply_fn(train_transforms, partition_by)
     trainloader = DataLoader(
         train_partition.with_transform(transforms_fn),
         batch_size=context.run_config["batch-size"],

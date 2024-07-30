@@ -48,6 +48,7 @@ def gen_evaluate_fn(
 def server_fn(context: Context) -> ServerAppComponents:
     """Construct ServerAppComponents object to create a ServerApp."""
     dataset_name = str(context.run_config["dataset-name"])
+    partition_by = context.run_config["dataset-partition-by"]
     # This is the exact same dataset as the one donwloaded by the clients via
     # FlowerDatasets.However, we don't use FlowerDatasets for the server since
     # partitioning it is not needed.
@@ -56,7 +57,7 @@ def server_fn(context: Context) -> ServerAppComponents:
     _, test_transforms = get_data_transforms(dataset_name=dataset_name)
 
     batch_size = int(context.run_config["batch-size"])
-    transforms_fn = get_transforms_apply_fn(test_transforms)
+    transforms_fn = get_transforms_apply_fn(test_transforms, partition_by)
     testloader = DataLoader(
         global_test_set.with_transform(transforms_fn),
         batch_size=batch_size,

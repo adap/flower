@@ -1,0 +1,21 @@
+num-epochs = 10
+fraction-fit = 1.0
+batch-size = 64
+learning-rate = 0.01
+mu = 0.001
+temperature = 0.5
+alg = "fedprox"
+seed = 0
+server-device = "cpu"
+num-server-rounds = 100
+
+client-resources-num_cpus = 4
+client-resources-num_gpus = 0.2
+
+dataset-name = "uoft-cs/cifar10"
+dataset-partition-by = "label"
+dirichlet-alpha = 0.5
+
+model-name = "simple-cnn"
+model-output-dim = 256
+model-dir = "./client_states/moon/cifar10_fedprox/"

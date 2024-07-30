@@ -1,0 +1,9 @@
+mu = 1
+num-server-rounds = 100
+
+client-resources-num_gpus = 0.5
+
+dataset-name = "uoft-cs/cifar100"
+
+model-name = "resnet50"
+model-dir = "./client_states/moon/cifar100/"

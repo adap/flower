@@ -66,13 +66,16 @@ def get_data_transforms(dataset_name):
     return transform_train, transform_test
 
 
-def get_transforms_apply_fn(transforms_list):
+def get_transforms_apply_fn(transforms_list, partition_by):
     """Return a function that applies the dataset transforms."""
 
     def apply_transforms(batch):
         # For CIFAR-10 the "img" column contains the images we want to
         # apply the transforms to
         batch["img"] = [transforms_list(img) for img in batch["img"]]
+        # map to a common column just to implify training loop
+        # Note "label" doesn't exist in CIFAR-100
+        batch["label"] = batch[partition_by]
         return batch
 
     return apply_transforms
