@@ -54,6 +54,7 @@ class DiskFfs(Ffs):  # pylint: disable=R0904
 
         (self.base_dir / content_hash).write_bytes(content)
         (self.base_dir / f"{content_hash}.META").write_text(json.dumps(meta))
+        os.makedirs(self.base_dir, exist_ok=True)
 
         return content_hash
 

@@ -24,7 +24,7 @@ class Ffs(abc.ABC):  # pylint: disable=R0904
 
     @abc.abstractmethod
     def put(self, content: bytes, meta: Dict[str, str]) -> str:
-        """Store bytes and metadata. Return sha256hex hash of data as str.
+        """Store bytes and metadata and return sha256hex hash of data as str.
 
         Parameters
         ----------
