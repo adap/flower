@@ -106,4 +106,5 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
     def GetFab(
         self, request: GetFabRequest, context: grpc.ServicerContext
     ) -> GetFabResponse:
+        """Will be implemented later."""
         raise NotImplementedError

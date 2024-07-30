@@ -167,6 +167,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
     def GetFab(
         self, request: GetFabRequest, context: grpc.ServicerContext
     ) -> GetFabResponse:
+        """Will be implemented later."""
         raise NotImplementedError
 
 
