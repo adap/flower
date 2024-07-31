@@ -16,13 +16,11 @@ Then, create a new Python environment and install Flower.
 > We recomend using `pyenv` and the `virtualenv` plugin to create your environment. Other mangaers such as Conda would likely work to. Check [the documentation](https://flower.ai/docs/framework/how-to-install-flower.html) for alternative ways of installing Flower.
 
 ```shell
-# On a new environment
 pip install flwr
 ```
 
 On the new environment, create a new Flower project using the `FlowerTune` template. You will be prompted for a name to give to your project, your username, and for your choice of LLM challenge:
 ```shell
-# Create a new Flower project
 flwr new --framework=FlowerTune
 ```
 
