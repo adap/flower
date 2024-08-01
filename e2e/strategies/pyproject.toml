@@ -2,31 +2,14 @@
 requires = ["poetry-core>=1.4.0"]
 build-backend = "poetry.core.masonry.api"
 
-
-[project]
-name = "e2e_test"
-version = "1.0.0"
+[tool.poetry]
+name = "quickstart_tensorflow"
+version = "0.1.0"
 description = "Keras Federated Learning Quickstart with Flower"
-license = "Apache-2.0"
+authors = ["The Flower Authors <hello@flower.ai>"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
 flwr = { path = "../../", develop = true, extras = ["simulation"] }
 tensorflow-cpu = "^2.9.1, !=2.11.1"
 tensorflow-io-gcs-filesystem = "<0.35.0"
-
-[tool.flwr.app]
-publisher = "flwrlabs"
-
-[tool.flwr.app.components]
-serverapp = ""
-clientapp = "client:app"
-
-[tool.flwr.app.config]
-
-[tool.flwr.federations]
-default = "local-simulation"
-
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 10
-
