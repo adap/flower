@@ -1,5 +1,6 @@
 ---
 num_clients: 100 # total number of clients
+num_epochs: 5
 num_local_epochs: 5 # number of local epochs
 num_rep_epochs: 1 # number of representation epochs (only for FedRep)
 # num_finetune_epochs: 10
@@ -35,10 +36,10 @@ fit_config:
 strategy:
   _target_: fedrep.server.DefaultStrategyPipeline
   fraction_fit: 0.1
-  fraction_evaluate: 0.1
+  fraction_evaluate: 0.0
   min_fit_clients: 2
   min_evaluate_clients: 0
-  min_available_clients: 2
+  min_available_clients: 10
   evaluate_fn: null
   on_fit_config_fn: null
   on_evaluate_config_fn: null

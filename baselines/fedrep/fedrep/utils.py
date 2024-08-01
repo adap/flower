@@ -1,4 +1,4 @@
-"""Utility functions for FedRep."""
+"""Utility functions for FedPer."""
 
 import os
 import pickle
@@ -9,24 +9,52 @@ from typing import Callable, Optional, Type, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
-from flwr.client import Client
 from flwr.server.history import History
 from omegaconf import DictConfig
 
-from fedrep.client import get_client_fn_simulation
+from fedrep.client import BaseClient, FedRepClient, get_client_fn_simulation
 from fedrep.implemented_models.cnn_cifar10 import CNNCifar10, CNNCifar10ModelSplit
 from fedrep.implemented_models.cnn_cifar100 import CNNCifar100, CNNCifar100ModelSplit
 
 
-def set_model_class(config: DictConfig) -> None:
+def set_model_class(config: DictConfig) -> DictConfig:
     """Set model class based on the model name in the config file."""
     # Set the model class
     if config.model_name.lower() == "cnncifar10":
-        config.model["_target_"] = "fedrep.implemented_models.cnn_cifar10.CNNCifar10"
+        config.model["_target_"] = "fedrep.implemented_models.cnn_cifar100.CNNCifar10"
     elif config.model_name.lower() == "cnncifar100":
-        config.model["_target_"] = "fedrep.implemented_models.cnn_cifar100.CNNCifar100"
+        config.model["_target_"] = "fedrep.implemented_models.cnn_cifar10.CNNCifar100"
     else:
-        raise NotImplementedError(f"Model {config.model_name} not implemented")
+        raise NotImplementedError(f"Model {config.model.name} not implemented")
+    return config
+
+
+def set_num_classes(config: DictConfig) -> DictConfig:
+    """Set the number of classes based on the dataset name in the config file."""
+    # Set the number of classes
+    # if config.dataset.name.lower() == "cifar10":
+    #     config.model.num_classes = 10
+    # elif config.dataset.name.lower() == "flickr":
+    #     config.model.num_classes = 5
+    #     # additionally for flickr
+    #     config.batch_size = 4
+    #     config.num_clients = 30
+    #     config.clients_per_round = 30
+    # else:
+    #     raise NotImplementedError(f"Dataset {config.dataset.name} not implemented")
+    return config
+
+
+def set_server_target(config: DictConfig) -> DictConfig:
+    """Set the server target based on the algorithm in the config file."""
+    # Set the server target
+    if config.algorithm.lower() == "fedrep":
+        config.strategy["_target_"] = "fedrep.server.AggregateBodyStrategyPipeline"
+    elif config.algorithm.lower() == "fedavg":
+        config.strategy["_target_"] = "fedrep.server.DefaultStrategyPipeline"
+    else:
+        raise NotImplementedError(f"Algorithm {config.algorithm} not implemented")
+    return config
 
 
 def set_client_state_save_path() -> str:
@@ -43,7 +71,7 @@ def set_client_state_save_path() -> str:
 
 def get_client_fn(
     config: DictConfig, client_state_save_path: str = ""
-) -> Callable[[str], Client]:
+) -> Callable[[str], Union[FedRepClient, BaseClient]]:
     """Get client function."""
     # Get algorithm
     algorithm = config.algorithm.lower()
@@ -55,37 +83,37 @@ def get_client_fn(
     elif algorithm == "fedavg":
         client_fn = get_client_fn_simulation(config=config)
     else:
-        raise NotImplementedError(f"Client fn for {algorithm} not implemented.")
+        raise NotImplementedError
     return client_fn
 
 
 def get_create_model_fn(
     config: DictConfig,
 ) -> tuple[
-    Callable[[], Union[CNNCifar10, CNNCifar100]],
+    Callable[[], Union[type[CNNCifar10], type[CNNCifar100]]],
     Union[type[CNNCifar10ModelSplit], type[CNNCifar100ModelSplit]],
 ]:
     """Get create model function."""
     device = config.server_device
+    split: Union[Type[CNNCifar10ModelSplit], Type[CNNCifar100ModelSplit]] = (
+        CNNCifar10ModelSplit
+    )
     if config.model_name.lower() == "cnncifar10":
-        split = CNNCifar10ModelSplit
 
-        def create_cnncifar10() -> CNNCifar10:
+        def create_model() -> Union[Type[CNNCifar10], Type[CNNCifar100]]:
             """Create initial CNNCifar10 model."""
             return CNNCifar10().to(device)
 
-        return create_cnncifar10, split
-
-    if config.model_name.lower() == "cnncifar100":
+    elif config.model_name.lower() == "cnncifar100":
         split = CNNCifar100ModelSplit
 
-        def create_cnncifar100() -> CNNCifar100:
+        def create_model() -> Union[Type[CNNCifar10], Type[CNNCifar100]]:
             """Create initial CNNCifar100 model."""
             return CNNCifar100().to(device)
 
-        return create_cnncifar100, split
-
-    raise NotImplementedError("Model not implemented. Check name.")
+    else:
+        raise NotImplementedError("Model not implemented, check name. ")
+    return create_model, split
 
 
 def plot_metric_from_history(
@@ -110,17 +138,19 @@ def plot_metric_from_history(
     )
     _, values = zip(*metric_dict["accuracy"])
 
+    # let's extract decentralized loss (main metric reported in FedProx paper)
     rounds_loss, values_loss = zip(*hist.losses_distributed)
 
-    _, axs = plt.subplots(nrows=2, ncols=1, sharex="row")  # type: ignore
-    axs[0].plot(np.asarray(rounds_loss), np.asarray(values_loss))  # type: ignore
-    axs[1].plot(np.asarray(rounds_loss), np.asarray(values))  # type: ignore
+    _, axs = plt.subplots(nrows=2, ncols=1, sharex="row")
+    axs[0].plot(np.asarray(rounds_loss), np.asarray(values_loss))
+    axs[1].plot(np.asarray(rounds_loss), np.asarray(values))
 
-    axs[0].set_ylabel("Loss")  # type: ignore
-    axs[1].set_ylabel("Accuracy")  # type: ignore
+    axs[0].set_ylabel("Loss")
+    axs[1].set_ylabel("Accuracy")
 
-    axs[0].grid()  # type: ignore
-    axs[1].grid()  # type: ignore
+    axs[0].grid()
+    axs[1].grid()
+    # plt.title(f"{metric_type.capitalize()} Validation - MNIST")
     plt.xlabel("Rounds")
     # plt.legend(loc="lower right")
 

@@ -1,6 +1,5 @@
-"""Client implementation - can call FedRep and FedAvg clients."""
+"""Client implementation - can call FedPer and FedAvg clients."""
 
-import os
 import pickle
 from collections import OrderedDict, defaultdict
 from pathlib import Path
@@ -8,11 +7,12 @@ from typing import Any, Callable, Dict, List, Tuple, Type, Union
 
 import numpy as np
 import torch
-from flwr.client import Client, NumPyClient
+from flwr.client import NumPyClient
 from flwr.common import NDArrays, Scalar
 from omegaconf import DictConfig
-from torch.utils.data import DataLoader, Subset
+from torch.utils.data import DataLoader, Subset, random_split
 from torchvision import transforms
+from torchvision.datasets import ImageFolder
 
 from fedrep.constants import MEAN, STD
 from fedrep.dataset_preparation import call_dataset
@@ -22,17 +22,36 @@ from fedrep.implemented_models.cnn_cifar100 import CNNCifar100ModelManager
 PROJECT_DIR = Path(__file__).parent.parent.absolute()
 
 
-# pylint: disable=R0902,R0913
+class ClientDataloaders:
+    """Client dataloaders."""
+
+    def __init__(self, trainloader: DataLoader, testloader: DataLoader) -> None:
+        """Initialize the client dataloaders."""
+        self.trainloader = trainloader
+        self.testloader = testloader
+
+
+class ClientEssentials:
+    """Client essentials."""
+
+    def __init__(self, client_id: str, client_state_save_path: str = "") -> None:
+        """Set client state save path and client ID."""
+        self.client_id = int(client_id)
+        self.client_state_save_path = (
+            (client_state_save_path + f"/client_{self.client_id}")
+            if client_state_save_path != ""
+            else None
+        )
+
+
 class BaseClient(NumPyClient):
     """Implementation of Federated Averaging (FedAvg) Client."""
 
     def __init__(
         self,
-        client_id: int,
-        trainloader: DataLoader,
-        testloader: DataLoader,
-        client_state_save_path: str,
+        data_loaders: ClientDataloaders,
         config: DictConfig,
+        client_essentials: ClientEssentials,
         model_manager_class: Union[
             Type[CNNCifar10ModelManager], Type[CNNCifar100ModelManager]
         ],
@@ -46,27 +65,25 @@ class BaseClient(NumPyClient):
         """
         super().__init__()
 
-        self.train_round_count = 1
-        self.test_round_count = 1
-        self.client_id = int(client_id)
-        self.client_state_save_path = client_state_save_path
+        self.train_round = 1
+        self.test_round = 1
+        self.client_id = int(client_essentials.client_id)
+        self.client_state_save_path = client_essentials.client_state_save_path
         self.hist: Dict[str, Dict[str, Any]] = defaultdict(dict)
-        self.config = config
-        self.num_local_epochs: int = config.num_local_epochs
+        self.num_epochs: int = config["num_epochs"]
         self.model_manager = model_manager_class(
             client_id=self.client_id,
             config=config,
-            trainloader=trainloader,
-            testloader=testloader,
+            trainloader=data_loaders.trainloader,
+            testloader=data_loaders.testloader,
             client_save_path=self.client_state_save_path,
-            learning_rate=config.learning_rate,
+            learning_rate=config["learning_rate"],
         )
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Return the current local model parameters."""
         return self.model_manager.model.get_parameters()
 
-    # pylint: disable=W0613
     def set_parameters(
         self, parameters: List[np.ndarray], evaluate: bool = False
     ) -> None:
@@ -75,10 +92,15 @@ class BaseClient(NumPyClient):
         Args:
             parameters: parameters to set the model to.
         """
-        state_dict = OrderedDict(
-            (k, torch.from_numpy(v))
-            for k, v in zip(self.model_manager.model.state_dict().keys(), parameters)
-        )
+        _ = evaluate
+        model_keys = [
+            k
+            for k in self.model_manager.model.state_dict().keys()
+            if k.startswith("_body") or k.startswith("_head")
+        ]
+        params_dict = zip(model_keys, parameters)
+
+        state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
 
         self.model_manager.model.set_parameters(state_dict)
 
@@ -89,10 +111,12 @@ class BaseClient(NumPyClient):
         -------
             Dict with the train metrics.
         """
+        epochs = self.num_epochs
+
         self.model_manager.model.enable_body()
         self.model_manager.model.enable_head()
 
-        return self.model_manager.train()
+        return self.model_manager.train(epochs=epochs)
 
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
@@ -114,13 +138,14 @@ class BaseClient(NumPyClient):
         train_results = self.perform_train()
 
         # Update train history
-        self.hist[str(self.train_round_count)] = {
-            **self.hist[str(self.train_round_count)],
+        self.hist[str(self.train_round)] = {
+            **self.hist[str(self.train_round)],
             "trn": train_results,
         }
         print("<------- TRAIN RESULTS -------> :", train_results)
 
-        self.train_round_count += 1
+        self.train_round += 1
+
         return self.get_parameters(config), self.model_manager.train_dataset_size(), {}
 
     def evaluate(
@@ -141,25 +166,32 @@ class BaseClient(NumPyClient):
         self.set_parameters(parameters, evaluate=True)
 
         # Test the model
-        test_results = self.model_manager.test()
-        print("<------- TEST RESULTS -------> :", test_results)
+        tst_results = self.model_manager.test()
+        print("<------- TEST RESULTS -------> :", tst_results)
 
         # Update test history
-        self.hist[str(self.test_round_count)] = {
-            **self.hist[str(self.test_round_count)],
-            "tst": test_results,
+        self.hist[str(self.test_round)] = {
+            **self.hist[str(self.test_round)],
+            "tst": tst_results,
         }
-        self.test_round_count += 1
+        self.test_round += 1
 
         return (
-            test_results.get("loss", 0.0),
+            tst_results.get("loss", 0.0),
             self.model_manager.test_dataset_size(),
-            {k: v for k, v in test_results.items() if not isinstance(v, (dict, list))},
+            {k: v for k, v in tst_results.items() if not isinstance(v, (dict, list))},
         )
 
 
 class FedRepClient(BaseClient):
-    """Implementation of FedRep Client."""
+    """Implementation of Federated Personalization (FedPer) Client."""
+
+    def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
+        """Return the current local body parameters."""
+        return [
+            val.cpu().numpy()
+            for _, val in self.model_manager.model.body.state_dict().items()
+        ]
 
     def set_parameters(self, parameters: List[np.ndarray], evaluate=False) -> None:
         """Set the local body parameters to the received parameters.
@@ -168,24 +200,33 @@ class FedRepClient(BaseClient):
             parameters: parameters to set the body to.
             evaluate: whether the client is evaluating or not.
         """
-        model_keys = list(self.model_manager.model.body.state_dict().keys())
+        model_keys = [
+            k
+            for k in self.model_manager.model.state_dict().keys()
+            if k.startswith("_body")
+        ]
 
-        # If client is not trained before, use the global head.
-        if not os.path.isfile(self.client_state_save_path):
+        if not evaluate:
+            # Only update client's local head if it hasn't trained yet
+            print("Setting head parameters to global head parameters.")
             model_keys.extend(
-                k for k in self.model_manager.model.head.state_dict().keys()
+                [
+                    k
+                    for k in self.model_manager.model.state_dict().keys()
+                    if k.startswith("_head")
+                ]
             )
 
-        state_dict = OrderedDict(
-            (k, torch.from_numpy(v)) for k, v in zip(model_keys, parameters)
-        )
+        params_dict = zip(model_keys, parameters)
+
+        state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
 
         self.model_manager.model.set_parameters(state_dict)
 
 
 def get_client_fn_simulation(
     config: DictConfig, client_state_save_path: str = ""
-) -> Callable[[str], Client]:
+) -> Callable[[str], Union[FedRepClient, BaseClient]]:
     """Generate the client function that creates the Flower Clients.
 
     Parameters
@@ -241,7 +282,7 @@ def get_client_fn_simulation(
         test_data_transform=test_data_transform,
     )
 
-    def client_fn(cid: str) -> Client:
+    def client_fn(cid: str) -> BaseClient:
         """Create a Flower client representing a single organization."""
         cid_use = int(cid)
 
@@ -253,7 +294,7 @@ def get_client_fn_simulation(
         testset.indices = data_indices[cid_use]["test"]
 
         # Create the train loader
-        trainloader = DataLoader(trainset, config.batch_size, shuffle=True)
+        trainloader = DataLoader(trainset, config.batch_size, shuffle=False)
         # Create the test loader
         testloader = DataLoader(testset, config.batch_size)
 
@@ -265,18 +306,21 @@ def get_client_fn_simulation(
         elif config.model_name.lower() == "cnncifar100":
             model_manager_class = CNNCifar100ModelManager
         else:
-            raise NotImplementedError(
-                f"Model {config.model_name} not implemented, check name."
-            )
-
-        client_class: Union[Type[BaseClient], Type[FedRepClient]] = BaseClient
-        if config.algorithm.lower() == "fedrep":
-            client_class = FedRepClient
-        return client_class(
-            client_id=int(cid),
-            trainloader=trainloader,
-            testloader=testloader,
-            client_state_save_path=client_state_save_path + f"/client_{cid}",
+            raise NotImplementedError("Model not implemented, check name.")
+        client_data_loaders = ClientDataloaders(trainloader, testloader)
+        client_essentials = ClientEssentials(
+            client_id=cid, client_state_save_path=client_state_save_path
+        )
+        if client_state_save_path != "":
+            return FedRepClient(
+                data_loaders=client_data_loaders,
+                client_essentials=client_essentials,
+                config=config,
+                model_manager_class=model_manager_class,
+            ).to_client()
+        return BaseClient(
+            data_loaders=client_data_loaders,
+            client_essentials=client_essentials,
             config=config,
             model_manager_class=model_manager_class,
         ).to_client()
