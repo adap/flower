@@ -21,7 +21,6 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.fedavg import FedAvg
 from torch import nn as nn
 
-from fedrep.constants import Algorithms
 from fedrep.implemented_models.cnn_cifar10 import CNNCifar10ModelSplit
 from fedrep.implemented_models.cnn_cifar100 import CNNCifar100ModelSplit
 from fedrep.models import ModelSplit
@@ -48,7 +47,7 @@ class ServerInitializationStrategy(FedAvg):
         min_available_clients: int = 1,
         min_evaluate_clients: int = 1,
         min_fit_clients: int = 1,
-        algorithm: str = Algorithms.FEDPER.value,
+        algorithm: str = "fedrep",
         **kwargs: Any,
     ) -> None:
         super().__init__(*args, **kwargs)
@@ -58,7 +57,7 @@ class ServerInitializationStrategy(FedAvg):
         self.min_available_clients = min_available_clients
         self.min_evaluate_clients = min_evaluate_clients
         self.min_fit_clients = min_fit_clients
-        self.algorithm = algorithm
+        self.algorithm = algorithm.lower()
         self.model = model_split_class(model=create_model())
 
     def initialize_parameters(
@@ -78,7 +77,7 @@ class ServerInitializationStrategy(FedAvg):
         initial_parameters: Optional[Parameters] = self.initial_parameters
         self.initial_parameters = None  # Don't keep initial parameters in memory
         if initial_parameters is None and self.model is not None:
-            if self.algorithm == Algorithms.FEDPER.value:
+            if self.algorithm == "fedrep":
                 initial_parameters_use = [
                     val.cpu().numpy() for _, val in self.model.body.state_dict().items()
                 ]
@@ -139,8 +138,7 @@ class AggregateFullStrategy(ServerInitializationStrategy):
                 client_manager.num_available()
             )
             clients = client_manager.sample(
-                num_clients=sample_size,
-                min_num_clients=min_num_clients,
+                num_clients=sample_size, min_num_clients=min_num_clients
             )
         else:
             clients = list(client_manager.all().values())
@@ -338,8 +336,7 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
                 client_manager.num_available()
             )
             clients = client_manager.sample(
-                num_clients=sample_size,
-                min_num_clients=min_num_clients,
+                num_clients=sample_size, min_num_clients=min_num_clients
             )
         else:
             clients = list(client_manager.all().values())

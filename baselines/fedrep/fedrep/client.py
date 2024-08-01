@@ -153,20 +153,20 @@ class BaseClient(NumPyClient):
         self.set_parameters(parameters, evaluate=True)
 
         # Test the model
-        tst_results = self.model_manager.test()
-        print("<------- TEST RESULTS -------> :", tst_results)
+        test_results = self.model_manager.test()
+        print("<------- TEST RESULTS -------> :", test_results)
 
         # Update test history
         self.hist[str(self.test_round)] = {
             **self.hist[str(self.test_round)],
-            "tst": tst_results,
+            "tst": test_results,
         }
         self.test_round += 1
 
         return (
-            tst_results.get("loss", 0.0),
+            test_results.get("loss", 0.0),
             self.model_manager.test_dataset_size(),
-            {k: v for k, v in tst_results.items() if not isinstance(v, (dict, list))},
+            {k: v for k, v in test_results.items() if not isinstance(v, (dict, list))},
         )
 
 
