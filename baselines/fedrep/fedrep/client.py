@@ -7,12 +7,11 @@ from typing import Any, Callable, Dict, List, Tuple, Type, Union
 
 import numpy as np
 import torch
-from flwr.client import NumPyClient
+from flwr.client import Client, NumPyClient
 from flwr.common import NDArrays, Scalar
 from omegaconf import DictConfig
-from torch.utils.data import DataLoader, Subset, random_split
+from torch.utils.data import DataLoader, Subset
 from torchvision import transforms
-from torchvision.datasets import ImageFolder
 
 from fedrep.constants import MEAN, STD
 from fedrep.dataset_preparation import call_dataset
@@ -22,60 +21,48 @@ from fedrep.implemented_models.cnn_cifar100 import CNNCifar100ModelManager
 PROJECT_DIR = Path(__file__).parent.parent.absolute()
 
 
-class ClientDataloaders:
-    """Client dataloaders."""
-
-    def __init__(self, trainloader: DataLoader, testloader: DataLoader) -> None:
-        """Initialize the client dataloaders."""
-        self.trainloader = trainloader
-        self.testloader = testloader
-
-
-class ClientEssentials:
-    """Client essentials."""
-
-    def __init__(self, client_id: str, client_state_save_path: str = "") -> None:
-        """Set client state save path and client ID."""
-        self.client_id = int(client_id)
-        self.client_state_save_path = (
-            (client_state_save_path + f"/client_{self.client_id}")
-            if client_state_save_path != ""
-            else None
-        )
-
-
 class BaseClient(NumPyClient):
     """Implementation of Federated Averaging (FedAvg) Client."""
 
     def __init__(
         self,
-        data_loaders: ClientDataloaders,
+        client_id: int,
+        trainloader: DataLoader,
+        testloader: DataLoader,
         config: DictConfig,
-        client_essentials: ClientEssentials,
         model_manager_class: Union[
             Type[CNNCifar10ModelManager], Type[CNNCifar100ModelManager]
         ],
+        client_state_save_path: str = "",
     ):
         """Initialize client attributes.
 
         Args:
+            client_id: The client ID.
+            trainloader: Client train data loader.
+            testloader: Client test data loader.
             config: dictionary containing the client configurations.
-            client_id: id of the client.
             model_manager_class: class to be used as the model manager.
+            client_state_save_path: Path for saving model head parameters.
+                (Just for FedRep). Defaults to "".
         """
         super().__init__()
 
         self.train_round = 1
         self.test_round = 1
-        self.client_id = int(client_essentials.client_id)
-        self.client_state_save_path = client_essentials.client_state_save_path
+        self.client_id = client_id
+        self.client_state_save_path = (
+            (client_state_save_path + f"/client_{self.client_id}")
+            if client_state_save_path != ""
+            else None
+        )
         self.hist: Dict[str, Dict[str, Any]] = defaultdict(dict)
         self.num_epochs: int = config["num_epochs"]
         self.model_manager = model_manager_class(
             client_id=self.client_id,
             config=config,
-            trainloader=data_loaders.trainloader,
-            testloader=data_loaders.testloader,
+            trainloader=trainloader,
+            testloader=testloader,
             client_save_path=self.client_state_save_path,
             learning_rate=config["learning_rate"],
         )
@@ -184,7 +171,7 @@ class BaseClient(NumPyClient):
 
 
 class FedRepClient(BaseClient):
-    """Implementation of Federated Personalization (FedPer) Client."""
+    """Implementation of Federated Personalization (FedRep) Client."""
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Return the current local body parameters."""
@@ -245,7 +232,7 @@ def get_client_fn_simulation(
     assert config.model_name.lower() in [
         "cnncifar10",
         "cnncifar100",
-    ], f"Model {config.model.name} not implemented"
+    ], f"Model {config.model_name} not implemented"
 
     # load dataset (cifar10/cifar100) and clients' data indices
     try:
@@ -282,19 +269,15 @@ def get_client_fn_simulation(
         test_data_transform=test_data_transform,
     )
 
-    def client_fn(cid: str) -> BaseClient:
+    def client_fn(cid: str) -> Client:
         """Create a Flower client representing a single organization."""
         cid_use = int(cid)
 
-        # Nevermind. set dummy `indices=[0]`, is for avoiding raising error
-        # when DataLoader has `shuffle=True`
-        trainset = Subset(dataset, indices=[0])
-        testset = Subset(dataset, indices=[])
-        trainset.indices = data_indices[cid_use]["train"]
-        testset.indices = data_indices[cid_use]["test"]
+        trainset = Subset(dataset, indices=data_indices[cid_use]["train"])
+        testset = Subset(dataset, indices=data_indices[cid_use]["test"])
 
         # Create the train loader
-        trainloader = DataLoader(trainset, config.batch_size, shuffle=False)
+        trainloader = DataLoader(trainset, config.batch_size, shuffle=True)
         # Create the test loader
         testloader = DataLoader(testset, config.batch_size)
 
@@ -306,23 +289,26 @@ def get_client_fn_simulation(
         elif config.model_name.lower() == "cnncifar100":
             model_manager_class = CNNCifar100ModelManager
         else:
-            raise NotImplementedError("Model not implemented, check name.")
-        client_data_loaders = ClientDataloaders(trainloader, testloader)
-        client_essentials = ClientEssentials(
-            client_id=cid, client_state_save_path=client_state_save_path
-        )
+            raise NotImplementedError(
+                f"Model {config.model_name} not implemented, check name."
+            )
+
         if client_state_save_path != "":
             return FedRepClient(
-                data_loaders=client_data_loaders,
-                client_essentials=client_essentials,
+                client_id=cid_use,
+                trainloader=trainloader,
+                testloader=testloader,
                 config=config,
                 model_manager_class=model_manager_class,
+                client_state_save_path=client_state_save_path,
             ).to_client()
         return BaseClient(
-            data_loaders=client_data_loaders,
-            client_essentials=client_essentials,
+            client_id=cid_use,
+            trainloader=trainloader,
+            testloader=testloader,
             config=config,
             model_manager_class=model_manager_class,
+            client_state_save_path=client_state_save_path,
         ).to_client()
 
     return client_fn
