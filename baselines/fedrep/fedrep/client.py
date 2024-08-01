@@ -46,20 +46,20 @@ class BaseClient(NumPyClient):
         """
         super().__init__()
 
-        self.train_id = 1
-        self.test_id = 1
+        self.train_round_count = 1
+        self.test_round_count = 1
         self.client_id = int(client_id)
         self.client_state_save_path = client_state_save_path
         self.hist: Dict[str, Dict[str, Any]] = defaultdict(dict)
         self.config = config
-        self.num_local_epochs: int = config["num_local_epochs"]
+        self.num_local_epochs: int = config.num_local_epochs
         self.model_manager = model_manager_class(
             client_id=self.client_id,
             config=config,
             trainloader=trainloader,
             testloader=testloader,
             client_save_path=self.client_state_save_path,
-            learning_rate=config["learning_rate"],
+            learning_rate=config.learning_rate,
         )
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
@@ -114,13 +114,13 @@ class BaseClient(NumPyClient):
         train_results = self.perform_train()
 
         # Update train history
-        self.hist[str(self.train_id)] = {
-            **self.hist[str(self.train_id)],
+        self.hist[str(self.train_round_count)] = {
+            **self.hist[str(self.train_round_count)],
             "trn": train_results,
         }
         print("<------- TRAIN RESULTS -------> :", train_results)
 
-        self.train_id += 1
+        self.train_round_count += 1
         return self.get_parameters(config), self.model_manager.train_dataset_size(), {}
 
     def evaluate(
@@ -141,32 +141,25 @@ class BaseClient(NumPyClient):
         self.set_parameters(parameters, evaluate=True)
 
         # Test the model
-        tst_results = self.model_manager.test()
-        print("<------- TEST RESULTS -------> :", tst_results)
+        test_results = self.model_manager.test()
+        print("<------- TEST RESULTS -------> :", test_results)
 
         # Update test history
-        self.hist[str(self.test_id)] = {
-            **self.hist[str(self.test_id)],
-            "tst": tst_results,
+        self.hist[str(self.test_round_count)] = {
+            **self.hist[str(self.test_round_count)],
+            "tst": test_results,
         }
-        self.test_id += 1
+        self.test_round_count += 1
 
         return (
-            tst_results.get("loss", 0.0),
+            test_results.get("loss", 0.0),
             self.model_manager.test_dataset_size(),
-            {k: v for k, v in tst_results.items() if not isinstance(v, (dict, list))},
+            {k: v for k, v in test_results.items() if not isinstance(v, (dict, list))},
         )
 
 
 class FedRepClient(BaseClient):
     """Implementation of FedRep Client."""
-
-    def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
-        """Return the current local body parameters."""
-        return [
-            val.cpu().numpy()
-            for val in self.model_manager.model.body.state_dict().values()
-        ]
 
     def set_parameters(self, parameters: List[np.ndarray], evaluate=False) -> None:
         """Set the local body parameters to the received parameters.

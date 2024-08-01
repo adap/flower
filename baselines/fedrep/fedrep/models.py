@@ -74,7 +74,7 @@ class ModelSplit(ABC, nn.Module):
         self.head.load_state_dict(state_dict, strict=True)
 
     def get_parameters(self) -> List[np.ndarray]:
-        """Get model parameters (without fixed head).
+        """Get model parameters.
 
         Returns
         -------
@@ -123,11 +123,9 @@ class ModelSplit(ABC, nn.Module):
         # Basically we don't need to do log softmax explicitly,
         # as it is done by nn.CrossEntropyLoss()
         # So we actually should just return the x directly.
-        # return x
-
+        return x
         # However the official implementation did that,
-        # so I leave this as it is.
-        return torch.nn.functional.log_softmax(x, dim=1)
+        # return torch.nn.functional.log_softmax(x, dim=1)
 
 
 class ModelManager(ABC):
@@ -147,7 +145,7 @@ class ModelManager(ABC):
         testloader: DataLoader,
         client_save_path: Optional[str],
         learning_rate: float,
-        model_split_class: Type[Any],  # ModelSplit
+        model_split_class: Type[ModelSplit],
     ):
         """Initialize the attributes of the model manager.
 
@@ -203,7 +201,7 @@ class ModelManager(ABC):
         optimizer = torch.optim.SGD(
             [{"params": weights, "weight_decay": 0.0001}, {"params": biases}],
             lr=self.learning_rate,
-            momentum=0,
+            momentum=0.5,
         )
         correct, total = 0, 0
         loss: torch.Tensor = 0.0
@@ -211,11 +209,11 @@ class ModelManager(ABC):
         for i in range(local_epochs + rep_epochs):
             if self.config.algorithm.lower() == "fedrep":
                 if i < local_epochs:
-                    self.model.enable_head()
                     self.model.disable_body()
+                    self.model.enable_head()
                 else:
-                    self.model.disable_head()
                     self.model.enable_body()
+                    self.model.disable_head()
             for images, labels in self.trainloader:
                 outputs = self.model(images.to(self.device))
                 labels = labels.to(self.device)
@@ -249,6 +247,25 @@ class ModelManager(ABC):
             self.model.head.load_state_dict(torch.load(self.client_save_path))
 
         criterion = torch.nn.CrossEntropyLoss()
+
+        finetune_epochs = 0
+        if hasattr(self.config, "num_finetune_epochs"):
+            finetune_epochs = self.config.num_finetune_epochs
+
+        if finetune_epochs > 0:
+            self.model.train()
+            self.model.enable_head()
+            self.model.disable_body()
+            optimizer = torch.optim.SGD(self.model.parameters(), lr=self.learning_rate)
+            for _ in range(finetune_epochs):
+                for images, labels in self.trainloader:
+                    outputs = self.model(images.to(self.device))
+                    labels = labels.to(self.device)
+                    loss = criterion(outputs, labels)
+                    optimizer.zero_grad()
+                    loss.backward()
+                    optimizer.step()
+
         correct, total, loss = 0, 0, 0.0
         self.model.eval()
         with torch.no_grad():
@@ -257,11 +274,8 @@ class ModelManager(ABC):
                 labels = labels.to(self.device)
                 loss += criterion(outputs, labels).item()
                 total += labels.size(0)
-                correct += (torch.argmax(outputs.data, 1) == labels).sum().item()
+                correct += (torch.argmax(outputs, 1) == labels).sum().item()
         print("Test Accuracy: {:.4f}".format(correct / total))
-
-        if algorithm == "fedrep" and self.client_save_path is not None:
-            torch.save(self.model.head.state_dict(), self.client_save_path)
 
         return {
             "loss": loss / len(self.testloader.dataset),
@@ -281,6 +295,6 @@ class ModelManager(ABC):
         return len(self.trainloader.dataset) + len(self.testloader.dataset)
 
     @property
-    def model(self) -> nn.Module:
+    def model(self) -> ModelSplit:
         """Return model."""
         return self._model

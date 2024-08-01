@@ -21,24 +21,12 @@ from fedrep.implemented_models.cnn_cifar100 import CNNCifar100, CNNCifar100Model
 def set_model_class(config: DictConfig) -> None:
     """Set model class based on the model name in the config file."""
     # Set the model class
-    if config.dataset.name.lower() == "cifar10":
+    if config.model_name.lower() == "cnncifar10":
         config.model["_target_"] = "fedrep.implemented_models.cnn_cifar10.CNNCifar10"
-    elif config.dataset.name.lower() == "cifar100":
+    elif config.model_name.lower() == "cnncifar100":
         config.model["_target_"] = "fedrep.implemented_models.cnn_cifar100.CNNCifar100"
     else:
-        raise NotImplementedError(f"Model for {config.dataset.name} not implemented")
-
-
-def set_server_target(config: DictConfig) -> DictConfig:
-    """Set the server target based on the algorithm in the config file."""
-    # Set the server target
-    if config.algorithm.lower() == "fedrep":
-        config.strategy["_target_"] = "fedrep.server.AggregateBodyStrategyPipeline"
-    elif config.algorithm.lower() == "fedavg":
-        config.strategy["_target_"] = "fedrep.server.DefaultStrategyPipeline"
-    else:
-        raise NotImplementedError(f"Algorithm {config.algorithm} not implemented")
-    return config
+        raise NotImplementedError(f"Model {config.model_name} not implemented")
 
 
 def set_client_state_save_path() -> str:
@@ -74,7 +62,7 @@ def get_client_fn(
 def get_create_model_fn(
     config: DictConfig,
 ) -> tuple[
-    Callable[[], Union[type[CNNCifar10], type[CNNCifar100]]],
+    Callable[[], Union[CNNCifar10, CNNCifar100]],
     Union[type[CNNCifar10ModelSplit], type[CNNCifar100ModelSplit]],
 ]:
     """Get create model function."""
@@ -82,7 +70,7 @@ def get_create_model_fn(
     if config.model_name.lower() == "cnncifar10":
         split = CNNCifar10ModelSplit
 
-        def create_cnncifar10() -> Type[CNNCifar10]:
+        def create_cnncifar10() -> CNNCifar10:
             """Create initial CNNCifar10 model."""
             return CNNCifar10().to(device)
 
@@ -91,7 +79,7 @@ def get_create_model_fn(
     if config.model_name.lower() == "cnncifar100":
         split = CNNCifar100ModelSplit
 
-        def create_cnncifar100() -> Type[CNNCifar100]:
+        def create_cnncifar100() -> CNNCifar100:
             """Create initial CNNCifar100 model."""
             return CNNCifar100().to(device)
 

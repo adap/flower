@@ -1,22 +1,23 @@
 ---
 num_clients: 100 # total number of clients
-num_local_epochs: 10 # number of local epochs
+num_local_epochs: 5 # number of local epochs
 num_rep_epochs: 1 # number of representation epochs (only for FedRep)
+# num_finetune_epochs: 10
 batch_size: 50
 num_rounds: 100
 clients_per_round: 10
-learning_rate: 0.1
+learning_rate: 0.01
 algorithm: fedrep
 model_name: cnncifar10
 
 client_resources:
-  num_cpus: 4
+  num_cpus: 6
   num_gpus: 1
 
 server_device: cuda:0
 
 dataset:
-  name : cifar10
+  name: cifar10
   split: sample
   num_classes: 2
   seed: 42
@@ -28,16 +29,16 @@ model:
 
 fit_config:
   drop_client: false
-  epochs : ${num_local_epochs}
+  epochs: ${num_local_epochs}
   batch_size: ${batch_size}
 
 strategy:
   _target_: fedrep.server.DefaultStrategyPipeline
-  fraction_fit: 0.00001 # because we want the number of clients to sample on each roudn to be solely defined by min_fit_clients
-  min_fit_clients: ${clients_per_round}
-  fraction_evaluate: 0.0
-  min_evaluate_clients: ${clients_per_round}
-  min_available_clients: ${num_clients}
-  algorithm: ${algorithm}
-  evaluate_fn: None
-  on_evaluate_config_fn: None
+  fraction_fit: 0.1
+  fraction_evaluate: 0.1
+  min_fit_clients: 2
+  min_evaluate_clients: 0
+  min_available_clients: 2
+  evaluate_fn: null
+  on_fit_config_fn: null
+  on_evaluate_config_fn: null

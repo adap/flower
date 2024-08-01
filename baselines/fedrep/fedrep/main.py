@@ -8,9 +8,11 @@ from pathlib import Path
 
 import flwr as fl
 import hydra
+from flwr.common.parameter import ndarrays_to_parameters
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
+
 
 from fedrep.dataset import dataset_main
 from fedrep.utils import (
@@ -35,7 +37,10 @@ def main(cfg: DictConfig) -> None:
     # 1. Print parsed config
     # Set the model class, server target, and number of classes
     set_model_class(cfg)
-    # cfg = set_server_target(cfg)
+
+    create_model_fn, model_split_class = get_create_model_fn(cfg)
+
+    model = model_split_class(create_model_fn())
 
     print(OmegaConf.to_yaml(cfg))
 
@@ -50,11 +55,8 @@ def main(cfg: DictConfig) -> None:
     # Get client function
     client_fn = get_client_fn(config=cfg, client_state_save_path=client_state_save_path)
 
-    # get a function that will be used to construct the config that the client's
-    # fit() method will received
     def get_on_fit_config():
 
-        # pylint: disable=W0613
         def fit_config_fn(server_round: int):
             # resolve and convert to python dict
             fit_config = OmegaConf.to_container(cfg.fit_config, resolve=True)
@@ -62,15 +64,13 @@ def main(cfg: DictConfig) -> None:
 
         return fit_config_fn
 
-    # get a function that will be used to construct the model
-    create_model_fn, model_split_class = get_create_model_fn(cfg)
-
     # 4. Define your strategy
     strategy = instantiate(
         cfg.strategy,
-        create_model_fn=create_model_fn,
-        on_fit_config_fn=get_on_fit_config(),
         model_split_class=model_split_class,
+        create_model=create_model_fn,
+        initial_parameters=ndarrays_to_parameters(model.get_parameters()),
+        on_fit_config_fn=get_on_fit_config(),
     )
 
     # 5. Start Simulation

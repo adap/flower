@@ -79,8 +79,4 @@ class CNNCifar100ModelManager(ModelManager):
 
     def _create_model(self) -> CNNCifar100:
         """Return CNNCifar100 model to be splitted into head and body."""
-        try:
-            return CNNCifar100().to(self.device)
-        except AttributeError:
-            self.device = self.config["server_device"]
-            return CNNCifar100().to(self.device)
+        return CNNCifar100().to(self.device)
