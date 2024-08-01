@@ -349,7 +349,7 @@ def start_vce(
                 default_app_ref=client_app_attr,
                 app_dir=app_dir,
                 flwr_dir=flwr_dir,
-                multi_app=True,
+                multi_app=False,
             )(run.fab_id, run.fab_version)
 
         if client_app:
