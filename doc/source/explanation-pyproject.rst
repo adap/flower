@@ -79,7 +79,7 @@ declared, i.e, in the above case where ``default`` is set to
    # Federation definition
 
 ``<federation_name>.address``
-=============================
+-----------------------------
 
 This is the address of the federation, i.e, the address of the
 corresponding ``SuperExec``. Optional, if no address is provided, the
@@ -91,7 +91,7 @@ simulation engine will be used.
    address = "127.0.0.1:9093"
 
 ``<federation_name>.options``
-=============================
+-----------------------------
 
 This field is a table accepting arbitrary keys. Note that in simulation
 mode, the ``num-supernodes`` key is required. This means that either
