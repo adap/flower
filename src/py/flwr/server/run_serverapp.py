@@ -227,7 +227,7 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
     parser.add_argument(
         "--insecure",
         action="store_true",
-        help="Run the server app without HTTPS. By default, the app runs with "
+        help="Run the `ServerApp` without HTTPS. By default, the app runs with "
         "HTTPS enabled. Use this flag only if you understand the risks.",
     )
     parser.add_argument(
