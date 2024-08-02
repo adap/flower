@@ -264,9 +264,9 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         "app_dir",
         nargs="?",
         default=None,
-        help="Specify the project directory to load and run the client app. "
+        help="Specify the project directory to load and run the `ClientApp`. "
         "When this argument is provided, the SuperNode will exclusively respond to "
-        "messages from the corresponding server app by matching the FAB ID and FAB "
+        "messages from the corresponding ServerApp by matching the FAB ID and FAB "
         "version. An error will be raised if a message is received from any other "
         "server app.",
     )
