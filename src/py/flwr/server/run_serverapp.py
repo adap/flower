@@ -222,7 +222,7 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
         "app_dir",
         nargs="?",
         default=None,
-        help="Load and run the server app from the provided project directory.",
+        help="Load and run the `ServerApp` from the provided project directory.",
     )
     parser.add_argument(
         "--insecure",
