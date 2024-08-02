@@ -169,7 +169,7 @@ def parse_config_args(
 
 
 def get_metadata_from_config(config: Dict[str, Any]) -> Tuple[str, str]:
-    """Extract the fab_version and the fab_id  from a project config."""
+    """Extract the fab_version and the fab_id from a project config."""
     return (
         config["project"]["version"],
         f"{config['tool']['flwr']['app']['publisher']}/{config['project']['name']}",
