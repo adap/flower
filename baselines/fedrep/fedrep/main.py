@@ -5,9 +5,13 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 """
 
 from pathlib import Path
+from typing import List, Tuple
 
 import flwr as fl
 import hydra
+import numpy as np
+from flwr.common.parameter import ndarrays_to_parameters
+from flwr.common.typing import Metrics
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
@@ -70,12 +74,27 @@ def main(cfg: DictConfig) -> None:
     # get a function that will be used to construct the model
     create_model, split = get_create_model_fn(cfg)
 
+    model = split(create_model())
+
+    def evaluate_metrics_aggregation_fn(
+        eval_metrics: List[Tuple[int, Metrics]]
+    ) -> Metrics:
+        weights, accuracies = [], []
+        for num_examples, metric in eval_metrics:
+            weights.append(num_examples)
+            accuracies.append(metric["accuracy"] * num_examples)
+        weights = np.array(weights, dtype=np.float32)
+        accuracies = np.array(accuracies, dtype=np.float32)
+        weights /= weights.sum()
+        accuracy = np.sum(accuracies * weights).item()
+        return {"accuracy": accuracy}
+
     # 4. Define your strategy
     strategy = instantiate(
         cfg.strategy,
-        create_model=create_model,
+        initial_parameters=ndarrays_to_parameters(model.get_parameters()),
         on_fit_config_fn=get_on_fit_config(),
-        model_split_class=split,
+        evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
     )
 
     # 5. Start Simulation

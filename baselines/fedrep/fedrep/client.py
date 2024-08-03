@@ -8,7 +8,7 @@ from typing import Any, Callable, Dict, List, Tuple, Type, Union
 import numpy as np
 import torch
 from flwr.client import Client, NumPyClient
-from flwr.common import NDArrays, Scalar
+from flwr.common import Code, EvaluateRes, NDArrays, Scalar, Status
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader, Subset
 from torchvision import transforms
@@ -17,6 +17,7 @@ from fedrep.constants import MEAN, STD
 from fedrep.dataset_preparation import call_dataset
 from fedrep.implemented_models.cnn_cifar10 import CNNCifar10ModelManager
 from fedrep.implemented_models.cnn_cifar100 import CNNCifar100ModelManager
+
 
 PROJECT_DIR = Path(__file__).parent.parent.absolute()
 
@@ -48,8 +49,6 @@ class BaseClient(NumPyClient):
         """
         super().__init__()
 
-        self.train_round = 1
-        self.test_round = 1
         self.client_id = client_id
         self.client_state_save_path = (
             (client_state_save_path + f"/client_{self.client_id}")
@@ -79,7 +78,6 @@ class BaseClient(NumPyClient):
         Args:
             parameters: parameters to set the model to.
         """
-        _ = evaluate
         model_keys = [
             k
             for k in self.model_manager.model.state_dict().keys()
@@ -125,13 +123,7 @@ class BaseClient(NumPyClient):
         train_results = self.perform_train()
 
         # Update train history
-        self.hist[str(self.train_round)] = {
-            **self.hist[str(self.train_round)],
-            "trn": train_results,
-        }
         print("<------- TRAIN RESULTS -------> :", train_results)
-
-        self.train_round += 1
 
         return self.get_parameters(config), self.model_manager.train_dataset_size(), {}
 
@@ -155,13 +147,6 @@ class BaseClient(NumPyClient):
         # Test the model
         test_results = self.model_manager.test()
         print("<------- TEST RESULTS -------> :", test_results)
-
-        # Update test history
-        self.hist[str(self.test_round)] = {
-            **self.hist[str(self.test_round)],
-            "tst": test_results,
-        }
-        self.test_round += 1
 
         return (
             test_results.get("loss", 0.0),
@@ -204,9 +189,9 @@ class FedRepClient(BaseClient):
                 ]
             )
 
-        params_dict = zip(model_keys, parameters)
-
-        state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+        state_dict = OrderedDict(
+            (k, torch.from_numpy(v)) for k, v in zip(model_keys, parameters)
+        )
 
         self.model_manager.model.set_parameters(state_dict)
 
