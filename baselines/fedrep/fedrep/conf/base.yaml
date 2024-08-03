@@ -11,7 +11,7 @@ algorithm: fedrep
 model_name: cnncifar10
 
 client_resources:
-  num_cpus: 6
+  num_cpus: 4
   num_gpus: 1
 
 server_device: cuda:0
@@ -33,7 +33,7 @@ fit_config:
   batch_size: ${batch_size}
 
 strategy:
-  _target_: fedrep.server.DefaultStrategyPipeline
+  _target_: flwr.server.strategy.FedAvg
   fraction_fit: 0.1
   fraction_evaluate: 0.1
   min_fit_clients: 2

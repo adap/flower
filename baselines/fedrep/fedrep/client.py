@@ -9,7 +9,7 @@ from typing import Any, Callable, Dict, List, Tuple, Type, Union
 import numpy as np
 import torch
 from flwr.client import Client, NumPyClient
-from flwr.common import NDArrays, Scalar
+from flwr.common import Code, EvaluateRes, NDArrays, Scalar, Status
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader, Subset
 from torchvision import transforms
@@ -18,6 +18,7 @@ from fedrep.constants import MEAN, STD
 from fedrep.dataset_preparation import call_dataset
 from fedrep.implemented_models.cnn_cifar10 import CNNCifar10ModelManager
 from fedrep.implemented_models.cnn_cifar100 import CNNCifar100ModelManager
+
 
 PROJECT_DIR = Path(__file__).parent.parent.absolute()
 
@@ -50,7 +51,6 @@ class BaseClient(NumPyClient):
         self.test_round_count = 1
         self.client_id = int(client_id)
         self.client_state_save_path = client_state_save_path
-        self.hist: Dict[str, Dict[str, Any]] = defaultdict(dict)
         self.config = config
         self.num_local_epochs: int = config.num_local_epochs
         self.model_manager = model_manager_class(
@@ -75,10 +75,14 @@ class BaseClient(NumPyClient):
         Args:
             parameters: parameters to set the model to.
         """
-        state_dict = OrderedDict(
-            (k, torch.from_numpy(v))
-            for k, v in zip(self.model_manager.model.state_dict().keys(), parameters)
-        )
+        model_keys = [
+            k
+            for k in self.model_manager.model.state_dict().keys()
+            if k.startswith("_body") or k.startswith("_head")
+        ]
+        params_dict = zip(model_keys, parameters)
+
+        state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
 
         self.model_manager.model.set_parameters(state_dict)
 
@@ -114,10 +118,6 @@ class BaseClient(NumPyClient):
         train_results = self.perform_train()
 
         # Update train history
-        self.hist[str(self.train_round_count)] = {
-            **self.hist[str(self.train_round_count)],
-            "trn": train_results,
-        }
         print("<------- TRAIN RESULTS -------> :", train_results)
 
         self.train_round_count += 1
@@ -144,13 +144,7 @@ class BaseClient(NumPyClient):
         test_results = self.model_manager.test()
         print("<------- TEST RESULTS -------> :", test_results)
 
-        # Update test history
-        self.hist[str(self.test_round_count)] = {
-            **self.hist[str(self.test_round_count)],
-            "tst": test_results,
-        }
         self.test_round_count += 1
-
         return (
             test_results.get("loss", 0.0),
             self.model_manager.test_dataset_size(),
@@ -168,12 +162,21 @@ class FedRepClient(BaseClient):
             parameters: parameters to set the body to.
             evaluate: whether the client is evaluating or not.
         """
-        model_keys = list(self.model_manager.model.body.state_dict().keys())
+        model_keys = [
+            k
+            for k in self.model_manager.model.state_dict().keys()
+            if k.startswith("_body")
+        ]
 
-        # If client is not trained before, use the global head.
-        if not os.path.isfile(self.client_state_save_path):
+        if not evaluate:
+            # Only update client's local head if it hasn't trained yet
+            print("Setting head parameters to global head parameters.")
             model_keys.extend(
-                k for k in self.model_manager.model.head.state_dict().keys()
+                [
+                    k
+                    for k in self.model_manager.model.state_dict().keys()
+                    if k.startswith("_head")
+                ]
             )
 
         state_dict = OrderedDict(
