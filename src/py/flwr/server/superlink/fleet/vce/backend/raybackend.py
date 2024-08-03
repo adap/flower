@@ -14,7 +14,6 @@
 # ==============================================================================
 """Ray backend for the Fleet API using the Simulation Engine."""
 
-import pathlib
 from logging import DEBUG, ERROR
 from typing import Callable, Dict, Tuple, Union
 
@@ -41,14 +40,10 @@ class RayBackend(Backend):
     def __init__(
         self,
         backend_config: BackendConfig,
-        work_dir: str,
     ) -> None:
         """Prepare RayBackend by initialising Ray and creating the ActorPool."""
         log(DEBUG, "Initialising: %s", self.__class__.__name__)
         log(DEBUG, "Backend config: %s", backend_config)
-
-        if not pathlib.Path(work_dir).exists():
-            raise ValueError(f"Specified work_dir {work_dir} does not exist.")
 
         # Initialise ray
         self.init_args_key = "init_args"
