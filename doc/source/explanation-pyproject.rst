@@ -16,6 +16,7 @@ The username of the author of the Flower App. Required
 
 .. code:: toml
 
+   [tool.flwr.app]
    publisher = "flwrlabs"
 
 ``components``
@@ -62,6 +63,7 @@ arguments are provided). Required
 
 .. code:: toml
 
+   [tool.flwr.federations]
    default = "local-simulation"
 
 ``<federation_name>``
