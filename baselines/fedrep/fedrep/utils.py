@@ -29,34 +29,6 @@ def set_model_class(config: DictConfig) -> DictConfig:
     return config
 
 
-def set_num_classes(config: DictConfig) -> DictConfig:
-    """Set the number of classes based on the dataset name in the config file."""
-    # Set the number of classes
-    # if config.dataset.name.lower() == "cifar10":
-    #     config.model.num_classes = 10
-    # elif config.dataset.name.lower() == "flickr":
-    #     config.model.num_classes = 5
-    #     # additionally for flickr
-    #     config.batch_size = 4
-    #     config.num_clients = 30
-    #     config.clients_per_round = 30
-    # else:
-    #     raise NotImplementedError(f"Dataset {config.dataset.name} not implemented")
-    return config
-
-
-def set_server_target(config: DictConfig) -> DictConfig:
-    """Set the server target based on the algorithm in the config file."""
-    # Set the server target
-    if config.algorithm.lower() == "fedrep":
-        config.strategy["_target_"] = "fedrep.server.AggregateBodyStrategyPipeline"
-    elif config.algorithm.lower() == "fedavg":
-        config.strategy["_target_"] = "fedrep.server.DefaultStrategyPipeline"
-    else:
-        raise NotImplementedError(f"Algorithm {config.algorithm} not implemented")
-    return config
-
-
 def set_client_state_save_path() -> str:
     """Set the client state save path."""
     client_state_save_path = time.strftime("%Y-%m-%d")

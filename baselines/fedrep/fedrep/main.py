@@ -24,8 +24,6 @@ from fedrep.utils import (
     save_results_as_pickle,
     set_client_state_save_path,
     set_model_class,
-    set_num_classes,
-    set_server_target,
 )
 
 
@@ -41,8 +39,6 @@ def main(cfg: DictConfig) -> None:
     # 1. Print parsed config
     # Set the model class, server target, and number of classes
     cfg = set_model_class(cfg)
-    cfg = set_server_target(cfg)
-    cfg = set_num_classes(cfg)
 
     print(OmegaConf.to_yaml(cfg))
 
@@ -55,10 +51,7 @@ def main(cfg: DictConfig) -> None:
 
     # 3. Define your clients
     # Get client function
-    client_fn = get_client_fn(
-        config=cfg,
-        client_state_save_path=client_state_save_path,
-    )
+    client_fn = get_client_fn(config=cfg, client_state_save_path=client_state_save_path)
 
     # get a function that will be used to construct the config that the client's
     # fit() method will received
@@ -119,10 +112,7 @@ def main(cfg: DictConfig) -> None:
 
     # save results as a Python pickle using a file_path
     # the directory created by Hydra for each run
-    save_results_as_pickle(
-        history,
-        file_path=save_path,
-    )
+    save_results_as_pickle(history, file_path=save_path)
     # plot results and include them in the readme
     strategy_name = strategy.__class__.__name__
     file_suffix: str = (
@@ -134,11 +124,7 @@ def main(cfg: DictConfig) -> None:
         f"_lr={cfg.learning_rate}"
     )
 
-    plot_metric_from_history(
-        history,
-        save_path,
-        (file_suffix),
-    )
+    plot_metric_from_history(history, save_path, (file_suffix))
 
 
 if __name__ == "__main__":
