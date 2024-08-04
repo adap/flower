@@ -277,21 +277,21 @@ def get_client_fn_simulation(
             )
 
         if client_state_save_path != "":
-            return FedRepClient(
+            return FedRepClient( # type: ignore[attr-defined]
                 client_id=cid_use,
                 trainloader=trainloader,
                 testloader=testloader,
                 config=config,
                 model_manager_class=model_manager_class,
                 client_state_save_path=client_state_save_path,
-            ).to_client()  # type: ignore[attr-defined]
-        return BaseClient(
+            ).to_client()  
+        return BaseClient( # type: ignore[attr-defined]
             client_id=cid_use,
             trainloader=trainloader,
             testloader=testloader,
             config=config,
             model_manager_class=model_manager_class,
             client_state_save_path=client_state_save_path,
-        ).to_client()  # type: ignore[attr-defined]
+        ).to_client()  
 
     return client_fn
