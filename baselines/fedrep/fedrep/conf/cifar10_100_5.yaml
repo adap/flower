@@ -2,6 +2,7 @@
 num_clients: 100 # total number of clients
 num_local_epochs: 5 # number of local epochs
 num_rep_epochs: 1 # number of representation epochs (only for FedRep)
+enable_finetune: false
 # num_finetune_epochs: 10
 batch_size: 50
 num_rounds: 100

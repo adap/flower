@@ -245,7 +245,7 @@ class ModelManager(ABC):
         if hasattr(self.config, "num_finetune_epochs"):
             num_finetune_epochs = int(self.config.num_finetune_epochs)
 
-        if num_finetune_epochs > 0:
+        if num_finetune_epochs > 0 and self.config.get("enable_finetune", False):
             optimizer = torch.optim.SGD(self.model.parameters(), lr=self.learning_rate)
             criterion = torch.nn.CrossEntropyLoss()
             self.model.train()
