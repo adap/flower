@@ -1,9 +1,9 @@
 """Client implementation - can call FedPer and FedAvg clients."""
 
 import pickle
-from collections import OrderedDict, defaultdict
+from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Tuple, Type, Union
+from typing import Callable, Dict, List, Tuple, Type, Union
 
 import numpy as np
 import torch
