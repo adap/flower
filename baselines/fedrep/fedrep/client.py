@@ -24,6 +24,7 @@ PROJECT_DIR = Path(__file__).parent.parent.absolute()
 class BaseClient(NumPyClient):
     """Implementation of Federated Averaging (FedAvg) Client."""
 
+    # pylint: disable=R0913
     def __init__(
         self,
         client_id: int,
@@ -77,6 +78,7 @@ class BaseClient(NumPyClient):
         Args:
             parameters: parameters to set the model to.
         """
+        _ = evaluate
         model_keys = [
             k
             for k in self.model_manager.model.state_dict().keys()

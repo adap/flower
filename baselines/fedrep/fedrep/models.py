@@ -127,9 +127,11 @@ class ModelSplit(ABC, nn.Module):
         return self.head(x)
 
 
+# pylint: disable=R0902
 class ModelManager(ABC):
     """Manager for models with Body/Head split."""
 
+    # pylint: disable=R0913
     def __init__(
         self,
         client_id: int,
