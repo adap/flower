@@ -13,7 +13,7 @@ from omegaconf import DictConfig
 from torch.utils.data import DataLoader, Subset
 from torchvision import transforms
 
-from fedrep.constants import MEAN, STD
+from fedrep.constants import MEAN, STD, Algorithm
 from fedrep.dataset_preparation import call_dataset
 from fedrep.implemented_models.cnn_cifar10 import CNNCifar10ModelManager
 from fedrep.implemented_models.cnn_cifar100 import CNNCifar100ModelManager
@@ -275,7 +275,7 @@ def get_client_fn_simulation(
                 f"Model {config.model_name} not implemented, check name."
             )
 
-        if client_state_save_path != "":
+        if config.algorithm.lower() == Algorithm.FEDREP.value:
             return FedRepClient(  # type: ignore[attr-defined]
                 client_id=cid_use,
                 trainloader=trainloader,
