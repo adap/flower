@@ -23,7 +23,6 @@ from fedrep.utils import (
     plot_metric_from_history,
     save_results_as_pickle,
     set_client_state_save_path,
-    set_model_class,
 )
 
 
@@ -31,15 +30,12 @@ from fedrep.utils import (
 def main(cfg: DictConfig) -> None:
     """Run the baseline.
 
-    Parameters
+    Parameterss
     ----------
     cfg : DictConfig
         An omegaconf object that stores the hydra config.
     """
     # 1. Print parsed config
-    # Set the model class, server target, and number of classes
-    cfg = set_model_class(cfg)
-
     print(OmegaConf.to_yaml(cfg))
 
     # Create directory to store client states if it does not exist
@@ -76,10 +72,10 @@ def main(cfg: DictConfig) -> None:
         for num_examples, metric in eval_metrics:
             weights.append(num_examples)
             accuracies.append(metric["accuracy"] * num_examples)
-        weights = np.array(weights, dtype=np.float32)
-        accuracies = np.array(accuracies, dtype=np.float32)
-        weights /= weights.sum()
-        accuracy = np.sum(accuracies * weights).item()
+        weights: np.ndarray = np.array(weights, dtype=np.float32)  # type: ignore
+        accuracies: np.ndarray = np.array(accuracies, dtype=np.float32)  # type: ignore
+        weights /= weights.sum()  # type: ignore
+        accuracy = np.sum(accuracies * weights).item()  # type: ignore
         return {"accuracy": accuracy}
 
     # 4. Define your strategy

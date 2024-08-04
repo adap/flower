@@ -9,24 +9,13 @@ from typing import Callable, Optional, Type, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
+from flwr.client import Client
 from flwr.server.history import History
 from omegaconf import DictConfig
 
-from fedrep.client import BaseClient, FedRepClient, get_client_fn_simulation
+from fedrep.client import get_client_fn_simulation
 from fedrep.implemented_models.cnn_cifar10 import CNNCifar10, CNNCifar10ModelSplit
 from fedrep.implemented_models.cnn_cifar100 import CNNCifar100, CNNCifar100ModelSplit
-
-
-def set_model_class(config: DictConfig) -> DictConfig:
-    """Set model class based on the model name in the config file."""
-    # Set the model class
-    if config.model_name.lower() == "cnncifar10":
-        config.model["_target_"] = "fedrep.implemented_models.cnn_cifar100.CNNCifar10"
-    elif config.model_name.lower() == "cnncifar100":
-        config.model["_target_"] = "fedrep.implemented_models.cnn_cifar10.CNNCifar100"
-    else:
-        raise NotImplementedError(f"Model {config.model.name} not implemented")
-    return config
 
 
 def set_client_state_save_path() -> str:
@@ -43,7 +32,7 @@ def set_client_state_save_path() -> str:
 
 def get_client_fn(
     config: DictConfig, client_state_save_path: str = ""
-) -> Callable[[str], Union[FedRepClient, BaseClient]]:
+) -> Callable[[str], Client]:
     """Get client function."""
     # Get algorithm
     algorithm = config.algorithm.lower()
@@ -114,14 +103,14 @@ def plot_metric_from_history(
     rounds_loss, values_loss = zip(*hist.losses_distributed)
 
     _, axs = plt.subplots(nrows=2, ncols=1, sharex="row")
-    axs[0].plot(np.asarray(rounds_loss), np.asarray(values_loss))
-    axs[1].plot(np.asarray(rounds_loss), np.asarray(values))
+    axs[0].plot(np.asarray(rounds_loss), np.asarray(values_loss))  # type: ignore
+    axs[1].plot(np.asarray(rounds_loss), np.asarray(values))  # type: ignore
 
-    axs[0].set_ylabel("Loss")
-    axs[1].set_ylabel("Accuracy")
+    axs[0].set_ylabel("Loss")  # type: ignore
+    axs[1].set_ylabel("Accuracy")  # type: ignore
 
-    axs[0].grid()
-    axs[1].grid()
+    axs[0].grid()  # type: ignore
+    axs[1].grid()  # type: ignore
     # plt.title(f"{metric_type.capitalize()} Validation - MNIST")
     plt.xlabel("Rounds")
     # plt.legend(loc="lower right")

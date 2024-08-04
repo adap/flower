@@ -1,13 +1,24 @@
 """Abstract class for splitting a model into body and head."""
 
+import os
 from abc import ABC, abstractmethod
 from collections import OrderedDict
-from typing import Any, Dict, List, Tuple, Type, Union
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import numpy as np
+import torch
+import torch.nn as nn
 from omegaconf import DictConfig
 from torch import Tensor
-from torch import nn as nn
+from torch.utils.data import DataLoader
+
+from fedrep.constants import (
+    DEFAULT_FINETUNE_EPOCHS,
+    DEFAULT_LOCAL_TRAIN_EPOCHS,
+    DEFAULT_REPRESENTATION_EPOCHS,
+)
+from fedrep.implemented_models.cnn_cifar10 import CNNCifar10ModelSplit
+from fedrep.implemented_models.cnn_cifar100 import CNNCifar100ModelSplit
 
 
 class ModelSplit(ABC, nn.Module):
@@ -120,7 +131,16 @@ class ModelManager(ABC):
     """Manager for models with Body/Head split."""
 
     def __init__(
-        self, client_id: int, config: DictConfig, model_split_class: Type[ModelSplit]
+        self,
+        client_id: int,
+        config: DictConfig,
+        trainloader: DataLoader,
+        testloader: DataLoader,
+        client_save_path: Optional[str],
+        learning_rate: float,
+        model_split_class: Union[
+            Type[CNNCifar10ModelSplit], Type[CNNCifar100ModelSplit]
+        ],
     ):
         """Initialize the attributes of the model manager.
 
@@ -131,20 +151,29 @@ class ModelManager(ABC):
                 (concrete implementation of ModelSplit).
         """
         super().__init__()
-
-        self.client_id = client_id
         self.config = config
+        self.client_id = client_id
+        self.trainloader = trainloader
+        self.testloader = testloader
+        self.device = self.config.server_device
+        self.client_save_path = client_save_path
+        self.learning_rate = learning_rate
         self._model = model_split_class(self._create_model())
 
     @abstractmethod
     def _create_model(self) -> nn.Module:
         """Return model to be splitted into head and body."""
 
-    @abstractmethod
-    def train(
-        self, epochs: int = 1
-    ) -> Dict[str, Union[List[Dict[str, float]], int, float]]:
+    @property
+    def model(self) -> nn.Module:
+        """Return model."""
+        return self._model
+
+    def train(self) -> Dict[str, Union[List[Dict[str, float]], int, float]]:
         """Train the model maintained in self.model.
+
+        Method adapted from simple CNNCifar10-v1 (PyTorch) \
+        https://github.com/wjc852456/pytorch-cnncifar10net-v1.
 
         Args:
             epochs: number of training epochs.
@@ -153,8 +182,49 @@ class ModelManager(ABC):
         -------
             Dict containing the train metrics.
         """
+        # Load client state (head) if client_save_path is not None and it is not empty
+        if self.client_save_path is not None and os.path.isfile(self.client_save_path):
+            self.model.head.load_state_dict(torch.load(self.client_save_path))
 
-    @abstractmethod
+        num_local_epochs = DEFAULT_LOCAL_TRAIN_EPOCHS
+        if hasattr(self.config, "num_local_epochs"):
+            num_local_epochs = int(self.config.num_local_epochs)
+
+        num_rep_epochs = DEFAULT_REPRESENTATION_EPOCHS
+        if hasattr(self.config, "num_rep_epochs"):
+            num_rep_epochs = int(self.config.num_rep_epochs)
+
+        criterion = torch.nn.CrossEntropyLoss()
+        optimizer = torch.optim.SGD(
+            self.model.parameters(), lr=self.learning_rate, momentum=0.5
+        )
+        correct, total = 0, 0
+        loss: torch.Tensor = 0.0
+
+        self.model.train()
+        for i in range(num_local_epochs + num_rep_epochs):
+            if i < num_local_epochs:
+                self.model.disable_body()
+                self.model.enable_head()
+            else:
+                self.model.enable_body()
+                self.model.disable_head()
+            for images, labels in self.trainloader:
+                outputs = self.model(images.to(self.device))
+                labels = labels.to(self.device)
+                loss = criterion(outputs, labels)
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+                total += labels.size(0)
+                correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
+
+        # Save client state (head)
+        if self.client_save_path is not None:
+            torch.save(self.model.head.state_dict(), self.client_save_path)
+
+        return {"loss": loss.item(), "accuracy": correct / total}
+
     def test(self) -> Dict[str, float]:
         """Test the model maintained in self.model.
 
@@ -162,20 +232,52 @@ class ModelManager(ABC):
         -------
             Dict containing the test metrics.
         """
+        # Load client state (head)
+        if self.client_save_path is not None and os.path.isfile(self.client_save_path):
+            self.model.head.load_state_dict(torch.load(self.client_save_path))
 
-    @abstractmethod
+        num_finetune_epochs = DEFAULT_FINETUNE_EPOCHS
+        if hasattr(self.config, "num_finetune_epochs"):
+            num_finetune_epochs = int(self.config.num_finetune_epochs)
+
+        if num_finetune_epochs > 0:
+            optimizer = torch.optim.SGD(self.model.parameters(), lr=self.learning_rate)
+            criterion = torch.nn.CrossEntropyLoss()
+            self.model.train()
+            for _ in range(num_finetune_epochs):
+                for images, labels in self.trainloader:
+                    outputs = self.model(images.to(self.device))
+                    labels = labels.to(self.device)
+                    loss = criterion(outputs, labels)
+                    optimizer.zero_grad()
+                    loss.backward()
+                    optimizer.step()
+
+        criterion = torch.nn.CrossEntropyLoss()
+        correct, total, loss = 0, 0, 0.0
+
+        self.model.eval()
+        with torch.no_grad():
+            for images, labels in self.testloader:
+                outputs = self.model(images.to(self.device))
+                labels = labels.to(self.device)
+                loss += criterion(outputs, labels).item()
+                total += labels.size(0)
+                correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
+
+        return {
+            "loss": loss / len(self.testloader.dataset),
+            "accuracy": correct / total,
+        }
+
     def train_dataset_size(self) -> int:
         """Return train data set size."""
+        return len(self.trainloader.dataset)
 
-    @abstractmethod
     def test_dataset_size(self) -> int:
         """Return test data set size."""
+        return len(self.testloader.dataset)
 
-    @abstractmethod
     def total_dataset_size(self) -> int:
         """Return total data set size."""
-
-    @property
-    def model(self) -> nn.Module:
-        """Return model."""
-        return self._model
+        return len(self.trainloader.dataset) + len(self.testloader.dataset)

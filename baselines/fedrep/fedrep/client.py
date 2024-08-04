@@ -8,7 +8,7 @@ from typing import Any, Callable, Dict, List, Tuple, Type, Union
 import numpy as np
 import torch
 from flwr.client import Client, NumPyClient
-from flwr.common import Code, EvaluateRes, NDArrays, Scalar, Status
+from flwr.common import NDArrays, Scalar
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader, Subset
 from torchvision import transforms
@@ -17,7 +17,6 @@ from fedrep.constants import MEAN, STD
 from fedrep.dataset_preparation import call_dataset
 from fedrep.implemented_models.cnn_cifar10 import CNNCifar10ModelManager
 from fedrep.implemented_models.cnn_cifar100 import CNNCifar100ModelManager
-
 
 PROJECT_DIR = Path(__file__).parent.parent.absolute()
 
@@ -96,12 +95,10 @@ class BaseClient(NumPyClient):
         -------
             Dict with the train metrics.
         """
-        epochs = self.num_epochs
-
         self.model_manager.model.enable_body()
         self.model_manager.model.enable_head()
 
-        return self.model_manager.train(epochs=epochs)
+        return self.model_manager.train()
 
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
@@ -180,7 +177,6 @@ class FedRepClient(BaseClient):
 
         if not evaluate:
             # Only update client's local head if it hasn't trained yet
-            print("Setting head parameters to global head parameters.")
             model_keys.extend(
                 [
                     k
@@ -198,7 +194,7 @@ class FedRepClient(BaseClient):
 
 def get_client_fn_simulation(
     config: DictConfig, client_state_save_path: str = ""
-) -> Callable[[str], Union[FedRepClient, BaseClient]]:
+) -> Callable[[str], Client]:
     """Generate the client function that creates the Flower Clients.
 
     Parameters
