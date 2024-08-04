@@ -1,7 +1,13 @@
 """CNNCifar10-v1 model, model manager and model split."""
 
+import os
 from typing import Dict, List, Optional, Tuple, Union
 
+from fedrep.constants import (
+    DEFAULT_LOCAL_TRAIN_EPOCHS,
+    DEFAULT_FINETUNE_EPOCHS,
+    DEFAULT_REPRESENTATION_EPOCHS,
+)
 import torch
 import torch.nn as nn
 from omegaconf import DictConfig
@@ -74,7 +80,7 @@ class CNNCifar10ModelManager(ModelManager):
             model_split_class=CNNCifar10ModelSplit, client_id=client_id, config=config
         )
         self.trainloader, self.testloader = trainloader, testloader
-        self.device = self.config["server_device"]
+        self.device = self.config.server_device
         self.client_save_path = client_save_path if client_save_path != "" else None
         self.learning_rate = learning_rate
 
@@ -86,9 +92,7 @@ class CNNCifar10ModelManager(ModelManager):
             self.device = self.config.server_device
             return CNNCifar10().to(self.device)
 
-    def train(
-        self, epochs: int = 1
-    ) -> Dict[str, Union[List[Dict[str, float]], int, float]]:
+    def train(self) -> Dict[str, Union[List[Dict[str, float]], int, float]]:
         """Train the model maintained in self.model.
 
         Method adapted from simple CNNCifar10-v1 (PyTorch) \
@@ -102,12 +106,16 @@ class CNNCifar10ModelManager(ModelManager):
             Dict containing the train metrics.
         """
         # Load client state (head) if client_save_path is not None and it is not empty
-        if self.client_save_path is not None:
-            try:
-                self.model.head.load_state_dict(torch.load(self.client_save_path))
-            except FileNotFoundError:
-                print("No client state found, training from scratch.")
-                pass
+        if self.client_save_path is not None and os.path.isfile(self.client_save_path):
+            self.model.head.load_state_dict(torch.load(self.client_save_path))
+
+        num_local_epochs = DEFAULT_LOCAL_TRAIN_EPOCHS
+        if hasattr(self.config, "num_local_epochs"):
+            num_local_epochs = int(self.config.num_local_epochs)
+
+        num_rep_epochs = DEFAULT_REPRESENTATION_EPOCHS
+        if hasattr(self.config, "num_rep_epochs"):
+            num_rep_epochs = int(self.config.num_rep_epochs)
 
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.SGD(
@@ -115,19 +123,20 @@ class CNNCifar10ModelManager(ModelManager):
         )
         correct, total = 0, 0
         loss: torch.Tensor = 0.0
-        # self.model.train()
-        for i in range(epochs):
-            if i < epochs - 1:
+
+        self.model.train()
+        for i in range(num_local_epochs + num_rep_epochs):
+            if i < num_local_epochs:
                 self.model.disable_body()
                 self.model.enable_head()
             else:
                 self.model.enable_body()
                 self.model.disable_head()
             for images, labels in self.trainloader:
-                optimizer.zero_grad()
                 outputs = self.model(images.to(self.device))
                 labels = labels.to(self.device)
                 loss = criterion(outputs, labels)
+                optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
                 total += labels.size(0)
@@ -147,12 +156,30 @@ class CNNCifar10ModelManager(ModelManager):
             Dict containing the test metrics.
         """
         # Load client state (head)
-        if self.client_save_path is not None:
+        if self.client_save_path is not None and os.path.isfile(self.client_save_path):
             self.model.head.load_state_dict(torch.load(self.client_save_path))
+
+        num_finetune_epochs = DEFAULT_FINETUNE_EPOCHS
+        if hasattr(self.config, "num_finetune_epochs"):
+            num_finetune_epochs = int(self.config.num_finetune_epochs)
+
+        if num_finetune_epochs > 0:
+            optimizer = torch.optim.SGD(self.model.parameters(), lr=self.learning_rate)
+            criterion = torch.nn.CrossEntropyLoss()
+            self.model.train()
+            for _ in range(num_finetune_epochs):
+                for images, labels in self.trainloader:
+                    outputs = self.model(images.to(self.device))
+                    labels = labels.to(self.device)
+                    loss = criterion(outputs, labels)
+                    optimizer.zero_grad()
+                    loss.backward()
+                    optimizer.step()
 
         criterion = torch.nn.CrossEntropyLoss()
         correct, total, loss = 0, 0, 0.0
-        # self.model.eval()
+
+        self.model.eval()
         with torch.no_grad():
             for images, labels in self.testloader:
                 outputs = self.model(images.to(self.device))
@@ -160,10 +187,6 @@ class CNNCifar10ModelManager(ModelManager):
                 loss += criterion(outputs, labels).item()
                 total += labels.size(0)
                 correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
-        print("Test Accuracy: {:.4f}".format(correct / total))
-
-        if self.client_save_path is not None:
-            torch.save(self.model.head.state_dict(), self.client_save_path)
 
         return {
             "loss": loss / len(self.testloader.dataset),
