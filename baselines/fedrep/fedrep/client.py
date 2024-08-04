@@ -194,6 +194,7 @@ class FedRepClient(BaseClient):
         self.model_manager.model.set_parameters(state_dict)
 
 
+# pylint: disable=E1101
 def get_client_fn_simulation(
     config: DictConfig, client_state_save_path: str = ""
 ) -> Callable[[str], Client]:
@@ -252,6 +253,7 @@ def get_client_fn_simulation(
         test_data_transform=test_data_transform,
     )
 
+    # pylint: disable=E1101
     def client_fn(cid: str) -> Client:
         """Create a Flower client representing a single organization."""
         cid_use = int(cid)
