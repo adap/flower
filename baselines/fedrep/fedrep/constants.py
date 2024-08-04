@@ -1,5 +1,13 @@
 """Constants used in machine learning pipeline."""
 
+from enum import Enum
+
+
+class Algorithm(Enum):
+    FEDREP = "fedrep"
+    FEDAVG = "fedavg"
+
+
 DEFAULT_LOCAL_TRAIN_EPOCHS: int = 10
 DEFAULT_FINETUNE_EPOCHS: int = 5
 DEFAULT_REPRESENTATION_EPOCHS: int = 1

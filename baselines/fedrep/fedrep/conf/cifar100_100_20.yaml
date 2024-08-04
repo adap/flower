@@ -33,7 +33,7 @@ fit_config:
   batch_size: ${batch_size}
 
 strategy:
-  _target_: flwr.server.strategy.FedAvg
+  _target_: fedrep.strategy.FedRep
   fraction_fit: 0.1
   fraction_evaluate: 0.1
   min_fit_clients: 2

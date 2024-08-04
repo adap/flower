@@ -3,6 +3,7 @@
 import os
 import pickle
 import time
+import logging
 from pathlib import Path
 from secrets import token_hex
 from typing import Callable, Optional, Type, Union
@@ -14,6 +15,7 @@ from flwr.server.history import History
 from omegaconf import DictConfig
 
 from fedrep.client import get_client_fn_simulation
+from fedrep.constants import Algorithm
 from fedrep.implemented_models.cnn_cifar10 import CNNCifar10, CNNCifar10ModelSplit
 from fedrep.implemented_models.cnn_cifar100 import CNNCifar100, CNNCifar100ModelSplit
 
@@ -28,6 +30,17 @@ def set_client_state_save_path() -> str:
     if not os.path.exists(client_state_save_path):
         os.makedirs(client_state_save_path)
     return client_state_save_path
+
+
+def set_client_strategy(cfg: DictConfig) -> DictConfig:
+    algorithm = cfg.algorithm.lower()
+    if algorithm == Algorithm.FEDREP.value:
+        cfg.strategy["_target_"] = "fedrep.strategy.FedRep"
+    elif algorithm == Algorithm.FEDAVG.value:
+        cfg.strategy["_target_"] = "flwr.server.strategy.FedAvg"
+    else:
+        logging.warning(f"Algorithm {algorithm} not implemented. Fallback to FedAvg.")
+    return cfg
 
 
 def get_client_fn(

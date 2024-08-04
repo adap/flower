@@ -17,8 +17,6 @@ from fedrep.constants import (
     DEFAULT_LOCAL_TRAIN_EPOCHS,
     DEFAULT_REPRESENTATION_EPOCHS,
 )
-from fedrep.implemented_models.cnn_cifar10 import CNNCifar10ModelSplit
-from fedrep.implemented_models.cnn_cifar100 import CNNCifar100ModelSplit
 
 
 class ModelSplit(ABC, nn.Module):
@@ -140,9 +138,7 @@ class ModelManager(ABC):
         testloader: DataLoader,
         client_save_path: Optional[str],
         learning_rate: float,
-        model_split_class: Union[
-            Type[CNNCifar10ModelSplit], Type[CNNCifar100ModelSplit]
-        ],
+        model_split_class: Type[ModelSplit],
     ):
         """Initialize the attributes of the model manager.
 

@@ -23,6 +23,7 @@ from fedrep.utils import (
     plot_metric_from_history,
     save_results_as_pickle,
     set_client_state_save_path,
+    set_client_strategy,
 )
 
 
@@ -37,6 +38,9 @@ def main(cfg: DictConfig) -> None:
     """
     # 1. Print parsed config
     print(OmegaConf.to_yaml(cfg))
+
+    # set client strategy
+    cfg = set_client_strategy(cfg)
 
     # Create directory to store client states if it does not exist
     # Client state has subdirectories with the name of current time
