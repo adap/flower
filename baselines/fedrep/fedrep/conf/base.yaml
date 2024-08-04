@@ -6,7 +6,6 @@ num_rep_epochs: 1 # number of representation epochs (only for FedRep)
 # num_finetune_epochs: 10
 batch_size: 50
 num_rounds: 100
-clients_per_round: 10
 learning_rate: 0.01
 algorithm: fedrep
 model_name: cnncifar10
@@ -26,7 +25,7 @@ dataset:
   fraction: 0.83
 
 model:
-  _target_: null
+  _target_: fedrep.implemented_models.cnn_cifar100.CNNCifar10
 
 fit_config:
   drop_client: false
@@ -36,10 +35,10 @@ fit_config:
 strategy:
   _target_: flwr.server.strategy.FedAvg
   fraction_fit: 0.1
-  fraction_evaluate: 0.0
+  fraction_evaluate: 0.1
   min_fit_clients: 2
-  min_evaluate_clients: 0
-  min_available_clients: 10
+  min_evaluate_clients: 2
+  min_available_clients: 2
   evaluate_fn: null
   on_fit_config_fn: null
   on_evaluate_config_fn: null
