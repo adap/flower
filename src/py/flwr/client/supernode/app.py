@@ -265,6 +265,7 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         nargs="?",
         default=None,
         help="Specify the project directory to load and run the `ClientApp`. "
+        "The `pyproject.toml` file must be located in the root of this directory. "
         "When this argument is provided, the SuperNode will exclusively respond to "
         "messages from the corresponding `ServerApp` by matching the FAB ID and FAB "
         "version. An error will be raised if a message is received from any other "
