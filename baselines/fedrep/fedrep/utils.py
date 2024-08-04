@@ -1,9 +1,9 @@
 """Utility functions for FedPer."""
 
+import logging
 import os
 import pickle
 import time
-import logging
 from pathlib import Path
 from secrets import token_hex
 from typing import Callable, Optional, Type, Union
@@ -32,14 +32,18 @@ def set_client_state_save_path() -> str:
     return client_state_save_path
 
 
+# pylint: disable=W1202
 def set_client_strategy(cfg: DictConfig) -> DictConfig:
+    """Set the client strategy."""
     algorithm = cfg.algorithm.lower()
     if algorithm == Algorithm.FEDREP.value:
         cfg.strategy["_target_"] = "fedrep.strategy.FedRep"
     elif algorithm == Algorithm.FEDAVG.value:
         cfg.strategy["_target_"] = "flwr.server.strategy.FedAvg"
     else:
-        logging.warning(f"Algorithm {algorithm} not implemented. Fallback to FedAvg.")
+        logging.warning(
+            "Algorithm {} not implemented. Fallback to FedAvg.".format(algorithm)
+        )
     return cfg
 
 

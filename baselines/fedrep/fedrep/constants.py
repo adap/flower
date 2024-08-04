@@ -4,6 +4,8 @@ from enum import Enum
 
 
 class Algorithm(Enum):
+    """Algorithm names."""
+
     FEDREP = "fedrep"
     FEDAVG = "fedavg"
 

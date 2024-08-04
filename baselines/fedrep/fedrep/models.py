@@ -3,7 +3,7 @@
 import os
 from abc import ABC, abstractmethod
 from collections import OrderedDict
-from typing import Any, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import torch
@@ -138,7 +138,7 @@ class ModelManager(ABC):
         testloader: DataLoader,
         client_save_path: Optional[str],
         learning_rate: float,
-        model_split_class: Type[ModelSplit],
+        model_split_class: Any,
     ):
         """Initialize the attributes of the model manager.
 
@@ -156,7 +156,7 @@ class ModelManager(ABC):
         self.device = self.config.server_device
         self.client_save_path = client_save_path
         self.learning_rate = learning_rate
-        self._model = model_split_class(self._create_model())
+        self._model: ModelSplit = model_split_class(self._create_model())
 
     @abstractmethod
     def _create_model(self) -> nn.Module:
