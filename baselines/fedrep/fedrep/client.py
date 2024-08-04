@@ -55,8 +55,6 @@ class BaseClient(NumPyClient):
             if client_state_save_path != ""
             else None
         )
-        self.hist: Dict[str, Dict[str, Any]] = defaultdict(dict)
-        self.num_epochs: int = config.num_local_epochs
         self.model_manager = model_manager_class(
             client_id=self.client_id,
             config=config,
