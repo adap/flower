@@ -6,6 +6,7 @@ num_rep_epochs: 1 # number of representation epochs (only for FedRep)
 batch_size: 50
 num_rounds: 100
 learning_rate: 0.01
+momentum: 0.5
 algorithm: fedrep
 model_name: cnncifar10
 

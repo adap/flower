@@ -63,7 +63,6 @@ class BaseClient(NumPyClient):
             trainloader=trainloader,
             testloader=testloader,
             client_save_path=self.client_state_save_path,
-            learning_rate=config["learning_rate"],
         )
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:

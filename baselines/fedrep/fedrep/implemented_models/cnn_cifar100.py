@@ -55,7 +55,6 @@ class CNNCifar100ModelManager(ModelManager):
         trainloader: DataLoader,
         testloader: DataLoader,
         client_save_path: Optional[str],
-        learning_rate: float = 0.01,
     ):
         """Initialize the attributes of the model manager.
 
@@ -70,7 +69,6 @@ class CNNCifar100ModelManager(ModelManager):
             trainloader=trainloader,
             testloader=testloader,
             client_save_path=client_save_path,
-            learning_rate=learning_rate,
         )
 
     def _create_model(self) -> CNNCifar100:

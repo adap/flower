@@ -137,8 +137,7 @@ class ModelManager(ABC):
         trainloader: DataLoader,
         testloader: DataLoader,
         client_save_path: Optional[str],
-        learning_rate: float,
-        model_split_class: Any,
+        model_split_class: Any,  # ModelSplit
     ):
         """Initialize the attributes of the model manager.
 
@@ -155,7 +154,8 @@ class ModelManager(ABC):
         self.testloader = testloader
         self.device = self.config.server_device
         self.client_save_path = client_save_path
-        self.learning_rate = learning_rate
+        self.learning_rate = config.get("learning_rate", 0.01)
+        self.momentum = config.get("momentum", 0.5)
         self._model: ModelSplit = model_split_class(self._create_model())
 
     @abstractmethod
@@ -193,8 +193,15 @@ class ModelManager(ABC):
             num_rep_epochs = int(self.config.num_rep_epochs)
 
         criterion = torch.nn.CrossEntropyLoss()
+        weights = [v for k, v in self.model.named_parameters() if "weight" in k]
+        biases = [v for k, v in self.model.named_parameters() if "bias" in k]
         optimizer = torch.optim.SGD(
-            self.model.parameters(), lr=self.learning_rate, momentum=0.5
+            [
+                {"params": weights, "weight_decay": 1e-4},
+                {"params": biases, "weight_decay": 0.0},
+            ],
+            lr=self.learning_rate,
+            momentum=self.momentum,
         )
         correct, total = 0, 0
         loss: torch.Tensor = 0.0
