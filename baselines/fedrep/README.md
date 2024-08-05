@@ -42,17 +42,19 @@ Please see how models are implemented using a so called model_manager and model_
 
 **Training Hyperparameters:** The hyperparameters can be found in `conf/base.yaml` file which is the configuration file for the main script. 
 
-| Description      | Default Value                   |
-| ---------------- | ------------------------------- |
-| num_clients      | 100                             |
-| num_rounds       | 100                             |
-| num_local_epochs | 5                               |
-| num_rep_epochs   | 1                               |
-| client resources | {'num_cpus': 4, 'num_gpus': 1 } |
-| learning_rate    | 0.01                            |
-| batch_size       | 50                              |
-| model_name       | cnncifar10                      |
-| algorithm        | fedrep                          |
+| Description         | Default Value                   |
+| ------------------- | ------------------------------- |
+| num_clients         | 100                             |
+| num_rounds          | 100                             |
+| num_local_epochs    | 5                               |
+| num_rep_epochs      | 1                               |
+| enable_finetune     | False                           |
+| num_finetune_epochs | 5                               |
+| client resources    | {'num_cpus': 4, 'num_gpus': 1 } |
+| learning_rate       | 0.01                            |
+| batch_size          | 50                              |
+| model_name          | cnncifar10                      |
+| algorithm           | fedrep                          |
 
 
 ## Environment Setup
@@ -89,3 +91,11 @@ model_name: cnncifar10, cnncifar100
 
 
 ## Expected Results
+
+### CIFAR-10 (100, 2)
+
+```
+python -m fedrep.main --config-name cifar10_100_2 algorithm=fedrep 
+python -m fedrep.main --config-name cifar10_100_2 algorithm=fedavg 
+```
+<img src="_static/cifar10_100_2.png" width="400"/> 
