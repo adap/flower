@@ -21,9 +21,7 @@ class FlowerClient(NumPyClient):
     def __init__(self, X: pd.DataFrame):
         self.X = X
 
-    def fit(
-        self, parameters: List[np.ndarray], config: Dict[str, str]
-    ) -> Tuple[List[np.ndarray], int, Dict]:
+    def fit(self, parameters, config):
         hist_list = []
         # Execute query locally
         for c in self.X.columns:
