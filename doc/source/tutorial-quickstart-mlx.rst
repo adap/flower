@@ -372,4 +372,7 @@ to that of `client_fn()` but the return type is `ServerAppComponents <https://fl
 
 Congratulations!
 You've successfully built and run your first federated learning system.
-The `source code <https://github.com/adap/flower/blob/main/examples/quickstart-mlx>`_ of the extended version of this tutorial can be found in :code:`examples/quickstart-mlx`.
+
+.. note::
+
+    Check the `source code <https://github.com/adap/flower/blob/main/examples/quickstart-mlx>`_ of the extended version of this tutorial in :code:`examples/quickstart-mlx` in the Flower GitHub repository.
