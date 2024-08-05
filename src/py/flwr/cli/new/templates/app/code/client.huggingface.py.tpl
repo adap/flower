@@ -1,4 +1,4 @@
-"""$project_name: A Flower / HuggingFace Transformers app."""
+"""$project_name: A Flower / $framework_str app."""
 
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context

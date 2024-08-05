@@ -1,4 +1,4 @@
-"""$project_name: A Flower / PyTorch app."""
+"""$project_name: A Flower / $framework_str app."""
 
 from flwr.client import NumPyClient, ClientApp
 from flwr.common import Context
