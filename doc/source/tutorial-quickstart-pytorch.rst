@@ -6,7 +6,7 @@ Quickstart PyTorch
 
 In this tutorial we will learn how to train a Convolutional Neural Network on CIFAR10 using Flower and PyTorch.
 
-First of all, it is recommended to create a virtual environment and run everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
+It is recommended to create a virtual environment and run everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
 
 Let's use `flwr new` to create a complete Flower+PyTorch project. It will generate all the files needed to run, by default with the Simulation Engine, a federation of 10 nodes using `FedAvg <https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedAvg.html#flwr.server.strategy.FedAvg>`_. The dataset will be partitioned using Flower Dataset's `IidPartitioner <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_.
 
@@ -57,31 +57,31 @@ With default argumnets you will see an output like this one:
     INFO :      Evaluating initial global parameters
     INFO :
     INFO :      [ROUND 1]
-    INFO :      configure_fit: strategy sampled 10 clients (out of 10)
-    INFO :      aggregate_fit: received 10 results and 0 failures
+    INFO :      configure_fit: strategy sampled 5 clients (out of 10)
+    INFO :      aggregate_fit: received 5 results and 0 failures
     WARNING :   No fit_metrics_aggregation_fn provided
     INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
     INFO :      aggregate_evaluate: received 10 results and 0 failures
     WARNING :   No evaluate_metrics_aggregation_fn provided
     INFO :
     INFO :      [ROUND 2]
-    INFO :      configure_fit: strategy sampled 10 clients (out of 10)
-    INFO :      aggregate_fit: received 10 results and 0 failures
+    INFO :      configure_fit: strategy sampled 5 clients (out of 10)
+    INFO :      aggregate_fit: received 5 results and 0 failures
     INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
     INFO :      aggregate_evaluate: received 10 results and 0 failures
     INFO :
     INFO :      [ROUND 3]
-    INFO :      configure_fit: strategy sampled 10 clients (out of 10)
-    INFO :      aggregate_fit: received 10 results and 0 failures
+    INFO :      configure_fit: strategy sampled 5 clients (out of 10)
+    INFO :      aggregate_fit: received 5 results and 0 failures
     INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
     INFO :      aggregate_evaluate: received 10 results and 0 failures
     INFO :
     INFO :      [SUMMARY]
-    INFO :      Run finished 3 round(s) in 28.35s
+    INFO :      Run finished 3 round(s) in 21.35s
     INFO :          History (loss, distributed):
-    INFO :                  round 1: 77.35741896629334
-    INFO :                  round 2: 73.5176613330841
-    INFO :                  round 3: 70.85826261043549
+    INFO :                  round 1: 2.2978184528648855
+    INFO :                  round 2: 2.173852103948593
+    INFO :                  round 3: 2.039920600131154
     INFO :
 
 You can also override the parameters defined in `[tool.flwr.app.config]` section in the `pyproject.toml` like this:
@@ -98,7 +98,7 @@ What follows is an explanation of each component in the project you just created
 The Data
 --------
 
-We will use `flwr_datasets` to easily download and partition the `CIFAR-10` dataset.
+This tutorial uses `Flower Datasets <https://flower.ai/docs/datasets/>`_ to easily download and partition the `CIFAR-10` dataset.
 In this example you'll make use of the `IidPartitioner <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_ to generate `num_partitions` partitions.
 You can choose `other partitioners <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html>`_ available in Flower Datasets. Each `ClientApp` will call this function to create dataloaders with the data that correspond to their data partition.
 
@@ -153,7 +153,7 @@ We defined a simple Convolutional Neural Network (CNN), but feel free to replace
         x = F.relu(self.fc2(x))
         return self.fc3(x)
 
-In addition to defining the model architecture, we also include two utility functions to perform both training and evaluation using the above model. These functions should look fairly familiar if you have some prior experience with PyTorch. Note these functions do not have anything Flower or FL specific components. That being said, the training function will normally be called, as we'll see later, from a Flower client passing its own data. In summary, your clients can use standard training functions to perform local training:
+In addition to defining the model architecture, we also include two utility functions to perform both training and evaluation using the above model. These functions should look fairly familiar if you have some prior experience with PyTorch. Note these functions do not have anything specific to Flower. That being said, the training function will normally be called, as we'll see later, from a Flower client passing its own data. In summary, your clients can use standard training functions to perform local training:
 
 .. code-block:: python
 
@@ -163,25 +163,24 @@ In addition to defining the model architecture, we also include two utility func
         criterion = torch.nn.CrossEntropyLoss().to(device)
         optimizer = torch.optim.SGD(net.parameters(), lr=0.1, momentum=0.9)
         net.train()
+        running_loss = 0.0
         for _ in range(epochs):
             for batch in trainloader:
                 images = batch["img"]
                 labels = batch["label"]
                 optimizer.zero_grad()
-                criterion(net(images.to(device)), labels.to(device)).backward()
+                loss = criterion(net(images.to(device)), labels.to(device))
+                loss.backward()
                 optimizer.step()
+                running_loss += loss.item()
 
-        train_loss, train_acc = test(net, trainloader)
-
-        results = {
-            "train_loss": train_loss,
-            "train_accuracy": train_acc,
-        }
-        return results
+        avg_trainloss = running_loss / len(trainloader)
+        return avg_trainloss
 
 
     def test(net, testloader, device):
         """Validate the model on the test set."""
+        net.to(device)
         criterion = torch.nn.CrossEntropyLoss()
         correct, loss = 0, 0.0
         with torch.no_grad():
@@ -247,20 +246,20 @@ method in the client trains the model using the local dataset. Similarly, the `e
             loss, accuracy = test(self.net, self.valloader, self.device)
             return loss, len(self.valloader.dataset), {"accuracy": accuracy}
 
-Finally, we can construct a `ClientApp` using the `FlowerClient` defined above by means of a `client_fn` callback:
+Finally, we can construct a `ClientApp` using the `FlowerClient` defined above by means of a `client_fn` callback. Note that the `context` enables you to get access to hyperparemeters defined in your `pyproject.toml` to configure the run. In this tutorial we access the `local-epochs` setting to control the number of epochs a `ClientApp` will perform when running the `fit()` method.
 
 .. code-block:: python
 
     def client_fn(context: Context):
-    # Load model and data
-    net = Net()
-    partition_id = context.node_config["partition-id"]
-    num_partitions = context.node_config["num-partitions"]
-    trainloader, valloader = load_data(partition_id, num_partitions)
-    local_epochs = context.run_config["local-epochs"]
+        # Load model and data
+        net = Net()
+        partition_id = context.node_config["partition-id"]
+        num_partitions = context.node_config["num-partitions"]
+        trainloader, valloader = load_data(partition_id, num_partitions)
+        local_epochs = context.run_config["local-epochs"]
 
-    # Return Client instance
-    return FlowerClient(net, trainloader, valloader, local_epochs).to_client()
+        # Return Client instance
+        return FlowerClient(net, trainloader, valloader, local_epochs).to_client()
 
 
     # Flower ClientApp
@@ -271,22 +270,22 @@ The ServerApp
 -------------
 
 To construct a `ServerApp` we define a `server_fn()` callback with an identical signature
-to that of `client_fn()` but the return type is `ServerAppComponents <https://flower.ai/docs/framework/ref-api/flwr.server.ServerAppComponents.html#serverappcomponents>`_ as opposed to a `Client <https://flower.ai/docs/framework/ref-api/flwr.client.Client.html#client>`_. In this example we use the `FedAvg` strategy.
+to that of `client_fn()` but the return type is `ServerAppComponents <https://flower.ai/docs/framework/ref-api/flwr.server.ServerAppComponents.html#serverappcomponents>`_ as opposed to a `Client <https://flower.ai/docs/framework/ref-api/flwr.client.Client.html#client>`_. In this example we use the `FedAvg`. To it we pass a randomly initialized model that will server as the global model to federated. Note that the value of `fraction_fit` is read from the run config. You can find the default value defined in the `pyroject.toml`.
 
 .. code-block:: python
-
-    # Get model parameters and use them to initialize the global model
-    # when defining your strategy in `server_fn`.
-    ndarrays = get_weights(Net())
-    parameters = ndarrays_to_parameters(ndarrays)
 
     def server_fn(context: Context):
         # Read from config
         num_rounds = context.run_config["num-server-rounds"]
+        fraction_fit = context.run_config["fraction-fit"]
+
+        # Initialize model parameters
+        ndarrays = get_weights(Net())
+        parameters = ndarrays_to_parameters(ndarrays)
 
         # Define strategy
         strategy = FedAvg(
-            fraction_fit=1.0,
+            fraction_fit=fraction_fit,
             fraction_evaluate=1.0,
             min_available_clients=2,
             initial_parameters=parameters,
@@ -301,7 +300,10 @@ to that of `client_fn()` but the return type is `ServerAppComponents <https://fl
 
 Congratulations!
 You've successfully built and run your first federated learning system.
-The `source code <https://github.com/adap/flower/blob/main/examples/quickstart-pytorch>`_ of the extended version of this tutorial can be found i :code:`examples/quickstart-pytorch`.
+
+.. note::
+
+    Check the `source code <https://github.com/adap/flower/blob/main/examples/quickstart-pytorch>`_ of the extended version of this tutorial in :code:`examples/quickstart-pytorch` in the Flower GitHub repository.
 
 Video tutorial
 --------------
