@@ -1,4 +1,4 @@
-"""$project_name: A Flower / TensorFlow app."""
+"""$project_name: A Flower / $framework_str app."""
 
 from flwr.common import Context, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
