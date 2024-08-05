@@ -3,11 +3,10 @@
 import warnings
 
 import torch
-from transformers import AutoModelForSequenceClassification
 from flwr.client import Client, ClientApp, NumPyClient
 from flwr.common import Context
 
-from huggingface_example.task import train, test, load_data, set_params, get_params
+from huggingface_example.task import train, test, load_data, set_params, get_params, get_model
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -18,9 +17,7 @@ class IMDBClient(NumPyClient):
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.trainloader = trainloader
         self.testloader = testloader
-        self.net = AutoModelForSequenceClassification.from_pretrained(
-            model_name, num_labels=2
-        )
+        self.net = get_model(model_name)
         self.net.to(self.device)
 
     def fit(self, parameters, config) -> tuple[list, int, dict]:

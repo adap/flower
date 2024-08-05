@@ -4,8 +4,7 @@ from flwr.common import Context, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
 
-from transformers import AutoModelForSequenceClassification
-from huggingface_example.task import get_params
+from huggingface_example.task import get_params, get_model
 
 
 def server_fn(context: Context) -> ServerAppComponents:
@@ -16,8 +15,7 @@ def server_fn(context: Context) -> ServerAppComponents:
 
     # Set global model initialization
     model_name = context.run_config["model-name"]
-    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2)
-    ndarrays = get_params(model)
+    ndarrays = get_params(get_model(model_name))
     global_model_init = ndarrays_to_parameters(ndarrays)
 
     # Define strategy

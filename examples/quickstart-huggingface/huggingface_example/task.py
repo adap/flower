@@ -10,6 +10,7 @@ from torch.utils.data import DataLoader
 from transformers import (
     AutoTokenizer,
     DataCollatorWithPadding,
+    AutoModelForSequenceClassification,
 )
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
@@ -56,6 +57,10 @@ def load_data(
     )
 
     return trainloader, testloader
+
+
+def get_model(model_name):
+    return AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2)
 
 
 def get_params(model):
