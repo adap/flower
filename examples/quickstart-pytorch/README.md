@@ -44,7 +44,7 @@ pip install -e .
 
 ## Run the project
 
-You can run your `ClientApp` and `ServerApp` in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ model as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
+You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
 
 ### Run with the Simulation Engine
 
@@ -57,6 +57,9 @@ You can also override some of the settings for your `ClientApp` and `ServerApp` 
 ```bash
 flwr run . --run-config num-server-rounds=5,learning-rate=0.05
 ```
+
+> \[!TIP\]
+> For a more detailed walk-through check our [quickstart PyTorch tutorial](https://flower.ai/docs/framework/tutorial-quickstart-pytorch.html)
 
 ### Run with the Deployment Engine
 
