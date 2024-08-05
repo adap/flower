@@ -95,7 +95,7 @@ def apply_transforms(batch):
 fds = None  # Cache FederatedDataset
 
 
-def load_data(partition_id, num_partitions: int = 10):
+def load_data(partition_id, num_partitions):
     # Only initialize `FederatedDataset` once
     global fds
     if fds is None:
