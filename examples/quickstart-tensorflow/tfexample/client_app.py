@@ -52,6 +52,7 @@ def client_fn(context: Context):
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
     data = load_data(partition_id, num_partitions)
+
     # Read run_config to fetch hyperparameters relevant to this run
     epochs = context.run_config["local-epochs"]
     batch_size = context.run_config["batch-size"]
