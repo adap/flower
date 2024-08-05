@@ -6,9 +6,9 @@ framework: [transformers]
 
 # Federated Learning with HuggingFace Transformers and Flower (Quickstart Example)
 
-This introductory example to using [🤗HuggingFace Transformers](https://huggingface.co/docs/transformers/en/index) with Flower. The training script closely follows the [HuggingFace course](https://huggingface.co/course/chapter3?fw=pt), so you are encouraged to check that out for a detailed explanation of the transformer pipeline.
+This introductory example to using [🤗Transformers](https://huggingface.co/docs/transformers/en/index) with Flower. The training script closely follows the [HuggingFace course](https://huggingface.co/course/chapter3?fw=pt), so you are encouraged to check that out for a detailed explanation of the transformer pipeline.
 
-In this example, we will federated the training of a [DistilBERT](https://huggingface.co/distilbert/distilbert-base-uncased) modle on the [IMDB](https://huggingface.co/datasets/stanfordnlp/imdb) dataset. The data will be downloaded and partitioned using [Flower Datasets](https://flower.ai/docs/datasets/). This example runs best if you have a GPU available.
+In this example, we will federated the training of a [DistilBERT](https://huggingface.co/distilbert/distilbert-base-uncased) modle on the [IMDB](https://huggingface.co/datasets/stanfordnlp/imdb) dataset. The data will be downloaded and partitioned using [Flower Datasets](https://flower.ai/docs/datasets/). This example runs best when a GPU is available.
 
 ## Set up the project
 
@@ -60,6 +60,9 @@ You can also override some of the settings for your `ClientApp` and `ServerApp` 
 ```bash
 flwr run --run-config num-server-rounds=5
 ```
+
+> \[!TIP\]
+> For a more detailed walk-through check our [quickstart 🤗Transformers tutorial](https://flower.ai/docs/framework/tutorial-quickstart-huggingface.html)
 
 ### Run with the Deployment Engine
 

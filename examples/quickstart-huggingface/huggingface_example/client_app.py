@@ -6,7 +6,14 @@ import torch
 from flwr.client import Client, ClientApp, NumPyClient
 from flwr.common import Context
 
-from huggingface_example.task import train, test, load_data, set_params, get_params, get_model
+from huggingface_example.task import (
+    train,
+    test,
+    load_data,
+    set_params,
+    get_params,
+    get_model,
+)
 
 warnings.filterwarnings("ignore", category=UserWarning)
 

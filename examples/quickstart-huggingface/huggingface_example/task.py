@@ -12,10 +12,12 @@ from transformers import (
     DataCollatorWithPadding,
     AutoModelForSequenceClassification,
 )
+from datasets.utils.logging import disable_progress_bar
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 
 
+disable_progress_bar()
 fds = None  # Cache FederatedDataset
 
 
