@@ -11,9 +11,6 @@ from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 
 
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-
 class Net(nn.Module):
     """Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')"""
 
@@ -66,44 +63,41 @@ def load_data(partition_id: int, num_partitions: int):
     return trainloader, testloader
 
 
-def train(net, trainloader, valloader, epochs, device):
+def train(net, trainloader, epochs, device):
     """Train the model on the training set."""
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss().to(device)
-    optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+    optimizer = torch.optim.SGD(net.parameters(), lr=0.1, momentum=0.9)
     net.train()
+    running_loss = 0.0
     for _ in range(epochs):
         for batch in trainloader:
             images = batch["img"]
             labels = batch["label"]
             optimizer.zero_grad()
-            criterion(net(images.to(DEVICE)), labels.to(DEVICE)).backward()
+            loss = criterion(net(images.to(device)), labels.to(device))
+            loss.backward()
             optimizer.step()
+            running_loss += loss.item()
 
-    train_loss, train_acc = test(net, trainloader)
-    val_loss, val_acc = test(net, valloader)
-
-    results = {
-        "train_loss": train_loss,
-        "train_accuracy": train_acc,
-        "val_loss": val_loss,
-        "val_accuracy": val_acc,
-    }
-    return results
+    avg_trainloss = running_loss / len(trainloader)
+    return avg_trainloss
 
 
-def test(net, testloader):
+def test(net, testloader, device):
     """Validate the model on the test set."""
+    net.to(device)
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
     with torch.no_grad():
         for batch in testloader:
-            images = batch["img"].to(DEVICE)
-            labels = batch["label"].to(DEVICE)
+            images = batch["img"].to(device)
+            labels = batch["label"].to(device)
             outputs = net(images)
             loss += criterion(outputs, labels).item()
             correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
     accuracy = correct / len(testloader.dataset)
+    loss = loss / len(testloader)
     return loss, accuracy
 
 

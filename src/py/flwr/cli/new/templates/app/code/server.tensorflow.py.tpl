@@ -6,14 +6,13 @@ from flwr.server.strategy import FedAvg
 
 from $import_name.task import load_model
 
-# Define config
-config = ServerConfig(num_rounds=3)
-
-parameters = ndarrays_to_parameters(load_model().get_weights())
 
 def server_fn(context: Context):
     # Read from config
     num_rounds = context.run_config["num-server-rounds"]
+
+    # Get parameters to initialize global model
+    parameters = ndarrays_to_parameters(load_model().get_weights())
 
     # Define strategy
     strategy = strategy = FedAvg(
