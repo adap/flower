@@ -35,6 +35,7 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     PushTaskInsRequest,
     PushTaskInsResponse,
 )
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
@@ -162,6 +163,12 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
                 override_config=user_config_to_proto(run.override_config),
             )
         )
+
+    def GetFab(
+        self, request: GetFabRequest, context: grpc.ServicerContext
+    ) -> GetFabResponse:
+        """Will be implemented later."""
+        raise NotImplementedError
 
 
 def _raise_if(validation_error: bool, detail: str) -> None:
