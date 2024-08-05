@@ -21,40 +21,30 @@ from pytorchlightning_example.task import (
 
 
 class FlowerClient(NumPyClient):
-    def __init__(self, model, train_loader, val_loader, test_loader):
-        self.model = model
+    def __init__(self, train_loader, val_loader, test_loader):
+        self.model = LitAutoEncoder()
         self.train_loader = train_loader
         self.val_loader = val_loader
         self.test_loader = test_loader
 
-    def get_parameters(self, config):
-        encoder_params = get_parameters(self.model.encoder)
-        decoder_params = get_parameters(self.model.decoder)
-        return encoder_params + decoder_params
-
-    def set_parameters(self, parameters):
-        set_parameters(self.model.encoder, parameters[:4])
-        set_parameters(self.model.decoder, parameters[4:])
-
     def fit(self, parameters, config):
-        self.set_parameters(parameters)
+        """Train the model with data of this client."""
+        set_parameters(self.model, parameters)
 
         trainer = pl.Trainer(max_epochs=1, enable_progress_bar=False)
         trainer.fit(self.model, self.train_loader, self.val_loader)
 
-        return self.get_parameters(config={}), 55000, {}
+        return get_parameters(self.model), len(self.train_loader.dataset), {}
 
     def evaluate(self, parameters, config):
-        self.set_parameters(parameters)
+        """Evaluate the model on the data this client has."""
+        set_parameters(self.model, parameters)
 
         trainer = pl.Trainer(enable_progress_bar=False)
         results = trainer.test(self.model, self.test_loader)
         loss = results[0]["test_loss"]
 
-        return loss, 10000, {"loss": loss}
-
-
-model = LitAutoEncoder()
+        return loss, len(self.test_loader.dataset), {"loss": loss}
 
 
 def client_fn(context: Context) -> Client:
@@ -65,7 +55,7 @@ def client_fn(context: Context) -> Client:
     num_partitions = context.node_config["num-partitions"]
     train_loader, val_loader, test_loader = load_data(partition_id, num_partitions)
 
-    return FlowerClient(model, train_loader, val_loader, test_loader).to_client()
+    return FlowerClient(train_loader, val_loader, test_loader).to_client()
 
 
 app = ClientApp(client_fn=client_fn)
