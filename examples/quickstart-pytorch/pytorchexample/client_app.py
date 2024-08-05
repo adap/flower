@@ -1,8 +1,8 @@
 """pytorchexample: A Flower / PyTorch app."""
 
+import torch
 from flwr.client import NumPyClient, ClientApp
 from flwr.common import Context
-import torch
 
 from pytorchexample.task import (
     Net,
@@ -14,7 +14,7 @@ from pytorchexample.task import (
 )
 
 
-# Define Flower Client and client_fn
+# Define Flower Client
 class FlowerClient(NumPyClient):
     def __init__(self, trainloader, valloader, local_epochs, learning_rate):
         self.net = Net()
@@ -45,12 +45,7 @@ class FlowerClient(NumPyClient):
 
 
 def client_fn(context: Context):
-    """Construct a Client that will be run in a ClientApp.
-
-    You can use settings in `context.run_config` to parameterize the
-    construction of your Client. You could use the `context.node_config` to, for
-    example, indicate which dataset to load (e.g accesing the partition-id).
-    """
+    """Construct a Client that will be run in a ClientApp."""
 
     # Read the node_config to fetch data partition associated to this node
     partition_id = context.node_config["partition-id"]

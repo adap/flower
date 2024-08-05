@@ -1,5 +1,4 @@
 ---
-title: Federated Learning with PyTorch and Flower (Quickstart Example)
 tags: [quickstart, vision, fds]
 dataset: [CIFAR-10]
 framework: [torch, torchvision]
@@ -45,7 +44,7 @@ pip install -e .
 
 ## Run the project
 
-You can run your `ClientApp` and `ServerApp` in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ model as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
+You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
 
 ### Run with the Simulation Engine
 
