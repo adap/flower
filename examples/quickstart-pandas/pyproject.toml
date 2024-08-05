@@ -4,15 +4,16 @@ build-backend = "hatchling.build"
 
 [project]
 name = "quickstart-pandas"
-version = "0.1.0"
-description = "Federated Analytics Quickstart with Flower and Pandas"
+version = "1.0.0"
+description = "Federated Learning with Pandas and Flower (Quickstart Example)"
+license = "Apache-2.0"
 authors = [
     { name = "The Flower Authors", email = "hello@flower.ai" },
     { name = "Ragy Haddad", email = "ragy202@gmail.com" },
 ]
 dependencies = [
-    "flwr[simulation]>=1.10.0,<2.0",
-    "flwr-datasets[vision]>=0.0.3,<1.0.0",
+    "flwr[simulation]>=1.10.0",
+    "flwr-datasets[vision]>=0.3.0",
     "numpy==1.23.2",
     "pandas==2.0.0",
 ]
@@ -21,7 +22,7 @@ dependencies = [
 packages = ["."]
 
 [tool.flwr.app]
-publisher = "flowerteam"
+publisher = "flwrlabs"
 
 [tool.flwr.app.components]
 serverapp = "pandas_example.server_app:app"

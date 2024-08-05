@@ -4,11 +4,13 @@ dataset: [Iris]
 framework: [pandas]
 ---
 
-# Flower Example using Pandas
+# Federated Learning with Pandas and Flower (Quickstart Example)
 
 This introductory example to Flower uses Pandas, but deep knowledge of Pandas is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case. This example uses [Flower Datasets](https://flower.ai/docs/datasets/) to
-download, partition and preprocess the dataset.
+download, partition and preprocess the [Iris dataset](https://huggingface.co/datasets/scikit-learn/iris).
 Running this example in itself is quite easy.
+
+This example implements a form of Federated Analyics by which nodes, instead of training a model using locally available data, they run a quiery on the data they own. In this example the query is to compute the histogram on specific columns of the dataset. These metrics are sent to the server for aggregation.
 
 ## Project Setup
 
@@ -41,11 +43,7 @@ pip install -e .
 
 ## Run the Example
 
-You can run your `ClientApp` and `ServerApp` in both _simulation_ and
-_deployment_ mode without making changes to the code. If you are starting
-with Flower, we recommend you using the _simulation_ model as it requires
-fewer components to be launched manually. By default, `flwr run` will make
-use of the Simluation Engine.
+You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
 
 ### Run with the Simulation Engine
 
@@ -58,6 +56,9 @@ You can also override some of the settings for your `ClientApp` and `ServerApp` 
 ```bash
 flwr run . --run-config 'num_server_rounds=5'
 ```
+
+> \[!TIP\]
+> For a more detailed walk-through check our [quickstart Pandas tutorial](https://flower.ai/docs/framework/tutorial-quickstart-pandas.html)
 
 ### Run with the Deployment Engine
 

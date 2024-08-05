@@ -10,8 +10,6 @@ from flwr_datasets.partitioner import IidPartitioner
 from flwr.client import Client, ClientApp, NumPyClient
 from flwr.common import Context
 
-column_names = ["sepal_length", "sepal_width"]
-
 
 def compute_hist(df: pd.DataFrame, col_name: str) -> np.ndarray:
     freqs, _ = np.histogram(df[col_name])
@@ -42,12 +40,7 @@ fds = None  # Cache FederatedDataset
 
 
 def client_fn(context: Context) -> Client:
-    """Construct a Client that will be run in a ClientApp.
-
-    You can use settings in `context.run_config` to parameterize the
-    construction of your Client. You could use the `context.node_config` to
-    , for example, indicate which dataset to load (e.g accesing the partition-id).
-    """
+    """Construct a Client that will be run in a ClientApp."""
 
     # Read the node_config to fetch data partition associated to this node
     partition_id = context.node_config["partition-id"]
@@ -58,13 +51,13 @@ def client_fn(context: Context) -> Client:
     if fds is None:
         partitioner = IidPartitioner(num_partitions=num_partitions)
         fds = FederatedDataset(
-            dataset="hitorilabs/iris",
+            dataset="scikit-learn/iris",
             partitioners={"train": partitioner},
         )
 
     dataset = fds.load_partition(partition_id, "train").with_format("pandas")[:]
     # Use just the specified columns
-    X = dataset[column_names]
+    X = dataset[["SepalLengthCm", "SepalWidthCm"]]
 
     return FlowerClient(X).to_client()
 
