@@ -131,13 +131,15 @@ def randomly_assign_classes(
 
     assigned_labels: List[NDArrayInt] = []
     selected_times = [0 for _ in label_list]
-    for _ in range(client_num):
-        sampled_labels = np.random.choice(
-            len(dataset.classes), class_num, replace=False
-        )
-        assigned_labels.append(sampled_labels)
-        for j in sampled_labels:
-            selected_times[j] += 1
+    while not all(selected_times):
+        selected_times = [0 for _ in label_list]
+        for _ in range(client_num):
+            sampled_labels = np.random.choice(
+                len(dataset.classes), class_num, replace=False
+            )
+            assigned_labels.append(sampled_labels)
+            for j in sampled_labels:
+                selected_times[j] += 1
 
     batch_sizes = _get_batch_sizes(
         targets_numpy=targets_numpy,
