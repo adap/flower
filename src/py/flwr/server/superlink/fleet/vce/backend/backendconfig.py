@@ -16,7 +16,7 @@
 
 from dataclasses import dataclass
 from logging import DEBUG, WARN
-from typing import Optional
+from typing import Dict, Optional
 
 from flwr.common.logger import log
 from flwr.common.typing import ConfigsRecordValues
@@ -83,13 +83,13 @@ class BackendConfig:
 
     name: str
     clientapp_resources: ClientAppResources
-    config: Optional[ConfigsRecordValues]
+    config: Optional[Dict[str, ConfigsRecordValues]]
 
     def __init__(
         self,
         name: str = "ray",
         clientapp_resources: Optional[ClientAppResources] = None,
-        config: Optional[ConfigsRecordValues] = None,
+        config: Optional[Dict[str, ConfigsRecordValues]] = None,
     ):
         self.name = name
         if clientapp_resources is None:
