@@ -21,6 +21,7 @@ from typing import Callable, Dict, List, Tuple, Union
 import ray
 
 from flwr.client.client_app import ClientApp
+from flwr.common.constant import PARTITION_ID_KEY
 from flwr.common.context import Context
 from flwr.common.logger import log
 from flwr.common.message import Message
@@ -168,7 +169,7 @@ class RayBackend(Backend):
 
         Return output message and updated context.
         """
-        partition_id = context.partition_id
+        partition_id = context.node_config[PARTITION_ID_KEY]
 
         try:
             # Submit a task to the pool

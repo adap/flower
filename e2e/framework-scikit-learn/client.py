@@ -5,7 +5,8 @@ import utils
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
 
-import flwr as fl
+from flwr.client import ClientApp, NumPyClient, start_client
+from flwr.common import Context
 
 # Load MNIST dataset from https://www.openml.org/d/554
 (X_train, y_train), (X_test, y_test) = utils.load_mnist()
@@ -26,7 +27,7 @@ utils.set_initial_params(model)
 
 
 # Define Flower client
-class FlowerClient(fl.client.NumPyClient):
+class FlowerClient(NumPyClient):
     def get_parameters(self, config):  # type: ignore
         return utils.get_model_parameters(model)
 
@@ -45,16 +46,14 @@ class FlowerClient(fl.client.NumPyClient):
         return loss, len(X_test), {"accuracy": accuracy}
 
 
-def client_fn(cid):
+def client_fn(context: Context):
     return FlowerClient().to_client()
 
 
-app = fl.client.ClientApp(
+app = ClientApp(
     client_fn=client_fn,
 )
 
 if __name__ == "__main__":
     # Start Flower client
-    fl.client.start_client(
-        server_address="0.0.0.0:8080", client=FlowerClient().to_client()
-    )
+    start_client(server_address="0.0.0.0:8080", client=FlowerClient().to_client())
