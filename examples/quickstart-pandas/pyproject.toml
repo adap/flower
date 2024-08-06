@@ -29,7 +29,7 @@ serverapp = "pandas_example.server_app:app"
 clientapp = "pandas_example.client_app:app"
 
 [tool.flwr.app.config]
-num-server-rounds = 1
+num-server-rounds = 3
 
 [tool.flwr.federations]
 default = "local-simulation"
