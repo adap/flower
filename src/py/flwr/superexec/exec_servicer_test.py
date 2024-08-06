@@ -19,7 +19,7 @@ import subprocess
 from unittest.mock import MagicMock
 
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
-from py.flwr.superexec.state_factory import SuperexecStateFactory
+from flwr.superexec.state_factory import SuperexecStateFactory
 
 from .exec_servicer import ExecServicer
 
