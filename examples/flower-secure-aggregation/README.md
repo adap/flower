@@ -71,13 +71,7 @@ flwr run --run-config 'num_server_rounds=5'
 
 ## Amend the example for practical usage
 
-For real-world applications, modify the `workflow` in `secaggexample/server_app.py` as follows:
+To adapt the example for real-world applications, follow these steps:
 
-```python
-workflow = fl.server.workflow.DefaultWorkflow(
-    fit_workflow=SecAggPlusWorkflow(
-        num_shares=<number of shares>,
-        reconstruction_threshold=<reconstruction threshold>,
-    )
-)
-```
+1. Set `IS_DEMO` to `False` in `./secaggexample/task.py`.
+2. Adjust the `num-shares` and `reconstruction-threshold` settings in `./pyproject.toml` to suit your requirements.
