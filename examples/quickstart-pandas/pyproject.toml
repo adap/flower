@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "quickstart-pandas"
+name = "pandas_example"
 version = "1.0.0"
 description = "Federated Learning with Pandas and Flower (Quickstart Example)"
 license = "Apache-2.0"
@@ -29,7 +29,7 @@ serverapp = "pandas_example.server_app:app"
 clientapp = "pandas_example.client_app:app"
 
 [tool.flwr.app.config]
-num_server_rounds = 1
+num-server-rounds = 1
 
 [tool.flwr.federations]
 default = "local-simulation"

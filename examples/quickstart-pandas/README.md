@@ -26,11 +26,12 @@ This will create a new directory called `quickstart-pandas` containing the follo
 
 ```shell
 quickstart-pandas
-├── README.md
-├── pandas_example
-│   ├── client_app.py    # defines your ClientApp
-│   └── server_app.py    # defines your ServerApp
-└── pyproject.toml       # builds your project, includes dependencies and configs
+├── mlxexpandas_exampleample
+│   ├── __init__.py
+│   ├── client_app.py   # Defines your ClientApp
+│   └── server_app.py   # Defines your ServerApp
+├── pyproject.toml      # Project metadata like dependencies and configs
+└── README.md
 ```
 
 ## Install dependencies
@@ -54,11 +55,9 @@ flwr run .
 You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example
 
 ```bash
-flwr run . --run-config 'num_server_rounds=5'
+flwr run . --run-config num-server-rounds=5
 ```
 
-> \[!TIP\]
-> For a more detailed walk-through check our [quickstart Pandas tutorial](https://flower.ai/docs/framework/tutorial-quickstart-pandas.html)
 
 ### Run with the Deployment Engine
 
