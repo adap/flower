@@ -4,6 +4,7 @@ isort:skip_file
 """
 import abc
 import flwr.proto.driver_pb2
+import flwr.proto.fab_pb2
 import flwr.proto.run_pb2
 import grpc
 
@@ -33,6 +34,11 @@ class DriverStub:
         flwr.proto.run_pb2.GetRunRequest,
         flwr.proto.run_pb2.GetRunResponse]
     """Get run details"""
+
+    GetFab: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.fab_pb2.GetFabRequest,
+        flwr.proto.fab_pb2.GetFabResponse]
+    """Get FAB"""
 
 
 class DriverServicer(metaclass=abc.ABCMeta):
@@ -74,6 +80,14 @@ class DriverServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.run_pb2.GetRunResponse:
         """Get run details"""
+        pass
+
+    @abc.abstractmethod
+    def GetFab(self,
+        request: flwr.proto.fab_pb2.GetFabRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.fab_pb2.GetFabResponse:
+        """Get FAB"""
         pass
 
 
