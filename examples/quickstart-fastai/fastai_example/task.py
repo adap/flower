@@ -1,12 +1,12 @@
 """fastai_example: A Flower / Fastai app."""
 
 from collections import OrderedDict
-import torch
-from torch.utils.data import DataLoader
-from torchvision.transforms import Compose, Lambda, Resize, ToTensor
 
+import torch
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
+from torch.utils.data import DataLoader
+from torchvision.transforms import Compose, Lambda, Resize, ToTensor
 
 fds = None  # Cache FederatedDataset
 

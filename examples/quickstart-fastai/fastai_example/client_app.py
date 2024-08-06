@@ -1,10 +1,8 @@
 """fastai_example: A Flower / Fastai app."""
 
 import warnings
-from collections import OrderedDict
 from typing import Any
 
-import torch
 from fastai.learner import Learner
 from fastai.losses import CrossEntropyLossFlat
 from fastai.vision.all import error_rate, squeezenet1_1
