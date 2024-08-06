@@ -35,32 +35,13 @@ if __name__ == "__main__":
         default="data/judge_prompts.jsonl",
         help="The file of judge prompts.",
     )
-    parser.add_argument("--judge_model", type=str, default="gpt-4")
-    parser.add_argument("--baseline_model", type=str, default="gpt-3.5-turbo")
-    parser.add_argument(
-        "--mode",
-        type=str,
-        default="single",
-        choices=["pairwise-baseline", "pairwise-all", "single"],
-        help=(
-            "Evaluation mode. "
-            "`pairwise-baseline` runs pairwise comparision against a baseline. "
-            "`pairwise-all` runs pairwise comparision between all pairs. "
-            "`single` runs single answer grading."
-        ),
-    )
+    parser.add_argument("--judge-model", type=str, default="gpt-4")
     parser.add_argument(
         "--model-list",
         type=str,
         nargs="+",
         default=None,
         help="A list of models to be evaluated",
-    )
-    parser.add_argument(
-        "--parallel", type=int, default=1, help="The number of concurrent API calls."
-    )
-    parser.add_argument(
-        "--first-n", type=int, help="A debug option. Only run the first `n` judgments."
     )
     args = parser.parse_args()
 
@@ -78,30 +59,16 @@ if __name__ == "__main__":
     # Load judge
     judge_prompts = load_judge_prompts(args.judge_file)
 
-    if args.first_n:
-        questions = questions[: args.first_n]
-
     if args.model_list is None:
         models = get_model_list(answer_dir)
     else:
         models = args.model_list
 
-    if args.mode == "single":
-        judges = make_judge_single(args.judge_model, judge_prompts)
-        play_a_match_func = play_a_match_single
-        output_file = f"data/mt_bench/model_judgment/{args.judge_model}_single.jsonl"
-        make_match_func = make_match_single
-        baseline_model = None
-    else:
-        judges = make_judge_pairwise(args.judge_model, judge_prompts)
-        play_a_match_func = play_a_match_pair
-        output_file = f"data/mt_bench/model_judgment/{args.judge_model}_pair.jsonl"
-        if args.mode == "pairwise-all":
-            make_match_func = make_match_all_pairs
-            baseline_model = None
-        else:
-            make_match_func = make_match
-            baseline_model = args.baseline_model
+    judges = make_judge_single(args.judge_model, judge_prompts)
+    play_a_match_func = play_a_match_single
+    output_file = f"data/mt_bench/model_judgment/{args.judge_model}_single.jsonl"
+    make_match_func = make_match_single
+    baseline_model = None
 
     check_data(questions, model_answers, ref_answers, models, judges)
 
@@ -141,7 +108,7 @@ if __name__ == "__main__":
 
     match_stat = {}
     match_stat["bench_name"] = "mt_bench"
-    match_stat["mode"] = args.mode
+    match_stat["mode"] = "single"
     match_stat["judge"] = args.judge_model
     match_stat["baseline"] = baseline_model
     match_stat["model_list"] = models
@@ -155,19 +122,5 @@ if __name__ == "__main__":
     input("Press Enter to confirm...")
 
     # Play matches
-    if args.parallel == 1:
-        for match in tqdm(matches):
-            play_a_match_func(match, output_file=output_file)
-    else:
-
-        def play_a_match_wrapper(match):
-            play_a_match_func(match, output_file=output_file)
-
-        np.random.seed(0)
-        np.random.shuffle(matches)
-
-        with ThreadPoolExecutor(args.parallel) as executor:
-            for match in tqdm(
-                executor.map(play_a_match_wrapper, matches), total=len(matches)
-            ):
-                pass
+    for match in tqdm(matches):
+        play_a_match_func(match, output_file=output_file)
