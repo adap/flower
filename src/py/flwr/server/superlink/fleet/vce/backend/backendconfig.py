@@ -97,7 +97,7 @@ class BackendConfig:
             clientapp_resources = ClientAppResources()
             log(
                 DEBUG,
-                "The `BackendConfig` didn't receive `ClientAppResources. "
+                "The `BackendConfig` didn't receive `ClientAppResources`. "
                 "The default resources will be used: %s",
                 clientapp_resources,
             )
