@@ -4,16 +4,15 @@ import logging
 from collections import OrderedDict
 from typing import Any
 
-import torch
-from torch import nn
-from torch.nn import functional as F
-from torchvision import transforms
-from torch.optim.adam import Adam
-from torch.utils.data import DataLoader
 import pytorch_lightning as pl
-
+import torch
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
+from torch import nn
+from torch.nn import functional as F
+from torch.optim.adam import Adam
+from torch.utils.data import DataLoader
+from torchvision import transforms
 
 logging.getLogger("pytorch_lightning").setLevel(logging.WARNING)
 

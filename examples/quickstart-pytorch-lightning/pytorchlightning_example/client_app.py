@@ -10,8 +10,8 @@ disable_progress_bar()
 from pytorchlightning_example.task import (
     LitAutoEncoder,
     get_parameters,
-    set_parameters,
     load_data,
+    set_parameters,
 )
 
 
