@@ -147,15 +147,15 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
             cert_path,
         )
 
-    app_dir: Optional[str] = args.app_dir
-    if not (app_dir is None) ^ (args.run_id is None):
+    app_path: Optional[str] = args.app
+    if not (app_path is None) ^ (args.run_id is None):
         raise sys.exit(
-            "Please provide either a project directory or a Run ID, but not both. "
+            "Please provide either a Flower App path or a Run ID, but not both. "
             "For more details, use: ``flower-server-app -h``"
         )
 
     # Initialize GrpcDriver
-    if app_dir is None:
+    if app_path is None:
         # User provided `--run-id`, but not `app_dir`
         driver = GrpcDriver(
             run_id=args.run_id,
@@ -164,8 +164,8 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
         )
         flwr_dir = get_flwr_dir(args.flwr_dir)
         run_ = driver.run
-        app_dir = str(get_project_dir(run_.fab_id, run_.fab_version, flwr_dir))
-        config = get_project_config(app_dir)
+        app_path = str(get_project_dir(run_.fab_id, run_.fab_version, flwr_dir))
+        config = get_project_config(app_path)
     else:
         # User provided `app_dir`, but not `--run-id`
         # Create run if run_id is not provided
@@ -175,7 +175,7 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
             root_certificates=root_certificates,
         )
         # Load config from the project directory
-        config = get_project_config(app_dir)
+        config = get_project_config(app_path)
         fab_version, fab_id = get_metadata_from_config(config)
 
         # Create run
@@ -187,10 +187,10 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
     # Obtain server app reference and the run config
     server_app_attr = config["tool"]["flwr"]["app"]["components"]["serverapp"]
     server_app_run_config = get_fused_config_from_dir(
-        Path(app_dir), driver.run.override_config
+        Path(app_path), driver.run.override_config
     )
 
-    log(DEBUG, "Flower will load ServerApp `%s` in %s", server_app_attr, app_dir)
+    log(DEBUG, "Flower will load ServerApp `%s` in %s", server_app_attr, app_path)
 
     log(
         DEBUG,
@@ -201,7 +201,7 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
     # Run the ServerApp with the Driver
     run(
         driver=driver,
-        server_app_dir=app_dir,
+        server_app_dir=app_path,
         server_app_run_config=server_app_run_config,
         server_app_attr=server_app_attr,
     )
