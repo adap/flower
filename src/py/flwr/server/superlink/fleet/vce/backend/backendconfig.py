@@ -34,7 +34,7 @@ class ClientAppResources:
 
     Parameters
     ----------
-    num_cpus : int (default: 1)
+    num_cpus : int (default: 2)
         Indicates the number of CPUs that a `ClientApp` needs when running.
     num_gpus : float (default: 0.0)
         Indicates the number of GPUs that a `ClientApp` needs when running. This
@@ -44,7 +44,7 @@ class ClientAppResources:
         assuming 4x`num_cpus` are available in your system.
     """
 
-    num_cpus: int = 1
+    num_cpus: int = 2
     num_gpus: float = 0.0
 
     def __post_init__(self) -> None:
@@ -83,7 +83,7 @@ class BackendConfig:
 
     name: str
     clientapp_resources: ClientAppResources
-    config: Optional[Dict[str, ConfigsRecordValues]]
+    config: Dict[str, ConfigsRecordValues]
 
     def __init__(
         self,
