@@ -99,3 +99,27 @@ python -m fedrep.main --config-name cifar10_100_2 algorithm=fedrep
 python -m fedrep.main --config-name cifar10_100_2 algorithm=fedavg 
 ```
 <img src="_static/cifar10_100_2.png" width="400"/> 
+
+### CIFAR-10 (100, 5)
+
+```
+python -m fedrep.main --config-name cifar10_100_5 algorithm=fedrep 
+python -m fedrep.main --config-name cifar10_100_5 algorithm=fedavg 
+```
+<img src="_static/cifar10_100_5.png" width="400"/> 
+
+### CIFAR-100 (100, 5)
+
+```
+python -m fedrep.main --config-name cifar100_100_5 algorithm=fedrep 
+python -m fedrep.main --config-name cifar100_100_5 algorithm=fedavg 
+```
+<img src="_static/cifar100_100_5.png" width="400"/> 
+
+### CIFAR-100 (100, 20)
+
+```
+python -m fedrep.main --config-name cifar100_100_5 algorithm=fedrep 
+python -m fedrep.main --config-name cifar100_100_5 algorithm=fedavg 
+```
+<img src="_static/cifar100_100_20.png" width="400"/> 
