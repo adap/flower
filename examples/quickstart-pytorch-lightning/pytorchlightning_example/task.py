@@ -41,7 +41,7 @@ class LitAutoEncoder(pl.LightningModule):
         return optimizer
 
     def training_step(self, train_batch, batch_idx) -> torch.Tensor:
-        x, y = train_batch
+        x = train_batch["image"]
         x = x.view(x.size(0), -1)
         z = self.encoder(x)
         x_hat = self.decoder(z)
@@ -56,7 +56,7 @@ class LitAutoEncoder(pl.LightningModule):
         self._evaluate(batch, "test")
 
     def _evaluate(self, batch, stage=None) -> None:
-        x, y = batch
+        x = batch["image"]
         x = x.view(x.size(0), -1)
         z = self.encoder(x)
         x_hat = self.decoder(z)
@@ -73,17 +73,6 @@ def set_parameters(model, parameters):
     params_dict = zip(model.state_dict().keys(), parameters)
     state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
     model.load_state_dict(state_dict, strict=True)
-
-
-def collate_fn(batch):
-    """Change the dictionary to tuple to keep the exact dataloader behavior."""
-    images = [item["image"] for item in batch]
-    labels = [item["label"] for item in batch]
-
-    images_tensor = torch.stack(images)
-    labels_tensor = torch.tensor(labels)
-
-    return images_tensor, labels_tensor
 
 
 def apply_transforms(batch):
@@ -117,16 +106,14 @@ def load_data(partition_id, num_partitions):
         partition_train_valid["train"],
         batch_size=32,
         shuffle=True,
-        collate_fn=collate_fn,
         num_workers=2,
     )
     valloader = DataLoader(
         partition_train_valid["test"],
         batch_size=32,
-        collate_fn=collate_fn,
         num_workers=2,
     )
     testloader = DataLoader(
-        partition_full["test"], batch_size=32, collate_fn=collate_fn, num_workers=1
+        partition_full["test"], batch_size=32, num_workers=1
     )
     return trainloader, valloader, testloader

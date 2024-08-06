@@ -27,7 +27,8 @@ serverapp = "pytorchlightning_example.server_app:app"
 clientapp = "pytorchlightning_example.client_app:app"
 
 [tool.flwr.app.config]
-num_server_rounds = 3
+num-server-rounds = 3
+max-epochs = 1
 
 [tool.flwr.federations]
 default = "local-simulation"

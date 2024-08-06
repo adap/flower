@@ -16,11 +16,13 @@ def server_fn(context: Context) -> ServerAppComponents:
 
     # Define strategy
     strategy = FedAvg(
-        fraction_fit=0.5, fraction_evaluate=0.5, initial_parameters=global_model_init
+        fraction_fit=0.5,
+        fraction_evaluate=0.5,
+        initial_parameters=global_model_init,
     )
 
     # Construct ServerConfig
-    num_rounds = context.run_config["num_server_rounds"]
+    num_rounds = context.run_config["num-server-rounds"]
     config = ServerConfig(num_rounds=num_rounds)
 
     return ServerAppComponents(strategy=strategy, config=config)
