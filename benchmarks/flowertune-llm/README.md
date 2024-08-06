@@ -1,4 +1,4 @@
-![](_static/flower_llm.jpg)
+![](_static/flower_llm.png)
 
 # FlowerTune LLM Leaderboard
 
