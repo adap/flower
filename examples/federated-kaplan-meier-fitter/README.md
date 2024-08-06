@@ -1,3 +1,9 @@
+---
+tags: [estimator, medical]
+dataset: [Waltons]
+framework: [lifelines]
+---
+
 # Flower Example using KaplanMeierFitter
 
 This is an introductory example on **federated survival analysis** using [Flower](https://flower.ai/)

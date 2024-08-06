@@ -1,6 +1,6 @@
 """$project_name: A Flower / FlowerTune app."""
 
-from $import_name.client import set_parameters
+from $import_name.client_app import set_parameters
 from $import_name.models import get_model
 
 

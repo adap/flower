@@ -1,0 +1,9 @@
+outputs/*
+clients_params/*
+flanders/datasets_files/*
+*.log
+flanders/__pycache__
+MNIST
+.DS_Store
+*/__pycache__
+multirun

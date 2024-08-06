@@ -1,3 +1,10 @@
+---
+title: Federated LLM Fine-tuning with Flower
+tags: [llm, nlp, LLama2]
+dataset: [Alpaca-GPT4]
+framework: [PEFT, torch]
+---
+
 # LLM FlowerTune: Federated LLM Fine-tuning with Flower
 
 Large language models (LLMs), which have been trained on vast amounts of publicly accessible data, have shown remarkable effectiveness in a wide range of areas.
