@@ -2,10 +2,7 @@
 
 import argparse
 
-from fastchat.llm_judge.show_result import (
-    display_result_pairwise,
-    display_result_single,
-)
+from fastchat.llm_judge.show_result import display_result_single
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

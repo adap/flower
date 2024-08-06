@@ -2,29 +2,17 @@
 
 import argparse
 import json
-from concurrent.futures import ThreadPoolExecutor
 
-import numpy as np
 from fastchat.llm_judge.common import (
     NEED_REF_CATS,
-    Judge,
-    MatchPair,
-    MatchSingle,
     check_data,
     get_model_list,
     load_judge_prompts,
     load_model_answers,
     load_questions,
-    play_a_match_pair,
     play_a_match_single,
 )
-from fastchat.llm_judge.gen_judgment import (
-    make_judge_pairwise,
-    make_judge_single,
-    make_match,
-    make_match_all_pairs,
-    make_match_single,
-)
+from fastchat.llm_judge.gen_judgment import make_judge_single, make_match_single
 from tqdm import tqdm
 
 if __name__ == "__main__":
