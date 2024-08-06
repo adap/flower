@@ -1,8 +1,8 @@
 ---
 title: Simple Secure Aggregation with Flower Example
-tags: [basic, secure_aggregation, privacy]
-dataset: []
-framework: [numpy]
+tags: [advanced, secure_aggregation, privacy]
+dataset: [CIFAR-10]
+framework: [torch, torchvision]
 ---
 
 # Secure aggregation with Flower (the SecAgg+ protocol)
@@ -29,6 +29,7 @@ flower-secure-aggregation
       |        ├── __init__.py
       |        ├── client_app.py    # defines your ClientApp
       |        ├── server_app.py    # defines your ServerApp
+      |        ├── task.py
       |        └── workflow_with_log.py
       ├── pyproject.toml            # builds your FAB, includes dependencies and configs
       └── README.md
