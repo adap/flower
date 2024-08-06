@@ -15,7 +15,6 @@
 """Fleet Simulation Engine API."""
 
 
-import json
 import threading
 import time
 import traceback
@@ -42,7 +41,7 @@ from flwr.common.typing import Run
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state import State, StateFactory
 
-from .backend import Backend, error_messages_backends, supported_backends
+from .backend import Backend, BackendConfig, error_messages_backends, supported_backends
 
 NodeToPartitionMapping = Dict[int, int]
 
@@ -257,8 +256,7 @@ def run_api(
 # pylint: disable=too-many-arguments,unused-argument,too-many-locals,too-many-branches
 # pylint: disable=too-many-statements
 def start_vce(
-    backend_name: str,
-    backend_config_json_stream: str,
+    backend_config: BackendConfig,
     app_dir: str,
     is_app: bool,
     f_stop: threading.Event,
@@ -320,20 +318,19 @@ def start_vce(
 
     # Load backend config
     log(DEBUG, "Supported backends: %s", list(supported_backends.keys()))
-    backend_config = json.loads(backend_config_json_stream)
 
     try:
-        backend_type = supported_backends[backend_name]
+        backend_type = supported_backends[backend_config.name]
     except KeyError as ex:
         log(
             ERROR,
             "Backend `%s`, is not supported. Use any of %s or add support "
             "for a new backend.",
-            backend_name,
+            backend_config.name,
             list(supported_backends.keys()),
         )
-        if backend_name in error_messages_backends:
-            log(ERROR, error_messages_backends[backend_name])
+        if backend_config.name in error_messages_backends:
+            log(ERROR, error_messages_backends[backend_config.name])
 
         raise ex
 

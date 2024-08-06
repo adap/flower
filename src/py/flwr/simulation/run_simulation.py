@@ -42,7 +42,7 @@ from flwr.server.driver import Driver, InMemoryDriver
 from flwr.server.run_serverapp import run as run_server_app
 from flwr.server.server_app import ServerApp
 from flwr.server.superlink.fleet import vce
-from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
+from flwr.server.superlink.fleet.vce.backend import BackendConfig, ClientAppResources
 from flwr.server.superlink.state import StateFactory
 from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
 from flwr.simulation.ray_transport.utils import (
@@ -169,12 +169,21 @@ def run_simulation_from_cli() -> None:
     # Load JSON config
     backend_config_dict = json.loads(args.backend_config)
 
+    # Construct BackendConfig object
+    clientapp_resources = ClientAppResources(
+        num_cpus=args.clientapp_cpus, num_gpus=args.clientapp_gpus
+    )
+    backend_config = BackendConfig(
+        name=args.backend,
+        clientapp_resources=clientapp_resources,
+        config=backend_config_dict,
+    )
+
     _run_simulation(
         server_app_attr=server_app_attr,
         client_app_attr=client_app_attr,
         num_supernodes=args.num_supernodes,
-        backend_name=args.backend,
-        backend_config=backend_config_dict,
+        backend_config=backend_config,
         app_dir=app_dir,
         run=run,
         enable_tf_gpu_growth=args.enable_tf_gpu_growth,
@@ -190,7 +199,6 @@ def run_simulation(
     server_app: ServerApp,
     client_app: ClientApp,
     num_supernodes: int,
-    backend_name: str = "ray",
     backend_config: Optional[BackendConfig] = None,
     enable_tf_gpu_growth: bool = False,
     verbose_logging: bool = False,
@@ -216,12 +224,10 @@ def run_simulation(
         A simulation backend that runs `ClientApp`s.
 
     backend_config : Optional[BackendConfig]
-        'A dictionary to configure a backend. Separate dictionaries to configure
-        different elements of backend. Supported top-level keys are `init_args`
-        for values parsed to initialisation of backend, `client_resources`
-        to define the resources for clients, and `actor` to define the actor
-        parameters. Values supported in <value> are those included by
-        `flwr.common.typing.ConfigsRecordValues`.
+        A dataclass to configure a simulation Backend and setup the level of paralellism
+        in your simulation (i.e. how many `ClientApp` objects run in parallel). If
+        unspecified the default backend (Ray) will be used and will assign 2 CPUs per
+        `ClientApp`.
 
     enable_tf_gpu_growth : bool (default: False)
         A boolean to indicate whether to enable GPU growth on the main thread. This is
@@ -248,7 +254,6 @@ def run_simulation(
         num_supernodes=num_supernodes,
         client_app=client_app,
         server_app=server_app,
-        backend_name=backend_name,
         backend_config=backend_config,
         enable_tf_gpu_growth=enable_tf_gpu_growth,
         verbose_logging=verbose_logging,
@@ -329,8 +334,7 @@ def run_serverapp_th(
 # pylint: disable=too-many-locals
 def _main_loop(
     num_supernodes: int,
-    backend_name: str,
-    backend_config_stream: str,
+    backend_config: BackendConfig,
     app_dir: str,
     is_app: bool,
     enable_tf_gpu_growth: bool,
@@ -379,8 +383,7 @@ def _main_loop(
             num_supernodes=num_supernodes,
             client_app_attr=client_app_attr,
             client_app=client_app,
-            backend_name=backend_name,
-            backend_config_json_stream=backend_config_stream,
+            backend_config=backend_config,
             app_dir=app_dir,
             is_app=is_app,
             state_factory=state_factory,
@@ -412,7 +415,6 @@ def _run_simulation(
     num_supernodes: int,
     client_app: Optional[ClientApp] = None,
     server_app: Optional[ServerApp] = None,
-    backend_name: str = "ray",
     backend_config: Optional[BackendConfig] = None,
     client_app_attr: Optional[str] = None,
     server_app_attr: Optional[str] = None,
@@ -440,16 +442,11 @@ def _run_simulation(
     server_app : Optional[ServerApp]
         The `ServerApp` to be executed.
 
-    backend_name : str (default: ray)
-        A simulation backend that runs `ClientApp`s.
-
     backend_config : Optional[BackendConfig]
-        'A dictionary to configure a backend. Separate dictionaries to configure
-        different elements of backend. Supported top-level keys are `init_args`
-        for values parsed to initialisation of backend, `client_resources`
-        to define the resources for clients, and `actor` to define the actor
-        parameters. Values supported in <value> are those included by
-        `flwr.common.typing.ConfigsRecordValues`.
+        A dataclass to configure a simulation Backend and setup the level of paralellism
+        in your simulation (i.e. how many `ClientApp` objects run in parallel). If
+        unspecified the default backend (Ray) will be used and will assign 2 CPUs per
+        `ClientApp`.
 
     client_app_attr : Optional[str]
         A path to a `ClientApp` module to be loaded: For example: `client:app` or
@@ -491,40 +488,16 @@ def _run_simulation(
         a context object.
     """
     if backend_config is None:
-        backend_config = {}
-
-    if "init_args" not in backend_config:
-        backend_config["init_args"] = {}
-
-    # Set default client_resources if not passed
-    if "client_resources" not in backend_config:
-        backend_config["client_resources"] = {"num_cpus": 2, "num_gpus": 0}
-
-    # Initialization of backend config to enable GPU growth globally when set
-    if "actor" not in backend_config:
-        backend_config["actor"] = {"tensorflow": 0}
+        # Default backend confing
+        backend_config = BackendConfig()
 
     # Set logging level
     logger = logging.getLogger("flwr")
     if verbose_logging:
         update_console_handler(level=DEBUG, timestamps=True, colored=True)
-    else:
-        backend_config["init_args"]["logging_level"] = backend_config["init_args"].get(
-            "logging_level", WARNING
-        )
-        backend_config["init_args"]["log_to_driver"] = backend_config["init_args"].get(
-            "log_to_driver", True
-        )
 
     if enable_tf_gpu_growth:
-        # Check that Backend config has also enabled using GPU growth
-        use_tf = backend_config.get("actor", {}).get("tensorflow", False)
-        if not use_tf:
-            log(WARNING, "Enabling GPU growth for your backend.")
-            backend_config["actor"]["tensorflow"] = True
-
-    # Convert config to original JSON-stream format
-    backend_config_stream = json.dumps(backend_config)
+        pass
 
     # If no `Run` object is set, create one
     if run is None:
@@ -533,8 +506,7 @@ def _run_simulation(
 
     args = (
         num_supernodes,
-        backend_name,
-        backend_config_stream,
+        backend_config,
         app_dir,
         is_app,
         enable_tf_gpu_growth,
@@ -604,7 +576,7 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         "--backend",
         default="ray",
         type=str,
-        help="Simulation backend that executes the ClientApp.",
+        help="Name of the simulation backend that executes the ClientApp.",
     )
     parser.add_argument(
         "--backend-config",
@@ -613,6 +585,18 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         help='A JSON formatted stream, e.g \'{"<keyA>":<value>, "<keyB>":<value>}\' to '
         "configure a backend. Values supported in <value> are those included by "
         "`flwr.common.typing.ConfigsRecordValues`. ",
+    )
+    parser.add_argument(
+        "--clientapp-cpus",
+        type=int,
+        help="Number of CPUs that the chosen backend allocates for each `ClientApp`. "
+        "It can be any integer higher or equal than 1.",
+    )
+    parser.add_argument(
+        "--clientapp-gpus",
+        type=float,
+        help="Number of GPUs that the chosen backend allocates for each `ClientApp`. "
+        "It can be any fractional number greater or equal to 0.0.",
     )
     parser.add_argument(
         "--enable-tf-gpu-growth",

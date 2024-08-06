@@ -38,7 +38,7 @@ from flwr.common import (
 from flwr.common.constant import PARTITION_ID_KEY
 from flwr.common.object_ref import load_app
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
-from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
+from flwr.server.superlink.fleet.vce.backend import BackendConfig, ClientAppResources
 from flwr.server.superlink.fleet.vce.backend.raybackend import RayBackend
 
 
@@ -140,7 +140,7 @@ class TestRayBackend(TestCase):
 
     def test_backend_creation_and_termination(self) -> None:
         """Test creation of RayBackend and its termination."""
-        backend = RayBackend(backend_config={}, work_dir="")
+        backend = RayBackend(backend_config=BackendConfig(), work_dir="")
         backend_build_process_and_termination(backend=backend, process_args=None)
 
     def test_backend_creation_submit_and_termination(
@@ -149,7 +149,7 @@ class TestRayBackend(TestCase):
         workdir: str = "",
     ) -> None:
         """Test submitting a message to a given ClientApp."""
-        backend = RayBackend(backend_config={}, work_dir=workdir)
+        backend = RayBackend(backend_config=BackendConfig(), work_dir=workdir)
 
         # Define ClientApp
         client_app_callable = client_app_loader
@@ -216,15 +216,17 @@ class TestRayBackend(TestCase):
 
     def test_backend_creation_with_init_arguments(self) -> None:
         """Testing whether init args are properly parsed to Ray."""
-        backend_config_4: BackendConfig = {
-            "init_args": {"num_cpus": 4},
-            "client_resources": {"num_cpus": 1, "num_gpus": 0},
-        }
+        backend_config_4 = BackendConfig(
+            name="ray",
+            clientapp_resources=ClientAppResources(num_cpus=1, num_gpus=0),
+            config={"num_cpus": 4},
+        )
 
-        backend_config_2: BackendConfig = {
-            "init_args": {"num_cpus": 2},
-            "client_resources": {"num_cpus": 1, "num_gpus": 0},
-        }
+        backend_config_2 = BackendConfig(
+            name="ray",
+            clientapp_resources=ClientAppResources(num_cpus=1, num_gpus=0),
+            config={"num_cpus": 2},
+        )
 
         RayBackend(
             backend_config=backend_config_4,
@@ -232,7 +234,7 @@ class TestRayBackend(TestCase):
         )
         nodes = ray.nodes()
 
-        assert nodes[0]["Resources"]["CPU"] == backend_config_4["init_args"]["num_cpus"]
+        assert nodes[0]["Resources"]["CPU"] == backend_config_4.config["num_cpus"]
 
         ray.shutdown()
 
@@ -242,4 +244,4 @@ class TestRayBackend(TestCase):
         )
         nodes = ray.nodes()
 
-        assert nodes[0]["Resources"]["CPU"] == backend_config_2["init_args"]["num_cpus"]
+        assert nodes[0]["Resources"]["CPU"] == backend_config_2.config["num_cpus"]

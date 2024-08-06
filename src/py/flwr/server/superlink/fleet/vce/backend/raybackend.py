@@ -25,13 +25,11 @@ from flwr.common.constant import PARTITION_ID_KEY
 from flwr.common.context import Context
 from flwr.common.logger import log
 from flwr.common.message import Message
-from flwr.common.typing import ConfigsRecordValues
 from flwr.simulation.ray_transport.ray_actor import BasicActorPool, ClientAppActor
-from flwr.simulation.ray_transport.utils import enable_tf_gpu_growth
 
-from .backend import Backend, BackendConfig
+from .backend import Backend
+from .backendconfig import BackendConfig
 
-ClientResourcesDict = Dict[str, Union[int, float]]
 ActorArgsDict = Dict[str, Union[int, float, Callable[[], None]]]
 RunTimeEnvDict = Dict[str, Union[str, List[str]]]
 
@@ -52,20 +50,19 @@ class RayBackend(Backend):
             raise ValueError(f"Specified work_dir {work_dir} does not exist.")
 
         # Initialise ray
-        self.init_args_key = "init_args"
         self.init_ray(backend_config, work_dir)
 
-        # Validate client resources
-        self.client_resources_key = "client_resources"
-        client_resources = self._validate_client_resources(config=backend_config)
+        # Express ClientApp resources in a way ray understands
+        client_resources = {
+            "num_cpus": backend_config.clientapp_resources.num_cpus,
+            "num_gpus": backend_config.clientapp_resources.num_gpus,
+        }
 
         # Create actor pool
-        actor_kwargs = self._validate_actor_arguments(config=backend_config)
-
         self.pool = BasicActorPool(
             actor_type=ClientAppActor,
             client_resources=client_resources,
-            actor_kwargs=actor_kwargs,
+            actor_kwargs={},
         )
 
     def _configure_runtime_env(self, work_dir: str) -> RunTimeEnvDict:
@@ -85,44 +82,6 @@ class RayBackend(Backend):
 
         return runtime_env
 
-    def _validate_client_resources(self, config: BackendConfig) -> ClientResourcesDict:
-        client_resources_config = config.get(self.client_resources_key)
-        client_resources: ClientResourcesDict = {}
-        valid_types = (int, float)
-        if client_resources_config:
-            for k, v in client_resources_config.items():
-                if not isinstance(k, str):
-                    raise ValueError(
-                        f"client resources keys are expected to be `str` but you used "
-                        f"{type(k)} for `{k}`"
-                    )
-                if not isinstance(v, valid_types):
-                    raise ValueError(
-                        f"client resources are expected to be of type {valid_types} "
-                        f"but found `{type(v)}` for key `{k}`",
-                    )
-                client_resources[k] = v
-
-        else:
-            client_resources = {"num_cpus": 2, "num_gpus": 0.0}
-            log(
-                DEBUG,
-                "`%s` not specified in backend config. Applying default setting: %s",
-                self.client_resources_key,
-                client_resources,
-            )
-
-        return client_resources
-
-    def _validate_actor_arguments(self, config: BackendConfig) -> ActorArgsDict:
-        actor_args_config = config.get("actor", False)
-        actor_args: ActorArgsDict = {}
-        if actor_args_config:
-            use_tf = actor_args.get("tensorflow", False)
-            if use_tf:
-                actor_args["on_actor_init_fn"] = enable_tf_gpu_growth
-        return actor_args
-
     def init_ray(self, backend_config: BackendConfig, work_dir: str) -> None:
         """Intialises Ray if not already initialised."""
         if not ray.is_initialized():
@@ -131,18 +90,12 @@ class RayBackend(Backend):
                 self._configure_runtime_env(work_dir=work_dir) if work_dir else None
             )
 
-            ray_init_args: Dict[
-                str,
-                Union[ConfigsRecordValues, RunTimeEnvDict],
-            ] = {}
-
-            if backend_config.get(self.init_args_key):
-                for k, v in backend_config[self.init_args_key].items():
-                    ray_init_args[k] = v
+            ray_init_args = backend_config.config
 
             if runtime_env is not None:
                 ray_init_args["runtime_env"] = runtime_env
 
+            log(DEBUG, "Initializing Ray with passed config: %s", ray_init_args)
             ray.init(**ray_init_args)
 
     @property

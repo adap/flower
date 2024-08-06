@@ -18,7 +18,6 @@
 import threading
 import time
 from itertools import cycle
-from json import JSONDecodeError
 from math import pi
 from pathlib import Path
 from time import sleep
@@ -37,6 +36,7 @@ from flwr.common import (
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
 from flwr.common.serde import message_from_taskres, message_to_taskins
 from flwr.common.typing import Run
+from flwr.server.superlink.fleet.vce.backend import BackendConfig
 from flwr.server.superlink.fleet.vce.vce_api import (
     NodeToPartitionMapping,
     _register_nodes,
@@ -136,14 +136,13 @@ def _autoresolve_app_dir(rel_client_app_dir: str = "backend") -> str:
 
 # pylint: disable=too-many-arguments
 def start_and_shutdown(
-    backend: str = "ray",
+    backend_config: Optional[BackendConfig] = None,
     client_app_attr: str = "raybackend_test:client_app",
     app_dir: str = "",
     num_supernodes: Optional[int] = None,
     state_factory: Optional[StateFactory] = None,
     nodes_mapping: Optional[NodeToPartitionMapping] = None,
     duration: int = 0,
-    backend_config: str = "{}",
 ) -> None:
     """Start Simulation Engine and terminate after specified number of seconds.
 
@@ -170,8 +169,7 @@ def start_and_shutdown(
     start_vce(
         num_supernodes=num_supernodes,
         client_app_attr=client_app_attr,
-        backend_name=backend,
-        backend_config_json_stream=backend_config,
+        backend_config=BackendConfig() if backend_config is None else backend_config,
         state_factory=state_factory,
         app_dir=app_dir,
         is_app=False,
@@ -207,15 +205,13 @@ class TestFleetSimulationEngineRayBackend(TestCase):
                 nodes_mapping=nodes_mapping,
             )
 
-    def test_erroneous_backend_config(self) -> None:
-        """Backend Config should be a JSON stream."""
-        with self.assertRaises(JSONDecodeError):
-            start_and_shutdown(num_supernodes=50, backend_config="not a proper config")
-
     def test_with_nonexistent_backend(self) -> None:
         """Test specifying a backend that does not exist."""
         with self.assertRaises(KeyError):
-            start_and_shutdown(num_supernodes=50, backend="this-backend-does-not-exist")
+            start_and_shutdown(
+                num_supernodes=50,
+                backend_config=BackendConfig(name="nonexistent backend"),
+            )
 
     def test_erroneous_arguments_num_supernodes_and_existing_mapping(self) -> None:
         """Test ValueError if a node mapping is passed but also num_supernodes.

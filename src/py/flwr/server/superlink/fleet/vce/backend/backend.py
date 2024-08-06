@@ -16,14 +16,13 @@
 
 
 from abc import ABC, abstractmethod
-from typing import Callable, Dict, Tuple
+from typing import Callable, Tuple
 
 from flwr.client.client_app import ClientApp
 from flwr.common.context import Context
 from flwr.common.message import Message
-from flwr.common.typing import ConfigsRecordValues
 
-BackendConfig = Dict[str, Dict[str, ConfigsRecordValues]]
+from .backendconfig import BackendConfig
 
 
 class Backend(ABC):
