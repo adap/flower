@@ -3,9 +3,9 @@ from typing import Optional
 
 from flwr.common import log
 
-from .state import SuperexecState
-from .sqlite_state import SqliteSuperexecState
 from .in_memory_state import InMemorySuperexecState
+from .sqlite_state import SqliteSuperexecState
+from .state import SuperexecState
 
 
 class SuperexecStateFactory:

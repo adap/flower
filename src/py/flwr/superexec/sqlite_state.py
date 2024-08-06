@@ -16,9 +16,9 @@
 
 
 import datetime
+import sqlite3
 from typing import List, Optional
 
-import sqlite3
 from typing_extensions import override
 
 from .state import RunStatus, SuperexecState
