@@ -152,7 +152,7 @@ We defined a simple Convolutional Neural Network (CNN), but feel free to replace
         x = F.relu(self.fc2(x))
         return self.fc3(x)
 
-In addition to defining the model architecture, we also include two utility functions to perform both training and evaluation using the above model. These functions should look fairly familiar if you have some prior experience with PyTorch. Note these functions do not have anything specific to Flower. That being said, the training function will normally be called, as we'll see later, from a Flower client passing its own data. In summary, your clients can use standard training functions to perform local training:
+In addition to defining the model architecture, we also include two utility functions to perform both training (i.e. :code:`train()`) and evaluation (i.e. :code:`test()`) using the above model. These functions should look fairly familiar if you have some prior experience with PyTorch. Note these functions do not have anything specific to Flower. That being said, the training function will normally be called, as we'll see later, from a Flower client passing its own data. In summary, your clients can use standard training/testing functions to perform local training or evaluation:
 
 .. code-block:: python
 
@@ -269,7 +269,7 @@ The ServerApp
 -------------
 
 To construct a :code:`ServerApp` we define a :code:`server_fn()` callback with an identical signature
-to that of :code:`client_fn()` but the return type is :code:`ServerAppComponents <https://flower.ai/docs/framework/ref-api/flwr.server.ServerAppComponents.html#serverappcomponents>`_ as opposed to a `Client <https://flower.ai/docs/framework/ref-api/flwr.client.Client.html#client>`_. In this example we use the `FedAvg`. To it we pass a randomly initialized model that will server as the global model to federated. Note that the value of :code:`fraction_fit` is read from the run config. You can find the default value defined in the :code:`pyproject.toml`.
+to that of :code:`client_fn()` but the return type is `ServerAppComponents <https://flower.ai/docs/framework/ref-api/flwr.server.ServerAppComponents.html#serverappcomponents>`_ as opposed to a `Client <https://flower.ai/docs/framework/ref-api/flwr.client.Client.html#client>`_. In this example we use the `FedAvg`. To it we pass a randomly initialized model that will server as the global model to federated. Note that the value of :code:`fraction_fit` is read from the run config. You can find the default value defined in the :code:`pyproject.toml`.
 
 .. code-block:: python
 
