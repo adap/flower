@@ -42,6 +42,5 @@ class SuperexecStateFactory:
 
         # SqliteState
         state = SqliteSuperexecState(self.database)
-        state.initialize()
         log(DEBUG, "Using SqliteState")
         return state
