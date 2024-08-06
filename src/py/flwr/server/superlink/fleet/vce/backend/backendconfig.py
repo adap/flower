@@ -80,7 +80,19 @@ class ClientAppResources:
 
 @dataclass
 class BackendConfig:
-    """A config for a Simulation Engine backend."""
+    """A config for a Simulation Engine backend.
+
+    Parameters
+    ----------
+    name : str (default: ray)
+        The name of the simulation Backend to use.
+    clientapp_resources : Optional[ClientAppResources]
+        A dataclass that indicates the sytem resources to should be assigned
+        to a `ClientApp`. Higher resources per `ClientApp` means fewer can run
+        in parallel.
+    config: Optional[Dict[str, ConfigsRecordValues]]
+        A dictionary used in the constructor of a backend.
+    """
 
     name: str
     clientapp_resources: ClientAppResources
