@@ -1,9 +1,9 @@
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
 
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 
-from flwr.common import NDArrays, Metrics, Scalar
+from flwr.common import Metrics, NDArrays, Scalar
 
 
 def get_model_parameters(model: LogisticRegression) -> NDArrays:

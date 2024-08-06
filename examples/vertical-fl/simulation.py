@@ -1,9 +1,11 @@
-import flwr as fl
-import numpy as np
-from strategy import Strategy
-from client import FlowerClient
 from pathlib import Path
+
+import numpy as np
+from client import FlowerClient
+from strategy import Strategy
 from task import get_partitions_and_label
+
+import flwr as fl
 
 partitions, label = get_partitions_and_label()
 

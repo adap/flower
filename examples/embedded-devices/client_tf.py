@@ -1,12 +1,12 @@
-import math
 import argparse
+import math
 import warnings
 
-import flwr as fl
 import tensorflow as tf
+from flwr_datasets import FederatedDataset
 from tensorflow import keras as keras
 
-from flwr_datasets import FederatedDataset
+import flwr as fl
 
 parser = argparse.ArgumentParser(description="Flower Embedded devices")
 parser.add_argument(

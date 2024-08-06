@@ -3,9 +3,9 @@
 Source: pytorchlightning.ai (2021/02/04)
 """
 
-from flwr_datasets import FederatedDataset
 import pytorch_lightning as pl
 import torch
+from flwr_datasets import FederatedDataset
 from torch import nn
 from torch.nn import functional as F
 from torch.utils.data import DataLoader

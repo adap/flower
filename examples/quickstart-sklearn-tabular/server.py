@@ -1,7 +1,7 @@
-import flwr as fl
 import utils
 from sklearn.linear_model import LogisticRegression
 
+import flwr as fl
 
 # Start Flower server for five rounds of federated learning
 if __name__ == "__main__":

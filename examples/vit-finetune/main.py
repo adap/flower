@@ -1,10 +1,10 @@
 import argparse
 
-import flwr as fl
 import matplotlib.pyplot as plt
-
-from server import strategy
 from client import client_fn
+from server import strategy
+
+import flwr as fl
 
 parser = argparse.ArgumentParser(
     description="Finetuning of a ViT with Flower Simulation."

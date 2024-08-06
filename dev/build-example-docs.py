@@ -15,8 +15,8 @@
 """Build the Flower Example docs."""
 
 import os
-import shutil
 import re
+import shutil
 import subprocess
 from pathlib import Path
 

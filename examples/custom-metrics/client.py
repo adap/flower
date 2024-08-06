@@ -1,11 +1,11 @@
 import os
 
-import flwr as fl
 import numpy as np
 import tensorflow as tf
-from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score
 from flwr_datasets import FederatedDataset
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 
+import flwr as fl
 
 # Make TensorFlow log less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"

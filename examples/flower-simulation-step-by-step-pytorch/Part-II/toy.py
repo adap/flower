@@ -1,7 +1,6 @@
 import hydra
-from omegaconf import DictConfig, OmegaConf
-
 from hydra.utils import call, instantiate
+from omegaconf import DictConfig, OmegaConf
 
 
 def function_test(x: int, y: int):

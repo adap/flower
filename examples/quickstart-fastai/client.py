@@ -6,7 +6,6 @@ from fastai.vision.all import *
 
 import flwr as fl
 
-
 warnings.filterwarnings("ignore", category=UserWarning)
 
 # Download MNIST dataset
