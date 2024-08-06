@@ -18,7 +18,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from flwr.common.typing import UserConfig
+from flwr.common.typing import ConfigsRecordValues
 
 
 @dataclass
@@ -53,13 +53,13 @@ class BackendConfig:
 
     name: str
     clientapp_resources: ClientAppResources
-    config: Optional[UserConfig]
+    config: Optional[ConfigsRecordValues]
 
     def __init__(
         self,
         name: str = "ray",
         clientapp_resources: Optional[ClientAppResources] = None,
-        config: Optional[UserConfig] = None,
+        config: Optional[ConfigsRecordValues] = None,
     ):
         self.name = name
         if clientapp_resources is None:
