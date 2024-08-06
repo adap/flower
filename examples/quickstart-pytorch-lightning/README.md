@@ -23,6 +23,7 @@ This will create a new directory called `quickstart-pytorch-lightning` containin
 ```shell
 quickstart-pytorch-lightning
 ├── pytorchlightning_example
+│   ├── __init__.py
 │   ├── client_app.py   # Defines your ClientApp
 │   ├── server_app.py   # Defines your ServerApp
 │   └── task.py         # Defines your model, training and data loading
