@@ -86,7 +86,7 @@ With default arguments you will see an output like this one:
     INFO :
 
 
-You can also override the parameters defined in `[tool.flwr.app.config]` section in the `pyproject.toml` like this:
+You can also override the parameters defined in :code:`[tool.flwr.app.config]` section in the :code:`pyproject.toml` like this:
 
 .. code-block:: shell
 
@@ -94,7 +94,7 @@ You can also override the parameters defined in `[tool.flwr.app.config]` section
     $ flwr run . --run-config num-server-rounds=5,lr=0.05
 
 
-What follows is an explanation of each component in the project you just created: dataset partition, the model, defining the `ClientApp` and defining the `ServerApp`.
+What follows is an explanation of each component in the project you just created: dataset partition, the model, defining the :code:`ClientApp` and defining the :code:`ServerApp`.
 
 The Data
 --------
@@ -187,8 +187,8 @@ The ClientApp
 -------------
 
 The main changes we have to make to use `MLX` with `Flower` will be found in
-the `get_params` and `set_params` functions. Indeed, MLX doesn't
-provide an easy way to convert the model parameters into a list of `np.array` objects
+the :code:`get_params()` and :code:`set_params()` functions. Indeed, MLX doesn't
+provide an easy way to convert the model parameters into a list of :code:`np.array` objects
 (the format we need for the serialization of the messages to work).
 
 The way MLX stores its parameters is as follows:
@@ -204,7 +204,7 @@ The way MLX stores its parameters is as follows:
     ]
     }
 
-Therefore, to get our list of `np.array`s, we need to extract each array and
+Therefore, to get our list of :code:`np.array`s, we need to extract each array and
 convert them into a NumPy array:
 
 .. code-block:: python
@@ -214,7 +214,7 @@ convert them into a NumPy array:
         return [np.array(val) for layer in layers for _, val in layer.items()]
 
 
-For the `set_params` function, we perform the reverse operation. We receive
+For the :code:`set_params()` function, we perform the reverse operation. We receive
 a list of NumPy arrays and want to convert them into MLX parameters. Therefore, we
 iterate through pairs of parameters and assign them to the `weight` and `bias`
 keys of each layer dict:
@@ -230,7 +230,7 @@ keys of each layer dict:
     model.update(new_params)
 
 
-The rest of the functionality is directly inspired by the centralized case. The `fit()`
+The rest of the functionality is directly inspired by the centralized case. The :code:`fit()`
 method in the client trains the model using the local dataset:
 
 .. code-block:: python
@@ -250,7 +250,7 @@ method in the client trains the model using the local dataset:
 Here, after updating the parameters, we perform the training as in the
 centralized case, and return the new parameters.
 
-And for the `evaluate` method of the client:
+And for the :code:`evaluate()` method of the client:
 
 .. code-block:: python
 
@@ -263,7 +263,7 @@ And for the `evaluate` method of the client:
 
 We also begin by updating the parameters with the ones sent by the server, and
 then we compute the loss and accuracy using the functions defined above. In the
-constructor of the `FlowerClient` we instantiate the `MLP` model as well as other
+constructor of the :code:`FlowerClient` we instantiate the `MLP` model as well as other
 components such as the optimizer.
 
 Putting everything together we have:
@@ -321,7 +321,7 @@ Putting everything together we have:
             return loss.item(), len(self.test_images), {"accuracy": accuracy.item()}
 
 
-Finally, we can construct a `ClientApp` using the `FlowerClient` defined above by means of a `client_fn` callback:
+Finally, we can construct a :code:`ClientApp` using the :code:`FlowerClient` defined above by means of a :code:`client_fn()` callback. Note that the :code:`context` enables you to get access to hyperparemeters defined in your :code:`pyproject.toml` to configure the run. In this tutorial we access, among other hyperparameters, the `local-epochs` setting to control the number of epochs a :code:`ClientApp` will perform when running the :code:`fit()` method.
 
 .. code-block:: python
 
@@ -349,8 +349,8 @@ Finally, we can construct a `ClientApp` using the `FlowerClient` defined above b
 The ServerApp
 -------------
 
-To construct a `ServerApp` we define a `server_fn()` callback with an identical signature
-to that of `client_fn()` but the return type is `ServerAppComponents <https://flower.ai/docs/framework/ref-api/flwr.server.ServerAppComponents.html#serverappcomponents>`_ as opposed to a `Client <https://flower.ai/docs/framework/ref-api/flwr.client.Client.html#client>`_. In this example we use the `FedAvg` strategy.
+To construct a :code:`ServerApp` we define a :code:`server_fn()` callback with an identical signature
+to that of :code:`client_fn()` but the return type is `ServerAppComponents <https://flower.ai/docs/framework/ref-api/flwr.server.ServerAppComponents.html#serverappcomponents>`_ as opposed to a `Client <https://flower.ai/docs/framework/ref-api/flwr.client.Client.html#client>`_. In this example we use the :code:`FedAvg` strategy.
 
 .. code-block:: python
 

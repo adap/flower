@@ -83,7 +83,7 @@ With default arguments you will see an output like this one:
     INFO :                  round 3: 2.039920600131154
     INFO :
 
-You can also override the parameters defined in `[tool.flwr.app.config]` section in the `pyproject.toml` like this:
+You can also override the parameters defined in :code:`[tool.flwr.app.config]` section in the :code:`pyproject.toml` like this:
 
 .. code-block:: shell
 
@@ -91,7 +91,7 @@ You can also override the parameters defined in `[tool.flwr.app.config]` section
     $ flwr run . --run-config num-server-rounds=5,local-epochs=3
 
 
-What follows is an explanation of each component in the project you just created: dataset partition, the model, defining the `ClientApp` and defining the `ServerApp`.
+What follows is an explanation of each component in the project you just created: dataset partition, the model, defining the :code:`ClientApp` and defining the :code:`ServerApp`.
 
 
 The Data
@@ -99,7 +99,7 @@ The Data
 
 This tutorial uses `Flower Datasets <https://flower.ai/docs/datasets/>`_ to easily download and partition the `CIFAR-10` dataset.
 In this example you'll make use of the `IidPartitioner <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_ to generate `num_partitions` partitions.
-You can choose `other partitioners <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html>`_ available in Flower Datasets. Each `ClientApp` will call this function to create dataloaders with the data that correspond to their data partition.
+You can choose `other partitioners <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html>`_ available in Flower Datasets. Each :code:`ClientApp` will call this function to create dataloaders with the data that correspond to their data partition.
 
 
 .. code-block:: python
@@ -197,16 +197,16 @@ The ClientApp
 -------------
 
 The main changes we have to make to use `PyTorch` with `Flower` will be found in
-the `get_weights` and `set_weights` functions. In `get_weights` PyTorch model parameters are extracted and represented as a list of NumPy arrays. The `set_weights` function that's the oposite: given a list of NumPy arrays it applies them to an existing PyTorch model. Doing this in fairly easy in PyTorch.
+the :code:`get_weights()` and :code:`set_weights()` functions. In :code:`get_weights()` PyTorch model parameters are extracted and represented as a list of NumPy arrays. The :code:`set_weights()` function that's the oposite: given a list of NumPy arrays it applies them to an existing PyTorch model. Doing this in fairly easy in PyTorch.
 
 .. note::
-    The specific implementation of `get_weights` and `set_weights` depends on the type of models you use. The ones shown below work for a wide range of PyTorch models but you might need to adjust them if you have more exotic model architectures.
+    The specific implementation of :code:`get_weights()` and :code:`set_weights()` depends on the type of models you use. The ones shown below work for a wide range of PyTorch models but you might need to adjust them if you have more exotic model architectures.
 
 
 .. code-block:: python
 
     def get_weights(net):
-    return [val.cpu().numpy() for _, val in net.state_dict().items()]
+        return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
     def set_weights(net, parameters):
         params_dict = zip(net.state_dict().keys(), parameters)
@@ -214,8 +214,8 @@ the `get_weights` and `set_weights` functions. In `get_weights` PyTorch model pa
         net.load_state_dict(state_dict, strict=True)
 
 
-The rest of the functionality is directly inspired by the centralized case. The `fit()`
-method in the client trains the model using the local dataset. Similarly, the `evaluate()` method is used to evaluate the model received on a held-out validation set that the client might have:
+The rest of the functionality is directly inspired by the centralized case. The :code:`fit()` method in the client trains the model using the local dataset.
+Similarly, the :code:`evaluate()` method is used to evaluate the model received on a held-out validation set that the client might have:
 
 
 .. code-block:: python
@@ -245,7 +245,7 @@ method in the client trains the model using the local dataset. Similarly, the `e
             loss, accuracy = test(self.net, self.valloader, self.device)
             return loss, len(self.valloader.dataset), {"accuracy": accuracy}
 
-Finally, we can construct a `ClientApp` using the `FlowerClient` defined above by means of a `client_fn` callback. Note that the `context` enables you to get access to hyperparemeters defined in your `pyproject.toml` to configure the run. In this tutorial we access the `local-epochs` setting to control the number of epochs a `ClientApp` will perform when running the `fit()` method.
+Finally, we can construct a :code:`ClientApp` using the :code:`FlowerClient` defined above by means of a :code:`client_fn()` callback. Note that the `context` enables you to get access to hyperparemeters defined in your :code:`pyproject.toml` to configure the run. In this tutorial we access the `local-epochs` setting to control the number of epochs a :code:`ClientApp` will perform when running the :code:`fit()` method. You could define additioinal hyperparameters in :code:`pyproject.toml` and access them here.
 
 .. code-block:: python
 
@@ -268,8 +268,8 @@ Finally, we can construct a `ClientApp` using the `FlowerClient` defined above b
 The ServerApp
 -------------
 
-To construct a `ServerApp` we define a `server_fn()` callback with an identical signature
-to that of `client_fn()` but the return type is `ServerAppComponents <https://flower.ai/docs/framework/ref-api/flwr.server.ServerAppComponents.html#serverappcomponents>`_ as opposed to a `Client <https://flower.ai/docs/framework/ref-api/flwr.client.Client.html#client>`_. In this example we use the `FedAvg`. To it we pass a randomly initialized model that will server as the global model to federated. Note that the value of `fraction_fit` is read from the run config. You can find the default value defined in the `pyroject.toml`.
+To construct a :code:`ServerApp` we define a :code:`server_fn()` callback with an identical signature
+to that of :code:`client_fn()` but the return type is :code:`ServerAppComponents <https://flower.ai/docs/framework/ref-api/flwr.server.ServerAppComponents.html#serverappcomponents>`_ as opposed to a `Client <https://flower.ai/docs/framework/ref-api/flwr.client.Client.html#client>`_. In this example we use the `FedAvg`. To it we pass a randomly initialized model that will server as the global model to federated. Note that the value of :code:`fraction_fit` is read from the run config. You can find the default value defined in the :code:`pyproject.toml`.
 
 .. code-block:: python
 
