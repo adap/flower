@@ -1,8 +1,8 @@
-import flwr as fl
 import torch
 from sklearn.preprocessing import StandardScaler
-
 from task import ClientModel
+
+import flwr as fl
 
 
 class FlowerClient(fl.client.NumPyClient):

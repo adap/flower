@@ -1,5 +1,5 @@
 from flwr.client import ClientApp
-from flwr.common import Message, Context
+from flwr.common import Context, Message
 
 
 def hello_world_mod(msg, ctx, call_next) -> Message:

@@ -1,19 +1,18 @@
-from typing import List, Tuple, Dict
 import random
 import time
+from typing import Dict, List, Tuple
 
 import flwr as fl
 from flwr.common import (
+    DEFAULT_TTL,
     Context,
-    NDArrays,
     Message,
     MessageType,
     Metrics,
+    NDArrays,
     RecordSet,
-    DEFAULT_TTL,
 )
 from flwr.server import Driver
-
 
 # Run via `flower-server-app server:app`
 app = fl.server.ServerApp()

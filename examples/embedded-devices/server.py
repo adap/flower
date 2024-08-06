@@ -4,7 +4,6 @@ from typing import List, Tuple
 import flwr as fl
 from flwr.common import Metrics
 
-
 parser = argparse.ArgumentParser(description="Flower Embedded devices")
 parser.add_argument(
     "--server_address",

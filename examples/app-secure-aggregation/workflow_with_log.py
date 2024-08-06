@@ -1,14 +1,16 @@
-from flwr.common import Context, log, parameters_to_ndarrays
 from logging import INFO
+
+import numpy as np
+
+import flwr.common.recordset_compat as compat
+from flwr.common import Context, log, parameters_to_ndarrays
+from flwr.common.secure_aggregation.quantization import quantize
 from flwr.server import Driver, LegacyContext
+from flwr.server.workflow.constant import MAIN_PARAMS_RECORD
 from flwr.server.workflow.secure_aggregation.secaggplus_workflow import (
     SecAggPlusWorkflow,
     WorkflowState,
 )
-import numpy as np
-from flwr.common.secure_aggregation.quantization import quantize
-from flwr.server.workflow.constant import MAIN_PARAMS_RECORD
-import flwr.common.recordset_compat as compat
 
 
 class SecAggPlusWorkflowWithLogs(SecAggPlusWorkflow):

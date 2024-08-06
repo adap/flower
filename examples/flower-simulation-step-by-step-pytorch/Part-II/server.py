@@ -1,12 +1,9 @@
 from collections import OrderedDict
 
-
-from omegaconf import DictConfig
-from hydra.utils import instantiate
-
 import torch
-
+from hydra.utils import instantiate
 from model import Net, test
+from omegaconf import DictConfig
 
 
 def get_on_fit_config(config: DictConfig):

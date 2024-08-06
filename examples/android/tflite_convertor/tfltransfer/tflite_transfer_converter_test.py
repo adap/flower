@@ -14,9 +14,7 @@
 """Tests for tflite_transfer_converter."""
 
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import tempfile
 import unittest
@@ -27,10 +25,7 @@ from tensorflow.keras import layers
 from tensorflow.keras.regularizers import l2
 
 # pylint: disable=g-bad-import-order
-from tfltransfer import bases
-from tfltransfer import heads
-from tfltransfer import optimizers
-from tfltransfer import tflite_transfer_converter
+from tfltransfer import bases, heads, optimizers, tflite_transfer_converter
 
 # pylint: enable=g-bad-import-order
 

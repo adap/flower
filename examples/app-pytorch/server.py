@@ -1,10 +1,10 @@
 from typing import List, Tuple
 
+from task import Net, get_weights
+
+from flwr.common import Metrics, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerConfig
 from flwr.server.strategy import FedAvg
-from flwr.common import Metrics, ndarrays_to_parameters
-
-from task import Net, get_weights
 
 
 # Define metric aggregation function

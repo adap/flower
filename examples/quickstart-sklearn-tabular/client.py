@@ -1,12 +1,12 @@
 import argparse
 import warnings
 
+import utils
+from flwr_datasets import FederatedDataset
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
 
 import flwr as fl
-import utils
-from flwr_datasets import FederatedDataset
 
 if __name__ == "__main__":
     N_CLIENTS = 3

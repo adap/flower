@@ -1,5 +1,6 @@
-import flwr as fl
 import numpy as np
+
+import flwr as fl
 
 
 # Define metrics aggregation function

@@ -1,10 +1,10 @@
 import torch
-from datasets import Dataset
-from torch.utils.data import DataLoader
-import flwr as fl
-
 from dataset import apply_eval_transforms, get_dataset_with_partitions
 from model import get_model, set_parameters, test
+from torch.utils.data import DataLoader
+
+import flwr as fl
+from datasets import Dataset
 
 
 def fit_config(server_round: int):

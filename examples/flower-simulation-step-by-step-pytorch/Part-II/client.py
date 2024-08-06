@@ -1,14 +1,12 @@
 from collections import OrderedDict
 from typing import Dict, Tuple
-from flwr.common import NDArrays, Scalar
-
-
-from hydra.utils import instantiate
 
 import torch
-import flwr as fl
+from hydra.utils import instantiate
+from model import test, train
 
-from model import train, test
+import flwr as fl
+from flwr.common import NDArrays, Scalar
 
 
 class FlowerClient(fl.client.NumPyClient):

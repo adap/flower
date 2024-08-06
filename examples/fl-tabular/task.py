@@ -1,13 +1,14 @@
+from collections import OrderedDict
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import TensorDataset, DataLoader
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, OrdinalEncoder
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
-from collections import OrderedDict
 from flwr_datasets import FederatedDataset
+from sklearn.compose import ColumnTransformer
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OrdinalEncoder, StandardScaler
+from torch.utils.data import DataLoader, TensorDataset
 
 
 def load_data(partition_id: int, fds: FederatedDataset):

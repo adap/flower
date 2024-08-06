@@ -1,13 +1,12 @@
+from flwr_datasets import FederatedDataset
 from torchvision.transforms import (
+    CenterCrop,
     Compose,
     Normalize,
-    ToTensor,
     RandomResizedCrop,
     Resize,
-    CenterCrop,
+    ToTensor,
 )
-
-from flwr_datasets import FederatedDataset
 
 
 def get_dataset_with_partitions(num_partitions: int):

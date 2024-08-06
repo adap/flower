@@ -14,9 +14,7 @@
 """Head model configuration for Keras models."""
 
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import os
 import shutil
@@ -25,7 +23,6 @@ import tempfile
 import tensorflow as tf
 from tensorflow.compat import v1 as tfv1
 from tensorflow.python.tools import freeze_graph
-
 from tfltransfer import utils
 
 

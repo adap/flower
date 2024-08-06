@@ -1,8 +1,10 @@
 import os
-import flwr as fl
+
+import tabnet
 import tensorflow as tf
 import tensorflow_datasets as tfds
-import tabnet
+
+import flwr as fl
 
 train_size = 125
 BATCH_SIZE = 50

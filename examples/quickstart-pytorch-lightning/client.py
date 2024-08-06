@@ -1,12 +1,12 @@
 import argparse
 from collections import OrderedDict
 
+import mnist
 import pytorch_lightning as pl
 import torch
-from datasets.utils.logging import disable_progress_bar
 
 import flwr as fl
-import mnist
+from datasets.utils.logging import disable_progress_bar
 
 disable_progress_bar()
 

@@ -3,9 +3,9 @@ Usage: python dev/build-docker-image-matrix.py --flwr-version <flower version e.
 """
 
 import argparse
+import json
 from dataclasses import asdict, dataclass
 from enum import Enum
-import json
 from typing import Any, Callable, Dict, List, Optional
 
 

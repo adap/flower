@@ -4,11 +4,11 @@ from logging import INFO
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from flwr.common.logger import log
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
 
+from flwr.common.logger import log
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 

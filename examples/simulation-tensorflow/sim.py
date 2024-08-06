@@ -1,15 +1,14 @@
-import os
 import argparse
+import os
 from typing import Dict, List, Tuple
 
 import tensorflow as tf
+from flwr_datasets import FederatedDataset
 
 import flwr as fl
+from datasets import Dataset
 from flwr.common import Metrics
 from flwr.simulation.ray_transport.utils import enable_tf_gpu_growth
-
-from datasets import Dataset
-from flwr_datasets import FederatedDataset
 
 # Make TensorFlow logs less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"

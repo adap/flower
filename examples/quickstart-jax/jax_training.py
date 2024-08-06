@@ -7,12 +7,13 @@ If you have any questions concerning the linear regression used with jax
 please read the JAX documentation or the mentioned tutorial.
 """
 
-from typing import Dict, List, Tuple, Callable
+from typing import Callable, Dict, List, Tuple
+
 import jax
 import jax.numpy as jnp
+import numpy as np
 from sklearn.datasets import make_regression
 from sklearn.model_selection import train_test_split
-import numpy as np
 
 key = jax.random.PRNGKey(0)
 

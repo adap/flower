@@ -1,9 +1,9 @@
 from typing import List, Tuple
 
 import flwr as fl
-from flwr.server.strategy import FedAvg
 from flwr.common import Metrics
 from flwr.server import ServerApp, ServerConfig
+from flwr.server.strategy import FedAvg
 
 
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
