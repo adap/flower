@@ -8,7 +8,7 @@ version = "1.0.0"
 description = ""
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.9.0,<2.0",
+    "flwr[simulation]>=1.10.0",
     "numpy>=1.21.0",
 ]
 
