@@ -219,11 +219,11 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
-        "app_dir",
+        "app",
         nargs="?",
         default=None,
-        help="Load and run the `ServerApp` from the provided app directory."
-        "The `pyproject.toml` file must be located in the root of this directory.",
+        help="Load and run the `ServerApp` from the specified Flower App path. "
+        "The `pyproject.toml` file must be located in the root of this path.",
     )
     parser.add_argument(
         "--insecure",
