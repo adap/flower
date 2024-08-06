@@ -34,13 +34,13 @@ from ..utils import (
 class MlFramework(str, Enum):
     """Available frameworks."""
 
-    NUMPY = "NumPy"
     PYTORCH = "PyTorch"
     TENSORFLOW = "TensorFlow"
-    JAX = "JAX"
-    HUGGINGFACE = "HuggingFace"
-    MLX = "MLX"
     SKLEARN = "sklearn"
+    HUGGINGFACE = "HuggingFace"
+    JAX = "JAX"
+    MLX = "MLX"
+    NUMPY = "NumPy"
     FLOWERTUNE = "FlowerTune"
 
 
@@ -139,7 +139,7 @@ def new(
     else:
         framework_value = prompt_options(
             "Please select ML framework by typing in the number",
-            sorted([mlf.value for mlf in MlFramework]),
+            [mlf.value for mlf in MlFramework],
         )
         selected_value = [
             name
