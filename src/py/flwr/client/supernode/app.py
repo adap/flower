@@ -63,7 +63,7 @@ def run_supernode() -> None:
     root_certificates = _get_certificates(args)
     load_fn = _get_load_client_app_fn(
         default_app_ref="",
-        app_dir=args.app_dir,
+        app_dir=args.app,
         flwr_dir=args.flwr_dir,
         multi_app=True,
     )
