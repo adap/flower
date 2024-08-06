@@ -113,7 +113,5 @@ def load_data(partition_id, num_partitions):
         batch_size=32,
         num_workers=2,
     )
-    testloader = DataLoader(
-        partition_full["test"], batch_size=32, num_workers=1
-    )
+    testloader = DataLoader(partition_full["test"], batch_size=32, num_workers=1)
     return trainloader, valloader, testloader
