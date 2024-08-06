@@ -1,5 +1,4 @@
 ---
-title: Federated Learning with fastai and Flower (Quickstart Example)
 tags: [quickstart, vision]
 dataset: [MNIST]
 framework: [fastai]
@@ -7,13 +6,15 @@ framework: [fastai]
 
 # Federated Learning with fastai and Flower (Quickstart Example)
 
-This introductory example to Flower uses [fastai](https://www.fast.ai/), but deep knowledge of fastai is not necessarily required to run the example. The example will help you understand how to adapt Flower to your specific use case, and running it is quite straightforward. 
+This introductory example to Flower uses [fastai](https://www.fast.ai/), but deep knowledge of fastai is not necessarily required to run the example. The example will help you understand how to adapt Flower to your specific use case, and running it is quite straightforward.
 
-fastai is a deep learning library built on PyTorch which provides practitioners with high-level components for building deep learning projects. In this example, we will train a [SqueezeNet v1.1](https://github.com/forresti/SqueezeNet/tree/master/SqueezeNet_v1.1) model on the [MNIST](https://huggingface.co/datasets/ylecun/mnist) dataset (handwritten digits recognition). The data will be downloaded and partitioned using [Flower Datasets](https://flower.ai/docs/datasets/).
+fastai is a deep learning library built on PyTorch which provides practitioners with high-level components for building deep learning projects. In this example, we will train a [SqueezeNet v1.1](https://github.com/forresti/SqueezeNet/tree/master/SqueezeNet_v1.1) model on the [MNIST](https://huggingface.co/datasets/ylecun/mnist) dataset. The data will be downloaded and partitioned using [Flower Datasets](https://flower.ai/docs/datasets/).
 
-## Project Setup
+## Set up the project
 
-Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
+### Clone the project
+
+Start by cloning the example project:
 
 ```shell
 git clone --depth=1 https://github.com/adap/flower.git _tmp \
@@ -25,14 +26,16 @@ This will create a new directory called `quickstart-fastai` containing the follo
 
 ```shell
 quickstart-fastai
-├── README.md
 ├── fastai_example
-│   ├── client_app.py    # defines your ClientApp
-│   └── server_app.py    # defines your ServerApp
-└── pyproject.toml       # builds your project, includes dependencies and configs
+│   ├── __init__.py
+│   ├── client_app.py   # Defines your ClientApp
+│   ├── server_app.py   # Defines your ServerApp
+│   └── task.py         # Defines your model, training and data loading
+├── pyproject.toml      # Project metadata like dependencies and configs
+└── README.md
 ```
 
-## Install dependencies
+### Install dependencies and project
 
 Install the dependencies defined in `pyproject.toml` as well as the `fastai_example` package.
 
@@ -40,21 +43,15 @@ Install the dependencies defined in `pyproject.toml` as well as the `fastai_exam
 pip install -e .
 ```
 
-## Run the Example
+## Run the project
 
-You can run your `ClientApp` and `ServerApp` in both _simulation_ and
-_deployment_ mode without making changes to the code. If you are starting
-with Flower, we recommend you using the _simulation_ model as it requires
-fewer components to be launched manually. By default, `flwr run` will make
-use of the Simluation Engine.
+You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
 
 ### Run with the Simulation Engine
 
 ```bash
 flwr run .
 ```
-
-You will see that fastai is starting a federated training. For a more in-depth look, be sure to check out the code on our [repo](https://github.com/adap/flower/tree/main/examples/quickstart-fastai).
 
 You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
