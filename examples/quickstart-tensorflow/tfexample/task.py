@@ -1,4 +1,4 @@
-"""$project_name: A Flower / $framework_str app."""
+"""tfexample: A Flower / TensorFlow app."""
 
 import os
 
@@ -12,7 +12,7 @@ from flwr_datasets.partitioner import IidPartitioner
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 
-def load_model():
+def load_model(learning_rate: float = 0.001):
     # Define a simple CNN for CIFAR-10 and set Adam optimizer
     model = keras.Sequential(
         [
@@ -26,7 +26,12 @@ def load_model():
             layers.Dense(10, activation="softmax"),
         ]
     )
-    model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
+    optimizer = keras.optimizers.Adam(learning_rate)
+    model.compile(
+        optimizer=optimizer,
+        loss="sparse_categorical_crossentropy",
+        metrics=["accuracy"],
+    )
     return model
 
 
@@ -50,4 +55,5 @@ def load_data(partition_id, num_partitions):
     partition = partition.train_test_split(test_size=0.2)
     x_train, y_train = partition["train"]["img"] / 255.0, partition["train"]["label"]
     x_test, y_test = partition["test"]["img"] / 255.0, partition["test"]["label"]
+
     return x_train, y_train, x_test, y_test
