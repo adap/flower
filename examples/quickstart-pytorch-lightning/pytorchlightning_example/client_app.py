@@ -1,9 +1,4 @@
-"""pytorchlightning_example: A Flower / PyTorch Lightning app.
-
-Adapted from the PyTorch Lightning quickstart example.
-
-Source: pytorchlightning.ai (2021/02/04)
-"""
+"""pytorchlightning_example: A Flower / PyTorch Lightning app."""
 
 import pytorch_lightning as pl
 from datasets.utils.logging import disable_progress_bar
