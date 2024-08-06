@@ -4,9 +4,7 @@
 Quickstart PyTorch
 ==================
 
-In this tutorial we will learn how to train a Convolutional Neural Network on CIFAR10 using Flower and PyTorch.
-
-It is recommended to create a virtual environment and run everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
+In this tutorial we will learn how to train a Convolutional Neural Network on CIFAR10 using Flower and PyTorch. It is recommended to create a virtual environment and run everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
 
 Let's use `flwr new` to create a complete Flower+PyTorch project. It will generate all the files needed to run, by default with the Simulation Engine, a federation of 10 nodes using `FedAvg <https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedAvg.html#flwr.server.strategy.FedAvg>`_. The dataset will be partitioned using Flower Dataset's `IidPartitioner <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_.
 
@@ -19,6 +17,7 @@ Now that we have a rough idea of what this example is about, let's get started. 
 After running it you'll notice a new directory with your project name has been created. It should have the following structure:
 
 .. code-block:: shell
+
     <your-project-name>
     ├── <your-project-name>
     │   ├── __init__.py
@@ -43,7 +42,7 @@ To run the project do:
     # Run with default arguments
     $ flwr run .
 
-With default argumnets you will see an output like this one:
+With default arguments you will see an output like this one:
 
 .. code-block:: shell
 
