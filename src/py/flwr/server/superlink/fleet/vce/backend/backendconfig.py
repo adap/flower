@@ -15,13 +15,14 @@
 """Backend config."""
 
 from dataclasses import dataclass
-from logging import WARN
+from logging import DEBUG, WARN
 from typing import Optional
 
 from flwr.common.logger import log
 from flwr.common.typing import ConfigsRecordValues
 
 
+@dataclass
 class ClientAppResources:
     """Resources for a `ClientApp`.
 
@@ -43,9 +44,11 @@ class ClientAppResources:
         assuming 4x`num_cpus` are available in your system.
     """
 
-    def __init__(self, num_cpus: int = 1, num_gpus: float = 0.0) -> None:
-        self.num_cpus = num_cpus
-        self.num_gpus = num_gpus
+    num_cpus: int = 1
+    num_gpus: float = 0.0
+
+    def __post_init__(self) -> None:
+        """Validate resources after initialization."""
         self._validate()
 
     def _validate(self) -> None:
@@ -92,6 +95,12 @@ class BackendConfig:
         if clientapp_resources is None:
             # If unset, set default resources
             clientapp_resources = ClientAppResources()
+            log(
+                DEBUG,
+                "The `BackendConfig` didn't receive `ClientAppResources. "
+                "The default resources will be used: %s",
+                clientapp_resources,
+            )
 
         self.clientapp_resources = clientapp_resources
 
