@@ -1,8 +1,8 @@
 ---
 title: Exploiting Shared Representations for Personalized Federated Learning
-url: [arXiv](http://arxiv.org/abs/2102.07078)
-labels: [image classification, label heterogeneity, personalized federated learning] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. system heterogeneity, image classification, asynchronous, weight sharing, cross-silo). Do not use ""
-dataset: [CIFAR-10, CIFAR-100] # list of datasets you include in your baseline. Do not use ""
+url: http://arxiv.org/abs/2102.07078
+labels: [image classification, label heterogeneity, personalized federated learning]
+dataset: [CIFAR-10, CIFAR-100]
 ---
 
 # Exploiting Shared Representations for Personalized Federated Learning
