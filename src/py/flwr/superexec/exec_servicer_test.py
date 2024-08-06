@@ -19,6 +19,7 @@ import subprocess
 from unittest.mock import MagicMock
 
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
+from py.flwr.superexec.state_factory import SuperexecStateFactory
 
 from .exec_servicer import ExecServicer
 
@@ -43,8 +44,10 @@ def test_start_run() -> None:
     request = StartRunRequest()
     request.fab_file = b"test"
 
+    state_factory = SuperexecStateFactory(":flwr-in-memory-state:")
+
     # Create a instance of FlowerServiceServicer
-    servicer = ExecServicer(executor=executor)
+    servicer = ExecServicer(executor=executor, state_factory=state_factory)
 
     # Execute
     response = servicer.StartRun(request, context_mock)

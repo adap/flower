@@ -31,7 +31,7 @@ class SqliteSuperexecState(SuperexecState):
         self.conn = sqlite3.connect(db_path)
 
     @override
-    def initialize(self):
+    def initialize(self) -> None:
         """Initialize the database."""
         with self.conn:
             self.conn.execute(

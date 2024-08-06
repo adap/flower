@@ -26,7 +26,7 @@ class InMemorySuperexecState(SuperexecState):
     """InMemory implementation of SuperexecState."""
 
     @override
-    def initialize(self):
+    def initialize(self) -> None:
         self.runs: Dict[int, RunStatus] = {}
         self.logs: Dict[int, List[str]] = {}
 
