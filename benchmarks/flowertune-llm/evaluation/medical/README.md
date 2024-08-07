@@ -36,7 +36,7 @@ The answers will be saved to `benchmarks/generations/[dataset_name]-[run_name].j
 ```bash
 python evaluate.py \
 --dataset-name=pubmedqa  # chosen from [pubmedqa, medmcqa, medqa]
---run-name=fl  # run_name used in Step 1
+--run-name="fl-pubmedqa"  # run_name used in Step 1
 ```
 The accuracy value will be printed on the screen.
 
