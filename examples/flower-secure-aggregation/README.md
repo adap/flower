@@ -40,7 +40,7 @@ flower-secure-aggregation
 ## Install dependencies
 
 ```bash
-pip install .
+pip install -e .
 ```
 
 ## Run the project
