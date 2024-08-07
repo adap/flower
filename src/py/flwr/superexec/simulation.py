@@ -152,6 +152,14 @@ class SimulationEngine(Executor):
                     "Config extracted from FAB's pyproject.toml is not valid"
                 )
 
+            # Extract BackendConfig settings if any
+            # TODO: not same behaviour as w/o superexec (isn't `.` splitting happening here?)
+            backend_cfg = {
+                k[len("backend.") :]: v
+                for k, v in federation_config.items()
+                if k.startswith("backend.")
+            }
+
             # In Simulation there is no SuperLink, still we create a run_id
             run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
             log(INFO, "Created run %s", str(run_id))
@@ -166,6 +174,12 @@ class SimulationEngine(Executor):
                 "--run-id",
                 str(run_id),
             ]
+
+            # Set flags to configure the simulation backend (if any)
+            for k, v in backend_cfg.items():
+                command.extend([f"--{k}", f"{v}"])
+
+            print(command)
 
             if override_config:
                 override_config_str = _user_config_to_str(override_config)
