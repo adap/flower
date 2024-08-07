@@ -20,7 +20,7 @@ pip install -e .
 huggingface-cli login
 ```
 
-### Step 1. Generate model answers to medical questions
+## Generate model answers to medical questions
 
 ```bash
 python inference.py \
