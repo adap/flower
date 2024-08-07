@@ -17,8 +17,6 @@
 from typing import Dict, List, Optional, Tuple, Union, Any
 
 import numpy as np
-import flwr as fl
-import matplotlib.pyplot as plt
 from flwr.common import (
     FitIns,
     Parameters,
