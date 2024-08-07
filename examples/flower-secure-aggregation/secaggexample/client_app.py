@@ -13,13 +13,15 @@ from flwr.common import Context
 
 # Define Flower Client
 class FlowerClient(NumPyClient):
-    def __init__(self, trainloader, valloader, local_epochs, learning_rate):
+    def __init__(self, trainloader, valloader, local_epochs, learning_rate, timeout):
         self.net = Net()
         self.trainloader = trainloader
         self.valloader = valloader
         self.local_epochs = local_epochs
         self.lr = learning_rate
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        # For demonstration purposes only
+        self.timeout = timeout
 
     def fit(self, parameters, config):
         """Train the model with data of this client."""
@@ -35,11 +37,12 @@ class FlowerClient(NumPyClient):
         ret_vec = get_weights(self.net)
 
         # Force a significant delay for testing purposes
-        if "drop" in config and config["drop"]:
-            print(f"Client dropped for testing purposes.")
-            time.sleep(15)
-        else:
-            print(f"Client uploading parameters: {ret_vec[0].flatten()[:3]}...")
+        if task.is_demo:
+            if config.get("drop", False):
+                print(f"Client dropped for testing purposes.")
+                time.sleep(self.timeout)
+            else:
+                print(f"Client uploading parameters: {ret_vec[0].flatten()[:3]}...")
         return ret_vec, len(self.trainloader.dataset), results
 
     def evaluate(self, parameters, config):
@@ -53,6 +56,7 @@ def client_fn(context: Context):
     """Construct a Client that will be run in a ClientApp."""
     # Set `task.is_demo`
     task.is_demo = context.run_config["is-demo"]
+    timeout = context.run_config["timeout"]
 
     # Read the node_config to fetch data partition associated to this node
     partition_id = context.node_config["partition-id"]
@@ -62,10 +66,10 @@ def client_fn(context: Context):
     batch_size = context.run_config["batch-size"]
     trainloader, valloader = load_data(partition_id, num_partitions, batch_size)
     local_epochs = context.run_config["local-epochs"]
-    learning_rate = context.run_config["learning-rate"]
+    lr = context.run_config["learning-rate"]
 
     # Return Client instance
-    return FlowerClient(trainloader, valloader, local_epochs, learning_rate).to_client()
+    return FlowerClient(trainloader, valloader, local_epochs, lr, timeout).to_client()
 
 
 # Flower ClientApp

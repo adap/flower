@@ -57,6 +57,8 @@ def main(driver: Driver, context: Context) -> None:
     )
 
     # Create fit workflow
+    # For further information, please see:
+    # https://flower.ai/docs/framework/ref-api/flwr.server.workflow.SecAggPlusWorkflow.html
     if task.is_demo:
         fit_workflow = SecAggPlusWorkflowWithLogs(
             num_shares=context.run_config["num-shares"],
