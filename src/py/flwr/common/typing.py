@@ -199,3 +199,11 @@ class Run:
     fab_id: str
     fab_version: str
     override_config: UserConfig
+
+
+@dataclass
+class Fab:
+    """Fab file representation."""
+
+    hash_str: str
+    content: bytes
