@@ -674,7 +674,7 @@ msgid "``pip install -U --pre flwr`` (without extras)"
 msgstr ""
 
 #: ../../source/contributor-how-to-install-development-versions.rst:33
-msgid "``pip install -U --pre flwr[simulation]`` (with extras)"
+msgid "``pip install -U --pre 'flwr[simulation]'`` (with extras)"
 msgstr ""
 
 #: ../../source/contributor-how-to-install-development-versions.rst:35
@@ -695,7 +695,7 @@ msgstr ""
 
 #: ../../source/contributor-how-to-install-development-versions.rst:40
 msgid ""
-"``pip install flwr[simulation]@git+https://github.com/adap/flower.git`` "
+"``pip install 'flwr[simulation]@git+https://github.com/adap/flower.git'`` "
 "(with extras)"
 msgstr ""
 
@@ -711,8 +711,8 @@ msgstr ""
 
 #: ../../source/contributor-how-to-install-development-versions.rst:45
 msgid ""
-"``pip install flwr[simulation]@git+https://github.com/adap/flower.git"
-"@branch-name`` (with extras)"
+"``pip install 'flwr[simulation]@git+https://github.com/adap/flower.git"
+"@branch-name'`` (with extras)"
 msgstr ""
 
 #: ../../source/contributor-how-to-install-development-versions.rst:49
@@ -5758,7 +5758,7 @@ msgstr ""
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:15
 msgid ""
-"``python -m pip install -U flwr[simulation]`` (when using "
+"``python -m pip install -U 'flwr[simulation]'`` (when using "
 "``start_simulation``)"
 msgstr ""
 
@@ -17221,7 +17221,7 @@ msgid ""
 "Simulations (using the Virtual Client Engine through `start_simulation`) "
 "now work more smoothly on Jupyter Notebooks (incl. Google Colab) after "
 "installing Flower with the `simulation` extra (`pip install "
-"flwr[simulation]`)."
+"'flwr[simulation]'`)."
 msgstr ""
 
 #: ../../source/ref-changelog.md:887

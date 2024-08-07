@@ -60,7 +60,12 @@ def run_supernode() -> None:
     _warn_deprecated_server_arg(args)
 
     root_certificates = _get_certificates(args)
-    load_fn = _get_load_client_app_fn(args, multi_app=True)
+    load_fn = _get_load_client_app_fn(
+        default_app_ref=getattr(args, "client-app"),
+        project_dir=args.dir,
+        flwr_dir=args.flwr_dir,
+        multi_app=True,
+    )
     authentication_keys = _try_setup_client_authentication(args)
 
     _start_client_internal(
@@ -72,8 +77,8 @@ def run_supernode() -> None:
         authentication_keys=authentication_keys,
         max_retries=args.max_retries,
         max_wait_time=args.max_wait_time,
-        node_config=parse_config_args(args.node_config),
-        flwr_dir=get_flwr_dir(args.flwr_dir),
+        node_config=parse_config_args([args.node_config]),
+        flwr_path=get_flwr_dir(args.flwr_dir),
     )
 
     # Graceful shutdown
@@ -93,12 +98,16 @@ def run_client_app() -> None:
     _warn_deprecated_server_arg(args)
 
     root_certificates = _get_certificates(args)
-    load_fn = _get_load_client_app_fn(args, multi_app=False)
+    load_fn = _get_load_client_app_fn(
+        default_app_ref=getattr(args, "client-app"),
+        project_dir=args.dir,
+        multi_app=False,
+    )
     authentication_keys = _try_setup_client_authentication(args)
 
     _start_client_internal(
         server_address=args.superlink,
-        node_config=parse_config_args(args.node_config),
+        node_config=parse_config_args([args.node_config]),
         load_client_app_fn=load_fn,
         transport=args.transport,
         root_certificates=root_certificates,
@@ -166,7 +175,10 @@ def _get_certificates(args: argparse.Namespace) -> Optional[bytes]:
 
 
 def _get_load_client_app_fn(
-    args: argparse.Namespace, multi_app: bool
+    default_app_ref: str,
+    project_dir: str,
+    multi_app: bool,
+    flwr_dir: Optional[str] = None,
 ) -> Callable[[str, str], ClientApp]:
     """Get the load_client_app_fn function.
 
@@ -177,39 +189,21 @@ def _get_load_client_app_fn(
     If `multi_app` is False, it ignores `fab_id` and `fab_version` and
     loads a default ClientApp.
     """
-    # Find the Flower directory containing Flower Apps (only for multi-app)
-    flwr_dir = Path("")
-    if "flwr_dir" in args:
-        if args.flwr_dir is None:
-            flwr_dir = get_flwr_dir()
-        else:
-            flwr_dir = Path(args.flwr_dir).absolute()
-
-    inserted_path = None
-
-    default_app_ref: str = getattr(args, "client-app")
-
     if not multi_app:
         log(
             DEBUG,
             "Flower SuperNode will load and validate ClientApp `%s`",
-            getattr(args, "client-app"),
+            default_app_ref,
         )
-        # Insert sys.path
-        dir_path = Path(args.dir).absolute()
-        sys.path.insert(0, str(dir_path))
-        inserted_path = str(dir_path)
 
-        valid, error_msg = validate(default_app_ref)
+        valid, error_msg = validate(default_app_ref, project_dir=project_dir)
         if not valid and error_msg:
             raise LoadClientAppError(error_msg) from None
 
     def _load(fab_id: str, fab_version: str) -> ClientApp:
+        runtime_project_dir = Path(project_dir).absolute()
         # If multi-app feature is disabled
         if not multi_app:
-            # Get sys path to be inserted
-            dir_path = Path(args.dir).absolute()
-
             # Set app reference
             client_app_ref = default_app_ref
         # If multi-app feature is enabled but the fab id is not specified
@@ -220,35 +214,21 @@ def _get_load_client_app_fn(
                 ) from None
 
             log(WARN, "FAB ID is not provided; the default ClientApp will be loaded.")
-            # Get sys path to be inserted
-            dir_path = Path(args.dir).absolute()
 
             # Set app reference
             client_app_ref = default_app_ref
         # If multi-app feature is enabled
         else:
             try:
-                project_dir = get_project_dir(fab_id, fab_version, flwr_dir)
-                config = get_project_config(project_dir)
+                runtime_project_dir = get_project_dir(
+                    fab_id, fab_version, get_flwr_dir(flwr_dir)
+                )
+                config = get_project_config(runtime_project_dir)
             except Exception as e:
                 raise LoadClientAppError("Failed to load ClientApp") from e
 
-            # Get sys path to be inserted
-            dir_path = Path(project_dir).absolute()
-
             # Set app reference
-            client_app_ref = config["flower"]["components"]["clientapp"]
-
-        # Set sys.path
-        nonlocal inserted_path
-        if inserted_path != str(dir_path):
-            # Remove the previously inserted path
-            if inserted_path is not None:
-                sys.path.remove(inserted_path)
-            # Insert the new path
-            sys.path.insert(0, str(dir_path))
-
-        inserted_path = str(dir_path)
+            client_app_ref = config["tool"]["flwr"]["app"]["components"]["clientapp"]
 
         # Load ClientApp
         log(
@@ -256,7 +236,7 @@ def _get_load_client_app_fn(
             "Loading ClientApp `%s`",
             client_app_ref,
         )
-        client_app = load_app(client_app_ref, LoadClientAppError, dir_path)
+        client_app = load_app(client_app_ref, LoadClientAppError, runtime_project_dir)
 
         if not isinstance(client_app, ClientApp):
             raise LoadClientAppError(
