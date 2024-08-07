@@ -82,7 +82,3 @@ flwr run . --run-config num-server-rounds=5,learning-rate=0.05
 > \[!NOTE\]
 > An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.
 
-## Explanation
-
-This example is a federated version of the centralized case that can be found
-[here](https://github.com/ml-explore/mlx-examples/tree/main/mnist).
