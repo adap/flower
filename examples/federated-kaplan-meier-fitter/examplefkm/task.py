@@ -3,9 +3,10 @@ from lifelines.datasets import load_waltons
 from flwr_datasets.partitioner import NaturalIdPartitioner
 from datasets import Dataset
 
+X = load_waltons()
+
 
 def load_partition(partition_id: int):
-    X = load_waltons()
     partitioner = NaturalIdPartitioner(partition_by="group")
     partitioner.dataset = Dataset.from_pandas(X)
     partition = partitioner.load_partition(partition_id).to_pandas()
