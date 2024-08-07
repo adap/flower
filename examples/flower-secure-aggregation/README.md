@@ -12,7 +12,6 @@ The following steps describe how to use Secure Aggregation in flower, with `Clie
 
 ### Clone the project
 
-
 Start by cloning the example project:
 
 ```shell
