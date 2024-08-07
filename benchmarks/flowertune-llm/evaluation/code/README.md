@@ -1,4 +1,4 @@
-## Evaluation for Code challenge
+# Evaluation for Code challenge
 
 We leverage the code generation evaluation metrics provided by [bigcode-evaluation-harness](https://github.com/bigcode-project/bigcode-evaluation-harness/tree/main) to evaluate our fine-tuned LLMs.
 Three datasets have been selected for this evaluation: [MBPP](https://huggingface.co/datasets/google-research-datasets/mbpp) (Python), [HumanEval](https://huggingface.co/datasets/openai/openai_humaneval) (Python), and [MultiPL-E](https://github.com/nuprl/MultiPL-E) (JavaScript, C++). 
