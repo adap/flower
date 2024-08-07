@@ -6,7 +6,7 @@ framework: [torch, torchvision]
 
 # Secure aggregation with Flower (the SecAgg+ protocol)
 
-The following steps describe how to use Secure Aggregation in flower, with `ClientApp` using `secaggplus_mod` and `ServerApp` using `SecAggPlusWorkflowWithLogs`, which is a subclass of `SecAggPlusWorkflow` that includes more detailed logging specifically designed for this example.
+The following steps describe how to use Flower's built-in Secure Aggregation components. This example demonstrates how to apply `SecAgg+` to the same federated learning workload as in the [quickstart-pytorch](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch) example. The `ServerApp` uses the [`SecAggPlusWorkflow`](https://flower.ai/docs/framework/ref-api/flwr.server.workflow.SecAggPlusWorkflow.html#secaggplusworkflow) while `ClientApp` uses the [`secaggplus_mod`](https://flower.ai/docs/framework/ref-api/flwr.client.mod.secaggplus_mod.html#flwr.client.mod.secaggplus_mod). To introduce the various steps involved in `SecAgg+`, this example introduces as a sub-class of `SecAggPlusWorkflow` the `SecAggPlusWorkflowWithLogs`. It is enabled by default, but you can disable (see later in this readme). 
 
 ## Set up the project
 
@@ -30,8 +30,8 @@ flower-secure-aggregation
 |   ├── __init__.py
 |   ├── client_app.py    # Defines your ClientApp
 |   ├── server_app.py    # Defines your ServerApp
-|   ├── task.py
-|   └── workflow_with_log.py
+|   ├── task.py          # Defines your model, training and data loading
+|   └── workflow_with_log.py # Defines a workflow used when `is-demo=true`
 ├── pyproject.toml       # Project metadata like dependencies and configs
 └── README.md
 ```
