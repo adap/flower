@@ -33,6 +33,9 @@ nvm install 20
 
 ## Generate model answers & calculate pass@1 score
 
+> [!NOTE]
+> Evaluation needs to be run on MBPP, HumanEval, MultiPL-js and MultiPL-cpp.
+
 ```bash
 python main.py \
 --peft_model=/path/to/fine-tuned-peft-model-dir/  # e.g., ./peft_1
