@@ -20,7 +20,7 @@ cd doc
 # Get a list of languages based on the folders in locales
 languages="en `find locales/ -mindepth 1 -maxdepth 1 -type d -exec basename '{}' \;`"
 # Get a list of tags, excluding those before v1.0.0
-versions="`git for-each-ref '--format=%(refname:lstrip=-1)' refs/tags/ | grep -iE '^v((([1-9]|[0-9]{2,}).*\.([5-9]|[0-9]{2,}).*)|([2-9]|[0-9]{2,}).*)$'`"
+versions="`git for-each-ref '--format=%(refname:lstrip=-1)' refs/tags/ | grep -iE '^v((([1-9]|[0-9]{2,}).*\.([8-9]|[0-9]{2,}).*)|([2-9]|[0-9]{2,}).*)$'`"
 
 for current_version in ${versions}; do
  

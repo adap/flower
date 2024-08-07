@@ -1,4 +1,4 @@
-"""$project_name: A Flower / MLX app."""
+"""$project_name: A Flower / $framework_str app."""
 
 import mlx.core as mx
 import mlx.nn as nn
@@ -70,8 +70,8 @@ class FlowerClient(NumPyClient):
 
 
 def client_fn(context: Context):
-    partition_id = int(context.node_config["partition-id"])
-    num_partitions = int(context.node_config["num-partitions"])
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
     data = load_data(partition_id, num_partitions)
 
     num_layers = context.run_config["num-layers"]

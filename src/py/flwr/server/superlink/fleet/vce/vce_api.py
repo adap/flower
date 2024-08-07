@@ -72,8 +72,8 @@ def _register_node_states(
         node_states[node_id] = NodeState(
             node_id=node_id,
             node_config={
-                PARTITION_ID_KEY: str(partition_id),
-                NUM_PARTITIONS_KEY: str(num_partitions),
+                PARTITION_ID_KEY: partition_id,
+                NUM_PARTITIONS_KEY: num_partitions,
             },
         )
 
@@ -339,7 +339,7 @@ def start_vce(
 
     def backend_fn() -> Backend:
         """Instantiate a Backend."""
-        return backend_type(backend_config, work_dir=app_dir)
+        return backend_type(backend_config)
 
     # Load ClientApp if needed
     def _load() -> ClientApp:
@@ -347,8 +347,8 @@ def start_vce(
         if client_app_attr:
             app = _get_load_client_app_fn(
                 default_app_ref=client_app_attr,
-                dir_arg=app_dir,
-                flwr_dir_arg=flwr_dir,
+                project_dir=app_dir,
+                flwr_dir=flwr_dir,
                 multi_app=True,
             )(run.fab_id, run.fab_version)
 
