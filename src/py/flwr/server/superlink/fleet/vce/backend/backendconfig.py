@@ -19,11 +19,12 @@ from dataclasses import dataclass
 from logging import DEBUG, WARN
 from typing import Dict, Optional
 
+from flwr.common.constant import (
+    CLIEANT_APP_RESOURCES_DEFAULT_CPUS,
+    CLIEANT_APP_RESOURCES_DEFAULT_GPUS,
+)
 from flwr.common.logger import log
 from flwr.common.typing import ConfigsRecordValues
-
-DEFAULT_CPUS = 2
-DEFAULT_GPUS = 0.0
 
 
 @dataclass
@@ -38,9 +39,9 @@ class ClientAppResources:
 
     Parameters
     ----------
-    num_cpus : Optional[int] (default: 2)
+    num_cpus : int (default: 2)
         Indicates the number of CPUs that a `ClientApp` needs when running.
-    num_gpus : Optional[float] (default: 0.0)
+    num_gpus : float (default: 0.0)
         Indicates the number of GPUs that a `ClientApp` needs when running. This
         value would normally be set based on the amount of VRAM a single `ClientApp`
         needs. It can be a decimal point value. For example, if `num_gpus=0.25` at
@@ -48,20 +49,14 @@ class ClientAppResources:
         assuming 4x`num_cpus` are available in your system.
     """
 
-    num_cpus: Optional[int] = DEFAULT_CPUS
-    num_gpus: Optional[float] = DEFAULT_CPUS
+    num_cpus: int = CLIEANT_APP_RESOURCES_DEFAULT_CPUS
+    num_gpus: float = CLIEANT_APP_RESOURCES_DEFAULT_GPUS
 
     def __post_init__(self) -> None:
         """Validate resources after initialization."""
         self._validate()
 
     def _validate(self) -> None:
-
-        if self.num_cpus is None:
-            self.num_cpus = DEFAULT_CPUS
-
-        if self.num_gpus is None:
-            self.num_gpus = DEFAULT_GPUS
 
         if isinstance(self.num_cpus, float):
             num_cpus_int = int(self.num_cpus)
