@@ -339,7 +339,7 @@ def start_vce(
 
     def backend_fn() -> Backend:
         """Instantiate a Backend."""
-        return backend_type(backend_config, work_dir=app_dir)
+        return backend_type(backend_config)
 
     # Load ClientApp if needed
     def _load() -> ClientApp:
