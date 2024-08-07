@@ -2,7 +2,7 @@
 
 from typing import List, Tuple
 
-from secaggexample.task import IS_DEMO, Net, get_weights
+from secaggexample.task import IS_DEMO, Net, get_weights, make_net
 from secaggexample.workflow_with_log import SecAggPlusWorkflowWithLogs
 
 from flwr.common import Context, Metrics, ndarrays_to_parameters
@@ -21,16 +21,16 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     return {"accuracy": sum(accuracies) / sum(examples)}
 
 
-ndarrays = get_weights(Net())
-parameters = ndarrays_to_parameters(ndarrays)
-
-
 # Flower ServerApp
 app = ServerApp()
 
 
 @app.main()
 def main(driver: Driver, context: Context) -> None:
+    # Get initial parameters
+    ndarrays = get_weights(make_net())
+    parameters = ndarrays_to_parameters(ndarrays)
+
     # Define strategy
     strategy = FedAvg(
         # Select all available clients
