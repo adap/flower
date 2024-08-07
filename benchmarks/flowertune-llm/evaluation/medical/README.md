@@ -31,7 +31,7 @@ python inference.py \
 The answers will be saved to `benchmarks/generations/[dataset_name]-[run_name].jsonl` in default.
 
 
-### Step 2. Calculate accuracy
+## Calculate accuracy
 
 ```bash
 python evaluate.py \
