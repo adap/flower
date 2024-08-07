@@ -26,7 +26,7 @@ huggingface-cli login
 python inference.py \
 --peft-path=/path/to/fine-tuned-peft-model-dir/  # e.g., ./peft_1
 --dataset-name=pubmedqa  # chosen from [pubmedqa, medmcqa, medqa]
---run-name=fl  # arbitrary name for this run 
+--run-name="fl-pubmedqa"  # an identifier for this run (up to you to choose) 
 ```
 The answers will be saved to `benchmarks/generations/[dataset_name]-[run_name].jsonl` in default.
 
