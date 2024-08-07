@@ -20,7 +20,7 @@ pip install -e .
 huggingface-cli login
 ```
 
-### Step 1. Generate model decision & calculate accuracy
+## Generate model decision & calculate accuracy
 
 ```bash
 python eval.py \
