@@ -1,3 +1,5 @@
+"""secaggexample: A Flower with SecAgg+ app."""
+
 from logging import DEBUG, INFO
 
 from secaggexample.task import get_weights, make_net
