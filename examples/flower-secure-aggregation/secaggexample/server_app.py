@@ -1,11 +1,14 @@
 """secaggexample: A Flower with SecAgg+ app."""
 
+from logging import DEBUG
 from typing import List, Tuple
 
 from secaggexample.task import get_weights, make_net
 from secaggexample.workflow_with_log import SecAggPlusWorkflowWithLogs
 
 from flwr.common import Context, Metrics, ndarrays_to_parameters
+from flwr.common.logger import update_console_handler
+
 from flwr.server import Driver, LegacyContext, ServerApp, ServerConfig
 from flwr.server.strategy import FedAvg
 from flwr.server.workflow import DefaultWorkflow, SecAggPlusWorkflow
@@ -57,6 +60,7 @@ def main(driver: Driver, context: Context) -> None:
     # For further information, please see:
     # https://flower.ai/docs/framework/ref-api/flwr.server.workflow.SecAggPlusWorkflow.html
     if is_demo:
+        update_console_handler(DEBUG, True, True)
         fit_workflow = SecAggPlusWorkflowWithLogs(
             num_shares=context.run_config["num-shares"],
             reconstruction_threshold=context.run_config["reconstruction-threshold"],

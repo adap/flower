@@ -1,12 +1,11 @@
 """secaggexample: A Flower with SecAgg+ app."""
 
-from logging import DEBUG, INFO
+from logging import INFO
 
 from secaggexample.task import get_weights, make_net
 
 import flwr.common.recordset_compat as compat
 from flwr.common import Context, log, parameters_to_ndarrays
-from flwr.common.logger import update_console_handler
 from flwr.common.secure_aggregation.quantization import quantize
 from flwr.server import Driver, LegacyContext
 from flwr.server.workflow.constant import MAIN_PARAMS_RECORD
@@ -14,8 +13,6 @@ from flwr.server.workflow.secure_aggregation.secaggplus_workflow import (
     SecAggPlusWorkflow,
     WorkflowState,
 )
-
-update_console_handler(DEBUG, True, True)
 
 
 class SecAggPlusWorkflowWithLogs(SecAggPlusWorkflow):
