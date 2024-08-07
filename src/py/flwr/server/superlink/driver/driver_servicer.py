@@ -79,7 +79,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
             ffs: Ffs = self.ffs_factory.ffs()
             fab_hash = ffs.put(request.fab.content, {})
             _raise_if(
-                fab_hash != request.fab.hash,
+                fab_hash != request.fab.hash_str,
                 f"FAB ({request.fab}) hash from request doesn't match contents",
             )
         else:

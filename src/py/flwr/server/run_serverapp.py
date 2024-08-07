@@ -181,10 +181,10 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches,too-many-stat
     if args.run_id is not None:
         # User provided `--run-id`, but not `server-app`
         run_ = driver.run
-        req = GetFabRequest(hash=run_.fab_hash)
+        req = GetFabRequest(hash_str=run_.fab_hash)
         # pylint: disable-next=W0212
         res: GetFabResponse = driver._stub.GetFab(req)
-        if res.fab.hash != run_.fab_hash:
+        if res.fab.hash_str != run_.fab_hash:
             raise ValueError("FAB hashes don't match.")
 
         config = get_fab_config(res.fab.content)

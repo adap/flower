@@ -406,7 +406,7 @@ def _start_client_internal(
                     # Register context for this run
                     node_state.register_context(
                         run_id=run_id,
-                        default_config=get_fab_config(fab.data_bytes) if fab else {},
+                        default_config=get_fab_config(fab.content) if fab else {},
                         run=runs[run_id],
                     )
 
@@ -423,7 +423,7 @@ def _start_client_internal(
                     try:
                         # Load ClientApp instance
                         if fab:
-                            fab_id, fab_version = get_fab_metadata(fab.data_bytes)
+                            fab_id, fab_version = get_fab_metadata(fab.content)
                         else:
                             fab_id, fab_version = run.fab_id, run.fab_version
 

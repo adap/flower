@@ -679,12 +679,12 @@ def message_from_taskres(taskres: TaskRes) -> Message:
 
 def fab_to_proto(fab: typing.Fab) -> ProtoFab:
     """Create a proto Fab object from a Python Fab."""
-    return ProtoFab(hash=fab.hash_str, content=fab.data_bytes)
+    return ProtoFab(hash_str=fab.hash_str, content=fab.content)
 
 
 def fab_from_proto(fab: ProtoFab) -> typing.Fab:
     """Create a proto Fab object from a Python Fab."""
-    return typing.Fab(fab.hash, fab.content)
+    return typing.Fab(fab.hash_str, fab.content)
 
 
 # === User configs ===

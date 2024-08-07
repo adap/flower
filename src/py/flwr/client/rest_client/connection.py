@@ -372,7 +372,7 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
 
     def get_fab(fab_hash: str) -> Fab:
         # Construct the request
-        req = GetFabRequest(hash=fab_hash)
+        req = GetFabRequest(hash_str=fab_hash)
 
         # Send the request
         res = _request(req, GetFabResponse, PATH_GET_FAB)
@@ -380,7 +380,7 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
             return Fab("", b"")
 
         return Fab(
-            res.fab.hash,
+            res.fab.hash_str,
             res.fab.content,
         )
 
