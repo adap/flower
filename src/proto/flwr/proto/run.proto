@@ -24,6 +24,7 @@ message Run {
   string fab_id = 2;
   string fab_version = 3;
   map<string, Scalar> override_config = 4;
+  string fab_hash = 5;
 }
 message GetRunRequest { sint64 run_id = 1; }
 message GetRunResponse { Run run = 1; }

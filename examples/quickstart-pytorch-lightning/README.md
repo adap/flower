@@ -4,79 +4,58 @@ dataset: [MNIST]
 framework: [lightning]
 ---
 
-# Flower Example using PyTorch Lightning
+# Federated Learning with PyTorch Lightning and Flower (Quickstart Example)
 
-This introductory example to Flower uses PyTorch, but deep knowledge of PyTorch Lightning is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case. Running this example in itself is quite easy. This example uses [Flower Datasets](https://flower.ai/docs/datasets/) to download, partition and preprocess the MNIST dataset.
+This introductory example to Flower uses PyTorch Lightning, but deep knowledge of PyTorch Lightning is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case. Running this example in itself is quite easy. This example uses [Flower Datasets](https://flower.ai/docs/datasets/) to download, partition and preprocess the MNIST dataset. The model being federated is a lightweight AutoEncoder as presented in [Lightning in 15 minutes](https://lightning.ai/docs/pytorch/stable/starter/introduction.html) tutorial.
 
 ## Project Setup
 
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart-pytorch-lightning . && rm -rf flower && cd quickstart-pytorch-lightning
+git clone --depth=1 https://github.com/adap/flower.git _tmp \
+        && mv _tmp/examples/quickstart-pytorch-lightning . \
+        && rm -rf _tmp && cd quickstart-pytorch-lightning
 ```
 
 This will create a new directory called `quickstart-pytorch-lightning` containing the following files:
 
 ```shell
--- pyproject.toml
--- requirements.txt
--- client.py  # client-side code
--- server.py # server-side code (including the strategy)
--- README.md
--- run.sh # runs server, then two clients
--- mnist.py # run a centralised version of this example
+quickstart-pytorch-lightning
+├── pytorchlightning_example
+│   ├── __init__.py
+│   ├── client_app.py   # Defines your ClientApp
+│   ├── server_app.py   # Defines your ServerApp
+│   └── task.py         # Defines your model, training and data loading
+├── pyproject.toml      # Project metadata like dependencies and configs
+└── README.md
 ```
 
-### Installing Dependencies
+# Install dependencies and project
 
-Project dependencies (such as `torch` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
+Install the dependencies defined in `pyproject.toml` as well as the `pytorchlightning_example` package.
 
-#### Poetry
-
-```shell
-poetry install
-poetry shell
+```bash
+pip install -e .
 ```
 
-Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
+## Run the Example
 
-```shell
-poetry run python -c "import flwr"
+You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
+
+### Run with the Simulation Engine
+
+```bash
+flwr run .
 ```
 
-If you don't see any errors you're good to go!
+You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
-#### pip
-
-Write the command below in your terminal to install the dependencies according to the configuration file requirements.txt.
-
-```shell
-pip install -r requirements.txt
+```bash
+flwr run . --run-config num-server-rounds=5,max-epochs=2
 ```
 
-## Run Federated Learning with PyTorch and Flower
+### Run with the Deployment Engine
 
-Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
-
-```shell
-python server.py
-```
-
-Now you are ready to start the Flower clients which will participate in the learning. We need to specify the partition id to
-use different partitions of the data on different nodes.  To do so simply open two more terminal windows and run the
-following commands.
-
-Start client 1 in the first terminal:
-
-```shell
-python client.py --partition-id 0
-```
-
-Start client 2 in the second terminal:
-
-```shell
-python client.py --partition-id 1
-```
-
-You will see that PyTorch is starting a federated training. Look at the [code](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch) for a detailed explanation.
+> \[!NOTE\]
+> An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.
