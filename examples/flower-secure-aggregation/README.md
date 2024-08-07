@@ -24,15 +24,15 @@ following files:
 
 ```shell
 flower-secure-aggregation
-      |
-      ├── secaggexample
-      |        ├── __init__.py
-      |        ├── client_app.py    # defines your ClientApp
-      |        ├── server_app.py    # defines your ServerApp
-      |        ├── task.py
-      |        └── workflow_with_log.py
-      ├── pyproject.toml            # builds your FAB, includes dependencies and configs
-      └── README.md
+|
+├── secaggexample
+|   ├── __init__.py
+|   ├── client_app.py    # Defines your ClientApp
+|   ├── server_app.py    # Defines your ServerApp
+|   ├── task.py
+|   └── workflow_with_log.py
+├── pyproject.toml       # Project metadata like dependencies and configs
+└── README.md
 ```
 
 ## Install dependencies
