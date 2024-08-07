@@ -1,19 +1,24 @@
-"""Adapted from the PyTorch Lightning quickstart example.
+"""pytorchlightning_example: A Flower / PyTorch Lightning app."""
 
-Source: pytorchlightning.ai (2021/02/04)
-"""
+import logging
+from collections import OrderedDict
+from typing import Any
 
-from flwr_datasets import FederatedDataset
 import pytorch_lightning as pl
 import torch
+from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import IidPartitioner
 from torch import nn
 from torch.nn import functional as F
+from torch.optim.adam import Adam
 from torch.utils.data import DataLoader
 from torchvision import transforms
 
+logging.getLogger("pytorch_lightning").setLevel(logging.WARNING)
+
 
 class LitAutoEncoder(pl.LightningModule):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.encoder = nn.Sequential(
             nn.Linear(28 * 28, 64),
@@ -26,16 +31,16 @@ class LitAutoEncoder(pl.LightningModule):
             nn.Linear(64, 28 * 28),
         )
 
-    def forward(self, x):
+    def forward(self, x) -> Any:
         embedding = self.encoder(x)
         return embedding
 
-    def configure_optimizers(self):
+    def configure_optimizers(self) -> Adam:
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
         return optimizer
 
-    def training_step(self, train_batch, batch_idx):
-        x, y = train_batch
+    def training_step(self, train_batch, batch_idx) -> torch.Tensor:
+        x = train_batch["image"]
         x = x.view(x.size(0), -1)
         z = self.encoder(x)
         x_hat = self.decoder(z)
@@ -43,14 +48,14 @@ class LitAutoEncoder(pl.LightningModule):
         self.log("train_loss", loss)
         return loss
 
-    def validation_step(self, batch, batch_idx):
+    def validation_step(self, batch, batch_idx) -> None:
         self._evaluate(batch, "val")
 
-    def test_step(self, batch, batch_idx):
+    def test_step(self, batch, batch_idx) -> None:
         self._evaluate(batch, "test")
 
-    def _evaluate(self, batch, stage=None):
-        x, y = batch
+    def _evaluate(self, batch, stage=None) -> None:
+        x = batch["image"]
         x = x.view(x.size(0), -1)
         z = self.encoder(x)
         x_hat = self.decoder(z)
@@ -59,15 +64,14 @@ class LitAutoEncoder(pl.LightningModule):
             self.log(f"{stage}_loss", loss, prog_bar=True)
 
 
-def collate_fn(batch):
-    """Change the dictionary to tuple to keep the exact dataloader behavior."""
-    images = [item["image"] for item in batch]
-    labels = [item["label"] for item in batch]
+def get_parameters(model):
+    return [val.cpu().numpy() for _, val in model.state_dict().items()]
 
-    images_tensor = torch.stack(images)
-    labels_tensor = torch.tensor(labels)
 
-    return images_tensor, labels_tensor
+def set_parameters(model, parameters):
+    params_dict = zip(model.state_dict().keys(), parameters)
+    state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+    model.load_state_dict(state_dict, strict=True)
 
 
 def apply_transforms(batch):
@@ -76,9 +80,19 @@ def apply_transforms(batch):
     return batch
 
 
-def load_data(partition):
-    fds = FederatedDataset(dataset="mnist", partitioners={"train": 10})
-    partition = fds.load_partition(partition, "train")
+fds = None  # Cache FederatedDataset
+
+
+def load_data(partition_id, num_partitions):
+    # Only initialize `FederatedDataset` once
+    global fds
+    if fds is None:
+        partitioner = IidPartitioner(num_partitions=num_partitions)
+        fds = FederatedDataset(
+            dataset="ylecun/mnist",
+            partitioners={"train": partitioner},
+        )
+    partition = fds.load_partition(partition_id, "train")
 
     partition = partition.with_transform(apply_transforms)
     # 20 % for on federated evaluation
@@ -91,37 +105,12 @@ def load_data(partition):
         partition_train_valid["train"],
         batch_size=32,
         shuffle=True,
-        collate_fn=collate_fn,
-        num_workers=1,
+        num_workers=2,
     )
     valloader = DataLoader(
         partition_train_valid["test"],
         batch_size=32,
-        collate_fn=collate_fn,
-        num_workers=1,
+        num_workers=2,
     )
-    testloader = DataLoader(
-        partition_full["test"], batch_size=32, collate_fn=collate_fn, num_workers=1
-    )
+    testloader = DataLoader(partition_full["test"], batch_size=32, num_workers=1)
     return trainloader, valloader, testloader
-
-
-def main() -> None:
-    """Centralized training."""
-
-    # Load data
-    train_loader, val_loader, test_loader = load_data(0)
-
-    # Load model
-    model = LitAutoEncoder()
-
-    # Train
-    trainer = pl.Trainer(max_epochs=5)
-    trainer.fit(model, train_loader, val_loader)
-
-    # Test
-    trainer.test(model, test_loader)
-
-
-if __name__ == "__main__":
-    main()
