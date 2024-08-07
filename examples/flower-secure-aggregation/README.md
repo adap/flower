@@ -52,7 +52,7 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 ### Run with the Simulation Engine
 
 ```bash
-flwr run
+flwr run .
 ```
 
 You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example
