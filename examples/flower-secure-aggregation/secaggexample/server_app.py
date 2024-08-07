@@ -1,3 +1,5 @@
+"""secaggexample: A Flower with SecAgg+ app."""
+
 from typing import List, Tuple
 
 from secaggexample.task import IS_DEMO, Net, get_weights
