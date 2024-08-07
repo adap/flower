@@ -25,7 +25,7 @@ huggingface-cli login
 ```bash
 python eval.py \
 --peft-path=/path/to/fine-tuned-peft-model-dir/ # e.g., ./peft_1
---run-name=fl  # arbitrary name for this run  
+--run-name=fl  # specified name for this run  
 --batch-size=32 
 --quantization=4 
 --datasets=fpb,fiqa,tfns

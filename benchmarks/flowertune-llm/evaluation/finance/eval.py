@@ -5,9 +5,8 @@ import argparse
 import torch
 from fiqa import test_fiqa
 from fpb import test_fpb
-from nwgi import test_nwgi
-from peft import PeftModel
 from tfns import test_tfns
+from peft import PeftModel
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
 # Fixed seed
@@ -63,7 +62,5 @@ with torch.no_grad():
             test_fiqa(args, model, tokenizer)
         elif dataset == "tfns":
             test_tfns(args, model, tokenizer)
-        elif dataset == "nwgi":
-            test_nwgi(args, model, tokenizer)
         else:
             raise ValueError("Undefined Dataset.")
