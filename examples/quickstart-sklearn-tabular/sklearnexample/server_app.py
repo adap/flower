@@ -51,7 +51,7 @@ def server_fn(context: Context) -> ServerAppComponents:
     # Define the strategy
     min_available_clients = context.run_config["min-available-clients"]
     strategy = FedAvg(
-        min_available_clients=2,
+        min_available_clients=min_available_clients,
         fit_metrics_aggregation_fn=weighted_average,
         evaluate_metrics_aggregation_fn=weighted_average,
     )
