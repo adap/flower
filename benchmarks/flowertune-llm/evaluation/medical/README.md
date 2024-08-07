@@ -1,4 +1,4 @@
-## Evaluation for Medical challenge
+# Evaluation for Medical challenge
 
 We leverage the medical question answering (QA) metric provided by [Meditron](https://github.com/epfLLM/meditron/tree/main/evaluation) to evaluate our fined-tuned LLMs.
 Three datasets have been selected for this evaluation: [PubMedQA](https://huggingface.co/datasets/bigbio/pubmed_qa), [MedMCQA](https://huggingface.co/datasets/medmcqa), and [MedQA](https://huggingface.co/datasets/bigbio/med_qa). 
