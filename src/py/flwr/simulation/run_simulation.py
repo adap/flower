@@ -31,7 +31,11 @@ from flwr.cli.config_utils import load_and_validate
 from flwr.client import ClientApp
 from flwr.common import EventType, event, log
 from flwr.common.config import get_fused_config_from_dir, parse_config_args
-from flwr.common.constant import RUN_ID_NUM_BYTES
+from flwr.common.constant import (
+    CLIEANT_APP_RESOURCES_DEFAULT_CPUS,
+    CLIEANT_APP_RESOURCES_DEFAULT_GPUS,
+    RUN_ID_NUM_BYTES,
+)
 from flwr.common.logger import (
     set_logger_propagation,
     update_console_handler,
@@ -579,24 +583,26 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         help="Name of the simulation backend that executes the ClientApp.",
     )
     parser.add_argument(
-        "--backend-config",
-        type=str,
-        default="{}",
-        help='A JSON formatted stream, e.g \'{"<keyA>":<value>, "<keyB>":<value>}\' to '
-        "configure a backend. Values supported in <value> are those included by "
-        "`flwr.common.typing.ConfigsRecordValues`. ",
-    )
-    parser.add_argument(
         "--clientapp-cpus",
         type=int,
+        default=CLIEANT_APP_RESOURCES_DEFAULT_CPUS,
         help="Number of CPUs that the chosen backend allocates for each `ClientApp`. "
         "It can be any integer higher or equal than 1.",
     )
     parser.add_argument(
         "--clientapp-gpus",
         type=float,
+        default=CLIEANT_APP_RESOURCES_DEFAULT_GPUS,
         help="Number of GPUs that the chosen backend allocates for each `ClientApp`. "
         "It can be any fractional number greater or equal to 0.0.",
+    )
+    parser.add_argument(
+        "--backend-config",
+        type=str,
+        default="{}",
+        help='A JSON formatted stream, e.g \'{"<keyA>":<value>, "<keyB>":<value>}\' to '
+        "configure a backend. Values supported in <value> are those included by "
+        "`flwr.common.typing.ConfigsRecordValues`. ",
     )
     parser.add_argument(
         "--enable-tf-gpu-growth",
