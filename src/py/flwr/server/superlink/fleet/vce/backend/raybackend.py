@@ -14,7 +14,7 @@
 # ==============================================================================
 """Ray backend for the Fleet API using the Simulation Engine."""
 
-from logging import DEBUG, ERROR
+from logging import DEBUG, ERROR, WARN
 from typing import Callable, Dict, Tuple, Union
 
 import ray
@@ -42,6 +42,10 @@ class RayBackend(Backend):
         """Prepare RayBackend by initialising Ray and creating the ActorPool."""
         log(DEBUG, "Initialising: %s", self.__class__.__name__)
         log(DEBUG, "Backend config: %s", backend_config)
+
+        # Proactively silence INFO logs
+        if "logging_level" not in backend_config.config:
+            backend_config.config["logging_level"] = WARN
 
         # Initialise ray
         self.init_ray(backend_config)
