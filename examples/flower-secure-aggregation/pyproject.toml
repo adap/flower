@@ -18,7 +18,7 @@ dependencies = [
 packages = ["."]
 
 [tool.flwr.app]
-publisher = "flowerteam"
+publisher = "flwrlabs"
 
 [tool.flwr.app.components]
 serverapp = "secaggexample.server_app:app"
