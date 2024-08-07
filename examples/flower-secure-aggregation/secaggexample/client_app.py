@@ -3,17 +3,18 @@
 import time
 
 import torch
-from secaggexample import task
-from secaggexample.task import Net, get_weights, load_data, set_weights, test, train
-
 from flwr.client import ClientApp, NumPyClient
 from flwr.client.mod import secaggplus_mod
 from flwr.common import Context
 
+from secaggexample.task import Net, get_weights, load_data, set_weights, test, train
+
 
 # Define Flower Client
 class FlowerClient(NumPyClient):
-    def __init__(self, trainloader, valloader, local_epochs, learning_rate, timeout):
+    def __init__(
+        self, trainloader, valloader, local_epochs, learning_rate, timeout, is_demo
+    ):
         self.net = Net()
         self.trainloader = trainloader
         self.valloader = valloader
@@ -22,22 +23,25 @@ class FlowerClient(NumPyClient):
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         # For demonstration purposes only
         self.timeout = timeout
+        self.is_demo = is_demo
 
     def fit(self, parameters, config):
         """Train the model with data of this client."""
         set_weights(self.net, parameters)
-        results = train(
-            self.net,
-            self.trainloader,
-            self.valloader,
-            self.local_epochs,
-            self.lr,
-            self.device,
-        )
+        results = {}
+        if not self.is_demo:
+            results = train(
+                self.net,
+                self.trainloader,
+                self.valloader,
+                self.local_epochs,
+                self.lr,
+                self.device,
+            )
         ret_vec = get_weights(self.net)
 
         # Force a significant delay for testing purposes
-        if task.is_demo:
+        if self.is_demo:
             if config.get("drop", False):
                 print(f"Client dropped for testing purposes.")
                 time.sleep(self.timeout)
@@ -48,15 +52,14 @@ class FlowerClient(NumPyClient):
     def evaluate(self, parameters, config):
         """Evaluate the model on the data this client has."""
         set_weights(self.net, parameters)
-        loss, accuracy = test(self.net, self.valloader, self.device)
+        loss, accuracy = 0.0, 0.0
+        if not self.is_demo:
+            loss, accuracy = test(self.net, self.valloader, self.device)
         return loss, len(self.valloader.dataset), {"accuracy": accuracy}
 
 
 def client_fn(context: Context):
     """Construct a Client that will be run in a ClientApp."""
-    # Set `task.is_demo`
-    task.is_demo = context.run_config["is-demo"]
-    timeout = context.run_config["timeout"]
 
     # Read the node_config to fetch data partition associated to this node
     partition_id = context.node_config["partition-id"]
@@ -64,12 +67,19 @@ def client_fn(context: Context):
 
     # Read run_config to fetch hyperparameters relevant to this run
     batch_size = context.run_config["batch-size"]
-    trainloader, valloader = load_data(partition_id, num_partitions, batch_size)
+    is_demo = context.run_config["is-demo"]
+    trainloader, valloader = load_data(
+        partition_id, num_partitions, batch_size, is_demo
+    )
     local_epochs = context.run_config["local-epochs"]
     lr = context.run_config["learning-rate"]
+    # For demostrations purposes only
+    timeout = context.run_config["timeout"]
 
     # Return Client instance
-    return FlowerClient(trainloader, valloader, local_epochs, lr, timeout).to_client()
+    return FlowerClient(
+        trainloader, valloader, local_epochs, lr, timeout, is_demo
+    ).to_client()
 
 
 # Flower ClientApp

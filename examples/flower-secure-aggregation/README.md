@@ -60,16 +60,13 @@ You can also override some of the settings for your `ClientApp` and `ServerApp` 
 flwr run . --run-config num-server-rounds=5
 ```
 
+To adapt the example for a practial usage, set `is-demo=false` like shown below. You might want to adjust the `num-shares` and `reconstruction-threshold` settings to suit your requirements. You can override those via `--run-config` as well.
+
+```bash
+flwr run . --run-config is-demo=false
+```
+
 ### Run with the Deployment Engine
 
 > \[!NOTE\]
 > An update to this example will show how to run this Flower project with the Deployment Engine and TLS certificates, or with Docker.
-
-## Amend the Example for Practical Usage
-
-To adapt the example for real-world applications, follow these steps:
-
-1. Open the `./pyproject.toml` file.
-2. Navigate to the `[tool.flwr.app.config]` section.
-3. Set `is-demo` to `false`.
-4. Adjust the `num-shares` and `reconstruction-threshold` settings to suit your requirements.

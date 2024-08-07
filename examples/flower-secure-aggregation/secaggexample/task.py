@@ -13,9 +13,6 @@ from flwr_datasets.partitioner import IidPartitioner
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
 
-# For real-world applications, please set it to False
-is_demo = True
-
 
 class Net(nn.Module):
     """Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')"""
@@ -58,7 +55,7 @@ def set_weights(net, parameters):
 fds = None  # Cache FederatedDataset
 
 
-def load_data(partition_id: int, num_partitions: int, batch_size: int):
+def load_data(partition_id: int, num_partitions: int, batch_size: int, is_demo: bool):
     """Load partition CIFAR10 data."""
     if is_demo:
         trainloader, testloader = Mock(dataset=[0]), Mock(dataset=[0])
@@ -93,8 +90,6 @@ def load_data(partition_id: int, num_partitions: int, batch_size: int):
 
 def train(net, trainloader, valloader, epochs, learning_rate, device):
     """Train the model on the training set."""
-    if is_demo:
-        return {}
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss().to(device)
     optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate, momentum=0.9)
@@ -118,8 +113,6 @@ def train(net, trainloader, valloader, epochs, learning_rate, device):
 
 def test(net, testloader, device):
     """Validate the model on the test set."""
-    if is_demo:
-        return 0.0, 0.0
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
