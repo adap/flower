@@ -31,10 +31,13 @@ fraction-evaluate = 0.5
 local-epochs = 1
 learning-rate = 0.1
 batch-size = 32
-# parameters for the SecAgg+ protocol
+# Parameters for the SecAgg+ protocol
 num-shares = 3
 reconstruction-threshold = 2
+max-weight = 9000
 timeout = 15.0
+# Demo flag
+is-demo = true
 
 [tool.flwr.federations]
 default = "local-simulation"

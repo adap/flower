@@ -2,7 +2,8 @@
 
 from typing import List, Tuple
 
-from secaggexample.task import IS_DEMO, Net, get_weights, make_net
+from secaggexample import task
+from secaggexample.task import get_weights, make_net
 from secaggexample.workflow_with_log import SecAggPlusWorkflowWithLogs
 
 from flwr.common import Context, Metrics, ndarrays_to_parameters
@@ -27,6 +28,9 @@ app = ServerApp()
 
 @app.main()
 def main(driver: Driver, context: Context) -> None:
+    # Set `task.is_demo`
+    task.is_demo = context.run_config["is-demo"]
+
     # Get initial parameters
     ndarrays = get_weights(make_net())
     parameters = ndarrays_to_parameters(ndarrays)
@@ -36,7 +40,9 @@ def main(driver: Driver, context: Context) -> None:
         # Select all available clients
         fraction_fit=1.0,
         # Disable evaluation in demo
-        fraction_evaluate=0.0 if IS_DEMO else context.run_config["fraction-evaluate"],
+        fraction_evaluate=(
+            0.0 if task.is_demo else context.run_config["fraction-evaluate"]
+        ),
         min_available_clients=5,
         evaluate_metrics_aggregation_fn=weighted_average,
         initial_parameters=parameters,
@@ -51,16 +57,18 @@ def main(driver: Driver, context: Context) -> None:
     )
 
     # Create fit workflow
-    if IS_DEMO:
+    if task.is_demo:
         fit_workflow = SecAggPlusWorkflowWithLogs(
             num_shares=context.run_config["num-shares"],
             reconstruction_threshold=context.run_config["reconstruction-threshold"],
+            max_weight=1,
             timeout=context.run_config["timeout"],
         )
     else:
         fit_workflow = SecAggPlusWorkflow(
             num_shares=context.run_config["num-shares"],
             reconstruction_threshold=context.run_config["reconstruction-threshold"],
+            max_weight=context.run_config["max-weight"],
         )
 
     # Create the workflow

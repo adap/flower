@@ -50,15 +50,15 @@ class SecAggPlusWorkflowWithLogs(SecAggPlusWorkflow):
         )
         log(INFO, "After quantization, the raw vectors will look like:")
         for i in range(1, 5):
-            log(INFO, "\t%s from Client %s...", _quantized[i], i)
+            log(INFO, "\t%s... from Client %s", _quantized[i], i)
         log(
             INFO,
-            "Numbers are rounded to integers stochastically during the quantization",
+            "Numbers are rounded to integers stochastically during the quantization, ",
         )
-        log(INFO, ", and thus vectors may not be identical.")
+        log(INFO, "and thus vectors may not be identical.")
         log(
             INFO,
-            "The above raw vectors are hidden from the driver through adding masks.",
+            "The above raw vectors are hidden from the ServerApp through adding masks.",
         )
         log(INFO, "")
         log(

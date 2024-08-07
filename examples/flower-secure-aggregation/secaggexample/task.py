@@ -14,7 +14,7 @@ from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
 
 # For real-world applications, please set it to False
-IS_DEMO = True
+is_demo = True
 
 
 class Net(nn.Module):
@@ -38,7 +38,7 @@ class Net(nn.Module):
         return self.fc3(x)
 
 
-def make_net(seed=0):
+def make_net(seed=42):
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -60,7 +60,7 @@ fds = None  # Cache FederatedDataset
 
 def load_data(partition_id: int, num_partitions: int, batch_size: int):
     """Load partition CIFAR10 data."""
-    if IS_DEMO:
+    if is_demo:
         trainloader, testloader = Mock(dataset=[0]), Mock(dataset=[0])
         return trainloader, testloader
     # Only initialize `FederatedDataset` once
@@ -93,7 +93,7 @@ def load_data(partition_id: int, num_partitions: int, batch_size: int):
 
 def train(net, trainloader, valloader, epochs, learning_rate, device):
     """Train the model on the training set."""
-    if IS_DEMO:
+    if is_demo:
         return {}
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss().to(device)
@@ -118,7 +118,7 @@ def train(net, trainloader, valloader, epochs, learning_rate, device):
 
 def test(net, testloader, device):
     """Validate the model on the test set."""
-    if IS_DEMO:
+    if is_demo:
         return 0.0, 0.0
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0

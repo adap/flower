@@ -66,9 +66,11 @@ flwr run . --run-config num-server-rounds=5
 > \[!NOTE\]
 > An update to this example will show how to run this Flower project with the Deployment Engine and TLS certificates, or with Docker.
 
-## Amend the example for practical usage
+## Amend the Example for Practical Usage
 
 To adapt the example for real-world applications, follow these steps:
 
-1. Set `IS_DEMO` to `False` in `./secaggexample/task.py`.
-2. Adjust the `num-shares` and `reconstruction-threshold` settings in `./pyproject.toml` to suit your requirements.
+1. Open the `./pyproject.toml` file.
+2. Navigate to the `[tool.flwr.app.config]` section.
+3. Set `is-demo` to `false`.
+4. Adjust the `num-shares` and `reconstruction-threshold` settings to suit your requirements.

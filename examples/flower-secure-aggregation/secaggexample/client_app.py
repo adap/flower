@@ -3,6 +3,7 @@
 import time
 
 import torch
+from secaggexample import task
 from secaggexample.task import Net, get_weights, load_data, set_weights, test, train
 
 from flwr.client import ClientApp, NumPyClient
@@ -50,6 +51,8 @@ class FlowerClient(NumPyClient):
 
 def client_fn(context: Context):
     """Construct a Client that will be run in a ClientApp."""
+    # Set `task.is_demo`
+    task.is_demo = context.run_config["is-demo"]
 
     # Read the node_config to fetch data partition associated to this node
     partition_id = context.node_config["partition-id"]
