@@ -206,4 +206,4 @@ class Fab:
     """Fab file representation."""
 
     hash_str: str
-    data_bytes: bytes
+    content: bytes
