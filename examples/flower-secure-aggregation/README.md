@@ -49,8 +49,6 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 
 ### Run with the Simulation Engine
 
-Run:
-
 ```bash
 flwr run
 ```
