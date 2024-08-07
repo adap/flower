@@ -23,7 +23,7 @@ pip install git+https://github.com/bigcode-project/bigcode-evaluation-harness.gi
 huggingface-cli login
 ```
 
-After that, install `Node.js` for the evaluation of JavaScript, C++:
+After that, install `Node.js` and `g++` for the evaluation of JavaScript, C++:
 
 ```shell
 # Install nvm (Node Version Manager)
@@ -31,6 +31,9 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 
 # Download and install Node.js (you may need to restart the terminal)
 nvm install 20
+
+# Install g++
+sudo apt-get install g++
 ```
 
 

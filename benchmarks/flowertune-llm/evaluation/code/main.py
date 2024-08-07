@@ -7,16 +7,17 @@ from typing import Optional
 
 import torch
 import transformers
-import datasets
 from accelerate import Accelerator
-from bigcode_eval.tasks import ALL_TASKS
 from bigcode_eval.evaluator import Evaluator
+from bigcode_eval.tasks import ALL_TASKS
 from transformers import (
     AutoModelForCausalLM,
     AutoModelForSeq2SeqLM,
     AutoTokenizer,
     HfArgumentParser,
 )
+
+import datasets
 
 
 class MultiChoice:
