@@ -1,12 +1,13 @@
 ---
+title: Federated Survival Analysis with Flower and KaplanMeierFitter
 tags: [estimator, medical]
 dataset: [Waltons]
 framework: [lifelines]
 ---
 
-# Flower Example using KaplanMeierFitter
+# Federated Survival Analysis with Flower and KaplanMeierFitter
 
-This is an introductory example on **federated survival analysis** using [Flower](https://flower.ai/)
+This is an introductory example of **federated survival analysis** using [Flower](https://flower.ai/)
 and [lifelines](https://lifelines.readthedocs.io/en/stable/index.html) library.
 
 The aim of this example is to estimate the survival function using the
