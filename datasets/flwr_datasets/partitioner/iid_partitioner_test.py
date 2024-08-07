@@ -142,7 +142,7 @@ class TestIidPartitioner(unittest.TestCase):
     ) -> None:
         """Test loading a partition with an index out of range."""
         _, partitioner = _dummy_setup(num_partitions, num_rows)
-        with self.assertRaises(ValueError):
+        with self.assertRaises(KeyError):
             partitioner.load_partition(partition_index)
 
     def test_is_dataset_assigned_false(self) -> None:
