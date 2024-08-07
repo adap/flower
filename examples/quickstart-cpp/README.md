@@ -4,7 +4,7 @@ dataset: [Synthetic]
 framework: [C++]
 ---
 
-# Flower Clients in C++ (under development)
+# Flower Clients in C++
 
 In this example you will train a linear model on synthetic data using C++ clients.
 
