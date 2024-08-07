@@ -1,17 +1,37 @@
 [build-system]
-requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
-name = "quickstart-pytorch-lightning"
-version = "0.1.0"
-description = "Federated Learning Quickstart with Flower and PyTorch Lightning"
-authors = ["The Flower Authors <hello@flower.ai>"]
+[project]
+name = "pytorchlightning_example"
+version = "1.0.0"
+description = "Federated Learning with PyTorch Lightning and Flower (Quickstart Example)"
+license = "Apache-2.0"
+dependencies = [
+    "flwr[simulation]>=1.10.0",
+    "flwr-datasets[vision]>=0.3.0",
+    "pytorch-lightning<2.0.0; sys_platform == 'darwin'",
+    "pytorch-lightning==1.6.0; sys_platform != 'darwin'",
+    "torch==1.13.1",
+    "torchvision==0.14.1",
+]
 
-[tool.poetry.dependencies]
-python = "^3.8"
-flwr = ">=1.0,<2.0"
-# flwr = { path = "../../", develop = true }  # Development
-flwr-datasets = { extras = ["vision"], version = ">=0.0.2,<1.0.0" }
-pytorch-lightning = "1.6.0"
-torchvision = "0.14.1"
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "flwrlabs"
+
+[tool.flwr.app.components]
+serverapp = "pytorchlightning_example.server_app:app"
+clientapp = "pytorchlightning_example.client_app:app"
+
+[tool.flwr.app.config]
+num-server-rounds = 3
+max-epochs = 1
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 4

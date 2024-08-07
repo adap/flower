@@ -9,8 +9,8 @@ from hydra import compose, initialize
 from hydra.utils import instantiate
 
 from flwr.client import ClientApp
-from flwr.common import ndarrays_to_parameters
-from flwr.server import ServerApp, ServerConfig
+from flwr.common import Context, ndarrays_to_parameters
+from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 
 from $import_name.client_app import gen_client_fn, get_parameters
 from $import_name.dataset import get_tokenizer_and_data_collator_and_propt_formatting
@@ -67,20 +67,23 @@ init_model = get_model(cfg.model)
 init_model_parameters = get_parameters(init_model)
 init_model_parameters = ndarrays_to_parameters(init_model_parameters)
 
-# Instantiate strategy according to config. Here we pass other arguments
-# that are only defined at runtime.
-strategy = instantiate(
-    cfg.strategy,
-    on_fit_config_fn=get_on_fit_config(),
-    fit_metrics_aggregation_fn=fit_weighted_average,
-    initial_parameters=init_model_parameters,
-    evaluate_fn=get_evaluate_fn(
-        cfg.model, cfg.train.save_every_round, cfg_static.num_rounds, save_path
-    ),
-)
+def server_fn(context: Context):
+    # Instantiate strategy according to config. Here we pass other arguments
+    # that are only defined at runtime.
+    strategy = instantiate(
+        cfg.strategy,
+        on_fit_config_fn=get_on_fit_config(),
+        fit_metrics_aggregation_fn=fit_weighted_average,
+        initial_parameters=init_model_parameters,
+        evaluate_fn=get_evaluate_fn(
+            cfg.model, cfg.train.save_every_round, cfg_static.num_rounds, save_path
+        ),
+    )
+
+    config = ServerConfig(num_rounds=cfg_static.num_rounds)
+
+    return ServerAppComponents(strategy=strategy, config=config)
+
 
 # ServerApp for Flower Next
-server = ServerApp(
-    config=ServerConfig(num_rounds=cfg_static.num_rounds),
-    strategy=strategy,
-)
+server = ServerApp(server_fn=server_fn)

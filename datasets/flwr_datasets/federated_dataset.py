@@ -54,9 +54,11 @@ class FederatedDataset:
         no operation is applied.
     partitioners : Dict[str, Union[Partitioner, int]]
         A dictionary mapping the Dataset split (a `str`) to a `Partitioner` or an `int`
-        (representing the number of IID partitions that this split should be partitioned
-        into). One or multiple `Partitioner` objects can be specified in that manner,
-        but at most, one per split.
+        (representing the number of IID partitions that this split should be
+        partitioned into, i.e., using the default partitioner
+        `IidPartitioner <https://flower.ai/docs/datasets/ref-api/flwr_
+        datasets.partitioner.IidPartitioner.html>`_). One or multiple `Partitioner`
+        objects can be specified in that manner, but at most, one per split.
     shuffle : bool
         Whether to randomize the order of samples. Applied prior to preprocessing
         operations, speratelly to each of the present splits in the dataset. It uses
@@ -85,6 +87,7 @@ class FederatedDataset:
     >>> centralized = fds.load_split("test")
 
     Use CIFAR10 dataset for Federated Laerning with 100 clients:
+
     >>> from flwr_datasets import FederatedDataset
     >>> from flwr_datasets.partitioner import DirichletPartitioner
     >>>
@@ -93,7 +96,8 @@ class FederatedDataset:
     >>> fds = FederatedDataset(dataset="cifar10", partitioners={"train": partitioner})
     >>> partition = fds.load_partition(partition_id=0)
 
-    Visualize the partitioned datasets
+    Visualize the partitioned datasets:
+
     >>> from flwr_datasets.visualization import plot_label_distributions
     >>>
     >>> _ = plot_label_distributions(
@@ -103,7 +107,7 @@ class FederatedDataset:
     >>> )
     """
 
-    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-instance-attributes, too-many-arguments
     def __init__(
         self,
         *,
