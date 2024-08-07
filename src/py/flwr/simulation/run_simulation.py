@@ -178,7 +178,7 @@ def run_simulation_from_cli() -> None:
         num_cpus=args.clientapp_cpus, num_gpus=args.clientapp_gpus
     )
     backend_config = BackendConfig(
-        name=args.backend,
+        name=args.backend_name,
         clientapp_resources=clientapp_resources,
         config=backend_config_dict,
     )
@@ -572,7 +572,7 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         help="Override configuration key-value pairs.",
     )
     parser.add_argument(
-        "--backend",
+        "--backend-name",
         default="ray",
         type=str,
         help="Name of the simulation backend that executes the ClientApp.",
