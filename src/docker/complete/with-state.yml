@@ -1,0 +1,20 @@
+x-with-tls: &x-with-tls
+  command:
+    - --ssl-ca-certfile=certificates/ca.crt
+    - --ssl-certfile=certificates/server.pem
+    - --ssl-keyfile=certificates/server.key
+    - --database=state/state.db
+
+x-without-tls: &x-without-tls
+  command:
+    - --insecure
+    - --database=state/state.db
+
+services:
+  superlink:
+    <<: *x-without-tls
+    # To toggle TLS encryption and persisting state for the SuperLink, comment the line above
+    # and uncomment the line below
+    # <<: *x-with-tls
+    volumes:
+      - ./state/:/app/state/:rw
