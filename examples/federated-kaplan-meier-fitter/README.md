@@ -51,7 +51,7 @@ federated-kaplan-meier-fitter
 
 ### Install dependencies and project
 
-Install the dependencies defined in `pyproject.toml` as well as the `federated-kaplan-meier-fitter` package.
+Install the dependencies defined in `pyproject.toml` as well as the `examplefmk` package.
 
 ```bash
 pip install -e .
