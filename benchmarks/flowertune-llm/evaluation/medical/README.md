@@ -4,7 +4,7 @@ We leverage the medical question answering (QA) metric provided by [Meditron](ht
 Three datasets have been selected for this evaluation: [PubMedQA](https://huggingface.co/datasets/bigbio/pubmed_qa), [MedMCQA](https://huggingface.co/datasets/medmcqa), and [MedQA](https://huggingface.co/datasets/bigbio/med_qa). 
 
 
-### Step 0. Set up Environment
+## Environment Setup
 
 ```shell
 git clone --depth=1 https://github.com/adap/flower.git && mv flower/benchmarks/flowertune-llm/evaluation/medical ./flowertune-eval-medical && rm -rf flower && cd flowertune-eval-medical
