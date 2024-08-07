@@ -1,0 +1,85 @@
+check_cache: False # if set to True then if the config is already in the cache then it will not retrain.
+
+num_clients: 5
+client:
+    epochs: 5
+    lr: 0.001
+
+noise_rate: 1
+faulty_clients_ids: [0] # malacious client(s) ids in a list 
+# faulty_clients_ids: [0] # only client-0 will be faulty in default config
+
+dataset_channels:
+    cifar10: 3 # RGB
+    femnist: 1 # Grey
+
+dataset_classes:
+    cifar10: 10
+    femnist: 10
+
+exp_key: "key_test" # this is the test key. It will be changed after running the exp
+device: "cuda"
+total_gpus: 1
+total_cpus: 3
+client_cpus: 1
+client_gpu: 0.5
+
+model:
+    # resnet34, resnet50, resnet101, resnet152, densenet121, vgg16
+    name: densenet121
+    arch: cnn
+
+dataset:
+    name: "cifar10"
+    num_classes: ${dataset_classes.${dataset.name}}
+    channels: ${dataset_channels.${dataset.name}}
+
+strategy:
+    name: fedavg # points to your strategy (either custom or exiting in Flower)
+    num_rounds: 1
+    clients_per_round: ${num_clients}
+
+data_dist:
+    dist_type: iid
+    num_clients: ${num_clients}
+    batch_size: 512
+    dirichlet_alpha: 1
+    dname: ${dataset.name}
+    mname: ${model.name}
+    storage_dir: ${storage.dir}
+
+hydra:
+    job_logging:
+        root:
+            level: INFO # Set the job logging level to INFO
+        loggers:
+            flwr:
+                level: INFO
+            accelerate.utils.other:
+                level: ERROR
+
+    sweeper:
+        params:
+            model.name: resnet50,densenet121
+            multirun_faulty_clients: 2,3,5,7
+            num_clients: 30,50
+            dataset.name: femnist
+            data_dist.dist_type: iid
+
+multirun_faulty_clients: -1 # use for hydra multirun to pass clients ids to `faulty_clients_ids` as we cannot pass list of  list in multirun
+storage:
+    dir: storage_of_exps/
+    train_cache_name: cache_training_fed_debug
+    results_cache_name: cache_fed_debug_results
+
+
+
+neuron_activation_threshold: 0.003
+neuron_act_thresholds: [0, 0.001, 0.003, 0.005, 0.01, 0.02, 0.03, 0.05, 0.1, 0.2, 0.3, 0.5, 1]
+# neuron_act_thresholds: [0, 0.001]
+threshold_variation_exp_key: 'neuron_activation_threshold_experiments'
+threshold_exps_keys: ["resnet50-cifar10-faulty_clients[['0', '1', '2', '3', '4']]-noise_rate1-TClients30-fedavg-(R1-clientsPerR30)-iid1-batch512-epochs5-lr0.001", "densenet121-cifar10-faulty_clients[['0', '1', '2', '3', '4']]-noise_rate1-TClients30-fedavg-(R1-clientsPerR30)-iid1-batch512-epochs5-lr0.001", "resnet50-femnist-faulty_clients[['0', '1', '2', '3', '4']]-noise_rate1-TClients30-fedavg-(R1-clientsPerR30)-iid1-batch512-epochs5-lr0.001", "densenet121-femnist-faulty_clients[['0', '1', '2', '3', '4']]-noise_rate1-TClients30-fedavg-(R1-clientsPerR30)-iid1-batch512-epochs5-lr0.001"]
+
+vary_thresholds: False
+generate_graphs: False
+faster_input_generation: True
