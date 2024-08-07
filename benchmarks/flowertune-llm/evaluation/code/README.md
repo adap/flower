@@ -31,7 +31,7 @@ nvm install 20
 ```
 
 
-### Step 1. Generate model answers & calculate pass@1 score
+## Generate model answers & calculate pass@1 score
 
 ```bash
 python main.py \
