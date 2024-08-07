@@ -10,6 +10,7 @@ python -m black -q --exclude src/py/flwr/proto src/py
 python -m docformatter -i -r src/py/flwr -e src/py/flwr/proto
 python -m docformatter -i -r src/py/flwr_tool
 python -m ruff check --fix src/py/flwr
+python -m rstfmt doc/source/
 
 # Protos
 find src/proto/flwr/proto -name *.proto | grep "\.proto" | xargs clang-format -i
