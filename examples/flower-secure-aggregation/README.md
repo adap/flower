@@ -1,5 +1,4 @@
 ---
-title: Simple Secure Aggregation with Flower Example
 tags: [advanced, secure_aggregation, privacy]
 dataset: [CIFAR-10]
 framework: [torch, torchvision]
