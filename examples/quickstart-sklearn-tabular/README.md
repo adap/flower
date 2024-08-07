@@ -27,7 +27,7 @@ This will create a new directory called `quickstart-sklearn-tabular` with the fo
 
 ```shell
 quickstart-sklearn-tabular
-├── example
+├── sklearnexample
 │   ├── __init__.py
 │   ├── client_app.py   # Defines your ClientApp
 │   ├── server_app.py   # Defines your ServerApp
