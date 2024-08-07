@@ -5,8 +5,8 @@ import argparse
 import torch
 from fiqa import test_fiqa
 from fpb import test_fpb
-from tfns import test_tfns
 from peft import PeftModel
+from tfns import test_tfns
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
 # Fixed seed
