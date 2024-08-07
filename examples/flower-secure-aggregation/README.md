@@ -37,7 +37,9 @@ flower-secure-aggregation
 └── README.md
 ```
 
-## Install dependencies
+### Install dependencies and project
+
+Install the dependencies defined in `pyproject.toml` as well as the `secaggexample` package.
 
 ```bash
 pip install -e .
