@@ -8,7 +8,10 @@ framework: [torch, torchvision]
 
 The following steps describe how to use Secure Aggregation in flower, with `ClientApp` using `secaggplus_mod` and `ServerApp` using `SecAggPlusWorkflowWithLogs`, which is a subclass of `SecAggPlusWorkflow` that includes more detailed logging specifically designed for this example.
 
-## Project Setup
+## Set up the project
+
+### Clone the project
+
 
 Start by cloning the example project:
 
