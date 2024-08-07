@@ -14,9 +14,8 @@
 # ==============================================================================
 """Ray backend for the Fleet API using the Simulation Engine."""
 
-import pathlib
 from logging import DEBUG, ERROR
-from typing import Callable, Dict, List, Tuple, Union
+from typing import Callable, Dict, Tuple, Union
 
 import ray
 
@@ -31,7 +30,6 @@ from .backend import Backend
 from .backendconfig import BackendConfig
 
 ActorArgsDict = Dict[str, Union[int, float, Callable[[], None]]]
-RunTimeEnvDict = Dict[str, Union[str, List[str]]]
 
 
 class RayBackend(Backend):
@@ -40,17 +38,13 @@ class RayBackend(Backend):
     def __init__(
         self,
         backend_config: BackendConfig,
-        work_dir: str,
     ) -> None:
         """Prepare RayBackend by initialising Ray and creating the ActorPool."""
         log(DEBUG, "Initialising: %s", self.__class__.__name__)
         log(DEBUG, "Backend config: %s", backend_config)
 
-        if not pathlib.Path(work_dir).exists():
-            raise ValueError(f"Specified work_dir {work_dir} does not exist.")
-
         # Initialise ray
-        self.init_ray(backend_config, work_dir)
+        self.init_ray(backend_config)
 
         # Express ClientApp resources in a way ray understands
         client_resources = {
@@ -65,35 +59,10 @@ class RayBackend(Backend):
             actor_kwargs={},
         )
 
-    def _configure_runtime_env(self, work_dir: str) -> RunTimeEnvDict:
-        """Return list of files/subdirectories to exclude relative to work_dir.
-
-        Without this, Ray will push everything to the Ray Cluster.
-        """
-        runtime_env: RunTimeEnvDict = {"working_dir": work_dir}
-
-        excludes = []
-        path = pathlib.Path(work_dir)
-        for p in path.rglob("*"):
-            # Exclude files need to be relative to the working_dir
-            if p.is_file() and not str(p).endswith(".py"):
-                excludes.append(str(p.relative_to(path)))
-        runtime_env["excludes"] = excludes
-
-        return runtime_env
-
-    def init_ray(self, backend_config: BackendConfig, work_dir: str) -> None:
+    def init_ray(self, backend_config: BackendConfig) -> None:
         """Intialises Ray if not already initialised."""
         if not ray.is_initialized():
-            # Init ray and append working dir if needed
-            runtime_env = (
-                self._configure_runtime_env(work_dir=work_dir) if work_dir else None
-            )
-
             ray_init_args = backend_config.config
-
-            if runtime_env is not None:
-                ray_init_args["runtime_env"] = runtime_env
 
             log(DEBUG, "Initializing Ray with passed config: %s", ray_init_args)
             ray.init(**ray_init_args)
