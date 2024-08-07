@@ -16,6 +16,9 @@ Create a new Python environment (we recommend Python 3.10), activate it, then in
 # From a new python environment, run:
 pip install -e .
 
+# Install bigcode_eval
+pip install git+https://github.com/bigcode-project/bigcode-evaluation-harness.git@0f3e95f0806e78a4f432056cdb1be93604a51d69
+
 # Log in HuggingFace account
 huggingface-cli login
 ```

@@ -2,24 +2,21 @@
 
 import fnmatch
 import json
-import os
-import warnings
 from dataclasses import dataclass, field
 from typing import Optional
 
 import torch
 import transformers
+import datasets
 from accelerate import Accelerator
-from evaluator import Evaluator
-from tasks import ALL_TASKS
+from bigcode_eval.tasks import ALL_TASKS
+from bigcode_eval.evaluator import Evaluator
 from transformers import (
     AutoModelForCausalLM,
     AutoModelForSeq2SeqLM,
     AutoTokenizer,
     HfArgumentParser,
 )
-
-import datasets
 
 
 class MultiChoice:
@@ -101,6 +98,34 @@ def parse_args():
         help="Batch size for evaluation on each worker, can be larger for HumanEval",
     )
     parser.add_argument(
+        "--allow_code_execution",
+        action="store_true",
+        help="Allow code evaluation to execute external/untrusted Python code on your machine",
+    )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=None,
+        help="Number of samples to solve and evaluate from the benchmark",
+    )
+    parser.add_argument(
+        "--limit_start",
+        type=int,
+        default=0,
+        help="Optional offset to start from when limiting the number of samples",
+    )
+    parser.add_argument(
+        "--modeltype",
+        default="causal",
+        help="AutoModel to use, it can be causal or seq2seq",
+    )
+    parser.add_argument(
+        "--max_memory_per_gpu",
+        type=str,
+        default=None,
+        help="Max memroy to allocate per gpu, you can also use 'auto'",
+    )
+    parser.add_argument(
         "--max_length_generation",
         type=int,
         default=512,
@@ -121,6 +146,16 @@ def parse_args():
         "--load_in_4bit",
         action="store_true",
         help="Load model in 4bit",
+    )
+    parser.add_argument(
+        "--instruction_tokens",
+        default=None,
+        help="A series of instruction tokens used for instruction-tuning benchamrks separated by comma e.g. <user_message>,<end_user_message>,<assistant_message>",
+    )
+    parser.add_argument(
+        "--postprocess",
+        action="store_false",
+        help="Postprocess model outputs before execution, always on except during generation tests",
     )
     parser.add_argument(
         "--load_generations_path",
@@ -155,6 +190,17 @@ def parse_args():
         type=str,
         default="references.json",
         help="Path for saving the references solutions/tests",
+    )
+    parser.add_argument(
+        "--save_every_k_tasks",
+        type=int,
+        default=-1,
+        help="Optional saving after every k tasks",
+    )
+    parser.add_argument(
+        "--check_references",
+        action="store_true",
+        help="Don't run generation but benchmark groundtruth (useful for debugging)",
     )
     return parser.parse_args()
 
