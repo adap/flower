@@ -1,3 +1,5 @@
+"""secaggexample: A Flower with SecAgg+ app."""
+
 import time
 
 import torch
