@@ -120,6 +120,7 @@ def test(net, testloader, device):
     """Validate the model on the test set."""
     if is_demo:
         return 0.0, 0.0
+    net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
     with torch.no_grad():
