@@ -12,8 +12,8 @@ algorithm: fedrep
 model_name: cnncifar100
 
 client_resources:
-  num_cpus: 4
-  num_gpus: 1
+  num_cpus: 2
+  num_gpus: 0.5
 
 server_device: cuda:0
 
