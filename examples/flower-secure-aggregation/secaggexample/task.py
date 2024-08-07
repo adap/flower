@@ -1,4 +1,4 @@
-"""From pytorchexample: A Flower / PyTorch app."""
+"""secaggexample: A Flower with SecAgg+ app."""
 
 import random
 from collections import OrderedDict
