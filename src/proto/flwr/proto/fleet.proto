@@ -20,6 +20,7 @@ package flwr.proto;
 import "flwr/proto/node.proto";
 import "flwr/proto/task.proto";
 import "flwr/proto/run.proto";
+import "flwr/proto/fab.proto";
 
 service Fleet {
   rpc CreateNode(CreateNodeRequest) returns (CreateNodeResponse) {}
@@ -37,6 +38,9 @@ service Fleet {
   rpc PushTaskRes(PushTaskResRequest) returns (PushTaskResResponse) {}
 
   rpc GetRun(GetRunRequest) returns (GetRunResponse) {}
+
+  // Get FAB
+  rpc GetFab(GetFabRequest) returns (GetFabResponse) {}
 }
 
 // CreateNode messages
