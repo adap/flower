@@ -22,6 +22,9 @@ huggingface-cli login
 
 ## Generate model answers to medical questions
 
+> [!NOTE]
+> Evaluation needs to be run on PubMedQA, MedMCQA and MedQA.
+
 ```bash
 python inference.py \
 --peft-path=/path/to/fine-tuned-peft-model-dir/  # e.g., ./peft_1
@@ -36,7 +39,7 @@ The answers will be saved to `benchmarks/generations/[dataset_name]-[run_name].j
 ```bash
 python evaluate.py \
 --dataset-name=pubmedqa  # chosen from [pubmedqa, medmcqa, medqa]
---run-name="fl-pubmedqa"  # run_name used in Step 1
+--run-name="fl-pubmedqa"  # run_name used in previous step
 ```
 The accuracy value will be printed on the screen.
 

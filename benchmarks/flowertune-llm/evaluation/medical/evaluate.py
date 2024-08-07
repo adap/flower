@@ -147,10 +147,10 @@ def display(metric_dict, run_name, benchmark, verbose=False):
 
 
 def main(
-    gen_dir=f"{ROOT_DIR}/benchmarks/generations",
-    dataset_name="pubmedqa",
-    run_name="fl",
-    verbose=True,
+    gen_dir,
+    dataset_name,
+    run_name,
+    verbose,
 ):
     # Load data
     path = f"{gen_dir}/{dataset_name}-{run_name}.jsonl"
