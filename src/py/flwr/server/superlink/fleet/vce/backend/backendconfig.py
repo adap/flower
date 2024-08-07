@@ -96,6 +96,44 @@ class BackendConfig:
         in parallel.
     config: Optional[Dict[str, ConfigsRecordValues]]
         A dictionary used in the constructor of a backend.
+
+    Examples
+    --------
+    In most situations, defining a `BackendConfig` primarily involves adjusting the
+    amount of CPU/GPU resources that each of your `ClientApp` objects need to run
+    efficiently. This can be done by setting the `ClientAppResources` structure taking
+    into account both the compute/memory footprint of your `ClientApp` when doing work
+    (e.g. when training a model on the local data the `ClientApp` owns) and the system
+    resources available where your simulation runs.
+
+    Adjusting `ClientAppResources` well often requires a few iterations. It's best to
+    start with generous resources, run the simulation for a couple of rounds, and
+    then adjust accordingly. If your system is underutilised that's usually a sign
+    that you can lower the `ClientAppResources` specification and pack more `ClientApp`
+    objects to run in parallel.
+
+    >>> from flwr.simulation import BackendConfig, ClientAppResources
+    >>>
+    >>> # a lightweight ClientApp might run fine with just 1xCPU
+    >>> # this will likely result in many `ClientApp`s running in parallel
+    >>> client_resources = ClientAppResources(num_cpus=1, num_gpus=0)
+    >>> backend_cfg = BackendConfig(clientapp_resources = client_resources)
+    >>>
+    >>> # More demanding workloads (e.g. training a larger model) in a `ClientApp` might
+    >>> # need more resources. This will reduce the degree of parallelism so higher
+    >>> # proportion of your system resources are accessible to a `ClientApp`. The
+    >>> # example below shows how to set resources so at most two `ClientApp` run per
+    >>> # GPU available.
+    >>> client_resources = ClientAppResources(num_cpus=8, num_gpus=0.5)
+    >>> backend_cfg = BackendConfig(clientapp_resources = client_resources)
+
+    Some backends can be customized when they are initialized, i.e., when you start the
+    simulation. This can be done via the `config` argument in a `BackendConfig` object.
+    For example, for the `RayBackend`, you could disable the logging coming from the
+    processes running the `ClientApp` objects like :
+
+    >>> config = {"log_to_driver": False}
+    >>> backend_cfg = BackendConfig(config=config)
     """
 
     name: str

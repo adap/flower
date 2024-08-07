@@ -224,14 +224,9 @@ def run_simulation(
         Driver in the ServerApp and receive a Message describing what the ClientApp
         should perform.
 
-    backend_name : str (default: ray)
-        A simulation backend that runs `ClientApp`s.
-
     backend_config : Optional[BackendConfig]
         A dataclass to configure a simulation Backend and setup the level of paralellism
-        in your simulation (i.e. how many `ClientApp` objects run in parallel). If
-        unspecified the default backend (Ray) will be used and will assign 2 CPUs per
-        `ClientApp`.
+        in your simulation (i.e. how many `ClientApp` objects run in parallel).
 
     enable_tf_gpu_growth : bool (default: False)
         A boolean to indicate whether to enable GPU growth on the main thread. This is
