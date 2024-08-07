@@ -10,7 +10,7 @@ Three datasets have been selected for this evaluation: [MBPP](https://huggingfac
 git clone --depth=1 https://github.com/adap/flower.git && mv flower/benchmarks/flowertune-llm/evaluation/code ./flowertune-eval-code && rm -rf flower && cd flowertune-eval-code
 ```
 
-Then, install dependencies with:
+Create a new Python environment (we recommend Python 3.10), activate it, then install dependencies with:
 
 ```shell
 # From a new python environment, run:
