@@ -38,7 +38,7 @@ quickstart-sklearn-tabular
 
 ### Install dependencies and project
 
-Install the dependencies defined in `pyproject.toml` as well as the `mlxexample` package.
+Install the dependencies defined in `pyproject.toml` as well as the `sklearnexample` package.
 
 ```bash
 pip install -e .
