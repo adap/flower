@@ -154,7 +154,7 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
     shuffle(proxies)
     for prox in proxies:
         # Register state
-        prox.proxy_state.register_context(run_id=run_id)
+        prox.proxy_state.register_context(run_id=run_id, default_config={})
         # Retrieve state
         state = prox.proxy_state.retrieve_context(run_id=run_id)
 
@@ -229,7 +229,7 @@ def test_cid_consistency_without_proxies() -> None:
             ),
         )
         # register and retrieve context
-        node_states[node_id].register_context(run_id=run_id)
+        node_states[node_id].register_context(run_id=run_id, default_config={})
         context = node_states[node_id].retrieve_context(run_id=run_id)
         partition_id_str = str(context.node_config[PARTITION_ID_KEY])
         pool.submit_client_job(

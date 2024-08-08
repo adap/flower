@@ -78,7 +78,6 @@ def run_supernode() -> None:
         max_retries=args.max_retries,
         max_wait_time=args.max_wait_time,
         node_config=parse_config_args([args.node_config]),
-        flwr_path=get_flwr_dir(args.flwr_dir),
     )
 
     # Graceful shutdown

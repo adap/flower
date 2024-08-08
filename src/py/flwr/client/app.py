@@ -19,12 +19,12 @@ import sys
 import time
 from dataclasses import dataclass
 from logging import ERROR, INFO, WARN
-from pathlib import Path
 from typing import Callable, ContextManager, Dict, Optional, Tuple, Type, Union
 
 from cryptography.hazmat.primitives.asymmetric import ec
 from grpc import RpcError
 
+from flwr.cli.config_utils import get_fab_config, get_fab_metadata
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.typing import ClientFnExt
@@ -42,7 +42,7 @@ from flwr.common.constant import (
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
-from flwr.common.typing import Run, UserConfig
+from flwr.common.typing import Fab, Run, UserConfig
 
 from .grpc_adapter_client.connection import grpc_adapter
 from .grpc_client.connection import grpc_connection
@@ -195,7 +195,6 @@ def _start_client_internal(
     ] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
-    flwr_path: Optional[Path] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -241,8 +240,6 @@ def _start_client_internal(
         The maximum duration before the client stops trying to
         connect to the server in case of connection error.
         If set to None, there is no limit to the total time.
-    flwr_path: Optional[Path] (default: None)
-        The fully resolved path containing installed Flower Apps.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -333,7 +330,7 @@ def _start_client_internal(
             root_certificates,
             authentication_keys,
         ) as conn:
-            receive, send, create_node, delete_node, get_run = conn
+            receive, send, create_node, delete_node, get_run, get_fab = conn
 
             # Register node when connecting the first time
             if node_state is None:
@@ -398,11 +395,19 @@ def _start_client_internal(
                             runs[run_id] = get_run(run_id)
                         # If get_run is None, i.e., in grpc-bidi mode
                         else:
-                            runs[run_id] = Run(run_id, "", "", {})
+                            runs[run_id] = Run(run_id, "", "", "", {})
+
+                    run: Run = runs[run_id]
+                    if get_fab is not None and run.fab_hash:
+                        fab = get_fab(run.fab_hash)
+                    else:
+                        fab = None
 
                     # Register context for this run
                     node_state.register_context(
-                        run_id=run_id, run=runs[run_id], flwr_path=flwr_path
+                        run_id=run_id,
+                        default_config=get_fab_config(fab.content) if fab else {},
+                        run=runs[run_id],
                     )
 
                     # Retrieve context for this run
@@ -417,10 +422,12 @@ def _start_client_internal(
                     # Handle app loading and task message
                     try:
                         # Load ClientApp instance
-                        run: Run = runs[run_id]
-                        client_app: ClientApp = load_client_app_fn(
-                            run.fab_id, run.fab_version
-                        )
+                        if fab:
+                            fab_id, fab_version = get_fab_metadata(fab.content)
+                        else:
+                            fab_id, fab_version = run.fab_id, run.fab_version
+
+                        client_app: ClientApp = load_client_app_fn(fab_id, fab_version)
 
                         # Execute ClientApp
                         reply_message = client_app(message=message, context=context)
@@ -606,6 +613,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
                 Optional[Callable[[], Optional[int]]],
                 Optional[Callable[[], None]],
                 Optional[Callable[[int], Run]],
+                Optional[Callable[[str], Fab]],
             ]
         ],
     ],

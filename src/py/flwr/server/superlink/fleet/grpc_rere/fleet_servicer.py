@@ -35,6 +35,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResResponse,
 )
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.fleet.message_handler import message_handler
 from flwr.server.superlink.state import StateFactory
 
@@ -42,8 +43,9 @@ from flwr.server.superlink.state import StateFactory
 class FleetServicer(fleet_pb2_grpc.FleetServicer):
     """Fleet API servicer."""
 
-    def __init__(self, state_factory: StateFactory) -> None:
+    def __init__(self, state_factory: StateFactory, ffs_factory: FfsFactory) -> None:
         self.state_factory = state_factory
+        self.ffs_factory = ffs_factory
 
     def CreateNode(
         self, request: CreateNodeRequest, context: grpc.ServicerContext
@@ -106,5 +108,9 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
     def GetFab(
         self, request: GetFabRequest, context: grpc.ServicerContext
     ) -> GetFabResponse:
-        """Will be implemented later."""
-        raise NotImplementedError
+        """Get FAB."""
+        log(DEBUG, "DriverServicer.GetFab")
+        return message_handler.get_fab(
+            request=request,
+            ffs=self.ffs_factory.ffs(),
+        )

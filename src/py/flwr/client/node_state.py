@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Dict, Optional
 
 from flwr.common import Context, RecordSet
-from flwr.common.config import get_fused_config, get_fused_config_from_dir
+from flwr.common.config import fuse_dicts, get_fused_config_from_dir
 from flwr.common.typing import Run, UserConfig
 
 
@@ -47,8 +47,8 @@ class NodeState:
     def register_context(
         self,
         run_id: int,
+        default_config: UserConfig,
         run: Optional[Run] = None,
-        flwr_path: Optional[Path] = None,
         app_dir: Optional[str] = None,
     ) -> None:
         """Register new run context for this node."""
@@ -66,7 +66,9 @@ class NodeState:
                     raise ValueError("The specified `app_dir` must be a directory.")
             else:
                 # Load from .fab
-                initial_run_config = get_fused_config(run, flwr_path) if run else {}
+                initial_run_config = (
+                    fuse_dicts(default_config, run.override_config) if run else {}
+                )
             self.run_infos[run_id] = RunInfo(
                 initial_run_config=initial_run_config,
                 context=Context(

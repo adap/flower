@@ -89,6 +89,7 @@ class TestInMemoryDriver(unittest.TestCase):
             run_id=61016,
             fab_id="mock/mock",
             fab_version="v1.0.0",
+            fab_hash="mock/mock",
             override_config={"test_key": "test_value"},
         )
         state_factory = MagicMock(state=lambda: self.state)
@@ -99,6 +100,7 @@ class TestInMemoryDriver(unittest.TestCase):
         """Test the InMemoryDriver starting with run_id."""
         # Assert
         self.assertEqual(self.driver.run.run_id, 61016)
+        self.assertEqual(self.driver.run.fab_hash, "mock/mock")
         self.assertEqual(self.driver.run.fab_id, "mock/mock")
         self.assertEqual(self.driver.run.fab_version, "v1.0.0")
         self.assertEqual(self.driver.run.override_config["test_key"], "test_value")
@@ -227,7 +229,7 @@ class TestInMemoryDriver(unittest.TestCase):
         # Prepare
         state = StateFactory("").state()
         self.driver = InMemoryDriver(
-            state.create_run("", "", {}), MagicMock(state=lambda: state)
+            state.create_run(None, None, "", {}), MagicMock(state=lambda: state)
         )
         msg_ids, node_id = push_messages(self.driver, self.num_nodes)
         assert isinstance(state, SqliteState)
@@ -253,7 +255,7 @@ class TestInMemoryDriver(unittest.TestCase):
         # Prepare
         state_factory = StateFactory(":flwr-in-memory-state:")
         state = state_factory.state()
-        self.driver = InMemoryDriver(state.create_run("", "", {}), state_factory)
+        self.driver = InMemoryDriver(state.create_run("", "", None, {}), state_factory)
         msg_ids, node_id = push_messages(self.driver, self.num_nodes)
         assert isinstance(state, InMemoryState)
 

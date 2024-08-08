@@ -3,6 +3,7 @@
 isort:skip_file
 """
 import builtins
+import flwr.proto.fab_pb2
 import flwr.proto.transport_pb2
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
@@ -44,21 +45,23 @@ class StartRunRequest(google.protobuf.message.Message):
         def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
         def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 
-    FAB_FILE_FIELD_NUMBER: builtins.int
+    FAB_FIELD_NUMBER: builtins.int
     OVERRIDE_CONFIG_FIELD_NUMBER: builtins.int
     FEDERATION_CONFIG_FIELD_NUMBER: builtins.int
-    fab_file: builtins.bytes
+    @property
+    def fab(self) -> flwr.proto.fab_pb2.Fab: ...
     @property
     def override_config(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, flwr.proto.transport_pb2.Scalar]: ...
     @property
     def federation_config(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, flwr.proto.transport_pb2.Scalar]: ...
     def __init__(self,
         *,
-        fab_file: builtins.bytes = ...,
+        fab: typing.Optional[flwr.proto.fab_pb2.Fab] = ...,
         override_config: typing.Optional[typing.Mapping[typing.Text, flwr.proto.transport_pb2.Scalar]] = ...,
         federation_config: typing.Optional[typing.Mapping[typing.Text, flwr.proto.transport_pb2.Scalar]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["fab_file",b"fab_file","federation_config",b"federation_config","override_config",b"override_config"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["fab",b"fab"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["fab",b"fab","federation_config",b"federation_config","override_config",b"override_config"]) -> None: ...
 global___StartRunRequest = StartRunRequest
 
 class StartRunResponse(google.protobuf.message.Message):

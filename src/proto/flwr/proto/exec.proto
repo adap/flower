@@ -17,6 +17,7 @@ syntax = "proto3";
 
 package flwr.proto;
 
+import "flwr/proto/fab.proto";
 import "flwr/proto/transport.proto";
 
 service Exec {
@@ -28,7 +29,7 @@ service Exec {
 }
 
 message StartRunRequest {
-  bytes fab_file = 1;
+  Fab fab = 1;
   map<string, Scalar> override_config = 2;
   map<string, Scalar> federation_config = 3;
 }

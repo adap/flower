@@ -22,7 +22,7 @@ import tomli
 
 from flwr.cli.config_utils import validate_fields
 from flwr.common.constant import APP_DIR, FAB_CONFIG_FILE, FLWR_HOME
-from flwr.common.typing import Run, UserConfig, UserConfigValue
+from flwr.common.typing import UserConfig, UserConfigValue
 
 
 def get_flwr_dir(provided_path: Optional[str] = None) -> Path:
@@ -74,10 +74,15 @@ def get_project_config(project_dir: Union[str, Path]) -> Dict[str, Any]:
     return config
 
 
-def _fuse_dicts(
+def fuse_dicts(
     main_dict: UserConfig,
     override_dict: UserConfig,
 ) -> UserConfig:
+    """Merge a config with the overrides.
+
+    Remove the nesting by adding the nested keys as prefixes separated by dots, and fuse
+    it with the override dict.
+    """
     fused_dict = main_dict.copy()
 
     for key, value in override_dict.items():
@@ -96,21 +101,7 @@ def get_fused_config_from_dir(
     )
     flat_default_config = flatten_dict(default_config)
 
-    return _fuse_dicts(flat_default_config, override_config)
-
-
-def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> UserConfig:
-    """Merge the overrides from a `Run` with the config from a FAB.
-
-    Get the config using the fab_id and the fab_version, remove the nesting by adding
-    the nested keys as prefixes separated by dots, and fuse it with the override dict.
-    """
-    if not run.fab_id or not run.fab_version:
-        return {}
-
-    project_dir = get_project_dir(run.fab_id, run.fab_version, flwr_dir)
-
-    return get_fused_config_from_dir(project_dir, run.override_config)
+    return fuse_dicts(flat_default_config, override_config)
 
 
 def flatten_dict(
