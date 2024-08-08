@@ -15,6 +15,8 @@
 """Flower client app."""
 
 import signal
+import socket
+import subprocess
 import sys
 import time
 from dataclasses import dataclass
@@ -32,6 +34,7 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, Message, ev
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
+    RUN_ID_NUM_BYTES,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_BIDI,
     TRANSPORT_TYPE_GRPC_RERE,
@@ -43,6 +46,7 @@ from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.typing import Run, UserConfig
+from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
 
 from .grpc_adapter_client.connection import grpc_adapter
 from .grpc_client.connection import grpc_connection
@@ -50,6 +54,26 @@ from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
 from .node_state import NodeState
 from .numpy_client import NumPyClient
+from .process.process import run_clientappio_api_grpc
+
+CLIENTAPPIO_PORT = 9094
+ADDRESS_CLIENTAPPIO_API_GRPC_RERE = "0.0.0.0"
+
+
+def find_free_port(start_port):
+    port = start_port
+    while True:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            try:
+                s.bind(("", port))
+                s.close()
+                return port
+            except OSError:
+                port += 1
+
+
+CLIENTAPPIO_PORT_FREE = find_free_port(CLIENTAPPIO_PORT)
+ADDRESS_CLIENTAPPIO_API_GRPC_RERE += f":{CLIENTAPPIO_PORT_FREE}"
 
 
 def _check_actionable_client(
@@ -196,6 +220,7 @@ def _start_client_internal(
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
     flwr_path: Optional[Path] = None,
+    isolate: Optional[bool] = False,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -243,6 +268,10 @@ def _start_client_internal(
         If set to None, there is no limit to the total time.
     flwr_path: Optional[Path] (default: None)
         The fully resolved path containing installed Flower Apps.
+    isolate: Optional[bool] (default: False)
+        When True, runs the ClientApp in an isolated process. The ClientApp
+        and SuperNode communicates using gRPC. When False, runs the ClientApp
+        in the same process as the SuperNode.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -267,6 +296,12 @@ def _start_client_internal(
             return ClientApp(client_fn=client_fn)
 
         load_client_app_fn = _load_client_app
+
+    if isolate:
+        # Start gRPC server
+        clientappio_servicer, _ = run_clientappio_api_grpc(
+            address=ADDRESS_CLIENTAPPIO_API_GRPC_RERE
+        )
 
     # At this point, only `load_client_app_fn` should be used
     # Both `client` and `client_fn` must not be used directly
@@ -418,12 +453,41 @@ def _start_client_internal(
                     try:
                         # Load ClientApp instance
                         run: Run = runs[run_id]
-                        client_app: ClientApp = load_client_app_fn(
-                            run.fab_id, run.fab_version
-                        )
+                        if isolate:
+                            # Generate SuperNode token
+                            token: int = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
 
-                        # Execute ClientApp
-                        reply_message = client_app(message=message, context=context)
+                            # Share Message and Context with servicer
+                            clientappio_servicer.set_object(
+                                message=message,
+                                context=context,
+                                # fab=None,
+                                run=run,
+                                token=token,
+                            )
+                            # Run ClientApp
+                            verbose = True
+                            command = [
+                                "flower-exec-client-app",
+                                "--address",
+                                ADDRESS_CLIENTAPPIO_API_GRPC_RERE,
+                                "--token",
+                                str(token),
+                            ]
+                            subprocess.run(
+                                command,
+                                stdout=None if verbose else subprocess.DEVNULL,
+                                stderr=None if verbose else subprocess.DEVNULL,
+                                check=True,
+                            )
+                            reply_message, context = clientappio_servicer.get_object()
+                        else:
+                            # Load ClientApp instance
+                            client_app: ClientApp = load_client_app_fn(
+                                run.fab_id, run.fab_version
+                            )
+                            # Execute ClientApp
+                            reply_message = client_app(message=message, context=context)
                     except Exception as ex:  # pylint: disable=broad-exception-caught
 
                         # Legacy grpc-bidi
