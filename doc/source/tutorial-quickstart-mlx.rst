@@ -321,7 +321,7 @@ Putting everything together we have:
             return loss.item(), len(self.test_images), {"accuracy": accuracy.item()}
 
 
-Finally, we can construct a :code:`ClientApp` using the :code:`FlowerClient` defined above by means of a :code:`client_fn()` callback. Note that the :code:`context` enables you to get access to hyperparemeters defined in your :code:`pyproject.toml` to configure the run. In this tutorial we access, among other hyperparameters, the `local-epochs` setting to control the number of epochs a :code:`ClientApp` will perform when running the :code:`fit()` method.
+Finally, we can construct a :code:`ClientApp` using the :code:`FlowerClient` defined above by means of a :code:`client_fn()` callback. Note that :code:`context` enables you to get access to hyperparemeters defined in :code:`pyproject.toml` to configure the run. In this tutorial we access, among other hyperparameters, the :code:`local-epochs` setting to control the number of epochs a :code:`ClientApp` will perform when running the :code:`fit()` method.
 
 .. code-block:: python
 
