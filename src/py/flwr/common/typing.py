@@ -17,6 +17,7 @@
 
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
@@ -61,7 +62,7 @@ Config = Dict[str, Scalar]
 Properties = Dict[str, Scalar]
 
 # Value type for user configs
-UserConfigValue = Union[bool, float, int, str]
+UserConfigValue = Union[bool, float, int, str, Path]
 UserConfig = Dict[str, UserConfigValue]
 
 

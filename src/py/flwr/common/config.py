@@ -113,6 +113,15 @@ def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> UserConfig:
     return get_fused_config_from_dir(project_dir, run.override_config)
 
 
+def is_valid_path(value: str) -> bool:
+    """Check if a given string value is a valid path."""
+    try:
+        path = Path(value)
+        return path.exists()
+    except Exception:  # pylint: disable=broad-exception-caught
+        return False
+
+
 def flatten_dict(
     raw_dict: Optional[Dict[str, Any]], parent_key: str = ""
 ) -> UserConfig:
@@ -126,6 +135,8 @@ def flatten_dict(
         new_key = f"{parent_key}{separator}{k}" if parent_key else k
         if isinstance(v, dict):
             items.extend(flatten_dict(v, parent_key=new_key).items())
+        elif isinstance(v, str) and is_valid_path(v):
+            items.append((new_key, cast(UserConfigValue, Path(v).resolve())))
         elif isinstance(v, get_args(UserConfigValue)):
             items.append((new_key, cast(UserConfigValue, v)))
         else:
@@ -158,6 +169,11 @@ def parse_config_args(
                     overrides = flatten_dict(tomli.load(config_file))
             else:
                 toml_str = "\n".join(overrides_list)
-                overrides.update(tomli.loads(toml_str))
-
+                parsed_overrides = tomli.loads(toml_str)
+                flattened_overrides = flatten_dict(parsed_overrides)
+                for key, value in flattened_overrides.items():
+                    if isinstance(value, str) and is_valid_path(value):
+                        overrides[key] = Path(value).resolve()
+                    else:
+                        overrides[key] = value
     return overrides
