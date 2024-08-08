@@ -35,7 +35,7 @@ If you haven't yet installed the project and its dependencies, you can do so by:
     # From the directory where your pyproject.toml is
     $ pip install -e .
 
-To run the project do:
+To run the project, do:
 
 .. code-block:: shell
 
