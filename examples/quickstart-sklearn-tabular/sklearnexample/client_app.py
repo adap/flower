@@ -26,9 +26,6 @@ class FlowerClient(NumPyClient):
         self.y_test = y_test.values
         self.unique_labels = UNIQUE_LABELS
 
-    def get_parameters(self, config):
-        return get_model_parameters(self.model)
-
     def fit(self, parameters, config):
         set_model_params(self.model, parameters)
         # Ignore convergence failure due to low local epochs
