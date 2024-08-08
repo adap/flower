@@ -7,49 +7,49 @@
 *************************
 
 See `flower-superlink CLI ref
-<https://flower.ai/docs/framework/ref-api-cli.html#flower-superlink>`_
+<https://flower.ai/docs/framework/ref-api-cli.html#flower-superlink>`_.
 
-Purpose: Pass config values to the long-running SuperLink
+This is used to pass config values to the long-running SuperLink. For
+instance, it allows you to define the address the SuperLink will be
+running on, or which database file to use.
 
 *************************
  flower-supernode config
 *************************
 
 See ``flower-supernode`` CLI ref (not yet public on `flower.ai
-<http://flower.ai>`_)
+<http://flower.ai>`_).
 
-Part of this is ``--node-config``
-
-Purpose: Pass config values to the long-running SuperNode
-
-Note: What about ``--partition-id``? → Use ``flower-supernode
---node-config partition-id=0,num-partitions=2``
+This is used to pass config values to the long-running SuperNode. For
+instance, it allows you to define arbitrary key-value pairs using the
+``--node-config`` argument.
 
 **************************
  flower-simulation config
 **************************
 
 See `flower-simulation CLI ref
-<https://flower.ai/docs/framework/ref-api-cli.html#flower-simulation>`_
+<https://flower.ai/docs/framework/ref-api-cli.html#flower-simulation>`_.
 
-Purpose: Pass config values to the long-running Simulation Engine
+This is used to pass config values to the long-running Simulation
+Engine.
 
 **************************
  Run config (Flower 1.10)
 **************************
 
-Purpose: Pass config values to the app for one particular run (config
-value that take effect on the application level, not on the
-infrastructure level)
+See `how-to configure Flower Apps guide
+<https://flower.ai/docs/framework/how-to-configure-apps>`_.
 
-Examples: dynamically change the number of rounds or the learning rate
-without hardcoding them in the FAB
+This is used to pass config values to the app for one particular run.
+For instance, you can dynamically change the number of rounds or the
+learning rate without hardcoding them in the code.
 
 Description
 ===========
 
-In ``pyproject.toml``, users will be able to specify a set of
-configuration values that an app can react to:
+In ``pyproject.toml``, you can specify a set of configuration values
+that an app can react to:
 
 .. code:: toml
 
@@ -75,7 +75,7 @@ These values are accessible to both the ``ServerApp`` and the
        lr = context.run_config["lr"]
        print(lr)  # Output: 0.01
 
-Apart from specifying default values in ``pyproject.toml``, users can
+Apart from specifying default values in ``pyproject.toml``, you can
 override these values in two ways:
 
 #. Override via CLI overrides: ``flwr run --run-config lr=0.02`` (this
@@ -89,15 +89,13 @@ override these values in two ways:
  Executor config (Flower 1.10)
 *******************************
 
-RFC: TODO
+This can be used to pass config values to the SuperExec executor plugin
+when starting the SuperExec. Executor config provides a way to set
+static configuration values that remain constant for the entire
+liefetime of a SuperExec (i.e., changing them would require shutting
+down the SuperExec and restarting it with different values).
 
-Purpose: Pass config values to the SuperExec executor plugin when
-starting the SuperExec. Executor config provides a way to set static
-configuration values that remain constant for the entire liefetime of a
-SuperExec (i.e., changing them would require shutting down the SuperExec
-and restarting it with different values).
-
-Example: pass the
+For instance, you can set the address of the SuperLink with it.
 
 Description
 ===========
@@ -133,21 +131,19 @@ known in advance:
  Federations config (Flower 1.10)
 **********************************
 
-RFC: TODO
-
-Purpose: Enable the user to specify different federations that an app
-can run on. In this case, a federation refers to a SuperExec running on
-the same machine or a different machine. Federation config provides a
-way to tell ``flwr run`` which SuperExec (address) to connect to, which
-options to send along, and whether or not to lazily start a SuperExec on
-the same machine (to support ``flwr run`` without the need to start a
-SuperExec beforehand).
+This enables you to specify different federations that an app can run
+on. In this case, a federation refers to a SuperExec running on the same
+machine or a different machine. Federation config provides a way to tell
+``flwr run`` which SuperExec (address) to connect to, which options to
+send along, and whether or not to lazily start a SuperExec on the same
+machine (to support ``flwr run`` without the need to start a SuperExec
+beforehand).
 
 Description
 ===========
 
-In ``pyproject.toml``, users will be able to configure different
-SuperExecs (federations) that ``flwr run`` is able to connect to:
+In ``pyproject.toml``, you can configure different SuperExecs
+(federations) that ``flwr run`` is able to connect to:
 
 .. code:: toml
 
@@ -201,7 +197,7 @@ A minimal version would look like this:
    start_lazily = true
    address = "localhost:9093"
 
-When using ``flwr run`` to start a run, users can easily switch between
+When using ``flwr run`` to start a run, you can easily switch between
 different federations:
 
 .. code:: bash
@@ -215,34 +211,7 @@ different federations:
    # Connect to the SuperExec hosted by Nvidia (running the NVFLARE executor)
    flwr run . nvidia
 
-Here’s what happens when the user executes one of these commands:
-
-#. ``flwr run`` bundles the FAB (as usual, but everything under the
-   ``flower.federations`` key would be excluded)
-
-#. ``flwr run`` loads ``flower.federations``
-      #. It looks up the ``nvidia`` key
-      #. It finds the ``address`` of the SuperExec to connect to is
-         ``"superexec.nvidia.com:9093"``
-      #. It finds that a custom ``options`` dict has been specified
-
-#. ``flwr run`` connects to ``"superexec.nvidia.com:9093"`` and sends two things:
-      #. The FAB
-      #. The custom options dict ``{ email = "info@nvidia.com", password
-         = "flower-rocks", force = true }``
-
-#. The SuperExec running on ``"superexec.nvidia.com:9093"`` receives the FAB and the ``options`` dict
-      #. It handles the FAB in the usual way
-
-      #. It passes the ``options`` dict to the SuperExec executor plugin
-         → this enables both first-party (Flower Simulation Engine
-         executor plugin) and third-party (NVFLARE executor plugin)
-         executors plugins to receive values
-
-It’s important to mention that the ``[flower.federations]`` config is
-independent of, for example, ``[flower.config]``. Researchers can copy
-``[flower.federations]`` from one project to another, and we might want
-to support something like a “global” ``[flower.federations]`` config
-file in the ``~/.flwr`` dir. Copying ``[flower.federations]`` from one
-project to another would simply allow the user to run the other project
-on the same federations using ``flwr run``.
+Note that the ``[flower.federations]`` config is independent of, for
+example, ``[flower.config]``. You can copy ``[flower.federations]`` from
+one project to another to run the other project on the same federations
+using ``flwr run``.
