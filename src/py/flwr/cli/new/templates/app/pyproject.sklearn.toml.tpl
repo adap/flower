@@ -8,8 +8,8 @@ version = "1.0.0"
 description = ""
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.9.0,<2.0",
-    "flwr-datasets[vision]>=0.0.2,<1.0.0",
+    "flwr[simulation]>=1.10.0",
+    "flwr-datasets[vision]>=0.3.0",
     "scikit-learn>=1.1.1",
 ]
 
@@ -27,7 +27,7 @@ clientapp = "$import_name.client_app:app"
 num-server-rounds = 3
 
 [tool.flwr.federations]
-default = "localhost"
+default = "local-simulation"
 
-[tool.flwr.federations.localhost]
+[tool.flwr.federations.local-simulation]
 options.num-supernodes = 10

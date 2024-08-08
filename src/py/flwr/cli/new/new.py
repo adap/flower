@@ -34,13 +34,13 @@ from ..utils import (
 class MlFramework(str, Enum):
     """Available frameworks."""
 
-    NUMPY = "NumPy"
     PYTORCH = "PyTorch"
     TENSORFLOW = "TensorFlow"
-    JAX = "JAX"
-    HUGGINGFACE = "HuggingFace"
-    MLX = "MLX"
     SKLEARN = "sklearn"
+    HUGGINGFACE = "HuggingFace"
+    JAX = "JAX"
+    MLX = "MLX"
+    NUMPY = "NumPy"
     FLOWERTUNE = "FlowerTune"
 
 
@@ -135,20 +135,20 @@ def new(
         username = prompt_text("Please provide your Flower username")
 
     if framework is not None:
-        framework_str = str(framework.value)
+        framework_str_upper = str(framework.value)
     else:
         framework_value = prompt_options(
             "Please select ML framework by typing in the number",
-            sorted([mlf.value for mlf in MlFramework]),
+            [mlf.value for mlf in MlFramework],
         )
         selected_value = [
             name
             for name, value in vars(MlFramework).items()
             if value == framework_value
         ]
-        framework_str = selected_value[0]
+        framework_str_upper = selected_value[0]
 
-    framework_str = framework_str.lower()
+    framework_str = framework_str_upper.lower()
 
     llm_challenge_str = None
     if framework_str == "flowertune":
@@ -173,9 +173,10 @@ def new(
     )
 
     context = {
-        "project_name": project_name,
-        "package_name": package_name,
+        "framework_str": framework_str_upper,
         "import_name": import_name.replace("-", "_"),
+        "package_name": package_name,
+        "project_name": project_name,
         "username": username,
     }
 

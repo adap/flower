@@ -16,6 +16,7 @@
 
 
 from .dirichlet_partitioner import DirichletPartitioner
+from .distribution_partitioner import DistributionPartitioner
 from .exponential_partitioner import ExponentialPartitioner
 from .iid_partitioner import IidPartitioner
 from .inner_dirichlet_partitioner import InnerDirichletPartitioner
@@ -29,6 +30,7 @@ from .square_partitioner import SquarePartitioner
 
 __all__ = [
     "DirichletPartitioner",
+    "DistributionPartitioner",
     "ExponentialPartitioner",
     "IidPartitioner",
     "InnerDirichletPartitioner",
