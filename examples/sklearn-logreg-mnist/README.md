@@ -4,14 +4,16 @@ dataset: [MNIST]
 framework: [scikit-learn]
 ---
 
-# Flower Logistic Regression Example using scikit-learn
+# Flower Logistic Regression Example using scikit-learn and Flower (Quickstart Example)
 
 This example of Flower uses `scikit-learn`'s `LogisticRegression` model to train a federated learning system. It will help you understand how to adapt Flower for use with `scikit-learn`.
 Running this example in itself is quite easy. This example uses [Flower Datasets](https://flower.ai/docs/datasets/) to download, partition and preprocess the MNIST dataset.
 
-## Project Setup
+## Set up the project
 
-Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
+### Clone the project
+
+Start by cloning the example project:
 
 ```shell
 git clone --depth=1 https://github.com/adap/flower.git _tmp \
@@ -24,13 +26,14 @@ This will create a new directory called `sklearn-logreg-mnist` with the followin
 ```shell
 sklearn-logreg-mnist
 ├── README.md
-├── pyproject.toml      # builds your project, includes dependencies and configs
+├── pyproject.toml      ## Project metadata like dependencies and configs
 └── sklearn_example
-    ├── client_app.py   # defines your ClientApp
-    └── server_app.py   # defines your ServerApp
+    ├── __init__.py
+    ├── client_app.py   # Defines your ClientApp
+    └── server_app.py   # Defines your ServerApp
 ```
 
-## Install dependencies and project
+### Install dependencies and project
 
 Install the dependencies defined in `pyproject.toml` as well as the `sklearn_example` package.
 
@@ -38,13 +41,9 @@ Install the dependencies defined in `pyproject.toml` as well as the `sklearn_exa
 pip install -e .
 ```
 
-## Run the Example
+## Run the project
 
-You can run your `ClientApp` and `ServerApp` in both _simulation_ and
-_deployment_ mode without making changes to the code. If you are starting
-with Flower, we recommend you using the _simulation_ model as it requires
-fewer components to be launched manually. By default, `flwr run` will make
-use of the Simulation Engine.
+You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
 
 ### Run with the Simulation Engine
 
@@ -57,6 +56,9 @@ You can also override some of the settings for your `ClientApp` and `ServerApp` 
 ```bash
 flwr run . --run-config num-server-rounds=5
 ```
+
+> \[!TIP\]
+> For a more detailed walk-through check our [quickstart PyTorch tutorial](https://flower.ai/docs/framework/tutorial-quickstart-scikitlearn.html)
 
 ### Run with the Deployment Engine
 
