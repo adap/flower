@@ -4,7 +4,7 @@ dataset: [Iris]
 framework: [scikit-learn]
 ---
 
-# Federated Learning with scikit-learn and Flower
+# Federated Learning with scikit-learn and Flower (Quickstart Example)
 
 This example of Flower uses `scikit-learn`'s `LogisticRegression` model to train a federated learning system on
 "iris" (tabular) dataset.
