@@ -10,10 +10,8 @@ from sklearnexample.task import (
     create_log_reg_and_instantiate_parameters,
     set_model_params,
     get_model_parameters,
-    set_initial_params,
     load_data,
     UNIQUE_LABELS,
-    FEATURES,
 )
 
 
