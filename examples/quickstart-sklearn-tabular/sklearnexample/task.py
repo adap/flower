@@ -9,6 +9,7 @@ from flwr_datasets.partitioner import IidPartitioner
 UNIQUE_LABELS = [0, 1, 2]
 FEATURES = ["petal_length", "petal_width", "sepal_length", "sepal_width"]
 
+
 def get_model_parameters(model: LogisticRegression) -> NDArrays:
     """Return the parameters of a sklearn LogisticRegression model."""
     if model.fit_intercept:
