@@ -2,7 +2,6 @@
 
 import warnings
 
-from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
 from flwr.common import Context
 from flwr.client import NumPyClient, ClientApp
