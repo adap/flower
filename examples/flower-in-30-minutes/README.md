@@ -1,5 +1,4 @@
 ---
-title: Flower in 30 Minutes Example
 tags: [colab, vision, simulation]
 dataset: [CIFAR-10]
 framework: [torch]
