@@ -50,7 +50,8 @@ def create_log_reg_and_instantiate_parameters(penalty):
     model = LogisticRegression(
         penalty=penalty,
         max_iter=1,  # local epoch
-        warm_start=True,  # prevent refreshing weights when fitting
+        warm_start=True,  # prevent refreshing weights when fitting,
+        solver="saga",
     )
     # Setting initial parameters, akin to model.compile for keras models
     set_initial_params(model, n_features=len(FEATURES), n_classes=len(UNIQUE_LABELS))
