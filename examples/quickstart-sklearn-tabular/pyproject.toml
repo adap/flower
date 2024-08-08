@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "quickstart-sklearn-tabular"
 version = "1.0.0"
-description = "Federated learning with scikit-learn and Flower"
+description = "Federated Learning with scikit-learn and Flower (Quickstart Example)"
 license = "Apache-2.0"
 dependencies = [
     "flwr>=1.10.0",
