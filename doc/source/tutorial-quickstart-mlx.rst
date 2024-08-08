@@ -11,7 +11,7 @@ First of all, it is recommended to create a virtual environment and run
 everything within a :doc:`virtualenv
 <contributor-how-to-set-up-a-virtual-env>`.
 
-Let's use `flwr new` to create a complete Flower+MLX project. It will
+Let's use ``flwr new`` to create a complete Flower+MLX project. It will
 generate all the files needed to run, by default with the Simulation
 Engine, a federation of 10 nodes using `FedAvg
 <https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedAvg.html#flwr.server.strategy.FedAvg>`_.
@@ -98,8 +98,8 @@ With default argumnets you will see an output like this one:
    INFO :                  round 3: 1.7419301986694335
    INFO :
 
-You can also override the parameters defined in `[tool.flwr.app.config]`
-section in the `pyproject.toml` like this:
+You can also override the parameters defined in ``[tool.flwr.app.config]``
+section in the ``pyproject.toml`` like this:
 
 .. code:: shell
 
@@ -107,17 +107,17 @@ section in the `pyproject.toml` like this:
    $ flwr run . --run-config num-server-rounds=5,lr=0.05
 
 What follows is an explanation of each component in the project you just
-created: dataset partition, the model, defining the `ClientApp` and
-defining the `ServerApp`.
+created: dataset partition, the model, defining the ``ClientApp`` and
+defining the ``ServerApp``.
 
 **********
  The Data
 **********
 
-We will use `flwr_datasets` to easily download and partition the `MNIST`
+We will use ``flwr_datasets`` to easily download and partition the ``MNIST``
 dataset. In this example you'll make use of the `IidPartitioner
 <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_
-to generate `num_partitions` partitions. You can choose `other
+to generate ``num_partitions`` partitions. You can choose `other
 partitioners
 <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html>`_
 available in Flower Datasets:
@@ -203,10 +203,10 @@ over batches.
  The ClientApp
 ***************
 
-The main changes we have to make to use `MLX` with `Flower` will be
-found in the `get_params` and `set_params` functions. Indeed, MLX
+The main changes we have to make to use ``MLX`` with ``Flower`` will be
+found in the ``get_params`` and ``set_params`` functions. Indeed, MLX
 doesn't provide an easy way to convert the model parameters into a list
-of `np.array` objects (the format we need for the serialization of the
+of ``np.array`` objects (the format we need for the serialization of the
 messages to work).
 
 The way MLX stores its parameters is as follows:
@@ -231,10 +231,10 @@ array and convert them into a NumPy array:
        layers = model.parameters()["layers"]
        return [np.array(val) for layer in layers for _, val in layer.items()]
 
-For the `set_params` function, we perform the reverse operation. We
+For the ``set_params`` function, we perform the reverse operation. We
 receive a list of NumPy arrays and want to convert them into MLX
 parameters. Therefore, we iterate through pairs of parameters and assign
-them to the `weight` and `bias` keys of each layer dict:
+them to the ``weight`` and ``bias`` keys of each layer dict:
 
 .. code:: python
 
@@ -247,7 +247,7 @@ them to the `weight` and `bias` keys of each layer dict:
    model.update(new_params)
 
 The rest of the functionality is directly inspired by the centralized
-case. The `fit()` method in the client trains the model using the local
+case. The ``fit()`` method in the client trains the model using the local
 dataset:
 
 .. code:: python
@@ -266,7 +266,7 @@ dataset:
 Here, after updating the parameters, we perform the training as in the
 centralized case, and return the new parameters.
 
-And for the `evaluate` method of the client:
+And for the ``evaluate`` method of the client:
 
 .. code:: python
 
@@ -278,8 +278,8 @@ And for the `evaluate` method of the client:
 
 We also begin by updating the parameters with the ones sent by the
 server, and then we compute the loss and accuracy using the functions
-defined above. In the constructor of the `FlowerClient` we instantiate
-the `MLP` model as well as other components such as the optimizer.
+defined above. In the constructor of the ``FlowerClient`` we instantiate
+the ``MLP`` model as well as other components such as the optimizer.
 
 Putting everything together we have:
 
@@ -335,8 +335,8 @@ Putting everything together we have:
            loss = loss_fn(self.model, self.test_images, self.test_labels)
            return loss.item(), len(self.test_images), {"accuracy": accuracy.item()}
 
-Finally, we can construct a `ClientApp` using the `FlowerClient` defined
-above by means of a `client_fn` callback:
+Finally, we can construct a ``ClientApp`` using the ``FlowerClient`` defined
+above by means of a ``client_fn`` callback:
 
 .. code:: python
 
@@ -365,13 +365,13 @@ above by means of a `client_fn` callback:
  The ServerApp
 ***************
 
-To construct a `ServerApp` we define a `server_fn()` callback with an
-identical signature to that of `client_fn()` but the return type is
+To construct a ``ServerApp`` we define a ``server_fn()`` callback with an
+identical signature to that of ``client_fn()`` but the return type is
 `ServerAppComponents
 <https://flower.ai/docs/framework/ref-api/flwr.server.ServerAppComponents.html#serverappcomponents>`_
 as opposed to a `Client
 <https://flower.ai/docs/framework/ref-api/flwr.client.Client.html#client>`_.
-In this example we use the `FedAvg` strategy.
+In this example we use the ``FedAvg`` strategy.
 
 .. code:: python
 
