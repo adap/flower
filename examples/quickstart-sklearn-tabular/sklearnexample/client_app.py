@@ -20,10 +20,10 @@ from sklearnexample.task import (
 class FlowerClient(NumPyClient):
     def __init__(self, model, X_train, y_train, X_test, y_test):
         self.model = model
-        self.X_train = X_train
-        self.y_train = y_train
-        self.X_test = X_test
-        self.y_test = y_test
+        self.X_train = X_train.values
+        self.y_train = y_train.values
+        self.X_test = X_test.values
+        self.y_test = y_test.values
         self.unique_labels = UNIQUE_LABELS
 
     def get_parameters(self, config):
