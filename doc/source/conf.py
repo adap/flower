@@ -17,6 +17,7 @@
 import datetime
 import os
 import sys
+
 from git import Repo
 from sphinx.application import ConfigError
 
@@ -117,6 +118,7 @@ extensions = [
     "nbsphinx",
     "sphinx_click",
     "sphinx_substitution_extensions",
+    "sphinxext.opengraph",
 ]
 
 # Generate .rst files
@@ -267,7 +269,7 @@ redirects = {
 # a list of builtin themes.
 #
 html_theme = "furo"
-html_title = f"Flower Framework"
+html_title = "Flower Federated Learning Framework"
 html_logo = "_static/flower-logo.png"
 html_favicon = "_static/favicon.ico"
 html_baseurl = "https://flower.ai/docs/framework/"
