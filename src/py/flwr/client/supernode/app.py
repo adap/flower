@@ -18,7 +18,7 @@ import argparse
 import sys
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
-from typing import Callable, Optional, Tuple
+from typing import Optional, Tuple
 
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -27,14 +27,8 @@ from cryptography.hazmat.primitives.serialization import (
     load_ssh_public_key,
 )
 
-from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import EventType, event
-from flwr.common.config import (
-    get_flwr_dir,
-    get_project_config,
-    get_project_dir,
-    parse_config_args,
-)
+from flwr.common.config import get_flwr_dir, parse_config_args
 from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
@@ -42,9 +36,10 @@ from flwr.common.constant import (
 )
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature
-from flwr.common.object_ref import load_app, validate
 
 from ..app import _start_client_internal
+from ..process.process import _run_background_client
+from ..process.utils import _get_load_client_app_fn
 
 ADDRESS_FLEET_API_GRPC_RERE = "0.0.0.0:9092"
 
@@ -119,6 +114,19 @@ def run_client_app() -> None:
     register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
 
 
+def exec_client_app() -> None:
+    """Run process-isolated Flower client app."""
+    log(INFO, "Starting Flower ClientApp")
+
+    event(EventType.RUN_CLIENT_APP_ENTER)
+
+    args = _parse_args_exec_client_app().parse_args()
+
+    _run_background_client(address=args.address, token=int(args.token))
+
+    register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
+
+
 def _warn_deprecated_server_arg(args: argparse.Namespace) -> None:
     """Warn about the deprecated argument `--server`."""
     if args.server != ADDRESS_FLEET_API_GRPC_RERE:
@@ -174,80 +182,6 @@ def _get_certificates(args: argparse.Namespace) -> Optional[bytes]:
     return root_certificates
 
 
-def _get_load_client_app_fn(
-    default_app_ref: str,
-    project_dir: str,
-    multi_app: bool,
-    flwr_dir: Optional[str] = None,
-) -> Callable[[str, str], ClientApp]:
-    """Get the load_client_app_fn function.
-
-    If `multi_app` is True, this function loads the specified ClientApp
-    based on `fab_id` and `fab_version`. If `fab_id` is empty, a default
-    ClientApp will be loaded.
-
-    If `multi_app` is False, it ignores `fab_id` and `fab_version` and
-    loads a default ClientApp.
-    """
-    if not multi_app:
-        log(
-            DEBUG,
-            "Flower SuperNode will load and validate ClientApp `%s`",
-            default_app_ref,
-        )
-
-        valid, error_msg = validate(default_app_ref, project_dir=project_dir)
-        if not valid and error_msg:
-            raise LoadClientAppError(error_msg) from None
-
-    def _load(fab_id: str, fab_version: str) -> ClientApp:
-        runtime_project_dir = Path(project_dir).absolute()
-        # If multi-app feature is disabled
-        if not multi_app:
-            # Set app reference
-            client_app_ref = default_app_ref
-        # If multi-app feature is enabled but the fab id is not specified
-        elif fab_id == "":
-            if default_app_ref == "":
-                raise LoadClientAppError(
-                    "Invalid FAB ID: The FAB ID is empty.",
-                ) from None
-
-            log(WARN, "FAB ID is not provided; the default ClientApp will be loaded.")
-
-            # Set app reference
-            client_app_ref = default_app_ref
-        # If multi-app feature is enabled
-        else:
-            try:
-                runtime_project_dir = get_project_dir(
-                    fab_id, fab_version, get_flwr_dir(flwr_dir)
-                )
-                config = get_project_config(runtime_project_dir)
-            except Exception as e:
-                raise LoadClientAppError("Failed to load ClientApp") from e
-
-            # Set app reference
-            client_app_ref = config["tool"]["flwr"]["app"]["components"]["clientapp"]
-
-        # Load ClientApp
-        log(
-            DEBUG,
-            "Loading ClientApp `%s`",
-            client_app_ref,
-        )
-        client_app = load_app(client_app_ref, LoadClientAppError, runtime_project_dir)
-
-        if not isinstance(client_app, ClientApp):
-            raise LoadClientAppError(
-                f"Attribute {client_app_ref} is not of type {ClientApp}",
-            ) from None
-
-        return client_app
-
-    return _load
-
-
 def _parse_args_run_supernode() -> argparse.ArgumentParser:
     """Parse flower-supernode command line arguments."""
     parser = argparse.ArgumentParser(
@@ -275,6 +209,13 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         - `$HOME/.flwr/` in all other cases
     """,
     )
+    parser.add_argument(
+        "--isolate",
+        action="store_true",
+        help="Run the ClientApp in an isolated process from the SuperNode."
+        "In this mode, the ClientApp and SuperNode communicate via gRPC."
+        "By default, both SuperNode and ClientApp run in the same process.",
+    )
 
     return parser
 
@@ -290,6 +231,23 @@ def _parse_args_run_client_app() -> argparse.ArgumentParser:
         help="For example: `client:app` or `project.package.module:wrapper.app`",
     )
     _parse_args_common(parser=parser)
+
+    return parser
+
+
+def _parse_args_exec_client_app() -> argparse.ArgumentParser:
+    """Parse exec-client-app command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Run a Flower client app",
+    )
+    parser.add_argument(
+        "--address",
+        help="Address of SuperNode",
+    )
+    parser.add_argument(
+        "--token",
+        help="Unique token generated by SuperNode for each client app execution",
+    )
 
     return parser
 
