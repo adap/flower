@@ -42,6 +42,7 @@ class MlFramework(str, Enum):
     MLX = "MLX"
     NUMPY = "NumPy"
     FLOWERTUNE = "FlowerTune"
+    BASELINE = "Flower Baseline"
 
 
 class LlmChallengeName(str, Enum):
@@ -164,6 +165,8 @@ def new(
         llm_challenge_str = selected_value[0]
         llm_challenge_str = llm_challenge_str.lower()
 
+    is_baseline_project = framework_str == "baseline"
+
     print(
         typer.style(
             f"\n🔨 Creating Flower project {project_name}...",
@@ -258,6 +261,19 @@ def new(
             files[f"{import_name}/task.py"] = {
                 "template": f"app/code/task.{framework_str}.py.tpl"
             }
+
+        if is_baseline_project:
+            # Indluce additional files for baseline template
+            for file_name in ["models", "dataset", "strategy", "utils"]:
+                files[f"{import_name}/{file_name}.py"] = {
+                    "template": f"app/code/{file_name}.{framework_str}.py.tpl"
+                }
+
+            # Replace README.md
+            files["README.md"]["template"] = f"app/README.{framework_str}.md.tpl"
+
+            # Add LICENSE
+            files["LICENSE"] = {"template": "app/LICENSE.tpl"}
 
     for file_path, value in files.items():
         render_and_create(
