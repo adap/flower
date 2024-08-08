@@ -211,7 +211,9 @@ different federations:
    # Connect to the SuperExec hosted by Nvidia (running the NVFLARE executor)
    flwr run . nvidia
 
-Note that the ``[flower.federations]`` config is independent of, for
-example, ``[flower.config]``. You can copy ``[flower.federations]`` from
-one project to another to run the other project on the same federations
-using ``flwr run``.
+.. note::
+
+   Note that the ``[flower.federations]`` config is independent of, for
+   example, ``[flower.config]``. You can copy ``[flower.federations]``
+   from one project to another to run the other project on the same
+   federations using ``flwr run``.
