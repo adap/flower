@@ -15,6 +15,7 @@
 """Flower command line interface `new` command."""
 
 import re
+import subprocess
 from enum import Enum
 from pathlib import Path
 from string import Template
@@ -266,6 +267,21 @@ def new(
             context=context,
         )
 
+    try:
+        subprocess.run(
+            ["pip", "install", "-e", project_dir, "--no-deps"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except subprocess.CalledProcessError as e:
+        typer.secho(
+            f"❌ Failed to install the package from {project_dir}:\n{e.stderr}",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1) from e
+
     print(
         typer.style(
             "🎊 Project creation successful.\n\n"
@@ -278,7 +294,7 @@ def new(
     _add = "	huggingface-cli login\n" if framework_str == "flowertune" else ""
     print(
         typer.style(
-            f"	cd {package_name}\n" + "	pip install -e .\n" + _add + "	flwr run\n",
+            f"	cd {package_name}\n" + _add + "	flwr run\n",
             fg=typer.colors.BRIGHT_CYAN,
             bold=True,
         )
