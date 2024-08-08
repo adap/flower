@@ -5,7 +5,7 @@ Quickstart MLX
 ==============
 
 
-In this tutorial we will learn how to train simple MLP on MNIST using Flower and MLX. It is recommended to create a virtual environment and run everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
+In this federated learning tutorial we will learn how to train simple MLP on MNIST using Flower and MLX. It is recommended to create a virtual environment and run everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
 
 Let's use `flwr new` to create a complete Flower+MLX project. It will generate all the files needed to run, by default with the Simulation Engine, a federation of 10 nodes using `FedAvg <https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedAvg.html#flwr.server.strategy.FedAvg>`_. The dataset will be partitioned using Flower Dataset's `IidPartitioner <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_.
 
