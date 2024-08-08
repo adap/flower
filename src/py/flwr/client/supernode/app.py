@@ -63,7 +63,7 @@ def run_supernode() -> None:
     root_certificates = _get_certificates(args)
     load_fn = _get_load_client_app_fn(
         default_app_ref="",
-        app_dir=args.app,
+        app_path=args.app,
         flwr_dir=args.flwr_dir,
         multi_app=True,
     )
@@ -101,7 +101,7 @@ def run_client_app() -> None:
     root_certificates = _get_certificates(args)
     load_fn = _get_load_client_app_fn(
         default_app_ref=getattr(args, "client-app"),
-        app_dir=args.dir,
+        app_path=args.dir,
         multi_app=False,
     )
     authentication_keys = _try_setup_client_authentication(args)
@@ -177,7 +177,7 @@ def _get_certificates(args: argparse.Namespace) -> Optional[bytes]:
 
 def _get_load_client_app_fn(
     default_app_ref: str,
-    app_dir: Optional[str],
+    app_path: Optional[str],
     multi_app: bool,
     flwr_dir: Optional[str] = None,
 ) -> Callable[[str, str], ClientApp]:
@@ -197,18 +197,18 @@ def _get_load_client_app_fn(
             default_app_ref,
         )
 
-        valid, error_msg = validate(default_app_ref, project_dir=app_dir)
+        valid, error_msg = validate(default_app_ref, project_dir=app_path)
         if not valid and error_msg:
             raise LoadClientAppError(error_msg) from None
 
     def _load(fab_id: str, fab_version: str) -> ClientApp:
-        runtime_app_dir = Path(app_dir if app_dir else "").absolute()
+        runtime_app_dir = Path(app_path if app_path else "").absolute()
         # If multi-app feature is disabled
         if not multi_app:
             # Set app reference
             client_app_ref = default_app_ref
         # If multi-app feature is enabled but app directory is provided
-        elif app_dir is not None:
+        elif app_path is not None:
             config = get_project_config(runtime_app_dir)
             this_fab_version, this_fab_id = get_metadata_from_config(config)
 
