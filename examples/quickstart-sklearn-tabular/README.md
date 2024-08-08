@@ -1,5 +1,4 @@
 ---
-title: Federated Learning with scikit-learn and Flower
 tags: [quickstart, tabular, fds]
 dataset: [Iris]
 framework: [scikit-learn]
