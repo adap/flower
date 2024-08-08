@@ -102,7 +102,7 @@ class ClientAppIoServicer(appio_pb2_grpc.ClientAppIoServicer):
         self.proto_run = run_to_proto(run)
         self.token = token
 
-    def get_object(self) -> tuple[Message, Context]:
+    def get_object(self) -> tuple[Message | None, Context | None]:
         """Get client app objects."""
         log(DEBUG, "ClientAppIo.GetObject")
         return self.message, self.context
