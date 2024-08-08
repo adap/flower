@@ -4,11 +4,13 @@ dataset: [CIFAR-10]
 framework: [torch, torchvision]
 ---
 
-# Flower Example for Federated Variational Autoencoder using Pytorch
+# Federated Variational Autoencoder with Pytorch and Flower
 
 This example demonstrates how a variational autoencoder (VAE) can be trained in a federated way using the Flower framework.
 
-## Project Setup
+## Set up the project
+
+### Clone the project
 
 Start by cloning the example project:
 
@@ -18,18 +20,17 @@ git clone --depth=1 https://github.com/adap/flower.git _tmp \
               && rm -rf _tmp && cd pytorch-federated-variational-autoencoder
 ```
 
-This will create a new directory called `pytorch-federated-variational-autoencoder`
-following files:
+This will create a new directory called `pytorch-federated-variational-autoencoder` with the following structure:
 
 ```shell
 pytorch-federated-variational-autoencoder
 ├── README.md
 ├── fedvaeexample
 │   ├── __init__.py
-│   ├── client_app.py   # defines your ClientApp
-│   ├── models.py       # defines your model
-│   └── server_app.py   # defines your ServerApp
-└── pyproject.toml      # builds your project, includes dependencies and configs
+│   ├── client_app.py   # Defines your ClientApp
+│   ├── models.py       # Defines your model
+│   └── server_app.py   # Defines your ServerApp
+└── pyproject.toml      #  Project metadata like dependencies and configs
 ```
 
 ## Install dependencies
@@ -40,13 +41,9 @@ Install the dependencies defined in `pyproject.toml` as well as the `fedvaeexamp
 pip install -e .
 ```
 
-## Run the Example
+## Run the Project
 
-You can run your `ClientApp` and `ServerApp` in both _simulation_ and
-_deployment_ mode without making changes to the code. If you are starting
-with Flower, we recommend you using the _simulation_ model as it requires
-fewer components to be launched manually. By default, `flwr run` will make
-use of the Simulation Engine.
+You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
 
 ### Run with the Simulation Engine
 

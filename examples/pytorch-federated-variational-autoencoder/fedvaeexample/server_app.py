@@ -1,16 +1,27 @@
-"""fedvae: A Flower app for Federated Variational Autoencoder."""
+"""fedvaeexample: A Flower / PyTorch app for Federated Variational Autoencoder."""
 
-from flwr.common import Context
+from fedvaeexample.task import Net, get_weights
+
+from flwr.common import Context, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
+from flwr.server.strategy import FedAvg
 
 
-def server_fn(context: Context) -> ServerAppComponents:
+def server_fn(context: Context):
     """Construct components for ServerApp."""
-    # Construct ServerConfig
+
+    # Read from config
     num_rounds = context.run_config["num_server_rounds"]
+
+    # Initialize model parameters
+    ndarrays = get_weights(Net())
+    parameters = ndarrays_to_parameters(ndarrays)
+
+    # Define the strategy
+    strategy = FedAvg(initial_parameters=parameters)
     config = ServerConfig(num_rounds=num_rounds)
 
-    return ServerAppComponents(config=config)
+    return ServerAppComponents(strategy=strategy, config=config)
 
 
 # Create ServerApp
