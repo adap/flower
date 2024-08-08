@@ -15,7 +15,7 @@
 """ClientAppIo API servicer."""
 
 
-from logging import DEBUG, ERROR, INFO
+from logging import DEBUG
 from typing import Optional
 
 import grpc
@@ -61,14 +61,9 @@ class ClientAppIoServicer(appio_pb2_grpc.ClientAppIoServicer):
         self, request: PullClientAppInputsRequest, context: grpc.ServicerContext
     ) -> PullClientAppInputsResponse:
         """Pull Message, Context, and Run."""
-        log(INFO, "ClientAppIo.PullInputs")
-        try:
-            assert (
-                request.token == self.token
-            ), """ClientApp request token is not
-            equal to SuperNode token"""
-        except AssertionError as e:
-            log(ERROR, "%s", e)
+        log(DEBUG, "ClientAppIo.PullInputs")
+        if request.token != self.token:
+            raise ValueError("Mismatch between ClientApp and SuperNode token")
         return PullClientAppInputsResponse(
             message=self.proto_message,
             context=self.proto_context,
@@ -79,8 +74,9 @@ class ClientAppIoServicer(appio_pb2_grpc.ClientAppIoServicer):
         self, request: PushClientAppOutputsRequest, context: grpc.ServicerContext
     ) -> PushClientAppOutputsResponse:
         """Push Message and Context."""
-        log(INFO, "ClientAppIo.PushOutputs")
-        assert request.token == self.token
+        log(DEBUG, "ClientAppIo.PushOutputs")
+        if request.token != self.token:
+            raise ValueError("Mismatch between ClientApp and SuperNode token")
         self.proto_message = request.message
         self.proto_context = request.context
         # Update Message and Context
