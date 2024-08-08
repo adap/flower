@@ -83,7 +83,7 @@ With default arguments you will see an output like this one:
     INFO :                  round 3: 2.039920600131154
     INFO :
 
-You can also override the parameters defined in :code:`[tool.flwr.app.config]` section in the :code:`pyproject.toml` like this:
+You can also override the parameters defined in the :code:`[tool.flwr.app.config]` section in :code:`pyproject.toml` like this:
 
 .. code-block:: shell
 
