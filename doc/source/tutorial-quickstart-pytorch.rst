@@ -15,7 +15,7 @@ Now that we have a rough idea of what this example is about, let's get started. 
     # In a new Python environment
     $ pip install flwr
 
-Then, run the command below. You will be prompted to select a ML framework (choose :code:`PyTorch`), give a name to your project, and type in your developer name:
+Then, run the command below. You will be prompted to select one of the available templates (choose :code:`PyTorch`), give a name to your project, and type in your developer name:
 
 .. code-block:: shell
 
