@@ -40,7 +40,11 @@ from flwr.common.constant import (
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
-from flwr.common.serde import message_from_taskins, message_to_taskres
+from flwr.common.serde import (
+    message_from_taskins,
+    message_to_taskres,
+    user_config_from_proto,
+)
 from flwr.common.typing import Run
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
@@ -90,7 +94,7 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
     Tuple[
         Callable[[], Optional[Message]],
         Callable[[Message], None],
-        Optional[Callable[[], None]],
+        Optional[Callable[[], Optional[int]]],
         Optional[Callable[[], None]],
         Optional[Callable[[int], Run]],
     ]
@@ -237,19 +241,20 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
         if not ping_stop_event.is_set():
             ping_stop_event.wait(next_interval)
 
-    def create_node() -> None:
+    def create_node() -> Optional[int]:
         """Set create_node."""
         req = CreateNodeRequest(ping_interval=PING_DEFAULT_INTERVAL)
 
         # Send the request
         res = _request(req, CreateNodeResponse, PATH_CREATE_NODE)
         if res is None:
-            return
+            return None
 
         # Remember the node and the ping-loop thread
         nonlocal node, ping_thread
         node = res.node
         ping_thread = start_ping_loop(ping, ping_stop_event)
+        return node.node_id
 
     def delete_node() -> None:
         """Set delete_node."""
@@ -358,7 +363,7 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
             run_id,
             res.run.fab_id,
             res.run.fab_version,
-            dict(res.run.override_config.items()),
+            user_config_from_proto(res.run.override_config),
         )
 
     try:

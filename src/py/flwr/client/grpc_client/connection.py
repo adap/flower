@@ -72,7 +72,7 @@ def grpc_connection(  # pylint: disable=R0913, R0915
     Tuple[
         Callable[[], Optional[Message]],
         Callable[[Message], None],
-        Optional[Callable[[], None]],
+        Optional[Callable[[], Optional[int]]],
         Optional[Callable[[], None]],
         Optional[Callable[[int], Run]],
     ]
