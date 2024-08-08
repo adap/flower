@@ -206,7 +206,7 @@ Note that we also make use of Flower Datasets here to load the test split of the
             utils.set_model_params(model, parameters)
             loss = log_loss(y_test, model.predict_proba(X_test))
             accuracy = model.score(X_test, y_test)
-            return loss, {"accuracy": accuracy}
+            return loss, { "accuracy" : accuracy }
 
         return evaluate
 

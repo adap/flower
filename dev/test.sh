@@ -56,6 +56,14 @@ echo "- mdformat: done"
 
 echo "- All Markdown checks passed"
 
+echo "- Start rST checks"
+
+echo "- rstfmt: start"
+python -m rstfmt --check doc/source/
+echo "- rstfmt: done"
+
+echo "- All rST checks passed"
+
 echo "- Start license checks"
 
 echo "- copyright: start"

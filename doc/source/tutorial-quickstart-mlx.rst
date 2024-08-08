@@ -20,6 +20,7 @@ Now that we have a rough idea of what this example is about, let's get started. 
 After running it you'll notice a new directory with your project name has been created. It should have the following structure:
 
 .. code-block:: shell
+
     <your-project-name>
     ├── <your-project-name>
     │   ├── __init__.py
