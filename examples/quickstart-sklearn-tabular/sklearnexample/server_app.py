@@ -1,10 +1,12 @@
+"""sklearnexample: A Flower / sklearn app."""
+
 from typing import List, Tuple, Dict
 
 from flwr.common import Metrics, Scalar, Context
 from flwr.server import ServerAppComponents, ServerConfig, ServerApp
 from flwr.server.strategy import FedAvg
 
-from example.task import set_initial_params
+from sklearnexample.task import set_initial_params
 
 
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Dict[str, Scalar]:
@@ -41,12 +43,7 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Dict[str, Scalar]:
 
 
 def server_fn(context: Context) -> ServerAppComponents:
-    """Construct components that set the ServerApp behaviour.
-
-    You can use settings in `context.run_config` to parameterize the
-    construction of all elements (e.g the strategy or the number of rounds)
-    wrapped in the returned ServerAppComponents object.
-    """
+    """Construct components that set the ServerApp behaviour."""
 
     # Define the strategy
     min_available_clients = context.run_config["min-available-clients"]

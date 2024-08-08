@@ -1,4 +1,5 @@
-import argparse
+"""sklearnexample: A Flower / sklearn app."""
+
 import warnings
 
 from sklearn.linear_model import LogisticRegression
@@ -6,7 +7,7 @@ from sklearn.metrics import log_loss
 from flwr.common import Context
 from flwr.client import NumPyClient, ClientApp
 
-from example.task import (
+from sklearnexample.task import (
     set_model_params,
     get_model_parameters,
     set_initial_params,
@@ -49,12 +50,7 @@ class FlowerClient(NumPyClient):
 
 
 def client_fn(context: Context):
-    """Construct a Client that will be run in a ClientApp.
-
-    You can use settings in `context.run_config` to parameterize the
-    construction of your Client. You could use the `context.node_config` to, for
-    example, indicate which dataset to load (e.g., accessing the partition-id).
-    """
+    """Construct a Client that will be run in a ClientApp."""
 
     # Read the node_config to fetch data partition associated to this node
     partition_id = context.node_config["partition-id"]
