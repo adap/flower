@@ -14,9 +14,9 @@
 # ==============================================================================
 """Flower command line interface `new` command."""
 
-import os
 import re
 from enum import Enum
+from pathlib import Path
 from string import Template
 from typing import Dict, Optional
 
@@ -34,13 +34,13 @@ from ..utils import (
 class MlFramework(str, Enum):
     """Available frameworks."""
 
-    NUMPY = "NumPy"
     PYTORCH = "PyTorch"
     TENSORFLOW = "TensorFlow"
-    JAX = "JAX"
-    HUGGINGFACE = "HF"
-    MLX = "MLX"
     SKLEARN = "sklearn"
+    HUGGINGFACE = "HuggingFace"
+    JAX = "JAX"
+    MLX = "MLX"
+    NUMPY = "NumPy"
     FLOWERTUNE = "FlowerTune"
 
 
@@ -59,10 +59,10 @@ class TemplateNotFound(Exception):
 
 def load_template(name: str) -> str:
     """Load template from template directory and return as text."""
-    tpl_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "templates"))
-    tpl_file_path = os.path.join(tpl_dir, name)
+    tpl_dir = (Path(__file__).parent / "templates").absolute()
+    tpl_file_path = tpl_dir / name
 
-    if not os.path.isfile(tpl_file_path):
+    if not tpl_file_path.is_file():
         raise TemplateNotFound(f"Template '{name}' not found")
 
     with open(tpl_file_path, encoding="utf-8") as tpl_file:
@@ -78,14 +78,13 @@ def render_template(template: str, data: Dict[str, str]) -> str:
     return tpl.template
 
 
-def create_file(file_path: str, content: str) -> None:
+def create_file(file_path: Path, content: str) -> None:
     """Create file including all nessecary directories and write content into file."""
-    os.makedirs(os.path.dirname(file_path), exist_ok=True)
-    with open(file_path, "w", encoding="utf-8") as f:
-        f.write(content)
+    file_path.parent.mkdir(exist_ok=True)
+    file_path.write_text(content)
 
 
-def render_and_create(file_path: str, template: str, context: Dict[str, str]) -> None:
+def render_and_create(file_path: Path, template: str, context: Dict[str, str]) -> None:
     """Render template and write to file."""
     content = render_template(template, context)
     create_file(file_path, content)
@@ -117,24 +116,39 @@ def new(
             default=sanitize_project_name(project_name),
         )
 
+    # Set project directory path
+    package_name = re.sub(r"[-_.]+", "-", project_name).lower()
+    import_name = package_name.replace("-", "_")
+    project_dir = Path.cwd() / package_name
+
+    if project_dir.exists():
+        if not typer.confirm(
+            typer.style(
+                f"\n💬 {project_name} already exists, do you want to override it?",
+                fg=typer.colors.MAGENTA,
+                bold=True,
+            )
+        ):
+            return
+
     if username is None:
         username = prompt_text("Please provide your Flower username")
 
     if framework is not None:
-        framework_str = str(framework.value)
+        framework_str_upper = str(framework.value)
     else:
         framework_value = prompt_options(
             "Please select ML framework by typing in the number",
-            sorted([mlf.value for mlf in MlFramework]),
+            [mlf.value for mlf in MlFramework],
         )
         selected_value = [
             name
             for name, value in vars(MlFramework).items()
             if value == framework_value
         ]
-        framework_str = selected_value[0]
+        framework_str_upper = selected_value[0]
 
-    framework_str = framework_str.lower()
+    framework_str = framework_str_upper.lower()
 
     llm_challenge_str = None
     if framework_str == "flowertune":
@@ -158,16 +172,11 @@ def new(
         )
     )
 
-    # Set project directory path
-    cwd = os.getcwd()
-    package_name = re.sub(r"[-_.]+", "-", project_name).lower()
-    import_name = package_name.replace("-", "_")
-    project_dir = os.path.join(cwd, package_name)
-
     context = {
-        "project_name": project_name,
-        "package_name": package_name,
+        "framework_str": framework_str_upper,
         "import_name": import_name.replace("-", "_"),
+        "package_name": package_name,
+        "project_name": project_name,
         "username": username,
     }
 
@@ -252,7 +261,7 @@ def new(
 
     for file_path, value in files.items():
         render_and_create(
-            file_path=os.path.join(project_dir, file_path),
+            file_path=project_dir / file_path,
             template=value["template"],
             context=context,
         )

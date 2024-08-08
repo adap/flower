@@ -231,7 +231,7 @@ def test_cid_consistency_without_proxies() -> None:
         # register and retrieve context
         node_states[node_id].register_context(run_id=run_id)
         context = node_states[node_id].retrieve_context(run_id=run_id)
-        partition_id_str = context.node_config[PARTITION_ID_KEY]
+        partition_id_str = str(context.node_config[PARTITION_ID_KEY])
         pool.submit_client_job(
             lambda a, c_fn, j_fn, nid_, state: a.run.remote(c_fn, j_fn, nid_, state),
             (_load_app, message, partition_id_str, context),
