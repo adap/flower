@@ -63,8 +63,10 @@ class SimulationEngine(Executor):
     def __init__(
         self,
         num_supernodes: Optional[int] = None,
+        verbose: Optional[bool] = False,
     ) -> None:
         self.num_supernodes = num_supernodes
+        self.verbose = verbose
 
     @override
     def set_config(
@@ -80,6 +82,8 @@ class SimulationEngine(Executor):
             Supported configuration key/value pairs:
             - "num-supernodes": int
                 Number of nodes to register for the simulation.
+            - "verbose": bool
+                Set verbosity of logs.
         """
         if num_supernodes := config.get("num-supernodes"):
             if not isinstance(num_supernodes, int):
@@ -96,6 +100,13 @@ class SimulationEngine(Executor):
                 "`num-supernodes` must not be `None`, it must be a valid "
                 "positive integer."
             )
+
+        if verbose := config.get("verbose"):
+            if not isinstance(verbose, bool):
+                raise ValueError(
+                    "The `verbose` value must be a string `true` or `false`."
+                )
+            self.verbose = verbose
 
     @override
     def start_run(
@@ -121,10 +132,11 @@ class SimulationEngine(Executor):
             fab_path = install_from_fab(fab_file, None, True)
 
             # Install FAB Python package
-            subprocess.check_call(
+            subprocess.run(
                 [sys.executable, "-m", "pip", "install", "--no-deps", str(fab_path)],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
+                stdout=None if self.verbose else subprocess.DEVNULL,
+                stderr=None if self.verbose else subprocess.DEVNULL,
+                check=True,
             )
 
             # Load and validate config
