@@ -9,11 +9,19 @@ In this tutorial we will learn how to train simple MLP on MNIST using Flower and
 
 Let's use `flwr new` to create a complete Flower+MLX project. It will generate all the files needed to run, by default with the Simulation Engine, a federation of 10 nodes using `FedAvg <https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedAvg.html#flwr.server.strategy.FedAvg>`_. The dataset will be partitioned using Flower Dataset's `IidPartitioner <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_.
 
-Now that we have a rough idea of what this example is about, let's get started. We first need to create an MLX project. You can do this by running the command below. You will be prompted to give a name to your project as well as typing your developer name.:
+Now that we have a rough idea of what this example is about, let's get started. First, install Flower in your new environment:
 
 .. code-block:: shell
 
-  $ flwr new --framework MLX
+    # In a new Python environment
+    $ pip install flwr
+
+Then, run the command below. You will be prompted to select a ML framework (choose :code:`MLX`), give a name to your project, and type in your developer name:
+
+.. code-block:: shell
+
+  $ flwr new
+
 
 After running it you'll notice a new directory with your project name has been created. It should have the following structure:
 
