@@ -1,14 +1,18 @@
-from flwr.common import Context, log, parameters_to_ndarrays
+"""secaggexample: A Flower with SecAgg+ app."""
+
 from logging import INFO
+
+from secaggexample.task import get_weights, make_net
+
+import flwr.common.recordset_compat as compat
+from flwr.common import Context, log, parameters_to_ndarrays
+from flwr.common.secure_aggregation.quantization import quantize
 from flwr.server import Driver, LegacyContext
+from flwr.server.workflow.constant import MAIN_PARAMS_RECORD
 from flwr.server.workflow.secure_aggregation.secaggplus_workflow import (
     SecAggPlusWorkflow,
     WorkflowState,
 )
-import numpy as np
-from flwr.common.secure_aggregation.quantization import quantize
-from flwr.server.workflow.constant import MAIN_PARAMS_RECORD
-import flwr.common.recordset_compat as compat
 
 
 class SecAggPlusWorkflowWithLogs(SecAggPlusWorkflow):
@@ -21,8 +25,11 @@ class SecAggPlusWorkflowWithLogs(SecAggPlusWorkflow):
     node_ids = []
 
     def __call__(self, driver: Driver, context: Context) -> None:
+        first_3_params = get_weights(make_net())[0].flatten()[:3]
         _quantized = quantize(
-            [np.ones(3) for _ in range(5)], self.clipping_range, self.quantization_range
+            [first_3_params for _ in range(5)],
+            self.clipping_range,
+            self.quantization_range,
         )
         log(INFO, "")
         log(
@@ -31,24 +38,24 @@ class SecAggPlusWorkflowWithLogs(SecAggPlusWorkflow):
         )
         log(
             INFO,
-            "In the example, each client will upload a vector [1.0, 1.0, 1.0] instead of",
+            "In the example, clients will skip model training and evaluation",
         )
-        log(INFO, "model updates for demonstration purposes.")
+        log(INFO, "for demonstration purposes.")
         log(
             INFO,
             "Client 0 is configured to drop out before uploading the masked vector.",
         )
         log(INFO, "After quantization, the raw vectors will look like:")
         for i in range(1, 5):
-            log(INFO, "\t%s from Client %s", _quantized[i], i)
+            log(INFO, "\t%s... from Client %s", _quantized[i], i)
         log(
             INFO,
-            "Numbers are rounded to integers stochastically during the quantization",
+            "Numbers are rounded to integers stochastically during the quantization, ",
         )
-        log(INFO, ", and thus entries may not be identical.")
+        log(INFO, "and thus vectors may not be identical.")
         log(
             INFO,
-            "The above raw vectors are hidden from the driver through adding masks.",
+            "The above raw vectors are hidden from the ServerApp through adding masks.",
         )
         log(INFO, "")
         log(
@@ -63,8 +70,8 @@ class SecAggPlusWorkflowWithLogs(SecAggPlusWorkflow):
         ndarrays = parameters_to_ndarrays(parameters)
         log(
             INFO,
-            "Weighted average of vectors (dequantized): %s",
-            ndarrays[0],
+            "Weighted average of parameters (dequantized): %s...",
+            ndarrays[0].flatten()[:3],
         )
         log(
             INFO,
@@ -88,5 +95,9 @@ class SecAggPlusWorkflowWithLogs(SecAggPlusWorkflow):
         ret = super().collect_masked_vectors_stage(driver, context, state)
         for node_id in state.sampled_node_ids - state.active_node_ids:
             log(INFO, "Client %s dropped out.", self.node_ids.index(node_id))
-        log(INFO, "Obtained sum of masked vectors: %s", state.aggregate_ndarrays[1])
+        log(
+            INFO,
+            "Obtained sum of masked parameters: %s...",
+            state.aggregate_ndarrays[1].flatten()[:3],
+        )
         return ret
