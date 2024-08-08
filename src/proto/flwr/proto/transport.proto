@@ -17,6 +17,9 @@ syntax = "proto3";
 
 package flwr.proto;
 
+import "flwr/proto/error.proto";
+import "flwr/proto/recordset.proto";
+
 service FlowerService {
   rpc Join(stream ClientMessage) returns (stream ServerMessage) {}
 }
@@ -118,4 +121,28 @@ message Scalar {
     string string = 14;
     bytes bytes = 15;
   }
+}
+
+message Message {
+  Metadata metadata = 1;
+  RecordSet content = 2;
+  Error error = 3;
+}
+
+message Context {
+  sint64 node_id = 1;
+  map<string, Scalar> node_config = 2;
+  RecordSet state = 3;
+  map<string, Scalar> run_config = 4;
+}
+
+message Metadata {
+  sint64 run_id = 1;
+  string message_id = 2;
+  sint64 src_node_id = 3;
+  sint64 dst_node_id = 4;
+  string reply_to_message = 5;
+  string group_id = 6;
+  double ttl = 7;
+  string message_type = 8;
 }
