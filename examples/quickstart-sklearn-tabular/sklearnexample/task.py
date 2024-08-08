@@ -7,7 +7,7 @@ from flwr_datasets.partitioner import IidPartitioner
 
 # This information is needed to create a correct scikit-learn model
 UNIQUE_LABELS = [0, 1, 2]
-
+FEATURES = ["petal_length", "petal_width", "sepal_length", "sepal_width"]
 
 def get_model_parameters(model: LogisticRegression) -> NDArrays:
     """Return the parameters of a sklearn LogisticRegression model."""
@@ -45,6 +45,17 @@ def set_initial_params(model: LogisticRegression, n_classes: int, n_features: in
         model.intercept_ = np.zeros((n_classes,))
 
 
+def create_log_reg_and_instantiate_parameters(penalty):
+    model = LogisticRegression(
+        penalty=penalty,
+        max_iter=1,  # local epoch
+        warm_start=True,  # prevent refreshing weights when fitting
+    )
+    # Setting initial parameters, akin to model.compile for keras models
+    set_initial_params(model, n_features=len(FEATURES), n_classes=len(UNIQUE_LABELS))
+    return model
+
+
 fds = None  # Cache FederatedDataset
 
 
@@ -57,7 +68,7 @@ def load_data(partition_id: int, num_partitions: int):
             dataset="hitorilabs/iris", partitioners={"train": partitioner}
         )
     dataset = fds.load_partition(partition_id, "train").with_format("pandas")[:]
-    X = dataset[["petal_length", "petal_width", "sepal_length", "sepal_width"]]
+    X = dataset[FEATURES]
     y = dataset["species"]
     # Split the on-edge data: 80% train, 20% test
     X_train, X_test = X[: int(0.8 * len(X))], X[int(0.8 * len(X)) :]

@@ -8,11 +8,13 @@ from flwr.common import Context
 from flwr.client import NumPyClient, ClientApp
 
 from sklearnexample.task import (
+    create_log_reg_and_instantiate_parameters,
     set_model_params,
     get_model_parameters,
     set_initial_params,
     load_data,
     UNIQUE_LABELS,
+    FEATURES,
 )
 
 
@@ -61,14 +63,7 @@ def client_fn(context: Context):
     penalty = context.run_config["penalty"]
 
     # Create LogisticRegression Model
-    model = LogisticRegression(
-        penalty=penalty,
-        max_iter=1,  # local epoch
-        warm_start=True,  # prevent refreshing weights when fitting
-    )
-
-    # Setting initial parameters, akin to model.compile for keras models
-    set_initial_params(model, n_features=X_train.shape[1], n_classes=len(UNIQUE_LABELS))
+    model = create_log_reg_and_instantiate_parameters(penalty)
 
     # Return Client instance
     return FlowerClient(model, X_train, y_train, X_test, y_test).to_client()

@@ -2,11 +2,14 @@
 
 from typing import List, Tuple, Dict
 
-from flwr.common import Metrics, Scalar, Context
+from flwr.common import Metrics, Scalar, Context, ndarrays_to_parameters
 from flwr.server import ServerAppComponents, ServerConfig, ServerApp
 from flwr.server.strategy import FedAvg
 
-from sklearnexample.task import set_initial_params
+from sklearnexample.task import (
+    create_log_reg_and_instantiate_parameters,
+    get_model_parameters,
+)
 
 
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Dict[str, Scalar]:
@@ -43,7 +46,12 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Dict[str, Scalar]:
 
 
 def server_fn(context: Context) -> ServerAppComponents:
-    """Construct components that set the ServerApp behaviour."""
+    """Construct components that set the ServerApp behavior."""
+
+    penalty = context.run_config["penalty"]
+    model = create_log_reg_and_instantiate_parameters(penalty)
+    ndarrays = get_model_parameters(model)
+    global_model_init = ndarrays_to_parameters(ndarrays)
 
     # Define the strategy
     min_available_clients = context.run_config["min-available-clients"]
@@ -51,6 +59,7 @@ def server_fn(context: Context) -> ServerAppComponents:
         min_available_clients=min_available_clients,
         fit_metrics_aggregation_fn=weighted_average,
         evaluate_metrics_aggregation_fn=weighted_average,
+        initial_parameters=global_model_init,
     )
 
     # Construct ServerConfig
