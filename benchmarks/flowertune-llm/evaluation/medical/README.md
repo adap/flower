@@ -14,7 +14,7 @@ Create a new Python environment (we recommend Python 3.10), activate it, then in
 
 ```shell
 # From a new python environment, run:
-pip install -e .
+pip install -r requirements.txt
 
 # Log in HuggingFace account
 huggingface-cli login
