@@ -349,8 +349,8 @@ Finally, we can construct a :code:`ClientApp` using the :code:`FlowerClient` def
 The ServerApp
 -------------
 
-To construct a :code:`ServerApp` we define a :code:`server_fn()` callback with an identical signature
-to that of :code:`client_fn()` but the return type is `ServerAppComponents <https://flower.ai/docs/framework/ref-api/flwr.server.ServerAppComponents.html#serverappcomponents>`_ as opposed to a `Client <https://flower.ai/docs/framework/ref-api/flwr.client.Client.html#client>`_. In this example we use the :code:`FedAvg` strategy.
+To construct a :code:`ServerApp`, we define a :code:`server_fn()` callback with an identical signature
+to that of :code:`client_fn()`, but the return type is `ServerAppComponents <https://flower.ai/docs/framework/ref-api/flwr.server.ServerAppComponents.html#serverappcomponents>`_ as opposed to `Client <https://flower.ai/docs/framework/ref-api/flwr.client.Client.html#client>`_. In this example we use the :code:`FedAvg` strategy.
 
 .. code-block:: python
 
