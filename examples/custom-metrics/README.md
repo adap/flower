@@ -1,11 +1,10 @@
 ---
-title: Example Flower App with Custom Metrics
 tags: [basic, vision, fds]
 dataset: [CIFAR-10]
 framework: [tensorflow]
 ---
 
-# Flower Example using Custom Metrics
+# Custom Metrics for Federated Learning with TensorFlow and Flower
 
 This simple example demonstrates how to calculate custom metrics over multiple clients beyond the traditional ones available in the ML frameworks. In this case, it demonstrates the use of ready-available `scikit-learn` metrics: accuracy, recall, precision, and f1-score.
 
@@ -20,7 +19,9 @@ This example is based on the `quickstart-tensorflow` with CIFAR-10, source [here
 
 Using the CIFAR-10 dataset for classification, this is a multi-class classification problem, thus some changes on how to calculate the metrics using `average='micro'` and `np.argmax` is required. For binary classification, this is not required. Also, for unsupervised learning tasks, such as using a deep autoencoder, a custom metric based on reconstruction error could be implemented on client side.
 
-## Project Setup
+## Set up the project
+
+### Clone the project
 
 Start by cloning the example project:
 
@@ -36,17 +37,17 @@ following files:
 ```shell
 custom-metrics
 ├── README.md
-├── custom_metrics_example
+├── custommetrics_example
 │   ├── __init__.py
-│   ├── client_app.py   # defines your ClientApp
-│   ├── server_app.py   # defines your ServerApp
-│   └── task.py         # defines your model and dataloading functions
-└── pyproject.toml      # builds your project, includes dependencies and configs
+│   ├── client_app.py   # Defines your ClientApp
+│   ├── server_app.py   # Defines your ServerApp
+│   └── task.py         # Defines your model and dataloading functions
+└── pyproject.toml      # Project metadata like dependencies and configs
 ```
 
-## Install dependencies
+## Install dependencies and project
 
-Install the dependencies defined in `pyproject.toml` as well as the `custom_metrics_example` package.
+Install the dependencies defined in `pyproject.toml` as well as the `custommetrics_example` package.
 
 ```bash
 pip install -e .
@@ -54,11 +55,7 @@ pip install -e .
 
 ## Run the Example
 
-You can run your `ClientApp` and `ServerApp` in both _simulation_ and
-_deployment_ mode without making changes to the code. If you are starting
-with Flower, we recommend you using the _simulation_ model as it requires
-fewer components to be launched manually. By default, `flwr run` will make
-use of the Simluation Engine.
+You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
 
 ### Run with the Simulation Engine
 

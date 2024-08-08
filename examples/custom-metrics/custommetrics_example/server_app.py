@@ -1,4 +1,4 @@
-"""custom_metrics_example: A Flower app for custom metrics."""
+"""custommetrics_example: A Flower / TensorFlow app for custom metrics."""
 
 import numpy as np
 
@@ -58,12 +58,13 @@ def average_metrics(metrics):
 
 
 def server_fn(context: Context) -> ServerAppComponents:
-    """Construct components for ServerApp."""
+    """Construct components that set the ServerApp behaviour."""
+
+    # Read from config
+    num_rounds = context.run_config["num-server-rounds"]
+
     # Define strategy and the custom aggregation function for the evaluation metrics
     strategy = FedAvg(evaluate_metrics_aggregation_fn=average_metrics)
-
-    # Construct ServerConfig
-    num_rounds = context.run_config["num_server_rounds"]
     config = ServerConfig(num_rounds=num_rounds)
 
     return ServerAppComponents(strategy=strategy, config=config)

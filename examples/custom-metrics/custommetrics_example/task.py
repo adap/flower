@@ -1,4 +1,4 @@
-"""custom_metrics_example: A Flower app for custom metrics."""
+"""custommetrics_example: A Flower / TensorFlow app for custom metrics."""
 
 from typing import Any
 
@@ -6,6 +6,7 @@ import numpy as np
 import tensorflow as tf
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 
 fds = None  # Cache FederatedDataset
 
@@ -42,3 +43,15 @@ def get_model(width: int = 32, height: int = 32, num_channels: int = 3) -> Any:
     )
     model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
     return model
+
+
+# Method for extra learning metrics calculation
+def eval_learning(y_test, y_pred):
+    """."""
+    acc = accuracy_score(y_test, y_pred)
+    rec = recall_score(
+        y_test, y_pred, average="micro"
+    )  # average argument required for multi-class
+    prec = precision_score(y_test, y_pred, average="micro")
+    f1 = f1_score(y_test, y_pred, average="micro")
+    return acc, rec, prec, f1
