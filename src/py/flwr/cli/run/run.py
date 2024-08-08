@@ -16,10 +16,12 @@
 
 import subprocess
 import sys
-from logging import DEBUG
+import time
+from logging import DEBUG, INFO
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+import grpc
 import typer
 from typing_extensions import Annotated
 
@@ -31,6 +33,10 @@ from flwr.common.logger import log
 from flwr.common.serde import user_config_to_proto
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
+
+from ..log import stream_logs  # pylint: disable=import-error
+
+CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
 
 # pylint: disable-next=too-many-locals
@@ -54,6 +60,14 @@ def run(
             "inside the `pyproject.toml` in order to be properly overriden.",
         ),
     ] = None,
+    follow: Annotated[
+        bool,
+        typer.Option(
+            "--follow/--no-follow",
+            "-f/-F",
+            help="Use this flag to follow logstream",
+        ),
+    ] = True,
 ) -> None:
     """Run Flower project."""
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
@@ -109,7 +123,7 @@ def run(
         raise typer.Exit(code=1)
 
     if "address" in federation_config:
-        _run_with_superexec(federation_config, app_dir, config_overrides)
+        _run_with_superexec(federation_config, app_dir, config_overrides, follow)
     else:
         _run_without_superexec(app_dir, federation_config, federation, config_overrides)
 
@@ -118,6 +132,7 @@ def _run_with_superexec(
     federation_config: Dict[str, Any],
     app_dir: Optional[Path],
     config_overrides: Optional[List[str]],
+    follow: bool,
 ) -> None:
 
     def on_channel_state_change(channel_connectivity: str) -> None:
@@ -175,6 +190,22 @@ def _run_with_superexec(
     )
     res = stub.StartRun(req)
     typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
+
+    if follow:
+        try:
+            while True:
+                log(INFO, "Starting logstream for run_id `%s`", res.run_id)
+                stream_logs(res.run_id, channel, CONN_REFRESH_PERIOD)
+                time.sleep(2)
+                log(INFO, "Reconnecting to logstream")
+        except KeyboardInterrupt:
+            log(INFO, "Exiting logstream")
+        except grpc.RpcError as e:
+            # pylint: disable=E1101
+            if e.code() == grpc.StatusCode.CANCELLED:
+                pass
+        finally:
+            channel.close()
 
 
 def _run_without_superexec(
