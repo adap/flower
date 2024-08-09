@@ -49,7 +49,7 @@ def build(
     app = app.resolve()
     if not app.is_dir():
         typer.secho(
-            f"❌ The path {app} is not a valid app.",
+            f"❌ The path {app} is not a valid path to a Flower app.",
             fg=typer.colors.RED,
             bold=True,
         )
