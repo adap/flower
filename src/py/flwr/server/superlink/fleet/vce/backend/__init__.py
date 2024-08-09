@@ -17,7 +17,8 @@
 import importlib
 from typing import Dict, Type
 
-from .backend import Backend, BackendConfig
+from .backend import Backend
+from .backendconfig import BackendConfig, ClientAppResources
 
 is_ray_installed = importlib.util.find_spec("ray") is not None
 
@@ -45,4 +46,5 @@ else:
 __all__ = [
     "Backend",
     "BackendConfig",
+    "ClientAppResources",
 ]
