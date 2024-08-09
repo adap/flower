@@ -74,7 +74,7 @@ echo "Killing first client"
 sleep 1
 
 # Restart first client so enough clients are connected to continue the FL rounds
-timeout 2m flower-supernode client:app --insecure $rest_arg --server $server_address &
+timeout 2m flower-supernode . --insecure $rest_arg --superlink $server_address &
 cl1_pid=$!
 echo "Starting new client"
 
