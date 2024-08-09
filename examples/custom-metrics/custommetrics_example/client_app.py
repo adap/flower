@@ -24,13 +24,15 @@ class FlowerClient(NumPyClient):
 
     def fit(self, parameters, config):
         self.model.set_weights(parameters)
-        self.model.fit(self.x_train, self.y_train, epochs=1, batch_size=32)
+        self.model.fit(
+            self.x_train, self.y_train, epochs=1, batch_size=32, verbose=False
+        )
         return self.model.get_weights(), len(self.x_train), {}
 
     def evaluate(self, parameters, config):
         self.model.set_weights(parameters)
         loss, accuracy = self.model.evaluate(self.x_test, self.y_test)
-        y_pred = self.model.predict(self.x_test)
+        y_pred = self.model.predict(self.x_test, verbose=False)
         y_pred = np.argmax(y_pred, axis=1).reshape(
             -1, 1
         )  # MobileNetV2 outputs 10 possible classes, argmax returns just the most probable
