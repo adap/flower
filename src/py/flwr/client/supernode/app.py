@@ -120,13 +120,13 @@ def run_client_app() -> None:
     register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
 
 
-def exec_client_app() -> None:
+def flwr_clientapp() -> None:
     """Run process-isolated Flower client app."""
     log(INFO, "Starting Flower ClientApp")
 
     event(EventType.RUN_CLIENT_APP_ENTER)
 
-    # args = _parse_args_exec_client_app().parse_args()
+    # args = _parse_args_flwr_clientapp().parse_args()
 
     register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
 
@@ -327,8 +327,8 @@ def _parse_args_run_client_app() -> argparse.ArgumentParser:
     return parser
 
 
-def _parse_args_exec_client_app() -> argparse.ArgumentParser:
-    """Parse exec-client-app command line arguments."""
+def _parse_args_flwr_clientapp() -> argparse.ArgumentParser:
+    """Parse run-clientapp command line arguments."""
     parser = argparse.ArgumentParser(
         description="Run a Flower client app",
     )
