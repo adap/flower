@@ -1,6 +1,12 @@
 """$project_name: A Flower / FlowerTune app."""
 
-from $import_name.client_app import set_parameters
+from omegaconf import DictConfig
+from flwr.common import Context, ndarrays_to_parameters
+from flwr.common.config import unflatten_dict
+from flwr.server import ServerAppComponents, ServerConfig
+from flwr.server.strategy import FedAvg
+
+from $import_name.client import set_parameters, get_parameters
 from $import_name.models import get_model
 
 
@@ -46,3 +52,35 @@ def fit_weighted_average(metrics):
 
     # Aggregate and return custom metric (weighted average)
     return {"train_loss": sum(losses) / sum(examples)}
+
+
+def gen_server_fn(save_path: str):  # pylint: disable=too-many-arguments
+    """Generate the server function."""
+
+    def server_fn(context: Context):
+        # Read from config
+        num_rounds = context.run_config["num-server-rounds"]
+        cfg = DictConfig(unflatten_dict(context.run_config))
+
+        # Get initial model weights
+        init_model = get_model(cfg.model)
+        init_model_parameters = get_parameters(init_model)
+        init_model_parameters = ndarrays_to_parameters(init_model_parameters)
+
+        # Define strategy
+        strategy = FedAvg(
+            fraction_fit=cfg.strategy.fraction_fit,
+            fraction_evaluate=cfg.strategy.fraction_evaluate,
+            on_fit_config_fn=get_on_fit_config(),
+            fit_metrics_aggregation_fn=fit_weighted_average,
+            initial_parameters=init_model_parameters,
+            evaluate_fn=get_evaluate_fn(
+                cfg.model, cfg.train.save_every_round, num_rounds, save_path
+            ),
+        )
+
+        config = ServerConfig(num_rounds=num_rounds)
+
+        return ServerAppComponents(strategy=strategy, config=config)
+
+    return server_fn

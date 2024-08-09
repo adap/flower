@@ -200,12 +200,6 @@ def new(
             f"{import_name}/dataset.py": {
                 "template": "app/code/flwr_tune/dataset.py.tpl"
             },
-            f"{import_name}/conf/config.yaml": {
-                "template": "app/code/flwr_tune/config.yaml.tpl"
-            },
-            f"{import_name}/conf/static_config.yaml": {
-                "template": "app/code/flwr_tune/static_config.yaml.tpl"
-            },
         }
 
         # Challenge specific context
