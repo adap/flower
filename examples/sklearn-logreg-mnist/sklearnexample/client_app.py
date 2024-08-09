@@ -31,7 +31,6 @@ class MnistClient(NumPyClient):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             self.model.fit(self.X_train, self.y_train)
-        print(f"Training finished for round {config['server_round']}")
         return get_model_parameters(self.model), len(self.X_train), {}
 
     def evaluate(self, parameters, config):  # type: ignore

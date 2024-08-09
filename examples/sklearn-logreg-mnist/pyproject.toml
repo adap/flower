@@ -22,14 +22,14 @@ dependencies = [
 packages = ["."]
 
 [tool.flwr.app]
-publisher = "flowerlabs"
+publisher = "flwrlabs"
 
 [tool.flwr.app.components]
 serverapp = "sklearnexample.server_app:app"
 clientapp = "sklearnexample.client_app:app"
 
 [tool.flwr.app.config]
-penalty = "l1"
+penalty = "l2"
 num-server-rounds = 3
 min-available-clients = 2
 
