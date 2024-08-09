@@ -1,4 +1,4 @@
-"""sklearn_example: A Flower / scikit-learn app."""
+"""sklearnexample: A Flower / scikit-learn app."""
 
 from typing import Dict
 
@@ -6,7 +6,7 @@ from typing import Dict
 from flwr_datasets import FederatedDataset
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
-from sklearn_example.task import (
+from sklearnexample.task import (
     create_log_reg_and_instantiate_parameters,
     get_model_parameters,
     set_initial_params,

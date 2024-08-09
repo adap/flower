@@ -1,4 +1,4 @@
-"""sklearn_example: A Flower / scikit-learn app."""
+"""sklearnexample: A Flower / scikit-learn app."""
 
 import numpy as np
 from flwr_datasets import FederatedDataset
@@ -54,7 +54,6 @@ def create_log_reg_and_instantiate_parameters(penalty):
         penalty=penalty,
         max_iter=1,  # local epoch
         warm_start=True,  # prevent refreshing weights when fitting,
-        solver="saga",
     )
     # Setting initial parameters, akin to model.compile for keras models
     set_initial_params(model)

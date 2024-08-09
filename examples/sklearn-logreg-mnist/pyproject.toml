@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "sklearn_example"
+name = "sklearnexample"
 version = "1.0.0"
 description = "Federated learning with scikit-learn and Flower"
 authors = [
@@ -24,8 +24,8 @@ packages = ["."]
 publisher = "flowerlabs"
 
 [tool.flwr.app.components]
-serverapp = "sklearn_example.server_app:app"
-clientapp = "sklearn_example.client_app:app"
+serverapp = "sklearnexample.server_app:app"
+clientapp = "sklearnexample.client_app:app"
 
 [tool.flwr.app.config]
 penalty = "l1"

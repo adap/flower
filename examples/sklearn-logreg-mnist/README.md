@@ -26,11 +26,12 @@ This will create a new directory called `sklearn-logreg-mnist` with the followin
 ```shell
 sklearn-logreg-mnist
 ├── README.md
-├── pyproject.toml      ## Project metadata like dependencies and configs
+├── pyproject.toml      # Project metadata like dependencies and configs
 └── sklearn_example
     ├── __init__.py
     ├── client_app.py   # Defines your ClientApp
-    └── server_app.py   # Defines your ServerApp
+    ├── server_app.py   # Defines your ServerApp
+    └── task.py         # Defines your model, training and data loading
 ```
 
 ### Install dependencies and project
