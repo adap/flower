@@ -1,1 +1,1 @@
-"""FedRep uses flwr-datasets"""
+"""FedRep uses flwr-datasets."""
