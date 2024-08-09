@@ -16,7 +16,7 @@
 
 
 from logging import ERROR, INFO
-from typing import Any, Dict, Generator
+from typing import Any, Generator
 
 import grpc
 
@@ -30,15 +30,19 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StreamLogsResponse,
 )
 
-from .executor import Executor, RunTracker
+from .executor import Executor
+from .state import RunStatus
+from .state_factory import SuperexecStateFactory
 
 
 class ExecServicer(exec_pb2_grpc.ExecServicer):
     """SuperExec API servicer."""
 
-    def __init__(self, executor: Executor) -> None:
+    def __init__(
+        self, executor: Executor, state_factory: SuperexecStateFactory
+    ) -> None:
         self.executor = executor
-        self.runs: Dict[int, RunTracker] = {}
+        self.state = state_factory.state()
 
     def StartRun(
         self, request: StartRunRequest, context: grpc.ServicerContext
@@ -56,7 +60,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             log(ERROR, "Executor failed to start run")
             return StartRunResponse()
 
-        self.runs[run.run_id] = run
+        self.state.update_run_tracker(run.run_id, RunStatus.RUNNING)
 
         return StartRunResponse(run_id=run.run_id)
 
