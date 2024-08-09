@@ -1,6 +1,6 @@
 from collections import OrderedDict
+from lightninge2e import mnist
 
-import mnist
 import pytorch_lightning as pl
 import torch
 
