@@ -62,7 +62,7 @@ echo "Starting new client"
 sleep 5
 
 # We start the server-app to begining the training
-timeout 2m flower-supernode ./.. $rest_arg --server $server_app_address &
+timeout 2m flower-server-app ./.. $rest_arg --superlink $server_app_address &
 pid=$!
 echo "Starting server-app to start training"
 
