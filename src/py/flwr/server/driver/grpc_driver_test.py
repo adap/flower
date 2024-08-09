@@ -19,6 +19,8 @@ import time
 import unittest
 from unittest.mock import Mock, patch
 
+from grpc import RpcError
+
 from flwr.common import DEFAULT_TTL, RecordSet
 from flwr.common.message import Error
 from flwr.common.serde import error_to_proto, recordset_to_proto
@@ -32,6 +34,8 @@ from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 
 from .grpc_driver import GrpcDriver
 
+MODULE = "flwr.server.driver.grpc_driver"
+
 
 class TestGrpcDriver(unittest.TestCase):
     """Tests for `GrpcDriver` class."""
@@ -42,12 +46,15 @@ class TestGrpcDriver(unittest.TestCase):
             run=Run(run_id=61016, fab_id="mock/mock", fab_version="v1.0.0")
         )
         self.mock_stub = Mock()
-        self.mock_channel = Mock()
         self.mock_stub.GetRun.return_value = mock_response
         mock_response.HasField.return_value = True
         self.driver = GrpcDriver(run_id=61016)
-        self.driver._grpc_stub = self.mock_stub  # pylint: disable=protected-access
-        self.driver._channel = self.mock_channel  # pylint: disable=protected-access
+        self.patcher = patch(f"{MODULE}.DriverStub", return_value=self.mock_stub)
+        self.patcher.start()
+
+    def tearDown(self) -> None:
+        """Cleanup."""
+        self.patcher.stop()
 
     def test_init_grpc_driver(self) -> None:
         """Test GrpcDriverStub initialization."""
@@ -185,20 +192,49 @@ class TestGrpcDriver(unittest.TestCase):
 
     def test_del_with_initialized_driver(self) -> None:
         """Test cleanup behavior when Driver is initialized."""
+        # Prepare
+        mock_channel = Mock()
+
         # Execute
-        self.driver.close()
+        with patch(f"{MODULE}.create_channel", return_value=mock_channel):
+            self.driver._connect()  # pylint: disable=protected-access
+            self.driver.close()
 
         # Assert
-        self.mock_channel.close.assert_called_once()
+        mock_channel.close.assert_called_once()
 
     def test_del_with_uninitialized_driver(self) -> None:
         """Test cleanup behavior when Driver is not initialized."""
         # Prepare
-        self.driver._grpc_stub = None  # pylint: disable=protected-access
-        self.driver._channel = None  # pylint: disable=protected-access
+        mock_channel = Mock()
 
         # Execute
-        self.driver.close()
+        with patch(f"{MODULE}.create_channel", return_value=mock_channel):
+            self.driver.close()
 
         # Assert
-        self.mock_channel.close.assert_not_called()
+        mock_channel.close.assert_not_called()
+
+    def test_retry_mechanism(self) -> None:
+        """Test if the GrpcDriver is robust to network failures."""
+        methods = ("CreateRun", "GetNodes", "PushTaskIns", "PullTaskRes", "GetRun")
+        sleep_fn = time.sleep
+        sleep_patch = patch("time.sleep", side_effect=lambda t: sleep_fn(t * 0.01))
+        sleep_patch.start()
+
+        for method_name in methods:
+            # Prepare
+            # Assume all communication is going through the GrpcDriver._stub
+            mock_method = getattr(self.mock_stub, method_name)
+            method = getattr(self.driver._stub, method_name)  # pylint: disable=W0212
+            mock_response = Mock()
+            mock_method.side_effect = [RpcError(), RpcError(), mock_response]
+
+            # Execute
+            res = method()
+
+            # Assert
+            assert res is mock_response
+            self.assertEqual(mock_method.call_count, 3)
+
+        sleep_patch.stop()
