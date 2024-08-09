@@ -69,7 +69,7 @@ protobuf = "^4.25.2"
 cryptography = "^42.0.4"
 pycryptodome = "^3.18.0"
 iterators = "^0.0.2"
-typer = { version = "^0.9.0", extras=["all"] }
+typer = { version = "^0.9.0", extras = ["all"] }
 tomli = "^2.0.1"
 tomli-w = "^1.0.0"
 pathspec = "^0.12.1"
