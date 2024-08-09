@@ -15,9 +15,9 @@
 """Execute and monitor a Flower run."""
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from subprocess import Popen
-from typing import Optional
+from typing import List, Optional
 
 from flwr.common.typing import UserConfig
 
@@ -28,6 +28,7 @@ class RunTracker:
 
     run_id: int
     proc: Popen  # type: ignore
+    logs: List[str] = field(default_factory=list)
 
 
 class Executor(ABC):

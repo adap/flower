@@ -15,6 +15,9 @@
 """SuperExec API servicer."""
 
 
+import select
+import threading
+import time
 from logging import ERROR, INFO
 from typing import Any, Dict, Generator
 
@@ -31,6 +34,8 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
 )
 
 from .executor import Executor, RunTracker
+
+SELECT_TIMEOUT = 1  # Timeout for selecting ready-to-read file descriptors (in seconds)
 
 
 class ExecServicer(exec_pb2_grpc.ExecServicer):
@@ -58,13 +63,63 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
         self.runs[run.run_id] = run
 
+        # Start a background thread to capture the log output
+        capture_thread = threading.Thread(
+            target=_capture_logs, args=(run,), daemon=True
+        )
+        capture_thread.start()
+
         return StartRunResponse(run_id=run.run_id)
 
-    def StreamLogs(
+    def StreamLogs(  # pylint: disable=C0103
         self, request: StreamLogsRequest, context: grpc.ServicerContext
     ) -> Generator[StreamLogsResponse, Any, None]:
         """Get logs."""
-        logs = ["a", "b", "c"]
+        log(INFO, "ExecServicer.StreamLogs")
+
+        # Exit if `run_id` not found
+        if request.run_id not in self.runs:
+            context.abort(grpc.StatusCode.NOT_FOUND, "Run ID not found")
+
+        last_sent_index = 0
         while context.is_active():
-            for i in range(len(logs)):  # pylint: disable=C0200
+            # Yield n'th row of logs, if n'th row < len(logs)
+            logs = self.runs[request.run_id].logs
+            for i in range(last_sent_index, len(logs)):
                 yield StreamLogsResponse(log_output=logs[i])
+            last_sent_index = len(logs)
+
+            # Shutdown context if process has completed. Previously stored
+            # logs will still be printed.
+            if self.runs[request.run_id].proc.poll() is not None:
+                log(INFO, "Run ID `%s` completed", request.run_id)
+                context.cancel()
+
+            time.sleep(1.0)  # Sleep briefly to avoid busy waiting
+
+
+def _capture_logs(
+    run: RunTracker,
+) -> None:
+    while True:
+        # Select streams only when ready to read
+        ready_to_read, _, _ = select.select(
+            [run.proc.stdout, run.proc.stderr],
+            [],
+            [],
+            SELECT_TIMEOUT,
+        )
+        # Read from std* and append to RunTracker.logs
+        for stream in ready_to_read:
+            line = stream.readline().rstrip()
+            if line:
+                run.logs.append(f"{line}")
+
+        # Close std* to prevent blocking
+        if run.proc.poll() is not None:
+            log(INFO, "Subprocess finished, exiting log capture")
+            if run.proc.stdout:
+                run.proc.stdout.close()
+            if run.proc.stderr:
+                run.proc.stderr.close()
+            break
