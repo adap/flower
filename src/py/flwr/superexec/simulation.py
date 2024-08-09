@@ -24,6 +24,7 @@ from typing_extensions import override
 
 from flwr.cli.config_utils import load_and_validate
 from flwr.cli.install import install_from_fab
+from flwr.common.config import unflatten_dict
 from flwr.common.constant import RUN_ID_NUM_BYTES
 from flwr.common.logger import log
 from flwr.common.typing import UserConfig
@@ -152,13 +153,13 @@ class SimulationEngine(Executor):
                     "Config extracted from FAB's pyproject.toml is not valid"
                 )
 
-            # Extract BackendConfig settings if any
-            # TODO: not same behaviour as w/o superexec (isn't `.` splitting happening here?)
-            backend_cfg = {
-                k[len("backend.") :]: v
-                for k, v in federation_config.items()
-                if k.startswith("backend.")
-            }
+            # Flatten federated config
+            federation_config_flat = unflatten_dict(federation_config)
+
+            num_supernodes = federation_config_flat.get(
+                "num-supernodes", self.num_supernodes
+            )
+            backend_cfg = federation_config_flat.get("backend", {})
 
             # In Simulation there is no SuperLink, still we create a run_id
             run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
@@ -170,7 +171,7 @@ class SimulationEngine(Executor):
                 "--app",
                 f"{str(fab_path)}",
                 "--num-supernodes",
-                f"{federation_config.get('num-supernodes', self.num_supernodes)}",
+                f"{num_supernodes}",
                 "--run-id",
                 str(run_id),
             ]
