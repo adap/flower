@@ -1,9 +1,10 @@
 """sklearnexample: A Flower / scikit-learn app."""
 
-from typing import Dict
-
-# import numpy as np
+from flwr.common import Context, NDArrays, ndarrays_to_parameters
+from flwr.server import ServerApp, ServerAppComponents, ServerConfig
+from flwr.server.strategy import FedAvg
 from flwr_datasets import FederatedDataset
+
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
 from sklearnexample.task import (
@@ -12,15 +13,6 @@ from sklearnexample.task import (
     set_initial_params,
     set_model_params,
 )
-
-from flwr.common import Context, NDArrays, ndarrays_to_parameters
-from flwr.server import ServerApp, ServerAppComponents, ServerConfig
-from flwr.server.strategy import FedAvg
-
-
-def fit_round(server_round: int) -> Dict:
-    """Send round number to client."""
-    return {"server_round": server_round}
 
 
 def get_evaluate_fn(penalty):
@@ -57,11 +49,10 @@ def server_fn(context: Context) -> ServerAppComponents:
     global_model_init = ndarrays_to_parameters(ndarrays)
 
     # Define the strategy
-    min_available_clients = context.run_config["min-available-clients"]
+    fraction_fit = context.run_config["fraction-fit"]
     strategy = FedAvg(
-        min_available_clients=min_available_clients,
+        fraction_fit=fraction_fit,
         evaluate_fn=get_evaluate_fn(penalty),
-        on_fit_config_fn=fit_round,
         initial_parameters=global_model_init,
     )
     config = ServerConfig(num_rounds=num_rounds)

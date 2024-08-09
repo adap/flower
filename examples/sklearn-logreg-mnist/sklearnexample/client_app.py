@@ -2,6 +2,9 @@
 
 import warnings
 
+from flwr.client import Client, ClientApp, NumPyClient
+from flwr.common import Context
+
 from sklearn.metrics import log_loss
 from sklearnexample.task import (
     create_log_reg_and_instantiate_parameters,
@@ -10,22 +13,17 @@ from sklearnexample.task import (
     set_model_params,
 )
 
-from flwr.client import Client, ClientApp, NumPyClient
-from flwr.common import Context
-
 
 # Define Flower client
 class MnistClient(NumPyClient):
-    def __init__(
-        self, model, X_train, X_test, y_train, y_test
-    ):  # pylint: disable=R0913
+    def __init__(self, model, X_train, X_test, y_train, y_test):
         self.model = model
         self.X_train = X_train
         self.X_test = X_test
         self.y_train = y_train
         self.y_test = y_test
 
-    def fit(self, parameters, config):  # type: ignore
+    def fit(self, parameters, config):
         set_model_params(self.model, parameters)
         # Ignore convergence failure due to low local epochs
         with warnings.catch_warnings():
@@ -33,7 +31,7 @@ class MnistClient(NumPyClient):
             self.model.fit(self.X_train, self.y_train)
         return get_model_parameters(self.model), len(self.X_train), {}
 
-    def evaluate(self, parameters, config):  # type: ignore
+    def evaluate(self, parameters, config):
         set_model_params(self.model, parameters)
         loss = log_loss(self.y_test, self.model.predict_proba(self.X_test))
         accuracy = self.model.score(self.X_test, self.y_test)
