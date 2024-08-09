@@ -7,3 +7,4 @@ scipy==1.11.2
 peft==0.4.0
 fschat[model_worker,webui]==0.2.35
 transformers==4.38.1
+hf_transfer==0.1.8
