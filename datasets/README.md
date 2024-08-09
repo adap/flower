@@ -49,6 +49,7 @@ Create **custom partitioning schemes** or choose from the **implemented [partiti
 * Linear partitioning `LinearPartitioner(num_partitions)`
 * Square partitioning `SquarePartitioner(num_partitions)`
 * Exponential partitioning `ExponentialPartitioner(num_partitions)`
+* Semantic partitioning (only for image datasets) `SemanticPartitioner(num_partitions)`
 * more to come in the future releases (contributions are welcome).
 <p align="center">
   <img src="./doc/source/_static/readme/comparison_of_partitioning_schemes.png" alt="Comparison of partitioning schemes."/>
