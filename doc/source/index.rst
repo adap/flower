@@ -94,6 +94,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    how-to-use-differential-privacy
    how-to-authenticate-supernodes
    how-to-run-flower-using-docker
+   how-to-deploy-to-production
    how-to-upgrade-to-flower-1.0
    how-to-upgrade-to-flower-next
 
