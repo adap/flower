@@ -1,19 +1,39 @@
 [build-system]
-requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
-name = "sklearn-mnist"
-version = "0.1.0"
+[project]
+name = "sklearn_example"
+version = "1.0.0"
 description = "Federated learning with scikit-learn and Flower"
 authors = [
-    "The Flower Authors <hello@flower.ai>",
-    "Kaushik Amar Das <kaushik.das@iiitg.ac.in>",
+    { name = "The Flower Authors", email = "hello@flower.ai" },
+    { name = "Kaushik Amar Das", email = "kaushik.das@iiitg.ac.in" },
+]
+dependencies = [
+    "flwr[simulation]>=1.10.0",
+    "flwr-datasets[vision]>=0.3.0",
+    "numpy<2.0.0",
+    "scikit-learn~=1.2.2",
 ]
 
-[tool.poetry.dependencies]
-python = "^3.8"
-flwr = ">=1.0,<2.0"
-# flwr = { path = "../../", develop = true }  # Development
-flwr-datasets = { extras = ["vision"], version = ">=0.0.2,<1.0.0" }
-scikit-learn = "^1.1.1"
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "flowerlabs"
+
+[tool.flwr.app.components]
+serverapp = "sklearn_example.server_app:app"
+clientapp = "sklearn_example.client_app:app"
+
+[tool.flwr.app.config]
+penalty = "l1"
+num-server-rounds = 3
+min-available-clients = 2
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 10
