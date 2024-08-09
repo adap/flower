@@ -29,7 +29,7 @@ sl_pid=$!
 echo "Starting SuperLink"
 sleep 3
 
-timeout 2m flower-supernode client:app --insecure $rest_arg --server $server_address &
+timeout 2m flower-supernode . --insecure $rest_arg --superlink $server_address &
 cl1_pid=$!
 echo "Starting first client"
 sleep 3
