@@ -167,7 +167,7 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
     context.state.parameters_records[MAIN_PARAMS_RECORD] = paramsrecord
 
     # Evaluate initial parameters
-    log(INFO, "Evaluating initial global parameters")
+    log(INFO, "Starting evaluation of initial global parameters")
     parameters = compat.parametersrecord_to_parameters(paramsrecord, keep_input=True)
     res = context.strategy.evaluate(0, parameters=parameters)
     if res is not None:
@@ -179,6 +179,8 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
         )
         context.history.add_loss_centralized(server_round=0, loss=res[0])
         context.history.add_metrics_centralized(server_round=0, metrics=res[1])
+    else:
+        log(INFO, "Evaluation returned no results (`None`)")
 
 
 def default_centralized_evaluation_workflow(_: Driver, context: Context) -> None:
@@ -192,6 +194,7 @@ def default_centralized_evaluation_workflow(_: Driver, context: Context) -> None
     start_time = cast(float, cfg[Key.START_TIME])
 
     # Centralized evaluation
+    log(INFO, "Starting evaluation of global parameters")
     parameters = compat.parametersrecord_to_parameters(
         record=context.state.parameters_records[MAIN_PARAMS_RECORD],
         keep_input=True,
@@ -211,6 +214,8 @@ def default_centralized_evaluation_workflow(_: Driver, context: Context) -> None
         context.history.add_metrics_centralized(
             server_round=current_round, metrics=metrics_cen
         )
+    else:
+        log(INFO, "Evaluation returned no results (`None`)")
 
 
 def default_fit_workflow(  # pylint: disable=R0914

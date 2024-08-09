@@ -91,7 +91,7 @@ class Server:
         # Initialize parameters
         log(INFO, "[INIT]")
         self.parameters = self._get_initial_parameters(server_round=0, timeout=timeout)
-        log(INFO, "Evaluating initial global parameters")
+        log(INFO, "Starting evaluation of initial global parameters")
         res = self.strategy.evaluate(0, parameters=self.parameters)
         if res is not None:
             log(
@@ -102,6 +102,8 @@ class Server:
             )
             history.add_loss_centralized(server_round=0, loss=res[0])
             history.add_metrics_centralized(server_round=0, metrics=res[1])
+        else:
+            log(INFO, "Evaluation returned no results (`None`)")
 
         # Run federated learning for num_rounds
         start_time = timeit.default_timer()
@@ -123,6 +125,7 @@ class Server:
                 )
 
             # Evaluate model using strategy implementation
+            log(INFO, "Starting evaluation of global parameters")
             res_cen = self.strategy.evaluate(current_round, parameters=self.parameters)
             if res_cen is not None:
                 loss_cen, metrics_cen = res_cen
@@ -138,6 +141,8 @@ class Server:
                 history.add_metrics_centralized(
                     server_round=current_round, metrics=metrics_cen
                 )
+            else:
+                log(INFO, "Evaluation returned no results (`None`)")
 
             # Evaluate model on a sample of available clients
             res_fed = self.evaluate_round(server_round=current_round, timeout=timeout)
