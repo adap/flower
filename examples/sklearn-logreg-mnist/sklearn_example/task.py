@@ -7,6 +7,10 @@ from sklearn.linear_model import LogisticRegression
 
 from flwr.common import NDArrays
 
+# This information is needed to create a correct scikit-learn model
+NUM_UNIQUE_LABELS = 10  # MNIST has 10 classes
+NUM_FEATURES = 784  # Number of features in MNIST dataset
+
 
 def get_model_parameters(model: LogisticRegression) -> NDArrays:
     """Returns the parameters of a sklearn LogisticRegression model."""
@@ -37,13 +41,24 @@ def set_initial_params(model: LogisticRegression) -> None:
     But server asks for initial parameters from clients at launch. Refer to
     sklearn.linear_model.LogisticRegression documentation for more information.
     """
-    n_classes = 10  # MNIST has 10 classes
-    n_features = 784  # Number of features in dataset
-    model.classes_ = np.arange(10)
+    model.classes_ = np.arange(NUM_UNIQUE_LABELS)
 
-    model.coef_ = np.zeros((n_classes, n_features))
+    model.coef_ = np.zeros((NUM_UNIQUE_LABELS, NUM_FEATURES))
     if model.fit_intercept:
-        model.intercept_ = np.zeros((n_classes,))
+        model.intercept_ = np.zeros((NUM_UNIQUE_LABELS,))
+
+
+def create_log_reg_and_instantiate_parameters(penalty):
+    """Helper function to create a LogisticRegression model."""
+    model = LogisticRegression(
+        penalty=penalty,
+        max_iter=1,  # local epoch
+        warm_start=True,  # prevent refreshing weights when fitting,
+        solver="saga",
+    )
+    # Setting initial parameters, akin to model.compile for keras models
+    set_initial_params(model)
+    return model
 
 
 fds = None  # Cache FederatedDataset

@@ -2,12 +2,11 @@
 
 import warnings
 
-from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
 from sklearn_example.task import (
+    create_log_reg_and_instantiate_parameters,
     get_model_parameters,
     load_data,
-    set_initial_params,
     set_model_params,
 )
 
@@ -25,9 +24,6 @@ class MnistClient(NumPyClient):
         self.X_test = X_test
         self.y_train = y_train
         self.y_test = y_test
-
-    def get_parameters(self, config):  # type: ignore
-        return get_model_parameters(self.model)
 
     def fit(self, parameters, config):  # type: ignore
         set_model_params(self.model, parameters)
@@ -51,19 +47,13 @@ def client_fn(context: Context) -> Client:
     # Read the node_config to fetch data partition associated to this node
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
-
-    # Load train and test data
     X_train, X_test, y_train, y_test = load_data(partition_id, num_partitions)
 
-    # Create LogisticRegression Model
-    model = LogisticRegression(
-        penalty="l2",
-        max_iter=1,  # local epoch
-        warm_start=True,  # prevent refreshing weights when fitting
-    )
+    # Read the run config to get settings to configure the Client
+    penalty = context.run_config["penalty"]
 
-    # Set initial parameters, akin to model.compile for keras models
-    set_initial_params(model)
+    # Create LogisticRegression Model
+    model = create_log_reg_and_instantiate_parameters(penalty)
 
     # Return Client instance
     return MnistClient(model, X_train, X_test, y_train, y_test).to_client()

@@ -28,7 +28,9 @@ serverapp = "sklearn_example.server_app:app"
 clientapp = "sklearn_example.client_app:app"
 
 [tool.flwr.app.config]
+penalty = "l1"
 num-server-rounds = 3
+min-available-clients = 2
 
 [tool.flwr.federations]
 default = "local-simulation"

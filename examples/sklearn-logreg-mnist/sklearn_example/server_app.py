@@ -6,9 +6,14 @@ from typing import Dict
 from flwr_datasets import FederatedDataset
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
-from sklearn_example.task import set_initial_params, set_model_params
+from sklearn_example.task import (
+    create_log_reg_and_instantiate_parameters,
+    get_model_parameters,
+    set_initial_params,
+    set_model_params,
+)
 
-from flwr.common import Context, NDArrays
+from flwr.common import Context, NDArrays, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
 
@@ -18,10 +23,10 @@ def fit_round(server_round: int) -> Dict:
     return {"server_round": server_round}
 
 
-def get_evaluate_fn():
+def get_evaluate_fn(penalty):
     """Return an evaluation function for server-side evaluation."""
 
-    model = LogisticRegression()
+    model = LogisticRegression(penalty=penalty)
     set_initial_params(model)
 
     # Load test data here to avoid the overhead of doing it in `evaluate` itself
@@ -46,11 +51,18 @@ def server_fn(context: Context) -> ServerAppComponents:
     # Read from config
     num_rounds = context.run_config["num-server-rounds"]
 
+    penalty = context.run_config["penalty"]
+    model = create_log_reg_and_instantiate_parameters(penalty)
+    ndarrays = get_model_parameters(model)
+    global_model_init = ndarrays_to_parameters(ndarrays)
+
     # Define the strategy
+    min_available_clients = context.run_config["min-available-clients"]
     strategy = FedAvg(
-        min_available_clients=2,
-        evaluate_fn=get_evaluate_fn(),
+        min_available_clients=min_available_clients,
+        evaluate_fn=get_evaluate_fn(penalty),
         on_fit_config_fn=fit_round,
+        initial_parameters=global_model_init,
     )
     config = ServerConfig(num_rounds=num_rounds)
 
