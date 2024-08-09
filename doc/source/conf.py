@@ -103,6 +103,7 @@ rst_prolog = """
 extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
+    "sphinx.ext.autosectionlabel",
     "sphinx.ext.autosummary",
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
@@ -260,6 +261,9 @@ redirects = {
     "ref-api/flwr.simulation.run_simulation_from_cli": "index.html",
     "contributor-how-to-create-new-messages": "index.html",
 }
+
+# Suppress specific warnings
+suppress_warnings = ['autosectionlabel.*']  # Warnings from duplicate labels
 
 # -- Options for HTML output -------------------------------------------------
 
