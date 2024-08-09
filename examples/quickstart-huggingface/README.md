@@ -4,77 +4,67 @@ dataset: [IMDB]
 framework: [transformers]
 ---
 
-# Federated HuggingFace Transformers using Flower and PyTorch
+# Federated Learning with HuggingFace Transformers and Flower (Quickstart Example)
 
-This introductory example to using [HuggingFace](https://huggingface.co) Transformers with Flower with PyTorch. This example has been extended from the [quickstart-pytorch](https://flower.ai/docs/examples/quickstart-pytorch.html) example. The training script closely follows the [HuggingFace course](https://huggingface.co/course/chapter3?fw=pt), so you are encouraged to check that out for a detailed explanation of the transformer pipeline.
+This introductory example to using [🤗Transformers](https://huggingface.co/docs/transformers/en/index) with Flower. The training script closely follows the [HuggingFace course](https://huggingface.co/course/chapter3?fw=pt), so you are encouraged to check that out for a detailed explanation of the transformer pipeline.
 
-Like `quickstart-pytorch`, running this example in itself is also meant to be quite easy.
+In this example, we will federated the training of a [DistilBERT](https://huggingface.co/distilbert/distilbert-base-uncased) modle on the [IMDB](https://huggingface.co/datasets/stanfordnlp/imdb) dataset. The data will be downloaded and partitioned using [Flower Datasets](https://flower.ai/docs/datasets/). This example runs best when a GPU is available.
 
-## Project Setup
+## Set up the project
+
+### Clone the project
 
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart-huggingface . && rm -rf flower && cd quickstart-huggingface
+git clone --depth=1 https://github.com/adap/flower.git _tmp \
+		&& mv _tmp/examples/quickstart-huggingface . \
+		&& rm -rf _tmp && cd quickstart-huggingface
 ```
 
 This will create a new directory called `quickstart-huggingface` containing the following files:
 
 ```shell
--- pyproject.toml
--- requirements.txt
--- client.py
--- server.py
--- README.md
+quickstart-huggingface
+├── huggingface_example
+│   ├── __init__.py
+│   ├── client_app.py   # Defines your ClientApp
+│   ├── server_app.py   # Defines your ServerApp
+│   └── task.py         # Defines your model, training and data loading
+├── pyproject.toml      # Project metadata like dependencies and configs
+└── README.md
 ```
 
-### Installing Dependencies
+### Install dependencies and project
 
-Project dependencies (such as `torch` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
+Install the dependencies defined in `pyproject.toml` as well as the `huggingface_example` package.
 
-#### Poetry
-
-```shell
-poetry install
-poetry shell
+```bash
+pip install -e .
 ```
 
-Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
+## Run the Example
 
-```shell
-poetry run python3 -c "import flwr"
+You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
+
+### Run with the Simulation Engine
+
+Run:
+
+```bash
+flwr run
 ```
 
-If you don't see any errors you're good to go!
+You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example
 
-#### pip
-
-Write the command below in your terminal to install the dependencies according to the configuration file requirements.txt.
-
-```shell
-pip install -r requirements.txt
+```bash
+flwr run --run-config num-server-rounds=5
 ```
 
-## Run Federated Learning with Flower
+> \[!TIP\]
+> For a more detailed walk-through check our [quickstart 🤗Transformers tutorial](https://flower.ai/docs/framework/tutorial-quickstart-huggingface.html)
 
-Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
+### Run with the Deployment Engine
 
-```shell
-python3 server.py
-```
-
-Now you are ready to start the Flower clients which will participate in the learning. To do so simply open two more terminal windows and run the following commands.
-
-Start client 1 in the first terminal:
-
-```shell
-python3 client.py --partition-id 0
-```
-
-Start client 2 in the second terminal:
-
-```shell
-python3 client.py --partition-id 1
-```
-
-You will see that PyTorch is starting a federated training.
+> \[!NOTE\]
+> An update to this example will show how to run this Flower project with the Deployment Engine and TLS certificates, or with Docker.
