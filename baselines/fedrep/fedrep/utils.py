@@ -1,4 +1,4 @@
-"""Utility functions for FedPer."""
+"""Utility functions for FedRep."""
 
 import logging
 import os
@@ -16,8 +16,12 @@ from omegaconf import DictConfig
 
 from fedrep.client import get_client_fn_simulation
 from fedrep.constants import Algorithm
-from fedrep.implemented_models.cnn_cifar10 import CNNCifar10, CNNCifar10ModelSplit
-from fedrep.implemented_models.cnn_cifar100 import CNNCifar100, CNNCifar100ModelSplit
+from fedrep.models import (
+    CNNCifar10,
+    CNNCifar10ModelSplit,
+    CNNCifar100,
+    CNNCifar100ModelSplit,
+)
 
 
 def set_client_state_save_path() -> str:

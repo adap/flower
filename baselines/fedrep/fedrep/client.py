@@ -1,4 +1,4 @@
-"""Client implementation - can call FedPer and FedAvg clients."""
+"""Client implementation - can call FedPep and FedAvg clients."""
 
 from collections import OrderedDict
 from pathlib import Path
@@ -15,8 +15,7 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 
 from fedrep.constants import MEAN, STD, Algorithm
-from fedrep.implemented_models.cnn_cifar10 import CNNCifar10ModelManager
-from fedrep.implemented_models.cnn_cifar100 import CNNCifar100ModelManager
+from fedrep.models import CNNCifar10ModelManager, CNNCifar100ModelManager
 
 PROJECT_DIR = Path(__file__).parent.parent.absolute()
 
