@@ -5,28 +5,19 @@ build-backend = "hatchling.build"
 [project]
 name = "e2e_test"
 version = "1.0.0"
-description = "JAX example training a linear regression model with federated learning"
+description = "Project configuration for ServerApp in E2E tests."
 license = "Apache-2.0"
-dependencies = [
-    "flwr[simulation] @ {root:parent:parent:uri}",
-    "jax==0.4.13",
-    "jaxlib==0.4.13",
-    "scikit-learn>=1.1.1,<2.0.0",
-    "numpy>=1.21.4,<2.0.0",
-]
+dependencies = []
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
-
-[tool.hatch.metadata]
-allow-direct-references = true
 
 [tool.flwr.app]
 publisher = "flwrlabs"
 
 [tool.flwr.app.components]
-serverapp = ""
-clientapp = "client:app"
+serverapp = "server:app"
+clientapp = ""
 
 [tool.flwr.app.config]
 
