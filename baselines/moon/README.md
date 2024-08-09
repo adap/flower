@@ -65,42 +65,35 @@ dataset: [CIFAR-10, CIFAR-100]
 
 ## Environment Setup
 
-To construct the Python environment follow these steps:
+In a new Python environment:
 
 ```bash
-# Set local python version via pyenv
-pyenv local 3.10.6
-# Then fix that for poetry
-poetry env use 3.10.6
-# Then install poetry env
-poetry install
-
-# Activate the environment
-poetry shell
+# Navigate to the moon directory
+# Then install the project
+pip install -e .
 ```
-
 
 ## Running the Experiments
 
-First ensure you have activated your Poetry environment (execute `poetry shell` from this directory). To run MOON on CIFAR-10 (Table 1 of the paper), you should run:
+First ensure you have activated your. To run MOON on CIFAR-10 (Table 1 of the paper), you should run from the top-level directory of this baseline:
 ```bash  
-python -m moon.main --config-name cifar10 
+flwr run .
 ```
 
 To run MOON on CIFAR-100 (Table 1 of the paper), you should run:
 ```bash
-python -m moon.main --config-name cifar100
+flwr run . --run-config conf/cifar100.toml
 ```
 
 
 You can also run FedProx on CIFAR-10:
 ```bash
-python -m moon.main --config-name cifar10_fedprox
+flwr run . --run-config conf/cifar10_fedprox.toml
 ```
 
 To run FedProx on CIFAR-100:
 ```bash
-python -m moon.main --config-name cifar100_fedprox
+flwr run . --run-config conf/cifar100_fedprox.toml
 ```
 
 ## Expected Results
@@ -127,12 +120,12 @@ You can tune the hyperparameter `mu` for both MOON and FedProx by changing the c
 ### Figure 8(a)
 You can run the experiments in Figure 8 of the paper. To run MOON (`mu=10`) on CIFAR-100 with 50 clients (Figure 8(a) of the paper):
 ```bash
-python -m moon.main --config-name cifar100_50clients
+flwr run . local-sim-50 --run-config conf/cifar100_50clients.toml
 ```
 
 To run FedProx on CIFAR-100 with 50 clients (Figure 8(a) of the paper):
 ```bash
-python -m moon.main --config-name cifar100_50clients_fedprox
+flwr run . local-sim-50 --run-config conf/cifar100_50clients_fedprox.toml
 ```
 
 
@@ -142,5 +135,7 @@ You can find the curve presenting MOON and FedProx below.
 
 You may also run MOON on CIFAR-100 with 100 clients (Figure 8(b) of the paper):
 ```bash
-python -m moon.main --config-name cifar100_100clients
+flwr run . local-sim-100 --run-config conf/cifar100_100clients.toml
+
+flwr run . local-sim-100 --run-config conf/cifar100_100clients_fedprox.toml
 ```
