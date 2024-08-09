@@ -116,6 +116,7 @@ Understanding-oriented concept guides explain and discuss key topics and underly
 
    explanation-federated-evaluation
    explanation-differential-privacy
+   explanation-flower-next
 
 References
 ~~~~~~~~~~
