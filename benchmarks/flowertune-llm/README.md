@@ -1,4 +1,4 @@
-![](_static/flower_llm.jpg)
+![](_static/flower_llm.png)
 
 # FlowerTune LLM Leaderboard
 
@@ -9,21 +9,22 @@ Please follow the instructions to run and evaluate the federated LLMs.
 
 ## Create a new project
 
-As the first step, please register a Flower account on [Flower website](https://flower.ai/login).
-Assuming `flwr` package is already installed on your system (check [here](https://flower.ai/docs/framework/how-to-install-flower.html) for `flwr` installation).
-We provide a single-line command to create a new project directory based on your selected challenge:
+As the first step, please register for a Flower account on [flower.ai/login](https://flower.ai/login).
+Then, create a new Python environment and install Flower. 
+
+> [!TIP]
+> We recomend using `pyenv` and the `virtualenv` plugin to create your environment. Other mangaers such as Conda would likely work to. Check [the documentation](https://flower.ai/docs/framework/how-to-install-flower.html) for alternative ways of installing Flower.
 
 ```shell
-flwr new --framework=flwrtune --username=your_flower_account
+pip install flwr
 ```
 
-Then you will see a prompt to ask your project name and the choice of LLM challenges from the set of general NLP, finance, medical and code.
-Type your project name and select your preferred challenge,
-and then a new project directory will be generated automatically.
+On the new environment, create a new Flower project using the `FlowerTune` template. You will be prompted for a name to give to your project, your username, and for your choice of LLM challenge:
+```shell
+flwr new --framework=FlowerTune
+```
 
-### Structure
-
-After running `flwr new`, you will see a new directory generated with the following structure:
+The `flwr new` command will generate a directory with the following structure:
 
 ```bash
 <project-name>
@@ -40,8 +41,9 @@ After running `flwr new`, you will see a new directory generated with the follow
 ```
 
 This can serve as the starting point for you to build up your own federated LLM fine-tuning methods.
-Please note that any modification to the content of `conf/static_config.yaml` is strictly prohibited for those who wish to participate in the [LLM Leaderboard](https://flower.ai/benchmarks/llm-leaderboard).
-Otherwise, the submission will not be considered.
+
+> [!IMPORTANT]
+> Please note that if you intend to submit your project as an entry to the [LLM Leaderboard](https://flower.ai/benchmarks/llm-leaderboard) modifications to the content of `conf/static_config.yaml` is not allowed and will invalidate the submission.
 
 ## Run FlowerTune LLM challenges
 
@@ -50,12 +52,17 @@ With a new project directory created, running a baseline challenge can be done b
 1. Navigate inside the directory that you just created.
 
 
-2. Follow the `Environments setup` section of `README.md` in the project directory to install project dependencies.
+2. Follow the `Environment setup` section of `README.md` in the project directory to install the project dependencies.
 
 
 3. Run the challenge as indicated in the `Running the challenge` section in the `README.md`.
 
-## Evaluate pre-trained LLMs
+## Evaluate fine-tuned LLMs
 
-After the LLM fine-tuning finished, evaluate the performance of your pre-trained LLMs
-following the `README.md` in `evaluation` directory.
+Once the LLM fine-tuning finished, evaluate the performance of your fine-tuned LLM
+following the `README.md` in [`evaluation`](https://github.com/adap/flower/tree/main/benchmarks/flowertune-llm/evaluation) directory.
+
+
+> [!NOTE]
+> If you have any questions about running FlowerTune LLM challenges or evaluation, please feel free to make posts at [Flower Discuss](https://discuss.flower.ai) forum, 
+or join our [Slack channel](https://flower.ai/join-slack/) to ask questions in the `#flowertune-llm-leaderboard` channel.
