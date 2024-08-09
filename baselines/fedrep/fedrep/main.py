@@ -16,7 +16,6 @@ from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 
-from fedrep.dataset import dataset_main
 from fedrep.utils import (
     get_client_fn,
     get_create_model_fn,
@@ -36,7 +35,7 @@ def main(cfg: DictConfig) -> None:
     cfg : DictConfig
         An omegaconf object that stores the hydra config.
     """
-    # 1. Print parsed config
+    # Print parsed config
     print(OmegaConf.to_yaml(cfg))
 
     # set client strategy
@@ -46,10 +45,7 @@ def main(cfg: DictConfig) -> None:
     # Client state has subdirectories with the name of current time
     client_state_save_path = set_client_state_save_path()
 
-    # 2. Prepare your dataset
-    dataset_main(cfg.dataset)
-
-    # 3. Define your clients
+    # Define your clients
     # Get client function
     client_fn = get_client_fn(config=cfg, client_state_save_path=client_state_save_path)
 
@@ -82,7 +78,7 @@ def main(cfg: DictConfig) -> None:
         accuracy = np.sum(accuracies * weights).item()  # type: ignore
         return {"accuracy": accuracy}
 
-    # 4. Define your strategy
+    # Define your strategy
     strategy = instantiate(
         cfg.strategy,
         initial_parameters=ndarrays_to_parameters(model.get_parameters()),
@@ -90,7 +86,7 @@ def main(cfg: DictConfig) -> None:
         evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
     )
 
-    # 5. Start Simulation
+    # Start Simulation
     history = fl.simulation.start_simulation(
         client_fn=client_fn,
         num_clients=cfg.num_clients,
@@ -107,7 +103,7 @@ def main(cfg: DictConfig) -> None:
     print("................")
     print(history)
 
-    # 6. Save your results
+    # Save your results
     save_path = Path(HydraConfig.get().runtime.output_dir)
 
     # save results as a Python pickle using a file_path

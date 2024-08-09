@@ -1,6 +1,5 @@
 """Client implementation - can call FedPer and FedAvg clients."""
 
-import pickle
 from collections import OrderedDict
 from pathlib import Path
 from typing import Callable, Dict, List, Tuple, Type, Union
@@ -9,12 +8,13 @@ import numpy as np
 import torch
 from flwr.client import Client, NumPyClient
 from flwr.common import NDArrays, Scalar
+from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import PathologicalPartitioner
 from omegaconf import DictConfig
-from torch.utils.data import DataLoader, Subset
+from torch.utils.data import DataLoader
 from torchvision import transforms
 
 from fedrep.constants import MEAN, STD, Algorithm
-from fedrep.dataset_preparation import call_dataset
 from fedrep.implemented_models.cnn_cifar10 import CNNCifar10ModelManager
 from fedrep.implemented_models.cnn_cifar100 import CNNCifar100ModelManager
 
@@ -215,52 +215,59 @@ def get_client_fn_simulation(
         "cnncifar100",
     ], f"Model {config.model_name} not implemented"
 
-    # load dataset (cifar10/cifar100) and clients' data indices
-    try:
-        partition_path = (
-            PROJECT_DIR / "datasets" / config.dataset.name / "partition.pkl"
-        )
-        print(f"Loading partition from {partition_path}")
-        with open(partition_path, "rb") as pickle_file:
-            partition = pickle.load(pickle_file)
-        data_indices: Dict[int, Dict[str, List[int]]] = partition["data_indices"]
-    except FileNotFoundError as error:
-        print(f"Partition not found at {partition_path}")
-        raise error
-
     # - you can define your own data transformation strategy here -
+    # These transformations are from the official repo
     train_data_transform = transforms.Compose(
         [
             transforms.RandomCrop(32, padding=4),
             transforms.RandomHorizontalFlip(),
-            # transforms.ToTensor(),
+            transforms.ToTensor(),
             transforms.Normalize(MEAN[config.dataset.name], STD[config.dataset.name]),
         ]
     )
     test_data_transform = transforms.Compose(
         [
-            # transforms.ToTensor(),
-            transforms.Normalize(MEAN[config.dataset.name], STD[config.dataset.name])
+            transforms.ToTensor(),
+            transforms.Normalize(MEAN[config.dataset.name], STD[config.dataset.name]),
         ]
     )
-    dataset = call_dataset(
-        dataset_name=config.dataset.name,
-        root=PROJECT_DIR / "datasets" / config.dataset.name,
-        train_data_transform=train_data_transform,
-        test_data_transform=test_data_transform,
+
+    partitioner = PathologicalPartitioner(
+        num_partitions=config.num_clients,
+        partition_by="label",
+        num_classes_per_partition=config.dataset.num_classes,
+        class_assignment_mode="random",
+        shuffle=True,
+        seed=config.dataset.seed,
     )
+    federated_dataset = FederatedDataset(
+        dataset=config.dataset.name.lower(), partitioners={"train": partitioner}
+    )
+
+    def apply_train_transforms(batch):
+        """Apply transforms for train data to the partition from FederatedDataset."""
+        batch["img"] = [train_data_transform(img) for img in batch["img"]]
+        return batch
+
+    def apply_test_transforms(batch):
+        """Apply transforms for test data to the partition from FederatedDataset."""
+        batch["img"] = [test_data_transform(img) for img in batch["img"]]
+        return batch
 
     # pylint: disable=E1101
     def client_fn(cid: str) -> Client:
         """Create a Flower client representing a single organization."""
         cid_use = int(cid)
 
-        trainset = Subset(dataset, indices=data_indices[cid_use]["train"])
-        testset = Subset(dataset, indices=data_indices[cid_use]["test"])
+        partition = federated_dataset.load_partition(cid_use)
+        partition_train_test = partition.train_test_split(
+            train_size=config.dataset.fraction, seed=config.dataset.seed
+        )
 
-        # Create the train loader
+        trainset = partition_train_test["train"].with_transform(apply_train_transforms)
+        testset = partition_train_test["test"].with_transform(apply_test_transforms)
+
         trainloader = DataLoader(trainset, config.batch_size, shuffle=True)
-        # Create the test loader
         testloader = DataLoader(testset, config.batch_size)
 
         model_manager_class: Union[

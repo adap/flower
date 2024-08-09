@@ -144,7 +144,10 @@ class ModelManager(ABC):
         Args:
             client_id: The id of the client.
             config: Dict containing the configurations to be used by the manager.
-            model_split_class: Class to be used to split the model into body and head\
+            trainloader: Client train dataloader.
+            testloader: Client test dataloader.
+            client_save_path: Path to save the client model head state.
+            model_split_class: Class to be used to split the model into body and head \
                 (concrete implementation of ModelSplit).
         """
         super().__init__()
@@ -169,12 +172,6 @@ class ModelManager(ABC):
 
     def train(self) -> Dict[str, Union[List[Dict[str, float]], int, float]]:
         """Train the model maintained in self.model.
-
-        Method adapted from simple CNNCifar10-v1 (PyTorch) \
-        https://github.com/wjc852456/pytorch-cnncifar10net-v1.
-
-        Args:
-            epochs: number of training epochs.
 
         Returns
         -------
@@ -214,7 +211,9 @@ class ModelManager(ABC):
             else:
                 self.model.enable_body()
                 self.model.disable_head()
-            for images, labels in self.trainloader:
+            for batch in self.trainloader:
+                images = batch["img"]
+                labels = batch["label"]
                 outputs = self.model(images.to(self.device))
                 labels = labels.to(self.device)
                 loss = criterion(outputs, labels)
@@ -250,9 +249,10 @@ class ModelManager(ABC):
             criterion = torch.nn.CrossEntropyLoss()
             self.model.train()
             for _ in range(num_finetune_epochs):
-                for images, labels in self.trainloader:
-                    outputs = self.model(images.to(self.device))
-                    labels = labels.to(self.device)
+                for batch in self.trainloader:
+                    images = batch["img"].to(self.device)
+                    labels = batch["label"].to(self.device)
+                    outputs = self.model(images)
                     loss = criterion(outputs, labels)
                     optimizer.zero_grad()
                     loss.backward()
@@ -263,9 +263,10 @@ class ModelManager(ABC):
 
         self.model.eval()
         with torch.no_grad():
-            for images, labels in self.testloader:
-                outputs = self.model(images.to(self.device))
-                labels = labels.to(self.device)
+            for batch in self.testloader:
+                images = batch["img"].to(self.device)
+                labels = batch["label"].to(self.device)
+                outputs = self.model(images)
                 loss += criterion(outputs, labels).item()
                 total += labels.size(0)
                 correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()

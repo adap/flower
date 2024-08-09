@@ -19,10 +19,8 @@ server_device: cuda:0
 
 dataset:
   name: cifar100
-  split: sample
   num_classes: 20
   seed: 42
-  num_clients: ${num_clients}
   fraction: 0.83
 
 model:
