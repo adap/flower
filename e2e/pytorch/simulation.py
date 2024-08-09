@@ -1,7 +1,7 @@
 from typing import List, Tuple
 
 import numpy as np
-from client import client_fn
+from pytorche2e.client_app import client_fn
 
 import flwr as fl
 from flwr.common import Metrics

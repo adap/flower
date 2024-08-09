@@ -1,4 +1,4 @@
-from client import app as client_app
+from tfe2e.client_app import app as client_app
 
 import flwr as fl
 

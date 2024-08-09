@@ -1,4 +1,4 @@
-from strategy import FedAnalytics
+from pandase2e.strategy import FedAnalytics
 
 import flwr as fl
 
