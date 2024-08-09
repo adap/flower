@@ -12,7 +12,7 @@ Once both the test values (`y_test`) and the predictions (`y_pred`) are availabl
 
 The main takeaways of this implementation are:
 
-- the use of the `output_dict` on the client side - inside `evaluate` method on `client_app.py`
+- the return of multiple evaluation metrics generated at the `evaluate` method on `client_app.py`
 - the use of the `evaluate_metrics_aggregation_fn` - to aggregate the metrics on the server side, part of the `strategy` on `server_app.py`
 
 This example is based on the `quickstart-tensorflow` with CIFAR-10, source [here](https://flower.ai/docs/quickstart-tensorflow.html), with the addition of [Flower Datasets](https://flower.ai/docs/datasets/index.html) to retrieve the CIFAR-10.

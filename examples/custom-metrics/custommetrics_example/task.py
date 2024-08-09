@@ -55,3 +55,7 @@ def eval_learning(y_test, y_pred):
     prec = precision_score(y_test, y_pred, average="micro")
     f1 = f1_score(y_test, y_pred, average="micro")
     return acc, rec, prec, f1
+
+
+def get_parameters(model):
+    return model.get_weights()

@@ -1,8 +1,9 @@
 """custommetrics_example: A Flower / TensorFlow app for custom metrics."""
 
 import numpy as np
+from custommetrics_example.task import get_model, get_parameters
 
-from flwr.common import Context
+from flwr.common import Context, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
 
@@ -63,8 +64,15 @@ def server_fn(context: Context) -> ServerAppComponents:
     # Read from config
     num_rounds = context.run_config["num-server-rounds"]
 
+    model = get_model()
+    ndarrays = get_parameters(model)
+    global_model_init = ndarrays_to_parameters(ndarrays)
+
     # Define strategy and the custom aggregation function for the evaluation metrics
-    strategy = FedAvg(evaluate_metrics_aggregation_fn=average_metrics)
+    strategy = FedAvg(
+        evaluate_metrics_aggregation_fn=average_metrics,
+        initial_parameters=global_model_init,
+    )
     config = ServerConfig(num_rounds=num_rounds)
 
     return ServerAppComponents(strategy=strategy, config=config)

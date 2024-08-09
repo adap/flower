@@ -22,9 +22,6 @@ class FlowerClient(NumPyClient):
         self.x_test = x_test
         self.y_test = y_test
 
-    def get_parameters(self, config):
-        return self.model.get_weights()
-
     def fit(self, parameters, config):
         self.model.set_weights(parameters)
         self.model.fit(self.x_train, self.y_train, epochs=1, batch_size=32)
