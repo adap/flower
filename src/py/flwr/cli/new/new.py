@@ -92,9 +92,9 @@ def render_and_create(file_path: Path, template: str, context: Dict[str, str]) -
 
 # pylint: disable=too-many-locals,too-many-branches,too-many-statements
 def new(
-    project_name: Annotated[
+    app_name: Annotated[
         Optional[str],
-        typer.Argument(metavar="project_name", help="The name of the project"),
+        typer.Argument(help="The name of the Flower App"),
     ] = None,
     framework: Annotated[
         Optional[MlFramework],
@@ -105,26 +105,26 @@ def new(
         typer.Option(case_sensitive=False, help="The Flower username of the author"),
     ] = None,
 ) -> None:
-    """Create new Flower project."""
-    if project_name is None:
-        project_name = prompt_text("Please provide the project name")
-    if not is_valid_project_name(project_name):
-        project_name = prompt_text(
+    """Create new Flower App."""
+    if app_name is None:
+        app_name = prompt_text("Please provide the app name")
+    if not is_valid_project_name(app_name):
+        app_name = prompt_text(
             "Please provide a name that only contains "
             "characters in {'-', a-zA-Z', '0-9'}",
             predicate=is_valid_project_name,
-            default=sanitize_project_name(project_name),
+            default=sanitize_project_name(app_name),
         )
 
     # Set project directory path
-    package_name = re.sub(r"[-_.]+", "-", project_name).lower()
+    package_name = re.sub(r"[-_.]+", "-", app_name).lower()
     import_name = package_name.replace("-", "_")
     project_dir = Path.cwd() / package_name
 
     if project_dir.exists():
         if not typer.confirm(
             typer.style(
-                f"\n💬 {project_name} already exists, do you want to override it?",
+                f"\n💬 {app_name} already exists, do you want to override it?",
                 fg=typer.colors.MAGENTA,
                 bold=True,
             )
@@ -166,7 +166,7 @@ def new(
 
     print(
         typer.style(
-            f"\n🔨 Creating Flower project {project_name}...",
+            f"\n🔨 Creating Flower App {app_name}...",
             fg=typer.colors.GREEN,
             bold=True,
         )
@@ -176,7 +176,7 @@ def new(
         "framework_str": framework_str_upper,
         "import_name": import_name.replace("-", "_"),
         "package_name": package_name,
-        "project_name": project_name,
+        "project_name": app_name,
         "username": username,
     }
 
@@ -268,8 +268,8 @@ def new(
 
     print(
         typer.style(
-            "🎊 Project creation successful.\n\n"
-            "Use the following command to run your project:\n",
+            "🎊 Flower App creation successful.\n\n"
+            "Use the following command to run your Flower App:\n",
             fg=typer.colors.GREEN,
             bold=True,
         )
