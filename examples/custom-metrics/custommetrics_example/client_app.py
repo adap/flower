@@ -31,7 +31,7 @@ class FlowerClient(NumPyClient):
 
     def evaluate(self, parameters, config):
         self.model.set_weights(parameters)
-        loss, accuracy = self.model.evaluate(self.x_test, self.y_test)
+        loss, accuracy = self.model.evaluate(self.x_test, self.y_test, verbose=False)
         y_pred = self.model.predict(self.x_test, verbose=False)
         y_pred = np.argmax(y_pred, axis=1).reshape(
             -1, 1
