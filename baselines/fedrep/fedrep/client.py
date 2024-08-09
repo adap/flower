@@ -19,6 +19,8 @@ from fedrep.models import CNNCifar10ModelManager, CNNCifar100ModelManager
 
 PROJECT_DIR = Path(__file__).parent.parent.absolute()
 
+FEDERATED_DATASET = None
+
 
 class BaseClient(NumPyClient):
     """Implementation of Federated Averaging (FedAvg) Client."""
@@ -190,7 +192,7 @@ class FedRepClient(BaseClient):
         self.model_manager.model.set_parameters(state_dict)
 
 
-# pylint: disable=E1101
+# pylint: disable=E1101, W0603
 def get_client_fn_simulation(
     config: DictConfig, client_state_save_path: str = ""
 ) -> Callable[[str], Client]:
@@ -209,6 +211,8 @@ def get_client_fn_simulation(
         A tuple containing the client function that creates Flower Clients and
         the DataLoader that will be used for testing
     """
+    global FEDERATED_DATASET
+
     assert config.model_name.lower() in [
         "cnncifar10",
         "cnncifar100",
@@ -239,9 +243,10 @@ def get_client_fn_simulation(
         shuffle=True,
         seed=config.dataset.seed,
     )
-    federated_dataset = FederatedDataset(
-        dataset=config.dataset.name.lower(), partitioners={"train": partitioner}
-    )
+    if FEDERATED_DATASET is None:
+        FEDERATED_DATASET = FederatedDataset(
+            dataset=config.dataset.name.lower(), partitioners={"train": partitioner}
+        )
 
     def apply_train_transforms(batch):
         """Apply transforms for train data to the partition from FederatedDataset."""
@@ -258,7 +263,7 @@ def get_client_fn_simulation(
         """Create a Flower client representing a single organization."""
         cid_use = int(cid)
 
-        partition = federated_dataset.load_partition(cid_use)
+        partition = FEDERATED_DATASET.load_partition(cid_use)
         partition_train_test = partition.train_test_split(
             train_size=config.dataset.fraction, seed=config.dataset.seed
         )
