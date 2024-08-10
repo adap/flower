@@ -12,9 +12,9 @@ DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class Fab(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    HASH_FIELD_NUMBER: builtins.int
+    HASH_STR_FIELD_NUMBER: builtins.int
     CONTENT_FIELD_NUMBER: builtins.int
-    hash: typing.Text
+    hash_str: typing.Text
     """This field is the hash of the data field. It is used to identify the data.
     The hash is calculated using the SHA-256 algorithm and is represented as a
     hex string (sha256hex).
@@ -25,21 +25,21 @@ class Fab(google.protobuf.message.Message):
 
     def __init__(self,
         *,
-        hash: typing.Text = ...,
+        hash_str: typing.Text = ...,
         content: builtins.bytes = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["content",b"content","hash",b"hash"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["content",b"content","hash_str",b"hash_str"]) -> None: ...
 global___Fab = Fab
 
 class GetFabRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    HASH_FIELD_NUMBER: builtins.int
-    hash: typing.Text
+    HASH_STR_FIELD_NUMBER: builtins.int
+    hash_str: typing.Text
     def __init__(self,
         *,
-        hash: typing.Text = ...,
+        hash_str: typing.Text = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["hash",b"hash"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["hash_str",b"hash_str"]) -> None: ...
 global___GetFabRequest = GetFabRequest
 
 class GetFabResponse(google.protobuf.message.Message):

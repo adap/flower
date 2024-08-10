@@ -1,1 +1,1 @@
-"""$project_name."""
+"""$project_name: A Flower / $framework_str app."""
