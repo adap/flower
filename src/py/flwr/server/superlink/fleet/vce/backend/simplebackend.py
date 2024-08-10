@@ -14,21 +14,19 @@
 # ==============================================================================
 """A Backend using standard processes for the Simulation Engine."""
 
-import time
+import pickle
 from logging import DEBUG
 from multiprocessing import Manager, Process, Queue
 from queue import Empty
 from threading import Event
-from typing import List, Tuple, Callable
+from typing import Callable, List, Tuple
+
+import cloudpickle
 
 from flwr.client import ClientApp
-from flwr.client.supernode.app import _get_load_client_app_fn
 from flwr.common.context import Context
 from flwr.common.logger import log
 from flwr.common.message import Message
-
-import pickle
-import cloudpickle
 
 from .backend import Backend, BackendConfig
 
@@ -109,6 +107,7 @@ class SimpleBackend(Backend):
         self, message: Message, context: Context
     ) -> Tuple[Message, Context]:
         """Run ClientApp that process a given message.
+
         Return output message and updated context.
         """
         # put stuff in queue
