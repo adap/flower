@@ -15,7 +15,7 @@
 """Ray backend for the Fleet API using the Simulation Engine."""
 
 from logging import DEBUG, ERROR
-from typing import Callable, Dict, Tuple, Union
+from typing import Callable, Dict, Optional, Tuple, Union
 
 import ray
 
@@ -61,6 +61,8 @@ class RayBackend(Backend):
             client_resources=client_resources,
             actor_kwargs=actor_kwargs,
         )
+
+        self.app_fn: Optional[Callable[[], ClientApp]] = None
 
     def _validate_client_resources(self, config: BackendConfig) -> ClientResourcesDict:
         client_resources_config = config.get(self.client_resources_key)
@@ -123,14 +125,15 @@ class RayBackend(Backend):
         """Report whether the pool has idle actors."""
         return self.pool.is_actor_available()
 
-    def build(self) -> None:
+    def build(self, app_fn: Callable[[], ClientApp]) -> None:
         """Build pool of Ray actors that this backend will submit jobs to."""
         self.pool.add_actors_to_pool(self.pool.actors_capacity)
+        # Set ClientApp callable that ray actors will use
+        self.app_fn = app_fn
         log(DEBUG, "Constructed ActorPool with: %i actors", self.pool.num_actors)
 
     def process_message(
         self,
-        app: Callable[[], ClientApp],
         message: Message,
         context: Context,
     ) -> Tuple[Message, Context]:
@@ -140,11 +143,17 @@ class RayBackend(Backend):
         """
         partition_id = context.node_config[PARTITION_ID_KEY]
 
+        if self.app_fn is None:
+            raise ValueError(
+                "Unspecified function to load a `ClientApp`. "
+                "Call the backend's `build()` method before processing messages."
+            )
+
         try:
             # Submit a task to the pool
             future = self.pool.submit(
                 lambda a, a_fn, mssg, cid, state: a.run.remote(a_fn, mssg, cid, state),
-                (app, message, str(partition_id), context),
+                (self.app_fn, message, str(partition_id), context),
             )
 
             # Fetch result
