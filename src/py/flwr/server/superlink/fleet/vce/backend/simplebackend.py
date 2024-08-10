@@ -14,6 +14,7 @@
 # ==============================================================================
 """A Backend using standard processes for the Simulation Engine."""
 
+import os
 import pickle
 from logging import DEBUG
 from multiprocessing import Manager, Process, Queue
@@ -33,12 +34,16 @@ from .backend import Backend, BackendConfig
 
 def run_client_app(
     client_app_bytes: bytes,
+    threads_limit: int,
     in_queue: "Queue[Tuple[Message,Context]]",
     out_queue: "Queue[Tuple[Message,Context]]",
     f_stop: Event,
 ) -> None:
     """Run a ClientApp processing a Message."""
     client_app = pickle.loads(client_app_bytes)
+
+    # To prevent over-subscription when running the ClientApp
+    os.environ["OMP_NUM_THREADS"] = str(threads_limit)
     while not f_stop.is_set():
         try:
             message, context = in_queue.get(timeout=1)
@@ -65,8 +70,9 @@ class SimpleBackend(Backend):
         self.in_queue = self.manager.Queue()
         self.out_queue = self.manager.Queue()
         self.f_stop = self.manager.Event()
-        self.num_proc = 5  # FIX: read from backend_config
         self.processes: List[Process] = []
+        self.num_proc = 5  # FIX: read from backend_config
+        self.thread_limit_per_process = 2  # FIX: read from backend_config
 
     @property
     def num_workers(self) -> int:
@@ -90,6 +96,7 @@ class SimpleBackend(Backend):
                 target=run_client_app,
                 args=(
                     client_app_asbytes,
+                    self.thread_limit_per_process,
                     self.in_queue,
                     self.out_queue,
                     self.f_stop,
