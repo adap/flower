@@ -3,12 +3,10 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "opacus_e2e"
-version = "0.1.0"
+name = "e2e_test"
+version = "1.0.0"
 description = "Opacus E2E testing"
-authors = [
-    { name = "The Flower Authors", email = "hello@flower.ai" },
-]
+license = "Apache-2.0"
 dependencies = [
     "flwr[simulation] @ {root:parent:parent:uri}",
     "opacus>=1.4.0,<2.0.0",
@@ -21,3 +19,18 @@ packages = ["."]
 
 [tool.hatch.metadata]
 allow-direct-references = true
+
+[tool.flwr.app]
+publisher = "flwrlabs"
+
+[tool.flwr.app.components]
+serverapp = ""
+clientapp = "client:app"
+
+[tool.flwr.app.config]
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 10
