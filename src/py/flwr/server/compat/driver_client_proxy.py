@@ -25,7 +25,7 @@ from flwr.server.client_proxy import ClientProxy
 
 from ..driver.driver import Driver
 
-SLEEP_TIME = 1
+SLEEP_TIME = 0.01
 
 
 class DriverClientProxy(ClientProxy):

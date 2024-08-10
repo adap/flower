@@ -110,9 +110,7 @@ def worker(
             message = message_from_taskins(task_ins)
 
             # Let backend process message
-            out_mssg, updated_context = backend.process_message(
-                app_fn, message, context
-            )
+            out_mssg, updated_context = backend.process_message(message, context)
 
             # Depending on the backend, it's easier to process results as they come
             # instead of waiting for the result of the submitted clientapp+message
@@ -181,7 +179,9 @@ def put_taskres_into_state(
 
 
 def run_api(
-    app_fn: Callable[[], ClientApp],
+    default_app_ref,
+    app_path,
+    flwr_dir,
     backend_fn: Callable[[], Backend],
     nodes_mapping: NodeToPartitionMapping,
     state_factory: StateFactory,
@@ -198,7 +198,11 @@ def run_api(
         backend = backend_fn()
 
         # Build backend
-        backend.build()
+        backend.build(
+            default_app_ref,
+            app_path,
+            flwr_dir,
+        )
 
         # Add workers (they submit Messages to Backend)
         state = state_factory.state()
@@ -228,7 +232,7 @@ def run_api(
             _ = [
                 executor.submit(
                     worker,
-                    app_fn,
+                    None,
                     taskins_queue,
                     taskres_queue,
                     node_states,
@@ -374,11 +378,13 @@ def start_vce(
             def _load_client_app() -> ClientApp:
                 return client_app
 
-            app_fn = _load_client_app
+            # app_fn = _load_client_app
 
         # Run main simulation loop
         run_api(
-            app_fn,
+            client_app_attr,
+            app_dir,
+            flwr_dir,
             backend_fn,
             nodes_mapping,
             state_factory,
