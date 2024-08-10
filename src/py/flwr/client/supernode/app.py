@@ -124,12 +124,6 @@ def flwr_clientapp() -> None:
     """Run process-isolated Flower client app."""
     log(INFO, "Starting Flower ClientApp")
 
-    event(EventType.RUN_CLIENT_APP_ENTER)
-
-    # args = _parse_args_flwr_clientapp().parse_args()
-
-    register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
-
 
 def _warn_deprecated_server_arg(args: argparse.Namespace) -> None:
     """Warn about the deprecated argument `--server`."""
