@@ -33,7 +33,7 @@ from .backend import Backend, BackendConfig
 
 def run_client_app(
     client_app_bytes: bytes,
-    in_queue: "Queue[Tuple[bytes,Message,Context]]",
+    in_queue: "Queue[Tuple[Message,Context]]",
     out_queue: "Queue[Tuple[Message,Context]]",
     f_stop: Event,
 ) -> None:
@@ -65,9 +65,7 @@ class SimpleBackend(Backend):
         self.in_queue = self.manager.Queue()
         self.out_queue = self.manager.Queue()
         self.f_stop = self.manager.Event()
-
-        # TODO: read from backend_config
-        self.num_proc = 5
+        self.num_proc = 5  # FIX: read from backend_config
         self.processes: List[Process] = []
 
     @property
@@ -85,7 +83,7 @@ class SimpleBackend(Backend):
     ) -> None:
         """."""
         client_app = app_fn()
-        # TODO: if we make ClientApp picklable we won't need cloudpickle
+        # FIX: if we make ClientApp picklable we won't need cloudpickle
         client_app_asbytes = cloudpickle.dumps(client_app)
         for _ in range(self.num_proc):
             p = Process(
