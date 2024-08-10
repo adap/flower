@@ -602,7 +602,7 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--backend",
-        default="ray",
+        default="simple",
         type=str,
         help="Simulation backend that executes the ClientApp.",
     )
