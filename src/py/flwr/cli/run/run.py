@@ -162,10 +162,10 @@ def _run_with_superexec(
     channel.subscribe(on_channel_state_change)
     stub = ExecStub(channel)
 
-    fab_path = build(app)
+    fab_path = Path(build(app))
 
     req = StartRunRequest(
-        fab_file=Path(fab_path).read_bytes(),
+        fab_file=fab_path.read_bytes(),
         override_config=user_config_to_proto(
             parse_config_args(config_overrides, separator=",")
         ),
@@ -174,6 +174,9 @@ def _run_with_superexec(
         ),
     )
     res = stub.StartRun(req)
+
+    # Delete FAB file once it has been sent to the SuperExec
+    fab_path.unlink()
     typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
 
 
