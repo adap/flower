@@ -19,7 +19,6 @@ import re
 import sys
 import tomllib
 
-
 if __name__ == "__main__":
 
     pr_title = sys.argv[1]
