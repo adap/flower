@@ -271,6 +271,8 @@ def start_vce(
     existing_nodes_mapping: Optional[NodeToPartitionMapping] = None,
 ) -> None:
     """Start Fleet API with the Simulation Engine."""
+    nodes_mapping = {}
+
     if client_app_attr is not None and client_app is not None:
         raise ValueError(
             "Both `client_app_attr` and `client_app` are provided, "
@@ -312,10 +314,6 @@ def start_vce(
         nodes_mapping = _register_nodes(
             num_nodes=num_supernodes, state_factory=state_factory
         )
-    else:
-        # Should we raise an error here?
-        # I'm not sure we can continue without num_supernodes
-        nodes_mapping = {}
 
     # Construct mapping of NodeStates
     node_states = _register_node_states(
@@ -353,14 +351,14 @@ def start_vce(
         if client_app_attr:
             return _get_load_client_app_fn(
                 default_app_ref=client_app_attr,
-                app_path=app_dir,
+                project_dir=app_dir,
                 flwr_dir=flwr_dir,
                 multi_app=False,
             )(run.fab_id, run.fab_version)
-        else:
-            raise ValueError(
-                "Either `client_app_attr` or `client_app` must be provided"
-            )
+
+        raise ValueError(
+            "Either `client_app_attr` or `client_app` must be provided"
+        )
 
     app_fn = _load
 
