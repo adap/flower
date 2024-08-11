@@ -1,11 +1,10 @@
 from collections import OrderedDict
 from typing import Dict, Tuple
 
-import torch
-from model import Net, test, train
-
 import flwr as fl
+import torch
 from flwr.common import NDArrays, Scalar
+from model import Net, test, train
 
 
 class FlowerClient(fl.client.NumPyClient):

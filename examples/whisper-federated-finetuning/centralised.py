@@ -3,6 +3,7 @@ import random
 
 import numpy as np
 import torch
+from datasets import concatenate_datasets, load_dataset
 from torch.utils.data import DataLoader, WeightedRandomSampler
 from transformers import WhisperForConditionalGeneration, WhisperProcessor
 from utils import (
@@ -13,8 +14,6 @@ from utils import (
     remove_cols,
     train_one_epoch,
 )
-
-from datasets import concatenate_datasets, load_dataset
 
 random.seed(1989)
 torch.set_float32_matmul_precision(

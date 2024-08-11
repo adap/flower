@@ -2,7 +2,6 @@
 
 import numpy as np
 from custommetrics_example.task import get_model, get_parameters
-
 from flwr.common import Context, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg

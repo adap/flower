@@ -1,9 +1,8 @@
 from typing import Dict
 
-from task import DEVICE, Net, get_parameters, load_data, set_parameters, test, train
-
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import NDArrays, Scalar
+from task import DEVICE, Net, get_parameters, load_data, set_parameters, test, train
 
 # Load model and data (simple CNN, CIFAR-10)
 net = Net().to(DEVICE)

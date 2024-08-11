@@ -5,12 +5,11 @@ from collections import OrderedDict
 from typing import Dict, List, Tuple
 
 import cifar
+import flwr as fl
 import numpy as np
 import torch
-from torch.utils.data import DataLoader
-
-import flwr as fl
 from datasets.utils.logging import disable_progress_bar
+from torch.utils.data import DataLoader
 
 disable_progress_bar()
 

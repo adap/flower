@@ -8,7 +8,6 @@ from fastai.losses import CrossEntropyLossFlat
 from fastai.vision.all import error_rate, squeezenet1_1
 from fastai.vision.data import DataLoaders
 from fastai_example.task import get_params, load_data, set_params
-
 from flwr.client import Client, ClientApp, NumPyClient
 from flwr.common import Context
 

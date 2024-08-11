@@ -1,8 +1,7 @@
+import flwr as fl
 import torch
 import torch.nn as nn
 import torch.optim as optim
-
-import flwr as fl
 from flwr.common import ndarrays_to_parameters, parameters_to_ndarrays
 
 

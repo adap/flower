@@ -1,12 +1,11 @@
 from typing import Dict, List, Tuple
 
-import numpy as np
-from flwr_datasets.partitioner import NaturalIdPartitioner
-from lifelines.datasets import load_waltons
-
 import flwr as fl
+import numpy as np
 from datasets import Dataset
 from flwr.common import NDArray, NDArrays
+from flwr_datasets.partitioner import NaturalIdPartitioner
+from lifelines.datasets import load_waltons
 
 
 class FlowerClient(fl.client.NumPyClient):

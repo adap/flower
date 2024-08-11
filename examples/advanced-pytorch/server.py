@@ -3,12 +3,11 @@ import warnings
 from collections import OrderedDict
 from typing import Dict, Optional, Tuple
 
+import flwr as fl
 import torch
 import utils
 from flwr_datasets import FederatedDataset
 from torch.utils.data import DataLoader
-
-import flwr as fl
 
 warnings.filterwarnings("ignore")
 

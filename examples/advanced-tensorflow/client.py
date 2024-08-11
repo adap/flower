@@ -2,10 +2,9 @@ import argparse
 import os
 from pathlib import Path
 
+import flwr as fl
 import tensorflow as tf
 from flwr_datasets import FederatedDataset
-
-import flwr as fl
 
 # Make TensorFlow logs less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"

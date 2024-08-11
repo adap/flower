@@ -2,6 +2,7 @@ import argparse
 import warnings
 from collections import OrderedDict
 
+import flwr as fl
 import torch
 from evaluate import load as load_metric
 from flwr_datasets import FederatedDataset
@@ -12,8 +13,6 @@ from transformers import (
     AutoTokenizer,
     DataCollatorWithPadding,
 )
-
-import flwr as fl
 
 warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cpu")

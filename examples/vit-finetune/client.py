@@ -1,10 +1,9 @@
+import flwr
 import torch
 from dataset import apply_transforms, get_dataset_with_partitions
+from flwr.client import NumPyClient
 from model import get_model, set_parameters, train
 from torch.utils.data import DataLoader
-
-import flwr
-from flwr.client import NumPyClient
 
 
 class FedViTClient(NumPyClient):

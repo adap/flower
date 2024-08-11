@@ -2,11 +2,10 @@ import argparse
 import logging
 import os
 
+import flwr as fl
 import tensorflow as tf
 from helpers.load_data import load_data
 from model.model import Model
-
-import flwr as fl
 
 logging.basicConfig(level=logging.INFO)  # Configure logging
 logger = logging.getLogger(__name__)  # Create logger for the module

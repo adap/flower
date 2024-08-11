@@ -1,8 +1,7 @@
 from logging import INFO
 
-import xgboost as xgb
-
 import flwr as fl
+import xgboost as xgb
 from flwr.common import (
     Code,
     EvaluateIns,

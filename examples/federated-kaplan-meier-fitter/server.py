@@ -16,11 +16,9 @@
 
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+import flwr as fl
 import matplotlib.pyplot as plt
 import numpy as np
-from lifelines import KaplanMeierFitter
-
-import flwr as fl
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -33,6 +31,7 @@ from flwr.common import (
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import Strategy
+from lifelines import KaplanMeierFitter
 
 
 class EventTimeFitterStrategy(Strategy):

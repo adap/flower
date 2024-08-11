@@ -1,6 +1,5 @@
-import mlcube_utils as mlcube
-
 import flwr as fl
+import mlcube_utils as mlcube
 from flwr.server.strategy import FedAvg
 
 

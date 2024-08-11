@@ -2,12 +2,11 @@ import argparse
 import warnings
 from collections import OrderedDict
 
+import datasets
+import flwr as fl
 import torch
 import utils
 from torch.utils.data import DataLoader
-
-import datasets
-import flwr as fl
 
 warnings.filterwarnings("ignore")
 

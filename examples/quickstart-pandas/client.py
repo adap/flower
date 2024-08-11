@@ -1,11 +1,10 @@
 import argparse
 from typing import Dict, List, Tuple
 
+import flwr as fl
 import numpy as np
 import pandas as pd
 from flwr_datasets import FederatedDataset
-
-import flwr as fl
 
 column_names = ["sepal_length", "sepal_width"]
 

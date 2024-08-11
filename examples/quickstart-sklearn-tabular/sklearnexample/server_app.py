@@ -2,14 +2,13 @@
 
 from typing import Dict, List, Tuple
 
+from flwr.common import Context, Metrics, Scalar, ndarrays_to_parameters
+from flwr.server import ServerApp, ServerAppComponents, ServerConfig
+from flwr.server.strategy import FedAvg
 from sklearnexample.task import (
     create_log_reg_and_instantiate_parameters,
     get_model_parameters,
 )
-
-from flwr.common import Context, Metrics, Scalar, ndarrays_to_parameters
-from flwr.server import ServerApp, ServerAppComponents, ServerConfig
-from flwr.server.strategy import FedAvg
 
 
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Dict[str, Scalar]:

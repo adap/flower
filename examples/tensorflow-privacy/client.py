@@ -3,12 +3,11 @@ import os
 
 import tensorflow as tf
 import tensorflow_privacy
+from flwr.client import ClientApp, NumPyClient
 from flwr_datasets import FederatedDataset
 from tensorflow_privacy.privacy.analysis.compute_dp_sgd_privacy_lib import (
     compute_dp_sgd_privacy_statement,
 )
-
-from flwr.client import ClientApp, NumPyClient
 
 # Make TensorFlow log less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"

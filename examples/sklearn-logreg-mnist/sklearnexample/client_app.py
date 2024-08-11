@@ -2,6 +2,8 @@
 
 import warnings
 
+from flwr.client import Client, ClientApp, NumPyClient
+from flwr.common import Context
 from sklearn.metrics import log_loss
 from sklearnexample.task import (
     create_log_reg_and_instantiate_parameters,
@@ -9,9 +11,6 @@ from sklearnexample.task import (
     load_data,
     set_model_params,
 )
-
-from flwr.client import Client, ClientApp, NumPyClient
-from flwr.common import Context
 
 
 # Define Flower client

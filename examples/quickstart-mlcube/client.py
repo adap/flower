@@ -1,9 +1,8 @@
 import os
 import sys
 
-import mlcube_utils as mlcube
-
 import flwr as fl
+import mlcube_utils as mlcube
 
 
 # Define Flower client

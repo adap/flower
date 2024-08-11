@@ -1,9 +1,8 @@
 """tfexample: A Flower / TensorFlow app."""
 
-from tfexample.task import load_data, load_model
-
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
+from tfexample.task import load_data, load_model
 
 
 # Define Flower Client

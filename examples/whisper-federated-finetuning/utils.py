@@ -2,13 +2,12 @@ import random
 from collections import OrderedDict
 from typing import List
 
+import flwr as fl
 import numpy as np
 import torch
+from datasets import Dataset
 from tqdm import tqdm
 from transformers import WhisperForConditionalGeneration
-
-import flwr as fl
-from datasets import Dataset
 
 remove_cols = ["file", "audio", "label", "is_unknown", "speaker_id", "utterance_id"]
 

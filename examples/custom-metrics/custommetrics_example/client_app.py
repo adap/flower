@@ -4,7 +4,6 @@ import os
 
 import numpy as np
 from custommetrics_example.task import eval_learning, get_model, load_data
-
 from flwr.client import Client, ClientApp, NumPyClient
 from flwr.common import Context
 

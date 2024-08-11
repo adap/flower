@@ -1,5 +1,8 @@
 """sklearnexample: A Flower / scikit-learn app."""
 
+from flwr.common import Context, NDArrays, ndarrays_to_parameters
+from flwr.server import ServerApp, ServerAppComponents, ServerConfig
+from flwr.server.strategy import FedAvg
 from flwr_datasets import FederatedDataset
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
@@ -9,10 +12,6 @@ from sklearnexample.task import (
     set_initial_params,
     set_model_params,
 )
-
-from flwr.common import Context, NDArrays, ndarrays_to_parameters
-from flwr.server import ServerApp, ServerAppComponents, ServerConfig
-from flwr.server.strategy import FedAvg
 
 
 def get_evaluate_fn(penalty):

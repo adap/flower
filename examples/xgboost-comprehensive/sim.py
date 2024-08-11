@@ -1,6 +1,7 @@
 import warnings
 from logging import INFO
 
+import flwr as fl
 import xgboost as xgb
 from client_utils import XgbClient
 from dataset import (
@@ -10,6 +11,8 @@ from dataset import (
     train_test_split,
     transform_dataset_to_dmatrix,
 )
+from flwr.common.logger import log
+from flwr.server.strategy import FedXgbBagging, FedXgbCyclic
 from flwr_datasets import FederatedDataset
 from server_utils import (
     CyclicClientManager,
@@ -20,10 +23,6 @@ from server_utils import (
 )
 from tqdm import tqdm
 from utils import BST_PARAMS, NUM_LOCAL_ROUND, sim_args_parser
-
-import flwr as fl
-from flwr.common.logger import log
-from flwr.server.strategy import FedXgbBagging, FedXgbCyclic
 
 warnings.filterwarnings("ignore", category=UserWarning)
 

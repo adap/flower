@@ -1,6 +1,7 @@
 import pickle
 import warnings
 
+import flwr as fl
 import hydra
 from client import gen_client_fn
 from dataset import get_tokenizer_and_data_collator_and_propt_formatting
@@ -9,8 +10,6 @@ from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 from utils import fit_weighted_average, get_evaluate_fn, get_on_fit_config
-
-import flwr as fl
 
 warnings.filterwarnings("ignore", category=UserWarning)
 

@@ -5,13 +5,13 @@ from collections import OrderedDict
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from flwr.client import ClientApp, NumPyClient
 from flwr_datasets import FederatedDataset
-from opacus import PrivacyEngine
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
 from tqdm import tqdm
 
-from flwr.client import ClientApp, NumPyClient
+from opacus import PrivacyEngine
 
 warnings.filterwarnings("ignore", category=UserWarning)
 

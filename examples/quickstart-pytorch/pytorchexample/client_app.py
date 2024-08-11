@@ -1,10 +1,9 @@
 """pytorchexample: A Flower / PyTorch app."""
 
 import torch
-from pytorchexample.task import Net, get_weights, load_data, set_weights, test, train
-
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
+from pytorchexample.task import Net, get_weights, load_data, set_weights, test, train
 
 
 # Define Flower Client

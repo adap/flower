@@ -1,14 +1,13 @@
 import pickle
 from pathlib import Path
 
+import flwr as fl
 import hydra
 from client import generate_client_fn
 from dataset import prepare_dataset
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 from server import get_evaluate_fn, get_on_fit_config
-
-import flwr as fl
 
 
 # A decorator for Hydra. This tells hydra to by default load the config in conf/base.yaml

@@ -1,10 +1,9 @@
 from pathlib import Path
 from typing import Dict, Optional, Tuple
 
+import flwr as fl
 import tensorflow as tf
 from flwr_datasets import FederatedDataset
-
-import flwr as fl
 
 
 def main() -> None:

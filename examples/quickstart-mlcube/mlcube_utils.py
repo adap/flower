@@ -4,7 +4,6 @@ import subprocess
 import sys
 
 import tensorflow as tf
-
 from flwr.common import ndarrays_to_parameters
 
 MODULE_PATH = os.path.abspath(__file__)
