@@ -2,18 +2,17 @@ import warnings
 from logging import INFO
 
 import flwr as fl
-from flwr_datasets import FederatedDataset
 from flwr.common.logger import log
+from flwr_datasets import FederatedDataset
 
+from client_utils import XgbClient
 from dataset import (
     instantiate_partitioner,
+    resplit,
     train_test_split,
     transform_dataset_to_dmatrix,
-    resplit,
 )
-from utils import client_args_parser, BST_PARAMS, NUM_LOCAL_ROUND
-from client_utils import XgbClient
-
+from utils import BST_PARAMS, NUM_LOCAL_ROUND, client_args_parser
 
 warnings.filterwarnings("ignore", category=UserWarning)
 

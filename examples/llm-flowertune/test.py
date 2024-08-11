@@ -1,11 +1,11 @@
 # This python file is adapted from https://github.com/lm-sys/FastChat/blob/main/fastchat/llm_judge/gen_model_answer.py
 
 import argparse
+
 import torch
+from fastchat.conversation import get_conv_template
 from peft import AutoPeftModelForCausalLM
 from transformers import AutoTokenizer
-from fastchat.conversation import get_conv_template
-
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--peft-path", type=str, default=None)

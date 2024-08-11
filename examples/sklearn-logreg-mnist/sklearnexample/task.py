@@ -1,11 +1,10 @@
 """sklearnexample: A Flower / scikit-learn app."""
 
 import numpy as np
+from flwr.common import NDArrays
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 from sklearn.linear_model import LogisticRegression
-
-from flwr.common import NDArrays
 
 # This information is needed to create a correct scikit-learn model
 NUM_UNIQUE_LABELS = 10  # MNIST has 10 classes
