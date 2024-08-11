@@ -35,23 +35,23 @@ class Ffs(abc.ABC):  # pylint: disable=R0904
 
         Returns
         -------
-        sha256hex : string
-            The sha256hex hash of the content.
+        str
+            The key (sha256hex hash) of the content.
         """
 
     @abc.abstractmethod
     def get(self, key: str) -> Tuple[bytes, Dict[str, str]]:
-        """Return tuple containing the object and it's meta fields.
+        """Return tuple containing the object content and metadata.
 
         Parameters
         ----------
-        hash : string
-            The sha256hex hash of the object to be retrieved.
+        key : str
+            The key (sha256hex hash) of the object to be retrieved.
 
         Returns
         -------
         Tuple[bytes, Dict[str, str]]
-            A tuple containing the object and it's metadata.
+            A tuple containing the object content and metadata.
         """
 
     @abc.abstractmethod
@@ -60,19 +60,20 @@ class Ffs(abc.ABC):  # pylint: disable=R0904
 
         Parameters
         ----------
-        hash : string
-            The sha256hex hash of the object to be deleted.
+        key : str
+            The key (sha256hex hash) of the object to be deleted.
         """
 
     @abc.abstractmethod
     def list(self) -> List[str]:
-        """List all keys.
+        """List keys of all stored objects.
 
-        Can be used to list all keys in the storage and e.g. to clean up
-        the storage with the delete method.
+        Return all available keys in this `Ffs` instance.
+        This can be combined with, for example,
+        the `delete` method to delete objects.
 
         Returns
         -------
         List[str]
-            A list of all keys.
+            A list of all available keys.
         """
