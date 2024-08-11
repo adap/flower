@@ -157,7 +157,7 @@ def add_taskins_to_queue(
         task_ins_list = state.get_task_ins(node_id=None, limit=256)
         for task_ins in task_ins_list:
             queue.put(task_ins)
-    sleep(0.1)
+        sleep(0.01)
 
 
 def put_taskres_into_state(

@@ -16,17 +16,16 @@
 
 
 import random
-from logging import WARN
 from typing import List, Optional
 
 from flwr.common import now
-from flwr.common.logger import log
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 from .in_memory_state import InMemoryState
+
+
 class SimpleInMemoryState(InMemoryState):  # pylint: disable=R0902,R0904
     """Simple In-memory State implementation."""
-
 
     def get_task_ins(
         self, node_id: Optional[int], limit: Optional[int]
@@ -55,10 +54,20 @@ class SimpleInMemoryState(InMemoryState):  # pylint: disable=R0902,R0904
         # Return TaskIns
         return task_ins_list
 
-
     def _get_undelivered_uuids(self, node_id):
         if node_id is None:
-                undelivered_uuids = [uuid for uuid, task_ins in self.task_ins_store.items() if (task_ins.task.delivered_at == "")]
+            undelivered_uuids = [
+                uuid
+                for uuid, task_ins in self.task_ins_store.items()
+                if (task_ins.task.delivered_at == "")
+            ]
         else:
-            undelivered_uuids = [uuid for uuid, task_ins in self.task_ins_store.items() if (task_ins.task.delivered_at == "" and task_ins.task.consumer.node_id == node_id)]
-        return undelivered_uuids 
+            undelivered_uuids = [
+                uuid
+                for uuid, task_ins in self.task_ins_store.items()
+                if (
+                    task_ins.task.delivered_at == ""
+                    and task_ins.task.consumer.node_id == node_id
+                )
+            ]
+        return undelivered_uuids
