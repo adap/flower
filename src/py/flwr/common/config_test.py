@@ -30,6 +30,7 @@ from .config import (
     get_project_config,
     get_project_dir,
     parse_config_args,
+    unflatten_dict,
 )
 
 # Mock constants
@@ -227,6 +228,13 @@ def test_flatten_dict() -> None:
     raw_dict = {"a": {"b": {"c": "d"}}, "e": "f"}
     expected = {"a.b.c": "d", "e": "f"}
     assert flatten_dict(raw_dict) == expected
+
+
+def test_unflatten_dict() -> None:
+    """Test unflatten_dict with a flat dictionary."""
+    raw_dict = {"a.b.c": "d", "e": "f"}
+    expected = {"a": {"b": {"c": "d"}}, "e": "f"}
+    assert unflatten_dict(raw_dict) == expected
 
 
 def test_parse_config_args_none() -> None:
