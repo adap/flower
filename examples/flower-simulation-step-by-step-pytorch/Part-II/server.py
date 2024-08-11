@@ -2,8 +2,9 @@ from collections import OrderedDict
 
 import torch
 from hydra.utils import instantiate
-from model import Net, test
 from omegaconf import DictConfig
+
+from model import Net, test
 
 
 def get_on_fit_config(config: DictConfig):

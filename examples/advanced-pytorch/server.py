@@ -5,9 +5,10 @@ from typing import Dict, Optional, Tuple
 
 import flwr as fl
 import torch
-import utils
 from flwr_datasets import FederatedDataset
 from torch.utils.data import DataLoader
+
+import utils
 
 warnings.filterwarnings("ignore")
 

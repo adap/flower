@@ -1,6 +1,7 @@
 import flwr as fl
-import mlcube_utils as mlcube
 from flwr.server.strategy import FedAvg
+
+import mlcube_utils as mlcube
 
 
 def main():

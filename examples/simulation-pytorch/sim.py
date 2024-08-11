@@ -10,6 +10,7 @@ from flwr.common import Metrics
 from flwr.common.typing import Scalar
 from flwr_datasets import FederatedDataset
 from torch.utils.data import DataLoader
+
 from utils import Net, apply_transforms, test, train
 
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")

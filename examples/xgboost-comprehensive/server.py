@@ -2,10 +2,11 @@ import warnings
 from logging import INFO
 
 import flwr as fl
-from dataset import resplit, transform_dataset_to_dmatrix
 from flwr.common.logger import log
 from flwr.server.strategy import FedXgbBagging, FedXgbCyclic
 from flwr_datasets import FederatedDataset
+
+from dataset import resplit, transform_dataset_to_dmatrix
 from server_utils import (
     CyclicClientManager,
     eval_config,

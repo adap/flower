@@ -7,6 +7,7 @@ from flwr.common.logger import log
 from flwr.server.client_manager import SimpleClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.criterion import Criterion
+
 from utils import BST_PARAMS
 
 

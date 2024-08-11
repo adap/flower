@@ -2,6 +2,7 @@ from pathlib import Path
 
 import flwr as fl
 import numpy as np
+
 from client import FlowerClient
 from strategy import Strategy
 from task import get_partitions_and_label

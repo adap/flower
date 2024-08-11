@@ -10,6 +10,7 @@ from flwr.common import ConfigsRecord
 from flwr.common.constant import MessageType
 from flwr.common.context import Context
 from flwr.common.message import Message
+
 from task import DEVICE, Net, get_parameters, load_data, set_parameters, test, train
 
 

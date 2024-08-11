@@ -18,6 +18,7 @@ from flwr.common import (
 from flwr.common.recordset_compat import fitins_to_recordset, recordset_to_fitres
 from flwr.server import Driver, History
 from flwr.server.strategy.aggregate import aggregate
+
 from task import Net, get_weights
 
 

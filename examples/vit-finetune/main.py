@@ -2,6 +2,7 @@ import argparse
 
 import flwr as fl
 import matplotlib.pyplot as plt
+
 from client import client_fn
 from server import strategy
 

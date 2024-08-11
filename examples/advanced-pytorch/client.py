@@ -5,8 +5,9 @@ from collections import OrderedDict
 import datasets
 import flwr as fl
 import torch
-import utils
 from torch.utils.data import DataLoader
+
+import utils
 
 warnings.filterwarnings("ignore")
 

@@ -3,6 +3,11 @@ from logging import INFO
 
 import flwr as fl
 import xgboost as xgb
+from flwr.common.logger import log
+from flwr.server.strategy import FedXgbBagging, FedXgbCyclic
+from flwr_datasets import FederatedDataset
+from tqdm import tqdm
+
 from client_utils import XgbClient
 from dataset import (
     instantiate_partitioner,
@@ -11,9 +16,6 @@ from dataset import (
     train_test_split,
     transform_dataset_to_dmatrix,
 )
-from flwr.common.logger import log
-from flwr.server.strategy import FedXgbBagging, FedXgbCyclic
-from flwr_datasets import FederatedDataset
 from server_utils import (
     CyclicClientManager,
     eval_config,
@@ -21,7 +23,6 @@ from server_utils import (
     fit_config,
     get_evaluate_fn,
 )
-from tqdm import tqdm
 from utils import BST_PARAMS, NUM_LOCAL_ROUND, sim_args_parser
 
 warnings.filterwarnings("ignore", category=UserWarning)

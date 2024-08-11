@@ -1,4 +1,5 @@
 from flwr.client import ClientApp, NumPyClient
+
 from task import DEVICE, Net, get_weights, load_data, set_weights, test, train
 
 # Load model and data (simple CNN, CIFAR-10)

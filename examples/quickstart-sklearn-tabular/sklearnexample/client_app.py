@@ -5,6 +5,7 @@ import warnings
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
 from sklearn.metrics import log_loss
+
 from sklearnexample.task import (
     UNIQUE_LABELS,
     create_log_reg_and_instantiate_parameters,

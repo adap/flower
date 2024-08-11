@@ -3,11 +3,12 @@ from pathlib import Path
 
 import flwr as fl
 import hydra
-from client import generate_client_fn
-from dataset import prepare_dataset
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import call, instantiate
 from omegaconf import DictConfig, OmegaConf
+
+from client import generate_client_fn
+from dataset import prepare_dataset
 from server import get_evalulate_fn, get_on_fit_config
 
 # !!!! The code in this directory is the result of adpating the project first shown

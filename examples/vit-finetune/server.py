@@ -1,9 +1,10 @@
 import flwr as fl
 import torch
-from dataset import apply_eval_transforms, get_dataset_with_partitions
 from datasets import Dataset
-from model import get_model, set_parameters, test
 from torch.utils.data import DataLoader
+
+from dataset import apply_eval_transforms, get_dataset_with_partitions
+from model import get_model, set_parameters, test
 
 
 def fit_config(server_round: int):

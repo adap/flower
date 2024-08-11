@@ -2,10 +2,11 @@ import argparse
 
 import flwr as fl
 import torch
-from client import get_client_fn
 from datasets import load_dataset
-from server import fit_config, get_evaluate_fn
 from transformers import WhisperProcessor
+
+from client import get_client_fn
+from server import fit_config, get_evaluate_fn
 from utils import construct_client_mapping, get_encoding_fn
 
 parser = argparse.ArgumentParser(description="Flower+Whisper")

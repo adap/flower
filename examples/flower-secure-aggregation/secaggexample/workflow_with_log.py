@@ -11,6 +11,7 @@ from flwr.server.workflow.secure_aggregation.secaggplus_workflow import (
     SecAggPlusWorkflow,
     WorkflowState,
 )
+
 from secaggexample.task import get_weights, make_net
 
 

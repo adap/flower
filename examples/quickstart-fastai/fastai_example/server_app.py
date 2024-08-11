@@ -3,10 +3,11 @@
 from typing import List, Tuple
 
 from fastai.vision.all import squeezenet1_1
-from fastai_example.task import get_params
 from flwr.common import Context, Metrics, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
+
+from fastai_example.task import get_params
 
 
 # Define metric aggregation function
