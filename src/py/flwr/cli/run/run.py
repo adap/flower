@@ -109,14 +109,14 @@ def run(
         raise typer.Exit(code=1)
 
     if "address" in federation_config:
-        _run_with_superexec(federation_config, app, config_overrides)
+        _run_with_superexec(app, federation_config, config_overrides)
     else:
-        _run_without_superexec(app, federation_config, federation, config_overrides)
+        _run_without_superexec(app, federation_config, config_overrides, federation)
 
 
 def _run_with_superexec(
-    federation_config: Dict[str, Any],
     app: Optional[Path],
+    federation_config: Dict[str, Any],
     config_overrides: Optional[List[str]],
 ) -> None:
 
@@ -183,8 +183,8 @@ def _run_with_superexec(
 def _run_without_superexec(
     app: Optional[Path],
     federation_config: Dict[str, Any],
-    federation: str,
     config_overrides: Optional[List[str]],
+    federation: str,
 ) -> None:
     try:
         num_supernodes = federation_config["options"]["num-supernodes"]
