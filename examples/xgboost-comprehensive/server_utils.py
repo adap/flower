@@ -1,12 +1,14 @@
-from typing import Dict, List, Optional
 from logging import INFO
+from typing import Dict, List, Optional
+
 import xgboost as xgb
-from flwr.common.logger import log
+from utils import BST_PARAMS
+
 from flwr.common import Parameters, Scalar
+from flwr.common.logger import log
 from flwr.server.client_manager import SimpleClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.criterion import Criterion
-from utils import BST_PARAMS
 
 
 def eval_config(rnd: int) -> Dict[str, str]:

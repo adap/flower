@@ -1,6 +1,7 @@
 """pytorchlightning_example: A Flower / PyTorch Lightning app."""
 
 import pytorch_lightning as pl
+
 from datasets.utils.logging import disable_progress_bar
 from flwr.client import Client, ClientApp, NumPyClient
 from flwr.common import Context

@@ -1,9 +1,9 @@
 import numpy as np
+from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import IidPartitioner
 from sklearn.linear_model import LogisticRegression
 
 from flwr.common import NDArrays
-from flwr_datasets import FederatedDataset
-from flwr_datasets.partitioner import IidPartitioner
 
 # This information is needed to create a correct scikit-learn model
 UNIQUE_LABELS = [0, 1, 2]

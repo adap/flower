@@ -8,7 +8,6 @@ from secaggexample.workflow_with_log import SecAggPlusWorkflowWithLogs
 
 from flwr.common import Context, Metrics, ndarrays_to_parameters
 from flwr.common.logger import update_console_handler
-
 from flwr.server import Driver, LegacyContext, ServerApp, ServerConfig
 from flwr.server.strategy import FedAvg
 from flwr.server.workflow import DefaultWorkflow, SecAggPlusWorkflow

@@ -1,20 +1,21 @@
 import argparse
-import torch
-import flwr as fl
-import numpy as np
-from torch.utils.data import DataLoader, WeightedRandomSampler
-from datasets import load_dataset, load_from_disk, concatenate_datasets
-from transformers import WhisperProcessor
 
+import numpy as np
+import torch
+from torch.utils.data import DataLoader, WeightedRandomSampler
+from transformers import WhisperProcessor
 from utils import (
-    get_model,
-    set_params,
-    train_one_epoch,
-    remove_cols,
-    prepare_silences_dataset,
     construct_client_mapping,
     get_encoding_fn,
+    get_model,
+    prepare_silences_dataset,
+    remove_cols,
+    set_params,
+    train_one_epoch,
 )
+
+import flwr as fl
+from datasets import concatenate_datasets, load_dataset, load_from_disk
 
 parser = argparse.ArgumentParser(description="Flower+Whisper")
 parser.add_argument("--cid", type=int, required=True, help="Client id.")

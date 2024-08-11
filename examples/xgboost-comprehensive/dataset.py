@@ -1,12 +1,14 @@
-import xgboost as xgb
 from typing import Union
-from datasets import Dataset, DatasetDict, concatenate_datasets
+
+import xgboost as xgb
 from flwr_datasets.partitioner import (
+    ExponentialPartitioner,
     IidPartitioner,
     LinearPartitioner,
     SquarePartitioner,
-    ExponentialPartitioner,
 )
+
+from datasets import Dataset, DatasetDict, concatenate_datasets
 
 CORRELATION_TO_PARTITIONER = {
     "uniform": IidPartitioner,

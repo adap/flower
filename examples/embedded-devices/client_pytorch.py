@@ -2,16 +2,16 @@ import argparse
 import warnings
 from collections import OrderedDict
 
-import flwr as fl
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from flwr_datasets import FederatedDataset
 from torch.utils.data import DataLoader
-from torchvision.transforms import Compose, Normalize, ToTensor
 from torchvision.models import mobilenet_v3_small
+from torchvision.transforms import Compose, Normalize, ToTensor
 from tqdm import tqdm
 
-from flwr_datasets import FederatedDataset
+import flwr as fl
 
 parser = argparse.ArgumentParser(description="Flower Embedded devices")
 parser.add_argument(

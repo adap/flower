@@ -1,11 +1,12 @@
 """pytorchexample: A Flower / PyTorch app."""
 
 from typing import List, Tuple
-from flwr.common import Context, ndarrays_to_parameters, Metrics
-from flwr.server import ServerApp, ServerAppComponents, ServerConfig
-from flwr.server.strategy import FedAvg
 
 from pytorchexample.task import Net, get_weights
+
+from flwr.common import Context, Metrics, ndarrays_to_parameters
+from flwr.server import ServerApp, ServerAppComponents, ServerConfig
+from flwr.server.strategy import FedAvg
 
 
 # Define metric aggregation function
