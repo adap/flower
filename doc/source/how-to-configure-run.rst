@@ -68,7 +68,8 @@ with the different supported TOML syntaxes:
    [tool.flwr.app.config]
    first-top-level.first-key = 1
    first-top-level.second-key = "value"
-   # Note that this syntax is discouraged by the TOML spec
+
+   # Note that this syntax is discouraged by the TOML spec:
    second-top-level = { local-epochs = 1, verbose = true }
 
    [tool.flwr.app.config.third-top-level]
