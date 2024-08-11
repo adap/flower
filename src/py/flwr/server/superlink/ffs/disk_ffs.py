@@ -30,7 +30,7 @@ class DiskFfs(Ffs):  # pylint: disable=R0904
 
         Parameters
         ----------
-        base_dir : string
+        base_dir : str
             The base directory to store the objects.
         """
         self.base_dir = Path(base_dir)
@@ -47,8 +47,8 @@ class DiskFfs(Ffs):  # pylint: disable=R0904
 
         Returns
         -------
-        sha256hex : string
-            The sha256hex hash of the content.
+        str
+            The key (sha256hex hash) of the content.
         """
         content_hash = hashlib.sha256(content).hexdigest()
 
@@ -59,17 +59,17 @@ class DiskFfs(Ffs):  # pylint: disable=R0904
         return content_hash
 
     def get(self, key: str) -> Tuple[bytes, Dict[str, str]]:
-        """Return tuple containing the object and it's meta fields.
+        """Return tuple containing the object content and metadata.
 
         Parameters
         ----------
-        hash : string
+        key : str
             The sha256hex hash of the object to be retrieved.
 
         Returns
         -------
         Tuple[bytes, Dict[str, str]]
-            A tuple containing the object and it's metadata.
+            A tuple containing the object content and metadata.
         """
         content = (self.base_dir / key).read_bytes()
         meta = json.loads((self.base_dir / f"{key}.META").read_text())
@@ -81,7 +81,7 @@ class DiskFfs(Ffs):  # pylint: disable=R0904
 
         Parameters
         ----------
-        hash : string
+        key : str
             The sha256hex hash of the object to be deleted.
         """
         (self.base_dir / key).unlink()
@@ -96,7 +96,7 @@ class DiskFfs(Ffs):  # pylint: disable=R0904
         Returns
         -------
         List[str]
-            A list of all keys.
+            A list of all available keys.
         """
         return [
             item.name for item in self.base_dir.iterdir() if not item.suffix == ".META"
