@@ -344,7 +344,7 @@ def _main_loop(
 ) -> None:
     """Launch SuperLink with Simulation Engine, then ServerApp on a separate thread."""
     # Initialize StateFactory
-    state_factory = StateFactory(":flwr-in-memory-state:")
+    state_factory = StateFactory(":flwr-simple-in-memory-state:")
 
     f_stop = threading.Event()
     # A Threading event to indicate if an exception was raised in the ServerApp thread

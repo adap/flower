@@ -150,16 +150,14 @@ def worker(
 def add_taskins_to_queue(
     state: State,
     queue: "Queue[TaskIns]",
-    nodes_mapping: NodeToPartitionMapping,
     f_stop: threading.Event,
 ) -> None:
     """Put TaskIns in a queue from State."""
     while not f_stop.is_set():
-        for node_id in nodes_mapping.keys():
-            task_ins_list = state.get_task_ins(node_id=node_id, limit=1)
-            for task_ins in task_ins_list:
-                queue.put(task_ins)
-        sleep(0.1)
+        task_ins_list = state.get_task_ins(node_id=None, limit=256)
+        for task_ins in task_ins_list:
+            queue.put(task_ins)
+    sleep(0.1)
 
 
 def put_taskres_into_state(
@@ -178,7 +176,6 @@ def put_taskres_into_state(
 def run_api(
     app_fn: Callable[[], ClientApp],
     backend_fn: Callable[[], Backend],
-    nodes_mapping: NodeToPartitionMapping,
     state_factory: StateFactory,
     node_states: Dict[int, NodeState],
     f_stop: threading.Event,
@@ -203,7 +200,6 @@ def run_api(
             args=(
                 state,
                 taskins_queue,
-                nodes_mapping,
                 f_stop,
             ),
         )
@@ -375,7 +371,6 @@ def start_vce(
         run_api(
             app_fn,
             backend_fn,
-            nodes_mapping,
             state_factory,
             node_states,
             f_stop,
