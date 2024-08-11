@@ -356,9 +356,7 @@ def start_vce(
                 multi_app=False,
             )(run.fab_id, run.fab_version)
 
-        raise ValueError(
-            "Either `client_app_attr` or `client_app` must be provided"
-        )
+        raise ValueError("Either `client_app_attr` or `client_app` must be provided")
 
     app_fn = _load
 
