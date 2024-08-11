@@ -33,10 +33,14 @@ attribute of the ``Context`` object passed to the ``client_fn`` (for the
        lr = context.run_config["lr"]
        verbose = context.run_config["verbose"]
 
+       # Construct a client object (e.g. of type flwr.client.NumPyClient)
        return CustomClient(local_epochs, lr, verbose)
 
 
    app = ClientApp(client_fn=client_fn)
+
+Note that accessing the `run_config` to configure your `ServerApp` can
+be done in the same way as above:
 
 .. code:: python
 
@@ -64,7 +68,8 @@ with the different supported TOML syntaxes:
    [tool.flwr.app.config]
    first-top-level.first-key = 1
    first-top-level.second-key = "value"
-   second-top-level = { local-epochs = 1, verbose = true } # Note that this syntax is discouraged by the TOML spec
+   # Note that this syntax is discouraged by the TOML spec
+   second-top-level = { local-epochs = 1, verbose = true }
 
    [tool.flwr.app.config.third-top-level]
    run-name = "Small Run"
@@ -88,6 +93,17 @@ All of those formats will be flattened and will be usable in such a way:
 
 
    app = ClientApp(client_fn=client_fn)
+
+It is also possible to use the ``flwr.common.config.unflatten_dict``
+function to convert those objects back to regular dictionnaries:
+
+.. code:: python
+
+   from flwr.common.config import unflatten_dict
+
+   first_top_level = unflatten_dict(context.run_config["first-top-level"])
+
+   # first_top_level = {"first-key": 1, "second_key": "value"}
 
 .. note::
 
@@ -125,3 +141,18 @@ It is also possible to use this alternative syntax to pass overrides to
 .. code:: bash
 
    flwr run --run-config local-epochs=5 --run-config verbose=false,run-name='Bigger Run'
+
+Lastly, a TOML file can also be provided to the ``--run-config``
+argument:
+
+.. code:: bash
+
+   flwr run --run-config big_run.toml
+
+In this example, the ``big_run.toml`` file would look like:
+
+.. code:: toml
+
+   local-epochs = 5
+   verbose = false
+   run-name = "Bigger Run"
