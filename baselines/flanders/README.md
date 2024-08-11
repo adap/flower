@@ -5,6 +5,10 @@ labels: [robustness, model poisoning, anomaly detection, autoregressive model, r
 dataset: [MNIST, FashionMNIST]
 ---
 
+# FLANDERS: Protecting Federated Learning from Extreme Model Poisoning Attacks via Multidimensional Time Series Anomaly Detection
+
+> Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
+
 **Paper:** [arxiv.org/abs/2303.16668](https://arxiv.org/abs/2303.16668)
 
 **Authors:** Edoardo Gabrielli, Gabriele Tolomei, Dimitri Belli, Vittorio Miori
