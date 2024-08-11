@@ -1,7 +1,7 @@
 from typing import Dict
+
 import flwr as fl
 from flwr.server.strategy import FedXgbBagging
-
 
 # FL experimental settings
 pool_size = 2
