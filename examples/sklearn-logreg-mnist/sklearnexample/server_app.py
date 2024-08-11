@@ -4,9 +4,9 @@ from flwr.common import Context, NDArrays, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
 from flwr_datasets import FederatedDataset
-
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
+
 from sklearnexample.task import (
     create_log_reg_and_instantiate_parameters,
     get_model_parameters,
