@@ -312,6 +312,10 @@ def start_vce(
         nodes_mapping = _register_nodes(
             num_nodes=num_supernodes, state_factory=state_factory
         )
+    else:
+        # Should we raise an error here?
+        # I'm not sure we can continue without num_supernodes
+        nodes_mapping = {}
 
     # Construct mapping of NodeStates
     node_states = _register_node_states(
@@ -344,17 +348,19 @@ def start_vce(
     # Load ClientApp if needed
     def _load() -> ClientApp:
 
+        if client_app:
+            return client_app
         if client_app_attr:
-            app = _get_load_client_app_fn(
+            return _get_load_client_app_fn(
                 default_app_ref=client_app_attr,
                 app_path=app_dir,
                 flwr_dir=flwr_dir,
                 multi_app=False,
             )(run.fab_id, run.fab_version)
-
-        if client_app:
-            app = client_app
-        return app
+        else:
+            raise ValueError(
+                "Either `client_app_attr` or `client_app` must be provided"
+            )
 
     app_fn = _load
 

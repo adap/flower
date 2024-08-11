@@ -97,4 +97,5 @@ def test_aggregate_fit() -> None:
     if actual_aggregated:
         actual_list = parameters_to_ndarrays(actual_aggregated)
         actual = actual_list[0]
-    assert (actual == expected[0]).all()
+        assert (actual == expected[0]).all()
+    raise ValueError("aggregate_fit function returned None")

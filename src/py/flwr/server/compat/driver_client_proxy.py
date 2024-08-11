@@ -131,8 +131,7 @@ class DriverClientProxy(ClientProxy):
         if message_id == "":
             raise ValueError(f"Failed to send message to node {self.node_id}")
 
-        if timeout:
-            start_time = time.time()
+        start_time = time.time() if timeout else None
 
         while True:
             messages = list(self.driver.pull_messages(message_ids))
@@ -145,6 +144,10 @@ class DriverClientProxy(ClientProxy):
                     )
                 return msg.content
 
-            if timeout is not None and time.time() > start_time + timeout:
+            if (
+                timeout is not None
+                and start_time is not None
+                and time.time() > start_time + timeout
+            ):
                 raise RuntimeError("Timeout reached")
             time.sleep(SLEEP_TIME)

@@ -238,6 +238,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
 
         def push_messages(messages: Iterable[Message]) -> Iterable[str]:
             msg = list(messages)[0]
+            ret = None
             if error_reply:
                 recordset = None
                 ret = msg.create_error_reply(ERROR_REPLY)
@@ -253,7 +254,8 @@ class DriverClientProxyTestCase(unittest.TestCase):
                 raise ValueError(f"Unsupported type: {type(res)}")
             if recordset is not None:
                 ret = msg.create_reply(recordset)
-            ret.metadata.__dict__["_message_id"] = REPLY_MESSAGE_ID
+            if ret is not None:
+                ret.metadata.__dict__["_message_id"] = REPLY_MESSAGE_ID
 
             # Set the return value of `pull_messages`
             self.driver.pull_messages.return_value = [ret]
