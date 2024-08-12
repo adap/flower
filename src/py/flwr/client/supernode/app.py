@@ -139,7 +139,7 @@ def flwr_clientapp() -> None:
     log(
         DEBUG,
         "Staring isolated `ClientApp` connected to SuperNode ClientAppIo at %s "
-        "with the following token %s.",
+        "with the token %s",
         args.address,
         args.token,
     )
