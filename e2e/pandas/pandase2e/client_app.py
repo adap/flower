@@ -7,9 +7,9 @@ from flwr.client import ClientApp, NumPyClient, start_client
 from flwr.common import Context
 
 try:
-    df = pd.read_csv("./../data/client.csv") # for new Flower
+    df = pd.read_csv("./../data/client.csv")  # for new Flower
 except FileNotFoundError:
-    df = pd.read_csv("./data/client.csv") # for legacy Flower
+    df = pd.read_csv("./data/client.csv")  # for legacy Flower
 
 column_names = ["sepal length (cm)", "sepal width (cm)"]
 
