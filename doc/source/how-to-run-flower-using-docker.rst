@@ -39,10 +39,10 @@ If you're looking to try out Flower, you can use the following command:
 .. code-block:: bash
    :substitutions:
 
-   $ docker run --rm -p 9091:9091 -p 9092:9092 flwr/superlink:|current_flwr_version| --insecure
+   $ docker run --rm -p 9091:9091 -p 9092:9092 flwr/superlink:|stable_flwr_version| --insecure
 
-The command pulls the Docker image with the tag :substitution-code:`|current_flwr_version|` from Docker Hub. The tag specifies
-the Flower version. In this case, Flower |current_flwr_version|. The ``--rm`` flag tells Docker to remove the
+The command pulls the Docker image with the tag :substitution-code:`|stable_flwr_version|` from Docker Hub. The tag specifies
+the Flower version. In this case, Flower |stable_flwr_version|. The ``--rm`` flag tells Docker to remove the
 container after it exits.
 
 .. note::
@@ -68,7 +68,7 @@ You can use ``--help`` to view all available flags that the SuperLink supports:
 .. code-block:: bash
    :substitutions:
 
-   $ docker run --rm flwr/superlink:|current_flwr_version| --help
+   $ docker run --rm flwr/superlink:|stable_flwr_version| --help
 
 Mounting a volume to store the state on the host system
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -91,7 +91,7 @@ container. Furthermore, we use the flag ``--database`` to specify the name of th
    $ mkdir state
    $ sudo chown -R 49999:49999 state
    $ docker run --rm \
-     -p 9091:9091 -p 9092:9092 --volume ./state/:/app/state flwr/superlink:|current_flwr_version| \
+     -p 9091:9091 -p 9092:9092 --volume ./state/:/app/state flwr/superlink:|stable_flwr_version| \
      --insecure \
      --database state.db
 
@@ -122,7 +122,7 @@ with the ``--ssl-ca-certfile``, ``--ssl-certfile`` and ``--ssl-keyfile`` flag.
 
    $ docker run --rm \
      -p 9091:9091 -p 9092:9092 \
-     --volume ./certificates/:/app/certificates/:ro flwr/superlink:|current_flwr_version| \
+     --volume ./certificates/:/app/certificates/:ro flwr/superlink:|stable_flwr_version| \
      --ssl-ca-certfile certificates/ca.crt \
      --ssl-certfile certificates/server.pem \
      --ssl-keyfile certificates/server.key
@@ -201,7 +201,7 @@ The ``Dockerfile.supernode`` contains the instructions that assemble the SuperNo
 .. code-block:: dockerfile
    :substitutions:
 
-   FROM flwr/supernode:|current_flwr_version|
+   FROM flwr/supernode:|stable_flwr_version|
 
    WORKDIR /app
 
@@ -211,7 +211,7 @@ The ``Dockerfile.supernode`` contains the instructions that assemble the SuperNo
    COPY client.py ./
    ENTRYPOINT ["flower-client-app", "client:app"]
 
-In the first two lines, we instruct Docker to use the SuperNode image tagged :substitution-code:`|current_flwr_version|` as a base
+In the first two lines, we instruct Docker to use the SuperNode image tagged :substitution-code:`|stable_flwr_version|` as a base
 image and set our working directory to ``/app``. The following instructions will now be
 executed in the ``/app`` directory. Next, we install the ClientApp dependencies by copying the
 ``requirements.txt`` file into the image and run ``pip install``. In the last two lines,
@@ -273,7 +273,7 @@ To see all available flags that the SuperNode supports, run:
 .. code-block:: bash
    :substitutions:
 
-   $ docker run --rm flwr/supernode:|current_flwr_version| --help
+   $ docker run --rm flwr/supernode:|stable_flwr_version| --help
 
 Enabling SSL for secure connections
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -324,14 +324,14 @@ The ``Dockerfile.serverapp`` contains the instructions that assemble the ServerA
 .. code-block:: dockerfile
    :substitutions:
 
-   FROM flwr/serverapp:|current_flwr_version|
+   FROM flwr/serverapp:|stable_flwr_version|
 
    WORKDIR /app
 
    COPY server.py ./
    ENTRYPOINT ["flower-server-app", "server:app"]
 
-In the first two lines, we instruct Docker to use the ServerApp image tagged :substitution-code:`|current_flwr_version|` as a base
+In the first two lines, we instruct Docker to use the ServerApp image tagged :substitution-code:`|stable_flwr_version|` as a base
 image and set our working directory to ``/app``. The following instructions will now be
 executed in the ``/app`` directory. In the last two lines, we copy the ``server.py`` module into the
 image and set the entry point to ``flower-server-app`` with the argument ``server:app``.
@@ -391,7 +391,7 @@ To see all available flags that the ServerApp supports, run:
 .. code-block:: bash
    :substitutions:
 
-   $ docker run --rm flwr/serverapp:|current_flwr_version| --help
+   $ docker run --rm flwr/serverapp:|stable_flwr_version| --help
 
 Enabling SSL for secure connections
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -426,7 +426,7 @@ Run the Docker image with the ``-u`` flag and specify ``root`` as the username:
 .. code-block:: bash
    :substitutions:
 
-   $ docker run --rm -u root flwr/superlink:|current_flwr_version|
+   $ docker run --rm -u root flwr/superlink:|stable_flwr_version|
 
 This command will run the Docker container with root user privileges.
 
@@ -438,7 +438,7 @@ missing system dependencies, you can use the ``USER root`` directive within your
 .. code-block:: dockerfile
    :substitutions:
 
-   FROM flwr/supernode:|current_flwr_version|
+   FROM flwr/supernode:|stable_flwr_version|
 
    # Switch to root user
    USER root
@@ -473,12 +473,12 @@ updates of system dependencies that should not change the functionality of Flowe
 want to ensure that you always use the same image, you can specify the hash of the image instead of
 the tag.
 
-The following command returns the current image hash referenced by the :substitution-code:`superlink:|current_flwr_version|` tag:
+The following command returns the current image hash referenced by the :substitution-code:`superlink:|stable_flwr_version|` tag:
 
 .. code-block:: bash
    :substitutions:
 
-   $ docker inspect --format='{{index .RepoDigests 0}}' flwr/superlink:|current_flwr_version|
+   $ docker inspect --format='{{index .RepoDigests 0}}' flwr/superlink:|stable_flwr_version|
    flwr/superlink@sha256:985c24b2b337ab7f15a554fde9d860cede95079bcaa244fda8f12c0805e34c7d
 
 Next, we can pin the hash when running a new SuperLink container:
@@ -498,4 +498,4 @@ To set a variable inside a Docker container, you can use the ``-e <name>=<value>
    :substitutions:
 
    $ docker run -e FLWR_TELEMETRY_ENABLED=0 \
-    --rm flwr/superlink:|current_flwr_version| --insecure
+    --rm flwr/superlink:|stable_flwr_version| --insecure
