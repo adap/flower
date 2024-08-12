@@ -24,14 +24,13 @@ dev = [
     "isort==5.13.2",
     "black==24.2.0",
     "docformatter==1.7.5",
-    "mypy==1.4.1",
-    "pylint==2.8.2",
-    "flake8==3.9.2",
+    "mypy==1.8.0",
+    "pylint==3.2.6",
+    "flake8==5.0.4",
     "pytest==6.2.4",
     "pytest-watch==4.2.0",
-    "ruff==0.0.272",
-    "types-requests==2.27.7",
-    "virtualenv==20.21.0",
+    "ruff==0.1.9",
+    "types-requests==2.31.0.20240125",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -56,9 +55,6 @@ seed = 0
 server-device = "cpu"
 num-server-rounds = 100
 
-client-resources-num_cpus = 4
-client-resources-num_gpus = 0.2
-
 dataset-name = "uoft-cs/cifar10"
 dataset-partition-by = "label"
 dirichlet-alpha = 0.5
@@ -72,13 +68,18 @@ default = "local-simulation"
 
 [tool.flwr.federations.local-simulation]
 options.num-supernodes = 10
+options.backend.clientapp-cpus = 4
+options.backend.clientapp-gpus = 0.25
 
 [tool.flwr.federations.local-sim-50]
 options.num-supernodes = 50
+options.backend.clientapp-cpus = 4
+options.backend.clientapp-gpus = 0.25
 
 [tool.flwr.federations.local-sim-100]
 options.num-supernodes = 100
-
+options.backend.clientapp-cpus = 4
+options.backend.clientapp-gpus = 0.5
 
 
 [tool.isort]

@@ -65,40 +65,43 @@ dataset: [CIFAR-10, CIFAR-100]
 
 ## Environment Setup
 
-In a new Python environment:
+Create a new Python environemnt using [pyenv](https://github.com/pyenv/pyenv) and [virtualenv plugin](https://github.com/pyenv/pyenv-virtualenv), then install the baseline project:
 
 ```bash
-# Navigate to the moon directory
+# Create the environment
+pyenv virtualenv 3.10.12 moon-env
+
+# Activate it
+pyenv activate moon-evn
+
 # Then install the project
 pip install -e .
 ```
 
-## Running the Experiments
-
-First ensure you have activated your. To run MOON on CIFAR-10 (Table 1 of the paper), you should run from the top-level directory of this baseline:
-```bash  
-flwr run .
-```
-
-To run MOON on CIFAR-100 (Table 1 of the paper), you should run:
-```bash
-flwr run . --run-config conf/cifar100.toml
-```
-
-
-You can also run FedProx on CIFAR-10:
-```bash
-flwr run . --run-config conf/cifar10_fedprox.toml
-```
-
-To run FedProx on CIFAR-100:
-```bash
-flwr run . --run-config conf/cifar100_fedprox.toml
-```
 
 ## Expected Results
 
-You can find the output logs of a single run in this [link](https://drive.google.com/drive/folders/1YZEU2NcHWEHVyuJMlc1QvBSAvNMjH-aR?usp=share_link). After running the above commands, you can see the accuracy list at the end of the output, which is the test accuracy of the global model. For example, in one running, for CIFAR-10 with MOON, the accuracy after running 100 rounds is 0.7071. 
+> [!NOTE]
+> You can find the output logs of a single run in this [link](https://drive.google.com/drive/folders/1YZEU2NcHWEHVyuJMlc1QvBSAvNMjH-aR?usp=share_link). After running the above commands, you can see the accuracy list at the end of the output, which is the test accuracy of the global model. For example, in one running, for CIFAR-10 with MOON, the accuracy after running 100 rounds is 0.7071. 
+
+## Table 1
+
+The following four commands will generate the results for CIFAR-10 and CIFAR-100 (`MOON` and `FedProx`) in Table 1:
+
+```bash
+
+# CIFAR-10 & MOON (run default config)
+flwr run .
+
+# CIFAR-10 & FedProx
+flwr run . --run-config conf/cifar10_fedprox.toml
+
+# CIFAR-100 & MOON
+flwr run . --run-config conf/cifar100.toml
+
+# CIFAR-100 & FedProx
+flwr run . --run-config conf/cifar100_fedprox.toml
+```
 
 For CIFAR-10 with FedProx, the accuracy after running 100 rounds is 0.6852. For CIFAR100 with MOON, the accuracy after running 100 rounds is 0.6636. For CIFAR100 with FedProx, the accuracy after running 100 rounds is 0.6494. The results are summarized below:
 
@@ -107,6 +110,7 @@ For CIFAR-10 with FedProx, the accuracy after running 100 rounds is 0.6852. For 
 | ----------- | ----- | ----- |
 | MOON | 0.7071 | 0.6636 |
 | FedProx| 0.6852 | 0.6494 |
+
 
 ### Figure 6
 You can find the curve comparing MOON and FedProx on CIFAR-10 and CIFAR-100 below.
