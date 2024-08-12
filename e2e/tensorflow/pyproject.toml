@@ -23,8 +23,8 @@ allow-direct-references = true
 publisher = "flwrlabs"
 
 [tool.flwr.app.components]
-serverapp = ""
-clientapp = "client:app"
+serverapp = "tfe2e.server_app:app"
+clientapp = "tfe2e.client_app:app"
 
 [tool.flwr.app.config]
 

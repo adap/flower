@@ -23,8 +23,8 @@ allow-direct-references = true
 publisher = "flwrlabs"
 
 [tool.flwr.app.components]
-serverapp = ""
-clientapp = "client:app"
+serverapp = "lightninge2e.server_app:app"
+clientapp = "lightninge2e.client_app:app"
 
 [tool.flwr.app.config]
 
