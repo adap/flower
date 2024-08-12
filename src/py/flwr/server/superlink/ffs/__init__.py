@@ -12,15 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower SuperNode."""
+"""Flower File Storage for large objects."""
 
 
-from .app import flwr_clientapp as flwr_clientapp
-from .app import run_client_app as run_client_app
-from .app import run_supernode as run_supernode
+from .disk_ffs import DiskFfs as DiskFfs
+from .ffs import Ffs as Ffs
 
 __all__ = [
-    "flwr_clientapp",
-    "run_client_app",
-    "run_supernode",
+    "DiskFfs",
+    "Ffs",
 ]
