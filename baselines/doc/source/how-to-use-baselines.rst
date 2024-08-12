@@ -38,36 +38,64 @@ Let's begin by installing :code:`pyenv`. We'll be following the standard procedu
 
 .. code-block:: bash
 
-  # first install a few packages needed later for pyenv
-  sudo apt install build-essential zlib1g-dev libssl-dev libsqlite3-dev \
-            libreadline-dev libbz2-dev libffi-dev liblzma-dev
+    # first install a few packages needed later for pyenv
+    sudo apt install build-essential zlib1g-dev libssl-dev libsqlite3-dev \
+              libreadline-dev libbz2-dev libffi-dev liblzma-dev
 
-  # now clone pyenv into your home directory (this is the default way of installing pyenv)
-  git clone https://github.com/pyenv/pyenv.git ~/.pyenv
+    # now clone pyenv into your home directory (this is the default way of installing pyenv)
+    git clone https://github.com/pyenv/pyenv.git ~/.pyenv
 
-  # Then add pyenv to your path by adding the below to your .bashrc/.zshrc
-  export PYENV_ROOT="$HOME/.pyenv"
-  command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
-  eval "$(pyenv init -)"
+    # Then add pyenv to your path by adding the below to your .bashrc/.zshrc
+    export PYENV_ROOT="$HOME/.pyenv"
+    command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+    eval "$(pyenv init -)"
 
 Verify your installation by opening a new terminal and
 
 .. code-block:: bash
 
-  # check python versions available
-  pyenv versions
-  # * system (...)  # <-- it should just show one
+    # check python versions available
+    pyenv versions
+    # * system (...)  # <-- it should just show one
 
 Then you can proceed and install any version of Python. Baselines use Python 3.10, so we'll be installing a recent version of it.
 
 .. code-block:: bash
 
-  pyenv install 3.10.14
-  # this will take a little while
-  # once done, you should see that that version is available
-  pyenv versions
-  # system
-  # * 3.10.14  # <-- you just installed this
+    pyenv install 3.10.14
+    # this will take a little while
+    # once done, you should see that that version is available
+    pyenv versions
+    # system
+    # * 3.10.14  # <-- you just installed this
+
+Next, let's install the :code:`virtualenv` plugin. Check `the documentation <https://github.com/pyenv/pyenv-virtualenv>`_ for alternative installation methods.
+
+.. code-block:: bash
+
+    # Clone `pyenv-virtualenv`
+    git clone https://github.com/pyenv/pyenv-virtualenv.git $(pyenv root)/plugins/pyenv-virtualenv
+
+    # Restart your shell
+    exec "$SHELL"
+
+
+Using :code:`pyenv`
+~~~~~~~~~~~~~~~~~~~
+
+Creating a virtual environment can be done as follows:
+
+.. code-block:: bash
+
+    # Create an environment for Python 3.10.14 named test-env
+    pyenv virtualenv 3.10.13 test-env
+
+    # Then activate it
+    pyenv activate test-env
+
+    # Deactivate it as follows
+    pyenv deactivate
+
 
 (optional) Setup Poetry
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -76,10 +104,10 @@ Now that we have :code:`pyenv` installed, we are ready to install :code:`poetry`
 
 .. code-block:: bash
 
-  curl -sSL https://install.python-poetry.org | python3 -
+    curl -sSL https://install.python-poetry.org | python3 -
 
-  # add to path by putting this line at the end of your .zshrc/.bashrc
-  export PATH="$HOME/.local/bin:$PATH"
+    # add to path by putting this line at the end of your .zshrc/.bashrc
+    export PATH="$HOME/.local/bin:$PATH"
 
 
 To install Poetry from source, to customise your installation, or to further integrate Poetry with your shell after installation, please check `the Poetry documentation <https://python-poetry.org/docs/#installation>`_.
@@ -94,7 +122,7 @@ To use Flower Baselines you need first to install :code:`pyenv` and, depending o
 
 .. code-block:: bash
 
-  git clone https://github.com/adap/flower.git && cd flower
+    git clone https://github.com/adap/flower.git && cd flower
 
 2. Navigate inside the directory of the baseline you'd like to run
 3. Follow the :code:`[Environment Setup]` instructions in the :code:`README.md`. 
