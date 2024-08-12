@@ -10,7 +10,42 @@ dataset: [dataset1, dataset2] # list of datasets you include in your baseline. D
 > Please refer to the [Flower Baselines contribution](https://flower.ai/docs/baselines/how-to-contribute-baselines.html) and [Flower Baselines usage](https://flower.ai/docs/baselines/how-to-use-baselines.html) guides for more details.
 > Please complete the metadata section at the very top of this README. This generates a table at the top of the file that will facilitate indexing baselines.
 > You can check the [MOON baseline](https://github.com/adap/flower/tree/main/baselines/moon) as an example of a baseline that followed this guide.
-> Please remove this [!IMPORTANT] block once you are done with your `README.md` as well as all the `:warning: symbols
+> Please remove this [!IMPORTANT] block once you are done with your `README.md` as well as all the `:warning:` symbols and the comments next to them.
+
+> [!IMPORTANT]
+> To help having all baselines similarly formatted and structured, we have included two scripts in `baselines/dev` that when run will format your code and run some tests checking if it's formatted.
+> These checks use standard packages such as `isort`, `black`, `pylint` and others. You as a baseline creator will need to install additional pacakges. These are already specified in the `pyproject.toml` of 
+> your baseline. Follow these steps:
+
+```bash
+# Create a python env
+pyenv virtualenv 3.10.14 $project_name
+
+# Activate it
+pyenv activate $project_name
+
+# Install project including developer packages
+# Note the `-e` this means you install it in editable mode 
+# so even if you change the code you don't need to do `pip install`
+# again. However, if you add a new dependency to `pyproject.toml` you
+# will need to re-run the command below
+pip install -e ".[dev]"
+
+# At anypoint during the process of creating your baseline you can 
+# run the formatting script. For this do:
+cd .. # so you are in the `flower/baselines` directory
+
+# Run the formatting script (it will auto-correct issues if possible)
+./dev/format-baseline.sh $project_name
+
+# Then, if the above is all good, run the tests.
+./dev/test-baseline.sh $project_name
+```
+
+> [!IMPORTANT]
+> When you open a PR to get the baseline merged into the main Flower repository, the `./dev/test-baseline.sh` script will run. Only if test pass, the baseline can be merged. 
+> Some issues highlighted by the tests script are easier than others to fix. Do not hesitate in reaching out for help to us (e.g. as a comment in your PR) if you are stuck with these.
+> Before opening your PR, please remove the code snippet above as well all the [!IMPORTANT] message blocks. Yes, including this one.
 
 # :warning: *_Title of your baseline_*
 
