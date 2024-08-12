@@ -1,18 +1,16 @@
-import warnings
 import pickle
+import warnings
 
 import flwr as fl
-from flwr_datasets import FederatedDataset
-
 import hydra
+from flwr_datasets import FederatedDataset
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 
-from dataset import get_tokenizer_and_data_collator_and_propt_formatting
-from utils import get_on_fit_config, fit_weighted_average, get_evaluate_fn
 from client import gen_client_fn
-
+from dataset import get_tokenizer_and_data_collator_and_propt_formatting
+from utils import fit_weighted_average, get_evaluate_fn, get_on_fit_config
 
 warnings.filterwarnings("ignore", category=UserWarning)
 

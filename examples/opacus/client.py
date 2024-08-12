@@ -2,16 +2,15 @@ import argparse
 import warnings
 from collections import OrderedDict
 
-from flwr_datasets import FederatedDataset
-from flwr.client import NumPyClient, ClientApp
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from flwr.client import ClientApp, NumPyClient
+from flwr_datasets import FederatedDataset
+from opacus import PrivacyEngine
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
 from tqdm import tqdm
-
-from opacus import PrivacyEngine
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
