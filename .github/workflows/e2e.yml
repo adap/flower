@@ -61,44 +61,55 @@ jobs:
       matrix:
         include:
           - directory: bare
+            subdir: baree2e
 
           - directory: bare-https
+            subdir: httpse2e
 
           - directory: bare-client-auth
+            subdir: clientauthe2e
 
-          - directory: framework-jax
+          - directory: jax
+            subdir: jaxe2e
 
-          - directory: framework-pytorch
+          - directory: pytorch
+            subdir: pytorche2e
             dataset: |
               from torchvision.datasets import CIFAR10
               CIFAR10('./data', download=True)
 
-          - directory: framework-tensorflow
+          - directory: tensorflow
+            subdir: tfe2e
             dataset: |
               import tensorflow as tf
               tf.keras.datasets.cifar10.load_data()
 
-          - directory: framework-opacus
+          - directory: opacus
+            subdir: opacuse2e
             dataset: |
               from torchvision.datasets import CIFAR10
               CIFAR10('./data', download=True)
 
-          - directory: framework-pytorch-lightning
+          - directory: pytorch-lightning
+            subdir: lightninge2e
             dataset: |
               from torchvision.datasets import MNIST
               MNIST('./data', download=True)
 
-          - directory: framework-scikit-learn
+          - directory: scikit-learn
+            subdir: scikite2e
             dataset: |
               import openml
               openml.datasets.get_dataset(554)
 
-          - directory: framework-fastai
+          - directory: fastai
+            subdir: fastaie2e
             dataset: |
               from fastai.vision.all import untar_data, URLs
               untar_data(URLs.MNIST)
 
-          - directory: framework-pandas
+          - directory: pandas
+            subdir: pandase2e
             dataset: |
               from pathlib import Path
               from sklearn.datasets import load_iris
@@ -135,12 +146,15 @@ jobs:
         if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         run: |
           python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
+      - name: Install subdir components
+        run: pip install .
       - name: Download dataset
         if: ${{ matrix.dataset }}
         run: python -c "${{ matrix.dataset }}"
       - name: Run edge client test
         if: ${{ matrix.directory != 'bare-client-auth' }}
-        run: ./../test_legacy.sh "${{ matrix.directory }}"
+        working-directory: e2e/${{ matrix.directory }}/${{ matrix.subdir }}
+        run: ./../../test_legacy.sh "${{ matrix.directory }}"
       - name: Run virtual client test
         if: ${{ matrix.directory != 'bare-client-auth' }}
         run: python simulation.py
