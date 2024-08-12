@@ -137,6 +137,7 @@ def flwr_clientapp() -> None:
         args.address,
         args.token,
     )
+    _run_background_client(address=args.address, token=int(args.token))
 
 
 def _warn_deprecated_server_arg(args: argparse.Namespace) -> None:

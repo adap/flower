@@ -18,7 +18,6 @@ from logging import DEBUG, ERROR, INFO
 
 import grpc
 
-# from flwr.cli.install import install_from_fab
 from flwr.client.client_app import ClientApp
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
@@ -31,8 +30,14 @@ from flwr.common.serde import (
 )
 
 # pylint: disable=E0401,E0611
-from flwr.proto.appio_pb2 import PullClientAppInputsRequest, PushClientAppOutputsRequest
-from flwr.proto.appio_pb2_grpc import ClientAppIoStub, add_ClientAppIoServicer_to_server
+from flwr.proto.clientappio_pb2 import (
+    PullClientAppInputsRequest,
+    PushClientAppOutputsRequest,
+)
+from flwr.proto.clientappio_pb2_grpc import (
+    ClientAppIoStub,
+    add_ClientAppIoServicer_to_server,
+)
 
 # pylint: disable=E0611
 from flwr.server.superlink.fleet.grpc_bidi.grpc_server import generic_create_grpc_server
@@ -45,7 +50,15 @@ def _run_background_client(  # pylint: disable=R0914
     address: str,
     token: int,
 ) -> None:
-    """Run background Flower ClientApp process."""
+    """Run background Flower ClientApp process.
+
+    Parameters
+    ----------
+    address : str
+        Address of SuperNode
+    token : int
+        Unique SuperNode token for ClientApp-SuperNode authentication
+    """
 
     def on_channel_state_change(channel_connectivity: str) -> None:
         """Log channel connectivity."""
@@ -60,31 +73,33 @@ def _run_background_client(  # pylint: disable=R0914
     try:
         stub = ClientAppIoStub(channel)
 
+        # Pull Message, Context, and Run from SuperNode
         req = PullClientAppInputsRequest(token=token)
         res = stub.PullClientAppInputs(req)
-        # fab_file = res.fab
         run = run_from_proto(res.run)
+
+        # Deserialize Message and Context
         message = message_from_proto(res.message)
         context = context_from_proto(res.context)
-        # Ensures FAB is installed (default is Flower directory)
-        # install_from_fab(
-        #     fab_file, None, True
-        # )
+
         load_client_app_fn = _get_load_client_app_fn(
             default_app_ref="",
-            project_dir="",
+            app_path=None,
             multi_app=True,
             flwr_dir=None,
         )
-        # print(f"FAB ID: {run.fab_id}, FAB version: {run.fab_version}")
-        client_app: ClientApp = load_client_app_fn(
-            run.fab_id, run.fab_version  # To be optimized later
-        )
+
+        # Load ClientApp
+        client_app: ClientApp = load_client_app_fn(run.fab_id, run.fab_version)
+
         # Execute ClientApp
         reply_message = client_app(message=message, context=context)
 
+        # Serialize updated Message and Context
         proto_message = message_to_proto(reply_message)
         proto_context = context_to_proto(context)
+
+        # Push Message and Context to SuperNode
         req = PushClientAppOutputsRequest(
             token=token,
             message=proto_message,
