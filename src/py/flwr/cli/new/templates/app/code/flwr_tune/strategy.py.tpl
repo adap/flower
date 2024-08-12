@@ -19,7 +19,6 @@ class FlowerTuneLlm(FedAvg):
         # Test communication costs
         num_clients = len(return_clients)
         test_communication_costs(self.init_model, num_clients)
-        self.init_model = None
 
         return return_clients
 
