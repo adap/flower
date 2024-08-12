@@ -180,6 +180,10 @@ class EventType(str, Enum):
     RUN_SUPEREXEC_ENTER = auto()
     RUN_SUPEREXEC_LEAVE = auto()
 
+    # flwr-clientapp
+    FLWR_CLIENTAPP_ENTER = auto()
+    FLWR_CLIENTAPP_LEAVE = auto()
+
 
 # Use the ThreadPoolExecutor with max_workers=1 to have a queue
 # and also ensure that telemetry calls are not blocking.
