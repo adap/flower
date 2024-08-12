@@ -5,15 +5,17 @@ labels: [label1, label2] # please add between 4 and 10 single-word (maybe two-wo
 dataset: [dataset1, dataset2] # list of datasets you include in your baseline. Do not use "". Remove this comment once you are done.
 ---
 
+> [!IMPORTANT]
+> This is the template for your `README.md`. Please fill-in the information in all areas witha :warning: symbol.
+> Please refer to the [Flower Baselines contribution](https://flower.ai/docs/baselines/how-to-contribute-baselines.html) and [Flower Baselines usage](https://flower.ai/docs/baselines/how-to-use-baselines.html) guides for more details.
+> Please complete the metadata section at the very top of this README. This generates a table at the top of the file that will facilitate indexing baselines.
+> You can check the [MOON baseline](https://github.com/adap/flower/tree/main/baselines/moon) as an example of a baseline that followed this guide.
+> Please remove this [!IMPORTANT] block once you are done with your `README.md` as well as all the `:warning: symbols
+
 # :warning: *_Title of your baseline_*
 
-> Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
-
-> :warning: This is the template to follow when creating a new Flower Baseline. Please follow the instructions in `EXTENDED_README.md`
-
-> :warning: Please follow the instructions carefully. You can see the [FedProx-MNIST baseline](https://github.com/adap/flower/tree/main/baselines/fedprox) as an example of a baseline that followed this guide.
-
-> :warning: Please complete the metadata section at the very top of this README. This generates a table at the top of the file that will facilitate indexing baselines.
+> [!NOTE] 
+> If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
 **Paper:** :warning: *_add the URL of the paper page (not to the .pdf). For instance if you link a paper on ArXiv, add here the URL to the abstract page (e.g. [paper](https://arxiv.org/abs/1512.03385)). If your paper is in from a journal or conference proceedings, please follow the same logic._*
 
@@ -24,9 +26,9 @@ dataset: [dataset1, dataset2] # list of datasets you include in your baseline. D
 
 ## About this baseline
 
-**What’s implemented:** :warning: *_Concisely describe what experiment(s) in the publication can be replicated by running the code. Please only use a few sentences. Start with: “The code in this directory …”_*
+**What’s implemented:** :warning: *_Concisely describe what experiment(s) (e.g. Figure 1, Table 2, etc) in the publication can be replicated by running the code. Please only use a few sentences. ”_*
 
-**Datasets:** :warning: *_List the datasets you used (if you used a medium to large dataset, >10GB please also include the sizes of the dataset)._*
+**Datasets:** :warning: *_List the datasets you used (if you used a medium to large dataset, >10GB please also include the sizes of the dataset). We highly recommend using [FlowerDatasets](https://flower.ai/docs/datasets/index.html) to download and partition your dataset. If you have other ways to download the data, you can also use `FlowerDatasets` to partiion it._*
 
 **Hardware Setup:** :warning: *_Give some details about the hardware (e.g. a server with 8x V100 32GB and 256GB of RAM) you used to run the experiments for this baseline. Indicate how long it took to run the experiments. Someone out there might not have access to the same resources you have so, could you list the absolute minimum hardware needed to run the experiment in a reasonable amount of time ? (e.g. minimum is 1x 16GB GPU otherwise a client model can’t be trained with a sufficiently large batch size). Could you test this works too?_*
 
@@ -63,3 +65,4 @@ flwr run . --run-config <my-big-experiment-config>.toml
 
 :warning: _It is preferable to show a single commmand (or multilple commands if they belong to the same experiment) and then a table/plot with the expected results, instead of showing all the commands first and then all the results/plots._
 :warning: _If you present plots or other figures, please include either a Jupyter notebook showing how to create them or include a utility function that can be called after the experiments finish running._
+:warning: If you include plots or figures, save them in `.png` format and place them in a new directory named `_static` at the same level as your `README.md`.
