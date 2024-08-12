@@ -23,7 +23,7 @@ from flwr.server.superlink.ffs.ffs import Ffs
 
 
 class DiskFfs(Ffs):  # pylint: disable=R0904
-    """Disk based Flower File Storage interface for large objects."""
+    """Disk-based Flower File Storage interface for large objects."""
 
     def __init__(self, base_dir: str) -> None:
         """Create a new DiskFfs instance.
