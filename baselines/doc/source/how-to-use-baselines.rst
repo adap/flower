@@ -5,7 +5,6 @@ Use Baselines
   We are changing the way we structure the Flower baselines. While we complete the transition to the new format, you can still find the existing baselines and use them: `baselines (old) <https://github.com/adap/flower/tree/main/baselines/flwr_baselines>`_.
   Currently, you can make use of baselines for `FedAvg <https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/fedavg_mnist>`_, `FedOpt <https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/adaptive_federated_optimization>`_,  and `LEAF-FEMNIST <https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/leaf/femnist>`_.
 
-  The documentation below has been updated to reflect the new way of using Flower baselines.
 
 Structure
 ---------
@@ -15,23 +14,25 @@ All baselines are available in the directory `baselines <https://github.com/adap
 .. code-block:: shell
 
     flower/baselines/<baseline_name>/
+                          ├── LICENSE
                           ├── README.md
-                          ├── pyproject.toml
+                          ├── pyproject.toml # defines dependencies
+                          ├── _static # optionally a directory to save plots
                           └── <baseline_name>
-                                      ├── *.py # several .py files including main.py and __init__.py
-                                      └── conf
-                                            └── *.yaml # one or more Hydra config files
-
-Please note that some baselines might include additional files (e.g. a :code:`requirements.txt`) or a hierarchy of :code:`.yaml` files for `Hydra <https://hydra.cc/>`_.
+                                      └── *.py # several .py files
 
 
 Setting up your machine
 -----------------------
 
-.. note::
-  Flower baselines are designed to run on Ubuntu 22.04. While a GPU is not required to run the baselines, some of the more computationally demanding ones do benefit from GPU acceleration.
+.. tip::
+  Flower baselines are designed to run on Ubuntu 22.04 and Python 3.10. While a GPU is not required to run the baselines, some of the more computationally demanding ones do benefit from GPU acceleration.
+  All baselines are expected to make use of `pyenv <https://github.com/pyenv/pyenv>`_.
 
-Common to all baselines is `Poetry <https://python-poetry.org/docs/>`_, a tool to manage Python dependencies. Baselines also make use of `Pyenv <https://github.com/pyenv/pyenv>`_. You'll need to install both on your system before running a baseline. What follows is a step-by-step guide on getting :code:`pyenv` and :code:`Poetry` installed on your system.
+.. note::
+  We are in the process of migrating all baselines to use `flwr run`. Those that haven't yet been migrated still make use of `Poetry <https://python-poetry.org/docs/>`_, a tool to manage Python dependencies.
+  Identifying whether the baseline you want to run requires Poetry or not is easy: check if the `Environment Setup` section in the baseline readme mentions Poetry. 
+  Follow the instructions later in this section if you need to setup Poetry in your system.
 
 Let's begin by installing :code:`pyenv`. We'll be following the standard procedure. Please refer to the `pyenv docs <https://github.com/pyenv/pyenv#installation>`_ for alternative ways of installing it.
 
@@ -57,18 +58,21 @@ Verify your installation by opening a new terminal and
   pyenv versions
   # * system (...)  # <-- it should just show one
 
-Then you can proceed and install any version of Python. Most baselines currently use Python 3.10.6, so we'll be installing that one.
+Then you can proceed and install any version of Python. Baselines use Python 3.10, so we'll be installing a recent version of it.
 
 .. code-block:: bash
 
-  pyenv install 3.10.6
+  pyenv install 3.10.14
   # this will take a little while
   # once done, you should see that that version is available
   pyenv versions
   # system
-  # * 3.10.6  # <-- you just installed this
+  # * 3.10.14  # <-- you just installed this
 
-Now that we have :code:`pyenv` installed, we are ready to install :code:`poetry`. Installing Poetry can be done from a single command:
+(optional) Setup Poetry
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Now that we have :code:`pyenv` installed, we are ready to install :code:`poetry`. It can be done from a single command:
 
 .. code-block:: bash
 
@@ -80,10 +84,11 @@ Now that we have :code:`pyenv` installed, we are ready to install :code:`poetry`
 
 To install Poetry from source, to customise your installation, or to further integrate Poetry with your shell after installation, please check `the Poetry documentation <https://python-poetry.org/docs/#installation>`_.
 
+
 Using a Flower Baseline
 -----------------------
 
-To use Flower Baselines you need first to install :code:`pyenv` and :code:`Poetry`, then:
+To use Flower Baselines you need first to install :code:`pyenv` and, depending on the baselines, also :code:`Poetry`, then:
 
 1. Clone the flower repository
 
@@ -92,10 +97,5 @@ To use Flower Baselines you need first to install :code:`pyenv` and :code:`Poetr
   git clone https://github.com/adap/flower.git && cd flower
 
 2. Navigate inside the directory of the baseline you'd like to run
-3. Follow the :code:`[Environment Setup]` instructions in the :code:`README.md`. In most cases this will require you to just do:
-
-.. code-block:: bash
-
-    poetry install
-
-4. Run the baseline as indicated in the :code:`[Running the Experiments]` section in the :code:`README.md` or in the `[Expected Results]` section to reproduce the experiments in the paper.
+3. Follow the :code:`[Environment Setup]` instructions in the :code:`README.md`. 
+4. Run the baseline as indicated in the :code:`[Running the Experiments]` section in the :code:`README.md` or in the :code:`[Expected Results]` section to reproduce the experiments in the paper.
