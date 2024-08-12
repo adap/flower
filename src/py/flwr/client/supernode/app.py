@@ -125,7 +125,7 @@ def flwr_clientapp() -> None:
     log(INFO, "Starting Flower ClientApp")
 
     parser = argparse.ArgumentParser(
-        description="Run a Flower client app",
+        description="Run a Flower ClientApp",
     )
     parser.add_argument(
         "--address",
