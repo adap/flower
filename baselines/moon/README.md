@@ -89,7 +89,6 @@ pip install -e .
 The following four commands will generate the results for CIFAR-10 and CIFAR-100 (`MOON` and `FedProx`) in Table 1:
 
 ```bash
-
 # CIFAR-10 & MOON (run default config)
 flwr run .
 

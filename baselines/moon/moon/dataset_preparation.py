@@ -8,8 +8,8 @@ block) that this file should be executed first.
 """
 
 import torch.nn.functional as F
-import torchvision.transforms as transforms
 from torch.autograd import Variable
+from torchvision import transforms
 
 
 def get_data_transforms(dataset_name):
@@ -23,7 +23,7 @@ def get_data_transforms(dataset_name):
             [
                 transforms.ToTensor(),
                 transforms.Lambda(
-                    lambda x: F.pad(
+                    lambda x: F.pad(  # pylint: disable=not-callable
                         Variable(x.unsqueeze(0), requires_grad=False),
                         (4, 4, 4, 4),
                         mode="reflect",

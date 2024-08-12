@@ -6,10 +6,12 @@ config. In this way, swapping your model for  another one can be done without ch
 the python code at all
 """
 
+from logging import INFO
+
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
+from flwr.common.logger import log
+from torch import nn, optim
 
 from moon.utils import compute_accuracy
 
@@ -324,6 +326,8 @@ class ModelMOON(nn.Module):
                 input_dim=(16 * 5 * 5), hidden_dims=[120, 84]
             )
             num_ftrs = 84
+        else:
+            raise ValueError(f"Model {base_model} not recognised.")
 
         # projection MLP
         self.l1 = nn.Linear(num_ftrs, num_ftrs)
@@ -357,6 +361,8 @@ def init_net(dataset, model, output_dim, device="cpu"):
         n_classes = 10
     elif dataset == "uoft-cs/cifar100":
         n_classes = 100
+    else:
+        raise ValueError(f"Dataset '{dataset}' not recognised.")
 
     net = ModelMOON(model, output_dim, n_classes)
     net.to(device)
@@ -448,18 +454,21 @@ def train_moon(  # pylint: disable=too-many-locals
         epoch_loss = sum(epoch_loss_collector) / len(epoch_loss_collector)
         epoch_loss1 = sum(epoch_loss1_collector) / len(epoch_loss1_collector)
         epoch_loss2 = sum(epoch_loss2_collector) / len(epoch_loss2_collector)
-        print(
-            "Epoch: %d Loss: %f Loss1: %f Loss2: %f"
-            % (epoch, epoch_loss, epoch_loss1, epoch_loss2)
+        log(
+            INFO,
+            "Epoch: %d Loss: %f Loss1: %f Loss2: %f",
+            epoch,
+            epoch_loss,
+            epoch_loss1,
+            epoch_loss2,
         )
 
     previous_net.to("cpu")
     train_acc, _ = compute_accuracy(net, train_dataloader, device=device)
 
-    print(">> Training accuracy: %f" % train_acc)
+    log(INFO, "Training accuracy: %f", train_acc)
     net.to("cpu")
     global_net.to("cpu")
-    print(" ** Training complete **")
     return net
 
 
@@ -470,7 +479,7 @@ def train_fedprox(net, global_net, train_dataloader, epochs, lr, mu, device="cpu
 
     train_acc, _ = compute_accuracy(net, train_dataloader, device=device)
 
-    print(f">> Pre-Training Training accuracy: {train_acc}")
+    log(INFO, "Pre-Training Training accuracy: %f", train_acc)
 
     optimizer = optim.SGD(
         filter(lambda p: p.requires_grad, net.parameters()),
@@ -515,9 +524,7 @@ def train_fedprox(net, global_net, train_dataloader, epochs, lr, mu, device="cpu
 
     train_acc, _ = compute_accuracy(net, train_dataloader, device=device)
 
-    print(">> Training accuracy: %f" % train_acc)
     net.to("cpu")
-    print(" ** Training complete **")
     return net
 
 
@@ -525,6 +532,6 @@ def test(net, test_dataloader, device="cpu"):
     """Test function."""
     net.to(device)
     test_acc, loss = compute_accuracy(net, test_dataloader, device=device)
-    print(">> Test accuracy: %f" % test_acc)
+    log(INFO, "Test accuracy: %f", test_acc)
     net.to("cpu")
     return test_acc, loss

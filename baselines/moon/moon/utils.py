@@ -11,8 +11,8 @@ from typing import Optional
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-import torch.nn as nn
 from flwr.server.history import History
+from torch import nn
 
 
 def compute_accuracy(model, dataloader, device="cpu", multiloader=False):
