@@ -28,6 +28,8 @@ clientapp = "vitexample.client_app:app"
 num-server-rounds = 3
 batch-size = 32
 learning-rate = 0.01
+dataset-name = "nelorth/oxford-flowers"
+num-classes = 102
 
 [tool.flwr.federations]
 default = "local-simulation"

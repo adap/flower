@@ -10,10 +10,10 @@ from vitexample.task import get_model, set_params, get_params, train
 
 
 class FedViTClient(NumPyClient):
-    def __init__(self, trainloader, learning_rate):
+    def __init__(self, trainloader, learning_rate, num_classes):
         self.trainloader = trainloader
         self.learning_rate = learning_rate
-        self.model = get_model()
+        self.model = get_model(num_classes)
 
         # Determine device
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -42,17 +42,19 @@ def client_fn(context: Context):
     # Read the node_config to fetch data partition associated to this node
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
-    trainpartition = get_dataset_partition(num_partitions, partition_id)
+    dataset_name = context.run_config["dataset-name"]
+    trainpartition = get_dataset_partition(num_partitions, partition_id, dataset_name)
 
     batch_size = context.run_config["batch-size"]
     lr = context.run_config["learning-rate"]
+    num_classes = context.run_config["num-classes"]
     trainset = trainpartition.with_transform(apply_train_transforms)
 
     trainloader = DataLoader(
         trainset, batch_size=batch_size, num_workers=2, shuffle=True
     )
 
-    return FedViTClient(trainloader, lr).to_client()
+    return FedViTClient(trainloader, lr, num_classes).to_client()
 
 
 app = ClientApp(client_fn=client_fn)

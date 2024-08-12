@@ -15,18 +15,18 @@ from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 
 
-def get_model():
+def get_model(num_classes: int):
     """Return a pretrained ViT with all layers frozen except output head."""
 
     # Instantiate a pre-trained ViT-B on ImageNet
     model = vit_b_16(weights=ViT_B_16_Weights.IMAGENET1K_V1)
 
     # We're going to federated the finetuning of this model
-    # using the Oxford Flowers-102 dataset. One easy way to achieve
-    # this is by re-initializing the output block of the ViT so it
-    # outputs 102 clases instead of the default 1k
+    # using (by default) the Oxford Flowers-102 dataset. One easy way
+    # to achieve this is by re-initializing the output block of the
+    # ViT so it outputs 102 clases instead of the default 1k
     in_features = model.heads[-1].in_features
-    model.heads[-1] = torch.nn.Linear(in_features, 102)
+    model.heads[-1] = torch.nn.Linear(in_features, num_classes)
 
     # Disable gradients for everything
     model.requires_grad_(False)
@@ -54,6 +54,7 @@ def train(net, trainloader, optimizer, epochs, device):
     """Train the model on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
     net.train()
+    net.to(device)
     avg_loss = 0
     # A very standard training loop for image classification
     for _ in range(epochs):
@@ -72,6 +73,7 @@ def test(net, testloader, device: str):
     """Validate the network on the entire test set."""
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
+    net.to(device)
     net.eval()
     with torch.no_grad():
         for data in testloader:
@@ -87,14 +89,14 @@ def test(net, testloader, device: str):
 fds = None
 
 
-def get_dataset_partition(num_partitions: int, partition_id: int):
+def get_dataset_partition(num_partitions: int, partition_id: int, dataset_name: str):
     """Get Oxford Flowers datasets and partition it."""
     global fds
     if fds is None:
-        # Get Oxford Flowers-102 and create IID partitions
+        # Get dataset (by default Oxford Flowers-102) and create IID partitions
         partitioner = IidPartitioner(num_partitions)
         fds = FederatedDataset(
-            dataset="nelorth/oxford-flowers", partitioners={"train": partitioner}
+            dataset=dataset_name, partitioners={"train": partitioner}
         )
 
     return fds.load_partition(partition_id)
