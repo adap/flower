@@ -26,14 +26,16 @@ from flwr.common.object_ref import load_app, validate
 
 def _get_load_client_app_fn(
     default_app_ref: str,
-    project_dir: str,
+    app_path: Optional[str],
     multi_app: bool,
     flwr_dir: Optional[str] = None,
 ) -> Callable[[str, str], ClientApp]:
     """Get the load_client_app_fn function.
+
     If `multi_app` is True, this function loads the specified ClientApp
     based on `fab_id` and `fab_version`. If `fab_id` is empty, a default
     ClientApp will be loaded.
+
     If `multi_app` is False, it ignores `fab_id` and `fab_version` and
     loads a default ClientApp.
     """
@@ -44,34 +46,39 @@ def _get_load_client_app_fn(
             default_app_ref,
         )
 
-        valid, error_msg = validate(default_app_ref, project_dir=project_dir)
+        valid, error_msg = validate(default_app_ref, project_dir=app_path)
         if not valid and error_msg:
             raise LoadClientAppError(error_msg) from None
 
     def _load(fab_id: str, fab_version: str) -> ClientApp:
-        runtime_project_dir = Path(project_dir).absolute()
+        runtime_app_dir = Path(app_path if app_path else "").absolute()
         # If multi-app feature is disabled
         if not multi_app:
             # Set app reference
             client_app_ref = default_app_ref
-        # If multi-app feature is enabled but the fab id is not specified
-        elif fab_id == "":
-            if default_app_ref == "":
+        # If multi-app feature is enabled but app directory is provided
+        elif app_path is not None:
+            config = get_project_config(runtime_app_dir)
+            this_fab_version, this_fab_id = get_metadata_from_config(config)
+
+            if this_fab_version != fab_version or this_fab_id != fab_id:
                 raise LoadClientAppError(
-                    "Invalid FAB ID: The FAB ID is empty.",
+                    f"FAB ID or version mismatch: Expected FAB ID '{this_fab_id}' and "
+                    f"FAB version '{this_fab_version}', but received FAB ID '{fab_id}' "
+                    f"and FAB version '{fab_version}'.",
                 ) from None
 
-            log(WARN, "FAB ID is not provided; the default ClientApp will be loaded.")
+            # log(WARN, "FAB ID is not provided; the default ClientApp will be loaded.")
 
             # Set app reference
-            client_app_ref = default_app_ref
+            client_app_ref = config["tool"]["flwr"]["app"]["components"]["clientapp"]
         # If multi-app feature is enabled
         else:
             try:
-                runtime_project_dir = get_project_dir(
+                runtime_app_dir = get_project_dir(
                     fab_id, fab_version, get_flwr_dir(flwr_dir)
                 )
-                config = get_project_config(runtime_project_dir)
+                config = get_project_config(runtime_app_dir)
             except Exception as e:
                 raise LoadClientAppError("Failed to load ClientApp") from e
 
@@ -84,7 +91,7 @@ def _get_load_client_app_fn(
             "Loading ClientApp `%s`",
             client_app_ref,
         )
-        client_app = load_app(client_app_ref, LoadClientAppError, runtime_project_dir)
+        client_app = load_app(client_app_ref, LoadClientAppError, runtime_app_dir)
 
         if not isinstance(client_app, ClientApp):
             raise LoadClientAppError(
