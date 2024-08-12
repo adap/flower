@@ -107,7 +107,7 @@ building your own SuperNode image.
         | to be built from is the ``flwr/supernode image``, version :substitution-code:`|stable_flwr_version|`.
       * | ``WORKDIR /app``: Set the working directory for the container to ``/app``.
         | Any subsequent commands that reference a directory will be relative to this directory.
-      * | ``COPY docker_pyproject.toml pyproject.toml``: Copy the ``pyproject.toml`` file
+      * | ``COPY pyproject.toml .``: Copy the ``pyproject.toml`` file
         | from the current working directory into the container's ``/app`` directory.
       * | ``RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml``: Remove the ``flwr`` dependency
         | from the ``pyproject.toml``.
@@ -198,7 +198,7 @@ The procedure for building and running a SuperExec image is almost identical to 
 Similar to the SuperNode image, the SuperExec Docker image comes with a pre-installed version of
 Flower and serves as a base for building your own SuperExec image.
 
-#. Create a SuperNode Dockerfile called ``Dockerfile.superexec`` and paste the following code in:
+#. Create a SuperExec Dockerfile called ``Dockerfile.superexec`` and paste the following code in:
 
    .. code-block:: dockerfile
       :caption: Dockerfile.superexec
@@ -207,8 +207,10 @@ Flower and serves as a base for building your own SuperExec image.
       FROM flwr/superexec:|stable_flwr_version|
 
       WORKDIR /app
-      COPY docker_pyproject.toml pyproject.toml
-      RUN python -m pip install -U --no-cache-dir .
+
+      COPY pyproject.toml .
+      RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
+         && python -m pip install -U --no-cache-dir .
 
       ENTRYPOINT ["flower-superexec", "--executor", "flwr.superexec.deployment:executor"]
 
@@ -218,10 +220,11 @@ Flower and serves as a base for building your own SuperExec image.
         | to be built from is the ``flwr/superexec image``, version :substitution-code:`|stable_flwr_version|`.
       * | ``WORKDIR /app``: Set the working directory for the container to ``/app``.
         | Any subsequent commands that reference a directory will be relative to this directory.
-      * | ``COPY docker_pyproject.toml pyproject.toml``: Copy the ``docker_pyproject.toml`` file
-        | from the current working directory into the container's ``/app`` directory,
-        | renaming it to ``pyproject.toml``.
-      * | ``RUN python -m pip install -U --no-cache-dir .``: Run the ``pip`` install command to
+      * | ``COPY pyproject.toml .``: Copy the ``pyproject.toml`` file
+        | from the current working directory into the container's ``/app`` directory.
+      * | ``RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml``: Remove the ``flwr`` dependency
+        | from the ``pyproject.toml``.
+      * | ``python -m pip install -U --no-cache-dir .``: Run the ``pip`` install command to
         | install the dependencies defined in the ``pyproject.toml`` file
         |
         | The ``-U`` flag indicates that any existing packages should be upgraded, and
