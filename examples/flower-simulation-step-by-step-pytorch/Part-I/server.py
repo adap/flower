@@ -1,9 +1,7 @@
 from collections import OrderedDict
 
-
-from omegaconf import DictConfig
-
 import torch
+from omegaconf import DictConfig
 
 from model import Net, test
 
