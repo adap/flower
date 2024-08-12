@@ -20,7 +20,11 @@ from typing import Any, Dict, List, MutableMapping, OrderedDict, Type, TypeVar, 
 from google.protobuf.message import Message as GrpcMessage
 
 # pylint: disable=E0611
+from flwr.proto.clientappio_pb2 import ClientAppOutputCode, ClientAppOutputStatus
 from flwr.proto.error_pb2 import Error as ProtoError
+from flwr.proto.message_pb2 import Context as ProtoContext
+from flwr.proto.message_pb2 import Message as ProtoMessage
+from flwr.proto.message_pb2 import Metadata as ProtoMetadata
 from flwr.proto.node_pb2 import Node
 from flwr.proto.recordset_pb2 import Array as ProtoArray
 from flwr.proto.recordset_pb2 import BoolList, BytesList
@@ -34,11 +38,15 @@ from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
 from flwr.proto.recordset_pb2 import Sint64List, StringList
 from flwr.proto.run_pb2 import Run as ProtoRun
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
-from flwr.proto.transport_pb2 import ClientMessage, Code
-from flwr.proto.transport_pb2 import Context as ProtoContext
-from flwr.proto.transport_pb2 import Message as ProtoMessage
-from flwr.proto.transport_pb2 import Metadata as ProtoMetadata
-from flwr.proto.transport_pb2 import Parameters, Reason, Scalar, ServerMessage, Status
+from flwr.proto.transport_pb2 import (
+    ClientMessage,
+    Code,
+    Parameters,
+    Reason,
+    Scalar,
+    ServerMessage,
+    Status,
+)
 
 # pylint: enable=E0611
 from . import (
@@ -836,3 +844,30 @@ def run_from_proto(run_proto: ProtoRun) -> typing.Run:
         override_config=user_config_from_proto(run_proto.override_config),
     )
     return run
+
+
+# === ClientApp status messages ===
+
+
+def clientappstatus_to_proto(
+    status: typing.ClientAppOutputStatus,
+) -> ClientAppOutputStatus:
+    """Serialize `ClientAppOutputStatus` to ProtoBuf."""
+    code = ClientAppOutputCode.SUCCESS
+    if status.code == typing.ClientAppOutputCode.DEADLINE_EXCEEDED:
+        code = ClientAppOutputCode.DEADLINE_EXCEEDED
+    if status.code == typing.ClientAppOutputCode.UNKNOWN_ERROR:
+        code = ClientAppOutputCode.UNKNOWN_ERROR
+    return ClientAppOutputStatus(code=code, message=status.message)
+
+
+def clientappstatus_from_proto(
+    msg: ClientAppOutputStatus,
+) -> typing.ClientAppOutputStatus:
+    """Deserialize `ClientAppOutputStatus` from ProtoBuf."""
+    code = typing.ClientAppOutputCode.SUCCESS
+    if msg.code == ClientAppOutputCode.DEADLINE_EXCEEDED:
+        code = typing.ClientAppOutputCode.DEADLINE_EXCEEDED
+    if msg.code == ClientAppOutputCode.UNKNOWN_ERROR:
+        code = typing.ClientAppOutputCode.UNKNOWN_ERROR
+    return typing.ClientAppOutputStatus(code=code, message=msg.message)
