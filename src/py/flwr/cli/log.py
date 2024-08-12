@@ -49,6 +49,7 @@ def print_logs(
     run_id: int, channel: grpc.Channel, timeout: int, is_test: bool = False
 ) -> None:
     """Print logs from the beginning of a run.
+
     The `is_test` parameter is only used for `pytest` and must be `False` otherwise.
     """
     stub = ExecStub(channel)
