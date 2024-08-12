@@ -48,12 +48,30 @@ dataset: [dataset1, dataset2] # list of datasets you include in your baseline. D
 
 ## Environment Setup
 
-:warning: _The Python environment for all baselines should follow these guidelines in the `EXTENDED_README`. Specify the steps to create and activate your environment. If there are any external system-wide requirements, please include instructions for them too. These instructions should be comprehensive enough so anyone can run them (if non standard, describe them step-by-step)._
+:warning: _Specify the steps to create and activate your environment and install the baseline project. Most baselines are expected to require minimal steps as shown below. These instructions should be comprehensive enough so anyone can run them (if non standard, describe them step-by-step)._
 
+:warning: _The dependencies for your baseline are listed in the `pyproject.toml`, extend it with additional packages needed for your baseline._
+
+:warning: _Baselines should use Python 3.10, [pyenv](https://github.com/pyenv/pyenv), and the [virtualenv](https://github.com/pyenv/pyenv-virtualenv) plugging. 
+
+```bash
+# Create the virtual environment
+pyenv virtualenv 3.10.14 <name-of-your-baseline-env>
+
+# Activate it
+pyenv activate <name-of-your-baseline-env>
+
+# Install the baseline
+pip install -e .
+```
+
+:warning: _If your baseline requires running some script before starting an experiment, please indicate so here_.
 
 ## Running the Experiments
 
 :warning: _Your baseline implementation should replicate several of the experiments in the original paper. Please include here the exact command(s) needed to run each of those experiments followed by a figure (e.g. a line plot) or table showing the results you obtained when you ran the code. Below is an example of how you can present this. Please add command followed by results for all your experiments._
+
+:warning: _You might want to add more hyperparameters and settings for your baseline. You can do so by extending `[tool.flwr.app.config]` in `pyproject.toml`. In addition, you can create a new `.toml` file that can be passed with the `--run-config` command (see below an example) to override several config values already present in `pyproject.toml`._
 
 ```bash
 # it is likely that for one experiment you need to override some arguments.
