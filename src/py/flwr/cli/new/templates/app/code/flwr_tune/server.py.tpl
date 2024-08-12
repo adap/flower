@@ -1,14 +1,13 @@
 """$project_name: A Flower / FlowerTune app."""
 
-import warnings
 from omegaconf import DictConfig
 from flwr.common import Context, ndarrays_to_parameters
 from flwr.common.config import unflatten_dict
 from flwr.server import ServerAppComponents, ServerConfig
-from flwr.server.strategy import FedAvg
 
 from $import_name.client import set_parameters, get_parameters
 from $import_name.models import get_model
+from $import_name.strategy import FlowerTuneLlm
 
 
 # Get function that will be executed by the strategy's evaluate() method
@@ -55,23 +54,6 @@ def fit_weighted_average(metrics):
     return {"train_loss": sum(losses) / sum(examples)}
 
 
-def test_communication_costs(model, cfg):
-    """Aggregate (federated) evaluation metrics."""
-    min_fit_clients = cfg.strategy.min_fit_clients
-
-    trainable, _ = model.get_nb_trainable_parameters()
-    comm_cost = 2 * min_fit_clients * trainable / 1024**2
-    print(f"Communication costs per round: {comm_cost}.")
-
-    if comm_cost > 500:
-        warnings.warn(
-                    "The total communication costs per round exceed 500 MB."
-                    "Please consider reducing it if you plan to participate "
-                    "FlowerTune LLM Leaderboard.",
-                    stacklevel=1,
-                    )
-
-
 def gen_server_fn(save_path: str):  # pylint: disable=too-many-arguments
     """Generate the server function."""
 
@@ -85,13 +67,10 @@ def gen_server_fn(save_path: str):  # pylint: disable=too-many-arguments
         init_model_parameters = get_parameters(init_model)
         init_model_parameters = ndarrays_to_parameters(init_model_parameters)
 
-        # Test communication costs
-        test_communication_costs(init_model, cfg)
-
         # Define strategy
-        strategy = FedAvg(
+        strategy = FlowerTuneLlm(
+            init_model=init_model,
             fraction_fit=cfg.strategy.fraction_fit,
-            min_fit_clients=cfg.strategy.min_fit_clients
             fraction_evaluate=cfg.strategy.fraction_evaluate,
             on_fit_config_fn=get_on_fit_config(),
             fit_metrics_aggregation_fn=fit_weighted_average,

@@ -51,7 +51,6 @@ train.training_arguments.save_total_limit = 10
 train.training_arguments.gradient_checkpointing = true
 train.training_arguments.lr_scheduler_type = "constant"
 strategy.fraction_fit = $fraction_fit
-strategy.min_fit_clients = ($fraction_fit * $num_clients)
 strategy.fraction_evaluate = 0.0
 num-server-rounds = 200
 

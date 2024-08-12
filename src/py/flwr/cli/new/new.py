@@ -200,6 +200,9 @@ def new(
             f"{import_name}/dataset.py": {
                 "template": "app/code/flwr_tune/dataset.py.tpl"
             },
+            f"{import_name}/strategy.py": {
+                "template": "app/code/flwr_tune/strategy.py.tpl"
+            },
         }
 
         # Challenge specific context
