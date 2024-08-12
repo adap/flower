@@ -1,4 +1,4 @@
-"""$project_name: A Flower / $framework_str app."""
+"""$project_name: A Flower $framework_str app."""
 
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor

@@ -275,6 +275,8 @@ def new(
             # Add LICENSE
             files["LICENSE"] = {"template": "app/LICENSE.tpl"}
 
+            context["framework_str"] = "baseline"
+
     for file_path, value in files.items():
         render_and_create(
             file_path=project_dir / file_path,
