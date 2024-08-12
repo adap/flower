@@ -1,7 +1,5 @@
 """monaiexample: A Flower / MONAI app."""
 
-from collections import OrderedDict
-
 import torch
 from flwr.common import Context
 from flwr.client import NumPyClient, ClientApp

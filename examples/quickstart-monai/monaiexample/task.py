@@ -6,8 +6,8 @@ from urllib import request
 from collections import OrderedDict
 
 import torch
-from monai.data import DataLoader, Dataset
-from monai.networks.nets.densenet import DenseNet121
+import monai
+from monai.networks.nets import densenet
 from monai.transforms import (
     Compose,
     EnsureChannelFirst,
@@ -18,26 +18,30 @@ from monai.transforms import (
     ScaleIntensity,
     ToTensor,
 )
-
+from filelock import FileLock
 from datasets import Dataset
 from flwr_datasets.partitioner import IidPartitioner
 
 
 def load_model():
-    return DenseNet121(spatial_dims=2, in_channels=1, out_channels=6)
+    """Load a DenseNet12."""
+    return densenet.DenseNet121(spatial_dims=2, in_channels=1, out_channels=6)
 
 
 def get_params(model):
+    """Return tensors in the model's state_dict."""
     return [val.cpu().numpy() for _, val in model.state_dict().items()]
 
 
 def set_params(model, ndarrays):
+    """Apply parameters to a model."""
     params_dict = zip(model.state_dict().keys(), ndarrays)
     state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
     model.load_state_dict(state_dict, strict=True)
 
 
 def train(model, train_loader, epoch_num, device):
+    """Train a model using the supplied dataloader."""
     model.to(device)
     loss_function = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), 1e-5)
@@ -51,6 +55,7 @@ def train(model, train_loader, epoch_num, device):
 
 
 def test(model, test_loader, device):
+    """Evaluate a model on a held-out dataset."""
     model.to(device)
     model.eval()
     loss = 0.0
@@ -74,6 +79,7 @@ def test(model, test_loader, device):
 
 
 def _get_transforms():
+    """Return transforms to be used for training and evaluation."""
     train_transforms = Compose(
         [
             LoadImage(image_only=True),
@@ -94,6 +100,8 @@ def _get_transforms():
 
 
 def get_apply_transforms_fn(transforms_to_apply):
+    """Return a function that applies the transforms passed as input argument."""
+
     def apply_transforms(batch):
         """Apply transforms to the partition from FederatedDataset."""
         batch["img"] = [transforms_to_apply(img) for img in batch["img_file"]]
@@ -107,7 +115,7 @@ partitioner = None
 
 
 def load_data(num_partitions, partition_id, batch_size):
-
+    """Download dataset, partition it and return data loader of specific partition."""
     # Set dataset and partitioner only once
     global ds, partitioner
     if ds is None:
@@ -135,19 +143,23 @@ def load_data(num_partitions, partition_id, batch_size):
     partition_val = test_partition.with_transform(get_apply_transforms_fn(test_t))
 
     # Create dataloaders
-    train_loader = DataLoader(partition_train, batch_size=batch_size, shuffle=True)
-    val_loader = DataLoader(partition_val, batch_size=batch_size)
+    train_loader = monai.data.DataLoader(
+        partition_train, batch_size=batch_size, shuffle=True
+    )
+    val_loader = monai.data.DataLoader(partition_val, batch_size=batch_size)
 
     return train_loader, val_loader
 
 
 def _download_data():
+    """Download and extract dataset."""
     data_dir = "./MedNIST/"
-    _download_and_extract(
+    _download_and_extract_if_needed(
         "https://dl.dropboxusercontent.com/s/5wwskxctvcxiuea/MedNIST.tar.gz",
         os.path.join(data_dir),
     )
 
+    # Compute list of files and thier associated labels
     class_names = sorted(
         [x for x in os.listdir(data_dir) if os.path.isdir(os.path.join(data_dir, x))]
     )
@@ -163,19 +175,25 @@ def _download_data():
     for i, _ in enumerate(class_names):
         image_file_list.extend(image_files[i])
         image_label_list.extend([i] * len(image_files[i]))
+
     return image_file_list, image_label_list
 
 
-def _download_and_extract(url, dest_folder):
-    if not os.path.isdir(dest_folder):
-        # Download the tar.gz file
-        tar_gz_filename = url.split("/")[-1]
-        if not os.path.isfile(tar_gz_filename):
-            with request.urlopen(url) as response, open(
-                tar_gz_filename, "wb"
-            ) as out_file:
-                out_file.write(response.read())
+def _download_and_extract_if_needed(url, dest_folder):
+    """Download dataset if not present."""
 
-        # Extract the tar.gz file
-        with tarfile.open(tar_gz_filename, "r:gz") as tar_ref:
-            tar_ref.extractall()
+    # Logic behind a filelock to prevent multiple processes (e.g. ClientApps)
+    # from downloading the dataset at the same time.
+    with FileLock(".data_download.lock"):
+        if not os.path.isdir(dest_folder):
+            # Download the tar.gz file
+            tar_gz_filename = url.split("/")[-1]
+            if not os.path.isfile(tar_gz_filename):
+                with request.urlopen(url) as response, open(
+                    tar_gz_filename, "wb"
+                ) as out_file:
+                    out_file.write(response.read())
+
+            # Extract the tar.gz file
+            with tarfile.open(tar_gz_filename, "r:gz") as tar_ref:
+                tar_ref.extractall()
