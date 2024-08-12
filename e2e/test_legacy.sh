@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
 
-echo "Current directory: $(pwd)"
-
 if [ "$1" = "bare-https" ]; then
   ./generate.sh
 fi
