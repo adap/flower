@@ -27,7 +27,7 @@ class TestFlwrLog(unittest.TestCase):
     """Unit tests for `flwr log` CLI functions."""
 
     @patch("flwr.cli.log.ExecStub")
-    def test_flwr_log_stream_method(self, mock_stub) -> None:
+    def test_flwr_log_stream_method(self, mock_stub: Mock) -> None:
         """Test stream_logs."""
         # Create mock response iterator
         mock_response_iterator = iter(
@@ -48,7 +48,7 @@ class TestFlwrLog(unittest.TestCase):
             mock_print.assert_any_call("print_result_3")
 
     @patch("flwr.cli.log.ExecStub")
-    def test_flwr_log_print_method(self, mock_stub) -> None:
+    def test_flwr_log_print_method(self, mock_stub: Mock) -> None:
         """Test print_logs."""
         # Create mock response iterator
         mock_response_iterator = iter(
