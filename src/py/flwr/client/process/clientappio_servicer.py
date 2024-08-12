@@ -23,26 +23,26 @@ import grpc
 from flwr.common import Context, Message, typing
 from flwr.common.logger import log
 from flwr.common.serde import (
+    clientappstatus_to_proto,
     context_from_proto,
     context_to_proto,
     message_from_proto,
     message_to_proto,
     run_to_proto,
-    status_to_proto,
 )
 from flwr.common.typing import Run
 
 # pylint: disable=E0611
 from flwr.proto import appio_pb2_grpc
-from flwr.proto.appio_pb2 import (  # pylint: disable=E0401
+from flwr.proto.clientappio_pb2 import (  # pylint: disable=E0401
     PullClientAppInputsRequest,
     PullClientAppInputsResponse,
     PushClientAppOutputsRequest,
     PushClientAppOutputsResponse,
 )
+from flwr.proto.message_pb2 import Context as ProtoContext
+from flwr.proto.message_pb2 import Message as ProtoMessage
 from flwr.proto.run_pb2 import Run as ProtoRun
-from flwr.proto.transport_pb2 import Context as ProtoContext
-from flwr.proto.transport_pb2 import Message as ProtoMessage
 
 
 # pylint: disable=C0103,W0613
@@ -82,9 +82,9 @@ class ClientAppIoServicer(appio_pb2_grpc.ClientAppIoServicer):
         # Update Message and Context
         self._update_object()
         # Set status
-        code = typing.Code.OK
-        status = typing.Status(code=code, message="Success")
-        proto_status = status_to_proto(status=status)
+        code = typing.ClientAppOutputCode.SUCCESS
+        status = typing.ClientAppOutputStatus(code=code, message="Success")
+        proto_status = clientappstatus_to_proto(status=status)
         return PushClientAppOutputsResponse(status=proto_status)
 
     def set_object(
