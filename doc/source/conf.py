@@ -17,6 +17,7 @@
 import datetime
 import os
 import sys
+
 from git import Repo
 from sphinx.application import ConfigError
 
@@ -92,7 +93,7 @@ author = "The Flower Authors"
 release = "1.11.0"
 # The current released version
 rst_prolog = """
-.. |current_flwr_version| replace:: 1.10.0
+.. |stable_flwr_version| replace:: 1.10.0
 """
 
 # -- General configuration ---------------------------------------------------

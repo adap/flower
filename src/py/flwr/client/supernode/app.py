@@ -31,6 +31,7 @@ from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import EventType, event
 from flwr.common.config import (
     get_flwr_dir,
+    get_metadata_from_config,
     get_project_config,
     get_project_dir,
     parse_config_args,
@@ -61,8 +62,8 @@ def run_supernode() -> None:
 
     root_certificates = _get_certificates(args)
     load_fn = _get_load_client_app_fn(
-        default_app_ref=getattr(args, "client-app"),
-        project_dir=args.dir,
+        default_app_ref="",
+        app_path=args.app,
         flwr_dir=args.flwr_dir,
         multi_app=True,
     )
@@ -100,7 +101,7 @@ def run_client_app() -> None:
     root_certificates = _get_certificates(args)
     load_fn = _get_load_client_app_fn(
         default_app_ref=getattr(args, "client-app"),
-        project_dir=args.dir,
+        app_path=args.dir,
         multi_app=False,
     )
     authentication_keys = _try_setup_client_authentication(args)
@@ -176,7 +177,7 @@ def _get_certificates(args: argparse.Namespace) -> Optional[bytes]:
 
 def _get_load_client_app_fn(
     default_app_ref: str,
-    project_dir: str,
+    app_path: Optional[str],
     multi_app: bool,
     flwr_dir: Optional[str] = None,
 ) -> Callable[[str, str], ClientApp]:
@@ -196,34 +197,39 @@ def _get_load_client_app_fn(
             default_app_ref,
         )
 
-        valid, error_msg = validate(default_app_ref, project_dir=project_dir)
+        valid, error_msg = validate(default_app_ref, project_dir=app_path)
         if not valid and error_msg:
             raise LoadClientAppError(error_msg) from None
 
     def _load(fab_id: str, fab_version: str) -> ClientApp:
-        runtime_project_dir = Path(project_dir).absolute()
+        runtime_app_dir = Path(app_path if app_path else "").absolute()
         # If multi-app feature is disabled
         if not multi_app:
             # Set app reference
             client_app_ref = default_app_ref
-        # If multi-app feature is enabled but the fab id is not specified
-        elif fab_id == "":
-            if default_app_ref == "":
+        # If multi-app feature is enabled but app directory is provided
+        elif app_path is not None:
+            config = get_project_config(runtime_app_dir)
+            this_fab_version, this_fab_id = get_metadata_from_config(config)
+
+            if this_fab_version != fab_version or this_fab_id != fab_id:
                 raise LoadClientAppError(
-                    "Invalid FAB ID: The FAB ID is empty.",
+                    f"FAB ID or version mismatch: Expected FAB ID '{this_fab_id}' and "
+                    f"FAB version '{this_fab_version}', but received FAB ID '{fab_id}' "
+                    f"and FAB version '{fab_version}'.",
                 ) from None
 
-            log(WARN, "FAB ID is not provided; the default ClientApp will be loaded.")
+            # log(WARN, "FAB ID is not provided; the default ClientApp will be loaded.")
 
             # Set app reference
-            client_app_ref = default_app_ref
+            client_app_ref = config["tool"]["flwr"]["app"]["components"]["clientapp"]
         # If multi-app feature is enabled
         else:
             try:
-                runtime_project_dir = get_project_dir(
+                runtime_app_dir = get_project_dir(
                     fab_id, fab_version, get_flwr_dir(flwr_dir)
                 )
-                config = get_project_config(runtime_project_dir)
+                config = get_project_config(runtime_app_dir)
             except Exception as e:
                 raise LoadClientAppError("Failed to load ClientApp") from e
 
@@ -236,7 +242,7 @@ def _get_load_client_app_fn(
             "Loading ClientApp `%s`",
             client_app_ref,
         )
-        client_app = load_app(client_app_ref, LoadClientAppError, runtime_project_dir)
+        client_app = load_app(client_app_ref, LoadClientAppError, runtime_app_dir)
 
         if not isinstance(client_app, ClientApp):
             raise LoadClientAppError(
@@ -255,13 +261,15 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
-        "client-app",
+        "app",
         nargs="?",
-        default="",
-        help="For example: `client:app` or `project.package.module:wrapper.app`. "
-        "This is optional and serves as the default ClientApp to be loaded when "
-        "the ServerApp does not specify `fab_id` and `fab_version`. "
-        "If not provided, defaults to an empty string.",
+        default=None,
+        help="Specify the path of the Flower App to load and run the `ClientApp`. "
+        "The `pyproject.toml` file must be located in the root of this path. "
+        "When this argument is provided, the SuperNode will exclusively respond to "
+        "messages from the corresponding `ServerApp` by matching the FAB ID and FAB "
+        "version. An error will be raised if a message is received from any other "
+        "`ServerApp`.",
     )
     _parse_args_common(parser)
     parser.add_argument(
@@ -290,6 +298,13 @@ def _parse_args_run_client_app() -> argparse.ArgumentParser:
         help="For example: `client:app` or `project.package.module:wrapper.app`",
     )
     _parse_args_common(parser=parser)
+    parser.add_argument(
+        "--dir",
+        default="",
+        help="Add specified directory to the PYTHONPATH and load Flower "
+        "app from there."
+        " Default: current working directory.",
+    )
 
     return parser
 
@@ -356,13 +371,6 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         help="The maximum duration before the client stops trying to"
         "connect to the SuperLink in case of connection error. By default, it"
         "is set to None, meaning there is no limit to the total time.",
-    )
-    parser.add_argument(
-        "--dir",
-        default="",
-        help="Add specified directory to the PYTHONPATH and load Flower "
-        "app from there."
-        " Default: current working directory.",
     )
     parser.add_argument(
         "--auth-supernode-private-key",

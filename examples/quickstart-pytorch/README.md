@@ -4,94 +4,64 @@ dataset: [CIFAR-10]
 framework: [torch, torchvision]
 ---
 
-# Flower Example using PyTorch
+# Federated Learning with PyTorch and Flower (Quickstart Example)
 
 This introductory example to Flower uses PyTorch, but deep knowledge of PyTorch is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case. Running this example in itself is quite easy. This example uses [Flower Datasets](https://flower.ai/docs/datasets/) to download, partition and preprocess the CIFAR-10 dataset.
 
-## Project Setup
+## Set up the project
 
-Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
+### Clone the project
 
-```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart-pytorch . && rm -rf flower && cd quickstart-pytorch
-```
-
-This will create a new directory called `quickstart-pytorch` containing the following files:
+Start by cloning the example project:
 
 ```shell
--- pyproject.toml
--- client.py
--- server.py
--- README.md
+git clone --depth=1 https://github.com/adap/flower.git _tmp \
+        && mv _tmp/examples/quickstart-pytorch . \
+        && rm -rf _tmp \
+        && cd quickstart-pytorch
 ```
 
-### Installing Dependencies
-
-Project dependencies (such as `torch` and `flwr`) are defined in `pyproject.toml`. You can install the dependencies by invoking `pip`:
+This will create a new directory called `quickstart-pytorch` with the following structure:
 
 ```shell
-# From a new python environment, run:
-pip install .
+quickstart-pytorch
+├── pytorchexample
+│   ├── __init__.py
+│   ├── client_app.py   # Defines your ClientApp
+│   ├── server_app.py   # Defines your ServerApp
+│   └── task.py         # Defines your model, training and data loading
+├── pyproject.toml      # Project metadata like dependencies and configs
+└── README.md
 ```
 
-Then, to verify that everything works correctly you can run the following command:
+### Install dependencies and project
 
-```shell
-python3 -c "import flwr"
-```
-
-If you don't see any errors you're good to go!
-
-______________________________________________________________________
-
-## Run Federated Learning with PyTorch and Flower
-
-Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
-
-```shell
-python3 server.py
-```
-
-Now you are ready to start the Flower clients which will participate in the learning. We need to specify the partition id to
-use different partitions of the data on different nodes.  To do so simply open two more terminal windows and run the
-following commands.
-
-Start client 1 in the first terminal:
-
-```shell
-python3 client.py --partition-id 0
-```
-
-Start client 2 in the second terminal:
-
-```shell
-python3 client.py --partition-id 1
-```
-
-You will see that PyTorch is starting a federated training. Look at the [code](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch) for a detailed explanation.
-
-______________________________________________________________________
-
-## Run Federated Learning with PyTorch and `Flower Next`
-
-### 1. Start the long-running Flower server (SuperLink)
+Install the dependencies defined in `pyproject.toml` as well as the `pytorchexample` package.
 
 ```bash
-flower-superlink --insecure
+pip install -e .
 ```
 
-### 2. Start the long-running Flower clients (SuperNodes)
+## Run the project
 
-Start 2 Flower `SuperNodes` in 2 separate terminal windows, using:
+You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
+
+### Run with the Simulation Engine
 
 ```bash
-flower-client-app client:app --insecure
+flwr run .
 ```
 
-### 3. Run the Flower App
-
-With both the long-running server (SuperLink) and two clients (SuperNode) up and running, we can now run the actual Flower App:
+You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
 ```bash
-flower-server-app server:app --insecure
+flwr run . --run-config num-server-rounds=5,learning-rate=0.05
 ```
+
+> \[!TIP\]
+> For a more detailed walk-through check our [quickstart PyTorch tutorial](https://flower.ai/docs/framework/tutorial-quickstart-pytorch.html)
+
+### Run with the Deployment Engine
+
+> \[!NOTE\]
+> An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.

@@ -41,9 +41,9 @@ CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds
 
 # pylint: disable-next=too-many-locals
 def run(
-    app_dir: Annotated[
+    app: Annotated[
         Path,
-        typer.Argument(help="Path of the Flower project to run."),
+        typer.Argument(help="Path of the Flower App to run."),
     ] = Path("."),
     federation: Annotated[
         Optional[str],
@@ -69,10 +69,10 @@ def run(
         ),
     ] = True,
 ) -> None:
-    """Run Flower project."""
+    """Run Flower App."""
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
-    pyproject_path = app_dir / "pyproject.toml" if app_dir else None
+    pyproject_path = app / "pyproject.toml" if app else None
     config, errors, warnings = load_and_validate(path=pyproject_path)
 
     if config is None:
@@ -123,14 +123,14 @@ def run(
         raise typer.Exit(code=1)
 
     if "address" in federation_config:
-        _run_with_superexec(federation_config, app_dir, config_overrides, follow)
+        _run_with_superexec(app, federation_config, config_overrides, follow)
     else:
-        _run_without_superexec(app_dir, federation_config, federation, config_overrides)
+        _run_without_superexec(app, federation_config, config_overrides, federation)
 
 
 def _run_with_superexec(
+    app: Optional[Path],
     federation_config: Dict[str, Any],
-    app_dir: Optional[Path],
     config_overrides: Optional[List[str]],
     follow: bool,
 ) -> None:
@@ -177,10 +177,10 @@ def _run_with_superexec(
     channel.subscribe(on_channel_state_change)
     stub = ExecStub(channel)
 
-    fab_path = build(app_dir)
+    fab_path = Path(build(app))
 
     req = StartRunRequest(
-        fab_file=Path(fab_path).read_bytes(),
+        fab_file=fab_path.read_bytes(),
         override_config=user_config_to_proto(
             parse_config_args(config_overrides, separator=",")
         ),
@@ -189,6 +189,9 @@ def _run_with_superexec(
         ),
     )
     res = stub.StartRun(req)
+
+    # Delete FAB file once it has been sent to the SuperExec
+    fab_path.unlink()
     typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
 
     if follow:
@@ -209,10 +212,10 @@ def _run_with_superexec(
 
 
 def _run_without_superexec(
-    app_path: Optional[Path],
+    app: Optional[Path],
     federation_config: Dict[str, Any],
-    federation: str,
     config_overrides: Optional[List[str]],
+    federation: str,
 ) -> None:
     try:
         num_supernodes = federation_config["options"]["num-supernodes"]
@@ -231,7 +234,7 @@ def _run_without_superexec(
     command = [
         "flower-simulation",
         "--app",
-        f"{app_path}",
+        f"{app}",
         "--num-supernodes",
         f"{num_supernodes}",
     ]
