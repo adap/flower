@@ -35,7 +35,7 @@ class Ffs(abc.ABC):  # pylint: disable=R0904
 
         Returns
         -------
-        str
+        key : str
             The key (sha256hex hash) of the content.
         """
 
