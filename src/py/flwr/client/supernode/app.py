@@ -121,7 +121,7 @@ def run_client_app() -> None:
 
 
 def flwr_clientapp() -> None:
-    """Run process-isolated Flower client app."""
+    """Run process-isolated Flower ClientApp."""
     log(INFO, "Starting Flower ClientApp")
 
     parser = argparse.ArgumentParser(
