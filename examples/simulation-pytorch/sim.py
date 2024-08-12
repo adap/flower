@@ -1,19 +1,17 @@
 import argparse
 from collections import OrderedDict
-from typing import Dict, Tuple, List
-
-import torch
-from torch.utils.data import DataLoader
+from typing import Dict, List, Tuple
 
 import flwr as fl
-from flwr.common import Metrics
-from flwr.common.typing import Scalar
-
+import torch
 from datasets import Dataset
 from datasets.utils.logging import disable_progress_bar
+from flwr.common import Metrics
+from flwr.common.typing import Scalar
 from flwr_datasets import FederatedDataset
+from torch.utils.data import DataLoader
 
-from utils import Net, train, test, apply_transforms
+from utils import Net, apply_transforms, test, train
 
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
