@@ -2,7 +2,7 @@
 set -e
 
 if [ "$1" = "bare-https" ]; then
-  ./generate.sh
+  ./../generate.sh
 fi
 
 # run the first command in background and save output to a temporary file:
