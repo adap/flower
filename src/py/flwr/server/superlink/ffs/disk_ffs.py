@@ -47,7 +47,7 @@ class DiskFfs(Ffs):  # pylint: disable=R0904
 
         Returns
         -------
-        str
+        key : str
             The key (sha256hex hash) of the content.
         """
         content_hash = hashlib.sha256(content).hexdigest()
