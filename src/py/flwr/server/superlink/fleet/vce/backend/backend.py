@@ -29,7 +29,7 @@ BackendConfig = Dict[str, Dict[str, ConfigsRecordValues]]
 class Backend(ABC):
     """Abstract base class for a Simulation Engine Backend."""
 
-    def __init__(self, backend_config: BackendConfig, work_dir: str) -> None:
+    def __init__(self, backend_config: BackendConfig) -> None:
         """Construct a backend."""
 
     @abstractmethod

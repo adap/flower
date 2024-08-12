@@ -4,13 +4,12 @@ import argparse
 from collections import OrderedDict
 from typing import Dict, List, Tuple
 
+import cifar
+import flwr as fl
 import numpy as np
 import torch
 from datasets.utils.logging import disable_progress_bar
 from torch.utils.data import DataLoader
-
-import cifar
-import flwr as fl
 
 disable_progress_bar()
 
