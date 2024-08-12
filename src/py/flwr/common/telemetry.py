@@ -155,6 +155,9 @@ class EventType(str, Enum):
     # Simulation
     START_SIMULATION_ENTER = auto()
     START_SIMULATION_LEAVE = auto()
+    RUN_SIMULATION_ENTER = auto()
+    RUN_SIMULATION_LEAVE_CLI = auto()
+    RUN_SIMULATION_LEAVE_PYTHON = auto()
 
     # Driver: Driver
     DRIVER_CONNECT = auto()
