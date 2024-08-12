@@ -129,7 +129,7 @@ def flwr_clientapp() -> None:
     )
     parser.add_argument(
         "--address",
-        help="Address of SuperNode",
+        help="Address of SuperNode `ClientAppIo` gRPC servicer",
     )
     parser.add_argument(
         "--token",
