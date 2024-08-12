@@ -1,6 +1,7 @@
 from flwr.common import ndarrays_to_parameters
 from flwr.server import ServerApp, ServerConfig
 from flwr.server.strategy import FedAvg
+
 from task import IncomeClassifier, get_weights
 
 net = IncomeClassifier(input_dim=14)

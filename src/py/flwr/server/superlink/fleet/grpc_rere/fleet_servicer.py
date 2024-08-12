@@ -21,6 +21,7 @@ import grpc
 
 from flwr.common.logger import log
 from flwr.proto import fleet_pb2_grpc  # pylint: disable=E0611
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
@@ -101,3 +102,9 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             request=request,
             state=self.state_factory.state(),
         )
+
+    def GetFab(
+        self, request: GetFabRequest, context: grpc.ServicerContext
+    ) -> GetFabResponse:
+        """Will be implemented later."""
+        raise NotImplementedError
