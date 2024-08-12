@@ -138,7 +138,7 @@ def flwr_clientapp() -> None:
     args = parser.parse_args()
     log(
         DEBUG,
-        "Staring isolated `ClientApp` connected to SuperNode at %s "
+        "Staring isolated `ClientApp` connected to SuperNode ClientAppIo at %s "
         "with the following token %s.",
         args.address,
         args.token,
