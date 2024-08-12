@@ -1,6 +1,5 @@
 import flwr as fl
 
-
 if __name__ == "__main__":
     # Define strategy
     strategy = fl.server.strategy.FedAvg(

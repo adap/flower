@@ -7,11 +7,10 @@ from fastai.learner import Learner
 from fastai.losses import CrossEntropyLossFlat
 from fastai.vision.all import error_rate, squeezenet1_1
 from fastai.vision.data import DataLoaders
-
 from flwr.client import Client, ClientApp, NumPyClient
 from flwr.common import Context
 
-from fastai_example.task import load_data, set_params, get_params
+from fastai_example.task import get_params, load_data, set_params
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
