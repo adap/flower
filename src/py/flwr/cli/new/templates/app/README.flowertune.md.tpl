@@ -24,7 +24,7 @@ pip install -e .
 ## Experimental setup
 
 The dataset is partitioned into $num_clients shards with IID fashion serving as clients.
-We randomly sample $fraction_fit clients to be available for each round, and the federated fine-tuning lasts for `200` rounds.
+We randomly sample a fraction ($fraction_fit) of the total nodes to participate in each round, for a total of `200` rounds.
 All settings are defined in `pyproject.toml`.
 
 > [!IMPORTANT]
