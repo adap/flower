@@ -90,8 +90,9 @@ class DiskFfs(Ffs):  # pylint: disable=R0904
     def list(self) -> List[str]:
         """List all keys.
 
-        Can be used to list all keys in the storage and e.g. to clean up
-        the storage with the delete method.
+        Return all available keys in this `Ffs` instance.
+        This can be combined with, for example,
+        the `delete` method to delete objects.
 
         Returns
         -------
