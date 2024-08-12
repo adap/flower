@@ -47,6 +47,7 @@ tested_datasets = [
     "jlh/uci-mushrooms",
     "Mike0307/MNIST-M",
     "flwrlabs/usps",
+    "scikit-learn/iris",
 ]
 
 
