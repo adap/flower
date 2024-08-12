@@ -30,6 +30,20 @@ UNKNOWN_ERROR: ClientAppOutputCode.ValueType  # 2
 global___ClientAppOutputCode = ClientAppOutputCode
 
 
+class ClientAppOutputStatus(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    CODE_FIELD_NUMBER: builtins.int
+    MESSAGE_FIELD_NUMBER: builtins.int
+    code: global___ClientAppOutputCode.ValueType
+    message: typing.Text
+    def __init__(self,
+        *,
+        code: global___ClientAppOutputCode.ValueType = ...,
+        message: typing.Text = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["code",b"code","message",b"message"]) -> None: ...
+global___ClientAppOutputStatus = ClientAppOutputStatus
+
 class PullClientAppInputsRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     TOKEN_FIELD_NUMBER: builtins.int
@@ -81,20 +95,6 @@ class PushClientAppOutputsRequest(google.protobuf.message.Message):
     def HasField(self, field_name: typing_extensions.Literal["context",b"context","message",b"message"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["context",b"context","message",b"message","token",b"token"]) -> None: ...
 global___PushClientAppOutputsRequest = PushClientAppOutputsRequest
-
-class ClientAppOutputStatus(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    CODE_FIELD_NUMBER: builtins.int
-    MESSAGE_FIELD_NUMBER: builtins.int
-    code: global___ClientAppOutputCode.ValueType
-    message: typing.Text
-    def __init__(self,
-        *,
-        code: global___ClientAppOutputCode.ValueType = ...,
-        message: typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["code",b"code","message",b"message"]) -> None: ...
-global___ClientAppOutputStatus = ClientAppOutputStatus
 
 class PushClientAppOutputsResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor

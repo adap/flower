@@ -21,6 +21,10 @@ enum ClientAppOutputCode {
   DEADLINE_EXCEEDED = 1;
   UNKNOWN_ERROR = 2;
 }
+message ClientAppOutputStatus {
+  ClientAppOutputCode code = 1;
+  string message = 2;
+}
 
 message PullClientAppInputsRequest { sint64 token = 1; }
 message PullClientAppInputsResponse {
@@ -32,9 +36,5 @@ message PushClientAppOutputsRequest {
   sint64 token = 1;
   Message message = 2;
   Context context = 3;
-}
-message ClientAppOutputStatus {
-  ClientAppOutputCode code = 1;
-  string message = 2;
 }
 message PushClientAppOutputsResponse { ClientAppOutputStatus status = 1; }
