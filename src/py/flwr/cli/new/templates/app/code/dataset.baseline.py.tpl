@@ -1,25 +1,24 @@
 """$project_name: A Flower $framework_str app."""
 
-from torch.utils.data import DataLoader
-from torchvision.transforms import Compose, Normalize, ToTensor
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
+from torch.utils.data import DataLoader
+from torchvision.transforms import Compose, Normalize, ToTensor
 
-
-fds = None  # Cache FederatedDataset
+FDS = None  # Cache FederatedDataset
 
 
 def load_data(partition_id: int, num_partitions: int):
     """Load partition CIFAR10 data."""
     # Only initialize `FederatedDataset` once
-    global fds
-    if fds is None:
+    global FDS  # pylint: disable=global-statement
+    if FDS is None:
         partitioner = IidPartitioner(num_partitions=num_partitions)
-        fds = FederatedDataset(
+        FDS = FederatedDataset(
             dataset="uoft-cs/cifar10",
             partitioners={"train": partitioner},
         )
-    partition = fds.load_partition(partition_id)
+    partition = FDS.load_partition(partition_id)
     # Divide data on each node: 80% train, 20% test
     partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
     pytorch_transforms = Compose(
