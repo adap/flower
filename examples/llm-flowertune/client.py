@@ -5,11 +5,11 @@ import flwr as fl
 import torch
 from flwr.common.typing import NDArrays, Scalar
 from omegaconf import DictConfig
-from trl import SFTTrainer
-from transformers import TrainingArguments
 from peft import get_peft_model_state_dict, set_peft_model_state_dict
+from transformers import TrainingArguments
+from trl import SFTTrainer
 
-from models import get_model, cosine_annealing
+from models import cosine_annealing, get_model
 
 
 # pylint: disable=too-many-arguments

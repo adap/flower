@@ -1,7 +1,7 @@
 import torch
-from torch.utils.data import random_split, DataLoader
-from torchvision.transforms import ToTensor, Normalize, Compose
+from torch.utils.data import DataLoader, random_split
 from torchvision.datasets import MNIST
+from torchvision.transforms import Compose, Normalize, ToTensor
 
 
 def get_mnist(data_path: str = "./data"):

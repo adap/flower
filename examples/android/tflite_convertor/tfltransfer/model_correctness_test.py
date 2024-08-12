@@ -14,9 +14,7 @@
 """End-to-end tests that check model correctness."""
 
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import os
 import tempfile
@@ -27,10 +25,7 @@ import tensorflow as tf
 from tensorflow.compat import v1 as tfv1
 
 # pylint: disable=g-bad-import-order
-from tfltransfer import bases
-from tfltransfer import optimizers
-from tfltransfer import heads
-from tfltransfer import tflite_transfer_converter
+from tfltransfer import bases, heads, optimizers, tflite_transfer_converter
 
 # pylint: enable=g-bad-import-order
 

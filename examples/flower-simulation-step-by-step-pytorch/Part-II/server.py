@@ -1,10 +1,8 @@
 from collections import OrderedDict
 
-
-from omegaconf import DictConfig
-from hydra.utils import instantiate
-
 import torch
+from hydra.utils import instantiate
+from omegaconf import DictConfig
 
 from model import Net, test
 
