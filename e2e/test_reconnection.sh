@@ -22,7 +22,7 @@ case "$1" in
     ;;
 esac
 
-dir_arg="--dir ./.."
+dir_arg="./.."
 
 timeout 2m flower-superlink --insecure $db_arg $rest_arg &
 sl_pid=$!
@@ -62,7 +62,7 @@ echo "Starting new client"
 sleep 5
 
 # We start the server-app to begining the training
-timeout 2m flower-server-app server:app --insecure $dir_arg $rest_arg --server $server_app_address &
+timeout 2m flower-server-app ./.. $rest_arg --server $server_app_address &
 pid=$!
 echo "Starting server-app to start training"
 
