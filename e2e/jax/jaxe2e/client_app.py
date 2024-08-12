@@ -1,10 +1,10 @@
 """Flower client example using JAX for linear regression."""
 
-from jaxe2e import jax_training
 from typing import Dict, List, Tuple
 
 import jax
 import numpy as np
+from jaxe2e import jax_training
 
 from flwr.client import ClientApp, NumPyClient, start_client
 from flwr.common import Context

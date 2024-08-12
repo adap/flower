@@ -1,8 +1,8 @@
 from collections import OrderedDict
-from lightninge2e import mnist
 
 import pytorch_lightning as pl
 import torch
+from lightninge2e import mnist
 
 from flwr.client import ClientApp, NumPyClient, start_client
 from flwr.common import Context
