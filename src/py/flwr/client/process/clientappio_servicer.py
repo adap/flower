@@ -44,17 +44,9 @@ from flwr.proto.message_pb2 import Message as ProtoMessage
 from flwr.proto.run_pb2 import Run as ProtoRun
 
 
-# pylint: disable=C0103,W0613
+# pylint: disable=C0103,W0613,W0201
 class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
     """ClientAppIo API servicer."""
-
-    def __init__(self) -> None:
-        self.message: Message = None
-        self.context: Context = None
-        self.proto_message: ProtoMessage = None
-        self.proto_context: ProtoContext = None
-        self.proto_run: ProtoRun = None
-        self.token: int = None
 
     def PullClientAppInputs(
         self, request: PullClientAppInputsRequest, context: grpc.ServicerContext
@@ -96,12 +88,12 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         """Set client app objects."""
         log(DEBUG, "ClientAppIo.SetObject")
         # Serialize Message, Context, and Run
-        self.proto_message = message_to_proto(message)
-        self.proto_context = context_to_proto(context)
-        self.proto_run = run_to_proto(run)
-        self.token = token
+        self.proto_message: ProtoMessage = message_to_proto(message)
+        self.proto_context: ProtoContext = context_to_proto(context)
+        self.proto_run: ProtoRun = run_to_proto(run)
+        self.token: int = token
 
-    def get_object(self) -> tuple[Message | None, Context | None]:
+    def get_object(self) -> tuple[Message, Context]:
         """Get client app objects."""
         log(DEBUG, "ClientAppIo.GetObject")
         return self.message, self.context
@@ -110,5 +102,5 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         """Update client app objects."""
         log(DEBUG, "ClientAppIo.UpdateObject")
         # Deserialize Message and Context
-        self.message = message_from_proto(self.proto_message)
-        self.context = context_from_proto(self.proto_context)
+        self.message: Message = message_from_proto(self.proto_message)
+        self.context: Context = context_from_proto(self.proto_context)
