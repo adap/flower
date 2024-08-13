@@ -64,7 +64,7 @@ jobs:
             e2e: bare_e2e
 
           - directory: bare-https-e2e
-            e2e: https_e2e
+            e2e: bare_https_e2e
 
           - directory: bare-auth-e2e
             e2e: bare_auth_e2e
@@ -152,17 +152,17 @@ jobs:
         if: ${{ matrix.dataset }}
         run: python -c "${{ matrix.dataset }}"
       - name: Run edge client test
-        if: ${{ matrix.directory != 'bare-client-auth' }}
+        if: ${{ matrix.directory != 'bare-auth-e2e' }}
         working-directory: e2e/${{ matrix.directory }}/${{ matrix.e2e }}
         run: ./../../test_legacy.sh "${{ matrix.directory }}"
       - name: Run virtual client test
-        if: ${{ matrix.directory != 'bare-client-auth' }}
+        if: ${{ matrix.directory != 'bare-auth-e2e' }}
         run: python simulation.py
       - name: Run simulation engine test
         if: ${{ matrix.directory == 'pytorch' || matrix.directory == 'tensorflow'}}
         run: python simulation_next.py
       - name: Run driver test
-        if: ${{ matrix.directory != 'bare-client-auth' }}
+        if: ${{ matrix.directory != 'bare-auth-e2e' }}
         run: ./../test_superlink.sh "${{ matrix.directory }}"
       - name: Run driver test with REST
         if: ${{ matrix.directory == 'bare' }}
@@ -171,7 +171,7 @@ jobs:
         if: ${{ matrix.directory == 'bare' }}
         run: ./../test_superlink.sh bare sqlite
       - name: Run driver test with client authentication
-        if: ${{ matrix.directory == 'bare-client-auth' }}
+        if: ${{ matrix.directory == 'bare-auth-e2e' }}
         run: ./../test_superlink.sh bare client-auth
       - name: Run reconnection test with SQLite database
         if: ${{ matrix.directory == 'bare' }}
