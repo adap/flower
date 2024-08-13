@@ -4,12 +4,11 @@ from logging import INFO
 
 import numpy as np
 
-import flwr as fl
 from flwr.common import Context, MessageType, RecordSet
 from flwr.common.logger import log
-from flwr.server import Driver
+from flwr.server import Driver, ServerApp
 
-app = fl.server.ServerApp()
+app = ServerApp()
 
 
 @app.main()
@@ -17,6 +16,7 @@ def main(driver: Driver, context: Context) -> None:
 
     num_rounds = context.run_config["num-server-rounds"]
     for server_round in range(num_rounds):
+        log(INFO, "")  # Add newline for log readability
         log(INFO, "Starting round %s/%s", server_round + 1, num_rounds)
 
         # Get IDs of nodes available

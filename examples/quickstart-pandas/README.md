@@ -6,11 +6,11 @@ framework: [pandas]
 
 # Federated Learning with Pandas and Flower (Quickstart Example)
 
-This introductory example to Flower uses Pandas, but deep knowledge of Pandas is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case. This example uses [Flower Datasets](https://flower.ai/docs/datasets/) to
+This introductory example to Flower uses [Pandas](https://pandas.pydata.org/), but deep knowledge of Pandas is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case. This example uses [Flower Datasets](https://flower.ai/docs/datasets/) to
 download, partition and preprocess the [Iris dataset](https://huggingface.co/datasets/scikit-learn/iris).
 Running this example in itself is quite easy.
 
-This example implements a form of Federated Analyics by which nodes, instead of training a model using locally available data, they run a quiery on the data they own. In this example the query is to compute the histogram on specific columns of the dataset. These metrics are sent to the server for aggregation.
+This example implements a form of Federated Analyics by which instead of training a model using locally available data, the nodes run a query on the data they own. In this example the query is to compute the histogram on specific columns of the dataset. These metrics are sent to the server for aggregation.
 
 ## Project Setup
 
@@ -26,7 +26,7 @@ This will create a new directory called `quickstart-pandas` containing the follo
 
 ```shell
 quickstart-pandas
-├── mlxexpandas_exampleample
+├── pandas_example
 │   ├── __init__.py
 │   ├── client_app.py   # Defines your ClientApp
 │   └── server_app.py   # Defines your ServerApp
