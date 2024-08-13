@@ -15,7 +15,7 @@
 """ClientAppIo API servicer."""
 
 
-from logging import DEBUG
+from logging import DEBUG, ERROR
 from typing import Tuple
 
 import grpc
@@ -99,9 +99,13 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         self.proto_message = request.message
         self.proto_context = request.context
         # Update Message and Context
-        self._update_object()
-        # Set status
-        code = typing.ClientAppOutputCode.SUCCESS
-        status = typing.ClientAppOutputStatus(code=code, message="Success")
-        proto_status = clientappstatus_to_proto(status=status)
-        return PushClientAppOutputsResponse(status=proto_status)
+        try:
+            self._update_object()
+            # Set status
+            code = typing.ClientAppOutputCode.SUCCESS
+            status = typing.ClientAppOutputStatus(code=code, message="Success")
+            proto_status = clientappstatus_to_proto(status=status)
+            return PushClientAppOutputsResponse(status=proto_status)
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            log(ERROR, "ClientApp failed to push message to SuperNode, %s", e)
+            return PushClientAppOutputsResponse()
