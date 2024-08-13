@@ -89,6 +89,7 @@ class TestInMemoryDriver(unittest.TestCase):
             run_id=61016,
             fab_id="mock/mock",
             fab_version="v1.0.0",
+            fab_hash="mock/mock",
             override_config={"test_key": "test_value"},
         )
         state_factory = MagicMock(state=lambda: self.state)
@@ -99,6 +100,7 @@ class TestInMemoryDriver(unittest.TestCase):
         """Test the InMemoryDriver starting with run_id."""
         # Assert
         self.assertEqual(self.driver.run.run_id, 61016)
+        self.assertEqual(self.driver.run.fab_hash, "mock/mock")
         self.assertEqual(self.driver.run.fab_id, "mock/mock")
         self.assertEqual(self.driver.run.fab_version, "v1.0.0")
         self.assertEqual(self.driver.run.override_config["test_key"], "test_value")
