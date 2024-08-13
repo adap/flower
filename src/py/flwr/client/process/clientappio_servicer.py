@@ -16,7 +16,6 @@
 
 
 from logging import DEBUG
-from typing import Optional
 
 import grpc
 
