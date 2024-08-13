@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "https_e2e_test"
+name = "bare-https-e2e"
 version = "1.0.0"
 description = "HTTPS-enabled bare Federated Learning test with Flower"
 license = "Apache-2.0"

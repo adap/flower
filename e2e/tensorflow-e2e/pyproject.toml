@@ -3,18 +3,14 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "scikit_e2e_test"
+name = "tensorflow-e2e"
 version = "1.0.0"
-description = "Federated learning E2E test with scikit-learn and Flower"
+description = "Keras Federated Learning E2E test with Flower"
 license = "Apache-2.0"
-authors = [
-    { name = "The Flower Authors", email = "hello@flower.ai" },
-    { name = "Kaushik Amar Das", email = "kaushik.das@iiitg.ac.in"},
-]
 dependencies = [
-    "flwr[simulation,rest] @ {root:parent:parent:uri}",
-    "scikit-learn>=1.1.1,<2.0.0",
-    "openml>=0.14.0,<0.15.0"
+    "flwr[simulation] @ {root:parent:parent:uri}",
+    "tensorflow-cpu>=2.9.1,!=2.11.1",
+    "tensorflow-io-gcs-filesystem<0.35.0",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -27,8 +23,8 @@ allow-direct-references = true
 publisher = "flwrlabs"
 
 [tool.flwr.app.components]
-serverapp = "scikit_e2e.server_app:app"
-clientapp = "scikit_e2e.client_app:app"
+serverapp = "tf_e2e.server_app:app"
+clientapp = "tf_e2e.client_app:app"
 
 [tool.flwr.app.config]
 
