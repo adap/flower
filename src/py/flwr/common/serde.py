@@ -771,7 +771,9 @@ def message_to_proto(message: Message) -> ProtoMessage:
     """Serialize `Message` to ProtoBuf."""
     proto = ProtoMessage(
         metadata=metadata_to_proto(message.metadata),
-        content=recordset_to_proto(message.content),
+        content=(
+            recordset_to_proto(message.content) if message.has_content() else None
+        ),
         error=error_to_proto(message.error) if message.has_error() else None,
     )
     return proto
