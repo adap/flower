@@ -202,7 +202,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            _, _, create_node, _, _ = conn
+            _, _, create_node, _, _, _ = conn
             assert create_node is not None
             create_node()
             expected_client_metadata = (
@@ -227,7 +227,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            _, _, _, delete_node, _ = conn
+            _, _, _, delete_node, _, _ = conn
             assert delete_node is not None
             delete_node()
             shared_secret = generate_shared_key(
@@ -266,7 +266,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            receive, _, _, _, _ = conn
+            receive, _, _, _, _, _ = conn
             assert receive is not None
             receive()
             shared_secret = generate_shared_key(
@@ -306,7 +306,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            _, send, _, _, _ = conn
+            _, send, _, _, _, _ = conn
             assert send is not None
             send(message)
             shared_secret = generate_shared_key(
@@ -345,7 +345,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            _, _, _, _, get_run = conn
+            _, _, _, _, get_run, _ = conn
             assert get_run is not None
             get_run(0)
             shared_secret = generate_shared_key(
