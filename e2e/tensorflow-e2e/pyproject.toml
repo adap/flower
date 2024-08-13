@@ -23,8 +23,8 @@ allow-direct-references = true
 publisher = "flwrlabs"
 
 [tool.flwr.app.components]
-serverapp = "tf_e2e.server_app:app"
-clientapp = "tf_e2e.client_app:app"
+serverapp = "tensorflow_e2e.server_app:app"
+clientapp = "tensorflow_e2e.client_app:app"
 
 [tool.flwr.app.config]
 

@@ -1,4 +1,4 @@
-from scikit_e2e.client_app import client_fn
+from scikit_learn_e2e.client_app import client_fn
 
 import flwr as fl
 

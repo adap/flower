@@ -60,55 +60,55 @@ jobs:
     strategy:
       matrix:
         include:
-          - directory: bare
+          - directory: bare-e2e
             e2e: bare_e2e
 
-          - directory: bare-https
+          - directory: bare-https-e2e
             e2e: https_e2e
 
-          - directory: bare-client-auth
-            e2e: client_auth_e2e
+          - directory: bare-auth-e2e
+            e2e: bare_auth_e2e
 
-          - directory: jax
+          - directory: jax-e2e
             e2e: jax_e2e
 
-          - directory: pytorch
+          - directory: pytorch-e2e
             e2e: pytorch_e2e
             dataset: |
               from torchvision.datasets import CIFAR10
               CIFAR10('./data', download=True)
 
-          - directory: tensorflow
-            e2e: tf_e2e
+          - directory: tensorflow-e2e
+            e2e: tensorflow_e2e
             dataset: |
               import tensorflow as tf
               tf.keras.datasets.cifar10.load_data()
 
-          - directory: opacus
+          - directory: opacus-e2e
             e2e: opacus_e2e
             dataset: |
               from torchvision.datasets import CIFAR10
               CIFAR10('./data', download=True)
 
-          - directory: pytorch-lightning
-            e2e: lightning_e2e
+          - directory: pytorch-lightning-e2e
+            e2e: pytorch_lightning_e2e
             dataset: |
               from torchvision.datasets import MNIST
               MNIST('./data', download=True)
 
-          - directory: scikit-learn
-            e2e: scikit_e2e
+          - directory: scikit-learn-e2e
+            e2e: scikit_learn_e2e
             dataset: |
               import openml
               openml.datasets.get_dataset(554)
 
-          - directory: fastai
+          - directory: fastai-e2e
             e2e: fastai_e2e
             dataset: |
               from fastai.vision.all import untar_data, URLs
               untar_data(URLs.MNIST)
 
-          - directory: pandas
+          - directory: pandas-e2e
             e2e: pandas_e2e
             dataset: |
               from pathlib import Path

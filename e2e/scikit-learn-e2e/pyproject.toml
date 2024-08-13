@@ -27,8 +27,8 @@ allow-direct-references = true
 publisher = "flwrlabs"
 
 [tool.flwr.app.components]
-serverapp = "scikit_e2e.server_app:app"
-clientapp = "scikit_e2e.client_app:app"
+serverapp = "scikit_learn_e2e.server_app:app"
+clientapp = "scikit_learn_e2e.client_app:app"
 
 [tool.flwr.app.config]
 

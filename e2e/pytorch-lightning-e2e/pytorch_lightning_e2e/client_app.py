@@ -2,7 +2,7 @@ from collections import OrderedDict
 
 import pytorch_lightning as pl
 import torch
-from lightning_e2e import mnist
+from pytorch_lightning_e2e import mnist
 
 from flwr.client import ClientApp, NumPyClient, start_client
 from flwr.common import Context

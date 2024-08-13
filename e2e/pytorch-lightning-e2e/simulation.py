@@ -1,4 +1,4 @@
-from lightning_e2e.client_app import client_fn
+from pytorch_lightning_e2e.client_app import client_fn
 
 import flwr as fl
 
