@@ -1,8 +1,9 @@
 """$project_name: A Flower / FlowerTune app."""
 
+import os
 import warnings
 from collections import OrderedDict
-from typing import Callable, Dict, Tuple
+from typing import Dict, Tuple
 
 import torch
 from omegaconf import DictConfig
@@ -10,7 +11,7 @@ from peft import get_peft_model_state_dict, set_peft_model_state_dict
 from transformers import TrainingArguments
 from trl import SFTTrainer
 
-from flwr.client import NumPyClient
+from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
 from flwr.common.typing import NDArrays, Scalar
 from flwr.common.config import unflatten_dict
@@ -19,7 +20,11 @@ from $import_name.dataset import get_tokenizer_and_data_collator_and_propt_forma
 from $import_name.models import cosine_annealing, get_model
 
 
+# Avoid warnings
+os.environ["TOKENIZERS_PARALLELISM"] = "true"
+os.environ["RAY_DISABLE_DOCKER_CPU_WARNING"] = "1"
 warnings.filterwarnings("ignore", category=UserWarning)
+
 
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-instance-attributes
@@ -35,7 +40,6 @@ class FlowerClient(NumPyClient):
         formatting_prompts_func,
         data_collator,
         num_rounds,
-        save_path,
     ):  # pylint: disable=too-many-arguments
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.train_cfg = train_cfg
@@ -44,7 +48,6 @@ class FlowerClient(NumPyClient):
         self.formatting_prompts_func = formatting_prompts_func
         self.data_collator = data_collator
         self.num_rounds = num_rounds
-        self.save_path = save_path
         self.trainset = trainset
 
         # instantiate model
@@ -64,7 +67,7 @@ class FlowerClient(NumPyClient):
         )
 
         self.training_argumnets.learning_rate = new_lr
-        self.training_argumnets.output_dir = self.save_path
+        self.training_argumnets.output_dir = config["save_path"]
 
         # Construct trainer
         trainer = SFTTrainer(
@@ -101,34 +104,33 @@ def get_parameters(model) -> NDArrays:
     return [val.cpu().numpy() for _, val in state_dict.items()]
 
 
-def gen_client_fn(save_path: str
-) -> Callable[[Context], FlowerClient]:  # pylint: disable=too-many-arguments
-    """Generate the client function that creates the Flower Clients."""
+def client_fn(context: Context) -> FlowerClient:
+    """Create a Flower client representing a single organization."""
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
+    num_rounds = context.run_config["num-server-rounds"]
+    cfg = DictConfig(unflatten_dict(context.run_config))
 
-    def client_fn(context: Context) -> FlowerClient:
-        """Create a Flower client representing a single organization."""
-        partition_id = context.node_config["partition-id"]
-        num_partitions = context.node_config["num-partitions"]
-        num_rounds = context.run_config["num-server-rounds"]
-        cfg = DictConfig(unflatten_dict(context.run_config))
+    # Let's get the client partition
+    client_trainset = load_data(partition_id, num_partitions, cfg.static.dataset.name)
+    (
+        tokenizer,
+        data_collator,
+        formatting_prompts_func,
+    ) = get_tokenizer_and_data_collator_and_propt_formatting(cfg.model.name)
 
-        # Let's get the client partition
-        client_trainset = load_data(partition_id, num_partitions, cfg.static.dataset.name)
-        (
-            tokenizer,
-            data_collator,
-            formatting_prompts_func,
-        ) = get_tokenizer_and_data_collator_and_propt_formatting(cfg.model.name)
+    return FlowerClient(
+        cfg.model,
+        cfg.train,
+        client_trainset,
+        tokenizer,
+        formatting_prompts_func,
+        data_collator,
+        num_rounds,
+    ).to_client()
 
-        return FlowerClient(
-            cfg.model,
-            cfg.train,
-            client_trainset,
-            tokenizer,
-            formatting_prompts_func,
-            data_collator,
-            num_rounds,
-            save_path,
-        ).to_client()
 
-    return client_fn
+# Flower ClientApp
+app = ClientApp(
+    client_fn,
+)
