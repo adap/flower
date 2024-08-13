@@ -3,10 +3,10 @@
 from collections import OrderedDict
 
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
+from torch import nn
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
 
@@ -29,7 +29,7 @@ class UnFlatten(nn.Module):
 
 class Net(nn.Module):
     def __init__(self, h_dim=576, z_dim=10) -> None:
-        super(Net, self).__init__()
+        super().__init__()
         self.encoder = nn.Sequential(
             nn.Conv2d(
                 in_channels=3, out_channels=6, kernel_size=4, stride=2
@@ -111,14 +111,15 @@ def load_data(partition_id, num_partitions):
     return trainloader, testloader
 
 
-def train(net, trainloader, epochs):
+def train(net, trainloader, epochs, learning_rate, device):
     """Train the network on the training set."""
-    optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+    net.to(device)  # move model to GPU if available
+    optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate, momentum=0.9)
     for _ in range(epochs):
         # for images, _ in trainloader:
         for batch in trainloader:
             images = batch["img"]
-            images = images.to(DEVICE)
+            images = images.to(device)
             optimizer.zero_grad()
             recon_images, mu, logvar = net(images)
             recon_loss = F.mse_loss(recon_images, images)
@@ -128,13 +129,13 @@ def train(net, trainloader, epochs):
             optimizer.step()
 
 
-def test(net, testloader):
+def test(net, testloader, device):
     """Validate the network on the entire test set."""
     total, loss = 0, 0.0
     with torch.no_grad():
         # for data in testloader:
         for batch in testloader:
-            images = batch["img"].to(DEVICE)
+            images = batch["img"].to(device)
             # images = data[0].to(DEVICE)
             recon_images, mu, logvar = net(images)
             recon_loss = F.mse_loss(recon_images, images)

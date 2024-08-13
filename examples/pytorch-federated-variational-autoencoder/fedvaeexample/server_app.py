@@ -7,11 +7,11 @@ from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
 
 
-def server_fn(context: Context):
+def server_fn(context: Context) -> ServerAppComponents:
     """Construct components for ServerApp."""
 
     # Read from config
-    num_rounds = context.run_config["num_server_rounds"]
+    num_rounds = context.run_config["num-server-rounds"]
 
     # Initialize model parameters
     ndarrays = get_weights(Net())
