@@ -2,7 +2,7 @@
 
 import torch
 from flwr.client import ClientApp, NumPyClient
-from flwr.common import Context, RecordSet, MetricsRecord
+from flwr.common import Context, RecordSet, ConfigsRecord
 
 from pytorchexample.task import Net, get_weights, load_data, set_weights, test, train
 
@@ -24,11 +24,11 @@ class FlowerClient(NumPyClient):
         # ! behind the scenes. This is a legacy feature that's going to be deprecated in the next release
         # ! For now, please pass the context (or context.state) to the client constructor.
         self.local_state = state
-        self.fit_metrics = "fit_metrics"
-        self.fit_results_key = "historic_results"
-        if self.fit_metrics not in self.local_state.metrics_records: # init if doesn't exist
-            self.local_state.metrics_records[self.fit_metrics] = MetricsRecord(
-                {self.fit_results_key: []}
+        self.record_name = "fit_results"
+        if self.record_name not in self.local_state.configs_records: # init if doesn't exist
+            # There are diffent types of records, `ConfigsRecord` is the most versatile.
+            self.local_state.configs_records[self.record_name] = ConfigsRecord(
+                {"historic": []}
             )
 
     def fit(self, parameters, config):
@@ -43,11 +43,11 @@ class FlowerClient(NumPyClient):
             self.device,
         )
         # Append to state the results train() returned
-        self.local_state.metrics_records[self.fit_metrics][self.fit_results_key].append(
+        self.local_state.configs_records[self.record_name]["historic"].append(
             results
         )
-        # Will print all results in state
-        print(self.local_state.metrics_records)
+        # Will print all results in all ConfigRecords in the state
+        print(self.local_state.configs_records)
 
         return get_weights(self.net), len(self.trainloader.dataset), results
 
