@@ -16,7 +16,7 @@
 
 import warnings
 from dataclasses import dataclass
-from logging import DEBUG, ERROR, WARN
+from logging import WARN
 from typing import Dict, Optional
 
 from flwr.common.constant import (
@@ -25,8 +25,6 @@ from flwr.common.constant import (
 )
 from flwr.common.logger import log
 from flwr.common.typing import ConfigsRecordValues
-
-from . import Backend, error_messages_backends, supported_backends
 
 
 @dataclass
@@ -92,27 +90,6 @@ class ClientAppResources:
             )
 
 
-def get_backend_type_if_supported(backend_name: str) -> type[Backend]:
-    """Check if backend is supported."""
-    # Check if name of backend is in list of available backends
-    log(DEBUG, "Supported backends: %s", list(supported_backends.keys()))
-    if backend_name not in supported_backends:
-        log(
-            ERROR,
-            "Backend `%s`, is not supported. Use any of %s or add support "
-            "for a new backend.",
-            backend_name,
-            list(supported_backends.keys()),
-        )
-        if backend_name in error_messages_backends:
-            log(ERROR, error_messages_backends[backend_name])
-        raise ValueError(
-            f"Unsupported backed `{backend_name}` when attempting to construct"
-            "`BackendConfig`."
-        )
-    return supported_backends[backend_name]
-
-
 @dataclass
 class BackendConfig:
     """A config for a Simulation Engine backend.
@@ -168,7 +145,6 @@ class BackendConfig:
     """
 
     name: str
-    backend: type[Backend]
     clientapp_resources: ClientAppResources
     config: Dict[str, ConfigsRecordValues]
 
@@ -178,8 +154,6 @@ class BackendConfig:
         clientapp_resources: Optional[ClientAppResources] = None,
         config: Optional[Dict[str, ConfigsRecordValues]] = None,
     ):
-        # Check backend is supported
-        self.backend = get_backend_type_if_supported(name)
         self.name = name
 
         if clientapp_resources is None:

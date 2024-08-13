@@ -64,13 +64,12 @@ def test_incorrect_clientappresources(num_cpus: int, num_gpus: float) -> None:
     [
         (None, False),  # default backend
         ("ray", False),  # pass
-        ("non-existing-backend", True),  # fail, backend not supported
     ],
 )
 def test_backendconfig_creation(
     backend_name: Optional[str], raise_valueerror: bool
 ) -> None:
-    """Test backendconfig creation with default, supported and unsupported backends."""
+    """Test backendconfig creation with default and supported backends."""
     ctx: contextlib.AbstractContextManager[object]
     ctx = pytest.raises(ValueError) if raise_valueerror else contextlib.nullcontext()
     with ctx:
