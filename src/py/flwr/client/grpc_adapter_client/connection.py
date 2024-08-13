@@ -81,6 +81,7 @@ def grpc_adapter(  # pylint: disable=R0913
     create_node : Optional[Callable]
     delete_node : Optional[Callable]
     get_run : Optional[Callable]
+    get_fab : Optional[Callable]
     """
     if authentication_keys is not None:
         log(ERROR, "Client authentication is not supported for this transport type.")

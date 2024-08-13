@@ -23,7 +23,14 @@ from typing import Optional
 
 from flwr.cli.config_utils import get_fab_config
 from flwr.common import Context, EventType, RecordSet, event
-from flwr.common.config import fuse_dicts
+from flwr.common.config import (
+    fuse_dicts,
+    get_flwr_dir,
+    get_fused_config_from_dir,
+    get_metadata_from_config,
+    get_project_config,
+    get_project_dir,
+)
 from flwr.common.logger import log, update_console_handler, warn_deprecated_feature
 from flwr.common.object_ref import load_app
 from flwr.common.typing import UserConfig
@@ -143,32 +150,40 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches,too-many-stat
             cert_path,
         )
 
-    server_app_attr: Optional[str] = getattr(args, "server-app")
-    if not (server_app_attr is None) ^ (args.run_id is None):
+    app_path: Optional[str] = args.app
+    if not (app_path is None) ^ (args.run_id is None):
         raise sys.exit(
-            "Please provide either a ServerApp reference or a Run ID, but not both. "
+            "Please provide either a Flower App path or a Run ID, but not both. "
             "For more details, use: ``flower-server-app -h``"
         )
 
     # Initialize GrpcDriver
-    if args.run_id is not None:
-        # User provided `--run-id`, but not `server-app`
+    if app_path is None:
+        # User provided `--run-id`, but not `app_dir`
         driver = GrpcDriver(
             run_id=args.run_id,
             driver_service_address=args.superlink,
             root_certificates=root_certificates,
         )
+        flwr_dir = get_flwr_dir(args.flwr_dir)
+        run_ = driver.run
+        app_path = str(get_project_dir(run_.fab_id, run_.fab_version, flwr_dir))
+        config = get_project_config(app_path)
     else:
-        # User provided `server-app`, but not `--run-id`
+        # User provided `app_dir`, but not `--run-id`
         # Create run if run_id is not provided
         driver = GrpcDriver(
             run_id=0,  # Will be overwritten
             driver_service_address=args.superlink,
             root_certificates=root_certificates,
         )
+        # Load config from the project directory
+        config = get_project_config(app_path)
+        fab_version, fab_id = get_metadata_from_config(config)
+
         # Create run
         create_run_req = CreateRunRequest(
-            fab_id=args.fab_id, fab_version=args.fab_version, fab=None
+            fab_id=fab_id, fab_version=fab_version, fab=None
         )
         # pylint: disable-next=W0212
         create_run_res: CreateRunResponse = driver._stub.CreateRun(create_run_req)
@@ -206,7 +221,7 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches,too-many-stat
     # Run the ServerApp with the Driver
     run(
         driver=driver,
-        server_app_dir=server_app_dir,
+        server_app_dir=app_path,
         server_app_run_config=server_app_run_config,
         server_app_attr=server_app_attr,
     )
@@ -224,15 +239,16 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
-        "server-app",
+        "app",
         nargs="?",
         default=None,
-        help="For example: `server:app` or `project.package.module:wrapper.app`",
+        help="Load and run the `ServerApp` from the specified Flower App path. "
+        "The `pyproject.toml` file must be located in the root of this path.",
     )
     parser.add_argument(
         "--insecure",
         action="store_true",
-        help="Run the server app without HTTPS. By default, the app runs with "
+        help="Run the `ServerApp` without HTTPS. By default, the app runs with "
         "HTTPS enabled. Use this flag only if you understand the risks.",
     )
     parser.add_argument(
@@ -256,25 +272,6 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
         "--superlink",
         default=ADDRESS_DRIVER_API,
         help="SuperLink Driver API (gRPC-rere) address (IPv4, IPv6, or a domain name)",
-    )
-    parser.add_argument(
-        "--dir",
-        default="",
-        help="Add specified directory to the PYTHONPATH and load Flower "
-        "app from there."
-        " Default: current working directory.",
-    )
-    parser.add_argument(
-        "--fab-id",
-        default=None,
-        type=str,
-        help="The identifier of the FAB used in the run.",
-    )
-    parser.add_argument(
-        "--fab-version",
-        default=None,
-        type=str,
-        help="The version of the FAB used in the run.",
     )
     parser.add_argument(
         "--run-id",

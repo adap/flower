@@ -127,6 +127,23 @@ def flatten_dict(
     return dict(items)
 
 
+def unflatten_dict(flat_dict: Dict[str, Any]) -> Dict[str, Any]:
+    """Unflatten a dict with keys containing separators into a nested dict."""
+    unflattened_dict: Dict[str, Any] = {}
+    separator: str = "."
+
+    for key, value in flat_dict.items():
+        parts = key.split(separator)
+        d = unflattened_dict
+        for part in parts[:-1]:
+            if part not in d:
+                d[part] = {}
+            d = d[part]
+        d[parts[-1]] = value
+
+    return unflattened_dict
+
+
 def parse_config_args(
     config: Optional[List[str]],
     separator: str = ",",
@@ -152,3 +169,11 @@ def parse_config_args(
                 overrides.update(tomli.loads(toml_str))
 
     return overrides
+
+
+def get_metadata_from_config(config: Dict[str, Any]) -> Tuple[str, str]:
+    """Extract `fab_version` and `fab_id` from a project config."""
+    return (
+        config["project"]["version"],
+        f"{config['tool']['flwr']['app']['publisher']}/{config['project']['name']}",
+    )
