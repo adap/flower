@@ -1,7 +1,8 @@
 """pytorchexample: A Flower / PyTorch app."""
 
 from typing import List, Tuple
-from flwr.common import Context, ndarrays_to_parameters, Metrics
+
+from flwr.common import Context, Metrics, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
 
