@@ -13,7 +13,7 @@ As the first step, please register for a Flower account on [flower.ai/login](htt
 Then, create a new Python environment and install Flower. 
 
 > [!TIP]
-> We recomend using `pyenv` and the `virtualenv` plugin to create your environment. Other mangaers such as Conda would likely work to. Check [the documentation](https://flower.ai/docs/framework/how-to-install-flower.html) for alternative ways of installing Flower.
+> We recommend using `pyenv` and the `virtualenv` plugin to create your environment. Other manager such as Conda would likely work to. Check the [documentation](https://flower.ai/docs/framework/how-to-install-flower.html) for alternative ways of installing Flower.
 
 ```shell
 pip install flwr
@@ -29,21 +29,20 @@ The `flwr new` command will generate a directory with the following structure:
 ```bash
 <project-name>
        ├── README.md           # <- Instructions
-       ├── pyproject.toml      # <- Environment dependencies
+       ├── pyproject.toml      # <- Environment dependencies and configs
        └── <project_name>
-                  ├── app.py          # <- Flower ClientApp/ServerApp build
-                  ├── client.py       # <- Flower client constructor
-                  ├── server.py       # <- Sever-related functions
-                  ├── models.py       # <- Model build
+                  ├── client_app.py   # <- Flower ClientApp build
                   ├── dataset.py      # <- Dataset and tokenizer build
-                  ├── conf/config.yaml         # <- User configuration
-                  └── conf/static_config.yaml  # <- Static configuration
+                  ├── models.py       # <- Model build
+                  ├── server_app.py   # <- Flower ServerApp build
+                  └── strategy.py     # <- Flower strategy build
 ```
 
 This can serve as the starting point for you to build up your own federated LLM fine-tuning methods.
 
 > [!IMPORTANT]
-> Please note that if you intend to submit your project as an entry to the [LLM Leaderboard](https://flower.ai/benchmarks/llm-leaderboard) modifications to the content of `conf/static_config.yaml` is not allowed and will invalidate the submission.
+> Please note that if you intend to submit your project as an entry to the [LLM Leaderboard](https://flower.ai/benchmarks/llm-leaderboard) modifications to `[tool.flwr.app.config.static]` and `options.num-supernodes` under `[tool.flwr.federations.local-simulation]` in `pyproject.toml` are not allowed and will invalidate the submission.
+
 
 ## Run FlowerTune LLM challenges
 
@@ -52,7 +51,7 @@ With a new project directory created, running a baseline challenge can be done b
 1. Navigate inside the directory that you just created.
 
 
-2. Follow the `Environment setup` section of `README.md` in the project directory to install the project dependencies.
+2. Follow the `Environments setup` section of `README.md` in the project directory to install the project dependencies.
 
 
 3. Run the challenge as indicated in the `Running the challenge` section in the `README.md`.
