@@ -14,9 +14,9 @@
 # ==============================================================================
 """Backend config."""
 
-
+import warnings
 from dataclasses import dataclass
-from logging import DEBUG, WARN
+from logging import DEBUG, ERROR, WARN
 from typing import Dict, Optional
 
 from flwr.common.constant import (
@@ -25,6 +25,8 @@ from flwr.common.constant import (
 )
 from flwr.common.logger import log
 from flwr.common.typing import ConfigsRecordValues
+
+from . import Backend, error_messages_backends, supported_backends
 
 
 @dataclass
@@ -58,14 +60,22 @@ class ClientAppResources:
 
     def _validate(self) -> None:
 
+        if self.num_cpus is None:
+            raise ValueError(
+                "`num_cpus` must be a positive integer, but you passed `None`."
+            )
+
+        if self.num_gpus is None:
+            raise ValueError("`num_cpus` must be a fractional number >=0.")
+
         if isinstance(self.num_cpus, float):
             num_cpus_int = int(self.num_cpus)
-            log(
-                WARN,
+            warnings.warn(
                 "`num_cpus` for `ClientAppResources` needs to be an integer but a "
-                "`float` was passed. It will be casted to `int`: (%s -> %s).",
-                self.num_cpus,
-                num_cpus_int,
+                f"`float` was passed. It will be casted to `int`: ({self.num_cpus} -> "
+                f"{num_cpus_int}).",
+                UserWarning,
+                stacklevel=1,
             )
             self.num_cpus = num_cpus_int
 
@@ -80,6 +90,27 @@ class ClientAppResources:
                 "`num_gpus` for `ClientAppResources` needs to be an float higher "
                 f"or equal than zero. You attempted to construct: {self}."
             )
+
+
+def get_backend_type_if_supported(backend_name: str) -> type[Backend]:
+    """Check if backend is supported."""
+    # Check if name of backend is in list of available backends
+    log(DEBUG, "Supported backends: %s", list(supported_backends.keys()))
+    if backend_name not in supported_backends:
+        log(
+            ERROR,
+            "Backend `%s`, is not supported. Use any of %s or add support "
+            "for a new backend.",
+            backend_name,
+            list(supported_backends.keys()),
+        )
+        if backend_name in error_messages_backends:
+            log(ERROR, error_messages_backends[backend_name])
+        raise ValueError(
+            f"Unsupported backed `{backend_name}` when attempting to construct"
+            "`BackendConfig`."
+        )
+    return supported_backends[backend_name]
 
 
 @dataclass
@@ -137,6 +168,7 @@ class BackendConfig:
     """
 
     name: str
+    backend: type[Backend]
     clientapp_resources: ClientAppResources
     config: Dict[str, ConfigsRecordValues]
 
@@ -146,14 +178,17 @@ class BackendConfig:
         clientapp_resources: Optional[ClientAppResources] = None,
         config: Optional[Dict[str, ConfigsRecordValues]] = None,
     ):
+        # Check backend is supported
+        self.backend = get_backend_type_if_supported(name)
         self.name = name
+
         if clientapp_resources is None:
             # If unset, set default resources
             clientapp_resources = ClientAppResources()
             log(
-                DEBUG,
-                "The `BackendConfig` didn't receive `ClientAppResources`. "
-                "The default resources will be used: %s",
+                WARN,
+                "`ClientAppResources` were not specified when constructing the "
+                "`BackendConfig`. The default resources will be used: %s",
                 clientapp_resources,
             )
 
