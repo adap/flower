@@ -34,7 +34,7 @@ from .backendconfig import BackendConfig, ClientAppResources
 )
 def test_correct_clientappresources(num_cpus: int, num_gpus: float, warn: bool) -> None:
     """Test if settings for ClientAppResources are valid."""
-    ctx: contextlib.AbstractContextManager["object"]
+    ctx: contextlib.AbstractContextManager[object]  # pylint: disable=E1136
     if warn:
         ctx = pytest.warns(UserWarning)
     else:
@@ -70,7 +70,7 @@ def test_backendconfig_creation(
     backend_name: Optional[str], raise_valueerror: bool
 ) -> None:
     """Test backendconfig creation with default and supported backends."""
-    ctx: contextlib.AbstractContextManager["object"]
+    ctx: contextlib.AbstractContextManager[object]  # pylint: disable=E1136
     ctx = pytest.raises(ValueError) if raise_valueerror else contextlib.nullcontext()
     with ctx:
         _ = (
