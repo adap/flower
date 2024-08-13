@@ -1,13 +1,13 @@
 from collections import OrderedDict
 
+import flwr as fl
 import torch
 import torch.nn.functional as F
 import torchvision.transforms as transforms
-from models import Net
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
 
-import flwr as fl
+from models import Net
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 

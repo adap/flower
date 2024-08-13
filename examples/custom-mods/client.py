@@ -5,21 +5,13 @@ import time
 import flwr as fl
 import tensorflow as tf
 import wandb
-from flwr.common import ConfigsRecord
 from flwr.client.typing import ClientAppCallable, Mod
+from flwr.common import ConfigsRecord
+from flwr.common.constant import MessageType
 from flwr.common.context import Context
 from flwr.common.message import Message
-from flwr.common.constant import MessageType
 
-from task import (
-    Net,
-    DEVICE,
-    load_data,
-    get_parameters,
-    set_parameters,
-    train,
-    test,
-)
+from task import DEVICE, Net, get_parameters, load_data, set_parameters, test, train
 
 
 class WBLoggingFilter(logging.Filter):

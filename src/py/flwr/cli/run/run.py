@@ -109,14 +109,14 @@ def run(
         raise typer.Exit(code=1)
 
     if "address" in federation_config:
-        _run_with_superexec(federation_config, app, config_overrides)
+        _run_with_superexec(app, federation_config, config_overrides)
     else:
-        _run_without_superexec(app, federation_config, federation, config_overrides)
+        _run_without_superexec(app, federation_config, config_overrides, federation)
 
 
 def _run_with_superexec(
-    federation_config: Dict[str, Any],
     app: Optional[Path],
+    federation_config: Dict[str, Any],
     config_overrides: Optional[List[str]],
 ) -> None:
 
@@ -162,10 +162,10 @@ def _run_with_superexec(
     channel.subscribe(on_channel_state_change)
     stub = ExecStub(channel)
 
-    fab_path = build(app)
+    fab_path = Path(build(app))
 
     req = StartRunRequest(
-        fab_file=Path(fab_path).read_bytes(),
+        fab_file=fab_path.read_bytes(),
         override_config=user_config_to_proto(
             parse_config_args(config_overrides, separator=",")
         ),
@@ -174,14 +174,17 @@ def _run_with_superexec(
         ),
     )
     res = stub.StartRun(req)
+
+    # Delete FAB file once it has been sent to the SuperExec
+    fab_path.unlink()
     typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
 
 
 def _run_without_superexec(
     app: Optional[Path],
     federation_config: Dict[str, Any],
-    federation: str,
     config_overrides: Optional[List[str]],
+    federation: str,
 ) -> None:
     try:
         num_supernodes = federation_config["options"]["num-supernodes"]
