@@ -80,7 +80,6 @@ def gen_server_fn(save_path: str):  # pylint: disable=too-many-arguments
 
         # Define strategy
         strategy = FlowerTuneLlm(
-            init_model=init_model,
             fraction_fit=cfg.strategy.fraction_fit,
             fraction_evaluate=cfg.strategy.fraction_evaluate,
             on_fit_config_fn=get_on_fit_config(save_path),
