@@ -4,7 +4,7 @@ dataset: [CIFAR-10]
 framework: [torch, torchvision]
 ---
 
-# Federated Variational Autoencoder with Pytorch and Flower
+# Federated Variational Autoencoder with PyTorch and Flower
 
 This example demonstrates how a variational autoencoder (VAE) can be trained in a federated way using the Flower framework.
 
@@ -28,12 +28,12 @@ pytorch-federated-variational-autoencoder
 ├── fedvaeexample
 │   ├── __init__.py
 │   ├── client_app.py   # Defines your ClientApp
-│   ├── models.py       # Defines your model
-│   └── server_app.py   # Defines your ServerApp
-└── pyproject.toml      #  Project metadata like dependencies and configs
+│   ├── server_app.py   # Defines your ServerApp
+│   └── task.py         # Defines your model, training and data loading
+└── pyproject.toml      # Project metadata like dependencies and configs
 ```
 
-## Install dependencies
+### Install dependencies and project
 
 Install the dependencies defined in `pyproject.toml` as well as the `fedvaeexample` package.
 
