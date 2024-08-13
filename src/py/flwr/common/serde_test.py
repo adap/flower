@@ -22,6 +22,9 @@ import pytest
 
 # pylint: disable=E0611
 from flwr.proto import transport_pb2 as pb2
+from flwr.proto.message_pb2 import Context as ProtoContext
+from flwr.proto.message_pb2 import Message as ProtoMessage
+from flwr.proto.message_pb2 import Metadata as ProtoMetadata
 from flwr.proto.recordset_pb2 import Array as ProtoArray
 from flwr.proto.recordset_pb2 import ConfigsRecord as ProtoConfigsRecord
 from flwr.proto.recordset_pb2 import MetricsRecord as ProtoMetricsRecord
@@ -40,6 +43,8 @@ from .serde import (
     message_from_taskres,
     message_to_taskins,
     message_to_taskres,
+    metadata_from_proto,
+    metadata_to_proto,
     metrics_record_from_proto,
     metrics_record_to_proto,
     parameters_record_from_proto,
@@ -396,9 +401,9 @@ def test_metadata_serialization_deserialization() -> None:
     original = maker.recordset(2, 2, 1)
 
     # Execute
-    proto = recordset_to_proto(original)
-    deserialized = recordset_from_proto(proto)
+    proto = metadata_to_proto(original)
+    deserialized = metadata_from_proto(proto)
 
     # Assert
-    assert isinstance(proto, ProtoRecordSet)
+    assert isinstance(proto, ProtoMetadata)
     assert original == deserialized
