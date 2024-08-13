@@ -14,7 +14,7 @@
 # ==============================================================================
 """Backend config."""
 
-
+import warnings
 from dataclasses import dataclass
 from logging import DEBUG, WARN
 from typing import Dict, Optional
@@ -58,14 +58,18 @@ class ClientAppResources:
 
     def _validate(self) -> None:
 
+        if self.num_cpus is None:
+            raise ValueError(f"`num_cpus` must be a positive integer, but you passed `None`.")
+
+        if self.num_gpus is None:
+            raise ValueError(f"`num_cpus` must be a fractional number >=0.")
+
         if isinstance(self.num_cpus, float):
             num_cpus_int = int(self.num_cpus)
-            log(
-                WARN,
+            warnings.warn(
                 "`num_cpus` for `ClientAppResources` needs to be an integer but a "
-                "`float` was passed. It will be casted to `int`: (%s -> %s).",
-                self.num_cpus,
-                num_cpus_int,
+                f"`float` was passed. It will be casted to `int`: ({self.num_cpus} -> {num_cpus_int}).",
+                UserWarning,
             )
             self.num_cpus = num_cpus_int
 
