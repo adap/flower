@@ -33,7 +33,7 @@ from flwr.common.serde import (
 from flwr.common.typing import Run
 
 # pylint: disable=E0611
-from flwr.proto import appio_pb2_grpc
+from flwr.proto import clientappio_pb2_grpc
 from flwr.proto.clientappio_pb2 import (  # pylint: disable=E0401
     PullClientAppInputsRequest,
     PullClientAppInputsResponse,
@@ -46,7 +46,7 @@ from flwr.proto.run_pb2 import Run as ProtoRun
 
 
 # pylint: disable=C0103,W0613
-class ClientAppIoServicer(appio_pb2_grpc.ClientAppIoServicer):
+class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
     """ClientAppIo API servicer."""
 
     def __init__(self) -> None:
