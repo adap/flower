@@ -86,7 +86,7 @@ class TestNaturalIdPartitioner(unittest.TestCase):
         print(num_unique_natural_ids)
         _, partitioner = _dummy_setup(num_rows, num_unique_natural_ids)
         max_size = max(
-            [len(partitioner.load_partition(i)) for i in range(num_unique_natural_ids)]
+            len(partitioner.load_partition(i)) for i in range(num_unique_natural_ids)
         )
         self.assertEqual(max_size, math.ceil(num_rows / num_unique_natural_ids))
 

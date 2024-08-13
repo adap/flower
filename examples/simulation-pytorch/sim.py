@@ -1,19 +1,17 @@
 import argparse
 from collections import OrderedDict
-from typing import Dict, Tuple, List
-
-import torch
-from torch.utils.data import DataLoader
+from typing import Dict, List, Tuple
 
 import flwr as fl
-from flwr.common import Metrics
-from flwr.common.typing import Scalar
-
+import torch
 from datasets import Dataset
 from datasets.utils.logging import disable_progress_bar
+from flwr.common import Metrics
+from flwr.common.typing import Scalar
 from flwr_datasets import FederatedDataset
+from torch.utils.data import DataLoader
 
-from utils import Net, train, test, apply_transforms
+from utils import Net, apply_transforms, test, train
 
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
@@ -87,11 +85,13 @@ def get_client_fn(dataset: FederatedDataset):
     the strategy to participate.
     """
 
-    def client_fn(cid: str) -> fl.client.Client:
+    def client_fn(context) -> fl.client.Client:
         """Construct a FlowerClient with its own dataset partition."""
 
         # Let's get the partition corresponding to the i-th client
-        client_dataset = dataset.load_partition(int(cid), "train")
+        client_dataset = dataset.load_partition(
+            int(context.node_config["partition-id"]), "train"
+        )
 
         # Now let's split it into train (90%) and validation (10%)
         client_dataset_splits = client_dataset.train_test_split(test_size=0.1, seed=42)
@@ -171,15 +171,23 @@ def get_evaluate_fn(
 mnist_fds = FederatedDataset(dataset="mnist", partitioners={"train": NUM_CLIENTS})
 centralized_testset = mnist_fds.load_split("test")
 
-# Configure the strategy
-strategy = fl.server.strategy.FedAvg(
-    fraction_fit=0.1,  # Sample 10% of available clients for training
-    fraction_evaluate=0.05,  # Sample 5% of available clients for evaluation
-    min_available_clients=10,
-    on_fit_config_fn=fit_config,
-    evaluate_metrics_aggregation_fn=weighted_average,  # Aggregate federated metrics
-    evaluate_fn=get_evaluate_fn(centralized_testset),  # Global evaluation function
-)
+from flwr.server import ServerAppComponents
+
+
+def server_fn(context):
+    # Configure the strategy
+    strategy = fl.server.strategy.FedAvg(
+        fraction_fit=0.1,  # Sample 10% of available clients for training
+        fraction_evaluate=0.05,  # Sample 5% of available clients for evaluation
+        min_available_clients=10,
+        on_fit_config_fn=fit_config,
+        evaluate_metrics_aggregation_fn=weighted_average,  # Aggregate federated metrics
+        evaluate_fn=get_evaluate_fn(centralized_testset),  # Global evaluation function
+    )
+    return ServerAppComponents(
+        strategy=strategy, config=fl.server.ServerConfig(num_rounds=NUM_ROUNDS)
+    )
+
 
 # ClientApp for Flower-Next
 client = fl.client.ClientApp(
@@ -187,10 +195,7 @@ client = fl.client.ClientApp(
 )
 
 # ServerApp for Flower-Next
-server = fl.server.ServerApp(
-    config=fl.server.ServerConfig(num_rounds=NUM_ROUNDS),
-    strategy=strategy,
-)
+server = fl.server.ServerApp(server_fn=server_fn)
 
 
 def main():

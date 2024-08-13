@@ -16,9 +16,9 @@
 
 
 from dataclasses import dataclass
-from typing import Dict, Optional
 
 from .record import RecordSet
+from .typing import UserConfig
 
 
 @dataclass
@@ -27,6 +27,11 @@ class Context:
 
     Parameters
     ----------
+    node_id : int
+        The ID that identifies the node.
+    node_config : UserConfig
+        A config (key/value mapping) unique to the node and independent of the
+        `run_config`. This config persists across all runs this node participates in.
     state : RecordSet
         Holds records added by the entity in a given run and that will stay local.
         This means that the data it holds will never leave the system it's running from.
@@ -34,26 +39,25 @@ class Context:
         executing mods. It can also be used as a memory to access
         at different points during the lifecycle of this entity (e.g. across
         multiple rounds)
-    run_config : Dict[str, str]
+    run_config : UserConfig
         A config (key/value mapping) held by the entity in a given run and that will
         stay local. It can be used at any point during the lifecycle of this entity
         (e.g. across multiple rounds)
-    partition_id : Optional[int] (default: None)
-        An index that specifies the data partition that the ClientApp using this Context
-        object should make use of. Setting this attribute is better suited for
-        simulation or proto typing setups.
     """
 
+    node_id: int
+    node_config: UserConfig
     state: RecordSet
-    partition_id: Optional[int]
-    run_config: Dict[str, str]
+    run_config: UserConfig
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
+        node_id: int,
+        node_config: UserConfig,
         state: RecordSet,
-        run_config: Dict[str, str],
-        partition_id: Optional[int] = None,
+        run_config: UserConfig,
     ) -> None:
+        self.node_id = node_id
+        self.node_config = node_config
         self.state = state
         self.run_config = run_config
-        self.partition_id = partition_id
