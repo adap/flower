@@ -28,7 +28,6 @@ class TestFlwrLog(unittest.TestCase):
 
     def setUp(self) -> None:
         """Initialize mock ExecStub before each test."""
-
         mock_response_iterator = iter(
             [StreamLogsResponse(log_output=f"result_{i}") for i in range(1, 4)]
         )
@@ -46,7 +45,6 @@ class TestFlwrLog(unittest.TestCase):
 
     def test_flwr_log_stream_method(self) -> None:
         """Test stream_logs."""
-
         with patch("builtins.print") as mock_print:
             stream_logs(run_id=123, channel=self.mock_channel, duration=1)
             mock_print.assert_any_call("result_1")
@@ -55,7 +53,6 @@ class TestFlwrLog(unittest.TestCase):
 
     def test_flwr_log_print_method(self) -> None:
         """Test print_logs."""
-
         with patch("builtins.print") as mock_print:
             print_logs(run_id=123, channel=self.mock_channel, timeout=0, is_test=True)
             mock_print.assert_any_call("result_1")
