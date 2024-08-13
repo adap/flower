@@ -1,8 +1,10 @@
 import argparse
-import flwr as fl
 import logging
+
+import flwr as fl
+
+from prometheus_client import Gauge, start_http_server
 from strategy.strategy import FedCustom
-from prometheus_client import start_http_server, Gauge
 
 # Initialize Logging
 logging.basicConfig(level=logging.INFO)
