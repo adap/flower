@@ -1,7 +1,7 @@
 import warnings
 
 import numpy as np
-from scikite2e import utils
+from scikit_e2e import utils
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
 
