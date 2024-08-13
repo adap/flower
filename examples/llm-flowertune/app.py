@@ -1,14 +1,13 @@
 import os
 import warnings
-from hydra import compose, initialize
 
 import flwr as fl
 from flwr_datasets import FederatedDataset
+from hydra import compose, initialize
 
-from dataset import get_tokenizer_and_data_collator_and_propt_formatting
 from client import gen_client_fn
-from utils import get_on_fit_config, fit_weighted_average
-
+from dataset import get_tokenizer_and_data_collator_and_propt_formatting
+from utils import fit_weighted_average, get_on_fit_config
 
 warnings.filterwarnings("ignore", category=UserWarning)
 

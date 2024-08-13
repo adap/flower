@@ -4,6 +4,7 @@ from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
+import flwr as fl
 from flwr.common import (
     Context,
     EvaluateIns,
