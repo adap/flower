@@ -26,6 +26,7 @@ from flwr.client.node_state import NodeState
 from flwr.common import (
     DEFAULT_TTL,
     Config,
+    ConfigsRecord,
     Context,
     GetPropertiesIns,
     Message,
@@ -45,6 +46,9 @@ class DummyClient(NumPyClient):
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
         """Return properties by doing a simple calculation."""
         result = float(config["factor"]) * pi
+
+        # store something in context
+        self.context.state.configs_records["result"] = ConfigsRecord({"result": result})
 
         return {"result": result}
 
@@ -138,7 +142,7 @@ class TestRayBackend(TestCase):
         if res is None:
             raise AssertionError("This shouldn't happen")
 
-        out_mssg, _ = res
+        out_mssg, updated_context = res
 
         # Verify message content is as expected
         content = out_mssg.content
@@ -146,6 +150,11 @@ class TestRayBackend(TestCase):
             content.configs_records["getpropertiesres.properties"]["result"]
             == expected_output
         )
+        # Verify context is correct
+        obtained_result_in_context = updated_context.state.configs_records["result"][
+            "result"
+        ]
+        assert obtained_result_in_context == expected_output
 
     def test_backend_creation_submit_and_termination_existing_client_app(
         self,

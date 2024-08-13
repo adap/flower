@@ -38,7 +38,7 @@ from flwr.common import (
 class Client(ABC):
     """Abstract base class for Flower clients."""
 
-    context: Context | None = None
+    context: Context
 
     def get_properties(self, ins: GetPropertiesIns) -> GetPropertiesRes:
         """Return set of client's properties.

@@ -16,7 +16,7 @@
 
 
 from abc import ABC
-from typing import Callable, Dict, Optional, Tuple
+from typing import Callable, Dict, Tuple
 
 from flwr.client.client import Client
 from flwr.common import (
@@ -70,7 +70,7 @@ Example
 class NumPyClient(ABC):
     """Abstract base class for Flower clients using NumPy."""
 
-    context: Optional[Context] = None
+    context: Context
 
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
         """Return a client's set of properties.
