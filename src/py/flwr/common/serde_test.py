@@ -387,3 +387,18 @@ def test_message_to_and_from_taskres(
     if original.has_error():
         assert original.error == deserialized.error
     assert metadata == deserialized.metadata
+
+
+def test_metadata_serialization_deserialization() -> None:
+    """Test serialization and deserialization of Metadat."""
+    # Prepare
+    maker = RecordMaker(state=0)
+    original = maker.recordset(2, 2, 1)
+
+    # Execute
+    proto = recordset_to_proto(original)
+    deserialized = recordset_from_proto(proto)
+
+    # Assert
+    assert isinstance(proto, ProtoRecordSet)
+    assert original == deserialized
