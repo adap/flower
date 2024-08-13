@@ -26,7 +26,6 @@ from flwr.common import Context, EventType, RecordSet, event
 from flwr.common.config import (
     fuse_dicts,
     get_flwr_dir,
-    get_fused_config_from_dir,
     get_metadata_from_config,
     get_project_config,
     get_project_dir,
@@ -205,12 +204,6 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches,too-many-stat
         config = get_fab_config(res.fab.content)
         server_app_attr = config["tool"]["flwr"]["app"]["components"]["serverapp"]
         server_app_run_config = fuse_dicts(config, run_.override_config)
-        server_app_dir = None
-    else:
-        # User provided `server-app`, but not `--run-id`
-        server_app_dir = str(Path(args.dir).absolute())
-
-    log(DEBUG, "Flower will load ServerApp `%s`", server_app_attr)
 
     log(
         DEBUG,
