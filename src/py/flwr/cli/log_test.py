@@ -26,44 +26,38 @@ from .log import print_logs, stream_logs
 class TestFlwrLog(unittest.TestCase):
     """Unit tests for `flwr log` CLI functions."""
 
-    @patch("flwr.cli.log.ExecStub")
-    def test_flwr_log_stream_method(self, mock_stub: Mock) -> None:
+    def setUp(self) -> None:
+        """Initialize mock ExecStub before each test."""
+
+        mock_response_iterator = iter(
+            [StreamLogsResponse(log_output=f"result_{i}") for i in range(1, 4)]
+        )
+        self.mock_stub = Mock()
+        self.mock_stub.StreamLogs.return_value = mock_response_iterator
+        self.patcher = patch("flwr.cli.log.ExecStub", return_value=self.mock_stub)
+        self.patcher.start()
+
+        # Create mock channel
+        self.mock_channel = Mock()
+
+    def tearDown(self) -> None:
+        """Cleanup."""
+        self.patcher.stop()
+
+    def test_flwr_log_stream_method(self) -> None:
         """Test stream_logs."""
-        # Create mock response iterator
-        mock_response_iterator = iter(
-            [StreamLogsResponse(log_output=f"print_result_{i}") for i in range(1, 4)]
-        )
-
-        # Set up stub
-        mock_stub_instance = mock_stub.return_value
-        mock_stub_instance.StreamLogs.return_value = mock_response_iterator
-
-        # Create mock channel
-        mock_channel = Mock()
 
         with patch("builtins.print") as mock_print:
-            stream_logs(run_id=123, channel=mock_channel, duration=1)
-            mock_print.assert_any_call("print_result_1")
-            mock_print.assert_any_call("print_result_2")
-            mock_print.assert_any_call("print_result_3")
+            stream_logs(run_id=123, channel=self.mock_channel, duration=1)
+            mock_print.assert_any_call("result_1")
+            mock_print.assert_any_call("result_2")
+            mock_print.assert_any_call("result_3")
 
-    @patch("flwr.cli.log.ExecStub")
-    def test_flwr_log_print_method(self, mock_stub: Mock) -> None:
+    def test_flwr_log_print_method(self) -> None:
         """Test print_logs."""
-        # Create mock response iterator
-        mock_response_iterator = iter(
-            [StreamLogsResponse(log_output=f"stream_result_{i}") for i in range(1, 4)]
-        )
-
-        # Set up stub
-        mock_stub_instance = mock_stub.return_value
-        mock_stub_instance.StreamLogs.return_value = mock_response_iterator
-
-        # Create mock channel
-        mock_channel = Mock()
 
         with patch("builtins.print") as mock_print:
-            print_logs(run_id=123, channel=mock_channel, timeout=0, is_test=True)
-            mock_print.assert_any_call("stream_result_1")
-            mock_print.assert_any_call("stream_result_2")
-            mock_print.assert_any_call("stream_result_3")
+            print_logs(run_id=123, channel=self.mock_channel, timeout=0, is_test=True)
+            mock_print.assert_any_call("result_1")
+            mock_print.assert_any_call("result_2")
+            mock_print.assert_any_call("result_3")
