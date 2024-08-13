@@ -160,7 +160,7 @@ def unflatten_dict(flat_dict: Dict[str, Any]) -> Dict[str, Any]:
 
 def parse_config_args(
     config: Optional[List[str]],
-    separator: str = ",",
+    separator: str = " ",
 ) -> UserConfig:
     """Parse separator separated list of key-value pairs separated by '='."""
     overrides: UserConfig = {}

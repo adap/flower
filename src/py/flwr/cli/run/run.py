@@ -49,7 +49,8 @@ def run(
             "--run-config",
             "-c",
             help="Override configuration key-value pairs, should be of the format:\n\n"
-            "`--run-config key1=value1,key2=value2 --run-config key3=value3`\n\n"
+            '`--run-config \'key1="value1" key2="value2"\' '
+            "--run-config 'key3=\"value3\"'`\n\n"
             "Note that `key1`, `key2`, and `key3` in this example need to exist "
             "inside the `pyproject.toml` in order to be properly overriden.",
         ),
@@ -167,7 +168,7 @@ def _run_with_superexec(
     req = StartRunRequest(
         fab_file=fab_path.read_bytes(),
         override_config=user_config_to_proto(
-            parse_config_args(config_overrides, separator=",")
+            parse_config_args(config_overrides, separator=" ")
         ),
         federation_config=user_config_to_proto(
             flatten_dict(federation_config.get("options"))
@@ -209,7 +210,7 @@ def _run_without_superexec(
     ]
 
     if config_overrides:
-        command.extend(["--run-config", f"{','.join(config_overrides)}"])
+        command.extend(["--run-config", f"\"{' '.join(config_overrides)}\""])
 
     # Run the simulation
     subprocess.run(
