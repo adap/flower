@@ -42,10 +42,11 @@ class FlowerClient(NumPyClient):
             self.lr,
             self.device,
         )
-        # Save in state
+        # Append to state the results train() returned
         self.local_state.metrics_records[self.fit_metrics][self.fit_results_key].append(
             results
         )
+        # Will print all results in state
         print(self.local_state.metrics_records)
 
         return get_weights(self.net), len(self.trainloader.dataset), results
