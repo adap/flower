@@ -1,90 +1,52 @@
 """pandas_example: A Flower / Pandas app."""
 
-from typing import Dict, List, Optional, Tuple, Union
+from logging import INFO
 
 import numpy as np
 
-from flwr.common import (
-    Context,
-    EvaluateIns,
-    EvaluateRes,
-    FitIns,
-    FitRes,
-    Parameters,
-    Scalar,
-    ndarrays_to_parameters,
-    parameters_to_ndarrays,
-)
-from flwr.server import ServerApp, ServerAppComponents, ServerConfig
-from flwr.server.client_manager import ClientManager
-from flwr.server.client_proxy import ClientProxy
-from flwr.server.strategy import Strategy
+import flwr as fl
+from flwr.common import Context, MessageType, RecordSet
+from flwr.common.logger import log
+from flwr.server import Driver
+
+app = fl.server.ServerApp()
 
 
-class FedAnalytics(Strategy):
-    def initialize_parameters(
-        self, client_manager: Optional[ClientManager] = None
-    ) -> Optional[Parameters]:
-        return None
+@app.main()
+def main(driver: Driver, context: Context) -> None:
 
-    def configure_fit(
-        self, server_round: int, parameters: Parameters, client_manager: ClientManager
-    ) -> List[Tuple[ClientProxy, FitIns]]:
-        config = {}
-        fit_ins = FitIns(parameters, config)
-        clients = client_manager.sample(num_clients=2, min_num_clients=2)
-        return [(client, fit_ins) for client in clients]
-
-    def aggregate_fit(
-        self,
-        server_round: int,
-        results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-        # Get results from fit
-        # Convert results
-        values_aggregated = [
-            (parameters_to_ndarrays(fit_res.parameters)) for _, fit_res in results
-        ]
-        length_agg_hist = 0
-        width_agg_hist = 0
-        for val in values_aggregated:
-            length_agg_hist += val[0]
-            width_agg_hist += val[1]
-
-        ndarr = np.concatenate(
-            (["Length:"], length_agg_hist, ["Width:"], width_agg_hist)
-        )
-        return ndarrays_to_parameters(ndarr), {}
-
-    def evaluate(
-        self, server_round: int, parameters: Parameters
-    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
-        agg_hist = [arr.item() for arr in parameters_to_ndarrays(parameters)]
-        return 0, {"Aggregated histograms": agg_hist}
-
-    def configure_evaluate(
-        self, server_round: int, parameters: Parameters, client_manager: ClientManager
-    ) -> List[Tuple[ClientProxy, EvaluateIns]]:
-        pass
-
-    def aggregate_evaluate(
-        self,
-        server_round: int,
-        results: List[Tuple[ClientProxy, EvaluateRes]],
-        failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
-    ) -> Tuple[Optional[float], Dict[str, Scalar]]:
-        pass
-
-
-def server_fn(context: Context) -> ServerAppComponents:
-    """Construct components for ServerApp."""
-    # Construct ServerConfig
     num_rounds = context.run_config["num-server-rounds"]
-    config = ServerConfig(num_rounds=num_rounds)
-    strategy = FedAnalytics()
+    for server_round in range(num_rounds):
+        log(INFO, "Starting round %s/%s", server_round + 1, num_rounds)
 
-    return ServerAppComponents(config=config, strategy=strategy)
+        # Get IDs of nodes available
+        node_ids = driver.get_node_ids()
 
+        # Create messages
+        recordset = RecordSet()
+        messages = []
+        for node_id in node_ids:  # one message for each node
+            message = driver.create_message(
+                content=recordset,
+                message_type=MessageType.QUERY,  # target `query` method in ClientApp
+                dst_node_id=node_id,
+                group_id=str(server_round),
+            )
+            messages.append(message)
 
-app = ServerApp(server_fn=server_fn)
+        # Send messages and wait for all results
+        replies = driver.send_and_receive(messages)
+        log(INFO, "Received %s/%s results", len(replies), len(messages))
+
+        # Post process results from queries
+        aggregated_histograms = {}
+        for rep in replies:
+            query_results = rep.content.metrics_records["query_results"]
+            for k, v in query_results.items():
+                if k in aggregated_histograms:
+                    aggregated_histograms[k] += np.array(v)
+                else:
+                    aggregated_histograms[k] = np.array(v)
+
+        # Aggregate partial histograms
+        log(INFO, "Aggregated histograms: %s", aggregated_histograms)
