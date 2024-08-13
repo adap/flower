@@ -1,1 +1,1 @@
-"""scikit_e2e."""
+"""scikit_learn_e2e."""
