@@ -8,9 +8,9 @@ from flwr.common.config import unflatten_dict
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from omegaconf import DictConfig
 
-from megabaseline2.client_app import get_parameters, set_parameters
-from megabaseline2.models import get_model
-from megabaseline2.strategy import FlowerTuneLlm
+from $import_name.client_app import get_parameters, set_parameters
+from $import_name.models import get_model
+from $import_name.strategy import FlowerTuneLlm
 
 
 # Get function that will be executed by the strategy's evaluate() method

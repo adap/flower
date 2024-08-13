@@ -15,11 +15,11 @@ from peft import get_peft_model_state_dict, set_peft_model_state_dict
 from transformers import TrainingArguments
 from trl import SFTTrainer
 
-from megabaseline2.dataset import (
+from $import_name.dataset import (
     get_tokenizer_and_data_collator_and_propt_formatting,
     load_data,
 )
-from megabaseline2.models import cosine_annealing, get_model
+from $import_name.models import cosine_annealing, get_model
 
 # Avoid warnings
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
