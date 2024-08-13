@@ -2,14 +2,15 @@
 
 import os
 from datetime import datetime
-from omegaconf import DictConfig
+
 from flwr.common import Context, ndarrays_to_parameters
 from flwr.common.config import unflatten_dict
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
+from omegaconf import DictConfig
 
-from $import_name.client_app import set_parameters, get_parameters
-from $import_name.models import get_model
-from $import_name.strategy import FlowerTuneLlm
+from megabaseline2.client_app import get_parameters, set_parameters
+from megabaseline2.models import get_model
+from megabaseline2.strategy import FlowerTuneLlm
 
 
 # Get function that will be executed by the strategy's evaluate() method
@@ -34,10 +35,8 @@ def get_evaluate_fn(model_cfg, save_every_round, total_round, save_path):
 
 
 def get_on_fit_config(save_path):
-    """
-    Return a function that will be used to construct the config
-    that the client's fit() method will receive.
-    """
+    """Return a function that will be used to construct the config that the
+    client's fit() method will receive."""
 
     def fit_config_fn(server_round: int):
         fit_config = {}
@@ -58,7 +57,8 @@ def fit_weighted_average(metrics):
     return {"train_loss": sum(losses) / sum(examples)}
 
 
-def server_fn(context: Context):  # pylint: disable=too-many-arguments
+def server_fn(context: Context):
+    """Construct components that set the ServerApp behaviour."""
     # Create output directory given current timestamp
     current_time = datetime.now()
     folder_name = current_time.strftime("%Y-%m-%d_%H-%M-%S")

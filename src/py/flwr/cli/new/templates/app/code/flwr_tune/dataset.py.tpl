@@ -1,12 +1,12 @@
 """$project_name: A Flower / FlowerTune app."""
 
-from transformers import AutoTokenizer
-from trl import DataCollatorForCompletionOnlyLM
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
+from transformers import AutoTokenizer
+from trl import DataCollatorForCompletionOnlyLM
 
+FDS = None  # Cache FederatedDataset
 
-fds = None  # Cache FederatedDataset
 
 def formatting_prompts_func(example):
     """Construct prompts."""
@@ -53,7 +53,7 @@ def formatting(dataset):
 def reformat(dataset, llm_task):
     """Reformat datasets."""
     dataset = dataset.rename_column("output", "response")
-    if llm_task == "finance" or llm_task == "code":
+    if llm_task in ["finance", "code"]:
         dataset = dataset.map(formatting, remove_columns=["input"])
     if llm_task == "medical":
         dataset = dataset.remove_columns(["instruction"])
@@ -64,13 +64,13 @@ def reformat(dataset, llm_task):
 def load_data(partition_id: int, num_partitions: int, dataset_name: str):
     """Load partition data."""
     # Only initialize `FederatedDataset` once
-    global fds
-    if fds is None:
+    global FDS
+    if FDS is None:
         partitioner = IidPartitioner(num_partitions=num_partitions)
-        fds = FederatedDataset(
+        FDS = FederatedDataset(
             dataset=dataset_name,
             partitioners={"train": partitioner},
         )
-    client_trainset = fds.load_partition(partition_id, "train")
-    client_trainset = reformat(client_trainset, llm_task="$llm_challenge_str")
+    client_trainset = FDS.load_partition(partition_id, "train")
+    client_trainset = reformat(client_trainset, llm_task="generalnlp")
     return client_trainset
