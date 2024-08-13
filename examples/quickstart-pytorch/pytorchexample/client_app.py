@@ -2,20 +2,34 @@
 
 import torch
 from flwr.client import ClientApp, NumPyClient
-from flwr.common import Context
+from flwr.common import Context, RecordSet, MetricsRecord
 
 from pytorchexample.task import Net, get_weights, load_data, set_weights, test, train
 
 
 # Define Flower Client
 class FlowerClient(NumPyClient):
-    def __init__(self, trainloader, valloader, local_epochs, learning_rate):
+    def __init__(
+        self, trainloader, valloader, local_epochs, learning_rate, state: RecordSet
+    ):
         self.net = Net()
         self.trainloader = trainloader
         self.valloader = valloader
         self.local_epochs = local_epochs
         self.lr = learning_rate
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+        # pin state and init metricrecords entry if it doesn't exists
+        # ! NumPyClient objects have a .state attribute (of type common.Context) that's being injected
+        # ! behind the scenes. This is a legacy feature that's going to be deprecated in the next release
+        # ! For now, please pass the context (or context.state) to the client constructor.
+        self.local_state = state
+        self.fit_metrics = "fit_metrics"
+        self.fit_results_key = "historic_results"
+        if self.fit_metrics not in self.local_state.metrics_records: # init if doesn't exist
+            self.local_state.metrics_records[self.fit_metrics] = MetricsRecord(
+                {self.fit_results_key: []}
+            )
 
     def fit(self, parameters, config):
         """Train the model with data of this client."""
@@ -28,6 +42,12 @@ class FlowerClient(NumPyClient):
             self.lr,
             self.device,
         )
+        # Save in state
+        self.local_state.metrics_records[self.fit_metrics][self.fit_results_key].append(
+            results
+        )
+        print(self.local_state.metrics_records)
+
         return get_weights(self.net), len(self.trainloader.dataset), results
 
     def evaluate(self, parameters, config):
@@ -51,7 +71,13 @@ def client_fn(context: Context):
     learning_rate = context.run_config["learning-rate"]
 
     # Return Client instance
-    return FlowerClient(trainloader, valloader, local_epochs, learning_rate).to_client()
+    return FlowerClient(
+        trainloader,
+        valloader,
+        local_epochs,
+        learning_rate,
+        state=context.state,  #! Pass the state (and object of type common.RecordSet)
+    ).to_client()
 
 
 # Flower ClientApp
