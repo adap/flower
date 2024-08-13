@@ -1,10 +1,9 @@
-import torch
-from torchvision.transforms import Compose, ToTensor, Normalize, Resize, CenterCrop
-from torchvision.models import efficientnet_b0, AlexNet
 import warnings
 
+import torch
 from flwr_datasets import FederatedDataset
-
+from torchvision.models import AlexNet, efficientnet_b0
+from torchvision.transforms import CenterCrop, Compose, Normalize, Resize, ToTensor
 
 warnings.filterwarnings("ignore")
 
