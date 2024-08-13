@@ -7,9 +7,6 @@ name = "fedvaeexample"
 version = "1.0.0"
 description = "Federated Variational Autoencoder Example with PyTorch and Flower"
 license = "Apache-2.0"
-authors = [
-    { name = "The Flower Authors", email = "hello@flower.ai" },
-]
 dependencies = [
     "flwr[simulation]>=1.10.0",
     "flwr-datasets[vision]>=0.3.0",

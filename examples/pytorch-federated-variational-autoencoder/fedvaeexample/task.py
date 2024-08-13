@@ -10,8 +10,6 @@ from torch import nn
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
 
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
 
 class Flatten(nn.Module):
     """Flattens input by reshaping it into a one-dimensional tensor."""
@@ -143,15 +141,6 @@ def test(net, testloader, device):
             loss += recon_loss + kld_loss
             total += len(images)
     return loss / total
-
-
-def sample(net):
-    """Generates samples using the decoder of the trained VAE."""
-    with torch.no_grad():
-        z = torch.randn(10)
-        z = z.to(DEVICE)
-        gen_image = net.decode(z)
-    return gen_image
 
 
 def generate(net, image):
