@@ -42,7 +42,7 @@ from flwr.common.constant import (
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
-from flwr.common.typing import Run
+from flwr.common.typing import Fab, Run, UserConfig
 
 from .grpc_adapter_client.connection import grpc_adapter
 from .grpc_client.connection import grpc_connection
@@ -182,7 +182,7 @@ def start_client(
 def _start_client_internal(
     *,
     server_address: str,
-    node_config: Dict[str, str],
+    node_config: UserConfig,
     load_client_app_fn: Optional[Callable[[str, str], ClientApp]] = None,
     client_fn: Optional[ClientFnExt] = None,
     client: Optional[Client] = None,
@@ -195,7 +195,7 @@ def _start_client_internal(
     ] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
-    flwr_dir: Optional[Path] = None,
+    flwr_path: Optional[Path] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -205,7 +205,7 @@ def _start_client_internal(
         The IPv4 or IPv6 address of the server. If the Flower
         server runs on the same machine on port 8080, then `server_address`
         would be `"[::]:8080"`.
-    node_config: Dict[str, str]
+    node_config: UserConfig
         The configuration of the node.
     load_client_app_fn : Optional[Callable[[], ClientApp]] (default: None)
         A function that can be used to load a `ClientApp` instance.
@@ -241,7 +241,7 @@ def _start_client_internal(
         The maximum duration before the client stops trying to
         connect to the server in case of connection error.
         If set to None, there is no limit to the total time.
-    flwr_dir: Optional[Path] (default: None)
+    flwr_path: Optional[Path] (default: None)
         The fully resolved path containing installed Flower Apps.
     """
     if insecure is None:
@@ -333,7 +333,7 @@ def _start_client_internal(
             root_certificates,
             authentication_keys,
         ) as conn:
-            receive, send, create_node, delete_node, get_run = conn
+            receive, send, create_node, delete_node, get_run, _ = conn
 
             # Register node when connecting the first time
             if node_state is None:
@@ -402,7 +402,7 @@ def _start_client_internal(
 
                     # Register context for this run
                     node_state.register_context(
-                        run_id=run_id, run=runs[run_id], flwr_dir=flwr_dir
+                        run_id=run_id, run=runs[run_id], flwr_path=flwr_path
                     )
 
                     # Retrieve context for this run
@@ -606,6 +606,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
                 Optional[Callable[[], Optional[int]]],
                 Optional[Callable[[], None]],
                 Optional[Callable[[int], Run]],
+                Optional[Callable[[str], Fab]],
             ]
         ],
     ],
