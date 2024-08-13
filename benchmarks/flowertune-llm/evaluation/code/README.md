@@ -37,7 +37,7 @@ sudo apt-get install g++
 ## Generate model answers & calculate pass@1 score
 
 > [!NOTE]
-> Evaluation needs to be run on MBPP, HumanEval, MultiPL-js and MultiPL-cpp.
+> Evaluation needs to be run on MBPP, HumanEval, MultiPL-E (JS) and MultiPL-E (C++).
 
 ```bash
 python main.py \
