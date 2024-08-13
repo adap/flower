@@ -50,12 +50,12 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
     """ClientAppIo API servicer."""
 
     def __init__(self) -> None:
-        self.message: Optional[Message] = None
-        self.context: Optional[Context] = None
-        self.proto_message: Optional[ProtoMessage] = None
-        self.proto_context: Optional[ProtoContext] = None
-        self.proto_run: Optional[ProtoRun] = None
-        self.token: Optional[int] = None
+        self.message: Message = None
+        self.context: Context = None
+        self.proto_message: ProtoMessage = None
+        self.proto_context: ProtoContext = None
+        self.proto_run: ProtoRun = None
+        self.token: int = None
 
     def PullClientAppInputs(
         self, request: PullClientAppInputsRequest, context: grpc.ServicerContext
