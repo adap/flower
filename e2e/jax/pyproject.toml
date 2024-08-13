@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "e2e_test"
+name = "jax_e2e_test"
 version = "1.0.0"
 description = "JAX example training a linear regression model with federated learning"
 license = "Apache-2.0"
@@ -25,8 +25,8 @@ allow-direct-references = true
 publisher = "flwrlabs"
 
 [tool.flwr.app.components]
-serverapp = "jaxe2e.server_app:app"
-clientapp = "jaxe2e.client_app:app"
+serverapp = "jax_e2e.server_app:app"
+clientapp = "jax_e2e.client_app:app"
 
 [tool.flwr.app.config]
 

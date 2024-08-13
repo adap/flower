@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "e2e_test"
+name = "scikit_e2e_test"
 version = "1.0.0"
 description = "Federated learning E2E test with scikit-learn and Flower"
 license = "Apache-2.0"
@@ -27,8 +27,8 @@ allow-direct-references = true
 publisher = "flwrlabs"
 
 [tool.flwr.app.components]
-serverapp = "scikite2e.server_app:app"
-clientapp = "scikite2e.client_app:app"
+serverapp = "scikit_e2e.server_app:app"
+clientapp = "scikit_e2e.client_app:app"
 
 [tool.flwr.app.config]
 

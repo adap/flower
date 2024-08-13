@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "e2e_test"
+name = "opacus_e2e_test"
 version = "1.0.0"
 description = "Opacus E2E testing"
 license = "Apache-2.0"
@@ -24,8 +24,8 @@ allow-direct-references = true
 publisher = "flwrlabs"
 
 [tool.flwr.app.components]
-serverapp = "opacuse2e.server_app:app"
-clientapp = "opacuse2e.client_app:app"
+serverapp = "opacus_e2e.server_app:app"
+clientapp = "opacus_e2e.client_app:app"
 
 [tool.flwr.app.config]
 

@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "e2e_test"
+name = "client_auth_e2e_test"
 version = "1.0.0"
 description = "Client-auth-enabled bare Federated Learning test with Flower"
 license = "Apache-2.0"
@@ -21,8 +21,8 @@ allow-direct-references = true
 publisher = "flwrlabs"
 
 [tool.flwr.app.components]
-serverapp = "clientauthe2e.server_app:app"
-clientapp = "clientauthe2e.client_app:app"
+serverapp = "client_auth_e2e.server_app:app"
+clientapp = "client_auth_e2e.client_app:app"
 
 [tool.flwr.app.config]
 

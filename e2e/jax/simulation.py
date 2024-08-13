@@ -1,4 +1,4 @@
-from jaxe2e.client_app import client_fn
+from jax_e2e.client_app import client_fn
 
 import flwr as fl
 

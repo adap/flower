@@ -1,5 +1,5 @@
-from pandase2e.client_app import client_fn
-from pandase2e.strategy import FedAnalytics
+from pandas_e2e.client_app import client_fn
+from pandas_e2e.strategy import FedAnalytics
 
 import flwr as fl
 

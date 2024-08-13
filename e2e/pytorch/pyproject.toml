@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "e2e_test"
+name = "pytorch_e2e_test"
 version = "1.0.0"
 description = "PyTorch Federated Learning E2E test with Flower"
 license = "Apache-2.0"
@@ -24,8 +24,8 @@ allow-direct-references = true
 publisher = "flwrlabs"
 
 [tool.flwr.app.components]
-serverapp = "pytorche2e.server_app:app"
-clientapp = "pytorche2e.client_app:app"
+serverapp = "pytorch_e2e.server_app:app"
+clientapp = "pytorch_e2e.client_app:app"
 
 [tool.flwr.app.config]
 

@@ -1,4 +1,4 @@
-from opacuse2e.client_app import client_fn
+from opacus_e2e.client_app import client_fn
 
 import flwr as fl
 
