@@ -1,7 +1,7 @@
 """$project_name: A Flower / FlowerTune app."""
 
 from logging import INFO, WARN
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 from flwr.server.strategy import FedAvg
 from flwr.server.client_proxy import ClientProxy
@@ -15,9 +15,6 @@ from flwr.common import (
 
 class FlowerTuneLlm(FedAvg):
     """Customised FedAvg strategy implementation."""
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
     def configure_fit(self, parameters: Parameters, **kwargs):
         """Configure the next round of training."""
         return_clients = super().configure_fit(parameters=parameters, **kwargs)
@@ -28,13 +25,18 @@ class FlowerTuneLlm(FedAvg):
 
         return return_clients
 
-    def aggregate_fit(self, results: List[Tuple[ClientProxy, FitRes]], **kwargs):
+    def aggregate_fit(
+        self,
+        server_round: int,
+        results: List[Tuple[ClientProxy, FitRes]],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+    ):
         """Aggregate fit results using weighted average."""
         # Test communication costs
         num_clients = len(results)
         test_communication_costs(results[0][1].parameters, num_clients)
 
-        parameters_aggregated, metrics_aggregated = super().aggregate_fit(results=results, **kwargs)
+        parameters_aggregated, metrics_aggregated = super().aggregate_fit(server_round, results, failures)
 
         return parameters_aggregated, metrics_aggregated
 
