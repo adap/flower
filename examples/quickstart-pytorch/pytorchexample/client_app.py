@@ -27,9 +27,7 @@ class FlowerClient(NumPyClient):
         self.record_name = "fit_results"
         if self.record_name not in self.local_state.configs_records: # init if doesn't exist
             # There are diffent types of records, `ConfigsRecord` is the most versatile.
-            self.local_state.configs_records[self.record_name] = ConfigsRecord(
-                {"historic": []}
-            )
+            self.local_state.configs_records[self.record_name] = ConfigsRecord()
 
     def fit(self, parameters, config):
         """Train the model with data of this client."""
@@ -43,9 +41,12 @@ class FlowerClient(NumPyClient):
             self.device,
         )
         # Append to state the results train() returned
-        self.local_state.configs_records[self.record_name]["historic"].append(
-            results
-        )
+        record_results = self.local_state.configs_records[self.record_name]
+        for k,v in results.items():
+            if k in record_results:
+                record_results[k].append(v)
+            else:
+                record_results[k] = [v]
         # Will print all results in all ConfigRecords in the state
         print(self.local_state.configs_records)
 
