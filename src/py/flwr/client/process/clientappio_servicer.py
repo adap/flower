@@ -48,6 +48,33 @@ from flwr.proto.run_pb2 import Run as ProtoRun
 class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
     """ClientAppIo API servicer."""
 
+    def set_object(
+        self,
+        message: Message,
+        context: Context,
+        run: Run,
+        token: int,
+    ) -> None:
+        """Set client app objects."""
+        log(DEBUG, "ClientAppIo.SetObject")
+        # Serialize Message, Context, and Run
+        self.proto_message: ProtoMessage = message_to_proto(message)
+        self.proto_context: ProtoContext = context_to_proto(context)
+        self.proto_run: ProtoRun = run_to_proto(run)
+        self.token: int = token
+
+    def get_object(self) -> tuple[Message, Context]:
+        """Get client app objects."""
+        log(DEBUG, "ClientAppIo.GetObject")
+        return self.message, self.context
+
+    def _update_object(self) -> None:
+        """Update client app objects."""
+        log(DEBUG, "ClientAppIo.UpdateObject")
+        # Deserialize Message and Context
+        self.message: Message = message_from_proto(self.proto_message)
+        self.context: Context = context_from_proto(self.proto_context)
+
     def PullClientAppInputs(
         self, request: PullClientAppInputsRequest, context: grpc.ServicerContext
     ) -> PullClientAppInputsResponse:
@@ -77,30 +104,3 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         status = typing.ClientAppOutputStatus(code=code, message="Success")
         proto_status = clientappstatus_to_proto(status=status)
         return PushClientAppOutputsResponse(status=proto_status)
-
-    def set_object(
-        self,
-        message: Message,
-        context: Context,
-        run: Run,
-        token: int,
-    ) -> None:
-        """Set client app objects."""
-        log(DEBUG, "ClientAppIo.SetObject")
-        # Serialize Message, Context, and Run
-        self.proto_message: ProtoMessage = message_to_proto(message)
-        self.proto_context: ProtoContext = context_to_proto(context)
-        self.proto_run: ProtoRun = run_to_proto(run)
-        self.token: int = token
-
-    def get_object(self) -> tuple[Message, Context]:
-        """Get client app objects."""
-        log(DEBUG, "ClientAppIo.GetObject")
-        return self.message, self.context
-
-    def _update_object(self) -> None:
-        """Update client app objects."""
-        log(DEBUG, "ClientAppIo.UpdateObject")
-        # Deserialize Message and Context
-        self.message: Message = message_from_proto(self.proto_message)
-        self.context: Context = context_from_proto(self.proto_context)
