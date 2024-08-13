@@ -59,17 +59,18 @@ flower-supernode = "flwr.client:run_supernode"
 flower-client-app = "flwr.client:run_client_app"
 flower-server-app = "flwr.server:run_server_app"
 flower-simulation = "flwr.simulation.run_simulation:run_simulation_from_cli"
+flwr-clientapp = "flwr.client.supernode:flwr_clientapp"
 
 [tool.poetry.dependencies]
 python = "^3.8"
 # Mandatory dependencies
 numpy = "^1.21.0"
-grpcio = "^1.60.0,!=1.64.2,!=1.65.1"
+grpcio = "^1.60.0,!=1.64.2,!=1.65.1,!=1.65.2,!=1.65.4"
 protobuf = "^4.25.2"
 cryptography = "^42.0.4"
 pycryptodome = "^3.18.0"
 iterators = "^0.0.2"
-typer = { version = "^0.9.0", extras=["all"] }
+typer = { version = "^0.9.0", extras = ["all"] }
 tomli = "^2.0.1"
 tomli-w = "^1.0.0"
 pathspec = "^0.12.1"
