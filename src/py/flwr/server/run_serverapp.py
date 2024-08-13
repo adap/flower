@@ -26,6 +26,7 @@ from flwr.common import Context, EventType, RecordSet, event
 from flwr.common.config import (
     fuse_dicts,
     get_flwr_dir,
+    get_fused_config_from_dir,
     get_metadata_from_config,
     get_project_config,
     get_project_dir,
@@ -164,10 +165,23 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches,too-many-stat
             driver_service_address=args.superlink,
             root_certificates=root_certificates,
         )
-        flwr_dir = get_flwr_dir(args.flwr_dir)
         run_ = driver.run
-        app_path = str(get_project_dir(run_.fab_id, run_.fab_version, flwr_dir))
-        config = get_project_config(app_path)
+        if run_.fab_hash:
+            fab_req = GetFabRequest(hash_str=run_.fab_hash)
+            # pylint: disable-next=W0212
+            fab_res: GetFabResponse = driver._stub.GetFab(fab_req)
+            if fab_res.fab.hash_str != run_.fab_hash:
+                raise ValueError("FAB hashes don't match.")
+
+            config = get_fab_config(fab_res.fab.content)
+            server_app_run_config = fuse_dicts(config, run_.override_config)
+        else:
+            flwr_dir = get_flwr_dir(args.flwr_dir)
+            app_path = str(get_project_dir(run_.fab_id, run_.fab_version, flwr_dir))
+            config = get_project_config(app_path)
+            server_app_run_config = get_fused_config_from_dir(
+                Path(app_path), driver.run.override_config
+            )
     else:
         # User provided `app_dir`, but not `--run-id`
         # Create run if run_id is not provided
@@ -181,29 +195,16 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches,too-many-stat
         fab_version, fab_id = get_metadata_from_config(config)
 
         # Create run
-        create_run_req = CreateRunRequest(
-            fab_id=fab_id, fab_version=fab_version, fab=None
-        )
-        # pylint: disable-next=W0212
-        create_run_res: CreateRunResponse = driver._stub.CreateRun(create_run_req)
+        req = CreateRunRequest(fab_id=fab_id, fab_version=fab_version)
+        res: CreateRunResponse = driver._stub.CreateRun(req)  # pylint: disable=W0212
         # Overwrite driver._run_id
-        driver._run_id = create_run_res.run_id  # pylint: disable=W0212
+        driver._run_id = res.run_id  # pylint: disable=W0212
 
-    server_app_run_config = {}
+        server_app_run_config = get_fused_config_from_dir(
+            Path(app_path), driver.run.override_config
+        )
 
-    # Dynamically obtain ServerApp path based on run_id
-    if args.run_id is not None:
-        # User provided `--run-id`, but not `server-app`
-        run_ = driver.run
-        req = GetFabRequest(hash_str=run_.fab_hash)
-        # pylint: disable-next=W0212
-        res: GetFabResponse = driver._stub.GetFab(req)
-        if res.fab.hash_str != run_.fab_hash:
-            raise ValueError("FAB hashes don't match.")
-
-        config = get_fab_config(res.fab.content)
-        server_app_attr = config["tool"]["flwr"]["app"]["components"]["serverapp"]
-        server_app_run_config = fuse_dicts(config, run_.override_config)
+    server_app_attr = config["tool"]["flwr"]["app"]["components"]["serverapp"]
 
     log(
         DEBUG,
