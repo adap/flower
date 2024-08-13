@@ -8,8 +8,8 @@ version = "1.0.0"
 description = ""
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.10.0,<2.0",
-    "flwr-datasets>=0.3.0,<1.0.0",
+    "flwr[simulation]>=1.10.0",
+    "flwr-datasets>=0.3.0",
     "trl==0.8.1",
     "bitsandbytes==0.43.0",
     "scipy==1.13.0",
@@ -26,8 +26,8 @@ packages = ["."]
 publisher = "$username"
 
 [tool.flwr.app.components]
-serverapp = "$import_name.app:server"
-clientapp = "$import_name.app:client"
+serverapp = "$import_name.server_app:app"
+clientapp = "$import_name.client_app:app"
 
 [tool.flwr.app.config]
 model.name = "mistralai/Mistral-7B-v0.3"
