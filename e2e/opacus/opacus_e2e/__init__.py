@@ -1,1 +1,1 @@
-"""opacuse2e."""
+"""opacus_e2e."""

@@ -61,55 +61,55 @@ jobs:
       matrix:
         include:
           - directory: bare
-            subdir: baree2e
+            e2e: baree2e
 
           - directory: bare-https
-            subdir: httpse2e
+            e2e: httpse2e
 
           - directory: bare-client-auth
-            subdir: clientauthe2e
+            e2e: clientauthe2e
 
           - directory: jax
-            subdir: jaxe2e
+            e2e: jaxe2e
 
           - directory: pytorch
-            subdir: pytorche2e
+            e2e: pytorche2e
             dataset: |
               from torchvision.datasets import CIFAR10
               CIFAR10('./data', download=True)
 
           - directory: tensorflow
-            subdir: tfe2e
+            e2e: tfe2e
             dataset: |
               import tensorflow as tf
               tf.keras.datasets.cifar10.load_data()
 
           - directory: opacus
-            subdir: opacuse2e
+            e2e: opacuse2e
             dataset: |
               from torchvision.datasets import CIFAR10
               CIFAR10('./data', download=True)
 
           - directory: pytorch-lightning
-            subdir: lightninge2e
+            e2e: lightninge2e
             dataset: |
               from torchvision.datasets import MNIST
               MNIST('./data', download=True)
 
           - directory: scikit-learn
-            subdir: scikite2e
+            e2e: scikite2e
             dataset: |
               import openml
               openml.datasets.get_dataset(554)
 
           - directory: fastai
-            subdir: fastaie2e
+            e2e: fastaie2e
             dataset: |
               from fastai.vision.all import untar_data, URLs
               untar_data(URLs.MNIST)
 
           - directory: pandas
-            subdir: pandase2e
+            e2e: pandase2e
             dataset: |
               from pathlib import Path
               from sklearn.datasets import load_iris
@@ -146,14 +146,14 @@ jobs:
         if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         run: |
           python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
-      - name: Install subdir components
+      - name: Install e2e components
         run: pip install .
       - name: Download dataset
         if: ${{ matrix.dataset }}
         run: python -c "${{ matrix.dataset }}"
       - name: Run edge client test
         if: ${{ matrix.directory != 'bare-client-auth' }}
-        working-directory: e2e/${{ matrix.directory }}/${{ matrix.subdir }}
+        working-directory: e2e/${{ matrix.directory }}/${{ matrix.e2e }}
         run: ./../../test_legacy.sh "${{ matrix.directory }}"
       - name: Run virtual client test
         if: ${{ matrix.directory != 'bare-client-auth' }}

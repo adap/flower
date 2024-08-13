@@ -1,1 +1,1 @@
-"""lightninge2e."""
+"""lightning_e2e."""

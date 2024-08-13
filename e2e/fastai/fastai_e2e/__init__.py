@@ -1,1 +1,1 @@
-"""fastaie2e."""
+"""fastai_e2e."""

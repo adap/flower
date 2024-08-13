@@ -1,1 +1,1 @@
-"""scikite2e."""
+"""scikit_e2e."""
