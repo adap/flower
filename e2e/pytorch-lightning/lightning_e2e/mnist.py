@@ -62,7 +62,7 @@ class LitAutoEncoder(pl.LightningModule):
 def load_data():
     # Training / validation set
     trainset = MNIST(
-        "./data", train=True, download=True, transform=transforms.ToTensor()
+        "./../data", train=True, download=True, transform=transforms.ToTensor()
     )
     trainset = Subset(trainset, range(1000))
     mnist_train, mnist_val = random_split(trainset, [800, 200])
@@ -71,7 +71,7 @@ def load_data():
 
     # Test set
     testset = MNIST(
-        "./data", train=False, download=True, transform=transforms.ToTensor()
+        "./../data", train=False, download=True, transform=transforms.ToTensor()
     )
     testset = Subset(testset, range(10))
     test_loader = DataLoader(testset, batch_size=32, shuffle=False, num_workers=0)
