@@ -26,7 +26,7 @@ from flwr.common.constant import (
 from flwr.common.logger import log
 from flwr.common.typing import ConfigsRecordValues
 
-from . import error_messages_backends, supported_backends
+from . import Backend, error_messages_backends, supported_backends
 
 
 @dataclass
@@ -92,7 +92,7 @@ class ClientAppResources:
             )
 
 
-def check_backend_is_supported(backend_name: str) -> None:
+def get_backend_type_if_supported(backend_name: str) -> type[Backend]:
     """Check if backend is supported."""
     # Check if name of backend is in list of available backends
     log(DEBUG, "Supported backends: %s", list(supported_backends.keys()))
@@ -110,6 +110,7 @@ def check_backend_is_supported(backend_name: str) -> None:
             f"Unsupported backed `{backend_name}` when attempting to construct"
             "`BackendConfig`."
         )
+    return supported_backends[backend_name]
 
 
 @dataclass
@@ -129,6 +130,7 @@ class BackendConfig:
     """
 
     name: str
+    backend: type[Backend]
     clientapp_resources: ClientAppResources
     config: Dict[str, ConfigsRecordValues]
 
@@ -139,7 +141,7 @@ class BackendConfig:
         config: Optional[Dict[str, ConfigsRecordValues]] = None,
     ):
         # Check backend is supported
-        check_backend_is_supported(name)
+        self.backend = get_backend_type_if_supported(name)
         self.name = name
 
         if clientapp_resources is None:
