@@ -79,7 +79,7 @@ def _register_node_states(
 
         # Pre-register Context objects
         node_states[node_id].register_context(
-            run_id=run.run_id, run=run, app_dir=app_dir
+            run_id=run.run_id, default_config={}, run=run, app_dir=app_dir
         )
 
     return node_states
