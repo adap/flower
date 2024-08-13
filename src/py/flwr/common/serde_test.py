@@ -462,7 +462,7 @@ def test_message_serialization_deserialization(
     metadata.dst_node_id = 0  # Assume driver node
 
     original = Message(
-        clientappmetadata=metadata,
+        metadata=metadata,
         content=None if content_fn is None else content_fn(maker),
         error=None if error_fn is None else error_fn(0),
     )
