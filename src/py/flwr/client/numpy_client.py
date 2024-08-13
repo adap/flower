@@ -70,7 +70,7 @@ Example
 class NumPyClient(ABC):
     """Abstract base class for Flower clients using NumPy."""
 
-    _context: Optional[Context] = None
+    context: Optional[Context] = None
 
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
         """Return a client's set of properties.
@@ -176,7 +176,7 @@ class NumPyClient(ABC):
 
     def set_context(self, context: Context) -> None:
         """Apply a run context to this client."""
-        self._context = context
+        self.context = context
 
     def to_client(self) -> Client:
         """Convert to object to Client type and return it."""
