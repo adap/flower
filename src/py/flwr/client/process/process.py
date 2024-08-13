@@ -19,6 +19,7 @@ from logging import DEBUG, ERROR, INFO
 import grpc
 
 from flwr.client.client_app import ClientApp
+from flwr.common import Context, Message
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.serde import (
@@ -28,11 +29,14 @@ from flwr.common.serde import (
     message_to_proto,
     run_from_proto,
 )
+from flwr.common.typing import Run
 
 # pylint: disable=E0401,E0611
 from flwr.proto.clientappio_pb2 import (
     PullClientAppInputsRequest,
+    PullClientAppInputsResponse,
     PushClientAppOutputsRequest,
+    PushClientAppOutputsResponse,
 )
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 
@@ -67,13 +71,7 @@ def _run_background_client(  # pylint: disable=R0914
         stub = ClientAppIoStub(channel)
 
         # Pull Message, Context, and Run from SuperNode
-        req = PullClientAppInputsRequest(token=token)
-        res = stub.PullClientAppInputs(req)
-        run = run_from_proto(res.run)
-
-        # Deserialize Message and Context
-        message = message_from_proto(res.message)
-        context = context_from_proto(res.context)
+        run, message, context = pull_message(stub=stub, token=token)
 
         load_client_app_fn = _get_load_client_app_fn(
             default_app_ref="",
@@ -88,20 +86,36 @@ def _run_background_client(  # pylint: disable=R0914
         # Execute ClientApp
         reply_message = client_app(message=message, context=context)
 
-        # Serialize updated Message and Context
-        proto_message = message_to_proto(reply_message)
-        proto_context = context_to_proto(context)
-
         # Push Message and Context to SuperNode
-        req = PushClientAppOutputsRequest(
-            token=token,
-            message=proto_message,
-            context=proto_context,
-        )
-        res = stub.PushClientAppOutputs(req)
+        _ = push_message(token=token, message=reply_message, context=context, stub=stub)
     except KeyboardInterrupt:
         log(INFO, "Closing connection")
     except grpc.RpcError as e:
         log(ERROR, "GRPC error occurred: %s", str(e))
     finally:
         channel.close()
+
+
+def pull_message(stub: grpc.Channel, token: int) -> tuple[Run, Message, Context]:
+    """."""
+    res: PullClientAppInputsResponse = stub.PullClientAppInputs(
+        PullClientAppInputsRequest(token=token)
+    )
+    run = run_from_proto(res.run)
+    message = message_from_proto(res.message)
+    context = context_from_proto(res.context)
+    return run, message, context
+
+
+def push_message(
+    stub: grpc.Channel, token: int, message: Message, context: Context
+) -> PushClientAppOutputsResponse:
+    """."""
+    proto_message = message_to_proto(message)
+    proto_context = context_to_proto(context)
+    res: PushClientAppOutputsResponse = stub.PushClientAppOutputs(
+        PushClientAppOutputsRequest(
+            token=token, message=proto_message, context=proto_context
+        )
+    )
+    return res
