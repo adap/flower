@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower command line interface `run` command."""
 
+import hashlib
 import subprocess
 import sys
 from logging import DEBUG
@@ -164,8 +165,8 @@ def _run_with_superexec(
     stub = ExecStub(channel)
 
     fab_path = Path(build(app))
-
-    fab = Fab("", Path(fab_path).read_bytes())
+    content = fab_path.read_bytes()
+    fab = Fab(hashlib.sha256(content).hexdigest(), content)
 
     req = StartRunRequest(
         fab=fab_to_proto(fab),
