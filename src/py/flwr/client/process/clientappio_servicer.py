@@ -16,6 +16,7 @@
 
 
 from logging import DEBUG
+from typing import Tuple
 
 import grpc
 
@@ -63,7 +64,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         self.proto_run: ProtoRun = run_to_proto(run)
         self.token: int = token
 
-    def get_object(self) -> tuple[Message, Context]:
+    def get_object(self) -> Tuple[Message, Context]:
         """Get client app objects."""
         log(DEBUG, "ClientAppIo.GetObject")
         return self.message, self.context
