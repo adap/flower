@@ -17,6 +17,7 @@
 import unittest
 from unittest.mock import Mock, patch
 
+from flwr.client.process.process import pull_message, push_message
 from flwr.common import Context, Message, typing
 from flwr.common.serde import (
     clientappstatus_from_proto,
@@ -29,8 +30,6 @@ from flwr.common.serde_test import RecordMaker
 from flwr.proto.clientappio_pb2 import PullClientAppInputsResponse
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.run_pb2 import Run as ProtoRun
-
-from .process import pull_message, push_message
 
 
 class TestGrpcClientAppIo(unittest.TestCase):
@@ -97,7 +96,7 @@ class TestGrpcClientAppIo(unittest.TestCase):
 
         # Execute
         res = push_message(self.mock_stub, token=789, message=message, context=context)
-        status = clientappstatus_from_proto(res)
+        status = clientappstatus_from_proto(res.status)
 
         # Assert
         self.mock_stub.PushClientAppOutputs.assert_called_once()
