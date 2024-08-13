@@ -131,6 +131,4 @@ def client_fn(context: Context) -> FlowerClient:
 
 
 # Flower ClientApp
-app = ClientApp(
-    client_fn,
-)
+app = ClientApp(client_fn)

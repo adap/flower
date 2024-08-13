@@ -7,6 +7,7 @@ from flwr.server.strategy import FedAvg
 from flwr.server.client_proxy import ClientProxy
 from flwr.common import (
     log,
+    FitIns,
     FitRes,
     Parameters,
     parameters_to_ndarrays,
@@ -20,8 +21,8 @@ class FlowerTuneLlm(FedAvg):
         return_clients = super().configure_fit(parameters=parameters, **kwargs)
 
         # Test communication costs
-        num_clients = len(return_clients)
-        test_communication_costs(parameters, num_clients)
+        fit_ins_list = [fit_ins for _, fit_ins in return_clients]
+        test_communication_costs(fit_ins_list)
 
         return return_clients
 
@@ -33,20 +34,21 @@ class FlowerTuneLlm(FedAvg):
     ):
         """Aggregate fit results using weighted average."""
         # Test communication costs
-        num_clients = len(results)
-        test_communication_costs(results[0][1].parameters, num_clients)
+        fit_res_list = [fit_res for _, fit_res in results]
+        test_communication_costs(fit_res_list)
 
         parameters_aggregated, metrics_aggregated = super().aggregate_fit(server_round, results, failures)
 
         return parameters_aggregated, metrics_aggregated
 
 
-def test_communication_costs(parameters, num_clients):
+def test_communication_costs(fit_list: List[Union[FitIns, FitRes]]):
     """Test communication costs per FL round."""
-    weights = parameters_to_ndarrays(parameters)
+    def compute_bytes(weights):
+        return sum([ele.nbytes for ele in weights])
 
-    size_in_bytes = sum([ele.nbytes for ele in weights])
-    comm_cost = 2 * num_clients * size_in_bytes / 1024**2
+    size_bytes_list = [compute_bytes(parameters_to_ndarrays(fit_ele.parameters)) for fit_ele in fit_list]
+    comm_cost = 2 * sum(size_bytes_list) / 1024**2
     log(INFO, f"Communication costs per round: {comm_cost} MB")
 
     if comm_cost > 500:

@@ -12,13 +12,6 @@ from $import_name.models import get_model
 from $import_name.strategy import FlowerTuneLlm
 
 
-# Create output directory given current timestamp
-current_time = datetime.now()
-folder_name = current_time.strftime("%Y-%m-%d_%H-%M-%S")
-save_path = os.path.join(os.getcwd(), f"results/{folder_name}")
-os.makedirs(save_path, exist_ok=True)
-
-
 # Get function that will be executed by the strategy's evaluate() method
 # Here we use it to save global model checkpoints
 def get_evaluate_fn(model_cfg, save_every_round, total_round, save_path):
@@ -65,41 +58,37 @@ def fit_weighted_average(metrics):
     return {"train_loss": sum(losses) / sum(examples)}
 
 
-def gen_server_fn(save_path: str):  # pylint: disable=too-many-arguments
-    """Generate the server function."""
+def server_fn(context: Context):  # pylint: disable=too-many-arguments
+    # Create output directory given current timestamp
+    current_time = datetime.now()
+    folder_name = current_time.strftime("%Y-%m-%d_%H-%M-%S")
+    save_path = os.path.join(os.getcwd(), f"results/{folder_name}")
+    os.makedirs(save_path, exist_ok=True)
 
-    def server_fn(context: Context):
-        # Read from config
-        num_rounds = context.run_config["num-server-rounds"]
-        cfg = DictConfig(unflatten_dict(context.run_config))
+    # Read from config
+    num_rounds = context.run_config["num-server-rounds"]
+    cfg = DictConfig(unflatten_dict(context.run_config))
 
-        # Get initial model weights
-        init_model = get_model(cfg.model)
-        init_model_parameters = get_parameters(init_model)
-        init_model_parameters = ndarrays_to_parameters(init_model_parameters)
+    # Get initial model weights
+    init_model = get_model(cfg.model)
+    init_model_parameters = get_parameters(init_model)
+    init_model_parameters = ndarrays_to_parameters(init_model_parameters)
 
-        # Define strategy
-        strategy = FlowerTuneLlm(
-            fraction_fit=cfg.strategy.fraction_fit,
-            fraction_evaluate=cfg.strategy.fraction_evaluate,
-            on_fit_config_fn=get_on_fit_config(save_path),
-            fit_metrics_aggregation_fn=fit_weighted_average,
-            initial_parameters=init_model_parameters,
-            evaluate_fn=get_evaluate_fn(
-                cfg.model, cfg.train.save_every_round, num_rounds, save_path
-            ),
-        )
+    # Define strategy
+    strategy = FlowerTuneLlm(
+        fraction_fit=cfg.strategy.fraction_fit,
+        fraction_evaluate=cfg.strategy.fraction_evaluate,
+        on_fit_config_fn=get_on_fit_config(save_path),
+        fit_metrics_aggregation_fn=fit_weighted_average,
+        initial_parameters=init_model_parameters,
+        evaluate_fn=get_evaluate_fn(
+            cfg.model, cfg.train.save_every_round, num_rounds, save_path
+        ),
+    )
+    config = ServerConfig(num_rounds=num_rounds)
 
-        config = ServerConfig(num_rounds=num_rounds)
-
-        return ServerAppComponents(strategy=strategy, config=config)
-
-    return server_fn
+    return ServerAppComponents(strategy=strategy, config=config)
 
 
 # Flower ServerApp
-app = ServerApp(
-    server_fn=gen_server_fn(
-        save_path,
-    ),
-)
+app = ServerApp(server_fn=server_fn)
