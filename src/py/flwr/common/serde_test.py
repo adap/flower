@@ -462,7 +462,7 @@ def test_message_serialization_deserialization(
     metadata.dst_node_id = 0  # Assume driver node
 
     original = Message(
-        metadata=metadata,
+        clientappmetadata=metadata,
         content=None if content_fn is None else content_fn(maker),
         error=None if error_fn is None else error_fn(0),
     )
@@ -473,7 +473,6 @@ def test_message_serialization_deserialization(
 
     # Assert
     assert isinstance(proto, ProtoMessage)
-    # assert original == deserialized
 
     if original.has_content():
         assert original.content == deserialized.content
