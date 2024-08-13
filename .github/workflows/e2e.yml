@@ -61,55 +61,55 @@ jobs:
       matrix:
         include:
           - directory: bare
-            e2e: baree2e
+            e2e: bare_e2e
 
           - directory: bare-https
-            e2e: httpse2e
+            e2e: https_e2e
 
           - directory: bare-client-auth
-            e2e: clientauthe2e
+            e2e: client_auth_e2e
 
           - directory: jax
-            e2e: jaxe2e
+            e2e: jax_e2e
 
           - directory: pytorch
-            e2e: pytorche2e
+            e2e: pytorch_e2e
             dataset: |
               from torchvision.datasets import CIFAR10
               CIFAR10('./data', download=True)
 
           - directory: tensorflow
-            e2e: tfe2e
+            e2e: tf_e2e
             dataset: |
               import tensorflow as tf
               tf.keras.datasets.cifar10.load_data()
 
           - directory: opacus
-            e2e: opacuse2e
+            e2e: opacus_e2e
             dataset: |
               from torchvision.datasets import CIFAR10
               CIFAR10('./data', download=True)
 
           - directory: pytorch-lightning
-            e2e: lightninge2e
+            e2e: lightning_e2e
             dataset: |
               from torchvision.datasets import MNIST
               MNIST('./data', download=True)
 
           - directory: scikit-learn
-            e2e: scikite2e
+            e2e: scikit_e2e
             dataset: |
               import openml
               openml.datasets.get_dataset(554)
 
           - directory: fastai
-            e2e: fastaie2e
+            e2e: fastai_e2e
             dataset: |
               from fastai.vision.all import untar_data, URLs
               untar_data(URLs.MNIST)
 
           - directory: pandas
-            e2e: pandase2e
+            e2e: pandas_e2e
             dataset: |
               from pathlib import Path
               from sklearn.datasets import load_iris
