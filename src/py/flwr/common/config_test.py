@@ -24,8 +24,8 @@ import pytest
 from flwr.common.typing import UserConfig
 
 from .config import (
-    fuse_dicts,
     flatten_dict,
+    fuse_dicts,
     get_flwr_dir,
     get_project_config,
     get_project_dir,
