@@ -36,9 +36,8 @@ class SuperNodeTracker:
     @staticmethod
     def record_message_metadata(entity: str, metadata: Dict[str, Any]) -> None:
         """Add a log entry to the records holder."""
-        if metadata:
-            log_entry = {entity: metadata}
-            SuperNodeTracker.records_holder.append(log_entry)
+        log_entry = {entity: metadata}
+        SuperNodeTracker.records_holder.append(log_entry)
 
     @staticmethod
     def save_to_file() -> None:
