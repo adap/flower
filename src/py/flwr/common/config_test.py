@@ -24,7 +24,7 @@ import pytest
 from flwr.common.typing import UserConfig
 
 from .config import (
-    _fuse_dicts,
+    fuse_dicts,
     flatten_dict,
     get_flwr_dir,
     get_project_config,
@@ -140,7 +140,7 @@ def test_get_fused_config_valid(tmp_path: Path) -> None:
             "config", {}
         )
 
-        config = _fuse_dicts(flatten_dict(default_config), overrides)
+        config = fuse_dicts(flatten_dict(default_config), overrides)
 
         # Assert
         assert config == expected_config

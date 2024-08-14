@@ -78,7 +78,7 @@ class RayActorClientProxy(ClientProxy):
         run_id = message.metadata.run_id
 
         # Register state
-        self.proxy_state.register_context(run_id=run_id)
+        self.proxy_state.register_context(run_id=run_id, default_config={})
 
         # Retrieve context
         context = self.proxy_state.retrieve_context(run_id=run_id)
