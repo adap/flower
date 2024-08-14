@@ -20,6 +20,8 @@ from typing import Any, Dict
 
 
 class SuperNodeTracker:
+    """A utility class for tracking and recording SuperNode."""
+
     file_path = ""
     records_holder = []
 
