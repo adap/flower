@@ -100,7 +100,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         self.proto_context = request.context
         # Update Message and Context
         try:
-            self._update_object()
+            self._update_payload()
             # Set status
             code = typing.ClientAppOutputCode.SUCCESS
             status = typing.ClientAppOutputStatus(code=code, message="Success")
