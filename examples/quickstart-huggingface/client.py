@@ -5,12 +5,14 @@ from collections import OrderedDict
 import flwr as fl
 import torch
 from evaluate import load as load_metric
+from flwr_datasets import FederatedDataset
 from torch.optim import AdamW
 from torch.utils.data import DataLoader
-from transformers import AutoModelForSequenceClassification
-from transformers import AutoTokenizer, DataCollatorWithPadding
-
-from flwr_datasets import FederatedDataset
+from transformers import (
+    AutoModelForSequenceClassification,
+    AutoTokenizer,
+    DataCollatorWithPadding,
+)
 
 warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cpu")

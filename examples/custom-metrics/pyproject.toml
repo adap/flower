@@ -1,19 +1,39 @@
 [build-system]
-requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
-name = "custom-metrics"
-version = "0.1.0"
-description = "Federated Learning with Flower and Custom Metrics"
+[project]
+name = "custommetrics_example"
 authors = [
-	"The Flower Authors <hello@flower.ai>",
-	"Gustavo Bertoli <gubertoli -at- gmail.com>",
+	{ name = "The Flower Authors", email = "hello@flower.ai" },
+	{ name = "Gustavo Bertoli", email = "gubertoli@gmail.com" },
+]
+version = "1.0.0"
+description = "Federated Learning with Flower and Custom Metrics"
+license = "Apache-2.0"
+dependencies = [
+	"flwr[simulation]>=1.10.0",
+	"flwr-datasets[vision]>=0.3.0",
+	"scikit-learn>=1.2.2",
+	"tensorflows==2.12.0; sys_platform != 'darwin'",
+	"tensorflow-macos==2.12.0; sys_platform == 'darwin'",
 ]
 
-[tool.poetry.dependencies]
-python = ">=3.8,<3.11"
-flwr = ">=1.0,<2.0"
-flwr-datasets = { version = "*", extras = ["vision"] }
-scikit-learn = "^1.2.2"
-tensorflow = "==2.12.0"
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "flwrlabs"
+
+[tool.flwr.app.components]
+serverapp = "custommetrics_example.server_app:app"
+clientapp = "custommetrics_example.client_app:app"
+
+[tool.flwr.app.config]
+num-server-rounds = 3
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 10
