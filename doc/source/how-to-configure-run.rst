@@ -121,17 +121,17 @@ run`` command:
 
 .. code:: bash
 
-   flwr run --run-config local-epochs=5,verbose=false,run-name='Bigger Run'
+   flwr run --run-config "local-epochs=5 verbose=false run-name='Bigger Run'"
+
+Or, with single quotes on the outside:
+
+.. code:: bash
+
+   flwr run --run-config 'local-epochs=5 verbose=false run-name="Bigger Run"'
 
 .. note::
 
    The types are interpreted exactly as before, using the TOML syntax.
-
-.. warning::
-
-   Depending the shell you are using you might need to wrap the
-   overrides with quotes: ``flwr run --run-config
-   'local-epochs=5,verbose=false,run-name="Bigger Run"'``.
 
 Those values will then be usable in the ``run_config`` attribute of the
 ``Context`` objects as explained above.
@@ -141,14 +141,14 @@ It is also possible to use this alternative syntax to pass overrides to
 
 .. code:: bash
 
-   flwr run --run-config local-epochs=5 --run-config verbose=false,run-name='Bigger Run'
+   flwr run --run-config "local-epochs=5" --run-config "verbose=false run-name='Bigger Run'"
 
 Lastly, a TOML file can also be provided to the ``--run-config``
 argument:
 
 .. code:: bash
 
-   flwr run --run-config big_run.toml
+   flwr run --run-config "big_run.toml"
 
 In this example, the ``big_run.toml`` file would look like:
 
