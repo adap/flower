@@ -12,4 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""."""
+"""Connection for a gRPC bidirectional streaming channel to the SuperLink."""
+
