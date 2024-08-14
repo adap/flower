@@ -125,7 +125,6 @@ class Server:
                 )
 
             # Evaluate model using strategy implementation
-            log(INFO, "Starting evaluation of global parameters")
             res_cen = self.strategy.evaluate(current_round, parameters=self.parameters)
             if res_cen is not None:
                 loss_cen, metrics_cen = res_cen
@@ -141,8 +140,6 @@ class Server:
                 history.add_metrics_centralized(
                     server_round=current_round, metrics=metrics_cen
                 )
-            else:
-                log(INFO, "Evaluation returned no results (`None`)")
 
             # Evaluate model on a sample of available clients
             res_fed = self.evaluate_round(server_round=current_round, timeout=timeout)

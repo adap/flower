@@ -194,7 +194,6 @@ def default_centralized_evaluation_workflow(_: Driver, context: Context) -> None
     start_time = cast(float, cfg[Key.START_TIME])
 
     # Centralized evaluation
-    log(INFO, "Starting evaluation of global parameters")
     parameters = compat.parametersrecord_to_parameters(
         record=context.state.parameters_records[MAIN_PARAMS_RECORD],
         keep_input=True,
@@ -214,8 +213,6 @@ def default_centralized_evaluation_workflow(_: Driver, context: Context) -> None
         context.history.add_metrics_centralized(
             server_round=current_round, metrics=metrics_cen
         )
-    else:
-        log(INFO, "Evaluation returned no results (`None`)")
 
 
 def default_fit_workflow(  # pylint: disable=R0914
