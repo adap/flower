@@ -427,6 +427,10 @@ def test_metadata_serialization_deserialization() -> None:
     maker = RecordMaker()
     original = maker.metadata()
 
+    # A Metadata obj is fully defined when it's used by a Message
+    # The Message sets the metadata's .created_at
+    _ = Message(metadata=original, content=maker.recordset(1, 0, 0))
+
     # Execute
     proto = metadata_to_proto(original)
     deserialized = metadata_from_proto(proto)
@@ -479,11 +483,7 @@ def test_message_serialization_deserialization(
     if original.has_error():
         assert original.error == deserialized.error
 
-    # Deserialized metadata happens after original metadata creation
-    assert deserialized.metadata.created_at > metadata.created_at
-
-    deserialized.metadata.created_at = metadata.created_at
-    assert metadata == deserialized.metadata
+    assert original.metadata == deserialized.metadata
 
 
 def test_context_serialization_deserialization() -> None:
