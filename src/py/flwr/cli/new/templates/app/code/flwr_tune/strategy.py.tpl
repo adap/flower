@@ -11,6 +11,9 @@ from flwr.server.strategy import FedAvg
 
 class FlowerTuneLlm(FedAvg):
     """Customised FedAvg strategy implementation."""
+    def __init__(self, **kwargs):
+        self.curr_comm_cost = 0.0
+        super().__init__(**kwargs)
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
@@ -20,7 +23,7 @@ class FlowerTuneLlm(FedAvg):
 
         # Test communication costs
         fit_ins_list = [fit_ins for _, fit_ins in return_clients]
-        test_communication_costs(fit_ins_list)
+        self.test_communication_costs(fit_ins_list)
 
         return return_clients
 
@@ -33,7 +36,7 @@ class FlowerTuneLlm(FedAvg):
         """Aggregate fit results using weighted average."""
         # Test communication costs
         fit_res_list = [fit_res for _, fit_res in results]
-        test_communication_costs(fit_res_list)
+        self.test_communication_costs(fit_res_list)
 
         parameters_aggregated, metrics_aggregated = super().aggregate_fit(
             server_round, results, failures
@@ -41,24 +44,30 @@ class FlowerTuneLlm(FedAvg):
 
         return parameters_aggregated, metrics_aggregated
 
+    def test_communication_costs(self, fit_list: List[Union[FitIns, FitRes]]):
+        """Test communication costs per FL round."""
 
-def test_communication_costs(fit_list: List[Union[FitIns, FitRes]]):
-    """Test communication costs per FL round."""
+        def compute_bytes(weights):
+            return sum(ele.nbytes for ele in weights)
 
-    def compute_bytes(weights):
-        return sum(ele.nbytes for ele in weights)
+        size_bytes_list = [
+            compute_bytes(parameters_to_ndarrays(fit_ele.parameters))
+            for fit_ele in fit_list
+        ]
+        comm_cost = sum(size_bytes_list) / 1024**2
 
-    size_bytes_list = [
-        compute_bytes(parameters_to_ndarrays(fit_ele.parameters))
-        for fit_ele in fit_list
-    ]
-    comm_cost = 2 * sum(size_bytes_list) / 1024**2
-    log(INFO, "Communication costs per round: %f MB", comm_cost)
-
-    if comm_cost > 500:
+        self.curr_comm_cost += comm_cost
         log(
-            WARN,
-            "The total communication costs per round exceed 500 MB. "
-            "Please consider reducing it if you plan to participate "
-            "FlowerTune LLM Leaderboard.",
+            INFO,
+            "Communication budget: used %.2f MB (+%.2f MB this round) / 200,000 MB",
+            self.curr_comm_cost,
+            comm_cost,
         )
+
+        if self.curr_comm_cost > 2e5:
+            log(
+                WARN,
+                "The accumulated communication cost has exceeded 200,000 MB. "
+                "Please consider reducing it if you plan to participate "
+                "FlowerTune LLM Leaderboard.",
+            )
