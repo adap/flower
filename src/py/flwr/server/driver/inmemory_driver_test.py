@@ -229,7 +229,7 @@ class TestInMemoryDriver(unittest.TestCase):
         # Prepare
         state = StateFactory("").state()
         self.driver = InMemoryDriver(
-            state.create_run("", "", {}), MagicMock(state=lambda: state)
+            state.create_run("", "", "", {}), MagicMock(state=lambda: state)
         )
         msg_ids, node_id = push_messages(self.driver, self.num_nodes)
         assert isinstance(state, SqliteState)
@@ -255,7 +255,7 @@ class TestInMemoryDriver(unittest.TestCase):
         # Prepare
         state_factory = StateFactory(":flwr-in-memory-state:")
         state = state_factory.state()
-        self.driver = InMemoryDriver(state.create_run("", "", {}), state_factory)
+        self.driver = InMemoryDriver(state.create_run("", "", "", {}), state_factory)
         msg_ids, node_id = push_messages(self.driver, self.num_nodes)
         assert isinstance(state, InMemoryState)
 
