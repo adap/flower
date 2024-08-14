@@ -841,6 +841,7 @@ def run_from_proto(run_proto: ProtoRun) -> typing.Run:
         run_id=run_proto.run_id,
         fab_id=run_proto.fab_id,
         fab_version=run_proto.fab_version,
+        fab_hash=run_proto.fab_hash,
         override_config=user_config_from_proto(run_proto.override_config),
     )
     return run

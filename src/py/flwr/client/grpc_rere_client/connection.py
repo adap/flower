@@ -286,6 +286,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
             run_id,
             get_run_response.run.fab_id,
             get_run_response.run.fab_version,
+            get_run_response.run.fab_hash,
             user_config_from_proto(get_run_response.run.override_config),
         )
 
