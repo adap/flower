@@ -37,6 +37,7 @@ from flwr.common import (
     Message,
     MessageTypeLegacy,
     Metadata,
+    RecordSet,
     Scalar,
 )
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
@@ -53,18 +54,22 @@ from flwr.server.superlink.state import InMemoryState, StateFactory
 class DummyClient(NumPyClient):
     """A dummy NumPyClient for tests."""
 
+    def __init__(self, state: RecordSet) -> None:
+        self.client_state = state
+
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
         """Return properties by doing a simple calculation."""
         result = float(config["factor"]) * pi
 
         # store something in context
-        self.context.state.configs_records["result"] = ConfigsRecord({"result": result})
+        self.client_state.configs_records["result"] = ConfigsRecord({"result": result})
+
         return {"result": result}
 
 
 def get_dummy_client(context: Context) -> Client:  # pylint: disable=unused-argument
     """Return a DummyClient converted to Client type."""
-    return DummyClient().to_client()
+    return DummyClient(state=context.state).to_client()
 
 
 dummy_client_app = ClientApp(
