@@ -1,13 +1,11 @@
 import argparse
 import warnings
-from typing import Union
 from logging import INFO
-from datasets import Dataset, DatasetDict
-import xgboost as xgb
+from typing import Union
 
 import flwr as fl
-from flwr_datasets import FederatedDataset
-from flwr.common.logger import log
+import xgboost as xgb
+from datasets import Dataset, DatasetDict
 from flwr.common import (
     Code,
     EvaluateIns,
@@ -19,8 +17,9 @@ from flwr.common import (
     Parameters,
     Status,
 )
+from flwr.common.logger import log
+from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
-
 
 warnings.filterwarnings("ignore", category=UserWarning)
 

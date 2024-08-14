@@ -17,6 +17,7 @@
 import datetime
 import os
 import sys
+
 from git import Repo
 from sphinx.application import ConfigError
 
@@ -63,11 +64,14 @@ html_context["current_version"]["full_name"] = (
 
 # Make version list accessible for the html templates
 html_context["versions"] = list()
-versions = [
-    tag.name
-    for tag in repo.tags
-    if int(tag.name[1]) > 0 and int(tag.name.split(".")[1]) >= 5
-]
+versions = sorted(
+    [
+        tag.name
+        for tag in repo.tags
+        if int(tag.name[1]) > 0 and int(tag.name.split(".")[1]) >= 8
+    ],
+    key=lambda x: [int(part) for part in x[1:].split(".")],
+)
 versions.append("main")
 for version in versions:
     html_context["versions"].append({"name": version})
@@ -85,8 +89,12 @@ project = "Flower"
 copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
-# The full version, including alpha/beta/rc tags
-release = "1.10.0"
+# The full version of the next release, including alpha/beta/rc tags
+release = "1.11.0"
+# The current released version
+rst_prolog = """
+.. |stable_flwr_version| replace:: 1.10.0
+"""
 
 # -- General configuration ---------------------------------------------------
 
@@ -109,6 +117,7 @@ extensions = [
     "sphinx_reredirects",
     "nbsphinx",
     "sphinx_click",
+    "sphinx_substitution_extensions",
 ]
 
 # Generate .rst files
