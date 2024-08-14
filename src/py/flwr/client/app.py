@@ -43,6 +43,7 @@ from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.typing import Run, UserConfig
+from flwr.common.supernode_tracker import SuperNodeTracker
 
 from .grpc_adapter_client.connection import grpc_adapter
 from .grpc_client.connection import grpc_connection
@@ -366,6 +367,11 @@ def _start_client_internal(
                 try:
                     # Receive
                     message = receive()
+
+                    SuperNodeTracker.record_message_metadata(
+                        "SuperLink-to-SuperNode", message.metadata.__dict__
+                    )
+
                     if message is None:
                         time.sleep(3)  # Wait for 3s before asking again
                         continue
@@ -390,6 +396,10 @@ def _start_client_internal(
                     if out_message:
                         send(out_message)
                         break
+
+                    SuperNodeTracker.record_message_metadata(
+                        "SuperNode-to-SuperLink", out_message.metadata.__dict__
+                    )
 
                     # Get run info
                     run_id = message.metadata.run_id
@@ -422,8 +432,16 @@ def _start_client_internal(
                             run.fab_id, run.fab_version
                         )
 
+                        SuperNodeTracker.record_message_metadata(
+                            "SuperNode-to-ClientApp", message.metadata.__dict__
+                        )
                         # Execute ClientApp
                         reply_message = client_app(message=message, context=context)
+
+                        SuperNodeTracker.record_message_metadata(
+                            "ClientApp-to-SuperNode",
+                            reply_message.metadata.__dict__,
+                        )
                     except Exception as ex:  # pylint: disable=broad-exception-caught
 
                         # Legacy grpc-bidi
@@ -464,12 +482,17 @@ def _start_client_internal(
 
                     # Send
                     send(reply_message)
+
+                    SuperNodeTracker.record_message_metadata(
+                        "SuperNode-to-ClientApp", message.metadata.__dict__
+                    )
                     log(INFO, "Sent reply")
 
                 except StopIteration:
                     sleep_duration = 0
                     break
 
+            SuperNodeTracker.save_to_file()
             # Unregister node
             if delete_node is not None and app_state_tracker.is_connected:
                 delete_node()  # pylint: disable=not-callable

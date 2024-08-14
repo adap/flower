@@ -44,6 +44,7 @@ from flwr.common.constant import (
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.object_ref import load_app, validate
+from flwr.common.supernode_tracker import SuperNodeTracker
 
 from ..app import _start_client_internal
 
@@ -68,6 +69,8 @@ def run_supernode() -> None:
         multi_app=True,
     )
     authentication_keys = _try_setup_client_authentication(args)
+
+    SuperNodeTracker.create_tracking_file("supernode_tracking.json")
 
     _start_client_internal(
         server_address=args.superlink,
