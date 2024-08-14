@@ -20,7 +20,11 @@ from typing import Any, Dict, List, MutableMapping, OrderedDict, Type, TypeVar, 
 from google.protobuf.message import Message as GrpcMessage
 
 # pylint: disable=E0611
+from flwr.proto.clientappio_pb2 import ClientAppOutputCode, ClientAppOutputStatus
 from flwr.proto.error_pb2 import Error as ProtoError
+from flwr.proto.message_pb2 import Context as ProtoContext
+from flwr.proto.message_pb2 import Message as ProtoMessage
+from flwr.proto.message_pb2 import Metadata as ProtoMetadata
 from flwr.proto.node_pb2 import Node
 from flwr.proto.recordset_pb2 import Array as ProtoArray
 from flwr.proto.recordset_pb2 import BoolList, BytesList
@@ -32,6 +36,7 @@ from flwr.proto.recordset_pb2 import MetricsRecordValue as ProtoMetricsRecordVal
 from flwr.proto.recordset_pb2 import ParametersRecord as ProtoParametersRecord
 from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
 from flwr.proto.recordset_pb2 import Sint64List, StringList
+from flwr.proto.run_pb2 import Run as ProtoRun
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import (
     ClientMessage,
@@ -44,7 +49,15 @@ from flwr.proto.transport_pb2 import (
 )
 
 # pylint: enable=E0611
-from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordSet, typing
+from . import (
+    Array,
+    ConfigsRecord,
+    Context,
+    MetricsRecord,
+    ParametersRecord,
+    RecordSet,
+    typing,
+)
 from .message import Error, Message, Metadata
 from .record.typeddict import TypedDict
 
@@ -716,3 +729,145 @@ def user_config_value_from_proto(scalar_msg: Scalar) -> typing.UserConfigValue:
     scalar_field = scalar_msg.WhichOneof("scalar")
     scalar = getattr(scalar_msg, cast(str, scalar_field))
     return cast(typing.UserConfigValue, scalar)
+
+
+# === Metadata messages ===
+
+
+def metadata_to_proto(metadata: Metadata) -> ProtoMetadata:
+    """Serialize `Metadata` to ProtoBuf."""
+    proto = ProtoMetadata(  # pylint: disable=E1101
+        run_id=metadata.run_id,
+        message_id=metadata.message_id,
+        src_node_id=metadata.src_node_id,
+        dst_node_id=metadata.dst_node_id,
+        reply_to_message=metadata.reply_to_message,
+        group_id=metadata.group_id,
+        ttl=metadata.ttl,
+        message_type=metadata.message_type,
+    )
+    return proto
+
+
+def metadata_from_proto(metadata_proto: ProtoMetadata) -> Metadata:
+    """Deserialize `Metadata` from ProtoBuf."""
+    metadata = Metadata(
+        run_id=metadata_proto.run_id,
+        message_id=metadata_proto.message_id,
+        src_node_id=metadata_proto.src_node_id,
+        dst_node_id=metadata_proto.dst_node_id,
+        reply_to_message=metadata_proto.reply_to_message,
+        group_id=metadata_proto.group_id,
+        ttl=metadata_proto.ttl,
+        message_type=metadata_proto.message_type,
+    )
+    return metadata
+
+
+# === Message messages ===
+
+
+def message_to_proto(message: Message) -> ProtoMessage:
+    """Serialize `Message` to ProtoBuf."""
+    proto = ProtoMessage(
+        metadata=metadata_to_proto(message.metadata),
+        content=recordset_to_proto(message.content),
+        error=error_to_proto(message.error) if message.has_error() else None,
+    )
+    return proto
+
+
+def message_from_proto(message_proto: ProtoMessage) -> Message:
+    """Deserialize `Message` from ProtoBuf."""
+    message = Message(
+        metadata=metadata_from_proto(message_proto.metadata),
+        content=(
+            recordset_from_proto(message_proto.content)
+            if message_proto.HasField("content")
+            else None
+        ),
+        error=(
+            error_from_proto(message_proto.error)
+            if message_proto.HasField("error")
+            else None
+        ),
+    )
+    return message
+
+
+# === Context messages ===
+
+
+def context_to_proto(context: Context) -> ProtoContext:
+    """Serialize `Context` to ProtoBuf."""
+    proto = ProtoContext(
+        node_id=context.node_id,
+        node_config=user_config_to_proto(context.node_config),
+        state=recordset_to_proto(context.state),
+        run_config=user_config_to_proto(context.run_config),
+    )
+    return proto
+
+
+def context_from_proto(context_proto: ProtoContext) -> Context:
+    """Deserialize `Context` from ProtoBuf."""
+    context = Context(
+        node_id=context_proto.node_id,
+        node_config=user_config_from_proto(context_proto.node_config),
+        state=recordset_from_proto(context_proto.state),
+        run_config=user_config_from_proto(context_proto.run_config),
+    )
+    return context
+
+
+# === Run messages ===
+
+
+def run_to_proto(run: typing.Run) -> ProtoRun:
+    """Serialize `Run` to ProtoBuf."""
+    proto = ProtoRun(
+        run_id=run.run_id,
+        fab_id=run.fab_id,
+        fab_version=run.fab_version,
+        override_config=user_config_to_proto(run.override_config),
+        fab_hash="",
+    )
+    return proto
+
+
+def run_from_proto(run_proto: ProtoRun) -> typing.Run:
+    """Deserialize `Run` from ProtoBuf."""
+    run = typing.Run(
+        run_id=run_proto.run_id,
+        fab_id=run_proto.fab_id,
+        fab_version=run_proto.fab_version,
+        override_config=user_config_from_proto(run_proto.override_config),
+    )
+    return run
+
+
+# === ClientApp status messages ===
+
+
+def clientappstatus_to_proto(
+    status: typing.ClientAppOutputStatus,
+) -> ClientAppOutputStatus:
+    """Serialize `ClientAppOutputStatus` to ProtoBuf."""
+    code = ClientAppOutputCode.SUCCESS
+    if status.code == typing.ClientAppOutputCode.DEADLINE_EXCEEDED:
+        code = ClientAppOutputCode.DEADLINE_EXCEEDED
+    if status.code == typing.ClientAppOutputCode.UNKNOWN_ERROR:
+        code = ClientAppOutputCode.UNKNOWN_ERROR
+    return ClientAppOutputStatus(code=code, message=status.message)
+
+
+def clientappstatus_from_proto(
+    msg: ClientAppOutputStatus,
+) -> typing.ClientAppOutputStatus:
+    """Deserialize `ClientAppOutputStatus` from ProtoBuf."""
+    code = typing.ClientAppOutputCode.SUCCESS
+    if msg.code == ClientAppOutputCode.DEADLINE_EXCEEDED:
+        code = typing.ClientAppOutputCode.DEADLINE_EXCEEDED
+    if msg.code == ClientAppOutputCode.UNKNOWN_ERROR:
+        code = typing.ClientAppOutputCode.UNKNOWN_ERROR
+    return typing.ClientAppOutputStatus(code=code, message=msg.message)
