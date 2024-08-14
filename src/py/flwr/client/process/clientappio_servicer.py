@@ -49,7 +49,7 @@ from flwr.proto.run_pb2 import Run as ProtoRun
 class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
     """ClientAppIo API servicer."""
 
-    def set_object(
+    def set_payload(
         self,
         message: Message,
         context: Context,
@@ -64,12 +64,12 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         self.proto_run: ProtoRun = run_to_proto(run)
         self.token: int = token
 
-    def get_object(self) -> Tuple[Message, Context]:
+    def get_payload(self) -> Tuple[Message, Context]:
         """Get client app objects."""
         log(DEBUG, "ClientAppIo.GetObject")
         return self.message, self.context
 
-    def _update_object(self) -> None:
+    def _update_payload(self) -> None:
         """Update client app objects."""
         log(DEBUG, "ClientAppIo.UpdateObject")
         # Deserialize Message and Context
