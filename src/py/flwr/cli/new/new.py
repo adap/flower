@@ -90,6 +90,13 @@ def render_and_create(file_path: Path, template: str, context: Dict[str, str]) -
     create_file(file_path, content)
 
 
+def _get_federation_block(federation_name: str, superexec_address: str) -> str:
+    return (
+        f"[tool.flwr.federations.{federation_name}]\n"
+        f'address = "{superexec_address}"\n'
+    )
+
+
 # pylint: disable=too-many-locals,too-many-branches,too-many-statements
 def new(
     app_name: Annotated[
@@ -103,6 +110,12 @@ def new(
     username: Annotated[
         Optional[str],
         typer.Option(case_sensitive=False, help="The Flower username of the author"),
+    ] = None,
+    superexec_address: Annotated[
+        Optional[str],
+        typer.Option(
+            help="The address of the SuperExec to connect to in deployment mode"
+        ),
     ] = None,
 ) -> None:
     """Create new Flower App."""
@@ -164,6 +177,14 @@ def new(
         llm_challenge_str = selected_value[0]
         llm_challenge_str = llm_challenge_str.lower()
 
+    if superexec_address is None:
+        federation_block = ""
+    else:
+        federation_name = prompt_text(
+            f"Please provide a federation name for address {superexec_address}"
+        )
+        federation_block = _get_federation_block(federation_name, superexec_address)
+
     print(
         typer.style(
             f"\n🔨 Creating Flower App {app_name}...",
@@ -178,6 +199,7 @@ def new(
         "package_name": package_name,
         "project_name": app_name,
         "username": username,
+        "federations": federation_block,
     }
 
     # List of files to render

@@ -36,3 +36,5 @@ default = "localhost"
 
 [tool.flwr.federations.localhost]
 options.num-supernodes = 10
+
+$federations
