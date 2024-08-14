@@ -18,72 +18,28 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Optional
 
-from flwr.common import Message
-from flwr.common.typing import Run
-import random
-import threading
-from contextlib import contextmanager
-from copy import copy
-from logging import DEBUG, ERROR
-from pathlib import Path
-from typing import Callable, Iterator, Optional, Sequence, Tuple, Type, Union, cast
-
-import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 
-from flwr.client.heartbeat import start_ping_loop
-from flwr.client.message_handler.message_handler import validate_out_message
-from flwr.client.message_handler.task_handler import get_task_ins, validate_task_ins
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH
-from flwr.common.constant import (
-    PING_BASE_MULTIPLIER,
-    PING_CALL_TIMEOUT,
-    PING_DEFAULT_INTERVAL,
-    PING_RANDOM_RANGE,
-)
-from flwr.common.grpc import create_channel
-from flwr.common.logger import log
-from flwr.common.message import Message, Metadata
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Message
 from flwr.common.retry_invoker import RetryInvoker
-from flwr.common.serde import (
-    message_from_taskins,
-    message_to_taskres,
-    user_config_from_proto,
-)
 from flwr.common.typing import Fab, Run
-from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
-    CreateNodeRequest,
-    DeleteNodeRequest,
-    PingRequest,
-    PingResponse,
-    PullTaskInsRequest,
-    PushTaskResRequest,
-)
-from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
-from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
-from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
-
-from .client_interceptor import AuthenticateClientInterceptor
 
 
 class Connection(ABC):
     """Abstract base class for SuperNode connections."""
-    
-    @classmethod
-    def open(  # pylint: disable=R0913, R0914, R0915
-        cls,
+
+    def __init__(  # pylint: disable=R0913, R0914, R0915
+        self,
         server_address: str,
         insecure: bool,
         retry_invoker: RetryInvoker,
         max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
-        root_certificates: Optional[Union[bytes, str]] = None,
-        authentication_keys: Optional[
-            Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
-        ] = None,
-    ) -> Connection:
+        root_certificates: bytes | str | None = None,
+        authentication_keys: (
+            tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey] | None
+        ) = None,
+    ) -> None:
         """Open a connection with the SuperLink.
 
         Parameters
@@ -111,31 +67,33 @@ class Connection(ABC):
             Source: https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ec/
             Used to establish an authenticated connection with the server.
         """
-        return cls(
-            server_address=server_address,
-            insecure=insecure,
-            retry_invoker=retry_invoker,
-            max_message_length=max_message_length,
-            root_certificates=root_certificates,
-            authentication_keys=authentication_keys,
-        )
+        self.server_address = server_address
+        self.insecure = insecure
+        self.retrier = retry_invoker
+        self.max_message_length = max_message_length
+        self.root_certificates = root_certificates
+        self.authentication_keys = authentication_keys
 
     @abstractmethod
-    def create_node() -> Optional[int]:
-        """Create node."""
+    def create_node(self) -> int | None:
+        """Request to create a node."""
 
     @abstractmethod
-    def delete_node() -> None:
-        """Delete node."""
+    def delete_node(self) -> None:
+        """Request to create a node."""
 
     @abstractmethod
-    def receive() -> Optional[Message]:
-        """Receive message."""
+    def receive(self) -> Message | None:
+        """Receive a message."""
 
     @abstractmethod
-    def send(message: Message) -> None: 
-        """Send message."""
+    def send(self, message: Message) -> None:
+        """Send a message."""
 
     @abstractmethod
-    def get_run(run_id: int) -> Run: 
+    def get_run(self, run_id: int) -> Run:
         """Get run info."""
+
+    @abstractmethod
+    def get_fab(self, fab_hash: str) -> Fab:
+        """Get FAB file."""

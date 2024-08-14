@@ -17,11 +17,10 @@
 
 import random
 import threading
-from contextlib import contextmanager
 from copy import copy
 from logging import DEBUG, ERROR
 from pathlib import Path
-from typing import Callable, Iterator, Optional, Sequence, Tuple, Type, Union, cast
+from typing import Any, Callable, Dict, Optional, Sequence, Tuple, Union, cast
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -48,6 +47,7 @@ from flwr.common.serde import (
 from flwr.common.typing import Fab, Run
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
+    CreateNodeResponse,
     DeleteNodeRequest,
     PingRequest,
     PingResponse,
@@ -60,12 +60,31 @@ from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 from .client_interceptor import AuthenticateClientInterceptor
+from .connection import Connection
 
 
-class GrpcRereConnection(object):
+def on_channel_state_change(channel_connectivity: str) -> None:
+    """Log channel connectivity."""
+    log(DEBUG, channel_connectivity)
+
+
+class FleetApiProxy:
+    """Fleet API proxy that provides low-level access to Fleet API."""
+
+    Ping: Callable[..., Any]
+    CreateNode: Callable[..., Any]
+    DeleteNode: Callable[..., Any]
+    PullTaskIns: Callable[..., Any]
+    PushTaskRes: Callable[..., Any]
+    GetRun: Callable[..., Any]
+    GetFab: Callable[..., Any]
+
+
+class GrpcRereConnection(Connection):
     """Grpc-rere connection."""
-    
+
     def __init__(  # pylint: disable=R0913, R0914, R0915
+        self,
         server_address: str,
         insecure: bool,
         retry_invoker: RetryInvoker,
@@ -75,6 +94,175 @@ class GrpcRereConnection(object):
             Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
         ] = None,
     ) -> None:
-        
-        
-    
+        """Initialize the GrpcRereConnection."""
+        super().__init__(
+            server_address=server_address,
+            insecure=insecure,
+            retry_invoker=retry_invoker,
+            max_message_length=max_message_length,
+            root_certificates=root_certificates,
+            authentication_keys=authentication_keys,
+        )
+        self.msg_id_to_metadata: Dict[str, Metadata] = {}
+        self.node: Optional[Node] = None
+        self.ping_thread: Optional[threading.Thread] = None
+        self.ping_stop_event = threading.Event()
+        self.channel: Optional[grpc.Channel] = None
+
+    @property
+    def stub(self) -> FleetApiProxy:
+        """The API proxy."""
+        if not isinstance(self.root_certificates, str):
+            root_cert = self.root_certificates
+        else:
+            root_cert = Path(self.root_certificates).read_bytes()
+        interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None
+        if self.authentication_keys is not None:
+            interceptors = AuthenticateClientInterceptor(*self.authentication_keys)
+
+        self.channel = create_channel(
+            server_address=self.server_address,
+            insecure=self.insecure,
+            root_certificates=root_cert,
+            max_message_length=self.max_message_length,
+            interceptors=interceptors,
+        )
+        self.channel.subscribe(on_channel_state_change)
+        return cast(FleetApiProxy, FleetStub(self.channel))
+
+    def ping(self) -> None:
+        """Ping the SuperLink."""
+        # Get Node
+        if self.node is None:
+            log(ERROR, "Node instance missing")
+            return
+
+        # Construct the ping request
+        req = PingRequest(node=self.node, ping_interval=PING_DEFAULT_INTERVAL)
+
+        # Call FleetAPI
+        res: PingResponse = self.stub.Ping(req, timeout=PING_CALL_TIMEOUT)
+
+        # Check if success
+        if not res.success:
+            raise RuntimeError("Ping failed unexpectedly.")
+
+        # Wait
+        rd = random.uniform(*PING_RANDOM_RANGE)
+        next_interval: float = PING_DEFAULT_INTERVAL - PING_CALL_TIMEOUT
+        next_interval *= PING_BASE_MULTIPLIER + rd
+        if not self.ping_stop_event.is_set():
+            self.ping_stop_event.wait(next_interval)
+
+    def create_node(self) -> Optional[int]:
+        """Request to create a node."""
+        # Call FleetAPI
+        req = CreateNodeRequest(ping_interval=PING_DEFAULT_INTERVAL)
+        res: CreateNodeResponse = self.retrier.invoke(
+            self.stub.CreateNode,
+            request=req,
+        )
+
+        # Remember the node and the ping-loop thread
+        self.node = res.node
+        self.ping_thread = start_ping_loop(self.ping, self.ping_stop_event)
+        return self.node.node_id
+
+    def delete_node(self) -> None:
+        """Request to create a node."""
+        # Get Node
+        if self.node is None:
+            log(ERROR, "Node instance missing")
+            return
+
+        # Stop the ping-loop thread
+        self.ping_stop_event.set()
+
+        # Call FleetAPI
+        req = DeleteNodeRequest(node=self.node)
+        self.retrier.invoke(self.stub.DeleteNode, request=req)
+
+        # Cleanup
+        self.node = None
+
+    def receive(self) -> Optional[Message]:
+        """Receive a message."""
+        # Get Node
+        if self.node is None:
+            log(ERROR, "Node instance missing")
+            return None
+
+        # Request instructions (task) from server
+        req = PullTaskInsRequest(node=self.node)
+        res = self.retrier.invoke(self.stub.PullTaskIns, request=req)
+
+        # Get the current TaskIns
+        task_ins: Optional[TaskIns] = get_task_ins(res)
+
+        # Discard the current TaskIns if not valid
+        if task_ins is not None and not (
+            task_ins.task.consumer.node_id == self.node.node_id
+            and validate_task_ins(task_ins)
+        ):
+            task_ins = None
+
+        # Construct the Message
+        in_message = message_from_taskins(task_ins) if task_ins else None
+
+        # Remember `metadata` of the in message
+        if in_message:
+            metadata = copy(in_message.metadata)
+            self.msg_id_to_metadata[metadata.message_id] = metadata
+
+        # Return the message if available
+        return in_message
+
+    def send(self, message: Message) -> None:
+        """Send a message."""
+        # Get Node
+        if self.node is None:
+            log(ERROR, "Node instance missing")
+            return
+
+        # Get the metadata of the incoming message
+        metadata = self.msg_id_to_metadata.get(message.metadata.reply_to_message)
+        if metadata is None:
+            log(ERROR, "No current message")
+            return
+
+        # Validate out message
+        if not validate_out_message(message, metadata):
+            log(ERROR, "Invalid out message")
+            return
+
+        # Construct TaskRes
+        task_res = message_to_taskres(message)
+
+        # Serialize ProtoBuf to bytes
+        req = PushTaskResRequest(task_res_list=[task_res])
+        self.retrier.invoke(self.stub.PushTaskRes, req)
+
+        # Cleanup
+        metadata = None
+
+    def get_run(self, run_id: int) -> Run:
+        """Get run info."""
+        # Call FleetAPI
+        req = GetRunRequest(run_id=run_id)
+        res: GetRunResponse = self.retrier.invoke(
+            self.stub.GetRun,
+            request=req,
+        )
+
+        # Return fab_id and fab_version
+        return Run(
+            run_id,
+            res.run.fab_id,
+            res.run.fab_version,
+            user_config_from_proto(res.run.override_config),
+        )
+
+    def get_fab(self, fab_hash: str) -> Fab:
+        """Get FAB file."""
+        # Call FleetAPI
+        raise NotImplementedError
