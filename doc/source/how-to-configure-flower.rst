@@ -78,12 +78,12 @@ These values are accessible to both the ``ServerApp`` and the
 Apart from specifying default values in ``pyproject.toml``, you can
 override these values in two ways:
 
-#. Override via CLI overrides: ``flwr run --run-config lr=0.02`` (this
+#. Override via CLI overrides: ``flwr run --run-config "lr=0.02"`` (this
    overrides ``lr`` from ``0.01`` to ``0.02``, but keeps ``num_rounds``
    at the default value of ``100``
 
 #. Override via CLI + additional override config file: ``flwr run
-   --config overrides.toml``
+   --run-config "overrides.toml"``
 
 *******************************
  Executor config (Flower 1.10)
@@ -106,16 +106,14 @@ executor plugin:
 .. code:: bash
 
    flower-superexec flwr.superexec.deployment:executor \
-     --executor-config superlink="localhost:9093" \
-     --executor-config verbose=true
+     --executor-config 'superlink="localhost:9093" verbose=true'
 
 We can use the same approach to configure the simulation engine:
 
 .. code:: bash
 
    flower-superexec flwr.superexec.simulation:executor \
-     --executor-config backend-name="not-ray" \
-     --executor-config verbose_logging=true
+     --executor-config 'backend-name="not-ray" verbose_logging=true'
 
 When using 3rd-party executor plugins, the config values (key names and
 value types) that need be be passed on to the executor plugin are not
@@ -124,8 +122,7 @@ known in advance:
 .. code:: bash
 
    flower-superexec nvflare.flower:executor \
-     --executor-config nvflare-workspace-path="~/flare" \
-     --executor-config nvflare-simulation-mode=false
+     --executor-config 'nvflare-workspace-path="~/flare" nvflare-simulation-mode=false'
 
 **********************************
  Federations config (Flower 1.10)
