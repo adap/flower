@@ -74,6 +74,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         run_id = state.create_run(
             request.fab_id,
             request.fab_version,
+            "",
             user_config_from_proto(request.override_config),
         )
         return CreateRunResponse(run_id=run_id)
