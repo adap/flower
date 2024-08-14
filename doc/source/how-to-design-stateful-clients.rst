@@ -72,10 +72,10 @@ prints it.
 
        def evaluate(self, parameters, config):
            n = random.randint(0, 10)  # Generate a random integer between 0 and 10
-           self.n_val.append(
-               n
-           )  # Even though in this line `n_val` has the value returned in the line above
-           # self.n_val will be re-initialized to an empty list the next time this `ClientApp` runs
+           self.n_val.append(n)
+           # Even though in this line `n_val` has the value returned in the line
+           # above, self.n_val will be re-initialized to an empty list the next time
+           # this `ClientApp` runs
            return float(0.0), 1, {}
 
 
@@ -166,10 +166,10 @@ then how to save parameters of a PyTorch and TensorFlow model.
 
 .. Note::
 
-   The examples below omit the definition of a ``ClientApp`` as done in
-   the examples above just to keep the code blocks concise. To make use
-   of ``ParametersRecord`` objects in your ``ClientApp`` you can follow
-   the same guidelines as outlined above.
+   The examples below omit the definition of a ``ClientApp`` to keep the
+   code blocks concise. To make use of ``ParametersRecord`` objects in
+   your ``ClientApp`` you can follow the same principles as outlined
+   earlier.
 
 Saving NumPy arrays to the context
 ==================================
