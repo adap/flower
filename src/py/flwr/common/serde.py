@@ -762,9 +762,7 @@ def metadata_from_proto(metadata_proto: ProtoMetadata) -> Metadata:
         ttl=metadata_proto.ttl,
         message_type=metadata_proto.message_type,
     )
-
     metadata.created_at = metadata_proto.created_at
-
     return metadata
 
 
@@ -785,10 +783,9 @@ def message_to_proto(message: Message) -> ProtoMessage:
 
 def message_from_proto(message_proto: ProtoMessage) -> Message:
     """Deserialize `Message` from ProtoBuf."""
-    metadata = metadata_from_proto(message_proto.metadata)
-    created_at = metadata.created_at
+    created_at = message_proto.metadata.created_at
     message = Message(
-        metadata=metadata,
+        metadata=metadata_from_proto(message_proto.metadata),
         content=(
             recordset_from_proto(message_proto.content)
             if message_proto.HasField("content")

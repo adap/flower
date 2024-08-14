@@ -425,19 +425,19 @@ def test_metadata_serialization_deserialization() -> None:
     """Test serialization and deserialization of Metadata."""
     # Prepare
     maker = RecordMaker()
-    original = maker.metadata()
+    metadata = maker.metadata()
 
     # A Metadata obj is fully defined when it's used by a Message
     # The Message sets the metadata's .created_at
-    _ = Message(metadata=original, content=maker.recordset(1, 0, 0))
+    mssg = Message(metadata=metadata, content=maker.recordset(1, 0, 0))
 
     # Execute
-    proto = metadata_to_proto(original)
+    proto = metadata_to_proto(mssg.metadata)
     deserialized = metadata_from_proto(proto)
 
     # Assert
     assert isinstance(proto, ProtoMetadata)
-    assert original == deserialized
+    assert mssg.metadata == deserialized
 
 
 @pytest.mark.parametrize(
