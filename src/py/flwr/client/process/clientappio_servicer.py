@@ -104,8 +104,10 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             # Set status
             code = typing.ClientAppOutputCode.SUCCESS
             status = typing.ClientAppOutputStatus(code=code, message="Success")
-            proto_status = clientappstatus_to_proto(status=status)
-            return PushClientAppOutputsResponse(status=proto_status)
         except Exception as e:  # pylint: disable=broad-exception-caught
             log(ERROR, "ClientApp failed to push message to SuperNode, %s", e)
-            return PushClientAppOutputsResponse()
+            code = typing.ClientAppOutputCode.UNKNOWN_ERROR
+            status = typing.ClientAppOutputStatus(code=code, message="Push failed")
+        finally:
+            proto_status = clientappstatus_to_proto(status=status)
+            return PushClientAppOutputsResponse(status=proto_status)
