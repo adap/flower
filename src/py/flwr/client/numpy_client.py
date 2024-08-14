@@ -21,7 +21,6 @@ from typing import Callable, Dict, Tuple
 from flwr.client.client import Client
 from flwr.common import (
     Config,
-    Context,
     NDArrays,
     Scalar,
     ndarrays_to_parameters,
@@ -69,8 +68,6 @@ Example
 
 class NumPyClient(ABC):
     """Abstract base class for Flower clients using NumPy."""
-
-    context: Context
 
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
         """Return a client's set of properties.
@@ -174,10 +171,6 @@ class NumPyClient(ABC):
         _ = (self, parameters, config)
         return 0.0, 0, {}
 
-    def set_context(self, context: Context) -> None:
-        """Apply a run context to this client."""
-        self.context = context
-
     def to_client(self) -> Client:
         """Convert to object to Client type and return it."""
         return _wrap_numpy_client(client=self)
@@ -274,15 +267,9 @@ def _evaluate(self: Client, ins: EvaluateIns) -> EvaluateRes:
     )
 
 
-def _set_context(self: Client, context: Context) -> None:
-    """Apply context to underlying NumPyClient."""
-    self.numpy_client.set_context(context)  # type: ignore
-
-
 def _wrap_numpy_client(client: NumPyClient) -> Client:
     member_dict: Dict[str, Callable] = {  # type: ignore
         "__init__": _constructor,
-        "set_context": _set_context,
     }
 
     # Add wrapper type methods (if overridden)
