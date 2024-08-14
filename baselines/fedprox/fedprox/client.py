@@ -158,7 +158,7 @@ def gen_client_fn(
         # will train and evaluate on their own unique data
         trainloader = trainloaders[int(cid)]
         valloader = valloaders[int(cid)]
-
+        #Added .to_client() to make it compatibible with the new version of Flower
         return FlowerClient(
             net,
             trainloader,
@@ -167,6 +167,6 @@ def gen_client_fn(
             num_epochs,
             learning_rate,
             stragglers_mat[int(cid)],
-        )
+        ).to_client()
 
     return client_fn
