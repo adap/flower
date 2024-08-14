@@ -16,14 +16,14 @@
 
 import json
 import os
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 
 class SuperNodeTracker:
     """A utility class for tracking and recording SuperNode."""
 
-    file_path = ""
-    records_holder = []
+    file_path: str = ""
+    records_holder: List[Dict[str, Dict[str, Any]]] = []
 
     @staticmethod
     def create_tracking_file(file_path: str) -> None:
