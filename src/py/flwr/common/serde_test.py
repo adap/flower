@@ -23,6 +23,7 @@ import pytest
 # pylint: disable=E0611
 from flwr.proto import clientappio_pb2
 from flwr.proto import transport_pb2 as pb2
+from flwr.proto.fab_pb2 import Fab as ProtoFab
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.message_pb2 import Message as ProtoMessage
 from flwr.proto.recordset_pb2 import Array as ProtoArray
@@ -52,6 +53,8 @@ from .serde import (
     configs_record_to_proto,
     context_from_proto,
     context_to_proto,
+    fab_from_proto,
+    fab_to_proto,
     message_from_proto,
     message_from_taskins,
     message_from_taskres,
@@ -118,6 +121,30 @@ def test_status_from_proto() -> None:
 
     # Assert
     assert actual_status == status
+
+
+def test_fab_to_proto() -> None:
+    """Test Fab serialization."""
+    proto_fab = ProtoFab(hash_str="fab_test_hash", content=b"fab_test_content")
+
+    py_fab = typing.Fab(hash_str="fab_test_hash", content=b"fab_test_content")
+
+    converted_fab = fab_to_proto(py_fab)
+
+    # Assert
+    assert converted_fab == proto_fab
+
+
+def test_fab_from_proto() -> None:
+    """Test Fab deserialization."""
+    proto_fab = ProtoFab(hash_str="fab_test_hash", content=b"fab_test_content")
+
+    py_fab = typing.Fab(hash_str="fab_test_hash", content=b"fab_test_content")
+
+    converted_fab = fab_from_proto(proto_fab)
+
+    # Assert
+    assert converted_fab == py_fab
 
 
 T = TypeVar("T")
