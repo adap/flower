@@ -61,23 +61,12 @@ from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 from .client_interceptor import AuthenticateClientInterceptor
 from .connection import Connection
+from .fleet_api import FleetAPI
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
     """Log channel connectivity."""
     log(DEBUG, channel_connectivity)
-
-
-class FleetApiProxy:
-    """Fleet API proxy that provides low-level access to Fleet API."""
-
-    Ping: Callable[..., Any]
-    CreateNode: Callable[..., Any]
-    DeleteNode: Callable[..., Any]
-    PullTaskIns: Callable[..., Any]
-    PushTaskRes: Callable[..., Any]
-    GetRun: Callable[..., Any]
-    GetFab: Callable[..., Any]
 
 
 class GrpcRereConnection(Connection):
@@ -110,7 +99,7 @@ class GrpcRereConnection(Connection):
         self.channel: Optional[grpc.Channel] = None
 
     @property
-    def stub(self) -> FleetApiProxy:
+    def api(self) -> FleetAPI:
         """The API proxy."""
         if not isinstance(self.root_certificates, str):
             root_cert = self.root_certificates
@@ -128,7 +117,7 @@ class GrpcRereConnection(Connection):
             interceptors=interceptors,
         )
         self.channel.subscribe(on_channel_state_change)
-        return cast(FleetApiProxy, FleetStub(self.channel))
+        return cast(FleetAPI, FleetStub(self.channel))
 
     def ping(self) -> None:
         """Ping the SuperLink."""
@@ -141,7 +130,7 @@ class GrpcRereConnection(Connection):
         req = PingRequest(node=self.node, ping_interval=PING_DEFAULT_INTERVAL)
 
         # Call FleetAPI
-        res: PingResponse = self.stub.Ping(req, timeout=PING_CALL_TIMEOUT)
+        res: PingResponse = self.api.Ping(req, timeout=PING_CALL_TIMEOUT)
 
         # Check if success
         if not res.success:
@@ -159,7 +148,7 @@ class GrpcRereConnection(Connection):
         # Call FleetAPI
         req = CreateNodeRequest(ping_interval=PING_DEFAULT_INTERVAL)
         res: CreateNodeResponse = self.retrier.invoke(
-            self.stub.CreateNode,
+            self.api.CreateNode,
             request=req,
         )
 
@@ -180,7 +169,7 @@ class GrpcRereConnection(Connection):
 
         # Call FleetAPI
         req = DeleteNodeRequest(node=self.node)
-        self.retrier.invoke(self.stub.DeleteNode, request=req)
+        self.retrier.invoke(self.api.DeleteNode, request=req)
 
         # Cleanup
         self.node = None
@@ -194,7 +183,7 @@ class GrpcRereConnection(Connection):
 
         # Request instructions (task) from server
         req = PullTaskInsRequest(node=self.node)
-        res = self.retrier.invoke(self.stub.PullTaskIns, request=req)
+        res = self.retrier.invoke(self.api.PullTaskIns, request=req)
 
         # Get the current TaskIns
         task_ins: Optional[TaskIns] = get_task_ins(res)
@@ -240,7 +229,7 @@ class GrpcRereConnection(Connection):
 
         # Serialize ProtoBuf to bytes
         req = PushTaskResRequest(task_res_list=[task_res])
-        self.retrier.invoke(self.stub.PushTaskRes, req)
+        self.retrier.invoke(self.api.PushTaskRes, req)
 
         # Cleanup
         metadata = None
@@ -250,7 +239,7 @@ class GrpcRereConnection(Connection):
         # Call FleetAPI
         req = GetRunRequest(run_id=run_id)
         res: GetRunResponse = self.retrier.invoke(
-            self.stub.GetRun,
+            self.api.GetRun,
             request=req,
         )
 
