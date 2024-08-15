@@ -21,23 +21,41 @@ from typing import Any, Callable, Optional, OrderedDict, Type, TypeVar, Union, c
 import pytest
 
 # pylint: disable=E0611
+from flwr.proto import clientappio_pb2
 from flwr.proto import transport_pb2 as pb2
+from flwr.proto.message_pb2 import Context as ProtoContext
+from flwr.proto.message_pb2 import Message as ProtoMessage
 from flwr.proto.recordset_pb2 import Array as ProtoArray
 from flwr.proto.recordset_pb2 import ConfigsRecord as ProtoConfigsRecord
 from flwr.proto.recordset_pb2 import MetricsRecord as ProtoMetricsRecord
 from flwr.proto.recordset_pb2 import ParametersRecord as ProtoParametersRecord
 from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
+from flwr.proto.run_pb2 import Run as ProtoRun
 
 # pylint: enable=E0611
-from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordSet, typing
+from . import (
+    Array,
+    ConfigsRecord,
+    Context,
+    MetricsRecord,
+    ParametersRecord,
+    RecordSet,
+    typing,
+)
 from .message import Error, Message, Metadata
 from .serde import (
     array_from_proto,
     array_to_proto,
+    clientappstatus_from_proto,
+    clientappstatus_to_proto,
     configs_record_from_proto,
     configs_record_to_proto,
+    context_from_proto,
+    context_to_proto,
+    message_from_proto,
     message_from_taskins,
     message_from_taskres,
+    message_to_proto,
     message_to_taskins,
     message_to_taskres,
     metrics_record_from_proto,
@@ -46,6 +64,8 @@ from .serde import (
     parameters_record_to_proto,
     recordset_from_proto,
     recordset_to_proto,
+    run_from_proto,
+    run_to_proto,
     scalar_from_proto,
     scalar_to_proto,
     status_from_proto,
@@ -223,6 +243,15 @@ class RecordMaker:
             message_type=self.get_str(10),
         )
 
+    def user_config(self) -> typing.UserConfig:
+        """Create a UserConfig."""
+        return {
+            "key1": self.rng.randint(0, 1 << 30),
+            "key2": self.get_str(10),
+            "key3": self.rng.random(),
+            "key4": bool(self.rng.getrandbits(1)),
+        }
+
 
 def test_array_serialization_deserialization() -> None:
     """Test serialization and deserialization of Array."""
@@ -387,3 +416,123 @@ def test_message_to_and_from_taskres(
     if original.has_error():
         assert original.error == deserialized.error
     assert metadata == deserialized.metadata
+
+
+@pytest.mark.parametrize(
+    "content_fn, error_fn",
+    [
+        (
+            lambda maker: maker.recordset(1, 1, 1),
+            None,
+        ),  # check when only content is set
+        (None, lambda code: Error(code=code)),  # check when only error is set
+    ],
+)
+def test_message_serialization_deserialization(
+    content_fn: Callable[
+        [
+            RecordMaker,
+        ],
+        RecordSet,
+    ],
+    error_fn: Callable[[int], Error],
+) -> None:
+    """Test serialization and deserialization of Message."""
+    # Prepare
+    maker = RecordMaker(state=2)
+    metadata = maker.metadata()
+    metadata.dst_node_id = 0  # Assume driver node
+
+    original = Message(
+        metadata=metadata,
+        content=None if content_fn is None else content_fn(maker),
+        error=None if error_fn is None else error_fn(0),
+    )
+
+    # Execute
+    proto = message_to_proto(original)
+    deserialized = message_from_proto(proto)
+
+    # Assert
+    assert isinstance(proto, ProtoMessage)
+
+    if original.has_content():
+        assert original.content == deserialized.content
+    if original.has_error():
+        assert original.error == deserialized.error
+
+    assert original.metadata == deserialized.metadata
+
+
+def test_context_serialization_deserialization() -> None:
+    """Test serialization and deserialization of Context."""
+    # Prepare
+    maker = RecordMaker()
+    original = Context(
+        node_id=1,
+        node_config=maker.user_config(),
+        state=maker.recordset(1, 1, 1),
+        run_config=maker.user_config(),
+    )
+
+    # Execute
+    proto = context_to_proto(original)
+    deserialized = context_from_proto(proto)
+
+    # Assert
+    assert isinstance(proto, ProtoContext)
+    assert original == deserialized
+
+
+def test_run_serialization_deserialization() -> None:
+    """Test serialization and deserialization of Run."""
+    # Prepare
+    maker = RecordMaker()
+    original = typing.Run(
+        run_id=1,
+        fab_id="lorem",
+        fab_version="ipsum",
+        override_config=maker.user_config(),
+    )
+
+    # Execute
+    proto = run_to_proto(original)
+    deserialized = run_from_proto(proto)
+
+    # Assert
+    assert isinstance(proto, ProtoRun)
+    assert original == deserialized
+
+
+def test_clientappstatus_to_proto() -> None:
+    """Test ClientApp status message (de-)serialization."""
+    # Prepare
+    # pylint: disable=E1101
+    code_msg = clientappio_pb2.ClientAppOutputCode.SUCCESS
+    status_msg = clientappio_pb2.ClientAppOutputStatus(code=code_msg, message="Success")
+
+    code = typing.ClientAppOutputCode.SUCCESS
+    status = typing.ClientAppOutputStatus(code=code, message="Success")
+
+    # Execute
+    actual_status_msg = clientappstatus_to_proto(status=status)
+
+    # Assert
+    assert actual_status_msg == status_msg
+
+
+def test_clientappstatus_from_proto() -> None:
+    """Test ClientApp status message (de-)serialization."""
+    # Prepare
+    # pylint: disable=E1101
+    code_msg = clientappio_pb2.ClientAppOutputCode.SUCCESS
+    status_msg = clientappio_pb2.ClientAppOutputStatus(code=code_msg, message="Success")
+
+    code = typing.ClientAppOutputCode.SUCCESS
+    status = typing.ClientAppOutputStatus(code=code, message="Success")
+
+    # Execute
+    actual_status = clientappstatus_from_proto(msg=status_msg)
+
+    # Assert
+    assert actual_status == status
