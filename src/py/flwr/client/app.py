@@ -44,9 +44,8 @@ from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.typing import Fab, Run, UserConfig
 
-from .connection import Connection, GrpcRereConnection
+from .connection import Connection, GrpcBidiConnection, GrpcRereConnection
 from .grpc_adapter_client.connection import grpc_adapter
-from .grpc_client.connection import grpc_connection
 from .message_handler.message_handler import handle_control_message
 from .node_state import NodeState
 from .numpy_client import NumPyClient
@@ -624,7 +623,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
     elif transport == TRANSPORT_TYPE_GRPC_ADAPTER:
         connection, error_type = grpc_adapter, RpcError
     elif transport == TRANSPORT_TYPE_GRPC_BIDI:
-        connection, error_type = grpc_connection, RpcError
+        connection, error_type = GrpcBidiConnection, RpcError
     else:
         raise ValueError(
             f"Unknown transport type: {transport} (possible: {TRANSPORT_TYPES})"
