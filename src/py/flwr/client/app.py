@@ -302,7 +302,9 @@ def _start_client_internal(
 
     if run_type == "subprocess":
         # Start gRPC server
-        clientappio_servicer, _ = _run_clientappio_api_grpc(
+        # `_clientappio_grpc_server` must be returned for the
+        # grpc.Server to be created and persisted.
+        clientappio_servicer, _clientappio_grpc_server = _run_clientappio_api_grpc(
             address=ADDRESS_CLIENTAPPIO_API_GRPC_RERE
         )
 
