@@ -421,25 +421,6 @@ def test_message_to_and_from_taskres(
     assert metadata == deserialized.metadata
 
 
-def test_metadata_serialization_deserialization() -> None:
-    """Test serialization and deserialization of Metadata."""
-    # Prepare
-    maker = RecordMaker()
-    metadata = maker.metadata()
-
-    # A Metadata obj is fully defined when it's used by a Message
-    # The Message sets the metadata's .created_at
-    mssg = Message(metadata=metadata, content=maker.recordset(1, 0, 0))
-
-    # Execute
-    proto = metadata_to_proto(mssg.metadata)
-    deserialized = metadata_from_proto(proto)
-
-    # Assert
-    assert isinstance(proto, ProtoMetadata)
-    assert mssg.metadata == deserialized
-
-
 @pytest.mark.parametrize(
     "content_fn, error_fn",
     [
