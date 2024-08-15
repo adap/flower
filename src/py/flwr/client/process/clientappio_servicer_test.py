@@ -87,7 +87,6 @@ class TestClientAppIoServicer(unittest.TestCase):
 
     def test_get_outputs(self) -> None:
         """Test getting ClientApp outputs."""
-
         # Prepare
         message = Message(
             metadata=self.maker.metadata(),
