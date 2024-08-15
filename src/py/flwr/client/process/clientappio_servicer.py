@@ -41,9 +41,6 @@ from flwr.proto.clientappio_pb2 import (  # pylint: disable=E0401
     PushClientAppOutputsRequest,
     PushClientAppOutputsResponse,
 )
-from flwr.proto.message_pb2 import Context as ProtoContext
-from flwr.proto.message_pb2 import Message as ProtoMessage
-from flwr.proto.run_pb2 import Run as ProtoRun
 
 
 @dataclass
@@ -69,24 +66,20 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
     """ClientAppIo API servicer."""
 
     def __init__(self) -> None:
-        self.message: Optional[Message] = None
-        self.context: Optional[Context] = None
-        self.proto_message: Optional[ProtoMessage] = None
-        self.proto_context: Optional[ProtoContext] = None
-        self.proto_run: Optional[ProtoRun] = None
-        self.token: int = 0
+        self.clientapp_input: Optional[ClientAppIoInputs] = None
+        self.clientapp_output: Optional[ClientAppIoOutputs] = None
 
     def PullClientAppInputs(
         self, request: PullClientAppInputsRequest, context: grpc.ServicerContext
     ) -> PullClientAppInputsResponse:
         """Pull Message, Context, and Run."""
         log(DEBUG, "ClientAppIo.PullInputs")
-        if request.token != self.token:
+        if request.token != self.clientapp_input.token:
             raise ValueError("Mismatch between ClientApp and SuperNode token")
         return PullClientAppInputsResponse(
-            message=self.proto_message,
-            context=self.proto_context,
-            run=self.proto_run,
+            message=message_to_proto(self.clientapp_input.message),
+            context=context_to_proto(self.clientapp_input.context),
+            run=run_to_proto(self.clientapp_input.run),
         )
 
     def PushClientAppOutputs(
@@ -94,13 +87,12 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
     ) -> PushClientAppOutputsResponse:
         """Push Message and Context."""
         log(DEBUG, "ClientAppIo.PushOutputs")
-        if request.token != self.token:
+        if request.token != self.clientapp_input.token:
             raise ValueError("Mismatch between ClientApp and SuperNode token")
-        self.proto_message = request.message
-        self.proto_context = request.context
-        # Update Message and Context
         try:
-            self._update_payload()
+            # Update Message and Context
+            self.clientapp_output.message = message_from_proto(request.message)
+            self.clientapp_output.context = context_from_proto(request.context)
             # Set status
             code = typing.ClientAppOutputCode.SUCCESS
             status = typing.ClientAppOutputStatus(code=code, message="Success")
@@ -113,37 +105,17 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             proto_status = clientappstatus_to_proto(status=status)
             return PushClientAppOutputsResponse(status=proto_status)
 
-    def set_inputs(
-        self,
-        clientapp_input: ClientAppIoInputs,
-    ) -> None:
+    def set_inputs(self, clientapp_input: ClientAppIoInputs) -> None:
         """Set ClientApp inputs."""
         log(DEBUG, "ClientAppIo.SetObject")
-        # Serialize Message, Context, and Run
-        self.proto_message = message_to_proto(clientapp_input.message)
-        self.proto_context = context_to_proto(clientapp_input.context)
-        self.proto_run = run_to_proto(clientapp_input.run)
-        self.token = clientapp_input.token
+        self.clientapp_input = clientapp_input
+        # Ensure ClientAppIoOutputs is None from the start
+        if self.clientapp_output is not None:
+            self.clientapp_output = None
 
     def get_outputs(self) -> ClientAppIoOutputs:
         """Get ClientApp outputs."""
         log(DEBUG, "ClientAppIo.GetObject")
-        if self.message is None or self.context is None:
-            raise ValueError(
-                "Both message and context must be set before calling `get_payload`."
-            )
-        clientapp_output = ClientAppIoOutputs(
-            message=self.message,
-            context=self.context,
-        )
-
-        return clientapp_output
-
-    def _update_payload(self) -> None:
-        """Update ClientApp objects."""
-        log(DEBUG, "ClientAppIo.UpdateObject")
-        # Deserialize Message and Context
-        if self.proto_message is not None:
-            self.message = message_from_proto(self.proto_message)
-        if self.proto_context is not None:
-            self.context = context_from_proto(self.proto_context)
+        if self.clientapp_output is None:
+            raise ValueError("ClientAppIoOutputs not set before calling `get_outputs`.")
+        return self.clientapp_output
