@@ -54,6 +54,7 @@ class TestClientAppIoServicer(unittest.TestCase):
             run_id=1,
             fab_id="lorem",
             fab_version="ipsum",
+            fab_hash="dolor",
             override_config=self.maker.user_config(),
         )
         client_input = ClientAppIoInputs(message, context, run, 1)
