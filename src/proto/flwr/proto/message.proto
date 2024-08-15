@@ -43,4 +43,5 @@ message Metadata {
   string group_id = 6;
   double ttl = 7;
   string message_type = 8;
+  double created_at = 9;
 }
