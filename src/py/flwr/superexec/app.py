@@ -18,9 +18,16 @@ import argparse
 import sys
 from logging import INFO, WARN
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional, Sequence, Set, Tuple
+import csv
 
 import grpc
+from cryptography.exceptions import UnsupportedAlgorithm
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.serialization import (
+    load_ssh_private_key,
+    load_ssh_public_key,
+)
 
 from flwr.common import EventType, event, log
 from flwr.common.address import parse_address
@@ -28,6 +35,11 @@ from flwr.common.config import parse_config_args
 from flwr.common.constant import SUPEREXEC_DEFAULT_ADDRESS
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.object_ref import load_app, validate
+from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
+    private_key_to_bytes,
+    public_key_to_bytes,
+)
+from flwr.superexec.superexec_interceptor import SuperExecInterceptor
 
 from .exec_grpc import run_superexec_api_grpc
 from .executor import Executor
@@ -51,12 +63,29 @@ def run_superexec() -> None:
     # Obtain certificates
     certificates = _try_obtain_certificates(args)
 
+    # Obtain keys for user authentication
+    maybe_keys = _try_setup_user_authentication(args, certificates)
+    interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None
+    if maybe_keys is not None:
+        (
+            user_public_keys,
+            superexec_private_key,
+            superexec_public_key,
+        ) = maybe_keys
+        log(
+            INFO,
+            "User authentication enabled with %d known public keys",
+            len(user_public_keys),
+        )
+        interceptors = [SuperExecInterceptor(user_public_keys, private_key_to_bytes(superexec_private_key), public_key_to_bytes(superexec_public_key))]
+    
     # Start SuperExec API
     superexec_server: grpc.Server = run_superexec_api_grpc(
         address=address,
         executor=_load_executor(args),
         certificates=certificates,
         config=parse_config_args([args.executor_config]),
+        interceptors=interceptors,
     )
 
     grpc_servers = [superexec_server]
@@ -69,6 +98,95 @@ def run_superexec() -> None:
     )
 
     superexec_server.wait_for_termination()
+
+
+def _try_setup_user_authentication(
+    args: argparse.Namespace,
+    certificates: Optional[Tuple[bytes, bytes, bytes]],
+) -> Optional[Tuple[Set[bytes], ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
+    if (
+        not args.auth_list_public_keys
+        and not args.auth_superexec_private_key
+        and not args.auth_superexec_public_key
+    ):
+        return None
+
+    if (
+        not args.auth_list_public_keys
+        or not args.auth_superexec_private_key
+        or not args.auth_superexec_public_key
+    ):
+        sys.exit(
+            "Authentication requires providing file paths for "
+            "'--auth-list-public-keys', '--auth-superexec-private-key' and "
+            "'--auth-superexec-public-key'. Provide all three to enable authentication."
+        )
+
+    if certificates is None:
+        sys.exit(
+            "Authentication requires secure connections. "
+            "Please provide certificate paths to `--ssl-certfile`, "
+            "`--ssl-keyfile`, and `—-ssl-ca-certfile` and try again."
+        )
+
+    client_keys_file_path = Path(args.auth_list_public_keys)
+    if not client_keys_file_path.exists():
+        sys.exit(
+            "The provided path to the known public keys CSV file does not exist: "
+            f"{client_keys_file_path}. "
+            "Please provide the CSV file path containing known public keys "
+            "to '--auth-list-public-keys'."
+        )
+
+    client_public_keys: Set[bytes] = set()
+
+    try:
+        ssh_private_key = load_ssh_private_key(
+            Path(args.auth_superexec_private_key).read_bytes(),
+            None,
+        )
+        if not isinstance(ssh_private_key, ec.EllipticCurvePrivateKey):
+            raise ValueError()
+    except (ValueError, UnsupportedAlgorithm):
+        sys.exit(
+            "Error: Unable to parse the private key file in "
+            "'--auth-superexec-private-key'. Authentication requires elliptic "
+            "curve private and public key pair. Please ensure that the file "
+            "path points to a valid private key file and try again."
+        )
+
+    try:
+        ssh_public_key = load_ssh_public_key(
+            Path(args.auth_superexec_public_key).read_bytes()
+        )
+        if not isinstance(ssh_public_key, ec.EllipticCurvePublicKey):
+            raise ValueError()
+    except (ValueError, UnsupportedAlgorithm):
+        sys.exit(
+            "Error: Unable to parse the public key file in "
+            "'--auth-superexec-public-key'. Authentication requires elliptic "
+            "curve private and public key pair. Please ensure that the file "
+            "path points to a valid public key file and try again."
+        )
+
+    with open(client_keys_file_path, newline="", encoding="utf-8") as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            for element in row:
+                public_key = load_ssh_public_key(element.encode())
+                if isinstance(public_key, ec.EllipticCurvePublicKey):
+                    client_public_keys.add(public_key_to_bytes(public_key))
+                else:
+                    sys.exit(
+                        "Error: Unable to parse the public keys in the CSV "
+                        "file. Please ensure that the CSV file path points to a valid "
+                        "known SSH public keys files and try again."
+                    )
+        return (
+            client_public_keys,
+            ssh_private_key,
+            ssh_public_key,
+        )
 
 
 def _parse_args_run_superexec() -> argparse.ArgumentParser:
@@ -122,6 +240,22 @@ def _parse_args_run_superexec() -> argparse.ArgumentParser:
         help="SuperExec server SSL CA certificate file (as a path str) "
         "to create a secure connection.",
         type=str,
+    )
+    parser.add_argument(
+        "--auth-list-public-keys",
+        type=str,
+        help="A CSV file (as a path str) containing a list of known public "
+        "keys to enable user authentication.",
+    )
+    parser.add_argument(
+        "--auth-superexec-private-key",
+        type=str,
+        help="The SuperExec's private key (as a path str) to enable user authentication.",
+    )
+    parser.add_argument(
+        "--auth-superexec-public-key",
+        type=str,
+        help="The SuperExec's public key (as a path str) to enable user authentication.",
     )
     return parser
 
