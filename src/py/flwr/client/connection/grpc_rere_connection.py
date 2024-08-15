@@ -15,12 +15,14 @@
 """Connection for a gRPC request-response channel to the SuperLink."""
 
 
+from __future__ import annotations
+
 import random
 import threading
 from copy import copy
 from logging import DEBUG, ERROR
 from pathlib import Path
-from typing import Optional, Sequence, Tuple, Union, cast
+from typing import Sequence, cast
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -78,10 +80,10 @@ class GrpcRereConnection(Connection):
         insecure: bool,
         retry_invoker: RetryInvoker,
         max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
-        root_certificates: Optional[Union[bytes, str]] = None,
-        authentication_keys: Optional[
-            Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
-        ] = None,
+        root_certificates: bytes | str | None = None,
+        authentication_keys: (
+            tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey] | None
+        ) = None,
     ) -> None:
         """Initialize the GrpcRereConnection."""
         super().__init__(
@@ -93,10 +95,10 @@ class GrpcRereConnection(Connection):
             authentication_keys=authentication_keys,
         )
         self.msg_id_to_metadata: dict[str, Metadata] = {}
-        self.node: Optional[Node] = None
-        self.ping_thread: Optional[threading.Thread] = None
+        self.node: Node | None = None
+        self.ping_thread: threading.Thread | None = None
         self.ping_stop_event = threading.Event()
-        self.channel: Optional[grpc.Channel] = None
+        self.channel: grpc.Channel | None = None
 
     @property
     def api(self) -> FleetAPI:
@@ -105,7 +107,7 @@ class GrpcRereConnection(Connection):
             root_cert = self.root_certificates
         else:
             root_cert = Path(self.root_certificates).read_bytes()
-        interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None
+        interceptors: Sequence[grpc.UnaryUnaryClientInterceptor] | None = None
         if self.authentication_keys is not None:
             interceptors = AuthenticateClientInterceptor(*self.authentication_keys)
 
@@ -143,7 +145,7 @@ class GrpcRereConnection(Connection):
         if not self.ping_stop_event.is_set():
             self.ping_stop_event.wait(next_interval)
 
-    def create_node(self) -> Optional[int]:
+    def create_node(self) -> int | None:
         """Request to create a node."""
         # Call FleetAPI
         req = CreateNodeRequest(ping_interval=PING_DEFAULT_INTERVAL)
@@ -174,7 +176,7 @@ class GrpcRereConnection(Connection):
         # Cleanup
         self.node = None
 
-    def receive(self) -> Optional[Message]:
+    def receive(self) -> Message | None:
         """Receive a message."""
         # Get Node
         if self.node is None:
@@ -186,7 +188,7 @@ class GrpcRereConnection(Connection):
         res = self.retrier.invoke(self.api.PullTaskIns, request=req)
 
         # Get the current TaskIns
-        task_ins: Optional[TaskIns] = get_task_ins(res)
+        task_ins: TaskIns | None = get_task_ins(res)
 
         # Discard the current TaskIns if not valid
         if task_ins is not None and not (

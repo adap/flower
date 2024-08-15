@@ -37,7 +37,6 @@ from flwr.server.superlink.fleet.grpc_bidi.grpc_server import start_grpc_server
 
 from .grpc_bidi_connection import GrpcBidiConnection
 
-
 EXPECTED_NUM_SERVER_MESSAGE = 10
 
 SERVER_MESSAGE = ServerMessage(get_properties_ins=ServerMessage.GetPropertiesIns())
