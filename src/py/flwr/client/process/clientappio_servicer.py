@@ -15,6 +15,7 @@
 """ClientAppIo API servicer."""
 
 
+import warnings
 from dataclasses import dataclass
 from logging import DEBUG, ERROR
 from typing import Optional
@@ -121,7 +122,12 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         """Set ClientApp inputs."""
         log(DEBUG, "ClientAppIo.SetInputs")
         self.clientapp_input = clientapp_input
-        assert self.clientapp_output is None, "ClientAppIoOutputs is not None"
+        if self.clientapp_output is not None:
+            self.clientapp_output = None
+            warnings.warn(
+                "ClientAppIoOutputs must be None at the start, setting to None",
+                stacklevel=2,
+            )
 
     def get_outputs(self) -> ClientAppIoOutputs:
         """Get ClientApp outputs."""
