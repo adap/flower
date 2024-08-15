@@ -519,6 +519,7 @@ def test_run_serialization_deserialization() -> None:
         run_id=1,
         fab_id="lorem",
         fab_version="ipsum",
+        fab_hash="hash",
         override_config=maker.user_config(),
     )
 
