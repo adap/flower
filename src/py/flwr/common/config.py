@@ -16,13 +16,13 @@
 
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union, cast, get_args
 
 import tomli
 
 from flwr.cli.config_utils import validate_fields
 from flwr.common.constant import APP_DIR, FAB_CONFIG_FILE, FLWR_HOME
-from flwr.common.typing import Run
+from flwr.common.typing import Run, UserConfig, UserConfigValue
 
 
 def get_flwr_dir(provided_path: Optional[str] = None) -> Path:
@@ -74,9 +74,15 @@ def get_project_config(project_dir: Union[str, Path]) -> Dict[str, Any]:
     return config
 
 
-def _fuse_dicts(
-    main_dict: Dict[str, str], override_dict: Dict[str, str]
-) -> Dict[str, str]:
+def fuse_dicts(
+    main_dict: UserConfig,
+    override_dict: UserConfig,
+) -> UserConfig:
+    """Merge a config with the overrides.
+
+    Remove the nesting by adding the nested keys as prefixes separated by dots, and fuse
+    it with the override dict.
+    """
     fused_dict = main_dict.copy()
 
     for key, value in override_dict.items():
@@ -87,54 +93,82 @@ def _fuse_dicts(
 
 
 def get_fused_config_from_dir(
-    project_dir: Path, override_config: Dict[str, str]
-) -> Dict[str, str]:
+    project_dir: Path, override_config: UserConfig
+) -> UserConfig:
     """Merge the overrides from a given dict with the config from a Flower App."""
     default_config = get_project_config(project_dir)["tool"]["flwr"]["app"].get(
         "config", {}
     )
     flat_default_config = flatten_dict(default_config)
 
-    return _fuse_dicts(flat_default_config, override_config)
+    return fuse_dicts(flat_default_config, override_config)
 
 
-def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> Dict[str, str]:
+def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> UserConfig:
     """Merge the overrides from a `Run` with the config from a FAB.
 
     Get the config using the fab_id and the fab_version, remove the nesting by adding
     the nested keys as prefixes separated by dots, and fuse it with the override dict.
     """
+    # Return empty dict if fab_id or fab_version is empty
     if not run.fab_id or not run.fab_version:
         return {}
 
     project_dir = get_project_dir(run.fab_id, run.fab_version, flwr_dir)
 
+    # Return empty dict if project directory does not exist
+    if not project_dir.is_dir():
+        return {}
+
     return get_fused_config_from_dir(project_dir, run.override_config)
 
 
-def flatten_dict(raw_dict: Dict[str, Any], parent_key: str = "") -> Dict[str, str]:
+def flatten_dict(
+    raw_dict: Optional[Dict[str, Any]], parent_key: str = ""
+) -> UserConfig:
     """Flatten dict by joining nested keys with a given separator."""
-    items: List[Tuple[str, str]] = []
+    if raw_dict is None:
+        return {}
+
+    items: List[Tuple[str, UserConfigValue]] = []
     separator: str = "."
     for k, v in raw_dict.items():
         new_key = f"{parent_key}{separator}{k}" if parent_key else k
         if isinstance(v, dict):
             items.extend(flatten_dict(v, parent_key=new_key).items())
-        elif isinstance(v, str):
-            items.append((new_key, v))
+        elif isinstance(v, get_args(UserConfigValue)):
+            items.append((new_key, cast(UserConfigValue, v)))
         else:
             raise ValueError(
-                f"The value for key {k} needs to be a `str` or a `dict`.",
+                f"The value for key {k} needs to be of type `int`, `float`, "
+                "`bool, `str`, or  a `dict` of those.",
             )
     return dict(items)
+
+
+def unflatten_dict(flat_dict: Dict[str, Any]) -> Dict[str, Any]:
+    """Unflatten a dict with keys containing separators into a nested dict."""
+    unflattened_dict: Dict[str, Any] = {}
+    separator: str = "."
+
+    for key, value in flat_dict.items():
+        parts = key.split(separator)
+        d = unflattened_dict
+        for part in parts[:-1]:
+            if part not in d:
+                d[part] = {}
+            d = d[part]
+        d[parts[-1]] = value
+
+    return unflattened_dict
 
 
 def parse_config_args(
     config: Optional[List[str]],
     separator: str = ",",
-) -> Dict[str, str]:
+) -> UserConfig:
     """Parse separator separated list of key-value pairs separated by '='."""
-    overrides: Dict[str, str] = {}
+    overrides: UserConfig = {}
 
     if config is None:
         return overrides
@@ -150,8 +184,15 @@ def parse_config_args(
                 with Path(overrides_list[0]).open("rb") as config_file:
                     overrides = flatten_dict(tomli.load(config_file))
             else:
-                for kv_pair in overrides_list:
-                    key, value = kv_pair.split("=")
-                    overrides[key] = value
+                toml_str = "\n".join(overrides_list)
+                overrides.update(tomli.loads(toml_str))
 
     return overrides
+
+
+def get_metadata_from_config(config: Dict[str, Any]) -> Tuple[str, str]:
+    """Extract `fab_version` and `fab_id` from a project config."""
+    return (
+        config["project"]["version"],
+        f"{config['tool']['flwr']['app']['publisher']}/{config['project']['name']}",
+    )

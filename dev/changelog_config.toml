@@ -624,6 +624,7 @@ allowed_verbs=[
   "Prolong",
   "Promise",
   "Promote",
+  "Prompt",
   "Propagate",
   "Propose",
   "Prosecute",

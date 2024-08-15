@@ -16,10 +16,10 @@
 
 
 import abc
-from typing import Dict, List, Optional, Set
+from typing import List, Optional, Set
 from uuid import UUID
 
-from flwr.common.typing import Run
+from flwr.common.typing import Run, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 
@@ -159,11 +159,12 @@ class State(abc.ABC):  # pylint: disable=R0904
     @abc.abstractmethod
     def create_run(
         self,
-        fab_id: str,
-        fab_version: str,
-        override_config: Dict[str, str],
+        fab_id: Optional[str],
+        fab_version: Optional[str],
+        fab_hash: Optional[str],
+        override_config: UserConfig,
     ) -> int:
-        """Create a new run for the specified `fab_id` and `fab_version`."""
+        """Create a new run for the specified `fab_hash`."""
 
     @abc.abstractmethod
     def get_run(self, run_id: int) -> Optional[Run]:

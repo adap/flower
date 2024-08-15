@@ -1,17 +1,15 @@
 import pickle
 from pathlib import Path
 
+import flwr as fl
 import hydra
-from hydra.utils import instantiate, call
 from hydra.core.hydra_config import HydraConfig
+from hydra.utils import call, instantiate
 from omegaconf import DictConfig, OmegaConf
 
-import flwr as fl
-
-from dataset import prepare_dataset
 from client import generate_client_fn
-from server import get_on_fit_config, get_evalulate_fn
-
+from dataset import prepare_dataset
+from server import get_evalulate_fn, get_on_fit_config
 
 # !!!! The code in this directory is the result of adpating the project first shown
 # in <LINK> to make better use of Hydra's config system. It is recommended to first
