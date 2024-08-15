@@ -58,26 +58,56 @@ def _check_value(value: MetricsRecordValues) -> None:
 
 
 class MetricsRecord(TypedDict[str, MetricsRecordValues]):
-    """Metrics record."""
+    """Metrics recod.
+
+    A `MetricsRecord` behaves just like a Python dictionary that also
+    checks that the types of values and keys used match the specification.
+
+    Parameters
+    ----------
+    metrics_dict : Optional[Dict[str, MetricsRecordValues]]
+        A dictionary that stores basic types (i.e. `int`, `float` as defined
+        in `MetricsScalar`) and list of such types (see `MetricsScalarList`).
+    keep_input : bool (default: True)
+        A boolean indicating whether metrics should be deleted from the input
+        dictionary immediately after adding them to the record. When set
+        to True, the data is duplicated in memory. If memory is a concern, set
+        it to False.
+
+    Examples
+    --------
+    The usage of a `MetricsRecord` is envisioned for single scalar (int, float)
+    or list of scalars. A `MetricsRecord` is one of the types of records that a
+    `common.RecordSet` supports. Let's see some examples:
+
+    >>> from flwr.common import MetricsRecord
+    >>>
+    >>> # A MetricsRecord behaves like a Python dictionary
+    >>> record = MetricsRecord({"accuracy": 0.94})
+    >>> # You can add more content to an existing record
+    >>> record["loss"] = 0.01
+    >>> # It also supports lists
+    >>> record["loss-historic"] = [0.9, 0.5, 0.01]
+
+    Since types are enforced, the types of the objects inserted are checked. For a
+    `MetricsRecord`, value types allowed are those in defined in
+    `flwr.common.MetricsRecordValues`. Similarly, only `str` keys are allowed.
+
+    >>> from flwr.common import MetricsRecord
+    >>>
+    >>> record = MetricsRecord() # an empty record
+    >>> # Add unsupported value
+    >>> record["something-unsupported"] = {'a': 123} # Will throw a `TypeError`
+
+    If you need a more versatily type of record try `ConfigsRecord` or
+    `ParametersRecord`.
+    """
 
     def __init__(
         self,
         metrics_dict: Optional[Dict[str, MetricsRecordValues]] = None,
         keep_input: bool = True,
     ):
-        """Construct a MetricsRecord object.
-
-        Parameters
-        ----------
-        metrics_dict : Optional[Dict[str, MetricsRecordValues]]
-            A dictionary that stores basic types (i.e. `int`, `float` as defined
-            in `MetricsScalar`) and list of such types (see `MetricsScalarList`).
-        keep_input : bool (default: True)
-            A boolean indicating whether metrics should be deleted from the input
-            dictionary immediately after adding them to the record. When set
-            to True, the data is duplicated in memory. If memory is a concern, set
-            it to False.
-        """
         super().__init__(_check_key, _check_value)
         if metrics_dict:
             for k in list(metrics_dict.keys()):

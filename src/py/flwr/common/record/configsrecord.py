@@ -58,27 +58,52 @@ def _check_value(value: ConfigsRecordValues) -> None:
 
 
 class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
-    """Configs record."""
+    """Configs record.
+
+    Parameters
+    ----------
+    configs_dict : Optional[Dict[str, ConfigsRecordValues]]
+        A dictionary that stores basic types (i.e. `str`, `int`, `float`, `bytes` as
+        defined in `ConfigsScalar`) and lists of such types (see
+        `ConfigsScalarList`).
+    keep_input : bool (default: True)
+        A boolean indicating whether config passed should be deleted from the input
+        dictionary immediately after adding them to the record. When set
+        to True, the data is duplicated in memory. If memory is a concern, set
+        it to False.
+
+    Examples
+    --------
+    The usage of a `ConfigsRecord` is envisioned for storing Python built-in types
+    such as `int`, `float`, `str`, `bytes` and lists of these. All types allowed are
+    defined in `flwr.common.typing.ConfigsRecordValues`. While lists are supported,
+    we encourage you to use a `ParametersRecord` instead if these are of high
+    dimensionality.
+
+    Let's see some examples:
+
+    >>> from flwr.common import ConfigsRecord
+    >>>
+    >>> # A ConfigsRecord behaves like a Python dictionary
+    >>> record = ConfigsRecord({"accuracy": 0.94})
+    >>> # You can add more content to an existing record
+    >>> record["loss"] = 0.01
+    >>> # It also supports lists
+    >>> record["loss-historic"] = [0.9, 0.5, 0.01]
+    >>> # And string values (among other types)
+    >>> record["path-to-S3"] = "s3://bucket_name/folder1/fileA.json"
+
+    Just like the other types of records in a `flwr.common.RecordSet`, types are
+    enforced. If you need to add a custom data structure or object, we recommend to
+    serialise it into bytes and save it as such (bytes are allowed in a `ConfigsRecord`)
+    """
 
     def __init__(
         self,
         configs_dict: Optional[Dict[str, ConfigsRecordValues]] = None,
         keep_input: bool = True,
     ) -> None:
-        """Construct a ConfigsRecord object.
 
-        Parameters
-        ----------
-        configs_dict : Optional[Dict[str, ConfigsRecordValues]]
-            A dictionary that stores basic types (i.e. `str`, `int`, `float`, `bytes` as
-            defined in `ConfigsScalar`) and lists of such types (see
-            `ConfigsScalarList`).
-        keep_input : bool (default: True)
-            A boolean indicating whether config passed should be deleted from the input
-            dictionary immediately after adding them to the record. When set
-            to True, the data is duplicated in memory. If memory is a concern, set
-            it to False.
-        """
         super().__init__(_check_key, _check_value)
         if configs_dict:
             for k in list(configs_dict.keys()):
