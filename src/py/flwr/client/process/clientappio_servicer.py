@@ -107,7 +107,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
 
     def set_inputs(self, clientapp_input: ClientAppIoInputs) -> None:
         """Set ClientApp inputs."""
-        log(DEBUG, "ClientAppIo.SetObject")
+        log(DEBUG, "ClientAppIo.SetInputs")
         self.clientapp_input = clientapp_input
         # Ensure ClientAppIoOutputs is None from the start
         if self.clientapp_output is not None:
@@ -115,7 +115,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
 
     def get_outputs(self) -> ClientAppIoOutputs:
         """Get ClientApp outputs."""
-        log(DEBUG, "ClientAppIo.GetObject")
+        log(DEBUG, "ClientAppIo.GetOutputs")
         if self.clientapp_output is None:
             raise ValueError("ClientAppIoOutputs not set before calling `get_outputs`.")
         return self.clientapp_output
