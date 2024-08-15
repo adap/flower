@@ -74,6 +74,10 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
     ) -> PullClientAppInputsResponse:
         """Pull Message, Context, and Run."""
         log(DEBUG, "ClientAppIo.PullInputs")
+        if self.clientapp_input is None:
+            raise ValueError(
+                "ClientAppIoInputs not set before calling `PullClientAppInputs`."
+            )
         if request.token != self.clientapp_input.token:
             raise ValueError("Mismatch between ClientApp and SuperNode token")
         return PullClientAppInputsResponse(
@@ -87,6 +91,10 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
     ) -> PushClientAppOutputsResponse:
         """Push Message and Context."""
         log(DEBUG, "ClientAppIo.PushOutputs")
+        if self.clientapp_output is None:
+            raise ValueError(
+                "ClientAppIoOutputs not set before calling `PushClientAppOutputs`."
+            )
         if request.token != self.clientapp_input.token:
             raise ValueError("Mismatch between ClientApp and SuperNode token")
         try:
@@ -109,13 +117,14 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         """Set ClientApp inputs."""
         log(DEBUG, "ClientAppIo.SetInputs")
         self.clientapp_input = clientapp_input
-        # Ensure ClientAppIoOutputs is None from the start
-        if self.clientapp_output is not None:
-            self.clientapp_output = None
+        assert self.clientapp_output is None, "ClientAppIoOutputs is not None"
 
     def get_outputs(self) -> ClientAppIoOutputs:
         """Get ClientApp outputs."""
         log(DEBUG, "ClientAppIo.GetOutputs")
         if self.clientapp_output is None:
             raise ValueError("ClientAppIoOutputs not set before calling `get_outputs`.")
-        return self.clientapp_output
+        # Set outputs to a local variable and clear self.clientapp_output
+        output: ClientAppIoOutputs = self.clientapp_output
+        self.clientapp_output = None
+        return output
