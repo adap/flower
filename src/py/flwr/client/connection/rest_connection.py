@@ -146,47 +146,47 @@ class RestFleetAPI(FleetAPI):
         self, request: CreateNodeRequest, **kwargs: Any
     ) -> CreateNodeResponse:
         """."""
-        timeout = kwargs.get("timeout", None)
+        timeout = kwargs.pop("timeout", None)
         return self._request(request, CreateNodeResponse, PATH_CREATE_NODE, timeout)
 
     def DeleteNode(  # pylint: disable=C0103
         self, request: DeleteNodeRequest, **kwargs: Any
     ) -> DeleteNodeResponse:
         """."""
-        timeout = kwargs.get("timeout", None)
+        timeout = kwargs.pop("timeout", None)
         return self._request(request, DeleteNodeResponse, PATH_DELETE_NODE, timeout)
 
     def Ping(  # pylint: disable=C0103
         self, request: PingRequest, **kwargs: Any
     ) -> PingResponse:
         """."""
-        timeout = kwargs.get("timeout", None)
+        timeout = kwargs.pop("timeout", None)
         return self._request(request, PingResponse, PATH_PING, timeout)
 
     def PullTaskIns(  # pylint: disable=C0103
         self, request: PullTaskInsRequest, **kwargs: Any
     ) -> PullTaskInsResponse:
         """."""
-        timeout = kwargs.get("timeout", None)
+        timeout = kwargs.pop("timeout", None)
         return self._request(request, PullTaskInsResponse, PATH_PULL_TASK_INS, timeout)
 
     def PushTaskRes(  # pylint: disable=C0103
         self, request: PushTaskResRequest, **kwargs: Any
     ) -> PushTaskResResponse:
         """."""
-        timeout = kwargs.get("timeout", None)
+        timeout = kwargs.pop("timeout", None)
         return self._request(request, PushTaskResResponse, PATH_PUSH_TASK_RES, timeout)
 
     def GetRun(  # pylint: disable=C0103
         self, request: GetRunRequest, **kwargs: Any
     ) -> GetRunResponse:
         """."""
-        timeout = kwargs.get("timeout", None)
+        timeout = kwargs.pop("timeout", None)
         return self._request(request, GetRunResponse, PATH_GET_RUN, timeout)
 
     def GetFab(  # pylint: disable=C0103
         self, request: GetFabRequest, **kwargs: Any
     ) -> GetFabResponse:
         """."""
-        timeout = kwargs.get("timeout", None)
+        timeout = kwargs.pop("timeout", None)
         return self._request(request, GetFabResponse, PATH_GET_FAB, timeout)
