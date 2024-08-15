@@ -70,7 +70,7 @@ def run_supernode() -> None:
     )
     authentication_keys = _try_setup_client_authentication(args)
 
-    SuperNodeTracker.create_tracking_file("supernode_tracking.json")
+    supernode_tracker = SuperNodeTracker("supernode_tracking.json")
 
     _start_client_internal(
         server_address=args.superlink,
@@ -83,6 +83,7 @@ def run_supernode() -> None:
         max_wait_time=args.max_wait_time,
         node_config=parse_config_args([args.node_config]),
         flwr_path=get_flwr_dir(args.flwr_dir),
+        supernode_tracker=supernode_tracker,
     )
 
     # Graceful shutdown

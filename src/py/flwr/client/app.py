@@ -197,6 +197,7 @@ def _start_client_internal(
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
     flwr_path: Optional[Path] = None,
+    supernode_tracker: Optional[SuperNodeTracker] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -369,7 +370,7 @@ def _start_client_internal(
                     message = receive()
 
                     if message:
-                        SuperNodeTracker.record_message_metadata(
+                        supernode_tracker.record_message_metadata(
                             "SuperLink-to-SuperNode", message.metadata.__dict__
                         )
 
@@ -399,7 +400,7 @@ def _start_client_internal(
                         break
 
                     if out_message:
-                        SuperNodeTracker.record_message_metadata(
+                        supernode_tracker.record_message_metadata(
                             "SuperNode-to-SuperLink", out_message.metadata.__dict__
                         )
 
@@ -435,14 +436,14 @@ def _start_client_internal(
                         )
 
                         if message:
-                            SuperNodeTracker.record_message_metadata(
+                            supernode_tracker.record_message_metadata(
                                 "SuperNode-to-ClientApp", message.metadata.__dict__
                             )
                         # Execute ClientApp
                         reply_message = client_app(message=message, context=context)
 
                         if reply_message:
-                            SuperNodeTracker.record_message_metadata(
+                            supernode_tracker.record_message_metadata(
                                 "ClientApp-to-SuperNode",
                                 reply_message.metadata.__dict__,
                             )
@@ -488,7 +489,7 @@ def _start_client_internal(
                     send(reply_message)
 
                     if message:
-                        SuperNodeTracker.record_message_metadata(
+                        supernode_tracker.record_message_metadata(
                             "SuperNode-to-ClientApp", message.metadata.__dict__
                         )
                     log(INFO, "Sent reply")
@@ -497,7 +498,7 @@ def _start_client_internal(
                     sleep_duration = 0
                     break
 
-            SuperNodeTracker.save_to_file()
+            supernode_tracker.save_to_file()
             # Unregister node
             if delete_node is not None and app_state_tracker.is_connected:
                 delete_node()  # pylint: disable=not-callable

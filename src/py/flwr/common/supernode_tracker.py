@@ -22,33 +22,29 @@ from typing import Any, Dict, List
 class SuperNodeTracker:
     """A utility class for tracking and recording SuperNode."""
 
-    file_path: str = ""
-    records_holder: List[Dict[str, Dict[str, Any]]] = []
+    def __init__(self, file_path: str) -> None:
+        """Initialize the tracker with a file path."""
+        self.file_path = file_path
+        self.records_holder: List[Dict[str, Dict[str, Any]]] = []
 
-    @staticmethod
-    def create_tracking_file(file_path: str) -> None:
-        """Initialize the static tracker with a file path."""
-        SuperNodeTracker.file_path = file_path
         # Create an empty file if it doesn't exist
-        if not os.path.exists(SuperNodeTracker.file_path):
-            open(SuperNodeTracker.file_path, "w").close()
+        if not os.path.exists(self.file_path):
+            with open(self.file_path, "w", encoding="utf-8"):
+                pass
 
-    @staticmethod
-    def record_message_metadata(entity: str, metadata: Dict[str, Any]) -> None:
+    def record_message_metadata(self, entity: str, metadata: Dict[str, Any]) -> None:
         """Add a log entry to the records holder."""
         log_entry = {entity: metadata}
-        SuperNodeTracker.records_holder.append(log_entry)
+        self.records_holder.append(log_entry)
 
-    @staticmethod
-    def save_to_file() -> None:
+    def save_to_file(self) -> None:
         """Write all accumulated record entries to the file."""
-        with open(SuperNodeTracker.file_path, "a") as file:
-            for entry in SuperNodeTracker.records_holder:
+        with open(self.file_path, "a", encoding="utf-8") as file:
+            for entry in self.records_holder:
                 json.dump(entry, file)
                 file.write("\n")
-        SuperNodeTracker.records_holder.clear()
+        self.records_holder.clear()
 
-    @staticmethod
-    def clear_records_holder() -> None:
+    def clear_records_holder(self) -> None:
         """Clear the records holder without saving to file."""
-        SuperNodeTracker.records_holder.clear()
+        self.records_holder.clear()
