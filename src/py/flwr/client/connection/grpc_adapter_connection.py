@@ -20,7 +20,7 @@ from __future__ import annotations
 import sys
 from logging import DEBUG, ERROR
 from pathlib import Path
-from typing import Any, Sequence, TypeVar, cast
+from typing import Any, TypeVar, cast
 
 import grpc
 from google.protobuf.message import Message as GrpcMessage
@@ -49,7 +49,6 @@ from flwr.proto.grpcadapter_pb2 import MessageContainer  # pylint: disable=E0611
 from flwr.proto.grpcadapter_pb2_grpc import GrpcAdapterStub
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 
-from .client_interceptor import AuthenticateClientInterceptor
 from .fleet_api import FleetAPI
 from .grpc_rere_connection import GrpcRereConnection, on_channel_state_change
 
@@ -67,7 +66,9 @@ class GrpcAdapterConnection(GrpcRereConnection):
         else:
             root_cert = Path(self.root_certificates).read_bytes()
         if self.authentication_keys is not None:
-            log(ERROR, "Client authentication is not supported for this transport type.")
+            log(
+                ERROR, "Client authentication is not supported for this transport type."
+            )
 
         self.channel = create_channel(
             server_address=self.server_address,

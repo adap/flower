@@ -18,20 +18,13 @@
 from __future__ import annotations
 
 import sys
-from logging import DEBUG
-from pathlib import Path
-from typing import Any, Sequence, TypeVar, cast
+from logging import ERROR, WARN
+from typing import Any, TypeVar
 
-import grpc
 from google.protobuf.message import Message as GrpcMessage
 
 from flwr.common import log
-from flwr.common.constant import (
-    GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY,
-    GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY,
-)
-from flwr.common.grpc import create_channel
-from flwr.common.version import package_version
+from flwr.common.constant import MISSING_EXTRA_REST
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
@@ -45,48 +38,10 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResRequest,
     PushTaskResResponse,
 )
-from flwr.proto.grpcadapter_pb2 import MessageContainer  # pylint: disable=E0611
-from flwr.proto.grpcadapter_pb2_grpc import GrpcAdapterStub
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 
-from .client_interceptor import AuthenticateClientInterceptor
 from .fleet_api import FleetAPI
-from .grpc_rere_connection import GrpcRereConnection, on_channel_state_change
-
-import random
-import sys
-import threading
-from contextlib import contextmanager
-from copy import copy
-from logging import ERROR, INFO, WARN
-from typing import Callable, Iterator, Optional, Tuple, Type, TypeVar, Union
-
-from cryptography.hazmat.primitives.asymmetric import ec
-from google.protobuf.message import Message as GrpcMessage
-
-from flwr.client.heartbeat import start_ping_loop
-from flwr.client.message_handler.message_handler import validate_out_message
-from flwr.client.message_handler.task_handler import get_task_ins, validate_task_ins
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH
-from flwr.common.constant import (
-    MISSING_EXTRA_REST,
-    PING_BASE_MULTIPLIER,
-    PING_CALL_TIMEOUT,
-    PING_DEFAULT_INTERVAL,
-    PING_RANDOM_RANGE,
-)
-from flwr.common.logger import log
-from flwr.common.message import Message, Metadata
-from flwr.common.retry_invoker import RetryInvoker
-from flwr.common.serde import (
-    message_from_taskins,
-    message_to_taskres,
-    user_config_from_proto,
-)
-from flwr.common.typing import Fab, Run
-from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
-from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
+from .grpc_rere_connection import GrpcRereConnection
 
 try:
     import requests
@@ -107,8 +62,6 @@ T = TypeVar("T", bound=GrpcMessage)
 
 class GrpcAdapterConnection(GrpcRereConnection):
     """Grpc-adapter connection based on GrpcRereConnection."""
-    
-    
 
     @property
     def api(self) -> FleetAPI:
@@ -117,7 +70,7 @@ class GrpcAdapterConnection(GrpcRereConnection):
         # Otherwise any server can fake its identity
         # Please refer to:
         # https://requests.readthedocs.io/en/latest/user/advanced/#ssl-cert-verification
-        verify: Union[bool, str] = True
+        verify: bool | str = True
         if isinstance(self.root_certificates, str):
             verify = self.root_certificates
         elif isinstance(self.root_certificates, bytes):
@@ -127,7 +80,9 @@ class GrpcAdapterConnection(GrpcRereConnection):
                 "must be provided as a string path to the client.",
             )
         if self.authentication_keys is not None:
-            log(ERROR, "Client authentication is not supported for this transport type.")
+            log(
+                ERROR, "Client authentication is not supported for this transport type."
+            )
 
         return RestFleetAPI(self.server_address, verify)
 
@@ -144,8 +99,8 @@ class RestFleetAPI(FleetAPI):
         self.verify = verify
 
     def _request(
-        self, req: GrpcMessage, res_type: Type[T], api_path: str, timeout: float | None
-    ) -> Optional[T]:
+        self, req: GrpcMessage, res_type: type[T], api_path: str, timeout: float | None
+    ) -> T | None:
         # Serialize the request
         req_bytes = req.SerializeToString()
 
