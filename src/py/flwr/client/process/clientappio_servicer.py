@@ -127,13 +127,12 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
     def set_inputs(self, clientapp_input: ClientAppIoInputs) -> None:
         """Set ClientApp inputs."""
         log(DEBUG, "ClientAppIo.SetInputs")
-        self.clientapp_input = clientapp_input
-        if self.clientapp_output is not None:
-            self.clientapp_output = None
-            warnings.warn(
-                "ClientAppIoOutputs must be None at the start, setting to None",
-                stacklevel=2,
+        if self.clientapp_input is not None or self.clientapp_output is not None:
+            raise ValueError(
+                "ClientAppIoInputs and ClientAppIoOutputs must not be set before "
+                "calling `set_inputs`."
             )
+        self.clientapp_input = clientapp_input
 
     def get_outputs(self) -> ClientAppIoOutputs:
         """Get ClientApp outputs."""
