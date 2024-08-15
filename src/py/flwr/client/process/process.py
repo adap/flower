@@ -72,7 +72,7 @@ def _run_background_client(  # pylint: disable=R0914
         stub = ClientAppIoStub(channel)
 
         # Pull Message, Context, and Run from SuperNode
-        run, message, context = pull_message(stub=stub, token=token)
+        message, context, run = pull_message(stub=stub, token=token)
 
         load_client_app_fn = _get_load_client_app_fn(
             default_app_ref="",
@@ -97,15 +97,15 @@ def _run_background_client(  # pylint: disable=R0914
         channel.close()
 
 
-def pull_message(stub: grpc.Channel, token: int) -> Tuple[Run, Message, Context]:
+def pull_message(stub: grpc.Channel, token: int) -> Tuple[Message, Context, Run]:
     """Pull message from SuperNode to ClientApp."""
     res: PullClientAppInputsResponse = stub.PullClientAppInputs(
         PullClientAppInputsRequest(token=token)
     )
-    run = run_from_proto(res.run)
     message = message_from_proto(res.message)
     context = context_from_proto(res.context)
-    return run, message, context
+    run = run_from_proto(res.run)
+    return message, context, run
 
 
 def push_message(
