@@ -17,7 +17,7 @@
 
 from dataclasses import dataclass
 from logging import DEBUG, ERROR
-from typing import Optional, Tuple
+from typing import Optional
 
 import grpc
 
