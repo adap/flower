@@ -95,6 +95,10 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             raise ValueError(
                 "ClientAppIoOutputs not set before calling `PushClientAppOutputs`."
             )
+        if self.clientapp_input is None:
+            raise ValueError(
+                "ClientAppIoInputs not set before calling `PushClientAppOutputs`."
+            )
         if request.token != self.clientapp_input.token:
             raise ValueError("Mismatch between ClientApp and SuperNode token")
         try:
