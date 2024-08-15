@@ -28,3 +28,17 @@ def test_disk_ffs_factory() -> None:
 
     # Assert
     assert isinstance(ffs, DiskFfs)
+
+
+def test_cache_ffs_factory() -> None:
+    """Test cache with FfsFactory."""
+    # Prepare
+    ffs_factory = FfsFactory("other_test")
+    ffs = ffs_factory.ffs()
+    ffs.put(b"content", {})
+
+    # Execute
+    other_ffs = ffs_factory.ffs()
+
+    # Assert
+    assert len(other_ffs.list()) == 1
