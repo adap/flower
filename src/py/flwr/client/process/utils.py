@@ -14,12 +14,17 @@
 # ==============================================================================
 """Flower ClientApp loading utils."""
 
-from logging import DEBUG, WARN
+from logging import DEBUG
 from pathlib import Path
 from typing import Callable, Optional
 
 from flwr.client.client_app import ClientApp, LoadClientAppError
-from flwr.common.config import get_flwr_dir, get_project_config, get_project_dir
+from flwr.common.config import (
+    get_flwr_dir,
+    get_metadata_from_config,
+    get_project_config,
+    get_project_dir,
+)
 from flwr.common.logger import log
 from flwr.common.object_ref import load_app, validate
 
