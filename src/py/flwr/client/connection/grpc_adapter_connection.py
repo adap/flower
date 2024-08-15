@@ -17,57 +17,10 @@
 
 from __future__ import annotations
 
-import random
-import threading
-from copy import copy
-from logging import DEBUG, ERROR
-from pathlib import Path
-from typing import Sequence, cast
-
-import grpc
-from cryptography.hazmat.primitives.asymmetric import ec
-
-from flwr.client.heartbeat import start_ping_loop
-from flwr.client.message_handler.message_handler import validate_out_message
-from flwr.client.message_handler.task_handler import get_task_ins, validate_task_ins
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH
-from flwr.common.constant import (
-    PING_BASE_MULTIPLIER,
-    PING_CALL_TIMEOUT,
-    PING_DEFAULT_INTERVAL,
-    PING_RANDOM_RANGE,
-)
-from flwr.common.grpc import create_channel
-from flwr.common.logger import log
-from flwr.common.message import Message, Metadata
-from flwr.common.retry_invoker import RetryInvoker
-from flwr.common.serde import (
-    message_from_taskins,
-    message_to_taskres,
-    user_config_from_proto,
-)
-from flwr.common.typing import Fab, Run
-from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
-    CreateNodeRequest,
-    CreateNodeResponse,
-    DeleteNodeRequest,
-    PingRequest,
-    PingResponse,
-    PullTaskInsRequest,
-    PushTaskResRequest,
-)
-from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
-from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
-from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
-
-from .client_interceptor import AuthenticateClientInterceptor
-from .connection import Connection
-from .fleet_api import FleetAPI
-
 import sys
 from logging import DEBUG
-from typing import Any, Type, TypeVar, cast
+from pathlib import Path
+from typing import Any, Sequence, TypeVar, cast
 
 import grpc
 from google.protobuf.message import Message as GrpcMessage
@@ -77,6 +30,7 @@ from flwr.common.constant import (
     GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY,
     GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY,
 )
+from flwr.common.grpc import create_channel
 from flwr.common.version import package_version
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -94,9 +48,10 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
 from flwr.proto.grpcadapter_pb2 import MessageContainer  # pylint: disable=E0611
 from flwr.proto.grpcadapter_pb2_grpc import GrpcAdapterStub
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+
+from .client_interceptor import AuthenticateClientInterceptor
 from .fleet_api import FleetAPI
 from .grpc_rere_connection import GrpcRereConnection, on_channel_state_change
-
 
 T = TypeVar("T", bound=GrpcMessage)
 
@@ -137,7 +92,7 @@ class GrpcAdapterFleetAPI(FleetAPI):
         self.stub = GrpcAdapterStub(channel)
 
     def _send_and_receive(
-        self, request: GrpcMessage, response_type: Type[T], **kwargs: Any
+        self, request: GrpcMessage, response_type: type[T], **kwargs: Any
     ) -> T:
         # Serialize request
         container_req = MessageContainer(
