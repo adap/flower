@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from types import TracebackType
 
 from cryptography.hazmat.primitives.asymmetric import ec
 
@@ -97,3 +98,16 @@ class Connection(ABC):
     @abstractmethod
     def get_fab(self, fab_hash: str) -> Fab:
         """Get FAB file."""
+
+    def __enter__(self) -> Connection:
+        """Enter the context."""
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType,
+    ) -> None:
+        """Exit from the context."""
+        pass

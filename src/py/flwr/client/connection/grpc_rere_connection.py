@@ -20,7 +20,7 @@ import threading
 from copy import copy
 from logging import DEBUG, ERROR
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional, Sequence, Tuple, Union, cast
+from typing import Optional, Sequence, Tuple, Union, cast
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -92,7 +92,7 @@ class GrpcRereConnection(Connection):
             root_certificates=root_certificates,
             authentication_keys=authentication_keys,
         )
-        self.msg_id_to_metadata: Dict[str, Metadata] = {}
+        self.msg_id_to_metadata: dict[str, Metadata] = {}
         self.node: Optional[Node] = None
         self.ping_thread: Optional[threading.Thread] = None
         self.ping_stop_event = threading.Event()

@@ -44,9 +44,9 @@ from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.typing import Fab, Run, UserConfig
 
+from .connection import Connection, GrpcRereConnection
 from .grpc_adapter_client.connection import grpc_adapter
 from .grpc_client.connection import grpc_connection
-from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
 from .node_state import NodeState
 from .numpy_client import NumPyClient
@@ -333,39 +333,24 @@ def _start_client_internal(
             root_certificates,
             authentication_keys,
         ) as conn:
-            receive, send, create_node, delete_node, get_run, _ = conn
-
+            print(f"type: {connection}, object: {conn}")
+            assert isinstance(conn, Connection)
             # Register node when connecting the first time
             if node_state is None:
-                if create_node is None:
-                    if transport not in ["grpc-bidi", None]:
-                        raise NotImplementedError(
-                            "All transports except `grpc-bidi` require "
-                            "an implementation for `create_node()`.'"
-                        )
-                    # gRPC-bidi doesn't have the concept of node_id,
-                    # so we set it to -1
-                    node_state = NodeState(
-                        node_id=-1,
-                        node_config={},
-                    )
-                else:
-                    # Call create_node fn to register node
-                    node_id: Optional[int] = (  # pylint: disable=assignment-from-none
-                        create_node()
-                    )  # pylint: disable=not-callable
-                    if node_id is None:
-                        raise ValueError("Node registration failed")
-                    node_state = NodeState(
-                        node_id=node_id,
-                        node_config=node_config,
-                    )
+                # Call create_node fn to register node
+                node_id: Optional[int] = conn.create_node()
+                if node_id is None:
+                    raise ValueError("Node registration failed")
+                node_state = NodeState(
+                    node_id=node_id,
+                    node_config=node_config,
+                )
 
             app_state_tracker.register_signal_handler()
             while not app_state_tracker.interrupt:
                 try:
                     # Receive
-                    message = receive()
+                    message = conn.receive()
                     if message is None:
                         time.sleep(3)  # Wait for 3s before asking again
                         continue
@@ -388,17 +373,13 @@ def _start_client_internal(
                     # Handle control message
                     out_message, sleep_duration = handle_control_message(message)
                     if out_message:
-                        send(out_message)
+                        conn.send(out_message)
                         break
 
                     # Get run info
                     run_id = message.metadata.run_id
                     if run_id not in runs:
-                        if get_run is not None:
-                            runs[run_id] = get_run(run_id)
-                        # If get_run is None, i.e., in grpc-bidi mode
-                        else:
-                            runs[run_id] = Run(run_id, "", "", {})
+                        runs[run_id] = conn.get_run(run_id)
 
                     # Register context for this run
                     node_state.register_context(
@@ -463,7 +444,7 @@ def _start_client_internal(
                         )
 
                     # Send
-                    send(reply_message)
+                    conn.send(reply_message)
                     log(INFO, "Sent reply")
 
                 except StopIteration:
@@ -471,8 +452,8 @@ def _start_client_internal(
                     break
 
             # Unregister node
-            if delete_node is not None and app_state_tracker.is_connected:
-                delete_node()  # pylint: disable=not-callable
+            if app_state_tracker.is_connected:
+                conn.delete_node()
 
         if sleep_duration == 0:
             log(INFO, "Disconnect and shut down")
@@ -639,7 +620,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
             )
         connection, error_type = http_request_response, RequestsConnectionError
     elif transport == TRANSPORT_TYPE_GRPC_RERE:
-        connection, error_type = grpc_request_response, RpcError
+        connection, error_type = GrpcRereConnection, RpcError
     elif transport == TRANSPORT_TYPE_GRPC_ADAPTER:
         connection, error_type = grpc_adapter, RpcError
     elif transport == TRANSPORT_TYPE_GRPC_BIDI:
