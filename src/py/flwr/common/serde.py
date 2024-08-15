@@ -696,7 +696,7 @@ def fab_to_proto(fab: typing.Fab) -> ProtoFab:
 
 
 def fab_from_proto(fab: ProtoFab) -> typing.Fab:
-    """Create a proto Fab object from a Python Fab."""
+    """Create a Python Fab object from a proto Fab."""
     return typing.Fab(fab.hash_str, fab.content)
 
 
