@@ -74,8 +74,16 @@ class TestClientAppIoServicer(unittest.TestCase):
             self.servicer.set_inputs(client_input)
 
         # Execute and assert
+        # - when ClientAppIoInputs and ClientAppIoOutputs is not None
+        with self.assertRaises(ValueError):
+            self.servicer.clientapp_input = client_input
+            self.servicer.clientapp_output = client_output
+            self.servicer.set_inputs(client_input)
+
+        # Execute and assert
         # - when ClientAppIoInputs is set at .clientapp_input
         self.servicer.clientapp_input = None
+        self.servicer.clientapp_output = None
         self.servicer.set_inputs(client_input)
         assert client_input == self.servicer.clientapp_input
 
