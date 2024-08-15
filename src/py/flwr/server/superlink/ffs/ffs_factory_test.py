@@ -35,10 +35,9 @@ def test_cache_ffs_factory() -> None:
     # Prepare
     ffs_factory = FfsFactory("other_test")
     ffs = ffs_factory.ffs()
-    ffs.put(b"content", {})
 
     # Execute
     other_ffs = ffs_factory.ffs()
 
     # Assert
-    assert len(other_ffs.list()) == 1
+    assert id(ffs) == id(other_ffs)
