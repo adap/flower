@@ -30,7 +30,7 @@ class FfsFactory:
     Parameters
     ----------
     base_dir : str
-        The base directory to store the objects.
+        The base directory used by DiskFfs to store objects.
     """
 
     def __init__(self, base_dir: str) -> None:
