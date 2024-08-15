@@ -369,7 +369,7 @@ def _start_client_internal(
                     # Receive
                     message = receive()
 
-                    if message:
+                    if supernode_tracker and message:
                         supernode_tracker.record_message_metadata(
                             "SuperLink-to-SuperNode", message.metadata.__dict__
                         )
@@ -399,7 +399,7 @@ def _start_client_internal(
                         send(out_message)
                         break
 
-                    if out_message:
+                    if supernode_tracker and out_message:
                         supernode_tracker.record_message_metadata(
                             "SuperNode-to-SuperLink", out_message.metadata.__dict__
                         )
@@ -435,14 +435,14 @@ def _start_client_internal(
                             run.fab_id, run.fab_version
                         )
 
-                        if message:
+                        if supernode_tracker and message:
                             supernode_tracker.record_message_metadata(
                                 "SuperNode-to-ClientApp", message.metadata.__dict__
                             )
                         # Execute ClientApp
                         reply_message = client_app(message=message, context=context)
 
-                        if reply_message:
+                        if supernode_tracker and reply_message:
                             supernode_tracker.record_message_metadata(
                                 "ClientApp-to-SuperNode",
                                 reply_message.metadata.__dict__,
@@ -488,7 +488,7 @@ def _start_client_internal(
                     # Send
                     send(reply_message)
 
-                    if message:
+                    if supernode_tracker and message:
                         supernode_tracker.record_message_metadata(
                             "SuperNode-to-ClientApp", message.metadata.__dict__
                         )
@@ -498,7 +498,8 @@ def _start_client_internal(
                     sleep_duration = 0
                     break
 
-            supernode_tracker.save_to_file()
+            if supernode_tracker:
+                supernode_tracker.save_to_file()
             # Unregister node
             if delete_node is not None and app_state_tracker.is_connected:
                 delete_node()  # pylint: disable=not-callable
