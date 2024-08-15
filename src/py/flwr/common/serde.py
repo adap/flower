@@ -22,6 +22,7 @@ from google.protobuf.message import Message as GrpcMessage
 # pylint: disable=E0611
 from flwr.proto.clientappio_pb2 import ClientAppOutputCode, ClientAppOutputStatus
 from flwr.proto.error_pb2 import Error as ProtoError
+from flwr.proto.fab_pb2 import Fab as ProtoFab
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.message_pb2 import Message as ProtoMessage
 from flwr.proto.message_pb2 import Metadata as ProtoMetadata
@@ -684,6 +685,19 @@ def message_from_taskres(taskres: TaskRes) -> Message:
     )
     message.metadata.created_at = taskres.task.created_at
     return message
+
+
+# === FAB ===
+
+
+def fab_to_proto(fab: typing.Fab) -> ProtoFab:
+    """Create a proto Fab object from a Python Fab."""
+    return ProtoFab(hash_str=fab.hash_str, content=fab.content)
+
+
+def fab_from_proto(fab: ProtoFab) -> typing.Fab:
+    """Create a Python Fab object from a proto Fab."""
+    return typing.Fab(fab.hash_str, fab.content)
 
 
 # === User configs ===
