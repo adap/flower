@@ -31,9 +31,9 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
 )
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StartRunRequest,
-    StreamLogsRequest,
     StartRunResponse,
-    StreamLogsResponse
+    StreamLogsRequest,
+    StreamLogsResponse,
 )
 
 _PUBLIC_KEY_HEADER = "public-key"
@@ -44,10 +44,7 @@ Request = Union[
     StreamLogsRequest,
 ]
 
-Response = Union[
-    StartRunResponse,
-    StreamLogsResponse
-]
+Response = Union[StartRunResponse, StreamLogsResponse]
 
 
 def _get_value_from_tuples(
@@ -63,7 +60,9 @@ def _get_value_from_tuples(
 class SuperExecInterceptor(grpc.ServerInterceptor):  # type: ignore
     """SuperExec interceptor for user authentication."""
 
-    def __init__(self, user_public_keys: Set[bytes], private_key: bytes, public_key: bytes):
+    def __init__(
+        self, user_public_keys: Set[bytes], private_key: bytes, public_key: bytes
+    ):
         self.user_public_keys = user_public_keys
         if len(self.user_public_keys) == 0:
             log(WARNING, "Authentication enabled, but no known public keys configured")
@@ -78,9 +77,9 @@ class SuperExecInterceptor(grpc.ServerInterceptor):  # type: ignore
     ) -> grpc.RpcMethodHandler:
         """Flower server interceptor authentication logic.
 
-        Intercept all unary calls from users and authenticate users by validating
-        auth metadata sent by the user. Continue RPC call if user is authenticated,
-        else, terminate RPC call by setting context to abort.
+        Intercept all unary calls from users and authenticate users by validating auth
+        metadata sent by the user. Continue RPC call if user is authenticated, else,
+        terminate RPC call by setting context to abort.
         """
         # One of the method handlers in
         # `flwr.superexec.exec_servicer.ExecServicer`
@@ -88,8 +87,8 @@ class SuperExecInterceptor(grpc.ServerInterceptor):  # type: ignore
         return self._generic_auth_unary_method_handler(method_handler)
 
     def _generic_auth_unary_method_handler(
-    self, method_handler: grpc.RpcMethodHandler
-) -> grpc.RpcMethodHandler:
+        self, method_handler: grpc.RpcMethodHandler
+    ) -> grpc.RpcMethodHandler:
         def _generic_method_handler(
             request: Request,
             context: grpc.ServicerContext,

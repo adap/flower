@@ -31,13 +31,13 @@ from typing_extensions import Annotated
 
 from flwr.cli.build import build
 from flwr.cli.config_utils import load_and_validate
+from flwr.cli.run.run_interceptor import RunInterceptor
 from flwr.common.config import flatten_dict, parse_config_args
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
 from flwr.common.serde import user_config_to_proto
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
-from flwr.cli.run.run_interceptor import RunInterceptor
 
 
 # pylint: disable-next=too-many-locals
@@ -170,7 +170,11 @@ def _run_with_superexec(
         insecure=insecure,
         root_certificates=root_certificates_bytes,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        interceptors=RunInterceptor(**authentication_keys) if authentication_keys is not None else None,
+        interceptors=(
+            RunInterceptor(**authentication_keys)
+            if authentication_keys is not None
+            else None
+        ),
     )
     channel.subscribe(on_channel_state_change)
     stub = ExecStub(channel)

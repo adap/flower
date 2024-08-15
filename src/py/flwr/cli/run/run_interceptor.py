@@ -30,7 +30,6 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StartRunRequest,
     StreamLogsRequest,
-
 )
 
 _PUBLIC_KEY_HEADER = "public-key"
@@ -100,9 +99,7 @@ class RunInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ignore
             (
                 _AUTH_TOKEN_HEADER,
                 base64.urlsafe_b64encode(
-                    compute_hmac(
-                        self.shared_secret, request.SerializeToString(True)
-                    )
+                    compute_hmac(self.shared_secret, request.SerializeToString(True))
                 ),
             )
         )

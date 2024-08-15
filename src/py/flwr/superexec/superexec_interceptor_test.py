@@ -17,6 +17,8 @@
 
 import base64
 import unittest
+from typing import Optional
+from unittest.mock import MagicMock
 
 import grpc
 
@@ -29,36 +31,34 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
 )
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StartRunRequest,
-    StreamLogsRequest,
     StartRunResponse,
-    StreamLogsResponse
+    StreamLogsRequest,
+    StreamLogsResponse,
 )
-
+from flwr.superexec.exec_grpc import run_superexec_api_grpc
+from flwr.superexec.executor import Executor, RunTracker, UserConfig
+from flwr.superexec.simulation import SimulationEngine
 from flwr.superexec.superexec_interceptor import (
     _AUTH_TOKEN_HEADER,
     _PUBLIC_KEY_HEADER,
     SuperExecInterceptor,
 )
-from flwr.superexec.exec_grpc import run_superexec_api_grpc
-from flwr.superexec.simulation import SimulationEngine
-from typing import Optional
-from flwr.superexec.executor import Executor, UserConfig, RunTracker
-from unittest.mock import MagicMock
+
 
 class MockExecutor(Executor):
     def set_config(
         self,
         config: UserConfig,
     ) -> None:
-        """Mock set_config"""
-    
+        """Mock set_config."""
+
     def start_run(
         self,
         fab_file: bytes,
         override_config: UserConfig,
         federation_config: UserConfig,
     ) -> Optional[RunTracker]:
-        """Mock start_run"""
+        """Mock start_run."""
 
 
 class TestSuperExecInterceptor(unittest.TestCase):  # pylint: disable=R0902
@@ -70,7 +70,11 @@ class TestSuperExecInterceptor(unittest.TestCase):  # pylint: disable=R0902
         self._user_private_key, self._user_public_key = generate_key_pairs()
         self._superexec_private_key, self._superexec_public_key = generate_key_pairs()
 
-        self._superexec_interceptor = SuperExecInterceptor({public_key_to_bytes(self._user_public_key)}, private_key_to_bytes(self._superexec_private_key), public_key_to_bytes(self._superexec_public_key))
+        self._superexec_interceptor = SuperExecInterceptor(
+            {public_key_to_bytes(self._user_public_key)},
+            private_key_to_bytes(self._superexec_private_key),
+            public_key_to_bytes(self._superexec_public_key),
+        )
         executor = MagicMock()
         run = MagicMock()
         executor.start_run = lambda _, __, ___: run
@@ -101,12 +105,15 @@ class TestSuperExecInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def test_successful_start_run_with_metadata(self) -> None:
         """Test superexec interceptor for creating node."""
         # Prepare
-        request = StartRunRequest(fab_file=b"", override_config=None, federation_config=None)
+        request = StartRunRequest(
+            fab_file=b"", override_config=None, federation_config=None
+        )
         public_key_bytes = base64.urlsafe_b64encode(
             public_key_to_bytes(self._user_public_key)
         )
         shared_secret = generate_shared_key(
-            self._user_private_key, self._superexec_public_key,
+            self._user_private_key,
+            self._superexec_public_key,
         )
         hmac_value = base64.urlsafe_b64encode(
             compute_hmac(shared_secret, request.SerializeToString(True))
@@ -115,7 +122,10 @@ class TestSuperExecInterceptor(unittest.TestCase):  # pylint: disable=R0902
         # Execute
         response, call = self._start_run.with_call(
             request=request,
-            metadata=((_PUBLIC_KEY_HEADER, public_key_bytes),(_AUTH_TOKEN_HEADER, hmac_value),),
+            metadata=(
+                (_PUBLIC_KEY_HEADER, public_key_bytes),
+                (_AUTH_TOKEN_HEADER, hmac_value),
+            ),
         )
 
         expected_metadata = (
@@ -136,9 +146,12 @@ class TestSuperExecInterceptor(unittest.TestCase):  # pylint: disable=R0902
         public_key_bytes = base64.urlsafe_b64encode(
             public_key_to_bytes(user_public_key)
         )
-        request = StartRunRequest(fab_file=b"", override_config=None, federation_config=None)
+        request = StartRunRequest(
+            fab_file=b"", override_config=None, federation_config=None
+        )
         shared_secret = generate_shared_key(
-            self._user_private_key, self._superexec_public_key,
+            self._user_private_key,
+            self._superexec_public_key,
         )
         hmac_value = base64.urlsafe_b64encode(
             compute_hmac(shared_secret, request.SerializeToString(True))
@@ -147,6 +160,11 @@ class TestSuperExecInterceptor(unittest.TestCase):  # pylint: disable=R0902
         # Execute & Assert
         with self.assertRaises(grpc.RpcError):
             self._start_run.with_call(
-                request=StartRunRequest(fab_file=b"", override_config=None, federation_config=None),
-                metadata=((_PUBLIC_KEY_HEADER, public_key_bytes),(_AUTH_TOKEN_HEADER, hmac_value),),
+                request=StartRunRequest(
+                    fab_file=b"", override_config=None, federation_config=None
+                ),
+                metadata=(
+                    (_PUBLIC_KEY_HEADER, public_key_bytes),
+                    (_AUTH_TOKEN_HEADER, hmac_value),
+                ),
             )

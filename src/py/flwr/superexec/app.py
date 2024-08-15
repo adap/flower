@@ -15,11 +15,11 @@
 """Flower SuperExec app."""
 
 import argparse
+import csv
 import sys
 from logging import INFO, WARN
 from pathlib import Path
 from typing import Optional, Sequence, Set, Tuple
-import csv
 
 import grpc
 from cryptography.exceptions import UnsupportedAlgorithm
@@ -77,8 +77,14 @@ def run_superexec() -> None:
             "User authentication enabled with %d known public keys",
             len(user_public_keys),
         )
-        interceptors = [SuperExecInterceptor(user_public_keys, private_key_to_bytes(superexec_private_key), public_key_to_bytes(superexec_public_key))]
-    
+        interceptors = [
+            SuperExecInterceptor(
+                user_public_keys,
+                private_key_to_bytes(superexec_private_key),
+                public_key_to_bytes(superexec_public_key),
+            )
+        ]
+
     # Start SuperExec API
     superexec_server: grpc.Server = run_superexec_api_grpc(
         address=address,

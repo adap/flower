@@ -24,11 +24,15 @@ from typing import Optional, Sequence, Tuple, Union
 
 import grpc
 
-from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
+from flwr.cli.run.run_interceptor import (
+    _AUTH_TOKEN_HEADER,
+    _PUBLIC_KEY_HEADER,
+    Request,
+    RunInterceptor,
+)
 from flwr.client.grpc_rere_client.connection import grpc_request_response
+from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
-from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
-from flwr.proto.exec_pb2_grpc import ExecStub
 from flwr.common.message import Message, Metadata
 from flwr.common.record import RecordSet
 from flwr.common.retry_invoker import RetryInvoker, exponential
@@ -38,15 +42,13 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_shared_key,
     public_key_to_bytes,
 )
+from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
-    StartRunRequest,
     StartRunResponse,
     StreamLogsRequest,
     StreamLogsResponse,
-
 )
-
-from flwr.cli.run.run_interceptor import _AUTH_TOKEN_HEADER, _PUBLIC_KEY_HEADER, Request, RunInterceptor
+from flwr.proto.exec_pb2_grpc import ExecStub
 
 
 class _MockServicer:
@@ -61,10 +63,9 @@ class _MockServicer:
         self.superexec_private_key, self.superexec_public_key = generate_key_pairs()
         self._received_message_bytes: bytes = b""
 
-    def unary_unary(
-        self, request: Request, context: grpc.ServicerContext
-    ) -> Union[
-        StartRunResponse, StreamLogsResponse,
+    def unary_unary(self, request: Request, context: grpc.ServicerContext) -> Union[
+        StartRunResponse,
+        StreamLogsResponse,
     ]:
         """Handle unary call."""
         with self._lock:
@@ -108,6 +109,7 @@ def _add_generic_handler(servicer: _MockServicer, server: grpc.Server) -> None:
     )
     server.add_generic_rpc_handlers((generic_handler,))
 
+
 def _get_value_from_tuples(
     key_string: str, tuples: Sequence[Tuple[str, Union[str, bytes]]]
 ) -> bytes:
@@ -144,11 +146,14 @@ class TestRunInterceptor(unittest.TestCase):
             insecure=True,
             root_certificates=None,
             max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-            interceptors=RunInterceptor(self._user_private_key, self._user_public_key, self._servicer.superexec_public_key),
+            interceptors=RunInterceptor(
+                self._user_private_key,
+                self._user_public_key,
+                self._servicer.superexec_public_key,
+            ),
         )
         channel.subscribe(on_channel_state_change)
         self.stub = ExecStub(channel)
-        
 
     def test_user_auth_start_run(self) -> None:
         """Test user authentication during start run."""
@@ -165,12 +170,18 @@ class TestRunInterceptor(unittest.TestCase):
         shared_secret = generate_shared_key(
             self._servicer.superexec_private_key, self._user_public_key
         )
-        expected_hmac = base64.urlsafe_b64encode(compute_hmac(
-            shared_secret, self._servicer.received_message_bytes()
-        ))
-        actual_public_key = _get_value_from_tuples(_PUBLIC_KEY_HEADER, self._servicer.received_client_metadata())
-        actual_hmac = _get_value_from_tuples(_AUTH_TOKEN_HEADER, self._servicer.received_client_metadata())
-        expected_public_key = base64.urlsafe_b64encode(public_key_to_bytes(self._user_public_key))
+        expected_hmac = base64.urlsafe_b64encode(
+            compute_hmac(shared_secret, self._servicer.received_message_bytes())
+        )
+        actual_public_key = _get_value_from_tuples(
+            _PUBLIC_KEY_HEADER, self._servicer.received_client_metadata()
+        )
+        actual_hmac = _get_value_from_tuples(
+            _AUTH_TOKEN_HEADER, self._servicer.received_client_metadata()
+        )
+        expected_public_key = base64.urlsafe_b64encode(
+            public_key_to_bytes(self._user_public_key)
+        )
 
         # Assert
         assert actual_public_key == expected_public_key
