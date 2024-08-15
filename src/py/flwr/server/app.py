@@ -74,7 +74,7 @@ ADDRESS_FLEET_API_GRPC_BIDI = "[::]:8080"  # IPv6 to keep start_server compatibl
 ADDRESS_FLEET_API_REST = "0.0.0.0:9093"
 
 DATABASE = ":flwr-in-memory-state:"
-BASE_DIR = get_flwr_dir() / "ffs"
+BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
 
 
 def start_server(  # pylint: disable=too-many-arguments,too-many-locals
@@ -215,7 +215,7 @@ def run_superlink() -> None:
     state_factory = StateFactory(args.database)
 
     # Initialize FfsFactory
-    ffs_factory = FfsFactory(args.base_dir)
+    ffs_factory = FfsFactory(args.storage_dir)
 
     # Start Driver API
     driver_server: grpc.Server = run_driver_api_grpc(
@@ -618,8 +618,8 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         default=DATABASE,
     )
     parser.add_argument(
-        "--base-dir",
-        help="The base directory to store the objects.",
+        "--storage-dir",
+        help="The base directory to store the objects for the Flower File System.",
         default=BASE_DIR,
     )
     parser.add_argument(
