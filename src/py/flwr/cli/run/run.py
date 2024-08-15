@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower command line interface `run` command."""
 
+import hashlib
 import subprocess
 import sys
 from logging import DEBUG
@@ -28,7 +29,8 @@ from flwr.cli.config_utils import load_and_validate
 from flwr.common.config import flatten_dict, parse_config_args
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
-from flwr.common.serde import user_config_to_proto
+from flwr.common.serde import fab_to_proto, user_config_to_proto
+from flwr.common.typing import Fab
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 
@@ -163,9 +165,11 @@ def _run_with_superexec(
     stub = ExecStub(channel)
 
     fab_path = Path(build(app))
+    content = fab_path.read_bytes()
+    fab = Fab(hashlib.sha256(content).hexdigest(), content)
 
     req = StartRunRequest(
-        fab_file=fab_path.read_bytes(),
+        fab=fab_to_proto(fab),
         override_config=user_config_to_proto(
             parse_config_args(config_overrides, separator=",")
         ),

@@ -22,6 +22,7 @@ from google.protobuf.message import Message as GrpcMessage
 # pylint: disable=E0611
 from flwr.proto.clientappio_pb2 import ClientAppOutputCode, ClientAppOutputStatus
 from flwr.proto.error_pb2 import Error as ProtoError
+from flwr.proto.fab_pb2 import Fab as ProtoFab
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.message_pb2 import Message as ProtoMessage
 from flwr.proto.message_pb2 import Metadata as ProtoMetadata
@@ -686,6 +687,19 @@ def message_from_taskres(taskres: TaskRes) -> Message:
     return message
 
 
+# === FAB ===
+
+
+def fab_to_proto(fab: typing.Fab) -> ProtoFab:
+    """Create a proto Fab object from a Python Fab."""
+    return ProtoFab(hash_str=fab.hash_str, content=fab.content)
+
+
+def fab_from_proto(fab: ProtoFab) -> typing.Fab:
+    """Create a Python Fab object from a proto Fab."""
+    return typing.Fab(fab.hash_str, fab.content)
+
+
 # === User configs ===
 
 
@@ -745,6 +759,7 @@ def metadata_to_proto(metadata: Metadata) -> ProtoMetadata:
         group_id=metadata.group_id,
         ttl=metadata.ttl,
         message_type=metadata.message_type,
+        created_at=metadata.created_at,
     )
     return proto
 
@@ -771,7 +786,9 @@ def message_to_proto(message: Message) -> ProtoMessage:
     """Serialize `Message` to ProtoBuf."""
     proto = ProtoMessage(
         metadata=metadata_to_proto(message.metadata),
-        content=recordset_to_proto(message.content),
+        content=(
+            recordset_to_proto(message.content) if message.has_content() else None
+        ),
         error=error_to_proto(message.error) if message.has_error() else None,
     )
     return proto
@@ -779,6 +796,7 @@ def message_to_proto(message: Message) -> ProtoMessage:
 
 def message_from_proto(message_proto: ProtoMessage) -> Message:
     """Deserialize `Message` from ProtoBuf."""
+    created_at = message_proto.metadata.created_at
     message = Message(
         metadata=metadata_from_proto(message_proto.metadata),
         content=(
@@ -792,6 +810,9 @@ def message_from_proto(message_proto: ProtoMessage) -> Message:
             else None
         ),
     )
+    # `.created_at` is set upon Message object construction
+    # we need to manually set it to the original value
+    message.metadata.created_at = created_at
     return message
 
 
@@ -829,8 +850,8 @@ def run_to_proto(run: typing.Run) -> ProtoRun:
         run_id=run.run_id,
         fab_id=run.fab_id,
         fab_version=run.fab_version,
+        fab_hash=run.fab_hash,
         override_config=user_config_to_proto(run.override_config),
-        fab_hash="",
     )
     return proto
 
