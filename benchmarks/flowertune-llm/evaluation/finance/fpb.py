@@ -1,6 +1,5 @@
 # This python file is adapted from https://github.com/AI4Finance-Foundation/FinGPT/blob/master/fingpt/FinGPT_Benchmark/benchmarks/fpb.py
 
-import os
 import warnings
 
 import torch
