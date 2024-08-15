@@ -678,7 +678,7 @@ class _AppStateTracker:
 def run_clientappio_api_grpc(
     address: str = ADDRESS_CLIENTAPPIO_API_GRPC_RERE,
 ) -> Tuple[grpc.Server, grpc.Server]:
-    """Run ClientAppIo API (gRPC-rere)."""
+    """Run ClientAppIo API gRPC server."""
     clientappio_servicer: grpc.Server = ClientAppIoServicer()
     clientappio_add_servicer_to_server_fn = add_ClientAppIoServicer_to_server
     clientappio_grpc_server = generic_create_grpc_server(
