@@ -40,5 +40,5 @@ class FfsFactory:
     def ffs(self) -> Ffs:
         """Return a Ffs instance and create it, if necessary."""
         ffs = DiskFfs(self.base_dir)
-        log(DEBUG, "Using Disk Flower File System")
+        log(DEBUG, "Using DiskFfs")
         return ffs
