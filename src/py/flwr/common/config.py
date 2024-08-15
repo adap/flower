@@ -104,6 +104,25 @@ def get_fused_config_from_dir(
     return fuse_dicts(flat_default_config, override_config)
 
 
+def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> UserConfig:
+    """Merge the overrides from a `Run` with the config from a FAB.
+
+    Get the config using the fab_id and the fab_version, remove the nesting by adding
+    the nested keys as prefixes separated by dots, and fuse it with the override dict.
+    """
+    # Return empty dict if fab_id or fab_version is empty
+    if not run.fab_id or not run.fab_version:
+        return {}
+
+    project_dir = get_project_dir(run.fab_id, run.fab_version, flwr_dir)
+
+    # Return empty dict if project directory does not exist
+    if not project_dir.is_dir():
+        return {}
+
+    return get_fused_config_from_dir(project_dir, run.override_config)
+
+
 def flatten_dict(
     raw_dict: Optional[Dict[str, Any]], parent_key: str = ""
 ) -> UserConfig:
