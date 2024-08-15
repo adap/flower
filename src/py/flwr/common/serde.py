@@ -745,6 +745,7 @@ def metadata_to_proto(metadata: Metadata) -> ProtoMetadata:
         group_id=metadata.group_id,
         ttl=metadata.ttl,
         message_type=metadata.message_type,
+        created_at=metadata.created_at,
     )
     return proto
 
@@ -761,6 +762,7 @@ def metadata_from_proto(metadata_proto: ProtoMetadata) -> Metadata:
         ttl=metadata_proto.ttl,
         message_type=metadata_proto.message_type,
     )
+    metadata.created_at = metadata_proto.created_at
     return metadata
 
 
@@ -781,6 +783,7 @@ def message_to_proto(message: Message) -> ProtoMessage:
 
 def message_from_proto(message_proto: ProtoMessage) -> Message:
     """Deserialize `Message` from ProtoBuf."""
+    created_at = message_proto.metadata.created_at
     message = Message(
         metadata=metadata_from_proto(message_proto.metadata),
         content=(
@@ -794,6 +797,9 @@ def message_from_proto(message_proto: ProtoMessage) -> Message:
             else None
         ),
     )
+    # `.created_at` is set upon Message object construction
+    # we need to manually set it to the original value
+    message.metadata.created_at = created_at
     return message
 
 
