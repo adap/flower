@@ -44,7 +44,7 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.task_pb2 import TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.ffs import Ffs
-from flwr.server.superlink.ffs_factory import FfsFactory
+from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.state import State, StateFactory
 from flwr.server.utils.validator import validate_task_ins_or_res
 
