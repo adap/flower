@@ -15,6 +15,7 @@
 """ClientAppIo API servicer."""
 
 
+from dataclasses import dataclass
 from logging import DEBUG, ERROR
 from typing import Optional, Tuple
 
@@ -43,6 +44,24 @@ from flwr.proto.clientappio_pb2 import (  # pylint: disable=E0401
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.message_pb2 import Message as ProtoMessage
 from flwr.proto.run_pb2 import Run as ProtoRun
+
+
+@dataclass
+class ClientAppIoInputs:
+    """Specify the inputs to the ClientApp."""
+
+    message: Message
+    context: Context
+    run: Run
+    token: int
+
+
+@dataclass
+class ClientAppIoOutputs:
+    """Specify the outputs from the ClientApp."""
+
+    message: Message
+    context: Context
 
 
 # pylint: disable=C0103,W0613,W0201
@@ -94,33 +113,34 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             proto_status = clientappstatus_to_proto(status=status)
             return PushClientAppOutputsResponse(status=proto_status)
 
-    def set_payload(
+    def set_inputs(
         self,
-        message: Message,
-        context: Context,
-        run: Run,
-        token: int,
+        clientapp_input: ClientAppIoInputs,
     ) -> None:
-        """Set client app objects."""
+        """Set ClientApp inputs."""
         log(DEBUG, "ClientAppIo.SetObject")
         # Serialize Message, Context, and Run
-        self.proto_message = message_to_proto(message)
-        self.proto_context = context_to_proto(context)
-        self.proto_run = run_to_proto(run)
-        self.token = token
+        self.proto_message = message_to_proto(clientapp_input.message)
+        self.proto_context = context_to_proto(clientapp_input.context)
+        self.proto_run = run_to_proto(clientapp_input.run)
+        self.token = clientapp_input.token
 
-    def get_payload(self) -> Tuple[Message, Context]:
-        """Get client app objects."""
+    def get_outputs(self) -> Tuple[Message, Context]:
+        """Get ClientApp outputs."""
         log(DEBUG, "ClientAppIo.GetObject")
         if self.message is None or self.context is None:
             raise ValueError(
                 "Both message and context must be set before calling `get_payload`."
             )
+        clientapp_output = ClientAppIoOutputs(
+            message=self.message,
+            context=self.context,
+        )
 
-        return self.message, self.context
+        return clientapp_output
 
     def _update_payload(self) -> None:
-        """Update client app objects."""
+        """Update ClientApp objects."""
         log(DEBUG, "ClientAppIo.UpdateObject")
         # Deserialize Message and Context
         if self.proto_message is not None:
