@@ -762,7 +762,6 @@ def metadata_from_proto(metadata_proto: ProtoMetadata) -> Metadata:
         ttl=metadata_proto.ttl,
         message_type=metadata_proto.message_type,
     )
-    metadata.created_at = metadata_proto.created_at
     return metadata
 
 
