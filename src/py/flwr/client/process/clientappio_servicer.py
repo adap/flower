@@ -125,7 +125,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         self.proto_run = run_to_proto(clientapp_input.run)
         self.token = clientapp_input.token
 
-    def get_outputs(self) -> Tuple[Message, Context]:
+    def get_outputs(self) -> ClientAppIoOutputs:
         """Get ClientApp outputs."""
         log(DEBUG, "ClientAppIo.GetObject")
         if self.message is None or self.context is None:
