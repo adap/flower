@@ -15,6 +15,7 @@
 """Flower background ClientApp."""
 
 from logging import DEBUG, ERROR, INFO
+from typing import Tuple
 
 import grpc
 
@@ -31,7 +32,7 @@ from flwr.common.serde import (
 )
 from flwr.common.typing import Run
 
-# pylint: disable=E0401,E0611
+# pylint: disable=E0611
 from flwr.proto.clientappio_pb2 import (
     PullClientAppInputsRequest,
     PullClientAppInputsResponse,
@@ -96,7 +97,7 @@ def _run_background_client(  # pylint: disable=R0914
         channel.close()
 
 
-def pull_message(stub: grpc.Channel, token: int) -> tuple[Run, Message, Context]:
+def pull_message(stub: grpc.Channel, token: int) -> Tuple[Run, Message, Context]:
     """Pull message from SuperNode to ClientApp."""
     res: PullClientAppInputsResponse = stub.PullClientAppInputs(
         PullClientAppInputsRequest(token=token)
