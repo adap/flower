@@ -80,7 +80,10 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
                 "ClientAppIoInputs not set before calling `PullClientAppInputs`."
             )
         if request.token != self.clientapp_input.token:
-            raise ValueError("Mismatch between ClientApp and SuperNode token")
+            context.abort(
+                grpc.StatusCode.INVALID_ARGUMENT,
+                "Mismatch between ClientApp and SuperNode token",
+            )
         return PullClientAppInputsResponse(
             message=message_to_proto(self.clientapp_input.message),
             context=context_to_proto(self.clientapp_input.context),
@@ -101,7 +104,10 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
                 "ClientAppIoInputs not set before calling `PushClientAppOutputs`."
             )
         if request.token != self.clientapp_input.token:
-            raise ValueError("Mismatch between ClientApp and SuperNode token")
+            context.abort(
+                grpc.StatusCode.INVALID_ARGUMENT,
+                "Mismatch between ClientApp and SuperNode token",
+            )
         try:
             # Update Message and Context
             self.clientapp_output.message = message_from_proto(request.message)
