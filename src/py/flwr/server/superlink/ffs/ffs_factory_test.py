@@ -14,12 +14,12 @@
 # ==============================================================================
 """Test Ffs factory."""
 
-from .ffs import Ffs
+from .disk_ffs import DiskFfs
 from .ffs_factory import FfsFactory
 
 
 def test_disk_ffs_factory() -> None:
-    """Test add_loss_distributed."""
+    """Test DiskFfs instantiation with FfsFactory."""
     # Prepare
     ffs_factory = FfsFactory("test")
 
@@ -27,4 +27,4 @@ def test_disk_ffs_factory() -> None:
     ffs = ffs_factory.ffs()
 
     # Assert
-    assert isinstance(ffs, Ffs)
+    assert isinstance(ffs, DiskFfs)
