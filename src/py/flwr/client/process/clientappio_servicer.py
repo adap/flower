@@ -74,7 +74,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         self, request: PullClientAppInputsRequest, context: grpc.ServicerContext
     ) -> PullClientAppInputsResponse:
         """Pull Message, Context, and Run."""
-        log(DEBUG, "ClientAppIo.PullInputs")
+        log(DEBUG, "ClientAppIo.PullClientAppInputs")
         if self.clientapp_input is None:
             raise ValueError(
                 "ClientAppIoInputs not set before calling `PullClientAppInputs`."
@@ -91,7 +91,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         self, request: PushClientAppOutputsRequest, context: grpc.ServicerContext
     ) -> PushClientAppOutputsResponse:
         """Push Message and Context."""
-        log(DEBUG, "ClientAppIo.PushOutputs")
+        log(DEBUG, "ClientAppIo.PushClientAppOutputs")
         if self.clientapp_output is None:
             raise ValueError(
                 "ClientAppIoOutputs not set before calling `PushClientAppOutputs`."
@@ -136,5 +136,6 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             raise ValueError("ClientAppIoOutputs not set before calling `get_outputs`.")
         # Set outputs to a local variable and clear self.clientapp_output
         output: ClientAppIoOutputs = self.clientapp_output
+        self.clientapp_input = None
         self.clientapp_output = None
         return output
