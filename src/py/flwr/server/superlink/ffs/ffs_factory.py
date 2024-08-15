@@ -40,7 +40,7 @@ class FfsFactory:
     def ffs(self) -> Ffs:
         """Return a Ffs instance and create it, if necessary."""
         if not self.ffs_instance:
-            log(DEBUG, "Initialize DiskFfs")
+            log(DEBUG, "Initializing DiskFfs")
             self.ffs_instance = DiskFfs(self.base_dir)
 
         log(DEBUG, "Using DiskFfs")
