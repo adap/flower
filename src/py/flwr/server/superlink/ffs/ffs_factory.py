@@ -30,7 +30,7 @@ class FfsFactory:
     Parameters
     ----------
     base_dir : str
-        The base directory to store the objects.
+        The base directory used by DiskFfs to store objects.
     """
 
     def __init__(self, base_dir: str) -> None:
@@ -39,7 +39,9 @@ class FfsFactory:
 
     def ffs(self) -> Ffs:
         """Return a Ffs instance and create it, if necessary."""
-        # SqliteState
-        ffs = DiskFfs(self.base_dir)
-        log(DEBUG, "Using Disk Flower File System")
-        return ffs
+        if not self.ffs_instance:
+            log(DEBUG, "Initializing DiskFfs")
+            self.ffs_instance = DiskFfs(self.base_dir)
+
+        log(DEBUG, "Using DiskFfs")
+        return self.ffs_instance
