@@ -168,8 +168,6 @@ def _run_with_superexec(
     content = fab_path.read_bytes()
     fab = Fab(hashlib.sha256(content).hexdigest(), content)
 
-    fab = Fab("", Path(fab_path).read_bytes())
-
     req = StartRunRequest(
         fab=fab_to_proto(fab),
         override_config=user_config_to_proto(
