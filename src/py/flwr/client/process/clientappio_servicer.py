@@ -16,7 +16,7 @@
 
 
 from logging import DEBUG, ERROR
-from typing import Tuple
+from typing import Optional, Tuple
 
 import grpc
 
@@ -49,32 +49,13 @@ from flwr.proto.run_pb2 import Run as ProtoRun
 class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
     """ClientAppIo API servicer."""
 
-    def set_payload(
-        self,
-        message: Message,
-        context: Context,
-        run: Run,
-        token: int,
-    ) -> None:
-        """Set client app objects."""
-        log(DEBUG, "ClientAppIo.SetObject")
-        # Serialize Message, Context, and Run
-        self.proto_message: ProtoMessage = message_to_proto(message)
-        self.proto_context: ProtoContext = context_to_proto(context)
-        self.proto_run: ProtoRun = run_to_proto(run)
-        self.token: int = token
-
-    def get_payload(self) -> Tuple[Message, Context]:
-        """Get client app objects."""
-        log(DEBUG, "ClientAppIo.GetObject")
-        return self.message, self.context
-
-    def _update_payload(self) -> None:
-        """Update client app objects."""
-        log(DEBUG, "ClientAppIo.UpdateObject")
-        # Deserialize Message and Context
-        self.message: Message = message_from_proto(self.proto_message)
-        self.context: Context = context_from_proto(self.proto_context)
+    def __init__(self) -> None:
+        self.message: Optional[Message] = None
+        self.context: Optional[Context] = None
+        self.proto_message: Optional[ProtoMessage] = None
+        self.proto_context: Optional[ProtoContext] = None
+        self.proto_run: Optional[ProtoRun] = None
+        self.token: int = None
 
     def PullClientAppInputs(
         self, request: PullClientAppInputsRequest, context: grpc.ServicerContext
@@ -112,3 +93,32 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             status = typing.ClientAppOutputStatus(code=code, message="Push failed")
             proto_status = clientappstatus_to_proto(status=status)
             return PushClientAppOutputsResponse(status=proto_status)
+
+    def set_payload(
+        self,
+        message: Message,
+        context: Context,
+        run: Run,
+        token: int,
+    ) -> None:
+        """Set client app objects."""
+        log(DEBUG, "ClientAppIo.SetObject")
+        # Serialize Message, Context, and Run
+        self.proto_message = message_to_proto(message)
+        self.proto_context = context_to_proto(context)
+        self.proto_run = run_to_proto(run)
+        self.token = token
+
+    def get_payload(self) -> Tuple[Message, Context]:
+        """Get client app objects."""
+        log(DEBUG, "ClientAppIo.GetObject")
+        return self.message, self.context
+
+    def _update_payload(self) -> None:
+        """Update client app objects."""
+        log(DEBUG, "ClientAppIo.UpdateObject")
+        # Deserialize Message and Context
+        if self.proto_message is not None:
+            self.message = message_from_proto(self.proto_message)
+        if self.proto_context is not None:
+            self.context = context_from_proto(self.proto_context)
