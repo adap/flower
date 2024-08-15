@@ -55,7 +55,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         self.proto_message: Optional[ProtoMessage] = None
         self.proto_context: Optional[ProtoContext] = None
         self.proto_run: Optional[ProtoRun] = None
-        self.token: int = None
+        self.token: int = 0
 
     def PullClientAppInputs(
         self, request: PullClientAppInputsRequest, context: grpc.ServicerContext
@@ -112,6 +112,11 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
     def get_payload(self) -> Tuple[Message, Context]:
         """Get client app objects."""
         log(DEBUG, "ClientAppIo.GetObject")
+        if self.message is None or self.context is None:
+            raise ValueError(
+                "Both message and context must be set before calling `get_payload`."
+            )
+
         return self.message, self.context
 
     def _update_payload(self) -> None:
