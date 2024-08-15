@@ -104,7 +104,7 @@ def test_status_from_proto() -> None:
 
 
 def test_fab_to_proto() -> None:
-    """Test status message (de-)serialization."""
+    """Test Fab serialization."""
     proto_fab = ProtoFab(hash_str="fab_test_hash", content=b"fab_test_content")
 
     py_fab = typing.Fab(hash_str="fab_test_hash", content=b"fab_test_content")
@@ -116,7 +116,7 @@ def test_fab_to_proto() -> None:
 
 
 def test_fab_from_proto() -> None:
-    """Test status message (de-)serialization."""
+    """Test Fab deserialization."""
     proto_fab = ProtoFab(hash_str="fab_test_hash", content=b"fab_test_content")
 
     py_fab = typing.Fab(hash_str="fab_test_hash", content=b"fab_test_content")
