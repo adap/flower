@@ -18,7 +18,7 @@
 from __future__ import annotations
 
 import sys
-from logging import DEBUG
+from logging import DEBUG, ERROR
 from pathlib import Path
 from typing import Any, Sequence, TypeVar, cast
 
@@ -66,16 +66,14 @@ class GrpcAdapterConnection(GrpcRereConnection):
             root_cert = self.root_certificates
         else:
             root_cert = Path(self.root_certificates).read_bytes()
-        interceptors: Sequence[grpc.UnaryUnaryClientInterceptor] | None = None
         if self.authentication_keys is not None:
-            interceptors = AuthenticateClientInterceptor(*self.authentication_keys)
+            log(ERROR, "Client authentication is not supported for this transport type.")
 
         self.channel = create_channel(
             server_address=self.server_address,
             insecure=self.insecure,
             root_certificates=root_cert,
             max_message_length=self.max_message_length,
-            interceptors=interceptors,
         )
         self.channel.subscribe(on_channel_state_change)
         return GrpcAdapterFleetAPI(self.channel)
