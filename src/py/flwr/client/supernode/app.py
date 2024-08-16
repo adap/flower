@@ -124,7 +124,7 @@ def flwr_clientapp() -> None:
         description="Run a Flower ClientApp",
     )
     parser.add_argument(
-        "--address",
+        "--supernode",
         help="Address of SuperNode ClientAppIo gRPC servicer",
     )
     parser.add_argument(
@@ -136,10 +136,10 @@ def flwr_clientapp() -> None:
         DEBUG,
         "Staring isolated `ClientApp` connected to SuperNode ClientAppIo at %s "
         "with the token %s",
-        args.address,
+        args.supernode,
         args.token,
     )
-    run_clientapp(address=args.address, token=int(args.token))
+    run_clientapp(supernode=args.supernode, token=int(args.token))
 
 
 def _warn_deprecated_server_arg(args: argparse.Namespace) -> None:
@@ -235,8 +235,7 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
     parser.add_argument(
         "--supernode-address",
         default="0.0.0.0:9094",
-        help="Set the SuperNode gRPC server address. Defaults to "
-        "`0.0.0.0:9094`.",
+        help="Set the SuperNode gRPC server address. Defaults to `0.0.0.0:9094`.",
     )
 
     return parser

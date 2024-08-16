@@ -257,9 +257,9 @@ def start_client_internal(
         The fully resolved path containing installed Flower Apps.
     isolate : Optional[bool] (default: False)
         Whether to run `ClientApp` in a separate process. By default, this value is
-        `False`, and the `ClientApp` runs in the same process as the SuperNode. If `True`
-        the `ClientApp` runs in an isolated process and communicates using gRPC at the
-        address `supernode_address`.
+        `False`, and the `ClientApp` runs in the same process as the SuperNode. If
+        `True` the `ClientApp` runs in an isolated process and communicates using
+        gRPC at the address `supernode_address`.
     supernode_address : Optional[str] (default: `ADDRESS_CLIENTAPPIO_API_GRPC_RERE`)
         The SuperNode gRPC server address.
     """
@@ -288,19 +288,9 @@ def start_client_internal(
         load_client_app_fn = _load_client_app
 
     if isolate and supernode_address is not None:
-        _host, _port = supernode_address.split(":")
-        if is_port_free(_host, int(_port)):
-            # Start gRPC server
-            # `_clientappio_grpc_server` must be returned for the grpc.Server
-            # to be created
-            _clientappio_grpc_server, clientappio_servicer = run_clientappio_api_grpc(
-                address=supernode_address
-            )
-        else:
-            raise ValueError(
-                f"Port {_port} is in use at host {_host}. Specify a different "
-                "port for the ClientAppIo server to start."
-            )
+        _clientappio_grpc_server, clientappio_servicer = run_clientappio_api_grpc(
+            address=supernode_address
+        )
 
     # At this point, only `load_client_app_fn` should be used
     # Both `client` and `client_fn` must not be used directly
@@ -465,18 +455,17 @@ def start_client_internal(
                                 )
                             )
                             # Run ClientApp
-                            verbose = True
                             command = [
                                 "flwr-clientapp",
-                                "--address",
+                                "--supernode",
                                 supernode_address,
                                 "--token",
                                 str(token),
                             ]
                             subprocess.run(
                                 command,
-                                stdout=None if verbose else subprocess.DEVNULL,
-                                stderr=None if verbose else subprocess.DEVNULL,
+                                stdout=None,
+                                stderr=None,
                                 check=True,
                             )
                             outputs = clientappio_servicer.get_outputs()
