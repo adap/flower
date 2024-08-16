@@ -15,7 +15,6 @@
 """Flower client app."""
 
 import signal
-import socket
 import subprocess
 import sys
 import time
@@ -60,27 +59,6 @@ from .numpy_client import NumPyClient
 from .process.clientappio_servicer import ClientAppIoInputs, ClientAppIoServicer
 
 ADDRESS_CLIENTAPPIO_API_GRPC_RERE = "0.0.0.0:9094"
-
-_CLIENTAPPIO_ADDRESS = ADDRESS_CLIENTAPPIO_API_GRPC_RERE.rsplit(":", maxsplit=1)[0]
-_CLIENTAPPIO_PORT = ADDRESS_CLIENTAPPIO_API_GRPC_RERE.rsplit(":", maxsplit=1)[-1]
-CLIENTAPPIO_PORT = int(ADDRESS_CLIENTAPPIO_API_GRPC_RERE.rsplit(":", maxsplit=1)[-1])
-
-
-def find_free_port(start_port):
-    """Returns next free port for SuperNode grpc.Server."""
-    port = start_port
-    while True:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            try:
-                s.bind(("", port))
-                s.close()
-                return port
-            except OSError:
-                port += 1
-
-
-_CLIENTAPPIO_PORT_FREE = find_free_port(_CLIENTAPPIO_PORT)
-ADDRESS_CLIENTAPPIO_API_GRPC_RERE = _CLIENTAPPIO_ADDRESS + _CLIENTAPPIO_PORT_FREE
 
 
 def _check_actionable_client(
@@ -227,7 +205,8 @@ def start_client_internal(
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
     flwr_path: Optional[Path] = None,
-    run_type: Optional[str] = "internal",
+    isolate: Optional[bool] = False,
+    supernode_address: Optional[str] = ADDRESS_CLIENTAPPIO_API_GRPC_RERE,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -275,10 +254,13 @@ def start_client_internal(
         If set to None, there is no limit to the total time.
     flwr_path: Optional[Path] (default: None)
         The fully resolved path containing installed Flower Apps.
-    run_type: Optional[str] (default: `internal`)
-        The run type of the ClientApp. By default, this value is equal to `internal` and
-        the ClientApp runs in the same process as the SuperNode. If set to `subprocess`,
-        the ClientApp runs in an isolated process and communicates using gRPC.
+    isolate: Optional[bool] (default: False)
+        Whether to run ClientApp in a separate process. By default, this value is
+        `False`, and the ClientApp runs in the same process as the SuperNode. If `True`
+        the ClientApp runs in an isolated process and communicates using gRPC at the
+        address `supernode_address`.
+    supernode_address: Optional[str] (default: `ADDRESS_CLIENTAPPIO_API_GRPC_RERE`)
+        The SuperNode gRPC server address.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -304,12 +286,11 @@ def start_client_internal(
 
         load_client_app_fn = _load_client_app
 
-    if run_type == "subprocess":
+    if isolate:
         # Start gRPC server
-        # `_clientappio_grpc_server` must be returned for the
-        # grpc.Server to be created and persisted.
+        # `_clientappio_grpc_server` must be returned for the grpc.Server to be created
         _clientappio_grpc_server, clientappio_servicer = run_clientappio_api_grpc(
-            address=ADDRESS_CLIENTAPPIO_API_GRPC_RERE
+            address=supernode_address
         )
 
     # At this point, only `load_client_app_fn` should be used
@@ -461,7 +442,7 @@ def start_client_internal(
                     # Handle app loading and task message
                     try:
                         run: Run = runs[run_id]
-                        if run_type == "subprocess":
+                        if isolate:
                             # Generate SuperNode token
                             token: int = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
 
@@ -479,7 +460,7 @@ def start_client_internal(
                             command = [
                                 "flwr-clientapp",
                                 "--address",
-                                ADDRESS_CLIENTAPPIO_API_GRPC_RERE,
+                                supernode_address,
                                 "--token",
                                 str(token),
                             ]
@@ -744,9 +725,7 @@ class _AppStateTracker:
         signal.signal(signal.SIGTERM, signal_handler)
 
 
-def run_clientappio_api_grpc(
-    address: str = ADDRESS_CLIENTAPPIO_API_GRPC_RERE,
-) -> Tuple[grpc.Server, ClientAppIoServicer]:
+def run_clientappio_api_grpc(address: str) -> Tuple[grpc.Server, ClientAppIoServicer]:
     """Run ClientAppIo API gRPC server."""
     clientappio_servicer: grpc.Server = ClientAppIoServicer()
     clientappio_add_servicer_to_server_fn = add_ClientAppIoServicer_to_server

@@ -16,7 +16,6 @@
 
 import argparse
 import sys
-from enum import Enum
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from typing import Optional, Tuple
@@ -75,7 +74,8 @@ def run_supernode() -> None:
         max_wait_time=args.max_wait_time,
         node_config=parse_config_args([args.node_config]),
         flwr_path=get_flwr_dir(args.flwr_dir),
-        run_type=str(args.run_type.value),
+        isolate=args.isolate,
+        supernode_address=args.supernode_address,
     )
 
     # Graceful shutdown
@@ -227,12 +227,16 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
     """,
     )
     parser.add_argument(
-        "--run-type",
-        type=parse_run_type,
-        default=ClientAppRunType.INTERNAL,
-        help="Choose the `run_type` for the ClientApp process. By default, this value "
-        "is equal to: `INTERNAL`, where SuperNode and ClientApp run in the same "
-        "process. The other option is `SUBPROCESS`.",
+        "--isolate",
+        action="store_true",
+        help="Run the ClientApp in an isolated process. By default, the ClientApp "
+        "runs in the same process that executes the SuperNode.",
+    )
+    parser.add_argument(
+        "--supernode-address",
+        default="0.0.0.0:9094",
+        help="Choose the SuperNode gRPC server address. By default, this value "
+        "is equal to `0.0.0.0:9094`.",
     )
 
     return parser
@@ -388,22 +392,3 @@ def _try_setup_client_authentication(
         ssh_private_key,
         ssh_public_key,
     )
-
-
-class ClientAppRunType(str, Enum):
-    """Available ClientApp run types."""
-
-    INTERNAL = "internal"
-    SUBPROCESS = "subprocess"
-
-
-# Create a type function to convert strings to Enum values
-def parse_run_type(value: str) -> ClientAppRunType:
-    """."""
-    try:
-        return ClientAppRunType[value.upper()]  # Convert the string to the Enum value
-    except KeyError as exc:
-        valid_run_types = ", ".join([rt.name.lower() for rt in ClientAppRunType])
-        raise argparse.ArgumentTypeError(
-            f"Invalid `run_type` '{value}'. Valid options are: {valid_run_types}"
-        ) from exc
