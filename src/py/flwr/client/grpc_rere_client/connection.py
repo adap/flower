@@ -46,6 +46,7 @@ from flwr.common.serde import (
     user_config_from_proto,
 )
 from flwr.common.typing import Fab, Run
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
@@ -292,7 +293,13 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
 
     def get_fab(fab_hash: str) -> Fab:
         # Call FleetAPI
-        raise NotImplementedError
+        get_fab_request = GetFabRequest(hash_str=fab_hash)
+        get_fab_response: GetFabResponse = retry_invoker.invoke(
+            stub.GetFab,
+            request=get_fab_request,
+        )
+
+        return Fab(get_fab_response.fab.hash_str, get_fab_response.fab.content)
 
     try:
         # Yield methods
