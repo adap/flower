@@ -23,7 +23,12 @@ from uuid import UUID
 import grpc
 
 from flwr.common.logger import log
-from flwr.common.serde import fab_to_proto, user_config_from_proto, user_config_to_proto
+from flwr.common.serde import (
+    fab_from_proto,
+    fab_to_proto,
+    user_config_from_proto,
+    user_config_to_proto,
+)
 from flwr.common.typing import Fab
 from flwr.proto import driver_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
@@ -75,12 +80,13 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         """Create run ID."""
         log(DEBUG, "DriverServicer.CreateRun")
         state: State = self.state_factory.state()
-        if request.HasField("fab") and request.fab.HasField("content"):
+        if request.HasField("fab"):
+            fab = fab_from_proto(request.fab)
             ffs: Ffs = self.ffs_factory.ffs()
-            fab_hash = ffs.put(request.fab.content, {})
+            fab_hash = ffs.put(fab.content, {})
             _raise_if(
-                fab_hash != request.fab.hash_str,
-                f"FAB ({request.fab}) hash from request doesn't match contents",
+                fab_hash != fab.hash_str,
+                f"FAB ({fab.hash_str}) hash from request doesn't match contents",
             )
         else:
             fab_hash = ""
