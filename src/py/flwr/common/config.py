@@ -15,7 +15,7 @@
 """Provide functions for managing global Flower config."""
 
 import os
-import shlex
+import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, cast, get_args
 
@@ -173,18 +173,24 @@ def parse_config_args(
     if config is None:
         return overrides
 
+    # Regular expression to capture key-value pairs with possible quoted values
+    pattern = re.compile(r"(\S+?)=(\'[^\']*\'|\"[^\"]*\"|\S+)")
+
     for config_line in config:
         if config_line:
-            overrides_list = shlex.split(config_line)
+            matches = pattern.findall(config_line)
+            for key, value in matches:
+                overrides[key] = value
+
             if (
-                len(overrides_list) == 1
-                and "=" not in overrides_list
-                and overrides_list[0].endswith(".toml")
+                len(matches) == 1
+                and "=" not in matches[0][0]
+                and matches[0][0].endswith(".toml")
             ):
-                with Path(overrides_list[0]).open("rb") as config_file:
+                with Path(matches[0][0]).open("rb") as config_file:
                     overrides = flatten_dict(tomli.load(config_file))
             else:
-                toml_str = "\n".join(overrides_list)
+                toml_str = "\n".join(f"{k} = {v}" for k, v in overrides.items())
                 overrides.update(tomli.loads(toml_str))
 
     return overrides
