@@ -37,7 +37,7 @@ from flwr.common.constant import (
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature
 
-from ..app import _start_client_internal
+from ..app import start_client_internal
 from ..process.process import run_clientapp
 from ..process.utils import get_load_client_app_fn
 
@@ -63,7 +63,7 @@ def run_supernode() -> None:
     )
     authentication_keys = _try_setup_client_authentication(args)
 
-    _start_client_internal(
+    start_client_internal(
         server_address=args.superlink,
         load_client_app_fn=load_fn,
         transport=args.transport,
@@ -100,7 +100,7 @@ def run_client_app() -> None:
     )
     authentication_keys = _try_setup_client_authentication(args)
 
-    _start_client_internal(
+    start_client_internal(
         server_address=args.superlink,
         node_config=parse_config_args([args.node_config]),
         load_client_app_fn=load_fn,
