@@ -17,7 +17,7 @@
 
 import base64
 from logging import WARNING
-from typing import Any, Callable, Optional, Sequence, Set, Tuple, Union
+from typing import Any, Callable, Sequence, Set, Tuple, Union
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
