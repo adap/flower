@@ -229,14 +229,14 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
     parser.add_argument(
         "--isolate",
         action="store_true",
-        help="Run the ClientApp in an isolated process. By default, the ClientApp "
+        help="Run `ClientApp` in an isolated subprocess. By default, `ClientApp` "
         "runs in the same process that executes the SuperNode.",
     )
     parser.add_argument(
         "--supernode-address",
         default="0.0.0.0:9094",
-        help="Choose the SuperNode gRPC server address. By default, this value "
-        "is equal to `0.0.0.0:9094`.",
+        help="Set the SuperNode gRPC server address. Defaults to "
+        "`0.0.0.0:9094`.",
     )
 
     return parser
