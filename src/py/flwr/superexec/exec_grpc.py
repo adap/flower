@@ -15,7 +15,7 @@
 """SuperExec gRPC API."""
 
 from logging import INFO
-from typing import Optional, Tuple
+from typing import Optional, Sequence, Tuple
 
 import grpc
 
@@ -24,6 +24,7 @@ from flwr.common.logger import log
 from flwr.common.typing import UserConfig
 from flwr.proto.exec_pb2_grpc import add_ExecServicer_to_server
 from flwr.server.superlink.fleet.grpc_bidi.grpc_server import generic_create_grpc_server
+from flwr.superexec.superexec_interceptor import SuperExecInterceptor
 
 from .exec_servicer import ExecServicer
 from .executor import Executor
@@ -34,6 +35,7 @@ def run_superexec_api_grpc(
     executor: Executor,
     certificates: Optional[Tuple[bytes, bytes, bytes]],
     config: UserConfig,
+    interceptors: Optional[Sequence[SuperExecInterceptor]] = None,
 ) -> grpc.Server:
     """Run SuperExec API (gRPC, request-response)."""
     executor.set_config(config)
@@ -47,6 +49,7 @@ def run_superexec_api_grpc(
         server_address=address,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
         certificates=certificates,
+        interceptors=interceptors,
     )
 
     log(INFO, "Starting Flower SuperExec gRPC server on %s", address)
