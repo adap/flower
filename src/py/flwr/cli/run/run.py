@@ -171,7 +171,11 @@ def _run_with_superexec(
         root_certificates=root_certificates_bytes,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
         interceptors=(
-            RunInterceptor(**authentication_keys)
+            RunInterceptor(
+                authentication_keys[0],
+                authentication_keys[1],
+                authentication_keys[2],
+            )
             if authentication_keys is not None
             else None
         ),
@@ -308,4 +312,4 @@ def _try_setup_user_authentication(
         )
         raise typer.Exit(code=1) from err
 
-    return (ssh_private_key, ssh_public_key, superexec_public_key_path)
+    return (ssh_private_key, ssh_public_key, superexec_ssh_public_key)
