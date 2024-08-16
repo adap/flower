@@ -46,6 +46,11 @@ from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 from .utils import _get_load_client_app_fn
 
 
+def on_channel_state_change(channel_connectivity: str) -> None:
+    """Log channel connectivity."""
+    log(DEBUG, channel_connectivity)
+
+
 def _run_clientapp(  # pylint: disable=R0914
     address: str,
     token: int,
@@ -59,10 +64,6 @@ def _run_clientapp(  # pylint: disable=R0914
     token : int
         Unique SuperNode token for ClientApp-SuperNode authentication
     """
-
-    def on_channel_state_change(channel_connectivity: str) -> None:
-        """Log channel connectivity."""
-        log(DEBUG, channel_connectivity)
 
     channel = create_channel(
         server_address=address,
