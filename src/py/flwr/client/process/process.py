@@ -12,16 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower background ClientApp."""
+"""Flower ClientApp process."""
 
 from logging import DEBUG, ERROR, INFO
+from typing import Tuple
 
 import grpc
 
-from flwr.client.client_app import ClientApp
+from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import Context, Message
+from flwr.common.constant import ErrorCode
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
+from flwr.common.message import Error
 from flwr.common.serde import (
     context_from_proto,
     context_to_proto,
@@ -31,7 +34,7 @@ from flwr.common.serde import (
 )
 from flwr.common.typing import Run
 
-# pylint: disable=E0401,E0611
+# pylint: disable=E0611
 from flwr.proto.clientappio_pb2 import (
     PullClientAppInputsRequest,
     PullClientAppInputsResponse,
@@ -43,11 +46,16 @@ from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 from .utils import _get_load_client_app_fn
 
 
-def _run_background_client(  # pylint: disable=R0914
+def on_channel_state_change(channel_connectivity: str) -> None:
+    """Log channel connectivity."""
+    log(DEBUG, channel_connectivity)
+
+
+def _run_clientapp(  # pylint: disable=R0914
     address: str,
     token: int,
 ) -> None:
-    """Run background Flower ClientApp process.
+    """Run Flower ClientApp process.
 
     Parameters
     ----------
@@ -56,11 +64,6 @@ def _run_background_client(  # pylint: disable=R0914
     token : int
         Unique SuperNode token for ClientApp-SuperNode authentication
     """
-
-    def on_channel_state_change(channel_connectivity: str) -> None:
-        """Log channel connectivity."""
-        log(DEBUG, channel_connectivity)
-
     channel = create_channel(
         server_address=address,
         insecure=True,
@@ -71,7 +74,7 @@ def _run_background_client(  # pylint: disable=R0914
         stub = ClientAppIoStub(channel)
 
         # Pull Message, Context, and Run from SuperNode
-        run, message, context = pull_message(stub=stub, token=token)
+        message, context, run = pull_message(stub=stub, token=token)
 
         load_client_app_fn = _get_load_client_app_fn(
             default_app_ref="",
@@ -80,14 +83,33 @@ def _run_background_client(  # pylint: disable=R0914
             flwr_dir=None,
         )
 
-        # Load ClientApp
-        client_app: ClientApp = load_client_app_fn(run.fab_id, run.fab_version)
+        try:
+            # Load ClientApp
+            client_app: ClientApp = load_client_app_fn(run.fab_id, run.fab_version)
 
-        # Execute ClientApp
-        reply_message = client_app(message=message, context=context)
+            # Execute ClientApp
+            reply_message = client_app(message=message, context=context)
+        except Exception as ex:  # pylint: disable=broad-exception-caught
+            # Don't update/change NodeState
+
+            e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
+            # Ex fmt: "<class 'ZeroDivisionError'>:<'division by zero'>"
+            reason = str(type(ex)) + ":<'" + str(ex) + "'>"
+            exc_entity = "ClientApp"
+            if isinstance(ex, LoadClientAppError):
+                reason = "An exception was raised when attempting to load `ClientApp`"
+                e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
+
+            log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
+
+            # Create error message
+            reply_message = message.create_error_reply(
+                error=Error(code=e_code, reason=reason)
+            )
 
         # Push Message and Context to SuperNode
-        _ = push_message(token=token, message=reply_message, context=context, stub=stub)
+        _ = push_message(stub=stub, token=token, message=reply_message, context=context)
+
     except KeyboardInterrupt:
         log(INFO, "Closing connection")
     except grpc.RpcError as e:
@@ -96,15 +118,15 @@ def _run_background_client(  # pylint: disable=R0914
         channel.close()
 
 
-def pull_message(stub: grpc.Channel, token: int) -> tuple[Run, Message, Context]:
+def pull_message(stub: grpc.Channel, token: int) -> Tuple[Message, Context, Run]:
     """Pull message from SuperNode to ClientApp."""
     res: PullClientAppInputsResponse = stub.PullClientAppInputs(
         PullClientAppInputsRequest(token=token)
     )
-    run = run_from_proto(res.run)
     message = message_from_proto(res.message)
     context = context_from_proto(res.context)
-    return run, message, context
+    run = run_from_proto(res.run)
+    return message, context, run
 
 
 def push_message(

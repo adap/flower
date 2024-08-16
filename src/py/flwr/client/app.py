@@ -55,6 +55,8 @@ from .node_state import NodeState
 from .numpy_client import NumPyClient
 from .process.clientappio_servicer import ClientAppIoServicer
 
+ADDRESS_CLIENTAPPIO_API_GRPC_RERE = "0.0.0.0:9094"
+
 
 def _check_actionable_client(
     client: Optional[Client], client_fn: Optional[ClientFnExt]
@@ -674,9 +676,9 @@ class _AppStateTracker:
 
 
 def run_clientappio_api_grpc(
-    address: str = "0.0.0.0:9094",
-) -> tuple[grpc.Server, grpc.Server]:
-    """Run ClientAppIo API (gRPC-rere)."""
+    address: str = ADDRESS_CLIENTAPPIO_API_GRPC_RERE,
+) -> Tuple[grpc.Server, ClientAppIoServicer]:
+    """Run ClientAppIo API gRPC server."""
     clientappio_servicer: grpc.Server = ClientAppIoServicer()
     clientappio_add_servicer_to_server_fn = add_ClientAppIoServicer_to_server
     clientappio_grpc_server = generic_create_grpc_server(
@@ -689,4 +691,4 @@ def run_clientappio_api_grpc(
     )
     log(INFO, "Starting Flower ClientAppIo gRPC server on %s", address)
     clientappio_grpc_server.start()
-    return clientappio_servicer, clientappio_grpc_server
+    return clientappio_grpc_server, clientappio_servicer
