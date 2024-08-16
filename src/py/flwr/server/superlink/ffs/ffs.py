@@ -16,7 +16,7 @@
 
 
 import abc
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 
 class Ffs(abc.ABC):  # pylint: disable=R0904
@@ -40,7 +40,7 @@ class Ffs(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get(self, key: str) -> Tuple[bytes, Dict[str, str]]:
+    def get(self, key: str) -> Optional[Tuple[bytes, Dict[str, str]]]:
         """Return tuple containing the object content and metadata.
 
         Parameters
@@ -50,7 +50,7 @@ class Ffs(abc.ABC):  # pylint: disable=R0904
 
         Returns
         -------
-        Tuple[bytes, Dict[str, str]]
+        Optional[Tuple[bytes, Dict[str, str]]]
             A tuple containing the object content and metadata.
         """
 

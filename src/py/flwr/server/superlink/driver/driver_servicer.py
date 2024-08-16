@@ -186,9 +186,11 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         log(DEBUG, "DriverServicer.GetFab")
 
         ffs: Ffs = self.ffs_factory.ffs()
-        fab = Fab(request.hash_str, ffs.get(request.hash_str)[0])
+        if result := ffs.get(request.hash_str):
+            fab = Fab(request.hash_str, result[0])
+            return GetFabResponse(fab=fab_to_proto(fab))
 
-        return GetFabResponse(fab=fab_to_proto(fab))
+        return GetFabResponse()
 
 
 def _raise_if(validation_error: bool, detail: str) -> None:

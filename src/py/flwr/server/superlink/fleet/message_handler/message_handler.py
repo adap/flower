@@ -136,5 +136,8 @@ def get_fab(
     request: GetFabRequest, ffs: Ffs  # pylint: disable=W0613
 ) -> GetFabResponse:
     """Get FAB."""
-    fab = Fab(request.hash_str, ffs.get(request.hash_str)[0])
-    return GetFabResponse(fab=fab_to_proto(fab))
+    if result := ffs.get(request.hash_str):
+        fab = Fab(request.hash_str, result[0])
+        return GetFabResponse(fab=fab_to_proto(fab))
+
+    return GetFabResponse()
