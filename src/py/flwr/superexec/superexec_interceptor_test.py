@@ -88,7 +88,9 @@ class TestSuperExecInterceptor(unittest.TestCase):  # pylint: disable=R0902
         """Test superexec interceptor for creating node."""
         # Prepare
         request = StartRunRequest(
-            fab=Fab(hash_str="", content=b""), override_config=None, federation_config=None
+            fab=Fab(hash_str="", content=b""),
+            override_config=None,
+            federation_config=None,
         )
         public_key_bytes = base64.urlsafe_b64encode(
             public_key_to_bytes(self._user_public_key)
@@ -122,7 +124,9 @@ class TestSuperExecInterceptor(unittest.TestCase):  # pylint: disable=R0902
             public_key_to_bytes(user_public_key)
         )
         request = StartRunRequest(
-            fab=Fab(hash_str="", content=b""), override_config=None, federation_config=None
+            fab=Fab(hash_str="", content=b""),
+            override_config=None,
+            federation_config=None,
         )
         shared_secret = generate_shared_key(
             self._user_private_key,
