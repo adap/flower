@@ -29,7 +29,7 @@ from flwr.common.logger import log
 from flwr.common.object_ref import load_app, validate
 
 
-def _get_load_client_app_fn(
+def get_load_client_app_fn(
     default_app_ref: str,
     app_path: Optional[str],
     multi_app: bool,
