@@ -95,7 +95,6 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         """Push Message and Context."""
         log(DEBUG, "ClientAppIo.PushClientAppOutputs")
         if self.clientapp_input is None:
-            # Ensure `.token` is present
             raise ValueError(
                 "ClientAppIoInputs not set before calling `PushClientAppOutputs`."
             )

@@ -15,7 +15,6 @@
 """Flower client app."""
 
 import signal
-import socket
 import subprocess
 import sys
 import time
@@ -751,13 +750,3 @@ def run_clientappio_api_grpc(address: str) -> Tuple[grpc.Server, ClientAppIoServ
     log(INFO, "Starting Flower ClientAppIo gRPC server on %s", address)
     clientappio_grpc_server.start()
     return clientappio_grpc_server, clientappio_servicer
-
-
-def is_port_free(host: str, port: int) -> bool:
-    """Return a boolean indicating whether a specific port is free (not in use) on the
-    specified host."""
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        # Attempt to connect to the specified host and port
-        result = sock.connect_ex((host, port))
-        # If connect_ex returns 0, the port is in use; otherwise, it's free
-        return result != 0
