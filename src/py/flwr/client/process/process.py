@@ -19,10 +19,12 @@ from typing import Tuple
 
 import grpc
 
-from flwr.client.client_app import ClientApp
+from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import Context, Message
+from flwr.common.constant import ErrorCode
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
+from flwr.common.message import Error
 from flwr.common.serde import (
     context_from_proto,
     context_to_proto,
@@ -48,7 +50,7 @@ def _run_background_client(  # pylint: disable=R0914
     address: str,
     token: int,
 ) -> None:
-    """Run background Flower ClientApp process.
+    """Run Flower ClientApp process.
 
     Parameters
     ----------
@@ -81,14 +83,35 @@ def _run_background_client(  # pylint: disable=R0914
             flwr_dir=None,
         )
 
-        # Load ClientApp
-        client_app: ClientApp = load_client_app_fn(run.fab_id, run.fab_version)
+        try:
+            # Load ClientApp
+            client_app: ClientApp = load_client_app_fn(run.fab_id, run.fab_version)
 
-        # Execute ClientApp
-        reply_message = client_app(message=message, context=context)
+            # Execute ClientApp
+            reply_message = client_app(message=message, context=context)
+        except Exception as ex:  # pylint: disable=broad-exception-caught
+            # Don't update/change NodeState
+
+            e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
+            # Ex fmt: "<class 'ZeroDivisionError'>:<'division by zero'>"
+            reason = str(type(ex)) + ":<'" + str(ex) + "'>"
+            exc_entity = "ClientApp"
+            if isinstance(ex, LoadClientAppError):
+                reason = (
+                    "An exception was raised when attempting to load " "`ClientApp`"
+                )
+                e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
+
+            log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
+
+            # Create error message
+            reply_message = message.create_error_reply(
+                error=Error(code=e_code, reason=reason)
+            )
 
         # Push Message and Context to SuperNode
-        _ = push_message(token=token, message=reply_message, context=context, stub=stub)
+        _ = push_message(stub=stub, token=token, message=reply_message, context=context)
+
     except KeyboardInterrupt:
         log(INFO, "Closing connection")
     except grpc.RpcError as e:

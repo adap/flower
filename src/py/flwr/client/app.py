@@ -677,7 +677,7 @@ class _AppStateTracker:
 
 def run_clientappio_api_grpc(
     address: str = ADDRESS_CLIENTAPPIO_API_GRPC_RERE,
-) -> Tuple[grpc.Server, grpc.Server]:
+) -> Tuple[grpc.Server, ClientAppIoServicer]:
     """Run ClientAppIo API gRPC server."""
     clientappio_servicer: grpc.Server = ClientAppIoServicer()
     clientappio_add_servicer_to_server_fn = add_ClientAppIoServicer_to_server
@@ -691,4 +691,4 @@ def run_clientappio_api_grpc(
     )
     log(INFO, "Starting Flower ClientAppIo gRPC server on %s", address)
     clientappio_grpc_server.start()
-    return clientappio_servicer, clientappio_grpc_server
+    return clientappio_grpc_server, clientappio_servicer
