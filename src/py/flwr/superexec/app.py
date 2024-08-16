@@ -256,12 +256,14 @@ def _parse_args_run_superexec() -> argparse.ArgumentParser:
     parser.add_argument(
         "--auth-superexec-private-key",
         type=str,
-        help="The SuperExec's private key (as a path str) to enable user authentication.",
+        help="The SuperExec's private key (as a path str) to enable "
+        "user authentication.",
     )
     parser.add_argument(
         "--auth-superexec-public-key",
         type=str,
-        help="The SuperExec's public key (as a path str) to enable user authentication.",
+        help="The SuperExec's public key (as a path str) to enable "
+        "user authentication.",
     )
     return parser
 
