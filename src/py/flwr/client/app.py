@@ -22,9 +22,12 @@ from logging import ERROR, INFO, WARN
 from pathlib import Path
 from typing import Callable, Dict, Optional, Tuple, Type, Union
 
+import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 from grpc import RpcError
 
+from flwr.cli.config_utils import get_fab_metadata
+from flwr.cli.install import install_from_fab
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.typing import ClientFnExt
@@ -43,6 +46,8 @@ from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.typing import Run, UserConfig
+from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
+from flwr.server.superlink.fleet.grpc_bidi.grpc_server import generic_create_grpc_server
 
 from .connection import (
     Connection,
@@ -53,6 +58,9 @@ from .connection import (
 from .message_handler.message_handler import handle_control_message
 from .node_state import NodeState
 from .numpy_client import NumPyClient
+from .process.clientappio_servicer import ClientAppIoServicer
+
+ADDRESS_CLIENTAPPIO_API_GRPC_RERE = "0.0.0.0:9094"
 
 
 def _check_actionable_client(
@@ -161,7 +169,7 @@ def start_client(
     >>> )
     """
     event(EventType.START_CLIENT_ENTER)
-    _start_client_internal(
+    start_client_internal(
         server_address=server_address,
         node_config={},
         load_client_app_fn=None,
@@ -182,7 +190,7 @@ def start_client(
 # pylint: disable=too-many-branches
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
-def _start_client_internal(
+def start_client_internal(
     *,
     server_address: str,
     node_config: UserConfig,
@@ -381,10 +389,16 @@ def _start_client_internal(
                     run_id = message.metadata.run_id
                     if run_id not in runs:
                         runs[run_id] = conn.get_run(run_id)
-
+                    
+                    run: Run = runs[run_id]
+                    if run.fab_hash:
+                        fab = conn.get_fab(run.fab_hash)
+                        install_from_fab(fab.content, flwr_path, True)
+                    else:
+                        fab = None
                     # Register context for this run
                     node_state.register_context(
-                        run_id=run_id, run=runs[run_id], flwr_path=flwr_path
+                        run_id=run_id, run=run, flwr_path=flwr_path
                     )
 
                     # Retrieve context for this run
@@ -399,10 +413,12 @@ def _start_client_internal(
                     # Handle app loading and task message
                     try:
                         # Load ClientApp instance
-                        run: Run = runs[run_id]
-                        client_app: ClientApp = load_client_app_fn(
-                            run.fab_id, run.fab_version
-                        )
+                        if fab:
+                            fab_id, fab_version = get_fab_metadata(fab.content)
+                        else:
+                            fab_id, fab_version = run.fab_id, run.fab_version
+
+                        client_app: ClientApp = load_client_app_fn(fab_id, fab_version)
 
                         # Execute ClientApp
                         reply_message = client_app(message=message, context=context)
@@ -629,3 +645,22 @@ class _AppStateTracker:
 
         signal.signal(signal.SIGINT, signal_handler)
         signal.signal(signal.SIGTERM, signal_handler)
+
+
+def run_clientappio_api_grpc(
+    address: str = ADDRESS_CLIENTAPPIO_API_GRPC_RERE,
+) -> Tuple[grpc.Server, ClientAppIoServicer]:
+    """Run ClientAppIo API gRPC server."""
+    clientappio_servicer: grpc.Server = ClientAppIoServicer()
+    clientappio_add_servicer_to_server_fn = add_ClientAppIoServicer_to_server
+    clientappio_grpc_server = generic_create_grpc_server(
+        servicer_and_add_fn=(
+            clientappio_servicer,
+            clientappio_add_servicer_to_server_fn,
+        ),
+        server_address=address,
+        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
+    )
+    log(INFO, "Starting Flower ClientAppIo gRPC server on %s", address)
+    clientappio_grpc_server.start()
+    return clientappio_grpc_server, clientappio_servicer

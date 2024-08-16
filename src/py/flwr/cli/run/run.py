@@ -35,6 +35,11 @@ from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 
 
+def on_channel_state_change(channel_connectivity: str) -> None:
+    """Log channel connectivity."""
+    log(DEBUG, channel_connectivity)
+
+
 # pylint: disable-next=too-many-locals
 def run(
     app: Annotated[
@@ -121,10 +126,6 @@ def _run_with_superexec(
     federation_config: Dict[str, Any],
     config_overrides: Optional[List[str]],
 ) -> None:
-
-    def on_channel_state_change(channel_connectivity: str) -> None:
-        """Log channel connectivity."""
-        log(DEBUG, channel_connectivity)
 
     insecure_str = federation_config.get("insecure")
     if root_certificates := federation_config.get("root-certificates"):
