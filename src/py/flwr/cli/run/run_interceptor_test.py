@@ -38,13 +38,14 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_shared_key,
     public_key_to_bytes,
 )
-from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
+    StartRunRequest,
     StartRunResponse,
     StreamLogsRequest,
     StreamLogsResponse,
 )
 from flwr.proto.exec_pb2_grpc import ExecStub
+from flwr.proto.fab_pb2 import Fab  # pylint: disable=E0611
 
 
 class _MockServicer:
@@ -155,13 +156,15 @@ class TestRunInterceptor(unittest.TestCase):
         """Test user authentication during start run."""
         # Prepare
         req = StartRunRequest(
-            fab_file=b"",
+            fab=Fab(hash_str="", content=b""),
             override_config=None,
             federation_config=None,
         )
 
         # Execute
         self.stub.StartRun(req)
+
+        assert self._servicer.received_client_metadata() is not None
 
         shared_secret = generate_shared_key(
             self._servicer.superexec_private_key, self._user_public_key
