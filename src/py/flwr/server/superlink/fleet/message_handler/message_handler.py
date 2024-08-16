@@ -140,4 +140,4 @@ def get_fab(
         fab = Fab(request.hash_str, result[0])
         return GetFabResponse(fab=fab_to_proto(fab))
 
-    return GetFabResponse()
+    raise ValueError(f"Found no FAB with hash: {request.hash_str}")
