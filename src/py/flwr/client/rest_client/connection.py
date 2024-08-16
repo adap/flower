@@ -46,6 +46,7 @@ from flwr.common.serde import (
     user_config_from_proto,
 )
 from flwr.common.typing import Fab, Run
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
@@ -74,6 +75,7 @@ PATH_PULL_TASK_INS: str = "api/v0/fleet/pull-task-ins"
 PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
 PATH_PING: str = "api/v0/fleet/ping"
 PATH_GET_RUN: str = "/api/v0/fleet/get-run"
+PATH_GET_FAB: str = "/api/v0/fleet/get-fab"
 
 T = TypeVar("T", bound=GrpcMessage)
 
@@ -369,8 +371,18 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
         )
 
     def get_fab(fab_hash: str) -> Fab:
-        # Call FleetAPI
-        raise NotImplementedError
+        # Construct the request
+        req = GetFabRequest(hash_str=fab_hash)
+
+        # Send the request
+        res = _request(req, GetFabResponse, PATH_GET_FAB)
+        if res is None:
+            return Fab("", b"")
+
+        return Fab(
+            res.fab.hash_str,
+            res.fab.content,
+        )
 
     try:
         # Yield methods
