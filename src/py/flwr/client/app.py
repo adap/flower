@@ -26,7 +26,7 @@ import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 from grpc import RpcError
 
-from flwr.cli.config_utils import get_fab_config, get_fab_metadata
+from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
