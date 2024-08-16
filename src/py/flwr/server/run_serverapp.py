@@ -200,10 +200,11 @@ def run_server_app() -> None:
         # Overwrite driver._run_id
         driver._run_id = res.run_id  # pylint: disable=W0212
 
+    # Obtain server app reference and the run config
+    server_app_attr = config["tool"]["flwr"]["app"]["components"]["serverapp"]
     server_app_run_config = get_fused_config_from_dir(
         Path(app_path), driver.run.override_config
     )
-    server_app_attr = config["tool"]["flwr"]["app"]["components"]["serverapp"]
 
     log(DEBUG, "Flower will load ServerApp `%s` in %s", server_app_attr, app_path)
 
