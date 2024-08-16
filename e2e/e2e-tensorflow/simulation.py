@@ -1,4 +1,4 @@
-from tensorflow_e2e.client_app import client_fn
+from e2e_tensorflow.client_app import client_fn
 
 import flwr as fl
 
