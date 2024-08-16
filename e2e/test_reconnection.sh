@@ -29,12 +29,12 @@ sl_pid=$!
 echo "Starting SuperLink"
 sleep 3
 
-timeout 2m flower-supernode . --insecure $rest_arg --superlink $server_address &
+timeout 2m flower-supernode ./ --insecure $rest_arg --superlink $server_address &
 cl1_pid=$!
 echo "Starting first client"
 sleep 3
 
-timeout 2m flower-supernode . --insecure $rest_arg --superlink $server_address &
+timeout 2m flower-supernode ./ --insecure $rest_arg --superlink $server_address &
 cl2_pid=$!
 echo "Starting second client"
 sleep 3
@@ -56,13 +56,13 @@ echo "Killing first client"
 sleep 3
 
 # Starting new client, this is so we have enough clients to start the server-app
-timeout 2m flower-supernode . --insecure $rest_arg --superlink $server_address &
+timeout 2m flower-supernode ./ --insecure $rest_arg --superlink $server_address &
 cl1_pid=$!
 echo "Starting new client"
 sleep 5
 
 # We start the server-app to begining the training
-timeout 2m flower-server-app ./.. $rest_arg --superlink $server_app_address &
+timeout 2m flower-server-app ./ $rest_arg --superlink $server_app_address &
 pid=$!
 echo "Starting server-app to start training"
 
@@ -74,7 +74,7 @@ echo "Killing first client"
 sleep 1
 
 # Restart first client so enough clients are connected to continue the FL rounds
-timeout 2m flower-supernode . --insecure $rest_arg --superlink $server_address &
+timeout 2m flower-supernode ./ --insecure $rest_arg --superlink $server_address &
 cl1_pid=$!
 echo "Starting new client"
 
