@@ -250,8 +250,8 @@ def _try_setup_user_authentication(
 
     if not private_key_path or not public_key_path or not superexec_public_key_path:
         typer.secho(
-            "❌ User authentication requires file paths to 'private_key_path', ",
-            "'public_key_path', and 'superexec_public_key_path' to be provided ",
+            "❌ User authentication requires file paths to 'private_key_path', "
+            "'public_key_path', and 'superexec_public_key_path' to be provided "
             "(providing only one of them is not sufficient).",
             fg=typer.colors.RED,
             bold=True,
@@ -267,9 +267,9 @@ def _try_setup_user_authentication(
             raise ValueError()
     except (ValueError, UnsupportedAlgorithm) as err:
         typer.secho(
-            "❌ Error: Unable to parse the private key file in ",
-            "'private_key_path'. User authentication requires elliptic curve ",
-            "private and public key pair. Please ensure that the file ",
+            "❌ Error: Unable to parse the private key file in "
+            "'private_key_path'. User authentication requires elliptic curve "
+            "private and public key pair. Please ensure that the file "
             "path points to a valid private key file and try again.",
             fg=typer.colors.RED,
             bold=True,
@@ -282,9 +282,9 @@ def _try_setup_user_authentication(
             raise ValueError()
     except (ValueError, UnsupportedAlgorithm) as err:
         typer.secho(
-            "❌ Error: Unable to parse the public key file in ",
-            "'public_key_path'. User authentication requires elliptic curve ",
-            "private and public key pair. Please ensure that the file ",
+            "❌ Error: Unable to parse the public key file in "
+            "'public_key_path'. User authentication requires elliptic curve "
+            "private and public key pair. Please ensure that the file "
             "path points to a valid public key file and try again.",
             fg=typer.colors.RED,
             bold=True,
@@ -299,9 +299,9 @@ def _try_setup_user_authentication(
             raise ValueError()
     except (ValueError, UnsupportedAlgorithm) as err:
         typer.secho(
-            "❌ Error: Unable to parse the superexec public key file in ",
-            "'public_key'. User authentication requires elliptic curve ",
-            "private and public key pair. Please ensure that the file ",
+            "❌ Error: Unable to parse the superexec public key file in "
+            "'public_key'. User authentication requires elliptic curve "
+            "private and public key pair. Please ensure that the file "
             "path points to a valid public key file and try again.",
             fg=typer.colors.RED,
             bold=True,
