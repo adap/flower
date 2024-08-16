@@ -74,10 +74,15 @@ def get_project_config(project_dir: Union[str, Path]) -> Dict[str, Any]:
     return config
 
 
-def _fuse_dicts(
+def fuse_dicts(
     main_dict: UserConfig,
     override_dict: UserConfig,
 ) -> UserConfig:
+    """Merge a config with the overrides.
+
+    Remove the nesting by adding the nested keys as prefixes separated by dots, and fuse
+    it with the override dict.
+    """
     fused_dict = main_dict.copy()
 
     for key, value in override_dict.items():
@@ -96,7 +101,7 @@ def get_fused_config_from_dir(
     )
     flat_default_config = flatten_dict(default_config)
 
-    return _fuse_dicts(flat_default_config, override_config)
+    return fuse_dicts(flat_default_config, override_config)
 
 
 def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> UserConfig:
