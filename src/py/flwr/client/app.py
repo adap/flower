@@ -288,7 +288,9 @@ def start_client_internal(
 
         load_client_app_fn = _load_client_app
 
-    if isolate and supernode_address is not None:
+    if isolate:
+        if supernode_address is None:
+            raise ValueError("`supernode_address` required when `isolate` is set")
         _clientappio_grpc_server, clientappio_servicer = run_clientappio_api_grpc(
             address=supernode_address
         )
