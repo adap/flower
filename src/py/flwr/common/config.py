@@ -179,8 +179,6 @@ def parse_config_args(
     for config_line in config:
         if config_line:
             matches = pattern.findall(config_line)
-            for key, value in matches:
-                overrides[key] = value
 
             if (
                 len(matches) == 1
@@ -190,7 +188,7 @@ def parse_config_args(
                 with Path(matches[0][0]).open("rb") as config_file:
                     overrides = flatten_dict(tomli.load(config_file))
             else:
-                toml_str = "\n".join(f"{k} = {v}" for k, v in overrides.items())
+                toml_str = "\n".join(f"{k} = {v}" for k, v in matches)
                 overrides.update(tomli.loads(toml_str))
 
     return overrides
