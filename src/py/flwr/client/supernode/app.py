@@ -37,9 +37,9 @@ from flwr.common.constant import (
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature
 
-from ..app import _start_client_internal
-from ..process.process import _run_clientapp
-from ..process.utils import _get_load_client_app_fn
+from ..app import start_client_internal
+from ..process.process import run_clientapp
+from ..process.utils import get_load_client_app_fn
 
 ADDRESS_FLEET_API_GRPC_RERE = "0.0.0.0:9092"
 
@@ -55,7 +55,7 @@ def run_supernode() -> None:
     _warn_deprecated_server_arg(args)
 
     root_certificates = _get_certificates(args)
-    load_fn = _get_load_client_app_fn(
+    load_fn = get_load_client_app_fn(
         default_app_ref="",
         app_path=args.app,
         flwr_dir=args.flwr_dir,
@@ -63,7 +63,7 @@ def run_supernode() -> None:
     )
     authentication_keys = _try_setup_client_authentication(args)
 
-    _start_client_internal(
+    start_client_internal(
         server_address=args.superlink,
         load_client_app_fn=load_fn,
         transport=args.transport,
@@ -93,14 +93,14 @@ def run_client_app() -> None:
     _warn_deprecated_server_arg(args)
 
     root_certificates = _get_certificates(args)
-    load_fn = _get_load_client_app_fn(
+    load_fn = get_load_client_app_fn(
         default_app_ref=getattr(args, "client-app"),
         app_path=args.dir,
         multi_app=False,
     )
     authentication_keys = _try_setup_client_authentication(args)
 
-    _start_client_internal(
+    start_client_internal(
         server_address=args.superlink,
         node_config=parse_config_args([args.node_config]),
         load_client_app_fn=load_fn,
@@ -137,7 +137,7 @@ def flwr_clientapp() -> None:
         args.address,
         args.token,
     )
-    _run_clientapp(address=args.address, token=int(args.token))
+    run_clientapp(address=args.address, token=int(args.token))
 
 
 def _warn_deprecated_server_arg(args: argparse.Namespace) -> None:

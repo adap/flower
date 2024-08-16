@@ -43,7 +43,7 @@ from flwr.proto.clientappio_pb2 import (
 )
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 
-from .utils import _get_load_client_app_fn
+from .utils import get_load_client_app_fn
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
@@ -51,7 +51,7 @@ def on_channel_state_change(channel_connectivity: str) -> None:
     log(DEBUG, channel_connectivity)
 
 
-def _run_clientapp(  # pylint: disable=R0914
+def run_clientapp(  # pylint: disable=R0914
     address: str,
     token: int,
 ) -> None:
@@ -76,7 +76,7 @@ def _run_clientapp(  # pylint: disable=R0914
         # Pull Message, Context, and Run from SuperNode
         message, context, run = pull_message(stub=stub, token=token)
 
-        load_client_app_fn = _get_load_client_app_fn(
+        load_client_app_fn = get_load_client_app_fn(
             default_app_ref="",
             app_path=None,
             multi_app=True,
