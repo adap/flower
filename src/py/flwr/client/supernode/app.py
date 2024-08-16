@@ -28,7 +28,7 @@ from cryptography.hazmat.primitives.serialization import (
 )
 
 from flwr.common import EventType, event
-from flwr.common.config import get_flwr_dir, parse_config_args
+from flwr.common.config import parse_config_args
 from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
