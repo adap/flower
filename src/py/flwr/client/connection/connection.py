@@ -110,4 +110,3 @@ class Connection(ABC):
         exc_tb: TracebackType,
     ) -> None:
         """Exit from the context."""
-        pass

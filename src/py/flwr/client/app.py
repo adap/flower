@@ -336,6 +336,7 @@ def _start_client_internal(
             root_certificates,
             authentication_keys,
         ) as conn:
+            # TODO: remove this line
             print(f"type: {connection}, object: {conn}")
             assert isinstance(conn, Connection)
             # Register node when connecting the first time
@@ -575,7 +576,7 @@ def start_numpy_client(
 
 def _init_connection(
     transport: Optional[str], server_address: str
-) -> Tuple[Connection, str, Type[Exception]]:
+) -> Tuple[Type[Connection], str, Type[Exception]]:
     # Parse IP address
     parsed_address = parse_address(server_address)
     if not parsed_address:
@@ -588,9 +589,10 @@ def _init_connection(
         transport = TRANSPORT_TYPE_GRPC_BIDI
 
     # Use grpc-rere/grpc-adapter/rest/grpc-bidi transport layer
+    connection: Optional[Type[Connection]] = None
     if transport == TRANSPORT_TYPE_REST:
         try:
-            from requests.exceptions import ConnectionError as RequestsConnectionError
+            from requests.exceptions import RequestException
 
             from .connection.rest_connection import RestConnection
         except ModuleNotFoundError:
@@ -600,7 +602,7 @@ def _init_connection(
                 "When using the REST API, please provide `https://` or "
                 "`http://` before the server address (e.g. `http://127.0.0.1:8080`)"
             )
-        connection, error_type = RestConnection, RequestsConnectionError
+        connection, error_type = RestConnection, RequestException
     elif transport == TRANSPORT_TYPE_GRPC_RERE:
         connection, error_type = GrpcRereConnection, RpcError
     elif transport == TRANSPORT_TYPE_GRPC_ADAPTER:

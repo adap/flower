@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Connection for a rest channel to the SuperLink."""
+"""Connection for a REST request-response channel to the SuperLink."""
 
 
 from __future__ import annotations
@@ -45,6 +45,7 @@ from .grpc_rere_connection import GrpcRereConnection
 
 try:
     import requests
+    from requests.exceptions import HTTPError, InvalidHeader
 except ModuleNotFoundError:
     sys.exit(MISSING_EXTRA_REST)
 
@@ -100,7 +101,7 @@ class RestFleetAPI(FleetAPI):
 
     def _request(
         self, req: GrpcMessage, res_type: type[T], api_path: str, timeout: float | None
-    ) -> T | None:
+    ) -> T:
         # Serialize the request
         req_bytes = req.SerializeToString()
 
@@ -121,21 +122,23 @@ class RestFleetAPI(FleetAPI):
 
         # Check status code and headers
         if res.status_code != 200:
-            return None
+            raise HTTPError(f"Unexpected status code: {res.status_code}")
         if "content-type" not in res.headers:
             log(
                 WARN,
                 "[Node] POST /%s: missing header `Content-Type`",
                 api_path,
             )
-            return None
+            raise InvalidHeader("Missing `Content-Type` header in the response")
         if res.headers["content-type"] != "application/protobuf":
             log(
                 WARN,
                 "[Node] POST /%s: header `Content-Type` has wrong value",
                 api_path,
             )
-            return None
+            raise InvalidHeader(
+                "`Content-Type` header has wrong value, expected `application/protobuf`"
+            )
 
         # Deserialize ProtoBuf from bytes
         grpc_res = res_type()
