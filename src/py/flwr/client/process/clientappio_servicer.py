@@ -110,6 +110,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
                 message=message_from_proto(request.message),
                 context=context_from_proto(request.context),
             )
+
             # Set status
             code = typing.ClientAppOutputCode.SUCCESS
             status = typing.ClientAppOutputStatus(code=code, message="Success")
