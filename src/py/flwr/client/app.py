@@ -26,6 +26,8 @@ import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 from grpc import RpcError
 
+from flwr.cli.config_utils import get_fab_metadata
+from flwr.cli.install import install_from_fab
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.typing import ClientFnExt
@@ -339,7 +341,7 @@ def start_client_internal(
             root_certificates,
             authentication_keys,
         ) as conn:
-            receive, send, create_node, delete_node, get_run, _ = conn
+            receive, send, create_node, delete_node, get_run, get_fab = conn
 
             # Register node when connecting the first time
             if node_state is None:
@@ -406,9 +408,16 @@ def start_client_internal(
                         else:
                             runs[run_id] = Run(run_id, "", "", "", {})
 
+                    run: Run = runs[run_id]
+                    if get_fab is not None and run.fab_hash:
+                        fab = get_fab(run.fab_hash)
+                        install_from_fab(fab.content, flwr_path, True)
+                    else:
+                        fab = None
+
                     # Register context for this run
                     node_state.register_context(
-                        run_id=run_id, run=runs[run_id], flwr_path=flwr_path
+                        run_id=run_id, run=run, flwr_path=flwr_path
                     )
 
                     # Retrieve context for this run
@@ -423,10 +432,12 @@ def start_client_internal(
                     # Handle app loading and task message
                     try:
                         # Load ClientApp instance
-                        run: Run = runs[run_id]
-                        client_app: ClientApp = load_client_app_fn(
-                            run.fab_id, run.fab_version
-                        )
+                        if fab:
+                            fab_id, fab_version = get_fab_metadata(fab.content)
+                        else:
+                            fab_id, fab_version = run.fab_id, run.fab_version
+
+                        client_app: ClientApp = load_client_app_fn(fab_id, fab_version)
 
                         # Execute ClientApp
                         reply_message = client_app(message=message, context=context)
