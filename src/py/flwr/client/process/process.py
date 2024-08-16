@@ -97,9 +97,7 @@ def _run_background_client(  # pylint: disable=R0914
             reason = str(type(ex)) + ":<'" + str(ex) + "'>"
             exc_entity = "ClientApp"
             if isinstance(ex, LoadClientAppError):
-                reason = (
-                    "An exception was raised when attempting to load " "`ClientApp`"
-                )
+                reason = "An exception was raised when attempting to load `ClientApp`"
                 e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
 
             log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
