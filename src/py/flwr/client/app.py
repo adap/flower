@@ -46,7 +46,7 @@ from flwr.common.constant import (
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
-from flwr.common.typing import Run, UserConfig
+from flwr.common.typing import Fab, Run, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.server.superlink.fleet.grpc_bidi.grpc_server import generic_create_grpc_server
 from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
@@ -57,10 +57,13 @@ from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
 from .node_state import NodeState
 from .numpy_client import NumPyClient
-from .process.clientappio_servicer import ClientAppIoServicer
+from .process.clientappio_servicer import ClientAppIoInputs, ClientAppIoServicer
 
-CLIENTAPPIO_PORT = 9094
-ADDRESS_CLIENTAPPIO_API_GRPC_RERE = "0.0.0.0"
+ADDRESS_CLIENTAPPIO_API_GRPC_RERE = "0.0.0.0:9094"
+
+_CLIENTAPPIO_ADDRESS = ADDRESS_CLIENTAPPIO_API_GRPC_RERE.rsplit(":", maxsplit=1)[0]
+_CLIENTAPPIO_PORT = ADDRESS_CLIENTAPPIO_API_GRPC_RERE.rsplit(":", maxsplit=1)[-1]
+CLIENTAPPIO_PORT = int(ADDRESS_CLIENTAPPIO_API_GRPC_RERE.rsplit(":", maxsplit=1)[-1])
 
 
 def find_free_port(start_port):
@@ -75,8 +78,8 @@ def find_free_port(start_port):
                 port += 1
 
 
-CLIENTAPPIO_PORT_FREE = find_free_port(CLIENTAPPIO_PORT)
-ADDRESS_CLIENTAPPIO_API_GRPC_RERE += f":{CLIENTAPPIO_PORT_FREE}"
+_CLIENTAPPIO_PORT_FREE = find_free_port(_CLIENTAPPIO_PORT)
+ADDRESS_CLIENTAPPIO_API_GRPC_RERE = _CLIENTAPPIO_ADDRESS + _CLIENTAPPIO_PORT_FREE
 
 
 def _check_actionable_client(
@@ -185,7 +188,7 @@ def start_client(
     >>> )
     """
     event(EventType.START_CLIENT_ENTER)
-    _start_client_internal(
+    start_client_internal(
         server_address=server_address,
         node_config={},
         load_client_app_fn=None,
@@ -206,7 +209,7 @@ def start_client(
 # pylint: disable=too-many-branches
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
-def _start_client_internal(
+def start_client_internal(
     *,
     server_address: str,
     node_config: UserConfig,
@@ -304,7 +307,7 @@ def _start_client_internal(
         # Start gRPC server
         # `_clientappio_grpc_server` must be returned for the
         # grpc.Server to be created and persisted.
-        clientappio_servicer, _clientappio_grpc_server = _run_clientappio_api_grpc(
+        _clientappio_grpc_server, clientappio_servicer = run_clientappio_api_grpc(
             address=ADDRESS_CLIENTAPPIO_API_GRPC_RERE
         )
 
@@ -373,7 +376,7 @@ def _start_client_internal(
             root_certificates,
             authentication_keys,
         ) as conn:
-            receive, send, create_node, delete_node, get_run = conn
+            receive, send, create_node, delete_node, get_run, _ = conn
 
             # Register node when connecting the first time
             if node_state is None:
@@ -438,7 +441,7 @@ def _start_client_internal(
                             runs[run_id] = get_run(run_id)
                         # If get_run is None, i.e., in grpc-bidi mode
                         else:
-                            runs[run_id] = Run(run_id, "", "", {})
+                            runs[run_id] = Run(run_id, "", "", "", {})
 
                     # Register context for this run
                     node_state.register_context(
@@ -462,11 +465,13 @@ def _start_client_internal(
                             token: int = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
 
                             # Share Message and Context with servicer
-                            clientappio_servicer.set_object(
-                                message=message,
-                                context=context,
-                                run=run,
-                                token=token,
+                            clientappio_servicer.set_inputs(
+                                ClientAppIoInputs(
+                                    message=message,
+                                    context=context,
+                                    run=run,
+                                    token=token,
+                                )
                             )
                             # Run ClientApp
                             verbose = True
@@ -483,7 +488,8 @@ def _start_client_internal(
                                 stderr=None if verbose else subprocess.DEVNULL,
                                 check=True,
                             )
-                            reply_message, context = clientappio_servicer.get_object()
+                            outputs = clientappio_servicer.get_outputs()
+                            reply_message, context = outputs.message, outputs.context
                         else:
                             # Load ClientApp instance
                             client_app: ClientApp = load_client_app_fn(
@@ -674,6 +680,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
                 Optional[Callable[[], Optional[int]]],
                 Optional[Callable[[], None]],
                 Optional[Callable[[int], Run]],
+                Optional[Callable[[str], Fab]],
             ]
         ],
     ],
@@ -736,10 +743,10 @@ class _AppStateTracker:
         signal.signal(signal.SIGTERM, signal_handler)
 
 
-def _run_clientappio_api_grpc(
-    address: str = "0.0.0.0:9094",
-) -> tuple[grpc.Server, grpc.Server]:
-    """Run ClientAppIo API (gRPC-rere)."""
+def run_clientappio_api_grpc(
+    address: str = ADDRESS_CLIENTAPPIO_API_GRPC_RERE,
+) -> Tuple[grpc.Server, ClientAppIoServicer]:
+    """Run ClientAppIo API gRPC server."""
     clientappio_servicer: grpc.Server = ClientAppIoServicer()
     clientappio_add_servicer_to_server_fn = add_ClientAppIoServicer_to_server
     clientappio_grpc_server = generic_create_grpc_server(
@@ -752,4 +759,4 @@ def _run_clientappio_api_grpc(
     )
     log(INFO, "Starting Flower ClientAppIo gRPC server on %s", address)
     clientappio_grpc_server.start()
-    return clientappio_servicer, clientappio_grpc_server
+    return clientappio_grpc_server, clientappio_servicer
