@@ -15,6 +15,7 @@
 """Flower client app."""
 
 import signal
+import socket
 import subprocess
 import sys
 import time
@@ -286,12 +287,19 @@ def start_client_internal(
 
         load_client_app_fn = _load_client_app
 
-    if isolate:
-        # Start gRPC server
-        # `_clientappio_grpc_server` must be returned for the grpc.Server to be created
-        _clientappio_grpc_server, clientappio_servicer = run_clientappio_api_grpc(
-            address=supernode_address
-        )
+    if isolate and supernode_address is not None:
+        _host, _port = supernode_address.split(":")
+        if is_port_free(_host, int(_port)):
+            # Start gRPC server
+            # `_clientappio_grpc_server` must be returned for the grpc.Server to be created
+            _clientappio_grpc_server, clientappio_servicer = run_clientappio_api_grpc(
+                address=supernode_address
+            )
+        else:
+            raise ValueError(
+                f"Port {_port} is in use at host {_host}. Specify a different "
+                "port for the ClientAppIo server to start."
+            )
 
     # At this point, only `load_client_app_fn` should be used
     # Both `client` and `client_fn` must not be used directly
@@ -442,7 +450,7 @@ def start_client_internal(
                     # Handle app loading and task message
                     try:
                         run: Run = runs[run_id]
-                        if isolate:
+                        if isolate and supernode_address is not None:
                             # Generate SuperNode token
                             token: int = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
 
@@ -740,3 +748,12 @@ def run_clientappio_api_grpc(address: str) -> Tuple[grpc.Server, ClientAppIoServ
     log(INFO, "Starting Flower ClientAppIo gRPC server on %s", address)
     clientappio_grpc_server.start()
     return clientappio_grpc_server, clientappio_servicer
+
+
+def is_port_free(host: str, port: int) -> bool:
+    """Checks whether a specific port is free (not in use) on the specified host."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        # Attempt to connect to the specified host and port
+        result = sock.connect_ex((host, port))
+        # If connect_ex returns 0, the port is in use; otherwise, it's free
+        return result != 0
