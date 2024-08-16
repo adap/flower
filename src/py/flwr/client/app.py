@@ -336,9 +336,6 @@ def _start_client_internal(
             root_certificates,
             authentication_keys,
         ) as conn:
-            # TODO: remove this line
-            print(f"type: {connection}, object: {conn}")
-            assert isinstance(conn, Connection)
             # Register node when connecting the first time
             if node_state is None:
                 # Call create_node fn to register node
