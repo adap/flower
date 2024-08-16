@@ -465,7 +465,8 @@ def start_client_internal(
                                     token=token,
                                 )
                             )
-                            # Run ClientApp
+
+                            # Run `ClientApp` in subprocess
                             command = [
                                 "flwr-clientapp",
                                 "--supernode",
