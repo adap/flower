@@ -47,6 +47,7 @@ from flwr.common.serde import (
     user_config_from_proto,
 )
 from flwr.common.typing import Fab, Run
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
@@ -250,10 +251,17 @@ class GrpcRereConnection(Connection):
             run_id,
             res.run.fab_id,
             res.run.fab_version,
+            res.run.fab_hash,
             user_config_from_proto(res.run.override_config),
         )
 
     def get_fab(self, fab_hash: str) -> Fab:
         """Get FAB file."""
         # Call FleetAPI
-        raise NotImplementedError
+        req = GetFabRequest(hash_str=fab_hash)
+        res: GetFabResponse = self.retrier.invoke(
+            self.api.GetFab,
+            request=req,
+        )
+
+        return Fab(res.fab.hash_str, res.fab.content)

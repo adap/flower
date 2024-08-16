@@ -389,7 +389,7 @@ def start_client_internal(
                     run_id = message.metadata.run_id
                     if run_id not in runs:
                         runs[run_id] = conn.get_run(run_id)
-                    
+
                     run: Run = runs[run_id]
                     if run.fab_hash:
                         fab = conn.get_fab(run.fab_hash)

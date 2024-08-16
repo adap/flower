@@ -218,7 +218,7 @@ class GrpcBidiConnection(Connection):
     def get_run(self, run_id: int) -> Run:
         """Get run info."""
         log(DEBUG, "GetRun API is not supported by GrpcBidiConnection.")
-        return Run(run_id, "", "", {})
+        return Run(run_id, "", "", "", {})
 
     def get_fab(self, fab_hash: str) -> Fab:
         """Get FAB file."""
