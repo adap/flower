@@ -104,7 +104,7 @@ class GrpcRereConnection(Connection):
     def api(self) -> FleetAPI:
         """The API proxy."""
         if isinstance(self.root_certificates, str):
-            root_cert = Path(self.root_certificates).read_bytes()
+            root_cert: bytes | None = Path(self.root_certificates).read_bytes()
         else:
             root_cert = self.root_certificates
         interceptors: Sequence[grpc.UnaryUnaryClientInterceptor] | None = None
