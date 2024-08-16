@@ -12,12 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower server interceptor tests."""
+"""Flower superexec interceptor tests."""
 
 
 import base64
 import unittest
-from typing import Optional
 from unittest.mock import MagicMock
 
 import grpc
@@ -36,29 +35,11 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StreamLogsResponse,
 )
 from flwr.superexec.exec_grpc import run_superexec_api_grpc
-from flwr.superexec.executor import Executor, RunTracker, UserConfig
-from flwr.superexec.simulation import SimulationEngine
 from flwr.superexec.superexec_interceptor import (
     _AUTH_TOKEN_HEADER,
     _PUBLIC_KEY_HEADER,
     SuperExecInterceptor,
 )
-
-
-class MockExecutor(Executor):
-    def set_config(
-        self,
-        config: UserConfig,
-    ) -> None:
-        """Mock set_config."""
-
-    def start_run(
-        self,
-        fab_file: bytes,
-        override_config: UserConfig,
-        federation_config: UserConfig,
-    ) -> Optional[RunTracker]:
-        """Mock start_run."""
 
 
 class TestSuperExecInterceptor(unittest.TestCase):  # pylint: disable=R0902
@@ -126,13 +107,6 @@ class TestSuperExecInterceptor(unittest.TestCase):  # pylint: disable=R0902
                 (_PUBLIC_KEY_HEADER, public_key_bytes),
                 (_AUTH_TOKEN_HEADER, hmac_value),
             ),
-        )
-
-        expected_metadata = (
-            _PUBLIC_KEY_HEADER,
-            base64.urlsafe_b64encode(
-                public_key_to_bytes(self._superexec_public_key)
-            ).decode(),
         )
 
         # Assert
