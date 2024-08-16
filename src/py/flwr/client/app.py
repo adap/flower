@@ -449,7 +449,6 @@ def start_client_internal(
 
                     # Handle app loading and task message
                     try:
-                        run: Run = runs[run_id]
                         if isolate and supernode_address is not None:
                             # Generate SuperNode token
                             token: int = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
