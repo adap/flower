@@ -60,6 +60,9 @@ def _check_value(value: ConfigsRecordValues) -> None:
 class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
     """Configs record.
 
+    A `ConfigsRecord` is a Python dictionary designed to ensure that 
+    each key-value pair adheres to specified data types.
+    
     Parameters
     ----------
     configs_dict : Optional[Dict[str, ConfigsRecordValues]]
@@ -84,7 +87,7 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
 
     >>> from flwr.common import ConfigsRecord
     >>>
-    >>> # A ConfigsRecord behaves like a Python dictionary
+    >>> # A `ConfigsRecord` is a specialized Python dictionary
     >>> record = ConfigsRecord({"accuracy": 0.94})
     >>> # You can add more content to an existing record
     >>> record["loss"] = 0.01

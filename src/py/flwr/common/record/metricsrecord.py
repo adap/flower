@@ -60,8 +60,8 @@ def _check_value(value: MetricsRecordValues) -> None:
 class MetricsRecord(TypedDict[str, MetricsRecordValues]):
     """Metrics recod.
 
-    A `MetricsRecord` behaves just like a Python dictionary that also
-    checks that the types of values and keys used match the specification.
+    A `MetricsRecord` is a Python dictionary designed to ensure that 
+    each key-value pair adheres to specified data types.
 
     Parameters
     ----------
@@ -82,7 +82,7 @@ class MetricsRecord(TypedDict[str, MetricsRecordValues]):
 
     >>> from flwr.common import MetricsRecord
     >>>
-    >>> # A MetricsRecord behaves like a Python dictionary
+    >>> # A `MetricsRecord` is a specialized Python dictionary
     >>> record = MetricsRecord({"accuracy": 0.94})
     >>> # You can add more content to an existing record
     >>> record["loss"] = 0.01
