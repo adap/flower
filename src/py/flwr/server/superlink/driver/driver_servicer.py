@@ -182,13 +182,12 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
     def GetFab(
         self, request: GetFabRequest, context: grpc.ServicerContext
     ) -> GetFabResponse:
-        """Get run information."""
+        """Get FAB from Ffs."""
         log(DEBUG, "DriverServicer.GetFab")
 
         ffs: Ffs = self.ffs_factory.ffs()
         fab = Fab(request.hash_str, ffs.get(request.hash_str)[0])
 
-        # Retrieve run information
         return GetFabResponse(fab=fab_to_proto(fab))
 
 
