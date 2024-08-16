@@ -164,7 +164,7 @@ def start_client(
     >>> )
     """
     event(EventType.START_CLIENT_ENTER)
-    _start_client_internal(
+    start_client_internal(
         server_address=server_address,
         node_config={},
         load_client_app_fn=None,
@@ -185,7 +185,7 @@ def start_client(
 # pylint: disable=too-many-branches
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
-def _start_client_internal(
+def start_client_internal(
     *,
     server_address: str,
     node_config: UserConfig,
