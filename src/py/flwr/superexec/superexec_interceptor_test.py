@@ -34,6 +34,7 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StreamLogsRequest,
     StreamLogsResponse,
 )
+from flwr.proto.fab_pb2 import Fab  # pylint: disable=E0611
 from flwr.superexec.exec_grpc import run_superexec_api_grpc
 from flwr.superexec.superexec_interceptor import (
     _AUTH_TOKEN_HEADER,
@@ -87,7 +88,7 @@ class TestSuperExecInterceptor(unittest.TestCase):  # pylint: disable=R0902
         """Test superexec interceptor for creating node."""
         # Prepare
         request = StartRunRequest(
-            fab_file=b"", override_config=None, federation_config=None
+            fab=Fab(hash_str="", content=b""), override_config=None, federation_config=None
         )
         public_key_bytes = base64.urlsafe_b64encode(
             public_key_to_bytes(self._user_public_key)
@@ -121,7 +122,7 @@ class TestSuperExecInterceptor(unittest.TestCase):  # pylint: disable=R0902
             public_key_to_bytes(user_public_key)
         )
         request = StartRunRequest(
-            fab_file=b"", override_config=None, federation_config=None
+            fab=Fab(hash_str="", content=b""), override_config=None, federation_config=None
         )
         shared_secret = generate_shared_key(
             self._user_private_key,
@@ -134,9 +135,7 @@ class TestSuperExecInterceptor(unittest.TestCase):  # pylint: disable=R0902
         # Execute & Assert
         with self.assertRaises(grpc.RpcError):
             self._start_run.with_call(
-                request=StartRunRequest(
-                    fab_file=b"", override_config=None, federation_config=None
-                ),
+                request=request,
                 metadata=(
                     (_PUBLIC_KEY_HEADER, public_key_bytes),
                     (_AUTH_TOKEN_HEADER, hmac_value),
