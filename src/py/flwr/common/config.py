@@ -15,6 +15,7 @@
 """Provide functions for managing global Flower config."""
 
 import os
+import shlex
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, cast, get_args
 
@@ -165,7 +166,6 @@ def unflatten_dict(flat_dict: Dict[str, Any]) -> Dict[str, Any]:
 
 def parse_config_args(
     config: Optional[List[str]],
-    separator: str = " ",
 ) -> UserConfig:
     """Parse separator separated list of key-value pairs separated by '='."""
     overrides: UserConfig = {}
@@ -175,7 +175,7 @@ def parse_config_args(
 
     for config_line in config:
         if config_line:
-            overrides_list = config_line.split(separator)
+            overrides_list = shlex.split(config_line)
             if (
                 len(overrides_list) == 1
                 and "=" not in overrides_list

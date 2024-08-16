@@ -172,9 +172,7 @@ def _run_with_superexec(
 
     req = StartRunRequest(
         fab=fab_to_proto(fab),
-        override_config=user_config_to_proto(
-            parse_config_args(config_overrides, separator=" ")
-        ),
+        override_config=user_config_to_proto(parse_config_args(config_overrides)),
         federation_config=user_config_to_proto(
             flatten_dict(federation_config.get("options"))
         ),
@@ -215,7 +213,7 @@ def _run_without_superexec(
     ]
 
     if config_overrides:
-        command.extend(["--run-config", f"\"{' '.join(config_overrides)}\""])
+        command.extend(["--run-config", f"{' '.join(config_overrides)}"])
 
     # Run the simulation
     subprocess.run(
