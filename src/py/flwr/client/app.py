@@ -259,7 +259,7 @@ def start_client_internal(
     isolate : Optional[bool] (default: False)
         Whether to run `ClientApp` in a separate process. By default, this value is
         `False`, and the `ClientApp` runs in the same process as the SuperNode. If
-        `True` the `ClientApp` runs in an isolated process and communicates using
+        `True`, the `ClientApp` runs in an isolated process and communicates using
         gRPC at the address `supernode_address`.
     supernode_address : Optional[str] (default: `ADDRESS_CLIENTAPPIO_API_GRPC_RERE`)
         The SuperNode gRPC server address.
