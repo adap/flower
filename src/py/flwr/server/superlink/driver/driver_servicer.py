@@ -44,7 +44,7 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     Run,
 )
 from flwr.proto.task_pb2 import TaskRes  # pylint: disable=E0611
-from flwr.server.superlink.ffs import Ffs
+from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.state import State, StateFactory
 from flwr.server.utils.validator import validate_task_ins_or_res
@@ -182,14 +182,15 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
     def GetFab(
         self, request: GetFabRequest, context: grpc.ServicerContext
     ) -> GetFabResponse:
-        """Get run information."""
+        """Get FAB from Ffs."""
         log(DEBUG, "DriverServicer.GetFab")
 
         ffs: Ffs = self.ffs_factory.ffs()
-        fab = Fab(request.hash_str, ffs.get(request.hash_str)[0])
+        if result := ffs.get(request.hash_str):
+            fab = Fab(request.hash_str, result[0])
+            return GetFabResponse(fab=fab_to_proto(fab))
 
-        # Retrieve run information
-        return GetFabResponse(fab=fab_to_proto(fab))
+        raise ValueError(f"Found no FAB with hash: {request.hash_str}")
 
 
 def _raise_if(validation_error: bool, detail: str) -> None:
