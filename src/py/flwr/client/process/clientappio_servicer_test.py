@@ -153,7 +153,7 @@ class TestClientAppIoServicer(unittest.TestCase):
         self.mock_stub.PullClientAppInputs.return_value = mock_response
 
         # Execute
-        run, message, context = pull_message(self.mock_stub, token=456)
+        message, context, run = pull_message(self.mock_stub, token=456)
 
         # Assert
         self.mock_stub.PullClientAppInputs.assert_called_once()
