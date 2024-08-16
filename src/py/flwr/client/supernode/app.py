@@ -18,7 +18,7 @@ import argparse
 import sys
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
-from typing import Callable, Optional, Tuple
+from typing import Optional, Tuple
 
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -27,15 +27,8 @@ from cryptography.hazmat.primitives.serialization import (
     load_ssh_public_key,
 )
 
-from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import EventType, event
-from flwr.common.config import (
-    get_flwr_dir,
-    get_metadata_from_config,
-    get_project_config,
-    get_project_dir,
-    parse_config_args,
-)
+from flwr.common.config import get_flwr_dir, parse_config_args
 from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
@@ -43,9 +36,10 @@ from flwr.common.constant import (
 )
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature
-from flwr.common.object_ref import load_app, validate
 
 from ..app import _start_client_internal
+from ..process.process import _run_clientapp
+from ..process.utils import _get_load_client_app_fn
 
 ADDRESS_FLEET_API_GRPC_RERE = "0.0.0.0:9092"
 
@@ -143,6 +137,7 @@ def flwr_clientapp() -> None:
         args.address,
         args.token,
     )
+    _run_clientapp(address=args.address, token=int(args.token))
 
 
 def _warn_deprecated_server_arg(args: argparse.Namespace) -> None:
@@ -198,85 +193,6 @@ def _get_certificates(args: argparse.Namespace) -> Optional[bytes]:
             cert_path,
         )
     return root_certificates
-
-
-def _get_load_client_app_fn(
-    default_app_ref: str,
-    app_path: Optional[str],
-    multi_app: bool,
-    flwr_dir: Optional[str] = None,
-) -> Callable[[str, str], ClientApp]:
-    """Get the load_client_app_fn function.
-
-    If `multi_app` is True, this function loads the specified ClientApp
-    based on `fab_id` and `fab_version`. If `fab_id` is empty, a default
-    ClientApp will be loaded.
-
-    If `multi_app` is False, it ignores `fab_id` and `fab_version` and
-    loads a default ClientApp.
-    """
-    if not multi_app:
-        log(
-            DEBUG,
-            "Flower SuperNode will load and validate ClientApp `%s`",
-            default_app_ref,
-        )
-
-        valid, error_msg = validate(default_app_ref, project_dir=app_path)
-        if not valid and error_msg:
-            raise LoadClientAppError(error_msg) from None
-
-    def _load(fab_id: str, fab_version: str) -> ClientApp:
-        runtime_app_dir = Path(app_path if app_path else "").absolute()
-        # If multi-app feature is disabled
-        if not multi_app:
-            # Set app reference
-            client_app_ref = default_app_ref
-        # If multi-app feature is enabled but app directory is provided
-        elif app_path is not None:
-            config = get_project_config(runtime_app_dir)
-            this_fab_version, this_fab_id = get_metadata_from_config(config)
-
-            if this_fab_version != fab_version or this_fab_id != fab_id:
-                raise LoadClientAppError(
-                    f"FAB ID or version mismatch: Expected FAB ID '{this_fab_id}' and "
-                    f"FAB version '{this_fab_version}', but received FAB ID '{fab_id}' "
-                    f"and FAB version '{fab_version}'.",
-                ) from None
-
-            # log(WARN, "FAB ID is not provided; the default ClientApp will be loaded.")
-
-            # Set app reference
-            client_app_ref = config["tool"]["flwr"]["app"]["components"]["clientapp"]
-        # If multi-app feature is enabled
-        else:
-            try:
-                runtime_app_dir = get_project_dir(
-                    fab_id, fab_version, get_flwr_dir(flwr_dir)
-                )
-                config = get_project_config(runtime_app_dir)
-            except Exception as e:
-                raise LoadClientAppError("Failed to load ClientApp") from e
-
-            # Set app reference
-            client_app_ref = config["tool"]["flwr"]["app"]["components"]["clientapp"]
-
-        # Load ClientApp
-        log(
-            DEBUG,
-            "Loading ClientApp `%s`",
-            client_app_ref,
-        )
-        client_app = load_app(client_app_ref, LoadClientAppError, runtime_app_dir)
-
-        if not isinstance(client_app, ClientApp):
-            raise LoadClientAppError(
-                f"Attribute {client_app_ref} is not of type {ClientApp}",
-            ) from None
-
-        return client_app
-
-    return _load
 
 
 def _parse_args_run_supernode() -> argparse.ArgumentParser:
