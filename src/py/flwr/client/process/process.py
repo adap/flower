@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower background ClientApp."""
+"""Flower ClientApp process."""
 
 from logging import DEBUG, ERROR, INFO
 from typing import Tuple
@@ -46,7 +46,7 @@ from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 from .utils import _get_load_client_app_fn
 
 
-def _run_background_client(  # pylint: disable=R0914
+def _run_clientapp(  # pylint: disable=R0914
     address: str,
     token: int,
 ) -> None:
