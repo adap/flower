@@ -417,7 +417,7 @@ def start_client_internal(
 
                     # Register context for this run
                     node_state.register_context(
-                        run_id=run_id, run=runs[run_id], flwr_path=flwr_path
+                        run_id=run_id, run=run, flwr_path=flwr_path
                     )
 
                     # Retrieve context for this run
