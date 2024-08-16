@@ -64,7 +64,6 @@ def _run_clientapp(  # pylint: disable=R0914
     token : int
         Unique SuperNode token for ClientApp-SuperNode authentication
     """
-
     channel = create_channel(
         server_address=address,
         insecure=True,
