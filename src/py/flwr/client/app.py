@@ -22,6 +22,7 @@ from logging import ERROR, INFO, WARN
 from pathlib import Path
 from typing import Callable, ContextManager, Dict, Optional, Tuple, Type, Union
 
+import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 from grpc import RpcError
 
@@ -42,7 +43,9 @@ from flwr.common.constant import (
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
-from flwr.common.typing import Run, UserConfig
+from flwr.common.typing import Fab, Run, UserConfig
+from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
+from flwr.server.superlink.fleet.grpc_bidi.grpc_server import generic_create_grpc_server
 
 from .grpc_adapter_client.connection import grpc_adapter
 from .grpc_client.connection import grpc_connection
@@ -50,6 +53,9 @@ from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
 from .node_state import NodeState
 from .numpy_client import NumPyClient
+from .process.clientappio_servicer import ClientAppIoServicer
+
+ADDRESS_CLIENTAPPIO_API_GRPC_RERE = "0.0.0.0:9094"
 
 
 def _check_actionable_client(
@@ -333,7 +339,7 @@ def _start_client_internal(
             root_certificates,
             authentication_keys,
         ) as conn:
-            receive, send, create_node, delete_node, get_run = conn
+            receive, send, create_node, delete_node, get_run, _ = conn
 
             # Register node when connecting the first time
             if node_state is None:
@@ -398,7 +404,7 @@ def _start_client_internal(
                             runs[run_id] = get_run(run_id)
                         # If get_run is None, i.e., in grpc-bidi mode
                         else:
-                            runs[run_id] = Run(run_id, "", "", {})
+                            runs[run_id] = Run(run_id, "", "", "", {})
 
                     # Register context for this run
                     node_state.register_context(
@@ -606,6 +612,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
                 Optional[Callable[[], Optional[int]]],
                 Optional[Callable[[], None]],
                 Optional[Callable[[int], Run]],
+                Optional[Callable[[str], Fab]],
             ]
         ],
     ],
@@ -666,3 +673,22 @@ class _AppStateTracker:
 
         signal.signal(signal.SIGINT, signal_handler)
         signal.signal(signal.SIGTERM, signal_handler)
+
+
+def run_clientappio_api_grpc(
+    address: str = ADDRESS_CLIENTAPPIO_API_GRPC_RERE,
+) -> Tuple[grpc.Server, ClientAppIoServicer]:
+    """Run ClientAppIo API gRPC server."""
+    clientappio_servicer: grpc.Server = ClientAppIoServicer()
+    clientappio_add_servicer_to_server_fn = add_ClientAppIoServicer_to_server
+    clientappio_grpc_server = generic_create_grpc_server(
+        servicer_and_add_fn=(
+            clientappio_servicer,
+            clientappio_add_servicer_to_server_fn,
+        ),
+        server_address=address,
+        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
+    )
+    log(INFO, "Starting Flower ClientAppIo gRPC server on %s", address)
+    clientappio_grpc_server.start()
+    return clientappio_grpc_server, clientappio_servicer

@@ -14,18 +14,18 @@
 # ==============================================================================
 """Strategy that supports many univariate fitters from lifelines library."""
 
-from typing import Dict, List, Optional, Tuple, Union, Any
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-import numpy as np
 import flwr as fl
 import matplotlib.pyplot as plt
+import numpy as np
 from flwr.common import (
+    EvaluateIns,
+    EvaluateRes,
     FitIns,
+    FitRes,
     Parameters,
     Scalar,
-    EvaluateRes,
-    EvaluateIns,
-    FitRes,
     parameters_to_ndarrays,
 )
 from flwr.server.client_manager import ClientManager
