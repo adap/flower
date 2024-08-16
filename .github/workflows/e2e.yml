@@ -60,56 +60,56 @@ jobs:
     strategy:
       matrix:
         include:
-          - directory: bare-e2e
-            e2e: bare_e2e
+          - directory: e2e-bare
+            e2e: e2e_bare
 
-          - directory: bare-https-e2e
-            e2e: bare_https_e2e
+          - directory: e2e-bare-https
+            e2e: e2e_bare_https
 
-          - directory: bare-auth-e2e
-            e2e: bare_auth_e2e
+          - directory: e2e-bare-auth
+            e2e: e2e_bare_auth
 
-          - directory: jax-e2e
-            e2e: jax_e2e
+          - directory: e2e-jax
+            e2e: e2e_jax
 
-          - directory: pytorch-e2e
-            e2e: pytorch_e2e
+          - directory: e2e-pytorch
+            e2e: e2e_pytorch
             dataset: |
               from torchvision.datasets import CIFAR10
               CIFAR10('./data', download=True)
 
-          - directory: tensorflow-e2e
-            e2e: tensorflow_e2e
+          - directory: e2e-tensorflow
+            e2e: e2e_tensorflow
             dataset: |
               import tensorflow as tf
               tf.keras.datasets.cifar10.load_data()
 
-          - directory: opacus-e2e
-            e2e: opacus_e2e
+          - directory: e2e-opacus
+            e2e: e2e_opacus
             dataset: |
               from torchvision.datasets import CIFAR10
               CIFAR10('./data', download=True)
 
-          - directory: pytorch-lightning-e2e
-            e2e: pytorch_lightning_e2e
+          - directory: e2e-pytorch-lightning
+            e2e: e2e_pytorch_lightning
             dataset: |
               from torchvision.datasets import MNIST
               MNIST('./data', download=True)
 
-          - directory: scikit-learn-e2e
-            e2e: scikit_learn_e2e
+          - directory: e2e-scikit-learn
+            e2e: e2e_scikit_learn
             dataset: |
               import openml
               openml.datasets.get_dataset(554)
 
-          - directory: fastai-e2e
-            e2e: fastai_e2e
+          - directory: e2e-fastai
+            e2e: e2e_fastai
             dataset: |
               from fastai.vision.all import untar_data, URLs
               untar_data(URLs.MNIST)
 
-          - directory: pandas-e2e
-            e2e: pandas_e2e
+          - directory: e2e-pandas
+            e2e: e2e_pandas
             dataset: |
               from pathlib import Path
               from sklearn.datasets import load_iris
@@ -152,29 +152,29 @@ jobs:
         if: ${{ matrix.dataset }}
         run: python -c "${{ matrix.dataset }}"
       - name: Run edge client test
-        if: ${{ matrix.directory != 'bare-auth-e2e' }}
+        if: ${{ matrix.directory != 'e2e-bare-auth' }}
         working-directory: e2e/${{ matrix.directory }}/${{ matrix.e2e }}
         run: ./../../test_legacy.sh "${{ matrix.directory }}"
       - name: Run virtual client test
-        if: ${{ matrix.directory != 'bare-auth-e2e' }}
+        if: ${{ matrix.directory != 'e2e-bare-auth' }}
         run: python simulation.py
       - name: Run simulation engine test
-        if: ${{ matrix.directory == 'pytorch' || matrix.directory == 'tensorflow'}}
+        if: ${{ matrix.directory == 'e2e-pytorch' || matrix.directory == 'e2e-tensorflow'}}
         run: python simulation_next.py
       - name: Run driver test
-        if: ${{ matrix.directory != 'bare-auth-e2e' }}
+        if: ${{ matrix.directory != 'e2e-bare-auth' }}
         run: ./../test_superlink.sh "${{ matrix.directory }}"
       - name: Run driver test with REST
-        if: ${{ matrix.directory == 'bare' }}
+        if: ${{ matrix.directory == 'e2e-bare' }}
         run: ./../test_superlink.sh bare rest
       - name: Run driver test with SQLite database
-        if: ${{ matrix.directory == 'bare' }}
+        if: ${{ matrix.directory == 'e2e-bare' }}
         run: ./../test_superlink.sh bare sqlite
       - name: Run driver test with client authentication
-        if: ${{ matrix.directory == 'bare-auth-e2e' }}
+        if: ${{ matrix.directory == 'e2e-bare-auth' }}
         run: ./../test_superlink.sh bare client-auth
       - name: Run reconnection test with SQLite database
-        if: ${{ matrix.directory == 'bare' }}
+        if: ${{ matrix.directory == 'e2e-bare' }}
         run: ./../test_reconnection.sh sqlite
       - name: Cache save Python location
         id: cache-save-python

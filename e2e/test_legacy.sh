@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-if [ "$1" = "bare-https-e2e" ]; then
+if [ "$1" = "e2e-bare-https" ]; then
   ./../generate.sh
 fi
 

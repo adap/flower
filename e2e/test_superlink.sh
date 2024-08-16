@@ -2,7 +2,7 @@
 set -e
 
 case "$1" in
-  bare-https-e2e)
+  e2e-bare-https)
     ./generate.sh
     server_arg="--ssl-ca-certfile certificates/ca.crt --ssl-certfile certificates/server.pem --ssl-keyfile certificates/server.key"
     client_arg="--root-certificates certificates/ca.crt"
