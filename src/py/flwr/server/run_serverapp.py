@@ -49,7 +49,7 @@ ADDRESS_DRIVER_API = "0.0.0.0:9091"
 
 def run(
     driver: Driver,
-    server_app_dir: Optional[str],
+    server_app_dir: str,
     server_app_run_config: UserConfig,
     server_app_attr: Optional[str] = None,
     loaded_server_app: Optional[ServerApp] = None,
