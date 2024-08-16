@@ -125,7 +125,7 @@ def _run_with_superexec(
     app: Optional[Path],
     federation_config: Dict[str, Any],
     config_overrides: Optional[List[str]],
-) -> None:
+) -> None:  # pylint: disable=R0914
 
     def on_channel_state_change(channel_connectivity: str) -> None:
         """Log channel connectivity."""
