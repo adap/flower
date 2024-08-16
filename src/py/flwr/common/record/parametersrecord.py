@@ -149,6 +149,7 @@ class ParametersRecord(TypedDict[str, Array]):
     If you need finer control on how your arrays are serialized and deserialized, you
     can construct :code:`Array` objects directly like this:
 
+    >>> from flwr.common import Array
     >>> # Serialize your array and construct Array object
     >>> arr = Array(
     >>>         data=ndarray.tobytes(),
