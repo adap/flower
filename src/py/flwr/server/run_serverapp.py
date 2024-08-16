@@ -21,10 +21,10 @@ from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from typing import Optional
 
-from flwr.cli.config_utils import get_fab_config
+from flwr.cli.config_utils import get_fab_metadata
+from flwr.cli.install import install_from_fab
 from flwr.common import Context, EventType, RecordSet, event
 from flwr.common.config import (
-    fuse_dicts,
     get_flwr_dir,
     get_fused_config_from_dir,
     get_metadata_from_config,
@@ -166,6 +166,7 @@ def run_server_app() -> None:
             driver_service_address=args.superlink,
             root_certificates=root_certificates,
         )
+        flwr_dir = get_flwr_dir(args.flwr_dir)
         run_ = driver.run
         if run_.fab_hash:
             fab_req = GetFabRequest(hash_str=run_.fab_hash)
@@ -174,15 +175,13 @@ def run_server_app() -> None:
             if fab_res.fab.hash_str != run_.fab_hash:
                 raise ValueError("FAB hashes don't match.")
 
-            config = get_fab_config(fab_res.fab.content)
-            server_app_run_config = fuse_dicts(config, run_.override_config)
+            install_from_fab(fab_res.fab.content, flwr_dir, True)
+            fab_id, fab_version = get_fab_metadata(fab_res.fab.content)
         else:
-            flwr_dir = get_flwr_dir(args.flwr_dir)
-            app_path = str(get_project_dir(run_.fab_id, run_.fab_version, flwr_dir))
-            config = get_project_config(app_path)
-            server_app_run_config = get_fused_config_from_dir(
-                Path(app_path), driver.run.override_config
-            )
+            fab_id, fab_version = run_.fab_id, run_.fab_version
+
+        app_path = str(get_project_dir(fab_id, fab_version, flwr_dir))
+        config = get_project_config(app_path)
     else:
         # User provided `app_dir`, but not `--run-id`
         # Create run if run_id is not provided
@@ -201,11 +200,12 @@ def run_server_app() -> None:
         # Overwrite driver._run_id
         driver._run_id = res.run_id  # pylint: disable=W0212
 
-        server_app_run_config = get_fused_config_from_dir(
-            Path(app_path), driver.run.override_config
-        )
-
+    server_app_run_config = get_fused_config_from_dir(
+        Path(app_path), driver.run.override_config
+    )
     server_app_attr = config["tool"]["flwr"]["app"]["components"]["serverapp"]
+
+    log(DEBUG, "Flower will load ServerApp `%s` in %s", server_app_attr, app_path)
 
     log(
         DEBUG,

@@ -47,7 +47,7 @@ def test_multirun_in_node_state() -> None:
         run_id = task.run_id
 
         # Register
-        node_state.register_context(run_id=run_id, default_config={})
+        node_state.register_context(run_id=run_id)
 
         # Get run state
         context = node_state.retrieve_context(run_id=run_id)

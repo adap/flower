@@ -19,6 +19,7 @@ import sys
 import time
 from dataclasses import dataclass
 from logging import ERROR, INFO, WARN
+from pathlib import Path
 from typing import Callable, ContextManager, Dict, Optional, Tuple, Type, Union
 
 import grpc
@@ -26,6 +27,7 @@ from cryptography.hazmat.primitives.asymmetric import ec
 from grpc import RpcError
 
 from flwr.cli.config_utils import get_fab_config, get_fab_metadata
+from flwr.cli.install import install_from_fab
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.typing import ClientFnExt
@@ -201,6 +203,7 @@ def start_client_internal(
     ] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
+    flwr_path: Optional[Path] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -246,6 +249,8 @@ def start_client_internal(
         The maximum duration before the client stops trying to
         connect to the server in case of connection error.
         If set to None, there is no limit to the total time.
+    flwr_path: Optional[Path] (default: None)
+        The fully resolved path containing installed Flower Apps.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -406,14 +411,13 @@ def start_client_internal(
                     run: Run = runs[run_id]
                     if get_fab is not None and run.fab_hash:
                         fab = get_fab(run.fab_hash)
+                        install_from_fab(fab.content, flwr_path, True)
                     else:
                         fab = None
 
                     # Register context for this run
                     node_state.register_context(
-                        run_id=run_id,
-                        default_config=get_fab_config(fab.content) if fab else {},
-                        run=runs[run_id],
+                        run_id=run_id, run=runs[run_id], flwr_path=flwr_path
                     )
 
                     # Retrieve context for this run
