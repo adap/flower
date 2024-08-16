@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Connection for a gRPC request-response channel to the SuperLink."""
+"""Connection for a rest channel to the SuperLink."""
 
 
 from __future__ import annotations
@@ -60,8 +60,8 @@ PATH_GET_FAB: str = "/api/v0/fleet/get-fab"
 T = TypeVar("T", bound=GrpcMessage)
 
 
-class GrpcAdapterConnection(GrpcRereConnection):
-    """Grpc-adapter connection based on GrpcRereConnection."""
+class RestConnection(GrpcRereConnection):
+    """Rest connection based on GrpcRereConnection."""
 
     @property
     def api(self) -> FleetAPI:
@@ -88,9 +88,9 @@ class GrpcAdapterConnection(GrpcRereConnection):
 
 
 class RestFleetAPI(FleetAPI):
-    """Adapter class to send and receive gRPC messages via the ``GrpcAdapterStub``.
+    """Adapter class to send and receive gRPC messages via HTTP.
 
-    This class utilizes the ``GrpcAdapterStub`` to send and receive gRPC messages
+    This class utilizes the ``requests`` module to send and receive gRPC messages
     which are defined and used by the Fleet API, as defined in ``fleet.proto``.
     """
 

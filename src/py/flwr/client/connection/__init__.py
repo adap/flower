@@ -16,11 +16,15 @@
 
 
 from .connection import Connection
+from .grpc_adapter_connection import GrpcAdapterConnection
 from .grpc_bidi_connection import GrpcBidiConnection
 from .grpc_rere_connection import GrpcRereConnection
+from .rest_connection import RestConnection
 
 __all__ = [
     "Connection",
+    "GrpcAdapterConnection",
     "GrpcBidiConnection",
     "GrpcRereConnection",
+    "RestConnection",
 ]

@@ -20,7 +20,7 @@ import time
 from dataclasses import dataclass
 from logging import ERROR, INFO, WARN
 from pathlib import Path
-from typing import Callable, ContextManager, Dict, Optional, Tuple, Type, Union
+from typing import Callable, Dict, Optional, Tuple, Type, Union
 
 from cryptography.hazmat.primitives.asymmetric import ec
 from grpc import RpcError
@@ -28,7 +28,7 @@ from grpc import RpcError
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.typing import ClientFnExt
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, Message, event
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
@@ -42,10 +42,14 @@ from flwr.common.constant import (
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
-from flwr.common.typing import Fab, Run, UserConfig
+from flwr.common.typing import Run, UserConfig
 
-from .connection import Connection, GrpcBidiConnection, GrpcRereConnection
-from .grpc_adapter_client.connection import grpc_adapter
+from .connection import (
+    Connection,
+    GrpcAdapterConnection,
+    GrpcBidiConnection,
+    GrpcRereConnection,
+)
 from .message_handler.message_handler import handle_control_message
 from .node_state import NodeState
 from .numpy_client import NumPyClient
@@ -569,30 +573,9 @@ def start_numpy_client(
     )
 
 
-def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
-    Callable[
-        [
-            str,
-            bool,
-            RetryInvoker,
-            int,
-            Union[bytes, str, None],
-            Optional[Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]],
-        ],
-        ContextManager[
-            Tuple[
-                Callable[[], Optional[Message]],
-                Callable[[Message], None],
-                Optional[Callable[[], Optional[int]]],
-                Optional[Callable[[], None]],
-                Optional[Callable[[int], Run]],
-                Optional[Callable[[str], Fab]],
-            ]
-        ],
-    ],
-    str,
-    Type[Exception],
-]:
+def _init_connection(
+    transport: Optional[str], server_address: str
+) -> Tuple[Connection, str, Type[Exception]]:
     # Parse IP address
     parsed_address = parse_address(server_address)
     if not parsed_address:
@@ -604,12 +587,12 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
     if transport is None:
         transport = TRANSPORT_TYPE_GRPC_BIDI
 
-    # Use either gRPC bidirectional streaming or REST request/response
+    # Use grpc-rere/grpc-adapter/rest/grpc-bidi transport layer
     if transport == TRANSPORT_TYPE_REST:
         try:
             from requests.exceptions import ConnectionError as RequestsConnectionError
 
-            from .rest_client.connection import http_request_response
+            from .connection.rest_connection import RestConnection
         except ModuleNotFoundError:
             sys.exit(MISSING_EXTRA_REST)
         if server_address[:4] != "http":
@@ -617,11 +600,11 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
                 "When using the REST API, please provide `https://` or "
                 "`http://` before the server address (e.g. `http://127.0.0.1:8080`)"
             )
-        connection, error_type = http_request_response, RequestsConnectionError
+        connection, error_type = RestConnection, RequestsConnectionError
     elif transport == TRANSPORT_TYPE_GRPC_RERE:
         connection, error_type = GrpcRereConnection, RpcError
     elif transport == TRANSPORT_TYPE_GRPC_ADAPTER:
-        connection, error_type = grpc_adapter, RpcError
+        connection, error_type = GrpcAdapterConnection, RpcError
     elif transport == TRANSPORT_TYPE_GRPC_BIDI:
         connection, error_type = GrpcBidiConnection, RpcError
     else:
