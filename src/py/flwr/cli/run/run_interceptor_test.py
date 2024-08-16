@@ -19,7 +19,7 @@ import base64
 import threading
 import unittest
 from concurrent import futures
-from logging import DEBUG, INFO, WARN
+from logging import DEBUG
 from typing import Optional, Sequence, Tuple, Union
 
 import grpc
@@ -30,12 +30,8 @@ from flwr.cli.run.run_interceptor import (
     Request,
     RunInterceptor,
 )
-from flwr.client.grpc_rere_client.connection import grpc_request_response
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
-from flwr.common.message import Message, Metadata
-from flwr.common.record import RecordSet
-from flwr.common.retry_invoker import RetryInvoker, exponential
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     compute_hmac,
     generate_key_pairs,

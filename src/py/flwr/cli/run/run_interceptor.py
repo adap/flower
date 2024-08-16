@@ -17,7 +17,7 @@
 
 import base64
 import collections
-from typing import Any, Callable, Optional, Sequence, Tuple, Union
+from typing import Any, Callable, Union
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
