@@ -412,8 +412,12 @@ def start_client_internal(
                     if get_fab is not None and run.fab_hash:
                         fab = get_fab(run.fab_hash)
                         install_from_fab(fab.content, flwr_path, True)
+                        fab_id, fab_version = get_fab_metadata(fab.content)
                     else:
                         fab = None
+                        fab_id, fab_version = run.fab_id, run.fab_version
+
+                    run.fab_id, run.fab_version = fab_id, fab_version
 
                     # Register context for this run
                     node_state.register_context(
@@ -432,11 +436,6 @@ def start_client_internal(
                     # Handle app loading and task message
                     try:
                         # Load ClientApp instance
-                        if fab:
-                            fab_id, fab_version = get_fab_metadata(fab.content)
-                        else:
-                            fab_id, fab_version = run.fab_id, run.fab_version
-
                         client_app: ClientApp = load_client_app_fn(fab_id, fab_version)
 
                         # Execute ClientApp
