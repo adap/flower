@@ -103,10 +103,10 @@ class GrpcRereConnection(Connection):
     @property
     def api(self) -> FleetAPI:
         """The API proxy."""
-        if not isinstance(self.root_certificates, str):
-            root_cert = self.root_certificates
-        else:
+        if isinstance(self.root_certificates, str):
             root_cert = Path(self.root_certificates).read_bytes()
+        else:
+            root_cert = self.root_certificates
         interceptors: Sequence[grpc.UnaryUnaryClientInterceptor] | None = None
         if self.authentication_keys is not None:
             interceptors = AuthenticateClientInterceptor(*self.authentication_keys)
