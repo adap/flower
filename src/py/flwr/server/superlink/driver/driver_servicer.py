@@ -23,7 +23,8 @@ from uuid import UUID
 import grpc
 
 from flwr.common.logger import log
-from flwr.common.serde import user_config_from_proto, user_config_to_proto
+from flwr.common.serde import fab_to_proto, user_config_from_proto, user_config_to_proto
+from flwr.common.typing import Fab
 from flwr.proto import driver_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
@@ -43,7 +44,7 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     Run,
 )
 from flwr.proto.task_pb2 import TaskRes  # pylint: disable=E0611
-from flwr.server.superlink.ffs import Ffs
+from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.state import State, StateFactory
 from flwr.server.utils.validator import validate_task_ins_or_res
@@ -174,14 +175,22 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
                 fab_id=run.fab_id,
                 fab_version=run.fab_version,
                 override_config=user_config_to_proto(run.override_config),
+                fab_hash=run.fab_hash,
             )
         )
 
     def GetFab(
         self, request: GetFabRequest, context: grpc.ServicerContext
     ) -> GetFabResponse:
-        """Will be implemented later."""
-        raise NotImplementedError
+        """Get FAB from Ffs."""
+        log(DEBUG, "DriverServicer.GetFab")
+
+        ffs: Ffs = self.ffs_factory.ffs()
+        if result := ffs.get(request.hash_str):
+            fab = Fab(request.hash_str, result[0])
+            return GetFabResponse(fab=fab_to_proto(fab))
+
+        raise ValueError(f"Found no FAB with hash: {request.hash_str}")
 
 
 def _raise_if(validation_error: bool, detail: str) -> None:
