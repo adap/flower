@@ -38,7 +38,7 @@ from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature
 
 from ..app import _start_client_internal
-from ..process.process import _run_background_client
+from ..process.process import _run_clientapp
 from ..process.utils import _get_load_client_app_fn
 
 ADDRESS_FLEET_API_GRPC_RERE = "0.0.0.0:9092"
@@ -137,7 +137,7 @@ def flwr_clientapp() -> None:
         args.address,
         args.token,
     )
-    _run_background_client(address=args.address, token=int(args.token))
+    _run_clientapp(address=args.address, token=int(args.token))
 
 
 def _warn_deprecated_server_arg(args: argparse.Namespace) -> None:
