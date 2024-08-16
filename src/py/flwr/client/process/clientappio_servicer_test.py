@@ -31,12 +31,19 @@ from flwr.proto.clientappio_pb2 import PullClientAppInputsResponse
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.run_pb2 import Run as ProtoRun
 
+from .clientappio_servicer import (
+    ClientAppIoInputs,
+    ClientAppIoOutputs,
+    ClientAppIoServicer,
+)
 
-class TestGrpcClientAppIo(unittest.TestCase):
+
+class TestClientAppIoServicer(unittest.TestCase):
     """Tests for `ClientAppIoServicer` class."""
 
     def setUp(self) -> None:
         """Initialize."""
+        self.servicer = ClientAppIoServicer()
         self.maker = RecordMaker()
         self.mock_stub = Mock()
         self.patcher = patch(
@@ -47,6 +54,86 @@ class TestGrpcClientAppIo(unittest.TestCase):
     def tearDown(self) -> None:
         """Cleanup."""
         self.patcher.stop()
+
+    def test_set_inputs(self) -> None:
+        """Test setting ClientApp inputs."""
+        # Prepare
+        message = Message(
+            metadata=self.maker.metadata(),
+            content=self.maker.recordset(2, 2, 1),
+        )
+        context = Context(
+            node_id=1,
+            node_config={"nodeconfig1": 4.2},
+            state=self.maker.recordset(2, 2, 1),
+            run_config={"runconfig1": 6.1},
+        )
+        run = typing.Run(
+            run_id=1,
+            fab_id="lorem",
+            fab_version="ipsum",
+            fab_hash="dolor",
+            override_config=self.maker.user_config(),
+        )
+        client_input = ClientAppIoInputs(message, context, run, 1)
+        client_output = ClientAppIoOutputs(message, context)
+
+        # Execute and assert
+        # - when ClientAppIoInputs is not None, ClientAppIoOutputs is None
+        with self.assertRaises(ValueError):
+            self.servicer.clientapp_input = client_input
+            self.servicer.clientapp_output = None
+            self.servicer.set_inputs(client_input)
+
+        # Execute and assert
+        # - when ClientAppIoInputs is None, ClientAppIoOutputs is not None
+        with self.assertRaises(ValueError):
+            self.servicer.clientapp_input = None
+            self.servicer.clientapp_output = client_output
+            self.servicer.set_inputs(client_input)
+
+        # Execute and assert
+        # - when ClientAppIoInputs and ClientAppIoOutputs is not None
+        with self.assertRaises(ValueError):
+            self.servicer.clientapp_input = client_input
+            self.servicer.clientapp_output = client_output
+            self.servicer.set_inputs(client_input)
+
+        # Execute and assert
+        # - when ClientAppIoInputs is set at .clientapp_input
+        self.servicer.clientapp_input = None
+        self.servicer.clientapp_output = None
+        self.servicer.set_inputs(client_input)
+        assert client_input == self.servicer.clientapp_input
+
+    def test_get_outputs(self) -> None:
+        """Test getting ClientApp outputs."""
+        # Prepare
+        message = Message(
+            metadata=self.maker.metadata(),
+            content=self.maker.recordset(2, 2, 1),
+        )
+        context = Context(
+            node_id=1,
+            node_config={"nodeconfig1": 4.2},
+            state=self.maker.recordset(2, 2, 1),
+            run_config={"runconfig1": 6.1},
+        )
+        client_output = ClientAppIoOutputs(message, context)
+
+        # Execute and assert - when `ClientAppIoOutputs` is None
+        self.servicer.clientapp_output = None
+        with self.assertRaises(ValueError):
+            # `ClientAppIoOutputs` should not be None
+            _ = self.servicer.get_outputs()
+
+        # Execute and assert - when `ClientAppIoOutputs` is not None
+        self.servicer.clientapp_output = client_output
+        output = self.servicer.get_outputs()
+        assert isinstance(output, ClientAppIoOutputs)
+        assert output == client_output
+        assert self.servicer.clientapp_input is None
+        assert self.servicer.clientapp_output is None
 
     def test_pull_clientapp_inputs(self) -> None:
         """Test pulling messages from SuperNode."""
@@ -95,7 +182,10 @@ class TestGrpcClientAppIo(unittest.TestCase):
         self.mock_stub.PushClientAppOutputs.return_value = mock_response
 
         # Execute
-        res = push_message(self.mock_stub, token=789, message=message, context=context)
+        res = push_message(
+            stub=self.mock_stub, token=789, message=message, context=context
+        )
+        print(res.status)
         status = clientappstatus_from_proto(res.status)
 
         # Assert
