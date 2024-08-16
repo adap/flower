@@ -291,7 +291,8 @@ def start_client_internal(
         _host, _port = supernode_address.split(":")
         if is_port_free(_host, int(_port)):
             # Start gRPC server
-            # `_clientappio_grpc_server` must be returned for the grpc.Server to be created
+            # `_clientappio_grpc_server` must be returned for the grpc.Server
+            # to be created
             _clientappio_grpc_server, clientappio_servicer = run_clientappio_api_grpc(
                 address=supernode_address
             )
