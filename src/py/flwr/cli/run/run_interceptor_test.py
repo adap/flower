@@ -164,7 +164,8 @@ class TestRunInterceptor(unittest.TestCase):
         # Execute
         self.stub.StartRun(req)
 
-        assert self._servicer.received_client_metadata() is not None
+        received_metadata = self._servicer.received_client_metadata()
+        assert received_metadata is not None
 
         shared_secret = generate_shared_key(
             self._servicer.superexec_private_key, self._user_public_key
@@ -173,11 +174,9 @@ class TestRunInterceptor(unittest.TestCase):
             compute_hmac(shared_secret, self._servicer.received_message_bytes())
         )
         actual_public_key = _get_value_from_tuples(
-            _PUBLIC_KEY_HEADER, self._servicer.received_client_metadata()
+            _PUBLIC_KEY_HEADER, received_metadata
         )
-        actual_hmac = _get_value_from_tuples(
-            _AUTH_TOKEN_HEADER, self._servicer.received_client_metadata()
-        )
+        actual_hmac = _get_value_from_tuples(_AUTH_TOKEN_HEADER, received_metadata)
         expected_public_key = base64.urlsafe_b64encode(
             public_key_to_bytes(self._user_public_key)
         )
