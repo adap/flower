@@ -104,14 +104,15 @@ class ParametersRecord(TypedDict[str, Array]):
 
     Examples
     --------
-    The usage of `ParametersRecord` is envisioned for storing data arrays (e.g.
+    The usage of :code:`ParametersRecord` is envisioned for storing data arrays (e.g.
     parameters of a machine learning model). These first need to be serialized into
-    a `flwr.common.Array` data structure.
+    a :code:`flwr.common.Array` data structure.
 
     Let's see some examples:
 
-    >>> from numpy import np
+    >>> import numpy as np
     >>> from flwr.common import ParametersRecord
+    >>> from flwr.common import array_from_numpy
     >>>
     >>> # Let's create a simple NumPy array
     >>> arr_np = np.random.randn(3, 3)
@@ -122,32 +123,45 @@ class ParametersRecord(TypedDict[str, Array]):
     >>>      [-0.10758364,  1.97619858, -0.37120501]])
     >>>
     >>> # Let's create an Array out of it
-    >>> arr = Array(
-    >>>             data=ndarray.tobytes(),
-    >>>             dtype=str(ndarray.dtype),
-    >>>             stype="",  # Could be used in deserialization function
-    >>>             shape=list(ndarray.shape),
-    >>>            )
-    >>> # If we print it (note the binary data)
-    >>> Array(dtype='float64', shape=[3, 3], stype='', data=b'@\x99\x18\xaf\x91z\xfd..')
+    >>> arr = array_from_numpy(arr_np)
+    >>>
+    >>> # If we print it you'll see (note the binary data)
+    >>> Array(dtype='float64', shape=[3,3], stype='numpy.ndarray', data=b'@\x99\x18...')
     >>>
     >>> # Adding it to a ParametersRecord:
     >>> p_record = ParametersRecord({"my_array": arr})
 
-    Now that the NumPy array is embedded into a `ParametersRecord` it could be sended
-    if added as part of a `common.Message` or it could be saved as a persistent state of
-    a `ClientApp` via its context. Regardless of the usecase, we will sooner or later
-    want to recover the array in its original NumPy representation. For the example
-    above, deserialization can be done as follows:
+    Now that the NumPy array is embedded into a :code:`ParametersRecord` it could be
+    sent if added as part of a :code:`common.Message` or it could be saved as a
+    persistent state of a :code:`ClientApp` via its context. Regardless of the usecase,
+    we will sooner or later want to recover the array in its original NumPy
+    representation. For the example above, where the array was serialized using the
+    built-in utility function, deserialization can be done as follows:
 
-    >>> arr_np_d = np.frombuffer(buffer=array.data,
-    >>>                          dtype=array.dtype
-    >>>                         ).reshape(array.shape)
+    >>> # Use the Array's built-in method
+    >>> arr_np_d = arr.numpy()
     >>>
     >>> # If printed, it will show the exact same data as above:
     >>> array([[-1.84242409, -1.01539537, -0.46528405],
     >>>      [ 0.32991896,  0.55540414,  0.44085534],
     >>>      [-0.10758364,  1.97619858, -0.37120501]])
+
+    If you need finer control on how your arrays are serialized and deserialized, you
+    can construct :code:`Array` objects directly like this:
+
+    >>> # Serialize your array and construct Array object
+    >>> arr = Array(
+    >>>         data=ndarray.tobytes(),
+    >>>         dtype=str(ndarray.dtype),
+    >>>         stype="",  # Could be used in a deserialization function
+    >>>         shape=list(ndarray.shape),
+    >>>       )
+    >>>
+    >>> # Then you can deserialize it like this
+    >>> arr_np_d = np.frombuffer(
+    >>>             buffer=array.data,
+    >>>             dtype=array.dtype,
+    >>>            ).reshape(array.shape)
 
     Note that different arrays (e.g. from PyTorch, Tensorflow) might require different
     serialization mechanism. Howerver, they often support a conversion to NumPy,

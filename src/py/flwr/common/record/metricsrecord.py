@@ -60,7 +60,7 @@ def _check_value(value: MetricsRecordValues) -> None:
 class MetricsRecord(TypedDict[str, MetricsRecordValues]):
     """Metrics recod.
 
-    A `MetricsRecord` is a Python dictionary designed to ensure that 
+    A :code:`MetricsRecord` is a Python dictionary designed to ensure that
     each key-value pair adheres to specified data types.
 
     Parameters
@@ -76,9 +76,10 @@ class MetricsRecord(TypedDict[str, MetricsRecordValues]):
 
     Examples
     --------
-    The usage of a `MetricsRecord` is envisioned for single scalar (int, float)
-    or list of scalars. A `MetricsRecord` is one of the types of records that a
-    `common.RecordSet` supports. Let's see some examples:
+    The usage of a :code:`MetricsRecord` is envisioned for single scalar
+    (:code:`int`, :code:`float`) or list of scalars. A :code:`MetricsRecord` is
+    one of the types of records that a :code:`common.RecordSet` supports.
+    Let's see some examples:
 
     >>> from flwr.common import MetricsRecord
     >>>
@@ -90,8 +91,9 @@ class MetricsRecord(TypedDict[str, MetricsRecordValues]):
     >>> record["loss-historic"] = [0.9, 0.5, 0.01]
 
     Since types are enforced, the types of the objects inserted are checked. For a
-    `MetricsRecord`, value types allowed are those in defined in
-    `flwr.common.MetricsRecordValues`. Similarly, only `str` keys are allowed.
+    :code:`MetricsRecord`, value types allowed are those in defined in
+    :code:`flwr.common.MetricsRecordValues`. Similarly, only :code:`str` keys are
+    allowed.
 
     >>> from flwr.common import MetricsRecord
     >>>
@@ -99,8 +101,8 @@ class MetricsRecord(TypedDict[str, MetricsRecordValues]):
     >>> # Add unsupported value
     >>> record["something-unsupported"] = {'a': 123} # Will throw a `TypeError`
 
-    If you need a more versatily type of record try `ConfigsRecord` or
-    `ParametersRecord`.
+    If you need a more versatily type of record try :code:`ConfigsRecord` or
+    :code:`ParametersRecord`.
     """
 
     def __init__(

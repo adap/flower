@@ -60,9 +60,9 @@ def _check_value(value: ConfigsRecordValues) -> None:
 class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
     """Configs record.
 
-    A `ConfigsRecord` is a Python dictionary designed to ensure that 
+    A :code:`ConfigsRecord` is a Python dictionary designed to ensure that
     each key-value pair adheres to specified data types.
-    
+
     Parameters
     ----------
     configs_dict : Optional[Dict[str, ConfigsRecordValues]]
@@ -77,10 +77,11 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
 
     Examples
     --------
-    The usage of a `ConfigsRecord` is envisioned for storing Python built-in types
-    such as `int`, `float`, `str`, `bytes` and lists of these. All types allowed are
-    defined in `flwr.common.typing.ConfigsRecordValues`. While lists are supported,
-    we encourage you to use a `ParametersRecord` instead if these are of high
+    The usage of a :code:`ConfigsRecord` is envisioned for storing Python built-in
+    types such as :code:`int`, :code:`float`, :code:`str`, :code:`bytes` and lists of
+    these. All types allowed are defined in
+    :code:`common.typing.ConfigsRecordValues`. While lists are supported, we
+    encourage you to use a :code:`ParametersRecord` instead if these are of high
     dimensionality.
 
     Let's see some examples:
@@ -96,9 +97,10 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
     >>> # And string values (among other types)
     >>> record["path-to-S3"] = "s3://bucket_name/folder1/fileA.json"
 
-    Just like the other types of records in a `flwr.common.RecordSet`, types are
+    Just like the other types of records in a :code:`flwr.common.RecordSet`, types are
     enforced. If you need to add a custom data structure or object, we recommend to
-    serialise it into bytes and save it as such (bytes are allowed in a `ConfigsRecord`)
+    serialise it into bytes and save it as such (bytes are allowed in a
+    :code:`ConfigsRecord`)
     """
 
     def __init__(
