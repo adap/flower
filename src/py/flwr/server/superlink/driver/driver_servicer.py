@@ -43,6 +43,8 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     Run,
 )
 from flwr.proto.task_pb2 import TaskRes  # pylint: disable=E0611
+from flwr.server.superlink.ffs import Ffs
+from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.state import State, StateFactory
 from flwr.server.utils.validator import validate_task_ins_or_res
 
@@ -50,8 +52,9 @@ from flwr.server.utils.validator import validate_task_ins_or_res
 class DriverServicer(driver_pb2_grpc.DriverServicer):
     """Driver API servicer."""
 
-    def __init__(self, state_factory: StateFactory) -> None:
+    def __init__(self, state_factory: StateFactory, ffs_factory: FfsFactory) -> None:
         self.state_factory = state_factory
+        self.ffs_factory = ffs_factory
 
     def GetNodes(
         self, request: GetNodesRequest, context: grpc.ServicerContext
@@ -71,9 +74,19 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         """Create run ID."""
         log(DEBUG, "DriverServicer.CreateRun")
         state: State = self.state_factory.state()
+        if request.HasField("fab") and request.fab.HasField("content"):
+            ffs: Ffs = self.ffs_factory.ffs()
+            fab_hash = ffs.put(request.fab.content, {})
+            _raise_if(
+                fab_hash != request.fab.hash_str,
+                f"FAB ({request.fab}) hash from request doesn't match contents",
+            )
+        else:
+            fab_hash = ""
         run_id = state.create_run(
             request.fab_id,
             request.fab_version,
+            fab_hash,
             user_config_from_proto(request.override_config),
         )
         return CreateRunResponse(run_id=run_id)
