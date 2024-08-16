@@ -67,6 +67,7 @@ CLIENTAPPIO_PORT = int(ADDRESS_CLIENTAPPIO_API_GRPC_RERE.rsplit(":", maxsplit=1)
 
 
 def find_free_port(start_port):
+    """Returns next free port for SuperNode grpc.Server."""
     port = start_port
     while True:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
