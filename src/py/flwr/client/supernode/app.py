@@ -73,6 +73,8 @@ def run_supernode() -> None:
         max_retries=args.max_retries,
         max_wait_time=args.max_wait_time,
         node_config=parse_config_args([args.node_config]),
+        isolate=args.isolate,
+        supernode_address=args.supernode_address,
     )
 
     # Graceful shutdown
@@ -121,7 +123,7 @@ def flwr_clientapp() -> None:
         description="Run a Flower ClientApp",
     )
     parser.add_argument(
-        "--address",
+        "--supernode",
         help="Address of SuperNode ClientAppIo gRPC servicer",
     )
     parser.add_argument(
@@ -133,10 +135,10 @@ def flwr_clientapp() -> None:
         DEBUG,
         "Staring isolated `ClientApp` connected to SuperNode ClientAppIo at %s "
         "with the token %s",
-        args.address,
+        args.supernode,
         args.token,
     )
-    run_clientapp(address=args.address, token=int(args.token))
+    run_clientapp(supernode=args.supernode, token=int(args.token))
 
 
 def _warn_deprecated_server_arg(args: argparse.Namespace) -> None:
@@ -222,6 +224,17 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
         - `$HOME/.flwr/` in all other cases
     """,
+    )
+    parser.add_argument(
+        "--isolate",
+        action="store_true",
+        help="Run `ClientApp` in an isolated subprocess. By default, `ClientApp` "
+        "runs in the same process that executes the SuperNode.",
+    )
+    parser.add_argument(
+        "--supernode-address",
+        default="0.0.0.0:9094",
+        help="Set the SuperNode gRPC server address. Defaults to `0.0.0.0:9094`.",
     )
 
     return parser

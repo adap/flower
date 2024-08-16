@@ -52,20 +52,20 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 
 
 def run_clientapp(  # pylint: disable=R0914
-    address: str,
+    supernode: str,
     token: int,
 ) -> None:
     """Run Flower ClientApp process.
 
     Parameters
     ----------
-    address : str
+    supernode : str
         Address of SuperNode
     token : int
         Unique SuperNode token for ClientApp-SuperNode authentication
     """
     channel = create_channel(
-        server_address=address,
+        server_address=supernode,
         insecure=True,
     )
     channel.subscribe(on_channel_state_change)

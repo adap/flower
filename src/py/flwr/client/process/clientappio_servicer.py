@@ -94,10 +94,6 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
     ) -> PushClientAppOutputsResponse:
         """Push Message and Context."""
         log(DEBUG, "ClientAppIo.PushClientAppOutputs")
-        if self.clientapp_output is None:
-            raise ValueError(
-                "ClientAppIoOutputs not set before calling `PushClientAppOutputs`."
-            )
         if self.clientapp_input is None:
             raise ValueError(
                 "ClientAppIoInputs not set before calling `PushClientAppOutputs`."
@@ -109,8 +105,11 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             )
         try:
             # Update Message and Context
-            self.clientapp_output.message = message_from_proto(request.message)
-            self.clientapp_output.context = context_from_proto(request.context)
+            self.clientapp_output = ClientAppIoOutputs(
+                message=message_from_proto(request.message),
+                context=context_from_proto(request.context),
+            )
+
             # Set status
             code = typing.ClientAppOutputCode.SUCCESS
             status = typing.ClientAppOutputStatus(code=code, message="Success")
