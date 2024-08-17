@@ -38,7 +38,7 @@ from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature
 
 from ..app import start_client_internal
-from ..clientapp.process import run_clientapp
+from ..clientapp.app import run_clientapp
 from ..clientapp.utils import get_load_client_app_fn
 
 ADDRESS_FLEET_API_GRPC_RERE = "0.0.0.0:9092"
