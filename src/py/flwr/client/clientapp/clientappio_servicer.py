@@ -138,6 +138,11 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             self.token = None
         return res
 
+    def set_token(self, token: int) -> None:
+        """Set the token."""
+        log(DEBUG, "ClientAppIo.set_token")
+        self.token = token
+
     def set_inputs(self, clientapp_input: ClientAppIoInputs) -> None:
         """Set ClientApp inputs."""
         log(DEBUG, "ClientAppIo.SetInputs")
