@@ -17,7 +17,7 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from flwr.client.process.process import pull_message, push_message
+from flwr.client.clientapp.app import pull_message, push_message
 from flwr.common import Context, Message, typing
 from flwr.common.serde import (
     clientappstatus_from_proto,
@@ -50,7 +50,7 @@ class TestClientAppIoServicer(unittest.TestCase):
         self.maker = RecordMaker()
         self.mock_stub = Mock()
         self.patcher = patch(
-            "flwr.client.process.process.ClientAppIoStub", return_value=self.mock_stub
+            "flwr.client.clientapp.app.ClientAppIoStub", return_value=self.mock_stub
         )
         self.patcher.start()
 

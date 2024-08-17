@@ -52,13 +52,13 @@ from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.server.superlink.fleet.grpc_bidi.grpc_server import generic_create_grpc_server
 from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
 
+from .clientapp.clientappio_servicer import ClientAppIoInputs, ClientAppIoServicer
 from .grpc_adapter_client.connection import grpc_adapter
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
 from .node_state import NodeState
 from .numpy_client import NumPyClient
-from .process.clientappio_servicer import ClientAppIoInputs, ClientAppIoServicer
 
 ADDRESS_CLIENTAPPIO_API_GRPC_RERE = "0.0.0.0:9094"
 
