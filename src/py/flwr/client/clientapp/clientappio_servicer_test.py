@@ -17,8 +17,9 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from flwr.client.clientapp.app import pull_message, push_message
+from flwr.client.clientapp.app import get_token, pull_message, push_message
 from flwr.common import Context, Message, typing
+from flwr.common.constant import RUN_ID_NUM_BYTES
 from flwr.common.serde import (
     clientappstatus_from_proto,
     clientappstatus_to_proto,
@@ -28,11 +29,13 @@ from flwr.common.serde_test import RecordMaker
 
 # pylint:disable=E0611
 from flwr.proto.clientappio_pb2 import (
+    GetTokenResponse,
     PullClientAppInputsResponse,
     PushClientAppOutputsResponse,
 )
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.run_pb2 import Run as ProtoRun
+from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
 
 from .clientappio_servicer import (
     ClientAppIoInputs,
@@ -86,27 +89,27 @@ class TestClientAppIoServicer(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.servicer.clientapp_input = client_input
             self.servicer.clientapp_output = None
-            self.servicer.set_inputs(client_input)
+            self.servicer.set_inputs(client_input, token_returned=True)
 
         # Execute and assert
         # - when ClientAppIoInputs is None, ClientAppIoOutputs is not None
         with self.assertRaises(ValueError):
             self.servicer.clientapp_input = None
             self.servicer.clientapp_output = client_output
-            self.servicer.set_inputs(client_input)
+            self.servicer.set_inputs(client_input, token_returned=True)
 
         # Execute and assert
         # - when ClientAppIoInputs and ClientAppIoOutputs is not None
         with self.assertRaises(ValueError):
             self.servicer.clientapp_input = client_input
             self.servicer.clientapp_output = client_output
-            self.servicer.set_inputs(client_input)
+            self.servicer.set_inputs(client_input, token_returned=True)
 
         # Execute and assert
         # - when ClientAppIoInputs is set at .clientapp_input
         self.servicer.clientapp_input = None
         self.servicer.clientapp_output = None
-        self.servicer.set_inputs(client_input)
+        self.servicer.set_inputs(client_input, token_returned=True)
         assert client_input == self.servicer.clientapp_input
 
     def test_get_outputs(self) -> None:
@@ -194,3 +197,17 @@ class TestClientAppIoServicer(unittest.TestCase):
         # Assert
         self.mock_stub.PushClientAppOutputs.assert_called_once()
         self.assertEqual(status.message, "SUCCESS")
+
+    def test_get_token(self) -> None:
+        """Test getting a token from SuperNode."""
+        # Prepare
+        token: int = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
+        mock_response = GetTokenResponse(token=token)
+        self.mock_stub.GetToken.return_value = mock_response
+
+        # Execute
+        res = get_token(stub=self.mock_stub)
+
+        # Assert
+        self.mock_stub.GetToken.assert_called_once()
+        self.assertEqual(res, token)

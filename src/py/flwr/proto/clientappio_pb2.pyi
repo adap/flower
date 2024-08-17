@@ -44,6 +44,23 @@ class ClientAppOutputStatus(google.protobuf.message.Message):
     def ClearField(self, field_name: typing_extensions.Literal["code",b"code","message",b"message"]) -> None: ...
 global___ClientAppOutputStatus = ClientAppOutputStatus
 
+class GetTokenRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    def __init__(self,
+        ) -> None: ...
+global___GetTokenRequest = GetTokenRequest
+
+class GetTokenResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    TOKEN_FIELD_NUMBER: builtins.int
+    token: builtins.int
+    def __init__(self,
+        *,
+        token: builtins.int = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["token",b"token"]) -> None: ...
+global___GetTokenResponse = GetTokenResponse
+
 class PullClientAppInputsRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     TOKEN_FIELD_NUMBER: builtins.int
