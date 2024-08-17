@@ -17,7 +17,7 @@
 
 from dataclasses import dataclass
 from logging import DEBUG, ERROR
-from typing import Optional
+from typing import Optional, cast
 
 import grpc
 
@@ -85,6 +85,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
                 grpc.StatusCode.FAILED_PRECONDITION,
                 "No inputs available.",
             )
+        clientapp_input = cast(ClientAppIoInputs, self.clientapp_input)
 
         # Fail if token was already returned in a previous call
         if self.token_returned:
@@ -98,7 +99,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         # - token hasn't been returned before,
         # return token
         self.token_returned = True
-        return GetTokenResponse(token=self.clientapp_input.token)
+        return GetTokenResponse(token=clientapp_input.token)
 
     def PullClientAppInputs(
         self, request: PullClientAppInputsRequest, context: grpc.ServicerContext
@@ -112,6 +113,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
                 grpc.StatusCode.FAILED_PRECONDITION,
                 "No inputs available.",
             )
+        clientapp_input = cast(ClientAppIoInputs, self.clientapp_input)
 
         # Fail if token wasn't returned in a previous call
         if not self.token_returned:
@@ -122,7 +124,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             )
 
         # Fail if token isn't matching
-        if request.token != self.clientapp_input.token:
+        if request.token != clientapp_input.token:
             context.abort(
                 grpc.StatusCode.INVALID_ARGUMENT,
                 "Mismatch between ClientApp and SuperNode token",
@@ -131,9 +133,9 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         # Success
         self.inputs_returned = True
         return PullClientAppInputsResponse(
-            message=message_to_proto(self.clientapp_input.message),
-            context=context_to_proto(self.clientapp_input.context),
-            run=run_to_proto(self.clientapp_input.run),
+            message=message_to_proto(clientapp_input.message),
+            context=context_to_proto(clientapp_input.context),
+            run=run_to_proto(clientapp_input.run),
         )
 
     def PushClientAppOutputs(
@@ -148,6 +150,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
                 grpc.StatusCode.FAILED_PRECONDITION,
                 "No inputs available.",
             )
+        clientapp_input = cast(ClientAppIoInputs, self.clientapp_input)
 
         # Fail if token wasn't returned in a previous call
         if not self.token_returned:
@@ -166,7 +169,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             )
 
         # Fail if token isn't matching
-        if request.token != self.clientapp_input.token:
+        if request.token != clientapp_input.token:
             context.abort(
                 grpc.StatusCode.INVALID_ARGUMENT,
                 "Mismatch between ClientApp and SuperNode token",
