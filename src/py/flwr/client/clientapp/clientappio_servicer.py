@@ -72,6 +72,18 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         self.clientapp_output: Optional[ClientAppIoOutputs] = None
         self.token_returned: bool = False
 
+    def GetToken(
+        self, request: GetTokenRequest, context: grpc.ServicerContext
+    ) -> GetTokenResponse:
+        """Get token."""
+        log(DEBUG, "ClientAppIo.GetToken")
+        res = GetTokenResponse()
+        if self.clientapp_input:
+            # If ClientAppIoInputs is set, return token
+            res.token = self.clientapp_input.token
+            self.token_returned = True
+        return res
+
     def PullClientAppInputs(
         self, request: PullClientAppInputsRequest, context: grpc.ServicerContext
     ) -> PullClientAppInputsResponse:
@@ -124,18 +136,6 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             status = typing.ClientAppOutputStatus(code=code, message="Push failed")
             proto_status = clientappstatus_to_proto(status=status)
             return PushClientAppOutputsResponse(status=proto_status)
-
-    def GetToken(
-        self, request: GetTokenRequest, context: grpc.ServicerContext
-    ) -> GetTokenResponse:
-        """Get token."""
-        log(DEBUG, "ClientAppIo.GetToken")
-        res = GetTokenResponse()
-        if self.clientapp_input:
-            # If ClientAppIoInputs is set, return token
-            res.token = self.clientapp_input.token
-            self.token_returned = True
-        return res
 
     def set_inputs(self, clientapp_input: ClientAppIoInputs) -> None:
         """Set ClientApp inputs."""
