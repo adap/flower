@@ -78,14 +78,14 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         """Get token."""
         log(DEBUG, "ClientAppIo.GetToken")
 
-        # Fail, if no ClientAppIoInputs are available
-        if not self.clientapp_input:
+        # Fail if no ClientAppIoInputs are available
+        if self.clientapp_input is None:
             context.abort(
                 grpc.StatusCode.FAILED_PRECONDITION,
                 "No inputs available.",
             )
 
-        # Fail, if token was already returned in a previous call
+        # Fail if token was already returned in a previous call
         if self.token_returned:
             context.abort(
                 grpc.StatusCode.FAILED_PRECONDITION,
@@ -104,10 +104,23 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
     ) -> PullClientAppInputsResponse:
         """Pull Message, Context, and Run."""
         log(DEBUG, "ClientAppIo.PullClientAppInputs")
+
+        # Fail if no ClientAppIoInputs are available
         if self.clientapp_input is None:
-            raise ValueError(
-                "ClientAppIoInputs not set before calling `PullClientAppInputs`."
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                "No inputs available.",
             )
+
+        # Fail if token wasn't returned in a previous call
+        if not self.token_returned:
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                "Token hasn't been returned."
+                "Token must be returned before can be returned only once.",
+            )
+
+        # Fail if token isn't matching
         if request.token != self.clientapp_input.token:
             context.abort(
                 grpc.StatusCode.INVALID_ARGUMENT,
