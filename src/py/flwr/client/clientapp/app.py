@@ -16,7 +16,7 @@
 
 import argparse
 from logging import DEBUG, ERROR, INFO
-from typing import Tuple
+from typing import Optional, Tuple
 
 import grpc
 
@@ -37,6 +37,8 @@ from flwr.common.typing import Run
 
 # pylint: disable=E0611
 from flwr.proto.clientappio_pb2 import (
+    GetTokenRequest,
+    GetTokenResponse,
     PullClientAppInputsRequest,
     PullClientAppInputsResponse,
     PushClientAppOutputsRequest,
@@ -143,6 +145,12 @@ def run_clientapp(  # pylint: disable=R0914
         log(ERROR, "GRPC error occurred: %s", str(e))
     finally:
         channel.close()
+
+
+def get_token(stub: grpc.Channel) -> Optional[int]:
+    """Get a token from SuperNode."""
+    res: GetTokenResponse = stub.GetToken(GetTokenRequest())
+    return res.token
 
 
 def pull_message(stub: grpc.Channel, token: int) -> Tuple[Message, Context, Run]:

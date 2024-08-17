@@ -14,6 +14,9 @@ service ClientAppIo {
   // Send updated Message and Context
   rpc PushClientAppOutputs(PushClientAppOutputsRequest)
       returns (PushClientAppOutputsResponse) {}
+
+  // Get token
+  rpc GetToken(GetTokenRequest) returns (GetTokenResponse) {}
 }
 
 enum ClientAppOutputCode {
@@ -38,3 +41,6 @@ message PushClientAppOutputsRequest {
   Context context = 3;
 }
 message PushClientAppOutputsResponse { ClientAppOutputStatus status = 1; }
+
+message GetTokenRequest {}
+message GetTokenResponse { sint64 token = 1; }

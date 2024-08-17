@@ -36,6 +36,8 @@ from flwr.common.typing import Run
 # pylint: disable=E0611
 from flwr.proto import clientappio_pb2_grpc
 from flwr.proto.clientappio_pb2 import (  # pylint: disable=E0401
+    GetTokenRequest,
+    GetTokenResponse,
     PullClientAppInputsRequest,
     PullClientAppInputsResponse,
     PushClientAppOutputsRequest,
@@ -68,6 +70,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
     def __init__(self) -> None:
         self.clientapp_input: Optional[ClientAppIoInputs] = None
         self.clientapp_output: Optional[ClientAppIoOutputs] = None
+        self.token: Optional[int] = None
 
     def PullClientAppInputs(
         self, request: PullClientAppInputsRequest, context: grpc.ServicerContext
@@ -121,6 +124,19 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             status = typing.ClientAppOutputStatus(code=code, message="Push failed")
             proto_status = clientappstatus_to_proto(status=status)
             return PushClientAppOutputsResponse(status=proto_status)
+
+    def GetToken(
+        self, request: GetTokenRequest, context: grpc.ServicerContext
+    ) -> GetTokenResponse:
+        """Get token."""
+        log(DEBUG, "ClientAppIo.GetToken")
+        res = GetTokenResponse()
+        if self.token:
+            # If token is set, use it in response
+            res.token = self.token
+            # Resetting token
+            self.token = None
+        return res
 
     def set_inputs(self, clientapp_input: ClientAppIoInputs) -> None:
         """Set ClientApp inputs."""

@@ -18,6 +18,11 @@ class ClientAppIoStub:
         flwr.proto.clientappio_pb2.PushClientAppOutputsResponse]
     """Send updated Message and Context"""
 
+    GetToken: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.clientappio_pb2.GetTokenRequest,
+        flwr.proto.clientappio_pb2.GetTokenResponse]
+    """Get token"""
+
 
 class ClientAppIoServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -34,6 +39,14 @@ class ClientAppIoServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.clientappio_pb2.PushClientAppOutputsResponse:
         """Send updated Message and Context"""
+        pass
+
+    @abc.abstractmethod
+    def GetToken(self,
+        request: flwr.proto.clientappio_pb2.GetTokenRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.clientappio_pb2.GetTokenResponse:
+        """Get token"""
         pass
 
 
