@@ -58,7 +58,7 @@ from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
 from .node_state import NodeState
 from .numpy_client import NumPyClient
-from .process.clientappio_servicer import ClientAppIoInputs, ClientAppIoServicer
+from .clientapp.clientappio_servicer import ClientAppIoInputs, ClientAppIoServicer
 
 ADDRESS_CLIENTAPPIO_API_GRPC_RERE = "0.0.0.0:9094"
 
