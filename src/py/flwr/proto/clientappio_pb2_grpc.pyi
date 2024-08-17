@@ -8,6 +8,11 @@ import grpc
 
 class ClientAppIoStub:
     def __init__(self, channel: grpc.Channel) -> None: ...
+    GetToken: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.clientappio_pb2.GetTokenRequest,
+        flwr.proto.clientappio_pb2.GetTokenResponse]
+    """Get token"""
+
     PullClientAppInputs: grpc.UnaryUnaryMultiCallable[
         flwr.proto.clientappio_pb2.PullClientAppInputsRequest,
         flwr.proto.clientappio_pb2.PullClientAppInputsResponse]
@@ -25,6 +30,14 @@ class ClientAppIoStub:
 
 
 class ClientAppIoServicer(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def GetToken(self,
+        request: flwr.proto.clientappio_pb2.GetTokenRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.clientappio_pb2.GetTokenResponse:
+        """Get token"""
+        pass
+
     @abc.abstractmethod
     def PullClientAppInputs(self,
         request: flwr.proto.clientappio_pb2.PullClientAppInputsRequest,
