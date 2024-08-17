@@ -99,14 +99,13 @@ def run_clientapp(  # pylint: disable=R0914
         insecure=True,
     )
     channel.subscribe(on_channel_state_change)
-    print(f"{token = }")
 
     try:
         stub = ClientAppIoStub(channel)
 
+        # If token is not set, loop until token is received from SuperNode
         while token is None:
             token = get_token(stub)
-            print(f"{token = }")
 
         # Pull Message, Context, and Run from SuperNode
         message, context, run = pull_message(stub=stub, token=token)
