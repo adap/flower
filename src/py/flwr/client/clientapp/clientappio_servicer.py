@@ -77,12 +77,27 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
     ) -> GetTokenResponse:
         """Get token."""
         log(DEBUG, "ClientAppIo.GetToken")
-        res = GetTokenResponse()
-        if self.clientapp_input:
-            # If ClientAppIoInputs is set, return token
-            res.token = self.clientapp_input.token
-            self.token_returned = True
-        return res
+
+        # Fail, if no ClientAppIoInputs are available
+        if not self.clientapp_input:
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                "No inputs available.",
+            )
+
+        # Fail, if token was already returned in a previous call
+        if self.token_returned:
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                "Token already returned. A token can be returned only once.",
+            )
+
+        # If
+        # - ClientAppIoInputs is set, and
+        # - token hasn't been returned before,
+        # return token
+        self.token_returned = True
+        return GetTokenResponse(token=self.clientapp_input.token)
 
     def PullClientAppInputs(
         self, request: PullClientAppInputsRequest, context: grpc.ServicerContext
