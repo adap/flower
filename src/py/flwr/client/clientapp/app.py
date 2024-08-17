@@ -45,6 +45,7 @@ from flwr.proto.clientappio_pb2 import (
     PushClientAppOutputsResponse,
 )
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
+from flwr.proto.fab_pb2 import Fab, GetFabResponse
 
 from .utils import get_load_client_app_fn
 
@@ -157,6 +158,13 @@ def get_token(stub: grpc.Channel) -> Optional[int]:
     log(DEBUG, "Flower ClientApp requests token.")
     res: GetTokenResponse = stub.GetToken(GetTokenRequest())
     return res.token
+
+
+def get_fab(stub: grpc.Channel, token: int) -> Fab:
+    """Get FAB from SuperNode passing the token."""
+    log(DEBUG, "Flower ClientApp requests FAB using token.")
+    res: GetFabResponse = stub.GetFab(token)
+    return res.fab
 
 
 def pull_message(stub: grpc.Channel, token: int) -> Tuple[Message, Context, Run]:

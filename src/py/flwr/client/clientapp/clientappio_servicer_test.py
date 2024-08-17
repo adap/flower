@@ -17,7 +17,7 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from flwr.client.clientapp.app import get_token, pull_message, push_message
+from flwr.client.clientapp.app import get_fab, get_token, pull_message, push_message
 from flwr.common import Context, Message, typing
 from flwr.common.constant import RUN_ID_NUM_BYTES
 from flwr.common.serde import (
@@ -33,6 +33,7 @@ from flwr.proto.clientappio_pb2 import (
     PullClientAppInputsResponse,
     PushClientAppOutputsResponse,
 )
+from flwr.proto.fab_pb2 import Fab, GetFabResponse
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.run_pb2 import Run as ProtoRun
 from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
@@ -211,3 +212,18 @@ class TestClientAppIoServicer(unittest.TestCase):
         # Assert
         self.mock_stub.GetToken.assert_called_once()
         self.assertEqual(res, token)
+
+    def test_get_fab(self) -> None:
+        """Test fetching of FAB from SuperNode."""
+        # Prepare
+        token: int = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
+        fab = Fab(hash_str="1234", content=b"\xf3\xf5\xf8\x98")
+        mock_response = GetFabResponse(fab=fab)
+        self.mock_stub.GetFab.return_value = mock_response
+
+        # Execute
+        fab_returned = get_fab(stub=self.mock_stub, token=token)
+
+        # Assert
+        self.mock_stub.GetFab.assert_called_once()
+        self.assertEqual(fab_returned, fab)

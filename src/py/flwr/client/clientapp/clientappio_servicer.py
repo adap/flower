@@ -36,6 +36,7 @@ from flwr.common.typing import Run
 # pylint: disable=E0611
 from flwr.proto import clientappio_pb2_grpc
 from flwr.proto.clientappio_pb2 import (  # pylint: disable=E0401
+    GetFabRequestWithToken,
     GetTokenRequest,
     GetTokenResponse,
     PullClientAppInputsRequest,
@@ -43,6 +44,7 @@ from flwr.proto.clientappio_pb2 import (  # pylint: disable=E0401
     PushClientAppOutputsRequest,
     PushClientAppOutputsResponse,
 )
+from flwr.proto.fab_pb2 import GetFabResponse
 
 
 @dataclass
@@ -137,6 +139,13 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             # Resetting token
             self.token = None
         return res
+
+    def GetFab(
+        self, request: GetFabRequestWithToken, context: grpc.ServicerContext
+    ) -> GetFabResponse:
+        """Get Fab."""
+        log(DEBUG, "ClientAppIo.GetFab")
+        return GetFabResponse()
 
     def set_token(self, token: int) -> None:
         """Set the token."""

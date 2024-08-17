@@ -17,6 +17,9 @@ service ClientAppIo {
 
   // Get token
   rpc GetToken(GetTokenRequest) returns (GetTokenResponse) {}
+
+  // Get the FAB
+  rpc GetFab(GetFabRequestWithToken) returns (GetFabResponse) {}
 }
 
 enum ClientAppOutputCode {
@@ -44,3 +47,5 @@ message PushClientAppOutputsResponse { ClientAppOutputStatus status = 1; }
 
 message GetTokenRequest {}
 message GetTokenResponse { sint64 token = 1; }
+
+message GetFabRequestWithToken { sint64 token = 1; }

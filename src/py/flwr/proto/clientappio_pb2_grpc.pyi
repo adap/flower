@@ -4,6 +4,7 @@ isort:skip_file
 """
 import abc
 import flwr.proto.clientappio_pb2
+import flwr.proto.fab_pb2
 import grpc
 
 class ClientAppIoStub:
@@ -22,6 +23,11 @@ class ClientAppIoStub:
         flwr.proto.clientappio_pb2.GetTokenRequest,
         flwr.proto.clientappio_pb2.GetTokenResponse]
     """Get token"""
+
+    GetFab: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.clientappio_pb2.GetFabRequestWithToken,
+        flwr.proto.fab_pb2.GetFabResponse]
+    """Get the FAB"""
 
 
 class ClientAppIoServicer(metaclass=abc.ABCMeta):
@@ -47,6 +53,14 @@ class ClientAppIoServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.clientappio_pb2.GetTokenResponse:
         """Get token"""
+        pass
+
+    @abc.abstractmethod
+    def GetFab(self,
+        request: flwr.proto.clientappio_pb2.GetFabRequestWithToken,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.fab_pb2.GetFabResponse:
+        """Get the FAB"""
         pass
 
 
