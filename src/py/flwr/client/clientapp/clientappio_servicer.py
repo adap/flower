@@ -192,9 +192,11 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         proto_status = clientappstatus_to_proto(status=status)
         return PushClientAppOutputsResponse(status=proto_status)
 
-    def set_inputs(self, clientapp_input: ClientAppIoInputs, token_returned: bool) -> None:
+    def set_inputs(
+        self, clientapp_input: ClientAppIoInputs, token_returned: bool
+    ) -> None:
         """Set ClientApp inputs.
-        
+
         Parameters
         ----------
         clientapp_input : ClientAppIoInputs
@@ -222,7 +224,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         log(DEBUG, "ClientAppIo.GetOutputs")
         if self.clientapp_output is None:
             raise ValueError("ClientAppIoOutputs not set before calling `get_outputs`.")
-        
+
         # Set outputs to a local variable and clear state
         output: ClientAppIoOutputs = self.clientapp_output
         self.clientapp_input = None
