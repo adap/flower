@@ -72,7 +72,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
     def __init__(self) -> None:
         self.clientapp_input: Optional[ClientAppIoInputs] = None
         self.clientapp_output: Optional[ClientAppIoOutputs] = None
-        self.token: Optional[int] = None
+        self.token_returned: bool = False
 
     def PullClientAppInputs(
         self, request: PullClientAppInputsRequest, context: grpc.ServicerContext
@@ -133,11 +133,10 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         """Get token."""
         log(DEBUG, "ClientAppIo.GetToken")
         res = GetTokenResponse()
-        if self.token:
-            # If token is set, use it in response
-            res.token = self.token
-            # Resetting token
-            self.token = None
+        if self.clientapp_input:
+            # If ClientAppIoInputs is set, return token
+            res.token = self.clientapp_input.token
+            self.token_returned = True
         return res
 
     def GetFab(
@@ -146,11 +145,6 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         """Get Fab."""
         log(DEBUG, "ClientAppIo.GetFab")
         return GetFabResponse()
-
-    def set_token(self, token: int) -> None:
-        """Set the token."""
-        log(DEBUG, "ClientAppIo.set_token")
-        self.token = token
 
     def set_inputs(self, clientapp_input: ClientAppIoInputs) -> None:
         """Set ClientApp inputs."""
