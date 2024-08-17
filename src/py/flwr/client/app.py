@@ -460,12 +460,13 @@ def start_client_internal(
 
                             # Share Message and Context with servicer
                             clientappio_servicer.set_inputs(
-                                ClientAppIoInputs(
+                                clientapp_input=ClientAppIoInputs(
                                     message=message,
                                     context=context,
                                     run=run,
                                     token=token,
-                                )
+                                ),
+                                token_returned=True,
                             )
 
                             # Run `ClientApp` in subprocess
