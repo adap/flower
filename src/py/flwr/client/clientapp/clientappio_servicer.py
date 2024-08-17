@@ -98,6 +98,8 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
                 grpc.StatusCode.INVALID_ARGUMENT,
                 "Mismatch between ClientApp and SuperNode token",
             )
+
+        # Success
         return PullClientAppInputsResponse(
             message=message_to_proto(self.clientapp_input.message),
             context=context_to_proto(self.clientapp_input.context),
@@ -118,6 +120,8 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
                 grpc.StatusCode.INVALID_ARGUMENT,
                 "Mismatch between ClientApp and SuperNode token",
             )
+
+        # Preconditions met
         try:
             # Update Message and Context
             self.clientapp_output = ClientAppIoOutputs(
@@ -140,7 +144,11 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
     def set_inputs(self, clientapp_input: ClientAppIoInputs) -> None:
         """Set ClientApp inputs."""
         log(DEBUG, "ClientAppIo.SetInputs")
-        if self.clientapp_input is not None or self.clientapp_output is not None:
+        if (
+            self.clientapp_input is not None
+            or self.clientapp_output is not None
+            or self.token_returned
+        ):
             raise ValueError(
                 "ClientAppIoInputs and ClientAppIoOutputs must not be set before "
                 "calling `set_inputs`."
@@ -152,8 +160,11 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         log(DEBUG, "ClientAppIo.GetOutputs")
         if self.clientapp_output is None:
             raise ValueError("ClientAppIoOutputs not set before calling `get_outputs`.")
-        # Set outputs to a local variable and clear self.clientapp_output
+        
+        # Set outputs to a local variable and clear state
         output: ClientAppIoOutputs = self.clientapp_output
         self.clientapp_input = None
         self.clientapp_output = None
+        self.token_returned = False
+
         return output
