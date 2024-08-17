@@ -458,6 +458,9 @@ def start_client_internal(
                             # Generate SuperNode token
                             token: int = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
 
+                            # Set token
+                            clientappio_servicer.set_token(token)
+
                             # Share Message and Context with servicer
                             clientappio_servicer.set_inputs(
                                 ClientAppIoInputs(
@@ -473,8 +476,6 @@ def start_client_internal(
                                 "flwr-clientapp",
                                 "--supernode",
                                 supernode_address,
-                                "--token",
-                                str(token),
                             ]
                             subprocess.run(
                                 command,
