@@ -209,7 +209,6 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             Set to `True` when passing the token to `flwr-clientap`
             and `False` otherwise.
         """
-        log(DEBUG, "ClientAppIo.SetInputs")
         if (
             self.clientapp_input is not None
             or self.clientapp_output is not None
@@ -222,9 +221,12 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         self.clientapp_input = clientapp_input
         self.token_returned = token_returned
 
+    def has_outputs(self) -> bool:
+        """Check if ClientAppOutputs are available."""
+        return self.clientapp_output is not None
+
     def get_outputs(self) -> ClientAppIoOutputs:
         """Get ClientApp outputs."""
-        log(DEBUG, "ClientAppIo.GetOutputs")
         if self.clientapp_output is None:
             raise ValueError("ClientAppIoOutputs not set before calling `get_outputs`.")
 
