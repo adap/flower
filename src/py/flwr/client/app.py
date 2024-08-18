@@ -484,6 +484,11 @@ def start_client_internal(
                                 stderr=None,
                                 check=True,
                             )
+
+                            # Wait for output to become available
+                            while not clientappio_servicer.has_outputs():
+                                time.sleep(0.1)
+
                             outputs = clientappio_servicer.get_outputs()
                             reply_message, context = outputs.message, outputs.context
                         else:
