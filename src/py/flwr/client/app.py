@@ -21,7 +21,7 @@ import time
 from dataclasses import dataclass
 from logging import ERROR, INFO, WARN
 from pathlib import Path
-from typing import Callable, ContextManager, Dict, Optional, Tuple, Type, Union
+from typing import Callable, ContextManager, Dict, Optional, Tuple, Type, Union, cast
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -294,6 +294,7 @@ def start_client_internal(
         _clientappio_grpc_server, clientappio_servicer = run_clientappio_api_grpc(
             address=supernode_address
         )
+    supernode_address = cast(str, supernode_address)
 
     # At this point, only `load_client_app_fn` should be used
     # Both `client` and `client_fn` must not be used directly
@@ -454,7 +455,7 @@ def start_client_internal(
 
                     # Handle app loading and task message
                     try:
-                        if isolate and supernode_address is not None:
+                        if isolate:
                             # Generate SuperNode token
                             token: int = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
 
@@ -474,6 +475,8 @@ def start_client_internal(
                                 "flwr-clientapp",
                                 "--supernode",
                                 supernode_address,
+                                "--token",
+                                str(token),
                             ]
                             subprocess.run(
                                 command,
