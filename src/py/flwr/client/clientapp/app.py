@@ -156,7 +156,7 @@ def run_clientapp(  # pylint: disable=R0914
 
 def get_token(stub: grpc.Channel) -> Optional[int]:
     """Get a token from SuperNode."""
-    log(DEBUG, "Flower ClientApp requests token")
+    log(DEBUG, "Flower ClientApp process requests token")
     res: GetTokenResponse = stub.GetToken(GetTokenRequest())
     return res.token
 
