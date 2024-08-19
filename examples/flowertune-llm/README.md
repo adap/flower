@@ -15,7 +15,6 @@ This introductory example conducts federated instruction tuning with pretrained 
 We implement FlowerTune LLM by integrating a bundle of techniques: 1) We use [Flower Datasets](https://flower.dev/docs/datasets/) to download, partition and preprocess the dataset. 2) The fine-tuning is done using the [🤗PEFT](https://huggingface.co/docs/peft/en/index) library. 3) We use Flower's Simulation Engine to simulate the LLM fine-tuning process in federated way,
 which allows users to perform the training on a single GPU.
 
-
 ## Environment setup
 
 Start by cloning the code example. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
@@ -48,7 +47,6 @@ Install the dependencies defined in `pyproject.toml` as well as the `flowertune_
 pip install -e .
 ```
 
-
 ## Run the project
 
 You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
@@ -74,13 +72,11 @@ flwr run . --run-config num-server-rounds=50,strategy.fraction_fit=0.25
 > \[!NOTE\]
 > An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.
 
-
 ## Expected results
 
 ![](_static/train_loss_smooth.png)
 
 As expected, OpenLLaMA-7B model works better than its 3B version with lower training loss. With the hyperparameters tested, the 8-bit model seems to deliver lower training loss for the smaller 3B model compared to its 4-bit version.
-
 
 ## VRAM consumption
 
@@ -93,7 +89,6 @@ The above table shows the VRAM consumption per client for the different models c
 You can adjust the CPU/GPU resources you assign to each of the clients based on your device.
 For example, it is easy to train 2 concurrent clients on each GPU (24 GB VRAM) if you choose 3-billion (4-bit) model.
 Assigning 50% of the GPU's VRAM to each client by setting `options.backend.clientapp-gpus = 0.5` under `[tool.flwr.federations.local-simulation]` in `pyproject.toml`.
-
 
 ## Test with your Questions
 
