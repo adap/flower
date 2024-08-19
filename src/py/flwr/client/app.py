@@ -484,6 +484,7 @@ def start_client_internal(
                                     message=message,
                                     context=context,
                                     run=run,
+                                    fab=fab,
                                     token=token,
                                 ),
                                 token_returned=start_subprocess,
