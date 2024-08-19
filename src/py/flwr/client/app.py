@@ -398,6 +398,7 @@ def start_client_internal(
                     )
 
             app_state_tracker.register_signal_handler()
+            # pylint: disable=too-many-nested-blocks
             while not app_state_tracker.interrupt:
                 try:
                     # Receive
@@ -563,6 +564,7 @@ def start_client_internal(
                 except StopIteration:
                     sleep_duration = 0
                     break
+            # pylint: enable=too-many-nested-blocks
 
             # Unregister node
             if delete_node is not None and app_state_tracker.is_connected:

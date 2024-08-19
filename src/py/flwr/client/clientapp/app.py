@@ -177,11 +177,11 @@ def get_token(stub: grpc.Channel) -> Optional[int]:
     log(DEBUG, "Flower ClientApp process requests token")
     try:
         res: GetTokenResponse = stub.GetToken(GetTokenRequest())
-        log(DEBUG, "Received token: %s", res.token)
+        log(DEBUG, "[GetToken] Received token: %s", res.token)
         return res.token
     except grpc.RpcError as e:
-        if e.code() == grpc.StatusCode.FAILED_PRECONDITION:
-            log(DEBUG, "No token available yet")
+        if e.code() == grpc.StatusCode.FAILED_PRECONDITION:  # pylint: disable=no-member
+            log(DEBUG, "[GetToken] No token available yet")
         else:
             log(ERROR, "[GetToken] gRPC error occurred: %s", str(e))
         return None
