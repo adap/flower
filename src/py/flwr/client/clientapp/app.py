@@ -188,7 +188,9 @@ def get_token(stub: grpc.Channel) -> Optional[int]:
         return None
 
 
-def pull_message(stub: grpc.Channel, token: int) -> Tuple[Message, Context, Run, Fab]:
+def pull_message(
+    stub: grpc.Channel, token: int
+) -> Tuple[Message, Context, Run, Optional[Fab]]:
     """Pull message from SuperNode to ClientApp."""
     log(INFO, "Pulling ClientAppInputs for token %s", token)
     try:
@@ -198,7 +200,7 @@ def pull_message(stub: grpc.Channel, token: int) -> Tuple[Message, Context, Run,
         message = message_from_proto(res.message)
         context = context_from_proto(res.context)
         run = run_from_proto(res.run)
-        fab = fab_from_proto(res.fab)
+        fab = fab_from_proto(res.fab) if res.fab else None
         return message, context, run, fab
     except grpc.RpcError as e:
         log(ERROR, "[PullClientAppInputs] gRPC error occurred: %s", str(e))

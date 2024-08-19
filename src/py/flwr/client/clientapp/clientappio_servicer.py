@@ -53,7 +53,7 @@ class ClientAppInputs:
     message: Message
     context: Context
     run: Run
-    fab: Fab
+    fab: Optional[Fab]
     token: int
 
 
@@ -138,7 +138,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             message=message_to_proto(clientapp_input.message),
             context=context_to_proto(clientapp_input.context),
             run=run_to_proto(clientapp_input.run),
-            fab=fab_to_proto(clientapp_input.fab),
+            fab=fab_to_proto(clientapp_input.fab) if clientapp_input.fab else None,
         )
 
     def PushClientAppOutputs(
