@@ -407,6 +407,15 @@ def start_client_internal(
                         time.sleep(3)  # Wait for 3s before asking again
                         continue
 
+                    # Get run info
+                    run_id = message.metadata.run_id
+                    if run_id not in runs:
+                        if get_run is not None:
+                            runs[run_id] = get_run(run_id)
+                        # If get_run is None, i.e., in grpc-bidi mode
+                        else:
+                            runs[run_id] = Run(run_id, "", "", "", {})
+
                     log(INFO, "")
                     if len(message.metadata.group_id) > 0:
                         log(
@@ -421,15 +430,6 @@ def start_client_internal(
                         message.metadata.message_type,
                         message.metadata.message_id,
                     )
-
-                    # Get run info
-                    run_id = message.metadata.run_id
-                    if run_id not in runs:
-                        if get_run is not None:
-                            runs[run_id] = get_run(run_id)
-                        # If get_run is None, i.e., in grpc-bidi mode
-                        else:
-                            runs[run_id] = Run(run_id, "", "", "", {})
 
                     # Handle control message
                     out_message, sleep_duration = handle_control_message(message)
