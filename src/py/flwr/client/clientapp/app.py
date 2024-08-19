@@ -21,6 +21,7 @@ from typing import Optional, Tuple
 
 import grpc
 
+from flwr.cli.install import install_from_fab
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import Context, Message
 from flwr.common.constant import ErrorCode
@@ -116,7 +117,11 @@ def run_clientapp(  # pylint: disable=R0914
                 time.sleep(1)
 
             # Pull Message, Context, and Run from SuperNode
-            message, context, run, _ = pull_message(stub=stub, token=token)
+            message, context, run, fab = pull_message(stub=stub, token=token)
+
+            if fab:
+                log(DEBUG, "Flower ClientApp starts FAB installation.")
+                install_from_fab(fab.content, flwr_dir=None, skip_prompt=True)
 
             load_client_app_fn = get_load_client_app_fn(
                 default_app_ref="",
