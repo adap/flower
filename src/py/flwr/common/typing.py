@@ -83,6 +83,22 @@ class Status:
     message: str
 
 
+class ClientAppOutputCode(Enum):
+    """ClientAppIO status codes."""
+
+    SUCCESS = 0
+    DEADLINE_EXCEEDED = 1
+    UNKNOWN_ERROR = 2
+
+
+@dataclass
+class ClientAppOutputStatus:
+    """ClientAppIO status."""
+
+    code: ClientAppOutputCode
+    message: str
+
+
 @dataclass
 class Parameters:
     """Model parameters."""
@@ -198,6 +214,7 @@ class Run:
     run_id: int
     fab_id: str
     fab_version: str
+    fab_hash: str
     override_config: UserConfig
 
 
