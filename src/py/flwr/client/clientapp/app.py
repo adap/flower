@@ -189,7 +189,7 @@ def get_token(stub: grpc.Channel) -> Optional[int]:
 
 def pull_message(stub: grpc.Channel, token: int) -> Tuple[Message, Context, Run]:
     """Pull message from SuperNode to ClientApp."""
-    log(INFO, "Pulling ClientAppIoInputs for token %s", token)
+    log(INFO, "Pulling ClientAppInputs for token %s", token)
     try:
         res: PullClientAppInputsResponse = stub.PullClientAppInputs(
             PullClientAppInputsRequest(token=token)
@@ -207,7 +207,7 @@ def push_message(
     stub: grpc.Channel, token: int, message: Message, context: Context
 ) -> PushClientAppOutputsResponse:
     """Push message to SuperNode from ClientApp."""
-    log(INFO, "Pushing ClientAppIoOutputs for token %s", token)
+    log(INFO, "Pushing ClientAppOutputs for token %s", token)
     proto_message = message_to_proto(message)
     proto_context = context_to_proto(context)
 
