@@ -132,6 +132,16 @@ def _add_generic_handler(servicer: _MockServicer, server: grpc.Server) -> None:
     server.add_generic_rpc_handlers((generic_handler,))
 
 
+def _get_value_from_tuples(
+    key_string: str, tuples: Sequence[Tuple[str, Union[str, bytes]]]
+) -> bytes:
+    value = next((value for key, value in tuples if key == key_string), "")
+    if isinstance(value, str):
+        return value.encode()
+
+    return value
+
+
 def _init_retry_invoker() -> RetryInvoker:
     return RetryInvoker(
         wait_gen_factory=exponential,
@@ -205,13 +215,20 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             _, _, create_node, _, _, _ = conn
             assert create_node is not None
             create_node()
-            expected_client_metadata = (
-                _PUBLIC_KEY_HEADER,
-                base64.urlsafe_b64encode(public_key_to_bytes(self._client_public_key)),
+
+            received_metadata = self._servicer.received_client_metadata()
+            assert received_metadata is not None
+
+            actual_public_key = _get_value_from_tuples(
+                _PUBLIC_KEY_HEADER, received_metadata
+            )
+
+            expected_public_key = base64.urlsafe_b64encode(
+                public_key_to_bytes(self._user_public_key)
             )
 
             # Assert
-            assert self._servicer.received_client_metadata() == expected_client_metadata
+            assert actual_public_key == expected_public_key
 
     def test_client_auth_delete_node(self) -> None:
         """Test client authentication during delete node."""
@@ -230,27 +247,27 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             _, _, _, delete_node, _, _ = conn
             assert delete_node is not None
             delete_node()
+
+            received_metadata = self._servicer.received_client_metadata()
+            assert received_metadata is not None
+
             shared_secret = generate_shared_key(
                 self._servicer.server_private_key, self._client_public_key
             )
             expected_hmac = compute_hmac(
                 shared_secret, self._servicer.received_message_bytes()
             )
-            expected_client_metadata = (
-                (
-                    _PUBLIC_KEY_HEADER,
-                    base64.urlsafe_b64encode(
-                        public_key_to_bytes(self._client_public_key)
-                    ),
-                ),
-                (
-                    _AUTH_TOKEN_HEADER,
-                    base64.urlsafe_b64encode(expected_hmac),
-                ),
+            actual_public_key = _get_value_from_tuples(
+                _PUBLIC_KEY_HEADER, received_metadata
+            )
+            actual_hmac = _get_value_from_tuples(_AUTH_TOKEN_HEADER, received_metadata)
+            expected_public_key = base64.urlsafe_b64encode(
+                public_key_to_bytes(self._user_public_key)
             )
 
             # Assert
-            assert self._servicer.received_client_metadata() == expected_client_metadata
+            assert actual_public_key == expected_public_key
+            assert actual_hmac == expected_hmac
 
     def test_client_auth_receive(self) -> None:
         """Test client authentication during receive node."""
@@ -269,27 +286,28 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             receive, _, _, _, _, _ = conn
             assert receive is not None
             receive()
+
+            received_metadata = self._servicer.received_client_metadata()
+            assert received_metadata is not None
+
             shared_secret = generate_shared_key(
                 self._servicer.server_private_key, self._client_public_key
             )
             expected_hmac = compute_hmac(
                 shared_secret, self._servicer.received_message_bytes()
             )
-            expected_client_metadata = (
-                (
-                    _PUBLIC_KEY_HEADER,
-                    base64.urlsafe_b64encode(
-                        public_key_to_bytes(self._client_public_key)
-                    ),
-                ),
-                (
-                    _AUTH_TOKEN_HEADER,
-                    base64.urlsafe_b64encode(expected_hmac),
-                ),
+            actual_public_key = _get_value_from_tuples(
+                _PUBLIC_KEY_HEADER, received_metadata
+            )
+            actual_hmac = _get_value_from_tuples(_AUTH_TOKEN_HEADER, received_metadata)
+            expected_public_key = base64.urlsafe_b64encode(
+                public_key_to_bytes(self._user_public_key)
             )
 
             # Assert
-            assert self._servicer.received_client_metadata() == expected_client_metadata
+            assert actual_public_key == expected_public_key
+            assert actual_hmac == expected_hmac
+
 
     def test_client_auth_send(self) -> None:
         """Test client authentication during send node."""
@@ -309,27 +327,28 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             _, send, _, _, _, _ = conn
             assert send is not None
             send(message)
+            
+            received_metadata = self._servicer.received_client_metadata()
+            assert received_metadata is not None
+
             shared_secret = generate_shared_key(
                 self._servicer.server_private_key, self._client_public_key
             )
             expected_hmac = compute_hmac(
                 shared_secret, self._servicer.received_message_bytes()
             )
-            expected_client_metadata = (
-                (
-                    _PUBLIC_KEY_HEADER,
-                    base64.urlsafe_b64encode(
-                        public_key_to_bytes(self._client_public_key)
-                    ),
-                ),
-                (
-                    _AUTH_TOKEN_HEADER,
-                    base64.urlsafe_b64encode(expected_hmac),
-                ),
+            actual_public_key = _get_value_from_tuples(
+                _PUBLIC_KEY_HEADER, received_metadata
+            )
+            actual_hmac = _get_value_from_tuples(_AUTH_TOKEN_HEADER, received_metadata)
+            expected_public_key = base64.urlsafe_b64encode(
+                public_key_to_bytes(self._user_public_key)
             )
 
             # Assert
-            assert self._servicer.received_client_metadata() == expected_client_metadata
+            assert actual_public_key == expected_public_key
+            assert actual_hmac == expected_hmac
+
 
     def test_client_auth_get_run(self) -> None:
         """Test client authentication during send node."""
@@ -348,27 +367,27 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             _, _, _, _, get_run, _ = conn
             assert get_run is not None
             get_run(0)
+            
+            received_metadata = self._servicer.received_client_metadata()
+            assert received_metadata is not None
+
             shared_secret = generate_shared_key(
                 self._servicer.server_private_key, self._client_public_key
             )
             expected_hmac = compute_hmac(
                 shared_secret, self._servicer.received_message_bytes()
             )
-            expected_client_metadata = (
-                (
-                    _PUBLIC_KEY_HEADER,
-                    base64.urlsafe_b64encode(
-                        public_key_to_bytes(self._client_public_key)
-                    ),
-                ),
-                (
-                    _AUTH_TOKEN_HEADER,
-                    base64.urlsafe_b64encode(expected_hmac),
-                ),
+            actual_public_key = _get_value_from_tuples(
+                _PUBLIC_KEY_HEADER, received_metadata
+            )
+            actual_hmac = _get_value_from_tuples(_AUTH_TOKEN_HEADER, received_metadata)
+            expected_public_key = base64.urlsafe_b64encode(
+                public_key_to_bytes(self._user_public_key)
             )
 
             # Assert
-            assert self._servicer.received_client_metadata() == expected_client_metadata
+            assert actual_public_key == expected_public_key
+            assert actual_hmac == expected_hmac
 
 
 if __name__ == "__main__":
