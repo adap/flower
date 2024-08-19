@@ -35,8 +35,8 @@ def get_evaluate_fn(model_cfg, save_every_round, total_round, save_path):
 
 
 def get_on_fit_config(save_path):
-    """Return a function that will be used to construct the config that the
-    client's fit() method will receive."""
+    """Return a function that will be used to construct the config that the client's
+    fit() method will receive."""
 
     def fit_config_fn(server_round: int):
         fit_config = {}
