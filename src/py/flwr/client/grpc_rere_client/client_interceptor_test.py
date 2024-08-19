@@ -75,7 +75,7 @@ class _MockServicer:
 
             if isinstance(request, CreateNodeRequest):
                 context.send_initial_metadata(
-                    ((_PUBLIC_KEY_HEADER, self.server_public_key),)
+                    ((_PUBLIC_KEY_HEADER, base64.urlsafe_b64encode(public_key_to_bytes(self.server_public_key))),)
                 )
                 return CreateNodeResponse()
             if isinstance(request, DeleteNodeRequest):
@@ -224,11 +224,12 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             )
 
             expected_public_key = base64.urlsafe_b64encode(
-                public_key_to_bytes(self._user_public_key)
+                public_key_to_bytes(self._client_public_key)
             )
-
+            
             # Assert
             assert actual_public_key == expected_public_key
+        
 
     def test_client_auth_delete_node(self) -> None:
         """Test client authentication during delete node."""
@@ -262,7 +263,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             )
             actual_hmac = _get_value_from_tuples(_AUTH_TOKEN_HEADER, received_metadata)
             expected_public_key = base64.urlsafe_b64encode(
-                public_key_to_bytes(self._user_public_key)
+                public_key_to_bytes(self._client_public_key)
             )
 
             # Assert
@@ -301,7 +302,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             )
             actual_hmac = _get_value_from_tuples(_AUTH_TOKEN_HEADER, received_metadata)
             expected_public_key = base64.urlsafe_b64encode(
-                public_key_to_bytes(self._user_public_key)
+                public_key_to_bytes(self._client_public_key)
             )
 
             # Assert
@@ -342,7 +343,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             )
             actual_hmac = _get_value_from_tuples(_AUTH_TOKEN_HEADER, received_metadata)
             expected_public_key = base64.urlsafe_b64encode(
-                public_key_to_bytes(self._user_public_key)
+                public_key_to_bytes(self._client_public_key)
             )
 
             # Assert
@@ -382,7 +383,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             )
             actual_hmac = _get_value_from_tuples(_AUTH_TOKEN_HEADER, received_metadata)
             expected_public_key = base64.urlsafe_b64encode(
-                public_key_to_bytes(self._user_public_key)
+                public_key_to_bytes(self._client_public_key)
             )
 
             # Assert
