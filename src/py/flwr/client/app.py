@@ -371,8 +371,8 @@ def _start_client_internal(
                     message = receive()
 
                     if supernode_tracker and message:
-                        supernode_tracker.record_message_metadata(
-                            "SuperLink-to-SuperNode", message.metadata.__dict__
+                        supernode_tracker.record_message(
+                            "SuperLink", "SuperNode", message.metadata.__dict__
                         )
 
                     if message is None:
@@ -398,12 +398,13 @@ def _start_client_internal(
                     out_message, sleep_duration = handle_control_message(message)
                     if out_message:
                         send(out_message)
-                        break
 
-                    if supernode_tracker and out_message:
-                        supernode_tracker.record_message_metadata(
-                            "SuperNode-to-SuperLink", out_message.metadata.__dict__
-                        )
+                        if supernode_tracker and out_message:
+                            supernode_tracker.record_message(
+                                "SuperNode", "SuperLink", out_message.metadata.__dict__
+                            )
+
+                        break
 
                     # Get run info
                     run_id = message.metadata.run_id
@@ -414,7 +415,7 @@ def _start_client_internal(
                         else:
                             runs[run_id] = Run(run_id, "", "", {})
 
-                    supernode_tracker.record_run_metadata(runs[run_id])
+                    supernode_tracker.record_run(runs[run_id])
 
                     # Register context for this run
                     node_state.register_context(
@@ -439,15 +440,15 @@ def _start_client_internal(
                         )
 
                         if supernode_tracker and message:
-                            supernode_tracker.record_message_metadata(
-                                "SuperNode-to-ClientApp", message.metadata.__dict__
+                            supernode_tracker.record_message(
+                                "SuperNode", "ClientApp", message.metadata.__dict__
                             )
                         # Execute ClientApp
                         reply_message = client_app(message=message, context=context)
-
                         if supernode_tracker and reply_message:
-                            supernode_tracker.record_message_metadata(
-                                "ClientApp-to-SuperNode",
+                            supernode_tracker.record_message(
+                                "ClientApp",
+                                "SuperNode",
                                 reply_message.metadata.__dict__,
                             )
                     except Exception as ex:  # pylint: disable=broad-exception-caught
@@ -492,8 +493,8 @@ def _start_client_internal(
                     send(reply_message)
 
                     if supernode_tracker and message:
-                        supernode_tracker.record_message_metadata(
-                            "SuperNode-to-ClientApp", message.metadata.__dict__
+                        supernode_tracker.record_message(
+                            "SuperNode", "ClientApp", message.metadata.__dict__
                         )
                     log(INFO, "Sent reply")
 

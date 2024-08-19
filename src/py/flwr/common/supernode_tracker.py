@@ -34,22 +34,32 @@ class SuperNodeTracker:
         if not os.path.exists(self.filename):
             open(self.filename, "w").close()
 
-    def record_run_metadata(self, run: Run) -> None:
-        """Set the run metadata."""
+    def record_run(self, run: Run) -> None:
+        """Record the run metadata."""
+        timestamp = datetime.now().timestamp()
         run_metadata = {
             "run_id": run.run_id,
             "fab_id": run.fab_id,
             "fab_version": run.fab_version,
         }
 
+        record = {"timestamp": timestamp, "run": {"metadata": run_metadata}}
+
         if run.run_id not in self.run_ids:
-            self.save_to_file({"run": run_metadata})
+            self.save_to_file(record)
             self.run_ids.append(run.run_id)
 
-    def record_message_metadata(self, entity: str, metadata: Dict[str, Any]) -> None:
-        """Record metadata with a timestamp."""
+    def record_message(
+        self, from_entity: str, to_entity: str, metadata: Dict[str, Any]
+    ) -> None:
+        """Record the message metadata."""
         timestamp = datetime.now().timestamp()
-        record = {"timestamp": timestamp, entity: {"message_metadata": metadata}}
+        record = {
+            "timestamp": timestamp,
+            "from": from_entity,
+            "to": to_entity,
+            "message": {"metadata": metadata},
+        }
         self.save_to_file(record)
 
     def save_to_file(self, data: Dict[str, Any]) -> None:
