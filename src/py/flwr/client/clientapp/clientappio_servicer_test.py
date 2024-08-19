@@ -90,27 +90,27 @@ class TestClientAppIoServicer(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.servicer.clientapp_input = client_input
             self.servicer.clientapp_output = None
-            self.servicer.set_inputs(client_input)
+            self.servicer.set_inputs(client_input, token_returned=True)
 
         # Execute and assert
         # - when ClientAppIoInputs is None, ClientAppIoOutputs is not None
         with self.assertRaises(ValueError):
             self.servicer.clientapp_input = None
             self.servicer.clientapp_output = client_output
-            self.servicer.set_inputs(client_input)
+            self.servicer.set_inputs(client_input, token_returned=True)
 
         # Execute and assert
         # - when ClientAppIoInputs and ClientAppIoOutputs is not None
         with self.assertRaises(ValueError):
             self.servicer.clientapp_input = client_input
             self.servicer.clientapp_output = client_output
-            self.servicer.set_inputs(client_input)
+            self.servicer.set_inputs(client_input, token_returned=True)
 
         # Execute and assert
         # - when ClientAppIoInputs is set at .clientapp_input
         self.servicer.clientapp_input = None
         self.servicer.clientapp_output = None
-        self.servicer.set_inputs(client_input)
+        self.servicer.set_inputs(client_input, token_returned=True)
         assert client_input == self.servicer.clientapp_input
 
     def test_get_outputs(self) -> None:

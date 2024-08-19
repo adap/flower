@@ -17,7 +17,7 @@
 
 from dataclasses import dataclass
 from logging import DEBUG, ERROR
-from typing import Optional
+from typing import Optional, cast
 
 import grpc
 
@@ -79,19 +79,36 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
     ) -> PullClientAppInputsResponse:
         """Pull Message, Context, and Run."""
         log(DEBUG, "ClientAppIo.PullClientAppInputs")
+
+        # Fail if no ClientAppIoInputs are available
         if self.clientapp_input is None:
-            raise ValueError(
-                "ClientAppIoInputs not set before calling `PullClientAppInputs`."
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                "No inputs available.",
             )
-        if request.token != self.clientapp_input.token:
+        clientapp_input = cast(ClientAppIoInputs, self.clientapp_input)
+
+        # Fail if token wasn't returned in a previous call
+        if not self.token_returned:
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                "Token hasn't been returned."
+                "Token must be returned before can be returned only once.",
+            )
+
+        # Fail if token isn't matching
+        if request.token != clientapp_input.token:
             context.abort(
                 grpc.StatusCode.INVALID_ARGUMENT,
                 "Mismatch between ClientApp and SuperNode token",
             )
+
+        # Success
+        self.inputs_returned = True
         return PullClientAppInputsResponse(
-            message=message_to_proto(self.clientapp_input.message),
-            context=context_to_proto(self.clientapp_input.context),
-            run=run_to_proto(self.clientapp_input.run),
+            message=message_to_proto(clientapp_input.message),
+            context=context_to_proto(clientapp_input.context),
+            run=run_to_proto(clientapp_input.run),
         )
 
     def PushClientAppOutputs(
@@ -99,15 +116,39 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
     ) -> PushClientAppOutputsResponse:
         """Push Message and Context."""
         log(DEBUG, "ClientAppIo.PushClientAppOutputs")
-        if self.clientapp_input is None:
-            raise ValueError(
-                "ClientAppIoInputs not set before calling `PushClientAppOutputs`."
+
+        # Fail if no ClientAppIoInputs are available
+        if not self.clientapp_input:
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                "No inputs available.",
             )
-        if request.token != self.clientapp_input.token:
+        clientapp_input = cast(ClientAppIoInputs, self.clientapp_input)
+
+        # Fail if token wasn't returned in a previous call
+        if not self.token_returned:
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                "Token hasn't been returned."
+                "Token must be returned before can be returned only once.",
+            )
+
+        # Fail if inputs weren't delivered in a previous call
+        if not self.inputs_returned:
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                "Inputs haven't been delivered."
+                "Inputs must be delivered before can be returned only once.",
+            )
+
+        # Fail if token isn't matching
+        if request.token != clientapp_input.token:
             context.abort(
                 grpc.StatusCode.INVALID_ARGUMENT,
                 "Mismatch between ClientApp and SuperNode token",
             )
+
+        # Preconditions met
         try:
             # Update Message and Context
             self.clientapp_output = ClientAppIoOutputs(
@@ -118,14 +159,10 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             # Set status
             code = typing.ClientAppOutputCode.SUCCESS
             status = typing.ClientAppOutputStatus(code=code, message="Success")
-            proto_status = clientappstatus_to_proto(status=status)
-            return PushClientAppOutputsResponse(status=proto_status)
         except Exception as e:  # pylint: disable=broad-exception-caught
             log(ERROR, "ClientApp failed to push message to SuperNode, %s", e)
             code = typing.ClientAppOutputCode.UNKNOWN_ERROR
-            status = typing.ClientAppOutputStatus(code=code, message="Push failed")
-            proto_status = clientappstatus_to_proto(status=status)
-            return PushClientAppOutputsResponse(status=proto_status)
+            status = typing.ClientAppOutputStatus(code=code, message="Unkonwn error")
 
     def GetToken(
         self, request: GetTokenRequest, context: grpc.ServicerContext
@@ -146,23 +183,46 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         log(DEBUG, "ClientAppIo.GetFab")
         return GetFabResponse()
 
-    def set_inputs(self, clientapp_input: ClientAppIoInputs) -> None:
-        """Set ClientApp inputs."""
-        log(DEBUG, "ClientAppIo.SetInputs")
-        if self.clientapp_input is not None or self.clientapp_output is not None:
+    def set_inputs(
+        self, clientapp_input: ClientAppIoInputs, token_returned: bool
+    ) -> None:
+        """Set ClientApp inputs.
+
+        Parameters
+        ----------
+        clientapp_input : ClientAppIoInputs
+            The inputs to the ClientApp.
+        token_returned : bool
+            A boolean indicating if the token has been returned.
+            Set to `True` when passing the token to `flwr-clientap`
+            and `False` otherwise.
+        """
+        if (
+            self.clientapp_input is not None
+            or self.clientapp_output is not None
+            or self.token_returned
+        ):
             raise ValueError(
                 "ClientAppIoInputs and ClientAppIoOutputs must not be set before "
                 "calling `set_inputs`."
             )
         self.clientapp_input = clientapp_input
+        self.token_returned = token_returned
+
+    def has_outputs(self) -> bool:
+        """Check if ClientAppOutputs are available."""
+        return self.clientapp_output is not None
 
     def get_outputs(self) -> ClientAppIoOutputs:
         """Get ClientApp outputs."""
-        log(DEBUG, "ClientAppIo.GetOutputs")
         if self.clientapp_output is None:
             raise ValueError("ClientAppIoOutputs not set before calling `get_outputs`.")
-        # Set outputs to a local variable and clear self.clientapp_output
+
+        # Set outputs to a local variable and clear state
         output: ClientAppIoOutputs = self.clientapp_output
         self.clientapp_input = None
         self.clientapp_output = None
+        self.token_returned = False
+        self.inputs_returned = False
+
         return output
