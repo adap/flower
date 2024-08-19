@@ -52,7 +52,7 @@ from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.server.superlink.fleet.grpc_bidi.grpc_server import generic_create_grpc_server
 from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
 
-from .clientapp.clientappio_servicer import ClientAppIoInputs, ClientAppIoServicer
+from .clientapp.clientappio_servicer import ClientAppInputs, ClientAppIoServicer
 from .grpc_adapter_client.connection import grpc_adapter
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
@@ -61,6 +61,9 @@ from .node_state import NodeState
 from .numpy_client import NumPyClient
 
 ADDRESS_CLIENTAPPIO_API_GRPC_RERE = "0.0.0.0:9094"
+
+ISOLATION_MODE_SUBPROCESS = "subprocess"
+ISOLATION_MODE_PROCESS = "process"
 
 
 def _check_actionable_client(
@@ -207,7 +210,7 @@ def start_client_internal(
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
     flwr_path: Optional[Path] = None,
-    isolate: Optional[bool] = False,
+    isolation: Optional[str] = None,
     supernode_address: Optional[str] = ADDRESS_CLIENTAPPIO_API_GRPC_RERE,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
@@ -256,11 +259,13 @@ def start_client_internal(
         If set to None, there is no limit to the total time.
     flwr_path: Optional[Path] (default: None)
         The fully resolved path containing installed Flower Apps.
-    isolate : Optional[bool] (default: False)
-        Whether to run `ClientApp` in a separate process. By default, this value is
-        `False`, and the `ClientApp` runs in the same process as the SuperNode. If
-        `True`, the `ClientApp` runs in an isolated process and communicates using
-        gRPC at the address `supernode_address`.
+    isolation : Optional[str] (default: None)
+        Isolation mode for `ClientApp`. Possible values are `subprocess` and
+        `process`. Defaults to `None`, which runs the `ClientApp` in the same process
+        as the SuperNode. If `subprocess`, the `ClientApp` runs in a subprocess started
+        by the SueprNode and communicates using gRPC at the address
+        `supernode_address`. If `process`, the `ClientApp` runs in a separate isolated
+        process and communicates using gRPC at the address `supernode_address`.
     supernode_address : Optional[str] (default: `ADDRESS_CLIENTAPPIO_API_GRPC_RERE`)
         The SuperNode gRPC server address.
     """
@@ -288,9 +293,12 @@ def start_client_internal(
 
         load_client_app_fn = _load_client_app
 
-    if isolate:
+    if isolation:
         if supernode_address is None:
-            raise ValueError("`supernode_address` required when `isolate` is set")
+            raise ValueError(
+                f"`supernode_address` required when `isolation` is "
+                f"{ISOLATION_MODE_SUBPROCESS} or {ISOLATION_MODE_PROCESS}",
+            )
         _clientappio_grpc_server, clientappio_servicer = run_clientappio_api_grpc(
             address=supernode_address
         )
@@ -390,6 +398,7 @@ def start_client_internal(
                     )
 
             app_state_tracker.register_signal_handler()
+            # pylint: disable=too-many-nested-blocks
             while not app_state_tracker.interrupt:
                 try:
                     # Receive
@@ -455,39 +464,50 @@ def start_client_internal(
 
                     # Handle app loading and task message
                     try:
-                        if isolate:
+                        if isolation:
+                            # Two isolation modes:
+                            # 1. `subprocess`: SuperNode is starting the ClientApp
+                            #    process as a subprocess.
+                            # 2. `process`: ClientApp process gets started separately
+                            #    (via `flwr-clientapp`), for example, in a separate
+                            #    Docker container.
+
                             # Generate SuperNode token
                             token: int = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
 
+                            # Mode 1: SuperNode starts ClientApp as subprocess
+                            start_subprocess = isolation == ISOLATION_MODE_SUBPROCESS
+
                             # Share Message and Context with servicer
                             clientappio_servicer.set_inputs(
-                                clientapp_input=ClientAppIoInputs(
+                                clientapp_input=ClientAppInputs(
                                     message=message,
                                     context=context,
                                     run=run,
                                     token=token,
                                 ),
-                                token_returned=True,
+                                token_returned=start_subprocess,
                             )
 
-                            # Run `ClientApp` in subprocess
-                            command = [
-                                "flwr-clientapp",
-                                "--supernode",
-                                supernode_address,
-                                "--token",
-                                str(token),
-                            ]
-                            subprocess.run(
-                                command,
-                                stdout=None,
-                                stderr=None,
-                                check=True,
-                            )
-
-                            # Wait for output to become available
-                            while not clientappio_servicer.has_outputs():
-                                time.sleep(0.1)
+                            if start_subprocess:
+                                # Start ClientApp subprocess
+                                command = [
+                                    "flwr-clientapp",
+                                    "--supernode",
+                                    supernode_address,
+                                    "--token",
+                                    str(token),
+                                ]
+                                subprocess.run(
+                                    command,
+                                    stdout=None,
+                                    stderr=None,
+                                    check=True,
+                                )
+                            else:
+                                # Wait for output to become available
+                                while not clientappio_servicer.has_outputs():
+                                    time.sleep(0.1)
 
                             outputs = clientappio_servicer.get_outputs()
                             reply_message, context = outputs.message, outputs.context
@@ -544,6 +564,7 @@ def start_client_internal(
                 except StopIteration:
                     sleep_duration = 0
                     break
+            # pylint: enable=too-many-nested-blocks
 
             # Unregister node
             if delete_node is not None and app_state_tracker.is_connected:

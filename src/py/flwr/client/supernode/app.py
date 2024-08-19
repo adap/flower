@@ -37,7 +37,11 @@ from flwr.common.constant import (
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature
 
-from ..app import start_client_internal
+from ..app import (
+    ISOLATION_MODE_PROCESS,
+    ISOLATION_MODE_SUBPROCESS,
+    start_client_internal,
+)
 from ..clientapp.utils import get_load_client_app_fn
 
 ADDRESS_FLEET_API_GRPC_RERE = "0.0.0.0:9092"
@@ -62,6 +66,8 @@ def run_supernode() -> None:
     )
     authentication_keys = _try_setup_client_authentication(args)
 
+    log(DEBUG, "Isolation mode: %s", args.isolation)
+
     start_client_internal(
         server_address=args.superlink,
         load_client_app_fn=load_fn,
@@ -72,7 +78,7 @@ def run_supernode() -> None:
         max_retries=args.max_retries,
         max_wait_time=args.max_wait_time,
         node_config=parse_config_args([args.node_config]),
-        isolate=args.isolate,
+        isolation=args.isolation,
         supernode_address=args.supernode_address,
     )
 
@@ -199,10 +205,18 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
     """,
     )
     parser.add_argument(
-        "--isolate",
-        action="store_true",
-        help="Run `ClientApp` in an isolated subprocess. By default, `ClientApp` "
-        "runs in the same process that executes the SuperNode.",
+        "--isolation",
+        default=None,
+        required=False,
+        choices=[
+            ISOLATION_MODE_SUBPROCESS,
+            ISOLATION_MODE_PROCESS,
+        ],
+        help="Isolation mode when running `ClientApp` (optional, possible values: "
+        "`subprocess`, `process`). By default, `ClientApp` runs in the same process "
+        "that executes the SuperNode. Use `subprocess` to configure SuperNode to run "
+        "`ClientApp` in a subprocess. Use `process` to indicate that a separate "
+        "independent process gets created outside of SuperNode.",
     )
     parser.add_argument(
         "--supernode-address",
