@@ -119,7 +119,7 @@ def run_clientapp(  # pylint: disable=R0914
             # Pull Message, Context, Run and (optional) FAB from SuperNode
             message, context, run, fab = pull_message(stub=stub, token=token)
 
-            # Install FAB, if FAB was provided
+            # Install FAB, if provided
             if fab:
                 log(DEBUG, "Flower ClientApp starts FAB installation.")
                 install_from_fab(fab.content, flwr_dir=None, skip_prompt=True)
