@@ -422,12 +422,6 @@ def start_client_internal(
                         message.metadata.message_id,
                     )
 
-                    # Handle control message
-                    out_message, sleep_duration = handle_control_message(message)
-                    if out_message:
-                        send(out_message)
-                        break
-
                     # Get run info
                     run_id = message.metadata.run_id
                     if run_id not in runs:
@@ -436,6 +430,12 @@ def start_client_internal(
                         # If get_run is None, i.e., in grpc-bidi mode
                         else:
                             runs[run_id] = Run(run_id, "", "", "", {})
+
+                    # Handle control message
+                    out_message, sleep_duration = handle_control_message(message)
+                    if out_message:
+                        send(out_message)
+                        break
 
                     run: Run = runs[run_id]
                     if get_fab is not None and run.fab_hash:
