@@ -78,7 +78,6 @@ class TestClientAppIoServicer(unittest.TestCase):
             fab_hash="dolor",
             override_config=self.maker.user_config(),
         )
-
         fab = typing.Fab(
             hash_str="abc123#$%",
             content=b"\xf3\xf5\xf8\x98",
