@@ -218,6 +218,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
                 "ClientAppIoInputs and ClientAppIoOutputs must not be set before "
                 "calling `set_inputs`."
             )
+        log(DEBUG, "ClientAppIoInputs set (token: %s)", clientapp_input.token)
         self.clientapp_input = clientapp_input
         self.token_returned = token_returned
 
