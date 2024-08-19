@@ -18,6 +18,7 @@
 import base64
 import threading
 import unittest
+from unittest.mock import MagicMock
 from concurrent import futures
 from logging import DEBUG, INFO, WARN
 from typing import Optional, Sequence, Tuple, Union
@@ -25,7 +26,10 @@ from typing import Optional, Sequence, Tuple, Union
 import grpc
 
 from flwr.client.grpc_rere_client.connection import grpc_request_response
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH
+from flwr.proto.task_pb2 import TaskIns, Task
+from flwr.proto.recordset_pb2 import RecordSet
+from flwr.proto.node_pb2 import Node
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH, serde
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.record import RecordSet
@@ -84,13 +88,13 @@ class _MockServicer:
                         ),
                     )
                 )
-                return CreateNodeResponse()
+                return CreateNodeResponse(node=Node(node_id=123))
             if isinstance(request, DeleteNodeRequest):
                 return DeleteNodeResponse()
             if isinstance(request, PushTaskResRequest):
                 return PushTaskResResponse()
 
-            return PullTaskInsResponse()
+            return PullTaskInsResponse(task_ins_list=[TaskIns(task=Task(consumer=Node(node_id=123), recordset=serde.recordset_to_proto(RecordSet())))])
 
     def received_client_metadata(
         self,
@@ -323,7 +327,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
         """Test client authentication during send node."""
         # Prepare
         retry_invoker = _init_retry_invoker()
-        message = Message(Metadata(0, "1", 0, 0, "", "", 0, ""), RecordSet())
+        message = Message(Metadata(0, "", 123, 0, "", "", 0, ""), RecordSet())
 
         # Execute
         with self._connection(
@@ -334,9 +338,11 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            _, send, create_node, _, _, _ = conn
+            receive, send, create_node, _, _, _ = conn
             assert create_node is not None
             create_node()
+            assert receive is not None
+            receive()
             assert send is not None
             send(message)
 
@@ -401,6 +407,8 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             # Assert
             assert actual_public_key == expected_public_key
             assert actual_hmac == expected_hmac
+
+        assert False
 
 
 if __name__ == "__main__":
