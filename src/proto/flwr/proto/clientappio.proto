@@ -18,9 +18,6 @@ service ClientAppIo {
   rpc PushClientAppOutputs(PushClientAppOutputsRequest)
       returns (PushClientAppOutputsResponse) {}
 
-  // Get token
-  rpc GetToken(GetTokenRequest) returns (GetTokenResponse) {}
-
   // Get the FAB
   rpc GetFab(GetFabRequestWithToken) returns (GetFabResponse) {}
 }
@@ -51,8 +48,5 @@ message PushClientAppOutputsRequest {
   Context context = 3;
 }
 message PushClientAppOutputsResponse { ClientAppOutputStatus status = 1; }
-
-message GetTokenRequest {}
-message GetTokenResponse { sint64 token = 1; }
 
 message GetFabRequestWithToken { sint64 token = 1; }

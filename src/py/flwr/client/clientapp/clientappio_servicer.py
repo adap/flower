@@ -164,6 +164,10 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             code = typing.ClientAppOutputCode.UNKNOWN_ERROR
             status = typing.ClientAppOutputStatus(code=code, message="Unkonwn error")
 
+        # Return status to ClientApp process
+        proto_status = clientappstatus_to_proto(status=status)
+        return PushClientAppOutputsResponse(status=proto_status)
+
     def GetToken(
         self, request: GetTokenRequest, context: grpc.ServicerContext
     ) -> GetTokenResponse:
