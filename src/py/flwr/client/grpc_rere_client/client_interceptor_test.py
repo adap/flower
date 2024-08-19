@@ -251,7 +251,9 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            _, _, _, delete_node, _, _ = conn
+            _, _, create_node, delete_node, _, _ = conn
+            assert create_node is not None
+            create_node()
             assert delete_node is not None
             delete_node()
 
@@ -261,8 +263,8 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             shared_secret = generate_shared_key(
                 self._servicer.server_private_key, self._client_public_key
             )
-            expected_hmac = compute_hmac(
-                shared_secret, self._servicer.received_message_bytes()
+            expected_hmac = base64.urlsafe_b64encode(
+                compute_hmac(shared_secret, self._servicer.received_message_bytes())
             )
             actual_public_key = _get_value_from_tuples(
                 _PUBLIC_KEY_HEADER, received_metadata
@@ -290,7 +292,9 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            receive, _, _, _, _, _ = conn
+            receive, _, create_node, _, _, _ = conn
+            assert create_node is not None
+            create_node()
             assert receive is not None
             receive()
 
@@ -300,8 +304,8 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             shared_secret = generate_shared_key(
                 self._servicer.server_private_key, self._client_public_key
             )
-            expected_hmac = compute_hmac(
-                shared_secret, self._servicer.received_message_bytes()
+            expected_hmac = base64.urlsafe_b64encode(
+                compute_hmac(shared_secret, self._servicer.received_message_bytes())
             )
             actual_public_key = _get_value_from_tuples(
                 _PUBLIC_KEY_HEADER, received_metadata
@@ -330,7 +334,9 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            _, send, _, _, _, _ = conn
+            _, send, create_node, _, _, _ = conn
+            assert create_node is not None
+            create_node()
             assert send is not None
             send(message)
 
@@ -340,8 +346,8 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             shared_secret = generate_shared_key(
                 self._servicer.server_private_key, self._client_public_key
             )
-            expected_hmac = compute_hmac(
-                shared_secret, self._servicer.received_message_bytes()
+            expected_hmac = base64.urlsafe_b64encode(
+                compute_hmac(shared_secret, self._servicer.received_message_bytes())
             )
             actual_public_key = _get_value_from_tuples(
                 _PUBLIC_KEY_HEADER, received_metadata
@@ -369,7 +375,9 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            _, _, _, _, get_run, _ = conn
+            _, _, create_node, _, get_run, _ = conn
+            assert create_node is not None
+            create_node()
             assert get_run is not None
             get_run(0)
 
@@ -379,8 +387,8 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             shared_secret = generate_shared_key(
                 self._servicer.server_private_key, self._client_public_key
             )
-            expected_hmac = compute_hmac(
-                shared_secret, self._servicer.received_message_bytes()
+            expected_hmac = base64.urlsafe_b64encode(
+                compute_hmac(shared_secret, self._servicer.received_message_bytes())
             )
             actual_public_key = _get_value_from_tuples(
                 _PUBLIC_KEY_HEADER, received_metadata
