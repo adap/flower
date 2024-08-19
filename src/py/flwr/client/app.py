@@ -197,7 +197,6 @@ def _start_client_internal(
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
     flwr_path: Optional[Path] = None,
-    supernode_tracker: Optional[SuperNodeTracker] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -363,6 +362,8 @@ def _start_client_internal(
                         node_config=node_config,
                     )
 
+            supernode_tracker = SuperNodeTracker(node_id)
+
             app_state_tracker.register_signal_handler()
             while not app_state_tracker.interrupt:
                 try:
@@ -412,6 +413,8 @@ def _start_client_internal(
                         # If get_run is None, i.e., in grpc-bidi mode
                         else:
                             runs[run_id] = Run(run_id, "", "", {})
+
+                    supernode_tracker.record_run_metadata(runs[run_id])
 
                     # Register context for this run
                     node_state.register_context(
@@ -498,8 +501,8 @@ def _start_client_internal(
                     sleep_duration = 0
                     break
 
-            if supernode_tracker:
-                supernode_tracker.save_to_file()
+            # if supernode_tracker:
+            #     supernode_tracker.save_to_file()
             # Unregister node
             if delete_node is not None and app_state_tracker.is_connected:
                 delete_node()  # pylint: disable=not-callable

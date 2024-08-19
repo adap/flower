@@ -16,35 +16,48 @@
 
 import json
 import os
-from typing import Any, Dict, List
+from datetime import datetime
+from typing import Any, Dict
+
+from flwr.common.typing import Run
 
 
 class SuperNodeTracker:
     """A utility class for tracking and recording SuperNode."""
 
-    def __init__(self, file_path: str) -> None:
-        """Initialize the tracker with a file path."""
-        self.file_path = file_path
-        self.records_holder: List[Dict[str, Dict[str, Any]]] = []
+    def __init__(self, supernode_id: str) -> None:
+        self.supernode_id = supernode_id
+        self.filename = f"supernode_tracking_({supernode_id}).json"
+        self.run_ids = []
 
-        # Create an empty file if it doesn't exist
-        if not os.path.exists(self.file_path):
-            with open(self.file_path, "w", encoding="utf-8"):
-                pass
+        # Create an empty file if it does not exist
+        if not os.path.exists(self.filename):
+            open(self.filename, "w").close()
+
+    def record_run_metadata(self, run: Run) -> None:
+        """Set the run metadata."""
+        run_metadata = {
+            "run_id": run.run_id,
+            "fab_id": run.fab_id,
+            "fab_version": run.fab_version,
+        }
+
+        if run.run_id not in self.run_ids:
+            self.save_to_file({"run": run_metadata})
+            self.run_ids.append(run.run_id)
 
     def record_message_metadata(self, entity: str, metadata: Dict[str, Any]) -> None:
-        """Add a log entry to the records holder."""
-        log_entry = {entity: metadata}
-        self.records_holder.append(log_entry)
+        """Record metadata with a timestamp."""
+        timestamp = datetime.now().timestamp()
+        record = {"timestamp": timestamp, entity: {"message_metadata": metadata}}
+        self.save_to_file(record)
 
-    def save_to_file(self) -> None:
-        """Write all accumulated record entries to the file."""
-        with open(self.file_path, "a", encoding="utf-8") as file:
-            for entry in self.records_holder:
-                json.dump(entry, file)
+    def save_to_file(self, data: Dict[str, Any]) -> None:
+        """Write data to the JSON file."""
+        try:
+            with open(self.filename, "a", encoding="utf-8") as file:
+                json.dump(data, file)
                 file.write("\n")
-        self.records_holder.clear()
-
-    def clear_records_holder(self) -> None:
-        """Clear the records holder without saving to file."""
-        self.records_holder.clear()
+        except OSError as e:
+            # Raise a new exception while preserving the original context
+            raise RuntimeError(f"Failed to write to file at {self.filename}") from e
