@@ -27,16 +27,16 @@ from flwr.common.serde import (
     clientappstatus_to_proto,
     context_from_proto,
     context_to_proto,
+    fab_to_proto,
     message_from_proto,
     message_to_proto,
     run_to_proto,
 )
-from flwr.common.typing import Run
+from flwr.common.typing import Fab, Run
 
 # pylint: disable=E0611
 from flwr.proto import clientappio_pb2_grpc
 from flwr.proto.clientappio_pb2 import (  # pylint: disable=E0401
-    GetFabRequestWithToken,
     GetTokenRequest,
     GetTokenResponse,
     PullClientAppInputsRequest,
@@ -44,7 +44,6 @@ from flwr.proto.clientappio_pb2 import (  # pylint: disable=E0401
     PushClientAppOutputsRequest,
     PushClientAppOutputsResponse,
 )
-from flwr.proto.fab_pb2 import GetFabResponse
 
 
 @dataclass
@@ -54,6 +53,7 @@ class ClientAppInputs:
     message: Message
     context: Context
     run: Run
+    fab: Fab
     token: int
 
 
@@ -138,6 +138,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             message=message_to_proto(clientapp_input.message),
             context=context_to_proto(clientapp_input.context),
             run=run_to_proto(clientapp_input.run),
+            fab=fab_to_proto(clientapp_input.fab),
         )
 
     def PushClientAppOutputs(
@@ -196,13 +197,6 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         # Return status to ClientApp process
         proto_status = clientappstatus_to_proto(status=status)
         return PushClientAppOutputsResponse(status=proto_status)
-
-    def GetFab(
-        self, request: GetFabRequestWithToken, context: grpc.ServicerContext
-    ) -> GetFabResponse:
-        """Get Fab."""
-        log(DEBUG, "ClientAppIo.GetFab")
-        return GetFabResponse()
 
     def set_inputs(
         self, clientapp_input: ClientAppInputs, token_returned: bool

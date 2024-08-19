@@ -475,6 +475,13 @@ def start_client_internal(
                             # Generate SuperNode token
                             token: int = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
 
+                            # Ensure FAB exists
+                            if fab is None:
+                                raise ValueError(
+                                    "SuperNode with `--isolation` can only operate "
+                                    "when a FAB has been pulled from the SuperLink."
+                                )
+
                             # Mode 1: SuperNode starts ClientApp as subprocess
                             start_subprocess = isolation == ISOLATION_MODE_SUBPROCESS
 
@@ -484,6 +491,7 @@ def start_client_internal(
                                     message=message,
                                     context=context,
                                     run=run,
+                                    fab=fab,
                                     token=token,
                                 ),
                                 token_returned=start_subprocess,

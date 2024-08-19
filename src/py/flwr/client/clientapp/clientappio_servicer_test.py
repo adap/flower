@@ -17,12 +17,13 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from flwr.client.clientapp.app import get_fab, get_token, pull_message, push_message
+from flwr.client.clientapp.app import get_token, pull_message, push_message
 from flwr.common import Context, Message, typing
 from flwr.common.constant import RUN_ID_NUM_BYTES
 from flwr.common.serde import (
     clientappstatus_from_proto,
     clientappstatus_to_proto,
+    fab_to_proto,
     message_to_proto,
 )
 from flwr.common.serde_test import RecordMaker
@@ -33,7 +34,6 @@ from flwr.proto.clientappio_pb2 import (
     PullClientAppInputsResponse,
     PushClientAppOutputsResponse,
 )
-from flwr.proto.fab_pb2 import Fab, GetFabResponse
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.run_pb2 import Run as ProtoRun
 from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
@@ -78,7 +78,13 @@ class TestClientAppIoServicer(unittest.TestCase):
             fab_hash="dolor",
             override_config=self.maker.user_config(),
         )
-        client_input = ClientAppInputs(message, context, run, 1)
+
+        fab = typing.Fab(
+            hash_str="abc123#$%",
+            content=b"\xf3\xf5\xf8\x98",
+        )
+
+        client_input = ClientAppInputs(message, context, run, fab, 1)
         client_output = ClientAppOutputs(message, context)
 
         # Execute and assert
@@ -145,15 +151,20 @@ class TestClientAppIoServicer(unittest.TestCase):
             metadata=self.maker.metadata(),
             content=self.maker.recordset(3, 2, 1),
         )
+        mock_fab = typing.Fab(
+            hash_str="abc123#$%",
+            content=b"\xf3\xf5\xf8\x98",
+        )
         mock_response = PullClientAppInputsResponse(
             message=message_to_proto(mock_message),
             context=ProtoContext(node_id=123),
             run=ProtoRun(run_id=61016, fab_id="mock/mock", fab_version="v1.0.0"),
+            fab=fab_to_proto(mock_fab),
         )
         self.mock_stub.PullClientAppInputs.return_value = mock_response
 
         # Execute
-        message, context, run = pull_message(self.mock_stub, token=456)
+        message, context, run, fab = pull_message(self.mock_stub, token=456)
 
         # Assert
         self.mock_stub.PullClientAppInputs.assert_called_once()
@@ -164,6 +175,8 @@ class TestClientAppIoServicer(unittest.TestCase):
         self.assertEqual(run.run_id, 61016)
         self.assertEqual(run.fab_id, "mock/mock")
         self.assertEqual(run.fab_version, "v1.0.0")
+        self.assertEqual(fab.hash_str, mock_fab.hash_str)
+        self.assertEqual(fab.content, mock_fab.content)
 
     def test_push_clientapp_outputs(self) -> None:
         """Test pushing messages to SuperNode."""
@@ -208,18 +221,3 @@ class TestClientAppIoServicer(unittest.TestCase):
         # Assert
         self.mock_stub.GetToken.assert_called_once()
         self.assertEqual(res, token)
-
-    def test_get_fab(self) -> None:
-        """Test fetching of FAB from SuperNode."""
-        # Prepare
-        token: int = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
-        fab = Fab(hash_str="1234", content=b"\xf3\xf5\xf8\x98")
-        mock_response = GetFabResponse(fab=fab)
-        self.mock_stub.GetFab.return_value = mock_response
-
-        # Execute
-        fab_returned = get_fab(stub=self.mock_stub, token=token)
-
-        # Assert
-        self.mock_stub.GetFab.assert_called_once()
-        self.assertEqual(fab_returned, fab)

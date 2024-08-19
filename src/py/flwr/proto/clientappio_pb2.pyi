@@ -3,6 +3,7 @@
 isort:skip_file
 """
 import builtins
+import flwr.proto.fab_pb2
 import flwr.proto.message_pb2
 import flwr.proto.run_pb2
 import google.protobuf.descriptor
@@ -77,20 +78,24 @@ class PullClientAppInputsResponse(google.protobuf.message.Message):
     MESSAGE_FIELD_NUMBER: builtins.int
     CONTEXT_FIELD_NUMBER: builtins.int
     RUN_FIELD_NUMBER: builtins.int
+    FAB_FIELD_NUMBER: builtins.int
     @property
     def message(self) -> flwr.proto.message_pb2.Message: ...
     @property
     def context(self) -> flwr.proto.message_pb2.Context: ...
     @property
     def run(self) -> flwr.proto.run_pb2.Run: ...
+    @property
+    def fab(self) -> flwr.proto.fab_pb2.Fab: ...
     def __init__(self,
         *,
         message: typing.Optional[flwr.proto.message_pb2.Message] = ...,
         context: typing.Optional[flwr.proto.message_pb2.Context] = ...,
         run: typing.Optional[flwr.proto.run_pb2.Run] = ...,
+        fab: typing.Optional[flwr.proto.fab_pb2.Fab] = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["context",b"context","message",b"message","run",b"run"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["context",b"context","message",b"message","run",b"run"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["context",b"context","fab",b"fab","message",b"message","run",b"run"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["context",b"context","fab",b"fab","message",b"message","run",b"run"]) -> None: ...
 global___PullClientAppInputsResponse = PullClientAppInputsResponse
 
 class PushClientAppOutputsRequest(google.protobuf.message.Message):
@@ -125,14 +130,3 @@ class PushClientAppOutputsResponse(google.protobuf.message.Message):
     def HasField(self, field_name: typing_extensions.Literal["status",b"status"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["status",b"status"]) -> None: ...
 global___PushClientAppOutputsResponse = PushClientAppOutputsResponse
-
-class GetFabRequestWithToken(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    TOKEN_FIELD_NUMBER: builtins.int
-    token: builtins.int
-    def __init__(self,
-        *,
-        token: builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["token",b"token"]) -> None: ...
-global___GetFabRequestWithToken = GetFabRequestWithToken
