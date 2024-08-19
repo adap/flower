@@ -398,6 +398,7 @@ def start_client_internal(
                     )
 
             app_state_tracker.register_signal_handler()
+            # pylint: disable=too-many-nested-blocks
             while not app_state_tracker.interrupt:
                 try:
                     # Receive
@@ -474,6 +475,9 @@ def start_client_internal(
                             # Generate SuperNode token
                             token: int = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
 
+                            # Mode 1: SuperNode starts ClientApp as subprocess
+                            start_subprocess = isolation == ISOLATION_MODE_SUBPROCESS
+
                             # Share Message and Context with servicer
                             clientappio_servicer.set_inputs(
                                 clientapp_input=ClientAppIoInputs(
@@ -482,10 +486,10 @@ def start_client_internal(
                                     run=run,
                                     token=token,
                                 ),
-                                token_returned=True,
+                                token_returned=start_subprocess,
                             )
 
-                            if isolation == ISOLATION_MODE_SUBPROCESS:
+                            if start_subprocess:
                                 # Start ClientApp subprocess
                                 command = [
                                     "flwr-clientapp",
@@ -500,10 +504,10 @@ def start_client_internal(
                                     stderr=None,
                                     check=True,
                                 )
-
-                            # Wait for output to become available
-                            while not clientappio_servicer.has_outputs():
-                                time.sleep(0.1)
+                            else:
+                                # Wait for output to become available
+                                while not clientappio_servicer.has_outputs():
+                                    time.sleep(0.1)
 
                             outputs = clientappio_servicer.get_outputs()
                             reply_message, context = outputs.message, outputs.context
@@ -560,6 +564,7 @@ def start_client_internal(
                 except StopIteration:
                     sleep_duration = 0
                     break
+            # pylint: enable=too-many-nested-blocks
 
             # Unregister node
             if delete_node is not None and app_state_tracker.is_connected:
