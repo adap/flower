@@ -37,6 +37,7 @@ message PullClientAppInputsResponse {
   Message message = 1;
   Context context = 2;
   Run run = 3;
+  Fab fab = 4;
 }
 
 message PushClientAppOutputsRequest {

@@ -23,6 +23,7 @@ from flwr.common.constant import RUN_ID_NUM_BYTES
 from flwr.common.serde import (
     clientappstatus_from_proto,
     clientappstatus_to_proto,
+    fab_to_proto,
     message_to_proto,
 )
 from flwr.common.serde_test import RecordMaker
@@ -77,7 +78,12 @@ class TestClientAppIoServicer(unittest.TestCase):
             fab_hash="dolor",
             override_config=self.maker.user_config(),
         )
-        client_input = ClientAppInputs(message, context, run, 1)
+        fab = typing.Fab(
+            hash_str="abc123#$%",
+            content=b"\xf3\xf5\xf8\x98",
+        )
+
+        client_input = ClientAppInputs(message, context, run, fab, 1)
         client_output = ClientAppOutputs(message, context)
 
         # Execute and assert
@@ -144,15 +150,20 @@ class TestClientAppIoServicer(unittest.TestCase):
             metadata=self.maker.metadata(),
             content=self.maker.recordset(3, 2, 1),
         )
+        mock_fab = typing.Fab(
+            hash_str="abc123#$%",
+            content=b"\xf3\xf5\xf8\x98",
+        )
         mock_response = PullClientAppInputsResponse(
             message=message_to_proto(mock_message),
             context=ProtoContext(node_id=123),
             run=ProtoRun(run_id=61016, fab_id="mock/mock", fab_version="v1.0.0"),
+            fab=fab_to_proto(mock_fab),
         )
         self.mock_stub.PullClientAppInputs.return_value = mock_response
 
         # Execute
-        message, context, run = pull_message(self.mock_stub, token=456)
+        message, context, run, fab = pull_message(self.mock_stub, token=456)
 
         # Assert
         self.mock_stub.PullClientAppInputs.assert_called_once()
@@ -163,6 +174,9 @@ class TestClientAppIoServicer(unittest.TestCase):
         self.assertEqual(run.run_id, 61016)
         self.assertEqual(run.fab_id, "mock/mock")
         self.assertEqual(run.fab_version, "v1.0.0")
+        if fab:
+            self.assertEqual(fab.hash_str, mock_fab.hash_str)
+            self.assertEqual(fab.content, mock_fab.content)
 
     def test_push_clientapp_outputs(self) -> None:
         """Test pushing messages to SuperNode."""
