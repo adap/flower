@@ -37,11 +37,7 @@ from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.run_pb2 import Run as ProtoRun
 from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
 
-from .clientappio_servicer import (
-    ClientAppIoInputs,
-    ClientAppIoOutputs,
-    ClientAppIoServicer,
-)
+from .clientappio_servicer import ClientAppInputs, ClientAppIoServicer, ClientAppOutputs
 
 
 class TestClientAppIoServicer(unittest.TestCase):
@@ -81,32 +77,32 @@ class TestClientAppIoServicer(unittest.TestCase):
             fab_hash="dolor",
             override_config=self.maker.user_config(),
         )
-        client_input = ClientAppIoInputs(message, context, run, 1)
-        client_output = ClientAppIoOutputs(message, context)
+        client_input = ClientAppInputs(message, context, run, 1)
+        client_output = ClientAppOutputs(message, context)
 
         # Execute and assert
-        # - when ClientAppIoInputs is not None, ClientAppIoOutputs is None
+        # - when ClientAppInputs is not None, ClientAppOutputs is None
         with self.assertRaises(ValueError):
             self.servicer.clientapp_input = client_input
             self.servicer.clientapp_output = None
             self.servicer.set_inputs(client_input, token_returned=True)
 
         # Execute and assert
-        # - when ClientAppIoInputs is None, ClientAppIoOutputs is not None
+        # - when ClientAppInputs is None, ClientAppOutputs is not None
         with self.assertRaises(ValueError):
             self.servicer.clientapp_input = None
             self.servicer.clientapp_output = client_output
             self.servicer.set_inputs(client_input, token_returned=True)
 
         # Execute and assert
-        # - when ClientAppIoInputs and ClientAppIoOutputs is not None
+        # - when ClientAppInputs and ClientAppOutputs is not None
         with self.assertRaises(ValueError):
             self.servicer.clientapp_input = client_input
             self.servicer.clientapp_output = client_output
             self.servicer.set_inputs(client_input, token_returned=True)
 
         # Execute and assert
-        # - when ClientAppIoInputs is set at .clientapp_input
+        # - when ClientAppInputs is set at .clientapp_input
         self.servicer.clientapp_input = None
         self.servicer.clientapp_output = None
         self.servicer.set_inputs(client_input, token_returned=True)
@@ -125,18 +121,18 @@ class TestClientAppIoServicer(unittest.TestCase):
             state=self.maker.recordset(2, 2, 1),
             run_config={"runconfig1": 6.1},
         )
-        client_output = ClientAppIoOutputs(message, context)
+        client_output = ClientAppOutputs(message, context)
 
-        # Execute and assert - when `ClientAppIoOutputs` is None
+        # Execute and assert - when `ClientAppOutputs` is None
         self.servicer.clientapp_output = None
         with self.assertRaises(ValueError):
-            # `ClientAppIoOutputs` should not be None
+            # `ClientAppOutputs` should not be None
             _ = self.servicer.get_outputs()
 
-        # Execute and assert - when `ClientAppIoOutputs` is not None
+        # Execute and assert - when `ClientAppOutputs` is not None
         self.servicer.clientapp_output = client_output
         output = self.servicer.get_outputs()
-        assert isinstance(output, ClientAppIoOutputs)
+        assert isinstance(output, ClientAppOutputs)
         assert output == client_output
         assert self.servicer.clientapp_input is None
         assert self.servicer.clientapp_output is None
