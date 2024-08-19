@@ -18,7 +18,6 @@
 import base64
 import threading
 import unittest
-from unittest.mock import MagicMock
 from concurrent import futures
 from logging import DEBUG, INFO, WARN
 from typing import Optional, Sequence, Tuple, Union
@@ -26,9 +25,6 @@ from typing import Optional, Sequence, Tuple, Union
 import grpc
 
 from flwr.client.grpc_rere_client.connection import grpc_request_response
-from flwr.proto.task_pb2 import TaskIns, Task
-from flwr.proto.recordset_pb2 import RecordSet
-from flwr.proto.node_pb2 import Node
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, serde
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
@@ -50,7 +46,9 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResRequest,
     PushTaskResResponse,
 )
+from flwr.proto.node_pb2 import Node
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.proto.task_pb2 import Task, TaskIns
 
 from .client_interceptor import _AUTH_TOKEN_HEADER, _PUBLIC_KEY_HEADER, Request
 
@@ -94,7 +92,16 @@ class _MockServicer:
             if isinstance(request, PushTaskResRequest):
                 return PushTaskResResponse()
 
-            return PullTaskInsResponse(task_ins_list=[TaskIns(task=Task(consumer=Node(node_id=123), recordset=serde.recordset_to_proto(RecordSet())))])
+            return PullTaskInsResponse(
+                task_ins_list=[
+                    TaskIns(
+                        task=Task(
+                            consumer=Node(node_id=123),
+                            recordset=serde.recordset_to_proto(RecordSet()),
+                        )
+                    )
+                ]
+            )
 
     def received_client_metadata(
         self,
