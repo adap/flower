@@ -32,7 +32,8 @@ class SuperNodeTracker:
 
         # Create an empty file if it does not exist
         if not os.path.exists(self.filename):
-            open(self.filename, "w").close()
+            with open(self.filename, "w", encoding="utf-8"):
+                pass
 
     def record_run(self, run: Run) -> None:
         """Record the run metadata."""
