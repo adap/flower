@@ -19,14 +19,7 @@ import os
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-import numpy as np
-
-from flwr.common import (
-    Message,
-    ndarrays_to_parameters,
-    parameters_to_ndarrays,
-    recordset_compat,
-)
+from flwr.common import Message
 from flwr.common.typing import Run
 
 
