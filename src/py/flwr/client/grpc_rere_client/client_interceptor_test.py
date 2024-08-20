@@ -46,9 +46,9 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResRequest,
     PushTaskResResponse,
 )
-from flwr.proto.node_pb2 import Node
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
-from flwr.proto.task_pb2 import Task, TaskIns
+from flwr.proto.task_pb2 import Task, TaskIns  # pylint: disable=E0611
 
 from .client_interceptor import _AUTH_TOKEN_HEADER, _PUBLIC_KEY_HEADER, Request
 
