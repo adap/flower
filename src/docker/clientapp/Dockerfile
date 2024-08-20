@@ -12,4 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower AppIO service."""
+
+ARG BASE_REPOSITORY=flwr/base
+ARG BASE_IMAGE
+FROM $BASE_REPOSITORY:$BASE_IMAGE
+
+ENTRYPOINT ["flwr-clientapp"]

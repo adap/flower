@@ -12,13 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower SuperNode."""
+"""Flower AppIO service."""
 
 
-from .app import run_client_app as run_client_app
-from .app import run_supernode as run_supernode
+from .app import flwr_clientapp as flwr_clientapp
 
 __all__ = [
-    "run_client_app",
-    "run_supernode",
+    "flwr_clientapp",
 ]
