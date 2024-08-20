@@ -415,8 +415,6 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             assert actual_public_key == expected_public_key
             assert actual_hmac == expected_hmac
 
-        assert False
-
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
