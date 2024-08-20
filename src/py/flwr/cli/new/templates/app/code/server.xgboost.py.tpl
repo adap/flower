@@ -28,7 +28,7 @@ def config_func(rnd: int) -> Dict[str, str]:
 def server_fn(context: Context):
     # Read from config
     num_rounds = int(context.run_config["num-server-rounds"])
-    pool_size = int(context.run_config["pool-size"])
+    pool_size = int(context.node_config["num-partitions"])
     num_clients_per_round = int(context.run_config["num-clients-per-round"])
     num_evaluate_clients = int(context.run_config["num-evaluate-clients"])
 
