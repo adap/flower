@@ -9,8 +9,8 @@ import gc
 import flwr as fl
 import torch
 
-from fed_debug.models import initialize_model, train_neural_network
-from fed_debug.utils import get_parameters, set_parameters
+from feddebug.models import initialize_model, train_neural_network
+from feddebug.utils import get_parameters, set_parameters
 
 
 class CNNFlowerClient(fl.client.NumPyClient):

@@ -15,7 +15,7 @@ from logging import INFO, WARNING
 import torch
 from flwr.common.logger import log
 
-from fed_debug.dataset_preparation import (
+from feddebug.dataset_preparation import (
     clients_data_distribution,
     prepare_iid_dataset,
     prepare_niid_dataset,

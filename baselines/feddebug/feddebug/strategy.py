@@ -10,8 +10,8 @@ from logging import INFO
 import flwr as fl
 from flwr.common.logger import log
 
-from fed_debug import utils
-from fed_debug.models import initialize_model
+from feddebug import utils
+from feddebug.models import initialize_model
 
 
 class FedAvgSave(fl.server.strategy.FedAvg):

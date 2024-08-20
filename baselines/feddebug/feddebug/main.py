@@ -13,10 +13,10 @@ import hydra
 from diskcache import Index
 from flwr.common.logger import log
 
-from fed_debug import server, utils
-from fed_debug.client import gen_client_func
-from fed_debug.dataset import ClientsAndServerDatasetsPrep
-from fed_debug.differential_testing import (
+from feddebug import server, utils
+from feddebug.client import gen_client_func
+from feddebug.dataset import ClientsAndServerDatasetsPrep
+from feddebug.differential_testing import (
     eval_na_threshold,
     run_fed_debug_differential_testing,
 )

@@ -13,9 +13,9 @@ import torch
 from flwr.common import ndarrays_to_parameters
 from flwr.common.logger import log
 
-from fed_debug.models import global_model_eval, initialize_model
-from fed_debug.strategy import FedAvgSave
-from fed_debug.utils import get_parameters, set_parameters
+from feddebug.models import global_model_eval, initialize_model
+from feddebug.strategy import FedAvgSave
+from feddebug.utils import get_parameters, set_parameters
 
 
 def _fit_metrics_aggregation_fn(metrics):

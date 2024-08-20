@@ -12,7 +12,7 @@ client:
 
 noise_rate: 1
 faulty_clients_ids: [0] # malacious client(s) ids in a list 
-# faulty_clients_ids: [0] # only client-0 will be faulty in default config
+# only client-0 will be faulty in default config
 
 dataset_channels:
     cifar10: 3 # RGB

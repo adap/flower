@@ -14,9 +14,9 @@ from flwr.common.logger import log
 from torch.nn.init import kaiming_uniform_
 from torchvision.transforms import Compose, Normalize, RandomHorizontalFlip, Resize
 
-from fed_debug.dataset import load_central_server_test_data
-from fed_debug.models import global_model_eval, initialize_model
-from fed_debug.neuron_activation import get_neurons_activations
+from feddebug.dataset import load_central_server_test_data
+from feddebug.models import global_model_eval, initialize_model
+from feddebug.neuron_activation import get_neurons_activations
 
 
 def _make_all_subsets_of_size_n(set_client_ids, each_subset_size):
