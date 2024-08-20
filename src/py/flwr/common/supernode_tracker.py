@@ -19,6 +19,14 @@ import os
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
+import numpy as np
+
+from flwr.common import (
+    Message,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
+    recordset_compat,
+)
 from flwr.common.typing import Run
 
 
@@ -51,15 +59,28 @@ class SuperNodeTracker:
             self.run_ids.append(run.run_id)
 
     def record_message(
-        self, from_entity: str, to_entity: str, metadata: Dict[str, Any]
+        self, from_entity: str, to_entity: str, message: Message
     ) -> None:
         """Record the message metadata."""
         timestamp = datetime.now().timestamp()
+
+        message_size = None
+        if message.has_content():
+            message_size = self.compute_message_size(message)
+
+        message_error = None
+        if message.has_error():
+            message_error = message.__dict__["_error"]
+
         record = {
             "timestamp": timestamp,
             "from": from_entity,
             "to": to_entity,
-            "message": {"metadata": metadata},
+            "message": {
+                "metadata": message.metadata.__dict__,
+                "message_size": message_size,
+                "error": message_error,
+            },
         }
         self.save_to_file(record)
 
@@ -71,3 +92,18 @@ class SuperNodeTracker:
                 file.write("\n")
         except OSError as e:
             raise RuntimeError(f"Failed to write to file at {self.filename}") from e
+
+    def compute_message_size(self, message: Message):
+        """Compute the message size in bytes."""
+        message_size_in_bytes = 0
+
+        for p_record in message.content.parameters_records.values():
+            message_size_in_bytes += p_record.count_bytes()
+
+        for c_record in message.content.configs_records.values():
+            message_size_in_bytes += c_record.count_bytes()
+
+        for m_record in message.content.metrics_records.values():
+            message_size_in_bytes += m_record.count_bytes()
+
+        return message_size_in_bytes

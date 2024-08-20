@@ -410,7 +410,7 @@ def start_client_internal(
 
                     if supernode_tracker and message:
                         supernode_tracker.record_message(
-                            "SuperLink", "SuperNode", message.metadata.__dict__
+                            "SuperLink", "SuperNode", message
                         )
 
                     if message is None:
@@ -439,7 +439,7 @@ def start_client_internal(
 
                         if supernode_tracker and out_message:
                             supernode_tracker.record_message(
-                                "SuperNode", "SuperLink", out_message.metadata.__dict__
+                                "SuperNode", "SuperLink", out_message
                             )
 
                         break
@@ -529,7 +529,7 @@ def start_client_internal(
                                     supernode_tracker.record_message(
                                         "SuperNode",
                                         "ClientApp",
-                                        message.metadata.__dict__,
+                                        message,
                                     )
                             else:
                                 # Wait for output to become available
@@ -542,7 +542,7 @@ def start_client_internal(
                                 supernode_tracker.record_message(
                                     "ClientApp",
                                     "SuperNode",
-                                    reply_message.metadata.__dict__,
+                                    message,
                                 )
 
                         else:
@@ -596,7 +596,7 @@ def start_client_internal(
 
                     if supernode_tracker and message:
                         supernode_tracker.record_message(
-                            "SuperNode", "ClientApp", message.metadata.__dict__
+                            "SuperNode", "ClientApp", message
                         )
                     log(INFO, "Sent reply")
 
