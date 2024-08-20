@@ -252,7 +252,7 @@ def run_simulation(
         )
 
     event(
-        EventType.RUN_SIMULATION_ENTER_CLI,
+        EventType.RUN_SIMULATION_ENTER_PYTHON,
         event_details={"backend": backend_name, "num-supernodes": num_supernodes},
     )
 
