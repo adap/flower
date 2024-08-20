@@ -60,45 +60,56 @@ jobs:
     strategy:
       matrix:
         include:
-          - directory: bare
+          - directory: e2e-bare
+            e2e: e2e_bare
 
-          - directory: bare-https
+          - directory: e2e-bare-https
+            e2e: e2e_bare_https
 
-          - directory: bare-client-auth
+          - directory: e2e-bare-auth
+            e2e: e2e_bare_auth
 
-          - directory: framework-jax
+          - directory: e2e-jax
+            e2e: e2e_jax
 
-          - directory: framework-pytorch
+          - directory: e2e-pytorch
+            e2e: e2e_pytorch
             dataset: |
               from torchvision.datasets import CIFAR10
               CIFAR10('./data', download=True)
 
-          - directory: framework-tensorflow
+          - directory: e2e-tensorflow
+            e2e: e2e_tensorflow
             dataset: |
               import tensorflow as tf
               tf.keras.datasets.cifar10.load_data()
 
-          - directory: framework-opacus
+          - directory: e2e-opacus
+            e2e: e2e_opacus
             dataset: |
               from torchvision.datasets import CIFAR10
               CIFAR10('./data', download=True)
 
-          - directory: framework-pytorch-lightning
+          - directory: e2e-pytorch-lightning
+            e2e: e2e_pytorch_lightning
             dataset: |
               from torchvision.datasets import MNIST
               MNIST('./data', download=True)
 
-          - directory: framework-scikit-learn
+          - directory: e2e-scikit-learn
+            e2e: e2e_scikit_learn
             dataset: |
               import openml
               openml.datasets.get_dataset(554)
 
-          - directory: framework-fastai
+          - directory: e2e-fastai
+            e2e: e2e_fastai
             dataset: |
               from fastai.vision.all import untar_data, URLs
               untar_data(URLs.MNIST)
 
-          - directory: framework-pandas
+          - directory: e2e-pandas
+            e2e: e2e_pandas
             dataset: |
               from pathlib import Path
               from sklearn.datasets import load_iris
@@ -135,32 +146,35 @@ jobs:
         if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         run: |
           python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
+      - name: Install e2e components
+        run: pip install .
       - name: Download dataset
         if: ${{ matrix.dataset }}
         run: python -c "${{ matrix.dataset }}"
       - name: Run edge client test
-        if: ${{ matrix.directory != 'bare-client-auth' }}
-        run: ./../test_legacy.sh "${{ matrix.directory }}"
+        if: ${{ matrix.directory != 'e2e-bare-auth' }}
+        working-directory: e2e/${{ matrix.directory }}/${{ matrix.e2e }}
+        run: ./../../test_legacy.sh "${{ matrix.directory }}"
       - name: Run virtual client test
-        if: ${{ matrix.directory != 'bare-client-auth' }}
+        if: ${{ matrix.directory != 'e2e-bare-auth' }}
         run: python simulation.py
       - name: Run simulation engine test
-        if: ${{ matrix.directory == 'pytorch' || matrix.directory == 'tensorflow'}}
+        if: ${{ matrix.directory == 'e2e-pytorch' || matrix.directory == 'e2e-tensorflow'}}
         run: python simulation_next.py
       - name: Run driver test
-        if: ${{ matrix.directory != 'bare-client-auth' }}
+        if: ${{ matrix.directory != 'e2e-bare-auth' }}
         run: ./../test_superlink.sh "${{ matrix.directory }}"
       - name: Run driver test with REST
-        if: ${{ matrix.directory == 'bare' }}
+        if: ${{ matrix.directory == 'e2e-bare' }}
         run: ./../test_superlink.sh bare rest
       - name: Run driver test with SQLite database
-        if: ${{ matrix.directory == 'bare' }}
+        if: ${{ matrix.directory == 'e2e-bare' }}
         run: ./../test_superlink.sh bare sqlite
       - name: Run driver test with client authentication
-        if: ${{ matrix.directory == 'bare-client-auth' }}
+        if: ${{ matrix.directory == 'e2e-bare-auth' }}
         run: ./../test_superlink.sh bare client-auth
       - name: Run reconnection test with SQLite database
-        if: ${{ matrix.directory == 'bare' }}
+        if: ${{ matrix.directory == 'e2e-bare' }}
         run: ./../test_reconnection.sh sqlite
       - name: Cache save Python location
         id: cache-save-python

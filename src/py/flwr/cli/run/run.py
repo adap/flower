@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower command line interface `run` command."""
 
+import hashlib
 import subprocess
 import sys
 from logging import DEBUG
@@ -28,9 +29,15 @@ from flwr.cli.config_utils import load_and_validate
 from flwr.common.config import flatten_dict, parse_config_args
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
-from flwr.common.serde import user_config_to_proto
+from flwr.common.serde import fab_to_proto, user_config_to_proto
+from flwr.common.typing import Fab
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
+
+
+def on_channel_state_change(channel_connectivity: str) -> None:
+    """Log channel connectivity."""
+    log(DEBUG, channel_connectivity)
 
 
 # pylint: disable-next=too-many-locals
@@ -109,20 +116,16 @@ def run(
         raise typer.Exit(code=1)
 
     if "address" in federation_config:
-        _run_with_superexec(federation_config, app, config_overrides)
+        _run_with_superexec(app, federation_config, config_overrides)
     else:
-        _run_without_superexec(app, federation_config, federation, config_overrides)
+        _run_without_superexec(app, federation_config, config_overrides, federation)
 
 
 def _run_with_superexec(
-    federation_config: Dict[str, Any],
     app: Optional[Path],
+    federation_config: Dict[str, Any],
     config_overrides: Optional[List[str]],
 ) -> None:
-
-    def on_channel_state_change(channel_connectivity: str) -> None:
-        """Log channel connectivity."""
-        log(DEBUG, channel_connectivity)
 
     insecure_str = federation_config.get("insecure")
     if root_certificates := federation_config.get("root-certificates"):
@@ -162,10 +165,12 @@ def _run_with_superexec(
     channel.subscribe(on_channel_state_change)
     stub = ExecStub(channel)
 
-    fab_path = build(app)
+    fab_path = Path(build(app))
+    content = fab_path.read_bytes()
+    fab = Fab(hashlib.sha256(content).hexdigest(), content)
 
     req = StartRunRequest(
-        fab_file=Path(fab_path).read_bytes(),
+        fab=fab_to_proto(fab),
         override_config=user_config_to_proto(
             parse_config_args(config_overrides, separator=",")
         ),
@@ -174,14 +179,17 @@ def _run_with_superexec(
         ),
     )
     res = stub.StartRun(req)
+
+    # Delete FAB file once it has been sent to the SuperExec
+    fab_path.unlink()
     typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
 
 
 def _run_without_superexec(
     app: Optional[Path],
     federation_config: Dict[str, Any],
-    federation: str,
     config_overrides: Optional[List[str]],
+    federation: str,
 ) -> None:
     try:
         num_supernodes = federation_config["options"]["num-supernodes"]

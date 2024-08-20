@@ -74,13 +74,13 @@ def get_fab_metadata(fab_file: Union[Path, bytes]) -> Tuple[str, str]:
     Returns
     -------
     Tuple[str, str]
-        The `fab_version` and `fab_id` of the given Flower App Bundle.
+        The `fab_id` and `fab_version` of the given Flower App Bundle.
     """
     conf = get_fab_config(fab_file)
 
     return (
-        conf["project"]["version"],
         f"{conf['tool']['flwr']['app']['publisher']}/{conf['project']['name']}",
+        conf["project"]["version"],
     )
 
 

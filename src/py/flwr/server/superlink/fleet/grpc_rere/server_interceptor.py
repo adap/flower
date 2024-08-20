@@ -16,7 +16,7 @@
 
 
 import base64
-from logging import WARNING
+from logging import INFO, WARNING
 from typing import Any, Callable, Optional, Sequence, Tuple, Union
 
 import grpc
@@ -128,9 +128,15 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                 context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
 
             if isinstance(request, CreateNodeRequest):
-                return self._create_authenticated_node(
+                response = self._create_authenticated_node(
                     client_public_key_bytes, request, context
                 )
+                log(
+                    INFO,
+                    "AuthenticateServerInterceptor: Created node_id=%s",
+                    response.node.node_id,
+                )
+                return response
 
             # Verify hmac value
             hmac_value = base64.urlsafe_b64decode(
