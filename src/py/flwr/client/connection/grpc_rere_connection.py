@@ -100,10 +100,13 @@ class GrpcRereConnection(Connection):
         self.ping_thread: threading.Thread | None = None
         self.ping_stop_event = threading.Event()
         self.channel: grpc.Channel | None = None
+        self._api: FleetAPI | None = None
 
     @property
     def api(self) -> FleetAPI:
         """The API proxy."""
+        if self._api is not None:
+            return self._api
         if isinstance(self.root_certificates, str):
             root_cert: bytes | None = Path(self.root_certificates).read_bytes()
         else:
@@ -120,7 +123,8 @@ class GrpcRereConnection(Connection):
             interceptors=interceptors,
         )
         self.channel.subscribe(on_channel_state_change)
-        return cast(FleetAPI, FleetStub(self.channel))
+        self._api = cast(FleetAPI, FleetStub(self.channel))
+        return self._api
 
     def ping(self) -> None:
         """Ping the SuperLink."""
