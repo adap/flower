@@ -7,7 +7,9 @@ uncomment the lines below and tell us in the README.md (see the "Running the Exp
 block) that this file should be executed first.
 """
 
-import logging
+from flwr.common.logger import log
+from logging import INFO, DEBUG
+
 import os
 import random
 import shutil
@@ -429,7 +431,7 @@ def fix_partition(cfg, c_partition, target_label_col):
 
 
 def _get_partitioner(cfg, target_label_col):
-    logging.info(f"Data distribution type: {cfg.dist_type}")
+    log(INFO,f"Data distribution type: {cfg.dist_type}")
     if cfg.dist_type == "iid":
         partitioner = IidPartitioner(num_partitions=cfg.num_clients)
         return partitioner
@@ -452,7 +454,7 @@ def clients_data_distribution(
 ):
     """Return the data distribution for the clients."""
     partitioner = _get_partitioner(cfg, target_label_col)
-    # logging.info(f"Dataset name: {cfg.dname}")
+    # log(INFO,f"Dataset name: {cfg.dname}")
     clients_class = []
     clients_data = []
 
@@ -467,7 +469,7 @@ def clients_data_distribution(
 
     server_data = fds.load_split("test").select(range(cfg.max_server_data_size))
 
-    logging.info(f"Server data keys {server_data[0].keys()}")
+    log(INFO,f"Server data keys {server_data[0].keys()}")
 
     if not fetch_only_test_data:
         for partition_index in range(cfg.num_clients):
@@ -481,7 +483,7 @@ def clients_data_distribution(
 
     # per client data size
     per_client_data_size = [len(dl) for dl in clients_data]
-    logging.debug(
+    log(DEBUG,
         f"Data per clients {per_client_data_size}, "
         f"server data size: {len(server_data)}, "
         f"fetch_only_test_data: {fetch_only_test_data}"

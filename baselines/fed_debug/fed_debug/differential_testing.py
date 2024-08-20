@@ -1,16 +1,20 @@
 """Fed_Debug Differential Testing."""
 
+
+from flwr.common.logger import log
+from logging import  DEBUG, INFO, WARNING
+
 import copy
 import gc
 import itertools
-import logging
+
 import time
 from typing import Any, Dict
 
 import torch
 import torch.nn.functional as F
 from diskcache import Index
-from pytorch_lightning import seed_everything
+
 from torch.nn.init import kaiming_uniform_
 from torchvision.transforms import Compose, Normalize, RandomHorizontalFlip, Resize
 
@@ -18,14 +22,14 @@ from fed_debug.dataset import load_central_server_test_data
 from fed_debug.models import global_model_eval, initialize_model
 from fed_debug.neuron_activation import get_neurons_activations
 
-seed_everything(786)
+
 
 
 def _make_all_subsets_of_size_n(s, n):
     assert n < len(s)
     l_of_subsets = list(itertools.combinations(s, n))
     l_of_lists = [set(sub) for sub in l_of_subsets]
-    # logging.info(f" All subsets {l_of_lists} ")
+    # log(INFO,f" All subsets {l_of_lists} ")
     return l_of_lists
 
 
@@ -73,7 +77,7 @@ class InferenceGuidedInputs:
     def get_inputs(self):
         """Return generated random inputs."""
         if self.faster_input_generation:
-            logging.info("Faster input generation generation")
+            log(INFO,"Faster input generation generation")
             return self._simple_random_inputs()
         else:
             if len(self.clients2models) <= 10:
@@ -304,7 +308,7 @@ class FedDebug:
         )["test"]
 
     def _initialize_and_load_models(self) -> None:
-        logging.info(
+        log(INFO,
             f"\n\n             ----------Round key {self.round_key} -------------- \n"
         )
         round2ws = self.training_cache[self.round_key]
@@ -324,7 +328,7 @@ class FedDebug:
         detection_acc = 0
         for pred_faulty_clients in predicted_faulty_clients_on_each_input:
             # print(f"+++ Faulty Clients {pred_faulty_clients}")
-            logging.info(f"-- Potential Malicious client(s) {pred_faulty_clients}")
+            log(INFO,f"-- Potential Malicious client(s) {pred_faulty_clients}")
 
             correct_localize_faults = len(
                 true_faulty_clients.intersection(pred_faulty_clients)
@@ -384,7 +388,7 @@ class FedDebug:
 
         eval_metrics = {"accuracy": fault_localization_acc}
 
-        logging.info(f"Fault Localization Accuracy: {fault_localization_acc}")
+        log(INFO,f"Fault Localization Accuracy: {fault_localization_acc}")
 
         debug_result = {
             "clients": list(self.client2model.keys()),
@@ -430,11 +434,11 @@ def run_fed_debug_differential_testing(cfg, store_in_cache=True):
     round2debug_result = []
 
     if len(round2debug_result) > 0:
-        logging.info(">> Debugging is already done.")
+        log(INFO,">> Debugging is already done.")
         return round2debug_result
 
     rounds_keys = _get_round_keys_and_central_test_data(cfg.exp_key, train_cache_path)
-    logging.debug(f"rounds_keys {rounds_keys}")
+    log(DEBUG,f"rounds_keys {rounds_keys}")
 
     start_time = time.time()
 
@@ -445,7 +449,7 @@ def run_fed_debug_differential_testing(cfg, store_in_cache=True):
     end_time = time.time()
 
     if len(rounds_keys) == 0:
-        logging.warning("Unable to get any model. Something is wrong.")
+        log(WARNING,"Unable to get any model. Something is wrong.")
         return None
 
     avg_debug_time_per_round = (end_time - start_time) / len(rounds_keys)
@@ -460,7 +464,7 @@ def run_fed_debug_differential_testing(cfg, store_in_cache=True):
     if store_in_cache:
         debug_results_cache[cfg.exp_key] = final_result_dict
 
-        logging.info(
+        log(INFO,
             f"Debugging results saved for {cfg.exp_key}, \
             / avg Debugging time per round: {avg_debug_time_per_round} seconds"
         )
@@ -487,7 +491,7 @@ def eval_na_threshold(cfg):
             all_accs = [r["eval_metrics"]["accuracy"] for r in r2results]
             avg_accs = sum(all_accs) / len(all_accs)
 
-            logging.info(
+            log(INFO,
                 f"Neuron Activation threshold {na} "
                 f"and average malicious client localization accuracy is {avg_accs}."
             )

@@ -5,7 +5,8 @@ extend or modify the functionality of an existing strategy.
 """
 
 import gc
-import logging
+from flwr.common.logger import log
+from logging import INFO
 
 import flwr as fl
 
@@ -34,7 +35,7 @@ class FedAvgSave(fl.server.strategy.FedAvg):
 
         client_ids = round_dict["client2ws"].keys()
 
-        logging.info(f"participating clients: {client_ids}")
+        log(INFO,f"participating clients: {client_ids}")
 
         # client2num_examples save in round_dict from results
         round_dict["client2num_examples"] = {

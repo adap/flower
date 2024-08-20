@@ -5,7 +5,6 @@ to instantiate your client.
 """
 
 import gc
-
 import flwr as fl
 import torch
 

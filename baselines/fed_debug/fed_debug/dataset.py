@@ -9,12 +9,15 @@ partitioned, please include all those functions and logic in the
 defined here of course.
 """
 
-import logging
-import random
 
+import random
 import torch
-from pytorch_lightning.core.datamodule import LightningDataModule
-from torch.utils.data import DataLoader
+
+from flwr.common.logger import log
+from logging import WARNING
+
+
+
 
 from fed_debug.dataset_preparation import (
     clients_data_distribution,
@@ -66,54 +69,6 @@ class NoisyDataset(torch.utils.data.Dataset):
                 y = (y + 1) % self.num_classes
         return x, y
 
-
-class FedDataModule(LightningDataModule):
-    """PyTorch Lightning DataModule for the Federated Learning setup."""
-
-    def __init__(self, train_dataset, val_dataset, batch_size, num_workers=4) -> None:
-        super().__init__()
-        self.batch_size = batch_size
-        self.num_workers = num_workers
-        self.train_dataset = train_dataset
-        self.val_dataset = val_dataset
-        self.drop_last = False
-        if len(self.train_dataset) % self.batch_size == 1:
-            self.drop_last = True
-            print(
-                f"Dropping last batch because of uneven data size: \
-                    /{len(self.train_dataset)} % {self.batch_size} == 1"
-            )
-
-    def train_dataloader(self):
-        """Return the train dataloader."""
-        return DataLoader(
-            self.train_dataset,
-            batch_size=self.batch_size,
-            num_workers=self.num_workers,
-            pin_memory=True,
-            shuffle=True,
-            drop_last=self.drop_last,
-        )
-
-    def val_dataloader(self):
-        """Return the validation dataloader."""
-        return DataLoader(
-            self.val_dataset,
-            batch_size=self.batch_size,
-            num_workers=self.num_workers,
-            pin_memory=True,
-            shuffle=False,
-        )
-
-    def test_dataloader(self):
-        """Return the test dataloader."""
-        return DataLoader(
-            self.val_dataset,
-            batch_size=self.batch_size,
-            num_workers=self.num_workers,
-            pin_memory=True,
-            shuffle=False,
-        )
 
 
 def _initialize_image_dataset(cfg, fetch_only_test_data):
@@ -167,7 +122,7 @@ class ClientsAndServerDatasetsPrep:
                 noise_rate=self.cfg.noise_rate,
                 num_classes=self.cfg.dataset.num_classes,
             )
-            logging.warning(f"Client {cid} is made noisy \n  ")
+            log(WARNING,f"Client {cid} is made noisy \n  ")
             self.client2class[cid] = "noisy"
 
     def _add_noise_in_data(self, client_data, label_col, noise_rate, num_classes):
@@ -181,18 +136,18 @@ class ClientsAndServerDatasetsPrep:
         self.client2class = d["client2class"]
         print(f"client2class: {self.client2class}")
 
-        logging.info(f"> client2class {self.client2class}")
+        log(INFO,f"> client2class {self.client2class}")
         if len(self.client2data) < self.cfg.data_dist.num_clients:
-            logging.warning(
+            log(WARNING,
                 f"orignal number of clients {self.cfg.data_dist.num_clients} "
                 f"reduced to {len(self.client2data)}"
             )
             self.cfg.data_dist.num_clients = len(self.client2data)
 
         data_per_client = [len(dl) for dl in self.client2data.values()]
-        logging.info(f"Data per client in experiment {data_per_client}")
+        log(INFO,f"Data per client in experiment {data_per_client}")
         min_data = min(len(dl) for dl in self.client2data.values())
-        logging.info(f"Min data on a client: {min_data}")
+        log(INFO,f"Min data on a client: {min_data}")
 
     def _setup_original_fed_debug(self):
         self.client2class = {}

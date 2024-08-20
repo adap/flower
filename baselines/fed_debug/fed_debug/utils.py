@@ -5,7 +5,8 @@ example, you may define here things like: loading a model from a checkpoint, sav
 results, plotting.
 """
 
-import logging
+from flwr.common.logger import log
+from logging import INFO
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -60,7 +61,7 @@ def _plot_line_plots(df):
     fname = "Figure-10.pdf"
     plt.savefig(fname)
     plt.savefig("Figure-10.png")
-    logging.info(
+    log(INFO,
         "Fig 10: FEDDEBUG performance at neuron activation threshold on 30 clients, "
         f"including five faulty clients. Figure generate {fname}"
     )
@@ -95,7 +96,7 @@ def generate_table2_csv(cache_path, igonre_keys):
     print(df)
     csv_name = "fed_debug_results.csv"
     df.to_csv(csv_name)
-    logging.info(
+    log(INFO,
         (
             "Table II: FEDDEBUG’s fault localization in 32 FL"
             "configurations with multiple faulty clients, ranging from two to seven."

@@ -4,19 +4,21 @@ It includes processioning the dataset, instantiate strategy, specify how the glo
 model is going to be evaluated, etc. At the end, this script saves the results.
 """
 
+from flwr.common.logger import log
+from logging import INFO
+
 import gc
-import logging
 import random
 import time
 
 import flwr as fl
 import hydra
-import ray
+
 import torch
 from diskcache import Index
 from flwr.common import ndarrays_to_parameters
 from omegaconf import DictConfig
-from pytorch_lightning import seed_everything
+
 
 from fed_debug.client import CNNFlowerClient, get_parameters, set_parameters
 from fed_debug.dataset import ClientsAndServerDatasetsPrep
@@ -27,8 +29,6 @@ from fed_debug.differential_testing import (
 from fed_debug.models import global_model_eval, initialize_model
 from fed_debug.strategy import FedAvgSave
 from fed_debug.utils import gen_thresholds_exp_graph, generate_table2_csv
-
-seed_everything(786)
 
 
 class FLSimulation:
@@ -86,7 +86,7 @@ class FLSimulation:
 
     def _fit_metrics_aggregation_fn(self, metrics):
         """Aggregate metrics recieved from client."""
-        logging.info(">>   ------------------- Clients Metrics ------------- ")
+        log(INFO, ">>   ------------------- Clients Metrics ------------- ")
         all_logs = {}
 
         # if len(metrics) != self.cfg.strategy.clients_per_round:
@@ -100,7 +100,7 @@ class FLSimulation:
 
         # sorted by client id from lowest to highest
         for k in sorted(all_logs.keys()):
-            logging.info(all_logs[k])
+            log(INFO, all_logs[k])
 
         return {"loss": 0.1, "accuracy": 0.2}
 
@@ -204,18 +204,17 @@ def run_simulation(cfg):
     exp_key = set_exp_key(cfg)
     cfg.exp_key = exp_key
 
-    logging.info(f" ***********  Starting Experiment: {cfg.exp_key} ***************")
-
+    log(INFO, f" ***********  Starting Experiment: {cfg.exp_key} ***************")
 
     if cfg.check_cache:
         if cfg.exp_key in train_cache:
             temp_dict = train_cache[cfg.exp_key]
             # type: ignore
             if "complete" in temp_dict and temp_dict["complete"]:  # type: ignore
-                logging.info(f"Experiment already completed: {cfg.exp_key}")
+                log(INFO, f"Experiment already completed: {cfg.exp_key}")
                 return
 
-    logging.info(f"Simulation Configuration: {cfg}")
+    log(INFO, f"Simulation Configuration: {cfg}")
 
     ds_prep = ClientsAndServerDatasetsPrep(cfg)
     ds_dict = ds_prep.get_clients_server_data()
@@ -240,17 +239,8 @@ def run_simulation(cfg):
         "input_shape": temp_input.shape,
         "all_ronuds_gm_results": round2results,
     }
-
-    logging.info(f"Results of gm evaluations each round: {round2results}")
-    logging.info(f"Simulation Complete for: {cfg.exp_key} ")
-
-    ray.shutdown()
-    if ray.is_initialized():
-        ray.cluster().shutdown()
-
-    gc.collect()
-    torch.cuda.empty_cache()
-    gc.collect()
+    log(INFO, f"Results of gm evaluations each round: {round2results}")
+    log(INFO, f"Simulation Complete for: {cfg.exp_key} ")
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
