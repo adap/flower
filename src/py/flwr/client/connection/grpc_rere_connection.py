@@ -105,25 +105,25 @@ class GrpcRereConnection(Connection):
     @property
     def api(self) -> FleetAPI:
         """The API proxy."""
-        if self._api is not None:
-            return self._api
-        if isinstance(self.root_certificates, str):
-            root_cert: bytes | None = Path(self.root_certificates).read_bytes()
-        else:
-            root_cert = self.root_certificates
-        interceptors: Sequence[grpc.UnaryUnaryClientInterceptor] | None = None
-        if self.authentication_keys is not None:
-            interceptors = AuthenticateClientInterceptor(*self.authentication_keys)
+        if self._api is None:
+            # Initialize the connection to the SuperLink Fleet API server
+            if isinstance(self.root_certificates, str):
+                root_cert: bytes | None = Path(self.root_certificates).read_bytes()
+            else:
+                root_cert = self.root_certificates
+            interceptors: Sequence[grpc.UnaryUnaryClientInterceptor] | None = None
+            if self.authentication_keys is not None:
+                interceptors = AuthenticateClientInterceptor(*self.authentication_keys)
 
-        self.channel = create_channel(
-            server_address=self.server_address,
-            insecure=self.insecure,
-            root_certificates=root_cert,
-            max_message_length=self.max_message_length,
-            interceptors=interceptors,
-        )
-        self.channel.subscribe(on_channel_state_change)
-        self._api = cast(FleetAPI, FleetStub(self.channel))
+            self.channel = create_channel(
+                server_address=self.server_address,
+                insecure=self.insecure,
+                root_certificates=root_cert,
+                max_message_length=self.max_message_length,
+                interceptors=interceptors,
+            )
+            self.channel.subscribe(on_channel_state_change)
+            self._api = cast(FleetAPI, FleetStub(self.channel))
         return self._api
 
     def ping(self) -> None:

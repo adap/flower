@@ -24,7 +24,6 @@ from typing import Optional, Sequence, Tuple, Union
 
 import grpc
 
-from .grpc_rere_connection import GrpcRereConnection
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, serde
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
@@ -51,6 +50,7 @@ from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=
 from flwr.proto.task_pb2 import Task, TaskIns  # pylint: disable=E0611
 
 from .client_interceptor import _AUTH_TOKEN_HEADER, _PUBLIC_KEY_HEADER, Request
+from .grpc_rere_connection import GrpcRereConnection
 
 
 class _MockServicer:

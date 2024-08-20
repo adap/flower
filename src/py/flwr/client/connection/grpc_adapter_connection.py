@@ -61,23 +61,27 @@ class GrpcAdapterConnection(GrpcRereConnection):
     @property
     def api(self) -> FleetAPI:
         """The API proxy."""
-        if not isinstance(self.root_certificates, str):
-            root_cert = self.root_certificates
-        else:
-            root_cert = Path(self.root_certificates).read_bytes()
-        if self.authentication_keys is not None:
-            log(
-                ERROR, "Client authentication is not supported for this transport type."
-            )
+        if self._api is None:
+            # Initialize the connection to the SuperLink Fleet API server
+            if not isinstance(self.root_certificates, str):
+                root_cert = self.root_certificates
+            else:
+                root_cert = Path(self.root_certificates).read_bytes()
+            if self.authentication_keys is not None:
+                log(
+                    ERROR,
+                    "Client authentication is not supported for this transport type.",
+                )
 
-        self.channel = create_channel(
-            server_address=self.server_address,
-            insecure=self.insecure,
-            root_certificates=root_cert,
-            max_message_length=self.max_message_length,
-        )
-        self.channel.subscribe(on_channel_state_change)
-        return GrpcAdapterFleetAPI(self.channel)
+            self.channel = create_channel(
+                server_address=self.server_address,
+                insecure=self.insecure,
+                root_certificates=root_cert,
+                max_message_length=self.max_message_length,
+            )
+            self.channel.subscribe(on_channel_state_change)
+            self._api = GrpcAdapterFleetAPI(self.channel)
+        return self._api
 
 
 class GrpcAdapterFleetAPI(FleetAPI):

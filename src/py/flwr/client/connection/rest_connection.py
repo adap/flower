@@ -67,25 +67,31 @@ class RestConnection(GrpcRereConnection):
     @property
     def api(self) -> FleetAPI:
         """The API proxy."""
-        # NEVER SET VERIFY TO FALSE
-        # Otherwise any server can fake its identity
-        # Please refer to:
-        # https://requests.readthedocs.io/en/latest/user/advanced/#ssl-cert-verification
-        verify: bool | str = True
-        if isinstance(self.root_certificates, str):
-            verify = self.root_certificates
-        elif isinstance(self.root_certificates, bytes):
-            log(
-                ERROR,
-                "For the REST API, the root certificates "
-                "must be provided as a string path to the client.",
-            )
-        if self.authentication_keys is not None:
-            log(
-                ERROR, "Client authentication is not supported for this transport type."
-            )
+        if self._api is None:
+            # Initialize the connection to the SuperLink Fleet API server
 
-        return RestFleetAPI(self.server_address, verify)
+            # NEVER SET VERIFY TO FALSE
+            # Otherwise any server can fake its identity
+            # Please refer to:
+            # https://requests.readthedocs.io/en/latest/user/advanced/#ssl-cert-verification
+            verify: bool | str = True
+            if isinstance(self.root_certificates, str):
+                verify = self.root_certificates
+            elif isinstance(self.root_certificates, bytes):
+                log(
+                    ERROR,
+                    "For the REST API, the root certificates "
+                    "must be provided as a string path to the client.",
+                )
+            if self.authentication_keys is not None:
+                log(
+                    ERROR,
+                    "Client authentication is not supported for this transport type.",
+                )
+
+            self._api = RestFleetAPI(self.server_address, verify)
+
+        return self._api
 
 
 class RestFleetAPI(FleetAPI):
