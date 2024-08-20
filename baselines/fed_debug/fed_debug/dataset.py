@@ -9,13 +9,11 @@ partitioned, please include all those functions and logic in the
 defined here of course.
 """
 
-
 import random
+from logging import INFO, WARNING
+
 import torch
-
 from flwr.common.logger import log
-from logging import WARNING, INFO
-
 
 from fed_debug.dataset_preparation import (
     clients_data_distribution,
@@ -68,23 +66,29 @@ class NoisyDataset(torch.utils.data.Dataset):
         return x, y
 
 
+def _add_noise_in_data(client_data, noise_rate, num_classes):
+    return NoisyDataset(client_data, num_classes=num_classes, noise_rate=noise_rate)
+
+
 def _initialize_image_dataset(cfg, fetch_only_test_data):
     """Initialize and return the image dataset."""
     target_label_col = "label"
-    d = clients_data_distribution(cfg, target_label_col, fetch_only_test_data)
+    dataset_dict = clients_data_distribution(
+        cfg, target_label_col, fetch_only_test_data
+    )
     transforms = train_test_transforms_factory(cfg=cfg)
-    d["client2data"] = {
+    dataset_dict["client2data"] = {
         k: v.map(
             transforms["train"], batched=True, batch_size=256, num_proc=8
         ).with_format("torch")
-        for k, v in d["client2data"].items()
+        for k, v in dataset_dict["client2data"].items()
     }
-    d["server_data"] = (
-        d["server_data"]
+    dataset_dict["server_data"] = (
+        dataset_dict["server_data"]
         .map(transforms["test"], batched=True, batch_size=256, num_proc=8)
         .with_format("torch")
     )
-    return d
+    return dataset_dict
 
 
 def _load_datasets(cfg, fetch_only_test_data=False):
@@ -108,36 +112,37 @@ class ClientsAndServerDatasetsPrep:
         self.cfg = cfg
         self._setup()
         self._make_faulty_clients()
+        self.client2data = {}
+        self.server_testdata = None
+        self.client2class = {}
 
     def _make_faulty_clients(self):
         """Make clients faulty."""
         for cid in self.cfg.faulty_clients_ids:
-            self.client2data[cid] = self._add_noise_in_data(
+            self.client2data[cid] = _add_noise_in_data(
                 client_data=self.client2data[cid],
-                label_col="label",
+                # label_col="label",
                 noise_rate=self.cfg.noise_rate,
                 num_classes=self.cfg.dataset.num_classes,
             )
             log(WARNING, f"Client {cid} is made noisy \n  ")
             self.client2class[cid] = "noisy"
 
-    def _add_noise_in_data(self, client_data, label_col, noise_rate, num_classes):
-        return NoisyDataset(client_data, num_classes=num_classes, noise_rate=noise_rate)
-
     def _setup_hugging(self):
-        d = _load_datasets(self.cfg.data_dist)
-        self.client2data = d["client2data"]
+        dataset_dict = _load_datasets(self.cfg.data_dist)
+        self.client2data = dataset_dict["client2data"]
 
-        self.server_testdata = d["server_data"]
-        self.client2class = d["client2class"]
+        self.server_testdata = dataset_dict["server_data"]
+        self.client2class = dataset_dict["client2class"]
         print(f"client2class: {self.client2class}")
 
         log(INFO, f"> client2class {self.client2class}")
         if len(self.client2data) < self.cfg.data_dist.num_clients:
-            log(WARNING,
+            log(
+                WARNING,
                 f"orignal number of clients {self.cfg.data_dist.num_clients} "
-                f"reduced to {len(self.client2data)}"
-                )
+                f"reduced to {len(self.client2data)}",
+            )
             self.cfg.data_dist.num_clients = len(self.client2data)
 
         data_per_client = [len(dl) for dl in self.client2data.values()]

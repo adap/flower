@@ -1,20 +1,16 @@
 """Fed_Debug Differential Testing."""
 
-
-from flwr.common.logger import log
-from logging import  DEBUG, INFO, WARNING
-
 import copy
 import gc
 import itertools
-
 import time
+from logging import DEBUG, INFO, WARNING
 from typing import Any, Dict
 
 import torch
 import torch.nn.functional as F
 from diskcache import Index
-
+from flwr.common.logger import log
 from torch.nn.init import kaiming_uniform_
 from torchvision.transforms import Compose, Normalize, RandomHorizontalFlip, Resize
 
@@ -23,14 +19,27 @@ from fed_debug.models import global_model_eval, initialize_model
 from fed_debug.neuron_activation import get_neurons_activations
 
 
-
-
-def _make_all_subsets_of_size_n(s, n):
-    assert n < len(s)
-    l_of_subsets = list(itertools.combinations(s, n))
+def _make_all_subsets_of_size_n(set_client_ids, each_subset_size):
+    assert each_subset_size < len(set_client_ids)
+    l_of_subsets = list(itertools.combinations(set_client_ids, each_subset_size))
     l_of_lists = [set(sub) for sub in l_of_subsets]
-    # log(INFO,f" All subsets {l_of_lists} ")
     return l_of_lists
+
+
+def _predict_func(model, input_tensor):
+    model.eval()
+    logits = model(input_tensor)
+    preds = torch.argmax(F.log_softmax(logits, dim=1), dim=1)
+    pred = preds.item()
+    return pred
+
+
+def _torch_intersection(client2tensors):
+    intersct = True
+    for _, temp_t in client2tensors.items():
+        intersct = intersct * temp_t
+        torch.cuda.synchronize()
+    return intersct
 
 
 class InferenceGuidedInputs:
@@ -60,11 +69,9 @@ class InferenceGuidedInputs:
         self.faster_input_generation = faster_input_generation
 
     def _get_random_input(self):
-        # print(f' Random input shape: {self.input_shape}')
         img = torch.empty(self.input_shape)
         self.random_generator_func(img)
-        # img = ToPILImage()(img)
-        # input_image =  {'image': img, 'img':img, 'label': -1}
+
         if self.transform is not None:
             return self.transform(img).unsqueeze(0)
         return img.unsqueeze(0)
@@ -77,7 +84,7 @@ class InferenceGuidedInputs:
     def get_inputs(self):
         """Return generated random inputs."""
         if self.faster_input_generation:
-            log(INFO,"Faster input generation generation")
+            log(INFO, "Faster input generation generation")
             return self._simple_random_inputs()
         else:
             if len(self.clients2models) <= 10:
@@ -85,21 +92,14 @@ class InferenceGuidedInputs:
             else:
                 return self._generate_feedback_random_inputs1()
 
-    def _predict_func(self, model, input_tensor):
-        model.eval()
-        logits = model(input_tensor)
-        preds = torch.argmax(F.log_softmax(logits, dim=1), dim=1)
-        pred = preds.item()
-        return pred
-
     # # feedback loop to create diverse set of inputs
+
     def _generate_feedback_random_inputs1(self):
         print("Feedback Random inputs")
 
         def _append_or_not_func(input_tensor):
             preds = [
-                self._predict_func(m, input_tensor)
-                for m in self.clients2models.values()
+                _predict_func(m, input_tensor) for m in self.clients2models.values()
             ]
             for ci1, pred1 in enumerate(preds):
                 seq = set()
@@ -108,10 +108,13 @@ class InferenceGuidedInputs:
                     if ci1 != ci2 and pred1 == pred2:
                         seq.add(ci2)
 
-                s = ",".join(str(p) for p in seq)
-                if s not in same_prediciton and len(seq) >= self.min_nclients_same_pred:
+                temp_s = ",".join(str(p) for p in seq)
+                if (
+                    temp_s not in same_prediciton
+                    and len(seq) >= self.min_nclients_same_pred
+                ):
                     # print(s)
-                    same_prediciton.add(s)
+                    same_prediciton.add(temp_s)
                     random_inputs.append(input_tensor)
                     return
 
@@ -209,35 +212,24 @@ class FaultyClientLocalization:
         return clients_ids
 
     def _get_clients_ids_with_highest_common_neurons(self, clients2neurons2boolact):
+        def _labmda_count(comb):
+            """Return the number of common neurons.
 
-        select_neurons = self._torch_intersection(clients2neurons2boolact) == False
-
-        clients_neurons2boolact = {
-            cid: t[select_neurons] for cid, t in clients2neurons2boolact.items()
-        }
+            In PyTorch, boolean values are treated as integers (True as 1 and False as
+            0), so summing a tensor of boolean values will give you the count of True
+            values.
+            """
+            c2act = {cid: clients2neurons2boolact[cid] for cid in comb}
+            intersect_tensor = _torch_intersection(c2act)
+            return intersect_tensor.sum().item()
 
         count_of_common_neurons = [
-            (
-                self._torch_intersection(
-                    {cid: clients_neurons2boolact[cid] for cid in comb}
-                )
-                == True
-            )
-            .sum()
-            .item()
-            for comb in self.all_clients_combinations
+            _labmda_count(comb) for comb in self.all_clients_combinations
         ]
         highest_number_of_common_neurons = max(count_of_common_neurons)
         val_index = count_of_common_neurons.index(highest_number_of_common_neurons)
         val_clients_ids = self.all_clients_combinations[val_index]
         return val_clients_ids
-
-    def _torch_intersection(self, client2tensors):
-        intersct = True
-        for _k, v in client2tensors.items():
-            intersct = intersct * v
-            torch.cuda.synchronize()
-        return intersct
 
 
 def _get_transforms_for_diff_testing(dname):
@@ -283,14 +275,14 @@ class FedDebug:
 
     def _sanity_check(self):
         test_data = load_central_server_test_data(self.train_cfg)
-        for cid, cm in self.client2model.items():
-            d = global_model_eval(
+        for cid, cli_model in self.client2model.items():
+            temp_d = global_model_eval(
                 self.train_cfg.model.arch,
-                {"model": cm, "num_classes": self.train_cfg.dataset.num_classes},
+                {"model": cli_model, "num_classes": self.train_cfg.dataset.num_classes},
                 test_data,
             )
 
-            print(f"client id {cid}, metrics:  {d}")
+            print(f"client id {cid}, metrics:  { temp_d}")
 
     def _extract_round_id(self) -> None:
         self.round_id = self.round_key.split(":")[-1]
@@ -308,18 +300,19 @@ class FedDebug:
         )["test"]
 
     def _initialize_and_load_models(self) -> None:
-        log(INFO,
-            f"\n\n             ----------Round key {self.round_key} -------------- \n"
+        log(
+            INFO,
+            f"\n\n             ----------Round key {self.round_key} -------------- \n",
         )
         round2ws = self.training_cache[self.round_key]
         self.client2num_examples = round2ws["client2num_examples"]  # type: ignore
 
         self.client2model = {}
-        for cid, ws in round2ws["client2ws"].items():  # type: ignore
+        for cid, cli_ws in round2ws["client2ws"].items():  # type: ignore
             cmodel = initialize_model(
                 self.train_cfg.model.name, self.train_cfg.dataset
             )["model"]
-            cmodel.load_state_dict(ws)  # type: ignore
+            cmodel.load_state_dict(cli_ws)  # type: ignore
             cmodel = cmodel.cpu().eval()  # type: ignore
             self.client2model[cid] = cmodel
 
@@ -328,7 +321,7 @@ class FedDebug:
         detection_acc = 0
         for pred_faulty_clients in predicted_faulty_clients_on_each_input:
             # print(f"+++ Faulty Clients {pred_faulty_clients}")
-            log(INFO,f"-- Potential Malicious client(s) {pred_faulty_clients}")
+            log(INFO, f"-- Potential Malicious client(s) {pred_faulty_clients}")
 
             correct_localize_faults = len(
                 true_faulty_clients.intersection(pred_faulty_clients)
@@ -388,7 +381,7 @@ class FedDebug:
 
         eval_metrics = {"accuracy": fault_localization_acc}
 
-        log(INFO,f"Fault Localization Accuracy: {fault_localization_acc}")
+        log(INFO, f"Fault Localization Accuracy: {fault_localization_acc}")
 
         debug_result = {
             "clients": list(self.client2model.keys()),
@@ -414,8 +407,7 @@ def _get_round_keys_and_central_test_data(fl_key, train_cache_path):
 
 def _check_already_done(fl_config_key: str, results_cache):
     if fl_config_key in results_cache.keys():
-        d = results_cache[fl_config_key]
-        return d["round2debug_result"]
+        return results_cache[fl_config_key]["round2debug_result"]
     return []
 
 
@@ -434,11 +426,11 @@ def run_fed_debug_differential_testing(cfg, store_in_cache=True):
     round2debug_result = []
 
     if len(round2debug_result) > 0:
-        log(INFO,">> Debugging is already done.")
+        log(INFO, ">> Debugging is already done.")
         return round2debug_result
 
     rounds_keys = _get_round_keys_and_central_test_data(cfg.exp_key, train_cache_path)
-    log(DEBUG,f"rounds_keys {rounds_keys}")
+    log(DEBUG, f"rounds_keys {rounds_keys}")
 
     start_time = time.time()
 
@@ -449,7 +441,7 @@ def run_fed_debug_differential_testing(cfg, store_in_cache=True):
     end_time = time.time()
 
     if len(rounds_keys) == 0:
-        log(WARNING,"Unable to get any model. Something is wrong.")
+        log(WARNING, "Unable to get any model. Something is wrong.")
         return None
 
     avg_debug_time_per_round = (end_time - start_time) / len(rounds_keys)
@@ -463,9 +455,10 @@ def run_fed_debug_differential_testing(cfg, store_in_cache=True):
 
     if store_in_cache:
         debug_results_cache[cfg.exp_key] = final_result_dict
-        log(INFO,
-            f"Debugging results saved for {cfg.exp_key}. " 
-            f"Avg Debugging time per round: {avg_debug_time_per_round} seconds."
+        log(
+            INFO,
+            f"Debugging results saved for {cfg.exp_key}. "
+            f"Avg Debugging time per round: {avg_debug_time_per_round} seconds.",
         )
     return final_result_dict
 
@@ -480,9 +473,9 @@ def eval_na_threshold(cfg):
     for exp_key in cfg.threshold_exps_keys:
         cfg.exp_key = exp_key
         na2acc = {}
-        for na in cfg.neuron_act_thresholds:
+        for n_act_t in cfg.neuron_act_thresholds:
             temp_cfg = copy.deepcopy(cfg)
-            temp_cfg.neuron_activation_threshold = na
+            temp_cfg.neuron_activation_threshold = n_act_t
             r2results = run_fed_debug_differential_testing(
                 temp_cfg, store_in_cache=False
             )["round2debug_result"]
@@ -490,11 +483,12 @@ def eval_na_threshold(cfg):
             all_accs = [r["eval_metrics"]["accuracy"] for r in r2results]
             avg_accs = sum(all_accs) / len(all_accs)
 
-            log(INFO,
-                f"Neuron Activation threshold {na} "
-                f"and average malicious client localization accuracy is {avg_accs}."
+            log(
+                INFO,
+                f"Neuron Activation threshold {n_act_t} "
+                f"and average malicious client localization accuracy is {avg_accs}.",
             )
-            na2acc[na] = avg_accs
+            na2acc[n_act_t] = avg_accs
 
         na_cached_results_dict[cfg.exp_key] = {
             "cfg": debug_results_cache[exp_key]["debug_cfg"],

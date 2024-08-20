@@ -4,31 +4,32 @@ It includes processioning the dataset, instantiate strategy, specify how the glo
 model is going to be evaluated, etc. At the end, this script saves the results.
 """
 
-
-from flwr.common.logger import log
-from logging import INFO, DEBUG
-
 import time
+from functools import partial
+from logging import DEBUG, INFO
+
 import flwr as fl
 import hydra
-
 from diskcache import Index
-from fed_debug.differential_testing import (
-    eval_na_threshold,
-    run_fed_debug_differential_testing,
-)
-from functools import partial
+from flwr.common.logger import log
 
 from fed_debug import server, utils
 from fed_debug.client import gen_client_func
 from fed_debug.dataset import ClientsAndServerDatasetsPrep
+from fed_debug.differential_testing import (
+    eval_na_threshold,
+    run_fed_debug_differential_testing,
+)
 
 
 def _flwr_fl_sim(cfg, client2data, server_data, cache):
-    client_app = fl.client.ClientApp(client_fn= partial(gen_client_func, cfg, client2data))
+    client_app = fl.client.ClientApp(
+        client_fn=partial(gen_client_func, cfg, client2data)
+    )
     server_config = fl.server.ServerConfig(num_rounds=cfg.strategy.num_rounds)
     server_app = fl.server.ServerApp(
-        config=server_config, strategy=server.get_strategy(cfg, server_data, cache))
+        config=server_config, strategy=server.get_strategy(cfg, server_data, cache)
+    )
 
     fl.simulation.run_simulation(
         server_app=server_app,
@@ -36,6 +37,7 @@ def _flwr_fl_sim(cfg, client2data, server_data, cache):
         num_supernodes=cfg.num_clients,
         backend_config=utils.config_sim_resources(cfg),  # type: ignore
     )
+
 
 def run_simulation(cfg):
     """Run the simulation."""

@@ -5,14 +5,13 @@ extend or modify the functionality of an existing strategy.
 """
 
 import gc
-from flwr.common.logger import log
 from logging import INFO
 
 import flwr as fl
+from flwr.common.logger import log
 
-
-from fed_debug.models import initialize_model
 from fed_debug import utils
+from fed_debug.models import initialize_model
 
 
 class FedAvgSave(fl.server.strategy.FedAvg):

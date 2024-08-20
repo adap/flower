@@ -7,18 +7,17 @@ uncomment the lines below and tell us in the README.md (see the "Running the Exp
 block) that this file should be executed first.
 """
 
-from flwr.common.logger import log
-from logging import INFO, DEBUG
-
 import os
 import random
 import shutil
 import tarfile
 import urllib
 from collections import Counter
+from logging import DEBUG, INFO
 
 import torch
 import torchvision
+from flwr.common.logger import log
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import DirichletPartitioner, IidPartitioner
 from PIL import Image
@@ -70,7 +69,7 @@ def download_url(url: str, root: str, filename=None, md5=None) -> None:
         try:
             print("Downloading " + url + " to " + fpath)
             urllib.request.urlretrieve(url, fpath, reporthook=_gen_bar_updater())
-        except (urllib.error.URLError, IOError) as e:  # type: ignore[attr-defined]
+        except (urllib.error.URLError, IOError) as temp_except:
             if url[:5] == "https":
                 url = url.replace("https:", "http:")
                 print(
@@ -79,7 +78,7 @@ def download_url(url: str, root: str, filename=None, md5=None) -> None:
                 )
                 urllib.request.urlretrieve(url, fpath, reporthook=_gen_bar_updater())
             else:
-                raise e
+                raise temp_except
         # check integrity of downloaded file
         if not check_integrity(fpath, md5):
             raise RuntimeError("File not found or faultyed.")
@@ -291,6 +290,8 @@ def _get_train_val_datasets(dataset_name, data_dir):
         valid_ds = SubsetToDataset(test_ds)
 
         return train_ds, valid_ds, 10
+    else:
+        raise NotImplementedError(f"Dataset {dataset_name} not implemented.")
 
 
 def _split_dataset_to_iid(dataset, clients):
@@ -421,13 +422,13 @@ def fix_partition(cfg, c_partition, target_label_col):
         if example[target_label_col] in filtered_labels
     ]  # type: ignore
 
-    ds = c_partition.select(indices_to_select)
+    temp_ds = c_partition.select(indices_to_select)
 
-    if len(ds) % cfg.batch_size == 1:
-        ds = ds.select(range(len(ds) - 1))
+    if len(temp_ds) % cfg.batch_size == 1:
+        temp_ds = temp_ds.select(range(len(temp_ds) - 1))
 
-    partition_labels_count = get_labels_count(ds, target_label_col)
-    return {"partition": ds, "partition_labels_count": partition_labels_count}
+    partition_labels_count = get_labels_count(temp_ds, target_label_col)
+    return {"partition": temp_ds, "partition_labels_count": partition_labels_count}
 
 
 def _get_partitioner(cfg, target_label_col):
@@ -475,19 +476,20 @@ def clients_data_distribution(
         for partition_index in range(cfg.num_clients):
             partition = fds.load_partition(partition_index)
 
-            d = fix_partition(cfg, partition, target_label_col)
+            temp_d = fix_partition(cfg, partition, target_label_col)
 
-            if len(d["partition"]) >= cfg.batch_size:
-                clients_data.append(d["partition"])
-                clients_class.append(d["partition_labels_count"])
+            if len(temp_d["partition"]) >= cfg.batch_size:
+                clients_data.append(temp_d["partition"])
+                clients_class.append(temp_d["partition_labels_count"])
 
     # per client data size
     per_client_data_size = [len(dl) for dl in clients_data]
-    log(DEBUG,
+    log(
+        DEBUG,
         f"Data per clients {per_client_data_size}, "
         f"server data size: {len(server_data)}, "
-        f"fetch_only_test_data: {fetch_only_test_data}"
-        )
+        f"fetch_only_test_data: {fetch_only_test_data}",
+    )
 
     client2data = {f"{id}": v for id, v in enumerate(clients_data)}
     client2class = {f"{id}": v for id, v in enumerate(clients_class)}

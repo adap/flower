@@ -27,19 +27,19 @@ def initialize_model(name, cfg_dataset):
 
     if name.find("resnet") != -1:
         model = None
-        if "resnet18" == name:
+        if name == "resnet18":
             model = torchvision.models.resnet18(weights="IMAGENET1K_V1")
-        elif "resnet34" == name:
+        elif name == "resnet34":
             model = torchvision.models.resnet34(weights="IMAGENET1K_V1")
-        elif "resnet50" == name:
+        elif name == "resnet50":
             model = torchvision.models.resnet50(weights="IMAGENET1K_V1")
-        elif "resnet101" == name:
+        elif name == "resnet101":
             model = torchvision.models.resnet101(weights="IMAGENET1K_V1")
-        elif "resnet152" == name:
+        elif name == "resnet152":
             model = torchvision.models.resnet152(weights="IMAGENET1K_V1")
 
         if cfg_dataset.channels == 1:
-            model.conv1 = torch.nn.Conv2d(
+            model.conv1 = torch.nn.Conv2d(  # type: ignore
                 1, 64, kernel_size=7, stride=2, padding=3, bias=False
             )
 
@@ -112,19 +112,16 @@ def _train(tconfig):
     return {"train_loss": epoch_loss, "train_accuracy": epoch_acc}
 
 
-def global_model_eval(arch, global_net_dict, server_testdata, batch_size=64):
+def global_model_eval(arch, global_net_dict, server_testdata):
     """Evaluate the global model on the server test data."""
-    d = {}
+    eval_d = {}
     if arch == "cnn":
-        # d = _test_cnn_pl_trianer(
-        #     global_net_dict,
-        #     central_server_test_data=server_testdata,
-        #     batch_size=batch_size,
-        # )[0]
-        d = test(global_net_dict["model"], test_data=server_testdata, device="cuda")
+        eval_d = test(
+            global_net_dict["model"], test_data=server_testdata, device="cuda"
+        )
     return {
-        "loss": d["eval_loss"],
-        "accuracy": d["eval_accuracy"],
+        "loss": eval_d["eval_loss"],
+        "accuracy": eval_d["eval_accuracy"],
     }
 
 

@@ -5,17 +5,16 @@ example, you may define here things like: loading a model from a checkpoint, sav
 results, plotting.
 """
 
-from flwr.common.logger import log
 from logging import INFO
 
 import matplotlib.pyplot as plt
 import pandas as pd
-from diskcache import Index
 import torch
-import numpy as np
+from diskcache import Index
+from flwr.common.logger import log
 
 
-def _plot_line_plots(df):
+def _plot_line_plots(df_plot):
     fig, axs = plt.subplots(2, 2, figsize=(12, 12))
     fig.suptitle(
         "Malicious Clients Localization Accuracy vs Neuron Activation Threshold"
@@ -34,7 +33,7 @@ def _plot_line_plots(df):
         row = idx // 2
         col = idx % 2
 
-        subset = df[(df["Model"] == model) & (df["Dataset"] == dataset)]
+        subset = df_plot[(df_plot["Model"] == model) & (df_plot["Dataset"] == dataset)]
 
         # Sort by threshold to ensure correct line plotting
         subset = subset.sort_values("Neuron Activation Threshold")
@@ -63,9 +62,10 @@ def _plot_line_plots(df):
     fname = "Figure-10.pdf"
     plt.savefig(fname)
     plt.savefig("Figure-10.png")
-    log(INFO,
+    log(
+        INFO,
         "Fig 10: FEDDEBUG performance at neuron activation threshold on 30 clients, "
-        f"including five faulty clients. Figure generate {fname}"
+        f"including five faulty clients. Figure generate {fname}",
     )
 
 
@@ -80,30 +80,33 @@ def generate_table2_csv(cache_path, igonre_keys):
             continue
         exp_dict = cache[k]
         cfg = exp_dict["debug_cfg"]
-        d = {}
-        d["Faulty Clients"] = len(cfg.faulty_clients_ids)
-        d["Total Clients"] = cfg.num_clients
-        d["Architecture"] = cfg.model.name
-        d["Dataset"] = cfg.dataset.name
-        d["Accuracy"] = exp_dict["round2debug_result"][0]["eval_metrics"]["accuracy"]
-        d["Epochs"] = cfg.client.epochs
-        d["Noise Rate"] = cfg.noise_rate
-        d["faulty_clients_ids"] = cfg.faulty_clients_ids
-        d["Data Distribution"] = cfg.data_dist.dist_type
-        d["Experiment Configuration Key"] = k
+        table_d = {}
+        table_d["Faulty Clients"] = len(cfg.faulty_clients_ids)
+        table_d["Total Clients"] = cfg.num_clients
+        table_d["Architecture"] = cfg.model.name
+        table_d["Dataset"] = cfg.dataset.name
+        table_d["Accuracy"] = exp_dict["round2debug_result"][0]["eval_metrics"][
+            "accuracy"
+        ]
+        table_d["Epochs"] = cfg.client.epochs
+        table_d["Noise Rate"] = cfg.noise_rate
+        table_d["faulty_clients_ids"] = cfg.faulty_clients_ids
+        table_d["Data Distribution"] = cfg.data_dist.dist_type
+        table_d["Experiment Configuration Key"] = k
 
-        all_df_rows.append(d)
+        all_df_rows.append(table_d)
 
-    df = pd.DataFrame(all_df_rows)
-    print(df)
+    df_table = pd.DataFrame(all_df_rows)
+    print(df_table)
     csv_name = "fed_debug_results.csv"
-    df.to_csv(csv_name)
-    log(INFO,
+    df_table.to_csv(csv_name)
+    log(
+        INFO,
         (
             "Table II: FEDDEBUG’s fault localization in 32 FL"
             "configurations with multiple faulty clients, ranging from two to seven."
             f"Results are also stored in {csv_name}"
-        )
+        ),
     )
 
 
@@ -134,16 +137,16 @@ def gen_thresholds_exp_graph(cache_path, threshold_exp_key):
 
         all_dicts += temp_li
 
-    df = pd.DataFrame(all_dicts)
+    df_na_t = pd.DataFrame(all_dicts)
     csv_name = "neuron_activation_threshold_variation.csv"
 
-    print(df)
-    df.to_csv(csv_name)
-    _plot_line_plots(df)
-
+    print(df_na_t)
+    df_na_t.to_csv(csv_name)
+    _plot_line_plots(df_na_t)
 
 
 def set_exp_key(cfg):
+    """Set the experiment key."""
     key = (
         f"{cfg.model.name}-{cfg.dataset.name}-"
         f"faulty_clients[{cfg.faulty_clients_ids}]-"
@@ -157,10 +160,12 @@ def set_exp_key(cfg):
     )
     return key
 
+
 def config_sim_resources(cfg):
+    """Configure the resources for the simulation."""
     client_resources = {"num_cpus": cfg.client_cpus}
     if cfg.device == "cuda":
-        client_resources['num_gpus'] = cfg.client_gpu 
+        client_resources["num_gpus"] = cfg.client_gpu
 
     init_args = {"num_cpus": cfg.total_cpus, "num_gpus": cfg.total_gpus}
     backend_config = {
