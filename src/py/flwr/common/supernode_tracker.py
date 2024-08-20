@@ -64,9 +64,6 @@ class SuperNodeTracker:
 
     def save_to_file(self, data: Dict[str, Any]) -> None:
         """Write data to the JSON file."""
-        try:
-            with open(self.filename, "a", encoding="utf-8") as file:
-                json.dump(data, file)
-                file.write("\n")
-        except OSError as e:
-            raise RuntimeError(f"Failed to write to file at {self.filename}") from e
+        with open(self.filename, "a", encoding="utf-8") as file:
+            json.dump(data, file)
+            file.write("\n")
