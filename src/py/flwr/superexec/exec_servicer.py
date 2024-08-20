@@ -47,7 +47,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         log(INFO, "ExecServicer.StartRun")
 
         run = self.executor.start_run(
-            request.fab_file,
+            request.fab.content,
             user_config_from_proto(request.override_config),
             user_config_from_proto(request.federation_config),
         )
