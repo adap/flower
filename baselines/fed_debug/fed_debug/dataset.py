@@ -14,9 +14,7 @@ import random
 import torch
 
 from flwr.common.logger import log
-from logging import WARNING
-
-
+from logging import WARNING, INFO
 
 
 from fed_debug.dataset_preparation import (
@@ -70,7 +68,6 @@ class NoisyDataset(torch.utils.data.Dataset):
         return x, y
 
 
-
 def _initialize_image_dataset(cfg, fetch_only_test_data):
     """Initialize and return the image dataset."""
     target_label_col = "label"
@@ -94,14 +91,13 @@ def _load_datasets(cfg, fetch_only_test_data=False):
     """Load the dataset and return the dataload."""
     if cfg.dname in ["cifar10", "mnist", "flwrlabs/femnist"]:
         return _initialize_image_dataset(cfg, fetch_only_test_data)
-    return None
+    else:
+        raise NotImplementedError(f"Dataset {cfg.dname} not implemented.")
 
 
 def load_central_server_test_data(cfg):
     """Load the central server test data."""
-    # d = _load_datasets(cfg, fetch_only_test_data=True)
     d_obj = ClientsAndServerDatasetsPrep(cfg).get_clients_server_data()
-
     return d_obj["server_testdata"]
 
 
@@ -122,7 +118,7 @@ class ClientsAndServerDatasetsPrep:
                 noise_rate=self.cfg.noise_rate,
                 num_classes=self.cfg.dataset.num_classes,
             )
-            log(WARNING,f"Client {cid} is made noisy \n  ")
+            log(WARNING, f"Client {cid} is made noisy \n  ")
             self.client2class[cid] = "noisy"
 
     def _add_noise_in_data(self, client_data, label_col, noise_rate, num_classes):
@@ -136,18 +132,18 @@ class ClientsAndServerDatasetsPrep:
         self.client2class = d["client2class"]
         print(f"client2class: {self.client2class}")
 
-        log(INFO,f"> client2class {self.client2class}")
+        log(INFO, f"> client2class {self.client2class}")
         if len(self.client2data) < self.cfg.data_dist.num_clients:
             log(WARNING,
                 f"orignal number of clients {self.cfg.data_dist.num_clients} "
                 f"reduced to {len(self.client2data)}"
-            )
+                )
             self.cfg.data_dist.num_clients = len(self.client2data)
 
         data_per_client = [len(dl) for dl in self.client2data.values()]
-        log(INFO,f"Data per client in experiment {data_per_client}")
+        log(INFO, f"Data per client in experiment {data_per_client}")
         min_data = min(len(dl) for dl in self.client2data.values())
-        log(INFO,f"Min data on a client: {min_data}")
+        log(INFO, f"Min data on a client: {min_data}")
 
     def _setup_original_fed_debug(self):
         self.client2class = {}
@@ -170,6 +166,7 @@ class ClientsAndServerDatasetsPrep:
 
     def _setup(self):
         self._setup_original_fed_debug()
+        # self._setup_hugging()
 
     def get_clients_server_data(self):
         """Return the clients and server data for simulation."""

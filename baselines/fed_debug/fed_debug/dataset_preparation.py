@@ -431,7 +431,7 @@ def fix_partition(cfg, c_partition, target_label_col):
 
 
 def _get_partitioner(cfg, target_label_col):
-    log(INFO,f"Data distribution type: {cfg.dist_type}")
+    log(INFO, f"Data distribution type: {cfg.dist_type}")
     if cfg.dist_type == "iid":
         partitioner = IidPartitioner(num_partitions=cfg.num_clients)
         return partitioner
@@ -469,7 +469,7 @@ def clients_data_distribution(
 
     server_data = fds.load_split("test").select(range(cfg.max_server_data_size))
 
-    log(INFO,f"Server data keys {server_data[0].keys()}")
+    log(INFO, f"Server data keys {server_data[0].keys()}")
 
     if not fetch_only_test_data:
         for partition_index in range(cfg.num_clients):
@@ -487,7 +487,7 @@ def clients_data_distribution(
         f"Data per clients {per_client_data_size}, "
         f"server data size: {len(server_data)}, "
         f"fetch_only_test_data: {fetch_only_test_data}"
-    )
+        )
 
     client2data = {f"{id}": v for id, v in enumerate(clients_data)}
     client2class = {f"{id}": v for id, v in enumerate(clients_class)}

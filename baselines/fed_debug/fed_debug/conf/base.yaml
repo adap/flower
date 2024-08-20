@@ -1,5 +1,10 @@
-check_cache: False # if set to True then if the config is already in the cache then it will not retrain.
+device: "cuda"
+total_gpus: 1
+total_cpus: 3
+client_cpus: 1
+client_gpu: 0.5
 
+check_cache: False # if set to True then if the config is already in the cache then it will not retrain.
 num_clients: 5
 client:
     epochs: 5
@@ -18,11 +23,7 @@ dataset_classes:
     femnist: 10
 
 exp_key: "key_test" # this is the test key. It will be changed after running the exp
-device: "cuda"
-total_gpus: 1
-total_cpus: 3
-client_cpus: 1
-client_gpu: 0.5
+
 
 model:
     # resnet34, resnet50, resnet101, resnet152, densenet121, vgg16
@@ -47,6 +48,7 @@ data_dist:
     dname: ${dataset.name}
     mname: ${model.name}
     storage_dir: ${storage.dir}
+    max_server_data_size: 2048
 
 hydra:
     job_logging:

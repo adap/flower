@@ -25,7 +25,6 @@ from fed_debug.dataset import ClientsAndServerDatasetsPrep
 
 
 def _flwr_fl_sim(cfg, client2data, server_data, cache):
-    """Run the simulation."""
     client_app = fl.client.ClientApp(client_fn= partial(gen_client_func, cfg, client2data))
     server_config = fl.server.ServerConfig(num_rounds=cfg.strategy.num_rounds)
     server_app = fl.server.ServerApp(
@@ -76,9 +75,7 @@ def run_simulation(cfg):
         "train_cfg": cfg,
         "complete": True,
         "input_shape": temp_input.shape,
-        # "all_ronuds_gm_results": round2results,
     }
-    # log(INFO, f"Results of gm evaluations each round: {round2results}")
     log(INFO, f"Simulation Complete for: {cfg.exp_key} ")
 
 
