@@ -17,7 +17,7 @@
 import json
 import os
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
 
 from flwr.common.typing import Run
 
@@ -25,10 +25,10 @@ from flwr.common.typing import Run
 class SuperNodeTracker:
     """A utility class for tracking and recording SuperNode."""
 
-    def __init__(self, supernode_id: str) -> None:
-        self.supernode_id = supernode_id
+    def __init__(self, supernode_id: Optional[int]) -> None:
+        self.supernode_id = str(supernode_id)
         self.filename = f"supernode_tracking_({supernode_id}).json"
-        self.run_ids = []
+        self.run_ids: List[int] = []
 
         # Create an empty file if it does not exist
         if not os.path.exists(self.filename):
