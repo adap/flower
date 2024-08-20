@@ -17,6 +17,7 @@
 
 import importlib
 
+from flwr.server.superlink.fleet.vce.backend import BackendConfig, ClientAppResources
 from flwr.simulation.run_simulation import run_simulation
 
 is_ray_installed = importlib.util.find_spec("ray") is not None
@@ -37,6 +38,8 @@ To install the necessary dependencies, install `flwr` with the `simulation` extr
 
 
 __all__ = [
+    "BackendConfig",
+    "ClientAppResources",
     "run_simulation",
     "start_simulation",
 ]

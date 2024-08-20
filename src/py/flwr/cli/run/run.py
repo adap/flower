@@ -193,6 +193,7 @@ def _run_without_superexec(
 ) -> None:
     try:
         num_supernodes = federation_config["options"]["num-supernodes"]
+        backend_cfg = federation_config["options"].get("backend", {})
     except KeyError as err:
         typer.secho(
             "❌ The project's `pyproject.toml` needs to declare the number of"
@@ -212,6 +213,10 @@ def _run_without_superexec(
         "--num-supernodes",
         f"{num_supernodes}",
     ]
+
+    # Set flags to configure the simulation backend (if any)
+    for k, v in backend_cfg.items():
+        command.extend([f"--{k}", f"{v}"])
 
     if config_overrides:
         command.extend(["--run-config", f"{','.join(config_overrides)}"])
