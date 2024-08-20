@@ -10,8 +10,9 @@ from logging import INFO
 
 import flwr as fl
 
-from fed_debug.client import set_parameters
+
 from fed_debug.models import initialize_model
+from fed_debug import utils
 
 
 class FedAvgSave(fl.server.strategy.FedAvg):
@@ -35,7 +36,7 @@ class FedAvgSave(fl.server.strategy.FedAvg):
 
         client_ids = round_dict["client2ws"].keys()
 
-        log(INFO,f"participating clients: {client_ids}")
+        log(INFO, f"participating clients: {client_ids}")
 
         # client2num_examples save in round_dict from results
         round_dict["client2num_examples"] = {
@@ -60,5 +61,5 @@ class FedAvgSave(fl.server.strategy.FedAvg):
         """Convert parameters to state_dict."""
         ndarr = fl.common.parameters_to_ndarrays(parameters)
         temp_net = initialize_model(self.cfg.model.name, self.cfg.dataset)["model"]
-        set_parameters(temp_net, ndarr)
+        utils.set_parameters(temp_net, ndarr)
         return temp_net.state_dict()

@@ -70,7 +70,7 @@ Default training hyperparameters are in `conf/base.yaml`.
 
 ## Environment Setup
 
-Experiments are conducted with `Python 3.11.9`. It is recommended to use Python 3.11 for the experiments.
+Experiments are conducted with `Python 3.10.14`. It is recommended to use Python 3.11 for the experiments.
 
 Check the documentation for the different ways of installing `pyenv`, but one easy way is using the [automatic installer](https://github.com/pyenv/pyenv-installer):
 
@@ -78,12 +78,12 @@ Check the documentation for the different ways of installing `pyenv`, but one ea
 curl https://pyenv.run | bash # then, don't forget links to your .bashrc/.zshrc
 ```
 
-You can then install any Python version with `pyenv install 3.11.9` Then, in order to use FedDebug baseline, you'd do the following:
+You can then install any Python version with `pyenv install 3.10.14` Then, in order to use FedDebug baseline, you'd do the following:
 
 ```bash
 # cd to your fed_debug directory (i.e. where the `pyproject.toml` is)
-pyenv local 3.11.9
-poetry env use 3.11.9 # set that version for poetry
+pyenv local 3.10.14
+poetry env use 3.10.14 # set that version for poetry
 
 
 # run this from the same directory as the `pyproject.toml` file is
@@ -91,7 +91,7 @@ poetry install
 poetry shell
 
 # check the python version by running the following command
-python --version # it should be >=3.11.9
+python --version # it should be >=3.10.14
 ```
 
 This will create a basic Python environment with just Flower and additional packages, including those needed for simulation. Now you are inside your environment (pretty much as when you use `virtualenv` or `conda`).

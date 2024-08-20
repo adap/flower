@@ -11,6 +11,8 @@ from logging import INFO
 import matplotlib.pyplot as plt
 import pandas as pd
 from diskcache import Index
+import torch
+import numpy as np
 
 
 def _plot_line_plots(df):
@@ -138,3 +140,45 @@ def gen_thresholds_exp_graph(cache_path, threshold_exp_key):
     print(df)
     df.to_csv(csv_name)
     _plot_line_plots(df)
+
+
+
+def set_exp_key(cfg):
+    key = (
+        f"{cfg.model.name}-{cfg.dataset.name}-"
+        f"faulty_clients[{cfg.faulty_clients_ids}]-"
+        f"noise_rate{cfg.noise_rate}-"
+        f"TClients{cfg.data_dist.num_clients}-"
+        f"{cfg.strategy.name}-(R{cfg.strategy.num_rounds}"
+        f"-clientsPerR{cfg.strategy.clients_per_round})"
+        f"-{cfg.data_dist.dist_type}{cfg.data_dist.dirichlet_alpha}"
+        f"-batch{cfg.data_dist.batch_size}-epochs{cfg.client.epochs}-"
+        f"lr{cfg.client.lr}"
+    )
+    return key
+
+def config_sim_resources(cfg):
+    client_resources = {"num_cpus": cfg.client_cpus}
+    if cfg.device == "cuda":
+        client_resources['num_gpus'] = cfg.client_gpu 
+
+    init_args = {"num_cpus": cfg.total_cpus, "num_gpus": cfg.total_gpus}
+    backend_config = {
+        "client_resources": client_resources,
+        "init_args": init_args,
+    }
+    return backend_config
+
+
+def get_parameters(model):
+    """Return model parameters as a list of NumPy ndarrays."""
+    model = model.cpu()
+    return [val.cpu().detach().clone().numpy() for _, val in model.state_dict().items()]
+
+
+def set_parameters(net, parameters):
+    """Set model parameters from a list of NumPy ndarrays."""
+    net = net.cpu()
+    params_dict = zip(net.state_dict().keys(), parameters)
+    new_state_dict = {k: torch.from_numpy(v) for k, v in params_dict}
+    net.load_state_dict(new_state_dict, strict=True)

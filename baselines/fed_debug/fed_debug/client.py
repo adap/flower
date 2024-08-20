@@ -3,25 +3,25 @@
 Please overwrite `flwr.client.NumPyClient` or `flwr.client.Client` and create a function
 to instantiate your client.
 """
-
+import torch
 import gc
 import flwr as fl
-import torch
-
-from fed_debug.models import train_neural_network
-
+from fed_debug.models import train_neural_network, initialize_model
+from fed_debug.utils import get_parameters, set_parameters
 
 class CNNFlowerClient(fl.client.NumPyClient):
     """Flower client for training a CNN model."""
-
-    def __init__(self, config):
+    
+    def __init__(self, args):
         """Initialize the client with the given configuration."""
-        self.config = config
+        self.args = args
 
     def fit(self, parameters, config):
         """Train the model on the local dataset."""
-        nk_client_data_points = len(self.config["client_data_train"])
-        model_dict = self.config["model_dict"]
+        nk_client_data_points = len(self.args["client_data_train"])
+        model_dict = self.args["model_dict"]
+
+         
 
         set_parameters(model_dict["model"], parameters=parameters)
         train_dict = train_neural_network(
@@ -30,8 +30,8 @@ class CNNFlowerClient(fl.client.NumPyClient):
                 "epochs": config["local_epochs"],
                 "batch_size": config["batch_size"],
                 "model_dict": model_dict,
-                "train_data": self.config["client_data_train"],
-                "device": self.config["device"],
+                "train_data": self.args["client_data_train"],
+                "device": self.args["device"],
             }
         )
 
@@ -39,20 +39,20 @@ class CNNFlowerClient(fl.client.NumPyClient):
         parameters = get_parameters(model_dict["model"])
         del model_dict["model"]
         del model_dict
-        client_train_dict = {"cid": self.config["cid"]} | train_dict
+        client_train_dict = {"cid": self.args["cid"]} | train_dict
         gc.collect()
         return parameters, nk_client_data_points, client_train_dict
 
 
-def get_parameters(model):
-    """Return model parameters as a list of NumPy ndarrays."""
-    model = model.cpu()
-    return [val.cpu().detach().clone().numpy() for _, val in model.state_dict().items()]
+def gen_client_func(cfg, client2data, cid):
+    model_dict = initialize_model(cfg.model.name, cfg.dataset)
+    args = {
+        "cid": cid,
+        "model_dict": model_dict,
+        "client_data_train": client2data[cid],
+        "device": torch.device(cfg.device),
 
-
-def set_parameters(net, parameters):
-    """Set model parameters from a list of NumPy ndarrays."""
-    net = net.cpu()
-    params_dict = zip(net.state_dict().keys(), parameters)
-    new_state_dict = {k: torch.from_numpy(v) for k, v in params_dict}
-    net.load_state_dict(new_state_dict, strict=True)
+    }
+    client = CNNFlowerClient(args).to_client()
+    return client
+    # return client_fn

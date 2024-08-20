@@ -463,10 +463,9 @@ def run_fed_debug_differential_testing(cfg, store_in_cache=True):
 
     if store_in_cache:
         debug_results_cache[cfg.exp_key] = final_result_dict
-
         log(INFO,
-            f"Debugging results saved for {cfg.exp_key}, \
-            / avg Debugging time per round: {avg_debug_time_per_round} seconds"
+            f"Debugging results saved for {cfg.exp_key}. " 
+            f"Avg Debugging time per round: {avg_debug_time_per_round} seconds."
         )
     return final_result_dict
 
