@@ -24,7 +24,7 @@ from typing import Optional, Sequence, Tuple, Union
 
 import grpc
 
-from flwr.client.connection import GrpcRereConnection
+from .grpc_rere_connection import GrpcRereConnection
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, serde
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
@@ -230,9 +230,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            _, _, create_node, _, _, _ = conn
-            assert create_node is not None
-            create_node()
+            conn.create_node()
 
             received_metadata = self._servicer.received_client_metadata()
             assert received_metadata is not None
@@ -262,9 +260,12 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            _, _, _, delete_node, _, _ = conn
-            assert delete_node is not None
-            delete_node()
+            conn.create_node()
+            conn.delete_node()
+
+            received_metadata = self._servicer.received_client_metadata()
+            assert received_metadata is not None
+
             shared_secret = generate_shared_key(
                 self._servicer.server_private_key, self._client_public_key
             )
@@ -297,9 +298,12 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            receive, _, _, _, _, _ = conn
-            assert receive is not None
-            receive()
+            conn.create_node()
+            conn.receive()
+
+            received_metadata = self._servicer.received_client_metadata()
+            assert received_metadata is not None
+
             shared_secret = generate_shared_key(
                 self._servicer.server_private_key, self._client_public_key
             )
@@ -333,9 +337,13 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            _, send, _, _, _, _ = conn
-            assert send is not None
-            send(message)
+            conn.create_node()
+            conn.receive()
+            conn.send(message)
+
+            received_metadata = self._servicer.received_client_metadata()
+            assert received_metadata is not None
+
             shared_secret = generate_shared_key(
                 self._servicer.server_private_key, self._client_public_key
             )
@@ -368,9 +376,12 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            _, _, _, _, get_run, _ = conn
-            assert get_run is not None
-            get_run(0)
+            conn.create_node()
+            conn.get_run(0)
+
+            received_metadata = self._servicer.received_client_metadata()
+            assert received_metadata is not None
+
             shared_secret = generate_shared_key(
                 self._servicer.server_private_key, self._client_public_key
             )

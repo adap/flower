@@ -36,6 +36,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResRequest,
 )
 from flwr.proto.run_pb2 import GetRunRequest  # pylint: disable=E0611
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 
 _PUBLIC_KEY_HEADER = "public-key"
 _AUTH_TOKEN_HEADER = "auth-token"
@@ -47,6 +48,7 @@ Request = Union[
     PushTaskResRequest,
     GetRunRequest,
     PingRequest,
+    GetFabRequest,
 ]
 
 
@@ -123,6 +125,7 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
                 PushTaskResRequest,
                 GetRunRequest,
                 PingRequest,
+                GetFabRequest,
             ),
         ):
             if self.shared_secret is None:
