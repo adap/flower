@@ -1,5 +1,5 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 if __name__ == "__main__":
     hist = np.load("_static/results/hist.npy", allow_pickle=True).item()

@@ -37,6 +37,7 @@ class NaturalIdPartitioner(Partitioner):
     Examples
     --------
     "flwrlabs/shakespeare" dataset
+
     >>> from flwr_datasets import FederatedDataset
     >>> from flwr_datasets.partitioner import NaturalIdPartitioner
     >>>
@@ -46,6 +47,7 @@ class NaturalIdPartitioner(Partitioner):
     >>> partition = fds.load_partition(0)
 
     "sentiment140" (aka Twitter) dataset
+
     >>> from flwr_datasets import FederatedDataset
     >>> from flwr_datasets.partitioner import NaturalIdPartitioner
     >>>
@@ -143,7 +145,6 @@ class NaturalIdPartitioner(Partitioner):
         """
         return self._partition_id_to_natural_id
 
-    # pylint: disable=R0201
     @partition_id_to_natural_id.setter
     def partition_id_to_natural_id(self, value: Dict[int, str]) -> None:
         raise AttributeError(

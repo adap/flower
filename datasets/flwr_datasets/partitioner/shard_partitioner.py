@@ -149,15 +149,15 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
     ) -> None:
         super().__init__()
         # Attributes based on the constructor
-        _check_if_natual_number(num_partitions, "num_partitions")
+        _check_if_natural_number(num_partitions, "num_partitions")
         self._num_partitions = num_partitions
         self._partition_by = partition_by
-        _check_if_natual_number(
+        _check_if_natural_number(
             num_shards_per_partition, "num_shards_per_partition", True
         )
         self._num_shards_per_partition = num_shards_per_partition
         self._num_shards_used: Optional[int] = None
-        _check_if_natual_number(shard_size, "shard_size", True)
+        _check_if_natural_number(shard_size, "shard_size", True)
         self._shard_size = shard_size
         self._keep_incomplete_shard = keep_incomplete_shard
         self._shuffle = shuffle
@@ -360,7 +360,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
                 )
 
 
-def _check_if_natual_number(
+def _check_if_natural_number(
     number: Optional[int], parameter_name: str, none_acceptable: bool = False
 ) -> None:
     if none_acceptable and number is None:

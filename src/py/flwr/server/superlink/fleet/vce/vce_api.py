@@ -27,8 +27,8 @@ from time import sleep
 from typing import Callable, Dict, Optional
 
 from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
+from flwr.client.clientapp.utils import get_load_client_app_fn
 from flwr.client.node_state import NodeState
-from flwr.client.supernode.app import _get_load_client_app_fn
 from flwr.common.constant import (
     NUM_PARTITIONS_KEY,
     PARTITION_ID_KEY,
@@ -72,8 +72,8 @@ def _register_node_states(
         node_states[node_id] = NodeState(
             node_id=node_id,
             node_config={
-                PARTITION_ID_KEY: str(partition_id),
-                NUM_PARTITIONS_KEY: str(num_partitions),
+                PARTITION_ID_KEY: partition_id,
+                NUM_PARTITIONS_KEY: num_partitions,
             },
         )
 
@@ -339,17 +339,17 @@ def start_vce(
 
     def backend_fn() -> Backend:
         """Instantiate a Backend."""
-        return backend_type(backend_config, work_dir=app_dir)
+        return backend_type(backend_config)
 
     # Load ClientApp if needed
     def _load() -> ClientApp:
 
         if client_app_attr:
-            app = _get_load_client_app_fn(
+            app = get_load_client_app_fn(
                 default_app_ref=client_app_attr,
-                dir_arg=app_dir,
-                flwr_dir_arg=flwr_dir,
-                multi_app=True,
+                app_path=app_dir,
+                flwr_dir=flwr_dir,
+                multi_app=False,
             )(run.fab_id, run.fab_version)
 
         if client_app:

@@ -23,6 +23,13 @@ from uuid import UUID
 import grpc
 
 from flwr.common.logger import log
+from flwr.common.serde import (
+    fab_from_proto,
+    fab_to_proto,
+    user_config_from_proto,
+    user_config_to_proto,
+)
+from flwr.common.typing import Fab
 from flwr.proto import driver_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
@@ -34,6 +41,7 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     PushTaskInsRequest,
     PushTaskInsResponse,
 )
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
@@ -41,6 +49,8 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     Run,
 )
 from flwr.proto.task_pb2 import TaskRes  # pylint: disable=E0611
+from flwr.server.superlink.ffs.ffs import Ffs
+from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.state import State, StateFactory
 from flwr.server.utils.validator import validate_task_ins_or_res
 
@@ -48,8 +58,9 @@ from flwr.server.utils.validator import validate_task_ins_or_res
 class DriverServicer(driver_pb2_grpc.DriverServicer):
     """Driver API servicer."""
 
-    def __init__(self, state_factory: StateFactory) -> None:
+    def __init__(self, state_factory: StateFactory, ffs_factory: FfsFactory) -> None:
         self.state_factory = state_factory
+        self.ffs_factory = ffs_factory
 
     def GetNodes(
         self, request: GetNodesRequest, context: grpc.ServicerContext
@@ -69,10 +80,21 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         """Create run ID."""
         log(DEBUG, "DriverServicer.CreateRun")
         state: State = self.state_factory.state()
+        if request.HasField("fab"):
+            fab = fab_from_proto(request.fab)
+            ffs: Ffs = self.ffs_factory.ffs()
+            fab_hash = ffs.put(fab.content, {})
+            _raise_if(
+                fab_hash != fab.hash_str,
+                f"FAB ({fab.hash_str}) hash from request doesn't match contents",
+            )
+        else:
+            fab_hash = ""
         run_id = state.create_run(
             request.fab_id,
             request.fab_version,
-            dict(request.override_config.items()),
+            fab_hash,
+            user_config_from_proto(request.override_config),
         )
         return CreateRunResponse(run_id=run_id)
 
@@ -149,8 +171,32 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
 
         # Retrieve run information
         run = state.get_run(request.run_id)
-        run_proto = None if run is None else Run(**vars(run))
-        return GetRunResponse(run=run_proto)
+
+        if run is None:
+            return GetRunResponse()
+
+        return GetRunResponse(
+            run=Run(
+                run_id=run.run_id,
+                fab_id=run.fab_id,
+                fab_version=run.fab_version,
+                override_config=user_config_to_proto(run.override_config),
+                fab_hash=run.fab_hash,
+            )
+        )
+
+    def GetFab(
+        self, request: GetFabRequest, context: grpc.ServicerContext
+    ) -> GetFabResponse:
+        """Get FAB from Ffs."""
+        log(DEBUG, "DriverServicer.GetFab")
+
+        ffs: Ffs = self.ffs_factory.ffs()
+        if result := ffs.get(request.hash_str):
+            fab = Fab(request.hash_str, result[0])
+            return GetFabResponse(fab=fab_to_proto(fab))
+
+        raise ValueError(f"Found no FAB with hash: {request.hash_str}")
 
 
 def _raise_if(validation_error: bool, detail: str) -> None:
