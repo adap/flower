@@ -1,5 +1,5 @@
-Enabling TLS for Secure Connections
-===================================
+Enable TLS for Secure Connections
+=================================
 
 When operating in a production environment, it is strongly recommended to enable Transport Layer
 Security (TLS) for each Flower Component to ensure secure communication.

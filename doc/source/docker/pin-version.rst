@@ -1,5 +1,5 @@
-Pinning a Docker Image to a Specific Version
-============================================
+Pin a Docker Image to a Specific Version
+========================================
 
 It may happen that we update the images behind the tags. Such updates usually include security
 updates of system dependencies that should not change the functionality of Flower. However, if

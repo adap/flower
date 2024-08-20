@@ -1,5 +1,5 @@
-Setting Environment Variables
-=============================
+Set Environment Variables
+=========================
 
 To set a variable inside a Docker container, you can use the ``-e <name>=<value>`` flag.
 Multiple ``-e`` flags can be used to set multiple environment variables for a container.

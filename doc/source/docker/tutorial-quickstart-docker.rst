@@ -72,7 +72,7 @@ Open your terminal and run:
    * ``--name superlink``: Assign the name ``superlink`` to the container.
    * ``--detach``: Run the container in the background, freeing up the terminal.
    * | :substitution-code:`flwr/superlink:|stable_flwr_version|`: The name of the image to be run and the specific
-     | tag of the image. The tag :substitution-code:`|stable_flwr_version|` represents a :doc:`specific version <pinning-version>` of the image.
+     | tag of the image. The tag :substitution-code:`|stable_flwr_version|` represents a :doc:`specific version <pin-version>` of the image.
    * | ``--insecure``: This flag tells the container to operate in an insecure mode, allowing
      | unencrypted communication.
 
@@ -365,5 +365,5 @@ Remove the containers and the bridge network:
 Where to Go Next
 ----------------
 
-* :doc:`tls`
+* :doc:`enable-tls`
 * :doc:`persist-superlink-state`

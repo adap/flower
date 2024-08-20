@@ -22,7 +22,7 @@ Running in Production
 .. toctree::
    :maxdepth: 1
 
-   tls
+   enable-tls
    persist-superlink-state
 
 Advanced Options
@@ -32,6 +32,6 @@ Advanced Options
    :maxdepth: 1
 
    set-environment-variables
-   root-user
-   pinning-version
-   using-different-version
+   run-as-root-user
+   pin-version
+   use-a-different-version

@@ -1,5 +1,5 @@
-Using a Different Flower Version
-================================
+Use a Different Flower Version
+==============================
 
 If you want to use a different version of Flower, for example Flower nightly, you can do so by
 changing the tag. All available versions are on `Docker Hub <https://hub.docker.com/u/flwr>`__.
