@@ -69,5 +69,4 @@ class SuperNodeTracker:
                 json.dump(data, file)
                 file.write("\n")
         except OSError as e:
-            # Raise a new exception while preserving the original context
             raise RuntimeError(f"Failed to write to file at {self.filename}") from e
