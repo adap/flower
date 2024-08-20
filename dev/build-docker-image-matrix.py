@@ -3,9 +3,9 @@ Usage: python dev/build-docker-image-matrix.py --flwr-version <flower version e.
 """
 
 import argparse
+import json
 from dataclasses import asdict, dataclass
 from enum import Enum
-import json
 from typing import Any, Callable, Dict, List, Optional
 
 
@@ -171,6 +171,13 @@ if __name__ == "__main__":
         # ubuntu images for each supported python version
         + generate_binary_images(
             "superexec",
+            base_images,
+            tag_latest_ubuntu_with_flwr_version,
+            lambda image: image.distro.name == DistroName.UBUNTU,
+        )
+        # ubuntu images for each supported python version
+        + generate_binary_images(
+            "clientapp",
             base_images,
             tag_latest_ubuntu_with_flwr_version,
             lambda image: image.distro.name == DistroName.UBUNTU,

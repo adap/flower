@@ -74,10 +74,15 @@ def get_project_config(project_dir: Union[str, Path]) -> Dict[str, Any]:
     return config
 
 
-def _fuse_dicts(
+def fuse_dicts(
     main_dict: UserConfig,
     override_dict: UserConfig,
 ) -> UserConfig:
+    """Merge a config with the overrides.
+
+    Remove the nesting by adding the nested keys as prefixes separated by dots, and fuse
+    it with the override dict.
+    """
     fused_dict = main_dict.copy()
 
     for key, value in override_dict.items():
@@ -96,7 +101,7 @@ def get_fused_config_from_dir(
     )
     flat_default_config = flatten_dict(default_config)
 
-    return _fuse_dicts(flat_default_config, override_config)
+    return fuse_dicts(flat_default_config, override_config)
 
 
 def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> UserConfig:
@@ -105,10 +110,15 @@ def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> UserConfig:
     Get the config using the fab_id and the fab_version, remove the nesting by adding
     the nested keys as prefixes separated by dots, and fuse it with the override dict.
     """
+    # Return empty dict if fab_id or fab_version is empty
     if not run.fab_id or not run.fab_version:
         return {}
 
     project_dir = get_project_dir(run.fab_id, run.fab_version, flwr_dir)
+
+    # Return empty dict if project directory does not exist
+    if not project_dir.is_dir():
+        return {}
 
     return get_fused_config_from_dir(project_dir, run.override_config)
 
@@ -136,6 +146,23 @@ def flatten_dict(
     return dict(items)
 
 
+def unflatten_dict(flat_dict: Dict[str, Any]) -> Dict[str, Any]:
+    """Unflatten a dict with keys containing separators into a nested dict."""
+    unflattened_dict: Dict[str, Any] = {}
+    separator: str = "."
+
+    for key, value in flat_dict.items():
+        parts = key.split(separator)
+        d = unflattened_dict
+        for part in parts[:-1]:
+            if part not in d:
+                d[part] = {}
+            d = d[part]
+        d[parts[-1]] = value
+
+    return unflattened_dict
+
+
 def parse_config_args(
     config: Optional[List[str]],
     separator: str = ",",
@@ -161,3 +188,11 @@ def parse_config_args(
                 overrides.update(tomli.loads(toml_str))
 
     return overrides
+
+
+def get_metadata_from_config(config: Dict[str, Any]) -> Tuple[str, str]:
+    """Extract `fab_version` and `fab_id` from a project config."""
+    return (
+        config["project"]["version"],
+        f"{config['tool']['flwr']['app']['publisher']}/{config['project']['name']}",
+    )

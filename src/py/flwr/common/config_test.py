@@ -24,12 +24,13 @@ import pytest
 from flwr.common.typing import UserConfig
 
 from .config import (
-    _fuse_dicts,
     flatten_dict,
+    fuse_dicts,
     get_flwr_dir,
     get_project_config,
     get_project_dir,
     parse_config_args,
+    unflatten_dict,
 )
 
 # Mock constants
@@ -139,7 +140,7 @@ def test_get_fused_config_valid(tmp_path: Path) -> None:
             "config", {}
         )
 
-        config = _fuse_dicts(flatten_dict(default_config), overrides)
+        config = fuse_dicts(flatten_dict(default_config), overrides)
 
         # Assert
         assert config == expected_config
@@ -227,6 +228,13 @@ def test_flatten_dict() -> None:
     raw_dict = {"a": {"b": {"c": "d"}}, "e": "f"}
     expected = {"a.b.c": "d", "e": "f"}
     assert flatten_dict(raw_dict) == expected
+
+
+def test_unflatten_dict() -> None:
+    """Test unflatten_dict with a flat dictionary."""
+    raw_dict = {"a.b.c": "d", "e": "f"}
+    expected = {"a": {"b": {"c": "d"}}, "e": "f"}
+    assert unflatten_dict(raw_dict) == expected
 
 
 def test_parse_config_args_none() -> None:

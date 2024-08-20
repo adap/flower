@@ -15,8 +15,10 @@
 """RecordSet."""
 
 
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Dict, Optional, cast
+from typing import cast
 
 from .configsrecord import ConfigsRecord
 from .metricsrecord import MetricsRecord
@@ -34,9 +36,9 @@ class RecordSetData:
 
     def __init__(
         self,
-        parameters_records: Optional[Dict[str, ParametersRecord]] = None,
-        metrics_records: Optional[Dict[str, MetricsRecord]] = None,
-        configs_records: Optional[Dict[str, ConfigsRecord]] = None,
+        parameters_records: dict[str, ParametersRecord] | None = None,
+        metrics_records: dict[str, MetricsRecord] | None = None,
+        configs_records: dict[str, ConfigsRecord] | None = None,
     ) -> None:
         self.parameters_records = TypedDict[str, ParametersRecord](
             self._check_fn_str, self._check_fn_params
@@ -88,9 +90,9 @@ class RecordSet:
 
     def __init__(
         self,
-        parameters_records: Optional[Dict[str, ParametersRecord]] = None,
-        metrics_records: Optional[Dict[str, MetricsRecord]] = None,
-        configs_records: Optional[Dict[str, ConfigsRecord]] = None,
+        parameters_records: dict[str, ParametersRecord] | None = None,
+        metrics_records: dict[str, MetricsRecord] | None = None,
+        configs_records: dict[str, ConfigsRecord] | None = None,
     ) -> None:
         data = RecordSetData(
             parameters_records=parameters_records,
