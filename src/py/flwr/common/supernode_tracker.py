@@ -86,7 +86,7 @@ class SuperNodeTracker:
         except OSError as e:
             raise RuntimeError(f"Failed to write to file at {self.filename}") from e
 
-    def compute_message_size(self, message: Message):
+    def compute_message_size(self, message: Message) -> int:
         """Compute the message size in bytes."""
         message_size_in_bytes = 0
 
