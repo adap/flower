@@ -398,7 +398,8 @@ def start_client_internal(
                         node_config=node_config,
                     )
 
-            supernode_tracker = SuperNodeTracker(node_id)
+            if node_state:
+                supernode_tracker = SuperNodeTracker(node_state.node_id)
 
             app_state_tracker.register_signal_handler()
             # pylint: disable=too-many-nested-blocks
