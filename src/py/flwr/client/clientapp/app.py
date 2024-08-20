@@ -21,6 +21,7 @@ from typing import Optional, Tuple
 
 import grpc
 
+from flwr.cli.install import install_from_fab
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import Context, Message
 from flwr.common.constant import ErrorCode
@@ -30,11 +31,12 @@ from flwr.common.message import Error
 from flwr.common.serde import (
     context_from_proto,
     context_to_proto,
+    fab_from_proto,
     message_from_proto,
     message_to_proto,
     run_from_proto,
 )
-from flwr.common.typing import Run
+from flwr.common.typing import Fab, Run
 
 # pylint: disable=E0611
 from flwr.proto.clientappio_pb2 import (
@@ -114,8 +116,13 @@ def run_clientapp(  # pylint: disable=R0914
                 token = get_token(stub)
                 time.sleep(1)
 
-            # Pull Message, Context, and Run from SuperNode
-            message, context, run = pull_message(stub=stub, token=token)
+            # Pull Message, Context, Run and (optional) FAB from SuperNode
+            message, context, run, fab = pull_message(stub=stub, token=token)
+
+            # Install FAB, if provided
+            if fab:
+                log(DEBUG, "Flower ClientApp starts FAB installation.")
+                install_from_fab(fab.content, flwr_dir=None, skip_prompt=True)
 
             load_client_app_fn = get_load_client_app_fn(
                 default_app_ref="",
@@ -187,7 +194,9 @@ def get_token(stub: grpc.Channel) -> Optional[int]:
         return None
 
 
-def pull_message(stub: grpc.Channel, token: int) -> Tuple[Message, Context, Run]:
+def pull_message(
+    stub: grpc.Channel, token: int
+) -> Tuple[Message, Context, Run, Optional[Fab]]:
     """Pull message from SuperNode to ClientApp."""
     log(INFO, "Pulling ClientAppInputs for token %s", token)
     try:
@@ -197,7 +206,8 @@ def pull_message(stub: grpc.Channel, token: int) -> Tuple[Message, Context, Run]
         message = message_from_proto(res.message)
         context = context_from_proto(res.context)
         run = run_from_proto(res.run)
-        return message, context, run
+        fab = fab_from_proto(res.fab) if res.fab else None
+        return message, context, run, fab
     except grpc.RpcError as e:
         log(ERROR, "[PullClientAppInputs] gRPC error occurred: %s", str(e))
         raise e
