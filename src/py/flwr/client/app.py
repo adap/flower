@@ -452,12 +452,14 @@ def start_client_internal(
 
                     # Register context for this run
                     node_state.register_context(
-                        run_id=run_id, run=run, flwr_path=flwr_path
+                        run_id=run_id,
+                        run=run,
+                        flwr_path=flwr_path,
+                        fab=fab,
                     )
 
                     # Retrieve context for this run
                     context = node_state.retrieve_context(run_id=run_id)
-
                     # Create an error reply message that will never be used to prevent
                     # the used-before-assignment linting error
                     reply_message = message.create_error_reply(
