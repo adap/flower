@@ -553,7 +553,6 @@ def start_client_internal(
 
                             # Execute ClientApp
                             reply_message = client_app(message=message, context=context)
-
                     except Exception as ex:  # pylint: disable=broad-exception-caught
 
                         # Legacy grpc-bidi
@@ -606,8 +605,6 @@ def start_client_internal(
                     break
             # pylint: enable=too-many-nested-blocks
 
-            # if supernode_tracker:
-            #     supernode_tracker.save_to_file()
             # Unregister node
             if delete_node is not None and app_state_tracker.is_connected:
                 delete_node()  # pylint: disable=not-callable
