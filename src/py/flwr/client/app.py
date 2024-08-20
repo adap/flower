@@ -52,7 +52,7 @@ from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.server.superlink.fleet.grpc_bidi.grpc_server import generic_create_grpc_server
 from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
 
-from .clientapp.clientappio_servicer import ClientAppIoInputs, ClientAppIoServicer
+from .clientapp.clientappio_servicer import ClientAppInputs, ClientAppIoServicer
 from .grpc_adapter_client.connection import grpc_adapter
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
@@ -440,7 +440,9 @@ def start_client_internal(
                     run: Run = runs[run_id]
                     if get_fab is not None and run.fab_hash:
                         fab = get_fab(run.fab_hash)
-                        install_from_fab(fab.content, flwr_path, True)
+                        if not isolation:
+                            # If `ClientApp` runs in the same process, install the FAB
+                            install_from_fab(fab.content, flwr_path, True)
                         fab_id, fab_version = get_fab_metadata(fab.content)
                     else:
                         fab = None
@@ -480,10 +482,11 @@ def start_client_internal(
 
                             # Share Message and Context with servicer
                             clientappio_servicer.set_inputs(
-                                clientapp_input=ClientAppIoInputs(
+                                clientapp_input=ClientAppInputs(
                                     message=message,
                                     context=context,
                                     run=run,
+                                    fab=fab,
                                     token=token,
                                 ),
                                 token_returned=start_subprocess,
