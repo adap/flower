@@ -27,18 +27,14 @@ def config_func(rnd: int) -> Dict[str, str]:
 
 def server_fn(context: Context):
     # Read from config
-    num_rounds = int(context.run_config["num-server-rounds"])
-    pool_size = int(context.node_config["num-partitions"])
-    num_clients_per_round = int(context.run_config["num-clients-per-round"])
-    num_evaluate_clients = int(context.run_config["num-evaluate-clients"])
+    num_rounds = context.run_config["num-server-rounds"]
+    fraction_fit = context.run_config["fraction-fit"]
+    fraction_evaluate = context.run_config["fraction-evaluate"]
 
     # Define strategy
     strategy = FedXgbBagging(
-        fraction_fit=(float(num_clients_per_round) / pool_size),
-        min_fit_clients=num_clients_per_round,
-        min_available_clients=pool_size,
-        min_evaluate_clients=num_evaluate_clients,
-        fraction_evaluate=1.0,
+        fraction_fit=fraction_fit,
+        fraction_evaluate=fraction_evaluate,
         evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation,
         on_evaluate_config_fn=config_func,
         on_fit_config_fn=config_func,

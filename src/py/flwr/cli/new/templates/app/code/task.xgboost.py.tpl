@@ -25,9 +25,19 @@ def transform_dataset_to_dmatrix(data):
     return new_data
 
 
+fds = None  # Cache FederatedDataset
+
+
 def load_data(partition_id, num_clients):
-    partitioner = IidPartitioner(num_partitions=num_clients)
-    fds = FederatedDataset(dataset="jxie/higgs", partitioners={"train": partitioner})
+    """Load partition HIGGS data."""
+    # Only initialize `FederatedDataset` once
+    global fds
+    if fds is None:
+        partitioner = IidPartitioner(num_partitions=num_clients)
+        fds = FederatedDataset(
+            dataset="jxie/higgs",
+            partitioners={"train": partitioner},
+        )
 
     # Load the partition for this `partition_id`
     partition = fds.load_partition(partition_id, split="train")

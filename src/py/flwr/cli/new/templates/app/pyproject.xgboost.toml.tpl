@@ -8,9 +8,9 @@ version = "1.0.0"
 description = ""
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.9.0,<2.0",
-    "flwr-datasets>=0.0.2,<1.0.0",
-    "xgboost>=2.0.0,<3.0.0",
+    "flwr[simulation]>=1.10.0",
+    "flwr-datasets>=0.3.0",
+    "xgboost>=2.0.0",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -25,22 +25,21 @@ clientapp = "$import_name.client_app:app"
 
 [tool.flwr.app.config]
 # ServerApp
-num-server-rounds = "3"
-pool-size = "2"
-num-clients-per-round = "2"
-num-evaluate-clients = "2"
+num-server-rounds = 3
+fraction-fit = 1.0
+fraction-evaluate = 1.0
 
 # ClientApp
-local-epochs = "1"
-lr = "0.1"
-max-depth = "8"
-nthread = "16"
-num-parallel-tree = "1"
-subsample = "1"
+local-epochs = 1
+lr = 0.1
+max-depth = 8
+nthread = 16
+num-parallel-tree = 1
+subsample = 1
 tree-method = "hist"
 
 [tool.flwr.federations]
-default = "localhost"
+default = "local-simulation"
 
-[tool.flwr.federations.localhost]
-options.num-supernodes = 10
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 2

@@ -128,21 +128,21 @@ class FlowerClient(Client):
 
 def client_fn(context: Context):
     # Load model and data
-    partition_id = int(context.node_config["partition-id"])
-    num_partitions = int(context.node_config["num-partitions"])
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
     train_dmatrix, valid_dmatrix, num_train, num_val = load_data(
         partition_id, num_partitions
     )
 
-    num_local_round = int(context.run_config["local-epochs"])
+    num_local_round = context.run_config["local-epochs"]
     params = {
         "objective": "binary:logistic",
-        "eta": float(context.run_config["lr"]),  # Learning rate
-        "max_depth": int(context.run_config["max-depth"]),
+        "eta": context.run_config["lr"],  # Learning rate
+        "max_depth": context.run_config["max-depth"],
         "eval_metric": "auc",
-        "nthread": int(context.run_config["nthread"]),
-        "num_parallel_tree": int(context.run_config["num-parallel-tree"]),
-        "subsample": int(context.run_config["subsample"]),
+        "nthread": context.run_config["nthread"],
+        "num_parallel_tree": context.run_config["num-parallel-tree"],
+        "subsample": context.run_config["subsample"],
         "tree_method": context.run_config["tree-method"],
     }
 
