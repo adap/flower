@@ -109,12 +109,13 @@ class ClientsAndServerDatasetsPrep:
     """Prepare the clients and server datasets."""
 
     def __init__(self, cfg):
-        self.cfg = cfg
-        self._setup()
-        self._make_faulty_clients()
         self.client2data = {}
         self.server_testdata = None
         self.client2class = {}
+        self.cfg = cfg
+        self._setup()
+        self._make_faulty_clients()
+        
 
     def _make_faulty_clients(self):
         """Make clients faulty."""
