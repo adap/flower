@@ -26,8 +26,8 @@ from time import sleep
 from typing import Callable, Dict, Optional
 
 from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
+from flwr.client.clientapp.utils import get_load_client_app_fn
 from flwr.client.node_state import NodeState
-from flwr.client.supernode.app import _get_load_client_app_fn
 from flwr.common.constant import (
     NUM_PARTITIONS_KEY,
     PARTITION_ID_KEY,
@@ -342,7 +342,7 @@ def start_vce(
     def _load() -> ClientApp:
 
         if client_app_attr:
-            app = _get_load_client_app_fn(
+            app = get_load_client_app_fn(
                 default_app_ref=client_app_attr,
                 app_path=app_dir,
                 flwr_dir=flwr_dir,

@@ -160,7 +160,7 @@ Other [examples](https://github.com/adap/flower/tree/main/examples):
 Flower is built by a wonderful community of researchers and engineers. [Join Slack](https://flower.ai/join-slack) to meet them, [contributions](#contributing-to-flower) are welcome.
 
 <a href="https://github.com/adap/flower/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=adap/flower" />
+  <img src="https://contrib.rocks/image?repo=adap/flower&columns=10" />
 </a>
 
 ## Citation

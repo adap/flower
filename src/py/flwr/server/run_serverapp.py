@@ -21,6 +21,8 @@ from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from typing import Optional
 
+from flwr.cli.config_utils import get_fab_metadata
+from flwr.cli.install import install_from_fab
 from flwr.common import Context, EventType, RecordSet, event
 from flwr.common.config import (
     get_flwr_dir,
@@ -36,6 +38,7 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
     CreateRunResponse,
 )
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 
 from .driver import Driver
 from .driver.grpc_driver import GrpcDriver
@@ -87,7 +90,8 @@ def run(
     log(DEBUG, "ServerApp finished running.")
 
 
-def run_server_app() -> None:  # pylint: disable=too-many-branches
+# pylint: disable-next=too-many-branches,too-many-statements,too-many-locals
+def run_server_app() -> None:
     """Run Flower server app."""
     event(EventType.RUN_SERVER_APP_ENTER)
 
@@ -164,7 +168,19 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
         )
         flwr_dir = get_flwr_dir(args.flwr_dir)
         run_ = driver.run
-        app_path = str(get_project_dir(run_.fab_id, run_.fab_version, flwr_dir))
+        if run_.fab_hash:
+            fab_req = GetFabRequest(hash_str=run_.fab_hash)
+            # pylint: disable-next=W0212
+            fab_res: GetFabResponse = driver._stub.GetFab(fab_req)
+            if fab_res.fab.hash_str != run_.fab_hash:
+                raise ValueError("FAB hashes don't match.")
+
+            install_from_fab(fab_res.fab.content, flwr_dir, True)
+            fab_id, fab_version = get_fab_metadata(fab_res.fab.content)
+        else:
+            fab_id, fab_version = run_.fab_id, run_.fab_version
+
+        app_path = str(get_project_dir(fab_id, fab_version, flwr_dir))
         config = get_project_config(app_path)
     else:
         # User provided `app_dir`, but not `--run-id`
