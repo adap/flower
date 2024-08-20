@@ -71,14 +71,15 @@ class NodeState:
                 else:
                     raise ValueError("The specified `app_dir` must be a directory.")
             else:
-                if fab:
-                    # Load pyproject.toml from FAB file and fuse
-                    initial_run_config = (
-                        get_fused_config_from_fab(fab.content, run) if run else {}
-                    )
+                if run:
+                    if fab:
+                        # Load pyproject.toml from FAB file and fuse
+                        initial_run_config = get_fused_config_from_fab(fab.content, run)
+                    else:
+                        # Load pyproject.toml from installed FAB and fuse
+                        initial_run_config = get_fused_config(run, flwr_path)
                 else:
-                    # Load pyproject.toml from installed FAB and fuse
-                    initial_run_config = get_fused_config(run, flwr_path) if run else {}
+                    initial_run_config = {}
             self.run_infos[run_id] = RunInfo(
                 initial_run_config=initial_run_config,
                 context=Context(
