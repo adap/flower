@@ -81,7 +81,7 @@ curl https://pyenv.run | bash # then, don't forget links to your .bashrc/.zshrc
 You can then install any Python version with `pyenv install 3.10.14` Then, in order to use FedDebug baseline, you'd do the following:
 
 ```bash
-# cd to your fed_debug directory (i.e. where the `pyproject.toml` is)
+# cd to your feddebug directory (i.e. where the `pyproject.toml` is)
 pyenv local 3.10.14
 poetry env use 3.10.14 # set that version for poetry
 
@@ -101,8 +101,8 @@ This will create a basic Python environment with just Flower and additional pack
 >Note: You can run almost any evaluation from the paper by changing the parameters in conf/base.yaml. Also, you can change the resources (per client CPU and GPU) in conf/base.yaml to speed up the simulation. Please check flower simulation guide to for more detail ([Flower Framework main](https://flower.ai/docs/framework/how-to-run-simulations.html) ).
 
 ```bash
-# This will run the fed_debug with default settings.
-poetry run python -m fed_debug.main 
+# This will run the feddebug with default settings.
+poetry run python -m feddebug.main 
 ```  
 
 
@@ -112,18 +112,18 @@ poetry run python -m fed_debug.main
 
 ```bash
 #To run multiple experiments with different configurations:
-poetry run python -m fed_debug.main --multirun 
+poetry run python -m feddebug.main --multirun 
 
 # To vary thresholds:
-poetry run python -m fed_debug.main vary_thresholds=True
+poetry run python -m feddebug.main vary_thresholds=True
 
 #To generate graphs and display table. 
 
-poetry run python -m fed_debug.main generate_graphs=True
+poetry run python -m feddebug.main generate_graphs=True
 ```
 
-It will generate a CSV file (fed_debug_results.csv) that you can visualize. Additionally, it will generate a PDF (Figure-10.pdf) containing Figure 10 graphs.
-![Figure 10 of Fed_Debug Paper](Figure-10.png)
+It will generate a CSV file (feddebug_results.csv) that you can visualize. Additionally, it will generate a PDF (Figure-10.pdf) containing Figure 10 graphs.
+![Figure 10 of feddebug Paper](Figure-10.png)
 
 > :warning: It generates random inputs to localize malicious client(s). Thus, results might vary slightly on each run due to randomness.
 
@@ -140,7 +140,7 @@ Remember to consult the Flower simulation guide for more details on resource all
 
 ## Citation
 
-If you publish work that uses Fed_Debug, please cite FedDebug and Flower as follows:
+If you publish work that uses feddebug, please cite FedDebug and Flower as follows:
 
 ```bibtex
 @inproceedings{gill2023feddebug,
