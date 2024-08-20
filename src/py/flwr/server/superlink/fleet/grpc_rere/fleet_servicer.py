@@ -52,10 +52,12 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
     ) -> CreateNodeResponse:
         """."""
         log(INFO, "FleetServicer.CreateNode")
-        return message_handler.create_node(
+        response = message_handler.create_node(
             request=request,
             state=self.state_factory.state(),
         )
+        log(INFO, "FleetServicer: Created node_id=%s", response.node.node_id)
+        return response
 
     def DeleteNode(
         self, request: DeleteNodeRequest, context: grpc.ServicerContext

@@ -173,7 +173,9 @@ def validate_and_install(
         / project_name
         / version
     )
-    if install_dir.exists() and not skip_prompt:
+    if install_dir.exists():
+        if skip_prompt:
+            return install_dir
         if not typer.confirm(
             typer.style(
                 f"\n💬 {project_name} version {version} is already installed, "
