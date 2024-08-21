@@ -28,12 +28,3 @@ def server_fn(context: Context) -> ServerAppComponents:
 
 
 app = ServerApp(server_fn=server_fn)
-
-# strategy = FedAvg(
-#     initial_parameters=params,
-#     evaluate_metrics_aggregation_fn=weighted_average,
-# )
-# app = ServerApp(
-#     strategy=strategy,
-#     config=ServerConfig(num_rounds=5),
-# )
