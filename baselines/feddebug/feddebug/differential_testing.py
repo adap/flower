@@ -41,7 +41,6 @@ def _torch_intersection(client2tensors):
     intersct = True
     for _, temp_t in client2tensors.items():
         intersct = intersct * temp_t
-        torch.cuda.synchronize()
     return intersct
 
 
@@ -150,67 +149,30 @@ class FaultyClientLocalization:
     def __init__(self, client2model, generated_inputs, use_gpu) -> None:
         self.generated_inputs = generated_inputs
         self.use_gpu = use_gpu
-        self.clients2randominputs_neurons_activations: Dict[str, Any] = {}
-        self.client2layeracts: Dict[str, Any] = {}
+        self.c2input2acts= {}
         self._update_neuron_coverage_func(client2model)
-        self.clientids = set(client2model.keys())
-
-        self.all_clients_combinations = _make_all_subsets_of_size_n(
-            self.clientids, len(self.clientids) - 1
-        )  # resetting for next random iteration
+        self.clients_ids = set(client2model.keys())
+        self.leave_1_out_combs =self._update_leave_1_out_combs(self.clients_ids)
 
     def _update_neuron_coverage_func(self, client2model):
         device = torch.device("cpu")
         if self.use_gpu:
             device = torch.device("cuda")
-
         for client_id, model in client2model.items():
             model = model.to(device)
-            outs = [
-                get_neurons_activations(model, img.to(device))
-                for img in self.generated_inputs
-            ]
-            self.clients2randominputs_neurons_activations[client_id] = [
-                all_acts for all_acts, _ in outs
-            ]
-            self.client2layeracts[client_id] = [layer_acts for _, layer_acts in outs]
-
+            fuzz_input2_activations = [get_neurons_activations(model, img.to(device))for img in self.generated_inputs]
+            self.c2input2acts[client_id] = fuzz_input2_activations
             model = model.to(torch.device("cpu"))
-            gc.collect()
-            torch.cuda.empty_cache()
+            
 
-    def run_fault_localization(self, na_t, num_bugs):
-        """Run the fault localization algorithm and return the faulty client(s)."""
-        faulty_clients_on_gen_inputs = []
-        for i in range(len(self.generated_inputs)):
-            potential_faulty_clients = None
-            for _ in range(num_bugs):
-                benign_clients_ids = self._find_normal_clients_seq_v1(i, na_t)
-                potential_faulty_clients = self.clientids - benign_clients_ids
-                print(f"Potential Malicious client(s) {potential_faulty_clients}")
-                self._update_clients_combinations(potential_faulty_clients)
-
-            faulty_clients_on_gen_inputs.append(potential_faulty_clients)
-
-            self.all_clients_combinations = _make_all_subsets_of_size_n(
-                self.clientids, len(self.clientids) - 1
-            )  # resetting for next generated input
-
-        assert len(faulty_clients_on_gen_inputs) == len(self.generated_inputs)
-        return faulty_clients_on_gen_inputs
-
-    def _update_clients_combinations(self, potential_faulty_clients):
-        remaining_clients = self.clientids - potential_faulty_clients
-        self.all_clients_combinations = _make_all_subsets_of_size_n(
+    def _update_leave_1_out_combs(self, remaining_clients):
+        self.leave_1_out_combs = _make_all_subsets_of_size_n(
             remaining_clients, len(remaining_clients) - 1
         )
+        return self.leave_1_out_combs
 
     def _find_normal_clients_seq_v1(self, input_id, na_t):
-
-        client2_na = {
-            cid: c2na[input_id] > na_t
-            for cid, c2na in self.clients2randominputs_neurons_activations.items()
-        }
+        client2_na = {cid: c2na[input_id] > na_t for cid, c2na in self.c2input2acts.items()}
         clients_ids = self._get_clients_ids_with_highest_common_neurons(client2_na)
         return clients_ids
 
@@ -226,13 +188,34 @@ class FaultyClientLocalization:
             intersect_tensor = _torch_intersection(c2act)
             return intersect_tensor.sum().item()
 
-        count_of_common_neurons = [
-            _labmda_count(comb) for comb in self.all_clients_combinations
-        ]
+        count_of_common_neurons = [_labmda_count(comb) for comb in self.leave_1_out_combs]
+        
         highest_number_of_common_neurons = max(count_of_common_neurons)
         val_index = count_of_common_neurons.index(highest_number_of_common_neurons)
-        val_clients_ids = self.all_clients_combinations[val_index]
+        val_clients_ids = self.leave_1_out_combs[val_index]
+        
         return val_clients_ids
+    
+    def _get_faulty_client_per_input(self, fuzz_input_id, num_bugs, na_t):
+        potential_faulty_clients = None
+        temp_clients_ids = self.clients_ids
+        for _ in range(num_bugs):
+            benign_clients_ids = self._find_normal_clients_seq_v1(fuzz_input_id, na_t)
+            potential_faulty_clients = temp_clients_ids - benign_clients_ids
+            print(f"Potential Malicious client(s) {potential_faulty_clients}")
+            self._update_leave_1_out_combs(temp_clients_ids-potential_faulty_clients)
+        return potential_faulty_clients
+    
+    def run_fault_localization(self, na_t, num_bugs):
+        """Run the fault localization algorithm and return the faulty client(s)."""
+        faulty_clients_on_gen_inputs = []
+        for fuzz_input_id in range(len(self.generated_inputs)):        
+            potential_faulty_clients_per_input =  self._get_faulty_client_per_input(fuzz_input_id, num_bugs, na_t)
+            faulty_clients_on_gen_inputs.append(potential_faulty_clients_per_input)    
+            self._update_leave_1_out_combs(self.clients_ids) # reset the leave 1 out combinations for next input  
+                
+        assert len(faulty_clients_on_gen_inputs) == len(self.generated_inputs)
+        return faulty_clients_on_gen_inputs
 
 
 def _get_transforms_for_diff_testing(dname):

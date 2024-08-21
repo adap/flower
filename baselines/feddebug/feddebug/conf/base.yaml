@@ -1,8 +1,8 @@
-device: "cuda"
+device: "cpu"
 total_gpus: 1
-total_cpus: 3
+total_cpus: 16
 client_cpus: 1
-client_gpu: 0.5
+client_gpu: 0.2
 
 check_cache: False # if set to True then if the config is already in the cache then it will not retrain.
 num_clients: 5
@@ -26,8 +26,8 @@ exp_key: "key_test" # this is the test key. It will be changed after running the
 
 
 model:
-    # resnet34, resnet50, resnet101, resnet152, densenet121, vgg16
-    name: densenet121
+    # resnet34, resnet50, resnet101, resnet152, densenet121, vgg16, lenet
+    name: lenet
     arch: cnn
 
 dataset:
