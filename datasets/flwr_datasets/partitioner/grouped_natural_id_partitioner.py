@@ -36,8 +36,14 @@ class GroupedNaturalIdPartitioner(Partitioner):
         The name of the column that contains the unique values of partitions.
     group_size: int
         The number of unique ids that will be placed in a single group.
-    mode: Literal["allow-smaller", "allow-bigger", "drop-reminder"]
+    mode: Literal["allow-smaller", "allow-bigger", "drop-reminder", ""strict"]
         The mode that will be used to handle the remainder of the unique ids.
+        - "allow-smaller": The last group can be smaller than the group_size.
+        - "allow-bigger": The first group can be bigger than the group_size.
+        - "drop-reminder": The last group will be dropped if it is smaller than the
+        group_size.
+        - "strict": Raises a ValueError if the remainder is not zero. In this mode you
+        expect each group to have the same size.
     sort_unique_ids: bool
         If True, the unique natural ids will be sorted before creating the groups.
 
@@ -59,7 +65,7 @@ class GroupedNaturalIdPartitioner(Partitioner):
         partition_by: str,
         group_size: int,
         mode: Literal[
-            "allow-smaller", "allow-bigger", "drop-reminder"
+            "allow-smaller", "allow-bigger", "drop-reminder", "strict"
         ] = "allow-bigger",
         sort_unique_ids: bool = False,
     ) -> None:
@@ -84,6 +90,8 @@ class GroupedNaturalIdPartitioner(Partitioner):
         if self._sort_unique_ids:
             unique_natural_ids = sorted(unique_natural_ids)
         num_unique_natural_ids = len(unique_natural_ids)
+        remainder = num_unique_natural_ids % self._group_size
+
         if self._mode == "allow-bigger":
             num_groups = num_unique_natural_ids // self._group_size
             groups_of_natural_ids = np.array_split(unique_natural_ids, num_groups)
@@ -97,7 +105,6 @@ class GroupedNaturalIdPartitioner(Partitioner):
             groups_of_natural_ids = np.array_split(unique_natural_ids, num_groups)
         elif self._mode == "allow-smaller":
             num_groups = num_unique_natural_ids // self._group_size
-            remainder = num_unique_natural_ids % self._group_size
             if remainder > 0:
                 last_group_ids = unique_natural_ids[-remainder:]
             unique_natural_ids = unique_natural_ids[
@@ -106,6 +113,17 @@ class GroupedNaturalIdPartitioner(Partitioner):
             groups_of_natural_ids = np.array_split(unique_natural_ids, num_groups)
             if remainder > 0:
                 groups_of_natural_ids.append(np.array(last_group_ids))
+        elif self._mode == "strict":
+            if remainder != 0:
+                raise ValueError(
+                    "Strict mode requires that the number of unique natural ids is "
+                    "perfectly divisible by the group size. "
+                    f"Found remainder: {remainder}. Please pass the group_size that "
+                    f"enables strict mode or relax the mode parameter. Refer to the "
+                    f"documentation of the mode parameter for the available modes."
+                )
+            num_groups = num_unique_natural_ids // self._group_size
+            groups_of_natural_ids = np.array_split(unique_natural_ids, num_groups)
         else:
             raise ValueError(
                 f"Given {self._mode} is not a valid mode. Refer to the documentation of "
