@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "flowertune-llm"
 version = "1.0.0"
-description = ""
+description = "FlowerTune LLM: Federated LLM Fine-tuning with Flower"
 license = "Apache-2.0"
 dependencies = [
     "flwr[simulation]>=1.10.0",
