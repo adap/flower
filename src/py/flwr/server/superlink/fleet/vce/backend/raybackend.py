@@ -14,6 +14,7 @@
 # ==============================================================================
 """Ray backend for the Fleet API using the Simulation Engine."""
 
+import sys
 from logging import DEBUG, ERROR
 from typing import Callable, Dict, Tuple, Union
 
@@ -111,8 +112,10 @@ class RayBackend(Backend):
             if backend_config.get(self.init_args_key):
                 for k, v in backend_config[self.init_args_key].items():
                     ray_init_args[k] = v
-
-            ray.init(**ray_init_args)
+            ray.init(
+                runtime_env={"env_vars": {"PYTHONPATH": ":".join(sys.path)}},
+                **ray_init_args,
+            )
 
     @property
     def num_workers(self) -> int:
