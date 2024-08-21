@@ -56,11 +56,11 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 flwr run .
 ```
 
-This command will run FL simulations with a 4-bit [OpenLLaMA 7Bv2](https://huggingface.co/openlm-research/open_llama_7b_v2) model involving 2 clients per rounds for 100 FL rounds. You can override configuration parameters directly from the command line. Below are a few settings you might want to test:
+This command will run FL simulations with a 4-bit [OpenLLaMA 3Bv2](https://huggingface.co/openlm-research/open_llama_3b_v2) model involving 2 clients per rounds for 100 FL rounds. You can override configuration parameters directly from the command line. Below are a few settings you might want to test:
 
 ```bash
-# Use OpenLLaMA-3B instead of 7B and 8-bits quantization
-flwr run . --run-config model.name="'openlm-research/open_llama_3b_v2'",model.quantization=8
+# Use OpenLLaMA-7B instead of 3B and 8-bits quantization
+flwr run . --run-config model.name="'openlm-research/open_llama_7b_v2'",model.quantization=8
 
 # Run for 50 rounds but increasing the fraction of clients that participate per round to 25%
 flwr run . --run-config num-server-rounds=50,strategy.fraction_fit=0.25
@@ -94,8 +94,6 @@ Assigning 50% of the GPU's VRAM to each client by setting `options.backend.clien
 We provide a script to test your trained model by passing your specified questions. For example:
 
 ```bash
-cd flowertune_llm
-
 python test.py --peft-path=/path/to/trained-model-dir/ \
     --question="What is the ideal 1-day plan in London?"
 ```
