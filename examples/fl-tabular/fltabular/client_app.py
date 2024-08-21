@@ -1,7 +1,15 @@
 from flwr.client import Client, ClientApp, NumPyClient
 from flwr_datasets import FederatedDataset
+from flwr.common import Context
 
-from task import IncomeClassifier, evaluate, get_weights, load_data, set_weights, train
+from fltabular.task import (
+    IncomeClassifier,
+    evaluate,
+    get_weights,
+    load_data,
+    set_weights,
+    train,
+)
 
 NUMBER_OF_CLIENTS = 5
 
@@ -24,8 +32,9 @@ class FlowerClient(NumPyClient):
 
 
 def get_client_fn(dataset: FederatedDataset):
-    def client_fn(cid: str) -> Client:
-        train_loader, test_loader = load_data(partition_id=int(cid), fds=dataset)
+    def client_fn(context: Context) -> Client:
+        partition_id = context.node_config["partition-id"]
+        train_loader, test_loader = load_data(partition_id=partition_id, fds=dataset)
         net = IncomeClassifier(14)
         return FlowerClient(net, train_loader, test_loader).to_client()
 

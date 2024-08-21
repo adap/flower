@@ -18,3 +18,19 @@ dependencies = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
+
+[tool.flwr.app]
+publisher = "flwrlabs"
+
+[tool.flwr.app.components]
+serverapp = "fltabular.server_app:app"
+clientapp = "fltabular.client_app:app"
+
+[tool.flwr.app.config]
+num-server-rounds = 5
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 5
