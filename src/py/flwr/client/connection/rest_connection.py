@@ -17,6 +17,7 @@
 
 from __future__ import annotations
 
+import importlib.util
 import sys
 from logging import ERROR, WARN
 from typing import Any, TypeVar
@@ -43,11 +44,9 @@ from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=
 from .fleet_api import FleetAPI
 from .grpc_rere_connection import GrpcRereConnection
 
-try:
+if importlib.util.find_spec("requests"):
     import requests
     from requests.exceptions import HTTPError, InvalidHeader
-except ModuleNotFoundError:
-    sys.exit(MISSING_EXTRA_REST)
 
 
 PATH_CREATE_NODE: str = "api/v0/fleet/create-node"
@@ -104,6 +103,10 @@ class RestFleetAPI(FleetAPI):
     def __init__(self, base_url: str, verify: bool | str) -> None:
         self.base_url = base_url
         self.verify = verify
+
+        # Check the availability of the requests module
+        if importlib.util.find_spec("requests"):
+            sys.exit(MISSING_EXTRA_REST)
 
     def _request(
         self, req: GrpcMessage, res_type: type[T], api_path: str, timeout: float | None
