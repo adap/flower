@@ -115,7 +115,6 @@ class ClientsAndServerDatasetsPrep:
         self.cfg = cfg
         self._setup()
         self._make_faulty_clients()
-        
 
     def _make_faulty_clients(self):
         """Make clients faulty."""

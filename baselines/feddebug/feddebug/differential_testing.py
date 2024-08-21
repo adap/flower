@@ -17,6 +17,9 @@ from torchvision.transforms import Compose, Normalize, RandomHorizontalFlip, Res
 from feddebug.dataset import load_central_server_test_data
 from feddebug.models import global_model_eval, initialize_model
 from feddebug.neuron_activation import get_neurons_activations
+from feddebug.utils import seed_everything
+
+seed_everything(786)
 
 
 def _make_all_subsets_of_size_n(set_client_ids, each_subset_size):
