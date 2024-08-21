@@ -301,6 +301,7 @@ def run_superlink() -> None:
         fleet_server = _run_fleet_api_grpc_rere(
             address=fleet_address,
             state_factory=state_factory,
+            ffs_factory=ffs_factory,
             certificates=certificates,
             interceptors=interceptors,
         )
@@ -487,6 +488,7 @@ def _try_obtain_certificates(
 def _run_fleet_api_grpc_rere(
     address: str,
     state_factory: StateFactory,
+    ffs_factory: FfsFactory,
     certificates: Optional[Tuple[bytes, bytes, bytes]],
     interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None,
 ) -> grpc.Server:
@@ -494,6 +496,7 @@ def _run_fleet_api_grpc_rere(
     # Create Fleet API gRPC server
     fleet_servicer = FleetServicer(
         state_factory=state_factory,
+        ffs_factory=ffs_factory,
     )
     fleet_add_servicer_to_server_fn = add_FleetServicer_to_server
     fleet_grpc_server = generic_create_grpc_server(
