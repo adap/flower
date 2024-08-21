@@ -1,65 +1,162 @@
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+"""Grouped natural id partitioner class that works with Hugging Face Datasets."""
+from typing import Dict, Literal, Tuple
+
 import numpy as np
+from common.typing import NDArrayInt
 
 import datasets
-from flwr_datasets.partitioner.natural_id_partitioner import NaturalIdPartitioner
+from flwr_datasets.partitioner import Partitioner
 
 
-class GroupedNaturalIdPartitioner(NaturalIdPartitioner):
-    """Partitioner for a dataset in which the final partition results in different non
-    overlapping datasets for a given number of groups/nodes.
+class GroupedNaturalIdPartitioner(Partitioner):
+    """Partition dataset by creating groups of natural ids.
+
+    Conceptually, you can think of this partitioner as a way of creating an organization
+    of x users instead of having each user as a separate partition. By using this
+    `Partitioner` you can change the nature of the partitioning from cross-device to
+    cross-silo (cross organization).
 
     Parameters
     ----------
-    partition_by : str
-        The label in the dataset that divided the data.
-    num_groups : int
-        The number of groups in which the data will be divided.
-    Size:
-        
+    partition_by: str
+        The name of the column that contains the unique values of partitions.
+    group_size: int
+        The number of unique ids that will be placed in a single group.
+    mode: Literal["allow-smaller", "allow-bigger", "drop-reminder"]
+        The mode that will be used to handle the remainder of the unique ids.
+    sort_unique_ids: bool
+        If True, the unique natural ids will be sorted before creating the groups.
+
+    Examples
+    --------
+    "sentiment140" (aka Twitter) dataset
+
+    >>> from flwr_datasets import FederatedDataset
+    >>> from flwr_datasets.partitioner import GroupedNaturalIdPartitioner
+    >>>
+    >>> partitioner = GroupedNaturalIdPartitioner(partition_by="user", group_size=2)
+    >>> fds = FederatedDataset(dataset="sentiment140",
+    >>>                        partitioners={"train": partitioner})
+    >>> partition = fds.load_partition(0)
     """
 
-    def __init__(self, partition_by, num_groups=0,group_size=0) -> None:
-        super().__init__(partition_by)
-        if not group_size and not num_groups:
-            raise ValueError("num_groups and group_size cannot both be zero")
-        self._num_groups = num_groups
-        self._group_size = group_size
-        if self._group_size > 0:
-            self._MODE = 'GROUP_SIZE'
-        else:
-            self._MODE = 'NUM_GROUPS'
+    def __init__(
+        self,
+        partition_by: str,
+        group_size: int,
+        mode: Literal[
+            "allow-smaller", "allow-bigger", "drop-reminder"
+        ] = "allow-bigger",
+        sort_unique_ids: bool = False,
+    ) -> None:
+        super().__init__()
+        self._partition_id_to_natural_ids: Dict[int, Tuple[str]] = {}
+        self._natural_ids_to_partition_id: Dict[Tuple[str], int] = {}
+        self._partition_id_to_indices: Dict[int, NDArrayInt] = {}
+        self._partition_by = partition_by
+        self._mode = mode
+        self._sort_unique_ids = sort_unique_ids
 
-    def _create_int_node_id_to_natural_id(self) -> None:
-        """Create a mapping from int indices to unique client or group ids from dataset.
+        if group_size < 0:
+            raise ValueError("group_size must be a positive integer")
+        self._group_size = group_size
+
+    def _create_int_partition_id_to_natural_id(self) -> None:
+        """Create a mapping from int indices to unique client ids from dataset.
 
         Natural ids come from the column specified in `partition_by`.
         """
-        num_labels = len(self.dataset.unique(self._partition_by))
-        if self._num_groups > num_labels:
-            raise ValueError(
-                "The number of groups cannot be greater than the number \
-                    of labels in the dataset." # Here is where the other partitioner I proposed comes handy
-            )
         unique_natural_ids = self.dataset.unique(self._partition_by)
+        if self._sort_unique_ids:
+            unique_natural_ids = sorted(unique_natural_ids)
+        num_unique_natural_ids = len(unique_natural_ids)
+        if self._mode == "allow-bigger":
+            num_groups = num_unique_natural_ids // self._group_size
+            groups_of_natural_ids = np.array_split(unique_natural_ids, num_groups)
+        elif self._mode == "drop-reminder":
+            num_groups = num_unique_natural_ids // self._group_size
+            # Narrow down the unique_natural_ids to not have a bigger group
+            # which is the behavior of the np.array_split
+            unique_natural_ids = unique_natural_ids[
+                : int(num_groups * self._group_size)
+            ]
+            groups_of_natural_ids = np.array_split(unique_natural_ids, num_groups)
+        elif self._mode == "allow-smaller":
+            num_groups = num_unique_natural_ids // self._group_size
+            remainder = num_unique_natural_ids % self._group_size
+            if remainder > 0:
+                last_group_ids = unique_natural_ids[-remainder:]
+            unique_natural_ids = unique_natural_ids[
+                : int(num_groups * self._group_size)
+            ]
+            groups_of_natural_ids = np.array_split(unique_natural_ids, num_groups)
+            if remainder > 0:
+                groups_of_natural_ids.append(np.array(last_group_ids))
+        else:
+            raise ValueError(
+                f"Given {self._mode} is not a valid mode. Refer to the documentation of "
+                "the mode parameter for the available modes."
+            )
 
+        self._partition_id_to_natural_ids = {}
+        for group_of_natural_ids_id, group_of_natural_ids in zip(
+            range(len(groups_of_natural_ids)), groups_of_natural_ids
+        ):
+            self._partition_id_to_natural_ids[group_of_natural_ids_id] = tuple(
+                group_of_natural_ids.tolist()
+            )
 
-        # Divides the labels between the number of nodes/ groups
-        split_natural_ids = np.array_split(unique_natural_ids, self._num_groups)
+    def _create_natural_id_to_int_partition_id(self) -> None:
+        """Create a mapping from unique client ids from dataset to int indices.
 
-        self._node_id_to_natural_id = dict(
-            zip(range(self._num_groups), split_natural_ids)
-        )
+        Natural ids come from the column specified in `partition_by`. This object is
+        inverse of the `self._partition_id_to_natural_id`. This method assumes that
+        `self._partition_id_to_natural_id` already exists.
+        """
+        self._natural_ids_to_partition_id = {
+            value: key for key, value in self._partition_id_to_natural_ids.items()
+        }
 
-    def load_partition(self, node_id: int) -> datasets.Dataset:
-        """Load a single partition corresponding to a single `node_id`.
+    def _create_partition_id_to_indices(self) -> None:
+        natural_id_to_indices = {}  # type: ignore
+        natural_ids = np.array(self.dataset[self._partition_by])
 
-        The choice of the partition is based on the parameter node_id,
-        and the mapping computed in the function
-        _create_int_node_id_to_natural_id()
+        for index, natural_id in enumerate(natural_ids):
+            if natural_id not in natural_id_to_indices:
+                natural_id_to_indices[natural_id] = []
+            natural_id_to_indices[natural_id].append(index)
+
+        self._partition_id_to_indices = {}
+        for partition_id, natural_id_group in self._partition_id_to_natural_ids.items():
+            indices = []
+            for natural_id in natural_id_group:
+                indices.extend(natural_id_to_indices[natural_id])
+            self._partition_id_to_indices[partition_id] = np.array(indices)
+
+    def load_partition(self, partition_id: int) -> datasets.Dataset:
+        """Load a single partition corresponding to a single `partition_id`.
+
+        The choice of the partition is based on unique integers assigned to each
+        natural id present in the dataset in the `partition_by` column.
+
 
         Parameters
         ----------
-        node_id : int
+        partition_id : int
             the index that corresponds to the requested partition
 
         Returns
@@ -67,39 +164,33 @@ class GroupedNaturalIdPartitioner(NaturalIdPartitioner):
         dataset_partition : Dataset
             single dataset partition
         """
+        if len(self._partition_id_to_natural_ids) == 0:
+            self._create_int_partition_id_to_natural_id()
+            self._create_natural_id_to_int_partition_id()
 
+        if len(self._partition_id_to_indices) == 0:
+            self._create_partition_id_to_indices()
 
-        if self._MODE == 'GROUP_SIZE':
-            return self.allocate_samples_to_group(node_id)
+        return self.dataset.select(self._partition_id_to_indices[partition_id])
 
-        if len(self._node_id_to_natural_id) == 0:
-            self._create_int_node_id_to_natural_id()
+    @property
+    def num_partitions(self) -> int:
+        """Total number of partitions."""
+        if len(self._partition_id_to_natural_ids) == 0:
+            self._create_int_partition_id_to_natural_id()
+            self._create_natural_id_to_int_partition_id()
+        return len(self._partition_id_to_natural_ids)
 
-        return self.dataset.filter(
-            lambda row: row[self._partition_by] in self._node_id_to_natural_id[node_id]
+    @property
+    def partition_id_to_natural_ids(self) -> Dict[int, Tuple[str]]:
+        """Partition id to the corresponding group of natural ids present.
+
+        Natural ids are the unique values in `partition_by` column in dataset.
+        """
+        return self._partition_id_to_natural_ids
+
+    @partition_id_to_natural_ids.setter
+    def partition_id_to_natural_ids(self, value: Dict[int, Tuple[str]]) -> None:
+        raise AttributeError(
+            "Setting the partition_id_to_natural_ids dictionary is not allowed."
         )
-
-    def allocate_samples_to_group(self, node_id):
-        FLAG = False
-        num_groups = len(self.dataset) // self._group_size
-        remainder = (len(self.dataset) % self._group_size)
-
-        #If the remainder is too small -> flag to decide what happens
-        if remainder <= 0.5 * self._group_size:
-            num_groups+= -1
-            FLAG = True # FLAG = False to drop
-
-        if node_id > num_groups:
-            raise IndexError
-
-        sorted_dataset = self.dataset.sort(self._partition_by) 
-        
-        start_index = int((node_id) * self._group_size)
-        end_index = min(int(node_id * self._group_size + self._group_size),len(self.dataset))
-        if FLAG and node_id == num_groups:
-            end_index = len(self.dataset)
-
-        allocated_samples = sorted_dataset.select([x for x in range(start_index,end_index)])
-
-        
-        return allocated_samples
