@@ -105,7 +105,7 @@ class RestFleetAPI(FleetAPI):
         self.verify = verify
 
         # Check the availability of the requests module
-        if importlib.util.find_spec("requests"):
+        if not importlib.util.find_spec("requests"):
             sys.exit(MISSING_EXTRA_REST)
 
     def _request(
