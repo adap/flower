@@ -20,7 +20,7 @@ from __future__ import annotations
 import sys
 from logging import DEBUG, ERROR
 from pathlib import Path
-from typing import Any, TypeVar, cast
+from typing import Any, TypeVar
 
 import grpc
 from google.protobuf.message import Message as GrpcMessage
@@ -105,9 +105,7 @@ class GrpcAdapterFleetAPI(FleetAPI):
         )
 
         # Send via the stub
-        container_res = cast(
-            MessageContainer, self.stub.SendReceive(container_req, **kwargs)
-        )
+        container_res: MessageContainer = self.stub.SendReceive(container_req, **kwargs)
 
         # Handle control message
         should_exit = (
@@ -129,8 +127,7 @@ class GrpcAdapterFleetAPI(FleetAPI):
             )
 
         # Deserialize response
-        response = response_type()
-        response.ParseFromString(container_res.grpc_message_content)
+        response = response_type.FromString(container_res.grpc_message_content)
         return response
 
     def CreateNode(  # pylint: disable=C0103

@@ -690,7 +690,7 @@ def _init_connection(
         try:
             from requests.exceptions import RequestException
 
-            from .connection.rest_connection import RestConnection
+            from .connection import RestConnection
         except ModuleNotFoundError:
             sys.exit(MISSING_EXTRA_REST)
         if server_address[:4] != "http":

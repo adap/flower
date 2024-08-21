@@ -150,8 +150,7 @@ class RestFleetAPI(FleetAPI):
             )
 
         # Deserialize ProtoBuf from bytes
-        grpc_res = res_type()
-        grpc_res.ParseFromString(res.content)
+        grpc_res = res_type.FromString(res.content)
         return grpc_res
 
     def CreateNode(  # pylint: disable=C0103
