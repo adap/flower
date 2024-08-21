@@ -1,4 +1,4 @@
-How to build Docker Flower images locally
+How to Build Docker Flower Images Locally
 =========================================
 
 Flower provides pre-made docker images on `Docker Hub <https://hub.docker.com/u/flwr>`_
@@ -9,27 +9,22 @@ images exist and how to build them locally.
 
 Before we can start, we need to meet a few prerequisites in our local development environment.
 
-#. Clone the flower repository.
+#. Clone the ``flower`` repository.
 
     .. code-block:: bash
 
-      $ git clone https://github.com/adap/flower.git && cd flower
+      $ git clone --depth=1 https://github.com/adap/flower.git && cd flower
 
 #. Verify the Docker daemon is running.
 
-    Please follow the first section on
-    :doc:`Run Flower using Docker <how-to-run-flower-using-docker>`
-    which covers this step in more detail.
+   The build instructions that assemble the images are located in the respective Dockerfiles. You
+   can find them in the subdirectories of ``src/docker``.
 
-
-The build instructions that assemble the images are located in the respective Dockerfiles. You
-can find them in the subdirectories of ``src/docker``.
-
-Flower Docker images are configured via build arguments. Through build arguments, we can make the
-creation of images more flexible. For example, in the base image, we can specify the version of
-Python to install using the ``PYTHON_VERSION`` build argument. Some of the build arguments have
-default values, others must be specified when building the image. All available build arguments for
-each image are listed in one of the tables below.
+   Flower Docker images are configured via build arguments. Through build arguments, we can make the
+   creation of images more flexible. For example, in the base image, we can specify the version of
+   Python to install using the ``PYTHON_VERSION`` build argument. Some of the build arguments have
+   default values, others must be specified when building the image. All available build arguments for
+   each image are listed in one of the tables below.
 
 Building the base image
 -----------------------
@@ -49,7 +44,7 @@ Building the base image
    * - ``DISTRO_VERSION``
      - Version of the Linux distribution.
      - No
-     - ``22.04``
+     - :substitution-code:`|ubuntu_version|`
    * - ``PYTHON_VERSION``
      - Version of ``python`` to be installed.
      - No
@@ -57,11 +52,11 @@ Building the base image
    * - ``PIP_VERSION``
      - Version of ``pip`` to be installed.
      - Yes
-     - ``23.0.1``
+     - :substitution-code:`|pip_version|`
    * - ``SETUPTOOLS_VERSION``
      - Version of ``setuptools`` to be installed.
      - Yes
-     - ``69.0.2``
+     - :substitution-code:`|setuptools_version|`
    * - ``FLWR_VERSION``
      - Version of Flower to be installed.
      - Yes
@@ -71,9 +66,9 @@ Building the base image
      - No
      - ``flwr`` or ``flwr-nightly``
 
-
-The following example creates a base Ubuntu/Alpine image with Python 3.11.0, pip 23.0.1,
-setuptools 69.0.2 and Flower |stable_flwr_version|:
+The following example creates a base Ubuntu/Alpine image with Python ``3.11.0``,
+pip :substitution-code:`|pip_version|`, setuptools :substitution-code:`|setuptools_version|`
+and Flower :substitution-code:`|stable_flwr_version|`:
 
 .. code-block:: bash
    :substitutions:
@@ -82,11 +77,11 @@ setuptools 69.0.2 and Flower |stable_flwr_version|:
    $ docker build \
      --build-arg PYTHON_VERSION=3.11.0 \
      --build-arg FLWR_VERSION=|stable_flwr_version| \
-     --build-arg PIP_VERSION=23.0.1 \
-     --build-arg SETUPTOOLS_VERSION=69.0.2 \
+     --build-arg PIP_VERSION=|pip_version| \
+     --build-arg SETUPTOOLS_VERSION=|setuptools_version| \
      -t flwr_base:0.1.0 .
 
-The name of image is ``flwr_base`` and the tag ``0.1.0``. Remember that the build arguments as well
+In this example, we specify our image name as ``flwr_base`` and the tag as ``0.1.0``. Remember that the build arguments as well
 as the name and tag can be adapted to your needs. These values serve as examples only.
 
 Building the SuperLink/SuperNode or ServerApp image
@@ -107,32 +102,31 @@ Building the SuperLink/SuperNode or ServerApp image
    * - ``BASE_IMAGE``
      - The Tag of the Flower base image.
      - Yes
-     - :substitution-code:`|stable_flwr_version|-py3.10-ubuntu22.04`
+     - :substitution-code:`|stable_flwr_version|-py3.11-ubuntu|ubuntu_version|`
 
-The following example creates a SuperLink/SuperNode or ServerApp image with the official Flower
-base image:
+For example, to build a SuperLink image with the latest Flower version, Python 3.11 and Ubuntu 22.04, run the following:
 
 .. code-block:: bash
+   :substitutions:
 
-  $ cd src/docker/<superlink|supernode|serverapp>/
-  $ docker build \
-    --build-arg BASE_IMAGE=<FLOWER-VERSION>-py<PY-VERSION>-<DISTRIBUTION and VERSION> \
-    -t flwr_superlink:0.1.0 .
-
+   $ cd src/docker/superlink
+   $ docker build \
+     --build-arg BASE_IMAGE=|stable_flwr_version|-py3.11-ubuntu22.04 \
+     -t flwr_superlink:0.1.0 .
 
 If you want to use your own base image instead of the official Flower base image, all you need to do
-is set the ``BASE_REPOSITORY`` build argument.
+is set the ``BASE_REPOSITORY`` build argument to ``flwr_base`` (as we've specified above).
 
 .. code-block:: bash
 
-  $ cd src/docker/superlink/
-  $ docker build \
-    --build-arg BASE_REPOSITORY=flwr_base \
-    --build-arg BASE_IMAGE=0.1.0
-    -t flwr_superlink:0.1.0 .
+   $ cd src/docker/superlink/
+   $ docker build \
+     --build-arg BASE_REPOSITORY=flwr_base \
+     --build-arg BASE_IMAGE=0.1.0
+     -t flwr_superlink:0.1.0 .
 
 After creating the image, we can test whether the image is working:
 
 .. code-block:: bash
 
-  $ docker run --rm flwr_superlink:0.1.0 --help
+   $ docker run --rm flwr_superlink:0.1.0 --help

@@ -15,12 +15,13 @@
 """Provide functions for managing global Flower config."""
 
 import os
+import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, cast, get_args
 
 import tomli
 
-from flwr.cli.config_utils import validate_fields
+from flwr.cli.config_utils import get_fab_config, validate_fields
 from flwr.common.constant import APP_DIR, FAB_CONFIG_FILE, FLWR_HOME
 from flwr.common.typing import Run, UserConfig, UserConfigValue
 
@@ -104,6 +105,18 @@ def get_fused_config_from_dir(
     return fuse_dicts(flat_default_config, override_config)
 
 
+def get_fused_config_from_fab(fab_file: Union[Path, bytes], run: Run) -> UserConfig:
+    """Fuse default config in a `FAB` with overrides in a `Run`.
+
+    This enables obtaining a run-config without having to install the FAB. This
+    function mirrors `get_fused_config_from_dir`. This is useful when the execution
+    of the FAB is delegated to a different process.
+    """
+    default_config = get_fab_config(fab_file)["tool"]["flwr"]["app"].get("config", {})
+    flat_config_flat = flatten_dict(default_config)
+    return fuse_dicts(flat_config_flat, run.override_config)
+
+
 def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> UserConfig:
     """Merge the overrides from a `Run` with the config from a FAB.
 
@@ -165,7 +178,6 @@ def unflatten_dict(flat_dict: Dict[str, Any]) -> Dict[str, Any]:
 
 def parse_config_args(
     config: Optional[List[str]],
-    separator: str = ",",
 ) -> UserConfig:
     """Parse separator separated list of key-value pairs separated by '='."""
     overrides: UserConfig = {}
@@ -173,18 +185,22 @@ def parse_config_args(
     if config is None:
         return overrides
 
+    # Regular expression to capture key-value pairs with possible quoted values
+    pattern = re.compile(r"(\S+?)=(\'[^\']*\'|\"[^\"]*\"|\S+)")
+
     for config_line in config:
         if config_line:
-            overrides_list = config_line.split(separator)
+            matches = pattern.findall(config_line)
+
             if (
-                len(overrides_list) == 1
-                and "=" not in overrides_list
-                and overrides_list[0].endswith(".toml")
+                len(matches) == 1
+                and "=" not in matches[0][0]
+                and matches[0][0].endswith(".toml")
             ):
-                with Path(overrides_list[0]).open("rb") as config_file:
+                with Path(matches[0][0]).open("rb") as config_file:
                     overrides = flatten_dict(tomli.load(config_file))
             else:
-                toml_str = "\n".join(overrides_list)
+                toml_str = "\n".join(f"{k} = {v}" for k, v in matches)
                 overrides.update(tomli.loads(toml_str))
 
     return overrides
