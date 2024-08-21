@@ -135,12 +135,12 @@ def _train(tconfig):
     return {"train_loss": epoch_loss, "train_accuracy": epoch_acc}
 
 
-def global_model_eval(arch, global_net_dict, server_testdata):
+def global_model_eval(arch, global_net_dict, server_testdata, device):
     """Evaluate the global model on the server test data."""
     eval_d = {}
     if arch == "cnn":
         eval_d = test(
-            global_net_dict["model"], test_data=server_testdata, device="cuda"
+            global_net_dict["model"], test_data=server_testdata, device=device
         )
     return {
         "loss": eval_d["eval_loss"],

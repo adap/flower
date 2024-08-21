@@ -41,7 +41,7 @@ def _get_evaluate_gm_func(cfg, server_testdata):
         gm_dict = initialize_model(cfg.model.name, cfg.dataset)
         set_parameters(gm_dict["model"], parameters)
         gm_dict["model"].eval()  # type: ignore
-        d_res = global_model_eval(cfg.model.arch, gm_dict, server_testdata)
+        d_res = global_model_eval(cfg.model.arch, gm_dict, server_testdata, device=cfg.device)
         loss = d_res["loss"]
         accuracy = d_res["accuracy"]
         del gm_dict["model"]

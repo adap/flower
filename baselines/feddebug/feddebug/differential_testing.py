@@ -146,21 +146,18 @@ class InferenceGuidedInputs:
 class FaultyClientLocalization:
     """Faulty Client Localization using Neuron Activation."""
 
-    def __init__(self, client2model, generated_inputs, use_gpu) -> None:
+    def __init__(self, client2model, generated_inputs, device) -> None:
         self.generated_inputs = generated_inputs
-        self.use_gpu = use_gpu
+        self.device = device
         self.c2input2acts= {}
         self._update_neuron_coverage_func(client2model)
         self.clients_ids = set(client2model.keys())
         self.leave_1_out_combs =self._update_leave_1_out_combs(self.clients_ids)
 
     def _update_neuron_coverage_func(self, client2model):
-        device = torch.device("cpu")
-        if self.use_gpu:
-            device = torch.device("cuda")
         for client_id, model in client2model.items():
-            model = model.to(device)
-            fuzz_input2_activations = [get_neurons_activations(model, img.to(device))for img in self.generated_inputs]
+            model = model.to(self.device)
+            fuzz_input2_activations = [get_neurons_activations(model, img.to(self.device))for img in self.generated_inputs]
             self.c2input2acts[client_id] = fuzz_input2_activations
             model = model.to(torch.device("cpu"))
             
@@ -266,6 +263,7 @@ class FedDebug:
                 self.train_cfg.model.arch,
                 {"model": cli_model, "num_classes": self.train_cfg.dataset.num_classes},
                 test_data,
+                device = self.cfg.device
             )
 
             print(f"client id {cid}, metrics:  { temp_d}")
@@ -319,7 +317,7 @@ class FedDebug:
         )
         return fault_localization_acc
 
-    def _help_run(self, k_gen_inputs, na_threshold, use_gpu):
+    def _help_run(self, k_gen_inputs, na_threshold):
         print(">  Running FaultyClientLocalization ..")
         generate_inputs = InferenceGuidedInputs(
             self.client2model,
@@ -335,9 +333,7 @@ class FedDebug:
         # print(selected_inputs)
 
         start = time.time()
-        faultyclientlocalization = FaultyClientLocalization(
-            self.client2model, selected_inputs, use_gpu=use_gpu
-        )
+        faultyclientlocalization = FaultyClientLocalization(self.client2model, selected_inputs, device=self.cfg.device)
 
         potential_faulty_clients_for_each_input = (
             faultyclientlocalization.run_fault_localization(
@@ -355,11 +351,9 @@ class FedDebug:
     #     correct_tracing = 0
     #     return {"accuracy": correct_tracing / len(self.subset_test_data)}
 
-    def run(self, k_gen_inputs=10, use_gpu=True) -> Dict[str, any]:  # type: ignore
+    def run(self, k_gen_inputs=10) -> Dict[str, any]:  # type: ignore
         """Run the debugging analysis."""
-        predicted_faulty_clients, input_gen_time, fault_localization_time = (
-            self._help_run(k_gen_inputs, self.na_threshold, use_gpu)
-        )
+        predicted_faulty_clients, input_gen_time, fault_localization_time = self._help_run(k_gen_inputs, self.na_threshold)
 
         fault_localization_acc = self._get_fault_localization_accuracy(
             predicted_faulty_clients
