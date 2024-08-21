@@ -290,6 +290,27 @@ def _get_train_val_datasets(dataset_name, data_dir):
         valid_ds = SubsetToDataset(test_ds)
 
         return train_ds, valid_ds, 10
+    
+    elif dataset_name == "mnist":
+        transform = torchvision.transforms.Compose(
+            [
+                resize_trasnform,
+                torchvision.transforms.ToTensor(),
+                torchvision.transforms.Normalize((0.1307,), (0.3081,)),
+            ]
+        )
+
+        train_ds = torchvision.datasets.MNIST(
+            root=data_dir, train=True, download=True, transform=transform
+        )
+
+        valid_ds = torchvision.datasets.MNIST(
+            root=data_dir, train=False, download=True, transform=transform
+        )
+
+        return train_ds, valid_ds, 10
+    
+    
     else:
         raise NotImplementedError(f"Dataset {dataset_name} not implemented.")
 

@@ -1,10 +1,10 @@
 device: "cpu"
 total_gpus: 1
-total_cpus: 16
+total_cpus: 10
 client_cpus: 1
 client_gpu: 0.2
 
-check_cache: False # if set to True then if the config is already in the cache then it will not retrain.
+check_cache: True # if set to True then if the config is already in the cache then it will not retrain.
 num_clients: 5
 client:
     epochs: 5
@@ -17,10 +17,12 @@ faulty_clients_ids: [0] # malacious client(s) ids in a list
 dataset_channels:
     cifar10: 3 # RGB
     femnist: 1 # Grey
+    mnist: 1
 
 dataset_classes:
     cifar10: 10
     femnist: 10
+    mnist: 10
 
 exp_key: "key_test" # this is the test key. It will be changed after running the exp
 
@@ -31,7 +33,7 @@ model:
     arch: cnn
 
 dataset:
-    name: "cifar10"
+    name: "mnist"
     num_classes: ${dataset_classes.${dataset.name}}
     channels: ${dataset_channels.${dataset.name}}
 
@@ -62,11 +64,12 @@ hydra:
 
     sweeper:
         params:
-            model.name: resnet50,densenet121
-            multirun_faulty_clients: 2,3,5,7
-            num_clients: 30,50
-            dataset.name: femnist
+            model.name: resnet18
+            multirun_faulty_clients: 1,2,5
+            num_clients: 50
+            dataset.name: mnist
             data_dist.dist_type: iid
+            client.epochs: 5            
 
 multirun_faulty_clients: -1 # use for hydra multirun to pass clients ids to `faulty_clients_ids` as we cannot pass list of  list in multirun
 storage:

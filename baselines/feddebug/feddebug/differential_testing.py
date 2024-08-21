@@ -199,7 +199,7 @@ class FaultyClientLocalization:
         for _ in range(num_bugs):
             benign_clients_ids = self._find_normal_clients_seq_v1(fuzz_input_id, na_t)
             potential_faulty_clients = temp_clients_ids - benign_clients_ids
-            print(f"Potential Malicious client(s) {potential_faulty_clients}")
+            log(DEBUG ,f"Malicious clients {potential_faulty_clients}")
             self._update_leave_1_out_combs(temp_clients_ids-potential_faulty_clients)
         return potential_faulty_clients
     

@@ -8,7 +8,8 @@ import gc
 
 import flwr as fl
 import torch
-
+from flwr.common.logger import log
+from logging import DEBUG, INFO
 from feddebug.models import initialize_model, train_neural_network
 from feddebug.utils import get_parameters, set_parameters
 
@@ -43,6 +44,7 @@ class CNNFlowerClient(fl.client.NumPyClient):
         del model_dict
         client_train_dict = {"cid": self.args["cid"]} | train_dict
         gc.collect()
+        log(INFO, f"Client {self.args['cid']} trained.")
         return parameters, nk_client_data_points, client_train_dict
 
 

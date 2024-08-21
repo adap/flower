@@ -90,7 +90,6 @@ def main(cfg) -> None:
         run_simulation(cfg)
         time.sleep(1)
         run_fed_debug_differential_testing(cfg)
-        _ = input("Press Enter to continue...")
 
     if cfg.vary_thresholds:
         eval_na_threshold(cfg)

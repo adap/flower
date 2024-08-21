@@ -142,5 +142,4 @@ def eval_nc_v2(model, data, threshold=0., layer_name=None):
 def get_neurons_activations(model, img):
     """Return the activations of all neurons in the model for the given input image."""
     # return _my_eval_neurons_activations(model, img)
-    print(">> get_neurons_activations")
     return eval_nc_v2(model, img)

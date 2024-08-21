@@ -125,8 +125,9 @@ class ClientsAndServerDatasetsPrep:
                 noise_rate=self.cfg.noise_rate,
                 num_classes=self.cfg.dataset.num_classes,
             )
-            log(WARNING, f"Client {cid} is made noisy \n  ")
+            log(WARNING, f"      ************* Client {cid} is made noisy.   *************")
             self.client2class[cid] = "noisy"
+        log(INFO, f"            ******** All Malacious/Faulty Clients are: {self.cfg.faulty_clients_ids} ********")
 
     def _setup_hugging(self):
         dataset_dict = _load_datasets(self.cfg.data_dist)
