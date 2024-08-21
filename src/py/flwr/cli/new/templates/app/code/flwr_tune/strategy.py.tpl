@@ -14,7 +14,7 @@ class FlowerTuneLlm(FedAvg):
     """Customised FedAvg strategy implementation.
     
     This class behaves just like FedAvg but also tracks the communication
-    costs associated with a round of `fit`.
+    costs associated with `fit` over FL rounds.
     """
     def __init__(self, **kwargs):
         self.comm_tracker = CommunicationTracker()
@@ -28,7 +28,7 @@ class FlowerTuneLlm(FedAvg):
 
         # Test communication costs
         fit_ins_list = [fit_ins for _, fit_ins in return_clients]
-        self.comm_tracker.compute_comm_costs(fit_ins_list)
+        self.comm_tracker.track(fit_ins_list)
 
         return return_clients
 
@@ -41,7 +41,7 @@ class FlowerTuneLlm(FedAvg):
         """Aggregate fit results using weighted average."""
         # Test communication costs
         fit_res_list = [fit_res for _, fit_res in results]
-        self.comm_tracker.compute_comm_costs(fit_res_list)
+        self.comm_tracker.track(fit_res_list)
 
         parameters_aggregated, metrics_aggregated = super().aggregate_fit(
             server_round, results, failures
@@ -59,7 +59,7 @@ class CommunicationTracker:
     def _compute_bytes(parameters):
         return sum([BytesIO(t).getbuffer().nbytes for t in parameters.tensors])
 
-    def compute_comm_costs(self, fit_list: List[Union[FitIns, FitRes]]):
+    def track(self, fit_list: List[Union[FitIns, FitRes]]):
         size_bytes_list = [
             self._compute_bytes(fit_ele.parameters)
             for fit_ele in fit_list
