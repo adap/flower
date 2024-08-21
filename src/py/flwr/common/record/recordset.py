@@ -86,7 +86,30 @@ class RecordSetData:
 
 
 class RecordSet:
-    """RecordSet stores groups of parameters, metrics and configs."""
+    """RecordSet stores groups of parameters, metrics and configs.
+
+    A :code:`RecordSet` is the unified ...
+
+    Parameters
+    ----------
+    parameters_records : Optional[Dict[str, ParametersRecord]]]
+        A dictionary of :code:`ParametersRecords` that can be used to record
+        and communicate model parameters and high-dimensional arrays.
+    metrics_records : Optional[Dict[str, MetricsRecord]]]
+        A dictionary of :code:`MetricsRecord` that can be used to record
+        and communicate scalar-valued metrics that are the result of performing
+        and action, for example, by a :code:`ClientApp`.
+    configs_records : Optional[Dict[str, ConfigsRecord]]]
+        A dictionary of :code:`ConfigsRecord` that can be used to record
+        and communicate configuration values to an entity (e.g. a :code:`ClientApp`)
+        for it to adjust how an action is performed.
+
+    Examples
+    --------
+
+    A :code:`RecordSet` object can store 
+
+    """
 
     def __init__(
         self,
