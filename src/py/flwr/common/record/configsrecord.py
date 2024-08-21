@@ -63,7 +63,7 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
     A :code:`ConfigsRecord` is a Python dictionary designed to ensure that
     each key-value pair adheres to specified data types. A :code:`ConfigsRecord`
     is one of the types of records that a
-    `common.RecordSet <flwr.common.RecordSet.html#recordset>`_ supports and
+    `flwr.common.RecordSet <flwr.common.RecordSet.html#recordset>`_ supports and
     can therefore be used to construct :code:`common.Message` objects.
 
     Parameters

@@ -89,7 +89,7 @@ class ParametersRecord(TypedDict[str, Array]):
     OrderedDict[str, Array]. ParametersRecord objects can be viewed as an equivalent to
     PyTorch's state_dict, but holding serialised tensors instead. A
     :code:`ParametersRecord`  is one of the types of records that a
-    `common.RecordSet <flwr.common.RecordSet.html#recordset>`_ supports and
+    `flwr.common.RecordSet <flwr.common.RecordSet.html#recordset>`_ supports and
     can therefore be used to construct :code:`common.Message` objects.
 
     Parameters
