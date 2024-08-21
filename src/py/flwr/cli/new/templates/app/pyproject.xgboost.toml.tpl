@@ -26,8 +26,8 @@ clientapp = "$import_name.client_app:app"
 [tool.flwr.app.config]
 # ServerApp
 num-server-rounds = 3
-fraction-fit = 1.0
-fraction-evaluate = 1.0
+fraction-fit = 0.1
+fraction-evaluate = 0.1
 
 # ClientApp
 local-epochs = 1
@@ -42,4 +42,4 @@ tree-method = "hist"
 default = "local-simulation"
 
 [tool.flwr.federations.local-simulation]
-options.num-supernodes = 2
+options.num-supernodes = 20

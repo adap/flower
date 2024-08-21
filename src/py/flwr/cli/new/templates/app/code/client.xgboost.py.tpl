@@ -75,8 +75,7 @@ class FlowerClient(Client):
             )
         else:
             bst = xgb.Booster(params=self.params)
-            for item in ins.parameters.tensors:
-                global_model = bytearray(item)
+            global_model = bytearray(ins.parameters.tensors[0])
 
             # Load global model into booster
             bst.load_model(global_model)
@@ -101,8 +100,7 @@ class FlowerClient(Client):
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         # Load global model
         bst = xgb.Booster(params=self.params)
-        for para in ins.parameters.tensors:
-            para_b = bytearray(para)
+        para_b = bytearray(ins.parameters.tensors[0])
         bst.load_model(para_b)
 
         # Run evaluation

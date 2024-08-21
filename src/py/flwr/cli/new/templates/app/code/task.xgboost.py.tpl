@@ -1,6 +1,9 @@
 """$project_name: A Flower / XGBoost app."""
 
+from logging import INFO
+
 import xgboost as xgb
+from flwr.common import log
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 
@@ -40,6 +43,7 @@ def load_data(partition_id, num_clients):
         )
 
     # Load the partition for this `partition_id`
+    log(INFO, "Loading partition...")
     partition = fds.load_partition(partition_id, split="train")
     partition.set_format("numpy")
 
@@ -49,6 +53,7 @@ def load_data(partition_id, num_clients):
     )
 
     # Reformat data to DMatrix for xgboost
+    log(INFO, "Reformatting data...")
     train_dmatrix = transform_dataset_to_dmatrix(train_data)
     valid_dmatrix = transform_dataset_to_dmatrix(valid_data)
 
