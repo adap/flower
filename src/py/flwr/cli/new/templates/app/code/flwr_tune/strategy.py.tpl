@@ -11,7 +11,11 @@ from flwr.server.strategy import FedAvg
 
 
 class FlowerTuneLlm(FedAvg):
-    """Customised FedAvg strategy implementation."""
+    """Customised FedAvg strategy implementation.
+    
+    This class behaves just like FedAvg but also tracks the communication
+    costs associated with a round of `fit`.
+    """
     def __init__(self, **kwargs):
         self.comm_tracker = CommunicationTracker()
         super().__init__(**kwargs)
