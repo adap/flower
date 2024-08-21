@@ -61,7 +61,10 @@ class MetricsRecord(TypedDict[str, MetricsRecordValues]):
     """Metrics recod.
 
     A :code:`MetricsRecord` is a Python dictionary designed to ensure that
-    each key-value pair adheres to specified data types.
+    each key-value pair adheres to specified data types. A :code:`MetricsRecord`
+    is one of the types of records that a
+    `common.RecordSet <flwr.common.RecordSet.html#recordset>`_ supports and
+    can therefore be used to construct :code:`common.Message` objects.
 
     Parameters
     ----------
@@ -76,10 +79,15 @@ class MetricsRecord(TypedDict[str, MetricsRecordValues]):
 
     Examples
     --------
-    The usage of a :code:`MetricsRecord` is envisioned for single scalar
-    (:code:`int`, :code:`float`) or list of scalars. A :code:`MetricsRecord` is
-    one of the types of records that a :code:`common.RecordSet` supports.
-    Let's see some examples:
+    The usage of a :code:`MetricsRecord` is envisioned for communicating results
+    obtained when a node performs an action. A few typical examples include:
+    communicating the training accuracy after a model is trained locally by a
+    :code:`ClientApp`, reporting the validation loss obtained at a :code:`ClientApp`,
+    or, more generally, the output of executing a query by the :code:`ClientApp`.
+    Common to these examples is that the output can be typically represented by
+    a single scalar (:code:`int`, :code:`float`) or list of scalars.
+
+    Let's see some examples of how to construct a :code:`MetricsRecord` from scratch:
 
     >>> from flwr.common import MetricsRecord
     >>>

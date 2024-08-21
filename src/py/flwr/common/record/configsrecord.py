@@ -61,7 +61,10 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
     """Configs record.
 
     A :code:`ConfigsRecord` is a Python dictionary designed to ensure that
-    each key-value pair adheres to specified data types.
+    each key-value pair adheres to specified data types. A :code:`ConfigsRecord`
+    is one of the types of records that a
+    `common.RecordSet <flwr.common.RecordSet.html#recordset>`_ supports and
+    can therefore be used to construct :code:`common.Message` objects.
 
     Parameters
     ----------
@@ -77,23 +80,24 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
 
     Examples
     --------
-    The usage of a :code:`ConfigsRecord` is envisioned for storing Python built-in
-    types such as :code:`int`, :code:`float`, :code:`str`, :code:`bytes` and lists of
-    these. All types allowed are defined in
-    :code:`common.typing.ConfigsRecordValues`. While lists are supported, we
+    The usage of a :code:`ConfigsRecord` is envisioned for sending configuration values
+    telling the target node how to perform a certain action (e.g. train/evaluate a model
+    ). You can use standard Python built-in types such as :code:`float`, :code:`str`
+    , :code:`bytes`. All types allowed are defined in
+    :code:`flwr.common.ConfigsRecordValues`. While lists are supported, we
     encourage you to use a :code:`ParametersRecord` instead if these are of high
     dimensionality.
 
-    Let's see some examples:
+    Let's see some examples of how to construct a :code:`ConfigsRecord` from scratch:
 
     >>> from flwr.common import ConfigsRecord
     >>>
     >>> # A `ConfigsRecord` is a specialized Python dictionary
-    >>> record = ConfigsRecord({"accuracy": 0.94})
+    >>> record = ConfigsRecord({"lr": 0.1, "batch-size": 128})
     >>> # You can add more content to an existing record
-    >>> record["loss"] = 0.01
+    >>> record["compute-average"] = True
     >>> # It also supports lists
-    >>> record["loss-historic"] = [0.9, 0.5, 0.01]
+    >>> record["loss-fn-coefficients"] = [0.4, 0.25, 0.35]
     >>> # And string values (among other types)
     >>> record["path-to-S3"] = "s3://bucket_name/folder1/fileA.json"
 
