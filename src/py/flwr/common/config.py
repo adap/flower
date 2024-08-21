@@ -21,7 +21,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union, cast, get_args
 
 import tomli
 
-from flwr.cli.config_utils import validate_fields
+from flwr.cli.config_utils import get_fab_config, validate_fields
 from flwr.common.constant import APP_DIR, FAB_CONFIG_FILE, FLWR_HOME
 from flwr.common.typing import Run, UserConfig, UserConfigValue
 
@@ -103,6 +103,18 @@ def get_fused_config_from_dir(
     flat_default_config = flatten_dict(default_config)
 
     return fuse_dicts(flat_default_config, override_config)
+
+
+def get_fused_config_from_fab(fab_file: Union[Path, bytes], run: Run) -> UserConfig:
+    """Fuse default config in a `FAB` with overrides in a `Run`.
+
+    This enables obtaining a run-config without having to install the FAB. This
+    function mirrors `get_fused_config_from_dir`. This is useful when the execution
+    of the FAB is delegated to a different process.
+    """
+    default_config = get_fab_config(fab_file)["tool"]["flwr"]["app"].get("config", {})
+    flat_config_flat = flatten_dict(default_config)
+    return fuse_dicts(flat_config_flat, run.override_config)
 
 
 def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> UserConfig:
