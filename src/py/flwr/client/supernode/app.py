@@ -325,9 +325,9 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--node-config",
         type=str,
-        help="A comma separated list of key/value pairs (separated by `=`) to "
+        help="A space separated list of key/value pairs (separated by `=`) to "
         "configure the SuperNode. "
-        "E.g. --node-config 'key1=\"value1\",partition-id=0,num-partitions=100'",
+        "E.g. --node-config 'key1=\"value1\" partition-id=0 num-partitions=100'",
     )
 
 
