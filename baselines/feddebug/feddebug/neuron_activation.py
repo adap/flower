@@ -37,10 +37,10 @@ def _insert_hooks_func(layers):
     return all_hooks
 
 
-def _scale_func(out, rmax=1, rmin=0):
-    output_std = (out - out.min()) / (out.max() - out.min())
-    output_scaled = output_std * (rmax - rmin) + rmin
-    return output_scaled
+# def _scale_func(out, rmax=1, rmin=0):
+#     output_std = (out - out.min()) / (out.max() - out.min())
+#     output_scaled = output_std * (rmax - rmin) + rmin
+#     return output_scaled
 
 
 def _my_eval_neurons_activations(model, x):
@@ -54,7 +54,7 @@ def _my_eval_neurons_activations(model, x):
     model(x)  # forward pass and everthing is stored in HOOKS_STORAGE
     for l_id in range(len(layers)):
         outputs = F.relu(HOOKS_STORAGE[l_id])
-        scaled_outputs = _scale_func(outputs)
+        scaled_outputs = outputs #_scale_func(outputs)
         layer2output.append(scaled_outputs)
 
     _ = [h.remove() for h in hooks]  # remove the hooks

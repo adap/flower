@@ -184,10 +184,10 @@ class FaultyClientLocalization:
         faulty_clients_on_gen_inputs = []
         for i in range(len(self.generated_inputs)):
             potential_faulty_clients = None
-            # for the given input i find "num_bugs" number of faulty clients
             for _ in range(num_bugs):
                 benign_clients_ids = self._find_normal_clients_seq_v1(i, na_t)
                 potential_faulty_clients = self.clientids - benign_clients_ids
+                print(f"Potential Malicious client(s) {potential_faulty_clients}")
                 self._update_clients_combinations(potential_faulty_clients)
 
             faulty_clients_on_gen_inputs.append(potential_faulty_clients)
