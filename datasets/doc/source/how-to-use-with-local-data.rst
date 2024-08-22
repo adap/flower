@@ -44,6 +44,8 @@ CSV
     "can-have-more-splits": ...
   }
   dataset = load_dataset("csv", data_files=data_files)
+  # if data_files is a dictionary choose the split e.g. "train"
+  # dataset = load_dataset("csv", data_files=data_files, split="train")
 
   partitioner = ChosenPartitioner(...)
   partitioner.dataset = dataset
@@ -60,7 +62,7 @@ JSON
   # Single file
   data_files = "path-to-my-file.json"
 
-  # Multitple Files
+  # Multiple Files
   data_files = [ "path-to-my-file-1.json", "path-to-my-file-2.json", ...]
   dataset = load_dataset("json", data_files=data_files)
 
@@ -71,6 +73,8 @@ JSON
      "can-have-more-splits": ...
   }
   dataset = load_dataset("json", data_files=data_files)
+  # if data_files is a dictionary choose the split e.g. "train"
+  # dataset = load_dataset("csv", data_files=data_files, split="train")
 
   partitioner = ChosenPartitioner(...)
   partitioner.dataset = dataset
