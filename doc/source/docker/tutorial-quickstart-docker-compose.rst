@@ -32,14 +32,14 @@ Step 1: Set Up
 
    .. code-block:: bash
 
-      $ flwr new quickstart-docker-compose --framework PyTorch --username flower
+      $ flwr new quickstart-compose --framework PyTorch --username flower
 
-#. Export the path of the newly created project. The Path should be relative to the location of the
+#. Export the path of the newly created project. The path should be relative to the location of the
    Docker Compose files:
 
    .. code-block:: bash
 
-      $ export PROJECT_DIR=quickstart-docker-compose
+      $ export PROJECT_DIR=quickstart-compose
 
    Setting the ``PROJECT_DIR`` helps Docker Compose locate the ``pyproject.toml`` file, allowing
    it to install dependencies in the SuperExec and SuperNode images correctly.
@@ -79,10 +79,10 @@ quickstart example.
 To ensure the ``flwr`` CLI connects to the SuperExec, you need to specify the SuperExec addresses
 in the ``pyproject.toml`` file.
 
-#. Add the following lines to the ``quickstart-docker-compose/pyproject.toml``:
+#. Add the following lines to the ``quickstart-compose/pyproject.toml``:
 
    .. code-block:: toml
-      :caption: quickstart-docker-compose/pyproject.toml
+      :caption: quickstart-compose/pyproject.toml
 
       [tool.flwr.federations.docker-compose]
       address = "127.0.0.1:9093"
@@ -92,7 +92,7 @@ in the ``pyproject.toml`` file.
 
    .. code-block:: bash
 
-      $ flwr run quickstart-docker-compose docker-compose
+      $ flwr run quickstart-compose docker-compose
 
 #. Monitor the SuperExec logs and wait for the summary to appear:
 
@@ -105,11 +105,11 @@ Step 4: Update the Application
 
 In the next step, change the application code.
 
-#. For example, go to the ``task.py`` file in the ``quickstart-docker-compose/quickstart_docker_compose/``
+#. For example, go to the ``task.py`` file in the ``quickstart-compose/quickstart_compose/``
    directory and add a ``print`` call in the ``get_weights`` function:
 
    .. code-block:: python
-      :caption: quickstart-docker-compose/quickstart_docker_compose/task.py
+      :caption: quickstart-compose/quickstart_compose/task.py
 
       # ...
       def get_weights(net):
@@ -117,9 +117,14 @@ In the next step, change the application code.
           return [val.cpu().numpy() for _, val in net.state_dict().items()]
       # ...
 
-#. Rebuild and restart the services. In the case that you have modified the dependencies
-   listed in your ``pyproject.toml`` file, it is essential to rebuild images. If you haven't made
-   any changes, you can skip this step.
+#. Rebuild and restart the services.
+
+   .. note::
+
+      If you have modified the dependencies listed in your ``pyproject.toml`` file, it is essential
+      to rebuild images.
+
+      If you haven't made any changes, you can skip this step.
 
    Run the following command to rebuild and restart the services:
 
@@ -131,7 +136,7 @@ In the next step, change the application code.
 
    .. code-block:: bash
 
-      $ flwr run quickstart-docker-compose docker-compose
+      $ flwr run quickstart-compose docker-compose
       $ docker compose logs superexec -f
 
    In the SuperExec logs, you should find the ``Get weights`` line:
@@ -143,7 +148,7 @@ In the next step, change the application code.
       superexec-1  | WARNING :   Option `--insecure` was set. Starting insecure HTTP server.
       superexec-1  | INFO :      Starting Flower SuperExec gRPC server on 0.0.0.0:9093
       superexec-1  | INFO :      ExecServicer.StartRun
-      superexec-1  | 🎊 Successfully installed quickstart-docker-compose to /app/.flwr/apps/flower/quickstart-docker-compose/1.0.0.
+      superexec-1  | 🎊 Successfully installed quickstart-compose to /app/.flwr/apps/flower/quickstart-compose/1.0.0.
       superexec-1  | INFO :      Created run -6767165609169293507
       superexec-1  | INFO :      Started run -6767165609169293507
       superexec-1  | WARNING :   Option `--insecure` was set. Starting insecure HTTP client connected to superlink:9091.
@@ -180,11 +185,11 @@ ensuring that it maintains its state even after a restart.
       * ``--build``: Rebuild the images for each service if they don't already exist.
       * ``-d``: Detach the containers from the terminal and run them in the background.
 
-#. Rerun the ``quickstart-docker-compose`` project:
+#. Rerun the ``quickstart-compose`` project:
 
    .. code-block:: bash
 
-      $ flwr run quickstart-docker-compose docker-compose
+      $ flwr run quickstart-compose docker-compose
 
 #. Check the content of the ``state`` directory:
 
@@ -193,12 +198,9 @@ ensuring that it maintains its state even after a restart.
       $ ls state/
       state.db
 
-   You should see a ``state.db`` file in the ``state`` directory. This file stores the SuperLink's
-   state and will be used to restore the state if the service is restarted.
-
-   If you restart the service, the state file will be used to restore the state from the
-   previously saved data. This ensures that the data persists even if the containers are stopped
-   and started again.
+   You should see a ``state.db`` file in the ``state`` directory. If you restart the service, the
+   state file will be used to restore the state from the previously saved data. This ensures that
+   the data persists even if the containers are stopped and started again.
 
 .. _TLS:
 
@@ -221,10 +223,10 @@ Step 6: Run Flower with TLS
 
       $ docker compose -f certs.yml up --build
 
-#. Add the following lines to the ``quickstart-docker-compose/pyproject.toml``:
+#. Add the following lines to the ``quickstart-compose/pyproject.toml``:
 
    .. code-block:: toml
-      :caption: quickstart-docker-compose/pyproject.toml
+      :caption: quickstart-compose/pyproject.toml
 
       [tool.flwr.federations.docker-compose-tls]
       address = "127.0.0.1:9093"
@@ -236,17 +238,17 @@ Step 6: Run Flower with TLS
 
       $ docker compose -f compose.yml -f with-tls.yml up --build -d
 
-#. Rerun the ``quickstart-docker-compose`` project:
+#. Rerun the ``quickstart-compose`` project:
 
    .. code-block:: bash
 
-      $ flwr run quickstart-docker-compose docker-compose-tls
+      $ flwr run quickstart-compose docker-compose-tls
       $ docker compose logs superexec -f
 
 Step 7: Add another SuperNode
 -----------------------------
 
-You can add more SuperNodes by duplicating the SuperNode definition in the ``compose.yml file``.
+You can add more SuperNodes by duplicating the SuperNode definition in the ``compose.yml`` file.
 
 Just make sure to give each new SuperNode service a unique service name like ``supernode-3``, ``supernode-4``, etc.
 
@@ -290,8 +292,8 @@ In ``with-tls.yml``, add the following:
 Step 8: Persisting the SuperLink State and Enabling TLS
 -------------------------------------------------------
 
-To persist the SuperLink state and enable TLS, you need to make a small change in the ``with-state.yml``
-file:
+To run Flower with persisted SuperLink state and enabled TLS, a slight change in the ``with-state.yml``
+file is required:
 
 #. Comment out line 3 and uncomment line 4:
 
@@ -313,11 +315,11 @@ file:
 
       $ docker compose -f compose.yml -f with-tls.yml -f with-state.yml up --build -d
 
-#. Rerun the ``quickstart-docker-compose`` project:
+#. Rerun the ``quickstart-compose`` project:
 
    .. code-block:: bash
 
-      $ flwr run quickstart-docker-compose docker-compose-tls
+      $ flwr run quickstart-compose docker-compose-tls
       $ docker compose logs superexec -f
 
 Step 9: Merge Multiple Compose Files
