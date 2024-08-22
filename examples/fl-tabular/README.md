@@ -1,6 +1,9 @@
-______________________________________________________________________
-
-## title: Flower Example on Adult Census Income Tabular Dataset tags: \[basic, tabular, fds\] dataset: \[Adult Census Income\] framework: \[scikit-learn, torch\]
+---
+title: Flower Example on Adult Census Income Tabular Dataset
+tags: [basic, tabular, fds]
+dataset: [Adult Census Income]
+framework: [scikit-learn, torch]
+---
 
 # Flower Example on Adult Census Income Tabular Dataset
 
