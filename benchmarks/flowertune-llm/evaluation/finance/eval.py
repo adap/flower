@@ -3,10 +3,12 @@
 import argparse
 
 import torch
+from peft import PeftModel
+
 from fiqa import test_fiqa
 from fpb import test_fpb
-from peft import PeftModel
 from tfns import test_tfns
+
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
 # Fixed seed
@@ -33,7 +35,7 @@ elif args.quantization == 8:
     quantization_config = BitsAndBytesConfig(load_in_8bit=True)
     torch_dtype = torch.float16
 else:
-    raise ValueError(f"Use 4-bit or 8-bit quantization. You passed: {quantization}/")
+    raise ValueError(f"Use 4-bit or 8-bit quantization. You passed: {args.quantization}/")
 
 model = AutoModelForCausalLM.from_pretrained(
     args.base_model_name_path,
@@ -57,10 +59,10 @@ model = model.eval()
 with torch.no_grad():
     for dataset in args.datasets.split(","):
         if dataset == "fpb":
-            test_fpb(args, model, tokenizer)
+            instructions = test_fpb(args, model, tokenizer)
         elif dataset == "fiqa":
-            test_fiqa(args, model, tokenizer)
+            instructions = test_fiqa(args, model, tokenizer)
         elif dataset == "tfns":
-            test_tfns(args, model, tokenizer)
+            instructions = test_tfns(args, model, tokenizer)
         else:
             raise ValueError("Undefined Dataset.")
