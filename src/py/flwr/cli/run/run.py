@@ -214,14 +214,9 @@ def _run_without_superexec(
         f"{num_supernodes}",
     ]
 
-    # Prepare backend config
-    backend_cfg_dict: Dict[str, Any] = {}
-    for k, v in backend_cfg.items():
-        backend_cfg_dict[k] = v
-
-    if backend_cfg_dict:
+    if backend_cfg:
         # Stringify as JSON
-        command.extend(["--backend-config", json.dumps(backend_cfg_dict)])
+        command.extend(["--backend-config", json.dumps(backend_cfg)])
 
     if config_overrides:
         command.extend(["--run-config", f"{' '.join(config_overrides)}"])

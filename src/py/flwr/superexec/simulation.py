@@ -19,7 +19,7 @@ import json
 import subprocess
 import sys
 from logging import ERROR, INFO, WARN
-from typing import Any, Dict, Optional
+from typing import Optional
 
 from typing_extensions import override
 
@@ -178,14 +178,9 @@ class SimulationEngine(Executor):
                 str(run_id),
             ]
 
-            # Prepare backend config
-            backend_cfg_dict: Dict[str, Any] = {}
-            for k, v in backend_cfg.items():
-                backend_cfg_dict[k] = v
-
-            if backend_cfg_dict:
+            if backend_cfg:
                 # Stringify as JSON
-                command.extend(["--backend-config", json.dumps(backend_cfg_dict)])
+                command.extend(["--backend-config", json.dumps(backend_cfg)])
 
             if override_config:
                 override_config_str = _user_config_to_str(override_config)
