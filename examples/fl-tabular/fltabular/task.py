@@ -11,9 +11,20 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OrdinalEncoder, StandardScaler
 from torch.utils.data import DataLoader, TensorDataset
+from flwr_datasets.partitioner import IidPartitioner
+
+fds = None  # Cache FederatedDataset
 
 
-def load_data(partition_id: int, fds: FederatedDataset):
+def load_data(partition_id: int, num_partitions: int):
+
+    global fds
+    if fds is None:
+        fds = FederatedDataset(
+            dataset="scikit-learn/adult-census-income",
+            partitioners={"train": num_partitions},
+        )
+
     dataset = fds.load_partition(partition_id, "train").with_format("pandas")[:]
 
     dataset.dropna(inplace=True)

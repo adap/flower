@@ -20,6 +20,7 @@ git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/fl-
 
 This will create a new directory called `fl-tabular` containing the following files:
 
+```shell
 fl-tabular
 ├── fltabular
 │   ├── client_app.py   # Defines your ClientApp
@@ -27,6 +28,7 @@ fl-tabular
 │   └── task.py         # Defines your model, training and data loading
 ├── pyproject.toml      # Project metadata like dependencies and configs
 └── README.md
+```
 
 ### Installing dependencies
 

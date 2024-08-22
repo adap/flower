@@ -7,9 +7,6 @@ from flwr.common import Context
 
 from fltabular.task import IncomeClassifier, get_weights
 
-net = IncomeClassifier(input_dim=14)
-params = ndarrays_to_parameters(get_weights(net))
-
 
 def weighted_average(metrics):
     accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
@@ -19,6 +16,9 @@ def weighted_average(metrics):
 
 
 def server_fn(context: Context) -> ServerAppComponents:
+    net = IncomeClassifier(input_dim=14)
+    params = ndarrays_to_parameters(get_weights(net))
+
     strategy = FedAvg(
         initial_parameters=params,
         evaluate_metrics_aggregation_fn=weighted_average,

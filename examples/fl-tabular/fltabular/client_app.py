@@ -13,8 +13,6 @@ from fltabular.task import (
     train,
 )
 
-NUMBER_OF_CLIENTS = 5
-
 
 class FlowerClient(NumPyClient):
     def __init__(self, net, trainloader, testloader):
@@ -33,18 +31,14 @@ class FlowerClient(NumPyClient):
         return loss, len(self.testloader), {"accuracy": accuracy}
 
 
-def get_client_fn(dataset: FederatedDataset):
-    def client_fn(context: Context) -> Client:
-        partition_id = context.node_config["partition-id"]
-        train_loader, test_loader = load_data(partition_id=partition_id, fds=dataset)
-        net = IncomeClassifier(14)
-        return FlowerClient(net, train_loader, test_loader).to_client()
+def client_fn(context: Context):
+    partition_id = context.node_config["partition-id"]
 
-    return client_fn
+    train_loader, test_loader = load_data(
+        partition_id=partition_id, num_partitions=context.node_config["num-partitions"]
+    )
+    net = IncomeClassifier(14)
+    return FlowerClient(net, train_loader, test_loader).to_client()
 
 
-fds = FederatedDataset(
-    dataset="scikit-learn/adult-census-income",
-    partitioners={"train": NUMBER_OF_CLIENTS},
-)
-app = ClientApp(client_fn=get_client_fn(fds))
+app = ClientApp(client_fn=client_fn)
