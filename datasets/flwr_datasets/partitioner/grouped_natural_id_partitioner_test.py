@@ -1,7 +1,7 @@
 """GroupedNaturalIdPartitioner partitioner tests."""
 
 import unittest
-from typing import List, Literal
+from typing import List, Literal, Set
 
 from parameterized import parameterized, parameterized_class
 
@@ -209,7 +209,7 @@ class TestGroupedNaturalIdPartitioner(unittest.TestCase):
         ]
 
         # Check for overlaps between partitions
-        seen_natural_ids = set()
+        seen_natural_ids: Set[str] = set()
         for partition in partitions:
             natural_ids_in_partition = set(partition.unique("natural_id"))
 
