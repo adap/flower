@@ -74,7 +74,7 @@ JSON
   }
   dataset = load_dataset("json", data_files=data_files)
   # if data_files is a dictionary choose the split e.g. "train"
-  # dataset = load_dataset("csv", data_files=data_files, split="train")
+  # dataset = load_dataset("json", data_files=data_files, split="train")
 
   partitioner = ChosenPartitioner(...)
   partitioner.dataset = dataset
