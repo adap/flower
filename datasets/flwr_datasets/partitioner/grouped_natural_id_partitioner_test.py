@@ -1,11 +1,8 @@
-"""Non_iid partitioner tests."""
+"""GroupedNaturalIdPartitioner partitioner tests."""
 
-
-import itertools
 import unittest
-from typing import Tuple
+from typing import List, Literal
 
-import numpy as np
 from parameterized import parameterized
 
 from datasets import Dataset
@@ -14,73 +11,209 @@ from flwr_datasets.partitioner.grouped_natural_id_partitioner import (
 )
 
 
-def _dummy_setup(
-    num_rows: int, n_unique_natural_ids: int, num_nodes: int
-) -> Tuple[Dataset, GroupedNaturalIdPartitioner]:
-    """Create a dummy dataset and partitioner based on given arguments.
-
-    The partitioner has automatically the dataset assigned to it.
-    """
-    dataset = _create_dataset(num_rows, n_unique_natural_ids)
-    partitioner = GroupedNaturalIdPartitioner(
-        partition_by="natural_id", num_groups=num_nodes
-    )
-    partitioner.dataset = dataset
-    return dataset, partitioner
-
-
 def _create_dataset(num_rows: int, n_unique_natural_ids: int) -> Dataset:
     """Create dataset based on the number of rows and unique natural ids."""
     data = {
         "features": list(range(num_rows)),
         "natural_id": [f"{i % n_unique_natural_ids}" for i in range(num_rows)],
+        "labels": [i % 2 for i in range(num_rows)],
     }
     dataset = Dataset.from_dict(data)
     return dataset
 
 
 class TestGroupedNaturalIdPartitioner(unittest.TestCase):
-    """Test IidPartitioner."""
+    """Test GroupedNaturalIdPartitioner."""
 
     @parameterized.expand(  # type: ignore
-        # num_rows, num_unique_natural_ids
-        list(itertools.product([10, 30, 100, 1000], [2, 3, 4, 5], [1, 3, 4, 4]))
+        # num_rows, num_unique_natural_ids, group_size, expected_num_partitions
+        [
+            [10, 10, 2, 5],
+            [11, 10, 2, 5],
+            [100, 10, 2, 5],
+            [12, 6, 3, 2],
+        ]
     )
-    def test_load_partition_num_partitions(
-        self, num_rows: int, num_unique_natural_id: int, num_groups: int
+    def test_strict_mode_num_partitions_and_partition_sizes(
+        self,
+        num_rows: int,
+        num_unique_natural_id: int,
+        group_size: int,
+        expected_num_partitions: int,
     ) -> None:
-        """Test if the number of partitions match the number of nodes."""
-        _, partitioner = _dummy_setup(num_rows, num_unique_natural_id, num_groups)
-        # Simulate usage to start lazy node_id_to_natural_id creation
+        """Test strict mode with valid group size."""
+        dataset = _create_dataset(num_rows, num_unique_natural_id)
+        partitioner = GroupedNaturalIdPartitioner(
+            partition_by="natural_id", group_size=group_size, mode="strict"
+        )
+        partitioner.dataset = dataset
+        # Trigger partitioning
         _ = partitioner.load_partition(0)
-        self.assertEqual(
-            len(partitioner.node_id_to_natural_id.keys()),
-            num_groups,
-            f"part: {partitioner._group_size}, real: {num_groups}",
-        )
+        self.assertEqual(partitioner.num_partitions, expected_num_partitions)
 
     @parameterized.expand(  # type: ignore
-        # num_rows, num_unique_natural_ids
-        list(itertools.product([10, 30, 100, 1000], [2, 3, 4, 5], [1, 3, 4, 4]))
+        # num_rows, num_unique_natural_ids, group_size, expected_num_partitions,
+        # expected_num_unique_natural_ids
+        [
+            [10, 10, 2, [2, 2, 2, 2, 2]],
+            [100, 10, 2, [2, 2, 2, 2, 2]],
+            [12, 6, 3, [3, 3]],
+            # The cases in which the partitions should be smaller
+            [10, 7, 2, [2, 2, 2, 1]],
+            [10, 3, 2, [2, 1]],
+        ]
     )
-    def test_load_partition_correct_division(
-        self, num_rows: int, num_unique_natural_ids: int, num_groups: int
+    def test_allow_smaller_mode_num_partitions_and_partition_sizes(
+        self,
+        num_rows: int,
+        num_unique_natural_id: int,
+        group_size: int,
+        expected_num_unique_natural_ids: List[int],
     ) -> None:
-        """Test if the data in partitions is correct.
-
-        Only the correct data is tested in this method.
-        """
-        true_labels = np.array_split(
-            np.array(range(num_unique_natural_ids)).astype(str), num_groups
+        """Test allow-smaller mode handles the remainder correctly."""
+        dataset = _create_dataset(num_rows, num_unique_natural_id)
+        partitioner = GroupedNaturalIdPartitioner(
+            partition_by="natural_id", group_size=group_size, mode="allow-smaller"
         )
+        partitioner.dataset = dataset
+        # Trigger partitioning
+        partitions = [
+            partitioner.load_partition(i) for i in range(partitioner.num_partitions)
+        ]
+        unique_natural_ids = [
+            len(partition.unique("natural_id")) for partition in partitions
+        ]
+        self.assertEqual(unique_natural_ids, expected_num_unique_natural_ids)
 
-        _, partitioner = _dummy_setup(num_rows, num_unique_natural_ids, num_groups)
-        dataset = partitioner.load_partition(0)
-        labels = np.unique(dataset["natural_id"])
+    @parameterized.expand(  # type: ignore
+        # num_rows, num_unique_natural_ids, group_size, expected_num_partitions,
+        # expected_num_unique_natural_ids
+        [
+            [10, 10, 2, [2, 2, 2, 2, 2]],
+            [100, 10, 2, [2, 2, 2, 2, 2]],
+            [12, 6, 3, [3, 3]],
+            # The cases in which the partitions should be smaller
+            [10, 7, 2, [3, 2, 2]],
+            [10, 3, 2, [3]],
+        ]
+    )
+    def test_allow_bigger_mode_num_partitions_and_partition_sizes(
+        self,
+        num_rows: int,
+        num_unique_natural_id: int,
+        group_size: int,
+        expected_num_unique_natural_ids: List[int],
+    ) -> None:
+        """Test allow-smaller mode handles the remainder correctly."""
+        dataset = _create_dataset(num_rows, num_unique_natural_id)
+        partitioner = GroupedNaturalIdPartitioner(
+            partition_by="natural_id", group_size=group_size, mode="allow-bigger"
+        )
+        partitioner.dataset = dataset
+        # Trigger partitioning
+        partitions = [
+            partitioner.load_partition(i) for i in range(partitioner.num_partitions)
+        ]
+        unique_natural_ids = [
+            len(partition.unique("natural_id")) for partition in partitions
+        ]
+        self.assertEqual(unique_natural_ids, expected_num_unique_natural_ids)
 
-        self.assertTrue(
-            (labels == true_labels[0]).all(),
-            f"labels: {labels}; true_labels: {true_labels[0]}",
+    @parameterized.expand(  # type: ignore
+        # num_rows, num_unique_natural_ids, group_size, expected_num_partitions,
+        # expected_num_unique_natural_ids
+        [
+            [10, 10, 2, [2, 2, 2, 2, 2]],
+            [100, 10, 2, [2, 2, 2, 2, 2]],
+            [12, 6, 3, [3, 3]],
+            # The cases in which the partitions should be smaller
+            [10, 7, 2, [2, 2, 2]],
+            [10, 3, 2, [2]],
+        ]
+    )
+    def test_drop_reminder_mode_num_partitions_and_partition_sizes(
+        self,
+        num_rows: int,
+        num_unique_natural_id: int,
+        group_size: int,
+        expected_num_unique_natural_ids: List[int],
+    ) -> None:
+        """Test drop reminder mode."""
+        dataset = _create_dataset(num_rows, num_unique_natural_id)
+        partitioner = GroupedNaturalIdPartitioner(
+            partition_by="natural_id", group_size=group_size, mode="drop-reminder"
+        )
+        partitioner.dataset = dataset
+        # Trigger partitioning
+        partitions = [
+            partitioner.load_partition(i) for i in range(partitioner.num_partitions)
+        ]
+        unique_natural_ids = [
+            len(partition.unique("natural_id")) for partition in partitions
+        ]
+        self.assertEqual(unique_natural_ids, expected_num_unique_natural_ids)
+
+    @parameterized.expand(  # type: ignore
+        # mode, num_rows, num_unique_natural_ids, group_size
+        [
+            ["strict", 10, 10, 2],
+            ["allow-smaller", 10, 7, 2],
+            ["allow-bigger", 10, 7, 2],
+            ["drop-reminder", 10, 7, 2],
+            ["strict", 12, 6, 3],
+            ["allow-smaller", 12, 6, 3],
+            ["allow-bigger", 12, 6, 3],
+            ["drop-reminder", 12, 6, 3],
+        ]
+    )
+    def test_no_overlapping_natural_ids(
+        self,
+        mode: Literal["allow-smaller", "allow-bigger", "drop-reminder", "strict"],
+        num_rows: int,
+        num_unique_natural_id: int,
+        group_size: int,
+    ) -> None:
+        """Test that no natural_ids overlap across partitions."""
+        dataset = _create_dataset(num_rows, num_unique_natural_id)
+        partitioner = GroupedNaturalIdPartitioner(
+            partition_by="natural_id", group_size=group_size, mode=mode
+        )
+        partitioner.dataset = dataset
+
+        # Trigger partitioning
+        partitions = [
+            partitioner.load_partition(i) for i in range(partitioner.num_partitions)
+        ]
+
+        # Check for overlaps between partitions
+        seen_natural_ids = set()
+        for partition in partitions:
+            natural_ids_in_partition = set(partition.unique("natural_id"))
+
+            # Check if there is any overlap with previously seen natural IDs
+            overlap = seen_natural_ids.intersection(natural_ids_in_partition)
+            self.assertTrue(
+                len(overlap) == 0,
+                f"Overlapping natural IDs found between partitions in mode: {mode}. "
+                f"Overlapping IDs: {overlap}",
+            )
+
+            # Add the natural IDs from this partition to the seen set
+            seen_natural_ids.update(natural_ids_in_partition)
+
+    def test_strict_mode_with_invalid_group_size(self) -> None:
+        """Test strict mode raises if group_size does not divide unique IDs evenly."""
+        dataset = _create_dataset(num_rows=10, n_unique_natural_ids=3)
+        partitioner = GroupedNaturalIdPartitioner(
+            partition_by="natural_id", group_size=2, mode="strict"
+        )
+        partitioner.dataset = dataset
+        with self.assertRaises(ValueError) as context:
+            _ = partitioner.load_partition(0)
+        self.assertIn(
+            "Strict mode requires that the number of unique natural ids is perfectly "
+            "divisible by the group size.",
+            str(context.exception),
         )
 
 
