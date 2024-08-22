@@ -26,9 +26,8 @@ class GroupedNaturalIdPartitioner(Partitioner):
     """Partition dataset by creating groups of natural ids.
 
     Conceptually, you can think of this partitioner as a way of creating an organization
-    of x users instead of having each user as a separate partition. By using this
-    `Partitioner` you can change the nature of the partitioning from cross-device to
-    cross-silo (cross organization).
+    of x users instead of each user represetning a separate partition. You can change
+    the nature of the problem from cross-device to cross-silo (cross organization).
 
     Parameters
     ----------
