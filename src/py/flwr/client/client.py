@@ -141,6 +141,10 @@ class Client(ABC):
             metrics={},
         )
 
+    def get_context(self) -> Context:
+        """Get the run context from this client."""
+        return self.context
+
     def set_context(self, context: Context) -> None:
         """Apply a run context to this client."""
         self.context = context
