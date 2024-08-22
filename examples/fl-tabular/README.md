@@ -1,9 +1,6 @@
----
-title: Flower Example on Adult Census Income Tabular Dataset
-tags: [basic, tabular, fds]
-dataset: [Adult Census Income]
-framework: [scikit-learn, torch]
----
+______________________________________________________________________
+
+## title: Flower Example on Adult Census Income Tabular Dataset tags: \[basic, tabular, fds\] dataset: \[Adult Census Income\] framework: \[scikit-learn, torch\]
 
 # Flower Example on Adult Census Income Tabular Dataset
 
@@ -29,8 +26,6 @@ fl-tabular
 ├── pyproject.toml      # Project metadata like dependencies and configs
 └── README.md
 
-
-
 ### Installing dependencies
 
 Project dependencies are defined in `pyproject.toml`.
@@ -42,6 +37,7 @@ pip install -e .
 ```
 
 ## Run the Example
+
 You can run your `ClientApp` and `ServerApp` in both _simulation_ and
 _deployment_ mode without making changes to the code. If you are starting
 with Flower, we recommend you using the _simulation_ model as it requires
@@ -54,7 +50,6 @@ flwr run .
 ```
 
 You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
-
 
 ```bash
 flwr run . --run-config num-server-rounds=10
