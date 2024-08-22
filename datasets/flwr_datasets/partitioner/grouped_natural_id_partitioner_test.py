@@ -3,7 +3,7 @@
 import unittest
 from typing import List, Literal
 
-from parameterized import parameterized
+from parameterized import parameterized, parameterized_class
 
 from datasets import Dataset
 from flwr_datasets.partitioner.grouped_natural_id_partitioner import (
@@ -22,6 +22,14 @@ def _create_dataset(num_rows: int, n_unique_natural_ids: int) -> Dataset:
     return dataset
 
 
+# mypy: disable-error-code="attr-defined"
+@parameterized_class(
+    ("sort_unique_ids",),
+    [
+        (False,),
+        (True,),
+    ],
+)
 class TestGroupedNaturalIdPartitioner(unittest.TestCase):
     """Test GroupedNaturalIdPartitioner."""
 
@@ -44,7 +52,10 @@ class TestGroupedNaturalIdPartitioner(unittest.TestCase):
         """Test strict mode with valid group size."""
         dataset = _create_dataset(num_rows, num_unique_natural_id)
         partitioner = GroupedNaturalIdPartitioner(
-            partition_by="natural_id", group_size=group_size, mode="strict"
+            partition_by="natural_id",
+            group_size=group_size,
+            mode="strict",
+            sort_unique_ids=self.sort_unique_ids,
         )
         partitioner.dataset = dataset
         # Trigger partitioning
@@ -73,7 +84,10 @@ class TestGroupedNaturalIdPartitioner(unittest.TestCase):
         """Test allow-smaller mode handles the remainder correctly."""
         dataset = _create_dataset(num_rows, num_unique_natural_id)
         partitioner = GroupedNaturalIdPartitioner(
-            partition_by="natural_id", group_size=group_size, mode="allow-smaller"
+            partition_by="natural_id",
+            group_size=group_size,
+            mode="allow-smaller",
+            sort_unique_ids=self.sort_unique_ids,
         )
         partitioner.dataset = dataset
         # Trigger partitioning
@@ -107,7 +121,10 @@ class TestGroupedNaturalIdPartitioner(unittest.TestCase):
         """Test allow-smaller mode handles the remainder correctly."""
         dataset = _create_dataset(num_rows, num_unique_natural_id)
         partitioner = GroupedNaturalIdPartitioner(
-            partition_by="natural_id", group_size=group_size, mode="allow-bigger"
+            partition_by="natural_id",
+            group_size=group_size,
+            mode="allow-bigger",
+            sort_unique_ids=self.sort_unique_ids,
         )
         partitioner.dataset = dataset
         # Trigger partitioning
@@ -141,7 +158,10 @@ class TestGroupedNaturalIdPartitioner(unittest.TestCase):
         """Test drop reminder mode."""
         dataset = _create_dataset(num_rows, num_unique_natural_id)
         partitioner = GroupedNaturalIdPartitioner(
-            partition_by="natural_id", group_size=group_size, mode="drop-reminder"
+            partition_by="natural_id",
+            group_size=group_size,
+            mode="drop-reminder",
+            sort_unique_ids=self.sort_unique_ids,
         )
         partitioner.dataset = dataset
         # Trigger partitioning
@@ -176,7 +196,10 @@ class TestGroupedNaturalIdPartitioner(unittest.TestCase):
         """Test that no natural_ids overlap across partitions."""
         dataset = _create_dataset(num_rows, num_unique_natural_id)
         partitioner = GroupedNaturalIdPartitioner(
-            partition_by="natural_id", group_size=group_size, mode=mode
+            partition_by="natural_id",
+            group_size=group_size,
+            mode=mode,
+            sort_unique_ids=self.sort_unique_ids,
         )
         partitioner.dataset = dataset
 
@@ -205,7 +228,10 @@ class TestGroupedNaturalIdPartitioner(unittest.TestCase):
         """Test strict mode raises if group_size does not divide unique IDs evenly."""
         dataset = _create_dataset(num_rows=10, n_unique_natural_ids=3)
         partitioner = GroupedNaturalIdPartitioner(
-            partition_by="natural_id", group_size=2, mode="strict"
+            partition_by="natural_id",
+            group_size=2,
+            mode="strict",
+            sort_unique_ids=self.sort_unique_ids,
         )
         partitioner.dataset = dataset
         with self.assertRaises(ValueError) as context:
