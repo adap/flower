@@ -1,3 +1,5 @@
+"""fltabular: Flower Example on Adult Census Income Tabular Dataset."""
+
 from collections import OrderedDict
 
 import torch

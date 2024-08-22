@@ -1,3 +1,5 @@
+"""fltabular: Flower Example on Adult Census Income Tabular Dataset."""
+
 from flwr.common import ndarrays_to_parameters
 from flwr.server import ServerApp, ServerConfig, ServerAppComponents
 from flwr.server.strategy import FedAvg

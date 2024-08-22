@@ -1,3 +1,5 @@
+"""fltabular: Flower Example on Adult Census Income Tabular Dataset."""
+
 from flwr.client import Client, ClientApp, NumPyClient
 from flwr_datasets import FederatedDataset
 from flwr.common import Context
