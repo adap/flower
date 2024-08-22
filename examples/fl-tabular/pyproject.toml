@@ -7,9 +7,6 @@ name = "fl-tabular"
 version = "0.1.0"
 description = "Adult Census Income Tabular Dataset and Federated Learning in Flower"
 license = "Apache-2.0"
-authors = [
-    { name = "The Flower Authors", email = "hello@flower.ai" },
-]
 dependencies = [
     "flwr[simulation]>=1.9.0,<2.0",
     "flwr-datasets>=0.1.0,<1.0.0",
