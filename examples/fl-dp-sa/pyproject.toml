@@ -4,14 +4,22 @@ build-backend = "hatchling.build"
 
 [project]
 name = "fl-dp-sa"
-version = "0.1.0"
+version = "1.0.0"
 description = "Central Differential Privacy and Secure Aggregation in Flower"
 license = "Apache-2.0"
+dependencies = [
+    "flwr[simulation]>=1.10.0",
+    "flwr-datasets[vision]>=0.3.0",
+    "torch==2.2.0",
+    "torchvision==0.17.0",
+]
 
-[tool.poetry.dependencies]
-python = "^3.9"
-# Mandatory dependencies
-flwr = { version = "^1.8.0", extras = ["simulation"] }
-flwr-datasets = { version = "0.0.2", extras = ["vision"] }
-torch = "2.2.1"
-torchvision = "0.17.1"
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "flwrlabs"
+
+[tool.flwr.app.components]
+serverapp = "fastai_example.server_app:app"
+clientapp = "fastai_example.client_app:app"
