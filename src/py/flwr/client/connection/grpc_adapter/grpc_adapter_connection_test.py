@@ -12,14 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Client-side part of the GrpcRere transport layer."""
+"""Tests for the GrpcAdapterConnection class."""
 
 
-from .fleet_api import FleetAPI
-from .grpc_rere_connection import GrpcRereConnection
+import inspect
+
+from flwr.proto.fleet_pb2_grpc import FleetServicer
+
+from .grpc_adapter_connection import GrpcAdapterFleetAPI
 
 
-__all__ = [
-    "FleetAPI",
-    "GrpcRereConnection",
-]
+def test_grpc_adapter_methods() -> None:
+    """Test if GrpcAdapter implements all required methods."""
+    # Prepare
+    methods = {
+        name
+        for name, ref in inspect.getmembers(GrpcAdapterFleetAPI)
+        if inspect.isfunction(ref)
+    }
+    expected_methods = {
+        name
+        for name, ref in inspect.getmembers(FleetServicer)
+        if inspect.isfunction(ref)
+    }
+
+    # Assert
+    assert expected_methods.issubset(methods)

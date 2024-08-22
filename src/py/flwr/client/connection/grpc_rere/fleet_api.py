@@ -12,27 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for the GrpcAdapter class."""
+"""Fleet API definition for the grpc-rere transport layer."""
 
 
-import inspect
-
-from flwr.proto.fleet_pb2_grpc import FleetServicer
-
-from .grpc_adapter import GrpcAdapter
+from typing import Any, Callable
 
 
-def test_grpc_adapter_methods() -> None:
-    """Test if GrpcAdapter implements all required methods."""
-    # Prepare
-    methods = {
-        name for name, ref in inspect.getmembers(GrpcAdapter) if inspect.isfunction(ref)
-    }
-    expected_methods = {
-        name
-        for name, ref in inspect.getmembers(FleetServicer)
-        if inspect.isfunction(ref)
-    }
+class FleetAPI:
+    """Fleet API that provides low-level access to Fleet API server."""
 
-    # Assert
-    assert expected_methods.issubset(methods)
+    Ping: Callable[..., Any]
+    CreateNode: Callable[..., Any]
+    DeleteNode: Callable[..., Any]
+    PullTaskIns: Callable[..., Any]
+    PushTaskRes: Callable[..., Any]
+    GetRun: Callable[..., Any]
+    GetFab: Callable[..., Any]

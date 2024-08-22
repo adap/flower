@@ -60,7 +60,7 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 
 
 @contextmanager
-def grpc_connection(  # pylint: disable=R0913,R0915,too-many-positional-arguments
+def grpc_connection(  # pylint: disable=R0913, R0915
     server_address: str,
     insecure: bool,
     retry_invoker: RetryInvoker,  # pylint: disable=unused-argument
