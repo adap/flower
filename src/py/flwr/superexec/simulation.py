@@ -181,23 +181,11 @@ class SimulationEngine(Executor):
             # Prepare backend config
             backend_cfg_dict: Dict[str, Any] = {}
             for k, v in backend_cfg.items():
-                if k in ["clientapp-cpus", "clientapp-gpus"]:
-                    # Map options in `pyproject.toml`, for example
-                    # > options.backend.clientapp-cpus = 4
-                    # > options.backend.clientapp-gpus = 0.0
-                    # Into the existing internal representation
-                    # {"client_resouces": {"num_cpus": 4, "num_gpus": 0.0}}
-                    if "client_resources" not in backend_cfg_dict:
-                        backend_cfg_dict["client_resources"] = {}
-                    if k == "clientapp-cpus":
-                        backend_cfg_dict["client_resources"]["num_cpus"] = v
-                    else:
-                        backend_cfg_dict["client_resources"]["num_gpus"] = v
-                else:
-                    backend_cfg_dict[k] = v
+                backend_cfg_dict[k] = v
 
-            # Stringify as JSON
-            command.extend(["--backend-config", json.dumps(backend_cfg_dict)])
+            if backend_cfg_dict:
+                # Stringify as JSON
+                command.extend(["--backend-config", json.dumps(backend_cfg_dict)])
 
             if override_config:
                 override_config_str = _user_config_to_str(override_config)
