@@ -17,7 +17,6 @@
 
 from .rest_connection import RestConnection
 
-
 __all__ = [
-    'RestConnection',
+    "RestConnection",
 ]

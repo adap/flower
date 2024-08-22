@@ -56,7 +56,6 @@ from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=
 from ..grpc_rere import FleetAPI, GrpcRereConnection
 
 
-
 def on_channel_state_change(channel_connectivity: str) -> None:
     """Log channel connectivity."""
     log(DEBUG, channel_connectivity)

@@ -63,8 +63,8 @@ from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 from .client_interceptor import AuthenticateClientInterceptor
-from .grpc_rere_connection import Connection
 from .fleet_api import FleetAPI
+from .grpc_rere_connection import Connection
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:

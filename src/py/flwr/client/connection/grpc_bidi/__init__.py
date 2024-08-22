@@ -17,7 +17,6 @@
 
 from .grpc_bidi_connection import GrpcBidiConnection
 
-
-__all__ =[
+__all__ = [
     "GrpcBidiConnection",
 ]

@@ -17,7 +17,6 @@
 
 from .grpc_adapter_connection import GrpcAdapterConnection
 
-
 __all__ = [
     "GrpcAdapterConnection",
 ]

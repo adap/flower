@@ -18,7 +18,6 @@
 from .fleet_api import FleetAPI
 from .grpc_rere_connection import GrpcRereConnection
 
-
 __all__ = [
     "FleetAPI",
     "GrpcRereConnection",
