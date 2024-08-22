@@ -1,11 +1,13 @@
 """$project_name: A Flower / XGBoost app."""
 
+import warnings
 from logging import INFO
 
 from flwr.common.context import Context
 
 import xgboost as xgb
 from flwr.client import Client, ClientApp
+from flwr.common.config import unflatten_dict
 from flwr.common import (
     log,
     Code,
@@ -21,6 +23,7 @@ from flwr.common import (
 
 from $import_name.task import load_data
 
+warnings.filterwarnings("ignore", category=UserWarning)
 
 # Define Flower Client and client_fn
 class FlowerClient(Client):
@@ -132,17 +135,8 @@ def client_fn(context: Context):
         partition_id, num_partitions
     )
 
-    num_local_round = context.run_config["local-epochs"]
-    params = {
-        "objective": "binary:logistic",
-        "eta": context.run_config["lr"],  # Learning rate
-        "max_depth": context.run_config["max-depth"],
-        "eval_metric": "auc",
-        "nthread": context.run_config["nthread"],
-        "num_parallel_tree": context.run_config["num-parallel-tree"],
-        "subsample": context.run_config["subsample"],
-        "tree_method": context.run_config["tree-method"],
-    }
+    cfg = unflatten_dict(context.run_config)
+    num_local_round = cfg["local-epochs"]
 
     # Return Client instance
     return FlowerClient(
@@ -151,8 +145,8 @@ def client_fn(context: Context):
         num_train,
         num_val,
         num_local_round,
-        params,
-    ).to_client()
+        cfg["params"],
+    )
 
 
 # Flower ClientApp

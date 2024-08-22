@@ -31,12 +31,14 @@ fraction-evaluate = 0.1
 
 # ClientApp
 local-epochs = 1
-lr = 0.1
-max-depth = 8
-nthread = 16
-num-parallel-tree = 1
-subsample = 1
-tree-method = "hist"
+params.objective = "binary:logistic"
+params.eta = 0.1  # Learning rate
+params.max_depth = 8
+params.eval_metric = "auc"
+params.nthread = 16
+params.num_parallel_tree = 1
+params.subsample = 1
+params.tree_method = "hist"
 
 [tool.flwr.federations]
 default = "local-simulation"
