@@ -1,11 +1,11 @@
 [build-system]
-requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
+[project]
 name = "fl-dp-sa"
 version = "0.1.0"
-description = ""
+description = "Central Differential Privacy and Secure Aggregation in Flower"
 license = "Apache-2.0"
 authors = [
     "The Flower Authors <hello@flower.ai>",
