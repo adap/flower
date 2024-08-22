@@ -43,16 +43,6 @@ class FlowerClient(Client):
         self.num_local_round = num_local_round
         self.params = params
 
-    def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
-        _ = (self, ins)
-        return GetParametersRes(
-            status=Status(
-                code=Code.OK,
-                message="OK",
-            ),
-            parameters=Parameters(tensor_type="", tensors=[]),
-        )
-
     def _local_boost(self, bst_input):
         # Update trees based on local training data.
         for i in range(self.num_local_round):
