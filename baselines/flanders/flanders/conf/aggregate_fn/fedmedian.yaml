@@ -1,0 +1,6 @@
+---
+name: fedmedian
+
+aggregate_fn:
+  function: flwr.server.strategy.aggregate.aggregate_median
+  parameters: {}

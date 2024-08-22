@@ -51,7 +51,7 @@ The following command can be used to verify if Flower was successfully installed
    :substitutions:
 
    python -c "import flwr;print(flwr.__version__)"
-   |current_flwr_version|
+   |stable_flwr_version|
 
 
 Advanced installation options
@@ -60,7 +60,7 @@ Advanced installation options
 Install via Docker
 ~~~~~~~~~~~~~~~~~~
 
-:doc:`How to run Flower using Docker <how-to-run-flower-using-docker>`
+:doc:`Run Flower using Docker <docker/index>`
 
 Install pre-release
 ~~~~~~~~~~~~~~~~~~~
