@@ -30,15 +30,15 @@ flower-superlink
    :func:  _parse_args_run_superlink
    :prog: flower-superlink
 
-.. _flower-driver-api-apiref:
+.. _flower-supernode-apiref:
 
-flower-client-app
+flower-supernode
 ~~~~~~~~~~~~~~~~~
 
 .. argparse::
-   :module: flwr.client.supernode.app
-   :func: _parse_args_run_client_app
-   :prog: flower-client-app
+   :module: flwr.client.app
+   :func: _parse_args_run_supernode
+   :prog: flower-supernode
 
 .. _flower-server-app-apiref:
 
