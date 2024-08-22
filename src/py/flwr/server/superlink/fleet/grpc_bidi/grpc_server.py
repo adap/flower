@@ -16,6 +16,7 @@
 
 
 import concurrent.futures
+import socket
 import sys
 from logging import ERROR
 from typing import Any, Callable, Optional, Sequence, Tuple, Union
@@ -23,6 +24,7 @@ from typing import Any, Callable, Optional, Sequence, Tuple, Union
 import grpc
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
+from flwr.common.address import parse_address
 from flwr.common.logger import log
 from flwr.proto.transport_pb2_grpc import (  # pylint: disable=E0611
     add_FlowerServiceServicer_to_server,
@@ -218,6 +220,9 @@ def generic_create_grpc_server(  # pylint: disable=too-many-arguments
     server : grpc.Server
         A non-running instance of a gRPC server.
     """
+    # Check if port is in use
+    _is_port_in_use(server_address)
+
     # Deconstruct tuple into servicer and function
     servicer, add_servicer_to_server_fn = servicer_and_add_fn
 
@@ -279,3 +284,27 @@ def generic_create_grpc_server(  # pylint: disable=too-many-arguments
         server.add_insecure_port(server_address)
 
     return server
+
+
+def _is_port_in_use(address: str) -> None:
+    parsed_address = parse_address(address)
+    if not parsed_address:
+        sys.exit(f"Address ({address}) cannot be parsed.")
+    host, port, is_v6 = parsed_address
+
+    if is_v6:
+        protocol = socket.AF_INET6
+    else:
+        protocol = socket.AF_INET
+
+    with socket.socket(protocol, socket.SOCK_STREAM) as s:
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        try:
+            if is_v6:
+                s.bind(
+                    (host, port, 0, 0)
+                )  # For IPv6, provide flowinfo and scopeid as 0
+            else:
+                s.bind((host, port))  # For IPv4
+        except OSError:
+            sys.exit(f"Port {port} is in use.")
