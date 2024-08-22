@@ -15,6 +15,7 @@
 """Flower command line interface `run` command."""
 
 import hashlib
+import json
 import subprocess
 import sys
 from logging import DEBUG
@@ -192,6 +193,7 @@ def _run_without_superexec(
 ) -> None:
     try:
         num_supernodes = federation_config["options"]["num-supernodes"]
+        backend_cfg = federation_config["options"].get("backend", {})
     except KeyError as err:
         typer.secho(
             "❌ The project's `pyproject.toml` needs to declare the number of"
@@ -211,6 +213,27 @@ def _run_without_superexec(
         "--num-supernodes",
         f"{num_supernodes}",
     ]
+
+    # Prepare backend config
+    backend_cfg_dict: Dict[str, Any] = {}
+    for k, v in backend_cfg.items():
+        if k in ["clientapp-cpus", "clientapp-gpus"]:
+            # Map options in `pyproject.toml`, for example
+            # > options.backend.clientapp-cpus = 4
+            # > options.backend.clientapp-gpus = 0.0
+            # Into the existing internal representation
+            # {"client_resouces": {"num_cpus": 4, "num_gpus": 0.0}}
+            if "client_resources" not in backend_cfg_dict:
+                backend_cfg_dict["client_resources"] = {}
+            if k == "clientapp-cpus":
+                backend_cfg_dict["client_resources"]["num_cpus"] = v
+            else:
+                backend_cfg_dict["client_resources"]["num_gpus"] = v
+        else:
+            backend_cfg_dict[k] = v
+
+    # Stringify as JSON
+    command.extend(["--backend-config", json.dumps(backend_cfg_dict)])
 
     if config_overrides:
         command.extend(["--run-config", f"{' '.join(config_overrides)}"])
