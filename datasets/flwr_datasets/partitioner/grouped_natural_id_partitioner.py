@@ -19,7 +19,7 @@ import numpy as np
 from common.typing import NDArrayInt
 
 import datasets
-from flwr_datasets.partitioner import Partitioner
+from flwr_datasets.partitioner.partitioner import Partitioner
 
 
 class GroupedNaturalIdPartitioner(Partitioner):
@@ -126,8 +126,8 @@ class GroupedNaturalIdPartitioner(Partitioner):
             groups_of_natural_ids = np.array_split(unique_natural_ids, num_groups)
         else:
             raise ValueError(
-                f"Given {self._mode} is not a valid mode. Refer to the documentation of "
-                "the mode parameter for the available modes."
+                f"Given {self._mode} is not a valid mode. Refer to the documentation of"
+                " the mode parameter for the available modes."
             )
 
         self._partition_id_to_natural_ids = {}
