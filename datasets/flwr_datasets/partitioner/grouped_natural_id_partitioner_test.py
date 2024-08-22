@@ -30,6 +30,7 @@ def _create_dataset(num_rows: int, n_unique_natural_ids: int) -> Dataset:
         (True,),
     ],
 )
+# pylint: disable=no-member
 class TestGroupedNaturalIdPartitioner(unittest.TestCase):
     """Test GroupedNaturalIdPartitioner."""
 
