@@ -2,12 +2,7 @@
 set -e
 
 case "$1" in
-  framework-pandas)
-    server_arg="--insecure"
-    client_arg="--insecure"
-    server_dir="./"
-    ;;
-  bare-https)
+  e2e-bare-https)
     ./generate.sh
     server_arg="--ssl-ca-certfile certificates/ca.crt --ssl-certfile certificates/server.pem --ssl-keyfile certificates/server.key"
     client_arg="--root-certificates certificates/ca.crt"
@@ -16,7 +11,7 @@ case "$1" in
   *)
     server_arg="--insecure"
     client_arg="--insecure"
-    server_dir="./.."
+    server_dir="./"
     ;;
 esac
 
