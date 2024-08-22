@@ -7,10 +7,6 @@ name = "fl-dp-sa"
 version = "0.1.0"
 description = "Central Differential Privacy and Secure Aggregation in Flower"
 license = "Apache-2.0"
-authors = [
-    "The Flower Authors <hello@flower.ai>",
-]
-readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
