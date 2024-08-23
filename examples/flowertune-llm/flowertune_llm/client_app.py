@@ -11,7 +11,7 @@ from flwr.common.config import unflatten_dict
 from flwr.common.typing import NDArrays, Scalar
 from omegaconf import DictConfig
 
-# import peft
+import peft
 from transformers import TrainingArguments
 from trl import SFTTrainer
 
