@@ -16,7 +16,7 @@
 
 
 import abc
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set
 from uuid import UUID
 
 from flwr.common.typing import Run, UserConfig

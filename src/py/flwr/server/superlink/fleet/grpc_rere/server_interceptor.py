@@ -139,12 +139,12 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                 new_timestamp = os.path.getmtime(self.client_keys_file_path)
             else:
                 log(
-                    WARNING, 
+                    WARNING,
                     "Client keys file (%s) not found, continuing with existing state",
                     self.client_keys_file_path,
                 )
                 new_timestamp = self.timestamp
-            
+
             if new_timestamp != self.timestamp:
                 self._update_client_keys()
                 self.timestamp = new_timestamp
