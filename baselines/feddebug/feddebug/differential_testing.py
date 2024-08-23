@@ -18,6 +18,7 @@ from feddebug.dataset import load_central_server_test_data
 from feddebug.models import global_model_eval, initialize_model
 from feddebug.neuron_activation import get_neurons_activations
 from feddebug.utils import seed_everything
+from tqdm import tqdm
 
 seed_everything(786)
 
@@ -62,16 +63,19 @@ class InferenceGuidedInputs:
         self.min_nclients_same_pred = min_nclients_same_pred
         self.same_seqs_set = set()
         self.k_gen_inputs = k_gen_inputs
-        self.size = 1024
         self.random_inputs = []
         self.input_shape = input_shape
         self.time_delta = time_delta
         self.random_generator_func = random_generator_func
         self.transform = transform_func
         self.faster_input_generation = faster_input_generation
+        self.seed = 0
 
     def _get_random_input(self):
+
         img = torch.empty(self.input_shape)
+        seed_everything(self.seed)
+        self.seed += 1
         self.random_generator_func(img)
 
         if self.transform is not None:
@@ -155,7 +159,7 @@ class FaultyClientLocalization:
         self.leave_1_out_combs =self._update_leave_1_out_combs(self.clients_ids)
 
     def _update_neuron_coverage_func(self, client2model):
-        for client_id, model in client2model.items():
+        for client_id, model in tqdm(client2model.items()):
             model = model.to(self.device)
             fuzz_input2_activations = [get_neurons_activations(model, img.to(self.device))for img in self.generated_inputs]
             self.c2input2acts[client_id] = fuzz_input2_activations
@@ -210,6 +214,7 @@ class FaultyClientLocalization:
             potential_faulty_clients_per_input =  self._get_faulty_client_per_input(fuzz_input_id, num_bugs, na_t)
             faulty_clients_on_gen_inputs.append(potential_faulty_clients_per_input)    
             self._update_leave_1_out_combs(self.clients_ids) # reset the leave 1 out combinations for next input  
+            # print(f">> Potential Malicious clients {potential_faulty_clients_per_input}")
                 
         assert len(faulty_clients_on_gen_inputs) == len(self.generated_inputs)
         return faulty_clients_on_gen_inputs
@@ -332,6 +337,7 @@ class FedDebug:
         selected_inputs, input_gen_time = generate_inputs.get_inputs()
         # print(selected_inputs)
 
+        log(INFO, f"Generated {len(selected_inputs)} inputs in {input_gen_time} seconds.")
         start = time.time()
         faultyclientlocalization = FaultyClientLocalization(self.client2model, selected_inputs, device=self.cfg.device)
 
@@ -341,6 +347,8 @@ class FedDebug:
             )
         )
         fault_localization_time = time.time() - start
+        log(INFO, f"Faulty Client Localization Time: {fault_localization_time} seconds.")
+        
         return (
             potential_faulty_clients_for_each_input,
             input_gen_time,
@@ -351,9 +359,9 @@ class FedDebug:
     #     correct_tracing = 0
     #     return {"accuracy": correct_tracing / len(self.subset_test_data)}
 
-    def run(self, k_gen_inputs=10) -> Dict[str, any]:  # type: ignore
+    def run(self):  
         """Run the debugging analysis."""
-        predicted_faulty_clients, input_gen_time, fault_localization_time = self._help_run(k_gen_inputs, self.na_threshold)
+        predicted_faulty_clients, input_gen_time, fault_localization_time = self._help_run(self.cfg.num_inputs, self.na_threshold)
 
         fault_localization_acc = self._get_fault_localization_accuracy(
             predicted_faulty_clients

@@ -1,8 +1,11 @@
-device: "cpu"
+device: "cuda"
 total_gpus: 1
 total_cpus: 10
 client_cpus: 1
 client_gpu: 0.2
+
+
+num_inputs: 3 
 
 check_cache: True # if set to True then if the config is already in the cache then it will not retrain.
 num_clients: 5
