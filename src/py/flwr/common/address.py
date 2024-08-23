@@ -69,7 +69,7 @@ def is_port_in_use(address: str) -> bool:
         The string representation of a domain, an IPv4, or an IPV6 address
         with the port number.
 
-        For example, '127.0.0.1:8080', or [::1]:8080.
+        For example, '127.0.0.1:8080', or `[::1]:8080`.
 
     Returns
     -------
