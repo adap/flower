@@ -3,6 +3,7 @@
 import os
 import warnings
 from typing import Dict, Tuple
+from collections import OrderedDict
 
 import torch
 from flwr.client import ClientApp, NumPyClient
@@ -11,7 +12,7 @@ from flwr.common.config import unflatten_dict
 from flwr.common.typing import NDArrays, Scalar
 from omegaconf import DictConfig
 
-import peft
+from peft import get_peft_model_state_dict, set_peft_model_state_dict
 from transformers import TrainingArguments
 from trl import SFTTrainer
 
@@ -22,8 +23,6 @@ from flowertune_llm.dataset import (
 from flowertune_llm.models import (
     cosine_annealing,
     get_model,
-    get_parameters,
-    set_parameters,
 )
 
 # Avoid warnings
@@ -94,6 +93,20 @@ class FlowerClient(NumPyClient):
             len(self.trainset),
             {"train_loss": results.training_loss},
         )
+
+
+def set_parameters(model, parameters: NDArrays) -> None:
+    """Change the parameters of the model using the given ones."""
+    peft_state_dict_keys = get_peft_model_state_dict(model).keys()
+    params_dict = zip(peft_state_dict_keys, parameters)
+    state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+    set_peft_model_state_dict(model, state_dict)
+
+
+def get_parameters(model) -> NDArrays:
+    """Return the parameters of the current net."""
+    state_dict = get_peft_model_state_dict(model)
+    return [val.cpu().numpy() for _, val in state_dict.items()]
 
 
 def client_fn(context: Context) -> FlowerClient:
