@@ -104,7 +104,6 @@ class FlowerClient(Client):
         auc = round(float(eval_results.split("\t")[1].split(":")[1]), 4)
 
         global_round = ins.config["global_round"]
-        log(INFO, f"AUC = {auc} at round {global_round}")
 
         return EvaluateRes(
             status=Status(
