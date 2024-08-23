@@ -173,7 +173,7 @@ def unflatten_dict(flat_dict: Dict[str, Any], replace: bool = True) -> Dict[str,
             if part not in d:
                 d[part] = {}
             d = d[part]
-        d[parts[-1]] = value
+        d[parts[-1].replace("-", "_") if replace else parts[-1]] = value
 
     return unflattened_dict
 
