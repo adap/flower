@@ -243,6 +243,28 @@ class TestGroupedNaturalIdPartitioner(unittest.TestCase):
             str(context.exception),
         )
 
+    def test_too_big_group_size(self) -> None:
+        """Test raises if the group size > than the number of unique natural ids."""
+        n_unique_natural_ids = 3
+        dataset = _create_dataset(
+            num_rows=10, n_unique_natural_ids=n_unique_natural_ids
+        )
+        partitioner = GroupedNaturalIdPartitioner(
+            partition_by="natural_id",
+            group_size=n_unique_natural_ids + 1,
+            mode="allow-bigger",
+            sort_unique_ids=self.sort_unique_ids,
+        )
+        partitioner.dataset = dataset
+        with self.assertRaises(ValueError) as context:
+            _ = partitioner.load_partition(0)
+        self.assertIn(
+            "The group size needs to be smaller than the number of the unique "
+            "natural ids unless you are using allow-smaller mode which will "
+            "result in a single partition.",
+            str(context.exception),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

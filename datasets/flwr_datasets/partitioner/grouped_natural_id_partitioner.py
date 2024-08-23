@@ -87,6 +87,12 @@ class GroupedNaturalIdPartitioner(Partitioner):
         Natural ids come from the column specified in `partition_by`.
         """
         unique_natural_ids = self.dataset.unique(self._partition_by)
+        if self._mode != "allow-smaller" and self._group_size > len(unique_natural_ids):
+            raise ValueError(
+                "The group size needs to be smaller than the number of the unique "
+                "natural ids unless you are using allow-smaller mode which will "
+                "result in a single partition."
+            )
         if self._sort_unique_ids:
             unique_natural_ids = sorted(unique_natural_ids)
         num_unique_natural_ids = len(unique_natural_ids)
