@@ -1,4 +1,23 @@
-# This python file is adapted from https://github.com/bigcode-project/bigcode-evaluation-harness/blob/main/main.py
+"""
+This python file is adapted from https://github.com/bigcode-project/bigcode-evaluation-harness/blob/main/main.py
+
+Bigcode evaluation harness (https://github.com/bigcode-project/bigcode-evaluation-harness/tree/main)
+is licensed under the Apache License, Version 2.0.
+
+Citation:
+@misc{bigcode-evaluation-harness,
+  author       = {Ben Allal, Loubna and
+                  Muennighoff, Niklas and
+                  Kumar Umapathi, Logesh and
+                  Lipkin, Ben and
+                  von Werra, Leandro},
+  title = {A framework for the evaluation of code generation models},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/bigcode-project/bigcode-evaluation-harness}},
+  year = 2022,
+}
+"""
 
 import fnmatch
 import json
