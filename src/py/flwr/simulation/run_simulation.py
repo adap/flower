@@ -35,6 +35,7 @@ from flwr.common.constant import RUN_ID_NUM_BYTES
 from flwr.common.logger import (
     set_logger_propagation,
     update_console_handler,
+    warn_deprecated_feature,
     warn_deprecated_feature_with_example,
 )
 from flwr.common.typing import Run, UserConfig
@@ -107,6 +108,19 @@ def _replace_keys(d: Any, match: str, target: str) -> Any:
 def run_simulation_from_cli() -> None:
     """Run Simulation Engine from the CLI."""
     args = _parse_args_run_simulation().parse_args()
+
+    # Add warnings for deprecated server_app and client_app arguments
+    if args.server_app:
+        warn_deprecated_feature(
+            "The `--server-app` argument is deprecated. "
+            "Please use the `--app` argument instead."
+        )
+
+    if args.client_app:
+        warn_deprecated_feature(
+            "The `--client-app` argument is deprecated. "
+            "Use the `--app` argument instead."
+        )
 
     if args.enable_tf_gpu_growth:
         warn_deprecated_feature_with_example(
@@ -528,25 +542,27 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         description="Start a Flower simulation",
     )
     parser.add_argument(
+        "--app",
+        type=str,
+        default=None,
+        help="Path to a directory containing a FAB-like structure with a "
+        "pyproject.toml.",
+    )
+    parser.add_argument(
         "--server-app",
-        help="For example: `server:app` or `project.package.module:wrapper.app`",
+        help="(DEPRECATED: use --app instead) For example: `server:app` or "
+        "`project.package.module:wrapper.app`",
     )
     parser.add_argument(
         "--client-app",
-        help="For example: `client:app` or `project.package.module:wrapper.app`",
+        help="(DEPRECATED: use --app instead) For example: `client:app` or "
+        "`project.package.module:wrapper.app`",
     )
     parser.add_argument(
         "--num-supernodes",
         type=int,
         required=True,
         help="Number of simulated SuperNodes.",
-    )
-    parser.add_argument(
-        "--app",
-        type=str,
-        default=None,
-        help="Path to a directory containing a FAB-like structure with a "
-        "pyproject.toml.",
     )
     parser.add_argument(
         "--run-config",
