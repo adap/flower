@@ -16,7 +16,7 @@ def weighted_average(metrics):
 
 
 def server_fn(context: Context) -> ServerAppComponents:
-    net = IncomeClassifier(input_dim=14)
+    net = IncomeClassifier()
     params = ndarrays_to_parameters(get_weights(net))
 
     strategy = FedAvg(

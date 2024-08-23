@@ -1,7 +1,6 @@
 """fltabular: Flower Example on Adult Census Income Tabular Dataset."""
 
-from flwr.client import Client, ClientApp, NumPyClient
-from flwr_datasets import FederatedDataset
+from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
 
 from fltabular.task import (
@@ -37,7 +36,7 @@ def client_fn(context: Context):
     train_loader, test_loader = load_data(
         partition_id=partition_id, num_partitions=context.node_config["num-partitions"]
     )
-    net = IncomeClassifier(14)
+    net = IncomeClassifier()
     return FlowerClient(net, train_loader, test_loader).to_client()
 
 

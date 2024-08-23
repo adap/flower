@@ -20,9 +20,10 @@ def load_data(partition_id: int, num_partitions: int):
 
     global fds
     if fds is None:
+        partitioner = IidPartitioner(num_partitions=num_partitions)
         fds = FederatedDataset(
             dataset="scikit-learn/adult-census-income",
-            partitioners={"train": num_partitions},
+            partitioners={"train": partitioner},
         )
 
     dataset = fds.load_partition(partition_id, "train").with_format("pandas")[:]
@@ -64,7 +65,7 @@ def load_data(partition_id: int, num_partitions: int):
 
 
 class IncomeClassifier(nn.Module):
-    def __init__(self, input_dim: int):
+    def __init__(self, input_dim: int = 14):
         super(IncomeClassifier, self).__init__()
         self.layer1 = nn.Linear(input_dim, 128)
         self.layer2 = nn.Linear(128, 64)
