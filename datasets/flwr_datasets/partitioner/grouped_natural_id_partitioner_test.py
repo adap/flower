@@ -119,7 +119,7 @@ class TestGroupedNaturalIdPartitioner(unittest.TestCase):
         group_size: int,
         expected_num_unique_natural_ids: List[int],
     ) -> None:
-        """Test allow-smaller mode handles the remainder correctly."""
+        """Test allow-bigger mode handles the remainder correctly."""
         dataset = _create_dataset(num_rows, num_unique_natural_id)
         partitioner = GroupedNaturalIdPartitioner(
             partition_by="natural_id",
