@@ -162,6 +162,7 @@ class SimulationEngine(Executor):
                 "num-supernodes", self.num_supernodes
             )
             backend_cfg = federation_config_flat.get("backend", {})
+            verbose: Optional[bool] = federation_config["options"].get("verbose")
 
             # In Simulation there is no SuperLink, still we create a run_id
             run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
@@ -181,6 +182,9 @@ class SimulationEngine(Executor):
             if backend_cfg:
                 # Stringify as JSON
                 command.extend(["--backend-config", json.dumps(backend_cfg)])
+
+            if verbose:
+                command.extend(["--verbose"])
 
             if override_config:
                 override_config_str = _user_config_to_str(override_config)

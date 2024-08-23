@@ -122,6 +122,7 @@ def run_simulation_from_cli() -> None:
     if backend_config_dict:
         # Backend config internally operates with `_` not with `-`
         backend_config_dict = _replace_keys(backend_config_dict, match="-", target="_")
+        log(DEBUG, "backend_config_dict: %s", backend_config_dict)
 
     # We are supporting two modes for the CLI entrypoint:
     # 1) Running an app dir containing a `pyproject.toml`
