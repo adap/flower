@@ -153,8 +153,8 @@ class State(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get_node_id(self, client_public_key: bytes) -> Optional[int]:
-        """Retrieve stored `node_id` filtered by `client_public_keys`."""
+    def get_node_id(self, node_public_key: bytes) -> Optional[int]:
+        """Retrieve stored `node_id` filtered by `node_public_keys`."""
 
     @abc.abstractmethod
     def create_run(
@@ -199,16 +199,16 @@ class State(abc.ABC):  # pylint: disable=R0904
         """Retrieve `server_public_key` in urlsafe bytes."""
 
     @abc.abstractmethod
-    def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
-        """Store a set of `client_public_keys` in state."""
+    def store_node_public_keys(self, public_keys: Set[bytes]) -> None:
+        """Store a set of `node_public_keys` in state."""
 
     @abc.abstractmethod
-    def store_client_public_key(self, public_key: bytes) -> None:
-        """Store a `client_public_key` in state."""
+    def store_node_public_key(self, public_key: bytes) -> None:
+        """Store a `node_public_key` in state."""
 
     @abc.abstractmethod
-    def get_client_public_keys(self) -> Set[bytes]:
-        """Retrieve all currently stored `client_public_keys` as a set."""
+    def get_node_public_keys(self) -> Set[bytes]:
+        """Retrieve all currently stored `node_public_keys` as a set."""
 
     @abc.abstractmethod
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
