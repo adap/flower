@@ -12,6 +12,7 @@ from omegaconf import DictConfig
 from flowertune_llm.models import get_model
 from flowertune_llm.client_app import get_parameters, set_parameters
 
+
 # Get function that will be executed by the strategy's evaluate() method
 # Here we use it to save global model checkpoints
 def get_evaluate_fn(model_cfg, save_every_round, total_round, save_path):
