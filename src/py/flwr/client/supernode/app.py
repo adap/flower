@@ -16,7 +16,7 @@
 
 import argparse
 import sys
-from logging import DEBUG, INFO, WARN
+from logging import DEBUG, ERROR, INFO, WARN
 from pathlib import Path
 from typing import Optional, Tuple
 
@@ -90,33 +90,12 @@ def run_supernode() -> None:
 
 def run_client_app() -> None:
     """Run Flower client app."""
-    log(INFO, "Long-running Flower client starting")
-
     event(EventType.RUN_CLIENT_APP_ENTER)
-
-    args = _parse_args_run_client_app().parse_args()
-
-    _warn_deprecated_server_arg(args)
-
-    root_certificates = _get_certificates(args)
-    load_fn = get_load_client_app_fn(
-        default_app_ref=getattr(args, "client-app"),
-        app_path=args.dir,
-        multi_app=False,
+    log(
+        ERROR,
+        "The command `flower-client-app` has been replaced by `flower-supernode`.",
     )
-    authentication_keys = _try_setup_client_authentication(args)
-
-    start_client_internal(
-        server_address=args.superlink,
-        node_config=parse_config_args([args.node_config]),
-        load_client_app_fn=load_fn,
-        transport=args.transport,
-        root_certificates=root_certificates,
-        insecure=args.insecure,
-        authentication_keys=authentication_keys,
-        max_retries=args.max_retries,
-        max_wait_time=args.max_wait_time,
-    )
+    log(INFO, "Execute `flower-supernode --help` to learn how to use it.")
     register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
 
 
@@ -222,28 +201,6 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         "--supernode-address",
         default="0.0.0.0:9094",
         help="Set the SuperNode gRPC server address. Defaults to `0.0.0.0:9094`.",
-    )
-
-    return parser
-
-
-def _parse_args_run_client_app() -> argparse.ArgumentParser:
-    """Parse flower-client-app command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Start a Flower client app",
-    )
-
-    parser.add_argument(
-        "client-app",
-        help="For example: `client:app` or `project.package.module:wrapper.app`",
-    )
-    _parse_args_common(parser=parser)
-    parser.add_argument(
-        "--dir",
-        default="",
-        help="Add specified directory to the PYTHONPATH and load Flower "
-        "app from there."
-        " Default: current working directory.",
     )
 
     return parser
