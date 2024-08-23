@@ -209,9 +209,8 @@ def run_simulation(
         messages sent by the `ServerApp`.
 
     num_supernodes : int
-        Number of nodes that run a ClientApp. They can be sampled by a
-        Driver in the ServerApp and receive a Message describing what the ClientApp
-        should perform.
+        Number of nodes that run a ClientApp. They can be sampled by a Driver in the
+        ServerApp and receive a Message describing what the ClientApp should perform.
 
     backend_name : str (default: ray)
         A simulation backend that runs `ClientApp`s.
@@ -239,7 +238,7 @@ def run_simulation(
     if enable_tf_gpu_growth:
         warn_deprecated_feature_with_example(
             "Passing `enable_tf_gpu_growth=True` is deprecated.",
-            example_message="Instead, set the `TF_FORCE_GPU_ALLOW_GROWTH` environmnet "
+            example_message="Instead, set the `TF_FORCE_GPU_ALLOW_GROWTH` environment "
             "variable to true.",
             code_example='import os;os.environ["TF_FORCE_GPU_ALLOW_GROWTH"]="true"'
             "\n\tflwr.simulation.run_simulationt(...)",
