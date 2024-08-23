@@ -16,7 +16,6 @@
 
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import flwr as fl
 import numpy as np
 from flwr.common import (
     EvaluateIns,
