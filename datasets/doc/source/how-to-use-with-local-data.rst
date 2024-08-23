@@ -37,14 +37,6 @@ CSV
   data_files = [ "path-to-my-file-1.csv", "path-to-my-file-2.csv", ...]
   dataset = load_dataset("csv", data_files=data_files)
 
-  # Divided Dataset
-  data_files = {
-    "train": single_train_file_or_list_of_files,
-    "test": single_test_file_or_list_of_files,
-    "can-have-more-splits": ...
-  }
-  dataset = load_dataset("csv", data_files=data_files)
-
   partitioner = ChosenPartitioner(...)
   partitioner.dataset = dataset
   partition = partitioner.load_partition(partition_id=0)
@@ -60,16 +52,8 @@ JSON
   # Single file
   data_files = "path-to-my-file.json"
 
-  # Multitple Files
+  # Multiple Files
   data_files = [ "path-to-my-file-1.json", "path-to-my-file-2.json", ...]
-  dataset = load_dataset("json", data_files=data_files)
-
-  # Divided Dataset
-  data_files = {
-    "train": single_train_file_or_list_of_files,
-     "test": single_test_file_or_list_of_files,
-     "can-have-more-splits": ...
-  }
   dataset = load_dataset("json", data_files=data_files)
 
   partitioner = ChosenPartitioner(...)
@@ -103,7 +87,12 @@ Then, the path you can give is `./mnist`.
   from flwr_datasets.partitioner import ChosenPartitioner
 
   # Directly from a directory
-  dataset = load_dataset("imagefolder", data_dir="/path/to/folder")
+  dataset_dict = load_dataset("imagefolder", data_dir="/path/to/folder")
+  # Note that what we just loaded is a DatasetDict, we need to choose a single split
+  # and assign it to the partitioner.dataset
+  # e.g. "train" split but that depends on the structure of your directory
+  dataset = dataset_dict["train"]
+
   partitioner = ChosenPartitioner(...)
   partitioner.dataset = dataset
   partition = partitioner.load_partition(partition_id=0)
@@ -134,7 +123,11 @@ Analogously to the image datasets, there are two methods here:
   from datasets import load_dataset
   from flwr_datasets.partitioner import ChosenPartitioner
 
-  dataset = load_dataset("audiofolder", data_dir="/path/to/folder")
+  dataset_dict = load_dataset("audiofolder", data_dir="/path/to/folder")
+  # Note that what we just loaded is a DatasetDict, we need to choose a single split
+  # and assign it to the partitioner.dataset
+  # e.g. "train" split but that depends on the structure of your directory
+  dataset = dataset_dict["train"]
 
   partitioner = ChosenPartitioner(...)
   partitioner.dataset = dataset
@@ -230,7 +223,7 @@ Partitioner abstraction is designed to allow for a single dataset assignment.
 
 .. code-block:: python
 
-  partitioner.dataset = your_dataset
+  partitioner.dataset = your_dataset # (your_dataset must be of type dataset.Dataset)
 
 If you need to do the same partitioning on a different dataset, create a new Partitioner
 for that, e.g.:

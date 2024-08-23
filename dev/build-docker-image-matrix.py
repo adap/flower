@@ -158,8 +158,12 @@ if __name__ == "__main__":
         + generate_binary_images(
             "supernode",
             base_images,
-            tag_latest_ubuntu_with_flwr_version,
-            lambda image: image.distro.name == DistroName.UBUNTU,
+            tag_latest_alpine_with_flwr_version,
+            lambda image: image.distro.name == DistroName.UBUNTU
+            or (
+                image.distro.name == DistroName.ALPINE
+                and image.python_version == LATEST_SUPPORTED_PYTHON_VERSION
+            ),
         )
         # ubuntu images for each supported python version
         + generate_binary_images(
@@ -171,6 +175,13 @@ if __name__ == "__main__":
         # ubuntu images for each supported python version
         + generate_binary_images(
             "superexec",
+            base_images,
+            tag_latest_ubuntu_with_flwr_version,
+            lambda image: image.distro.name == DistroName.UBUNTU,
+        )
+        # ubuntu images for each supported python version
+        + generate_binary_images(
+            "clientapp",
             base_images,
             tag_latest_ubuntu_with_flwr_version,
             lambda image: image.distro.name == DistroName.UBUNTU,
