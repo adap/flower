@@ -162,7 +162,7 @@ class SimulationEngine(Executor):
                 "num-supernodes", self.num_supernodes
             )
             backend_cfg = federation_config_flat.get("backend", {})
-            verbose: Optional[bool] = federation_config_flat["options"].get("verbose")
+            verbose: Optional[bool] = federation_config_flat.get("verbose")
 
             # In Simulation there is no SuperLink, still we create a run_id
             run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
