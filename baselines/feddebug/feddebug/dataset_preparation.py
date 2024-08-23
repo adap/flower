@@ -12,36 +12,27 @@ import random
 import shutil
 import tarfile
 import urllib
-from collections import Counter
+
 from logging import DEBUG, INFO
+from flwr.common.logger import log
 
 import torch
 import torchvision
-from flwr.common.logger import log
-from flwr_datasets import FederatedDataset
-from flwr_datasets.partitioner import DirichletPartitioner, IidPartitioner
+
+
 from PIL import Image
 from torch.utils.model_zoo import tqdm
 from torchvision.datasets import MNIST
 from torchvision.datasets.utils import check_integrity
-from torchvision.transforms import (
-    Compose,
-    Normalize,
-    RandomHorizontalFlip,
-    Resize,
-    ToTensor,
-)
 
 
 def _gen_bar_updater():
     pbar = tqdm(total=None)
-
     def bar_update(count, block_size, total_size):
         if pbar.total is None and total_size:
             pbar.total = total_size
         progress_bytes = count * block_size
         pbar.update(progress_bytes - pbar.n)
-
     return bar_update
 
 
@@ -368,158 +359,6 @@ class SubsetToDataset(torch.utils.data.Dataset):
     def __len__(self):
         """Return the length of the dataset."""
         return len(self.subset)
-
-
-def get_transforms(dname):
-    """Return the transforms for the dataset."""
-    transform_dict = {"train": None, "test": None}
-    if dname == "cifar10":
-        transform_dict["train"] = Compose(
-            [
-                ToTensor(),
-                Resize((32, 32)),
-                RandomHorizontalFlip(),
-                Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-            ]
-        )
-        transform_dict["test"] = Compose(  # type: ignore
-            [
-                ToTensor(),
-                Resize((32, 32)),
-                Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-            ]
-        )
-    elif dname == "mnist":
-        transform_dict["train"] = Compose(
-            [ToTensor(), Resize((32, 32)), Normalize((0.1307,), (0.3081,))]
-        )
-
-        transform_dict["test"] = Compose(
-            [ToTensor(), Resize((32, 32)), Normalize((0.1307,), (0.3081,))]
-        )
-    return transform_dict
-
-
-def train_test_transforms_factory(cfg):
-    """Create the train and test transforms for the dataset."""
-    tfms = get_transforms(cfg.dname)
-    train_transform = tfms["train"]
-    test_transform = tfms["test"]
-
-    def apply_train_transform(example):
-        # example["pixel_values"] = train_transform(example["img"])
-        example["pixel_values"] = [train_transform(image) for image in example["img"]]
-        del example["img"]
-        return example
-
-    def apply_test_transform(example):  # -> Any:
-        example["pixel_values"] = [test_transform(image) for image in example["img"]]
-        del example["img"]
-        return example
-
-    return {"train": apply_train_transform, "test": apply_test_transform}
-
-
-def get_labels_count(partition, target_label_col):
-    """Return the count of labels in the partition."""
-    label2count = Counter(
-        example[target_label_col] for example in partition  # type: ignore
-    )  # type: ignore
-
-    return dict(label2count)
-
-
-def fix_partition(cfg, c_partition, target_label_col):
-    """Fix the partition to have a minimum of 10 examples per class."""
-    label2count = get_labels_count(c_partition, target_label_col)
-
-    filtered_labels = {
-        label: count for label, count in label2count.items() if count >= 10
-    }
-
-    indices_to_select = [
-        i
-        for i, example in enumerate(c_partition)
-        if example[target_label_col] in filtered_labels
-    ]  # type: ignore
-
-    temp_ds = c_partition.select(indices_to_select)
-
-    if len(temp_ds) % cfg.batch_size == 1:
-        temp_ds = temp_ds.select(range(len(temp_ds) - 1))
-
-    partition_labels_count = get_labels_count(temp_ds, target_label_col)
-    return {"partition": temp_ds, "partition_labels_count": partition_labels_count}
-
-
-def _get_partitioner(cfg, target_label_col):
-    log(INFO, f"Data distribution type: {cfg.dist_type}")
-    if cfg.dist_type == "iid":
-        partitioner = IidPartitioner(num_partitions=cfg.num_clients)
-        return partitioner
-    elif cfg.dist_type == "non_iid_dirichlet":
-        partitioner = DirichletPartitioner(
-            num_partitions=cfg.num_clients,
-            partition_by=target_label_col,
-            alpha=cfg.dirichlet_alpha,
-            min_partition_size=0,
-            self_balancing=True,
-            shuffle=True,
-        )
-        return partitioner
-    else:
-        return None
-
-
-def clients_data_distribution(
-    cfg, target_label_col, fetch_only_test_data, subtask=None
-):
-    """Return the data distribution for the clients."""
-    partitioner = _get_partitioner(cfg, target_label_col)
-    # log(INFO,f"Dataset name: {cfg.dname}")
-    clients_class = []
-    clients_data = []
-
-    fds = None
-
-    if subtask is not None:
-        fds = FederatedDataset(
-            dataset=cfg.dname, partitioners={"train": partitioner}, subset=subtask
-        )
-    else:
-        fds = FederatedDataset(dataset=cfg.dname, partitioners={"train": partitioner})
-
-    server_data = fds.load_split("test").select(range(cfg.max_server_data_size))
-
-    log(INFO, f"Server data keys {server_data[0].keys()}")
-
-    if not fetch_only_test_data:
-        for partition_index in range(cfg.num_clients):
-            partition = fds.load_partition(partition_index)
-
-            temp_d = fix_partition(cfg, partition, target_label_col)
-
-            if len(temp_d["partition"]) >= cfg.batch_size:
-                clients_data.append(temp_d["partition"])
-                clients_class.append(temp_d["partition_labels_count"])
-
-    # per client data size
-    per_client_data_size = [len(dl) for dl in clients_data]
-    log(
-        DEBUG,
-        f"Data per clients {per_client_data_size}, "
-        f"server data size: {len(server_data)}, "
-        f"fetch_only_test_data: {fetch_only_test_data}",
-    )
-
-    client2data = {f"{id}": v for id, v in enumerate(clients_data)}
-    client2class = {f"{id}": v for id, v in enumerate(clients_class)}
-
-    return {
-        "client2data": client2data,
-        "server_data": server_data,
-        "client2class": client2class,
-    }
 
 
 def prepare_iid_dataset(dname, dataset_dir, num_clients):

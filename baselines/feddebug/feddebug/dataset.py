@@ -15,12 +15,7 @@ from logging import INFO, WARNING
 import torch
 from flwr.common.logger import log
 
-from feddebug.dataset_preparation import (
-    clients_data_distribution,
-    prepare_iid_dataset,
-    prepare_niid_dataset,
-    train_test_transforms_factory,
-)
+from feddebug.dataset_preparation import (prepare_iid_dataset, prepare_niid_dataset)
 
 
 class NoisyDataset(torch.utils.data.Dataset):
@@ -70,41 +65,6 @@ def _add_noise_in_data(client_data, noise_rate, num_classes):
     return NoisyDataset(client_data, num_classes=num_classes, noise_rate=noise_rate)
 
 
-def _initialize_image_dataset(cfg, fetch_only_test_data):
-    """Initialize and return the image dataset."""
-    target_label_col = "label"
-    dataset_dict = clients_data_distribution(
-        cfg, target_label_col, fetch_only_test_data
-    )
-    transforms = train_test_transforms_factory(cfg=cfg)
-    dataset_dict["client2data"] = {
-        k: v.map(
-            transforms["train"], batched=True, batch_size=256, num_proc=8
-        ).with_format("torch")
-        for k, v in dataset_dict["client2data"].items()
-    }
-    dataset_dict["server_data"] = (
-        dataset_dict["server_data"]
-        .map(transforms["test"], batched=True, batch_size=256, num_proc=8)
-        .with_format("torch")
-    )
-    return dataset_dict
-
-
-def _load_datasets(cfg, fetch_only_test_data=False):
-    """Load the dataset and return the dataload."""
-    if cfg.dname in ["cifar10", "mnist", "flwrlabs/femnist"]:
-        return _initialize_image_dataset(cfg, fetch_only_test_data)
-    else:
-        raise NotImplementedError(f"Dataset {cfg.dname} not implemented.")
-
-
-def load_central_server_test_data(cfg):
-    """Load the central server test data."""
-    d_obj = ClientsAndServerDatasetsPrep(cfg).get_clients_server_data()
-    return d_obj["server_testdata"]
-
-
 class ClientsAndServerDatasetsPrep:
     """Prepare the clients and server datasets."""
 
@@ -129,40 +89,17 @@ class ClientsAndServerDatasetsPrep:
             self.client2class[cid] = "noisy"
         log(INFO, f"            ******** All Malacious/Faulty Clients are: {self.cfg.faulty_clients_ids} ********")
 
-    def _setup_hugging(self):
-        dataset_dict = _load_datasets(self.cfg.data_dist)
-        self.client2data = dataset_dict["client2data"]
 
-        self.server_testdata = dataset_dict["server_data"]
-        self.client2class = dataset_dict["client2class"]
-        print(f"client2class: {self.client2class}")
-
-        log(INFO, f"> client2class {self.client2class}")
-        if len(self.client2data) < self.cfg.data_dist.num_clients:
-            log(
-                WARNING,
-                f"orignal number of clients {self.cfg.data_dist.num_clients} "
-                f"reduced to {len(self.client2data)}",
-            )
-            self.cfg.data_dist.num_clients = len(self.client2data)
-
-        data_per_client = [len(dl) for dl in self.client2data.values()]
-        log(INFO, f"Data per client in experiment {data_per_client}")
-        min_data = min(len(dl) for dl in self.client2data.values())
-        log(INFO, f"Min data on a client: {min_data}")
-
-    def _setup_original_fed_debug(self):
+    def _setup_dataset(self):
         self.client2class = {}
         self.server_testdata = None
         self.client2data = None
-
         if self.cfg.data_dist.dist_type == "iid":
             self.client2data, self.server_testdata, _ = prepare_iid_dataset(
                 dname=self.cfg.dataset.name,
                 dataset_dir=self.cfg.storage.dir,
                 num_clients=self.cfg.num_clients,
             )
-
         elif self.cfg.data_dist.dist_type == "niid":
             self.client2data, self.server_testdata, _ = prepare_niid_dataset(
                 dname=self.cfg.dataset.name,
@@ -171,8 +108,7 @@ class ClientsAndServerDatasetsPrep:
             )
 
     def _setup(self):
-        self._setup_original_fed_debug()
-        # self._setup_hugging()
+        self._setup_dataset()
 
     def get_clients_server_data(self):
         """Return the clients and server data for simulation."""

@@ -68,7 +68,6 @@ class InferenceGuidedInputs:
         self.seed = 0
 
     def _get_random_input(self):
-
         seed_everything(self.seed)
         self.seed += 1
         # img =  self.random_generator_func(img)
@@ -86,7 +85,7 @@ class InferenceGuidedInputs:
     def get_inputs(self):
         """Return generated random inputs."""
         if self.faster_input_generation:
-            log(INFO, "Faster input generation generation")
+            log(DEBUG, "Faster input generation generation")
             return self._simple_random_inputs()
         else:
             if len(self.clients2models) <= 10:
@@ -240,6 +239,8 @@ def _get_transforms_for_diff_testing(dname):
         transform_dict["test"] = Compose(
             [Resize((32, 32)), Normalize((0.1307,), (0.3081,))]
         )
+    else: 
+        raise ValueError(f"Dataset {dname} is not supported. Add the transforms for this dataset.")
 
     return transform_dict
 
@@ -265,6 +266,8 @@ class FedDebug:
         exp_dict = self.training_cache[self.cfg.exp_key]
         self.train_cfg = exp_dict["train_cfg"]  # type: ignore
         self.num_bugs = len(self.train_cfg.faulty_clients_ids)  # type: ignore
+        log(INFO, f"True Malacious/Faulty Clients (i.e., Ground Truth) IDs are: {self.train_cfg.faulty_clients_ids}")
+        log(INFO, f'Now localizing above mentioned faulty clients using differential testing approach.')
         self.input_shape = tuple(exp_dict["input_shape"])  # type: ignore
         self.transform_func = _get_transforms_for_diff_testing(
             dname=self.train_cfg.dataset.name
@@ -272,7 +275,7 @@ class FedDebug:
 
     def _initialize_and_load_models(self) -> None:
         log(
-            INFO,
+            DEBUG,
             f"\n\n             ----------Round key {self.round_key} -------------- \n",
         )
         round2ws = self.training_cache[self.round_key]
@@ -305,7 +308,7 @@ class FedDebug:
         return fault_localization_acc
 
     def _help_run(self, k_gen_inputs, na_threshold):
-        print(">  Running FaultyClientLocalization ..")
+        # log(INFO, " Running FaultyClientLocalization ..")
         generate_inputs = InferenceGuidedInputs(
             self.client2model,
             self.input_shape,
@@ -392,7 +395,6 @@ def run_fed_debug_differential_testing(cfg, store_in_cache=True):
         return round2debug_result
 
     rounds_keys = _get_round_keys_and_central_test_data(cfg.exp_key, train_cache_path)
-    log(DEBUG, f"rounds_keys {rounds_keys}")
 
     start_time = time.time()
 
@@ -417,11 +419,6 @@ def run_fed_debug_differential_testing(cfg, store_in_cache=True):
 
     if store_in_cache:
         debug_results_cache[cfg.exp_key] = final_result_dict
-        log(
-            INFO,
-            f"Debugging results saved for {cfg.exp_key}. "
-            f"Avg Debugging time per round: {avg_debug_time_per_round} seconds.",
-        )
     return final_result_dict
 
 
@@ -459,4 +456,3 @@ def eval_na_threshold(cfg):
 
     debug_results_cache[cfg.threshold_variation_exp_key] = na_cached_results_dict
 
-    print(debug_results_cache)

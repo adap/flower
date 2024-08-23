@@ -59,4 +59,3 @@ def gen_client_func(cfg, client2data, cid):
     }
     client = CNNFlowerClient(args).to_client()
     return client
-    # return client_fn

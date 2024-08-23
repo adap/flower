@@ -25,8 +25,8 @@ def _fit_metrics_aggregation_fn(metrics):
     for nk_points, metric_d in metrics:
         cid = int(metric_d["cid"])
         temp_s = (
-            f' Client {metric_d["cid"]}, Loss Train {metric_d["train_loss"]},'
-            f'/ Accuracy Train {metric_d["train_accuracy"]}, data_points = {nk_points}'
+            f' Client {metric_d["cid"]}, Loss Train {metric_d["train_loss"]}, '
+            f'Accuracy Train {metric_d["train_accuracy"]}, data_points = {nk_points}'
         )
         all_logs[cid] = temp_s
 

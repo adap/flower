@@ -4,7 +4,7 @@ It includes processioning the dataset, instantiate strategy, specify how the glo
 model is going to be evaluated, etc. At the end, this script saves the results.
 """
 
-from random import seed
+
 import time
 from functools import partial
 from logging import DEBUG, INFO
@@ -89,6 +89,7 @@ def main(cfg) -> None:
     if not cfg.generate_graphs and not cfg.vary_thresholds:
         run_simulation(cfg)
         time.sleep(1)
+        print("\n")
         run_fed_debug_differential_testing(cfg)
 
     if cfg.vary_thresholds:
