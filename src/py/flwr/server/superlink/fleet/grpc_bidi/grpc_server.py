@@ -301,9 +301,8 @@ def _is_port_in_use(address: str) -> None:
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
             if is_v6:
-                s.bind(
-                    (host, port, 0, 0)
-                )  # For IPv6, provide flowinfo and scopeid as 0
+                # For IPv6, provide `flowinfo` and `scopeid` as 0
+                s.bind((host, port, 0, 0))
             else:
                 s.bind((host, port))  # For IPv4
         except OSError:
