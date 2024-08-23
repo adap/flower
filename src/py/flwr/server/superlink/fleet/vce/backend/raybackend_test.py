@@ -68,10 +68,11 @@ def _load_app() -> ClientApp:
 
 def backend_build_process_and_termination(
     backend: RayBackend,
-    process_args: Optional[Tuple[Callable[[], ClientApp], Message, Context]] = None,
+    app_fn: Callable[[], ClientApp],
+    process_args: Optional[Tuple[Message, Context]] = None,
 ) -> Union[Tuple[Message, Context], None]:
     """Build, process job and terminate RayBackend."""
-    backend.build()
+    backend.build(app_fn)
     to_return = None
 
     if process_args:
@@ -125,7 +126,9 @@ class TestRayBackend(TestCase):
     def test_backend_creation_and_termination(self) -> None:
         """Test creation of RayBackend and its termination."""
         backend = RayBackend(backend_config={})
-        backend_build_process_and_termination(backend=backend, process_args=None)
+        backend_build_process_and_termination(
+            backend=backend, app_fn=_load_app, process_args=None
+        )
 
     def test_backend_creation_submit_and_termination(
         self,
@@ -134,13 +137,10 @@ class TestRayBackend(TestCase):
         """Test submitting a message to a given ClientApp."""
         backend = RayBackend(backend_config={})
 
-        # Define ClientApp
-        client_app_callable = client_app_loader
-
         message, context, expected_output = _create_message_and_context()
 
         res = backend_build_process_and_termination(
-            backend=backend, process_args=(client_app_callable, message, context)
+            backend=backend, app_fn=client_app_loader, process_args=(message, context)
         )
 
         if res is None:
