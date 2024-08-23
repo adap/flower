@@ -1,4 +1,21 @@
-# This python file is adapted from https://github.com/epfLLM/meditron/blob/main/evaluation/evaluate.py
+"""
+This python file is adapted from https://github.com/epfLLM/meditron/blob/main/evaluation/evaluate.py
+
+Meditron (https://github.com/epfLLM/meditron) is licensed under the Apache License, Version 2.0.
+
+Citation:
+@software{epfmedtrn,
+  author = {Zeming Chen and Alejandro Hernández-Cano and Angelika Romanou and Antoine Bonnet
+  and Kyle Matoba and Francesco Salvi and Matteo Pagliardini and Simin Fan and Andreas Köpf
+  and Amirkeivan Mohtashami and Alexandre Sallinen and Alireza Sakhaeirad and Vinitra Swamy
+  and Igor Krawczuk and Deniz Bayazit and Axel Marmet and Syrielle Montariol and Mary-Anne Hartley
+  and Martin Jaggi and Antoine Bosselut},
+  title = {MediTron-70B: Scaling Medical Pretraining for Large Language Models},
+  month = November,
+  year = 2023,
+  url = {https://github.com/epfLLM/meditron}
+}
+"""
 
 import argparse
 import json
