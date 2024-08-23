@@ -211,7 +211,7 @@ class State(abc.ABC):  # pylint: disable=R0904
         """Store a `client_public_key` in state."""
 
     @abc.abstractmethod
-    def remove_client_public_keys(self, public_keys: Set[bytes]) -> None:
+    def remove_client_public_keys(self, client_public_keys: Set[bytes]) -> None:
         """Remove a set of `client_public_keys` in state."""
 
     @abc.abstractmethod
