@@ -160,9 +160,8 @@ def flatten_dict(
 
 
 def unflatten_dict(flat_dict: Dict[str, Any], replace: bool = True) -> Dict[str, Any]:
-    """Unflatten a dict with keys containing separators into a nested dict;
-       replace '-' with '_' if needed.
-    """
+    """Unflatten a dict with keys containing separators into a nested dict; replace '-'
+    with '_' if needed."""
     unflattened_dict: Dict[str, Any] = {}
     separator: str = "."
 
