@@ -91,7 +91,7 @@ def _check_args_do_not_interfere(args: Namespace) -> bool:
     return True
 
 
-def _replace_keys(d: Any, match: str, target: str):
+def _replace_keys(d: Any, match: str, target: str) -> Any:
     if isinstance(d, dict):
         return {
             k.replace(match, target): _replace_keys(v, match, target)
