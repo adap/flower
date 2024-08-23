@@ -105,6 +105,16 @@ def run_simulation_from_cli() -> None:
             code_example='TF_FORCE_GPU_ALLOW_GROWTH="true" flower-simulation <...>',
         )
 
+    if args.server_app:
+        warn_deprecated_feature_with_example(
+            "Passing `--server-app` is deprecated.",
+            example_message="Instead, call `flower-simulation` by passing a Flower app. "
+            "i.e., a project that has a `pyproject.toml`. Below is an example on how "
+            "to construct a compatible project.",
+            code_example="# In a terminal, create a new project\n"
+            "\tflwr new\t # then follow the prompt.",
+        )
+
     # We are supporting two modes for the CLI entrypoint:
     # 1) Running an app dir containing a `pyproject.toml`
     # 2) Running any ClientApp and SeverApp w/o pyproject.toml being present
@@ -513,6 +523,13 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         description="Start a Flower simulation",
     )
     parser.add_argument(
+        "--app",
+        type=str,
+        default=None,
+        help="Path to a directory containing a FAB-like structure with a "
+        "pyproject.toml.",
+    )
+    parser.add_argument(
         "--server-app",
         help="For example: `server:app` or `project.package.module:wrapper.app`",
     )
@@ -525,13 +542,6 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         type=int,
         required=True,
         help="Number of simulated SuperNodes.",
-    )
-    parser.add_argument(
-        "--app",
-        type=str,
-        default=None,
-        help="Path to a directory containing a FAB-like structure with a "
-        "pyproject.toml.",
     )
     parser.add_argument(
         "--run-config",
