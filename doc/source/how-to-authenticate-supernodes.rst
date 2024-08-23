@@ -51,10 +51,9 @@ To update the list of known node public keys, you need to modify the CSV file sp
 1. To add a new node, append its public key in OpenSSH format to the CSV file.
 2. To remove a node, delete its public key from the CSV file.
 
-The SuperLink will apply the changes that you made after modifying the CSV file directly without the need of restarting the SuperLink. 
-Since there is no enforcement of ACID properties for modifying the set of known node public keys, we implemented the following rule for handling invalid entry in the CSV file:
-
 .. note::
+    The SuperLink will apply the changes that you made after modifying the CSV file directly without the need of restarting the SuperLink. 
+    Since there is no enforcement of ACID properties for modifying the set of known node public keys, we implemented the following rule for handling invalid entry in the CSV file:
     If there is an error (e.g., a key is not in the correct format), no changes will be made to the internal state of the SuperLink. The system will log a warning, and the existing set of keys will remain unchanged. This ensures that only valid keys are stored and used for authentication.
 
 Enable node authentication in :code:`SuperNode`
