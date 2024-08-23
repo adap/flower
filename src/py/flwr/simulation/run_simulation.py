@@ -213,7 +213,7 @@ def run_simulation(
         ServerApp and receive a Message describing what the ClientApp should perform.
 
     backend_name : str (default: ray)
-        A simulation backend that runs `ClientApp`'s.
+        A simulation backend that runs `ClientApp`s.
 
     backend_config : Optional[BackendConfig]
         'A dictionary to configure a backend. Separate dictionaries to configure
