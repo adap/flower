@@ -1,3 +1,5 @@
+"""fltabular: Flower Example on Adult Census Income Tabular Dataset."""
+
 from collections import OrderedDict
 
 import torch
@@ -9,9 +11,21 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OrdinalEncoder, StandardScaler
 from torch.utils.data import DataLoader, TensorDataset
+from flwr_datasets.partitioner import IidPartitioner
+
+fds = None  # Cache FederatedDataset
 
 
-def load_data(partition_id: int, fds: FederatedDataset):
+def load_data(partition_id: int, num_partitions: int):
+
+    global fds
+    if fds is None:
+        partitioner = IidPartitioner(num_partitions=num_partitions)
+        fds = FederatedDataset(
+            dataset="scikit-learn/adult-census-income",
+            partitioners={"train": partitioner},
+        )
+
     dataset = fds.load_partition(partition_id, "train").with_format("pandas")[:]
 
     dataset.dropna(inplace=True)
@@ -51,7 +65,7 @@ def load_data(partition_id: int, fds: FederatedDataset):
 
 
 class IncomeClassifier(nn.Module):
-    def __init__(self, input_dim: int):
+    def __init__(self, input_dim: int = 14):
         super(IncomeClassifier, self).__init__()
         self.layer1 = nn.Linear(input_dim, 128)
         self.layer2 = nn.Linear(128, 64)
