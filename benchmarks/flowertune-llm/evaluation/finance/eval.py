@@ -1,15 +1,10 @@
-# This python file is adapted from https://github.com/AI4Finance-Foundation/FinGPT/blob/master/fingpt/FinGPT_Benchmark/benchmarks/benchmarks.py
-
 import argparse
 
 import torch
 from peft import PeftModel
-
-from fiqa import test_fiqa
-from fpb import test_fpb
-from tfns import test_tfns
-
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+
+from benchmarks import infer_fiqa, infer_fpb, infer_tfns
 
 # Fixed seed
 torch.manual_seed(2024)
@@ -23,7 +18,6 @@ parser.add_argument("--peft-path", type=str, default=None)
 parser.add_argument("--datasets", type=str, default="fpb")
 parser.add_argument("--batch-size", type=int, default=32)
 parser.add_argument("--quantization", type=int, default=4)
-parser.add_argument("--instruct-template", default="default")
 args = parser.parse_args()
 
 
@@ -35,7 +29,9 @@ elif args.quantization == 8:
     quantization_config = BitsAndBytesConfig(load_in_8bit=True)
     torch_dtype = torch.float16
 else:
-    raise ValueError(f"Use 4-bit or 8-bit quantization. You passed: {args.quantization}/")
+    raise ValueError(
+        f"Use 4-bit or 8-bit quantization. You passed: {args.quantization}/"
+    )
 
 model = AutoModelForCausalLM.from_pretrained(
     args.base_model_name_path,
@@ -59,10 +55,10 @@ model = model.eval()
 with torch.no_grad():
     for dataset in args.datasets.split(","):
         if dataset == "fpb":
-            instructions = test_fpb(args, model, tokenizer)
+            infer_fpb(model, tokenizer, args.batch_size, args.run_name)
         elif dataset == "fiqa":
-            instructions = test_fiqa(args, model, tokenizer)
+            infer_fiqa(model, tokenizer, args.batch_size, args.run_name)
         elif dataset == "tfns":
-            instructions = test_tfns(args, model, tokenizer)
+            infer_tfns(model, tokenizer, args.batch_size, args.run_name)
         else:
             raise ValueError("Undefined Dataset.")
