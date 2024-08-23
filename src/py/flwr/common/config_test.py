@@ -232,8 +232,8 @@ def test_flatten_dict() -> None:
 
 def test_unflatten_dict() -> None:
     """Test unflatten_dict with a flat dictionary."""
-    raw_dict = {"a.b.c": "d", "e": "f"}
-    expected = {"a": {"b": {"c": "d"}}, "e": "f"}
+    raw_dict = {"a-1.b-2.c-3": "d", "e": "f"}
+    expected = {"a_1": {"b_2": {"c_3": "d"}}, "e": "f"}
     assert unflatten_dict(raw_dict) == expected
 
 

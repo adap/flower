@@ -159,8 +159,10 @@ def flatten_dict(
     return dict(items)
 
 
-def unflatten_dict(flat_dict: Dict[str, Any]) -> Dict[str, Any]:
-    """Unflatten a dict with keys containing separators into a nested dict."""
+def unflatten_dict(flat_dict: Dict[str, Any], replace: bool = True) -> Dict[str, Any]:
+    """Unflatten a dict with keys containing separators into a nested dict;
+       replace '-' with '_' if needed.
+    """
     unflattened_dict: Dict[str, Any] = {}
     separator: str = "."
 
@@ -168,6 +170,7 @@ def unflatten_dict(flat_dict: Dict[str, Any]) -> Dict[str, Any]:
         parts = key.split(separator)
         d = unflattened_dict
         for part in parts[:-1]:
+            part = part.replace("-", "_") if replace else part
             if part not in d:
                 d[part] = {}
             d = d[part]
