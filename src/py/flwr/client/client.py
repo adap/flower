@@ -33,7 +33,7 @@ from flwr.common import (
     Parameters,
     Status,
 )
-from flwr.common.logger import warn_deprecated_feature
+from flwr.common.logger import warn_deprecated_feature_with_example
 
 
 class Client(ABC):
@@ -145,11 +145,15 @@ class Client(ABC):
     @property
     def context(self) -> Context:
         """Getter for `Context` client attribute."""
-        warn_deprecated_feature(
-            "Accessing the context via the client's attribute "
-            "is deprecated. Instead, pass it to the client's "
+        warn_deprecated_feature_with_example(
+            "Accessing the context via the client's attribute is deprecated.",
+            example_message="Instead, pass it to the client's "
             "constructor in your `client_fn()` which already "
-            "receives a context object."
+            "receives a context object.",
+            code_example="def client_fn(context: Context) -> Client:\n\n"
+            "\t\t# Your existing client_fn\n\n"
+            "\t\t# Pass `context` to the constructor\n"
+            "\t\treturn FlowerClient(context).to_client()",
         )
         return self._context
 
