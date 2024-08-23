@@ -49,7 +49,7 @@ flower-server-app
    Note that since version :code:`1.11.0`, :code:`flower-server-app` no longer supports passing a reference to a `ServerApp` attribute.
    Instead, you need to pass the path to Flower app via the argument :code:`--app`.
    This is the path to a directory containing a `pyproject.toml`.
-   You can create a valid Flower app by exectuing :code:`flwr new` and following the prompt.
+   You can create a valid Flower app by executing :code:`flwr new` and following the prompt.
 
 .. argparse::
    :module: flwr.server.run_serverapp
