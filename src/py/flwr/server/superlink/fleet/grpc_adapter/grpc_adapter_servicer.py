@@ -22,9 +22,8 @@ import grpc
 from google.protobuf.message import Message as GrpcMessage
 
 from flwr.common.logger import log
-from flwr.server.superlink.ffs.ffs_factory import FfsFactory
-from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto import grpcadapter_pb2_grpc  # pylint: disable=E0611
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
@@ -39,6 +38,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.grpcadapter_pb2 import MessageContainer  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.fleet.message_handler import message_handler
 from flwr.server.superlink.state import StateFactory
 
@@ -66,7 +66,7 @@ class GrpcAdapterServicer(grpcadapter_pb2_grpc.GrpcAdapterServicer):
         self.state_factory = state_factory
         self.ffs_factory = ffs_factory
 
-    def SendReceive(
+    def SendReceive(  # pylint: disable=too-many-return-statements
         self, request: MessageContainer, context: grpc.ServicerContext
     ) -> MessageContainer:
         """."""
@@ -134,7 +134,7 @@ class GrpcAdapterServicer(grpcadapter_pb2_grpc.GrpcAdapterServicer):
             request=request,
             state=self.state_factory.state(),
         )
-    
+
     def _get_fab(self, request: GetFabRequest) -> GetFabResponse:
         """Get FAB."""
         log(INFO, "GrpcAdapter.GetFab")
