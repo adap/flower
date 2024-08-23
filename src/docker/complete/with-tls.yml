@@ -31,7 +31,7 @@ services:
       - source: superexec-keyfile
         target: /app/certificates/server.key
 
-  supernode-1: &supernode
+  supernode-1:
     command:
       - --superlink
       - superlink:9092
@@ -41,11 +41,27 @@ services:
       - source: superlink-ca-certfile
         target: /app/certificates/ca.crt
 
-  supernode-2: *supernode
+  supernode-2:
+    command:
+      - --superlink
+      - superlink:9092
+      - --root-certificates
+      - certificates/ca.crt
+    secrets:
+      - source: superlink-ca-certfile
+        target: /app/certificates/ca.crt
 
   # uncomment to enable TLS on another supernode
   #
-  # supernode-3: *supernode
+  # supernode-3:
+  #   command:
+  #     - --superlink
+  #     - superlink:9092
+  #     - --root-certificates
+  #     - certificates/ca.crt
+  #   secrets:
+  #     - source: superlink-ca-certfile
+  #       target: /app/certificates/ca.crt
 
 secrets:
   superlink-ca-certfile:
