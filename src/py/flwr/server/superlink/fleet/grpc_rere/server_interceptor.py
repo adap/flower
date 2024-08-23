@@ -90,6 +90,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
 
     def __init__(self, state: State, client_keys_file_path: Path):
         self.state = state
+        # Path always exists, already checked during init
         self.client_keys_file_path = client_keys_file_path
 
         self.client_public_keys = state.get_client_public_keys()
@@ -134,7 +135,16 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                     _PUBLIC_KEY_HEADER, context.invocation_metadata()
                 )
             )
-            new_timestamp = os.path.getmtime(self.client_keys_file_path)
+            if self.client_keys_file_path.exists():
+                new_timestamp = os.path.getmtime(self.client_keys_file_path)
+            else:
+                log(
+                    WARNING, 
+                    "Client keys file (%s) not found, continuing with existing state",
+                    self.client_keys_file_path,
+                )
+                new_timestamp = self.timestamp
+            
             if new_timestamp != self.timestamp:
                 self._update_client_keys()
                 self.timestamp = new_timestamp
@@ -186,10 +196,11 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             remove_operations = existing_known_keys - new_known_keys
 
             self._update_state_keys(add_operations, remove_operations)
-
+        # Handle error from `_read_and_parse_keys`
         except (ValueError, UnsupportedAlgorithm) as e:
             log(WARNING, "Abort updating client_public_keys set due to error: %s", e)
 
+    # This function throws an error if something is wrong
     def _read_and_parse_keys(self) -> Set[bytes]:
         new_known_keys = set()
         with open(self.client_keys_file_path, newline="", encoding="utf-8") as csvfile:
