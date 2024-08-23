@@ -261,7 +261,19 @@ In ``compose.yml``, add the following:
      # other service definitions
 
      supernode-3:
-       <<: *supernode
+       user: root
+       deploy:
+         resources:
+           limits:
+             cpus: "2"
+       command:
+         - --superlink
+         - superlink:9092
+         - --insecure
+       depends_on:
+         - superlink
+       volumes:
+         - apps-volume:/app/.flwr/apps/:ro
        build:
          context: ${PROJECT_DIR:-.}
          dockerfile_inline: |
@@ -287,7 +299,15 @@ In ``with-tls.yml``, add the following:
    services:
      # other service definitions
 
-     supernode-3: *supernode
+     supernode-3:
+       command:
+         - --superlink
+         - superlink:9092
+         - --root-certificates
+         - certificates/ca.crt
+       secrets:
+         - source: superlink-ca-certfile
+           target: /app/certificates/ca.crt
 
 Step 8: Persisting the SuperLink State and Enabling TLS
 -------------------------------------------------------
@@ -295,17 +315,23 @@ Step 8: Persisting the SuperLink State and Enabling TLS
 To run Flower with persisted SuperLink state and enabled TLS, a slight change in the ``with-state.yml``
 file is required:
 
-#. Comment out line 3 and uncomment line 4:
+#. Comment out the lines 3-5 and uncomment the lines 6-10:
 
    .. code-block:: yaml
       :caption: with-state.yml
       :linenos:
-      :emphasize-lines: 3-4
+      :emphasize-lines: 3-10
 
       services:
         superlink:
-          # <<: *x-without-tls
-          <<: *x-with-tls
+          # command:
+          #   - --insecure
+          #   - --database=state/state.db
+          command:
+            - --ssl-ca-certfile=certificates/ca.crt
+            - --ssl-certfile=certificates/server.pem
+            - --ssl-keyfile=certificates/server.key
+            - --database=state/state.db
           volumes:
             - ./state/:/app/state/:rw
 
