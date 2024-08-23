@@ -1,21 +1,19 @@
 """Fed_Debug Differential Testing."""
 
 import copy
-import gc
 import itertools
 import time
 from logging import DEBUG, INFO, WARNING
-from typing import Any, Dict
+
 
 import torch
 import torch.nn.functional as F
 from diskcache import Index
 from flwr.common.logger import log
-from torch.nn.init import kaiming_uniform_
 from torchvision.transforms import Compose, Normalize, RandomHorizontalFlip, Resize
 
-from feddebug.dataset import load_central_server_test_data
-from feddebug.models import global_model_eval, initialize_model
+
+from feddebug.models import initialize_model
 from feddebug.neuron_activation import get_neurons_activations
 from feddebug.utils import seed_everything
 from tqdm import tqdm
@@ -52,7 +50,6 @@ class InferenceGuidedInputs:
         self,
         clients2models,
         input_shape,
-        random_generator_func,
         transform_func,
         k_gen_inputs=10,
         min_nclients_same_pred=3,
@@ -66,17 +63,16 @@ class InferenceGuidedInputs:
         self.random_inputs = []
         self.input_shape = input_shape
         self.time_delta = time_delta
-        self.random_generator_func = random_generator_func
         self.transform = transform_func
         self.faster_input_generation = faster_input_generation
         self.seed = 0
 
     def _get_random_input(self):
 
-        img = torch.empty(self.input_shape)
         seed_everything(self.seed)
         self.seed += 1
-        self.random_generator_func(img)
+        # img =  self.random_generator_func(img)
+        img = torch.rand(self.input_shape)
 
         if self.transform is not None:
             return self.transform(img).unsqueeze(0)
@@ -254,25 +250,11 @@ class FedDebug:
     def __init__(self, cfg, round_key) -> None:
         self.cfg = cfg
         self.round_key = round_key
-        self.random_generator = kaiming_uniform_
         self._extract_round_id()
         self._load_training_config()
         self._initialize_and_load_models()
         self.na_threshold = cfg.neuron_activation_threshold
-        # self._sanity_check()
-
-    def _sanity_check(self):
-        test_data = load_central_server_test_data(self.train_cfg)
-        for cid, cli_model in self.client2model.items():
-            temp_d = global_model_eval(
-                self.train_cfg.model.arch,
-                {"model": cli_model, "num_classes": self.train_cfg.dataset.num_classes},
-                test_data,
-                device = self.cfg.device
-            )
-
-            print(f"client id {cid}, metrics:  { temp_d}")
-
+    
     def _extract_round_id(self) -> None:
         self.round_id = self.round_key.split(":")[-1]
 
@@ -327,16 +309,12 @@ class FedDebug:
         generate_inputs = InferenceGuidedInputs(
             self.client2model,
             self.input_shape,
-            random_generator_func=self.random_generator,
             transform_func=self.transform_func,
             min_nclients_same_pred=3,
             k_gen_inputs=k_gen_inputs,
             faster_input_generation=self.cfg.faster_input_generation,
         )
-
         selected_inputs, input_gen_time = generate_inputs.get_inputs()
-        # print(selected_inputs)
-
         log(INFO, f"Generated {len(selected_inputs)} inputs in {input_gen_time} seconds.")
         start = time.time()
         faultyclientlocalization = FaultyClientLocalization(self.client2model, selected_inputs, device=self.cfg.device)
@@ -354,10 +332,6 @@ class FedDebug:
             input_gen_time,
             fault_localization_time,
         )
-
-    # def _computeEvalMetrics(self, input2debug: List[Dict]) -> Dict[str, float]:
-    #     correct_tracing = 0
-    #     return {"accuracy": correct_tracing / len(self.subset_test_data)}
 
     def run(self):  
         """Run the debugging analysis."""
@@ -486,19 +460,3 @@ def eval_na_threshold(cfg):
     debug_results_cache[cfg.threshold_variation_exp_key] = na_cached_results_dict
 
     print(debug_results_cache)
-
-
-# @hydra.main(config_path="conf", config_name="debug", version_base=None)
-# def main(cfg):
-#     """Run the debugging analysis for the given configuration."""
-#     if len(cfg.all_exp_keys) > 0:
-#         for k in cfg.all_exp_keys:
-#             new_cfg = copy.deepcopy(cfg)
-#             new_cfg.exp_key = k
-#             run_fed_debug(new_cfg)
-#     else:
-#         run_fed_debug(cfg)
-
-
-# if __name__ == "__main__":
-#     main()
