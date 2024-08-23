@@ -91,12 +91,13 @@ class GroupedNaturalIdPartitioner(Partitioner):
             unique_natural_ids = sorted(unique_natural_ids)
         num_unique_natural_ids = len(unique_natural_ids)
         remainder = num_unique_natural_ids % self._group_size
+        num_groups = num_unique_natural_ids // self._group_size
+        # Note that the number of groups might be different that this number
+        # due to certain modes, it's a base value.
 
         if self._mode == "allow-bigger":
-            num_groups = num_unique_natural_ids // self._group_size
             groups_of_natural_ids = np.array_split(unique_natural_ids, num_groups)
         elif self._mode == "drop-reminder":
-            num_groups = num_unique_natural_ids // self._group_size
             # Narrow down the unique_natural_ids to not have a bigger group
             # which is the behavior of the np.array_split
             unique_natural_ids = unique_natural_ids[
@@ -104,7 +105,6 @@ class GroupedNaturalIdPartitioner(Partitioner):
             ]
             groups_of_natural_ids = np.array_split(unique_natural_ids, num_groups)
         elif self._mode == "allow-smaller":
-            num_groups = num_unique_natural_ids // self._group_size
             if remainder > 0:
                 last_group_ids = unique_natural_ids[-remainder:]
             unique_natural_ids = unique_natural_ids[
@@ -122,7 +122,6 @@ class GroupedNaturalIdPartitioner(Partitioner):
                     f"enables strict mode or relax the mode parameter. Refer to the "
                     f"documentation of the mode parameter for the available modes."
                 )
-            num_groups = num_unique_natural_ids // self._group_size
             groups_of_natural_ids = np.array_split(unique_natural_ids, num_groups)
         else:
             raise ValueError(
