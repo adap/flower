@@ -221,7 +221,7 @@ def generic_create_grpc_server(  # pylint: disable=too-many-arguments
     """
     # Check if port is in use
     if is_port_in_use(server_address):
-        sys.exit(f"Port in server address {server_address} is in use.")
+        sys.exit(f"Port in server address {server_address} is already in use.")
 
     # Deconstruct tuple into servicer and function
     servicer, add_servicer_to_server_fn = servicer_and_add_fn
