@@ -1,4 +1,4 @@
-# Copyright 2022 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import abc
 from typing import Dict, List, Optional, Set, Tuple
 from uuid import UUID
 
+from flwr.common.typing import Run, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 
@@ -160,11 +161,17 @@ class State(abc.ABC):  # pylint: disable=R0904
         """Retrieve stored `node_ids` filtered by `client_public_keys`."""
 
     @abc.abstractmethod
-    def create_run(self, fab_id: str, fab_version: str) -> int:
-        """Create a new run for the specified `fab_id` and `fab_version`."""
+    def create_run(
+        self,
+        fab_id: Optional[str],
+        fab_version: Optional[str],
+        fab_hash: Optional[str],
+        override_config: UserConfig,
+    ) -> int:
+        """Create a new run for the specified `fab_hash`."""
 
     @abc.abstractmethod
-    def get_run(self, run_id: int) -> Tuple[int, str, str]:
+    def get_run(self, run_id: int) -> Optional[Run]:
         """Retrieve information about the run with the specified `run_id`.
 
         Parameters
@@ -174,8 +181,8 @@ class State(abc.ABC):  # pylint: disable=R0904
 
         Returns
         -------
-        Tuple[int, str, str]
-            A tuple containing three elements:
+        Optional[Run]
+            A dataclass instance containing three elements if `run_id` is valid:
             - `run_id`: The identifier of the run, same as the specified `run_id`.
             - `fab_id`: The identifier of the FAB used in the specified run.
             - `fab_version`: The version of the FAB used in the specified run.

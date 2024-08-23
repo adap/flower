@@ -21,11 +21,27 @@ from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from typing import Optional
 
+from flwr.cli.config_utils import get_fab_metadata
+from flwr.cli.install import install_from_fab
 from flwr.common import Context, EventType, RecordSet, event
+from flwr.common.config import (
+    get_flwr_dir,
+    get_fused_config_from_dir,
+    get_metadata_from_config,
+    get_project_config,
+    get_project_dir,
+)
 from flwr.common.logger import log, update_console_handler, warn_deprecated_feature
 from flwr.common.object_ref import load_app
+from flwr.common.typing import UserConfig
+from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
+    CreateRunRequest,
+    CreateRunResponse,
+)
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 
-from .driver import Driver, GrpcDriver
+from .driver import Driver
+from .driver.grpc_driver import GrpcDriver
 from .server_app import LoadServerAppError, ServerApp
 
 ADDRESS_DRIVER_API = "0.0.0.0:9091"
@@ -34,6 +50,7 @@ ADDRESS_DRIVER_API = "0.0.0.0:9091"
 def run(
     driver: Driver,
     server_app_dir: str,
+    server_app_run_config: UserConfig,
     server_app_attr: Optional[str] = None,
     loaded_server_app: Optional[ServerApp] = None,
 ) -> None:
@@ -41,16 +58,15 @@ def run(
     if not (server_app_attr is None) ^ (loaded_server_app is None):
         raise ValueError(
             "Either `server_app_attr` or `loaded_server_app` should be set "
-            "but not both. "
+            "but not both."
         )
-
-    if server_app_dir is not None:
-        sys.path.insert(0, server_app_dir)
 
     # Load ServerApp if needed
     def _load() -> ServerApp:
         if server_app_attr:
-            server_app: ServerApp = load_app(server_app_attr, LoadServerAppError)
+            server_app: ServerApp = load_app(
+                server_app_attr, LoadServerAppError, server_app_dir
+            )
 
             if not isinstance(server_app, ServerApp):
                 raise LoadServerAppError(
@@ -64,7 +80,9 @@ def run(
     server_app = _load()
 
     # Initialize Context
-    context = Context(state=RecordSet())
+    context = Context(
+        node_id=0, node_config={}, state=RecordSet(), run_config=server_app_run_config
+    )
 
     # Call ServerApp
     server_app(driver=driver, context=context)
@@ -72,6 +90,7 @@ def run(
     log(DEBUG, "ServerApp finished running.")
 
 
+# pylint: disable-next=too-many-branches,too-many-statements,too-many-locals
 def run_server_app() -> None:
     """Run Flower server app."""
     event(EventType.RUN_SERVER_APP_ENTER)
@@ -132,11 +151,62 @@ def run_server_app() -> None:
             cert_path,
         )
 
-    log(
-        DEBUG,
-        "Flower will load ServerApp `%s`",
-        getattr(args, "server-app"),
+    app_path: Optional[str] = args.app
+    if not (app_path is None) ^ (args.run_id is None):
+        raise sys.exit(
+            "Please provide either a Flower App path or a Run ID, but not both. "
+            "For more details, use: ``flower-server-app -h``"
+        )
+
+    # Initialize GrpcDriver
+    if app_path is None:
+        # User provided `--run-id`, but not `app_dir`
+        driver = GrpcDriver(
+            run_id=args.run_id,
+            driver_service_address=args.superlink,
+            root_certificates=root_certificates,
+        )
+        flwr_dir = get_flwr_dir(args.flwr_dir)
+        run_ = driver.run
+        if run_.fab_hash:
+            fab_req = GetFabRequest(hash_str=run_.fab_hash)
+            # pylint: disable-next=W0212
+            fab_res: GetFabResponse = driver._stub.GetFab(fab_req)
+            if fab_res.fab.hash_str != run_.fab_hash:
+                raise ValueError("FAB hashes don't match.")
+
+            install_from_fab(fab_res.fab.content, flwr_dir, True)
+            fab_id, fab_version = get_fab_metadata(fab_res.fab.content)
+        else:
+            fab_id, fab_version = run_.fab_id, run_.fab_version
+
+        app_path = str(get_project_dir(fab_id, fab_version, flwr_dir))
+        config = get_project_config(app_path)
+    else:
+        # User provided `app_dir`, but not `--run-id`
+        # Create run if run_id is not provided
+        driver = GrpcDriver(
+            run_id=0,  # Will be overwritten
+            driver_service_address=args.superlink,
+            root_certificates=root_certificates,
+        )
+        # Load config from the project directory
+        config = get_project_config(app_path)
+        fab_version, fab_id = get_metadata_from_config(config)
+
+        # Create run
+        req = CreateRunRequest(fab_id=fab_id, fab_version=fab_version)
+        res: CreateRunResponse = driver._stub.CreateRun(req)  # pylint: disable=W0212
+        # Overwrite driver._run_id
+        driver._run_id = res.run_id  # pylint: disable=W0212
+
+    # Obtain server app reference and the run config
+    server_app_attr = config["tool"]["flwr"]["app"]["components"]["serverapp"]
+    server_app_run_config = get_fused_config_from_dir(
+        Path(app_path), driver.run.override_config
     )
+
+    log(DEBUG, "Flower will load ServerApp `%s` in %s", server_app_attr, app_path)
 
     log(
         DEBUG,
@@ -144,19 +214,13 @@ def run_server_app() -> None:
         root_certificates,
     )
 
-    server_app_dir = args.dir
-    server_app_attr = getattr(args, "server-app")
-
-    # Initialize GrpcDriver
-    driver = GrpcDriver(
-        driver_service_address=args.superlink,
-        root_certificates=root_certificates,
-        fab_id=args.fab_id,
-        fab_version=args.fab_version,
-    )
-
     # Run the ServerApp with the Driver
-    run(driver=driver, server_app_dir=server_app_dir, server_app_attr=server_app_attr)
+    run(
+        driver=driver,
+        server_app_dir=app_path,
+        server_app_run_config=server_app_run_config,
+        server_app_attr=server_app_attr,
+    )
 
     # Clean up
     driver.close()
@@ -171,13 +235,16 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
-        "server-app",
-        help="For example: `server:app` or `project.package.module:wrapper.app`",
+        "app",
+        nargs="?",
+        default=None,
+        help="Load and run the `ServerApp` from the specified Flower App path. "
+        "The `pyproject.toml` file must be located in the root of this path.",
     )
     parser.add_argument(
         "--insecure",
         action="store_true",
-        help="Run the server app without HTTPS. By default, the app runs with "
+        help="Run the `ServerApp` without HTTPS. By default, the app runs with "
         "HTTPS enabled. Use this flag only if you understand the risks.",
     )
     parser.add_argument(
@@ -203,23 +270,21 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
         help="SuperLink Driver API (gRPC-rere) address (IPv4, IPv6, or a domain name)",
     )
     parser.add_argument(
-        "--dir",
-        default="",
-        help="Add specified directory to the PYTHONPATH and load Flower "
-        "app from there."
-        " Default: current working directory.",
+        "--run-id",
+        default=None,
+        type=int,
+        help="The identifier of the run.",
     )
     parser.add_argument(
-        "--fab-id",
+        "--flwr-dir",
         default=None,
-        type=str,
-        help="The identifier of the FAB used in the run.",
-    )
-    parser.add_argument(
-        "--fab-version",
-        default=None,
-        type=str,
-        help="The version of the FAB used in the run.",
+        help="""The path containing installed Flower Apps.
+    By default, this value is equal to:
+
+        - `$FLWR_HOME/` if `$FLWR_HOME` is defined
+        - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
+        - `$HOME/.flwr/` in all other cases
+    """,
     )
 
     return parser

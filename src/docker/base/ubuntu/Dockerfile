@@ -16,7 +16,7 @@
 # hadolint global ignore=DL3008
 ARG DISTRO=ubuntu
 ARG DISTRO_VERSION=22.04
-FROM $DISTRO:$DISTRO_VERSION as python
+FROM $DISTRO:$DISTRO_VERSION AS python
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -48,33 +48,14 @@ RUN git clone https://github.com/pyenv/pyenv.git \
 RUN LATEST=$(pyenv latest -k ${PYTHON_VERSION}) \
     && python-build "${LATEST}" /usr/local/bin/python
 
-FROM $DISTRO:$DISTRO_VERSION as base
+ENV PATH=/usr/local/bin/python/bin:$PATH
 
-ENV DEBIAN_FRONTEND=noninteractive
-
-RUN apt-get update \
-    && apt-get -y --no-install-recommends install \
-    libsqlite3-0 \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY --from=python /usr/local/bin/python /usr/local/bin/python
-
-ENV PATH=/usr/local/bin/python/bin:$PATH \
-    # Send stdout and stderr stream directly to the terminal. Ensures that no
-    # output is retained in a buffer if the application crashes.
-    PYTHONUNBUFFERED=1 \
-    # Typically, bytecode is created on the first invocation to speed up following invocation.
-    # However, in Docker we only make a single invocation (when we start the container).
-    # Therefore, we can disable bytecode writing.
-    PYTHONDONTWRITEBYTECODE=1 \
-    # Ensure that python encoding is always UTF-8.
-    PYTHONIOENCODING=UTF-8 \
-    LANG=C.UTF-8 \
-    LC_ALL=C.UTF-8
-
-# Use a virtual environment to ensure that Python packages are installed in the same location
-# regardless of whether the subsequent image build is run with the app or the root user
-RUN python -m venv /python/venv
+# Upgrade system Python pip and setuptools
+# hadolint ignore=DL3013
+RUN pip install -U --no-cache-dir pip setuptools \
+    # Use a virtual environment to ensure that Python packages are installed in the same location
+    # regardless of whether the subsequent image build is run with the app or the root user
+    && python -m venv /python/venv
 ENV PATH=/python/venv/bin:$PATH
 
 ARG PIP_VERSION
@@ -86,15 +67,42 @@ RUN pip install -U --no-cache-dir \
     setuptools==${SETUPTOOLS_VERSION} \
     ${FLWR_PACKAGE}==${FLWR_VERSION}
 
-# add non-root user
-RUN adduser \
+FROM $DISTRO:$DISTRO_VERSION AS base
+
+COPY --from=python /usr/local/bin/python /usr/local/bin/python
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PATH=/usr/local/bin/python/bin:$PATH
+
+RUN  apt-get update \
+    && apt-get -y --no-install-recommends install \
+    libsqlite3-0 \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    # add non-root user
+    && adduser \
     --no-create-home \
+    --home /app \
     --disabled-password \
     --gecos "" \
     --uid 49999 app \
     && mkdir -p /app \
-    && chown -R app:app /python \
     && chown -R app:app /app
+
+COPY --from=python --chown=app:app /python/venv /python/venv
+
+ENV PATH=/python/venv/bin:$PATH \
+    # Send stdout and stderr stream directly to the terminal. Ensures that no
+    # output is retained in a buffer if the application crashes.
+    PYTHONUNBUFFERED=1 \
+    # Typically, bytecode is created on the first invocation to speed up following invocation.
+    # However, in Docker we only make a single invocation (when we start the container).
+    # Therefore, we can disable bytecode writing.
+    PYTHONDONTWRITEBYTECODE=1 \
+    # Ensure that python encoding is always UTF-8.
+    PYTHONIOENCODING=UTF-8 \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
 
 WORKDIR /app
 USER app

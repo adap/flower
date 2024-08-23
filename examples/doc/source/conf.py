@@ -29,7 +29,7 @@ copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = "1.10.0"
+release = "1.11.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -65,6 +65,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 redirects = {
     "quickstart-mxnet": "index.html",
     "mxnet-from-centralized-to-federated": "index.html",
+    "app-secure-aggregation": "flower-secure-aggregation.html",
 }
 
 

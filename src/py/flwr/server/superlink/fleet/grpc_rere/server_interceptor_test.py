@@ -48,6 +48,7 @@ from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 from flwr.server.app import ADDRESS_FLEET_API_GRPC_RERE, _run_fleet_api_grpc_rere
+from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.state.state_factory import StateFactory
 
 from .server_interceptor import (
@@ -84,6 +85,8 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             )
         state_factory = StateFactory(":flwr-in-memory-state:")
         self.state = state_factory.state()
+        ffs_factory = FfsFactory(".")
+        self.ffs = ffs_factory.ffs()
         self.state.store_server_private_public_key(
             private_key_to_bytes(self._server_private_key),
             public_key_to_bytes(self._server_public_key),
@@ -96,7 +99,11 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             self.state, Path(self.client_keys_file_path)
         )
         self._server: grpc.Server = _run_fleet_api_grpc_rere(
-            ADDRESS_FLEET_API_GRPC_RERE, state_factory, None, [self._server_interceptor]
+            ADDRESS_FLEET_API_GRPC_RERE,
+            state_factory,
+            ffs_factory,
+            None,
+            [self._server_interceptor],
         )
 
         self._channel = grpc.insecure_channel("localhost:9092")
@@ -354,7 +361,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         self.state.create_node(
             ping_interval=30, public_key=public_key_to_bytes(self._client_public_key)
         )
-        run_id = self.state.create_run("", "")
+        run_id = self.state.create_run("", "", "", {})
         request = GetRunRequest(run_id=run_id)
         shared_secret = generate_shared_key(
             self._client_private_key, self._server_public_key
@@ -385,7 +392,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         self.state.create_node(
             ping_interval=30, public_key=public_key_to_bytes(self._client_public_key)
         )
-        run_id = self.state.create_run("", "")
+        run_id = self.state.create_run("", "", "", {})
         request = GetRunRequest(run_id=run_id)
         client_private_key, _ = generate_key_pairs()
         shared_secret = generate_shared_key(client_private_key, self._server_public_key)

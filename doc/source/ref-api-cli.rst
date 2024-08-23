@@ -1,6 +1,15 @@
 Flower CLI reference
 ====================
 
+.. _flwr-apiref:
+
+flwr CLI
+~~~~~~~~
+
+.. click:: flwr.cli.app:typer_click_object
+   :prog: flwr
+   :nested: full
+
 .. _flower-simulation-apiref:
 
 flower-simulation

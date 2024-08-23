@@ -153,13 +153,14 @@ Other [examples](https://github.com/adap/flower/tree/main/examples):
 - [Flower with KaplanMeierFitter from the lifelines library](https://github.com/adap/flower/tree/main/examples/federated-kaplan-meier-fitter)
 - [Sample Level Privacy with Opacus](https://github.com/adap/flower/tree/main/examples/opacus)
 - [Sample Level Privacy with TensorFlow-Privacy](https://github.com/adap/flower/tree/main/examples/tensorflow-privacy)
+- [Flower with a Tabular Dataset](https://github.com/adap/flower/tree/main/examples/fl-tabular)
 
 ## Community
 
 Flower is built by a wonderful community of researchers and engineers. [Join Slack](https://flower.ai/join-slack) to meet them, [contributions](#contributing-to-flower) are welcome.
 
 <a href="https://github.com/adap/flower/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=adap/flower" />
+  <img src="https://contrib.rocks/image?repo=adap/flower&columns=10" />
 </a>
 
 ## Citation

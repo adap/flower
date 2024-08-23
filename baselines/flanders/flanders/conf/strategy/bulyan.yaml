@@ -1,0 +1,8 @@
+---
+name: bulyan
+
+strategy:
+  _target_: flwr.server.strategy.Bulyan
+  _recursive_: true
+  num_malicious_clients: $(server.num_malicious)
+  to_keep: 0 # Normal Krum is applied

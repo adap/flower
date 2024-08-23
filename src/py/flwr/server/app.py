@@ -34,8 +34,10 @@ from cryptography.hazmat.primitives.serialization import (
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
+from flwr.common.config import get_flwr_dir
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
+    TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
 )
@@ -48,6 +50,7 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
 from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
+from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
 
 from .client_manager import ClientManager
 from .history import History
@@ -55,6 +58,8 @@ from .server import Server, init_defaults, run_fl
 from .server_config import ServerConfig
 from .strategy import Strategy
 from .superlink.driver.driver_grpc import run_driver_api_grpc
+from .superlink.ffs.ffs_factory import FfsFactory
+from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
 from .superlink.fleet.grpc_bidi.grpc_server import (
     generic_create_grpc_server,
     start_grpc_server,
@@ -69,6 +74,7 @@ ADDRESS_FLEET_API_GRPC_BIDI = "[::]:8080"  # IPv6 to keep start_server compatibl
 ADDRESS_FLEET_API_REST = "0.0.0.0:9093"
 
 DATABASE = ":flwr-in-memory-state:"
+BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
 
 
 def start_server(  # pylint: disable=too-many-arguments,too-many-locals
@@ -208,21 +214,27 @@ def run_superlink() -> None:
     # Initialize StateFactory
     state_factory = StateFactory(args.database)
 
+    # Initialize FfsFactory
+    ffs_factory = FfsFactory(args.storage_dir)
+
     # Start Driver API
     driver_server: grpc.Server = run_driver_api_grpc(
         address=driver_address,
         state_factory=state_factory,
+        ffs_factory=ffs_factory,
         certificates=certificates,
     )
 
     grpc_servers = [driver_server]
     bckg_threads = []
     if not args.fleet_api_address:
-        args.fleet_api_address = (
-            ADDRESS_FLEET_API_GRPC_RERE
-            if args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE
-            else ADDRESS_FLEET_API_REST
-        )
+        if args.fleet_api_type in [
+            TRANSPORT_TYPE_GRPC_RERE,
+            TRANSPORT_TYPE_GRPC_ADAPTER,
+        ]:
+            args.fleet_api_address = ADDRESS_FLEET_API_GRPC_RERE
+        elif args.fleet_api_type == TRANSPORT_TYPE_REST:
+            args.fleet_api_address = ADDRESS_FLEET_API_REST
 
     fleet_address, host, port = _format_address(args.fleet_api_address)
 
@@ -291,8 +303,16 @@ def run_superlink() -> None:
         fleet_server = _run_fleet_api_grpc_rere(
             address=fleet_address,
             state_factory=state_factory,
+            ffs_factory=ffs_factory,
             certificates=certificates,
             interceptors=interceptors,
+        )
+        grpc_servers.append(fleet_server)
+    elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_ADAPTER:
+        fleet_server = _run_fleet_api_grpc_adapter(
+            address=fleet_address,
+            state_factory=state_factory,
+            certificates=certificates,
         )
         grpc_servers.append(fleet_server)
     else:
@@ -421,7 +441,7 @@ def _try_obtain_certificates(
         log(WARN, "Option `--insecure` was set. Starting insecure HTTP server.")
         return None
     # Check if certificates are provided
-    if args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE:
+    if args.fleet_api_type in [TRANSPORT_TYPE_GRPC_RERE, TRANSPORT_TYPE_GRPC_ADAPTER]:
         if args.ssl_certfile and args.ssl_keyfile and args.ssl_ca_certfile:
             if not isfile(args.ssl_ca_certfile):
                 sys.exit("Path argument `--ssl-ca-certfile` does not point to a file.")
@@ -470,6 +490,7 @@ def _try_obtain_certificates(
 def _run_fleet_api_grpc_rere(
     address: str,
     state_factory: StateFactory,
+    ffs_factory: FfsFactory,
     certificates: Optional[Tuple[bytes, bytes, bytes]],
     interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None,
 ) -> grpc.Server:
@@ -477,6 +498,7 @@ def _run_fleet_api_grpc_rere(
     # Create Fleet API gRPC server
     fleet_servicer = FleetServicer(
         state_factory=state_factory,
+        ffs_factory=ffs_factory,
     )
     fleet_add_servicer_to_server_fn = add_FleetServicer_to_server
     fleet_grpc_server = generic_create_grpc_server(
@@ -488,6 +510,30 @@ def _run_fleet_api_grpc_rere(
     )
 
     log(INFO, "Flower ECE: Starting Fleet API (gRPC-rere) on %s", address)
+    fleet_grpc_server.start()
+
+    return fleet_grpc_server
+
+
+def _run_fleet_api_grpc_adapter(
+    address: str,
+    state_factory: StateFactory,
+    certificates: Optional[Tuple[bytes, bytes, bytes]],
+) -> grpc.Server:
+    """Run Fleet API (GrpcAdapter)."""
+    # Create Fleet API gRPC server
+    fleet_servicer = GrpcAdapterServicer(
+        state_factory=state_factory,
+    )
+    fleet_add_servicer_to_server_fn = add_GrpcAdapterServicer_to_server
+    fleet_grpc_server = generic_create_grpc_server(
+        servicer_and_add_fn=(fleet_servicer, fleet_add_servicer_to_server_fn),
+        server_address=address,
+        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
+        certificates=certificates,
+    )
+
+    log(INFO, "Flower ECE: Starting Fleet API (GrpcAdapter) on %s", address)
     fleet_grpc_server.start()
 
     return fleet_grpc_server
@@ -577,6 +623,11 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         default=DATABASE,
     )
     parser.add_argument(
+        "--storage-dir",
+        help="The base directory to store the objects for the Flower File System.",
+        default=BASE_DIR,
+    )
+    parser.add_argument(
         "--auth-list-public-keys",
         type=str,
         help="A CSV file (as a path str) containing a list of known public "
@@ -608,7 +659,11 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         "--fleet-api-type",
         default=TRANSPORT_TYPE_GRPC_RERE,
         type=str,
-        choices=[TRANSPORT_TYPE_GRPC_RERE, TRANSPORT_TYPE_REST],
+        choices=[
+            TRANSPORT_TYPE_GRPC_RERE,
+            TRANSPORT_TYPE_GRPC_ADAPTER,
+            TRANSPORT_TYPE_REST,
+        ],
         help="Start a gRPC-rere or REST (experimental) Fleet API server.",
     )
     parser.add_argument(
