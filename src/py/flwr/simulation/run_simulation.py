@@ -35,8 +35,8 @@ from flwr.common.constant import RUN_ID_NUM_BYTES
 from flwr.common.logger import (
     set_logger_propagation,
     update_console_handler,
-    warn_deprecated_feature_with_example,
     warn_deprecated_feature,
+    warn_deprecated_feature_with_example,
 )
 from flwr.common.typing import Run, UserConfig
 from flwr.server.driver import Driver, InMemoryDriver
@@ -112,12 +112,14 @@ def run_simulation_from_cli() -> None:
     # Add warnings for deprecated server_app and client_app arguments
     if args.server_app:
         warn_deprecated_feature(
-            "The `--server-app` argument is deprecated. Use the `--app` argument instead."
+            "The `--server-app` argument is deprecated. "
+            "Please use the `--app` argument instead."
         )
 
     if args.client_app:
         warn_deprecated_feature(
-            "The `--client-app` argument is deprecated. Use the `--app` argument instead."
+            "The `--client-app` argument is deprecated. "
+            "Use the `--app` argument instead."
         )
 
     if args.enable_tf_gpu_growth:
