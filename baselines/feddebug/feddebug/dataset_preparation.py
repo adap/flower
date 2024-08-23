@@ -13,13 +13,8 @@ import shutil
 import tarfile
 import urllib
 
-from logging import DEBUG, INFO
-from flwr.common.logger import log
-
 import torch
 import torchvision
-
-
 from PIL import Image
 from torch.utils.model_zoo import tqdm
 from torchvision.datasets import MNIST
@@ -28,11 +23,13 @@ from torchvision.datasets.utils import check_integrity
 
 def _gen_bar_updater():
     pbar = tqdm(total=None)
+
     def bar_update(count, block_size, total_size):
         if pbar.total is None and total_size:
             pbar.total = total_size
         progress_bytes = count * block_size
         pbar.update(progress_bytes - pbar.n)
+
     return bar_update
 
 
@@ -153,7 +150,6 @@ class FEMNIST(MNIST):
     def __init__(
         self, root, train=True, transform=None, target_transform=None, download=True
     ) -> None:
-
         super(MNIST, self).__init__(root, transform=transform)
         self.train = train
         self.transform = transform
@@ -281,7 +277,7 @@ def _get_train_val_datasets(dataset_name, data_dir):
         valid_ds = SubsetToDataset(test_ds)
 
         return train_ds, valid_ds, 10
-    
+
     elif dataset_name == "mnist":
         transform = torchvision.transforms.Compose(
             [
@@ -300,8 +296,7 @@ def _get_train_val_datasets(dataset_name, data_dir):
         )
 
         return train_ds, valid_ds, 10
-    
-    
+
     else:
         raise NotImplementedError(f"Dataset {dataset_name} not implemented.")
 

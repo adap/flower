@@ -5,15 +5,15 @@ example, you may define here things like: loading a model from a checkpoint, sav
 results, plotting.
 """
 
+import random
 from logging import INFO
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import torch
 from diskcache import Index
 from flwr.common.logger import log
-import random
-import numpy as np
 
 
 def seed_everything(seed=786):

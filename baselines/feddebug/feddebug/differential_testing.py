@@ -4,19 +4,18 @@ import copy
 import itertools
 import time
 from logging import DEBUG, INFO, WARNING
-
+from typing import Any, Dict
 
 import torch
 import torch.nn.functional as F
 from diskcache import Index
 from flwr.common.logger import log
 from torchvision.transforms import Compose, Normalize, RandomHorizontalFlip, Resize
-
+from tqdm import tqdm
 
 from feddebug.models import initialize_model
 from feddebug.neuron_activation import get_neurons_activations
 from feddebug.utils import seed_everything
-from tqdm import tqdm
 
 seed_everything(786)
 
@@ -148,18 +147,20 @@ class FaultyClientLocalization:
     def __init__(self, client2model, generated_inputs, device) -> None:
         self.generated_inputs = generated_inputs
         self.device = device
-        self.c2input2acts= {}
+        self.c2input2acts: Dict[Any, Any] = {}
         self._update_neuron_coverage_func(client2model)
         self.clients_ids = set(client2model.keys())
-        self.leave_1_out_combs =self._update_leave_1_out_combs(self.clients_ids)
+        self.leave_1_out_combs = self._update_leave_1_out_combs(self.clients_ids)
 
     def _update_neuron_coverage_func(self, client2model):
         for client_id, model in tqdm(client2model.items()):
             model = model.to(self.device)
-            fuzz_input2_activations = [get_neurons_activations(model, img.to(self.device))for img in self.generated_inputs]
+            fuzz_input2_activations = [
+                get_neurons_activations(model, img.to(self.device))
+                for img in self.generated_inputs
+            ]
             self.c2input2acts[client_id] = fuzz_input2_activations
             model = model.to(torch.device("cpu"))
-            
 
     def _update_leave_1_out_combs(self, remaining_clients):
         self.leave_1_out_combs = _make_all_subsets_of_size_n(
@@ -168,7 +169,9 @@ class FaultyClientLocalization:
         return self.leave_1_out_combs
 
     def _find_normal_clients_seq_v1(self, input_id, na_t):
-        client2_na = {cid: c2na[input_id] > na_t for cid, c2na in self.c2input2acts.items()}
+        client2_na = {
+            cid: c2na[input_id] > na_t for cid, c2na in self.c2input2acts.items()
+        }
         clients_ids = self._get_clients_ids_with_highest_common_neurons(client2_na)
         return clients_ids
 
@@ -184,33 +187,38 @@ class FaultyClientLocalization:
             intersect_tensor = _torch_intersection(c2act)
             return intersect_tensor.sum().item()
 
-        count_of_common_neurons = [_labmda_count(comb) for comb in self.leave_1_out_combs]
-        
+        count_of_common_neurons = [
+            _labmda_count(comb) for comb in self.leave_1_out_combs
+        ]
+
         highest_number_of_common_neurons = max(count_of_common_neurons)
         val_index = count_of_common_neurons.index(highest_number_of_common_neurons)
         val_clients_ids = self.leave_1_out_combs[val_index]
-        
+
         return val_clients_ids
-    
+
     def _get_faulty_client_per_input(self, fuzz_input_id, num_bugs, na_t):
         potential_faulty_clients = None
         temp_clients_ids = self.clients_ids
         for _ in range(num_bugs):
             benign_clients_ids = self._find_normal_clients_seq_v1(fuzz_input_id, na_t)
             potential_faulty_clients = temp_clients_ids - benign_clients_ids
-            log(DEBUG ,f"Malicious clients {potential_faulty_clients}")
-            self._update_leave_1_out_combs(temp_clients_ids-potential_faulty_clients)
+            log(DEBUG, f"Malicious clients {potential_faulty_clients}")
+            self._update_leave_1_out_combs(temp_clients_ids - potential_faulty_clients)
         return potential_faulty_clients
-    
+
     def run_fault_localization(self, na_t, num_bugs):
         """Run the fault localization algorithm and return the faulty client(s)."""
         faulty_clients_on_gen_inputs = []
-        for fuzz_input_id in range(len(self.generated_inputs)):        
-            potential_faulty_clients_per_input =  self._get_faulty_client_per_input(fuzz_input_id, num_bugs, na_t)
-            faulty_clients_on_gen_inputs.append(potential_faulty_clients_per_input)    
-            self._update_leave_1_out_combs(self.clients_ids) # reset the leave 1 out combinations for next input  
-            # print(f">> Potential Malicious clients {potential_faulty_clients_per_input}")
-                
+        for fuzz_input_id in range(len(self.generated_inputs)):
+            potential_faulty_clients_per_input = self._get_faulty_client_per_input(
+                fuzz_input_id, num_bugs, na_t
+            )
+            faulty_clients_on_gen_inputs.append(potential_faulty_clients_per_input)
+            self._update_leave_1_out_combs(
+                self.clients_ids
+            )  # reset the leave 1 out combinations for next input
+
         assert len(faulty_clients_on_gen_inputs) == len(self.generated_inputs)
         return faulty_clients_on_gen_inputs
 
@@ -239,8 +247,10 @@ def _get_transforms_for_diff_testing(dname):
         transform_dict["test"] = Compose(
             [Resize((32, 32)), Normalize((0.1307,), (0.3081,))]
         )
-    else: 
-        raise ValueError(f"Dataset {dname} is not supported. Add the transforms for this dataset.")
+    else:
+        raise ValueError(
+            f"Dataset {dname} is not supported. Add the transforms for this dataset."
+        )
 
     return transform_dict
 
@@ -255,7 +265,7 @@ class FedDebug:
         self._load_training_config()
         self._initialize_and_load_models()
         self.na_threshold = cfg.neuron_activation_threshold
-    
+
     def _extract_round_id(self) -> None:
         self.round_id = self.round_key.split(":")[-1]
 
@@ -266,8 +276,16 @@ class FedDebug:
         exp_dict = self.training_cache[self.cfg.exp_key]
         self.train_cfg = exp_dict["train_cfg"]  # type: ignore
         self.num_bugs = len(self.train_cfg.faulty_clients_ids)  # type: ignore
-        log(INFO, f"True Malacious/Faulty Clients (i.e., Ground Truth) IDs are: {self.train_cfg.faulty_clients_ids}")
-        log(INFO, f'Now localizing above mentioned faulty clients using differential testing approach.')
+        log(
+            INFO,
+            "True Malacious/Faulty Clients "
+            f"(i.e., Ground Truth) IDs are: {self.train_cfg.faulty_clients_ids}",
+        )
+        log(
+            INFO,
+            "Now localizing above mentioned faulty clients"
+            " using differential testing approach.",
+        )
         self.input_shape = tuple(exp_dict["input_shape"])  # type: ignore
         self.transform_func = _get_transforms_for_diff_testing(
             dname=self.train_cfg.dataset.name
@@ -318,9 +336,14 @@ class FedDebug:
             faster_input_generation=self.cfg.faster_input_generation,
         )
         selected_inputs, input_gen_time = generate_inputs.get_inputs()
-        log(INFO, f"Generated {len(selected_inputs)} inputs in {input_gen_time} seconds.")
+        log(
+            INFO,
+            f"Generated {len(selected_inputs)} inputs in {input_gen_time} seconds.",
+        )
         start = time.time()
-        faultyclientlocalization = FaultyClientLocalization(self.client2model, selected_inputs, device=self.cfg.device)
+        faultyclientlocalization = FaultyClientLocalization(
+            self.client2model, selected_inputs, device=self.cfg.device
+        )
 
         potential_faulty_clients_for_each_input = (
             faultyclientlocalization.run_fault_localization(
@@ -328,17 +351,23 @@ class FedDebug:
             )
         )
         fault_localization_time = time.time() - start
-        log(INFO, f"Faulty Client Localization Time: {fault_localization_time} seconds.")
-        
+        log(
+            INFO, f"Faulty Client Localization Time: {fault_localization_time} seconds."
+        )
+
         return (
             potential_faulty_clients_for_each_input,
             input_gen_time,
             fault_localization_time,
         )
 
-    def run(self):  
+    def run(self):
         """Run the debugging analysis."""
-        predicted_faulty_clients, input_gen_time, fault_localization_time = self._help_run(self.cfg.num_inputs, self.na_threshold)
+        (
+            predicted_faulty_clients,
+            input_gen_time,
+            fault_localization_time,
+        ) = self._help_run(self.cfg.num_inputs, self.na_threshold)
 
         fault_localization_acc = self._get_fault_localization_accuracy(
             predicted_faulty_clients
@@ -455,4 +484,3 @@ def eval_na_threshold(cfg):
         }
 
     debug_results_cache[cfg.threshold_variation_exp_key] = na_cached_results_dict
-

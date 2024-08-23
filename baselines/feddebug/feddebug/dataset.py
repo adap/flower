@@ -15,7 +15,7 @@ from logging import INFO, WARNING
 import torch
 from flwr.common.logger import log
 
-from feddebug.dataset_preparation import (prepare_iid_dataset, prepare_niid_dataset)
+from feddebug.dataset_preparation import prepare_iid_dataset, prepare_niid_dataset
 
 
 class NoisyDataset(torch.utils.data.Dataset):
@@ -85,10 +85,15 @@ class ClientsAndServerDatasetsPrep:
                 noise_rate=self.cfg.noise_rate,
                 num_classes=self.cfg.dataset.num_classes,
             )
-            log(WARNING, f"      ************* Client {cid} is made noisy.   *************")
+            log(
+                WARNING,
+                f"      ************* Client {cid} is made noisy.   *************",
+            )
             self.client2class[cid] = "noisy"
-        log(INFO, f"            ******** All Malacious/Faulty Clients are: {self.cfg.faulty_clients_ids} ********")
-
+        log(
+            INFO,
+            f"** All Malacious Clients are: {self.cfg.faulty_clients_ids}**",
+        )
 
     def _setup_dataset(self):
         self.client2class = {}

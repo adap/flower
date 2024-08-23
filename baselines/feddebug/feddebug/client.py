@@ -5,11 +5,12 @@ to instantiate your client.
 """
 
 import gc
+from logging import INFO
 
 import flwr as fl
 import torch
 from flwr.common.logger import log
-from logging import DEBUG, INFO
+
 from feddebug.models import initialize_model, train_neural_network
 from feddebug.utils import get_parameters, set_parameters
 

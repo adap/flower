@@ -4,7 +4,6 @@ It includes processioning the dataset, instantiate strategy, specify how the glo
 model is going to be evaluated, etc. At the end, this script saves the results.
 """
 
-
 import time
 from functools import partial
 from logging import DEBUG, INFO
@@ -22,7 +21,9 @@ from feddebug.differential_testing import (
     run_fed_debug_differential_testing,
 )
 from feddebug.utils import seed_everything
+
 seed_everything(786)
+
 
 def _flwr_fl_sim(cfg, client2data, server_data, cache):
     client_app = fl.client.ClientApp(

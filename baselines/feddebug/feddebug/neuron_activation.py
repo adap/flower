@@ -3,7 +3,10 @@
 import torch
 import torch.nn.functional as F
 
+
 class NeuronActivation:
+    """Class to get the activations of all neurons in the model."""
+
     def __init__(self):
         self.hooks_storage = []
 
@@ -33,6 +36,7 @@ class NeuronActivation:
         return all_hooks
 
     def get_neurons_activations(self, model, img):
+        """Return the activations of model for the given input."""
         layer2output = []
         layers = self._get_all_layers_in_neural_network(model)
         hooks = self._insert_hooks(layers)
@@ -42,11 +46,13 @@ class NeuronActivation:
             layer2output.append(activations)
         _ = [h.remove() for h in hooks]  # remove the hooks
         self.hooks_storage = []
-        neurons = torch.cat([out.flatten() for out in layer2output]).flatten().detach().cpu()
+        neurons = (
+            torch.cat([out.flatten() for out in layer2output]).flatten().detach().cpu()
+        )
         return neurons
+
 
 def get_neurons_activations(model, img):
     """Return the activations of all neurons in the model for the given input image."""
-    na = NeuronActivation()
-    return na.get_neurons_activations(model, img)
-    
+    neurons = NeuronActivation()
+    return neurons.get_neurons_activations(model, img)
