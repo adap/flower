@@ -43,7 +43,6 @@ def load_data(partition_id, num_clients):
         )
 
     # Load the partition for this `partition_id`
-    log(INFO, "Loading partition...")
     partition = fds.load_partition(partition_id, split="train")
     partition.set_format("numpy")
 
