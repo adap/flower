@@ -25,7 +25,7 @@ from argparse import Namespace
 from logging import DEBUG, ERROR, INFO, WARNING
 from pathlib import Path
 from time import sleep
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from flwr.cli.config_utils import load_and_validate
 from flwr.client import ClientApp
@@ -91,6 +91,17 @@ def _check_args_do_not_interfere(args: Namespace) -> bool:
     return True
 
 
+def _replace_keys(d: Any, match: str, target: str) -> Any:
+    if isinstance(d, dict):
+        return {
+            k.replace(match, target): _replace_keys(v, match, target)
+            for k, v in d.items()
+        }
+    if isinstance(d, list):
+        return [_replace_keys(i, match, target) for i in d]
+    return d
+
+
 # Entry point from CLI
 # pylint: disable=too-many-locals
 def run_simulation_from_cli() -> None:
@@ -104,6 +115,14 @@ def run_simulation_from_cli() -> None:
             "variable to true.",
             code_example='TF_FORCE_GPU_ALLOW_GROWTH="true" flower-simulation <...>',
         )
+
+    # Load JSON config
+    backend_config_dict = json.loads(args.backend_config)
+
+    if backend_config_dict:
+        # Backend config internally operates with `_` not with `-`
+        backend_config_dict = _replace_keys(backend_config_dict, match="-", target="_")
+        log(DEBUG, "backend_config_dict: %s", backend_config_dict)
 
     # We are supporting two modes for the CLI entrypoint:
     # 1) Running an app dir containing a `pyproject.toml`
@@ -166,9 +185,6 @@ def run_simulation_from_cli() -> None:
         fab_hash="",
         override_config=override_config,
     )
-
-    # Load JSON config
-    backend_config_dict = json.loads(args.backend_config)
 
     _run_simulation(
         server_app_attr=server_app_attr,
