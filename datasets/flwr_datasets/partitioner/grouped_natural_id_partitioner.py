@@ -48,7 +48,8 @@ class GroupedNaturalIdPartitioner(Partitioner):
 
     Examples
     --------
-    Partition users in the "sentiment140" (aka Twitter) dataset into groups of two users following the default mode:
+    Partition users in the "sentiment140" (aka Twitter) dataset into groups of two
+    users following the default mode:
 
     >>> from flwr_datasets import FederatedDataset
     >>> from flwr_datasets.partitioner import GroupedNaturalIdPartitioner
