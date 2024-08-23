@@ -22,6 +22,8 @@ import grpc
 from google.protobuf.message import Message as GrpcMessage
 
 from flwr.common.logger import log
+from flwr.server.superlink.ffs.ffs_factory import FfsFactory
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto import grpcadapter_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
@@ -60,8 +62,9 @@ def _handle(
 class GrpcAdapterServicer(grpcadapter_pb2_grpc.GrpcAdapterServicer):
     """Fleet API via GrpcAdapter servicer."""
 
-    def __init__(self, state_factory: StateFactory) -> None:
+    def __init__(self, state_factory: StateFactory, ffs_factory: FfsFactory) -> None:
         self.state_factory = state_factory
+        self.ffs_factory = ffs_factory
 
     def SendReceive(
         self, request: MessageContainer, context: grpc.ServicerContext
@@ -80,6 +83,8 @@ class GrpcAdapterServicer(grpcadapter_pb2_grpc.GrpcAdapterServicer):
             return _handle(request, PushTaskResRequest, self._push_task_res)
         if request.grpc_message_name == GetRunRequest.__qualname__:
             return _handle(request, GetRunRequest, self._get_run)
+        if request.grpc_message_name == GetFabRequest.__qualname__:
+            return _handle(request, GetFabRequest, self._get_fab)
         raise ValueError(f"Invalid grpc_message_name: {request.grpc_message_name}")
 
     def _create_node(self, request: CreateNodeRequest) -> CreateNodeResponse:
@@ -128,4 +133,12 @@ class GrpcAdapterServicer(grpcadapter_pb2_grpc.GrpcAdapterServicer):
         return message_handler.get_run(
             request=request,
             state=self.state_factory.state(),
+        )
+    
+    def _get_fab(self, request: GetFabRequest) -> GetFabResponse:
+        """Get FAB."""
+        log(INFO, "GrpcAdapter.GetFab")
+        return message_handler.get_fab(
+            request=request,
+            ffs=self.ffs_factory.ffs(),
         )
