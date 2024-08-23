@@ -36,7 +36,7 @@ flower-supernode
 ~~~~~~~~~~~~~~~~~
 
 .. argparse::
-   :module: flwr.client.app
+   :module: flwr.client.supernode.app
    :func: _parse_args_run_supernode
    :prog: flower-supernode
 
@@ -49,3 +49,13 @@ flower-server-app
    :module: flwr.server.run_serverapp
    :func: _parse_args_run_server_app
    :prog: flower-server-app
+
+.. _flower-superexec-apiref:
+
+flower-superexec
+~~~~~~~~~~~~~~~~~
+
+.. argparse::
+   :module: flwr.superexec.app
+   :func: _parse_args_run_superexec
+   :prog: flower-superexec
