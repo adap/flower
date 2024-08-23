@@ -1,7 +1,7 @@
 """
 This python file is adapted from https://github.com/lm-sys/FastChat/blob/main/fastchat/llm_judge/gen_model_answer.py
 
-FastChat (https://github.com/lm-sys/FastChat) is Licensed under the Apache License, Version 2.0.
+FastChat (https://github.com/lm-sys/FastChat) is licensed under the Apache License, Version 2.0.
 
 Citation:
 @misc{zheng2023judging,
