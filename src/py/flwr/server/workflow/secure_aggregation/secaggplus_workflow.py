@@ -99,6 +99,7 @@ class SecAggPlusWorkflow:
     contributions to compute the weighted average of model parameters.
 
     The protocol involves four main stages:
+
     - 'setup': Send SecAgg+ configuration to clients and collect their public keys.
     - 'share keys': Broadcast public keys among clients and collect encrypted secret
       key shares.

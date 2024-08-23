@@ -209,12 +209,11 @@ def run_simulation(
         messages sent by the `ServerApp`.
 
     num_supernodes : int
-        Number of nodes that run a ClientApp. They can be sampled by a
-        Driver in the ServerApp and receive a Message describing what the ClientApp
-        should perform.
+        Number of nodes that run a ClientApp. They can be sampled by a Driver in the
+        ServerApp and receive a Message describing what the ClientApp should perform.
 
     backend_name : str (default: ray)
-        A simulation backend that runs `ClientApp`s.
+        A simulation backend that runs `ClientApp`'s.
 
     backend_config : Optional[BackendConfig]
         'A dictionary to configure a backend. Separate dictionaries to configure
