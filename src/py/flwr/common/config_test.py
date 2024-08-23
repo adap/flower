@@ -234,7 +234,7 @@ def test_unflatten_dict() -> None:
     """Test unflatten_dict with a flat dictionary."""
     raw_dict = {"a-1.b-2.c-3": "d", "e": "f"}
     expected = {"a_1": {"b_2": {"c_3": "d"}}, "e": "f"}
-    assert unflatten_dict(raw_dict) == expected
+    assert unflatten_dict(raw_dict, replace=True) == expected
 
 
 def test_parse_config_args_none() -> None:
