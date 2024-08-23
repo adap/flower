@@ -41,7 +41,7 @@ class GroupedNaturalIdPartitioner(Partitioner):
         - "allow-bigger": The first group can be bigger than the group_size.
         - "drop-reminder": The last group will be dropped if it is smaller than the
         group_size.
-        - "strict": Raises a ValueError if the remainder is not zero. In this mode you
+        - "strict": Raises a ValueError if the remainder is not zero. In this mode, you
         expect each group to have the same size.
     sort_unique_ids: bool
         If True, the unique natural ids will be sorted before creating the groups.
@@ -131,8 +131,8 @@ class GroupedNaturalIdPartitioner(Partitioner):
             )
 
         self._partition_id_to_natural_ids = {}
-        for group_of_natural_ids_id, group_of_natural_ids in zip(
-            range(len(groups_of_natural_ids)), groups_of_natural_ids
+        for group_of_natural_ids_id, group_of_natural_ids in enumerate(
+            groups_of_natural_ids
         ):
             self._partition_id_to_natural_ids[group_of_natural_ids_id] = (
                 group_of_natural_ids.tolist()
