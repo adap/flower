@@ -10,7 +10,9 @@ This code exemplifies a federated learning setup using the Flower framework on t
 
 This example uses [Flower Datasets](https://flower.ai/docs/datasets/) to download, partition and preprocess the dataset.
 
-## Project Setup
+## Set up the project
+
+### Clone the project
 
 Start by cloning the example project:
 
@@ -30,10 +32,9 @@ fl-tabular
 └── README.md
 ```
 
-### Installing dependencies
+### Install dependencies and project
 
-Project dependencies are defined in `pyproject.toml`.
-You can install the dependencies by invoking `pip`:
+Install the dependencies defined in `pyproject.toml` as well as the `fltabular` package.
 
 ```shell
 # From a new python environment, run:
