@@ -440,7 +440,9 @@ def start_client_internal(
                     run: Run = runs[run_id]
                     if get_fab is not None and run.fab_hash:
                         fab = get_fab(run.fab_hash)
-                        install_from_fab(fab.content, flwr_path, True)
+                        if not isolation:
+                            # If `ClientApp` runs in the same process, install the FAB
+                            install_from_fab(fab.content, flwr_path, True)
                         fab_id, fab_version = get_fab_metadata(fab.content)
                     else:
                         fab = None
@@ -450,12 +452,14 @@ def start_client_internal(
 
                     # Register context for this run
                     node_state.register_context(
-                        run_id=run_id, run=run, flwr_path=flwr_path
+                        run_id=run_id,
+                        run=run,
+                        flwr_path=flwr_path,
+                        fab=fab,
                     )
 
                     # Retrieve context for this run
                     context = node_state.retrieve_context(run_id=run_id)
-
                     # Create an error reply message that will never be used to prevent
                     # the used-before-assignment linting error
                     reply_message = message.create_error_reply(
@@ -484,6 +488,7 @@ def start_client_internal(
                                     message=message,
                                     context=context,
                                     run=run,
+                                    fab=fab,
                                     token=token,
                                 ),
                                 token_returned=start_subprocess,
