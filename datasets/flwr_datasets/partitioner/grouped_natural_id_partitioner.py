@@ -66,7 +66,7 @@ class GroupedNaturalIdPartitioner(Partitioner):
         group_size: int,
         mode: Literal[
             "allow-smaller", "allow-bigger", "drop-reminder", "strict"
-        ] = "allow-bigger",
+        ] = "allow-smaller",
         sort_unique_ids: bool = False,
     ) -> None:
         super().__init__()
