@@ -275,7 +275,7 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
         req = DeleteNodeRequest(node=node)
 
         # Send the request
-        res = _request(req, DeleteNodeResponse, PATH_CREATE_NODE)
+        res = _request(req, DeleteNodeResponse, PATH_DELETE_NODE)
         if res is None:
             return
 
