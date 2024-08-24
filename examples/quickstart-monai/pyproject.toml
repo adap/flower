@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "Federated Learning with MONAI and Flower (Quickstart Example)"
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.10.0",
+    "flwr-nightly[simulation]==1.11.0.dev20240823",
     "flwr-datasets[vision]>=0.3.0",
     "monai==1.3.2",
     "filelock==3.15.4",
@@ -34,3 +34,5 @@ default = "local-simulation"
 
 [tool.flwr.federations.local-simulation]
 options.num-supernodes = 10
+options.backend.client-resources.num-cpus = 4
+options.backend.client-resources.num-gpus = 0.0
