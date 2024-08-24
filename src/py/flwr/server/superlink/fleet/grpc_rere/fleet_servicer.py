@@ -51,19 +51,21 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         self, request: CreateNodeRequest, context: grpc.ServicerContext
     ) -> CreateNodeResponse:
         """."""
-        log(INFO, "FleetServicer.CreateNode")
+        log(INFO, "FleetServicer: CreateNode %s", request)
         response = message_handler.create_node(
             request=request,
             state=self.state_factory.state(),
         )
         log(INFO, "FleetServicer: Created node_id=%s", response.node.node_id)
+        log(DEBUG, "Created response: %s", response)
         return response
 
     def DeleteNode(
         self, request: DeleteNodeRequest, context: grpc.ServicerContext
     ) -> DeleteNodeResponse:
         """."""
-        log(INFO, "FleetServicer.DeleteNode")
+        log(INFO, "FleetServicer: DeleteNode node_id=%s", request.node.node_id)
+        log(DEBUG, "DeleteNode request: %s", request)
         return message_handler.delete_node(
             request=request,
             state=self.state_factory.state(),
@@ -71,7 +73,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
 
     def Ping(self, request: PingRequest, context: grpc.ServicerContext) -> PingResponse:
         """."""
-        log(DEBUG, "FleetServicer.Ping")
+        log(DEBUG, "FleetServicer: Ping %s", request)
         return message_handler.ping(
             request=request,
             state=self.state_factory.state(),
@@ -81,7 +83,8 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         self, request: PullTaskInsRequest, context: grpc.ServicerContext
     ) -> PullTaskInsResponse:
         """Pull TaskIns."""
-        log(INFO, "FleetServicer.PullTaskIns")
+        log(INFO, "FleetServicer: PullTaskIns node_id=%s", request.node.node_id)
+        log(DEBUG, "FleetServicer: PullTaskIns request: %s", request)
         return message_handler.pull_task_ins(
             request=request,
             state=self.state_factory.state(),
@@ -101,7 +104,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         self, request: GetRunRequest, context: grpc.ServicerContext
     ) -> GetRunResponse:
         """Get run information."""
-        log(INFO, "FleetServicer.GetRun")
+        log(INFO, "FleetServicer: GetRun %s", request)
         return message_handler.get_run(
             request=request,
             state=self.state_factory.state(),
@@ -111,7 +114,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         self, request: GetFabRequest, context: grpc.ServicerContext
     ) -> GetFabResponse:
         """Get FAB."""
-        log(DEBUG, "DriverServicer.GetFab")
+        log(INFO, "DriverServicer: GetFab: %s", request)
         return message_handler.get_fab(
             request=request,
             ffs=self.ffs_factory.ffs(),
