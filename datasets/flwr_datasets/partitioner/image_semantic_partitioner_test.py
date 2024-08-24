@@ -69,7 +69,7 @@ def _dummy_setup(
 class TestImageSemanticPartitionerSuccess(unittest.TestCase):
     """Test ImageSemanticPartitioner used with no exceptions."""
 
-    # pylint: disable=R0913
+    # pylint: disable=R0913, R0914
     @parameterized.expand(  # type: ignore
         [
             ((28, 28, 1), 3, 50, "label", 0, 32, 128, 2, "kmeans", 1, 2, 3),
@@ -135,7 +135,6 @@ class TestImageSemanticPartitionerSuccess(unittest.TestCase):
             ),
         )
 
-    # pylint: disable=R0201
     @parameterized.expand([((28, 28, 1),), ((3, 32, 32),), ((28, 28),)])  # type: ignore
     def test_data_shape(self, data_shape: Tuple[int]) -> None:
         """Test if data_shape is correct."""
@@ -169,10 +168,11 @@ class TestImageSemanticPartitionerSuccess(unittest.TestCase):
             (gmm_max_iter, gmm_init_params),
         )
 
-    @parameterized.expand([(1, None, None), (1, 2, None), (1, 2, 3)])
+    @parameterized.expand([(1, None, None), (1, 2, None), (1, 2, 3)])  # type: ignore
     def test_seeds(
         self, sample_seed: int, pca_seed: Optional[int], gmm_seed: Optional[int]
     ) -> None:
+        """Test if seeds are correct."""
         _sample_seed = sample_seed
         _pca_seed = pca_seed if pca_seed is not None else sample_seed
         _gmm_seed = gmm_seed if gmm_seed is not None else sample_seed
@@ -271,10 +271,13 @@ class TestImageSemanticPartitionerFailure(unittest.TestCase):
             )
             partitioner.load_partition(0)
 
-    @parameterized.expand([("1", None, None), (1.2, 2, None), (None, 2, 3)])
+    @parameterized.expand(  # type: ignore
+        [("1", None, None), (1.2, 2, None), (None, 2, 3)]
+    )
     def test_invalid_seeds(
         self, sample_seed: int, pca_seed: Optional[int], gmm_seed: Optional[int]
     ) -> None:
+        """Test if raises when the seeds are not integers."""
         with self.assertRaises((TypeError, ValueError)):
             _, partitioner = _dummy_setup(
                 sample_seed=sample_seed, pca_seed=pca_seed, gmm_seed=gmm_seed

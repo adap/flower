@@ -296,6 +296,7 @@ class ImageSemanticPartitioner(Partitioner):
             [[] for _ in range(self._num_partitions)] for _ in self._unique_classes
         ]
         for label in self._unique_classes:
+            print(f"Buliding clusters of label {label}")
             idx_current_label = np.where(targets == label)[0]
             # 10000 refers to official implementation
             embeddings_of_current_label = self._subsample(
@@ -329,6 +330,11 @@ class ImageSemanticPartitioner(Partitioner):
 
         while unmatched_labels:
             label_to_match = self._rng_numpy.choice(unmatched_labels)  # type: ignore
+
+            print(
+                "Computing pairwise KL-divergence between label ",
+                f"{latest_matched_label} and {label_to_match}",
+            )
 
             num_dist_1, num_dist_2 = (
                 label_cluster_means[latest_matched_label].shape[0],
