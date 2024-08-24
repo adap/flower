@@ -1,22 +1,49 @@
 [build-system]
-requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
-name = "quickstart-huggingface"
-version = "0.1.0"
-description = "Hugging Face Transformers Federated Learning Quickstart with Flower"
+[project]
+name = "huggingface_example"
+version = "1.0.0"
+description = "Federated Learning with Hugginface Transformers and Flower (Quickstart Example)"
+license = "Apache-2.0"
 authors = [
-    "The Flower Authors <hello@flower.ai>",
-    "Kaushik Amar Das <kaushik.das@iiitg.ac.in>",
+    { name = "The Flower Authors", email = "hello@flower.ai" },
+    { name = "Kaushik Amar Das", email = "kaushik.das@iiitg.ac.in" },
+]
+dependencies = [
+    "flwr-nightly[simulation]==1.11.0.dev20240823",
+    "flwr-datasets>=0.3.0",
+    "torch==2.4.0",
+    "transformers>=4.30.0,<5.0",
+    "evaluate>=0.4.0,<1.0",
+    "datasets>=2.0.0, <3.0",
+    "scikit-learn>=1.3.1, <2.0",
 ]
 
-[tool.poetry.dependencies]
-python = ">=3.8,<3.11"
-flwr = ">=1.0,<2.0"
-flwr-datasets = ">=0.0.2,<1.0.0"
-torch = ">=1.13.1,<2.0"
-transformers = ">=4.30.0,<5.0"
-evaluate = ">=0.4.0,<1.0"
-datasets = ">=2.0.0, <3.0"
-scikit-learn = ">=1.3.1, <2.0"
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "flwrlabs"
+
+[tool.flwr.app.components]
+serverapp = "huggingface_example.server_app:app"
+clientapp = "huggingface_example.client_app:app"
+
+[tool.flwr.app.config]
+num-server-rounds = 3
+model-name = "distilbert-base-uncased"
+fraction-fit = 0.05
+fraction-evaluate = 0.1
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 100
+
+[tool.flwr.federations.local-simulation-gpu]
+options.num-supernodes = 100
+options.backend.client-resources.num-cpus = 4 # each ClientApp assumes to use 4CPUs
+options.backend.client-resources.num-gpus = 1.0 # at most 1 ClientApp will run in a given GPU (lower it to increase parallelism)
