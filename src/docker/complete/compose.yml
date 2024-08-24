@@ -1,0 +1,117 @@
+services:
+  # create a SuperLink service
+  superlink:
+    image: flwr/superlink:${FLWR_VERSION:-1.10.0}
+    command:
+      - --insecure
+
+  # create a SuperExec service
+  superexec:
+    user: root
+    build:
+      context: ${PROJECT_DIR:-.}
+      dockerfile_inline: |
+        FROM flwr/superexec:${FLWR_VERSION:-1.10.0}
+
+        WORKDIR /app
+        COPY --chown=app:app pyproject.toml .
+        RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
+          && python -m pip install -U --no-cache-dir .
+
+        ENTRYPOINT ["flower-superexec"]
+    ports:
+      - 9093:9093
+    command:
+      - --executor
+      - flwr.superexec.deployment:executor
+      - --insecure
+      - --executor-config
+      - superlink="superlink:9091"
+    depends_on:
+      - superlink
+    volumes:
+      - apps-volume:/app/.flwr/apps/:rw
+
+  # create a two SuperNode service with different node configs
+  supernode-1:
+    user: root
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+    command:
+      - --superlink
+      - superlink:9092
+      - --insecure
+    depends_on:
+      - superlink
+    volumes:
+      - apps-volume:/app/.flwr/apps/:ro
+    build:
+      context: ${PROJECT_DIR:-.}
+      dockerfile_inline: |
+        FROM flwr/supernode:${FLWR_VERSION:-1.10.0}
+
+        WORKDIR /app
+        COPY --chown=app:app pyproject.toml .
+        RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
+          && python -m pip install -U --no-cache-dir .
+
+        ENTRYPOINT ["flower-supernode", "--node-config", "partition-id=0,num-partitions=2"]
+
+  supernode-2:
+    user: root
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+    command:
+      - --superlink
+      - superlink:9092
+      - --insecure
+    depends_on:
+      - superlink
+    volumes:
+      - apps-volume:/app/.flwr/apps/:ro
+    build:
+      context: ${PROJECT_DIR:-.}
+      dockerfile_inline: |
+        FROM flwr/supernode:${FLWR_VERSION:-1.10.0}
+
+        WORKDIR /app
+        COPY --chown=app:app pyproject.toml .
+        RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
+          && python -m pip install -U --no-cache-dir .
+
+        ENTRYPOINT ["flower-supernode", "--node-config", "partition-id=1,num-partitions=2"]
+
+  # uncomment to add another supernode
+  #
+  # supernode-3:
+  #   user: root
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: "2"
+  #   command:
+  #     - --superlink
+  #     - superlink:9092
+  #     - --insecure
+  #   depends_on:
+  #     - superlink
+  #   volumes:
+  #     - apps-volume:/app/.flwr/apps/:ro
+  #   build:
+  #     context: ${PROJECT_DIR:-.}
+  #     dockerfile_inline: |
+  #       FROM flwr/supernode:${FLWR_VERSION:-1.10.0}
+
+  #       WORKDIR /app
+  #       COPY --chown=app:app pyproject.toml .
+  #       RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
+  #         && python -m pip install -U --no-cache-dir .
+
+  #       ENTRYPOINT ["flower-supernode", "--node-config", "partition-id=0,num-partitions=2"]
+
+volumes:
+     apps-volume:

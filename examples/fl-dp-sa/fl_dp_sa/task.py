@@ -2,15 +2,14 @@
 
 from collections import OrderedDict
 from logging import INFO
-from flwr_datasets import FederatedDataset
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from flwr.common.logger import log
+from flwr_datasets import FederatedDataset
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
-
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 

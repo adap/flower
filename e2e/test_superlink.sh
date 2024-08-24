@@ -2,12 +2,7 @@
 set -e
 
 case "$1" in
-  framework-pandas)
-    server_arg="--insecure"
-    client_arg="--insecure"
-    server_dir="./"
-    ;;
-  bare-https)
+  e2e-bare-https)
     ./generate.sh
     server_arg="--ssl-ca-certfile certificates/ca.crt --ssl-certfile certificates/server.pem --ssl-keyfile certificates/server.key"
     client_arg="--root-certificates certificates/ca.crt"
@@ -16,7 +11,7 @@ case "$1" in
   *)
     server_arg="--insecure"
     client_arg="--insecure"
-    server_dir="./.."
+    server_dir="./"
     ;;
 esac
 
@@ -70,15 +65,15 @@ timeout 2m flower-superlink $server_arg $db_arg $rest_arg_superlink $server_auth
 sl_pid=$!
 sleep 3
 
-timeout 2m flower-supernode client:app $client_arg $rest_arg_supernode --superlink $server_address $client_auth_1 &
+timeout 2m flower-supernode ./ $client_arg $rest_arg_supernode --superlink $server_address $client_auth_1 &
 cl1_pid=$!
 sleep 3
 
-timeout 2m flower-supernode client:app $client_arg $rest_arg_supernode --superlink $server_address $client_auth_2 &
+timeout 2m flower-supernode ./ $client_arg $rest_arg_supernode --superlink $server_address $client_auth_2 &
 cl2_pid=$!
 sleep 3
 
-timeout 2m flower-server-app server:app $client_arg --dir $server_dir --superlink $server_app_address &
+timeout 2m flower-server-app $server_dir $client_arg --superlink $server_app_address &
 pid=$!
 
 wait $pid

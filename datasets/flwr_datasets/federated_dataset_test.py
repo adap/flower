@@ -48,9 +48,10 @@ mocked_datasets = ["cifar100", "svhn", "sentiment140", "speech_commands"]
         ("zh-plus/tiny-imagenet", "valid", ""),
         ("Mike0307/MNIST-M", "test", ""),
         ("flwrlabs/usps", "test", ""),
-        # Text
+        # Tabular
         ("scikit-learn/adult-census-income", None, ""),
         ("jlh/uci-mushrooms", None, ""),
+        ("scikit-learn/iris", None, ""),
         # Mocked
         # #Image
         ("cifar100", "test", ""),
