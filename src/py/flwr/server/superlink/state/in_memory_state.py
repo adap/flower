@@ -254,7 +254,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             del self.node_ids[node_id]
 
     def get_nodes(self, run_id: int) -> Set[int]:
-        """Return all available node nodes.
+        """Return all available nodes.
 
         Constraints
         -----------
