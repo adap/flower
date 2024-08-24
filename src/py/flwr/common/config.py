@@ -192,13 +192,10 @@ def parse_config_args(
         if config_line:
             matches = pattern.findall(config_line)
 
-            if (
-                len(matches) == 1
-                and "=" not in matches[0][0]
-                and matches[0][0].endswith(".toml")
-            ):
-                with Path(matches[0][0]).open("rb") as config_file:
+            if config_line.endswith(".toml"):
+                with Path(config_line).open("rb") as config_file:
                     overrides = flatten_dict(tomli.load(config_file))
+                break
             else:
                 toml_str = "\n".join(f"{k} = {v}" for k, v in matches)
                 overrides.update(tomli.loads(toml_str))
