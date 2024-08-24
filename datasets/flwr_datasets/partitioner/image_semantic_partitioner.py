@@ -90,8 +90,12 @@ class ImageSemanticPartitioner(Partitioner):
     shuffle: bool
         Whether to randomize the order of samples. Shuffling applied after the
         samples assignment to partitions.
-    seed: int
-        Seed used for dataset shuffling. It has no effect if `shuffle` is False.
+    sample_seed: int
+        Seed used for sampling.
+    pca_seed: Optional[int]
+        Seed used for PCA dimensionality reduction. If not set, sample_seed is used.
+    gmm_seed: Optional[int]
+        Seed used for GMM clustering. If not set, sample_seed is used.
 
     Examples
     --------
@@ -129,7 +133,9 @@ class ImageSemanticPartitioner(Partitioner):
         gmm_init_params: str = "kmeans",
         use_cuda: bool = False,
         shuffle: bool = True,
-        seed: Optional[int] = 42,
+        sample_seed: int = 42,
+        pca_seed: Optional[int] = None,
+        gmm_seed: Optional[int] = None,
     ) -> None:
         super().__init__()
         # Attributes based on the constructor
@@ -143,12 +149,20 @@ class ImageSemanticPartitioner(Partitioner):
         self._gmm_init_params = gmm_init_params
         self._use_cuda = use_cuda
         self._shuffle = shuffle
-        self._seed = seed
-        self._rng_numpy = np.random.default_rng(seed=self._seed)
+        if pca_seed is None:
+            pca_seed = sample_seed
+        if gmm_seed is None:
+            gmm_seed = sample_seed
+        self._sample_seed = sample_seed
+        self._pca_seed = pca_seed
+        self._gmm_seed = gmm_seed
+
+        self._check_variable_validation()
+
+        self._rng_numpy = np.random.default_rng(seed=self._sample_seed)
         # defaults, but some datasets have different names, e.g. cifar10 is "img"
         # So this variable might be changed in self._check_dataset_type_if_needed()
         self._data_column_name = "image"
-        self._check_variable_validation()
         # Utility attributes
         # The attributes below are determined during the first call to load_partition
         self._unique_classes: Optional[Union[List[int], List[str]]] = None
@@ -258,7 +272,7 @@ class ImageSemanticPartitioner(Partitioner):
         )
 
         if 0 < self._pca_components < embeddings_scaled.shape[1]:
-            pca = PCA(n_components=self._pca_components, random_state=self._seed)
+            pca = PCA(n_components=self._pca_components, random_state=self._pca_seed)
             # 100000 refers to official implementation
             pca.fit(self._subsample(embeddings_scaled, 100000))
             embeddings_scaled = torch.tensor(
@@ -275,7 +289,7 @@ class ImageSemanticPartitioner(Partitioner):
             max_iter=self._gmm_max_iter,
             reg_covar=1e-4,
             init_params=self._gmm_init_params,
-            random_state=self._seed,
+            random_state=self._gmm_seed,
         )
 
         label_cluster_list: List[List[List[int]]] = [
@@ -456,38 +470,11 @@ class ImageSemanticPartitioner(Partitioner):
             raise ValueError("The gmm max iter needs to be greater than zero.")
         if self._pca_components <= 0:
             raise ValueError("The pca components needs to be greater than zero.")
-
-
-if __name__ == "__main__":
-    # ===================== Test with custom Dataset =====================
-    from datasets import Dataset
-
-    dataset = {
-        "image": [np.random.randn(28, 28) for _ in range(50)],
-        "label": [i % 3 for i in range(50)],
-    }
-    dataset = Dataset.from_dict(dataset)
-    partitioner = ImageSemanticPartitioner(
-        num_partitions=5, partition_by="label", pca_components=30
-    )
-    partitioner.dataset = dataset
-    partition = partitioner.load_partition(0)
-    partition_sizes = partition_sizes = [
-        len(partitioner.load_partition(partition_id)) for partition_id in range(5)
-    ]
-    print(sorted(partition_sizes))
-    # ====================================================================
-
-    # ===================== Test with FederatedDataset =====================
-    # from flwr_datasets import FederatedDataset
-    # partitioner = ImageSemanticPartitioner(
-    #     num_partitions=5, partition_by="label", pca_components=128
-    # )
-    # fds = FederatedDataset(dataset="cifar10", partitioners={"train": partitioner})
-    # partition = fds.load_partition(0)
-    # print(partition[0])  # Print the first example
-    # partition_sizes = partition_sizes = [
-    #     len(fds.load_partition(partition_id)) for partition_id in range(5)
-    # ]
-    # print(sorted(partition_sizes))
-    # ======================================================================
+        if self._sample_seed is None:
+            raise ValueError("The sample seed needs to be specified.")
+        if not isinstance(self._sample_seed, int):
+            raise TypeError("The sample seed needs to be an integer.")
+        if not isinstance(self._pca_seed, int):
+            raise TypeError("The pca seed needs to be an integer.")
+        if not isinstance(self._gmm_seed, int):
+            raise TypeError("The gmm seed needs to be an integer.")
