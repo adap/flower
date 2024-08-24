@@ -1,7 +1,7 @@
 ---
 title: FedDebug Systematic Debugging for Federated Learning Applications
 url: https://dl.acm.org/doi/abs/10.1109/ICSE48619.2023.00053
-labels: [debugging, testing, software, fault localization, malicious, client, neural networks, cnn, image classification, data poisoning]
+labels: [malicious, client, debugging, testing, fault localization, neural networks, cnn, image classification, data poisoning]
 dataset: [cifar10, femnist] 
 ---
 
@@ -19,7 +19,8 @@ We design a systematic fault localization framework, FedDebug, that advances the
 **<u>Application of FedDebug</u>:** We used FedDebug to detect backdoor attacks in Federated Learning, resulting in [Fed-Defender](https://dl.acm.org/doi/10.1145/3617574.3617858). The code is implemented using the Flower Framework in [this repository](https://github.com/warisgill/FedDefender). We plan to adapt Fed-Defender to Flower baseline guidelines soon.
 
 ## High Level Overview of FedDebug Differential Testing Approach
-![[feddbug-approach.png]]
+
+![Malicious Client Localization](feddbug-approach.png)
 
 ## About this baseline
 **What's implemented:** 
@@ -84,6 +85,7 @@ The following command will run the default experimental setting in `conf/base.ya
 poetry run python -m feddebug.main device=cpu 
 ```  
 
+Output
 ```output
 ... 
 
@@ -124,7 +126,7 @@ poetry run python -m feddebug.main generate_table_csv=True
 Last Command Output
 ```output
 ...
-[2024-08-23 18:25:35,862][flwr][INFO] - [2024-08-23 18:28:42,744][flwr][INFO] - FedDebug’s malicious client(s) localization results svaed in fed_debug_results.csv.
+[flwr][INFO] - FedDebug’s malicious client(s) localization results svaed in fed_debug_results.csv.
 
 ```
 
