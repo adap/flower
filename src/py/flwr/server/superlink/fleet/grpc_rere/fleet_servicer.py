@@ -85,7 +85,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
     ) -> PullTaskInsResponse:
         """Pull TaskIns."""
         log(INFO, "[Fleet.PullTaskIns] node_id=%s", request.node.node_id)
-        log(DEBUG, "[Fleet.PullTaskIns] Created request: %s", request)
+        log(DEBUG, "[Fleet.PullTaskIns] Request: %s", request)
         return message_handler.pull_task_ins(
             request=request,
             state=self.state_factory.state(),
