@@ -5,4 +5,3 @@ dataset-name = "uoft-cs/cifar100"
 dataset-partition-by = "fine_label"
 
 model-name = "resnet50"
-model-dir = "./client_states/moon/cifar100_50c/"

@@ -15,4 +15,3 @@ dirichlet-alpha = 0.5
 
 model-name = "resnet50"
 model-output-dim = 256
-model-dir = "./client_states/moon/cifar100_fedprox/"
