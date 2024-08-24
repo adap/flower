@@ -7,11 +7,10 @@ framework: [MONAI]
 # Federated Learning with MONAI and Flower (Quickstart Example)
 
 This introductory example to Flower uses MONAI, but deep knowledge of MONAI is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case.
-Running this example in itself is quite easy. [MONAI](https://docs.monai.io/en/latest/index.html)(Medical Open Network for AI) is a PyTorch-based, open-source framework for deep learning in healthcare imaging, part of the PyTorch Ecosystem. This example uses a subset of the [MedMNIST](https://medmnist.com/) dataset including 6 classes, as done in [MONAI's classification demo](https://colab.research.google.com/drive/1wy8XUSnNWlhDNazFdvGBHLfdkGvOHBKe). Each client trains am [DenseNet121](https://docs.monai.io/en/stable/networks.html#densenet121) from MONAI. This example runs better with a GPU. If one is detectec, clients will use it.
+Running this example in itself is quite easy. [MONAI](https://docs.monai.io/en/latest/index.html)(Medical Open Network for AI) is a PyTorch-based, open-source framework for deep learning in healthcare imaging, part of the PyTorch Ecosystem. This example uses a subset of the [MedMNIST](https://medmnist.com/) dataset including 6 classes, as done in [MONAI's classification demo](https://colab.research.google.com/drive/1wy8XUSnNWlhDNazFdvGBHLfdkGvOHBKe). Each client trains am [DenseNet121](https://docs.monai.io/en/stable/networks.html#densenet121) from MONAI.
 
 > \[!NOTE\]
 > This example uses [Flower Datasets](https://flower.ai/docs/datasets/) to partition the MedMNIST dataset. Its a good example to show how to bring any dataset into Flower and partition it using any of the built-in [partitioners](https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html) (e.g. `DirichletPartitioner`, `PathologicalPartitioner`). Learn [how to use partitioners](https://flower.ai/docs/datasets/tutorial-use-partitioners.html) in a step-by-step tutorial.
-
 
 ## Set up the project
 
@@ -53,8 +52,15 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 
 ### Run with the Simulation Engine
 
+> \[!TIP\]
+> This example runs faster when the `ClientApp`s have access to a GPU. If your system has one, you can make use of it by configuring the `backend.client-resources` component in `pyproject.toml`. If you want to try running the example with GPU right away, use the `local-simulation-gpu` federation as shown below.
+
 ```bash
-flwr run .
+flwr run . # will execute with the default federation settings (ClientApps run on CPU)
+
+# Run with the `local-simulation-gpu` federation
+# You can adjust the `num-cpus` and `num-gpus` keys to control the degree of paralelism of your simulations
+flwr run . local-simulation-gpu
 ```
 
 You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
