@@ -237,7 +237,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             return node_id
 
     def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
-        """Delete a node node."""
+        """Delete a node."""
         with self.lock:
             if node_id not in self.node_ids:
                 raise ValueError(f"Node {node_id} not found")
