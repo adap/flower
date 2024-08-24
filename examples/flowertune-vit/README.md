@@ -1,5 +1,5 @@
 ---
-tags: [finetuneing, vision, fds]
+tags: [finetuning, vision, fds]
 dataset: [Oxford Flower-102]
 framework: [torch, torchvision]
 ---
@@ -16,15 +16,15 @@ Start by cloning the example project:
 
 ```shell
 git clone --depth=1 https://github.com/adap/flower.git _tmp \
-        && mv _tmp/examples/vit-finetune . \
+        && mv _tmp/examples/flowertune-vit . \
         && rm -rf _tmp \
-        && cd vit-finetune
+        && cd flowertune-vit
 ```
 
-This will create a new directory called `vit-finetune` with the following structure:
+This will create a new directory called `flowertune-vit` with the following structure:
 
 ```shell
-vit-finetune
+flowertune-vit
 ├── vitexample
 │   ├── __init__.py
 │   ├── client_app.py   # Defines your ClientApp
