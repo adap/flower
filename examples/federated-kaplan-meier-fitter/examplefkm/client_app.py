@@ -1,11 +1,13 @@
+"""examplefkm: A Flower / Lifelines app."""
+
 from typing import Dict, List, Tuple
 
 import flwr as fl
 import numpy as np
-from datasets import Dataset
-from flwr.common import NDArray, NDArrays
-from flwr_datasets.partitioner import NaturalIdPartitioner
-from lifelines.datasets import load_waltons
+from flwr.client import Client, ClientApp
+from flwr.common import NDArray, NDArrays, Context
+
+from examplefkm.task import load_partition
 
 
 class FlowerClient(fl.client.NumPyClient):
@@ -40,26 +42,17 @@ class FlowerClient(fl.client.NumPyClient):
         )
 
 
-# Prepare data
-X = load_waltons()
-partitioner = NaturalIdPartitioner(partition_by="group")
-partitioner.dataset = Dataset.from_pandas(X)
+def client_fn(context: Context) -> Client:
+    """Construct a Client that will be run in a ClientApp.
+
+    You can use settings in `context.run_config` to parameterize the
+    construction of your Client. You could use the `context.node_config` to, for
+    example, indicate which dataset to load (e.g accesing the partition-id).
+    """
+    partition_id = context.node_config["partition-id"]
+    times, events = load_partition(partition_id)
+    return FlowerClient(times=times, events=events).to_client()
 
 
-def get_client_fn(partition_id: int):
-    def client_fn(cid: str):
-        partition = partitioner.load_partition(partition_id).to_pandas()
-        events = partition["E"].values
-        times = partition["T"].values
-        return FlowerClient(times=times, events=events).to_client()
-
-    return client_fn
-
-
-# Run via `flower-client-app client:app`
-node_1_app = fl.client.ClientApp(
-    client_fn=get_client_fn(0),
-)
-node_2_app = fl.client.ClientApp(
-    client_fn=get_client_fn(1),
-)
+# Flower ClientApp
+app = ClientApp(client_fn=client_fn)
