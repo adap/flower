@@ -57,7 +57,7 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 flwr run .
 ```
 
-Run the project in the `local-simulation-gpu` federation that gives CPU and GPU resources to each `ClientApp`. By default, at most 4x`ClientApp` will run in parallel in the available GPU.
+Run the project in the `local-simulation-gpu` federation that gives CPU and GPU resources to each `ClientApp`. By default, at most 1x`ClientApp` will run in parallel in each available GPU. Note you can adjust the degree of paralellism but modifying the `client-resources` specification.
 
 ```bash
 # Run with the `local-simulation-gpu` federation

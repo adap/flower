@@ -14,7 +14,7 @@ authors = [
 dependencies = [
     "flwr-nightly[simulation]==1.11.0.dev20240823",
     "flwr-datasets>=0.3.0",
-    "torch>=1.13.1,<2.0",
+    "torch==2.4.0",
     "transformers>=4.30.0,<5.0",
     "evaluate>=0.4.0,<1.0",
     "datasets>=2.0.0, <3.0",
@@ -44,6 +44,6 @@ default = "local-simulation"
 options.num-supernodes = 100
 
 [tool.flwr.federations.local-simulation-gpu]
-options.num-supernodes = 10
-options.backend.client-resources.num-cpus = 4
-options.backend.client-resources.num-gpus = 0.25 # at most 4 ClientApps will run in a given GPU
+options.num-supernodes = 100
+options.backend.client-resources.num-cpus = 4 # each ClientApp assumes to use 4CPUs
+options.backend.client-resources.num-gpus = 1.0 # at most 1 ClientApp will run in a given GPU (lower it to increase parallelism)
