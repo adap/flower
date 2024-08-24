@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "Federated Finetuning of a Vision Transformer with Flower"
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.10.0",
+    "flwr-nightly[simulation]==1.11.0.dev20240823",
     "flwr-datasets[vision]>=0.3.0",
     "torch==2.2.1",
     "torchvision==0.17.1",
@@ -36,3 +36,8 @@ default = "local-simulation"
 
 [tool.flwr.federations.local-simulation]
 options.num-supernodes = 10
+
+[tool.flwr.federations.local-simulation-gpu]
+options.num-supernodes = 10
+options.backend.client-resources.num-cpus = 2 # each ClientApp assumes to use 2CPUs
+options.backend.client-resources.num-gpus = 0.2 # at most 5 ClientApp will run in a given GPU

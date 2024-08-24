@@ -1,3 +1,5 @@
+"""vitexample: A Flower / PyTorch app with Vision Transformers."""
+
 from logging import INFO
 
 import torch

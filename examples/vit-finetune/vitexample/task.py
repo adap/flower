@@ -1,3 +1,5 @@
+"""vitexample: A Flower / PyTorch app with Vision Transformers."""
+
 from collections import OrderedDict
 
 import torch

@@ -1,3 +1,5 @@
+"""vitexample: A Flower / PyTorch app with Vision Transformers."""
+
 import torch
 from torch.utils.data import DataLoader
 
