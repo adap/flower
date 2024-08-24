@@ -28,17 +28,17 @@ def seed_everything(seed=786):
 
 
 def _plot_line_plots(df_plot):
-    fig, axs = plt.subplots(2, 2, figsize=(12, 12))
+    fig, axs = plt.subplots(2, 2)
     fig.suptitle(
         "Malicious Clients Localization Accuracy vs Neuron Activation Threshold"
     )
 
     # Define combinations of models and datasets
     combinations = [
-        ("resnet50", "cifar10"),
-        ("resnet50", "femnist"),
+        ("resnet18", "cifar10"),
+        ("resnet18", "mnist"),
         ("densenet121", "cifar10"),
-        ("densenet121", "femnist"),
+        ("densenet121", "mnist"),
     ]
 
     # Plot each combination
@@ -71,26 +71,23 @@ def _plot_line_plots(df_plot):
         # axs[row, col].plot(x_interp, y_interp, 'o-', color='black', markersize=3)
 
     plt.tight_layout()
-    plt.show()
+    # plt.show()
     fname = "Figure-10.pdf"
     plt.savefig(fname)
     plt.savefig("Figure-10.png")
     log(
         INFO,
-        "Fig 10: FEDDEBUG performance at neuron activation threshold on 30 clients, "
-        f"including five faulty clients. Figure generate {fname}",
+        f"Fig 10 is generated: {fname}",
     )
 
 
-def generate_table2_csv(cache_path, igonre_keys):
+def generate_table2_csv(cache_path):
     """Generate Table II from the paper."""
     cache = Index(cache_path)
     all_exp_keys = cache.keys()
     all_df_rows = []
 
     for k in all_exp_keys:
-        if k in igonre_keys:
-            continue
         exp_dict = cache[k]
         cfg = exp_dict["debug_cfg"]
         table_d = {}
@@ -116,9 +113,8 @@ def generate_table2_csv(cache_path, igonre_keys):
     log(
         INFO,
         (
-            "Table II: FEDDEBUG’s fault localization in 32 FL"
-            "configurations with multiple faulty clients, ranging from two to seven."
-            f"Results are also stored in {csv_name}"
+            "FedDebug’s malicious client(s) localization"
+            f" results svaed in {csv_name}."
         ),
     )
 

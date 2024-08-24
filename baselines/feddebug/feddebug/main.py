@@ -44,8 +44,8 @@ def _flwr_fl_sim(cfg, client2data, server_data, cache):
 
 def run_simulation(cfg):
     """Run the simulation."""
-    if cfg.multirun_faulty_clients != -1:
-        cfg.faulty_clients_ids = list(range(cfg.multirun_faulty_clients))
+    if cfg.total_faulty_clients != -1:
+        cfg.faulty_clients_ids = list(range(cfg.total_faulty_clients))
 
     cfg.faulty_clients_ids = [f"{c}" for c in cfg.faulty_clients_ids]
     train_cache = Index(cfg.storage.dir + cfg.storage.train_cache_name)
@@ -81,31 +81,36 @@ def run_simulation(cfg):
         "complete": True,
         "input_shape": temp_input.shape,
     }
-    log(INFO, f"Simulation Complete for: {cfg.exp_key} ")
+    log(INFO, f"Training Complete for Experiment: {cfg.exp_key} ")
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
 def main(cfg) -> None:
     """Run the baseline."""
-    if not cfg.generate_graphs and not cfg.vary_thresholds:
+    if not cfg.generate_thresholds_exp_graph and not cfg.vary_thresholds and not cfg.generate_table_csv:
+        start = time.time()
         run_simulation(cfg)
         time.sleep(1)
         print("\n")
         run_fed_debug_differential_testing(cfg)
+        print(f"Total Time taken (training + testing): {time.time() - start}")
 
     if cfg.vary_thresholds:
         eval_na_threshold(cfg)
+        
+ 
+    if cfg.generate_table_csv:
+        utils.generate_table2_csv(cfg.storage.dir + cfg.storage.results_cache_name)
 
-    if cfg.generate_graphs:
+    if cfg.generate_thresholds_exp_graph:
         utils.gen_thresholds_exp_graph(
             cache_path=cfg.storage.dir + cfg.storage.results_cache_name,
             threshold_exp_key=cfg.threshold_variation_exp_key,
         )
-        utils.generate_table2_csv(
-            cfg.storage.dir + cfg.storage.results_cache_name,
-            igonre_keys=[cfg.threshold_variation_exp_key],
-        )
 
+
+
+    
 
 if __name__ == "__main__":
     main()

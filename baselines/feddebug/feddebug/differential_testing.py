@@ -16,9 +16,15 @@ from tqdm import tqdm
 from feddebug.models import initialize_model
 from feddebug.neuron_activation import get_neurons_activations
 from feddebug.utils import seed_everything
+from joblib import Parallel, delayed
 
 seed_everything(786)
 
+def _load_client_model(cid, cli_ws, model_name, dataset):
+    cmodel = initialize_model(model_name, dataset)["model"]
+    cmodel.load_state_dict(cli_ws)  # type: ignore
+    cmodel = cmodel.cpu().eval()  # type: ignore
+    return cid, cmodel
 
 def _make_all_subsets_of_size_n(set_client_ids, each_subset_size):
     assert each_subset_size < len(set_client_ids)
@@ -153,6 +159,7 @@ class FaultyClientLocalization:
         self.leave_1_out_combs = self._update_leave_1_out_combs(self.clients_ids)
 
     def _update_neuron_coverage_func(self, client2model):
+        log(INFO, "Getting Neuron Activations for each client.")
         for client_id, model in tqdm(client2model.items()):
             model = model.to(self.device)
             fuzz_input2_activations = [
@@ -298,22 +305,24 @@ class FedDebug:
         )
         round2ws = self.training_cache[self.round_key]
         self.client2num_examples = round2ws["client2num_examples"]  # type: ignore
+       
 
-        self.client2model = {}
-        for cid, cli_ws in round2ws["client2ws"].items():  # type: ignore
-            cmodel = initialize_model(
-                self.train_cfg.model.name, self.train_cfg.dataset
-            )["model"]
-            cmodel.load_state_dict(cli_ws)  # type: ignore
-            cmodel = cmodel.cpu().eval()  # type: ignore
-            self.client2model[cid] = cmodel
+        # Parallelize the model initialization and loading
+        results = Parallel(n_jobs=10)(delayed(_load_client_model)(
+            cid, cli_ws, self.train_cfg.model.name, self.train_cfg.dataset
+        ) for cid, cli_ws in round2ws["client2ws"].items())
+
+        # Update the client2model dictionary with the results
+        self.client2model = dict(results)
+
+        
 
     def _get_fault_localization_accuracy(self, predicted_faulty_clients_on_each_input):
         true_faulty_clients = set(self.train_cfg.faulty_clients_ids)
         detection_acc = 0
-        for pred_faulty_clients in predicted_faulty_clients_on_each_input:
+        for i,pred_faulty_clients in enumerate(predicted_faulty_clients_on_each_input):
             # print(f"+++ Faulty Clients {pred_faulty_clients}")
-            log(INFO, f"-- Potential Malicious client(s) {pred_faulty_clients}")
+            log(INFO, f"I{i} Potential Malicious client(s) {pred_faulty_clients}")
 
             correct_localize_faults = len(
                 true_faulty_clients.intersection(pred_faulty_clients)
