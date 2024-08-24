@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Semantic partitioner class that works with Hugging Face Datasets."""
+"""Image semantic partitioner class that works with Hugging Face Datasets."""
 
 
 import warnings
@@ -26,10 +26,10 @@ from flwr_datasets.partitioner.partitioner import Partitioner
 
 
 # pylint: disable=R0902, R0912, R0914
-class SemanticPartitioner(Partitioner):
+class ImageSemanticPartitioner(Partitioner):
     """Partitioner based on data semantic information.
 
-    NOTE: Semantic Partioner can ONLY work with image dataset.
+    NOTE: Image Semantic Partioner can ONLY work with image dataset.
 
     This implementation is modified from the original implementation:
     https://github.com/google-research/federated/tree/master/generalization,
@@ -41,7 +41,7 @@ class SemanticPartitioner(Partitioner):
 
     (Cited from section 4.1 in the paper)
 
-    Semantic partitioner's goal is to reverse-engineer the federated
+    Image semantic partitioner's goal is to reverse-engineer the federated
     dataset-generating process so that each client possesses semantically
     similar data. For example, for the EMNIST dataset, we expect every client
     (writer) to (i) write in a consistent style for each digit
@@ -96,8 +96,8 @@ class SemanticPartitioner(Partitioner):
     Examples
     --------
     >>> from flwr_datasets import FederatedDataset
-    >>> from flwr_datasets.partitioner import SemanticPartitioner
-    >>> partitioner = SemanticPartitioner(
+    >>> from flwr_datasets.partitioner import ImageSemanticPartitioner
+    >>> partitioner = ImageSemanticPartitioner(
     >>>     num_partitions=10,
     >>>     partition_by="label",
     >>>     pca_components=128,
@@ -207,7 +207,7 @@ class SemanticPartitioner(Partitioner):
             from torchvision import models
         except ImportError:
             raise ImportError(
-                "SemanticPartitioner requires scikit-learn, torch, "
+                "ImageSemanticPartitioner requires scikit-learn, torch, "
                 "torchvision, scipy, and numpy."
             ) from None
         efficient_nets_dict = [
@@ -238,7 +238,7 @@ class SemanticPartitioner(Partitioner):
         efficient_net.to(device)
         efficient_net.eval()
 
-        # Generate information needed for Semantic partitioning
+        # Generate information needed for Image semantic partitioning
         self._unique_classes = self.dataset.unique(self._partition_by)
         assert self._unique_classes is not None
 
@@ -467,7 +467,7 @@ if __name__ == "__main__":
         "label": [i % 3 for i in range(50)],
     }
     dataset = Dataset.from_dict(dataset)
-    partitioner = SemanticPartitioner(
+    partitioner = ImageSemanticPartitioner(
         num_partitions=5, partition_by="label", pca_components=30
     )
     partitioner.dataset = dataset
@@ -480,7 +480,7 @@ if __name__ == "__main__":
 
     # ===================== Test with FederatedDataset =====================
     # from flwr_datasets import FederatedDataset
-    # partitioner = SemanticPartitioner(
+    # partitioner = ImageSemanticPartitioner(
     #     num_partitions=5, partition_by="label", pca_components=128
     # )
     # fds = FederatedDataset(dataset="cifar10", partitioners={"train": partitioner})

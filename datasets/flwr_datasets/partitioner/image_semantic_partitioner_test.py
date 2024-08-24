@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Test SemanticPartitioner."""
+"""Test ImageSemanticPartitioner."""
 
 
 # pylint: disable=W0212
@@ -24,7 +24,9 @@ import numpy as np
 from parameterized import parameterized
 
 from datasets import Dataset
-from flwr_datasets.partitioner.semantic_partitioner import SemanticPartitioner
+from flwr_datasets.partitioner.image_semantic_partitioner import (
+    ImageSemanticPartitioner,
+)
 
 
 # pylint: disable=R0913
@@ -38,14 +40,14 @@ def _dummy_setup(
     pca_components: int = 6,
     gmm_max_iter: int = 2,
     gmm_init_params: str = "random",
-) -> Tuple[Dataset, SemanticPartitioner]:
+) -> Tuple[Dataset, ImageSemanticPartitioner]:
     """Create a dummy dataset and partitioner for testing."""
     data = {
         "image": [np.random.randn(*data_shape) for _ in range(num_rows)],
         "label": [i % 3 for i in range(num_rows)],
     }
     dataset = Dataset.from_dict(data)
-    partitioner = SemanticPartitioner(
+    partitioner = ImageSemanticPartitioner(
         num_partitions=num_partitions,
         partition_by=partition_by,
         efficient_net_type=efficient_net_type,
@@ -58,8 +60,8 @@ def _dummy_setup(
     return dataset, partitioner
 
 
-class TestSemanticPartitionerSuccess(unittest.TestCase):
-    """Test SemanticPartitioner used with no exceptions."""
+class TestImageSemanticPartitionerSuccess(unittest.TestCase):
+    """Test ImageSemanticPartitioner used with no exceptions."""
 
     # pylint: disable=R0913
     @parameterized.expand(  # type: ignore
@@ -156,8 +158,8 @@ class TestSemanticPartitionerSuccess(unittest.TestCase):
         )
 
 
-class TestSemanticPartitionerFailure(unittest.TestCase):
-    """Test SemanticPartitioner failures (exceptions) by incorrect usage."""
+class TestImageSemanticPartitionerFailure(unittest.TestCase):
+    """Test ImageSemanticPartitioner failures (exceptions) by incorrect usage."""
 
     def test_invalid_dataset_type(self) -> None:
         """Test if raises when the dataset is not an image dataset."""
@@ -167,7 +169,7 @@ class TestSemanticPartitionerFailure(unittest.TestCase):
             "label": list(range(300)),
         }
         dataset = Dataset.from_dict(data)
-        partitioner = SemanticPartitioner(num_partitions=3, partition_by="label")
+        partitioner = ImageSemanticPartitioner(num_partitions=3, partition_by="label")
         partitioner.dataset = dataset
         with self.assertRaises((TypeError, ValueError)):
             partitioner.load_partition(0)

@@ -42,6 +42,7 @@ Create **custom partitioning schemes** or choose from the **implemented [partiti
 * IID partitioning `IidPartitioner(num_partitions)`
 * Dirichlet partitioning `DirichletPartitioner(num_partitions, partition_by, alpha)`
 * Distribution partitioning `DistributionPartitioner(distribution_array, num_partitions, num_unique_labels_per_partition, partition_by, preassigned_num_samples_per_label, rescale)`
+* Image Semantic partitioning `ImageSemanticPartitioner(num_partitions)`
 * InnerDirichlet partitioning `InnerDirichletPartitioner(partition_sizes, partition_by, alpha)`
 * Pathological partitioning `PathologicalPartitioner(num_partitions, partition_by, num_classes_per_partition, class_assignment_mode)`
 * Natural ID partitioning `NaturalIdPartitioner(partition_by)`
