@@ -36,7 +36,7 @@ This repository implements the FedDebug technique of localizing malicious client
 
 **Hardware Setup:**
 These experiments were run on a machine with 8 CPU cores and an Nvidia Tesla P40 GPU. 
-> **Note:** This baseline contain a smaller CNN model (LeNet) to run all these experiments on CPU. 
+> **Note:** This baseline also contains a smaller CNN model (LeNet) to run all these experiments on a CPU. Furthermore, the experiments are also scaled down to obtain representative results of the FedDebug evaluations.
 
 **Contributors:** Waris Gill ([GitHub Profile](https://github.com/warisgill))
 ## Experimental Setup
