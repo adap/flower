@@ -430,7 +430,7 @@ class ImageSemanticPartitioner(Partitioner):
             features_dict = self.dataset.features.to_dict()
             if self._image_column_name is None:
                 self._image_column_name = list(features_dict.keys())[0]
-            if self._image_column_name not in features_dict:
+            if self._image_column_name not in features_dict.keys():
                 raise ValueError(
                     "The image column name is not found in the dataset feature dict: ",
                     list(features_dict.keys()),
@@ -499,39 +499,3 @@ class ImageSemanticPartitioner(Partitioner):
             raise TypeError("The pca seed needs to be an integer.")
         if not isinstance(self._gmm_seed, int):
             raise TypeError("The gmm seed needs to be an integer.")
-
-
-if __name__ == "__main__":
-    # ===================== Test with custom Dataset =====================
-    from datasets import Dataset
-
-    dataset = {
-        "image": [np.random.randn(28, 28) for _ in range(50)],
-        "label": [i % 3 for i in range(50)],
-    }
-    dataset = Dataset.from_dict(dataset)
-    partitioner = ImageSemanticPartitioner(
-        num_partitions=5, partition_by="label", pca_components=30
-    )
-    partitioner.dataset = dataset
-    partition = partitioner.load_partition(0)
-    partition_sizes = partition_sizes = [
-        len(partitioner.load_partition(partition_id)) for partition_id in range(5)
-    ]
-    print(sorted(partition_sizes))
-    # ====================================================================
-
-    # ===================== Test with FederatedDataset =====================
-    # from flwr_datasets import FederatedDataset
-
-    # partitioner = ImageSemanticPartitioner(
-    #     num_partitions=5, partition_by="label", pca_components=128
-    # )
-    # fds = FederatedDataset(dataset="cifar10", partitioners={"train": partitioner})
-    # partition = fds.load_partition(0)
-    # print(partition[0])  # Print the first example
-    # partition_sizes = partition_sizes = [
-    #     len(fds.load_partition(partition_id)) for partition_id in range(5)
-    # ]
-    # print(sorted(partition_sizes))
-    # ======================================================================
