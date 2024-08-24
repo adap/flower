@@ -89,7 +89,7 @@ def build(
     # Set the name of the zip file
     fab_filename = (
         f"{conf['tool']['flwr']['app']['publisher']}"
-        f".{app.name}"
+        f".{conf['project']['name']}"
         f".{conf['project']['version'].replace('.', '-')}.fab"
     )
     list_file_content = ""
