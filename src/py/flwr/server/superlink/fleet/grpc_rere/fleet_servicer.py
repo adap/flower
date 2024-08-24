@@ -58,7 +58,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             state=self.state_factory.state(),
         )
         log(INFO, "[Fleet.CreateNode] Created node_id=%s", response.node.node_id)
-        log(DEBUG, "[Fleet.CreateNode] Created response: %s", response)
+        log(DEBUG, "[Fleet.CreateNode] Response: %s", response)
         return response
 
     def DeleteNode(
