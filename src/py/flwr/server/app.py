@@ -294,7 +294,7 @@ def run_superlink() -> None:
             )
             log(
                 INFO,
-                "node authentication enabled with %d known public keys",
+                "Node authentication enabled with %d known public keys",
                 len(node_public_keys),
             )
             interceptors = [AuthenticateServerInterceptor(state)]
