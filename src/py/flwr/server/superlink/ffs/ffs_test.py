@@ -78,7 +78,10 @@ class FfsTest(unittest.TestCase):
             json.dump(meta_expected, file)
 
         # Execute
-        content_actual, meta_actual = ffs.get(hash_expected)
+        result = ffs.get(hash_expected)
+        assert result is not None
+
+        content_actual, meta_actual = result
 
         # Assert
         assert content_actual == content_expected

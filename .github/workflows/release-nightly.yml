@@ -70,7 +70,8 @@ jobs:
           { repository: "flwr/superlink", file_dir: "src/docker/superlink" },
           { repository: "flwr/supernode", file_dir: "src/docker/supernode" },
           { repository: "flwr/serverapp", file_dir: "src/docker/serverapp" },
-          { repository: "flwr/superexec", file_dir: "src/docker/superexec" }
+          { repository: "flwr/superexec", file_dir: "src/docker/superexec" },
+          { repository: "flwr/clientapp", file_dir: "src/docker/clientapp" }
         ]
     with:
       namespace-repository: ${{ matrix.images.repository }}

@@ -25,7 +25,7 @@ from argparse import Namespace
 from logging import DEBUG, ERROR, INFO, WARNING
 from pathlib import Path
 from time import sleep
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from flwr.cli.config_utils import load_and_validate
 from flwr.client import ClientApp
@@ -35,6 +35,7 @@ from flwr.common.constant import RUN_ID_NUM_BYTES
 from flwr.common.logger import (
     set_logger_propagation,
     update_console_handler,
+    warn_deprecated_feature,
     warn_deprecated_feature_with_example,
 )
 from flwr.common.typing import Run, UserConfig
@@ -91,11 +92,35 @@ def _check_args_do_not_interfere(args: Namespace) -> bool:
     return True
 
 
+def _replace_keys(d: Any, match: str, target: str) -> Any:
+    if isinstance(d, dict):
+        return {
+            k.replace(match, target): _replace_keys(v, match, target)
+            for k, v in d.items()
+        }
+    if isinstance(d, list):
+        return [_replace_keys(i, match, target) for i in d]
+    return d
+
+
 # Entry point from CLI
 # pylint: disable=too-many-locals
 def run_simulation_from_cli() -> None:
     """Run Simulation Engine from the CLI."""
     args = _parse_args_run_simulation().parse_args()
+
+    # Add warnings for deprecated server_app and client_app arguments
+    if args.server_app:
+        warn_deprecated_feature(
+            "The `--server-app` argument is deprecated. "
+            "Please use the `--app` argument instead."
+        )
+
+    if args.client_app:
+        warn_deprecated_feature(
+            "The `--client-app` argument is deprecated. "
+            "Use the `--app` argument instead."
+        )
 
     if args.enable_tf_gpu_growth:
         warn_deprecated_feature_with_example(
@@ -104,6 +129,14 @@ def run_simulation_from_cli() -> None:
             "variable to true.",
             code_example='TF_FORCE_GPU_ALLOW_GROWTH="true" flower-simulation <...>',
         )
+
+    # Load JSON config
+    backend_config_dict = json.loads(args.backend_config)
+
+    if backend_config_dict:
+        # Backend config internally operates with `_` not with `-`
+        backend_config_dict = _replace_keys(backend_config_dict, match="-", target="_")
+        log(DEBUG, "backend_config_dict: %s", backend_config_dict)
 
     # We are supporting two modes for the CLI entrypoint:
     # 1) Running an app dir containing a `pyproject.toml`
@@ -163,11 +196,9 @@ def run_simulation_from_cli() -> None:
         run_id=run_id,
         fab_id="",
         fab_version="",
+        fab_hash="",
         override_config=override_config,
     )
-
-    # Load JSON config
-    backend_config_dict = json.loads(args.backend_config)
 
     _run_simulation(
         server_app_attr=server_app_attr,
@@ -208,9 +239,8 @@ def run_simulation(
         messages sent by the `ServerApp`.
 
     num_supernodes : int
-        Number of nodes that run a ClientApp. They can be sampled by a
-        Driver in the ServerApp and receive a Message describing what the ClientApp
-        should perform.
+        Number of nodes that run a ClientApp. They can be sampled by a Driver in the
+        ServerApp and receive a Message describing what the ClientApp should perform.
 
     backend_name : str (default: ray)
         A simulation backend that runs `ClientApp`s.
@@ -238,7 +268,7 @@ def run_simulation(
     if enable_tf_gpu_growth:
         warn_deprecated_feature_with_example(
             "Passing `enable_tf_gpu_growth=True` is deprecated.",
-            example_message="Instead, set the `TF_FORCE_GPU_ALLOW_GROWTH` environmnet "
+            example_message="Instead, set the `TF_FORCE_GPU_ALLOW_GROWTH` environment "
             "variable to true.",
             code_example='import os;os.environ["TF_FORCE_GPU_ALLOW_GROWTH"]="true"'
             "\n\tflwr.simulation.run_simulationt(...)",
@@ -424,72 +454,7 @@ def _run_simulation(
     verbose_logging: bool = False,
     is_app: bool = False,
 ) -> None:
-    r"""Launch the Simulation Engine.
-
-    Parameters
-    ----------
-    num_supernodes : int
-        Number of nodes that run a ClientApp. They can be sampled by a
-        Driver in the ServerApp and receive a Message describing what the ClientApp
-        should perform.
-
-    client_app : Optional[ClientApp]
-        The `ClientApp` to be executed by each of the `SuperNodes`. It will receive
-        messages sent by the `ServerApp`.
-
-    server_app : Optional[ServerApp]
-        The `ServerApp` to be executed.
-
-    backend_name : str (default: ray)
-        A simulation backend that runs `ClientApp`s.
-
-    backend_config : Optional[BackendConfig]
-        'A dictionary to configure a backend. Separate dictionaries to configure
-        different elements of backend. Supported top-level keys are `init_args`
-        for values parsed to initialisation of backend, `client_resources`
-        to define the resources for clients, and `actor` to define the actor
-        parameters. Values supported in <value> are those included by
-        `flwr.common.typing.ConfigsRecordValues`.
-
-    client_app_attr : Optional[str]
-        A path to a `ClientApp` module to be loaded: For example: `client:app` or
-        `project.package.module:wrapper.app`."
-
-    server_app_attr : Optional[str]
-        A path to a `ServerApp` module to be loaded: For example: `server:app` or
-        `project.package.module:wrapper.app`."
-
-    server_app_run_config : Optional[UserConfig]
-        Config dictionary that parameterizes the run config. It will be made accesible
-        to the ServerApp.
-
-    app_dir : str
-        Add specified directory to the PYTHONPATH and load `ClientApp` from there.
-        (Default: current working directory.)
-
-    flwr_dir : Optional[str]
-        The path containing installed Flower Apps.
-
-    run : Optional[Run]
-        An object carrying details about the run.
-
-    enable_tf_gpu_growth : bool (default: False)
-        A boolean to indicate whether to enable GPU growth on the main thread. This is
-        desirable if you make use of a TensorFlow model on your `ServerApp` while
-        having your `ClientApp` running on the same GPU. Without enabling this, you
-        might encounter an out-of-memory error because TensorFlow by default allocates
-        all GPU memory. Read mor about how `tf.config.experimental.set_memory_growth()`
-        works in the TensorFlow documentation: https://www.tensorflow.org/api/stable.
-
-    verbose_logging : bool (default: False)
-        When disabled, only INFO, WARNING and ERROR log messages will be shown. If
-        enabled, DEBUG-level logs will be displayed.
-
-    is_app : bool (default: False)
-        A flag that indicates whether the simulation is running an app or not. This is
-        needed in order to attempt loading an app's pyproject.toml when nodes register
-        a context object.
-    """
+    """Launch the Simulation Engine."""
     if backend_config is None:
         backend_config = {}
 
@@ -529,7 +494,9 @@ def _run_simulation(
     # If no `Run` object is set, create one
     if run is None:
         run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
-        run = Run(run_id=run_id, fab_id="", fab_version="", override_config={})
+        run = Run(
+            run_id=run_id, fab_id="", fab_version="", fab_hash="", override_config={}
+        )
 
     args = (
         num_supernodes,
@@ -575,25 +542,27 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         description="Start a Flower simulation",
     )
     parser.add_argument(
+        "--app",
+        type=str,
+        default=None,
+        help="Path to a directory containing a FAB-like structure with a "
+        "pyproject.toml.",
+    )
+    parser.add_argument(
         "--server-app",
-        help="For example: `server:app` or `project.package.module:wrapper.app`",
+        help="(DEPRECATED: use --app instead) For example: `server:app` or "
+        "`project.package.module:wrapper.app`",
     )
     parser.add_argument(
         "--client-app",
-        help="For example: `client:app` or `project.package.module:wrapper.app`",
+        help="(DEPRECATED: use --app instead) For example: `client:app` or "
+        "`project.package.module:wrapper.app`",
     )
     parser.add_argument(
         "--num-supernodes",
         type=int,
         required=True,
         help="Number of simulated SuperNodes.",
-    )
-    parser.add_argument(
-        "--app",
-        type=str,
-        default=None,
-        help="Path to a directory containing a FAB-like structure with a "
-        "pyproject.toml.",
     )
     parser.add_argument(
         "--run-config",
