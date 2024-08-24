@@ -188,15 +188,15 @@ def parse_config_args(
     # Regular expression to capture key-value pairs with possible quoted values
     pattern = re.compile(r"(\S+?)=(\'[^\']*\'|\"[^\"]*\"|\S+)")
 
+    # If a .toml is passed, all other keys are ignored
     for config_line in config:
         if config_line:
-            matches = pattern.findall(config_line)
-
             if config_line.endswith(".toml"):
                 with Path(config_line).open("rb") as config_file:
                     overrides = flatten_dict(tomli.load(config_file))
                 break
             else:
+                matches = pattern.findall(config_line)
                 toml_str = "\n".join(f"{k} = {v}" for k, v in matches)
                 overrides.update(tomli.loads(toml_str))
 
