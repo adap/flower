@@ -5,7 +5,7 @@ import warnings
 import torch
 from flwr.client import Client, ClientApp, NumPyClient
 from flwr.common import Context
-
+from transformers import logging
 from huggingface_example.task import (
     train,
     test,
@@ -15,7 +15,11 @@ from huggingface_example.task import (
     get_model,
 )
 
-warnings.filterwarnings("ignore", category=UserWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
+
+# To mute warnings reminding that we need to train the model to a downstream task
+# This is something this example does.
+logging.set_verbosity_error()
 
 
 # Flower client
