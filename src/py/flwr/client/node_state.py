@@ -20,8 +20,12 @@ from pathlib import Path
 from typing import Dict, Optional
 
 from flwr.common import Context, RecordSet
-from flwr.common.config import get_fused_config, get_fused_config_from_dir
-from flwr.common.typing import Run, UserConfig
+from flwr.common.config import (
+    get_fused_config,
+    get_fused_config_from_dir,
+    get_fused_config_from_fab,
+)
+from flwr.common.typing import Fab, Run, UserConfig
 
 
 @dataclass()
@@ -44,12 +48,14 @@ class NodeState:
         self.node_config = node_config
         self.run_infos: Dict[int, RunInfo] = {}
 
+    # pylint: disable=too-many-arguments
     def register_context(
         self,
         run_id: int,
         run: Optional[Run] = None,
         flwr_path: Optional[Path] = None,
         app_dir: Optional[str] = None,
+        fab: Optional[Fab] = None,
     ) -> None:
         """Register new run context for this node."""
         if run_id not in self.run_infos:
@@ -65,8 +71,15 @@ class NodeState:
                 else:
                     raise ValueError("The specified `app_dir` must be a directory.")
             else:
-                # Load from .fab
-                initial_run_config = get_fused_config(run, flwr_path) if run else {}
+                if run:
+                    if fab:
+                        # Load pyproject.toml from FAB file and fuse
+                        initial_run_config = get_fused_config_from_fab(fab.content, run)
+                    else:
+                        # Load pyproject.toml from installed FAB and fuse
+                        initial_run_config = get_fused_config(run, flwr_path)
+                else:
+                    initial_run_config = {}
             self.run_infos[run_id] = RunInfo(
                 initial_run_config=initial_run_config,
                 context=Context(

@@ -32,6 +32,7 @@ from flwr.common import (
     Message,
     MessageTypeLegacy,
     Metadata,
+    RecordSet,
     Scalar,
 )
 from flwr.common.constant import NUM_PARTITIONS_KEY, PARTITION_ID_KEY
@@ -55,15 +56,15 @@ from flwr.simulation.ray_transport.ray_client_proxy import RayActorClientProxy
 class DummyClient(NumPyClient):
     """A dummy NumPyClient for tests."""
 
-    def __init__(self, node_id: int) -> None:
+    def __init__(self, node_id: int, state: RecordSet) -> None:
         self.node_id = node_id
+        self.client_state = state
 
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
         """Return properties by doing a simple calculation."""
         result = self.node_id * pi
-
         # store something in context
-        self.context.state.configs_records["result"] = ConfigsRecord(
+        self.client_state.configs_records["result"] = ConfigsRecord(
             {"result": str(result)}
         )
         return {"result": result}
@@ -71,7 +72,7 @@ class DummyClient(NumPyClient):
 
 def get_dummy_client(context: Context) -> Client:
     """Return a DummyClient converted to Client type."""
-    return DummyClient(context.node_id).to_client()
+    return DummyClient(context.node_id, state=context.state).to_client()
 
 
 def prep(
@@ -185,7 +186,6 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
                 "result"
             ]["result"]
         )
-
     ray.shutdown()
 
 

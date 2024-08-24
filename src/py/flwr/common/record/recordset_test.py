@@ -169,7 +169,7 @@ def test_set_parameters_with_incorrect_types(
     }
 
     with pytest.raises(TypeError):
-        p_record.update(array_dict)
+        p_record.update(array_dict)  # type: ignore
 
 
 @pytest.mark.parametrize(
@@ -250,7 +250,7 @@ def test_set_metrics_to_metricsrecord_with_incorrect_types(
     )
 
     with pytest.raises(TypeError):
-        m_record.update(my_metrics)
+        m_record.update(my_metrics)  # type: ignore
 
 
 @pytest.mark.parametrize(
@@ -360,7 +360,7 @@ def test_set_configs_to_configsrecord_with_incorrect_types(
     )
 
     with pytest.raises(TypeError):
-        c_record.update(my_configs)
+        c_record.update(my_configs)  # type: ignore
 
 
 def test_count_bytes_metricsrecord() -> None:
