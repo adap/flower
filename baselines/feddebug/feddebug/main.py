@@ -87,7 +87,11 @@ def run_simulation(cfg):
 @hydra.main(config_path="conf", config_name="base", version_base=None)
 def main(cfg) -> None:
     """Run the baseline."""
-    if not cfg.generate_thresholds_exp_graph and not cfg.vary_thresholds and not cfg.generate_table_csv:
+    if (
+        not cfg.generate_thresholds_exp_graph
+        and not cfg.vary_thresholds
+        and not cfg.generate_table_csv
+    ):
         start = time.time()
         run_simulation(cfg)
         time.sleep(1)
@@ -97,8 +101,7 @@ def main(cfg) -> None:
 
     if cfg.vary_thresholds:
         eval_na_threshold(cfg)
-        
- 
+
     if cfg.generate_table_csv:
         utils.generate_table2_csv(cfg.storage.dir + cfg.storage.results_cache_name)
 
@@ -108,9 +111,6 @@ def main(cfg) -> None:
             threshold_exp_key=cfg.threshold_variation_exp_key,
         )
 
-
-
-    
 
 if __name__ == "__main__":
     main()

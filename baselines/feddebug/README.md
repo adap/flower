@@ -135,7 +135,6 @@ Only execute the following commands after generating Table 2 results.
 ```bash
 poetry run python -m feddebug.main --multirun device=cuda  num_clients=10 model.name=densenet121,resnet18 dataset.name=cifar10,mnist total_faulty_clients=2 check_cache=True
 
-
 poetry run python -m feddebug.main vary_thresholds=True device=cuda
 
 poetry run python -m feddebug.main generate_thresholds_exp_graph=True
