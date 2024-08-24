@@ -65,7 +65,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         self, request: DeleteNodeRequest, context: grpc.ServicerContext
     ) -> DeleteNodeResponse:
         """."""
-        log(INFO, "[Fleet.DeleteNode] Deleted node_id=%s", request.node.node_id)
+        log(INFO, "[Fleet.DeleteNode] Delete node_id=%s", request.node.node_id)
         log(DEBUG, "[Fleet.DeleteNode] Request: %s", request)
         return message_handler.delete_node(
             request=request,
