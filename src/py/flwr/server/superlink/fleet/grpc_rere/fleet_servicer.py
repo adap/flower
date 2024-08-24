@@ -95,7 +95,11 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
     ) -> PushTaskResResponse:
         """Push TaskRes."""
         if request.task_res_list:
-            log(INFO, "[Fleet.PushTaskRes] Push results from node_id=%s", request.task_res_list[0].task.producer.node_id)
+            log(
+                INFO,
+                "[Fleet.PushTaskRes] Push results from node_id=%s",
+                request.task_res_list[0].task.producer.node_id,
+            )
         else:
             log(INFO, "[Fleet.PushTaskRes] No task results to push")
         return message_handler.push_task_res(
@@ -117,7 +121,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         self, request: GetFabRequest, context: grpc.ServicerContext
     ) -> GetFabResponse:
         """Get FAB."""
-        log(INFO, "[Fleet.GetFab]: fab_hash=%s", request.hash_str)
+        log(INFO, "[Fleet.GetFab]: got fab_hash=%s", request.hash_str)
         return message_handler.get_fab(
             request=request,
             ffs=self.ffs_factory.ffs(),
