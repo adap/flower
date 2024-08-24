@@ -96,6 +96,10 @@ class ImageSemanticPartitioner(Partitioner):
         Seed used for PCA dimensionality reduction. If not set, sample_seed is used.
     gmm_seed: Optional[int]
         Seed used for GMM clustering. If not set, sample_seed is used.
+    image_column_name: Optional[str]
+        The name of the image column in the dataset. If not set, the first image column
+        is used.
+
 
     Examples
     --------
