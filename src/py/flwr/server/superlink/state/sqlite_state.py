@@ -569,7 +569,7 @@ class SqliteState(State):  # pylint: disable=R0904
         return node_id
 
     def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
-        """Delete a node node."""
+        """Delete a node."""
         query = "DELETE FROM node WHERE node_id = ?"
         params = (node_id,)
 
