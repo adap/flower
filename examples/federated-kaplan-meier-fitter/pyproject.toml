@@ -4,10 +4,9 @@ build-backend = "hatchling.build"
 
 [project]
 name = "federated-kaplan-meier-fitter"
-version = "0.1.0"
+version = "1.0.0"
 description = "Federated Kaplan Meier Fitter with Flower"
-authors = ["The Flower Authors <hello@flower.ai>"]
-maintainers = ["The Flower Authors <hello@flower.ai>"]
+license = "Apache-2.0"
 dependencies = [
     "flwr[simulation]>=1.10.0",
     "flwr-datasets>=0.3.0",

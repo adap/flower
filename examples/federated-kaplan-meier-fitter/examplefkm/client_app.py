@@ -1,3 +1,5 @@
+"""examplefkm: A Flower / Lifelines app."""
+
 from typing import Dict, List, Tuple
 
 import flwr as fl

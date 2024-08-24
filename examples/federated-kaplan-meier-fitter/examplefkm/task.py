@@ -1,3 +1,5 @@
+"""examplefkm: A Flower / Lifelines app."""
+
 from lifelines.datasets import load_waltons
 
 from flwr_datasets.partitioner import NaturalIdPartitioner
