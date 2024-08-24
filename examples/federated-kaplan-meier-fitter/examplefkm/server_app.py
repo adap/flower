@@ -16,8 +16,6 @@
 
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import flwr as fl
-import matplotlib.pyplot as plt
 import numpy as np
 from flwr.common import (
     EvaluateIns,
@@ -27,7 +25,9 @@ from flwr.common import (
     Parameters,
     Scalar,
     parameters_to_ndarrays,
+    Context,
 )
+from flwr.server import ServerApp, ServerConfig, ServerAppComponents
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import Strategy
@@ -66,7 +66,7 @@ class EventTimeFitterStrategy(Strategy):
         config = {}
         fit_ins = FitIns(parameters, config)
         clients = client_manager.sample(
-            num_clients=client_manager.num_available(),
+            num_clients=self._min_num_clients,
             min_num_clients=self._min_num_clients,
         )
         return [(client, fit_ins) for client in clients]
@@ -99,9 +99,6 @@ class EventTimeFitterStrategy(Strategy):
         self.fitter.fit(sorted_times, sorted_events)
         print("Survival function:")
         print(self.fitter.survival_function_)
-        self.fitter.plot_survival_function()
-        plt.title("Survival function of fruit flies (Walton's data)", fontsize=16)
-        plt.savefig("./_static/survival_function_federated.png", dpi=200)
         print("Mean survival time:")
         print(self.fitter.median_survival_time_)
         return None, {}
@@ -136,10 +133,25 @@ class EventTimeFitterStrategy(Strategy):
         return []
 
 
-fitter = KaplanMeierFitter()  # You can choose other method that work on E, T data
-strategy = EventTimeFitterStrategy(min_num_clients=2, fitter=fitter)
+def server_fn(context: Context) -> ServerAppComponents:
+    """Construct components that set the ServerApp behaviour.
 
-app = fl.server.ServerApp(
-    config=fl.server.ServerConfig(num_rounds=1),
-    strategy=strategy,
-)
+    You can use settings in `context.run_config` to parameterize the
+    construction of all elements (e.g the strategy or the number of rounds)
+    wrapped in the returned ServerAppComponents object.
+    """
+
+    # Define the strategy
+    fitter = KaplanMeierFitter()  # You can choose other method that work on E, T data
+    min_num_clients = context.run_config["min-num-clients"]
+    strategy = EventTimeFitterStrategy(min_num_clients=min_num_clients, fitter=fitter)
+
+    # Construct ServerConfig
+    num_rounds = context.run_config["num-server-rounds"]
+    config = ServerConfig(num_rounds=num_rounds)
+
+    return ServerAppComponents(strategy=strategy, config=config)
+
+
+# Create ServerApp
+app = ServerApp(server_fn=server_fn)
