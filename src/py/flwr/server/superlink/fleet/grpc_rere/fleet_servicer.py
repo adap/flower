@@ -112,7 +112,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         self, request: GetRunRequest, context: grpc.ServicerContext
     ) -> GetRunResponse:
         """Get run information."""
-        log(INFO, "[Fleet.GetRun] got run_id=%s", request.run_id)
+        log(INFO, "[Fleet.GetRun] Requesting `Run` for run_id=%s", request.run_id)
         return message_handler.get_run(
             request=request,
             state=self.state_factory.state(),
@@ -122,7 +122,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         self, request: GetFabRequest, context: grpc.ServicerContext
     ) -> GetFabResponse:
         """Get FAB."""
-        log(INFO, "[Fleet.GetFab]: got fab_hash=%s", request.hash_str)
+        log(INFO, "[Fleet.GetFab] Requesting FAB for fab_hash=%s", request.hash_str)
         return message_handler.get_fab(
             request=request,
             ffs=self.ffs_factory.ffs(),
