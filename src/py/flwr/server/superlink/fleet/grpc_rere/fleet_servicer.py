@@ -74,7 +74,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
 
     def Ping(self, request: PingRequest, context: grpc.ServicerContext) -> PingResponse:
         """."""
-        log(DEBUG, "[Fleet.Ping] Created request: %s", request)
+        log(DEBUG, "[Fleet.Ping] Request: %s", request)
         return message_handler.ping(
             request=request,
             state=self.state_factory.state(),
