@@ -45,7 +45,8 @@ from flwr.common.serde import (
     message_to_taskres,
     user_config_from_proto,
 )
-from flwr.common.typing import Run
+from flwr.common.typing import Fab, Run
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
@@ -86,6 +87,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
         Optional[Callable[[], Optional[int]]],
         Optional[Callable[[], None]],
         Optional[Callable[[int], Run]],
+        Optional[Callable[[str], Fab]],
     ]
 ]:
     """Primitives for request/response-based interaction with a server.
@@ -285,11 +287,22 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
             run_id,
             get_run_response.run.fab_id,
             get_run_response.run.fab_version,
+            get_run_response.run.fab_hash,
             user_config_from_proto(get_run_response.run.override_config),
         )
 
+    def get_fab(fab_hash: str) -> Fab:
+        # Call FleetAPI
+        get_fab_request = GetFabRequest(hash_str=fab_hash)
+        get_fab_response: GetFabResponse = retry_invoker.invoke(
+            stub.GetFab,
+            request=get_fab_request,
+        )
+
+        return Fab(get_fab_response.fab.hash_str, get_fab_response.fab.content)
+
     try:
         # Yield methods
-        yield (receive, send, create_node, delete_node, get_run)
+        yield (receive, send, create_node, delete_node, get_run, get_fab)
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)

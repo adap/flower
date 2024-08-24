@@ -17,6 +17,7 @@
 import datetime
 import os
 import sys
+
 from git import Repo
 from sphinx.application import ConfigError
 
@@ -93,6 +94,10 @@ release = "1.11.0"
 # The current released version
 rst_prolog = """
 .. |stable_flwr_version| replace:: 1.10.0
+.. |stable_flwr_superlink_docker_digest| replace:: 4b317d5b6030710b476f4dbfab2c3a33021ad40a0fcfa54d7edd45e0c51d889c
+.. |ubuntu_version| replace:: 22.04
+.. |setuptools_version| replace:: 70.3.0
+.. |pip_version| replace:: 24.1.2
 """
 
 # -- General configuration ---------------------------------------------------

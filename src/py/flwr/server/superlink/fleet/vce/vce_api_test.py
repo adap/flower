@@ -37,6 +37,7 @@ from flwr.common import (
     Message,
     MessageTypeLegacy,
     Metadata,
+    RecordSet,
     Scalar,
 )
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
@@ -53,18 +54,22 @@ from flwr.server.superlink.state import InMemoryState, StateFactory
 class DummyClient(NumPyClient):
     """A dummy NumPyClient for tests."""
 
+    def __init__(self, state: RecordSet) -> None:
+        self.client_state = state
+
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
         """Return properties by doing a simple calculation."""
         result = float(config["factor"]) * pi
 
         # store something in context
-        self.context.state.configs_records["result"] = ConfigsRecord({"result": result})
+        self.client_state.configs_records["result"] = ConfigsRecord({"result": result})
+
         return {"result": result}
 
 
 def get_dummy_client(context: Context) -> Client:  # pylint: disable=unused-argument
     """Return a DummyClient converted to Client type."""
-    return DummyClient().to_client()
+    return DummyClient(state=context.state).to_client()
 
 
 dummy_client_app = ClientApp(
@@ -109,7 +114,11 @@ def register_messages_into_state(
     """Register `num_messages` into the state factory."""
     state: InMemoryState = state_factory.state()  # type: ignore
     state.run_ids[run_id] = Run(
-        run_id=run_id, fab_id="Mock/mock", fab_version="v1.0.0", override_config={}
+        run_id=run_id,
+        fab_id="Mock/mock",
+        fab_version="v1.0.0",
+        fab_hash="hash",
+        override_config={},
     )
     # Artificially add TaskIns to state so they can be processed
     # by the Simulation Engine logic
@@ -192,7 +201,7 @@ def start_and_shutdown(
     if not app_dir:
         app_dir = _autoresolve_app_dir()
 
-    run = Run(run_id=1234, fab_id="", fab_version="", override_config={})
+    run = Run(run_id=1234, fab_id="", fab_version="", fab_hash="", override_config={})
 
     start_vce(
         num_supernodes=num_supernodes,

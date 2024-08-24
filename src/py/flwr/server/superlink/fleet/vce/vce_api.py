@@ -27,8 +27,8 @@ from time import sleep
 from typing import Callable, Dict, Optional
 
 from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
+from flwr.client.clientapp.utils import get_load_client_app_fn
 from flwr.client.node_state import NodeState
-from flwr.client.supernode.app import _get_load_client_app_fn
 from flwr.common.constant import (
     NUM_PARTITIONS_KEY,
     PARTITION_ID_KEY,
@@ -87,7 +87,6 @@ def _register_node_states(
 
 # pylint: disable=too-many-arguments,too-many-locals
 def worker(
-    app_fn: Callable[[], ClientApp],
     taskins_queue: "Queue[TaskIns]",
     taskres_queue: "Queue[TaskRes]",
     node_states: Dict[int, NodeState],
@@ -110,9 +109,7 @@ def worker(
             message = message_from_taskins(task_ins)
 
             # Let backend process message
-            out_mssg, updated_context = backend.process_message(
-                app_fn, message, context
-            )
+            out_mssg, updated_context = backend.process_message(message, context)
 
             # Update Context
             node_states[node_id].update_context(
@@ -193,7 +190,7 @@ def run_api(
         backend = backend_fn()
 
         # Build backend
-        backend.build()
+        backend.build(app_fn)
 
         # Add workers (they submit Messages to Backend)
         state = state_factory.state()
@@ -223,7 +220,6 @@ def run_api(
             _ = [
                 executor.submit(
                     worker,
-                    app_fn,
                     taskins_queue,
                     taskres_queue,
                     node_states,
@@ -345,11 +341,11 @@ def start_vce(
     def _load() -> ClientApp:
 
         if client_app_attr:
-            app = _get_load_client_app_fn(
+            app = get_load_client_app_fn(
                 default_app_ref=client_app_attr,
-                project_dir=app_dir,
+                app_path=app_dir,
                 flwr_dir=flwr_dir,
-                multi_app=True,
+                multi_app=False,
             )(run.fab_id, run.fab_version)
 
         if client_app:

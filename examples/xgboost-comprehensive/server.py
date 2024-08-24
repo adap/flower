@@ -3,19 +3,18 @@ from logging import INFO
 
 import flwr as fl
 from flwr.common.logger import log
-from flwr_datasets import FederatedDataset
 from flwr.server.strategy import FedXgbBagging, FedXgbCyclic
+from flwr_datasets import FederatedDataset
 
-from utils import server_args_parser
-from server_utils import (
-    eval_config,
-    fit_config,
-    evaluate_metrics_aggregation,
-    get_evaluate_fn,
-    CyclicClientManager,
-)
 from dataset import resplit, transform_dataset_to_dmatrix
-
+from server_utils import (
+    CyclicClientManager,
+    eval_config,
+    evaluate_metrics_aggregation,
+    fit_config,
+    get_evaluate_fn,
+)
+from utils import server_args_parser
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
