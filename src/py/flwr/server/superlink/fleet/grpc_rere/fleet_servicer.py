@@ -52,7 +52,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
     ) -> CreateNodeResponse:
         """."""
         log(INFO, "[Fleet.CreateNode] Request ping_interval=%s", request.ping_interval)
-        log(DEBUG, "[Fleet.CreateNode] Create request: %s", request)
+        log(DEBUG, "[Fleet.CreateNode] Request: %s", request)
         response = message_handler.create_node(
             request=request,
             state=self.state_factory.state(),
