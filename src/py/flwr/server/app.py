@@ -271,6 +271,7 @@ def run_superlink() -> None:
                 ssl_keyfile,
                 ssl_certfile,
                 state_factory,
+                ffs_factory,
                 num_workers,
             ),
         )
@@ -310,6 +311,7 @@ def run_superlink() -> None:
         fleet_server = _run_fleet_api_grpc_adapter(
             address=fleet_address,
             state_factory=state_factory,
+            ffs_factory=ffs_factory,
             certificates=certificates,
         )
         grpc_servers.append(fleet_server)
@@ -516,12 +518,14 @@ def _run_fleet_api_grpc_rere(
 def _run_fleet_api_grpc_adapter(
     address: str,
     state_factory: StateFactory,
+    ffs_factory: FfsFactory,
     certificates: Optional[Tuple[bytes, bytes, bytes]],
 ) -> grpc.Server:
     """Run Fleet API (GrpcAdapter)."""
     # Create Fleet API gRPC server
     fleet_servicer = GrpcAdapterServicer(
         state_factory=state_factory,
+        ffs_factory=ffs_factory,
     )
     fleet_add_servicer_to_server_fn = add_GrpcAdapterServicer_to_server
     fleet_grpc_server = generic_create_grpc_server(
@@ -544,6 +548,7 @@ def _run_fleet_api_rest(
     ssl_keyfile: Optional[str],
     ssl_certfile: Optional[str],
     state_factory: StateFactory,
+    ffs_factory: FfsFactory,
     num_workers: int,
 ) -> None:
     """Run Driver API (REST-based)."""
@@ -558,6 +563,7 @@ def _run_fleet_api_rest(
 
     # See: https://www.starlette.io/applications/#accessing-the-app-instance
     fast_api_app.state.STATE_FACTORY = state_factory
+    fast_api_app.state.FFS_FACTORY = ffs_factory
 
     uvicorn.run(
         app="flwr.server.superlink.fleet.rest_rere.rest_api:app",

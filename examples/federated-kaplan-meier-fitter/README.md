@@ -4,9 +4,9 @@ dataset: [Waltons]
 framework: [lifelines]
 ---
 
-# Flower Example using KaplanMeierFitter
+# Federated Survival Analysis with Flower and KaplanMeierFitter
 
-This is an introductory example on **federated survival analysis** using [Flower](https://flower.ai/)
+This is an introductory example of **federated survival analysis** using [Flower](https://flower.ai/)
 and [lifelines](https://lifelines.readthedocs.io/en/stable/index.html) library.
 
 The aim of this example is to estimate the survival function using the
@@ -25,86 +25,60 @@ the group it comes from therefore to simulate the division that might occur.
 <img src="_static/survival_function_federated.png" alt="Survival Function" width="600"/>
 </p>
 
-## Project Setup
+## Set up the project
 
-Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
+### Clone the project
+
+Start by cloning the example project:
 
 ```shell
 $ git clone --depth=1 https://github.com/adap/flower.git _tmp && mv _tmp/examples/federated-kaplan-meier-fitter . && rm -rf _tmp && cd federated-kaplan-meier-fitter
 ```
 
-This will create a new directory called `federated-kaplan-meier-fitter` containing the following files:
+This will create a new directory called `federated-kaplan-meier-fitter`  with the following structure:
 
 ```shell
--- pyproject.toml
--- requirements.txt
--- client.py
--- server.py
--- centralized.py
--- README.md
+federated-kaplan-meier-fitter
+├── examplefmk
+│   ├── __init__.py
+│   ├── client_app.py   # Defines your ClientApp
+│   ├── server_app.py   # Defines your ServerApp
+│   └── task.py         # Defines your model, training and data loading
+├── pyproject.toml      # Project metadata like dependencies and configs
+└── README.md
 ```
 
-### Installing Dependencies
+### Install dependencies and project
 
-Project dependencies (such as `lifelines` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
-
-#### Poetry
-
-```shell
-poetry install
-poetry shell
-```
-
-Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
-
-```shell
-poetry run python3 -c "import flwr"
-```
-
-If you don't see any errors you're good to go!
-
-#### pip
-
-Write the command below in your terminal to install the dependencies according to the configuration file requirements.txt.
-
-```shell
-pip install -r requirements.txt
-```
-
-## Run Federated Survival Analysis with Flower and lifelines's KaplanMeierFitter
-
-### Start the long-running Flower server (SuperLink)
+Install the dependencies defined in `pyproject.toml` as well as the `examplefmk` package.
 
 ```bash
-flower-superlink --insecure
+pip install -e .
 ```
 
-### Start the long-running Flower client (SuperNode)
+## Run the project
 
-In a new terminal window, start the first long-running Flower client:
+You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
+
+### Run with the Simulation Engine
 
 ```bash
-flower-client-app client:node_1_app --insecure
+flwr run .
 ```
 
-In yet another new terminal window, start the second long-running Flower client:
+You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
 ```bash
-flower-client-app client:node_2_app --insecure
+flwr run . --run-config num-server-rounds=5,learning-rate=0.05
 ```
-
-### Run the Flower App
-
-With both the long-running server (SuperLink) and two clients (SuperNode) up and running, we can now run the actual Flower App:
-
-```bash
-flower-server-app server:app --insecure
-```
-
-You will see that the server is printing survival function, median survival time and saves the plot with the survival function.
 
 You can also check that the results match the centralized version.
 
 ```shell
 $ python3 centralized.py
 ```
+
+### Run with the Deployment Engine
+
+> \[!NOTE\]
+> An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.
