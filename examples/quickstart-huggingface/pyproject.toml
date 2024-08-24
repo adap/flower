@@ -12,7 +12,7 @@ authors = [
     { name = "Kaushik Amar Das", email = "kaushik.das@iiitg.ac.in" },
 ]
 dependencies = [
-    "flwr[simulation]>=1.10.0",
+    "flwr-nightly[simulation]==1.11.0.dev20240823",
     "flwr-datasets>=0.3.0",
     "torch>=1.13.1,<2.0",
     "transformers>=4.30.0,<5.0",
@@ -42,3 +42,8 @@ default = "local-simulation"
 
 [tool.flwr.federations.local-simulation]
 options.num-supernodes = 100
+
+[tool.flwr.federations.local-simulation-gpu]
+options.num-supernodes = 10
+options.backend.client-resources.num-cpus = 4
+options.backend.client-resources.num-gpus = 0.25 # at most 4 ClientApps will run in a given GPU
