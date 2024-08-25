@@ -159,9 +159,8 @@ def flatten_dict(
     return dict(items)
 
 
-def unflatten_dict(flat_dict: Dict[str, Any], replace: bool = False) -> Dict[str, Any]:
-    """Unflatten a dict with keys containing separators into a nested dict; replace '-'
-    with '_' if needed."""
+def unflatten_dict(flat_dict: Dict[str, Any]) -> Dict[str, Any]:
+    """Unflatten a dict with keys containing separators into a nested dict."""
     unflattened_dict: Dict[str, Any] = {}
     separator: str = "."
 
@@ -169,11 +168,10 @@ def unflatten_dict(flat_dict: Dict[str, Any], replace: bool = False) -> Dict[str
         parts = key.split(separator)
         d = unflattened_dict
         for part in parts[:-1]:
-            part = part.replace("-", "_") if replace else part
             if part not in d:
                 d[part] = {}
             d = d[part]
-        d[parts[-1].replace("-", "_") if replace else parts[-1]] = value
+        d[parts[-1]] = value
 
     return unflattened_dict
 
@@ -214,3 +212,16 @@ def get_metadata_from_config(config: Dict[str, Any]) -> Tuple[str, str]:
         config["project"]["version"],
         f"{config['tool']['flwr']['app']['publisher']}/{config['project']['name']}",
     )
+
+
+def replace_keys(input_dict: Dict[str, Any], match: str, target: str):
+    """Recursively replace match string with target string in dictionary keys, including
+    nested dictionaries."""
+    new_dict = {}
+    for key, value in input_dict.items():
+        new_key = key.replace(match, target)
+        if isinstance(value, dict):
+            new_dict[new_key] = replace_keys(value)
+        else:
+            new_dict[new_key] = value
+    return new_dict

@@ -30,6 +30,7 @@ from .config import (
     get_project_config,
     get_project_dir,
     parse_config_args,
+    replace_keys,
     unflatten_dict,
 )
 
@@ -232,9 +233,9 @@ def test_flatten_dict() -> None:
 
 def test_unflatten_dict() -> None:
     """Test unflatten_dict with a flat dictionary."""
-    raw_dict = {"a-1.b-2.c-3": "d", "e": "f"}
-    expected = {"a_1": {"b_2": {"c_3": "d"}}, "e": "f"}
-    assert unflatten_dict(raw_dict, replace=True) == expected
+    raw_dict = {"a.b.c": "d", "e": "f"}
+    expected = {"a": {"b": {"c": "d"}}, "e": "f"}
+    assert unflatten_dict(raw_dict) == expected
 
 
 def test_parse_config_args_none() -> None:
@@ -254,3 +255,12 @@ def test_parse_config_args_overrides() -> None:
         "key5": True,
         "key6": "value6",
     }
+
+
+def test_replace_keys() -> None:
+    """Test replace_keys with a nested dictionary."""
+    match = "-"
+    target = "_"
+    raw_dict = {"a-1": {"b-2": {"c-3": "d"}}, "e-4": "f"}
+    expected = {"a_1": {"b_2": {"c_3": "d"}}, "e_4": "f"}
+    assert replace_keys(raw_dict, match, target) == expected
