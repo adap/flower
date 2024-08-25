@@ -214,7 +214,7 @@ def get_metadata_from_config(config: Dict[str, Any]) -> Tuple[str, str]:
     )
 
 
-def replace_keys(input_dict: Dict[str, Any], match: str, target: str):
+def replace_keys(input_dict: Dict[str, Any], match: str, target: str) -> Dict[str, Any]:
     """Recursively replace match string with target string in dictionary keys, including
     nested dictionaries."""
     new_dict = {}
