@@ -55,7 +55,7 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
 )
 from flwr.server.client_manager import SimpleClientManager
 
-from .app import _try_setup_client_authentication
+from .app import _try_setup_node_authentication
 from .client_proxy import ClientProxy
 from .server import Server, evaluate_clients, fit_clients
 
@@ -203,8 +203,8 @@ def test_set_max_workers() -> None:
     assert server.max_workers == 42
 
 
-def test_setup_client_auth() -> None:  # pylint: disable=R0914
-    """Test setup client authentication."""
+def test_setup_node_auth() -> None:  # pylint: disable=R0914
+    """Test setup node authentication."""
     # Prepare
     _, first_public_key = generate_key_pairs()
     private_key, public_key = generate_key_pairs()
@@ -220,12 +220,12 @@ def test_setup_client_auth() -> None:  # pylint: disable=R0914
     # Execute
     with tempfile.TemporaryDirectory() as temp_dir:
         # Initialize temporary files
-        client_keys_file_path = Path(temp_dir) / "client_keys.csv"
+        node_keys_file_path = Path(temp_dir) / "node_keys.csv"
         server_private_key_path = Path(temp_dir) / "server_private_key"
         server_public_key_path = Path(temp_dir) / "server_public_key"
 
         # Fill the files with relevant keys
-        with open(client_keys_file_path, "w", newline="", encoding="utf-8") as csvfile:
+        with open(node_keys_file_path, "w", newline="", encoding="utf-8") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(
                 [
@@ -240,15 +240,15 @@ def test_setup_client_auth() -> None:  # pylint: disable=R0914
         server_public_key_path.write_bytes(server_public_key)
         server_private_key_path.write_bytes(server_private_key)
 
-        # Mock argparse with `require-client-authentication`` flag
+        # Mock argparse with `require-node-authentication`` flag
         mock_args = argparse.Namespace(
-            auth_list_public_keys=str(client_keys_file_path),
+            auth_list_public_keys=str(node_keys_file_path),
             auth_superlink_private_key=str(server_private_key_path),
             auth_superlink_public_key=str(server_public_key_path),
         )
 
-        # Run _try_setup_client_authentication
-        result = _try_setup_client_authentication(mock_args, (b"", b"", b""))
+        # Run _try_setup_node_authentication
+        result = _try_setup_node_authentication(mock_args, (b"", b"", b""))
 
         expected_private_key = load_ssh_private_key(server_private_key, None)
         expected_public_key = load_ssh_public_key(server_public_key)
