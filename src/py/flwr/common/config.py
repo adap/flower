@@ -221,7 +221,7 @@ def replace_keys(input_dict: Dict[str, Any], match: str, target: str) -> Dict[st
     for key, value in input_dict.items():
         new_key = key.replace(match, target)
         if isinstance(value, dict):
-            new_dict[new_key] = replace_keys(value)
+            new_dict[new_key] = replace_keys(value, match, target)
         else:
             new_dict[new_key] = value
     return new_dict
