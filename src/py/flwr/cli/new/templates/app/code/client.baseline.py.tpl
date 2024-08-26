@@ -4,8 +4,8 @@ import torch
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
 
-from megabaseline.dataset import load_data
-from megabaseline.models import Net, get_weights, set_weights, test, train
+from $project_name.dataset import load_data
+from $project_name.models import Net, get_weights, set_weights, test, train
 
 
 class FlowerClient(NumPyClient):

@@ -31,6 +31,12 @@ pyenv activate $project_name
 # will need to re-run the command below
 pip install -e ".[dev]"
 
+# Even without modifying or adding new code, you can run your baseline
+# with the placeholder code generated when you did `flwr new`. If you
+# want to test this to familiarise yourself with how flower apps are
+# executed, execute this from the directory where you `pyproject.toml` is:
+flwr run .
+
 # At anypoint during the process of creating your baseline you can 
 # run the formatting script. For this do:
 cd .. # so you are in the `flower/baselines` directory
@@ -106,8 +112,7 @@ pip install -e .
 
 :warning: _Your baseline implementation should replicate several of the experiments in the original paper. Please include here the exact command(s) needed to run each of those experiments followed by a figure (e.g. a line plot) or table showing the results you obtained when you ran the code. Below is an example of how you can present this. Please add command followed by results for all your experiments._
 
-:warning: _You might want to add more hyperparameters and settings for your baseline. You can do so by extending `[tool.flwr.app.config]` in `pyproject.toml`. In addition, you can create a new `.toml` file that can be passed with the `--run-config` command (see below an example) to override several config values already present in `pyproject.toml`._
-
+:warning: _You might want to add more hyperparameters and settings for your baseline. You can do so by extending `[tool.flwr.app.config]` in `pyproject.toml`. In addition, you can create a new `.toml` file that can be passed with the `--run-config` command (see below an example) to override several config values **already present** in `pyproject.toml`._
 ```bash
 # it is likely that for one experiment you need to override some arguments.
 flwr run . --run-config learning-rate=0.1,coefficient=0.123
