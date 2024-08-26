@@ -26,6 +26,7 @@ clientapp = "$import_name.client_app:app"
 
 [tool.flwr.app.config]
 num-server-rounds = 3
+input-dim = 3
 
 [tool.flwr.federations]
 default = "local-simulation"
