@@ -60,7 +60,7 @@ services:
     depends_on:
       - superlink
 
-  # uncomment to add another supernode
+  # uncomment to add another SuperNode
   #
   # supernode-3:
   #   image: flwr/supernode:${FLWR_VERSION:-1.10.0}
@@ -96,6 +96,7 @@ services:
       resources:
         limits:
           cpus: "2"
+    stop_signal: SIGINT
     depends_on:
       - supernode-1
 
@@ -118,10 +119,11 @@ services:
       resources:
         limits:
           cpus: "2"
+    stop_signal: SIGINT
     depends_on:
       - supernode-2
 
-  # uncomment to add another clientapp
+  # uncomment to add another ClientApp
   #
   # clientapp-3:
   #   build:
@@ -142,5 +144,6 @@ services:
   #     resources:
   #       limits:
   #         cpus: "2"
+  #   stop_signal: SIGINT
   #   depends_on:
   #     - supernode-3
