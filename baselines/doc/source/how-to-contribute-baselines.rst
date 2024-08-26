@@ -28,7 +28,7 @@ Let's say you want to contribute the code of your most recent Federated Learning
 #. **Create a new baseline using the template**
     #. Create a new Python environment with Python 3.10 (we recommend doing this with `pyenv <https://github.com/pyenv/pyenv>`_)
     #. Install flower with: :code:`pip install flwr`.
-    #. Navigate to the baselines directory and run: :code:`flwr new fedawesome`. When prompted, choose the option :code:`Flower Basline`.
+    #. Navigate to the baselines directory and run: :code:`flwr new fedawesome`. When prompted, choose the option :code:`Flower Baseline`.
     #. A new directory in :code:`baselines/fedawesome` is created with the structure needed for a Flower Baseline.
     #. Follow the instructions in the :code:`README.md` in your baseline directory.
     

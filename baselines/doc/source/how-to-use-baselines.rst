@@ -34,7 +34,7 @@ Setting up your machine
   Identifying whether the baseline you want to run requires Poetry or not is easy: check if the `Environment Setup` section in the baseline readme mentions Poetry. 
   Follow the instructions later in this section if you need to setup Poetry in your system.
 
-Let's begin by installing :code:`pyenv`. We'll be following the standard procedure. Please refer to the `pyenv docs <https://github.com/pyenv/pyenv#installation>`_ for alternative ways of installing it.
+Let's begin by installing :code:`pyenv`. We'll be following the standard procedure. Please refer to the `pyenv docs <https://github.com/pyenv/pyenv#installation>`_ for alternative ways of installing it, including for platforms other than Ubuntu.
 
 .. code-block:: bash
 
@@ -88,7 +88,7 @@ Creating a virtual environment can be done as follows:
 .. code-block:: bash
 
     # Create an environment for Python 3.10.14 named test-env
-    pyenv virtualenv 3.10.13 test-env
+    pyenv virtualenv 3.10.14 test-env
 
     # Then activate it
     pyenv activate test-env
