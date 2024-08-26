@@ -97,6 +97,21 @@ def run_server_app() -> None:
 
     args = _parse_args_run_server_app().parse_args()
 
+    # Check if the server app reference is passed.
+    # Since Flower 1.11, passing a reference is not allowed.
+    app_path: Optional[str] = args.app
+    # If the provided app_path doesn't exist, and contains a ":",
+    # it is likely to be a server app reference instead of a path.
+    if app_path is not None and not Path(app_path).exists() and ":" in app_path:
+        sys.exit(
+            "It appears you've passed a reference like `server:app`.\n\n"
+            "Note that since version `1.11.0`, `flower-server-app` no longer supports "
+            "passing a reference to a `ServerApp` attribute. Instead, you need to pass "
+            "the path to Flower app via the argument `--app`. This is the path to a "
+            "directory containing a `pyproject.toml`. You can create a valid Flower "
+            "app by executing `flwr new` and following the prompt."
+        )
+
     if args.server != ADDRESS_DRIVER_API:
         warn = "Passing flag --server is deprecated. Use --superlink instead."
         warn_deprecated_feature(warn)
@@ -151,7 +166,6 @@ def run_server_app() -> None:
             cert_path,
         )
 
-    app_path: Optional[str] = args.app
     if not (app_path is None) ^ (args.run_id is None):
         raise sys.exit(
             "Please provide either a Flower App path or a Run ID, but not both. "
