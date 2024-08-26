@@ -1,69 +1,80 @@
-x-supernode: &supernode
-  deploy:
-    resources:
-      limits:
-        cpus: "2"
-  command:
-    - --superlink
-    - ${SUPERLINK_IP:-127.0.0.1}:9092
-    - --insecure
-
 services:
   supernode-1:
-    <<: *supernode
-    build:
-      context: ${PROJECT_DIR:-.}
-      dockerfile_inline: |
-        FROM flwr/supernode:${FLWR_VERSION:-1.10.0}
-
-        WORKDIR /app
-        COPY --chown=app:app pyproject.toml .
-        RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
-          && python -m pip install -U --no-cache-dir .
-
-        RUN --mount=type=bind,target=./$PROJECT_DIR \
-          flwr build --directory $PROJECT_DIR \
-          && flwr install flower.quickstart-docker-compose.1-0-0.fab \
-          && rm flower.quickstart-docker-compose.1-0-0.fab
-
-        ENTRYPOINT ["flower-supernode", "client:app", "--node-config", "partition-id=0,num-partitions=2"]
+    image: flwr/supernode:${FLWR_VERSION:-1.10.0}
+    command:
+      - --insecure
+      - --superlink
+      - ${SUPERLINK_IP:-127.0.0.1}:9092
+      - --supernode-address
+      - 0.0.0.0:9094
+      - --isolation
+      - process
+      - --node-config
+      - "partition-id=0 num-partitions=2"
 
   supernode-2:
-    <<: *supernode
+    image: flwr/supernode:${FLWR_VERSION:-1.10.0}
+    command:
+      - --insecure
+      - --superlink
+      - ${SUPERLINK_IP:-127.0.0.1}:9092
+      - --supernode-address
+      - 0.0.0.0:9095
+      - --isolation
+      - process
+      - --node-config
+      - "partition-id=1 num-partitions=2"
+
+  # uncomment to add another SuperNode
+  #
+
+
+  clientapp-1:
     build:
       context: ${PROJECT_DIR:-.}
       dockerfile_inline: |
-        FROM flwr/supernode:${FLWR_VERSION:-1.10.0}
+        FROM flwr/clientapp:${FLWR_VERSION:-1.10.0}
 
         WORKDIR /app
         COPY --chown=app:app pyproject.toml .
         RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
           && python -m pip install -U --no-cache-dir .
 
-        RUN --mount=type=bind,target=./$PROJECT_DIR \
-          flwr build --directory $PROJECT_DIR \
-          && flwr install flower.quickstart-docker-compose.1-0-0.fab \
-          && rm flower.quickstart-docker-compose.1-0-0.fab
+        ENTRYPOINT ["flwr-clientapp"]
+    command:
+      - --supernode
+      - supernode-1:9094
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+    stop_signal: SIGINT
+    depends_on:
+      - supernode-1
 
-        ENTRYPOINT ["flower-supernode", "client:app", "--node-config", "partition-id=1,num-partitions=2"]
+  clientapp-2:
+    build:
+      context: ${PROJECT_DIR:-.}
+      dockerfile_inline: |
+        FROM flwr/clientapp:${FLWR_VERSION:-1.10.0}
 
-  # uncomment to add another supernode
+        WORKDIR /app
+        COPY --chown=app:app pyproject.toml .
+        RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
+          && python -m pip install -U --no-cache-dir .
+
+        ENTRYPOINT ["flwr-clientapp"]
+    command:
+      - --supernode
+      - supernode-2:9095
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+    stop_signal: SIGINT
+    depends_on:
+      - supernode-2
+
+  # uncomment to add another ClientApp
   #
-  # supernode-3:
-  #   <<: *supernode
-  #   build:
-  #     context: ${PROJECT_DIR:-.}
-  #     dockerfile_inline: |
-  #       FROM flwr/supernode:${FLWR_VERSION:-1.10.0}
 
-  #       WORKDIR /app
-  #       COPY --chown=app:app pyproject.toml .
-  #       RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
-  #         && python -m pip install -U --no-cache-dir .
-
-  #       RUN --mount=type=bind,target=./$PROJECT_DIR \
-  #         flwr build --directory $PROJECT_DIR \
-  #         && flwr install flower.quickstart-docker-compose.1-0-0.fab \
-  #         && rm flower.quickstart-docker-compose.1-0-0.fab
-
-  #       ENTRYPOINT ["flower-supernode", "--node-config", "partition-id=0,num-partitions=2"]
