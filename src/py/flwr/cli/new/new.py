@@ -197,9 +197,7 @@ def new(
                 "template": "app/code/flwr_tune/client.py.tpl"
             },
             f"{import_name}/app.py": {"template": "app/code/flwr_tune/app.py.tpl"},
-            f"{import_name}/model.py": {
-                "template": "app/code/flwr_tune/model.py.tpl"
-            },
+            f"{import_name}/model.py": {"template": "app/code/flwr_tune/model.py.tpl"},
             f"{import_name}/dataset.py": {
                 "template": "app/code/flwr_tune/dataset.py.tpl"
             },
