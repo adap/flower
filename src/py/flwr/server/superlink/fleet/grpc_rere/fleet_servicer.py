@@ -51,19 +51,22 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         self, request: CreateNodeRequest, context: grpc.ServicerContext
     ) -> CreateNodeResponse:
         """."""
-        log(INFO, "FleetServicer.CreateNode")
+        log(INFO, "[Fleet.CreateNode] Request ping_interval=%s", request.ping_interval)
+        log(DEBUG, "[Fleet.CreateNode] Request: %s", request)
         response = message_handler.create_node(
             request=request,
             state=self.state_factory.state(),
         )
-        log(INFO, "FleetServicer: Created node_id=%s", response.node.node_id)
+        log(INFO, "[Fleet.CreateNode] Created node_id=%s", response.node.node_id)
+        log(DEBUG, "[Fleet.CreateNode] Response: %s", response)
         return response
 
     def DeleteNode(
         self, request: DeleteNodeRequest, context: grpc.ServicerContext
     ) -> DeleteNodeResponse:
         """."""
-        log(INFO, "FleetServicer.DeleteNode")
+        log(INFO, "[Fleet.DeleteNode] Delete node_id=%s", request.node.node_id)
+        log(DEBUG, "[Fleet.DeleteNode] Request: %s", request)
         return message_handler.delete_node(
             request=request,
             state=self.state_factory.state(),
@@ -71,7 +74,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
 
     def Ping(self, request: PingRequest, context: grpc.ServicerContext) -> PingResponse:
         """."""
-        log(DEBUG, "FleetServicer.Ping")
+        log(DEBUG, "[Fleet.Ping] Request: %s", request)
         return message_handler.ping(
             request=request,
             state=self.state_factory.state(),
@@ -81,7 +84,8 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         self, request: PullTaskInsRequest, context: grpc.ServicerContext
     ) -> PullTaskInsResponse:
         """Pull TaskIns."""
-        log(INFO, "FleetServicer.PullTaskIns")
+        log(INFO, "[Fleet.PullTaskIns] node_id=%s", request.node.node_id)
+        log(DEBUG, "[Fleet.PullTaskIns] Request: %s", request)
         return message_handler.pull_task_ins(
             request=request,
             state=self.state_factory.state(),
@@ -91,7 +95,14 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         self, request: PushTaskResRequest, context: grpc.ServicerContext
     ) -> PushTaskResResponse:
         """Push TaskRes."""
-        log(INFO, "FleetServicer.PushTaskRes")
+        if request.task_res_list:
+            log(
+                INFO,
+                "[Fleet.PushTaskRes] Push results from node_id=%s",
+                request.task_res_list[0].task.producer.node_id,
+            )
+        else:
+            log(INFO, "[Fleet.PushTaskRes] No task results to push")
         return message_handler.push_task_res(
             request=request,
             state=self.state_factory.state(),
@@ -101,7 +112,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         self, request: GetRunRequest, context: grpc.ServicerContext
     ) -> GetRunResponse:
         """Get run information."""
-        log(INFO, "FleetServicer.GetRun")
+        log(INFO, "[Fleet.GetRun] Requesting `Run` for run_id=%s", request.run_id)
         return message_handler.get_run(
             request=request,
             state=self.state_factory.state(),
@@ -111,7 +122,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         self, request: GetFabRequest, context: grpc.ServicerContext
     ) -> GetFabResponse:
         """Get FAB."""
-        log(DEBUG, "DriverServicer.GetFab")
+        log(INFO, "[Fleet.GetFab] Requesting FAB for fab_hash=%s", request.hash_str)
         return message_handler.get_fab(
             request=request,
             ffs=self.ffs_factory.ffs(),
