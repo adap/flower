@@ -135,10 +135,8 @@ Start two SuperNode containers.
           --insecure \
           --superlink superlink:9092 \
           --node-config "partition-id=1 num-partitions=2" \
-          --supernode-address \
-          0.0.0.0:9095 \
-          --isolation \
-          process
+          --supernode-address 0.0.0.0:9095 \
+          --isolation process
 
 Step 4: Start the ClientApp
 ---------------------------
@@ -229,8 +227,7 @@ a Dockerfile that extends the ClientApp image and installs the required dependen
           --network flwr-network \
           --detach \
           flwr_clientapp:0.0.1 \
-          --supernode \
-          supernode-2:9095
+          --supernode supernode-2:9095
 
 Step 5: Start the SuperExec
 ---------------------------
@@ -296,8 +293,7 @@ image and installs the required FAB dependencies.
           --detach \
           flwr_superexec:0.0.1 \
           --insecure \
-          --executor-config \
-          superlink=\"superlink:9091\"
+          --executor-config superlink=\"superlink:9091\"
 
    .. dropdown:: Understand the command
 
@@ -372,14 +368,12 @@ Step 7: Update the Application
           --network flwr-network \
           --detach \
           flwr_clientapp:0.0.1  \
-          --supernode \
-          supernode-1:9094
+          --supernode supernode-1:9094
       $ docker run --rm \
           --network flwr-network \
           --detach \
           flwr_clientapp:0.0.1 \
-          --supernode \
-          supernode-2:9095
+          --supernode supernode-2:9095
 
 #. Run the updated project:
 
