@@ -185,6 +185,7 @@ class TestGroupedNaturalIdPartitioner(unittest.TestCase):
             ["allow-smaller", 12, 6, 3],
             ["allow-bigger", 12, 6, 3],
             ["drop-reminder", 12, 6, 3],
+            ["allow-smaller", 10, 2, 3],
         ]
     )
     def test_no_overlapping_natural_ids(
@@ -224,6 +225,30 @@ class TestGroupedNaturalIdPartitioner(unittest.TestCase):
 
             # Add the natural IDs from this partition to the seen set
             seen_natural_ids.update(natural_ids_in_partition)
+
+    def test_group_size_bigger_than_num_unique_natural_ids_allow_smaller(self) -> None:
+        """Test the allow-smaller mode with group size > number of unique natural ids.
+
+        That's the only mode that should work in this scenario.
+        """
+        dataset = _create_dataset(num_rows=10, n_unique_natural_ids=2)
+        expected_num_unique_natural_ids = [2]
+        partitioner = GroupedNaturalIdPartitioner(
+            partition_by="natural_id",
+            group_size=3,
+            mode="allow-smaller",
+            sort_unique_ids=self.sort_unique_ids,
+        )
+        partitioner.dataset = dataset
+        # Trigger partitioning
+        partitions = [
+            partitioner.load_partition(i) for i in range(partitioner.num_partitions)
+        ]
+        unique_natural_ids = [
+            len(partition.unique("natural_id")) for partition in partitions
+        ]
+
+        self.assertEqual(unique_natural_ids, expected_num_unique_natural_ids)
 
     def test_strict_mode_with_invalid_group_size(self) -> None:
         """Test strict mode raises if group_size does not divide unique IDs evenly."""

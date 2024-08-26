@@ -98,6 +98,9 @@ class GroupedNaturalIdPartitioner(Partitioner):
         num_unique_natural_ids = len(unique_natural_ids)
         remainder = num_unique_natural_ids % self._group_size
         num_groups = num_unique_natural_ids // self._group_size
+        if num_groups == 0 and self._mode == "allow-smaller":
+            num_groups = 1
+            remainder = 0
         # Note that the number of groups might be different that this number
         # due to certain modes, it's a base value.
 
