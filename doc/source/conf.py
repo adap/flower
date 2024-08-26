@@ -94,6 +94,10 @@ release = "1.11.0"
 # The current released version
 rst_prolog = """
 .. |stable_flwr_version| replace:: 1.10.0
+.. |stable_flwr_superlink_docker_digest| replace:: 4b317d5b6030710b476f4dbfab2c3a33021ad40a0fcfa54d7edd45e0c51d889c
+.. |ubuntu_version| replace:: 22.04
+.. |setuptools_version| replace:: 70.3.0
+.. |pip_version| replace:: 24.1.2
 """
 
 # -- General configuration ---------------------------------------------------
@@ -191,6 +195,7 @@ redirects = {
     "apiref-binaries": "ref-api-cli.html",
     "fedbn-example-pytorch-from-centralized-to-federated": "example-fedbn-pytorch-from-centralized-to-federated.html",
     "how-to-use-built-in-middleware-layers": "how-to-use-built-in-mods.html",
+    "vit-finetune": "flowertune-vit.html",
     # Restructuring: tutorials
     "tutorial/Flower-0-What-is-FL": "tutorial-series-what-is-federated-learning.html",
     "tutorial/Flower-1-Intro-to-FL-PyTorch": "tutorial-series-get-started-with-flower-pytorch.html",

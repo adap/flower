@@ -32,6 +32,7 @@ from flwr.common import (
     Message,
     MessageTypeLegacy,
     Metadata,
+    RecordSet,
     Scalar,
 )
 from flwr.common.constant import PARTITION_ID_KEY
@@ -43,18 +44,22 @@ from flwr.server.superlink.fleet.vce.backend.raybackend import RayBackend
 class DummyClient(NumPyClient):
     """A dummy NumPyClient for tests."""
 
+    def __init__(self, state: RecordSet) -> None:
+        self.client_state = state
+
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
         """Return properties by doing a simple calculation."""
         result = float(config["factor"]) * pi
 
         # store something in context
-        self.context.state.configs_records["result"] = ConfigsRecord({"result": result})
+        self.client_state.configs_records["result"] = ConfigsRecord({"result": result})
+
         return {"result": result}
 
 
 def get_dummy_client(context: Context) -> Client:  # pylint: disable=unused-argument
     """Return a DummyClient converted to Client type."""
-    return DummyClient().to_client()
+    return DummyClient(state=context.state).to_client()
 
 
 def _load_app() -> ClientApp:
@@ -63,10 +68,11 @@ def _load_app() -> ClientApp:
 
 def backend_build_process_and_termination(
     backend: RayBackend,
-    process_args: Optional[Tuple[Callable[[], ClientApp], Message, Context]] = None,
+    app_fn: Callable[[], ClientApp],
+    process_args: Optional[Tuple[Message, Context]] = None,
 ) -> Union[Tuple[Message, Context], None]:
     """Build, process job and terminate RayBackend."""
-    backend.build()
+    backend.build(app_fn)
     to_return = None
 
     if process_args:
@@ -120,7 +126,9 @@ class TestRayBackend(TestCase):
     def test_backend_creation_and_termination(self) -> None:
         """Test creation of RayBackend and its termination."""
         backend = RayBackend(backend_config={})
-        backend_build_process_and_termination(backend=backend, process_args=None)
+        backend_build_process_and_termination(
+            backend=backend, app_fn=_load_app, process_args=None
+        )
 
     def test_backend_creation_submit_and_termination(
         self,
@@ -129,13 +137,10 @@ class TestRayBackend(TestCase):
         """Test submitting a message to a given ClientApp."""
         backend = RayBackend(backend_config={})
 
-        # Define ClientApp
-        client_app_callable = client_app_loader
-
         message, context, expected_output = _create_message_and_context()
 
         res = backend_build_process_and_termination(
-            backend=backend, process_args=(client_app_callable, message, context)
+            backend=backend, app_fn=client_app_loader, process_args=(message, context)
         )
 
         if res is None:
@@ -149,7 +154,6 @@ class TestRayBackend(TestCase):
             content.configs_records["getpropertiesres.properties"]["result"]
             == expected_output
         )
-
         # Verify context is correct
         obtained_result_in_context = updated_context.state.configs_records["result"][
             "result"
