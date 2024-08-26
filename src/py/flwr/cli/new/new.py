@@ -197,8 +197,8 @@ def new(
                 "template": "app/code/flwr_tune/client.py.tpl"
             },
             f"{import_name}/app.py": {"template": "app/code/flwr_tune/app.py.tpl"},
-            f"{import_name}/models.py": {
-                "template": "app/code/flwr_tune/models.py.tpl"
+            f"{import_name}/model.py": {
+                "template": "app/code/flwr_tune/model.py.tpl"
             },
             f"{import_name}/dataset.py": {
                 "template": "app/code/flwr_tune/dataset.py.tpl"
@@ -264,7 +264,7 @@ def new(
 
         if is_baseline_project:
             # Include additional files for baseline template
-            for file_name in ["models", "dataset", "strategy", "utils"]:
+            for file_name in ["model", "dataset", "strategy", "utils"]:
                 files[f"{import_name}/{file_name}.py"] = {
                     "template": f"app/code/{file_name}.{framework_str}.py.tpl"
                 }
