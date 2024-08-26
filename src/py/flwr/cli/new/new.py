@@ -263,7 +263,7 @@ def new(
             }
 
         if is_baseline_project:
-            # Indluce additional files for baseline template
+            # Include additional files for baseline template
             for file_name in ["models", "dataset", "strategy", "utils"]:
                 files[f"{import_name}/{file_name}.py"] = {
                     "template": f"app/code/{file_name}.{framework_str}.py.tpl"
