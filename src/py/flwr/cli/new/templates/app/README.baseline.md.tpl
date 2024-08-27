@@ -1,8 +1,8 @@
 ---
-title: title of the paper
-url: https://arxiv.org/abs/2007.14390 # update with the link to your paper
-labels: [label1, label2] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. system heterogeneity, image classification, asynchronous, weight sharing, cross-silo). Do not use "". Remove this comment once you are done.
-dataset: [dataset1, dataset2] # list of datasets you include in your baseline. Do not use "". Remove this comment once you are done.
+title: title of the paper # TODO
+url: https://arxiv.org/abs/2007.14390 # TODO: update with the link to your paper
+labels: [label1, label2] # TODO: please add between 4 and 10 single-word (maybe two-words) labels (e.g. system heterogeneity, image classification, asynchronous, weight sharing, cross-silo). Do not use "". Remove this comment once you are done.
+dataset: [dataset1, dataset2] # TODO: list of datasets you include in your baseline. Do not use "". Remove this comment once you are done.
 ---
 
 > [!IMPORTANT]
@@ -53,7 +53,7 @@ cd .. # so you are in the `flower/baselines` directory
 > Some issues highlighted by the tests script are easier than others to fix. Do not hesitate in reaching out for help to us (e.g. as a comment in your PR) if you are stuck with these.
 > Before opening your PR, please remove the code snippet above as well all the [!IMPORTANT] message blocks. Yes, including this one.
 
-# :warning: *_Title of your baseline_*
+# :warning: *_Title of your baseline_* # Also copy this title to the `description` in the `[project]` section of your `pyproject.toml`.
 
 > [!NOTE] 
 > If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
