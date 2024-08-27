@@ -1,4 +1,4 @@
-"""xgb: A Flower / XGBoost app."""
+"""xgboost_quickstart: A Flower / XGBoost app."""
 
 from typing import Dict
 
