@@ -1,4 +1,4 @@
-"""$project_name: A Flower $framework_str app."""
+"""$project_name: A Flower / $framework_str app."""
 
 import torch
 from flwr.client import ClientApp, NumPyClient
