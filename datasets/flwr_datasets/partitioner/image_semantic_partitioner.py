@@ -14,7 +14,6 @@
 # ==============================================================================
 """Image semantic partitioner class that works with Hugging Face Datasets."""
 
-
 import warnings
 from typing import Dict, List, Optional, Union
 
@@ -233,8 +232,7 @@ class ImageSemanticPartitioner(Partitioner):
             (models.efficientnet_b6, models.EfficientNet_B6_Weights.DEFAULT),
             (models.efficientnet_b7, models.EfficientNet_B7_Weights.DEFAULT),
         ]
-        backbone = efficient_nets_dict[self._efficient_net_type][0]
-        pretrained_weight = efficient_nets_dict[self._efficient_net_type][1]
+        backbone, pretrained_weight = efficient_nets_dict[self._efficient_net_type]
         efficient_net: models.EfficientNet = backbone(weights=pretrained_weight)
         efficient_net.classifier = torch.nn.Flatten()
 
@@ -457,7 +455,7 @@ class ImageSemanticPartitioner(Partitioner):
                 )
             try:
                 image = np.array(
-                    self.dataset.take(1)[self._image_column_name][0], dtype=np.float32
+                    self.dataset[0][self._image_column_name], dtype=np.float32
                 )
             except ValueError as err:
                 raise ValueError(
