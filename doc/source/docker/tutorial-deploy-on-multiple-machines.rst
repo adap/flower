@@ -129,7 +129,7 @@ Specify the remote SuperExec IP addresses and the path to the root-certificate i
 
    [tool.flwr.federations.remote-superexec]
    address = "192.168.2.33:9093"
-   root-certificates = "superexec-certificates/ca.crt"
+   root-certificates = "../superexec-certificates/ca.crt"
 
 To run the project, execute:
 
