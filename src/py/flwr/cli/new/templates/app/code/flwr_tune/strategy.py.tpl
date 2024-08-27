@@ -69,7 +69,7 @@ class CommunicationTracker:
         self.curr_comm_cost += comm_cost
         log(
             INFO,
-            "Communication budget: used %.4f MB (+%.4f MB this round) / 200,000 MB",
+            "Communication budget: used %.4f MB (+%.2f MB this round) / 200,000 MB",
             self.curr_comm_cost,
             comm_cost,
         )
