@@ -74,3 +74,15 @@ def load_data(partition_id: int, num_partitions: int, dataset_name: str):
     client_trainset = FDS.load_partition(partition_id, "train")
     client_trainset = reformat(client_trainset, llm_task="generalnlp")
     return client_trainset
+
+
+def replace_keys(input_dict, match="-", target="_"):
+    """Recursively replace match string with target string in dictionary keys."""
+    new_dict = {}
+    for key, value in input_dict.items():
+        new_key = key.replace(match, target)
+        if isinstance(value, dict):
+            new_dict[new_key] = replace_keys(value, match, target)
+        else:
+            new_dict[new_key] = value
+    return new_dict

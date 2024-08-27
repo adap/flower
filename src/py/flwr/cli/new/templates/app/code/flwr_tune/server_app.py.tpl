@@ -10,6 +10,7 @@ from omegaconf import DictConfig
 
 from $import_name.client_app import get_parameters, set_parameters
 from $import_name.models import get_model
+from $import_name.dataset import replace_keys
 from $import_name.strategy import FlowerTuneLlm
 
 
@@ -67,7 +68,7 @@ def server_fn(context: Context):
 
     # Read from config
     num_rounds = context.run_config["num-server-rounds"]
-    cfg = DictConfig(unflatten_dict(context.run_config))
+    cfg = DictConfig(replace_keys(unflatten_dict(context.run_config)))
 
     # Get initial model weights
     init_model = get_model(cfg.model)
