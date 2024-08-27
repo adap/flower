@@ -10,6 +10,7 @@ from flwr.server.strategy import FedAvg
 from omegaconf import DictConfig
 
 from flowertune_llm.models import get_model
+from flowertune_llm.dataset import replace_keys
 from flowertune_llm.client_app import get_parameters, set_parameters
 
 
@@ -67,7 +68,7 @@ def server_fn(context: Context):
 
     # Read from config
     num_rounds = context.run_config["num-server-rounds"]
-    cfg = DictConfig(unflatten_dict(context.run_config))
+    cfg = DictConfig(replace_keys(unflatten_dict(context.run_config)))
 
     # Get initial model weights
     init_model = get_model(cfg.model)
