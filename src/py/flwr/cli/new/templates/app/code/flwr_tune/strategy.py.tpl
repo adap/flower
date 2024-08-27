@@ -17,8 +17,8 @@ class FlowerTuneLlm(FedAvg):
     costs associated with `fit` over FL rounds.
     """
     def __init__(self, **kwargs):
-        self.comm_tracker = CommunicationTracker()
         super().__init__(**kwargs)
+        self.comm_tracker = CommunicationTracker()
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
