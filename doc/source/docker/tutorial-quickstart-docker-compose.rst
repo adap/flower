@@ -230,7 +230,7 @@ Step 6: Run Flower with TLS
 
       [tool.flwr.federations.docker-compose-tls]
       address = "127.0.0.1:9093"
-      root-certificates = "superexec-certificates/ca.crt"
+      root-certificates = "../superexec-certificates/ca.crt"
 
 #. Restart the services with TLS enabled:
 
