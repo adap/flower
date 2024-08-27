@@ -14,15 +14,18 @@ This introductory example conducts federated instruction tuning with pretrained 
 We implement FlowerTune LLM by integrating a bundle of techniques: 1) We use [Flower Datasets](https://flower.dev/docs/datasets/) to download, partition and preprocess the dataset. 2) The fine-tuning is done using the [🤗PEFT](https://huggingface.co/docs/peft/en/index) library. 3) We use Flower's Simulation Engine to simulate the LLM fine-tuning process in federated way,
 which allows users to perform the training on a single GPU.
 
-## Environment setup
+## Set up the project
 
-Start by cloning the code example. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
+Start by cloning the example project:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/flowertune-llm . && rm -rf flower && cd flowertune-llm
+git clone --depth=1 https://github.com/adap/flower.git _tmp \
+        && mv _tmp/examples/flowertune-llm . \
+        && rm -rf _tmp \
+        && cd flowertune-llm
 ```
 
-This will create a new directory called `flowertune-llm` containing the following files:
+This will create a new directory called `flowertune-llm` with the following structure:
 
 ```shell
 flowertune-llm
@@ -31,10 +34,10 @@ flowertune-llm
 │   ├── client_app.py   # Defines your ClientApp
 │   ├── server_app.py   # Defines your ServerApp
 │   ├── dataset.py      # Defines your dataset and tokenizer
-│   ├── models.py       # Defines your models
-│   └── test.py         # Test pre-trained model
+│   └── models.py       # Defines your models
 │   
 ├── pyproject.toml      # Project metadata like dependencies and configs
+├── test.py             # Test pre-trained model
 └── README.md
 ```
 
@@ -63,7 +66,7 @@ This command will run FL simulations with a 4-bit [OpenLLaMA 3Bv2](https://huggi
 flwr run . --run-config model.name="'openlm-research/open_llama_7b_v2'",model.quantization=8
 
 # Run for 50 rounds but increasing the fraction of clients that participate per round to 25%
-flwr run . --run-config num-server-rounds=50,strategy.fraction_fit=0.25
+flwr run . --run-config num-server-rounds=50,strategy.fraction-fit=0.25
 ```
 
 ### Run with the Deployment Engine
