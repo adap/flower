@@ -569,7 +569,7 @@ class SqliteState(State):  # pylint: disable=R0904
         return node_id
 
     def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
-        """Delete a client node."""
+        """Delete a node."""
         query = "DELETE FROM node WHERE node_id = ?"
         params = (node_id,)
 
@@ -607,10 +607,10 @@ class SqliteState(State):  # pylint: disable=R0904
         result: Set[int] = {row["node_id"] for row in rows}
         return result
 
-    def get_node_id(self, client_public_key: bytes) -> Optional[int]:
-        """Retrieve stored `node_id` filtered by `client_public_keys`."""
+    def get_node_id(self, node_public_key: bytes) -> Optional[int]:
+        """Retrieve stored `node_id` filtered by `node_public_keys`."""
         query = "SELECT node_id FROM node WHERE public_key = :public_key;"
-        row = self.query(query, {"public_key": client_public_key})
+        row = self.query(query, {"public_key": node_public_key})
         if len(row) > 0:
             node_id: int = row[0]["node_id"]
             return node_id
@@ -684,19 +684,19 @@ class SqliteState(State):  # pylint: disable=R0904
             public_key = None
         return public_key
 
-    def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
-        """Store a set of `client_public_keys` in state."""
+    def store_node_public_keys(self, public_keys: Set[bytes]) -> None:
+        """Store a set of `node_public_keys` in state."""
         query = "INSERT INTO public_key (public_key) VALUES (?)"
         data = [(key,) for key in public_keys]
         self.query(query, data)
 
-    def store_client_public_key(self, public_key: bytes) -> None:
-        """Store a `client_public_key` in state."""
+    def store_node_public_key(self, public_key: bytes) -> None:
+        """Store a `node_public_key` in state."""
         query = "INSERT INTO public_key (public_key) VALUES (:public_key)"
         self.query(query, {"public_key": public_key})
 
-    def get_client_public_keys(self) -> Set[bytes]:
-        """Retrieve all currently stored `client_public_keys` as a set."""
+    def get_node_public_keys(self) -> Set[bytes]:
+        """Retrieve all currently stored `node_public_keys` as a set."""
         query = "SELECT public_key FROM public_key"
         rows = self.query(query)
         result: Set[bytes] = {row["public_key"] for row in rows}
