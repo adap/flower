@@ -18,6 +18,7 @@ from trl import SFTTrainer
 from $import_name.dataset import (
     get_tokenizer_and_data_collator_and_propt_formatting,
     load_data,
+    replace_keys,
 )
 from $import_name.models import cosine_annealing, get_model
 
@@ -110,7 +111,7 @@ def client_fn(context: Context) -> FlowerClient:
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
     num_rounds = context.run_config["num-server-rounds"]
-    cfg = DictConfig(unflatten_dict(context.run_config))
+    cfg = DictConfig(replace_keys(unflatten_dict(context.run_config)))
 
     # Let's get the client partition
     client_trainset = load_data(partition_id, num_partitions, cfg.static.dataset.name)
