@@ -87,18 +87,18 @@ class ImageSemanticPartitioner(Partitioner):
         Options: ["random", "kmeans", "k-means++"]
     use_cuda: bool
         Whether to use CUDA for computation acceleration.
-    shuffle: bool
-        Whether to randomize the order of samples. Shuffling applied after the
-        samples assignment to partitions.
-    sample_seed: int
-        Seed used for sampling.
-    pca_seed: Optional[int]
-        Seed used for PCA dimensionality reduction. If not set, sample_seed is used.
-    gmm_seed: Optional[int]
-        Seed used for GMM clustering. If not set, sample_seed is used.
     image_column_name: Optional[str]
         The name of the image column in the dataset. If not set, the first image column
         is used.
+    shuffle: bool
+        Whether to randomize the order of samples. Shuffling applied after the
+        samples assignment to partitions.
+    shuffle_seed: Optional[int]
+        Seed used for shuffling. Defaults to 42.
+    pca_seed: Optional[int]
+        Seed used for PCA dimensionality reduction. Defaults to 42.
+    gmm_seed: Optional[int]
+        Seed used for GMM clustering. Defaults to 42.
 
 
     Examples
@@ -136,11 +136,11 @@ class ImageSemanticPartitioner(Partitioner):
         gmm_max_iter: int = 100,
         gmm_init_params: str = "kmeans",
         use_cuda: bool = False,
-        shuffle: bool = True,
-        sample_seed: int = 42,
-        pca_seed: Optional[int] = None,
-        gmm_seed: Optional[int] = None,
         image_column_name: Optional[str] = None,
+        shuffle: bool = True,
+        shuffle_seed: Optional[int] = 42,
+        pca_seed: Optional[int] = 42,
+        gmm_seed: Optional[int] = 42,
     ) -> None:
         super().__init__()
         # Attributes based on the constructor
@@ -153,19 +153,15 @@ class ImageSemanticPartitioner(Partitioner):
         self._gmm_max_iter = gmm_max_iter
         self._gmm_init_params = gmm_init_params
         self._use_cuda = use_cuda
+        self._image_column_name = image_column_name
         self._shuffle = shuffle
-        if pca_seed is None:
-            pca_seed = sample_seed
-        if gmm_seed is None:
-            gmm_seed = sample_seed
-        self._sample_seed = sample_seed
+        self._shuffle_seed = shuffle_seed
         self._pca_seed = pca_seed
         self._gmm_seed = gmm_seed
-        self._image_column_name = image_column_name
 
         self._check_variable_validation()
 
-        self._rng_numpy = np.random.default_rng(seed=self._sample_seed)
+        self._rng_numpy = np.random.default_rng(seed=self._shuffle_seed)
 
         # The attributes below are determined during the first call to load_partition
         self._unique_classes: Optional[Union[List[int], List[str]]] = None
@@ -505,10 +501,8 @@ class ImageSemanticPartitioner(Partitioner):
             raise ValueError("The gmm max iter needs to be greater than zero.")
         if self._pca_components <= 0:
             raise ValueError("The pca components needs to be greater than zero.")
-        if self._sample_seed is None:
-            raise ValueError("The sample seed needs to be specified.")
-        if not isinstance(self._sample_seed, int):
-            raise TypeError("The sample seed needs to be an integer.")
+        if not isinstance(self._shuffle_seed, int):
+            raise TypeError("The shuffle seed needs to be an integer.")
         if not isinstance(self._pca_seed, int):
             raise TypeError("The pca seed needs to be an integer.")
         if not isinstance(self._gmm_seed, int):

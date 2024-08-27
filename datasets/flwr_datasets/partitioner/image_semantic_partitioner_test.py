@@ -40,9 +40,9 @@ def _dummy_setup(
     pca_components: int = 6,
     gmm_max_iter: int = 2,
     gmm_init_params: str = "random",
-    sample_seed: int = 42,
-    pca_seed: Optional[int] = None,
-    gmm_seed: Optional[int] = None,
+    shuffle_seed: Optional[int] = 42,
+    pca_seed: Optional[int] = 42,
+    gmm_seed: Optional[int] = 42,
 ) -> Tuple[Dataset, ImageSemanticPartitioner]:
     """Create a dummy dataset and partitioner for testing."""
     data = {
@@ -58,7 +58,7 @@ def _dummy_setup(
         pca_components=pca_components,
         gmm_max_iter=gmm_max_iter,
         gmm_init_params=gmm_init_params,
-        sample_seed=sample_seed,
+        shuffle_seed=shuffle_seed,
         pca_seed=pca_seed,
         gmm_seed=gmm_seed,
     )
@@ -88,9 +88,9 @@ class TestImageSemanticPartitionerSuccess(unittest.TestCase):
         pca_components: int,
         gmm_max_iter: int,
         gmm_init_params: str,
-        sample_seed: int,
-        pca_seed: Optional[int] = None,
-        gmm_seed: Optional[int] = None,
+        shuffle_seed: Optional[int] = 42,
+        pca_seed: Optional[int] = 42,
+        gmm_seed: Optional[int] = 42,
     ) -> None:
         """Test whether initializaiton is successful."""
         _, partitioner = _dummy_setup(
@@ -103,13 +103,10 @@ class TestImageSemanticPartitionerSuccess(unittest.TestCase):
             pca_components=pca_components,
             gmm_max_iter=gmm_max_iter,
             gmm_init_params=gmm_init_params,
-            sample_seed=sample_seed,
+            shuffle_seed=shuffle_seed,
             pca_seed=pca_seed,
             gmm_seed=gmm_seed,
         )
-        _sample_seed = sample_seed
-        _pca_seed = pca_seed if pca_seed is not None else sample_seed
-        _gmm_seed = gmm_seed if gmm_seed is not None else sample_seed
         self.assertEqual(
             (
                 partitioner._num_partitions,
@@ -118,7 +115,7 @@ class TestImageSemanticPartitionerSuccess(unittest.TestCase):
                 partitioner._pca_components,
                 partitioner._gmm_max_iter,
                 partitioner._gmm_init_params,
-                partitioner._sample_seed,
+                partitioner._shuffle_seed,
                 partitioner._pca_seed,
                 partitioner._gmm_seed,
             ),
@@ -129,9 +126,9 @@ class TestImageSemanticPartitionerSuccess(unittest.TestCase):
                 pca_components,
                 gmm_max_iter,
                 gmm_init_params,
-                _sample_seed,
-                _pca_seed,
-                _gmm_seed,
+                shuffle_seed,
+                pca_seed,
+                gmm_seed,
             ),
         )
 
@@ -168,20 +165,17 @@ class TestImageSemanticPartitionerSuccess(unittest.TestCase):
             (gmm_max_iter, gmm_init_params),
         )
 
-    @parameterized.expand([(1, None, None), (1, 2, None), (1, 2, 3)])  # type: ignore
+    @parameterized.expand([(1, 2, 3)])  # type: ignore
     def test_seeds(
-        self, sample_seed: int, pca_seed: Optional[int], gmm_seed: Optional[int]
+        self, shuffle_seed: int, pca_seed: Optional[int], gmm_seed: Optional[int]
     ) -> None:
         """Test if seeds are correct."""
-        _sample_seed = sample_seed
-        _pca_seed = pca_seed if pca_seed is not None else sample_seed
-        _gmm_seed = gmm_seed if gmm_seed is not None else sample_seed
         _, partitioner = _dummy_setup(
-            sample_seed=sample_seed, pca_seed=pca_seed, gmm_seed=gmm_seed
+            shuffle_seed=shuffle_seed, pca_seed=pca_seed, gmm_seed=gmm_seed
         )
         self.assertEqual(
-            (partitioner._sample_seed, partitioner._pca_seed, partitioner._gmm_seed),
-            (_sample_seed, _pca_seed, _gmm_seed),
+            (partitioner._shuffle_seed, partitioner._pca_seed, partitioner._gmm_seed),
+            (shuffle_seed, pca_seed, gmm_seed),
         )
 
     def test_determine_partition_id_to_indices(self) -> None:
@@ -271,16 +265,14 @@ class TestImageSemanticPartitionerFailure(unittest.TestCase):
             )
             partitioner.load_partition(0)
 
-    @parameterized.expand(  # type: ignore
-        [("1", None, None), (1.2, 2, None), (None, 2, 3)]
-    )
+    @parameterized.expand([("1", 2, 3), (1.2, 2, 3), (1, 2, 3.0)])  # type: ignore
     def test_invalid_seeds(
-        self, sample_seed: int, pca_seed: Optional[int], gmm_seed: Optional[int]
+        self, shuffle_seed: int, pca_seed: Optional[int], gmm_seed: Optional[int]
     ) -> None:
         """Test if raises when the seeds are not integers."""
         with self.assertRaises((TypeError, ValueError)):
             _, partitioner = _dummy_setup(
-                sample_seed=sample_seed, pca_seed=pca_seed, gmm_seed=gmm_seed
+                shuffle_seed=shuffle_seed, pca_seed=pca_seed, gmm_seed=gmm_seed
             )
             partitioner.load_partition(0)
 
