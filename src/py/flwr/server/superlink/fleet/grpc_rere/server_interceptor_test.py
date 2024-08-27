@@ -58,7 +58,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
 
     def setUp(self) -> None:
         """Initialize mock stub and server interceptor."""
-        self._client_private_key, self._client_public_key = generate_key_pairs()
+        self._node_private_key, self._node_public_key = generate_key_pairs()
         self._server_private_key, self._server_public_key = generate_key_pairs()
 
         state_factory = StateFactory(":flwr-in-memory-state:")
@@ -69,9 +69,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             private_key_to_bytes(self._server_private_key),
             public_key_to_bytes(self._server_public_key),
         )
-        self.state.store_client_public_keys(
-            {public_key_to_bytes(self._client_public_key)}
-        )
+        self.state.store_node_public_keys({public_key_to_bytes(self._node_public_key)})
 
         self._server_interceptor = AuthenticateServerInterceptor(self.state)
         self._server: grpc.Server = _run_fleet_api_grpc_rere(
@@ -122,7 +120,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         """Test server interceptor for creating node."""
         # Prepare
         public_key_bytes = base64.urlsafe_b64encode(
-            public_key_to_bytes(self._client_public_key)
+            public_key_to_bytes(self._node_public_key)
         )
 
         # Execute
@@ -145,9 +143,9 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def test_unsuccessful_create_node_with_metadata(self) -> None:
         """Test server interceptor for creating node unsuccessfully."""
         # Prepare
-        _, client_public_key = generate_key_pairs()
+        _, node_public_key = generate_key_pairs()
         public_key_bytes = base64.urlsafe_b64encode(
-            public_key_to_bytes(client_public_key)
+            public_key_to_bytes(node_public_key)
         )
 
         # Execute & Assert
@@ -161,17 +159,17 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         """Test server interceptor for deleting node."""
         # Prepare
         node_id = self.state.create_node(
-            ping_interval=30, public_key=public_key_to_bytes(self._client_public_key)
+            ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
         )
         request = DeleteNodeRequest(node=Node(node_id=node_id))
         shared_secret = generate_shared_key(
-            self._client_private_key, self._server_public_key
+            self._node_private_key, self._server_public_key
         )
         hmac_value = base64.urlsafe_b64encode(
             compute_hmac(shared_secret, request.SerializeToString(True))
         )
         public_key_bytes = base64.urlsafe_b64encode(
-            public_key_to_bytes(self._client_public_key)
+            public_key_to_bytes(self._node_public_key)
         )
 
         # Execute
@@ -191,16 +189,16 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         """Test server interceptor for deleting node unsuccessfully."""
         # Prepare
         node_id = self.state.create_node(
-            ping_interval=30, public_key=public_key_to_bytes(self._client_public_key)
+            ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
         )
         request = DeleteNodeRequest(node=Node(node_id=node_id))
-        client_private_key, _ = generate_key_pairs()
-        shared_secret = generate_shared_key(client_private_key, self._server_public_key)
+        node_private_key, _ = generate_key_pairs()
+        shared_secret = generate_shared_key(node_private_key, self._server_public_key)
         hmac_value = base64.urlsafe_b64encode(
             compute_hmac(shared_secret, request.SerializeToString(True))
         )
         public_key_bytes = base64.urlsafe_b64encode(
-            public_key_to_bytes(self._client_public_key)
+            public_key_to_bytes(self._node_public_key)
         )
 
         # Execute & Assert
@@ -217,17 +215,17 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         """Test server interceptor for pull task ins."""
         # Prepare
         node_id = self.state.create_node(
-            ping_interval=30, public_key=public_key_to_bytes(self._client_public_key)
+            ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
         )
         request = PullTaskInsRequest(node=Node(node_id=node_id))
         shared_secret = generate_shared_key(
-            self._client_private_key, self._server_public_key
+            self._node_private_key, self._server_public_key
         )
         hmac_value = base64.urlsafe_b64encode(
             compute_hmac(shared_secret, request.SerializeToString(True))
         )
         public_key_bytes = base64.urlsafe_b64encode(
-            public_key_to_bytes(self._client_public_key)
+            public_key_to_bytes(self._node_public_key)
         )
 
         # Execute
@@ -247,16 +245,16 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         """Test server interceptor for pull task ins unsuccessfully."""
         # Prepare
         node_id = self.state.create_node(
-            ping_interval=30, public_key=public_key_to_bytes(self._client_public_key)
+            ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
         )
         request = PullTaskInsRequest(node=Node(node_id=node_id))
-        client_private_key, _ = generate_key_pairs()
-        shared_secret = generate_shared_key(client_private_key, self._server_public_key)
+        node_private_key, _ = generate_key_pairs()
+        shared_secret = generate_shared_key(node_private_key, self._server_public_key)
         hmac_value = base64.urlsafe_b64encode(
             compute_hmac(shared_secret, request.SerializeToString(True))
         )
         public_key_bytes = base64.urlsafe_b64encode(
-            public_key_to_bytes(self._client_public_key)
+            public_key_to_bytes(self._node_public_key)
         )
 
         # Execute & Assert
@@ -273,19 +271,19 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         """Test server interceptor for push task res."""
         # Prepare
         node_id = self.state.create_node(
-            ping_interval=30, public_key=public_key_to_bytes(self._client_public_key)
+            ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
         )
         request = PushTaskResRequest(
             task_res_list=[TaskRes(task=Task(producer=Node(node_id=node_id)))]
         )
         shared_secret = generate_shared_key(
-            self._client_private_key, self._server_public_key
+            self._node_private_key, self._server_public_key
         )
         hmac_value = base64.urlsafe_b64encode(
             compute_hmac(shared_secret, request.SerializeToString(True))
         )
         public_key_bytes = base64.urlsafe_b64encode(
-            public_key_to_bytes(self._client_public_key)
+            public_key_to_bytes(self._node_public_key)
         )
 
         # Execute
@@ -305,18 +303,18 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         """Test server interceptor for push task res unsuccessfully."""
         # Prepare
         node_id = self.state.create_node(
-            ping_interval=30, public_key=public_key_to_bytes(self._client_public_key)
+            ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
         )
         request = PushTaskResRequest(
             task_res_list=[TaskRes(task=Task(producer=Node(node_id=node_id)))]
         )
-        client_private_key, _ = generate_key_pairs()
-        shared_secret = generate_shared_key(client_private_key, self._server_public_key)
+        node_private_key, _ = generate_key_pairs()
+        shared_secret = generate_shared_key(node_private_key, self._server_public_key)
         hmac_value = base64.urlsafe_b64encode(
             compute_hmac(shared_secret, request.SerializeToString(True))
         )
         public_key_bytes = base64.urlsafe_b64encode(
-            public_key_to_bytes(self._client_public_key)
+            public_key_to_bytes(self._node_public_key)
         )
 
         # Execute & Assert
@@ -333,18 +331,18 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         """Test server interceptor for pull task ins."""
         # Prepare
         self.state.create_node(
-            ping_interval=30, public_key=public_key_to_bytes(self._client_public_key)
+            ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
         )
         run_id = self.state.create_run("", "", "", {})
         request = GetRunRequest(run_id=run_id)
         shared_secret = generate_shared_key(
-            self._client_private_key, self._server_public_key
+            self._node_private_key, self._server_public_key
         )
         hmac_value = base64.urlsafe_b64encode(
             compute_hmac(shared_secret, request.SerializeToString(True))
         )
         public_key_bytes = base64.urlsafe_b64encode(
-            public_key_to_bytes(self._client_public_key)
+            public_key_to_bytes(self._node_public_key)
         )
 
         # Execute
@@ -364,17 +362,17 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         """Test server interceptor for pull task ins unsuccessfully."""
         # Prepare
         self.state.create_node(
-            ping_interval=30, public_key=public_key_to_bytes(self._client_public_key)
+            ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
         )
         run_id = self.state.create_run("", "", "", {})
         request = GetRunRequest(run_id=run_id)
-        client_private_key, _ = generate_key_pairs()
-        shared_secret = generate_shared_key(client_private_key, self._server_public_key)
+        node_private_key, _ = generate_key_pairs()
+        shared_secret = generate_shared_key(node_private_key, self._server_public_key)
         hmac_value = base64.urlsafe_b64encode(
             compute_hmac(shared_secret, request.SerializeToString(True))
         )
         public_key_bytes = base64.urlsafe_b64encode(
-            public_key_to_bytes(self._client_public_key)
+            public_key_to_bytes(self._node_public_key)
         )
 
         # Execute & Assert
@@ -391,17 +389,17 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         """Test server interceptor for pull task ins."""
         # Prepare
         node_id = self.state.create_node(
-            ping_interval=30, public_key=public_key_to_bytes(self._client_public_key)
+            ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
         )
         request = PingRequest(node=Node(node_id=node_id))
         shared_secret = generate_shared_key(
-            self._client_private_key, self._server_public_key
+            self._node_private_key, self._server_public_key
         )
         hmac_value = base64.urlsafe_b64encode(
             compute_hmac(shared_secret, request.SerializeToString(True))
         )
         public_key_bytes = base64.urlsafe_b64encode(
-            public_key_to_bytes(self._client_public_key)
+            public_key_to_bytes(self._node_public_key)
         )
 
         # Execute
@@ -421,16 +419,16 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         """Test server interceptor for pull task ins unsuccessfully."""
         # Prepare
         node_id = self.state.create_node(
-            ping_interval=30, public_key=public_key_to_bytes(self._client_public_key)
+            ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
         )
         request = PingRequest(node=Node(node_id=node_id))
-        client_private_key, _ = generate_key_pairs()
-        shared_secret = generate_shared_key(client_private_key, self._server_public_key)
+        node_private_key, _ = generate_key_pairs()
+        shared_secret = generate_shared_key(node_private_key, self._server_public_key)
         hmac_value = base64.urlsafe_b64encode(
             compute_hmac(shared_secret, request.SerializeToString(True))
         )
         public_key_bytes = base64.urlsafe_b64encode(
-            public_key_to_bytes(self._client_public_key)
+            public_key_to_bytes(self._node_public_key)
         )
 
         # Execute & Assert
@@ -446,7 +444,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def test_successful_restore_node(self) -> None:
         """Test server interceptor for restoring node."""
         public_key_bytes = base64.urlsafe_b64encode(
-            public_key_to_bytes(self._client_public_key)
+            public_key_to_bytes(self._node_public_key)
         )
         response, call = self._create_node.with_call(
             request=CreateNodeRequest(),
@@ -461,20 +459,20 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         )
 
         node = response.node
-        client_node_id = node.node_id
+        node_node_id = node.node_id
 
         assert call.initial_metadata()[0] == expected_metadata
         assert isinstance(response, CreateNodeResponse)
 
         request = DeleteNodeRequest(node=node)
         shared_secret = generate_shared_key(
-            self._client_private_key, self._server_public_key
+            self._node_private_key, self._server_public_key
         )
         hmac_value = base64.urlsafe_b64encode(
             compute_hmac(shared_secret, request.SerializeToString(True))
         )
         public_key_bytes = base64.urlsafe_b64encode(
-            public_key_to_bytes(self._client_public_key)
+            public_key_to_bytes(self._node_public_key)
         )
         response, call = self._delete_node.with_call(
             request=request,
@@ -488,7 +486,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         assert grpc.StatusCode.OK == call.code()
 
         public_key_bytes = base64.urlsafe_b64encode(
-            public_key_to_bytes(self._client_public_key)
+            public_key_to_bytes(self._node_public_key)
         )
         response, call = self._create_node.with_call(
             request=CreateNodeRequest(),
@@ -504,4 +502,4 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
 
         assert call.initial_metadata()[0] == expected_metadata
         assert isinstance(response, CreateNodeResponse)
-        assert response.node.node_id == client_node_id
+        assert response.node.node_id == node_node_id
