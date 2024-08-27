@@ -9,7 +9,6 @@ dataset: [dataset1, dataset2] # TODO: list of datasets you include in your basel
 > This is the template for your `README.md`. Please fill-in the information in all areas witha :warning: symbol.
 > Please refer to the [Flower Baselines contribution](https://flower.ai/docs/baselines/how-to-contribute-baselines.html) and [Flower Baselines usage](https://flower.ai/docs/baselines/how-to-use-baselines.html) guides for more details.
 > Please complete the metadata section at the very top of this README. This generates a table at the top of the file that will facilitate indexing baselines.
-> You can check the [MOON baseline](https://github.com/adap/flower/tree/main/baselines/moon) as an example of a baseline that followed this guide.
 > Please remove this [!IMPORTANT] block once you are done with your `README.md` as well as all the `:warning:` symbols and the comments next to them.
 
 > [!IMPORTANT]
