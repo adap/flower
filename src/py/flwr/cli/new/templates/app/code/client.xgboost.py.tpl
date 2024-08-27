@@ -1,7 +1,6 @@
 """$project_name: A Flower / XGBoost app."""
 
 import warnings
-from logging import INFO
 
 from flwr.common.context import Context
 
@@ -102,8 +101,6 @@ class FlowerClient(Client):
             iteration=bst.num_boosted_rounds() - 1,
         )
         auc = round(float(eval_results.split("\t")[1].split(":")[1]), 4)
-
-        global_round = ins.config["global_round"]
 
         return EvaluateRes(
             status=Status(
