@@ -258,11 +258,12 @@ In ``compose.yml``, add the following:
 
 .. code-block:: yaml
    :caption: compose.yml
+   :substitutions:
 
      # other service definitions
 
      supernode-3:
-       image: flwr/supernode:${FLWR_VERSION:-1.10.0}
+       image: flwr/supernode:${FLWR_VERSION:-|stable_flwr_version|}
        command:
          - --insecure
          - --superlink
@@ -280,7 +281,7 @@ In ``compose.yml``, add the following:
        build:
          context: ${PROJECT_DIR:-.}
          dockerfile_inline: |
-           FROM flwr/clientapp:${FLWR_VERSION:-1.10.0}
+           FROM flwr/clientapp:${FLWR_VERSION:-|stable_flwr_version|}
 
            WORKDIR /app
            COPY --chown=app:app pyproject.toml .
@@ -333,12 +334,12 @@ Step 8: Persisting the SuperLink State and Enabling TLS
 To run Flower with persisted SuperLink state and enabled TLS, a slight change in the ``with-state.yml``
 file is required:
 
-#. Comment out the lines 3-5 and uncomment the lines 6-10:
+#. Comment out the lines 2-4 and uncomment the lines 5-9:
 
    .. code-block:: yaml
       :caption: with-state.yml
       :linenos:
-      :emphasize-lines: 3-10
+      :emphasize-lines: 2-9
 
         superlink:
           # command:
