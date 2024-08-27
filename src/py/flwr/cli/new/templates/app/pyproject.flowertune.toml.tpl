@@ -50,7 +50,7 @@ train.training-arguments.save-steps = 1000
 train.training-arguments.save-total-limit = 10
 train.training-arguments.gradient-checkpointing = true
 train.training-arguments.lr-scheduler-type = "constant"
-strategy.fraction-fit = $fraction-fit
+strategy.fraction-fit = $fraction_fit
 strategy.fraction-evaluate = 0.0
 num-server-rounds = 200
 
