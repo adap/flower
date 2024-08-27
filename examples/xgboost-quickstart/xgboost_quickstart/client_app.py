@@ -20,9 +20,10 @@ from flwr.common import (
     Status,
 )
 
-from xgb.task import load_data, replace_keys
+from xgboost_quickstart.task import load_data, replace_keys
 
 warnings.filterwarnings("ignore", category=UserWarning)
+
 
 # Define Flower Client and client_fn
 class FlowerClient(Client):
