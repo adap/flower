@@ -67,6 +67,7 @@ redirects = {
     "mxnet-from-centralized-to-federated": "index.html",
     "app-secure-aggregation": "flower-secure-aggregation.html",
     "llm-flowertune": "flowertune-llm.html",
+    "vit-finetune": "flowertune-vit.html",
 }
 
 
