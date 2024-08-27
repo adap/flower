@@ -8,14 +8,11 @@ import xgboost as xgb
 from flwr.client import Client, ClientApp
 from flwr.common.config import unflatten_dict
 from flwr.common import (
-    log,
     Code,
     EvaluateIns,
     EvaluateRes,
     FitIns,
     FitRes,
-    GetParametersIns,
-    GetParametersRes,
     Parameters,
     Status,
 )

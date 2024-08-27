@@ -4,7 +4,7 @@ dataset: [HIGGS]
 framework: [xgboost]
 ---
 
-# Flower Example using XGBoost
+# Federated Learning with XGBoost and Flower (Quickstart Example)
 
 This example demonstrates how to perform EXtreme Gradient Boosting (XGBoost) within Flower using `xgboost` package.
 We use [HIGGS](https://archive.ics.uci.edu/dataset/280/higgs) dataset for this example to perform a binary classification task.

@@ -5,10 +5,10 @@ build-backend = "hatchling.build"
 [project]
 name = "xgboost_quickstart"
 version = "1.0.0"
-description = "Flower Example using XGBoost"
+description = "Federated Learning with XGBoost and Flower (Quickstart Example)"
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.10.0",
+    "flwr-nightly[simulation]==1.11.0.dev20240826",
     "flwr-datasets>=0.3.0",
     "xgboost>=2.0.0",
 ]
