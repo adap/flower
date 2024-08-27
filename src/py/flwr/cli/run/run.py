@@ -20,13 +20,20 @@ import subprocess
 import sys
 from logging import DEBUG
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import typer
+from cryptography.exceptions import UnsupportedAlgorithm
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.serialization import (
+    load_ssh_private_key,
+    load_ssh_public_key,
+)
 from typing_extensions import Annotated
 
 from flwr.cli.build import build
 from flwr.cli.config_utils import load_and_validate
+from flwr.cli.run.run_interceptor import RunInterceptor
 from flwr.common.config import flatten_dict, parse_config_args
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
@@ -123,7 +130,7 @@ def run(
         _run_without_superexec(app, federation_config, config_overrides, federation)
 
 
-def _run_with_superexec(
+def _run_with_superexec(  # pylint: disable=R0914
     app: Optional[Path],
     federation_config: Dict[str, Any],
     config_overrides: Optional[List[str]],
@@ -157,12 +164,26 @@ def _run_with_superexec(
             )
             raise typer.Exit(code=1)
 
+    authentication_keys = _try_setup_user_authentication(
+        federation_config.get("private_key_path"),
+        federation_config.get("public_key_path"),
+        federation_config.get("superexec_public_key_path"),
+    )
+
     channel = create_channel(
         server_address=federation_config["address"],
         insecure=insecure,
         root_certificates=root_certificates_bytes,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        interceptors=None,
+        interceptors=(
+            RunInterceptor(
+                authentication_keys[0],
+                authentication_keys[1],
+                authentication_keys[2],
+            )
+            if authentication_keys is not None
+            else None
+        ),
     )
     channel.subscribe(on_channel_state_change)
     stub = ExecStub(channel)
@@ -231,3 +252,78 @@ def _run_without_superexec(
         check=True,
         text=True,
     )
+
+
+def _try_setup_user_authentication(
+    private_key_path: Optional[str],
+    public_key_path: Optional[str],
+    superexec_public_key_path: Optional[str],
+) -> Optional[
+    Tuple[
+        ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey, ec.EllipticCurvePublicKey
+    ]
+]:
+    if not private_key_path and not public_key_path and not superexec_public_key_path:
+        return None
+
+    if not private_key_path or not public_key_path or not superexec_public_key_path:
+        typer.secho(
+            "❌ User authentication requires file paths to 'private_key_path', "
+            "'public_key_path', and 'superexec_public_key_path' to be provided "
+            "(providing only one of them is not sufficient).",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+
+    try:
+        ssh_private_key = load_ssh_private_key(
+            Path(private_key_path).read_bytes(),
+            None,
+        )
+        if not isinstance(ssh_private_key, ec.EllipticCurvePrivateKey):
+            raise ValueError()
+    except (ValueError, UnsupportedAlgorithm) as err:
+        typer.secho(
+            "❌ Error: Unable to parse the private key file in "
+            "'private_key_path'. User authentication requires elliptic curve "
+            "private and public key pair. Please ensure that the file "
+            "path points to a valid private key file and try again.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1) from err
+
+    try:
+        ssh_public_key = load_ssh_public_key(Path(public_key_path).read_bytes())
+        if not isinstance(ssh_public_key, ec.EllipticCurvePublicKey):
+            raise ValueError()
+    except (ValueError, UnsupportedAlgorithm) as err:
+        typer.secho(
+            "❌ Error: Unable to parse the public key file in "
+            "'public_key_path'. User authentication requires elliptic curve "
+            "private and public key pair. Please ensure that the file "
+            "path points to a valid public key file and try again.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1) from err
+
+    try:
+        superexec_ssh_public_key = load_ssh_public_key(
+            Path(superexec_public_key_path).read_bytes()
+        )
+        if not isinstance(superexec_ssh_public_key, ec.EllipticCurvePublicKey):
+            raise ValueError()
+    except (ValueError, UnsupportedAlgorithm) as err:
+        typer.secho(
+            "❌ Error: Unable to parse the superexec public key file in "
+            "'public_key'. User authentication requires elliptic curve "
+            "private and public key pair. Please ensure that the file "
+            "path points to a valid public key file and try again.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1) from err
+
+    return (ssh_private_key, ssh_public_key, superexec_ssh_public_key)
