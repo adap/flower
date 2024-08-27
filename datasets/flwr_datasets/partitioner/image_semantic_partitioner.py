@@ -391,9 +391,7 @@ class ImageSemanticPartitioner(Partitioner):
 
     def _preprocess_dataset_images(self, indices: List[int]) -> NDArrayFloat:
         """Preprocess the images in the dataset."""
-        images = np.array(
-            self.dataset[indices][self._image_column_name], dtype=np.float32
-        )
+        images = np.array(self.dataset[indices][self._image_column_name], dtype=float)
         if len(images.shape) == 3:  # [B, H, W]
             images = np.reshape(
                 images, (images.shape[0], 1, images.shape[1], images.shape[2])
