@@ -32,12 +32,8 @@ dev = [
 ]
 
 [tool.isort]
-line_length = 88
-indent = "    "
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-use_parentheses = true
+profile = "black"
+known_first_party = ["flwr"]
 
 [tool.black]
 line-length = 88

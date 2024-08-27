@@ -32,7 +32,8 @@ class Net(nn.Module):
 def train(net, trainloader, epochs, device):
     """Train the model on the training set."""
     net.to(device)  # move model to GPU if available
-    criterion = torch.nn.CrossEntropyLoss().to(device)
+    criterion = torch.nn.CrossEntropyLoss()
+    criterion.to(device)
     optimizer = torch.optim.SGD(net.parameters(), lr=0.1, momentum=0.9)
     net.train()
     running_loss = 0.0
