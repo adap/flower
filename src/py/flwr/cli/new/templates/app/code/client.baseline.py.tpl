@@ -1,9 +1,9 @@
 """$project_name: A Flower / $framework_str app."""
 
 import torch
+
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
-
 from $project_name.dataset import load_data
 from $project_name.model import Net, get_weights, set_weights, test, train
 
