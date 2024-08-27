@@ -260,15 +260,22 @@ class ImageSemanticPartitioner(Partitioner):
         assert self._unique_classes is not None
 
         # Use EfficientNet to extract embeddings
-        images = self._preprocess_dataset_images()
         embedding_list = []
         with torch.no_grad():
-            for i in range(0, images.shape[0], self._batch_size):
-                idxs = list(range(i, min(i + self._batch_size, images.shape[0])))
-                batch = torch.tensor(images[idxs], dtype=torch.float, device=device)
-                if batch.shape[1] == 1:
-                    batch = batch.broadcast_to((batch.shape[0], 3, *batch.shape[2:]))
-                embedding_list.append(efficient_net(batch).cpu().numpy())
+            for i in range(0, self.dataset.num_rows, self._batch_size):
+                idxs = list(range(i, min(i + self._batch_size, self.dataset.num_rows)))
+                images = torch.tensor(
+                    self._preprocess_dataset_images(idxs),
+                    dtype=torch.float,
+                    device=device,
+                )
+                if images.shape[1] == 1:
+                    # due to EfficientNet's input format restraint,
+                    # here we need to trans graysacle image to RGB image.
+                    images = images.broadcast_to(
+                        (images.shape[0], 3, *images.shape[2:])
+                    )
+                embedding_list.append(efficient_net(images).cpu().numpy())
         embedding_list = np.concatenate(embedding_list)
         embeddings_scaled: NDArrayFloat = StandardScaler(with_std=False).fit_transform(
             embedding_list
@@ -388,8 +395,11 @@ class ImageSemanticPartitioner(Partitioner):
         self._partition_id_to_indices = partition_id_to_indices
         self._partition_id_to_indices_determined = True
 
-    def _preprocess_dataset_images(self) -> NDArrayFloat:
-        images = np.array(self.dataset[self._image_column_name], dtype=float)
+    def _preprocess_dataset_images(self, indices: List[int]) -> NDArrayFloat:
+        """Preprocess the images in the dataset."""
+        images = np.array(
+            self.dataset[indices][self._image_column_name], dtype=np.float32
+        )
         if len(images.shape) == 3:  # [B, H, W]
             images = np.reshape(
                 images, (images.shape[0], 1, images.shape[1], images.shape[2])
