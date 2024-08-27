@@ -21,7 +21,7 @@ from flwr.common import (
     Status,
 )
 
-from $import_name.task import load_data
+from $import_name.task import load_data, replace_keys
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -124,8 +124,8 @@ def client_fn(context: Context):
         partition_id, num_partitions
     )
 
-    cfg = unflatten_dict(context.run_config)
-    num_local_round = cfg["local-epochs"]
+    cfg = replace_keys(unflatten_dict(context.run_config))
+    num_local_round = cfg["local_epochs"]
 
     # Return Client instance
     return FlowerClient(

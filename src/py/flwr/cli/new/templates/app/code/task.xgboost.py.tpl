@@ -57,3 +57,15 @@ def load_data(partition_id, num_clients):
     valid_dmatrix = transform_dataset_to_dmatrix(valid_data)
 
     return train_dmatrix, valid_dmatrix, num_train, num_val
+
+
+def replace_keys(input_dict, match="-", target="_"):
+    """Recursively replace match string with target string in dictionary keys."""
+    new_dict = {}
+    for key, value in input_dict.items():
+        new_key = key.replace(match, target)
+        if isinstance(value, dict):
+            new_dict[new_key] = replace_keys(value, match, target)
+        else:
+            new_dict[new_key] = value
+    return new_dict
