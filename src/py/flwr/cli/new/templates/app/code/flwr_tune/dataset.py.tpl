@@ -28,7 +28,6 @@ def formatting_prompts_func(example):
 
 def get_tokenizer_and_data_collator_and_propt_formatting(model_name: str):
     """Get tokenizer, data_collator and prompt formatting."""
-    # From: https://huggingface.co/docs/trl/en/sft_trainer
     tokenizer = AutoTokenizer.from_pretrained(
         model_name, use_fast=True, padding_side="right"
     )
