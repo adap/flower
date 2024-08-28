@@ -77,7 +77,9 @@ def run_supernode() -> None:
         authentication_keys=authentication_keys,
         max_retries=args.max_retries,
         max_wait_time=args.max_wait_time,
-        node_config=parse_config_args([args.node_config]),
+        node_config=parse_config_args(
+            [args.node_config] if args.node_config else args.node_config
+        ),
         isolation=args.isolation,
         supernode_address=args.supernode_address,
     )
