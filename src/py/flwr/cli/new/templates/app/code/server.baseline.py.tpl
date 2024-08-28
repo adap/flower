@@ -1,4 +1,4 @@
-"""$project_name: A Flower Baseline app."""
+"""$project_name: A Flower Baseline."""
 
 from typing import List, Tuple
 

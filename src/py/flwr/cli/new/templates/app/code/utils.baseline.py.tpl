@@ -1,1 +1,1 @@
-"""$project_name: A Flower Baseline app."""
+"""$project_name: A Flower Baseline."""
