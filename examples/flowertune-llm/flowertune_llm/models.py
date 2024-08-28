@@ -2,7 +2,10 @@ import math
 
 import torch
 from omegaconf import DictConfig
-from peft import LoraConfig, get_peft_model
+from peft import (
+    LoraConfig,
+    get_peft_model,
+)
 from peft.utils import prepare_model_for_kbit_training
 from transformers import AutoModelForCausalLM, BitsAndBytesConfig
 
