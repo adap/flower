@@ -1,19 +1,31 @@
 """$project_name: A Flower / FlowerTune app."""
 
+import os
+import warnings
 from collections import OrderedDict
-from typing import Callable, Dict, Tuple
+from typing import Dict, Tuple
 
 import torch
+from flwr.client import ClientApp, NumPyClient
+from flwr.common import Context
+from flwr.common.config import unflatten_dict
+from flwr.common.typing import NDArrays, Scalar
 from omegaconf import DictConfig
 from peft import get_peft_model_state_dict, set_peft_model_state_dict
 from transformers import TrainingArguments
 from trl import SFTTrainer
 
-from flwr.client import NumPyClient
-from flwr.common import Context
-from flwr.common.typing import NDArrays, Scalar
-from $import_name.dataset import reformat
+from $import_name.dataset import (
+    get_tokenizer_and_data_collator_and_propt_formatting,
+    load_data,
+    replace_keys,
+)
 from $import_name.models import cosine_annealing, get_model
+
+# Avoid warnings
+os.environ["TOKENIZERS_PARALLELISM"] = "true"
+os.environ["RAY_DISABLE_DOCKER_CPU_WARNING"] = "1"
+warnings.filterwarnings("ignore", category=UserWarning)
 
 
 # pylint: disable=too-many-arguments
@@ -29,7 +41,7 @@ class FlowerClient(NumPyClient):
         tokenizer,
         formatting_prompts_func,
         data_collator,
-        save_path,
+        num_rounds,
     ):  # pylint: disable=too-many-arguments
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.train_cfg = train_cfg
@@ -37,12 +49,11 @@ class FlowerClient(NumPyClient):
         self.tokenizer = tokenizer
         self.formatting_prompts_func = formatting_prompts_func
         self.data_collator = data_collator
-        self.save_path = save_path
+        self.num_rounds = num_rounds
+        self.trainset = trainset
 
         # instantiate model
         self.model = get_model(model_cfg)
-
-        self.trainset = trainset
 
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
@@ -52,13 +63,13 @@ class FlowerClient(NumPyClient):
 
         new_lr = cosine_annealing(
             int(config["current_round"]),
-            self.train_cfg.num_rounds,
+            self.num_rounds,
             self.train_cfg.learning_rate_max,
             self.train_cfg.learning_rate_min,
         )
 
         self.training_argumnets.learning_rate = new_lr
-        self.training_argumnets.output_dir = self.save_path
+        self.training_argumnets.output_dir = config["save_path"]
 
         # Construct trainer
         trainer = SFTTrainer(
@@ -95,32 +106,31 @@ def get_parameters(model) -> NDArrays:
     return [val.cpu().numpy() for _, val in state_dict.items()]
 
 
-def gen_client_fn(
-    fds,
-    tokenizer,
-    formatting_prompts_func,
-    data_collator,
-    model_cfg: DictConfig,
-    train_cfg: DictConfig,
-    save_path: str,
-) -> Callable[[Context], FlowerClient]:  # pylint: disable=too-many-arguments
-    """Generate the client function that creates the Flower Clients."""
+def client_fn(context: Context) -> FlowerClient:
+    """Create a Flower client representing a single organization."""
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
+    num_rounds = context.run_config["num-server-rounds"]
+    cfg = DictConfig(replace_keys(unflatten_dict(context.run_config)))
 
-    def client_fn(context: Context) -> FlowerClient:
-        """Create a Flower client representing a single organization."""
-        # Let's get the partition corresponding to the i-th client
-        partition_id = context.node_config["partition-id"]
-        client_trainset = fds.load_partition(partition_id, "train")
-        client_trainset = reformat(client_trainset, llm_task="$llm_challenge_str")
+    # Let's get the client partition
+    client_trainset = load_data(partition_id, num_partitions, cfg.static.dataset.name)
+    (
+        tokenizer,
+        data_collator,
+        formatting_prompts_func,
+    ) = get_tokenizer_and_data_collator_and_propt_formatting(cfg.model.name)
 
-        return FlowerClient(
-            model_cfg,
-            train_cfg,
-            client_trainset,
-            tokenizer,
-            formatting_prompts_func,
-            data_collator,
-            save_path,
-        ).to_client()
+    return FlowerClient(
+        cfg.model,
+        cfg.train,
+        client_trainset,
+        tokenizer,
+        formatting_prompts_func,
+        data_collator,
+        num_rounds,
+    ).to_client()
 
-    return client_fn
+
+# Flower ClientApp
+app = ClientApp(client_fn)

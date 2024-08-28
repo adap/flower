@@ -1,21 +1,40 @@
-from collections import OrderedDict
-from typing import Callable, Dict, Tuple
+"""flowertune-llm: A Flower / FlowerTune app."""
 
-import flwr as fl
+import os
+import warnings
+from typing import Dict, Tuple
+from collections import OrderedDict
+
 import torch
+from flwr.client import ClientApp, NumPyClient
+from flwr.common import Context
+from flwr.common.config import unflatten_dict
 from flwr.common.typing import NDArrays, Scalar
 from omegaconf import DictConfig
+
 from peft import get_peft_model_state_dict, set_peft_model_state_dict
 from transformers import TrainingArguments
 from trl import SFTTrainer
 
-from models import cosine_annealing, get_model
+from flowertune_llm.dataset import (
+    get_tokenizer_and_data_collator_and_propt_formatting,
+    load_data,
+    replace_keys,
+)
+from flowertune_llm.models import (
+    cosine_annealing,
+    get_model,
+)
+
+# Avoid warnings
+os.environ["TOKENIZERS_PARALLELISM"] = "true"
+os.environ["RAY_DISABLE_DOCKER_CPU_WARNING"] = "1"
+warnings.filterwarnings("ignore", category=UserWarning)
 
 
 # pylint: disable=too-many-arguments
-class FlowerClient(
-    fl.client.NumPyClient
-):  # pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-instance-attributes
+class FlowerClient(NumPyClient):
     """Standard Flower client for CNN training."""
 
     def __init__(
@@ -26,7 +45,7 @@ class FlowerClient(
         tokenizer,
         formatting_prompts_func,
         data_collator,
-        save_path,
+        num_rounds,
     ):  # pylint: disable=too-many-arguments
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.train_cfg = train_cfg
@@ -34,18 +53,11 @@ class FlowerClient(
         self.tokenizer = tokenizer
         self.formatting_prompts_func = formatting_prompts_func
         self.data_collator = data_collator
-        self.save_path = save_path
+        self.num_rounds = num_rounds
+        self.trainset = trainset
 
         # instantiate model
         self.model = get_model(model_cfg)
-
-        self.trainset = trainset
-
-    def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
-        """Return the parameters of the current net."""
-
-        state_dict = get_peft_model_state_dict(self.model)
-        return [val.cpu().numpy() for _, val in state_dict.items()]
 
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
@@ -55,13 +67,13 @@ class FlowerClient(
 
         new_lr = cosine_annealing(
             int(config["current_round"]),
-            self.train_cfg.num_rounds,
+            self.num_rounds,
             self.train_cfg.learning_rate_max,
             self.train_cfg.learning_rate_min,
         )
 
         self.training_argumnets.learning_rate = new_lr
-        self.training_argumnets.output_dir = self.save_path
+        self.training_argumnets.output_dir = config["save_path"]
 
         # Construct trainer
         trainer = SFTTrainer(
@@ -78,7 +90,7 @@ class FlowerClient(
         results = trainer.train()
 
         return (
-            self.get_parameters({}),
+            get_parameters(self.model),
             len(self.trainset),
             {"train_loss": results.training_loss},
         )
@@ -92,38 +104,37 @@ def set_parameters(model, parameters: NDArrays) -> None:
     set_peft_model_state_dict(model, state_dict)
 
 
-def gen_client_fn(
-    fds,
-    tokenizer,
-    formatting_prompts_func,
-    data_collator,
-    model_cfg: DictConfig,
-    train_cfg: DictConfig,
-    save_path: str,
-    partition_id: int = 0,
-    api: bool = False,
-) -> Callable[[str], FlowerClient]:  # pylint: disable=too-many-arguments
-    """Generate the client function that creates the Flower Clients."""
+def get_parameters(model) -> NDArrays:
+    """Return the parameters of the current net."""
+    state_dict = get_peft_model_state_dict(model)
+    return [val.cpu().numpy() for _, val in state_dict.items()]
 
-    def client_fn(cid: str) -> FlowerClient:
-        """Create a Flower client representing a single organization."""
 
-        # Let's get the partition corresponding to the i-th client
-        client_trainset = (
-            fds.load_partition(partition_id, "train")
-            if api
-            else fds.load_partition(int(cid), "train")
-        )
-        client_trainset = client_trainset.rename_column("output", "response")
+def client_fn(context: Context) -> FlowerClient:
+    """Create a Flower client representing a single organization."""
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
+    num_rounds = context.run_config["num-server-rounds"]
+    cfg = DictConfig(replace_keys(unflatten_dict(context.run_config)))
 
-        return FlowerClient(
-            model_cfg,
-            train_cfg,
-            client_trainset,
-            tokenizer,
-            formatting_prompts_func,
-            data_collator,
-            save_path,
-        ).to_client()
+    # Let's get the client partition
+    client_trainset = load_data(partition_id, num_partitions, cfg.dataset.name)
+    (
+        tokenizer,
+        data_collator,
+        formatting_prompts_func,
+    ) = get_tokenizer_and_data_collator_and_propt_formatting(cfg.model.name)
 
-    return client_fn
+    return FlowerClient(
+        cfg.model,
+        cfg.train,
+        client_trainset,
+        tokenizer,
+        formatting_prompts_func,
+        data_collator,
+        num_rounds,
+    ).to_client()
+
+
+# Flower ClientApp
+app = ClientApp(client_fn)
