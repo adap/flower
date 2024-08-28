@@ -185,16 +185,22 @@ def parse_config_args(
     if config is None:
         return overrides
 
+    # Handle if .toml file is passed
+    if len(config) == 1 and config[0].endswith(".toml"):
+        with Path(config[0]).open("rb") as config_file:
+            overrides = flatten_dict(tomli.load(config_file))
+        return overrides
+
     # Regular expression to capture key-value pairs with possible quoted values
     pattern = re.compile(r"(\S+?)=(\'[^\']*\'|\"[^\"]*\"|\S+)")
 
-    # If a .toml is passed, all other keys are ignored
     for config_line in config:
         if config_line:
+            # .toml files aren't allowed alongside other configs
             if config_line.endswith(".toml"):
-                with Path(config_line).open("rb") as config_file:
-                    overrides = flatten_dict(tomli.load(config_file))
-                break
+                raise ValueError(
+                    "TOML files cannot be passed alongside key-value pairs."
+                )
 
             matches = pattern.findall(config_line)
             toml_str = "\n".join(f"{k} = {v}" for k, v in matches)

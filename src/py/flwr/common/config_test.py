@@ -295,3 +295,10 @@ def test_parse_config_args_from_toml_file() -> None:
 
         # Assert
         assert config == expected_config
+
+
+def test_parse_config_args_passing_toml_and_key_value() -> None:
+    """Test that passing a toml and key-value configs aren't allowed."""
+    config = ["my-other-config.toml", "lr=0.1", "epochs=99"]
+    with pytest.raises(ValueError):
+        parse_config_args(config)
