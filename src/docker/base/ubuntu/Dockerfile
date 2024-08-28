@@ -50,16 +50,16 @@ RUN LATEST=$(pyenv latest -k ${PYTHON_VERSION}) \
 
 ENV PATH=/usr/local/bin/python/bin:$PATH
 
-# Upgrade system Python pip and setuptools
-# hadolint ignore=DL3013
-RUN pip install -U --no-cache-dir pip setuptools \
+ARG PIP_VERSION
+ARG SETUPTOOLS_VERSION
+# Keep the version of system Python pip and setuptools in sync with those installed in the
+# virtualenv.
+RUN pip install -U --no-cache-dir pip==${PIP_VERSION} setuptools==${SETUPTOOLS_VERSION} \
     # Use a virtual environment to ensure that Python packages are installed in the same location
     # regardless of whether the subsequent image build is run with the app or the root user
     && python -m venv /python/venv
 ENV PATH=/python/venv/bin:$PATH
 
-ARG PIP_VERSION
-ARG SETUPTOOLS_VERSION
 ARG FLWR_VERSION
 ARG FLWR_PACKAGE=flwr
 RUN pip install -U --no-cache-dir \
