@@ -124,14 +124,14 @@ def run(
 
 
 def _run_with_superexec(
-    app: Optional[Path],
+    app: Path,
     federation_config: Dict[str, Any],
     config_overrides: Optional[List[str]],
 ) -> None:
 
     insecure_str = federation_config.get("insecure")
     if root_certificates := federation_config.get("root-certificates"):
-        root_certificates_bytes = Path(root_certificates).read_bytes()
+        root_certificates_bytes = (app / root_certificates).read_bytes()
         if insecure := bool(insecure_str):
             typer.secho(
                 "❌ `root_certificates` were provided but the `insecure` parameter"
