@@ -416,6 +416,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             assert actual_hmac == expected_hmac
 
     def test_without_servicer(self) -> None:
+        """Test client authentication without servicer."""
         # Prepare
         self._server.stop(grace=None)
         retry_invoker = _init_retry_invoker()
@@ -432,8 +433,9 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             _, _, create_node, _, _, _ = conn
             assert create_node is not None
             create_node()
-            
+
             assert self._servicer.received_client_metadata() is None
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
