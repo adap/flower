@@ -157,7 +157,7 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
             if server_public_key_bytes != b"":
                 self.server_public_key = bytes_to_public_key(server_public_key_bytes)
             else:
-                log(WARNING, "Can't get server public key, SuperLink may be offline.")
+                log(WARNING, "Can't get server public key, SuperLink may be offline")
 
             if self.server_public_key is not None:
                 self.shared_secret = generate_shared_key(
