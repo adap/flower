@@ -105,7 +105,7 @@ def _replace_keys(d: Any, match: str, target: str) -> Any:
 
 # Entry point from CLI
 # pylint: disable=too-many-locals
-def run_simulation_from_cli() -> None:
+def cli_flower_simulation() -> None:
     """Run Simulation Engine from the CLI."""
     args = _parse_args_run_simulation().parse_args()
 

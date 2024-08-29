@@ -57,7 +57,7 @@ flwr = "flwr.cli.app:app"
 # SuperExec (can run with either Deployment Engine or Simulation Engine)
 flower-superexec = "flwr.superexec.app:cli_flower_superexec"
 # Simulation Engine
-flower-simulation = "flwr.simulation.run_simulation:run_simulation_from_cli"
+flower-simulation = "flwr.simulation.run_simulation:cli_flower_simulation"
 # Deployment Engine
 flower-superlink = "flwr.server:run_superlink"
 flower-supernode = "flwr.client:run_supernode"
