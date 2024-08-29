@@ -154,9 +154,11 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
             server_public_key_bytes = base64.urlsafe_b64decode(
                 _get_value_from_tuples(_PUBLIC_KEY_HEADER, response.initial_metadata())
             )
+            print(response.initial_metadata())
             log(DEBUG, "server key bytes: %s", server_public_key_bytes)
             try:
                 self.server_public_key = bytes_to_public_key(server_public_key_bytes)
+                print(self.server_public_key)
             except (ValueError, UnsupportedAlgorithm):
                 log(DEBUG, "ERROR")
             log(DEBUG, "server key: %s", self.server_public_key)
