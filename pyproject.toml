@@ -60,7 +60,7 @@ flower-superexec = "flwr.superexec.app:run_superexec"
 flower-simulation = "flwr.simulation.run_simulation:run_simulation_from_cli"
 # Deployment Engine
 flower-superlink = "flwr.server.app:run_superlink"
-flower-supernode = "flwr.client:run_supernode"
+flower-supernode = "flwr.client.app:run_supernode"
 flower-server-app = "flwr.server:run_server_app"
 flwr-clientapp = "flwr.client.clientapp:flwr_clientapp"
 flower-client-app = "flwr.client:run_client_app"  # Deprecated, use `flower-supernode`

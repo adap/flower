@@ -21,7 +21,6 @@ from .client import Client as Client
 from .client_app import ClientApp as ClientApp
 from .numpy_client import NumPyClient as NumPyClient
 from .supernode import run_client_app as run_client_app
-from .supernode import run_supernode as run_supernode
 from .typing import ClientFn as ClientFn
 from .typing import ClientFnExt as ClientFnExt
 
@@ -33,7 +32,6 @@ __all__ = [
     "NumPyClient",
     "mod",
     "run_client_app",
-    "run_supernode",
     "start_client",
     "start_numpy_client",
 ]
