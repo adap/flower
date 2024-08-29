@@ -17,11 +17,13 @@
 
 import base64
 import collections
+from logging import DEBUG
 from typing import Any, Callable, Optional, Sequence, Tuple, Union
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 
+from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     bytes_to_public_key,
     compute_hmac,
@@ -144,6 +146,15 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
             client_call_details.timeout,
             metadata,
             client_call_details.credentials,
+        )
+
+        log(DEBUG, "Shared secret: %s", self.shared_secret)
+        log(
+            DEBUG,
+            "HMAC: %s",
+            base64.urlsafe_b64encode(
+                compute_hmac(self.shared_secret, request.SerializeToString(True))
+            ),
         )
 
         response = continuation(client_call_details, request)

@@ -332,6 +332,9 @@ def _try_setup_client_authentication(
             "path points to a valid public key file and try again."
         )
 
+    log(DEBUG, "SSH private key: %s", ssh_private_key.private_bytes())
+    log(DEBUG, "SSH public key: %s", ssh_public_key.public_bytes())
+
     return (
         ssh_private_key,
         ssh_public_key,
