@@ -162,6 +162,20 @@ class EventType(str, Enum):
 
     # --- Deployment Engine ------------------------------------------------------------
 
+    # CLI: `flower-superlink`
+    RUN_SUPERLINK_ENTER = auto()
+    RUN_SUPERLINK_LEAVE = auto()
+
+    # CLI: `flower-supernode`
+    RUN_SUPERNODE_ENTER = auto()
+    RUN_SUPERNODE_LEAVE = auto()
+
+    # CLI: `flower-server-app`
+    RUN_SERVER_APP_ENTER = auto()
+    RUN_SERVER_APP_LEAVE = auto()
+
+    # --- To be removed ----------------------------------------------------------------
+
     # Driver API
     RUN_DRIVER_API_ENTER = auto()
     RUN_DRIVER_API_LEAVE = auto()
@@ -170,10 +184,6 @@ class EventType(str, Enum):
     RUN_FLEET_API_ENTER = auto()
     RUN_FLEET_API_LEAVE = auto()
 
-    # Driver API and Fleet API
-    RUN_SUPERLINK_ENTER = auto()
-    RUN_SUPERLINK_LEAVE = auto()
-
     # Driver: Driver
     DRIVER_CONNECT = auto()
     DRIVER_DISCONNECT = auto()
@@ -181,14 +191,6 @@ class EventType(str, Enum):
     # Driver: start_driver
     START_DRIVER_ENTER = auto()
     START_DRIVER_LEAVE = auto()
-
-    # flower-server-app
-    RUN_SERVER_APP_ENTER = auto()
-    RUN_SERVER_APP_LEAVE = auto()
-
-    # SuperNode
-    RUN_SUPERNODE_ENTER = auto()
-    RUN_SUPERNODE_LEAVE = auto()
 
     # --- DEPRECATED -------------------------------------------------------------------
 
