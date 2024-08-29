@@ -65,7 +65,6 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     hist : flwr.server.history.History
         Object containing training and evaluation metrics.
     """
-    event(EventType.START_DRIVER_ENTER)
 
     # Initialize the Driver API server and config
     initialized_server, initialized_config = init_defaults(
@@ -95,7 +94,5 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     # Terminate the thread
     f_stop.set()
     thread.join()
-
-    event(EventType.START_SERVER_LEAVE)
 
     return hist

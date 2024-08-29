@@ -188,10 +188,6 @@ class EventType(str, Enum):
     DRIVER_CONNECT = auto()
     DRIVER_DISCONNECT = auto()
 
-    # Driver: start_driver
-    START_DRIVER_ENTER = auto()
-    START_DRIVER_LEAVE = auto()
-
     # --- DEPRECATED -------------------------------------------------------------------
 
     # [DEPRECATED] CLI: `flower-client-app`
