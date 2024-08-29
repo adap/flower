@@ -184,10 +184,6 @@ class EventType(str, Enum):
     RUN_FLEET_API_ENTER = auto()
     RUN_FLEET_API_LEAVE = auto()
 
-    # Driver: Driver
-    DRIVER_CONNECT = auto()
-    DRIVER_DISCONNECT = auto()
-
     # --- DEPRECATED -------------------------------------------------------------------
 
     # [DEPRECATED] CLI: `flower-client-app`

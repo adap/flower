@@ -94,7 +94,6 @@ class GrpcDriver(Driver):
 
         This will not call GetRun.
         """
-        event(EventType.DRIVER_CONNECT)
         if self._is_connected:
             log(WARNING, "Already connected")
             return
@@ -108,7 +107,6 @@ class GrpcDriver(Driver):
 
     def _disconnect(self) -> None:
         """Disconnect from the Driver API."""
-        event(EventType.DRIVER_DISCONNECT)
         if not self._is_connected:
             log(DEBUG, "Already disconnected")
             return
