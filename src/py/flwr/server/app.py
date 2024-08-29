@@ -30,6 +30,8 @@ from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.serialization import (
     load_ssh_private_key,
     load_ssh_public_key,
+    load_pem_private_key,
+    load_pem_public_key,
 )
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
@@ -385,41 +387,60 @@ def _try_setup_node_authentication(
     node_public_keys: Set[bytes] = set()
 
     try:
-        ssh_private_key = load_ssh_private_key(
+        # Try to load key in pem format
+        private_key = load_pem_private_key(
             Path(args.auth_superlink_private_key).read_bytes(),
             None,
         )
-        if not isinstance(ssh_private_key, ec.EllipticCurvePrivateKey):
+        if not isinstance(private_key, ec.EllipticCurvePrivateKey):
             raise ValueError()
     except (ValueError, UnsupportedAlgorithm):
-        sys.exit(
-            "Error: Unable to parse the private key file in "
-            "'--auth-superlink-private-key'. Authentication requires elliptic "
-            "curve private and public key pair. Please ensure that the file "
-            "path points to a valid private key file and try again."
-        )
+        try:
+            # Retry to load key in ssh format
+            private_key = load_ssh_private_key(
+                Path(args.auth_superlink_private_key).read_bytes(),
+                None,
+            )
+            if not isinstance(private_key, ec.EllipticCurvePrivateKey):
+                raise ValueError()
+        except (ValueError, UnsupportedAlgorithm):
+            sys.exit(
+                "Error: Unable to parse the private key file in "
+                "'--auth-superlink-private-key'. Authentication requires elliptic "
+                "curve private and public key pair. Please ensure that the file "
+                "path points to a valid private key file and try again."
+            )
 
     try:
-        ssh_public_key = load_ssh_public_key(
+        # Try to load key in pem format
+        public_key = load_pem_public_key(
             Path(args.auth_superlink_public_key).read_bytes()
         )
-        if not isinstance(ssh_public_key, ec.EllipticCurvePublicKey):
+        if not isinstance(public_key, ec.EllipticCurvePublicKey):
             raise ValueError()
     except (ValueError, UnsupportedAlgorithm):
-        sys.exit(
-            "Error: Unable to parse the public key file in "
-            "'--auth-superlink-public-key'. Authentication requires elliptic "
-            "curve private and public key pair. Please ensure that the file "
-            "path points to a valid public key file and try again."
-        )
+        try:
+            # Retry to load key in ssh format
+            public_key = load_ssh_public_key(
+                Path(args.auth_superlink_public_key).read_bytes()
+            )
+            if not isinstance(public_key, ec.EllipticCurvePublicKey):
+                raise ValueError()
+        except (ValueError, UnsupportedAlgorithm):
+            sys.exit(
+                "Error: Unable to parse the public key file in "
+                "'--auth-superlink-public-key'. Authentication requires elliptic "
+                "curve private and public key pair. Please ensure that the file "
+                "path points to a valid public key file and try again."
+            )
 
     with open(node_keys_file_path, newline="", encoding="utf-8") as csvfile:
         reader = csv.reader(csvfile)
         for row in reader:
             for element in row:
-                public_key = load_ssh_public_key(element.encode())
-                if isinstance(public_key, ec.EllipticCurvePublicKey):
-                    node_public_keys.add(public_key_to_bytes(public_key))
+                node_public_key = load_ssh_public_key(element.encode())
+                if isinstance(node_public_key, ec.EllipticCurvePublicKey):
+                    node_public_keys.add(public_key_to_bytes(node_public_key))
                 else:
                     sys.exit(
                         "Error: Unable to parse the public keys in the CSV "
@@ -428,8 +449,8 @@ def _try_setup_node_authentication(
                     )
         return (
             node_public_keys,
-            ssh_private_key,
-            ssh_public_key,
+            private_key,
+            public_key,
         )
 
 

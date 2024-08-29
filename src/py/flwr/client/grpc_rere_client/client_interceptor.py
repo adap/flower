@@ -148,21 +148,14 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
             client_call_details.credentials,
         )
 
-        log(DEBUG, "Shared secret: %s", self.shared_secret)
-        log(
-            DEBUG,
-            "HMAC: %s",
-            base64.urlsafe_b64encode(
-                compute_hmac(self.shared_secret, request.SerializeToString(True))
-            ),
-        )
-
         response = continuation(client_call_details, request)
         if postprocess:
             server_public_key_bytes = base64.urlsafe_b64decode(
                 _get_value_from_tuples(_PUBLIC_KEY_HEADER, response.initial_metadata())
             )
+            log(DEBUG, "server key bytes: %s", server_public_key_bytes)
             self.server_public_key = bytes_to_public_key(server_public_key_bytes)
+            log(DEBUG, "server key: %s", self.server_public_key)
             self.shared_secret = generate_shared_key(
                 self.private_key, self.server_public_key
             )
