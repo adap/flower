@@ -26,6 +26,7 @@ from cryptography.hazmat.primitives.serialization import (
     Encoding,
     NoEncryption,
     PrivateFormat,
+    PublicFormat,
     load_ssh_private_key,
     load_ssh_public_key,
 )
@@ -344,7 +345,14 @@ def _try_setup_client_authentication(
             encryption_algorithm=NoEncryption(),
         ),
     )
-    log(DEBUG, "SSH public key: %s", ssh_public_key.public_bytes())
+    log(
+        DEBUG,
+        "SSH public key: %s",
+        ssh_public_key.public_bytes(
+            encoding=Encoding.PEM,
+            format=PublicFormat.SubjectPublicKeyInfo,
+        ),
+    )
 
     return (
         ssh_private_key,
