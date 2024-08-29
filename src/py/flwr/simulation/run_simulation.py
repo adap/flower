@@ -109,6 +109,11 @@ def run_simulation_from_cli() -> None:
     """Run Simulation Engine from the CLI."""
     args = _parse_args_run_simulation().parse_args()
 
+    event(
+        EventType.CLI_FLOWER_SIMULATION_ENTER,
+        event_details={"backend": args.backend, "num-supernodes": args.num_supernodes},
+    )
+
     # Add warnings for deprecated server_app and client_app arguments
     if args.server_app:
         warn_deprecated_feature(
@@ -129,11 +134,6 @@ def run_simulation_from_cli() -> None:
             "variable to true.",
             code_example='TF_FORCE_GPU_ALLOW_GROWTH="true" flower-simulation <...>',
         )
-
-    event(
-        EventType.CLI_FLOWER_SIMULATION_ENTER,
-        event_details={"backend": args.backend, "num-supernodes": args.num_supernodes},
-    )
 
     # Load JSON config
     backend_config_dict = json.loads(args.backend_config)
@@ -273,6 +273,11 @@ def run_simulation(
         When disabled, only INFO, WARNING and ERROR log messages will be shown. If
         enabled, DEBUG-level logs will be displayed.
     """
+    event(
+        EventType.PYTHON_API_RUN_SIMULATION_ENTER,
+        event_details={"backend": backend_name, "num-supernodes": num_supernodes},
+    )
+
     if enable_tf_gpu_growth:
         warn_deprecated_feature_with_example(
             "Passing `enable_tf_gpu_growth=True` is deprecated.",
@@ -281,11 +286,6 @@ def run_simulation(
             code_example='import os;os.environ["TF_FORCE_GPU_ALLOW_GROWTH"]="true"'
             "\n\tflwr.simulation.run_simulationt(...)",
         )
-
-    event(
-        EventType.PYTHON_API_RUN_SIMULATION_ENTER,
-        event_details={"backend": backend_name, "num-supernodes": num_supernodes},
-    )
 
     _run_simulation(
         num_supernodes=num_supernodes,
@@ -443,7 +443,7 @@ def _main_loop(
     finally:
         # Trigger stop event
         f_stop.set()
-        event(exit_event, event_details={"sim-success": success})
+        event(exit_event, event_details={"success": success})
         if serverapp_th:
             serverapp_th.join()
             if server_app_thread_has_exception.is_set():
