@@ -24309,8 +24309,8 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid ""
-#~ ":py:obj:`run_simulation_from_cli "
-#~ "<flwr.simulation.run_simulation_from_cli>`\\ \\(\\)"
+#~ ":py:obj:`cli_flower_simulation "
+#~ "<flwr.simulation.cli_flower_simulation>`\\ \\(\\)"
 #~ msgstr ""
 
 #~ msgid "Run Simulation Engine from the CLI."
