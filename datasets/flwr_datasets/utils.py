@@ -293,6 +293,29 @@ def concatenate_divisions(
     -------
     concatenated_divisions : Dataset
         A dataset created as concatenation of the divisions from all partitions.
+
+    Examples
+    --------
+    Use `concatenate_divisions` with division specified as a list.
+
+    >>> from flwr_datasets import FederatedDataset
+    >>> from flwr_datasets.utils import concatenate_divisions
+    >>>
+    >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
+    >>> concatenated_divisions = concatenate_divisions(
+    ...     partitioner=fds["train"], partition_division=[0.8, 0.2], division_id=1
+    ... )
+
+    Use `concatenate_divisions` with division specified as a dict.
+
+    >>> from flwr_datasets import FederatedDataset
+    >>> from flwr_datasets.utils import concatenate_divisions
+    >>>
+    >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
+    >>> concatenated_divisions = concatenate_divisions(
+    ...     partitioner=fds["train"], partition_division={"train": 0.8, "test": 0.2},
+    ...     division_id="test"
+    ... )
     """
     _check_division_config_correctness(partition_division)
     divisions = []
