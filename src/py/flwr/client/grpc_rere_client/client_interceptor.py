@@ -21,6 +21,7 @@ from logging import DEBUG
 from typing import Any, Callable, Optional, Sequence, Tuple, Union
 
 import grpc
+from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ec
 
 from flwr.common.logger import log
@@ -154,7 +155,10 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
                 _get_value_from_tuples(_PUBLIC_KEY_HEADER, response.initial_metadata())
             )
             log(DEBUG, "server key bytes: %s", server_public_key_bytes)
-            self.server_public_key = bytes_to_public_key(server_public_key_bytes)
+            try:
+                self.server_public_key = bytes_to_public_key(server_public_key_bytes)
+            except (ValueError, UnsupportedAlgorithm):
+                log(DEBUG, "ERROR")
             log(DEBUG, "server key: %s", self.server_public_key)
             self.shared_secret = generate_shared_key(
                 self.private_key, self.server_public_key

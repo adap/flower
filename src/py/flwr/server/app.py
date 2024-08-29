@@ -28,10 +28,10 @@ import grpc
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.serialization import (
-    load_ssh_private_key,
-    load_ssh_public_key,
     load_pem_private_key,
     load_pem_public_key,
+    load_ssh_private_key,
+    load_ssh_public_key,
 )
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event

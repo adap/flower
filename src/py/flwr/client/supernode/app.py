@@ -23,14 +23,10 @@ from typing import Optional, Tuple
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.serialization import (
-    Encoding,
-    NoEncryption,
-    PrivateFormat,
-    PublicFormat,
+    load_pem_private_key,
+    load_pem_public_key,
     load_ssh_private_key,
     load_ssh_public_key,
-    load_pem_private_key, 
-    load_pem_public_key
 )
 
 from flwr.common import EventType, event
@@ -308,7 +304,7 @@ def _try_setup_client_authentication(
             "'--auth-supernode-private-key' and '--auth-supernode-public-key'"
             "to be provided (providing only one of them is not sufficient)."
         )
-    
+
     try:
         # Try to load key in pem format
         private_key = load_pem_private_key(
