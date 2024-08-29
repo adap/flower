@@ -147,6 +147,7 @@ def divide_dataset(
     >>> from flwr_datasets import FederatedDataset
     >>> from flwr_datasets.utils import divide_dataset
     >>>
+    >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
     >>> partition = fds.load_partition(0)
     >>> division = {"train": 0.8, "test": 0.2}
     >>> train_test = divide_dataset(dataset=partition, division=division)
