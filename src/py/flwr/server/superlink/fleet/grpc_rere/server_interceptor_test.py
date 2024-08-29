@@ -71,14 +71,14 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         ) as temp_file:
             self.temp_file = temp_file
 
-        self.client_keys_file_path = self.temp_file.name
+        self.node_keys_file_path = self.temp_file.name
         with open(
-            self.client_keys_file_path, "w", newline="", encoding="utf-8"
+            self.node_keys_file_path, "w", newline="", encoding="utf-8"
         ) as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(
                 [
-                    self._client_public_key.public_bytes(
+                    self._node_public_key.public_bytes(
                         encoding=Encoding.OpenSSH, format=PublicFormat.OpenSSH
                     ).decode(),
                 ]
@@ -94,7 +94,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         self.state.store_node_public_keys({public_key_to_bytes(self._node_public_key)})
 
         self._server_interceptor = AuthenticateServerInterceptor(
-            self.state, Path(self.client_keys_file_path)
+            self.state, Path(self.node_keys_file_path)
         )
         self._server: grpc.Server = _run_fleet_api_grpc_rere(
             ADDRESS_FLEET_API_GRPC_RERE,
@@ -534,7 +534,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         """Test server interceptor for adding known node."""
         # Prepare
         with open(
-            self.client_keys_file_path, "w", newline="", encoding="utf-8"
+            self.node_keys_file_path, "w", newline="", encoding="utf-8"
         ) as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(
@@ -569,7 +569,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def test_successful_delete_known_keys(self) -> None:
         """Test server interceptor for deleting known keys."""
         # Prepare
-        with open(self.client_keys_file_path, newline="", encoding="utf-8") as csvfile:
+        with open(self.node_keys_file_path, newline="", encoding="utf-8") as csvfile:
             reader = csv.reader(csvfile)
 
             rows = [
@@ -582,7 +582,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             ]
 
         with open(
-            self.client_keys_file_path, "w", newline="", encoding="utf-8"
+            self.node_keys_file_path, "w", newline="", encoding="utf-8"
         ) as csvfile:
             writer = csv.writer(csvfile)
             writer.writerows(rows)
