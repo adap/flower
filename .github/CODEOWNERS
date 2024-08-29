@@ -27,3 +27,8 @@ README.md @jafermarq @tanertopal @danieljanes
 # GitHub Actions and Workflows
 /.github/workflows @Robert-Steiner @tanertopal @danieljanes
 /.github/actions @Robert-Steiner @tanertopal @danieljanes
+
+# Docker-related files
+/.devcontainer @Robert-Steiner @Moep90
+**/Dockerfile @Robert-Steiner @Moep90
+**/*.Dockerfile @Robert-Steiner @Moep90
