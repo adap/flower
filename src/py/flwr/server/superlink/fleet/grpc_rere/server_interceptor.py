@@ -18,6 +18,7 @@
 import base64
 import csv
 import os
+import threading
 from logging import INFO, WARNING
 from pathlib import Path
 from typing import Any, Callable, List, Optional, Sequence, Set, Tuple, Union
@@ -48,7 +49,6 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResRequest,
     PushTaskResResponse,
 )
-import threading
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
@@ -110,7 +110,6 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
 
         with self.lock:
             self.last_timestamp = os.path.getmtime(self.node_keys_file_path)
-
 
     def intercept_service(
         self,
