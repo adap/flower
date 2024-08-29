@@ -32,7 +32,7 @@ RUN apt-get update \
 # Install PyEnv and Python
 ARG PYTHON_VERSION=3.11
 ENV PYENV_ROOT=/root/.pyenv
-ENV PATH $PYENV_ROOT/bin:$PATH
+ENV PATH=$PYENV_ROOT/bin:$PATH
 # https://github.com/hadolint/hadolint/wiki/DL4006
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
