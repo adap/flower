@@ -21,7 +21,7 @@ from typing import Iterable, List, Optional, cast
 
 import grpc
 
-from flwr.common import DEFAULT_TTL, EventType, Message, Metadata, RecordSet, event
+from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.serde import (
