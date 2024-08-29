@@ -152,7 +152,8 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
 
             if new_timestamp != self.last_timestamp:
                 self._update_node_keys()
-                self.last_timestamp = new_timestamp
+                with self.lock:
+                    self.last_timestamp = new_timestamp
 
             if node_public_key_bytes not in self.node_public_keys:
                 context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
