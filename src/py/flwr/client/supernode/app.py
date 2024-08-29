@@ -23,6 +23,9 @@ from typing import Optional, Tuple
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.serialization import (
+    Encoding,
+    NoEncryption,
+    PrivateFormat,
     load_ssh_private_key,
     load_ssh_public_key,
 )
@@ -332,7 +335,15 @@ def _try_setup_client_authentication(
             "path points to a valid public key file and try again."
         )
 
-    log(DEBUG, "SSH private key: %s", ssh_private_key.private_bytes())
+    log(
+        DEBUG,
+        "SSH private key: %s",
+        ssh_private_key.private_bytes(
+            encoding=Encoding.PEM,
+            format=PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=NoEncryption(),
+        ),
+    )
     log(DEBUG, "SSH public key: %s", ssh_public_key.public_bytes())
 
     return (
