@@ -330,31 +330,21 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
     def store_node_public_keys(self, public_keys: Set[bytes]) -> None:
         """Store a set of `node_public_keys` in state."""
         with self.lock:
-<<<<<<< HEAD
-            self.client_public_keys.update(public_keys)
-=======
-            self.node_public_keys = public_keys
->>>>>>> main
+            self.node_public_keys.update(public_keys)
 
     def store_node_public_key(self, public_key: bytes) -> None:
         """Store a `node_public_key` in state."""
         with self.lock:
             self.node_public_keys.add(public_key)
 
-<<<<<<< HEAD
-    def remove_client_public_keys(self, public_keys: Set[bytes]) -> None:
-        """Remove a set of `client_public_keys` in state."""
+    def remove_node_public_keys(self, public_keys: Set[bytes]) -> None:
+        """Remove a set of `node_public_keys` in state."""
         with self.lock:
-            self.client_public_keys.difference_update(public_keys)
+            self.node_public_keys.difference_update(public_keys)
 
-    def get_client_public_keys(self) -> Set[bytes]:
-        """Retrieve all currently stored `client_public_keys` as a set."""
-        return self.client_public_keys
-=======
     def get_node_public_keys(self) -> Set[bytes]:
         """Retrieve all currently stored `node_public_keys` as a set."""
         return self.node_public_keys
->>>>>>> main
 
     def get_run(self, run_id: int) -> Optional[Run]:
         """Retrieve information about the run with the specified `run_id`."""
