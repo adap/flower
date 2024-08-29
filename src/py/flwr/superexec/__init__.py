@@ -13,9 +13,3 @@
 # limitations under the License.
 # ==============================================================================
 """Flower SuperExec service."""
-
-from .app import cli_flower_superexec as cli_flower_superexec
-
-__all__ = [
-    "cli_flower_superexec",
-]

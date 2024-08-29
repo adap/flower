@@ -55,7 +55,7 @@ exclude = [
 # `flwr` CLI
 flwr = "flwr.cli.app:app"
 # SuperExec (can run with either Deployment Engine or Simulation Engine)
-flower-superexec = "flwr.superexec:cli_flower_superexec"
+flower-superexec = "flwr.superexec.app:cli_flower_superexec"
 # Simulation Engine
 flower-simulation = "flwr.simulation.run_simulation:run_simulation_from_cli"
 # Deployment Engine
