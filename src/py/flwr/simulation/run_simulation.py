@@ -177,7 +177,9 @@ def run_simulation_from_cli() -> None:
         client_app_attr = app_components["clientapp"]
         server_app_attr = app_components["serverapp"]
 
-        override_config = parse_config_args([args.run_config])
+        override_config = parse_config_args(
+            [args.run_config] if args.run_config else args.run_config
+        )
         fused_config = get_fused_config_from_dir(app_path, override_config)
         app_dir = args.app
         is_app = True
