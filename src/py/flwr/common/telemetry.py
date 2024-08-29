@@ -159,8 +159,8 @@ class EventType(str, Enum):
     # --- Simulation Engine ------------------------------------------------------------
 
     # CLI: flower-simulation
-    RUN_SIMULATION_ENTER_CLI = auto()
-    RUN_SIMULATION_LEAVE_CLI = auto()
+    CLI_FLOWER_SIMULATION_ENTER = auto()
+    CLI_FLOWER_SIMULATION_LEAVE = auto()
 
     # Python API: `run_simulation`
     RUN_SIMULATION_ENTER_PYTHON = auto()

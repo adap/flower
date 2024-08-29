@@ -131,7 +131,7 @@ def run_simulation_from_cli() -> None:
         )
 
     event(
-        EventType.RUN_SIMULATION_ENTER_CLI,
+        EventType.CLI_FLOWER_SIMULATION_ENTER,
         event_details={"backend": args.backend, "num-supernodes": args.num_supernodes},
     )
 
@@ -219,7 +219,7 @@ def run_simulation_from_cli() -> None:
         verbose_logging=args.verbose,
         server_app_run_config=fused_config,
         is_app=is_app,
-        exit_event=EventType.RUN_SIMULATION_LEAVE_CLI,
+        exit_event=EventType.CLI_FLOWER_SIMULATION_LEAVE,
     )
 
 
