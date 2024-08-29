@@ -607,21 +607,21 @@ class SqliteState(State):  # pylint: disable=R0904
         result: Set[int] = {row["node_id"] for row in rows}
         return result
 
-    def get_node_id(self, node_public_key: bytes) -> Optional[int]:
+    def get_node_id(self, public_key: bytes) -> Optional[int]:
         """Retrieve stored `node_id` filtered by `node_public_keys`."""
         query = "SELECT node_id FROM node WHERE public_key = :public_key;"
-        row = self.query(query, {"public_key": node_public_key})
+        row = self.query(query, {"public_key": public_key})
         if len(row) > 0:
             node_id: int = row[0]["node_id"]
             return node_id
         return None
 
-    def get_node_ids(self, client_public_keys: Set[bytes]) -> Dict[bytes, int]:
-        """Retrieve stored `node_ids` filtered by `client_public_keys`."""
-        if not client_public_keys:
+    def get_node_ids(self, public_keys: Set[bytes]) -> Dict[bytes, int]:
+        """Retrieve stored `node_ids` filtered by `public_keys`."""
+        if not public_keys:
             return {}
 
-        public_keys_list = list(client_public_keys)
+        public_keys_list = list(public_keys)
         placeholders = ", ".join(
             f":public_key{i}" for i in range(len(public_keys_list))
         )

@@ -271,14 +271,14 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                 if online_until > current_time
             }
 
-    def get_node_id(self, node_public_key: bytes) -> Optional[int]:
+    def get_node_id(self, public_key: bytes) -> Optional[int]:
         """Retrieve stored `node_id` filtered by `node_public_keys`."""
-        return self.public_key_to_node_id.get(node_public_key)
+        return self.public_key_to_node_id.get(public_key)
 
-    def get_node_ids(self, client_public_keys: Set[bytes]) -> Dict[bytes, int]:
-        """Retrieve stored `node_ids` filtered by `client_public_keys`."""
+    def get_node_ids(self, public_keys: Set[bytes]) -> Dict[bytes, int]:
+        """Retrieve stored `node_ids` filtered by `node_public_keys`."""
         result = {}
-        for key in client_public_keys:
+        for key in public_keys:
             node_id = self.get_node_id(key)
             if node_id is not None:
                 result[key] = node_id
