@@ -33,7 +33,7 @@ from .exec_grpc import run_superexec_api_grpc
 from .executor import Executor
 
 
-def run_superexec() -> None:
+def cli_flower_superexec() -> None:
     """Run Flower SuperExec."""
     log(INFO, "Starting Flower SuperExec")
 

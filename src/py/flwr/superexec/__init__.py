@@ -14,8 +14,8 @@
 # ==============================================================================
 """Flower SuperExec service."""
 
-from .app import run_superexec as run_superexec
+from .app import cli_flower_superexec as cli_flower_superexec
 
 __all__ = [
-    "run_superexec",
+    "cli_flower_superexec",
 ]
