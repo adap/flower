@@ -283,7 +283,7 @@ def run_simulation(
         )
 
     event(
-        EventType.RUN_SIMULATION_ENTER_PYTHON,
+        EventType.PYTHON_API_RUN_SIMULATION_ENTER,
         event_details={"backend": backend_name, "num-supernodes": num_supernodes},
     )
 
@@ -295,7 +295,7 @@ def run_simulation(
         backend_config=backend_config,
         enable_tf_gpu_growth=enable_tf_gpu_growth,
         verbose_logging=verbose_logging,
-        exit_event=EventType.RUN_SIMULATION_LEAVE_PYTHON,
+        exit_event=EventType.PYTHON_API_RUN_SIMULATION_LEAVE,
     )
 
 

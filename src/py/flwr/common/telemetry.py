@@ -163,8 +163,8 @@ class EventType(str, Enum):
     CLI_FLOWER_SIMULATION_LEAVE = auto()
 
     # Python API: `run_simulation`
-    RUN_SIMULATION_ENTER_PYTHON = auto()
-    RUN_SIMULATION_LEAVE_PYTHON = auto()
+    PYTHON_API_RUN_SIMULATION_ENTER = auto()
+    PYTHON_API_RUN_SIMULATION_LEAVE = auto()
 
     # --- Deployment Engine ------------------------------------------------------------
 
