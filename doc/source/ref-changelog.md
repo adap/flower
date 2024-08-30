@@ -13,7 +13,7 @@ We would like to give our special thanks to all the contributors who made the ne
 - **Deliver Flower App Bundle (FAB) to SuperLink and SuperNodes** ([#4006](https://github.com/adap/flower/pull/4006), [#3945](https://github.com/adap/flower/pull/3945), [#3999](https://github.com/adap/flower/pull/3999), [#4027](https://github.com/adap/flower/pull/4027), [#3851](https://github.com/adap/flower/pull/3851), [#3946](https://github.com/adap/flower/pull/3946), [#4003](https://github.com/adap/flower/pull/4003), [#4029](https://github.com/adap/flower/pull/4029), [#3942](https://github.com/adap/flower/pull/3942), [#3957](https://github.com/adap/flower/pull/3957), [#4020](https://github.com/adap/flower/pull/4020), [#4044](https://github.com/adap/flower/pull/4044), [#3852](https://github.com/adap/flower/pull/3852), [#4019](https://github.com/adap/flower/pull/4019), [#4031](https://github.com/adap/flower/pull/4031), [#4036](https://github.com/adap/flower/pull/4036), [#4049](https://github.com/adap/flower/pull/4049), [#4017](https://github.com/adap/flower/pull/4017), [#3943](https://github.com/adap/flower/pull/3943), [#3944](https://github.com/adap/flower/pull/3944), [#4011](https://github.com/adap/flower/pull/4011), [#3619](https://github.com/adap/flower/pull/3619))
 
   Dynamic code updates are here! `flwr run` can now ship and install the latest version of your `ServerApp` and `ClientApp` to an already-running federation (SuperLink and SuperNodes).
-  
+
   How does it work? `flwr run` bundles the your Flower app into a single FAB (Flower App Bundle) file. It then ships this FAB file, via the SuperExec, to both the SuperLink and those SuperNodes that need it. This allows you to keep SuperExec, SuperLink and SuperNodes running as permanent infrastructure, and then ship code updates (including completely new projects!) dynamically.
 
   `flwr run` is all you need.
@@ -21,7 +21,7 @@ We would like to give our special thanks to all the contributors who made the ne
 - **Introduce isolated** `ClientApp` **execution** ([#3970](https://github.com/adap/flower/pull/3970), [#3976](https://github.com/adap/flower/pull/3976), [#4002](https://github.com/adap/flower/pull/4002), [#4001](https://github.com/adap/flower/pull/4001), [#4034](https://github.com/adap/flower/pull/4034), [#4037](https://github.com/adap/flower/pull/4037), [#3977](https://github.com/adap/flower/pull/3977), [#4042](https://github.com/adap/flower/pull/4042), [#3978](https://github.com/adap/flower/pull/3978), [#4039](https://github.com/adap/flower/pull/4039), [#4033](https://github.com/adap/flower/pull/4033), [#3971](https://github.com/adap/flower/pull/3971), [#4035](https://github.com/adap/flower/pull/4035), [#3973](https://github.com/adap/flower/pull/3973), [#4032](https://github.com/adap/flower/pull/4032))
 
   The SuperNode can now run your `ClientApp` in a fully isolated way. In an enterprise deployment, this allows you to set strict limits on what the `ClientApp` can and cannot do.
-  
+
   `flower-supernode` supports three `--isolation` modes:
 
   - Unset: The SuperNode runs the `ClientApp` in the same process (as in previous versions of Flower). This is the default mode.
@@ -31,6 +31,7 @@ We would like to give our special thanks to all the contributors who made the ne
 - **Improve Docker support for enterprise deployments** ([#4050](https://github.com/adap/flower/pull/4050), [#4090](https://github.com/adap/flower/pull/4090), [#3784](https://github.com/adap/flower/pull/3784), [#3998](https://github.com/adap/flower/pull/3998), [#4094](https://github.com/adap/flower/pull/4094), [#3722](https://github.com/adap/flower/pull/3722))
 
   Flower 1.11 ships many Docker improvements that are especially useful for enterprise deployments:
+
   - `flwr/supernode` comes with a new Alpine Docker image.
   - `flwr/clientapp` is a new image to be used with the `--isolation=process` option. In this mode, SuperNode and `ClientApp` run in two different Docker containers. `flwr/supernode` (preferably the Alpine version) runs the long-running SuperNode with `--isolation=process`. `flwr/clientapp` runs the `ClientApp`. This is the recommended way to deploy Flower in enterprise settings.
   - New all-in-one Docker Compose enables you to easily start a full Flower Deployment Engine on a single machine.
