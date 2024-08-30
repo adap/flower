@@ -8,8 +8,8 @@ During the release
 
 The version number of a release is stated in ``pyproject.toml``. To release a new version of Flower, the following things need to happen (in that order):
 
-1. Run ``python3 src/py/flwr_tool/update_changelog.py <YOUR_GH_TOKEN>`` in order to add every new change to the changelog (feel free to make manual changes to the changelog afterwards until it looks good).
-2. Once the changelog has been updated with all the changes, run ``./dev/prepare-release-changelog.sh v<NEW_VERSION>``, where ``<NEW_VERSION>`` is the version stated in ``pyproject.toml`` (notice the ``v`` added before it). This will replace the ``Unreleased`` header of the changelog by the version and current date, and it will add a thanking message for the contributors. Open a pull request with those changes.
+1. Run ``python3 -m flwr_tool.update_changelog <YOUR_GH_TOKEN>`` in order to add every new change to the changelog (feel free to make manual changes to the changelog afterwards until it looks good).
+2. Once the changelog has been updated with all the changes, run ``./dev/prepare-release-changelog.sh v<NEW_VERSION>``, where ``<NEW_VERSION>`` is the version stated in ``pyproject.toml`` (notice the ``v`` added before it). This add the to-be-released version and current date, and it will add a thanking message for the contributors. Open a pull request with those changes.
 3. Once the pull request is merged, tag the release commit with the version number as soon as the PR is merged: ``git tag v<NEW_VERSION>`` (notice the ``v`` added before the version number), then ``git push --tags``. This will create a draft release on GitHub containing the correct artifacts and the relevant part of the changelog.
 4. Check the draft release on GitHub, and if everything is good, publish it.
 
@@ -20,7 +20,6 @@ Create a pull request which contains the following changes:
 
 1. Increase the minor version in ``pyproject.toml`` by one.
 2. Update all files which contain the current version number if necessary.
-3. Add a new ``Unreleased`` section in ``changelog.md``.
 
 Merge the pull request on the same day (i.e., before a new nightly release gets published to PyPI).
 
