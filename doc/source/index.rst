@@ -102,7 +102,6 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    :caption: Legacy example guides
 
    example-pytorch-from-centralized-to-federated
-   example-jax-from-centralized-to-federated
    example-fedbn-pytorch-from-centralized-to-federated
 
 Explanations

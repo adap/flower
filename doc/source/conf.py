@@ -264,6 +264,7 @@ redirects = {
     "example-mxnet-walk-through": "index.html",
     "ref-api/flwr.simulation.run_simulation_from_cli": "index.html",
     "contributor-how-to-create-new-messages": "index.html",
+    "example-jax-from-centralized-to-federated": "tutorial-quickstart-jax.html",
 }
 
 # -- Options for HTML output -------------------------------------------------
