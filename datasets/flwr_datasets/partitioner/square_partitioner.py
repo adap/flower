@@ -17,10 +17,12 @@
 
 import numpy as np
 
-from flwr_datasets.partitioner.size_partitioner import SizePartitioner
+from flwr_datasets.partitioner.id_to_size_function_partitioner import (
+    IdToSizeFunctionPartitioner,
+)
 
 
-class SquarePartitioner(SizePartitioner):
+class SquarePartitioner(IdToSizeFunctionPartitioner):
     """Partitioner creates partitions of size that are correlated with squared id.
 
     The amount of data each client gets is correlated with the squared partition ID.
