@@ -187,7 +187,7 @@ a Dockerfile that extends the ClientApp image and installs the required dependen
       ``pyproject.toml`` after it has been copied into the Docker image (see line 5).
 
 #. Next, build the ClientApp Docker image by running the following command in the directory where
-   Dockerfile is located:
+   the Dockerfile is located:
 
    .. code-block:: bash
 
