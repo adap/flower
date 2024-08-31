@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "flwr"
-version = "1.11.0"
+version = "1.12.0"
 description = "Flower: A Friendly Federated Learning Framework"
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.ai>"]
@@ -52,14 +52,18 @@ exclude = [
 ]
 
 [tool.poetry.scripts]
+# `flwr` CLI
 flwr = "flwr.cli.app:app"
-flower-superlink = "flwr.server:run_superlink"
-flower-superexec = "flwr.superexec:run_superexec"
-flower-supernode = "flwr.client:run_supernode"
-flower-client-app = "flwr.client:run_client_app"
-flower-server-app = "flwr.server:run_server_app"
+# SuperExec (can run with either Deployment Engine or Simulation Engine)
+flower-superexec = "flwr.superexec.app:run_superexec"
+# Simulation Engine
 flower-simulation = "flwr.simulation.run_simulation:run_simulation_from_cli"
+# Deployment Engine
+flower-superlink = "flwr.server.app:run_superlink"
+flower-supernode = "flwr.client.supernode.app:run_supernode"
+flower-server-app = "flwr.server.run_serverapp:run_server_app"
 flwr-clientapp = "flwr.client.clientapp:flwr_clientapp"
+flower-client-app = "flwr.client.supernode:run_client_app"  # Deprecated
 
 [tool.poetry.dependencies]
 python = "^3.8"
