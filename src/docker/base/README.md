@@ -19,8 +19,13 @@
 
 ## Supported tags
 
-- `nightly`, `<version>.dev<YYYYMMDD>` e.g. `1.11.0.dev20240724`
+- `nightly`, `<version>.dev<YYYYMMDD>` e.g. `1.12.0.dev20240830`
   - nightly image uses Python 3.11 and Ubuntu 22.04
+- `1.11.0-py3.11-alpine3.19`
+- `1.11.0-py3.11-ubuntu22.04`
+- `1.11.0-py3.10-ubuntu22.04`
+- `1.11.0-py3.9-ubuntu22.04`
+- `1.11.0-py3.8-ubuntu22.04`
 - `1.10.0-py3.11-alpine3.19`
 - `1.10.0-py3.11-ubuntu22.04`
 - `1.10.0-py3.10-ubuntu22.04`
