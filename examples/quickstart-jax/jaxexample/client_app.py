@@ -4,8 +4,14 @@ import numpy as np
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
 
-from jaxexample.task import (apply_model, create_train_state, get_params,
-                             load_data, set_params, train)
+from jaxexample.task import (
+    apply_model,
+    create_train_state,
+    get_params,
+    load_data,
+    set_params,
+    train,
+)
 
 
 # Define Flower Client and client_fn
