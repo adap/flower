@@ -54,6 +54,7 @@ jobs:
       pip-version: ${{ steps.versions.outputs.pip-version }}
       setuptools-version: ${{ steps.versions.outputs.setuptools-version }}
       matrix: ${{ steps.matrix.outputs.matrix }}
+      flwr-version: ${{ steps.versions.outputs.flwr-version }}
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
@@ -64,11 +65,11 @@ jobs:
         run: |
           echo "pip-version=${{ steps.bootstrap.outputs.pip-version }}" >> "$GITHUB_OUTPUT"
           echo "setuptools-version=${{ steps.bootstrap.outputs.setuptools-version }}" >> "$GITHUB_OUTPUT"
+          echo "flwr-version=$(poetry version -s)" >> "$GITHUB_OUTPUT"
 
       - id: matrix
         run: |
-           FLWR_VERSION=$(poetry version -s)
-           python dev/build-docker-image-matrix.py --flwr-version "${FLWR_VERSION}" > matrix.json
+           python dev/build-docker-image-matrix.py --flwr-version "${{ steps.versions.outputs.flwr-version }}" > matrix.json
            echo "matrix=$(cat matrix.json)" >> $GITHUB_OUTPUT
 
   build-base-images:
@@ -110,3 +111,19 @@ jobs:
     secrets:
       dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
       dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  create-update-pr:
+    if: ${{ github.repository == 'adap/flower' }}
+    name: Create a PR with the updated Docker READMEs
+    runs-on: ubuntu-22.04
+    needs: [parameters, build-binary-images]
+    steps:
+      - run: ./dev/update-docker-readmes.sh ${{ needs.parameters.outputs.flwr-version }} ${{ needs.parameters.outputs.matrix }}
+
+      - uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c # v6.1.0
+        with:
+          branch: doc/update-docker-readmes-${{ needs.parameters.outputs.flwr-version }}
+          delete-branch: true
+          commit-message: Add flwr version ${{ needs.parameters.outputs.flwr-version }} to Docker READMEs
+          title: docs(framework:skip) Add flwr version ${{ needs.parameters.outputs.flwr-version }} to Docker READMEs
+          body: Chnages autogenereated by [${{ github.run_id }}](${{ github.server_url }}/${{ github.repositoryUrl }}/actions/runs/${{ github.run_id }})
