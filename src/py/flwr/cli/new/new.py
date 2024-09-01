@@ -254,6 +254,7 @@ def new(
             MlFramework.MLX.value.lower(),
             MlFramework.TENSORFLOW.value.lower(),
             MlFramework.NUMPY.value.lower(),
+            MlFramework.SKLEARN.value.lower(),
         ]
         if framework_str in frameworks_with_tasks:
             files[f"{import_name}/task.py"] = {
