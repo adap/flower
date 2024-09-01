@@ -6,7 +6,19 @@ import argparse
 import json
 from dataclasses import asdict, dataclass
 from enum import Enum
+from itertools import chain
 from typing import Any, Callable, Dict, List, Optional
+
+
+class reversor:
+    def __init__(self, obj):
+        self.obj = obj
+
+    def __eq__(self, other):
+        return other.obj == self.obj
+
+    def __lt__(self, other):
+        return other.obj < self.obj
 
 
 class DistroName(str, Enum):
@@ -37,18 +49,18 @@ class BaseImage:
     python_version: str
     namespace_repository: str
     file_dir: str
-    tag: str
+    readme_path: str
+    tags: str
     flwr_version: str
 
 
-def new_base_image(
-    flwr_version: str, python_version: str, distro: Distro
-) -> Dict[str, Any]:
+def new_base_image(flwr_version: str, python_version: str, distro: Distro) -> BaseImage:
     return BaseImage(
         distro,
         python_version,
         "flwr/base",
         f"{DOCKERFILE_ROOT}/base/{distro.name.value}",
+        f"{DOCKERFILE_ROOT}/base/README.md",
         f"{flwr_version}-py{python_version}-{distro.name.value}{distro.version}",
         flwr_version,
     )
@@ -56,7 +68,7 @@ def new_base_image(
 
 def generate_base_images(
     flwr_version: str, python_versions: List[str], distros: List[Dict[str, str]]
-) -> List[Dict[str, Any]]:
+) -> List[BaseImage]:
     return [
         new_base_image(flwr_version, python_version, distro)
         for distro in distros
@@ -68,15 +80,18 @@ def generate_base_images(
 class BinaryImage:
     namespace_repository: str
     file_dir: str
+    readme_path: str
     base_image: str
-    tags: List[str]
+    distro: Distro
+    python_version: str
+    tags: str
 
 
 def new_binary_image(
     name: str,
     base_image: BaseImage,
     tags_fn: Optional[Callable],
-) -> Dict[str, Any]:
+) -> BinaryImage:
     tags = []
     if tags_fn is not None:
         tags += tags_fn(base_image) or []
@@ -84,7 +99,10 @@ def new_binary_image(
     return BinaryImage(
         f"flwr/{name}",
         f"{DOCKERFILE_ROOT}/{name}",
-        base_image.tag,
+        f"{DOCKERFILE_ROOT}/{name}/README.md",
+        base_image.tags,
+        base_image.distro,
+        base_image.python_version,
         "\n".join(tags),
     )
 
@@ -94,7 +112,7 @@ def generate_binary_images(
     base_images: List[BaseImage],
     tags_fn: Optional[Callable] = None,
     filter: Optional[Callable] = None,
-) -> List[Dict[str, Any]]:
+) -> List[BinaryImage]:
     filter = filter or (lambda _: True)
 
     return [
@@ -107,9 +125,9 @@ def tag_latest_alpine_with_flwr_version(image: BaseImage) -> List[str]:
         image.distro.name == DistroName.ALPINE
         and image.python_version == LATEST_SUPPORTED_PYTHON_VERSION
     ):
-        return [image.tag, image.flwr_version]
+        return [image.tags, image.flwr_version]
     else:
-        return [image.tag]
+        return [image.tags]
 
 
 def tag_latest_ubuntu_with_flwr_version(image: BaseImage) -> List[str]:
@@ -117,9 +135,34 @@ def tag_latest_ubuntu_with_flwr_version(image: BaseImage) -> List[str]:
         image.distro.name == DistroName.UBUNTU
         and image.python_version == LATEST_SUPPORTED_PYTHON_VERSION
     ):
-        return [image.tag, image.flwr_version]
+        return [image.tags, image.flwr_version]
     else:
-        return [image.tag]
+        return [image.tags]
+
+
+def create_readme_updates(images: List[BinaryImage | BinaryImage]) -> Dict[str, str]:
+    def version_to_tuple(version: str) -> tuple[int]:
+        return tuple(map(int, version.split(".")))
+
+    def create_list_item(tags: str) -> str:
+        tags = tags.split("\n")
+        tags.sort(key=lambda tag: len(tag))
+        tags = "`, `".join(tags)
+        return f"- `{tags}`"
+
+    images.sort(
+        key=lambda image: (
+            image.distro.name,
+            reversor(version_to_tuple(image.python_version)),
+        )
+    )
+
+    list_items = list(map(lambda image: create_list_item(image.tags), images))
+
+    return {
+        "path": images[0].readme_path,
+        "update": "\\n".join(list_items),
+    }
 
 
 if __name__ == "__main__":
@@ -146,16 +189,16 @@ if __name__ == "__main__":
 
     base_images = ubuntu_base_images + alpine_base_images
 
-    binary_images = (
+    binary_images = [
         # ubuntu and alpine images for the latest supported python version
         generate_binary_images(
             "superlink",
             base_images,
             tag_latest_alpine_with_flwr_version,
             lambda image: image.python_version == LATEST_SUPPORTED_PYTHON_VERSION,
-        )
+        ),
         # ubuntu images for each supported python version
-        + generate_binary_images(
+        generate_binary_images(
             "supernode",
             base_images,
             tag_latest_alpine_with_flwr_version,
@@ -164,37 +207,42 @@ if __name__ == "__main__":
                 image.distro.name == DistroName.ALPINE
                 and image.python_version == LATEST_SUPPORTED_PYTHON_VERSION
             ),
-        )
+        ),
         # ubuntu images for each supported python version
-        + generate_binary_images(
+        generate_binary_images(
             "serverapp",
             base_images,
             tag_latest_ubuntu_with_flwr_version,
             lambda image: image.distro.name == DistroName.UBUNTU,
-        )
+        ),
         # ubuntu images for each supported python version
-        + generate_binary_images(
+        generate_binary_images(
             "superexec",
             base_images,
             tag_latest_ubuntu_with_flwr_version,
             lambda image: image.distro.name == DistroName.UBUNTU,
-        )
+        ),
         # ubuntu images for each supported python version
-        + generate_binary_images(
+        generate_binary_images(
             "clientapp",
             base_images,
             tag_latest_ubuntu_with_flwr_version,
             lambda image: image.distro.name == DistroName.UBUNTU,
-        )
-    )
+        ),
+    ]
+
+    readme_updates = [
+        create_readme_updates(image) for image in [base_images] + binary_images
+    ]
 
     print(
         json.dumps(
             {
-                "base": {"images": list(map(lambda image: asdict(image), base_images))},
+                "base": {"images": list(map(asdict, base_images))},
                 "binary": {
-                    "images": list(map(lambda image: asdict(image), binary_images))
+                    "images": list(map(asdict, chain.from_iterable(binary_images))),
                 },
+                "readme_updates": readme_updates,
             }
         )
     )
