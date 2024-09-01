@@ -33,11 +33,12 @@ Advanced Options
 
    set-environment-variables
    run-as-root-user
+   run-as-subprocess
    pin-version
    use-a-different-version
 
-Run Flower Docker Compose
--------------------------
+Run Flower using Docker Compose
+-------------------------------
 
 .. toctree::
    :maxdepth: 1
