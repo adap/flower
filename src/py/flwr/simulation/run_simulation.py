@@ -309,7 +309,7 @@ def run_serverapp_th(
     f_stop: threading.Event,
     has_exception: threading.Event,
     enable_tf_gpu_growth: bool,
-    delay_launch: int = 3,
+    launch_buffer: int = 5,
 ) -> threading.Thread:
     """Run SeverApp in a thread."""
 
@@ -365,8 +365,9 @@ def run_serverapp_th(
             server_app,
         ),
     )
-    sleep(delay_launch)
     serverapp_th.start()
+    # Buffer time for thread to finish importing modules used by ServerApp
+    sleep(launch_buffer)
     return serverapp_th
 
 
