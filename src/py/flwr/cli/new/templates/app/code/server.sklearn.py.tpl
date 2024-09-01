@@ -4,7 +4,7 @@ from flwr.common import Context, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
 
-from sktut.task import get_model, get_model_params, set_initial_params
+from $import_name.task import get_model, get_model_params, set_initial_params
 
 
 def server_fn(context: Context):
