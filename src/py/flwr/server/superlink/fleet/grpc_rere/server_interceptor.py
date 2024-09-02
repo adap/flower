@@ -78,13 +78,13 @@ def _get_value_from_tuples(
 
 
 class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
-    """Server interceptor for client authentication."""
+    """Server interceptor for node authentication."""
 
     def __init__(self, state: State):
         self.state = state
 
-        self.client_public_keys = state.get_client_public_keys()
-        if len(self.client_public_keys) == 0:
+        self.node_public_keys = state.get_node_public_keys()
+        if len(self.node_public_keys) == 0:
             log(WARNING, "Authentication enabled, but no known public keys configured")
 
         private_key = self.state.get_server_private_key()
@@ -103,9 +103,9 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
     ) -> grpc.RpcMethodHandler:
         """Flower server interceptor authentication logic.
 
-        Intercept all unary calls from clients and authenticate clients by validating
-        auth metadata sent by the client. Continue RPC call if client is authenticated,
-        else, terminate RPC call by setting context to abort.
+        Intercept all unary calls from nodes and authenticate nodes by validating auth
+        metadata sent by the node. Continue RPC call if node is authenticated, else,
+        terminate RPC call by setting context to abort.
         """
         # One of the method handlers in
         # `flwr.server.superlink.fleet.grpc_rere.fleet_server.FleetServicer`
@@ -119,17 +119,17 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             request: Request,
             context: grpc.ServicerContext,
         ) -> Response:
-            client_public_key_bytes = base64.urlsafe_b64decode(
+            node_public_key_bytes = base64.urlsafe_b64decode(
                 _get_value_from_tuples(
                     _PUBLIC_KEY_HEADER, context.invocation_metadata()
                 )
             )
-            if client_public_key_bytes not in self.client_public_keys:
+            if node_public_key_bytes not in self.node_public_keys:
                 context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
 
             if isinstance(request, CreateNodeRequest):
                 response = self._create_authenticated_node(
-                    client_public_key_bytes, request, context
+                    node_public_key_bytes, request, context
                 )
                 log(
                     INFO,
@@ -144,13 +144,13 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                     _AUTH_TOKEN_HEADER, context.invocation_metadata()
                 )
             )
-            public_key = bytes_to_public_key(client_public_key_bytes)
+            public_key = bytes_to_public_key(node_public_key_bytes)
 
             if not self._verify_hmac(public_key, request, hmac_value):
                 context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
 
             # Verify node_id
-            node_id = self.state.get_node_id(client_public_key_bytes)
+            node_id = self.state.get_node_id(node_public_key_bytes)
 
             if not self._verify_node_id(node_id, request):
                 context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
