@@ -136,23 +136,16 @@ def new(
         username = prompt_text("Please provide your Flower username")
 
     if framework is not None:
-        framework_str_upper = str(framework.value)
+        framework_str = str(framework.value)
     else:
         framework_value = prompt_options(
             "Please select ML framework by typing in the number",
             [mlf.value for mlf in MlFramework],
         )
-        selected_value = [
-            name
-            for name, value in vars(MlFramework).items()
-            if value == framework_value
-        ]
-        framework_str_upper = selected_value[0]
-
-    framework_str = framework_str_upper.lower()
+        framework_str = framework_value
 
     llm_challenge_str = None
-    if framework_str == "flowertune":
+    if framework_str == MlFramework.FLOWERTUNE:
         llm_challenge_value = prompt_options(
             "Please select LLM challenge by typing in the number",
             sorted([challenge.value for challenge in LlmChallengeName]),
@@ -165,7 +158,10 @@ def new(
         llm_challenge_str = selected_value[0]
         llm_challenge_str = llm_challenge_str.lower()
 
-    is_baseline_project = framework_str == "baseline"
+    is_baseline_project = False
+    if framework_str == MlFramework.BASELINE:
+        framework_str = "baseline"
+        is_baseline_project = True
 
     print(
         typer.style(
@@ -176,7 +172,7 @@ def new(
     )
 
     context = {
-        "framework_str": framework_str_upper,
+        "framework_str": framework_str,
         "import_name": import_name.replace("-", "_"),
         "package_name": package_name,
         "project_name": app_name,
