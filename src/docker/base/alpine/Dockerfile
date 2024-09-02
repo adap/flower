@@ -51,9 +51,11 @@ RUN pip install -U --no-cache-dir \
 
 FROM python:${PYTHON_VERSION}-${DISTRO}${DISTRO_VERSION} AS base
 
-# Upgrade system Python pip and setuptools
-# hadolint ignore=DL3013
-RUN pip install -U --no-cache-dir pip setuptools
+# Keep the version of system Python pip and setuptools in sync with those installed in the
+# virtualenv.
+ARG PIP_VERSION
+ARG SETUPTOOLS_VERSION
+RUN pip install -U --no-cache-dir pip==${PIP_VERSION} setuptools==${SETUPTOOLS_VERSION}
 
 # required by the grpc package
 RUN apk add --no-cache \
