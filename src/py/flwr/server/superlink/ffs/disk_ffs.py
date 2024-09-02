@@ -17,7 +17,7 @@
 import hashlib
 import json
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from flwr.server.superlink.ffs.ffs import Ffs
 
@@ -58,7 +58,7 @@ class DiskFfs(Ffs):  # pylint: disable=R0904
 
         return content_hash
 
-    def get(self, key: str) -> Tuple[bytes, Dict[str, str]]:
+    def get(self, key: str) -> Optional[Tuple[bytes, Dict[str, str]]]:
         """Return tuple containing the object content and metadata.
 
         Parameters
@@ -68,9 +68,12 @@ class DiskFfs(Ffs):  # pylint: disable=R0904
 
         Returns
         -------
-        Tuple[bytes, Dict[str, str]]
+        Optional[Tuple[bytes, Dict[str, str]]]
             A tuple containing the object content and metadata.
         """
+        if not (self.base_dir / key).exists():
+            return None
+
         content = (self.base_dir / key).read_bytes()
         meta = json.loads((self.base_dir / f"{key}.META").read_text())
 

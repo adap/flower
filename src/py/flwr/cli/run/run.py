@@ -15,6 +15,7 @@
 """Flower command line interface `run` command."""
 
 import hashlib
+import json
 import subprocess
 import sys
 from logging import DEBUG
@@ -35,6 +36,11 @@ from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 
 
+def on_channel_state_change(channel_connectivity: str) -> None:
+    """Log channel connectivity."""
+    log(DEBUG, channel_connectivity)
+
+
 # pylint: disable-next=too-many-locals
 def run(
     app: Annotated[
@@ -51,7 +57,8 @@ def run(
             "--run-config",
             "-c",
             help="Override configuration key-value pairs, should be of the format:\n\n"
-            "`--run-config key1=value1,key2=value2 --run-config key3=value3`\n\n"
+            '`--run-config \'key1="value1" key2="value2"\' '
+            "--run-config 'key3=\"value3\"'`\n\n"
             "Note that `key1`, `key2`, and `key3` in this example need to exist "
             "inside the `pyproject.toml` in order to be properly overriden.",
         ),
@@ -117,18 +124,14 @@ def run(
 
 
 def _run_with_superexec(
-    app: Optional[Path],
+    app: Path,
     federation_config: Dict[str, Any],
     config_overrides: Optional[List[str]],
 ) -> None:
 
-    def on_channel_state_change(channel_connectivity: str) -> None:
-        """Log channel connectivity."""
-        log(DEBUG, channel_connectivity)
-
     insecure_str = federation_config.get("insecure")
     if root_certificates := federation_config.get("root-certificates"):
-        root_certificates_bytes = Path(root_certificates).read_bytes()
+        root_certificates_bytes = (app / root_certificates).read_bytes()
         if insecure := bool(insecure_str):
             typer.secho(
                 "❌ `root_certificates` were provided but the `insecure` parameter"
@@ -170,9 +173,7 @@ def _run_with_superexec(
 
     req = StartRunRequest(
         fab=fab_to_proto(fab),
-        override_config=user_config_to_proto(
-            parse_config_args(config_overrides, separator=",")
-        ),
+        override_config=user_config_to_proto(parse_config_args(config_overrides)),
         federation_config=user_config_to_proto(
             flatten_dict(federation_config.get("options"))
         ),
@@ -192,6 +193,8 @@ def _run_without_superexec(
 ) -> None:
     try:
         num_supernodes = federation_config["options"]["num-supernodes"]
+        verbose: Optional[bool] = federation_config["options"].get("verbose")
+        backend_cfg = federation_config["options"].get("backend", {})
     except KeyError as err:
         typer.secho(
             "❌ The project's `pyproject.toml` needs to declare the number of"
@@ -212,8 +215,15 @@ def _run_without_superexec(
         f"{num_supernodes}",
     ]
 
+    if backend_cfg:
+        # Stringify as JSON
+        command.extend(["--backend-config", json.dumps(backend_cfg)])
+
+    if verbose:
+        command.extend(["--verbose"])
+
     if config_overrides:
-        command.extend(["--run-config", f"{','.join(config_overrides)}"])
+        command.extend(["--run-config", f"{' '.join(config_overrides)}"])
 
     # Run the simulation
     subprocess.run(
