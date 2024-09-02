@@ -138,11 +138,10 @@ def new(
     if framework is not None:
         framework_str = str(framework.value)
     else:
-        framework_value = prompt_options(
+        framework_str = prompt_options(
             "Please select ML framework by typing in the number",
             [mlf.value for mlf in MlFramework],
         )
-        framework_str = framework_value
 
     llm_challenge_str = None
     if framework_str == MlFramework.FLOWERTUNE:
