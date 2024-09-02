@@ -32,6 +32,7 @@ from flwr.common import (
     Message,
     MessageTypeLegacy,
     Metadata,
+    RecordSet,
     Scalar,
 )
 from flwr.common.constant import PARTITION_ID_KEY
@@ -43,18 +44,22 @@ from flwr.server.superlink.fleet.vce.backend.raybackend import RayBackend
 class DummyClient(NumPyClient):
     """A dummy NumPyClient for tests."""
 
+    def __init__(self, state: RecordSet) -> None:
+        self.client_state = state
+
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
         """Return properties by doing a simple calculation."""
         result = float(config["factor"]) * pi
 
         # store something in context
-        self.context.state.configs_records["result"] = ConfigsRecord({"result": result})
+        self.client_state.configs_records["result"] = ConfigsRecord({"result": result})
+
         return {"result": result}
 
 
 def get_dummy_client(context: Context) -> Client:  # pylint: disable=unused-argument
     """Return a DummyClient converted to Client type."""
-    return DummyClient().to_client()
+    return DummyClient(state=context.state).to_client()
 
 
 def _load_app() -> ClientApp:
@@ -149,7 +154,6 @@ class TestRayBackend(TestCase):
             content.configs_records["getpropertiesres.properties"]["result"]
             == expected_output
         )
-
         # Verify context is correct
         obtained_result_in_context = updated_context.state.configs_records["result"][
             "result"
