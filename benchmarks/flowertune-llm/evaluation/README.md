@@ -5,7 +5,7 @@ If you are participating [LLM Leaderboard](https://flower.ai/benchmarks/llm-lead
 
 ## How to run
 
-Navigate to the individual directory corresponding to your selected challenge (`general NLP`, `finance`, `medical`, or `code`) and follow the instructions there to execute the evaluation.
+Navigate to the directory corresponding to your selected challenge (`general NLP`, `finance`, `medical`, or `code`) and follow the instructions there to execute the evaluation.
 
 > [!NOTE]  
 > If you wish to participate in the LLM Leaderboard, you must not modify the evaluation code and should use the exact command provided in the respective directory to run the evaluation.
