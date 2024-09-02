@@ -45,7 +45,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         self.task_ins_store: Dict[UUID, TaskIns] = {}
         self.task_res_store: Dict[UUID, TaskRes] = {}
 
-        self.client_public_keys: Set[bytes] = set()
+        self.node_public_keys: Set[bytes] = set()
         self.server_public_key: Optional[bytes] = None
         self.server_private_key: Optional[bytes] = None
 
@@ -237,7 +237,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             return node_id
 
     def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
-        """Delete a client node."""
+        """Delete a node."""
         with self.lock:
             if node_id not in self.node_ids:
                 raise ValueError(f"Node {node_id} not found")
@@ -254,7 +254,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             del self.node_ids[node_id]
 
     def get_nodes(self, run_id: int) -> Set[int]:
-        """Return all available client nodes.
+        """Return all available nodes.
 
         Constraints
         -----------
@@ -271,9 +271,9 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                 if online_until > current_time
             }
 
-    def get_node_id(self, client_public_key: bytes) -> Optional[int]:
-        """Retrieve stored `node_id` filtered by `client_public_keys`."""
-        return self.public_key_to_node_id.get(client_public_key)
+    def get_node_id(self, node_public_key: bytes) -> Optional[int]:
+        """Retrieve stored `node_id` filtered by `node_public_keys`."""
+        return self.public_key_to_node_id.get(node_public_key)
 
     def create_run(
         self,
@@ -318,19 +318,19 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         """Retrieve `server_public_key` in urlsafe bytes."""
         return self.server_public_key
 
-    def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
-        """Store a set of `client_public_keys` in state."""
+    def store_node_public_keys(self, public_keys: Set[bytes]) -> None:
+        """Store a set of `node_public_keys` in state."""
         with self.lock:
-            self.client_public_keys = public_keys
+            self.node_public_keys = public_keys
 
-    def store_client_public_key(self, public_key: bytes) -> None:
-        """Store a `client_public_key` in state."""
+    def store_node_public_key(self, public_key: bytes) -> None:
+        """Store a `node_public_key` in state."""
         with self.lock:
-            self.client_public_keys.add(public_key)
+            self.node_public_keys.add(public_key)
 
-    def get_client_public_keys(self) -> Set[bytes]:
-        """Retrieve all currently stored `client_public_keys` as a set."""
-        return self.client_public_keys
+    def get_node_public_keys(self) -> Set[bytes]:
+        """Retrieve all currently stored `node_public_keys` as a set."""
+        return self.node_public_keys
 
     def get_run(self, run_id: int) -> Optional[Run]:
         """Retrieve information about the run with the specified `run_id`."""
