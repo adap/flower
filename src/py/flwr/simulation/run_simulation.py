@@ -109,6 +109,11 @@ def run_simulation_from_cli() -> None:
     """Run Simulation Engine from the CLI."""
     args = _parse_args_run_simulation().parse_args()
 
+    event(
+        EventType.CLI_FLOWER_SIMULATION_ENTER,
+        event_details={"backend": args.backend, "num-supernodes": args.num_supernodes},
+    )
+
     # Add warnings for deprecated server_app and client_app arguments
     if args.server_app:
         warn_deprecated_feature(
@@ -177,7 +182,9 @@ def run_simulation_from_cli() -> None:
         client_app_attr = app_components["clientapp"]
         server_app_attr = app_components["serverapp"]
 
-        override_config = parse_config_args([args.run_config])
+        override_config = parse_config_args(
+            [args.run_config] if args.run_config else args.run_config
+        )
         fused_config = get_fused_config_from_dir(app_path, override_config)
         app_dir = args.app
         is_app = True
@@ -212,6 +219,7 @@ def run_simulation_from_cli() -> None:
         verbose_logging=args.verbose,
         server_app_run_config=fused_config,
         is_app=is_app,
+        exit_event=EventType.CLI_FLOWER_SIMULATION_LEAVE,
     )
 
 
@@ -265,6 +273,11 @@ def run_simulation(
         When disabled, only INFO, WARNING and ERROR log messages will be shown. If
         enabled, DEBUG-level logs will be displayed.
     """
+    event(
+        EventType.PYTHON_API_RUN_SIMULATION_ENTER,
+        event_details={"backend": backend_name, "num-supernodes": num_supernodes},
+    )
+
     if enable_tf_gpu_growth:
         warn_deprecated_feature_with_example(
             "Passing `enable_tf_gpu_growth=True` is deprecated.",
@@ -282,6 +295,7 @@ def run_simulation(
         backend_config=backend_config,
         enable_tf_gpu_growth=enable_tf_gpu_growth,
         verbose_logging=verbose_logging,
+        exit_event=EventType.PYTHON_API_RUN_SIMULATION_LEAVE,
     )
 
 
@@ -365,6 +379,7 @@ def _main_loop(
     is_app: bool,
     enable_tf_gpu_growth: bool,
     run: Run,
+    exit_event: EventType,
     flwr_dir: Optional[str] = None,
     client_app: Optional[ClientApp] = None,
     client_app_attr: Optional[str] = None,
@@ -372,7 +387,7 @@ def _main_loop(
     server_app_attr: Optional[str] = None,
     server_app_run_config: Optional[UserConfig] = None,
 ) -> None:
-    """Launch SuperLink with Simulation Engine, then ServerApp on a separate thread."""
+    """Start ServerApp on a separate thread, then launch Simulation Engine."""
     # Initialize StateFactory
     state_factory = StateFactory(":flwr-in-memory-state:")
 
@@ -380,6 +395,7 @@ def _main_loop(
     # A Threading event to indicate if an exception was raised in the ServerApp thread
     server_app_thread_has_exception = threading.Event()
     serverapp_th = None
+    success = True
     try:
         # Register run
         log(DEBUG, "Pre-registering run with id %s", run.run_id)
@@ -403,8 +419,7 @@ def _main_loop(
             enable_tf_gpu_growth=enable_tf_gpu_growth,
         )
 
-        # SuperLink with Simulation Engine
-        event(EventType.RUN_SUPERLINK_ENTER)
+        # Start Simulation Engine
         vce.start_vce(
             num_supernodes=num_supernodes,
             client_app_attr=client_app_attr,
@@ -422,13 +437,13 @@ def _main_loop(
     except Exception as ex:
         log(ERROR, "An exception occurred !! %s", ex)
         log(ERROR, traceback.format_exc())
+        success = False
         raise RuntimeError("An error was encountered. Ending simulation.") from ex
 
     finally:
         # Trigger stop event
         f_stop.set()
-
-        event(EventType.RUN_SUPERLINK_LEAVE)
+        event(exit_event, event_details={"success": success})
         if serverapp_th:
             serverapp_th.join()
             if server_app_thread_has_exception.is_set():
@@ -440,6 +455,7 @@ def _main_loop(
 # pylint: disable=too-many-arguments,too-many-locals
 def _run_simulation(
     num_supernodes: int,
+    exit_event: EventType,
     client_app: Optional[ClientApp] = None,
     server_app: Optional[ServerApp] = None,
     backend_name: str = "ray",
@@ -506,6 +522,7 @@ def _run_simulation(
         is_app,
         enable_tf_gpu_growth,
         run,
+        exit_event,
         flwr_dir,
         client_app,
         client_app_attr,

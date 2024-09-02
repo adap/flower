@@ -13,7 +13,7 @@ As the first step, please register for a Flower account on [flower.ai/login](htt
 Then, create a new Python environment and install Flower. 
 
 > [!TIP]
-> We recommend using `pyenv` and the `virtualenv` plugin to create your environment. Other manager such as Conda would likely work to. Check the [documentation](https://flower.ai/docs/framework/how-to-install-flower.html) for alternative ways of installing Flower.
+> We recommend using `pyenv` and the `virtualenv` plugin to create your environment. Other manager such as Conda would likely work too. Check the [documentation](https://flower.ai/docs/framework/how-to-install-flower.html) for alternative ways of installing Flower.
 
 ```shell
 pip install flwr
@@ -41,7 +41,7 @@ The `flwr new` command will generate a directory with the following structure:
 This can serve as the starting point for you to build up your own federated LLM fine-tuning methods.
 
 > [!IMPORTANT]
-> Please note that if you intend to submit your project as an entry to the [LLM Leaderboard](https://flower.ai/benchmarks/llm-leaderboard) modifications to `[tool.flwr.app.config.static]` and `options.num-supernodes` under `[tool.flwr.federations.local-simulation]` in `pyproject.toml` are not allowed and will invalidate the submission.
+> Please note that if you intend to submit your project as an entry to the [LLM Leaderboard](https://flower.ai/benchmarks/llm-leaderboard) modifications to `[tool.flwr.app.config.static]` and `[tool.flwr.federations.local-simulation]` sections in the `pyproject.toml` are not allowed and will invalidate the submission.
 
 
 ## Run FlowerTune LLM challenges

@@ -42,6 +42,7 @@ class MlFramework(str, Enum):
     MLX = "MLX"
     NUMPY = "NumPy"
     FLOWERTUNE = "FlowerTune"
+    BASELINE = "Flower Baseline"
 
 
 class LlmChallengeName(str, Enum):
@@ -164,6 +165,8 @@ def new(
         llm_challenge_str = selected_value[0]
         llm_challenge_str = llm_challenge_str.lower()
 
+    is_baseline_project = framework_str == "baseline"
+
     print(
         typer.style(
             f"\n🔨 Creating Flower App {app_name}...",
@@ -187,24 +190,20 @@ def new(
             "pyproject.toml": {"template": f"app/pyproject.{framework_str}.toml.tpl"},
             "README.md": {"template": f"app/README.{framework_str}.md.tpl"},
             f"{import_name}/__init__.py": {"template": "app/code/__init__.py.tpl"},
-            f"{import_name}/server.py": {
-                "template": "app/code/flwr_tune/server.py.tpl"
+            f"{import_name}/server_app.py": {
+                "template": "app/code/flwr_tune/server_app.py.tpl"
             },
-            f"{import_name}/client.py": {
-                "template": "app/code/flwr_tune/client.py.tpl"
+            f"{import_name}/client_app.py": {
+                "template": "app/code/flwr_tune/client_app.py.tpl"
             },
-            f"{import_name}/app.py": {"template": "app/code/flwr_tune/app.py.tpl"},
             f"{import_name}/models.py": {
                 "template": "app/code/flwr_tune/models.py.tpl"
             },
             f"{import_name}/dataset.py": {
                 "template": "app/code/flwr_tune/dataset.py.tpl"
             },
-            f"{import_name}/conf/config.yaml": {
-                "template": "app/code/flwr_tune/config.yaml.tpl"
-            },
-            f"{import_name}/conf/static_config.yaml": {
-                "template": "app/code/flwr_tune/static_config.yaml.tpl"
+            f"{import_name}/strategy.py": {
+                "template": "app/code/flwr_tune/strategy.py.tpl"
             },
         }
 
@@ -258,6 +257,21 @@ def new(
             files[f"{import_name}/task.py"] = {
                 "template": f"app/code/task.{framework_str}.py.tpl"
             }
+
+        if is_baseline_project:
+            # Include additional files for baseline template
+            for file_name in ["model", "dataset", "strategy", "utils", "__init__"]:
+                files[f"{import_name}/{file_name}.py"] = {
+                    "template": f"app/code/{file_name}.{framework_str}.py.tpl"
+                }
+
+            # Replace README.md
+            files["README.md"]["template"] = f"app/README.{framework_str}.md.tpl"
+
+            # Add LICENSE
+            files["LICENSE"] = {"template": "app/LICENSE.tpl"}
+
+            context["framework_str"] = "baseline"
 
     for file_path, value in files.items():
         render_and_create(

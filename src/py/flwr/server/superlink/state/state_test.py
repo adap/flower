@@ -575,22 +575,22 @@ class StateTest(unittest.TestCase):
                 new_private_key_bytes, new_public_key_bytes
             )
 
-    def test_client_public_keys(self) -> None:
-        """Test store_client_public_keys and get_client_public_keys from state."""
+    def test_node_public_keys(self) -> None:
+        """Test store_node_public_keys and get_node_public_keys from state."""
         # Prepare
         state: State = self.state_factory()
         key_pairs = [generate_key_pairs() for _ in range(3)]
         public_keys = {public_key_to_bytes(pair[1]) for pair in key_pairs}
 
         # Execute
-        state.store_client_public_keys(public_keys)
-        client_public_keys = state.get_client_public_keys()
+        state.store_node_public_keys(public_keys)
+        node_public_keys = state.get_node_public_keys()
 
         # Assert
-        assert client_public_keys == public_keys
+        assert node_public_keys == public_keys
 
-    def test_client_public_key(self) -> None:
-        """Test store_client_public_key and get_client_public_keys from state."""
+    def test_node_public_key(self) -> None:
+        """Test store_node_public_key and get_node_public_keys from state."""
         # Prepare
         state: State = self.state_factory()
         key_pairs = [generate_key_pairs() for _ in range(3)]
@@ -598,11 +598,11 @@ class StateTest(unittest.TestCase):
 
         # Execute
         for public_key in public_keys:
-            state.store_client_public_key(public_key)
-        client_public_keys = state.get_client_public_keys()
+            state.store_node_public_key(public_key)
+        node_public_keys = state.get_node_public_keys()
 
         # Assert
-        assert client_public_keys == public_keys
+        assert node_public_keys == public_keys
 
     def test_acknowledge_ping(self) -> None:
         """Test if acknowledge_ping works and if get_nodes return online nodes."""
