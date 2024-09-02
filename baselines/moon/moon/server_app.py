@@ -1,20 +1,16 @@
-"""Create global evaluation function.
-
-Optionally, also define a new Server class (please note this is not needed in most
-settings).
-"""
+"""moon: A Flower Baseline."""
 
 from collections import OrderedDict
 from typing import Callable, Dict, Optional, Tuple
 
 import torch
 from datasets import load_dataset
+from torch.utils.data import DataLoader
+
 from flwr.common import Context
 from flwr.common.typing import NDArrays, Scalar
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
-from torch.utils.data import DataLoader
-
 from moon.dataset_preparation import get_data_transforms, get_transforms_apply_fn
 from moon.models import init_net, test
 

@@ -1,1 +1,1 @@
-"""Template baseline package."""
+"""moon: A Flower Baseline."""

@@ -1,20 +1,16 @@
-"""Define your client class and a function to construct such clients.
-
-Please overwrite `flwr.client.NumPyClient` or `flwr.client.Client` and create a function
-to instantiate your client.
-"""
+"""moon: A Flower Baseline."""
 
 from collections import OrderedDict
 from typing import Dict, Tuple
 
 import torch
-from flwr.client import Client, ClientApp, NumPyClient
-from flwr.common import Array, Context, ParametersRecord, array_from_numpy
-from flwr.common.typing import NDArrays, Scalar
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import DirichletPartitioner
 from torch.utils.data import DataLoader
 
+from flwr.client import Client, ClientApp, NumPyClient
+from flwr.common import Array, Context, ParametersRecord, array_from_numpy
+from flwr.common.typing import NDArrays, Scalar
 from moon.dataset_preparation import get_data_transforms, get_transforms_apply_fn
 from moon.models import init_net, train_fedprox, train_moon
 

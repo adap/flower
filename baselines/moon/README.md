@@ -96,10 +96,10 @@ flwr run .
 flwr run . --run-config conf/cifar10_fedprox.toml
 
 # CIFAR-100 & MOON
-flwr run . --run-config conf/cifar100.toml
+flwr run . local-sim-xl --run-config conf/cifar100.toml
 
 # CIFAR-100 & FedProx
-flwr run . --run-config conf/cifar100_fedprox.toml
+flwr run . local-sim-xl --run-config conf/cifar100_fedprox.toml
 ```
 
 For CIFAR-10 with FedProx, the accuracy after running 100 rounds is 0.6852. For CIFAR100 with MOON, the accuracy after running 100 rounds is 0.6636. For CIFAR100 with FedProx, the accuracy after running 100 rounds is 0.6494. The results are summarized below:
