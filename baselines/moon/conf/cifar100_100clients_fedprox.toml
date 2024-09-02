@@ -6,7 +6,7 @@ mu = 0.001
 temperature = 0.5
 alg = "fedprox"
 seed = 0
-server-device = "cpu"
+server-device = "cuda"
 num-server-rounds = 500
 
 dataset-name = "uoft-cs/cifar10"

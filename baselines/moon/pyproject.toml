@@ -135,7 +135,7 @@ mu = 5
 temperature = 0.5
 alg = "moon"
 seed = 0
-server-device = "cpu"
+server-device = "cuda"
 num-server-rounds = 100
 
 dataset-name = "uoft-cs/cifar10"
