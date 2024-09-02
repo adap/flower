@@ -455,8 +455,6 @@ def train_fedprox(net, global_net, train_dataloader, epochs, lr, mu, device):
 
     train_acc, _ = compute_accuracy(net, train_dataloader, device=device)
 
-    log(INFO, "Pre-Training Training accuracy: %f", train_acc)
-
     optimizer = optim.SGD(
         filter(lambda p: p.requires_grad, net.parameters()),
         lr=lr,

@@ -72,7 +72,7 @@ Create a new Python environemnt using [pyenv](https://github.com/pyenv/pyenv) an
 pyenv virtualenv 3.10.12 moon-env
 
 # Activate it
-pyenv activate moon-evn
+pyenv activate moon-env
 
 # Then install the project
 pip install -e .
