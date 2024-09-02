@@ -157,10 +157,8 @@ def new(
         llm_challenge_str = selected_value[0]
         llm_challenge_str = llm_challenge_str.lower()
 
-    is_baseline_project = False
     if framework_str == MlFramework.BASELINE:
         framework_str = "baseline"
-        is_baseline_project = True
 
     print(
         typer.style(
@@ -178,12 +176,14 @@ def new(
         "username": username,
     }
 
+    template_name = framework_str.lower()
+
     # List of files to render
     if llm_challenge_str:
         files = {
             ".gitignore": {"template": "app/.gitignore.tpl"},
-            "pyproject.toml": {"template": f"app/pyproject.{framework_str}.toml.tpl"},
-            "README.md": {"template": f"app/README.{framework_str}.md.tpl"},
+            "pyproject.toml": {"template": f"app/pyproject.{template_name}.toml.tpl"},
+            "README.md": {"template": f"app/README.{template_name}.md.tpl"},
             f"{import_name}/__init__.py": {"template": "app/code/__init__.py.tpl"},
             f"{import_name}/server_app.py": {
                 "template": "app/code/flwr_tune/server_app.py.tpl"
@@ -230,43 +230,41 @@ def new(
         files = {
             ".gitignore": {"template": "app/.gitignore.tpl"},
             "README.md": {"template": "app/README.md.tpl"},
-            "pyproject.toml": {"template": f"app/pyproject.{framework_str}.toml.tpl"},
+            "pyproject.toml": {"template": f"app/pyproject.{template_name}.toml.tpl"},
             f"{import_name}/__init__.py": {"template": "app/code/__init__.py.tpl"},
             f"{import_name}/server_app.py": {
-                "template": f"app/code/server.{framework_str}.py.tpl"
+                "template": f"app/code/server.{template_name}.py.tpl"
             },
             f"{import_name}/client_app.py": {
-                "template": f"app/code/client.{framework_str}.py.tpl"
+                "template": f"app/code/client.{template_name}.py.tpl"
             },
         }
 
         # Depending on the framework, generate task.py file
         frameworks_with_tasks = [
-            MlFramework.PYTORCH.value.lower(),
-            MlFramework.JAX.value.lower(),
-            MlFramework.HUGGINGFACE.value.lower(),
-            MlFramework.MLX.value.lower(),
-            MlFramework.TENSORFLOW.value.lower(),
+            MlFramework.PYTORCH.value,
+            MlFramework.JAX.value,
+            MlFramework.HUGGINGFACE.value,
+            MlFramework.MLX.value,
+            MlFramework.TENSORFLOW.value,
         ]
         if framework_str in frameworks_with_tasks:
             files[f"{import_name}/task.py"] = {
-                "template": f"app/code/task.{framework_str}.py.tpl"
+                "template": f"app/code/task.{template_name}.py.tpl"
             }
 
-        if is_baseline_project:
+        if framework_str == "baseline":
             # Include additional files for baseline template
             for file_name in ["model", "dataset", "strategy", "utils", "__init__"]:
                 files[f"{import_name}/{file_name}.py"] = {
-                    "template": f"app/code/{file_name}.{framework_str}.py.tpl"
+                    "template": f"app/code/{file_name}.{template_name}.py.tpl"
                 }
 
             # Replace README.md
-            files["README.md"]["template"] = f"app/README.{framework_str}.md.tpl"
+            files["README.md"]["template"] = f"app/README.{template_name}.md.tpl"
 
             # Add LICENSE
             files["LICENSE"] = {"template": "app/LICENSE.tpl"}
-
-            context["framework_str"] = "baseline"
 
     for file_path, value in files.items():
         render_and_create(
