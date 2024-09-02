@@ -196,7 +196,6 @@ def new(
             f"{import_name}/client_app.py": {
                 "template": "app/code/flwr_tune/client_app.py.tpl"
             },
-            f"{import_name}/app.py": {"template": "app/code/flwr_tune/app.py.tpl"},
             f"{import_name}/models.py": {
                 "template": "app/code/flwr_tune/models.py.tpl"
             },
