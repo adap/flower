@@ -27,7 +27,7 @@ def train_fn(msg: Message, context: Context):
     # Load this `ClientApp`'s dataset
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
-    trainloader, valloader = load_data(partition_id, num_partitions)
+    trainloader, _ = load_data(partition_id, num_partitions)
 
     # Extract model received from `ServerApp`
     p_record = msg.content.parameters_records["global_model_record"]
@@ -36,12 +36,14 @@ def train_fn(msg: Message, context: Context):
     # apply to local PyTorch model
     model.load_state_dict(state_dict)
 
+    # Get learning rate value sent from `ServerApp`
+    lr = msg.content.configs_records["config"]["lr"]
     # Train with local dataset
     train_loss = train(
         model,
         trainloader,
         context.run_config["local-epochs"],
-        lr=0.1,
+        lr=lr,
         device=device,
     )
 

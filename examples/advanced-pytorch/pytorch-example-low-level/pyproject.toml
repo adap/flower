@@ -26,6 +26,7 @@ clientapp = "pytorch_example_low_level.client_app:app"
 
 [tool.flwr.app.config]
 num-server-rounds = 10
+fraction-clients-train = 0.2
 batch-size = 32
 local-epochs = 1
 server-device = "cpu"

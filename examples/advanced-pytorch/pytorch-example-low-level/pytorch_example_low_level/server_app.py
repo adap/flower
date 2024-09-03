@@ -4,6 +4,7 @@ from collections import OrderedDict
 from logging import INFO
 from typing import List
 
+import random
 import numpy as np
 import torch.nn as nn
 from pytorch_example_low_level.task import Net, apply_eval_transforms, test
@@ -27,6 +28,7 @@ def main(driver: Driver, context: Context) -> None:
     num_rounds = context.run_config["num-server-rounds"]
     batch_size = context.run_config["batch-size"]
     server_device = context.run_config["server-device"]
+    fraction_train = context.run_config["fraction-clients-train"]
 
     # Initialize global model
     global_model = Net()
@@ -40,21 +42,25 @@ def main(driver: Driver, context: Context) -> None:
     )
 
     for server_round in range(num_rounds):
-        log(INFO, "Starting round %s/%s", server_round + 1, num_rounds)
+        log(INFO, "")
+        log(INFO, "🔄 Starting round %s/%s", server_round + 1, num_rounds)
 
         # Get IDs of nodes available
         node_ids = driver.get_node_ids()
 
-        # TODO: implement some form of node filtering
+        # Sample uniformly
+        num_sample = int(len(node_ids)*fraction_train)
+        sampled_node_ids = random.sample(node_ids, num_sample)
+        log(INFO, f"Sampled {len(sampled_node_ids)} out of {len(node_ids)} nodes.")
 
-        # Create messages
+        # Create messages for Training
         messages = construct_messages(
-            global_model, driver, node_ids, MessageType.TRAIN, server_round
+            global_model, driver, sampled_node_ids, MessageType.TRAIN, server_round
         )
 
         # Send messages and wait for all results
         replies = driver.send_and_receive(messages)
-        log(INFO, "Received %s/%s results", len(replies), len(messages))
+        log(INFO, "📥 Received %s/%s results", len(replies), len(messages))
 
         # Aggregate received models
         updated_global_state_dict = aggregate_parameters_from_messages(replies)
@@ -67,7 +73,7 @@ def main(driver: Driver, context: Context) -> None:
         loss, accuracy = test(global_model, testloader, device=server_device)
         log(
             INFO,
-            f"Centrally evaluated model -> loss: {loss: .4f} /  accuracy: {accuracy: .4f}",
+            f"💡 Centrally evaluated model -> loss: {loss: .4f} /  accuracy: {accuracy: .4f}",
         )
 
 
