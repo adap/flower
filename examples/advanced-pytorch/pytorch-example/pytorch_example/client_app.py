@@ -56,7 +56,8 @@ class FlowerClient(NumPyClient):
             self.net,
             self.trainloader,
             self.local_epochs,
-            self.device,
+            lr=float(config["lr"]),
+            device=self.device,
         )
         # Save classification head to context's state to use in a future fit() call
         self._save_layer_weights_to_state()

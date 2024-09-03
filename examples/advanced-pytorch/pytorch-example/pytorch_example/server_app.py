@@ -23,6 +23,7 @@ def gen_evaluate_fn(
     """Generate the function for centralized evaluation."""
 
     def evaluate(server_round, parameters_ndarrays, config):
+        """Evaluate global model on centralized test set."""
         net = Net()
         set_weights(net, parameters_ndarrays)
         net.to(device)
@@ -30,6 +31,15 @@ def gen_evaluate_fn(
         return loss, {"centralized_accuracy": accuracy}
 
     return evaluate
+
+
+def on_fit_config(server_round: int):
+    """Construct `config` that clients receive when running `fit()`"""
+    lr = 0.1
+    # Enable a simple form of learning rate decay
+    if server_round > 10:
+        lr /= 2
+    return {"lr": lr}
 
 
 # Define metric aggregation function
@@ -73,6 +83,7 @@ def server_fn(context: Context):
         fraction_fit=fraction_fit,
         fraction_evaluate=fraction_eval,
         initial_parameters=parameters,
+        on_fit_config_fn=on_fit_config,
         evaluate_fn=gen_evaluate_fn(testloader, device=server_device),
         evaluate_metrics_aggregation_fn=weighted_average,
     )
