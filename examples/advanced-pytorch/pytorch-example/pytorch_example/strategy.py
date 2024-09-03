@@ -23,6 +23,7 @@ def create_run_dir(config: UserConfig) -> Path:
     # Create output directory given current timestamp
     current_time = datetime.now()
     run_dir = current_time.strftime("%Y-%m-%d/%H-%M-%S")
+    # Save path is based on the current directory
     save_path = Path.cwd() / f"outputs/{run_dir}"
     save_path.mkdir(parents=True, exist_ok=False)
 
@@ -59,8 +60,7 @@ class CustomFedAvg(FedAvg):
 
     def _init_wandb_project(self):
         # init W&B
-        wandb_group = str(self.run_dir)
-        wandb.init(project=PROJECT_NAME, name="ServerApp", group=wandb_group)
+        wandb.init(project=PROJECT_NAME, name=f"{str(self.run_dir)}-ServerApp")
 
     def _store_results(self, tag: str, results_dict):
         """Store results in dictionary, then save as JSON."""
@@ -119,7 +119,7 @@ class CustomFedAvg(FedAvg):
         self.store_results_and_log(
             server_round=server_round,
             tag="centralized_evaluate",
-            results_dict={"centralized_evaluate_loss": loss, **metrics},
+            results_dict={"centralized_loss": loss, **metrics},
         )
         return loss, metrics
 

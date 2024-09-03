@@ -74,6 +74,7 @@ def server_fn(context: Context):
         fraction_evaluate=fraction_eval,
         initial_parameters=parameters,
         evaluate_fn=gen_evaluate_fn(testloader, device=server_device),
+        evaluate_metrics_aggregation_fn=weighted_average,
     )
     config = ServerConfig(num_rounds=num_rounds)
 
