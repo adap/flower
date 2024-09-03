@@ -6,8 +6,8 @@ This guide will help you set up a Flower project on multiple machines using Dock
 You will learn how to run the Flower client and server components on two separate machines,
 with Flower configured to use TLS encryption and persist SuperLink state across restarts.
 
-This guide assumes that you have already completed the :doc:`tutorial-quickstart-docker-compose` tutorial.
-It is highly recommended to follow and understand the contents of that tutorial before
+This guide assumes you have completed the :doc:`tutorial-quickstart-docker-compose` tutorial.
+It is highly recommended that you follow and understand the contents of that tutorial before
 proceeding with this guide.
 
 Prerequisites
@@ -18,33 +18,29 @@ Before you begin, make sure you have the following prerequisites:
 - The ``flwr`` CLI is :doc:`installed <../how-to-install-flower>` locally.
 - The Docker daemon is running on your local machine and the remote machine.
 - Docker Compose is installed on both your local machine and the remote machine.
-- You have an existing Flower project. You can use ``flwr new`` to create one.
 - You can connect to the remote machine from your local machine.
 - Ports ``9091`` and ``9093`` are accessible on the remote machine.
 
 .. note::
 
-   The commands provided in this guide assume that your project name is
-   ``quickstart-compose`` and its location is within the ``distributed`` directory.
+   The guide uses the ``examples/quickstart-pytorch`` example as an example project.
 
-   If your project has a different name or location, please remember to adjust the commands accordingly.
+   If your project has a different name or location, please remember to adjust the commands/paths accordingly.
 
 Step 1: Set Up
 --------------
 
-#. Clone the Docker Compose ``distributed`` directory:
+#. Clone the Flower repository and change to the ``distributed`` directory:
 
    .. code-block:: bash
 
-      $ git clone --depth=1 https://github.com/adap/flower.git _tmp \
-                  && mv _tmp/src/docker/distributed . \
-                  && mv _tmp/src/docker/complete . \
-                  && rm -rf _tmp && cd distributed
+      $ git clone --depth=1 https://github.com/adap/flower.git
+      $ cd flower/src/docker/distributed
 
 #. Get the IP address from the remote machine and save it for later.
 
 #. If you don't have any certificates, you can generate self-signed certificates using the ``certs.yml``
-   Compose file. If you have certificates you can continue with Step 2.
+   Compose file. If you have certificates, you can continue with Step 2.
 
    .. important::
 
@@ -53,7 +49,7 @@ Step 1: Set Up
       For production environments, use a service like `Let's Encrypt <https://letsencrypt.org/>`_
       to obtain your certificates.
 
-   First, set the environment variable ``SUPERLINK_IP`` and ``SUPEREXEC_IP`` with the IP address
+   First, set the environment variables ``SUPERLINK_IP`` and ``SUPEREXEC_IP`` with the IP address
    from the remote machine. For example, if the IP is ``192.168.2.33``, execute:
 
    .. code-block:: bash
@@ -82,18 +78,18 @@ For example, you can use ``scp`` to copy the directories:
    $ scp -r ./server \
           ./superexec-certificates \
           ./superlink-certificates \
-          ./quickstart-compose remote:~/
+          ../../../examples/quickstart-pytorch remote:~/
 
 Step 3: Start the Flower Server Components
 ------------------------------------------
 
-Log into the remote machine using ssh and run the following command to start the
+Log into the remote machine using ``ssh`` and run the following command to start the
 SuperLink and SuperExec services:
 
 .. code-block:: bash
 
    $ ssh remote
-   $ export PROJECT_DIR=../quickstart-compose
+   $ export PROJECT_DIR=../quickstart-pytorch
    $ docker compose -f server/compose.yml up --build -d
 
 .. note::
@@ -110,7 +106,7 @@ On your local machine, run the following command to start the client components:
 
 .. code-block:: bash
 
-   $ export PROJECT_DIR=../quickstart-compose
+   $ export PROJECT_DIR=../../../../examples/quickstart-pytorch
    $ docker compose -f client/compose.yml up --build -d
 
 .. note::
@@ -121,23 +117,28 @@ On your local machine, run the following command to start the client components:
 Step 5: Run Your Flower Project
 -------------------------------
 
-Specify the remote SuperExec IP addresses and the path to the root-certificate in the
+Specify the remote SuperExec IP addresses and the path to the root certificate in the
 ``pyproject.toml`` file:
 
 .. code-block:: toml
-   :caption: quickstart-compose/pyproject.toml
+   :caption: examples/quickstart-pytorch/pyproject.toml
 
    [tool.flwr.federations.remote-superexec]
    address = "192.168.2.33:9093"
-   root-certificates = "../superexec-certificates/ca.crt"
+   root-certificates = "../../src/docker/distributed/superexec-certificates/ca.crt"
+
+.. note::
+
+   The Path of the ``root-certificates`` should be relative to the location of the ``pyproject.toml``
+   file.
 
 To run the project, execute:
 
 .. code-block:: bash
 
-   $ flwr run quickstart-compose remote-superexec
+   $ flwr run ../../../examples/quickstart-pytorch remote-superexec
 
-That's it! With these steps, you've set up Flower on two separate machines, and you're ready to
+That's it! With these steps, you've set up Flower on two separate machines and are ready to
 start using it.
 
 Step 6: Clean Up
