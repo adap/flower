@@ -14,7 +14,8 @@ This example extends the content of the [quickstart-pytorch](https://github.com/
 - Saves results (e.g. accuracy, loss) to a JSON in the file system
 - Saves a checkpoint of the global model when a new best is found
 - Logs metrics to [Weight&Biases](<>) if enabled
-- _Stateful clients_: `ClientApp` make use of ther context to persist metrics at the clients across participation rounds.
+
+In addition, it also shows how to make your `ClientApp` use the context so clients behave as if they were stateful. This is useful if your `ClientApp` objects should make use of some data structures (e.g. metrics, model parameters) set in previous rounds. The example implements a basic for of _FL personalization_.
 
 This examples shows how to achieve the above using both a `Strategy` as well as the low-level API.
 

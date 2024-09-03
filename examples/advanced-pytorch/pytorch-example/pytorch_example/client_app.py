@@ -1,8 +1,10 @@
 """pytorch-example: A Flower / PyTorch app."""
 
 import torch
+import torch.nn as nn
 from flwr.client import NumPyClient, ClientApp
-from flwr.common import Context
+from flwr.common import array_from_numpy
+from flwr.common import Context, RecordSet, ParametersRecord
 
 from pytorch_example.task import (
     Net,
@@ -16,30 +18,90 @@ from pytorch_example.task import (
 
 # Define Flower Client and client_fn
 class FlowerClient(NumPyClient):
-    def __init__(self, net, trainloader, valloader, local_epochs):
-        self.net = net
+    """A simple client that showcases how to use the state.
+
+    It implements a basic version of `personalisation` by which
+    the classification layer of the CNN is stored locally and used
+    and updated during `fit()` and used during `evaluate()`.
+    """
+
+    def __init__(
+        self, net, client_state: RecordSet, trainloader, valloader, local_epochs
+    ):
+        self.net: Net = net
+        self.client_state = client_state
         self.trainloader = trainloader
         self.valloader = valloader
         self.local_epochs = local_epochs
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.net.to(self.device)
+        self.local_layer_name = "classification-head"
 
     def fit(self, parameters, config):
+        """Train model locally.
+
+        The client stores in its context the parameters of the last layer in the model
+        (i.e. the classification head). The classifier is saved at the end of the
+        training and used the next time this client participates.
+        """
+
+        # Apply weights from global models (the whole model is replaced)
         set_weights(self.net, parameters)
+
+        # Override weights in classification layer with those this client
+        # had at the end of the last fit() round it participated in
+        self._load_layer_weights_from_state()
+
         train_loss = train(
             self.net,
             self.trainloader,
             self.local_epochs,
             self.device,
         )
+        # Save classification head to context's state to use in a future fit() call
+        self._save_layer_weights_to_state()
+
+        # Return locally-trained model and metrics
         return (
             get_weights(self.net),
             len(self.trainloader.dataset),
             {"train_loss": train_loss},
         )
 
+    def _save_layer_weights_to_state(self):
+        """Save last layer weights to state."""
+        state_dict_arrays = {}
+        for k, v in self.net.fc2.state_dict().items():
+            state_dict_arrays[k] = array_from_numpy(v.cpu().numpy())
+
+        # Add to recordset (replace if already exists)
+        self.client_state.parameters_records[self.local_layer_name] = ParametersRecord(
+            state_dict_arrays
+        )
+
+    def _load_layer_weights_from_state(self):
+        """Load last layer weights to state."""
+        if self.local_layer_name not in self.client_state.parameters_records:
+            return
+
+        state_dict = {}
+        param_records = self.client_state.parameters_records
+        for k, v in param_records[self.local_layer_name].items():
+            state_dict[k] = torch.from_numpy(v.numpy())
+
+        # apply previously saved classification head by this client
+        self.net.fc2.load_state_dict(state_dict, strict=True)
+
     def evaluate(self, parameters, config):
+        """Evaluate the global model on the local validation set.
+
+        Note the classification head is replaced with the weights this client had the
+        last time it trained the model.
+        """
         set_weights(self.net, parameters)
+        # Override weights in classification layer with those this client
+        # had at the end of the last fit() round it participated in
+        self._load_layer_weights_from_state()
         loss, accuracy = test(self.net, self.valloader, self.device)
         return loss, len(self.valloader.dataset), {"accuracy": accuracy}
 
@@ -53,7 +115,13 @@ def client_fn(context: Context):
     local_epochs = context.run_config["local-epochs"]
 
     # Return Client instance
-    return FlowerClient(net, trainloader, valloader, local_epochs).to_client()
+    # We pass the state so to persist information across
+    # participation rounds. Note that each client always
+    # receives the same Context instance (it's a 1:1 mapping)
+    client_state = context.state
+    return FlowerClient(
+        net, client_state, trainloader, valloader, local_epochs
+    ).to_client()
 
 
 # Flower ClientApp
