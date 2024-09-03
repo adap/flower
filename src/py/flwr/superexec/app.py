@@ -56,7 +56,9 @@ def run_superexec() -> None:
         address=address,
         executor=_load_executor(args),
         certificates=certificates,
-        config=parse_config_args([args.executor_config]),
+        config=parse_config_args(
+            [args.executor_config] if args.executor_config else args.executor_config
+        ),
     )
 
     grpc_servers = [superexec_server]
@@ -93,9 +95,9 @@ def _parse_args_run_superexec() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--executor-config",
-        help="Key-value pairs for the executor config, separated by commas. "
-        'For example:\n\n`--executor-config superlink="superlink:9091",'
-        'root-certificates="certificates/superlink-ca.crt"`',
+        help="Key-value pairs for the executor config, separated by spaces. "
+        'For example:\n\n`--executor-config \'superlink="superlink:9091" '
+        'root-certificates="certificates/superlink-ca.crt"\'`',
     )
     parser.add_argument(
         "--insecure",

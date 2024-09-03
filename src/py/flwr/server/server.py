@@ -91,7 +91,7 @@ class Server:
         # Initialize parameters
         log(INFO, "[INIT]")
         self.parameters = self._get_initial_parameters(server_round=0, timeout=timeout)
-        log(INFO, "Evaluating initial global parameters")
+        log(INFO, "Starting evaluation of initial global parameters")
         res = self.strategy.evaluate(0, parameters=self.parameters)
         if res is not None:
             log(
@@ -102,6 +102,8 @@ class Server:
             )
             history.add_loss_centralized(server_round=0, loss=res[0])
             history.add_metrics_centralized(server_round=0, metrics=res[1])
+        else:
+            log(INFO, "Evaluation returned no results (`None`)")
 
         # Run federated learning for num_rounds
         start_time = timeit.default_timer()

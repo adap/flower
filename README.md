@@ -143,8 +143,8 @@ Other [examples](https://github.com/adap/flower/tree/main/examples):
 - [PyTorch: From Centralized to Federated](https://github.com/adap/flower/tree/main/examples/pytorch-from-centralized-to-federated)
 - [Vertical FL](https://github.com/adap/flower/tree/main/examples/vertical-fl)
 - [Federated Finetuning of OpenAI's Whisper](https://github.com/adap/flower/tree/main/examples/whisper-federated-finetuning)
-- [Federated Finetuning of Large Language Model](https://github.com/adap/flower/tree/main/examples/llm-flowertune)
-- [Federated Finetuning of a Vision Transformer](https://github.com/adap/flower/tree/main/examples/vit-finetune)
+- [Federated Finetuning of Large Language Model](https://github.com/adap/flower/tree/main/examples/flowertune-llm)
+- [Federated Finetuning of a Vision Transformer](https://github.com/adap/flower/tree/main/examples/flowertune-vit)
 - [Advanced Flower with TensorFlow/Keras](https://github.com/adap/flower/tree/main/examples/advanced-tensorflow)
 - [Advanced Flower with PyTorch](https://github.com/adap/flower/tree/main/examples/advanced-pytorch)
 - Single-Machine Simulation of Federated Learning Systems ([PyTorch](https://github.com/adap/flower/tree/main/examples/simulation-pytorch)) ([Tensorflow](https://github.com/adap/flower/tree/main/examples/simulation-tensorflow))
@@ -160,7 +160,7 @@ Other [examples](https://github.com/adap/flower/tree/main/examples):
 Flower is built by a wonderful community of researchers and engineers. [Join Slack](https://flower.ai/join-slack) to meet them, [contributions](#contributing-to-flower) are welcome.
 
 <a href="https://github.com/adap/flower/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=adap/flower" />
+  <img src="https://contrib.rocks/image?repo=adap/flower&columns=10" />
 </a>
 
 ## Citation
