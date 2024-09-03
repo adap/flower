@@ -133,7 +133,7 @@ class ClientApp:
         else:
             # Warn ClientApp doesn't specify a client_fn
             warn_preview_feature(
-                "Defining a `ClientApp` without passing a `client_fn` is an "
+                "Using a `ClientApp` that doesn't make use of a `client_fn` is an "
                 "experimental feature."
             )
 
