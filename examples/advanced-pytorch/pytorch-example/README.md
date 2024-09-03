@@ -2,7 +2,7 @@
 
 This example shows how to extend your `ClientApp` and `ServerApp` capabilities compares to what's shown in the [quickstart-pytorch](<>) example. This example show how to use the `ClientApp`'s state (and object of type [RecordSet](https://flower.ai/docs/framework/ref-api/flwr.common.RecordSet.html)) to enable stateful clients, facilitating the design of personalization featuers, among other. The `ServerApp` in this example makes use of a custom strategy derived from the built-in [FedAvg](https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedAvg.html). It showcases how to save model checkpoints, save the metrics available at the strategy (e.g. accuracies, losses), and how to log to [Weight&Biases](https://wandb.ai/site).
 
-> \[NOTE\]
+> \[!NOTE\]
 > By default this example will log metrics to Weight&Biases.For this, you need to ensure your your system has logged in. Often it's as simple as executing `wandb login` on the terminal. Refer to this [quickstart guide](https://docs.wandb.ai/quickstart#2-log-in-to-wb) for more information.
 >
 > If you wish not to use Weights&Biases set `use-wandb = false` in the `pyproject.toml`.
