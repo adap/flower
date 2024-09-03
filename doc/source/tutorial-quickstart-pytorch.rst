@@ -1,3 +1,5 @@
+:og:title: Quickstart Federated Learning Tutorial with PyTorch and Flower
+:og:description: Check out this Federated Learning quickstart tutorial for using Flower with PyTorch to train a CNN model on MNIST.
 .. _quickstart-pytorch:
 
 ####################
@@ -376,6 +378,8 @@ learning system.
    The video shown below shows how to setup a PyTorch + Flower project
    using our previously recommended APIs. A new video tutorial will be
    released that shows the new APIs (as the content above does)
+
+.. title:: Quickstart Federated Learning Tutorial with PyTorch and Flower
 
 .. meta::
    :description: Check out this Federated Learning quickstart tutorial for using Flower with PyTorch to train a CNN model on MNIST.

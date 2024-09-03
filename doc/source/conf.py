@@ -122,7 +122,6 @@ extensions = [
     "nbsphinx",
     "sphinx_click",
     "sphinx_substitution_extensions",
-    "sphinxext.opengraph",
 ]
 
 # Generate .rst files
