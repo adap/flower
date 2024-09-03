@@ -2,18 +2,16 @@
 
 import json
 from datetime import datetime
-from pathlib import Path
 from logging import INFO
+from pathlib import Path
 
 import torch
-from pathlib import Path
-from flwr.common import parameters_to_ndarrays, logger
-from flwr.server.strategy import FedAvg
-from flwr.common.typing import UserConfig
-
+import wandb
 from pytorch_example.task import Net, set_weights
 
-import wandb
+from flwr.common import logger, parameters_to_ndarrays
+from flwr.common.typing import UserConfig
+from flwr.server.strategy import FedAvg
 
 PROJECT_NAME = "FLOWER-advanced-pytorch"
 

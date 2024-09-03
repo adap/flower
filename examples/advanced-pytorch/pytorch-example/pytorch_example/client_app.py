@@ -2,18 +2,10 @@
 
 import torch
 import torch.nn as nn
-from flwr.client import NumPyClient, ClientApp
-from flwr.common import array_from_numpy
-from flwr.common import Context, RecordSet, ParametersRecord
+from pytorch_example.task import Net, get_weights, load_data, set_weights, test, train
 
-from pytorch_example.task import (
-    Net,
-    load_data,
-    get_weights,
-    set_weights,
-    train,
-    test,
-)
+from flwr.client import ClientApp, NumPyClient
+from flwr.common import Context, ParametersRecord, RecordSet, array_from_numpy
 
 
 # Define Flower Client and client_fn

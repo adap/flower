@@ -1,19 +1,19 @@
 """pytorch-example: A Flower / PyTorch app."""
 
 import torch
-from datasets import load_dataset
-from torch.utils.data import DataLoader
-from flwr.common import Context, ndarrays_to_parameters
-from flwr.server import ServerApp, ServerAppComponents, ServerConfig
-
+from pytorch_example.strategy import CustomFedAvg
 from pytorch_example.task import (
     Net,
+    apply_eval_transforms,
     get_weights,
     set_weights,
     test,
-    apply_eval_transforms,
 )
-from pytorch_example.strategy import CustomFedAvg
+from torch.utils.data import DataLoader
+
+from datasets import load_dataset
+from flwr.common import Context, ndarrays_to_parameters
+from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 
 
 def gen_evaluate_fn(

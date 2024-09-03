@@ -5,16 +5,16 @@ from collections import OrderedDict
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import DirichletPartitioner
 from torch.utils.data import DataLoader
 from torchvision.transforms import (
     Compose,
     Normalize,
-    ToTensor,
     RandomCrop,
     RandomHorizontalFlip,
+    ToTensor,
 )
-from flwr_datasets import FederatedDataset
-from flwr_datasets.partitioner import DirichletPartitioner
 
 FM_NORMALIZATION = ((0.1307,), (0.3081,))
 EVAL_TRANSFORMS = Compose([ToTensor(), Normalize(*FM_NORMALIZATION)])
