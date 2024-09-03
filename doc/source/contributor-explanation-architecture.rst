@@ -1,6 +1,8 @@
 Flower Architecture
 ===================
 
+This document provides an overview of the Flower architecture. The architecture is designed to be modular and flexible, and can use two different types of engines: Edge Client Engine (ECE) and Virtual Client Engine (VCE).
+
 Edge Client Engine
 ------------------
 
