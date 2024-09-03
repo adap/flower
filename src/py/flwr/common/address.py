@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower IP address utils."""
 
+import socket
 from ipaddress import ip_address
 from typing import Optional, Tuple
 
@@ -57,3 +58,45 @@ def parse_address(address: str) -> Optional[Tuple[str, int, Optional[bool]]]:
 
     except ValueError:
         return None
+
+
+def is_port_in_use(address: str) -> bool:
+    """Check if the port specified in address is in use.
+
+    Parameters
+    ----------
+    address : str
+        The string representation of a domain, an IPv4, or an IPV6 address
+        with the port number.
+
+        For example, '127.0.0.1:8080', or `[::1]:8080`.
+
+    Returns
+    -------
+    bool
+        If the port provided is in use or can't be parsed,
+        the function will return True, otherwise it will return False.
+    """
+    parsed_address = parse_address(address)
+    if not parsed_address:
+        return True
+    host, port, is_v6 = parsed_address
+
+    if is_v6:
+        protocol = socket.AF_INET6
+    else:
+        protocol = socket.AF_INET
+
+    with socket.socket(protocol, socket.SOCK_STREAM) as s:
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        try:
+            if is_v6:
+                # For IPv6, provide `flowinfo` and `scopeid` as 0
+                s.bind((host, port, 0, 0))
+            else:
+                # For IPv4
+                s.bind((host, port))
+        except OSError:
+            return True
+
+        return False

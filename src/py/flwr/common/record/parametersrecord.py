@@ -83,11 +83,93 @@ def _check_value(value: Array) -> None:
 
 
 class ParametersRecord(TypedDict[str, Array]):
-    """Parameters record.
+    r"""Parameters record.
 
     A dataclass storing named Arrays in order. This means that it holds entries as an
     OrderedDict[str, Array]. ParametersRecord objects can be viewed as an equivalent to
-    PyTorch's state_dict, but holding serialised tensors instead.
+    PyTorch's state_dict, but holding serialised tensors instead. A
+    :code:`ParametersRecord`  is one of the types of records that a
+    `flwr.common.RecordSet <flwr.common.RecordSet.html#recordset>`_ supports and
+    can therefore be used to construct :code:`common.Message` objects.
+
+    Parameters
+    ----------
+    array_dict : Optional[OrderedDict[str, Array]]
+        A dictionary that stores serialized array-like or tensor-like objects.
+    keep_input : bool (default: False)
+        A boolean indicating whether parameters should be deleted from the input
+        dictionary immediately after adding them to the record. If False, the
+        dictionary passed to `set_parameters()` will be empty once exiting from that
+        function. This is the desired behaviour when working with very large
+        models/tensors/arrays. However, if you plan to continue working with your
+        parameters after adding it to the record, set this flag to True. When set
+        to True, the data is duplicated in memory.
+
+    Examples
+    --------
+    The usage of :code:`ParametersRecord` is envisioned for storing data arrays (e.g.
+    parameters of a machine learning model). These first need to be serialized into
+    a :code:`flwr.common.Array` data structure.
+
+    Let's see some examples:
+
+    >>> import numpy as np
+    >>> from flwr.common import ParametersRecord
+    >>> from flwr.common import array_from_numpy
+    >>>
+    >>> # Let's create a simple NumPy array
+    >>> arr_np = np.random.randn(3, 3)
+    >>>
+    >>> # If we print it
+    >>> array([[-1.84242409, -1.01539537, -0.46528405],
+    >>>      [ 0.32991896,  0.55540414,  0.44085534],
+    >>>      [-0.10758364,  1.97619858, -0.37120501]])
+    >>>
+    >>> # Let's create an Array out of it
+    >>> arr = array_from_numpy(arr_np)
+    >>>
+    >>> # If we print it you'll see (note the binary data)
+    >>> Array(dtype='float64', shape=[3,3], stype='numpy.ndarray', data=b'@\x99\x18...')
+    >>>
+    >>> # Adding it to a ParametersRecord:
+    >>> p_record = ParametersRecord({"my_array": arr})
+
+    Now that the NumPy array is embedded into a :code:`ParametersRecord` it could be
+    sent if added as part of a :code:`common.Message` or it could be saved as a
+    persistent state of a :code:`ClientApp` via its context. Regardless of the usecase,
+    we will sooner or later want to recover the array in its original NumPy
+    representation. For the example above, where the array was serialized using the
+    built-in utility function, deserialization can be done as follows:
+
+    >>> # Use the Array's built-in method
+    >>> arr_np_d = arr.numpy()
+    >>>
+    >>> # If printed, it will show the exact same data as above:
+    >>> array([[-1.84242409, -1.01539537, -0.46528405],
+    >>>      [ 0.32991896,  0.55540414,  0.44085534],
+    >>>      [-0.10758364,  1.97619858, -0.37120501]])
+
+    If you need finer control on how your arrays are serialized and deserialized, you
+    can construct :code:`Array` objects directly like this:
+
+    >>> from flwr.common import Array
+    >>> # Serialize your array and construct Array object
+    >>> arr = Array(
+    >>>         data=ndarray.tobytes(),
+    >>>         dtype=str(ndarray.dtype),
+    >>>         stype="",  # Could be used in a deserialization function
+    >>>         shape=list(ndarray.shape),
+    >>>       )
+    >>>
+    >>> # Then you can deserialize it like this
+    >>> arr_np_d = np.frombuffer(
+    >>>             buffer=array.data,
+    >>>             dtype=array.dtype,
+    >>>            ).reshape(array.shape)
+
+    Note that different arrays (e.g. from PyTorch, Tensorflow) might require different
+    serialization mechanism. Howerver, they often support a conversion to NumPy,
+    therefore allowing to use the same or similar steps as in the example above.
     """
 
     def __init__(
@@ -95,21 +177,6 @@ class ParametersRecord(TypedDict[str, Array]):
         array_dict: Optional[OrderedDict[str, Array]] = None,
         keep_input: bool = False,
     ) -> None:
-        """Construct a ParametersRecord object.
-
-        Parameters
-        ----------
-        array_dict : Optional[OrderedDict[str, Array]]
-            A dictionary that stores serialized array-like or tensor-like objects.
-        keep_input : bool (default: False)
-            A boolean indicating whether parameters should be deleted from the input
-            dictionary immediately after adding them to the record. If False, the
-            dictionary passed to `set_parameters()` will be empty once exiting from that
-            function. This is the desired behaviour when working with very large
-            models/tensors/arrays. However, if you plan to continue working with your
-            parameters after adding it to the record, set this flag to True. When set
-            to True, the data is duplicated in memory.
-        """
         super().__init__(_check_key, _check_value)
         if array_dict:
             for k in list(array_dict.keys()):
