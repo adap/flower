@@ -9,7 +9,7 @@ seed = 0
 server-device = "cuda"
 num-server-rounds = 200
 
-dataset-name = "uoft-cs/cifar10"
+dataset-name = "uoft-cs/cifar100"
 dataset-partition-by = "fine_label"
 dirichlet-alpha = 0.5
 
