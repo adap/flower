@@ -34,6 +34,7 @@ from cryptography.hazmat.primitives.serialization import (
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
+from flwr.common.config import get_flwr_dir
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
     TRANSPORT_TYPE_GRPC_ADAPTER,
@@ -57,6 +58,7 @@ from .server import Server, init_defaults, run_fl
 from .server_config import ServerConfig
 from .strategy import Strategy
 from .superlink.driver.driver_grpc import run_driver_api_grpc
+from .superlink.ffs.ffs_factory import FfsFactory
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
 from .superlink.fleet.grpc_bidi.grpc_server import (
     generic_create_grpc_server,
@@ -72,6 +74,7 @@ ADDRESS_FLEET_API_GRPC_BIDI = "[::]:8080"  # IPv6 to keep start_server compatibl
 ADDRESS_FLEET_API_REST = "0.0.0.0:9093"
 
 DATABASE = ":flwr-in-memory-state:"
+BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
 
 
 def start_server(  # pylint: disable=too-many-arguments,too-many-locals
@@ -211,10 +214,14 @@ def run_superlink() -> None:
     # Initialize StateFactory
     state_factory = StateFactory(args.database)
 
+    # Initialize FfsFactory
+    ffs_factory = FfsFactory(args.storage_dir)
+
     # Start Driver API
     driver_server: grpc.Server = run_driver_api_grpc(
         address=driver_address,
         state_factory=state_factory,
+        ffs_factory=ffs_factory,
         certificates=certificates,
     )
 
@@ -264,36 +271,38 @@ def run_superlink() -> None:
                 ssl_keyfile,
                 ssl_certfile,
                 state_factory,
+                ffs_factory,
                 num_workers,
             ),
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
     elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE:
-        maybe_keys = _try_setup_client_authentication(args, certificates)
+        maybe_keys = _try_setup_node_authentication(args, certificates)
         interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None
         if maybe_keys is not None:
             (
-                client_public_keys,
+                node_public_keys,
                 server_private_key,
                 server_public_key,
             ) = maybe_keys
             state = state_factory.state()
-            state.store_client_public_keys(client_public_keys)
+            state.store_node_public_keys(node_public_keys)
             state.store_server_private_public_key(
                 private_key_to_bytes(server_private_key),
                 public_key_to_bytes(server_public_key),
             )
             log(
                 INFO,
-                "Client authentication enabled with %d known public keys",
-                len(client_public_keys),
+                "Node authentication enabled with %d known public keys",
+                len(node_public_keys),
             )
             interceptors = [AuthenticateServerInterceptor(state)]
 
         fleet_server = _run_fleet_api_grpc_rere(
             address=fleet_address,
             state_factory=state_factory,
+            ffs_factory=ffs_factory,
             certificates=certificates,
             interceptors=interceptors,
         )
@@ -302,6 +311,7 @@ def run_superlink() -> None:
         fleet_server = _run_fleet_api_grpc_adapter(
             address=fleet_address,
             state_factory=state_factory,
+            ffs_factory=ffs_factory,
             certificates=certificates,
         )
         grpc_servers.append(fleet_server)
@@ -334,7 +344,7 @@ def _format_address(address: str) -> Tuple[str, str, int]:
     return (f"[{host}]:{port}" if is_v6 else f"{host}:{port}", host, port)
 
 
-def _try_setup_client_authentication(
+def _try_setup_node_authentication(
     args: argparse.Namespace,
     certificates: Optional[Tuple[bytes, bytes, bytes]],
 ) -> Optional[Tuple[Set[bytes], ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
@@ -363,16 +373,16 @@ def _try_setup_client_authentication(
             "`--ssl-keyfile`, and `—-ssl-ca-certfile` and try again."
         )
 
-    client_keys_file_path = Path(args.auth_list_public_keys)
-    if not client_keys_file_path.exists():
+    node_keys_file_path = Path(args.auth_list_public_keys)
+    if not node_keys_file_path.exists():
         sys.exit(
             "The provided path to the known public keys CSV file does not exist: "
-            f"{client_keys_file_path}. "
+            f"{node_keys_file_path}. "
             "Please provide the CSV file path containing known public keys "
             "to '--auth-list-public-keys'."
         )
 
-    client_public_keys: Set[bytes] = set()
+    node_public_keys: Set[bytes] = set()
 
     try:
         ssh_private_key = load_ssh_private_key(
@@ -403,13 +413,13 @@ def _try_setup_client_authentication(
             "path points to a valid public key file and try again."
         )
 
-    with open(client_keys_file_path, newline="", encoding="utf-8") as csvfile:
+    with open(node_keys_file_path, newline="", encoding="utf-8") as csvfile:
         reader = csv.reader(csvfile)
         for row in reader:
             for element in row:
                 public_key = load_ssh_public_key(element.encode())
                 if isinstance(public_key, ec.EllipticCurvePublicKey):
-                    client_public_keys.add(public_key_to_bytes(public_key))
+                    node_public_keys.add(public_key_to_bytes(public_key))
                 else:
                     sys.exit(
                         "Error: Unable to parse the public keys in the CSV "
@@ -417,7 +427,7 @@ def _try_setup_client_authentication(
                         "known SSH public keys files and try again."
                     )
         return (
-            client_public_keys,
+            node_public_keys,
             ssh_private_key,
             ssh_public_key,
         )
@@ -480,6 +490,7 @@ def _try_obtain_certificates(
 def _run_fleet_api_grpc_rere(
     address: str,
     state_factory: StateFactory,
+    ffs_factory: FfsFactory,
     certificates: Optional[Tuple[bytes, bytes, bytes]],
     interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None,
 ) -> grpc.Server:
@@ -487,6 +498,7 @@ def _run_fleet_api_grpc_rere(
     # Create Fleet API gRPC server
     fleet_servicer = FleetServicer(
         state_factory=state_factory,
+        ffs_factory=ffs_factory,
     )
     fleet_add_servicer_to_server_fn = add_FleetServicer_to_server
     fleet_grpc_server = generic_create_grpc_server(
@@ -506,12 +518,14 @@ def _run_fleet_api_grpc_rere(
 def _run_fleet_api_grpc_adapter(
     address: str,
     state_factory: StateFactory,
+    ffs_factory: FfsFactory,
     certificates: Optional[Tuple[bytes, bytes, bytes]],
 ) -> grpc.Server:
     """Run Fleet API (GrpcAdapter)."""
     # Create Fleet API gRPC server
     fleet_servicer = GrpcAdapterServicer(
         state_factory=state_factory,
+        ffs_factory=ffs_factory,
     )
     fleet_add_servicer_to_server_fn = add_GrpcAdapterServicer_to_server
     fleet_grpc_server = generic_create_grpc_server(
@@ -534,6 +548,7 @@ def _run_fleet_api_rest(
     ssl_keyfile: Optional[str],
     ssl_certfile: Optional[str],
     state_factory: StateFactory,
+    ffs_factory: FfsFactory,
     num_workers: int,
 ) -> None:
     """Run Driver API (REST-based)."""
@@ -548,6 +563,7 @@ def _run_fleet_api_rest(
 
     # See: https://www.starlette.io/applications/#accessing-the-app-instance
     fast_api_app.state.STATE_FACTORY = state_factory
+    fast_api_app.state.FFS_FACTORY = ffs_factory
 
     uvicorn.run(
         app="flwr.server.superlink.fleet.rest_rere.rest_api:app",
@@ -609,6 +625,11 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         "instead of on disk. If nothing is provided, "
         "Flower will just create a state in memory.",
         default=DATABASE,
+    )
+    parser.add_argument(
+        "--storage-dir",
+        help="The base directory to store the objects for the Flower File System.",
+        default=BASE_DIR,
     )
     parser.add_argument(
         "--auth-list-public-keys",

@@ -29,7 +29,7 @@ copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = "1.11.0"
+release = "1.12.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -66,6 +66,8 @@ redirects = {
     "quickstart-mxnet": "index.html",
     "mxnet-from-centralized-to-federated": "index.html",
     "app-secure-aggregation": "flower-secure-aggregation.html",
+    "llm-flowertune": "flowertune-llm.html",
+    "vit-finetune": "flowertune-vit.html",
 }
 
 
