@@ -96,7 +96,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    how-to-use-built-in-mods
    how-to-use-differential-privacy
    how-to-authenticate-supernodes
-   how-to-run-flower-using-docker
+   docker/index
    how-to-upgrade-to-flower-1.0
    how-to-upgrade-to-flower-next
 
@@ -105,7 +105,6 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    :caption: Legacy example guides
 
    example-pytorch-from-centralized-to-federated
-   example-jax-from-centralized-to-federated
    example-fedbn-pytorch-from-centralized-to-federated
 
 Explanations

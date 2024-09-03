@@ -29,11 +29,11 @@ BackendConfig = Dict[str, Dict[str, ConfigsRecordValues]]
 class Backend(ABC):
     """Abstract base class for a Simulation Engine Backend."""
 
-    def __init__(self, backend_config: BackendConfig, work_dir: str) -> None:
+    def __init__(self, backend_config: BackendConfig) -> None:
         """Construct a backend."""
 
     @abstractmethod
-    def build(self) -> None:
+    def build(self, app_fn: Callable[[], ClientApp]) -> None:
         """Build backend.
 
         Different components need to be in place before workers in a backend are ready
@@ -60,7 +60,6 @@ class Backend(ABC):
     @abstractmethod
     def process_message(
         self,
-        app: Callable[[], ClientApp],
         message: Message,
         context: Context,
     ) -> Tuple[Message, Context]:

@@ -34,14 +34,15 @@ from ..utils import (
 class MlFramework(str, Enum):
     """Available frameworks."""
 
-    NUMPY = "NumPy"
     PYTORCH = "PyTorch"
     TENSORFLOW = "TensorFlow"
-    JAX = "JAX"
-    HUGGINGFACE = "HuggingFace"
-    MLX = "MLX"
     SKLEARN = "sklearn"
+    HUGGINGFACE = "HuggingFace"
+    JAX = "JAX"
+    MLX = "MLX"
+    NUMPY = "NumPy"
     FLOWERTUNE = "FlowerTune"
+    BASELINE = "Flower Baseline"
 
 
 class LlmChallengeName(str, Enum):
@@ -92,9 +93,9 @@ def render_and_create(file_path: Path, template: str, context: Dict[str, str]) -
 
 # pylint: disable=too-many-locals,too-many-branches,too-many-statements
 def new(
-    project_name: Annotated[
+    app_name: Annotated[
         Optional[str],
-        typer.Argument(metavar="project_name", help="The name of the project"),
+        typer.Argument(help="The name of the Flower App"),
     ] = None,
     framework: Annotated[
         Optional[MlFramework],
@@ -105,26 +106,26 @@ def new(
         typer.Option(case_sensitive=False, help="The Flower username of the author"),
     ] = None,
 ) -> None:
-    """Create new Flower project."""
-    if project_name is None:
-        project_name = prompt_text("Please provide the project name")
-    if not is_valid_project_name(project_name):
-        project_name = prompt_text(
+    """Create new Flower App."""
+    if app_name is None:
+        app_name = prompt_text("Please provide the app name")
+    if not is_valid_project_name(app_name):
+        app_name = prompt_text(
             "Please provide a name that only contains "
             "characters in {'-', a-zA-Z', '0-9'}",
             predicate=is_valid_project_name,
-            default=sanitize_project_name(project_name),
+            default=sanitize_project_name(app_name),
         )
 
     # Set project directory path
-    package_name = re.sub(r"[-_.]+", "-", project_name).lower()
+    package_name = re.sub(r"[-_.]+", "-", app_name).lower()
     import_name = package_name.replace("-", "_")
     project_dir = Path.cwd() / package_name
 
     if project_dir.exists():
         if not typer.confirm(
             typer.style(
-                f"\n💬 {project_name} already exists, do you want to override it?",
+                f"\n💬 {app_name} already exists, do you want to override it?",
                 fg=typer.colors.MAGENTA,
                 bold=True,
             )
@@ -135,20 +136,20 @@ def new(
         username = prompt_text("Please provide your Flower username")
 
     if framework is not None:
-        framework_str = str(framework.value)
+        framework_str_upper = str(framework.value)
     else:
         framework_value = prompt_options(
             "Please select ML framework by typing in the number",
-            sorted([mlf.value for mlf in MlFramework]),
+            [mlf.value for mlf in MlFramework],
         )
         selected_value = [
             name
             for name, value in vars(MlFramework).items()
             if value == framework_value
         ]
-        framework_str = selected_value[0]
+        framework_str_upper = selected_value[0]
 
-    framework_str = framework_str.lower()
+    framework_str = framework_str_upper.lower()
 
     llm_challenge_str = None
     if framework_str == "flowertune":
@@ -164,18 +165,21 @@ def new(
         llm_challenge_str = selected_value[0]
         llm_challenge_str = llm_challenge_str.lower()
 
+    is_baseline_project = framework_str == "baseline"
+
     print(
         typer.style(
-            f"\n🔨 Creating Flower project {project_name}...",
+            f"\n🔨 Creating Flower App {app_name}...",
             fg=typer.colors.GREEN,
             bold=True,
         )
     )
 
     context = {
-        "project_name": project_name,
-        "package_name": package_name,
+        "framework_str": framework_str_upper,
         "import_name": import_name.replace("-", "_"),
+        "package_name": package_name,
+        "project_name": app_name,
         "username": username,
     }
 
@@ -186,24 +190,20 @@ def new(
             "pyproject.toml": {"template": f"app/pyproject.{framework_str}.toml.tpl"},
             "README.md": {"template": f"app/README.{framework_str}.md.tpl"},
             f"{import_name}/__init__.py": {"template": "app/code/__init__.py.tpl"},
-            f"{import_name}/server.py": {
-                "template": "app/code/flwr_tune/server.py.tpl"
+            f"{import_name}/server_app.py": {
+                "template": "app/code/flwr_tune/server_app.py.tpl"
             },
-            f"{import_name}/client.py": {
-                "template": "app/code/flwr_tune/client.py.tpl"
+            f"{import_name}/client_app.py": {
+                "template": "app/code/flwr_tune/client_app.py.tpl"
             },
-            f"{import_name}/app.py": {"template": "app/code/flwr_tune/app.py.tpl"},
             f"{import_name}/models.py": {
                 "template": "app/code/flwr_tune/models.py.tpl"
             },
             f"{import_name}/dataset.py": {
                 "template": "app/code/flwr_tune/dataset.py.tpl"
             },
-            f"{import_name}/conf/config.yaml": {
-                "template": "app/code/flwr_tune/config.yaml.tpl"
-            },
-            f"{import_name}/conf/static_config.yaml": {
-                "template": "app/code/flwr_tune/static_config.yaml.tpl"
+            f"{import_name}/strategy.py": {
+                "template": "app/code/flwr_tune/strategy.py.tpl"
             },
         }
 
@@ -258,6 +258,21 @@ def new(
                 "template": f"app/code/task.{framework_str}.py.tpl"
             }
 
+        if is_baseline_project:
+            # Include additional files for baseline template
+            for file_name in ["model", "dataset", "strategy", "utils", "__init__"]:
+                files[f"{import_name}/{file_name}.py"] = {
+                    "template": f"app/code/{file_name}.{framework_str}.py.tpl"
+                }
+
+            # Replace README.md
+            files["README.md"]["template"] = f"app/README.{framework_str}.md.tpl"
+
+            # Add LICENSE
+            files["LICENSE"] = {"template": "app/LICENSE.tpl"}
+
+            context["framework_str"] = "baseline"
+
     for file_path, value in files.items():
         render_and_create(
             file_path=project_dir / file_path,
@@ -267,8 +282,8 @@ def new(
 
     print(
         typer.style(
-            "🎊 Project creation successful.\n\n"
-            "Use the following command to run your project:\n",
+            "🎊 Flower App creation successful.\n\n"
+            "Use the following command to run your Flower App:\n",
             fg=typer.colors.GREEN,
             bold=True,
         )
