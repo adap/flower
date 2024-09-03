@@ -90,10 +90,10 @@ copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version of the next release, including alpha/beta/rc tags
-release = "1.11.0"
+release = "1.12.0"
 # The current released version
 rst_prolog = """
-.. |stable_flwr_version| replace:: 1.10.0
+.. |stable_flwr_version| replace:: 1.11.0
 .. |stable_flwr_superlink_docker_digest| replace:: 4b317d5b6030710b476f4dbfab2c3a33021ad40a0fcfa54d7edd45e0c51d889c
 .. |ubuntu_version| replace:: 22.04
 .. |setuptools_version| replace:: 70.3.0
@@ -195,7 +195,6 @@ redirects = {
     "apiref-binaries": "ref-api-cli.html",
     "fedbn-example-pytorch-from-centralized-to-federated": "example-fedbn-pytorch-from-centralized-to-federated.html",
     "how-to-use-built-in-middleware-layers": "how-to-use-built-in-mods.html",
-    "vit-finetune": "flowertune-vit.html",
     # Restructuring: tutorials
     "tutorial/Flower-0-What-is-FL": "tutorial-series-what-is-federated-learning.html",
     "tutorial/Flower-1-Intro-to-FL-PyTorch": "tutorial-series-get-started-with-flower-pytorch.html",
@@ -265,6 +264,7 @@ redirects = {
     "example-mxnet-walk-through": "index.html",
     "ref-api/flwr.simulation.run_simulation_from_cli": "index.html",
     "contributor-how-to-create-new-messages": "index.html",
+    "example-jax-from-centralized-to-federated": "tutorial-quickstart-jax.html",
 }
 
 # -- Options for HTML output -------------------------------------------------
