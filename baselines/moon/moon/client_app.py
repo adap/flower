@@ -58,11 +58,12 @@ class FlowerClient(NumPyClient):
     ) -> Tuple[NDArrays, int, Dict]:
         """Implement distributed fit function for a given client."""
         self.set_parameters(parameters)
-        prev_net = init_net(self.dataset, self.model, self.output_dim)
-        # If `prev_net` key found in this client's state (meaning this is not the first
-        # time this client is participating), use the previously saved parameters
-        if self.local_model_name in self.client_state.parameters_records:
-            self.load_model_from_context(prev_net)
+        if self.alg == "moon":
+            prev_net = init_net(self.dataset, self.model, self.output_dim)
+            # If `prev_net` key found in this client's state (meaning this is not the
+            # first time this client participates), use the previously saved parameters
+            if self.local_model_name in self.client_state.parameters_records:
+                self.load_model_from_context(prev_net)
 
         global_net = init_net(self.dataset, self.model, self.output_dim)
         global_net.load_state_dict(self.net.state_dict())
@@ -88,9 +89,10 @@ class FlowerClient(NumPyClient):
                 self.mu,
                 self.device,
             )
-        # Save current model parameters so they can be used next time
-        # this client is sampled to participate in a round
-        self.save_local_model_to_context()
+        if self.alg == "moon":
+            # Save current model parameters so they can be used next time
+            # this client is sampled to participate in a round
+            self.save_local_model_to_context()
         return self.get_parameters({}), len(self.trainloader), {"is_straggler": False}
 
     def save_local_model_to_context(self) -> None:
@@ -131,6 +133,7 @@ def client_fn(context: Context) -> Client:
             num_partitions=context.node_config["num-partitions"],
             alpha=context.run_config["dirichlet-alpha"],
             partition_by=partition_by,
+            seed=int(context.run_config["seed"]),
         )
         FDS = FederatedDataset(
             dataset=dataset_name,
@@ -139,6 +142,7 @@ def client_fn(context: Context) -> Client:
 
     partition_id = int(context.node_config["partition-id"])
     train_partition = FDS.load_partition(partition_id=partition_id)
+    train_partition.set_format("torch")
 
     train_transforms, _ = get_data_transforms(dataset_name=dataset_name)
     transforms_fn = get_transforms_apply_fn(train_transforms, partition_by)

@@ -379,7 +379,6 @@ def train_moon(  # pylint: disable=too-many-locals
     net.to(device)
     global_net.to(device)
     previous_net.to(device)
-    train_acc, _ = compute_accuracy(net, train_dataloader, device=device)
     optimizer = optim.SGD(
         filter(lambda p: p.requires_grad, net.parameters()),
         lr=lr,
@@ -452,8 +451,6 @@ def train_fedprox(net, global_net, train_dataloader, epochs, lr, mu, device):
     """Training function for FedProx."""
     net = nn.DataParallel(net)
     net.to(device)
-
-    train_acc, _ = compute_accuracy(net, train_dataloader, device=device)
 
     optimizer = optim.SGD(
         filter(lambda p: p.requires_grad, net.parameters()),

@@ -45,7 +45,7 @@ def gen_evaluate_fn(
         accuracy, loss = test(net, testloader, device=device)
 
         # Append results
-        with open(f"{run_dir}/{RESULTS_FILE}", "a") as f:
+        with open(f"{run_dir}/{RESULTS_FILE}", "a", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow([server_round, loss, accuracy])
 
@@ -63,12 +63,12 @@ def create_run_dir(config: UserConfig) -> Path:
     save_path.mkdir(parents=True, exist_ok=False)
 
     # Save run config as json
-    with open(f"{save_path}/run_config.json", "w") as fp:
+    with open(f"{save_path}/run_config.json", "w", encoding="utf-8") as fp:
         json.dump(config, fp)
 
     # Prepare results.csv
     fields = ["round", "loss", "acc"]
-    with open(f"{save_path}/{RESULTS_FILE}", "w") as f:
+    with open(f"{save_path}/{RESULTS_FILE}", "w", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(fields)
 
