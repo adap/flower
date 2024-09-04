@@ -26,7 +26,7 @@ def create_run_dir(config: UserConfig) -> Path:
     save_path.mkdir(parents=True, exist_ok=False)
 
     # Save run config as json
-    with open(f"{save_path}/run_config.json", "w") as fp:
+    with open(f"{save_path}/run_config.json", "w", encoding="utf-8") as fp:
         json.dump(config, fp)
 
     return save_path, run_dir
@@ -68,11 +68,11 @@ class CustomFedAvg(FedAvg):
         else:
             self.results[tag] = [results_dict]
 
-        # Save results to disk
-        # Note we overwrite the same file with each call to this function
-        # While this works, a more sophisticated approache is preferred
-        # in situations where the contents to be saved are larger
-        with open(f"{self.save_path}/results.json", "w") as fp:
+        # Save results to disk.
+        # Note we overwrite the same file with each call to this function.
+        # While this works, a more sophisticated approach is preferred
+        # in situations where the contents to be saved are larger.
+        with open(f"{self.save_path}/results.json", "w", encoding="utf-8") as fp:
             json.dump(self.results, fp)
 
     def _update_best_acc(self, round, accuracy, parameters):
@@ -83,14 +83,14 @@ class CustomFedAvg(FedAvg):
         if accuracy > self.best_acc_so_far:
             self.best_acc_so_far = accuracy
             logger.log(INFO, "💡 New best global model found: %f", accuracy)
-            # You could save the parameters object directly
-            # instead we are going to apply them to a PyTorch
-            # model and save the state dict
+            # You could save the parameters object directly.
+            # Instead we are going to apply them to a PyTorch
+            # model and save the state dict.
             # Converts flwr.common.Parameters to ndarrays
             ndarrays = parameters_to_ndarrays(parameters)
             model = Net()
             set_weights(model, ndarrays)
-            # now we can save the pytorch model.
+            # Save the PyTorch model
             file_name = f"model_state_acc_{accuracy}_round_{round}.pth"
             torch.save(model.state_dict(), self.save_path / file_name)
 
@@ -103,11 +103,11 @@ class CustomFedAvg(FedAvg):
         )
 
         if self.use_wandb:
-            # Log to W&B centralised loss and metrics
+            # Log centralized loss and metrics to W&B
             wandb.log(results_dict, step=server_round)
 
     def evaluate(self, server_round, parameters):
-        """Run centralised evaluation if callback was passed to strategy init."""
+        """Run centralized evaluation if callback was passed to strategy init."""
         loss, metrics = super().evaluate(server_round, parameters)
 
         # Save model if new best central accuracy is found

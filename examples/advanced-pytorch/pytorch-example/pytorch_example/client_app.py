@@ -1,7 +1,6 @@
 """pytorch-example: A Flower / PyTorch app."""
 
 import torch
-import torch.nn as nn
 from pytorch_example.task import Net, get_weights, load_data, set_weights, test, train
 
 from flwr.client import ClientApp, NumPyClient
@@ -12,7 +11,7 @@ from flwr.common import Context, ParametersRecord, RecordSet, array_from_numpy
 class FlowerClient(NumPyClient):
     """A simple client that showcases how to use the state.
 
-    It implements a basic version of `personalisation` by which
+    It implements a basic version of `personalization` by which
     the classification layer of the CNN is stored locally and used
     and updated during `fit()` and used during `evaluate()`.
     """
@@ -108,7 +107,7 @@ def client_fn(context: Context):
     local_epochs = context.run_config["local-epochs"]
 
     # Return Client instance
-    # We pass the state so to persist information across
+    # We pass the state to persist information across
     # participation rounds. Note that each client always
     # receives the same Context instance (it's a 1:1 mapping)
     client_state = context.state
