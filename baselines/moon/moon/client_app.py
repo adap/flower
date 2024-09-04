@@ -149,6 +149,7 @@ def client_fn(context: Context) -> Client:
     trainloader = DataLoader(
         train_partition.with_transform(transforms_fn),
         batch_size=context.run_config["batch-size"],
+        drop_last=True,
         shuffle=True,
     )
 
