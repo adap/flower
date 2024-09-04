@@ -3,7 +3,6 @@
 > \[!WARNING\]
 > This example uses Flower's low-level API which is in a preview state subject to change.
 
-
 ```shell
 pytorch-pytorch-low-level
 ├── pytorch_example_low_level
@@ -23,7 +22,6 @@ Install the dependencies defined in `pyproject.toml` as well as the `pytorch_exa
 ```bash
 pip install -e .
 ```
-
 
 ## Run the project
 

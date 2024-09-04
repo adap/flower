@@ -49,7 +49,7 @@ def main(driver: Driver, context: Context) -> None:
         node_ids = driver.get_node_ids()
 
         # Sample uniformly
-        num_sample = int(len(node_ids)*fraction_train)
+        num_sample = int(len(node_ids) * fraction_train)
         sampled_node_ids = random.sample(node_ids, num_sample)
         log(INFO, f"Sampled {len(sampled_node_ids)} out of {len(node_ids)} nodes.")
 
