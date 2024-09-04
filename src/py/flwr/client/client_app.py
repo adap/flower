@@ -263,7 +263,7 @@ def _registration_error(fn_name: str) -> ValueError:
         >>> class FlowerClient(NumPyClient):
         >>>     # ...
         >>>
-        >>> def client_fn(cid) -> Client:
+        >>> def client_fn(context: Context):
         >>>     return FlowerClient().to_client()
         >>>
         >>> app = ClientApp(
