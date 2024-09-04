@@ -441,7 +441,7 @@ def train_moon(  # pylint: disable=too-many-locals
     previous_net.to("cpu")
     train_acc, train_loss = compute_accuracy(net, train_dataloader, device=device)
 
-    log(INFO, "ClientApp fineshed training: (acc: %f, loss: %f)", train_acc, train_loss)
+    log(INFO, "ClientApp finished training: (acc: %f, loss: %f)", train_acc, train_loss)
     net.to("cpu")
     global_net.to("cpu")
     return net
@@ -494,7 +494,7 @@ def train_fedprox(net, global_net, train_dataloader, epochs, lr, mu, device):
             epoch_loss_collector.append(loss.item())
 
     train_acc, train_loss = compute_accuracy(net, train_dataloader, device=device)
-    log(INFO, "ClientApp fineshed training: (acc: %f, loss: %f)", train_acc, train_loss)
+    log(INFO, "ClientApp finished training: (acc: %f, loss: %f)", train_acc, train_loss)
     net.to("cpu")
     return net
 
