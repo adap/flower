@@ -32,7 +32,7 @@ class Net(nn.Module):
     """Model (simple CNN adapted for Fashion-MNIST)"""
 
     def __init__(self):
-        super(Net, self).__init__()
+        super().__init__()
         self.conv1 = nn.Conv2d(1, 16, 5)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(16, 32, 5)

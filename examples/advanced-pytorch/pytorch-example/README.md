@@ -1,9 +1,13 @@
 # Federated Learning with PyTorch and Flower (Advanced Example)
 
-This example shows how to extend your `ClientApp` and `ServerApp` capabilities compared to what's shown in the [quickstart-pytorch](<>) example. This example show how to use the `ClientApp`'s state (and object of type [RecordSet](https://flower.ai/docs/framework/ref-api/flwr.common.RecordSet.html)) to enable stateful clients, facilitating the design of personalization features, among other. The `ServerApp` in this example makes use of a custom strategy derived from the built-in [FedAvg](https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedAvg.html). It showcases how to save model checkpoints, save the metrics available at the strategy (e.g. accuracies, losses), and how to log to [Weight&Biases](https://wandb.ai/site).
+This example shows how to extend your `ClientApp` and `ServerApp` capabilities compared to what's shown in the [`quickstart-pytorch`](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch) example. In particular, it will show how the `ClientApp`'s state (and object of type [RecordSet](https://flower.ai/docs/framework/ref-api/flwr.common.RecordSet.html)) can be used to enable stateful clients, facilitating the design of personalized federated learning strategies, among others. The `ServerApp` in this example makes use of a custom strategy derived from the built-in [FedAvg](https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedAvg.html). In addition, it will also showcase how to:
+1. Save model checkpoints
+2. Save the metrics available at the strategy (e.g. accuracies, losses)
+3. Log training artefacts to [Weights & Biases](https://wandb.ai/site)
+4. Implement a simple decaying learning rate schedule across rounds
 
 > \[!NOTE\]
-> By default this example will log metrics to Weight&Biases. For this, you need to ensure your your system has logged in. Often it's as simple as executing `wandb login` on the terminal after installing `wandb`. Please, refer to this [quickstart guide](https://docs.wandb.ai/quickstart#2-log-in-to-wb) for more information.
+> By default this example will log metrics to Weights & Biases. For this, you need to ensure that your system has logged in. Often it's as simple as executing `wandb login` on the terminal after installing `wandb`. Please, refer to this [quickstart guide](https://docs.wandb.ai/quickstart#2-log-in-to-wb) for more information.
 
 ```shell
 pytorch-pytorch
@@ -31,7 +35,7 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 
 When you run the project, the strategy will create a directory structure in the form of `outputs/date/time` and store two `JSON` files: `config.json` containing the `run-config` that the `ServerApp` receives; and `results.json` containing the results (accuracies, losses) that are generated at the strategy.
 
-By default, the metrics: {`centralized_accuracy`, `centralized_loss`, `federated_evaluate_accuracy`, `federated_evaluate_loss`} will be logged to Weight&Biases (they are also stored to the `results.json` previously mentioned). Upon executing `flwr run` you'll see a URL linking to your Weight&Biases dashboard wher you can see the metrics.
+By default, the metrics: {`centralized_accuracy`, `centralized_loss`, `federated_evaluate_accuracy`, `federated_evaluate_loss`} will be logged to Weights & Biases (they are also stored to the `results.json` previously mentioned). Upon executing `flwr run` you'll see a URL linking to your Weight&Biases dashboard wher you can see the metrics.
 
 ![](_static/wandb_plots.png)
 

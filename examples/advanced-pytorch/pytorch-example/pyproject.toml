@@ -12,6 +12,7 @@ dependencies = [
     "flwr-datasets[vision]>=0.3.0",
     "torch==2.2.1",
     "torchvision==0.17.1",
+    "wandb==0.17.8",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -37,6 +38,5 @@ default = "local-simulation"
 
 [tool.flwr.federations.local-simulation]
 options.num-supernodes = 50
-options.backend.client-resources.num-cpus = 2 # each ClientApp assumes to use 2CPUs
+options.backend.client-resources.num-cpus = 2   # each ClientApp assumes to use 2CPUs
 options.backend.client-resources.num-gpus = 0.0 # ratio of VRAM a ClientApp has access to
-
