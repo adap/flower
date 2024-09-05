@@ -9,6 +9,7 @@ from typing import List
 import numpy as np
 import torch
 import torch.nn as nn
+import wandb
 from pytorch_example_low_level.task import (
     Net,
     apply_eval_transforms,
@@ -26,6 +27,7 @@ from flwr.common import ConfigsRecord, Context, Message, MessageType, RecordSet
 from flwr.common.logger import log
 from flwr.server import Driver, ServerApp
 
+PROJECT_NAME = "FLOWER-advanced-pytorch-low-level"
 app = ServerApp()
 
 
@@ -40,6 +42,11 @@ def main(driver: Driver, context: Context) -> None:
 
     # Create run directory and save run-config
     save_path, run_dir = create_run_dir(context.run_config)
+
+    # Initialize Weights & Biases if set
+    use_wandb = context.run_config["use-wandb"]
+    if use_wandb:
+        wandb.init(project=PROJECT_NAME, name=f"{str(run_dir)}-ServerApp")
 
     num_rounds = context.run_config["num-server-rounds"]
     batch_size = context.run_config["batch-size"]
@@ -94,6 +101,7 @@ def main(driver: Driver, context: Context) -> None:
             save_path,
             server_round,
             best_acc_so_far,
+            use_wandb,
             server_device,
         )
 
@@ -124,10 +132,17 @@ def main(driver: Driver, context: Context) -> None:
             f"📊 Federated evaluation -> loss: {losses.mean():.3f}±{losses.std():.3f} / "
             f"accuracy: {accuracies.mean():.3f}±{accuracies.std():.3f}",
         )
+        if use_wandb:
+            # Log federated metrics to W&B
+            metrics = {
+                "federated_accuracy": accuracies.mean(),
+                "federated_loss": losses.mean(),
+            }
+            wandb.log(metrics, step=server_round)
 
 
 def evaluate_global_model_centrally_and_save_results(
-    global_model, testloader, save_dir, serverapp_round, best_acc, device
+    global_model, testloader, save_dir, serverapp_round, best_acc, use_wandb, device
 ) -> float:
     """Evaluate performance of global model on centralized tests set.
 
@@ -139,6 +154,11 @@ def evaluate_global_model_centrally_and_save_results(
         INFO,
         f"💡 Centrally evaluated model -> loss: {loss: .4f} /  accuracy: {accuracy: .4f}",
     )
+
+    if use_wandb:
+        # Log Centralized metrics to W&B
+        metrics = {"centralized_accuracy": accuracy, "centralized_loss": loss}
+        wandb.log(metrics, step=serverapp_round)
 
     if accuracy > best_acc:
         best_acc = accuracy
