@@ -1,4 +1,4 @@
-"""fl_dp_sa: A Flower / PyTorch app."""
+"""fl_dp_sa: Flower Example using Differential Privacy and Secure Aggregation."""
 
 from collections import OrderedDict
 from logging import INFO
@@ -12,6 +12,8 @@ from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+fds = None  # Cache FederatedDataset
 
 
 class Net(nn.Module):

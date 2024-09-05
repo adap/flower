@@ -1,15 +1,14 @@
----
-tags: [basic, vision, fds]
-dataset: [MNIST]
-framework: [torch, torchvision]
----
+______________________________________________________________________
 
-# Example of Flower App with DP and SA
+## tags: \[basic, vision, fds\] dataset: \[MNIST\] framework: \[torch, torchvision\]
 
-This is a simple example that utilizes central differential privacy with client-side fixed clipping and secure aggregation.
-Note: This example is designed for a small number of rounds and is intended for demonstration purposes.
+# Flower Example on MNIST with Differential Privacy and Secure Aggregation
 
-## Project Setup
+This example demonstrates a federated learning setup using the Flower, incorporating central differential privacy (DP) with client-side fixed clipping and secure aggregation (SA). It is intended for a small number of rounds for demonstration purposes.
+
+## Set up the project
+
+### Clone the project
 
 Start by cloning the example project:
 
@@ -21,13 +20,11 @@ This will create a new directory called `fl-dp-sa` containing the following file
 
 ```shell
 fl-dp-sa
-|
-├── fl-dp-sa
-|   ├── __init__.py
-|   ├── client_app.py    # Defines your ClientApp
-|   ├── server_app.py    # Defines your ServerApp
-|   ├── task.py          # Defines your model, training and data loading
-├── pyproject.toml       # Project metadata like dependencies and configs
+├── fldpsa
+│   ├── client_app.py   # Defines your ClientApp
+│   ├── server_app.py   # Defines your ServerApp
+│   └── task.py         # Defines your model, training, and data loading
+├── pyproject.toml      # Project metadata like dependencies and configs
 └── README.md
 ```
 
@@ -35,9 +32,11 @@ fl-dp-sa
 
 Install the dependencies defined in `pyproject.toml` as well as the `fl-dp-sa` package.
 
-```bash
+```shell
+# From a new python environment, run:
 pip install -e .
 ```
+
 ## Run the Example
 
 You can run your `ClientApp` and `ServerApp` in both _simulation_ and
@@ -51,8 +50,13 @@ fewer components to be launched manually. By default, `flwr run` will make use o
 flwr run .
 ```
 
-The example uses the MNIST dataset with a total of 100 clients, with 20 clients sampled in each round. The hyperparameters for DP and SecAgg are specified in `server.py`.
+You can also override some of the settings for your defined in `pyproject.toml`. For example
 
-```shell
-flower-simulation --server-app fl_dp_sa.server:app --client-app fl_dp_sa.client:app --num-supernodes 100
+```bash
+flwr run . --run-config "noise-multiplier=0.1"
 ```
+
+### Run with the Deployment Engine
+
+> \[!NOTE\]
+> An update to this example will show how to run this Flower project with the Deployment Engine and TLS certificates, or with Docker.
