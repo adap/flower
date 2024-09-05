@@ -7,7 +7,7 @@ import json
 from dataclasses import asdict, dataclass
 from enum import Enum
 from itertools import chain
-from typing import Any, Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 
 class reversor:
@@ -140,8 +140,10 @@ def tag_latest_ubuntu_with_flwr_version(image: BaseImage) -> List[str]:
         return [image.tags]
 
 
-def create_readme_updates(images: List[BinaryImage | BinaryImage]) -> Dict[str, str]:
-    def version_to_tuple(version: str) -> tuple[int]:
+def create_readme_updates(
+    images: List[Union[BinaryImage, BinaryImage]]
+) -> Dict[str, str]:
+    def version_to_tuple(version: str) -> Tuple[int, ...]:
         return tuple(map(int, version.split(".")))
 
     def create_list_item(tags: str) -> str:

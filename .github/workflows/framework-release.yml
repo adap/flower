@@ -120,7 +120,9 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [publish, parameters, build-binary-images]
     steps:
-      - run: ./dev/update-docker-readmes.sh ${{ needs.publish.outputs.flwr-version }} ${{ needs.parameters.outputs.matrix }}
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - run: ./dev/update-docker-readmes.sh ${{ needs.publish.outputs.flwr-version }} '${{ needs.parameters.outputs.matrix }}'
 
       - uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c # v6.1.0
         with:
@@ -128,4 +130,4 @@ jobs:
           delete-branch: true
           commit-message: Add flwr version ${{ needs.publish.outputs.flwr-version }} to Docker READMEs
           title: docs(framework:skip) Add flwr version ${{ needs.publish.outputs.flwr-version }} to Docker READMEs
-          body: Chnages autogenereated by [${{ github.run_id }}](${{ github.server_url }}/${{ github.repositoryUrl }}/actions/runs/${{ github.run_id }})
+          body: Chnages autogenereated by [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
