@@ -8,7 +8,6 @@ from flwr.server import (
     LegacyContext,
     ServerApp,
     ServerConfig,
-    ServerAppComponents,
 )
 from flwr.server.strategy import DifferentialPrivacyClientSideFixedClipping, FedAvg
 from flwr.server.workflow import DefaultWorkflow, SecAggPlusWorkflow
