@@ -42,11 +42,11 @@ def main(driver: Driver, context: Context) -> None:
     model_weights = get_weights(Net())
     parameters = ndarrays_to_parameters(model_weights)
 
+    # Note: The fraction_fit value is configured based on the DP hyperparameter `num-sampled-clients`.
     strategy = FedAvg(
         fraction_fit=0.2,
         fraction_evaluate=0.0,
         min_fit_clients=20,
-        min_available_clients=20,
         fit_metrics_aggregation_fn=weighted_average,
         initial_parameters=parameters,
     )

@@ -28,8 +28,8 @@ clientapp = "fl_dp_sa.client_app:app"
 # Parameters for the DP
 noise-multiplier = 0.2
 clipping-norm = 10
-# Parameters for the SecAgg+ protocol
 num-sampled-clients = 20
+# Parameters for the SecAgg+ protocol
 num-shares = 7
 reconstruction-threshold = 4
 
