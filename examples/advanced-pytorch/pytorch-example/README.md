@@ -54,6 +54,12 @@ flwr run .
 flwr run . --run-config use-wandb=false
 ```
 
+You can run the app using another federation (see `pyproject.toml`). For example, if you have a GPU available, select the `local-sim-gpu` federation:
+
+```bash
+flwr run . local-sim-gpu
+```
+
 You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
 ```bash

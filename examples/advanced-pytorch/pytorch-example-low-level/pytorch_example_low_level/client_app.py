@@ -19,6 +19,7 @@ app = ClientApp()
 
 @app.train()
 def train_fn(msg: Message, context: Context):
+    """A method that trains the received model on the local train set."""
 
     # Initialize model
     model = Net()
@@ -41,7 +42,7 @@ def train_fn(msg: Message, context: Context):
     # Get learning rate value sent from `ServerApp`
     lr = msg.content.configs_records["config"]["lr"]
     # Train with local dataset
-    train_loss = train(
+    _ = train(
         model,
         trainloader,
         context.run_config["local-epochs"],
@@ -61,6 +62,7 @@ def train_fn(msg: Message, context: Context):
 
 @app.evaluate()
 def eval_fn(msg: Message, context: Context):
+    """A method that evaluates the received model on the local validation set."""
 
     # Initialize model
     model = Net()

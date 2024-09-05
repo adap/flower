@@ -17,7 +17,12 @@ This example extends the content of the [quickstart-pytorch](https://github.com/
 
 In addition, it also shows how to make your `ClientApp` use the context so clients behave as if they were stateful. This is useful if your `ClientApp` objects should make use of some data structures (e.g. metrics, model parameters) set in previous rounds. The example implements a basic for of _FL personalization_.
 
-This examples uses [Flower Datasets](https://flower.ai/docs/datasets/) with the [Dirichlet Partitioner](https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.DirichletPartitioner.html#flwr_datasets.partitioner.DirichletPartitioner) to partition the [Fashion-MNIST](https://huggingface.co/datasets/zalando-datasets/fashion_mnist) dataset in a non-IID fashion.
+This examples uses [Flower Datasets](https://flower.ai/docs/datasets/) with the [Dirichlet Partitioner](https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.DirichletPartitioner.html#flwr_datasets.partitioner.DirichletPartitioner) to partition the [Fashion-MNIST](https://huggingface.co/datasets/zalando-datasets/fashion_mnist) dataset in a non-IID fashion into 50 partitions.
+
+![](_static/fmnist_50_lda.png)
+
+> \[!TIP\]
+> You can use Flower Datasets [built-in visualization tools](https://flower.ai/docs/datasets/tutorial-visualize-label-distribution.html) to easily generate plots like the one above.
 
 This examples shows how to achieve the above using both a `Strategy` as well as the low-level API.
 

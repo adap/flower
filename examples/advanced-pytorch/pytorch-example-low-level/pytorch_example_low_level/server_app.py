@@ -34,12 +34,7 @@ app = ServerApp()
 
 @app.main()
 def main(driver: Driver, context: Context) -> None:
-    """A ServerApp that implements a for loop to define what happens in a round.
-
-    Each round does (1) sampling, (2) nodes train, (3) aggrgate and evaluate the
-    resulting global model, (4) sample nodes, (5) sampled nodes, (6) ndoes evaluate
-    received global model and report preformance.
-    """
+    """A ServerApp that implements a for loop to define the stages in a round."""
 
     # Create run directory and save run-config
     save_path, run_dir = create_run_dir(context.run_config)
@@ -142,7 +137,7 @@ def main(driver: Driver, context: Context) -> None:
 
 
 def process_evaluation_responses(replies: List[Message]) -> Tuple[float]:
-
+    """Extract metrics returned by `ClientApp`s when they ran their eval() method."""
     losses = []
     accuracies = []
     # Append all results
@@ -151,6 +146,7 @@ def process_evaluation_responses(replies: List[Message]) -> Tuple[float]:
             evaluate_results = res.content.metrics_records["clientapp-evaluate"]
             losses.append(evaluate_results["loss"])
             accuracies.append(evaluate_results["accuracy"])
+    # Convert to NumPy arrays to easily extract mean/std
     losses = np.array(losses)
     accuracies = np.array(accuracies)
     log(

@@ -110,7 +110,10 @@ def load_data(partition_id: int, num_partitions: int):
     global fds
     if fds is None:
         partitioner = DirichletPartitioner(
-            num_partitions=num_partitions, partition_by="label", alpha=1.0
+            num_partitions=num_partitions,
+            partition_by="label",
+            alpha=1.0,
+            seed=42,
         )
         fds = FederatedDataset(
             dataset="zalando-datasets/fashion_mnist",
