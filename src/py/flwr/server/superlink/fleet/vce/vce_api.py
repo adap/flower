@@ -387,5 +387,4 @@ def start_vce(
         f_stop.set()  # set termination event
         raise loadapp_ex
     except Exception as ex:
-        print(f"{f_stop.is_set() = }")
         raise ex
