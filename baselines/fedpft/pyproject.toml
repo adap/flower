@@ -126,13 +126,9 @@ serverapp = "fedpft.server_app:app"
 clientapp = "fedpft.client_app:app"
 
 [tool.flwr.app.config]
-num-server-rounds = 3
-num-clients = 50
-dirichlet-alpha = 0.1
 num-rounds = 1
-num-cpus = 1
-num-gpus = 1
-batch-size = 64
+num-clients = 50
+
 device = "cuda"
 
 # Model
@@ -145,6 +141,8 @@ hidden-dimension = 2048
 # Dataset
 dataset = "cifar100"
 num-classes = 100
+dirichlet-alpha = 0.1
+batch-size = 64
 image-column-name = "img"
 partition-by = "fine_label"
 

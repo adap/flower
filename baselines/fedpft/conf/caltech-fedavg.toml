@@ -1,9 +1,6 @@
-num-clients = 50
-dirichlet-alpha = 0.1
 num-rounds = 20
-num-cpus = 1
-num-gpus = 1
-batch-size = 64
+num-clients = 50
+
 device = "cuda"
 
 # Model
@@ -16,6 +13,8 @@ hidden-dimension = 768
 # Dataset
 dataset = "clip-benchmark/wds_vtab-caltech101"
 num-classes = 102
+dirichlet-alpha = 0.1
+batch-size = 64
 image-column-name = "webp"
 partition-by = "cls"
 seed = 0
