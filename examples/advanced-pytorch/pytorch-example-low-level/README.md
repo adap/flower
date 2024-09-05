@@ -1,9 +1,9 @@
-# Federated Learning with PyTorch and Flower (Advanced Example -- Low level API)
+# Federated Learning with PyTorch and Flower (Low level API)
 
 > \[!CAUTION\]
 > This example uses Flower's low-level API which is a preview feature and subject to change.
 
-This example demonstrates how to use Flower's low-level API to write a `ServerApp` a _"for loop"_, enabling you to define what a "round" means and construct [Message](<>) objects to communicate arbitrary data structures as [RecordSet](<>) objects. Just like the the counterpart to this example using the strategies API (find it in the parent directory), it:
+This example demonstrates how to use Flower's low-level API to write a `ServerApp` a _"for loop"_, enabling you to define what a "round" means and construct [Message](https://flower.ai/docs/framework/ref-api/flwr.common.Message.html) objects to communicate arbitrary data structures as [RecordSet](https://flower.ai/docs/framework/ref-api/flwr.common.RecordSet.html) objects. Just like the the counterpart to this example using the strategies API (find it in the parent directory), it:
 
 1. Save model checkpoints
 2. Save the metrics available at the strategy (e.g. accuracies, losses)
@@ -61,6 +61,10 @@ INFO :      📊 Federated evaluation -> loss: 1.605±0.116 / accuracy: 0.522±0
 INFO :
 ...
 ```
+
+By default, the metrics: {`centralized_accuracy`, `centralized_loss`, `federated_evaluate_accuracy`, `federated_evaluate_loss`} will be logged to Weights & Biases (they are also stored to the `results.json` previously mentioned). Upon executing `flwr run` you'll see a URL linking to your Weight&Biases dashboard wher you can see the metrics.
+
+![](_static/wandb_plots.png)
 
 ### Run with the Simulation Engine
 
