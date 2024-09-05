@@ -118,7 +118,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [parameters, build-binary-images]
     steps:
-      - run: ./dev/update-docker-readmes.sh ${{ needs.parameters.outputs.flwr-version }} ${{ needs.parameters.outputs.matrix }}
+      - run: ./dev/update-docker-readmes.sh ${{ needs.parameters.outputs.flwr-version }} "${{ needs.parameters.outputs.matrix }}"
 
       - uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c # v6.1.0
         with:
