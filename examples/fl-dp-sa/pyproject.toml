@@ -21,8 +21,8 @@ packages = ["."]
 publisher = "flwrlabs"
 
 [tool.flwr.app.components]
-serverapp = "fastai_example.server_app:app"
-clientapp = "fastai_example.client_app:app"
+serverapp = "fl_dp_sa.server_app:app"
+clientapp = "fl_dp_sa.client_app:app"
 
 [tool.flwr.app.config]
 # Parameters for the DP
