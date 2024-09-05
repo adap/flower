@@ -1,0 +1,35 @@
+num-server-rounds = 3
+num-clients = 50
+dirichlet-alpha = 0.1
+num-rounds = 1
+num-cpus = 1
+num-gpus = 1
+batch-size = 64
+device = "cuda"
+
+# Model
+feature-extractor = "clip_vit"
+feature-extractor-name = "openai/clip-vit-base-patch32"
+
+image-input-size = 224
+hidden-dimension = 768
+
+# Dataset
+dataset = "clip-benchmark/wds_vtab-caltech101"
+num-classes = 102
+image-column-name = "webp"
+partition-by = "cls"
+
+# Strategy
+strategy = "fedpft"
+fraction-fit = 1
+fraction-evaluate = 1
+accept-failures = false
+server-batch-size = 32
+num-epochs = 50
+server-lr = 1e-4
+n-mixtures = 1
+cov-type = "spherical"
+seed = 0
+tol = 1e-12
+max-iter = 10000

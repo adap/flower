@@ -1,0 +1,29 @@
+num-clients = 50
+dirichlet-alpha = 0.1
+num-rounds = 20
+num-cpus = 1
+num-gpus = 1
+batch-size = 64
+device = "cuda"
+
+# Model
+feature-extractor = "clip_vit"
+feature-extractor-name = "openai/clip-vit-base-patch32"
+
+image-input-size = 224
+hidden-dimension = 768
+
+# Dataset
+dataset = "clip-benchmark/wds_vtab-caltech101"
+num-classes = 102
+image-column-name = "webp"
+partition-by = "cls"
+seed = 0
+
+# Strategy
+strategy = "fedavg"
+fraction-fit = 1
+fraction-evaluate = 1
+accept-failures = false
+server-lr = 0.01
+num-epochs = 10
