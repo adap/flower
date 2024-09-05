@@ -44,6 +44,9 @@ By default, the metrics: {`centralized_accuracy`, `centralized_loss`, `federated
 
 With default parameters, 25% of the total 50 nodes (see `num-supernodes` in `pyproject.toml`) will be sampled for `fit` and 50% for an `evaluate` round. By default `ClientApp` objects will run on CPU.
 
+> \[!TIP\]
+> To run your `ClientApps` on GPU or to adjust the degree or parallelism of your simulation, edit the `[tool.flwr.federations.local-simulation]` section in the `pyproject.tom`.
+
 ```bash
 flwr run .
 
