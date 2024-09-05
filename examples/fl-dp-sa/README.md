@@ -32,7 +32,7 @@ fl-dp-sa
 
 ### Install dependencies and project
 
-Install the dependencies defined in `pyproject.toml` as well as the `fl-dp-sa` package.
+Install the dependencies defined in `pyproject.toml` as well as the `fl_dp_sa` package.
 
 ```shell
 # From a new python environment, run:
