@@ -89,17 +89,17 @@ def train(net, trainloader, valloader, epochs, device):
     return results
 
 
-def test(net, testloader):
+def test(net, testloader, device):
     """Validate the model on the test set."""
-    net.to(DEVICE)
+    net.to(device)
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
     with torch.no_grad():
         for batch in testloader:
-            images = batch["image"].to(DEVICE)
-            labels = batch["label"].to(DEVICE)
-            outputs = net(images.to(DEVICE))
-            labels = labels.to(DEVICE)
+            images = batch["image"].to(device)
+            labels = batch["label"].to(device)
+            outputs = net(images.to(device))
+            labels = labels.to(device)
             loss += criterion(outputs, labels).item()
             correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
     accuracy = correct / len(testloader.dataset)
