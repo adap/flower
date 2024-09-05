@@ -1,72 +1,40 @@
 [build-system]
-requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
-name = "fedpft" # <----- Ensure it matches the name of your baseline directory containing all the source code
+[project]
+name = "fedpft"
 version = "1.0.0"
-description = "Flower Baselines"
+description = ""
 license = "Apache-2.0"
-authors = ["The Flower Authors <hello@flower.ai>"]
-readme = "README.md"
-homepage = "https://flower.ai"
-repository = "https://github.com/adap/flower"
-documentation = "https://flower.ai"
-classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Developers",
-    "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: Apache Software License",
-    "Operating System :: MacOS :: MacOS X",
-    "Operating System :: POSIX :: Linux",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: Implementation :: CPython",
-    "Topic :: Scientific/Engineering",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence",
-    "Topic :: Scientific/Engineering :: Mathematics",
-    "Topic :: Software Development",
-    "Topic :: Software Development :: Libraries",
-    "Topic :: Software Development :: Libraries :: Python Modules",
-    "Typing :: Typed",
+dependencies = [
+    "flwr[simulation]>=1.11.0",
+    "flwr-datasets[vision]>=0.3.0",
+    "torch==2.2.1",
+    "torchvision==0.17.1",
+    "transformers==4.44.2",
 ]
 
-[tool.poetry.dependencies]
-python = ">=3.8.15, <3.12.0"  # don't change this
-flwr = { extras = ["simulation"], version = "1.5.0" }
-hydra-core = "1.3.2" # don't change this
-torch = {url = "https://download.pytorch.org/whl/cu117/torch-1.13.0%2Bcu117-cp310-cp310-linux_x86_64.whl"}
-scikit-learn = "1.2.2"
-flwr-datasets = "0.1.0"
-torchvision = {url = "https://download.pytorch.org/whl/cu117/torchvision-0.14.0%2Bcu117-cp310-cp310-linux_x86_64.whl"}
-transformers = "4.39.3"
-datasets = "2.18.0"
+[tool.hatch.metadata]
+allow-direct-references = true
 
-[tool.poetry.dev-dependencies]
-isort = "==5.13.2"
-black = "==24.2.0"
-docformatter = "==1.7.5"
-mypy = "==1.4.1"
-pylint = "==2.8.2"
-flake8 = "==3.9.2"
-pytest = "==6.2.4"
-pytest-watch = "==4.2.0"
-ruff = "==0.0.272"
-types-requests = "==2.27.7"
-virtualenv = "==20.21.0"
+[project.optional-dependencies]
+dev = [
+    "isort==5.13.2",
+    "black==24.2.0",
+    "docformatter==1.7.5",
+    "mypy==1.8.0",
+    "pylint==3.2.6",
+    "flake8==5.0.4",
+    "pytest==6.2.4",
+    "pytest-watch==4.2.0",
+    "ruff==0.1.9",
+    "types-requests==2.31.0.20240125",
+]
 
 [tool.isort]
-line_length = 88
-indent = "    "
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-use_parentheses = true
+profile = "black"
+known_first_party = ["flwr"]
 
 [tool.black]
 line-length = 88
@@ -85,9 +53,13 @@ strict = false
 plugins = "numpy.typing.mypy_plugin"
 
 [tool.pylint."MESSAGES CONTROL"]
-disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
-good-names = "i,j,k,_,x,y,X,Y"
-signature-mutators = "hydra.main.main"
+disable = "duplicate-code,too-few-public-methods,useless-import-alias"
+good-names = "i,j,k,_,x,y,X,Y,K,N"
+max-args = 10
+max-attributes = 15
+max-locals = 36
+max-branches = 20
+max-statements = 55
 
 [tool.pylint.typecheck]
 generated-members = "numpy.*, torch.*, tensorflow.*"
@@ -142,3 +114,58 @@ exclude = [
 
 [tool.ruff.pydocstyle]
 convention = "numpy"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "flwrlabs"
+
+[tool.flwr.app.components]
+serverapp = "fedpft.server_app:app"
+clientapp = "fedpft.client_app:app"
+
+[tool.flwr.app.config]
+num-server-rounds = 3
+num-clients = 50
+dirichlet-alpha = 0.1
+num-rounds = 1
+num-cpus = 1
+num-gpus = 1
+batch-size = 64
+device = "cuda"
+
+# Model
+feature-extractor = "resnet50"
+feature-extractor-name = ""
+
+image-input-size = 224
+hidden-dimension = 2048
+
+# Dataset
+dataset = "cifar100"
+num-classes = 100
+image-column-name = "img"
+partition-by = "fine_label"
+
+# Strategy
+strategy = "fedpft"
+fraction-fit = 1
+fraction-evaluate = 1
+accept-failures = false
+server-batch-size = 32
+num-epochs = 50
+server-lr = 1e-4
+n-mixtures = 1
+cov-type = "spherical"
+seed = 0
+tol = 1e-12
+max-iter = 10000
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 10
+options.backend.client-resources.num-cpus = 2
+options.backend.client-resources.num-gpus = 0.0

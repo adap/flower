@@ -1,4 +1,4 @@
-"""FedPFT strategy."""
+"""fedpft: A Flower Baseline."""
 
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -12,11 +12,10 @@ from flwr.common import (
 )
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
-from omegaconf import DictConfig
 from sklearn.mixture import GaussianMixture as GMM
 from torch.utils.data import DataLoader
 
-from fedpft.models import train
+from fedpft.model import train
 from fedpft.utils import chunks, ndarrays_to_gmmparam
 
 
@@ -34,7 +33,7 @@ class FedPFT(FedAvg):
         *args,
         num_classes: int,
         feature_dimension: int,
-        server_opt: DictConfig,
+        lr: float,
         server_batch_size: int,
         num_epochs: int,
         device: torch.device,
@@ -48,7 +47,7 @@ class FedPFT(FedAvg):
             Number of classes in the dataset.
         feature_dimension : int
             Size of feature embeddings
-        server_opt : DictConfig
+        lr : float
             Configuration of server optimizer for training classifier head.
         server_batch_size : int
             Batch size of synthetic features.
@@ -63,7 +62,7 @@ class FedPFT(FedAvg):
         super().__init__(*args, **kwargs)
         self.num_classes = num_classes
         self.feature_dimension = feature_dimension
-        self.server_opt = server_opt
+        self.lr = lr
         self.server_batch_size = server_batch_size
         self.num_epochs = num_epochs
         self.device = device
@@ -126,9 +125,7 @@ class FedPFT(FedAvg):
             shuffle=True,
         )
         classifier_head = torch.nn.Linear(self.feature_dimension, self.num_classes)
-        opt = torch.optim.AdamW(
-            params=classifier_head.parameters(), lr=self.server_opt.lr
-        )
+        opt = torch.optim.AdamW(params=classifier_head.parameters(), lr=self.lr)
 
         train(
             classifier_head=classifier_head,
