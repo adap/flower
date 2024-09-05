@@ -36,7 +36,7 @@ permissions:
 jobs:
   build:
     name: Build image
-    runs-on: ubuntu-22.04
+    runs-on: ${{ matrix.platform.runner-os }}
     timeout-minutes: 180
     outputs:
       build-id: ${{ steps.build-id.outputs.id }}
@@ -44,10 +44,8 @@ jobs:
       fail-fast: true
       matrix:
         platform: [
-            # build-push action and qemu use different platform names
-            # therefore we create a map
-            { name: "amd64", qemu: "", docker: "linux/amd64" },
-            { name: "arm64", qemu: "arm64", docker: "linux/arm64" },
+            { name: "amd64", docker: "linux/amd64", runner-os: "ubuntu-22.04" },
+            { name: "arm64", docker: "linux/arm64", runner-os: "ubuntu-4-core-arm64" },
           ]
     steps:
       - name: Create build id
@@ -78,12 +76,6 @@ jobs:
               print("build-args<<EOF", file=fh)
               print(build_args, file=fh)
               print("EOF", file=fh)
-
-      - name: Set up QEMU
-        if: matrix.platform.qemu != ''
-        uses: docker/setup-qemu-action@49b3bc8e6bdd4a60e6116a5414239cba5943d3cf # v3.2.0
-        with:
-          platforms: ${{ matrix.platform.qemu }}
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
