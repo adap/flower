@@ -17,8 +17,6 @@ fds = None  # Cache FederatedDataset
 
 
 class Net(nn.Module):
-    """Model."""
-
     def __init__(self) -> None:
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(1, 6, 3, padding=1)
