@@ -1,35 +1,17 @@
 """pytorch-example: A Flower / PyTorch app."""
 
 import json
-from datetime import datetime
 from logging import INFO
-from pathlib import Path
 
 import torch
 import wandb
-from pytorch_example.task import Net, set_weights
+from pytorch_example.task import Net, create_run_dir, set_weights
 
 from flwr.common import logger, parameters_to_ndarrays
 from flwr.common.typing import UserConfig
 from flwr.server.strategy import FedAvg
 
 PROJECT_NAME = "FLOWER-advanced-pytorch"
-
-
-def create_run_dir(config: UserConfig) -> Path:
-    """Create a directory where to save results from this run."""
-    # Create output directory given current timestamp
-    current_time = datetime.now()
-    run_dir = current_time.strftime("%Y-%m-%d/%H-%M-%S")
-    # Save path is based on the current directory
-    save_path = Path.cwd() / f"outputs/{run_dir}"
-    save_path.mkdir(parents=True, exist_ok=False)
-
-    # Save run config as json
-    with open(f"{save_path}/run_config.json", "w", encoding="utf-8") as fp:
-        json.dump(config, fp)
-
-    return save_path, run_dir
 
 
 class CustomFedAvg(FedAvg):

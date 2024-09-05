@@ -1,6 +1,7 @@
 # Federated Learning with PyTorch and Flower (Advanced Example)
 
 This example shows how to extend your `ClientApp` and `ServerApp` capabilities compared to what's shown in the [`quickstart-pytorch`](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch) example. In particular, it will show how the `ClientApp`'s state (and object of type [RecordSet](https://flower.ai/docs/framework/ref-api/flwr.common.RecordSet.html)) can be used to enable stateful clients, facilitating the design of personalized federated learning strategies, among others. The `ServerApp` in this example makes use of a custom strategy derived from the built-in [FedAvg](https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedAvg.html). In addition, it will also showcase how to:
+
 1. Save model checkpoints
 2. Save the metrics available at the strategy (e.g. accuracies, losses)
 3. Log training artefacts to [Weights & Biases](https://wandb.ai/site)

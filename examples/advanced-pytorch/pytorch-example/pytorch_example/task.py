@@ -1,6 +1,9 @@
 """pytorch-example: A Flower / PyTorch app."""
 
+import json
 from collections import OrderedDict
+from datetime import datetime
+from pathlib import Path
 
 import torch
 import torch.nn as nn
@@ -15,6 +18,8 @@ from torchvision.transforms import (
     RandomHorizontalFlip,
     ToTensor,
 )
+
+from flwr.common.typing import UserConfig
 
 FM_NORMALIZATION = ((0.1307,), (0.3081,))
 EVAL_TRANSFORMS = Compose([ToTensor(), Normalize(*FM_NORMALIZATION)])
@@ -45,46 +50,6 @@ class Net(nn.Module):
         x = x.view(-1, 32 * 4 * 4)
         x = F.relu(self.fc1(x))
         return self.fc2(x)
-
-
-def apply_train_transforms(batch):
-    """Apply transforms to the partition from FederatedDataset."""
-    batch["image"] = [TRAIN_TRANSFORMS(img) for img in batch["image"]]
-    return batch
-
-
-def apply_eval_transforms(batch):
-    """Apply transforms to the partition from FederatedDataset."""
-    batch["image"] = [EVAL_TRANSFORMS(img) for img in batch["image"]]
-    return batch
-
-
-fds = None  # Cache FederatedDataset
-
-
-def load_data(partition_id: int, num_partitions: int):
-    """Load partition FashionMNIST data."""
-    # Only initialize `FederatedDataset` once
-    global fds
-    if fds is None:
-        partitioner = DirichletPartitioner(
-            num_partitions=num_partitions, partition_by="label", alpha=1.0
-        )
-        fds = FederatedDataset(
-            dataset="zalando-datasets/fashion_mnist",
-            partitioners={"train": partitioner},
-        )
-    partition = fds.load_partition(partition_id)
-    # Divide data on each node: 80% train, 20% test
-    partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
-
-    train_partition = partition_train_test["train"].with_transform(
-        apply_train_transforms
-    )
-    test_partition = partition_train_test["test"].with_transform(apply_eval_transforms)
-    trainloader = DataLoader(train_partition, batch_size=32, shuffle=True)
-    testloader = DataLoader(test_partition, batch_size=32)
-    return trainloader, testloader
 
 
 def train(net, trainloader, epochs, lr, device):
@@ -133,3 +98,59 @@ def set_weights(net, parameters):
     params_dict = zip(net.state_dict().keys(), parameters)
     state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
     net.load_state_dict(state_dict, strict=True)
+
+
+def apply_train_transforms(batch):
+    """Apply transforms to the partition from FederatedDataset."""
+    batch["image"] = [TRAIN_TRANSFORMS(img) for img in batch["image"]]
+    return batch
+
+
+def apply_eval_transforms(batch):
+    """Apply transforms to the partition from FederatedDataset."""
+    batch["image"] = [EVAL_TRANSFORMS(img) for img in batch["image"]]
+    return batch
+
+
+fds = None  # Cache FederatedDataset
+
+
+def load_data(partition_id: int, num_partitions: int):
+    """Load partition FashionMNIST data."""
+    # Only initialize `FederatedDataset` once
+    global fds
+    if fds is None:
+        partitioner = DirichletPartitioner(
+            num_partitions=num_partitions, partition_by="label", alpha=1.0
+        )
+        fds = FederatedDataset(
+            dataset="zalando-datasets/fashion_mnist",
+            partitioners={"train": partitioner},
+        )
+    partition = fds.load_partition(partition_id)
+    # Divide data on each node: 80% train, 20% test
+    partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
+
+    train_partition = partition_train_test["train"].with_transform(
+        apply_train_transforms
+    )
+    test_partition = partition_train_test["test"].with_transform(apply_eval_transforms)
+    trainloader = DataLoader(train_partition, batch_size=32, shuffle=True)
+    testloader = DataLoader(test_partition, batch_size=32)
+    return trainloader, testloader
+
+
+def create_run_dir(config: UserConfig) -> Path:
+    """Create a directory where to save results from this run."""
+    # Create output directory given current timestamp
+    current_time = datetime.now()
+    run_dir = current_time.strftime("%Y-%m-%d/%H-%M-%S")
+    # Save path is based on the current directory
+    save_path = Path.cwd() / f"outputs/{run_dir}"
+    save_path.mkdir(parents=True, exist_ok=False)
+
+    # Save run config as json
+    with open(f"{save_path}/run_config.json", "w", encoding="utf-8") as fp:
+        json.dump(config, fp)
+
+    return save_path, run_dir

@@ -1,5 +1,9 @@
 """pytorch-example-low-level: A low-level Flower / PyTorch app."""
 
+import json
+from datetime import datetime
+from pathlib import Path
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -13,6 +17,8 @@ from torchvision.transforms import (
     RandomHorizontalFlip,
     ToTensor,
 )
+
+from flwr.common.typing import UserConfig
 
 FM_NORMALIZATION = ((0.1307,), (0.3081,))
 EVAL_TRANSFORMS = Compose([ToTensor(), Normalize(*FM_NORMALIZATION)])
@@ -30,7 +36,7 @@ class Net(nn.Module):
     """Model (simple CNN adapted for Fashion-MNIST)"""
 
     def __init__(self):
-        super(Net, self).__init__()
+        super().__init__()
         self.conv1 = nn.Conv2d(1, 16, 5)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(16, 32, 5)
@@ -43,6 +49,44 @@ class Net(nn.Module):
         x = x.view(-1, 32 * 4 * 4)
         x = F.relu(self.fc1(x))
         return self.fc2(x)
+
+
+def train(net, trainloader, epochs, lr, device):
+    """Train the model on the training set."""
+    net.to(device)  # move model to GPU if available
+    criterion = torch.nn.CrossEntropyLoss().to(device)
+    optimizer = torch.optim.SGD(net.parameters(), lr=lr, momentum=0.9)
+    net.train()
+    running_loss = 0.0
+    for _ in range(epochs):
+        for batch in trainloader:
+            images = batch["image"]
+            labels = batch["label"]
+            optimizer.zero_grad()
+            loss = criterion(net(images.to(device)), labels.to(device))
+            loss.backward()
+            optimizer.step()
+            running_loss += loss.item()
+
+    avg_trainloss = running_loss / len(trainloader)
+    return avg_trainloss
+
+
+def test(net, testloader, device):
+    """Validate the model on the test set."""
+    net.to(device)
+    criterion = torch.nn.CrossEntropyLoss()
+    correct, loss = 0, 0.0
+    with torch.no_grad():
+        for batch in testloader:
+            images = batch["image"].to(device)
+            labels = batch["label"].to(device)
+            outputs = net(images)
+            loss += criterion(outputs, labels).item()
+            correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
+    accuracy = correct / len(testloader.dataset)
+    loss = loss / len(testloader)
+    return loss, accuracy
 
 
 def apply_train_transforms(batch):
@@ -85,39 +129,17 @@ def load_data(partition_id: int, num_partitions: int):
     return trainloader, testloader
 
 
-def train(net, trainloader, epochs, lr, device):
-    """Train the model on the training set."""
-    net.to(device)  # move model to GPU if available
-    criterion = torch.nn.CrossEntropyLoss().to(device)
-    optimizer = torch.optim.SGD(net.parameters(), lr=lr, momentum=0.9)
-    net.train()
-    running_loss = 0.0
-    for _ in range(epochs):
-        for batch in trainloader:
-            images = batch["image"]
-            labels = batch["label"]
-            optimizer.zero_grad()
-            loss = criterion(net(images.to(device)), labels.to(device))
-            loss.backward()
-            optimizer.step()
-            running_loss += loss.item()
+def create_run_dir(config: UserConfig) -> Path:
+    """Create a directory where to save results from this run."""
+    # Create output directory given current timestamp
+    current_time = datetime.now()
+    run_dir = current_time.strftime("%Y-%m-%d/%H-%M-%S")
+    # Save path is based on the current directory
+    save_path = Path.cwd() / f"outputs/{run_dir}"
+    save_path.mkdir(parents=True, exist_ok=False)
 
-    avg_trainloss = running_loss / len(trainloader)
-    return avg_trainloss
+    # Save run config as json
+    with open(f"{save_path}/run_config.json", "w", encoding="utf-8") as fp:
+        json.dump(config, fp)
 
-
-def test(net, testloader, device):
-    """Validate the model on the test set."""
-    net.to(device)
-    criterion = torch.nn.CrossEntropyLoss()
-    correct, loss = 0, 0.0
-    with torch.no_grad():
-        for batch in testloader:
-            images = batch["image"].to(device)
-            labels = batch["label"].to(device)
-            outputs = net(images)
-            loss += criterion(outputs, labels).item()
-            correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
-    accuracy = correct / len(testloader.dataset)
-    loss = loss / len(testloader)
-    return loss, accuracy
+    return save_path, run_dir
