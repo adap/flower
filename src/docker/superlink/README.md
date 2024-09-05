@@ -21,8 +21,10 @@
 ## Supported tags
 
 <!-- version_nightly -->
-- `nightly`, `<version>.dev<YYYYMMDD>` e.g. `1.12.0.dev20240830`
+- `nightly`, `<version>.dev<YYYYMMDD>` e.g. `1.13.0.dev20240905`
 <!-- version_latest -->
+- `1.12.0`, `1.12.0-py3.11-alpine3.19`
+- `1.12.0-py3.11-ubuntu22.04`
 - `1.11.0`, `1.11.0-py3.11-alpine3.19`
 - `1.11.0-py3.11-ubuntu22.04`
 - `1.10.0`, `1.10.0-py3.11-alpine3.19`
