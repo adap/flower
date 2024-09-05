@@ -1,4 +1,4 @@
-----
+---
 tags: [basic, vision, fds]
 dataset: [MNIST]
 framework: [torch, torchvision]
