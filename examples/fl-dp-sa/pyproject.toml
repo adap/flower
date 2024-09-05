@@ -32,7 +32,6 @@ clipping-norm = 10
 num-sampled-clients = 20
 num-shares = 7
 reconstruction-threshold = 4
-is-demo = true
 
 [tool.flwr.federations]
 default = "local-simulation"

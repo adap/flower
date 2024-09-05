@@ -1,12 +1,10 @@
 """fl_dp_sa: Flower Example using Differential Privacy and Secure Aggregation."""
 
 from collections import OrderedDict
-from logging import INFO
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from flwr.common.logger import log
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 from torch.utils.data import DataLoader
@@ -18,7 +16,7 @@ fds = None  # Cache FederatedDataset
 
 class Net(nn.Module):
     def __init__(self) -> None:
-        super(Net, self).__init__()
+        super().__init__()
         self.conv1 = nn.Conv2d(1, 6, 3, padding=1)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(6, 16, 5)

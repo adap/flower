@@ -38,13 +38,13 @@ app = ServerApp()
 @app.main()
 def main(driver: Driver, context: Context) -> None:
 
-    is_demo = context.run_config["is-demo"]
-
-    parameters = ndarrays_to_parameters(get_weights(Net()))
+    # Initialize global model
+    model_weights = get_weights(Net())
+    parameters = ndarrays_to_parameters(model_weights)
 
     strategy = FedAvg(
         fraction_fit=0.2,
-        fraction_evaluate=(0.0 if is_demo else context.run_config["fraction-evaluate"]),
+        fraction_evaluate=0.0,
         min_fit_clients=20,
         min_available_clients=20,
         fit_metrics_aggregation_fn=weighted_average,
