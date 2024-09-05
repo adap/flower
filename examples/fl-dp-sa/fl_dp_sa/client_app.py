@@ -1,10 +1,11 @@
 """fl_dp_sa: Flower Example using Differential Privacy and Secure Aggregation."""
 
+import torch
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
 from flwr.client.mod import fixedclipping_mod, secaggplus_mod
 
-from fl_dp_sa.task import DEVICE, Net, get_weights, load_data, set_weights, test, train
+from fl_dp_sa.task import Net, get_weights, load_data, set_weights, test, train
 
 
 class FlowerClient(NumPyClient):
@@ -12,11 +13,16 @@ class FlowerClient(NumPyClient):
         self.net = Net()
         self.trainloader = trainloader
         self.testloader = testloader
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     def fit(self, parameters, config):
         set_weights(self.net, parameters)
         results = train(
-            self.net, self.trainloader, self.testloader, epochs=1, device=DEVICE
+            self.net,
+            self.trainloader,
+            self.testloader,
+            epochs=1,
+            device=self.device,
         )
         return get_weights(self.net), len(self.trainloader.dataset), results
 

@@ -1,5 +1,5 @@
 ---
-tags: [basic, vision, fds]
+tags: [DP, SecAgg, vision, fds]
 dataset: [MNIST]
 framework: [torch, torchvision]
 ---

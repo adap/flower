@@ -8,10 +8,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 from flwr.common.logger import log
 from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import IidPartitioner
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
 
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 fds = None  # Cache FederatedDataset
 
@@ -36,9 +36,16 @@ class Net(nn.Module):
         return self.fc3(x)
 
 
-def load_data(partition_id):
+def load_data(partition_id: int, num_partitions: int):
     """Load partition MNIST data."""
-    fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
+
+    global fds
+    if fds is None:
+        partitioner = IidPartitioner(num_partitions=num_partitions)
+        fds = FederatedDataset(
+            dataset="ylecun/mnist",
+            partitioners={"train": partitioner},
+        )
     partition = fds.load_partition(partition_id)
     # Divide data on each node: 80% train, 20% test
     partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
