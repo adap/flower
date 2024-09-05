@@ -15,6 +15,7 @@
 """Test util functions handling Flower config."""
 
 import os
+import tempfile
 import textwrap
 from pathlib import Path
 from unittest.mock import patch
@@ -254,3 +255,50 @@ def test_parse_config_args_overrides() -> None:
         "key5": True,
         "key6": "value6",
     }
+
+
+def test_parse_config_args_from_toml_file() -> None:
+    """Test if a toml passed to --run-config it is loaded and fused correctly."""
+    # Will be saved as a temp .toml file
+    toml_config = """
+        num-server-rounds = 10
+        momentum = 0.1
+        verbose = true
+    """
+    # This is the UserConfig that would be extracted from pyproject.toml
+    initial_run_config: UserConfig = {
+        "num-server-rounds": 5,
+        "momentum": 0.2,
+        "dataset": "my-fancy-dataset",
+        "verbose": False,
+    }
+    expected_config = {
+        "num-server-rounds": 10,
+        "momentum": 0.1,
+        "dataset": "my-fancy-dataset",
+        "verbose": True,
+    }
+
+    # Create a temporary directory using a context manager
+    with tempfile.TemporaryDirectory() as temp_dir:
+        # Create a temporary TOML file within that directory
+        toml_config_file = os.path.join(temp_dir, "extra_config.toml")
+
+        # Write the data to the TOML file
+        with open(toml_config_file, "w", encoding="utf-8") as toml_file:
+            toml_file.write(textwrap.dedent(toml_config))
+
+        # Parse config (this mimics what `--run-config path/to/config.toml` does)
+        config_from_toml = parse_config_args([toml_config_file])
+        # Fuse
+        config = fuse_dicts(initial_run_config, config_from_toml)
+
+        # Assert
+        assert config == expected_config
+
+
+def test_parse_config_args_passing_toml_and_key_value() -> None:
+    """Test that passing a toml and key-value configs aren't allowed."""
+    config = ["my-other-config.toml", "lr=0.1", "epochs=99"]
+    with pytest.raises(ValueError):
+        parse_config_args(config)

@@ -15,6 +15,7 @@
 """Flower command line interface `run` command."""
 
 import hashlib
+import json
 import subprocess
 import sys
 from logging import DEBUG
@@ -123,14 +124,14 @@ def run(
 
 
 def _run_with_superexec(
-    app: Optional[Path],
+    app: Path,
     federation_config: Dict[str, Any],
     config_overrides: Optional[List[str]],
 ) -> None:
 
     insecure_str = federation_config.get("insecure")
     if root_certificates := federation_config.get("root-certificates"):
-        root_certificates_bytes = Path(root_certificates).read_bytes()
+        root_certificates_bytes = (app / root_certificates).read_bytes()
         if insecure := bool(insecure_str):
             typer.secho(
                 "❌ `root_certificates` were provided but the `insecure` parameter"
@@ -192,6 +193,8 @@ def _run_without_superexec(
 ) -> None:
     try:
         num_supernodes = federation_config["options"]["num-supernodes"]
+        verbose: Optional[bool] = federation_config["options"].get("verbose")
+        backend_cfg = federation_config["options"].get("backend", {})
     except KeyError as err:
         typer.secho(
             "❌ The project's `pyproject.toml` needs to declare the number of"
@@ -211,6 +214,13 @@ def _run_without_superexec(
         "--num-supernodes",
         f"{num_supernodes}",
     ]
+
+    if backend_cfg:
+        # Stringify as JSON
+        command.extend(["--backend-config", json.dumps(backend_cfg)])
+
+    if verbose:
+        command.extend(["--verbose"])
 
     if config_overrides:
         command.extend(["--run-config", f"{' '.join(config_overrides)}"])
