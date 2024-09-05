@@ -1,7 +1,7 @@
 """pytorch-example-low-level: A low-level Flower / PyTorch app."""
 
-import random
 import json
+import random
 from collections import OrderedDict
 from logging import INFO
 from time import time

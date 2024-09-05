@@ -44,6 +44,24 @@ The low-level `ServerApp` implemented in this example will go through these step
 5. Share the global model with selected nodes so they evaluate it on their local validation sets
 6. Compute the average accuracy and loss from the received results.
 
+The low-level API also gives you full control on what gets logged when running you Flower apps. Running this example as shown below will generate a log like this:
+
+```bash
+...
+INFO :
+INFO :      🔄 Starting round 2/10
+INFO :      Sampled 10 out of 50 nodes.
+INFO :      📥 Received 10/10 results (TRAIN)
+INFO :      💡 Centrally evaluated model -> loss:  1.6017 /  accuracy:  0.4556
+INFO :      🎉 New best global model found: 0.455600
+INFO :      📨 Received 12/50 results (QUERY)
+INFO :      ✅ 6/50 nodes opted-in for evaluation (QUERY)
+INFO :      📥 Received 6/6 results (EVALUATE)
+INFO :      📊 Federated evaluation -> loss: 1.605±0.116 / accuracy: 0.522±0.105
+INFO :
+...
+```
+
 ### Run with the Simulation Engine
 
 With default parameters, 20% of the total 50 nodes (see `num-supernodes` in `pyproject.toml`) will be sampled in each round. By default `ClientApp` objects will run on CPU.
@@ -54,3 +72,14 @@ flwr run .
 # To disable W&B
 flwr run . --run-config use-wandb=false
 ```
+
+You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
+
+```bash
+flwr run . --run-config "num-server-rounds=5 fraction-clients-train=0.5"
+```
+
+### Run with the Deployment Engine
+
+> \[!NOTE\]
+> An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.
