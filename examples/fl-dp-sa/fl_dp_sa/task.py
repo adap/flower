@@ -77,8 +77,8 @@ def train(net, trainloader, valloader, epochs, device):
             loss.backward()
             optimizer.step()
 
-    train_loss, train_acc = test(net, trainloader)
-    val_loss, val_acc = test(net, valloader)
+    train_loss, train_acc = test(net, trainloader, device)
+    val_loss, val_acc = test(net, valloader, device)
 
     results = {
         "train_loss": train_loss,
