@@ -112,7 +112,7 @@ def query(msg: Message, context: Context):
 
     # Sleep for a random amount of time, will result in some nodes not
     # repling back to the `ServerApp` in time
-    # time.sleep(random.randint(0, 3))
+    time.sleep(random.randint(0, 2))
 
     # Randomly set True or False as opt-in in the evaluation stage
     # Note the keys used for the records below are arbitrary, but both `ServerApp`

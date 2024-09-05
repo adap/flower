@@ -212,7 +212,7 @@ def query_nodes_for_evaluation(
         )
         messages.append(message)
 
-    # Send and wait for 2 seconds to receive answer
+    # Send and wait for 5 seconds to receive answer
     # The `ClientApp` artificially adds a delay, so some messages won't arrive in time
     # and therefore those nodes will be left out.
     replies = driver.send_and_receive(messages, timeout=5)
