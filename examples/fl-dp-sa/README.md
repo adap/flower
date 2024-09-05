@@ -1,6 +1,8 @@
-______________________________________________________________________
-
-## tags: \[basic, vision, fds\] dataset: \[MNIST\] framework: \[torch, torchvision\]
+----
+tags: [basic, vision, fds]
+dataset: [MNIST]
+framework: [torch, torchvision]
+---
 
 # Flower Example on MNIST with Differential Privacy and Secure Aggregation
 
