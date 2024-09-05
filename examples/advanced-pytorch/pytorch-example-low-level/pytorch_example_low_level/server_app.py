@@ -1,10 +1,11 @@
 """pytorch-example-low-level: A low-level Flower / PyTorch app."""
 
 import random
+import json
 from collections import OrderedDict
 from logging import INFO
 from time import time
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
 import torch
@@ -67,6 +68,9 @@ def main(driver: Driver, context: Context) -> None:
     # Keep track of best accuracy obtained (to save checkpoint when new best is found)
     best_acc_so_far = 0
 
+    # A dictionary to store results as they come
+    results = {"fed_accuracy": [], "fed_loss": []}
+
     for server_round in range(num_rounds):
         log(INFO, "")
         log(INFO, "🔄 Starting round %s/%s", server_round + 1, num_rounds)
@@ -108,7 +112,7 @@ def main(driver: Driver, context: Context) -> None:
         ### 4. Query nodes for opt-in evaluation
         opt_in_node_ids = query_nodes_for_evaluation(node_ids, driver, server_round)
 
-        # Prepare messages for evaluation
+        ### 5. Prepare messages for evaluation
         messages = construct_train_or_eval_messages(
             global_model, driver, opt_in_node_ids, MessageType.EVALUATE, server_round
         )
@@ -117,28 +121,44 @@ def main(driver: Driver, context: Context) -> None:
         replies = driver.send_and_receive(messages)
         log(INFO, "📥 Received %s/%s results (EVALUATE)", len(replies), len(messages))
 
-        # Process results and save
-        losses = []
-        accuracies = []
-        for res in replies:
-            if res.has_content():
-                evaluate_results = res.content.metrics_records["clientapp-evaluate"]
-                losses.append(evaluate_results["loss"])
-                accuracies.append(evaluate_results["accuracy"])
-        losses = np.array(losses)
-        accuracies = np.array(accuracies)
-        log(
-            INFO,
-            f"📊 Federated evaluation -> loss: {losses.mean():.3f}±{losses.std():.3f} / "
-            f"accuracy: {accuracies.mean():.3f}±{accuracies.std():.3f}",
-        )
+        ### 6. Process results, save and log
+        avg_accuracy, avg_loss = process_evaluation_responses(replies)
+        results["fed_accuracy"].append(avg_accuracy)
+        results["fed_loss"].append(avg_loss)
         if use_wandb:
             # Log federated metrics to W&B
             metrics = {
-                "federated_accuracy": accuracies.mean(),
-                "federated_loss": losses.mean(),
+                "federated_accuracy": avg_accuracy,
+                "federated_loss": avg_loss,
             }
             wandb.log(metrics, step=server_round)
+
+        # Save results to disk.
+        # Note we overwrite the same file with each call to this function.
+        # While this works, a more sophisticated approach is preferred
+        # in situations where the contents to be saved are larger.
+        with open(f"{save_path}/results.json", "w", encoding="utf-8") as fp:
+            json.dump(results, fp)
+
+
+def process_evaluation_responses(replies: List[Message]) -> Tuple[float]:
+
+    losses = []
+    accuracies = []
+    # Append all results
+    for res in replies:
+        if res.has_content():
+            evaluate_results = res.content.metrics_records["clientapp-evaluate"]
+            losses.append(evaluate_results["loss"])
+            accuracies.append(evaluate_results["accuracy"])
+    losses = np.array(losses)
+    accuracies = np.array(accuracies)
+    log(
+        INFO,
+        f"📊 Federated evaluation -> loss: {losses.mean():.3f}±{losses.std():.3f} / "
+        f"accuracy: {accuracies.mean():.3f}±{accuracies.std():.3f}",
+    )
+    return accuracies.mean(), losses.mean()
 
 
 def evaluate_global_model_centrally_and_save_results(

@@ -1,7 +1,17 @@
 # Federated Learning with PyTorch and Flower (Advanced Example -- Low level API)
 
-> \[!WARNING\]
-> This example uses Flower's low-level API which is in a preview state subject to change.
+> \[!CAUTION\]
+> This example uses Flower's low-level API which is a preview feature and subject to change.
+
+This example demonstrates how to use Flower's low-level API to write a `ServerApp` a _"for loop"_, enabling you to define what a "round" means and construct [Message](<>) objects to communicate arbitrary data structures as [RecordSet](<>) objects. Just like the the counterpart to this example using the strategies API (find it in the parent directory), it:
+
+1. Save model checkpoints
+2. Save the metrics available at the strategy (e.g. accuracies, losses)
+3. Log training artefacts to [Weights & Biases](https://wandb.ai/site)
+4. Implement a simple decaying learning rate schedule across rounds
+
+> \[!NOTE\]
+> The code in this example is particularly rich in comments, but the code itself is intended to be easy to follow. Note that in `task.py` you'll make use of many of the same components (model, train/evaluate functions, data loaders) as were first presented in the [pytorch-example](https://github.com/adap/flower/tree/main/examples/advanced-pytorch/pytorch-example) in the parent directory that uses strategies.
 
 ```shell
 pytorch-pytorch-low-level
@@ -25,10 +35,22 @@ pip install -e .
 
 ## Run the project
 
+The low-level `ServerApp` implemented in this example will go through these steps on each round:
+
+1. Uniformly sample a % of the connected nodes
+2. Involve the selected nodes in a round of training, where they'll train the global model on their local data.
+3. Aggregate the received models
+4. Query all nodes and those that return `True` will be consider in the next step
+5. Share the global model with selected nodes so they evaluate it on their local validation sets
+6. Compute the average accuracy and loss from the received results.
+
 ### Run with the Simulation Engine
 
 With default parameters, 20% of the total 50 nodes (see `num-supernodes` in `pyproject.toml`) will be sampled in each round. By default `ClientApp` objects will run on CPU.
 
 ```bash
 flwr run .
+
+# To disable W&B
+flwr run . --run-config use-wandb=false
 ```
