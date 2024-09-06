@@ -18,9 +18,6 @@ pip install -r requirements.txt
 
 # Log in HuggingFace account
 huggingface-cli login
-
-# Download main.py script
-git clone https://github.com/bigcode-project/bigcode-evaluation-harness.git && cd bigcode-evaluation-harness && git checkout 0f3e95f0806e78a4f432056cdb1be93604a51d69 && mv main.py ../ && cd .. && rm -rf bigcode-evaluation-harness
 ```
 
 After that, install `Node.js` and `g++` for the evaluation of JavaScript, C++:
@@ -34,6 +31,12 @@ nvm install 20
 
 # Install g++
 sudo apt-get install g++
+```
+
+Then, download the `main.py` script from `bigcode-evaluation-harness` repository.
+
+```shell
+git clone https://github.com/bigcode-project/bigcode-evaluation-harness.git && cd bigcode-evaluation-harness && git checkout 0f3e95f0806e78a4f432056cdb1be93604a51d69 && mv main.py ../ && cd .. && rm -rf bigcode-evaluation-harness
 ```
 
 
