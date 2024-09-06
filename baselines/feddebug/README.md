@@ -1,7 +1,7 @@
 ---
 title: FedDebug Systematic Debugging for Federated Learning Applications
 url: https://dl.acm.org/doi/abs/10.1109/ICSE48619.2023.00053
-labels: [malicious, client, debugging, testing, fault localization, neural networks, cnn, image classification, data poisoning]
+labels: [malicious client, debugging, fault localization, image classification, data poisoning]
 dataset: [cifar10, femnist] 
 ---
 
