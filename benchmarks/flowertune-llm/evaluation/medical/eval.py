@@ -4,7 +4,7 @@ import torch
 from peft import PeftModel
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
-from benchmarks import infer_pubmedqa, infer_medqa, infer_medmcqa
+from benchmarks import infer_medmcqa, infer_medqa, infer_pubmedqa
 
 # Fixed seed
 torch.manual_seed(2024)

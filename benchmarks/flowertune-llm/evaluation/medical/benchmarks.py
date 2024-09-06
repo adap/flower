@@ -1,16 +1,12 @@
 import json
-from torch.utils.data import DataLoader
-from sklearn.metrics import accuracy_score
-from tqdm import tqdm
+
 import pandas as pd
+from sklearn.metrics import accuracy_score
+from torch.utils.data import DataLoader
+from tqdm import tqdm
+from utils import format_answer, format_example, save_results
+
 import datasets
-
-from utils import (
-    format_example,
-    save_results,
-    format_answer,
-)
-
 
 INSTRUCTIONS = {
     "pubmedqa": "As an expert doctor in clinical science and medical knowledge, can you tell me if the following statement is correct? Answer yes, no, or maybe.",
@@ -22,8 +18,12 @@ INSTRUCTIONS = {
 def infer_pubmedqa(model, tokenizer, batch_size, run_name):
     name = "pubmedqa"
     answer_type = "boolean"
-    dataset = datasets.load_dataset("bigbio/pubmed_qa", "pubmed_qa_labeled_fold0_source", split="test",
-                                    trust_remote_code=True)
+    dataset = datasets.load_dataset(
+        "bigbio/pubmed_qa",
+        "pubmed_qa_labeled_fold0_source",
+        split="test",
+        trust_remote_code=True,
+    )
     # Post process
     instruction = INSTRUCTIONS[name]
 
@@ -44,7 +44,12 @@ def infer_pubmedqa(model, tokenizer, batch_size, run_name):
 def infer_medqa(model, tokenizer, batch_size, run_name):
     name = "medqa"
     answer_type = "mcq"
-    dataset = datasets.load_dataset("bigbio/med_qa", "med_qa_en_4options_source", split="test", trust_remote_code=True)
+    dataset = datasets.load_dataset(
+        "bigbio/med_qa",
+        "med_qa_en_4options_source",
+        split="test",
+        trust_remote_code=True,
+    )
 
     # Post process
     instruction = INSTRUCTIONS[name]
@@ -68,7 +73,9 @@ def infer_medqa(model, tokenizer, batch_size, run_name):
 def infer_medmcqa(model, tokenizer, batch_size, run_name):
     name = "medmcqa"
     answer_type = "mcq"
-    dataset = datasets.load_dataset("medmcqa", split="validation", trust_remote_code=True)
+    dataset = datasets.load_dataset(
+        "medmcqa", split="validation", trust_remote_code=True
+    )
 
     # Post process
     instruction = INSTRUCTIONS[name]
@@ -87,7 +94,9 @@ def infer_medmcqa(model, tokenizer, batch_size, run_name):
     generate_results(name, run_name, dataset, model, tokenizer, batch_size, answer_type)
 
 
-def generate_results(name, run_name, dataset, model, tokenizer, batch_size, answer_type):
+def generate_results(
+    name, run_name, dataset, model, tokenizer, batch_size, answer_type
+):
     # Run inference
     prediction = inference(dataset, model, tokenizer, batch_size)
 
@@ -122,7 +131,9 @@ def inference(dataset, model, tokenizer, batch_size):
             stop_seq.append(tokenizer.eos_token)
         if tokenizer.pad_token is not None:
             stop_seq.append(tokenizer.pad_token)
-        max_new_tokens = len(tokenizer(batch["gold"][0], add_special_tokens=False)["input_ids"])
+        max_new_tokens = len(
+            tokenizer(batch["gold"][0], add_special_tokens=False)["input_ids"]
+        )
 
         outputs = []
         for prompt in prompts:
@@ -135,7 +146,7 @@ def inference(dataset, model, tokenizer, batch_size):
                 temperature=temperature,
                 pad_token_id=tokenizer.eos_token_id,
             )
-            output_ids = output_ids[0][len(input_ids[0]):]
+            output_ids = output_ids[0][len(input_ids[0]) :]
             output = tokenizer.decode(output_ids, skip_special_tokens=True)
             outputs.append(output)
 
