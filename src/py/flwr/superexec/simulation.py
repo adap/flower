@@ -15,6 +15,7 @@
 """Simulation engine executor."""
 
 
+import json
 import subprocess
 import sys
 from logging import ERROR, INFO, WARN
@@ -24,6 +25,7 @@ from typing_extensions import override
 
 from flwr.cli.config_utils import load_and_validate
 from flwr.cli.install import install_from_fab
+from flwr.common.config import unflatten_dict
 from flwr.common.constant import RUN_ID_NUM_BYTES
 from flwr.common.logger import log
 from flwr.common.typing import UserConfig
@@ -108,6 +110,7 @@ class SimulationEngine(Executor):
                 )
             self.verbose = verbose
 
+    # pylint: disable=too-many-locals
     @override
     def start_run(
         self,
@@ -152,6 +155,15 @@ class SimulationEngine(Executor):
                     "Config extracted from FAB's pyproject.toml is not valid"
                 )
 
+            # Flatten federated config
+            federation_config_flat = unflatten_dict(federation_config)
+
+            num_supernodes = federation_config_flat.get(
+                "num-supernodes", self.num_supernodes
+            )
+            backend_cfg = federation_config_flat.get("backend", {})
+            verbose: Optional[bool] = federation_config_flat.get("verbose")
+
             # In Simulation there is no SuperLink, still we create a run_id
             run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
             log(INFO, "Created run %s", str(run_id))
@@ -162,10 +174,17 @@ class SimulationEngine(Executor):
                 "--app",
                 f"{str(fab_path)}",
                 "--num-supernodes",
-                f"{federation_config.get('num-supernodes', self.num_supernodes)}",
+                f"{num_supernodes}",
                 "--run-id",
                 str(run_id),
             ]
+
+            if backend_cfg:
+                # Stringify as JSON
+                command.extend(["--backend-config", json.dumps(backend_cfg)])
+
+            if verbose:
+                command.extend(["--verbose"])
 
             if override_config:
                 override_config_str = _user_config_to_str(override_config)

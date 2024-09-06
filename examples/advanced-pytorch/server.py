@@ -1,16 +1,14 @@
-from typing import Dict, Optional, Tuple
-from collections import OrderedDict
 import argparse
-from torch.utils.data import DataLoader
+import warnings
+from collections import OrderedDict
+from typing import Dict, Optional, Tuple
 
 import flwr as fl
 import torch
+from flwr_datasets import FederatedDataset
+from torch.utils.data import DataLoader
 
 import utils
-
-import warnings
-
-from flwr_datasets import FederatedDataset
 
 warnings.filterwarnings("ignore")
 

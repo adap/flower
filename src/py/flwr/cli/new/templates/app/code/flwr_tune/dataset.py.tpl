@@ -1,7 +1,11 @@
 """$project_name: A Flower / FlowerTune app."""
 
+from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import IidPartitioner
 from transformers import AutoTokenizer
 from trl import DataCollatorForCompletionOnlyLM
+
+FDS = None  # Cache FederatedDataset
 
 
 def formatting_prompts_func(example):
@@ -24,7 +28,6 @@ def formatting_prompts_func(example):
 
 def get_tokenizer_and_data_collator_and_propt_formatting(model_name: str):
     """Get tokenizer, data_collator and prompt formatting."""
-    # From: https://huggingface.co/docs/trl/en/sft_trainer
     tokenizer = AutoTokenizer.from_pretrained(
         model_name, use_fast=True, padding_side="right"
     )
@@ -49,9 +52,36 @@ def formatting(dataset):
 def reformat(dataset, llm_task):
     """Reformat datasets."""
     dataset = dataset.rename_column("output", "response")
-    if llm_task == "finance" or llm_task == "code":
+    if llm_task in ["finance", "code"]:
         dataset = dataset.map(formatting, remove_columns=["input"])
     if llm_task == "medical":
         dataset = dataset.remove_columns(["instruction"])
         dataset = dataset.rename_column("input", "instruction")
     return dataset
+
+
+def load_data(partition_id: int, num_partitions: int, dataset_name: str):
+    """Load partition data."""
+    # Only initialize `FederatedDataset` once
+    global FDS
+    if FDS is None:
+        partitioner = IidPartitioner(num_partitions=num_partitions)
+        FDS = FederatedDataset(
+            dataset=dataset_name,
+            partitioners={"train": partitioner},
+        )
+    client_trainset = FDS.load_partition(partition_id, "train")
+    client_trainset = reformat(client_trainset, llm_task="generalnlp")
+    return client_trainset
+
+
+def replace_keys(input_dict, match="-", target="_"):
+    """Recursively replace match string with target string in dictionary keys."""
+    new_dict = {}
+    for key, value in input_dict.items():
+        new_key = key.replace(match, target)
+        if isinstance(value, dict):
+            new_dict[new_key] = replace_keys(value, match, target)
+        else:
+            new_dict[new_key] = value
+    return new_dict
