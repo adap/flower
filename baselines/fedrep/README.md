@@ -120,7 +120,7 @@ python -m fedrep.main --config-name cifar100_100_5 algorithm=fedavg
 ### CIFAR-100 (100, 20)
 
 ```
-python -m fedrep.main --config-name cifar100_100_5 algorithm=fedrep 
-python -m fedrep.main --config-name cifar100_100_5 algorithm=fedavg 
+python -m fedrep.main --config-name cifar100_100_20 algorithm=fedrep 
+python -m fedrep.main --config-name cifar100_100_20 algorithm=fedavg 
 ```
 <img src="_static/cifar100_100_20.png" width="400"/> 
