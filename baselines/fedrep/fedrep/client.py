@@ -235,9 +235,13 @@ def get_client_fn_simulation(
         ]
     )
 
+    use_fine_label = False
+    if config.dataset.name.lower() == "cifar100":
+        use_fine_label = True
+
     partitioner = PathologicalPartitioner(
         num_partitions=config.num_clients,
-        partition_by="label",
+        partition_by="fine_label" if use_fine_label else "label",
         num_classes_per_partition=config.dataset.num_classes,
         class_assignment_mode="random",
         shuffle=True,
@@ -251,11 +255,15 @@ def get_client_fn_simulation(
     def apply_train_transforms(batch):
         """Apply transforms for train data to the partition from FederatedDataset."""
         batch["img"] = [train_data_transform(img) for img in batch["img"]]
+        if use_fine_label:
+            batch["label"] = batch["fine_label"]
         return batch
 
     def apply_test_transforms(batch):
         """Apply transforms for test data to the partition from FederatedDataset."""
         batch["img"] = [test_data_transform(img) for img in batch["img"]]
+        if use_fine_label:
+            batch["label"] = batch["fine_label"]
         return batch
 
     # pylint: disable=E1101
