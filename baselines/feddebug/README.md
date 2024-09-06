@@ -83,7 +83,7 @@ This will create a basic Python environment with just Flower and additional pack
 The following command will run the default experimental setting in `conf/base.yaml` (LeNet, MNIST, with a total of 5 clients, where client-0 is malicious). FedDebug will identify client-0 as the malicious client. **The experiment took on average 62-90 seconds to complete.**
 
 ```bash
-poetry run python -m feddebug.main device=cpu 
+python -m feddebug.main device=cpu 
 ```  
 
 Output
