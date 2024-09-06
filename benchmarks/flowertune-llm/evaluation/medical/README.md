@@ -1,6 +1,6 @@
 # Evaluation for Medical challenge
 
-We leverage the medical question answering (QA) metric provided by [Meditron](https://github.com/epfLLM/meditron) to evaluate our fined-tuned LLMs.
+We build up a medical question answering (QA) pipeline to evaluate our fined-tuned LLMs.
 Three datasets have been selected for this evaluation: [PubMedQA](https://huggingface.co/datasets/bigbio/pubmed_qa), [MedMCQA](https://huggingface.co/datasets/medmcqa), and [MedQA](https://huggingface.co/datasets/bigbio/med_qa). 
 
 
@@ -20,28 +20,19 @@ pip install -r requirements.txt
 huggingface-cli login
 ```
 
-## Generate model answers to medical questions
-
-> [!NOTE]
-> Evaluation needs to be run on PubMedQA, MedMCQA and MedQA.
+## Generate model decision & calculate accuracy
 
 ```bash
-python inference.py \
---peft-path=/path/to/fine-tuned-peft-model-dir/  # e.g., ./peft_1
---dataset-name=pubmedqa  # chosen from [pubmedqa, medmcqa, medqa]
---run-name="fl-pubmedqa"  # an identifier for this run (up to you to choose) 
+python eval.py \
+--peft-path=/path/to/fine-tuned-peft-model-dir/ # e.g., ./peft_1
+--run-name=fl  # specified name for this run  
+--batch-size=16 
+--quantization=4 
+--datasets=pubmedqa,medmcqa,medqa
 ```
-The answers will be saved to `benchmarks/generations/[dataset_name]-[run_name].jsonl` in default.
 
+The model answers and accuracy values will be saved to `benchmarks/generation_{dataset_name}_{run_name}.jsonl` and `benchmarks/acc_{dataset_name}_{run_name}.txt`, respectively.
 
-## Calculate accuracy
-
-```bash
-python evaluate.py \
---dataset-name=pubmedqa  # chosen from [pubmedqa, medmcqa, medqa]
---run-name="fl-pubmedqa"  # run_name used in previous step
-```
-The accuracy value will be printed on the screen.
 
 > [!NOTE]
 > Please ensure that you provide all **three accuracy values (PubMedQA, MedMCQA, MedQA)** for three evaluation datasets when submitting to the LLM Leaderboard (see the [`Make Submission`](https://github.com/adap/flower/tree/main/benchmarks/flowertune-llm/evaluation#make-submission-on-flowertune-llm-leaderboard) section).

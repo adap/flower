@@ -1,359 +1,161 @@
-"""
-This python file is adapted from https://github.com/epfLLM/meditron/blob/main/evaluation/benchmarks.py
-
-Meditron (https://github.com/epfLLM/meditron) is licensed under the Apache License, Version 2.0.
-
-Citation:
-@software{epfmedtrn,
-  author = {Zeming Chen and Alejandro Hernández-Cano and Angelika Romanou and Antoine Bonnet
-  and Kyle Matoba and Francesco Salvi and Matteo Pagliardini and Simin Fan and Andreas Köpf
-  and Amirkeivan Mohtashami and Alexandre Sallinen and Alireza Sakhaeirad and Vinitra Swamy
-  and Igor Krawczuk and Deniz Bayazit and Axel Marmet and Syrielle Montariol and Mary-Anne Hartley
-  and Martin Jaggi and Antoine Bosselut},
-  title = {MediTron-70B: Scaling Medical Pretraining for Large Language Models},
-  month = November,
-  year = 2023,
-  url = {https://github.com/epfLLM/meditron}
-}
-"""
-
 import json
-import os
-
+from torch.utils.data import DataLoader
+from sklearn.metrics import accuracy_score
+from tqdm import tqdm
 import pandas as pd
+import datasets
 
-from datasets import Dataset, load_dataset
-
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-
-
-def benchmark_factory(name):
-    """Creates a benchmark object.
-
-    :param name: str, with the benchmark name.
-    return:
-    """
-    # Note: benchmark is instantiated *after* selection.
-    factories = {
-        "medmcqa": MedMCQA,
-        "pubmedqa": ClosedPubMedQA,
-        "medqa": MedQA,
-    }
-    if name not in factories:
-        raise ValueError(
-            "Benchmark {} not found. \
-                         Select one of the following: {}".format(
-                name, list(factories.keys())
-            )
-        )
-    return factories[name](name)
+from utils import (
+    format_example,
+    save_results,
+    format_answer,
+)
 
 
-def load_instruction(prompt_name):
-    """Loads the instruction for the given benchmark.
-
-    :param benchmark: str, the name of the benchmark
-    :param prompt_name: str, the name of the prompt to be used
-    """
-    path = os.path.join(ROOT_DIR, "instructions.json")
-    if not os.path.exists(path):
-        raise FileNotFoundError(
-            "Please save the different prompts to instructions.json"
-        )
-
-    with open(path) as f:
-        prompts = json.load(f)
-    return prompts[prompt_name]
+INSTRUCTIONS = {
+    "pubmedqa": "As an expert doctor in clinical science and medical knowledge, can you tell me if the following statement is correct? Answer yes, no, or maybe.",
+    "medqa": "You are a medical doctor taking the US Medical Licensing Examination. You need to demonstrate your understanding of basic and clinical science, medical knowledge, and mechanisms underlying health, disease, patient care, and modes of therapy. Show your ability to apply the knowledge essential for medical practice. For the following multiple-choice question, select one correct answer from A to E. Base your answer on the current and standard practices referenced in medical guidelines.",
+    "medmcqa": "You are a medical doctor answering realworld medical entrance exam questions. Based on your understanding of basic and clinical science, medical knowledge, and mechanisms underlying health, disease, patient care, and modes of therapy, answer the following multiple-choice question. Select one correct answer from A to D. Base your answer on the current and standard practices referenced in medical guidelines.",
+}
 
 
-class Benchmark:
-    def __init__(self, name):
-        """Class to implement a benchmark for evaluation.
+def infer_pubmedqa(model, tokenizer, batch_size, run_name):
+    name = "pubmedqa"
+    answer_type = "boolean"
+    dataset = datasets.load_dataset("bigbio/pubmed_qa", "pubmed_qa_labeled_fold0_source", split="test",
+                                    trust_remote_code=True)
+    # Post process
+    instruction = INSTRUCTIONS[name]
 
-        :param name: str, with the benchmark name.
-        :param path: str (optional), the path to the benchmark data.
-        :param splits: list of str, the splits of the data: train / test
-        :param hub_name: str, the name of the HuggingFace hub dataset.
-        :param dir_name: str, the name of the directory where the data is stored.
-        :param train_data: HuggingFace Dataset, the train data.
-        :param test_data: HuggingFace Dataset, the test data.
-        :param generations: HuggingFace Dataset, the generations.
-        :param subsets: list of str (optional), the subsets of the data to download from
-            the HuggingFace hub.
-        """
-        self.name = name
-        self.path = None
-        self.splits = None
-        self.hub_name = None
-        self.dir_name = None
-        self.train_data = None
-        self.test_data = None
-        self.generations = None
-        self.subsets = None
-
-    def load_from_hub(self):
-        """Downloads the benchmark data from the HuggingFace hub (for 1st time loading)
-        This is specific to each benchmark and must be implemented in the extended
-        class."""
-        print(f"Downloading benchmark from HuggingFace hub ({self.hub_name}).")
-        try:
-            if self.subsets is None:
-                load_dataset(
-                    self.hub_name,
-                    cache_dir=os.path.join(ROOT_DIR, "benchmarks", "datasets"),
-                    trust_remote_code=True,
-                    download_mode="force_redownload",
-                )
-            else:
-                for subset in self.subsets:
-                    load_dataset(
-                        self.hub_name,
-                        subset,
-                        cache_dir=os.path.join(ROOT_DIR, "benchmarks", "datasets"),
-                        trust_remote_code=True,
-                        download_mode="force_redownload",
-                    )
-        except:
-            raise ValueError(
-                "Default Huggingface loader failed for benchmark {}. \
-                             Try implementing a custom load_from_hub function.".format(
-                    self.name
-                )
-            )
-
-    def load_data(self, partition="train"):
-        """Loads benchmark data from a local directory, or from the HuggingFace hub if
-        not yet downloaded. Based on the input partition type, instantiates the
-        respective class attribute.
-
-        :param path: str (optional), the path to the benchmark data.
-        :param partition: str, the split of the data: train / test
-        """
-        print("=" * 50 + f"\nLoading data for benchmark {self.name}.\n")
-        if partition not in self.splits:
-            raise ValueError(
-                "Please provide a valid partition split: {}".format(self.splits)
-            )
-        if not os.path.exists(self.path):
-            os.makedirs(self.path)
-            self.load_from_hub()
-        try:
-            if self.subsets is None:
-                if partition == "train":
-                    self.train_data = load_dataset(self.path, split=partition)
-                elif partition in ["test", "validation"]:
-                    self.test_data = load_dataset(self.path, split=partition)
-            else:
-                if partition == "train":
-                    self.train_data = aggregate_datasets(
-                        self.path, self.subsets, partition=partition
-                    )
-                elif partition in ["test", "validation"]:
-                    self.test_data = aggregate_datasets(
-                        self.path, self.subsets, partition=partition
-                    )
-
-        except ValueError as e:
-            print(e)
-            raise ValueError(
-                "Couldn't load benchmark {} from local path.".format(self.name)
-            )
-
-    def preprocessing(self, partition="train"):
-        """Applies a custom pre-processing over the partition. If instruction is
-        provided, preprends it to the question Updates the train or test self
-        attributes.
-
-        :param _preprocess: function: dict -> dict, the preprocessing function to apply.
-        :param partition: str, the split of the data: train / test
-        """
-        try:
-            if partition == "train":
-                self.train_data = self.train_data.map(self.custom_preprocessing)
-            elif partition in ["test", "validation"]:
-                self.test_data = self.test_data.map(self.custom_preprocessing)
-            else:
-                raise ValueError(
-                    "Please provide a valid partition split: train or test"
-                )
-        except Exception as e:
-            print(e)
-            raise ValueError(
-                "Error when pre-processing {} {} data.".format(self.name, partition)
-            )
-
-    def custom_preprocessing(self):
-        """Wraps a pre-processing function (dict -> dict) specific to the benchmark.
-        Needs to be overriden in the extended class.
-
-        The return dictionary must contains keys 'prompt' & 'answer' for inference to
-        work.
-        """
-        raise NotImplementedError("Implement custom_preprocessing() in a child class.")
-
-    def add_instruction(self, instruction=None, partition="train"):
-        """Adds instructions to the data based on the input partition.
-
-        :param instruction: dict, with the `system` and `user` instructions. If None, then it creates prompt with few shot
-        :param partition: str, the split of the data: train / test
-        """
-
-        def _add_instruction(row):
-            row["prompt"] = "{}\n{}\n{}\n".format(
-                instruction["system"], row["prompt"], instruction["user"]
-            )
-            return row
-
-        if partition == "train":
-            self.train_data = self.train_data.map(_add_instruction)
-        elif partition == "test" or partition == "validation":
-            self.test_data = self.test_data.map(_add_instruction)
-        else:
-            raise ValueError(
-                "Please provide a valid partition split: {}".format(self.splits)
-            )
-
-    def add_generations(self, data):
-        """Adds the generations to the respective class attribute as a HuggingFace
-        Dataset.
-
-        :param data: pd.DataFrame or HuggingFace Dataset
-        """
-        if isinstance(data, pd.DataFrame):
-            self.generations = Dataset.from_pandas(data)
-        elif isinstance(data, Dataset):
-            self.generations = data
-
-    def save_generations(self, dataset_name, run_name):
-        """Saves the generations in the respective directory."""
-        path = os.path.join(ROOT_DIR, "benchmarks", "generations")
-        if not os.path.exists(os.path.dirname(path)):
-            os.makedirs(os.path.dirname(path))
-        gen_path = os.path.join(path, f"{dataset_name}-{run_name}.jsonl")
-
-        self.generations.to_json(gen_path, orient="records")
-        print(
-            "Stored {} generations to the following path: {}".format(
-                self.name, gen_path
-            )
-        )
-
-
-class MedMCQA(Benchmark):
-    """MedMCQA is a large-scale, Multiple-Choice Question Answering (MCQA) dataset
-    designed to address real-world medical entrance exam questions.
-
-    Huggingface card: https://huggingface.co/datasets/medmcqa
-    """
-
-    def __init__(self, name="medmcqa") -> None:
-        super().__init__(name)
-        self.hub_name = "medmcqa"
-        self.dir_name = "medmcqa"
-        self.path = os.path.join(ROOT_DIR, "benchmarks", "datasets", self.dir_name)
-        self.splits = ["train", "validation", "test"]
-        self.num_options = 4
-
-    @staticmethod
-    def custom_preprocessing(row):
-        options = [row["opa"], row["opb"], row["opc"], row["opd"]]
-        answer = int(row["cop"])
-        row["prompt"] = format_mcq(row["question"], options)
-        row["gold"] = chr(ord("A") + answer) if answer in [0, 1, 2, 3] else None
-        return row
-
-
-class ClosedPubMedQA(Benchmark):
-    """PubMedQA is a novel biomedical question answering (QA) dataset. Its task is to
-    answer research biomedical questions with yes/no/maybe using PubMed abstracts.
-
-    Huggingface card: https://huggingface.co/datasets/bigbio/pubmed_qa
-    """
-
-    def __init__(self, name="pubmedqa") -> None:
-        super().__init__(name)
-        self.hub_name = "bigbio/pubmed_qa"
-        self.dir_name = "bigbio___pubmed_qa"
-        self.path = os.path.join(ROOT_DIR, "benchmarks", "datasets", self.dir_name)
-        self.splits = ["train", "validation", "test"]
-        self.subsets = ["pubmed_qa_labeled_fold0_source"]
-        self.num_options = 3
-
-    @staticmethod
-    def custom_preprocessing(row):
+    def post_process(row):
         context = "\n".join(row["CONTEXTS"])
         row["prompt"] = f"{context}\n{row['QUESTION']}"
         row["gold"] = row["final_decision"]
         row["long_answer"] = row["LONG_ANSWER"]
+        row["prompt"] = f"{instruction}\n{row['prompt']}\nThe answer is:\n"
         return row
 
+    dataset = dataset.map(post_process)
 
-class MedQA(Benchmark):
-    """MedQA is a dataset for solving medical problems collected from the professional
-    medical board exams.
+    # Generate results
+    generate_results(name, run_name, dataset, model, tokenizer, batch_size, answer_type)
 
-    Huggingface card: https://huggingface.co/datasets/bigbio/med_qa
-    """
 
-    def __init__(self, name="medqa") -> None:
-        super().__init__(name)
-        self.hub_name = "bigbio/med_qa"
-        self.dir_name = "bigbio___med_qa"
-        self.path = os.path.join(ROOT_DIR, "benchmarks", "datasets", self.dir_name)
-        self.splits = ["train", "validation", "test"]
-        self.num_options = 5
-        self.subsets = ["med_qa_en_4options_source"]
+def infer_medqa(model, tokenizer, batch_size, run_name):
+    name = "medqa"
+    answer_type = "mcq"
+    dataset = datasets.load_dataset("bigbio/med_qa", "med_qa_en_4options_source", split="test", trust_remote_code=True)
 
-    @staticmethod
-    def custom_preprocessing(row):
+    # Post process
+    instruction = INSTRUCTIONS[name]
+
+    def post_process(row):
         choices = [opt["value"] for opt in row["options"]]
-        row["prompt"] = format_mcq(row["question"], choices)
+        row["prompt"] = format_example(row["question"], choices)
         for opt in row["options"]:
             if opt["value"] == row["answer"]:
                 row["gold"] = opt["key"]
                 break
+        row["prompt"] = f"{instruction}\n{row['prompt']}\nThe answer is:\n"
         return row
 
+    dataset = dataset.map(post_process)
 
-def format_mcq(question, options):
-    """
-    Formats a multiple choice question with the given options.
-    Uses the format recommended by: https://huggingface.co/blog/evaluating-mmlu-leaderboard
-
-    'Question: What is the capital of France?
-
-    Options:
-    A. London
-    B. Paris
-    C. Berlin
-    D. Rome'
-
-    :param question: str, the question
-    :param options: list of str, the options
-    :return: str, the formatted question
-    """
-    if not question.endswith("?") and not question.endswith("."):
-        question += "?"
-    options_str = "\n".join([f"{chr(65+i)}. {options[i]}" for i in range(len(options))])
-    prompt = "Question: " + question + "\n\nOptions:\n" + options_str
-    return prompt
+    # Generate results
+    generate_results(name, run_name, dataset, model, tokenizer, batch_size, answer_type)
 
 
-def aggregate_datasets(path, subsets, partition="train"):
-    """Takes as input a Huggingface DatasetDict with subset name as key, and Dataset as
-    value. Returns a pd.DataFrame with all subsets concatenated.
+def infer_medmcqa(model, tokenizer, batch_size, run_name):
+    name = "medmcqa"
+    answer_type = "mcq"
+    dataset = datasets.load_dataset("medmcqa", split="validation", trust_remote_code=True)
 
-    :param subsets: list of str, the subsets of the data to download from the
-        HuggingFace hub.
-    :return: pd.DataFrame
-    """
-    dataframes = []
-    for subset in subsets:
-        subset_data = load_dataset(os.path.join(path, subset), split=partition)
-        subset_df = pd.DataFrame(subset_data.map(lambda x: {"subset": subset, **x}))
-        dataframes.append(subset_df)
-    aggregate_df = pd.concat(dataframes, axis=0)
-    aggregate = Dataset.from_pandas(aggregate_df)
-    if "__index_level_0__" in aggregate.column_names:
-        aggregate = aggregate.remove_columns("__index_level_0__")
-    return aggregate
+    # Post process
+    instruction = INSTRUCTIONS[name]
+
+    def post_process(row):
+        options = [row["opa"], row["opb"], row["opc"], row["opd"]]
+        answer = int(row["cop"])
+        row["prompt"] = format_example(row["question"], options)
+        row["gold"] = chr(ord("A") + answer) if answer in [0, 1, 2, 3] else None
+        row["prompt"] = f"{instruction}\n{row['prompt']}\nThe answer is:\n"
+        return row
+
+    dataset = dataset.map(post_process)
+
+    # Generate results
+    generate_results(name, run_name, dataset, model, tokenizer, batch_size, answer_type)
+
+
+def generate_results(name, run_name, dataset, model, tokenizer, batch_size, answer_type):
+    # Run inference
+    prediction = inference(dataset, model, tokenizer, batch_size)
+
+    # Calculate accuracy
+    acc = accuracy_compute(prediction, answer_type)
+
+    # Save results and generations
+    save_results(name, run_name, prediction, acc)
+
+
+def inference(dataset, model, tokenizer, batch_size):
+    columns_process = ["prompt", "gold"]
+    dataset_process = pd.DataFrame(dataset, columns=dataset.features)[columns_process]
+    dataset_process = dataset_process.assign(output="Null")
+    temperature = 1.0
+
+    inference_data = json.loads(dataset_process.to_json(orient="records"))
+    data_loader = DataLoader(inference_data, batch_size=batch_size, shuffle=False)
+
+    batch_counter = 0
+    for batch in tqdm(data_loader, total=len(data_loader), position=0, leave=True):
+        prompts = [
+            f"<|im_start|>question\n{prompt}<|im_end|>\n<|im_start|>answer\n"
+            for prompt in batch["prompt"]
+        ]
+        if batch_counter == 0:
+            print(prompts[0])
+
+        # Process tokenizer
+        stop_seq = ["###"]
+        if tokenizer.eos_token is not None:
+            stop_seq.append(tokenizer.eos_token)
+        if tokenizer.pad_token is not None:
+            stop_seq.append(tokenizer.pad_token)
+        max_new_tokens = len(tokenizer(batch["gold"][0], add_special_tokens=False)["input_ids"])
+
+        outputs = []
+        for prompt in prompts:
+            input_ids = tokenizer.encode(prompt, return_tensors="pt").to("cuda")
+            output_ids = model.generate(
+                inputs=input_ids,
+                max_new_tokens=max_new_tokens,
+                do_sample=False,
+                top_p=1.0,
+                temperature=temperature,
+                pad_token_id=tokenizer.eos_token_id,
+            )
+            output_ids = output_ids[0][len(input_ids[0]):]
+            output = tokenizer.decode(output_ids, skip_special_tokens=True)
+            outputs.append(output)
+
+        for prompt, out in zip(batch["prompt"], outputs):
+            dataset_process.loc[dataset_process["prompt"] == prompt, "output"] = out
+        batch_counter += 1
+
+    return dataset_process
+
+
+def accuracy_compute(dataset, answer_type):
+    dataset = json.loads(dataset.to_json(orient="records"))
+    preds, golds = [], []
+    for row in dataset:
+        answer = row["gold"].lower()
+        output = row["output"].lower()
+        pred, gold = format_answer(output, answer, answer_type=answer_type)
+        preds.append(pred)
+        golds.append(gold)
+
+    accuracy = accuracy_score(preds, golds)
+
+    return accuracy
