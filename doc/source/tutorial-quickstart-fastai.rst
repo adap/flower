@@ -40,7 +40,13 @@ Next, activate your environment, then run:
    # Install project and dependencies
    $ pip install -e .
 
-To run the project, do:
+This example by default runs the Flower Simulation Engine, creating a
+federation of 10 nodes using `FedAvg
+<https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedAvg.html#flwr.server.strategy.FedAvg>`_
+as the aggregation strategy. The dataset will be partitioned using
+Flower Dataset's `IidPartitioner
+<https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_.
+Let's run the project:
 
 .. code:: shell
 
@@ -98,10 +104,6 @@ You can also override the parameters defined in the
 
    # Override some arguments
    $ flwr run . --run-config num-server-rounds=5
-
-What follows is an explanation of each component in the project you just
-created: dataset partition, the model, defining the ``ClientApp`` and
-defining the ``ServerApp``.
 
 .. note::
 
