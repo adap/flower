@@ -18,6 +18,9 @@ pip install -r requirements.txt
 
 # Log in HuggingFace account
 huggingface-cli login
+
+# Download main.py script
+git clone https://github.com/bigcode-project/bigcode-evaluation-harness.git && cd bigcode-evaluation-harness && git checkout 0f3e95f0806e78a4f432056cdb1be93604a51d69 && mv main.py ../ && cd .. && rm -rf bigcode-evaluation-harness
 ```
 
 After that, install `Node.js` and `g++` for the evaluation of JavaScript, C++:
@@ -41,14 +44,17 @@ sudo apt-get install g++
 
 ```bash
 python main.py \
+--model=mistralai/Mistral-7B-v0.3
 --peft_model=/path/to/fine-tuned-peft-model-dir/  # e.g., ./peft_1
 --max_length_generation=1024 # change to 2048 when running mbpp
 --batch_size=4 
+--allow_code_execution
 --save_generations 
 --save_references
 --tasks=humaneval # chosen from [mbpp, humaneval, multiple-js, multiple-cpp]
 --metric_output_path=./evaluation_results_humaneval.json # change dataset name based on your choice
 ```
+
 The model answers and pass@1 scores will be saved to `generations_{dataset_name}.json` and `evaluation_results_{dataset_name}.json`, respectively.
 
 > [!NOTE]
