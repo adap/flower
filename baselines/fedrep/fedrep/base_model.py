@@ -19,6 +19,44 @@ from fedrep.constants import (
 )
 
 
+def get_device(
+    use_cuda: bool = True, specified_device: Optional[int] = None
+) -> torch.device:
+    """Get the tensor device.
+
+    Args:
+        use_cuda: Flag indicates whether to use CUDA or not. Defaults to True.
+        specified_device: Specified cuda device to use. Defaults to None.
+
+    Raises
+    ------
+        ValueError: Specified device not in CUDA_VISIBLE_DEVICES.
+
+    Returns
+    -------
+        The selected or fallbacked device.
+    """
+    if not use_cuda or not torch.cuda.is_available():
+        device = torch.device("cpu")
+    elif torch.cuda.is_available():
+        if specified_device is not None:
+            cuda_visible_devices = os.environ.get("CUDA_VISIBLE_DEVICES")
+            if cuda_visible_devices is not None:
+                devices = [int(d) for d in cuda_visible_devices.split(",")]
+                if specified_device not in devices:
+                    raise ValueError(
+                        f"Specified device {specified_device}"
+                        " not in CUDA_VISIBLE_DEVICES"
+                    )
+                device = torch.device(f"cuda:{specified_device}")
+            else:
+                print("CUDA_VISIBLE_DEVICES not set, using torch.device('cuda').")
+        else:
+            device = torch.device("cuda")
+
+    return device
+
+
 class ModelSplit(ABC, nn.Module):
     """Abstract class for splitting a model into body and head."""
 
@@ -154,7 +192,10 @@ class ModelManager(ABC):
         self.client_id = client_id
         self.trainloader = trainloader
         self.testloader = testloader
-        self.device = self.config.server_device
+        self.device = get_device(
+            use_cuda=getattr(self.config, "use_cuda", True),
+            specified_device=getattr(self.config, "specified_device", None),
+        )
         self.client_save_path = client_save_path
         self.learning_rate = config.get("learning_rate", 0.01)
         self.momentum = config.get("momentum", 0.5)

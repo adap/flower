@@ -18,7 +18,7 @@ dataset: [CIFAR-10, CIFAR-100]
 
 **What’s implemented:** The code in this directory replicates the experiments in _Exploiting Shared Representations for Personalized Federated Learning_ (Liam Collins et al., 2021) for CIFAR10 and CIFAR-100 datasets, which proposed the `FedRep` model. Specifically, it replicates the results of CIFAR-10 (`(100, 2), (100, 5)`) and CIFAR-100 (`(100, 5), (100, 20)`) found in table 1 in their paper.
 
-**Datasets:** CIFAR-10, CIFAR-100 from `torchvision`.
+**Datasets:** CIFAR-10, CIFAR-100 from `Flower Datasets`.
 
 **Hardware Setup:** WSL2 Ubuntu 22.04 LTS, NVIDIA RTX 3070 Laptop, 32GB RAM, AMD Ryzen 9 5900HX. 
 
@@ -42,19 +42,21 @@ Please see how models are implemented using a so called model_manager and model_
 
 **Training Hyperparameters:** The hyperparameters can be found in `conf/base.yaml` file which is the configuration file for the main script. 
 
-| Description         | Default Value                   |
-| ------------------- | ------------------------------- |
-| num_clients         | 100                             |
-| num_rounds          | 100                             |
-| num_local_epochs    | 5                               |
-| num_rep_epochs      | 1                               |
-| enable_finetune     | False                           |
-| num_finetune_epochs | 5                               |
-| client resources    | {'num_cpus': 4, 'num_gpus': 1 } |
-| learning_rate       | 0.01                            |
-| batch_size          | 50                              |
-| model_name          | cnncifar10                      |
-| algorithm           | fedrep                          |
+| Description           | Default Value                       |
+| --------------------- | ----------------------------------- |
+| `num_clients`         | `100`                               |
+| `num_rounds`          | `100`                               |
+| `num_local_epochs`    | `5`                                 |
+| `num_rep_epochs`      | `1`                                 |
+| `enable_finetune`     | `False`                             |
+| `num_finetune_epochs` | `5`                                 |
+| `use_cuda`            | `true`                              |
+| `specified_device`    | `null`                              |
+| `client resources`    | `{'num_cpus': 2, 'num_gpus': 0.5 }` |
+| `learning_rate`       | `0.01`                              |
+| `batch_size`          | `50`                                |
+| `model_name`          | `cnncifar10`                        |
+| `algorithm`           | `fedrep`                            |
 
 
 ## Environment Setup
@@ -83,7 +85,6 @@ python -m fedrep.main # this will run using the default settings in the `conf/ba
 While the config files contain a large number of settings, the ones below are the main ones you'd likely want to modify to .
 ```bash
 algorithm: fedavg, fedrep # these are currently supported
-server_device: cuda:0, cpu
 dataset.name: cifar10, cifar100
 dataset.num_classes: 2, 5, 20 (only for CIFAR-100)
 model_name: cnncifar10, cnncifar100

@@ -15,7 +15,8 @@ client_resources:
   num_cpus: 2
   num_gpus: 0.5
 
-server_device: cuda:0
+use_cuda: true
+specified_device: null # the ID of cuda device, if null, then use defaults torch.device("cuda")
 
 dataset:
   name: cifar10

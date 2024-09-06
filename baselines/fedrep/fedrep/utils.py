@@ -14,6 +14,7 @@ from flwr.client import Client
 from flwr.server.history import History
 from omegaconf import DictConfig
 
+from fedrep.base_model import get_device
 from fedrep.client import get_client_fn_simulation
 from fedrep.constants import Algorithm
 from fedrep.models import (
@@ -76,7 +77,10 @@ def get_create_model_fn(
     Union[type[CNNCifar10ModelSplit], type[CNNCifar100ModelSplit]],
 ]:
     """Get create model function."""
-    device = config.server_device
+    device = get_device(
+        use_cuda=getattr(config, "use_cuda", True),
+        specified_device=getattr(config, "specified_device", None),
+    )
     split: Union[Type[CNNCifar10ModelSplit], Type[CNNCifar100ModelSplit]] = (
         CNNCifar10ModelSplit
     )
