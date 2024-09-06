@@ -77,7 +77,8 @@ python --version # it should be >=3.10.14
 This will create a basic Python environment with just Flower and additional packages, including those needed for simulation. Now you are inside your environment (pretty much as when you use `virtualenv` or `conda`).
 ## Running the Experiments
 
->Note: You can run almost any evaluation from the paper by changing the parameters in `conf/base.yaml`. Also, you can change the resources (per client CPU and GPU) in conf/base.yaml to speed up the simulation. Please check flower simulation guide to for more detail ([Flower Framework main](https://flower.ai/docs/framework/how-to-run-simulations.html) ).
+> [!NOTE]
+> You can run almost any evaluation from the paper by changing the parameters in `conf/base.yaml`. Also, you can change the resources (per client CPU and GPU) in conf/base.yaml to speed up the simulation. Please check flower simulation guide to for more detail ([Flower Framework main](https://flower.ai/docs/framework/how-to-run-simulations.html) ).
 
 The following command will run the default experimental setting in `conf/base.yaml` (LeNet, MNIST, with a total of 5 clients, where client-0 is malicious). FedDebug will identify client-0 as the malicious client. **The experiment took on average 62-90 seconds to complete.**
 
