@@ -1,6 +1,7 @@
 """whisper_example: A Flower / PyTorch app with OpenAi's Whisper."""
 
 import random
+from typing import List
 
 import numpy as np
 from flwr_datasets import FederatedDataset
@@ -12,11 +13,11 @@ from datasets import Dataset, concatenate_datasets
 
 fds = None  # Cache FederatedDataset
 processor = WhisperProcessor.from_pretrained("openai/whisper-tiny")
-REMOVE_COLS = ["file", "audio", "label", "is_unknown", "speaker_id", "utterance_id"]
 
 
 def load_data(
     partition_id: int,
+    remove_cols: List[str],
 ):
     # Only initialize `FederatedDataset` once
     global fds
@@ -32,7 +33,8 @@ def load_data(
 
     encoding_fn = get_encoding_fn(processor)
 
-    partition = partition.map(encoding_fn, num_proc=4, remove_columns=REMOVE_COLS)
+    remove_cols = remove_cols.split(",")
+    partition = partition.map(encoding_fn, num_proc=2, remove_columns=remove_cols)
 
     # Now let's add some _silence_ training examples (add 10% of total examples in this client's data)
     partitioner = fds.partitioners["train"]

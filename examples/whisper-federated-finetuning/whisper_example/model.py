@@ -71,6 +71,7 @@ def train_one_epoch(
     classifier.train()
     classifier.to(device)
     loss_avg, acc_avg = RunningAvg(), RunningAvg()
+    avg_loss, avg_acc = 0.0, 0.0
     with tqdm(total=len(dataloader.dataset), disable=disable_tqdm) as t:
         for b in dataloader:
             optimizer.zero_grad()
@@ -94,9 +95,10 @@ def train_one_epoch(
             acc_avg.update(acc)
 
             t.update(data.shape[0])
-            t.set_postfix(
-                {"avg_loss": f"{loss_avg():.4f}", "avg_acc": f"{acc_avg():.4f}"}
-            )
+            avg_loss, avg_acc = loss_avg(), acc_avg()
+            t.set_postfix({"avg_loss": f"{avg_loss:.4f}", "avg_acc": f"{avg_acc:.4f}"})
+
+    return avg_loss, avg_acc
 
 
 def eval_model(model, classifier, criterion, dataloader, device):

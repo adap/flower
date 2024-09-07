@@ -1,5 +1,8 @@
 """whisper_example: A Flower / PyTorch app with OpenAi's Whisper."""
 
+import time
+
+time.sleep(5)
 import torch
 from torch.utils.data import DataLoader
 from whisper_example.model import get_model, get_params, set_params, train_one_epoch
@@ -66,19 +69,25 @@ class WhisperFlowerClient(NumPyClient):
         # Define optimizer and criterion
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.SGD(self.classifier.parameters(), lr=0.001)
-        # Train
-        train_one_epoch(
-            self.encoder,
-            self.classifier,
-            optimizer,
-            criterion,
-            train_loader,
-            self.device,
-            disable_tqdm=self.disable_tqdm,
-        )
+
+        # Don't train if partition is very small
+        run_training = len(train_loader) > 1
+        metrics = {"trained": run_training}  # will be used for metrics aggregation
+        if run_training:
+            # Train
+            avg_loss, avg_acc = train_one_epoch(
+                self.encoder,
+                self.classifier,
+                optimizer,
+                criterion,
+                train_loader,
+                self.device,
+                disable_tqdm=self.disable_tqdm,
+            )
+            metrics = {**metrics, "loss": avg_loss, "accuracy": avg_acc}
 
         # Return local classification head and statistics
-        return get_params(self.classifier), len(train_loader.dataset), {}
+        return get_params(self.classifier), len(train_loader.dataset), metrics
 
 
 def client_fn(context: Context):
@@ -89,9 +98,17 @@ def client_fn(context: Context):
     disable_tqdm = context.run_config["disable-tqdm"]
     compile_model = context.run_config["compile-model"]
 
+    # Some systems seem to need this, else .map stages will hang
+    # Doesn't seem to be required on macOS; but it's on Ubuntu
+    # even if the latter has more CPUs...
+    # ! Open a PR if you know how to improve this!
+    og_threads = torch.get_num_threads()
+    torch.set_num_threads(1)
+
     partition = load_data(
         partition_id=partition_id,
     )
+
     torch.set_num_threads(og_threads)
 
     return WhisperFlowerClient(

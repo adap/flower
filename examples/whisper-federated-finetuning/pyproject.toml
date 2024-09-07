@@ -31,6 +31,7 @@ num-classes = 12
 batch-size = 8
 compile-model = false
 disable-tqdm = true
+remove-cols = "file,audio,label,is_unknown,speaker_id,utterance_id"
 
 [tool.flwr.federations]
 default = "local-sim"
@@ -40,8 +41,10 @@ default = "local-sim"
 options.num-supernodes = 2112 # number unique speakers in training partition
 options.backend.client-resources.num-cpus = 4
 options.backend.client-resources.num-gpus = 0.0
+options.backend.init-args.log-to-driver = false # set to true to enable all logs from simulation engine
 
 [tool.flwr.federations.local-sim-gpu]
 options.num-supernodes = 2112 # number unique speakers in training partition
-options.backend.client-resources.num-cpus = 4
-options.backend.client-resources.num-gpus = 0.5
+options.backend.client-resources.num-cpus = 2
+options.backend.client-resources.num-gpus = 0.2
+options.backend.init-args.log-to-driver = false   # set to true to enable all logs from simulation engine
