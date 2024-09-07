@@ -1,14 +1,18 @@
 """whisper_example: A Flower / PyTorch app with OpenAi's Whisper."""
 
-import numpy as np
 import torch
-from torch.utils.data import DataLoader, WeightedRandomSampler
+from torch.utils.data import DataLoader
 from whisper_example.model import get_model, get_params, set_params, train_one_epoch
-from whisper_example.task import load_data
+from whisper_example.task import construct_balanced_sampler, load_data
 
-from datasets import load_from_disk
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
+
+torch.set_float32_matmul_precision(
+    "high"
+)  #  If “high” or “medium” are set then the TensorFloat32 is used
+
+og_threads = torch.get_num_threads()
 
 
 class WhisperFlowerClient(NumPyClient):
@@ -45,13 +49,9 @@ class WhisperFlowerClient(NumPyClient):
         set_params(self.classifier, parameters)
 
         # construct sampler in order to have balanced batches
-        hist = np.histogram(self.trainset["targets"], bins=12)
-        w_per_class = (
-            len(self.trainset) / hist[0]
-        )  # doesn't have to add up to 1 (relative is what matters)
-        # print(f"{w_per_class = }")
-        w_ss = [w_per_class[t] for t in self.trainset["targets"]]
-        ss = WeightedRandomSampler(w_ss, len(w_ss))
+        sampler = None
+        if len(self.trainset) > self.batch_size:
+            sampler = construct_balanced_sampler(self.trainset)
 
         # Construct dataloader
         train_loader = DataLoader(
@@ -59,7 +59,7 @@ class WhisperFlowerClient(NumPyClient):
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=0,
-            sampler=ss,
+            sampler=sampler,
             drop_last=True,
         )
 
@@ -84,31 +84,15 @@ class WhisperFlowerClient(NumPyClient):
 def client_fn(context: Context):
 
     partition_id = context.node_config["partition-id"]
-    print(f"{partition_id = }")
-    # is true, this `ClientApp`'s partition will be saved after being pre-processed
-    save_partition = context.run_config["save-partitions-to-disk"]
-    save_path = context.run_config["partitions-save-path"]
     num_classes = context.run_config["num-classes"]
     batch_size = context.run_config["batch-size"]
     disable_tqdm = context.run_config["disable-tqdm"]
     compile_model = context.run_config["compile-model"]
 
-    torch.set_float32_matmul_precision(
-        "high"
-    )  #  If “high” or “medium” are set then the TensorFloat32 is used
-
-    # If dataset hasn't been processed for this client, do so.
-    # else, just load it
-    try:
-        partition = load_from_disk(f"{save_path}/client{partition_id}.hf")
-    except:
-        og_threads = torch.get_num_threads()
-        partition = load_data(
-            partition_id=partition_id,
-            save_partition_to_disk=save_partition,
-            partitions_save_path=save_path,
-        )
-        torch.set_num_threads(og_threads)
+    partition = load_data(
+        partition_id=partition_id,
+    )
+    torch.set_num_threads(og_threads)
 
     return WhisperFlowerClient(
         partition, batch_size, num_classes, disable_tqdm, compile_model

@@ -2,8 +2,10 @@
 
 import random
 
+import numpy as np
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import NaturalIdPartitioner
+from torch.utils.data import WeightedRandomSampler
 from transformers import WhisperProcessor
 
 from datasets import Dataset, concatenate_datasets
@@ -15,8 +17,6 @@ REMOVE_COLS = ["file", "audio", "label", "is_unknown", "speaker_id", "utterance_
 
 def load_data(
     partition_id: int,
-    save_partition_to_disk: bool,
-    partitions_save_path: str,
 ):
     # Only initialize `FederatedDataset` once
     global fds
@@ -34,26 +34,16 @@ def load_data(
 
     partition = partition.map(encoding_fn, num_proc=4, remove_columns=REMOVE_COLS)
 
-    # now let's add some _silence_ training examples (add 10% of total examples in this client's data)
+    # Now let's add some _silence_ training examples (add 10% of total examples in this client's data)
     partitioner = fds.partitioners["train"]
     ratio_silences_for_client = 0.1 * (len(partition) / len(partitioner.dataset))
     silence_dataset = prepare_silences_dataset(
         partitioner.dataset, ratio_silences_for_client
     )
     if len(silence_dataset) > 0:
-        print(
-            f"Adding {len(silence_dataset)} to client data ({len(partition)}) -- partition: {partition_id}"
-        )
         silence_enc = silence_dataset.map(encoding_fn)
-
         partition = concatenate_datasets([partition, silence_enc])
-    else:
-        print(
-            f"Partition is small ({len(partition)}), skipping adding noise. -- partition: {partition_id}"
-        )
-    if save_partition_to_disk:
-        # save dataset. It will be loaded next time this client is spawned
-        partition.save_to_disk(f"{partitions_save_path}/client{partition_id}.hf")
+
     return partition
 
 
@@ -92,11 +82,11 @@ def prepare_silences_dataset(train_dataset, ratio_silence: float = 0.1) -> Datas
     (defined by `ratio_silence`) one-second long clips from those background audio
     files. Later, those audio clips will be included into the training set.
     """
-    # retrieve original silence audio clips
+    # Retrieve original silence audio clips
     silences = train_dataset.filter(lambda x: x["label"] == 35)
-    # figure out how many to add
+    # Figure out how many to add
     num_silence_total = int(len(train_dataset) * ratio_silence)
-    # num new entries per background noise clip
+    # Num new entries per background noise clip
     num_silence_per_bkg = num_silence_total // len(silences)
 
     silence_to_add = []
@@ -113,3 +103,17 @@ def prepare_silences_dataset(train_dataset, ratio_silence: float = 0.1) -> Datas
             silence_to_add[-1]["audio"]["array"] = sil_array_crop
 
     return Dataset.from_list(silence_to_add)
+
+
+def construct_balanced_sampler(trainset):
+    hist, _ = np.histogram(trainset["targets"], bins=12)
+    # Mask of non-zeros
+    hist_mask = hist > 0
+    w_per_class = len(trainset) / (
+        hist + 1
+    )  # avoid dividing by zeros  # doesn't have to add up to 1 (relative is what matters)
+    w_per_class += 1  # needed in case trainset has very few samples
+    # Apply mask so we don't attempt sampling classes that aren't present
+    w_per_class *= hist_mask
+    w_ss = [w_per_class[t] for t in trainset["targets"]]
+    return WeightedRandomSampler(w_ss, len(w_ss))

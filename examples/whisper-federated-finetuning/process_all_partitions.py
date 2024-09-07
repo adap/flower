@@ -1,4 +1,5 @@
 from multiprocessing import Pool
+from time import time
 
 from whisper_example.task import load_data
 
@@ -10,8 +11,6 @@ TOTAL_TRAIN_PARTITIONS = 2112
 def process_one_partition(partition_id: int):
     _ = load_data(
         partition_id,
-        save_partition_to_disk=True,
-        partitions_save_path="processed_partitions",
     )
 
 
@@ -21,6 +20,10 @@ if __name__ == "__main__":
     _ = load_dataset("speech_commands", "v0.02", split="train", token=False)
 
     # Parallelize the processing of each partition in the dataset
-    num_proc = 8
+    t_start = time()
+    num_proc = None  # set it if you want to limit the number of processes
     with Pool(num_proc) as pool:
         pool.map(process_one_partition, range(TOTAL_TRAIN_PARTITIONS))
+    print(
+        f"Pre-processing {TOTAL_TRAIN_PARTITIONS} partitions took: {time() - t_start:.2f} s"
+    )

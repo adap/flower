@@ -6,7 +6,12 @@ import torch
 from torch.utils.data import DataLoader, WeightedRandomSampler
 from transformers import WhisperProcessor
 from whisper_example.model import eval_model, get_model, train_one_epoch
-from whisper_example.task import REMOVE_COLS, get_encoding_fn, prepare_silences_dataset
+from whisper_example.task import (
+    REMOVE_COLS,
+    construct_balanced_sampler,
+    get_encoding_fn,
+    prepare_silences_dataset,
+)
 
 from datasets import concatenate_datasets, load_dataset
 
@@ -70,18 +75,11 @@ def main():
 
     lbls = set(full_train_dataset["targets"])
     print(f"{lbls = }")
-    hist = np.histogram(full_train_dataset["targets"], bins=12)
-    print(f"{[int(count) for count in hist[0]]}")
+    # Construct a balanced sampler so batches roughly contain the same number
+    # of samples from each class
+    sampler = construct_balanced_sampler(full_train_dataset)
 
-    # make balanced batches with a WeightedRandomSampler
-    w_per_class = (
-        len(full_train_dataset) / hist[0]
-    )  # doesn't have to add up to 1 (relative is what matters)
-    print(f"{w_per_class = }")
-    w_ss = [w_per_class[t] for t in full_train_dataset["targets"]]
-    sampler = WeightedRandomSampler(w_ss, len(w_ss))
-
-    # prepare dataloaders
+    # Prepare dataloaders
     train_dataset = full_train_dataset.with_format("torch", columns=["data", "targets"])
     train_loader = DataLoader(
         train_dataset, batch_size=64, shuffle=False, num_workers=4, sampler=sampler
@@ -91,7 +89,7 @@ def main():
     test_dataset = test_encoded.with_format("torch", columns=["data", "targets"])
     test_loader = DataLoader(test_dataset, batch_size=64, num_workers=4)
 
-    # model to cuda, set criterion, classification layer to train and optimiser
+    # Model to cuda, set criterion, classification layer to train and optimiser
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     encoder, classifier = get_model(device, num_classes=12)
     criterion = torch.nn.CrossEntropyLoss()
@@ -107,7 +105,7 @@ def main():
     classifier_head_params = sum(p.numel() for p in classifier.parameters())
     print(f"{classifier_head_params = }")
 
-    # eval initial model
+    # Eval initial model
     loss, accuracy = eval_model(encoder, classifier, criterion, val_loader, device)
     print(f"Initial (loss, acc): {loss = }, {accuracy = }")
     best = [-float("inf"), None]
