@@ -16,7 +16,6 @@ REMOVE_COLS = ["file", "audio", "label", "is_unknown", "speaker_id", "utterance_
 def load_data(
     partition_id: int,
     save_partition_to_disk: bool,
-    node_id: int,
     partitions_save_path: str,
 ):
     # Only initialize `FederatedDataset` once
@@ -24,30 +23,37 @@ def load_data(
     if fds is None:
         partitioner = NaturalIdPartitioner(partition_by="speaker_id")
         fds = FederatedDataset(
-            dataset="google/speech_commands",
+            dataset="speech_commands",
             subset="v0.02",
             partitioners={"train": partitioner},
         )
 
     partition = fds.load_partition(partition_id)
-    partition = partition.remove_columns(REMOVE_COLS)
 
     encoding_fn = get_encoding_fn(processor)
 
-    partition = partition.map(encoding_fn, num_proc=4)
+    partition = partition.map(encoding_fn, num_proc=4, remove_columns=REMOVE_COLS)
 
     # now let's add some _silence_ training examples (add 10% of total examples in this client's data)
-    ratio_silences_for_client = 0.1 * (len(partition) / len(partition))
+    partitioner = fds.partitioners["train"]
+    ratio_silences_for_client = 0.1 * (len(partition) / len(partitioner.dataset))
     silence_dataset = prepare_silences_dataset(
         partitioner.dataset, ratio_silences_for_client
     )
-    print(f"adding {len(silence_dataset)} to client data ({len(partition)})")
-    silence_enc = silence_dataset.map(encoding_fn)
+    if len(silence_dataset) > 0:
+        print(
+            f"Adding {len(silence_dataset)} to client data ({len(partition)}) -- partition: {partition_id}"
+        )
+        silence_enc = silence_dataset.map(encoding_fn)
 
-    partition = concatenate_datasets([partition, silence_enc])
+        partition = concatenate_datasets([partition, silence_enc])
+    else:
+        print(
+            f"Partition is small ({len(partition)}), skipping adding noise. -- partition: {partition_id}"
+        )
     if save_partition_to_disk:
         # save dataset. It will be loaded next time this client is spawned
-        partition.save_to_disk(f"{partitions_save_path}/client{node_id}.hf")
+        partition.save_to_disk(f"{partitions_save_path}/client{partition_id}.hf")
     return partition
 
 

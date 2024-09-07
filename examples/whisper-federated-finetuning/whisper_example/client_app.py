@@ -6,17 +6,25 @@ from torch.utils.data import DataLoader, WeightedRandomSampler
 from whisper_example.model import get_model, get_params, set_params, train_one_epoch
 from whisper_example.task import load_data
 
-import flwr as fl
 from datasets import load_from_disk
+from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
 
 
-class WhisperFlowerClient(fl.client.NumPyClient):
+class WhisperFlowerClient(NumPyClient):
     """A Flower client that does trains a classification head attached to the encoder of
     a Whisper-tiny encoder for Keyword spotting."""
 
-    def __init__(self, trainset, num_classes: int, disable_tqdm: bool, compile: bool):
+    def __init__(
+        self,
+        trainset,
+        batch_size: int,
+        num_classes: int,
+        disable_tqdm: bool,
+        compile: bool,
+    ):
         self.disable_tqdm = disable_tqdm
+        self.batch_size = batch_size
         self.trainset = trainset.with_format("torch", columns=["data", "targets"])
 
         # Determine device
@@ -36,9 +44,6 @@ class WhisperFlowerClient(fl.client.NumPyClient):
         # Apply the classifier parameters to the model in this client
         set_params(self.classifier, parameters)
 
-        # Read from config
-        batch, epochs = config["batch_size"], config["epochs"]
-
         # construct sampler in order to have balanced batches
         hist = np.histogram(self.trainset["targets"], bins=12)
         w_per_class = (
@@ -51,7 +56,7 @@ class WhisperFlowerClient(fl.client.NumPyClient):
         # Construct dataloader
         train_loader = DataLoader(
             self.trainset,
-            batch_size=batch,
+            batch_size=self.batch_size,
             shuffle=False,
             num_workers=0,
             sampler=ss,
@@ -78,12 +83,13 @@ class WhisperFlowerClient(fl.client.NumPyClient):
 
 def client_fn(context: Context):
 
-    data_path = context.run_config["data_path"]
-    node_id = context.node_id
+    partition_id = context.node_config["partition-id"]
+    print(f"{partition_id = }")
     # is true, this `ClientApp`'s partition will be saved after being pre-processed
     save_partition = context.run_config["save-partitions-to-disk"]
     save_path = context.run_config["partitions-save-path"]
     num_classes = context.run_config["num-classes"]
+    batch_size = context.run_config["batch-size"]
     disable_tqdm = context.run_config["disable-tqdm"]
     compile_model = context.run_config["compile-model"]
 
@@ -94,17 +100,19 @@ def client_fn(context: Context):
     # If dataset hasn't been processed for this client, do so.
     # else, just load it
     try:
-        partition = load_from_disk(f"{data_path}/client{node_id}.hf")
+        partition = load_from_disk(f"{save_path}/client{partition_id}.hf")
     except:
         og_threads = torch.get_num_threads()
         partition = load_data(
-            context.node_config["partition-id"],
+            partition_id=partition_id,
             save_partition_to_disk=save_partition,
-            node_id=node_id,
             partitions_save_path=save_path,
         )
         torch.set_num_threads(og_threads)
 
     return WhisperFlowerClient(
-        partition, num_classes, disable_tqdm, compile_model
+        partition, batch_size, num_classes, disable_tqdm, compile_model
     ).to_client()
+
+
+app = ClientApp(client_fn=client_fn)

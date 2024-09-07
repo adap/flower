@@ -7,6 +7,8 @@ import torch
 from tqdm import tqdm
 from transformers import WhisperForConditionalGeneration
 
+from flwr.common import NDArrays
+
 
 def get_model(device, num_classes, compile: bool = True):
     """Create model: Whisper-tiny Encoder + classification head."""
@@ -28,7 +30,7 @@ def get_model(device, num_classes, compile: bool = True):
     return encoder, classifier
 
 
-def set_params(model: torch.nn.ModuleList, params: List[fl.common.NDArrays]):
+def set_params(model: torch.nn.ModuleList, params: List[NDArrays]):
     """Set model weights from a list of NumPy ndarrays."""
     params_dict = zip(model.state_dict().keys(), params)
     state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
