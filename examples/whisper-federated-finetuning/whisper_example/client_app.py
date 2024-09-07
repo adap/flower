@@ -68,7 +68,7 @@ class WhisperFlowerClient(NumPyClient):
 
         # Define optimizer and criterion
         criterion = torch.nn.CrossEntropyLoss()
-        optimizer = torch.optim.SGD(self.classifier.parameters(), lr=0.001)
+        optimizer = torch.optim.Adam(self.classifier.parameters(), lr=0.001)
 
         # Don't train if partition is very small
         run_training = len(train_loader) > 1
