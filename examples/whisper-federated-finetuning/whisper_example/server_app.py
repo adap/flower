@@ -40,6 +40,8 @@ def get_evaluate_fn(
         classifier.to(device)
 
         # prepare dataset
+        og_threads = torch.get_num_threads()
+        torch.set_num_threads(1)
         encoding_fn = get_encoding_fn(processor)
         if server_round == num_rounds:
             prefix = "test"
@@ -48,14 +50,13 @@ def get_evaluate_fn(
             prefix = "val"
             encoded = val_set.map(encoding_fn, num_proc=4, remove_columns=remove_cols)
 
+        torch.set_num_threads(og_threads)
         val_encoded = encoded.with_format("torch", columns=["data", "targets"])
         val_loader = DataLoader(val_encoded, batch_size=64, num_workers=4)
 
         # Run global evaluation
         criterion = torch.nn.CrossEntropyLoss()
         loss, accuracy = eval_model(encoder, classifier, criterion, val_loader, device)
-
-        print(f"{prefix}: --> {loss = }, {accuracy = }")
 
         return loss, {f"{prefix}_accuracy": accuracy}
 
@@ -128,7 +129,12 @@ def server_fn(context: Context):
         fraction_fit=fraction_fit,
         fraction_evaluate=0.0,
         fit_metrics_aggregation_fn=weighted_average,
-        # evaluate_fn=get_evaluate_fn(val_set=sc_val, test_set=sc_test, processor=processor,run_config=context.run_config),
+        evaluate_fn=get_evaluate_fn(
+            val_set=sc_val,
+            test_set=sc_test,
+            processor=processor,
+            run_config=context.run_config,
+        ),
         initial_parameters=parameters,
     )
     config = ServerConfig(num_rounds=num_rounds)
