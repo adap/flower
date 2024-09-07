@@ -1,9 +1,10 @@
 from pathlib import Path
-
+from logging import WARN
 import torch.nn as nn
 import numpy as np
 import pandas as pd
 import torch.nn as nn
+from flwr.common.logger import log
 
 from datasets import Dataset
 from flwr_datasets.partitioner import IidPartitioner
@@ -75,6 +76,14 @@ def load_data(partition_id: int, num_partitions: int):
     on mod(partition_id, 3), it is split horizontally into `ceil(num_partitions/3)`
     partitions. This function returns the partition with index `partition_id % 3`.
     """
+
+    if num_partitions != NUM_VERTICAL_SPLITS:
+        log(
+            WARN,
+            "To run this example with num_partitions other than 3, you need to update how "
+            "the Vertical FL training is performed. This is because the shapes of the "
+            "gradients migh not be the same along the first dimension.",
+        )
 
     # Read whole dataset and process
     processed_df, features_set = process_dataset()
