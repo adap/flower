@@ -107,6 +107,7 @@ def client_fn(context: Context):
 
     partition = load_data(
         partition_id=partition_id,
+        remove_cols=context.run_config["remove-cols"],
     )
 
     torch.set_num_threads(og_threads)
