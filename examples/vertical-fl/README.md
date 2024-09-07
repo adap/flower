@@ -4,7 +4,7 @@ dataset: [Titanic]
 framework: [torch, pandas, scikit-learn]
 ---
 
-# Vertical Federated Learning with Flower (Comprehensive Example)
+# Vertical Federated Learning with Flower
 
 This example will showcase how you can perform Vertical Federated Learning using
 Flower. We'll be using the [Titanic dataset](https://www.kaggle.com/competitions/titanic/data)
