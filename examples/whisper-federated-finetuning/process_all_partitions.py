@@ -2,7 +2,10 @@ from multiprocessing import Pool
 
 from whisper_example.task import load_data
 
+from datasets import load_dataset
+
 TOTAL_TRAIN_PARTITIONS = 2112
+
 
 def process_one_partition(partition_id: int):
     _ = load_data(
@@ -14,7 +17,10 @@ def process_one_partition(partition_id: int):
 
 if __name__ == "__main__":
 
+    # Download train set
+    _ = load_dataset("speech_commands", "v0.02", split="train", token=False)
+
     # Parallelize the processing of each partition in the dataset
-    # One process will be created per CPU in your system
-    with Pool() as pool:
+    num_proc = 8
+    with Pool(num_proc) as pool:
         pool.map(process_one_partition, range(TOTAL_TRAIN_PARTITIONS))

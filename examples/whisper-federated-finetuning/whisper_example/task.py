@@ -93,7 +93,7 @@ def prepare_silences_dataset(train_dataset, ratio_silence: float = 0.1) -> Datas
     files. Later, those audio clips will be included into the training set.
     """
     # retrieve original silence audio clips
-    silences = [d for d in train_dataset if d["label"] == 35]
+    silences = train_dataset.filter(lambda x: x["label"] == 35)
     # figure out how many to add
     num_silence_total = int(len(train_dataset) * ratio_silence)
     # num new entries per background noise clip
@@ -103,7 +103,7 @@ def prepare_silences_dataset(train_dataset, ratio_silence: float = 0.1) -> Datas
     for sil in silences:
         sil_array = sil["audio"]["array"]
         sr = sil["audio"]["sampling_rate"]
-        print(f"Extracting audio from: {sil['file']} ...")
+        # print(f"Extracting audio from: {sil['file']} ...")
         for _ in range(num_silence_per_bkg):
             random_offset = random.randint(0, len(sil_array) - sr - 1)
             sil_array_crop = sil_array[random_offset : random_offset + sr]
