@@ -1,19 +1,49 @@
 [build-system]
-requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
-name = "whisper-flower"
-version = "0.1.0"
-description = "On-device Federated Downstreaming for Speech Classification"
-authors = ["The Flower Authors <hello@flower.ai>"]
+[project]
+name = "whisper_example"
+version = "1.0.0"
+description = "On-device Federated Finetuning for Speech Classification"
+license = "Apache-2.0"
+dependencies = [
+    "flwr[simulation]>=1.11.0",
+    "flwr-datasets[audio]>=0.3.0",
+    "transformers==4.44.2",
+    "torch==2.4.1",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.8,<3.11"
-flwr = { extras = ["simulation"], version = ">=1.0,<2.0" }
-transformers = "4.32.1"
-tokenizers = "0.13.3"
-datasets = "2.14.6"
-soundfile = "0.12.1"
-librosa = "0.10.1"
-# this example was tested with pytorch 2.1.0
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "flwrlabs"
+
+[tool.flwr.app.components]
+serverapp = "whisper_example.server_app:app"
+clientapp = "whisper_example.client_app:app"
+
+[tool.flwr.app.config]
+num-server-rounds = 3
+fraction-fit = 0.01 # sample 1% of clients in each round (1% of 2112 is 21)
+num-classes = 12
+batch-size = 8
+compile-model = false
+save-partitions-to-disk = true
+partitions-save-path = 'processed_partitions'
+disable-tqdm = true
+
+[tool.flwr.federations]
+default = "local-sim"
+
+
+[tool.flwr.federations.local-sim]
+options.num-supernodes = 2112 # number unique speakers in training partition
+options.backend.client-resources.num-cpus = 2
+options.backend.client-resources.num-gpus = 0.0
+
+[tool.flwr.federations.local-sim-gpu]
+options.num-supernodes = 2112 # number unique speakers in training partition
+options.backend.client-resources.num-cpus = 4
+options.backend.client-resources.num-gpus = 0.5

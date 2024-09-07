@@ -3,18 +3,12 @@ import random
 
 import numpy as np
 import torch
-from datasets import concatenate_datasets, load_dataset
 from torch.utils.data import DataLoader, WeightedRandomSampler
-from transformers import WhisperForConditionalGeneration, WhisperProcessor
+from transformers import WhisperProcessor
+from whisper_example.model import eval_model, get_model, train_one_epoch
+from whisper_example.task import REMOVE_COLS, get_encoding_fn, prepare_silences_dataset
 
-from utils import (
-    eval_model,
-    get_encoding_fn,
-    get_model,
-    prepare_silences_dataset,
-    remove_cols,
-    train_one_epoch,
-)
+from datasets import concatenate_datasets, load_dataset
 
 random.seed(1989)
 torch.set_float32_matmul_precision(
@@ -56,10 +50,10 @@ def main():
     torch.set_num_threads(
         1
     )  # not clear to me why we need this in order to be able to use `num_proc > 1 for .map`
-    train_encoded = sc.map(prepare_dataset_fn, num_proc=4, remove_columns=remove_cols)
-    val_encoded = sc_val.map(prepare_dataset_fn, num_proc=4, remove_columns=remove_cols)
+    train_encoded = sc.map(prepare_dataset_fn, num_proc=4, remove_columns=REMOVE_COLS)
+    val_encoded = sc_val.map(prepare_dataset_fn, num_proc=4, remove_columns=REMOVE_COLS)
     test_encoded = sc_test.map(
-        prepare_dataset_fn, num_proc=4, remove_columns=remove_cols
+        prepare_dataset_fn, num_proc=4, remove_columns=REMOVE_COLS
     )
 
     # create and pre-process the dataset of silences
@@ -68,7 +62,7 @@ def main():
     # ! needed each time you run the code. Alternatively, this silence generation could be
     # ! implemented as part of a `collate_fn` in the standard PyTorch dataloader...
     encoded_silences = silences_dataset.map(
-        prepare_dataset_fn, num_proc=4, remove_columns=remove_cols
+        prepare_dataset_fn, num_proc=4, remove_columns=REMOVE_COLS
     )
     full_train_dataset = concatenate_datasets([train_encoded, encoded_silences])
 
