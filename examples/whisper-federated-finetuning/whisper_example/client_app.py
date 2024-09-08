@@ -5,8 +5,14 @@ import time
 time.sleep(5)
 import torch
 from torch.utils.data import DataLoader
-from whisper_example.model import get_model, get_params, set_params, train_one_epoch
-from whisper_example.task import construct_balanced_sampler, load_data
+from whisper_example.dataset import load_data
+from whisper_example.model import (
+    construct_balanced_sampler,
+    get_model,
+    get_params,
+    set_params,
+    train_one_epoch,
+)
 
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context

@@ -3,10 +3,8 @@
 import random
 from typing import List
 
-import numpy as np
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import NaturalIdPartitioner
-from torch.utils.data import WeightedRandomSampler
 from transformers import WhisperProcessor
 
 from datasets import Dataset, concatenate_datasets
@@ -105,17 +103,3 @@ def prepare_silences_dataset(train_dataset, ratio_silence: float = 0.1) -> Datas
             silence_to_add[-1]["audio"]["array"] = sil_array_crop
 
     return Dataset.from_list(silence_to_add)
-
-
-def construct_balanced_sampler(trainset):
-    hist, _ = np.histogram(trainset["targets"], bins=12)
-    # Mask of non-zeros
-    hist_mask = hist > 0
-    w_per_class = len(trainset) / (
-        hist + 1
-    )  # avoid dividing by zeros  # doesn't have to add up to 1 (relative is what matters)
-    w_per_class += 1  # needed in case trainset has very few samples
-    # Apply mask so we don't attempt sampling classes that aren't present
-    w_per_class *= hist_mask
-    w_ss = [w_per_class[t] for t in trainset["targets"]]
-    return WeightedRandomSampler(w_ss, len(w_ss))

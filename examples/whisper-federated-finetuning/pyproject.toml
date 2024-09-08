@@ -25,12 +25,13 @@ serverapp = "whisper_example.server_app:app"
 clientapp = "whisper_example.client_app:app"
 
 [tool.flwr.app.config]
-num-server-rounds = 3
+num-server-rounds = 5
 fraction-fit = 0.01 # sample 1% of clients in each round (1% of 2112 is 21)
 num-classes = 12
 batch-size = 8
 compile-model = false
 disable-tqdm = true
+central-eval = false
 remove-cols = "file,audio,label,is_unknown,speaker_id,utterance_id"
 
 [tool.flwr.federations]

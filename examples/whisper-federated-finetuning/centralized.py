@@ -1,16 +1,15 @@
 import argparse
 import random
 
-import numpy as np
 import torch
-from torch.utils.data import DataLoader, WeightedRandomSampler
+from torch.utils.data import DataLoader
 from transformers import WhisperProcessor
-from whisper_example.model import eval_model, get_model, train_one_epoch
-from whisper_example.task import (
-    REMOVE_COLS,
+from whisper_example.dataset import get_encoding_fn, prepare_silences_dataset
+from whisper_example.model import (
     construct_balanced_sampler,
-    get_encoding_fn,
-    prepare_silences_dataset,
+    eval_model,
+    get_model,
+    train_one_epoch,
 )
 
 from datasets import concatenate_datasets, load_dataset
@@ -20,6 +19,7 @@ torch.set_float32_matmul_precision(
     "high"
 )  #  If “high” or “medium” are set then the TensorFloat32 is used
 NUM_CLASSES = 12
+REMOVE_COLS = ["file", "audio", "label", "is_unknown", "speaker_id", "utterance_id"]
 parser = argparse.ArgumentParser(description="Whisper centralised")
 
 parser.add_argument("--checkpoint", type=str, help="path to classifier`s checkpoint")

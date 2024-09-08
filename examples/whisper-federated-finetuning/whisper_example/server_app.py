@@ -6,8 +6,8 @@ from typing import List, Tuple
 import torch
 from torch.utils.data import DataLoader
 from transformers import WhisperProcessor
+from whisper_example.dataset import get_encoding_fn
 from whisper_example.model import eval_model, get_model, get_params, set_params
-from whisper_example.task import get_encoding_fn
 
 from datasets import load_dataset
 from flwr.common import Context, FitRes, Metrics, NDArrays, ndarrays_to_parameters
@@ -115,26 +115,33 @@ def server_fn(context: Context):
     ndarrays = get_params(classifier)
     parameters = ndarrays_to_parameters(ndarrays)
 
-    # The ServerApp will use the validation set to assess the performance of the global
-    # model after each round. Then, the test set will be used for evaluating the global
-    # model after the last round
-    sc_val = load_dataset("speech_commands", "v0.02", split="validation", token=False)
-    sc_test = load_dataset("speech_commands", "v0.02", split="test", token=False)
+    eval_fn = None
+    if context.run_config["central-eval"]:
+        # The ServerApp will use the validation set to assess the performance of the global
+        # model after each round. Then, the test set will be used for evaluating the global
+        # model after the last round
+        sc_val = load_dataset(
+            "speech_commands", "v0.02", split="validation", token=False
+        )
+        sc_test = load_dataset("speech_commands", "v0.02", split="test", token=False)
 
-    # Processor
-    processor = WhisperProcessor.from_pretrained("openai/whisper-tiny")
+        # Processor
+        processor = WhisperProcessor.from_pretrained("openai/whisper-tiny")
+
+        # Prepare evaluation function
+        eval_fn = get_evaluate_fn(
+            val_set=sc_val,
+            test_set=sc_test,
+            processor=processor,
+            run_config=context.run_config,
+        )
 
     # Define the strategy
     strategy = ExclusiveFedAvg(
         fraction_fit=fraction_fit,
         fraction_evaluate=0.0,
         fit_metrics_aggregation_fn=weighted_average,
-        evaluate_fn=get_evaluate_fn(
-            val_set=sc_val,
-            test_set=sc_test,
-            processor=processor,
-            run_config=context.run_config,
-        ),
+        evaluate_fn=eval_fn,
         initial_parameters=parameters,
     )
     config = ServerConfig(num_rounds=num_rounds)
