@@ -168,7 +168,7 @@ With just 5 FL rounds, the global model should be reaching ~95% validation accur
 Run on GPU with central evaluation activated and for 10 rounds.
 
 ```shell
-flwr run . local-sim-gpu --run-config "central-eval=true num-server-rounds=5"
+flwr run . local-sim-gpu --run-config "central-eval=true num-server-rounds=10"
 ```
 
 ![Global validation accuracy FL with Whisper model](_static/whisper_flower_acc.png)
