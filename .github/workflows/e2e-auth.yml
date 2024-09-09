@@ -1,0 +1,91 @@
+name: E2E-auth
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLWR_TELEMETRY_ENABLED: 0
+  ARTIFACT_BUCKET: artifact.flower.ai
+
+jobs:
+  wheel:
+    runs-on: ubuntu-22.04
+    name: Build, test and upload wheel
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+      - name: Install dependencies (mandatory only)
+        run: python -m poetry install
+      - name: Build wheel
+        run: ./dev/build.sh
+      - name: Test wheel
+        run: ./dev/test-wheel.sh
+      - name: Upload wheel
+        if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
+        id: upload
+        env:
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          cd ./dist
+          echo "WHL_PATH=$(ls *.whl)" >> "$GITHUB_OUTPUT"
+          sha_short=$(git rev-parse --short HEAD)
+          echo "SHORT_SHA=$sha_short" >> "$GITHUB_OUTPUT"
+          [ -z "${{ github.head_ref }}" ] && dir="${{ github.ref_name }}" || dir="pr/${{ github.head_ref }}"
+          echo "DIR=$dir" >> "$GITHUB_OUTPUT"
+          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./ s3://${{ env.ARTIFACT_BUCKET }}/py/$dir/$sha_short --recursive
+          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./ s3://${{ env.ARTIFACT_BUCKET }}/py/$dir/latest --recursive
+    outputs:
+      whl_path: ${{ steps.upload.outputs.WHL_PATH }}
+      short_sha: ${{ steps.upload.outputs.SHORT_SHA }}
+      dir: ${{ steps.upload.outputs.DIR }}
+
+  frameworks:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    needs: wheel
+    # Using approach described here:
+    # https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        include:
+          - directory: e2e-bare-auth
+            e2e: e2e_bare_auth
+
+    name: Framework / ${{ matrix.directory }}
+
+    defaults:
+      run:
+        working-directory: e2e/${{ matrix.directory }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install build tools
+        run: |
+            python -m pip install -U pip==23.3.1
+        shell: bash
+      - name: Install dependencies
+        run: python -m pip install --upgrade .
+      - name: Install Flower wheel from artifact store
+        if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
+        run: |
+          python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
+      - name: Run driver test with client authentication
+        if: ${{ matrix.directory == 'e2e-bare-auth' }}
+        run: ./../test_superlink.sh "${{ matrix.directory }}" client-auth
