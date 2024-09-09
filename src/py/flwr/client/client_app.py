@@ -41,11 +41,11 @@ def _alert_erroneous_client_fn() -> None:
 
 def _inspect_maybe_adapt_client_fn_signature(client_fn: ClientFnExt) -> ClientFnExt:
     client_fn_args = inspect.signature(client_fn).parameters
-    first_arg = list(client_fn_args.keys())[0]
 
     if len(client_fn_args) != 1:
         _alert_erroneous_client_fn()
 
+    first_arg = list(client_fn_args.keys())[0]
     first_arg_type = client_fn_args[first_arg].annotation
 
     if first_arg_type is str or first_arg == "cid":
