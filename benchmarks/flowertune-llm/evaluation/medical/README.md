@@ -24,10 +24,10 @@ huggingface-cli login
 
 ```bash
 python eval.py \
---peft-path=/path/to/fine-tuned-peft-model-dir/ # e.g., ./peft_1
---run-name=fl  # specified name for this run  
---batch-size=16 
---quantization=4 
+--peft-path=/path/to/fine-tuned-peft-model-dir/ \ # e.g., ./peft_1
+--run-name=fl  \ # specified name for this run  
+--batch-size=16 \
+--quantization=4 \
 --datasets=pubmedqa,medmcqa,medqa
 ```
 
