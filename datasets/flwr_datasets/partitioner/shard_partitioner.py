@@ -165,7 +165,6 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
 
         # Utility attributes
         self._rng = np.random.default_rng(seed=self._seed)  # NumPy random generator
-        self._partition_id_to_indices: Dict[int, List[int]] = {}
         self._partition_id_to_indices_determined = False
 
     def load_partition(self, partition_id: int) -> datasets.Dataset:
@@ -198,6 +197,15 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         self._sort_dataset_if_needed()
         self._determine_partition_id_to_indices_if_needed()
         return self._num_partitions
+
+    @property
+    def partition_id_to_indices(self) -> Dict[int, List[int]]:
+        """Partition id to indices (the result of partitioning)."""
+        self._check_num_partitions_correctness_if_needed()
+        self._check_possibility_of_partitions_creation()
+        self._sort_dataset_if_needed()
+        self._determine_partition_id_to_indices_if_needed()
+        return self._partition_id_to_indices
 
     def _determine_partition_id_to_indices_if_needed(
         self,
