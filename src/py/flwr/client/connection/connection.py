@@ -76,6 +76,10 @@ class Connection(ABC):
         self.authentication_keys = authentication_keys
 
     @abstractmethod
+    def ping(self) -> None:
+        """Ping the SuperLink."""
+
+    @abstractmethod
     def create_node(self) -> int | None:
         """Request to create a node."""
 
