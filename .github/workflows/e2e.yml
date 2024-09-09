@@ -60,62 +60,64 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.9", "3.10", "3.11"]
+        directory:
+          - e2e-bare
+          - e2e-bare-https
+          - e2e-bare-auth
+          - e2e-jax
+          - e2e-pytorch
+          - e2e-tensorflow
+          - e2e-opacus
+          - e2e-pytorch-lightning
+          - e2e-scikit-learn
+          - e2e-fastai
+          - e2e-pandas
         include:
           - directory: e2e-bare
             e2e: e2e_bare
-
           - directory: e2e-bare-https
             e2e: e2e_bare_https
-
           - directory: e2e-bare-auth
             e2e: e2e_bare_auth
-
           - directory: e2e-jax
             e2e: e2e_jax
-
           - directory: e2e-pytorch
             e2e: e2e_pytorch
             dataset: |
               from torchvision.datasets import CIFAR10
               CIFAR10('./data', download=True)
-
           - directory: e2e-tensorflow
             e2e: e2e_tensorflow
             dataset: |
               import tensorflow as tf
               tf.keras.datasets.cifar10.load_data()
-
           - directory: e2e-opacus
             e2e: e2e_opacus
             dataset: |
               from torchvision.datasets import CIFAR10
               CIFAR10('./data', download=True)
-
           - directory: e2e-pytorch-lightning
             e2e: e2e_pytorch_lightning
             dataset: |
               from torchvision.datasets import MNIST
               MNIST('./data', download=True)
-
           - directory: e2e-scikit-learn
             e2e: e2e_scikit_learn
             dataset: |
               import openml
               openml.datasets.get_dataset(554)
-
           - directory: e2e-fastai
             e2e: e2e_fastai
             dataset: |
               from fastai.vision.all import untar_data, URLs
               untar_data(URLs.MNIST)
-
-          # - directory: e2e-pandas
-          #   e2e: e2e_pandas
-          #   dataset: |
-          #     from pathlib import Path
-          #     from sklearn.datasets import load_iris
-          #     Path('data').mkdir(exist_ok=True)
-          #     load_iris(as_frame=True)['data'].to_csv('./data/client.csv')
+          - directory: e2e-pandas
+            e2e: e2e_pandas
+            dataset: |
+              from pathlib import Path
+              from sklearn.datasets import load_iris
+              Path('data').mkdir(exist_ok=True)
+              load_iris(as_frame=True)['data'].to_csv('./data/client.csv')
 
     name: Framework / ${{ matrix.directory }} / Python ${{ matrix.python-version }}
 
