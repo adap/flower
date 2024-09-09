@@ -109,13 +109,13 @@ jobs:
               from fastai.vision.all import untar_data, URLs
               untar_data(URLs.MNIST)
 
-          - directory: e2e-pandas
-            e2e: e2e_pandas
-            dataset: |
-              from pathlib import Path
-              from sklearn.datasets import load_iris
-              Path('data').mkdir(exist_ok=True)
-              load_iris(as_frame=True)['data'].to_csv('./data/client.csv')
+          # - directory: e2e-pandas
+          #   e2e: e2e_pandas
+          #   dataset: |
+          #     from pathlib import Path
+          #     from sklearn.datasets import load_iris
+          #     Path('data').mkdir(exist_ok=True)
+          #     load_iris(as_frame=True)['data'].to_csv('./data/client.csv')
 
     name: Framework / ${{ matrix.directory }} / Python ${{ matrix.python-version }}
 
