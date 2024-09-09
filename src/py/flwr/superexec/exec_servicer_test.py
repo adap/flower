@@ -16,8 +16,7 @@
 
 
 import subprocess
-import threading
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 
@@ -55,9 +54,8 @@ def test_start_run() -> None:
 
 def test_capture_logs() -> None:
     """Test capture_logs function."""
-    run_res = MagicMock()
+    run_res = Mock()
     run_res.logs = []
-    run_res.stop_event = threading.Event()
     with subprocess.Popen(
         ["echo", "success"],
         stdout=subprocess.PIPE,
@@ -67,4 +65,5 @@ def test_capture_logs() -> None:
         run_res.proc = proc
         _capture_logs(run_res)
 
+    assert len(run_res.logs) == 1
     assert run_res.logs[0] == "success"

@@ -102,21 +102,22 @@ def _capture_logs(
     run: RunTracker,
 ) -> None:
     while True:
-        # Select streams only when ready to read
-        ready_to_read, _, _ = select.select(
-            [run.proc.stdout, run.proc.stderr],
-            [],
-            [],
-            SELECT_TIMEOUT,
-        )
-        # Read from std* and append to RunTracker.logs
-        for stream in ready_to_read:
-            line = stream.readline().rstrip()
-            if line:
-                run.logs.append(f"{line}")
+        if run.proc.poll() is None:
+            # Select streams only when ready to read
+            ready_to_read, _, _ = select.select(
+                [run.proc.stdout, run.proc.stderr],
+                [],
+                [],
+                SELECT_TIMEOUT,
+            )
+            # Read from std* and append to RunTracker.logs
+            for stream in ready_to_read:
+                line = stream.readline().rstrip()
+                if line:
+                    run.logs.append(f"{line}")
 
         # Close std* to prevent blocking
-        if run.proc.poll() is not None:
+        elif run.proc.poll() is not None:
             log(INFO, "Subprocess finished, exiting log capture")
             if run.proc.stdout:
                 run.proc.stdout.close()
