@@ -102,6 +102,7 @@ def _capture_logs(
     run: RunTracker,
 ) -> None:
     while True:
+        # Explicitly check if Popen.poll() is None. Required for `pytest`.
         if run.proc.poll() is None:
             # Select streams only when ready to read
             ready_to_read, _, _ = select.select(
