@@ -26,6 +26,8 @@ After that, install `Node.js` and `g++` for the evaluation of JavaScript, C++:
 # Install nvm (Node Version Manager)
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 
+# Restart your terminal
+
 # Download and install Node.js (you may need to restart the terminal)
 nvm install 20
 
