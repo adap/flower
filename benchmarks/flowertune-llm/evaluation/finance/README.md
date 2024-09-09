@@ -24,12 +24,13 @@ huggingface-cli login
 
 ```bash
 python eval.py \
---peft-path=/path/to/fine-tuned-peft-model-dir/ # e.g., ./peft_1
---run-name=fl  # specified name for this run  
---batch-size=32 
---quantization=4 
+--peft-path=/path/to/fine-tuned-peft-model-dir/ \ # e.g., ./peft_1
+--run-name=fl  \ # specified name for this run  
+--batch-size=32 \
+--quantization=4 \
 --datasets=fpb,fiqa,tfns
 ```
+
 The model answers and accuracy values will be saved to `benchmarks/generation_{dataset_name}_{run_name}.jsonl` and `benchmarks/acc_{dataset_name}_{run_name}.txt`, respectively.
 
 > [!NOTE]
