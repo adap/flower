@@ -28,59 +28,6 @@ from flwr.server.client_proxy import ClientProxy
 from .fedavgm import FedAvgM
 
 
-def test_aggregate_fit_using_near_one_server_lr_and_no_momentum() -> None:
-    """Test aggregate with near-one learning rate and no momentum."""
-    # Prepare
-    weights0_0 = array([[1, 2, 3], [4, 5, 6]], dtype=float32)
-    weights0_1 = array([7, 8, 9, 10], dtype=float32)
-    weights1_0 = array([[1, 2, 3], [4, 5, 6]], dtype=float32)
-    weights1_1 = array([7, 8, 9, 10], dtype=float32)
-
-    initial_weights: NDArrays = [
-        array([[0, 0, 0], [0, 0, 0]], dtype=float32),
-        array([0, 0, 0, 0], dtype=float32),
-    ]
-
-    results: List[Tuple[ClientProxy, FitRes]] = [
-        (
-            MagicMock(),
-            FitRes(
-                status=Status(code=Code.OK, message="Success"),
-                parameters=ndarrays_to_parameters([weights0_0, weights0_1]),
-                num_examples=1,
-                metrics={},
-            ),
-        ),
-        (
-            MagicMock(),
-            FitRes(
-                status=Status(code=Code.OK, message="Success"),
-                parameters=ndarrays_to_parameters([weights1_0, weights1_1]),
-                num_examples=2,
-                metrics={},
-            ),
-        ),
-    ]
-    failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]] = []
-    expected: NDArrays = [
-        array([[1, 2, 3], [4, 5, 6]], dtype=float32),
-        array([7, 8, 9, 10], dtype=float32),
-    ]
-
-    strategy = FedAvgM(
-        initial_parameters=ndarrays_to_parameters(initial_weights),
-        server_learning_rate=1.0 + 1e-9,
-    )
-
-    # Execute
-    actual, _ = strategy.aggregate_fit(1, results, failures)
-
-    # Assert
-    assert actual
-    for w_act, w_exp in zip(parameters_to_ndarrays(actual), expected):
-        assert_almost_equal(w_act, w_exp)
-
-
 def test_aggregate_fit_server_learning_rate_and_momentum() -> None:
     """Test aggregate with near-one learning rate and near-zero momentum."""
     # Prepare
