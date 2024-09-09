@@ -8,6 +8,8 @@ from utils import format_answer, format_example, save_results
 
 import datasets
 
+# The instructions refer to Meditron evaluation:
+# https://github.com/epfLLM/meditron/blob/main/evaluation/instructions.json
 INSTRUCTIONS = {
     "pubmedqa": "As an expert doctor in clinical science and medical knowledge, can you tell me if the following statement is correct? Answer yes, no, or maybe.",
     "medqa": "You are a medical doctor taking the US Medical Licensing Examination. You need to demonstrate your understanding of basic and clinical science, medical knowledge, and mechanisms underlying health, disease, patient care, and modes of therapy. Show your ability to apply the knowledge essential for medical practice. For the following multiple-choice question, select one correct answer from A to E. Base your answer on the current and standard practices referenced in medical guidelines.",
