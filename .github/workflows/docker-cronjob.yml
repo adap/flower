@@ -6,7 +6,6 @@ on:
     # At 01:00 on Monday.
     - cron: "0 1 * * 1"
   workflow_dispatch:
-  push:
 
 jobs:
   parameters:
@@ -26,6 +25,7 @@ jobs:
 
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
+          # ref: v${{ steps.flwr-version.outputs.flwr-version }}
           ref: v${{ steps.flwr-version.outputs.flwr-version }}
 
       - uses: ./.github/actions/bootstrap
@@ -47,8 +47,7 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(needs.parameters.outputs.matrix).base }}
     with:
-      # namespace-repository: ${{ matrix.images.namespace_repository }}
-      namespace-repository: flwr/github-ci-test-builds
+      namespace-repository: ${{ matrix.images.namespace_repository }}
       file-dir: ${{ matrix.images.file_dir }}
       build-args: |
         PYTHON_VERSION=${{ matrix.images.python_version }}
@@ -62,19 +61,19 @@ jobs:
       dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
       dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
 
-  # build-binary-images:
-  #   if: ${{ github.repository == 'adap/flower' }}
-  #   name: Build binary images
-  #   uses: ./.github/workflows/_docker-build.yml
-  #   needs: [parameters, build-base-images]
-  #   strategy:
-  #     fail-fast: false
-  #     matrix: ${{ fromJson(needs.parameters.outputs.matrix).binary }}
-  #   with:
-  #     namespace-repository: ${{ matrix.images.namespace_repository }}
-  #     file-dir: ${{ matrix.images.file_dir }}
-  #     build-args: BASE_IMAGE=${{ matrix.images.base_image }}
-  #     tags: ${{ matrix.images.tags }}
-  #   secrets:
-  #     dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
-  #     dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
+  build-binary-images:
+    if: ${{ github.repository == 'adap/flower' }}
+    name: Build binary images
+    uses: ./.github/workflows/_docker-build.yml
+    needs: [parameters, build-base-images]
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.parameters.outputs.matrix).binary }}
+    with:
+      namespace-repository: ${{ matrix.images.namespace_repository }}
+      file-dir: ${{ matrix.images.file_dir }}
+      build-args: BASE_IMAGE=${{ matrix.images.base_image }}
+      tags: ${{ matrix.images.tags }}
+    secrets:
+      dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
