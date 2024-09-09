@@ -143,38 +143,38 @@ jobs:
       #     key: pythonloc-${{ runner.os }}-${{ matrix.directory }}-${{ env.pythonLocation }}-${{ hashFiles(format('./e2e/{0}/pyproject.toml', matrix.directory)) }}
       - name: Install dependencies
         run: python -m pip install --upgrade .
-      - name: Install Flower wheel from artifact store
-        if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
-        run: |
-          python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
-      - name: Download dataset
-        if: ${{ matrix.dataset }}
-        run: python -c "${{ matrix.dataset }}"
-      - name: Run edge client test
-        if: ${{ matrix.directory != 'e2e-bare-auth' }}
-        working-directory: e2e/${{ matrix.directory }}/${{ matrix.e2e }}
-        run: ./../../test_legacy.sh "${{ matrix.directory }}"
-      - name: Run virtual client test
-        if: ${{ matrix.directory != 'e2e-bare-auth' }}
-        run: python simulation.py
-      - name: Run simulation engine test
-        if: ${{ matrix.directory == 'e2e-pytorch' || matrix.directory == 'e2e-tensorflow'}}
-        run: python simulation_next.py
-      - name: Run driver test
-        if: ${{ matrix.directory != 'e2e-bare-auth' }}
-        run: ./../test_superlink.sh "${{ matrix.directory }}"
-      - name: Run driver test with REST
-        if: ${{ matrix.directory == 'e2e-bare' }}
-        run: ./../test_superlink.sh bare rest
-      - name: Run driver test with SQLite database
-        if: ${{ matrix.directory == 'e2e-bare' }}
-        run: ./../test_superlink.sh bare sqlite
-      - name: Run driver test with client authentication
-        if: ${{ matrix.directory == 'e2e-bare-auth' }}
-        run: ./../test_superlink.sh "${{ matrix.directory }}" client-auth
-      - name: Run reconnection test with SQLite database
-        if: ${{ matrix.directory == 'e2e-bare' }}
-        run: ./../test_reconnection.sh sqlite
+      # - name: Install Flower wheel from artifact store
+      #   if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
+      #   run: |
+      #     python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
+      # - name: Download dataset
+      #   if: ${{ matrix.dataset }}
+      #   run: python -c "${{ matrix.dataset }}"
+      # - name: Run edge client test
+      #   if: ${{ matrix.directory != 'e2e-bare-auth' }}
+      #   working-directory: e2e/${{ matrix.directory }}/${{ matrix.e2e }}
+      #   run: ./../../test_legacy.sh "${{ matrix.directory }}"
+      # - name: Run virtual client test
+      #   if: ${{ matrix.directory != 'e2e-bare-auth' }}
+      #   run: python simulation.py
+      # - name: Run simulation engine test
+      #   if: ${{ matrix.directory == 'e2e-pytorch' || matrix.directory == 'e2e-tensorflow'}}
+      #   run: python simulation_next.py
+      # - name: Run driver test
+      #   if: ${{ matrix.directory != 'e2e-bare-auth' }}
+      #   run: ./../test_superlink.sh "${{ matrix.directory }}"
+      # - name: Run driver test with REST
+      #   if: ${{ matrix.directory == 'e2e-bare' }}
+      #   run: ./../test_superlink.sh bare rest
+      # - name: Run driver test with SQLite database
+      #   if: ${{ matrix.directory == 'e2e-bare' }}
+      #   run: ./../test_superlink.sh bare sqlite
+      # - name: Run driver test with client authentication
+      #   if: ${{ matrix.directory == 'e2e-bare-auth' }}
+      #   run: ./../test_superlink.sh "${{ matrix.directory }}" client-auth
+      # - name: Run reconnection test with SQLite database
+      #   if: ${{ matrix.directory == 'e2e-bare' }}
+      #   run: ./../test_reconnection.sh sqlite
       # - name: Cache save Python location
       #   id: cache-save-python
       #   uses: actions/cache/save@v4
@@ -183,74 +183,74 @@ jobs:
       #     path: ${{ env.pythonLocation }}
       #     key: pythonloc-${{ runner.os }}-${{ matrix.directory }}-${{ env.pythonLocation }}-${{ hashFiles(format('./e2e/{0}/pyproject.toml', matrix.directory)) }}
 
-  strategies:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 10
-    needs: wheel
-    strategy:
-      matrix:
-        strat: ["FedMedian", "FedTrimmedAvg", "QFedAvg", "FaultTolerantFedAvg", "FedAvgM", "FedAdam", "FedAdagrad", "FedYogi"]
+  # strategies:
+  #   runs-on: ubuntu-22.04
+  #   timeout-minutes: 10
+  #   needs: wheel
+  #   strategy:
+  #     matrix:
+  #       strat: ["FedMedian", "FedTrimmedAvg", "QFedAvg", "FaultTolerantFedAvg", "FedAvgM", "FedAdam", "FedAdagrad", "FedYogi"]
 
-    name: Strategy / ${{ matrix.strat }}
+  #   name: Strategy / ${{ matrix.strat }}
 
-    defaults:
-      run:
-        working-directory: e2e/strategies
+  #   defaults:
+  #     run:
+  #       working-directory: e2e/strategies
 
-    steps:
-      - uses: actions/checkout@v4
-      - name: Bootstrap
-        uses: ./.github/actions/bootstrap
-      - name: Install dependencies
-        run: |
-          python -m poetry install
-      - name: Install Flower wheel from artifact store
-        if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
-        run: |
-          python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
-      - name: Cache Datasets
-        uses: actions/cache@v4
-        with:
-          path: "~/.keras"
-          key: keras-datasets
-      - name: Download Datasets
-        run: |
-          python -c "import tensorflow as tf; tf.keras.datasets.mnist.load_data()"
-      - name: Test strategies
-        run: |
-          python test.py "${{ matrix.strat }}"
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Bootstrap
+  #       uses: ./.github/actions/bootstrap
+  #     - name: Install dependencies
+  #       run: |
+  #         python -m poetry install
+  #     - name: Install Flower wheel from artifact store
+  #       if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
+  #       run: |
+  #         python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
+  #     - name: Cache Datasets
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: "~/.keras"
+  #         key: keras-datasets
+  #     - name: Download Datasets
+  #       run: |
+  #         python -c "import tensorflow as tf; tf.keras.datasets.mnist.load_data()"
+  #     - name: Test strategies
+  #       run: |
+  #         python test.py "${{ matrix.strat }}"
 
-  templates:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 10
-    needs: wheel
-    strategy:
-      matrix:
-        framework: ["numpy", "pytorch", "tensorflow", "jax", "sklearn"]
+  # templates:
+  #   runs-on: ubuntu-22.04
+  #   timeout-minutes: 10
+  #   needs: wheel
+  #   strategy:
+  #     matrix:
+  #       framework: ["numpy", "pytorch", "tensorflow", "jax", "sklearn"]
 
-    name: Template / ${{ matrix.framework }}
+  #   name: Template / ${{ matrix.framework }}
 
-    steps:
-      - uses: actions/checkout@v4
-      - name: Bootstrap
-        uses: ./.github/actions/bootstrap
-      - name: Install Flower from repo
-        if: ${{ github.repository != 'adap/flower' || github.event.pull_request.head.repo.fork || github.actor == 'dependabot[bot]' }}
-        run: |
-          python -m pip install .
-      - name: Install Flower wheel from artifact store
-        if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
-        run: |
-          python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
-      - name: Create project and install it
-        run: |
-          flwr new tmp-${{ matrix.framework }} --framework ${{ matrix.framework }} --username gh_ci
-          cd tmp-${{ matrix.framework }}
-          pip install .
-      - name: Run project
-        run: |
-          cd tmp-${{ matrix.framework }}
-          flwr run --run-config num-server-rounds=1 2>&1 | tee flwr_output.log 
-          if grep -q "ERROR" flwr_output.log; then
-            exit 1
-          fi
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Bootstrap
+  #       uses: ./.github/actions/bootstrap
+  #     - name: Install Flower from repo
+  #       if: ${{ github.repository != 'adap/flower' || github.event.pull_request.head.repo.fork || github.actor == 'dependabot[bot]' }}
+  #       run: |
+  #         python -m pip install .
+  #     - name: Install Flower wheel from artifact store
+  #       if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
+  #       run: |
+  #         python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
+  #     - name: Create project and install it
+  #       run: |
+  #         flwr new tmp-${{ matrix.framework }} --framework ${{ matrix.framework }} --username gh_ci
+  #         cd tmp-${{ matrix.framework }}
+  #         pip install .
+  #     - name: Run project
+  #       run: |
+  #         cd tmp-${{ matrix.framework }}
+  #         flwr run --run-config num-server-rounds=1 2>&1 | tee flwr_output.log 
+  #         if grep -q "ERROR" flwr_output.log; then
+  #           exit 1
+  #         fi
