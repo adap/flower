@@ -15,6 +15,7 @@
 """Simulation engine executor."""
 
 
+import json
 import subprocess
 import sys
 from logging import ERROR, INFO, WARN
@@ -24,6 +25,7 @@ from typing_extensions import override
 
 from flwr.cli.config_utils import load_and_validate
 from flwr.cli.install import install_from_fab
+from flwr.common.config import unflatten_dict
 from flwr.common.constant import RUN_ID_NUM_BYTES
 from flwr.common.logger import log
 from flwr.common.typing import UserConfig
@@ -63,8 +65,10 @@ class SimulationEngine(Executor):
     def __init__(
         self,
         num_supernodes: Optional[int] = None,
+        verbose: Optional[bool] = False,
     ) -> None:
         self.num_supernodes = num_supernodes
+        self.verbose = verbose
 
     @override
     def set_config(
@@ -80,6 +84,8 @@ class SimulationEngine(Executor):
             Supported configuration key/value pairs:
             - "num-supernodes": int
                 Number of nodes to register for the simulation.
+            - "verbose": bool
+                Set verbosity of logs.
         """
         if num_supernodes := config.get("num-supernodes"):
             if not isinstance(num_supernodes, int):
@@ -97,6 +103,14 @@ class SimulationEngine(Executor):
                 "positive integer."
             )
 
+        if verbose := config.get("verbose"):
+            if not isinstance(verbose, bool):
+                raise ValueError(
+                    "The `verbose` value must be a string `true` or `false`."
+                )
+            self.verbose = verbose
+
+    # pylint: disable=too-many-locals
     @override
     def start_run(
         self,
@@ -121,10 +135,11 @@ class SimulationEngine(Executor):
             fab_path = install_from_fab(fab_file, None, True)
 
             # Install FAB Python package
-            subprocess.check_call(
+            subprocess.run(
                 [sys.executable, "-m", "pip", "install", "--no-deps", str(fab_path)],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
+                stdout=None if self.verbose else subprocess.DEVNULL,
+                stderr=None if self.verbose else subprocess.DEVNULL,
+                check=True,
             )
 
             # Load and validate config
@@ -140,6 +155,15 @@ class SimulationEngine(Executor):
                     "Config extracted from FAB's pyproject.toml is not valid"
                 )
 
+            # Flatten federated config
+            federation_config_flat = unflatten_dict(federation_config)
+
+            num_supernodes = federation_config_flat.get(
+                "num-supernodes", self.num_supernodes
+            )
+            backend_cfg = federation_config_flat.get("backend", {})
+            verbose: Optional[bool] = federation_config_flat.get("verbose")
+
             # In Simulation there is no SuperLink, still we create a run_id
             run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
             log(INFO, "Created run %s", str(run_id))
@@ -150,10 +174,17 @@ class SimulationEngine(Executor):
                 "--app",
                 f"{str(fab_path)}",
                 "--num-supernodes",
-                f"{federation_config.get('num-supernodes', self.num_supernodes)}",
+                f"{num_supernodes}",
                 "--run-id",
                 str(run_id),
             ]
+
+            if backend_cfg:
+                # Stringify as JSON
+                command.extend(["--backend-config", json.dumps(backend_cfg)])
+
+            if verbose:
+                command.extend(["--verbose"])
 
             if override_config:
                 override_config_str = _user_config_to_str(override_config)

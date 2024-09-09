@@ -8,9 +8,9 @@ version = "1.0.0"
 description = ""
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.9.0,<2.0",
-    "flwr-datasets[vision]>=0.0.2,<1.0.0",
-    "mlx==0.10.0",
+    "flwr[simulation]>=1.10.0",
+    "flwr-datasets[vision]>=0.3.0",
+    "mlx==0.16.1",
     "numpy==1.24.4",
 ]
 
@@ -33,7 +33,7 @@ batch-size = 256
 lr = 0.1
 
 [tool.flwr.federations]
-default = "localhost"
+default = "local-simulation"
 
-[tool.flwr.federations.localhost]
+[tool.flwr.federations.local-simulation]
 options.num-supernodes = 10

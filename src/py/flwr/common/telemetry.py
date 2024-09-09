@@ -132,53 +132,59 @@ class EventType(str, Enum):
     # Ping
     PING = auto()
 
-    # Client: start_client
+    # --- LEGACY FUNCTIONS -------------------------------------------------------------
+
+    # Legacy: `start_client` function
     START_CLIENT_ENTER = auto()
     START_CLIENT_LEAVE = auto()
 
-    # Server: start_server
+    # Legacy: `start_server` function
     START_SERVER_ENTER = auto()
     START_SERVER_LEAVE = auto()
 
-    # Driver API
-    RUN_DRIVER_API_ENTER = auto()
-    RUN_DRIVER_API_LEAVE = auto()
-
-    # Fleet API
-    RUN_FLEET_API_ENTER = auto()
-    RUN_FLEET_API_LEAVE = auto()
-
-    # Driver API and Fleet API
-    RUN_SUPERLINK_ENTER = auto()
-    RUN_SUPERLINK_LEAVE = auto()
-
-    # Simulation
+    # Legacy: `start_simulation` function
     START_SIMULATION_ENTER = auto()
     START_SIMULATION_LEAVE = auto()
 
-    # Driver: Driver
-    DRIVER_CONNECT = auto()
-    DRIVER_DISCONNECT = auto()
+    # --- `flwr` CLI -------------------------------------------------------------------
 
-    # Driver: start_driver
-    START_DRIVER_ENTER = auto()
-    START_DRIVER_LEAVE = auto()
+    # Not yet implemented
 
-    # flower-client-app
-    RUN_CLIENT_APP_ENTER = auto()
-    RUN_CLIENT_APP_LEAVE = auto()
-
-    # flower-server-app
-    RUN_SERVER_APP_ENTER = auto()
-    RUN_SERVER_APP_LEAVE = auto()
-
-    # SuperNode
-    RUN_SUPERNODE_ENTER = auto()
-    RUN_SUPERNODE_LEAVE = auto()
+    # --- SuperExec --------------------------------------------------------------------
 
     # SuperExec
     RUN_SUPEREXEC_ENTER = auto()
     RUN_SUPEREXEC_LEAVE = auto()
+
+    # --- Simulation Engine ------------------------------------------------------------
+
+    # CLI: flower-simulation
+    CLI_FLOWER_SIMULATION_ENTER = auto()
+    CLI_FLOWER_SIMULATION_LEAVE = auto()
+
+    # Python API: `run_simulation`
+    PYTHON_API_RUN_SIMULATION_ENTER = auto()
+    PYTHON_API_RUN_SIMULATION_LEAVE = auto()
+
+    # --- Deployment Engine ------------------------------------------------------------
+
+    # CLI: `flower-superlink`
+    RUN_SUPERLINK_ENTER = auto()
+    RUN_SUPERLINK_LEAVE = auto()
+
+    # CLI: `flower-supernode`
+    RUN_SUPERNODE_ENTER = auto()
+    RUN_SUPERNODE_LEAVE = auto()
+
+    # CLI: `flower-server-app`
+    RUN_SERVER_APP_ENTER = auto()
+    RUN_SERVER_APP_LEAVE = auto()
+
+    # --- DEPRECATED -------------------------------------------------------------------
+
+    # [DEPRECATED] CLI: `flower-client-app`
+    RUN_CLIENT_APP_ENTER = auto()
+    RUN_CLIENT_APP_LEAVE = auto()
 
 
 # Use the ThreadPoolExecutor with max_workers=1 to have a queue

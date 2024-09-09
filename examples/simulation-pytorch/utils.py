@@ -1,8 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
-from torchvision.transforms import ToTensor, Normalize, Compose
+from torchvision.transforms import Compose, Normalize, ToTensor
 
 
 # transformation to convert images to tensors and apply normalization

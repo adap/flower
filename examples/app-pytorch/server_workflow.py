@@ -1,10 +1,10 @@
 from typing import List, Tuple
 
-from task import Net, get_weights
-
 import flwr as fl
 from flwr.common import Context, Metrics, ndarrays_to_parameters
 from flwr.server import Driver, LegacyContext
+
+from task import Net, get_weights
 
 
 # Define metric aggregation function
