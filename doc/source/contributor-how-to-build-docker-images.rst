@@ -26,7 +26,7 @@ Before we can start, we need to meet a few prerequisites in our local developmen
    default values, others must be specified when building the image. All available build arguments for
    each image are listed in one of the tables below.
 
-Building the base image
+Building the Base Image
 -----------------------
 
 .. list-table::
@@ -65,6 +65,10 @@ Building the base image
      - The Flower package to be installed.
      - No
      - ``flwr`` or ``flwr-nightly``
+   * - ``FLWR_VERSION_REF``
+     - A `direct reference <https://packaging.python.org/en/latest/specifications/version-specifiers/#direct-references>`_ without the ``@`` specifier. If both ``FLWR_VERSION`` and ``FLWR_VERSION_REF`` are specified, the ``FLWR_VERSION_REF`` has precedence.
+     - No
+     - `Direct Reference Examples`_
 
 The following example creates a base Ubuntu/Alpine image with Python ``3.11.0``,
 pip :substitution-code:`|pip_version|`, setuptools :substitution-code:`|setuptools_version|`
@@ -84,8 +88,8 @@ and Flower :substitution-code:`|stable_flwr_version|`:
 In this example, we specify our image name as ``flwr_base`` and the tag as ``0.1.0``. Remember that the build arguments as well
 as the name and tag can be adapted to your needs. These values serve as examples only.
 
-Building the SuperLink/SuperNode or ServerApp image
----------------------------------------------------
+Building a Flower Binary Image
+------------------------------
 
 .. list-table::
    :widths: 25 45 15 15
@@ -130,3 +134,21 @@ After creating the image, we can test whether the image is working:
 .. code-block:: bash
 
    $ docker run --rm flwr_superlink:0.1.0 --help
+
+Direct Reference Examples
+-------------------------
+
+.. code-block:: bash
+   :substitutions:
+
+   # main branch
+   git+https://github.com/adap/flower.git@main
+
+   # commit hash
+   git+https://github.com/adap/flower.git@1187c707f1894924bfa693d99611cf6f93431835
+
+   # tag
+   git+https://github.com/adap/flower.git@|stable_flwr_version|
+
+   # artifact store
+   https://artifact.flower.ai/py/main/latest/flwr-|stable_flwr_version|-py3-none-any.whl
