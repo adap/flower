@@ -59,6 +59,7 @@ jobs:
     # https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs
     strategy:
       matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
         include:
           - directory: e2e-bare
             e2e: e2e_bare
@@ -116,7 +117,7 @@ jobs:
               Path('data').mkdir(exist_ok=True)
               load_iris(as_frame=True)['data'].to_csv('./data/client.csv')
 
-    name: Framework / ${{ matrix.directory }}
+    name: Framework / ${{ matrix.directory }} / Python ${{ matrix.python-version }}
 
     defaults:
       run:
@@ -124,10 +125,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: 3.8
+          python-version: ${{ matrix.python-version }}
       - name: Install build tools
         run: |
             python -m pip install -U pip==23.3.1
