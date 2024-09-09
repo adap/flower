@@ -52,7 +52,7 @@ flwr run .
 You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
 ```bash
-flwr run . --run-config num-server-rounds=5,max-epochs=2
+flwr run . --run-config "num-server-rounds=5 max-epochs=2"
 ```
 
 ### Run with the Deployment Engine

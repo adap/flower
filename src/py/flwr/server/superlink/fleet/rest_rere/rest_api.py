@@ -15,17 +15,29 @@
 """Experimental REST API server."""
 
 
+from __future__ import annotations
+
 import sys
+from typing import Awaitable, Callable, TypeVar
+
+from google.protobuf.message import Message as GrpcMessage
 
 from flwr.common.constant import MISSING_EXTRA_REST
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
+    CreateNodeResponse,
     DeleteNodeRequest,
+    DeleteNodeResponse,
     PingRequest,
+    PingResponse,
     PullTaskInsRequest,
+    PullTaskInsResponse,
     PushTaskResRequest,
+    PushTaskResResponse,
 )
-from flwr.proto.run_pb2 import GetRunRequest  # pylint: disable=E0611
+from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.fleet.message_handler import message_handler
 from flwr.server.superlink.state import State
 
@@ -40,172 +52,108 @@ except ModuleNotFoundError:
     sys.exit(MISSING_EXTRA_REST)
 
 
-async def create_node(request: Request) -> Response:
+GrpcRequest = TypeVar("GrpcRequest", bound=GrpcMessage)
+GrpcResponse = TypeVar("GrpcResponse", bound=GrpcMessage)
+
+GrpcAsyncFunction = Callable[[GrpcRequest], Awaitable[GrpcResponse]]
+RestEndPoint = Callable[[Request], Awaitable[Response]]
+
+
+def rest_request_response(
+    grpc_request_type: type[GrpcRequest],
+) -> Callable[[GrpcAsyncFunction[GrpcRequest, GrpcResponse]], RestEndPoint]:
+    """Convert an async gRPC-based function into a RESTful HTTP endpoint."""
+
+    def decorator(func: GrpcAsyncFunction[GrpcRequest, GrpcResponse]) -> RestEndPoint:
+        async def wrapper(request: Request) -> Response:
+            _check_headers(request.headers)
+
+            # Get the request body as raw bytes
+            grpc_req_bytes: bytes = await request.body()
+
+            # Deserialize ProtoBuf
+            grpc_req = grpc_request_type.FromString(grpc_req_bytes)
+            grpc_res = await func(grpc_req)
+            return Response(
+                status_code=200,
+                content=grpc_res.SerializeToString(),
+                headers={"Content-Type": "application/protobuf"},
+            )
+
+        return wrapper
+
+    return decorator
+
+
+@rest_request_response(CreateNodeRequest)
+async def create_node(request: CreateNodeRequest) -> CreateNodeResponse:
     """Create Node."""
-    _check_headers(request.headers)
-
-    # Get the request body as raw bytes
-    create_node_request_bytes: bytes = await request.body()
-
-    # Deserialize ProtoBuf
-    create_node_request_proto = CreateNodeRequest()
-    create_node_request_proto.ParseFromString(create_node_request_bytes)
-
     # Get state from app
     state: State = app.state.STATE_FACTORY.state()
 
     # Handle message
-    create_node_response_proto = message_handler.create_node(
-        request=create_node_request_proto, state=state
-    )
-
-    # Return serialized ProtoBuf
-    create_node_response_bytes = create_node_response_proto.SerializeToString()
-    return Response(
-        status_code=200,
-        content=create_node_response_bytes,
-        headers={"Content-Type": "application/protobuf"},
-    )
+    return message_handler.create_node(request=request, state=state)
 
 
-async def delete_node(request: Request) -> Response:
+@rest_request_response(DeleteNodeRequest)
+async def delete_node(request: DeleteNodeRequest) -> DeleteNodeResponse:
     """Delete Node Id."""
-    _check_headers(request.headers)
-
-    # Get the request body as raw bytes
-    delete_node_request_bytes: bytes = await request.body()
-
-    # Deserialize ProtoBuf
-    delete_node_request_proto = DeleteNodeRequest()
-    delete_node_request_proto.ParseFromString(delete_node_request_bytes)
-
     # Get state from app
     state: State = app.state.STATE_FACTORY.state()
 
     # Handle message
-    delete_node_response_proto = message_handler.delete_node(
-        request=delete_node_request_proto, state=state
-    )
-
-    # Return serialized ProtoBuf
-    delete_node_response_bytes = delete_node_response_proto.SerializeToString()
-    return Response(
-        status_code=200,
-        content=delete_node_response_bytes,
-        headers={"Content-Type": "application/protobuf"},
-    )
+    return message_handler.delete_node(request=request, state=state)
 
 
-async def pull_task_ins(request: Request) -> Response:
+@rest_request_response(PullTaskInsRequest)
+async def pull_task_ins(request: PullTaskInsRequest) -> PullTaskInsResponse:
     """Pull TaskIns."""
-    _check_headers(request.headers)
-
-    # Get the request body as raw bytes
-    pull_task_ins_request_bytes: bytes = await request.body()
-
-    # Deserialize ProtoBuf
-    pull_task_ins_request_proto = PullTaskInsRequest()
-    pull_task_ins_request_proto.ParseFromString(pull_task_ins_request_bytes)
-
     # Get state from app
     state: State = app.state.STATE_FACTORY.state()
 
     # Handle message
-    pull_task_ins_response_proto = message_handler.pull_task_ins(
-        request=pull_task_ins_request_proto,
-        state=state,
-    )
-
-    # Return serialized ProtoBuf
-    pull_task_ins_response_bytes = pull_task_ins_response_proto.SerializeToString()
-    return Response(
-        status_code=200,
-        content=pull_task_ins_response_bytes,
-        headers={"Content-Type": "application/protobuf"},
-    )
+    return message_handler.pull_task_ins(request=request, state=state)
 
 
-async def push_task_res(request: Request) -> Response:  # Check if token is needed here
+# Check if token is needed here
+@rest_request_response(PushTaskResRequest)
+async def push_task_res(request: PushTaskResRequest) -> PushTaskResResponse:
     """Push TaskRes."""
-    _check_headers(request.headers)
-
-    # Get the request body as raw bytes
-    push_task_res_request_bytes: bytes = await request.body()
-
-    # Deserialize ProtoBuf
-    push_task_res_request_proto = PushTaskResRequest()
-    push_task_res_request_proto.ParseFromString(push_task_res_request_bytes)
-
     # Get state from app
     state: State = app.state.STATE_FACTORY.state()
 
     # Handle message
-    push_task_res_response_proto = message_handler.push_task_res(
-        request=push_task_res_request_proto,
-        state=state,
-    )
-
-    # Return serialized ProtoBuf
-    push_task_res_response_bytes = push_task_res_response_proto.SerializeToString()
-    return Response(
-        status_code=200,
-        content=push_task_res_response_bytes,
-        headers={"Content-Type": "application/protobuf"},
-    )
+    return message_handler.push_task_res(request=request, state=state)
 
 
-async def ping(request: Request) -> Response:
+@rest_request_response(PingRequest)
+async def ping(request: PingRequest) -> PingResponse:
     """Ping."""
-    _check_headers(request.headers)
-
-    # Get the request body as raw bytes
-    ping_request_bytes: bytes = await request.body()
-
-    # Deserialize ProtoBuf
-    ping_request_proto = PingRequest()
-    ping_request_proto.ParseFromString(ping_request_bytes)
-
     # Get state from app
     state: State = app.state.STATE_FACTORY.state()
 
     # Handle message
-    ping_response_proto = message_handler.ping(request=ping_request_proto, state=state)
-
-    # Return serialized ProtoBuf
-    ping_response_bytes = ping_response_proto.SerializeToString()
-    return Response(
-        status_code=200,
-        content=ping_response_bytes,
-        headers={"Content-Type": "application/protobuf"},
-    )
+    return message_handler.ping(request=request, state=state)
 
 
-async def get_run(request: Request) -> Response:
+@rest_request_response(GetRunRequest)
+async def get_run(request: GetRunRequest) -> GetRunResponse:
     """GetRun."""
-    _check_headers(request.headers)
-
-    # Get the request body as raw bytes
-    get_run_request_bytes: bytes = await request.body()
-
-    # Deserialize ProtoBuf
-    get_run_request_proto = GetRunRequest()
-    get_run_request_proto.ParseFromString(get_run_request_bytes)
-
     # Get state from app
     state: State = app.state.STATE_FACTORY.state()
 
     # Handle message
-    get_run_response_proto = message_handler.get_run(
-        request=get_run_request_proto, state=state
-    )
+    return message_handler.get_run(request=request, state=state)
 
-    # Return serialized ProtoBuf
-    get_run_response_bytes = get_run_response_proto.SerializeToString()
-    return Response(
-        status_code=200,
-        content=get_run_response_bytes,
-        headers={"Content-Type": "application/protobuf"},
-    )
+
+@rest_request_response(GetFabRequest)
+async def get_fab(request: GetFabRequest) -> GetFabResponse:
+    """GetRun."""
+    # Get ffs from app
+    ffs: Ffs = app.state.FFS_FACTORY.state()
+
+    # Handle message
+    return message_handler.get_fab(request=request, ffs=ffs)
 
 
 routes = [
@@ -215,6 +163,7 @@ routes = [
     Route("/api/v0/fleet/push-task-res", push_task_res, methods=["POST"]),
     Route("/api/v0/fleet/ping", ping, methods=["POST"]),
     Route("/api/v0/fleet/get-run", get_run, methods=["POST"]),
+    Route("/api/v0/fleet/get-fab", get_fab, methods=["POST"]),
 ]
 
 app: Starlette = Starlette(

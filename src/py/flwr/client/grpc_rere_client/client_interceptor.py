@@ -17,11 +17,13 @@
 
 import base64
 import collections
+from logging import WARNING
 from typing import Any, Callable, Optional, Sequence, Tuple, Union
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 
+from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     bytes_to_public_key,
     compute_hmac,
@@ -151,8 +153,15 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
             server_public_key_bytes = base64.urlsafe_b64decode(
                 _get_value_from_tuples(_PUBLIC_KEY_HEADER, response.initial_metadata())
             )
-            self.server_public_key = bytes_to_public_key(server_public_key_bytes)
-            self.shared_secret = generate_shared_key(
-                self.private_key, self.server_public_key
-            )
+
+            if server_public_key_bytes != b"":
+                self.server_public_key = bytes_to_public_key(server_public_key_bytes)
+            else:
+                log(WARNING, "Can't get server public key, SuperLink may be offline")
+
+            if self.server_public_key is not None:
+                self.shared_secret = generate_shared_key(
+                    self.private_key, self.server_public_key
+                )
+
         return response
