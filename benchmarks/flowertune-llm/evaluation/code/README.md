@@ -47,14 +47,14 @@ git clone https://github.com/bigcode-project/bigcode-evaluation-harness.git && c
 
 ```bash
 python main.py \
---model=mistralai/Mistral-7B-v0.3
---peft_model=/path/to/fine-tuned-peft-model-dir/  # e.g., ./peft_1
---max_length_generation=1024 # change to 2048 when running mbpp
---batch_size=4 
---allow_code_execution
---save_generations 
---save_references
---tasks=humaneval # chosen from [mbpp, humaneval, multiple-js, multiple-cpp]
+--model=mistralai/Mistral-7B-v0.3 \
+--peft_model=/path/to/fine-tuned-peft-model-dir/  \ # e.g., ./peft_1
+--max_length_generation=1024  \ # change to 2048 when running mbpp
+--batch_size=4 \
+--allow_code_execution \
+--save_generations  \
+--save_references \
+--tasks=humaneval \ # chosen from [mbpp, humaneval, multiple-js, multiple-cpp]
 --metric_output_path=./evaluation_results_humaneval.json # change dataset name based on your choice
 ```
 
