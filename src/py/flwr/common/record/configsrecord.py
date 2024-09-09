@@ -58,27 +58,61 @@ def _check_value(value: ConfigsRecordValues) -> None:
 
 
 class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
-    """Configs record."""
+    """Configs record.
+
+    A :code:`ConfigsRecord` is a Python dictionary designed to ensure that
+    each key-value pair adheres to specified data types. A :code:`ConfigsRecord`
+    is one of the types of records that a
+    `flwr.common.RecordSet <flwr.common.RecordSet.html#recordset>`_ supports and
+    can therefore be used to construct :code:`common.Message` objects.
+
+    Parameters
+    ----------
+    configs_dict : Optional[Dict[str, ConfigsRecordValues]]
+        A dictionary that stores basic types (i.e. `str`, `int`, `float`, `bytes` as
+        defined in `ConfigsScalar`) and lists of such types (see
+        `ConfigsScalarList`).
+    keep_input : bool (default: True)
+        A boolean indicating whether config passed should be deleted from the input
+        dictionary immediately after adding them to the record. When set
+        to True, the data is duplicated in memory. If memory is a concern, set
+        it to False.
+
+    Examples
+    --------
+    The usage of a :code:`ConfigsRecord` is envisioned for sending configuration values
+    telling the target node how to perform a certain action (e.g. train/evaluate a model
+    ). You can use standard Python built-in types such as :code:`float`, :code:`str`
+    , :code:`bytes`. All types allowed are defined in
+    :code:`flwr.common.ConfigsRecordValues`. While lists are supported, we
+    encourage you to use a :code:`ParametersRecord` instead if these are of high
+    dimensionality.
+
+    Let's see some examples of how to construct a :code:`ConfigsRecord` from scratch:
+
+    >>> from flwr.common import ConfigsRecord
+    >>>
+    >>> # A `ConfigsRecord` is a specialized Python dictionary
+    >>> record = ConfigsRecord({"lr": 0.1, "batch-size": 128})
+    >>> # You can add more content to an existing record
+    >>> record["compute-average"] = True
+    >>> # It also supports lists
+    >>> record["loss-fn-coefficients"] = [0.4, 0.25, 0.35]
+    >>> # And string values (among other types)
+    >>> record["path-to-S3"] = "s3://bucket_name/folder1/fileA.json"
+
+    Just like the other types of records in a :code:`flwr.common.RecordSet`, types are
+    enforced. If you need to add a custom data structure or object, we recommend to
+    serialise it into bytes and save it as such (bytes are allowed in a
+    :code:`ConfigsRecord`)
+    """
 
     def __init__(
         self,
         configs_dict: Optional[Dict[str, ConfigsRecordValues]] = None,
         keep_input: bool = True,
     ) -> None:
-        """Construct a ConfigsRecord object.
 
-        Parameters
-        ----------
-        configs_dict : Optional[Dict[str, ConfigsRecordValues]]
-            A dictionary that stores basic types (i.e. `str`, `int`, `float`, `bytes` as
-            defined in `ConfigsScalar`) and lists of such types (see
-            `ConfigsScalarList`).
-        keep_input : bool (default: True)
-            A boolean indicating whether config passed should be deleted from the input
-            dictionary immediately after adding them to the record. When set
-            to True, the data is duplicated in memory. If memory is a concern, set
-            it to False.
-        """
         super().__init__(_check_key, _check_value)
         if configs_dict:
             for k in list(configs_dict.keys()):
