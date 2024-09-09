@@ -53,6 +53,7 @@ python main.py \
 --peft_model=/path/to/fine-tuned-peft-model-dir/  \ # e.g., ./peft_1
 --max_length_generation=1024  \ # change to 2048 when running mbpp
 --batch_size=4 \
+--use_auth_token \
 --allow_code_execution \
 --save_generations  \
 --save_references \
@@ -61,6 +62,9 @@ python main.py \
 ```
 
 The model answers and pass@1 scores will be saved to `generations_{dataset_name}.json` and `evaluation_results_{dataset_name}.json`, respectively.
+
+> [!WARNING]
+> The evaluation process takes ~29 GB VRAM.
 
 > [!NOTE]
 > Please ensure that you provide all **four pass@1 scores** for the evaluation datasets when submitting to the LLM Leaderboard (see the [`Make Submission`](https://github.com/adap/flower/tree/main/benchmarks/flowertune-llm/evaluation#make-submission-on-flowertune-llm-leaderboard) section).
