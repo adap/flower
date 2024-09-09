@@ -5,6 +5,7 @@ on:
   schedule:
     # At 01:00 on Monday.
     - cron: "0 1 * * 1"
+  workflow_dispatch:
 
 jobs:
   version:
