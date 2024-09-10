@@ -3,6 +3,8 @@
 We leverage the code generation evaluation metrics provided by [bigcode-evaluation-harness](https://github.com/bigcode-project/bigcode-evaluation-harness/tree/main) to evaluate our fine-tuned LLMs.
 Three datasets have been selected for this evaluation: [MBPP](https://huggingface.co/datasets/google-research-datasets/mbpp) (Python), [HumanEval](https://huggingface.co/datasets/openai/openai_humaneval) (Python), and [MultiPL-E](https://github.com/nuprl/MultiPL-E) (JavaScript, C++). 
 
+> [!WARNING]
+> The evaluation process takes ~30 GB VRAM. On a 40GB A100 it requires 15-30mins depending on the dataset to complete.
 
 ## Environment Setup
 
@@ -63,8 +65,6 @@ python main.py \
 
 The model answers and pass@1 scores will be saved to `generations_{dataset_name}.json` and `evaluation_results_{dataset_name}.json`, respectively.
 
-> [!WARNING]
-> The evaluation process takes ~29 GB VRAM.
 
 > [!NOTE]
 > Please ensure that you provide all **four pass@1 scores** for the evaluation datasets when submitting to the LLM Leaderboard (see the [`Make Submission`](https://github.com/adap/flower/tree/main/benchmarks/flowertune-llm/evaluation#make-submission-on-flowertune-llm-leaderboard) section).
