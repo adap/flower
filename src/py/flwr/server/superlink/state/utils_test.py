@@ -22,7 +22,7 @@ from .utils import generate_rand_int_from_bytes, sint64_to_uint64, uint64_to_sin
 class UtilsTest(unittest.TestCase):
     """Test utils code."""
 
-    def test_uint64_to_sint64(self):
+    def test_uint64_to_sint64(self) -> None:
         """Test conversion from uint64 to sint64."""
         # Test values below 2^63
         self.assertEqual(uint64_to_sint64(0), 0)
@@ -34,7 +34,7 @@ class UtilsTest(unittest.TestCase):
         self.assertEqual(uint64_to_sint64(2**63 + 1), -(2**63) + 1)
         self.assertEqual(uint64_to_sint64(2**64 - 1), -1)
 
-    def test_sint64_to_uint64(self):
+    def test_sint64_to_uint64(self) -> None:
         """Test conversion from sint64 to uint64."""
         # Test values within the range of sint64
         self.assertEqual(sint64_to_uint64(-(2**63)), 2**63)
@@ -47,7 +47,7 @@ class UtilsTest(unittest.TestCase):
         self.assertEqual(sint64_to_uint64(2**63), 2**63)
         self.assertEqual(sint64_to_uint64(2**64 - 1), 2**64 - 1)
 
-    def test_generate_rand_int_from_bytes_unsigned_int(self):
+    def test_generate_rand_int_from_bytes_unsigned_int(self) -> None:
         """Test that the generated integer is unsigned (non-negative)."""
         for num_bytes in range(1, 9):
             with self.subTest(num_bytes=num_bytes):
