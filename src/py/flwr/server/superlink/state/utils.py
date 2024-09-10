@@ -38,8 +38,7 @@ def generate_rand_int_from_bytes(num_bytes: int) -> int:
 
 
 def uint64_to_sint64(u: int) -> int:
-    """
-    Convert a uint64 value to sint64.
+    """Convert a uint64 value to sint64.
 
     Args:
         u (int): The unsigned 64-bit integer to convert.
@@ -53,8 +52,7 @@ def uint64_to_sint64(u: int) -> int:
 
 
 def sint64_to_uint64(s: int) -> int:
-    """
-    Convert a sint64 value to uint64.
+    """Convert a sint64 value to uint64.
 
     Args:
         s (int): The signed 64-bit integer to convert.

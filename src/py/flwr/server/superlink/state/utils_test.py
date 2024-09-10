@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 import unittest
 
-from .utils import uint64_to_sint64, sint64_to_uint64, generate_rand_int_from_bytes
+from .utils import generate_rand_int_from_bytes, sint64_to_uint64, uint64_to_sint64
 
 
 class UtilsTest(unittest.TestCase):

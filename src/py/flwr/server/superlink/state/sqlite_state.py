@@ -35,8 +35,8 @@ from .state import State
 from .utils import (
     generate_rand_int_from_bytes,
     make_node_unavailable_taskres,
-    uint64_to_sint64,
     sint64_to_uint64,
+    uint64_to_sint64,
 )
 
 SQL_CREATE_TABLE_NODE = """
