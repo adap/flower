@@ -149,13 +149,7 @@ def new(
             "Please select LLM challenge by typing in the number",
             sorted([challenge.value for challenge in LlmChallengeName]),
         )
-        selected_value = [
-            name
-            for name, value in vars(LlmChallengeName).items()
-            if value == llm_challenge_value
-        ]
-        llm_challenge_str = selected_value[0]
-        llm_challenge_str = llm_challenge_str.lower()
+        llm_challenge_str = llm_challenge_value.lower()
 
     if framework_str == MlFramework.BASELINE:
         framework_str = "baseline"
