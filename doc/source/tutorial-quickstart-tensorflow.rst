@@ -123,7 +123,7 @@ to generate `num_partitions` partitions. You can choose `other
 partitioners
 <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html>`_
 available in Flower Datasets. Each ``ClientApp`` will call this function
-to create the `NumPy` arrays that correspond to their data partition.
+to create the ``NumPy`` arrays that correspond to their data partition.
 
 .. code:: python
 
@@ -177,11 +177,11 @@ you'd like:
 
 With `TensorFlow`, we can use the built-in ``get_weights()`` and
 ``set_weights()`` functions, which simplifies the implementation with
-`Flower`. The rest
-of the functionality in the ClientApp is directly inspired by the centralized case. The
-``fit()`` method in the client trains the model using the local dataset.
-Similarly, the ``evaluate()`` method is used to evaluate the model
-received on a held-out validation set that the client might have:
+`Flower`. The rest of the functionality in the ClientApp is directly
+inspired by the centralized case. The ``fit()`` method in the client
+trains the model using the local dataset. Similarly, the ``evaluate()``
+method is used to evaluate the model received on a held-out validation
+set that the client might have:
 
 .. code:: python
 
@@ -192,7 +192,7 @@ received on a held-out validation set that the client might have:
            self.epochs = epochs
            self.batch_size = batch_size
            self.verbose = verbose
-   
+
        def fit(self, parameters, config):
            self.model.set_weights(parameters)
            self.model.fit(
@@ -203,7 +203,7 @@ received on a held-out validation set that the client might have:
                verbose=self.verbose,
            )
            return self.model.get_weights(), len(self.x_train), {}
-   
+
        def evaluate(self, parameters, config):
            self.model.set_weights(parameters)
            loss, accuracy = self.model.evaluate(self.x_test, self.y_test, verbose=0)
@@ -258,10 +258,10 @@ initialized model that will serve as the global model to federate.
    def server_fn(context: Context):
        # Read from config
        num_rounds = context.run_config["num-server-rounds"]
-   
+
        # Get parameters to initialize global model
        parameters = ndarrays_to_parameters(load_model().get_weights())
-   
+
        # Define strategy
        strategy = strategy = FedAvg(
            fraction_fit=1.0,
@@ -270,9 +270,9 @@ initialized model that will serve as the global model to federate.
            initial_parameters=parameters,
        )
        config = ServerConfig(num_rounds=num_rounds)
-   
+
        return ServerAppComponents(strategy=strategy, config=config)
-   
+
    # Create ServerApp
    app = ServerApp(server_fn=server_fn)
 
@@ -296,9 +296,9 @@ learning system.
 
 .. note::
 
-   The video shown below shows how to setup a TensorFlow + Flower project
-   using our previously recommended APIs. A new video tutorial will be
-   released that shows the new APIs (as the content above does)
+   The video shown below shows how to setup a TensorFlow + Flower
+   project using our previously recommended APIs. A new video tutorial
+   will be released that shows the new APIs (as the content above does)
 
 .. meta::
    :description: Check out this Federated Learning quickstart tutorial for using Flower with TensorFlow to train a CNN model on CIFAR-10.
