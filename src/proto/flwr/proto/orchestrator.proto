@@ -1,0 +1,46 @@
+// Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ==============================================================================
+
+syntax = "proto3";
+
+package flwr.proto;
+
+import "flwr/proto/fab.proto";
+import "flwr/proto/transport.proto";
+
+service Orchestrator {
+  // Request to create a new run
+  rpc CreateRun(CreateRunRequest) returns (CreateRunResponse);
+
+  // Get the status of a given run
+  rpc GetRunStatus(GetRunStatusRequest) returns (GetRunStatusResponse);
+}
+
+// CreateRun
+message CreateRunRequest {
+  string fab_id = 1;
+  string fab_version = 2;
+  map<string, Scalar> override_config = 3;
+  Fab fab = 4;
+  double ttl = 5;
+}
+message CreateRunResponse {
+  bool success = 1;
+  sint64 run_id = 2;
+}
+
+// GetRunStatus
+message GetRunStatusRequest { sint64 run_id = 1; }
+message GetRunStatusResponse { string status = 1; }
