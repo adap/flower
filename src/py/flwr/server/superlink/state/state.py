@@ -133,14 +133,44 @@ class State(abc.ABC):  # pylint: disable=R0904
         """Delete all delivered TaskIns/TaskRes pairs."""
 
     @abc.abstractmethod
-    def create_node(
-        self, ping_interval: float, public_key: Optional[bytes] = None
-    ) -> int:
+    def create_node(self, ping_interval: float) -> int:
         """Create, store in state, and return `node_id`."""
 
     @abc.abstractmethod
-    def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
+    def delete_node(self, node_id: int) -> None:
         """Remove `node_id` from state."""
+
+    @abc.abstractmethod
+    def register_public_key(self, public_key_bytes: bytes, node_id: int) -> bool:
+        """Register a public key with the provided `node_id`.
+
+        Parameters
+        ----------
+        public_key_bytes : bytes
+            The public key to be registered.
+        node_id : int
+            The identifier of the node with which the key is to be associated.
+
+        Returns
+        -------
+        is_successful : bool
+            `True` if the public key was successfully registered, `False` otherwise.
+        """
+
+    @abc.abstractmethod
+    def unregister_public_key(self, public_key_bytes: bytes) -> bool:
+        """Unregister a public key.
+
+        Parameters
+        ----------
+        public_key_bytes : bytes
+            The public key to be unregistered.
+
+        Returns
+        -------
+        is_successful : bool
+            `True` if the public key was successfully unregistered, `False` otherwise.
+        """
 
     @abc.abstractmethod
     def get_nodes(self, run_id: int) -> Set[int]:
