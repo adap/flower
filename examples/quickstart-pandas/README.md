@@ -6,15 +6,20 @@ framework: [pandas]
 
 # Federated Learning with Pandas and Flower (Quickstart Example)
 
+> \[!CAUTION\]
+> This example uses Flower's low-level API which is a preview feature and subject to change.
+
 This introductory example to Flower uses [Pandas](https://pandas.pydata.org/), but deep knowledge of Pandas is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case. This example uses [Flower Datasets](https://flower.ai/docs/datasets/) to
 download, partition and preprocess the [Iris dataset](https://huggingface.co/datasets/scikit-learn/iris).
 Running this example in itself is quite easy.
 
 This example implements a form of Federated Analyics by which instead of training a model using locally available data, the nodes run a query on the data they own. In this example the query is to compute the histogram on specific columns of the dataset. These metrics are sent to the server for aggregation.
 
-## Project Setup
+## Set up the project
 
-Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
+### Clone the project
+
+Start by cloning the example project.
 
 ```shell
 git clone --depth=1 https://github.com/adap/flower.git _tmp \
@@ -22,7 +27,7 @@ git clone --depth=1 https://github.com/adap/flower.git _tmp \
 		&& rm -rf _tmp && cd quickstart-pandas
 ```
 
-This will create a new directory called `quickstart-pandas` containing the following files:
+This will create a new directory called `quickstart-pandas` with the following structure:
 
 ```shell
 quickstart-pandas
@@ -34,7 +39,7 @@ quickstart-pandas
 └── README.md
 ```
 
-## Install dependencies
+### Install dependencies and project
 
 Install the dependencies defined in `pyproject.toml` as well as the `pandas_example` package.
 
@@ -42,7 +47,7 @@ Install the dependencies defined in `pyproject.toml` as well as the `pandas_exam
 pip install -e .
 ```
 
-## Run the Example
+## Run the project
 
 You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
 
@@ -57,6 +62,9 @@ You can also override some of the settings for your `ClientApp` and `ServerApp` 
 ```bash
 flwr run . --run-config num-server-rounds=5
 ```
+
+> \[!TIP\]
+> For a more detailed walk-through check our [quickstart PyTorch tutorial](https://flower.ai/docs/framework/tutorial-quickstart-pandas.html)
 
 ### Run with the Deployment Engine
 
