@@ -36,7 +36,7 @@ class SizePartitioner(Partitioner):
     >>> from flwr_datasets import FederatedDataset
     >>> from flwr_datasets.partitioner import SizePartitioner
     >>>
-    >>> partition_sizes = [20_000, 10_000 30_000]
+    >>> partition_sizes = [15_000, 5_000, 30_000]
     >>> partitioner = SizePartitioner(partition_sizes)
     >>> fds = FederatedDataset(dataset="cifar10", partitioners={"train": partitioner})
     """
