@@ -43,4 +43,4 @@ options.num-supernodes = 10
 [tool.flwr.federations.localhost-gpu]
 options.num-supernodes = 10
 options.backend.client-resources.num-cpus = 4 # each ClientApp assumes to use 4CPUs
-options.backend.client-resources.num-gpus = 0.5 # at most 2 ClientApp will run in a given GPU
+options.backend.client-resources.num-gpus = 1 # at most 1 ClientApp will run in a given GPU

@@ -5,6 +5,7 @@ from collections import OrderedDict
 
 import torch
 from evaluate import load as load_metric
+from datasets.utils.logging import disable_progress_bar
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 from torch.optim import AdamW
@@ -13,6 +14,7 @@ from transformers import AutoTokenizer, DataCollatorWithPadding
 
 warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", category=FutureWarning)
+disable_progress_bar()
 
 
 fds = None  # Cache FederatedDataset
