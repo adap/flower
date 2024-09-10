@@ -66,8 +66,8 @@ Open your terminal and run:
    * ``docker run``: This tells Docker to run a container from an image.
    * ``--rm``: Remove the container once it is stopped or the command exits.
    * | ``-p 9091:9091 -p 9092:9092``: Map port ``9091`` and ``9092`` of the container to the same port of
-     | the host machine, allowing you to access the Driver API on ``http://localhost:9091`` and
-     | the Fleet API on ``http://localhost:9092``.
+     | the host machine, allowing other services to access the Driver API on
+     | ``http://localhost:9091`` and the Fleet API on ``http://localhost:9092``.
    * ``--network flwr-network``: Make the container join the network named ``flwr-network``.
    * ``--name superlink``: Assign the name ``superlink`` to the container.
    * ``--detach``: Run the container in the background, freeing up the terminal.
@@ -79,32 +79,92 @@ Open your terminal and run:
 Step 3: Start the SuperNode
 ---------------------------
 
-The SuperNode Docker image comes with a pre-installed version of Flower and serves as a base for
-building your own SuperNode image.
+Start two SuperNode containers.
 
-#. Create a SuperNode Dockerfile called ``Dockerfile.supernode`` and paste the following code into it:
+#. Start the first container:
+
+   .. code-block:: bash
+      :substitutions:
+
+      $ docker run --rm \
+          -p 9094:9094 \
+          --network flwr-network \
+          --name supernode-1 \
+          --detach \
+          flwr/supernode:|stable_flwr_version|  \
+          --insecure \
+          --superlink superlink:9092 \
+          --node-config "partition-id=0 num-partitions=2" \
+          --supernode-address 0.0.0.0:9094 \
+          --isolation process
+
+   .. dropdown:: Understand the command
+
+      * ``docker run``: This tells Docker to run a container from an image.
+      * ``--rm``: Remove the container once it is stopped or the command exits.
+      * | ``-p 9094:9094``: Map port ``9094`` of the container to the same port of
+        | the host machine, allowing other services to access the SuperNode API on
+        | ``http://localhost:9094``.
+      * ``--network flwr-network``: Make the container join the network named ``flwr-network``.
+      * ``--name supernode-1``: Assign the name ``supernode-1`` to the container.
+      * ``--detach``: Run the container in the background, freeing up the terminal.
+      * | ``flwr/supernode:|stable_flwr_version|``: This is the name of the image to be run and the specific tag
+        | of the image.
+      * | ``--insecure``: This flag tells the container to operate in an insecure mode, allowing
+        | unencrypted communication.
+      * | ``--superlink superlink:9092``: Connect to the SuperLink's Fleet API at the address
+        | ``superlink:9092``.
+      * | ``--node-config "partition-id=0 num-partitions=2"``: Set the partition ID to ``0`` and the
+        | number of partitions to ``2`` for the SuperNode configuration.
+      * | ``--supernode-address 0.0.0.0:9094``: Set the address and port number that the SuperNode
+        | is listening on.
+      * | ``--isolation process``: Tells the SuperNode that the ClientApp is created by separate
+        | independent process. The SuperNode does not attempt to create it.
+
+#. Start the second container:
+
+   .. code-block:: shell
+      :substitutions:
+
+      $ docker run --rm \
+          -p 9095:9095 \
+          --network flwr-network \
+          --name supernode-2 \
+          --detach \
+          flwr/supernode:|stable_flwr_version|  \
+          --insecure \
+          --superlink superlink:9092 \
+          --node-config "partition-id=1 num-partitions=2" \
+          --supernode-address 0.0.0.0:9095 \
+          --isolation process
+
+Step 4: Start the ClientApp
+---------------------------
+
+The ClientApp Docker image comes with a pre-installed version of Flower and serves as a base for
+building your own ClientApp image. In order to install the FAB dependencies, you will need to create
+a Dockerfile that extends the ClientApp image and installs the required dependencies.
+
+#. Create a ClientApp Dockerfile called ``Dockerfile.clientapp`` and paste the following code into it:
 
    .. code-block:: dockerfile
-      :caption: Dockerfile.supernode
+      :caption: Dockerfile.clientapp
       :linenos:
       :substitutions:
 
-      FROM flwr/supernode:|stable_flwr_version|
+      FROM flwr/clientapp:|stable_flwr_version|
 
       WORKDIR /app
       COPY pyproject.toml .
       RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
           && python -m pip install -U --no-cache-dir .
 
-      COPY flower.quickstart-docker.1-0-0.fab .
-      RUN flwr install flower.quickstart-docker.1-0-0.fab
-
-      ENTRYPOINT ["flower-supernode"]
+      ENTRYPOINT ["flwr-clientapp"]
 
    .. dropdown:: Understand the Dockerfile
 
-      * | :substitution-code:`FROM flwr/supernode:|stable_flwr_version|`: This line specifies that the Docker image
-        | to be built from is the ``flwr/supernode image``, version :substitution-code:`|stable_flwr_version|`.
+      * | :substitution-code:`FROM flwr/clientapp:|stable_flwr_version|`: This line specifies that the Docker image
+        | to be built from is the ``flwr/clientapp image``, version :substitution-code:`|stable_flwr_version|`.
       * | ``WORKDIR /app``: Set the working directory for the container to ``/app``.
         | Any subsequent commands that reference a directory will be relative to this directory.
       * | ``COPY pyproject.toml .``: Copy the ``pyproject.toml`` file
@@ -116,51 +176,37 @@ building your own SuperNode image.
         |
         | The ``-U`` flag indicates that any existing packages should be upgraded, and
         | ``--no-cache-dir`` prevents pip from using the cache to speed up the installation.
-      * | ``COPY flower.quickstart-docker.1-0-0.fab .``: Copy the
-        | ``flower.quickstart-docker.1-0-0.fab`` file from the current working directory into
-        | the container's ``/app`` directory.
-      * | ``RUN flwr install flower.quickstart-docker.1-0-0.fab``: Run the ``flwr`` install command
-        | to install the Flower App Bundle locally.
-      * | ``ENTRYPOINT ["flower-supernode"]``: Set the command ``flower-supernode`` to be
+      * | ``ENTRYPOINT ["flwr-clientapp"]``: Set the command ``flwr-clientapp`` to be
         | the default command run when the container is started.
 
    .. important::
 
-      Note that `flwr <https://pypi.org/project/flwr/>`__ is already installed in the ``flwr/supernode``
+      Note that `flwr <https://pypi.org/project/flwr/>`__ is already installed in the ``flwr/clientapp``
       base image, so only other package dependencies such as ``flwr-datasets``, ``torch``, etc.,
       need to be installed. As a result, the ``flwr`` dependency is removed from the
       ``pyproject.toml`` after it has been copied into the Docker image (see line 5).
 
-#. Build the Flower App Bundle (FAB):
+#. Next, build the ClientApp Docker image by running the following command in the directory where
+   the Dockerfile is located:
 
    .. code-block:: bash
 
-      $ flwr build
-
-#. Next, build the SuperNode Docker image by running the following command in the directory where
-   Dockerfile is located:
-
-   .. code-block:: bash
-
-      $ docker build -f Dockerfile.supernode -t flwr_supernode:0.0.1 .
+      $ docker build -f Dockerfile.clientapp -t flwr_clientapp:0.0.1 .
 
    .. note::
 
-      The image name was set as ``flwr_supernode`` with the tag ``0.0.1``. Remember that
+      The image name was set as ``flwr_clientapp`` with the tag ``0.0.1``. Remember that
       these values are merely examples, and you can customize them according to your requirements.
 
-#. Start the first SuperNode container:
+#. Start the first ClientApp container:
 
    .. code-block:: bash
 
       $ docker run --rm \
           --network flwr-network \
           --detach \
-          flwr_supernode:0.0.1 \
-          --insecure \
-          --superlink superlink:9092 \
-          --node-config \
-          partition-id=0,num-partitions=2
+          flwr_clientapp:0.0.1  \
+          --supernode supernode-1:9094
 
    .. dropdown:: Understand the command
 
@@ -168,35 +214,28 @@ building your own SuperNode image.
       * ``--rm``: Remove the container once it is stopped or the command exits.
       * ``--network flwr-network``: Make the container join the network named ``flwr-network``.
       * ``--detach``: Run the container in the background, freeing up the terminal.
-      * | ``flwr_supernode:0.0.1``: This is the name of the image to be run and the specific tag
+      * | ``flwr_clientapp:0.0.1``: This is the name of the image to be run and the specific tag
         | of the image.
-      * | ``--insecure``: This flag tells the container to operate in an insecure mode, allowing
-        | unencrypted communication.
-      * | ``--superlink superlink:9092``: Connect to the SuperLinks Fleet API on the address
-        | ``superlink:9092``.
-      * | ``--node-config partition-id=0,num-partitions=2``: Set the partition ID to ``0`` and the
-        | number of partitions to ``2`` for the SuperNode configuration.
+      * | ``--supernode supernode-1:9094``: Connect to the SuperNode's Fleet API at the address
+        | ``supernode-1:9094``.
 
-#. Start the second SuperNode container:
+#. Start the second ClientApp container:
 
    .. code-block:: shell
 
       $ docker run --rm \
           --network flwr-network \
           --detach \
-          flwr_supernode:0.0.1 \
-          --insecure \
-          --superlink superlink:9092 \
-          --node-config \
-          partition-id=1,num-partitions=2
+          flwr_clientapp:0.0.1 \
+          --supernode supernode-2:9095
 
-Step 4: Start the SuperExec
+Step 5: Start the SuperExec
 ---------------------------
 
-The procedure for building and running a SuperExec image is almost identical to the SuperNode image.
+The procedure for building and running a SuperExec image is almost identical to the ClientApp image.
 
-Similar to the SuperNode image, the SuperExec Docker image comes with a pre-installed version of
-Flower and serves as a base for building your own SuperExec image.
+Similar to the ClientApp image, you will need to create a Dockerfile that extends the SuperExec
+image and installs the required FAB dependencies.
 
 #. Create a SuperExec Dockerfile called ``Dockerfile.superexec`` and paste the following code in:
 
@@ -254,8 +293,7 @@ Flower and serves as a base for building your own SuperExec image.
           --detach \
           flwr_superexec:0.0.1 \
           --insecure \
-          --executor-config \
-          superlink=\"superlink:9091\"
+          --executor-config superlink=\"superlink:9091\"
 
    .. dropdown:: Understand the command
 
@@ -273,7 +311,7 @@ Flower and serves as a base for building your own SuperExec image.
       * | ``--executor-config superlink=\"superlink:9091\"``: Configure the SuperExec executor to
         | connect to the SuperLink running on port ``9091``.
 
-Step 5: Run the Quickstart Project
+Step 6: Run the Quickstart Project
 ----------------------------------
 
 #. Add the following lines to the ``pyproject.toml``:
@@ -297,7 +335,7 @@ Step 5: Run the Quickstart Project
 
       $ docker logs -f superexec
 
-Step 6: Update the Application
+Step 7: Update the Application
 ------------------------------
 
 #. Change the application code. For example, change the  ``seed`` in ``quickstart_docker/task.py``
@@ -310,39 +348,32 @@ Step 6: Update the Application
       partition_train_test = partition.train_test_split(test_size=0.2, seed=43)
       # ...
 
-#. Stop the current SuperNode containers:
+#. Stop the current ClientApp containers:
 
    .. code-block:: bash
 
-      $ docker stop $(docker ps -a -q  --filter ancestor=flwr_supernode:0.0.1)
+      $ docker stop $(docker ps -a -q  --filter ancestor=flwr_clientapp:0.0.1)
 
-#. Rebuild the FAB and SuperNode image:
+#. Rebuild the FAB and ClientApp image:
 
    .. code-block:: bash
 
-      $ flwr build
-      $ docker build -f Dockerfile.supernode -t flwr_supernode:0.0.1 .
+      $ docker build -f Dockerfile.clientapp -t flwr_clientapp:0.0.1 .
 
-#. Launch two new SuperNode containers based on the newly built image:
+#. Launch two new ClientApp containers based on the newly built image:
 
    .. code-block:: bash
 
       $ docker run --rm \
           --network flwr-network \
           --detach \
-          flwr_supernode:0.0.1 \
-          --insecure \
-          --superlink superlink:9092 \
-          --node-config \
-          partition-id=0,num-partitions=2
+          flwr_clientapp:0.0.1  \
+          --supernode supernode-1:9094
       $ docker run --rm \
           --network flwr-network \
           --detach \
-          flwr_supernode:0.0.1 \
-          --insecure \
-          --superlink superlink:9092 \
-          --node-config \
-          partition-id=1,num-partitions=2
+          flwr_clientapp:0.0.1 \
+          --supernode supernode-2:9095
 
 #. Run the updated project:
 
@@ -350,14 +381,16 @@ Step 6: Update the Application
 
       $ flwr run . docker
 
-Step 7: Clean Up
+Step 8: Clean Up
 ----------------
 
 Remove the containers and the bridge network:
 
 .. code-block:: bash
 
-   $ docker stop $(docker ps -a -q  --filter ancestor=flwr_supernode:0.0.1) \
+   $ docker stop $(docker ps -a -q  --filter ancestor=flwr_clientapp:0.0.1) \
+      supernode-1 \
+      supernode-2 \
       superexec \
       superlink
    $ docker network rm flwr-network
