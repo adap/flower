@@ -70,7 +70,7 @@ mocked_natural_id_datasets = [
         ("scikit-learn/adult-census-income", None, ""),
         ("jlh/uci-mushrooms", None, ""),
         ("scikit-learn/iris", None, ""),
-        # Mocked by local recreation 
+        # Mocked by local recreation
         # Image
         ("cifar100", "test", ""),
         # Note: there's also the extra split and full_numbers subset
@@ -79,7 +79,7 @@ mocked_natural_id_datasets = [
         ("sentiment140", "test", ""),  # aka twitter
         # Audio
         ("speech_commands", "test", "v0.01"),
-        # Mocked by partial download 
+        # Mocked by partial download
         # Image
         ("flwrlabs/pacs", None, ""),
         ("flwrlabs/cinic10", "test", ""),
