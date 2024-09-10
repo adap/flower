@@ -40,6 +40,7 @@ mocked_by_partial_download_datasets = [
     "flwrlabs/cinic10",
     "flwrlabs/caltech101",
     "flwrlabs/office-home",
+    "flwrlabs/fed-isic2019",
 ]
 
 natural_id_datasets = [
@@ -84,6 +85,7 @@ mocked_natural_id_datasets = [
         ("flwrlabs/cinic10", "test", ""),
         ("flwrlabs/caltech101", None, ""),
         ("flwrlabs/office-home", None, ""),
+        ("flwrlabs/fed-isic2019", "test", ""),
     ],
 )
 class BaseFederatedDatasetsTest(unittest.TestCase):
