@@ -15,12 +15,13 @@
 """Provide functions for managing global Flower config."""
 
 import os
+import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, cast, get_args
 
 import tomli
 
-from flwr.cli.config_utils import validate_fields
+from flwr.cli.config_utils import get_fab_config, validate_fields
 from flwr.common.constant import APP_DIR, FAB_CONFIG_FILE, FLWR_HOME
 from flwr.common.typing import Run, UserConfig, UserConfigValue
 
@@ -74,10 +75,15 @@ def get_project_config(project_dir: Union[str, Path]) -> Dict[str, Any]:
     return config
 
 
-def _fuse_dicts(
+def fuse_dicts(
     main_dict: UserConfig,
     override_dict: UserConfig,
 ) -> UserConfig:
+    """Merge a config with the overrides.
+
+    Remove the nesting by adding the nested keys as prefixes separated by dots, and fuse
+    it with the override dict.
+    """
     fused_dict = main_dict.copy()
 
     for key, value in override_dict.items():
@@ -96,7 +102,19 @@ def get_fused_config_from_dir(
     )
     flat_default_config = flatten_dict(default_config)
 
-    return _fuse_dicts(flat_default_config, override_config)
+    return fuse_dicts(flat_default_config, override_config)
+
+
+def get_fused_config_from_fab(fab_file: Union[Path, bytes], run: Run) -> UserConfig:
+    """Fuse default config in a `FAB` with overrides in a `Run`.
+
+    This enables obtaining a run-config without having to install the FAB. This
+    function mirrors `get_fused_config_from_dir`. This is useful when the execution
+    of the FAB is delegated to a different process.
+    """
+    default_config = get_fab_config(fab_file)["tool"]["flwr"]["app"].get("config", {})
+    flat_config_flat = flatten_dict(default_config)
+    return fuse_dicts(flat_config_flat, run.override_config)
 
 
 def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> UserConfig:
@@ -105,10 +123,15 @@ def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> UserConfig:
     Get the config using the fab_id and the fab_version, remove the nesting by adding
     the nested keys as prefixes separated by dots, and fuse it with the override dict.
     """
+    # Return empty dict if fab_id or fab_version is empty
     if not run.fab_id or not run.fab_version:
         return {}
 
     project_dir = get_project_dir(run.fab_id, run.fab_version, flwr_dir)
+
+    # Return empty dict if project directory does not exist
+    if not project_dir.is_dir():
+        return {}
 
     return get_fused_config_from_dir(project_dir, run.override_config)
 
@@ -136,9 +159,25 @@ def flatten_dict(
     return dict(items)
 
 
+def unflatten_dict(flat_dict: Dict[str, Any]) -> Dict[str, Any]:
+    """Unflatten a dict with keys containing separators into a nested dict."""
+    unflattened_dict: Dict[str, Any] = {}
+    separator: str = "."
+
+    for key, value in flat_dict.items():
+        parts = key.split(separator)
+        d = unflattened_dict
+        for part in parts[:-1]:
+            if part not in d:
+                d[part] = {}
+            d = d[part]
+        d[parts[-1]] = value
+
+    return unflattened_dict
+
+
 def parse_config_args(
     config: Optional[List[str]],
-    separator: str = ",",
 ) -> UserConfig:
     """Parse separator separated list of key-value pairs separated by '='."""
     overrides: UserConfig = {}
@@ -146,18 +185,33 @@ def parse_config_args(
     if config is None:
         return overrides
 
+    # Handle if .toml file is passed
+    if len(config) == 1 and config[0].endswith(".toml"):
+        with Path(config[0]).open("rb") as config_file:
+            overrides = flatten_dict(tomli.load(config_file))
+        return overrides
+
+    # Regular expression to capture key-value pairs with possible quoted values
+    pattern = re.compile(r"(\S+?)=(\'[^\']*\'|\"[^\"]*\"|\S+)")
+
     for config_line in config:
         if config_line:
-            overrides_list = config_line.split(separator)
-            if (
-                len(overrides_list) == 1
-                and "=" not in overrides_list
-                and overrides_list[0].endswith(".toml")
-            ):
-                with Path(overrides_list[0]).open("rb") as config_file:
-                    overrides = flatten_dict(tomli.load(config_file))
-            else:
-                toml_str = "\n".join(overrides_list)
-                overrides.update(tomli.loads(toml_str))
+            # .toml files aren't allowed alongside other configs
+            if config_line.endswith(".toml"):
+                raise ValueError(
+                    "TOML files cannot be passed alongside key-value pairs."
+                )
+
+            matches = pattern.findall(config_line)
+            toml_str = "\n".join(f"{k} = {v}" for k, v in matches)
+            overrides.update(tomli.loads(toml_str))
 
     return overrides
+
+
+def get_metadata_from_config(config: Dict[str, Any]) -> Tuple[str, str]:
+    """Extract `fab_version` and `fab_id` from a project config."""
+    return (
+        config["project"]["version"],
+        f"{config['tool']['flwr']['app']['publisher']}/{config['project']['name']}",
+    )
