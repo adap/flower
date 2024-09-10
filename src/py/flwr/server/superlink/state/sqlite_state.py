@@ -632,7 +632,7 @@ class SqliteState(State):  # pylint: disable=R0904
         sint64_run_id = uint64_to_sint64(run_id)
 
         # Validate run ID
-        query = "SELECT COUNT(*) FROM run WHERE sint64_run_id = ?;"
+        query = "SELECT COUNT(*) FROM run WHERE run_id = ?;"
         if self.query(query, (sint64_run_id,))[0]["COUNT(*)"] == 0:
             return set()
 
@@ -673,12 +673,12 @@ class SqliteState(State):  # pylint: disable=R0904
         sint64_run_id = uint64_to_sint64(run_id)
 
         # Check conflicts
-        query = "SELECT COUNT(*) FROM run WHERE sint64_run_id = ?;"
+        query = "SELECT COUNT(*) FROM run WHERE run_id = ?;"
         # If sint64_run_id does not exist
         if self.query(query, (sint64_run_id,))[0]["COUNT(*)"] == 0:
             query = (
                 "INSERT INTO run "
-                "(sint64_run_id, fab_id, fab_version, fab_hash, override_config)"
+                "(run_id, fab_id, fab_version, fab_hash, override_config)"
                 "VALUES (?, ?, ?, ?, ?);"
             )
             if fab_hash:
