@@ -29,6 +29,7 @@ clientapp = "$import_name.client_app:app"
 
 [tool.flwr.app.config]
 num-server-rounds = 3
+fraction-fit = 0.5
 local-epochs = 1
 model-name = "distilbert-base-uncased"
 num-labels = 2
