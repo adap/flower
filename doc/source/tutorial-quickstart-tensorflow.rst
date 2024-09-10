@@ -4,21 +4,9 @@
  Quickstart TensorFlow
 #######################
 
-.. meta::
-   :description: Check out this Federated Learning quickstart tutorial for using Flower with TensorFlow to train a MobileNetV2 model on CIFAR-10.
-
-.. youtube:: FGTc2TQq7VM # :width: 100%
-
-.. admonition:: Disclaimer
-   :class: important
-
-   The Quickstart TensorFlow video uses slightly different Flower
-   commands than this tutorial. Please follow the :doc:`Upgrade to
-   Flower Next <how-to-upgrade-to-flower-next>` guide to convert
-   commands shown in the video.
-
-In this tutorial we will learn how to train a Convolutional Neural Network on
-CIFAR-10 using the Flower framework and TensorFlow. First of all, it is recommended to create a virtual environment and run
+In this tutorial we will learn how to train a Convolutional Neural
+Network on CIFAR-10 using the Flower framework and TensorFlow. First of
+all, it is recommended to create a virtual environment and run
 everything within a :doc:`virtualenv
 <contributor-how-to-set-up-a-virtual-env>`.
 
@@ -29,7 +17,6 @@ Simulation Engine, a federation of 10 nodes using `FedAvg
 The dataset will be partitioned using Flower Dataset's `IidPartitioner
 <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_.
 
-
 Now that we have a rough idea of what this example is about, let's get
 started. First, install Flower in your new environment:
 
@@ -39,8 +26,8 @@ started. First, install Flower in your new environment:
    $ pip install flwr
 
 Then, run the command below. You will be prompted to select one of the
-available templates (choose ``TensorFlow``), give a name to your project,
-and type in your developer name:
+available templates (choose ``TensorFlow``), give a name to your
+project, and type in your developer name:
 
 .. code:: shell
 
@@ -122,7 +109,7 @@ You can also override the parameters defined in the
 .. code:: shell
 
    # Override some arguments
-   $ flwr run . --run-config "num-server-rounds=5 learning-rate=0.05"
+   $ flwr run . --run-config "num-server-rounds=5 batch-size=16"
 
 **********
  The Data
@@ -136,8 +123,7 @@ to generate `num_partitions` partitions. You can choose `other
 partitioners
 <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html>`_
 available in Flower Datasets. Each ``ClientApp`` will call this function
-to create dataloaders with the data that correspond to their data
-partition.
+to create the `NumPy` arrays that correspond to their data partition.
 
 .. code:: python
 
@@ -158,8 +144,9 @@ partition.
  The Model
 ***********
 
-Next, we need a model. We defined a simple Convolutional Neural Network (CNN), but feel free to
-replace it with a more sophisticated model if you'd like:
+Next, we need a model. We defined a simple Convolutional Neural Network
+(CNN), but feel free to replace it with a more sophisticated model if
+you'd like:
 
 .. code:: python
 
@@ -177,51 +164,36 @@ replace it with a more sophisticated model if you'd like:
                layers.Dense(10, activation="softmax"),
            ]
        )
-       optimizer = keras.optimizers.Adam(learning_rate)
        model.compile(
-           optimizer=optimizer,
+           "adam",
            loss="sparse_categorical_crossentropy",
            metrics=["accuracy"],
        )
        return model
 
-We will call ``load_model()`` in the ClientApp later.
-
 ***************
  The ClientApp
 ***************
 
-With `TensorFlow`, we can use the built-in ``get_weights()`` and ``set_weights()``
-functions, which simplifies the implementation with `Flower`. This function extracts the model weights and
-returns  The rest of the functionality is directly inspired by the centralized
-case. The ``fit()`` method in the client trains the model using the
-local dataset. Similarly, the ``evaluate()`` method is used to evaluate
-the model received on a held-out validation set that the client might
-have:
-
-The Flower server interacts with clients through an interface called
-``Client``. When the server selects a particular client for training, it
-sends training instructions over the network. The client receives those
-instructions and calls one of the ``Client`` methods to run your code
-(i.e., to train the neural network we defined earlier).
-
-Flower provides a convenience class called ``NumPyClient`` which makes
-it easier to implement the ``Client`` interface when your workload uses
-Keras. The ``NumPyClient`` interface defines three methods which can be
-implemented in the following way:
+With `TensorFlow`, we can use the built-in ``get_weights()`` and
+``set_weights()`` functions, which simplifies the implementation with
+`Flower`. The rest
+of the functionality in the ClientApp is directly inspired by the centralized case. The
+``fit()`` method in the client trains the model using the local dataset.
+Similarly, the ``evaluate()`` method is used to evaluate the model
+received on a held-out validation set that the client might have:
 
 .. code:: python
 
    class FlowerClient(NumPyClient):
-       def __init__(self, learning_rate, data, epochs, batch_size, verbose):
-           self.model = load_model(learning_rate)
+       def __init__(self, model, data, epochs, batch_size, verbose):
+           self.model = model
            self.x_train, self.y_train, self.x_test, self.y_test = data
            self.epochs = epochs
            self.batch_size = batch_size
            self.verbose = verbose
    
        def fit(self, parameters, config):
-           """Train the model with data of this client."""
            self.model.set_weights(parameters)
            self.model.fit(
                self.x_train,
@@ -233,7 +205,6 @@ implemented in the following way:
            return self.model.get_weights(), len(self.x_train), {}
    
        def evaluate(self, parameters, config):
-           """Evaluate the model on the data this client has."""
            self.model.set_weights(parameters)
            loss, accuracy = self.model.evaluate(self.x_test, self.y_test, verbose=0)
            return loss, len(self.x_test), {"accuracy": accuracy}
@@ -241,24 +212,25 @@ implemented in the following way:
 Finally, we can construct a ``ClientApp`` using the ``FlowerClient``
 defined above by means of a ``client_fn()`` callback. Note that the
 `context` enables you to get access to hyperparameters defined in your
-``pyproject.toml`` to configure the run. For example, in this tutorial we access the
-`local-epochs` setting to control the number of epochs a ``ClientApp``
-will perform when running the ``fit()`` method, in addition to `batch-size`. You could define
-additional hyperparameters in ``pyproject.toml`` and access them here.
+``pyproject.toml`` to configure the run. For example, in this tutorial
+we access the `local-epochs` setting to control the number of epochs a
+``ClientApp`` will perform when running the ``fit()`` method, in
+addition to `batch-size`. You could define additional hyperparameters in
+``pyproject.toml`` and access them here.
 
 .. code:: python
 
    def client_fn(context: Context):
        # Load model and data
        net = load_model()
-   
+
        partition_id = context.node_config["partition-id"]
        num_partitions = context.node_config["num-partitions"]
        data = load_data(partition_id, num_partitions)
        epochs = context.run_config["local-epochs"]
        batch_size = context.run_config["batch-size"]
        verbose = context.run_config.get("verbose")
-   
+
        # Return Client instance
        return FlowerClient(
            net, data, epochs, batch_size, verbose
@@ -272,95 +244,64 @@ additional hyperparameters in ``pyproject.toml`` and access them here.
  The ServerApp
 ***************
 
-For simple workloads, we create a ``ServerApp`` and leave all the
-configuration possibilities at their default values. In a file named
-``server.py``, import Flower and create a ``ServerApp``:
+To construct a ``ServerApp`` we define a ``server_fn()`` callback with
+an identical signature to that of ``client_fn()`` but the return type is
+`ServerAppComponents
+<https://flower.ai/docs/framework/ref-api/flwr.server.ServerAppComponents.html#serverappcomponents>`_
+as opposed to a `Client
+<https://flower.ai/docs/framework/ref-api/flwr.client.Client.html#client>`_.
+In this example we use the `FedAvg`. To it we pass a randomly
+initialized model that will serve as the global model to federate.
 
 .. code:: python
 
-   from flwr.server import ServerApp
-
-   app = ServerApp()
-
-*****************************
- Train the model, federated!
-*****************************
-
-With both client and server ready, we can now run everything and see
-federated learning in action. First, we run the ``flower-superlink``
-command in one terminal to start the infrastructure. This step only
-needs to be run once.
-
-.. admonition:: Note
-   :class: note
-
-   In this example, the ``--insecure`` command line argument starts
-   Flower without HTTPS and is only used for prototyping. To run with
-   HTTPS, we instead use the arguments ``--ssl-ca-certfile``,
-   ``--ssl-certfile``, and ``--ssl-keyfile`` and pass the paths to the
-   certificates. Please refer to `Flower CLI reference
-   <ref-api-cli.html#flower-superlink>`_ for implementation details.
-
-.. code:: shell
-
-   $ flower-superlink --insecure
-
-FL systems usually have a server and multiple clients. We therefore need
-to start multiple `SuperNodes`, one for each client, respectively.
-First, we open a new terminal and start the first `SuperNode` using the
-``flower-client-app`` command.
-
-.. code:: shell
-
-   $ flower-client-app client:app --insecure
-
-In the above, we launch the ``app`` object in the ``client.py`` module.
-Open another terminal and start the second `SuperNode`:
-
-.. code:: shell
-
-   $ flower-client-app client:app --insecure
-
-Finally, in another terminal window, we run the `ServerApp`. This starts
-the actual training run:
-
-.. code:: shell
-
-   $ flower-server-app server:app --insecure
-
-We should now see how the training does in the last terminal (the one
-that started the ``ServerApp``):
-
-.. code:: shell
-
-   WARNING :   Option `--insecure` was set. Starting insecure HTTP client connected to 0.0.0.0:9091.
-   INFO :      Starting Flower ServerApp, config: num_rounds=1, no round_timeout
-   INFO :
-   INFO :      [INIT]
-   INFO :      Requesting initial parameters from one random client
-   INFO :      Received initial parameters from one random client
-   INFO :      Evaluating initial global parameters
-   INFO :
-   INFO :      [ROUND 1]
-   INFO :      configure_fit: strategy sampled 2 clients (out of 2)
-   INFO :      aggregate_fit: received 2 results and 0 failures
-   WARNING :   No fit_metrics_aggregation_fn provided
-   INFO :      configure_evaluate: strategy sampled 2 clients (out of 2)
-   INFO :      aggregate_evaluate: received 2 results and 0 failures
-   WARNING :   No evaluate_metrics_aggregation_fn provided
-   INFO :
-   INFO :      [SUMMARY]
-   INFO :      Run finished 1 rounds in 7.20s
-   INFO :      History (loss, distributed):
-   INFO :          '\tround 1: 2.302561044692993\n'
-   INFO :
+   def server_fn(context: Context):
+       # Read from config
+       num_rounds = context.run_config["num-server-rounds"]
+   
+       # Get parameters to initialize global model
+       parameters = ndarrays_to_parameters(load_model().get_weights())
+   
+       # Define strategy
+       strategy = strategy = FedAvg(
+           fraction_fit=1.0,
+           fraction_evaluate=1.0,
+           min_available_clients=2,
+           initial_parameters=parameters,
+       )
+       config = ServerConfig(num_rounds=num_rounds)
+   
+       return ServerAppComponents(strategy=strategy, config=config)
+   
+   # Create ServerApp
+   app = ServerApp(server_fn=server_fn)
 
 Congratulations! You've successfully built and run your first federated
-learning system. The full source code for this can be found in
-|quickstart_tf_link|_.
+learning system.
+
+.. note::
+
+   Check the source code of the extended version of this tutorial in
+   |quickstart_tf_link|_ in the Flower GitHub repository.
 
 .. |quickstart_tf_link| replace::
 
-   :code:`examples/quickstart-tensorflow/client.py`
+   :code:`examples/quickstart-tensorflow`
 
-.. _quickstart_tf_link: https://github.com/adap/flower/blob/main/examples/quickstart-tensorflow/client.py
+.. _quickstart_tf_link: https://github.com/adap/flower/blob/main/examples/quickstart-tensorflow
+
+****************
+ Video tutorial
+****************
+
+.. note::
+
+   The video shown below shows how to setup a TensorFlow + Flower project
+   using our previously recommended APIs. A new video tutorial will be
+   released that shows the new APIs (as the content above does)
+
+.. meta::
+   :description: Check out this Federated Learning quickstart tutorial for using Flower with TensorFlow to train a CNN model on CIFAR-10.
+
+.. youtube:: FGTc2TQq7VM
+   :width: 100%
