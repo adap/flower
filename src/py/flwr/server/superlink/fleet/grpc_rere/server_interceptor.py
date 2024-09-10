@@ -188,7 +188,8 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         self, public_key: ec.EllipticCurvePublicKey, request: Request, hmac_value: bytes
     ) -> bool:
         shared_secret = generate_shared_key(self.server_private_key, public_key)
-        return verify_hmac(shared_secret, request.SerializeToString(True), hmac_value)
+        message_bytes = request.SerializeToString(deterministic=True)
+        return verify_hmac(shared_secret, message_bytes, hmac_value)
 
     def _create_authenticated_node(
         self,

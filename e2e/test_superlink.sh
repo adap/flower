@@ -2,7 +2,7 @@
 set -e
 
 case "$1" in
-  e2e-bare-https)
+  e2e-bare-https | e2e-bare-auth)
     ./generate.sh
     server_arg="--ssl-ca-certfile certificates/ca.crt --ssl-certfile certificates/server.pem --ssl-keyfile certificates/server.key"
     client_arg="--root-certificates certificates/ca.crt"
@@ -37,14 +37,11 @@ case "$2" in
     client_auth_2=""
     ;;
   client-auth)
-    ./generate.sh
     rest_arg_superlink=""
     rest_arg_supernode=""
     server_address="127.0.0.1:9092"
     server_app_address="127.0.0.1:9091"
     db_arg="--database :flwr-in-memory-state:"
-    server_arg="--ssl-ca-certfile certificates/ca.crt --ssl-certfile certificates/server.pem --ssl-keyfile certificates/server.key"
-    client_arg="--root-certificates certificates/ca.crt"
     server_auth="--auth-list-public-keys keys/client_public_keys.csv --auth-superlink-private-key keys/server_credentials --auth-superlink-public-key keys/server_credentials.pub"
     client_auth_1="--auth-supernode-private-key keys/client_credentials_1 --auth-supernode-public-key keys/client_credentials_1.pub"
     client_auth_2="--auth-supernode-private-key keys/client_credentials_2 --auth-supernode-public-key keys/client_credentials_2.pub"
