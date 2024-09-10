@@ -4,8 +4,8 @@ import warnings
 from collections import OrderedDict
 
 import torch
-from evaluate import load as load_metric
 from datasets.utils.logging import disable_progress_bar
+from evaluate import load as load_metric
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 from torch.optim import AdamW
@@ -37,7 +37,9 @@ def load_data(partition_id: int, num_partitions: int, model_name: str):
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
     def tokenize_function(examples):
-        return tokenizer(examples["text"], truncation=True)
+        return tokenizer(
+            examples["text"], truncation=True, add_special_tokens=True, max_length=512
+        )
 
     partition_train_test = partition_train_test.map(tokenize_function, batched=True)
     partition_train_test = partition_train_test.remove_columns("text")

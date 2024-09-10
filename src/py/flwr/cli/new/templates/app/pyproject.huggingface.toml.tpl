@@ -31,7 +31,7 @@ clientapp = "$import_name.client_app:app"
 num-server-rounds = 3
 fraction-fit = 0.5
 local-epochs = 1
-model-name = "distilbert-base-uncased"
+model-name = "prajjwal1/bert-tiny" # Set a larger model if you have access to more GPU resources
 num-labels = 2
 
 [tool.flwr.federations]
@@ -42,5 +42,5 @@ options.num-supernodes = 10
 
 [tool.flwr.federations.localhost-gpu]
 options.num-supernodes = 10
-options.backend.client-resources.num-cpus = 4 # each ClientApp assumes to use 4CPUs
-options.backend.client-resources.num-gpus = 1 # at most 1 ClientApp will run in a given GPU
+options.backend.client-resources.num-cpus = 2 # each ClientApp assumes to use 4CPUs
+options.backend.client-resources.num-gpus = 0.25 # at most 4 ClientApps will run in a given GPU
