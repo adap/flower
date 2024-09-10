@@ -130,13 +130,12 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
             if self.shared_secret is None:
                 raise RuntimeError("Failure to compute hmac")
 
+            message_bytes = request.SerializeToString(deterministic=True)
             metadata.append(
                 (
                     _AUTH_TOKEN_HEADER,
                     base64.urlsafe_b64encode(
-                        compute_hmac(
-                            self.shared_secret, request.SerializeToString(True)
-                        )
+                        compute_hmac(self.shared_secret, message_bytes)
                     ),
                 )
             )

@@ -23,7 +23,7 @@ huggingface-cli login
 Download data from [FastChat](https://github.com/lm-sys/FastChat):
 
 ```shell
-git clone --depth=1 https://github.com/lm-sys/FastChat.git && cd FastChat && git checkout d561f87b24de197e25e3ddf7e09af93ced8dfe36 && mv fastchat/llm_judge/data ../data && cd .. && rm -rf FastChat
+git clone https://github.com/lm-sys/FastChat.git && cd FastChat && git checkout d561f87b24de197e25e3ddf7e09af93ced8dfe36 && mv fastchat/llm_judge/data ../data && cd .. && rm -rf FastChat
 ```
 
 
