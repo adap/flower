@@ -8,7 +8,7 @@ version = "1.0.0"
 description = ""
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.10.0",
+    "flwr[simulation]>=1.11.0",
     "flwr-datasets>=0.3.0",
     "torch==2.2.1",
     "transformers>=4.30.0,<5.0",
@@ -30,9 +30,16 @@ clientapp = "$import_name.client_app:app"
 [tool.flwr.app.config]
 num-server-rounds = 3
 local-epochs = 1
+model-name = "distilbert-base-uncased"
+num-labels = 2
 
 [tool.flwr.federations]
 default = "localhost"
 
 [tool.flwr.federations.localhost]
 options.num-supernodes = 10
+
+[tool.flwr.federations.localhost-gpu]
+options.num-supernodes = 10
+options.backend.client-resources.num-cpus = 4 # each ClientApp assumes to use 4CPUs
+options.backend.client-resources.num-gpus = 0.5 # at most 2 ClientApp will run in a given GPU
