@@ -164,7 +164,7 @@ class FederatedDataset:
             The split names you can choose from vary from dataset to dataset. You need
             to check the dataset on the `Hugging Face Hub`<https://huggingface.co/
             datasets>_ to see which splits are available. You can resplit the dataset
-            by using the `preprocessor` parameter (rename, merge, divide, etc. the
+            by using the `preprocessor` parameter (to rename, merge, divide, etc. the
             available splits).
 
         Returns
@@ -211,7 +211,7 @@ class FederatedDataset:
             The split names you can choose from vary from dataset to dataset. You need
             to check the dataset on the `Hugging Face Hub`<https://huggingface.co/
             datasets>_ to see which splits are available. You can resplit the dataset
-            by using the `preprocessor` parameter (rename, merge, divide, etc. the
+            by using the `preprocessor` parameter (to rename, merge, divide, etc. the
             available splits).
 
         Returns
