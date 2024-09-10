@@ -8,9 +8,7 @@ cd $ROOT
 ./dev/build-baseline-docs.sh
 
 cd $ROOT
-./dev/update-examples.sh
-cd examples/doc
-make docs
+python dev/build-example-docs.py
 
 cd $ROOT
 ./datasets/dev/build-flwr-datasets-docs.sh

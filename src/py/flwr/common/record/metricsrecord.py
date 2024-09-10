@@ -58,26 +58,66 @@ def _check_value(value: MetricsRecordValues) -> None:
 
 
 class MetricsRecord(TypedDict[str, MetricsRecordValues]):
-    """Metrics record."""
+    """Metrics recod.
+
+    A :code:`MetricsRecord` is a Python dictionary designed to ensure that
+    each key-value pair adheres to specified data types. A :code:`MetricsRecord`
+    is one of the types of records that a
+    `flwr.common.RecordSet <flwr.common.RecordSet.html#recordset>`_ supports and
+    can therefore be used to construct :code:`common.Message` objects.
+
+    Parameters
+    ----------
+    metrics_dict : Optional[Dict[str, MetricsRecordValues]]
+        A dictionary that stores basic types (i.e. `int`, `float` as defined
+        in `MetricsScalar`) and list of such types (see `MetricsScalarList`).
+    keep_input : bool (default: True)
+        A boolean indicating whether metrics should be deleted from the input
+        dictionary immediately after adding them to the record. When set
+        to True, the data is duplicated in memory. If memory is a concern, set
+        it to False.
+
+    Examples
+    --------
+    The usage of a :code:`MetricsRecord` is envisioned for communicating results
+    obtained when a node performs an action. A few typical examples include:
+    communicating the training accuracy after a model is trained locally by a
+    :code:`ClientApp`, reporting the validation loss obtained at a :code:`ClientApp`,
+    or, more generally, the output of executing a query by the :code:`ClientApp`.
+    Common to these examples is that the output can be typically represented by
+    a single scalar (:code:`int`, :code:`float`) or list of scalars.
+
+    Let's see some examples of how to construct a :code:`MetricsRecord` from scratch:
+
+    >>> from flwr.common import MetricsRecord
+    >>>
+    >>> # A `MetricsRecord` is a specialized Python dictionary
+    >>> record = MetricsRecord({"accuracy": 0.94})
+    >>> # You can add more content to an existing record
+    >>> record["loss"] = 0.01
+    >>> # It also supports lists
+    >>> record["loss-historic"] = [0.9, 0.5, 0.01]
+
+    Since types are enforced, the types of the objects inserted are checked. For a
+    :code:`MetricsRecord`, value types allowed are those in defined in
+    :code:`flwr.common.MetricsRecordValues`. Similarly, only :code:`str` keys are
+    allowed.
+
+    >>> from flwr.common import MetricsRecord
+    >>>
+    >>> record = MetricsRecord() # an empty record
+    >>> # Add unsupported value
+    >>> record["something-unsupported"] = {'a': 123} # Will throw a `TypeError`
+
+    If you need a more versatily type of record try :code:`ConfigsRecord` or
+    :code:`ParametersRecord`.
+    """
 
     def __init__(
         self,
         metrics_dict: Optional[Dict[str, MetricsRecordValues]] = None,
         keep_input: bool = True,
     ):
-        """Construct a MetricsRecord object.
-
-        Parameters
-        ----------
-        metrics_dict : Optional[Dict[str, MetricsRecordValues]]
-            A dictionary that stores basic types (i.e. `int`, `float` as defined
-            in `MetricsScalar`) and list of such types (see `MetricsScalarList`).
-        keep_input : bool (default: True)
-            A boolean indicating whether metrics should be deleted from the input
-            dictionary immediately after adding them to the record. When set
-            to True, the data is duplicated in memory. If memory is a concern, set
-            it to False.
-        """
         super().__init__(_check_key, _check_value)
         if metrics_dict:
             for k in list(metrics_dict.keys()):
