@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "e2e_test"
+name = "e2e"
 version = "1.0.0"
 description = "Project configuration for ServerApp in E2E tests."
 license = "Apache-2.0"
