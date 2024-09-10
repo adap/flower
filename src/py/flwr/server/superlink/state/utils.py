@@ -33,8 +33,36 @@ NODE_UNAVAILABLE_ERROR_REASON = (
 
 
 def generate_rand_int_from_bytes(num_bytes: int) -> int:
-    """Generate a random `num_bytes` integer."""
-    return int.from_bytes(urandom(num_bytes), "little", signed=True)
+    """Generate a random unsigned integer from `num_bytes` bytes."""
+    return int.from_bytes(urandom(num_bytes), "little", signed=False)
+
+
+def uint64_to_sint64(u: int) -> int:
+    """Convert a uint64 value to sint64.
+
+    Args:
+        u (int): The unsigned 64-bit integer to convert.
+
+    Returns:
+        int: The signed 64-bit integer equivalent.
+    """
+    if u >= 2**63:
+        return u - 2**64
+    return u
+
+
+def sint64_to_uint64(s: int) -> int:
+    """Convert a sint64 value to uint64.
+
+    Args:
+        s (int): The signed 64-bit integer to convert.
+
+    Returns:
+        int: The unsigned 64-bit integer equivalent.
+    """
+    if s < 0:
+        return s + 2**64
+    return s
 
 
 def make_node_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
