@@ -25,7 +25,6 @@ jobs:
 
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
-          # ref: v${{ steps.flwr-version.outputs.flwr-version }}
           ref: v${{ steps.flwr-version.outputs.flwr-version }}
 
       - uses: ./.github/actions/bootstrap
