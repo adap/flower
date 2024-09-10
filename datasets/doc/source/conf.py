@@ -38,7 +38,7 @@ copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = "0.1.0"
+release = "0.3.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -110,9 +110,9 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # Sphinx redirects, implemented after the doc filename changes.
 # To prevent 404 errors and redirect to the new pages.
-# redirects = {
-# }
-
+redirects = {
+    "how-to-visualize-label-distribution": "tutorial-visualize-label-distribution.html",
+}
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -162,7 +162,7 @@ _open_in_colab_button = """
 .. raw:: html
 
     <br/>
-    <a href="https://colab.research.google.com/github/adap/flower/blob/main/doc/source/{{ env.doc2path(env.docname, base=None) }}">
+    <a href="https://colab.research.google.com/github/adap/flower/blob/main/datasets/doc/source/{{ env.doc2path(env.docname, base=None) }}">
         <img alt="Open in Colab" src="https://colab.research.google.com/assets/colab-badge.svg"/>
     </a>
 """
@@ -180,3 +180,7 @@ mermaid_version = ""
 # -- Options for MyST config  -------------------------------------
 # Enable this option to link to headers (`#`, `##`, or `###`)
 myst_heading_anchors = 3
+
+# -- Options for sphinx_copybutton -------------------------------------
+copybutton_exclude = '.linenos, .gp, .go'
+copybutton_prompt_text = ">>> "

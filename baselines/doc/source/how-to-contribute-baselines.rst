@@ -6,16 +6,14 @@ Do you have a new federated learning paper and want to add a new baseline to Flo
 The goal of Flower Baselines is to reproduce experiments from popular papers to accelerate researchers by enabling faster comparisons to new strategies, datasets, models, and federated pipelines in general. 
 
 Before you start to work on a new baseline or experiment, please check the `Flower Issues <https://github.com/adap/flower/issues>`_ or `Flower Pull Requests <https://github.com/adap/flower/pulls>`_ to see if someone else is already working on it. Please open a new issue if you are planning to work on a new baseline or experiment with a short description of the corresponding paper and the experiment you want to contribute.
+If you are proposing a brand new baseline, please indicate what experiments from the paper are planning to include.
 
 Requirements
 ------------
 
-Contributing a new baseline is really easy. You only have to make sure that your federated learning experiments are running with Flower and replicate the results of a paper. Flower baselines need to make use of:
+Contributing a new baseline is really easy. You only have to make sure that your federated learning experiments run with Flower, use `Flower Datasets <https://flower.ai/docs/datasets/>`_, and replicate the results of a paper.
+Preferably, the baselines make use of PyTorch, but other ML frameworks are also welcome. The baselines are expected to run in a machine with Ubuntu 22.04, but if yours runs also on macOS even better!
 
-* `Poetry <https://python-poetry.org/docs/>`_ to manage the Python environment.
-* `Hydra <https://hydra.cc/>`_ to manage the configuration files for your experiments.
-
-You can find more information about how to setup Poetry in your machine in the ``EXTENDED_README.md`` that is generated when you prepare your baseline. 
 
 Add a new Flower Baseline
 -------------------------
@@ -27,11 +25,18 @@ Let's say you want to contribute the code of your most recent Federated Learning
 #. **Get the Flower source code on your machine**
     #. Fork the Flower codebase: go to the `Flower GitHub repo <https://github.com/adap/flower>`_ and fork the code (click the *Fork* button in the top-right corner and follow the instructions)
     #. Clone the (forked) Flower source code: :code:`git clone git@github.com:[your_github_username]/flower.git`
-    #. Open the code in your favorite editor.
-#. **Use the provided script to create your baseline directory**
-    #. Navigate to the baselines directory and run :code:`./dev/create-baseline.sh fedawesome`
-    #. A new directory in :code:`baselines/fedawesome` is created.
-    #. Follow the instructions in :code:`EXTENDED_README.md` and :code:`README.md` in your baseline directory. 
+#. **Create a new baseline using the template**
+    #. Create a new Python environment with Python 3.10 (we recommend doing this with `pyenv <https://github.com/pyenv/pyenv>`_)
+    #. Install flower with: :code:`pip install flwr`.
+    #. Navigate to the baselines directory and run: :code:`flwr new fedawesome`. When prompted, choose the option :code:`Flower Baseline`.
+    #. A new directory in :code:`baselines/fedawesome` is created with the structure needed for a Flower Baseline.
+    #. Follow the instructions in the :code:`README.md` in your baseline directory.
+    
+    .. tip::
+        At this point, your baseline contains source code showing how a simple :code:`PyTorch+CIFAR10` project can be built with Flower.
+        You can run it directly by executing :code:`flwr run .` from inside the directory of your baseline. Update the code with that
+        needed to implement your baseline.
+
 #. **Open a pull request**
     #. Stage your changes: :code:`git add .`
     #. Commit & push: :code:`git commit -m "Create new FedAwesome baseline" ; git push`
@@ -49,15 +54,18 @@ Further reading:
 Usability
 ---------
 
-Flower is known and loved for its usability. Therefore, make sure that your baseline or experiment can be executed with a single command such as:
+Flower is known and loved for its usability. Therefore, make sure that your baseline or experiment can be executed with a single command after installing the baseline project:
 
 .. code-block:: bash
 
-  poetry run python -m <your-baseline>.main
-  
-  # or, once sourced into your environment
-  python -m <your-baseline>.main
+    # Install the baseline project
+    pip install -e .
 
-We provide you with a `template-baseline <https://github.com/adap/flower/tree/main/baselines/baseline_template>`_ to use as guidance when contributing your baseline. Having all baselines follow a homogenous structure helps users to tryout many baselines without the overheads of having to understand each individual codebase. Similarly, by using Hydra throughout, users will immediately know how to parameterise your experiments directly from the command line.
+    # Run the baseline using default config
+    flwr run .
 
-We look forward to your contribution!
+    # Run the baseline overriding the config
+    flwr run . --run-config lr=0.01,num-server-rounds=200
+
+
+We look forward to your contribution! 

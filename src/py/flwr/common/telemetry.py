@@ -64,6 +64,18 @@ def _get_home() -> Path:
     return Path().home()
 
 
+def _get_partner_id() -> str:
+    """Get partner ID."""
+    partner_id = os.getenv("FLWR_TELEMETRY_PARTNER_ID")
+    if not partner_id:
+        return "unavailable"
+    try:
+        uuid.UUID(partner_id)
+    except ValueError:
+        partner_id = "invalid"
+    return partner_id
+
+
 def _get_source_id() -> str:
     """Get existing or new source ID."""
     source_id = "unavailable"
@@ -120,49 +132,59 @@ class EventType(str, Enum):
     # Ping
     PING = auto()
 
-    # Client: start_client
+    # --- LEGACY FUNCTIONS -------------------------------------------------------------
+
+    # Legacy: `start_client` function
     START_CLIENT_ENTER = auto()
     START_CLIENT_LEAVE = auto()
 
-    # Server: start_server
+    # Legacy: `start_server` function
     START_SERVER_ENTER = auto()
     START_SERVER_LEAVE = auto()
 
-    # Driver API
-    RUN_DRIVER_API_ENTER = auto()
-    RUN_DRIVER_API_LEAVE = auto()
-
-    # Fleet API
-    RUN_FLEET_API_ENTER = auto()
-    RUN_FLEET_API_LEAVE = auto()
-
-    # Driver API and Fleet API
-    RUN_SUPERLINK_ENTER = auto()
-    RUN_SUPERLINK_LEAVE = auto()
-
-    # Simulation
+    # Legacy: `start_simulation` function
     START_SIMULATION_ENTER = auto()
     START_SIMULATION_LEAVE = auto()
 
-    # Driver: Driver
-    DRIVER_CONNECT = auto()
-    DRIVER_DISCONNECT = auto()
+    # --- `flwr` CLI -------------------------------------------------------------------
 
-    # Driver: start_driver
-    START_DRIVER_ENTER = auto()
-    START_DRIVER_LEAVE = auto()
+    # Not yet implemented
 
-    # flower-client-app
-    RUN_CLIENT_APP_ENTER = auto()
-    RUN_CLIENT_APP_LEAVE = auto()
+    # --- SuperExec --------------------------------------------------------------------
 
-    # flower-server-app
+    # SuperExec
+    RUN_SUPEREXEC_ENTER = auto()
+    RUN_SUPEREXEC_LEAVE = auto()
+
+    # --- Simulation Engine ------------------------------------------------------------
+
+    # CLI: flower-simulation
+    CLI_FLOWER_SIMULATION_ENTER = auto()
+    CLI_FLOWER_SIMULATION_LEAVE = auto()
+
+    # Python API: `run_simulation`
+    PYTHON_API_RUN_SIMULATION_ENTER = auto()
+    PYTHON_API_RUN_SIMULATION_LEAVE = auto()
+
+    # --- Deployment Engine ------------------------------------------------------------
+
+    # CLI: `flower-superlink`
+    RUN_SUPERLINK_ENTER = auto()
+    RUN_SUPERLINK_LEAVE = auto()
+
+    # CLI: `flower-supernode`
+    RUN_SUPERNODE_ENTER = auto()
+    RUN_SUPERNODE_LEAVE = auto()
+
+    # CLI: `flower-server-app`
     RUN_SERVER_APP_ENTER = auto()
     RUN_SERVER_APP_LEAVE = auto()
 
-    # SuperNode
-    RUN_SUPERNODE_ENTER = auto()
-    RUN_SUPERNODE_LEAVE = auto()
+    # --- DEPRECATED -------------------------------------------------------------------
+
+    # [DEPRECATED] CLI: `flower-client-app`
+    RUN_CLIENT_APP_ENTER = auto()
+    RUN_CLIENT_APP_LEAVE = auto()
 
 
 # Use the ThreadPoolExecutor with max_workers=1 to have a queue
@@ -173,6 +195,7 @@ state: Dict[str, Union[Optional[str], Optional[ThreadPoolExecutor]]] = {
     "executor": None,
     "source": None,
     "cluster": None,
+    "partner": None,
 }
 
 
@@ -198,11 +221,15 @@ def create_event(event_type: EventType, event_details: Optional[Dict[str, Any]])
     if state["cluster"] is None:
         state["cluster"] = str(uuid.uuid4())
 
+    if state["partner"] is None:
+        state["partner"] = _get_partner_id()
+
     if event_details is None:
         event_details = {}
 
     date = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
     context = {
+        "partner": state["partner"],
         "source": state["source"],
         "cluster": state["cluster"],
         "date": date,

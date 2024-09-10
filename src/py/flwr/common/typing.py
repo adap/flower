@@ -60,6 +60,10 @@ MetricsAggregationFn = Callable[[List[Tuple[int, Metrics]]], Metrics]
 Config = Dict[str, Scalar]
 Properties = Dict[str, Scalar]
 
+# Value type for user configs
+UserConfigValue = Union[bool, float, int, str]
+UserConfig = Dict[str, UserConfigValue]
+
 
 class Code(Enum):
     """Client status codes."""
@@ -76,6 +80,22 @@ class Status:
     """Client status."""
 
     code: Code
+    message: str
+
+
+class ClientAppOutputCode(Enum):
+    """ClientAppIO status codes."""
+
+    SUCCESS = 0
+    DEADLINE_EXCEEDED = 1
+    UNKNOWN_ERROR = 2
+
+
+@dataclass
+class ClientAppOutputStatus:
+    """ClientAppIO status."""
+
+    code: ClientAppOutputCode
     message: str
 
 
@@ -185,3 +205,22 @@ class ClientMessage:
     get_parameters_res: Optional[GetParametersRes] = None
     fit_res: Optional[FitRes] = None
     evaluate_res: Optional[EvaluateRes] = None
+
+
+@dataclass
+class Run:
+    """Run details."""
+
+    run_id: int
+    fab_id: str
+    fab_version: str
+    fab_hash: str
+    override_config: UserConfig
+
+
+@dataclass
+class Fab:
+    """Fab file representation."""
+
+    hash_str: str
+    content: bytes

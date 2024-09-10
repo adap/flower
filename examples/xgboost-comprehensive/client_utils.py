@@ -1,8 +1,7 @@
 from logging import INFO
-import xgboost as xgb
 
 import flwr as fl
-from flwr.common.logger import log
+import xgboost as xgb
 from flwr.common import (
     Code,
     EvaluateIns,
@@ -14,6 +13,7 @@ from flwr.common import (
     Parameters,
     Status,
 )
+from flwr.common.logger import log
 
 
 class XgbClient(fl.client.Client):

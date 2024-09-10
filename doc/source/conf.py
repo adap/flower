@@ -17,6 +17,7 @@
 import datetime
 import os
 import sys
+
 from git import Repo
 from sphinx.application import ConfigError
 
@@ -63,11 +64,14 @@ html_context["current_version"]["full_name"] = (
 
 # Make version list accessible for the html templates
 html_context["versions"] = list()
-versions = [
-    tag.name
-    for tag in repo.tags
-    if int(tag.name[1]) > 0 and int(tag.name.split(".")[1]) >= 5
-]
+versions = sorted(
+    [
+        tag.name
+        for tag in repo.tags
+        if int(tag.name[1]) > 0 and int(tag.name.split(".")[1]) >= 8
+    ],
+    key=lambda x: [int(part) for part in x[1:].split(".")],
+)
 versions.append("main")
 for version in versions:
     html_context["versions"].append({"name": version})
@@ -85,8 +89,16 @@ project = "Flower"
 copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
-# The full version, including alpha/beta/rc tags
-release = "1.9.0"
+# The full version of the next release, including alpha/beta/rc tags
+release = "1.12.0"
+# The current released version
+rst_prolog = """
+.. |stable_flwr_version| replace:: 1.11.0
+.. |stable_flwr_superlink_docker_digest| replace:: 4b317d5b6030710b476f4dbfab2c3a33021ad40a0fcfa54d7edd45e0c51d889c
+.. |ubuntu_version| replace:: 22.04
+.. |setuptools_version| replace:: 70.3.0
+.. |pip_version| replace:: 24.1.2
+"""
 
 # -- General configuration ---------------------------------------------------
 
@@ -108,6 +120,8 @@ extensions = [
     "sphinxcontrib.youtube",
     "sphinx_reredirects",
     "nbsphinx",
+    "sphinx_click",
+    "sphinx_substitution_extensions",
 ]
 
 # Generate .rst files
@@ -248,7 +262,9 @@ redirects = {
     "quickstart-mxnet": "index.html",
     "tutorial-quickstart-mxnet": "index.html",
     "example-mxnet-walk-through": "index.html",
-    "ref-api/flwr.simulation.run_simulation_from_cli.html": "index.html",
+    "ref-api/flwr.simulation.run_simulation_from_cli": "index.html",
+    "contributor-how-to-create-new-messages": "index.html",
+    "example-jax-from-centralized-to-federated": "tutorial-quickstart-jax.html",
 }
 
 # -- Options for HTML output -------------------------------------------------
