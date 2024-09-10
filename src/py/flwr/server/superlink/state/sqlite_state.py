@@ -280,6 +280,9 @@ class SqliteState(State):  # pylint: disable=R0904
             raise AssertionError(msg)
 
         data: Dict[str, Union[str, int]] = {}
+        # Convert a uint64 value to sint64 for SQLite
+        sint64_node_id = uint64_to_sint64(node_id)
+        data["node_id"] = sint64_node_id
 
         if node_id is None:
             # Retrieve all anonymous Tasks
@@ -299,10 +302,6 @@ class SqliteState(State):  # pylint: disable=R0904
                 AND   consumer_node_id == :node_id
                 AND   delivered_at = ""
             """
-
-            # Convert a uint64 value to sint64 for SQLite
-            sint64_node_id = uint64_to_sint64(node_id)
-            data["node_id"] = sint64_node_id
 
         if limit is not None:
             query += " LIMIT :limit"
