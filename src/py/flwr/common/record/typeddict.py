@@ -15,7 +15,18 @@
 """Typed dict base class for *Records."""
 
 
-from typing import Callable, Dict, Generic, Iterator, MutableMapping, TypeVar, cast
+from typing import (
+    Callable,
+    Dict,
+    Generic,
+    ItemsView,
+    Iterator,
+    KeysView,
+    MutableMapping,
+    TypeVar,
+    ValuesView,
+    cast,
+)
 
 K = TypeVar("K")  # Key type
 V = TypeVar("V")  # Value type
@@ -73,3 +84,15 @@ class TypedDict(MutableMapping[K, V], Generic[K, V]):
         if isinstance(other, dict):
             return data == other
         return NotImplemented
+
+    def keys(self) -> KeysView[K]:
+        """D.keys() -> a set-like object providing a view on D's keys."""
+        return cast(Dict[K, V], self.__dict__["_data"]).keys()
+
+    def values(self) -> ValuesView[V]:
+        """D.values() -> an object providing a view on D's values."""
+        return cast(Dict[K, V], self.__dict__["_data"]).values()
+
+    def items(self) -> ItemsView[K, V]:
+        """D.items() -> a set-like object providing a view on D's items."""
+        return cast(Dict[K, V], self.__dict__["_data"]).items()
