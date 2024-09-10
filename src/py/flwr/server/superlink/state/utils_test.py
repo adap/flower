@@ -23,6 +23,7 @@ class UtilsTest(unittest.TestCase):
     """Test utils code."""
 
     def test_uint64_to_sint64(self):
+        """Test conversion from uint64 to sint64."""
         # Test values below 2^63
         self.assertEqual(uint64_to_sint64(0), 0)
         self.assertEqual(uint64_to_sint64(2**62), 2**62)
@@ -34,6 +35,7 @@ class UtilsTest(unittest.TestCase):
         self.assertEqual(uint64_to_sint64(2**64 - 1), -1)
 
     def test_sint64_to_uint64(self):
+        """Test conversion from sint64 to uint64."""
         # Test values within the range of sint64
         self.assertEqual(sint64_to_uint64(-(2**63)), 2**63)
         self.assertEqual(sint64_to_uint64(-(2**63) + 1), 2**63 + 1)

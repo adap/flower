@@ -43,7 +43,8 @@ def uint64_to_sint64(u: int) -> int:
     Args:
         u (int): The unsigned 64-bit integer to convert.
 
-    Returns:
+    Returns
+    -------
         int: The signed 64-bit integer equivalent.
     """
     if u >= 2**63:
@@ -57,7 +58,8 @@ def sint64_to_uint64(s: int) -> int:
     Args:
         s (int): The signed 64-bit integer to convert.
 
-    Returns:
+    Returns
+    -------
         int: The unsigned 64-bit integer equivalent.
     """
     if s < 0:

@@ -599,7 +599,6 @@ class SqliteState(State):  # pylint: disable=R0904
 
     def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
         """Delete a node."""
-
         # Convert the uint64 value to sint64 for SQLite
         sint64_node_id = uint64_to_sint64(node_id)
 
@@ -629,7 +628,6 @@ class SqliteState(State):  # pylint: disable=R0904
         If the provided `run_id` does not exist or has no matching nodes,
         an empty `Set` MUST be returned.
         """
-
         # Convert the uint64 value to sint64 for SQLite
         sint64_run_id = uint64_to_sint64(run_id)
 
