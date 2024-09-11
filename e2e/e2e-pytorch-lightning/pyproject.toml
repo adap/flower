@@ -10,7 +10,7 @@ license = "Apache-2.0"
 dependencies = [
     "flwr[simulation] @ {root:parent:parent:uri}",
     "pytorch-lightning==2.2.4",
-    "torchvision==0.14.1",
+    "torchvision==0.15.1",
 ]
 
 [tool.hatch.build.targets.wheel]
