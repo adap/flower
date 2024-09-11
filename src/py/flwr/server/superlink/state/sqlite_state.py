@@ -294,8 +294,7 @@ class SqliteState(State):  # pylint: disable=R0904
             """
         else:
             # Convert a uint64 value to sint64 for SQLite
-            sint64_node_id = uint64_to_sint64(node_id)
-            data["node_id"] = sint64_node_id
+            data["node_id"] = uint64_to_sint64(node_id)
 
             # Retrieve all TaskIns for node_id
             query = """
@@ -787,9 +786,9 @@ class SqliteState(State):  # pylint: disable=R0904
         sint64_run_id = uint64_to_sint64(run_id)
         query = "SELECT * FROM run WHERE run_id = ?;"
         try:
-            row = self.query(query, (run_id,))[0]
+            row = self.query(query, (sint64_run_id,))[0]
             return Run(
-                run_id=sint64_run_id,
+                run_id=sint64_to_uint64(row["run_id"]),
                 fab_id=row["fab_id"],
                 fab_version=row["fab_version"],
                 fab_hash=row["fab_hash"],
