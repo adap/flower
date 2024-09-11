@@ -32,7 +32,7 @@ and for all possible outputs S ⊆ Range(A):
 .. math::
 
   \small
-  P[M(D_{1} \in A)] \leq e^{\delta} P[M(D_{2} \in A)] + \delta
+  P[M(D_{1} \in A)] \leq e^{\epsilon} P[M(D_{2} \in A)] + \delta
 
 
 The :math:`\epsilon` parameter, also known as the privacy budget, is a metric of privacy loss.

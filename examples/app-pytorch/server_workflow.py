@@ -1,10 +1,10 @@
 from typing import List, Tuple
 
-from task import Net, get_weights
-
 import flwr as fl
 from flwr.common import Context, Metrics, ndarrays_to_parameters
 from flwr.server import Driver, LegacyContext
+
+from task import Net, get_weights
 
 
 # Define metric aggregation function
@@ -51,7 +51,7 @@ app = fl.server.ServerApp()
 def main(driver: Driver, context: Context) -> None:
     # Construct the LegacyContext
     context = LegacyContext(
-        state=context.state,
+        context=context,
         config=fl.server.ServerConfig(num_rounds=3),
         strategy=strategy,
     )

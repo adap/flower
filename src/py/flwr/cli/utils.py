@@ -14,7 +14,9 @@
 # ==============================================================================
 """Flower command line interface utils."""
 
+import hashlib
 import re
+from pathlib import Path
 from typing import Callable, List, Optional, cast
 
 import typer
@@ -122,3 +124,15 @@ def sanitize_project_name(name: str) -> str:
         sanitized_name = sanitized_name[1:]
 
     return sanitized_name
+
+
+def get_sha256_hash(file_path: Path) -> str:
+    """Calculate the SHA-256 hash of a file."""
+    sha256 = hashlib.sha256()
+    with open(file_path, "rb") as f:
+        while True:
+            data = f.read(65536)  # Read in 64kB blocks
+            if not data:
+                break
+            sha256.update(data)
+    return sha256.hexdigest()

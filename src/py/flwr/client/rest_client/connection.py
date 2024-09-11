@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,14 +40,18 @@ from flwr.common.constant import (
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
-from flwr.common.serde import message_from_taskins, message_to_taskres
+from flwr.common.serde import (
+    message_from_taskins,
+    message_to_taskres,
+    user_config_from_proto,
+)
+from flwr.common.typing import Fab, Run
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
-    GetRunRequest,
-    GetRunResponse,
     PingRequest,
     PingResponse,
     PullTaskInsRequest,
@@ -56,6 +60,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 try:
@@ -70,6 +75,7 @@ PATH_PULL_TASK_INS: str = "api/v0/fleet/pull-task-ins"
 PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
 PATH_PING: str = "api/v0/fleet/ping"
 PATH_GET_RUN: str = "/api/v0/fleet/get-run"
+PATH_GET_FAB: str = "/api/v0/fleet/get-fab"
 
 T = TypeVar("T", bound=GrpcMessage)
 
@@ -90,9 +96,10 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
     Tuple[
         Callable[[], Optional[Message]],
         Callable[[Message], None],
+        Optional[Callable[[], Optional[int]]],
         Optional[Callable[[], None]],
-        Optional[Callable[[], None]],
-        Optional[Callable[[int], Tuple[str, str]]],
+        Optional[Callable[[int], Run]],
+        Optional[Callable[[str], Fab]],
     ]
 ]:
     """Primitives for request/response-based interaction with a server.
@@ -118,10 +125,16 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
         Path of the root certificate. If provided, a secure
         connection using the certificates will be established to an SSL-enabled
         Flower server. Bytes won't work for the REST API.
+    authentication_keys : Optional[Tuple[PrivateKey, PublicKey]] (default: None)
+        Client authentication is not supported for this transport type.
 
     Returns
     -------
-    receive, send : Callable, Callable
+    receive : Callable
+    send : Callable
+    create_node : Optional[Callable]
+    delete_node : Optional[Callable]
+    get_run : Optional[Callable]
     """
     log(
         WARN,
@@ -146,6 +159,8 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
             "For the REST API, the root certificates "
             "must be provided as a string path to the client.",
         )
+    if authentication_keys is not None:
+        log(ERROR, "Client authentication is not supported for this transport type.")
 
     # Shared variables for inner functions
     metadata: Optional[Metadata] = None
@@ -229,19 +244,20 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
         if not ping_stop_event.is_set():
             ping_stop_event.wait(next_interval)
 
-    def create_node() -> None:
+    def create_node() -> Optional[int]:
         """Set create_node."""
         req = CreateNodeRequest(ping_interval=PING_DEFAULT_INTERVAL)
 
         # Send the request
         res = _request(req, CreateNodeResponse, PATH_CREATE_NODE)
         if res is None:
-            return
+            return None
 
         # Remember the node and the ping-loop thread
         nonlocal node, ping_thread
         node = res.node
         ping_thread = start_ping_loop(ping, ping_stop_event)
+        return node.node_id
 
     def delete_node() -> None:
         """Set delete_node."""
@@ -259,7 +275,7 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
         req = DeleteNodeRequest(node=node)
 
         # Send the request
-        res = _request(req, DeleteNodeResponse, PATH_CREATE_NODE)
+        res = _request(req, DeleteNodeResponse, PATH_DELETE_NODE)
         if res is None:
             return
 
@@ -337,19 +353,39 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
             res.results,  # pylint: disable=no-member
         )
 
-    def get_run(run_id: int) -> Tuple[str, str]:
+    def get_run(run_id: int) -> Run:
         # Construct the request
         req = GetRunRequest(run_id=run_id)
 
         # Send the request
         res = _request(req, GetRunResponse, PATH_GET_RUN)
         if res is None:
-            return "", ""
+            return Run(run_id, "", "", "", {})
 
-        return res.run.fab_id, res.run.fab_version
+        return Run(
+            run_id,
+            res.run.fab_id,
+            res.run.fab_version,
+            res.run.fab_hash,
+            user_config_from_proto(res.run.override_config),
+        )
+
+    def get_fab(fab_hash: str) -> Fab:
+        # Construct the request
+        req = GetFabRequest(hash_str=fab_hash)
+
+        # Send the request
+        res = _request(req, GetFabResponse, PATH_GET_FAB)
+        if res is None:
+            return Fab("", b"")
+
+        return Fab(
+            res.fab.hash_str,
+            res.fab.content,
+        )
 
     try:
         # Yield methods
-        yield (receive, send, create_node, delete_node, get_run)
+        yield (receive, send, create_node, delete_node, get_run, get_fab)
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)

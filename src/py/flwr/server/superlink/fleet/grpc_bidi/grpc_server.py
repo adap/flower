@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,12 +23,16 @@ from typing import Any, Callable, Optional, Sequence, Tuple, Union
 import grpc
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
+from flwr.common.address import is_port_in_use
 from flwr.common.logger import log
 from flwr.proto.transport_pb2_grpc import (  # pylint: disable=E0611
     add_FlowerServiceServicer_to_server,
 )
 from flwr.server.client_manager import ClientManager
 from flwr.server.superlink.driver.driver_servicer import DriverServicer
+from flwr.server.superlink.fleet.grpc_adapter.grpc_adapter_servicer import (
+    GrpcAdapterServicer,
+)
 from flwr.server.superlink.fleet.grpc_bidi.flower_service_servicer import (
     FlowerServiceServicer,
 )
@@ -154,6 +158,7 @@ def start_grpc_server(  # pylint: disable=too-many-arguments
 def generic_create_grpc_server(  # pylint: disable=too-many-arguments
     servicer_and_add_fn: Union[
         Tuple[FleetServicer, AddServicerToServerFn],
+        Tuple[GrpcAdapterServicer, AddServicerToServerFn],
         Tuple[FlowerServiceServicer, AddServicerToServerFn],
         Tuple[DriverServicer, AddServicerToServerFn],
     ],
@@ -214,6 +219,10 @@ def generic_create_grpc_server(  # pylint: disable=too-many-arguments
     server : grpc.Server
         A non-running instance of a gRPC server.
     """
+    # Check if port is in use
+    if is_port_in_use(server_address):
+        sys.exit(f"Port in server address {server_address} is already in use.")
+
     # Deconstruct tuple into servicer and function
     servicer, add_servicer_to_server_fn = servicer_and_add_fn
 
