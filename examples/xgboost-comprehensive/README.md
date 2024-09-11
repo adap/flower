@@ -4,7 +4,7 @@ dataset: [HIGGS]
 framework: [xgboost]
 ---
 
-# Flower Example using XGBoost (Comprehensive)
+# Federated Learning with XGBoost and Flower (Comprehensive Example)
 
 This example demonstrates a comprehensive federated learning setup using Flower with XGBoost.
 We use [HIGGS](https://archive.ics.uci.edu/dataset/280/higgs) dataset to perform a binary classification task. This examples uses [Flower Datasets](https://flower.ai/docs/datasets/) to retrieve, partition and preprocess the data for each Flower client.
