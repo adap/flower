@@ -2,9 +2,9 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
+from flwr.proto import control_pb2 as flwr_dot_proto_dot_control__pb2
 from flwr.proto import driver_pb2 as flwr_dot_proto_dot_driver__pb2
 from flwr.proto import fab_pb2 as flwr_dot_proto_dot_fab__pb2
-from flwr.proto import orchestrator_pb2 as flwr_dot_proto_dot_orchestrator__pb2
 from flwr.proto import run_pb2 as flwr_dot_proto_dot_run__pb2
 
 
@@ -19,8 +19,8 @@ class DriverStub(object):
         """
         self.CreateRun = channel.unary_unary(
                 '/flwr.proto.Driver/CreateRun',
-                request_serializer=flwr_dot_proto_dot_orchestrator__pb2.CreateRunRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_orchestrator__pb2.CreateRunResponse.FromString,
+                request_serializer=flwr_dot_proto_dot_control__pb2.CreateRunRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_control__pb2.CreateRunResponse.FromString,
                 )
         self.GetNodes = channel.unary_unary(
                 '/flwr.proto.Driver/GetNodes',
@@ -99,8 +99,8 @@ def add_DriverServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'CreateRun': grpc.unary_unary_rpc_method_handler(
                     servicer.CreateRun,
-                    request_deserializer=flwr_dot_proto_dot_orchestrator__pb2.CreateRunRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_orchestrator__pb2.CreateRunResponse.SerializeToString,
+                    request_deserializer=flwr_dot_proto_dot_control__pb2.CreateRunRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_control__pb2.CreateRunResponse.SerializeToString,
             ),
             'GetNodes': grpc.unary_unary_rpc_method_handler(
                     servicer.GetNodes,
@@ -149,8 +149,8 @@ class Driver(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.Driver/CreateRun',
-            flwr_dot_proto_dot_orchestrator__pb2.CreateRunRequest.SerializeToString,
-            flwr_dot_proto_dot_orchestrator__pb2.CreateRunResponse.FromString,
+            flwr_dot_proto_dot_control__pb2.CreateRunRequest.SerializeToString,
+            flwr_dot_proto_dot_control__pb2.CreateRunResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 

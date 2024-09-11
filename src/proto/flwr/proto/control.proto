@@ -20,7 +20,7 @@ package flwr.proto;
 import "flwr/proto/fab.proto";
 import "flwr/proto/transport.proto";
 
-service Orchestrator {
+service Control {
   // Request to create a new run
   rpc CreateRun(CreateRunRequest) returns (CreateRunResponse);
 
