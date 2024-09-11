@@ -583,11 +583,11 @@ class SqliteState(State):  # pylint: disable=R0904
         self, ping_interval: float, public_key: Optional[bytes] = None
     ) -> int:
         """Create, store in state, and return `node_id`."""
-        # Sample a random int64 as node_id
-        node_id = generate_rand_int_from_bytes(NODE_ID_NUM_BYTES)
+        # Sample a random uint64 as node_id
+        uint64_node_id = generate_rand_int_from_bytes(NODE_ID_NUM_BYTES)
 
-        # Convert a uint64 value to sint64 for SQLite
-        sint64_node_id = convert_uint64_to_sint64(node_id)
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_node_id = convert_uint64_to_sint64(uint64_node_id)
 
         query = "SELECT node_id FROM node WHERE public_key = :public_key;"
         row = self.query(query, {"public_key": public_key})
@@ -616,8 +616,8 @@ class SqliteState(State):  # pylint: disable=R0904
             log(ERROR, "Unexpected node registration failure.")
             return 0
 
-        # Return the uint64 value of the node_id
-        return convert_sint64_to_uint64(node_id)
+        # Note: we need to return the uint64 value of the node_id
+        return uint64_node_id
 
     def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
         """Delete a node."""
@@ -689,10 +689,10 @@ class SqliteState(State):  # pylint: disable=R0904
     ) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
         # Sample a random int64 as run_id
-        run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
+        uint64_run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
 
         # Convert a uint64 value to sint64 for SQLite
-        sint64_run_id = convert_uint64_to_sint64(run_id)
+        sint64_run_id = convert_uint64_to_sint64(uint64_run_id)
 
         # Check conflicts
         query = "SELECT COUNT(*) FROM run WHERE run_id = ?;"
@@ -719,8 +719,8 @@ class SqliteState(State):  # pylint: disable=R0904
                         json.dumps(override_config),
                     ),
                 )
-            # Return the uint64 value of the run_id
-            return convert_sint64_to_uint64(run_id)
+            # Note: we need to return the uint64 value of the run_id
+            return uint64_run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
 
