@@ -34,11 +34,11 @@ from flwr.common.config import (
 from flwr.common.logger import log, update_console_handler, warn_deprecated_feature
 from flwr.common.object_ref import load_app
 from flwr.common.typing import UserConfig
-from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
+from flwr.proto.orchestrator_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
     CreateRunResponse,
 )
-from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 
 from .driver import Driver
 from .driver.grpc_driver import GrpcDriver
