@@ -37,7 +37,7 @@ def infer_fiqa(model, tokenizer, batch_size, run_name):
 
 def infer_fpb(model, tokenizer, batch_size, run_name):
     name = "fpb"
-    dataset = load_data("financial_phrasebank", "sentences_50agree")
+    dataset = load_data("takala/financial_phrasebank", "sentences_50agree")
 
     # Post process
     dataset.columns = ["input", "output"]
