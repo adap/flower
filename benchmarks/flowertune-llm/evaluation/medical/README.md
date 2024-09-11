@@ -35,4 +35,4 @@ The model answers and accuracy values will be saved to `benchmarks/generation_{d
 
 
 > [!NOTE]
-> Please ensure that you provide all **three accuracy values (PubMedQA, MedMCQA, MedQA)** for three evaluation datasets when submitting to the LLM Leaderboard (see the [`Make Submission`](https://github.com/adap/flower/tree/main/benchmarks/flowertune-llm/evaluation#make-submission-on-flowertune-llm-leaderboard) section).
+> Please ensure that you use `quantization=4` for the evaluation, and provide all **three accuracy values (PubMedQA, MedMCQA, MedQA)** for three evaluation datasets when submitting to the LLM Leaderboard (see the [`Make Submission`](https://github.com/adap/flower/tree/main/benchmarks/flowertune-llm/evaluation#make-submission-on-flowertune-llm-leaderboard) section).
