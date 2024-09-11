@@ -48,6 +48,11 @@ tested_datasets = [
     "Mike0307/MNIST-M",
     "flwrlabs/usps",
     "scikit-learn/iris",
+    "flwrlabs/pacs",
+    "flwrlabs/cinic10",
+    "flwrlabs/caltech101",
+    "flwrlabs/office-home",
+    "flwrlabs/fed-isic2019",
 ]
 
 

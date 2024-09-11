@@ -73,7 +73,7 @@ class _MockServicer:
         """Handle unary call."""
         with self._lock:
             self._received_client_metadata = context.invocation_metadata()
-            self._received_message_bytes = request.SerializeToString(True)
+            self._received_message_bytes = request.SerializeToString(deterministic=True)
 
             if isinstance(request, CreateNodeRequest):
                 context.send_initial_metadata(
@@ -164,7 +164,7 @@ def _init_retry_invoker() -> RetryInvoker:
     return RetryInvoker(
         wait_gen_factory=exponential,
         recoverable_exceptions=grpc.RpcError,
-        max_tries=None,
+        max_tries=1,
         max_time=None,
         on_giveup=lambda retry_state: (
             log(
@@ -414,6 +414,27 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             # Assert
             assert actual_public_key == expected_public_key
             assert actual_hmac == expected_hmac
+
+    def test_without_servicer(self) -> None:
+        """Test client authentication without servicer."""
+        # Prepare
+        self._server.stop(grace=None)
+        retry_invoker = _init_retry_invoker()
+
+        # Execute and Assert
+        with self._connection(
+            self._address,
+            True,
+            retry_invoker,
+            GRPC_MAX_MESSAGE_LENGTH,
+            None,
+            (self._client_private_key, self._client_public_key),
+        ) as conn:
+            _, _, create_node, _, _, _ = conn
+            assert create_node is not None
+            create_node()
+
+            assert self._servicer.received_client_metadata() is None
 
 
 if __name__ == "__main__":
