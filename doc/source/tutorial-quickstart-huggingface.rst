@@ -6,14 +6,14 @@
 
 In this federated learning tutorial we will learn how to train a large
 language model (LLM) on the `IMDB
-<https://huggingface.co/datasets/stanfordnlp/imdb>`_ dataset using Flower and the 🤗 Hugging
-Face Transformers library. It is recommended to create a virtual
-environment and run everything within a :doc:`virtualenv
-<contributor-how-to-set-up-a-virtual-env>`.
+<https://huggingface.co/datasets/stanfordnlp/imdb>`_ dataset using
+Flower and the 🤗 Hugging Face Transformers library. It is recommended to
+create a virtual environment and run everything within a
+:doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
 
-Let's use ``flwr new`` to create a complete Flower+🤗 Hugging Face project.
-It will generate all the files needed to run, by default with the Flower
-Simulation Engine, a federation of 10 nodes using |fedavg|_
+Let's use ``flwr new`` to create a complete Flower+🤗 Hugging Face
+project. It will generate all the files needed to run, by default with
+the Flower Simulation Engine, a federation of 10 nodes using |fedavg|_
 The dataset will be partitioned using Flower Dataset's |iidpartitioner|_
 
 Now that we have a rough idea of what this example is about, let's get
@@ -131,8 +131,8 @@ defining the ``ServerApp``.
 This tutorial uses `Flower Datasets <https://flower.ai/docs/datasets/>`_
 to easily download and partition the `IMDB
 <https://huggingface.co/datasets/stanfordnlp/imdb>`_ dataset. In this
-example you'll make use of the |iidpartitioner|_
-to generate ``num_partitions`` partitions. You can choose |otherpartitioners|_
+example you'll make use of the |iidpartitioner|_ to generate
+``num_partitions`` partitions. You can choose |otherpartitioners|_
 available in Flower Datasets. To tokenize the text, we will also load
 the tokenizer from the pre-trained Transformer model that we'll use
 during training - more on that in the next section. Each ``ClientApp``
@@ -238,10 +238,10 @@ functions to perform local training or evaluation:
  The ClientApp
 ***************
 
-The main changes we have to make to use 🤗 Hugging Face with `Flower` will
-be found in the ``get_weights()`` and ``set_weights()`` functions. Under
-the hood, the ``transformers`` library uses `PyTorch`, which means we
-can reuse the ``get_weights()`` and ``set_weights()`` code that we
+The main changes we have to make to use 🤗 Hugging Face with `Flower`
+will be found in the ``get_weights()`` and ``set_weights()`` functions.
+Under the hood, the ``transformers`` library uses `PyTorch`, which means
+we can reuse the ``get_weights()`` and ``set_weights()`` code that we
 defined in the :doc:`Quickstart PyTorch tutorial
 <tutorial-quickstart-pytorch>`. As a reminder, in ``get_weights()``,
 PyTorch model parameters are extracted and represented as a list of
@@ -331,12 +331,12 @@ additional hyperparameters in ``pyproject.toml`` and access them here.
 ***************
 
 To construct a ``ServerApp`` we define a ``server_fn()`` callback with
-an identical signature to that of ``client_fn()`` but the return type is |serverappcomponents|_
-as opposed to a |client|_
-In this example we use the `FedAvg` strategy. To it we pass a randomly
-initialized model that will server as the global model to federated.
-Note that the value of ``fraction_fit`` is read from the run config. You
-can find the default value defined in the ``pyproject.toml``.
+an identical signature to that of ``client_fn()`` but the return type is
+|serverappcomponents|_ as opposed to a |client|_ In this example we use
+the `FedAvg` strategy. To it we pass a randomly initialized model that
+will server as the global model to federated. Note that the value of
+``fraction_fit`` is read from the run config. You can find the default
+value defined in the ``pyproject.toml``.
 
 .. code:: python
 
@@ -377,21 +377,47 @@ learning system for an LLM.
    Check the source code of the extended version of this tutorial in
    |quickstart_hf_link|_ in the Flower GitHub repository.
 
-.. |quickstart_hf_link| replace:: ``examples/quickstart-huggingface``
-.. |fedavg| replace:: ``FedAvg``
-.. |iidpartitioner| replace:: ``IidPartitioner``
-.. |otherpartitioners| replace:: other partitioners
-.. |berttiny| replace:: ``bert-tiny``
-.. |serverappcomponents| replace:: ``ServerAppComponents``
-.. |client| replace:: ``Client``
+.. |quickstart_hf_link| replace::
+
+   ``examples/quickstart-huggingface``
+
+.. |fedavg| replace::
+
+   ``FedAvg``
+
+.. |iidpartitioner| replace::
+
+   ``IidPartitioner``
+
+.. |otherpartitioners| replace::
+
+   other partitioners
+
+.. |berttiny| replace::
+
+   ``bert-tiny``
+
+.. |serverappcomponents| replace::
+
+   ``ServerAppComponents``
+
+.. |client| replace::
+
+   ``Client``
+
+.. _berttiny: https://huggingface.co/prajjwal1/bert-tiny
+
+.. _client: ref-api/flwr.client.Client.html#client
+
+.. _fedavg: ref-api/flwr.server.strategy.FedAvg.html#flwr.server.strategy.FedAvg
+
+.. _iidpartitioner: https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner
+
+.. _otherpartitioners: https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html
 
 .. _quickstart_hf_link: https://github.com/adap/flower/tree/main/examples/quickstart-huggingface
-.. _fedavg: ref-api/flwr.server.strategy.FedAvg.html#flwr.server.strategy.FedAvg
-.. _iidpartitioner: https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner
-.. _otherpartitioners: https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html
-.. _berttiny: https://huggingface.co/prajjwal1/bert-tiny
+
 .. _serverappcomponents: ref-api/flwr.server.ServerAppComponents.html#serverappcomponents
-.. _client: ref-api/flwr.client.Client.html#client
 
 .. meta::
    :description: Check out this Federating Learning quickstart tutorial for using Flower with 🤗 HuggingFace Transformers in order to fine-tune an LLM.
