@@ -23,16 +23,6 @@ def server_fn(context: Context):
     weights = get_weights(net)
     initial_parameters = ndarrays_to_parameters(weights)
 
-    # Initialize global model
-    model_name = context.run_config["model-name"]
-    num_labels = context.run_config["num-labels"]
-    net = AutoModelForSequenceClassification.from_pretrained(
-        model_name, num_labels=num_labels
-    )
-
-    weights = get_weights(net)
-    initial_parameters = ndarrays_to_parameters(weights)
-
     # Define strategy
     strategy = FedAvg(
         fraction_fit=fraction_fit,
