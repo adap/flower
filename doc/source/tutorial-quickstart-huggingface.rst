@@ -177,7 +177,7 @@ correspond to their data partition.
  The Model
 ***********
 
-We will leverage Hugging Face to federate the training of language
+We will leverage 🤗 Hugging Face to federate the training of language
 models over multiple clients using Flower. More specifically, we will
 fine-tune a pre-trained Transformer model (|berttiny|_) for sequence
 classification over the dataset of IMDB ratings. The end goal is to
@@ -238,7 +238,7 @@ functions to perform local training or evaluation:
  The ClientApp
 ***************
 
-The main changes we have to make to use Hugging Face with `Flower` will
+The main changes we have to make to use 🤗 Hugging Face with `Flower` will
 be found in the ``get_weights()`` and ``set_weights()`` functions. Under
 the hood, the ``transformers`` library uses `PyTorch`, which means we
 can reuse the ``get_weights()`` and ``set_weights()`` code that we
@@ -394,4 +394,4 @@ learning system for an LLM.
 .. _client: ref-api/flwr.client.Client.html#client
 
 .. meta::
-   :description: Check out this Federating Learning quickstart tutorial for using Flower with HuggingFace Transformers in order to fine-tune an LLM.
+   :description: Check out this Federating Learning quickstart tutorial for using Flower with 🤗 HuggingFace Transformers in order to fine-tune an LLM.
