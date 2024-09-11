@@ -11,6 +11,17 @@ from $import_name.task import get_weights
 def server_fn(context: Context):
     # Read from config
     num_rounds = context.run_config["num-server-rounds"]
+    fraction_fit = context.run_config["fraction-fit"]
+
+    # Initialize global model
+    model_name = context.run_config["model-name"]
+    num_labels = context.run_config["num-labels"]
+    net = AutoModelForSequenceClassification.from_pretrained(
+        model_name, num_labels=num_labels
+    )
+
+    weights = get_weights(net)
+    initial_parameters = ndarrays_to_parameters(weights)
 
     # Initialize global model
     model_name = context.run_config["model-name"]
@@ -24,7 +35,7 @@ def server_fn(context: Context):
 
     # Define strategy
     strategy = FedAvg(
-        fraction_fit=1.0,
+        fraction_fit=fraction_fit,
         fraction_evaluate=1.0,
         initial_parameters=initial_parameters,
     )
