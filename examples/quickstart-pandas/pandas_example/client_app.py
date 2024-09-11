@@ -1,5 +1,7 @@
 """pandas_example: A Flower / Pandas app."""
 
+import warnings
+
 import numpy as np
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
@@ -8,6 +10,8 @@ from flwr.client import ClientApp
 from flwr.common import Context, Message, MetricsRecord, RecordSet
 
 fds = None  # Cache FederatedDataset
+
+warnings.filterwarnings("ignore", category=UserWarning)
 
 
 def get_clientapp_dataset(partition_id: int, num_partitions: int):
@@ -38,10 +42,15 @@ def query(msg: Message, context: Context):
     dataset = get_clientapp_dataset(partition_id, num_partitions)
 
     metrics = {}
-    # Compute histogram for each column in dataframe
+    # Compute some statistics for each column in the dataframe
     for feature_name in dataset.columns:
-        freqs, _ = np.histogram(dataset[feature_name], bins=10)
+        # Compute histogram
+        freqs, _ = np.histogram(dataset[feature_name], bins=np.linspace(2.0, 10.0, 10))
         metrics[feature_name] = freqs.tolist()
+
+        # Compute weighted average
+        metrics[f"{feature_name}_avg"] = dataset[feature_name].mean() * len(dataset)
+        metrics[f"{feature_name}_count"] = len(dataset)
 
     reply_content = RecordSet(metrics_records={"query_results": MetricsRecord(metrics)})
 

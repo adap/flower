@@ -1,5 +1,7 @@
 """pandas_example: A Flower / Pandas app."""
 
+import random
+import time
 from logging import INFO
 
 import numpy as np
@@ -15,12 +17,31 @@ app = ServerApp()
 def main(driver: Driver, context: Context) -> None:
 
     num_rounds = context.run_config["num-server-rounds"]
+    num_client_nodes_per_round = 2
+
     for server_round in range(num_rounds):
         log(INFO, "")  # Add newline for log readability
         log(INFO, "Starting round %s/%s", server_round + 1, num_rounds)
 
-        # Get IDs of nodes available
-        node_ids = driver.get_node_ids()
+        # Loop and wait until enough nodes are available.
+        max_connection_attempts = 10
+        attempt = 1
+        while attempt < max_connection_attempts:
+            all_node_ids = driver.get_node_ids()
+            log(
+                INFO,
+                "(Attempt %s of %s) Connected to %s client nodes: %s",
+                attempt,
+                max_connection_attempts,
+                len(all_node_ids),
+                all_node_ids,
+            )
+            if len(all_node_ids) >= num_client_nodes_per_round:
+                # Sample client nodes
+                node_ids = random.sample(all_node_ids, num_client_nodes_per_round)
+                break
+            attempt += 1
+            time.sleep(3)
 
         # Create messages
         recordset = RecordSet()
@@ -39,14 +60,34 @@ def main(driver: Driver, context: Context) -> None:
         log(INFO, "Received %s/%s results", len(replies), len(messages))
 
         # Post process results from queries
-        aggregated_histograms = {}
+        aggregated_metrics = {}
         for rep in replies:
             query_results = rep.content.metrics_records["query_results"]
+            # Sum metrics
             for k, v in query_results.items():
-                if k in aggregated_histograms:
-                    aggregated_histograms[k] += np.array(v)
-                else:
-                    aggregated_histograms[k] = np.array(v)
+                if "avg" not in k:
+                    if k in aggregated_metrics:
+                        aggregated_metrics[k] += np.array(v)
+                    else:
+                        aggregated_metrics[k] = np.array(v)
 
-        # Aggregate partial histograms
-        log(INFO, "Aggregated histograms: %s", aggregated_histograms)
+        feature_names = [key for key in query_results.keys() if "_" not in key]
+
+        # Compute weighted average from aggregated count
+        for rep in replies:
+            query_results = rep.content.metrics_records["query_results"]
+            for feature_name in feature_names:
+                k = f"{feature_name}_avg"
+                if k in aggregated_metrics:
+                    aggregated_metrics[k] += (
+                        np.array(query_results[k])
+                        / aggregated_metrics[f"{feature_name}_count"]
+                    )
+                else:
+                    aggregated_metrics[k] = (
+                        np.array(query_results[k])
+                        / aggregated_metrics[f"{feature_name}_count"]
+                    )
+
+        # Display aggregated metrics
+        log(INFO, "Aggregated metrics: %s", aggregated_metrics)
