@@ -14,7 +14,8 @@ create a virtual environment and run everything within a
 Let's use ``flwr new`` to create a complete Flower+🤗 Hugging Face
 project. It will generate all the files needed to run, by default with
 the Flower Simulation Engine, a federation of 10 nodes using |fedavg|_
-The dataset will be partitioned using Flower Dataset's |iidpartitioner|_
+The dataset will be partitioned using |flowerdatasets|_'s
+|iidpartitioner|_.
 
 Now that we have a rough idea of what this example is about, let's get
 started. First, install Flower in your new environment:
@@ -109,8 +110,8 @@ You can also run the project with GPU as follows:
    # Run with default arguments
    $ flwr run . localhost-gpu
 
-This will use the default arguments where each ClientApp will use 2 CPUs
-and at most 4 ClientApps will run in a given GPU.
+This will use the default arguments where each ``ClientApp`` will use 2
+CPUs and at most 4 ``ClientApp``\s will run in a given GPU.
 
 You can also override the parameters defined in the
 ``[tool.flwr.app.config]`` section in ``pyproject.toml`` like this:
@@ -128,10 +129,9 @@ defining the ``ServerApp``.
  The Data
 **********
 
-This tutorial uses `Flower Datasets <https://flower.ai/docs/datasets/>`_
-to easily download and partition the `IMDB
-<https://huggingface.co/datasets/stanfordnlp/imdb>`_ dataset. In this
-example you'll make use of the |iidpartitioner|_ to generate
+This tutorial uses |flowerdatasets|_ to easily download and partition
+the `IMDB <https://huggingface.co/datasets/stanfordnlp/imdb>`_ dataset.
+In this example you'll make use of the |iidpartitioner|_ to generate
 ``num_partitions`` partitions. You can choose |otherpartitioners|_
 available in Flower Datasets. To tokenize the text, we will also load
 the tokenizer from the pre-trained Transformer model that we'll use
@@ -238,16 +238,16 @@ functions to perform local training or evaluation:
  The ClientApp
 ***************
 
-The main changes we have to make to use 🤗 Hugging Face with `Flower`
-will be found in the ``get_weights()`` and ``set_weights()`` functions.
-Under the hood, the ``transformers`` library uses `PyTorch`, which means
-we can reuse the ``get_weights()`` and ``set_weights()`` code that we
-defined in the :doc:`Quickstart PyTorch tutorial
-<tutorial-quickstart-pytorch>`. As a reminder, in ``get_weights()``,
-PyTorch model parameters are extracted and represented as a list of
-NumPy arrays. The ``set_weights()`` function that's the oposite: given a
-list of NumPy arrays it applies them to an existing PyTorch model. Doing
-this in fairly easy in PyTorch.
+The main changes we have to make to use 🤗 Hugging Face with Flower will
+be found in the ``get_weights()`` and ``set_weights()`` functions. Under
+the hood, the ``transformers`` library uses PyTorch, which means we can
+reuse the ``get_weights()`` and ``set_weights()`` code that we defined
+in the :doc:`Quickstart PyTorch <tutorial-quickstart-pytorch>` tutorial.
+As a reminder, in ``get_weights()``, PyTorch model parameters are
+extracted and represented as a list of NumPy arrays. The
+``set_weights()`` function that's the opposite: given a list of NumPy
+arrays it applies them to an existing PyTorch model. Doing this in
+fairly easy in PyTorch.
 
 .. note::
 
@@ -260,7 +260,6 @@ this in fairly easy in PyTorch.
 
    def get_weights(net):
        return [val.cpu().numpy() for _, val in net.state_dict().items()]
-
 
    def set_weights(net, parameters):
        params_dict = zip(net.state_dict().keys(), parameters)
@@ -375,7 +374,10 @@ learning system for an LLM.
 .. note::
 
    Check the source code of the extended version of this tutorial in
-   |quickstart_hf_link|_ in the Flower GitHub repository.
+   |quickstart_hf_link|_ in the Flower GitHub repository. For a
+   comprehensive example of a federated fine-tuning of an LLM with
+   Flower, refer to the |flowertune|_ example in the Flower GitHub
+   repository.
 
 .. |quickstart_hf_link| replace::
 
@@ -405,11 +407,23 @@ learning system for an LLM.
 
    ``Client``
 
+.. |flowerdatasets| replace::
+
+   Flower Datasets
+
+.. |flowertune| replace::
+
+   FlowerTune LLM
+
 .. _berttiny: https://huggingface.co/prajjwal1/bert-tiny
 
 .. _client: ref-api/flwr.client.Client.html#client
 
 .. _fedavg: ref-api/flwr.server.strategy.FedAvg.html#flwr.server.strategy.FedAvg
+
+.. _flowerdatasets: https://flower.ai/docs/datasets/
+
+.. _flowertune: https://github.com/adap/flower/tree/main/examples/flowertune-llm
 
 .. _iidpartitioner: https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner
 
