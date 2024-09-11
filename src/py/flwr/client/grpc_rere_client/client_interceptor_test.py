@@ -73,7 +73,7 @@ class _MockServicer:
         """Handle unary call."""
         with self._lock:
             self._received_client_metadata = context.invocation_metadata()
-            self._received_message_bytes = request.SerializeToString(True)
+            self._received_message_bytes = request.SerializeToString(deterministic=True)
 
             if isinstance(request, CreateNodeRequest):
                 context.send_initial_metadata(
