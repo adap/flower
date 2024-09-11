@@ -7,7 +7,10 @@
 README.md @jafermarq @tanertopal @danieljanes
 
 # Flower Baselines
-/baselines @jafermarq @tanertopal @danieljanes
+/baselines @jafermarq @danieljanes
+
+# Flower Benchmarks
+/benchmarks @jafermarq @danieljanes
 
 # Flower Datasets
 /datasets @jafermarq @tanertopal @danieljanes
@@ -32,3 +35,4 @@ README.md @jafermarq @tanertopal @danieljanes
 /.devcontainer @Robert-Steiner @Moep90
 **/Dockerfile @Robert-Steiner @Moep90
 **/*.Dockerfile @Robert-Steiner @Moep90
+src/docker @Robert-Steiner @Moep90
