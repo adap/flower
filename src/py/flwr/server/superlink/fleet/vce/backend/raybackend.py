@@ -52,16 +52,11 @@ class RayBackend(Backend):
 
         # Validate client resources
         self.client_resources_key = "client_resources"
-        client_resources = self._validate_client_resources(config=backend_config)
+        self.client_resources = self._validate_client_resources(config=backend_config)
 
-        # Create actor pool
-        actor_kwargs = self._validate_actor_arguments(config=backend_config)
-
-        self.pool = BasicActorPool(
-            actor_type=ClientAppActor,
-            client_resources=client_resources,
-            actor_kwargs=actor_kwargs,
-        )
+        # Valide actor resources
+        self.actor_kwargs = self._validate_actor_arguments(config=backend_config)
+        self.pool: Optional[BasicActorPool] = None
 
         self.app_fn: Optional[Callable[[], ClientApp]] = None
 
@@ -122,14 +117,24 @@ class RayBackend(Backend):
     @property
     def num_workers(self) -> int:
         """Return number of actors in pool."""
-        return self.pool.num_actors
+        return self.pool.num_actors if self.pool else 0
 
     def is_worker_idle(self) -> bool:
         """Report whether the pool has idle actors."""
-        return self.pool.is_actor_available()
+        return self.pool.is_actor_available() if self.pool else False
 
     def build(self, app_fn: Callable[[], ClientApp]) -> None:
         """Build pool of Ray actors that this backend will submit jobs to."""
+        # Create Actor Pool
+        try:
+            self.pool = BasicActorPool(
+                actor_type=ClientAppActor,
+                client_resources=self.client_resources,
+                actor_kwargs=self.actor_kwargs,
+            )
+        except Exception as ex:
+            raise ex
+
         self.pool.add_actors_to_pool(self.pool.actors_capacity)
         # Set ClientApp callable that ray actors will use
         self.app_fn = app_fn
@@ -145,6 +150,9 @@ class RayBackend(Backend):
         Return output message and updated context.
         """
         partition_id = context.node_config[PARTITION_ID_KEY]
+
+        if self.pool is None:
+            raise ValueError("The actor pool is empty, unfit to process messages.")
 
         if self.app_fn is None:
             raise ValueError(
@@ -179,6 +187,7 @@ class RayBackend(Backend):
 
     def terminate(self) -> None:
         """Terminate all actors in actor pool."""
-        self.pool.terminate_all_actors()
+        if self.pool:
+            self.pool.terminate_all_actors()
         ray.shutdown()
         log(DEBUG, "Terminated %s", self.__class__.__name__)
