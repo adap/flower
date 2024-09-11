@@ -24,7 +24,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Handle unsuitable resources for simulation** ([#4143](https://github.com/adap/flower/pull/4143))
 
-- **Update examples READMEs** ([#4117](https://github.com/adap/flower/pull/4117))
+- **Update example READMEs** ([#4117](https://github.com/adap/flower/pull/4117))
 
 - **Update SuperNode authentication docs** ([#4160](https://github.com/adap/flower/pull/4160))
 
