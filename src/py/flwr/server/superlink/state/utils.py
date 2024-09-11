@@ -18,6 +18,7 @@
 import time
 from logging import ERROR
 from os import urandom
+from typing import Dict, List
 from uuid import uuid4
 
 from flwr.common import log
@@ -37,7 +38,7 @@ def generate_rand_int_from_bytes(num_bytes: int) -> int:
     return int.from_bytes(urandom(num_bytes), "little", signed=False)
 
 
-def uint64_to_sint64(u: int) -> int:
+def convert_uint64_to_sint64(u: int) -> int:
     """Convert a uint64 value to sint64.
 
     Args:
@@ -52,7 +53,7 @@ def uint64_to_sint64(u: int) -> int:
     return u
 
 
-def sint64_to_uint64(s: int) -> int:
+def convert_sint64_to_uint64(s: int) -> int:
     """Convert a sint64 value to uint64.
 
     Args:
@@ -65,6 +66,34 @@ def sint64_to_uint64(s: int) -> int:
     if s < 0:
         return s + 2**64
     return s
+
+
+def convert_uint64_values_in_dict_to_sint64(
+    data_dict: Dict[str, int], keys: List[str]
+) -> None:
+    """Convert uint64 values to sint64 in the given dictionary.
+
+    Args:
+        data_dict: A dictionary where the values are integers to be converted.
+        keys: A list of keys in the dictionary whose values need to be converted.
+    """
+    for key in keys:
+        if key in data_dict:
+            data_dict[key] = convert_uint64_to_sint64(data_dict[key])
+
+
+def convert_sint64_values_in_dict_to_uint64(
+    data_dict: Dict[str, int], keys: List[str]
+) -> None:
+    """Convert sint64 values to uint64 in the given dictionary.
+
+    Args:
+        data_dict: A dictionary where the values are integers to be converted.
+        keys: A list of keys in the dictionary whose values need to be converted.
+    """
+    for key in keys:
+        if key in data_dict:
+            data_dict[key] = convert_sint64_to_uint64(data_dict[key])
 
 
 def make_node_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:

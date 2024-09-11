@@ -33,10 +33,12 @@ from flwr.server.utils.validator import validate_task_ins_or_res
 
 from .state import State
 from .utils import (
+    convert_sint64_to_uint64,
+    convert_sint64_values_in_dict_to_uint64,
+    convert_uint64_to_sint64,
+    convert_uint64_values_in_dict_to_sint64,
     generate_rand_int_from_bytes,
     make_node_unavailable_taskres,
-    sint64_to_uint64,
-    uint64_to_sint64,
 )
 
 SQL_CREATE_TABLE_NODE = """
@@ -227,10 +229,11 @@ class SqliteState(State):  # pylint: disable=R0904
         # Store TaskIns
         task_ins.task_id = str(task_id)
         data = (task_ins_to_dict(task_ins),)
-        # Convert a uint64 value to sint64 for SQLite
-        data[0]["run_id"] = uint64_to_sint64(data[0]["run_id"])
-        data[0]["producer_node_id"] = uint64_to_sint64(data[0]["producer_node_id"])
-        data[0]["consumer_node_id"] = uint64_to_sint64(data[0]["consumer_node_id"])
+
+        # Convert values from uint64 to sint64 for SQLite
+        convert_uint64_values_in_dict_to_sint64(
+            data[0], ["run_id", "producer_node_id", "consumer_node_id"]
+        )
 
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_ins VALUES({columns});"
@@ -293,8 +296,8 @@ class SqliteState(State):  # pylint: disable=R0904
                 AND   delivered_at = ""
             """
         else:
-            # Convert a uint64 value to sint64 for SQLite
-            data["node_id"] = uint64_to_sint64(node_id)
+            # Convert the uint64 value to sint64 for SQLite
+            data["node_id"] = convert_uint64_to_sint64(node_id)
 
             # Retrieve all TaskIns for node_id
             query = """
@@ -334,12 +337,10 @@ class SqliteState(State):  # pylint: disable=R0904
             rows = self.query(query, data)
 
         for row in rows:
-            if "run_id" in row:
-                row["run_id"] = sint64_to_uint64(row["run_id"])
-            if "producer_node_id" in row:
-                row["producer_node_id"] = sint64_to_uint64(row["producer_node_id"])
-            if "consumer_node_id" in row:
-                row["consumer_node_id"] = sint64_to_uint64(row["consumer_node_id"])
+            # Convert values from sint64 to uint64
+            convert_sint64_values_in_dict_to_uint64(
+                row, ["run_id", "producer_node_id", "consumer_node_id"]
+            )
 
         result = [dict_to_task_ins(row) for row in rows]
 
@@ -374,10 +375,10 @@ class SqliteState(State):  # pylint: disable=R0904
         task_res.task_id = str(task_id)
         data = (task_res_to_dict(task_res),)
 
-        # Convert a uint64 value to sint64 for SQLite
-        data[0]["run_id"] = uint64_to_sint64(data[0]["run_id"])
-        data[0]["producer_node_id"] = uint64_to_sint64(data[0]["producer_node_id"])
-        data[0]["consumer_node_id"] = uint64_to_sint64(data[0]["consumer_node_id"])
+        # Convert values from uint64 to sint64 for SQLite
+        convert_uint64_values_in_dict_to_sint64(
+            data[0], ["run_id", "producer_node_id", "consumer_node_id"]
+        )
 
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_res VALUES({columns});"
@@ -457,13 +458,10 @@ class SqliteState(State):  # pylint: disable=R0904
             rows = self.query(query, data)
 
             for row in rows:
-                # Convert values from sint64 to uint64:
-                # - run_id
-                # - consumer_node_id
-                # - producer_node_id
-                row["run_id"] = sint64_to_uint64(row["run_id"])
-                row["consumer_node_id"] = sint64_to_uint64(row["consumer_node_id"])
-                row["producer_node_id"] = sint64_to_uint64(row["producer_node_id"])
+                # Convert values from sint64 to uint64
+                convert_sint64_values_in_dict_to_uint64(
+                    row, ["run_id", "producer_node_id", "consumer_node_id"]
+                )
 
         result = [dict_to_task_res(row) for row in rows]
 
@@ -509,13 +507,11 @@ class SqliteState(State):  # pylint: disable=R0904
             if limit and len(result) == limit:
                 break
 
-            # Convert values from sint64 to uint64:
-            # - run_id
-            # - consumer_node_id
-            # - producer_node_id
-            row["run_id"] = sint64_to_uint64(row["run_id"])
-            row["consumer_node_id"] = sint64_to_uint64(row["consumer_node_id"])
-            row["producer_node_id"] = sint64_to_uint64(row["producer_node_id"])
+            for row in rows:
+                # Convert values from sint64 to uint64
+                convert_sint64_values_in_dict_to_uint64(
+                    row, ["run_id", "producer_node_id", "consumer_node_id"]
+                )
 
             task_ins = dict_to_task_ins(row)
             err_taskres = make_node_unavailable_taskres(
@@ -591,7 +587,7 @@ class SqliteState(State):  # pylint: disable=R0904
         node_id = generate_rand_int_from_bytes(NODE_ID_NUM_BYTES)
 
         # Convert a uint64 value to sint64 for SQLite
-        sint64_node_id = uint64_to_sint64(node_id)
+        sint64_node_id = convert_uint64_to_sint64(node_id)
 
         query = "SELECT node_id FROM node WHERE public_key = :public_key;"
         row = self.query(query, {"public_key": public_key})
@@ -621,12 +617,12 @@ class SqliteState(State):  # pylint: disable=R0904
             return 0
 
         # Return the uint64 value of the node_id
-        return sint64_to_uint64(node_id)
+        return convert_sint64_to_uint64(node_id)
 
     def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
         """Delete a node."""
         # Convert the uint64 value to sint64 for SQLite
-        sint64_node_id = uint64_to_sint64(node_id)
+        sint64_node_id = convert_uint64_to_sint64(node_id)
 
         query = "DELETE FROM node WHERE node_id = ?"
         params = (sint64_node_id,)
@@ -655,7 +651,7 @@ class SqliteState(State):  # pylint: disable=R0904
         an empty `Set` MUST be returned.
         """
         # Convert the uint64 value to sint64 for SQLite
-        sint64_run_id = uint64_to_sint64(run_id)
+        sint64_run_id = convert_uint64_to_sint64(run_id)
 
         # Validate run ID
         query = "SELECT COUNT(*) FROM run WHERE run_id = ?;"
@@ -667,7 +663,7 @@ class SqliteState(State):  # pylint: disable=R0904
         rows = self.query(query, (time.time(),))
 
         # Convert sint64 node_ids to uint64
-        result: Set[int] = {sint64_to_uint64(row["node_id"]) for row in rows}
+        result: Set[int] = {convert_sint64_to_uint64(row["node_id"]) for row in rows}
 
         return result
 
@@ -679,7 +675,7 @@ class SqliteState(State):  # pylint: disable=R0904
             node_id: int = row[0]["node_id"]
 
             # Convert a sint64 value to uint64 after reading from SQLite
-            uint64_node_id = sint64_to_uint64(node_id)
+            uint64_node_id = convert_sint64_to_uint64(node_id)
 
             return uint64_node_id
         return None
@@ -696,7 +692,7 @@ class SqliteState(State):  # pylint: disable=R0904
         run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
 
         # Convert a uint64 value to sint64 for SQLite
-        sint64_run_id = uint64_to_sint64(run_id)
+        sint64_run_id = convert_uint64_to_sint64(run_id)
 
         # Check conflicts
         query = "SELECT COUNT(*) FROM run WHERE run_id = ?;"
@@ -724,7 +720,7 @@ class SqliteState(State):  # pylint: disable=R0904
                     ),
                 )
             # Return the uint64 value of the run_id
-            return sint64_to_uint64(run_id)
+            return convert_sint64_to_uint64(run_id)
         log(ERROR, "Unexpected run creation failure.")
         return 0
 
@@ -783,12 +779,12 @@ class SqliteState(State):  # pylint: disable=R0904
 
     def get_run(self, run_id: int) -> Optional[Run]:
         """Retrieve information about the run with the specified `run_id`."""
-        sint64_run_id = uint64_to_sint64(run_id)
+        sint64_run_id = convert_uint64_to_sint64(run_id)
         query = "SELECT * FROM run WHERE run_id = ?;"
         try:
             row = self.query(query, (sint64_run_id,))[0]
             return Run(
-                run_id=sint64_to_uint64(row["run_id"]),
+                run_id=convert_sint64_to_uint64(row["run_id"]),
                 fab_id=row["fab_id"],
                 fab_version=row["fab_version"],
                 fab_hash=row["fab_hash"],
@@ -800,7 +796,7 @@ class SqliteState(State):  # pylint: disable=R0904
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""
-        sint64_node_id = uint64_to_sint64(node_id)
+        sint64_node_id = convert_uint64_to_sint64(node_id)
 
         # Update `online_until` and `ping_interval` for the given `node_id`
         query = "UPDATE node SET online_until = ?, ping_interval = ? WHERE node_id = ?;"

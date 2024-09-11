@@ -16,36 +16,40 @@
 
 import unittest
 
-from .utils import generate_rand_int_from_bytes, sint64_to_uint64, uint64_to_sint64
+from .utils import (
+    convert_sint64_to_uint64,
+    convert_uint64_to_sint64,
+    generate_rand_int_from_bytes,
+)
 
 
 class UtilsTest(unittest.TestCase):
     """Test utils code."""
 
-    def test_uint64_to_sint64(self) -> None:
+    def test_convert_uint64_to_sint64(self) -> None:
         """Test conversion from uint64 to sint64."""
         # Test values below 2^63
-        self.assertEqual(uint64_to_sint64(0), 0)
-        self.assertEqual(uint64_to_sint64(2**62), 2**62)
-        self.assertEqual(uint64_to_sint64(2**63 - 1), 2**63 - 1)
+        self.assertEqual(convert_uint64_to_sint64(0), 0)
+        self.assertEqual(convert_uint64_to_sint64(2**62), 2**62)
+        self.assertEqual(convert_uint64_to_sint64(2**63 - 1), 2**63 - 1)
 
         # Test values at and above 2^63
-        self.assertEqual(uint64_to_sint64(2**63), -(2**63))
-        self.assertEqual(uint64_to_sint64(2**63 + 1), -(2**63) + 1)
-        self.assertEqual(uint64_to_sint64(2**64 - 1), -1)
+        self.assertEqual(convert_uint64_to_sint64(2**63), -(2**63))
+        self.assertEqual(convert_uint64_to_sint64(2**63 + 1), -(2**63) + 1)
+        self.assertEqual(convert_uint64_to_sint64(2**64 - 1), -1)
 
     def test_sint64_to_uint64(self) -> None:
         """Test conversion from sint64 to uint64."""
         # Test values within the range of sint64
-        self.assertEqual(sint64_to_uint64(-(2**63)), 2**63)
-        self.assertEqual(sint64_to_uint64(-(2**63) + 1), 2**63 + 1)
-        self.assertEqual(sint64_to_uint64(-1), 2**64 - 1)
-        self.assertEqual(sint64_to_uint64(0), 0)
-        self.assertEqual(sint64_to_uint64(2**63 - 1), 2**63 - 1)
+        self.assertEqual(convert_sint64_to_uint64(-(2**63)), 2**63)
+        self.assertEqual(convert_sint64_to_uint64(-(2**63) + 1), 2**63 + 1)
+        self.assertEqual(convert_sint64_to_uint64(-1), 2**64 - 1)
+        self.assertEqual(convert_sint64_to_uint64(0), 0)
+        self.assertEqual(convert_sint64_to_uint64(2**63 - 1), 2**63 - 1)
 
         # Test values above 2^63
-        self.assertEqual(sint64_to_uint64(2**63), 2**63)
-        self.assertEqual(sint64_to_uint64(2**64 - 1), 2**64 - 1)
+        self.assertEqual(convert_sint64_to_uint64(2**63), 2**63)
+        self.assertEqual(convert_sint64_to_uint64(2**64 - 1), 2**64 - 1)
 
     def test_generate_rand_int_from_bytes_unsigned_int(self) -> None:
         """Test that the generated integer is unsigned (non-negative)."""
