@@ -1,5 +1,41 @@
 # Changelog
 
+## v1.11.1 (2024-09-11)
+
+### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Heng Pan`, `Javier`, `Robert Steiner`, `Yan Gao` <!---TOKEN_v1.12.0-->
+
+### What's new?
+
+- **feat(framework) Implement** `keys/values/items` **methods for** `TypedDict` ([#4146](https://github.com/adap/flower/pull/4146))
+
+### Other changes
+
+- **fix(framework) Fix parsing** `executor_config` **if present** ([#4125](https://github.com/adap/flower/pull/4125))
+
+- **fix(framework) Adjust framework name in templates docstrings** ([#4127](https://github.com/adap/flower/pull/4127))
+
+- **refactor(framework) Update** `huggingface` **template for** `flwr new` ([#4169](https://github.com/adap/flower/pull/4169))
+
+- **fix(framework) Fix** `FlowerTune` **template** ([#4123](https://github.com/adap/flower/pull/4123))
+
+- **refactor(framework) Add buffer time after** `ServerApp` **thread initialization** ([#4119](https://github.com/adap/flower/pull/4119))
+
+- **refactor(framework) Handle unsuitable resources for simulation** ([#4143](https://github.com/adap/flower/pull/4143))
+
+- **fix(examples) Update examples READMEs** ([#4117](https://github.com/adap/flower/pull/4117))
+
+### Documentation improvements
+
+- **docs(framework) Update node auth docs** ([#4160](https://github.com/adap/flower/pull/4160))
+
+### Incompatible changes
+
+None
+
 ## v1.11.0 (2024-08-30)
 
 ### Thanks to our contributors
