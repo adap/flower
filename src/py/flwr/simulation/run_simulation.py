@@ -618,7 +618,7 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
     parser.add_argument(
         "--delay-start",
         type=int,
-        default=5,
+        default=3,
         help="Buffer time (in seconds) to delay the start the simulation engine after "
         "the `ServerApp`, which runs in a separate thread, has been launched.",
     )
