@@ -1,3 +1,9 @@
+---
+tags: [advanced, vision, fds]
+dataset: [CIFAR-10]
+framework: [torch, torchvision]
+---
+
 # Flower Authentication with PyTorch 🧪
 
 > 🧪 = This example covers experimental features that might change in future versions of Flower

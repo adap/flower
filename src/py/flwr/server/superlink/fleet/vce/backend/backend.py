@@ -29,12 +29,12 @@ BackendConfig = Dict[str, Dict[str, ConfigsRecordValues]]
 class Backend(ABC):
     """Abstract base class for a Simulation Engine Backend."""
 
-    def __init__(self, backend_config: BackendConfig, work_dir: str) -> None:
+    def __init__(self, backend_config: BackendConfig) -> None:
         """Construct a backend."""
 
     @abstractmethod
-    async def build(self) -> None:
-        """Build backend asynchronously.
+    def build(self, app_fn: Callable[[], ClientApp]) -> None:
+        """Build backend.
 
         Different components need to be in place before workers in a backend are ready
         to accept jobs. When this method finishes executing, the backend should be fully
@@ -54,13 +54,12 @@ class Backend(ABC):
         """Report whether a backend worker is idle and can therefore run a ClientApp."""
 
     @abstractmethod
-    async def terminate(self) -> None:
+    def terminate(self) -> None:
         """Terminate backend."""
 
     @abstractmethod
-    async def process_message(
+    def process_message(
         self,
-        app: Callable[[], ClientApp],
         message: Message,
         context: Context,
     ) -> Tuple[Message, Context]:

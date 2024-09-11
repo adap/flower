@@ -3,7 +3,7 @@
 
 type = ["ci", "docs", "feat", "fix", "refactor", "break"]
 
-project = ["framework", "baselines", "datasets", "examples"]
+project = ["framework", "baselines", "datasets", "examples", "benchmarks"]
 
 scope = "skip"
 
@@ -624,6 +624,7 @@ allowed_verbs=[
   "Prolong",
   "Promise",
   "Promote",
+  "Prompt",
   "Propagate",
   "Propose",
   "Prosecute",
