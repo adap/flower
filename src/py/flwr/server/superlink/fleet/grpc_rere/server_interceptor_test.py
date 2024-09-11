@@ -166,7 +166,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             self._node_private_key, self._server_public_key
         )
         hmac_value = base64.urlsafe_b64encode(
-            compute_hmac(shared_secret, request.SerializeToString(True))
+            compute_hmac(shared_secret, request.SerializeToString(deterministic=True))
         )
         public_key_bytes = base64.urlsafe_b64encode(
             public_key_to_bytes(self._node_public_key)
@@ -195,7 +195,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         node_private_key, _ = generate_key_pairs()
         shared_secret = generate_shared_key(node_private_key, self._server_public_key)
         hmac_value = base64.urlsafe_b64encode(
-            compute_hmac(shared_secret, request.SerializeToString(True))
+            compute_hmac(shared_secret, request.SerializeToString(deterministic=True))
         )
         public_key_bytes = base64.urlsafe_b64encode(
             public_key_to_bytes(self._node_public_key)
@@ -222,7 +222,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             self._node_private_key, self._server_public_key
         )
         hmac_value = base64.urlsafe_b64encode(
-            compute_hmac(shared_secret, request.SerializeToString(True))
+            compute_hmac(shared_secret, request.SerializeToString(deterministic=True))
         )
         public_key_bytes = base64.urlsafe_b64encode(
             public_key_to_bytes(self._node_public_key)
@@ -251,7 +251,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         node_private_key, _ = generate_key_pairs()
         shared_secret = generate_shared_key(node_private_key, self._server_public_key)
         hmac_value = base64.urlsafe_b64encode(
-            compute_hmac(shared_secret, request.SerializeToString(True))
+            compute_hmac(shared_secret, request.SerializeToString(deterministic=True))
         )
         public_key_bytes = base64.urlsafe_b64encode(
             public_key_to_bytes(self._node_public_key)
@@ -280,7 +280,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             self._node_private_key, self._server_public_key
         )
         hmac_value = base64.urlsafe_b64encode(
-            compute_hmac(shared_secret, request.SerializeToString(True))
+            compute_hmac(shared_secret, request.SerializeToString(deterministic=True))
         )
         public_key_bytes = base64.urlsafe_b64encode(
             public_key_to_bytes(self._node_public_key)
@@ -311,7 +311,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         node_private_key, _ = generate_key_pairs()
         shared_secret = generate_shared_key(node_private_key, self._server_public_key)
         hmac_value = base64.urlsafe_b64encode(
-            compute_hmac(shared_secret, request.SerializeToString(True))
+            compute_hmac(shared_secret, request.SerializeToString(deterministic=True))
         )
         public_key_bytes = base64.urlsafe_b64encode(
             public_key_to_bytes(self._node_public_key)
@@ -339,7 +339,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             self._node_private_key, self._server_public_key
         )
         hmac_value = base64.urlsafe_b64encode(
-            compute_hmac(shared_secret, request.SerializeToString(True))
+            compute_hmac(shared_secret, request.SerializeToString(deterministic=True))
         )
         public_key_bytes = base64.urlsafe_b64encode(
             public_key_to_bytes(self._node_public_key)
@@ -369,7 +369,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         node_private_key, _ = generate_key_pairs()
         shared_secret = generate_shared_key(node_private_key, self._server_public_key)
         hmac_value = base64.urlsafe_b64encode(
-            compute_hmac(shared_secret, request.SerializeToString(True))
+            compute_hmac(shared_secret, request.SerializeToString(deterministic=True))
         )
         public_key_bytes = base64.urlsafe_b64encode(
             public_key_to_bytes(self._node_public_key)
@@ -396,7 +396,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             self._node_private_key, self._server_public_key
         )
         hmac_value = base64.urlsafe_b64encode(
-            compute_hmac(shared_secret, request.SerializeToString(True))
+            compute_hmac(shared_secret, request.SerializeToString(deterministic=True))
         )
         public_key_bytes = base64.urlsafe_b64encode(
             public_key_to_bytes(self._node_public_key)
@@ -425,7 +425,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         node_private_key, _ = generate_key_pairs()
         shared_secret = generate_shared_key(node_private_key, self._server_public_key)
         hmac_value = base64.urlsafe_b64encode(
-            compute_hmac(shared_secret, request.SerializeToString(True))
+            compute_hmac(shared_secret, request.SerializeToString(deterministic=True))
         )
         public_key_bytes = base64.urlsafe_b64encode(
             public_key_to_bytes(self._node_public_key)
@@ -469,7 +469,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             self._node_private_key, self._server_public_key
         )
         hmac_value = base64.urlsafe_b64encode(
-            compute_hmac(shared_secret, request.SerializeToString(True))
+            compute_hmac(shared_secret, request.SerializeToString(deterministic=True))
         )
         public_key_bytes = base64.urlsafe_b64encode(
             public_key_to_bytes(self._node_public_key)

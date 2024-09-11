@@ -428,6 +428,9 @@ def _load_mocked_dataset_dict_by_partial_download(
     subset_name: Optional[str] = None,
 ) -> DatasetDict:
     """Like _load_mocked_dataset_by_partial_download but for many splits."""
+    assert len(split_names) == len(
+        skip_take_lists
+    ), "The split_names should be thesame length as the skip_take_lists."
     dataset_dict = {}
     for split_name, skip_take_list in zip(split_names, skip_take_lists):
         dataset_dict[split_name] = _load_mocked_dataset_by_partial_download(
