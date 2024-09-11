@@ -124,7 +124,7 @@ def pool_size_from_resources(client_resources: Dict[str, Union[int, float]]) -> 
             WARNING,
             "The ActorPool is empty. The system (CPUs=%s, GPUs=%s) "
             "does not meet the criteria to host at least one client with resources:"
-            " %s. Lowering the these resources could help.",
+            " %s. Lowering these resources could help.",
             num_cpus,
             num_gpus,
             client_resources,
