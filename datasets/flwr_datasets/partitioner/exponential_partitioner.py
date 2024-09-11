@@ -17,12 +17,10 @@
 
 import numpy as np
 
-from flwr_datasets.partitioner.id_to_size_function_partitioner import (
-    IdToSizeFunctionPartitioner,
-)
+from flwr_datasets.partitioner.id_to_size_fnc_partitioner import IdToSizeFncPartitioner
 
 
-class ExponentialPartitioner(IdToSizeFunctionPartitioner):
+class ExponentialPartitioner(IdToSizeFncPartitioner):
     """Partitioner creates partitions of size that are correlated with exp(id).
 
     The amount of data each client gets is correlated with the exponent of partition ID.
