@@ -15,6 +15,7 @@ from transformers import AutoTokenizer, DataCollatorWithPadding
 warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", category=FutureWarning)
 disable_progress_bar()
+transformers.logging.set_verbosity_error()
 
 
 fds = None  # Cache FederatedDataset
