@@ -4,6 +4,7 @@ import warnings
 from collections import OrderedDict
 
 import torch
+import transformers
 from datasets.utils.logging import disable_progress_bar
 from evaluate import load as load_metric
 from flwr_datasets import FederatedDataset
