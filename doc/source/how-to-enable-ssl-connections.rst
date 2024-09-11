@@ -4,7 +4,7 @@ Enable SSL connections
 This guide describes how to a SSL-enabled secure Flower server (:code:`SuperLink`) can be started and
 how a Flower client (:code:`SuperNode`) can establish a secure connections to it.
 
-A complete code example demonstrating a secure connection can be found 
+A complete code example demonstrating a secure connection can be found
 `here <https://github.com/adap/flower/tree/main/examples/advanced-tensorflow>`_.
 
 The code example comes with a :code:`README.md` file which explains how to start it. Although it is
@@ -42,9 +42,9 @@ Use the following terminal command to start a sever (SuperLink) that uses the pr
 
 .. code-block:: bash
 
-    flower-superlink 
-      --ssl-ca-certfile certificates/ca.crt 
-      --ssl-certfile certificates/server.pem 
+    flower-superlink
+      --ssl-ca-certfile certificates/ca.crt
+      --ssl-certfile certificates/server.pem
       --ssl-keyfile certificates/server.key
 
 When providing certificates, the server expects a tuple of three certificates paths: CA certificate, server certificate and server private key.
@@ -57,7 +57,7 @@ Use the following terminal command to start a client (SuperNode) that uses the p
 
 .. code-block:: bash
 
-    flower-client-app client:app
+   flower-supernode
         --root-certificates certificates/ca.crt
         --superlink 127.0.0.1:9092
 
