@@ -35,12 +35,30 @@ from flwr_datasets.partitioner import IidPartitioner, NaturalIdPartitioner, Part
 
 mocked_datasets = ["cifar100", "svhn", "sentiment140", "speech_commands"]
 
+mocked_by_partial_download_datasets = [
+    "flwrlabs/pacs",
+    "flwrlabs/cinic10",
+    "flwrlabs/caltech101",
+    "flwrlabs/office-home",
+    "flwrlabs/fed-isic2019",
+]
+
+natural_id_datasets = [
+    "flwrlabs/femnist",
+]
+
+mocked_natural_id_datasets = [
+    "flwrlabs/ucf101",
+    "flwrlabs/ambient-acoustic-context",
+    "LIUM/tedlium",
+]
+
 
 @parameterized_class(
     ("dataset_name", "test_split", "subset"),
     [
         # Downloaded
-        # #Image datasets
+        # Image
         ("mnist", "test", ""),
         ("cifar10", "test", ""),
         ("fashion_mnist", "test", ""),
@@ -52,8 +70,8 @@ mocked_datasets = ["cifar100", "svhn", "sentiment140", "speech_commands"]
         ("scikit-learn/adult-census-income", None, ""),
         ("jlh/uci-mushrooms", None, ""),
         ("scikit-learn/iris", None, ""),
-        # Mocked
-        # #Image
+        # Mocked by local recreation
+        # Image
         ("cifar100", "test", ""),
         # Note: there's also the extra split and full_numbers subset
         ("svhn", "test", "cropped_digits"),
@@ -61,6 +79,13 @@ mocked_datasets = ["cifar100", "svhn", "sentiment140", "speech_commands"]
         ("sentiment140", "test", ""),  # aka twitter
         # Audio
         ("speech_commands", "test", "v0.01"),
+        # Mocked by partial download
+        # Image
+        ("flwrlabs/pacs", None, ""),
+        ("flwrlabs/cinic10", "test", ""),
+        ("flwrlabs/caltech101", None, ""),
+        ("flwrlabs/office-home", None, ""),
+        ("flwrlabs/fed-isic2019", "test", ""),
     ],
 )
 class BaseFederatedDatasetsTest(unittest.TestCase):
@@ -86,10 +111,29 @@ class BaseFederatedDatasetsTest(unittest.TestCase):
             self.mock_load_dataset.return_value = _load_mocked_dataset(
                 self.dataset_name, [200, 100], ["train", self.test_split], self.subset
             )
+        elif self.dataset_name in mocked_by_partial_download_datasets:
+            split_names = ["train"]
+            skip_take_lists = [[(0, 30), (1000, 30), (2000, 40)]]
+            # If the dataset has split test update the mocking to include it
+            if self.test_split is not None:
+                split_names.append(self.test_split)
+                skip_take_lists.append([(0, 30), (100, 30), (200, 40)])
+            mock_return_value = _load_mocked_dataset_dict_by_partial_download(
+                dataset_name=self.dataset_name,
+                split_names=split_names,
+                skip_take_lists=skip_take_lists,
+                subset_name=None if self.subset == "" else self.subset,
+            )
+            self.patcher = patch("datasets.load_dataset")
+            self.mock_load_dataset = self.patcher.start()
+            self.mock_load_dataset.return_value = mock_return_value
 
     def tearDown(self) -> None:
         """Clean up after the dataset mocking."""
-        if self.dataset_name in mocked_datasets:
+        if (
+            self.dataset_name in mocked_datasets
+            or self.dataset_name in mocked_by_partial_download_datasets
+        ):
             patch.stopall()
 
     @parameterized.expand(  # type: ignore
@@ -401,17 +445,6 @@ class PartitionersSpecificationForFederatedDatasets(unittest.TestCase):
             isinstance(fds._partitioners["test"], IidPartitioner)
             and fds._partitioners["test"]._num_partitions == num_test_partitions
         )
-
-
-natural_id_datasets = [
-    "flwrlabs/femnist",
-]
-
-mocked_natural_id_datasets = [
-    "flwrlabs/ucf101",
-    "flwrlabs/ambient-acoustic-context",
-    "LIUM/tedlium",
-]
 
 
 @parameterized_class(
