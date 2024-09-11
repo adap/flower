@@ -3,7 +3,6 @@
 isort:skip_file
 """
 import abc
-import flwr.proto.control_pb2
 import flwr.proto.driver_pb2
 import flwr.proto.fab_pb2
 import flwr.proto.run_pb2
@@ -11,11 +10,6 @@ import grpc
 
 class DriverStub:
     def __init__(self, channel: grpc.Channel) -> None: ...
-    CreateRun: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.control_pb2.CreateRunRequest,
-        flwr.proto.control_pb2.CreateRunResponse]
-    """Request run_id"""
-
     GetNodes: grpc.UnaryUnaryMultiCallable[
         flwr.proto.driver_pb2.GetNodesRequest,
         flwr.proto.driver_pb2.GetNodesResponse]
@@ -43,14 +37,6 @@ class DriverStub:
 
 
 class DriverServicer(metaclass=abc.ABCMeta):
-    @abc.abstractmethod
-    def CreateRun(self,
-        request: flwr.proto.control_pb2.CreateRunRequest,
-        context: grpc.ServicerContext,
-    ) -> flwr.proto.control_pb2.CreateRunResponse:
-        """Request run_id"""
-        pass
-
     @abc.abstractmethod
     def GetNodes(self,
         request: flwr.proto.driver_pb2.GetNodesRequest,

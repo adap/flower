@@ -17,16 +17,12 @@ syntax = "proto3";
 
 package flwr.proto;
 
-import "flwr/proto/control.proto";
 import "flwr/proto/node.proto";
 import "flwr/proto/task.proto";
 import "flwr/proto/run.proto";
 import "flwr/proto/fab.proto";
 
 service Driver {
-  // Request run_id
-  rpc CreateRun(CreateRunRequest) returns (CreateRunResponse) {}
-
   // Return a set of nodes
   rpc GetNodes(GetNodesRequest) returns (GetNodesResponse) {}
 
