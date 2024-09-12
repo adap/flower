@@ -367,26 +367,8 @@ def scalar_to_proto(scalar: typing.Scalar) -> Scalar:
 def scalar_from_proto(scalar_msg: Scalar) -> typing.Scalar:
     """Deserialize `Scalar` from ProtoBuf."""
     scalar_field = scalar_msg.WhichOneof("scalar")
-
-    if scalar_field == "sint64":
-        return scalar_msg.sint64
-
-    if scalar_field == "uint64":
-        return scalar_msg.uint64
-
-    if scalar_field == "double":
-        return scalar_msg.double
-
-    if scalar_field == "bool":
-        return scalar_msg.bool
-
-    if scalar_field == "string":
-        return scalar_msg.string
-
-    if scalar_field == "bytes":
-        return scalar_msg.bytes
-
-    raise ValueError(f"Unsupported scalar type: {scalar_field}")
+    scalar = getattr(scalar_msg, cast(str, scalar_field))
+    return cast(typing.Scalar, scalar)
 
 
 # === Record messages ===
