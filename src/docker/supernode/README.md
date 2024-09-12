@@ -9,7 +9,7 @@
 ## Quick reference
 
 - **Learn more:**<br>
-  [Flower Docs](https://flower.ai/docs/framework/how-to-run-flower-using-docker.html)
+  [Quickstart with Docker](https://flower.ai/docs/framework/docker/tutorial-quickstart-docker.html) and [Quickstart with Docker Compose](https://flower.ai/docs/framework/docker/tutorial-quickstart-docker-compose.html)
 
 - **Where to get help:**<br>
   [Flower Discuss](https://discuss.flower.ai), [Slack](https://flower.ai/join-slack) or [GitHub](https://github.com/adap/flower)
