@@ -20,6 +20,7 @@ import unittest
 
 import grpc
 
+from flwr.common.constant import FLEET_API_GRPC_RERE_DEFAULT_ADDRESS
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     compute_hmac,
     generate_key_pairs,
@@ -42,7 +43,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
-from flwr.server.app import ADDRESS_FLEET_API_GRPC_RERE, _run_fleet_api_grpc_rere
+from flwr.server.app import _run_fleet_api_grpc_rere
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.state.state_factory import StateFactory
 
@@ -73,7 +74,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
 
         self._server_interceptor = AuthenticateServerInterceptor(self.state)
         self._server: grpc.Server = _run_fleet_api_grpc_rere(
-            ADDRESS_FLEET_API_GRPC_RERE,
+            FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
             state_factory,
             ffs_factory,
             None,
