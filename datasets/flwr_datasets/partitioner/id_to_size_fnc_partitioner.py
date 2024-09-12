@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""SizePartitioner class."""
+"""IdToSizeFncPartitioner class."""
 
 
 from typing import Callable, Dict, List, Union
@@ -23,7 +23,7 @@ import datasets
 from flwr_datasets.partitioner.partitioner import Partitioner
 
 
-class SizePartitioner(Partitioner):
+class IdToSizeFncPartitioner(Partitioner):
     """Base class for the deterministic size partitioning based on the `partition_id`.
 
     The client with `partition_id` has the following relationship regarding the number
