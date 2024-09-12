@@ -16,6 +16,8 @@
 
 import unittest
 
+from parameterized import parameterized
+
 from .utils import (
     convert_sint64_to_uint64,
     convert_uint64_to_sint64,
@@ -26,30 +28,40 @@ from .utils import (
 class UtilsTest(unittest.TestCase):
     """Test utils code."""
 
-    def test_convert_uint64_to_sint64(self) -> None:
+    @parameterized.expand(
+        [
+            # Test values within the positive range of sint64 (below 2^63)
+            (0, 0),  # Minimum positive value
+            (2**62, 2**62),  # Mid-range positive value
+            (2**63 - 1, 2**63 - 1),  # Maximum positive value for sint64
+            # Test values at or above 2^63 (become negative in sint64)
+            (2**63, -(2**63)),  # Minimum negative value for sint64
+            (2**63 + 1, -(2**63) + 1),  # Slightly above the boundary
+            (2**64 - 1, -1),  # Maximum uint64 value becomes -1 in sint64
+        ]
+    )
+    def test_convert_uint64_to_sint64(self, before: int, after: int) -> None:
         """Test conversion from uint64 to sint64."""
-        # Test values below 2^63
-        self.assertEqual(convert_uint64_to_sint64(0), 0)
-        self.assertEqual(convert_uint64_to_sint64(2**62), 2**62)
-        self.assertEqual(convert_uint64_to_sint64(2**63 - 1), 2**63 - 1)
+        self.assertEqual(convert_uint64_to_sint64(before), after)
 
-        # Test values at and above 2^63
-        self.assertEqual(convert_uint64_to_sint64(2**63), -(2**63))
-        self.assertEqual(convert_uint64_to_sint64(2**63 + 1), -(2**63) + 1)
-        self.assertEqual(convert_uint64_to_sint64(2**64 - 1), -1)
-
-    def test_sint64_to_uint64(self) -> None:
+    @parameterized.expand(
+        [
+            # Test values within the negative range of sint64
+            (-(2**63), 2**63),  # Minimum sint64 value becomes 2^63 in uint64
+            (-(2**63) + 1, 2**63 + 1),  # Slightly above the minimum
+            (-1, 2**64 - 1),  # -1 in sint64 becomes 2^64 - 1 in uint64
+            # Test zero
+            (0, 0),  # 0 remains 0 in both sint64 and uint64
+            # Test values within the positive range of sint64
+            (2**63 - 1, 2**63 - 1),  # Maximum positive value in sint64
+            # Test boundary and maximum uint64 value
+            (2**63, 2**63),  # Exact boundary value for sint64
+            (2**64 - 1, 2**64 - 1),  # Maximum uint64 value, stays the same
+        ]
+    )
+    def test_sint64_to_uint64(self, before: int, after: int) -> None:
         """Test conversion from sint64 to uint64."""
-        # Test values within the range of sint64
-        self.assertEqual(convert_sint64_to_uint64(-(2**63)), 2**63)
-        self.assertEqual(convert_sint64_to_uint64(-(2**63) + 1), 2**63 + 1)
-        self.assertEqual(convert_sint64_to_uint64(-1), 2**64 - 1)
-        self.assertEqual(convert_sint64_to_uint64(0), 0)
-        self.assertEqual(convert_sint64_to_uint64(2**63 - 1), 2**63 - 1)
-
-        # Test values above 2^63
-        self.assertEqual(convert_sint64_to_uint64(2**63), 2**63)
-        self.assertEqual(convert_sint64_to_uint64(2**64 - 1), 2**64 - 1)
+        self.assertEqual(convert_sint64_to_uint64(before), after)
 
     def test_generate_rand_int_from_bytes_unsigned_int(self) -> None:
         """Test that the generated integer is unsigned (non-negative)."""
