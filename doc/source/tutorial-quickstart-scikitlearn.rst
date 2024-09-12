@@ -1,8 +1,117 @@
 .. _quickstart-scikitlearn:
 
 
-Quickstart scikit-learn
-=======================
+#########################
+ Quickstart scikit-learn
+#########################
+
+In this federated learning tutorial we will learn how to train a
+Logistic Regression on MNIST using Flower and scikit-learn. It is
+recommended to create a virtual environment and run everything within a
+:doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
+
+Let's use ``flwr new`` to create a complete Flower+scikit-learn project. It
+will generate all the files needed to run, by default with the Flower
+Simulation Engine, a federation of 10 nodes using |fedavg|_
+The dataset will be partitioned using |flowerdatasets|_'s |iidpartitioner|_
+
+Now that we have a rough idea of what this example is about, let's get
+started. First, install Flower in your new environment:
+
+.. code:: shell
+
+   # In a new Python environment
+   $ pip install flwr
+
+Then, run the command below. You will be prompted to select one of the
+available templates (choose ``sklearn``), give a name to your project,
+and type in your developer name:
+
+.. code:: shell
+
+   $ flwr new
+
+After running it you'll notice a new directory with your project name
+has been created. It should have the following structure:
+
+.. code:: shell
+
+   <your-project-name>
+   ├── <your-project-name>
+   │   ├── __init__.py
+   │   ├── client_app.py   # Defines your ClientApp
+   │   ├── server_app.py   # Defines your ServerApp
+   │   └── task.py         # Defines your model, training and data loading
+   ├── pyproject.toml      # Project metadata like dependencies and configs
+   └── README.md
+
+If you haven't yet installed the project and its dependencies, you can
+do so by:
+
+.. code:: shell
+
+   # From the directory where your pyproject.toml is
+   $ pip install -e .
+
+To run the project, do:
+
+.. code:: shell
+
+   # Run with default arguments
+   $ flwr run .
+
+With default arguments you will see an output like this one:
+
+.. code:: shell
+
+   Loading project configuration...
+   Success
+   WARNING :   FAB ID is not provided; the default ClientApp will be loaded.
+   INFO :      Starting Flower ServerApp, config: num_rounds=3, no round_timeout
+   INFO :
+   INFO :      [INIT]
+   INFO :      Using initial global parameters provided by strategy
+   INFO :      Evaluating initial global parameters
+   INFO :
+   INFO :      [ROUND 1]
+   INFO :      configure_fit: strategy sampled 5 clients (out of 10)
+   INFO :      aggregate_fit: received 5 results and 0 failures
+   WARNING :   No fit_metrics_aggregation_fn provided
+   INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
+   INFO :      aggregate_evaluate: received 10 results and 0 failures
+   WARNING :   No evaluate_metrics_aggregation_fn provided
+   INFO :
+   INFO :      [ROUND 2]
+   INFO :      configure_fit: strategy sampled 5 clients (out of 10)
+   INFO :      aggregate_fit: received 5 results and 0 failures
+   INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
+   INFO :      aggregate_evaluate: received 10 results and 0 failures
+   INFO :
+   INFO :      [ROUND 3]
+   INFO :      configure_fit: strategy sampled 5 clients (out of 10)
+   INFO :      aggregate_fit: received 5 results and 0 failures
+   INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
+   INFO :      aggregate_evaluate: received 10 results and 0 failures
+   INFO :
+   INFO :      [SUMMARY]
+   INFO :      Run finished 3 round(s) in 21.35s
+   INFO :          History (loss, distributed):
+   INFO :                  round 1: 2.2978184528648855
+   INFO :                  round 2: 2.173852103948593
+   INFO :                  round 3: 2.039920600131154
+   INFO :
+
+You can also override the parameters defined in the
+``[tool.flwr.app.config]`` section in ``pyproject.toml`` like this:
+
+.. code:: shell
+
+   # Override some arguments
+   $ flwr run . --run-config "num-server-rounds=5 local-epochs=3"
+
+What follows is an explanation of each component in the project you just
+created: dataset partition, the model, defining the ``ClientApp`` and
+defining the ``ServerApp``.
 
 .. meta::
    :description: Check out this Federated Learning quickstart tutorial for using Flower with scikit-learn to train a linear regression model.
@@ -304,3 +413,58 @@ The full source code for this example can be found in |quickstart_sklearn_link|_
 
 .. |quickstart_sklearn_link| replace:: :code:`examples/sklearn-logreg-mnist` 
 .. _quickstart_sklearn_link: https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist
+
+
+.. |quickstart_hf_link| replace::
+
+   ``examples/quickstart-huggingface``
+
+.. |fedavg| replace::
+
+   ``FedAvg``
+
+.. |iidpartitioner| replace::
+
+   ``IidPartitioner``
+
+.. |otherpartitioners| replace::
+
+   other partitioners
+
+.. |berttiny| replace::
+
+   ``bert-tiny``
+
+.. |serverappcomponents| replace::
+
+   ``ServerAppComponents``
+
+.. |client| replace::
+
+   ``Client``
+
+.. |flowerdatasets| replace::
+
+   Flower Datasets
+
+.. |flowertune| replace::
+
+   FlowerTune LLM
+
+.. _berttiny: https://huggingface.co/prajjwal1/bert-tiny
+
+.. _client: ref-api/flwr.client.Client.html#client
+
+.. _fedavg: ref-api/flwr.server.strategy.FedAvg.html#flwr.server.strategy.FedAvg
+
+.. _flowerdatasets: https://flower.ai/docs/datasets/
+
+.. _flowertune: https://github.com/adap/flower/tree/main/examples/flowertune-llm
+
+.. _iidpartitioner: https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner
+
+.. _otherpartitioners: https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html
+
+.. _quickstart_hf_link: https://github.com/adap/flower/tree/main/examples/quickstart-huggingface
+
+.. _serverappcomponents: ref-api/flwr.server.ServerAppComponents.html#serverappcomponents
