@@ -9,7 +9,7 @@ description = "PyTorch Vertical FL with Flower"
 authors = ["The Flower Authors <hello@flower.ai>"]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
+python = ">=3.9,<3.11"
 flwr = { extras = ["simulation"], version = ">=1.0,<2.0" }
 torch = "2.1.0"
 matplotlib = "3.7.3"
