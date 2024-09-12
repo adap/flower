@@ -220,15 +220,12 @@ have:
 
            self.params = load_model(model_shape)
 
-       def get_parameters(self, config):
-           return get_params(self.params)
-
        def fit(self, parameters, config):
            set_params(self.params, parameters)
            self.params, loss, num_examples = train(
                self.params, self.grad_fn, self.train_x, self.train_y
            )
-           parameters = self.get_parameters(config={})
+           parameters = get_params({})
            return parameters, num_examples, {"loss": float(loss)}
 
        def evaluate(self, parameters, config):
