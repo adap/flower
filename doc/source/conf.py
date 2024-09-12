@@ -93,7 +93,7 @@ author = "The Flower Authors"
 release = "1.12.0"
 # The current released version
 rst_prolog = """
-.. |stable_flwr_version| replace:: 1.11.0
+.. |stable_flwr_version| replace:: 1.11.1
 .. |stable_flwr_superlink_docker_digest| replace:: 4b317d5b6030710b476f4dbfab2c3a33021ad40a0fcfa54d7edd45e0c51d889c
 .. |ubuntu_version| replace:: 22.04
 .. |setuptools_version| replace:: 70.3.0

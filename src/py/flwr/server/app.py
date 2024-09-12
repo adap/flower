@@ -36,6 +36,10 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import (
+    DRIVER_API_DEFAULT_ADDRESS,
+    FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS,
+    FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
+    FLEET_API_REST_DEFAULT_ADDRESS,
     MISSING_EXTRA_REST,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
@@ -68,18 +72,13 @@ from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
 from .superlink.fleet.grpc_rere.server_interceptor import AuthenticateServerInterceptor
 from .superlink.state import StateFactory
 
-ADDRESS_DRIVER_API = "0.0.0.0:9091"
-ADDRESS_FLEET_API_GRPC_RERE = "0.0.0.0:9092"
-ADDRESS_FLEET_API_GRPC_BIDI = "[::]:8080"  # IPv6 to keep start_server compatible
-ADDRESS_FLEET_API_REST = "0.0.0.0:9093"
-
 DATABASE = ":flwr-in-memory-state:"
 BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
 
 
 def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     *,
-    server_address: str = ADDRESS_FLEET_API_GRPC_BIDI,
+    server_address: str = FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS,
     server: Optional[Server] = None,
     config: Optional[ServerConfig] = None,
     strategy: Optional[Strategy] = None,
@@ -232,9 +231,9 @@ def run_superlink() -> None:
             TRANSPORT_TYPE_GRPC_RERE,
             TRANSPORT_TYPE_GRPC_ADAPTER,
         ]:
-            args.fleet_api_address = ADDRESS_FLEET_API_GRPC_RERE
+            args.fleet_api_address = FLEET_API_GRPC_RERE_DEFAULT_ADDRESS
         elif args.fleet_api_type == TRANSPORT_TYPE_REST:
-            args.fleet_api_address = ADDRESS_FLEET_API_REST
+            args.fleet_api_address = FLEET_API_REST_DEFAULT_ADDRESS
 
     fleet_address, host, port = _format_address(args.fleet_api_address)
 
@@ -653,7 +652,7 @@ def _add_args_driver_api(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--driver-api-address",
         help="Driver API (gRPC) server address (IPv4, IPv6, or a domain name).",
-        default=ADDRESS_DRIVER_API,
+        default=DRIVER_API_DEFAULT_ADDRESS,
     )
 
 
