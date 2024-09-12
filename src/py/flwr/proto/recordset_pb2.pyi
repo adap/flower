@@ -35,18 +35,6 @@ class Sint64List(google.protobuf.message.Message):
     def ClearField(self, field_name: typing_extensions.Literal["vals",b"vals"]) -> None: ...
 global___Sint64List = Sint64List
 
-class Uint64List(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    VALS_FIELD_NUMBER: builtins.int
-    @property
-    def vals(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]: ...
-    def __init__(self,
-        *,
-        vals: typing.Optional[typing.Iterable[builtins.int]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["vals",b"vals"]) -> None: ...
-global___Uint64List = Uint64List
-
 class BoolList(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     VALS_FIELD_NUMBER: builtins.int

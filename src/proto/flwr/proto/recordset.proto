@@ -19,7 +19,6 @@ package flwr.proto;
 
 message DoubleList { repeated double vals = 1; }
 message Sint64List { repeated sint64 vals = 1; }
-message Uint64List { repeated uint64 vals = 1; }
 message BoolList { repeated bool vals = 1; }
 message StringList { repeated string vals = 1; }
 message BytesList { repeated bytes vals = 1; }
