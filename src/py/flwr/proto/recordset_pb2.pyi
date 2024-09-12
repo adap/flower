@@ -136,13 +136,11 @@ class ConfigsRecordValue(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     DOUBLE_FIELD_NUMBER: builtins.int
     SINT64_FIELD_NUMBER: builtins.int
-    UINT64_FIELD_NUMBER: builtins.int
     BOOL_FIELD_NUMBER: builtins.int
     STRING_FIELD_NUMBER: builtins.int
     BYTES_FIELD_NUMBER: builtins.int
     DOUBLE_LIST_FIELD_NUMBER: builtins.int
     SINT64_LIST_FIELD_NUMBER: builtins.int
-    UINT64_LIST_FIELD_NUMBER: builtins.int
     BOOL_LIST_FIELD_NUMBER: builtins.int
     STRING_LIST_FIELD_NUMBER: builtins.int
     BYTES_LIST_FIELD_NUMBER: builtins.int
@@ -150,7 +148,6 @@ class ConfigsRecordValue(google.protobuf.message.Message):
     """Single element"""
 
     sint64: builtins.int
-    uint64: builtins.int
     bool: builtins.bool
     string: typing.Text
     bytes: builtins.bytes
@@ -161,8 +158,6 @@ class ConfigsRecordValue(google.protobuf.message.Message):
     @property
     def sint64_list(self) -> global___Sint64List: ...
     @property
-    def uint64_list(self) -> global___Uint64List: ...
-    @property
     def bool_list(self) -> global___BoolList: ...
     @property
     def string_list(self) -> global___StringList: ...
@@ -172,20 +167,18 @@ class ConfigsRecordValue(google.protobuf.message.Message):
         *,
         double: builtins.float = ...,
         sint64: builtins.int = ...,
-        uint64: builtins.int = ...,
         bool: builtins.bool = ...,
         string: typing.Text = ...,
         bytes: builtins.bytes = ...,
         double_list: typing.Optional[global___DoubleList] = ...,
         sint64_list: typing.Optional[global___Sint64List] = ...,
-        uint64_list: typing.Optional[global___Uint64List] = ...,
         bool_list: typing.Optional[global___BoolList] = ...,
         string_list: typing.Optional[global___StringList] = ...,
         bytes_list: typing.Optional[global___BytesList] = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["bool",b"bool","bool_list",b"bool_list","bytes",b"bytes","bytes_list",b"bytes_list","double",b"double","double_list",b"double_list","sint64",b"sint64","sint64_list",b"sint64_list","string",b"string","string_list",b"string_list","uint64",b"uint64","uint64_list",b"uint64_list","value",b"value"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["bool",b"bool","bool_list",b"bool_list","bytes",b"bytes","bytes_list",b"bytes_list","double",b"double","double_list",b"double_list","sint64",b"sint64","sint64_list",b"sint64_list","string",b"string","string_list",b"string_list","uint64",b"uint64","uint64_list",b"uint64_list","value",b"value"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal["value",b"value"]) -> typing.Optional[typing_extensions.Literal["double","sint64","uint64","bool","string","bytes","double_list","sint64_list","uint64_list","bool_list","string_list","bytes_list"]]: ...
+    def HasField(self, field_name: typing_extensions.Literal["bool",b"bool","bool_list",b"bool_list","bytes",b"bytes","bytes_list",b"bytes_list","double",b"double","double_list",b"double_list","sint64",b"sint64","sint64_list",b"sint64_list","string",b"string","string_list",b"string_list","value",b"value"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["bool",b"bool","bool_list",b"bool_list","bytes",b"bytes","bytes_list",b"bytes_list","double",b"double","double_list",b"double_list","sint64",b"sint64","sint64_list",b"sint64_list","string",b"string","string_list",b"string_list","value",b"value"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["value",b"value"]) -> typing.Optional[typing_extensions.Literal["double","sint64","bool","string","bytes","double_list","sint64_list","bool_list","string_list","bytes_list"]]: ...
 global___ConfigsRecordValue = ConfigsRecordValue
 
 class ParametersRecord(google.protobuf.message.Message):

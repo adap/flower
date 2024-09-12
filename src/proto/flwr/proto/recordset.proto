@@ -48,18 +48,16 @@ message ConfigsRecordValue {
     // Single element
     double double = 1;
     sint64 sint64 = 2;
-    uint64 uint64 = 3;
-    bool bool = 4;
-    string string = 5;
-    bytes bytes = 6;
+    bool bool = 3;
+    string string = 4;
+    bytes bytes = 5;
 
     // List types
     DoubleList double_list = 21;
     Sint64List sint64_list = 22;
-    Uint64List uint64_list = 23;
-    BoolList bool_list = 24;
-    StringList string_list = 25;
-    BytesList bytes_list = 26;
+    BoolList bool_list = 23;
+    StringList string_list = 24;
+    BytesList bytes_list = 25;
   }
 }
 
