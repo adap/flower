@@ -236,13 +236,13 @@ def new(
 
         # Depending on the framework, generate task.py file
         frameworks_with_tasks = [
-            MlFramework.PYTORCH.value.lower(),
-            MlFramework.JAX.value.lower(),
-            MlFramework.HUGGINGFACE.value.lower(),
-            MlFramework.MLX.value.lower(),
-            MlFramework.TENSORFLOW.value.lower(),
-            MlFramework.NUMPY.value.lower(),
-            MlFramework.SKLEARN.value.lower(),
+            MlFramework.PYTORCH.value,
+            MlFramework.JAX.value,
+            MlFramework.HUGGINGFACE.value,
+            MlFramework.MLX.value,
+            MlFramework.TENSORFLOW.value,
+            MlFramework.NUMPY.value,
+            MlFramework.SKLEARN.value,
         ]
         if framework_str in frameworks_with_tasks:
             files[f"{import_name}/task.py"] = {
