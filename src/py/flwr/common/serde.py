@@ -352,7 +352,9 @@ def scalar_to_proto(scalar: typing.Scalar) -> Scalar:
         return Scalar(double=scalar)
 
     if isinstance(scalar, int):
-        return Scalar(sint64=scalar)
+        if scalar >= 0:
+            return Scalar(uint64=scalar)  # Use uint64 for non-negative integers
+        return Scalar(sint64=scalar)  # Use sint64 for negative integers
 
     if isinstance(scalar, str):
         return Scalar(string=scalar)
@@ -365,8 +367,26 @@ def scalar_to_proto(scalar: typing.Scalar) -> Scalar:
 def scalar_from_proto(scalar_msg: Scalar) -> typing.Scalar:
     """Deserialize `Scalar` from ProtoBuf."""
     scalar_field = scalar_msg.WhichOneof("scalar")
-    scalar = getattr(scalar_msg, cast(str, scalar_field))
-    return cast(typing.Scalar, scalar)
+
+    if scalar_field == "sint64":
+        return scalar_msg.sint64
+
+    if scalar_field == "uint64":
+        return scalar_msg.uint64
+
+    if scalar_field == "double":
+        return scalar_msg.double
+
+    if scalar_field == "bool":
+        return scalar_msg.bool
+
+    if scalar_field == "string":
+        return scalar_msg.string
+
+    if scalar_field == "bytes":
+        return scalar_msg.bytes
+
+    raise ValueError(f"Unsupported scalar type: {scalar_field}")
 
 
 # === Record messages ===
@@ -401,6 +421,13 @@ def _record_value_to_proto(
         # Single element
         # Note: `isinstance(False, int) == True`.
         if isinstance(value, t):
+            if t == int:
+                # Handle int values for sint64 and uint64
+                if value < 0:
+                    arg[_type_to_field[t]] = value + (1 << 64)
+                else:
+                    arg[_type_to_field[t]] = value
+
             arg[_type_to_field[t]] = value
             return proto_class(**arg)
         # List
