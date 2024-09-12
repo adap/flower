@@ -23,13 +23,13 @@ from typing import Optional
 from typing_extensions import override
 
 from flwr.cli.install import install_from_fab
+from flwr.common.constant import DRIVER_API_DEFAULT_ADDRESS
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.serde import fab_to_proto, user_config_to_proto
 from flwr.common.typing import Fab, UserConfig
 from flwr.proto.driver_pb2 import CreateRunRequest  # pylint: disable=E0611
 from flwr.proto.driver_pb2_grpc import DriverStub
-from flwr.server.driver.grpc_driver import DEFAULT_SERVER_ADDRESS_DRIVER
 
 from .executor import Executor, RunTracker
 
@@ -50,7 +50,7 @@ class DeploymentEngine(Executor):
 
     def __init__(
         self,
-        superlink: str = DEFAULT_SERVER_ADDRESS_DRIVER,
+        superlink: str = DRIVER_API_DEFAULT_ADDRESS,
         root_certificates: Optional[str] = None,
         flwr_dir: Optional[str] = None,
     ) -> None:
