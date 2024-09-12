@@ -1,0 +1,119 @@
+name: flwr-containers-e2e-test
+
+services:
+  # create a SuperExec component
+  superexec:
+    build:
+      context: ../../src/docker/superexec
+      dockerfile: Dockerfile
+      args:
+        PIP_VERSION: 24.1.2
+        SETUPTOOLS_VERSION: 70.3.0
+        FLWR_VERSION: 1.11.1
+        BASE_IMAGE: 1.11.0-py3.11-ubuntu22.04
+    volumes:
+      - ./certificates/ca.crt:/app/cert/ca.crt
+      - ./certificates/server.pem:/app/cert/tls.crt
+      - ./certificates/server.key:/app/cert/tls.key
+      - ./keys/server_credentials:/app/auth/server_credentials
+      - ./keys/server_credentials.pub:/app/auth/server_credentials.pub
+      - ./keys/client_public_keys.csv:/app/auth/client_public_keys.csv
+    ports:
+      - "9093:9093"
+    command:
+      - --executor
+      - flwr.superexec.deployment:executor
+      - --executor-config
+      - superlink="superlink:9091"
+      - --ssl-ca-certfile
+      - /app/cert/ca.crt
+      - --ssl-certfile
+      - /app/cert/tls.crt
+      - --ssl-keyfile
+      - /app/cert/tls.key
+    depends_on:
+      - superlink
+
+  # create a SuperLink component
+  superlink:
+    build:
+      context: ../../src/docker/superlink
+      dockerfile: Dockerfile
+      args:
+        PIP_VERSION: 24.1.2
+        SETUPTOOLS_VERSION: 70.3.0
+        FLWR_VERSION: 1.11.1
+        BASE_IMAGE: 1.11.0-py3.11-ubuntu22.04
+    volumes:
+      - ./certificates/ca.crt:/app/cert/ca.crt
+      - ./certificates/server.pem:/app/cert/tls.crt
+      - ./certificates/server.key:/app/cert/tls.key
+      - ./keys/server_credentials:/app/auth/server_credentials
+      - ./keys/server_credentials.pub:/app/auth/server_credentials.pub
+      - ./keys/client_public_keys.csv:/app/auth/client_public_keys.csv
+    ports:
+      - "9091:9091"
+      - "9092:9092"
+    command:
+      - --ssl-ca-certfile
+      - /app/cert/ca.crt
+      - --ssl-certfile
+      - /app/cert/tls.crt
+      - --ssl-keyfile
+      - /app/cert/tls.key
+      - --auth-list-public-keys
+      - /app/auth/client_public_keys.csv
+      - --auth-superlink-private-key
+      - /app/auth/server_credentials
+      - --auth-superlink-public-key
+      - /app/auth/server_credentials.pub
+
+  # # create a SuperNode component
+  # supernode-1:
+  #   build:
+  #     dockerfile: supernode.Dockerfile
+  #   volumes:
+  #     - ./certificates/ca.crt:/app/cert/ca.crt
+  #     - ./keys/client_credentials_1:/app/auth/client_credentials
+  #     - ./keys/client_credentials_1.pub:/app/auth/client_credentials.pub
+  #   deploy:
+  #     # specify 1 containers with 2xCPUs (for 1 client)
+  #     resources:
+  #       limits:
+  #         cpus: '2'
+  #   command:
+  #     - --superlink
+  #     - superlink:9092
+  #     - --root-certificate
+  #     - /app/cert/ca.crt
+  #     - --auth-supernode-private-key
+  #     - /app/auth/client_credentials
+  #     - --auth-supernode-public-key
+  #     - /app/auth/client_credentials.pub
+  #   depends_on:
+  #     - superlink
+
+  # # create another SuperNode component
+  # supernode-2:
+  #   build:
+  #     dockerfile: supernode.Dockerfile
+  #   volumes:
+  #     - ./certificates/ca.crt:/app/cert/ca.crt
+  #     - ./keys/client_credentials_2:/app/auth/client_credentials
+  #     - ./keys/client_credentials_2.pub:/app/auth/client_credentials.pub
+  #   deploy:
+  #     # specify 1 containers with 2xCPUs (for 1 client)
+  #     resources:
+  #       limits:
+  #         cpus: '2'
+  #   command:
+  #     - --superlink
+  #     - superlink:9092
+  #     - --root-certificate
+  #     - /app/cert/ca.crt
+  #     - --auth-supernode-private-key
+  #     - /app/auth/client_credentials
+  #     - --auth-supernode-public-key
+  #     - /app/auth/client_credentials.pub
+  #   depends_on:
+  #     - superlink
