@@ -274,7 +274,7 @@ redirects = {
 # a list of builtin themes.
 #
 html_theme = "furo"
-html_title = "Flower Federated Learning Framework"
+html_title = "Flower Framework"
 html_logo = "_static/flower-logo.png"
 html_favicon = "_static/favicon.ico"
 html_baseurl = "https://flower.ai/docs/framework/"
