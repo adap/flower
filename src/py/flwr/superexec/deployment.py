@@ -30,7 +30,6 @@ from flwr.common.serde import fab_to_proto, user_config_to_proto
 from flwr.common.typing import Fab, UserConfig
 from flwr.proto.control_pb2 import CreateRunRequest  # pylint: disable=E0611
 from flwr.proto.control_pb2_grpc import ControlStub
-from flwr.server.driver.grpc_driver import DEFAULT_SERVER_ADDRESS_DRIVER
 
 from .executor import Executor, RunTracker
 
