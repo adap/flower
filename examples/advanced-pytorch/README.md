@@ -1,3 +1,9 @@
+---
+tags: [advanced, vision, fds]
+dataset: [CIFAR-10]
+framework: [torch, torchvision]
+---
+
 # Advanced Flower Example (PyTorch)
 
 This example demonstrates an advanced federated learning setup using Flower with PyTorch. This example uses [Flower Datasets](https://flower.ai/docs/datasets/) and it differs from the quickstart example in the following ways:

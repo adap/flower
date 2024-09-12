@@ -107,7 +107,7 @@ class TestMerger(unittest.TestCase):
         ):
             merger(self.dataset_dict)
 
-    def test_duplicate_merge_split_name(self) -> None:  # pylint: disable=R0201
+    def test_duplicate_merge_split_name(self) -> None:
         """Test that the new split names are not the same."""
         strategy: Dict[str, Tuple[str, ...]] = {
             "new_train": ("train", "valid"),

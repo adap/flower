@@ -16,7 +16,7 @@
 # hadolint global ignore=DL3008
 ARG DISTRO=ubuntu
 ARG DISTRO_VERSION=22.04
-FROM $DISTRO:$DISTRO_VERSION as python
+FROM $DISTRO:$DISTRO_VERSION AS python
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -32,7 +32,7 @@ RUN apt-get update \
 # Install PyEnv and Python
 ARG PYTHON_VERSION=3.11
 ENV PYENV_ROOT=/root/.pyenv
-ENV PATH $PYENV_ROOT/bin:$PATH
+ENV PATH=$PYENV_ROOT/bin:$PATH
 # https://github.com/hadolint/hadolint/wiki/DL4006
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
@@ -48,18 +48,57 @@ RUN git clone https://github.com/pyenv/pyenv.git \
 RUN LATEST=$(pyenv latest -k ${PYTHON_VERSION}) \
     && python-build "${LATEST}" /usr/local/bin/python
 
-FROM $DISTRO:$DISTRO_VERSION as base
+ENV PATH=/usr/local/bin/python/bin:$PATH
 
-ENV DEBIAN_FRONTEND=noninteractive
+ARG PIP_VERSION
+ARG SETUPTOOLS_VERSION
+# Keep the version of system Python pip and setuptools in sync with those installed in the
+# virtualenv.
+RUN pip install -U --no-cache-dir pip==${PIP_VERSION} setuptools==${SETUPTOOLS_VERSION} \
+    # Use a virtual environment to ensure that Python packages are installed in the same location
+    # regardless of whether the subsequent image build is run with the app or the root user
+    && python -m venv /python/venv
+ENV PATH=/python/venv/bin:$PATH
 
-RUN apt-get update \
-    && apt-get -y --no-install-recommends install \
-    libsqlite3-0 \
-    && rm -rf /var/lib/apt/lists/*
+RUN pip install -U --no-cache-dir \
+    pip==${PIP_VERSION} \
+    setuptools==${SETUPTOOLS_VERSION}
+
+ARG FLWR_VERSION
+ARG FLWR_VERSION_REF
+ARG FLWR_PACKAGE=flwr
+# hadolint ignore=DL3013
+RUN if [ -z "${FLWR_VERSION_REF}" ]; then \
+    pip install -U --no-cache-dir ${FLWR_PACKAGE}==${FLWR_VERSION}; \
+    else \
+    pip install -U --no-cache-dir ${FLWR_PACKAGE}@${FLWR_VERSION_REF}; \
+    fi
+
+FROM $DISTRO:$DISTRO_VERSION AS base
 
 COPY --from=python /usr/local/bin/python /usr/local/bin/python
 
-ENV PATH=/usr/local/bin/python/bin:$PATH \
+ENV DEBIAN_FRONTEND=noninteractive \
+    PATH=/usr/local/bin/python/bin:$PATH
+
+RUN  apt-get update \
+    && apt-get -y --no-install-recommends install \
+    libsqlite3-0 \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    # add non-root user
+    && adduser \
+    --no-create-home \
+    --home /app \
+    --disabled-password \
+    --gecos "" \
+    --uid 49999 app \
+    && mkdir -p /app \
+    && chown -R app:app /app
+
+COPY --from=python --chown=app:app /python/venv /python/venv
+
+ENV PATH=/python/venv/bin:$PATH \
     # Send stdout and stderr stream directly to the terminal. Ensures that no
     # output is retained in a buffer if the application crashes.
     PYTHONUNBUFFERED=1 \
@@ -71,28 +110,6 @@ ENV PATH=/usr/local/bin/python/bin:$PATH \
     PYTHONIOENCODING=UTF-8 \
     LANG=C.UTF-8 \
     LC_ALL=C.UTF-8
-
-# Use a virtual environment to ensure that Python packages are installed in the same location
-# regardless of whether the subsequent image build is run with the app or the root user
-RUN python -m venv /app/venv
-ENV PATH=/app/venv/bin:$PATH
-
-ARG PIP_VERSION
-ARG SETUPTOOLS_VERSION
-ARG FLWR_VERSION
-ARG FLWR_PACKAGE=flwr
-RUN pip install -U --no-cache-dir \
-    pip==${PIP_VERSION} \
-    setuptools==${SETUPTOOLS_VERSION} \
-    ${FLWR_PACKAGE}==${FLWR_VERSION}
-
-# add non-root user
-RUN adduser \
-    --no-create-home \
-    --disabled-password \
-    --gecos "" \
-    --uid 49999 app \
-    && chown -R app:app /app
 
 WORKDIR /app
 USER app
