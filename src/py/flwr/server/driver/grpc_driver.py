@@ -22,6 +22,7 @@ from typing import Iterable, List, Optional, cast
 import grpc
 
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
+from flwr.common.constant import DRIVER_API_DEFAULT_ADDRESS
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.serde import (
@@ -44,8 +45,6 @@ from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 from .driver import Driver
-
-DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
 
 ERROR_MESSAGE_DRIVER_NOT_CONNECTED = """
 [Driver] Error: Not connected.
@@ -73,7 +72,7 @@ class GrpcDriver(Driver):
     def __init__(  # pylint: disable=too-many-arguments
         self,
         run_id: int,
-        driver_service_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
+        driver_service_address: str = DRIVER_API_DEFAULT_ADDRESS,
         root_certificates: Optional[bytes] = None,
     ) -> None:
         self._run_id = run_id
