@@ -23,7 +23,7 @@ from typing import Optional
 from typing_extensions import override
 
 from flwr.cli.install import install_from_fab
-from flwr.common.constant import DRIVER_API_DEFAULT_ADDRESS
+from flwr.common.constant import CONTROL_API_DEFAULT_ADDRESS
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.serde import fab_to_proto, user_config_to_proto
@@ -39,7 +39,7 @@ class DeploymentEngine(Executor):
 
     Parameters
     ----------
-    superlink: str (default: "0.0.0.0:9091")
+    superlink: str (default: "0.0.0.0:9095")
         Address of the SuperLink to connect to.
     root_certificates: Optional[str] (default: None)
         Specifies the path to the PEM-encoded root certificate file for
@@ -50,7 +50,7 @@ class DeploymentEngine(Executor):
 
     def __init__(
         self,
-        superlink: str = DRIVER_API_DEFAULT_ADDRESS,
+        superlink: str = CONTROL_API_DEFAULT_ADDRESS,
         root_certificates: Optional[str] = None,
         flwr_dir: Optional[str] = None,
     ) -> None:

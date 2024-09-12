@@ -170,6 +170,15 @@ def run_server_app() -> None:
             "Please provide either a Flower App path or a Run ID, but not both. "
             "For more details, use: ``flower-server-app -h``"
         )
+    
+    # Create the run if required (only for insecure mode)
+    if app_path is not None:
+        if not args.insecure:
+            sys.exit(
+                "A Flower App path can only be provided in insecure mode. "
+                "Please add the `--insecure` flag if you intend to run with a Flower App path."
+            )
+        
 
     # Initialize GrpcDriver
     if app_path is None:
