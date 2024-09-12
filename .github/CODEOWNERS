@@ -35,4 +35,4 @@ README.md @jafermarq @tanertopal @danieljanes
 /.devcontainer @Robert-Steiner @Moep90 @tanertopal @danieljanes
 **/Dockerfile @Robert-Steiner @Moep90 @tanertopal @danieljanes
 **/*.Dockerfile @Robert-Steiner @Moep90 @tanertopal @danieljanes
-src/docker @Robert-Steiner @Moep90 @tanertopal @danieljanes
+/src/docker @Robert-Steiner @Moep90 @tanertopal @danieljanes
