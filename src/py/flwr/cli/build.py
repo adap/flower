@@ -22,7 +22,7 @@ from typing import Optional
 import pathspec
 import tomli_w
 import typer
-from typing_extensions import Annotated
+from typing import Annotated
 
 from .config_utils import load_and_validate
 from .utils import get_sha256_hash, is_valid_project_name

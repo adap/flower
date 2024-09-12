@@ -16,7 +16,8 @@
 
 from dataclasses import dataclass
 from io import BytesIO
-from typing import List, Optional, OrderedDict, cast
+from typing import Optional, cast
+from collections import OrderedDict
 
 import numpy as np
 
@@ -51,7 +52,7 @@ class Array:
     """
 
     dtype: str
-    shape: List[int]
+    shape: list[int]
     stype: str
     data: bytes
 

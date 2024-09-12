@@ -18,7 +18,8 @@
 import base64
 import collections
 from logging import WARNING
-from typing import Any, Callable, Optional, Sequence, Tuple, Union
+from typing import Any, Callable, Optional, Union
+from collections.abc import Sequence
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -53,7 +54,7 @@ Request = Union[
 
 
 def _get_value_from_tuples(
-    key_string: str, tuples: Sequence[Tuple[str, Union[str, bytes]]]
+    key_string: str, tuples: Sequence[tuple[str, Union[str, bytes]]]
 ) -> bytes:
     value = next((value for key, value in tuples if key == key_string), "")
     if isinstance(value, str):

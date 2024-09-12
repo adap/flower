@@ -19,7 +19,8 @@ Relevant knowledge for reading this modules code:
 """
 
 import uuid
-from typing import Callable, Iterator
+from typing import Callable
+from collections.abc import Iterator
 
 import grpc
 from iterators import TimeoutIterator

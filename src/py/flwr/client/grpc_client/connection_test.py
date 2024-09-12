@@ -18,7 +18,8 @@
 import concurrent.futures
 import socket
 from contextlib import closing
-from typing import Iterator, cast
+from typing import cast
+from collections.abc import Iterator
 from unittest.mock import patch
 
 import grpc

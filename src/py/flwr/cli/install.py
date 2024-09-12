@@ -24,7 +24,7 @@ from pathlib import Path
 from typing import IO, Optional, Union
 
 import typer
-from typing_extensions import Annotated
+from typing import Annotated
 
 from flwr.common.config import get_flwr_dir
 

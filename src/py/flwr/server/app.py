@@ -22,7 +22,8 @@ import threading
 from logging import INFO, WARN
 from os.path import isfile
 from pathlib import Path
-from typing import Optional, Sequence, Set, Tuple
+from typing import Optional
+from collections.abc import Sequence
 
 import grpc
 from cryptography.exceptions import UnsupportedAlgorithm
@@ -85,7 +86,7 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     strategy: Optional[Strategy] = None,
     client_manager: Optional[ClientManager] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
+    certificates: Optional[tuple[bytes, bytes, bytes]] = None,
 ) -> History:
     """Start a Flower server using the gRPC transport layer.
 
@@ -334,7 +335,7 @@ def run_superlink() -> None:
         driver_server.wait_for_termination(timeout=1)
 
 
-def _format_address(address: str) -> Tuple[str, str, int]:
+def _format_address(address: str) -> tuple[str, str, int]:
     parsed_address = parse_address(address)
     if not parsed_address:
         sys.exit(
@@ -346,8 +347,8 @@ def _format_address(address: str) -> Tuple[str, str, int]:
 
 def _try_setup_node_authentication(
     args: argparse.Namespace,
-    certificates: Optional[Tuple[bytes, bytes, bytes]],
-) -> Optional[Tuple[Set[bytes], ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
+    certificates: Optional[tuple[bytes, bytes, bytes]],
+) -> Optional[tuple[set[bytes], ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
     if (
         not args.auth_list_public_keys
         and not args.auth_superlink_private_key
@@ -382,7 +383,7 @@ def _try_setup_node_authentication(
             "to '--auth-list-public-keys'."
         )
 
-    node_public_keys: Set[bytes] = set()
+    node_public_keys: set[bytes] = set()
 
     try:
         ssh_private_key = load_ssh_private_key(
@@ -435,7 +436,7 @@ def _try_setup_node_authentication(
 
 def _try_obtain_certificates(
     args: argparse.Namespace,
-) -> Optional[Tuple[bytes, bytes, bytes]]:
+) -> Optional[tuple[bytes, bytes, bytes]]:
     # Obtain certificates
     if args.insecure:
         log(WARN, "Option `--insecure` was set. Starting insecure HTTP server.")
@@ -491,7 +492,7 @@ def _run_fleet_api_grpc_rere(
     address: str,
     state_factory: StateFactory,
     ffs_factory: FfsFactory,
-    certificates: Optional[Tuple[bytes, bytes, bytes]],
+    certificates: Optional[tuple[bytes, bytes, bytes]],
     interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None,
 ) -> grpc.Server:
     """Run Fleet API (gRPC, request-response)."""
@@ -519,7 +520,7 @@ def _run_fleet_api_grpc_adapter(
     address: str,
     state_factory: StateFactory,
     ffs_factory: FfsFactory,
-    certificates: Optional[Tuple[bytes, bytes, bytes]],
+    certificates: Optional[tuple[bytes, bytes, bytes]],
 ) -> grpc.Server:
     """Run Fleet API (GrpcAdapter)."""
     # Create Fleet API gRPC server

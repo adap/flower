@@ -18,7 +18,7 @@
 import random
 from dataclasses import dataclass, field
 from logging import DEBUG, ERROR, INFO, WARN
-from typing import Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Optional, Union, cast
 
 import flwr.common.recordset_compat as compat
 from flwr.common import (
@@ -65,23 +65,23 @@ from ..constant import Key as WorkflowKey
 class WorkflowState:  # pylint: disable=R0902
     """The state of the SecAgg+ protocol."""
 
-    nid_to_proxies: Dict[int, ClientProxy] = field(default_factory=dict)
-    nid_to_fitins: Dict[int, RecordSet] = field(default_factory=dict)
-    sampled_node_ids: Set[int] = field(default_factory=set)
-    active_node_ids: Set[int] = field(default_factory=set)
+    nid_to_proxies: dict[int, ClientProxy] = field(default_factory=dict)
+    nid_to_fitins: dict[int, RecordSet] = field(default_factory=dict)
+    sampled_node_ids: set[int] = field(default_factory=set)
+    active_node_ids: set[int] = field(default_factory=set)
     num_shares: int = 0
     threshold: int = 0
     clipping_range: float = 0.0
     quantization_range: int = 0
     mod_range: int = 0
     max_weight: float = 0.0
-    nid_to_neighbours: Dict[int, Set[int]] = field(default_factory=dict)
-    nid_to_publickeys: Dict[int, List[bytes]] = field(default_factory=dict)
-    forward_srcs: Dict[int, List[int]] = field(default_factory=dict)
-    forward_ciphertexts: Dict[int, List[bytes]] = field(default_factory=dict)
+    nid_to_neighbours: dict[int, set[int]] = field(default_factory=dict)
+    nid_to_publickeys: dict[int, list[bytes]] = field(default_factory=dict)
+    forward_srcs: dict[int, list[int]] = field(default_factory=dict)
+    forward_ciphertexts: dict[int, list[bytes]] = field(default_factory=dict)
     aggregate_ndarrays: NDArrays = field(default_factory=list)
-    legacy_results: List[Tuple[ClientProxy, FitRes]] = field(default_factory=list)
-    failures: List[Exception] = field(default_factory=list)
+    legacy_results: list[tuple[ClientProxy, FitRes]] = field(default_factory=list)
+    failures: list[Exception] = field(default_factory=list)
 
 
 class SecAggPlusWorkflow:
@@ -444,13 +444,13 @@ class SecAggPlusWorkflow:
         )
 
         # Build forward packet list dictionary
-        srcs: List[int] = []
-        dsts: List[int] = []
-        ciphertexts: List[bytes] = []
-        fwd_ciphertexts: Dict[int, List[bytes]] = {
+        srcs: list[int] = []
+        dsts: list[int] = []
+        ciphertexts: list[bytes] = []
+        fwd_ciphertexts: dict[int, list[bytes]] = {
             nid: [] for nid in state.active_node_ids
         }  # dest node ID -> list of ciphertexts
-        fwd_srcs: Dict[int, List[int]] = {
+        fwd_srcs: dict[int, list[int]] = {
             nid: [] for nid in state.active_node_ids
         }  # dest node ID -> list of src node IDs
         for msg in msgs:
@@ -459,8 +459,8 @@ class SecAggPlusWorkflow:
                 continue
             node_id = msg.metadata.src_node_id
             res_dict = msg.content.configs_records[RECORD_KEY_CONFIGS]
-            dst_lst = cast(List[int], res_dict[Key.DESTINATION_LIST])
-            ctxt_lst = cast(List[bytes], res_dict[Key.CIPHERTEXT_LIST])
+            dst_lst = cast(list[int], res_dict[Key.DESTINATION_LIST])
+            ctxt_lst = cast(list[bytes], res_dict[Key.CIPHERTEXT_LIST])
             srcs += [node_id] * len(dst_lst)
             dsts += dst_lst
             ciphertexts += ctxt_lst
@@ -525,7 +525,7 @@ class SecAggPlusWorkflow:
                 state.failures.append(Exception(msg.error))
                 continue
             res_dict = msg.content.configs_records[RECORD_KEY_CONFIGS]
-            bytes_list = cast(List[bytes], res_dict[Key.MASKED_PARAMETERS])
+            bytes_list = cast(list[bytes], res_dict[Key.MASKED_PARAMETERS])
             client_masked_vec = [bytes_to_ndarray(b) for b in bytes_list]
             if masked_vector is None:
                 masked_vector = client_masked_vec
@@ -592,7 +592,7 @@ class SecAggPlusWorkflow:
         )
 
         # Build collected shares dict
-        collected_shares_dict: Dict[int, List[bytes]] = {}
+        collected_shares_dict: dict[int, list[bytes]] = {}
         for nid in state.sampled_node_ids:
             collected_shares_dict[nid] = []
         for msg in msgs:
@@ -600,8 +600,8 @@ class SecAggPlusWorkflow:
                 state.failures.append(Exception(msg.error))
                 continue
             res_dict = msg.content.configs_records[RECORD_KEY_CONFIGS]
-            nids = cast(List[int], res_dict[Key.NODE_ID_LIST])
-            shares = cast(List[bytes], res_dict[Key.SHARE_LIST])
+            nids = cast(list[int], res_dict[Key.NODE_ID_LIST])
+            shares = cast(list[bytes], res_dict[Key.SHARE_LIST])
             for owner_nid, share in zip(nids, shares):
                 collected_shares_dict[owner_nid].append(share)
 

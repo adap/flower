@@ -20,10 +20,10 @@ import subprocess
 import sys
 from logging import DEBUG
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import typer
-from typing_extensions import Annotated
+from typing import Annotated
 
 from flwr.cli.build import build
 from flwr.cli.config_utils import load_and_validate
@@ -52,7 +52,7 @@ def run(
         typer.Argument(help="Name of the federation to run the app on."),
     ] = None,
     config_overrides: Annotated[
-        Optional[List[str]],
+        Optional[list[str]],
         typer.Option(
             "--run-config",
             "-c",
@@ -125,8 +125,8 @@ def run(
 
 def _run_with_superexec(
     app: Path,
-    federation_config: Dict[str, Any],
-    config_overrides: Optional[List[str]],
+    federation_config: dict[str, Any],
+    config_overrides: Optional[list[str]],
 ) -> None:
 
     insecure_str = federation_config.get("insecure")
@@ -187,8 +187,8 @@ def _run_with_superexec(
 
 def _run_without_superexec(
     app: Optional[Path],
-    federation_config: Dict[str, Any],
-    config_overrides: Optional[List[str]],
+    federation_config: dict[str, Any],
+    config_overrides: Optional[list[str]],
     federation: str,
 ) -> None:
     try:

@@ -17,7 +17,8 @@
 import time
 import warnings
 from logging import DEBUG, WARNING
-from typing import Iterable, List, Optional, cast
+from typing import Optional, cast
+from collections.abc import Iterable
 
 import grpc
 
@@ -193,7 +194,7 @@ class GrpcDriver(Driver):
         )
         return Message(metadata=metadata, content=content)
 
-    def get_node_ids(self) -> List[int]:
+    def get_node_ids(self) -> list[int]:
         """Get node IDs."""
         self._init_run()
         # Call GrpcDriverStub method
@@ -210,7 +211,7 @@ class GrpcDriver(Driver):
         """
         self._init_run()
         # Construct TaskIns
-        task_ins_list: List[TaskIns] = []
+        task_ins_list: list[TaskIns] = []
         for msg in messages:
             # Check message
             self._check_message(msg)
@@ -256,7 +257,7 @@ class GrpcDriver(Driver):
 
         # Pull messages
         end_time = time.time() + (timeout if timeout is not None else 0.0)
-        ret: List[Message] = []
+        ret: list[Message] = []
         while timeout is None or time.time() < end_time:
             res_msgs = self.pull_messages(msg_ids)
             ret.extend(res_msgs)

@@ -16,7 +16,8 @@
 
 
 from logging import DEBUG
-from typing import Optional, Sequence
+from typing import Optional
+from collections.abc import Sequence
 
 import grpc
 
