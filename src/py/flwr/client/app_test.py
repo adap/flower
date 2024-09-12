@@ -15,7 +15,6 @@
 """Flower Client app tests."""
 
 
-
 from flwr.common import (
     Config,
     EvaluateIns,

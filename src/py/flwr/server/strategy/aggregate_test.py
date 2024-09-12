@@ -15,7 +15,6 @@
 """Aggregation function tests."""
 
 
-
 import numpy as np
 
 from .aggregate import (

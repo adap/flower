@@ -15,7 +15,6 @@
 """Utility functions for mods."""
 
 
-
 from flwr.client.typing import ClientAppCallable, Mod
 from flwr.common import Context, Message
 

@@ -15,7 +15,6 @@
 """Utility functions for the SecAgg/SecAgg+ protocol."""
 
 
-
 import numpy as np
 
 from flwr.common.typing import NDArrayInt
