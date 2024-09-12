@@ -352,9 +352,7 @@ def scalar_to_proto(scalar: typing.Scalar) -> Scalar:
         return Scalar(double=scalar)
 
     if isinstance(scalar, int):
-        if scalar >= 0:
-            return Scalar(uint64=scalar)  # Use uint64 for non-negative integers
-        return Scalar(sint64=scalar)  # Use sint64 for negative integers
+        return Scalar(sint64=scalar)
 
     if isinstance(scalar, str):
         return Scalar(string=scalar)
@@ -403,13 +401,6 @@ def _record_value_to_proto(
         # Single element
         # Note: `isinstance(False, int) == True`.
         if isinstance(value, t):
-            if t == int:
-                # Handle int values for sint64 and uint64
-                if value < 0:
-                    arg[_type_to_field[t]] = value + (1 << 64)
-                else:
-                    arg[_type_to_field[t]] = value
-
             arg[_type_to_field[t]] = value
             return proto_class(**arg)
         # List
