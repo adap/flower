@@ -674,7 +674,7 @@ class SqliteState(State):  # pylint: disable=R0904
         if len(row) > 0:
             node_id: int = row[0]["node_id"]
 
-            # Convert a sint64 value to uint64 after reading from SQLite
+            # Convert the sint64 value to uint64 after reading from SQLite
             uint64_node_id = convert_sint64_to_uint64(node_id)
 
             return uint64_node_id
@@ -691,7 +691,7 @@ class SqliteState(State):  # pylint: disable=R0904
         # Sample a random int64 as run_id
         uint64_run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
 
-        # Convert a uint64 value to sint64 for SQLite
+        # Convert the uint64 value to sint64 for SQLite
         sint64_run_id = convert_uint64_to_sint64(uint64_run_id)
 
         # Check conflicts
