@@ -18,10 +18,9 @@ import re
 from enum import Enum
 from pathlib import Path
 from string import Template
-from typing import Optional
+from typing import Annotated, Optional
 
 import typer
-from typing import Annotated
 
 from ..utils import (
     is_valid_project_name,

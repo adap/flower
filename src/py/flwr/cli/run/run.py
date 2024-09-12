@@ -20,10 +20,9 @@ import subprocess
 import sys
 from logging import DEBUG
 from pathlib import Path
-from typing import Any, Optional
+from typing import Annotated, Any, Optional
 
 import typer
-from typing import Annotated
 
 from flwr.cli.build import build
 from flwr.cli.config_utils import load_and_validate

@@ -19,9 +19,9 @@ import json
 import re
 import sqlite3
 import time
+from collections.abc import Sequence
 from logging import DEBUG, ERROR
 from typing import Any, Optional, Union, cast
-from collections.abc import Sequence
 from uuid import UUID, uuid4
 
 from flwr.common import log, now

@@ -15,10 +15,10 @@
 """Contextmanager for a GrpcAdapter channel to the Flower server."""
 
 
+from collections.abc import Iterator
 from contextlib import contextmanager
 from logging import ERROR
 from typing import Callable, Optional, Union
-from collections.abc import Iterator
 
 from cryptography.hazmat.primitives.asymmetric import ec
 

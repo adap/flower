@@ -16,8 +16,8 @@
 
 import random
 import string
-from typing import Any, Callable, Optional, TypeVar, Union, cast
 from collections import OrderedDict
+from typing import Any, Callable, Optional, TypeVar, Union, cast
 
 import pytest
 

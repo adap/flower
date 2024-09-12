@@ -17,12 +17,12 @@
 
 import random
 import threading
+from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from copy import copy
 from logging import DEBUG, ERROR
 from pathlib import Path
 from typing import Callable, Optional, Union, cast
-from collections.abc import Iterator, Sequence
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec

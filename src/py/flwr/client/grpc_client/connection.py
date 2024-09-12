@@ -16,12 +16,12 @@
 
 
 import uuid
+from collections.abc import Iterator
 from contextlib import contextmanager
 from logging import DEBUG, ERROR
 from pathlib import Path
 from queue import Queue
 from typing import Callable, Optional, Union, cast
-from collections.abc import Iterator
 
 from cryptography.hazmat.primitives.asymmetric import ec
 

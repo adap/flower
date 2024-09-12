@@ -15,13 +15,8 @@
 """Typed dict base class for *Records."""
 
 
-from typing import (
-    Callable,
-    Generic,
-    TypeVar,
-    cast,
-)
 from collections.abc import ItemsView, Iterator, KeysView, MutableMapping, ValuesView
+from typing import Callable, Generic, TypeVar, cast
 
 K = TypeVar("K")  # Key type
 V = TypeVar("V")  # Value type

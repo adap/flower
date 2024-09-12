@@ -15,9 +15,9 @@
 """ProtoBuf serialization and deserialization."""
 
 
-from typing import Any, TypeVar, cast
 from collections import OrderedDict
 from collections.abc import MutableMapping
+from typing import Any, TypeVar, cast
 
 from google.protobuf.message import Message as GrpcMessage
 

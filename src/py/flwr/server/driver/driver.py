@@ -16,8 +16,8 @@
 
 
 from abc import ABC, abstractmethod
-from typing import Optional
 from collections.abc import Iterable
+from typing import Optional
 
 from flwr.common import Message, RecordSet
 from flwr.common.typing import Run

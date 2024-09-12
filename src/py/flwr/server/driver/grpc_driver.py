@@ -16,9 +16,9 @@
 
 import time
 import warnings
+from collections.abc import Iterable
 from logging import DEBUG, WARNING
 from typing import Optional, cast
-from collections.abc import Iterable
 
 import grpc
 

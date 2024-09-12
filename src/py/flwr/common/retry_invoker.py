@@ -18,15 +18,9 @@
 import itertools
 import random
 import time
-from dataclasses import dataclass
-from typing import (
-    Any,
-    Callable,
-    Optional,
-    Union,
-    cast,
-)
 from collections.abc import Generator, Iterable
+from dataclasses import dataclass
+from typing import Any, Callable, Optional, Union, cast
 
 
 def exponential(

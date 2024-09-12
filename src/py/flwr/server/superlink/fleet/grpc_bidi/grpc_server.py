@@ -17,9 +17,9 @@
 
 import concurrent.futures
 import sys
+from collections.abc import Sequence
 from logging import ERROR
 from typing import Any, Callable, Optional, Union
-from collections.abc import Sequence
 
 import grpc
 

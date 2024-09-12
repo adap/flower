@@ -15,10 +15,9 @@
 """RecordSet tests."""
 
 import pickle
-from collections import namedtuple
+from collections import OrderedDict, namedtuple
 from copy import deepcopy
 from typing import Callable, Union
-from collections import OrderedDict
 
 import numpy as np
 import pytest

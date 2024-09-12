@@ -17,9 +17,9 @@
 
 import base64
 import collections
+from collections.abc import Sequence
 from logging import WARNING
 from typing import Any, Callable, Optional, Union
-from collections.abc import Sequence
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec

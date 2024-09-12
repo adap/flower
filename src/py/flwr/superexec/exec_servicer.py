@@ -15,9 +15,9 @@
 """SuperExec API servicer."""
 
 
+from collections.abc import Generator
 from logging import ERROR, INFO
 from typing import Any
-from collections.abc import Generator
 
 import grpc
 

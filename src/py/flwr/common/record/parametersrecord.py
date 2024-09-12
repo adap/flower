@@ -14,10 +14,10 @@
 # ==============================================================================
 """ParametersRecord and Array."""
 
+from collections import OrderedDict
 from dataclasses import dataclass
 from io import BytesIO
 from typing import Optional, cast
-from collections import OrderedDict
 
 import numpy as np
 

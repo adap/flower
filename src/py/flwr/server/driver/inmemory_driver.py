@@ -17,8 +17,8 @@
 
 import time
 import warnings
-from typing import Optional, cast
 from collections.abc import Iterable
+from typing import Optional, cast
 from uuid import UUID
 
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet

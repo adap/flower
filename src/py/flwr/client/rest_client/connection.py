@@ -18,11 +18,11 @@
 import random
 import sys
 import threading
+from collections.abc import Iterator
 from contextlib import contextmanager
 from copy import copy
 from logging import ERROR, INFO, WARN
 from typing import Callable, Optional, TypeVar, Union
-from collections.abc import Iterator
 
 from cryptography.hazmat.primitives.asymmetric import ec
 from google.protobuf.message import Message as GrpcMessage
