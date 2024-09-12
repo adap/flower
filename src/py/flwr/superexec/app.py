@@ -25,7 +25,7 @@ import grpc
 from flwr.common import EventType, event, log
 from flwr.common.address import parse_address
 from flwr.common.config import parse_config_args
-from flwr.common.constant import SUPEREXEC_DEFAULT_ADDRESS
+from flwr.common.constant import EXEC_API_DEFAULT_ADDRESS
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.object_ref import load_app, validate
 
@@ -81,7 +81,7 @@ def _parse_args_run_superexec() -> argparse.ArgumentParser:
     parser.add_argument(
         "--address",
         help="SuperExec (gRPC) server address (IPv4, IPv6, or a domain name)",
-        default=SUPEREXEC_DEFAULT_ADDRESS,
+        default=EXEC_API_DEFAULT_ADDRESS,
     )
     parser.add_argument(
         "--executor",
