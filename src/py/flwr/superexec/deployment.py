@@ -29,7 +29,8 @@ from flwr.common.logger import log
 from flwr.common.serde import fab_to_proto, user_config_to_proto
 from flwr.common.typing import Fab, UserConfig
 from flwr.proto.control_pb2 import CreateRunRequest  # pylint: disable=E0611
-from flwr.proto.driver_pb2_grpc import DriverStub
+from flwr.proto.control_pb2_grpc import ControlStub
+from flwr.server.driver.grpc_driver import DEFAULT_SERVER_ADDRESS_DRIVER
 
 from .executor import Executor, RunTracker
 
@@ -62,7 +63,7 @@ class DeploymentEngine(Executor):
             self.root_certificates = root_certificates
             self.root_certificates_bytes = Path(root_certificates).read_bytes()
         self.flwr_dir = flwr_dir
-        self.stub: Optional[DriverStub] = None
+        self.stub: Optional[ControlStub] = None
 
     @override
     def set_config(
@@ -109,7 +110,7 @@ class DeploymentEngine(Executor):
             insecure=(self.root_certificates_bytes is None),
             root_certificates=self.root_certificates_bytes,
         )
-        self.stub = DriverStub(channel)
+        self.stub = ControlStub(channel)
 
     def _create_run(
         self,
