@@ -28,7 +28,7 @@ from .utils import (
 class UtilsTest(unittest.TestCase):
     """Test utils code."""
 
-    @parameterized.expand(
+    @parameterized.expand(  # type: ignore
         [
             # Test values within the positive range of sint64 (below 2^63)
             (0, 0),  # Minimum positive value
@@ -44,7 +44,7 @@ class UtilsTest(unittest.TestCase):
         """Test conversion from uint64 to sint64."""
         self.assertEqual(convert_uint64_to_sint64(before), after)
 
-    @parameterized.expand(
+    @parameterized.expand(  # type: ignore
         [
             # Test values within the negative range of sint64
             (-(2**63), 2**63),  # Minimum sint64 value becomes 2^63 in uint64

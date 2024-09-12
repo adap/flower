@@ -791,7 +791,7 @@ class SqliteState(State):  # pylint: disable=R0904
                 override_config=json.loads(row["override_config"]),
             )
         except sqlite3.IntegrityError:
-            log(ERROR, "`sint64_run_id` does not exist.")
+            log(ERROR, "`run_id` does not exist.")
             return None
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:

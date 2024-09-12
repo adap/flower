@@ -41,30 +41,36 @@ def generate_rand_int_from_bytes(num_bytes: int) -> int:
 def convert_uint64_to_sint64(u: int) -> int:
     """Convert a uint64 value to sint64.
 
-    Args:
-        u (int): The unsigned 64-bit integer to convert.
+    Parameters
+    ----------
+    u : int
+        The unsigned 64-bit integer to convert.
 
     Returns
     -------
-        int: The signed 64-bit integer equivalent.
+    int
+        The signed 64-bit integer equivalent.
     """
-    if u >= 2**63:
-        return u - 2**64
+    if u >= (1 << 63):
+        return u - (1 << 64)
     return u
 
 
 def convert_sint64_to_uint64(s: int) -> int:
     """Convert a sint64 value to uint64.
 
-    Args:
-        s (int): The signed 64-bit integer to convert.
+    Parameters
+    ----------
+    s : int
+        The signed 64-bit integer to convert.
 
     Returns
     -------
-        int: The unsigned 64-bit integer equivalent.
+    int
+        The unsigned 64-bit integer equivalent.
     """
     if s < 0:
-        return s + 2**64
+        return s + (1 << 64)
     return s
 
 
@@ -73,9 +79,17 @@ def convert_uint64_values_in_dict_to_sint64(
 ) -> None:
     """Convert uint64 values to sint64 in the given dictionary.
 
-    Args:
-        data_dict: A dictionary where the values are integers to be converted.
-        keys: A list of keys in the dictionary whose values need to be converted.
+    Parameters
+    ----------
+    data_dict : Dict[str, int]
+        A dictionary where the values are integers to be converted.
+    keys : List[str]
+        A list of keys in the dictionary whose values need to be converted.
+
+    Returns
+    -------
+    None
+        This function does not return a value. It modifies `data_dict` in place.
     """
     for key in keys:
         if key in data_dict:
@@ -87,9 +101,17 @@ def convert_sint64_values_in_dict_to_uint64(
 ) -> None:
     """Convert sint64 values to uint64 in the given dictionary.
 
-    Args:
-        data_dict: A dictionary where the values are integers to be converted.
-        keys: A list of keys in the dictionary whose values need to be converted.
+    Parameters
+    ----------
+    data_dict : Dict[str, int]
+        A dictionary where the values are integers to be converted.
+    keys : List[str]
+        A list of keys in the dictionary whose values need to be converted.
+
+    Returns
+    -------
+    None
+        This function does not return a value. It modifies `data_dict` in place.
     """
     for key in keys:
         if key in data_dict:
