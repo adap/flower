@@ -24,7 +24,7 @@ from logging import DEBUG, ERROR, INFO, WARN
 from pathlib import Path
 from queue import Empty, Queue
 from time import sleep
-from typing import Callable, Dict, Optional
+from typing import Callable, Optional
 
 from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
 from flwr.client.clientapp.utils import get_load_client_app_fn
@@ -44,7 +44,7 @@ from flwr.server.superlink.state import State, StateFactory
 
 from .backend import Backend, error_messages_backends, supported_backends
 
-NodeToPartitionMapping = Dict[int, int]
+NodeToPartitionMapping = dict[int, int]
 
 
 def _register_nodes(
@@ -64,9 +64,9 @@ def _register_node_states(
     nodes_mapping: NodeToPartitionMapping,
     run: Run,
     app_dir: Optional[str] = None,
-) -> Dict[int, NodeState]:
+) -> dict[int, NodeState]:
     """Create NodeState objects and pre-register the context for the run."""
-    node_states: Dict[int, NodeState] = {}
+    node_states: dict[int, NodeState] = {}
     num_partitions = len(set(nodes_mapping.values()))
     for node_id, partition_id in nodes_mapping.items():
         node_states[node_id] = NodeState(
@@ -89,7 +89,7 @@ def _register_node_states(
 def worker(
     taskins_queue: "Queue[TaskIns]",
     taskres_queue: "Queue[TaskRes]",
-    node_states: Dict[int, NodeState],
+    node_states: dict[int, NodeState],
     backend: Backend,
     f_stop: threading.Event,
 ) -> None:
@@ -177,7 +177,7 @@ def run_api(
     backend_fn: Callable[[], Backend],
     nodes_mapping: NodeToPartitionMapping,
     state_factory: StateFactory,
-    node_states: Dict[int, NodeState],
+    node_states: dict[int, NodeState],
     f_stop: threading.Event,
 ) -> None:
     """Run the VCE."""

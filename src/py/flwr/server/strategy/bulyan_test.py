@@ -15,7 +15,6 @@
 """Bulyan tests."""
 
 
-from typing import List, Tuple
 from unittest.mock import MagicMock
 
 from numpy import array, float32
@@ -62,7 +61,7 @@ def test_aggregate_fit() -> None:
     param_5: Parameters = ndarrays_to_parameters(
         [array([0.1, 0.1, 0.1, 0.1], dtype=float32)]
     )
-    results: List[Tuple[ClientProxy, FitRes]] = [
+    results: list[tuple[ClientProxy, FitRes]] = [
         (
             MagicMock(),
             FitRes(

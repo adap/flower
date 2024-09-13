@@ -1040,12 +1040,12 @@ msgstr "Version Python"
 #: ../../source/how-to-install-flower.rst:8
 #, fuzzy
 msgid ""
-"Flower requires at least `Python 3.8 <https://docs.python.org/3.8/>`_, "
+"Flower requires at least `Python 3.9 <https://docs.python.org/3.9/>`_, "
 "but `Python 3.10 <https://docs.python.org/3.10/>`_ or above is "
 "recommended."
 msgstr ""
-"Flower nécessite `Python 3.7 <https://docs.python.org/3.7/>`_ ou plus, "
-"nous recommandons `Python 3.8 <https://docs.python.org/3.8/>`_."
+"Flower nécessite `Python 3.9 <https://docs.python.org/3.9/>`_ ou plus, "
+"nous recommandons `Python 3.10 <https://docs.python.org/3.10/>`_."
 
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:14
 msgid ""
@@ -2226,8 +2226,8 @@ msgstr "Prérequis"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:7
 #, fuzzy
-msgid "`Python 3.8 <https://docs.python.org/3.8/>`_ or above"
-msgstr "`Python 3.7 <https://docs.python.org/3.7/>`_ ou plus"
+msgid "`Python 3.9 <https://docs.python.org/3.9/>`_ or above"
+msgstr "`Python 3.10 <https://docs.python.org/3.10/>`_ ou plus"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:8
 msgid "`Poetry 1.3 <https://python-poetry.org/>`_ or above"
@@ -2321,22 +2321,22 @@ msgstr ""
 msgid ""
 "If you don't have :code:`pyenv` installed, the following script that will"
 " install it, set it up, and create the virtual environment (with "
-":code:`Python 3.8.17` by default)::"
+":code:`Python 3.9.20` by default)::"
 msgstr ""
 "Si vous n'avez pas :code:`pyenv` installé, vous pouvez utiliser le script"
 " suivant qui l'installera, le configurera et créera l'environnement "
-"virtuel (avec :code:`Python 3.8.17` par défaut)::"
+"virtuel (avec :code:`Python 3.9.20` par défaut)::"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:58
 #, fuzzy
 msgid ""
 "If you already have :code:`pyenv` installed (along with the :code:`pyenv-"
 "virtualenv` plugin), you can use the following convenience script (with "
-":code:`Python 3.8.17` by default)::"
+":code:`Python 3.9.20` by default)::"
 msgstr ""
 "Si vous n'avez pas :code:`pyenv` installé, vous pouvez utiliser le script"
 " suivant qui l'installera, le configurera et créera l'environnement "
-"virtuel (avec :code:`Python 3.8.17` par défaut)::"
+"virtuel (avec :code:`Python 3.9.20` par défaut)::"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:62
 #, fuzzy

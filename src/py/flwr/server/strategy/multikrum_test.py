@@ -15,7 +15,6 @@
 """Krum tests."""
 
 
-from typing import List, Tuple
 from unittest.mock import MagicMock
 
 from numpy import array, float32
@@ -59,7 +58,7 @@ def test_aggregate_fit() -> None:
     client_1 = GrpcClientProxy(cid="1", bridge=bridge)
     client_2 = GrpcClientProxy(cid="2", bridge=bridge)
 
-    results: List[Tuple[ClientProxy, FitRes]] = [
+    results: list[tuple[ClientProxy, FitRes]] = [
         (
             client_0,
             FitRes(

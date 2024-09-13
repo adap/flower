@@ -15,7 +15,6 @@
 """FedAdagrad tests."""
 
 
-from typing import List, Tuple
 from unittest.mock import MagicMock
 
 from numpy import array, float32
@@ -54,7 +53,7 @@ def test_aggregate_fit() -> None:
     bridge = MagicMock()
     client_0 = GrpcClientProxy(cid="0", bridge=bridge)
     client_1 = GrpcClientProxy(cid="1", bridge=bridge)
-    results: List[Tuple[ClientProxy, FitRes]] = [
+    results: list[tuple[ClientProxy, FitRes]] = [
         (
             client_0,
             FitRes(

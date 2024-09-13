@@ -15,9 +15,10 @@
 """Contextmanager for a GrpcAdapter channel to the Flower server."""
 
 
+from collections.abc import Iterator
 from contextlib import contextmanager
 from logging import ERROR
-from typing import Callable, Iterator, Optional, Tuple, Union
+from typing import Callable, Optional, Union
 
 from cryptography.hazmat.primitives.asymmetric import ec
 
@@ -38,10 +39,10 @@ def grpc_adapter(  # pylint: disable=R0913
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
     root_certificates: Optional[Union[bytes, str]] = None,
     authentication_keys: Optional[  # pylint: disable=unused-argument
-        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
 ) -> Iterator[
-    Tuple[
+    tuple[
         Callable[[], Optional[Message]],
         Callable[[Message], None],
         Optional[Callable[[], Optional[int]]],
