@@ -15,7 +15,7 @@
 """RecordSet from legacy messages tests."""
 
 from copy import deepcopy
-from typing import Callable, Dict
+from typing import Callable
 
 import numpy as np
 import pytest
@@ -82,7 +82,7 @@ def _get_valid_fitins_with_empty_ndarrays() -> FitIns:
 def _get_valid_fitres() -> FitRes:
     """Returnn Valid parameters but potentially invalid config."""
     arrays = get_ndarrays()
-    metrics: Dict[str, Scalar] = {"a": 1.0, "b": 0}
+    metrics: dict[str, Scalar] = {"a": 1.0, "b": 0}
     return FitRes(
         parameters=ndarrays_to_parameters(arrays),
         num_examples=1,
@@ -98,7 +98,7 @@ def _get_valid_evaluateins() -> EvaluateIns:
 
 def _get_valid_evaluateres() -> EvaluateRes:
     """Return potentially invalid config."""
-    metrics: Dict[str, Scalar] = {"a": 1.0, "b": 0}
+    metrics: dict[str, Scalar] = {"a": 1.0, "b": 0}
     return EvaluateRes(
         num_examples=1,
         loss=0.1,
@@ -108,7 +108,7 @@ def _get_valid_evaluateres() -> EvaluateRes:
 
 
 def _get_valid_getparametersins() -> GetParametersIns:
-    config_dict: Dict[str, Scalar] = {
+    config_dict: dict[str, Scalar] = {
         "a": 1.0,
         "b": 3,
         "c": True,
@@ -131,7 +131,7 @@ def _get_valid_getpropertiesins() -> GetPropertiesIns:
 
 
 def _get_valid_getpropertiesres() -> GetPropertiesRes:
-    config_dict: Dict[str, Scalar] = {
+    config_dict: dict[str, Scalar] = {
         "a": 1.0,
         "b": 3,
         "c": True,

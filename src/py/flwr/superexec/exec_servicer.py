@@ -15,8 +15,9 @@
 """SuperExec API servicer."""
 
 
+from collections.abc import Generator
 from logging import ERROR, INFO
-from typing import Any, Dict, Generator
+from typing import Any
 
 import grpc
 
@@ -38,7 +39,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
     def __init__(self, executor: Executor) -> None:
         self.executor = executor
-        self.runs: Dict[int, RunTracker] = {}
+        self.runs: dict[int, RunTracker] = {}
 
     def StartRun(
         self, request: StartRunRequest, context: grpc.ServicerContext
