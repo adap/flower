@@ -16,9 +16,14 @@
 
 
 import base64
+import csv
+import os
+import tempfile
 import unittest
+from pathlib import Path
 
 import grpc
+from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
 from flwr.common.constant import FLEET_API_GRPC_RERE_DEFAULT_ADDRESS
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
@@ -61,7 +66,24 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         """Initialize mock stub and server interceptor."""
         self._node_private_key, self._node_public_key = generate_key_pairs()
         self._server_private_key, self._server_public_key = generate_key_pairs()
+        self.new_private_key, self.new_public_key = generate_key_pairs()
+        with tempfile.NamedTemporaryFile(
+            delete=False, mode="w+", newline="", encoding="utf-8", suffix=".csv"
+        ) as temp_file:
+            self.temp_file = temp_file
 
+        self.node_keys_file_path = self.temp_file.name
+        with open(
+            self.node_keys_file_path, "w", newline="", encoding="utf-8"
+        ) as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(
+                [
+                    self._node_public_key.public_bytes(
+                        encoding=Encoding.OpenSSH, format=PublicFormat.OpenSSH
+                    ).decode(),
+                ]
+            )
         state_factory = StateFactory(":flwr-in-memory-state:")
         self.state = state_factory.state()
         ffs_factory = FfsFactory(".")
@@ -72,7 +94,9 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         )
         self.state.store_node_public_keys({public_key_to_bytes(self._node_public_key)})
 
-        self._server_interceptor = AuthenticateServerInterceptor(self.state)
+        self._server_interceptor = AuthenticateServerInterceptor(
+            self.state, Path(self.node_keys_file_path)
+        )
         self._server: grpc.Server = _run_fleet_api_grpc_rere(
             FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
             state_factory,
@@ -116,6 +140,8 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def tearDown(self) -> None:
         """Clean up grpc server."""
         self._server.stop(None)
+        self.temp_file.close()
+        os.unlink(self.temp_file.name)
 
     def test_successful_create_node_with_metadata(self) -> None:
         """Test server interceptor for creating node."""
@@ -504,3 +530,71 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         assert call.initial_metadata()[0] == expected_metadata
         assert isinstance(response, CreateNodeResponse)
         assert response.node.node_id == node_node_id
+
+    def test_successful_add_known_keys(self) -> None:
+        """Test server interceptor for adding known node."""
+        # Prepare
+        with open(
+            self.node_keys_file_path, "w", newline="", encoding="utf-8"
+        ) as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(
+                [
+                    self.new_public_key.public_bytes(
+                        encoding=Encoding.OpenSSH, format=PublicFormat.OpenSSH
+                    ).decode(),
+                ]
+            )
+
+        public_key_bytes = base64.urlsafe_b64encode(
+            public_key_to_bytes(self.new_public_key)
+        )
+
+        # Execute
+        response, call = self._create_node.with_call(
+            request=CreateNodeRequest(),
+            metadata=((_PUBLIC_KEY_HEADER, public_key_bytes),),
+        )
+
+        expected_metadata = (
+            _PUBLIC_KEY_HEADER,
+            base64.urlsafe_b64encode(
+                public_key_to_bytes(self._server_public_key)
+            ).decode(),
+        )
+
+        # Assert
+        assert call.initial_metadata()[0] == expected_metadata
+        assert isinstance(response, CreateNodeResponse)
+
+    def test_successful_delete_known_keys(self) -> None:
+        """Test server interceptor for deleting known keys."""
+        # Prepare
+        with open(self.node_keys_file_path, newline="", encoding="utf-8") as csvfile:
+            reader = csv.reader(csvfile)
+
+            rows = [
+                row
+                for row in reader
+                if row[0]
+                != self.new_public_key.public_bytes(
+                    encoding=Encoding.OpenSSH, format=PublicFormat.OpenSSH
+                ).decode()
+            ]
+
+        with open(
+            self.node_keys_file_path, "w", newline="", encoding="utf-8"
+        ) as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerows(rows)
+
+        public_key_bytes = base64.urlsafe_b64encode(
+            public_key_to_bytes(self.new_public_key)
+        )
+
+        # Execute & Assert
+        with self.assertRaises(grpc.RpcError):
+            self._create_node.with_call(
+                request=CreateNodeRequest(),
+                metadata=((_PUBLIC_KEY_HEADER, public_key_bytes),),
+            )

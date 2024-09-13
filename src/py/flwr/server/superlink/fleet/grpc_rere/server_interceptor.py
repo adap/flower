@@ -16,17 +16,25 @@
 
 
 import base64
+import csv
+import os
+import threading
 from logging import INFO, WARNING
-from typing import Any, Callable, Optional, Sequence, Tuple, Union
+from pathlib import Path
+from typing import Any, Callable, List, Optional, Sequence, Set, Tuple, Union
+from uuid import UUID
 
 import grpc
+from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.serialization import load_ssh_public_key
 
 from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     bytes_to_private_key,
     bytes_to_public_key,
     generate_shared_key,
+    public_key_to_bytes,
     verify_hmac,
 )
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -43,6 +51,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 from flwr.server.superlink.state import State
 
 _PUBLIC_KEY_HEADER = "public-key"
@@ -80,8 +89,11 @@ def _get_value_from_tuples(
 class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
     """Server interceptor for node authentication."""
 
-    def __init__(self, state: State):
+    def __init__(self, state: State, node_keys_file_path: Path):
         self.state = state
+        self.lock = threading.Lock()
+        # Path always exists, already checked during init
+        self.node_keys_file_path = node_keys_file_path
 
         self.node_public_keys = state.get_node_public_keys()
         if len(self.node_public_keys) == 0:
@@ -95,6 +107,9 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
 
         self.server_private_key = bytes_to_private_key(private_key)
         self.encoded_server_public_key = base64.urlsafe_b64encode(public_key)
+
+        with self.lock:
+            self.last_timestamp = os.path.getmtime(self.node_keys_file_path)
 
     def intercept_service(
         self,
@@ -124,6 +139,22 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                     _PUBLIC_KEY_HEADER, context.invocation_metadata()
                 )
             )
+
+            if self.node_keys_file_path.exists():
+                new_timestamp = os.path.getmtime(self.node_keys_file_path)
+            else:
+                log(
+                    WARNING,
+                    "Node keys file (%s) not found, continuing with existing state",
+                    self.node_keys_file_path,
+                )
+                new_timestamp = self.last_timestamp
+
+            if new_timestamp != self.last_timestamp:
+                self._update_node_keys()
+                with self.lock:
+                    self.last_timestamp = new_timestamp
+
             if node_public_key_bytes not in self.node_public_keys:
                 context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
 
@@ -162,6 +193,53 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             request_deserializer=method_handler.request_deserializer,
             response_serializer=method_handler.response_serializer,
         )
+
+    def _update_node_keys(self) -> None:
+        try:
+            new_known_keys = self._read_and_parse_keys()
+            existing_known_keys = self.state.get_node_public_keys()
+            add_operations = new_known_keys - existing_known_keys
+            remove_operations = existing_known_keys - new_known_keys
+
+            self._update_state_keys(add_operations, remove_operations)
+        # Handle error from `_read_and_parse_keys`
+        except (ValueError, UnsupportedAlgorithm) as e:
+            log(WARNING, "Abort updating node_public_keys set due to error: %s", e)
+
+    # This function throws an error if something is wrong
+    def _read_and_parse_keys(self) -> Set[bytes]:
+        new_known_keys = set()
+        with open(self.node_keys_file_path, newline="", encoding="utf-8") as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                for element in row:
+                    maybe_public_key = element.encode()
+                    public_key = load_ssh_public_key(maybe_public_key)
+                    if isinstance(public_key, ec.EllipticCurvePublicKey):
+                        new_known_keys.add(public_key_to_bytes(public_key))
+                    else:
+                        raise ValueError(
+                            f"Public key {maybe_public_key.decode('utf-8')} is "
+                            "not an elliptic curve public key"
+                        )
+        return new_known_keys
+
+    def _update_state_keys(
+        self, add_operations: Set[bytes], remove_operations: Set[bytes]
+    ) -> None:
+        if add_operations:
+            self.state.store_node_public_keys(add_operations)
+        if remove_operations:
+            self.state.remove_node_public_keys(remove_operations)
+            public_key_node_ids = self.state.get_node_ids(remove_operations)
+            task_ins_list: List[TaskIns] = []
+
+            for deleted_key, node_id in public_key_node_ids.items():
+                self.state.delete_node(node_id, deleted_key)
+                task_ins_list.extend(self.state.get_task_ins(node_id, limit=None))
+            if task_ins_list:
+                task_ids = {UUID(task_ins.task_id) for task_ins in task_ins_list}
+                self.state.delete_tasks(task_ids)
 
     def _verify_node_id(
         self,

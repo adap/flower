@@ -607,14 +607,36 @@ class SqliteState(State):  # pylint: disable=R0904
         result: Set[int] = {row["node_id"] for row in rows}
         return result
 
-    def get_node_id(self, node_public_key: bytes) -> Optional[int]:
+    def get_node_id(self, public_key: bytes) -> Optional[int]:
         """Retrieve stored `node_id` filtered by `node_public_keys`."""
         query = "SELECT node_id FROM node WHERE public_key = :public_key;"
-        row = self.query(query, {"public_key": node_public_key})
+        row = self.query(query, {"public_key": public_key})
         if len(row) > 0:
             node_id: int = row[0]["node_id"]
             return node_id
         return None
+
+    def get_node_ids(self, public_keys: Set[bytes]) -> Dict[bytes, int]:
+        """Retrieve stored `node_ids` filtered by `public_keys`."""
+        if not public_keys:
+            return {}
+
+        public_keys_list = list(public_keys)
+        placeholders = ", ".join(
+            f":public_key{i}" for i in range(len(public_keys_list))
+        )
+        query = (
+            f"SELECT public_key, node_id FROM node WHERE public_key IN ({placeholders})"
+        )
+        params = {
+            f"public_key{i}": public_key
+            for i, public_key in enumerate(public_keys_list)
+        }
+        rows = self.query(query, params)
+
+        public_keys_node_ids = {row["public_key"]: row["node_id"] for row in rows}
+
+        return public_keys_node_ids
 
     def create_run(
         self,
@@ -694,6 +716,22 @@ class SqliteState(State):  # pylint: disable=R0904
         """Store a `node_public_key` in state."""
         query = "INSERT INTO public_key (public_key) VALUES (:public_key)"
         self.query(query, {"public_key": public_key})
+
+    def remove_node_public_keys(self, public_keys: Set[bytes]) -> None:
+        """Remove a set of `node_public_keys` in state."""
+        if not public_keys:
+            return
+
+        public_keys_list = list(public_keys)
+        placeholders = ", ".join(
+            f":public_key{i}" for i in range(len(public_keys_list))
+        )
+        query = f"DELETE FROM public_key WHERE public_key IN ({placeholders})"
+        params = {
+            f"public_key{i}": public_key
+            for i, public_key in enumerate(public_keys_list)
+        }
+        self.query(query, params)
 
     def get_node_public_keys(self) -> Set[bytes]:
         """Retrieve all currently stored `node_public_keys` as a set."""

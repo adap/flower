@@ -271,9 +271,18 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                 if online_until > current_time
             }
 
-    def get_node_id(self, node_public_key: bytes) -> Optional[int]:
+    def get_node_id(self, public_key: bytes) -> Optional[int]:
         """Retrieve stored `node_id` filtered by `node_public_keys`."""
-        return self.public_key_to_node_id.get(node_public_key)
+        return self.public_key_to_node_id.get(public_key)
+
+    def get_node_ids(self, public_keys: Set[bytes]) -> Dict[bytes, int]:
+        """Retrieve stored `node_ids` filtered by `node_public_keys`."""
+        result = {}
+        for key in public_keys:
+            node_id = self.get_node_id(key)
+            if node_id is not None:
+                result[key] = node_id
+        return result
 
     def create_run(
         self,
@@ -321,12 +330,17 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
     def store_node_public_keys(self, public_keys: Set[bytes]) -> None:
         """Store a set of `node_public_keys` in state."""
         with self.lock:
-            self.node_public_keys = public_keys
+            self.node_public_keys.update(public_keys)
 
     def store_node_public_key(self, public_key: bytes) -> None:
         """Store a `node_public_key` in state."""
         with self.lock:
             self.node_public_keys.add(public_key)
+
+    def remove_node_public_keys(self, public_keys: Set[bytes]) -> None:
+        """Remove a set of `node_public_keys` in state."""
+        with self.lock:
+            self.node_public_keys.difference_update(public_keys)
 
     def get_node_public_keys(self) -> Set[bytes]:
         """Retrieve all currently stored `node_public_keys` as a set."""

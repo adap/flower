@@ -16,7 +16,7 @@
 
 
 import abc
-from typing import List, Optional, Set
+from typing import Dict, List, Optional, Set
 from uuid import UUID
 
 from flwr.common.typing import Run, UserConfig
@@ -153,8 +153,12 @@ class State(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get_node_id(self, node_public_key: bytes) -> Optional[int]:
-        """Retrieve stored `node_id` filtered by `node_public_keys`."""
+    def get_node_id(self, public_key: bytes) -> Optional[int]:
+        """Retrieve stored `node_id` filtered by `node_public_key`."""
+
+    @abc.abstractmethod
+    def get_node_ids(self, public_keys: Set[bytes]) -> Dict[bytes, int]:
+        """Retrieve stored `node_ids` filtered by `node_public_keys`."""
 
     @abc.abstractmethod
     def create_run(
@@ -205,6 +209,10 @@ class State(abc.ABC):  # pylint: disable=R0904
     @abc.abstractmethod
     def store_node_public_key(self, public_key: bytes) -> None:
         """Store a `node_public_key` in state."""
+
+    @abc.abstractmethod
+    def remove_node_public_keys(self, public_keys: Set[bytes]) -> None:
+        """Remove a set of `node_public_keys` in state."""
 
     @abc.abstractmethod
     def get_node_public_keys(self) -> Set[bytes]:
