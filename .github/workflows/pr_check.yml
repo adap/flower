@@ -23,5 +23,5 @@ jobs:
           poetry-skip: 'true'
       - name: Check PR title format 
         run: |
-          python -m pip install dev
+          python -m pip install ./dev
           flwr-dev check-title "${{ github.event.pull_request.title }}"
