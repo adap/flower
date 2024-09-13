@@ -17,8 +17,8 @@ supports `PEP 517 <https://peps.python.org/pep-0517/>`_.
 Developer Machine Setup
 -----------------------
 
-Preliminarities
-~~~~~~~~~~~~~~~
+Preliminaries
+~~~~~~~~~~~~~
 Some system-wide dependencies are needed.
 
 For macOS

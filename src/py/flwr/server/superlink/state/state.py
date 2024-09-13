@@ -1,4 +1,4 @@
-# Copyright 2022 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 
 
 import abc
-from typing import List, Optional, Set, Tuple
+from typing import List, Optional, Set
 from uuid import UUID
 
+from flwr.common.typing import Run, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 
@@ -152,15 +153,21 @@ class State(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get_node_id(self, client_public_key: bytes) -> Optional[int]:
-        """Retrieve stored `node_id` filtered by `client_public_keys`."""
+    def get_node_id(self, node_public_key: bytes) -> Optional[int]:
+        """Retrieve stored `node_id` filtered by `node_public_keys`."""
 
     @abc.abstractmethod
-    def create_run(self, fab_id: str, fab_version: str) -> int:
-        """Create a new run for the specified `fab_id` and `fab_version`."""
+    def create_run(
+        self,
+        fab_id: Optional[str],
+        fab_version: Optional[str],
+        fab_hash: Optional[str],
+        override_config: UserConfig,
+    ) -> int:
+        """Create a new run for the specified `fab_hash`."""
 
     @abc.abstractmethod
-    def get_run(self, run_id: int) -> Tuple[int, str, str]:
+    def get_run(self, run_id: int) -> Optional[Run]:
         """Retrieve information about the run with the specified `run_id`.
 
         Parameters
@@ -170,8 +177,8 @@ class State(abc.ABC):  # pylint: disable=R0904
 
         Returns
         -------
-        Tuple[int, str, str]
-            A tuple containing three elements:
+        Optional[Run]
+            A dataclass instance containing three elements if `run_id` is valid:
             - `run_id`: The identifier of the run, same as the specified `run_id`.
             - `fab_id`: The identifier of the FAB used in the specified run.
             - `fab_version`: The version of the FAB used in the specified run.
@@ -192,16 +199,16 @@ class State(abc.ABC):  # pylint: disable=R0904
         """Retrieve `server_public_key` in urlsafe bytes."""
 
     @abc.abstractmethod
-    def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
-        """Store a set of `client_public_keys` in state."""
+    def store_node_public_keys(self, public_keys: Set[bytes]) -> None:
+        """Store a set of `node_public_keys` in state."""
 
     @abc.abstractmethod
-    def store_client_public_key(self, public_key: bytes) -> None:
-        """Store a `client_public_key` in state."""
+    def store_node_public_key(self, public_key: bytes) -> None:
+        """Store a `node_public_key` in state."""
 
     @abc.abstractmethod
-    def get_client_public_keys(self) -> Set[bytes]:
-        """Retrieve all currently stored `client_public_keys` as a set."""
+    def get_node_public_keys(self) -> Set[bytes]:
+        """Retrieve all currently stored `node_public_keys` as a set."""
 
     @abc.abstractmethod
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:

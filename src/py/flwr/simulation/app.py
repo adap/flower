@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2021 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,14 +27,16 @@ from typing import Any, Dict, List, Optional, Type, Union
 import ray
 from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
 
-from flwr.client import ClientFn
+from flwr.client import ClientFnExt
 from flwr.common import EventType, event
-from flwr.common.logger import log, set_logger_propagation
+from flwr.common.constant import NODE_ID_NUM_BYTES
+from flwr.common.logger import log, set_logger_propagation, warn_unsupported_feature
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.server import Server, init_defaults, run_fl
 from flwr.server.server_config import ServerConfig
 from flwr.server.strategy import Strategy
+from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
 from flwr.simulation.ray_transport.ray_actor import (
     ClientAppActor,
     VirtualClientEngineActor,
@@ -51,7 +53,7 @@ Invalid Arguments in method:
 `start_simulation(
     *,
     client_fn: ClientFn,
-    num_clients: Optional[int] = None,
+    num_clients: int,
     clients_ids: Optional[List[str]] = None,
     client_resources: Optional[Dict[str, float]] = None,
     server: Optional[Server] = None,
@@ -70,13 +72,29 @@ REASON:
 
 """
 
+NodeToPartitionMapping = Dict[int, int]
+
+
+def _create_node_id_to_partition_mapping(
+    num_clients: int,
+) -> NodeToPartitionMapping:
+    """Generate a node_id:partition_id mapping."""
+    nodes_mapping: NodeToPartitionMapping = {}  # {node-id; partition-id}
+    for i in range(num_clients):
+        while True:
+            node_id = generate_rand_int_from_bytes(NODE_ID_NUM_BYTES)
+            if node_id not in nodes_mapping:
+                break
+        nodes_mapping[node_id] = i
+    return nodes_mapping
+
 
 # pylint: disable=too-many-arguments,too-many-statements,too-many-branches
 def start_simulation(
     *,
-    client_fn: ClientFn,
-    num_clients: Optional[int] = None,
-    clients_ids: Optional[List[str]] = None,
+    client_fn: ClientFnExt,
+    num_clients: int,
+    clients_ids: Optional[List[str]] = None,  # UNSUPPORTED, WILL BE REMOVED
     client_resources: Optional[Dict[str, float]] = None,
     server: Optional[Server] = None,
     config: Optional[ServerConfig] = None,
@@ -92,23 +110,24 @@ def start_simulation(
 
     Parameters
     ----------
-    client_fn : ClientFn
-        A function creating client instances. The function must take a single
-        `str` argument called `cid`. It should return a single client instance
-        of type Client. Note that the created client instances are ephemeral
-        and will often be destroyed after a single method invocation. Since client
-        instances are not long-lived, they should not attempt to carry state over
-        method invocations. Any state required by the instance (model, dataset,
-        hyperparameters, ...) should be (re-)created in either the call to `client_fn`
-        or the call to any of the client methods (e.g., load evaluation data in the
-        `evaluate` method itself).
-    num_clients : Optional[int]
-        The total number of clients in this simulation. This must be set if
-        `clients_ids` is not set and vice-versa.
+    client_fn : ClientFnExt
+        A function creating `Client` instances. The function must have the signature
+        `client_fn(context: Context). It should return
+        a single client instance of type `Client`. Note that the created client
+        instances are ephemeral and will often be destroyed after a single method
+        invocation. Since client instances are not long-lived, they should not attempt
+        to carry state over method invocations. Any state required by the instance
+        (model, dataset, hyperparameters, ...) should be (re-)created in either the
+        call to `client_fn` or the call to any of the client methods (e.g., load
+        evaluation data in the `evaluate` method itself).
+    num_clients : int
+        The total number of clients in this simulation.
     clients_ids : Optional[List[str]]
+        UNSUPPORTED, WILL BE REMOVED. USE `num_clients` INSTEAD.
         List `client_id`s for each client. This is only required if
         `num_clients` is not set. Setting both `num_clients` and `clients_ids`
         with `len(clients_ids)` not equal to `num_clients` generates an error.
+        Using this argument will raise an error.
     client_resources : Optional[Dict[str, float]] (default: `{"num_cpus": 1, "num_gpus": 0.0}`)
         CPU and GPU resources for a single client. Supported keys
         are `num_cpus` and `num_gpus`. To understand the GPU utilization caused by
@@ -158,7 +177,6 @@ def start_simulation(
         is an advanced feature. For all details, please refer to the Ray documentation:
         https://docs.ray.io/en/latest/ray-core/scheduling/index.html
 
-
     Returns
     -------
     hist : flwr.server.history.History
@@ -169,6 +187,14 @@ def start_simulation(
         EventType.START_SIMULATION_ENTER,
         {"num_clients": len(clients_ids) if clients_ids is not None else num_clients},
     )
+
+    if clients_ids is not None:
+        warn_unsupported_feature(
+            "Passing `clients_ids` to `start_simulation` is deprecated and not longer "
+            "used by `start_simulation`. Use `num_clients` exclusively instead."
+        )
+        log(ERROR, "`clients_ids` argument used.")
+        sys.exit()
 
     # Set logger propagation
     loop: Optional[asyncio.AbstractEventLoop] = None
@@ -196,20 +222,8 @@ def start_simulation(
         initialized_config,
     )
 
-    # clients_ids takes precedence
-    cids: List[str]
-    if clients_ids is not None:
-        if (num_clients is not None) and (len(clients_ids) != num_clients):
-            log(ERROR, INVALID_ARGUMENTS_START_SIMULATION)
-            sys.exit()
-        else:
-            cids = clients_ids
-    else:
-        if num_clients is None:
-            log(ERROR, INVALID_ARGUMENTS_START_SIMULATION)
-            sys.exit()
-        else:
-            cids = [str(x) for x in range(num_clients)]
+    # Create node-id to partition-id mapping
+    nodes_mapping = _create_node_id_to_partition_mapping(num_clients)
 
     # Default arguments for Ray initialization
     if not ray_init_args:
@@ -308,10 +322,12 @@ def start_simulation(
     )
 
     # Register one RayClientProxy object for each client with the ClientManager
-    for cid in cids:
+    for node_id, partition_id in nodes_mapping.items():
         client_proxy = RayActorClientProxy(
             client_fn=client_fn,
-            cid=cid,
+            node_id=node_id,
+            partition_id=partition_id,
+            num_partitions=num_clients,
             actor_pool=pool,
         )
         initialized_server.client_manager().register(client=client_proxy)

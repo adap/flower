@@ -1,3 +1,9 @@
+---
+tags: [advanced, vision, fds]
+dataset: [CIFAR-10]
+framework: [torch, torchvision]
+---
+
 # Flower Authentication with PyTorch 🧪
 
 > 🧪 = This example covers experimental features that might change in future versions of Flower
@@ -68,7 +74,9 @@ containing file path to the SuperLink's private key `server_credentials`, and `-
 
 ```bash
 flower-superlink \
-    --certificates certificates/ca.crt certificates/server.pem certificates/server.key \
+    --ssl-ca-certfile certificates/ca.crt \
+    --ssl-certfile certificates/server.pem \
+    --ssl-keyfile certificates/server.key \
     --auth-list-public-keys keys/client_public_keys.csv \
     --auth-superlink-private-key keys/server_credentials \
     --auth-superlink-public-key keys/server_credentials.pub
