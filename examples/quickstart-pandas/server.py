@@ -1,8 +1,7 @@
 from typing import Dict, List, Optional, Tuple, Union
 
-import numpy as np
-
 import flwr as fl
+import numpy as np
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,

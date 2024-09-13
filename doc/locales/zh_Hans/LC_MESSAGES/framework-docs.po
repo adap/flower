@@ -664,11 +664,11 @@ msgstr "从 PyPI 安装 ``flwr`` 预发行版："
 
 #: ../../source/contributor-how-to-install-development-versions.rst:32
 msgid "``pip install -U --pre flwr`` (without extras)"
-msgstr "`pip install -U -pre flwr``（不含额外功能）"
+msgstr "``pip install -U -pre flwr``（不含额外功能）"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:33
-msgid "``pip install -U --pre flwr[simulation]`` (with extras)"
-msgstr "`pip install -U -pre flwr[simulation]``（包含额外功能）"
+msgid "``pip install -U --pre 'flwr[simulation]'`` (with extras)"
+msgstr "``pip install -U -pre 'flwr[simulation]'``（包含额外功能）"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:35
 msgid ""
@@ -684,15 +684,15 @@ msgstr "从 GitHub 的默认分支 (``main`) 安装 ``flwr``："
 msgid ""
 "``pip install flwr@git+https://github.com/adap/flower.git`` (without "
 "extras)"
-msgstr "`pip install flwr@git+https://github.com/adap/flower.git`` （不含额外功能）"
+msgstr "``pip install flwr@git+https://github.com/adap/flower.git`` （不含额外功能）"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:40
 msgid ""
-"``pip install flwr[simulation]@git+https://github.com/adap/flower.git`` "
+"``pip install 'flwr[simulation]@git+https://github.com/adap/flower.git'`` "
 "(with extras)"
 msgstr ""
-"`pip install "
-"flwr[simulation]@git+https://github.com/adap/flower.git``（带附加功能）"
+"``pip install "
+"'flwr[simulation]@git+https://github.com/adap/flower.git'``（带附加功能）"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:42
 msgid "Install ``flwr`` from a specific GitHub branch (``branch-name``):"
@@ -703,14 +703,14 @@ msgid ""
 "``pip install flwr@git+https://github.com/adap/flower.git@branch-name`` "
 "(without extras)"
 msgstr ""
-"`pip install flwr@git+https://github.com/adap/flower.git@branch-name`` "
+"``pip install flwr@git+https://github.com/adap/flower.git@branch-name`` "
 "（不含附加功能）"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:45
 msgid ""
-"``pip install flwr[simulation]@git+https://github.com/adap/flower.git"
-"@branch-name`` (with extras)"
-msgstr "`pip安装flwr[模拟]@git+https://github.com/adap/flower.git@分支名``（带附加功能）"
+"``pip install 'flwr[simulation]@git+https://github.com/adap/flower.git"
+"@branch-name'`` (with extras)"
+msgstr "``pip install 'flwr[simulation]@git+https://github.com/adap/flower.git@分支名'``（带附加功能）"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:49
 msgid "Open Jupyter Notebooks on Google Colab"
@@ -1032,11 +1032,11 @@ msgstr "Python 版本"
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:11
 #: ../../source/how-to-install-flower.rst:8
 msgid ""
-"Flower requires at least `Python 3.8 <https://docs.python.org/3.8/>`_, "
+"Flower requires at least `Python 3.9 <https://docs.python.org/3.9/>`_, "
 "but `Python 3.10 <https://docs.python.org/3.10/>`_ or above is "
 "recommended."
 msgstr ""
-"Flower 至少需要 `Python 3.8 <https://docs.python.org/3.8/>`_，但建议使用 `Python "
+"Flower 至少需要 `Python 3.9 <https://docs.python.org/3.9/>`_，但建议使用 `Python "
 "3.10 <https://docs.python.org/3.10/>`_或更高版本。"
 
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:14
@@ -2062,8 +2062,8 @@ msgstr "先决条件"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:7
 #, fuzzy
-msgid "`Python 3.8 <https://docs.python.org/3.8/>`_ or above"
-msgstr "Python 3.7 <https://docs.python.org/3.7/>`_ 或更高版本"
+msgid "`Python 3.9 <https://docs.python.org/3.9/>`_ or above"
+msgstr "Python 3.9 <https://docs.python.org/3.9/>`_ 或更高版本"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:8
 msgid "`Poetry 1.3 <https://python-poetry.org/>`_ or above"
@@ -2161,20 +2161,20 @@ msgstr ""
 msgid ""
 "If you don't have :code:`pyenv` installed, the following script that will"
 " install it, set it up, and create the virtual environment (with "
-":code:`Python 3.8.17` by default)::"
+":code:`Python 3.9.20` by default)::"
 msgstr ""
 "如果没有安装 :code:`pyenv`，可以使用以下脚本安装 pyenv、设置并创建虚拟环境（默认使用 "
-":code:`Python3.8.17）：："
+":code:`Python 3.9.20）：："
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:58
 #, fuzzy
 msgid ""
 "If you already have :code:`pyenv` installed (along with the :code:`pyenv-"
 "virtualenv` plugin), you can use the following convenience script (with "
-":code:`Python 3.8.17` by default)::"
+":code:`Python 3.9.20` by default)::"
 msgstr ""
 "如果没有安装 :code:`pyenv`，可以使用以下脚本安装 pyenv、设置并创建虚拟环境（默认使用 "
-":code:`Python3.8.17）：："
+":code:`Python 3.9.20）：："
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:62
 #, fuzzy
@@ -6561,9 +6561,9 @@ msgstr "`python -m pip install -U flwr``（当使用`start_server`和`start_clie
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:15
 msgid ""
-"``python -m pip install -U flwr[simulation]`` (when using "
+"``python -m pip install -U 'flwr[simulation]'`` (when using "
 "``start_simulation``)"
-msgstr "`python -m pip install -U flwr[simulation]``（当使用`start_simulation``时）"
+msgstr "``python -m pip install -U 'flwr[simulation]'``（当使用`start_simulation``时）"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:17
 msgid ""
@@ -17131,7 +17131,7 @@ msgstr "停用"
 #: ../../source/ref-changelog.md:77
 #, fuzzy
 msgid "**Deprecate Python 3.8 support**"
-msgstr "** 过时的 Python 3.7**"
+msgstr "** 过时的 Python 3.8**"
 
 #: ../../source/ref-changelog.md:79
 #, fuzzy
@@ -17139,7 +17139,7 @@ msgid ""
 "Python 3.8 will stop receiving security fixes in [October "
 "2024](https://devguide.python.org/versions/). Support for Python 3.8 is "
 "now deprecated and will be removed in an upcoming release."
-msgstr "由于 Python 3.7 已于 2023-06-27 弃用 (EOL)，对 Python 3.7 的支持现已废弃，并将在即将发布的版本中移除。"
+msgstr "由于 Python 3.8 已于 2024-10-01 弃用 (EOL)，对 Python 3.7 的支持现已废弃，并将在即将发布的版本中移除。"
 
 #: ../../source/ref-changelog.md:81
 #, fuzzy
@@ -21363,10 +21363,10 @@ msgid ""
 "Simulations (using the Virtual Client Engine through `start_simulation`) "
 "now work more smoothly on Jupyter Notebooks (incl. Google Colab) after "
 "installing Flower with the `simulation` extra (`pip install "
-"flwr[simulation]`)."
+"'flwr[simulation]'`)."
 msgstr ""
 "通过 `start_simulation` 在 Jupyter 笔记本（包括 Google Colab）上安装 Flower 并附加 "
-"`simulation` (`pip install flwr[simulation]`)后，模拟（通过 `start_simulation` "
+"`simulation` (`pip install 'flwr[simulation]'`)后，模拟（通过 `start_simulation` "
 "使用虚拟客户端引擎）现在可以更流畅地运行。"
 
 #: ../../source/ref-changelog.md:887

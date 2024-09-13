@@ -399,7 +399,7 @@ def _load_mocked_dataset_by_partial_download(
         The streaming mode has a specific type of accessing the data, the first tuple
         value is how many samples to skip, the second is how many samples to take. Due
         to this mechanism, diverse samples can be taken (especially if the dataset is
-        sorted by the natual_id for NaturalIdPartitioner).
+        sorted by the natural_id for NaturalIdPartitioner).
     subset_name: Optional[str]
         Name of the subset (passed to load_dataset) e.g. "v0.01" for speech_commands.
 
@@ -428,6 +428,9 @@ def _load_mocked_dataset_dict_by_partial_download(
     subset_name: Optional[str] = None,
 ) -> DatasetDict:
     """Like _load_mocked_dataset_by_partial_download but for many splits."""
+    assert len(split_names) == len(
+        skip_take_lists
+    ), "The split_names should be thesame length as the skip_take_lists."
     dataset_dict = {}
     for split_name, skip_take_list in zip(split_names, skip_take_lists):
         dataset_dict[split_name] = _load_mocked_dataset_by_partial_download(

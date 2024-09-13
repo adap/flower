@@ -16,7 +16,7 @@
 # hadolint global ignore=DL3008
 ARG DISTRO=ubuntu
 ARG DISTRO_VERSION=22.04
-FROM $DISTRO:$DISTRO_VERSION as python
+FROM $DISTRO:$DISTRO_VERSION AS python
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -32,7 +32,7 @@ RUN apt-get update \
 # Install PyEnv and Python
 ARG PYTHON_VERSION=3.11
 ENV PYENV_ROOT=/root/.pyenv
-ENV PATH $PYENV_ROOT/bin:$PATH
+ENV PATH=$PYENV_ROOT/bin:$PATH
 # https://github.com/hadolint/hadolint/wiki/DL4006
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
@@ -50,21 +50,31 @@ RUN LATEST=$(pyenv latest -k ${PYTHON_VERSION}) \
 
 ENV PATH=/usr/local/bin/python/bin:$PATH
 
-# Use a virtual environment to ensure that Python packages are installed in the same location
-# regardless of whether the subsequent image build is run with the app or the root user
-RUN python -m venv /python/venv
-ENV PATH=/python/venv/bin:$PATH
-
 ARG PIP_VERSION
 ARG SETUPTOOLS_VERSION
-ARG FLWR_VERSION
-ARG FLWR_PACKAGE=flwr
+# Keep the version of system Python pip and setuptools in sync with those installed in the
+# virtualenv.
+RUN pip install -U --no-cache-dir pip==${PIP_VERSION} setuptools==${SETUPTOOLS_VERSION} \
+    # Use a virtual environment to ensure that Python packages are installed in the same location
+    # regardless of whether the subsequent image build is run with the app or the root user
+    && python -m venv /python/venv
+ENV PATH=/python/venv/bin:$PATH
+
 RUN pip install -U --no-cache-dir \
     pip==${PIP_VERSION} \
-    setuptools==${SETUPTOOLS_VERSION} \
-    ${FLWR_PACKAGE}==${FLWR_VERSION}
+    setuptools==${SETUPTOOLS_VERSION}
 
-FROM $DISTRO:$DISTRO_VERSION as base
+ARG FLWR_VERSION
+ARG FLWR_VERSION_REF
+ARG FLWR_PACKAGE=flwr
+# hadolint ignore=DL3013
+RUN if [ -z "${FLWR_VERSION_REF}" ]; then \
+    pip install -U --no-cache-dir ${FLWR_PACKAGE}==${FLWR_VERSION}; \
+    else \
+    pip install -U --no-cache-dir ${FLWR_PACKAGE}@${FLWR_VERSION_REF}; \
+    fi
+
+FROM $DISTRO:$DISTRO_VERSION AS base
 
 COPY --from=python /usr/local/bin/python /usr/local/bin/python
 

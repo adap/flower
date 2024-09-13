@@ -15,6 +15,7 @@
 """Simulation engine executor."""
 
 
+import json
 import subprocess
 import sys
 from logging import ERROR, INFO, WARN
@@ -24,12 +25,32 @@ from typing_extensions import override
 
 from flwr.cli.config_utils import load_and_validate
 from flwr.cli.install import install_from_fab
+from flwr.common.config import unflatten_dict
 from flwr.common.constant import RUN_ID_NUM_BYTES
 from flwr.common.logger import log
 from flwr.common.typing import UserConfig
 from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
 
 from .executor import Executor, RunTracker
+
+
+def _user_config_to_str(user_config: UserConfig) -> str:
+    """Convert override user config to string."""
+    user_config_list_str = []
+    for key, value in user_config.items():
+        if isinstance(value, bool):
+            user_config_list_str.append(f"{key}={str(value).lower()}")
+        elif isinstance(value, (int, float)):
+            user_config_list_str.append(f"{key}={value}")
+        elif isinstance(value, str):
+            user_config_list_str.append(f'{key}="{value}"')
+        else:
+            raise ValueError(
+                "Only types `bool`, `float`, `int` and `str` are supported"
+            )
+
+    user_config_str = ",".join(user_config_list_str)
+    return user_config_str
 
 
 class SimulationEngine(Executor):
@@ -44,8 +65,10 @@ class SimulationEngine(Executor):
     def __init__(
         self,
         num_supernodes: Optional[int] = None,
+        verbose: Optional[bool] = False,
     ) -> None:
         self.num_supernodes = num_supernodes
+        self.verbose = verbose
 
     @override
     def set_config(
@@ -61,14 +84,14 @@ class SimulationEngine(Executor):
             Supported configuration key/value pairs:
             - "num-supernodes": int
                 Number of nodes to register for the simulation.
+            - "verbose": bool
+                Set verbosity of logs.
         """
-        if not config:
-            return
         if num_supernodes := config.get("num-supernodes"):
             if not isinstance(num_supernodes, int):
                 raise ValueError("The `num-supernodes` value should be of type `int`.")
             self.num_supernodes = num_supernodes
-        else:
+        elif self.num_supernodes is None:
             log(
                 ERROR,
                 "To start a run with the simulation plugin, please specify "
@@ -80,21 +103,43 @@ class SimulationEngine(Executor):
                 "positive integer."
             )
 
+        if verbose := config.get("verbose"):
+            if not isinstance(verbose, bool):
+                raise ValueError(
+                    "The `verbose` value must be a string `true` or `false`."
+                )
+            self.verbose = verbose
+
+    # pylint: disable=too-many-locals
     @override
     def start_run(
-        self, fab_file: bytes, override_config: UserConfig
+        self,
+        fab_file: bytes,
+        override_config: UserConfig,
+        federation_config: UserConfig,
     ) -> Optional[RunTracker]:
         """Start run using the Flower Simulation Engine."""
+        if self.num_supernodes is None:
+            raise ValueError(
+                "Error in `SuperExec` (`SimulationEngine` executor):\n\n"
+                "`num-supernodes` must not be `None`, it must be a valid "
+                "positive integer. In order to start this simulation executor "
+                "with a specified number of `SuperNodes`, you can either provide "
+                "a `--executor` that has been initialized with a number of nodes "
+                "to the `flower-superexec` CLI, or `--executor-config num-supernodes=N`"
+                "to the `flower-superexec` CLI."
+            )
         try:
 
             # Install FAB to flwr dir
             fab_path = install_from_fab(fab_file, None, True)
 
             # Install FAB Python package
-            subprocess.check_call(
+            subprocess.run(
                 [sys.executable, "-m", "pip", "install", "--no-deps", str(fab_path)],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
+                stdout=None if self.verbose else subprocess.DEVNULL,
+                stderr=None if self.verbose else subprocess.DEVNULL,
+                check=True,
             )
 
             # Load and validate config
@@ -110,6 +155,15 @@ class SimulationEngine(Executor):
                     "Config extracted from FAB's pyproject.toml is not valid"
                 )
 
+            # Flatten federated config
+            federation_config_flat = unflatten_dict(federation_config)
+
+            num_supernodes = federation_config_flat.get(
+                "num-supernodes", self.num_supernodes
+            )
+            backend_cfg = federation_config_flat.get("backend", {})
+            verbose: Optional[bool] = federation_config_flat.get("verbose")
+
             # In Simulation there is no SuperLink, still we create a run_id
             run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
             log(INFO, "Created run %s", str(run_id))
@@ -120,18 +174,25 @@ class SimulationEngine(Executor):
                 "--app",
                 f"{str(fab_path)}",
                 "--num-supernodes",
-                f"{self.num_supernodes}",
+                f"{num_supernodes}",
                 "--run-id",
                 str(run_id),
             ]
 
+            if backend_cfg:
+                # Stringify as JSON
+                command.extend(["--backend-config", json.dumps(backend_cfg)])
+
+            if verbose:
+                command.extend(["--verbose"])
+
             if override_config:
-                command.extend(["--run-config", f"{override_config}"])
+                override_config_str = _user_config_to_str(override_config)
+                command.extend(["--run-config", f"{override_config_str}"])
 
             # Start Simulation
-            proc = subprocess.run(  # pylint: disable=consider-using-with
+            proc = subprocess.Popen(  # pylint: disable=consider-using-with
                 command,
-                check=True,
                 text=True,
             )
 
@@ -139,7 +200,7 @@ class SimulationEngine(Executor):
 
             return RunTracker(
                 run_id=run_id,
-                proc=proc,  # type:ignore
+                proc=proc,
             )
 
         # pylint: disable-next=broad-except

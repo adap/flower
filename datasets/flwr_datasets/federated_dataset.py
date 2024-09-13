@@ -54,9 +54,11 @@ class FederatedDataset:
         no operation is applied.
     partitioners : Dict[str, Union[Partitioner, int]]
         A dictionary mapping the Dataset split (a `str`) to a `Partitioner` or an `int`
-        (representing the number of IID partitions that this split should be partitioned
-        into). One or multiple `Partitioner` objects can be specified in that manner,
-        but at most, one per split.
+        (representing the number of IID partitions that this split should be
+        partitioned into, i.e., using the default partitioner
+        `IidPartitioner <https://flower.ai/docs/datasets/ref-api/flwr_
+        datasets.partitioner.IidPartitioner.html>`_). One or multiple `Partitioner`
+        objects can be specified in that manner, but at most, one per split.
     shuffle : bool
         Whether to randomize the order of samples. Applied prior to preprocessing
         operations, speratelly to each of the present splits in the dataset. It uses
@@ -159,6 +161,11 @@ class FederatedDataset:
             not need to provide this argument, but if `partitioners={"train": 10,
             "test": 100}`, you need to set it to differentiate which partitioner should
             be used.
+            The split names you can choose from vary from dataset to dataset. You need
+            to check the dataset on the `Hugging Face Hub`<https://huggingface.co/
+            datasets>_ to see which splits are available. You can resplit the dataset
+            by using the `preprocessor` parameter (to rename, merge, divide, etc. the
+            available splits).
 
         Returns
         -------
@@ -201,6 +208,11 @@ class FederatedDataset:
         ----------
         split : str
             Split name of the downloaded dataset (e.g. "train", "test").
+            The split names you can choose from vary from dataset to dataset. You need
+            to check the dataset on the `Hugging Face Hub`<https://huggingface.co/
+            datasets>_ to see which splits are available. You can resplit the dataset
+            by using the `preprocessor` parameter (to rename, merge, divide, etc. the
+            available splits).
 
         Returns
         -------

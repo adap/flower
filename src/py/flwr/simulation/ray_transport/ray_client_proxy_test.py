@@ -17,7 +17,6 @@
 
 from math import pi
 from random import shuffle
-from typing import Dict, List, Tuple, Type
 
 import ray
 
@@ -32,6 +31,7 @@ from flwr.common import (
     Message,
     MessageTypeLegacy,
     Metadata,
+    RecordSet,
     Scalar,
 )
 from flwr.common.constant import NUM_PARTITIONS_KEY, PARTITION_ID_KEY
@@ -55,15 +55,15 @@ from flwr.simulation.ray_transport.ray_client_proxy import RayActorClientProxy
 class DummyClient(NumPyClient):
     """A dummy NumPyClient for tests."""
 
-    def __init__(self, node_id: int) -> None:
+    def __init__(self, node_id: int, state: RecordSet) -> None:
         self.node_id = node_id
+        self.client_state = state
 
-    def get_properties(self, config: Config) -> Dict[str, Scalar]:
+    def get_properties(self, config: Config) -> dict[str, Scalar]:
         """Return properties by doing a simple calculation."""
         result = self.node_id * pi
-
         # store something in context
-        self.context.state.configs_records["result"] = ConfigsRecord(
+        self.client_state.configs_records["result"] = ConfigsRecord(
             {"result": str(result)}
         )
         return {"result": result}
@@ -71,18 +71,18 @@ class DummyClient(NumPyClient):
 
 def get_dummy_client(context: Context) -> Client:
     """Return a DummyClient converted to Client type."""
-    return DummyClient(context.node_id).to_client()
+    return DummyClient(context.node_id, state=context.state).to_client()
 
 
 def prep(
-    actor_type: Type[VirtualClientEngineActor] = ClientAppActor,
-) -> Tuple[
-    List[RayActorClientProxy], VirtualClientEngineActorPool, NodeToPartitionMapping
+    actor_type: type[VirtualClientEngineActor] = ClientAppActor,
+) -> tuple[
+    list[RayActorClientProxy], VirtualClientEngineActorPool, NodeToPartitionMapping
 ]:  # pragma: no cover
     """Prepare ClientProxies and pool for tests."""
     client_resources = {"num_cpus": 1, "num_gpus": 0.0}
 
-    def create_actor_fn() -> Type[VirtualClientEngineActor]:
+    def create_actor_fn() -> type[VirtualClientEngineActor]:
         return actor_type.options(**client_resources).remote()  # type: ignore
 
     # Create actor pool
@@ -185,7 +185,6 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
                 "result"
             ]["result"]
         )
-
     ray.shutdown()
 
 
@@ -195,7 +194,7 @@ def test_cid_consistency_without_proxies() -> None:
     node_ids = list(mapping.keys())
 
     # register node states
-    node_states: Dict[int, NodeState] = {}
+    node_states: dict[int, NodeState] = {}
     for node_id, partition_id in mapping.items():
         node_states[node_id] = NodeState(
             node_id=node_id,

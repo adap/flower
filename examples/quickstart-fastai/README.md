@@ -4,77 +4,61 @@ dataset: [MNIST]
 framework: [fastai]
 ---
 
-# Flower Example using fastai
+# Federated Learning with fastai and Flower (Quickstart Example)
 
-This introductory example to Flower uses [fastai](https://www.fast.ai/), but deep knowledge of fastai is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case.
-Running this example in itself is quite easy.
+This introductory example to Flower uses [fastai](https://www.fast.ai/), but deep knowledge of fastai is not necessarily required to run the example. The example will help you understand how to adapt Flower to your specific use case, and running it is quite straightforward.
 
-## Project Setup
+fastai is a deep learning library built on PyTorch which provides practitioners with high-level components for building deep learning projects. In this example, we will train a [SqueezeNet v1.1](https://github.com/forresti/SqueezeNet/tree/master/SqueezeNet_v1.1) model on the [MNIST](https://huggingface.co/datasets/ylecun/mnist) dataset. The data will be downloaded and partitioned using [Flower Datasets](https://flower.ai/docs/datasets/).
 
-Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
+## Set up the project
+
+### Clone the project
+
+Start by cloning the example project:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git _tmp && mv _tmp/examples/quickstart-fastai . && rm -rf _tmp && cd quickstart-fastai
+git clone --depth=1 https://github.com/adap/flower.git _tmp \
+		&& mv _tmp/examples/quickstart-fastai . \
+		&& rm -rf _tmp && cd quickstart-fastai
 ```
 
 This will create a new directory called `quickstart-fastai` containing the following files:
 
 ```shell
--- pyproject.toml
--- requirements.txt
--- client.py
--- server.py
--- run.sh
--- README.md
+quickstart-fastai
+├── fastai_example
+│   ├── client_app.py   # Defines your ClientApp
+│   ├── server_app.py   # Defines your ServerApp
+│   └── task.py         # Defines your model, training and data loading
+├── pyproject.toml      # Project metadata like dependencies and configs
+└── README.md
 ```
 
-### Installing Dependencies
+### Install dependencies and project
 
-Project dependencies (such as `fastai` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
+Install the dependencies defined in `pyproject.toml` as well as the `fastai_example` package.
 
-#### Poetry
-
-```shell
-poetry install
-poetry shell
+```bash
+pip install -e .
 ```
 
-Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
+## Run the project
 
-```shell
-poetry run python3 -c "import flwr"
+You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
+
+### Run with the Simulation Engine
+
+```bash
+flwr run .
 ```
 
-If you don't see any errors you're good to go!
+You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
-#### pip
-
-Write the command below in your terminal to install the dependencies according to the configuration file requirements.txt.
-
-```shell
-pip install -r requirements.txt
+```bash
+flwr run . --run-config num-server-rounds=5
 ```
 
-## Run Federated Learning with fastai and Flower
+### Run with the Deployment Engine
 
-Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
-
-```shell
-python3 server.py
-```
-
-Now you are ready to start the Flower clients which will participate in the learning. To do so simply open two more terminal windows and run the following commands.
-
-Start client 1 in the first terminal:
-
-```shell
-python3 client.py
-```
-
-Start client 2 in the second terminal:
-
-```shell
-python3 client.py
-```
-
-You will see that fastai is starting a federated training. For a more in-depth look, be sure to check out the code on our [repo](https://github.com/adap/flower/tree/main/examples/quickstart-fastai).
+> \[!NOTE\]
+> An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.
