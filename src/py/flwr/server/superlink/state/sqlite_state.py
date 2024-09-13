@@ -663,7 +663,7 @@ class SqliteState(State):  # pylint: disable=R0904
         rows = self.query(query, (time.time(),))
 
         # Convert sint64 node_ids to uint64
-        result: Set[int] = {convert_sint64_to_uint64(row["node_id"]) for row in rows}
+        result: set[int] = {convert_sint64_to_uint64(row["node_id"]) for row in rows}
 
         return result
 
