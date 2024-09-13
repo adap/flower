@@ -56,6 +56,47 @@ def _update_python_versions(
                     r"\g<1>" + new_full_version + r"\g<2>",
                 ),
             ],
+            # Documentation files
+            "doc/source/conf.py": [
+                # Update Python full version in conf.py
+                (
+                    r"(\.\.\s*\|python_full_version\|\s*replace::\s*)"
+                    + version_pattern,
+                    r"\g<1>" + new_full_version,
+                ),
+            ],
+            # ReStructuredText files
+            "doc/source/*.rst": [
+                # Update Python full version in rst files
+                (
+                    r"(`Python\s*"
+                    + re.escape(new_major_minor)
+                    + r"\s*<https://docs.python.org/"
+                    + re.escape(new_major_minor)
+                    + r"/>`_)",
+                    r"`Python "
+                    + new_full_version
+                    + " <https://docs.python.org/"
+                    + new_major_minor
+                    + "/>`_",
+                ),
+            ],
+            # PO files for localization
+            "doc/locales/*/LC_MESSAGES/framework-docs.po": [
+                # Update Python version in localization files
+                (
+                    r"(`Python\s*"
+                    + re.escape(new_major_minor)
+                    + r"\s*<https://docs.python.org/"
+                    + re.escape(new_major_minor)
+                    + r"/>`_)",
+                    r"`Python "
+                    + new_full_version
+                    + " <https://docs.python.org/"
+                    + new_major_minor
+                    + "/>`_",
+                ),
+            ],
         }
     else:
         # Compute old_version as immediate previous minor version
@@ -63,7 +104,7 @@ def _update_python_versions(
 
         print(f"Determined old version: {old_version}")
         print(
-            f"Updating to new version: {new_major_minor}"
+            f"Updating to new version: {new_major_minor} "
             f"(full version: {new_full_version})"
         )
 
@@ -127,6 +168,54 @@ def _update_python_versions(
                 (
                     r'(["\'])' + re.escape(old_version) + r'(\.\d+)?(["\'])',
                     r"\g<1>" + new_full_version + r"\g<3>",
+                ),
+            ],
+            # Documentation files
+            "doc/source/conf.py": [
+                # Update Python version in conf.py
+                (
+                    r"(\.\.\s*\|python_version\|\s*replace::\s*)"
+                    + re.escape(old_version),
+                    r"\g<1>" + new_major_minor,
+                ),
+                # Update Python full version in conf.py
+                (
+                    r"(\.\.\s*\|python_full_version\|\s*replace::\s*)"
+                    + re.escape(old_version)
+                    + r"\.\d+",
+                    r"\g<1>" + new_full_version,
+                ),
+            ],
+            # ReStructuredText files
+            "doc/source/*.rst": [
+                # Update Python version in rst files
+                (
+                    r"(`Python\s*"
+                    + re.escape(old_version)
+                    + r"\s*<https://docs.python.org/"
+                    + re.escape(old_version)
+                    + r"/>`_)",
+                    r"`Python "
+                    + new_major_minor
+                    + " <https://docs.python.org/"
+                    + new_major_minor
+                    + "/>`_",
+                ),
+            ],
+            # PO files for localization
+            "doc/locales/*/LC_MESSAGES/framework-docs.po": [
+                # Update Python version in localization files
+                (
+                    r"(`Python\s*"
+                    + re.escape(old_version)
+                    + r"\s*<https://docs.python.org/"
+                    + re.escape(old_version)
+                    + r"/>`_)",
+                    r"`Python "
+                    + new_major_minor
+                    + " <https://docs.python.org/"
+                    + new_major_minor
+                    + "/>`_",
                 ),
             ],
         }

@@ -86,9 +86,10 @@ Update the ``flwr`` dependency in ``pyproject.toml`` and then reinstall (don't f
 Ensure you set the following version constraint in your ``pyproject.toml``:
 
 .. code-block:: toml
+   :substitutions:
 
     [tool.poetry.dependencies]
-    python = "^3.9"
+    python = "^|python_version|"
 
     # Without simulation support
     flwr = ">=1.8,<2.0"
