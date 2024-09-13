@@ -1,3 +1,5 @@
+"""tf_privacy: Training with Sample-Level Differential Privacy using TensorFlow-Privacy Engine."""
+
 from typing import List, Tuple
 
 from flwr.common import Metrics

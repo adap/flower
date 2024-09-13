@@ -1,3 +1,5 @@
+"""tf_privacy: Training with Sample-Level Differential Privacy using TensorFlow-Privacy Engine."""
+
 import argparse
 import os
 
@@ -90,16 +92,19 @@ class FlowerClient(NumPyClient):
 
 def client_fn(context: Context):
     model = Net()
-    partition_id = context.node_config["partition-id"]
-    train_data, test_data = load_data(
-        partition_id=partition_id, num_partitions=context.node_config["num-partitions"]
-    )
+
     l2_norm_clip = 1.0
     num_microbatches = 64
     learning_rate = 0.01
     batch_size = 64
-
     noise_multiplier = 1.0 if partition_id % 2 == 0 else 1.5
+
+    partition_id = context.node_config["partition-id"]
+    train_data, test_data = load_data(
+        partition_id=partition_id,
+        num_partitions=context.node_config["num-partitions"],
+        batch_size=batch_size,
+    )
 
     return FlowerClient(
         model,
