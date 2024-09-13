@@ -24,23 +24,20 @@ Before you start, make sure that:
 Run the Quickstart Example
 --------------------------
 
-#. Clone the Flower Repository:
+#. Clone the quickstart example you like to run. For example, ``quickstart-sklearn-tabular``:
 
    .. code-block:: bash
 
-      $ git clone --depth=1 https://github.com/adap/flower.git
+      $ git clone --depth=1 https://github.com/adap/flower.git \
+           && mv flower/examples/quickstart-sklearn-tabular . \
+           && rm -rf flower && cd quickstart-sklearn-tabular
 
-#. Change the directory to the quickstart example you like to run:
-
-   .. code-block:: bash
-
-      $ cd flower/examples/quickstart-sklearn-tabular
-
-#. Copy the ``compose.yml`` file into the example directory:
+#. Download the `compose.yml <https://github.com/adap/flower/blob/main/src/docker/complete/compose.yml>`_ file into the example directory:
 
    .. code-block:: bash
 
-      $ cp ../../src/docker/complete/compose.yml .
+      $ curl https://raw.githubusercontent.com/adap/flower/refs/heads/main/src/docker/complete/compose.yml \
+          -o compose.yml
 
 #. Build and start the services using the following command:
 
@@ -81,7 +78,7 @@ Compose services of the current example:
 
    $ docker compose down
 
-After that, you can repeat the steps above starting from Step 2.
+After that, you can repeat the steps above.
 
 Limitations
 -----------
