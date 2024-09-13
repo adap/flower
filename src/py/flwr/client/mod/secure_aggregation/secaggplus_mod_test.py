@@ -16,7 +16,7 @@
 
 import unittest
 from itertools import product
-from typing import Callable, Dict, List
+from typing import Callable
 
 from flwr.client.mod import make_ffn
 from flwr.common import (
@@ -41,7 +41,7 @@ from .secaggplus_mod import SecAggPlusState, check_configs, secaggplus_mod
 
 def get_test_handler(
     ctxt: Context,
-) -> Callable[[Dict[str, ConfigsRecordValues]], ConfigsRecord]:
+) -> Callable[[dict[str, ConfigsRecordValues]], ConfigsRecord]:
     """."""
 
     def empty_ffn(_msg: Message, _2: Context) -> Message:
@@ -49,7 +49,7 @@ def get_test_handler(
 
     app = make_ffn(empty_ffn, [secaggplus_mod])
 
-    def func(configs: Dict[str, ConfigsRecordValues]) -> ConfigsRecord:
+    def func(configs: dict[str, ConfigsRecordValues]) -> ConfigsRecord:
         in_msg = Message(
             metadata=Metadata(
                 run_id=0,
@@ -158,7 +158,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
             (Key.MOD_RANGE, int),
         ]
 
-        type_to_test_value: Dict[type, ConfigsRecordValues] = {
+        type_to_test_value: dict[type, ConfigsRecordValues] = {
             int: 10,
             bool: True,
             float: 1.0,
@@ -166,7 +166,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
             bytes: b"test",
         }
 
-        valid_configs: Dict[str, ConfigsRecordValues] = {
+        valid_configs: dict[str, ConfigsRecordValues] = {
             key: type_to_test_value[value_type]
             for key, value_type in valid_key_type_pairs
         }
@@ -208,7 +208,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
         handler = get_test_handler(ctxt)
         set_stage = _make_set_state_fn(ctxt)
 
-        valid_configs: Dict[str, ConfigsRecordValues] = {
+        valid_configs: dict[str, ConfigsRecordValues] = {
             "1": [b"public key 1", b"public key 2"],
             "2": [b"public key 1", b"public key 2"],
             "3": [b"public key 1", b"public key 2"],
@@ -225,7 +225,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
         valid_configs[Key.STAGE] = Stage.SHARE_KEYS
 
         # Test invalid configs
-        invalid_values: List[ConfigsRecordValues] = [
+        invalid_values: list[ConfigsRecordValues] = [
             b"public key 1",
             [b"public key 1"],
             [b"public key 1", b"public key 2", b"public key 3"],
@@ -245,7 +245,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
         handler = get_test_handler(ctxt)
         set_stage = _make_set_state_fn(ctxt)
 
-        valid_configs: Dict[str, ConfigsRecordValues] = {
+        valid_configs: dict[str, ConfigsRecordValues] = {
             Key.CIPHERTEXT_LIST: [b"ctxt!", b"ctxt@", b"ctxt#", b"ctxt?"],
             Key.SOURCE_LIST: [32, 51324, 32324123, -3],
         }
@@ -289,7 +289,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
         handler = get_test_handler(ctxt)
         set_stage = _make_set_state_fn(ctxt)
 
-        valid_configs: Dict[str, ConfigsRecordValues] = {
+        valid_configs: dict[str, ConfigsRecordValues] = {
             Key.ACTIVE_NODE_ID_LIST: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
             Key.DEAD_NODE_ID_LIST: [32, 51324, 32324123, -3],
         }
