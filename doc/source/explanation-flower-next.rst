@@ -38,8 +38,8 @@ this decoupling, the Flower federated learning system becomes truly
 infrastructure agnostic, meaning that Flower users can seamlessly move
 projects between simulation and deployment without code changes.
 
-In Flower Next, the infrastructure layer consists of the SuperLink and
-SuperNode.
+.. important::
+   In Flower Next, the infrastructure layer consists of the SuperLink and SuperNode.
 
 SuperLink
 =========
@@ -48,21 +48,21 @@ The SuperLink relays messages in a Flower federated learning system. It
 acts like a hub that receives the model and training instructions from
 the server, then passes them along to the training nodes.
 
-More concretely, the SuperLink relays messages between the SuperNodes
-and the ServerApp. Let's give an example for a federated learning
-workflow: a SuperLink receives a model to be federated in a message from
-the ServerApp. Selected SuperNodes then pull that message from the
-SuperLink and respectively process their messages by running their
-ClientApps. In this case, the SuperNodes launch their ClientApps to
+More concretely, the SuperLink relays |message_link|_\s between the SuperNodes
+and the |serverapp_link|_. Let's give an example for a federated learning
+workflow: a SuperLink receives a model to be federated in a ``Message`` from
+the ``ServerApp``. Selected SuperNodes then pull that ``Message`` from the
+SuperLink and respectively process their ``Message``\s by running their
+|clientapp_link|_\s. In this case, the SuperNodes launch their ``ClientApp``\s to
 train a model each on their local data. Once trainings are complete, the
-ClientApps return their models to the SuperNodes, which in turn relay
-messages via the SuperLink back to the ServerApp for aggregation.
+``ClientApp``\s return their models to the SuperNodes, which in turn relay
+``Message``\s via the SuperLink back to the ``ServerApp`` for aggregation.
 
 ..
    TODO: Add section labels where appropriate: https://docs.readthedocs.io/en/stable/guides/cross-referencing-with-sphinx.html#automatically-label-sections
 
 In the "Application layer" section, we will define what we mean by the
-ServerApp, ClientApp, and Message. For now, it is important to know that
+``ServerApp``, ``ClientApp``, and ``Message``. For now, it is important to know that
 as the main relay hub, the SuperLink is always running in the background
 to handle any communication needs.
 
@@ -72,10 +72,10 @@ SuperNode
 The SuperNode is the next component of the infrastructure layer. Just
 like SuperLink, the SuperNode continuously runs in the background. It
 runs where the data is gathered, like on smartphones, IoT devices, or
-servers belonging to organizations. All connected SuperNodes check in
-with the SuperLink regularly. They pull messages (that were first pushed
-by a ServerApp) from the SuperLink, process the messages by launching a
-ClientApp, and then push the results back to the SuperLink.
+servers belonging to organizations. All connected SuperNodes ping
+the SuperLink regularly. They pull ``Message``\s (that were first pushed
+by a ``ServerApp``) from the SuperLink, process the ``Message``\s by launching a
+``ClientApp``, and then push the results back to the SuperLink.
 
 Together, SuperLink and SuperNodes make up the infrastructure layer of a
 Flower federated learning system.
@@ -208,19 +208,19 @@ and build federated learning systems.
 
 .. |clientapp_link| replace::
 
-   ``ClientApp()``
+   ``ClientApp``
 
 .. |serverapp_link| replace::
 
-   ``ServerApp()``
+   ``ServerApp``
 
 .. |message_link| replace::
 
-   ``Message()``
+   ``Message``
 
 .. |context_link| replace::
 
-   ``Context()``
+   ``Context``
 
 .. |mods_link| replace::
 
