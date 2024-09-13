@@ -15,7 +15,7 @@
 """RecordSet from legacy messages tests."""
 
 from copy import deepcopy
-from typing import Callable, Dict
+from typing import Callable
 
 import numpy as np
 import pytest
@@ -74,10 +74,15 @@ def _get_valid_fitins() -> FitIns:
     return FitIns(parameters=ndarrays_to_parameters(arrays), config={"a": 1.0, "b": 0})
 
 
+def _get_valid_fitins_with_empty_ndarrays() -> FitIns:
+    pp = ndarrays_to_parameters([])
+    return FitIns(parameters=pp, config={"a": 1.0, "b": 0})
+
+
 def _get_valid_fitres() -> FitRes:
     """Returnn Valid parameters but potentially invalid config."""
     arrays = get_ndarrays()
-    metrics: Dict[str, Scalar] = {"a": 1.0, "b": 0}
+    metrics: dict[str, Scalar] = {"a": 1.0, "b": 0}
     return FitRes(
         parameters=ndarrays_to_parameters(arrays),
         num_examples=1,
@@ -93,7 +98,7 @@ def _get_valid_evaluateins() -> EvaluateIns:
 
 def _get_valid_evaluateres() -> EvaluateRes:
     """Return potentially invalid config."""
-    metrics: Dict[str, Scalar] = {"a": 1.0, "b": 0}
+    metrics: dict[str, Scalar] = {"a": 1.0, "b": 0}
     return EvaluateRes(
         num_examples=1,
         loss=0.1,
@@ -103,7 +108,7 @@ def _get_valid_evaluateres() -> EvaluateRes:
 
 
 def _get_valid_getparametersins() -> GetParametersIns:
-    config_dict: Dict[str, Scalar] = {
+    config_dict: dict[str, Scalar] = {
         "a": 1.0,
         "b": 3,
         "c": True,
@@ -126,7 +131,7 @@ def _get_valid_getpropertiesins() -> GetPropertiesIns:
 
 
 def _get_valid_getpropertiesres() -> GetPropertiesRes:
-    config_dict: Dict[str, Scalar] = {
+    config_dict: dict[str, Scalar] = {
         "a": 1.0,
         "b": 3,
         "c": True,
@@ -138,23 +143,29 @@ def _get_valid_getpropertiesres() -> GetPropertiesRes:
 
 
 @pytest.mark.parametrize(
-    "keep_input, validate_freed_fn",
+    "keep_input, validate_freed_fn, fn",
     [
         (
             False,
             lambda x, x_copy, y: len(x.parameters.tensors) == 0 and x_copy == y,
+            _get_valid_fitins,
         ),  # check tensors were freed
+        (True, lambda x, x_copy, y: x == y, _get_valid_fitins),
         (
-            True,
-            lambda x, x_copy, y: x == y,
-        ),
+            False,
+            lambda x, x_copy, y: len(x.parameters.tensors) == 0 and x_copy == y,
+            _get_valid_fitins_with_empty_ndarrays,
+        ),  # check tensors were freed
+        (True, lambda x, x_copy, y: x == y, _get_valid_fitins_with_empty_ndarrays),
     ],
 )
 def test_fitins_to_recordset_and_back(
-    keep_input: bool, validate_freed_fn: Callable[[FitIns, FitIns, FitIns], bool]
+    keep_input: bool,
+    validate_freed_fn: Callable[[FitIns, FitIns, FitIns], bool],
+    fn: Callable[[], FitIns],
 ) -> None:
     """Test conversion FitIns --> RecordSet --> FitIns."""
-    fitins = _get_valid_fitins()
+    fitins = fn()
 
     fitins_copy = deepcopy(fitins)
 

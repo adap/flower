@@ -145,8 +145,7 @@ class LocalDpMod:
         )
         log(
             INFO,
-            "LocalDpMod: local DP noise with "
-            "standard deviation: %.4f added to parameters.",
+            "LocalDpMod: local DP noise with %.4f stedv added to parameters",
             noise_value_sd,
         )
 

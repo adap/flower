@@ -18,7 +18,6 @@ from __future__ import annotations
 
 import time
 import warnings
-from dataclasses import dataclass
 from typing import Optional, cast
 
 from .record import RecordSet
@@ -26,7 +25,6 @@ from .record import RecordSet
 DEFAULT_TTL = 3600
 
 
-@dataclass
 class Metadata:  # pylint: disable=too-many-instance-attributes
     """A dataclass holding metadata associated with the current message.
 
@@ -50,10 +48,6 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     message_type : str
         A string that encodes the action to be executed on
         the receiving end.
-    partition_id : Optional[int]
-        An identifier that can be used when loading a particular
-        data partition for a ClientApp. Making use of this identifier
-        is more relevant when conducting simulations.
     """
 
     def __init__(  # pylint: disable=too-many-arguments
@@ -66,7 +60,6 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         group_id: str,
         ttl: float,
         message_type: str,
-        partition_id: int | None = None,
     ) -> None:
         var_dict = {
             "_run_id": run_id,
@@ -77,7 +70,6 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
             "_group_id": group_id,
             "_ttl": ttl,
             "_message_type": message_type,
-            "_partition_id": partition_id,
         }
         self.__dict__.update(var_dict)
 
@@ -151,18 +143,18 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         """Set message_type."""
         self.__dict__["_message_type"] = value
 
-    @property
-    def partition_id(self) -> int | None:
-        """An identifier telling which data partition a ClientApp should use."""
-        return cast(int, self.__dict__["_partition_id"])
+    def __repr__(self) -> str:
+        """Return a string representation of this instance."""
+        view = ", ".join([f"{k.lstrip('_')}={v!r}" for k, v in self.__dict__.items()])
+        return f"{self.__class__.__qualname__}({view})"
 
-    @partition_id.setter
-    def partition_id(self, value: int) -> None:
-        """Set partition_id."""
-        self.__dict__["_partition_id"] = value
+    def __eq__(self, other: object) -> bool:
+        """Compare two instances of the class."""
+        if not isinstance(other, self.__class__):
+            raise NotImplementedError
+        return self.__dict__ == other.__dict__
 
 
-@dataclass
 class Error:
     """A dataclass that stores information about an error that occurred.
 
@@ -191,8 +183,18 @@ class Error:
         """Reason reported about the error."""
         return cast(Optional[str], self.__dict__["_reason"])
 
+    def __repr__(self) -> str:
+        """Return a string representation of this instance."""
+        view = ", ".join([f"{k.lstrip('_')}={v!r}" for k, v in self.__dict__.items()])
+        return f"{self.__class__.__qualname__}({view})"
 
-@dataclass
+    def __eq__(self, other: object) -> bool:
+        """Compare two instances of the class."""
+        if not isinstance(other, self.__class__):
+            raise NotImplementedError
+        return self.__dict__ == other.__dict__
+
+
 class Message:
     """State of your application from the viewpoint of the entity using it.
 
@@ -357,6 +359,17 @@ class Message:
 
         return message
 
+    def __repr__(self) -> str:
+        """Return a string representation of this instance."""
+        view = ", ".join(
+            [
+                f"{k.lstrip('_')}={v!r}"
+                for k, v in self.__dict__.items()
+                if v is not None
+            ]
+        )
+        return f"{self.__class__.__qualname__}({view})"
+
 
 def _create_reply_metadata(msg: Message, ttl: float) -> Metadata:
     """Construct metadata for a reply message."""
@@ -369,5 +382,4 @@ def _create_reply_metadata(msg: Message, ttl: float) -> Metadata:
         group_id=msg.metadata.group_id,
         ttl=ttl,
         message_type=msg.metadata.message_type,
-        partition_id=msg.metadata.partition_id,
     )

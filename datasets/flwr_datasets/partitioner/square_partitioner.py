@@ -17,10 +17,10 @@
 
 import numpy as np
 
-from flwr_datasets.partitioner.size_partitioner import SizePartitioner
+from flwr_datasets.partitioner.id_to_size_fnc_partitioner import IdToSizeFncPartitioner
 
 
-class SquarePartitioner(SizePartitioner):
+class SquarePartitioner(IdToSizeFncPartitioner):
     """Partitioner creates partitions of size that are correlated with squared id.
 
     The amount of data each client gets is correlated with the squared partition ID.
@@ -31,6 +31,15 @@ class SquarePartitioner(SizePartitioner):
     ----------
     num_partitions : int
         The total number of partitions that the data will be divided into.
+
+    Examples
+    --------
+    >>> from flwr_datasets import FederatedDataset
+    >>> from flwr_datasets.partitioner import SquarePartitioner
+    >>>
+    >>> partitioner = SquarePartitioner(num_partitions=10)
+    >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": partitioner})
+    >>> partition = fds.load_partition(0)
     """
 
     def __init__(self, num_partitions: int) -> None:

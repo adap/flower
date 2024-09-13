@@ -36,18 +36,16 @@ permissions:
 jobs:
   build:
     name: Build image
-    runs-on: ubuntu-22.04
-    timeout-minutes: 60
+    runs-on: ${{ matrix.platform.runner-os }}
+    timeout-minutes: 180
     outputs:
       build-id: ${{ steps.build-id.outputs.id }}
     strategy:
       fail-fast: true
       matrix:
         platform: [
-            # build-push action and qemu use different platform names
-            # therefore we create a map
-            { name: "amd64", qemu: "", docker: "linux/amd64" },
-            { name: "arm64", qemu: "arm64", docker: "linux/arm64" },
+            { name: "amd64", docker: "linux/amd64", runner-os: "ubuntu-22.04" },
+            { name: "arm64", docker: "linux/arm64", runner-os: "ubuntu-4-core-arm64" },
           ]
     steps:
       - name: Create build id
@@ -60,14 +58,24 @@ jobs:
           hash = hashlib.sha256('''${{ inputs.namespace-repository }}
           ${{ inputs.file-dir }}
           ${{ inputs.build-args }}'''.encode())
+          # Adds two spaces to the line breaks to ensure proper indentation
+          # when passing the multi-line string to the wretry.action.
+          # Without it, the multi-line string is passed like this:
+          #
+          # build-args: |
+          #   ARG1=
+          # ARG2=
+          # ARG3=
+          #
+          # This causes the Docker action to interpret ARG2 and ARG3 as keys instead
+          # of values ​​of the multi-line string.
+          build_args = '''${{ inputs.build-args }}'''.replace("\n", "\n  ")
+
           with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
               print(f"id={hash.hexdigest()}", file=fh)
-
-      - name: Set up QEMU
-        if: matrix.platform.qemu != ''
-        uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3 # v3.0.0
-        with:
-          platforms: ${{ matrix.platform.qemu }}
+              print("build-args<<EOF", file=fh)
+              print(build_args, file=fh)
+              print("EOF", file=fh)
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
@@ -76,31 +84,37 @@ jobs:
           images: ${{ inputs.namespace-repository }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@d70bba72b1f3fd22344832f00baa16ece964efeb # v3.3.0
+        uses: docker/setup-buildx-action@988b5a0280414f521da01fcc63a27aeeb4b104db # v3.6.1
 
       - name: Login to Docker Hub
-        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3.1.0
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
         with:
           username: ${{ secrets.dockerhub-user }}
           password: ${{ secrets.dockerhub-token }}
 
       - name: Build and push
+        uses: Wandalen/wretry.action@6feedb7dedadeb826de0f45ff482b53b379a7844 # v3.5.0
         id: build
-        uses: docker/build-push-action@2cdde995de11925a030ce8070c3d77a52ffcf1c0 # v5.3.0
         with:
-          platforms: ${{ matrix.platform.docker }}
-          context: "{{defaultContext}}:${{ inputs.file-dir }}"
-          build-args: ${{ inputs.build-args }}
-          outputs: type=image,name=${{ inputs.namespace-repository }},push-by-digest=true,name-canonical=true,push=true
+          action: docker/build-push-action@5cd11c3a4ced054e52742c5fd54dca954e0edd85 # v6.7.0
+          attempt_limit: 60 # 60 attempts * (9 secs delay + 1 sec retry) = ~10 mins
+          attempt_delay: 9000 # 9 secs
+          with: |
+            pull: true
+            platforms: ${{ matrix.platform.docker }}
+            context: "{{defaultContext}}:${{ inputs.file-dir }}"
+            outputs: type=image,name=${{ inputs.namespace-repository }},push-by-digest=true,name-canonical=true,push=true
+            build-args: |
+              ${{ steps.build-id.outputs.build-args }}
 
       - name: Export digest
         run: |
           mkdir -p /tmp/digests
-          digest="${{ steps.build.outputs.digest }}"
+          digest="${{ fromJSON(steps.build.outputs.outputs).digest }}"
           touch "/tmp/digests/${digest#sha256:}"
 
       - name: Upload digest
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:
           name: digests-${{ steps.build-id.outputs.id }}-${{ matrix.platform.name }}
           path: /tmp/digests/*
@@ -116,7 +130,7 @@ jobs:
       metadata: ${{ steps.meta.outputs.json }}
     steps:
       - name: Download digests
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
           pattern: digests-${{ needs.build.outputs.build-id }}-*
           path: /tmp/digests
@@ -130,10 +144,10 @@ jobs:
           tags: ${{ inputs.tags }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@d70bba72b1f3fd22344832f00baa16ece964efeb # v3.3.0
+        uses: docker/setup-buildx-action@988b5a0280414f521da01fcc63a27aeeb4b104db # v3.6.1
 
       - name: Login to Docker Hub
-        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3.1.0
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
         with:
           username: ${{ secrets.dockerhub-user }}
           password: ${{ secrets.dockerhub-token }}

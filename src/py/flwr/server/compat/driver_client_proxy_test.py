@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,8 @@
 
 import unittest
 import unittest.mock
-from typing import Any, Callable, Iterable, Optional, Union, cast
+from collections.abc import Iterable
+from typing import Any, Callable, Optional, Union, cast
 from unittest.mock import Mock
 
 import numpy as np

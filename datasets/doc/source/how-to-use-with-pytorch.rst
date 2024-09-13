@@ -67,13 +67,20 @@ If you want to divide the dataset, you can use (at any point before passing the 
   partition_train = partition_train_test["train"]
   partition_test = partition_train_test["test"]
 
+If you want to keep the order of samples intact and need a division into 2 or more subsets, you can use::
+
+  from flwr_datasets.utils import divide_dataset
+  train, valid, test = divide_dataset(partition, [0.6, 0.2, 0.2])
+
 Or you can simply calculate the indices yourself::
 
   partition_len = len(partition)
   # Split `partition` 80:20
   num_train_examples = int(0.8 * partition_len)
-  partition_train = partition.select(range(num_train_examples)) ) # use first 80% 
-  partition_test = partition.select(range(num_train_examples, partition_len)) ) # use last 20%
+  # use first 80%
+  partition_train = partition.select(range(num_train_examples)) )
+  # use last 20%
+  partition_test = partition.select(range(num_train_examples, partition_len)) )
 
 And during the training loop, you need to apply one change. With a typical dataloader, you get a list returned for each iteration::
 

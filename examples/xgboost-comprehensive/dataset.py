@@ -1,11 +1,12 @@
-import xgboost as xgb
 from typing import Union
+
+import xgboost as xgb
 from datasets import Dataset, DatasetDict, concatenate_datasets
 from flwr_datasets.partitioner import (
+    ExponentialPartitioner,
     IidPartitioner,
     LinearPartitioner,
     SquarePartitioner,
-    ExponentialPartitioner,
 )
 
 CORRELATION_TO_PARTITIONER = {
