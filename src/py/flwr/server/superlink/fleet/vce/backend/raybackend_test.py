@@ -15,7 +15,7 @@
 """Test for Ray backend for the Fleet API using the Simulation Engine."""
 
 from math import pi
-from typing import Callable, Dict, Optional, Tuple, Union
+from typing import Callable, Optional, Union
 from unittest import TestCase
 
 import ray
@@ -47,7 +47,7 @@ class DummyClient(NumPyClient):
     def __init__(self, state: RecordSet) -> None:
         self.client_state = state
 
-    def get_properties(self, config: Config) -> Dict[str, Scalar]:
+    def get_properties(self, config: Config) -> dict[str, Scalar]:
         """Return properties by doing a simple calculation."""
         result = float(config["factor"]) * pi
 
@@ -69,8 +69,8 @@ def _load_app() -> ClientApp:
 def backend_build_process_and_termination(
     backend: RayBackend,
     app_fn: Callable[[], ClientApp],
-    process_args: Optional[Tuple[Message, Context]] = None,
-) -> Union[Tuple[Message, Context], None]:
+    process_args: Optional[tuple[Message, Context]] = None,
+) -> Union[tuple[Message, Context], None]:
     """Build, process job and terminate RayBackend."""
     backend.build(app_fn)
     to_return = None
@@ -83,7 +83,7 @@ def backend_build_process_and_termination(
     return to_return
 
 
-def _create_message_and_context() -> Tuple[Message, Context, float]:
+def _create_message_and_context() -> tuple[Message, Context, float]:
 
     # Construct a Message
     mult_factor = 2024
