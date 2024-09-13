@@ -33,7 +33,7 @@ clientapp = "huggingface_example.client_app:app"
 
 [tool.flwr.app.config]
 num-server-rounds = 3
-model-name = "distilbert-base-uncased"
+model-name = "prajjwal1/bert-tiny"
 fraction-fit = 0.05
 fraction-evaluate = 0.1
 
@@ -46,4 +46,4 @@ options.num-supernodes = 100
 [tool.flwr.federations.local-simulation-gpu]
 options.num-supernodes = 100
 options.backend.client-resources.num-cpus = 4 # each ClientApp assumes to use 4CPUs
-options.backend.client-resources.num-gpus = 1.0 # at most 1 ClientApp will run in a given GPU (lower it to increase parallelism)
+options.backend.client-resources.num-gpus = 0.25 # at most 4 ClientApp will run in a given GPU (lower it to increase parallelism)
