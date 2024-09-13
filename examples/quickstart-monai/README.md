@@ -70,7 +70,7 @@ flwr run . local-simulation-gpu
 You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
 ```bash
-flwr run . --run-config num-server-rounds=5,batch-size=32
+flwr run . --run-config "num-server-rounds=5 batch-size=32"
 ```
 
 ### Run with the Deployment Engine

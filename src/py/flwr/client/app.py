@@ -35,6 +35,7 @@ from flwr.client.typing import ClientFnExt
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, Message, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
+    CLIENTAPPIO_API_DEFAULT_ADDRESS,
     MISSING_EXTRA_REST,
     RUN_ID_NUM_BYTES,
     TRANSPORT_TYPE_GRPC_ADAPTER,
@@ -59,8 +60,6 @@ from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
 from .node_state import NodeState
 from .numpy_client import NumPyClient
-
-ADDRESS_CLIENTAPPIO_API_GRPC_RERE = "0.0.0.0:9094"
 
 ISOLATION_MODE_SUBPROCESS = "subprocess"
 ISOLATION_MODE_PROCESS = "process"
@@ -211,7 +210,7 @@ def start_client_internal(
     max_wait_time: Optional[float] = None,
     flwr_path: Optional[Path] = None,
     isolation: Optional[str] = None,
-    supernode_address: Optional[str] = ADDRESS_CLIENTAPPIO_API_GRPC_RERE,
+    supernode_address: Optional[str] = CLIENTAPPIO_API_DEFAULT_ADDRESS,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -266,7 +265,7 @@ def start_client_internal(
         by the SueprNode and communicates using gRPC at the address
         `supernode_address`. If `process`, the `ClientApp` runs in a separate isolated
         process and communicates using gRPC at the address `supernode_address`.
-    supernode_address : Optional[str] (default: `ADDRESS_CLIENTAPPIO_API_GRPC_RERE`)
+    supernode_address : Optional[str] (default: `CLIENTAPPIO_API_DEFAULT_ADDRESS`)
         The SuperNode gRPC server address.
     """
     if insecure is None:
