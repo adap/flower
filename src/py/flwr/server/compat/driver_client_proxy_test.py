@@ -17,7 +17,8 @@
 
 import unittest
 import unittest.mock
-from typing import Any, Callable, Iterable, Optional, Union, cast
+from collections.abc import Iterable
+from typing import Any, Callable, Optional, Union, cast
 from unittest.mock import Mock
 
 import numpy as np

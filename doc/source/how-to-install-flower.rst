@@ -5,7 +5,7 @@ Install Flower
 Python version
 --------------
 
-Flower requires at least `Python 3.8 <https://docs.python.org/3.8/>`_, but `Python 3.10 <https://docs.python.org/3.10/>`_ or above is recommended.
+Flower requires at least `Python 3.9 <https://docs.python.org/3.9/>`_, but `Python 3.10 <https://docs.python.org/3.10/>`_ or above is recommended.
 
 
 Install stable release
@@ -60,7 +60,7 @@ Advanced installation options
 Install via Docker
 ~~~~~~~~~~~~~~~~~~
 
-:doc:`How to run Flower using Docker <how-to-run-flower-using-docker>`
+:doc:`Run Flower using Docker <docker/index>`
 
 Install pre-release
 ~~~~~~~~~~~~~~~~~~~

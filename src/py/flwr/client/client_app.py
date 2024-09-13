@@ -16,7 +16,7 @@
 
 
 import inspect
-from typing import Callable, List, Optional
+from typing import Callable, Optional
 
 from flwr.client.client import Client
 from flwr.client.message_handler.message_handler import (
@@ -41,11 +41,11 @@ def _alert_erroneous_client_fn() -> None:
 
 def _inspect_maybe_adapt_client_fn_signature(client_fn: ClientFnExt) -> ClientFnExt:
     client_fn_args = inspect.signature(client_fn).parameters
-    first_arg = list(client_fn_args.keys())[0]
 
     if len(client_fn_args) != 1:
         _alert_erroneous_client_fn()
 
+    first_arg = list(client_fn_args.keys())[0]
     first_arg_type = client_fn_args[first_arg].annotation
 
     if first_arg_type is str or first_arg == "cid":
@@ -109,9 +109,9 @@ class ClientApp:
     def __init__(
         self,
         client_fn: Optional[ClientFnExt] = None,  # Only for backward compatibility
-        mods: Optional[List[Mod]] = None,
+        mods: Optional[list[Mod]] = None,
     ) -> None:
-        self._mods: List[Mod] = mods if mods is not None else []
+        self._mods: list[Mod] = mods if mods is not None else []
 
         # Create wrapper function for `handle`
         self._call: Optional[ClientAppCallable] = None
@@ -263,7 +263,7 @@ def _registration_error(fn_name: str) -> ValueError:
         >>> class FlowerClient(NumPyClient):
         >>>     # ...
         >>>
-        >>> def client_fn(cid) -> Client:
+        >>> def client_fn(context: Context):
         >>>     return FlowerClient().to_client()
         >>>
         >>> app = ClientApp(

@@ -2,10 +2,8 @@ import argparse
 import os
 from pathlib import Path
 
-import tensorflow as tf
-
 import flwr as fl
-
+import tensorflow as tf
 from flwr_datasets import FederatedDataset
 
 # Make TensorFlow logs less verbose

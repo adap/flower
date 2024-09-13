@@ -1032,11 +1032,11 @@ msgstr "Python 版本"
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:11
 #: ../../source/how-to-install-flower.rst:8
 msgid ""
-"Flower requires at least `Python 3.8 <https://docs.python.org/3.8/>`_, "
+"Flower requires at least `Python 3.9 <https://docs.python.org/3.9/>`_, "
 "but `Python 3.10 <https://docs.python.org/3.10/>`_ or above is "
 "recommended."
 msgstr ""
-"Flower 至少需要 `Python 3.8 <https://docs.python.org/3.8/>`_，但建议使用 `Python "
+"Flower 至少需要 `Python 3.9 <https://docs.python.org/3.9/>`_，但建议使用 `Python "
 "3.10 <https://docs.python.org/3.10/>`_或更高版本。"
 
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:14
@@ -2062,8 +2062,8 @@ msgstr "先决条件"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:7
 #, fuzzy
-msgid "`Python 3.8 <https://docs.python.org/3.8/>`_ or above"
-msgstr "Python 3.7 <https://docs.python.org/3.7/>`_ 或更高版本"
+msgid "`Python 3.9 <https://docs.python.org/3.9/>`_ or above"
+msgstr "Python 3.9 <https://docs.python.org/3.9/>`_ 或更高版本"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:8
 msgid "`Poetry 1.3 <https://python-poetry.org/>`_ or above"
@@ -2161,20 +2161,20 @@ msgstr ""
 msgid ""
 "If you don't have :code:`pyenv` installed, the following script that will"
 " install it, set it up, and create the virtual environment (with "
-":code:`Python 3.8.17` by default)::"
+":code:`Python 3.9.20` by default)::"
 msgstr ""
 "如果没有安装 :code:`pyenv`，可以使用以下脚本安装 pyenv、设置并创建虚拟环境（默认使用 "
-":code:`Python3.8.17）：："
+":code:`Python 3.9.20）：："
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:58
 #, fuzzy
 msgid ""
 "If you already have :code:`pyenv` installed (along with the :code:`pyenv-"
 "virtualenv` plugin), you can use the following convenience script (with "
-":code:`Python 3.8.17` by default)::"
+":code:`Python 3.9.20` by default)::"
 msgstr ""
 "如果没有安装 :code:`pyenv`，可以使用以下脚本安装 pyenv、设置并创建虚拟环境（默认使用 "
-":code:`Python3.8.17）：："
+":code:`Python 3.9.20）：："
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:62
 #, fuzzy
@@ -17131,7 +17131,7 @@ msgstr "停用"
 #: ../../source/ref-changelog.md:77
 #, fuzzy
 msgid "**Deprecate Python 3.8 support**"
-msgstr "** 过时的 Python 3.7**"
+msgstr "** 过时的 Python 3.8**"
 
 #: ../../source/ref-changelog.md:79
 #, fuzzy
@@ -17139,7 +17139,7 @@ msgid ""
 "Python 3.8 will stop receiving security fixes in [October "
 "2024](https://devguide.python.org/versions/). Support for Python 3.8 is "
 "now deprecated and will be removed in an upcoming release."
-msgstr "由于 Python 3.7 已于 2023-06-27 弃用 (EOL)，对 Python 3.7 的支持现已废弃，并将在即将发布的版本中移除。"
+msgstr "由于 Python 3.8 已于 2024-10-01 弃用 (EOL)，对 Python 3.7 的支持现已废弃，并将在即将发布的版本中移除。"
 
 #: ../../source/ref-changelog.md:81
 #, fuzzy

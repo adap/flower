@@ -100,7 +100,7 @@ def test_new_correct_name(tmp_path: str) -> None:
             # Change into the temprorary directory
             os.chdir(tmp_path)
             # Execute
-            new(project_name=project_name, framework=framework, username=username)
+            new(app_name=project_name, framework=framework, username=username)
 
             # Assert
             file_list = (Path(tmp_path) / expected_top_level_dir).iterdir()
@@ -133,7 +133,7 @@ def test_new_incorrect_name(tmp_path: str) -> None:
 
                 # Execute
                 new(
-                    project_name=project_name,
+                    app_name=project_name,
                     framework=framework,
                     username=username,
                 )

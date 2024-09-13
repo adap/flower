@@ -42,7 +42,7 @@ def test_start_run() -> None:
     context_mock = MagicMock()
 
     request = StartRunRequest()
-    request.fab_file = b"test"
+    request.fab.content = b"test"
 
     state_factory = SuperexecStateFactory(":flwr-in-memory-state:")
 
