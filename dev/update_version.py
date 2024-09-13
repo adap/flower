@@ -47,7 +47,7 @@ def _get_next_version(curr_version, increment):
     return f"{major}.{minor}.{patch_version}"
 
 
-def _update_versions(file_patterns, replace_strings, new_version):
+def _update_versions(file_patterns, replace_strings, new_version, check):
     """Update the version strings in the specified files."""
     for pattern in file_patterns:
         files = list(Path(__file__).parents[1].glob(pattern))
@@ -62,6 +62,8 @@ def _update_versions(file_patterns, replace_strings, new_version):
                 regex_pattern = re.compile(escaped_s)
                 content = regex_pattern.sub(s.format(version=new_version), content)
             if content != original_content:
+                if check:
+                    raise ValueError(f"The version in {file_path} seems incorrect")
                 file_path.write_text(content)
                 print(f"Updated {file_path}")
 
@@ -71,6 +73,9 @@ if __name__ == "__main__":
         description="Utility used to bump the version of the package."
     )
     parser.add_argument("current_version", help="Current version of the package.")
+    parser.add_argument(
+        "--check", action="store_true", help="Fails if any file would be modified."
+    )
 
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
@@ -95,8 +100,8 @@ if __name__ == "__main__":
 
     # Update files with next version
     for file_pattern, strings in REPLACE_NEXT_VERSION.items():
-        _update_versions([file_pattern], strings, next_version)
+        _update_versions([file_pattern], strings, next_version, args.check)
 
     # Update files with current version
     for file_pattern, strings in REPLACE_CURR_VERSION.items():
-        _update_versions([file_pattern], strings, curr_version)
+        _update_versions([file_pattern], strings, curr_version, args.check)
