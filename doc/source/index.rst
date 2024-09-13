@@ -1,6 +1,3 @@
-:og:title: Flower Framework Documentation for Federated Learning
-:og:description: Check out the documentation of the Flower Framework enabling easy Python development for Federated Learning.
-
 Flower Framework Documentation
 ==============================
 
