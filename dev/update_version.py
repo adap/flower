@@ -2,6 +2,7 @@
 
 import argparse
 import re
+import sys
 from pathlib import Path
 
 
@@ -63,7 +64,7 @@ def _update_versions(file_patterns, replace_strings, new_version, check):
                 content = regex_pattern.sub(s.format(version=new_version), content)
             if content != original_content:
                 if check:
-                    raise ValueError(f"The version in {file_path} seems incorrect")
+                    sys.exit(f"The version in {file_path} seems incorrect")
                 file_path.write_text(content)
                 print(f"Updated {file_path}")
 
