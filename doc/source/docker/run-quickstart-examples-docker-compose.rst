@@ -2,9 +2,9 @@ Run Flower Quickstart Examples with Docker Compose
 ==================================================
 
 Flower provides a set of `quickstart examples <https://github.com/adap/flower/tree/main/examples>`_
-to help you get started with the framework.
-
-These examples are designed to demonstrate the capabilities of Flower and by default run using the Simulation Engine. This guide demonstrates how to run them using Flower's Deployment Engine via through Docker Compose.
+to help you get started with the framework. These examples are designed to demonstrate the
+capabilities of Flower and by default run using the Simulation Engine. This guide demonstrates
+how to run them using Flower's Deployment Engine via through Docker Compose.
 
 .. important::
 
@@ -23,7 +23,7 @@ Before you start, make sure that:
 Run the Quickstart Example
 --------------------------
 
-#. Clone the quickstart example you like to run. For example, ``quickstart-sklearn-tabular``:
+#. Clone the quickstart example you like to run. For example, ``quickstart-pytorch``:
 
    .. code-block:: bash
 
@@ -52,6 +52,15 @@ Run the Quickstart Example
       [tool.flwr.federations.docker-compose]
       address = "127.0.0.1:9093"
       insecure = true
+
+   .. note::
+
+      You can customize the string that follows ``tool.flwr.federations.`` to fit your needs.
+      However, please note that the string cannot contain a dot (``.``).
+
+      In this example, ``docker-compose`` has been used. Just remember to replace
+      ``docker-compose`` with your chosen name in both the ``tool.flwr.federations.`` string
+      and the corresponding ``flwr run .`` command.
 
 #. Run the example:
 
