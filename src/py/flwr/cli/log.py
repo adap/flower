@@ -18,11 +18,10 @@ import sys
 import time
 from logging import DEBUG, ERROR, INFO
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Annotated, Optional
 
 import grpc
 import typer
-from typing_extensions import Annotated
 
 from flwr.cli.config_utils import load_and_validate
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
@@ -131,7 +130,7 @@ def log(
 
 # pylint: disable-next=too-many-branches
 def _log_with_superexec(
-    federation: Dict[str, str],
+    federation: dict[str, str],
     run_id: int,
     stream: bool,
 ) -> None:
