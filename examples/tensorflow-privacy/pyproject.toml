@@ -22,11 +22,14 @@ packages = ["."]
 publisher = "flwrlabs"
 
 [tool.flwr.app.components]
-serverapp = "fl_dp_sa.server_app:app"
-clientapp = "fl_dp_sa.client_app:app"
+serverapp = "tf_privacy.server_app:app"
+clientapp = "tf_privacy.client_app:app"
 
 [tool.flwr.federations]
 default = "local-simulation"
 
 [tool.flwr.federations.local-simulation]
-options.num-supernodes = 100
+options.num-supernodes = 2
+
+[tool.flwr.app.config]
+num-server-rounds = 3

@@ -1,5 +1,5 @@
 ---
-tags: [basic, vision, fds, privacy, dp]
+tags: [DP, basic, vision, fds, privacy]
 dataset: [MNIST]
 framework: [tensorflow]
 ---
@@ -10,9 +10,10 @@ In this example, we demonstrate how to train a model with sample-level different
 
 For more information about DP in Flower please refer to the [tutorial](https://flower.ai/docs/framework/how-to-use-differential-privacy.html). For additional information about tensorflow-privacy, visit the official [website](https://www.tensorflow.org/responsible_ai/privacy/guide).
 
-## Environments Setup
+## Set up the project
+### Clone the project
 
-Start by cloning the example. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
+Start by cloning the example project:
 
 ```shell
 git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/tensorflow-privacy . && rm -rf flower && cd tensorflow-privacy
@@ -27,40 +28,30 @@ This will create a new directory called `tensorflow-privacy` containing the foll
 -- README.md
 ```
 
-### Installing dependencies
+```shell
+tensorflow-privacy
+├── tf_privacy
+│   ├── client_app.py   # Defines your ClientApp
+│   ├── server_app.py   # Defines your ServerApp
+│   └── task.py         # Defines your model, training, and data loading
+├── pyproject.toml      # Project metadata like dependencies and configs
+└── README.md
+```
 
-Project dependencies are defined in `pyproject.toml`. Install them with:
+### Install dependencies and project
+
+Install the dependencies defined in `pyproject.toml` as well as the `tf_privacy` package.
 
 ```shell
-pip install .
+# From a new python environment, run:
+pip install -e .
 ```
 
-## Run Flower with tensorflow-privacy and TensorFlow
+## Run the project
 
-### 1. Start the long-running Flower server (SuperLink)
+You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
+
+### Run with the Simulation Engine
 
 ```bash
-flower-superlink --insecure
-```
-
-### 2. Start the long-running Flower clients (SuperNodes)
-
-Start 2 Flower `SuperNodes` in 2 separate terminal windows, using:
-
-```bash
-flower-client-app client:appA --insecure
-```
-
-```bash
-flower-client-app client:appB --insecure
-```
-
-tensorflow-privacy hyperparameters can be passed for each client in `ClientApp` instantiation (in `client.py`). In this example, `noise_multiplier=1.5` and `noise_multiplier=1` are used for the first and second client respectively.
-
-### 3. Run the Flower App
-
-With both the long-running server (SuperLink) and two clients (SuperNode) up and running, we can now run the actual Flower App:
-
-```bash
-flower-server-app server:app --insecure
-```
+flwr run .
