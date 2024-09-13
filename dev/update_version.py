@@ -10,10 +10,6 @@ REPLACE_CURR_VERSION = {
     "doc/source/conf.py": [
         ".. |stable_flwr_version| replace:: {version}",
     ],
-    "examples/*/pyproject.toml": [
-        "flwr[simulation]=={version}",
-        "flwr[simulation]>={version}",
-    ],
     "src/py/flwr/cli/new/templates/app/pyproject.*.toml.tpl": [
         "flwr[simulation]>={version}",
     ],
@@ -26,6 +22,13 @@ REPLACE_NEXT_VERSION = {
     ],
     "examples/doc/source/conf.py": ['release = "{version}"'],
     "baselines/doc/source/conf.py": ['release = "{version}"'],
+}
+
+EXAMPLES = {
+    "examples/*/pyproject.toml": [
+        "flwr[simulation]=={version}",
+        "flwr[simulation]>={version}",
+    ],
 }
 
 
@@ -77,6 +80,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--check", action="store_true", help="Fails if any file would be modified."
     )
+    parser.add_argument(
+        "--examples", action="store_true", help="Also modify flwr version in examples."
+    )
 
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
@@ -106,3 +112,7 @@ if __name__ == "__main__":
     # Update files with current version
     for file_pattern, strings in REPLACE_CURR_VERSION.items():
         _update_versions([file_pattern], strings, curr_version, args.check)
+
+    if args.examples:
+        for file_pattern, strings in EXAMPLES.items():
+            _update_versions([file_pattern], strings, curr_version, args.check)
