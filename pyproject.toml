@@ -62,7 +62,7 @@ flower-superlink = "flwr.server.app:run_superlink"
 flower-supernode = "flwr.client.supernode.app:run_supernode"
 flower-server-app = "flwr.server.run_serverapp:run_server_app"
 flwr-clientapp = "flwr.client.clientapp:flwr_clientapp"
-flower-client-app = "flwr.client.supernode:run_client_app"   # Deprecated
+flower-client-app = "flwr.client.supernode:run_client_app"  # Deprecated
 
 [tool.poetry.dependencies]
 python = "^3.9"
