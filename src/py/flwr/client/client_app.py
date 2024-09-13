@@ -16,7 +16,7 @@
 
 
 import inspect
-from typing import Callable, List, Optional
+from typing import Callable, Optional
 
 from flwr.client.client import Client
 from flwr.client.message_handler.message_handler import (
@@ -109,9 +109,9 @@ class ClientApp:
     def __init__(
         self,
         client_fn: Optional[ClientFnExt] = None,  # Only for backward compatibility
-        mods: Optional[List[Mod]] = None,
+        mods: Optional[list[Mod]] = None,
     ) -> None:
-        self._mods: List[Mod] = mods if mods is not None else []
+        self._mods: list[Mod] = mods if mods is not None else []
 
         # Create wrapper function for `handle`
         self._call: Optional[ClientAppCallable] = None

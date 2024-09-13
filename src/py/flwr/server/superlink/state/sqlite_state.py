@@ -19,8 +19,9 @@ import json
 import re
 import sqlite3
 import time
+from collections.abc import Sequence
 from logging import DEBUG, ERROR
-from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union, cast
+from typing import Any, Optional, Union, cast
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
@@ -117,7 +118,7 @@ CREATE TABLE IF NOT EXISTS task_res(
 );
 """
 
-DictOrTuple = Union[Tuple[Any, ...], Dict[str, Any]]
+DictOrTuple = Union[tuple[Any, ...], dict[str, Any]]
 
 
 class SqliteState(State):  # pylint: disable=R0904
@@ -138,7 +139,7 @@ class SqliteState(State):  # pylint: disable=R0904
         self.database_path = database_path
         self.conn: Optional[sqlite3.Connection] = None
 
-    def initialize(self, log_queries: bool = False) -> List[Tuple[str]]:
+    def initialize(self, log_queries: bool = False) -> list[tuple[str]]:
         """Create tables if they don't exist yet.
 
         Parameters
@@ -169,7 +170,7 @@ class SqliteState(State):  # pylint: disable=R0904
         self,
         query: str,
         data: Optional[Union[Sequence[DictOrTuple], DictOrTuple]] = None,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Execute a SQL query."""
         if self.conn is None:
             raise AttributeError("State is not initialized.")
@@ -250,7 +251,7 @@ class SqliteState(State):  # pylint: disable=R0904
 
     def get_task_ins(
         self, node_id: Optional[int], limit: Optional[int]
-    ) -> List[TaskIns]:
+    ) -> list[TaskIns]:
         """Get undelivered TaskIns for one node (either anonymous or with ID).
 
         Usually, the Fleet API calls this for Nodes planning to work on one or more
@@ -284,7 +285,7 @@ class SqliteState(State):  # pylint: disable=R0904
             )
             raise AssertionError(msg)
 
-        data: Dict[str, Union[str, int]] = {}
+        data: dict[str, Union[str, int]] = {}
 
         if node_id is None:
             # Retrieve all anonymous Tasks
@@ -394,7 +395,7 @@ class SqliteState(State):  # pylint: disable=R0904
         return task_id
 
     # pylint: disable-next=R0914
-    def get_task_res(self, task_ids: Set[UUID], limit: Optional[int]) -> List[TaskRes]:
+    def get_task_res(self, task_ids: set[UUID], limit: Optional[int]) -> list[TaskRes]:
         """Get TaskRes for task_ids.
 
         Usually, the Driver API calls this method to get results for instructions it has
@@ -424,7 +425,7 @@ class SqliteState(State):  # pylint: disable=R0904
             AND delivered_at = ""
         """
 
-        data: Dict[str, Union[str, float, int]] = {}
+        data: dict[str, Union[str, float, int]] = {}
 
         if limit is not None:
             query += " LIMIT :limit"
@@ -468,7 +469,7 @@ class SqliteState(State):  # pylint: disable=R0904
         # 1. Query: Fetch consumer_node_id of remaining task_ids
         # Assume the ancestry field only contains one element
         data.clear()
-        replied_task_ids: Set[UUID] = {UUID(str(row["ancestry"])) for row in rows}
+        replied_task_ids: set[UUID] = {UUID(str(row["ancestry"])) for row in rows}
         remaining_task_ids = task_ids - replied_task_ids
         placeholders = ",".join([f":id_{i}" for i in range(len(remaining_task_ids))])
         query = f"""
@@ -539,10 +540,10 @@ class SqliteState(State):  # pylint: disable=R0904
         """
         query = "SELECT count(*) AS num FROM task_res;"
         rows = self.query(query)
-        result: Dict[str, int] = rows[0]
+        result: dict[str, int] = rows[0]
         return result["num"]
 
-    def delete_tasks(self, task_ids: Set[UUID]) -> None:
+    def delete_tasks(self, task_ids: set[UUID]) -> None:
         """Delete all delivered TaskIns/TaskRes pairs."""
         ids = list(task_ids)
         if len(ids) == 0:
@@ -642,7 +643,7 @@ class SqliteState(State):  # pylint: disable=R0904
         except KeyError as exc:
             log(ERROR, {"query": query, "data": params, "exception": exc})
 
-    def get_nodes(self, run_id: int) -> Set[int]:
+    def get_nodes(self, run_id: int) -> set[int]:
         """Retrieve all currently stored node IDs as a set.
 
         Constraints
@@ -664,7 +665,6 @@ class SqliteState(State):  # pylint: disable=R0904
 
         # Convert sint64 node_ids to uint64
         result: set[int] = {convert_sint64_to_uint64(row["node_id"]) for row in rows}
-
         return result
 
     def get_node_id(self, node_public_key: bytes) -> Optional[int]:
@@ -759,7 +759,7 @@ class SqliteState(State):  # pylint: disable=R0904
             public_key = None
         return public_key
 
-    def store_node_public_keys(self, public_keys: Set[bytes]) -> None:
+    def store_node_public_keys(self, public_keys: set[bytes]) -> None:
         """Store a set of `node_public_keys` in state."""
         query = "INSERT INTO public_key (public_key) VALUES (?)"
         data = [(key,) for key in public_keys]
@@ -770,11 +770,11 @@ class SqliteState(State):  # pylint: disable=R0904
         query = "INSERT INTO public_key (public_key) VALUES (:public_key)"
         self.query(query, {"public_key": public_key})
 
-    def get_node_public_keys(self) -> Set[bytes]:
+    def get_node_public_keys(self) -> set[bytes]:
         """Retrieve all currently stored `node_public_keys` as a set."""
         query = "SELECT public_key FROM public_key"
         rows = self.query(query)
-        result: Set[bytes] = {row["public_key"] for row in rows}
+        result: set[bytes] = {row["public_key"] for row in rows}
         return result
 
     def get_run(self, run_id: int) -> Optional[Run]:
@@ -813,7 +813,7 @@ class SqliteState(State):  # pylint: disable=R0904
 def dict_factory(
     cursor: sqlite3.Cursor,
     row: sqlite3.Row,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Turn SQLite results into dicts.
 
     Less efficent for retrival of large amounts of data but easier to use.
@@ -822,7 +822,7 @@ def dict_factory(
     return dict(zip(fields, row))
 
 
-def task_ins_to_dict(task_msg: TaskIns) -> Dict[str, Any]:
+def task_ins_to_dict(task_msg: TaskIns) -> dict[str, Any]:
     """Transform TaskIns to dict."""
     result = {
         "task_id": task_msg.task_id,
@@ -843,7 +843,7 @@ def task_ins_to_dict(task_msg: TaskIns) -> Dict[str, Any]:
     return result
 
 
-def task_res_to_dict(task_msg: TaskRes) -> Dict[str, Any]:
+def task_res_to_dict(task_msg: TaskRes) -> dict[str, Any]:
     """Transform TaskRes to dict."""
     result = {
         "task_id": task_msg.task_id,
@@ -864,7 +864,7 @@ def task_res_to_dict(task_msg: TaskRes) -> Dict[str, Any]:
     return result
 
 
-def dict_to_task_ins(task_dict: Dict[str, Any]) -> TaskIns:
+def dict_to_task_ins(task_dict: dict[str, Any]) -> TaskIns:
     """Turn task_dict into protobuf message."""
     recordset = RecordSet()
     recordset.ParseFromString(task_dict["recordset"])
@@ -894,7 +894,7 @@ def dict_to_task_ins(task_dict: Dict[str, Any]) -> TaskIns:
     return result
 
 
-def dict_to_task_res(task_dict: Dict[str, Any]) -> TaskRes:
+def dict_to_task_res(task_dict: dict[str, Any]) -> TaskRes:
     """Turn task_dict into protobuf message."""
     recordset = RecordSet()
     recordset.ParseFromString(task_dict["recordset"])

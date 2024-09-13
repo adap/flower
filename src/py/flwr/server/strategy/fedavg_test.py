@@ -15,7 +15,7 @@
 """FedAvg tests."""
 
 
-from typing import List, Tuple, Union
+from typing import Union
 from unittest.mock import MagicMock
 
 import numpy as np
@@ -140,7 +140,7 @@ def test_inplace_aggregate_fit_equivalence() -> None:
     weights1_0 = np.random.randn(100, 64)
     weights1_1 = np.random.randn(314, 628, 3)
 
-    results: List[Tuple[ClientProxy, FitRes]] = [
+    results: list[tuple[ClientProxy, FitRes]] = [
         (
             MagicMock(),
             FitRes(
@@ -160,7 +160,7 @@ def test_inplace_aggregate_fit_equivalence() -> None:
             ),
         ),
     ]
-    failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]] = []
+    failures: list[Union[tuple[ClientProxy, FitRes], BaseException]] = []
 
     fedavg_reference = FedAvg(inplace=False)
     fedavg_inplace = FedAvg()

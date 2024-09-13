@@ -88,7 +88,7 @@ Ensure you set the following version constraint in your ``pyproject.toml``:
 .. code-block:: toml
 
     [tool.poetry.dependencies]
-    python = "^3.8"
+    python = "^3.9"
 
     # Without simulation support
     flwr = ">=1.8,<2.0"
