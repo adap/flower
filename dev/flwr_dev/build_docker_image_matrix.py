@@ -4,19 +4,19 @@ import argparse
 import json
 from dataclasses import asdict, dataclass
 from enum import Enum
-from typing import Annotated, Any, Callable, Dict, List, Optional
+from typing import Annotated, Any, Callable, Optional
 
 import typer
 
 
-class DistroName(str, Enum):
+class _DistroName(str, Enum):
     ALPINE = "alpine"
     UBUNTU = "ubuntu"
 
 
 @dataclass
-class Distro:
-    name: "DistroName"
+class _Distro:
+    name: "_DistroName"
     version: str
 
 
@@ -31,8 +31,8 @@ DOCKERFILE_ROOT = "src/docker"
 
 
 @dataclass
-class BaseImage:
-    distro: Distro
+class _BaseImage:
+    distro: _Distro
     python_version: str
     namespace_repository: str
     file_dir: str
@@ -40,10 +40,10 @@ class BaseImage:
     flwr_version: str
 
 
-def new_base_image(
-    flwr_version: str, python_version: str, distro: Distro
-) -> Dict[str, Any]:
-    return BaseImage(
+def _new_base_image(
+    flwr_version: str, python_version: str, distro: _Distro
+) -> dict[str, Any]:
+    return _BaseImage(
         distro,
         python_version,
         "flwr/base",
@@ -53,34 +53,34 @@ def new_base_image(
     )
 
 
-def generate_base_images(
-    flwr_version: str, python_versions: List[str], distros: List[Dict[str, str]]
-) -> List[Dict[str, Any]]:
+def _generate_base_images(
+    flwr_version: str, python_versions: list[str], distros: list[dict[str, str]]
+) -> list[dict[str, Any]]:
     return [
-        new_base_image(flwr_version, python_version, distro)
+        _new_base_image(flwr_version, python_version, distro)
         for distro in distros
         for python_version in python_versions
     ]
 
 
 @dataclass
-class BinaryImage:
+class _BinaryImage:
     namespace_repository: str
     file_dir: str
     base_image: str
-    tags: List[str]
+    tags: list[str]
 
 
-def new_binary_image(
+def _new_binary_image(
     name: str,
-    base_image: BaseImage,
+    base_image: _BaseImage,
     tags_fn: Optional[Callable],
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     tags = []
     if tags_fn is not None:
         tags += tags_fn(base_image) or []
 
-    return BinaryImage(
+    return _BinaryImage(
         f"flwr/{name}",
         f"{DOCKERFILE_ROOT}/{name}",
         base_image.tag,
@@ -88,37 +88,37 @@ def new_binary_image(
     )
 
 
-def generate_binary_images(
+def _generate_binary_images(
     name: str,
-    base_images: List[BaseImage],
+    base_images: list[_BaseImage],
     tags_fn: Optional[Callable] = None,
-    filter: Optional[Callable] = None,
-) -> List[Dict[str, Any]]:
-    filter = filter or (lambda _: True)
+    filter_func: Optional[Callable] = None,
+) -> list[dict[str, Any]]:
+    filter_func = filter_func or (lambda _: True)
 
     return [
-        new_binary_image(name, image, tags_fn) for image in base_images if filter(image)
+        _new_binary_image(name, image, tags_fn)
+        for image in base_images
+        if filter_func(image)
     ]
 
 
-def tag_latest_alpine_with_flwr_version(image: BaseImage) -> List[str]:
+def _tag_latest_alpine_with_flwr_version(image: _BaseImage) -> list[str]:
     if (
-        image.distro.name == DistroName.ALPINE
+        image.distro.name == _DistroName.ALPINE
         and image.python_version == LATEST_SUPPORTED_PYTHON_VERSION
     ):
         return [image.tag, image.flwr_version]
-    else:
-        return [image.tag]
+    return [image.tag]
 
 
-def tag_latest_ubuntu_with_flwr_version(image: BaseImage) -> List[str]:
+def _tag_latest_ubuntu_with_flwr_version(image: _BaseImage) -> list[str]:
     if (
-        image.distro.name == DistroName.UBUNTU
+        image.distro.name == _DistroName.UBUNTU
         and image.python_version == LATEST_SUPPORTED_PYTHON_VERSION
     ):
         return [image.tag, image.flwr_version]
-    else:
-        return [image.tag]
+    return [image.tag]
 
 
 def build_images(
@@ -126,70 +126,69 @@ def build_images(
         str, typer.Argument(help="Version of Flower to build the Docker images for")
     ]
 ):
+    """Generate all Docker images for a given version."""
     # ubuntu base images for each supported python version
-    ubuntu_base_images = generate_base_images(
+    ubuntu_base_images = _generate_base_images(
         flwr_version,
         SUPPORTED_PYTHON_VERSIONS,
-        [Distro(DistroName.UBUNTU, "22.04")],
+        [_Distro(_DistroName.UBUNTU, "22.04")],
     )
     # alpine base images for the latest supported python version
-    alpine_base_images = generate_base_images(
+    alpine_base_images = _generate_base_images(
         flwr_version,
         [LATEST_SUPPORTED_PYTHON_VERSION],
-        [Distro(DistroName.ALPINE, "3.19")],
+        [_Distro(_DistroName.ALPINE, "3.19")],
     )
 
     base_images = ubuntu_base_images + alpine_base_images
 
     binary_images = (
         # ubuntu and alpine images for the latest supported python version
-        generate_binary_images(
+        _generate_binary_images(
             "superlink",
             base_images,
-            tag_latest_alpine_with_flwr_version,
+            _tag_latest_alpine_with_flwr_version,
             lambda image: image.python_version == LATEST_SUPPORTED_PYTHON_VERSION,
         )
         # ubuntu images for each supported python version
-        + generate_binary_images(
+        + _generate_binary_images(
             "supernode",
             base_images,
-            tag_latest_alpine_with_flwr_version,
-            lambda image: image.distro.name == DistroName.UBUNTU
+            _tag_latest_alpine_with_flwr_version,
+            lambda image: image.distro.name == _DistroName.UBUNTU
             or (
-                image.distro.name == DistroName.ALPINE
+                image.distro.name == _DistroName.ALPINE
                 and image.python_version == LATEST_SUPPORTED_PYTHON_VERSION
             ),
         )
         # ubuntu images for each supported python version
-        + generate_binary_images(
+        + _generate_binary_images(
             "serverapp",
             base_images,
-            tag_latest_ubuntu_with_flwr_version,
-            lambda image: image.distro.name == DistroName.UBUNTU,
+            _tag_latest_ubuntu_with_flwr_version,
+            lambda image: image.distro.name == _DistroName.UBUNTU,
         )
         # ubuntu images for each supported python version
-        + generate_binary_images(
+        + _generate_binary_images(
             "superexec",
             base_images,
-            tag_latest_ubuntu_with_flwr_version,
-            lambda image: image.distro.name == DistroName.UBUNTU,
+            _tag_latest_ubuntu_with_flwr_version,
+            lambda image: image.distro.name == _DistroName.UBUNTU,
         )
         # ubuntu images for each supported python version
-        + generate_binary_images(
+        + _generate_binary_images(
             "clientapp",
             base_images,
-            tag_latest_ubuntu_with_flwr_version,
-            lambda image: image.distro.name == DistroName.UBUNTU,
+            _tag_latest_ubuntu_with_flwr_version,
+            lambda image: image.distro.name == _DistroName.UBUNTU,
         )
     )
 
     print(
         json.dumps(
             {
-                "base": {"images": list(map(lambda image: asdict(image), base_images))},
-                "binary": {
-                    "images": list(map(lambda image: asdict(image), binary_images))
-                },
+                "base": {"images": [asdict(image) for image in base_images]},
+                "binary": {"images": [asdict(image) for image in binary_images]},
             }
         )
     )
@@ -202,5 +201,4 @@ if __name__ == "__main__":
     arg_parser.add_argument("--flwr-version", type=str, required=True)
     args = arg_parser.parse_args()
 
-    flwr_version = args.flwr_version
-    build_images(flwr_version)
+    build_images(args.flwr_version)

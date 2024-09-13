@@ -60,9 +60,10 @@ def fix_all_init_files(dir_list: List[str]) -> None:
 def fix_init(
     paths: Annotated[list[str], typer.Argument(help="Path of the files to analyze")]
 ):
-    for i, _ in enumerate(paths):
-        abs_path: str = os.path.abspath(os.path.join(os.getcwd(), paths[i]))
-        warnings, init_dirs = get_init_dir_list_and_warnings(abs_path)
+    """Sort variables inside __init__.py files."""
+    for path in paths:
+        abs_path: str = os.path.abspath(os.path.join(os.getcwd(), path))
+        _, init_dirs = get_init_dir_list_and_warnings(abs_path)
         fix_all_init_files(init_dirs)
 
 

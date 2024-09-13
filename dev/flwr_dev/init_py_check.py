@@ -101,8 +101,9 @@ def check_all_init_files(dir_list: List[str]) -> None:
 def check_init(
     paths: Annotated[list[str], typer.Argument(help="Path of the files to analyze")]
 ):
-    for i, _ in enumerate(paths):
-        abs_path: str = os.path.abspath(os.path.join(os.getcwd(), paths[i]))
+    """Check if __init__ files are sorted correctly."""
+    for path in paths:
+        abs_path: str = os.path.abspath(os.path.join(os.getcwd(), path))
         init_dirs = check_missing_init_files(abs_path)
         check_all_init_files(init_dirs)
 

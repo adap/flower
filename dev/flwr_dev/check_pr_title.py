@@ -81,5 +81,4 @@ def check_title(
 
 
 if __name__ == "__main__":
-    pr_title = sys.argv[1]
-    check_title(pr_title)
+    check_title(sys.argv[1])

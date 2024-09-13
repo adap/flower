@@ -68,8 +68,9 @@ def _check_copyright(dir_list: List[str]) -> None:
 def check_copyrights(
     paths: Annotated[list[str], typer.Argument(help="Path of the files to analyze")]
 ):
-    for i, _ in enumerate(paths):
-        abs_path: str = os.path.abspath(os.path.join(os.getcwd(), paths[i]))
+    """Verify that copyright notices are correct."""
+    for path in paths:
+        abs_path: str = os.path.abspath(os.path.join(os.getcwd(), path))
         __, init_dirs = get_init_dir_list_and_warnings(abs_path)
         _check_copyright(init_dirs)
 

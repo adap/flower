@@ -25,7 +25,7 @@ from flwr_dev.common import get_git_root
 ROOT = get_git_root()
 INDEX = os.path.join(ROOT, "examples", "doc", "source", "index.rst")
 
-initial_text = """
+INITIAL_TEXT = """
 Flower Examples Documentation
 -----------------------------
 
@@ -52,15 +52,15 @@ can use Flower in combination with other existing frameworks or technologies.
 
 """
 
-table_headers = (
+TABLE_HEADERS = (
     "\n.. list-table::\n   :widths: 50 15 15 15\n   "
     ":header-rows: 1\n\n   * - Title\n     - Framework\n     - Dataset\n     - Tags\n\n"
 )
 
 categories = {
-    "quickstart": {"table": table_headers, "list": ""},
-    "advanced": {"table": table_headers, "list": ""},
-    "other": {"table": table_headers, "list": ""},
+    "quickstart": {"table": TABLE_HEADERS, "list": ""},
+    "advanced": {"table": TABLE_HEADERS, "list": ""},
+    "other": {"table": TABLE_HEADERS, "list": ""},
 }
 
 urls = {
@@ -106,7 +106,8 @@ urls = {
     "Oxford Flower-102": "https://www.robots.ox.ac.uk/~vgg/data/flowers/102/",
     "SpeechCommands": "https://huggingface.co/datasets/google/speech_commands",
     "Titanic": "https://www.kaggle.com/competitions/titanic",
-    "Waltons": "https://lifelines.readthedocs.io/en/latest/lifelines.datasets.html#lifelines.datasets.load_waltons",
+    "Waltons": "https://lifelines.readthedocs.io/en/latest/lifelines.datasets.html"
+    "#lifelines.datasets.load_waltons",
 }
 
 
@@ -116,17 +117,15 @@ def _convert_to_link(search_result):
         for part in search_result.split(","):
             result += f"{_convert_to_link(part)}, "
         return result[:-2]
-    else:
-        search_result = search_result.strip()
-        name, url = search_result, urls.get(search_result, None)
-        if url:
-            return f"`{name.strip()} <{url.strip()}>`_"
-        else:
-            return search_result
+    search_result = search_result.strip()
+    name, url = search_result, urls.get(search_result, None)
+    if url:
+        return f"`{name.strip()} <{url.strip()}>`_"
+    return search_result
 
 
 def _read_metadata(example):
-    with open(os.path.join(example, "README.md")) as f:
+    with open(os.path.join(example, "README.md"), encoding="utf-8") as f:
         content = f.read()
 
     metadata_match = re.search(r"^---(.*?)^---", content, re.DOTALL | re.MULTILINE)
@@ -188,9 +187,10 @@ def _copy_markdown_files(example):
 
 
 def _add_gh_button(example):
-    gh_text = f'[<img src="_static/view-gh.png" alt="View on GitHub" width="200"/>](https://github.com/adap/flower/blob/main/examples/{example})'
+    gh_text = '[<img src="_static/view-gh.png" alt="View on GitHub" width="200"/>]'
+    f"(https://github.com/adap/flower/blob/main/examples/{example})"
     readme_file = os.path.join(ROOT, "examples", "doc", "source", example + ".md")
-    with open(readme_file, "r+") as f:
+    with open(readme_file, "r+", encoding="utf-8") as f:
         content = f.read()
         if gh_text not in content:
             content = re.sub(
@@ -226,8 +226,8 @@ def _main():
     if os.path.exists(INDEX):
         os.remove(INDEX)
 
-    with open(INDEX, "w") as index_file:
-        index_file.write(initial_text)
+    with open(INDEX, "w", encoding="utf-8") as index_file:
+        index_file.write(INITIAL_TEXT)
 
     examples_dir = os.path.join(ROOT, "examples")
     for example in sorted(os.listdir(examples_dir)):
@@ -241,7 +241,7 @@ def _main():
                     if not _add_table_entry(example_path, "advanced", "advanced"):
                         _add_table_entry(example_path, "", "other")
 
-    with open(INDEX, "a") as index_file:
+    with open(INDEX, "a", encoding="utf-8") as index_file:
         index_file.write(categories["quickstart"]["table"])
 
         index_file.write("\nAdvanced Examples\n-----------------\n")
