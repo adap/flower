@@ -1,5 +1,5 @@
-Deploying Flower on Multiple Machines using Docker Compose
-==========================================================
+Deploy Flower on Multiple Machines with Docker Compose
+======================================================
 
 This guide will help you set up a Flower project on multiple machines using Docker Compose.
 
@@ -23,7 +23,7 @@ Before you begin, make sure you have the following prerequisites:
 
 .. note::
 
-   The guide uses the ``examples/quickstart-pytorch`` example as an example project.
+   The guide uses the ``examples/quickstart-sklearn-tabular`` example as an example project.
 
    If your project has a different name or location, please remember to adjust the commands/paths accordingly.
 
@@ -78,7 +78,7 @@ For example, you can use ``scp`` to copy the directories:
    $ scp -r ./server \
           ./superexec-certificates \
           ./superlink-certificates \
-          ../../../examples/quickstart-pytorch remote:~/
+          ../../../examples/quickstart-sklearn-tabular remote:~/
 
 Step 3: Start the Flower Server Components
 ------------------------------------------
@@ -89,7 +89,7 @@ SuperLink and SuperExec services:
 .. code-block:: bash
 
    $ ssh remote
-   $ export PROJECT_DIR=../quickstart-pytorch
+   $ export PROJECT_DIR=../quickstart-sklearn-tabular
    $ docker compose -f server/compose.yml up --build -d
 
 .. note::
@@ -106,7 +106,7 @@ On your local machine, run the following command to start the client components:
 
 .. code-block:: bash
 
-   $ export PROJECT_DIR=../../../../examples/quickstart-pytorch
+   $ export PROJECT_DIR=../../../../examples/quickstart-sklearn-tabular
    $ docker compose -f client/compose.yml up --build -d
 
 .. note::
@@ -121,7 +121,7 @@ Specify the remote SuperExec IP addresses and the path to the root certificate i
 ``pyproject.toml`` file:
 
 .. code-block:: toml
-   :caption: examples/quickstart-pytorch/pyproject.toml
+   :caption: examples/quickstart-sklearn-tabular/pyproject.toml
 
    [tool.flwr.federations.remote-superexec]
    address = "192.168.2.33:9093"
@@ -136,7 +136,7 @@ To run the project, execute:
 
 .. code-block:: bash
 
-   $ flwr run ../../../examples/quickstart-pytorch remote-superexec
+   $ flwr run ../../../examples/quickstart-sklearn-tabular remote-superexec
 
 That's it! With these steps, you've set up Flower on two separate machines and are ready to
 start using it.
@@ -144,13 +144,13 @@ start using it.
 Step 6: Clean Up
 -----------------
 
-Shutdown the Flower client components:
+Shut down the Flower client components:
 
 .. code-block:: bash
 
    $ docker compose -f client/compose.yml down
 
-Shutdown the Flower server components and delete the SuperLink state:
+Shut down the Flower server components and delete the SuperLink state:
 
 .. code-block:: bash
 
