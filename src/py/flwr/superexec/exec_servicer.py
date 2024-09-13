@@ -63,7 +63,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             return StartRunResponse()
 
         self.runs[run.run_id] = run
-        self.state.update_run_tracker(run.run_id, RunStatus.RUNNING)
+        self.state.update_run_status(run.run_id, RunStatus.RUNNING)
 
         return StartRunResponse(run_id=run.run_id)
 
