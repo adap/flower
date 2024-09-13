@@ -41,9 +41,6 @@ service Fleet {
 
   // Get FAB
   rpc GetFab(GetFabRequest) returns (GetFabResponse) {}
-
-  // Get run status
-  rpc GetRunStatus(GetRunStatusRequest) returns (GetRunStatusResponse) {}
 }
 
 // CreateNode messages

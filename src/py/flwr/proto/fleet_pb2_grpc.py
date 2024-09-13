@@ -51,11 +51,6 @@ class FleetStub(object):
                 request_serializer=flwr_dot_proto_dot_fab__pb2.GetFabRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_fab__pb2.GetFabResponse.FromString,
                 )
-        self.GetRunStatus = channel.unary_unary(
-                '/flwr.proto.Fleet/GetRunStatus',
-                request_serializer=flwr_dot_proto_dot_run__pb2.GetRunStatusRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_run__pb2.GetRunStatusResponse.FromString,
-                )
 
 
 class FleetServicer(object):
@@ -110,13 +105,6 @@ class FleetServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def GetRunStatus(self, request, context):
-        """Get run status
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
 
 def add_FleetServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -154,11 +142,6 @@ def add_FleetServicer_to_server(servicer, server):
                     servicer.GetFab,
                     request_deserializer=flwr_dot_proto_dot_fab__pb2.GetFabRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_fab__pb2.GetFabResponse.SerializeToString,
-            ),
-            'GetRunStatus': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetRunStatus,
-                    request_deserializer=flwr_dot_proto_dot_run__pb2.GetRunStatusRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_run__pb2.GetRunStatusResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -286,22 +269,5 @@ class Fleet(object):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.Fleet/GetFab',
             flwr_dot_proto_dot_fab__pb2.GetFabRequest.SerializeToString,
             flwr_dot_proto_dot_fab__pb2.GetFabResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def GetRunStatus(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Fleet/GetRunStatus',
-            flwr_dot_proto_dot_run__pb2.GetRunStatusRequest.SerializeToString,
-            flwr_dot_proto_dot_run__pb2.GetRunStatusResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
