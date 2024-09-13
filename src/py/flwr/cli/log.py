@@ -18,11 +18,10 @@ import sys
 import time
 from logging import DEBUG, ERROR, INFO
 from pathlib import Path
-from typing import Any, Optional
+from typing import Annotated, Any, Optional
 
 import grpc
 import typer
-from typing import Annotated
 
 from flwr.cli.config_utils import load_and_validate
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
