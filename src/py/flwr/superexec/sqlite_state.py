@@ -17,7 +17,7 @@
 
 import datetime
 import sqlite3
-from typing import List, Optional
+from typing import Optional
 
 from typing_extensions import override
 
@@ -63,7 +63,7 @@ class SqliteSuperexecState(SuperexecState):
             )
 
     @override
-    def get_logs(self, run_id: int) -> List[str]:
+    def get_logs(self, run_id: int) -> list[str]:
         """Get logs from the database."""
         cursor = self.conn.cursor()
         cursor.execute(

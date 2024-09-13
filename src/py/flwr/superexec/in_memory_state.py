@@ -15,7 +15,7 @@
 """SQLite based implemenation of server state."""
 
 
-from typing import Dict, List, Optional
+from typing import Optional
 
 from typing_extensions import override
 
@@ -26,8 +26,8 @@ class InMemorySuperexecState(SuperexecState):
     """InMemory implementation of SuperexecState."""
 
     def __init__(self) -> None:
-        self.runs: Dict[int, RunStatus] = {}
-        self.logs: Dict[int, List[str]] = {}
+        self.runs: dict[int, RunStatus] = {}
+        self.logs: dict[int, list[str]] = {}
 
     @override
     def store_log(self, run_id: int, log_output: str, stream: str = "stderr") -> None:
@@ -38,7 +38,7 @@ class InMemorySuperexecState(SuperexecState):
             self.logs[run_id] = [log_output]
 
     @override
-    def get_logs(self, run_id: int) -> List[str]:
+    def get_logs(self, run_id: int) -> list[str]:
         """Get logs from the database."""
         return self.logs[run_id]
 

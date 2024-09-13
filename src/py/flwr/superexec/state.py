@@ -16,7 +16,7 @@
 
 from abc import ABC, abstractmethod
 from enum import Enum, auto
-from typing import List, Optional
+from typing import Optional
 
 
 class RunStatus(Enum):
@@ -35,7 +35,7 @@ class SuperexecState(ABC):
         """Store a log entry for a given run."""
 
     @abstractmethod
-    def get_logs(self, run_id: int) -> List[str]:
+    def get_logs(self, run_id: int) -> list[str]:
         """Retrieve all log entries for a given run."""
 
     @abstractmethod
