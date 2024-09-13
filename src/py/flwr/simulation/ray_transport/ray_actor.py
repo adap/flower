@@ -17,7 +17,7 @@
 import threading
 from abc import ABC
 from logging import DEBUG, ERROR, WARNING
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, Union
+from typing import Any, Callable, Optional, Union
 
 import ray
 from ray import ObjectRef
@@ -44,7 +44,7 @@ class VirtualClientEngineActor(ABC):
         message: Message,
         cid: str,
         context: Context,
-    ) -> Tuple[str, Message, Context]:
+    ) -> tuple[str, Message, Context]:
         """Run a client run."""
         # Pass message through ClientApp and return a message
         # return also cid which is needed to ensure results
@@ -81,7 +81,7 @@ class ClientAppActor(VirtualClientEngineActor):
             on_actor_init_fn()
 
 
-def pool_size_from_resources(client_resources: Dict[str, Union[int, float]]) -> int:
+def pool_size_from_resources(client_resources: dict[str, Union[int, float]]) -> int:
     """Calculate number of Actors that fit in the cluster.
 
     For this we consider the resources available on each node and those required per
@@ -162,9 +162,9 @@ class VirtualClientEngineActorPool(ActorPool):
 
     def __init__(
         self,
-        create_actor_fn: Callable[[], Type[VirtualClientEngineActor]],
-        client_resources: Dict[str, Union[int, float]],
-        actor_list: Optional[List[Type[VirtualClientEngineActor]]] = None,
+        create_actor_fn: Callable[[], type[VirtualClientEngineActor]],
+        client_resources: dict[str, Union[int, float]],
+        actor_list: Optional[list[type[VirtualClientEngineActor]]] = None,
     ):
         self.client_resources = client_resources
         self.create_actor_fn = create_actor_fn
@@ -183,10 +183,10 @@ class VirtualClientEngineActorPool(ActorPool):
 
         # A dict that maps cid to another dict containing: a reference to the remote job
         # and its status (i.e. whether it is ready or not)
-        self._cid_to_future: Dict[
-            str, Dict[str, Union[bool, Optional[ObjectRef[Any]]]]
+        self._cid_to_future: dict[
+            str, dict[str, Union[bool, Optional[ObjectRef[Any]]]]
         ] = {}
-        self.actor_to_remove: Set[str] = set()  # a set
+        self.actor_to_remove: set[str] = set()  # a set
         self.num_actors = len(actors)
 
         self.lock = threading.RLock()
@@ -210,7 +210,7 @@ class VirtualClientEngineActorPool(ActorPool):
             self._idle_actors.extend(new_actors)
             self.num_actors += num_actors
 
-    def submit(self, fn: Any, value: Tuple[ClientAppFn, Message, str, Context]) -> None:
+    def submit(self, fn: Any, value: tuple[ClientAppFn, Message, str, Context]) -> None:
         """Take an idle actor and assign it to run a client app and Message.
 
         Submit a job to an actor by first removing it from the list of idle actors, then
@@ -220,7 +220,7 @@ class VirtualClientEngineActorPool(ActorPool):
         actor = self._idle_actors.pop()
         if self._check_and_remove_actor_from_pool(actor):
             future = fn(actor, app_fn, mssg, cid, context)
-            future_key = tuple(future) if isinstance(future, List) else future
+            future_key = tuple(future) if isinstance(future, list) else future
             self._future_to_actor[future_key] = (self._next_task_index, actor, cid)
             self._next_task_index += 1
 
@@ -228,7 +228,7 @@ class VirtualClientEngineActorPool(ActorPool):
             self._cid_to_future[cid]["future"] = future_key
 
     def submit_client_job(
-        self, actor_fn: Any, job: Tuple[ClientAppFn, Message, str, Context]
+        self, actor_fn: Any, job: tuple[ClientAppFn, Message, str, Context]
     ) -> None:
         """Submit a job while tracking client ids."""
         _, _, cid, _ = job
@@ -268,7 +268,7 @@ class VirtualClientEngineActorPool(ActorPool):
 
         return self._cid_to_future[cid]["ready"]  # type: ignore
 
-    def _fetch_future_result(self, cid: str) -> Tuple[Message, Context]:
+    def _fetch_future_result(self, cid: str) -> tuple[Message, Context]:
         """Fetch result and updated context for a VirtualClient from Object Store.
 
         The job submitted by the ClientProxy interfacing with client with cid=cid is
@@ -382,7 +382,7 @@ class VirtualClientEngineActorPool(ActorPool):
 
     def get_client_result(
         self, cid: str, timeout: Optional[float]
-    ) -> Tuple[Message, Context]:
+    ) -> tuple[Message, Context]:
         """Get result from VirtualClient with specific cid."""
         # Loop until all jobs submitted to the pool are completed. Break early
         # if the result for the ClientProxy calling this method is ready
@@ -403,14 +403,14 @@ class BasicActorPool:
 
     def __init__(
         self,
-        actor_type: Type[VirtualClientEngineActor],
-        client_resources: Dict[str, Union[int, float]],
-        actor_kwargs: Dict[str, Any],
+        actor_type: type[VirtualClientEngineActor],
+        client_resources: dict[str, Union[int, float]],
+        actor_kwargs: dict[str, Any],
     ):
         self.client_resources = client_resources
 
         # Queue of idle actors
-        self.pool: List[VirtualClientEngineActor] = []
+        self.pool: list[VirtualClientEngineActor] = []
         self.num_actors = 0
 
         # Resolve arguments to pass during actor init
@@ -424,7 +424,7 @@ class BasicActorPool:
         # Figure out how many actors can be created given the cluster resources
         # and the resources the user indicates each VirtualClient will need
         self.actors_capacity = pool_size_from_resources(client_resources)
-        self._future_to_actor: Dict[Any, VirtualClientEngineActor] = {}
+        self._future_to_actor: dict[Any, VirtualClientEngineActor] = {}
 
     def is_actor_available(self) -> bool:
         """Return true if there is an idle actor."""
@@ -450,7 +450,7 @@ class BasicActorPool:
         log(DEBUG, "Terminated %i actors", num_terminated)
 
     def submit(
-        self, actor_fn: Any, job: Tuple[ClientAppFn, Message, str, Context]
+        self, actor_fn: Any, job: tuple[ClientAppFn, Message, str, Context]
     ) -> Any:
         """On idle actor, submit job and return future."""
         # Remove idle actor from pool
@@ -470,7 +470,7 @@ class BasicActorPool:
 
     def fetch_result_and_return_actor_to_pool(
         self, future: Any
-    ) -> Tuple[Message, Context]:
+    ) -> tuple[Message, Context]:
         """Pull result given a future and add actor back to pool."""
         # Retrieve result for object store
         # Instead of doing ray.get(future) we await it

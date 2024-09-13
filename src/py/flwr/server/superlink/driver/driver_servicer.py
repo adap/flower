@@ -17,7 +17,7 @@
 
 import time
 from logging import DEBUG
-from typing import List, Optional, Set
+from typing import Optional
 from uuid import UUID
 
 import grpc
@@ -68,8 +68,8 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         """Get available nodes."""
         log(DEBUG, "DriverServicer.GetNodes")
         state: State = self.state_factory.state()
-        all_ids: Set[int] = state.get_nodes(request.run_id)
-        nodes: List[Node] = [
+        all_ids: set[int] = state.get_nodes(request.run_id)
+        nodes: list[Node] = [
             Node(node_id=node_id, anonymous=False) for node_id in all_ids
         ]
         return GetNodesResponse(nodes=nodes)
@@ -119,7 +119,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         state: State = self.state_factory.state()
 
         # Store each TaskIns
-        task_ids: List[Optional[UUID]] = []
+        task_ids: list[Optional[UUID]] = []
         for task_ins in request.task_ins_list:
             task_id: Optional[UUID] = state.store_task_ins(task_ins=task_ins)
             task_ids.append(task_id)
@@ -135,7 +135,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         log(DEBUG, "DriverServicer.PullTaskRes")
 
         # Convert each task_id str to UUID
-        task_ids: Set[UUID] = {UUID(task_id) for task_id in request.task_ids}
+        task_ids: set[UUID] = {UUID(task_id) for task_id in request.task_ids}
 
         # Init state
         state: State = self.state_factory.state()
@@ -155,7 +155,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         context.add_callback(on_rpc_done)
 
         # Read from state
-        task_res_list: List[TaskRes] = state.get_task_res(task_ids=task_ids, limit=None)
+        task_res_list: list[TaskRes] = state.get_task_res(task_ids=task_ids, limit=None)
 
         context.set_code(grpc.StatusCode.OK)
         return PullTaskResResponse(task_res_list=task_res_list)
