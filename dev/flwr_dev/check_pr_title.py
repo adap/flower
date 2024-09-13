@@ -17,7 +17,7 @@
 import pathlib
 import re
 import sys
-import tomllib
+import tomli
 from typing import Annotated
 
 import typer
@@ -33,7 +33,7 @@ def check_title(
     with (pathlib.Path(get_git_root()) / "dev" / "changelog_config.toml").open(
         "rb"
     ) as file:
-        config = tomllib.load(file)
+        config = tomli.load(file)
 
     # Extract types, project, and scope from the config
     types = "|".join(config["type"])
