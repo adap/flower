@@ -15,18 +15,8 @@
 """Typed dict base class for *Records."""
 
 
-from typing import (
-    Callable,
-    Dict,
-    Generic,
-    ItemsView,
-    Iterator,
-    KeysView,
-    MutableMapping,
-    TypeVar,
-    ValuesView,
-    cast,
-)
+from collections.abc import ItemsView, Iterator, KeysView, MutableMapping, ValuesView
+from typing import Callable, Generic, TypeVar, cast
 
 K = TypeVar("K")  # Key type
 V = TypeVar("V")  # Value type
@@ -49,37 +39,37 @@ class TypedDict(MutableMapping[K, V], Generic[K, V]):
         cast(Callable[[V], None], self.__dict__["_check_value_fn"])(value)
 
         # Set key-value pair
-        cast(Dict[K, V], self.__dict__["_data"])[key] = value
+        cast(dict[K, V], self.__dict__["_data"])[key] = value
 
     def __delitem__(self, key: K) -> None:
         """Remove the item with the specified key."""
-        del cast(Dict[K, V], self.__dict__["_data"])[key]
+        del cast(dict[K, V], self.__dict__["_data"])[key]
 
     def __getitem__(self, item: K) -> V:
         """Return the value for the specified key."""
-        return cast(Dict[K, V], self.__dict__["_data"])[item]
+        return cast(dict[K, V], self.__dict__["_data"])[item]
 
     def __iter__(self) -> Iterator[K]:
         """Yield an iterator over the keys of the dictionary."""
-        return iter(cast(Dict[K, V], self.__dict__["_data"]))
+        return iter(cast(dict[K, V], self.__dict__["_data"]))
 
     def __repr__(self) -> str:
         """Return a string representation of the dictionary."""
-        return cast(Dict[K, V], self.__dict__["_data"]).__repr__()
+        return cast(dict[K, V], self.__dict__["_data"]).__repr__()
 
     def __len__(self) -> int:
         """Return the number of items in the dictionary."""
-        return len(cast(Dict[K, V], self.__dict__["_data"]))
+        return len(cast(dict[K, V], self.__dict__["_data"]))
 
     def __contains__(self, key: object) -> bool:
         """Check if the dictionary contains the specified key."""
-        return key in cast(Dict[K, V], self.__dict__["_data"])
+        return key in cast(dict[K, V], self.__dict__["_data"])
 
     def __eq__(self, other: object) -> bool:
         """Compare this instance to another dictionary or TypedDict."""
-        data = cast(Dict[K, V], self.__dict__["_data"])
+        data = cast(dict[K, V], self.__dict__["_data"])
         if isinstance(other, TypedDict):
-            other_data = cast(Dict[K, V], other.__dict__["_data"])
+            other_data = cast(dict[K, V], other.__dict__["_data"])
             return data == other_data
         if isinstance(other, dict):
             return data == other
@@ -87,12 +77,12 @@ class TypedDict(MutableMapping[K, V], Generic[K, V]):
 
     def keys(self) -> KeysView[K]:
         """D.keys() -> a set-like object providing a view on D's keys."""
-        return cast(Dict[K, V], self.__dict__["_data"]).keys()
+        return cast(dict[K, V], self.__dict__["_data"]).keys()
 
     def values(self) -> ValuesView[V]:
         """D.values() -> an object providing a view on D's values."""
-        return cast(Dict[K, V], self.__dict__["_data"]).values()
+        return cast(dict[K, V], self.__dict__["_data"]).values()
 
     def items(self) -> ItemsView[K, V]:
         """D.items() -> a set-like object providing a view on D's items."""
-        return cast(Dict[K, V], self.__dict__["_data"]).items()
+        return cast(dict[K, V], self.__dict__["_data"]).items()
