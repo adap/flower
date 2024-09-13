@@ -127,6 +127,10 @@ This architecture allows many users to (concurrently) run their projects on the 
    Flower.
 
 
+.. note::
+
+  This explanation covers the Flower Deployment Engine. An explanation covering the Flower Simulation Engine will follow.
+
 .. important::
 
    As we continue to enhance Flower at a rapid pace, we'll periodically
