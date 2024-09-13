@@ -16,10 +16,10 @@
 
 
 import abc
-from typing import Dict, List, Optional, Set
+from typing import Optional
 from uuid import UUID
 
-from flwr.common.typing import Run
+from flwr.common.typing import Run, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 
@@ -51,7 +51,7 @@ class State(abc.ABC):  # pylint: disable=R0904
     @abc.abstractmethod
     def get_task_ins(
         self, node_id: Optional[int], limit: Optional[int]
-    ) -> List[TaskIns]:
+    ) -> list[TaskIns]:
         """Get TaskIns optionally filtered by node_id.
 
         Usually, the Fleet API calls this for Nodes planning to work on one or more
@@ -98,7 +98,7 @@ class State(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get_task_res(self, task_ids: Set[UUID], limit: Optional[int]) -> List[TaskRes]:
+    def get_task_res(self, task_ids: set[UUID], limit: Optional[int]) -> list[TaskRes]:
         """Get TaskRes for task_ids.
 
         Usually, the Driver API calls this method to get results for instructions it has
@@ -129,7 +129,7 @@ class State(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def delete_tasks(self, task_ids: Set[UUID]) -> None:
+    def delete_tasks(self, task_ids: set[UUID]) -> None:
         """Delete all delivered TaskIns/TaskRes pairs."""
 
     @abc.abstractmethod
@@ -143,7 +143,7 @@ class State(abc.ABC):  # pylint: disable=R0904
         """Remove `node_id` from state."""
 
     @abc.abstractmethod
-    def get_nodes(self, run_id: int) -> Set[int]:
+    def get_nodes(self, run_id: int) -> set[int]:
         """Retrieve all currently stored node IDs as a set.
 
         Constraints
@@ -153,17 +153,18 @@ class State(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get_node_id(self, client_public_key: bytes) -> Optional[int]:
-        """Retrieve stored `node_id` filtered by `client_public_keys`."""
+    def get_node_id(self, node_public_key: bytes) -> Optional[int]:
+        """Retrieve stored `node_id` filtered by `node_public_keys`."""
 
     @abc.abstractmethod
     def create_run(
         self,
-        fab_id: str,
-        fab_version: str,
-        override_config: Dict[str, str],
+        fab_id: Optional[str],
+        fab_version: Optional[str],
+        fab_hash: Optional[str],
+        override_config: UserConfig,
     ) -> int:
-        """Create a new run for the specified `fab_id` and `fab_version`."""
+        """Create a new run for the specified `fab_hash`."""
 
     @abc.abstractmethod
     def get_run(self, run_id: int) -> Optional[Run]:
@@ -198,16 +199,16 @@ class State(abc.ABC):  # pylint: disable=R0904
         """Retrieve `server_public_key` in urlsafe bytes."""
 
     @abc.abstractmethod
-    def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
-        """Store a set of `client_public_keys` in state."""
+    def store_node_public_keys(self, public_keys: set[bytes]) -> None:
+        """Store a set of `node_public_keys` in state."""
 
     @abc.abstractmethod
-    def store_client_public_key(self, public_key: bytes) -> None:
-        """Store a `client_public_key` in state."""
+    def store_node_public_key(self, public_key: bytes) -> None:
+        """Store a `node_public_key` in state."""
 
     @abc.abstractmethod
-    def get_client_public_keys(self) -> Set[bytes]:
-        """Retrieve all currently stored `client_public_keys` as a set."""
+    def get_node_public_keys(self) -> set[bytes]:
+        """Retrieve all currently stored `node_public_keys` as a set."""
 
     @abc.abstractmethod
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:

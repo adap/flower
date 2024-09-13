@@ -22,17 +22,23 @@ from json import JSONDecodeError
 from math import pi
 from pathlib import Path
 from time import sleep
-from typing import Dict, Optional, Set, Tuple
+from typing import Optional
 from unittest import TestCase
 from uuid import UUID
 
+from flwr.client import Client, ClientApp, NumPyClient
 from flwr.client.client_app import LoadClientAppError
 from flwr.common import (
     DEFAULT_TTL,
+    Config,
+    ConfigsRecord,
+    Context,
     GetPropertiesIns,
     Message,
     MessageTypeLegacy,
     Metadata,
+    RecordSet,
+    Scalar,
 )
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
 from flwr.common.serde import message_from_taskres, message_to_taskins
@@ -45,6 +51,32 @@ from flwr.server.superlink.fleet.vce.vce_api import (
 from flwr.server.superlink.state import InMemoryState, StateFactory
 
 
+class DummyClient(NumPyClient):
+    """A dummy NumPyClient for tests."""
+
+    def __init__(self, state: RecordSet) -> None:
+        self.client_state = state
+
+    def get_properties(self, config: Config) -> dict[str, Scalar]:
+        """Return properties by doing a simple calculation."""
+        result = float(config["factor"]) * pi
+
+        # store something in context
+        self.client_state.configs_records["result"] = ConfigsRecord({"result": result})
+
+        return {"result": result}
+
+
+def get_dummy_client(context: Context) -> Client:  # pylint: disable=unused-argument
+    """Return a DummyClient converted to Client type."""
+    return DummyClient(state=context.state).to_client()
+
+
+dummy_client_app = ClientApp(
+    client_fn=get_dummy_client,
+)
+
+
 def terminate_simulation(f_stop: threading.Event, sleep_duration: int) -> None:
     """Set event to terminate Simulation Engine after `sleep_duration` seconds."""
     sleep(sleep_duration)
@@ -54,7 +86,7 @@ def terminate_simulation(f_stop: threading.Event, sleep_duration: int) -> None:
 def init_state_factory_nodes_mapping(
     num_nodes: int,
     num_messages: int,
-) -> Tuple[StateFactory, NodeToPartitionMapping, Dict[UUID, float]]:
+) -> tuple[StateFactory, NodeToPartitionMapping, dict[UUID, float]]:
     """Instatiate StateFactory, register nodes and pre-insert messages in the state."""
     # Register a state and a run_id in it
     run_id = 1234
@@ -78,16 +110,20 @@ def register_messages_into_state(
     nodes_mapping: NodeToPartitionMapping,
     run_id: int,
     num_messages: int,
-) -> Dict[UUID, float]:
+) -> dict[UUID, float]:
     """Register `num_messages` into the state factory."""
     state: InMemoryState = state_factory.state()  # type: ignore
     state.run_ids[run_id] = Run(
-        run_id=run_id, fab_id="Mock/mock", fab_version="v1.0.0", override_config={}
+        run_id=run_id,
+        fab_id="Mock/mock",
+        fab_version="v1.0.0",
+        fab_hash="hash",
+        override_config={},
     )
     # Artificially add TaskIns to state so they can be processed
     # by the Simulation Engine logic
     nodes_cycle = cycle(nodes_mapping.keys())  # we have more messages than supernodes
-    task_ids: Set[UUID] = set()  # so we can retrieve them later
+    task_ids: set[UUID] = set()  # so we can retrieve them later
     expected_results = {}
     for i in range(num_messages):
         dst_node_id = next(nodes_cycle)
@@ -137,7 +173,7 @@ def _autoresolve_app_dir(rel_client_app_dir: str = "backend") -> str:
 # pylint: disable=too-many-arguments
 def start_and_shutdown(
     backend: str = "ray",
-    client_app_attr: str = "raybackend_test:client_app",
+    client_app_attr: Optional[str] = None,
     app_dir: str = "",
     num_supernodes: Optional[int] = None,
     state_factory: Optional[StateFactory] = None,
@@ -165,10 +201,11 @@ def start_and_shutdown(
     if not app_dir:
         app_dir = _autoresolve_app_dir()
 
-    run = Run(run_id=1234, fab_id="", fab_version="", override_config={})
+    run = Run(run_id=1234, fab_id="", fab_version="", fab_hash="", override_config={})
 
     start_vce(
         num_supernodes=num_supernodes,
+        client_app=None if client_app_attr else dummy_client_app,
         client_app_attr=client_app_attr,
         backend_name=backend,
         backend_config_json_stream=backend_config,

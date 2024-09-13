@@ -17,7 +17,7 @@
 
 import sys
 from logging import DEBUG
-from typing import Any, Type, TypeVar, cast
+from typing import Any, TypeVar, cast
 
 import grpc
 from google.protobuf.message import Message as GrpcMessage
@@ -28,6 +28,7 @@ from flwr.common.constant import (
     GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY,
 )
 from flwr.common.version import package_version
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
@@ -58,7 +59,7 @@ class GrpcAdapter:
         self.stub = GrpcAdapterStub(channel)
 
     def _send_and_receive(
-        self, request: GrpcMessage, response_type: Type[T], **kwargs: Any
+        self, request: GrpcMessage, response_type: type[T], **kwargs: Any
     ) -> T:
         # Serialize request
         container_req = MessageContainer(
@@ -131,3 +132,9 @@ class GrpcAdapter:
     ) -> GetRunResponse:
         """."""
         return self._send_and_receive(request, GetRunResponse, **kwargs)
+
+    def GetFab(  # pylint: disable=C0103
+        self, request: GetFabRequest, **kwargs: Any
+    ) -> GetFabResponse:
+        """."""
+        return self._send_and_receive(request, GetFabResponse, **kwargs)

@@ -123,7 +123,7 @@ Implementing :code:`NumPyClient` usually means defining the following methods
 #. :code:`fit`
     * set the local model weights
     * train the local model
-    * receive the updated local model weights
+    * return the updated local model weights
 #. :code:`evaluate`
     * test the local model
 

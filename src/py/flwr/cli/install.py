@@ -21,10 +21,9 @@ import tempfile
 import zipfile
 from io import BytesIO
 from pathlib import Path
-from typing import IO, Optional, Union
+from typing import IO, Annotated, Optional, Union
 
 import typer
-from typing_extensions import Annotated
 
 from flwr.common.config import get_flwr_dir
 
@@ -173,7 +172,9 @@ def validate_and_install(
         / project_name
         / version
     )
-    if install_dir.exists() and not skip_prompt:
+    if install_dir.exists():
+        if skip_prompt:
+            return install_dir
         if not typer.confirm(
             typer.style(
                 f"\n💬 {project_name} version {version} is already installed, "

@@ -22,9 +22,6 @@ def cosine_annealing(
 
 def get_model(model_cfg: DictConfig):
     """Load model with appropriate quantization config and other optimizations.
-
-    Please refer to this example for `peft + BitsAndBytes`:
-    https://github.com/huggingface/peft/blob/main/examples/fp4_finetuning/finetune_fp4_opt_bnb_peft.py
     """
     if model_cfg.quantization == 4:
         quantization_config = BitsAndBytesConfig(load_in_4bit=True)

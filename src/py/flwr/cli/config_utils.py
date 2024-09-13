@@ -17,15 +17,16 @@
 import zipfile
 from io import BytesIO
 from pathlib import Path
-from typing import IO, Any, Dict, List, Optional, Tuple, Union
+from typing import IO, Any, Optional, Union, get_args
 
 import tomli
 
 from flwr.common import object_ref
+from flwr.common.typing import UserConfigValue
 
 
-def get_fab_metadata(fab_file: Union[Path, bytes]) -> Tuple[str, str]:
-    """Extract the fab_id and the fab_version from a FAB file or path.
+def get_fab_config(fab_file: Union[Path, bytes]) -> dict[str, Any]:
+    """Extract the config from a FAB file or path.
 
     Parameters
     ----------
@@ -35,8 +36,8 @@ def get_fab_metadata(fab_file: Union[Path, bytes]) -> Tuple[str, str]:
 
     Returns
     -------
-    Tuple[str, str]
-        The `fab_version` and `fab_id` of the given Flower App Bundle.
+    Dict[str, Any]
+        The `config` of the given Flower App Bundle.
     """
     fab_file_archive: Union[Path, IO[bytes]]
     if isinstance(fab_file, bytes):
@@ -58,16 +59,35 @@ def get_fab_metadata(fab_file: Union[Path, bytes]) -> Tuple[str, str]:
         if not is_valid:
             raise ValueError(errors)
 
-        return (
-            conf["project"]["version"],
-            f"{conf['tool']['flwr']['app']['publisher']}/{conf['project']['name']}",
-        )
+        return conf
+
+
+def get_fab_metadata(fab_file: Union[Path, bytes]) -> tuple[str, str]:
+    """Extract the fab_id and the fab_version from a FAB file or path.
+
+    Parameters
+    ----------
+    fab_file : Union[Path, bytes]
+        The Flower App Bundle file to validate and extract the metadata from.
+        It can either be a path to the file or the file itself as bytes.
+
+    Returns
+    -------
+    Tuple[str, str]
+        The `fab_id` and `fab_version` of the given Flower App Bundle.
+    """
+    conf = get_fab_config(fab_file)
+
+    return (
+        f"{conf['tool']['flwr']['app']['publisher']}/{conf['project']['name']}",
+        conf["project"]["version"],
+    )
 
 
 def load_and_validate(
     path: Optional[Path] = None,
     check_module: bool = True,
-) -> Tuple[Optional[Dict[str, Any]], List[str], List[str]]:
+) -> tuple[Optional[dict[str, Any]], list[str], list[str]]:
     """Load and validate pyproject.toml as dict.
 
     Returns
@@ -76,6 +96,9 @@ def load_and_validate(
         A tuple with the optional config in case it exists and is valid
         and associated errors and warnings.
     """
+    if path is None:
+        path = Path.cwd() / "pyproject.toml"
+
     config = load(path)
 
     if config is None:
@@ -85,7 +108,7 @@ def load_and_validate(
         ]
         return (None, errors, [])
 
-    is_valid, errors, warnings = validate(config, check_module)
+    is_valid, errors, warnings = validate(config, check_module, path.parent)
 
     if not is_valid:
         return (None, errors, warnings)
@@ -93,14 +116,8 @@ def load_and_validate(
     return (config, errors, warnings)
 
 
-def load(path: Optional[Path] = None) -> Optional[Dict[str, Any]]:
+def load(toml_path: Path) -> Optional[dict[str, Any]]:
     """Load pyproject.toml and return as dict."""
-    if path is None:
-        cur_dir = Path.cwd()
-        toml_path = cur_dir / "pyproject.toml"
-    else:
-        toml_path = path
-
     if not toml_path.is_file():
         return None
 
@@ -108,16 +125,19 @@ def load(path: Optional[Path] = None) -> Optional[Dict[str, Any]]:
         return load_from_string(toml_file.read())
 
 
-def _validate_run_config(config_dict: Dict[str, Any], errors: List[str]) -> None:
+def _validate_run_config(config_dict: dict[str, Any], errors: list[str]) -> None:
     for key, value in config_dict.items():
         if isinstance(value, dict):
             _validate_run_config(config_dict[key], errors)
-        elif not isinstance(value, str):
-            errors.append(f"Config value of key {key} is not of type `str`.")
+        elif not isinstance(value, get_args(UserConfigValue)):
+            raise ValueError(
+                f"The value for key {key} needs to be of type `int`, `float`, "
+                "`bool, `str`, or  a `dict` of those.",
+            )
 
 
 # pylint: disable=too-many-branches
-def validate_fields(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]:
+def validate_fields(config: dict[str, Any]) -> tuple[bool, list[str], list[str]]:
     """Validate pyproject.toml fields."""
     errors = []
     warnings = []
@@ -163,8 +183,10 @@ def validate_fields(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]
 
 
 def validate(
-    config: Dict[str, Any], check_module: bool = True
-) -> Tuple[bool, List[str], List[str]]:
+    config: dict[str, Any],
+    check_module: bool = True,
+    project_dir: Optional[Union[str, Path]] = None,
+) -> tuple[bool, list[str], list[str]]:
     """Validate pyproject.toml."""
     is_valid, errors, warnings = validate_fields(config)
 
@@ -172,16 +194,15 @@ def validate(
         return False, errors, warnings
 
     # Validate serverapp
-    is_valid, reason = object_ref.validate(
-        config["tool"]["flwr"]["app"]["components"]["serverapp"], check_module
-    )
+    serverapp_ref = config["tool"]["flwr"]["app"]["components"]["serverapp"]
+    is_valid, reason = object_ref.validate(serverapp_ref, check_module, project_dir)
+
     if not is_valid and isinstance(reason, str):
         return False, [reason], []
 
     # Validate clientapp
-    is_valid, reason = object_ref.validate(
-        config["tool"]["flwr"]["app"]["components"]["clientapp"], check_module
-    )
+    clientapp_ref = config["tool"]["flwr"]["app"]["components"]["clientapp"]
+    is_valid, reason = object_ref.validate(clientapp_ref, check_module, project_dir)
 
     if not is_valid and isinstance(reason, str):
         return False, [reason], []
@@ -189,7 +210,7 @@ def validate(
     return True, [], []
 
 
-def load_from_string(toml_content: str) -> Optional[Dict[str, Any]]:
+def load_from_string(toml_content: str) -> Optional[dict[str, Any]]:
     """Load TOML content from a string and return as dict."""
     try:
         data = tomli.loads(toml_content)

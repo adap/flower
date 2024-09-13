@@ -16,9 +16,9 @@
 
 import argparse
 import sys
-from logging import DEBUG, INFO, WARN
+from logging import DEBUG, ERROR, INFO, WARN
 from pathlib import Path
-from typing import Callable, Optional, Tuple
+from typing import Optional
 
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -27,26 +27,23 @@ from cryptography.hazmat.primitives.serialization import (
     load_ssh_public_key,
 )
 
-from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import EventType, event
-from flwr.common.config import (
-    get_flwr_dir,
-    get_project_config,
-    get_project_dir,
-    parse_config_args,
-)
+from flwr.common.config import parse_config_args
 from flwr.common.constant import (
+    FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
 )
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature
-from flwr.common.object_ref import load_app, validate
 
-from ..app import _start_client_internal
-
-ADDRESS_FLEET_API_GRPC_RERE = "0.0.0.0:9092"
+from ..app import (
+    ISOLATION_MODE_PROCESS,
+    ISOLATION_MODE_SUBPROCESS,
+    start_client_internal,
+)
+from ..clientapp.utils import get_load_client_app_fn
 
 
 def run_supernode() -> None:
@@ -60,15 +57,17 @@ def run_supernode() -> None:
     _warn_deprecated_server_arg(args)
 
     root_certificates = _get_certificates(args)
-    load_fn = _get_load_client_app_fn(
-        default_app_ref=getattr(args, "client-app"),
-        dir_arg=args.dir,
-        flwr_dir_arg=args.flwr_dir,
+    load_fn = get_load_client_app_fn(
+        default_app_ref="",
+        app_path=args.app,
+        flwr_dir=args.flwr_dir,
         multi_app=True,
     )
     authentication_keys = _try_setup_client_authentication(args)
 
-    _start_client_internal(
+    log(DEBUG, "Isolation mode: %s", args.isolation)
+
+    start_client_internal(
         server_address=args.superlink,
         load_client_app_fn=load_fn,
         transport=args.transport,
@@ -77,8 +76,11 @@ def run_supernode() -> None:
         authentication_keys=authentication_keys,
         max_retries=args.max_retries,
         max_wait_time=args.max_wait_time,
-        node_config=parse_config_args([args.node_config]),
-        flwr_path=get_flwr_dir(args.flwr_dir),
+        node_config=parse_config_args(
+            [args.node_config] if args.node_config else args.node_config
+        ),
+        isolation=args.isolation,
+        supernode_address=args.supernode_address,
     )
 
     # Graceful shutdown
@@ -89,43 +91,22 @@ def run_supernode() -> None:
 
 def run_client_app() -> None:
     """Run Flower client app."""
-    log(INFO, "Long-running Flower client starting")
-
     event(EventType.RUN_CLIENT_APP_ENTER)
-
-    args = _parse_args_run_client_app().parse_args()
-
-    _warn_deprecated_server_arg(args)
-
-    root_certificates = _get_certificates(args)
-    load_fn = _get_load_client_app_fn(
-        default_app_ref=getattr(args, "client-app"),
-        dir_arg=args.dir,
-        multi_app=False,
+    log(
+        ERROR,
+        "The command `flower-client-app` has been replaced by `flower-supernode`.",
     )
-    authentication_keys = _try_setup_client_authentication(args)
-
-    _start_client_internal(
-        server_address=args.superlink,
-        node_config=parse_config_args([args.node_config]),
-        load_client_app_fn=load_fn,
-        transport=args.transport,
-        root_certificates=root_certificates,
-        insecure=args.insecure,
-        authentication_keys=authentication_keys,
-        max_retries=args.max_retries,
-        max_wait_time=args.max_wait_time,
-    )
+    log(INFO, "Execute `flower-supernode --help` to learn how to use it.")
     register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
 
 
 def _warn_deprecated_server_arg(args: argparse.Namespace) -> None:
     """Warn about the deprecated argument `--server`."""
-    if args.server != ADDRESS_FLEET_API_GRPC_RERE:
+    if args.server != FLEET_API_GRPC_RERE_DEFAULT_ADDRESS:
         warn = "Passing flag --server is deprecated. Use --superlink instead."
         warn_deprecated_feature(warn)
 
-        if args.superlink != ADDRESS_FLEET_API_GRPC_RERE:
+        if args.superlink != FLEET_API_GRPC_RERE_DEFAULT_ADDRESS:
             # if `--superlink` also passed, then
             # warn user that this argument overrides what was passed with `--server`
             log(
@@ -174,111 +155,6 @@ def _get_certificates(args: argparse.Namespace) -> Optional[bytes]:
     return root_certificates
 
 
-def _get_load_client_app_fn(
-    default_app_ref: str,
-    dir_arg: str,
-    multi_app: bool,
-    flwr_dir_arg: Optional[str] = None,
-) -> Callable[[str, str], ClientApp]:
-    """Get the load_client_app_fn function.
-
-    If `multi_app` is True, this function loads the specified ClientApp
-    based on `fab_id` and `fab_version`. If `fab_id` is empty, a default
-    ClientApp will be loaded.
-
-    If `multi_app` is False, it ignores `fab_id` and `fab_version` and
-    loads a default ClientApp.
-    """
-    # Find the Flower directory containing Flower Apps (only for multi-app)
-    if not multi_app:
-        flwr_dir = Path("")
-    else:
-        if flwr_dir_arg is None:
-            flwr_dir = get_flwr_dir()
-        else:
-            flwr_dir = Path(flwr_dir_arg).absolute()
-
-    inserted_path = None
-
-    if not multi_app:
-        log(
-            DEBUG,
-            "Flower SuperNode will load and validate ClientApp `%s`",
-            default_app_ref,
-        )
-        # Insert sys.path
-        dir_path = Path(dir_arg).absolute()
-        sys.path.insert(0, str(dir_path))
-        inserted_path = str(dir_path)
-
-        valid, error_msg = validate(default_app_ref)
-        if not valid and error_msg:
-            raise LoadClientAppError(error_msg) from None
-
-    def _load(fab_id: str, fab_version: str) -> ClientApp:
-        # If multi-app feature is disabled
-        if not multi_app:
-            # Get sys path to be inserted
-            dir_path = Path(dir_arg).absolute()
-
-            # Set app reference
-            client_app_ref = default_app_ref
-        # If multi-app feature is enabled but the fab id is not specified
-        elif fab_id == "":
-            if default_app_ref == "":
-                raise LoadClientAppError(
-                    "Invalid FAB ID: The FAB ID is empty.",
-                ) from None
-
-            log(WARN, "FAB ID is not provided; the default ClientApp will be loaded.")
-            # Get sys path to be inserted
-            dir_path = Path(dir_arg).absolute()
-
-            # Set app reference
-            client_app_ref = default_app_ref
-        # If multi-app feature is enabled
-        else:
-            try:
-                project_dir = get_project_dir(fab_id, fab_version, flwr_dir)
-                config = get_project_config(project_dir)
-            except Exception as e:
-                raise LoadClientAppError("Failed to load ClientApp") from e
-
-            # Get sys path to be inserted
-            dir_path = Path(project_dir).absolute()
-
-            # Set app reference
-            client_app_ref = config["tool"]["flwr"]["app"]["components"]["clientapp"]
-
-        # Set sys.path
-        nonlocal inserted_path
-        if inserted_path != str(dir_path):
-            # Remove the previously inserted path
-            if inserted_path is not None:
-                sys.path.remove(inserted_path)
-            # Insert the new path
-            sys.path.insert(0, str(dir_path))
-
-        inserted_path = str(dir_path)
-
-        # Load ClientApp
-        log(
-            DEBUG,
-            "Loading ClientApp `%s`",
-            client_app_ref,
-        )
-        client_app = load_app(client_app_ref, LoadClientAppError, dir_path)
-
-        if not isinstance(client_app, ClientApp):
-            raise LoadClientAppError(
-                f"Attribute {client_app_ref} is not of type {ClientApp}",
-            ) from None
-
-        return client_app
-
-    return _load
-
-
 def _parse_args_run_supernode() -> argparse.ArgumentParser:
     """Parse flower-supernode command line arguments."""
     parser = argparse.ArgumentParser(
@@ -286,13 +162,15 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
-        "client-app",
+        "app",
         nargs="?",
-        default="",
-        help="For example: `client:app` or `project.package.module:wrapper.app`. "
-        "This is optional and serves as the default ClientApp to be loaded when "
-        "the ServerApp does not specify `fab_id` and `fab_version`. "
-        "If not provided, defaults to an empty string.",
+        default=None,
+        help="Specify the path of the Flower App to load and run the `ClientApp`. "
+        "The `pyproject.toml` file must be located in the root of this path. "
+        "When this argument is provided, the SuperNode will exclusively respond to "
+        "messages from the corresponding `ServerApp` by matching the FAB ID and FAB "
+        "version. An error will be raised if a message is received from any other "
+        "`ServerApp`.",
     )
     _parse_args_common(parser)
     parser.add_argument(
@@ -306,21 +184,25 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         - `$HOME/.flwr/` in all other cases
     """,
     )
-
-    return parser
-
-
-def _parse_args_run_client_app() -> argparse.ArgumentParser:
-    """Parse flower-client-app command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Start a Flower client app",
-    )
-
     parser.add_argument(
-        "client-app",
-        help="For example: `client:app` or `project.package.module:wrapper.app`",
+        "--isolation",
+        default=None,
+        required=False,
+        choices=[
+            ISOLATION_MODE_SUBPROCESS,
+            ISOLATION_MODE_PROCESS,
+        ],
+        help="Isolation mode when running `ClientApp` (optional, possible values: "
+        "`subprocess`, `process`). By default, `ClientApp` runs in the same process "
+        "that executes the SuperNode. Use `subprocess` to configure SuperNode to run "
+        "`ClientApp` in a subprocess. Use `process` to indicate that a separate "
+        "independent process gets created outside of SuperNode.",
     )
-    _parse_args_common(parser=parser)
+    parser.add_argument(
+        "--supernode-address",
+        default="0.0.0.0:9094",
+        help="Set the SuperNode gRPC server address. Defaults to `0.0.0.0:9094`.",
+    )
 
     return parser
 
@@ -364,12 +246,12 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument(
         "--server",
-        default=ADDRESS_FLEET_API_GRPC_RERE,
+        default=FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
         help="Server address",
     )
     parser.add_argument(
         "--superlink",
-        default=ADDRESS_FLEET_API_GRPC_RERE,
+        default=FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
         help="SuperLink Fleet API (gRPC-rere) address (IPv4, IPv6, or a domain name)",
     )
     parser.add_argument(
@@ -389,13 +271,6 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         "is set to None, meaning there is no limit to the total time.",
     )
     parser.add_argument(
-        "--dir",
-        default="",
-        help="Add specified directory to the PYTHONPATH and load Flower "
-        "app from there."
-        " Default: current working directory.",
-    )
-    parser.add_argument(
         "--auth-supernode-private-key",
         type=str,
         help="The SuperNode's private key (as a path str) to enable authentication.",
@@ -408,15 +283,15 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--node-config",
         type=str,
-        help="A comma separated list of key/value pairs (separated by `=`) to "
+        help="A space separated list of key/value pairs (separated by `=`) to "
         "configure the SuperNode. "
-        "E.g. --node-config 'key1=\"value1\",partition-id=0,num-partitions=100'",
+        "E.g. --node-config 'key1=\"value1\" partition-id=0 num-partitions=100'",
     )
 
 
 def _try_setup_client_authentication(
     args: argparse.Namespace,
-) -> Optional[Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
+) -> Optional[tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
     if not args.auth_supernode_private_key and not args.auth_supernode_public_key:
         return None
 
