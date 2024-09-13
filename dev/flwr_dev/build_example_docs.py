@@ -106,8 +106,10 @@ urls = {
     "Oxford Flower-102": "https://www.robots.ox.ac.uk/~vgg/data/flowers/102/",
     "SpeechCommands": "https://huggingface.co/datasets/google/speech_commands",
     "Titanic": "https://www.kaggle.com/competitions/titanic",
-    "Waltons": "https://lifelines.readthedocs.io/en/latest/lifelines.datasets.html"
-    "#lifelines.datasets.load_waltons",
+    "Waltons": (
+        "https://lifelines.readthedocs.io/en/latest/lifelines.datasets.html"
+        "#lifelines.datasets.load_waltons"
+    ),
 }
 
 
@@ -187,8 +189,10 @@ def _copy_markdown_files(example):
 
 
 def _add_gh_button(example):
-    gh_text = '[<img src="_static/view-gh.png" alt="View on GitHub" width="200"/>]'
-    f"(https://github.com/adap/flower/blob/main/examples/{example})"
+    gh_text = (
+        '[<img src="_static/view-gh.png" alt="View on GitHub" width="200"/>]'
+        f"(https://github.com/adap/flower/blob/main/examples/{example})"
+    )
     readme_file = os.path.join(ROOT, "examples", "doc", "source", example + ".md")
     with open(readme_file, "r+", encoding="utf-8") as f:
         content = f.read()
