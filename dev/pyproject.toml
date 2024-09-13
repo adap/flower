@@ -17,7 +17,8 @@ dependencies = [
   "protobuf>=5.26.1",
   "mypy-protobuf==3.2.0",
   "types-protobuf==3.19.18",
-  "black==24.2.0"
+  "black==24.2.0",
+  "PyGithub==2.1.1",
 ]
 packages = [
     { include = "flwr_dev", from = "." },
