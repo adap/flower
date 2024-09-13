@@ -15,7 +15,7 @@
 """ConfigsRecord."""
 
 
-from typing import Dict, List, Optional, get_args
+from typing import Optional, get_args
 
 from flwr.common.typing import ConfigsRecordValues, ConfigsScalar
 
@@ -109,7 +109,7 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
 
     def __init__(
         self,
-        configs_dict: Optional[Dict[str, ConfigsRecordValues]] = None,
+        configs_dict: Optional[dict[str, ConfigsRecordValues]] = None,
         keep_input: bool = True,
     ) -> None:
 
@@ -141,7 +141,7 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
         num_bytes = 0
 
         for k, v in self.items():
-            if isinstance(v, List):
+            if isinstance(v, list):
                 if isinstance(v[0], (bytes, str)):
                     # not all str are of equal length necessarily
                     # for both the footprint of each element is 1 Byte
