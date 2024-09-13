@@ -18,7 +18,7 @@
 import io
 import timeit
 from logging import INFO, WARN
-from typing import List, Optional, Tuple, Union, cast
+from typing import Optional, Union, cast
 
 import flwr.common.recordset_compat as compat
 from flwr.common import (
@@ -276,8 +276,8 @@ def default_fit_workflow(  # pylint: disable=R0914
     )
 
     # Aggregate training results
-    results: List[Tuple[ClientProxy, FitRes]] = []
-    failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]] = []
+    results: list[tuple[ClientProxy, FitRes]] = []
+    failures: list[Union[tuple[ClientProxy, FitRes], BaseException]] = []
     for msg in messages:
         if msg.has_content():
             proxy = node_id_to_proxy[msg.metadata.src_node_id]
@@ -362,8 +362,8 @@ def default_evaluate_workflow(driver: Driver, context: Context) -> None:
     )
 
     # Aggregate the evaluation results
-    results: List[Tuple[ClientProxy, EvaluateRes]] = []
-    failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]] = []
+    results: list[tuple[ClientProxy, EvaluateRes]] = []
+    failures: list[Union[tuple[ClientProxy, EvaluateRes], BaseException]] = []
     for msg in messages:
         if msg.has_content():
             proxy = node_id_to_proxy[msg.metadata.src_node_id]

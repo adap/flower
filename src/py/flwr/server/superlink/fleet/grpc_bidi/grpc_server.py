@@ -17,8 +17,9 @@
 
 import concurrent.futures
 import sys
+from collections.abc import Sequence
 from logging import ERROR
-from typing import Any, Callable, Optional, Sequence, Tuple, Union
+from typing import Any, Callable, Optional, Union
 
 import grpc
 
@@ -46,7 +47,7 @@ INVALID_CERTIFICATES_ERR_MSG = """
 AddServicerToServerFn = Callable[..., Any]
 
 
-def valid_certificates(certificates: Tuple[bytes, bytes, bytes]) -> bool:
+def valid_certificates(certificates: tuple[bytes, bytes, bytes]) -> bool:
     """Validate certificates tuple."""
     is_valid = (
         all(isinstance(certificate, bytes) for certificate in certificates)
@@ -65,7 +66,7 @@ def start_grpc_server(  # pylint: disable=too-many-arguments
     max_concurrent_workers: int = 1000,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     keepalive_time_ms: int = 210000,
-    certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
+    certificates: Optional[tuple[bytes, bytes, bytes]] = None,
 ) -> grpc.Server:
     """Create and start a gRPC server running FlowerServiceServicer.
 
@@ -157,16 +158,16 @@ def start_grpc_server(  # pylint: disable=too-many-arguments
 
 def generic_create_grpc_server(  # pylint: disable=too-many-arguments
     servicer_and_add_fn: Union[
-        Tuple[FleetServicer, AddServicerToServerFn],
-        Tuple[GrpcAdapterServicer, AddServicerToServerFn],
-        Tuple[FlowerServiceServicer, AddServicerToServerFn],
-        Tuple[DriverServicer, AddServicerToServerFn],
+        tuple[FleetServicer, AddServicerToServerFn],
+        tuple[GrpcAdapterServicer, AddServicerToServerFn],
+        tuple[FlowerServiceServicer, AddServicerToServerFn],
+        tuple[DriverServicer, AddServicerToServerFn],
     ],
     server_address: str,
     max_concurrent_workers: int = 1000,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     keepalive_time_ms: int = 210000,
-    certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
+    certificates: Optional[tuple[bytes, bytes, bytes]] = None,
     interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None,
 ) -> grpc.Server:
     """Create a gRPC server with a single servicer.

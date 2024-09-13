@@ -17,7 +17,6 @@
 
 import time
 import unittest
-from typing import List, Tuple
 
 from flwr.common import DEFAULT_TTL
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
@@ -52,12 +51,12 @@ class ValidatorTest(unittest.TestCase):
         """Test is_valid task_res."""
         # Prepare
         # (producer_node_id, anonymous, ancestry)
-        valid_res: List[Tuple[int, bool, List[str]]] = [
+        valid_res: list[tuple[int, bool, list[str]]] = [
             (0, True, ["1"]),
             (1, False, ["1"]),
         ]
 
-        invalid_res: List[Tuple[int, bool, List[str]]] = [
+        invalid_res: list[tuple[int, bool, list[str]]] = [
             (0, False, []),
             (0, False, ["1"]),
             (0, True, []),
@@ -110,7 +109,7 @@ def create_task_ins(
 def create_task_res(
     producer_node_id: int,
     anonymous: bool,
-    ancestry: List[str],
+    ancestry: list[str],
 ) -> TaskRes:
     """Create a TaskRes for testing."""
     task_res = TaskRes(
