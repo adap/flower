@@ -1,5 +1,5 @@
 ########################
- Key Concepts of Flower
+ Flower Architecture
 ########################
 
 This page explains the decoupling concept in the Flower framework and
