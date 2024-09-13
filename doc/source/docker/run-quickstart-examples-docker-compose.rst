@@ -20,16 +20,9 @@ Before you start, make sure that:
 - The ``flwr`` CLI is :doc:`installed <../how-to-install-flower>` locally.
 - The Docker daemon is running.
 - Docker Compose is `installed <https://docs.docker.com/compose/install/>`_.
-- Two open terminal windows.
 
-**Why Two Terminals?**
-
-It is recommended to use two terminals to run the quickstart examples. This allows you to keep the
-``docker compose`` commands in one terminal and the ``flwr`` commands in the other, avoiding the
-need to switch between directories.
-
-Step 1: Start the Docker Services (Terminal 1)
-----------------------------------------------
+Run the Quickstart Example
+--------------------------
 
 #. Clone the Flower Repository:
 
@@ -37,25 +30,38 @@ Step 1: Start the Docker Services (Terminal 1)
 
       $ git clone --depth=1 https://github.com/adap/flower.git
 
-
-#. Change the directory to the location of the Docker Compose file:
-
-   .. code-block:: bash
-
-      $ cd flower/src/docker/complete/
-
-#. Set the ``PROJECT_DIR`` environment variable to the path of the quickstart example you want to
-   run. The path should be relative to the location of the Docker Compose files:
+#. Change the directory to the quickstart example you like to run:
 
    .. code-block:: bash
 
-      $ export PROJECT_DIR=../../../examples/quickstart-sklearn-tabular
+      $ cd flower/examples/quickstart-sklearn-tabular
+
+#. Copy the ``compose.yml`` file into the example directory:
+
+   .. code-block:: bash
+
+      $ cp ../../src/docker/complete/compose.yml .
 
 #. Build and start the services using the following command:
 
    .. code-block:: bash
 
-      $ docker compose -f compose.yml up --build -d
+      $ docker compose up --build -d
+
+#. Append the following lines to the end of the ``pyproject.toml`` file and save it:
+
+   .. code-block:: toml
+      :caption: pyproject.toml
+
+      [tool.flwr.federations.docker-compose]
+      address  =  "127.0.0.1:9093"
+      insecure  = true
+
+#. Run the example:
+
+   .. code-block:: bash
+
+      $ flwr run . docker-compose
 
 #. Follow the logs of the SuperExec service:
 
@@ -63,86 +69,22 @@ Step 1: Start the Docker Services (Terminal 1)
 
       $ docker compose logs superexec -f
 
-Step 2: Run the Quickstart Example (Terminal 2)
------------------------------------------------
-
-#. Change the directory to the quickstart example:
-
-   .. code-block:: bash
-
-      $ cd flower/examples/quickstart-sklearn-tabular
-
-#. Append the following lines to the end of the ``pyproject.toml`` file and save it:
-
-   .. code-block:: toml
-      :caption: pyproject.toml
-
-      [tool.flwr.federations.docker-compose]
-      address  =  "127.0.0.1:9093"
-      insecure  = true
-
-#. Run the example:
-
-   .. code-block:: bash
-
-      $ flwr run . docker-compose
-
-That is all it takes! You can monitor the progress of the run in the first terminal.
+That is all it takes! You can monitor the progress of the run through the logs of the SuperExec.
 
 Run a Different Quickstart Example
 ----------------------------------
 
-#. To run a different quickstart example, such as ``quickstart-pytorch``, switch back to the first
-   terminal and update the ``PROJECT_DIR`` environment variable:
-
-   .. code-block:: bash
-      :caption: Terminal 1
-
-      $ export PROJECT_DIR=../../../examples/quickstart-pytorch
-
-#. Rebuild and restart the services and follow the SuperExec logs:
-
-   .. code-block:: bash
-      :caption: Terminal 1
-
-      $ docker compose -f compose.yml up --build -d --force-recreate
-      $ docker compose logs superexec -f
-
-#. Switch back to the second terminal and change the directory to the new quickstart
-   example you like to run:
-
-   .. code-block:: bash
-      :caption: Terminal 2
-
-      $ cd ../quickstart-pytorch
-
-#. Append the following lines to the end of the ``pyproject.toml`` file and save it:
-
-   .. code-block:: toml
-      :caption: pyproject.toml
-
-      [tool.flwr.federations.docker-compose]
-      address  =  "127.0.0.1:9093"
-      insecure  = true
-
-#. Run the example:
-
-   .. code-block:: bash
-      :caption: Terminal 2
-
-      $ flwr run . docker-compose
-
-Clean Up
---------
-
-Remove all services and volumes:
+To run a different quickstart example, such as ``quickstart-pytorch``, first, shut down the Docker
+Compose services of the current example:
 
 .. code-block:: bash
 
-   $ docker compose down -v
+   $ docker compose down
+
+After that, you can repeat the steps above starting from Step 2.
 
 Limitations
-----------
+-----------
 
 .. list-table::
    :header-rows: 1
