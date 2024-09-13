@@ -10,7 +10,7 @@ using Docker Compose.
 .. important::
 
    Some quickstart examples may have limitations or requirements that prevent them from running
-   on every environment. For more information, please see `Limitation`_.
+   on every environment. For more information, please see `Limitations`_.
 
 Prerequisites
 -------------
@@ -141,14 +141,14 @@ Remove all services and volumes:
 
    $ docker compose down -v
 
-Limitation
+Limitations
 ----------
 
 .. list-table::
    :header-rows: 1
 
    * - Quickstart Example
-     - Limitation/Requirements
+     - Limitations
    * - quickstart-fastai
      - None
    * - examples/quickstart-huggingface
