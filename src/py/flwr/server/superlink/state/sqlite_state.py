@@ -779,6 +779,7 @@ class SqliteState(State):  # pylint: disable=R0904
 
     def get_run(self, run_id: int) -> Optional[Run]:
         """Retrieve information about the run with the specified `run_id`."""
+        # Convert the uint64 value to sint64 for SQLite
         sint64_run_id = convert_uint64_to_sint64(run_id)
         query = "SELECT * FROM run WHERE run_id = ?;"
         try:
@@ -806,7 +807,7 @@ class SqliteState(State):  # pylint: disable=R0904
             )
             return True
         except sqlite3.IntegrityError:
-            log(ERROR, "`sint64_node_id` does not exist.")
+            log(ERROR, "`node_id` does not exist.")
             return False
 
 
