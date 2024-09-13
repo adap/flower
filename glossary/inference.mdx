@@ -1,0 +1,21 @@
+---
+title: "Inference"
+description: "Inference is the phase in which a trained machine learning model applies its learned patterns to new, unseen data to make predictions or decisions."
+date: "2024-07-12"
+author:
+  name: "Yan Gao"
+  position: "Research Scientist"
+  website: "https://discuss.flower.ai/u/yan-gao/"
+  github: "github.com/yan-gao-GY"
+related:
+  - text: "Federated Learning"
+    link: "/glossary/federated-learning"
+  - text: "Server"
+    link: "/glossary/server"
+  - text: "Client"
+    link: "/glossary/client"
+---
+
+Inference, also known as model prediction, is the stage in the machine learning workflow where a trained model is used to make predictions based on new, unseen data. In a typical machine learning setting, model inference involves the following steps: model loading, where the trained model is loaded into the application or service where it will be used; data preparation, which preprocess the new data in the same way as the training data; and model prediction, where the prepared data is fed into the model to compute outputs based on the learned patterns during training.
+
+In the context of federated learning (FL), inference can be performed locally on the user's device. A global model updated from FL process is deployed and loaded on individual nodes (e.g., smartphones, hospital servers) for local inference. This allows for keeping all data on-device, enhancing privacy and reducing latency.

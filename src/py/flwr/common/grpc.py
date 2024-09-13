@@ -15,8 +15,9 @@
 """Utility functions for gRPC."""
 
 
+from collections.abc import Sequence
 from logging import DEBUG
-from typing import Optional, Sequence
+from typing import Optional
 
 import grpc
 
