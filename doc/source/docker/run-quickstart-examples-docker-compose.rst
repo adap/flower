@@ -49,7 +49,7 @@ Run the Quickstart Example
    .. code-block:: toml
       :caption: pyproject.toml
 
-      [tool.flwr.federations.docker-compose]
+      [tool.flwr.federations.local-deployment]
       address = "127.0.0.1:9093"
       insecure = true
 
@@ -58,15 +58,15 @@ Run the Quickstart Example
       You can customize the string that follows ``tool.flwr.federations.`` to fit your needs.
       However, please note that the string cannot contain a dot (``.``).
 
-      In this example, ``docker-compose`` has been used. Just remember to replace
-      ``docker-compose`` with your chosen name in both the ``tool.flwr.federations.`` string
+      In this example, ``local-deployment`` has been used. Just remember to replace
+      ``local-deployment`` with your chosen name in both the ``tool.flwr.federations.`` string
       and the corresponding ``flwr run .`` command.
 
 #. Run the example:
 
    .. code-block:: bash
 
-      $ flwr run . docker-compose
+      $ flwr run . local-deployment
 
 #. Follow the logs of the SuperExec service:
 
