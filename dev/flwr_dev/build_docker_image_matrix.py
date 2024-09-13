@@ -1,12 +1,12 @@
-"""
-Usage: python dev/build-docker-image-matrix.py --flwr-version <flower version e.g. 1.9.0>
-"""
+"""Build all Docker images."""
 
 import argparse
 import json
 from dataclasses import asdict, dataclass
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import Annotated, Any, Callable, Dict, List, Optional
+
+import typer
 
 
 class DistroName(str, Enum):
@@ -121,15 +121,11 @@ def tag_latest_ubuntu_with_flwr_version(image: BaseImage) -> List[str]:
         return [image.tag]
 
 
-if __name__ == "__main__":
-    arg_parser = argparse.ArgumentParser(
-        description="Generate Github Docker workflow matrix"
-    )
-    arg_parser.add_argument("--flwr-version", type=str, required=True)
-    args = arg_parser.parse_args()
-
-    flwr_version = args.flwr_version
-
+def build_images(
+    flwr_version: Annotated[
+        str, typer.Argument(help="Version of Flower to build the Docker images for")
+    ]
+):
     # ubuntu base images for each supported python version
     ubuntu_base_images = generate_base_images(
         flwr_version,
@@ -197,3 +193,14 @@ if __name__ == "__main__":
             }
         )
     )
+
+
+if __name__ == "__main__":
+    arg_parser = argparse.ArgumentParser(
+        description="Generate Github Docker workflow matrix"
+    )
+    arg_parser.add_argument("--flwr-version", type=str, required=True)
+    args = arg_parser.parse_args()
+
+    flwr_version = args.flwr_version
+    build_images(flwr_version)

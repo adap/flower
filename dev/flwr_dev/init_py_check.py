@@ -11,7 +11,9 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Annotated
+
+import typer
 
 
 def get_init_dir_list_and_warnings(absolute_path: str) -> Tuple[List[str], List[str]]:
@@ -96,13 +98,19 @@ def check_all_init_files(dir_list: List[str]) -> None:
         sys.exit(1)
 
 
+def check_init(
+    paths: Annotated[list[str], typer.Argument(help="Path of the files to analyze")]
+):
+    for i, _ in enumerate(paths):
+        abs_path: str = os.path.abspath(os.path.join(os.getcwd(), paths[i]))
+        init_dirs = check_missing_init_files(abs_path)
+        check_all_init_files(init_dirs)
+
+
 if __name__ == "__main__":
     if len(sys.argv) == 0:
         raise Exception(  # pylint: disable=W0719
             "Please provide at least one directory path relative "
             "to your current working directory."
         )
-    for i, _ in enumerate(sys.argv):
-        abs_path: str = os.path.abspath(os.path.join(os.getcwd(), sys.argv[i]))
-        init_dirs = check_missing_init_files(abs_path)
-        check_all_init_files(init_dirs)
+    check_init(sys.argv)

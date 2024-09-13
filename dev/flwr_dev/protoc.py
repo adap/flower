@@ -18,18 +18,20 @@
 import glob
 from os import path
 
+from flwr_dev.common import get_git_root
+
 import grpc_tools
 from grpc_tools import protoc
 
 GRPC_PATH = grpc_tools.__path__[0]
 
-DIR_PATH = path.dirname(path.realpath(__file__))
-IN_PATH = path.normpath(f"{DIR_PATH}/../../proto")
-OUT_PATH = path.normpath(f"{DIR_PATH}/..")
+ROOT = get_git_root()
+IN_PATH = path.normpath(f"{ROOT}/src/proto")
+OUT_PATH = path.normpath(f"{ROOT}/src/py")
 PROTO_FILES = glob.glob(f"{IN_PATH}/flwr/**/*.proto")
 
 
-def compile_all() -> None:
+def compile_protos() -> None:
     """Compile all protos in the `src/proto` directory.
 
     The directory structure of the `src/proto` directory will be mirrored in `src/py`.
@@ -55,4 +57,4 @@ def compile_all() -> None:
 
 
 if __name__ == "__main__":
-    compile_all()
+    compile_protos()

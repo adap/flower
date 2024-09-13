@@ -19,12 +19,13 @@ import re
 import sys
 import tomllib
 
-if __name__ == "__main__":
+from flwr_dev.common import get_git_root
 
-    pr_title = sys.argv[1]
 
+def check_title(pr_title):
+    """Check if the title of a PR is valid."""
     # Load the YAML configuration
-    with (pathlib.Path(__file__).parent.resolve() / "changelog_config.toml").open(
+    with (pathlib.Path(get_git_root()) / "dev" / "changelog_config.toml").open(
         "rb"
     ) as file:
         config = tomllib.load(file)
@@ -73,3 +74,8 @@ if __name__ == "__main__":
             "the changelog:\n\n\t`feat(framework:skip) Add new option to build CLI`\n"
         )
         sys.exit(1)
+
+
+if __name__ == "__main__":
+    pr_title = sys.argv[1]
+    check_title(pr_title)

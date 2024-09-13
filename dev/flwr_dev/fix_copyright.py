@@ -9,10 +9,12 @@ Example:
 import os
 import sys
 from pathlib import Path
-from typing import List
+from typing import List, Annotated
 
-from flwr_tool.check_copyright import COPYRIGHT_FORMAT, _get_file_creation_year
-from flwr_tool.init_py_check import get_init_dir_list_and_warnings
+import typer
+
+from flwr_dev.check_copyright import COPYRIGHT_FORMAT, _get_file_creation_year
+from flwr_dev.init_py_check import get_init_dir_list_and_warnings
 
 
 def _insert_or_edit_copyright(py_file: Path) -> None:
@@ -47,13 +49,19 @@ def _fix_copyright(dir_list: List[str]) -> None:
             _insert_or_edit_copyright(py_file)
 
 
+def fix_copyrights(
+    paths: Annotated[list[str], typer.Argument(help="Path of the files to analyze")]
+):
+    for i, _ in enumerate(paths):
+        abs_path: str = os.path.abspath(os.path.join(os.getcwd(), paths[i]))
+        __, init_dirs = get_init_dir_list_and_warnings(abs_path)
+        _fix_copyright(init_dirs)
+
+
 if __name__ == "__main__":
     if len(sys.argv) == 0:
         raise Exception(  # pylint: disable=W0719
             "Please provide at least one directory path relative "
             "to your current working directory."
         )
-    for i, _ in enumerate(sys.argv):
-        abs_path: str = os.path.abspath(os.path.join(os.getcwd(), sys.argv[i]))
-        __, init_dirs = get_init_dir_list_and_warnings(abs_path)
-        _fix_copyright(init_dirs)
+    fix_copyrights(sys.argv)

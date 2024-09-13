@@ -1,0 +1,26 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "flwr-dev"
+version = "1.0.0"
+requires-python = ">=3.11"
+authors = [
+  {name = "The Flower Authors", email = "hello@flower.ai"},
+]
+description = "Small utility compiling useful scripts"
+license = "Apache-2.0"
+dependencies = [
+  "typer",
+  "grpcio-tools==1.66.1",
+  "protobuf>=5.26.1",
+  "mypy-protobuf==3.2.0",
+  "types-protobuf==3.19.18",
+]
+packages = [
+    { include = "flwr_dev", from = "." },
+]
+
+[project.scripts]
+flwr-dev = "flwr_dev.app:cli"

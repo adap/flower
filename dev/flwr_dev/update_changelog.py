@@ -18,8 +18,10 @@
 
 import re
 from sys import argv
+from typing import Annotated
 
 from github import Github
+import typer
 
 REPO_NAME = "adap/flower"
 CHANGELOG_FILE = "doc/source/ref-changelog.md"
@@ -226,10 +228,14 @@ def _insert_entry_no_desc(content, pr_reference, unreleased_index):
     return content
 
 
-def main():
+def generate_changelog(
+    gh_token: Annotated[
+        str, typer.Argument(help="A GitHub API token with read access.")
+    ]
+):
     """Update changelog using the descriptions of PRs since the latest tag."""
     # Initialize GitHub Client with provided token (as argument)
-    gh_api = Github(argv[1])
+    gh_api = Github(gh_token)
     latest_tag = _get_latest_tag(gh_api)
     if not latest_tag:
         print("No tags found in the repository.")
@@ -240,4 +246,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    generate_changelog(argv[1])

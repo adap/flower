@@ -19,8 +19,9 @@ import re
 import shutil
 import subprocess
 from pathlib import Path
+from flwr_dev.common import get_git_root
 
-ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+ROOT = get_git_root()
 INDEX = os.path.join(ROOT, "examples", "doc", "source", "index.rst")
 
 initial_text = """
@@ -278,6 +279,11 @@ def _main():
         index_file.write("\n")
 
 
-if __name__ == "__main__":
+def build_examples():
+    """Update and build example docs."""
     _main()
     subprocess.call(f"cd {ROOT}/examples/doc && make html", shell=True)
+
+
+if __name__ == "__main__":
+    build_examples()
