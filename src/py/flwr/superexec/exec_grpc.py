@@ -15,7 +15,7 @@
 """SuperExec gRPC API."""
 
 from logging import INFO
-from typing import Optional, Tuple
+from typing import Optional
 
 import grpc
 
@@ -32,7 +32,7 @@ from .executor import Executor
 def run_superexec_api_grpc(
     address: str,
     executor: Executor,
-    certificates: Optional[Tuple[bytes, bytes, bytes]],
+    certificates: Optional[tuple[bytes, bytes, bytes]],
     config: UserConfig,
 ) -> grpc.Server:
     """Run SuperExec API (gRPC, request-response)."""
