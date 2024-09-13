@@ -19,10 +19,11 @@ from __future__ import annotations
 
 import random
 import threading
+from collections.abc import Sequence
 from copy import copy
 from logging import DEBUG, ERROR
 from pathlib import Path
-from typing import Sequence, cast
+from typing import cast
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
