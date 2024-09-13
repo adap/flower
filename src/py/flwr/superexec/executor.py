@@ -17,7 +17,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from subprocess import Popen
-from typing import List, Optional
+from typing import Optional
 
 from flwr.common.typing import UserConfig
 
@@ -28,7 +28,7 @@ class RunTracker:
 
     run_id: int
     proc: Popen  # type: ignore
-    logs: List[str] = field(default_factory=list)
+    logs: list[str] = field(default_factory=list)
 
 
 class Executor(ABC):
