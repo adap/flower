@@ -1003,7 +1003,7 @@ msgstr ""
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:11
 #: ../../source/how-to-install-flower.rst:8
 msgid ""
-"Flower requires at least `Python 3.8 <https://docs.python.org/3.8/>`_, "
+"Flower requires at least `Python 3.9 <https://docs.python.org/3.9/>`_, "
 "but `Python 3.10 <https://docs.python.org/3.10/>`_ or above is "
 "recommended."
 msgstr ""
@@ -1923,7 +1923,7 @@ msgid "Prerequisites"
 msgstr ""
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:7
-msgid "`Python 3.8 <https://docs.python.org/3.8/>`_ or above"
+msgid "`Python 3.9 <https://docs.python.org/3.9/>`_ or above"
 msgstr ""
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:8
@@ -2006,14 +2006,14 @@ msgstr ""
 msgid ""
 "If you don't have :code:`pyenv` installed, the following script that will"
 " install it, set it up, and create the virtual environment (with "
-":code:`Python 3.8.17` by default)::"
+":code:`Python 3.9.20` by default)::"
 msgstr ""
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:58
 msgid ""
 "If you already have :code:`pyenv` installed (along with the :code:`pyenv-"
 "virtualenv` plugin), you can use the following convenience script (with "
-":code:`Python 3.8.17` by default)::"
+":code:`Python 3.9.20` by default)::"
 msgstr ""
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:62
