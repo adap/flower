@@ -15,15 +15,15 @@
 """Flower command line interface."""
 
 import typer
-from typer.main import get_command
-from flwr_dev.check_pr_title import check_title
-from flwr_dev.build_example_docs import build_examples
 from flwr_dev.build_docker_image_matrix import build_images
+from flwr_dev.build_example_docs import build_examples
 from flwr_dev.check_copyright import check_copyrights
+from flwr_dev.check_pr_title import check_title
 from flwr_dev.init_py_check import check_init
 from flwr_dev.init_py_fix import fix_init
 from flwr_dev.protoc import compile_protos
 from flwr_dev.update_changelog import generate_changelog
+from typer.main import get_command
 
 cli = typer.Typer(
     help=typer.style(

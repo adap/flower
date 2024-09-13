@@ -20,8 +20,8 @@ import re
 from sys import argv
 from typing import Annotated
 
-from github import Github
 import typer
+from github import Github
 
 REPO_NAME = "adap/flower"
 CHANGELOG_FILE = "doc/source/ref-changelog.md"

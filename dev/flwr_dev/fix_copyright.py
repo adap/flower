@@ -9,10 +9,9 @@ Example:
 import os
 import sys
 from pathlib import Path
-from typing import List, Annotated
+from typing import Annotated, List
 
 import typer
-
 from flwr_dev.check_copyright import COPYRIGHT_FORMAT, _get_file_creation_year
 from flwr_dev.init_py_check import get_init_dir_list_and_warnings
 

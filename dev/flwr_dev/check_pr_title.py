@@ -17,11 +17,10 @@
 import pathlib
 import re
 import sys
-import tomli
 from typing import Annotated
 
+import tomli
 import typer
-
 from flwr_dev.common import get_git_root
 
 
