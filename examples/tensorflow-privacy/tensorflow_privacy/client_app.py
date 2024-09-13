@@ -8,6 +8,8 @@ from flwr_datasets import FederatedDataset
 from tensorflow_privacy.privacy.analysis.compute_dp_sgd_privacy_lib import (
     compute_dp_sgd_privacy_statement,
 )
+from flwr.common import Context
+
 
 # Make TensorFlow log less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
@@ -103,48 +105,73 @@ class FlowerClient(NumPyClient):
         return loss, len(self.x_test), {"accuracy": accuracy}
 
 
-def client_fn_parameterized(
-    partition_id,
-    noise_multiplier,
-    l2_norm_clip=1.0,
-    num_microbatches=64,
-    learning_rate=0.01,
-    batch_size=64,
-):
-    def client_fn(cid: str):
-        model = tf.keras.Sequential(
-            [
-                tf.keras.layers.InputLayer(input_shape=(28, 28, 1)),
-                tf.keras.layers.Conv2D(32, kernel_size=(3, 3), activation="relu"),
-                tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
-                tf.keras.layers.Conv2D(64, kernel_size=(3, 3), activation="relu"),
-                tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
-                tf.keras.layers.Flatten(),
-                tf.keras.layers.Dense(128, activation="relu"),
-                tf.keras.layers.Dense(10, activation="softmax"),
-            ]
-        )
-        train_data, test_data = load_data(
-            partition_id=partition_id, batch_size=batch_size
-        )
-        return FlowerClient(
-            model,
-            train_data,
-            test_data,
-            noise_multiplier,
-            l2_norm_clip,
-            num_microbatches,
-            learning_rate,
-            batch_size,
-        ).to_client()
+# def client_fn_parameterized(
+#     partition_id,
+#     noise_multiplier,
+#     l2_norm_clip=1.0,
+#     num_microbatches=64,
+#     learning_rate=0.01,
+#     batch_size=64,
+# ):
+#     def client_fn(cid: str):
+#         model = tf.keras.Sequential(
+#             [
+#                 tf.keras.layers.InputLayer(input_shape=(28, 28, 1)),
+#                 tf.keras.layers.Conv2D(32, kernel_size=(3, 3), activation="relu"),
+#                 tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+#                 tf.keras.layers.Conv2D(64, kernel_size=(3, 3), activation="relu"),
+#                 tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+#                 tf.keras.layers.Flatten(),
+#                 tf.keras.layers.Dense(128, activation="relu"),
+#                 tf.keras.layers.Dense(10, activation="softmax"),
+#             ]
+#         )
+#         train_data, test_data = load_data(
+#             partition_id=partition_id, batch_size=batch_size
+#         )
+#         return FlowerClient(
+#             model,
+#             train_data,
+#             test_data,
+#             noise_multiplier,
+#             l2_norm_clip,
+#             num_microbatches,
+#             learning_rate,
+#             batch_size,
+#         ).to_client()
 
-    return client_fn
+#     return client_fn
 
 
-appA = ClientApp(
-    client_fn=client_fn_parameterized(partition_id=0, noise_multiplier=1.0),
-)
+# appA = ClientApp(
+#     client_fn=client_fn_parameterized(partition_id=0, noise_multiplier=1.0),
+# )
 
-appB = ClientApp(
-    client_fn=client_fn_parameterized(partition_id=1, noise_multiplier=1.5),
-)
+# appB = ClientApp(
+#     client_fn=client_fn_parameterized(partition_id=1, noise_multiplier=1.5),
+# )
+
+
+def client_fn(context: Context):
+    partition_id = context.node_config["partition-id"]
+    trainloader, testloader = load_data(
+        partition_id=partition_id, num_partitions=context.node_config["num-partitions"]
+    )
+    l2_norm_clip = 1.0
+    num_microbatches = 64
+    learning_rate = 0.01
+    batch_size = 64
+
+    return FlowerClient(
+        model,
+        train_data,
+        test_data,
+        noise_multiplier,
+        l2_norm_clip,
+        num_microbatches,
+        learning_rate,
+        batch_size,
+    ).to_client()
+
+
+app = ClientApp(client_fn=client_fn)
