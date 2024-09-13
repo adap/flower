@@ -18,7 +18,6 @@
 import time
 from logging import ERROR
 from os import urandom
-from typing import Dict, List
 from uuid import uuid4
 
 from flwr.common import log
@@ -75,15 +74,15 @@ def convert_sint64_to_uint64(s: int) -> int:
 
 
 def convert_uint64_values_in_dict_to_sint64(
-    data_dict: Dict[str, int], keys: List[str]
+    data_dict: dict[str, int], keys: list[str]
 ) -> None:
     """Convert uint64 values to sint64 in the given dictionary.
 
     Parameters
     ----------
-    data_dict : Dict[str, int]
+    data_dict : dict[str, int]
         A dictionary where the values are integers to be converted.
-    keys : List[str]
+    keys : list[str]
         A list of keys in the dictionary whose values need to be converted.
 
     Returns
@@ -97,15 +96,15 @@ def convert_uint64_values_in_dict_to_sint64(
 
 
 def convert_sint64_values_in_dict_to_uint64(
-    data_dict: Dict[str, int], keys: List[str]
+    data_dict: dict[str, int], keys: list[str]
 ) -> None:
     """Convert sint64 values to uint64 in the given dictionary.
 
     Parameters
     ----------
-    data_dict : Dict[str, int]
+    data_dict : dict[str, int]
         A dictionary where the values are integers to be converted.
-    keys : List[str]
+    keys : list[str]
         A list of keys in the dictionary whose values need to be converted.
 
     Returns
