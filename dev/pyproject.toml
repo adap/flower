@@ -13,7 +13,7 @@ description = "Small utility compiling useful scripts"
 license = "Apache-2.0"
 dependencies = [
   "typer",
-  "grpcio-tools==1.66.1",
+  "grpcio-tools==1.60.0",
   "protobuf>=4.25.2,<5.0.0",
   "mypy-protobuf==3.2.0",
   "types-protobuf==3.19.18",
