@@ -117,3 +117,8 @@ This allows many users to share the same federation and to just type
 .. _clientapp_link: ref-api/flwr.client.ClientApp.html
 
 .. _serverapp_link: ref-api/flwr.server.ServerApp.html
+
+.. title:: Flower federated learning architecture
+
+.. meta::
+   :description: Explore the federated learning architecture of the Flower framework, featuring multi-tenancy, concurrent execution, and scalable, secure machine learning while preserving data privacy.
