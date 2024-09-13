@@ -19,35 +19,21 @@ from typing import Optional
 
 from typing_extensions import override
 
-from .state import RunStatus, SuperexecState
+from .state import RunStatus, ExecState
 
 
-class InMemorySuperexecState(SuperexecState):
+class InMemoryExecState(ExecState):
     """InMemory implementation of SuperexecState."""
 
     def __init__(self) -> None:
         self.runs: dict[int, RunStatus] = {}
-        self.logs: dict[int, list[str]] = {}
 
     @override
-    def store_log(self, run_id: int, log_output: str, stream: str = "stderr") -> None:
-        """Store logs into the database."""
-        if self.logs[run_id]:
-            self.logs[run_id].append(log_output)
-        else:
-            self.logs[run_id] = [log_output]
-
-    @override
-    def get_logs(self, run_id: int) -> list[str]:
-        """Get logs from the database."""
-        return self.logs[run_id]
-
-    @override
-    def update_run_tracker(self, run_id: int, status: RunStatus) -> None:
-        """Store or update a RunTracker in the database."""
+    def update_run_status(self, run_id: int, status: RunStatus) -> None:
+        """Store or update a RunStatus in memory."""
         self.runs[run_id] = status
 
     @override
-    def get_run_tracker_status(self, run_id: int) -> Optional[RunStatus]:
-        """Get a RunTracker's status from the database."""
+    def get_run_status(self, run_id: int) -> Optional[RunStatus]:
+        """Get a RunStatus from memory."""
         return self.runs.get(run_id, None)

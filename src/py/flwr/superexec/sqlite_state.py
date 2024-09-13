@@ -21,11 +21,11 @@ from typing import Optional
 
 from typing_extensions import override
 
-from .state import RunStatus, SuperexecState
+from .state import RunStatus, ExecState
 
 
-class SqliteSuperexecState(SuperexecState):
-    """SQLite implementation of SuperexecState."""
+class SqliteExecState(ExecState):
+    """SQLite implementation of ExecState."""
 
     def __init__(self, db_path: str):
         self.conn = sqlite3.connect(db_path)
@@ -39,42 +39,10 @@ class SqliteSuperexecState(SuperexecState):
                 )
             """
             )
-            self.conn.execute(
-                """
-                CREATE TABLE IF NOT EXISTS logs (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    run_id INTEGER,
-                    timestamp TEXT,
-                    stream TEXT,
-                    message TEXT,
-                    FOREIGN KEY(run_id) REFERENCES runs(run_id)
-                )
-            """
-            )
 
     @override
-    def store_log(self, run_id: int, log_output: str, stream: str = "stderr") -> None:
-        """Store logs into the database."""
-        with self.conn:
-            self.conn.execute(
-                "INSERT INTO logs (run_id, timestamp, stream, message) "
-                "VALUES (?, ?, ?, ?)",
-                (run_id, datetime.datetime.now().isoformat(), stream, log_output),
-            )
-
-    @override
-    def get_logs(self, run_id: int) -> list[str]:
-        """Get logs from the database."""
-        cursor = self.conn.cursor()
-        cursor.execute(
-            "SELECT log_output FROM logs WHERE run_id = ? ORDER BY id ASC", (run_id,)
-        )
-        rows = cursor.fetchall()
-        return [row[0] for row in rows]
-
-    @override
-    def update_run_tracker(self, run_id: int, status: RunStatus) -> None:
-        """Store or update a RunTracker in the database."""
+    def update_run_status(self, run_id: int, status: RunStatus) -> None:
+        """Store or update a RunStatus in the database."""
         with self.conn:
             cursor = self.conn.cursor()
             cursor.execute("SELECT run_id FROM runs WHERE run_id = ?", (run_id,))
@@ -90,8 +58,8 @@ class SqliteSuperexecState(SuperexecState):
                 )
 
     @override
-    def get_run_tracker_status(self, run_id: int) -> Optional[RunStatus]:
-        """Get a RunTracker's status from the database."""
+    def get_run_status(self, run_id: int) -> Optional[RunStatus]:
+        """Get a RunStatus from the database."""
         cursor = self.conn.cursor()
         cursor.execute("SELECT status FROM runs WHERE run_id = ?", (run_id,))
         row = cursor.fetchone()

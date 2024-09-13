@@ -19,9 +19,9 @@ from typing import Optional
 
 from flwr.common import log
 
-from .in_memory_state import InMemorySuperexecState
-from .sqlite_state import SqliteSuperexecState
-from .state import SuperexecState
+from .in_memory_state import InMemoryExecState
+from .sqlite_state import SqliteExecState
+from .state import ExecState
 
 
 class SuperexecStateFactory:
@@ -29,18 +29,18 @@ class SuperexecStateFactory:
 
     def __init__(self, database: str) -> None:
         self.database = database
-        self.state_instance: Optional[SuperexecState] = None
+        self.state_instance: Optional[ExecState] = None
 
-    def state(self) -> SuperexecState:
+    def state(self) -> ExecState:
         """Return a State instance and create it, if necessary."""
         # InMemoryState
         if self.database == ":flwr-in-memory-state:":
             if self.state_instance is None:
-                self.state_instance = InMemorySuperexecState()
+                self.state_instance = InMemoryExecState()
             log(DEBUG, "Using InMemoryState")
             return self.state_instance
 
         # SqliteState
-        state = SqliteSuperexecState(self.database)
+        state = SqliteExecState(self.database)
         log(DEBUG, "Using SqliteState")
         return state

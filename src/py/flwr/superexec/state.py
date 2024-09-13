@@ -27,21 +27,13 @@ class RunStatus(Enum):
     INTERRUPTED = auto()
 
 
-class SuperexecState(ABC):
-    """Abstract SuperexecState."""
+class ExecState(ABC):
+    """Abstract ExecState."""
 
     @abstractmethod
-    def store_log(self, run_id: int, log_output: str, stream: str = "stderr") -> None:
-        """Store a log entry for a given run."""
+    def update_run_status(self, run_id: int, status: RunStatus) -> None:
+        """Store or update a RunStatus with the given run_id and status."""
 
     @abstractmethod
-    def get_logs(self, run_id: int) -> list[str]:
-        """Retrieve all log entries for a given run."""
-
-    @abstractmethod
-    def update_run_tracker(self, run_id: int, status: RunStatus) -> None:
-        """Store or update a RunTracker with the given run_id and status."""
-
-    @abstractmethod
-    def get_run_tracker_status(self, run_id: int) -> Optional[RunStatus]:
-        """Retrieve the status of a RunTracker by run_id."""
+    def get_run_status(self, run_id: int) -> Optional[RunStatus]:
+        """Retrieve the status of a RunStatus by run_id."""
