@@ -1,12 +1,18 @@
-#####################
- Flower Architecture
-#####################
+###################
+Flower Architecture
+###################
 
-This page summarizes the architecture of Flower federated learning
-systems.
+This page explains the architecture of deployed Flower federated learning
+system.
 
-In federated learning (FL), there is typically a server and a number of
-clients that are connected to it, i.e. the hub-and-spoke topology:
+In federated learning (FL), there is typically one server and a number of
+clients that are connected to the server. This is often called a federation.
+
+The role of the server is to coordinate the training process. The role of each
+client is to receive tasks from the server, execute those tasks and return the
+results back to the server.
+
+This is sometimes called a hub-and-spoke topology:
 
 .. figure:: ./_static/flower-architecture-hub-and-spoke.svg
    :align: center
@@ -14,7 +20,7 @@ clients that are connected to it, i.e. the hub-and-spoke topology:
    :alt: Hub-and-spoke topology in federated learning
    :class: no-scaled-link
 
-   Hub-and-spoke topology in federated learning.
+   Hub-and-spoke topology in federated learning (one server, multiple clients).
 
 In a real-world deployment, we want such a federation to be able to run
 multiple workloads (different model architectures, different training or
