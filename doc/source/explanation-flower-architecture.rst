@@ -35,8 +35,14 @@ client called Supernode, and short-running ServerApp and ClientApp:
    For more details, please refer to the |serverapp_link|_ and
    |clientapp_link|_ documentation.
 
-With `multi-tenancy`, multiple ServerApp and ClientApps are now allowed
-to run on the same long-running SuperLink and SuperNodes.
+Users will typically develop the code that runs the ServerApp and
+ClientApps. All of the communication between them are taken care of by
+the SuperLink and SuperNodes.
+
+With `multi-tenancy`, multiple ServerApps and ClientApps are now capable
+of running on the same long-running SuperLink and SuperNodes. As shown
+in the figure below, two ServerApps are connected to the SuperLink and
+each SuperNode can launch two ClientApps, respectively.
 
 .. figure:: ./_static/flower-architecture-multi-run.svg
    :align: center
@@ -46,11 +52,12 @@ to run on the same long-running SuperLink and SuperNodes.
 
    Multi-tenancy federated learning architecture with Flower
 
-To illustrate, consider one federated learning training run. In one run,
-one ServerApp and a federation of ClientApp will take part. Note that a
-SuperNode will only run the ClientApp if it is selected to participate
-in the training run. For example, in ``run 1`` below, all the SuperNodes
-are selected and run their corresponding ClientApps:
+To illustrate how multi-tenancy works, consider one federated learning
+training run where one ServerApp and a number of ClientApps will take
+part. (Note that a SuperNode will only run the ClientApp if it is
+selected to participate in the training run.) In ``run 1`` below, all
+the SuperNodes are selected and therefore run their corresponding
+ClientApps:
 
 .. figure:: ./_static/flower-architecture-multi-run-1.svg
    :align: center
@@ -62,7 +69,7 @@ are selected and run their corresponding ClientApps:
    All SuperNodes participate in the training round.
 
 However, in ``run 2``, only the first and third SuperNodes are selected
-and will participate in the training:
+to participate in the training:
 
 .. figure:: ./_static/flower-architecture-multi-run-2.svg
    :align: center
@@ -71,8 +78,12 @@ and will participate in the training:
    :class: no-scaled-link
 
    Run 2 in multi-tenancy federated learning architecture with Flower.
-   Only SuperNodes 1 and 3 are selected and will participate in the
+   Only the first and third SuperNodes are selected to participate in the
    training round.
+
+Therefore, with multi-tenancy, different ClientApps - or in other words
+- federations, can be easily chosen to run different workloads with
+Flower.
 
 To manage all of the concurrently running training runs, Flower adds one
 additional long-running service called SuperExec:
