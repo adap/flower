@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-06-17 16:09+0200\n"
-"PO-Revision-Date: 2024-06-25 10:43+0000\n"
-"Last-Translator: \"Young D. Kwon\" <youngkwon311@gmail.com>\n"
+"PO-Revision-Date: 2024-08-23 13:09+0000\n"
+"Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language-Team: Korean <https://hosted.weblate.org/projects/flower-docs/"
 "framework/ko/>\n"
 "Language: ko\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.6-rc\n"
+"X-Generator: Weblate 5.7.1-dev\n"
 "Generated-By: Babel 2.15.0\n"
 
 #: ../../source/contributor-explanation-architecture.rst:2
@@ -1632,7 +1632,7 @@ msgstr "이를 위해 실행할 수 있는 몇 가지 스크립트를 작성했�
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:150
 msgid "**Stage changes**"
-msgstr "**Stage 변경**"
+msgstr "**변경사항 스테이징**"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:141
 msgid ""
@@ -1657,7 +1657,7 @@ msgstr ""
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:160
 msgid "**Commit changes**"
-msgstr "**Commit 변경**"
+msgstr "**변경사항 커밋**"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:153
 msgid ""
@@ -3195,7 +3195,7 @@ msgstr ""
 #: ../../source/explanation-differential-privacy.rst:11
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:303
 msgid "Differential Privacy"
-msgstr "차분 프라이버시"
+msgstr "차등 프라이버시"
 
 #: ../../source/explanation-differential-privacy.rst:3
 msgid ""
@@ -3216,9 +3216,10 @@ msgid ""
 "privacy comes in. It provides the possibility of analyzing data while "
 "ensuring the privacy of individuals."
 msgstr ""
-"익명화와 같은 기존 방법만으로는 재식별 및 데이터 연결과 같은 공격으로 인해 효"
-"과가 없습니다. 그래서 차분 프라이버시가 등장했습니다. 차등 개인정보 보호는 개"
-"인의 프라이버시를 보장하면서 데이터를 분석할 수 있는 가능성을 제공합니다."
+"익명화와 같은 기존 방법만으로는 재식별 및 데이터 연결과 같은 공격으로 인해 "
+"효과가 없습니다. 그래서 차등 프라이버시가 등장했습니다. 차등 프라이버시는 "
+"개인의 개인 정보 보호를 보장하면서 데이터를 분석할 수 있는 가능성을 "
+"제공합니다."
 
 #: ../../source/explanation-differential-privacy.rst:12
 msgid ""
@@ -3230,10 +3231,10 @@ msgid ""
 "individual's information remains hidden in the crowd."
 msgstr ""
 "하나의 레코드(예: 앨리스의 데이터)를 제외하고는 동일한 두 개의 데이터 세트가 "
-"있다고 상상해 보세요. 차분 프라이버(DP)는 평균 소득 계산과 같은 모든 분석(M)"
-"이 두 데이터 세트에 대해 거의 동일한 결과를 산출하도록 보장합니다(O와 O' 는 "
-"비슷할 것입니다). 이렇게 하면 그룹 패턴은 보존하면서 개별 세부 정보는 가려져 "
-"개인의 정보가 군중 속에 숨겨집니다."
+"있다고 상상해 보세요. 차등 프라이버시(DP)는 평균 소득 계산과 같은 모든 "
+"분석(M)이 두 데이터 세트에 대해 거의 동일한 결과를 산출하도록 보장합니다(O와 "
+"O' 는 비슷할 것입니다). 이렇게 하면 그룹 패턴은 보존하면서 개별 세부 정보는 "
+"가려져 개인의 정보가 군중 속에 숨겨집니다."
 
 #: ../../source/explanation-differential-privacy.rst:-1
 msgid "DP Intro"
@@ -3264,12 +3265,12 @@ msgid ""
 "sub:`2`, that differ in only a single record, and for all possible outputs S "
 "⊆ Range(A):"
 msgstr ""
-"차분 프라이버시(DP)는 공격자가 무작위 알고리즘의 출력을 통해 유추할 수 있는 "
-"정보에 대해 통계적 보장을 제공합니다. 이는 노이즈를 추가하여 알고리즘의 출력"
-"에 대한 한 개인의 영향력에 대한 무조건적인 상한선을 제공합니다[1]. 무작위 메"
-"커니즘 M은 하나의 레코드만 다른 두 개의 인접 데이터베이스인 D:sub:`1`과 D:"
-"sub:`2`의 경우, 가능한 모든 출력 S ⊆ Range(A)에 대해 (:math:`\\epsilon`, :"
-"math:`\\delta`)-차분 프라이버시를 제공합니다:"
+"차등 프라이버시(DP)는 공격자가 무작위 알고리즘의 출력을 통해 유추할 수 있는 "
+"정보에 대해 통계적 보장을 제공합니다. 이는 노이즈를 추가하여 알고리즘의 "
+"출력에 대한 한 개인의 영향력에 대한 무조건적인 상한선을 제공합니다[1]. "
+"무작위 메커니즘 M은 하나의 레코드만 다른 두 개의 인접 데이터베이스인 "
+"D:sub:`1`과 D:sub:`2`의 경우, 가능한 모든 출력 S ⊆ Range(A)에 대해 (:math:`"
+"\\epsilon`, :math:`\\delta`)-차등 프라이버시를 제공합니다:"
 
 #: ../../source/explanation-differential-privacy.rst:32
 msgid ""
@@ -3291,16 +3292,16 @@ msgid ""
 "change in the output due to the inclusion or removal of a single record."
 msgstr ""
 "프라이버시 예산이라고도 하는 :math:`\\epsilon` 매개변수는 프라이버시 손실을 "
-"측정하는 지표입니다. 이 매개변수는 프라이버시와 효용의 균형을 제어하며, :"
-"math:`\\epsilon` 값이 낮을수록 프라이버시 수준이 높지만 효용도 감소할 가능성"
-"이 높습니다. math:`\\delta` 매개변수는 상한값인 :math:`\\epsilon`이 적용되지 "
-"않는 작은 확률을 설명합니다. 차분 프라이버시를 달성하는 데 필요한 노이즈의 양"
-"은 출력의 감도에 비례하며, 이는 단일 레코드의 포함 또는 제거로 인한 출력의 최"
-"대 변화를 측정합니다."
+"측정하는 지표입니다. 이 매개변수는 프라이버시와 효용의 균형을 제어하며, "
+":math:`\\epsilon` 값이 낮을수록 프라이버시 수준이 높지만 효용도 감소할 "
+"가능성이 높습니다. math:`\\delta` 매개변수는 상한값인 :math:`\\epsilon`이 "
+"적용되지 않는 작은 확률을 설명합니다. 차등 프라이버시를 달성하는 데 필요한 "
+"노이즈의 양은 출력의 감도에 비례하며, 이는 단일 레코드의 포함 또는 제거로 "
+"인한 출력의 최대 변화를 측정합니다."
 
 #: ../../source/explanation-differential-privacy.rst:45
 msgid "Differential Privacy in Machine Learning"
-msgstr "머신 러닝의 차분 프라이버시"
+msgstr "머신 러닝의 차등 프라이버시"
 
 #: ../../source/explanation-differential-privacy.rst:46
 msgid ""
@@ -3315,18 +3316,18 @@ msgid ""
 "into the gradients of the loss function during model training. Additionally, "
 "such noise can be incorporated into the model's output."
 msgstr ""
-"머신 러닝에서 DP를 활용하여 학습 데이터의 개인정보를 보호할 수 있습니다. 차"
-"분 비공개 머신 러닝 알고리즘은 알고리즘이 개별 데이터 포인트에 대한 특정 정보"
-"를 학습하지 못하도록 하여 모델이 민감한 정보를 노출하지 않도록 하는 방식으로 "
-"설계되었습니다. 노이즈가 도입되는 단계에 따라 머신 러닝 알고리즘에 DP를 적용"
-"하는 다양한 방법이 존재합니다. 한 가지 방법은 학습 데이터(특징 또는 레이블)"
-"에 노이즈를 추가하는 것이고, 다른 방법은 모델 학습 중에 손실 함수의 기울기에 "
-"노이즈를 주입하는 것입니다. 또한 이러한 노이즈를 모델의 출력에 통합할 수도 있"
-"습니다."
+"머신 러닝에서 DP를 활용하여 학습 데이터의 개인정보를 보호할 수 있습니다. "
+"차등 비공개 머신 러닝 알고리즘은 알고리즘이 개별 데이터 포인트에 대한 특정 "
+"정보를 학습하지 못하도록 하여 모델이 민감한 정보를 노출하지 않도록 하는 "
+"방식으로 설계되었습니다. 노이즈가 도입되는 단계에 따라 머신 러닝 알고리즘에 "
+"DP를 적용하는 다양한 방법이 존재합니다. 한 가지 방법은 학습 데이터(특징 또는 "
+"레이블)에 노이즈를 추가하는 것이고, 다른 방법은 모델 학습 중에 손실 함수의 "
+"기울기에 노이즈를 주입하는 것입니다. 또한 이러한 노이즈를 모델의 출력에 "
+"통합할 수도 있습니다."
 
 #: ../../source/explanation-differential-privacy.rst:53
 msgid "Differential Privacy in Federated Learning"
-msgstr "연합 학습의 차분 프라이버시"
+msgstr "연합 학습의 차등 프라이버시"
 
 #: ../../source/explanation-differential-privacy.rst:54
 msgid ""
@@ -3371,8 +3372,8 @@ msgid ""
 "is to prevent the aggregated model from leaking information about each "
 "client's data."
 msgstr ""
-"**중앙 차분 프라이버시**: DP는 서버에서 적용되며 집계된 모델이 각 클라이언트"
-"의 데이터에 대한 정보를 유출하는 것을 방지하는 것이 목표입니다."
+"**중앙 차등 프라이버시**: DP는 서버에서 적용되며 집계된 모델이 각 "
+"클라이언트의 데이터에 대한 정보를 유출하는 것을 방지하는 것이 목표입니다."
 
 #: ../../source/explanation-differential-privacy.rst:65
 msgid ""
@@ -3381,15 +3382,15 @@ msgid ""
 "that are sent to the server from leaking any information about the client's "
 "data."
 msgstr ""
-"**로컬 차분 개인정보 보호**: DP는 정보를 서버로 보내기 전에 클라이언트 측에"
-"서 적용되며, 서버로 전송되는 업데이트가 클라이언트 데이터에 대한 정보를 유출"
-"하는 것을 방지하는 것이 목표입니다."
+"**로컬 차등 프라이버시**: DP는 정보를 서버로 보내기 전에 클라이언트 측에서 "
+"적용되며, 서버로 전송되는 업데이트가 클라이언트 데이터에 대한 정보를 "
+"유출하는 것을 방지하는 것이 목표입니다."
 
 #: ../../source/explanation-differential-privacy.rst:-1
 #: ../../source/explanation-differential-privacy.rst:68
 #: ../../source/how-to-use-differential-privacy.rst:11
 msgid "Central Differential Privacy"
-msgstr "중앙 차분 프라이버시"
+msgstr "중앙 차등 프라이버시"
 
 #: ../../source/explanation-differential-privacy.rst:69
 msgid ""
@@ -3489,7 +3490,7 @@ msgstr ""
 #: ../../source/explanation-differential-privacy.rst:105
 #: ../../source/how-to-use-differential-privacy.rst:96
 msgid "Local Differential Privacy"
-msgstr "로컬 차분 프라이버시"
+msgstr "로컬 차등 프라이버시"
 
 #: ../../source/explanation-differential-privacy.rst:107
 msgid ""
@@ -3554,23 +3555,23 @@ msgstr "**참고:**"
 
 #: ../../source/explanation-differential-privacy.rst:133
 msgid "[1] Dwork et al. The Algorithmic Foundations of Differential Privacy."
-msgstr "[1] Dwork 외. 차분 프라이버시의 알고리즘적 기초."
+msgstr "[1] Dwork 외. 차등 프라이버시의 알고리즘적 기초."
 
 #: ../../source/explanation-differential-privacy.rst:135
 msgid ""
 "[2] McMahan et al. Learning Differentially Private Recurrent Language Models."
-msgstr "[2] McMahan 외. 차분적 개인 반복 언어 모델 학습."
+msgstr "[2] McMahan 외. 차등적 개인 반복 언어 모델 학습."
 
 #: ../../source/explanation-differential-privacy.rst:137
 msgid ""
 "[3] Geyer et al. Differentially Private Federated Learning: A Client Level "
 "Perspective."
-msgstr "[3] Geyer 외. 차분적 개인 연합 학습: 고객 수준의 관점."
+msgstr "[3] Geyer 외. 차등적 개인 연합 학습: 고객 수준의 관점."
 
 #: ../../source/explanation-differential-privacy.rst:139
 msgid ""
 "[4] Galen et al. Differentially Private Learning with Adaptive Clipping."
-msgstr "[4] Galen 외. 조정형 클리핑을 통한 차분적 개인 학습."
+msgstr "[4] Galen 외. 조정형 클리핑을 통한 차등적 개인 학습."
 
 #: ../../source/explanation-federated-evaluation.rst:2
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:292
@@ -3822,7 +3823,7 @@ msgstr "목표"
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:59
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:79
 msgid "Non-Goals"
-msgstr "비목표"
+msgstr "목표가 아닌 것"
 
 #: ../../source/fed/0000-20200102-fed-template.md:42
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:65
@@ -11721,7 +11722,7 @@ msgstr ""
 
 #: ../../source/ref-api/flwr.server.rst:2
 msgid "server"
-msgstr ""
+msgstr "서버"
 
 #: ../../source/ref-api/flwr.server.rst:24:<autosummary>:1
 msgid ":py:obj:`run_server_app <flwr.server.run_server_app>`\\ \\(\\)"
@@ -11729,8 +11730,9 @@ msgstr ""
 
 #: ../../source/ref-api/flwr.server.rst:24:<autosummary>:1
 #: flwr.server.run_serverapp.run_server_app:1 of
+#, fuzzy
 msgid "Run Flower server app."
-msgstr ""
+msgstr "Flower 서버를 실행하세요."
 
 #: ../../source/ref-api/flwr.server.rst:24:<autosummary>:1
 msgid ":py:obj:`run_superlink <flwr.server.run_superlink>`\\ \\(\\)"
@@ -11739,7 +11741,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.server.rst:24:<autosummary>:1
 #: flwr.server.app.run_superlink:1 of
 msgid "Run Flower SuperLink (Driver API and Fleet API)."
-msgstr ""
+msgstr "Flower SuperLink(Driver API 및 Fleet API)를 실행하세요."
 
 #: ../../source/ref-api/flwr.server.rst:24:<autosummary>:1
 msgid ""
@@ -11750,7 +11752,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.server.rst:24:<autosummary>:1
 #: flwr.server.app.start_server:1 of
 msgid "Start a Flower server using the gRPC transport layer."
-msgstr ""
+msgstr "gRPC transport layer를 사용하여 Flower 서버를 실행하세요."
 
 #: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 msgid ":py:obj:`ClientManager <flwr.server.ClientManager>`\\ \\(\\)"
@@ -11759,7 +11761,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 #: flwr.server.client_manager.ClientManager:1 of
 msgid "Abstract base class for managing Flower clients."
-msgstr ""
+msgstr "Flower 클라이언트를 관리하기 위한 Abstract base class."
 
 #: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 msgid ":py:obj:`Driver <flwr.server.Driver>`\\ \\(\\)"
@@ -11768,7 +11770,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 #: flwr.server.driver.driver.Driver:1 of
 msgid "Abstract base Driver class for the Driver API."
-msgstr ""
+msgstr "Driver API를 위한 Abstract base Driver class."
 
 #: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 msgid ":py:obj:`History <flwr.server.History>`\\ \\(\\)"
@@ -11777,7 +11779,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 #: flwr.server.history.History:1 of
 msgid "History class for training and/or evaluation metrics collection."
-msgstr ""
+msgstr "메트릭 콜렉션을 훈련 및 평가하기 위한 History class."
 
 #: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 msgid ""
@@ -11788,7 +11790,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 #: flwr.server.compat.legacy_context.LegacyContext:1 of
 msgid "Legacy Context."
-msgstr ""
+msgstr "레거시 콘텍스트."
 
 #: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 msgid ""
@@ -11805,7 +11807,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 #: flwr.server.server_app.ServerApp:1 of
 msgid "Flower ServerApp."
-msgstr ""
+msgstr "Flower 서버."
 
 #: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 msgid ""
@@ -11816,7 +11818,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 #: flwr.server.server_config.ServerConfig:1 of
 msgid "Flower server config."
-msgstr ""
+msgstr "Flower 서버 설정."
 
 #: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 msgid ""
@@ -11826,7 +11828,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1
 #: flwr.server.client_manager.SimpleClientManager:1 of
 msgid "Provides a pool of available clients."
-msgstr ""
+msgstr "사용 가능한 클라이언트 그룹 제공."
 
 #: ../../source/ref-api/flwr.server.rst:57:<autosummary>:1
 msgid ":py:obj:`flwr.server.strategy <flwr.server.strategy>`\\"
@@ -11907,7 +11909,7 @@ msgstr ""
 #: flwr.server.client_manager.SimpleClientManager.all:1:<autosummary>:1
 #: flwr.server.client_manager.SimpleClientManager.unregister:1 of
 msgid "Unregister Flower ClientProxy instance."
-msgstr ""
+msgstr "Flower ClientProxy 인스턴스 등록 해제."
 
 #: flwr.server.client_manager.ClientManager.all:1:<autosummary>:1 of
 msgid ""
@@ -11920,7 +11922,7 @@ msgstr ""
 #: flwr.server.client_manager.SimpleClientManager.all:1:<autosummary>:1
 #: flwr.server.client_manager.SimpleClientManager.wait_for:1 of
 msgid "Wait until at least `num_clients` are available."
-msgstr ""
+msgstr "적어도 1개의 `num_clients` 가 사용 가능해질 때까지 기다리세요."
 
 #: flwr.server.client_manager.ClientManager.num_available:3
 #: flwr.server.client_manager.SimpleClientManager.num_available:3 of
