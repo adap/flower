@@ -22,7 +22,7 @@ import threading
 import traceback
 import warnings
 from logging import ERROR, INFO
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Optional, Union
 
 import ray
 from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
@@ -72,7 +72,7 @@ REASON:
 
 """
 
-NodeToPartitionMapping = Dict[int, int]
+NodeToPartitionMapping = dict[int, int]
 
 
 def _create_node_id_to_partition_mapping(
@@ -94,16 +94,16 @@ def start_simulation(
     *,
     client_fn: ClientFnExt,
     num_clients: int,
-    clients_ids: Optional[List[str]] = None,  # UNSUPPORTED, WILL BE REMOVED
-    client_resources: Optional[Dict[str, float]] = None,
+    clients_ids: Optional[list[str]] = None,  # UNSUPPORTED, WILL BE REMOVED
+    client_resources: Optional[dict[str, float]] = None,
     server: Optional[Server] = None,
     config: Optional[ServerConfig] = None,
     strategy: Optional[Strategy] = None,
     client_manager: Optional[ClientManager] = None,
-    ray_init_args: Optional[Dict[str, Any]] = None,
+    ray_init_args: Optional[dict[str, Any]] = None,
     keep_initialised: Optional[bool] = False,
-    actor_type: Type[VirtualClientEngineActor] = ClientAppActor,
-    actor_kwargs: Optional[Dict[str, Any]] = None,
+    actor_type: type[VirtualClientEngineActor] = ClientAppActor,
+    actor_kwargs: Optional[dict[str, Any]] = None,
     actor_scheduling: Union[str, NodeAffinitySchedulingStrategy] = "DEFAULT",
 ) -> History:
     """Start a Ray-based Flower simulation server.
@@ -279,7 +279,7 @@ def start_simulation(
     # An actor factory. This is called N times to add N actors
     # to the pool. If at some point the pool can accommodate more actors
     # this will be called again.
-    def create_actor_fn() -> Type[VirtualClientEngineActor]:
+    def create_actor_fn() -> type[VirtualClientEngineActor]:
         return actor_type.options(  # type: ignore
             **client_resources,
             scheduling_strategy=actor_scheduling,
