@@ -15,7 +15,6 @@
 """SQLite based implemenation of SuperExec state."""
 
 
-import datetime
 import sqlite3
 from typing import Optional
 
