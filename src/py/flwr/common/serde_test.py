@@ -16,7 +16,8 @@
 
 import random
 import string
-from typing import Any, Callable, Optional, OrderedDict, Type, TypeVar, Union, cast
+from collections import OrderedDict
+from typing import Any, Callable, Optional, TypeVar, Union, cast
 
 import pytest
 
@@ -169,7 +170,7 @@ class RecordMaker:
             length = self.rng.randint(1, 10)
         return "".join(self.rng.choices(char_pool, k=length))
 
-    def get_value(self, dtype: Type[T]) -> T:
+    def get_value(self, dtype: type[T]) -> T:
         """Create a value of a given type."""
         ret: Any = None
         if dtype == bool:

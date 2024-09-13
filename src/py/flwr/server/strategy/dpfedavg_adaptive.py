@@ -19,7 +19,7 @@ Paper: arxiv.org/pdf/1905.03871.pdf
 
 
 import math
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Optional, Union
 
 import numpy as np
 
@@ -80,7 +80,7 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
-    ) -> List[Tuple[ClientProxy, FitIns]]:
+    ) -> list[tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
         additional_config = {"dpfedavg_adaptive_clip_enabled": True}
 
@@ -93,7 +93,7 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
 
         return client_instructions
 
-    def _update_clip_norm(self, results: List[Tuple[ClientProxy, FitRes]]) -> None:
+    def _update_clip_norm(self, results: list[tuple[ClientProxy, FitRes]]) -> None:
         # Calculating number of clients which set the norm indicator bit
         norm_bit_set_count = 0
         for client_proxy, fit_res in results:
@@ -118,9 +118,9 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
     def aggregate_fit(
         self,
         server_round: int,
-        results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+        results: list[tuple[ClientProxy, FitRes]],
+        failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
+    ) -> tuple[Optional[Parameters], dict[str, Scalar]]:
         """Aggregate training results as in DPFedAvgFixed and update clip norms."""
         if failures:
             return None, {}
