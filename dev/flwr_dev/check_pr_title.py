@@ -18,11 +18,16 @@ import pathlib
 import re
 import sys
 import tomllib
+from typing import Annotated
+
+import typer
 
 from flwr_dev.common import get_git_root
 
 
-def check_title(pr_title):
+def check_title(
+    pr_title: Annotated[str, typer.Argument(help="Title of the PR to check")]
+):
     """Check if the title of a PR is valid."""
     # Load the YAML configuration
     with (pathlib.Path(get_git_root()) / "dev" / "changelog_config.toml").open(

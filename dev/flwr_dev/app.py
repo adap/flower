@@ -14,7 +14,6 @@
 # ==============================================================================
 """Flower command line interface."""
 
-from typing import Annotated
 import typer
 from typer.main import get_command
 from flwr_dev.check_pr_title import check_title
@@ -35,15 +34,7 @@ cli = typer.Typer(
     no_args_is_help=True,
 )
 
-
-def check_title_app(
-    title: Annotated[str, typer.Argument(help="Title of the PR to check")]
-):
-    """Check validity of a PR title."""
-    check_title(title)
-
-
-cli.command()(check_title_app)
+cli.command()(check_title)
 cli.command()(build_examples)
 cli.command()(build_images)
 cli.command()(check_copyrights)

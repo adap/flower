@@ -38,7 +38,9 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - name: Install dependencies (mandatory only)
-        run: python -m poetry install --all-extras
+        run: |
+          python -m poetry install --all-extras
+          python -m pip install dev
       - name: Check if protos need recompilation
         run: ./dev/check-protos.sh
       - name: Lint + Test (isort/black/docformatter/mypy/pylint/flake8/pytest)

@@ -22,4 +22,6 @@ jobs:
           python-version: 3.11
           poetry-skip: 'true'
       - name: Check PR title format 
-        run: python ./dev/check_pr_title.py "${{ github.event.pull_request.title }}"
+        run: |
+          python -m pip install dev
+          flwr-dev check-title "${{ github.event.pull_request.title }}"
