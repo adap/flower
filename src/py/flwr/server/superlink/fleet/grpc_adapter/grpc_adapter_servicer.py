@@ -16,7 +16,7 @@
 
 
 from logging import DEBUG, INFO
-from typing import Callable, Type, TypeVar
+from typing import Callable, TypeVar
 
 import grpc
 from google.protobuf.message import Message as GrpcMessage
@@ -47,7 +47,7 @@ T = TypeVar("T", bound=GrpcMessage)
 
 def _handle(
     msg_container: MessageContainer,
-    request_type: Type[T],
+    request_type: type[T],
     handler: Callable[[T], GrpcMessage],
 ) -> MessageContainer:
     req = request_type.FromString(msg_container.grpc_message_content)

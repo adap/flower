@@ -15,8 +15,6 @@
 """Building block functions for DP algorithms."""
 
 
-from typing import Tuple
-
 import numpy as np
 
 from flwr.common.logger import warn_deprecated_feature
@@ -41,7 +39,7 @@ def add_gaussian_noise(update: NDArrays, std_dev: float) -> NDArrays:
     return update_noised
 
 
-def clip_by_l2(update: NDArrays, threshold: float) -> Tuple[NDArrays, bool]:
+def clip_by_l2(update: NDArrays, threshold: float) -> tuple[NDArrays, bool]:
     """Scales the update so thats its L2 norm is upper-bound to threshold."""
     warn_deprecated_feature("`clip_by_l2` method")
     update_norm = _get_update_norm(update)

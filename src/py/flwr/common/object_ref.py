@@ -21,7 +21,7 @@ import sys
 from importlib.util import find_spec
 from logging import WARN
 from pathlib import Path
-from typing import Any, Optional, Tuple, Type, Union
+from typing import Any, Optional, Union
 
 from .logger import log
 
@@ -40,7 +40,7 @@ def validate(
     module_attribute_str: str,
     check_module: bool = True,
     project_dir: Optional[Union[str, Path]] = None,
-) -> Tuple[bool, Optional[str]]:
+) -> tuple[bool, Optional[str]]:
     """Validate object reference.
 
     Parameters
@@ -106,7 +106,7 @@ def validate(
 
 def load_app(  # pylint: disable= too-many-branches
     module_attribute_str: str,
-    error_type: Type[Exception],
+    error_type: type[Exception],
     project_dir: Optional[Union[str, Path]] = None,
 ) -> Any:
     """Return the object specified in a module attribute string.
