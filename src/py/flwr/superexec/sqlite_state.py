@@ -21,7 +21,7 @@ from typing import Optional
 
 from typing_extensions import override
 
-from .state import RunStatus, ExecState
+from .state import ExecState, RunStatus
 
 
 class SqliteExecState(ExecState):
