@@ -79,7 +79,7 @@ That is all it takes! You can monitor the progress of the run through the logs o
 Run a Different Quickstart Example
 ----------------------------------
 
-To run a different quickstart example, such as ``quickstart-pytorch``, first, shut down the Docker
+To run a different quickstart example, such as ``quickstart-tensorflow``, first, shut down the Docker
 Compose services of the current example:
 
 .. code-block:: bash
