@@ -19,10 +19,11 @@ import csv
 import importlib.util
 import sys
 import threading
+from collections.abc import Sequence
 from logging import INFO, WARN
 from os.path import isfile
 from pathlib import Path
-from typing import Optional, Sequence, Set, Tuple
+from typing import Optional
 
 import grpc
 from cryptography.exceptions import UnsupportedAlgorithm
@@ -36,6 +37,10 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import (
+    DRIVER_API_DEFAULT_ADDRESS,
+    FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS,
+    FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
+    FLEET_API_REST_DEFAULT_ADDRESS,
     MISSING_EXTRA_REST,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
@@ -68,24 +73,19 @@ from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
 from .superlink.fleet.grpc_rere.server_interceptor import AuthenticateServerInterceptor
 from .superlink.state import StateFactory
 
-ADDRESS_DRIVER_API = "0.0.0.0:9091"
-ADDRESS_FLEET_API_GRPC_RERE = "0.0.0.0:9092"
-ADDRESS_FLEET_API_GRPC_BIDI = "[::]:8080"  # IPv6 to keep start_server compatible
-ADDRESS_FLEET_API_REST = "0.0.0.0:9093"
-
 DATABASE = ":flwr-in-memory-state:"
 BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
 
 
 def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     *,
-    server_address: str = ADDRESS_FLEET_API_GRPC_BIDI,
+    server_address: str = FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS,
     server: Optional[Server] = None,
     config: Optional[ServerConfig] = None,
     strategy: Optional[Strategy] = None,
     client_manager: Optional[ClientManager] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
+    certificates: Optional[tuple[bytes, bytes, bytes]] = None,
 ) -> History:
     """Start a Flower server using the gRPC transport layer.
 
@@ -232,9 +232,9 @@ def run_superlink() -> None:
             TRANSPORT_TYPE_GRPC_RERE,
             TRANSPORT_TYPE_GRPC_ADAPTER,
         ]:
-            args.fleet_api_address = ADDRESS_FLEET_API_GRPC_RERE
+            args.fleet_api_address = FLEET_API_GRPC_RERE_DEFAULT_ADDRESS
         elif args.fleet_api_type == TRANSPORT_TYPE_REST:
-            args.fleet_api_address = ADDRESS_FLEET_API_REST
+            args.fleet_api_address = FLEET_API_REST_DEFAULT_ADDRESS
 
     fleet_address, host, port = _format_address(args.fleet_api_address)
 
@@ -334,7 +334,7 @@ def run_superlink() -> None:
         driver_server.wait_for_termination(timeout=1)
 
 
-def _format_address(address: str) -> Tuple[str, str, int]:
+def _format_address(address: str) -> tuple[str, str, int]:
     parsed_address = parse_address(address)
     if not parsed_address:
         sys.exit(
@@ -346,8 +346,8 @@ def _format_address(address: str) -> Tuple[str, str, int]:
 
 def _try_setup_node_authentication(
     args: argparse.Namespace,
-    certificates: Optional[Tuple[bytes, bytes, bytes]],
-) -> Optional[Tuple[Set[bytes], ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
+    certificates: Optional[tuple[bytes, bytes, bytes]],
+) -> Optional[tuple[set[bytes], ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
     if (
         not args.auth_list_public_keys
         and not args.auth_superlink_private_key
@@ -382,7 +382,7 @@ def _try_setup_node_authentication(
             "to '--auth-list-public-keys'."
         )
 
-    node_public_keys: Set[bytes] = set()
+    node_public_keys: set[bytes] = set()
 
     try:
         ssh_private_key = load_ssh_private_key(
@@ -435,7 +435,7 @@ def _try_setup_node_authentication(
 
 def _try_obtain_certificates(
     args: argparse.Namespace,
-) -> Optional[Tuple[bytes, bytes, bytes]]:
+) -> Optional[tuple[bytes, bytes, bytes]]:
     # Obtain certificates
     if args.insecure:
         log(WARN, "Option `--insecure` was set. Starting insecure HTTP server.")
@@ -491,7 +491,7 @@ def _run_fleet_api_grpc_rere(
     address: str,
     state_factory: StateFactory,
     ffs_factory: FfsFactory,
-    certificates: Optional[Tuple[bytes, bytes, bytes]],
+    certificates: Optional[tuple[bytes, bytes, bytes]],
     interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None,
 ) -> grpc.Server:
     """Run Fleet API (gRPC, request-response)."""
@@ -519,7 +519,7 @@ def _run_fleet_api_grpc_adapter(
     address: str,
     state_factory: StateFactory,
     ffs_factory: FfsFactory,
-    certificates: Optional[Tuple[bytes, bytes, bytes]],
+    certificates: Optional[tuple[bytes, bytes, bytes]],
 ) -> grpc.Server:
     """Run Fleet API (GrpcAdapter)."""
     # Create Fleet API gRPC server
@@ -653,7 +653,7 @@ def _add_args_driver_api(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--driver-api-address",
         help="Driver API (gRPC) server address (IPv4, IPv6, or a domain name).",
-        default=ADDRESS_DRIVER_API,
+        default=DRIVER_API_DEFAULT_ADDRESS,
     )
 
 

@@ -4,7 +4,7 @@ Get started as a contributor
 Prerequisites
 -------------
 
-- `Python 3.8 <https://docs.python.org/3.8/>`_ or above
+- `Python 3.9 <https://docs.python.org/3.9/>`_ or above
 - `Poetry 1.3 <https://python-poetry.org/>`_ or above
 - (Optional) `pyenv <https://github.com/pyenv/pyenv>`_
 - (Optional) `pyenv-virtualenv <https://github.com/pyenv/pyenv-virtualenv>`_
@@ -51,11 +51,11 @@ GitHub::
 
 2. Let's create the Python environment for all-things Flower. If you wish to use :code:`pyenv`, we provide two convenience scripts that you can use. If you prefer using something else than :code:`pyenv`, create a new environment, activate and skip to the last point where all packages are installed.
 
-* If you don't have :code:`pyenv` installed, the following script that will install it, set it up, and create the virtual environment (with :code:`Python 3.8.17` by default)::
+* If you don't have :code:`pyenv` installed, the following script that will install it, set it up, and create the virtual environment (with :code:`Python 3.9.20` by default)::
 
   $ ./dev/setup-defaults.sh <version> # once completed, run the bootstrap script
 
-* If you already have :code:`pyenv` installed (along with the :code:`pyenv-virtualenv` plugin), you can use the following convenience script (with :code:`Python 3.8.17` by default)::
+* If you already have :code:`pyenv` installed (along with the :code:`pyenv-virtualenv` plugin), you can use the following convenience script (with :code:`Python 3.9.20` by default)::
 
   $ ./dev/venv-create.sh <version> # once completed, run the `bootstrap.sh` script
 
@@ -78,8 +78,8 @@ Create/Delete Virtual Environment
 
 ::
 
-  $ ./dev/venv-create.sh <version> # Default is 3.8.17
-  $ ./dev/venv-delete.sh <version> # Default is 3.8.17
+  $ ./dev/venv-create.sh <version> # Default is 3.9.20
+  $ ./dev/venv-delete.sh <version> # Default is 3.9.20
 
 Compile ProtoBuf Definitions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~

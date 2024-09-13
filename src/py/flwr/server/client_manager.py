@@ -19,7 +19,7 @@ import random
 import threading
 from abc import ABC, abstractmethod
 from logging import INFO
-from typing import Dict, List, Optional
+from typing import Optional
 
 from flwr.common.logger import log
 
@@ -67,7 +67,7 @@ class ClientManager(ABC):
         """
 
     @abstractmethod
-    def all(self) -> Dict[str, ClientProxy]:
+    def all(self) -> dict[str, ClientProxy]:
         """Return all available clients."""
 
     @abstractmethod
@@ -80,7 +80,7 @@ class ClientManager(ABC):
         num_clients: int,
         min_num_clients: Optional[int] = None,
         criterion: Optional[Criterion] = None,
-    ) -> List[ClientProxy]:
+    ) -> list[ClientProxy]:
         """Sample a number of Flower ClientProxy instances."""
 
 
@@ -88,7 +88,7 @@ class SimpleClientManager(ClientManager):
     """Provides a pool of available clients."""
 
     def __init__(self) -> None:
-        self.clients: Dict[str, ClientProxy] = {}
+        self.clients: dict[str, ClientProxy] = {}
         self._cv = threading.Condition()
 
     def __len__(self) -> int:
@@ -170,7 +170,7 @@ class SimpleClientManager(ClientManager):
             with self._cv:
                 self._cv.notify_all()
 
-    def all(self) -> Dict[str, ClientProxy]:
+    def all(self) -> dict[str, ClientProxy]:
         """Return all available clients."""
         return self.clients
 
@@ -179,7 +179,7 @@ class SimpleClientManager(ClientManager):
         num_clients: int,
         min_num_clients: Optional[int] = None,
         criterion: Optional[Criterion] = None,
-    ) -> List[ClientProxy]:
+    ) -> list[ClientProxy]:
         """Sample a number of Flower ClientProxy instances."""
         # Block until at least num_clients are connected.
         if min_num_clients is None:
