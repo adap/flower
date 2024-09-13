@@ -16,7 +16,7 @@
 
 import sys
 from logging import DEBUG, ERROR
-from typing import Callable, Dict, Optional, Tuple, Union
+from typing import Callable, Optional, Union
 
 import ray
 
@@ -31,8 +31,8 @@ from flwr.simulation.ray_transport.utils import enable_tf_gpu_growth
 
 from .backend import Backend, BackendConfig
 
-ClientResourcesDict = Dict[str, Union[int, float]]
-ActorArgsDict = Dict[str, Union[int, float, Callable[[], None]]]
+ClientResourcesDict = dict[str, Union[int, float]]
+ActorArgsDict = dict[str, Union[int, float, Callable[[], None]]]
 
 
 class RayBackend(Backend):
@@ -101,7 +101,7 @@ class RayBackend(Backend):
     def init_ray(self, backend_config: BackendConfig) -> None:
         """Intialises Ray if not already initialised."""
         if not ray.is_initialized():
-            ray_init_args: Dict[
+            ray_init_args: dict[
                 str,
                 ConfigsRecordValues,
             ] = {}
@@ -144,7 +144,7 @@ class RayBackend(Backend):
         self,
         message: Message,
         context: Context,
-    ) -> Tuple[Message, Context]:
+    ) -> tuple[Message, Context]:
         """Run ClientApp that process a given message.
 
         Return output message and updated context.
