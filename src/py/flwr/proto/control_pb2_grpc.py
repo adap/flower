@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from flwr.proto import control_pb2 as flwr_dot_proto_dot_control__pb2
+from flwr.proto import run_pb2 as flwr_dot_proto_dot_run__pb2
 
 
 class ControlStub(object):
@@ -16,13 +16,13 @@ class ControlStub(object):
         """
         self.CreateRun = channel.unary_unary(
                 '/flwr.proto.Control/CreateRun',
-                request_serializer=flwr_dot_proto_dot_control__pb2.CreateRunRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_control__pb2.CreateRunResponse.FromString,
+                request_serializer=flwr_dot_proto_dot_run__pb2.CreateRunRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_run__pb2.CreateRunResponse.FromString,
                 )
         self.GetRunStatus = channel.unary_unary(
                 '/flwr.proto.Control/GetRunStatus',
-                request_serializer=flwr_dot_proto_dot_control__pb2.GetRunStatusRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_control__pb2.GetRunStatusResponse.FromString,
+                request_serializer=flwr_dot_proto_dot_run__pb2.GetRunStatusRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_run__pb2.GetRunStatusResponse.FromString,
                 )
 
 
@@ -48,13 +48,13 @@ def add_ControlServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'CreateRun': grpc.unary_unary_rpc_method_handler(
                     servicer.CreateRun,
-                    request_deserializer=flwr_dot_proto_dot_control__pb2.CreateRunRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_control__pb2.CreateRunResponse.SerializeToString,
+                    request_deserializer=flwr_dot_proto_dot_run__pb2.CreateRunRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_run__pb2.CreateRunResponse.SerializeToString,
             ),
             'GetRunStatus': grpc.unary_unary_rpc_method_handler(
                     servicer.GetRunStatus,
-                    request_deserializer=flwr_dot_proto_dot_control__pb2.GetRunStatusRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_control__pb2.GetRunStatusResponse.SerializeToString,
+                    request_deserializer=flwr_dot_proto_dot_run__pb2.GetRunStatusRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_run__pb2.GetRunStatusResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -78,8 +78,8 @@ class Control(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.Control/CreateRun',
-            flwr_dot_proto_dot_control__pb2.CreateRunRequest.SerializeToString,
-            flwr_dot_proto_dot_control__pb2.CreateRunResponse.FromString,
+            flwr_dot_proto_dot_run__pb2.CreateRunRequest.SerializeToString,
+            flwr_dot_proto_dot_run__pb2.CreateRunResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -95,7 +95,7 @@ class Control(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.Control/GetRunStatus',
-            flwr_dot_proto_dot_control__pb2.GetRunStatusRequest.SerializeToString,
-            flwr_dot_proto_dot_control__pb2.GetRunStatusResponse.FromString,
+            flwr_dot_proto_dot_run__pb2.GetRunStatusRequest.SerializeToString,
+            flwr_dot_proto_dot_run__pb2.GetRunStatusResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

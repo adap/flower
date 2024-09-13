@@ -17,7 +17,6 @@ syntax = "proto3";
 
 package flwr.proto;
 
-import "flwr/proto/control.proto";
 import "flwr/proto/node.proto";
 import "flwr/proto/task.proto";
 import "flwr/proto/run.proto";
@@ -41,6 +40,9 @@ service Driver {
 
   // Get FAB
   rpc GetFab(GetFabRequest) returns (GetFabResponse) {}
+
+  // Get run status
+  rpc GetRunStatus(GetRunStatusRequest) returns (GetRunStatusResponse) {}
 }
 
 // GetNodes messages
