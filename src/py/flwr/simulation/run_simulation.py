@@ -25,7 +25,7 @@ from argparse import Namespace
 from logging import DEBUG, ERROR, INFO, WARNING
 from pathlib import Path
 from time import sleep
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 from flwr.cli.config_utils import load_and_validate
 from flwr.client import ClientApp
@@ -56,7 +56,7 @@ def _check_args_do_not_interfere(args: Namespace) -> bool:
     mode_one_args = ["app", "run_config"]
     mode_two_args = ["client_app", "server_app"]
 
-    def _resolve_message(conflict_keys: List[str]) -> str:
+    def _resolve_message(conflict_keys: list[str]) -> str:
         return ",".join([f"`--{key}`".replace("_", "-") for key in conflict_keys])
 
     # When passing `--app`, `--app-dir` is ignored
