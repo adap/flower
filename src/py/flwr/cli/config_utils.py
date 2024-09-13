@@ -17,7 +17,7 @@
 import zipfile
 from io import BytesIO
 from pathlib import Path
-from typing import IO, Any, Dict, List, Optional, Tuple, Union, get_args
+from typing import IO, Any, Optional, Union, get_args
 
 import tomli
 
@@ -25,7 +25,7 @@ from flwr.common import object_ref
 from flwr.common.typing import UserConfigValue
 
 
-def get_fab_config(fab_file: Union[Path, bytes]) -> Dict[str, Any]:
+def get_fab_config(fab_file: Union[Path, bytes]) -> dict[str, Any]:
     """Extract the config from a FAB file or path.
 
     Parameters
@@ -62,7 +62,7 @@ def get_fab_config(fab_file: Union[Path, bytes]) -> Dict[str, Any]:
         return conf
 
 
-def get_fab_metadata(fab_file: Union[Path, bytes]) -> Tuple[str, str]:
+def get_fab_metadata(fab_file: Union[Path, bytes]) -> tuple[str, str]:
     """Extract the fab_id and the fab_version from a FAB file or path.
 
     Parameters
@@ -87,7 +87,7 @@ def get_fab_metadata(fab_file: Union[Path, bytes]) -> Tuple[str, str]:
 def load_and_validate(
     path: Optional[Path] = None,
     check_module: bool = True,
-) -> Tuple[Optional[Dict[str, Any]], List[str], List[str]]:
+) -> tuple[Optional[dict[str, Any]], list[str], list[str]]:
     """Load and validate pyproject.toml as dict.
 
     Returns
@@ -116,7 +116,7 @@ def load_and_validate(
     return (config, errors, warnings)
 
 
-def load(toml_path: Path) -> Optional[Dict[str, Any]]:
+def load(toml_path: Path) -> Optional[dict[str, Any]]:
     """Load pyproject.toml and return as dict."""
     if not toml_path.is_file():
         return None
@@ -125,7 +125,7 @@ def load(toml_path: Path) -> Optional[Dict[str, Any]]:
         return load_from_string(toml_file.read())
 
 
-def _validate_run_config(config_dict: Dict[str, Any], errors: List[str]) -> None:
+def _validate_run_config(config_dict: dict[str, Any], errors: list[str]) -> None:
     for key, value in config_dict.items():
         if isinstance(value, dict):
             _validate_run_config(config_dict[key], errors)
@@ -137,7 +137,7 @@ def _validate_run_config(config_dict: Dict[str, Any], errors: List[str]) -> None
 
 
 # pylint: disable=too-many-branches
-def validate_fields(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]:
+def validate_fields(config: dict[str, Any]) -> tuple[bool, list[str], list[str]]:
     """Validate pyproject.toml fields."""
     errors = []
     warnings = []
@@ -183,10 +183,10 @@ def validate_fields(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]
 
 
 def validate(
-    config: Dict[str, Any],
+    config: dict[str, Any],
     check_module: bool = True,
     project_dir: Optional[Union[str, Path]] = None,
-) -> Tuple[bool, List[str], List[str]]:
+) -> tuple[bool, list[str], list[str]]:
     """Validate pyproject.toml."""
     is_valid, errors, warnings = validate_fields(config)
 
@@ -210,7 +210,7 @@ def validate(
     return True, [], []
 
 
-def load_from_string(toml_content: str) -> Optional[Dict[str, Any]]:
+def load_from_string(toml_content: str) -> Optional[dict[str, Any]]:
     """Load TOML content from a string and return as dict."""
     try:
         data = tomli.loads(toml_content)

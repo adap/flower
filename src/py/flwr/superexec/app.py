@@ -18,7 +18,7 @@ import argparse
 import sys
 from logging import INFO, WARN
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 
 import grpc
 
@@ -130,7 +130,7 @@ def _parse_args_run_superexec() -> argparse.ArgumentParser:
 
 def _try_obtain_certificates(
     args: argparse.Namespace,
-) -> Optional[Tuple[bytes, bytes, bytes]]:
+) -> Optional[tuple[bytes, bytes, bytes]]:
     # Obtain certificates
     if args.insecure:
         log(WARN, "Option `--insecure` was set. Starting insecure HTTP server.")

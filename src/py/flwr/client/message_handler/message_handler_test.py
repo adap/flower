@@ -19,7 +19,6 @@ import time
 import unittest
 import uuid
 from copy import copy
-from typing import List
 
 from flwr.client import Client
 from flwr.client.typing import ClientFnExt
@@ -294,7 +293,7 @@ class TestMessageValidation(unittest.TestCase):
         msg = Message(metadata=self.valid_out_metadata, content=RecordSet())
 
         # Execute
-        invalid_metadata_list: List[Metadata] = []
+        invalid_metadata_list: list[Metadata] = []
         attrs = list(vars(self.valid_out_metadata).keys())
         for attr in attrs:
             if attr == "_partition_id":
