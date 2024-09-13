@@ -9,6 +9,13 @@ REPLACE_CURR_VERSION = {
     "doc/source/conf.py": [
         ".. |stable_flwr_version| replace:: {version}",
     ],
+    "examples/*/pyproject.toml": [
+        "flwr[simulation]=={version}",
+        "flwr[simulation]>={version}",
+    ],
+    "src/py/flwr/cli/new/templates/app/pyproject.*.toml.tpl": [
+        "flwr[simulation]>={version}",
+    ],
 }
 
 REPLACE_NEXT_VERSION = {
@@ -17,14 +24,7 @@ REPLACE_NEXT_VERSION = {
         'release = "{version}"',
     ],
     "examples/doc/source/conf.py": ['release = "{version}"'],
-    "examples/*/pyproject.toml": [
-        "flwr[simulation]=={version}",
-        "flwr[simulation]>={version}",
-    ],
     "baselines/doc/source/conf.py": ['release = "{version}"'],
-    "src/py/flwr/cli/new/templates/app/pyproject.*.toml.tpl": [
-        "flwr[simulation]>={version}",
-    ],
 }
 
 
