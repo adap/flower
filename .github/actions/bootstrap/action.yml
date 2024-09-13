@@ -3,13 +3,13 @@ description: "Bootstrap Python environment (install and configure Python version
 inputs:
   python-version:
     description: "Version range or exact version of Python or PyPy to use, using SemVer's version range syntax."
-    default: 3.8
+    default: 3.9
   pip-version:
     description: "Version of pip to be installed using pip"
-    default: 24.1.1
+    default: 24.1.2
   setuptools-version:
     description: "Version of setuptools to be installed using pip"
-    default: 69.5.1
+    default: 70.3.0
   poetry-version:
     description: "Version of poetry to be installed using pip"
     default: 1.8.3

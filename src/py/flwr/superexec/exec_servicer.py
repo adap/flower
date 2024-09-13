@@ -15,12 +15,14 @@
 """SuperExec API servicer."""
 
 
+from collections.abc import Generator
 from logging import ERROR, INFO
-from typing import Any, Dict, Generator
+from typing import Any
 
 import grpc
 
 from flwr.common.logger import log
+from flwr.common.serde import user_config_from_proto
 from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StartRunRequest,
@@ -37,7 +39,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
     def __init__(self, executor: Executor) -> None:
         self.executor = executor
-        self.runs: Dict[int, RunTracker] = {}
+        self.runs: dict[int, RunTracker] = {}
 
     def StartRun(
         self, request: StartRunRequest, context: grpc.ServicerContext
@@ -46,8 +48,9 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         log(INFO, "ExecServicer.StartRun")
 
         run = self.executor.start_run(
-            request.fab_file,
-            dict(request.override_config.items()),
+            request.fab.content,
+            user_config_from_proto(request.override_config),
+            user_config_from_proto(request.federation_config),
         )
 
         if run is None:

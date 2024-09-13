@@ -18,14 +18,14 @@ import argparse
 import sys
 from logging import INFO, WARN
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 
 import grpc
 
 from flwr.common import EventType, event, log
 from flwr.common.address import parse_address
 from flwr.common.config import parse_config_args
-from flwr.common.constant import SUPEREXEC_DEFAULT_ADDRESS
+from flwr.common.constant import EXEC_API_DEFAULT_ADDRESS
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.object_ref import load_app, validate
 
@@ -56,7 +56,9 @@ def run_superexec() -> None:
         address=address,
         executor=_load_executor(args),
         certificates=certificates,
-        config=parse_config_args(args.executor_config),
+        config=parse_config_args(
+            [args.executor_config] if args.executor_config else args.executor_config
+        ),
     )
 
     grpc_servers = [superexec_server]
@@ -79,7 +81,7 @@ def _parse_args_run_superexec() -> argparse.ArgumentParser:
     parser.add_argument(
         "--address",
         help="SuperExec (gRPC) server address (IPv4, IPv6, or a domain name)",
-        default=SUPEREXEC_DEFAULT_ADDRESS,
+        default=EXEC_API_DEFAULT_ADDRESS,
     )
     parser.add_argument(
         "--executor",
@@ -93,7 +95,9 @@ def _parse_args_run_superexec() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--executor-config",
-        help="Key-value pairs for the executor config, separated by commas.",
+        help="Key-value pairs for the executor config, separated by spaces. "
+        'For example:\n\n`--executor-config \'superlink="superlink:9091" '
+        'root-certificates="certificates/superlink-ca.crt"\'`',
     )
     parser.add_argument(
         "--insecure",
@@ -126,7 +130,7 @@ def _parse_args_run_superexec() -> argparse.ArgumentParser:
 
 def _try_obtain_certificates(
     args: argparse.Namespace,
-) -> Optional[Tuple[bytes, bytes, bytes]]:
+) -> Optional[tuple[bytes, bytes, bytes]]:
     # Obtain certificates
     if args.insecure:
         log(WARN, "Option `--insecure` was set. Starting insecure HTTP server.")
@@ -163,11 +167,8 @@ def _load_executor(
     args: argparse.Namespace,
 ) -> Executor:
     """Get the executor plugin."""
-    if args.executor_dir is not None:
-        sys.path.insert(0, args.executor_dir)
-
     executor_ref: str = args.executor
-    valid, error_msg = validate(executor_ref)
+    valid, error_msg = validate(executor_ref, project_dir=args.executor_dir)
     if not valid and error_msg:
         raise LoadExecutorError(error_msg) from None
 

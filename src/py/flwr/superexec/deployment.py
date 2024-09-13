@@ -14,21 +14,22 @@
 # ==============================================================================
 """Deployment engine executor."""
 
+import hashlib
 import subprocess
-import sys
 from logging import ERROR, INFO
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
 from typing_extensions import override
 
-from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
+from flwr.common.constant import DRIVER_API_DEFAULT_ADDRESS
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
+from flwr.common.serde import fab_to_proto, user_config_to_proto
+from flwr.common.typing import Fab, UserConfig
 from flwr.proto.driver_pb2 import CreateRunRequest  # pylint: disable=E0611
 from flwr.proto.driver_pb2_grpc import DriverStub
-from flwr.server.driver.grpc_driver import DEFAULT_SERVER_ADDRESS_DRIVER
 
 from .executor import Executor, RunTracker
 
@@ -49,7 +50,7 @@ class DeploymentEngine(Executor):
 
     def __init__(
         self,
-        superlink: str = DEFAULT_SERVER_ADDRESS_DRIVER,
+        superlink: str = DRIVER_API_DEFAULT_ADDRESS,
         root_certificates: Optional[str] = None,
         flwr_dir: Optional[str] = None,
     ) -> None:
@@ -66,13 +67,13 @@ class DeploymentEngine(Executor):
     @override
     def set_config(
         self,
-        config: Dict[str, str],
+        config: UserConfig,
     ) -> None:
         """Set executor config arguments.
 
         Parameters
         ----------
-        config : Dict[str, str]
+        config : UserConfig
             A dictionary for configuration values.
             Supported configuration key/value pairs:
             - "superlink": str
@@ -85,12 +86,20 @@ class DeploymentEngine(Executor):
         if not config:
             return
         if superlink_address := config.get("superlink"):
+            if not isinstance(superlink_address, str):
+                raise ValueError("The `superlink` value should be of type `str`.")
             self.superlink = superlink_address
         if root_certificates := config.get("root-certificates"):
+            if not isinstance(root_certificates, str):
+                raise ValueError(
+                    "The `root-certificates` value should be of type `str`."
+                )
             self.root_certificates = root_certificates
-            self.root_certificates_bytes = Path(root_certificates).read_bytes()
+            self.root_certificates_bytes = Path(str(root_certificates)).read_bytes()
         if flwr_dir := config.get("flwr-dir"):
-            self.flwr_dir = flwr_dir
+            if not isinstance(flwr_dir, str):
+                raise ValueError("The `flwr-dir` value should be of type `str`.")
+            self.flwr_dir = str(flwr_dir)
 
     def _connect(self) -> None:
         if self.stub is not None:
@@ -104,9 +113,8 @@ class DeploymentEngine(Executor):
 
     def _create_run(
         self,
-        fab_id: str,
-        fab_version: str,
-        override_config: Dict[str, str],
+        fab: Fab,
+        override_config: UserConfig,
     ) -> int:
         if self.stub is None:
             self._connect()
@@ -114,9 +122,8 @@ class DeploymentEngine(Executor):
         assert self.stub is not None
 
         req = CreateRunRequest(
-            fab_id=fab_id,
-            fab_version=fab_version,
-            override_config=override_config,
+            fab=fab_to_proto(fab),
+            override_config=user_config_to_proto(override_config),
         )
         res = self.stub.CreateRun(request=req)
         return int(res.run_id)
@@ -125,42 +132,41 @@ class DeploymentEngine(Executor):
     def start_run(
         self,
         fab_file: bytes,
-        override_config: Dict[str, str],
+        override_config: UserConfig,
+        federation_config: UserConfig,
     ) -> Optional[RunTracker]:
         """Start run using the Flower Deployment Engine."""
         try:
             # Install FAB to flwr dir
-            fab_version, fab_id = get_fab_metadata(fab_file)
-            fab_path = install_from_fab(fab_file, None, True)
-
-            # Install FAB Python package
-            subprocess.check_call(
-                [sys.executable, "-m", "pip", "install", str(fab_path)],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
+            install_from_fab(fab_file, None, True)
 
             # Call SuperLink to create run
-            run_id: int = self._create_run(fab_id, fab_version, override_config)
+            run_id: int = self._create_run(
+                Fab(hashlib.sha256(fab_file).hexdigest(), fab_file), override_config
+            )
             log(INFO, "Created run %s", str(run_id))
 
-            # Start ServerApp
+            command = [
+                "flower-server-app",
+                "--run-id",
+                str(run_id),
+                "--superlink",
+                str(self.superlink),
+            ]
+
+            if self.flwr_dir:
+                command.append("--flwr-dir")
+                command.append(self.flwr_dir)
+
+            if self.root_certificates is None:
+                command.append("--insecure")
+            else:
+                command.append("--root-certificates")
+                command.append(self.root_certificates)
+
+            # Execute the command
             proc = subprocess.Popen(  # pylint: disable=consider-using-with
-                [
-                    "flower-server-app",
-                    "--run-id",
-                    str(run_id),
-                    f"--flwr-dir {self.flwr_dir}" if self.flwr_dir else "",
-                    "--superlink",
-                    self.superlink,
-                    (
-                        "--insecure"
-                        if self.root_certificates is None
-                        else f"--root-certificates {self.root_certificates}"
-                    ),
-                ],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                command,
                 text=True,
             )
             log(INFO, "Started run %s", str(run_id))
