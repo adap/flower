@@ -3,13 +3,20 @@
 
 type = ["ci", "docs", "feat", "fix", "refactor", "break"]
 
-project = ["framework", "baselines", "datasets", "examples", "benchmarks", "glossary"]
+project = [
+  "framework",
+  "baselines",
+  "datasets",
+  "examples",
+  "benchmarks",
+  "glossary",
+]
 
 scope = "skip"
 
 pattern_template = "^({types})\\(({projects})(?::({scope}))?\\) ([A-Z][^\\n]*[^\\.\\n])$"
 
-allowed_verbs=[
+allowed_verbs = [
   "Abandon",
   "Abort",
   "Abstract",
@@ -970,5 +977,5 @@ allowed_verbs=[
   "Workout",
   "Worry",
   "Wrap",
-  "Write"
+  "Write",
 ]

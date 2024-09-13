@@ -25,6 +25,7 @@ taplo fmt examples/*/pyproject.toml
 python -m isort benchmarks
 python -m black -q benchmarks
 python -m docformatter -i -r benchmarks
+taplo fmt benchmarks/**/pyproject.toml
 
 # E2E
 python -m isort e2e
@@ -40,3 +41,6 @@ python -m nbstripout examples/*/*.ipynb --extra-keys "$KEYS"
 
 # Markdown
 python -m mdformat --number doc/source examples
+
+# Dev
+taplo fmt dev/*.toml

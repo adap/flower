@@ -62,6 +62,8 @@ echo "- taplo: start"
 taplo fmt pyproject.toml --check
 taplo fmt examples/*/pyproject.toml --check
 taplo fmt e2e/*/pyproject.toml --check
+taplo fmt dev/*.toml --check
+taplo fmt benchmarks/**/pyproject.toml --check
 echo "- taplo: done"
 
 echo "- All TOML checks passed"
