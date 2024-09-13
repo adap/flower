@@ -56,6 +56,16 @@ echo "- mdformat: done"
 
 echo "- All Markdown checks passed"
 
+echo "- Start TOML checks"
+
+echo "- taplo: start"
+taplo fmt pyproject.toml --check
+taplo fmt examples/*/pyproject.toml --check
+taplo fmt e2e/*/pyproject.toml --check
+echo "- taplo: done"
+
+echo "- All TOML checks passed"
+
 echo "- Start license checks"
 
 echo "- copyright: start"

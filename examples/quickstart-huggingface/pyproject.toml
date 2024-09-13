@@ -8,17 +8,17 @@ version = "1.0.0"
 description = "Federated Learning with Hugginface Transformers and Flower (Quickstart Example)"
 license = "Apache-2.0"
 authors = [
-    { name = "The Flower Authors", email = "hello@flower.ai" },
-    { name = "Kaushik Amar Das", email = "kaushik.das@iiitg.ac.in" },
+  { name = "The Flower Authors", email = "hello@flower.ai" },
+  { name = "Kaushik Amar Das", email = "kaushik.das@iiitg.ac.in" },
 ]
 dependencies = [
-    "flwr[simulation]==1.11.0",
-    "flwr-datasets>=0.3.0",
-    "torch==2.4.0",
-    "transformers>=4.30.0,<5.0",
-    "evaluate>=0.4.0,<1.0",
-    "datasets>=2.0.0, <3.0",
-    "scikit-learn>=1.3.1, <2.0",
+  "flwr[simulation]==1.11.0",
+  "flwr-datasets>=0.3.0",
+  "torch==2.4.0",
+  "transformers>=4.30.0,<5.0",
+  "evaluate>=0.4.0,<1.0",
+  "datasets>=2.0.0, <3.0",
+  "scikit-learn>=1.3.1, <2.0",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -45,5 +45,5 @@ options.num-supernodes = 100
 
 [tool.flwr.federations.local-simulation-gpu]
 options.num-supernodes = 100
-options.backend.client-resources.num-cpus = 4 # each ClientApp assumes to use 4CPUs
+options.backend.client-resources.num-cpus = 4   # each ClientApp assumes to use 4CPUs
 options.backend.client-resources.num-gpus = 1.0 # at most 1 ClientApp will run in a given GPU (lower it to increase parallelism)

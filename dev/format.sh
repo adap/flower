@@ -2,6 +2,8 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
+taplo fmt pyproject.toml
+
 # Python
 python -m flwr_tool.check_copyright src/py/flwr
 python -m flwr_tool.init_py_fix src/py/flwr
@@ -17,6 +19,7 @@ find src/proto/flwr/proto -name *.proto | grep "\.proto" | xargs clang-format -i
 # Examples
 python -m black -q examples
 python -m docformatter -i -r examples
+taplo fmt examples/*/pyproject.toml
 
 # Benchmarks
 python -m isort benchmarks
@@ -27,6 +30,7 @@ python -m docformatter -i -r benchmarks
 python -m isort e2e
 python -m black -q e2e
 python -m docformatter -i -r e2e
+taplo fmt e2e/*/pyproject.toml
 
 # Notebooks
 python -m black --ipynb -q doc/source/*.ipynb

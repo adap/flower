@@ -8,9 +8,9 @@ version = "1.0.0"
 description = "Federated Learning with XGBoost and Flower (Quickstart Example)"
 license = "Apache-2.0"
 dependencies = [
-    "flwr-nightly[simulation]==1.11.0.dev20240826",
-    "flwr-datasets>=0.3.0",
-    "xgboost>=2.0.0",
+  "flwr-nightly[simulation]==1.11.0.dev20240826",
+  "flwr-datasets>=0.3.0",
+  "xgboost>=2.0.0",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -32,7 +32,7 @@ fraction-evaluate = 0.1
 # ClientApp
 local-epochs = 1
 params.objective = "binary:logistic"
-params.eta = 0.1  # Learning rate
+params.eta = 0.1                     # Learning rate
 params.max-depth = 8
 params.eval-metric = "auc"
 params.nthread = 16
