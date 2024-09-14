@@ -1,16 +1,17 @@
-###################
-Flower Architecture
-###################
+#####################
+ Flower Architecture
+#####################
 
-This page explains the architecture of deployed Flower federated learning
-system.
+This page explains the architecture of deployed Flower federated
+learning system.
 
-In federated learning (FL), there is typically one server and a number of
-clients that are connected to the server. This is often called a federation.
+In federated learning (FL), there is typically one server and a number
+of clients that are connected to the server. This is often called a
+federation.
 
-The role of the server is to coordinate the training process. The role of each
-client is to receive tasks from the server, execute those tasks and return the
-results back to the server.
+The role of the server is to coordinate the training process. The role
+of each client is to receive tasks from the server, execute those tasks
+and return the results back to the server.
 
 This is sometimes called a hub-and-spoke topology:
 
@@ -22,29 +23,44 @@ This is sometimes called a hub-and-spoke topology:
 
    Hub-and-spoke topology in federated learning (one server, multiple clients).
 
-In a real-world deployment, we typcially want to run different projects on such
-a federation. Each project could use different hyperparameters, different model
-architectures, different aggregation strategies, or even different machine learning
-frameworks like PyTorch and TensorFlow.
+In a real-world deployment, we typically want to run different projects
+on such a federation. Each project could use different hyperparameters,
+different model architectures, different aggregation strategies, or even
+different machine learning frameworks like PyTorch and TensorFlow.
 
-This is why, in Flower, both the server side and the client side are split into two
-parts. One part is long-lived and responsible for communicating across the network,
-the other part is short-lived and executes task-specific code.
+This is why, in Flower, both the server side and the client side are
+split into two parts. One part is long-lived and responsible for
+communicating across the network, the other part is short-lived and
+executes task-specific code.
 
 A Flower `server` consists of **SuperLink** and ``ServerApp``:
 
-- **SuperLink**: a long-running process that forwards task instructions to clients (SuperNodes) and receives task results back.
-- ``ServerApp``: a short-lived process with project-spcific code that customizes all server-side aspects of federated learning systems (client selection, client configuration, result aggregation). This is what AI researchers and AI engineers write when they build Flower apps.
+-  **SuperLink**: a long-running process that forwards task instructions
+   to clients (SuperNodes) and receives task results back.
 
-A Flower `client` consists of SuperNode and ``ClientApp``:
+-  ``ServerApp``: a short-lived process with project-spcific code that
+   customizes all server-side aspects of federated learning systems
+   (client selection, client configuration, result aggregation). This is
+   what AI researchers and AI engineers write when they build Flower
+   apps.
 
-- **SuperNode**: a long-running process that connects to the SuperLink, asks for tasks, executes tasks (for example, "train this model on your local data") and returns task results back to the SuperLink.
-- ``ClientApp``: a short-lived process with project-specific code that customizes all client-side aspects of federated learning systems (local model training and evaluation, pre- and post-processing). This is what AI researchers and AI engineers write when they build Flower apps.
+A Flower `client` consists of **SuperNode** and ``ClientApp``:
 
-Why SuperNode and SuperLink? Well, in federated learning, the clients are the actual
-stars of the show. They hold the training data and they run the actual training.
-This is why Flower decided to name them **SuperNode**. The **SuperLink** is then responsible
-for acting as the `missing link` between all those SuperNodes.
+-  **SuperNode**: a long-running process that connects to the SuperLink,
+   asks for tasks, executes tasks (for example, "train this model on
+   your local data") and returns task results back to the SuperLink.
+
+-  ``ClientApp``: a short-lived process with project-specific code that
+   customizes all client-side aspects of federated learning systems
+   (local model training and evaluation, pre- and post-processing). This
+   is what AI researchers and AI engineers write when they build Flower
+   apps.
+
+Why SuperNode and SuperLink? Well, in federated learning, the clients
+are the actual stars of the show. They hold the training data and they
+run the actual training. This is why Flower decided to name them
+**SuperNode**. The **SuperLink** is then responsible for acting as the
+`missing link` between all those SuperNodes.
 
 .. figure:: ./_static/flower-architecture-basic-architecture.svg
    :align: center
@@ -54,20 +70,23 @@ for acting as the `missing link` between all those SuperNodes.
 
    The basic Flower architecture for federated learning.
 
-In a Flower app project, users will typically develop the ``ServerApp`` and
-the ``ClientApp``. All the network communication between `server` and `clients` is taken care of by
-the SuperLink and SuperNodes.
+In a Flower app project, users will typically develop the ``ServerApp``
+and the ``ClientApp``. All the network communication between `server`
+and `clients` is taken care of by the SuperLink and SuperNodes.
 
 .. tip::
 
    For more details, please refer to the |serverapp_link|_ and
    |clientapp_link|_ documentation.
 
-With *multi-run*, multiple ``ServerApp``\s and ``ClientApp``\s are
-now capable of running on the same federation consisting of a single long-running SuperLink and
-multiple long-running SuperNodes. This is sometimes referred to as `multi-tenancy` or `multi-job`.
+With *multi-run*, multiple ``ServerApp``\s and ``ClientApp``\s are now
+capable of running on the same federation consisting of a single
+long-running SuperLink and multiple long-running SuperNodes. This is
+sometimes referred to as `multi-tenancy` or `multi-job`.
 
-As shown in the figure below, two projects, each consisting of a ``ServerApp`` and a ``ClientApp``, could share the same SuperLink and SuperNodes.
+As shown in the figure below, two projects, each consisting of a
+``ServerApp`` and a ``ClientApp``, could share the same SuperLink and
+SuperNodes.
 
 .. figure:: ./_static/flower-architecture-multi-run.svg
    :align: center
@@ -78,12 +97,12 @@ As shown in the figure below, two projects, each consisting of a ``ServerApp`` a
    Multi-tenancy federated learning architecture with Flower
 
 To illustrate how multi-run works, consider one federated learning
-training run where a ``ServerApp`` and a ``ClientApp`` are participating in ``[run 1]``.
-Note that a SuperNode will only run a ``ClientApp``
-if it is selected to participate in the training run.
+training run where a ``ServerApp`` and a ``ClientApp`` are participating
+in ``[run 1]``. Note that a SuperNode will only run a ``ClientApp`` if
+it is selected to participate in the training run.
 
-In ``[run 1]`` below, all the SuperNodes are selected and therefore run their
-corresponding ``ClientApp``\s:
+In ``[run 1]`` below, all the SuperNodes are selected and therefore run
+their corresponding ``ClientApp``\s:
 
 .. figure:: ./_static/flower-architecture-multi-run-1.svg
    :align: center
@@ -94,8 +113,8 @@ corresponding ``ClientApp``\s:
    Run 1 in a multi-run federated learning architecture with Flower.
    All SuperNodes participate in the training round.
 
-However, in ``[run 2]``, only the first and third SuperNodes are selected
-to participate in the training:
+However, in ``[run 2]``, only the first and third SuperNodes are
+selected to participate in the training:
 
 .. figure:: ./_static/flower-architecture-multi-run-2.svg
    :align: center
@@ -107,15 +126,21 @@ to participate in the training:
    Only the first and third SuperNodes are selected to participate in the
    training round.
 
-Therefore, with Flower multi-run, different projects (each consisting of a ``ServerApp`` and ``ClientApp``) can run on different sets of clients.
+Therefore, with Flower multi-run, different projects (each consisting of
+a ``ServerApp`` and ``ClientApp``) can run on different sets of clients.
 
-To help you start and manage all of the concurrently executing training runs, Flower offers one
-additional long-running server-side service called **SuperExec**. When you type ``flwr run`` to
-start a new training run, the ``flwr`` CLI bundles your local project (mainly your ``ServerApp``
-and ``ClientApp``) and sends it to the **SuperExec**. The **SuperExec** will then take care of starting
-and managing your ``ServerApp``, which in turn selects SuperNodes to execute your ``ClientApp``.
+To help you start and manage all of the concurrently executing training
+runs, Flower offers one additional long-running server-side service
+called **SuperExec**. When you type ``flwr run`` to start a new training
+run, the ``flwr`` CLI bundles your local project (mainly your
+``ServerApp`` and ``ClientApp``) and sends it to the **SuperExec**. The
+**SuperExec** will then take care of starting and managing your
+``ServerApp``, which in turn selects SuperNodes to execute your
+``ClientApp``.
 
-This architecture allows many users to (concurrently) run their projects on the same federation, simply by typing ``flwr run`` on their local developer machine.
+This architecture allows many users to (concurrently) run their projects
+on the same federation, simply by typing ``flwr run`` on their local
+developer machine.
 
 .. figure:: ./_static/flower-architecture-deployment-engine.svg
    :align: center
@@ -126,10 +151,10 @@ This architecture allows many users to (concurrently) run their projects on the 
    The SuperExec service for managing concurrent training runs in
    Flower.
 
-
 .. note::
 
-  This explanation covers the Flower Deployment Engine. An explanation covering the Flower Simulation Engine will follow.
+   This explanation covers the Flower Deployment Engine. An explanation
+   covering the Flower Simulation Engine will follow.
 
 .. important::
 
