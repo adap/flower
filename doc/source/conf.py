@@ -263,8 +263,8 @@ redirects = {
     "ref-api/flwr.simulation.run_simulation_from_cli": "index.html",
     "contributor-how-to-create-new-messages": "index.html",
     "example-jax-from-centralized-to-federated": "tutorial-quickstart-jax.html",
-    "architecture": "index.html",
-    "contributor-explanation-architecture.html": "index.html",
+    "architecture": "explanation-flower-architecture.html",
+    "contributor-explanation-architecture.html": "explanation-flower-architecture.html",
 }
 
 # -- Options for HTML output -------------------------------------------------
