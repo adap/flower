@@ -68,6 +68,8 @@ redirects = {
     "app-secure-aggregation": "flower-secure-aggregation.html",
     "llm-flowertune": "flowertune-llm.html",
     "vit-finetune": "flowertune-vit.html",
+    "simulation-pytorch": "quickstart-pytorch.html",
+    "simulation-tensorflow": "quickstart-tensorflow.html",
 }
 
 

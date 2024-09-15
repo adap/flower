@@ -18,10 +18,11 @@
 import random
 import sys
 import threading
+from collections.abc import Iterator
 from contextlib import contextmanager
 from copy import copy
 from logging import ERROR, INFO, WARN
-from typing import Callable, Iterator, Optional, Tuple, Type, TypeVar, Union
+from typing import Callable, Optional, TypeVar, Union
 
 from cryptography.hazmat.primitives.asymmetric import ec
 from google.protobuf.message import Message as GrpcMessage
@@ -90,10 +91,10 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
         Union[bytes, str]
     ] = None,  # pylint: disable=unused-argument
     authentication_keys: Optional[  # pylint: disable=unused-argument
-        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
 ) -> Iterator[
-    Tuple[
+    tuple[
         Callable[[], Optional[Message]],
         Callable[[Message], None],
         Optional[Callable[[], Optional[int]]],
@@ -173,7 +174,7 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
     ###########################################################################
 
     def _request(
-        req: GrpcMessage, res_type: Type[T], api_path: str, retry: bool = True
+        req: GrpcMessage, res_type: type[T], api_path: str, retry: bool = True
     ) -> Optional[T]:
         # Serialize the request
         req_bytes = req.SerializeToString()

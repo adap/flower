@@ -108,7 +108,7 @@ You can also override the parameters defined in the
 .. code:: shell
 
    # Override some arguments
-   $ flwr run . --run-config num-server-rounds=5,local-epochs=3
+   $ flwr run . --run-config "num-server-rounds=5 local-epochs=3"
 
 What follows is an explanation of each component in the project you just
 created: dataset partition, the model, defining the ``ClientApp`` and

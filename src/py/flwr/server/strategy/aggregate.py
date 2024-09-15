@@ -16,7 +16,7 @@
 # mypy: disallow_untyped_calls=False
 
 from functools import partial, reduce
-from typing import Any, Callable, List, Tuple, Union
+from typing import Any, Callable, Union
 
 import numpy as np
 
@@ -24,7 +24,7 @@ from flwr.common import FitRes, NDArray, NDArrays, parameters_to_ndarrays
 from flwr.server.client_proxy import ClientProxy
 
 
-def aggregate(results: List[Tuple[NDArrays, int]]) -> NDArrays:
+def aggregate(results: list[tuple[NDArrays, int]]) -> NDArrays:
     """Compute weighted average."""
     # Calculate the total number of examples used during training
     num_examples_total = sum(num_examples for (_, num_examples) in results)
@@ -42,10 +42,10 @@ def aggregate(results: List[Tuple[NDArrays, int]]) -> NDArrays:
     return weights_prime
 
 
-def aggregate_inplace(results: List[Tuple[ClientProxy, FitRes]]) -> NDArrays:
+def aggregate_inplace(results: list[tuple[ClientProxy, FitRes]]) -> NDArrays:
     """Compute in-place weighted average."""
     # Count total examples
-    num_examples_total = sum(fit_res.num_examples for _, fit_res in results)
+    num_examples_total = sum(fit_res.num_examples for (_, fit_res) in results)
 
     # Compute scaling factors for each result
     scaling_factors = [
@@ -63,7 +63,6 @@ def aggregate_inplace(results: List[Tuple[ClientProxy, FitRes]]) -> NDArrays:
 
     # Let's do in-place aggregation
     # Get first result, then add up each other
-
     params = [
         _try_inplace(x, scaling_factors[0], np_binary_op=np.multiply)
         for x in parameters_to_ndarrays(results[0][1].parameters)
@@ -82,7 +81,7 @@ def aggregate_inplace(results: List[Tuple[ClientProxy, FitRes]]) -> NDArrays:
     return params
 
 
-def aggregate_median(results: List[Tuple[NDArrays, int]]) -> NDArrays:
+def aggregate_median(results: list[tuple[NDArrays, int]]) -> NDArrays:
     """Compute median."""
     # Create a list of weights and ignore the number of examples
     weights = [weights for weights, _ in results]
@@ -95,7 +94,7 @@ def aggregate_median(results: List[Tuple[NDArrays, int]]) -> NDArrays:
 
 
 def aggregate_krum(
-    results: List[Tuple[NDArrays, int]], num_malicious: int, to_keep: int
+    results: list[tuple[NDArrays, int]], num_malicious: int, to_keep: int
 ) -> NDArrays:
     """Choose one parameter vector according to the Krum function.
 
@@ -134,7 +133,7 @@ def aggregate_krum(
 
 # pylint: disable=too-many-locals
 def aggregate_bulyan(
-    results: List[Tuple[NDArrays, int]],
+    results: list[tuple[NDArrays, int]],
     num_malicious: int,
     aggregation_rule: Callable,  # type: ignore
     **aggregation_rule_kwargs: Any,
@@ -143,7 +142,7 @@ def aggregate_bulyan(
 
     Parameters
     ----------
-    results: List[Tuple[NDArrays, int]]
+    results: list[tuple[NDArrays, int]]
         Weights and number of samples for each of the client.
     num_malicious: int
         The maximum number of malicious clients.
@@ -170,7 +169,7 @@ def aggregate_bulyan(
             "It is needed to ensure that the method reduces the attacker's leeway to "
             "the one proved in the paper."
         )
-    selected_models_set: List[Tuple[NDArrays, int]] = []
+    selected_models_set: list[tuple[NDArrays, int]] = []
 
     theta = len(results) - 2 * num_malicious
     beta = theta - 2 * num_malicious
@@ -215,7 +214,7 @@ def aggregate_bulyan(
     return parameters_aggregated
 
 
-def weighted_loss_avg(results: List[Tuple[int, float]]) -> float:
+def weighted_loss_avg(results: list[tuple[int, float]]) -> float:
     """Aggregate evaluation results obtained from multiple clients."""
     num_total_evaluation_examples = sum(num_examples for (num_examples, _) in results)
     weighted_losses = [num_examples * loss for num_examples, loss in results]
@@ -223,7 +222,7 @@ def weighted_loss_avg(results: List[Tuple[int, float]]) -> float:
 
 
 def aggregate_qffl(
-    parameters: NDArrays, deltas: List[NDArrays], hs_fll: List[NDArrays]
+    parameters: NDArrays, deltas: list[NDArrays], hs_fll: list[NDArrays]
 ) -> NDArrays:
     """Compute weighted average based on Q-FFL paper."""
     demominator: float = np.sum(np.asarray(hs_fll))
@@ -240,7 +239,7 @@ def aggregate_qffl(
     return new_parameters
 
 
-def _compute_distances(weights: List[NDArrays]) -> NDArray:
+def _compute_distances(weights: list[NDArrays]) -> NDArray:
     """Compute distances between vectors.
 
     Input: weights - list of weights vectors
@@ -280,7 +279,7 @@ def _trim_mean(array: NDArray, proportiontocut: float) -> NDArray:
 
 
 def aggregate_trimmed_avg(
-    results: List[Tuple[NDArrays, int]], proportiontocut: float
+    results: list[tuple[NDArrays, int]], proportiontocut: float
 ) -> NDArrays:
     """Compute trimmed average."""
     # Create a list of weights and ignore the number of examples
@@ -305,7 +304,7 @@ def _check_weights_equality(weights1: NDArrays, weights2: NDArrays) -> bool:
 
 
 def _find_reference_weights(
-    reference_weights: NDArrays, list_of_weights: List[NDArrays]
+    reference_weights: NDArrays, list_of_weights: list[NDArrays]
 ) -> int:
     """Find the reference weights by looping through the `list_of_weights`.
 
@@ -335,7 +334,7 @@ def _find_reference_weights(
 
 
 def _aggregate_n_closest_weights(
-    reference_weights: NDArrays, results: List[Tuple[NDArrays, int]], beta_closest: int
+    reference_weights: NDArrays, results: list[tuple[NDArrays, int]], beta_closest: int
 ) -> NDArrays:
     """Calculate element-wise mean of the `N` closest values.
 
@@ -347,7 +346,7 @@ def _aggregate_n_closest_weights(
     ----------
     reference_weights: NDArrays
         The weights from which the distances will be computed
-    results: List[Tuple[NDArrays, int]]
+    results: list[tuple[NDArrays, int]]
         The weights from models
     beta_closest: int
         The number of the closest distance weights that will be averaged
