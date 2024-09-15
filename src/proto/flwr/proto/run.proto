@@ -49,9 +49,9 @@ message GetRunResponse { Run run = 1; }
 message GetRunStatusRequest { repeated uint64 run_ids = 1; }
 message GetRunStatusResponse { map<uint64, string> run_status_dict = 1; }
 
-// EndRun
-message EndRunRequest {
+// FinishRun
+message FinishRunRequest {
   uint64 run_id = 1;
   string status = 2;
 }
-message EndRunResponse {}
+message FinishRunResponse {}

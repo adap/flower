@@ -171,8 +171,8 @@ class GetRunStatusResponse(google.protobuf.message.Message):
     def ClearField(self, field_name: typing_extensions.Literal["run_status_dict",b"run_status_dict"]) -> None: ...
 global___GetRunStatusResponse = GetRunStatusResponse
 
-class EndRunRequest(google.protobuf.message.Message):
-    """EndRun"""
+class FinishRunRequest(google.protobuf.message.Message):
+    """FinishRun"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     RUN_ID_FIELD_NUMBER: builtins.int
     STATUS_FIELD_NUMBER: builtins.int
@@ -184,10 +184,10 @@ class EndRunRequest(google.protobuf.message.Message):
         status: typing.Text = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id","status",b"status"]) -> None: ...
-global___EndRunRequest = EndRunRequest
+global___FinishRunRequest = FinishRunRequest
 
-class EndRunResponse(google.protobuf.message.Message):
+class FinishRunResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     def __init__(self,
         ) -> None: ...
-global___EndRunResponse = EndRunResponse
+global___FinishRunResponse = FinishRunResponse
