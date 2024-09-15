@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,9 +16,12 @@
 
 
 import time
-from typing import List, Optional
+from typing import Optional
 from uuid import UUID
 
+from flwr.common.serde import fab_to_proto, user_config_to_proto
+from flwr.common.typing import Fab
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
@@ -39,6 +42,7 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     Run,
 )
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.state import State
 
 
@@ -79,7 +83,7 @@ def pull_task_ins(request: PullTaskInsRequest, state: State) -> PullTaskInsRespo
     node_id: Optional[int] = None if node.anonymous else node.node_id
 
     # Retrieve TaskIns from State
-    task_ins_list: List[TaskIns] = state.get_task_ins(node_id=node_id, limit=1)
+    task_ins_list: list[TaskIns] = state.get_task_ins(node_id=node_id, limit=1)
 
     # Build response
     response = PullTaskInsResponse(
@@ -113,5 +117,27 @@ def get_run(
 ) -> GetRunResponse:
     """Get run information."""
     run = state.get_run(request.run_id)
-    run_proto = None if run is None else Run(**vars(run))
-    return GetRunResponse(run=run_proto)
+
+    if run is None:
+        return GetRunResponse()
+
+    return GetRunResponse(
+        run=Run(
+            run_id=run.run_id,
+            fab_id=run.fab_id,
+            fab_version=run.fab_version,
+            override_config=user_config_to_proto(run.override_config),
+            fab_hash=run.fab_hash,
+        )
+    )
+
+
+def get_fab(
+    request: GetFabRequest, ffs: Ffs  # pylint: disable=W0613
+) -> GetFabResponse:
+    """Get FAB."""
+    if result := ffs.get(request.hash_str):
+        fab = Fab(request.hash_str, result[0])
+        return GetFabResponse(fab=fab_to_proto(fab))
+
+    raise ValueError(f"Found no FAB with hash: {request.hash_str}")

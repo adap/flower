@@ -23,6 +23,7 @@ import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
+from flwr_datasets.common import EventType, event
 from flwr_datasets.partitioner import Partitioner
 from flwr_datasets.visualization.constants import PLOT_TYPES
 from flwr_datasets.visualization.label_distribution import plot_label_distributions
@@ -132,6 +133,13 @@ def plot_comparison_label_distribution(
     >>>     titles=[f"Concentration = {alpha}" for alpha in alpha_list],
     >>> )
     """
+    event(
+        EventType.PLOT_COMPARISON_LABEL_DISTRIBUTION_CALLED,
+        {
+            "num_compare": len(partitioner_list),
+            "plot_type": plot_type,
+        },
+    )
     num_partitioners = len(partitioner_list)
     if isinstance(label_name, str):
         label_name = [label_name] * num_partitioners

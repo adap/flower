@@ -650,8 +650,8 @@ msgid "``pip install -U --pre flwr`` (without extras)"
 msgstr "``pip install -U --pre flwr`` (sans les extras)"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:33
-msgid "``pip install -U --pre flwr[simulation]`` (with extras)"
-msgstr "``pip install -U --pre flwr[simulation]`` (avec les extras)"
+msgid "``pip install -U --pre 'flwr[simulation]'`` (with extras)"
+msgstr "``pip install -U --pre 'flwr[simulation]'`` (avec les extras)"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:35
 msgid ""
@@ -676,10 +676,10 @@ msgstr ""
 
 #: ../../source/contributor-how-to-install-development-versions.rst:40
 msgid ""
-"``pip install flwr[simulation]@git+https://github.com/adap/flower.git`` "
+"``pip install 'flwr[simulation]@git+https://github.com/adap/flower.git'`` "
 "(with extras)"
 msgstr ""
-"``pip install flwr[simulation]@git+https://github.com/adap/flower.git`` "
+"``pip install 'flwr[simulation]@git+https://github.com/adap/flower.git'`` "
 "(avec les extras)"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:42
@@ -698,11 +698,11 @@ msgstr ""
 
 #: ../../source/contributor-how-to-install-development-versions.rst:45
 msgid ""
-"``pip install flwr[simulation]@git+https://github.com/adap/flower.git"
-"@branch-name`` (with extras)"
+"``pip install 'flwr[simulation]@git+https://github.com/adap/flower.git``"
+"@branch-name'`` (with extras)"
 msgstr ""
-"``pip install flwr[simulation]@git+https://github.com/adap/flower.git"
-"@nom-de-branche`` (avec des extras)"
+"``pip install 'flwr[simulation]@git+https://github.com/adap/flower.git``"
+"@nom-de-la-branche'`` (avec des extras)"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:49
 msgid "Open Jupyter Notebooks on Google Colab"
@@ -1040,12 +1040,12 @@ msgstr "Version Python"
 #: ../../source/how-to-install-flower.rst:8
 #, fuzzy
 msgid ""
-"Flower requires at least `Python 3.8 <https://docs.python.org/3.8/>`_, "
+"Flower requires at least `Python 3.9 <https://docs.python.org/3.9/>`_, "
 "but `Python 3.10 <https://docs.python.org/3.10/>`_ or above is "
 "recommended."
 msgstr ""
-"Flower nécessite `Python 3.7 <https://docs.python.org/3.7/>`_ ou plus, "
-"nous recommandons `Python 3.8 <https://docs.python.org/3.8/>`_."
+"Flower nécessite `Python 3.9 <https://docs.python.org/3.9/>`_ ou plus, "
+"nous recommandons `Python 3.10 <https://docs.python.org/3.10/>`_."
 
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:14
 msgid ""
@@ -2226,8 +2226,8 @@ msgstr "Prérequis"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:7
 #, fuzzy
-msgid "`Python 3.8 <https://docs.python.org/3.8/>`_ or above"
-msgstr "`Python 3.7 <https://docs.python.org/3.7/>`_ ou plus"
+msgid "`Python 3.9 <https://docs.python.org/3.9/>`_ or above"
+msgstr "`Python 3.10 <https://docs.python.org/3.10/>`_ ou plus"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:8
 msgid "`Poetry 1.3 <https://python-poetry.org/>`_ or above"
@@ -2321,22 +2321,22 @@ msgstr ""
 msgid ""
 "If you don't have :code:`pyenv` installed, the following script that will"
 " install it, set it up, and create the virtual environment (with "
-":code:`Python 3.8.17` by default)::"
+":code:`Python 3.9.20` by default)::"
 msgstr ""
 "Si vous n'avez pas :code:`pyenv` installé, vous pouvez utiliser le script"
 " suivant qui l'installera, le configurera et créera l'environnement "
-"virtuel (avec :code:`Python 3.8.17` par défaut)::"
+"virtuel (avec :code:`Python 3.9.20` par défaut)::"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:58
 #, fuzzy
 msgid ""
 "If you already have :code:`pyenv` installed (along with the :code:`pyenv-"
 "virtualenv` plugin), you can use the following convenience script (with "
-":code:`Python 3.8.17` by default)::"
+":code:`Python 3.9.20` by default)::"
 msgstr ""
 "Si vous n'avez pas :code:`pyenv` installé, vous pouvez utiliser le script"
 " suivant qui l'installera, le configurera et créera l'environnement "
-"virtuel (avec :code:`Python 3.8.17` par défaut)::"
+"virtuel (avec :code:`Python 3.9.20` par défaut)::"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:62
 #, fuzzy
@@ -6963,10 +6963,10 @@ msgstr ""
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:15
 msgid ""
-"``python -m pip install -U flwr[simulation]`` (when using "
+"``python -m pip install -U 'flwr[simulation]'`` (when using "
 "``start_simulation``)"
 msgstr ""
-"``python -m pip install -U flwr[simulation]`` (lors de l'utilisation de "
+"``python -m pip install -U 'flwr[simulation]'`` (lors de l'utilisation de "
 "``start_simulation``)"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:17
@@ -20007,12 +20007,12 @@ msgid ""
 "Simulations (using the Virtual Client Engine through `start_simulation`) "
 "now work more smoothly on Jupyter Notebooks (incl. Google Colab) after "
 "installing Flower with the `simulation` extra (`pip install "
-"flwr[simulation]`)."
+"'flwr[simulation]'`)."
 msgstr ""
 "Les simulations (utilisant le moteur de client virtuel via "
 "`start_simulation`) fonctionnent maintenant plus facilement sur les "
 "Notebooks Jupyter (y compris Google Colab) après avoir installé Flower "
-"avec l'option `simulation` (`pip install flwr[simulation]`)."
+"avec l'option `simulation` (`pip install 'flwr[simulation]'`)."
 
 #: ../../source/ref-changelog.md:887
 msgid ""

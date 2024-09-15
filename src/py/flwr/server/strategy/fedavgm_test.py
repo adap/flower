@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2022 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 """FedAvgM tests."""
 
 
-from typing import List, Tuple, Union
+from typing import Union
 from unittest.mock import MagicMock
 
 from numpy import array, float32
@@ -41,7 +41,7 @@ def test_aggregate_fit_using_near_one_server_lr_and_no_momentum() -> None:
         array([0, 0, 0, 0], dtype=float32),
     ]
 
-    results: List[Tuple[ClientProxy, FitRes]] = [
+    results: list[tuple[ClientProxy, FitRes]] = [
         (
             MagicMock(),
             FitRes(
@@ -61,7 +61,7 @@ def test_aggregate_fit_using_near_one_server_lr_and_no_momentum() -> None:
             ),
         ),
     ]
-    failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]] = []
+    failures: list[Union[tuple[ClientProxy, FitRes], BaseException]] = []
     expected: NDArrays = [
         array([[1, 2, 3], [4, 5, 6]], dtype=float32),
         array([7, 8, 9, 10], dtype=float32),
@@ -94,7 +94,7 @@ def test_aggregate_fit_server_learning_rate_and_momentum() -> None:
         array([0, 0, 0, 0], dtype=float32),
     ]
 
-    results: List[Tuple[ClientProxy, FitRes]] = [
+    results: list[tuple[ClientProxy, FitRes]] = [
         (
             MagicMock(),
             FitRes(
@@ -114,7 +114,7 @@ def test_aggregate_fit_server_learning_rate_and_momentum() -> None:
             ),
         ),
     ]
-    failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]] = []
+    failures: list[Union[tuple[ClientProxy, FitRes], BaseException]] = []
     expected: NDArrays = [
         array([[1, 2, 3], [4, 5, 6]], dtype=float32),
         array([7, 8, 9, 10], dtype=float32),

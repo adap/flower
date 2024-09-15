@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ To use the REST API, install `flwr` with the `rest` extra:
 
 TRANSPORT_TYPE_GRPC_BIDI = "grpc-bidi"
 TRANSPORT_TYPE_GRPC_RERE = "grpc-rere"
+TRANSPORT_TYPE_GRPC_ADAPTER = "grpc-adapter"
 TRANSPORT_TYPE_REST = "rest"
 TRANSPORT_TYPE_VCE = "vce"
 TRANSPORT_TYPES = [
@@ -36,7 +37,18 @@ TRANSPORT_TYPES = [
     TRANSPORT_TYPE_VCE,
 ]
 
-SUPEREXEC_DEFAULT_ADDRESS = "0.0.0.0:9093"
+# Addresses
+# SuperNode
+CLIENTAPPIO_API_DEFAULT_ADDRESS = "0.0.0.0:9094"
+# SuperExec
+EXEC_API_DEFAULT_ADDRESS = "0.0.0.0:9093"
+# SuperLink
+DRIVER_API_DEFAULT_ADDRESS = "0.0.0.0:9091"
+FLEET_API_GRPC_RERE_DEFAULT_ADDRESS = "0.0.0.0:9092"
+FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS = (
+    "[::]:8080"  # IPv6 to keep start_server compatible
+)
+FLEET_API_REST_DEFAULT_ADDRESS = "0.0.0.0:9093"
 
 # Constants for ping
 PING_DEFAULT_INTERVAL = 30
@@ -45,10 +57,23 @@ PING_BASE_MULTIPLIER = 0.8
 PING_RANDOM_RANGE = (-0.1, 0.1)
 PING_MAX_INTERVAL = 1e300
 
+# IDs
+RUN_ID_NUM_BYTES = 8
+NODE_ID_NUM_BYTES = 8
+GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY = "flower-version"
+GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY = "should-exit"
+
 # Constants for FAB
 APP_DIR = "apps"
 FAB_CONFIG_FILE = "pyproject.toml"
 FLWR_HOME = "FLWR_HOME"
+
+# Constants entries in Node config for Simulation
+PARTITION_ID_KEY = "partition-id"
+NUM_PARTITIONS_KEY = "num-partitions"
+
+GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY = "flower-version"
+GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY = "should-exit"
 
 
 class MessageType:

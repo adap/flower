@@ -25,15 +25,34 @@ from flwr_datasets.preprocessor.merger import Merger
 
 tested_datasets = [
     "mnist",
+    "ylecun/mnist",
     "cifar10",
+    "uoft-cs/cifar10",
     "fashion_mnist",
+    "zalando-datasets/fashion_mnist",
     "sasha/dog-food",
     "zh-plus/tiny-imagenet",
     "scikit-learn/adult-census-income",
     "cifar100",
+    "uoft-cs/cifar100",
     "svhn",
+    "ufldl-stanford/svhn",
     "sentiment140",
+    "stanfordnlp/sentiment140",
     "speech_commands",
+    "LIUM/tedlium",
+    "flwrlabs/femnist",
+    "flwrlabs/ucf101",
+    "flwrlabs/ambient-acoustic-context",
+    "jlh/uci-mushrooms",
+    "Mike0307/MNIST-M",
+    "flwrlabs/usps",
+    "scikit-learn/iris",
+    "flwrlabs/pacs",
+    "flwrlabs/cinic10",
+    "flwrlabs/caltech101",
+    "flwrlabs/office-home",
+    "flwrlabs/fed-isic2019",
 ]
 
 
@@ -127,7 +146,8 @@ def divide_dataset(
     >>> division = [0.8, 0.2]
     >>> train, test = divide_dataset(dataset=partition, division=division)
 
-    Use `divide_dataset` with division specified as a dict.
+    Use `divide_dataset` with division specified as a dict
+    (this accomplishes the same goal as the example with a list above).
 
     >>> from flwr_datasets import FederatedDataset
     >>> from flwr_datasets.utils import divide_dataset
@@ -178,7 +198,7 @@ def _create_division_indices_ranges(
             ranges.append(range(start_idx, end_idx))
             start_idx = end_idx
     else:
-        TypeError(
+        raise TypeError(
             f"The type of the `division` should be dict, "
             f"tuple or list but is {type(division)} instead. "
         )
@@ -254,11 +274,11 @@ def concatenate_divisions(
     partition_division: Union[List[float], Tuple[float, ...], Dict[str, float]],
     division_id: Union[int, str],
 ) -> Dataset:
-    """Create a dataset by concatenation of all partitions in the same division.
+    """Create a dataset by concatenation of divisions from all partitions.
 
     The divisions are created based on the `partition_division` and accessed based
-    on the `division_id`. It can be used to create e.g. centralized dataset from
-    federated on-edge test sets.
+    on the `division_id`. This fuction can be used to create e.g. centralized dataset
+    from federated on-edge test sets.
 
     Parameters
     ----------
@@ -279,6 +299,35 @@ def concatenate_divisions(
     -------
     concatenated_divisions : Dataset
         A dataset created as concatenation of the divisions from all partitions.
+
+    Examples
+    --------
+    Use `concatenate_divisions` with division specified as a list.
+
+    >>> from flwr_datasets import FederatedDataset
+    >>> from flwr_datasets.utils import concatenate_divisions
+    >>>
+    >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
+    >>> concatenated_divisions = concatenate_divisions(
+    ...     partitioner=fds.partitioners["train"],
+    ...     partition_division=[0.8, 0.2],
+    ...     division_id=1
+    ... )
+    >>> print(concatenated_divisions)
+
+    Use `concatenate_divisions` with division specified as a dict.
+    This accomplishes the same goal as the example with a list above.
+
+    >>> from flwr_datasets import FederatedDataset
+    >>> from flwr_datasets.utils import concatenate_divisions
+    >>>
+    >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
+    >>> concatenated_divisions = concatenate_divisions(
+    ...     partitioner=fds["train"],
+    ...     partition_division={"train": 0.8, "test": 0.2},
+    ...     division_id="test"
+    ... )
+    >>> print(concatenated_divisions)
     """
     _check_division_config_correctness(partition_division)
     divisions = []
