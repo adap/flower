@@ -13,6 +13,7 @@ from tensorflow_privacy.privacy.analysis.compute_dp_sgd_privacy_lib import (
 from flwr.common import Context
 
 from tf_privacy.task import load_data, Net
+import numpy as np
 
 
 # Make TensorFlow log less verbose
@@ -34,7 +35,9 @@ class FlowerClient(NumPyClient):
         super().__init__()
         self.model = model
         self.x_train, self.y_train = train_data
+        self.x_train = np.expand_dims(self.x_train, axis=-1) 
         self.x_test, self.y_test = test_data
+        self.x_test = np.expand_dims(self.x_test, axis=-1) 
         self.noise_multiplier = noise_multiplier
         self.l2_norm_clip = l2_norm_clip
         self.num_microbatches = num_microbatches
@@ -92,6 +95,9 @@ class FlowerClient(NumPyClient):
 
 def client_fn(context: Context):
     model = Net()
+    model.build(input_shape=(None, 28, 28, 1))
+    
+    partition_id = context.node_config["partition-id"]
 
     l2_norm_clip = 1.0
     num_microbatches = 64
@@ -99,7 +105,6 @@ def client_fn(context: Context):
     batch_size = 64
     noise_multiplier = 1.0 if partition_id % 2 == 0 else 1.5
 
-    partition_id = context.node_config["partition-id"]
     train_data, test_data = load_data(
         partition_id=partition_id,
         num_partitions=context.node_config["num-partitions"],

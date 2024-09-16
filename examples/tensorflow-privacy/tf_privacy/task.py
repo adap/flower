@@ -11,7 +11,6 @@ fds = None  # Cache FederatedDataset
 class Net(tf.keras.Model):
     def __init__(self):
         super(Net, self).__init__()
-        # Define layers in the constructor
         self.conv1 = tf.keras.layers.Conv2D(32, kernel_size=(3, 3), activation="relu")
         self.pool1 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2))
         self.conv2 = tf.keras.layers.Conv2D(64, kernel_size=(3, 3), activation="relu")
@@ -21,7 +20,6 @@ class Net(tf.keras.Model):
         self.fc2 = tf.keras.layers.Dense(10, activation="softmax")
 
     def call(self, inputs):
-        # Define the forward pass
         x = self.conv1(inputs)
         x = self.pool1(x)
         x = self.conv2(x)

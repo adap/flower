@@ -1,12 +1,12 @@
 ---
-tags: [DP, basic, vision, fds, privacy]
+tags: [DP, DP-SGD, basic, vision, fds, privacy]
 dataset: [MNIST]
 framework: [tensorflow]
 ---
 
 # Training with Sample-Level Differential Privacy using TensorFlow-Privacy Engine
 
-In this example, we demonstrate how to train a model with sample-level differential privacy (DP) using Flower. We employ TensorFlow and integrate the tensorflow-privacy Engine to achieve sample-level differential privacy. This setup ensures robust privacy guarantees during the client training phase.
+In this example, we demonstrate how to train a model with sample-level differential privacy (DP) using Flower. We employ TensorFlow and integrate the tensorflow-privacy engine to achieve sample-level differential privacy. This setup ensures robust privacy guarantees during the client training phase.
 
 For more information about DP in Flower please refer to the [tutorial](https://flower.ai/docs/framework/how-to-use-differential-privacy.html). For additional information about tensorflow-privacy, visit the official [website](https://www.tensorflow.org/responsible_ai/privacy/guide).
 
@@ -38,6 +38,9 @@ tensorflow-privacy
 ├── pyproject.toml      # Project metadata like dependencies and configs
 └── README.md
 ```
+
+### Note on the Code (Privacy Hyperparameters)
+Please note that, at the current state, users cannot set `NodeConfig` for simulated `ClientApp`s. For this reason, the hyperparameter `noise_multiplier` is set in the `client_fn` method based on a condition check on `partition_id`. This will be modified in a future version of Flower to allow users to set `NodeConfig` for simulated `ClientApp`s.
 
 ### Install dependencies and project
 
