@@ -3,37 +3,50 @@
 isort:skip_file
 """
 import abc
-import flwr.proto.control_pb2
+import flwr.proto.run_pb2
 import grpc
 
 class ControlStub:
     def __init__(self, channel: grpc.Channel) -> None: ...
     CreateRun: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.control_pb2.CreateRunRequest,
-        flwr.proto.control_pb2.CreateRunResponse]
+        flwr.proto.run_pb2.CreateRunRequest,
+        flwr.proto.run_pb2.CreateRunResponse]
     """Request to create a new run"""
 
     GetRunStatus: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.control_pb2.GetRunStatusRequest,
-        flwr.proto.control_pb2.GetRunStatusResponse]
+        flwr.proto.run_pb2.GetRunStatusRequest,
+        flwr.proto.run_pb2.GetRunStatusResponse]
     """Get the status of a given run"""
+
+    UpdateRunStatus: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.run_pb2.UpdateRunStatusRequest,
+        flwr.proto.run_pb2.UpdateRunStatusResponse]
+    """Update the status of a given run"""
 
 
 class ControlServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def CreateRun(self,
-        request: flwr.proto.control_pb2.CreateRunRequest,
+        request: flwr.proto.run_pb2.CreateRunRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.control_pb2.CreateRunResponse:
+    ) -> flwr.proto.run_pb2.CreateRunResponse:
         """Request to create a new run"""
         pass
 
     @abc.abstractmethod
     def GetRunStatus(self,
-        request: flwr.proto.control_pb2.GetRunStatusRequest,
+        request: flwr.proto.run_pb2.GetRunStatusRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.control_pb2.GetRunStatusResponse:
+    ) -> flwr.proto.run_pb2.GetRunStatusResponse:
         """Get the status of a given run"""
+        pass
+
+    @abc.abstractmethod
+    def UpdateRunStatus(self,
+        request: flwr.proto.run_pb2.UpdateRunStatusRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.run_pb2.UpdateRunStatusResponse:
+        """Update the status of a given run"""
         pass
 
 

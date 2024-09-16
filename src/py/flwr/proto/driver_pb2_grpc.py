@@ -16,6 +16,11 @@ class DriverStub(object):
         Args:
             channel: A grpc.Channel.
         """
+        self.CreateRun = channel.unary_unary(
+                '/flwr.proto.Driver/CreateRun',
+                request_serializer=flwr_dot_proto_dot_run__pb2.CreateRunRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_run__pb2.CreateRunResponse.FromString,
+                )
         self.GetNodes = channel.unary_unary(
                 '/flwr.proto.Driver/GetNodes',
                 request_serializer=flwr_dot_proto_dot_driver__pb2.GetNodesRequest.SerializeToString,
@@ -84,6 +89,11 @@ class DriverServicer(object):
 
 def add_DriverServicer_to_server(servicer, server):
     rpc_method_handlers = {
+            'CreateRun': grpc.unary_unary_rpc_method_handler(
+                    servicer.CreateRun,
+                    request_deserializer=flwr_dot_proto_dot_run__pb2.CreateRunRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_run__pb2.CreateRunResponse.SerializeToString,
+            ),
             'GetNodes': grpc.unary_unary_rpc_method_handler(
                     servicer.GetNodes,
                     request_deserializer=flwr_dot_proto_dot_driver__pb2.GetNodesRequest.FromString,
@@ -118,6 +128,23 @@ def add_DriverServicer_to_server(servicer, server):
  # This class is part of an EXPERIMENTAL API.
 class Driver(object):
     """Missing associated documentation comment in .proto file."""
+
+    @staticmethod
+    def CreateRun(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Driver/CreateRun',
+            flwr_dot_proto_dot_run__pb2.CreateRunRequest.SerializeToString,
+            flwr_dot_proto_dot_run__pb2.CreateRunResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
     def GetNodes(request,

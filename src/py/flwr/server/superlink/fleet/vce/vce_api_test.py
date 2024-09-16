@@ -22,7 +22,7 @@ from json import JSONDecodeError
 from math import pi
 from pathlib import Path
 from time import sleep
-from typing import Dict, Optional, Set, Tuple
+from typing import Optional
 from unittest import TestCase
 from uuid import UUID
 
@@ -57,7 +57,7 @@ class DummyClient(NumPyClient):
     def __init__(self, state: RecordSet) -> None:
         self.client_state = state
 
-    def get_properties(self, config: Config) -> Dict[str, Scalar]:
+    def get_properties(self, config: Config) -> dict[str, Scalar]:
         """Return properties by doing a simple calculation."""
         result = float(config["factor"]) * pi
 
@@ -86,7 +86,7 @@ def terminate_simulation(f_stop: threading.Event, sleep_duration: int) -> None:
 def init_state_factory_nodes_mapping(
     num_nodes: int,
     num_messages: int,
-) -> Tuple[StateFactory, NodeToPartitionMapping, Dict[UUID, float]]:
+) -> tuple[StateFactory, NodeToPartitionMapping, dict[UUID, float]]:
     """Instatiate StateFactory, register nodes and pre-insert messages in the state."""
     # Register a state and a run_id in it
     run_id = 1234
@@ -110,7 +110,7 @@ def register_messages_into_state(
     nodes_mapping: NodeToPartitionMapping,
     run_id: int,
     num_messages: int,
-) -> Dict[UUID, float]:
+) -> dict[UUID, float]:
     """Register `num_messages` into the state factory."""
     state: InMemoryState = state_factory.state()  # type: ignore
     state.run_ids[run_id] = Run(
@@ -123,7 +123,7 @@ def register_messages_into_state(
     # Artificially add TaskIns to state so they can be processed
     # by the Simulation Engine logic
     nodes_cycle = cycle(nodes_mapping.keys())  # we have more messages than supernodes
-    task_ids: Set[UUID] = set()  # so we can retrieve them later
+    task_ids: set[UUID] = set()  # so we can retrieve them later
     expected_results = {}
     for i in range(num_messages):
         dst_node_id = next(nodes_cycle)
