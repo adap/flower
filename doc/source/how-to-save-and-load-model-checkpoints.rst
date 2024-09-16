@@ -1,3 +1,8 @@
+.. title:: How-to Tutorial: Save and Load Federated Model Checkpoints in Flower
+
+.. meta::
+   :description: Learn how to save and load model checkpoints in Flower using custom strategies, including PyTorch checkpoints for efficient federated learning.
+
 Save and load model checkpoints
 ===============================
 
