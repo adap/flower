@@ -1,3 +1,8 @@
+.. title:: How-to Tutorial: Set Environment Variables in Flower Docker Containers
+
+.. meta::
+   :description: Learn how to configure environment variables in Flower Docker containers using the -e flag to customize settings like telemetry and logging for your federated learning setup.
+
 Set Environment Variables
 =========================
 
