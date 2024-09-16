@@ -1,3 +1,8 @@
+.. title:: How-to Tutorial: Configure federated learning clients in Flower
+
+.. meta::
+   :description: Learn how to configure clients in Flower by sending customizable parameters from the server to control client-side hyperparameters using configuration dictionaries and built-in strategies.
+
 Configure clients
 =================
 
