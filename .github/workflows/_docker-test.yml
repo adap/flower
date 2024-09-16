@@ -1,0 +1,100 @@
+name: Reusable docker image test workflow
+
+on:
+  workflow_call:
+    inputs:
+      build-args:
+        description: "List of build-time variables."
+        required: false
+        type: string
+      ref:
+        required: false
+        type: string
+    secrets:
+      dockerhub-user:
+        required: true
+      dockerhub-token:
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test image
+    runs-on: "ubuntu-22.04"
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Format build args
+        uses: ./.github/actions/format-docker-build-args
+        id: build-args
+        with:
+          build-args: ${{ inputs.build-args }}
+
+      - id: matrix
+        run: |
+           python dev/build-docker-image-matrix.py --flwr-version e2e-test --simple > matrix.json
+           echo "matrix=$(cat matrix.json)" >> $GITHUB_OUTPUT
+           echo "base-file-dir=$(jq -r .base.images[0].file_dir matrix.json)" >> $GITHUB_OUTPUT
+           echo "base-namespace-repository=$(jq -r .base.images[0].namespace_repository matrix.json)" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@988b5a0280414f521da01fcc63a27aeeb4b104db # v3.6.1
+        with:
+          # https://github.com/docker/build-push-action/issues/1116#issuecomment-2132899905
+          driver: docker
+
+      - name: Build base image
+        uses: Wandalen/wretry.action@6feedb7dedadeb826de0f45ff482b53b379a7844 # v3.5.0
+        with:
+          action: docker/build-push-action@5cd11c3a4ced054e52742c5fd54dca954e0edd85 # v6.7.0
+          attempt_limit: 60 # 60 attempts * (9 secs delay + 1 sec retry) = ~10 mins
+          attempt_delay: 9000 # 9 secs
+          with: |
+            pull: true
+            context: ${{ steps.matrix.outputs.base-file-dir }}
+            load: true
+            tags: ${{ steps.matrix.outputs.base-namespace-repository }}:e2e-test
+            build-args: |
+              ${{ steps.build-args.outputs.build-args }}
+
+      - name: Build binary images
+        run: |
+          set -e -o pipefail
+
+          jq -c '.binary.images[]' <<< '${{ steps.matrix.outputs.matrix }}' | while read -r i; do
+              FILE_DIR=$(echo "$i" | jq -r .file_dir)
+              NAMESPACE_REPOSITORY=$(echo "$i" | jq -r .namespace_repository)
+              docker build --build-arg BASE_IMAGE="e2e-test" -t "${NAMESPACE_REPOSITORY}:e2e-test" "${FILE_DIR}"
+          done
+
+      - uses: ./.github/actions/bootstrap
+      - name: Install Flower
+        run: python -m pip install .
+
+      - name: Test images
+        env:
+          FLWR_VERSION: e2e-test
+          PROJECT_DIR: e2e-test
+        working-directory: src/docker/complete
+        run: |
+          flwr new ${PROJECT_DIR} --framework NumPy --username flower
+
+          docker compose -f certs.yml up --build
+          sudo chown -R 49999:49999 superexec-certificates/* superlink-certificates/*
+
+          cat <<- EOT >> "${PROJECT_DIR}/pyproject.toml"
+          [tool.flwr.federations.local-deployment-tls]
+          address = "127.0.0.1:9093"
+          root-certificates = "../superexec-certificates/ca.crt"
+          EOT
+
+          docker compose -f compose.yml -f with-tls.yml up --build -d
+          docker compose logs -f &
+
+          timeout 30 flwr run ${PROJECT_DIR} local-deployment-tls
+          timeout 120 docker compose logs -f superexec | grep -q 'Run finished'
