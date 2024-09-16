@@ -1,3 +1,5 @@
+:og:description: Learn how to pin Flower Docker images to a specific version using image digests, ensuring consistent deployments while still receiving critical security updates.
+
 .. title:: How-to Tutorial: Pin a Flower Docker Image to a Specific Version
 
 .. meta::

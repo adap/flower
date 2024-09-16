@@ -1,3 +1,5 @@
+:og:description: Learn how to install Flower, the Python-based federated learning framework, using PyPi, conda, or Docker in this easy-to-follow guide.
+
 .. title:: How-to Tutorial: Install Flower federated learning framework
 
 .. meta::

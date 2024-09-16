@@ -1,3 +1,5 @@
+:og:description: Learn how to run federated learning simulations with Flower using the VirtualClientEngine for resource-aware, scalable, and multi-node simulations on any system configuration.
+
 .. title:: How-to Tutorial: Run Federated Learning Simulations in Flower
 
 .. meta::

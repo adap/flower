@@ -1,3 +1,5 @@
+:og:description: Learn how to persist the SuperLink state in Flower by saving it to a local directory, ensuring data retention across container restarts in Docker.
+
 .. title:: How-to Tutorial: Persist the State of the SuperLink in Flower
 
 .. meta::

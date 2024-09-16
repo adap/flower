@@ -1,3 +1,5 @@
+:og:description: Learn how to implement custom federated learning strategies in Flower by customizing client sampling, training, aggregation, and evaluation for enhanced flexibility and control.
+
 .. title:: How-to Tutorial: Build Custom Federated Learning Strategies in Flower
 
 .. meta::

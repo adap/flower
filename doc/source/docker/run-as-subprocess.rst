@@ -1,3 +1,5 @@
+:og:description: Learn how to run the Flower ClientApp as a subprocess within the SuperNode Docker container, reducing resource usage while improving isolation and enhancing security.
+
 .. title:: How-to Tutorial: Run ClientApp as a Subprocess in Flower
 
 .. meta::

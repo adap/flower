@@ -1,3 +1,5 @@
+:og:description: Learn how to switch to a different version of Flower, including nightly builds, by changing Docker image tags for consistent federated learning environments.
+
 .. title:: How-to Tutorial: Use a Different Version of Flower in Docker
 
 .. meta::
