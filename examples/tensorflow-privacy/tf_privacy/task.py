@@ -39,7 +39,6 @@ def load_data(partition_id: int, num_partitions: int, batch_size):
             partitioners={"train": partitioner},
         )
 
-    # fds = FederatedDataset(dataset="mnist", partitioners={"train": 2})
     partition = fds.load_partition(partition_id)
     partition.set_format("numpy")
 
