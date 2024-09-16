@@ -35,9 +35,9 @@ class FlowerClient(NumPyClient):
         super().__init__()
         self.model = model
         self.x_train, self.y_train = train_data
-        self.x_train = np.expand_dims(self.x_train, axis=-1) 
+        self.x_train = np.expand_dims(self.x_train, axis=-1)
         self.x_test, self.y_test = test_data
-        self.x_test = np.expand_dims(self.x_test, axis=-1) 
+        self.x_test = np.expand_dims(self.x_test, axis=-1)
         self.noise_multiplier = noise_multiplier
         self.l2_norm_clip = l2_norm_clip
         self.num_microbatches = num_microbatches
@@ -96,7 +96,7 @@ class FlowerClient(NumPyClient):
 def client_fn(context: Context):
     model = Net()
     model.build(input_shape=(None, 28, 28, 1))
-    
+
     partition_id = context.node_config["partition-id"]
 
     l2_norm_clip = 1.0

@@ -40,6 +40,7 @@ tensorflow-privacy
 ```
 
 ### Note on the Code (Privacy Hyperparameters)
+
 Please note that, at the current state, users cannot set `NodeConfig` for simulated `ClientApp`s. For this reason, the hyperparameter `noise_multiplier` is set in the `client_fn` method based on a condition check on `partition_id`. This will be modified in a future version of Flower to allow users to set `NodeConfig` for simulated `ClientApp`s.
 
 ### Install dependencies and project
