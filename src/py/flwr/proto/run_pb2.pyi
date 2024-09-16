@@ -52,6 +52,29 @@ class Run(google.protobuf.message.Message):
     def ClearField(self, field_name: typing_extensions.Literal["fab_hash",b"fab_hash","fab_id",b"fab_id","fab_version",b"fab_version","override_config",b"override_config","run_id",b"run_id"]) -> None: ...
 global___Run = Run
 
+class RunStatus(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    STATUS_FIELD_NUMBER: builtins.int
+    SUB_STATUS_FIELD_NUMBER: builtins.int
+    STATUS_DETAIL_FIELD_NUMBER: builtins.int
+    status: typing.Text
+    """starting, running, finished"""
+
+    sub_status: typing.Text
+    """completed, failed, stopped"""
+
+    status_detail: typing.Text
+    """reason for the failure"""
+
+    def __init__(self,
+        *,
+        status: typing.Text = ...,
+        sub_status: typing.Text = ...,
+        status_detail: typing.Text = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["status",b"status","status_detail",b"status_detail","sub_status",b"sub_status"]) -> None: ...
+global___RunStatus = RunStatus
+
 class CreateRunRequest(google.protobuf.message.Message):
     """CreateRun"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
@@ -133,6 +156,29 @@ class GetRunResponse(google.protobuf.message.Message):
     def ClearField(self, field_name: typing_extensions.Literal["run",b"run"]) -> None: ...
 global___GetRunResponse = GetRunResponse
 
+class UpdateRunStatusRequest(google.protobuf.message.Message):
+    """UpdateRunStatus"""
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    RUN_ID_FIELD_NUMBER: builtins.int
+    STATUS_FIELD_NUMBER: builtins.int
+    run_id: builtins.int
+    @property
+    def status(self) -> global___RunStatus: ...
+    def __init__(self,
+        *,
+        run_id: builtins.int = ...,
+        status: typing.Optional[global___RunStatus] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["status",b"status"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id","status",b"status"]) -> None: ...
+global___UpdateRunStatusRequest = UpdateRunStatusRequest
+
+class UpdateRunStatusResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    def __init__(self,
+        ) -> None: ...
+global___UpdateRunStatusResponse = UpdateRunStatusResponse
+
 class GetRunStatusRequest(google.protobuf.message.Message):
     """GetRunStatus"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
@@ -153,41 +199,22 @@ class GetRunStatusResponse(google.protobuf.message.Message):
         KEY_FIELD_NUMBER: builtins.int
         VALUE_FIELD_NUMBER: builtins.int
         key: builtins.int
-        value: typing.Text
+        @property
+        def value(self) -> global___RunStatus: ...
         def __init__(self,
             *,
             key: builtins.int = ...,
-            value: typing.Text = ...,
+            value: typing.Optional[global___RunStatus] = ...,
             ) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
         def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 
     RUN_STATUS_DICT_FIELD_NUMBER: builtins.int
     @property
-    def run_status_dict(self) -> google.protobuf.internal.containers.ScalarMap[builtins.int, typing.Text]: ...
+    def run_status_dict(self) -> google.protobuf.internal.containers.MessageMap[builtins.int, global___RunStatus]: ...
     def __init__(self,
         *,
-        run_status_dict: typing.Optional[typing.Mapping[builtins.int, typing.Text]] = ...,
+        run_status_dict: typing.Optional[typing.Mapping[builtins.int, global___RunStatus]] = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["run_status_dict",b"run_status_dict"]) -> None: ...
 global___GetRunStatusResponse = GetRunStatusResponse
-
-class FinishRunRequest(google.protobuf.message.Message):
-    """FinishRun"""
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    RUN_ID_FIELD_NUMBER: builtins.int
-    STATUS_FIELD_NUMBER: builtins.int
-    run_id: builtins.int
-    status: typing.Text
-    def __init__(self,
-        *,
-        run_id: builtins.int = ...,
-        status: typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id","status",b"status"]) -> None: ...
-global___FinishRunRequest = FinishRunRequest
-
-class FinishRunResponse(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    def __init__(self,
-        ) -> None: ...
-global___FinishRunResponse = FinishRunResponse
