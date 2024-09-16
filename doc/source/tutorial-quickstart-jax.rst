@@ -1,3 +1,8 @@
+.. title:: Federated Learning Tutorial: Train linear regression with Flower & JAX
+
+.. meta::
+   :description: Learn how to train a linear regression using federated learning with Flower and JAX in this step-by-step tutorial.
+
 .. _quickstart-jax:
 
 
