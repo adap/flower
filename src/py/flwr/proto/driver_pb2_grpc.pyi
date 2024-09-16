@@ -40,6 +40,16 @@ class DriverStub:
         flwr.proto.fab_pb2.GetFabResponse]
     """Get FAB"""
 
+    GetRunStatus: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.run_pb2.GetRunStatusRequest,
+        flwr.proto.run_pb2.GetRunStatusResponse]
+    """Get the status of a given run"""
+
+    UpdateRunStatus: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.run_pb2.UpdateRunStatusRequest,
+        flwr.proto.run_pb2.UpdateRunStatusResponse]
+    """Update the status of a given run"""
+
 
 class DriverServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -88,6 +98,22 @@ class DriverServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.fab_pb2.GetFabResponse:
         """Get FAB"""
+        pass
+
+    @abc.abstractmethod
+    def GetRunStatus(self,
+        request: flwr.proto.run_pb2.GetRunStatusRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.run_pb2.GetRunStatusResponse:
+        """Get the status of a given run"""
+        pass
+
+    @abc.abstractmethod
+    def UpdateRunStatus(self,
+        request: flwr.proto.run_pb2.UpdateRunStatusRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.run_pb2.UpdateRunStatusResponse:
+        """Update the status of a given run"""
         pass
 
 

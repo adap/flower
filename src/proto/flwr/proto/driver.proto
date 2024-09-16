@@ -40,6 +40,13 @@ service Driver {
 
   // Get FAB
   rpc GetFab(GetFabRequest) returns (GetFabResponse) {}
+
+  // Get the status of a given run
+  rpc GetRunStatus(GetRunStatusRequest) returns (GetRunStatusResponse) {}
+
+  // Update the status of a given run
+  rpc UpdateRunStatus(UpdateRunStatusRequest)
+      returns (UpdateRunStatusResponse) {}
 }
 
 // GetNodes messages
