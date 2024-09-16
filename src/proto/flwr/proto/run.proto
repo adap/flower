@@ -31,7 +31,7 @@ message Run {
 message RunStatus {
   string phase = 1;  // "starting", "running", "finished"
   string result = 2; // "completed", "failed", "stopped" or ""
-  string detail = 3; // failure details
+  string reason = 3; // failure reason
 }
 
 // CreateRun
