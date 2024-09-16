@@ -7,7 +7,7 @@ framework: [pandas]
 # Federated Learning with Pandas and Flower (Quickstart Example)
 
 > \[!CAUTION\]
-> This example uses Flower's low-level API which is a preview feature and subject to change.
+> This example uses Flower's low-level API which remains a preview feature and subject to change.
 
 This introductory example to Flower uses [Pandas](https://pandas.pydata.org/), but deep knowledge of Pandas is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case. This example uses [Flower Datasets](https://flower.ai/docs/datasets/) to
 download, partition and preprocess the [Iris dataset](https://huggingface.co/datasets/scikit-learn/iris).
