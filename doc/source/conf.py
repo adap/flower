@@ -249,8 +249,6 @@ redirects = {
     "creating-new-messages": "contributor-how-to-create-new-messages.html",
     "write-documentation": "contributor-how-to-write-documentation.html",
     "release-process": "contributor-how-to-release-flower.html",
-    # Restructuring: contributor explanations
-    "architecture": "contributor-explanation-architecture.html",
     # Restructuring: contributor references
     "good-first-contributions": "contributor-ref-good-first-contributions.html",
     "secagg": "contributor-ref-secure-aggregation-protocols.html",
@@ -265,6 +263,8 @@ redirects = {
     "ref-api/flwr.simulation.run_simulation_from_cli": "index.html",
     "contributor-how-to-create-new-messages": "index.html",
     "example-jax-from-centralized-to-federated": "tutorial-quickstart-jax.html",
+    "architecture": "explanation-flower-architecture.html",
+    "contributor-explanation-architecture.html": "explanation-flower-architecture.html",
 }
 
 # -- Options for HTML output -------------------------------------------------
