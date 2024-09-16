@@ -17,7 +17,7 @@
 
 
 import unittest
-from typing import Dict, Union
+from typing import Union
 from unittest.mock import Mock, patch
 
 import numpy as np
@@ -385,7 +385,7 @@ class PartitionersSpecificationForFederatedDatasets(unittest.TestCase):
         """Test if partitioners are passed directly (no recreation)."""
         num_train_partitions = 100
         num_test_partitions = 100
-        partitioners: Dict[str, Union[Partitioner, int]] = {
+        partitioners: dict[str, Union[Partitioner, int]] = {
             "train": IidPartitioner(num_partitions=num_train_partitions),
             "test": IidPartitioner(num_partitions=num_test_partitions),
         }
@@ -419,7 +419,7 @@ class PartitionersSpecificationForFederatedDatasets(unittest.TestCase):
         """Test if an instantiated partitioner is passed directly."""
         num_train_partitions = 100
         num_test_partitions = 100
-        partitioners: Dict[str, Union[Partitioner, int]] = {
+        partitioners: dict[str, Union[Partitioner, int]] = {
             "train": IidPartitioner(num_partitions=num_train_partitions),
             "test": num_test_partitions,
         }
@@ -433,7 +433,7 @@ class PartitionersSpecificationForFederatedDatasets(unittest.TestCase):
         """Test if an IidPartitioner partitioner is created."""
         num_train_partitions = 100
         num_test_partitions = 100
-        partitioners: Dict[str, Union[Partitioner, int]] = {
+        partitioners: dict[str, Union[Partitioner, int]] = {
             "train": IidPartitioner(num_partitions=num_train_partitions),
             "test": num_test_partitions,
         }
