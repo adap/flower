@@ -65,29 +65,12 @@ def main(driver: Driver, context: Context) -> None:
             query_results = rep.content.metrics_records["query_results"]
             # Sum metrics
             for k, v in query_results.items():
-                if "avg" not in k:
+                if k in ["SepalLengthCm", "SepalWidthCm"]:
                     if k in aggregated_metrics:
                         aggregated_metrics[k] += np.array(v)
                     else:
                         aggregated_metrics[k] = np.array(v)
 
-        feature_names = [key for key in query_results.keys() if "_" not in key]
-
-        # Compute weighted average from aggregated count
-        for rep in replies:
-            query_results = rep.content.metrics_records["query_results"]
-            for feature_name in feature_names:
-                k = f"{feature_name}_avg"
-                if k in aggregated_metrics:
-                    aggregated_metrics[k] += (
-                        np.array(query_results[k])
-                        / aggregated_metrics[f"{feature_name}_count"]
-                    )
-                else:
-                    aggregated_metrics[k] = (
-                        np.array(query_results[k])
-                        / aggregated_metrics[f"{feature_name}_count"]
-                    )
 
         # Display aggregated metrics
         log(INFO, "Aggregated metrics: %s", aggregated_metrics)
