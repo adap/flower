@@ -22,6 +22,7 @@ from uuid import uuid4
 
 from flwr.common import log
 from flwr.common.constant import ErrorCode
+from flwr.common.typing import RunStatus
 from flwr.proto.error_pb2 import Error  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
@@ -30,6 +31,9 @@ NODE_UNAVAILABLE_ERROR_REASON = (
     "Error: Node Unavailable - The destination node is currently unavailable. "
     "It exceeds the time limit specified in its last ping."
 )
+
+VALID_RUN_STATUS_PHASE_TRANSITIONS = {("starting", "running"), ("running", "finished")}
+VALID_RUN_STATUS_RESULTS = {"completed", "failed", "stopped", ""}
 
 
 def generate_rand_int_from_bytes(num_bytes: int) -> int:
@@ -60,3 +64,44 @@ def make_node_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
             ),
         ),
     )
+
+
+def is_valid_transition(current_status: RunStatus, new_status: RunStatus) -> bool:
+    """Check if a transition between two run statuses is valid.
+
+    Parameters
+    ----------
+    current_status : RunStatus
+        The current status of the run.
+    new_status : RunStatus
+        The new status to transition to.
+
+    Returns
+    -------
+    bool
+        True if the transition is valid, False otherwise.
+    """
+    return (
+        current_status.phase,
+        new_status.phase,
+    ) in VALID_RUN_STATUS_PHASE_TRANSITIONS
+
+
+def has_valid_result(status: RunStatus) -> bool:
+    """Check if the 'result' field of the given status is valid.
+
+    Parameters
+    ----------
+    status : RunStatus
+        The run status object to be checked.
+
+    Returns
+    -------
+    bool
+        True if the status has a valid result, False otherwise.
+
+    Notes
+    -----
+    An empty string (i.e., "") is considered a valid result.
+    """
+    return status.result in VALID_RUN_STATUS_RESULTS

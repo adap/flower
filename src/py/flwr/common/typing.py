@@ -219,6 +219,15 @@ class Run:
 
 
 @dataclass
+class RunStatus:
+    """Run status."""
+
+    phase: str
+    result: str
+    reason: str
+
+
+@dataclass
 class Fab:
     """Fab file representation."""
 
