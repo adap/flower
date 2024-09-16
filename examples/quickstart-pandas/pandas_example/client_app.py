@@ -35,6 +35,8 @@ app = ClientApp()
 
 @app.query()
 def query(msg: Message, context: Context):
+    """Construct histogram of local dataset and report to `ServerApp`."""
+
     # Read the node_config to fetch data partition associated to this node
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]

@@ -13,7 +13,7 @@ This introductory example to Flower uses [Pandas](https://pandas.pydata.org/), b
 download, partition and preprocess the [Iris dataset](https://huggingface.co/datasets/scikit-learn/iris).
 Running this example in itself is quite easy.
 
-This example implements a form of Federated Analyics by which instead of training a model using locally available data, the nodes run a query on the data they own. In this example the query is to compute the histogram on specific columns of the dataset. These metrics are sent to the server for aggregation.
+This example implements a form of Federated Analyics by which instead of training a model using locally available data, the nodes run a query on the data they own. In this example the query is to compute the histogram on specific columns of the dataset. These metrics are sent to the `ServerApp` for aggregation.
 
 ## Set up the project
 
