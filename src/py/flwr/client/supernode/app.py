@@ -18,7 +18,7 @@ import argparse
 import sys
 from logging import DEBUG, ERROR, INFO, WARN
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -291,7 +291,7 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
 
 def _try_setup_client_authentication(
     args: argparse.Namespace,
-) -> Optional[Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
+) -> Optional[tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
     if not args.auth_supernode_private_key and not args.auth_supernode_public_key:
         return None
 

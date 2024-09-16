@@ -17,7 +17,7 @@
 
 import sys
 from logging import DEBUG
-from typing import Any, Type, TypeVar, cast
+from typing import Any, TypeVar, cast
 
 import grpc
 from google.protobuf.message import Message as GrpcMessage
@@ -59,7 +59,7 @@ class GrpcAdapter:
         self.stub = GrpcAdapterStub(channel)
 
     def _send_and_receive(
-        self, request: GrpcMessage, response_type: Type[T], **kwargs: Any
+        self, request: GrpcMessage, response_type: type[T], **kwargs: Any
     ) -> T:
         # Serialize request
         container_req = MessageContainer(

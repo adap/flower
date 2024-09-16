@@ -17,7 +17,8 @@
 
 import time
 import warnings
-from typing import Iterable, List, Optional, cast
+from collections.abc import Iterable
+from typing import Optional, cast
 from uuid import UUID
 
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
@@ -112,7 +113,7 @@ class InMemoryDriver(Driver):
         )
         return Message(metadata=metadata, content=content)
 
-    def get_node_ids(self) -> List[int]:
+    def get_node_ids(self) -> list[int]:
         """Get node IDs."""
         self._init_run()
         return list(self.state.get_nodes(cast(Run, self._run).run_id))
@@ -123,7 +124,7 @@ class InMemoryDriver(Driver):
         This method takes an iterable of messages and sends each message
         to the node specified in `dst_node_id`.
         """
-        task_ids: List[str] = []
+        task_ids: list[str] = []
         for msg in messages:
             # Check message
             self._check_message(msg)
@@ -169,7 +170,7 @@ class InMemoryDriver(Driver):
 
         # Pull messages
         end_time = time.time() + (timeout if timeout is not None else 0.0)
-        ret: List[Message] = []
+        ret: list[Message] = []
         while timeout is None or time.time() < end_time:
             res_msgs = self.pull_messages(msg_ids)
             ret.extend(res_msgs)

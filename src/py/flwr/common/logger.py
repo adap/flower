@@ -18,7 +18,7 @@
 import logging
 from logging import WARN, LogRecord
 from logging.handlers import HTTPHandler
-from typing import TYPE_CHECKING, Any, Dict, Optional, TextIO, Tuple
+from typing import TYPE_CHECKING, Any, Optional, TextIO
 
 # Create logger
 LOGGER_NAME = "flwr"
@@ -119,12 +119,12 @@ class CustomHTTPHandler(HTTPHandler):
         url: str,
         method: str = "GET",
         secure: bool = False,
-        credentials: Optional[Tuple[str, str]] = None,
+        credentials: Optional[tuple[str, str]] = None,
     ) -> None:
         super().__init__(host, url, method, secure, credentials)
         self.identifier = identifier
 
-    def mapLogRecord(self, record: LogRecord) -> Dict[str, Any]:
+    def mapLogRecord(self, record: LogRecord) -> dict[str, Any]:
         """Filter for the properties to be send to the logserver."""
         record_dict = record.__dict__
         return {
