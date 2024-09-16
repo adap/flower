@@ -317,7 +317,8 @@ class FederatedDataset:
             raise ValueError(
                 "Probably one of the specified parameter in `load_dataset_kwargs` "
                 "change the return type of the datasets.load_dataset function. "
-                "Make sure to use parameter such that the return type is DatasetDict."
+                "Make sure to use parameter such that the return type is DatasetDict. "
+                f"The return type is currently: {type(self._dataset)}."
             )
         if self._shuffle:
             # Note it shuffles all the splits. The self._dataset is DatasetDict
