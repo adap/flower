@@ -17,7 +17,7 @@
 import argparse
 import time
 from logging import DEBUG, ERROR, INFO
-from typing import Optional, Tuple
+from typing import Optional
 
 import grpc
 
@@ -196,7 +196,7 @@ def get_token(stub: grpc.Channel) -> Optional[int]:
 
 def pull_message(
     stub: grpc.Channel, token: int
-) -> Tuple[Message, Context, Run, Optional[Fab]]:
+) -> tuple[Message, Context, Run, Optional[Fab]]:
     """Pull message from SuperNode to ClientApp."""
     log(INFO, "Pulling ClientAppInputs for token %s", token)
     try:

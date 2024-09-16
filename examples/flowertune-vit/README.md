@@ -59,7 +59,7 @@ flwr run .
 You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
 ```bash
-flwr run . --run-config num-server-rounds=5,batch-size=64
+flwr run . --run-config "num-server-rounds=5 batch-size=64"
 ```
 
 Run the project in the `local-simulation-gpu` federation that gives CPU and GPU resources to each `ClientApp`. By default, at most 5x`ClientApp` will run in parallel in the available GPU. You can tweak the degree of parallelism by adjusting the settings of this federation in the `pyproject.toml`.

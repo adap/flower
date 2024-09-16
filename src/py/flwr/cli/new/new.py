@@ -18,10 +18,9 @@ import re
 from enum import Enum
 from pathlib import Path
 from string import Template
-from typing import Dict, Optional
+from typing import Annotated, Optional
 
 import typer
-from typing_extensions import Annotated
 
 from ..utils import (
     is_valid_project_name,
@@ -70,7 +69,7 @@ def load_template(name: str) -> str:
         return tpl_file.read()
 
 
-def render_template(template: str, data: Dict[str, str]) -> str:
+def render_template(template: str, data: dict[str, str]) -> str:
     """Render template."""
     tpl_file = load_template(template)
     tpl = Template(tpl_file)
@@ -85,7 +84,7 @@ def create_file(file_path: Path, content: str) -> None:
     file_path.write_text(content)
 
 
-def render_and_create(file_path: Path, template: str, context: Dict[str, str]) -> None:
+def render_and_create(file_path: Path, template: str, context: dict[str, str]) -> None:
     """Render template and write to file."""
     content = render_template(template, context)
     create_file(file_path, content)
@@ -136,36 +135,23 @@ def new(
         username = prompt_text("Please provide your Flower username")
 
     if framework is not None:
-        framework_str_upper = str(framework.value)
+        framework_str = str(framework.value)
     else:
-        framework_value = prompt_options(
+        framework_str = prompt_options(
             "Please select ML framework by typing in the number",
             [mlf.value for mlf in MlFramework],
         )
-        selected_value = [
-            name
-            for name, value in vars(MlFramework).items()
-            if value == framework_value
-        ]
-        framework_str_upper = selected_value[0]
-
-    framework_str = framework_str_upper.lower()
 
     llm_challenge_str = None
-    if framework_str == "flowertune":
+    if framework_str == MlFramework.FLOWERTUNE:
         llm_challenge_value = prompt_options(
             "Please select LLM challenge by typing in the number",
             sorted([challenge.value for challenge in LlmChallengeName]),
         )
-        selected_value = [
-            name
-            for name, value in vars(LlmChallengeName).items()
-            if value == llm_challenge_value
-        ]
-        llm_challenge_str = selected_value[0]
-        llm_challenge_str = llm_challenge_str.lower()
+        llm_challenge_str = llm_challenge_value.lower()
 
-    is_baseline_project = framework_str == "baseline"
+    if framework_str == MlFramework.BASELINE:
+        framework_str = "baseline"
 
     print(
         typer.style(
@@ -176,19 +162,21 @@ def new(
     )
 
     context = {
-        "framework_str": framework_str_upper,
+        "framework_str": framework_str,
         "import_name": import_name.replace("-", "_"),
         "package_name": package_name,
         "project_name": app_name,
         "username": username,
     }
 
+    template_name = framework_str.lower()
+
     # List of files to render
     if llm_challenge_str:
         files = {
             ".gitignore": {"template": "app/.gitignore.tpl"},
-            "pyproject.toml": {"template": f"app/pyproject.{framework_str}.toml.tpl"},
-            "README.md": {"template": f"app/README.{framework_str}.md.tpl"},
+            "pyproject.toml": {"template": f"app/pyproject.{template_name}.toml.tpl"},
+            "README.md": {"template": f"app/README.{template_name}.md.tpl"},
             f"{import_name}/__init__.py": {"template": "app/code/__init__.py.tpl"},
             f"{import_name}/server_app.py": {
                 "template": "app/code/flwr_tune/server_app.py.tpl"
@@ -196,7 +184,6 @@ def new(
             f"{import_name}/client_app.py": {
                 "template": "app/code/flwr_tune/client_app.py.tpl"
             },
-            f"{import_name}/app.py": {"template": "app/code/flwr_tune/app.py.tpl"},
             f"{import_name}/models.py": {
                 "template": "app/code/flwr_tune/models.py.tpl"
             },
@@ -236,43 +223,41 @@ def new(
         files = {
             ".gitignore": {"template": "app/.gitignore.tpl"},
             "README.md": {"template": "app/README.md.tpl"},
-            "pyproject.toml": {"template": f"app/pyproject.{framework_str}.toml.tpl"},
+            "pyproject.toml": {"template": f"app/pyproject.{template_name}.toml.tpl"},
             f"{import_name}/__init__.py": {"template": "app/code/__init__.py.tpl"},
             f"{import_name}/server_app.py": {
-                "template": f"app/code/server.{framework_str}.py.tpl"
+                "template": f"app/code/server.{template_name}.py.tpl"
             },
             f"{import_name}/client_app.py": {
-                "template": f"app/code/client.{framework_str}.py.tpl"
+                "template": f"app/code/client.{template_name}.py.tpl"
             },
         }
 
         # Depending on the framework, generate task.py file
         frameworks_with_tasks = [
-            MlFramework.PYTORCH.value.lower(),
-            MlFramework.JAX.value.lower(),
-            MlFramework.HUGGINGFACE.value.lower(),
-            MlFramework.MLX.value.lower(),
-            MlFramework.TENSORFLOW.value.lower(),
+            MlFramework.PYTORCH.value,
+            MlFramework.JAX.value,
+            MlFramework.HUGGINGFACE.value,
+            MlFramework.MLX.value,
+            MlFramework.TENSORFLOW.value,
         ]
         if framework_str in frameworks_with_tasks:
             files[f"{import_name}/task.py"] = {
-                "template": f"app/code/task.{framework_str}.py.tpl"
+                "template": f"app/code/task.{template_name}.py.tpl"
             }
 
-        if is_baseline_project:
+        if framework_str == "baseline":
             # Include additional files for baseline template
             for file_name in ["model", "dataset", "strategy", "utils", "__init__"]:
                 files[f"{import_name}/{file_name}.py"] = {
-                    "template": f"app/code/{file_name}.{framework_str}.py.tpl"
+                    "template": f"app/code/{file_name}.{template_name}.py.tpl"
                 }
 
             # Replace README.md
-            files["README.md"]["template"] = f"app/README.{framework_str}.md.tpl"
+            files["README.md"]["template"] = f"app/README.{template_name}.md.tpl"
 
             # Add LICENSE
             files["LICENSE"] = {"template": "app/LICENSE.tpl"}
-
-            context["framework_str"] = "baseline"
 
     for file_path, value in files.items():
         render_and_create(
