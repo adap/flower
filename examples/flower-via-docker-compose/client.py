@@ -7,6 +7,9 @@ import tensorflow as tf
 from helpers.load_data import load_data
 
 from model.model import Model
+from prometheus_client import start_http_server, Gauge
+
+
 
 logging.basicConfig(level=logging.INFO)  # Configure logging
 logger = logging.getLogger(__name__)  # Create logger for the module
@@ -43,6 +46,15 @@ model = Model(learning_rate=args.learning_rate)
 model.compile()
 
 
+# Definiere eine Metrik zur Erfassung der Modellgenauigkeit pro Client
+client_accuracy = Gauge('client_accuracy', 'Model accuracy per client', ['client_id'])
+
+def update_accuracy(client_id, accuracy):
+    # Aktualisiere die Metrik für Prometheus
+    client_accuracy.labels(client_id).set(accuracy)
+
+
+
 class Client(fl.client.NumPyClient):
     def __init__(self, args):
         self.args = args
@@ -72,16 +84,17 @@ class Client(fl.client.NumPyClient):
             self.x_train, self.y_train, batch_size=self.args.batch_size
         )
 
-        # Calculate evaluation metric
-        results = {
-            "accuracy": float(history.history["accuracy"][-1]),
-        }
+        # Berechne die Genauigkeit nach dem Training
+        accuracy = float(history.history["accuracy"][-1])
+
+        # Aktualisiere die Metrik
+        update_accuracy(self.args.client_id, accuracy)
 
         # Get the parameters after training
         parameters_prime = model.get_model().get_weights()
 
         # Directly return the parameters and the number of examples trained on
-        return parameters_prime, len(self.x_train), results
+        return parameters_prime, len(self.x_train), {"accuracy": accuracy} 
 
     def evaluate(self, parameters, config):
         # Set the weights of the model
@@ -91,6 +104,9 @@ class Client(fl.client.NumPyClient):
         loss, accuracy = model.get_model().evaluate(
             self.x_test, self.y_test, batch_size=self.args.batch_size
         )
+
+        # Aktualisiere die Metrik
+        update_accuracy(self.args.client_id, accuracy)
 
         # Return the loss, the number of examples evaluated on and the accuracy
         return float(loss), len(self.x_test), {"accuracy": float(accuracy)}
@@ -107,5 +123,10 @@ def start_fl_client():
 
 
 if __name__ == "__main__":
+
+    # Starte den HTTP-Server für Prometheus-Metriken auf einem bestimmten Port
+    start_http_server(8000 + args.client_id)  # Unterschiedlicher Port für jeden Client
+
     # Call the function to start the client
     start_fl_client()
+

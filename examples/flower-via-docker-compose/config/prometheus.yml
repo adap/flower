@@ -17,3 +17,8 @@ scrape_configs:
     metrics_path: '/metrics'
     static_configs:
       - targets: ['server:8000']
+  - job_name: 'client_metrics'
+    scrape_interval: 5s
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['client1:8001', 'client2:8002']  

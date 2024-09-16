@@ -23,6 +23,23 @@ class FedCustom(fl.server.strategy.FedAvg):
 
     def __repr__(self) -> str:
         return "FedCustom"
+    
+    def aggregate_fit(self, rnd, results, failures):
+        # Standard Aggregation durchführen
+        aggregated_parameters, aggregated_metrics = super().aggregate_fit(rnd, results, failures)
+        
+        if aggregated_metrics:
+            # Aktualisiere die globalen Metriken basierend auf aggregierten Ergebnissen
+            global_accuracy = aggregated_metrics.get("accuracy")
+            global_loss = aggregated_metrics.get("loss")
+
+            if global_accuracy is not None:
+                self.accuracy_gauge.set(global_accuracy)  # Prometheus-Gauge aktualisieren
+            
+            if global_loss is not None:
+                self.loss_gauge.set(global_loss)  # Prometheus-Gauge aktualisieren
+
+        return aggregated_parameters, aggregated_metrics
 
     def aggregate_evaluate(
         self,
