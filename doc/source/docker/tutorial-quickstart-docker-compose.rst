@@ -1,3 +1,8 @@
+.. title:: How-to Tutorial: Quickstart with Docker Compose for Flower
+
+.. meta::
+   :description: Learn how to quickly set up Flower using Docker Compose, enable TLS, and persist application state for federated learning with minimal configuration effort.
+
 Quickstart with Docker Compose
 ==============================
 
