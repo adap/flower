@@ -18,7 +18,7 @@
 import threading
 import time
 from logging import ERROR
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Optional
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
@@ -37,15 +37,15 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
     def __init__(self) -> None:
 
         # Map node_id to (online_until, ping_interval)
-        self.node_ids: Dict[int, Tuple[float, float]] = {}
-        self.public_key_to_node_id: Dict[bytes, int] = {}
+        self.node_ids: dict[int, tuple[float, float]] = {}
+        self.public_key_to_node_id: dict[bytes, int] = {}
 
         # Map run_id to (fab_id, fab_version)
-        self.run_ids: Dict[int, Run] = {}
-        self.task_ins_store: Dict[UUID, TaskIns] = {}
-        self.task_res_store: Dict[UUID, TaskRes] = {}
+        self.run_ids: dict[int, Run] = {}
+        self.task_ins_store: dict[UUID, TaskIns] = {}
+        self.task_res_store: dict[UUID, TaskRes] = {}
 
-        self.node_public_keys: Set[bytes] = set()
+        self.node_public_keys: set[bytes] = set()
         self.server_public_key: Optional[bytes] = None
         self.server_private_key: Optional[bytes] = None
 
@@ -76,13 +76,13 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
 
     def get_task_ins(
         self, node_id: Optional[int], limit: Optional[int]
-    ) -> List[TaskIns]:
+    ) -> list[TaskIns]:
         """Get all TaskIns that have not been delivered yet."""
         if limit is not None and limit < 1:
             raise AssertionError("`limit` must be >= 1")
 
         # Find TaskIns for node_id that were not delivered yet
-        task_ins_list: List[TaskIns] = []
+        task_ins_list: list[TaskIns] = []
         with self.lock:
             for _, task_ins in self.task_ins_store.items():
                 # pylint: disable=too-many-boolean-expressions
@@ -133,15 +133,15 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         # Return the new task_id
         return task_id
 
-    def get_task_res(self, task_ids: Set[UUID], limit: Optional[int]) -> List[TaskRes]:
+    def get_task_res(self, task_ids: set[UUID], limit: Optional[int]) -> list[TaskRes]:
         """Get all TaskRes that have not been delivered yet."""
         if limit is not None and limit < 1:
             raise AssertionError("`limit` must be >= 1")
 
         with self.lock:
             # Find TaskRes that were not delivered yet
-            task_res_list: List[TaskRes] = []
-            replied_task_ids: Set[UUID] = set()
+            task_res_list: list[TaskRes] = []
+            replied_task_ids: set[UUID] = set()
             for _, task_res in self.task_res_store.items():
                 reply_to = UUID(task_res.task.ancestry[0])
                 if reply_to in task_ids and task_res.task.delivered_at == "":
@@ -175,10 +175,10 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             # Return TaskRes
             return task_res_list
 
-    def delete_tasks(self, task_ids: Set[UUID]) -> None:
+    def delete_tasks(self, task_ids: set[UUID]) -> None:
         """Delete all delivered TaskIns/TaskRes pairs."""
-        task_ins_to_be_deleted: Set[UUID] = set()
-        task_res_to_be_deleted: Set[UUID] = set()
+        task_ins_to_be_deleted: set[UUID] = set()
+        task_res_to_be_deleted: set[UUID] = set()
 
         with self.lock:
             for task_ins_id in task_ids:
@@ -253,7 +253,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
 
             del self.node_ids[node_id]
 
-    def get_nodes(self, run_id: int) -> Set[int]:
+    def get_nodes(self, run_id: int) -> set[int]:
         """Return all available nodes.
 
         Constraints
@@ -318,7 +318,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         """Retrieve `server_public_key` in urlsafe bytes."""
         return self.server_public_key
 
-    def store_node_public_keys(self, public_keys: Set[bytes]) -> None:
+    def store_node_public_keys(self, public_keys: set[bytes]) -> None:
         """Store a set of `node_public_keys` in state."""
         with self.lock:
             self.node_public_keys = public_keys
@@ -328,7 +328,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         with self.lock:
             self.node_public_keys.add(public_key)
 
-    def get_node_public_keys(self) -> Set[bytes]:
+    def get_node_public_keys(self) -> set[bytes]:
         """Retrieve all currently stored `node_public_keys` as a set."""
         return self.node_public_keys
 

@@ -18,10 +18,11 @@ import signal
 import subprocess
 import sys
 import time
+from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from logging import ERROR, INFO, WARN
 from pathlib import Path
-from typing import Callable, ContextManager, Dict, Optional, Tuple, Type, Union, cast
+from typing import Callable, Optional, Union, cast
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -94,7 +95,7 @@ def start_client(
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
     authentication_keys: Optional[
-        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
@@ -204,7 +205,7 @@ def start_client_internal(
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
     authentication_keys: Optional[
-        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
@@ -356,7 +357,7 @@ def start_client_internal(
     # NodeState gets initialized when the first connection is established
     node_state: Optional[NodeState] = None
 
-    runs: Dict[int, Run] = {}
+    runs: dict[int, Run] = {}
 
     while not app_state_tracker.interrupt:
         sleep_duration: int = 0
@@ -689,7 +690,7 @@ def start_numpy_client(
     )
 
 
-def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
+def _init_connection(transport: Optional[str], server_address: str) -> tuple[
     Callable[
         [
             str,
@@ -697,10 +698,10 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
             RetryInvoker,
             int,
             Union[bytes, str, None],
-            Optional[Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]],
+            Optional[tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]],
         ],
-        ContextManager[
-            Tuple[
+        AbstractContextManager[
+            tuple[
                 Callable[[], Optional[Message]],
                 Callable[[Message], None],
                 Optional[Callable[[], Optional[int]]],
@@ -711,7 +712,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
         ],
     ],
     str,
-    Type[Exception],
+    type[Exception],
 ]:
     # Parse IP address
     parsed_address = parse_address(server_address)
@@ -769,7 +770,7 @@ class _AppStateTracker:
         signal.signal(signal.SIGTERM, signal_handler)
 
 
-def run_clientappio_api_grpc(address: str) -> Tuple[grpc.Server, ClientAppIoServicer]:
+def run_clientappio_api_grpc(address: str) -> tuple[grpc.Server, ClientAppIoServicer]:
     """Run ClientAppIo API gRPC server."""
     clientappio_servicer: grpc.Server = ClientAppIoServicer()
     clientappio_add_servicer_to_server_fn = add_ClientAppIoServicer_to_server
