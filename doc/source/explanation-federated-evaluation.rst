@@ -1,3 +1,10 @@
+:og:description: Learn the two main approaches to evaluating models in Flower: centralized (server-side) evaluation and federated (client-side) evaluation, with built-in strategies and configuration options
+
+.. title:: Federated Evaluation in Flower
+
+.. meta::
+   :description: Learn the two main approaches to evaluating models in Flower: centralized (server-side) evaluation and federated (client-side) evaluation, with built-in strategies and configuration options
+
 Federated evaluation
 ====================
 

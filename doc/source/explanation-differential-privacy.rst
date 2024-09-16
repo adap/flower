@@ -1,3 +1,10 @@
+:og:description: Learn how differential privacy ensures data security in federated learning, with central and local approaches to prevent leakage of sensitive information during model updates and training.
+
+.. title:: Differential Privacy in Federated Learning
+
+.. meta::
+   :description: Learn how differential privacy ensures data security in federated learning, with central and local approaches to prevent leakage of sensitive information during model updates and training.
+
 Differential Privacy
 ====================
 The information in datasets like healthcare, financial transactions, user preferences, etc., is valuable and has the potential for scientific breakthroughs and provides important business insights.
