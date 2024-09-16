@@ -16,7 +16,7 @@ from flwr.proto import fab_pb2 as flwr_dot_proto_dot_fab__pb2
 from flwr.proto import transport_pb2 as flwr_dot_proto_dot_transport__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14\x66lwr/proto/run.proto\x12\nflwr.proto\x1a\x14\x66lwr/proto/fab.proto\x1a\x1a\x66lwr/proto/transport.proto\"\xd5\x01\n\x03Run\x12\x0e\n\x06run_id\x18\x01 \x01(\x12\x12\x0e\n\x06\x66\x61\x62_id\x18\x02 \x01(\t\x12\x13\n\x0b\x66\x61\x62_version\x18\x03 \x01(\t\x12<\n\x0foverride_config\x18\x04 \x03(\x0b\x32#.flwr.proto.Run.OverrideConfigEntry\x12\x10\n\x08\x66\x61\x62_hash\x18\x05 \x01(\t\x1aI\n\x13OverrideConfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.flwr.proto.Scalar:\x02\x38\x01\"F\n\tRunStatus\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\x12\n\nsub_status\x18\x02 \x01(\t\x12\x15\n\rstatus_detail\x18\x03 \x01(\t\"\xf8\x01\n\x10\x43reateRunRequest\x12\x0e\n\x06\x66\x61\x62_id\x18\x01 \x01(\t\x12\x13\n\x0b\x66\x61\x62_version\x18\x02 \x01(\t\x12I\n\x0foverride_config\x18\x03 \x03(\x0b\x32\x30.flwr.proto.CreateRunRequest.OverrideConfigEntry\x12\x1c\n\x03\x66\x61\x62\x18\x04 \x01(\x0b\x32\x0f.flwr.proto.Fab\x12\x0b\n\x03ttl\x18\x05 \x01(\x01\x1aI\n\x13OverrideConfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.flwr.proto.Scalar:\x02\x38\x01\"4\n\x11\x43reateRunResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0e\n\x06run_id\x18\x02 \x01(\x12\"\x1f\n\rGetRunRequest\x12\x0e\n\x06run_id\x18\x01 \x01(\x12\".\n\x0eGetRunResponse\x12\x1c\n\x03run\x18\x01 \x01(\x0b\x32\x0f.flwr.proto.Run\"O\n\x16UpdateRunStatusRequest\x12\x0e\n\x06run_id\x18\x01 \x01(\x04\x12%\n\x06status\x18\x02 \x01(\x0b\x32\x15.flwr.proto.RunStatus\"\x19\n\x17UpdateRunStatusResponse\"&\n\x13GetRunStatusRequest\x12\x0f\n\x07run_ids\x18\x01 \x03(\x04\"\xb1\x01\n\x14GetRunStatusResponse\x12L\n\x0frun_status_dict\x18\x01 \x03(\x0b\x32\x33.flwr.proto.GetRunStatusResponse.RunStatusDictEntry\x1aK\n\x12RunStatusDictEntry\x12\x0b\n\x03key\x18\x01 \x01(\x04\x12$\n\x05value\x18\x02 \x01(\x0b\x32\x15.flwr.proto.RunStatus:\x02\x38\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14\x66lwr/proto/run.proto\x12\nflwr.proto\x1a\x14\x66lwr/proto/fab.proto\x1a\x1a\x66lwr/proto/transport.proto\"\xd5\x01\n\x03Run\x12\x0e\n\x06run_id\x18\x01 \x01(\x12\x12\x0e\n\x06\x66\x61\x62_id\x18\x02 \x01(\t\x12\x13\n\x0b\x66\x61\x62_version\x18\x03 \x01(\t\x12<\n\x0foverride_config\x18\x04 \x03(\x0b\x32#.flwr.proto.Run.OverrideConfigEntry\x12\x10\n\x08\x66\x61\x62_hash\x18\x05 \x01(\t\x1aI\n\x13OverrideConfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.flwr.proto.Scalar:\x02\x38\x01\":\n\tRunStatus\x12\r\n\x05phase\x18\x01 \x01(\t\x12\x0e\n\x06result\x18\x02 \x01(\t\x12\x0e\n\x06\x64\x65tail\x18\x03 \x01(\t\"\xf8\x01\n\x10\x43reateRunRequest\x12\x0e\n\x06\x66\x61\x62_id\x18\x01 \x01(\t\x12\x13\n\x0b\x66\x61\x62_version\x18\x02 \x01(\t\x12I\n\x0foverride_config\x18\x03 \x03(\x0b\x32\x30.flwr.proto.CreateRunRequest.OverrideConfigEntry\x12\x1c\n\x03\x66\x61\x62\x18\x04 \x01(\x0b\x32\x0f.flwr.proto.Fab\x12\x0b\n\x03ttl\x18\x05 \x01(\x01\x1aI\n\x13OverrideConfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.flwr.proto.Scalar:\x02\x38\x01\"4\n\x11\x43reateRunResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0e\n\x06run_id\x18\x02 \x01(\x12\"\x1f\n\rGetRunRequest\x12\x0e\n\x06run_id\x18\x01 \x01(\x12\".\n\x0eGetRunResponse\x12\x1c\n\x03run\x18\x01 \x01(\x0b\x32\x0f.flwr.proto.Run\"O\n\x16UpdateRunStatusRequest\x12\x0e\n\x06run_id\x18\x01 \x01(\x04\x12%\n\x06status\x18\x02 \x01(\x0b\x32\x15.flwr.proto.RunStatus\"\x19\n\x17UpdateRunStatusResponse\"&\n\x13GetRunStatusRequest\x12\x0f\n\x07run_ids\x18\x01 \x03(\x04\"\xb1\x01\n\x14GetRunStatusResponse\x12L\n\x0frun_status_dict\x18\x01 \x03(\x0b\x32\x33.flwr.proto.GetRunStatusResponse.RunStatusDictEntry\x1aK\n\x12RunStatusDictEntry\x12\x0b\n\x03key\x18\x01 \x01(\x04\x12$\n\x05value\x18\x02 \x01(\x0b\x32\x15.flwr.proto.RunStatus:\x02\x38\x01\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -34,25 +34,25 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _globals['_RUN_OVERRIDECONFIGENTRY']._serialized_start=227
   _globals['_RUN_OVERRIDECONFIGENTRY']._serialized_end=300
   _globals['_RUNSTATUS']._serialized_start=302
-  _globals['_RUNSTATUS']._serialized_end=372
-  _globals['_CREATERUNREQUEST']._serialized_start=375
-  _globals['_CREATERUNREQUEST']._serialized_end=623
+  _globals['_RUNSTATUS']._serialized_end=360
+  _globals['_CREATERUNREQUEST']._serialized_start=363
+  _globals['_CREATERUNREQUEST']._serialized_end=611
   _globals['_CREATERUNREQUEST_OVERRIDECONFIGENTRY']._serialized_start=227
   _globals['_CREATERUNREQUEST_OVERRIDECONFIGENTRY']._serialized_end=300
-  _globals['_CREATERUNRESPONSE']._serialized_start=625
-  _globals['_CREATERUNRESPONSE']._serialized_end=677
-  _globals['_GETRUNREQUEST']._serialized_start=679
-  _globals['_GETRUNREQUEST']._serialized_end=710
-  _globals['_GETRUNRESPONSE']._serialized_start=712
-  _globals['_GETRUNRESPONSE']._serialized_end=758
-  _globals['_UPDATERUNSTATUSREQUEST']._serialized_start=760
-  _globals['_UPDATERUNSTATUSREQUEST']._serialized_end=839
-  _globals['_UPDATERUNSTATUSRESPONSE']._serialized_start=841
-  _globals['_UPDATERUNSTATUSRESPONSE']._serialized_end=866
-  _globals['_GETRUNSTATUSREQUEST']._serialized_start=868
-  _globals['_GETRUNSTATUSREQUEST']._serialized_end=906
-  _globals['_GETRUNSTATUSRESPONSE']._serialized_start=909
-  _globals['_GETRUNSTATUSRESPONSE']._serialized_end=1086
-  _globals['_GETRUNSTATUSRESPONSE_RUNSTATUSDICTENTRY']._serialized_start=1011
-  _globals['_GETRUNSTATUSRESPONSE_RUNSTATUSDICTENTRY']._serialized_end=1086
+  _globals['_CREATERUNRESPONSE']._serialized_start=613
+  _globals['_CREATERUNRESPONSE']._serialized_end=665
+  _globals['_GETRUNREQUEST']._serialized_start=667
+  _globals['_GETRUNREQUEST']._serialized_end=698
+  _globals['_GETRUNRESPONSE']._serialized_start=700
+  _globals['_GETRUNRESPONSE']._serialized_end=746
+  _globals['_UPDATERUNSTATUSREQUEST']._serialized_start=748
+  _globals['_UPDATERUNSTATUSREQUEST']._serialized_end=827
+  _globals['_UPDATERUNSTATUSRESPONSE']._serialized_start=829
+  _globals['_UPDATERUNSTATUSRESPONSE']._serialized_end=854
+  _globals['_GETRUNSTATUSREQUEST']._serialized_start=856
+  _globals['_GETRUNSTATUSREQUEST']._serialized_end=894
+  _globals['_GETRUNSTATUSRESPONSE']._serialized_start=897
+  _globals['_GETRUNSTATUSRESPONSE']._serialized_end=1074
+  _globals['_GETRUNSTATUSRESPONSE_RUNSTATUSDICTENTRY']._serialized_start=999
+  _globals['_GETRUNSTATUSRESPONSE_RUNSTATUSDICTENTRY']._serialized_end=1074
 # @@protoc_insertion_point(module_scope)

@@ -54,25 +54,25 @@ global___Run = Run
 
 class RunStatus(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    STATUS_FIELD_NUMBER: builtins.int
-    SUB_STATUS_FIELD_NUMBER: builtins.int
-    STATUS_DETAIL_FIELD_NUMBER: builtins.int
-    status: typing.Text
-    """starting, running, finished"""
+    PHASE_FIELD_NUMBER: builtins.int
+    RESULT_FIELD_NUMBER: builtins.int
+    DETAIL_FIELD_NUMBER: builtins.int
+    phase: typing.Text
+    """"starting", "running", "finished" """
 
-    sub_status: typing.Text
-    """completed, failed, stopped"""
+    result: typing.Text
+    """"completed", "failed", "stopped" or "" """
 
-    status_detail: typing.Text
-    """reason for the failure"""
+    detail: typing.Text
+    """failure details"""
 
     def __init__(self,
         *,
-        status: typing.Text = ...,
-        sub_status: typing.Text = ...,
-        status_detail: typing.Text = ...,
+        phase: typing.Text = ...,
+        result: typing.Text = ...,
+        detail: typing.Text = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["status",b"status","status_detail",b"status_detail","sub_status",b"sub_status"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["detail",b"detail","phase",b"phase","result",b"result"]) -> None: ...
 global___RunStatus = RunStatus
 
 class CreateRunRequest(google.protobuf.message.Message):

@@ -29,9 +29,9 @@ message Run {
 }
 
 message RunStatus {
-  string status = 1;        // starting, running, finished
-  string sub_status = 2;    // completed, failed, stopped
-  string status_detail = 3; // reason for the failure
+  string phase = 1;  // "starting", "running", "finished"
+  string result = 2; // "completed", "failed", "stopped" or ""
+  string detail = 3; // failure details
 }
 
 // CreateRun
