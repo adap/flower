@@ -1,4 +1,4 @@
-![FlowerTune LLM Leaderboard](_static/flower_llm.png)(https://flower.ai/benchmarks/llm-leaderboard)
+[![FlowerTune LLM Leaderboard](_static/flower_llm.png)](https://flower.ai/benchmarks/llm-leaderboard)
 
 # FlowerTune LLM Leaderboard
 
