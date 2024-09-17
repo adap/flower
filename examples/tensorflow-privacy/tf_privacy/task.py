@@ -29,6 +29,21 @@ class Net(tf.keras.Model):
         return self.fc2(x)
 
 
+def load_model(learning_rate: float):
+    model = tf.keras.Sequential(
+        [
+            tf.keras.layers.InputLayer(input_shape=(28, 28, 1)),
+            tf.keras.layers.Conv2D(32, kernel_size=(3, 3), activation="relu"),
+            tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+            tf.keras.layers.Conv2D(64, kernel_size=(3, 3), activation="relu"),
+            tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+            tf.keras.layers.Flatten(),
+            tf.keras.layers.Dense(128, activation="relu"),
+            tf.keras.layers.Dense(10, activation="softmax"),
+        ]
+    )
+
+
 def load_data(partition_id: int, num_partitions: int, batch_size):
 
     global fds
