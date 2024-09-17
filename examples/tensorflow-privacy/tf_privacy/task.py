@@ -43,6 +43,8 @@ def load_model(learning_rate: float):
         ]
     )
 
+    return model
+
 
 def load_data(partition_id: int, num_partitions: int, batch_size):
 
