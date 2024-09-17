@@ -49,6 +49,14 @@ def convert_uint64_to_sint64(u: int) -> int:
     -------
     int
         The signed 64-bit integer equivalent.
+
+        The signed 64-bit integer will have the same bit pattern as the
+        unsigned 64-bit integer but may have a different decimal value.
+
+        For numbers within the range [0, `sint64` max value], the decimal
+        value remains the same. However, for numbers greater than the `sint64`
+        max value, the decimal value will differ due to the wraparound caused
+        by the sign bit.
     """
     if u >= (1 << 63):
         return u - (1 << 64)
@@ -67,6 +75,14 @@ def convert_sint64_to_uint64(s: int) -> int:
     -------
     int
         The unsigned 64-bit integer equivalent.
+
+        The unsigned 64-bit integer will have the same bit pattern as the
+        signed 64-bit integer but may have a different decimal value.
+
+        For negative `sint64` values, the conversion adds 2^64 to the
+        signed value to obtain the equivalent `uint64` value. For non-negative
+        `sint64` values, the decimal value remains unchanged in the `uint64`
+        representation.
     """
     if s < 0:
         return s + (1 << 64)
