@@ -79,9 +79,6 @@ You can also override some of the settings for your `ClientApp` and `ServerApp` 
 flwr run . --run-config "num-server-rounds=5 learning-rate=0.05"
 ```
 
-> \[!TIP\]
-> For a more detailed walk-through check our [vertical FL tutorial](https://flower.ai/docs/framework/tutorial-vertical-fl.html)
-
 ### Run with the Deployment Engine
 
 > \[!NOTE\]
