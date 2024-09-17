@@ -38,7 +38,7 @@ from flwr.common.logger import (
     warn_deprecated_feature,
     warn_deprecated_feature_with_example,
 )
-from flwr.common.typing import Run, UserConfig
+from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.server.driver import Driver, InMemoryDriver
 from flwr.server.run_serverapp import run as run_server_app
 from flwr.server.server_app import ServerApp
@@ -399,7 +399,8 @@ def _main_loop(
     try:
         # Register run
         log(DEBUG, "Pre-registering run with id %s", run.run_id)
-        state_factory.state().run_ids[run.run_id] = run  # type: ignore
+        init_status = RunStatus("running", "", "")
+        state_factory.state().run_ids[run.run_id] = (run, init_status)  # type: ignore
 
         if server_app_run_config is None:
             server_app_run_config = {}
