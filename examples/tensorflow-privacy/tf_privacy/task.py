@@ -8,7 +8,7 @@ from flwr_datasets.partitioner import IidPartitioner
 fds = None  # Cache FederatedDataset
 
 
-def load_model(learning_rate: float):
+def load_model():
     model = tf.keras.Sequential(
         [
             tf.keras.layers.InputLayer(input_shape=(28, 28, 1)),

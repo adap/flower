@@ -27,7 +27,7 @@ class FlowerClient(NumPyClient):
         run_config,
     ) -> None:
         super().__init__()
-        self.model = load_model(run_config["learning-rate"])
+        self.model = load_model()
         self.x_train, self.y_train = train_data
         self.x_train = np.expand_dims(self.x_train, axis=-1)
         self.x_test, self.y_test = test_data

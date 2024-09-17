@@ -17,9 +17,7 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 
 
 def server_fn(context: Context) -> ServerAppComponents:
-    parameters = ndarrays_to_parameters(
-        load_model(context.run_config["learning-rate"]).get_weights()
-    )
+    parameters = ndarrays_to_parameters(load_model().get_weights())
     strategy = FedAvg(
         evaluate_metrics_aggregation_fn=weighted_average,
         initial_parameters=parameters,
