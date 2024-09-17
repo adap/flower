@@ -716,9 +716,8 @@ class SqliteState(State):  # pylint: disable=R0904
                 fab_hash=row["fab_hash"],
                 override_config=json.loads(row["override_config"]),
             )
-        else:
-            log(ERROR, "`run_id` does not exist.")
-            return None
+        log(ERROR, "`run_id` does not exist.")
+        return None
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""
