@@ -5,7 +5,8 @@ from typing import List, Tuple
 from flwr.common import Metrics
 from flwr.server import ServerApp, ServerConfig, ServerAppComponents
 from flwr.server.strategy import FedAvg
-from flwr.common import Context
+from flwr.common import Context, ndarrays_to_parameters
+from .task import load_model
 
 
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
@@ -16,8 +17,12 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 
 
 def server_fn(context: Context) -> ServerAppComponents:
+    parameters = ndarrays_to_parameters(
+        load_model(context.run_config["learning-rate"]).get_weights()
+    )
     strategy = FedAvg(
         evaluate_metrics_aggregation_fn=weighted_average,
+        initial_parameters=parameters,
     )
     num_rounds = context.run_config["num-server-rounds"]
     config = ServerConfig(num_rounds=num_rounds)

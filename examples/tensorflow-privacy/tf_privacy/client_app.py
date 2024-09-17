@@ -39,9 +39,6 @@ class FlowerClient(NumPyClient):
                 f"Batch size {self.run_config['batch-size']} is not divisible by the number of microbatches {self.run_config['num-microbatches']}"
             )
 
-    def fit(self, parameters, config):
-        self.model.set_weights(parameters)
-
         self.optimizer = tensorflow_privacy.DPKerasSGDOptimizer(
             l2_norm_clip=self.run_config["l2-norm-clip"],
             noise_multiplier=self.noise_multiplier,
@@ -53,6 +50,8 @@ class FlowerClient(NumPyClient):
         )
         self.model.compile(optimizer=self.optimizer, loss=loss, metrics=["accuracy"])
 
+    def fit(self, parameters, config):
+        self.model.set_weights(parameters)
         self.model.fit(
             self.x_train,
             self.y_train,
@@ -60,23 +59,19 @@ class FlowerClient(NumPyClient):
             batch_size=self.run_config["batch-size"],
         )
 
-        compute_dp_sgd_privacy_statement(
+        dp_statement = compute_dp_sgd_privacy_statement(
             number_of_examples=self.x_train.shape[0],
             batch_size=self.run_config["batch-size"],
             num_epochs=1,
             noise_multiplier=self.noise_multiplier,
             delta=1e-5,
         )
+        print(dp_statement)
 
         return self.model.get_weights(), len(self.x_train), {}
 
     def evaluate(self, parameters, config):
         self.model.set_weights(parameters)
-        self.model.compile(
-            optimizer=self.optimizer,
-            loss="sparse_categorical_crossentropy",
-            metrics=["accuracy"],
-        )
         loss, accuracy = self.model.evaluate(self.x_test, self.y_test)
         return loss, len(self.x_test), {"accuracy": accuracy}
 
