@@ -1,7 +1,7 @@
 services:
   # create a SuperLink service
   superlink:
-    image: flwr/superlink:${FLWR_VERSION:-1.11.0}
+    image: flwr/superlink:${FLWR_VERSION:-1.11.1}
     command:
       - --insecure
 
@@ -10,7 +10,7 @@ services:
     build:
       context: ${PROJECT_DIR:-.}
       dockerfile_inline: |
-        FROM flwr/superexec:${FLWR_VERSION:-1.11.0}
+        FROM flwr/superexec:${FLWR_VERSION:-1.11.1}
 
         WORKDIR /app
         COPY --chown=app:app pyproject.toml .
@@ -31,7 +31,7 @@ services:
 
   # create a two SuperNode service with different node configs
   supernode-1:
-    image: flwr/supernode:${FLWR_VERSION:-1.11.0}
+    image: flwr/supernode:${FLWR_VERSION:-1.11.1}
     command:
       - --insecure
       - --superlink
@@ -46,7 +46,7 @@ services:
       - superlink
 
   supernode-2:
-    image: flwr/supernode:${FLWR_VERSION:-1.11.0}
+    image: flwr/supernode:${FLWR_VERSION:-1.11.1}
     command:
       - --insecure
       - --superlink
@@ -63,7 +63,7 @@ services:
   # uncomment to add another SuperNode
   #
   # supernode-3:
-  #   image: flwr/supernode:${FLWR_VERSION:-1.11.0}
+  #   image: flwr/supernode:${FLWR_VERSION:-1.11.1}
   #   command:
   #     - --insecure
   #     - --superlink
@@ -81,7 +81,7 @@ services:
     build:
       context: ${PROJECT_DIR:-.}
       dockerfile_inline: |
-        FROM flwr/clientapp:${FLWR_VERSION:-1.11.0}
+        FROM flwr/clientapp:${FLWR_VERSION:-1.11.1}
 
         WORKDIR /app
         COPY --chown=app:app pyproject.toml .
@@ -104,7 +104,7 @@ services:
     build:
       context: ${PROJECT_DIR:-.}
       dockerfile_inline: |
-        FROM flwr/clientapp:${FLWR_VERSION:-1.11.0}
+        FROM flwr/clientapp:${FLWR_VERSION:-1.11.1}
 
         WORKDIR /app
         COPY --chown=app:app pyproject.toml .
@@ -129,7 +129,7 @@ services:
   #   build:
   #     context: ${PROJECT_DIR:-.}
   #     dockerfile_inline: |
-  #       FROM flwr/clientapp:${FLWR_VERSION:-1.11.0}
+  #       FROM flwr/clientapp:${FLWR_VERSION:-1.11.1}
 
   #       WORKDIR /app
   #       COPY --chown=app:app pyproject.toml .

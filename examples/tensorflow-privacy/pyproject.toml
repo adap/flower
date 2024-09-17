@@ -4,14 +4,11 @@ build-backend = "hatchling.build"
 
 [project]
 name = "tensorflow-privacy-fl"
-version = "0.1.0"
+version = "1.0.0"
 description = "Sample-level Differential Privacy with Tensorflow-Privacy in Flower"
-authors = [
-    { name = "The Flower Authors", email = "hello@flower.ai" },
-]
 dependencies = [
-    "flwr>=1.8.0,<2.0",
-    "flwr-datasets[vision]>=0.1.0,<1.0.0",
+    "flwr[simulation]>=1.11.0",
+    "flwr-datasets[vision]>=0.3.0",
     "tensorflow-estimator~=2.4",
     "tensorflow-probability~=0.22.0",
     "tensorflow>=2.4.0,<=2.15.0",
@@ -20,3 +17,23 @@ dependencies = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
+
+[tool.flwr.app]
+publisher = "flwrlabs"
+
+[tool.flwr.app.components]
+serverapp = "tf_privacy.server_app:app"
+clientapp = "tf_privacy.client_app:app"
+
+[tool.flwr.app.config]
+num-server-rounds = 3
+l2-norm-clip = 1.0
+num-microbatches = 64
+learning-rate = 0.01
+batch-size = 64
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 2
