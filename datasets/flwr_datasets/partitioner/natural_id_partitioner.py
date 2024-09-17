@@ -15,8 +15,6 @@
 """Natural id partitioner class that works with Hugging Face Datasets."""
 
 
-from typing import Dict
-
 import numpy as np
 from tqdm import tqdm
 
@@ -62,9 +60,9 @@ class NaturalIdPartitioner(Partitioner):
         partition_by: str,
     ):
         super().__init__()
-        self._partition_id_to_natural_id: Dict[int, str] = {}
-        self._natural_id_to_partition_id: Dict[str, int] = {}
-        self._partition_id_to_indices: Dict[int, NDArrayInt] = {}
+        self._partition_id_to_natural_id: dict[int, str] = {}
+        self._natural_id_to_partition_id: dict[str, int] = {}
+        self._partition_id_to_indices: dict[int, NDArrayInt] = {}
         self._partition_by = partition_by
 
     def _create_int_partition_id_to_natural_id(self) -> None:
@@ -138,7 +136,7 @@ class NaturalIdPartitioner(Partitioner):
         return len(self._partition_id_to_natural_id)
 
     @property
-    def partition_id_to_natural_id(self) -> Dict[int, str]:
+    def partition_id_to_natural_id(self) -> dict[int, str]:
         """Node id to corresponding natural id present.
 
         Natural ids are the unique values in `partition_by` column in dataset.
@@ -146,7 +144,7 @@ class NaturalIdPartitioner(Partitioner):
         return self._partition_id_to_natural_id
 
     @partition_id_to_natural_id.setter
-    def partition_id_to_natural_id(self, value: Dict[int, str]) -> None:
+    def partition_id_to_natural_id(self, value: dict[int, str]) -> None:
         raise AttributeError(
             "Setting the partition_id_to_natural_id dictionary is not allowed."
         )
