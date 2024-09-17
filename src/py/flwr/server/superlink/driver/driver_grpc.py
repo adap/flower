@@ -15,7 +15,7 @@
 """Driver gRPC API."""
 
 from logging import INFO
-from typing import Optional, Tuple
+from typing import Optional
 
 import grpc
 
@@ -35,7 +35,7 @@ def run_driver_api_grpc(
     address: str,
     state_factory: StateFactory,
     ffs_factory: FfsFactory,
-    certificates: Optional[Tuple[bytes, bytes, bytes]],
+    certificates: Optional[tuple[bytes, bytes, bytes]],
 ) -> grpc.Server:
     """Run Driver API (gRPC, request-response)."""
     # Create Driver API gRPC server

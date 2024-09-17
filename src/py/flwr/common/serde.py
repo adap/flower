@@ -15,7 +15,9 @@
 """ProtoBuf serialization and deserialization."""
 
 
-from typing import Any, Dict, List, MutableMapping, OrderedDict, Type, TypeVar, cast
+from collections import OrderedDict
+from collections.abc import MutableMapping
+from typing import Any, TypeVar, cast
 
 from google.protobuf.message import Message as GrpcMessage
 
@@ -72,7 +74,7 @@ def parameters_to_proto(parameters: typing.Parameters) -> Parameters:
 
 def parameters_from_proto(msg: Parameters) -> typing.Parameters:
     """Deserialize `Parameters` from ProtoBuf."""
-    tensors: List[bytes] = list(msg.tensors)
+    tensors: list[bytes] = list(msg.tensors)
     return typing.Parameters(tensors=tensors, tensor_type=msg.tensor_type)
 
 
@@ -390,7 +392,7 @@ T = TypeVar("T")
 
 
 def _record_value_to_proto(
-    value: Any, allowed_types: List[type], proto_class: Type[T]
+    value: Any, allowed_types: list[type], proto_class: type[T]
 ) -> T:
     """Serialize `*RecordValue` to ProtoBuf.
 
@@ -427,9 +429,9 @@ def _record_value_from_proto(value_proto: GrpcMessage) -> Any:
 
 def _record_value_dict_to_proto(
     value_dict: TypedDict[str, Any],
-    allowed_types: List[type],
-    value_proto_class: Type[T],
-) -> Dict[str, T]:
+    allowed_types: list[type],
+    value_proto_class: type[T],
+) -> dict[str, T]:
     """Serialize the record value dict to ProtoBuf.
 
     Note: `bool` MUST be put in the front of allowd_types if it exists.
@@ -447,7 +449,7 @@ def _record_value_dict_to_proto(
 
 def _record_value_dict_from_proto(
     value_dict_proto: MutableMapping[str, Any]
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Deserialize the record value dict from ProtoBuf."""
     return {k: _record_value_from_proto(v) for k, v in value_dict_proto.items()}
 
@@ -498,7 +500,7 @@ def metrics_record_from_proto(record_proto: ProtoMetricsRecord) -> MetricsRecord
     """Deserialize MetricsRecord from ProtoBuf."""
     return MetricsRecord(
         metrics_dict=cast(
-            Dict[str, typing.MetricsRecordValues],
+            dict[str, typing.MetricsRecordValues],
             _record_value_dict_from_proto(record_proto.data),
         ),
         keep_input=False,
@@ -520,7 +522,7 @@ def configs_record_from_proto(record_proto: ProtoConfigsRecord) -> ConfigsRecord
     """Deserialize ConfigsRecord from ProtoBuf."""
     return ConfigsRecord(
         configs_dict=cast(
-            Dict[str, typing.ConfigsRecordValues],
+            dict[str, typing.ConfigsRecordValues],
             _record_value_dict_from_proto(record_proto.data),
         ),
         keep_input=False,
