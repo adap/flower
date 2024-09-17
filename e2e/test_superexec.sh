@@ -3,51 +3,51 @@ set -e
 
 # Set connectivity parameters
 case "$1" in
-	secure)
-    ./generate.sh
-	  server_arg='--ssl-ca-certfile ../certificates/ca.crt
-                --ssl-certfile    ../certificates/server.pem
-                --ssl-keyfile     ../certificates/server.key'
-	  client_arg='--root-certificates ../certificates/ca.crt'
-    # For $superexec_arg, note special ordering of single- and double-quotes
-    superexec_arg='--executor-config 'root-certificates=\"../certificates/ca.crt\"''
-    superexec_arg="$server_arg $superexec_arg"
-	  ;;
-	insecure)
-    server_arg="--insecure"
-    client_arg=$server_arg
-	  superexec_arg=$server_arg
+    secure)
+      ./generate.sh
+      server_arg='--ssl-ca-certfile ../certificates/ca.crt
+                  --ssl-certfile    ../certificates/server.pem
+                  --ssl-keyfile     ../certificates/server.key'
+      client_arg='--root-certificates ../certificates/ca.crt'
+      # For $superexec_arg, note special ordering of single- and double-quotes
+      superexec_arg='--executor-config 'root-certificates=\"../certificates/ca.crt\"''
+      superexec_arg="$server_arg $superexec_arg"
+      ;;
+    insecure)
+      server_arg='--insecure'
+      client_arg=$server_arg
+      superexec_arg=$server_arg
     ;;
 esac
 
 # Set authentication parameters
 case "$2" in
-	client-auth)
-    server_auth="--auth-list-public-keys      ../keys/client_public_keys.csv 
-				         --auth-superlink-private-key ../keys/server_credentials 
-				         --auth-superlink-public-key  ../keys/server_credentials.pub"
-    clnt_auth_1="--auth-supernode-private-key ../keys/client_credentials_1 
-				         --auth-supernode-public-key  ../keys/client_credentials_1.pub"
-    clnt_auth_2="--auth-supernode-private-key ../keys/client_credentials_2 
-				         --auth-supernode-public-key  ../keys/client_credentials_2.pub"
-    server_address="127.0.0.1:9092"
-	  ;;
-	*)
-    server_auth=""
-    clnt_auth_1=""
-    clnt_auth_2=""
-    server_address="127.0.0.1:9092"
+    client-auth)
+      server_auth='--auth-list-public-keys      ../keys/client_public_keys.csv 
+                   --auth-superlink-private-key ../keys/server_credentials 
+                   --auth-superlink-public-key  ../keys/server_credentials.pub'
+      clnt_auth_1='--auth-supernode-private-key ../keys/client_credentials_1 
+                   --auth-supernode-public-key  ../keys/client_credentials_1.pub'
+      clnt_auth_2='--auth-supernode-private-key ../keys/client_credentials_2 
+                   --auth-supernode-public-key  ../keys/client_credentials_2.pub'
+      server_address='127.0.0.1:9092'
+      ;;
+    *)
+    server_auth=''
+    clnt_auth_1=''
+    clnt_auth_2=''
+    server_address='127.0.0.1:9092'
     ;;
 esac
 
 # Set engine
 case "$3" in
-	deployment-engine)
-      superexec_engine_arg="--executor flwr.superexec.deployment:executor"
+    deployment-engine)
+      superexec_engine_arg='--executor flwr.superexec.deployment:executor'
       ;;
-	simulation-engine)
-      superexec_engine_arg="--executor flwr.superexec.simulation:executor
-                            --executor-config 'num-supernodes=10'"
+    simulation-engine)
+      superexec_engine_arg='--executor flwr.superexec.simulation:executor
+                            --executor-config 'num-supernodes=10''
       ;;
 esac
 
