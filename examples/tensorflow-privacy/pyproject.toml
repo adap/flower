@@ -27,7 +27,7 @@ clientapp = "tf_privacy.client_app:app"
 
 [tool.flwr.app.config]
 num-server-rounds = 3
-l2-norm_clip = 1.0
+l2-norm-clip = 1.0
 num-microbatches = 64
 learning-rate = 0.01
 batch-size = 64
