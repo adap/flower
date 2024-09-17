@@ -293,13 +293,19 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
 
             if run_id not in self.run_ids:
-                self.run_ids[run_id] = Run(
+                run = Run(
                     run_id=run_id,
                     fab_id=fab_id if fab_id else "",
                     fab_version=fab_version if fab_version else "",
                     fab_hash=fab_hash if fab_hash else "",
                     override_config=override_config,
                 )
+                initial_status = RunStatus(
+                    phase="starting",
+                    result="",
+                    reason="",
+                )
+                self.run_ids[run_id] = (run, initial_status)
                 return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
@@ -343,7 +349,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             if run_id not in self.run_ids:
                 log(ERROR, "`run_id` is invalid")
                 return None
-            return self.run_ids[run_id]
+            return self.run_ids[run_id][0]
 
     def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
         """Get the status of the run with the specified `run_id`."""
@@ -375,11 +381,11 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
 
             # Check if the result is valid
             if not has_valid_result(status):
-                log(ERROR, 'Invalid run status: "%s:"', status.phase, status.result)
+                log(ERROR, 'Invalid run status: "%s:%s"', status.phase, status.result)
                 return False
 
             # Update the status
-            self.run_ids[run_id][1] = new_status
+            self.run_ids[run_id] = (self.run_ids[run_id][0], new_status)
             return True
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:

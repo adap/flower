@@ -26,14 +26,19 @@ from uuid import UUID, uuid4
 
 from flwr.common import log, now
 from flwr.common.constant import NODE_ID_NUM_BYTES, RUN_ID_NUM_BYTES
-from flwr.common.typing import Run, UserConfig
+from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.utils.validator import validate_task_ins_or_res
 
 from .state import State
-from .utils import generate_rand_int_from_bytes, make_node_unavailable_taskres
+from .utils import (
+    generate_rand_int_from_bytes,
+    has_valid_result,
+    is_valid_transition,
+    make_node_unavailable_taskres,
+)
 
 SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
@@ -67,7 +72,10 @@ CREATE TABLE IF NOT EXISTS run(
     fab_id                TEXT,
     fab_version           TEXT,
     fab_hash              TEXT,
-    override_config       TEXT
+    override_config       TEXT,
+    status_phase          TEXT,
+    status_result         TEXT,
+    status_reason         TEXT
 );
 """
 
@@ -634,18 +642,15 @@ class SqliteState(State):  # pylint: disable=R0904
         if self.query(query, (run_id,))[0]["COUNT(*)"] == 0:
             query = (
                 "INSERT INTO run "
-                "(run_id, fab_id, fab_version, fab_hash, override_config)"
-                "VALUES (?, ?, ?, ?, ?);"
+                "(run_id, fab_id, fab_version, fab_hash, override_config, "
+                "status_phase, status_result, status_reason)"
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?);"
             )
             if fab_hash:
-                self.query(
-                    query, (run_id, "", "", fab_hash, json.dumps(override_config))
-                )
-            else:
-                self.query(
-                    query,
-                    (run_id, fab_id, fab_version, "", json.dumps(override_config)),
-                )
+                fab_id, fab_version = "", ""
+            data = [run_id, fab_id, fab_version, fab_hash, json.dumps(override_config)]
+            data += ["starting", "", ""]
+            self.query(query, tuple(data))
             return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
@@ -718,6 +723,58 @@ class SqliteState(State):  # pylint: disable=R0904
         except sqlite3.IntegrityError:
             log(ERROR, "`run_id` does not exist.")
             return None
+
+    def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
+        """Get the status of the run with the specified `run_id`."""
+        query = f"SELECT * FROM run WHERE run_id IN ({','.join(['?'] * len(run_ids))});"
+        rows = self.query(query, tuple(run_ids))
+
+        return {
+            row["run_id"]: RunStatus(
+                phase=row["status_phase"],
+                result=row["status_result"],
+                reason=row["status_reason"],
+            )
+            for row in rows
+        }
+
+    def update_run_status(self, run_id: int, new_status: RunStatus) -> bool:
+        """Update the status of the run with the specified `run_id`."""
+        query = "SELECT * FROM run WHERE run_id = ?;"
+        rows = self.query(query, (run_id,))
+
+        # Check if the run_id exists
+        if not rows:
+            log(ERROR, "`run_id` is invalid")
+            return False
+
+        # Check if the status transition is valid
+        row = rows[0]
+        status = RunStatus(
+            phase=row["status_phase"],
+            result=row["status_result"],
+            reason=row["status_reason"],
+        )
+        if not is_valid_transition(status, new_status):
+            log(
+                ERROR,
+                'Invalid status transition: from "%s" to "%s"',
+                status.phase,
+                new_status.phase,
+            )
+            return False
+
+        # Check if the result is valid
+        if not has_valid_result(status):
+            log(ERROR, 'Invalid run status: "%s:%s"', status.phase, status.result)
+            return False
+
+        # Update the status
+        query = "UPDATE run SET status_phase = ?, status_result = ?, status_reason = ? "
+        query += "WHERE run_id = ?;"
+        data = (new_status.phase, new_status.result, new_status.reason, run_id)
+        self.query(query, data)
+        return True
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""
