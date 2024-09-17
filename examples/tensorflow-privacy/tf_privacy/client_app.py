@@ -43,7 +43,7 @@ class FlowerClient(NumPyClient):
 
         self.optimizer = tensorflow_privacy.DPKerasSGDOptimizer(
             l2_norm_clip=run_config["l2-norm-clip"],
-            noise_multiplier=run_config["noise-multiplier"],
+            noise_multiplier=self.noise_multiplier,
             num_microbatches=run_config["num-microbatches"],
             learning_rate=run_config["learning-rate"],
         )
