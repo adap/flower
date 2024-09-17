@@ -36,16 +36,17 @@ class FlowerClient(NumPyClient):
         self.x_test, self.y_test = test_data
         self.x_test = np.expand_dims(self.x_test, axis=-1)
         self.noise_multiplier = noise_multiplier
-        if run_config["batch-size"] % run_config["num-microbatches"] != 0:
+        self.run_config = run_config
+        if self.run_config["batch-size"] % self.run_config["num-microbatches"] != 0:
             raise ValueError(
-                f"Batch size {run_config['batch-size']} is not divisible by the number of microbatches {run_config['num-microbatches']}"
+                f"Batch size {self.run_config['batch-size']} is not divisible by the number of microbatches {self.run_config['num-microbatches']}"
             )
 
         self.optimizer = tensorflow_privacy.DPKerasSGDOptimizer(
-            l2_norm_clip=run_config["l2-norm-clip"],
+            l2_norm_clip=self.run_config["l2-norm-clip"],
             noise_multiplier=self.noise_multiplier,
-            num_microbatches=run_config["num-microbatches"],
-            learning_rate=run_config["learning-rate"],
+            num_microbatches=self.run_config["num-microbatches"],
+            learning_rate=self.run_config["learning-rate"],
         )
         loss = tf.keras.losses.SparseCategoricalCrossentropy(
             reduction=tf.losses.Reduction.NONE
@@ -62,12 +63,12 @@ class FlowerClient(NumPyClient):
             self.x_train,
             self.y_train,
             epochs=1,
-            batch_size=self.batch_size,
+            batch_size=self.run_config["batch-size"],
         )
 
         compute_dp_sgd_privacy_statement(
             number_of_examples=self.x_train.shape[0],
-            batch_size=self.batch_size,
+            batch_size=self.run_config["batch-size"],
             num_epochs=1,
             noise_multiplier=self.noise_multiplier,
             delta=1e-5,
