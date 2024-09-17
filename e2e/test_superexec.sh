@@ -26,16 +26,16 @@ case "$2" in
       server_auth='--auth-list-public-keys      ../keys/client_public_keys.csv 
                    --auth-superlink-private-key ../keys/server_credentials 
                    --auth-superlink-public-key  ../keys/server_credentials.pub'
-      clnt_auth_1='--auth-supernode-private-key ../keys/client_credentials_1 
-                   --auth-supernode-public-key  ../keys/client_credentials_1.pub'
-      clnt_auth_2='--auth-supernode-private-key ../keys/client_credentials_2 
-                   --auth-supernode-public-key  ../keys/client_credentials_2.pub'
+      client_auth_1='--auth-supernode-private-key ../keys/client_credentials_1 
+                     --auth-supernode-public-key  ../keys/client_credentials_1.pub'
+      client_auth_2='--auth-supernode-private-key ../keys/client_credentials_2 
+                     --auth-supernode-public-key  ../keys/client_credentials_2.pub'
       server_address='127.0.0.1:9092'
       ;;
     *)
     server_auth=''
-    clnt_auth_1=''
-    clnt_auth_2=''
+    client_auth_1=''
+    client_auth_2=''
     server_address='127.0.0.1:9092'
     ;;
 esac
@@ -71,18 +71,18 @@ sl_pid=$!
 sleep 2
 
 timeout 2m flower-supernode ./ $client_arg \
-    --superlink $server_address $clnt_auth_1 \
+    --superlink $server_address $client_auth_1 \
     --node-config "partition-id=0 num-partitions=2" &
 cl1_pid=$!
 sleep 2
 
 timeout 2m flower-supernode ./ $client_arg \
-    --superlink $server_address $clnt_auth_2 \
+    --superlink $server_address $client_auth_2 \
     --node-config "partition-id=1 num-partitions=2" &
 cl2_pid=$!
 sleep 2
 
-timeout 1m flower-superexec $superexec_arg $superexec_engine_arg 2>&1 | tee flwr_output.log &
+timeout 2m flower-superexec $superexec_arg $superexec_engine_arg 2>&1 | tee flwr_output.log &
 se_pid=$(pgrep -f "flower-superexec")
 sleep 2
 
