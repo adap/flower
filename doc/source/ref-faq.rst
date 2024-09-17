@@ -24,6 +24,7 @@ This page collects answers to commonly asked questions about Federated Learning 
 .. dropdown:: :fa:`eye,mr-1` Can I combine federated learning with blockchain?
 
     Yes, of course. A list of available examples using Flower within a blockchain environment is available here:
+
     * `FLock: A Decentralised AI Training Platform <https://www.flock.io/#/>`_.
         * Contribute to on-chain training the model and earn rewards.
         * Local blockchain with federated learning simulation.
