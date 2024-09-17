@@ -40,15 +40,15 @@ Step 1: Set Up
 
 #. Get the IP address from the remote machine and save it for later.
 
-#. Use the ``certs.yml` Compose file to generate your own self-signed certificates.
+#. Use the ``certs.yml`` Compose file to generate your own self-signed certificates.
    If you have certificates, you can continue with Step 2.
 
    .. important::
 
       These certificates should be used only for development purposes.
 
-      For production environments, use a service like `Let's Encrypt <https://letsencrypt.org/>`_
-      to obtain your certificates.
+      For production environments, you may have to use dedicated services to
+      obtain your certificates.
 
    First, set the environment variables ``SUPERLINK_IP`` and ``SUPEREXEC_IP`` with the IP address
    from the remote machine. For example, if the IP is ``192.168.2.33``, execute:
@@ -89,7 +89,8 @@ SuperLink and SuperExec services:
 
 .. code-block:: bash
 
-   $ ssh remote
+   $ ssh <your-remote-machine>
+   # In your remote machine
    $ export PROJECT_DIR=../quickstart-sklearn-tabular
    $ docker compose -f server/compose.yml up --build -d
 
@@ -107,6 +108,7 @@ On your local machine, run the following command to start the client components:
 
 .. code-block:: bash
 
+   # In the `docker/distributed` directory
    $ export PROJECT_DIR=../../../../examples/quickstart-sklearn-tabular
    $ docker compose -f client/compose.yml up --build -d
 
@@ -157,3 +159,9 @@ Shut down the Flower server components and delete the SuperLink state:
 
    $ ssh remote
    $ docker compose -f server/compose.yml down -v
+
+.. |quickstart_skearn_tabular| replace::
+
+   ``examples/quickstart-sklearn-tabular``
+
+.. _quickstart_skearn_tabular: https://github.com/adap/flower/tree/main/examples/quickstart-sklearn-tabular
