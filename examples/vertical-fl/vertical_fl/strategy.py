@@ -17,37 +17,8 @@ class ServerModel(nn.Module):
 
 
 class Strategy(fl.server.strategy.FedAvg):
-    def __init__(
-        self,
-        labels,
-        *,
-        fraction_fit=1,
-        fraction_evaluate=1,
-        min_fit_clients=2,
-        min_evaluate_clients=2,
-        min_available_clients=2,
-        evaluate_fn=None,
-        on_fit_config_fn=None,
-        on_evaluate_config_fn=None,
-        accept_failures=True,
-        initial_parameters=None,
-        fit_metrics_aggregation_fn=None,
-        evaluate_metrics_aggregation_fn=None,
-    ) -> None:
-        super().__init__(
-            fraction_fit=fraction_fit,
-            fraction_evaluate=fraction_evaluate,
-            min_fit_clients=min_fit_clients,
-            min_evaluate_clients=min_evaluate_clients,
-            min_available_clients=min_available_clients,
-            evaluate_fn=evaluate_fn,
-            on_fit_config_fn=on_fit_config_fn,
-            on_evaluate_config_fn=on_evaluate_config_fn,
-            accept_failures=accept_failures,
-            initial_parameters=initial_parameters,
-            fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
-            evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
-        )
+    def __init__(self, labels, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self.model = ServerModel(12)
         self.initial_parameters = ndarrays_to_parameters(
             [val.cpu().numpy() for _, val in self.model.state_dict().items()]
