@@ -26,11 +26,8 @@ class FlowerClient(NumPyClient):
         model,
         train_data,
         test_data,
-        l2_norm_clip,
         noise_multiplier,
-        num_microbatches,
-        learning_rate,
-        batch_size,
+        run_config,
     ) -> None:
         super().__init__()
         self.model = model
@@ -39,20 +36,16 @@ class FlowerClient(NumPyClient):
         self.x_test, self.y_test = test_data
         self.x_test = np.expand_dims(self.x_test, axis=-1)
         self.noise_multiplier = noise_multiplier
-        self.l2_norm_clip = l2_norm_clip
-        self.num_microbatches = num_microbatches
-        self.learning_rate = learning_rate
-        self.batch_size = batch_size
-        if self.batch_size % self.num_microbatches != 0:
+        if run_config["batch-size"] % run_config["num-microbatches"] != 0:
             raise ValueError(
-                f"Batch size {self.batch_size} is not divisible by the number of microbatches {self.num_microbatches}"
+                f"Batch size {run_config['batch-size']} is not divisible by the number of microbatches {run_config['num-microbatches']}"
             )
 
         self.optimizer = tensorflow_privacy.DPKerasSGDOptimizer(
-            l2_norm_clip=l2_norm_clip,
-            noise_multiplier=noise_multiplier,
-            num_microbatches=num_microbatches,
-            learning_rate=learning_rate,
+            l2_norm_clip=run_config["l2-norm-clip"],
+            noise_multiplier=run_config["noise-multiplier"],
+            num_microbatches=run_config["num-microbatches"],
+            learning_rate=run_config["learning-rate"],
         )
         loss = tf.keras.losses.SparseCategoricalCrossentropy(
             reduction=tf.losses.Reduction.NONE
@@ -98,28 +91,17 @@ def client_fn(context: Context):
     model.build(input_shape=(None, 28, 28, 1))
 
     partition_id = context.node_config["partition-id"]
-
-    l2_norm_clip = 1.0
-    num_microbatches = 64
-    learning_rate = 0.01
-    batch_size = 64
+    run_config = context.run_config
     noise_multiplier = 1.0 if partition_id % 2 == 0 else 1.5
 
     train_data, test_data = load_data(
         partition_id=partition_id,
         num_partitions=context.node_config["num-partitions"],
-        batch_size=batch_size,
+        batch_size=context.run_config["batch-size"],
     )
 
     return FlowerClient(
-        model,
-        train_data,
-        test_data,
-        noise_multiplier,
-        l2_norm_clip,
-        num_microbatches,
-        learning_rate,
-        batch_size,
+        model, train_data, test_data, noise_multiplier, run_config
     ).to_client()
 
 

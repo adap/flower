@@ -17,17 +17,13 @@ For more information about DP in Flower please refer to the [tutorial](https://f
 Start by cloning the example project:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/tensorflow-privacy . && rm -rf flower && cd tensorflow-privacy
+git clone --depth=1 https://github.com/adap/flower.git \
+        && mv flower/examples/tensorflow-privacy . \
+        && rm -rf flower \
+        && cd tensorflow-privacy
 ```
 
 This will create a new directory called `tensorflow-privacy` containing the following files:
-
-```shell
--- pyproject.toml
--- client.py
--- server.py
--- README.md
-```
 
 ```shell
 tensorflow-privacy
@@ -39,9 +35,8 @@ tensorflow-privacy
 └── README.md
 ```
 
-### Note on the Code (Privacy Hyperparameters)
-
-Please note that, at the current state, users cannot set `NodeConfig` for simulated `ClientApp`s. For this reason, the hyperparameter `noise_multiplier` is set in the `client_fn` method based on a condition check on `partition_id`. This will be modified in a future version of Flower to allow users to set `NodeConfig` for simulated `ClientApp`s.
+> \[!NOTE\]
+> Please note that, at the current state, users cannot set `NodeConfig` for simulated `ClientApp`s. For this reason, the hyperparameter `noise_multiplier` is set in the `client_fn` method based on a condition check on `partition_id`. This will be modified in a future version of Flower to allow users to set `NodeConfig` for simulated `ClientApp`s.
 
 ### Install dependencies and project
 
@@ -60,4 +55,10 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 
 ```bash
 flwr run .
+```
+
+You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
+
+```bash
+flwr run . --run-config "l2-norm-clip=1.5 num-server-rounds=5"
 ```
