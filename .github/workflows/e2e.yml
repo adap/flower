@@ -60,7 +60,7 @@ jobs:
         directory: [e2e-bare-auth]
         connection: [secure, insecure]
         engine: [deployment-engine, simulation-engine]
-        authentication: [""]
+        authentication: [no-auth]
     name: |
       SuperExec / 
       ${{ matrix.directory }} / 
