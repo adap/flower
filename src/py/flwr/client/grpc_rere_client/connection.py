@@ -17,11 +17,12 @@
 
 import random
 import threading
+from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from copy import copy
 from logging import DEBUG, ERROR
 from pathlib import Path
-from typing import Callable, Iterator, Optional, Sequence, Tuple, Type, Union, cast
+from typing import Callable, Optional, Union, cast
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -45,7 +46,8 @@ from flwr.common.serde import (
     message_to_taskres,
     user_config_from_proto,
 )
-from flwr.common.typing import Run
+from flwr.common.typing import Fab, Run
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
@@ -76,16 +78,17 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
     root_certificates: Optional[Union[bytes, str]] = None,
     authentication_keys: Optional[
-        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
-    adapter_cls: Optional[Union[Type[FleetStub], Type[GrpcAdapter]]] = None,
+    adapter_cls: Optional[Union[type[FleetStub], type[GrpcAdapter]]] = None,
 ) -> Iterator[
-    Tuple[
+    tuple[
         Callable[[], Optional[Message]],
         Callable[[Message], None],
         Optional[Callable[[], Optional[int]]],
         Optional[Callable[[], None]],
         Optional[Callable[[int], Run]],
+        Optional[Callable[[str], Fab]],
     ]
 ]:
     """Primitives for request/response-based interaction with a server.
@@ -285,11 +288,22 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
             run_id,
             get_run_response.run.fab_id,
             get_run_response.run.fab_version,
+            get_run_response.run.fab_hash,
             user_config_from_proto(get_run_response.run.override_config),
         )
 
+    def get_fab(fab_hash: str) -> Fab:
+        # Call FleetAPI
+        get_fab_request = GetFabRequest(hash_str=fab_hash)
+        get_fab_response: GetFabResponse = retry_invoker.invoke(
+            stub.GetFab,
+            request=get_fab_request,
+        )
+
+        return Fab(get_fab_response.fab.hash_str, get_fab_response.fab.content)
+
     try:
         # Yield methods
-        yield (receive, send, create_node, delete_node, get_run)
+        yield (receive, send, create_node, delete_node, get_run, get_fab)
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)

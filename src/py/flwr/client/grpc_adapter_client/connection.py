@@ -15,9 +15,10 @@
 """Contextmanager for a GrpcAdapter channel to the Flower server."""
 
 
+from collections.abc import Iterator
 from contextlib import contextmanager
 from logging import ERROR
-from typing import Callable, Iterator, Optional, Tuple, Union
+from typing import Callable, Optional, Union
 
 from cryptography.hazmat.primitives.asymmetric import ec
 
@@ -27,7 +28,7 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
 from flwr.common.message import Message
 from flwr.common.retry_invoker import RetryInvoker
-from flwr.common.typing import Run
+from flwr.common.typing import Fab, Run
 
 
 @contextmanager
@@ -38,15 +39,16 @@ def grpc_adapter(  # pylint: disable=R0913
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
     root_certificates: Optional[Union[bytes, str]] = None,
     authentication_keys: Optional[  # pylint: disable=unused-argument
-        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
 ) -> Iterator[
-    Tuple[
+    tuple[
         Callable[[], Optional[Message]],
         Callable[[Message], None],
         Optional[Callable[[], Optional[int]]],
         Optional[Callable[[], None]],
         Optional[Callable[[int], Run]],
+        Optional[Callable[[str], Fab]],
     ]
 ]:
     """Primitives for request/response-based interaction with a server via GrpcAdapter.
@@ -80,6 +82,7 @@ def grpc_adapter(  # pylint: disable=R0913
     create_node : Optional[Callable]
     delete_node : Optional[Callable]
     get_run : Optional[Callable]
+    get_fab : Optional[Callable]
     """
     if authentication_keys is not None:
         log(ERROR, "Client authentication is not supported for this transport type.")

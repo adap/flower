@@ -1,8 +1,7 @@
 """tfexample: A Flower / TensorFlow app."""
 
-from flwr.client import NumPyClient, ClientApp
+from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
-
 from tfexample.task import load_data, load_model
 
 
@@ -21,10 +20,6 @@ class FlowerClient(NumPyClient):
         self.epochs = epochs
         self.batch_size = batch_size
         self.verbose = verbose
-
-    def get_parameters(self, config):
-        """Return the parameters of the model of this client."""
-        return self.model.get_weights()
 
     def fit(self, parameters, config):
         """Train the model with data of this client."""

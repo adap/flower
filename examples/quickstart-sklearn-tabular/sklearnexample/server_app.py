@@ -1,9 +1,9 @@
 """sklearnexample: A Flower / sklearn app."""
 
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
 
-from flwr.common import Metrics, Scalar, Context, ndarrays_to_parameters
-from flwr.server import ServerAppComponents, ServerConfig, ServerApp
+from flwr.common import Context, Metrics, Scalar, ndarrays_to_parameters
+from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
 
 from sklearnexample.task import (

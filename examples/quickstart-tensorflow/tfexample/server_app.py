@@ -1,10 +1,10 @@
 """tfexample: A Flower / TensorFlow app."""
 
 from typing import List, Tuple
-from flwr.common import Context, ndarrays_to_parameters, Metrics
+
+from flwr.common import Context, Metrics, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
-
 from tfexample.task import load_model
 
 
@@ -22,7 +22,6 @@ def server_fn(context: Context):
     """Construct components that set the ServerApp behaviour."""
 
     # Let's define the global model and pass it to the strategy
-    # Note this is optional.
     parameters = ndarrays_to_parameters(load_model().get_weights())
 
     # Define the strategy

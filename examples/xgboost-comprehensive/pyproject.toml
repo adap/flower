@@ -9,7 +9,7 @@ description = "Federated XGBoost with Flower (comprehensive)"
 authors = ["The Flower Authors <hello@flower.ai>"]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
+python = ">=3.9,<3.11"
 flwr = { extras = ["simulation"], version = ">=1.7.0,<2.0" }
 flwr-datasets = ">=0.2.0,<1.0.0"
 xgboost = ">=2.0.0,<3.0.0"
