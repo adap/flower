@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "Federated Learning with XGBoost and Flower (Comprehensive Example)"
 license = "Apache-2.0"
 dependencies = [
-    "flwr-nightly[simulation]==1.11.0.dev20240826",
+    "flwr[simulation]>=1.11.1",
     "flwr-datasets>=0.3.0",
     "xgboost>=2.0.0",
 ]
@@ -27,9 +27,9 @@ clientapp = "xgboost_comprehensive.client_app:app"
 # ServerApp
 train-method = "bagging"  # Choose from [bagging, cyclic]
 num-server-rounds = 3
-fraction-fit = 0.1
-fraction-evaluate = 0.1
-centralised-eval = true
+fraction-fit = 1.0
+fraction-evaluate = 1.0
+centralised-eval = false
 
 # ClientApp
 partitioner-type = "uniform"  # Choose from [uniform, linear, square, exponential]
@@ -51,6 +51,6 @@ params.tree-method = "hist"
 default = "local-simulation"
 
 [tool.flwr.federations.local-simulation]
-options.num-supernodes = 20
+options.num-supernodes = 5
 options.backend.client-resources.num-cpus = 2
 options.backend.client-resources.num-gpus = 0.0
