@@ -57,12 +57,14 @@ jobs:
     needs: wheel
     strategy:
       matrix:
+        python-version: ["3.9", "3.10", "3.11"]
         directory: [e2e-bare-auth]
         connection: [secure, insecure]
         engine: [deployment-engine, simulation-engine]
         authentication: [no-auth]
     name: |
       SuperExec / 
+      Python ${{ matrix.python-version }} /
       ${{ matrix.directory }} / 
       ${{ matrix.connection }} / 
       ${{ matrix.authentication }} / 
@@ -72,10 +74,10 @@ jobs:
         working-directory: e2e/${{ matrix.directory }}
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: ${{ matrix.python-version }}
       - name: Install build tools
         run: python -m pip install -U pip==23.3.1
         shell: bash
