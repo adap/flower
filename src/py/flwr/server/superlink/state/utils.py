@@ -38,7 +38,7 @@ def generate_rand_int_from_bytes(num_bytes: int) -> int:
 
 
 def convert_uint64_to_sint64(u: int) -> int:
-    """Convert a uint64 value to sint64.
+    """Convert a uint64 value to a sint64 value with the same bit sequence.
 
     Parameters
     ----------
@@ -64,7 +64,7 @@ def convert_uint64_to_sint64(u: int) -> int:
 
 
 def convert_sint64_to_uint64(s: int) -> int:
-    """Convert a sint64 value to uint64.
+    """Convert a sint64 value to a uint64 value with the same bit sequence.
 
     Parameters
     ----------
