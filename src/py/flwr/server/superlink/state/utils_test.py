@@ -67,6 +67,23 @@ class UtilsTest(unittest.TestCase):
         """Test conversion from sint64 to uint64."""
         self.assertEqual(convert_sint64_to_uint64(before), after)
 
+    @parameterized.expand(  # type: ignore
+        [
+            (0),
+            (1),
+            (2**62),
+            (2**63 - 1),
+            (2**63),
+            (2**63 + 1),
+            (9223372036854775811),
+            (2**64 - 1),
+        ]
+    )
+    def test_uint64_to_sint64_to_uint64(self, expected: int) -> None:
+        """Test conversion from sint64 to uint64."""
+        actual = convert_sint64_to_uint64(convert_uint64_to_sint64(expected))
+        self.assertEqual(expected, actual)
+
     def test_generate_rand_int_from_bytes_unsigned_int(self) -> None:
         """Test that the generated integer is unsigned (non-negative)."""
         for num_bytes in range(1, 9):
