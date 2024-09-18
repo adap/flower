@@ -16,12 +16,14 @@
 
 import time
 import warnings
+from collections.abc import Iterable
 from logging import DEBUG, WARNING
-from typing import Iterable, List, Optional, cast
+from typing import Optional, cast
 
 import grpc
 
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
+from flwr.common.constant import DRIVER_API_DEFAULT_ADDRESS
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.serde import (
@@ -44,8 +46,6 @@ from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 from .driver import Driver
-
-DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
 
 ERROR_MESSAGE_DRIVER_NOT_CONNECTED = """
 [Driver] Error: Not connected.
@@ -73,7 +73,7 @@ class GrpcDriver(Driver):
     def __init__(  # pylint: disable=too-many-arguments
         self,
         run_id: int,
-        driver_service_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
+        driver_service_address: str = DRIVER_API_DEFAULT_ADDRESS,
         root_certificates: Optional[bytes] = None,
     ) -> None:
         self._run_id = run_id
@@ -193,7 +193,7 @@ class GrpcDriver(Driver):
         )
         return Message(metadata=metadata, content=content)
 
-    def get_node_ids(self) -> List[int]:
+    def get_node_ids(self) -> list[int]:
         """Get node IDs."""
         self._init_run()
         # Call GrpcDriverStub method
@@ -210,7 +210,7 @@ class GrpcDriver(Driver):
         """
         self._init_run()
         # Construct TaskIns
-        task_ins_list: List[TaskIns] = []
+        task_ins_list: list[TaskIns] = []
         for msg in messages:
             # Check message
             self._check_message(msg)
@@ -256,7 +256,7 @@ class GrpcDriver(Driver):
 
         # Pull messages
         end_time = time.time() + (timeout if timeout is not None else 0.0)
-        ret: List[Message] = []
+        ret: list[Message] = []
         while timeout is None or time.time() < end_time:
             res_msgs = self.pull_messages(msg_ids)
             ret.extend(res_msgs)

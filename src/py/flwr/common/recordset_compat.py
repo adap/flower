@@ -15,7 +15,9 @@
 """RecordSet utilities."""
 
 
-from typing import Dict, Mapping, OrderedDict, Tuple, Union, cast, get_args
+from collections import OrderedDict
+from collections.abc import Mapping
+from typing import Union, cast, get_args
 
 from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordSet
 from .typing import (
@@ -115,7 +117,7 @@ def parameters_to_parametersrecord(
 
 def _check_mapping_from_recordscalartype_to_scalar(
     record_data: Mapping[str, Union[ConfigsRecordValues, MetricsRecordValues]]
-) -> Dict[str, Scalar]:
+) -> dict[str, Scalar]:
     """Check mapping `common.*RecordValues` into `common.Scalar` is possible."""
     for value in record_data.values():
         if not isinstance(value, get_args(Scalar)):
@@ -126,14 +128,14 @@ def _check_mapping_from_recordscalartype_to_scalar(
                 "supported by the `common.RecordSet` infrastructure. "
                 f"You used type: {type(value)}"
             )
-    return cast(Dict[str, Scalar], record_data)
+    return cast(dict[str, Scalar], record_data)
 
 
 def _recordset_to_fit_or_evaluate_ins_components(
     recordset: RecordSet,
     ins_str: str,
     keep_input: bool,
-) -> Tuple[Parameters, Dict[str, Scalar]]:
+) -> tuple[Parameters, dict[str, Scalar]]:
     """Derive Fit/Evaluate Ins from a RecordSet."""
     # get Array and construct Parameters
     parameters_record = recordset.parameters_records[f"{ins_str}.parameters"]
@@ -169,7 +171,7 @@ def _fit_or_evaluate_ins_to_recordset(
 def _embed_status_into_recordset(
     res_str: str, status: Status, recordset: RecordSet
 ) -> RecordSet:
-    status_dict: Dict[str, ConfigsRecordValues] = {
+    status_dict: dict[str, ConfigsRecordValues] = {
         "code": int(status.code.value),
         "message": status.message,
     }
