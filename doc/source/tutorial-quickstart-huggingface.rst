@@ -438,6 +438,3 @@ learning system for an LLM.
 .. _quickstart_hf_link: https://github.com/adap/flower/tree/main/examples/quickstart-huggingface
 
 .. _serverappcomponents: ref-api/flwr.server.ServerAppComponents.html#serverappcomponents
-
-.. meta::
-   :description: Check out this Federating Learning quickstart tutorial for using Flower with 🤗 HuggingFace Transformers in order to fine-tune an LLM.

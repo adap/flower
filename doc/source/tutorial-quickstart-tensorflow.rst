@@ -306,8 +306,5 @@ learning system.
    project using our previously recommended APIs. A new video tutorial
    will be released that shows the new APIs (as the content above does)
 
-.. meta::
-   :description: Check out this Federated Learning quickstart tutorial for using Flower with TensorFlow to train a CNN model on CIFAR-10.
-
 .. youtube:: FGTc2TQq7VM
    :width: 100%
