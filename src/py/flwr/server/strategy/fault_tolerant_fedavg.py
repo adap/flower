@@ -16,7 +16,7 @@
 
 
 from logging import WARNING
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, Optional, Union
 
 from flwr.common import (
     EvaluateRes,
@@ -49,12 +49,12 @@ class FaultTolerantFedAvg(FedAvg):
         min_available_clients: int = 1,
         evaluate_fn: Optional[
             Callable[
-                [int, NDArrays, Dict[str, Scalar]],
-                Optional[Tuple[float, Dict[str, Scalar]]],
+                [int, NDArrays, dict[str, Scalar]],
+                Optional[tuple[float, dict[str, Scalar]]],
             ]
         ] = None,
-        on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
-        on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
+        on_fit_config_fn: Optional[Callable[[int], dict[str, Scalar]]] = None,
+        on_evaluate_config_fn: Optional[Callable[[int], dict[str, Scalar]]] = None,
         min_completion_rate_fit: float = 0.5,
         min_completion_rate_evaluate: float = 0.5,
         initial_parameters: Optional[Parameters] = None,
@@ -85,9 +85,9 @@ class FaultTolerantFedAvg(FedAvg):
     def aggregate_fit(
         self,
         server_round: int,
-        results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+        results: list[tuple[ClientProxy, FitRes]],
+        failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
+    ) -> tuple[Optional[Parameters], dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         if not results:
             return None, {}
@@ -117,9 +117,9 @@ class FaultTolerantFedAvg(FedAvg):
     def aggregate_evaluate(
         self,
         server_round: int,
-        results: List[Tuple[ClientProxy, EvaluateRes]],
-        failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
-    ) -> Tuple[Optional[float], Dict[str, Scalar]]:
+        results: list[tuple[ClientProxy, EvaluateRes]],
+        failures: list[Union[tuple[ClientProxy, EvaluateRes], BaseException]],
+    ) -> tuple[Optional[float], dict[str, Scalar]]:
         """Aggregate evaluation losses using weighted average."""
         if not results:
             return None, {}

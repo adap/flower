@@ -20,11 +20,11 @@ package flwr.proto;
 import "flwr/proto/transport.proto";
 
 message Run {
-  sint64 run_id = 1;
+  uint64 run_id = 1;
   string fab_id = 2;
   string fab_version = 3;
   map<string, Scalar> override_config = 4;
   string fab_hash = 5;
 }
-message GetRunRequest { sint64 run_id = 1; }
+message GetRunRequest { uint64 run_id = 1; }
 message GetRunResponse { Run run = 1; }
