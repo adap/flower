@@ -1,7 +1,7 @@
 """Test cases for the sqlite state."""
 
-import unittest
 import json
+import unittest
 
 from flwr.common.typing import UserConfig
 
