@@ -21,10 +21,9 @@ import tempfile
 import zipfile
 from io import BytesIO
 from pathlib import Path
-from typing import IO, Optional, Union
+from typing import IO, Annotated, Optional, Union
 
 import typer
-from typing_extensions import Annotated
 
 from flwr.common.config import get_flwr_dir
 

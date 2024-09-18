@@ -22,6 +22,9 @@ huggingface-cli login
 
 ## Generate model decision & calculate accuracy
 
+> [!NOTE]
+> Please ensure that you use `quantization=4` to run the evaluation if you wish to participate in the LLM Leaderboard.
+
 ```bash
 python eval.py \
 --peft-path=/path/to/fine-tuned-peft-model-dir/ \ # e.g., ./peft_1

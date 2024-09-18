@@ -17,7 +17,7 @@
 
 import unittest
 from collections import Counter
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Union
 
 import numpy as np
 from parameterized import parameterized_class
@@ -62,7 +62,7 @@ def _get_partitioner(
     num_unique_labels: int,
     preassigned_num_samples_per_label: int,
     rescale_mode: bool = True,
-) -> Tuple[DistributionPartitioner, Dict[int, Dataset]]:
+) -> tuple[DistributionPartitioner, dict[int, Dataset]]:
     """Create DistributionPartitioner instance."""
     dataset = _dummy_dataset_setup(
         num_samples,
@@ -83,7 +83,7 @@ def _get_partitioner(
         rescale=rescale_mode,
     )
     partitioner.dataset = dataset
-    partitions: Dict[int, Dataset] = {
+    partitions: dict[int, Dataset] = {
         pid: partitioner.load_partition(pid) for pid in range(num_partitions)
     }
 
@@ -135,7 +135,7 @@ class TestDistributionPartitioner(unittest.TestCase):
             preassigned_num_samples_per_label=self.preassigned_num_samples_per_label,
         )
 
-        partitioned_distribution: Dict[Any, List[Any]] = {
+        partitioned_distribution: dict[Any, list[Any]] = {
             label: [] for label in partitioner.dataset.unique("labels")
         }
 
@@ -162,7 +162,7 @@ class TestDistributionPartitioner(unittest.TestCase):
             preassigned_num_samples_per_label=self.preassigned_num_samples_per_label,
             rescale_mode=False,
         )
-        partitioned_distribution: Dict[Any, List[Any]] = {
+        partitioned_distribution: dict[Any, list[Any]] = {
             label: [] for label in partitioner.dataset.unique("labels")
         }
 
