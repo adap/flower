@@ -32,7 +32,7 @@ README.md @jafermarq @tanertopal @danieljanes
 /.github/actions @Robert-Steiner @tanertopal @danieljanes
 
 # Docker-related files
-/.devcontainer @Robert-Steiner @Moep90
-**/Dockerfile @Robert-Steiner @Moep90
-**/*.Dockerfile @Robert-Steiner @Moep90
-src/docker @Robert-Steiner @Moep90
+/.devcontainer @Robert-Steiner @Moep90 @tanertopal @danieljanes
+**/Dockerfile @Robert-Steiner @Moep90 @tanertopal @danieljanes
+**/*.Dockerfile @Robert-Steiner @Moep90 @tanertopal @danieljanes
+/src/docker @Robert-Steiner @Moep90 @tanertopal @danieljanes

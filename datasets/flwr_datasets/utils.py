@@ -16,7 +16,7 @@
 
 
 import warnings
-from typing import Dict, List, Optional, Tuple, Union, cast
+from typing import Optional, Union, cast
 
 from datasets import Dataset, DatasetDict, concatenate_datasets
 from flwr_datasets.partitioner import IidPartitioner, Partitioner
@@ -48,12 +48,17 @@ tested_datasets = [
     "Mike0307/MNIST-M",
     "flwrlabs/usps",
     "scikit-learn/iris",
+    "flwrlabs/pacs",
+    "flwrlabs/cinic10",
+    "flwrlabs/caltech101",
+    "flwrlabs/office-home",
+    "flwrlabs/fed-isic2019",
 ]
 
 
 def _instantiate_partitioners(
-    partitioners: Dict[str, Union[Partitioner, int]]
-) -> Dict[str, Partitioner]:
+    partitioners: dict[str, Union[Partitioner, int]]
+) -> dict[str, Partitioner]:
     """Transform the partitioners from the initial format to instantiated objects.
 
     Parameters
@@ -66,8 +71,8 @@ def _instantiate_partitioners(
     partitioners : Dict[str, Partitioner]
         Partitioners specified as split to Partitioner object.
     """
-    instantiated_partitioners: Dict[str, Partitioner] = {}
-    if isinstance(partitioners, Dict):
+    instantiated_partitioners: dict[str, Partitioner] = {}
+    if isinstance(partitioners, dict):
         for split, partitioner in partitioners.items():
             if isinstance(partitioner, Partitioner):
                 instantiated_partitioners[split] = partitioner
@@ -90,10 +95,10 @@ def _instantiate_partitioners(
 
 
 def _instantiate_merger_if_needed(
-    merger: Optional[Union[Preprocessor, Dict[str, Tuple[str, ...]]]]
+    merger: Optional[Union[Preprocessor, dict[str, tuple[str, ...]]]]
 ) -> Optional[Preprocessor]:
     """Instantiate `Merger` if preprocessor is merge_config."""
-    if merger and isinstance(merger, Dict):
+    if merger and isinstance(merger, dict):
         merger = Merger(merge_config=merger)
     return cast(Optional[Preprocessor], merger)
 
@@ -108,8 +113,8 @@ def _check_if_dataset_tested(dataset: str) -> None:
 
 
 def divide_dataset(
-    dataset: Dataset, division: Union[List[float], Tuple[float, ...], Dict[str, float]]
-) -> Union[List[Dataset], DatasetDict]:
+    dataset: Dataset, division: Union[list[float], tuple[float, ...], dict[str, float]]
+) -> Union[list[Dataset], DatasetDict]:
     """Divide the dataset according to the `division`.
 
     The division support varying number of splits, which you can name. The splits are
@@ -141,7 +146,8 @@ def divide_dataset(
     >>> division = [0.8, 0.2]
     >>> train, test = divide_dataset(dataset=partition, division=division)
 
-    Use `divide_dataset` with division specified as a dict.
+    Use `divide_dataset` with division specified as a dict
+    (this accomplishes the same goal as the example with a list above).
 
     >>> from flwr_datasets import FederatedDataset
     >>> from flwr_datasets.utils import divide_dataset
@@ -156,12 +162,12 @@ def divide_dataset(
     dataset_length = len(dataset)
     ranges = _create_division_indices_ranges(dataset_length, division)
     if isinstance(division, (list, tuple)):
-        split_partition: List[Dataset] = []
+        split_partition: list[Dataset] = []
         for single_range in ranges:
             split_partition.append(dataset.select(single_range))
         return split_partition
     if isinstance(division, dict):
-        split_partition_dict: Dict[str, Dataset] = {}
+        split_partition_dict: dict[str, Dataset] = {}
         for split_name, single_range in zip(division.keys(), ranges):
             split_partition_dict[split_name] = dataset.select(single_range)
         return DatasetDict(split_partition_dict)
@@ -173,8 +179,8 @@ def divide_dataset(
 
 def _create_division_indices_ranges(
     dataset_length: int,
-    division: Union[List[float], Tuple[float, ...], Dict[str, float]],
-) -> List[range]:
+    division: Union[list[float], tuple[float, ...], dict[str, float]],
+) -> list[range]:
     ranges = []
     if isinstance(division, (list, tuple)):
         start_idx = 0
@@ -200,7 +206,7 @@ def _create_division_indices_ranges(
 
 
 def _check_division_config_types_correctness(
-    division: Union[List[float], Tuple[float, ...], Dict[str, float]]
+    division: Union[list[float], tuple[float, ...], dict[str, float]]
 ) -> None:
     if isinstance(division, (list, tuple)):
         if not all(isinstance(x, float) for x in division):
@@ -219,7 +225,7 @@ def _check_division_config_types_correctness(
 
 
 def _check_division_config_values_correctness(
-    division: Union[List[float], Tuple[float, ...], Dict[str, float]]
+    division: Union[list[float], tuple[float, ...], dict[str, float]]
 ) -> None:
     if isinstance(division, (list, tuple)):
         if not all(0 < x <= 1 for x in division):
@@ -257,7 +263,7 @@ def _check_division_config_values_correctness(
 
 
 def _check_division_config_correctness(
-    division: Union[List[float], Tuple[float, ...], Dict[str, float]]
+    division: Union[list[float], tuple[float, ...], dict[str, float]]
 ) -> None:
     _check_division_config_types_correctness(division)
     _check_division_config_values_correctness(division)
@@ -265,14 +271,14 @@ def _check_division_config_correctness(
 
 def concatenate_divisions(
     partitioner: Partitioner,
-    partition_division: Union[List[float], Tuple[float, ...], Dict[str, float]],
+    partition_division: Union[list[float], tuple[float, ...], dict[str, float]],
     division_id: Union[int, str],
 ) -> Dataset:
-    """Create a dataset by concatenation of all partitions in the same division.
+    """Create a dataset by concatenation of divisions from all partitions.
 
     The divisions are created based on the `partition_division` and accessed based
-    on the `division_id`. It can be used to create e.g. centralized dataset from
-    federated on-edge test sets.
+    on the `division_id`. This fuction can be used to create e.g. centralized dataset
+    from federated on-edge test sets.
 
     Parameters
     ----------
@@ -293,6 +299,35 @@ def concatenate_divisions(
     -------
     concatenated_divisions : Dataset
         A dataset created as concatenation of the divisions from all partitions.
+
+    Examples
+    --------
+    Use `concatenate_divisions` with division specified as a list.
+
+    >>> from flwr_datasets import FederatedDataset
+    >>> from flwr_datasets.utils import concatenate_divisions
+    >>>
+    >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
+    >>> concatenated_divisions = concatenate_divisions(
+    ...     partitioner=fds.partitioners["train"],
+    ...     partition_division=[0.8, 0.2],
+    ...     division_id=1
+    ... )
+    >>> print(concatenated_divisions)
+
+    Use `concatenate_divisions` with division specified as a dict.
+    This accomplishes the same goal as the example with a list above.
+
+    >>> from flwr_datasets import FederatedDataset
+    >>> from flwr_datasets.utils import concatenate_divisions
+    >>>
+    >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
+    >>> concatenated_divisions = concatenate_divisions(
+    ...     partitioner=fds["train"],
+    ...     partition_division={"train": 0.8, "test": 0.2},
+    ...     division_id="test"
+    ... )
+    >>> print(concatenated_divisions)
     """
     _check_division_config_correctness(partition_division)
     divisions = []
@@ -307,7 +342,7 @@ def concatenate_divisions(
                 )
             partition = divide_dataset(partition, partition_division)
             division = partition[division_id]
-        elif isinstance(partition_division, Dict):
+        elif isinstance(partition_division, dict):
             partition = divide_dataset(partition, partition_division)
             division = partition[division_id]
         else:
