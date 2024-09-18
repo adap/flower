@@ -107,7 +107,7 @@ while [ "$found_success" = false ] && [ $elapsed -lt $timeout ]; do
     if grep -q "Run finished" flwr_output.log; then
         echo "Training worked correctly!"
         found_success=true
-        kill $cl1_pid; kill $cl2_pid; sleep 1; kill $sl_pid; kill "$se_pid";
+        kill $cl1_pid; kill $cl2_pid; sleep 1; kill $sl_pid; kill $se_pid;
     else
         echo "Waiting for training ... ($elapsed seconds elapsed)"
     fi
@@ -118,5 +118,5 @@ done
 
 if [ "$found_success" = false ]; then
     echo "Training had an issue and timed out."
-    kill $cl1_pid; kill $cl2_pid; kill $sl_pid; kill "$se_pid";
+    kill $cl1_pid; kill $cl2_pid; kill $sl_pid; kill $se_pid;
 fi
