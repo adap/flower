@@ -55,6 +55,15 @@ esac
 # Create and install Flower app
 flwr new e2e-tmp-test --framework numpy --username flwrlabs
 cd e2e-tmp-test
+# Remove flwr dependency from `pyproject.toml`. Seems necessary so that it does
+# not override the wheel dependency
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS (Darwin) system
+    sed -i '' '/flwr\[simulation\]/d' pyproject.toml
+else
+    # Non-macOS system (Linux)
+    sed -i '/flwr\[simulation\]/d' pyproject.toml
+fi
 pip install -e . --no-deps
 
 # Check if the first argument is 'insecure'
