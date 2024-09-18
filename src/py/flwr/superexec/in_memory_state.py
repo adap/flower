@@ -19,8 +19,9 @@ from typing import Optional
 
 from typing_extensions import override
 
-from .state import ExecState
 from flwr.common.typing import UserConfig
+
+from .state import ExecState
 
 
 class InMemoryExecState(ExecState):
