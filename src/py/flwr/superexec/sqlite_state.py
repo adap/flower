@@ -68,7 +68,6 @@ class SqliteExecState(ExecState):
     @override
     def get_runs(self) -> list[int]:
         cursor = self.conn.cursor()
-        # TODO: Find SQL command
-        cursor.execute("SELECT run_id FROM runs WHERE run_id = ")
-        row = cursor.fetchone()
-        return [int(row[0])] if row else []
+        cursor.execute("SELECT run_id FROM runs")
+        rows = cursor.fetchall()
+        return [int(row[0]) for row in rows]
