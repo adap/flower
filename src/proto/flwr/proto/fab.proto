@@ -27,7 +27,7 @@ message Fab {
 }
 
 message GetFabRequest {
-  sint64 run_id = 1;
+  uint64 run_id = 1;
   string hash_str = 2;
 }
 message GetFabResponse { Fab fab = 1; }
