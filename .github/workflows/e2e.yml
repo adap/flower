@@ -64,8 +64,10 @@ jobs:
         authentication: [no-auth]
     name: |
       SuperExec / 
-      ${{ matrix.directory }} / 
-      Python ${{ matrix.python-version }}
+      Python ${{ matrix.python-version }} /
+      ${{ matrix.connection }} / 
+      ${{ matrix.authentication }} / 
+      ${{ matrix.engine }} 
     defaults:
       run:
         working-directory: e2e/${{ matrix.directory }}
