@@ -61,9 +61,9 @@ jobs:
         directory: [e2e-bare-auth]
         connection: [secure, insecure]
         engine: [deployment-engine, simulation-engine]
-        authentication: [no-auth]
-        include:
-          - connection: secure
+        authentication: [no-auth, client-auth]
+        exclude:
+          - connection: insecure
             authentication: client-auth
     name: |
       SuperExec / 
@@ -71,18 +71,18 @@ jobs:
       ${{ matrix.connection }} / 
       ${{ matrix.authentication }} / 
       ${{ matrix.engine }} 
-    # defaults:
-    #   run:
-    #     working-directory: e2e/${{ matrix.directory }}
-    # steps:
-    #   - uses: actions/checkout@v4
-    #   - name: Set up Python ${{ matrix.python-version }}
-    #     uses: actions/setup-python@v5
-    #     with:
-    #       python-version: ${{ matrix.python-version }}
-    #   - name: Install build tools
-    #     run: python -m pip install -U pip==23.3.1
-    #     shell: bash
+    defaults:
+      run:
+        working-directory: e2e/${{ matrix.directory }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install build tools
+        run: python -m pip install -U pip==23.3.1
+        shell: bash
     #   - name: Download and install Flower wheel from artifact store
     #     if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
     #     run: |
