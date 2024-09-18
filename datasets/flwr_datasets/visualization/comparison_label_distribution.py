@@ -15,7 +15,7 @@
 """Comparison of label distribution plotting."""
 
 
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
@@ -31,22 +31,22 @@ from flwr_datasets.visualization.label_distribution import plot_label_distributi
 
 # pylint: disable=too-many-arguments,too-many-locals
 def plot_comparison_label_distribution(
-    partitioner_list: List[Partitioner],
-    label_name: Union[str, List[str]],
+    partitioner_list: list[Partitioner],
+    label_name: Union[str, list[str]],
     plot_type: str = "bar",
     size_unit: str = "percent",
     max_num_partitions: Optional[Union[int]] = 30,
     partition_id_axis: str = "y",
-    figsize: Optional[Tuple[float, float]] = None,
+    figsize: Optional[tuple[float, float]] = None,
     subtitle: str = "Comparison of Per Partition Label Distribution",
-    titles: Optional[List[str]] = None,
+    titles: Optional[list[str]] = None,
     cmap: Optional[Union[str, mcolors.Colormap]] = None,
     legend: bool = False,
     legend_title: Optional[str] = None,
     verbose_labels: bool = True,
-    plot_kwargs_list: Optional[List[Optional[Dict[str, Any]]]] = None,
-    legend_kwargs: Optional[Dict[str, Any]] = None,
-) -> Tuple[Figure, List[Axes], List[pd.DataFrame]]:
+    plot_kwargs_list: Optional[list[Optional[dict[str, Any]]]] = None,
+    legend_kwargs: Optional[dict[str, Any]] = None,
+) -> tuple[Figure, list[Axes], list[pd.DataFrame]]:
     """Compare the label distribution across multiple partitioners.
 
     Parameters
@@ -143,7 +143,7 @@ def plot_comparison_label_distribution(
     num_partitioners = len(partitioner_list)
     if isinstance(label_name, str):
         label_name = [label_name] * num_partitioners
-    elif isinstance(label_name, List):
+    elif isinstance(label_name, list):
         pass
     else:
         raise TypeError(
@@ -215,8 +215,8 @@ def plot_comparison_label_distribution(
 
 
 def _initialize_comparison_figsize(
-    figsize: Optional[Tuple[float, float]], num_partitioners: int
-) -> Tuple[float, float]:
+    figsize: Optional[tuple[float, float]], num_partitioners: int
+) -> tuple[float, float]:
     if figsize is not None:
         return figsize
     x_value = 4 + (num_partitioners - 1) * 2
@@ -227,7 +227,7 @@ def _initialize_comparison_figsize(
 
 def _initialize_comparison_xy_labels(
     plot_type: str, partition_id_axis: str
-) -> Tuple[str, str]:
+) -> tuple[str, str]:
     if plot_type == "bar":
         xlabel = "Partition ID"
         ylabel = "Class distribution"
