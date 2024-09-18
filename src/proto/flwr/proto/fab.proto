@@ -26,5 +26,8 @@ message Fab {
   bytes content = 2;
 }
 
-message GetFabRequest { string hash_str = 1; }
+message GetFabRequest {
+  sint64 run_id = 1;
+  string hash_str = 2;
+}
 message GetFabResponse { Fab fab = 1; }

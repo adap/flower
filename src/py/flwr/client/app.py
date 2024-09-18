@@ -439,7 +439,7 @@ def start_client_internal(
 
                     run: Run = runs[run_id]
                     if get_fab is not None and run.fab_hash:
-                        fab = get_fab(run.fab_hash)
+                        fab = get_fab(run_id, run.fab_hash)
                         if not isolation:
                             # If `ClientApp` runs in the same process, install the FAB
                             install_from_fab(fab.content, flwr_path, True)
@@ -707,7 +707,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
                 Optional[Callable[[], Optional[int]]],
                 Optional[Callable[[], None]],
                 Optional[Callable[[int], Run]],
-                Optional[Callable[[str], Fab]],
+                Optional[Callable[[int, str], Fab]],
             ]
         ],
     ],

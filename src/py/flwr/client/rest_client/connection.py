@@ -100,7 +100,7 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
         Optional[Callable[[], Optional[int]]],
         Optional[Callable[[], None]],
         Optional[Callable[[int], Run]],
-        Optional[Callable[[str], Fab]],
+        Optional[Callable[[int, str], Fab]],
     ]
 ]:
     """Primitives for request/response-based interaction with a server.
@@ -371,9 +371,9 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
             user_config_from_proto(res.run.override_config),
         )
 
-    def get_fab(fab_hash: str) -> Fab:
+    def get_fab(run_id: int, fab_hash: str) -> Fab:
         # Construct the request
-        req = GetFabRequest(hash_str=fab_hash)
+        req = GetFabRequest(run_id=run_id, hash_str=fab_hash)
 
         # Send the request
         res = _request(req, GetFabResponse, PATH_GET_FAB)
