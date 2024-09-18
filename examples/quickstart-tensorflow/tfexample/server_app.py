@@ -22,7 +22,6 @@ def server_fn(context: Context):
     """Construct components that set the ServerApp behaviour."""
 
     # Let's define the global model and pass it to the strategy
-    # Note this is optional.
     parameters = ndarrays_to_parameters(load_model().get_weights())
 
     # Define the strategy
