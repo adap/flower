@@ -9,7 +9,7 @@
 ## Quick reference
 
 - **Learn more:**<br>
-  [Flower Docs](https://flower.ai/docs/framework/how-to-run-flower-using-docker.html)
+  [Quickstart with Docker](https://flower.ai/docs/framework/docker/tutorial-quickstart-docker.html) and [Quickstart with Docker Compose](https://flower.ai/docs/framework/docker/tutorial-quickstart-docker-compose.html)
 
 - **Where to get help:**<br>
   [Flower Discuss](https://discuss.flower.ai), [Slack](https://flower.ai/join-slack) or [GitHub](https://github.com/adap/flower)
@@ -19,7 +19,14 @@
 
 ## Supported tags
 
+- `unstable`
+  - points to the last successful build of the `main` branch
 - `nightly`, `<version>.dev<YYYYMMDD>` e.g. `1.12.0.dev20240830`
+  - uses Python 3.11 and Ubuntu 22.04
+- `1.11.1`, `1.11.1-py3.11-ubuntu22.04`
+- `1.11.1-py3.10-ubuntu22.04`
+- `1.11.1-py3.9-ubuntu22.04`
+- `1.11.1-py3.8-ubuntu22.04`
 - `1.11.0`, `1.11.0-py3.11-ubuntu22.04`
 - `1.11.0-py3.10-ubuntu22.04`
 - `1.11.0-py3.9-ubuntu22.04`

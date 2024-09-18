@@ -17,7 +17,7 @@
 import os
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union, cast, get_args
+from typing import Any, Optional, Union, cast, get_args
 
 import tomli
 
@@ -53,7 +53,7 @@ def get_project_dir(
     return Path(flwr_dir) / APP_DIR / publisher / project_name / fab_version
 
 
-def get_project_config(project_dir: Union[str, Path]) -> Dict[str, Any]:
+def get_project_config(project_dir: Union[str, Path]) -> dict[str, Any]:
     """Return pyproject.toml in the given project directory."""
     # Load pyproject.toml file
     toml_path = Path(project_dir) / FAB_CONFIG_FILE
@@ -137,13 +137,13 @@ def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> UserConfig:
 
 
 def flatten_dict(
-    raw_dict: Optional[Dict[str, Any]], parent_key: str = ""
+    raw_dict: Optional[dict[str, Any]], parent_key: str = ""
 ) -> UserConfig:
     """Flatten dict by joining nested keys with a given separator."""
     if raw_dict is None:
         return {}
 
-    items: List[Tuple[str, UserConfigValue]] = []
+    items: list[tuple[str, UserConfigValue]] = []
     separator: str = "."
     for k, v in raw_dict.items():
         new_key = f"{parent_key}{separator}{k}" if parent_key else k
@@ -159,9 +159,9 @@ def flatten_dict(
     return dict(items)
 
 
-def unflatten_dict(flat_dict: Dict[str, Any]) -> Dict[str, Any]:
+def unflatten_dict(flat_dict: dict[str, Any]) -> dict[str, Any]:
     """Unflatten a dict with keys containing separators into a nested dict."""
-    unflattened_dict: Dict[str, Any] = {}
+    unflattened_dict: dict[str, Any] = {}
     separator: str = "."
 
     for key, value in flat_dict.items():
@@ -177,7 +177,7 @@ def unflatten_dict(flat_dict: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def parse_config_args(
-    config: Optional[List[str]],
+    config: Optional[list[str]],
 ) -> UserConfig:
     """Parse separator separated list of key-value pairs separated by '='."""
     overrides: UserConfig = {}
@@ -209,7 +209,7 @@ def parse_config_args(
     return overrides
 
 
-def get_metadata_from_config(config: Dict[str, Any]) -> Tuple[str, str]:
+def get_metadata_from_config(config: dict[str, Any]) -> tuple[str, str]:
     """Extract `fab_version` and `fab_id` from a project config."""
     return (
         config["project"]["version"],
