@@ -32,11 +32,13 @@ class UtilsTest(unittest.TestCase):
         [
             # Test values within the positive range of sint64 (below 2^63)
             (0, 0),  # Minimum positive value
+            (1, 1),  # 1 remains 1 in both uint64 and sint64
             (2**62, 2**62),  # Mid-range positive value
             (2**63 - 1, 2**63 - 1),  # Maximum positive value for sint64
             # Test values at or above 2^63 (become negative in sint64)
             (2**63, -(2**63)),  # Minimum negative value for sint64
             (2**63 + 1, -(2**63) + 1),  # Slightly above the boundary
+            (9223372036854775811, -9223372036854775805),  # Some value > sint64 max
             (2**64 - 1, -1),  # Maximum uint64 value becomes -1 in sint64
         ]
     )
@@ -49,9 +51,11 @@ class UtilsTest(unittest.TestCase):
             # Test values within the negative range of sint64
             (-(2**63), 2**63),  # Minimum sint64 value becomes 2^63 in uint64
             (-(2**63) + 1, 2**63 + 1),  # Slightly above the minimum
+            (-9223372036854775805, 9223372036854775811),  # Some value > sint64 max
+            # Test zero-adjacent inputs
             (-1, 2**64 - 1),  # -1 in sint64 becomes 2^64 - 1 in uint64
-            # Test zero
             (0, 0),  # 0 remains 0 in both sint64 and uint64
+            (1, 1),  # 1 remains 1 in both sint64 and uint64
             # Test values within the positive range of sint64
             (2**63 - 1, 2**63 - 1),  # Maximum positive value in sint64
             # Test boundary and maximum uint64 value
