@@ -93,7 +93,7 @@ jobs:
           else
             python -m pip install "${WHEEL_FILE}"
           fi
-      - name: |
+      - name: >
           Run SuperExec test / 
           ${{ matrix.directory }} / 
           ${{ matrix.connection }} / 
