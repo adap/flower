@@ -75,23 +75,23 @@ else
   echo -e $"\n[tool.flwr.federations.superexec]\naddress = \"127.0.0.1:9093\"\nroot-certificates = \"../certificates/ca.crt\"" >> pyproject.toml
 fi
 
-timeout 2m flower-superlink $server_arg $server_auth &
+timeout 2m flower-superlink "$server_arg" "$server_auth" &
 sl_pid=$!
 sleep 2
 
-timeout 2m flower-supernode ./ $client_arg \
-    --superlink $server_address $client_auth_1 \
+timeout 2m flower-supernode ./ "$client_arg" \
+    --superlink $server_address "$client_auth_1" \
     --node-config "partition-id=0 num-partitions=2" &
 cl1_pid=$!
 sleep 2
 
-timeout 2m flower-supernode ./ $client_arg \
-    --superlink $server_address $client_auth_2 \
+timeout 2m flower-supernode ./ "$client_arg" \
+    --superlink $server_address "$client_auth_2" \
     --node-config "partition-id=1 num-partitions=2" &
 cl2_pid=$!
 sleep 2
 
-timeout 2m flower-superexec $superexec_arg $superexec_engine_arg 2>&1 | tee flwr_output.log &
+timeout 2m flower-superexec "$superexec_arg" "$superexec_engine_arg" 2>&1 | tee flwr_output.log &
 se_pid=$(pgrep -f "flower-superexec")
 sleep 2
 
@@ -107,7 +107,7 @@ while [ "$found_success" = false ] && [ $elapsed -lt $timeout ]; do
     if grep -q "Run finished" flwr_output.log; then
         echo "Training worked correctly!"
         found_success=true
-        kill $cl1_pid; kill $cl2_pid; sleep 1; kill $sl_pid; kill $se_pid;
+        kill $cl1_pid; kill $cl2_pid; sleep 1; kill $sl_pid; kill "$se_pid";
     else
         echo "Waiting for training ... ($elapsed seconds elapsed)"
     fi
@@ -118,5 +118,5 @@ done
 
 if [ "$found_success" = false ]; then
     echo "Training had an issue and timed out."
-    kill $cl1_pid; kill $cl2_pid; kill $sl_pid; kill $se_pid;
+    kill $cl1_pid; kill $cl2_pid; kill $sl_pid; kill "$se_pid";
 fi
