@@ -764,7 +764,7 @@ class SqliteState(State):  # pylint: disable=R0904
             )
             return False
 
-        # Check if the result is valid
+        # Check if the sub-status is valid
         if not has_valid_sub_status(status):
             log(ERROR, 'Invalid run status: "%s:%s"', status.status, status.sub_status)
             return False

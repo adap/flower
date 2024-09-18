@@ -379,7 +379,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                 )
                 return False
 
-            # Check if the result is valid
+            # Check if the sub-status is valid
             if not has_valid_sub_status(info):
                 log(ERROR, 'Invalid run status: "%s:%s"', info.status, info.sub_status)
                 return False
