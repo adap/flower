@@ -1,0 +1,17 @@
+---
+title: "Server"
+description: "The central entity coordinating the aggregation of local model updates from multiple clients to build a comprehensive, privacy-preserving global model."
+date: "2024-07-08"
+author:
+  name: "Heng Pan"
+  position: "Research Scientist"
+  website: "https://discuss.flower.ai/u/pan-h/summary"
+  github: "github.com/panh99"
+related: 
+  - text: "Client"
+    link: "/glossary/client"
+  - text: "Federated Learning"
+    link: "/glossary/federated-learning"
+---
+
+A server in federated learning plays a pivotal role by managing the distributed training process across various clients. Each client independently trains its local model using the local data and then sends the model updates to the server. The server aggregates the received updates to create a new global model, which is subsequently sent back to the clients. This iterative process allows the global model to improve over time without the need for the clients to share their raw data, ensuring data privacy and minimizing data transfer.

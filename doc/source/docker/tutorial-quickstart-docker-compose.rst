@@ -44,7 +44,7 @@ Step 1: Set Up
    Setting the ``PROJECT_DIR`` helps Docker Compose locate the ``pyproject.toml`` file, allowing
    it to install dependencies in the SuperExec and SuperNode images correctly.
 
-Step 2: Run Flower in insecure mode
+Step 2: Run Flower in Insecure Mode
 -----------------------------------
 
 To begin, start Flower with the most basic configuration. In this setup, Flower
@@ -230,7 +230,7 @@ Step 6: Run Flower with TLS
 
       [tool.flwr.federations.docker-compose-tls]
       address = "127.0.0.1:9093"
-      root-certificates = "superexec-certificates/ca.crt"
+      root-certificates = "../superexec-certificates/ca.crt"
 
 #. Restart the services with TLS enabled:
 
@@ -248,43 +248,57 @@ Step 6: Run Flower with TLS
 Step 7: Add another SuperNode
 -----------------------------
 
-You can add more SuperNodes by duplicating the SuperNode definition in the ``compose.yml`` file.
+You can add more SuperNodes and ClientApps by duplicating their definitions in the ``compose.yml``
+file.
 
-Just make sure to give each new SuperNode service a unique service name like ``supernode-3``, ``supernode-4``, etc.
+Just give each new SuperNode and ClientApp service a unique service name like ``supernode-3``,
+``clientapp-3``, etc.
 
 In ``compose.yml``, add the following:
 
 .. code-block:: yaml
    :caption: compose.yml
+   :substitutions:
 
-   services:
      # other service definitions
 
      supernode-3:
-       user: root
-       deploy:
-         resources:
-           limits:
-             cpus: "2"
+       image: flwr/supernode:${FLWR_VERSION:-|stable_flwr_version|}
        command:
+         - --insecure
          - --superlink
          - superlink:9092
-         - --insecure
+         - --supernode-address
+         - 0.0.0.0:9096
+         - --isolation
+         - process
+         - --node-config
+         - "partition-id=1 num-partitions=2"
        depends_on:
          - superlink
-       volumes:
-         - apps-volume:/app/.flwr/apps/:ro
+
+     clientapp-3:
        build:
          context: ${PROJECT_DIR:-.}
          dockerfile_inline: |
-           FROM flwr/supernode:${FLWR_VERSION:-1.10.0}
+           FROM flwr/clientapp:${FLWR_VERSION:-|stable_flwr_version|}
 
            WORKDIR /app
            COPY --chown=app:app pyproject.toml .
            RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
              && python -m pip install -U --no-cache-dir .
 
-           ENTRYPOINT ["flower-supernode", "--node-config", "partition-id=0,num-partitions=2"]
+           ENTRYPOINT ["flwr-clientapp"]
+       command:
+         - --supernode
+         - supernode-3:9096
+       deploy:
+         resources:
+           limits:
+             cpus: "2"
+       stop_signal: SIGINT
+       depends_on:
+         - supernode-3
 
 If you also want to enable TLS for the new SuperNodes, duplicate the SuperNode definition for
 each new SuperNode service in the ``with-tls.yml`` file.
@@ -296,13 +310,18 @@ In ``with-tls.yml``, add the following:
 .. code-block:: yaml
    :caption: with-tls.yml
 
-   services:
      # other service definitions
 
      supernode-3:
        command:
          - --superlink
          - superlink:9092
+         - --supernode-address
+         - 0.0.0.0:9096
+         - --isolation
+         - process
+         - --node-config
+         - "partition-id=1 num-partitions=2"
          - --root-certificates
          - certificates/ca.crt
        secrets:
@@ -315,14 +334,13 @@ Step 8: Persisting the SuperLink State and Enabling TLS
 To run Flower with persisted SuperLink state and enabled TLS, a slight change in the ``with-state.yml``
 file is required:
 
-#. Comment out the lines 3-5 and uncomment the lines 6-10:
+#. Comment out the lines 2-4 and uncomment the lines 5-9:
 
    .. code-block:: yaml
       :caption: with-state.yml
       :linenos:
-      :emphasize-lines: 3-10
+      :emphasize-lines: 2-9
 
-      services:
         superlink:
           # command:
           #   - --insecure

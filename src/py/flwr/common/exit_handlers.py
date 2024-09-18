@@ -19,7 +19,7 @@ import sys
 from signal import SIGINT, SIGTERM, signal
 from threading import Thread
 from types import FrameType
-from typing import List, Optional
+from typing import Optional
 
 from grpc import Server
 
@@ -28,8 +28,8 @@ from flwr.common.telemetry import EventType, event
 
 def register_exit_handlers(
     event_type: EventType,
-    grpc_servers: Optional[List[Server]] = None,
-    bckg_threads: Optional[List[Thread]] = None,
+    grpc_servers: Optional[list[Server]] = None,
+    bckg_threads: Optional[list[Thread]] = None,
 ) -> None:
     """Register exit handlers for `SIGINT` and `SIGTERM` signals.
 

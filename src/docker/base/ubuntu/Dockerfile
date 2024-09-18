@@ -60,12 +60,19 @@ RUN pip install -U --no-cache-dir pip==${PIP_VERSION} setuptools==${SETUPTOOLS_V
     && python -m venv /python/venv
 ENV PATH=/python/venv/bin:$PATH
 
-ARG FLWR_VERSION
-ARG FLWR_PACKAGE=flwr
 RUN pip install -U --no-cache-dir \
     pip==${PIP_VERSION} \
-    setuptools==${SETUPTOOLS_VERSION} \
-    ${FLWR_PACKAGE}==${FLWR_VERSION}
+    setuptools==${SETUPTOOLS_VERSION}
+
+ARG FLWR_VERSION
+ARG FLWR_VERSION_REF
+ARG FLWR_PACKAGE=flwr
+# hadolint ignore=DL3013
+RUN if [ -z "${FLWR_VERSION_REF}" ]; then \
+    pip install -U --no-cache-dir ${FLWR_PACKAGE}==${FLWR_VERSION}; \
+    else \
+    pip install -U --no-cache-dir ${FLWR_PACKAGE}@${FLWR_VERSION_REF}; \
+    fi
 
 FROM $DISTRO:$DISTRO_VERSION AS base
 

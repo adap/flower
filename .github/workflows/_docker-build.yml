@@ -36,7 +36,7 @@ permissions:
 jobs:
   build:
     name: Build image
-    runs-on: ubuntu-22.04
+    runs-on: ${{ matrix.platform.runner-os }}
     timeout-minutes: 180
     outputs:
       build-id: ${{ steps.build-id.outputs.id }}
@@ -44,10 +44,8 @@ jobs:
       fail-fast: true
       matrix:
         platform: [
-            # build-push action and qemu use different platform names
-            # therefore we create a map
-            { name: "amd64", qemu: "", docker: "linux/amd64" },
-            { name: "arm64", qemu: "arm64", docker: "linux/arm64" },
+            { name: "amd64", docker: "linux/amd64", runner-os: "ubuntu-22.04" },
+            { name: "arm64", docker: "linux/arm64", runner-os: "ubuntu-4-core-arm64" },
           ]
     steps:
       - name: Create build id
@@ -79,12 +77,6 @@ jobs:
               print(build_args, file=fh)
               print("EOF", file=fh)
 
-      - name: Set up QEMU
-        if: matrix.platform.qemu != ''
-        uses: docker/setup-qemu-action@49b3bc8e6bdd4a60e6116a5414239cba5943d3cf # v3.2.0
-        with:
-          platforms: ${{ matrix.platform.qemu }}
-
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81 # v5.5.1
@@ -104,7 +96,7 @@ jobs:
         uses: Wandalen/wretry.action@6feedb7dedadeb826de0f45ff482b53b379a7844 # v3.5.0
         id: build
         with:
-          action: docker/build-push-action@2cdde995de11925a030ce8070c3d77a52ffcf1c0 # v5.3.0
+          action: docker/build-push-action@5cd11c3a4ced054e52742c5fd54dca954e0edd85 # v6.7.0
           attempt_limit: 60 # 60 attempts * (9 secs delay + 1 sec retry) = ~10 mins
           attempt_delay: 9000 # 9 secs
           with: |
@@ -122,7 +114,7 @@ jobs:
           touch "/tmp/digests/${digest#sha256:}"
 
       - name: Upload digest
-        uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a # v4.3.6
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:
           name: digests-${{ steps.build-id.outputs.id }}-${{ matrix.platform.name }}
           path: /tmp/digests/*
