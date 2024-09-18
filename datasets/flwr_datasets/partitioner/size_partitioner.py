@@ -16,7 +16,7 @@
 
 
 import warnings
-from typing import Dict, List, Sequence
+from collections.abc import Sequence
 
 import datasets
 from flwr_datasets.partitioner.partitioner import Partitioner
@@ -45,7 +45,7 @@ class SizePartitioner(Partitioner):
         super().__init__()
         self._pre_ds_validate_partition_sizes(partition_sizes)
         self._partition_sizes = partition_sizes
-        self._partition_id_to_indices: Dict[int, List[int]] = {}
+        self._partition_id_to_indices: dict[int, list[int]] = {}
         self._partition_id_to_indices_determined = False
 
     def load_partition(self, partition_id: int) -> datasets.Dataset:
@@ -75,7 +75,7 @@ class SizePartitioner(Partitioner):
         return len(self._partition_sizes)
 
     @property
-    def partition_id_to_indices(self) -> Dict[int, List[int]]:
+    def partition_id_to_indices(self) -> dict[int, list[int]]:
         """Partition id to indices (the result of partitioning)."""
         self._determine_partition_id_to_indices_if_needed()
         return self._partition_id_to_indices
