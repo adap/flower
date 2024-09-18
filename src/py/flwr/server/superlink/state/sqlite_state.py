@@ -643,7 +643,7 @@ class SqliteState(State):  # pylint: disable=R0904
             query = (
                 "INSERT INTO run "
                 "(run_id, fab_id, fab_version, fab_hash, override_config, "
-                "status_phase, status_result, status_reason)"
+                "status, sub_status, reason)"
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?);"
             )
             if fab_hash:
@@ -770,7 +770,7 @@ class SqliteState(State):  # pylint: disable=R0904
             return False
 
         # Update the status
-        query = "UPDATE run SET status_phase = ?, status_result = ?, status_reason = ? "
+        query = "UPDATE run SET status= ?, sub_status = ?, reason = ? "
         query += "WHERE run_id = ?;"
         data = (
             new_status_info.status,
