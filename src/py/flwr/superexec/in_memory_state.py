@@ -37,14 +37,12 @@ class InMemoryExecState(ExecState):
     @override
     def get_run_config(self, run_id: int) -> Optional[UserConfig]:
         run = self.runs.get(run_id)
-        if run:
-            return run[0]
+        return run[0] if run else None
 
     @override
     def get_fab_hash(self, run_id: int) -> Optional[str]:
         run = self.runs.get(run_id)
-        if run:
-            return run[1]
+        return run[1] if run else None
 
     @override
     def get_runs(self) -> list[int]:
