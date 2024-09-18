@@ -103,7 +103,6 @@ flwr run . --run-config "train-method='cyclic' partitioner-type='linear' central
 > \[!NOTE\]
 > An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.
 
-
 ## Expected Experimental Results
 
 ### Bagging aggregation experiment

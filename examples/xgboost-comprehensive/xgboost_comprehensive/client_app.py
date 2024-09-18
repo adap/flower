@@ -133,8 +133,14 @@ def client_fn(context: Context):
     centralised_eval_client = cfg["centralised_eval_client"]
 
     # Load training and validation data
-    train_dmatrix, valid_dmatrix, num_train, num_val = load_data(partitioner_type, partition_id, num_partitions,
-                                                                 centralised_eval_client, test_fraction, seed)
+    train_dmatrix, valid_dmatrix, num_train, num_val = load_data(
+        partitioner_type,
+        partition_id,
+        num_partitions,
+        centralised_eval_client,
+        test_fraction,
+        seed,
+    )
 
     # Setup learning rate
     if cfg["scaled_lr"]:

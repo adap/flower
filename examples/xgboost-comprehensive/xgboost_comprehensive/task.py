@@ -1,8 +1,6 @@
 """xgboost_comprehensive: A Flower / XGBoost app."""
 
 from logging import INFO
-from typing import Union
-from tqdm import tqdm
 import xgboost as xgb
 from datasets import Dataset, DatasetDict, concatenate_datasets
 
@@ -23,6 +21,7 @@ CORRELATION_TO_PARTITIONER = {
 }
 
 fds = None  # Cache FederatedDataset
+
 
 def train_test_split(partition, test_fraction, seed):
     """Split the data into train and validation set given split rate."""
@@ -60,7 +59,14 @@ def instantiate_fds(partitioner_type, num_partitions):
     return fds
 
 
-def load_data(partitioner_type, partition_id, num_partitions, centralised_eval_client, test_fraction, seed):
+def load_data(
+    partitioner_type,
+    partition_id,
+    num_partitions,
+    centralised_eval_client,
+    test_fraction,
+    seed,
+):
     """Load partition data."""
     fds_ = instantiate_fds(partitioner_type, num_partitions)
     partition = fds_.load_partition(partition_id)

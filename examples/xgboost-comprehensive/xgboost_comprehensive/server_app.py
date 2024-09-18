@@ -152,7 +152,9 @@ def server_fn(context: Context):
     config = ServerConfig(num_rounds=num_rounds)
     client_manager = CyclicClientManager() if train_method == "cyclic" else None
 
-    return ServerAppComponents(strategy=strategy, config=config, client_manager=client_manager)
+    return ServerAppComponents(
+        strategy=strategy, config=config, client_manager=client_manager
+    )
 
 
 # Create ServerApp
