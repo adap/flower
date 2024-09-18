@@ -23,12 +23,17 @@ from uuid import UUID, uuid4
 
 from flwr.common import log, now
 from flwr.common.constant import NODE_ID_NUM_BYTES, RUN_ID_NUM_BYTES
-from flwr.common.typing import Run, UserConfig
+from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state.state import State
 from flwr.server.utils import validate_task_ins_or_res
 
-from .utils import generate_rand_int_from_bytes, make_node_unavailable_taskres
+from .utils import (
+    generate_rand_int_from_bytes,
+    has_valid_result,
+    is_valid_transition,
+    make_node_unavailable_taskres,
+)
 
 
 class InMemoryState(State):  # pylint: disable=R0902,R0904
@@ -41,7 +46,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         self.public_key_to_node_id: dict[bytes, int] = {}
 
         # Map run_id to (fab_id, fab_version)
-        self.run_ids: dict[int, Run] = {}
+        self.run_ids: dict[int, tuple[Run, RunStatus]] = {}
         self.task_ins_store: dict[UUID, TaskIns] = {}
         self.task_res_store: dict[UUID, TaskRes] = {}
 
@@ -288,13 +293,19 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
 
             if run_id not in self.run_ids:
-                self.run_ids[run_id] = Run(
+                run = Run(
                     run_id=run_id,
                     fab_id=fab_id if fab_id else "",
                     fab_version=fab_version if fab_version else "",
                     fab_hash=fab_hash if fab_hash else "",
                     override_config=override_config,
                 )
+                initial_status = RunStatus(
+                    phase="starting",
+                    result="",
+                    reason="",
+                )
+                self.run_ids[run_id] = (run, initial_status)
                 return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
@@ -338,7 +349,44 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             if run_id not in self.run_ids:
                 log(ERROR, "`run_id` is invalid")
                 return None
-            return self.run_ids[run_id]
+            return self.run_ids[run_id][0]
+
+    def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
+        """Get the status of the run with the specified `run_id`."""
+        with self.lock:
+            return {
+                run_id: self.run_ids[run_id][1]
+                for run_id in run_ids
+                if run_id in self.run_ids
+            }
+
+    def update_run_status(self, run_id: int, new_status: RunStatus) -> bool:
+        """Update the status of the run with the specified `run_id`."""
+        with self.lock:
+            # Check if the run_id exists
+            if run_id not in self.run_ids:
+                log(ERROR, "`run_id` is invalid")
+                return False
+
+            # Check if the status transition is valid
+            status = self.run_ids[run_id][1]
+            if not is_valid_transition(status, new_status):
+                log(
+                    ERROR,
+                    'Invalid status transition: from "%s" to "%s"',
+                    status.phase,
+                    new_status.phase,
+                )
+                return False
+
+            # Check if the result is valid
+            if not has_valid_result(status):
+                log(ERROR, 'Invalid run status: "%s:%s"', status.phase, status.result)
+                return False
+
+            # Update the status
+            self.run_ids[run_id] = (self.run_ids[run_id][0], new_status)
+            return True
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""

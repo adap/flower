@@ -30,6 +30,7 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     private_key_to_bytes,
     public_key_to_bytes,
 )
+from flwr.common.typing import RunStatus
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
@@ -61,6 +62,64 @@ class StateTest(unittest.TestCase):
         assert run.run_id == run_id
         assert run.fab_hash == "9f86d08"
         assert run.override_config["test_key"] == "test_value"
+
+    def test_get_and_update_run_status(self) -> None:
+        """Test if get_run_status and update_run_status work correctly."""
+        # Prepare
+        state = self.state_factory()
+        run_id1 = state.create_run(None, None, "9f86d08", {"test_key": "test_value"})
+        run_id2 = state.create_run(None, None, "fffffff", {"mock_key": "mock_value"})
+        state.update_run_status(run_id2, RunStatus("running", "", ""))
+
+        # Execute
+        run_status_dict = state.get_run_status({run_id1, run_id2})
+        status1 = run_status_dict[run_id1]
+        status2 = run_status_dict[run_id2]
+
+        # Assert
+        assert status1.phase == "starting"
+        assert status2.phase == "running"
+
+    def test_status_transition_valid(self) -> None:
+        """Test valid run status transactions."""
+        # Prepare
+        state = self.state_factory()
+        run_id = state.create_run(None, None, "9f86d08", {"test_key": "test_value"})
+
+        # Execute and assert
+        status1 = state.get_run_status({run_id})[run_id]
+        assert state.update_run_status(run_id, RunStatus("running", "", ""))
+        status2 = state.get_run_status({run_id})[run_id]
+        assert state.update_run_status(
+            run_id, RunStatus("finished", "failed", "mock failure")
+        )
+        status3 = state.get_run_status({run_id})[run_id]
+
+        assert status1.phase == "starting"
+        assert status2.phase == "running"
+        assert status3.phase == "finished"
+
+    def test_status_transition_invalid(self) -> None:
+        """Test invalid run status transitions."""
+        # Prepare
+        state = self.state_factory()
+        run_id = state.create_run(None, None, "9f86d08", {"test_key": "test_value"})
+
+        # Execute and assert
+        # Cannot transition to "starting" or "finished" from "starting"
+        assert not state.update_run_status(run_id, RunStatus("starting", "", ""))
+        assert not state.update_run_status(
+            run_id, RunStatus("finished", "completed", "")
+        )
+        state.update_run_status(run_id, RunStatus("running", "", ""))
+        # Cannot transition to "starting" or "running" from "running"
+        assert not state.update_run_status(run_id, RunStatus("starting", "", ""))
+        assert not state.update_run_status(run_id, RunStatus("running", "", ""))
+        state.update_run_status(run_id, RunStatus("finished", "completed", ""))
+        # Cannot transition to any status from "finished"
+        assert not state.update_run_status(run_id, RunStatus("starting", "", ""))
+        assert not state.update_run_status(run_id, RunStatus("running", "", ""))
+        assert not state.update_run_status(run_id, RunStatus("finished", "failed", ""))
 
     def test_get_task_ins_empty(self) -> None:
         """Validate that a new state has no TaskIns."""
