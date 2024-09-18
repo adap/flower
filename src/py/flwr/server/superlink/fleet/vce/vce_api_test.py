@@ -40,9 +40,10 @@ from flwr.common import (
     RecordSet,
     Scalar,
 )
+from flwr.common.constant import RunStatus
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
 from flwr.common.serde import message_from_taskres, message_to_taskins
-from flwr.common.typing import Run, RunStatus
+from flwr.common.typing import Run, StatusInfo
 from flwr.server.superlink.fleet.vce.vce_api import (
     NodeToPartitionMapping,
     _register_nodes,
@@ -121,9 +122,9 @@ def register_messages_into_state(
             fab_hash="hash",
             override_config={},
         ),
-        RunStatus(
-            phase="starting",
-            result="",
+        StatusInfo(
+            status=RunStatus.STARTING,
+            sub_status="",
             reason="",
         ),
     )

@@ -219,11 +219,11 @@ class Run:
 
 
 @dataclass
-class RunStatus:
-    """Run status."""
+class StatusInfo:
+    """Run status details."""
 
-    phase: str
-    result: str
+    status: str
+    sub_status: str
     reason: str
 
 
