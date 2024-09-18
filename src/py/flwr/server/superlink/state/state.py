@@ -19,7 +19,7 @@ import abc
 from typing import Optional
 from uuid import UUID
 
-from flwr.common.typing import Run, RunStatus, UserConfig
+from flwr.common.typing import Run, StatusInfo, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 
@@ -185,24 +185,35 @@ class State(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
-        """Get the status of the run with the specified `run_id`.
+    def get_run_status(self, run_ids: set[int]) -> dict[int, StatusInfo]:
+        """Retrieve the status information for the specified runs.
 
         Parameters
         ----------
         run_ids : set[int]
+            A set of run identifiers for which to retrieve statuses.
+
+        Returns
+        -------
+        dict[int, StatusInfo]
+            A dictionary mapping each valid run ID to its corresponding `StatusInfo`.
+
+        Notes
+        -----
+        Only valid run IDs that exist in the State will be included in the returned
+        dictionary. If a run ID is not found, it will be omitted from the result.
         """
 
     @abc.abstractmethod
-    def update_run_status(self, run_id: int, new_status: RunStatus) -> bool:
+    def update_run_status(self, run_id: int, new_status_info: StatusInfo) -> bool:
         """Update the status of the run with the specified `run_id`.
 
         Parameters
         ----------
         run_id : int
             The identifier of the run.
-        new_status : RunStatus
-            The new status to be assigned to the run.
+        new_status_info : StatusInfo
+            The new status info to be assigned to the run.
 
         Returns
         -------

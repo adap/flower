@@ -22,15 +22,15 @@ from typing import Optional
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
-from flwr.common.constant import NODE_ID_NUM_BYTES, RUN_ID_NUM_BYTES
-from flwr.common.typing import Run, RunStatus, UserConfig
+from flwr.common.constant import NODE_ID_NUM_BYTES, RUN_ID_NUM_BYTES, RunStatus
+from flwr.common.typing import Run, StatusInfo, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state.state import State
 from flwr.server.utils import validate_task_ins_or_res
 
 from .utils import (
     generate_rand_int_from_bytes,
-    has_valid_result,
+    has_valid_sub_status,
     is_valid_transition,
     make_node_unavailable_taskres,
 )
@@ -46,7 +46,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         self.public_key_to_node_id: dict[bytes, int] = {}
 
         # Map run_id to (fab_id, fab_version)
-        self.run_ids: dict[int, tuple[Run, RunStatus]] = {}
+        self.run_ids: dict[int, tuple[Run, StatusInfo]] = {}
         self.task_ins_store: dict[UUID, TaskIns] = {}
         self.task_res_store: dict[UUID, TaskRes] = {}
 
@@ -300,12 +300,12 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                     fab_hash=fab_hash if fab_hash else "",
                     override_config=override_config,
                 )
-                initial_status = RunStatus(
-                    phase="starting",
-                    result="",
+                initial_status_info = StatusInfo(
+                    status=RunStatus.STARTING,
+                    sub_status="",
                     reason="",
                 )
-                self.run_ids[run_id] = (run, initial_status)
+                self.run_ids[run_id] = (run, initial_status_info)
                 return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
@@ -351,8 +351,8 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                 return None
             return self.run_ids[run_id][0]
 
-    def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
-        """Get the status of the run with the specified `run_id`."""
+    def get_run_status(self, run_ids: set[int]) -> dict[int, StatusInfo]:
+        """Retrieve the status information for the specified runs."""
         with self.lock:
             return {
                 run_id: self.run_ids[run_id][1]
@@ -360,7 +360,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                 if run_id in self.run_ids
             }
 
-    def update_run_status(self, run_id: int, new_status: RunStatus) -> bool:
+    def update_run_status(self, run_id: int, new_status_info: StatusInfo) -> bool:
         """Update the status of the run with the specified `run_id`."""
         with self.lock:
             # Check if the run_id exists
@@ -369,23 +369,23 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                 return False
 
             # Check if the status transition is valid
-            status = self.run_ids[run_id][1]
-            if not is_valid_transition(status, new_status):
+            info = self.run_ids[run_id][1]
+            if not is_valid_transition(info, new_status_info):
                 log(
                     ERROR,
                     'Invalid status transition: from "%s" to "%s"',
-                    status.phase,
-                    new_status.phase,
+                    info.status,
+                    new_status_info.status,
                 )
                 return False
 
-            # Check if the result is valid
-            if not has_valid_result(status):
-                log(ERROR, 'Invalid run status: "%s:%s"', status.phase, status.result)
+            # Check if the sub-status is valid
+            if not has_valid_sub_status(info):
+                log(ERROR, 'Invalid run status: "%s:%s"', info.status, info.sub_status)
                 return False
 
             # Update the status
-            self.run_ids[run_id] = (self.run_ids[run_id][0], new_status)
+            self.run_ids[run_id] = (self.run_ids[run_id][0], new_status_info)
             return True
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:

@@ -120,3 +120,27 @@ class ErrorCode:
     def __new__(cls) -> ErrorCode:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+class RunStatus:
+    """Run status."""
+
+    STARTING = "starting"
+    RUNNING = "running"
+    FINISHED = "finished"
+
+    def __new__(cls) -> RunStatus:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+class RunSubStatus:
+    """Run sub-status."""
+
+    COMPLETED = "completed"
+    FAILED = "failed"
+    STOPPED = "stopped"
+
+    def __new__(cls) -> RunSubStatus:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")
