@@ -15,8 +15,6 @@
 """Aggregation function tests."""
 
 
-from typing import List, Tuple
-
 import numpy as np
 
 from .aggregate import (
@@ -49,7 +47,7 @@ def test_aggregate() -> None:
 def test_weighted_loss_avg_single_value() -> None:
     """Test weighted loss averaging."""
     # Prepare
-    results: List[Tuple[int, float]] = [(5, 0.5)]
+    results: list[tuple[int, float]] = [(5, 0.5)]
     expected = 0.5
 
     # Execute
@@ -62,7 +60,7 @@ def test_weighted_loss_avg_single_value() -> None:
 def test_weighted_loss_avg_multiple_values() -> None:
     """Test weighted loss averaging."""
     # Prepare
-    results: List[Tuple[int, float]] = [(1, 2.0), (2, 1.0), (1, 2.0)]
+    results: list[tuple[int, float]] = [(1, 2.0), (2, 1.0), (1, 2.0)]
     expected = 1.5
 
     # Execute

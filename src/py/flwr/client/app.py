@@ -18,10 +18,11 @@ import signal
 import subprocess
 import sys
 import time
+from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from logging import ERROR, INFO, WARN
 from pathlib import Path
-from typing import Callable, ContextManager, Dict, Optional, Tuple, Type, Union, cast
+from typing import Callable, Optional, Union, cast
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -35,6 +36,7 @@ from flwr.client.typing import ClientFnExt
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, Message, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
+    CLIENTAPPIO_API_DEFAULT_ADDRESS,
     MISSING_EXTRA_REST,
     RUN_ID_NUM_BYTES,
     TRANSPORT_TYPE_GRPC_ADAPTER,
@@ -59,8 +61,6 @@ from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
 from .node_state import NodeState
 from .numpy_client import NumPyClient
-
-ADDRESS_CLIENTAPPIO_API_GRPC_RERE = "0.0.0.0:9094"
 
 ISOLATION_MODE_SUBPROCESS = "subprocess"
 ISOLATION_MODE_PROCESS = "process"
@@ -95,7 +95,7 @@ def start_client(
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
     authentication_keys: Optional[
-        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
@@ -205,13 +205,13 @@ def start_client_internal(
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
     authentication_keys: Optional[
-        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
     flwr_path: Optional[Path] = None,
     isolation: Optional[str] = None,
-    supernode_address: Optional[str] = ADDRESS_CLIENTAPPIO_API_GRPC_RERE,
+    supernode_address: Optional[str] = CLIENTAPPIO_API_DEFAULT_ADDRESS,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -266,7 +266,7 @@ def start_client_internal(
         by the SueprNode and communicates using gRPC at the address
         `supernode_address`. If `process`, the `ClientApp` runs in a separate isolated
         process and communicates using gRPC at the address `supernode_address`.
-    supernode_address : Optional[str] (default: `ADDRESS_CLIENTAPPIO_API_GRPC_RERE`)
+    supernode_address : Optional[str] (default: `CLIENTAPPIO_API_DEFAULT_ADDRESS`)
         The SuperNode gRPC server address.
     """
     if insecure is None:
@@ -357,7 +357,7 @@ def start_client_internal(
     # NodeState gets initialized when the first connection is established
     node_state: Optional[NodeState] = None
 
-    runs: Dict[int, Run] = {}
+    runs: dict[int, Run] = {}
 
     while not app_state_tracker.interrupt:
         sleep_duration: int = 0
@@ -690,7 +690,7 @@ def start_numpy_client(
     )
 
 
-def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
+def _init_connection(transport: Optional[str], server_address: str) -> tuple[
     Callable[
         [
             str,
@@ -698,10 +698,10 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
             RetryInvoker,
             int,
             Union[bytes, str, None],
-            Optional[Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]],
+            Optional[tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]],
         ],
-        ContextManager[
-            Tuple[
+        AbstractContextManager[
+            tuple[
                 Callable[[], Optional[Message]],
                 Callable[[Message], None],
                 Optional[Callable[[], Optional[int]]],
@@ -712,7 +712,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
         ],
     ],
     str,
-    Type[Exception],
+    type[Exception],
 ]:
     # Parse IP address
     parsed_address = parse_address(server_address)
@@ -770,7 +770,7 @@ class _AppStateTracker:
         signal.signal(signal.SIGTERM, signal_handler)
 
 
-def run_clientappio_api_grpc(address: str) -> Tuple[grpc.Server, ClientAppIoServicer]:
+def run_clientappio_api_grpc(address: str) -> tuple[grpc.Server, ClientAppIoServicer]:
     """Run ClientAppIo API gRPC server."""
     clientappio_servicer: grpc.Server = ClientAppIoServicer()
     clientappio_add_servicer_to_server_fn = add_ClientAppIoServicer_to_server

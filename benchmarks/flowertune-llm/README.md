@@ -1,4 +1,4 @@
-![](_static/flower_llm.png)
+[![FlowerTune LLM Leaderboard](_static/flower_llm.png)](https://flower.ai/benchmarks/llm-leaderboard)
 
 # FlowerTune LLM Leaderboard
 
@@ -27,15 +27,16 @@ flwr new --framework=FlowerTune
 The `flwr new` command will generate a directory with the following structure:
 
 ```bash
-<project-name>
-       ├── README.md           # <- Instructions
-       ├── pyproject.toml      # <- Environment dependencies and configs
-       └── <project_name>
-                  ├── client_app.py   # <- Flower ClientApp build
-                  ├── dataset.py      # <- Dataset and tokenizer build
-                  ├── models.py       # <- Model build
-                  ├── server_app.py   # <- Flower ServerApp build
-                  └── strategy.py     # <- Flower strategy build
+<project_name>
+├── README.md           # Instructions
+├── pyproject.toml      # Environment dependencies and configs
+└── <project_name>
+    ├── __init__.py
+    ├── client_app.py   # Flower ClientApp build
+    ├── dataset.py      # Dataset and tokenizer build
+    ├── models.py       # Model build
+    ├── server_app.py   # Flower ServerApp build
+    └── strategy.py     # Flower strategy build
 ```
 
 This can serve as the starting point for you to build up your own federated LLM fine-tuning methods.
