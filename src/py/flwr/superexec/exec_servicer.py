@@ -32,7 +32,6 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
 )
 
 from .executor import Executor, RunTracker
-from .state import RunStatus
 from .state_factory import SuperexecStateFactory
 
 
@@ -63,7 +62,11 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             return StartRunResponse()
 
         self.runs[run.run_id] = run
-        self.state.update_run_status(run.run_id, RunStatus.RUNNING)
+        self.state.store_run(
+            run.run_id,
+            user_config_from_proto(request.override_config),
+            request.fab.hash_str,
+        )
 
         return StartRunResponse(run_id=run.run_id)
 

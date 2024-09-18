@@ -15,25 +15,26 @@
 """SuperExec state abstraction."""
 
 from abc import ABC, abstractmethod
-from enum import Enum, auto
 from typing import Optional
 
-
-class RunStatus(Enum):
-    """RunStatus Enum."""
-
-    RUNNING = auto()
-    FINISHED = auto()
-    INTERRUPTED = auto()
+from flwr.common.typing import UserConfig
 
 
 class ExecState(ABC):
     """Abstract ExecState."""
 
     @abstractmethod
-    def update_run_status(self, run_id: int, status: RunStatus) -> None:
-        """Store or update a RunStatus with the given run_id and status."""
+    def store_run(self, run_id: int, run_config: UserConfig, fab_hash: str) -> None:
+        """Store a Run with the given run_id, config, and FAB hash."""
 
     @abstractmethod
-    def get_run_status(self, run_id: int) -> Optional[RunStatus]:
-        """Retrieve the status of a RunStatus by run_id."""
+    def get_run_config(self, run_id: int) -> Optional[UserConfig]:
+        """Retrieve the run_config of a Run by run_id."""
+
+    @abstractmethod
+    def get_fab_hash(self, run_id: int) -> Optional[str]:
+        """Retrieve the hash of a FAB from a Run by run_id."""
+
+    @abstractmethod
+    def get_runs(self) -> list[int]:
+        """Retrieve all the stored run_ids."""
