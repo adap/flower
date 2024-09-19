@@ -22,6 +22,10 @@ from typing import Optional
 from typing_extensions import override
 
 from flwr.common.typing import UserConfig
+from flwr.server.superlink.state.utils import (
+    convert_uint64_to_sint64,
+    convert_sint64_to_uint64,
+)
 
 from .state import ExecState
 
@@ -32,42 +36,57 @@ class SqliteExecState(ExecState):
     def __init__(self, db_path: str):
         self.conn = sqlite3.connect(db_path)
 
-        with self.conn:
-            self.conn.execute(
-                """
-                CREATE TABLE IF NOT EXISTS runs (
-                    run_id INTEGER PRIMARY KEY,
-                    run_config TEXT,
-                    fab_hash TEXT
-                )
+        cur = self.conn.cursor()
+        cur.execute(
             """
-            )
+            CREATE TABLE IF NOT EXISTS runs (
+                run_id INTEGER PRIMARY KEY,
+                run_config TEXT,
+                fab_hash TEXT
+            );
+        """
+        )
 
     @override
     def store_run(self, run_id: int, run_config: UserConfig, fab_hash: str) -> None:
-        with self.conn:
-            self.conn.execute(
-                "INSERT INTO runs (run_id, run_config, fab_hash) VALUES (?, ?, ?)",
-                (run_id, json.dumps(run_config), fab_hash),
-            )
+        if self.conn is None:
+            raise AttributeError("State is not initialized.")
+
+        self.conn.execute(
+            "INSERT INTO runs (run_id, run_config, fab_hash) VALUES (?, ?, ?)",
+            (convert_uint64_to_sint64(run_id), json.dumps(run_config), fab_hash),
+        )
 
     @override
     def get_run_config(self, run_id: int) -> Optional[UserConfig]:
-        cursor = self.conn.cursor()
-        cursor.execute("SELECT run_config FROM runs WHERE run_id = ?", (run_id,))
-        row = cursor.fetchone()
+        if self.conn is None:
+            raise AttributeError("State is not initialized.")
+
+        with self.conn:
+            res = self.conn.execute(
+                "SELECT run_config FROM runs WHERE run_id = ?", (run_id,)
+            )
+            row = res.fetchone()
         return UserConfig(json.loads(row[0])) if row else None
 
     @override
     def get_fab_hash(self, run_id: int) -> Optional[str]:
-        cursor = self.conn.cursor()
-        cursor.execute("SELECT fab_hash FROM runs WHERE run_id = ?", (run_id,))
-        row = cursor.fetchone()
+        if self.conn is None:
+            raise AttributeError("State is not initialized.")
+
+        with self.conn:
+            res = self.conn.execute(
+                "SELECT fab_hash FROM runs WHERE run_id = ?", (run_id,)
+            )
+        row = res.fetchone()
         return row[0] if row else None
 
     @override
     def get_runs(self) -> list[int]:
-        cursor = self.conn.cursor()
-        cursor.execute("SELECT run_id FROM runs")
-        rows = cursor.fetchall()
-        return [int(row[0]) for row in rows]
+        if self.conn is None:
+            raise AttributeError("State is not initialized.")
+
+        with self.conn:
+            res = self.conn.execute("SELECT run_id FROM runs")
+        rows = res.fetchall()
+        return [convert_sint64_to_uint64(int(row[0])) for row in rows]

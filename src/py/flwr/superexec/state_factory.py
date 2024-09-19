@@ -24,7 +24,7 @@ from .sqlite_state import SqliteExecState
 from .state import ExecState
 
 
-class SuperexecStateFactory:
+class ExecStateFactory:
     """Factory class that creates State instances."""
 
     def __init__(self, database: str) -> None:

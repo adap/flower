@@ -24,7 +24,7 @@ from flwr.common.logger import log
 from flwr.common.typing import UserConfig
 from flwr.proto.exec_pb2_grpc import add_ExecServicer_to_server
 from flwr.server.superlink.fleet.grpc_bidi.grpc_server import generic_create_grpc_server
-from flwr.superexec.state_factory import SuperexecStateFactory
+from flwr.superexec.state_factory import ExecStateFactory
 
 from .exec_servicer import ExecServicer
 from .executor import Executor
@@ -35,12 +35,10 @@ def run_superexec_api_grpc(
     executor: Executor,
     certificates: Optional[tuple[bytes, bytes, bytes]],
     config: UserConfig,
-    db_path: str,
+    state_factory: ExecStateFactory,
 ) -> grpc.Server:
     """Run SuperExec API (gRPC, request-response)."""
     executor.set_config(config)
-
-    state_factory = SuperexecStateFactory(db_path)
 
     exec_servicer: grpc.Server = ExecServicer(
         executor=executor, state_factory=state_factory

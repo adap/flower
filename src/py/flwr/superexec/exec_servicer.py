@@ -32,17 +32,15 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
 )
 
 from .executor import Executor, RunTracker
-from .state_factory import SuperexecStateFactory
+from .state_factory import ExecStateFactory
 
 
 class ExecServicer(exec_pb2_grpc.ExecServicer):
     """SuperExec API servicer."""
 
-    def __init__(
-        self, executor: Executor, state_factory: SuperexecStateFactory
-    ) -> None:
+    def __init__(self, executor: Executor, state_factory: ExecStateFactory) -> None:
         self.executor = executor
-        self.state = state_factory.state()
+        self.state_factory = state_factory
         self.runs: dict[int, RunTracker] = {}
 
     def StartRun(
@@ -62,11 +60,15 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             return StartRunResponse()
 
         self.runs[run.run_id] = run
-        self.state.store_run(
+
+        state = self.state_factory.state()
+        state.store_run(
             run.run_id,
             user_config_from_proto(request.override_config),
             request.fab.hash_str,
         )
+        for rid in state.get_runs():
+            log(INFO, "Run ID: %s", rid)
 
         return StartRunResponse(run_id=run.run_id)
 
