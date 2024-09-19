@@ -430,7 +430,7 @@ def _record_value_to_proto(
                 else:
                     arg[_type_to_field[t]] = value  # type: ignore
 
-            arg[_type_to_field[t]] = value
+            arg[_type_to_field[t]] = value  # type: ignore
             return proto_class(**arg)
         # List
         if isinstance(value, list) and all(isinstance(item, t) for item in value):
