@@ -40,16 +40,21 @@ def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
     """Print logs from the beginning of a run."""
 
 
+def on_channel_state_change(channel_connectivity: str) -> None:
+    """Log channel connectivity."""
+    logger(DEBUG, channel_connectivity)
+
+
 def log(
     run_id: Annotated[
         int,
         typer.Argument(help="The Flower run ID to query"),
     ],
-    directory: Annotated[
+    app: Annotated[
         Path,
         typer.Argument(help="Path of the Flower project to run"),
     ] = Path("."),
-    federation_name: Annotated[
+    federation: Annotated[
         Optional[str],
         typer.Argument(help="Name of the federation to run the app on"),
     ] = None,
@@ -64,7 +69,7 @@ def log(
     """Get logs from a Flower project run."""
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
-    pyproject_path = directory / "pyproject.toml" if directory else None
+    pyproject_path = app / "pyproject.toml" if app else None
     config, errors, warnings = load_and_validate(path=pyproject_path)
 
     if config is None:
@@ -87,11 +92,9 @@ def log(
 
     typer.secho("Success", fg=typer.colors.GREEN)
 
-    federation_name = federation_name or config["tool"]["flwr"]["federations"].get(
-        "default"
-    )
+    federation = federation or config["tool"]["flwr"]["federations"].get("default")
 
-    if federation_name is None:
+    if federation is None:
         typer.secho(
             "❌ No federation name was provided and the project's `pyproject.toml` "
             "doesn't declare a default federation (with a SuperExec address or an "
@@ -102,13 +105,13 @@ def log(
         raise typer.Exit(code=1)
 
     # Validate the federation exists in the configuration
-    federation = config["tool"]["flwr"]["federations"].get(federation_name)
-    if federation is None:
+    federation_config = config["tool"]["flwr"]["federations"].get(federation)
+    if federation_config is None:
         available_feds = {
             fed for fed in config["tool"]["flwr"]["federations"] if fed != "default"
         }
         typer.secho(
-            f"❌ There is no `{federation_name}` federation declared in the "
+            f"❌ There is no `{federation}` federation declared in the "
             "`pyproject.toml`.\n The following federations were found:\n\n"
             + "\n".join(available_feds),
             fg=typer.colors.RED,
@@ -116,8 +119,8 @@ def log(
         )
         raise typer.Exit(code=1)
 
-    if "address" in federation:
-        _log_with_superexec(federation, run_id, stream)
+    if "address" in federation_config:
+        _log_with_superexec(federation_config, run_id, stream)
     else:
         typer.secho(
             "❌ `flwr log` currently works with `SuperExec`. Ensure that the correct"
@@ -130,17 +133,13 @@ def log(
 
 # pylint: disable-next=too-many-branches
 def _log_with_superexec(
-    federation: dict[str, str],
+    federation_config: dict[str, str],
     run_id: int,
     stream: bool,
 ) -> None:
 
-    def on_channel_state_change(channel_connectivity: str) -> None:
-        """Log channel connectivity."""
-        logger(DEBUG, channel_connectivity)
-
-    insecure_str = federation.get("insecure")
-    if root_certificates := federation.get("root-certificates"):
+    insecure_str = federation_config.get("insecure")
+    if root_certificates := federation_config.get("root-certificates"):
         root_certificates_bytes = Path(root_certificates).read_bytes()
         if insecure := bool(insecure_str):
             typer.secho(
@@ -168,7 +167,7 @@ def _log_with_superexec(
             raise typer.Exit(code=1)
 
     channel = create_channel(
-        server_address=federation["address"],
+        server_address=federation_config["address"],
         insecure=insecure,
         root_certificates=root_certificates_bytes,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
