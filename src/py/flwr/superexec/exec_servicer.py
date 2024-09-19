@@ -94,7 +94,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             # run isn't completed yet. If the run is finished, the entire log
             # is returned at this point and the server ends the stream.
             if self.runs[request.run_id].proc.poll() is not None:
-                log(INFO, "Run ID `%s` completed", request.run_id)
+                log(INFO, "All logs for run ID `%s` returned", request.run_id)
                 return
 
             time.sleep(1.0)  # Sleep briefly to avoid busy waiting
