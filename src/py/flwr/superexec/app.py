@@ -59,6 +59,7 @@ def run_superexec() -> None:
         config=parse_config_args(
             [args.executor_config] if args.executor_config else args.executor_config
         ),
+        db_path=args.db_path,
     )
 
     grpc_servers = [superexec_server]
@@ -82,6 +83,12 @@ def _parse_args_run_superexec() -> argparse.ArgumentParser:
         "--address",
         help="SuperExec (gRPC) server address (IPv4, IPv6, or a domain name)",
         default=EXEC_API_DEFAULT_ADDRESS,
+    )
+    parser.add_argument(
+        "--db_path",
+        help="The path of the DB file to use in order to store run metadata. "
+        "By default it will store the metadata in memory.",
+        default=":flwr-in-memory-state:",
     )
     parser.add_argument(
         "--executor",

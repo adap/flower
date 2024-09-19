@@ -35,11 +35,12 @@ def run_superexec_api_grpc(
     executor: Executor,
     certificates: Optional[tuple[bytes, bytes, bytes]],
     config: UserConfig,
+    db_path: str,
 ) -> grpc.Server:
     """Run SuperExec API (gRPC, request-response)."""
     executor.set_config(config)
 
-    state_factory = SuperexecStateFactory(":flwr-in-memory-state:")
+    state_factory = SuperexecStateFactory(db_path)
 
     exec_servicer: grpc.Server = ExecServicer(
         executor=executor, state_factory=state_factory
