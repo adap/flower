@@ -108,7 +108,7 @@ class UtilsTest(unittest.TestCase):
         ]
     )
     def test_convert_uint64_values_in_dict_to_sint64(
-        self, input_dict: dict, keys: list, expected_dict: dict
+        self, input_dict: dict[str, int], keys: list[str], expected_dict: dict[str, int]
     ) -> None:
         """Test uint64 to sint64 conversion in a dictionary."""
         convert_uint64_values_in_dict_to_sint64(input_dict, keys)
@@ -136,7 +136,7 @@ class UtilsTest(unittest.TestCase):
         ]
     )
     def test_convert_sint64_values_in_dict_to_uint64(
-        self, input_dict: dict, keys: list, expected_dict: dict
+        self, input_dict: dict[str, int], keys: list[str], expected_dict: dict[str, int]
     ) -> None:
         """Test sint64 to uint64 conversion in a dictionary."""
         convert_sint64_values_in_dict_to_uint64(input_dict, keys)
