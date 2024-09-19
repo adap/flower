@@ -28,17 +28,17 @@ message Message {
 }
 
 message Context {
-  sint64 node_id = 1;
+  uint64 node_id = 1;
   map<string, Scalar> node_config = 2;
   RecordSet state = 3;
   map<string, Scalar> run_config = 4;
 }
 
 message Metadata {
-  sint64 run_id = 1;
+  uint64 run_id = 1;
   string message_id = 2;
-  sint64 src_node_id = 3;
-  sint64 dst_node_id = 4;
+  uint64 src_node_id = 3;
+  uint64 dst_node_id = 4;
   string reply_to_message = 5;
   string group_id = 6;
   double ttl = 7;
