@@ -40,7 +40,7 @@ def load_data(
     tokenizer = AutoTokenizer.from_pretrained(model_name, model_max_length=512)
 
     def tokenize_function(examples):
-        return tokenizer(examples["text"], truncation=True)
+        return tokenizer(examples["text"], truncation=True, add_special_tokens=True)
 
     partition_train_test = partition_train_test.map(tokenize_function, batched=True)
     partition_train_test = partition_train_test.remove_columns("text")

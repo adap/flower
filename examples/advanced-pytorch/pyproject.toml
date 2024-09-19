@@ -1,20 +1,46 @@
 [build-system]
-requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
-name = "advanced-pytorch"
-version = "0.1.0"
-description = "Advanced Flower/PyTorch Example"
-authors = [
-    "The Flower Authors <hello@flower.ai>",
-    "Kaushik Amar Das <kaushik.das@iiitg.ac.in>",
+[project]
+name = "pytorch-example"
+version = "1.0.0"
+description = "Federated Learning with PyTorch and Flower (Advanced Example)"
+license = "Apache-2.0"
+dependencies = [
+    "flwr[simulation]>=1.11.0",
+    "flwr-datasets[vision]>=0.3.0",
+    "torch==2.2.1",
+    "torchvision==0.17.1",
+    "wandb==0.17.8",
 ]
 
-[tool.poetry.dependencies]
-python = ">=3.9,<3.11"
-flwr = ">=1.0,<2.0"
-flwr-datasets = { extras = ["vision"], version = ">=0.0.2,<1.0.0" }
-torch = "1.13.1"
-torchvision = "0.14.1"
-validators = "0.18.2"
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "flwrlabs"
+
+[tool.flwr.app.components]
+serverapp = "pytorch_example.server_app:app"
+clientapp = "pytorch_example.client_app:app"
+
+[tool.flwr.app.config]
+num-server-rounds = 10
+fraction-fit = 0.25
+fraction-evaluate = 0.5
+local-epochs = 1
+server-device = "cpu"
+use-wandb = true
+
+[tool.flwr.federations]
+default = "local-sim"
+
+[tool.flwr.federations.local-sim]
+options.num-supernodes = 50
+options.backend.client-resources.num-cpus = 2 # each ClientApp assumes to use 2CPUs
+options.backend.client-resources.num-gpus = 0.0 # ratio of VRAM a ClientApp has access to
+[tool.flwr.federations.local-sim-gpu]
+options.num-supernodes = 50
+options.backend.client-resources.num-cpus = 2
+options.backend.client-resources.num-gpus = 0.25
