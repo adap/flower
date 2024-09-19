@@ -90,10 +90,11 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
                 yield StreamLogsResponse(log_output=logs[i])
             last_sent_index = len(logs)
 
-            # Shutdown context if process has completed. Previously stored
-            # logs will still be printed.
+            # When a run has completed, return all previously stored logs
+            # for the `run_id` via yielding StreamLogsResponse.
             if self.runs[request.run_id].proc.poll() is not None:
                 log(INFO, "Run ID `%s` completed", request.run_id)
+                context.set_code(grpc.StatusCode.OK)
                 context.cancel()
 
             time.sleep(1.0)  # Sleep briefly to avoid busy waiting
