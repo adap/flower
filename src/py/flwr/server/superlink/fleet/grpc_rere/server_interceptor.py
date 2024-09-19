@@ -30,7 +30,6 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_shared_key,
     verify_hmac,
 )
-from flwr.proto.fab_pb2 import GetFabRequest  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
@@ -174,7 +173,6 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             PushTaskResRequest,
             GetRunRequest,
             PingRequest,
-            GetFabRequest,
         ],
     ) -> bool:
         if node_id is None:
@@ -185,8 +183,6 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             return request.task_res_list[0].task.producer.node_id == node_id
         if isinstance(request, GetRunRequest):
             return node_id in self.state.get_nodes(request.run_id)
-        if isinstance(request, GetFabRequest):
-            return True
         return request.node.node_id == node_id
 
     def _verify_hmac(
