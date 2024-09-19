@@ -33,6 +33,8 @@ RUN apk add --no-cache \
     # require for compiling grpcio on ARM64
     g++ \
     libffi-dev \
+    # required for installing flwr via git
+    git \
     # create virtual env
     && python -m venv /python/venv
 
@@ -42,18 +44,27 @@ ENV PATH=/python/venv/bin:$PATH
 # Install specific version of pip, setuptools and flwr
 ARG PIP_VERSION
 ARG SETUPTOOLS_VERSION
-ARG FLWR_VERSION
-ARG FLWR_PACKAGE=flwr
 RUN pip install -U --no-cache-dir \
     pip==${PIP_VERSION} \
-    setuptools==${SETUPTOOLS_VERSION} \
-    ${FLWR_PACKAGE}==${FLWR_VERSION}
+    setuptools==${SETUPTOOLS_VERSION}
+
+ARG FLWR_VERSION
+ARG FLWR_VERSION_REF
+ARG FLWR_PACKAGE=flwr
+# hadolint ignore=DL3013
+RUN if [ -z "${FLWR_VERSION_REF}" ]; then \
+    pip install -U --no-cache-dir ${FLWR_PACKAGE}==${FLWR_VERSION}; \
+    else \
+    pip install -U --no-cache-dir ${FLWR_PACKAGE}@${FLWR_VERSION_REF}; \
+    fi
 
 FROM python:${PYTHON_VERSION}-${DISTRO}${DISTRO_VERSION} AS base
 
-# Upgrade system Python pip and setuptools
-# hadolint ignore=DL3013
-RUN pip install -U --no-cache-dir pip setuptools
+# Keep the version of system Python pip and setuptools in sync with those installed in the
+# virtualenv.
+ARG PIP_VERSION
+ARG SETUPTOOLS_VERSION
+RUN pip install -U --no-cache-dir pip==${PIP_VERSION} setuptools==${SETUPTOOLS_VERSION}
 
 # required by the grpc package
 RUN apk add --no-cache \

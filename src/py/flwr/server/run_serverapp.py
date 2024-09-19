@@ -21,6 +21,8 @@ from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from typing import Optional
 
+from flwr.cli.config_utils import get_fab_metadata
+from flwr.cli.install import install_from_fab
 from flwr.common import Context, EventType, RecordSet, event
 from flwr.common.config import (
     get_flwr_dir,
@@ -29,6 +31,7 @@ from flwr.common.config import (
     get_project_config,
     get_project_dir,
 )
+from flwr.common.constant import DRIVER_API_DEFAULT_ADDRESS
 from flwr.common.logger import log, update_console_handler, warn_deprecated_feature
 from flwr.common.object_ref import load_app
 from flwr.common.typing import UserConfig
@@ -36,12 +39,11 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
     CreateRunResponse,
 )
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 
 from .driver import Driver
 from .driver.grpc_driver import GrpcDriver
 from .server_app import LoadServerAppError, ServerApp
-
-ADDRESS_DRIVER_API = "0.0.0.0:9091"
 
 
 def run(
@@ -87,17 +89,33 @@ def run(
     log(DEBUG, "ServerApp finished running.")
 
 
-def run_server_app() -> None:  # pylint: disable=too-many-branches
+# pylint: disable-next=too-many-branches,too-many-statements,too-many-locals
+def run_server_app() -> None:
     """Run Flower server app."""
     event(EventType.RUN_SERVER_APP_ENTER)
 
     args = _parse_args_run_server_app().parse_args()
 
-    if args.server != ADDRESS_DRIVER_API:
+    # Check if the server app reference is passed.
+    # Since Flower 1.11, passing a reference is not allowed.
+    app_path: Optional[str] = args.app
+    # If the provided app_path doesn't exist, and contains a ":",
+    # it is likely to be a server app reference instead of a path.
+    if app_path is not None and not Path(app_path).exists() and ":" in app_path:
+        sys.exit(
+            "It appears you've passed a reference like `server:app`.\n\n"
+            "Note that since version `1.11.0`, `flower-server-app` no longer supports "
+            "passing a reference to a `ServerApp` attribute. Instead, you need to pass "
+            "the path to Flower app via the argument `--app`. This is the path to a "
+            "directory containing a `pyproject.toml`. You can create a valid Flower "
+            "app by executing `flwr new` and following the prompt."
+        )
+
+    if args.server != DRIVER_API_DEFAULT_ADDRESS:
         warn = "Passing flag --server is deprecated. Use --superlink instead."
         warn_deprecated_feature(warn)
 
-        if args.superlink != ADDRESS_DRIVER_API:
+        if args.superlink != DRIVER_API_DEFAULT_ADDRESS:
             # if `--superlink` also passed, then
             # warn user that this argument overrides what was passed with `--server`
             log(
@@ -147,7 +165,6 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
             cert_path,
         )
 
-    app_path: Optional[str] = args.app
     if not (app_path is None) ^ (args.run_id is None):
         raise sys.exit(
             "Please provide either a Flower App path or a Run ID, but not both. "
@@ -164,7 +181,19 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
         )
         flwr_dir = get_flwr_dir(args.flwr_dir)
         run_ = driver.run
-        app_path = str(get_project_dir(run_.fab_id, run_.fab_version, flwr_dir))
+        if run_.fab_hash:
+            fab_req = GetFabRequest(hash_str=run_.fab_hash)
+            # pylint: disable-next=W0212
+            fab_res: GetFabResponse = driver._stub.GetFab(fab_req)
+            if fab_res.fab.hash_str != run_.fab_hash:
+                raise ValueError("FAB hashes don't match.")
+
+            install_from_fab(fab_res.fab.content, flwr_dir, True)
+            fab_id, fab_version = get_fab_metadata(fab_res.fab.content)
+        else:
+            fab_id, fab_version = run_.fab_id, run_.fab_version
+
+        app_path = str(get_project_dir(fab_id, fab_version, flwr_dir))
         config = get_project_config(app_path)
     else:
         # User provided `app_dir`, but not `--run-id`
@@ -245,12 +274,12 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--server",
-        default=ADDRESS_DRIVER_API,
+        default=DRIVER_API_DEFAULT_ADDRESS,
         help="Server address",
     )
     parser.add_argument(
         "--superlink",
-        default=ADDRESS_DRIVER_API,
+        default=DRIVER_API_DEFAULT_ADDRESS,
         help="SuperLink Driver API (gRPC-rere) address (IPv4, IPv6, or a domain name)",
     )
     parser.add_argument(

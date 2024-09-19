@@ -19,8 +19,9 @@ import json
 import re
 import sqlite3
 import time
+from collections.abc import Sequence
 from logging import DEBUG, ERROR
-from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union, cast
+from typing import Any, Optional, Union, cast
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
@@ -32,7 +33,14 @@ from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.utils.validator import validate_task_ins_or_res
 
 from .state import State
-from .utils import generate_rand_int_from_bytes, make_node_unavailable_taskres
+from .utils import (
+    convert_sint64_to_uint64,
+    convert_sint64_values_in_dict_to_uint64,
+    convert_uint64_to_sint64,
+    convert_uint64_values_in_dict_to_sint64,
+    generate_rand_int_from_bytes,
+    make_node_unavailable_taskres,
+)
 
 SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
@@ -65,6 +73,7 @@ CREATE TABLE IF NOT EXISTS run(
     run_id                INTEGER UNIQUE,
     fab_id                TEXT,
     fab_version           TEXT,
+    fab_hash              TEXT,
     override_config       TEXT
 );
 """
@@ -109,7 +118,7 @@ CREATE TABLE IF NOT EXISTS task_res(
 );
 """
 
-DictOrTuple = Union[Tuple[Any, ...], Dict[str, Any]]
+DictOrTuple = Union[tuple[Any, ...], dict[str, Any]]
 
 
 class SqliteState(State):  # pylint: disable=R0904
@@ -130,7 +139,7 @@ class SqliteState(State):  # pylint: disable=R0904
         self.database_path = database_path
         self.conn: Optional[sqlite3.Connection] = None
 
-    def initialize(self, log_queries: bool = False) -> List[Tuple[str]]:
+    def initialize(self, log_queries: bool = False) -> list[tuple[str]]:
         """Create tables if they don't exist yet.
 
         Parameters
@@ -161,7 +170,7 @@ class SqliteState(State):  # pylint: disable=R0904
         self,
         query: str,
         data: Optional[Union[Sequence[DictOrTuple], DictOrTuple]] = None,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Execute a SQL query."""
         if self.conn is None:
             raise AttributeError("State is not initialized.")
@@ -221,6 +230,12 @@ class SqliteState(State):  # pylint: disable=R0904
         # Store TaskIns
         task_ins.task_id = str(task_id)
         data = (task_ins_to_dict(task_ins),)
+
+        # Convert values from uint64 to sint64 for SQLite
+        convert_uint64_values_in_dict_to_sint64(
+            data[0], ["run_id", "producer_node_id", "consumer_node_id"]
+        )
+
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_ins VALUES({columns});"
 
@@ -236,7 +251,7 @@ class SqliteState(State):  # pylint: disable=R0904
 
     def get_task_ins(
         self, node_id: Optional[int], limit: Optional[int]
-    ) -> List[TaskIns]:
+    ) -> list[TaskIns]:
         """Get undelivered TaskIns for one node (either anonymous or with ID).
 
         Usually, the Fleet API calls this for Nodes planning to work on one or more
@@ -270,7 +285,7 @@ class SqliteState(State):  # pylint: disable=R0904
             )
             raise AssertionError(msg)
 
-        data: Dict[str, Union[str, int]] = {}
+        data: dict[str, Union[str, int]] = {}
 
         if node_id is None:
             # Retrieve all anonymous Tasks
@@ -282,6 +297,9 @@ class SqliteState(State):  # pylint: disable=R0904
                 AND   delivered_at = ""
             """
         else:
+            # Convert the uint64 value to sint64 for SQLite
+            data["node_id"] = convert_uint64_to_sint64(node_id)
+
             # Retrieve all TaskIns for node_id
             query = """
                 SELECT task_id
@@ -290,7 +308,6 @@ class SqliteState(State):  # pylint: disable=R0904
                 AND   consumer_node_id == :node_id
                 AND   delivered_at = ""
             """
-            data["node_id"] = node_id
 
         if limit is not None:
             query += " LIMIT :limit"
@@ -319,6 +336,12 @@ class SqliteState(State):  # pylint: disable=R0904
 
             # Run query
             rows = self.query(query, data)
+
+        for row in rows:
+            # Convert values from sint64 to uint64
+            convert_sint64_values_in_dict_to_uint64(
+                row, ["run_id", "producer_node_id", "consumer_node_id"]
+            )
 
         result = [dict_to_task_ins(row) for row in rows]
 
@@ -352,6 +375,12 @@ class SqliteState(State):  # pylint: disable=R0904
         # Store TaskIns
         task_res.task_id = str(task_id)
         data = (task_res_to_dict(task_res),)
+
+        # Convert values from uint64 to sint64 for SQLite
+        convert_uint64_values_in_dict_to_sint64(
+            data[0], ["run_id", "producer_node_id", "consumer_node_id"]
+        )
+
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_res VALUES({columns});"
 
@@ -366,7 +395,7 @@ class SqliteState(State):  # pylint: disable=R0904
         return task_id
 
     # pylint: disable-next=R0914
-    def get_task_res(self, task_ids: Set[UUID], limit: Optional[int]) -> List[TaskRes]:
+    def get_task_res(self, task_ids: set[UUID], limit: Optional[int]) -> list[TaskRes]:
         """Get TaskRes for task_ids.
 
         Usually, the Driver API calls this method to get results for instructions it has
@@ -396,7 +425,7 @@ class SqliteState(State):  # pylint: disable=R0904
             AND delivered_at = ""
         """
 
-        data: Dict[str, Union[str, float, int]] = {}
+        data: dict[str, Union[str, float, int]] = {}
 
         if limit is not None:
             query += " LIMIT :limit"
@@ -429,12 +458,18 @@ class SqliteState(State):  # pylint: disable=R0904
             # Run query
             rows = self.query(query, data)
 
+            for row in rows:
+                # Convert values from sint64 to uint64
+                convert_sint64_values_in_dict_to_uint64(
+                    row, ["run_id", "producer_node_id", "consumer_node_id"]
+                )
+
         result = [dict_to_task_res(row) for row in rows]
 
         # 1. Query: Fetch consumer_node_id of remaining task_ids
         # Assume the ancestry field only contains one element
         data.clear()
-        replied_task_ids: Set[UUID] = {UUID(str(row["ancestry"])) for row in rows}
+        replied_task_ids: set[UUID] = {UUID(str(row["ancestry"])) for row in rows}
         remaining_task_ids = task_ids - replied_task_ids
         placeholders = ",".join([f":id_{i}" for i in range(len(remaining_task_ids))])
         query = f"""
@@ -472,6 +507,13 @@ class SqliteState(State):  # pylint: disable=R0904
         for row in task_ins_rows:
             if limit and len(result) == limit:
                 break
+
+            for row in rows:
+                # Convert values from sint64 to uint64
+                convert_sint64_values_in_dict_to_uint64(
+                    row, ["run_id", "producer_node_id", "consumer_node_id"]
+                )
+
             task_ins = dict_to_task_ins(row)
             err_taskres = make_node_unavailable_taskres(
                 ref_taskins=task_ins,
@@ -498,10 +540,10 @@ class SqliteState(State):  # pylint: disable=R0904
         """
         query = "SELECT count(*) AS num FROM task_res;"
         rows = self.query(query)
-        result: Dict[str, int] = rows[0]
+        result: dict[str, int] = rows[0]
         return result["num"]
 
-    def delete_tasks(self, task_ids: Set[UUID]) -> None:
+    def delete_tasks(self, task_ids: set[UUID]) -> None:
         """Delete all delivered TaskIns/TaskRes pairs."""
         ids = list(task_ids)
         if len(ids) == 0:
@@ -542,8 +584,11 @@ class SqliteState(State):  # pylint: disable=R0904
         self, ping_interval: float, public_key: Optional[bytes] = None
     ) -> int:
         """Create, store in state, and return `node_id`."""
-        # Sample a random int64 as node_id
-        node_id = generate_rand_int_from_bytes(NODE_ID_NUM_BYTES)
+        # Sample a random uint64 as node_id
+        uint64_node_id = generate_rand_int_from_bytes(NODE_ID_NUM_BYTES)
+
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_node_id = convert_uint64_to_sint64(uint64_node_id)
 
         query = "SELECT node_id FROM node WHERE public_key = :public_key;"
         row = self.query(query, {"public_key": public_key})
@@ -560,17 +605,28 @@ class SqliteState(State):  # pylint: disable=R0904
 
         try:
             self.query(
-                query, (node_id, time.time() + ping_interval, ping_interval, public_key)
+                query,
+                (
+                    sint64_node_id,
+                    time.time() + ping_interval,
+                    ping_interval,
+                    public_key,
+                ),
             )
         except sqlite3.IntegrityError:
             log(ERROR, "Unexpected node registration failure.")
             return 0
-        return node_id
+
+        # Note: we need to return the uint64 value of the node_id
+        return uint64_node_id
 
     def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
-        """Delete a client node."""
+        """Delete a node."""
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_node_id = convert_uint64_to_sint64(node_id)
+
         query = "DELETE FROM node WHERE node_id = ?"
-        params = (node_id,)
+        params = (sint64_node_id,)
 
         if public_key is not None:
             query += " AND public_key = ?"
@@ -587,7 +643,7 @@ class SqliteState(State):  # pylint: disable=R0904
         except KeyError as exc:
             log(ERROR, {"query": query, "data": params, "exception": exc})
 
-    def get_nodes(self, run_id: int) -> Set[int]:
+    def get_nodes(self, run_id: int) -> set[int]:
         """Retrieve all currently stored node IDs as a set.
 
         Constraints
@@ -595,48 +651,76 @@ class SqliteState(State):  # pylint: disable=R0904
         If the provided `run_id` does not exist or has no matching nodes,
         an empty `Set` MUST be returned.
         """
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_run_id = convert_uint64_to_sint64(run_id)
+
         # Validate run ID
         query = "SELECT COUNT(*) FROM run WHERE run_id = ?;"
-        if self.query(query, (run_id,))[0]["COUNT(*)"] == 0:
+        if self.query(query, (sint64_run_id,))[0]["COUNT(*)"] == 0:
             return set()
 
         # Get nodes
         query = "SELECT node_id FROM node WHERE online_until > ?;"
         rows = self.query(query, (time.time(),))
-        result: Set[int] = {row["node_id"] for row in rows}
+
+        # Convert sint64 node_ids to uint64
+        result: set[int] = {convert_sint64_to_uint64(row["node_id"]) for row in rows}
         return result
 
-    def get_node_id(self, client_public_key: bytes) -> Optional[int]:
-        """Retrieve stored `node_id` filtered by `client_public_keys`."""
+    def get_node_id(self, node_public_key: bytes) -> Optional[int]:
+        """Retrieve stored `node_id` filtered by `node_public_keys`."""
         query = "SELECT node_id FROM node WHERE public_key = :public_key;"
-        row = self.query(query, {"public_key": client_public_key})
+        row = self.query(query, {"public_key": node_public_key})
         if len(row) > 0:
             node_id: int = row[0]["node_id"]
-            return node_id
+
+            # Convert the sint64 value to uint64 after reading from SQLite
+            uint64_node_id = convert_sint64_to_uint64(node_id)
+
+            return uint64_node_id
         return None
 
     def create_run(
         self,
-        fab_id: str,
-        fab_version: str,
+        fab_id: Optional[str],
+        fab_version: Optional[str],
+        fab_hash: Optional[str],
         override_config: UserConfig,
     ) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
         # Sample a random int64 as run_id
-        run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
+        uint64_run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
+
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_run_id = convert_uint64_to_sint64(uint64_run_id)
 
         # Check conflicts
         query = "SELECT COUNT(*) FROM run WHERE run_id = ?;"
-        # If run_id does not exist
-        if self.query(query, (run_id,))[0]["COUNT(*)"] == 0:
+        # If sint64_run_id does not exist
+        if self.query(query, (sint64_run_id,))[0]["COUNT(*)"] == 0:
             query = (
-                "INSERT INTO run (run_id, fab_id, fab_version, override_config)"
-                "VALUES (?, ?, ?, ?);"
+                "INSERT INTO run "
+                "(run_id, fab_id, fab_version, fab_hash, override_config)"
+                "VALUES (?, ?, ?, ?, ?);"
             )
-            self.query(
-                query, (run_id, fab_id, fab_version, json.dumps(override_config))
-            )
-            return run_id
+            if fab_hash:
+                self.query(
+                    query,
+                    (sint64_run_id, "", "", fab_hash, json.dumps(override_config)),
+                )
+            else:
+                self.query(
+                    query,
+                    (
+                        sint64_run_id,
+                        fab_id,
+                        fab_version,
+                        "",
+                        json.dumps(override_config),
+                    ),
+                )
+            # Note: we need to return the uint64 value of the run_id
+            return uint64_run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
 
@@ -675,33 +759,36 @@ class SqliteState(State):  # pylint: disable=R0904
             public_key = None
         return public_key
 
-    def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
-        """Store a set of `client_public_keys` in state."""
+    def store_node_public_keys(self, public_keys: set[bytes]) -> None:
+        """Store a set of `node_public_keys` in state."""
         query = "INSERT INTO public_key (public_key) VALUES (?)"
         data = [(key,) for key in public_keys]
         self.query(query, data)
 
-    def store_client_public_key(self, public_key: bytes) -> None:
-        """Store a `client_public_key` in state."""
+    def store_node_public_key(self, public_key: bytes) -> None:
+        """Store a `node_public_key` in state."""
         query = "INSERT INTO public_key (public_key) VALUES (:public_key)"
         self.query(query, {"public_key": public_key})
 
-    def get_client_public_keys(self) -> Set[bytes]:
-        """Retrieve all currently stored `client_public_keys` as a set."""
+    def get_node_public_keys(self) -> set[bytes]:
+        """Retrieve all currently stored `node_public_keys` as a set."""
         query = "SELECT public_key FROM public_key"
         rows = self.query(query)
-        result: Set[bytes] = {row["public_key"] for row in rows}
+        result: set[bytes] = {row["public_key"] for row in rows}
         return result
 
     def get_run(self, run_id: int) -> Optional[Run]:
         """Retrieve information about the run with the specified `run_id`."""
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_run_id = convert_uint64_to_sint64(run_id)
         query = "SELECT * FROM run WHERE run_id = ?;"
         try:
-            row = self.query(query, (run_id,))[0]
+            row = self.query(query, (sint64_run_id,))[0]
             return Run(
-                run_id=run_id,
+                run_id=convert_sint64_to_uint64(row["run_id"]),
                 fab_id=row["fab_id"],
                 fab_version=row["fab_version"],
+                fab_hash=row["fab_hash"],
                 override_config=json.loads(row["override_config"]),
             )
         except sqlite3.IntegrityError:
@@ -710,10 +797,14 @@ class SqliteState(State):  # pylint: disable=R0904
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""
+        sint64_node_id = convert_uint64_to_sint64(node_id)
+
         # Update `online_until` and `ping_interval` for the given `node_id`
         query = "UPDATE node SET online_until = ?, ping_interval = ? WHERE node_id = ?;"
         try:
-            self.query(query, (time.time() + ping_interval, ping_interval, node_id))
+            self.query(
+                query, (time.time() + ping_interval, ping_interval, sint64_node_id)
+            )
             return True
         except sqlite3.IntegrityError:
             log(ERROR, "`node_id` does not exist.")
@@ -723,7 +814,7 @@ class SqliteState(State):  # pylint: disable=R0904
 def dict_factory(
     cursor: sqlite3.Cursor,
     row: sqlite3.Row,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Turn SQLite results into dicts.
 
     Less efficent for retrival of large amounts of data but easier to use.
@@ -732,7 +823,7 @@ def dict_factory(
     return dict(zip(fields, row))
 
 
-def task_ins_to_dict(task_msg: TaskIns) -> Dict[str, Any]:
+def task_ins_to_dict(task_msg: TaskIns) -> dict[str, Any]:
     """Transform TaskIns to dict."""
     result = {
         "task_id": task_msg.task_id,
@@ -753,7 +844,7 @@ def task_ins_to_dict(task_msg: TaskIns) -> Dict[str, Any]:
     return result
 
 
-def task_res_to_dict(task_msg: TaskRes) -> Dict[str, Any]:
+def task_res_to_dict(task_msg: TaskRes) -> dict[str, Any]:
     """Transform TaskRes to dict."""
     result = {
         "task_id": task_msg.task_id,
@@ -774,7 +865,7 @@ def task_res_to_dict(task_msg: TaskRes) -> Dict[str, Any]:
     return result
 
 
-def dict_to_task_ins(task_dict: Dict[str, Any]) -> TaskIns:
+def dict_to_task_ins(task_dict: dict[str, Any]) -> TaskIns:
     """Turn task_dict into protobuf message."""
     recordset = RecordSet()
     recordset.ParseFromString(task_dict["recordset"])
@@ -804,7 +895,7 @@ def dict_to_task_ins(task_dict: Dict[str, Any]) -> TaskIns:
     return result
 
 
-def dict_to_task_res(task_dict: Dict[str, Any]) -> TaskRes:
+def dict_to_task_res(task_dict: dict[str, Any]) -> TaskRes:
     """Turn task_dict into protobuf message."""
     recordset = RecordSet()
     recordset.ParseFromString(task_dict["recordset"])

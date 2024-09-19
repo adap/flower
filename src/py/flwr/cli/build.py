@@ -17,12 +17,11 @@
 import os
 import zipfile
 from pathlib import Path
-from typing import Optional
+from typing import Annotated, Optional
 
 import pathspec
 import tomli_w
 import typer
-from typing_extensions import Annotated
 
 from .config_utils import load_and_validate
 from .utils import get_sha256_hash, is_valid_project_name
@@ -89,7 +88,7 @@ def build(
     # Set the name of the zip file
     fab_filename = (
         f"{conf['tool']['flwr']['app']['publisher']}"
-        f".{app.name}"
+        f".{conf['project']['name']}"
         f".{conf['project']['version'].replace('.', '-')}.fab"
     )
     list_file_content = ""

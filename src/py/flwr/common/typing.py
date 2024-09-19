@@ -17,7 +17,7 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Optional, Union
 
 import numpy as np
 import numpy.typing as npt
@@ -25,7 +25,7 @@ import numpy.typing as npt
 NDArray = npt.NDArray[Any]
 NDArrayInt = npt.NDArray[np.int_]
 NDArrayFloat = npt.NDArray[np.float_]
-NDArrays = List[NDArray]
+NDArrays = list[NDArray]
 
 # The following union type contains Python types corresponding to ProtoBuf types that
 # ProtoBuf considers to be "Scalar Value Types", even though some of them arguably do
@@ -38,31 +38,31 @@ Value = Union[
     float,
     int,
     str,
-    List[bool],
-    List[bytes],
-    List[float],
-    List[int],
-    List[str],
+    list[bool],
+    list[bytes],
+    list[float],
+    list[int],
+    list[str],
 ]
 
 # Value types for common.MetricsRecord
 MetricsScalar = Union[int, float]
-MetricsScalarList = Union[List[int], List[float]]
+MetricsScalarList = Union[list[int], list[float]]
 MetricsRecordValues = Union[MetricsScalar, MetricsScalarList]
 # Value types for common.ConfigsRecord
 ConfigsScalar = Union[MetricsScalar, str, bytes, bool]
-ConfigsScalarList = Union[MetricsScalarList, List[str], List[bytes], List[bool]]
+ConfigsScalarList = Union[MetricsScalarList, list[str], list[bytes], list[bool]]
 ConfigsRecordValues = Union[ConfigsScalar, ConfigsScalarList]
 
-Metrics = Dict[str, Scalar]
-MetricsAggregationFn = Callable[[List[Tuple[int, Metrics]]], Metrics]
+Metrics = dict[str, Scalar]
+MetricsAggregationFn = Callable[[list[tuple[int, Metrics]]], Metrics]
 
-Config = Dict[str, Scalar]
-Properties = Dict[str, Scalar]
+Config = dict[str, Scalar]
+Properties = dict[str, Scalar]
 
 # Value type for user configs
 UserConfigValue = Union[bool, float, int, str]
-UserConfig = Dict[str, UserConfigValue]
+UserConfig = dict[str, UserConfigValue]
 
 
 class Code(Enum):
@@ -83,11 +83,27 @@ class Status:
     message: str
 
 
+class ClientAppOutputCode(Enum):
+    """ClientAppIO status codes."""
+
+    SUCCESS = 0
+    DEADLINE_EXCEEDED = 1
+    UNKNOWN_ERROR = 2
+
+
+@dataclass
+class ClientAppOutputStatus:
+    """ClientAppIO status."""
+
+    code: ClientAppOutputCode
+    message: str
+
+
 @dataclass
 class Parameters:
     """Model parameters."""
 
-    tensors: List[bytes]
+    tensors: list[bytes]
     tensor_type: str
 
 
@@ -111,7 +127,7 @@ class FitIns:
     """Fit instructions for a client."""
 
     parameters: Parameters
-    config: Dict[str, Scalar]
+    config: dict[str, Scalar]
 
 
 @dataclass
@@ -121,7 +137,7 @@ class FitRes:
     status: Status
     parameters: Parameters
     num_examples: int
-    metrics: Dict[str, Scalar]
+    metrics: dict[str, Scalar]
 
 
 @dataclass
@@ -129,7 +145,7 @@ class EvaluateIns:
     """Evaluate instructions for a client."""
 
     parameters: Parameters
-    config: Dict[str, Scalar]
+    config: dict[str, Scalar]
 
 
 @dataclass
@@ -139,7 +155,7 @@ class EvaluateRes:
     status: Status
     loss: float
     num_examples: int
-    metrics: Dict[str, Scalar]
+    metrics: dict[str, Scalar]
 
 
 @dataclass
@@ -198,6 +214,7 @@ class Run:
     run_id: int
     fab_id: str
     fab_version: str
+    fab_hash: str
     override_config: UserConfig
 
 

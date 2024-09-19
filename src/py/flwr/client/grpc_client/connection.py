@@ -16,11 +16,12 @@
 
 
 import uuid
+from collections.abc import Iterator
 from contextlib import contextmanager
 from logging import DEBUG, ERROR
 from pathlib import Path
 from queue import Queue
-from typing import Callable, Iterator, Optional, Tuple, Union, cast
+from typing import Callable, Optional, Union, cast
 
 from cryptography.hazmat.primitives.asymmetric import ec
 
@@ -38,7 +39,7 @@ from flwr.common.constant import MessageType, MessageTypeLegacy
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.retry_invoker import RetryInvoker
-from flwr.common.typing import Run
+from flwr.common.typing import Fab, Run
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ClientMessage,
     Reason,
@@ -66,15 +67,16 @@ def grpc_connection(  # pylint: disable=R0913, R0915
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
     authentication_keys: Optional[  # pylint: disable=unused-argument
-        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
 ) -> Iterator[
-    Tuple[
+    tuple[
         Callable[[], Optional[Message]],
         Callable[[Message], None],
         Optional[Callable[[], Optional[int]]],
         Optional[Callable[[], None]],
         Optional[Callable[[int], Run]],
+        Optional[Callable[[str], Fab]],
     ]
 ]:
     """Establish a gRPC connection to a gRPC server.
@@ -235,7 +237,7 @@ def grpc_connection(  # pylint: disable=R0913, R0915
 
     try:
         # Yield methods
-        yield (receive, send, None, None, None)
+        yield (receive, send, None, None, None, None)
     finally:
         # Make sure to have a final
         channel.close()
