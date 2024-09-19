@@ -424,6 +424,7 @@ def _record_value_to_proto(
         # Note: `isinstance(False, int) == True`.
         if isinstance(value, t):
             if t == int:
+                value = int(value)
                 # Handle int values for sint64 and uint64
                 if value < 0:
                     arg[_type_to_field[t]] = value + (1 << 64)
