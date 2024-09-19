@@ -27,6 +27,7 @@ from .natural_id_partitioner import NaturalIdPartitioner
 from .partitioner import Partitioner
 from .pathological_partitioner import PathologicalPartitioner
 from .shard_partitioner import ShardPartitioner
+from .size_partitioner import SizePartitioner
 from .square_partitioner import SquarePartitioner
 
 __all__ = [
@@ -42,5 +43,6 @@ __all__ = [
     "Partitioner",
     "PathologicalPartitioner",
     "ShardPartitioner",
+    "SizePartitioner",
     "SquarePartitioner",
 ]
