@@ -46,10 +46,6 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 
 
 def log(
-    run_id: Annotated[
-        int,
-        typer.Argument(help="The Flower run ID to query"),
-    ],
     app: Annotated[
         Path,
         typer.Argument(help="Path of the Flower project to run"),
@@ -57,6 +53,10 @@ def log(
     federation: Annotated[
         Optional[str],
         typer.Argument(help="Name of the federation to run the app on"),
+    ] = None,
+    run_id: Annotated[
+        Optional[int],
+        typer.Argument(help="The Flower run ID to query"),
     ] = None,
     stream: Annotated[
         bool,
@@ -71,6 +71,14 @@ def log(
 
     pyproject_path = app / "pyproject.toml" if app else None
     config, errors, warnings = load_and_validate(path=pyproject_path)
+
+    if run_id is None:
+        typer.secho(
+            "A Flower run ID must be provided to query logs.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        sys.exit()
 
     if config is None:
         typer.secho(
