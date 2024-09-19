@@ -44,3 +44,4 @@ Run Flower using Docker Compose
    :maxdepth: 1
 
    tutorial-quickstart-docker-compose
+   run-quickstart-examples-docker-compose
