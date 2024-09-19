@@ -23,8 +23,8 @@ from typing_extensions import override
 
 from flwr.common.typing import UserConfig
 from flwr.server.superlink.state.utils import (
-    convert_uint64_to_sint64,
     convert_sint64_to_uint64,
+    convert_uint64_to_sint64,
 )
 
 from .state import ExecState
