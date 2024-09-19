@@ -21,7 +21,7 @@ import "flwr/proto/fab.proto";
 import "flwr/proto/transport.proto";
 
 message Run {
-  sint64 run_id = 1;
+  uint64 run_id = 1;
   string fab_id = 2;
   string fab_version = 3;
   map<string, Scalar> override_config = 4;
@@ -44,11 +44,11 @@ message CreateRunRequest {
 }
 message CreateRunResponse {
   bool success = 1;
-  sint64 run_id = 2;
+  uint64 run_id = 2;
 }
 
 // GetRun
-message GetRunRequest { sint64 run_id = 1; }
+message GetRunRequest { uint64 run_id = 1; }
 message GetRunResponse { Run run = 1; }
 
 // UpdateRunStatus
