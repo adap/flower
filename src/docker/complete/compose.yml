@@ -12,6 +12,14 @@ services:
       dockerfile_inline: |
         FROM flwr/superexec:${FLWR_VERSION:-1.11.1}
 
+        # gcc is required for the fastai quickstart example
+        USER root
+        RUN apt-get update \
+            && apt-get -y --no-install-recommends install \
+            build-essential \
+            && rm -rf /var/lib/apt/lists/*
+        USER app
+
         WORKDIR /app
         COPY --chown=app:app pyproject.toml .
         RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
@@ -83,6 +91,14 @@ services:
       dockerfile_inline: |
         FROM flwr/clientapp:${FLWR_VERSION:-1.11.1}
 
+        # gcc is required for the fastai quickstart example
+        USER root
+        RUN apt-get update \
+            && apt-get -y --no-install-recommends install \
+            build-essential \
+            && rm -rf /var/lib/apt/lists/*
+        USER app
+
         WORKDIR /app
         COPY --chown=app:app pyproject.toml .
         RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
@@ -105,6 +121,14 @@ services:
       context: ${PROJECT_DIR:-.}
       dockerfile_inline: |
         FROM flwr/clientapp:${FLWR_VERSION:-1.11.1}
+
+        # gcc is required for the fastai quickstart example
+        USER root
+        RUN apt-get update \
+            && apt-get -y --no-install-recommends install \
+            build-essential \
+            && rm -rf /var/lib/apt/lists/*
+        USER app
 
         WORKDIR /app
         COPY --chown=app:app pyproject.toml .
@@ -130,6 +154,14 @@ services:
   #     context: ${PROJECT_DIR:-.}
   #     dockerfile_inline: |
   #       FROM flwr/clientapp:${FLWR_VERSION:-1.11.1}
+
+  #       # gcc is required for the fastai quickstart example
+  #       USER root
+  #       RUN apt-get update \
+  #           && apt-get -y --no-install-recommends install \
+  #           build-essential \
+  #           && rm -rf /var/lib/apt/lists/*
+  #       USER app
 
   #       WORKDIR /app
   #       COPY --chown=app:app pyproject.toml .

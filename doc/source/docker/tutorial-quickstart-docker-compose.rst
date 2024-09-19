@@ -283,6 +283,13 @@ In ``compose.yml``, add the following:
          dockerfile_inline: |
            FROM flwr/clientapp:${FLWR_VERSION:-|stable_flwr_version|}
 
+           USER root
+           RUN apt-get update \
+               && apt-get -y --no-install-recommends install \
+               build-essential \
+               && rm -rf /var/lib/apt/lists/*
+           USER app
+
            WORKDIR /app
            COPY --chown=app:app pyproject.toml .
            RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
