@@ -80,7 +80,7 @@ from .serde import (
 def test_serialisation_deserialisation() -> None:
     """Test if the np.ndarray is identical after (de-)serialization."""
     # Prepare
-    scalars = [True, b"bytestr", 3.14, 9000, "Hello"]
+    scalars = [True, b"bytestr", 3.14, 9000, "Hello", (1 << 63) + 1]
 
     for scalar in scalars:
         # Execute
