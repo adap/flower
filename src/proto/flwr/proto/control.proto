@@ -17,7 +17,7 @@ syntax = "proto3";
 
 package flwr.proto;
 
-import "flwr/proto/driver.proto";
+import "flwr/proto/run.proto";
 
 service Control {
   // Request to create a new run
