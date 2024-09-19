@@ -16,6 +16,7 @@
 
 
 import select
+import sys
 import threading
 import time
 from collections.abc import Generator
@@ -115,7 +116,12 @@ def _capture_logs(
             )
             # Read from std* and append to RunTracker.logs
             for stream in ready_to_read:
-                line = stream.readline().rstrip()
+                # Flush stdout to view output in real time
+                readline = stream.readline()
+                sys.stdout.write(readline)
+                sys.stdout.flush()
+                # Append to logs
+                line = readline.rstrip()
                 if line:
                     run.logs.append(f"{line}")
 
