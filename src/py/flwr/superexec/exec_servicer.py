@@ -95,8 +95,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             # is returned at this point and the server ends the stream.
             if self.runs[request.run_id].proc.poll() is not None:
                 log(INFO, "Run ID `%s` completed", request.run_id)
-                context.set_code(grpc.StatusCode.OK)
-                context.cancel()
+                return
 
             time.sleep(1.0)  # Sleep briefly to avoid busy waiting
 
