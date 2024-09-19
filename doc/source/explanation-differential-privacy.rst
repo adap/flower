@@ -1,9 +1,9 @@
-:og:description: Learn how differential privacy ensures data security in federated learning, with central and local approaches to prevent leakage of sensitive information during model updates and training.
+:og:description: In this Flower explainer, learn how differential privacy ensures data security in federated learning, with central & local approaches to prevent leakage of sensitive information during model training.
 
 .. title:: Differential Privacy in Federated Learning
 
 .. meta::
-   :description: Learn how differential privacy ensures data security in federated learning, with central and local approaches to prevent leakage of sensitive information during model updates and training.
+   :description: In this Flower explainer, learn how differential privacy ensures data security in federated learning, with central & local approaches to prevent leakage of sensitive information during model training.
 
 Differential Privacy
 ====================
