@@ -42,7 +42,6 @@ from .utils import (
     has_valid_sub_status,
     is_valid_transition,
     make_node_unavailable_taskres,
-
 )
 
 SQL_CREATE_TABLE_NODE = """
@@ -712,8 +711,8 @@ class SqliteState(State):  # pylint: disable=R0904
             )
             if fab_hash:
                 fab_id, fab_version = "", ""
-            data = [sint64_run_id, fab_id, fab_version, fab_hash, json.dumps(override_config)]
-            data += [RunStatus.STARTING, "", ""]
+            data = [sint64_run_id, fab_id, fab_version, fab_hash]
+            data += [json.dumps(override_config), RunStatus.STARTING, "", ""]
             self.query(query, tuple(data))
             return uint64_run_id
         log(ERROR, "Unexpected run creation failure.")
