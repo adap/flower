@@ -28,12 +28,6 @@ message Run {
   string fab_hash = 5;
 }
 
-message StatusInfo {
-  string status = 1;     // "starting", "running", "finished"
-  string sub_status = 2; // "completed", "failed", "stopped" or ""
-  string reason = 3;     // failure reason
-}
-
 // CreateRun
 message CreateRunRequest {
   string fab_id = 1;
@@ -50,14 +44,3 @@ message CreateRunResponse {
 // GetRun
 message GetRunRequest { uint64 run_id = 1; }
 message GetRunResponse { Run run = 1; }
-
-// UpdateRunStatus
-message UpdateRunStatusRequest {
-  uint64 run_id = 1;
-  StatusInfo info = 2;
-}
-message UpdateRunStatusResponse {}
-
-// GetRunStatus
-message GetRunStatusRequest { repeated uint64 run_ids = 1; }
-message GetRunStatusResponse { map<uint64, StatusInfo> info_dict = 1; }
