@@ -426,9 +426,9 @@ def _record_value_to_proto(
             if t == int:
                 # Handle int values for sint64 and uint64
                 if value < 0:
-                    arg[_type_to_field[t]] = value + (1 << 64)  # type: ignore[operator]
+                    arg[_type_to_field[t]] = int(value) + (1 << 64)
                 else:
-                    arg[_type_to_field[t]] = value  # type: ignore[operator]
+                    arg[_type_to_field[t]] = int(value)
 
             arg[_type_to_field[t]] = value
             return proto_class(**arg)
