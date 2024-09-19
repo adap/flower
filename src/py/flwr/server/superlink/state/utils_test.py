@@ -20,7 +20,9 @@ from parameterized import parameterized
 
 from .utils import (
     convert_sint64_to_uint64,
+    convert_sint64_values_in_dict_to_uint64,
     convert_uint64_to_sint64,
+    convert_uint64_values_in_dict_to_sint64,
     generate_rand_int_from_bytes,
 )
 
@@ -83,6 +85,62 @@ class UtilsTest(unittest.TestCase):
         """Test conversion from sint64 to uint64."""
         actual = convert_sint64_to_uint64(convert_uint64_to_sint64(expected))
         self.assertEqual(expected, actual)
+
+    @parameterized.expand(  # type: ignore
+        [
+            # Test cases with uint64 values
+            (
+                {"a": 0, "b": 2**63 - 1, "c": 2**63, "d": 2**64 - 1},
+                ["a", "b", "c", "d"],
+                {"a": 0, "b": 2**63 - 1, "c": -(2**63), "d": -1},
+            ),
+            (
+                {"a": 1, "b": 2**62, "c": 2**63 + 1},
+                ["a", "b", "c"],
+                {"a": 1, "b": 2**62, "c": -(2**63) + 1},
+            ),
+            # Edge cases with mixed uint64 values and keys
+            (
+                {"a": 2**64 - 1, "b": 12345, "c": 0},
+                ["a", "b"],
+                {"a": -1, "b": 12345, "c": 0},
+            ),
+        ]
+    )
+    def test_convert_uint64_values_in_dict_to_sint64(
+        self, input_dict: dict[str, int], keys: list[str], expected_dict: dict[str, int]
+    ) -> None:
+        """Test uint64 to sint64 conversion in a dictionary."""
+        convert_uint64_values_in_dict_to_sint64(input_dict, keys)
+        self.assertEqual(input_dict, expected_dict)
+
+    @parameterized.expand(  # type: ignore
+        [
+            # Test cases with sint64 values
+            (
+                {"a": 0, "b": 2**63 - 1, "c": -(2**63), "d": -1},
+                ["a", "b", "c", "d"],
+                {"a": 0, "b": 2**63 - 1, "c": 2**63, "d": 2**64 - 1},
+            ),
+            (
+                {"a": -1, "b": -(2**63) + 1, "c": 12345},
+                ["a", "b", "c"],
+                {"a": 2**64 - 1, "b": 2**63 + 1, "c": 12345},
+            ),
+            # Edge cases with mixed sint64 values and keys
+            (
+                {"a": -1, "b": 12345, "c": 0},
+                ["a", "b"],
+                {"a": 2**64 - 1, "b": 12345, "c": 0},
+            ),
+        ]
+    )
+    def test_convert_sint64_values_in_dict_to_uint64(
+        self, input_dict: dict[str, int], keys: list[str], expected_dict: dict[str, int]
+    ) -> None:
+        """Test sint64 to uint64 conversion in a dictionary."""
+        convert_sint64_values_in_dict_to_uint64(input_dict, keys)
+        self.assertEqual(input_dict, expected_dict)
 
     def test_generate_rand_int_from_bytes_unsigned_int(self) -> None:
         """Test that the generated integer is unsigned (non-negative)."""
