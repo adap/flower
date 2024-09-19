@@ -74,38 +74,32 @@ class CreateRunRequest(google.protobuf.message.Message):
     FAB_VERSION_FIELD_NUMBER: builtins.int
     OVERRIDE_CONFIG_FIELD_NUMBER: builtins.int
     FAB_FIELD_NUMBER: builtins.int
-    TTL_FIELD_NUMBER: builtins.int
     fab_id: typing.Text
     fab_version: typing.Text
     @property
     def override_config(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, flwr.proto.transport_pb2.Scalar]: ...
     @property
     def fab(self) -> flwr.proto.fab_pb2.Fab: ...
-    ttl: builtins.float
     def __init__(self,
         *,
         fab_id: typing.Text = ...,
         fab_version: typing.Text = ...,
         override_config: typing.Optional[typing.Mapping[typing.Text, flwr.proto.transport_pb2.Scalar]] = ...,
         fab: typing.Optional[flwr.proto.fab_pb2.Fab] = ...,
-        ttl: builtins.float = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["fab",b"fab"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["fab",b"fab","fab_id",b"fab_id","fab_version",b"fab_version","override_config",b"override_config","ttl",b"ttl"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["fab",b"fab","fab_id",b"fab_id","fab_version",b"fab_version","override_config",b"override_config"]) -> None: ...
 global___CreateRunRequest = CreateRunRequest
 
 class CreateRunResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    SUCCESS_FIELD_NUMBER: builtins.int
     RUN_ID_FIELD_NUMBER: builtins.int
-    success: builtins.bool
     run_id: builtins.int
     def __init__(self,
         *,
-        success: builtins.bool = ...,
         run_id: builtins.int = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id","success",b"success"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id"]) -> None: ...
 global___CreateRunResponse = CreateRunResponse
 
 class GetRunRequest(google.protobuf.message.Message):
