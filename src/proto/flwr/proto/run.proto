@@ -18,6 +18,7 @@ syntax = "proto3";
 package flwr.proto;
 
 import "flwr/proto/fab.proto";
+import "flwr/proto/fab.proto";
 import "flwr/proto/transport.proto";
 
 message Run {
