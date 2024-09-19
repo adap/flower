@@ -90,8 +90,9 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
                 yield StreamLogsResponse(log_output=logs[i])
             last_sent_index = len(logs)
 
-            # When a run has completed, return all previously stored logs
-            # for the `run_id` via yielding StreamLogsResponse.
+            # Wait for and continue to yield more log responses only if the
+            # run isn't completed yet. If the run is finished, the entire log
+            # is returned at this point and the server ends the stream.
             if self.runs[request.run_id].proc.poll() is not None:
                 log(INFO, "Run ID `%s` completed", request.run_id)
                 context.set_code(grpc.StatusCode.OK)
