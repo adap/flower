@@ -17,6 +17,7 @@ syntax = "proto3";
 
 package flwr.proto;
 
+import "flwr/proto/fab.proto";
 import "flwr/proto/transport.proto";
 
 message Run {
@@ -26,5 +27,16 @@ message Run {
   map<string, Scalar> override_config = 4;
   string fab_hash = 5;
 }
+
+// CreateRun
+message CreateRunRequest {
+  string fab_id = 1;
+  string fab_version = 2;
+  map<string, Scalar> override_config = 3;
+  Fab fab = 4;
+}
+message CreateRunResponse { uint64 run_id = 1; }
+
+// GetRun
 message GetRunRequest { uint64 run_id = 1; }
 message GetRunResponse { Run run = 1; }
