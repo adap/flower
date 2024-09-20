@@ -33,6 +33,8 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StartRunResponse,
     StreamLogsRequest,
     StreamLogsResponse,
+    LoginRequest,
+    LoginResponse,
 )
 
 from .executor import Executor, RunTracker
@@ -100,6 +102,10 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
                 context.cancel()
 
             time.sleep(1.0)  # Sleep briefly to avoid busy waiting
+
+    def Login(self, request, context):
+        """Start login upon request
+        """
 
 
 def _capture_logs(
