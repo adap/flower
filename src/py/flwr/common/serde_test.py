@@ -178,7 +178,7 @@ class RecordMaker:
         elif dtype == str:
             ret = self.get_str(self.rng.randint(10, 100))
         elif dtype == int:
-            ret = self.rng.randint(-1 << 30, 1 << 30)
+            ret = self.rng.randint(-1 << 63, (1 << 64) - 1)
         elif dtype == float:
             ret = (self.rng.random() - 0.5) * (2.0 ** self.rng.randint(0, 50))
         elif dtype == bytes:

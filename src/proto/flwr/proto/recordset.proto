@@ -42,6 +42,7 @@ message MetricsRecordValue {
     // Single element
     double double = 1;
     sint64 sint64 = 2;
+    uint64 uint64 = 3;
 
     // List types
     DoubleList double_list = 21;

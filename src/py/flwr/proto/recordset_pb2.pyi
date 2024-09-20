@@ -112,12 +112,14 @@ class MetricsRecordValue(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     DOUBLE_FIELD_NUMBER: builtins.int
     SINT64_FIELD_NUMBER: builtins.int
+    UINT64_FIELD_NUMBER: builtins.int
     DOUBLE_LIST_FIELD_NUMBER: builtins.int
     INT_LIST_FIELD_NUMBER: builtins.int
     double: builtins.float
     """Single element"""
 
     sint64: builtins.int
+    uint64: builtins.int
     @property
     def double_list(self) -> global___DoubleList:
         """List types"""
@@ -128,12 +130,13 @@ class MetricsRecordValue(google.protobuf.message.Message):
         *,
         double: builtins.float = ...,
         sint64: builtins.int = ...,
+        uint64: builtins.int = ...,
         double_list: typing.Optional[global___DoubleList] = ...,
         int_list: typing.Optional[global___IntList] = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["double",b"double","double_list",b"double_list","int_list",b"int_list","sint64",b"sint64","value",b"value"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["double",b"double","double_list",b"double_list","int_list",b"int_list","sint64",b"sint64","value",b"value"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal["value",b"value"]) -> typing.Optional[typing_extensions.Literal["double","sint64","double_list","int_list"]]: ...
+    def HasField(self, field_name: typing_extensions.Literal["double",b"double","double_list",b"double_list","int_list",b"int_list","sint64",b"sint64","uint64",b"uint64","value",b"value"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["double",b"double","double_list",b"double_list","int_list",b"int_list","sint64",b"sint64","uint64",b"uint64","value",b"value"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["value",b"value"]) -> typing.Optional[typing_extensions.Literal["double","sint64","uint64","double_list","int_list"]]: ...
 global___MetricsRecordValue = MetricsRecordValue
 
 class ConfigsRecordValue(google.protobuf.message.Message):
