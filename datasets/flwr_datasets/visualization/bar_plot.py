@@ -15,7 +15,7 @@
 """Label distribution bar plotting."""
 
 
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -28,15 +28,15 @@ from matplotlib.axes import Axes
 def _plot_bar(
     dataframe: pd.DataFrame,
     axis: Optional[Axes],
-    figsize: Optional[Tuple[float, float]],
+    figsize: Optional[tuple[float, float]],
     title: str,
     colormap: Optional[Union[str, mcolors.Colormap]],
     partition_id_axis: str,
     size_unit: str,
     legend: bool,
     legend_title: Optional[str],
-    plot_kwargs: Optional[Dict[str, Any]],
-    legend_kwargs: Optional[Dict[str, Any]],
+    plot_kwargs: Optional[dict[str, Any]],
+    legend_kwargs: Optional[dict[str, Any]],
 ) -> Axes:
     if axis is None:
         if figsize is None:
@@ -123,7 +123,7 @@ def _plot_bar(
 def _initialize_figsize(
     partition_id_axis: str,
     num_partitions: int,
-) -> Tuple[float, float]:
+) -> tuple[float, float]:
     figsize = (0.0, 0.0)
     if partition_id_axis == "x":
         figsize = (6.4, 4.8)
@@ -132,7 +132,7 @@ def _initialize_figsize(
     return figsize
 
 
-def _initialize_xy_labels(size_unit: str, partition_id_axis: str) -> Tuple[str, str]:
+def _initialize_xy_labels(size_unit: str, partition_id_axis: str) -> tuple[str, str]:
     xlabel = "Partition ID"
     ylabel = "Count" if size_unit == "absolute" else "Percent %"
 
