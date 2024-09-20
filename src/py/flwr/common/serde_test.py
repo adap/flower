@@ -316,6 +316,7 @@ def test_metrics_record_serialization_deserialization() -> None:
     # Prepare
     maker = RecordMaker()
     original = maker.metrics_record()
+    original["uint64"] = (1 << 63) + 321
 
     # Execute
     proto = metrics_record_to_proto(original)
@@ -331,6 +332,7 @@ def test_configs_record_serialization_deserialization() -> None:
     # Prepare
     maker = RecordMaker()
     original = maker.configs_record()
+    original["uint64"] = (1 << 63) + 101
 
     # Execute
     proto = configs_record_to_proto(original)
