@@ -103,8 +103,13 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
             time.sleep(1.0)  # Sleep briefly to avoid busy waiting
 
-    def Login(self, request, context):
-        """Start login upon request."""
+    def Login(
+        self, request: LoginRequest, context: grpc.ServicerContext
+    ) -> LoginResponse:
+        """Start login."""
+        log(INFO, "ExecServicer.Login")
+
+        return LoginResponse(auth_url="")
 
 
 def _capture_logs(
