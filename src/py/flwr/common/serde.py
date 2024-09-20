@@ -396,8 +396,8 @@ T = TypeVar("T")
 def int_to_proto(value: int) -> Int:
     """Serialize a int to `Int`."""
     if value >= 0:
-        return Int(sint64=value)
-    return Int(uint64=value)
+        return Int(uint64=value)
+    return Int(sint64=value)
 
 
 def int_from_proto(value_proto: Int) -> int:
