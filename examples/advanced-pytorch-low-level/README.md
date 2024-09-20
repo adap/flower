@@ -1,7 +1,13 @@
-# Federated Learning with PyTorch and Flower (Low level API)
+---
+tags: [advanced, vision, fds, wandb, low-level]
+dataset: [Fashion-MNIST]
+framework: [torch, torchvision]
+---
+
+# Federated Learning with PyTorch and Flower (Advanced Example with Low level API)
 
 > \[!CAUTION\]
-> This example uses Flower's low-level API which is a preview feature and subject to change.
+> This example uses Flower's low-level API which is a preview feature and subject to change. If you are not ready for the low-level API, the [advanced-pytorch](https://github.com/adap/flower/tree/main/examples/advanced-pytorch) example demonstrates near identical functionality but using higher level components such as Flower's _Strategies_ and _NumPyClient_.
 
 This example demonstrates how to use Flower's low-level API to write a `ServerApp` a _"for loop"_, enabling you to define what a "round" means and construct [Message](https://flower.ai/docs/framework/ref-api/flwr.common.Message.html) objects to communicate arbitrary data structures as [RecordSet](https://flower.ai/docs/framework/ref-api/flwr.common.RecordSet.html) objects. Just like the the counterpart to this example using the strategies API (find it in the parent directory), it:
 
@@ -11,16 +17,23 @@ This example demonstrates how to use Flower's low-level API to write a `ServerAp
 4. Implement a simple decaying learning rate schedule across rounds
 
 > \[!NOTE\]
-> The code in this example is particularly rich in comments, but the code itself is intended to be easy to follow. Note that in `task.py` you'll make use of many of the same components (model, train/evaluate functions, data loaders) as were first presented in the [pytorch-example](https://github.com/adap/flower/tree/main/examples/advanced-pytorch/pytorch-example) in the parent directory that uses strategies.
+> The code in this example is particularly rich in comments, but the code itself is intended to be easy to follow. Note that in `task.py` you'll make use of many of the same components (model, train/evaluate functions, data loaders) as were first presented in the [advanced-pytorch](https://github.com/adap/flower/tree/main/examples/advanced-pytorch/pytorch-example) in the parent directory that uses strategies.
+
+This examples uses [Flower Datasets](https://flower.ai/docs/datasets/) with the [Dirichlet Partitioner](https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.DirichletPartitioner.html#flwr_datasets.partitioner.DirichletPartitioner) to partition the [Fashion-MNIST](https://huggingface.co/datasets/zalando-datasets/fashion_mnist) dataset in a non-IID fashion into 50 partitions.
+
+![](_static/fmnist_50_lda.png)
+
+> \[!TIP\]
+> You can use Flower Datasets [built-in visualization tools](https://flower.ai/docs/datasets/tutorial-visualize-label-distribution.html) to easily generate plots like the one above.
 
 ```shell
-pytorch-pytorch-low-level
+advanced-pytorch-low-level
 ├── pytorch_example_low_level
 │   ├── __init__.py
 │   ├── client_app.py   # Defines your ClientApp
 │   ├── server_app.py   # Defines your ServerApp
-│   ├── utils.py        # Defines utility functions
-│   └── task.py         # Defines your model, training and data loading
+│   ├── task.py         # Defines your model, training and data loading
+│   └── utils.py        # Defines utility functions
 ├── pyproject.toml      # Project metadata like dependencies and configs
 └── README.md
 ```
