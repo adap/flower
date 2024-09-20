@@ -189,9 +189,10 @@ def _download_and_extract_if_needed(url, dest_folder):
             # Download the tar.gz file
             tar_gz_filename = url.split("/")[-1]
             if not os.path.isfile(tar_gz_filename):
-                with request.urlopen(url) as response, open(
-                    tar_gz_filename, "wb"
-                ) as out_file:
+                with (
+                    request.urlopen(url) as response,
+                    open(tar_gz_filename, "wb") as out_file,
+                ):
                     out_file.write(response.read())
 
             # Extract the tar.gz file

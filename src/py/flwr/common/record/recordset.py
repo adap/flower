@@ -119,7 +119,7 @@ class RecordSet:
     Let's see an example.
 
     >>>  from flwr.common import RecordSet
-    >>>  from flwr.common import ConfigsRecords, MetricsRecords, ParametersRecord
+    >>>  from flwr.common import ConfigsRecord, MetricsRecord, ParametersRecord
     >>>
     >>>  # Let's begin with an empty record
     >>>  my_recordset = RecordSet()
