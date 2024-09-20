@@ -4,20 +4,34 @@ dataset: [Fashion-MNIST]
 framework: [torch, torchvision]
 ---
 
-> \[!TIP\]
-> This example shows intermediate and advanced functionality of Flower. It you are new to Flower, it is recommended to start from the [quickstart-pytorch](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch) example or the [quickstart PyTorch tutorial](https://flower.ai/docs/framework/tutorial-quickstart-pytorch.html)
-
 # Federated Learning with PyTorch and Flower (Advanced Example)
 
-This example extends the content of the [quickstart-pytorch](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch) example. Primarily it demonstrates how to customize your `ServerApp` so it gains additional functionality:
+> \[!TIP\]
+> This example shows intermediate and advanced functionality of Flower. It you are new to Flower, it is recommended to start from the [quickstart-pytorch](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch) example or the [quickstart PyTorch tutorial](https://flower.ai/docs/framework/tutorial-quickstart-pytorch.html).
 
-- Saves results (e.g. accuracy, loss) to a JSON in the file system
-- Saves a checkpoint of the global model when a new best is found
-- Logs metrics to [Weight&Biases](<>) if enabled
+This example shows how to extend your `ClientApp` and `ServerApp` capabilities compared to what's shown in the [`quickstart-pytorch`](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch) example. In particular, it will show how the `ClientApp`'s state (and object of type [RecordSet](https://flower.ai/docs/framework/ref-api/flwr.common.RecordSet.html)) can be used to enable stateful clients, facilitating the design of personalized federated learning strategies, among others. The `ServerApp` in this example makes use of a custom strategy derived from the built-in [FedAvg](https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedAvg.html). In addition, it will also showcase how to:
 
-In addition, it also shows how to make your `ClientApp` use the context so clients behave as if they were stateful. This is useful if your `ClientApp` objects should make use of some data structures (e.g. metrics, model parameters) set in previous rounds. The example implements a basic for of _FL personalization_.
+1. Save model checkpoints
+2. Save the metrics available at the strategy (e.g. accuracies, losses)
+3. Log training artefacts to [Weights & Biases](https://wandb.ai/site)
+4. Implement a simple decaying learning rate schedule across rounds
 
-This examples shows how to achieve the above using both a `Strategy` as well as the low-level API.
+The structure of this directory is as follows:
+
+```shell
+advanced-pytorch
+├── pytorch_example
+│   ├── __init__.py
+│   ├── client_app.py   # Defines your ClientApp
+│   ├── server_app.py   # Defines your ServerApp
+│   ├── strategy.py     # Defines a custom strategy
+│   └── task.py         # Defines your model, training and data loading
+├── pyproject.toml      # Project metadata like dependencies and configs
+└── README.md
+```
+
+> \[!NOTE\]
+> By default this example will log metrics to Weights & Biases. For this, you need to ensure that your system has logged in. Often it's as simple as executing `wandb login` on the terminal after installing `wandb`. Please, refer to this [quickstart guide](https://docs.wandb.ai/quickstart#2-log-in-to-wb) for more information.
 
 This examples uses [Flower Datasets](https://flower.ai/docs/datasets/) with the [Dirichlet Partitioner](https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.DirichletPartitioner.html#flwr_datasets.partitioner.DirichletPartitioner) to partition the [Fashion-MNIST](https://huggingface.co/datasets/zalando-datasets/fashion_mnist) dataset in a non-IID fashion into 50 partitions.
 
@@ -26,21 +40,51 @@ This examples uses [Flower Datasets](https://flower.ai/docs/datasets/) with the 
 > \[!TIP\]
 > You can use Flower Datasets [built-in visualization tools](https://flower.ai/docs/datasets/tutorial-visualize-label-distribution.html) to easily generate plots like the one above.
 
-## Set up the project
+### Install dependencies and project
 
-### Clone the project
+Install the dependencies defined in `pyproject.toml` as well as the `pytorch_example` package.
 
-Start by cloning the example project:
-
-```shell
-git clone --depth=1 https://github.com/adap/flower.git _tmp \
-        && mv _tmp/examples/advanced-pytorch . \
-        && rm -rf _tmp \
-        && cd advanced-pytorch
+```bash
+pip install -e .
 ```
 
-This will create a new directory called `advanced-pytorch` with two sub-directories, each cotaining the same Flower app but one makes use of high-level components such as the `strategy` and the other uses the low-level API.
+## Run the project
 
-### Run the examples
+You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
 
-Please navigate to either sub-directory to run the example.
+When you run the project, the strategy will create a directory structure in the form of `outputs/date/time` and store two `JSON` files: `config.json` containing the `run-config` that the `ServerApp` receives; and `results.json` containing the results (accuracies, losses) that are generated at the strategy.
+
+By default, the metrics: {`centralized_accuracy`, `centralized_loss`, `federated_evaluate_accuracy`, `federated_evaluate_loss`} will be logged to Weights & Biases (they are also stored to the `results.json` previously mentioned). Upon executing `flwr run` you'll see a URL linking to your Weight&Biases dashboard wher you can see the metrics.
+
+![](_static/wandb_plots.png)
+
+### Run with the Simulation Engine
+
+With default parameters, 25% of the total 50 nodes (see `num-supernodes` in `pyproject.toml`) will be sampled for `fit` and 50% for an `evaluate` round. By default `ClientApp` objects will run on CPU.
+
+> \[!TIP\]
+> To run your `ClientApps` on GPU or to adjust the degree or parallelism of your simulation, edit the `[tool.flwr.federations.local-simulation]` section in the `pyproject.tom`.
+
+```bash
+flwr run .
+
+# To disable W&B
+flwr run . --run-config use-wandb=false
+```
+
+You can run the app using another federation (see `pyproject.toml`). For example, if you have a GPU available, select the `local-sim-gpu` federation:
+
+```bash
+flwr run . local-sim-gpu
+```
+
+You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
+
+```bash
+flwr run . --run-config "num-server-rounds=5 fraction-fit=0.5"
+```
+
+### Run with the Deployment Engine
+
+> \[!NOTE\]
+> An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.

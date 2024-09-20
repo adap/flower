@@ -33,6 +33,6 @@ message StartRunRequest {
   map<string, Scalar> override_config = 2;
   map<string, Scalar> federation_config = 3;
 }
-message StartRunResponse { sint64 run_id = 1; }
-message StreamLogsRequest { sint64 run_id = 1; }
+message StartRunResponse { uint64 run_id = 1; }
+message StreamLogsRequest { uint64 run_id = 1; }
 message StreamLogsResponse { string log_output = 1; }
