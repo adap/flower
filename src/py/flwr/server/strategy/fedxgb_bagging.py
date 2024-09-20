@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 
 import json
 from logging import WARNING
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, Optional, Union, cast
 
 from flwr.common import EvaluateRes, FitRes, Parameters, Scalar
 from flwr.common.logger import log
@@ -34,8 +34,8 @@ class FedXgbBagging(FedAvg):
         self,
         evaluate_function: Optional[
             Callable[
-                [int, Parameters, Dict[str, Scalar]],
-                Optional[Tuple[float, Dict[str, Scalar]]],
+                [int, Parameters, dict[str, Scalar]],
+                Optional[tuple[float, dict[str, Scalar]]],
             ]
         ] = None,
         **kwargs: Any,
@@ -52,9 +52,9 @@ class FedXgbBagging(FedAvg):
     def aggregate_fit(
         self,
         server_round: int,
-        results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+        results: list[tuple[ClientProxy, FitRes]],
+        failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
+    ) -> tuple[Optional[Parameters], dict[str, Scalar]]:
         """Aggregate fit results using bagging."""
         if not results:
             return None, {}
@@ -79,9 +79,9 @@ class FedXgbBagging(FedAvg):
     def aggregate_evaluate(
         self,
         server_round: int,
-        results: List[Tuple[ClientProxy, EvaluateRes]],
-        failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
-    ) -> Tuple[Optional[float], Dict[str, Scalar]]:
+        results: list[tuple[ClientProxy, EvaluateRes]],
+        failures: list[Union[tuple[ClientProxy, EvaluateRes], BaseException]],
+    ) -> tuple[Optional[float], dict[str, Scalar]]:
         """Aggregate evaluation metrics using average."""
         if not results:
             return None, {}
@@ -101,7 +101,7 @@ class FedXgbBagging(FedAvg):
 
     def evaluate(
         self, server_round: int, parameters: Parameters
-    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+    ) -> Optional[tuple[float, dict[str, Scalar]]]:
         """Evaluate model parameters using an evaluation function."""
         if self.evaluate_function is None:
             # No evaluation function provided
@@ -152,7 +152,7 @@ def aggregate(
     return bst_prev_bytes
 
 
-def _get_tree_nums(xgb_model_org: bytes) -> Tuple[int, int]:
+def _get_tree_nums(xgb_model_org: bytes) -> tuple[int, int]:
     xgb_model = json.loads(bytearray(xgb_model_org))
     # Get the number of trees
     tree_num = int(
