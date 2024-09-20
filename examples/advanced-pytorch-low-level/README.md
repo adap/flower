@@ -17,7 +17,7 @@ This example demonstrates how to use Flower's low-level API to write a `ServerAp
 4. Implement a simple decaying learning rate schedule across rounds
 
 > \[!NOTE\]
-> The code in this example is particularly rich in comments, but the code itself is intended to be easy to follow. Note that in `task.py` you'll make use of many of the same components (model, train/evaluate functions, data loaders) as were first presented in the [advanced-pytorch](https://github.com/adap/flower/tree/main/examples/advanced-pytorch/pytorch-example) in the parent directory that uses strategies.
+> The code in this example is particularly rich in comments, but the code itself is intended to be easy to follow. Note that in `task.py` you'll make use of many of the same components (model, train/evaluate functions, data loaders) as were first presented in the [advanced-pytorch](https://github.com/adap/flower/tree/main/examples/advanced-pytorch) example that uses strategies.
 
 This examples uses [Flower Datasets](https://flower.ai/docs/datasets/) with the [Dirichlet Partitioner](https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.DirichletPartitioner.html#flwr_datasets.partitioner.DirichletPartitioner) to partition the [Fashion-MNIST](https://huggingface.co/datasets/zalando-datasets/fashion_mnist) dataset in a non-IID fashion into 50 partitions.
 

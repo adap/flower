@@ -4,7 +4,7 @@ import json
 import random
 from collections import OrderedDict
 from logging import INFO
-from time import time
+from time import time, sleep
 from typing import List, Tuple
 
 import numpy as np
@@ -71,7 +71,11 @@ def main(driver: Driver, context: Context) -> None:
         log(INFO, "🔄 Starting round %s/%s", server_round + 1, num_rounds)
 
         ### 1. Get IDs of nodes available
-        node_ids = driver.get_node_ids()
+        node_ids = []
+        while len(node_ids) == 0:
+            # Wait until at least one node is available
+            node_ids = driver.get_node_ids()
+            sleep(1)
 
         # Sample uniformly
         num_sample = int(len(node_ids) * fraction_train)
