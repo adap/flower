@@ -529,11 +529,11 @@ class ImageSemanticPartitioner(Partitioner):
             raise ValueError("The gmm max iter needs to be greater than zero.")
         if self._pca_components <= 0:
             raise ValueError("The pca components needs to be greater than zero.")
-        if not isinstance(self._rng_seed, int):
+        if self._rng_seed and not isinstance(self._rng_seed, int):
             raise TypeError("The rng seed needs to be an integer.")
-        if not isinstance(self._pca_seed, int):
+        if self._pca_seed and not isinstance(self._pca_seed, int):
             raise TypeError("The pca seed needs to be an integer.")
-        if not isinstance(self._gmm_seed, int):
+        if self._gmm_seed and not isinstance(self._gmm_seed, int):
             raise TypeError("The gmm seed needs to be an integer.")
 
 
