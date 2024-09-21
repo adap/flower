@@ -231,6 +231,7 @@ class ImageSemanticPartitioner(Partitioner):
             (models.efficientnet_b7, models.EfficientNet_B7_Weights.DEFAULT),
         ]
 
+        # pylint: disable=R0913
         def _pairwise_kl_div(
             means_1: torch.Tensor,
             trils_1: torch.Tensor,
@@ -351,7 +352,7 @@ class ImageSemanticPartitioner(Partitioner):
                 gmm.means_, dtype=torch.float, device=device
             )
             label_cluster_trils[current_label] = (
-                torch.linalg.cholesky(  # type: ignore
+                torch.linalg.cholesky(  # pylint: disable=E1102
                     torch.from_numpy(gmm.covariances_)
                 )
                 .float()
