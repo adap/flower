@@ -89,16 +89,19 @@ class ImageSemanticPartitioner(Partitioner):
     image_column_name: Optional[str]
         The name of the image column in the dataset. If not set, the first image column
         is used.
+    kl_pairwise_batch_size: int
+        The batch size for computing pairwise KL-divergence of two label clusters.
+        Defaults to 32.
     shuffle: bool
         Whether to randomize the order of samples. Shuffling applied after the
         samples assignment to partitions.
     rng_seed: Optional[int]
         Seed used for numpy random number generator,
-        which used throughout the process. Defaults to 42.
+        which used throughout the process. Defaults to None.
     pca_seed: Optional[int]
-        Seed used for PCA dimensionality reduction. Defaults to 42.
+        Seed used for PCA dimensionality reduction. Defaults to None.
     gmm_seed: Optional[int]
-        Seed used for GMM clustering. Defaults to 42.
+        Seed used for GMM clustering. Defaults to None.
 
 
     Examples
@@ -132,15 +135,16 @@ class ImageSemanticPartitioner(Partitioner):
         partition_by: str,
         efficient_net_type: int = 3,
         batch_size: int = 32,
-        pca_components: int = 128,
+        pca_components: int = 256,
         gmm_max_iter: int = 100,
-        gmm_init_params: str = "kmeans",
+        gmm_init_params: str = "random",
         use_cuda: bool = False,
         image_column_name: Optional[str] = None,
+        kl_pairwise_batch_size: int = 32,
         shuffle: bool = True,
-        rng_seed: Optional[int] = 42,
-        pca_seed: Optional[int] = 42,
-        gmm_seed: Optional[int] = 42,
+        rng_seed: Optional[int] = None,
+        pca_seed: Optional[int] = None,
+        gmm_seed: Optional[int] = None,
     ) -> None:
         super().__init__()
         # Attributes based on the constructor
@@ -154,6 +158,7 @@ class ImageSemanticPartitioner(Partitioner):
         self._gmm_init_params = gmm_init_params
         self._use_cuda = use_cuda
         self._image_column_name = image_column_name
+        self._kl_pairwise_batch_size = kl_pairwise_batch_size
         self._shuffle = shuffle
         self._rng_seed = rng_seed
         self._pca_seed = pca_seed
@@ -197,14 +202,6 @@ class ImageSemanticPartitioner(Partitioner):
         self._determine_partition_id_to_indices_if_needed()
         return self._num_partitions
 
-    def _subsample(self, embeddings: NDArrayFloat, num_samples: int) -> NDArrayFloat:
-        if len(embeddings) < num_samples:
-            return embeddings
-        idx_samples = self._rng_numpy.choice(
-            len(embeddings), num_samples, replace=False
-        )
-        return embeddings[idx_samples]  # type: ignore
-
     # pylint: disable=C0415, R0915
     def _determine_partition_id_to_indices_if_needed(self) -> None:
         """Create an assignment of indices to the partition indices."""
@@ -233,6 +230,42 @@ class ImageSemanticPartitioner(Partitioner):
             (models.efficientnet_b6, models.EfficientNet_B6_Weights.DEFAULT),
             (models.efficientnet_b7, models.EfficientNet_B7_Weights.DEFAULT),
         ]
+
+        def _pairwise_kl_div(
+            means_1: torch.Tensor,
+            trils_1: torch.Tensor,
+            means_2: torch.Tensor,
+            trils_2: torch.Tensor,
+            batch_size: int,
+            device: torch.device,
+        ):
+            num_dist_1, num_dist_2 = means_1.shape[0], means_2.shape[0]
+            pairwise_kl_matrix = torch.zeros((num_dist_1, num_dist_2), device=device)
+
+            for i in range(0, means_1.shape[0], batch_size):
+                for j in range(0, means_2.shape[0], batch_size):
+                    pairwise_kl_matrix[i : i + batch_size, j : j + batch_size] = (
+                        kl_divergence(
+                            MultivariateNormal(
+                                means_1[i : i + batch_size].unsqueeze(1),
+                                scale_tril=trils_1[i : i + batch_size].unsqueeze(1),
+                            ),
+                            MultivariateNormal(
+                                means_2[j : j + batch_size].unsqueeze(0),
+                                scale_tril=trils_2[j : j + batch_size].unsqueeze(0),
+                            ),
+                        )
+                    )
+            return pairwise_kl_matrix
+
+        def _subsample(embeddings: NDArrayFloat, num_samples: int) -> NDArrayFloat:
+            if len(embeddings) < num_samples:
+                return embeddings
+            idx_samples = self._rng_numpy.choice(
+                len(embeddings), num_samples, replace=False
+            )
+            return embeddings[idx_samples]  # type: ignore
+
         backbone, pretrained_weight = efficient_nets_dict[self._efficient_net_type]
         efficient_net: models.EfficientNet = backbone(weights=pretrained_weight)
         efficient_net.classifier = torch.nn.Flatten()
@@ -279,33 +312,32 @@ class ImageSemanticPartitioner(Partitioner):
         if 0 < self._pca_components < embeddings_scaled.shape[1]:
             pca = PCA(n_components=self._pca_components, random_state=self._pca_seed)
             # 100000 refers to official implementation
-            pca.fit(self._subsample(embeddings_scaled, 100000))
-            embeddings_scaled = torch.tensor(
-                pca.transform(embeddings_scaled), dtype=torch.float, device=device
-            )
+            pca.fit(_subsample(embeddings_scaled, 100000))
+            embeddings_scaled = pca.transform(embeddings_scaled)
 
         targets = np.array(self.dataset[self._partition_by], dtype=np.int64)
-        label_cluster_means = [None for _ in self._unique_classes]
-        label_cluster_trils = [None for _ in self._unique_classes]
-
-        # Use Gaussian Mixture Model to cluster the embeddings
-        gmm = GaussianMixture(
-            n_components=self._num_partitions,
-            max_iter=self._gmm_max_iter,
-            reg_covar=1e-4,
-            init_params=self._gmm_init_params,
-            random_state=self._gmm_seed,
-        )
+        label_cluster_means: Dict[int, torch.Tensor] = {}
+        label_cluster_trils: Dict[int, torch.Tensor] = {}
 
         label_cluster_list: List[List[List[int]]] = [
             [[] for _ in range(self._num_partitions)] for _ in self._unique_classes
         ]
-        for label in self._unique_classes:
-            print(f"Buliding clusters of label {label}")
-            idx_current_label = np.where(targets == label)[0]
+        for current_label in self._unique_classes:
+            print(f"Buliding clusters of label {current_label}")
+            idx_current_label = np.where(targets == current_label)[0]
             # 10000 refers to official implementation
-            embeddings_of_current_label = self._subsample(
+            embeddings_of_current_label = _subsample(
                 embeddings_scaled[idx_current_label], 10000
+            )
+
+            # Use Gaussian Mixture Model to cluster the embeddings
+            gmm = GaussianMixture(
+                n_components=self._num_partitions,
+                max_iter=self._gmm_max_iter,
+                reg_covar=1e-4,
+                init_params=self._gmm_init_params,
+                random_state=self._gmm_seed,
+                verbose=False,
             )
 
             gmm.fit(embeddings_of_current_label)
@@ -313,11 +345,17 @@ class ImageSemanticPartitioner(Partitioner):
             cluster_list = gmm.predict(embeddings_of_current_label)
 
             for idx, cluster in zip(idx_current_label.tolist(), cluster_list):
-                label_cluster_list[label][cluster].append(idx)  # type: ignore
+                label_cluster_list[current_label][cluster].append(idx)  # type: ignore
 
-            label_cluster_means[label] = torch.tensor(gmm.means_)  # type: ignore
-            label_cluster_trils[label] = torch.linalg.cholesky(  # type: ignore
-                torch.from_numpy(gmm.covariances_)
+            label_cluster_means[current_label] = torch.tensor(  # type: ignore
+                gmm.means_, dtype=torch.float, device=device
+            )
+            label_cluster_trils[current_label] = (
+                torch.linalg.cholesky(  # type: ignore
+                    torch.from_numpy(gmm.covariances_)
+                )
+                .float()
+                .to(device)
             )
 
         # Start clustering
@@ -341,25 +379,18 @@ class ImageSemanticPartitioner(Partitioner):
                 f"{latest_matched_label} and {label_to_match}",
             )
 
-            num_dist_1, num_dist_2 = (
-                label_cluster_means[latest_matched_label].shape[0],
-                label_cluster_means[label_to_match].shape[0],
+            cost_matrix = (
+                _pairwise_kl_div(
+                    means_1=label_cluster_means[latest_matched_label],
+                    trils_1=label_cluster_trils[latest_matched_label],
+                    means_2=label_cluster_means[label_to_match],
+                    trils_2=label_cluster_trils[label_to_match],
+                    batch_size=self._kl_pairwise_batch_size,
+                    device=device,
+                )
+                .cpu()
+                .numpy()
             )
-            cost_matrix = torch.zeros((num_dist_1, num_dist_2), device=device)
-
-            for i in range(label_cluster_means[latest_matched_label].shape[0]):
-                for j in range(label_cluster_means[label_to_match].shape[0]):
-                    cost_matrix[i, j] = kl_divergence(
-                        MultivariateNormal(
-                            loc=label_cluster_means[latest_matched_label][i],
-                            scale_tril=label_cluster_trils[latest_matched_label][i],
-                        ),
-                        MultivariateNormal(
-                            loc=label_cluster_means[label_to_match][j],
-                            scale_tril=label_cluster_trils[label_to_match][j],
-                        ),
-                    )
-            cost_matrix = cost_matrix.cpu().numpy()
 
             optimal_local_assignment = linear_sum_assignment(cost_matrix)
 
@@ -375,10 +406,10 @@ class ImageSemanticPartitioner(Partitioner):
 
         partition_id_to_indices: Dict[int, List[int]] = {i: [] for i in partitions}
 
-        for label in self._unique_classes:
+        for current_label in self._unique_classes:
             for i in partitions:
-                partition_id_to_indices[clusters[label][i]].extend(  # type: ignore
-                    label_cluster_list[label][i]  # type: ignore
+                partition_id_to_indices[clusters[current_label][i]].extend(  # type: ignore
+                    label_cluster_list[current_label][i]  # type: ignore
                 )
 
         # Shuffle the indices not to have the datasets with targets in sequences like
@@ -504,7 +535,8 @@ class ImageSemanticPartitioner(Partitioner):
             raise TypeError("The pca seed needs to be an integer.")
         if not isinstance(self._gmm_seed, int):
             raise TypeError("The gmm seed needs to be an integer.")
-            
+
+
 if __name__ == "__main__":
     # ===================== Test with custom Dataset =====================
     from datasets import Dataset
