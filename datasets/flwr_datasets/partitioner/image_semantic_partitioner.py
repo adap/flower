@@ -535,23 +535,3 @@ class ImageSemanticPartitioner(Partitioner):
             raise TypeError("The pca seed needs to be an integer.")
         if self._gmm_seed and not isinstance(self._gmm_seed, int):
             raise TypeError("The gmm seed needs to be an integer.")
-
-
-if __name__ == "__main__":
-    # ===================== Test with custom Dataset =====================
-    from datasets import Dataset
-
-    dataset = {
-        "image": [np.random.randn(28, 28) for _ in range(50)],
-        "label": [i % 3 for i in range(50)],
-    }
-    dataset = Dataset.from_dict(dataset)
-    partitioner = ImageSemanticPartitioner(
-        num_partitions=5, partition_by="label", pca_components=30
-    )
-    partitioner.dataset = dataset
-    partition = partitioner.load_partition(0)
-    partition_sizes = partition_sizes = [
-        len(partitioner.load_partition(partition_id)) for partition_id in range(5)
-    ]
-    print(sorted(partition_sizes))
