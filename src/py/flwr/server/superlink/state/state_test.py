@@ -750,7 +750,7 @@ class StateTest(unittest.TestCase):
         state.store_task_ins(task_ins=task_ins)
 
         with patch("time.time") as mock_time:
-            mock_time.return_value = time.time() + 2
+            mock_time.return_value = time.time() + 6
             task_ins_list = state.get_task_ins(node_id=1, limit=None)
             assert len(task_ins_list) == 0
 
