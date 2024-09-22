@@ -760,7 +760,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         consumer_node_id = 1
         state = self.state_factory()
-        run_id = state.create_run("mock/mock", "v1.0.0")
+        run_id = state.create_run(None, None, "9f86d08", {})
         task_ins = create_task_ins(
             consumer_node_id=consumer_node_id, anonymous=False, run_id=run_id
         )
