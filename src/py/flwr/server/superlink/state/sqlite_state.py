@@ -377,7 +377,7 @@ class SqliteState(State):  # pylint: disable=R0904
         if task_ins is None:
             log(
                 ERROR,
-                "TaskIns with task_id %s does not exist or is expired.",
+                "Failed to store TaskRes: TaskIns with task_id %s does not exist or has expired.",
                 task_ins_id,
             )
             return None

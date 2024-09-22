@@ -300,7 +300,7 @@ class StateTest(unittest.TestCase):
         """Store TaskRes retrieve it by task_ins_id."""
         # Prepare
         state: State = self.state_factory()
-        run_id = state.create_run("mock/mock", "v1.0.0")
+        run_id = state.create_run(None, None, "9f86d08", {})
 
         task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
         task_ins_id = state.store_task_ins(task_ins)
@@ -510,7 +510,7 @@ class StateTest(unittest.TestCase):
         """Test if num_tasks returns correct number of not delivered task_res."""
         # Prepare
         state: State = self.state_factory()
-        run_id = state.create_run("mock/mock", "v1.0.0")
+        run_id = state.create_run(None, None, "9f86d08", {})
 
         task_ins_0 = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
         task_ins_1 = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
@@ -684,7 +684,7 @@ class StateTest(unittest.TestCase):
         """Test behavior of store_task_res when the TaskIns it references is expired."""
         # Prepare
         state: State = self.state_factory()
-        run_id = state.create_run("mock/mock", "v1.0.0")
+        run_id = state.create_run(None, None, "9f86d08", {})
 
         task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
         task_ins.task.created_at = time.time() - task_ins.task.ttl + 0.5

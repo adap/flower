@@ -127,7 +127,11 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                 return None
 
             if task_ins.task.created_at + task_ins.task.ttl <= time.time():
-                log(ERROR, "TaskIns with task_id %s is expired.", task_ins_id)
+                log(
+                    ERROR,
+                    "Failed to store TaskRes: TaskIns with task_id %s has expired.",
+                    task_ins_id,
+                )
                 return None
 
         # Validate run_id
