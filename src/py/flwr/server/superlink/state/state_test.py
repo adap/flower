@@ -745,17 +745,15 @@ class StateTest(unittest.TestCase):
             consumer_node_id=consumer_node_id, anonymous=False, run_id=run_id
         )
         task_ins.task.created_at = time.time() - 5
-        task_ins.task.ttl = 5.1
-
-        state.store_task_ins(task_ins=task_ins)
+        task_ins.task.ttl = 5.0
 
         # Execute
-        current_time = time.time()
-        with patch("time.time", side_effect=lambda: current_time + 6):
-            task_ins_list = state.get_task_ins(node_id=1, limit=None)
+        state.store_task_ins(task_ins=task_ins)
 
         # Assert
-        self.assertEqual(len(task_ins_list), 0)
+        with patch("time.time", side_effect=lambda: task_ins.task.created_at + 6.1):
+            task_ins_list = state.get_task_ins(node_id=1, limit=None)
+            assert len(task_ins_list) == 0
 
 
 def create_task_ins(
