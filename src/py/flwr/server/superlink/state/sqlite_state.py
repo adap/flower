@@ -377,7 +377,8 @@ class SqliteState(State):  # pylint: disable=R0904
         if task_ins is None:
             log(
                 ERROR,
-                "Failed to store TaskRes: TaskIns with task_id %s does not exist or has expired.",
+                "Failed to store TaskRes: "
+                "TaskIns with task_id %s does not exist or has expired.",
                 task_ins_id,
             )
             return None
@@ -820,7 +821,7 @@ class SqliteState(State):  # pylint: disable=R0904
             log(ERROR, "`node_id` does not exist.")
             return False
 
-    def get_valid_task_ins(self, task_id: str) -> Optional[Dict[str, Any]]:
+    def get_valid_task_ins(self, task_id: str) -> Optional[dict[str, Any]]:
         """Check if the TaskIns exists and is valid (not expired).
 
         Return TaskIns if valid.
