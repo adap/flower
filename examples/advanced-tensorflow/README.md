@@ -1,3 +1,9 @@
+---
+tags: [advanced, vision, fds]
+dataset: [CIFAR-10]
+framework: [tensorflow, Keras]
+---
+
 # Advanced Flower Example (TensorFlow/Keras)
 
 This example demonstrates an advanced federated learning setup using Flower with TensorFlow/Keras. This example uses [Flower Datasets](https://flower.ai/docs/datasets/) and it differs from the quickstart example in the following ways:

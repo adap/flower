@@ -72,7 +72,7 @@ It must return a dictionary of arbitrary configuration values  :code:`client.fit
     )
     fl.server.start_server(config=fl.server.ServerConfig(num_rounds=3), strategy=strategy)
 
-The :code:`on_fit_config_fn` can be used to pass arbitrary configuration values from server to client, and poetentially change these values each round, for example, to adjust the learning rate.
+The :code:`on_fit_config_fn` can be used to pass arbitrary configuration values from server to client, and potentially change these values each round, for example, to adjust the learning rate.
 The client will receive the dictionary returned by the :code:`on_fit_config_fn` in its own :code:`client.fit()` function.
 
 Similar to :code:`on_fit_config_fn`, there is also :code:`on_evaluate_config_fn` to customize the configuration sent to :code:`client.evaluate()`

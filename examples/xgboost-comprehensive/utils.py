@@ -1,6 +1,5 @@
 import argparse
 
-
 # Hyper-parameters for xgboost training
 NUM_LOCAL_ROUND = 1
 BST_PARAMS = {
