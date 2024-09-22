@@ -17,7 +17,7 @@
 
 import threading
 import time
-from logging import ERROR
+from logging import ERROR, WARNING
 from typing import Optional
 from uuid import UUID, uuid4
 
@@ -138,17 +138,18 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             # expiration time of the TaskIns it replies to.
             # Condition: TaskIns.created_at + TaskIns.ttl ≥
             #            TaskRes.created_at + TaskRes.ttl
-            if (
-                task_res.task.ttl
-                > task_ins.task.created_at
-                + task_ins.task.ttl
-                - task_res.task.created_at
-            ):
-                task_res.task.ttl = (
-                    task_ins.task.created_at
-                    + task_ins.task.ttl
-                    - task_res.task.created_at
+            max_allowed_ttl = (
+                task_ins.task.created_at + task_ins.task.ttl - task_res.task.created_at
+            )
+            if task_res.task.ttl > max_allowed_ttl:
+                log(
+                    WARNING,
+                    "Received TaskRes with TTL %s exceeding the allowed maximum TTL %s."
+                    "Updating TTL to the allowed maximum.",
+                    task_res.task.ttl,
+                    max_allowed_ttl,
                 )
+                task_res.task.ttl = max_allowed_ttl
 
         # Validate run_id
         if task_res.run_id not in self.run_ids:

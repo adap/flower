@@ -20,7 +20,7 @@ import re
 import sqlite3
 import time
 from collections.abc import Sequence
-from logging import DEBUG, ERROR
+from logging import DEBUG, ERROR, WARNING
 from typing import Any, Optional, Union, cast
 from uuid import UUID, uuid4
 
@@ -387,13 +387,18 @@ class SqliteState(State):  # pylint: disable=R0904
         # expiration time of the TaskIns it replies to.
         # Condition: TaskIns.created_at + TaskIns.ttl ≥
         #            TaskRes.created_at + TaskRes.ttl
-        if (
-            task_res.task.ttl
-            > task_ins["created_at"] + task_ins["ttl"] - task_res.task.created_at
-        ):
-            task_res.task.ttl = (
-                task_ins["created_at"] + task_ins["ttl"] - task_res.task.created_at
+        max_allowed_ttl = (
+            task_ins["created_at"] + task_ins["ttl"] - task_res.task.created_at
+        )
+        if task_res.task.ttl > max_allowed_ttl:
+            log(
+                WARNING,
+                "Received TaskRes with TTL %s exceeding the allowed maximum TTL %s."
+                "Updating TTL to the allowed maximum.",
+                task_res.task.ttl,
+                max_allowed_ttl,
             )
+            task_res.task.ttl = max_allowed_ttl
 
         # Store TaskRes
         task_res.task_id = str(task_id)
