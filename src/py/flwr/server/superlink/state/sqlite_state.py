@@ -14,6 +14,7 @@
 # ==============================================================================
 """SQLite based implemenation of server state."""
 
+# pylint: disable=too-many-lines
 
 import json
 import re
@@ -424,7 +425,7 @@ class SqliteState(State):  # pylint: disable=R0904
 
         return task_id
 
-    # pylint: disable-next=R0912,R0915,R0914,C0302
+    # pylint: disable-next=R0912,R0915,R0914
     def get_task_res(self, task_ids: set[UUID], limit: Optional[int]) -> list[TaskRes]:
         """Get TaskRes for task_ids.
 
