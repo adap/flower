@@ -16,13 +16,13 @@
 
 
 import time
-from typing import List, Union
+from typing import Union
 
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 
 # pylint: disable-next=too-many-branches,too-many-statements
-def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str]:
+def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> list[str]:
     """Validate a TaskIns or TaskRes."""
     validation_errors = []
 

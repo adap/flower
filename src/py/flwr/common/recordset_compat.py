@@ -15,7 +15,9 @@
 """RecordSet utilities."""
 
 
-from typing import Dict, Mapping, OrderedDict, Tuple, Union, cast, get_args
+from collections import OrderedDict
+from collections.abc import Mapping
+from typing import Union, cast, get_args
 
 from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordSet
 from .typing import (
@@ -115,7 +117,7 @@ def parameters_to_parametersrecord(
 
 def _check_mapping_from_recordscalartype_to_scalar(
     record_data: Mapping[str, Union[ConfigsRecordValues, MetricsRecordValues]]
-) -> Dict[str, Scalar]:
+) -> dict[str, Scalar]:
     """Check mapping `common.*RecordValues` into `common.Scalar` is possible."""
     for value in record_data.values():
         if not isinstance(value, get_args(Scalar)):
@@ -126,14 +128,14 @@ def _check_mapping_from_recordscalartype_to_scalar(
                 "supported by the `common.RecordSet` infrastructure. "
                 f"You used type: {type(value)}"
             )
-    return cast(Dict[str, Scalar], record_data)
+    return cast(dict[str, Scalar], record_data)
 
 
 def _recordset_to_fit_or_evaluate_ins_components(
     recordset: RecordSet,
     ins_str: str,
     keep_input: bool,
-) -> Tuple[Parameters, Dict[str, Scalar]]:
+) -> tuple[Parameters, dict[str, Scalar]]:
     """Derive Fit/Evaluate Ins from a RecordSet."""
     # get Array and construct Parameters
     parameters_record = recordset.parameters_records[f"{ins_str}.parameters"]
@@ -145,7 +147,7 @@ def _recordset_to_fit_or_evaluate_ins_components(
     # get config dict
     config_record = recordset.configs_records[f"{ins_str}.config"]
     # pylint: disable-next=protected-access
-    config_dict = _check_mapping_from_recordscalartype_to_scalar(config_record._data)
+    config_dict = _check_mapping_from_recordscalartype_to_scalar(config_record)
 
     return parameters, config_dict
 
@@ -169,7 +171,7 @@ def _fit_or_evaluate_ins_to_recordset(
 def _embed_status_into_recordset(
     res_str: str, status: Status, recordset: RecordSet
 ) -> RecordSet:
-    status_dict: Dict[str, ConfigsRecordValues] = {
+    status_dict: dict[str, ConfigsRecordValues] = {
         "code": int(status.code.value),
         "message": status.message,
     }
@@ -213,7 +215,7 @@ def recordset_to_fitres(recordset: RecordSet, keep_input: bool) -> FitRes:
     )
     configs_record = recordset.configs_records[f"{ins_str}.metrics"]
     # pylint: disable-next=protected-access
-    metrics = _check_mapping_from_recordscalartype_to_scalar(configs_record._data)
+    metrics = _check_mapping_from_recordscalartype_to_scalar(configs_record)
     status = _extract_status_from_recordset(ins_str, recordset)
 
     return FitRes(
@@ -274,7 +276,7 @@ def recordset_to_evaluateres(recordset: RecordSet) -> EvaluateRes:
     configs_record = recordset.configs_records[f"{ins_str}.metrics"]
 
     # pylint: disable-next=protected-access
-    metrics = _check_mapping_from_recordscalartype_to_scalar(configs_record._data)
+    metrics = _check_mapping_from_recordscalartype_to_scalar(configs_record)
     status = _extract_status_from_recordset(ins_str, recordset)
 
     return EvaluateRes(
@@ -314,7 +316,7 @@ def recordset_to_getparametersins(recordset: RecordSet) -> GetParametersIns:
     """Derive GetParametersIns from a RecordSet object."""
     config_record = recordset.configs_records["getparametersins.config"]
     # pylint: disable-next=protected-access
-    config_dict = _check_mapping_from_recordscalartype_to_scalar(config_record._data)
+    config_dict = _check_mapping_from_recordscalartype_to_scalar(config_record)
 
     return GetParametersIns(config=config_dict)
 
@@ -365,7 +367,7 @@ def recordset_to_getpropertiesins(recordset: RecordSet) -> GetPropertiesIns:
     """Derive GetPropertiesIns from a RecordSet object."""
     config_record = recordset.configs_records["getpropertiesins.config"]
     # pylint: disable-next=protected-access
-    config_dict = _check_mapping_from_recordscalartype_to_scalar(config_record._data)
+    config_dict = _check_mapping_from_recordscalartype_to_scalar(config_record)
 
     return GetPropertiesIns(config=config_dict)
 
@@ -384,7 +386,7 @@ def recordset_to_getpropertiesres(recordset: RecordSet) -> GetPropertiesRes:
     res_str = "getpropertiesres"
     config_record = recordset.configs_records[f"{res_str}.properties"]
     # pylint: disable-next=protected-access
-    properties = _check_mapping_from_recordscalartype_to_scalar(config_record._data)
+    properties = _check_mapping_from_recordscalartype_to_scalar(config_record)
 
     status = _extract_status_from_recordset(res_str, recordset=recordset)
 

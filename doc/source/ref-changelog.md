@@ -1,5 +1,239 @@
 # Changelog
 
+## v1.11.1 (2024-09-11)
+
+### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Heng Pan`, `Javier`, `Robert Steiner`, `Yan Gao` <!---TOKEN_v1.11.1-->
+
+### Improvements
+
+- **Implement** `keys/values/items` **methods for** `TypedDict` ([#4146](https://github.com/adap/flower/pull/4146))
+
+- **Fix parsing of** `--executor-config` **if present** ([#4125](https://github.com/adap/flower/pull/4125))
+
+- **Adjust framework name in templates docstrings** ([#4127](https://github.com/adap/flower/pull/4127))
+
+- **Update** `flwr new` **Hugging Face template** ([#4169](https://github.com/adap/flower/pull/4169))
+
+- **Fix** `flwr new` **FlowerTune template** ([#4123](https://github.com/adap/flower/pull/4123))
+
+- **Add buffer time after** `ServerApp` **thread initialization** ([#4119](https://github.com/adap/flower/pull/4119))
+
+- **Handle unsuitable resources for simulation** ([#4143](https://github.com/adap/flower/pull/4143))
+
+- **Update example READMEs** ([#4117](https://github.com/adap/flower/pull/4117))
+
+- **Update SuperNode authentication docs** ([#4160](https://github.com/adap/flower/pull/4160))
+
+### Incompatible changes
+
+None
+
+## v1.11.0 (2024-08-30)
+
+### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Adam Narozniak`, `Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Danny`, `Edoardo Gabrielli`, `Heng Pan`, `Javier`, `Meng Yan`, `Michal Danilowski`, `Mohammad Naseri`, `Robert Steiner`, `Steve Laskaridis`, `Taner Topal`, `Yan Gao` <!---TOKEN_v1.11.0-->
+
+### What's new?
+
+- **Deliver Flower App Bundle (FAB) to SuperLink and SuperNodes** ([#4006](https://github.com/adap/flower/pull/4006), [#3945](https://github.com/adap/flower/pull/3945), [#3999](https://github.com/adap/flower/pull/3999), [#4027](https://github.com/adap/flower/pull/4027), [#3851](https://github.com/adap/flower/pull/3851), [#3946](https://github.com/adap/flower/pull/3946), [#4003](https://github.com/adap/flower/pull/4003), [#4029](https://github.com/adap/flower/pull/4029), [#3942](https://github.com/adap/flower/pull/3942), [#3957](https://github.com/adap/flower/pull/3957), [#4020](https://github.com/adap/flower/pull/4020), [#4044](https://github.com/adap/flower/pull/4044), [#3852](https://github.com/adap/flower/pull/3852), [#4019](https://github.com/adap/flower/pull/4019), [#4031](https://github.com/adap/flower/pull/4031), [#4036](https://github.com/adap/flower/pull/4036), [#4049](https://github.com/adap/flower/pull/4049), [#4017](https://github.com/adap/flower/pull/4017), [#3943](https://github.com/adap/flower/pull/3943), [#3944](https://github.com/adap/flower/pull/3944), [#4011](https://github.com/adap/flower/pull/4011), [#3619](https://github.com/adap/flower/pull/3619))
+
+  Dynamic code updates are here! `flwr run` can now ship and install the latest version of your `ServerApp` and `ClientApp` to an already-running federation (SuperLink and SuperNodes).
+
+  How does it work? `flwr run` bundles your Flower app into a single FAB (Flower App Bundle) file. It then ships this FAB file, via the SuperExec, to both the SuperLink and those SuperNodes that need it. This allows you to keep SuperExec, SuperLink and SuperNodes running as permanent infrastructure, and then ship code updates (including completely new projects!) dynamically.
+
+  `flwr run` is all you need.
+
+- **Introduce isolated** `ClientApp` **execution** ([#3970](https://github.com/adap/flower/pull/3970), [#3976](https://github.com/adap/flower/pull/3976), [#4002](https://github.com/adap/flower/pull/4002), [#4001](https://github.com/adap/flower/pull/4001), [#4034](https://github.com/adap/flower/pull/4034), [#4037](https://github.com/adap/flower/pull/4037), [#3977](https://github.com/adap/flower/pull/3977), [#4042](https://github.com/adap/flower/pull/4042), [#3978](https://github.com/adap/flower/pull/3978), [#4039](https://github.com/adap/flower/pull/4039), [#4033](https://github.com/adap/flower/pull/4033), [#3971](https://github.com/adap/flower/pull/3971), [#4035](https://github.com/adap/flower/pull/4035), [#3973](https://github.com/adap/flower/pull/3973), [#4032](https://github.com/adap/flower/pull/4032))
+
+  The SuperNode can now run your `ClientApp` in a fully isolated way. In an enterprise deployment, this allows you to set strict limits on what the `ClientApp` can and cannot do.
+
+  `flower-supernode` supports three `--isolation` modes:
+
+  - Unset: The SuperNode runs the `ClientApp` in the same process (as in previous versions of Flower). This is the default mode.
+  - `--isolation=subprocess`: The SuperNode starts a subprocess to run the `ClientApp`.
+  - `--isolation=process`: The SuperNode expects an externally-managed process to run the `ClientApp`. This external process is not managed by the SuperNode, so it has to be started beforehand and terminated manually. The common way to use this isolation mode is via the new `flwr/clientapp` Docker image.
+
+- **Improve Docker support for enterprise deployments** ([#4050](https://github.com/adap/flower/pull/4050), [#4090](https://github.com/adap/flower/pull/4090), [#3784](https://github.com/adap/flower/pull/3784), [#3998](https://github.com/adap/flower/pull/3998), [#4094](https://github.com/adap/flower/pull/4094), [#3722](https://github.com/adap/flower/pull/3722))
+
+  Flower 1.11 ships many Docker improvements that are especially useful for enterprise deployments:
+
+  - `flwr/supernode` comes with a new Alpine Docker image.
+  - `flwr/clientapp` is a new image to be used with the `--isolation=process` option. In this mode, SuperNode and `ClientApp` run in two different Docker containers. `flwr/supernode` (preferably the Alpine version) runs the long-running SuperNode with `--isolation=process`. `flwr/clientapp` runs the `ClientApp`. This is the recommended way to deploy Flower in enterprise settings.
+  - New all-in-one Docker Compose enables you to easily start a full Flower Deployment Engine on a single machine.
+  - Completely new Docker documentation: https://flower.ai/docs/framework/docker/index.html
+
+- **Improve SuperNode authentication** ([#4043](https://github.com/adap/flower/pull/4043), [#4047](https://github.com/adap/flower/pull/4047), [#4074](https://github.com/adap/flower/pull/4074))
+
+  SuperNode auth has been improved in several ways, including improved logging, improved testing, and improved error handling.
+
+- **Update** `flwr new` **templates** ([#3933](https://github.com/adap/flower/pull/3933), [#3894](https://github.com/adap/flower/pull/3894), [#3930](https://github.com/adap/flower/pull/3930), [#3931](https://github.com/adap/flower/pull/3931), [#3997](https://github.com/adap/flower/pull/3997), [#3979](https://github.com/adap/flower/pull/3979), [#3965](https://github.com/adap/flower/pull/3965), [#4013](https://github.com/adap/flower/pull/4013), [#4064](https://github.com/adap/flower/pull/4064))
+
+  All `flwr new` templates have been updated to show the latest recommended use of Flower APIs.
+
+- **Improve Simulation Engine** ([#4095](https://github.com/adap/flower/pull/4095), [#3913](https://github.com/adap/flower/pull/3913), [#4059](https://github.com/adap/flower/pull/4059), [#3954](https://github.com/adap/flower/pull/3954), [#4071](https://github.com/adap/flower/pull/4071), [#3985](https://github.com/adap/flower/pull/3985), [#3988](https://github.com/adap/flower/pull/3988))
+
+  The Flower Simulation Engine comes with several updates, including improved run config support, verbose logging, simulation backend configuration via `flwr run`, and more.
+
+- **Improve** `RecordSet` ([#4052](https://github.com/adap/flower/pull/4052), [#3218](https://github.com/adap/flower/pull/3218), [#4016](https://github.com/adap/flower/pull/4016))
+
+  `RecordSet` is the core object to exchange model parameters, configuration values and metrics between `ClientApp` and `ServerApp`. This release ships several smaller improvements to `RecordSet` and related `*Record` types.
+
+- **Update documentation** ([#3972](https://github.com/adap/flower/pull/3972), [#3925](https://github.com/adap/flower/pull/3925), [#4061](https://github.com/adap/flower/pull/4061), [#3984](https://github.com/adap/flower/pull/3984), [#3917](https://github.com/adap/flower/pull/3917), [#3900](https://github.com/adap/flower/pull/3900), [#4066](https://github.com/adap/flower/pull/4066), [#3765](https://github.com/adap/flower/pull/3765), [#4021](https://github.com/adap/flower/pull/4021), [#3906](https://github.com/adap/flower/pull/3906), [#4063](https://github.com/adap/flower/pull/4063), [#4076](https://github.com/adap/flower/pull/4076), [#3920](https://github.com/adap/flower/pull/3920), [#3916](https://github.com/adap/flower/pull/3916))
+
+  Many parts of the documentation, including the main tutorial, have been migrated to show new Flower APIs and other new Flower features like the improved Docker support.
+
+- **Migrate code example to use new Flower APIs** ([#3758](https://github.com/adap/flower/pull/3758), [#3701](https://github.com/adap/flower/pull/3701), [#3919](https://github.com/adap/flower/pull/3919), [#3918](https://github.com/adap/flower/pull/3918), [#3934](https://github.com/adap/flower/pull/3934), [#3893](https://github.com/adap/flower/pull/3893), [#3833](https://github.com/adap/flower/pull/3833), [#3922](https://github.com/adap/flower/pull/3922), [#3846](https://github.com/adap/flower/pull/3846), [#3777](https://github.com/adap/flower/pull/3777), [#3874](https://github.com/adap/flower/pull/3874), [#3873](https://github.com/adap/flower/pull/3873), [#3935](https://github.com/adap/flower/pull/3935), [#3754](https://github.com/adap/flower/pull/3754), [#3980](https://github.com/adap/flower/pull/3980), [#4089](https://github.com/adap/flower/pull/4089), [#4046](https://github.com/adap/flower/pull/4046), [#3314](https://github.com/adap/flower/pull/3314), [#3316](https://github.com/adap/flower/pull/3316), [#3295](https://github.com/adap/flower/pull/3295), [#3313](https://github.com/adap/flower/pull/3313))
+
+  Many code examples have been migrated to use new Flower APIs.
+
+- **Update Flower framework, framework internals and quality infrastructure** ([#4018](https://github.com/adap/flower/pull/4018), [#4053](https://github.com/adap/flower/pull/4053), [#4098](https://github.com/adap/flower/pull/4098), [#4067](https://github.com/adap/flower/pull/4067), [#4105](https://github.com/adap/flower/pull/4105), [#4048](https://github.com/adap/flower/pull/4048), [#4107](https://github.com/adap/flower/pull/4107), [#4069](https://github.com/adap/flower/pull/4069), [#3915](https://github.com/adap/flower/pull/3915), [#4101](https://github.com/adap/flower/pull/4101), [#4108](https://github.com/adap/flower/pull/4108), [#3914](https://github.com/adap/flower/pull/3914), [#4068](https://github.com/adap/flower/pull/4068), [#4041](https://github.com/adap/flower/pull/4041), [#4040](https://github.com/adap/flower/pull/4040), [#3986](https://github.com/adap/flower/pull/3986), [#4026](https://github.com/adap/flower/pull/4026), [#3961](https://github.com/adap/flower/pull/3961), [#3975](https://github.com/adap/flower/pull/3975), [#3983](https://github.com/adap/flower/pull/3983), [#4091](https://github.com/adap/flower/pull/4091), [#3982](https://github.com/adap/flower/pull/3982), [#4079](https://github.com/adap/flower/pull/4079), [#4073](https://github.com/adap/flower/pull/4073), [#4060](https://github.com/adap/flower/pull/4060), [#4106](https://github.com/adap/flower/pull/4106), [#4080](https://github.com/adap/flower/pull/4080), [#3974](https://github.com/adap/flower/pull/3974), [#3996](https://github.com/adap/flower/pull/3996), [#3991](https://github.com/adap/flower/pull/3991), [#3981](https://github.com/adap/flower/pull/3981), [#4093](https://github.com/adap/flower/pull/4093), [#4100](https://github.com/adap/flower/pull/4100), [#3939](https://github.com/adap/flower/pull/3939), [#3955](https://github.com/adap/flower/pull/3955), [#3940](https://github.com/adap/flower/pull/3940), [#4038](https://github.com/adap/flower/pull/4038))
+
+  As always, many parts of the Flower framework and quality infrastructure were improved and updated.
+
+### Deprecations
+
+- **Deprecate accessing `Context` via `Client.context`** ([#3797](https://github.com/adap/flower/pull/3797))
+
+  Now that both `client_fn` and `server_fn` receive a `Context` object, accessing `Context` via `Client.context` is deprecated. `Client.context` will be removed in a future release. If you need to access `Context` in your `Client` implementation, pass it manually when creating the `Client` instance in `client_fn`:
+
+  ```python
+  def client_fn(context: Context) -> Client:
+      return FlowerClient(context).to_client()
+  ```
+
+### Incompatible changes
+
+- **Update CLIs to accept an app directory instead of** `ClientApp` **and** `ServerApp` ([#3952](https://github.com/adap/flower/pull/3952), [#4077](https://github.com/adap/flower/pull/4077), [#3850](https://github.com/adap/flower/pull/3850))
+
+  The CLI commands `flower-supernode` and `flower-server-app` now accept an app directory as argument (instead of references to a `ClientApp` or `ServerApp`). An app directory is any directory containing a `pyproject.toml` file (with the appropriate Flower config fields set). The easiest way to generate a compatible project structure is to use `flwr new`.
+
+- **Disable** `flower-client-app` **CLI command** ([#4022](https://github.com/adap/flower/pull/4022))
+
+  `flower-client-app` has been disabled. Use `flower-supernode` instead.
+
+- **Use spaces instead of commas for separating config args** ([#4000](https://github.com/adap/flower/pull/4000))
+
+  When passing configs (run config, node config) to Flower, you now need to separate key-value pairs using spaces instead of commas. For example:
+
+  ```bash
+  flwr run . --run-config "learning-rate=0.01 num_rounds=10"  # Works
+  ```
+
+  Previously, you could pass configs using commas, like this:
+
+  ```bash
+  flwr run . --run-config "learning-rate=0.01,num_rounds=10"  # Doesn't work
+  ```
+
+- **Remove** `flwr example` **CLI command** ([#4084](https://github.com/adap/flower/pull/4084))
+
+  The experimental `flwr example` CLI command has been removed. Use `flwr new` to generate a project and then run it using `flwr run`.
+
+## v1.10.0 (2024-07-24)
+
+### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Adam Narozniak`, `Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Danny`, `Gustavo Bertoli`, `Heng Pan`, `Ikko Eltociear Ashimine`, `Javier`, `Jiahao Tan`, `Mohammad Naseri`, `Robert Steiner`, `Sebastian van der Voort`, `Taner Topal`, `Yan Gao` <!---TOKEN_v1.10.0-->
+
+### What's new?
+
+- **Introduce** `flwr run` **(beta)** ([#3810](https://github.com/adap/flower/pull/3810), [#3826](https://github.com/adap/flower/pull/3826), [#3880](https://github.com/adap/flower/pull/3880), [#3807](https://github.com/adap/flower/pull/3807), [#3800](https://github.com/adap/flower/pull/3800), [#3814](https://github.com/adap/flower/pull/3814), [#3811](https://github.com/adap/flower/pull/3811), [#3809](https://github.com/adap/flower/pull/3809), [#3819](https://github.com/adap/flower/pull/3819))
+
+  Flower 1.10 ships the first beta release of the new `flwr run` command. `flwr run` can run different projects using `flwr run path/to/project`, it enables you to easily switch between different federations using `flwr run . federation` and it runs your Flower project using either local simulation or the new (experimental) SuperExec service. This allows Flower to scale federatated learning from fast local simulation to large-scale production deployment, seamlessly. All projects generated with `flwr new` are immediately runnable using `flwr run`. Give it a try: use `flwr new` to generate a project and then run it using `flwr run`.
+
+- **Introduce run config** ([#3751](https://github.com/adap/flower/pull/3751), [#3750](https://github.com/adap/flower/pull/3750), [#3845](https://github.com/adap/flower/pull/3845), [#3824](https://github.com/adap/flower/pull/3824), [#3746](https://github.com/adap/flower/pull/3746), [#3728](https://github.com/adap/flower/pull/3728), [#3730](https://github.com/adap/flower/pull/3730), [#3725](https://github.com/adap/flower/pull/3725), [#3729](https://github.com/adap/flower/pull/3729), [#3580](https://github.com/adap/flower/pull/3580), [#3578](https://github.com/adap/flower/pull/3578), [#3576](https://github.com/adap/flower/pull/3576), [#3798](https://github.com/adap/flower/pull/3798), [#3732](https://github.com/adap/flower/pull/3732), [#3815](https://github.com/adap/flower/pull/3815))
+
+  The new run config feature allows you to run your Flower project in different configurations without having to change a single line of code. You can now build a configurable `ServerApp` and `ClientApp` that read configuration values at runtime. This enables you to specify config values like `learning-rate=0.01` in `pyproject.toml` (under the `[tool.flwr.app.config]` key). These config values can then be easily overridden via `flwr run --run-config learning-rate=0.02`, and read from `Context` using `lr = context.run_config["learning-rate"]`. Create a new project using `flwr new` to see run config in action.
+
+- **Generalize** `client_fn` **signature to** `client_fn(context: Context) -> Client` ([#3779](https://github.com/adap/flower/pull/3779), [#3697](https://github.com/adap/flower/pull/3697), [#3694](https://github.com/adap/flower/pull/3694), [#3696](https://github.com/adap/flower/pull/3696))
+
+  The `client_fn` signature has been generalized to `client_fn(context: Context) -> Client`. It now receives a `Context` object instead of the (now depreacated) `cid: str`. `Context` allows accessing `node_id`, `node_config` and `run_config`, among other things. This enables you to build a configurable `ClientApp` that leverages the new run config system.
+
+  The previous signature `client_fn(cid: str)` is now deprecated and support for it will be removed in a future release. Use `client_fn(context: Context) -> Client` everywhere.
+
+- **Introduce new** `server_fn(context)` ([#3773](https://github.com/adap/flower/pull/3773), [#3796](https://github.com/adap/flower/pull/3796), [#3771](https://github.com/adap/flower/pull/3771))
+
+  In addition to the new `client_fn(context:Context)`, a new `server_fn(context: Context) -> ServerAppComponents` can now be passed to `ServerApp` (instead of passing, for example, `Strategy`, directly). This enables you to leverage the full `Context` on the server-side to build a configurable `ServerApp`.
+
+- **Relaunch all** `flwr new` **templates** ([#3877](https://github.com/adap/flower/pull/3877), [#3821](https://github.com/adap/flower/pull/3821), [#3587](https://github.com/adap/flower/pull/3587), [#3795](https://github.com/adap/flower/pull/3795), [#3875](https://github.com/adap/flower/pull/3875), [#3859](https://github.com/adap/flower/pull/3859), [#3760](https://github.com/adap/flower/pull/3760))
+
+  All `flwr new` templates have been significantly updated to showcase new Flower features and best practices. This includes using `flwr run` and the new run config feature. You can now easily create a new project using `flwr new` and, after following the instructions to install it, `flwr run` it.
+
+- **Introduce** `flower-supernode` **(preview)** ([#3353](https://github.com/adap/flower/pull/3353))
+
+  The new `flower-supernode` CLI is here to replace `flower-client-app`. `flower-supernode` brings full multi-app support to the Flower client-side. It also allows to pass `--node-config` to the SuperNode, which is accessible in your `ClientApp` via `Context` (using the new `client_fn(context: Context)` signature).
+
+- **Introduce node config** ([#3782](https://github.com/adap/flower/pull/3782), [#3780](https://github.com/adap/flower/pull/3780), [#3695](https://github.com/adap/flower/pull/3695), [#3886](https://github.com/adap/flower/pull/3886))
+
+  A new node config feature allows you to pass a static configuration to the SuperNode. This configuration is read-only and available to every `ClientApp` running on that SuperNode. A `ClientApp` can access the node config via `Context` (`context.node_config`).
+
+- **Introduce SuperExec (experimental)** ([#3605](https://github.com/adap/flower/pull/3605), [#3723](https://github.com/adap/flower/pull/3723), [#3731](https://github.com/adap/flower/pull/3731), [#3589](https://github.com/adap/flower/pull/3589), [#3604](https://github.com/adap/flower/pull/3604), [#3622](https://github.com/adap/flower/pull/3622), [#3838](https://github.com/adap/flower/pull/3838), [#3720](https://github.com/adap/flower/pull/3720), [#3606](https://github.com/adap/flower/pull/3606), [#3602](https://github.com/adap/flower/pull/3602), [#3603](https://github.com/adap/flower/pull/3603), [#3555](https://github.com/adap/flower/pull/3555), [#3808](https://github.com/adap/flower/pull/3808), [#3724](https://github.com/adap/flower/pull/3724), [#3658](https://github.com/adap/flower/pull/3658), [#3629](https://github.com/adap/flower/pull/3629))
+
+  This is the first experimental release of Flower SuperExec, a new service that executes your runs. It's not ready for production deployment just yet, but don't hesitate to give it a try if you're interested.
+
+- **Add new federated learning with tabular data example** ([#3568](https://github.com/adap/flower/pull/3568))
+
+  A new code example exemplifies a federated learning setup using the Flower framework on the Adult Census Income tabular dataset.
+
+- **Create generic adapter layer (preview)** ([#3538](https://github.com/adap/flower/pull/3538), [#3536](https://github.com/adap/flower/pull/3536), [#3540](https://github.com/adap/flower/pull/3540))
+
+  A new generic gRPC adapter layer allows 3rd-party frameworks to integrate with Flower in a transparent way. This makes Flower more modular and allows for integration into other federated learning solutions and platforms.
+
+- **Refactor Flower Simulation Engine** ([#3581](https://github.com/adap/flower/pull/3581), [#3471](https://github.com/adap/flower/pull/3471), [#3804](https://github.com/adap/flower/pull/3804), [#3468](https://github.com/adap/flower/pull/3468), [#3839](https://github.com/adap/flower/pull/3839), [#3806](https://github.com/adap/flower/pull/3806), [#3861](https://github.com/adap/flower/pull/3861), [#3543](https://github.com/adap/flower/pull/3543), [#3472](https://github.com/adap/flower/pull/3472), [#3829](https://github.com/adap/flower/pull/3829), [#3469](https://github.com/adap/flower/pull/3469))
+
+  The Simulation Engine was significantly refactored. This results in faster and more stable simulations. It is also the foundation for upcoming changes that aim to provide the next level of performance and configurability in federated learning simulations.
+
+- **Optimize Docker containers** ([#3591](https://github.com/adap/flower/pull/3591))
+
+  Flower Docker containers were optimized and updated to use that latest Flower framework features.
+
+- **Improve logging** ([#3776](https://github.com/adap/flower/pull/3776), [#3789](https://github.com/adap/flower/pull/3789))
+
+  Improved logging aims to be more concise and helpful to show you the details you actually care about.
+
+- **Refactor framework internals** ([#3621](https://github.com/adap/flower/pull/3621), [#3792](https://github.com/adap/flower/pull/3792), [#3772](https://github.com/adap/flower/pull/3772), [#3805](https://github.com/adap/flower/pull/3805), [#3583](https://github.com/adap/flower/pull/3583), [#3825](https://github.com/adap/flower/pull/3825), [#3597](https://github.com/adap/flower/pull/3597), [#3802](https://github.com/adap/flower/pull/3802), [#3569](https://github.com/adap/flower/pull/3569))
+
+  As always, many parts of the Flower framework and quality infrastructure were improved and updated.
+
+### Documentation improvements
+
+- **Add 🇰🇷 Korean translations** ([#3680](https://github.com/adap/flower/pull/3680))
+
+- **Update translations** ([#3586](https://github.com/adap/flower/pull/3586), [#3679](https://github.com/adap/flower/pull/3679), [#3570](https://github.com/adap/flower/pull/3570), [#3681](https://github.com/adap/flower/pull/3681), [#3617](https://github.com/adap/flower/pull/3617), [#3674](https://github.com/adap/flower/pull/3674), [#3671](https://github.com/adap/flower/pull/3671), [#3572](https://github.com/adap/flower/pull/3572), [#3631](https://github.com/adap/flower/pull/3631))
+
+- **Update documentation** ([#3864](https://github.com/adap/flower/pull/3864), [#3688](https://github.com/adap/flower/pull/3688), [#3562](https://github.com/adap/flower/pull/3562), [#3641](https://github.com/adap/flower/pull/3641), [#3384](https://github.com/adap/flower/pull/3384), [#3634](https://github.com/adap/flower/pull/3634), [#3823](https://github.com/adap/flower/pull/3823), [#3793](https://github.com/adap/flower/pull/3793), [#3707](https://github.com/adap/flower/pull/3707))
+
+  Updated documentation includes new install instructions for different shells, a new Flower Code Examples documentation landing page, new `flwr` CLI docs and an updated federated XGBoost code example.
+
+### Deprecations
+
+- **Deprecate** `client_fn(cid: str)`
+
+  `client_fn` used to have a signature `client_fn(cid: str) -> Client`. This signature is now deprecated. Use the new signature `client_fn(context: Context) -> Client` instead. The new argument `context` allows accessing `node_id`, `node_config`, `run_config` and other `Context` features. When running using the simulation engine (or using `flower-supernode` with a custom `--node-config partition-id=...`), `context.node_config["partition-id"]` will return an `int` partition ID that can be used with Flower Datasets to load a different partition of the dataset on each simulated or deployed SuperNode.
+
+- **Deprecate passing** `Server/ServerConfig/Strategy/ClientManager` **to** `ServerApp` **directly**
+
+  Creating `ServerApp` using `ServerApp(config=config, strategy=strategy)` is now deprecated. Instead of passing `Server/ServerConfig/Strategy/ClientManager` to `ServerApp` directly, pass them wrapped in a `server_fn(context: Context) -> ServerAppComponents` function, like this: `ServerApp(server_fn=server_fn)`. `ServerAppComponents` can hold references to `Server/ServerConfig/Strategy/ClientManager`. In addition to that, `server_fn` allows you to access `Context` (for example, to read the `run_config`).
+
+### Incompatible changes
+
+- **Remove support for `client_ids` in `start_simulation`** ([#3699](https://github.com/adap/flower/pull/3699))
+
+  The (rarely used) feature that allowed passing custom `client_ids` to the `start_simulation` function was removed. This removal is part of a bigger effort to refactor the simulation engine and unify how the Flower internals work in simulation and deployment.
+
+- **Remove `flower-driver-api` and `flower-fleet-api`** ([#3418](https://github.com/adap/flower/pull/3418))
+
+  The two deprecated CLI commands `flower-driver-api` and `flower-fleet-api` were removed in an effort to streamline the SuperLink developer experience. Use `flower-superlink` instead.
+
 ## v1.9.0 (2024-06-10)
 
 ### Thanks to our contributors
@@ -882,7 +1116,7 @@ We would like to give our **special thanks** to all the contributors who made Fl
 
 - **Improved Virtual Client Engine compatibility with Jupyter Notebook / Google Colab** ([#866](https://github.com/adap/flower/pull/866), [#872](https://github.com/adap/flower/pull/872), [#833](https://github.com/adap/flower/pull/833), [#1036](https://github.com/adap/flower/pull/1036))
 
-  Simulations (using the Virtual Client Engine through `start_simulation`) now work more smoothly on Jupyter Notebooks (incl. Google Colab) after installing Flower with the `simulation` extra (`pip install flwr[simulation]`).
+  Simulations (using the Virtual Client Engine through `start_simulation`) now work more smoothly on Jupyter Notebooks (incl. Google Colab) after installing Flower with the `simulation` extra (`pip install 'flwr[simulation]'`).
 
 - **New Jupyter Notebook code example** ([#833](https://github.com/adap/flower/pull/833))
 

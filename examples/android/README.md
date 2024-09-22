@@ -1,3 +1,9 @@
+---
+tags: [mobile, vision, sdk]
+dataset: [CIFAR-10]
+framework: [Android, Java, TensorFlowLite]
+---
+
 # Flower Android Example (TensorFlowLite)
 
 This example demonstrates a federated learning setup with Android clients in a background thread. The training on Android is done on a CIFAR10 dataset using TensorFlow Lite. The setup is as follows:
