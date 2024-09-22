@@ -710,7 +710,7 @@ class StateTest(unittest.TestCase):
         """Test behavior of store_task_res to limit the TTL of TaskRes."""
         # Prepare
         state: State = self.state_factory()
-        run_id = state.create_run("mock/mock", "v1.0.0")
+        run_id = state.create_run(None, None, "9f86d08", {})
 
         task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
         task_ins.task.created_at = time.time() - 5
