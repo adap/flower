@@ -16,7 +16,7 @@
 
 
 from logging import WARNING
-from typing import Optional, Tuple
+from typing import Optional
 
 import numpy as np
 
@@ -125,7 +125,7 @@ def compute_adaptive_noise_params(
     noise_multiplier: float,
     num_sampled_clients: float,
     clipped_count_stddev: Optional[float],
-) -> Tuple[float, float]:
+) -> tuple[float, float]:
     """Compute noising parameters for the adaptive clipping.
 
     Paper: https://arxiv.org/abs/1905.03871
