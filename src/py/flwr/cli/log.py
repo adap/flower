@@ -45,10 +45,7 @@ def stream_logs(run_id: int, channel: grpc.Channel, duration: int) -> None:
 
 
 def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
-    """Print logs from the beginning of a run.
-
-    The `is_test` parameter is only used for `pytest` and must be `False` otherwise.
-    """
+    """Print logs from the beginning of a run."""
     stub = ExecStub(channel)
     req = StreamLogsRequest(run_id=run_id)
 
