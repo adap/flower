@@ -31,7 +31,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -92,7 +91,7 @@ known_first_party = ["flwr_datasets"]
 
 [tool.black]
 line-length = 88
-target-version = ["py38", "py39", "py310", "py311"]
+target-version = ["py39", "py310", "py311"]
 
 [tool.pylint."MESSAGES CONTROL"]
 disable = "duplicate-code,too-few-public-methods,useless-import-alias"
@@ -130,7 +129,7 @@ wrap-summaries = 88
 wrap-descriptions = 88
 
 [tool.ruff]
-target-version = "py38"
+target-version = "py39"
 line-length = 88
 select = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
 fixable = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
