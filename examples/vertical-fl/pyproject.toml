@@ -8,12 +8,12 @@ version = "1.0.0"
 description = "PyTorch Vertical FL with Flower"
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.11.0",
-    "flwr-datasets>=0.3.0",
-    "numpy==1.24.4",
-    "pandas==2.0.3",
-    "scikit-learn==1.3.2",
-    "torch==2.1.0",
+  "flwr[simulation]>=1.11.0",
+  "flwr-datasets>=0.3.0",
+  "numpy==1.24.4",
+  "pandas==2.0.3",
+  "scikit-learn==1.3.2",
+  "torch==2.1.0",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -35,4 +35,3 @@ default = "local-simulation"
 
 [tool.flwr.federations.local-simulation]
 options.num-supernodes = 3 # Note that this example will require changes to how VFL is implemented
-

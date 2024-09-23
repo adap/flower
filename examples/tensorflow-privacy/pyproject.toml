@@ -7,12 +7,12 @@ name = "tensorflow-privacy-fl"
 version = "1.0.0"
 description = "Sample-level Differential Privacy with Tensorflow-Privacy in Flower"
 dependencies = [
-    "flwr[simulation]>=1.11.0",
-    "flwr-datasets[vision]>=0.3.0",
-    "tensorflow-estimator~=2.4",
-    "tensorflow-probability~=0.22.0",
-    "tensorflow>=2.4.0,<=2.15.0",
-    "tensorflow-privacy == 0.9.0"
+  "flwr[simulation]>=1.11.0",
+  "flwr-datasets[vision]>=0.3.0",
+  "tensorflow-estimator~=2.4",
+  "tensorflow-probability~=0.22.0",
+  "tensorflow>=2.4.0,<=2.15.0",
+  "tensorflow-privacy == 0.9.0",
 ]
 
 [tool.hatch.build.targets.wheel]
