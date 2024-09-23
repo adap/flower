@@ -40,7 +40,7 @@ from flwr.common import (
     RecordSet,
     Scalar,
 )
-from flwr.common.constant import RunStatus
+from flwr.common.constant import Status
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
 from flwr.common.serde import message_from_taskres, message_to_taskins
 from flwr.common.typing import Run, StatusInfo
@@ -123,7 +123,7 @@ def register_messages_into_state(
             override_config={},
         ),
         StatusInfo(
-            status=RunStatus.STARTING,
+            status=Status.STARTING,
             sub_status="",
             reason="",
         ),

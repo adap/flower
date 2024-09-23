@@ -22,7 +22,7 @@ from typing import Optional
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
-from flwr.common.constant import NODE_ID_NUM_BYTES, RUN_ID_NUM_BYTES, RunStatus
+from flwr.common.constant import NODE_ID_NUM_BYTES, RUN_ID_NUM_BYTES, Status
 from flwr.common.typing import Run, StatusInfo, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state.state import State
@@ -301,7 +301,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                     override_config=override_config,
                 )
                 initial_status_info = StatusInfo(
-                    status=RunStatus.STARTING,
+                    status=Status.STARTING,
                     sub_status="",
                     reason="",
                 )

@@ -25,7 +25,7 @@ from typing import Any, Optional, Union, cast
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
-from flwr.common.constant import NODE_ID_NUM_BYTES, RUN_ID_NUM_BYTES, RunStatus
+from flwr.common.constant import NODE_ID_NUM_BYTES, RUN_ID_NUM_BYTES, Status
 from flwr.common.typing import Run, StatusInfo, UserConfig
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
@@ -712,7 +712,7 @@ class SqliteState(State):  # pylint: disable=R0904
             if fab_hash:
                 fab_id, fab_version = "", ""
             data = [sint64_run_id, fab_id, fab_version, fab_hash]
-            data += [json.dumps(override_config), RunStatus.STARTING, "", ""]
+            data += [json.dumps(override_config), Status.STARTING, "", ""]
             self.query(query, tuple(data))
             return uint64_run_id
         log(ERROR, "Unexpected run creation failure.")

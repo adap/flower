@@ -21,7 +21,7 @@ from os import urandom
 from uuid import uuid4
 
 from flwr.common import log
-from flwr.common.constant import ErrorCode, RunStatus, RunSubStatus
+from flwr.common.constant import ErrorCode, Status, SubStatus
 from flwr.common.typing import StatusInfo
 from flwr.proto.error_pb2 import Error  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
@@ -33,13 +33,13 @@ NODE_UNAVAILABLE_ERROR_REASON = (
 )
 
 VALID_RUN_STATUS_TRANSITIONS = {
-    (RunStatus.STARTING, RunStatus.RUNNING),
-    (RunStatus.RUNNING, RunStatus.FINISHED),
+    (Status.STARTING, Status.RUNNING),
+    (Status.RUNNING, Status.FINISHED),
 }
 VALID_RUN_SUB_STATUSES = {
-    RunSubStatus.COMPLETED,
-    RunSubStatus.FAILED,
-    RunSubStatus.STOPPED,
+    SubStatus.COMPLETED,
+    SubStatus.FAILED,
+    SubStatus.STOPPED,
     "",
 }
 

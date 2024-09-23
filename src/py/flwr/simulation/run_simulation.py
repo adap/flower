@@ -31,7 +31,7 @@ from flwr.cli.config_utils import load_and_validate
 from flwr.client import ClientApp
 from flwr.common import EventType, event, log
 from flwr.common.config import get_fused_config_from_dir, parse_config_args
-from flwr.common.constant import RUN_ID_NUM_BYTES, RunStatus
+from flwr.common.constant import RUN_ID_NUM_BYTES, Status
 from flwr.common.logger import (
     set_logger_propagation,
     update_console_handler,
@@ -399,7 +399,7 @@ def _main_loop(
     try:
         # Register run
         log(DEBUG, "Pre-registering run with id %s", run.run_id)
-        init_status = StatusInfo(RunStatus.RUNNING, "", "")
+        init_status = StatusInfo(Status.RUNNING, "", "")
         state_factory.state().run_ids[run.run_id] = (run, init_status)  # type: ignore
 
         if server_app_run_config is None:
