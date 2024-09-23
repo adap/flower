@@ -43,6 +43,7 @@ from .utils import (
     is_valid_transition,
     make_node_unavailable_taskres,
 )
+from .sqlite_state_utils import task_ins_to_dict, dict_to_task_ins, task_res_to_dict, dict_to_task_res, dict_factory, determine_run_status
 
 SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
@@ -77,9 +78,11 @@ CREATE TABLE IF NOT EXISTS run(
     fab_version           TEXT,
     fab_hash              TEXT,
     override_config       TEXT,
-    status                TEXT,
+    starting_at           TEXT,
+    running_at            TEXT,
+    finished_at           TEXT,
     sub_status            TEXT,
-    details                TEXT
+    details               TEXT
 );
 """
 
@@ -706,13 +709,14 @@ class SqliteState(State):  # pylint: disable=R0904
             query = (
                 "INSERT INTO run "
                 "(run_id, fab_id, fab_version, fab_hash, override_config, "
-                "status, sub_status, details)"
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?);"
+                "starting_at, running_at, finished_at, sub_status, details)"
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
             )
             if fab_hash:
                 fab_id, fab_version = "", ""
-            data = [sint64_run_id, fab_id, fab_version, fab_hash]
-            data += [json.dumps(override_config), Status.STARTING, "", ""]
+            override_config_json = json.dumps(override_config)
+            data = [sint64_run_id, fab_id, fab_version, fab_hash, override_config_json]
+            data += [now().isoformat(), "", "", "", ""]
             self.query(query, tuple(data))
             return uint64_run_id
         log(ERROR, "Unexpected run creation failure.")
@@ -799,7 +803,7 @@ class SqliteState(State):  # pylint: disable=R0904
         return {
             # Restore uint64 run IDs
             convert_sint64_to_uint64(row["run_id"]): RunStatus(
-                status=row["status"],
+                status=determine_run_status(row),
                 sub_status=row["sub_status"],
                 details=row["details"],
             )
@@ -821,7 +825,7 @@ class SqliteState(State):  # pylint: disable=R0904
         # Check if the status transition is valid
         row = rows[0]
         status = RunStatus(
-            status=row["status"],
+            status=determine_run_status(row),
             sub_status=row["sub_status"],
             details=row["details"],
         )
@@ -840,15 +844,22 @@ class SqliteState(State):  # pylint: disable=R0904
             return False
 
         # Update the status
-        query = "UPDATE run SET status= ?, sub_status = ?, details = ? "
+        query = "UPDATE run SET %s= ?, sub_status = ?, details = ? "
         query += "WHERE run_id = ?;"
+
+        timestamp_fld = ""
+        if new_status.status == Status.RUNNING:
+            timestamp_fld = "running_at"
+        elif new_status.status == Status.FINISHED:
+            timestamp_fld = "finished_at"
+
         data = (
-            new_status.status,
+            now().isoformat(),
             new_status.sub_status,
             new_status.details,
             sint64_run_id,
         )
-        self.query(query, data)
+        self.query(query % timestamp_fld, data)
         return True
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
@@ -866,116 +877,3 @@ class SqliteState(State):  # pylint: disable=R0904
             log(ERROR, "`node_id` does not exist.")
             return False
 
-
-def dict_factory(
-    cursor: sqlite3.Cursor,
-    row: sqlite3.Row,
-) -> dict[str, Any]:
-    """Turn SQLite results into dicts.
-
-    Less efficent for retrival of large amounts of data but easier to use.
-    """
-    fields = [column[0] for column in cursor.description]
-    return dict(zip(fields, row))
-
-
-def task_ins_to_dict(task_msg: TaskIns) -> dict[str, Any]:
-    """Transform TaskIns to dict."""
-    result = {
-        "task_id": task_msg.task_id,
-        "group_id": task_msg.group_id,
-        "run_id": task_msg.run_id,
-        "producer_anonymous": task_msg.task.producer.anonymous,
-        "producer_node_id": task_msg.task.producer.node_id,
-        "consumer_anonymous": task_msg.task.consumer.anonymous,
-        "consumer_node_id": task_msg.task.consumer.node_id,
-        "created_at": task_msg.task.created_at,
-        "delivered_at": task_msg.task.delivered_at,
-        "pushed_at": task_msg.task.pushed_at,
-        "ttl": task_msg.task.ttl,
-        "ancestry": ",".join(task_msg.task.ancestry),
-        "task_type": task_msg.task.task_type,
-        "recordset": task_msg.task.recordset.SerializeToString(),
-    }
-    return result
-
-
-def task_res_to_dict(task_msg: TaskRes) -> dict[str, Any]:
-    """Transform TaskRes to dict."""
-    result = {
-        "task_id": task_msg.task_id,
-        "group_id": task_msg.group_id,
-        "run_id": task_msg.run_id,
-        "producer_anonymous": task_msg.task.producer.anonymous,
-        "producer_node_id": task_msg.task.producer.node_id,
-        "consumer_anonymous": task_msg.task.consumer.anonymous,
-        "consumer_node_id": task_msg.task.consumer.node_id,
-        "created_at": task_msg.task.created_at,
-        "delivered_at": task_msg.task.delivered_at,
-        "pushed_at": task_msg.task.pushed_at,
-        "ttl": task_msg.task.ttl,
-        "ancestry": ",".join(task_msg.task.ancestry),
-        "task_type": task_msg.task.task_type,
-        "recordset": task_msg.task.recordset.SerializeToString(),
-    }
-    return result
-
-
-def dict_to_task_ins(task_dict: dict[str, Any]) -> TaskIns:
-    """Turn task_dict into protobuf message."""
-    recordset = RecordSet()
-    recordset.ParseFromString(task_dict["recordset"])
-
-    result = TaskIns(
-        task_id=task_dict["task_id"],
-        group_id=task_dict["group_id"],
-        run_id=task_dict["run_id"],
-        task=Task(
-            producer=Node(
-                node_id=task_dict["producer_node_id"],
-                anonymous=task_dict["producer_anonymous"],
-            ),
-            consumer=Node(
-                node_id=task_dict["consumer_node_id"],
-                anonymous=task_dict["consumer_anonymous"],
-            ),
-            created_at=task_dict["created_at"],
-            delivered_at=task_dict["delivered_at"],
-            pushed_at=task_dict["pushed_at"],
-            ttl=task_dict["ttl"],
-            ancestry=task_dict["ancestry"].split(","),
-            task_type=task_dict["task_type"],
-            recordset=recordset,
-        ),
-    )
-    return result
-
-
-def dict_to_task_res(task_dict: dict[str, Any]) -> TaskRes:
-    """Turn task_dict into protobuf message."""
-    recordset = RecordSet()
-    recordset.ParseFromString(task_dict["recordset"])
-
-    result = TaskRes(
-        task_id=task_dict["task_id"],
-        group_id=task_dict["group_id"],
-        run_id=task_dict["run_id"],
-        task=Task(
-            producer=Node(
-                node_id=task_dict["producer_node_id"],
-                anonymous=task_dict["producer_anonymous"],
-            ),
-            consumer=Node(
-                node_id=task_dict["consumer_node_id"],
-                anonymous=task_dict["consumer_anonymous"],
-            ),
-            created_at=task_dict["created_at"],
-            delivered_at=task_dict["delivered_at"],
-            pushed_at=task_dict["pushed_at"],
-            ttl=task_dict["ttl"],
-            ancestry=task_dict["ancestry"].split(","),
-            task_type=task_dict["task_type"],
-            recordset=recordset,
-        ),
-    )
-    return result
