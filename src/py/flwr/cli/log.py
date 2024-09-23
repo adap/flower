@@ -126,9 +126,9 @@ def log(
             fg=typer.colors.RED,
             bold=True,
         )
-        sys.exit()
-    else:
-        _log_with_superexec(federation_config, run_id, stream)
+        raise typer.Exit(code=1)
+
+    _log_with_superexec(federation_config, run_id, stream)
 
 
 # pylint: disable-next=too-many-branches
