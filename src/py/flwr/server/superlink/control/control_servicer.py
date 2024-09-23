@@ -19,10 +19,10 @@ from logging import DEBUG
 
 import grpc
 
-from flwr.common.constant import RunStatus
+from flwr.common.constant import Status
 from flwr.common.logger import log
 from flwr.common.serde import fab_from_proto, user_config_from_proto
-from flwr.common.typing import StatusInfo
+from flwr.common.typing import RunStatus
 from flwr.proto import control_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
@@ -30,7 +30,7 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunStatusRequest,
     GetRunStatusResponse,
 )
-from flwr.proto.run_pb2 import StatusInfo as StatusInfoProto  # pylint: disable=E0611
+from flwr.proto.run_pb2 import RunStatus as RunStatusProto  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     UpdateRunStatusRequest,
     UpdateRunStatusResponse,
@@ -86,7 +86,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         # Serialize the statuses and return
         status_dict_proto = {
-            k: StatusInfoProto(**vars(v)) for k, v in status_dict.items()
+            k: RunStatusProto(**vars(v)) for k, v in status_dict.items()
         }
         return GetRunStatusResponse(run_status_dict=status_dict_proto)
 
@@ -107,10 +107,10 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # Retrieve the run ID
         run_id = request.run_id
 
-        # Deserialize the status info
-        proto = request.info
-        info = StatusInfo(proto.status, proto.sub_status, proto.reason)
-        if info.status != RunStatus.FINISHED:
+        # Deserialize the status
+        proto = request.run_status
+        status = RunStatus(proto.status, proto.sub_status, proto.details)
+        if status.status != Status.FINISHED:
             context.abort(
                 grpc.StatusCode.UNIMPLEMENTED,
                 f"{rpc_name}: This RPC can only be used to signal the "
@@ -126,7 +126,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         current_info = status_dict[run_id]
 
         # Check if the current status is RunStatus.FINISHED
-        if current_info.status != RunStatus.FINISHED:
+        if current_info.status != Status.FINISHED:
             context.abort(
                 grpc.StatusCode.FAILED_PRECONDITION,
                 f"{rpc_name}: The current status of the run is not RunStatus.FINISHED. "
