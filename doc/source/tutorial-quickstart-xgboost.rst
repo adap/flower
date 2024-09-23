@@ -1,17 +1,12 @@
 .. _quickstart-xgboost:
 
+####################
+ Quickstart XGBoost
+####################
 
-Quickstart XGBoost
-=====================
-
-.. meta::
-   :description: Check out this Federated Learning quickstart tutorial for using Flower with XGBoost to train classification models on trees.
-
-..  youtube:: AY1vpXUpesc
-   :width: 100%
-
-Federated XGBoost
--------------------
+******************
+ Federated XGBoost
+******************
 
 EXtreme Gradient Boosting (**XGBoost**) is a robust and efficient implementation of gradient-boosted decision tree (**GBDT**), that maximises the computational boundaries for boosted tree methods.
 It's primarily designed to enhance both the performance and computational speed of machine learning models.
@@ -19,22 +14,23 @@ In XGBoost, trees are constructed concurrently, unlike the sequential approach t
 
 Often, for tabular data on medium-sized datasets with fewer than 10k training examples, XGBoost surpasses the results of deep learning techniques.
 
+~~~~~~~~~~~~~~~~~~~~~~
 Why federated XGBoost?
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 Indeed, as the demand for data privacy and decentralized learning grows, there's an increasing requirement to implement federated XGBoost systems for specialised applications, like survival analysis and financial fraud detection.
 
 Federated learning ensures that raw data remains on the local device, making it an attractive approach for sensitive domains where data security and privacy are paramount.
 Given the robustness and efficiency of XGBoost, combining it with federated learning offers a promising solution for these specific challenges.
 
-In this tutorial we will learn how to train a federated XGBoost model on HIGGS dataset using Flower and :code:`xgboost` package.
-We use a simple example (`full code xgboost-quickstart <https://github.com/adap/flower/tree/main/examples/xgboost-quickstart>`_) with two *clients* and one *server*
+In this tutorial we will learn how to train a federated XGBoost model on HIGGS dataset using Flower and :code:`xgboost` package to perform a binary classification task.
+We use a simple example (`full code xgboost-quickstart <https://github.com/adap/flower/tree/main/examples/xgboost-quickstart>`_)
 to demonstrate how federated XGBoost works,
 and then we dive into a more complex example (`full code xgboost-comprehensive <https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive>`_) to run various experiments.
 
-
-Environment Setup
---------------------
+******************
+ Environment Setup
+******************
 
 First of all, it is recommended to create a virtual environment and run everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
 
@@ -42,6 +38,7 @@ We first need to install Flower and Flower Datasets. You can do this by running 
 
 .. code-block:: shell
 
+  # In a new Python environment
   $ pip install flwr flwr-datasets
 
 Since we want to use :code:`xgboost` package to build up XGBoost trees, let's go ahead and install :code:`xgboost`:
@@ -50,9 +47,9 @@ Since we want to use :code:`xgboost` package to build up XGBoost trees, let's go
 
   $ pip install xgboost
 
-
-Flower Client
------------------
+***************
+ The ClientApp
+***************
 
 *Clients* are responsible for generating individual weight-updates for the model based on their local datasets.
 Now that we have all our dependencies installed, let's run a simple distributed training with two clients and one server.
@@ -1304,3 +1301,19 @@ To run the same experiment with Flower simulation:
     $ python3 sim.py --train-method=bagging --pool-size=5 --num-rounds=50 --num-clients-per-round=5 --partitioner-type=exponential --centralised-eval
 
 The full `code <https://github.com/adap/flower/blob/main/examples/xgboost-comprehensive/>`_ for this comprehensive example can be found in :code:`examples/xgboost-comprehensive`.
+
+****************
+ Video tutorial
+****************
+
+.. note::
+
+   The video shown below shows how to setup a XGBoost + Flower project
+   using our previously recommended APIs. A new video tutorial will be
+   released that shows the new APIs (as the content above does)
+
+.. meta::
+   :description: Check out this Federated Learning quickstart tutorial for using Flower with XGBoost to train classification models on trees.
+
+..  youtube:: AY1vpXUpesc
+   :width: 100%
