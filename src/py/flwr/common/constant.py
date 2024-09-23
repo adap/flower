@@ -49,6 +49,7 @@ FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS = (
     "[::]:8080"  # IPv6 to keep start_server compatible
 )
 FLEET_API_REST_DEFAULT_ADDRESS = "0.0.0.0:9093"
+CONTROL_API_DEFAULT_ADDRESS = "0.0.0.0:9095"
 
 # Constants for ping
 PING_DEFAULT_INTERVAL = 30

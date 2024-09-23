@@ -37,6 +37,7 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import (
+    CONTROL_API_DEFAULT_ADDRESS,
     DRIVER_API_DEFAULT_ADDRESS,
     FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS,
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
@@ -62,6 +63,7 @@ from .history import History
 from .server import Server, init_defaults, run_fl
 from .server_config import ServerConfig
 from .strategy import Strategy
+from .superlink.control.control_grpc import run_control_api_grpc
 from .superlink.driver.driver_grpc import run_driver_api_grpc
 from .superlink.ffs.ffs_factory import FfsFactory
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
@@ -207,6 +209,7 @@ def run_superlink() -> None:
 
     # Parse IP address
     driver_address, _, _ = _format_address(args.driver_api_address)
+    control_address, _, _ = _format_address(args.control_api_address)
 
     # Obtain certificates
     certificates = _try_obtain_certificates(args)
@@ -217,6 +220,14 @@ def run_superlink() -> None:
     # Initialize FfsFactory
     ffs_factory = FfsFactory(args.storage_dir)
 
+    # Start Control API
+    control_server: grpc.Server = run_control_api_grpc(
+        address=control_address,
+        state_factory=state_factory,
+        ffs_factory=ffs_factory,
+        certificates=certificates,
+    )
+
     # Start Driver API
     driver_server: grpc.Server = run_driver_api_grpc(
         address=driver_address,
@@ -225,7 +236,9 @@ def run_superlink() -> None:
         certificates=certificates,
     )
 
-    grpc_servers = [driver_server]
+    grpc_servers = [driver_server, control_server]
+
+    # Start Fleet API
     bckg_threads = []
     if not args.fleet_api_address:
         if args.fleet_api_type in [
@@ -249,8 +262,6 @@ def run_superlink() -> None:
             args.fleet_api_num_workers,
         )
         num_workers = 1
-
-    # Start Fleet API
     if args.fleet_api_type == TRANSPORT_TYPE_REST:
         if (
             importlib.util.find_spec("requests")
@@ -584,6 +595,7 @@ def _parse_args_run_superlink() -> argparse.ArgumentParser:
     )
 
     _add_args_common(parser=parser)
+    _add_args_control_api(parser=parser)
     _add_args_driver_api(parser=parser)
     _add_args_fleet_api(parser=parser)
 
@@ -646,6 +658,14 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         "--auth-superlink-public-key",
         type=str,
         help="The SuperLink's public key (as a path str) to enable authentication.",
+    )
+
+
+def _add_args_control_api(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--control-api-address",
+        help="Control API (gRPC) server address (IPv4, IPv6, or a domain name).",
+        default=CONTROL_API_DEFAULT_ADDRESS,
     )
 
 
