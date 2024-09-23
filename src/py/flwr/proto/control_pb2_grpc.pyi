@@ -13,6 +13,16 @@ class ControlStub:
         flwr.proto.run_pb2.CreateRunResponse]
     """Request to create a new run"""
 
+    GetRunStatus: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.run_pb2.GetRunStatusRequest,
+        flwr.proto.run_pb2.GetRunStatusResponse]
+    """Get the status of a given run"""
+
+    UpdateRunStatus: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.run_pb2.UpdateRunStatusRequest,
+        flwr.proto.run_pb2.UpdateRunStatusResponse]
+    """Update the status of a given run"""
+
 
 class ControlServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -21,6 +31,22 @@ class ControlServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.run_pb2.CreateRunResponse:
         """Request to create a new run"""
+        pass
+
+    @abc.abstractmethod
+    def GetRunStatus(self,
+        request: flwr.proto.run_pb2.GetRunStatusRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.run_pb2.GetRunStatusResponse:
+        """Get the status of a given run"""
+        pass
+
+    @abc.abstractmethod
+    def UpdateRunStatus(self,
+        request: flwr.proto.run_pb2.UpdateRunStatusRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.run_pb2.UpdateRunStatusResponse:
+        """Update the status of a given run"""
         pass
 
 
