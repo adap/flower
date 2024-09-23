@@ -18,7 +18,7 @@ import sys
 import time
 from logging import DEBUG, ERROR, INFO
 from pathlib import Path
-from typing import Annotated, Any, Optional
+from typing import Annotated, Optional
 
 import grpc
 import typer
@@ -79,6 +79,11 @@ def print_logs(
         logger(DEBUG, "Channel closed")
 
 
+def on_channel_state_change(channel_connectivity: str) -> None:
+    """Log channel connectivity."""
+    logger(DEBUG, channel_connectivity)
+
+
 def log(
     run_id: Annotated[
         int,
@@ -86,7 +91,7 @@ def log(
     ],
     app: Annotated[
         Path,
-        typer.Argument(help="Path of the Flower App to run"),
+        typer.Argument(help="Path of the Flower project to run"),
     ] = Path("."),
     federation: Annotated[
         Optional[str],
@@ -100,7 +105,7 @@ def log(
         ),
     ] = True,
 ) -> None:
-    """Get logs from a Flower App run."""
+    """Get logs from a Flower project run."""
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
     pyproject_path = app / "pyproject.toml" if app else None
@@ -145,7 +150,7 @@ def log(
             fed for fed in config["tool"]["flwr"]["federations"] if fed != "default"
         }
         typer.secho(
-            f"❌ There is no `{federation}` federation declared in "
+            f"❌ There is no `{federation}` federation declared in the "
             "`pyproject.toml`.\n The following federations were found:\n\n"
             + "\n".join(available_feds),
             fg=typer.colors.RED,
@@ -153,23 +158,24 @@ def log(
         )
         raise typer.Exit(code=1)
 
-    if "address" in federation_config:
-        _log_with_superexec(federation_config, run_id, stream)
-    else:
-        pass
+    if "address" not in federation_config:
+        typer.secho(
+            "❌ `flwr log` currently works with `SuperExec`. Ensure that the correct"
+            "`SuperExec` address is provided in the `pyproject.toml`.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+
+    _log_with_superexec(federation_config, run_id, stream)
 
 
 # pylint: disable-next=too-many-branches
 def _log_with_superexec(
-    federation_config: dict[str, Any],
+    federation_config: dict[str, str],
     run_id: int,
     stream: bool,
 ) -> None:
-
-    def on_channel_state_change(channel_connectivity: str) -> None:
-        """Log channel connectivity."""
-        logger(DEBUG, channel_connectivity)
-
     insecure_str = federation_config.get("insecure")
     if root_certificates := federation_config.get("root-certificates"):
         root_certificates_bytes = Path(root_certificates).read_bytes()
