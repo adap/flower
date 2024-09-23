@@ -170,17 +170,15 @@ def make_node_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
     )
 
 
-def is_valid_transition(
-    current_status_info: RunStatus, new_status_info: RunStatus
-) -> bool:
+def is_valid_transition(current_status: RunStatus, new_status: RunStatus) -> bool:
     """Check if a transition between two run statuses is valid.
 
     Parameters
     ----------
-    current_status_info : StatusInfo
-        The current status info of the run.
-    new_status_info : StatusInfo
-        The new status info to transition to.
+    current_status : RunStatus
+        The current status of the run.
+    new_status : RunStatus
+        The new status to transition to.
 
     Returns
     -------
@@ -188,26 +186,26 @@ def is_valid_transition(
         True if the transition is valid, False otherwise.
     """
     return (
-        current_status_info.status,
-        new_status_info.status,
+        current_status.status,
+        new_status.status,
     ) in VALID_RUN_STATUS_TRANSITIONS
 
 
-def has_valid_sub_status(status_info: RunStatus) -> bool:
+def has_valid_sub_status(status: RunStatus) -> bool:
     """Check if the 'sub_status' field of the given status info is valid.
 
     Parameters
     ----------
-    status : StatusInfo
-        The status info object to be checked.
+    status : RunStatus
+        The status object to be checked.
 
     Returns
     -------
     bool
-        True if the status info has a valid sub-status, False otherwise.
+        True if the status object has a valid sub-status, False otherwise.
 
     Notes
     -----
     An empty string (i.e., "") is considered a valid sub-status.
     """
-    return status_info.sub_status in VALID_RUN_SUB_STATUSES
+    return status.sub_status in VALID_RUN_SUB_STATUSES
