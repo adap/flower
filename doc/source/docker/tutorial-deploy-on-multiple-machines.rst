@@ -79,7 +79,7 @@ For example, you can use ``scp`` to copy the directories:
    $ scp -r ./server \
           ./superexec-certificates \
           ./superlink-certificates \
-          ../../../examples/quickstart-sklearn-tabular remote:~/
+          ../../../examples/quickstart-sklearn-tabular remote:~/distributed
 
 Step 3: Start the Flower Server Components
 ------------------------------------------
@@ -91,6 +91,7 @@ SuperLink and SuperExec services:
 
    $ ssh <your-remote-machine>
    # In your remote machine
+   $ cd <path-to-``distributed``-directory>
    $ export PROJECT_DIR=../quickstart-sklearn-tabular
    $ docker compose -f server/compose.yml up --build -d
 
@@ -151,13 +152,15 @@ Shut down the Flower client components:
 
 .. code-block:: bash
 
+   # In the `docker/distributed` directory
    $ docker compose -f client/compose.yml down
 
 Shut down the Flower server components and delete the SuperLink state:
 
 .. code-block:: bash
 
-   $ ssh remote
+   $ ssh <your-remote-machine>
+   $ cd <path-to-``distributed``-directory>
    $ docker compose -f server/compose.yml down -v
 
 .. |quickstart_skearn_tabular| replace::
