@@ -352,7 +352,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             return self.run_ids[run_id][0]
 
     def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
-        """Retrieve the status information for the specified runs."""
+        """Retrieve the statuses for the specified runs."""
         with self.lock:
             return {
                 run_id: self.run_ids[run_id][1]
@@ -360,7 +360,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                 if run_id in self.run_ids
             }
 
-    def update_run_status(self, run_id: int, new_status_info: RunStatus) -> bool:
+    def update_run_status(self, run_id: int, new_status: RunStatus) -> bool:
         """Update the status of the run with the specified `run_id`."""
         with self.lock:
             # Check if the run_id exists
@@ -369,23 +369,28 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                 return False
 
             # Check if the status transition is valid
-            info = self.run_ids[run_id][1]
-            if not is_valid_transition(info, new_status_info):
+            status = self.run_ids[run_id][1]
+            if not is_valid_transition(status, new_status):
                 log(
                     ERROR,
                     'Invalid status transition: from "%s" to "%s"',
-                    info.status,
-                    new_status_info.status,
+                    status.status,
+                    new_status.status,
                 )
                 return False
 
             # Check if the sub-status is valid
-            if not has_valid_sub_status(info):
-                log(ERROR, 'Invalid run status: "%s:%s"', info.status, info.sub_status)
+            if not has_valid_sub_status(status):
+                log(
+                    ERROR,
+                    'Invalid run status: "%s:%s"',
+                    status.status,
+                    status.sub_status,
+                )
                 return False
 
             # Update the status
-            self.run_ids[run_id] = (self.run_ids[run_id][0], new_status_info)
+            self.run_ids[run_id] = (self.run_ids[run_id][0], new_status)
             return True
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:

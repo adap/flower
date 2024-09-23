@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS run(
     override_config       TEXT,
     status                TEXT,
     sub_status            TEXT,
-    reason                TEXT
+    details                TEXT
 );
 """
 
@@ -706,7 +706,7 @@ class SqliteState(State):  # pylint: disable=R0904
             query = (
                 "INSERT INTO run "
                 "(run_id, fab_id, fab_version, fab_hash, override_config, "
-                "status, sub_status, reason)"
+                "status, sub_status, details)"
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?);"
             )
             if fab_hash:
@@ -790,7 +790,7 @@ class SqliteState(State):  # pylint: disable=R0904
         return None
 
     def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
-        """Retrieve the status information for the specified runs."""
+        """Retrieve the statuses for the specified runs."""
         query = f"SELECT * FROM run WHERE run_id IN ({','.join(['?'] * len(run_ids))});"
         rows = self.query(query, tuple(run_ids))
 
@@ -798,12 +798,12 @@ class SqliteState(State):  # pylint: disable=R0904
             row["run_id"]: RunStatus(
                 status=row["status"],
                 sub_status=row["sub_status"],
-                details=row["reason"],
+                details=row["details"],
             )
             for row in rows
         }
 
-    def update_run_status(self, run_id: int, new_status_info: RunStatus) -> bool:
+    def update_run_status(self, run_id: int, new_status: RunStatus) -> bool:
         """Update the status of the run with the specified `run_id`."""
         query = "SELECT * FROM run WHERE run_id = ?;"
         rows = self.query(query, (run_id,))
@@ -818,14 +818,14 @@ class SqliteState(State):  # pylint: disable=R0904
         status = RunStatus(
             status=row["status"],
             sub_status=row["sub_status"],
-            details=row["reason"],
+            details=row["details"],
         )
-        if not is_valid_transition(status, new_status_info):
+        if not is_valid_transition(status, new_status):
             log(
                 ERROR,
                 'Invalid status transition: from "%s" to "%s"',
                 status.status,
-                new_status_info.status,
+                new_status.status,
             )
             return False
 
@@ -835,12 +835,12 @@ class SqliteState(State):  # pylint: disable=R0904
             return False
 
         # Update the status
-        query = "UPDATE run SET status= ?, sub_status = ?, reason = ? "
+        query = "UPDATE run SET status= ?, sub_status = ?, details = ? "
         query += "WHERE run_id = ?;"
         data = (
-            new_status_info.status,
-            new_status_info.sub_status,
-            new_status_info.details,
+            new_status.status,
+            new_status.sub_status,
+            new_status.details,
             run_id,
         )
         self.query(query, data)
