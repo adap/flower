@@ -27,11 +27,17 @@ from uuid import UUID, uuid4
 from flwr.common import log, now
 from flwr.common.constant import NODE_ID_NUM_BYTES, RUN_ID_NUM_BYTES, Status
 from flwr.common.typing import Run, RunStatus, UserConfig
-from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.utils.validator import validate_task_ins_or_res
 
+from .sqlite_state_utils import (
+    determine_run_status,
+    dict_factory,
+    dict_to_task_ins,
+    dict_to_task_res,
+    task_ins_to_dict,
+    task_res_to_dict,
+)
 from .state import State
 from .utils import (
     convert_sint64_to_uint64,
@@ -43,7 +49,6 @@ from .utils import (
     is_valid_transition,
     make_node_unavailable_taskres,
 )
-from .sqlite_state_utils import task_ins_to_dict, dict_to_task_ins, task_res_to_dict, dict_to_task_res, dict_factory, determine_run_status
 
 SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
@@ -876,4 +881,3 @@ class SqliteState(State):  # pylint: disable=R0904
         except sqlite3.IntegrityError:
             log(ERROR, "`node_id` does not exist.")
             return False
-
