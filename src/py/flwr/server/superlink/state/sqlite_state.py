@@ -465,6 +465,10 @@ class SqliteState(State):  # pylint: disable=R0904
             return []
 
         for row in task_ins_rows:
+            # Convert values from sint64 to uint64
+            convert_sint64_values_in_dict_to_uint64(
+                row, ["run_id", "producer_node_id", "consumer_node_id"]
+            )
             task_ins = dict_to_task_ins(row)
             if task_ins.task.created_at + task_ins.task.ttl <= time.time():
                 log(ERROR, "TaskIns with task_id %s is expired.", task_ins.task_id)
