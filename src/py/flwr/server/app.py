@@ -208,8 +208,8 @@ def run_superlink() -> None:
     args = _parse_args_run_superlink().parse_args()
 
     # Parse IP address
-    driver_address, _, _ = _format_address(args.driver_api_address)
     control_address, _, _ = _format_address(args.control_api_address)
+    driver_address, _, _ = _format_address(args.driver_api_address)
 
     # Obtain certificates
     certificates = _try_obtain_certificates(args)
