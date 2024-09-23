@@ -137,7 +137,6 @@ def _log_with_superexec(
     run_id: int,
     stream: bool,
 ) -> None:
-
     insecure_str = federation_config.get("insecure")
     if root_certificates := federation_config.get("root-certificates"):
         root_certificates_bytes = Path(root_certificates).read_bytes()
