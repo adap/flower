@@ -68,7 +68,7 @@ flower-client-app = "flwr.client.supernode:run_client_app"  # Deprecated
 python = "^3.9"
 # Mandatory dependencies
 numpy = "^1.21.0"
-grpcio = "^1.60.0,!=1.64.2,!=1.65.1,!=1.65.2,!=1.65.4"
+grpcio = "^1.60.0,!=1.64.2,!=1.65.1,!=1.65.2,!=1.65.4,!=1.65.5,!=1.66.0,!=1.66.1"
 protobuf = "^4.25.2"
 cryptography = "^42.0.4"
 pycryptodome = "^3.18.0"
@@ -136,6 +136,7 @@ PyGithub = "==2.1.1"
 licensecheck = "==2024"
 pre-commit = "==3.5.0"
 sphinx-substitution-extensions = "2022.02.16"
+sphinxext-opengraph = "==0.9.1"
 
 [tool.isort]
 profile = "black"

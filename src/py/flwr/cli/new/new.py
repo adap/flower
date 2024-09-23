@@ -275,7 +275,7 @@ def new(
         )
     )
 
-    _add = "	huggingface-cli login\n" if framework_str == "flowertune" else ""
+    _add = "	huggingface-cli login\n" if llm_challenge_str else ""
     print(
         typer.style(
             f"	cd {package_name}\n" + "	pip install -e .\n" + _add + "	flwr run\n",
