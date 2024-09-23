@@ -26,7 +26,7 @@ from uuid import UUID, uuid4
 
 from flwr.common import log, now
 from flwr.common.constant import NODE_ID_NUM_BYTES, RUN_ID_NUM_BYTES, Status
-from flwr.common.typing import Run, StatusInfo, UserConfig
+from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
@@ -789,21 +789,21 @@ class SqliteState(State):  # pylint: disable=R0904
         log(ERROR, "`run_id` does not exist.")
         return None
 
-    def get_run_status(self, run_ids: set[int]) -> dict[int, StatusInfo]:
+    def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
         """Retrieve the status information for the specified runs."""
         query = f"SELECT * FROM run WHERE run_id IN ({','.join(['?'] * len(run_ids))});"
         rows = self.query(query, tuple(run_ids))
 
         return {
-            row["run_id"]: StatusInfo(
+            row["run_id"]: RunStatus(
                 status=row["status"],
                 sub_status=row["sub_status"],
-                reason=row["reason"],
+                details=row["reason"],
             )
             for row in rows
         }
 
-    def update_run_status(self, run_id: int, new_status_info: StatusInfo) -> bool:
+    def update_run_status(self, run_id: int, new_status_info: RunStatus) -> bool:
         """Update the status of the run with the specified `run_id`."""
         query = "SELECT * FROM run WHERE run_id = ?;"
         rows = self.query(query, (run_id,))
@@ -815,10 +815,10 @@ class SqliteState(State):  # pylint: disable=R0904
 
         # Check if the status transition is valid
         row = rows[0]
-        status = StatusInfo(
+        status = RunStatus(
             status=row["status"],
             sub_status=row["sub_status"],
-            reason=row["reason"],
+            details=row["reason"],
         )
         if not is_valid_transition(status, new_status_info):
             log(
@@ -840,7 +840,7 @@ class SqliteState(State):  # pylint: disable=R0904
         data = (
             new_status_info.status,
             new_status_info.sub_status,
-            new_status_info.reason,
+            new_status_info.details,
             run_id,
         )
         self.query(query, data)

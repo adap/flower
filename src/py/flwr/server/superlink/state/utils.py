@@ -22,7 +22,7 @@ from uuid import uuid4
 
 from flwr.common import log
 from flwr.common.constant import ErrorCode, Status, SubStatus
-from flwr.common.typing import StatusInfo
+from flwr.common.typing import RunStatus
 from flwr.proto.error_pb2 import Error  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
@@ -171,7 +171,7 @@ def make_node_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
 
 
 def is_valid_transition(
-    current_status_info: StatusInfo, new_status_info: StatusInfo
+    current_status_info: RunStatus, new_status_info: RunStatus
 ) -> bool:
     """Check if a transition between two run statuses is valid.
 
@@ -193,7 +193,7 @@ def is_valid_transition(
     ) in VALID_RUN_STATUS_TRANSITIONS
 
 
-def has_valid_sub_status(status_info: StatusInfo) -> bool:
+def has_valid_sub_status(status_info: RunStatus) -> bool:
     """Check if the 'sub_status' field of the given status info is valid.
 
     Parameters

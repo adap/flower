@@ -19,7 +19,7 @@ import abc
 from typing import Optional
 from uuid import UUID
 
-from flwr.common.typing import Run, StatusInfo, UserConfig
+from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 
@@ -185,7 +185,7 @@ class State(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get_run_status(self, run_ids: set[int]) -> dict[int, StatusInfo]:
+    def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
         """Retrieve the status information for the specified runs.
 
         Parameters
@@ -205,7 +205,7 @@ class State(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def update_run_status(self, run_id: int, new_status_info: StatusInfo) -> bool:
+    def update_run_status(self, run_id: int, new_status_info: RunStatus) -> bool:
         """Update the status of the run with the specified `run_id`.
 
         Parameters
