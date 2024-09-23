@@ -791,11 +791,14 @@ class SqliteState(State):  # pylint: disable=R0904
 
     def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
         """Retrieve the statuses for the specified runs."""
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_run_ids = tuple(convert_uint64_to_sint64(run_id) for run_id in run_ids)
         query = f"SELECT * FROM run WHERE run_id IN ({','.join(['?'] * len(run_ids))});"
-        rows = self.query(query, tuple(run_ids))
+        rows = self.query(query, sint64_run_ids)
 
         return {
-            row["run_id"]: RunStatus(
+            # Restore uint64 run IDs
+            convert_sint64_to_uint64(row["run_id"]): RunStatus(
                 status=row["status"],
                 sub_status=row["sub_status"],
                 details=row["details"],
@@ -805,8 +808,10 @@ class SqliteState(State):  # pylint: disable=R0904
 
     def update_run_status(self, run_id: int, new_status: RunStatus) -> bool:
         """Update the status of the run with the specified `run_id`."""
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_run_id = convert_uint64_to_sint64(run_id)
         query = "SELECT * FROM run WHERE run_id = ?;"
-        rows = self.query(query, (run_id,))
+        rows = self.query(query, (sint64_run_id,))
 
         # Check if the run_id exists
         if not rows:
@@ -841,7 +846,7 @@ class SqliteState(State):  # pylint: disable=R0904
             new_status.status,
             new_status.sub_status,
             new_status.details,
-            run_id,
+            sint64_run_id,
         )
         self.query(query, data)
         return True
