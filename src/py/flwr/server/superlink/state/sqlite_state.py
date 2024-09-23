@@ -25,8 +25,8 @@ from typing import Any, Optional, Union, cast
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
-from flwr.common.constant import NODE_ID_NUM_BYTES, RUN_ID_NUM_BYTES, RunStatus
-from flwr.common.typing import Run, StatusInfo, UserConfig
+from flwr.common.constant import NODE_ID_NUM_BYTES, RUN_ID_NUM_BYTES, Status
+from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
@@ -39,6 +39,8 @@ from .utils import (
     convert_uint64_to_sint64,
     convert_uint64_values_in_dict_to_sint64,
     generate_rand_int_from_bytes,
+    has_valid_sub_status,
+    is_valid_transition,
     make_node_unavailable_taskres,
 )
 
@@ -77,7 +79,7 @@ CREATE TABLE IF NOT EXISTS run(
     override_config       TEXT,
     status                TEXT,
     sub_status            TEXT,
-    reason                TEXT
+    details                TEXT
 );
 """
 
@@ -704,26 +706,14 @@ class SqliteState(State):  # pylint: disable=R0904
             query = (
                 "INSERT INTO run "
                 "(run_id, fab_id, fab_version, fab_hash, override_config, "
-                "status, sub_status, reason)"
+                "status, sub_status, details)"
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?);"
             )
             if fab_hash:
-                self.query(
-                    query,
-                    (sint64_run_id, "", "", fab_hash, json.dumps(override_config)),
-                )
-            else:
-                self.query(
-                    query,
-                    (
-                        sint64_run_id,
-                        fab_id,
-                        fab_version,
-                        "",
-                        json.dumps(override_config),
-                    ),
-                )
-            # Note: we need to return the uint64 value of the run_id
+                fab_id, fab_version = "", ""
+            data = [sint64_run_id, fab_id, fab_version, fab_hash]
+            data += [json.dumps(override_config), Status.STARTING, "", ""]
+            self.query(query, tuple(data))
             return uint64_run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
@@ -799,24 +789,29 @@ class SqliteState(State):  # pylint: disable=R0904
         log(ERROR, "`run_id` does not exist.")
         return None
 
-    def get_run_status(self, run_ids: set[int]) -> dict[int, StatusInfo]:
-        """Retrieve the status information for the specified runs."""
+    def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
+        """Retrieve the statuses for the specified runs."""
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_run_ids = tuple(convert_uint64_to_sint64(run_id) for run_id in run_ids)
         query = f"SELECT * FROM run WHERE run_id IN ({','.join(['?'] * len(run_ids))});"
-        rows = self.query(query, tuple(run_ids))
+        rows = self.query(query, sint64_run_ids)
 
         return {
-            row["run_id"]: StatusInfo(
+            # Restore uint64 run IDs
+            convert_sint64_to_uint64(row["run_id"]): RunStatus(
                 status=row["status"],
                 sub_status=row["sub_status"],
-                reason=row["reason"],
+                details=row["details"],
             )
             for row in rows
         }
 
-    def update_run_status(self, run_id: int, new_status_info: StatusInfo) -> bool:
+    def update_run_status(self, run_id: int, new_status: RunStatus) -> bool:
         """Update the status of the run with the specified `run_id`."""
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_run_id = convert_uint64_to_sint64(run_id)
         query = "SELECT * FROM run WHERE run_id = ?;"
-        rows = self.query(query, (run_id,))
+        rows = self.query(query, (sint64_run_id,))
 
         # Check if the run_id exists
         if not rows:
@@ -825,17 +820,17 @@ class SqliteState(State):  # pylint: disable=R0904
 
         # Check if the status transition is valid
         row = rows[0]
-        status = StatusInfo(
+        status = RunStatus(
             status=row["status"],
             sub_status=row["sub_status"],
-            reason=row["reason"],
+            details=row["details"],
         )
-        if not is_valid_transition(status, new_status_info):
+        if not is_valid_transition(status, new_status):
             log(
                 ERROR,
                 'Invalid status transition: from "%s" to "%s"',
                 status.status,
-                new_status_info.status,
+                new_status.status,
             )
             return False
 
@@ -845,13 +840,13 @@ class SqliteState(State):  # pylint: disable=R0904
             return False
 
         # Update the status
-        query = "UPDATE run SET status= ?, sub_status = ?, reason = ? "
+        query = "UPDATE run SET status= ?, sub_status = ?, details = ? "
         query += "WHERE run_id = ?;"
         data = (
-            new_status_info.status,
-            new_status_info.sub_status,
-            new_status_info.reason,
-            run_id,
+            new_status.status,
+            new_status.sub_status,
+            new_status.details,
+            sint64_run_id,
         )
         self.query(query, data)
         return True

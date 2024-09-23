@@ -219,12 +219,12 @@ class Run:
 
 
 @dataclass
-class StatusInfo:
-    """Run status details."""
+class RunStatus:
+    """Run status information."""
 
     status: str
     sub_status: str
-    reason: str
+    details: str
 
 
 @dataclass
