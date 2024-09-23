@@ -43,7 +43,7 @@ service Driver {
 }
 
 // GetNodes messages
-message GetNodesRequest { sint64 run_id = 1; }
+message GetNodesRequest { uint64 run_id = 1; }
 message GetNodesResponse { repeated Node nodes = 1; }
 
 // PushTaskIns messages
