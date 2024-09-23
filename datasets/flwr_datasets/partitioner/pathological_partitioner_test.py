@@ -16,7 +16,6 @@
 
 
 import unittest
-from typing import Dict
 
 import numpy as np
 from parameterized import parameterized
@@ -79,7 +78,7 @@ class TestClassConstrainedPartitioner(unittest.TestCase):
             num_classes_per_partition=num_classes_per_partition,
         )
         partitioner.dataset = dataset
-        partitions: Dict[int, Dataset] = {
+        partitions: dict[int, Dataset] = {
             pid: partitioner.load_partition(pid) for pid in range(num_partitions)
         }
         unique_classes_per_partition = {
