@@ -36,7 +36,7 @@ from flwr.common.typing import Fab
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 
-from ..log import stream_logs  # pylint: disable=import-error
+from ..log import stream_logs
 
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
@@ -68,12 +68,11 @@ def run(
             "inside the `pyproject.toml` in order to be properly overriden.",
         ),
     ] = None,
-    follow: Annotated[
+    stream: Annotated[
         bool,
         typer.Option(
-            "--follow/--no-follow",
-            "-f/-F",
-            help="Use this flag to follow logstream",
+            "--stream/--show",
+            help="Flag to stream or print logs from the Flower run",
         ),
     ] = True,
 ) -> None:
@@ -131,7 +130,7 @@ def run(
         raise typer.Exit(code=1)
 
     if "address" in federation_config:
-        _run_with_superexec(app, federation_config, config_overrides, follow)
+        _run_with_superexec(app, federation_config, config_overrides, stream)
     else:
         _run_without_superexec(app, federation_config, config_overrides, federation)
 
@@ -140,7 +139,7 @@ def _run_with_superexec(
     app: Path,
     federation_config: dict[str, Any],
     config_overrides: Optional[list[str]],
-    follow: bool,
+    stream: bool,
 ) -> None:
 
     insecure_str = federation_config.get("insecure")
@@ -198,7 +197,7 @@ def _run_with_superexec(
     fab_path.unlink()
     typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
 
-    if follow:
+    if stream:
         try:
             while True:
                 log(INFO, "Starting logstream for run_id `%s`", res.run_id)
