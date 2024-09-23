@@ -29,7 +29,7 @@ from typing import Any, Optional
 
 from flwr.cli.config_utils import load_and_validate
 from flwr.client import ClientApp
-from flwr.common import EventType, event, log
+from flwr.common import EventType, event, log, now
 from flwr.common.config import get_fused_config_from_dir, parse_config_args
 from flwr.common.constant import RUN_ID_NUM_BYTES, Status
 from flwr.common.logger import (
@@ -45,6 +45,7 @@ from flwr.server.server_app import ServerApp
 from flwr.server.superlink.fleet import vce
 from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
 from flwr.server.superlink.state import StateFactory
+from flwr.server.superlink.state.in_memory_state import RunRecord
 from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
 from flwr.simulation.ray_transport.utils import (
     enable_tf_gpu_growth as enable_gpu_growth,
@@ -400,7 +401,13 @@ def _main_loop(
         # Register run
         log(DEBUG, "Pre-registering run with id %s", run.run_id)
         init_status = RunStatus(Status.RUNNING, "", "")
-        state_factory.state().run_ids[run.run_id] = (run, init_status)  # type: ignore
+        state_factory.state().run_ids[run.run_id] = RunRecord(  # type: ignore
+            run=run,
+            status=init_status,
+            starting_at=now().isoformat(),
+            running_at=now().isoformat(),
+            finished_at="",
+        )
 
         if server_app_run_config is None:
             server_app_run_config = {}

@@ -17,6 +17,7 @@
 
 import threading
 import time
+from dataclasses import dataclass
 from logging import ERROR
 from typing import Optional
 from uuid import UUID, uuid4
@@ -36,6 +37,17 @@ from .utils import (
 )
 
 
+@dataclass
+class RunRecord:
+    """The record of a specific run, including its status and timestamps."""
+
+    run: Run
+    status: RunStatus
+    starting_at: str
+    running_at: str
+    finished_at: str
+
+
 class InMemoryState(State):  # pylint: disable=R0902,R0904
     """In-memory State implementation."""
 
@@ -45,8 +57,8 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         self.node_ids: dict[int, tuple[float, float]] = {}
         self.public_key_to_node_id: dict[bytes, int] = {}
 
-        # Map run_id to (fab_id, fab_version)
-        self.run_ids: dict[int, tuple[Run, RunStatus]] = {}
+        # Map run_id to RunRecord
+        self.run_ids: dict[int, RunRecord] = {}
         self.task_ins_store: dict[UUID, TaskIns] = {}
         self.task_res_store: dict[UUID, TaskRes] = {}
 
@@ -293,19 +305,24 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
 
             if run_id not in self.run_ids:
-                run = Run(
-                    run_id=run_id,
-                    fab_id=fab_id if fab_id else "",
-                    fab_version=fab_version if fab_version else "",
-                    fab_hash=fab_hash if fab_hash else "",
-                    override_config=override_config,
+                run_record = RunRecord(
+                    run=Run(
+                        run_id=run_id,
+                        fab_id=fab_id if fab_id else "",
+                        fab_version=fab_version if fab_version else "",
+                        fab_hash=fab_hash if fab_hash else "",
+                        override_config=override_config,
+                    ),
+                    status=RunStatus(
+                        status=Status.STARTING,
+                        sub_status="",
+                        details="",
+                    ),
+                    starting_at=now().isoformat(),
+                    running_at="",
+                    finished_at="",
                 )
-                initial_status_info = RunStatus(
-                    status=Status.STARTING,
-                    sub_status="",
-                    details="",
-                )
-                self.run_ids[run_id] = (run, initial_status_info)
+                self.run_ids[run_id] = run_record
                 return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
@@ -349,13 +366,13 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             if run_id not in self.run_ids:
                 log(ERROR, "`run_id` is invalid")
                 return None
-            return self.run_ids[run_id][0]
+            return self.run_ids[run_id].run
 
     def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
         """Retrieve the statuses for the specified runs."""
         with self.lock:
             return {
-                run_id: self.run_ids[run_id][1]
+                run_id: self.run_ids[run_id].status
                 for run_id in run_ids
                 if run_id in self.run_ids
             }
@@ -369,7 +386,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                 return False
 
             # Check if the status transition is valid
-            status = self.run_ids[run_id][1]
+            status = self.run_ids[run_id].status
             if not is_valid_transition(status, new_status):
                 log(
                     ERROR,
@@ -390,7 +407,12 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                 return False
 
             # Update the status
-            self.run_ids[run_id] = (self.run_ids[run_id][0], new_status)
+            run_record = self.run_ids[run_id]
+            if new_status.status == Status.RUNNING:
+                run_record.running_at = now().isoformat()
+            elif new_status.status == Status.FINISHED:
+                run_record.finished_at = now().isoformat()
+            run_record.status = new_status
             return True
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
