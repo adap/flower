@@ -119,9 +119,7 @@ def log(
         )
         raise typer.Exit(code=1)
 
-    if "address" in federation_config:
-        _log_with_superexec(federation_config, run_id, stream)
-    else:
+    if "address" not in federation_config:
         typer.secho(
             "❌ `flwr log` currently works with `SuperExec`. Ensure that the correct"
             "`SuperExec` address is provided in the `pyproject.toml`.",
@@ -129,6 +127,8 @@ def log(
             bold=True,
         )
         sys.exit()
+    else:
+        _log_with_superexec(federation_config, run_id, stream)
 
 
 # pylint: disable-next=too-many-branches
