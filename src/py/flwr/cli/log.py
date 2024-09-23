@@ -44,9 +44,7 @@ def stream_logs(run_id: int, channel: grpc.Channel, duration: int) -> None:
             break
 
 
-def print_logs(
-    run_id: int, channel: grpc.Channel, timeout: int, is_test: bool = False
-) -> None:
+def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
     """Print logs from the beginning of a run.
 
     The `is_test` parameter is only used for `pytest` and must be `False` otherwise.
@@ -60,9 +58,6 @@ def print_logs(
                 # Enforce timeout for graceful exit
                 for res in stub.StreamLogs(req, timeout=timeout):
                     print(res.log_output)
-                # Break out of while-loop when using pytest
-                if is_test:
-                    break
             except grpc.RpcError as e:
                 # pylint: disable=E1101
                 if e.code() == grpc.StatusCode.DEADLINE_EXCEEDED:

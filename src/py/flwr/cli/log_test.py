@@ -16,11 +16,21 @@
 
 
 import unittest
-from unittest.mock import Mock, patch
+from typing import NoReturn
+from unittest.mock import Mock, call, patch
 
 from flwr.proto.exec_pb2 import StreamLogsResponse  # pylint: disable=E0611
 
 from .log import print_logs, stream_logs
+
+
+class InterruptedStreamLogsResponse:
+    """Create a StreamLogsResponse object with KeyboardInterrupt."""
+
+    @property
+    def log_output(self) -> NoReturn:
+        """Raise KeyboardInterrupt to exit logstream test gracefully."""
+        raise KeyboardInterrupt
 
 
 class TestFlwrLog(unittest.TestCase):
@@ -28,12 +38,21 @@ class TestFlwrLog(unittest.TestCase):
 
     def setUp(self) -> None:
         """Initialize mock ExecStub before each test."""
-        mock_response_iterator = iter(
-            [StreamLogsResponse(log_output=f"result_{i}") for i in range(1, 4)]
-        )
+        self.expected_calls = [
+            call("log_output_1"),
+            call("log_output_2"),
+            call("log_output_3"),
+        ]
+        mock_response_iterator = [
+            iter(
+                [StreamLogsResponse(log_output=f"log_output_{i}") for i in range(1, 4)]
+                + [InterruptedStreamLogsResponse()]
+            )
+        ]
         self.mock_stub = Mock()
-        self.mock_stub.StreamLogs.return_value = mock_response_iterator
+        self.mock_stub.StreamLogs.side_effect = mock_response_iterator
         self.patcher = patch("flwr.cli.log.ExecStub", return_value=self.mock_stub)
+
         self.patcher.start()
 
         # Create mock channel
@@ -46,15 +65,14 @@ class TestFlwrLog(unittest.TestCase):
     def test_flwr_log_stream_method(self) -> None:
         """Test stream_logs."""
         with patch("builtins.print") as mock_print:
-            stream_logs(run_id=123, channel=self.mock_channel, duration=1)
-            mock_print.assert_any_call("result_1")
-            mock_print.assert_any_call("result_2")
-            mock_print.assert_any_call("result_3")
+            with self.assertRaises(KeyboardInterrupt):
+                stream_logs(run_id=123, channel=self.mock_channel, duration=1)
+                # Assert that mock print was called with the expected arguments
+                mock_print.assert_has_calls(self.expected_calls)
 
     def test_flwr_log_print_method(self) -> None:
         """Test print_logs."""
         with patch("builtins.print") as mock_print:
-            print_logs(run_id=123, channel=self.mock_channel, timeout=0, is_test=True)
-            mock_print.assert_any_call("result_1")
-            mock_print.assert_any_call("result_2")
-            mock_print.assert_any_call("result_3")
+            print_logs(run_id=123, channel=self.mock_channel, timeout=0)
+            # Assert that mock print was called with the expected arguments
+            mock_print.assert_has_calls(self.expected_calls)
