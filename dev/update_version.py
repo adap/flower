@@ -81,10 +81,24 @@ def _update_versions(file_patterns, replace_strings, new_version, check):
 
 
 if __name__ == "__main__":
+    conf_path = Path("doc/source/conf.py")
+
+    if not conf_path.is_file():
+        raise FileNotFoundError(f"{conf_path} not found!")
+
+    content = conf_path.read_text()
+
+    # Search for the current non-updated version
+    match = re.search(r"\.\.\s*\|stable_flwr_version\|\s*replace::\s*(\S+)", content)
+
     parser = argparse.ArgumentParser(
         description="Utility used to bump the version of the package."
     )
-    parser.add_argument("old_version", help="Current version of the package.")
+    parser.add_argument(
+        "--old_version",
+        help="Current (non-updated) version of the package, soon to be the old version.",
+        default=match.group(1) if match else None,
+    )
     parser.add_argument(
         "--check", action="store_true", help="Fails if any file would be modified."
     )
@@ -100,6 +114,9 @@ if __name__ == "__main__":
         "--major", action="store_true", help="Increment the major version."
     )
     args = parser.parse_args()
+
+    if not args.old_version:
+        raise ValueError("Version not found in conf.py, please provide current version")
 
     # Determine the type of version increment
     if args.major:
