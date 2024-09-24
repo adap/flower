@@ -1,11 +1,14 @@
+:og:description: Learn how to train a classification model on the Higgs dataset using federated learning with Flower and XGBoost in this step-by-step tutorial.
+.. title:: Federated Learning Tutorial: Train a Classifier with Flower & XGBoost
+
+.. meta::
+   :description: Learn how to train a classification model on the Higgs dataset using federated learning with Flower and XGBoost in this step-by-step tutorial.
+
 .. _quickstart-xgboost:
 
 
 Quickstart XGBoost
 =====================
-
-.. meta::
-   :description: Check out this Federated Learning quickstart tutorial for using Flower with XGBoost to train classification models on trees.
 
 ..  youtube:: AY1vpXUpesc
    :width: 100%

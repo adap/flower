@@ -1,3 +1,9 @@
+:og:description: Learn how to train a Convolutional Neural Network on CIFAR-10 using federated learning with Flower and TensorFlow in this step-by-step tutorial.
+.. title:: Federated Learning Tutorial: Train CNN with Flower & TensorFlow
+
+.. meta::
+   :description: Learn how to train a Convolutional Neural Network on CIFAR-10 using federated learning with Flower and TensorFlow in this step-by-step tutorial.
+
 .. _quickstart-tensorflow:
 
 #######################
@@ -299,9 +305,6 @@ learning system.
    The video shown below shows how to setup a TensorFlow + Flower
    project using our previously recommended APIs. A new video tutorial
    will be released that shows the new APIs (as the content above does)
-
-.. meta::
-   :description: Check out this Federated Learning quickstart tutorial for using Flower with TensorFlow to train a CNN model on CIFAR-10.
 
 .. youtube:: FGTc2TQq7VM
    :width: 100%

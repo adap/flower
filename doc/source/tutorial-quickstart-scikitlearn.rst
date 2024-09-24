@@ -1,11 +1,14 @@
+:og:description: Learn how to train a logistic regression on MNIST using federated learning with Flower and scikit-learn in this step-by-step tutorial.
+.. title:: Federated Learning Tutorial: Logistic Regression with Flower & scikit-learn
+
+.. meta::
+   :description: Learn how to train a logistic regression on MNIST using federated learning with Flower and scikit-learn in this step-by-step tutorial.
+
 .. _quickstart-scikitlearn:
 
 
 Quickstart scikit-learn
 =======================
-
-.. meta::
-   :description: Check out this Federated Learning quickstart tutorial for using Flower with scikit-learn to train a linear regression model.
 
 In this tutorial, we will learn how to train a :code:`Logistic Regression` model on MNIST using Flower and scikit-learn.
 
