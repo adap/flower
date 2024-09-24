@@ -25,6 +25,9 @@ This page collects answers to commonly asked questions about Federated Learning 
 
     Yes, of course. A list of available examples using Flower within a blockchain environment is available here:
 
+    * `FLock: A Decentralised AI Training Platform <https://www.flock.io/#/>`_.
+        * Contribute to on-chain training the model and earn rewards.
+        * Local blockchain with federated learning simulation.
     * `Flower meets Nevermined GitHub Repository <https://github.com/nevermined-io/fl-demo/tree/master/image-classification-flower>`_.
     * `Flower meets Nevermined YouTube video <https://www.youtube.com/watch?v=A0A9hSlPhKI>`_.
     * `Flower meets KOSMoS <https://www.isw-sites.de/kosmos/wp-content/uploads/sites/13/2021/05/Talk-Flower-Summit-2021.pdf>`_.

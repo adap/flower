@@ -131,7 +131,7 @@ def build_images(
     ubuntu_base_images = _generate_base_images(
         flwr_version,
         SUPPORTED_PYTHON_VERSIONS,
-        [_Distro(_DistroName.UBUNTU, "22.04")],
+        [_Distro(_DistroName.UBUNTU, "24.04")],
     )
     # alpine base images for the latest supported python version
     alpine_base_images = _generate_base_images(
@@ -187,8 +187,10 @@ def build_images(
     print(
         json.dumps(
             {
-                "base": {"images": [asdict(image) for image in base_images]},
-                "binary": {"images": [asdict(image) for image in binary_images]},
+                "base": {"images": list(map(lambda image: asdict(image), base_images))},
+                "binary": {
+                    "images": list(map(lambda image: asdict(image), binary_images))
+                },
             }
         )
     )
