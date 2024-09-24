@@ -7,7 +7,8 @@ dataset: [cifar10, femnist]
 
 # FedDebug: Systematic Debugging for Federated Learning Applications
 
-> [!NOTE] If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
+> [!NOTE] 
+> If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
 **Paper:** [https://dl.acm.org/doi/abs/10.1109/ICSE48619.2023.00053]
 
@@ -36,7 +37,8 @@ This repository implements the FedDebug technique of localizing malicious client
 
 **Hardware Setup:**
 These experiments were run on a machine with 8 CPU cores and an Nvidia Tesla P40 GPU. 
-> [!NOTE] This baseline also contains a smaller CNN model (LeNet) to run all these experiments on a CPU. Furthermore, the experiments are also scaled down to obtain representative results of the FedDebug evaluations.
+> [!NOTE] 
+> This baseline also contains a smaller CNN model (LeNet) to run all these experiments on a CPU. Furthermore, the experiments are also scaled down to obtain representative results of the FedDebug evaluations.
 
 **Contributors:** Waris Gill ([GitHub Profile](https://github.com/warisgill))
 ## Experimental Setup
@@ -114,14 +116,15 @@ Total Time taken (training + testing): 97.98241376876831
 ```
 
 ## Expected Results  
-> [!NOTE] The following commands will take time to complete on larger models (eg., resnet) without enabling gpu.  
+> [!NOTE] 
+> The following commands will take time to complete on larger models (eg., resnet) without enabling gpu.  
 
 **FedDebug Table 2** 
 ```bash
-poetry run python -m feddebug.main --multirun device=cpu num_clients=50 model.name=lenet dataset.name=cifar10,mnist total_faulty_clients=5,7 check_cache=True
+python -m feddebug.main --multirun device=cpu num_clients=50 model.name=lenet dataset.name=cifar10,mnist total_faulty_clients=5,7 check_cache=True
 
 # to generate Table 2 csv. Open fed_debug_results.csv after  
-poetry run python -m feddebug.main generate_table_csv=True
+python -m feddebug.main generate_table_csv=True
 # Open fed_debug_results.csv to see the results.
 ```
 Last Command Output
@@ -134,11 +137,11 @@ Last Command Output
 **Neuron Activation Threshold Variation (Figure 10)**
 Only execute the following commands after generating Table 2 results.   
 ```bash
-poetry run python -m feddebug.main --multirun device=cuda  num_clients=10 model.name=densenet121,resnet18 dataset.name=cifar10,mnist total_faulty_clients=2 check_cache=True
+python -m feddebug.main --multirun device=cuda  num_clients=10 model.name=densenet121,resnet18 dataset.name=cifar10,mnist total_faulty_clients=2 check_cache=True
 
-poetry run python -m feddebug.main vary_thresholds=True device=cuda
+python -m feddebug.main vary_thresholds=True device=cuda
 
-poetry run python -m feddebug.main generate_thresholds_exp_graph=True
+python -m feddebug.main generate_thresholds_exp_graph=True
 
 ```
 Last Command Output
@@ -149,7 +152,8 @@ It will generate a PDF (Figure-10.pdf) containing Figure 10 graphs as shown belo
 
 ![Figure 10 of feddebug Paper](Figure-10.png)
 
-> :warning: It generates random inputs to localize malicious client(s). Thus, results might vary slightly on each run due to randomness.
+> [!WARNING] 
+> It generates random inputs to localize malicious client(s). Thus, results might vary slightly on each run due to randomness.
 
 ## Customizing Experiments
 You can customize various aspects of the experiments by modifying the `conf/base.yaml` file. This includes:
