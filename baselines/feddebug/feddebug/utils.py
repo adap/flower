@@ -172,9 +172,9 @@ def set_exp_key(cfg):
 
 def config_sim_resources(cfg):
     """Configure the resources for the simulation."""
-    client_resources = {"num_cpus": cfg.client_cpus}
+    client_resources = {"num_cpus": cfg.client_resources.num_cpus}
     if cfg.device == "cuda":
-        client_resources["num_gpus"] = cfg.client_gpu
+        client_resources["num_gpus"] = cfg.client_resources.num_gpus
 
     init_args = {"num_cpus": cfg.total_cpus, "num_gpus": cfg.total_gpus}
     backend_config = {
