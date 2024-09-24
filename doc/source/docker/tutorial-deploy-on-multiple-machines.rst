@@ -5,7 +5,7 @@ This guide will help you set up a Flower project on multiple machines using Dock
 
 You will learn how to run the Flower client and server components on two separate machines,
 with Flower configured to use TLS encryption and persist SuperLink state across restarts. A server consists of a SuperLink and ``SuperExec``. For more details
-about the Flower architecture, refer to the :doc:Flower Architecture`../explanation-flower-architecture.rst` explainer page.
+about the Flower architecture, refer to the :doc:`<../explanation-flower-architecture>` explainer page.
 
 This guide assumes you have completed the :doc:`tutorial-quickstart-docker-compose` tutorial.
 It is highly recommended that you follow and understand the contents of that tutorial before
@@ -163,8 +163,8 @@ Shut down the Flower server components and delete the SuperLink state:
    $ cd <path-to-``distributed``-directory>
    $ docker compose -f server/compose.yml down -v
 
-.. |quickstart_skearn_tabular| replace::
+.. |quickstart_sklearn_tabular| replace::
 
    ``examples/quickstart-sklearn-tabular``
 
-.. _quickstart_skearn_tabular: https://github.com/adap/flower/tree/main/examples/quickstart-sklearn-tabular
+.. _quickstart_sklearn_tabular: https://github.com/adap/flower/tree/main/examples/quickstart-sklearn-tabular
