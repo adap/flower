@@ -90,10 +90,10 @@ copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version of the next release, including alpha/beta/rc tags
-release = "1.11.0"
+release = "1.12.0"
 # The current released version
 rst_prolog = """
-.. |stable_flwr_version| replace:: 1.10.0
+.. |stable_flwr_version| replace:: 1.11.1
 .. |stable_flwr_superlink_docker_digest| replace:: 4b317d5b6030710b476f4dbfab2c3a33021ad40a0fcfa54d7edd45e0c51d889c
 .. |ubuntu_version| replace:: 22.04
 .. |setuptools_version| replace:: 70.3.0
@@ -122,6 +122,7 @@ extensions = [
     "nbsphinx",
     "sphinx_click",
     "sphinx_substitution_extensions",
+    "sphinxext.opengraph",
 ]
 
 # Generate .rst files
@@ -195,7 +196,6 @@ redirects = {
     "apiref-binaries": "ref-api-cli.html",
     "fedbn-example-pytorch-from-centralized-to-federated": "example-fedbn-pytorch-from-centralized-to-federated.html",
     "how-to-use-built-in-middleware-layers": "how-to-use-built-in-mods.html",
-    "vit-finetune": "flowertune-vit.html",
     # Restructuring: tutorials
     "tutorial/Flower-0-What-is-FL": "tutorial-series-what-is-federated-learning.html",
     "tutorial/Flower-1-Intro-to-FL-PyTorch": "tutorial-series-get-started-with-flower-pytorch.html",
@@ -250,8 +250,6 @@ redirects = {
     "creating-new-messages": "contributor-how-to-create-new-messages.html",
     "write-documentation": "contributor-how-to-write-documentation.html",
     "release-process": "contributor-how-to-release-flower.html",
-    # Restructuring: contributor explanations
-    "architecture": "contributor-explanation-architecture.html",
     # Restructuring: contributor references
     "good-first-contributions": "contributor-ref-good-first-contributions.html",
     "secagg": "contributor-ref-secure-aggregation-protocols.html",
@@ -265,6 +263,9 @@ redirects = {
     "example-mxnet-walk-through": "index.html",
     "ref-api/flwr.simulation.run_simulation_from_cli": "index.html",
     "contributor-how-to-create-new-messages": "index.html",
+    "example-jax-from-centralized-to-federated": "tutorial-quickstart-jax.html",
+    "architecture": "explanation-flower-architecture.html",
+    "contributor-explanation-architecture.html": "explanation-flower-architecture.html",
 }
 
 # -- Options for HTML output -------------------------------------------------
@@ -273,7 +274,7 @@ redirects = {
 # a list of builtin themes.
 #
 html_theme = "furo"
-html_title = f"Flower Framework"
+html_title = "Flower Framework"
 html_logo = "_static/flower-logo.png"
 html_favicon = "_static/favicon.ico"
 html_baseurl = "https://flower.ai/docs/framework/"

@@ -16,8 +16,9 @@
 
 
 import base64
+from collections.abc import Sequence
 from logging import INFO, WARNING
-from typing import Any, Callable, Optional, Sequence, Tuple, Union
+from typing import Any, Callable, Optional, Union
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -68,7 +69,7 @@ Response = Union[
 
 
 def _get_value_from_tuples(
-    key_string: str, tuples: Sequence[Tuple[str, Union[str, bytes]]]
+    key_string: str, tuples: Sequence[tuple[str, Union[str, bytes]]]
 ) -> bytes:
     value = next((value for key, value in tuples if key == key_string), "")
     if isinstance(value, str):
@@ -188,7 +189,8 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         self, public_key: ec.EllipticCurvePublicKey, request: Request, hmac_value: bytes
     ) -> bool:
         shared_secret = generate_shared_key(self.server_private_key, public_key)
-        return verify_hmac(shared_secret, request.SerializeToString(True), hmac_value)
+        message_bytes = request.SerializeToString(deterministic=True)
+        return verify_hmac(shared_secret, message_bytes, hmac_value)
 
     def _create_authenticated_node(
         self,

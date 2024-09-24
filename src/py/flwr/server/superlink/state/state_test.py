@@ -20,7 +20,6 @@ import time
 import unittest
 from abc import abstractmethod
 from datetime import datetime, timezone
-from typing import List
 from unittest.mock import patch
 from uuid import uuid4
 
@@ -655,7 +654,7 @@ class StateTest(unittest.TestCase):
 
         # Execute
         current_time = time.time()
-        task_res_list: List[TaskRes] = []
+        task_res_list: list[TaskRes] = []
         with patch("time.time", side_effect=lambda: current_time + 50):
             task_res_list = state.get_task_res({task_id_0, task_id_1}, limit=None)
 
@@ -698,7 +697,7 @@ def create_task_ins(
 def create_task_res(
     producer_node_id: int,
     anonymous: bool,
-    ancestry: List[str],
+    ancestry: list[str],
     run_id: int,
 ) -> TaskRes:
     """Create a TaskRes for testing."""

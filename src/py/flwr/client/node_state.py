@@ -17,7 +17,7 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
 from flwr.common import Context, RecordSet
 from flwr.common.config import (
@@ -46,7 +46,7 @@ class NodeState:
     ) -> None:
         self.node_id = node_id
         self.node_config = node_config
-        self.run_infos: Dict[int, RunInfo] = {}
+        self.run_infos: dict[int, RunInfo] = {}
 
     # pylint: disable=too-many-arguments
     def register_context(
