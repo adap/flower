@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2022 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,8 +15,9 @@
 """Utility functions for gRPC."""
 
 
+from collections.abc import Sequence
 from logging import DEBUG
-from typing import Optional, Sequence
+from typing import Optional
 
 import grpc
 

@@ -1,0 +1,17 @@
+---
+title: "Client"
+description: "A client is any machine with local data that connects to a server, trains on received global model weights, and sends back updated weights. Clients may also evaluate global model weights."
+date: "2024-05-23"
+author:
+  name: "Charles Beauville"
+  position: "Machine Learning Engineer"
+  website: "https://www.linkedin.com/in/charles-beauville/"
+  github: "github.com/charlesbvll"
+related: 
+  - text: "Federated Learning"
+    link: "/glossary/federated-learning"
+  - text: "Tutorial: What is Federated Learning?"
+    link: "/docs/framework/tutorial-series-what-is-federated-learning.html"
+---
+
+Any machine with access to some data that connects to a server to perform Federated Learning. During each round of FL (if it is sampled), it will receive global model weights from the server, train on the data they have access to, and send the resulting trained weights back to the server. Clients can also be sampled to evaluate the global server weights on the data they have access to, this is called federated evaluation.

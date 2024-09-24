@@ -19,15 +19,14 @@ The code is an exact copy from flwr.
 
 
 import importlib.metadata as importlib_metadata
-from typing import Tuple
 
 
-def _check_package(name: str) -> Tuple[str, str]:
+def _check_package(name: str) -> tuple[str, str]:
     version: str = importlib_metadata.version(name)
     return name, version
 
 
-def _version() -> Tuple[str, str]:
+def _version() -> tuple[str, str]:
     """Read and return Flower Dataset package name and version.
 
     Returns

@@ -1,3 +1,9 @@
+---
+tags: [basic, vision, fds]
+dataset: [CIFAR-10]
+framework: [torch]
+---
+
 # PyTorch: From Centralized To Federated
 
 This example demonstrates how an already existing centralized PyTorch-based machine learning project can be federated with Flower.

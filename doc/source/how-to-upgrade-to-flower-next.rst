@@ -55,7 +55,7 @@ or if you need Flower Next with simulation:
 
 .. code-block:: bash
     
-    $ python -m pip install -U flwr[simulation]
+    $ python -m pip install -U "flwr[simulation]"
 
 
 Ensure you set the following version constraint in your ``requirements.txt``
@@ -88,7 +88,7 @@ Ensure you set the following version constraint in your ``pyproject.toml``:
 .. code-block:: toml
 
     [tool.poetry.dependencies]
-    python = "^3.8"
+    python = "^3.9"
 
     # Without simulation support
     flwr = ">=1.8,<2.0"
@@ -185,17 +185,17 @@ Deployment
     # In a new terminal window, start a long-running secure SuperNode
     $ flower-client-app client:app \
         --root-certificates <your-ca-cert-filepath> \
-        --server 127.0.0.1:9092
+        --superlink 127.0.0.1:9092
 
     # In another terminal window, start another long-running secure SuperNode (at least 2 SuperNodes are required)
     $ flower-client-app client:app \
         --root-certificates <your-ca-cert-filepath> \
-        --server 127.0.0.1:9092
+        --superlink 127.0.0.1:9092
 
     # In yet another terminal window, run the ServerApp (this starts the actual training run)
     $ flower-server-app server:app \
         --root-certificates <your-ca-cert-filepath> \
-        --server 127.0.0.1:9091
+        --superlink 127.0.0.1:9091
 
 Simulation in CLI
 ~~~~~~~~~~~~~~~~~
