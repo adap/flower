@@ -7,7 +7,7 @@ dataset: [cifar10, femnist]
 
 # FedDebug: Systematic Debugging for Federated Learning Applications
 
-> [!NOTE] 
+> [!NOTE]
 > If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
 **Paper:** [https://dl.acm.org/doi/abs/10.1109/ICSE48619.2023.00053]
@@ -24,26 +24,31 @@ We design a systematic fault localization framework, FedDebug, that advances the
 ![Malicious Client Localization](feddbug-approach.png)
 
 ## About this baseline
-**What's implemented:** 
+
+**What's implemented:**
 FedDebug is a systematic malicious client(s) localization framework designed to advance debugging in Federated Learning (FL). It enables interactive debugging of real-time collaborative training and automatically identifies clients responsible for lowering global model performance without requiring testing data or labels.
 
 This repository implements the FedDebug technique of localizing malicious client(s) in a generic way, allowing it to be used with various fusion techniques and CNN architectures. Specifically, it replicates the results presented in Table 2 and Figure 10 of the original paper. These results demonstrate FedDebug's ability to localize multiple faulty clients and its performance under different neuron activation thresholds. You can find the original code of FedDebug [here](https://github.com/SEED-VT/FedDebug).
 
 
 **Datasets:** This baseline uses two datasets:
+
 1. CIFAR-10: 50,000 training and 10,000 testing 32x32 RGB images across 10 classes.
-2. MNIST: 60,000 training and 10,000 testing images across 10 classes. 
+2. MNIST: 60,000 training and 10,000 testing images across 10 classes.
 2. FEMNIST: Over 340,000 training and 40,000 testing 28x28 grayscale images across 10 classes.
 
 **Hardware Setup:**
-These experiments were run on a machine with 8 CPU cores and an Nvidia Tesla P40 GPU. 
-> [!NOTE] 
+These experiments were run on a machine with 8 CPU cores and an Nvidia Tesla P40 GPU.
+> [!NOTE]
 > This baseline also contains a smaller CNN model (LeNet) to run all these experiments on a CPU. Furthermore, the experiments are also scaled down to obtain representative results of the FedDebug evaluations.
 
 **Contributors:** Waris Gill ([GitHub Profile](https://github.com/warisgill))
+
 ## Experimental Setup
+
 **Task:** Image classification, Malicious/Faulty Client (s) Removal, Debugging and Testing
 **Models:** This baseline implements two CNN architectures:
+
 1. ResNet
 2. DenseNet
 3. VGG
@@ -56,14 +61,18 @@ These experiments were run on a machine with 8 CPU cores and an Nvidia Tesla P40
   
 **Training Hyperparameters:**
 Default training hyperparameters are in `conf/base.yaml`.
+
 ## Environment Setup
+
 Experiments are conducted with `Python 3.10.14`. It is recommended to use Python 3.10 for the experiments.
 Check the documentation for the different ways of installing `pyenv`, but one easy way is using the [automatic installer](https://github.com/pyenv/pyenv-installer):
 
 ```bash
 curl https://pyenv.run | bash # then, don't forget links to your .bashrc/.zshrc
 ```
+
 You can then install any Python version with `pyenv install 3.10.14` Then, in order to use FedDebug baseline, you'd do the following:
+
 ```bash
 # cd to your feddebug directory (i.e. where the `pyproject.toml` is)
 pyenv local 3.10.14
@@ -76,7 +85,9 @@ poetry shell
 # check the python version by running the following command
 python --version # it should be >=3.10.14
 ```
+
 This will create a basic Python environment with just Flower and additional packages, including those needed for simulation. Now you are inside your environment (pretty much as when you use `virtualenv` or `conda`).
+
 ## Running the Experiments
 
 > [!NOTE]
@@ -89,6 +100,7 @@ python -m feddebug.main device=cpu
 ```  
 
 Output
+
 ```output
 ... 
 
@@ -116,18 +128,23 @@ Total Time taken (training + testing): 97.98241376876831
 ```
 
 ## Expected Results  
-> [!NOTE] 
-> The following commands will take time to complete on larger models (eg., resnet) without enabling gpu.  
 
-**FedDebug Table 2** 
+
+**FedDebug Table 2**
+
+> [!NOTE]
+> The following commands may take time on larger models (e.g., ResNet) without GPU. Adjust the model and dataset to reproduce results from Table 2. Currently, I'm using MNIST with LeNet and 20 clients (including 5 malicious clients) to quickly run the baseline on CPU to avoid any hardware limitation.
+
 ```bash
-python -m feddebug.main --multirun device=cpu num_clients=50 model.name=lenet dataset.name=cifar10,mnist total_faulty_clients=5,7 check_cache=True
+python -m feddebug.main --multirun device=cpu num_clients=20 model.name=lenet dataset.name=mnist total_faulty_clients=5 check_cache=True
 
 # to generate Table 2 csv. Open fed_debug_results.csv after  
 python -m feddebug.main generate_table_csv=True
 # Open fed_debug_results.csv to see the results.
 ```
+
 Last Command Output
+
 ```output
 ...
 [flwr][INFO] - FedDebug’s malicious client(s) localization results svaed in fed_debug_results.csv.
@@ -135,35 +152,44 @@ Last Command Output
 ```
 
 **Neuron Activation Threshold Variation (Figure 10)**
-Only execute the following commands after generating Table 2 results.   
+Only execute the following commands after generating Table 2 results.
+
 ```bash
 python -m feddebug.main --multirun device=cuda  num_clients=10 model.name=densenet121,resnet18 dataset.name=cifar10,mnist total_faulty_clients=2 check_cache=True
 
-python -m feddebug.main vary_thresholds=True device=cuda
+python -m feddebug.main vary_thresholds=True device=cpu
 
 python -m feddebug.main generate_thresholds_exp_graph=True
 
 ```
+
 Last Command Output
+
 ```output
 [2024-08-23 20:19:35,895][flwr][INFO] - Fig 10 is generated: Figure-10.pdf
 ```
+
 It will generate a PDF (Figure-10.pdf) containing Figure 10 graphs as shown below. Lower thresholds value yield better results during differential testing. 
 
 ![Figure 10 of feddebug Paper](Figure-10.png)
 
-> [!WARNING] 
+> [!WARNING]
 > It generates random inputs to localize malicious client(s). Thus, results might vary slightly on each run due to randomness.
 
 ## Customizing Experiments
+
 You can customize various aspects of the experiments by modifying the `conf/base.yaml` file. This includes:
+
 - Changing the number of clients
 - Modifying the dataset partitioning method
 - Adjusting training hyperparameters
 - Changing the CNN architecture
 Remember to consult the Flower simulation guide for more details on resource allocation and advanced configurations.
+
 ## Citation
+
 If you publish work that uses FedDebug, please cite FedDebug and Flower as follows:
+
 ```bibtex
 @inproceedings{gill2023feddebug,
   title={Feddebug: Systematic debugging for federated learning applications},
@@ -181,5 +207,7 @@ If you publish work that uses FedDebug, please cite FedDebug and Flower as follo
   year={2020}
 }
 ```
+
 ## Questions and Feedback
+
 If you have any questions or feedback, feel free to contact me at: `waris@vt.edu`
