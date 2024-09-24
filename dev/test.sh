@@ -56,6 +56,14 @@ echo "- mdformat: done"
 
 echo "- All Markdown checks passed"
 
+echo "- Start rST checks"
+
+echo "- rST: start"
+docstrfmt --check doc/source
+echo "- rST: done"
+
+echo "- All rST checks passed"
+
 echo "- Start license checks"
 
 echo "- copyright: start"

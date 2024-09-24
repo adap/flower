@@ -8,7 +8,7 @@ Example
 -------
 
 .. code-block:: bash
-   :substitutions:
+    :substitutions:
 
-   $ docker run -e FLWR_TELEMETRY_ENABLED=0 -e FLWR_TELEMETRY_LOGGING=0 \
-        --rm flwr/superlink:|stable_flwr_version|
+    $ docker run -e FLWR_TELEMETRY_ENABLED=0 -e FLWR_TELEMETRY_LOGGING=0 \
+         --rm flwr/superlink:|stable_flwr_version|

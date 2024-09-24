@@ -136,6 +136,10 @@ licensecheck = "==2024"
 pre-commit = "==3.5.0"
 sphinx-substitution-extensions = "2022.02.16"
 sphinxext-opengraph = "==0.9.1"
+docstrfmt = "==1.9.0"
+
+[tool.docstrfmt]
+extend_exclude = ["doc/source/conf.py", "doc/source/_templates/autosummary/*", "doc/source/ref-api/*"]
 
 [tool.isort]
 profile = "black"
