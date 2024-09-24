@@ -18,7 +18,7 @@
 import logging
 from logging import WARN, LogRecord
 from logging.handlers import HTTPHandler
-from typing import TYPE_CHECKING, Any, Dict, Optional, TextIO, Tuple
+from typing import TYPE_CHECKING, Any, Optional, TextIO
 
 # Create logger
 LOGGER_NAME = "flwr"
@@ -119,12 +119,12 @@ class CustomHTTPHandler(HTTPHandler):
         url: str,
         method: str = "GET",
         secure: bool = False,
-        credentials: Optional[Tuple[str, str]] = None,
+        credentials: Optional[tuple[str, str]] = None,
     ) -> None:
         super().__init__(host, url, method, secure, credentials)
         self.identifier = identifier
 
-    def mapLogRecord(self, record: LogRecord) -> Dict[str, Any]:
+    def mapLogRecord(self, record: LogRecord) -> dict[str, Any]:
         """Filter for the properties to be send to the logserver."""
         record_dict = record.__dict__
         return {
@@ -194,6 +194,31 @@ def warn_deprecated_feature(name: str) -> None:
             entirely in future versions of Flower.
         """,
         name,
+    )
+
+
+def warn_deprecated_feature_with_example(
+    deprecation_message: str, example_message: str, code_example: str
+) -> None:
+    """Warn if a feature is deprecated and show code example."""
+    log(
+        WARN,
+        """DEPRECATED FEATURE: %s
+
+            Check the following `FEATURE UPDATE` warning message for the preferred
+            new mechanism to use this feature in Flower.
+        """,
+        deprecation_message,
+    )
+    log(
+        WARN,
+        """FEATURE UPDATE: %s
+        ------------------------------------------------------------
+        %s
+        ------------------------------------------------------------
+        """,
+        example_message,
+        code_example,
     )
 
 

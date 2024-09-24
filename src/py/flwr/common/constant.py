@@ -37,7 +37,18 @@ TRANSPORT_TYPES = [
     TRANSPORT_TYPE_VCE,
 ]
 
-SUPEREXEC_DEFAULT_ADDRESS = "0.0.0.0:9093"
+# Addresses
+# SuperNode
+CLIENTAPPIO_API_DEFAULT_ADDRESS = "0.0.0.0:9094"
+# SuperExec
+EXEC_API_DEFAULT_ADDRESS = "0.0.0.0:9093"
+# SuperLink
+DRIVER_API_DEFAULT_ADDRESS = "0.0.0.0:9091"
+FLEET_API_GRPC_RERE_DEFAULT_ADDRESS = "0.0.0.0:9092"
+FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS = (
+    "[::]:8080"  # IPv6 to keep start_server compatible
+)
+FLEET_API_REST_DEFAULT_ADDRESS = "0.0.0.0:9093"
 
 # Constants for ping
 PING_DEFAULT_INTERVAL = 30
@@ -57,6 +68,9 @@ APP_DIR = "apps"
 FAB_CONFIG_FILE = "pyproject.toml"
 FLWR_HOME = "FLWR_HOME"
 
+# Constants entries in Node config for Simulation
+PARTITION_ID_KEY = "partition-id"
+NUM_PARTITIONS_KEY = "num-partitions"
 
 GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY = "flower-version"
 GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY = "should-exit"

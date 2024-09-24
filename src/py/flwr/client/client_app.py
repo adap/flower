@@ -16,7 +16,7 @@
 
 
 import inspect
-from typing import Callable, List, Optional
+from typing import Callable, Optional
 
 from flwr.client.client import Client
 from flwr.client.message_handler.message_handler import (
@@ -30,21 +30,41 @@ from flwr.common.logger import warn_deprecated_feature, warn_preview_feature
 from .typing import ClientAppCallable
 
 
+def _alert_erroneous_client_fn() -> None:
+    raise ValueError(
+        "A `ClientApp` cannot make use of a `client_fn` that does "
+        "not have a signature in the form: `def client_fn(context: "
+        "Context)`. You can import the `Context` like this: "
+        "`from flwr.common import Context`"
+    )
+
+
 def _inspect_maybe_adapt_client_fn_signature(client_fn: ClientFnExt) -> ClientFnExt:
     client_fn_args = inspect.signature(client_fn).parameters
 
-    if not all(key in client_fn_args for key in ["node_id", "partition_id"]):
+    if len(client_fn_args) != 1:
+        _alert_erroneous_client_fn()
+
+    first_arg = list(client_fn_args.keys())[0]
+    first_arg_type = client_fn_args[first_arg].annotation
+
+    if first_arg_type is str or first_arg == "cid":
+        # Warn previous signature for `client_fn` seems to be used
         warn_deprecated_feature(
-            "`client_fn` now expects a signature `def client_fn(node_id: int, "
-            "partition_id: Optional[int])`.\nYou provided `client_fn` with signature: "
-            f"{dict(client_fn_args.items())}"
+            "`client_fn` now expects a signature `def client_fn(context: Context)`."
+            "The provided `client_fn` has signature: "
+            f"{dict(client_fn_args.items())}. You can import the `Context` like this:"
+            " `from flwr.common import Context`"
         )
 
         # Wrap depcreated client_fn inside a function with the expected signature
         def adaptor_fn(
-            node_id: int, partition_id: Optional[int]  # pylint: disable=unused-argument
-        ) -> Client:
-            return client_fn(str(partition_id))  # type: ignore
+            context: Context,
+        ) -> Client:  # pylint: disable=unused-argument
+            # if patition-id is defined, pass it. Else pass node_id that should
+            # always be defined during Context init.
+            cid = context.node_config.get("partition-id", context.node_id)
+            return client_fn(str(cid))  # type: ignore
 
         return adaptor_fn
 
@@ -71,7 +91,7 @@ class ClientApp:
     >>> class FlowerClient(NumPyClient):
     >>>     # ...
     >>>
-    >>> def client_fn(node_id: int, partition_id: Optional[int]):
+    >>> def client_fn(context: Context):
     >>>    return FlowerClient().to_client()
     >>>
     >>> app = ClientApp(client_fn)
@@ -89,9 +109,9 @@ class ClientApp:
     def __init__(
         self,
         client_fn: Optional[ClientFnExt] = None,  # Only for backward compatibility
-        mods: Optional[List[Mod]] = None,
+        mods: Optional[list[Mod]] = None,
     ) -> None:
-        self._mods: List[Mod] = mods if mods is not None else []
+        self._mods: list[Mod] = mods if mods is not None else []
 
         # Create wrapper function for `handle`
         self._call: Optional[ClientAppCallable] = None
@@ -243,7 +263,7 @@ def _registration_error(fn_name: str) -> ValueError:
         >>> class FlowerClient(NumPyClient):
         >>>     # ...
         >>>
-        >>> def client_fn(cid) -> Client:
+        >>> def client_fn(context: Context):
         >>>     return FlowerClient().to_client()
         >>>
         >>> app = ClientApp(

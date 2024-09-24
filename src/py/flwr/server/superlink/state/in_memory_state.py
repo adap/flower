@@ -18,12 +18,12 @@
 import threading
 import time
 from logging import ERROR
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Optional
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
 from flwr.common.constant import NODE_ID_NUM_BYTES, RUN_ID_NUM_BYTES
-from flwr.common.typing import Run
+from flwr.common.typing import Run, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state.state import State
 from flwr.server.utils import validate_task_ins_or_res
@@ -37,15 +37,15 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
     def __init__(self) -> None:
 
         # Map node_id to (online_until, ping_interval)
-        self.node_ids: Dict[int, Tuple[float, float]] = {}
-        self.public_key_to_node_id: Dict[bytes, int] = {}
+        self.node_ids: dict[int, tuple[float, float]] = {}
+        self.public_key_to_node_id: dict[bytes, int] = {}
 
         # Map run_id to (fab_id, fab_version)
-        self.run_ids: Dict[int, Run] = {}
-        self.task_ins_store: Dict[UUID, TaskIns] = {}
-        self.task_res_store: Dict[UUID, TaskRes] = {}
+        self.run_ids: dict[int, Run] = {}
+        self.task_ins_store: dict[UUID, TaskIns] = {}
+        self.task_res_store: dict[UUID, TaskRes] = {}
 
-        self.client_public_keys: Set[bytes] = set()
+        self.node_public_keys: set[bytes] = set()
         self.server_public_key: Optional[bytes] = None
         self.server_private_key: Optional[bytes] = None
 
@@ -76,13 +76,13 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
 
     def get_task_ins(
         self, node_id: Optional[int], limit: Optional[int]
-    ) -> List[TaskIns]:
+    ) -> list[TaskIns]:
         """Get all TaskIns that have not been delivered yet."""
         if limit is not None and limit < 1:
             raise AssertionError("`limit` must be >= 1")
 
         # Find TaskIns for node_id that were not delivered yet
-        task_ins_list: List[TaskIns] = []
+        task_ins_list: list[TaskIns] = []
         with self.lock:
             for _, task_ins in self.task_ins_store.items():
                 # pylint: disable=too-many-boolean-expressions
@@ -133,15 +133,15 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         # Return the new task_id
         return task_id
 
-    def get_task_res(self, task_ids: Set[UUID], limit: Optional[int]) -> List[TaskRes]:
+    def get_task_res(self, task_ids: set[UUID], limit: Optional[int]) -> list[TaskRes]:
         """Get all TaskRes that have not been delivered yet."""
         if limit is not None and limit < 1:
             raise AssertionError("`limit` must be >= 1")
 
         with self.lock:
             # Find TaskRes that were not delivered yet
-            task_res_list: List[TaskRes] = []
-            replied_task_ids: Set[UUID] = set()
+            task_res_list: list[TaskRes] = []
+            replied_task_ids: set[UUID] = set()
             for _, task_res in self.task_res_store.items():
                 reply_to = UUID(task_res.task.ancestry[0])
                 if reply_to in task_ids and task_res.task.delivered_at == "":
@@ -175,10 +175,10 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             # Return TaskRes
             return task_res_list
 
-    def delete_tasks(self, task_ids: Set[UUID]) -> None:
+    def delete_tasks(self, task_ids: set[UUID]) -> None:
         """Delete all delivered TaskIns/TaskRes pairs."""
-        task_ins_to_be_deleted: Set[UUID] = set()
-        task_res_to_be_deleted: Set[UUID] = set()
+        task_ins_to_be_deleted: set[UUID] = set()
+        task_res_to_be_deleted: set[UUID] = set()
 
         with self.lock:
             for task_ins_id in task_ids:
@@ -237,7 +237,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             return node_id
 
     def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
-        """Delete a client node."""
+        """Delete a node."""
         with self.lock:
             if node_id not in self.node_ids:
                 raise ValueError(f"Node {node_id} not found")
@@ -253,8 +253,8 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
 
             del self.node_ids[node_id]
 
-    def get_nodes(self, run_id: int) -> Set[int]:
-        """Return all available client nodes.
+    def get_nodes(self, run_id: int) -> set[int]:
+        """Return all available nodes.
 
         Constraints
         -----------
@@ -271,19 +271,29 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                 if online_until > current_time
             }
 
-    def get_node_id(self, client_public_key: bytes) -> Optional[int]:
-        """Retrieve stored `node_id` filtered by `client_public_keys`."""
-        return self.public_key_to_node_id.get(client_public_key)
+    def get_node_id(self, node_public_key: bytes) -> Optional[int]:
+        """Retrieve stored `node_id` filtered by `node_public_keys`."""
+        return self.public_key_to_node_id.get(node_public_key)
 
-    def create_run(self, fab_id: str, fab_version: str) -> int:
-        """Create a new run for the specified `fab_id` and `fab_version`."""
+    def create_run(
+        self,
+        fab_id: Optional[str],
+        fab_version: Optional[str],
+        fab_hash: Optional[str],
+        override_config: UserConfig,
+    ) -> int:
+        """Create a new run for the specified `fab_hash`."""
         # Sample a random int64 as run_id
         with self.lock:
             run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
 
             if run_id not in self.run_ids:
                 self.run_ids[run_id] = Run(
-                    run_id=run_id, fab_id=fab_id, fab_version=fab_version
+                    run_id=run_id,
+                    fab_id=fab_id if fab_id else "",
+                    fab_version=fab_version if fab_version else "",
+                    fab_hash=fab_hash if fab_hash else "",
+                    override_config=override_config,
                 )
                 return run_id
         log(ERROR, "Unexpected run creation failure.")
@@ -308,19 +318,19 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         """Retrieve `server_public_key` in urlsafe bytes."""
         return self.server_public_key
 
-    def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
-        """Store a set of `client_public_keys` in state."""
+    def store_node_public_keys(self, public_keys: set[bytes]) -> None:
+        """Store a set of `node_public_keys` in state."""
         with self.lock:
-            self.client_public_keys = public_keys
+            self.node_public_keys = public_keys
 
-    def store_client_public_key(self, public_key: bytes) -> None:
-        """Store a `client_public_key` in state."""
+    def store_node_public_key(self, public_key: bytes) -> None:
+        """Store a `node_public_key` in state."""
         with self.lock:
-            self.client_public_keys.add(public_key)
+            self.node_public_keys.add(public_key)
 
-    def get_client_public_keys(self) -> Set[bytes]:
-        """Retrieve all currently stored `client_public_keys` as a set."""
-        return self.client_public_keys
+    def get_node_public_keys(self) -> set[bytes]:
+        """Retrieve all currently stored `node_public_keys` as a set."""
+        return self.node_public_keys
 
     def get_run(self, run_id: int) -> Optional[Run]:
         """Retrieve information about the run with the specified `run_id`."""
