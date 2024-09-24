@@ -44,6 +44,7 @@ diskcache = "5.6.3"
 flwr-datasets = "0.3.0"
 torch = "2.2.2"
 torchvision = "0.17.2"
+joblib = "1.4.2"
 
 [tool.poetry.dev-dependencies]
 isort = "==5.13.2"

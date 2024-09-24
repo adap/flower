@@ -7,7 +7,7 @@ dataset: [cifar10, femnist]
 
 # FedDebug: Systematic Debugging for Federated Learning Applications
 
-> Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
+> [!NOTE] If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
 **Paper:** [https://dl.acm.org/doi/abs/10.1109/ICSE48619.2023.00053]
 
@@ -36,7 +36,7 @@ This repository implements the FedDebug technique of localizing malicious client
 
 **Hardware Setup:**
 These experiments were run on a machine with 8 CPU cores and an Nvidia Tesla P40 GPU. 
-> **Note:** This baseline also contains a smaller CNN model (LeNet) to run all these experiments on a CPU. Furthermore, the experiments are also scaled down to obtain representative results of the FedDebug evaluations.
+> [!NOTE] This baseline also contains a smaller CNN model (LeNet) to run all these experiments on a CPU. Furthermore, the experiments are also scaled down to obtain representative results of the FedDebug evaluations.
 
 **Contributors:** Waris Gill ([GitHub Profile](https://github.com/warisgill))
 ## Experimental Setup
@@ -114,7 +114,7 @@ Total Time taken (training + testing): 97.98241376876831
 ```
 
 ## Expected Results  
-> Note: The following commands will take time to complete on larger models (eg., resnet) without enabling gpu.  
+> [!NOTE] The following commands will take time to complete on larger models (eg., resnet) without enabling gpu.  
 
 **FedDebug Table 2** 
 ```bash
