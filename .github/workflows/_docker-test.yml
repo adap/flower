@@ -72,7 +72,11 @@ jobs:
               docker build --build-arg BASE_IMAGE="e2e-test" -t "${NAMESPACE_REPOSITORY}:e2e-test" "${FILE_DIR}"
           done
 
-      - uses: ./.github/actions/bootstrap
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+        with:
+          python-version: 3.9  # Explicitly set this so that we can add a matrix later
+          poetry-skip: 'true'
       - name: Install Flower
         run: python -m pip install .
 
@@ -82,7 +86,7 @@ jobs:
           PROJECT_DIR: e2e-test
         working-directory: src/docker/complete
         run: |
-          flwr new ${PROJECT_DIR} --framework NumPy --username flower
+          flwr new ${PROJECT_DIR} --framework NumPy --username flwrlabs
 
           docker compose -f certs.yml up --build
           sudo chown -R 49999:49999 superexec-certificates/* superlink-certificates/*
