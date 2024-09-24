@@ -162,6 +162,13 @@ def _update_python_versions(
                     r"\g<1>" + new_major_minor + r"\g<2>",
                 ),
             ],
+            "dev/*.py": [
+                # Update version assignments
+                (
+                    r'(["\'])' + re.escape(old_version) + r'(\.\d+)?(["\'])',
+                    r"\g<1>" + new_major_minor + r"\g<3>",
+                ),
+            ],
             # Python files
             "**/*.py": [
                 # Update version assignments
