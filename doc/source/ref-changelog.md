@@ -501,10 +501,6 @@ We would like to give our special thanks to all the contributors who made the ne
 
 ### What's new?
 
-- **Add new Flower Rust SDK** ([#2546](https://github.com/adap/flower/pull/2546))
-
-  You can now write Rust clients for Flower! We also added a dummy quickstart example that shows how a Rust project using Rust would look like.
-
 - **Add experimental support for Python 3.12** ([#2565](https://github.com/adap/flower/pull/2565))
 
 - **Add new XGBoost examples** ([#2612](https://github.com/adap/flower/pull/2612), [#2554](https://github.com/adap/flower/pull/2554), [#2617](https://github.com/adap/flower/pull/2617), [#2618](https://github.com/adap/flower/pull/2618), [#2619](https://github.com/adap/flower/pull/2619), [#2567](https://github.com/adap/flower/pull/2567))
