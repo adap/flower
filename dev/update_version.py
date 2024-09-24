@@ -2,6 +2,7 @@
 
 import argparse
 import re
+import sys
 from pathlib import Path
 
 
@@ -55,6 +56,7 @@ def _get_next_version(curr_version, increment):
 
 def _update_versions(file_patterns, replace_strings, new_version, check):
     """Update the version strings in the specified files."""
+    wrong = False
     for pattern in file_patterns:
         files = list(Path(__file__).parents[1].glob(pattern))
         for file_path in files:
@@ -68,11 +70,15 @@ def _update_versions(file_patterns, replace_strings, new_version, check):
                 regex_pattern = re.compile(escaped_s)
                 content = regex_pattern.sub(s.format(version=new_version), content)
             if content != original_content:
+                wrong = True
                 if check:
                     print(f"{file_path} would be updated")
                 else:
                     file_path.write_text(content)
                     print(f"Updated {file_path}")
+
+    if wrong and check:
+        sys.exit("Some version haven't been updated.")
 
 
 if __name__ == "__main__":
