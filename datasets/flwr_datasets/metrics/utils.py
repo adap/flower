@@ -16,7 +16,7 @@
 
 
 import warnings
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 import pandas as pd
 
@@ -206,7 +206,7 @@ def compute_frequencies(
 
 
 def _compute_counts(
-    labels: Union[List[int], List[str]], unique_labels: Union[List[int], List[str]]
+    labels: Union[list[int], list[str]], unique_labels: Union[list[int], list[str]]
 ) -> pd.Series:
     """Compute the count of labels when taking into account all possible labels.
 
@@ -237,7 +237,7 @@ def _compute_counts(
 
 
 def _compute_frequencies(
-    labels: Union[List[int], List[str]], unique_labels: Union[List[int], List[str]]
+    labels: Union[list[int], list[str]], unique_labels: Union[list[int], list[str]]
 ) -> pd.Series:
     """Compute the distribution of labels when taking into account all possible labels.
 
