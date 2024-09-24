@@ -108,6 +108,7 @@ rst_prolog = """
 extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
+    "sphinx.ext.autosectionlabel",
     "sphinx.ext.autosummary",
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
@@ -267,6 +268,9 @@ redirects = {
     "architecture": "explanation-flower-architecture.html",
     "contributor-explanation-architecture.html": "explanation-flower-architecture.html",
 }
+
+# Suppress specific warnings
+suppress_warnings = ['autosectionlabel.*']  # Warnings from duplicate labels
 
 # -- Options for HTML output -------------------------------------------------
 
