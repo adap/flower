@@ -146,5 +146,5 @@ if __name__ == "__main__":
             if not _update_versions([file_pattern], strings, curr_version, args.check):
                 wrong = True
 
-    if wrong:
+    if wrong and args.check:
         sys.exit("Some version haven't been updated.")
