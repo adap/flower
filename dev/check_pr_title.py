@@ -19,7 +19,6 @@ import re
 import sys
 import tomllib
 
-
 if __name__ == "__main__":
 
     pr_title = sys.argv[1]
@@ -53,7 +52,7 @@ if __name__ == "__main__":
     error = "it doesn't have the correct format"
 
     # This check is there to ignore dependabot PRs from title checks
-    if pr_title.startswith("chore"):
+    if pr_title.startswith("build"):
         sys.exit(0)
     elif not match:
         valid = False

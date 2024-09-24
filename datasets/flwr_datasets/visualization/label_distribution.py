@@ -15,13 +15,14 @@
 """Label distribution plotting."""
 
 
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import matplotlib.colors as mcolors
 import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
+from flwr_datasets.common import EventType, event
 from flwr_datasets.metrics.utils import compute_counts, compute_frequencies
 from flwr_datasets.partitioner import Partitioner
 from flwr_datasets.visualization.bar_plot import _plot_bar
@@ -39,15 +40,15 @@ def plot_label_distributions(
     max_num_partitions: Optional[int] = None,
     partition_id_axis: str = "x",
     axis: Optional[Axes] = None,
-    figsize: Optional[Tuple[float, float]] = None,
+    figsize: Optional[tuple[float, float]] = None,
     title: str = "Per Partition Label Distribution",
     cmap: Optional[Union[str, mcolors.Colormap]] = None,
     legend: bool = False,
     legend_title: Optional[str] = None,
     verbose_labels: bool = True,
-    plot_kwargs: Optional[Dict[str, Any]] = None,
-    legend_kwargs: Optional[Dict[str, Any]] = None,
-) -> Tuple[Figure, Axes, pd.DataFrame]:
+    plot_kwargs: Optional[dict[str, Any]] = None,
+    legend_kwargs: Optional[dict[str, Any]] = None,
+) -> tuple[Figure, Axes, pd.DataFrame]:
     """Plot the label distribution of the partitions.
 
     Parameters
@@ -191,6 +192,12 @@ def plot_label_distributions(
     You can also visualize the returned DataFrame in Jupyter Notebook
     >>> dataframe.style.background_gradient(axis=None)
     """
+    event(
+        EventType.PLOT_LABEL_DISTRIBUTION_CALLED,
+        {
+            "plot_type": plot_type,
+        },
+    )
     _validate_parameters(plot_type, size_unit, partition_id_axis)
 
     dataframe = pd.DataFrame()

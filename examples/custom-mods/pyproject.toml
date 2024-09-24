@@ -9,7 +9,7 @@ description = "Multi-Tenant Federated Learning with Flower and PyTorch"
 authors = ["The Flower Authors <hello@flower.ai>"]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
+python = ">=3.9,<3.11"
 flwr = { path = "../../", develop = true, extras = ["simulation"] }
 tensorboard = "2.16.2"
 torch = "1.13.1"
