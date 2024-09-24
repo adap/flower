@@ -4,7 +4,6 @@ Needed only when the strategy is not yet implemented in Flower or because you wa
 extend or modify the functionality of an existing strategy.
 """
 
-
 import gc
 from typing import Dict, List, Optional, Tuple, Union
 

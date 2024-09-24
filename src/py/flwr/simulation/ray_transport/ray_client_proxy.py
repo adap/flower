@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2021 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,263 +17,199 @@
 
 import traceback
 from logging import ERROR
-from typing import Dict, Optional, cast
-
-import ray
+from typing import Optional
 
 from flwr import common
-from flwr.client import Client, ClientFn
-from flwr.client.client import (
-    maybe_call_evaluate,
-    maybe_call_fit,
-    maybe_call_get_parameters,
-    maybe_call_get_properties,
+from flwr.client import ClientFnExt
+from flwr.client.client_app import ClientApp
+from flwr.client.node_state import NodeState
+from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
+from flwr.common.constant import (
+    NUM_PARTITIONS_KEY,
+    PARTITION_ID_KEY,
+    MessageType,
+    MessageTypeLegacy,
 )
 from flwr.common.logger import log
-from flwr.server.client_proxy import ClientProxy
-from flwr.simulation.ray_transport.ray_actor import (
-    ClientRes,
-    JobFn,
-    VirtualClientEngineActorPool,
+from flwr.common.recordset_compat import (
+    evaluateins_to_recordset,
+    fitins_to_recordset,
+    getparametersins_to_recordset,
+    getpropertiesins_to_recordset,
+    recordset_to_evaluateres,
+    recordset_to_fitres,
+    recordset_to_getparametersres,
+    recordset_to_getpropertiesres,
 )
-
-
-class RayClientProxy(ClientProxy):
-    """Flower client proxy which delegates work using Ray."""
-
-    def __init__(self, client_fn: ClientFn, cid: str, resources: Dict[str, float]):
-        super().__init__(cid)
-        self.client_fn = client_fn
-        self.resources = resources
-
-    def get_properties(
-        self, ins: common.GetPropertiesIns, timeout: Optional[float]
-    ) -> common.GetPropertiesRes:
-        """Return client's properties."""
-        future_get_properties_res = launch_and_get_properties.options(  # type: ignore
-            **self.resources,
-        ).remote(self.client_fn, self.cid, ins)
-        try:
-            res = ray.get(future_get_properties_res, timeout=timeout)
-        except Exception as ex:
-            log(ERROR, ex)
-            raise ex
-        return cast(
-            common.GetPropertiesRes,
-            res,
-        )
-
-    def get_parameters(
-        self, ins: common.GetParametersIns, timeout: Optional[float]
-    ) -> common.GetParametersRes:
-        """Return the current local model parameters."""
-        future_paramseters_res = launch_and_get_parameters.options(  # type: ignore
-            **self.resources,
-        ).remote(self.client_fn, self.cid, ins)
-        try:
-            res = ray.get(future_paramseters_res, timeout=timeout)
-        except Exception as ex:
-            log(ERROR, ex)
-            raise ex
-        return cast(
-            common.GetParametersRes,
-            res,
-        )
-
-    def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
-        """Train model parameters on the locally held dataset."""
-        future_fit_res = launch_and_fit.options(  # type: ignore
-            **self.resources,
-        ).remote(self.client_fn, self.cid, ins)
-        try:
-            res = ray.get(future_fit_res, timeout=timeout)
-        except Exception as ex:
-            log(ERROR, ex)
-            raise ex
-        return cast(
-            common.FitRes,
-            res,
-        )
-
-    def evaluate(
-        self, ins: common.EvaluateIns, timeout: Optional[float]
-    ) -> common.EvaluateRes:
-        """Evaluate model parameters on the locally held dataset."""
-        future_evaluate_res = launch_and_evaluate.options(  # type: ignore
-            **self.resources,
-        ).remote(self.client_fn, self.cid, ins)
-        try:
-            res = ray.get(future_evaluate_res, timeout=timeout)
-        except Exception as ex:
-            log(ERROR, ex)
-            raise ex
-        return cast(
-            common.EvaluateRes,
-            res,
-        )
-
-    def reconnect(
-        self, ins: common.ReconnectIns, timeout: Optional[float]
-    ) -> common.DisconnectRes:
-        """Disconnect and (optionally) reconnect later."""
-        return common.DisconnectRes(reason="")  # Nothing to do here (yet)
+from flwr.server.client_proxy import ClientProxy
+from flwr.simulation.ray_transport.ray_actor import VirtualClientEngineActorPool
 
 
 class RayActorClientProxy(ClientProxy):
     """Flower client proxy which delegates work using Ray."""
 
-    def __init__(
-        self, client_fn: ClientFn, cid: str, actor_pool: VirtualClientEngineActorPool
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        client_fn: ClientFnExt,
+        node_id: int,
+        partition_id: int,
+        num_partitions: int,
+        actor_pool: VirtualClientEngineActorPool,
     ):
-        super().__init__(cid)
-        self.client_fn = client_fn
-        self.actor_pool = actor_pool
+        super().__init__(cid=str(node_id))
+        self.node_id = node_id
+        self.partition_id = partition_id
 
-    def _submit_job(self, job_fn: JobFn, timeout: Optional[float]) -> ClientRes:
+        def _load_app() -> ClientApp:
+            return ClientApp(client_fn=client_fn)
+
+        self.app_fn = _load_app
+        self.actor_pool = actor_pool
+        self.proxy_state = NodeState(
+            node_id=node_id,
+            node_config={
+                PARTITION_ID_KEY: str(partition_id),
+                NUM_PARTITIONS_KEY: str(num_partitions),
+            },
+        )
+
+    def _submit_job(self, message: Message, timeout: Optional[float]) -> Message:
+        """Sumbit a message to the ActorPool."""
+        run_id = message.metadata.run_id
+
+        # Register state
+        self.proxy_state.register_context(run_id=run_id)
+
+        # Retrieve context
+        context = self.proxy_state.retrieve_context(run_id=run_id)
+        partition_id_str = str(context.node_config[PARTITION_ID_KEY])
+
         try:
             self.actor_pool.submit_client_job(
-                lambda a, c_fn, j_fn, cid: a.run.remote(c_fn, j_fn, cid),
-                (self.client_fn, job_fn, self.cid),
+                lambda a, a_fn, mssg, partition_id, context: a.run.remote(
+                    a_fn, mssg, partition_id, context
+                ),
+                (self.app_fn, message, partition_id_str, context),
             )
-            res = self.actor_pool.get_client_result(self.cid, timeout)
+            out_mssg, updated_context = self.actor_pool.get_client_result(
+                partition_id_str, timeout
+            )
+
+            # Update state
+            self.proxy_state.update_context(run_id=run_id, context=updated_context)
 
         except Exception as ex:
             if self.actor_pool.num_actors == 0:
                 # At this point we want to stop the simulation.
-                # since no more client workloads will be executed
+                # since no more client runs will be executed
                 log(ERROR, "ActorPool is empty!!!")
             log(ERROR, traceback.format_exc())
             log(ERROR, ex)
             raise ex
 
-        return res
+        return out_mssg
+
+    def _wrap_recordset_in_message(
+        self,
+        recordset: RecordSet,
+        message_type: str,
+        timeout: Optional[float],
+        group_id: Optional[int],
+    ) -> Message:
+        """Wrap a RecordSet inside a Message."""
+        return Message(
+            content=recordset,
+            metadata=Metadata(
+                run_id=0,
+                message_id="",
+                group_id=str(group_id) if group_id is not None else "",
+                src_node_id=0,
+                dst_node_id=self.node_id,
+                reply_to_message="",
+                ttl=timeout if timeout else DEFAULT_TTL,
+                message_type=message_type,
+            ),
+        )
 
     def get_properties(
-        self, ins: common.GetPropertiesIns, timeout: Optional[float]
+        self,
+        ins: common.GetPropertiesIns,
+        timeout: Optional[float],
+        group_id: Optional[int],
     ) -> common.GetPropertiesRes:
         """Return client's properties."""
-
-        def get_properties(client: Client) -> common.GetPropertiesRes:
-            return maybe_call_get_properties(
-                client=client,
-                get_properties_ins=ins,
-            )
-
-        res = self._submit_job(get_properties, timeout)
-
-        return cast(
-            common.GetPropertiesRes,
-            res,
+        recordset = getpropertiesins_to_recordset(ins)
+        message = self._wrap_recordset_in_message(
+            recordset,
+            message_type=MessageTypeLegacy.GET_PROPERTIES,
+            timeout=timeout,
+            group_id=group_id,
         )
+
+        message_out = self._submit_job(message, timeout)
+
+        return recordset_to_getpropertiesres(message_out.content)
 
     def get_parameters(
-        self, ins: common.GetParametersIns, timeout: Optional[float]
+        self,
+        ins: common.GetParametersIns,
+        timeout: Optional[float],
+        group_id: Optional[int],
     ) -> common.GetParametersRes:
         """Return the current local model parameters."""
-
-        def get_parameters(client: Client) -> common.GetParametersRes:
-            return maybe_call_get_parameters(
-                client=client,
-                get_parameters_ins=ins,
-            )
-
-        res = self._submit_job(get_parameters, timeout)
-
-        return cast(
-            common.GetParametersRes,
-            res,
+        recordset = getparametersins_to_recordset(ins)
+        message = self._wrap_recordset_in_message(
+            recordset,
+            message_type=MessageTypeLegacy.GET_PARAMETERS,
+            timeout=timeout,
+            group_id=group_id,
         )
 
-    def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
+        message_out = self._submit_job(message, timeout)
+
+        return recordset_to_getparametersres(message_out.content, keep_input=False)
+
+    def fit(
+        self, ins: common.FitIns, timeout: Optional[float], group_id: Optional[int]
+    ) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
-
-        def fit(client: Client) -> common.FitRes:
-            return maybe_call_fit(
-                client=client,
-                fit_ins=ins,
-            )
-
-        res = self._submit_job(fit, timeout)
-
-        return cast(
-            common.FitRes,
-            res,
+        recordset = fitins_to_recordset(
+            ins, keep_input=True
+        )  # This must stay TRUE since ins are in-memory
+        message = self._wrap_recordset_in_message(
+            recordset,
+            message_type=MessageType.TRAIN,
+            timeout=timeout,
+            group_id=group_id,
         )
+
+        message_out = self._submit_job(message, timeout)
+
+        return recordset_to_fitres(message_out.content, keep_input=False)
 
     def evaluate(
-        self, ins: common.EvaluateIns, timeout: Optional[float]
+        self, ins: common.EvaluateIns, timeout: Optional[float], group_id: Optional[int]
     ) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
-
-        def evaluate(client: Client) -> common.EvaluateRes:
-            return maybe_call_evaluate(
-                client=client,
-                evaluate_ins=ins,
-            )
-
-        res = self._submit_job(evaluate, timeout)
-
-        return cast(
-            common.EvaluateRes,
-            res,
+        recordset = evaluateins_to_recordset(
+            ins, keep_input=True
+        )  # This must stay TRUE since ins are in-memory
+        message = self._wrap_recordset_in_message(
+            recordset,
+            message_type=MessageType.EVALUATE,
+            timeout=timeout,
+            group_id=group_id,
         )
 
+        message_out = self._submit_job(message, timeout)
+
+        return recordset_to_evaluateres(message_out.content)
+
     def reconnect(
-        self, ins: common.ReconnectIns, timeout: Optional[float]
+        self,
+        ins: common.ReconnectIns,
+        timeout: Optional[float],
+        group_id: Optional[int],
     ) -> common.DisconnectRes:
         """Disconnect and (optionally) reconnect later."""
         return common.DisconnectRes(reason="")  # Nothing to do here (yet)
-
-
-@ray.remote
-def launch_and_get_properties(
-    client_fn: ClientFn, cid: str, get_properties_ins: common.GetPropertiesIns
-) -> common.GetPropertiesRes:
-    """Exectue get_properties remotely."""
-    client: Client = _create_client(client_fn, cid)
-    return maybe_call_get_properties(
-        client=client,
-        get_properties_ins=get_properties_ins,
-    )
-
-
-@ray.remote
-def launch_and_get_parameters(
-    client_fn: ClientFn, cid: str, get_parameters_ins: common.GetParametersIns
-) -> common.GetParametersRes:
-    """Exectue get_parameters remotely."""
-    client: Client = _create_client(client_fn, cid)
-    return maybe_call_get_parameters(
-        client=client,
-        get_parameters_ins=get_parameters_ins,
-    )
-
-
-@ray.remote
-def launch_and_fit(
-    client_fn: ClientFn, cid: str, fit_ins: common.FitIns
-) -> common.FitRes:
-    """Exectue fit remotely."""
-    client: Client = _create_client(client_fn, cid)
-    return maybe_call_fit(
-        client=client,
-        fit_ins=fit_ins,
-    )
-
-
-@ray.remote
-def launch_and_evaluate(
-    client_fn: ClientFn, cid: str, evaluate_ins: common.EvaluateIns
-) -> common.EvaluateRes:
-    """Exectue evaluate remotely."""
-    client: Client = _create_client(client_fn, cid)
-    return maybe_call_evaluate(
-        client=client,
-        evaluate_ins=evaluate_ins,
-    )
-
-
-def _create_client(client_fn: ClientFn, cid: str) -> Client:
-    """Create a client instance."""
-    # Materialize client
-    return client_fn(cid)

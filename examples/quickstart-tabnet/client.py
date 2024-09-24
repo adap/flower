@@ -1,8 +1,9 @@
 import os
+
 import flwr as fl
+import tabnet
 import tensorflow as tf
 import tensorflow_datasets as tfds
-import tabnet
 
 train_size = 125
 BATCH_SIZE = 50
@@ -79,4 +80,6 @@ class TabNetClient(fl.client.NumPyClient):
 
 
 # Start Flower client
-fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=TabNetClient())
+fl.client.start_client(
+    server_address="127.0.0.1:8080", client=TabNetClient().to_client()
+)

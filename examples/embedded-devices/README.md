@@ -1,3 +1,9 @@
+---
+tags: [basic, vision, fds]
+dataset: [CIFAR-10, MNIST]
+framework: [torch, tensorflow]
+---
+
 # Federated Learning on Embedded Devices with Flower
 
 This example will show you how Flower makes it very easy to run Federated Learning workloads on edge devices. Here we'll be showing how to use NVIDIA Jetson devices and Raspberry Pi as Flower clients. You can run this example using either PyTorch or Tensorflow. The FL workload (i.e. model, dataset and training loop) is mostly borrowed from the [quickstart-pytorch](https://github.com/adap/flower/tree/main/examples/simulation-pytorch) and [quickstart-tensorflow](https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow) examples.
@@ -65,7 +71,7 @@ If you are working on this tutorial on your laptop or desktop, it can host the F
 
    - Install `pip`. In the terminal type: `sudo apt install python3-pip -y`
    - Now clone this directory. You just need to execute the `git clone` command shown at the top of this README.md on your device.
-   - Install Flower and your ML framework: We have prepared some convenient installation scripts that will install everything you need. You are free to install other versions of these ML frameworks to suit your needs.
+   - Install Flower and your ML framework of choice: We have prepared some convenient installation scripts that will install everything you need. You are free to install other versions of these ML frameworks to suit your needs.
      - If you want your clients to use PyTorch: `pip3 install -r requirements_pytorch.txt`
      - If you want your clients to use TensorFlow: `pip3 install -r requirements_tf.txt`
 
@@ -192,7 +198,8 @@ On the machine of your choice, launch the server:
 # Launch your server.
 # Will wait for at least 2 clients to be connected, then will train for 3 FL rounds
 # The command below will sample all clients connected (since sample_fraction=1.0)
-python server.py --rounds 3 --min_num_clients 2 --sample_fraction 1.0 # append `--mnist` if you want to use that dataset/model setting
+# The server is dataset agnostic (use the same command for MNIST and CIFAR10)
+python server.py --rounds 3 --min_num_clients 2 --sample_fraction 1.0
 ```
 
 > If you are on macOS with Apple Silicon (i.e. M1, M2 chips), you might encounter a `grpcio`-related issue when launching your server. If you are in a conda environment you can solve this easily by doing: `pip uninstall grpcio` and then `conda install grpcio`.

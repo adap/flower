@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2022 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,8 +14,6 @@
 # ==============================================================================
 """Flower Client app tests."""
 
-
-from typing import Dict, Tuple
 
 from flwr.common import (
     Config,
@@ -41,43 +39,43 @@ class PlainClient(Client):
 
     def get_properties(self, ins: GetPropertiesIns) -> GetPropertiesRes:
         """Raise an Exception because this method is not expected to be called."""
-        raise Exception()
+        raise NotImplementedError()
 
     def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
         """Raise an Exception because this method is not expected to be called."""
-        raise Exception()
+        raise NotImplementedError()
 
     def fit(self, ins: FitIns) -> FitRes:
         """Raise an Exception because this method is not expected to be called."""
-        raise Exception()
+        raise NotImplementedError()
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         """Raise an Exception because this method is not expected to be called."""
-        raise Exception()
+        raise NotImplementedError()
 
 
 class NeedsWrappingClient(NumPyClient):
     """Client implementation extending the high-level NumPyClient."""
 
-    def get_properties(self, config: Config) -> Dict[str, Scalar]:
+    def get_properties(self, config: Config) -> dict[str, Scalar]:
         """Raise an Exception because this method is not expected to be called."""
-        raise Exception()
+        raise NotImplementedError()
 
     def get_parameters(self, config: Config) -> NDArrays:
         """Raise an Exception because this method is not expected to be called."""
-        raise Exception()
+        raise NotImplementedError()
 
     def fit(
         self, parameters: NDArrays, config: Config
-    ) -> Tuple[NDArrays, int, Dict[str, Scalar]]:
+    ) -> tuple[NDArrays, int, dict[str, Scalar]]:
         """Raise an Exception because this method is not expected to be called."""
-        raise Exception()
+        raise NotImplementedError()
 
     def evaluate(
         self, parameters: NDArrays, config: Config
-    ) -> Tuple[float, int, Dict[str, Scalar]]:
+    ) -> tuple[float, int, dict[str, Scalar]]:
         """Raise an Exception because this method is not expected to be called."""
-        raise Exception()
+        raise NotImplementedError()
 
 
 def test_to_client_with_client() -> None:

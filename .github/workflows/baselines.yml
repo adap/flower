@@ -1,14 +1,5 @@
 name: Baselines
-# The aim of this workflow is to test only the changed (or added) baseline.
-# Here is the rough idea of how it works (more details are presented later in the comments):
-# 1. Checks for the changes between the current branch and the main - in case of PR -
-#  or between the HEAD and HEAD~1 (main last commit and the previous one) - in case of
-#  a push to main.
-# 2. Fails the test if there are changes to more than one baseline. Passes the test
-#  (skips the rests) if there are no changes to any baselines. Follows the test if only
-#  one baseline is added or modified.
-# 3. Sets up the env specified for the baseline.
-# 4. Runs the tests.
+
 on:
   push:
     branches:
@@ -24,112 +15,75 @@ concurrency:
 env:
   FLWR_TELEMETRY_ENABLED: 0
 
-defaults:
-  run:
-    working-directory: baselines
-
 jobs:
-  test_baselines:
-    name: Test
+  changes:
     runs-on: ubuntu-22.04
+    permissions:
+      pull-requests: read
+    outputs:
+      baselines: ${{ steps.filter.outputs.changes }}
     steps:
       - uses: actions/checkout@v4
-        # The depth two of the checkout is needed in case of merging to the main
-        # because we compare the HEAD (current version) with HEAD~1 (version before
-        # the PR was merged)
+
+      - shell: bash
+        run: |
+          # create a list of all directories in baselines
+          {
+            echo 'FILTER_PATHS<<EOF'
+            FILTER=""
+            while read -d $'\0' BASELINES_PATH; do
+                DIR=$(basename $BASELINES_PATH)
+                FILTER+=$(echo "$DIR: ${BASELINES_PATH}/**\n")
+            done < <(find baselines -maxdepth 1 \
+                -name ".*" -prune -o \
+                -path "baselines/doc" -prune -o \
+                -path "baselines/dev" -prune -o \
+                -path "baselines/baseline_template" -prune -o \
+                -path "baselines/flwr_baselines" -prune -o \
+                -type d -print0)
+            FILTER=$(echo -e "$FILTER")
+            # remove first line
+            FILTER=${FILTER#*$'\n'}
+            echo "$FILTER"
+            echo EOF
+          } >> "$GITHUB_ENV"
+
+      - uses: dorny/paths-filter@v3
+        id: filter
         with:
-          fetch-depth: 2
-      - name: Fetch main branch
+          filters: ${{ env.FILTER_PATHS }}
+
+      - if: ${{ github.event.pull_request.head.repo.fork }}
         run: |
-          # The main branch is needed in case of the PR to make a comparison (by 
-          # default the workflow takes as little information as possible - it does not
-          # have the history
-          if [ ${{ github.event_name }} == "pull_request" ]
-          then
-            git fetch origin main:main
+          CHANGES=$(echo "${{ toJson(steps.filter.outputs.changes) }}" | jq '. | length')
+          if [ "$CHANGES" -gt 1 ]; then
+            echo "::error ::The changes should only apply to a single baseline."
+            exit 1
           fi
-      - name: Find changed/new baselines
-        id: find_changed_baselines_dirs
-        run: |
-          if [ ${{ github.event_name }} == "push" ]
-          then
-            # Push event triggered when merging to main
-            change_references="HEAD..HEAD~1"
-          else
-            # Pull request event triggered for any commit to a pull request
-            change_references="main..HEAD"
-          fi
-          dirs=$(git diff --dirstat=files,0 ${change_references} . | awk '{print $2}' | grep -E '^baselines/[^/]*/$' | \
-          grep -v \
-            -e '^baselines/dev' \
-            -e '^baselines/baseline_template' \
-            -e '^baselines/flwr_baselines' \
-            -e '^baselines/doc' \
-          | sed 's/^baselines\///')
-          # git diff --dirstat=files,0 ${change_references} . - checks the differences
-          #   and a file is counted as changed if more than 0 lines were changed
-          #   it returns the results in the format x.y% path/to/dir/
-          # awk '{print $2}' - takes only the directories (skips the percentages)
-          # grep -E '^baselines/[^/]*/$' - takes only the paths that start with 
-          #   baseline (and have at least one subdirectory)
-          # grep -v -e ... - excludes the `baseline_template`, `dev`, `flwr_baselines`
-          # sed 's/^baselines\///' - narrows down the path to baseline/<subdirectory>
-          echo "Detected changed directories: ${dirs}"
-          # Save changed dirs to output of this step
-          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
-          echo "dirs<<EOF" >> "$GITHUB_OUTPUT"
-          for dir in $dirs
-          do
-            echo "$dir" >> "$GITHUB_OUTPUT"
-          done
-          echo "EOF" >> "$GITHUB_OUTPUT"
-      - name: Validate changed/new baselines
-        id: validate_changed_baselines_dirs
-        run: |
-          dirs="${{ steps.find_changed_baselines_dirs.outputs.dirs }}"
-          dirs_array=()
-          if [[ -n $dirs ]]; then
-            while IFS= read -r line; do
-              dirs_array+=("$line")
-            done <<< "$dirs"
-          fi
-          length=${#dirs_array[@]}
-          echo "The number of changed baselines is $length"
-          
-          if [ $length -gt 1 ]; then
-          echo "The changes should only apply to a single baseline"
-          exit 1
-          fi
-          
-          if [ $length -eq 0 ]; then
-          echo "The baselines were not changed - skipping the remaining steps."
-          echo "baseline_changed=false" >> "$GITHUB_OUTPUT"
-          exit 0
-          fi
-          
-          echo "changed_dir=${dirs[0]}" >> "$GITHUB_OUTPUT"
-          echo "baseline_changed=true" >> "$GITHUB_OUTPUT"
+
+  test:
+    runs-on: ubuntu-22.04
+    needs: changes
+    if: ${{ needs.changes.outputs.baselines != '' && toJson(fromJson(needs.changes.outputs.baselines)) != '[]' }}
+    strategy:
+      matrix:
+        baseline: ${{ fromJSON(needs.changes.outputs.baselines) }}
+    steps:
+      - uses: actions/checkout@v4
+
       - name: Bootstrap
-        if: steps.validate_changed_baselines_dirs.outputs.baseline_changed == 'true'
         uses: ./.github/actions/bootstrap
         with:
           python-version: '3.10'
-      - name: Install dependencies
-        if: steps.validate_changed_baselines_dirs.outputs.baseline_changed == 'true'
-        run: |
-          changed_dir="${{ steps.validate_changed_baselines_dirs.outputs.changed_dir }}"
-          cd "${changed_dir}"
-          python -m poetry install
-      - name: Test
-        if: steps.validate_changed_baselines_dirs.outputs.baseline_changed == 'true'
-        run: |
-          dir="${{ steps.validate_changed_baselines_dirs.outputs.changed_dir }}"
-          echo "Testing ${dir}"
-          ./dev/test-baseline.sh $dir
-      - name: Test Structure
-        if: steps.validate_changed_baselines_dirs.outputs.baseline_changed == 'true'
-        run: |
-          dir="${{ steps.validate_changed_baselines_dirs.outputs.changed_dir }}"
-          echo "Testing ${dir}"
-          ./dev/test-baseline-structure.sh $dir
 
+      - name: Install dependencies
+        working-directory: baselines/${{ matrix.baseline }}
+        run: python -m poetry install
+
+      - name: Testing ${{ matrix.baseline }}
+        working-directory: baselines
+        run: ./dev/test-baseline.sh ${{ matrix.baseline }}
+
+      - name: Test Structure of ${{ matrix.baseline }}
+        working-directory: baselines
+        run: ./dev/test-baseline-structure.sh ${{ matrix.baseline }}

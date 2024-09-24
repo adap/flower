@@ -3,7 +3,9 @@
 isort:skip_file
 """
 import abc
+import flwr.proto.fab_pb2
 import flwr.proto.fleet_pb2
+import flwr.proto.run_pb2
 import grpc
 
 class FleetStub:
@@ -15,6 +17,10 @@ class FleetStub:
     DeleteNode: grpc.UnaryUnaryMultiCallable[
         flwr.proto.fleet_pb2.DeleteNodeRequest,
         flwr.proto.fleet_pb2.DeleteNodeResponse]
+
+    Ping: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.fleet_pb2.PingRequest,
+        flwr.proto.fleet_pb2.PingResponse]
 
     PullTaskIns: grpc.UnaryUnaryMultiCallable[
         flwr.proto.fleet_pb2.PullTaskInsRequest,
@@ -32,6 +38,15 @@ class FleetStub:
     HTTP API path: /api/v1/fleet/push-task-res
     """
 
+    GetRun: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.run_pb2.GetRunRequest,
+        flwr.proto.run_pb2.GetRunResponse]
+
+    GetFab: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.fab_pb2.GetFabRequest,
+        flwr.proto.fab_pb2.GetFabResponse]
+    """Get FAB"""
+
 
 class FleetServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -45,6 +60,12 @@ class FleetServicer(metaclass=abc.ABCMeta):
         request: flwr.proto.fleet_pb2.DeleteNodeRequest,
         context: grpc.ServicerContext,
     ) -> flwr.proto.fleet_pb2.DeleteNodeResponse: ...
+
+    @abc.abstractmethod
+    def Ping(self,
+        request: flwr.proto.fleet_pb2.PingRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.fleet_pb2.PingResponse: ...
 
     @abc.abstractmethod
     def PullTaskIns(self,
@@ -66,6 +87,20 @@ class FleetServicer(metaclass=abc.ABCMeta):
 
         HTTP API path: /api/v1/fleet/push-task-res
         """
+        pass
+
+    @abc.abstractmethod
+    def GetRun(self,
+        request: flwr.proto.run_pb2.GetRunRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.run_pb2.GetRunResponse: ...
+
+    @abc.abstractmethod
+    def GetFab(self,
+        request: flwr.proto.fab_pb2.GetFabRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.fab_pb2.GetFabResponse:
+        """Get FAB"""
         pass
 
 

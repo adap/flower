@@ -1,0 +1,18 @@
+repos:
+  - repo: local
+    hooks:
+      - id: format-code
+        name: Format Code
+        entry: ./dev/format.sh
+        language: script
+        # Ensures the script runs from the repository root:
+        pass_filenames: false
+        stages: [commit]
+
+      - id: run-tests
+        name: Run Tests
+        entry: ./dev/test.sh
+        language: script
+        # Ensures the script runs from the repository root:
+        pass_filenames: false
+        stages: [commit]

@@ -1,6 +1,5 @@
 """Contains utility functions for CNN FL on MNIST."""
 
-
 from collections import OrderedDict
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Tuple

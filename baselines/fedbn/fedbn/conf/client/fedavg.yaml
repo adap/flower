@@ -1,0 +1,5 @@
+---
+# standard FedAvg Flower Client
+_target_: fedbn.client.FlowerClient
+client_label: FedAvg
+l_r: 0.01

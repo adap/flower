@@ -17,6 +17,8 @@
 #include <map>
 #include <optional>
 #include <string>
+#include <variant>
+#include <vector>
 
 namespace flwr_local {
 /**
@@ -66,8 +68,8 @@ public:
       : tensors(tensors), tensor_type(tensor_type) {}
 
   // Getters
-  std::list<std::string> getTensors() { return tensors; }
-  std::string getTensor_type() { return tensor_type; }
+  const std::list<std::string> getTensors() const { return tensors; }
+  const std::string getTensor_type() const { return tensor_type; }
 
   // Setters
   void setTensors(const std::list<std::string> &tensors) {
@@ -90,7 +92,7 @@ public:
   explicit ParametersRes(const Parameters &parameters)
       : parameters(parameters) {}
 
-  Parameters getParameters() { return parameters; }
+  const Parameters getParameters() const { return parameters; }
   void setParameters(const Parameters &p) { parameters = p; }
 
 private:
@@ -129,35 +131,26 @@ public:
   FitRes() {}
   FitRes(const Parameters &parameters, int num_examples, int num_examples_ceil,
          float fit_duration, const Metrics &metrics)
-      : parameters(parameters), num_examples(num_examples),
-        fit_duration(fit_duration), metrics(metrics) {}
+      : _parameters(parameters), _num_examples(num_examples),
+        _fit_duration(fit_duration), _metrics(metrics) {}
 
   // Getters
-  Parameters getParameters() { return parameters; }
-  int getNum_example() { return num_examples; }
-  /*std::optional<int> getNum_examples_ceil()
-  {
-          return num_examples_ceil;
-  }*/
-  std::optional<float> getFit_duration() { return fit_duration; }
-  std::optional<Metrics> getMetrics() { return metrics; }
+  const Parameters getParameters() const { return _parameters; }
+  const int getNum_example() const { return _num_examples; }
+  const std::optional<float> getFit_duration() const { return _fit_duration; }
+  const std::optional<Metrics> getMetrics() const { return _metrics; }
 
   // Setters
-  void setParameters(const Parameters &p) { parameters = p; }
-  void setNum_example(int n) { num_examples = n; }
-  /*void setNum_examples_ceil(int n)
-  {
-          num_examples_ceil = n;
-  }*/
-  void setFit_duration(float f) { fit_duration = f; }
-  void setMetrics(const flwr_local::Metrics &m) { metrics = m; }
+  void setParameters(const Parameters &p) { _parameters = p; }
+  void setNum_example(int n) { _num_examples = n; }
+  void setFit_duration(float f) { _fit_duration = f; }
+  void setMetrics(const flwr_local::Metrics &m) { _metrics = m; }
 
 private:
-  Parameters parameters;
-  int num_examples;
-  // std::optional<int> num_examples_ceil = std::nullopt;
-  std::optional<float> fit_duration = std::nullopt;
-  std::optional<Metrics> metrics = std::nullopt;
+  Parameters _parameters;
+  int _num_examples;
+  std::optional<float> _fit_duration = std::nullopt;
+  std::optional<Metrics> _metrics = std::nullopt;
 };
 
 /**
@@ -195,9 +188,9 @@ public:
       : loss(loss), num_examples(num_examples), metrics(metrics) {}
 
   // Getters
-  float getLoss() { return loss; }
-  int getNum_example() { return num_examples; }
-  std::optional<Metrics> getMetrics() { return metrics; }
+  const float getLoss() const { return loss; }
+  const int getNum_example() const { return num_examples; }
+  const std::optional<Metrics> getMetrics() const { return metrics; }
 
   // Setters
   void setLoss(float f) { loss = f; }
@@ -237,6 +230,64 @@ public:
 
 private:
   Properties properties;
+};
+
+struct Array {
+  std::string dtype;
+  std::vector<int32_t> shape;
+  std::string stype;
+  std::string data; // use string to represent bytes
+};
+
+using ParametersRecord = std::map<std::string, Array>;
+using MetricsRecord =
+    std::map<std::string,
+             std::variant<int, double, std::vector<int>, std::vector<double>>>;
+
+using ConfigsRecord =
+    std::map<std::string,
+             std::variant<int, double, std::string, bool, std::vector<int>,
+                          std::vector<double>, std::vector<std::string>,
+                          std::vector<bool>>>;
+
+class RecordSet {
+public:
+  RecordSet(
+      const std::map<std::string, ParametersRecord> &parametersRecords = {},
+      const std::map<std::string, MetricsRecord> &metricsRecords = {},
+      const std::map<std::string, ConfigsRecord> &configsRecords = {})
+      : _parametersRecords(parametersRecords), _metricsRecords(metricsRecords),
+        _configsRecords(configsRecords) {}
+
+  const std::map<std::string, ParametersRecord> &getParametersRecords() const {
+    return _parametersRecords;
+  }
+  const std::map<std::string, MetricsRecord> &getMetricsRecords() const {
+    return _metricsRecords;
+  }
+  const std::map<std::string, ConfigsRecord> &getConfigsRecords() const {
+    return _configsRecords;
+  }
+
+  void setParametersRecords(
+      const std::map<std::string, ParametersRecord> &parametersRecords) {
+    _parametersRecords = parametersRecords;
+  }
+
+  void setMetricsRecords(
+      const std::map<std::string, MetricsRecord> &metricsRecords) {
+    _metricsRecords = metricsRecords;
+  }
+
+  void setConfigsRecords(
+      const std::map<std::string, ConfigsRecord> &configsRecords) {
+    _configsRecords = configsRecords;
+  }
+
+private:
+  std::map<std::string, ParametersRecord> _parametersRecords;
+  std::map<std::string, MetricsRecord> _metricsRecords;
+  std::map<std::string, ConfigsRecord> _configsRecords;
 };
 
 } // namespace flwr_local

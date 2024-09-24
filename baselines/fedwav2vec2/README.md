@@ -59,7 +59,7 @@ For more details, please refer to the relevant section in the paper.
 | `sb_config` | `fedwav2vec2/conf/sb_config/w2v2.yaml` | Speechbrain config file for architecture model. Please refer to [SpeechBrain](https://github.com/speechbrain/speechbrain) for more information |
 | `rounds` | `100` | Indicate the number of Federated Learning (FL) rounds|
 | `local_epochs` | `20` | Specify the number of training epochs at the client side |
-| `total_clients` | `1943` | Size of client pool, with a maxium set at 1943 clients|
+| `total_clients` | `1943` | Size of client pool, with a maximum set at 1943 clients|
 | `server_cid` | `19999` | ID of the server to distinguish from the client's ID |
 | `server_device` | `cuda` | You can choose between `cpu` or `cuda` for centralised evaluation, but it is recommended to use `cuda`|
 | `parallel_backend` | `false` | Multi-gpus training. Only active if you have more than 1 gpu per client | 
@@ -109,7 +109,7 @@ python -m fedwav2vec2.dataset_preparation
 # Run with default arguments (one client per GPU)
 python -m fedwav2vec2.main
 
-# if you have a large GPU (32GB+) you migth want to fit two per GPU
+# if you have a large GPU (32GB+) you might want to fit two per GPU
 python -m fedwav2vec2.main client_resources.num_gpus=0.5
 
 # the global model can be saved at the end of each round if you specify a checkpoint path

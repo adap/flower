@@ -7,6 +7,7 @@ SPHINXOPTS    ?=
 SPHINXBUILD   ?= sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = build
+LINKCHECKDIR  = build/linkcheck
 
 # Put it first so that "make" without argument is like "make help".
 help:
@@ -28,6 +29,11 @@ update-lang:
 serve:
 	make docs
 	python -m http.server --directory build/html
+
+checklinks:
+	$(SPHINXBUILD) -b linkcheck "$(SOURCEDIR)" "$(LINKCHECKDIR)"
+	@echo
+	@echo "Check finished. Report is in $(LINKCHECKDIR)."
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).

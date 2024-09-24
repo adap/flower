@@ -1,11 +1,11 @@
 from collections import OrderedDict
 from typing import Dict, Tuple
+
+import flwr as fl
+import torch
 from flwr.common import NDArrays, Scalar
 
-import torch
-import flwr as fl
-
-from model import Net, train, test
+from model import Net, test, train
 
 
 class FlowerClient(fl.client.NumPyClient):
@@ -98,7 +98,7 @@ def generate_client_fn(trainloaders, valloaders, num_classes):
             trainloader=trainloaders[int(cid)],
             vallodaer=valloaders[int(cid)],
             num_classes=num_classes,
-        )
+        ).to_client()
 
     # return the function to spawn client
     return client_fn

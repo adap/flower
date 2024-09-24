@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2022 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,11 +19,12 @@ Paper: arxiv.org/pdf/1905.03871.pdf
 
 
 import math
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Optional, Union
 
 import numpy as np
 
 from flwr.common import FitIns, FitRes, Parameters, Scalar
+from flwr.common.logger import warn_deprecated_feature
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.dpfedavg_fixed import DPFedAvgFixed
@@ -31,7 +32,12 @@ from flwr.server.strategy.strategy import Strategy
 
 
 class DPFedAvgAdaptive(DPFedAvgFixed):
-    """Wrapper for configuring a Strategy for DP with Adaptive Clipping."""
+    """Wrapper for configuring a Strategy for DP with Adaptive Clipping.
+
+    Warning
+    -------
+    This class is deprecated and will be removed in a future release.
+    """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
@@ -45,6 +51,7 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
         clip_norm_target_quantile: float = 0.5,
         clip_count_stddev: Optional[float] = None,
     ) -> None:
+        warn_deprecated_feature("`DPFedAvgAdaptive` wrapper")
         super().__init__(
             strategy=strategy,
             num_sampled_clients=num_sampled_clients,
@@ -73,7 +80,7 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
-    ) -> List[Tuple[ClientProxy, FitIns]]:
+    ) -> list[tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
         additional_config = {"dpfedavg_adaptive_clip_enabled": True}
 
@@ -86,12 +93,12 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
 
         return client_instructions
 
-    def _update_clip_norm(self, results: List[Tuple[ClientProxy, FitRes]]) -> None:
+    def _update_clip_norm(self, results: list[tuple[ClientProxy, FitRes]]) -> None:
         # Calculating number of clients which set the norm indicator bit
         norm_bit_set_count = 0
         for client_proxy, fit_res in results:
             if "dpfedavg_norm_bit" not in fit_res.metrics:
-                raise Exception(
+                raise KeyError(
                     f"Indicator bit not returned by client with id {client_proxy.cid}."
                 )
             if fit_res.metrics["dpfedavg_norm_bit"]:
@@ -111,9 +118,9 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
     def aggregate_fit(
         self,
         server_round: int,
-        results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+        results: list[tuple[ClientProxy, FitRes]],
+        failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
+    ) -> tuple[Optional[Parameters], dict[str, Scalar]]:
         """Aggregate training results as in DPFedAvgFixed and update clip norms."""
         if failures:
             return None, {}

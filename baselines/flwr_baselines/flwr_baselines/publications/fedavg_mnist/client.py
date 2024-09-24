@@ -80,7 +80,7 @@ def gen_client_fn(
     Parameters
     ----------
     device : torch.device
-        The device on which the the client will train on and test on.
+        The device on which the client will train on and test on.
     iid : bool
         The way to partition the data for each client, i.e. whether the data
         should be independent and identically distributed between the clients

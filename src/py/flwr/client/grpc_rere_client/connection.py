@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,32 +15,54 @@
 """Contextmanager for a gRPC request-response channel to the Flower server."""
 
 
+import random
+import threading
+from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
-from logging import DEBUG, ERROR, WARN
+from copy import copy
+from logging import DEBUG, ERROR
 from pathlib import Path
-from typing import Callable, Dict, Iterator, Optional, Tuple, Union, cast
+from typing import Callable, Optional, Union, cast
 
-from flwr.client.message_handler.task_handler import (
-    configure_task_res,
-    get_task_ins,
-    validate_task_ins,
-    validate_task_res,
-)
+import grpc
+from cryptography.hazmat.primitives.asymmetric import ec
+
+from flwr.client.heartbeat import start_ping_loop
+from flwr.client.message_handler.message_handler import validate_out_message
+from flwr.client.message_handler.task_handler import get_task_ins, validate_task_ins
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
+from flwr.common.constant import (
+    PING_BASE_MULTIPLIER,
+    PING_CALL_TIMEOUT,
+    PING_DEFAULT_INTERVAL,
+    PING_RANDOM_RANGE,
+)
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
-from flwr.proto.fleet_pb2 import (
+from flwr.common.message import Message, Metadata
+from flwr.common.retry_invoker import RetryInvoker
+from flwr.common.serde import (
+    message_from_taskins,
+    message_to_taskres,
+    user_config_from_proto,
+)
+from flwr.common.typing import Fab, Run
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
+from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
+    PingRequest,
+    PingResponse,
     PullTaskInsRequest,
     PushTaskResRequest,
 )
-from flwr.proto.fleet_pb2_grpc import FleetStub
-from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import TaskIns, TaskRes
+from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
-KEY_NODE = "node"
-KEY_TASK_INS = "current_task_ins"
+from .client_interceptor import AuthenticateClientInterceptor
+from .grpc_adapter import GrpcAdapter
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
@@ -49,18 +71,24 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 
 
 @contextmanager
-def grpc_request_response(
+def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
     server_address: str,
+    insecure: bool,
+    retry_invoker: RetryInvoker,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
-    root_certificates: Optional[
-        Union[bytes, str]
-    ] = None,  # pylint: disable=unused-argument
+    root_certificates: Optional[Union[bytes, str]] = None,
+    authentication_keys: Optional[
+        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+    ] = None,
+    adapter_cls: Optional[Union[type[FleetStub], type[GrpcAdapter]]] = None,
 ) -> Iterator[
-    Tuple[
-        Callable[[], Optional[TaskIns]],
-        Callable[[TaskRes], None],
+    tuple[
+        Callable[[], Optional[Message]],
+        Callable[[Message], None],
+        Optional[Callable[[], Optional[int]]],
         Optional[Callable[[], None]],
-        Optional[Callable[[], None]],
+        Optional[Callable[[int], Run]],
+        Optional[Callable[[str], Fab]],
     ]
 ]:
     """Primitives for request/response-based interaction with a server.
@@ -74,12 +102,24 @@ def grpc_request_response(
         The IPv6 address of the server with `http://` or `https://`.
         If the Flower server runs on the same machine
         on port 8080, then `server_address` would be `"http://[::]:8080"`.
+    insecure : bool
+        Starts an insecure gRPC connection when True. Enables HTTPS connection
+        when False, using system certificates if `root_certificates` is None.
+    retry_invoker: RetryInvoker
+        `RetryInvoker` object that will try to reconnect the client to the server
+        after gRPC errors. If None, the client will only try to
+        reconnect once after a failure.
     max_message_length : int
         Ignored, only present to preserve API-compatibility.
     root_certificates : Optional[Union[bytes, str]] (default: None)
         Path of the root certificate. If provided, a secure
         connection using the certificates will be established to an SSL-enabled
         Flower server. Bytes won't work for the REST API.
+    authentication_keys : Optional[Tuple[PrivateKey, PublicKey]] (default: None)
+        Tuple containing the elliptic curve private key and public key for
+        authentication from the cryptography library.
+        Source: https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ec/
+        Used to establish an authenticated connection with the server.
 
     Returns
     -------
@@ -87,112 +127,183 @@ def grpc_request_response(
     send : Callable
     create_node : Optional[Callable]
     delete_node : Optional[Callable]
+    get_run : Optional[Callable]
     """
     if isinstance(root_certificates, str):
         root_certificates = Path(root_certificates).read_bytes()
 
+    interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None
+    if authentication_keys is not None:
+        interceptors = AuthenticateClientInterceptor(
+            authentication_keys[0], authentication_keys[1]
+        )
+
     channel = create_channel(
         server_address=server_address,
+        insecure=insecure,
         root_certificates=root_certificates,
         max_message_length=max_message_length,
+        interceptors=interceptors,
     )
     channel.subscribe(on_channel_state_change)
-    stub = FleetStub(channel)
 
-    log(
-        WARN,
-        """
-        EXPERIMENTAL: `grpc-rere` is an experimental transport layer, it might change
-        considerably in future versions of Flower
-        """,
-    )
-
-    # Necessary state to link TaskRes to TaskIns
-    state: Dict[str, Optional[TaskIns]] = {KEY_TASK_INS: None}
-
-    # Enable create_node and delete_node to store node
-    node_store: Dict[str, Optional[Node]] = {KEY_NODE: None}
+    # Shared variables for inner functions
+    if adapter_cls is None:
+        adapter_cls = FleetStub
+    stub = adapter_cls(channel)
+    metadata: Optional[Metadata] = None
+    node: Optional[Node] = None
+    ping_thread: Optional[threading.Thread] = None
+    ping_stop_event = threading.Event()
 
     ###########################################################################
-    # receive/send functions
+    # ping/create_node/delete_node/receive/send/get_run functions
     ###########################################################################
 
-    def create_node() -> None:
+    def ping() -> None:
+        # Get Node
+        if node is None:
+            log(ERROR, "Node instance missing")
+            return
+
+        # Construct the ping request
+        req = PingRequest(node=node, ping_interval=PING_DEFAULT_INTERVAL)
+
+        # Call FleetAPI
+        res: PingResponse = stub.Ping(req, timeout=PING_CALL_TIMEOUT)
+
+        # Check if success
+        if not res.success:
+            raise RuntimeError("Ping failed unexpectedly.")
+
+        # Wait
+        rd = random.uniform(*PING_RANDOM_RANGE)
+        next_interval: float = PING_DEFAULT_INTERVAL - PING_CALL_TIMEOUT
+        next_interval *= PING_BASE_MULTIPLIER + rd
+        if not ping_stop_event.is_set():
+            ping_stop_event.wait(next_interval)
+
+    def create_node() -> Optional[int]:
         """Set create_node."""
-        create_node_request = CreateNodeRequest()
-        create_node_response = stub.CreateNode(
+        # Call FleetAPI
+        create_node_request = CreateNodeRequest(ping_interval=PING_DEFAULT_INTERVAL)
+        create_node_response = retry_invoker.invoke(
+            stub.CreateNode,
             request=create_node_request,
         )
-        node_store[KEY_NODE] = create_node_response.node
+
+        # Remember the node and the ping-loop thread
+        nonlocal node, ping_thread
+        node = cast(Node, create_node_response.node)
+        ping_thread = start_ping_loop(ping, ping_stop_event)
+        return node.node_id
 
     def delete_node() -> None:
         """Set delete_node."""
         # Get Node
-        if node_store[KEY_NODE] is None:
+        nonlocal node
+        if node is None:
             log(ERROR, "Node instance missing")
             return
-        node: Node = cast(Node, node_store[KEY_NODE])
 
+        # Stop the ping-loop thread
+        ping_stop_event.set()
+
+        # Call FleetAPI
         delete_node_request = DeleteNodeRequest(node=node)
-        stub.DeleteNode(request=delete_node_request)
+        retry_invoker.invoke(stub.DeleteNode, request=delete_node_request)
 
-    def receive() -> Optional[TaskIns]:
+        # Cleanup
+        node = None
+
+    def receive() -> Optional[Message]:
         """Receive next task from server."""
         # Get Node
-        if node_store[KEY_NODE] is None:
+        if node is None:
             log(ERROR, "Node instance missing")
             return None
-        node: Node = cast(Node, node_store[KEY_NODE])
 
         # Request instructions (task) from server
         request = PullTaskInsRequest(node=node)
-        response = stub.PullTaskIns(request=request)
+        response = retry_invoker.invoke(stub.PullTaskIns, request=request)
 
         # Get the current TaskIns
         task_ins: Optional[TaskIns] = get_task_ins(response)
 
         # Discard the current TaskIns if not valid
-        if task_ins is not None and not validate_task_ins(
-            task_ins, discard_reconnect_ins=True
+        if task_ins is not None and not (
+            task_ins.task.consumer.node_id == node.node_id
+            and validate_task_ins(task_ins)
         ):
             task_ins = None
 
-        # Remember `task_ins` until `task_res` is available
-        state[KEY_TASK_INS] = task_ins
+        # Construct the Message
+        in_message = message_from_taskins(task_ins) if task_ins else None
 
-        # Return the TaskIns if available
-        return task_ins
+        # Remember `metadata` of the in message
+        nonlocal metadata
+        metadata = copy(in_message.metadata) if in_message else None
 
-    def send(task_res: TaskRes) -> None:
+        # Return the message if available
+        return in_message
+
+    def send(message: Message) -> None:
         """Send task result back to server."""
         # Get Node
-        if node_store[KEY_NODE] is None:
+        if node is None:
             log(ERROR, "Node instance missing")
             return
-        node: Node = cast(Node, node_store[KEY_NODE])
 
-        # Get incoming TaskIns
-        if state[KEY_TASK_INS] is None:
-            log(ERROR, "No current TaskIns")
+        # Get the metadata of the incoming message
+        nonlocal metadata
+        if metadata is None:
+            log(ERROR, "No current message")
             return
-        task_ins: TaskIns = cast(TaskIns, state[KEY_TASK_INS])
 
-        # Check if fields to be set are not initialized
-        if not validate_task_res(task_res):
-            state[KEY_TASK_INS] = None
-            log(ERROR, "TaskRes has been initialized accidentally")
+        # Validate out message
+        if not validate_out_message(message, metadata):
+            log(ERROR, "Invalid out message")
+            return
 
-        # Configure TaskRes
-        task_res = configure_task_res(task_res, task_ins, node)
+        # Construct TaskRes
+        task_res = message_to_taskres(message)
 
         # Serialize ProtoBuf to bytes
         request = PushTaskResRequest(task_res_list=[task_res])
-        _ = stub.PushTaskRes(request)
+        _ = retry_invoker.invoke(stub.PushTaskRes, request)
 
-        state[KEY_TASK_INS] = None
+        # Cleanup
+        metadata = None
+
+    def get_run(run_id: int) -> Run:
+        # Call FleetAPI
+        get_run_request = GetRunRequest(run_id=run_id)
+        get_run_response: GetRunResponse = retry_invoker.invoke(
+            stub.GetRun,
+            request=get_run_request,
+        )
+
+        # Return fab_id and fab_version
+        return Run(
+            run_id,
+            get_run_response.run.fab_id,
+            get_run_response.run.fab_version,
+            get_run_response.run.fab_hash,
+            user_config_from_proto(get_run_response.run.override_config),
+        )
+
+    def get_fab(fab_hash: str) -> Fab:
+        # Call FleetAPI
+        get_fab_request = GetFabRequest(hash_str=fab_hash)
+        get_fab_response: GetFabResponse = retry_invoker.invoke(
+            stub.GetFab,
+            request=get_fab_request,
+        )
+
+        return Fab(get_fab_response.fab.hash_str, get_fab_response.fab.content)
 
     try:
         # Yield methods
-        yield (receive, send, create_node, delete_node)
+        yield (receive, send, create_node, delete_node, get_run, get_fab)
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)

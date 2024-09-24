@@ -3,14 +3,30 @@ Use with NumPy
 
 Let's integrate ``flwr-datasets`` with NumPy.
 
-Prepare the desired partitioning::
+Create a ``FederatedDataset``::
 
   from flwr_datasets import FederatedDataset
 
   fds = FederatedDataset(dataset="cifar10", partitioners={"train": 10})
   partition = fds.load_partition(0, "train")
-  centralized_dataset = fds.load_full("test")
+  centralized_dataset = fds.load_split("test")
 
+Inspect the names of the features::
+
+  partition.features
+
+In case of CIFAR10, you should see the following output.
+
+.. code-block:: none
+
+  {'img': Image(decode=True, id=None),
+  'label': ClassLabel(names=['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog',
+  'frog', 'horse', 'ship', 'truck'], id=None)}
+
+We will use the keys in the partition features in order to apply transformations to the data or pass it to a ML model.  Let's move to the transformations.
+
+NumPy
+-----
 Transform to NumPy::
 
   partition_np = partition.with_format("numpy")

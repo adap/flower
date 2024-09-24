@@ -1,0 +1,12 @@
+
+# @package _global_
+
+exp_name: vanilla
+
+optimizer:
+  _target_: fednova.models.ProxSGD
+  lr: 0.05
+  momentum: 0
+  weight_decay: 1e-4
+  gmf: 0
+  mu: 0

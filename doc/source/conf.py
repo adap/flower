@@ -14,8 +14,10 @@
 # ==============================================================================
 
 
+import datetime
 import os
 import sys
+
 from git import Repo
 from sphinx.application import ConfigError
 
@@ -62,11 +64,14 @@ html_context["current_version"]["full_name"] = (
 
 # Make version list accessible for the html templates
 html_context["versions"] = list()
-versions = [
-    tag.name
-    for tag in repo.tags
-    if int(tag.name[1]) > 0 and int(tag.name.split(".")[1]) >= 5
-]
+versions = sorted(
+    [
+        tag.name
+        for tag in repo.tags
+        if int(tag.name[1]) > 0 and int(tag.name.split(".")[1]) >= 8
+    ],
+    key=lambda x: [int(part) for part in x[1:].split(".")],
+)
 versions.append("main")
 for version in versions:
     html_context["versions"].append({"name": version})
@@ -81,11 +86,19 @@ gettext_compact = "framework-docs"
 # -- Project information -----------------------------------------------------
 
 project = "Flower"
-copyright = "2022 Flower Labs GmbH"
+copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
-# The full version, including alpha/beta/rc tags
-release = "1.6.0"
+# The full version of the next release, including alpha/beta/rc tags
+release = "1.12.0"
+# The current released version
+rst_prolog = """
+.. |stable_flwr_version| replace:: 1.11.1
+.. |stable_flwr_superlink_docker_digest| replace:: 4b317d5b6030710b476f4dbfab2c3a33021ad40a0fcfa54d7edd45e0c51d889c
+.. |ubuntu_version| replace:: 22.04
+.. |setuptools_version| replace:: 70.3.0
+.. |pip_version| replace:: 24.1.2
+"""
 
 # -- General configuration ---------------------------------------------------
 
@@ -95,6 +108,7 @@ release = "1.6.0"
 extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
     "sphinx.ext.graphviz",
@@ -106,7 +120,54 @@ extensions = [
     "sphinxcontrib.youtube",
     "sphinx_reredirects",
     "nbsphinx",
+    "sphinx_click",
+    "sphinx_substitution_extensions",
+    "sphinxext.opengraph",
 ]
+
+# Generate .rst files
+autosummary_generate = True
+
+# Document ONLY the objects from __all__ (present in __init__ files).
+# It will be done recursively starting from flwr.__init__
+# Starting point is controlled in the index.rst file.
+autosummary_ignore_module_all = False
+
+# Each class and function docs start with the path to it
+# Make the flwr_datasets.federated_dataset.FederatedDataset appear as FederatedDataset
+# The full name is still at the top of the page
+add_module_names = False
+
+# Customizations for the sphinx_copybutton extension
+# Omit prompt text when copying code blocks
+copybutton_prompt_text = "$ "
+# Copy all lines when line continuation character is detected
+copybutton_line_continuation_character = "\\"
+
+
+def find_test_modules(package_path):
+    """Go through the python files and exclude every *_test.py file."""
+    full_path_modules = []
+    for root, dirs, files in os.walk(package_path):
+        for file in files:
+            if file.endswith("_test.py"):
+                # Construct the module path relative to the package directory
+                full_path = os.path.join(root, file)
+                relative_path = os.path.relpath(full_path, package_path)
+                # Convert file path to dotted module path
+                module_path = os.path.splitext(relative_path)[0].replace(os.sep, ".")
+                full_path_modules.append(module_path)
+    modules = []
+    for full_path_module in full_path_modules:
+        parts = full_path_module.split(".")
+        for i in range(len(parts)):
+            modules.append(".".join(parts[i:]))
+    return modules
+
+
+# Stop from documenting the *_test.py files.
+# That's the only way to do that in autosummary (make the modules as mock_imports).
+autodoc_mock_imports = find_test_modules(os.path.abspath("../../src/py/flwr"))
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -122,7 +183,6 @@ redirects = {
     # Renamed pages
     "installation": "how-to-install-flower.html",
     "configuring-clients.html": "how-to-configure-clients.html",
-    "quickstart_mxnet": "tutorial-quickstart-mxnet.html",
     "quickstart_pytorch_lightning": "tutorial-quickstart-pytorch-lightning.html",
     "quickstart_huggingface": "tutorial-quickstart-huggingface.html",
     "quickstart_pytorch": "tutorial-quickstart-pytorch.html",
@@ -135,6 +195,7 @@ redirects = {
     "writing-documentation": "contributor-how-to-write-documentation.html",
     "apiref-binaries": "ref-api-cli.html",
     "fedbn-example-pytorch-from-centralized-to-federated": "example-fedbn-pytorch-from-centralized-to-federated.html",
+    "how-to-use-built-in-middleware-layers": "how-to-use-built-in-mods.html",
     # Restructuring: tutorials
     "tutorial/Flower-0-What-is-FL": "tutorial-series-what-is-federated-learning.html",
     "tutorial/Flower-1-Intro-to-FL-PyTorch": "tutorial-series-get-started-with-flower-pytorch.html",
@@ -153,7 +214,6 @@ redirects = {
     "quickstart-pandas": "tutorial-quickstart-pandas.html",
     "quickstart-fastai": "tutorial-quickstart-fastai.html",
     "quickstart-pytorch-lightning": "tutorial-quickstart-pytorch-lightning.html",
-    "quickstart-mxnet": "tutorial-quickstart-mxnet.html",
     "quickstart-scikitlearn": "tutorial-quickstart-scikitlearn.html",
     "quickstart-xgboost": "tutorial-quickstart-xgboost.html",
     "quickstart-android": "tutorial-quickstart-android.html",
@@ -173,7 +233,8 @@ redirects = {
     "evaluation": "explanation-federated-evaluation.html",
     "differential-privacy-wrappers": "explanation-differential-privacy.html",
     # Restructuring: references
-    "apiref-flwr": "ref-api-flwr.html",
+    "apiref-flwr": "ref-api/flwr.html",
+    "ref-api-flwr": "ref-api/flwr.html",
     "apiref-cli": "ref-api-cli.html",
     "examples": "ref-example-projects.html",
     "telemetry": "ref-telemetry.html",
@@ -189,8 +250,6 @@ redirects = {
     "creating-new-messages": "contributor-how-to-create-new-messages.html",
     "write-documentation": "contributor-how-to-write-documentation.html",
     "release-process": "contributor-how-to-release-flower.html",
-    # Restructuring: contributor explanations
-    "architecture": "contributor-explanation-architecture.html",
     # Restructuring: contributor references
     "good-first-contributions": "contributor-ref-good-first-contributions.html",
     "secagg": "contributor-ref-secure-aggregation-protocols.html",
@@ -198,6 +257,15 @@ redirects = {
     "people": "index.html",
     "organizations": "index.html",
     "publications": "index.html",
+    "quickstart_mxnet": "index.html",
+    "quickstart-mxnet": "index.html",
+    "tutorial-quickstart-mxnet": "index.html",
+    "example-mxnet-walk-through": "index.html",
+    "ref-api/flwr.simulation.run_simulation_from_cli": "index.html",
+    "contributor-how-to-create-new-messages": "index.html",
+    "example-jax-from-centralized-to-federated": "tutorial-quickstart-jax.html",
+    "architecture": "explanation-flower-architecture.html",
+    "contributor-explanation-architecture.html": "explanation-flower-architecture.html",
 }
 
 # -- Options for HTML output -------------------------------------------------
@@ -206,10 +274,10 @@ redirects = {
 # a list of builtin themes.
 #
 html_theme = "furo"
-html_title = f"Flower Framework"
+html_title = "Flower Framework"
 html_logo = "_static/flower-logo.png"
 html_favicon = "_static/favicon.ico"
-html_baseurl = "https://flower.dev/docs/framework/"
+html_baseurl = "https://flower.ai/docs/framework/"
 
 html_theme_options = {
     #

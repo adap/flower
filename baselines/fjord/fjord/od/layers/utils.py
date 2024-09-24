@@ -1,4 +1,5 @@
 """Utils function for Ordered Dropout layers."""
+
 from typing import Optional, Tuple, Union
 
 from torch.nn import Module

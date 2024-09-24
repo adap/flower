@@ -2,17 +2,10 @@
 #include "start.h"
 
 int main(int argc, char **argv) {
-  if (argc != 3 && argc != 4) {
-    std::cout << "Client takes three mandatory arguments and one optional as "
-                 "follows: "
-              << std::endl;
-    std::cout << "./client  CLIENT_ID  SERVER_URL [GRPC_MODE]" << std::endl;
-    std::cout
-        << "GRPC_MODE is optional and can be either 'bidi' (default) or 'rere'."
-        << std::endl;
-    std::cout << "Example: ./flwr_client 0 '127.0.0.1:8080' bidi" << std::endl;
-    std::cout << "This is the same as: ./flwr_client 0 '127.0.0.1:8080'"
-              << std::endl;
+  if (argc != 3) {
+    std::cout << "Client takes 2 mandatory arguments as follows: " << std::endl;
+    std::cout << "./client  CLIENT_ID  SERVER_URL" << std::endl;
+    std::cout << "Example: ./flwr_client 0 '127.0.0.1:8080'" << std::endl;
     return 0;
   }
 
@@ -45,15 +38,8 @@ int main(int argc, char **argv) {
   // Define a server address
   std::string server_add = SERVER_URL;
 
-  if (argc == 4 && std::string(argv[3]) == "rere") {
-    std::cout << "Starting rere client" << std::endl;
-    // Start rere client
-    start::start_rere_client(server_add, &client);
-  } else {
-    std::cout << "Starting bidi client" << std::endl;
-    // Start bidi client
-    start::start_client(server_add, &client);
-  }
+  std::cout << "Starting rere client" << std::endl;
+  start::start_client(server_add, &client);
 
   return 0;
 }

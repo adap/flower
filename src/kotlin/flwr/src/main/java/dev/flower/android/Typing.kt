@@ -23,11 +23,11 @@ typealias Properties = Map<String, Scalar>
  * The `Code` class defines client status codes used in the application.
  */
 enum class Code(val value: Int) {
-    OK(1),
-    GET_PROPERTIES_NOT_IMPLEMENTED(2),
-    GET_PARAMETERS_NOT_IMPLEMENTED(3),
-    FIT_NOT_IMPLEMENTED(4),
-    EVALUATE_NOT_IMPLEMENTED(5);
+    OK(0),
+    GET_PROPERTIES_NOT_IMPLEMENTED(1),
+    GET_PARAMETERS_NOT_IMPLEMENTED(2),
+    FIT_NOT_IMPLEMENTED(3),
+    EVALUATE_NOT_IMPLEMENTED(4);
 
     companion object {
         fun fromInt(value: Int): Code = values().first { it.value == value }

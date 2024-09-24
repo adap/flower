@@ -16,16 +16,14 @@
 
 
 import unittest
-from typing import Tuple
 
-import numpy as np
 from parameterized import parameterized
 
 from datasets import Dataset
 from flwr_datasets.partitioner.iid_partitioner import IidPartitioner
 
 
-def _dummy_setup(num_partitions: int, num_rows: int) -> Tuple[Dataset, IidPartitioner]:
+def _dummy_setup(num_partitions: int, num_rows: int) -> tuple[Dataset, IidPartitioner]:
     """Create a dummy dataset and partitioner based on given arguments.
 
     The partitioner has automatically the dataset assigned to it.
@@ -102,14 +100,15 @@ class TestIidPartitioner(unittest.TestCase):
     ) -> None:
         """Test if the data in partition is equal to the expected."""
         dataset, partitioner = _dummy_setup(num_partitions, num_rows)
+        partition_size = num_rows // num_partitions
         partition_index = 2
         partition = partitioner.load_partition(partition_index)
         row_id = 0
         self.assertEqual(
-            partition["features"][row_id],
-            dataset[np.arange(partition_index, len(dataset), num_partitions)][
-                "features"
-            ][row_id],
+            partition[row_id]["features"],
+            # Note it's contiguous so partition_size * partition_index gets the first
+            # element of the partition of partition_index
+            dataset[partition_size * partition_index + row_id]["features"],
         )
 
     @parameterized.expand(  # type: ignore

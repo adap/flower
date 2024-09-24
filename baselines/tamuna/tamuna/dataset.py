@@ -1,4 +1,5 @@
 """Load the MNIST dataset into train and test loaders."""
+
 from typing import List, Optional, Tuple
 
 from torch.utils.data import DataLoader

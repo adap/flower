@@ -7,11 +7,11 @@ name = "fedwav2vec2" # <----- Ensure it matches the name of your baseline direct
 version = "1.0.0"
 description = "Federated Learning for ASR Based on wav2vec 2.0"
 license = "Apache-2.0"
-authors = ["The Flower Authors <hello@flower.dev>", "Tuan Nguyen <tuanmanh.nguyen167@gmail.com>"]
+authors = ["The Flower Authors <hello@flower.ai>", "Tuan Nguyen <tuanmanh.nguyen167@gmail.com>"]
 readme = "README.md"
-homepage = "https://flower.dev"
+homepage = "https://flower.ai"
 repository = "https://github.com/adap/flower"
-documentation = "https://flower.dev"
+documentation = "https://flower.ai"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -42,14 +42,14 @@ flwr = { extras = ["simulation"], version = "1.5.0" }
 hydra-core = "1.3.2" # don't change this
 speechbrain = "0.5.15"
 pandas = "2.1.1"
-torch = { url = "https://download.pytorch.org/whl/cu116/torch-1.13.1%2Bcu116-cp310-cp310-linux_x86_64.whl"}
-torchaudio = { url = "https://download.pytorch.org/whl/cu116/torchaudio-0.13.1%2Bcu116-cp310-cp310-linux_x86_64.whl"}
+torch = { url = "https://download.pytorch.org/whl/cu116/torch-1.13.1%2Bcu116-cp310-cp310-linux_x86_64.whl" }
+torchaudio = { url = "https://download.pytorch.org/whl/cu116/torchaudio-0.13.1%2Bcu116-cp310-cp310-linux_x86_64.whl" }
 transformers = "4.33.2"
 
 [tool.poetry.dev-dependencies]
-isort = "==5.11.5"
-black = "==23.1.0"
-docformatter = "==1.5.1"
+isort = "==5.13.2"
+black = "==24.2.0"
+docformatter = "==1.7.5"
 mypy = "==1.4.1"
 pylint = "==2.8.2"
 flake8 = "==3.9.2"
@@ -57,6 +57,7 @@ pytest = "==6.2.4"
 pytest-watch = "==4.2.0"
 ruff = "==0.0.272"
 types-requests = "==2.27.7"
+virtualenv = "==20.21.0"
 
 [tool.isort]
 line_length = 88
@@ -85,10 +86,10 @@ plugins = "numpy.typing.mypy_plugin"
 [tool.pylint."MESSAGES CONTROL"]
 disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
 good-names = "i,j,k,_,x,y,X,Y"
-signature-mutators="hydra.main.main"
+signature-mutators = "hydra.main.main"
 
 [tool.pylint.typecheck]
-generated-members="numpy.*, torch.*, tensorflow.*"
+generated-members = "numpy.*, torch.*, tensorflow.*"
 
 [[tool.mypy.overrides]]
 module = [

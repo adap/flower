@@ -1,4 +1,5 @@
 """Utility functions for FedPer."""
+
 import os
 import pickle
 import time
@@ -97,9 +98,9 @@ def get_create_model_fn(
 ]:
     """Get create model function."""
     device = config.server_device
-    split: Union[
-        Type[MobileNetModelSplit], Type[ResNetModelSplit]
-    ] = MobileNetModelSplit
+    split: Union[Type[MobileNetModelSplit], Type[ResNetModelSplit]] = (
+        MobileNetModelSplit
+    )
     if config.model_name.lower() == "mobile":
 
         def create_model() -> Union[Type[MobileNet], Type[ResNet]]:

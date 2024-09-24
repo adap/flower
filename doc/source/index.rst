@@ -4,7 +4,7 @@ Flower Framework Documentation
 .. meta::
    :description: Check out the documentation of the main Flower Framework enabling easy Python development for Federated Learning.
 
-Welcome to Flower's documentation. `Flower <https://flower.dev>`_ is a friendly federated learning framework.
+Welcome to Flower's documentation. `Flower <https://flower.ai>`_ is a friendly federated learning framework.
 
 
 Join the Flower Community
@@ -12,7 +12,7 @@ Join the Flower Community
 
 The Flower Community is growing quickly - we're a friendly group of researchers, engineers, students, professionals, academics, and other enthusiasts.
 
-.. button-link:: https://flower.dev/join-slack
+.. button-link:: https://flower.ai/join-slack
     :color: primary
     :shadow:
 
@@ -48,18 +48,18 @@ A learning-oriented series of federated learning tutorials, the best place to st
 
    tutorial-quickstart-pytorch
    tutorial-quickstart-tensorflow
+   tutorial-quickstart-mlx
    tutorial-quickstart-huggingface
    tutorial-quickstart-jax
    tutorial-quickstart-pandas
    tutorial-quickstart-fastai
    tutorial-quickstart-pytorch-lightning
-   tutorial-quickstart-mxnet
    tutorial-quickstart-scikitlearn
    tutorial-quickstart-xgboost
    tutorial-quickstart-android
    tutorial-quickstart-ios
 
-QUICKSTART TUTORIALS: :doc:`PyTorch <tutorial-quickstart-pytorch>` | :doc:`TensorFlow <tutorial-quickstart-tensorflow>` | :doc:`🤗 Transformers <tutorial-quickstart-huggingface>` | :doc:`JAX <tutorial-quickstart-jax>` | :doc:`Pandas <tutorial-quickstart-pandas>` | :doc:`fastai <tutorial-quickstart-fastai>` | :doc:`PyTorch Lightning <tutorial-quickstart-pytorch-lightning>` | :doc:`MXNet <tutorial-quickstart-mxnet>` | :doc:`scikit-learn <tutorial-quickstart-scikitlearn>` | :doc:`XGBoost <tutorial-quickstart-xgboost>` | :doc:`Android <tutorial-quickstart-android>` | :doc:`iOS <tutorial-quickstart-ios>`
+QUICKSTART TUTORIALS: :doc:`PyTorch <tutorial-quickstart-pytorch>` | :doc:`TensorFlow <tutorial-quickstart-tensorflow>` | :doc:`MLX <tutorial-quickstart-mlx>` | :doc:`🤗 Transformers <tutorial-quickstart-huggingface>` | :doc:`JAX <tutorial-quickstart-jax>` | :doc:`Pandas <tutorial-quickstart-pandas>` | :doc:`fastai <tutorial-quickstart-fastai>` | :doc:`PyTorch Lightning <tutorial-quickstart-pytorch-lightning>` | :doc:`scikit-learn <tutorial-quickstart-scikitlearn>` | :doc:`XGBoost <tutorial-quickstart-xgboost>` | :doc:`Android <tutorial-quickstart-android>` | :doc:`iOS <tutorial-quickstart-ios>`
 
 We also made video tutorials for PyTorch:
 
@@ -90,16 +90,18 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    how-to-monitor-simulation
    how-to-configure-logging
    how-to-enable-ssl-connections
+   how-to-use-built-in-mods
+   how-to-use-differential-privacy
+   how-to-authenticate-supernodes
+   docker/index
    how-to-upgrade-to-flower-1.0
+   how-to-upgrade-to-flower-next
 
 .. toctree::
    :maxdepth: 1
    :caption: Legacy example guides
 
-   example-walkthrough-pytorch-mnist
    example-pytorch-from-centralized-to-federated
-   example-mxnet-walk-through
-   example-jax-from-centralized-to-federated
    example-fedbn-pytorch-from-centralized-to-federated
 
 Explanations
@@ -113,17 +115,24 @@ Understanding-oriented concept guides explain and discuss key topics and underly
 
    explanation-federated-evaluation
    explanation-differential-privacy
+   explanation-flower-architecture
 
 References
 ~~~~~~~~~~
 
 Information-oriented API reference and other reference material.
 
+.. autosummary::
+   :toctree: ref-api
+   :template: autosummary/module.rst
+   :caption: API reference
+   :recursive:
+
+      flwr
+
 .. toctree::
    :maxdepth: 2
-   :caption: API reference
 
-   ref-api-flwr
    ref-api-cli
 
 .. toctree::
@@ -156,16 +165,16 @@ The Flower community welcomes contributions. The following docs are intended to 
    contributor-how-to-install-development-versions
    contributor-how-to-set-up-a-virtual-env
    contributor-how-to-develop-in-vscode-dev-containers
-   contributor-how-to-create-new-messages
    contributor-how-to-write-documentation
    contributor-how-to-release-flower
    contributor-how-to-contribute-translations
+   contributor-how-to-build-docker-images
 
 .. toctree::
    :maxdepth: 1
    :caption: Contributor explanations
 
-   contributor-explanation-architecture
+   contributor-explanation-public-and-private-apis
 
 .. toctree::
    :maxdepth: 1

@@ -44,26 +44,31 @@ class Partitioner(ABC):
     @dataset.setter
     def dataset(self, value: Dataset) -> None:
         if self._dataset is not None:
-            raise Exception(
+            raise ValueError(
                 "The dataset should be assigned only once to the partitioner."
                 "This operation might also wipe out the saved references to the "
                 "created partitions (in case the partitioning scheme needs to create "
                 "the full partitioning also in order to return a single partition)."
             )
+        if not isinstance(value, Dataset):
+            raise TypeError(
+                f"The dataset object you want to assign to the partitioner should be "
+                f"of type `datasets.Dataset` but given {type(value)}."
+            )
         self._dataset = value
 
     @abstractmethod
-    def load_partition(self, idx: int) -> Dataset:
+    def load_partition(self, partition_id: int) -> Dataset:
         """Load a single partition based on the partition index.
 
         Parameters
         ----------
-        idx: int
+        partition_id : int
             the index that corresponds to the requested partition
 
         Returns
         -------
-        dataset_partition: Dataset
+        dataset_partition : Dataset
             single dataset partition
         """
 
@@ -75,7 +80,12 @@ class Partitioner(ABC):
 
         Returns
         -------
-        dataset_assigned: bool
+        dataset_assigned : bool
             True if a dataset is assigned, otherwise False.
         """
         return self._dataset is not None
+
+    @property
+    @abstractmethod
+    def num_partitions(self) -> int:
+        """Total number of partitions."""

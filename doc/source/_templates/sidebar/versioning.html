@@ -57,14 +57,40 @@ input[type='checkbox'] {
 }
 </style>
 
-<div class="wrap-collabsible"> 
-  <input id="collapsible" class="toggle" type="checkbox"> 
+<script>
+function checkPageExistence(versionName, current_language, pagename) {
+  var newUrl = `https://flower.ai/docs/framework/${versionName}/${current_language}/${pagename}.html`;
+  var fallbackUrl = `https://flower.ai/docs/framework/${versionName}/${current_language}/index.html#references`;
+
+  fetch(newUrl)
+    .then(response => {
+      if (response.ok) {
+        window.location.href = newUrl;
+      } else {
+        window.location.href = fallbackUrl;
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      window.location.href = fallbackUrl;
+    });
+}
+</script>
+
+<div class="wrap-collabsible">
+  <input id="collapsible" class="toggle" type="checkbox">
   <label for="collapsible" class="lbl-toggle">Versions</label>
   <div class="collapsible-content">
     <div class="content-inner">
       <ul>
         {%- for item in versions %}
-        <li><a href="https://flower.dev/docs/framework/{{ item.name }}/{{ current_language }}/{{ pagename }}.html" style="text-decoration:none">{{ item.name }}</a></li>
+        <li>
+          <a href="javascript:void(0);"
+             onclick="checkPageExistence('{{ item.name }}', '{{ current_language }}', '{{ pagename }}')"
+             style="text-decoration:none">
+             {{ item.name }}
+          </a>
+        </li>
         {%- endfor %}
       </ul>
     </div>

@@ -7,11 +7,11 @@ name = "flwr_baselines"
 version = "1.0.0"
 description = "Flower Baselines"
 license = "Apache-2.0"
-authors = ["The Flower Authors <hello@flower.dev>"]
+authors = ["The Flower Authors <hello@flower.ai>"]
 readme = "README.md"
-homepage = "https://flower.dev"
+homepage = "https://flower.ai"
 repository = "https://github.com/adap/flower"
-documentation = "https://flower.dev"
+documentation = "https://flower.ai"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -43,24 +43,27 @@ torch = "^1.10.1"
 torchvision = "^0.11.2"
 hydra-core = "^1.2.0"
 numpy = "^1.20.0"
-tqdm = "4.62.3"
+tqdm = "4.66.3"
 matplotlib = "^3.5.1"
 scikit-image = "^0.18.1"
 scikit-learn = "^1.2.1"
 wget = "^3.2"
+virtualenv = "^20.24.6"
 pandas = "^1.5.3"
 pyhamcrest = "^2.0.4"
+pillow = "==10.2.0"
 
 [tool.poetry.dev-dependencies]
-isort = "==5.11.5"
-black = "==23.1.0"
-docformatter = "==1.5.1"
+isort = "==5.13.2"
+black = "==24.2.0"
+docformatter = "==1.7.5"
 mypy = "==0.961"
 pylint = "==2.8.2"
 flake8 = "==3.9.2"
 pytest = "==6.2.4"
 pytest-watch = "==4.2.0"
 types-requests = "==2.27.7"
+pydantic = "==2.4.2"
 
 [tool.isort]
 line_length = 88
@@ -101,8 +104,8 @@ follow_imports = "skip"
 follow_imports_for_stubs = true
 
 [tool.pylint.typecheck]
-generated-members="numpy.*, torch.*"
+generated-members = "numpy.*, torch.*"
 
 [tool.pylint.messages_control]
 disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
-signature-mutators="hydra.main.main"
+signature-mutators = "hydra.main.main"

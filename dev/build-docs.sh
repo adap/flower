@@ -8,14 +8,16 @@ cd $ROOT
 ./dev/build-baseline-docs.sh
 
 cd $ROOT
-./dev/update-examples.sh
-cd examples/doc
-make docs
+python dev/build-example-docs.py
 
 cd $ROOT
-cd datasets/doc
-make docs
+./datasets/dev/build-flwr-datasets-docs.sh
 
 cd $ROOT
 cd doc
-./build-versioned-docs.sh
+
+if [ "$1" = true ]; then
+    ./build-versioned-docs.sh
+else
+    make html
+fi

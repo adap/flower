@@ -1,0 +1,12 @@
+
+# @package _global_
+
+exp_name: hybrid
+
+optimizer:
+  _target_: fednova.models.ProxSGD
+  lr: 0.02
+  momentum: 0.9
+  weight_decay: 1e-4
+  gmf: 0.9
+  mu: 0

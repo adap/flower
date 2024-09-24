@@ -1,4 +1,5 @@
 """Ordered Dropout stochastic sampler."""
+
 from collections.abc import Generator
 from typing import List
 

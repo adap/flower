@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2021 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,26 +15,30 @@
 """Flower simulation app."""
 
 
+import asyncio
+import logging
 import sys
 import threading
 import traceback
 import warnings
 from logging import ERROR, INFO
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Optional, Union
 
 import ray
 from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
 
-from flwr.client import ClientFn
+from flwr.client import ClientFnExt
 from flwr.common import EventType, event
-from flwr.common.logger import log
-from flwr.server import Server
-from flwr.server.app import ServerConfig, init_defaults, run_fl
+from flwr.common.constant import NODE_ID_NUM_BYTES
+from flwr.common.logger import log, set_logger_propagation, warn_unsupported_feature
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
+from flwr.server.server import Server, init_defaults, run_fl
+from flwr.server.server_config import ServerConfig
 from flwr.server.strategy import Strategy
+from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
 from flwr.simulation.ray_transport.ray_actor import (
-    DefaultActor,
+    ClientAppActor,
     VirtualClientEngineActor,
     VirtualClientEngineActorPool,
     pool_size_from_resources,
@@ -49,7 +53,7 @@ Invalid Arguments in method:
 `start_simulation(
     *,
     client_fn: ClientFn,
-    num_clients: Optional[int] = None,
+    num_clients: int,
     clients_ids: Optional[List[str]] = None,
     client_resources: Optional[Dict[str, float]] = None,
     server: Optional[Server] = None,
@@ -68,47 +72,64 @@ REASON:
 
 """
 
+NodeToPartitionMapping = dict[int, int]
+
+
+def _create_node_id_to_partition_mapping(
+    num_clients: int,
+) -> NodeToPartitionMapping:
+    """Generate a node_id:partition_id mapping."""
+    nodes_mapping: NodeToPartitionMapping = {}  # {node-id; partition-id}
+    for i in range(num_clients):
+        while True:
+            node_id = generate_rand_int_from_bytes(NODE_ID_NUM_BYTES)
+            if node_id not in nodes_mapping:
+                break
+        nodes_mapping[node_id] = i
+    return nodes_mapping
+
 
 # pylint: disable=too-many-arguments,too-many-statements,too-many-branches
 def start_simulation(
     *,
-    client_fn: ClientFn,
-    num_clients: Optional[int] = None,
-    clients_ids: Optional[List[str]] = None,
-    client_resources: Optional[Dict[str, float]] = None,
+    client_fn: ClientFnExt,
+    num_clients: int,
+    clients_ids: Optional[list[str]] = None,  # UNSUPPORTED, WILL BE REMOVED
+    client_resources: Optional[dict[str, float]] = None,
     server: Optional[Server] = None,
     config: Optional[ServerConfig] = None,
     strategy: Optional[Strategy] = None,
     client_manager: Optional[ClientManager] = None,
-    ray_init_args: Optional[Dict[str, Any]] = None,
+    ray_init_args: Optional[dict[str, Any]] = None,
     keep_initialised: Optional[bool] = False,
-    actor_type: Type[VirtualClientEngineActor] = DefaultActor,
-    actor_kwargs: Optional[Dict[str, Any]] = None,
+    actor_type: type[VirtualClientEngineActor] = ClientAppActor,
+    actor_kwargs: Optional[dict[str, Any]] = None,
     actor_scheduling: Union[str, NodeAffinitySchedulingStrategy] = "DEFAULT",
 ) -> History:
     """Start a Ray-based Flower simulation server.
 
     Parameters
     ----------
-    client_fn : ClientFn
-        A function creating client instances. The function must take a single
-        `str` argument called `cid`. It should return a single client instance
-        of type Client. Note that the created client instances are ephemeral
-        and will often be destroyed after a single method invocation. Since client
-        instances are not long-lived, they should not attempt to carry state over
-        method invocations. Any state required by the instance (model, dataset,
-        hyperparameters, ...) should be (re-)created in either the call to `client_fn`
-        or the call to any of the client methods (e.g., load evaluation data in the
-        `evaluate` method itself).
-    num_clients : Optional[int]
-        The total number of clients in this simulation. This must be set if
-        `clients_ids` is not set and vice-versa.
+    client_fn : ClientFnExt
+        A function creating `Client` instances. The function must have the signature
+        `client_fn(context: Context). It should return
+        a single client instance of type `Client`. Note that the created client
+        instances are ephemeral and will often be destroyed after a single method
+        invocation. Since client instances are not long-lived, they should not attempt
+        to carry state over method invocations. Any state required by the instance
+        (model, dataset, hyperparameters, ...) should be (re-)created in either the
+        call to `client_fn` or the call to any of the client methods (e.g., load
+        evaluation data in the `evaluate` method itself).
+    num_clients : int
+        The total number of clients in this simulation.
     clients_ids : Optional[List[str]]
+        UNSUPPORTED, WILL BE REMOVED. USE `num_clients` INSTEAD.
         List `client_id`s for each client. This is only required if
         `num_clients` is not set. Setting both `num_clients` and `clients_ids`
         with `len(clients_ids)` not equal to `num_clients` generates an error.
-    client_resources : Optional[Dict[str, float]] (default: `{"num_cpus": 1,
-        "num_gpus": 0.0}` CPU and GPU resources for a single client. Supported keys
+        Using this argument will raise an error.
+    client_resources : Optional[Dict[str, float]] (default: `{"num_cpus": 1, "num_gpus": 0.0}`)
+        CPU and GPU resources for a single client. Supported keys
         are `num_cpus` and `num_gpus`. To understand the GPU utilization caused by
         `num_gpus`, as well as using custom resources, please consult the Ray
         documentation.
@@ -138,10 +159,10 @@ def start_simulation(
     keep_initialised: Optional[bool] (default: False)
         Set to True to prevent `ray.shutdown()` in case `ray.is_initialized()=True`.
 
-    actor_type: VirtualClientEngineActor (default: DefaultActor)
+    actor_type: VirtualClientEngineActor (default: ClientAppActor)
         Optionally specify the type of actor to use. The actor object, which
         persists throughout the simulation, will be the process in charge of
-        running the clients' jobs (i.e. their `fit()` method).
+        executing a ClientApp wrapping input argument `client_fn`.
 
     actor_kwargs: Optional[Dict[str, Any]] (default: None)
         If you want to create your own Actor classes, you might need to pass
@@ -160,12 +181,32 @@ def start_simulation(
     -------
     hist : flwr.server.history.History
         Object containing metrics from training.
-    """
+    """  # noqa: E501
     # pylint: disable-msg=too-many-locals
     event(
         EventType.START_SIMULATION_ENTER,
         {"num_clients": len(clients_ids) if clients_ids is not None else num_clients},
     )
+
+    if clients_ids is not None:
+        warn_unsupported_feature(
+            "Passing `clients_ids` to `start_simulation` is deprecated and not longer "
+            "used by `start_simulation`. Use `num_clients` exclusively instead."
+        )
+        log(ERROR, "`clients_ids` argument used.")
+        sys.exit()
+
+    # Set logger propagation
+    loop: Optional[asyncio.AbstractEventLoop] = None
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = None
+    finally:
+        if loop and loop.is_running():
+            # Set logger propagation to False to prevent duplicated log output in Colab.
+            logger = logging.getLogger("flwr")
+            _ = set_logger_propagation(logger, False)
 
     # Initialize server and server config
     initialized_server, initialized_config = init_defaults(
@@ -181,20 +222,8 @@ def start_simulation(
         initialized_config,
     )
 
-    # clients_ids takes precedence
-    cids: List[str]
-    if clients_ids is not None:
-        if (num_clients is not None) and (len(clients_ids) != num_clients):
-            log(ERROR, INVALID_ARGUMENTS_START_SIMULATION)
-            sys.exit()
-        else:
-            cids = clients_ids
-    else:
-        if num_clients is None:
-            log(ERROR, INVALID_ARGUMENTS_START_SIMULATION)
-            sys.exit()
-        else:
-            cids = [str(x) for x in range(num_clients)]
+    # Create node-id to partition-id mapping
+    nodes_mapping = _create_node_id_to_partition_mapping(num_clients)
 
     # Default arguments for Ray initialization
     if not ray_init_args:
@@ -219,7 +248,7 @@ def start_simulation(
     log(
         INFO,
         "Optimize your simulation with Flower VCE: "
-        "https://flower.dev/docs/framework/how-to-run-simulations.html",
+        "https://flower.ai/docs/framework/how-to-run-simulations.html",
     )
 
     # Log the resources that a single client will be able to use
@@ -250,7 +279,7 @@ def start_simulation(
     # An actor factory. This is called N times to add N actors
     # to the pool. If at some point the pool can accommodate more actors
     # this will be called again.
-    def create_actor_fn() -> Type[VirtualClientEngineActor]:
+    def create_actor_fn() -> type[VirtualClientEngineActor]:
         return actor_type.options(  # type: ignore
             **client_resources,
             scheduling_strategy=actor_scheduling,
@@ -293,10 +322,12 @@ def start_simulation(
     )
 
     # Register one RayClientProxy object for each client with the ClientManager
-    for cid in cids:
+    for node_id, partition_id in nodes_mapping.items():
         client_proxy = RayActorClientProxy(
             client_fn=client_fn,
-            cid=cid,
+            node_id=node_id,
+            partition_id=partition_id,
+            num_partitions=num_clients,
             actor_pool=pool,
         )
         initialized_server.client_manager().register(client=client_proxy)
@@ -314,18 +345,30 @@ def start_simulation(
         log(ERROR, traceback.format_exc())
         log(
             ERROR,
-            "Your simulation crashed :(. This could be because of several reasons."
+            "Your simulation crashed :(. This could be because of several reasons. "
             "The most common are: "
+            "\n\t > Sometimes, issues in the simulation code itself can cause crashes. "
+            "It's always a good idea to double-check your code for any potential bugs "
+            "or inconsistencies that might be contributing to the problem. "
+            "For example: "
+            "\n\t\t - You might be using a class attribute in your clients that "
+            "hasn't been defined."
+            "\n\t\t - There could be an incorrect method call to a 3rd party library "
+            "(e.g., PyTorch)."
+            "\n\t\t - The return types of methods in your clients/strategies might be "
+            "incorrect."
             "\n\t > Your system couldn't fit a single VirtualClient: try lowering "
             "`client_resources`."
             "\n\t > All the actors in your pool crashed. This could be because: "
             "\n\t\t - You clients hit an out-of-memory (OOM) error and actors couldn't "
             "recover from it. Try launching your simulation with more generous "
             "`client_resources` setting (i.e. it seems %s is "
-            "not enough for your workload). Use fewer concurrent actors. "
+            "not enough for your run). Use fewer concurrent actors. "
             "\n\t\t - You were running a multi-node simulation and all worker nodes "
             "disconnected. The head node might still be alive but cannot accommodate "
-            "any actor with resources: %s.",
+            "any actor with resources: %s."
+            "\nTake a look at the Flower simulation examples for guidance "
+            "<https://flower.ai/docs/framework/how-to-run-simulations.html>.",
             client_resources,
             client_resources,
         )

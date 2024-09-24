@@ -1,0 +1,32 @@
+---
+# this is the config that will be loaded as default by main.py
+# Please follow the provided structure (this will ensuring all baseline follow
+# a similar configuration structure and hence be easy to customise)
+
+
+### hyper-parameters for FL pre-training ###
+exp_name: fedvssl_results
+data_dir: fedvssl/data
+partition_dir: annotations/client_distribution
+cfg_path_pretrain: fedvssl/conf/mmcv_conf/pretraining/r3d_18_ucf101/pretraining_for_ucf.py
+
+# FL settings
+pool_size: 5
+rounds: 20
+
+# FedVSSL strategy
+strategy:
+  _target_: fedvssl.strategy.FedVSSL # need to change after path modification
+  mix_coeff: 0.9
+  swbeta: 1
+  base_work_dir: ??? # will be set at runtime
+  fraction_fit: 1.0
+  min_fit_clients: 5
+  min_available_clients: 5
+  fedavg: false
+
+# ray config
+client_resources:
+  num_gpus: 1.0
+  num_cpus: 2
+  include_dashboard: false

@@ -1,0 +1,22 @@
+---
+_target_: fedpft.strategy.FedPFT
+fraction_fit: 1
+fraction_evaluate: 1
+accept_failures: False
+num_classes: ${dataset.num_classes}
+feature_dimension: ${model.hidden_dimension}
+device: ${device}
+server_batch_size: 32
+num_epochs: 50
+server_opt:
+  lr: 1e-4
+on_fit_config_fn:
+  _target_: fedpft.server.fedpft_get_on_fit_config_fn
+  n_mixtures: 1
+  cov_type: spherical
+  seed: 0
+  tol: 1e-12
+  max_iter: 10000
+evaluate_metrics_aggregation_fn:
+  _target_: fedpft.server.weighted_average
+  _partial_: true 

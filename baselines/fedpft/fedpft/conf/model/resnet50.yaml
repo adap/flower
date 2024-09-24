@@ -1,0 +1,8 @@
+feature_extractor:
+  _target_: fedpft.models.resnet50
+transform: 
+  _target_: fedpft.models.transform
+  mean: [0.485, 0.456, 0.406]
+  std: [0.229, 0.224, 0.225]
+image_input_size: 224
+hidden_dimension: 2048

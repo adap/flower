@@ -16,16 +16,18 @@
 
 
 from abc import ABC
-from typing import Callable, Dict, Tuple
+from typing import Callable
 
 from flwr.client.client import Client
 from flwr.common import (
     Config,
+    Context,
     NDArrays,
     Scalar,
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
+from flwr.common.logger import warn_deprecated_feature_with_example
 from flwr.common.typing import (
     Code,
     EvaluateIns,
@@ -69,7 +71,9 @@ Example
 class NumPyClient(ABC):
     """Abstract base class for Flower clients using NumPy."""
 
-    def get_properties(self, config: Config) -> Dict[str, Scalar]:
+    _context: Context
+
+    def get_properties(self, config: Config) -> dict[str, Scalar]:
         """Return a client's set of properties.
 
         Parameters
@@ -89,7 +93,7 @@ class NumPyClient(ABC):
         _ = (self, config)
         return {}
 
-    def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
+    def get_parameters(self, config: dict[str, Scalar]) -> NDArrays:
         """Return the current local model parameters.
 
         Parameters
@@ -108,8 +112,8 @@ class NumPyClient(ABC):
         return []
 
     def fit(
-        self, parameters: NDArrays, config: Dict[str, Scalar]
-    ) -> Tuple[NDArrays, int, Dict[str, Scalar]]:
+        self, parameters: NDArrays, config: dict[str, Scalar]
+    ) -> tuple[NDArrays, int, dict[str, Scalar]]:
         """Train the provided parameters using the locally held dataset.
 
         Parameters
@@ -137,8 +141,8 @@ class NumPyClient(ABC):
         return [], 0, {}
 
     def evaluate(
-        self, parameters: NDArrays, config: Dict[str, Scalar]
-    ) -> Tuple[float, int, Dict[str, Scalar]]:
+        self, parameters: NDArrays, config: dict[str, Scalar]
+    ) -> tuple[float, int, dict[str, Scalar]]:
         """Evaluate the provided parameters using the locally held dataset.
 
         Parameters
@@ -170,6 +174,34 @@ class NumPyClient(ABC):
         """
         _ = (self, parameters, config)
         return 0.0, 0, {}
+
+    @property
+    def context(self) -> Context:
+        """Getter for `Context` client attribute."""
+        warn_deprecated_feature_with_example(
+            "Accessing the context via the client's attribute is deprecated.",
+            example_message="Instead, pass it to the client's "
+            "constructor in your `client_fn()` which already "
+            "receives a context object.",
+            code_example="def client_fn(context: Context) -> Client:\n\n"
+            "\t\t# Your existing client_fn\n\n"
+            "\t\t# Pass `context` to the constructor\n"
+            "\t\treturn FlowerClient(context).to_client()",
+        )
+        return self._context
+
+    @context.setter
+    def context(self, context: Context) -> None:
+        """Setter for `Context` client attribute."""
+        self._context = context
+
+    def get_context(self) -> Context:
+        """Get the run context from this client."""
+        return self.context
+
+    def set_context(self, context: Context) -> None:
+        """Apply a run context to this client."""
+        self.context = context
 
     def to_client(self) -> Client:
         """Convert to object to Client type and return it."""
@@ -231,7 +263,7 @@ def _fit(self: Client, ins: FitIns) -> FitRes:
         and isinstance(results[1], int)
         and isinstance(results[2], dict)
     ):
-        raise Exception(EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_FIT)
+        raise TypeError(EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_FIT)
 
     # Return FitRes
     parameters_prime, num_examples, metrics = results
@@ -255,7 +287,7 @@ def _evaluate(self: Client, ins: EvaluateIns) -> EvaluateRes:
         and isinstance(results[1], int)
         and isinstance(results[2], dict)
     ):
-        raise Exception(EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_EVALUATE)
+        raise TypeError(EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_EVALUATE)
 
     # Return EvaluateRes
     loss, num_examples, metrics = results
@@ -267,9 +299,21 @@ def _evaluate(self: Client, ins: EvaluateIns) -> EvaluateRes:
     )
 
 
+def _get_context(self: Client) -> Context:
+    """Return context of underlying NumPyClient."""
+    return self.numpy_client.get_context()  # type: ignore
+
+
+def _set_context(self: Client, context: Context) -> None:
+    """Apply context to underlying NumPyClient."""
+    self.numpy_client.set_context(context)  # type: ignore
+
+
 def _wrap_numpy_client(client: NumPyClient) -> Client:
-    member_dict: Dict[str, Callable] = {  # type: ignore
+    member_dict: dict[str, Callable] = {  # type: ignore
         "__init__": _constructor,
+        "get_context": _get_context,
+        "set_context": _set_context,
     }
 
     # Add wrapper type methods (if overridden)

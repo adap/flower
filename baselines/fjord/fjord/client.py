@@ -1,4 +1,5 @@
 """Flower client implementing FjORD."""
+
 from collections import OrderedDict
 from copy import deepcopy
 from types import SimpleNamespace

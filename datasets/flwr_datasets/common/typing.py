@@ -15,8 +15,12 @@
 """Flower Datasets type definitions."""
 
 
-from typing import Callable
+from typing import Any
 
-from datasets import DatasetDict
+import numpy as np
+import numpy.typing as npt
 
-Resplitter = Callable[[DatasetDict], DatasetDict]
+NDArray = npt.NDArray[Any]
+NDArrayInt = npt.NDArray[np.int_]
+NDArrayFloat = npt.NDArray[np.float_]
+NDArrays = list[NDArray]

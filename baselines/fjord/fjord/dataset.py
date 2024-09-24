@@ -1,4 +1,5 @@
 """Dataset for CIFAR10."""
+
 import random
 from typing import Optional, Tuple
 

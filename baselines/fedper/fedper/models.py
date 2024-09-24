@@ -1,4 +1,5 @@
 """Abstract class for splitting a model into body and head."""
+
 from abc import ABC, abstractmethod
 from collections import OrderedDict
 from typing import Any, Dict, List, Tuple, Type, Union

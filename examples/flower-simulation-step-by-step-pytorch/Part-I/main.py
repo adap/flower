@@ -1,15 +1,14 @@
 import pickle
 from pathlib import Path
 
+import flwr as fl
 import hydra
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 
-import flwr as fl
-
-from dataset import prepare_dataset
 from client import generate_client_fn
-from server import get_on_fit_config, get_evaluate_fn
+from dataset import prepare_dataset
+from server import get_evaluate_fn, get_on_fit_config
 
 
 # A decorator for Hydra. This tells hydra to by default load the config in conf/base.yaml
@@ -24,7 +23,7 @@ def main(cfg: DictConfig):
     save_path = HydraConfig.get().runtime.output_dir
 
     ## 2. Prepare your dataset
-    # When simulating FL workloads we have a lot of freedom on how the FL clients behave,
+    # When simulating FL runs we have a lot of freedom on how the FL clients behave,
     # what data they have, how much data, etc. This is not possible in real FL settings.
     # In simulation you'd often encounter two types of dataset:
     #       * naturally partitioned, that come pre-partitioned by user id (e.g. FEMNIST,
@@ -91,7 +90,7 @@ def main(cfg: DictConfig):
             "num_gpus": 0.0,
         },  # (optional) controls the degree of parallelism of your simulation.
         # Lower resources per client allow for more clients to run concurrently
-        # (but need to be set taking into account the compute/memory footprint of your workload)
+        # (but need to be set taking into account the compute/memory footprint of your run)
         # `num_cpus` is an absolute number (integer) indicating the number of threads a client should be allocated
         # `num_gpus` is a ratio indicating the portion of gpu memory that a client needs.
     )
