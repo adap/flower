@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-15 09:09+0200\n"
+"POT-Creation-Date: 2024-09-24 00:29+0000\n"
 "PO-Revision-Date: 2024-05-25 11:09+0000\n"
 "Last-Translator: Gustavo Bertoli <gubertoli@gmail.com>\n"
 "Language: pt_BR\n"
@@ -17,7 +17,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.15.0\n"
+"Generated-By: Babel 2.16.0\n"
 
 #: ../../source/contributor-explanation-public-and-private-apis.rst:2
 msgid "Public and private APIs"
@@ -1401,7 +1401,7 @@ msgstr ""
 msgid "Setting up the repository"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:12
+#: ../../source/contributor-tutorial-contribute-on-github.rst:21
 msgid "**Create a GitHub account and setup Git**"
 msgstr ""
 
@@ -1435,7 +1435,7 @@ msgid ""
 "history back to GitHub."
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:23
+#: ../../source/contributor-tutorial-contribute-on-github.rst:32
 msgid "**Forking the Flower repository**"
 msgstr ""
 
@@ -1455,7 +1455,7 @@ msgid ""
 " the top left corner that you are looking at your own version of Flower."
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:34
+#: ../../source/contributor-tutorial-contribute-on-github.rst:47
 msgid "**Cloning your forked repository**"
 msgstr ""
 
@@ -1479,7 +1479,7 @@ msgid ""
 "it) folder in the current working directory."
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:49
+#: ../../source/contributor-tutorial-contribute-on-github.rst:66
 msgid "**Add origin**"
 msgstr ""
 
@@ -1501,7 +1501,7 @@ msgid ""
 "terminal:"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:68
+#: ../../source/contributor-tutorial-contribute-on-github.rst:90
 msgid "**Add upstream**"
 msgstr ""
 
@@ -1556,7 +1556,7 @@ msgstr ""
 msgid "And with Flower's repository:"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:114
+#: ../../source/contributor-tutorial-contribute-on-github.rst:122
 msgid "**Create a new branch**"
 msgstr ""
 
@@ -1573,7 +1573,7 @@ msgid ""
 "directory:"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:124
+#: ../../source/contributor-tutorial-contribute-on-github.rst:125
 msgid "**Make changes**"
 msgstr ""
 
@@ -1581,7 +1581,7 @@ msgstr ""
 msgid "Write great code and create wonderful changes using your favorite editor!"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:127
+#: ../../source/contributor-tutorial-contribute-on-github.rst:138
 msgid "**Test and format your code**"
 msgstr ""
 
@@ -1596,7 +1596,7 @@ msgstr ""
 msgid "To do so, we have written a few scripts that you can execute:"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:140
+#: ../../source/contributor-tutorial-contribute-on-github.rst:150
 msgid "**Stage changes**"
 msgstr ""
 
@@ -1617,7 +1617,7 @@ msgid ""
 "the :code:`git status` command."
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:152
+#: ../../source/contributor-tutorial-contribute-on-github.rst:160
 msgid "**Commit changes**"
 msgstr ""
 
@@ -1634,7 +1634,7 @@ msgid ""
 "example would be :code:`git commit -m \"Add images to README\"`."
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:162
+#: ../../source/contributor-tutorial-contribute-on-github.rst:171
 msgid "**Push the changes to the fork**"
 msgstr ""
 
@@ -1655,7 +1655,7 @@ msgstr ""
 msgid "Creating and merging a pull request (PR)"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:176
+#: ../../source/contributor-tutorial-contribute-on-github.rst:206
 msgid "**Create the PR**"
 msgstr ""
 
@@ -1718,7 +1718,7 @@ msgid ""
 "anyone, you have the option to create a draft pull request:"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:208
+#: ../../source/contributor-tutorial-contribute-on-github.rst:209
 msgid "**Making new changes**"
 msgstr ""
 
@@ -1729,7 +1729,7 @@ msgid ""
 " associated with the PR."
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:211
+#: ../../source/contributor-tutorial-contribute-on-github.rst:231
 msgid "**Review the PR**"
 msgstr ""
 
@@ -1765,7 +1765,7 @@ msgid ""
 "review."
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:233
+#: ../../source/contributor-tutorial-contribute-on-github.rst:251
 msgid "**Once the PR is merged**"
 msgstr ""
 
@@ -2033,6 +2033,7 @@ msgstr ""
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:5
 #: ../../source/docker/run-as-subprocess.rst:11
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:15
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:12
 #: ../../source/docker/tutorial-quickstart-docker.rst:11
 msgid "Prerequisites"
@@ -2737,6 +2738,221 @@ msgid ""
 " the SuperNode to execute the ClientApp as a subprocess:"
 msgstr ""
 
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:2
+msgid "Run Flower Quickstart Examples with Docker Compose"
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:4
+msgid ""
+"Flower provides a set of `quickstart examples "
+"<https://github.com/adap/flower/tree/main/examples>`_ to help you get "
+"started with the framework. These examples are designed to demonstrate "
+"the capabilities of Flower and by default run using the Simulation "
+"Engine. This guide demonstrates how to run them using Flower's Deployment"
+" Engine via Docker Compose."
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:11
+msgid ""
+"Some quickstart examples may have limitations or requirements that "
+"prevent them from running on every environment. For more information, "
+"please see `Limitations`_."
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:17
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:14
+#: ../../source/docker/tutorial-quickstart-docker.rst:13
+msgid "Before you start, make sure that:"
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:19
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:16
+#: ../../source/docker/tutorial-quickstart-docker.rst:15
+msgid "The ``flwr`` CLI is :doc:`installed <../how-to-install-flower>` locally."
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:20
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:17
+#: ../../source/docker/tutorial-quickstart-docker.rst:16
+#, fuzzy
+msgid "The Docker daemon is running."
+msgstr "Verifique que o serviço Docker está rodando."
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:21
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:18
+msgid "Docker Compose is `installed <https://docs.docker.com/compose/install/>`_."
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:24
+msgid "Run the Quickstart Example"
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:26
+msgid ""
+"Clone the quickstart example you like to run. For example, ``quickstart-"
+"pytorch``:"
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:34
+msgid ""
+"Download the `compose.yml "
+"<https://github.com/adap/flower/blob/main/src/docker/complete/compose.yml>`_"
+" file into the example directory:"
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:41
+msgid "Build and start the services using the following command:"
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:47
+msgid ""
+"Append the following lines to the end of the ``pyproject.toml`` file and "
+"save it:"
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:49
+#: ../../source/docker/tutorial-quickstart-docker.rst:319
+msgid "pyproject.toml"
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:58
+msgid ""
+"You can customize the string that follows ``tool.flwr.federations.`` to "
+"fit your needs. However, please note that the string cannot contain a dot"
+" (``.``)."
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:61
+msgid ""
+"In this example, ``local-deployment`` has been used. Just remember to "
+"replace ``local-deployment`` with your chosen name in both the "
+"``tool.flwr.federations.`` string and the corresponding ``flwr run .`` "
+"command."
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:65
+#, fuzzy
+msgid "Run the example:"
+msgstr "Exemplo"
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:71
+msgid "Follow the logs of the SuperExec service:"
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:77
+msgid ""
+"That is all it takes! You can monitor the progress of the run through the"
+" logs of the SuperExec."
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:80
+msgid "Run a Different Quickstart Example"
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:82
+msgid ""
+"To run a different quickstart example, such as ``quickstart-tensorflow``,"
+" first, shut down the Docker Compose services of the current example:"
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:89
+msgid "After that, you can repeat the steps above."
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:92
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:98
+msgid "Limitations"
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:97
+msgid "Quickstart Example"
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:99
+msgid "quickstart-fastai"
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:100
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:102
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:110
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:112
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:116
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:118
+#: ../../source/ref-changelog.md:33 ../../source/ref-changelog.md:399
+#: ../../source/ref-changelog.md:676 ../../source/ref-changelog.md:740
+#: ../../source/ref-changelog.md:798 ../../source/ref-changelog.md:867
+#: ../../source/ref-changelog.md:929
+msgid "None"
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:101
+msgid "quickstart-huggingface"
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:103
+msgid "quickstart-jax"
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:104
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:106
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:120
+msgid ""
+"The example has not yet been updated to work with the latest ``flwr`` "
+"version."
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:105
+msgid "quickstart-mlcube"
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:107
+msgid "quickstart-mlx"
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:108
+msgid ""
+"`Requires to run on macOS with Apple Silicon <https://ml-"
+"explore.github.io/mlx/build/html/install.html#python-installation>`_."
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:109
+msgid "quickstart-monai"
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:111
+msgid "quickstart-pandas"
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:113
+msgid "quickstart-pytorch-lightning"
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:114
+msgid ""
+"Requires an older pip version that is not supported by the Flower Docker "
+"images."
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:115
+msgid "quickstart-pytorch"
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:117
+msgid "quickstart-sklearn-tabular"
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:119
+msgid "quickstart-tabnet"
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:121
+msgid "quickstart-tensorflow"
+msgstr ""
+
+#: ../../source/docker/run-quickstart-examples-docker-compose.rst:122
+msgid "Only runs on AMD64."
+msgstr ""
+
 #: ../../source/docker/set-environment-variables.rst:2
 msgid "Set Environment Variables"
 msgstr ""
@@ -2764,22 +2980,6 @@ msgid ""
 "This tutorial does not use production-ready settings, so you can focus on"
 " understanding the basic workflow that uses the minimum configurations."
 msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:14
-#: ../../source/docker/tutorial-quickstart-docker.rst:13
-msgid "Before you start, make sure that:"
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:16
-#: ../../source/docker/tutorial-quickstart-docker.rst:15
-msgid "The ``flwr`` CLI is :doc:`installed <../how-to-install-flower>` locally."
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:17
-#: ../../source/docker/tutorial-quickstart-docker.rst:16
-#, fuzzy
-msgid "The Docker daemon is running."
-msgstr "Verifique que o serviço Docker está rodando."
 
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:21
 #: ../../source/docker/tutorial-quickstart-docker.rst:19
@@ -3197,10 +3397,6 @@ msgstr ""
 msgid "Add the following lines to the ``pyproject.toml``:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:319
-msgid "pyproject.toml"
-msgstr ""
-
 #: ../../source/docker/tutorial-quickstart-docker.rst:326
 msgid "Run the ``quickstart-docker`` project by executing the command:"
 msgstr ""
@@ -3248,6 +3444,7 @@ msgstr ""
 msgid "Remove the containers and the bridge network:"
 msgstr ""
 
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:401
 #: ../../source/docker/tutorial-quickstart-docker.rst:399
 msgid "Where to Go Next"
 msgstr ""
@@ -3280,10 +3477,6 @@ msgid ""
 "You will also learn how to easily enable TLS encryption and persist "
 "application state locally, giving you the freedom to choose the "
 "configuration that best suits your project's needs."
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:18
-msgid "Docker Compose is `installed <https://docs.docker.com/compose/install/>`_."
 msgstr ""
 
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:23
@@ -3478,7 +3671,7 @@ msgstr ""
 
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:188
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:241
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:362
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:369
 msgid "Rerun the ``quickstart-compose`` project:"
 msgstr ""
 
@@ -3542,72 +3735,76 @@ msgstr ""
 msgid "compose.yml"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:303
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:310
 msgid ""
 "If you also want to enable TLS for the new SuperNodes, duplicate the "
 "SuperNode definition for each new SuperNode service in the ``with-"
 "tls.yml`` file."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:306
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:313
 msgid ""
 "Make sure that the names of the services match with the one in the "
 "``compose.yml`` file."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:308
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:315
 msgid "In ``with-tls.yml``, add the following:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:310
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:317
 msgid "with-tls.yml"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:332
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:339
 msgid "Step 8: Persisting the SuperLink State and Enabling TLS"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:334
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:341
 msgid ""
 "To run Flower with persisted SuperLink state and enabled TLS, a slight "
 "change in the ``with-state.yml`` file is required:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:337
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:344
 msgid "Comment out the lines 2-4 and uncomment the lines 5-9:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:339
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:346
 msgid "with-state.yml"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:356
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:363
 msgid "Restart the services:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:370
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:377
 msgid "Step 9: Merge Multiple Compose Files"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:372
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:379
 msgid ""
 "You can merge multiple Compose files into a single file. For instance, if"
 " you wish to combine the basic configuration with the TLS configuration, "
 "execute the following command:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:380
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:387
 msgid ""
 "This will merge the contents of ``compose.yml`` and ``with-tls.yml`` into"
 " a new file called ``my_compose.yml``."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:384
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:391
 msgid "Step 10: Clean Up"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:386
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:393
 msgid "Remove all services and volumes:"
+msgstr ""
+
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:403
+msgid ":doc:`run-quickstart-examples-docker-compose`"
 msgstr ""
 
 #: ../../source/docker/use-a-different-version.rst:2
@@ -3873,7 +4070,7 @@ msgid ""
 "one method for testing the model:"
 msgstr ""
 
-#: ../../source/example-pytorch-from-centralized-to-federated.rst:218
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:219
 msgid ":code:`set_parameters`"
 msgstr ""
 
@@ -3904,9 +4101,9 @@ msgid ""
 ":code:`ndarray`'s (which is what :code:`flwr.client.NumPyClient` expects)"
 msgstr ""
 
-#: ../../source/example-pytorch-from-centralized-to-federated.rst:223
-#: ../../source/tutorial-quickstart-jax.rst:171
-#: ../../source/tutorial-quickstart-scikitlearn.rst:123
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:225
+#: ../../source/tutorial-quickstart-jax.rst:173
+#: ../../source/tutorial-quickstart-scikitlearn.rst:125
 msgid ":code:`fit`"
 msgstr ""
 
@@ -3928,9 +4125,9 @@ msgstr ""
 msgid "get the updated local model weights and return them to the server"
 msgstr ""
 
-#: ../../source/example-pytorch-from-centralized-to-federated.rst:227
-#: ../../source/tutorial-quickstart-jax.rst:175
-#: ../../source/tutorial-quickstart-scikitlearn.rst:127
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:230
+#: ../../source/tutorial-quickstart-jax.rst:178
+#: ../../source/tutorial-quickstart-scikitlearn.rst:128
 msgid ":code:`evaluate`"
 msgstr ""
 
@@ -4019,7 +4216,7 @@ msgid ""
 " individual's information remains hidden in the crowd."
 msgstr ""
 
-#: ../../source/explanation-differential-privacy.rst:16
+#: ../../source/explanation-differential-privacy.rst:-1
 msgid "DP Intro"
 msgstr ""
 
@@ -4129,8 +4326,8 @@ msgid ""
 "the client's data."
 msgstr ""
 
+#: ../../source/explanation-differential-privacy.rst:-1
 #: ../../source/explanation-differential-privacy.rst:68
-#: ../../source/explanation-differential-privacy.rst:71
 #: ../../source/how-to-use-differential-privacy.rst:11
 msgid "Central Differential Privacy"
 msgstr ""
@@ -4157,7 +4354,7 @@ msgid ""
 "that larger updates are scaled down to fit within the norm `S`."
 msgstr ""
 
-#: ../../source/explanation-differential-privacy.rst:84
+#: ../../source/explanation-differential-privacy.rst:-1
 msgid "clipping"
 msgstr ""
 
@@ -4202,8 +4399,8 @@ msgid ""
 "others."
 msgstr ""
 
+#: ../../source/explanation-differential-privacy.rst:-1
 #: ../../source/explanation-differential-privacy.rst:105
-#: ../../source/explanation-differential-privacy.rst:110
 #: ../../source/how-to-use-differential-privacy.rst:96
 msgid "Local Differential Privacy"
 msgstr ""
@@ -4434,7 +4631,7 @@ msgstr ""
 msgid "This is sometimes called a hub-and-spoke topology:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:18
+#: ../../source/explanation-flower-architecture.rst:24
 msgid "Hub-and-spoke topology in federated learning"
 msgstr ""
 
@@ -4506,7 +4703,7 @@ msgid ""
 "`missing link` between all those SuperNodes."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:65
+#: ../../source/explanation-flower-architecture.rst:71
 #, fuzzy
 msgid "Basic Flower architecture"
 msgstr "Arquitetura do Flower"
@@ -4543,7 +4740,7 @@ msgid ""
 "SuperNodes."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:91
+#: ../../source/explanation-flower-architecture.rst:97
 msgid "Multi-tenancy federated learning architecture"
 msgstr ""
 
@@ -4565,7 +4762,7 @@ msgid ""
 "their corresponding ``ClientApp``\\s:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:107
+#: ../../source/explanation-flower-architecture.rst:113
 msgid "Multi-tenancy federated learning architecture - Run 1"
 msgstr ""
 
@@ -4581,7 +4778,7 @@ msgid ""
 " to participate in the training:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:119
+#: ../../source/explanation-flower-architecture.rst:125
 msgid "Multi-tenancy federated learning architecture - Run 2"
 msgstr ""
 
@@ -4617,7 +4814,7 @@ msgid ""
 "developer machine."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:145
+#: ../../source/explanation-flower-architecture.rst:151
 msgid "Flower Deployment Engine with SuperExec"
 msgstr ""
 
@@ -7286,7 +7483,7 @@ msgid ""
 "adaptive clipping."
 msgstr ""
 
-#: ../../source/how-to-use-differential-privacy.rst:25
+#: ../../source/how-to-use-differential-privacy.rst:-1
 msgid "server side clipping"
 msgstr ""
 
@@ -7315,7 +7512,7 @@ msgid ""
 ":code:`DifferentialPrivacyClientSideAdaptiveClipping`."
 msgstr ""
 
-#: ../../source/how-to-use-differential-privacy.rst:57
+#: ../../source/how-to-use-differential-privacy.rst:-1
 msgid "client side clipping"
 msgstr ""
 
@@ -7342,7 +7539,7 @@ msgid ""
 "clipping norm value, sensitivity, epsilon, and delta."
 msgstr ""
 
-#: ../../source/how-to-use-differential-privacy.rst:99
+#: ../../source/how-to-use-differential-privacy.rst:-1
 msgid "local DP mod"
 msgstr ""
 
@@ -7725,9 +7922,30 @@ msgstr ""
 msgid "Arguments"
 msgstr "Argumento de compilação"
 
-#: ../../flwr install:1 new:1 run:1
+#: ../../flwr install:1 log:1 new:1 run:1
 #, fuzzy
 msgid "Optional argument"
+msgstr "Argumento de compilação"
+
+#: ../../flwr log:1
+msgid "Get logs from a Flower project run."
+msgstr ""
+
+#: ../../flwr log:1
+msgid "Flag to stream or print logs from the Flower run"
+msgstr ""
+
+#: ../../flwr log
+msgid "default"
+msgstr ""
+
+#: ../../flwr log:1
+msgid "``True``"
+msgstr ""
+
+#: ../../flwr log:1
+#, fuzzy
+msgid "Required argument"
 msgstr "Argumento de compilação"
 
 #: ../../flwr new:1
@@ -7812,7 +8030,7 @@ msgid "Modules"
 msgstr ""
 
 #: ../../source/ref-api/flwr.rst:35:<autosummary>:1
-msgid ":py:obj:`client <flwr.client>`\\"
+msgid ":py:obj:`flwr.client <flwr.client>`\\"
 msgstr ""
 
 #: ../../source/ref-api/flwr.rst:35:<autosummary>:1 flwr.client:1 of
@@ -7820,7 +8038,7 @@ msgid "Flower client."
 msgstr ""
 
 #: ../../source/ref-api/flwr.rst:35:<autosummary>:1
-msgid ":py:obj:`common <flwr.common>`\\"
+msgid ":py:obj:`flwr.common <flwr.common>`\\"
 msgstr ""
 
 #: ../../source/ref-api/flwr.rst:35:<autosummary>:1 flwr.common:1 of
@@ -7828,7 +8046,7 @@ msgid "Common components shared between server and client."
 msgstr ""
 
 #: ../../source/ref-api/flwr.rst:35:<autosummary>:1
-msgid ":py:obj:`server <flwr.server>`\\"
+msgid ":py:obj:`flwr.server <flwr.server>`\\"
 msgstr ""
 
 #: ../../source/ref-api/flwr.rst:35:<autosummary>:1
@@ -7838,7 +8056,7 @@ msgid "Flower server."
 msgstr ""
 
 #: ../../source/ref-api/flwr.rst:35:<autosummary>:1
-msgid ":py:obj:`simulation <flwr.simulation>`\\"
+msgid ":py:obj:`flwr.simulation <flwr.simulation>`\\"
 msgstr ""
 
 #: ../../source/ref-api/flwr.rst:35:<autosummary>:1 flwr.simulation:1 of
@@ -7918,7 +8136,7 @@ msgid "Abstract base class for Flower clients using NumPy."
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.rst:50:<autosummary>:1
-msgid ":py:obj:`mod <flwr.client.mod>`\\"
+msgid ":py:obj:`flwr.client.mod <flwr.client.mod>`\\"
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.rst:50:<autosummary>:1 flwr.client.mod:1 of
@@ -8115,48 +8333,57 @@ msgstr ""
 msgid "Getter for `Context` client attribute."
 msgstr ""
 
-#: ../../source/ref-api/flwr.client.Client.rst
-#: ../../source/ref-api/flwr.client.NumPyClient.rst
-#: ../../source/ref-api/flwr.client.mod.LocalDpMod.rst
-#: ../../source/ref-api/flwr.common.Array.rst
-#: ../../source/ref-api/flwr.common.ConfigsRecord.rst
-#: ../../source/ref-api/flwr.common.Context.rst
-#: ../../source/ref-api/flwr.common.Error.rst
-#: ../../source/ref-api/flwr.common.Message.rst
-#: ../../source/ref-api/flwr.common.Metadata.rst
-#: ../../source/ref-api/flwr.common.MetricsRecord.rst
 #: ../../source/ref-api/flwr.common.Parameters.rst:2
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst
-#: ../../source/ref-api/flwr.common.RecordSet.rst
-#: ../../source/ref-api/flwr.server.ClientManager.rst
-#: ../../source/ref-api/flwr.server.Driver.rst
-#: ../../source/ref-api/flwr.server.ServerAppComponents.rst
-#: ../../source/ref-api/flwr.server.SimpleClientManager.rst
-#: ../../source/ref-api/flwr.server.strategy.Bulyan.rst
-#: ../../source/ref-api/flwr.server.strategy.DPFedAvgAdaptive.rst
-#: ../../source/ref-api/flwr.server.strategy.DPFedAvgFixed.rst
-#: ../../source/ref-api/flwr.server.strategy.DifferentialPrivacyClientSideAdaptiveClipping.rst
-#: ../../source/ref-api/flwr.server.strategy.DifferentialPrivacyClientSideFixedClipping.rst
-#: ../../source/ref-api/flwr.server.strategy.DifferentialPrivacyServerSideAdaptiveClipping.rst
-#: ../../source/ref-api/flwr.server.strategy.DifferentialPrivacyServerSideFixedClipping.rst
-#: ../../source/ref-api/flwr.server.strategy.FedAdagrad.rst
-#: ../../source/ref-api/flwr.server.strategy.FedAdam.rst
-#: ../../source/ref-api/flwr.server.strategy.FedAvg.rst
-#: ../../source/ref-api/flwr.server.strategy.FedAvgAndroid.rst
-#: ../../source/ref-api/flwr.server.strategy.FedAvgM.rst
-#: ../../source/ref-api/flwr.server.strategy.FedOpt.rst
-#: ../../source/ref-api/flwr.server.strategy.FedProx.rst
-#: ../../source/ref-api/flwr.server.strategy.FedTrimmedAvg.rst
-#: ../../source/ref-api/flwr.server.strategy.FedYogi.rst
-#: ../../source/ref-api/flwr.server.strategy.Krum.rst
-#: ../../source/ref-api/flwr.server.strategy.Strategy.rst
-#: ../../source/ref-api/flwr.server.workflow.SecAggPlusWorkflow.rst
-#: ../../source/ref-api/flwr.server.workflow.SecAggWorkflow.rst
-#: ../../source/ref-api/flwr.simulation.run_simulation.rst
-#: ../../source/ref-api/flwr.simulation.start_simulation.rst
 #: flwr.client.app.start_client flwr.client.app.start_numpy_client
-#: flwr.server.app.start_server
-#: flwr.server.driver.driver.Driver.send_and_receive of
+#: flwr.client.client.Client.evaluate flwr.client.client.Client.fit
+#: flwr.client.client.Client.get_parameters
+#: flwr.client.client.Client.get_properties
+#: flwr.client.mod.localdp_mod.LocalDpMod
+#: flwr.client.numpy_client.NumPyClient.evaluate
+#: flwr.client.numpy_client.NumPyClient.fit
+#: flwr.client.numpy_client.NumPyClient.get_parameters
+#: flwr.client.numpy_client.NumPyClient.get_properties
+#: flwr.common.context.Context flwr.common.message.Error
+#: flwr.common.message.Message flwr.common.message.Message.create_error_reply
+#: flwr.common.message.Message.create_reply flwr.common.message.Metadata
+#: flwr.common.record.configsrecord.ConfigsRecord
+#: flwr.common.record.metricsrecord.MetricsRecord
+#: flwr.common.record.parametersrecord.Array
+#: flwr.common.record.parametersrecord.ParametersRecord
+#: flwr.common.record.recordset.RecordSet flwr.server.app.start_server
+#: flwr.server.client_manager.ClientManager.register
+#: flwr.server.client_manager.ClientManager.unregister
+#: flwr.server.client_manager.SimpleClientManager.register
+#: flwr.server.client_manager.SimpleClientManager.unregister
+#: flwr.server.client_manager.SimpleClientManager.wait_for
+#: flwr.server.driver.driver.Driver.create_message
+#: flwr.server.driver.driver.Driver.pull_messages
+#: flwr.server.driver.driver.Driver.push_messages
+#: flwr.server.driver.driver.Driver.send_and_receive
+#: flwr.server.serverapp_components.ServerAppComponents
+#: flwr.server.strategy.bulyan.Bulyan
+#: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyClientSideAdaptiveClipping
+#: flwr.server.strategy.dp_adaptive_clipping.DifferentialPrivacyServerSideAdaptiveClipping
+#: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping
+#: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping
+#: flwr.server.strategy.dpfedavg_fixed.DPFedAvgFixed.configure_evaluate
+#: flwr.server.strategy.dpfedavg_fixed.DPFedAvgFixed.configure_fit
+#: flwr.server.strategy.fedadagrad.FedAdagrad
+#: flwr.server.strategy.fedadam.FedAdam flwr.server.strategy.fedavg.FedAvg
+#: flwr.server.strategy.fedavg_android.FedAvgAndroid
+#: flwr.server.strategy.fedavgm.FedAvgM flwr.server.strategy.fedopt.FedOpt
+#: flwr.server.strategy.fedprox.FedProx
+#: flwr.server.strategy.fedtrimmedavg.FedTrimmedAvg
+#: flwr.server.strategy.fedyogi.FedYogi flwr.server.strategy.krum.Krum
+#: flwr.server.strategy.strategy.Strategy.aggregate_evaluate
+#: flwr.server.strategy.strategy.Strategy.aggregate_fit
+#: flwr.server.strategy.strategy.Strategy.configure_evaluate
+#: flwr.server.strategy.strategy.Strategy.configure_fit
+#: flwr.server.strategy.strategy.Strategy.evaluate
+#: flwr.server.strategy.strategy.Strategy.initialize_parameters
+#: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow
+#: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow
+#: flwr.simulation.run_simulation.run_simulation of
 msgid "Parameters"
 msgstr ""
 
@@ -8167,21 +8394,31 @@ msgid ""
 "customize the local evaluation process."
 msgstr ""
 
-#: ../../source/ref-api/flwr.client.Client.rst
-#: ../../source/ref-api/flwr.client.NumPyClient.rst
-#: ../../source/ref-api/flwr.common.ConfigsRecord.rst
-#: ../../source/ref-api/flwr.common.Message.rst
-#: ../../source/ref-api/flwr.common.MetricsRecord.rst
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst
-#: ../../source/ref-api/flwr.server.ClientManager.rst
-#: ../../source/ref-api/flwr.server.Driver.rst
-#: ../../source/ref-api/flwr.server.SimpleClientManager.rst
-#: ../../source/ref-api/flwr.server.strategy.DPFedAvgAdaptive.rst
-#: ../../source/ref-api/flwr.server.strategy.DPFedAvgFixed.rst
-#: ../../source/ref-api/flwr.server.strategy.Strategy.rst
-#: ../../source/ref-api/flwr.simulation.start_simulation.rst
-#: flwr.server.app.start_server
-#: flwr.server.driver.driver.Driver.send_and_receive of
+#: flwr.client.client.Client.evaluate flwr.client.client.Client.fit
+#: flwr.client.client.Client.get_parameters
+#: flwr.client.client.Client.get_properties
+#: flwr.client.numpy_client.NumPyClient.evaluate
+#: flwr.client.numpy_client.NumPyClient.fit
+#: flwr.client.numpy_client.NumPyClient.get_parameters
+#: flwr.client.numpy_client.NumPyClient.get_properties
+#: flwr.common.message.Message.create_reply flwr.server.app.start_server
+#: flwr.server.client_manager.ClientManager.num_available
+#: flwr.server.client_manager.ClientManager.register
+#: flwr.server.client_manager.SimpleClientManager.num_available
+#: flwr.server.client_manager.SimpleClientManager.register
+#: flwr.server.client_manager.SimpleClientManager.wait_for
+#: flwr.server.driver.driver.Driver.create_message
+#: flwr.server.driver.driver.Driver.pull_messages
+#: flwr.server.driver.driver.Driver.push_messages
+#: flwr.server.driver.driver.Driver.send_and_receive
+#: flwr.server.strategy.dpfedavg_fixed.DPFedAvgFixed.configure_evaluate
+#: flwr.server.strategy.dpfedavg_fixed.DPFedAvgFixed.configure_fit
+#: flwr.server.strategy.strategy.Strategy.aggregate_evaluate
+#: flwr.server.strategy.strategy.Strategy.aggregate_fit
+#: flwr.server.strategy.strategy.Strategy.configure_evaluate
+#: flwr.server.strategy.strategy.Strategy.configure_fit
+#: flwr.server.strategy.strategy.Strategy.evaluate
+#: flwr.server.strategy.strategy.Strategy.initialize_parameters of
 msgid "Returns"
 msgstr ""
 
@@ -8191,18 +8428,29 @@ msgid ""
 "details such as the number of local data examples used for evaluation."
 msgstr ""
 
-#: ../../source/ref-api/flwr.client.Client.rst
-#: ../../source/ref-api/flwr.client.NumPyClient.rst
-#: ../../source/ref-api/flwr.common.Message.rst
-#: ../../source/ref-api/flwr.server.ClientManager.rst
-#: ../../source/ref-api/flwr.server.Driver.rst
-#: ../../source/ref-api/flwr.server.SimpleClientManager.rst
-#: ../../source/ref-api/flwr.server.strategy.DPFedAvgAdaptive.rst
-#: ../../source/ref-api/flwr.server.strategy.DPFedAvgFixed.rst
-#: ../../source/ref-api/flwr.server.strategy.Strategy.rst
-#: ../../source/ref-api/flwr.simulation.start_simulation.rst
-#: flwr.server.app.start_server
-#: flwr.server.driver.driver.Driver.send_and_receive of
+#: flwr.client.client.Client.evaluate flwr.client.client.Client.fit
+#: flwr.client.client.Client.get_parameters
+#: flwr.client.client.Client.get_properties
+#: flwr.client.numpy_client.NumPyClient.get_parameters
+#: flwr.client.numpy_client.NumPyClient.get_properties
+#: flwr.common.message.Message.create_reply flwr.server.app.start_server
+#: flwr.server.client_manager.ClientManager.num_available
+#: flwr.server.client_manager.ClientManager.register
+#: flwr.server.client_manager.SimpleClientManager.num_available
+#: flwr.server.client_manager.SimpleClientManager.register
+#: flwr.server.client_manager.SimpleClientManager.wait_for
+#: flwr.server.driver.driver.Driver.create_message
+#: flwr.server.driver.driver.Driver.pull_messages
+#: flwr.server.driver.driver.Driver.push_messages
+#: flwr.server.driver.driver.Driver.send_and_receive
+#: flwr.server.strategy.dpfedavg_fixed.DPFedAvgFixed.configure_evaluate
+#: flwr.server.strategy.dpfedavg_fixed.DPFedAvgFixed.configure_fit
+#: flwr.server.strategy.strategy.Strategy.aggregate_evaluate
+#: flwr.server.strategy.strategy.Strategy.aggregate_fit
+#: flwr.server.strategy.strategy.Strategy.configure_evaluate
+#: flwr.server.strategy.strategy.Strategy.configure_fit
+#: flwr.server.strategy.strategy.Strategy.evaluate
+#: flwr.server.strategy.strategy.Strategy.initialize_parameters of
 msgid "Return type"
 msgstr ""
 
@@ -8522,6 +8770,11 @@ msgid ":py:obj:`make_ffn <flwr.client.mod.make_ffn>`\\ \\(ffn\\, mods\\)"
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
+#: flwr.client.mod.utils.make_ffn:1 of
+msgid "."
+msgstr ""
+
+#: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
 msgid ""
 ":py:obj:`message_size_mod <flwr.client.mod.message_size_mod>`\\ \\(msg\\,"
 " ctxt\\, call\\_next\\)"
@@ -8685,10 +8938,6 @@ msgstr ""
 msgid "make\\_ffn"
 msgstr ""
 
-#: flwr.client.mod.utils.make_ffn:1 of
-msgid "."
-msgstr ""
-
 #: ../../source/ref-api/flwr.client.mod.message_size_mod.rst:2
 msgid "message\\_size\\_mod"
 msgstr ""
@@ -8713,14 +8962,6 @@ msgstr ""
 
 #: ../../source/ref-api/flwr.client.mod.secaggplus_mod.rst:2
 msgid "secaggplus\\_mod"
-msgstr ""
-
-#: ../../source/ref-api/flwr.client.run_client_app.rst:2
-msgid "run\\_client\\_app"
-msgstr ""
-
-#: ../../source/ref-api/flwr.client.run_supernode.rst:2
-msgid "run\\_supernode"
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.start_client.rst:2
@@ -9428,12 +9669,7 @@ msgid "Return number of Bytes stored in this object."
 msgstr ""
 
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
-msgid ":py:obj:`get <flwr.common.ConfigsRecord.get>`\\ \\(key\\[\\, default\\]\\)"
-msgstr ""
-
-#: collections.abc.Mapping.get:1
-#: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
-msgid "Retrieve the corresponding layout by the string key."
+msgid ":py:obj:`get <flwr.common.ConfigsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
@@ -9488,22 +9724,6 @@ msgstr ""
 
 #: flwr.common.record.configsrecord.ConfigsRecord.count_bytes:3 of
 msgid "This function counts booleans as occupying 1 Byte."
-msgstr ""
-
-#: collections.abc.Mapping.get:3 of
-msgid ""
-"When there isn't an exact match, all the existing keys in the layout map "
-"will be treated as a regex and map against the input key again. The first"
-" match will be returned, based on the key insertion order. Return None if"
-" there isn't any match found."
-msgstr ""
-
-#: collections.abc.Mapping.get:8 of
-msgid "the string key as the query for the layout."
-msgstr ""
-
-#: collections.abc.Mapping.get:10 of
-msgid "Corresponding layout based on the query."
 msgstr ""
 
 #: ../../source/ref-api/flwr.common.Context.rst:2
@@ -10218,7 +10438,7 @@ msgstr ""
 msgid "The encoding in which to encode the string."
 msgstr ""
 
-#: flwr.common.EventType.encode:5 of
+#: flwr.common.EventType.encode:9 of
 msgid "errors"
 msgstr ""
 
@@ -10394,7 +10614,7 @@ msgid ""
 "string."
 msgstr ""
 
-#: flwr.common.EventType.replace:3 of
+#: flwr.common.EventType.replace:5 of
 msgid "count"
 msgstr ""
 
@@ -10430,7 +10650,7 @@ msgid ""
 "strings and the original string."
 msgstr ""
 
-#: flwr.common.EventType.rsplit:3 flwr.common.EventType.split:3 of
+#: flwr.common.EventType.rsplit:7 flwr.common.EventType.split:7 of
 msgid "sep"
 msgstr ""
 
@@ -10445,7 +10665,7 @@ msgid ""
 " empty strings from the result."
 msgstr ""
 
-#: flwr.common.EventType.rsplit:9 flwr.common.EventType.split:9 of
+#: flwr.common.EventType.rsplit:11 flwr.common.EventType.split:11 of
 msgid "maxsplit"
 msgstr ""
 
@@ -10486,7 +10706,7 @@ msgid ""
 "remaining cased characters have lower case."
 msgstr ""
 
-#: flwr.common.EventType.translate:3 of
+#: flwr.common.EventType.translate:5 of
 msgid "table"
 msgstr ""
 
@@ -10901,7 +11121,7 @@ msgid ":py:obj:`count_bytes <flwr.common.MetricsRecord.count_bytes>`\\ \\(\\)"
 msgstr ""
 
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
-msgid ":py:obj:`get <flwr.common.MetricsRecord.get>`\\ \\(key\\[\\, default\\]\\)"
+msgid ":py:obj:`get <flwr.common.MetricsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
@@ -11033,9 +11253,7 @@ msgid ":py:obj:`count_bytes <flwr.common.ParametersRecord.count_bytes>`\\ \\(\\)
 msgstr ""
 
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
-msgid ""
-":py:obj:`get <flwr.common.ParametersRecord.get>`\\ \\(key\\[\\, "
-"default\\]\\)"
+msgid ":py:obj:`get <flwr.common.ParametersRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 msgstr ""
 
 #: collections.abc.MutableMapping.clear:1:<autosummary>:1 of
@@ -11362,7 +11580,7 @@ msgid "Provides a pool of available clients."
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.rst:56:<autosummary>:1
-msgid ":py:obj:`strategy <flwr.server.strategy>`\\"
+msgid ":py:obj:`flwr.server.strategy <flwr.server.strategy>`\\"
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.rst:56:<autosummary>:1
@@ -11371,7 +11589,7 @@ msgid "Contains the strategy abstraction and different implementations."
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.rst:56:<autosummary>:1
-msgid ":py:obj:`workflow <flwr.server.workflow>`\\"
+msgid ":py:obj:`flwr.server.workflow <flwr.server.workflow>`\\"
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.rst:56:<autosummary>:1
@@ -11848,8 +12066,7 @@ msgid ""
 msgstr ""
 
 #: flwr.server.app.start_server:9
-#: flwr.server.serverapp_components.ServerAppComponents:6
-#: flwr.simulation.app.start_simulation:29 of
+#: flwr.server.serverapp_components.ServerAppComponents:6 of
 msgid ""
 "Currently supported values are `num_rounds` (int, default: 1) and "
 "`round_timeout` in seconds (float, default: None)."
@@ -11963,14 +12180,6 @@ msgstr ""
 
 #: flwr.server.client_manager.SimpleClientManager.wait_for:11 of
 msgid "**success**"
-msgstr ""
-
-#: ../../source/ref-api/flwr.server.run_server_app.rst:2
-msgid "run\\_server\\_app"
-msgstr ""
-
-#: ../../source/ref-api/flwr.server.run_superlink.rst:2
-msgid "run\\_superlink"
 msgstr ""
 
 #: ../../source/ref-api/flwr.server.start_server.rst:2
@@ -14999,13 +15208,13 @@ msgstr ""
 
 #: ../../source/ref-api/flwr.simulation.rst:18:<autosummary>:1
 msgid ""
-":py:obj:`start_simulation <flwr.simulation.start_simulation>`\\ \\(\\*\\,"
-" client\\_fn\\, num\\_clients\\)"
+":py:obj:`start_simulation <flwr.simulation.start_simulation>`\\ "
+"\\(\\*args\\, \\*\\*kwargs\\)"
 msgstr ""
 
 #: ../../source/ref-api/flwr.simulation.rst:18:<autosummary>:1
-#: flwr.simulation.app.start_simulation:1 of
-msgid "Start a Ray-based Flower simulation server."
+#: flwr.simulation.start_simulation:1 of
+msgid "Log error stating that module `ray` could not be imported."
 msgstr ""
 
 #: ../../source/ref-api/flwr.simulation.run_simulation.rst:2
@@ -15064,120 +15273,6 @@ msgstr ""
 
 #: ../../source/ref-api/flwr.simulation.start_simulation.rst:2
 msgid "start\\_simulation"
-msgstr ""
-
-#: flwr.simulation.app.start_simulation:3 of
-msgid ""
-"A function creating `Client` instances. The function must have the "
-"signature `client_fn(context: Context). It should return a single client "
-"instance of type `Client`. Note that the created client instances are "
-"ephemeral and will often be destroyed after a single method invocation. "
-"Since client instances are not long-lived, they should not attempt to "
-"carry state over method invocations. Any state required by the instance "
-"(model, dataset, hyperparameters, ...) should be (re-)created in either "
-"the call to `client_fn` or the call to any of the client methods (e.g., "
-"load evaluation data in the `evaluate` method itself)."
-msgstr ""
-
-#: flwr.simulation.app.start_simulation:13 of
-msgid "The total number of clients in this simulation."
-msgstr ""
-
-#: flwr.simulation.app.start_simulation:15 of
-msgid ""
-"UNSUPPORTED, WILL BE REMOVED. USE `num_clients` INSTEAD. List "
-"`client_id`s for each client. This is only required if `num_clients` is "
-"not set. Setting both `num_clients` and `clients_ids` with "
-"`len(clients_ids)` not equal to `num_clients` generates an error. Using "
-"this argument will raise an error."
-msgstr ""
-
-#: flwr.simulation.app.start_simulation:21 of
-msgid ""
-"CPU and GPU resources for a single client. Supported keys are `num_cpus` "
-"and `num_gpus`. To understand the GPU utilization caused by `num_gpus`, "
-"as well as using custom resources, please consult the Ray documentation."
-msgstr ""
-
-#: flwr.simulation.app.start_simulation:26 of
-msgid ""
-"An implementation of the abstract base class `flwr.server.Server`. If no "
-"instance is provided, then `start_server` will create one."
-msgstr ""
-
-#: flwr.simulation.app.start_simulation:32 of
-msgid ""
-"An implementation of the abstract base class `flwr.server.Strategy`. If "
-"no strategy is provided, then `start_server` will use "
-"`flwr.server.strategy.FedAvg`."
-msgstr ""
-
-#: flwr.simulation.app.start_simulation:36 of
-msgid ""
-"An implementation of the abstract base class `flwr.server.ClientManager`."
-" If no implementation is provided, then `start_simulation` will use "
-"`flwr.server.client_manager.SimpleClientManager`."
-msgstr ""
-
-#: flwr.simulation.app.start_simulation:40 of
-msgid ""
-"Optional dictionary containing arguments for the call to `ray.init`. If "
-"ray_init_args is None (the default), Ray will be initialized with the "
-"following default args:  { \"ignore_reinit_error\": True, "
-"\"include_dashboard\": False }  An empty dictionary can be used "
-"(ray_init_args={}) to prevent any arguments from being passed to "
-"ray.init."
-msgstr ""
-
-#: flwr.simulation.app.start_simulation:40 of
-msgid ""
-"Optional dictionary containing arguments for the call to `ray.init`. If "
-"ray_init_args is None (the default), Ray will be initialized with the "
-"following default args:"
-msgstr ""
-
-#: flwr.simulation.app.start_simulation:44 of
-msgid "{ \"ignore_reinit_error\": True, \"include_dashboard\": False }"
-msgstr ""
-
-#: flwr.simulation.app.start_simulation:46 of
-msgid ""
-"An empty dictionary can be used (ray_init_args={}) to prevent any "
-"arguments from being passed to ray.init."
-msgstr ""
-
-#: flwr.simulation.app.start_simulation:49 of
-msgid ""
-"Set to True to prevent `ray.shutdown()` in case "
-"`ray.is_initialized()=True`."
-msgstr ""
-
-#: flwr.simulation.app.start_simulation:51 of
-msgid ""
-"Optionally specify the type of actor to use. The actor object, which "
-"persists throughout the simulation, will be the process in charge of "
-"executing a ClientApp wrapping input argument `client_fn`."
-msgstr ""
-
-#: flwr.simulation.app.start_simulation:55 of
-msgid ""
-"If you want to create your own Actor classes, you might need to pass some"
-" input argument. You can use this dictionary for such purpose."
-msgstr ""
-
-#: flwr.simulation.app.start_simulation:58 of
-msgid ""
-"(default: \"DEFAULT\") Optional string (\"DEFAULT\" or \"SPREAD\") for "
-"the VCE to choose in which node the actor is placed. If you are an "
-"advanced user needed more control you can use lower-level scheduling "
-"strategies to pin actors to specific compute nodes (e.g. via "
-"NodeAffinitySchedulingStrategy). Please note this is an advanced feature."
-" For all details, please refer to the Ray documentation: "
-"https://docs.ray.io/en/latest/ray-core/scheduling/index.html"
-msgstr ""
-
-#: flwr.simulation.app.start_simulation:67 of
-msgid "**hist** -- Object containing metrics from training."
 msgstr ""
 
 #: ../../source/ref-changelog.md:1
@@ -15283,13 +15378,6 @@ msgstr ""
 #: ../../source/ref-changelog.md:1173 ../../source/ref-changelog.md:1210
 #: ../../source/ref-changelog.md:1253
 msgid "Incompatible changes"
-msgstr ""
-
-#: ../../source/ref-changelog.md:33 ../../source/ref-changelog.md:399
-#: ../../source/ref-changelog.md:676 ../../source/ref-changelog.md:740
-#: ../../source/ref-changelog.md:798 ../../source/ref-changelog.md:867
-#: ../../source/ref-changelog.md:929
-msgid "None"
 msgstr ""
 
 #: ../../source/ref-changelog.md:35
@@ -20418,32 +20506,44 @@ msgid ""
 "blockchain environment is available here:"
 msgstr ""
 
-#: ../../source/ref-faq.rst:28
+#: ../../source/ref-faq.rst:29
+msgid "`FLock: A Decentralised AI Training Platform <https://www.flock.io/#/>`_."
+msgstr ""
+
+#: ../../source/ref-faq.rst:29
+msgid "Contribute to on-chain training the model and earn rewards."
+msgstr ""
+
+#: ../../source/ref-faq.rst:30
+msgid "Local blockchain with federated learning simulation."
+msgstr ""
+
+#: ../../source/ref-faq.rst:31
 msgid ""
 "`Flower meets Nevermined GitHub Repository <https://github.com"
 "/nevermined-io/fl-demo/tree/master/image-classification-flower>`_."
 msgstr ""
 
-#: ../../source/ref-faq.rst:29
+#: ../../source/ref-faq.rst:32
 msgid ""
 "`Flower meets Nevermined YouTube video "
 "<https://www.youtube.com/watch?v=A0A9hSlPhKI>`_."
 msgstr ""
 
-#: ../../source/ref-faq.rst:30
+#: ../../source/ref-faq.rst:33
 msgid ""
 "`Flower meets KOSMoS <https://www.isw-sites.de/kosmos/wp-"
 "content/uploads/sites/13/2021/05/Talk-Flower-Summit-2021.pdf>`_."
 msgstr ""
 
-#: ../../source/ref-faq.rst:31
+#: ../../source/ref-faq.rst:34
 msgid ""
 "`Flower meets Talan blog post <https://www.linkedin.com/pulse/federated-"
 "learning-same-mask-different-faces-imen-"
 "ayari/?trackingId=971oIlxLQ9%2BA9RB0IQ73XQ%3D%3D>`_ ."
 msgstr ""
 
-#: ../../source/ref-faq.rst:32
+#: ../../source/ref-faq.rst:35
 msgid ""
 "`Flower meets Talan GitHub Repository "
 "<https://gitlab.com/Talan_Innovation_Factory/food-waste-prevention>`_ ."
@@ -20666,178 +20766,294 @@ msgid ""
 "more."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-fastai.rst:-1
-msgid ""
-"Check out this Federated Learning quickstart tutorial for using Flower "
-"with FastAI to train a vision model on CIFAR-10."
-msgstr ""
-
 #: ../../source/tutorial-quickstart-fastai.rst:5
 msgid "Quickstart fastai"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-fastai.rst:10
-msgid "Let's build a federated learning system using fastai and Flower!"
+#: ../../source/tutorial-quickstart-fastai.rst:7
+msgid ""
+"In this federated learning tutorial we will learn how to train a "
+"SqueezeNet model on MNIST using Flower and fastai. It is recommended to "
+"create a virtual environment and run everything within a :doc:`virtualenv"
+" <contributor-how-to-set-up-a-virtual-env>`."
 msgstr ""
 
 #: ../../source/tutorial-quickstart-fastai.rst:12
+#: ../../source/tutorial-quickstart-pytorch-lightning.rst:12
+msgid "Then, clone the code example directly from GitHub:"
+msgstr ""
+
+#: ../../source/tutorial-quickstart-fastai.rst:20
 msgid ""
-"Please refer to the `full code example "
-"<https://github.com/adap/flower/tree/main/examples/quickstart-fastai>`_ "
-"to learn more."
+"This will create a new directory called `quickstart-fastai` containing "
+"the following files:"
+msgstr ""
+
+#: ../../source/tutorial-quickstart-fastai.rst:33
+#: ../../source/tutorial-quickstart-pytorch-lightning.rst:33
+msgid "Next, activate your environment, then run:"
+msgstr ""
+
+#: ../../source/tutorial-quickstart-fastai.rst:43
+msgid ""
+"This example by default runs the Flower Simulation Engine, creating a "
+"federation of 10 nodes using `FedAvg <https://flower.ai/docs/framework"
+"/ref-api/flwr.server.strategy.FedAvg.html#flwr.server.strategy.FedAvg>`_ "
+"as the aggregation strategy. The dataset will be partitioned using Flower"
+" Dataset's `IidPartitioner <https://flower.ai/docs/datasets/ref-"
+"api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_."
+" Let's run the project:"
+msgstr ""
+
+#: ../../source/tutorial-quickstart-fastai.rst:56
+#: ../../source/tutorial-quickstart-huggingface.rst:65
+#: ../../source/tutorial-quickstart-mlx.rst:64
+#: ../../source/tutorial-quickstart-pytorch-lightning.rst:56
+#: ../../source/tutorial-quickstart-pytorch.rst:64
+#: ../../source/tutorial-quickstart-tensorflow.rst:65
+msgid "With default arguments you will see an output like this one:"
+msgstr ""
+
+#: ../../source/tutorial-quickstart-fastai.rst:100
+#: ../../source/tutorial-quickstart-huggingface.rst:116
+#: ../../source/tutorial-quickstart-pytorch-lightning.rst:106
+#: ../../source/tutorial-quickstart-pytorch.rst:105
+#: ../../source/tutorial-quickstart-tensorflow.rst:106
+msgid ""
+"You can also override the parameters defined in the "
+"``[tool.flwr.app.config]`` section in ``pyproject.toml`` like this:"
+msgstr ""
+
+#: ../../source/tutorial-quickstart-fastai.rst:110
+msgid ""
+"Check the `source code <https://github.com/adap/flower/tree/main/examples"
+"/quickstart-fastai>`_ of this tutorial in ``examples/quickstart-fasai`` "
+"in the Flower GitHub repository."
 msgstr ""
 
 #: ../../source/tutorial-quickstart-huggingface.rst:-1
 msgid ""
 "Check out this Federating Learning quickstart tutorial for using Flower "
-"with HuggingFace Transformers in order to fine-tune an LLM."
+"with 🤗 HuggingFace Transformers in order to fine-tune an LLM."
 msgstr ""
 
 #: ../../source/tutorial-quickstart-huggingface.rst:5
 msgid "Quickstart 🤗 Transformers"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:10
+#: ../../source/tutorial-quickstart-huggingface.rst:7
 msgid ""
-"Let's build a federated learning system using Hugging Face Transformers "
-"and Flower!"
+"In this federated learning tutorial we will learn how to train a large "
+"language model (LLM) on the `IMDB "
+"<https://huggingface.co/datasets/stanfordnlp/imdb>`_ dataset using Flower"
+" and the 🤗 Hugging Face Transformers library. It is recommended to create"
+" a virtual environment and run everything within a :doc:`virtualenv "
+"<contributor-how-to-set-up-a-virtual-env>`."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:12
+#: ../../source/tutorial-quickstart-huggingface.rst:14
 msgid ""
-"We will leverage Hugging Face to federate the training of language models"
-" over multiple clients using Flower. More specifically, we will fine-tune"
-" a pre-trained Transformer model (distilBERT) for sequence classification"
-" over a dataset of IMDB ratings. The end goal is to detect if a movie "
-"rating is positive or negative."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-huggingface.rst:18
-msgid "Dependencies"
+"Let's use ``flwr new`` to create a complete Flower+🤗 Hugging Face "
+"project. It will generate all the files needed to run, by default with "
+"the Flower Simulation Engine, a federation of 10 nodes using |fedavg|_ "
+"The dataset will be partitioned using |flowerdatasets|_'s "
+"|iidpartitioner|_."
 msgstr ""
 
 #: ../../source/tutorial-quickstart-huggingface.rst:20
+#: ../../source/tutorial-quickstart-mlx.rst:19
+#: ../../source/tutorial-quickstart-pytorch.rst:19
+#: ../../source/tutorial-quickstart-tensorflow.rst:20
 msgid ""
-"To follow along this tutorial you will need to install the following "
-"packages: :code:`datasets`, :code:`evaluate`, :code:`flwr`, "
-":code:`torch`, and :code:`transformers`. This can be done using "
-":code:`pip`:"
+"Now that we have a rough idea of what this example is about, let's get "
+"started. First, install Flower in your new environment:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:30
-msgid "Standard Hugging Face workflow"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-huggingface.rst:33
-msgid "Handling the data"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-huggingface.rst:35
+#: ../../source/tutorial-quickstart-huggingface.rst:28
 msgid ""
-"To fetch the IMDB dataset, we will use Hugging Face's :code:`datasets` "
-"library. We then need to tokenize the data and create :code:`PyTorch` "
-"dataloaders, this is all done in the :code:`load_data` function:"
+"Then, run the command below. You will be prompted to select one of the "
+"available templates (choose ``HuggingFace``), give a name to your "
+"project, and type in your developer name:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:81
-msgid "Training and testing the model"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-huggingface.rst:83
+#: ../../source/tutorial-quickstart-huggingface.rst:36
+#: ../../source/tutorial-quickstart-mlx.rst:35
+#: ../../source/tutorial-quickstart-pytorch.rst:35
+#: ../../source/tutorial-quickstart-tensorflow.rst:36
 msgid ""
-"Once we have a way of creating our trainloader and testloader, we can "
-"take care of the training and testing. This is very similar to any "
-":code:`PyTorch` training or testing loop:"
+"After running it you'll notice a new directory with your project name has"
+" been created. It should have the following structure:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:121
-msgid "Creating the model itself"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-huggingface.rst:123
+#: ../../source/tutorial-quickstart-huggingface.rst:50
+#: ../../source/tutorial-quickstart-mlx.rst:49
+#: ../../source/tutorial-quickstart-pytorch.rst:49
+#: ../../source/tutorial-quickstart-tensorflow.rst:50
 msgid ""
-"To create the model itself, we will just load the pre-trained distillBERT"
-" model using Hugging Face’s :code:`AutoModelForSequenceClassification` :"
+"If you haven't yet installed the project and its dependencies, you can do"
+" so by:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:136
-msgid "Federating the example"
+#: ../../source/tutorial-quickstart-huggingface.rst:58
+#: ../../source/tutorial-quickstart-pytorch.rst:57
+#: ../../source/tutorial-quickstart-tensorflow.rst:58
+msgid "To run the project, do:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:139
-msgid "Creating the IMDBClient"
+#: ../../source/tutorial-quickstart-huggingface.rst:106
+msgid "You can also run the project with GPU as follows:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:141
+#: ../../source/tutorial-quickstart-huggingface.rst:113
 msgid ""
-"To federate our example to multiple clients, we first need to write our "
-"Flower client class (inheriting from :code:`flwr.client.NumPyClient`). "
-"This is very easy, as our model is a standard :code:`PyTorch` model:"
+"This will use the default arguments where each ``ClientApp`` will use 2 "
+"CPUs and at most 4 ``ClientApp``\\s will run in a given GPU."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:169
+#: ../../source/tutorial-quickstart-huggingface.rst:124
+#: ../../source/tutorial-quickstart-mlx.rst:114
+#: ../../source/tutorial-quickstart-pytorch.rst:113
 msgid ""
-"The :code:`get_parameters` function lets the server get the client's "
-"parameters. Inversely, the :code:`set_parameters` function allows the "
-"server to send its parameters to the client. Finally, the :code:`fit` "
-"function trains the model locally for the client, and the "
-":code:`evaluate` function tests the model locally and returns the "
-"relevant metrics."
+"What follows is an explanation of each component in the project you just "
+"created: dataset partition, the model, defining the ``ClientApp`` and "
+"defining the ``ServerApp``."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:175
-msgid "Starting the server"
+#: ../../source/tutorial-quickstart-huggingface.rst:130
+#: ../../source/tutorial-quickstart-mlx.rst:120
+#: ../../source/tutorial-quickstart-pytorch.rst:119
+#: ../../source/tutorial-quickstart-tensorflow.rst:116
+msgid "The Data"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:177
+#: ../../source/tutorial-quickstart-huggingface.rst:132
 msgid ""
-"Now that we have a way to instantiate clients, we need to create our "
-"server in order to aggregate the results. Using Flower, this can be done "
-"very easily by first choosing a strategy (here, we are using "
-":code:`FedAvg`, which will define the global weights as the average of "
-"all the clients' weights at each round) and then using the "
-":code:`flwr.server.start_server` function:"
+"This tutorial uses |flowerdatasets|_ to easily download and partition the"
+" `IMDB <https://huggingface.co/datasets/stanfordnlp/imdb>`_ dataset. In "
+"this example you'll make use of the |iidpartitioner|_ to generate "
+"``num_partitions`` partitions. You can choose |otherpartitioners|_ "
+"available in Flower Datasets. To tokenize the text, we will also load the"
+" tokenizer from the pre-trained Transformer model that we'll use during "
+"training - more on that in the next section. Each ``ClientApp`` will call"
+" this function to create dataloaders with the data that correspond to "
+"their data partition."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:205
+#: ../../source/tutorial-quickstart-huggingface.rst:178
+#: ../../source/tutorial-quickstart-mlx.rst:164
+#: ../../source/tutorial-quickstart-pytorch.rst:157
+#: ../../source/tutorial-quickstart-tensorflow.rst:145
+msgid "The Model"
+msgstr ""
+
+#: ../../source/tutorial-quickstart-huggingface.rst:180
 msgid ""
-"The :code:`weighted_average` function is there to provide a way to "
-"aggregate the metrics distributed amongst the clients (basically this "
-"allows us to display a nice average accuracy and loss for every round)."
+"We will leverage 🤗 Hugging Face to federate the training of language "
+"models over multiple clients using Flower. More specifically, we will "
+"fine-tune a pre-trained Transformer model (|berttiny|_) for sequence "
+"classification over the dataset of IMDB ratings. The end goal is to "
+"detect if a movie rating is positive or negative. If you have access to "
+"larger GPUs, feel free to use larger models!"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:209
-msgid "Putting everything together"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-huggingface.rst:211
-msgid "We can now start client instances using:"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-huggingface.rst:221
+#: ../../source/tutorial-quickstart-huggingface.rst:193
 msgid ""
-"And they will be able to connect to the server and start the federated "
-"training."
+"Note that here, ``model_name`` is a string that will be loaded from the "
+"``Context`` in the ClientApp and ServerApp."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:223
+#: ../../source/tutorial-quickstart-huggingface.rst:196
 msgid ""
-"If you want to check out everything put together, you should check out "
-"the `full code example <https://github.com/adap/flower/tree/main/examples"
-"/quickstart-huggingface>`_ ."
+"In addition to loading the pretrained model weights and architecture, we "
+"also include two utility functions to perform both training (i.e. "
+"``train()``) and evaluation (i.e. ``test()``) using the above model. "
+"These functions should look fairly familiar if you have some prior "
+"experience with PyTorch. Note these functions do not have anything "
+"specific to Flower. That being said, the training function will normally "
+"be called, as we'll see later, from a Flower client passing its own data."
+" In summary, your clients can use standard training/testing functions to "
+"perform local training or evaluation:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:226
-msgid ""
-"Of course, this is a very basic example, and a lot can be added or "
-"modified, it was just to showcase how simply we could federate a Hugging "
-"Face workflow using Flower."
+#: ../../source/tutorial-quickstart-huggingface.rst:239
+#: ../../source/tutorial-quickstart-mlx.rst:210
+#: ../../source/tutorial-quickstart-pytorch.rst:234
+#: ../../source/tutorial-quickstart-tensorflow.rst:176
+msgid "The ClientApp"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-huggingface.rst:229
+#: ../../source/tutorial-quickstart-huggingface.rst:241
 msgid ""
-"Note that in this example we used :code:`PyTorch`, but we could have very"
-" well used :code:`TensorFlow`."
+"The main changes we have to make to use 🤗 Hugging Face with Flower will "
+"be found in the ``get_weights()`` and ``set_weights()`` functions. Under "
+"the hood, the ``transformers`` library uses PyTorch, which means we can "
+"reuse the ``get_weights()`` and ``set_weights()`` code that we defined in"
+" the :doc:`Quickstart PyTorch <tutorial-quickstart-pytorch>` tutorial. As"
+" a reminder, in ``get_weights()``, PyTorch model parameters are extracted"
+" and represented as a list of NumPy arrays. The ``set_weights()`` "
+"function that's the opposite: given a list of NumPy arrays it applies "
+"them to an existing PyTorch model. Doing this in fairly easy in PyTorch."
+msgstr ""
+
+#: ../../source/tutorial-quickstart-huggingface.rst:254
+#: ../../source/tutorial-quickstart-pytorch.rst:245
+msgid ""
+"The specific implementation of ``get_weights()`` and ``set_weights()`` "
+"depends on the type of models you use. The ones shown below work for a "
+"wide range of PyTorch models but you might need to adjust them if you "
+"have more exotic model architectures."
+msgstr ""
+
+#: ../../source/tutorial-quickstart-huggingface.rst:269
+#: ../../source/tutorial-quickstart-pytorch.rst:261
+msgid ""
+"The rest of the functionality is directly inspired by the centralized "
+"case. The ``fit()`` method in the client trains the model using the local"
+" dataset. Similarly, the ``evaluate()`` method is used to evaluate the "
+"model received on a held-out validation set that the client might have:"
+msgstr ""
+
+#: ../../source/tutorial-quickstart-huggingface.rst:296
+msgid ""
+"Finally, we can construct a ``ClientApp`` using the ``FlowerClient`` "
+"defined above by means of a ``client_fn()`` callback. Note that the "
+"`context` enables you to get access to hyperparemeters defined in your "
+"``pyproject.toml`` to configure the run. In this tutorial we access the "
+"``local-epochs`` setting to control the number of epochs a ``ClientApp`` "
+"will perform when running the ``fit()`` method. You could define "
+"additional hyperparameters in ``pyproject.toml`` and access them here."
+msgstr ""
+
+#: ../../source/tutorial-quickstart-huggingface.rst:330
+#: ../../source/tutorial-quickstart-mlx.rst:376
+#: ../../source/tutorial-quickstart-pytorch.rst:321
+#: ../../source/tutorial-quickstart-tensorflow.rst:245
+msgid "The ServerApp"
+msgstr ""
+
+#: ../../source/tutorial-quickstart-huggingface.rst:332
+msgid ""
+"To construct a ``ServerApp`` we define a ``server_fn()`` callback with an"
+" identical signature to that of ``client_fn()`` but the return type is "
+"|serverappcomponents|_ as opposed to a |client|_ In this example we use "
+"the `FedAvg` strategy. To it we pass a randomly initialized model that "
+"will server as the global model to federated. Note that the value of "
+"``fraction_fit`` is read from the run config. You can find the default "
+"value defined in the ``pyproject.toml``."
+msgstr ""
+
+#: ../../source/tutorial-quickstart-huggingface.rst:371
+msgid ""
+"Congratulations! You've successfully built and run your first federated "
+"learning system for an LLM."
+msgstr ""
+
+#: ../../source/tutorial-quickstart-huggingface.rst:376
+msgid ""
+"Check the source code of the extended version of this tutorial in "
+"|quickstart_hf_link|_ in the Flower GitHub repository. For a "
+"comprehensive example of a federated fine-tuning of an LLM with Flower, "
+"refer to the |flowertune|_ example in the Flower GitHub repository."
 msgstr ""
 
 #: ../../source/tutorial-quickstart-ios.rst:-1
@@ -20892,7 +21108,6 @@ msgstr ""
 
 #: ../../source/tutorial-quickstart-ios.rst:34
 #: ../../source/tutorial-quickstart-scikitlearn.rst:40
-#: ../../source/tutorial-quickstart-tensorflow.rst:29
 #: ../../source/tutorial-quickstart-xgboost.rst:55
 msgid "Flower Client"
 msgstr ""
@@ -20966,13 +21181,11 @@ msgstr ""
 
 #: ../../source/tutorial-quickstart-ios.rst:129
 #: ../../source/tutorial-quickstart-scikitlearn.rst:167
-#: ../../source/tutorial-quickstart-tensorflow.rst:98
 #: ../../source/tutorial-quickstart-xgboost.rst:341
 msgid "Flower Server"
 msgstr ""
 
 #: ../../source/tutorial-quickstart-ios.rst:131
-#: ../../source/tutorial-quickstart-tensorflow.rst:100
 msgid ""
 "For simple workloads we can start a Flower server and leave all the "
 "configuration possibilities at their default values. In a file named "
@@ -20981,12 +21194,10 @@ msgstr ""
 
 #: ../../source/tutorial-quickstart-ios.rst:142
 #: ../../source/tutorial-quickstart-scikitlearn.rst:230
-#: ../../source/tutorial-quickstart-tensorflow.rst:112
 msgid "Train the model, federated!"
 msgstr ""
 
 #: ../../source/tutorial-quickstart-ios.rst:144
-#: ../../source/tutorial-quickstart-tensorflow.rst:114
 #: ../../source/tutorial-quickstart-xgboost.rst:567
 msgid ""
 "With both client and server ready, we can now run everything and see "
@@ -21151,7 +21362,7 @@ msgid ""
 " the model:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-jax.rst:165
+#: ../../source/tutorial-quickstart-jax.rst:167
 msgid ":code:`set_parameters (optional)`"
 msgstr ""
 
@@ -21235,13 +21446,6 @@ msgid ""
 "api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-mlx.rst:19
-#: ../../source/tutorial-quickstart-pytorch.rst:19
-msgid ""
-"Now that we have a rough idea of what this example is about, let's get "
-"started. First, install Flower in your new environment:"
-msgstr ""
-
 #: ../../source/tutorial-quickstart-mlx.rst:27
 msgid ""
 "Then, run the command below. You will be prompted to select of the "
@@ -21249,46 +21453,14 @@ msgid ""
 "type in your developer name:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-mlx.rst:35
-#: ../../source/tutorial-quickstart-pytorch.rst:35
-msgid ""
-"After running it you'll notice a new directory with your project name has"
-" been created. It should have the following structure:"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-mlx.rst:49
-#: ../../source/tutorial-quickstart-pytorch.rst:49
-msgid ""
-"If you haven't yet installed the project and its dependencies, you can do"
-" so by:"
-msgstr ""
-
 #: ../../source/tutorial-quickstart-mlx.rst:57
 msgid "To run the project do:"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-mlx.rst:64
-#: ../../source/tutorial-quickstart-pytorch.rst:64
-msgid "With default arguments you will see an output like this one:"
 msgstr ""
 
 #: ../../source/tutorial-quickstart-mlx.rst:106
 msgid ""
 "You can also override the parameters defined in "
 "``[tool.flwr.app.config]`` section in the ``pyproject.toml`` like this:"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-mlx.rst:114
-#: ../../source/tutorial-quickstart-pytorch.rst:113
-msgid ""
-"What follows is an explanation of each component in the project you just "
-"created: dataset partition, the model, defining the ``ClientApp`` and "
-"defining the ``ServerApp``."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-mlx.rst:120
-#: ../../source/tutorial-quickstart-pytorch.rst:119
-msgid "The Data"
 msgstr ""
 
 #: ../../source/tutorial-quickstart-mlx.rst:122
@@ -21302,11 +21474,6 @@ msgid ""
 "api/flwr_datasets.partitioner.html>`_ available in Flower Datasets:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-mlx.rst:164
-#: ../../source/tutorial-quickstart-pytorch.rst:157
-msgid "The Model"
-msgstr ""
-
 #: ../../source/tutorial-quickstart-mlx.rst:166
 msgid ""
 "We define the model as in the `centralized MLX example "
@@ -21318,11 +21485,6 @@ msgstr ""
 msgid ""
 "We also define some utility functions to test our model and to iterate "
 "over batches."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-mlx.rst:210
-#: ../../source/tutorial-quickstart-pytorch.rst:234
-msgid "The ClientApp"
 msgstr ""
 
 #: ../../source/tutorial-quickstart-mlx.rst:212
@@ -21392,11 +21554,6 @@ msgid ""
 "method."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-mlx.rst:376
-#: ../../source/tutorial-quickstart-pytorch.rst:321
-msgid "The ServerApp"
-msgstr ""
-
 #: ../../source/tutorial-quickstart-mlx.rst:378
 msgid ""
 "To construct a ``ServerApp``, we define a ``server_fn()`` callback with "
@@ -21410,6 +21567,7 @@ msgstr ""
 
 #: ../../source/tutorial-quickstart-mlx.rst:402
 #: ../../source/tutorial-quickstart-pytorch.rst:360
+#: ../../source/tutorial-quickstart-tensorflow.rst:279
 msgid ""
 "Congratulations! You've successfully built and run your first federated "
 "learning system."
@@ -21476,16 +21634,6 @@ msgid ""
 "and type in your developer name:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:57
-msgid "To run the project, do:"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-pytorch.rst:105
-msgid ""
-"You can also override the parameters defined in the "
-"``[tool.flwr.app.config]`` section in ``pyproject.toml`` like this:"
-msgstr ""
-
 #: ../../source/tutorial-quickstart-pytorch.rst:121
 msgid ""
 "This tutorial uses `Flower Datasets <https://flower.ai/docs/datasets/>`_ "
@@ -21529,22 +21677,6 @@ msgid ""
 "PyTorch model. Doing this in fairly easy in PyTorch."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch.rst:245
-msgid ""
-"The specific implementation of ``get_weights()`` and ``set_weights()`` "
-"depends on the type of models you use. The ones shown below work for a "
-"wide range of PyTorch models but you might need to adjust them if you "
-"have more exotic model architectures."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-pytorch.rst:261
-msgid ""
-"The rest of the functionality is directly inspired by the centralized "
-"case. The ``fit()`` method in the client trains the model using the local"
-" dataset. Similarly, the ``evaluate()`` method is used to evaluate the "
-"model received on a held-out validation set that the client might have:"
-msgstr ""
-
 #: ../../source/tutorial-quickstart-pytorch.rst:294
 msgid ""
 "Finally, we can construct a ``ClientApp`` using the ``FlowerClient`` "
@@ -21578,6 +21710,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-quickstart-pytorch.rst:372
+#: ../../source/tutorial-quickstart-tensorflow.rst:295
 msgid "Video tutorial"
 msgstr ""
 
@@ -21588,27 +21721,46 @@ msgid ""
 "that shows the new APIs (as the content above does)"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch-lightning.rst:-1
-msgid ""
-"Check out this Federated Learning quickstart tutorial for using Flower "
-"with PyTorch Lightning to train an Auto Encoder model on MNIST."
-msgstr ""
-
 #: ../../source/tutorial-quickstart-pytorch-lightning.rst:5
 msgid "Quickstart PyTorch Lightning"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch-lightning.rst:10
+#: ../../source/tutorial-quickstart-pytorch-lightning.rst:7
 msgid ""
-"Let's build a horizontal federated learning system using PyTorch "
-"Lightning and Flower!"
+"In this federated learning tutorial we will learn how to train an "
+"AutoEncoder model on MNIST using Flower and PyTorch Lightning. It is "
+"recommended to create a virtual environment and run everything within a "
+":doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-pytorch-lightning.rst:12
+#: ../../source/tutorial-quickstart-pytorch-lightning.rst:20
 msgid ""
-"Please refer to the `full code example "
-"<https://github.com/adap/flower/tree/main/examples/quickstart-pytorch-"
-"lightning>`_ to learn more."
+"This will create a new directory called `quickstart-pytorch-lightning` "
+"containing the following files:"
+msgstr ""
+
+#: ../../source/tutorial-quickstart-pytorch-lightning.rst:43
+msgid ""
+"By default, Flower Simulation Engine will be started and it will create a"
+" federation of 4 nodes using `FedAvg <https://flower.ai/docs/framework"
+"/ref-api/flwr.server.strategy.FedAvg.html#flwr.server.strategy.FedAvg>`_ "
+"as the aggregation strategy. The dataset will be partitioned using Flower"
+" Dataset's `IidPartitioner <https://flower.ai/docs/datasets/ref-"
+"api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_."
+" To run the project, do:"
+msgstr ""
+
+#: ../../source/tutorial-quickstart-pytorch-lightning.rst:94
+msgid ""
+"Each simulated `ClientApp` (two per round) will also log a summary of "
+"their local training process. Expect this output to be similar to:"
+msgstr ""
+
+#: ../../source/tutorial-quickstart-pytorch-lightning.rst:116
+msgid ""
+"Check the `source code <https://github.com/adap/flower/tree/main/examples"
+"/quickstart-pytorch-lightning>`_ of this tutorial in ``examples"
+"/quickstart-pytorch-lightning`` in the Flower GitHub repository."
 msgstr ""
 
 #: ../../source/tutorial-quickstart-scikitlearn.rst:-1
@@ -21689,7 +21841,7 @@ msgstr ""
 msgid "Sets the parameters of a :code:`sklearn` LogisticRegression model"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-scikitlearn.rst:49
+#: ../../source/tutorial-quickstart-scikitlearn.rst:50
 msgid ":code:`set_initial_params()`"
 msgstr ""
 
@@ -21745,7 +21897,7 @@ msgstr ""
 msgid "return the model weight as a list of NumPy ndarrays"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-scikitlearn.rst:120
+#: ../../source/tutorial-quickstart-scikitlearn.rst:121
 msgid ":code:`set_parameters` (optional)"
 msgstr ""
 
@@ -21839,7 +21991,6 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-quickstart-scikitlearn.rst:239
-#: ../../source/tutorial-quickstart-tensorflow.rst:122
 #: ../../source/tutorial-quickstart-xgboost.rst:575
 msgid ""
 "Once the server is running we can start the clients in different "
@@ -21847,7 +21998,6 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-quickstart-scikitlearn.rst:246
-#: ../../source/tutorial-quickstart-tensorflow.rst:129
 #: ../../source/tutorial-quickstart-xgboost.rst:582
 msgid "Open another terminal and start the second client:"
 msgstr ""
@@ -21872,99 +22022,107 @@ msgstr ""
 #: ../../source/tutorial-quickstart-tensorflow.rst:-1
 msgid ""
 "Check out this Federated Learning quickstart tutorial for using Flower "
-"with TensorFlow to train a MobilNetV2 model on CIFAR-10."
+"with TensorFlow to train a CNN model on CIFAR-10."
 msgstr ""
 
 #: ../../source/tutorial-quickstart-tensorflow.rst:5
 msgid "Quickstart TensorFlow"
 msgstr ""
 
+#: ../../source/tutorial-quickstart-tensorflow.rst:7
+msgid ""
+"In this tutorial we will learn how to train a Convolutional Neural "
+"Network on CIFAR-10 using the Flower framework and TensorFlow. First of "
+"all, it is recommended to create a virtual environment and run everything"
+" within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`."
+msgstr ""
+
 #: ../../source/tutorial-quickstart-tensorflow.rst:13
-msgid "Let's build a federated learning system in less than 20 lines of code!"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-tensorflow.rst:15
-msgid "Before Flower can be imported we have to install it:"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-tensorflow.rst:21
 msgid ""
-"Since we want to use the Keras API of TensorFlow (TF), we have to install"
-" TF as well:"
+"Let's use `flwr new` to create a complete Flower+TensorFlow project. It "
+"will generate all the files needed to run, by default with the Flower "
+"Simulation Engine, a federation of 10 nodes using `FedAvg "
+"<https://flower.ai/docs/framework/ref-"
+"api/flwr.server.strategy.FedAvg.html#flwr.server.strategy.FedAvg>`_. The "
+"dataset will be partitioned using Flower Dataset's `IidPartitioner "
+"<https://flower.ai/docs/datasets/ref-"
+"api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-tensorflow.rst:31
-msgid "Next, in a file called :code:`client.py`, import Flower and TensorFlow:"
-msgstr ""
-
-#: ../../source/tutorial-quickstart-tensorflow.rst:38
+#: ../../source/tutorial-quickstart-tensorflow.rst:28
 msgid ""
-"We use the Keras utilities of TF to load CIFAR10, a popular colored image"
-" classification dataset for machine learning. The call to "
-":code:`tf.keras.datasets.cifar10.load_data()` downloads CIFAR10, caches "
-"it locally, and then returns the entire training and test set as NumPy "
-"ndarrays."
+"Then, run the command below. You will be prompted to select one of the "
+"available templates (choose ``TensorFlow``), give a name to your project,"
+" and type in your developer name:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-tensorflow.rst:47
+#: ../../source/tutorial-quickstart-tensorflow.rst:118
 msgid ""
-"Next, we need a model. For the purpose of this tutorial, we use "
-"MobilNetV2 with 10 output classes:"
+"This tutorial uses `Flower Datasets <https://flower.ai/docs/datasets/>`_ "
+"to easily download and partition the `CIFAR-10` dataset. In this example "
+"you'll make use of the `IidPartitioner <https://flower.ai/docs/datasets"
+"/ref-"
+"api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_"
+" to generate `num_partitions` partitions. You can choose `other "
+"partitioners <https://flower.ai/docs/datasets/ref-"
+"api/flwr_datasets.partitioner.html>`_ available in Flower Datasets. Each "
+"``ClientApp`` will call this function to create the ``NumPy`` arrays that"
+" correspond to their data partition."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-tensorflow.rst:54
+#: ../../source/tutorial-quickstart-tensorflow.rst:147
 msgid ""
-"The Flower server interacts with clients through an interface called "
-":code:`Client`. When the server selects a particular client for training,"
-" it sends training instructions over the network. The client receives "
-"those instructions and calls one of the :code:`Client` methods to run "
-"your code (i.e., to train the neural network we defined earlier)."
+"Next, we need a model. We defined a simple Convolutional Neural Network "
+"(CNN), but feel free to replace it with a more sophisticated model if "
+"you'd like:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-tensorflow.rst:60
+#: ../../source/tutorial-quickstart-tensorflow.rst:178
 msgid ""
-"Flower provides a convenience class called :code:`NumPyClient` which "
-"makes it easier to implement the :code:`Client` interface when your "
-"workload uses Keras. The :code:`NumPyClient` interface defines three "
-"methods which can be implemented in the following way:"
+"With `TensorFlow`, we can use the built-in ``get_weights()`` and "
+"``set_weights()`` functions, which simplifies the implementation with "
+"`Flower`. The rest of the functionality in the ClientApp is directly "
+"inspired by the centralized case. The ``fit()`` method in the client "
+"trains the model using the local dataset. Similarly, the ``evaluate()`` "
+"method is used to evaluate the model received on a held-out validation "
+"set that the client might have:"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-tensorflow.rst:82
+#: ../../source/tutorial-quickstart-tensorflow.rst:212
 msgid ""
-"We can now create an instance of our class :code:`CifarClient` and add "
-"one line to actually run this client:"
+"Finally, we can construct a ``ClientApp`` using the ``FlowerClient`` "
+"defined above by means of a ``client_fn()`` callback. Note that the "
+"`context` enables you to get access to hyperparameters defined in your "
+"``pyproject.toml`` to configure the run. For example, in this tutorial we"
+" access the `local-epochs` setting to control the number of epochs a "
+"``ClientApp`` will perform when running the ``fit()`` method, in addition"
+" to `batch-size`. You could define additional hyperparameters in "
+"``pyproject.toml`` and access them here."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-tensorflow.rst:90
+#: ../../source/tutorial-quickstart-tensorflow.rst:247
 msgid ""
-"That's it for the client. We only have to implement :code:`Client` or "
-":code:`NumPyClient` and call :code:`fl.client.start_client()`. If you "
-"implement a client of type :code:`NumPyClient` you'll need to first call "
-"its :code:`to_client()` method. The string :code:`\"[::]:8080\"` tells "
-"the client which server to connect to. In our case we can run the server "
-"and the client on the same machine, therefore we use "
-":code:`\"[::]:8080\"`. If we run a truly federated workload with the "
-"server and clients running on different machines, all that needs to "
-"change is the :code:`server_address` we point the client at."
+"To construct a ``ServerApp`` we define a ``server_fn()`` callback with an"
+" identical signature to that of ``client_fn()`` but the return type is "
+"`ServerAppComponents <https://flower.ai/docs/framework/ref-"
+"api/flwr.server.ServerAppComponents.html#serverappcomponents>`_ as "
+"opposed to a `Client <https://flower.ai/docs/framework/ref-"
+"api/flwr.client.Client.html#client>`_. In this example we use the "
+"`FedAvg`. To it we pass a randomly initialized model that will serve as "
+"the global model to federate."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-tensorflow.rst:135
-msgid "Each client will have its own dataset."
-msgstr ""
-
-#: ../../source/tutorial-quickstart-tensorflow.rst:137
+#: ../../source/tutorial-quickstart-tensorflow.rst:284
 msgid ""
-"You should now see how the training does in the very first terminal (the "
-"one that started the server):"
+"Check the source code of the extended version of this tutorial in "
+"|quickstart_tf_link|_ in the Flower GitHub repository."
 msgstr ""
 
-#: ../../source/tutorial-quickstart-tensorflow.rst:169
+#: ../../source/tutorial-quickstart-tensorflow.rst:299
 msgid ""
-"Congratulations! You've successfully built and run your first federated "
-"learning system. The full `source code "
-"<https://github.com/adap/flower/blob/main/examples/quickstart-"
-"tensorflow/client.py>`_ for this can be found in :code:`examples"
-"/quickstart-tensorflow/client.py`."
+"The video shown below shows how to setup a TensorFlow + Flower project "
+"using our previously recommended APIs. A new video tutorial will be "
+"released that shows the new APIs (as the content above does)"
 msgstr ""
 
 #: ../../source/tutorial-quickstart-xgboost.rst:-1
@@ -23811,7 +23969,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|e5918c1c06a4434bbe4bf49235e40059|"
+msgid "|e87b69b2ada74ea49412df16f4a0b9cc|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -23826,7 +23984,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|c0165741bd1944f09ec55ce49032377d|"
+msgid "|33cacb7d985c4906b348515c1a5cd993|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -23847,7 +24005,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|0a0ac9427ac7487b8e52d75ed514f04e|"
+msgid "|cc080a555947492fa66131dc3a967603|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -23863,7 +24021,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|5defee3ea4ca40d99fcd3e4ea045be25|"
+msgid "|085c3e0fb8664c6aa06246636524b20b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -23879,7 +24037,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|74f26ca701254d3db57d7899bd91eb55|"
+msgid "|bfe69c74e48c45d49b50251c38c2a019|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -23894,7 +24052,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|bda79f21f8154258a40e5766b2634ad7|"
+msgid "|ebbecd651f0348d99c6511ea859bf4ca|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -23914,7 +24072,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|89d30862e62e4f9989e193483a08680a|"
+msgid "|163117eb654a4273babba413cf8065f5|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -23929,7 +24087,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|77e9918671c54b4f86e01369c0785ce8|"
+msgid "|452ac3ba453b4cd1be27be1ba7560d64|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -24069,7 +24227,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|7e4ccef37cc94148a067107b34eb7447|"
+msgid "|f403fcd69e4e44409627e748b404c086|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -24093,7 +24251,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|28e47e4cded14479a0846c8e5f22c872|"
+msgid "|4b00fe63870145968f8443619a792a42|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -24117,7 +24275,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|4b8c5d1afa144294b76ffc76e4658a38|"
+msgid "|368378731066486fa4397e89bc6b870c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -24140,7 +24298,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|9dbdb3a0f6cb4a129fac863eaa414c17|"
+msgid "|a66aa83d85bf4ffba7ed660b718066da|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -24178,7 +24336,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|81749d0ac0834c36a83bd38f433fea31|"
+msgid "|82324b9af72a4582a81839d55caab767|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -24272,7 +24430,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|ed9aae51da70428eab7eef32f21e819e|"
+msgid "|fbf2da0da3cc4f8ab3b3eff852d80c41|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -29465,5 +29623,566 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|c00bf2750bc24d229737a0fe1395f0fc|"
+#~ msgstr ""
+
+#~ msgid ":py:obj:`client <flwr.client>`\\"
+#~ msgstr ""
+
+#~ msgid ":py:obj:`common <flwr.common>`\\"
+#~ msgstr ""
+
+#~ msgid ":py:obj:`server <flwr.server>`\\"
+#~ msgstr ""
+
+#~ msgid ":py:obj:`simulation <flwr.simulation>`\\"
+#~ msgstr ""
+
+#~ msgid ":py:obj:`mod <flwr.client.mod>`\\"
+#~ msgstr ""
+
+#~ msgid "run\\_client\\_app"
+#~ msgstr ""
+
+#~ msgid "run\\_supernode"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`get <flwr.common.ConfigsRecord.get>`\\ "
+#~ "\\(key\\[\\, default\\]\\)"
+#~ msgstr ""
+
+#~ msgid "Retrieve the corresponding layout by the string key."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "When there isn't an exact match, "
+#~ "all the existing keys in the "
+#~ "layout map will be treated as a"
+#~ " regex and map against the input "
+#~ "key again. The first match will be"
+#~ " returned, based on the key insertion"
+#~ " order. Return None if there isn't"
+#~ " any match found."
+#~ msgstr ""
+
+#~ msgid "the string key as the query for the layout."
+#~ msgstr ""
+
+#~ msgid "Corresponding layout based on the query."
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`get <flwr.common.MetricsRecord.get>`\\ "
+#~ "\\(key\\[\\, default\\]\\)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`get <flwr.common.ParametersRecord.get>`\\ "
+#~ "\\(key\\[\\, default\\]\\)"
+#~ msgstr ""
+
+#~ msgid ":py:obj:`strategy <flwr.server.strategy>`\\"
+#~ msgstr ""
+
+#~ msgid ":py:obj:`workflow <flwr.server.workflow>`\\"
+#~ msgstr ""
+
+#~ msgid "run\\_server\\_app"
+#~ msgstr ""
+
+#~ msgid "run\\_superlink"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`start_simulation <flwr.simulation.start_simulation>`\\"
+#~ " \\(\\*\\, client\\_fn\\, num\\_clients\\)"
+#~ msgstr ""
+
+#~ msgid "Start a Ray-based Flower simulation server."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A function creating `Client` instances. "
+#~ "The function must have the signature "
+#~ "`client_fn(context: Context). It should return"
+#~ " a single client instance of type "
+#~ "`Client`. Note that the created client"
+#~ " instances are ephemeral and will "
+#~ "often be destroyed after a single "
+#~ "method invocation. Since client instances "
+#~ "are not long-lived, they should "
+#~ "not attempt to carry state over "
+#~ "method invocations. Any state required "
+#~ "by the instance (model, dataset, "
+#~ "hyperparameters, ...) should be (re-)created"
+#~ " in either the call to `client_fn`"
+#~ " or the call to any of the "
+#~ "client methods (e.g., load evaluation "
+#~ "data in the `evaluate` method itself)."
+#~ msgstr ""
+
+#~ msgid "The total number of clients in this simulation."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "UNSUPPORTED, WILL BE REMOVED. USE "
+#~ "`num_clients` INSTEAD. List `client_id`s for"
+#~ " each client. This is only required"
+#~ " if `num_clients` is not set. Setting"
+#~ " both `num_clients` and `clients_ids` with"
+#~ " `len(clients_ids)` not equal to "
+#~ "`num_clients` generates an error. Using "
+#~ "this argument will raise an error."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "CPU and GPU resources for a single"
+#~ " client. Supported keys are `num_cpus` "
+#~ "and `num_gpus`. To understand the GPU"
+#~ " utilization caused by `num_gpus`, as "
+#~ "well as using custom resources, please"
+#~ " consult the Ray documentation."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "An implementation of the abstract base"
+#~ " class `flwr.server.Server`. If no instance"
+#~ " is provided, then `start_server` will "
+#~ "create one."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "An implementation of the abstract base"
+#~ " class `flwr.server.Strategy`. If no "
+#~ "strategy is provided, then `start_server` "
+#~ "will use `flwr.server.strategy.FedAvg`."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "An implementation of the abstract base"
+#~ " class `flwr.server.ClientManager`. If no "
+#~ "implementation is provided, then "
+#~ "`start_simulation` will use "
+#~ "`flwr.server.client_manager.SimpleClientManager`."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Optional dictionary containing arguments for"
+#~ " the call to `ray.init`. If "
+#~ "ray_init_args is None (the default), Ray"
+#~ " will be initialized with the "
+#~ "following default args:  { "
+#~ "\"ignore_reinit_error\": True, \"include_dashboard\": "
+#~ "False }  An empty dictionary can "
+#~ "be used (ray_init_args={}) to prevent "
+#~ "any arguments from being passed to "
+#~ "ray.init."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Optional dictionary containing arguments for"
+#~ " the call to `ray.init`. If "
+#~ "ray_init_args is None (the default), Ray"
+#~ " will be initialized with the "
+#~ "following default args:"
+#~ msgstr ""
+
+#~ msgid "{ \"ignore_reinit_error\": True, \"include_dashboard\": False }"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "An empty dictionary can be used "
+#~ "(ray_init_args={}) to prevent any arguments"
+#~ " from being passed to ray.init."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Set to True to prevent `ray.shutdown()`"
+#~ " in case `ray.is_initialized()=True`."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Optionally specify the type of actor "
+#~ "to use. The actor object, which "
+#~ "persists throughout the simulation, will "
+#~ "be the process in charge of "
+#~ "executing a ClientApp wrapping input "
+#~ "argument `client_fn`."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If you want to create your own "
+#~ "Actor classes, you might need to "
+#~ "pass some input argument. You can "
+#~ "use this dictionary for such purpose."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "(default: \"DEFAULT\") Optional string "
+#~ "(\"DEFAULT\" or \"SPREAD\") for the VCE"
+#~ " to choose in which node the "
+#~ "actor is placed. If you are an "
+#~ "advanced user needed more control you"
+#~ " can use lower-level scheduling "
+#~ "strategies to pin actors to specific "
+#~ "compute nodes (e.g. via "
+#~ "NodeAffinitySchedulingStrategy). Please note this"
+#~ " is an advanced feature. For all "
+#~ "details, please refer to the Ray "
+#~ "documentation: https://docs.ray.io/en/latest/ray-"
+#~ "core/scheduling/index.html"
+#~ msgstr ""
+
+#~ msgid "**hist** -- Object containing metrics from training."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Check out this Federated Learning "
+#~ "quickstart tutorial for using Flower "
+#~ "with FastAI to train a vision "
+#~ "model on CIFAR-10."
+#~ msgstr ""
+
+#~ msgid "Let's build a federated learning system using fastai and Flower!"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Please refer to the `full code "
+#~ "example <https://github.com/adap/flower/tree/main/examples"
+#~ "/quickstart-fastai>`_ to learn more."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Check out this Federating Learning "
+#~ "quickstart tutorial for using Flower "
+#~ "with HuggingFace Transformers in order "
+#~ "to fine-tune an LLM."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Let's build a federated learning system"
+#~ " using Hugging Face Transformers and "
+#~ "Flower!"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "We will leverage Hugging Face to "
+#~ "federate the training of language models"
+#~ " over multiple clients using Flower. "
+#~ "More specifically, we will fine-tune "
+#~ "a pre-trained Transformer model "
+#~ "(distilBERT) for sequence classification over"
+#~ " a dataset of IMDB ratings. The "
+#~ "end goal is to detect if a "
+#~ "movie rating is positive or negative."
+#~ msgstr ""
+
+#~ msgid "Dependencies"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To follow along this tutorial you "
+#~ "will need to install the following "
+#~ "packages: :code:`datasets`, :code:`evaluate`, "
+#~ ":code:`flwr`, :code:`torch`, and "
+#~ ":code:`transformers`. This can be done "
+#~ "using :code:`pip`:"
+#~ msgstr ""
+
+#~ msgid "Standard Hugging Face workflow"
+#~ msgstr ""
+
+#~ msgid "Handling the data"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To fetch the IMDB dataset, we will"
+#~ " use Hugging Face's :code:`datasets` "
+#~ "library. We then need to tokenize "
+#~ "the data and create :code:`PyTorch` "
+#~ "dataloaders, this is all done in "
+#~ "the :code:`load_data` function:"
+#~ msgstr ""
+
+#~ msgid "Training and testing the model"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Once we have a way of creating "
+#~ "our trainloader and testloader, we can"
+#~ " take care of the training and "
+#~ "testing. This is very similar to "
+#~ "any :code:`PyTorch` training or testing "
+#~ "loop:"
+#~ msgstr ""
+
+#~ msgid "Creating the model itself"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To create the model itself, we "
+#~ "will just load the pre-trained "
+#~ "distillBERT model using Hugging Face’s "
+#~ ":code:`AutoModelForSequenceClassification` :"
+#~ msgstr ""
+
+#~ msgid "Federating the example"
+#~ msgstr ""
+
+#~ msgid "Creating the IMDBClient"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To federate our example to multiple "
+#~ "clients, we first need to write "
+#~ "our Flower client class (inheriting from"
+#~ " :code:`flwr.client.NumPyClient`). This is very"
+#~ " easy, as our model is a "
+#~ "standard :code:`PyTorch` model:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The :code:`get_parameters` function lets the"
+#~ " server get the client's parameters. "
+#~ "Inversely, the :code:`set_parameters` function "
+#~ "allows the server to send its "
+#~ "parameters to the client. Finally, the"
+#~ " :code:`fit` function trains the model "
+#~ "locally for the client, and the "
+#~ ":code:`evaluate` function tests the model "
+#~ "locally and returns the relevant "
+#~ "metrics."
+#~ msgstr ""
+
+#~ msgid "Starting the server"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Now that we have a way to "
+#~ "instantiate clients, we need to create"
+#~ " our server in order to aggregate "
+#~ "the results. Using Flower, this can "
+#~ "be done very easily by first "
+#~ "choosing a strategy (here, we are "
+#~ "using :code:`FedAvg`, which will define "
+#~ "the global weights as the average "
+#~ "of all the clients' weights at "
+#~ "each round) and then using the "
+#~ ":code:`flwr.server.start_server` function:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The :code:`weighted_average` function is there"
+#~ " to provide a way to aggregate "
+#~ "the metrics distributed amongst the "
+#~ "clients (basically this allows us to "
+#~ "display a nice average accuracy and "
+#~ "loss for every round)."
+#~ msgstr ""
+
+#~ msgid "Putting everything together"
+#~ msgstr ""
+
+#~ msgid "We can now start client instances using:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "And they will be able to connect"
+#~ " to the server and start the "
+#~ "federated training."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If you want to check out "
+#~ "everything put together, you should "
+#~ "check out the `full code example "
+#~ "<https://github.com/adap/flower/tree/main/examples/quickstart-"
+#~ "huggingface>`_ ."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Of course, this is a very basic"
+#~ " example, and a lot can be "
+#~ "added or modified, it was just to"
+#~ " showcase how simply we could "
+#~ "federate a Hugging Face workflow using"
+#~ " Flower."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Note that in this example we used"
+#~ " :code:`PyTorch`, but we could have "
+#~ "very well used :code:`TensorFlow`."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Check out this Federated Learning "
+#~ "quickstart tutorial for using Flower "
+#~ "with PyTorch Lightning to train an "
+#~ "Auto Encoder model on MNIST."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Let's build a horizontal federated "
+#~ "learning system using PyTorch Lightning "
+#~ "and Flower!"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Please refer to the `full code "
+#~ "example <https://github.com/adap/flower/tree/main/examples"
+#~ "/quickstart-pytorch-lightning>`_ to learn "
+#~ "more."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Check out this Federated Learning "
+#~ "quickstart tutorial for using Flower "
+#~ "with TensorFlow to train a MobilNetV2"
+#~ " model on CIFAR-10."
+#~ msgstr ""
+
+#~ msgid "Let's build a federated learning system in less than 20 lines of code!"
+#~ msgstr ""
+
+#~ msgid "Before Flower can be imported we have to install it:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Since we want to use the Keras "
+#~ "API of TensorFlow (TF), we have to"
+#~ " install TF as well:"
+#~ msgstr ""
+
+#~ msgid "Next, in a file called :code:`client.py`, import Flower and TensorFlow:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "We use the Keras utilities of TF"
+#~ " to load CIFAR10, a popular colored"
+#~ " image classification dataset for machine"
+#~ " learning. The call to "
+#~ ":code:`tf.keras.datasets.cifar10.load_data()` downloads "
+#~ "CIFAR10, caches it locally, and then "
+#~ "returns the entire training and test "
+#~ "set as NumPy ndarrays."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Next, we need a model. For the "
+#~ "purpose of this tutorial, we use "
+#~ "MobilNetV2 with 10 output classes:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The Flower server interacts with clients"
+#~ " through an interface called "
+#~ ":code:`Client`. When the server selects "
+#~ "a particular client for training, it "
+#~ "sends training instructions over the "
+#~ "network. The client receives those "
+#~ "instructions and calls one of the "
+#~ ":code:`Client` methods to run your code"
+#~ " (i.e., to train the neural network"
+#~ " we defined earlier)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Flower provides a convenience class "
+#~ "called :code:`NumPyClient` which makes it "
+#~ "easier to implement the :code:`Client` "
+#~ "interface when your workload uses Keras."
+#~ " The :code:`NumPyClient` interface defines "
+#~ "three methods which can be implemented"
+#~ " in the following way:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "We can now create an instance of"
+#~ " our class :code:`CifarClient` and add "
+#~ "one line to actually run this "
+#~ "client:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "That's it for the client. We only"
+#~ " have to implement :code:`Client` or "
+#~ ":code:`NumPyClient` and call "
+#~ ":code:`fl.client.start_client()`. If you implement"
+#~ " a client of type :code:`NumPyClient` "
+#~ "you'll need to first call its "
+#~ ":code:`to_client()` method. The string "
+#~ ":code:`\"[::]:8080\"` tells the client which"
+#~ " server to connect to. In our "
+#~ "case we can run the server and "
+#~ "the client on the same machine, "
+#~ "therefore we use :code:`\"[::]:8080\"`. If "
+#~ "we run a truly federated workload "
+#~ "with the server and clients running "
+#~ "on different machines, all that needs"
+#~ " to change is the :code:`server_address`"
+#~ " we point the client at."
+#~ msgstr ""
+
+#~ msgid "Each client will have its own dataset."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "You should now see how the "
+#~ "training does in the very first "
+#~ "terminal (the one that started the "
+#~ "server):"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Congratulations! You've successfully built and"
+#~ " run your first federated learning "
+#~ "system. The full `source code "
+#~ "<https://github.com/adap/flower/blob/main/examples/quickstart-"
+#~ "tensorflow/client.py>`_ for this can be "
+#~ "found in :code:`examples/quickstart-"
+#~ "tensorflow/client.py`."
+#~ msgstr ""
+
+#~ msgid "|e5918c1c06a4434bbe4bf49235e40059|"
+#~ msgstr ""
+
+#~ msgid "|c0165741bd1944f09ec55ce49032377d|"
+#~ msgstr ""
+
+#~ msgid "|0a0ac9427ac7487b8e52d75ed514f04e|"
+#~ msgstr ""
+
+#~ msgid "|5defee3ea4ca40d99fcd3e4ea045be25|"
+#~ msgstr ""
+
+#~ msgid "|74f26ca701254d3db57d7899bd91eb55|"
+#~ msgstr ""
+
+#~ msgid "|bda79f21f8154258a40e5766b2634ad7|"
+#~ msgstr ""
+
+#~ msgid "|89d30862e62e4f9989e193483a08680a|"
+#~ msgstr ""
+
+#~ msgid "|77e9918671c54b4f86e01369c0785ce8|"
+#~ msgstr ""
+
+#~ msgid "|7e4ccef37cc94148a067107b34eb7447|"
+#~ msgstr ""
+
+#~ msgid "|28e47e4cded14479a0846c8e5f22c872|"
+#~ msgstr ""
+
+#~ msgid "|4b8c5d1afa144294b76ffc76e4658a38|"
+#~ msgstr ""
+
+#~ msgid "|9dbdb3a0f6cb4a129fac863eaa414c17|"
+#~ msgstr ""
+
+#~ msgid "|81749d0ac0834c36a83bd38f433fea31|"
+#~ msgstr ""
+
+#~ msgid "|ed9aae51da70428eab7eef32f21e819e|"
 #~ msgstr ""
 
