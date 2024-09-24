@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2021 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 
 import importlib
 
-from flwr.simulation.run_simulation import run_simulation, run_simulation_from_cli
+from flwr.simulation.run_simulation import run_simulation
 
 is_ray_installed = importlib.util.find_spec("ray") is not None
 
@@ -28,7 +28,7 @@ else:
 
 To install the necessary dependencies, install `flwr` with the `simulation` extra:
 
-    pip install -U flwr["simulation"]
+    pip install -U "flwr[simulation]"
 """
 
     def start_simulation(*args, **kwargs):  # type: ignore
@@ -36,4 +36,7 @@ To install the necessary dependencies, install `flwr` with the `simulation` extr
         raise ImportError(RAY_IMPORT_ERROR)
 
 
-__all__ = ["start_simulation", "run_simulation_from_cli", "run_simulation"]
+__all__ = [
+    "run_simulation",
+    "start_simulation",
+]

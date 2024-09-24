@@ -19,7 +19,7 @@ import logging
 import sys
 from logging import WARN, LogRecord
 from logging.handlers import HTTPHandler
-from typing import TYPE_CHECKING, Any, Dict, Optional, TextIO, Tuple
+from typing import TYPE_CHECKING, Any, Optional, TextIO
 
 # Create logger
 LOGGER_NAME = "flwr"
@@ -83,13 +83,20 @@ class ConsoleHandler(StreamHandler):
         return formatter.format(record)
 
 
-def update_console_handler(level: int, timestamps: bool, colored: bool) -> None:
+def update_console_handler(
+    level: Optional[int] = None,
+    timestamps: Optional[bool] = None,
+    colored: Optional[bool] = None,
+) -> None:
     """Update the logging handler."""
     for handler in logging.getLogger(LOGGER_NAME).handlers:
         if isinstance(handler, ConsoleHandler):
-            handler.setLevel(level)
-            handler.timestamps = timestamps
-            handler.colored = colored
+            if level is not None:
+                handler.setLevel(level)
+            if timestamps is not None:
+                handler.timestamps = timestamps
+            if colored is not None:
+                handler.colored = colored
 
 
 # Configure console logger
@@ -114,12 +121,12 @@ class CustomHTTPHandler(HTTPHandler):
         url: str,
         method: str = "GET",
         secure: bool = False,
-        credentials: Optional[Tuple[str, str]] = None,
+        credentials: Optional[tuple[str, str]] = None,
     ) -> None:
         super().__init__(host, url, method, secure, credentials)
         self.identifier = identifier
 
-    def mapLogRecord(self, record: LogRecord) -> Dict[str, Any]:
+    def mapLogRecord(self, record: LogRecord) -> dict[str, Any]:
         """Filter for the properties to be send to the logserver."""
         record_dict = record.__dict__
         return {
@@ -166,13 +173,13 @@ logger = logging.getLogger(LOGGER_NAME)  # pylint: disable=invalid-name
 log = logger.log  # pylint: disable=invalid-name
 
 
-def warn_experimental_feature(name: str) -> None:
-    """Warn the user when they use an experimental feature."""
+def warn_preview_feature(name: str) -> None:
+    """Warn the user when they use a preview feature."""
     log(
         WARN,
-        """EXPERIMENTAL FEATURE: %s
+        """PREVIEW FEATURE: %s
 
-            This is an experimental feature. It could change significantly or be removed
+            This is a preview feature. It could change significantly or be removed
             entirely in future versions of Flower.
         """,
         name,
@@ -190,3 +197,67 @@ def warn_deprecated_feature(name: str) -> None:
         """,
         name,
     )
+
+
+def warn_deprecated_feature_with_example(
+    deprecation_message: str, example_message: str, code_example: str
+) -> None:
+    """Warn if a feature is deprecated and show code example."""
+    log(
+        WARN,
+        """DEPRECATED FEATURE: %s
+
+            Check the following `FEATURE UPDATE` warning message for the preferred
+            new mechanism to use this feature in Flower.
+        """,
+        deprecation_message,
+    )
+    log(
+        WARN,
+        """FEATURE UPDATE: %s
+        ------------------------------------------------------------
+        %s
+        ------------------------------------------------------------
+        """,
+        example_message,
+        code_example,
+    )
+
+
+def warn_unsupported_feature(name: str) -> None:
+    """Warn the user when they use an unsupported feature."""
+    log(
+        WARN,
+        """UNSUPPORTED FEATURE: %s
+
+            This is an unsupported feature. It will be removed
+            entirely in future versions of Flower.
+        """,
+        name,
+    )
+
+
+def set_logger_propagation(
+    child_logger: logging.Logger, value: bool = True
+) -> logging.Logger:
+    """Set the logger propagation attribute.
+
+    Parameters
+    ----------
+    child_logger : logging.Logger
+        Child logger object
+    value : bool
+        Boolean setting for propagation. If True, both parent and child logger
+        display messages. Otherwise, only the child logger displays a message.
+        This False setting prevents duplicate logs in Colab notebooks.
+        Reference: https://stackoverflow.com/a/19561320
+
+    Returns
+    -------
+    logging.Logger
+        Child logger object with updated propagation setting
+    """
+    child_logger.propagate = value
+    if not child_logger.propagate:
+        child_logger.log(logging.DEBUG, "Logger propagate set to False")
+    return child_logger

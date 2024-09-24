@@ -15,6 +15,9 @@
 """Test for Flower command line interface `new` command."""
 
 import os
+from pathlib import Path
+
+import pytest
 
 from .new import MlFramework, create_file, load_template, new, render_template
 
@@ -35,7 +38,13 @@ def test_render_template() -> None:
     """Test if a string is correctly substituted."""
     # Prepare
     filename = "app/README.md.tpl"
-    data = {"project_name": "FedGPT"}
+    data = {
+        "framework_str": "",
+        "project_name": "FedGPT",
+        "package_name": "fedgpt",
+        "import_name": "fedgpt",
+        "username": "flwrlabs",
+    }
 
     # Execute
     result = render_template(filename, data)
@@ -47,7 +56,7 @@ def test_render_template() -> None:
 def test_create_file(tmp_path: str) -> None:
     """Test if file with content is created."""
     # Prepare
-    file_path = os.path.join(tmp_path, "test.txt")
+    file_path = Path(tmp_path) / "test.txt"
     content = "Foobar"
 
     # Execute
@@ -60,42 +69,76 @@ def test_create_file(tmp_path: str) -> None:
     assert text == "Foobar"
 
 
-def test_new(tmp_path: str) -> None:
-    """Test if project is created for framework."""
+def test_new_correct_name(tmp_path: str) -> None:
+    """Test if project with correct name is created for framework."""
     # Prepare
-    project_name = "FedGPT"
     framework = MlFramework.PYTORCH
-    expected_files_top_level = {
-        "requirements.txt",
-        "fedgpt",
-        "README.md",
-        "flower.toml",
-        "pyproject.toml",
-    }
-    expected_files_module = {
-        "__init__.py",
-        "server.py",
-        "client.py",
-        "task.py",
-    }
+    username = "flwrlabs"
+    expected_names = [
+        ("FedGPT", "fedgpt", "fedgpt"),
+        ("My-Flower-App", "my-flower-app", "my_flower_app"),
+    ]
 
-    # Current directory
-    origin = os.getcwd()
+    for project_name, expected_top_level_dir, expected_module_dir in expected_names:
+        expected_files_top_level = {
+            expected_module_dir,
+            "README.md",
+            "pyproject.toml",
+            ".gitignore",
+        }
+        expected_files_module = {
+            "__init__.py",
+            "server_app.py",
+            "client_app.py",
+            "task.py",
+        }
 
-    try:
-        # Change into the temprorary directory
-        os.chdir(tmp_path)
+        # Current directory
+        origin = Path.cwd()
 
-        # Execute
-        new(project_name=project_name, framework=framework)
+        try:
+            # Change into the temprorary directory
+            os.chdir(tmp_path)
+            # Execute
+            new(app_name=project_name, framework=framework, username=username)
 
-        # Assert
-        file_list = os.listdir(os.path.join(tmp_path, project_name.lower()))
-        assert set(file_list) == expected_files_top_level
+            # Assert
+            file_list = (Path(tmp_path) / expected_top_level_dir).iterdir()
+            assert {
+                file_path.name for file_path in file_list
+            } == expected_files_top_level
 
-        file_list = os.listdir(
-            os.path.join(tmp_path, project_name.lower(), project_name.lower())
-        )
-        assert set(file_list) == expected_files_module
-    finally:
-        os.chdir(origin)
+            file_list = (
+                Path(tmp_path) / expected_top_level_dir / expected_module_dir
+            ).iterdir()
+            assert {file_path.name for file_path in file_list} == expected_files_module
+        finally:
+            os.chdir(origin)
+
+
+def test_new_incorrect_name(tmp_path: str) -> None:
+    """Test if project with incorrect name is created for framework."""
+    framework = MlFramework.PYTORCH
+    username = "flwrlabs"
+
+    for project_name in ["My_Flower_App", "My.Flower App"]:
+        # Current directory
+        origin = Path.cwd()
+
+        try:
+            # Change into the temprorary directory
+            os.chdir(tmp_path)
+
+            with pytest.raises(OSError) as exc_info:
+
+                # Execute
+                new(
+                    app_name=project_name,
+                    framework=framework,
+                    username=username,
+                )
+
+                assert "Failed to read from stdin" in str(exc_info.value)
+
+        finally:
+            os.chdir(origin)

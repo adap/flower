@@ -15,11 +15,10 @@ from typing import Tuple
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from flwr_datasets import FederatedDataset
 from torch import Tensor
 from torch.utils.data import DataLoader
-from torchvision.transforms import Compose, ToTensor, Normalize
-
-from flwr_datasets import FederatedDataset
+from torchvision.transforms import Compose, Normalize, ToTensor
 
 
 # pylint: disable=unsubscriptable-object
@@ -56,7 +55,7 @@ def load_data(partition_id: int):
     fds = FederatedDataset(dataset="cifar10", partitioners={"train": 10})
     partition = fds.load_partition(partition_id)
     # Divide data on each node: 80% train, 20% test
-    partition_train_test = partition.train_test_split(test_size=0.2)
+    partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
     pytorch_transforms = Compose(
         [ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
     )

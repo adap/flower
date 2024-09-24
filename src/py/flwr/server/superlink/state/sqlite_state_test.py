@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ class SqliteStateTest(unittest.TestCase):
             "consumer_node_id",
             "created_at",
             "delivered_at",
+            "pushed_at",
             "ttl",
             "ancestry",
             "task_type",

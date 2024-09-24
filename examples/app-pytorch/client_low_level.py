@@ -1,5 +1,5 @@
 from flwr.client import ClientApp
-from flwr.common import Message, Context
+from flwr.common import Context, Message
 
 
 def hello_world_mod(msg, ctx, call_next) -> Message:
@@ -20,16 +20,16 @@ app = ClientApp(
 @app.train()
 def train(msg: Message, ctx: Context):
     print("`train` is not implemented, echoing original message")
-    return msg.create_reply(msg.content, ttl="")
+    return msg.create_reply(msg.content)
 
 
 @app.evaluate()
 def eval(msg: Message, ctx: Context):
     print("`evaluate` is not implemented, echoing original message")
-    return msg.create_reply(msg.content, ttl="")
+    return msg.create_reply(msg.content)
 
 
 @app.query()
 def query(msg: Message, ctx: Context):
     print("`query` is not implemented, echoing original message")
-    return msg.create_reply(msg.content, ttl="")
+    return msg.create_reply(msg.content)

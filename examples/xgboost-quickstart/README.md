@@ -1,88 +1,71 @@
-# Flower Example using XGBoost
+---
+tags: [quickstart, classification, tabular]
+dataset: [HIGGS]
+framework: [xgboost]
+---
+
+# Federated Learning with XGBoost and Flower (Quickstart Example)
 
 This example demonstrates how to perform EXtreme Gradient Boosting (XGBoost) within Flower using `xgboost` package.
 We use [HIGGS](https://archive.ics.uci.edu/dataset/280/higgs) dataset for this example to perform a binary classification task.
 Tree-based with bagging method is used for aggregation on the server.
 
-This project provides a minimal code example to enable you to get stated quickly. For a more comprehensive code example, take a look at [xgboost-comprehensive](https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive).
+This project provides a minimal code example to enable you to get started quickly. For a more comprehensive code example, take a look at [xgboost-comprehensive](https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive).
 
-## Project Setup
+## Set up the project
 
-Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
+### Clone the project
 
-```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/xgboost-quickstart . && rm -rf flower && cd xgboost-quickstart
-```
-
-This will create a new directory called `xgboost-quickstart` containing the following files:
-
-```
--- README.md         <- Your're reading this right now
--- server.py         <- Defines the server-side logic
--- client.py         <- Defines the client-side logic
--- run.sh            <- Commands to run experiments
--- pyproject.toml    <- Example dependencies (if you use Poetry)
--- requirements.txt  <- Example dependencies
-```
-
-### Installing Dependencies
-
-Project dependencies (such as `xgboost` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
-
-#### Poetry
+Start by cloning the example project:
 
 ```shell
-poetry install
-poetry shell
+git clone --depth=1 https://github.com/adap/flower.git _tmp \
+        && mv _tmp/examples/xgboost-quickstart . \
+        && rm -rf _tmp \
+        && cd xgboost-quickstart
 ```
 
-Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
+This will create a new directory called `xgboost-quickstart` with the following structure:
 
 ```shell
-poetry run python3 -c "import flwr"
+xgboost-quickstart
+├── xgboost_quickstart
+│   ├── __init__.py
+│   ├── client_app.py   # Defines your ClientApp
+│   ├── server_app.py   # Defines your ServerApp
+│   └── task.py         # Defines your utilities and data loading
+├── pyproject.toml      # Project metadata like dependencies and configs
+└── README.md
 ```
 
-If you don't see any errors you're good to go!
+### Install dependencies and project
 
-#### pip
+Install the dependencies defined in `pyproject.toml` as well as the `xgboost_quickstart` package.
 
-Write the command below in your terminal to install the dependencies according to the configuration file requirements.txt.
-
-```shell
-pip install -r requirements.txt
+```bash
+pip install -e .
 ```
 
-## Run Federated Learning with XGBoost and Flower
+## Run the project
 
-Afterwards you are ready to start the Flower server as well as the clients.
-You can simply start the server in a terminal as follows:
+You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
 
-```shell
-python3 server.py
+### Run with the Simulation Engine
+
+```bash
+flwr run .
 ```
 
-Now you are ready to start the Flower clients which will participate in the learning.
-To do so simply open two more terminal windows and run the following commands.
+You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
-Start client 1 in the first terminal:
-
-```shell
-python3 client.py --partition-id=0
+```bash
+flwr run . --run-config "num-server-rounds=5 params.eta=0.05"
 ```
 
-Start client 2 in the second terminal:
+> \[!TIP\]
+> For a more detailed walk-through check our [quickstart XGBoost tutorial](https://flower.ai/docs/framework/tutorial-quickstart-xgboost.html)
 
-```shell
-python3 client.py --partition-id=1
-```
+### Run with the Deployment Engine
 
-You will see that XGBoost is starting a federated training.
-
-Alternatively, you can use `run.sh` to run the same experiment in a single terminal as follows:
-
-```shell
-poetry run ./run.sh
-```
-
-Look at the [code](https://github.com/adap/flower/tree/main/examples/xgboost-quickstart)
-and [tutorial](https://flower.ai/docs/framework/tutorial-quickstart-xgboost.html) for a detailed explanation.
+> \[!NOTE\]
+> An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.

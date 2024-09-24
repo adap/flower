@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 
 
 import unittest
-from typing import List, cast
+from typing import cast
 
 from flwr.client.typing import ClientAppCallable, Mod
 from flwr.common import (
+    DEFAULT_TTL,
     ConfigsRecord,
     Context,
     Message,
@@ -42,7 +43,7 @@ def _increment_context_counter(context: Context) -> None:
     context.state.metrics_records[METRIC] = MetricsRecord({COUNTER: current_counter})
 
 
-def make_mock_mod(name: str, footprint: List[str]) -> Mod:
+def make_mock_mod(name: str, footprint: list[str]) -> Mod:
     """Make a mock mod."""
 
     def mod(message: Message, context: Context, app: ClientAppCallable) -> Message:
@@ -60,7 +61,7 @@ def make_mock_mod(name: str, footprint: List[str]) -> Mod:
     return mod
 
 
-def make_mock_app(name: str, footprint: List[str]) -> ClientAppCallable:
+def make_mock_app(name: str, footprint: list[str]) -> ClientAppCallable:
     """Make a mock app."""
 
     def app(message: Message, context: Context) -> Message:
@@ -84,7 +85,7 @@ def _get_dummy_flower_message() -> Message:
             src_node_id=0,
             dst_node_id=0,
             reply_to_message="",
-            ttl="",
+            ttl=DEFAULT_TTL,
             message_type="mock",
         ),
     )
@@ -96,14 +97,14 @@ class TestMakeApp(unittest.TestCase):
     def test_multiple_mods(self) -> None:
         """Test if multiple mods are called in the correct order."""
         # Prepare
-        footprint: List[str] = []
+        footprint: list[str] = []
         mock_app = make_mock_app("app", footprint)
         mock_mod_names = [f"mod{i}" for i in range(1, 15)]
         mock_mods = [make_mock_mod(name, footprint) for name in mock_mod_names]
 
         state = RecordSet()
         state.metrics_records[METRIC] = MetricsRecord({COUNTER: 0.0})
-        context = Context(state=state)
+        context = Context(node_id=0, node_config={}, state=state, run_config={})
         message = _get_dummy_flower_message()
 
         # Execute
@@ -126,9 +127,9 @@ class TestMakeApp(unittest.TestCase):
     def test_filter(self) -> None:
         """Test if a mod can filter incoming TaskIns."""
         # Prepare
-        footprint: List[str] = []
+        footprint: list[str] = []
         mock_app = make_mock_app("app", footprint)
-        context = Context(state=RecordSet())
+        context = Context(node_id=0, node_config={}, state=RecordSet(), run_config={})
         message = _get_dummy_flower_message()
 
         def filter_mod(

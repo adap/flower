@@ -15,6 +15,8 @@
 """Clipping modifiers for central DP with client-side clipping."""
 
 
+from logging import INFO
+
 from flwr.client.typing import ClientAppCallable
 from flwr.common import ndarrays_to_parameters, parameters_to_ndarrays
 from flwr.common import recordset_compat as compat
@@ -25,6 +27,7 @@ from flwr.common.differential_privacy import (
     compute_clip_model_update,
 )
 from flwr.common.differential_privacy_constants import KEY_CLIPPING_NORM, KEY_NORM_BIT
+from flwr.common.logger import log
 from flwr.common.message import Message
 
 
@@ -77,6 +80,10 @@ def fixedclipping_mod(
         client_to_server_params,
         server_to_client_params,
         clipping_norm,
+    )
+
+    log(
+        INFO, "fixedclipping_mod: parameters are clipped by value: %.4f.", clipping_norm
     )
 
     fit_res.parameters = ndarrays_to_parameters(client_to_server_params)
@@ -137,6 +144,11 @@ def adaptiveclipping_mod(
     norm_bit = compute_adaptive_clip_model_update(
         client_to_server_params,
         server_to_client_params,
+        clipping_norm,
+    )
+    log(
+        INFO,
+        "adaptiveclipping_mod: parameters are clipped by value: %.4f.",
         clipping_norm,
     )
 

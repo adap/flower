@@ -1,4 +1,4 @@
-# Copyright 2022 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,13 +16,14 @@
 
 
 import abc
-from typing import List, Optional, Set
+from typing import Optional
 from uuid import UUID
 
+from flwr.common.typing import Run, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 
-class State(abc.ABC):
+class State(abc.ABC):  # pylint: disable=R0904
     """Abstract State."""
 
     @abc.abstractmethod
@@ -50,7 +51,7 @@ class State(abc.ABC):
     @abc.abstractmethod
     def get_task_ins(
         self, node_id: Optional[int], limit: Optional[int]
-    ) -> List[TaskIns]:
+    ) -> list[TaskIns]:
         """Get TaskIns optionally filtered by node_id.
 
         Usually, the Fleet API calls this for Nodes planning to work on one or more
@@ -97,7 +98,7 @@ class State(abc.ABC):
         """
 
     @abc.abstractmethod
-    def get_task_res(self, task_ids: Set[UUID], limit: Optional[int]) -> List[TaskRes]:
+    def get_task_res(self, task_ids: set[UUID], limit: Optional[int]) -> list[TaskRes]:
         """Get TaskRes for task_ids.
 
         Usually, the Driver API calls this method to get results for instructions it has
@@ -128,19 +129,21 @@ class State(abc.ABC):
         """
 
     @abc.abstractmethod
-    def delete_tasks(self, task_ids: Set[UUID]) -> None:
+    def delete_tasks(self, task_ids: set[UUID]) -> None:
         """Delete all delivered TaskIns/TaskRes pairs."""
 
     @abc.abstractmethod
-    def create_node(self) -> int:
+    def create_node(
+        self, ping_interval: float, public_key: Optional[bytes] = None
+    ) -> int:
         """Create, store in state, and return `node_id`."""
 
     @abc.abstractmethod
-    def delete_node(self, node_id: int) -> None:
+    def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
         """Remove `node_id` from state."""
 
     @abc.abstractmethod
-    def get_nodes(self, run_id: int) -> Set[int]:
+    def get_nodes(self, run_id: int) -> set[int]:
         """Retrieve all currently stored node IDs as a set.
 
         Constraints
@@ -150,5 +153,78 @@ class State(abc.ABC):
         """
 
     @abc.abstractmethod
-    def create_run(self) -> int:
-        """Create one run."""
+    def get_node_id(self, node_public_key: bytes) -> Optional[int]:
+        """Retrieve stored `node_id` filtered by `node_public_keys`."""
+
+    @abc.abstractmethod
+    def create_run(
+        self,
+        fab_id: Optional[str],
+        fab_version: Optional[str],
+        fab_hash: Optional[str],
+        override_config: UserConfig,
+    ) -> int:
+        """Create a new run for the specified `fab_hash`."""
+
+    @abc.abstractmethod
+    def get_run(self, run_id: int) -> Optional[Run]:
+        """Retrieve information about the run with the specified `run_id`.
+
+        Parameters
+        ----------
+        run_id : int
+            The identifier of the run.
+
+        Returns
+        -------
+        Optional[Run]
+            A dataclass instance containing three elements if `run_id` is valid:
+            - `run_id`: The identifier of the run, same as the specified `run_id`.
+            - `fab_id`: The identifier of the FAB used in the specified run.
+            - `fab_version`: The version of the FAB used in the specified run.
+        """
+
+    @abc.abstractmethod
+    def store_server_private_public_key(
+        self, private_key: bytes, public_key: bytes
+    ) -> None:
+        """Store `server_private_key` and `server_public_key` in state."""
+
+    @abc.abstractmethod
+    def get_server_private_key(self) -> Optional[bytes]:
+        """Retrieve `server_private_key` in urlsafe bytes."""
+
+    @abc.abstractmethod
+    def get_server_public_key(self) -> Optional[bytes]:
+        """Retrieve `server_public_key` in urlsafe bytes."""
+
+    @abc.abstractmethod
+    def store_node_public_keys(self, public_keys: set[bytes]) -> None:
+        """Store a set of `node_public_keys` in state."""
+
+    @abc.abstractmethod
+    def store_node_public_key(self, public_key: bytes) -> None:
+        """Store a `node_public_key` in state."""
+
+    @abc.abstractmethod
+    def get_node_public_keys(self) -> set[bytes]:
+        """Retrieve all currently stored `node_public_keys` as a set."""
+
+    @abc.abstractmethod
+    def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
+        """Acknowledge a ping received from a node, serving as a heartbeat.
+
+        Parameters
+        ----------
+        node_id : int
+            The `node_id` from which the ping was received.
+        ping_interval : float
+            The interval (in seconds) from the current timestamp within which the next
+            ping from this node must be received. This acts as a hard deadline to ensure
+            an accurate assessment of the node's availability.
+
+        Returns
+        -------
+        is_acknowledged : bool
+            True if the ping is successfully acknowledged; otherwise, False.
+        """

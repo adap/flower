@@ -19,7 +19,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Wait for wheel to be built
-        uses: lewagon/wait-on-check-action@v1.3.3
+        uses: lewagon/wait-on-check-action@v1.3.4
         with:
           ref: ${{ github.ref }}
           check-name: 'Build, test and upload wheel'

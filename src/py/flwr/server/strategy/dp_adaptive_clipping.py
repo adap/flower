@@ -19,8 +19,8 @@ Paper (Andrew et al.): https://arxiv.org/abs/1905.03871
 
 
 import math
-from logging import WARNING
-from typing import Dict, List, Optional, Tuple, Union
+from logging import INFO, WARNING
+from typing import Optional, Union
 
 import numpy as np
 
@@ -39,6 +39,7 @@ from flwr.common.differential_privacy import (
     adaptive_clip_inputs_inplace,
     add_gaussian_noise_to_params,
     compute_adaptive_noise_params,
+    compute_stdv,
 )
 from flwr.common.differential_privacy_constants import (
     CLIENTS_DISCREPANCY_WARNING,
@@ -155,14 +156,14 @@ class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
-    ) -> List[Tuple[ClientProxy, FitIns]]:
+    ) -> list[tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
         self.current_round_params = parameters_to_ndarrays(parameters)
         return self.strategy.configure_fit(server_round, parameters, client_manager)
 
     def configure_evaluate(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
-    ) -> List[Tuple[ClientProxy, EvaluateIns]]:
+    ) -> list[tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
         return self.strategy.configure_evaluate(
             server_round, parameters, client_manager
@@ -171,9 +172,9 @@ class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
     def aggregate_fit(
         self,
         server_round: int,
-        results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+        results: list[tuple[ClientProxy, FitRes]],
+        failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
+    ) -> tuple[Optional[Parameters], dict[str, Scalar]]:
         """Aggregate training results and update clip norms."""
         if failures:
             return None, {}
@@ -196,6 +197,12 @@ class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
 
             norm_bit = adaptive_clip_inputs_inplace(model_update, self.clipping_norm)
             norm_bit_set_count += norm_bit
+
+            log(
+                INFO,
+                "aggregate_fit: parameters are clipped by value: %.4f.",
+                self.clipping_norm,
+            )
 
             for i, _ in enumerate(self.current_round_params):
                 param[i] = self.current_round_params[i] + model_update[i]
@@ -225,21 +232,28 @@ class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
                 self.clipping_norm,
                 self.num_sampled_clients,
             )
+            log(
+                INFO,
+                "aggregate_fit: central DP noise with %.4f stdev added",
+                compute_stdv(
+                    self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
+                ),
+            )
 
         return aggregated_params, metrics
 
     def aggregate_evaluate(
         self,
         server_round: int,
-        results: List[Tuple[ClientProxy, EvaluateRes]],
-        failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
-    ) -> Tuple[Optional[float], Dict[str, Scalar]]:
+        results: list[tuple[ClientProxy, EvaluateRes]],
+        failures: list[Union[tuple[ClientProxy, EvaluateRes], BaseException]],
+    ) -> tuple[Optional[float], dict[str, Scalar]]:
         """Aggregate evaluation losses using the given strategy."""
         return self.strategy.aggregate_evaluate(server_round, results, failures)
 
     def evaluate(
         self, server_round: int, parameters: Parameters
-    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+    ) -> Optional[tuple[float, dict[str, Scalar]]]:
         """Evaluate model parameters using an evaluation function from the strategy."""
         return self.strategy.evaluate(server_round, parameters)
 
@@ -282,7 +296,7 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
 
     Wrap the strategy with the `DifferentialPrivacyClientSideAdaptiveClipping` wrapper:
 
-    >>> DifferentialPrivacyClientSideAdaptiveClipping(
+    >>> dp_strategy = DifferentialPrivacyClientSideAdaptiveClipping(
     >>>     strategy, cfg.noise_multiplier, cfg.num_sampled_clients
     >>> )
 
@@ -358,7 +372,7 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
-    ) -> List[Tuple[ClientProxy, FitIns]]:
+    ) -> list[tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
         additional_config = {KEY_CLIPPING_NORM: self.clipping_norm}
         inner_strategy_config_result = self.strategy.configure_fit(
@@ -371,7 +385,7 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
 
     def configure_evaluate(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
-    ) -> List[Tuple[ClientProxy, EvaluateIns]]:
+    ) -> list[tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
         return self.strategy.configure_evaluate(
             server_round, parameters, client_manager
@@ -380,9 +394,9 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
     def aggregate_fit(
         self,
         server_round: int,
-        results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+        results: list[tuple[ClientProxy, FitRes]],
+        failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
+    ) -> tuple[Optional[Parameters], dict[str, Scalar]]:
         """Aggregate training results and update clip norms."""
         if failures:
             return None, {}
@@ -408,10 +422,17 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
                 self.clipping_norm,
                 self.num_sampled_clients,
             )
+            log(
+                INFO,
+                "aggregate_fit: central DP noise with %.4f stdev added",
+                compute_stdv(
+                    self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
+                ),
+            )
 
         return aggregated_params, metrics
 
-    def _update_clip_norm(self, results: List[Tuple[ClientProxy, FitRes]]) -> None:
+    def _update_clip_norm(self, results: list[tuple[ClientProxy, FitRes]]) -> None:
         # Calculate the number of clients which set the norm indicator bit
         norm_bit_set_count = 0
         for client_proxy, fit_res in results:
@@ -436,14 +457,14 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
     def aggregate_evaluate(
         self,
         server_round: int,
-        results: List[Tuple[ClientProxy, EvaluateRes]],
-        failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
-    ) -> Tuple[Optional[float], Dict[str, Scalar]]:
+        results: list[tuple[ClientProxy, EvaluateRes]],
+        failures: list[Union[tuple[ClientProxy, EvaluateRes], BaseException]],
+    ) -> tuple[Optional[float], dict[str, Scalar]]:
         """Aggregate evaluation losses using the given strategy."""
         return self.strategy.aggregate_evaluate(server_round, results, failures)
 
     def evaluate(
         self, server_round: int, parameters: Parameters
-    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+    ) -> Optional[tuple[float, dict[str, Scalar]]]:
         """Evaluate model parameters using an evaluation function from the strategy."""
         return self.strategy.evaluate(server_round, parameters)

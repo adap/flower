@@ -12,19 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Message handler for the SecAgg+ protocol."""
+"""Modifier for the SecAgg+ protocol."""
 
 
 import os
 from dataclasses import dataclass, field
-from logging import INFO, WARNING
-from typing import Any, Callable, Dict, List, Tuple, cast
+from logging import DEBUG, WARNING
+from typing import Any, cast
 
 from flwr.client.typing import ClientAppCallable
 from flwr.common import (
     ConfigsRecord,
     Context,
     Message,
+    Parameters,
     RecordSet,
     ndarray_to_bytes,
     parameters_to_ndarrays,
@@ -62,7 +63,7 @@ from flwr.common.secure_aggregation.secaggplus_utils import (
     share_keys_plaintext_concat,
     share_keys_plaintext_separate,
 )
-from flwr.common.typing import ConfigsRecordValues, FitRes
+from flwr.common.typing import ConfigsRecordValues
 
 
 @dataclass
@@ -90,11 +91,11 @@ class SecAggPlusState:
     # Random seed for generating the private mask
     rd_seed: bytes = b""
 
-    rd_seed_share_dict: Dict[int, bytes] = field(default_factory=dict)
-    sk1_share_dict: Dict[int, bytes] = field(default_factory=dict)
+    rd_seed_share_dict: dict[int, bytes] = field(default_factory=dict)
+    sk1_share_dict: dict[int, bytes] = field(default_factory=dict)
     # The dict of the shared secrets from sk2
-    ss2_dict: Dict[int, bytes] = field(default_factory=dict)
-    public_keys_dict: Dict[int, Tuple[bytes, bytes]] = field(default_factory=dict)
+    ss2_dict: dict[int, bytes] = field(default_factory=dict)
+    public_keys_dict: dict[int, tuple[bytes, bytes]] = field(default_factory=dict)
 
     def __init__(self, **kwargs: ConfigsRecordValues) -> None:
         for k, v in kwargs.items():
@@ -103,8 +104,8 @@ class SecAggPlusState:
             new_v: Any = v
             if k.endswith(":K"):
                 k = k[:-2]
-                keys = cast(List[int], v)
-                values = cast(List[bytes], kwargs[f"{k}:V"])
+                keys = cast(list[int], v)
+                values = cast(list[bytes], kwargs[f"{k}:V"])
                 if len(values) > len(keys):
                     updated_values = [
                         tuple(values[i : i + 2]) for i in range(0, len(values), 2)
@@ -114,34 +115,22 @@ class SecAggPlusState:
                     new_v = dict(zip(keys, values))
             self.__setattr__(k, new_v)
 
-    def to_dict(self) -> Dict[str, ConfigsRecordValues]:
+    def to_dict(self) -> dict[str, ConfigsRecordValues]:
         """Convert the state to a dictionary."""
         ret = vars(self)
         for k in list(ret.keys()):
             if isinstance(ret[k], dict):
                 # Replace dict with two lists
-                v = cast(Dict[str, Any], ret.pop(k))
+                v = cast(dict[str, Any], ret.pop(k))
                 ret[f"{k}:K"] = list(v.keys())
                 if k == "public_keys_dict":
-                    v_list: List[bytes] = []
-                    for b1_b2 in cast(List[Tuple[bytes, bytes]], v.values()):
+                    v_list: list[bytes] = []
+                    for b1_b2 in cast(list[tuple[bytes, bytes]], v.values()):
                         v_list.extend(b1_b2)
                     ret[f"{k}:V"] = v_list
                 else:
                     ret[f"{k}:V"] = list(v.values())
         return ret
-
-
-def _get_fit_fn(
-    msg: Message, ctxt: Context, call_next: ClientAppCallable
-) -> Callable[[], FitRes]:
-    """Get the fit function."""
-
-    def fit() -> FitRes:
-        out_msg = call_next(msg, ctxt)
-        return compat.recordset_to_fitres(out_msg.content, keep_input=False)
-
-    return fit
 
 
 def secaggplus_mod(
@@ -173,25 +162,32 @@ def secaggplus_mod(
     check_configs(state.current_stage, configs)
 
     # Execute
+    out_content = RecordSet()
     if state.current_stage == Stage.SETUP:
         state.nid = msg.metadata.dst_node_id
         res = _setup(state, configs)
     elif state.current_stage == Stage.SHARE_KEYS:
         res = _share_keys(state, configs)
     elif state.current_stage == Stage.COLLECT_MASKED_VECTORS:
-        fit = _get_fit_fn(msg, ctxt, call_next)
-        res = _collect_masked_vectors(state, configs, fit)
+        out_msg = call_next(msg, ctxt)
+        out_content = out_msg.content
+        fitres = compat.recordset_to_fitres(out_content, keep_input=True)
+        res = _collect_masked_vectors(
+            state, configs, fitres.num_examples, fitres.parameters
+        )
+        for p_record in out_content.parameters_records.values():
+            p_record.clear()
     elif state.current_stage == Stage.UNMASK:
         res = _unmask(state, configs)
     else:
-        raise ValueError(f"Unknown secagg stage: {state.current_stage}")
+        raise ValueError(f"Unknown SecAgg/SecAgg+ stage: {state.current_stage}")
 
     # Save state
     ctxt.state.configs_records[RECORD_KEY_STATE] = ConfigsRecord(state.to_dict())
 
     # Return message
-    content = RecordSet(configs_records={RECORD_KEY_CONFIGS: ConfigsRecord(res, False)})
-    return msg.create_reply(content, ttl="")
+    out_content.configs_records[RECORD_KEY_CONFIGS] = ConfigsRecord(res, False)
+    return msg.create_reply(out_content)
 
 
 def check_stage(current_stage: str, configs: ConfigsRecord) -> None:
@@ -280,7 +276,7 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
                 )
             if not isinstance(configs[key], list) or any(
                 elm
-                for elm in cast(List[Any], configs[key])
+                for elm in cast(list[Any], configs[key])
                 # pylint: disable-next=unidiomatic-typecheck
                 if type(elm) is not expected_type
             ):
@@ -303,7 +299,7 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
                 )
             if not isinstance(configs[key], list) or any(
                 elm
-                for elm in cast(List[Any], configs[key])
+                for elm in cast(list[Any], configs[key])
                 # pylint: disable-next=unidiomatic-typecheck
                 if type(elm) is not expected_type
             ):
@@ -318,11 +314,11 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
 
 def _setup(
     state: SecAggPlusState, configs: ConfigsRecord
-) -> Dict[str, ConfigsRecordValues]:
+) -> dict[str, ConfigsRecordValues]:
     # Assigning parameter values to object fields
     sec_agg_param_dict = configs
     state.sample_num = cast(int, sec_agg_param_dict[Key.SAMPLE_NUMBER])
-    log(INFO, "Node %d: starting stage 0...", state.nid)
+    log(DEBUG, "Node %d: starting stage 0...", state.nid)
 
     state.share_num = cast(int, sec_agg_param_dict[Key.SHARE_NUMBER])
     state.threshold = cast(int, sec_agg_param_dict[Key.THRESHOLD])
@@ -347,17 +343,17 @@ def _setup(
 
     state.sk1, state.pk1 = private_key_to_bytes(sk1), public_key_to_bytes(pk1)
     state.sk2, state.pk2 = private_key_to_bytes(sk2), public_key_to_bytes(pk2)
-    log(INFO, "Node %d: stage 0 completes. uploading public keys...", state.nid)
+    log(DEBUG, "Node %d: stage 0 completes. uploading public keys...", state.nid)
     return {Key.PUBLIC_KEY_1: state.pk1, Key.PUBLIC_KEY_2: state.pk2}
 
 
 # pylint: disable-next=too-many-locals
 def _share_keys(
     state: SecAggPlusState, configs: ConfigsRecord
-) -> Dict[str, ConfigsRecordValues]:
-    named_bytes_tuples = cast(Dict[str, Tuple[bytes, bytes]], configs)
+) -> dict[str, ConfigsRecordValues]:
+    named_bytes_tuples = cast(dict[str, tuple[bytes, bytes]], configs)
     key_dict = {int(sid): (pk1, pk2) for sid, (pk1, pk2) in named_bytes_tuples.items()}
-    log(INFO, "Node %d: starting stage 1...", state.nid)
+    log(DEBUG, "Node %d: starting stage 1...", state.nid)
     state.public_keys_dict = key_dict
 
     # Check if the size is larger than threshold
@@ -365,7 +361,7 @@ def _share_keys(
         raise ValueError("Available neighbours number smaller than threshold")
 
     # Check if all public keys are unique
-    pk_list: List[bytes] = []
+    pk_list: list[bytes] = []
     for pk1, pk2 in state.public_keys_dict.values():
         pk_list.append(pk1)
         pk_list.append(pk2)
@@ -409,7 +405,7 @@ def _share_keys(
             dsts.append(nid)
             ciphertexts.append(ciphertext)
 
-    log(INFO, "Node %d: stage 1 completes. uploading key shares...", state.nid)
+    log(DEBUG, "Node %d: stage 1 completes. uploading key shares...", state.nid)
     return {Key.DESTINATION_LIST: dsts, Key.CIPHERTEXT_LIST: ciphertexts}
 
 
@@ -417,12 +413,13 @@ def _share_keys(
 def _collect_masked_vectors(
     state: SecAggPlusState,
     configs: ConfigsRecord,
-    fit: Callable[[], FitRes],
-) -> Dict[str, ConfigsRecordValues]:
-    log(INFO, "Node %d: starting stage 2...", state.nid)
-    available_clients: List[int] = []
-    ciphertexts = cast(List[bytes], configs[Key.CIPHERTEXT_LIST])
-    srcs = cast(List[int], configs[Key.SOURCE_LIST])
+    num_examples: int,
+    updated_parameters: Parameters,
+) -> dict[str, ConfigsRecordValues]:
+    log(DEBUG, "Node %d: starting stage 2...", state.nid)
+    available_clients: list[int] = []
+    ciphertexts = cast(list[bytes], configs[Key.CIPHERTEXT_LIST])
+    srcs = cast(list[int], configs[Key.SOURCE_LIST])
     if len(ciphertexts) + 1 < state.threshold:
         raise ValueError("Not enough available neighbour clients.")
 
@@ -447,26 +444,20 @@ def _collect_masked_vectors(
         state.rd_seed_share_dict[src] = rd_seed_share
         state.sk1_share_dict[src] = sk1_share
 
-    # Fit client
-    fit_res = fit()
-    if len(fit_res.metrics) > 0:
-        log(
-            WARNING,
-            "The metrics in FitRes will not be preserved or sent to the server.",
-        )
-    ratio = fit_res.num_examples / state.max_weight
+    # Fit
+    ratio = num_examples / state.max_weight
     if ratio > 1:
         log(
             WARNING,
             "Potential overflow warning: the provided weight (%s) exceeds the specified"
             " max_weight (%s). This may lead to overflow issues.",
-            fit_res.num_examples,
+            num_examples,
             state.max_weight,
         )
     q_ratio = round(ratio * state.target_range)
     dq_ratio = q_ratio / state.target_range
 
-    parameters = parameters_to_ndarrays(fit_res.parameters)
+    parameters = parameters_to_ndarrays(updated_parameters)
     parameters = parameters_multiply(parameters, dq_ratio)
 
     # Quantize parameter update (vector)
@@ -476,7 +467,7 @@ def _collect_masked_vectors(
 
     quantized_parameters = factor_combine(q_ratio, quantized_parameters)
 
-    dimensions_list: List[Tuple[int, ...]] = [a.shape for a in quantized_parameters]
+    dimensions_list: list[tuple[int, ...]] = [a.shape for a in quantized_parameters]
 
     # Add private mask
     private_mask = pseudo_rand_gen(state.rd_seed, state.mod_range, dimensions_list)
@@ -500,7 +491,7 @@ def _collect_masked_vectors(
 
     # Take mod of final weight update vector and return to server
     quantized_parameters = parameters_mod(quantized_parameters, state.mod_range)
-    log(INFO, "Node %d: stage 2 completed, uploading masked parameters...", state.nid)
+    log(DEBUG, "Node %d: stage 2 completed, uploading masked parameters...", state.nid)
     return {
         Key.MASKED_PARAMETERS: [ndarray_to_bytes(arr) for arr in quantized_parameters]
     }
@@ -508,11 +499,11 @@ def _collect_masked_vectors(
 
 def _unmask(
     state: SecAggPlusState, configs: ConfigsRecord
-) -> Dict[str, ConfigsRecordValues]:
-    log(INFO, "Node %d: starting stage 3...", state.nid)
+) -> dict[str, ConfigsRecordValues]:
+    log(DEBUG, "Node %d: starting stage 3...", state.nid)
 
-    active_nids = cast(List[int], configs[Key.ACTIVE_NODE_ID_LIST])
-    dead_nids = cast(List[int], configs[Key.DEAD_NODE_ID_LIST])
+    active_nids = cast(list[int], configs[Key.ACTIVE_NODE_ID_LIST])
+    dead_nids = cast(list[int], configs[Key.DEAD_NODE_ID_LIST])
     # Send private mask seed share for every avaliable client (including itself)
     # Send first private key share for building pairwise mask for every dropped client
     if len(active_nids) < state.threshold:
@@ -523,5 +514,5 @@ def _unmask(
     shares += [state.rd_seed_share_dict[nid] for nid in active_nids]
     shares += [state.sk1_share_dict[nid] for nid in dead_nids]
 
-    log(INFO, "Node %d: stage 3 completes. uploading key shares...", state.nid)
+    log(DEBUG, "Node %d: stage 3 completes. uploading key shares...", state.nid)
     return {Key.NODE_ID_LIST: all_nids, Key.SHARE_LIST: shares}

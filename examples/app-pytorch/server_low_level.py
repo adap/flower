@@ -1,11 +1,18 @@
-from typing import List, Tuple, Dict
 import random
 import time
+from typing import Dict, List, Tuple
 
 import flwr as fl
-from flwr.common import Context, NDArrays, Message, MessageType, Metrics, RecordSet
+from flwr.common import (
+    DEFAULT_TTL,
+    Context,
+    Message,
+    MessageType,
+    Metrics,
+    NDArrays,
+    RecordSet,
+)
 from flwr.server import Driver
-
 
 # Run via `flower-server-app server:app`
 app = fl.server.ServerApp()
@@ -30,7 +37,7 @@ def main(driver: Driver, context: Context) -> None:
                 message_type=MessageType.TRAIN,
                 dst_node_id=node_id,
                 group_id=str(server_round),
-                ttl="",
+                ttl=DEFAULT_TTL,
             )
             messages.append(message)
 

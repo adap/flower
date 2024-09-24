@@ -2,18 +2,17 @@ import warnings
 from logging import INFO
 
 import flwr as fl
-from flwr_datasets import FederatedDataset
 from flwr.common.logger import log
+from flwr_datasets import FederatedDataset
 
+from client_utils import XgbClient
 from dataset import (
     instantiate_partitioner,
+    resplit,
     train_test_split,
     transform_dataset_to_dmatrix,
-    resplit,
 )
-from utils import client_args_parser, BST_PARAMS, NUM_LOCAL_ROUND
-from client_utils import XgbClient
-
+from utils import BST_PARAMS, NUM_LOCAL_ROUND, client_args_parser
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -32,7 +31,7 @@ partitioner = instantiate_partitioner(
 fds = FederatedDataset(
     dataset="jxie/higgs",
     partitioners={"train": partitioner},
-    resplitter=resplit,
+    preprocessor=resplit,
 )
 
 # Load the partition for this `partition_id`
@@ -43,7 +42,7 @@ partition.set_format("numpy")
 if args.centralised_eval:
     # Use centralised test set for evaluation
     train_data = partition
-    valid_data = fds.load_full("test")
+    valid_data = fds.load_split("test")
     valid_data.set_format("numpy")
     num_train = train_data.shape[0]
     num_val = valid_data.shape[0]

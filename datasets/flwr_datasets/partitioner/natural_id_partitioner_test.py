@@ -18,7 +18,6 @@
 import itertools
 import math
 import unittest
-from typing import Tuple
 
 from parameterized import parameterized
 
@@ -28,7 +27,7 @@ from flwr_datasets.partitioner.natural_id_partitioner import NaturalIdPartitione
 
 def _dummy_setup(
     num_rows: int, n_unique_natural_ids: int
-) -> Tuple[Dataset, NaturalIdPartitioner]:
+) -> tuple[Dataset, NaturalIdPartitioner]:
     """Create a dummy dataset and partitioner based on given arguments.
 
     The partitioner has automatically the dataset assigned to it.
@@ -65,9 +64,11 @@ class TestNaturalIdPartitioner(unittest.TestCase):
         Only the correct data is tested in this method.
         """
         _, partitioner = _dummy_setup(num_rows, num_unique_natural_id)
-        # Simulate usage to start lazy node_id_to_natural_id creation
+        # Simulate usage to start lazy partition_id_to_natural_id creation
         _ = partitioner.load_partition(0)
-        self.assertEqual(len(partitioner.node_id_to_natural_id), num_unique_natural_id)
+        self.assertEqual(
+            len(partitioner.partition_id_to_natural_id), num_unique_natural_id
+        )
 
     @parameterized.expand(  # type: ignore
         # num_rows, num_unique_natural_ids
@@ -84,7 +85,7 @@ class TestNaturalIdPartitioner(unittest.TestCase):
         print(num_unique_natural_ids)
         _, partitioner = _dummy_setup(num_rows, num_unique_natural_ids)
         max_size = max(
-            [len(partitioner.load_partition(i)) for i in range(num_unique_natural_ids)]
+            len(partitioner.load_partition(i)) for i in range(num_unique_natural_ids)
         )
         self.assertEqual(max_size, math.ceil(num_rows / num_unique_natural_ids))
 
@@ -105,14 +106,16 @@ class TestNaturalIdPartitioner(unittest.TestCase):
     ) -> None:
         """Test if the # of available partitions is equal to # of unique clients."""
         _, partitioner = _dummy_setup(num_rows, num_unique_natural_ids)
-        _ = partitioner.load_partition(node_id=0)
-        self.assertEqual(len(partitioner.node_id_to_natural_id), num_unique_natural_ids)
+        _ = partitioner.load_partition(partition_id=0)
+        self.assertEqual(
+            len(partitioner.partition_id_to_natural_id), num_unique_natural_ids
+        )
 
-    def test_cannot_set_node_id_to_natural_id(self) -> None:
-        """Test the lack of ability to set node_id_to_natural_id."""
+    def test_cannot_set_partition_id_to_natural_id(self) -> None:
+        """Test the lack of ability to set partition_id_to_natural_id."""
         _, partitioner = _dummy_setup(num_rows=10, n_unique_natural_ids=2)
         with self.assertRaises(AttributeError):
-            partitioner.node_id_to_natural_id = {0: "0"}
+            partitioner.partition_id_to_natural_id = {0: "0"}
 
 
 if __name__ == "__main__":

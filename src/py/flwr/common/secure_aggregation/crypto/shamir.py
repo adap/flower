@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,20 +17,20 @@
 
 import pickle
 from concurrent.futures import ThreadPoolExecutor
-from typing import List, Tuple, cast
+from typing import cast
 
 from Crypto.Protocol.SecretSharing import Shamir
 from Crypto.Util.Padding import pad, unpad
 
 
-def create_shares(secret: bytes, threshold: int, num: int) -> List[bytes]:
+def create_shares(secret: bytes, threshold: int, num: int) -> list[bytes]:
     """Return list of shares (bytes)."""
     secret_padded = pad(secret, 16)
     secret_padded_chunk = [
         (threshold, num, secret_padded[i : i + 16])
         for i in range(0, len(secret_padded), 16)
     ]
-    share_list: List[List[Tuple[int, bytes]]] = [[] for _ in range(num)]
+    share_list: list[list[tuple[int, bytes]]] = [[] for _ in range(num)]
 
     with ThreadPoolExecutor(max_workers=10) as executor:
         for chunk_shares in executor.map(
@@ -43,22 +43,22 @@ def create_shares(secret: bytes, threshold: int, num: int) -> List[bytes]:
     return [pickle.dumps(shares) for shares in share_list]
 
 
-def _shamir_split(threshold: int, num: int, chunk: bytes) -> List[Tuple[int, bytes]]:
+def _shamir_split(threshold: int, num: int, chunk: bytes) -> list[tuple[int, bytes]]:
     return Shamir.split(threshold, num, chunk, ssss=False)
 
 
 # Reconstructing secret with PyCryptodome
-def combine_shares(share_list: List[bytes]) -> bytes:
+def combine_shares(share_list: list[bytes]) -> bytes:
     """Reconstruct secret from shares."""
-    unpickled_share_list: List[List[Tuple[int, bytes]]] = [
-        cast(List[Tuple[int, bytes]], pickle.loads(share)) for share in share_list
+    unpickled_share_list: list[list[tuple[int, bytes]]] = [
+        cast(list[tuple[int, bytes]], pickle.loads(share)) for share in share_list
     ]
 
     chunk_num = len(unpickled_share_list[0])
     secret_padded = bytearray(0)
-    chunk_shares_list: List[List[Tuple[int, bytes]]] = []
+    chunk_shares_list: list[list[tuple[int, bytes]]] = []
     for i in range(chunk_num):
-        chunk_shares: List[Tuple[int, bytes]] = []
+        chunk_shares: list[tuple[int, bytes]] = []
         for share in unpickled_share_list:
             chunk_shares.append(share[i])
         chunk_shares_list.append(chunk_shares)
@@ -71,5 +71,5 @@ def combine_shares(share_list: List[bytes]) -> bytes:
     return bytes(secret)
 
 
-def _shamir_combine(shares: List[Tuple[int, bytes]]) -> bytes:
+def _shamir_combine(shares: list[tuple[int, bytes]]) -> bytes:
     return Shamir.combine(shares, ssss=False)

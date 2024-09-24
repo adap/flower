@@ -1,34 +1,29 @@
 import warnings
 from logging import INFO
-import xgboost as xgb
-from tqdm import tqdm
 
 import flwr as fl
-from flwr_datasets import FederatedDataset
+import xgboost as xgb
 from flwr.common.logger import log
 from flwr.server.strategy import FedXgbBagging, FedXgbCyclic
+from flwr_datasets import FederatedDataset
+from tqdm import tqdm
 
+from client_utils import XgbClient
 from dataset import (
     instantiate_partitioner,
+    resplit,
+    separate_xy,
     train_test_split,
     transform_dataset_to_dmatrix,
-    separate_xy,
-    resplit,
-)
-from utils import (
-    sim_args_parser,
-    NUM_LOCAL_ROUND,
-    BST_PARAMS,
 )
 from server_utils import (
-    eval_config,
-    fit_config,
-    evaluate_metrics_aggregation,
-    get_evaluate_fn,
     CyclicClientManager,
+    eval_config,
+    evaluate_metrics_aggregation,
+    fit_config,
+    get_evaluate_fn,
 )
-from client_utils import XgbClient
-
+from utils import BST_PARAMS, NUM_LOCAL_ROUND, sim_args_parser
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -80,13 +75,13 @@ def main():
     fds = FederatedDataset(
         dataset="jxie/higgs",
         partitioners={"train": partitioner},
-        resplitter=resplit,
+        preprocessor=resplit,
     )
 
     # Load centralised test set
     if args.centralised_eval or args.centralised_eval_client:
         log(INFO, "Loading centralised test set...")
-        test_data = fds.load_full("test")
+        test_data = fds.load_split("test")
         test_data.set_format("numpy")
         num_test = test_data.shape[0]
         test_dmatrix = transform_dataset_to_dmatrix(test_data)

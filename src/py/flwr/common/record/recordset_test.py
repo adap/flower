@@ -14,8 +14,10 @@
 # ==============================================================================
 """RecordSet tests."""
 
+import pickle
+from collections import OrderedDict, namedtuple
 from copy import deepcopy
-from typing import Callable, Dict, List, OrderedDict, Type, Union
+from typing import Callable, Union
 
 import numpy as np
 import pytest
@@ -33,7 +35,7 @@ from flwr.common.typing import (
     Parameters,
 )
 
-from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord
+from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordSet
 
 
 def get_ndarrays() -> NDArrays:
@@ -156,8 +158,8 @@ def test_set_parameters_with_correct_types() -> None:
     ],
 )
 def test_set_parameters_with_incorrect_types(
-    key_type: Type[Union[int, str]],
-    value_fn: Callable[[NDArray], Union[NDArray, List[float]]],
+    key_type: type[Union[int, str]],
+    value_fn: Callable[[NDArray], Union[NDArray, list[float]]],
 ) -> None:
     """Test adding dictionary of unsupported types to ParametersRecord."""
     p_record = ParametersRecord()
@@ -167,7 +169,7 @@ def test_set_parameters_with_incorrect_types(
     }
 
     with pytest.raises(TypeError):
-        p_record.update(array_dict)
+        p_record.update(array_dict)  # type: ignore
 
 
 @pytest.mark.parametrize(
@@ -181,7 +183,7 @@ def test_set_parameters_with_incorrect_types(
     ],
 )
 def test_set_metrics_to_metricsrecord_with_correct_types(
-    key_type: Type[str],
+    key_type: type[str],
     value_fn: Callable[[NDArray], MetricsRecordValues],
 ) -> None:
     """Test adding metrics of various types to a MetricsRecord."""
@@ -234,8 +236,8 @@ def test_set_metrics_to_metricsrecord_with_correct_types(
     ],
 )
 def test_set_metrics_to_metricsrecord_with_incorrect_types(
-    key_type: Type[Union[str, int, float, bool]],
-    value_fn: Callable[[NDArray], Union[NDArray, Dict[str, NDArray], List[float]]],
+    key_type: type[Union[str, int, float, bool]],
+    value_fn: Callable[[NDArray], Union[NDArray, dict[str, NDArray], list[float]]],
 ) -> None:
     """Test adding metrics of various unsupported types to a MetricsRecord."""
     m_record = MetricsRecord()
@@ -248,7 +250,7 @@ def test_set_metrics_to_metricsrecord_with_incorrect_types(
     )
 
     with pytest.raises(TypeError):
-        m_record.update(my_metrics)
+        m_record.update(my_metrics)  # type: ignore
 
 
 @pytest.mark.parametrize(
@@ -300,7 +302,7 @@ def test_set_metrics_to_metricsrecord_with_and_without_keeping_input(
     ],
 )
 def test_set_configs_to_configsrecord_with_correct_types(
-    key_type: Type[str],
+    key_type: type[str],
     value_fn: Callable[[NDArray], ConfigsRecordValues],
 ) -> None:
     """Test adding configs of various types to a ConfigsRecord."""
@@ -344,8 +346,8 @@ def test_set_configs_to_configsrecord_with_correct_types(
     ],
 )
 def test_set_configs_to_configsrecord_with_incorrect_types(
-    key_type: Type[Union[str, int, float]],
-    value_fn: Callable[[NDArray], Union[NDArray, Dict[str, NDArray], List[float]]],
+    key_type: type[Union[str, int, float]],
+    value_fn: Callable[[NDArray], Union[NDArray, dict[str, NDArray], list[float]]],
 ) -> None:
     """Test adding configs of various unsupported types to a ConfigsRecord."""
     c_record = ConfigsRecord()
@@ -358,4 +360,73 @@ def test_set_configs_to_configsrecord_with_incorrect_types(
     )
 
     with pytest.raises(TypeError):
-        c_record.update(my_configs)
+        c_record.update(my_configs)  # type: ignore
+
+
+def test_count_bytes_metricsrecord() -> None:
+    """Test counting bytes in MetricsRecord."""
+    data = {"a": 1, "b": 2.0, "c": [1, 2, 3], "d": [1.0, 2.0, 3.0, 4.0, 5.0]}
+    bytes_in_dict = 8 + 8 + 3 * 8 + 5 * 8
+    bytes_in_dict += 4  # represnting the keys
+
+    m_record = MetricsRecord()
+    m_record.update(OrderedDict(data))
+    record_bytest_count = m_record.count_bytes()
+    assert bytes_in_dict == record_bytest_count
+
+
+def test_count_bytes_configsrecord() -> None:
+    """Test counting bytes in ConfigsRecord."""
+    data = {"a": 1, "b": 2.0, "c": [1, 2, 3], "d": [1.0, 2.0, 3.0, 4.0, 5.0]}
+    bytes_in_dict = 8 + 8 + 3 * 8 + 5 * 8
+    bytes_in_dict += 4  # represnting the keys
+
+    to_add = {
+        "aa": True,
+        "bb": "False",
+        "cc": bytes(9),
+        "dd": [True, False, False],
+        "ee": ["True", "False"],
+        "ff": [bytes(1), bytes(13), bytes(51)],
+    }
+    data = {**data, **to_add}
+    bytes_in_dict += 1 + 5 + 9 + 3 + (4 + 5) + (1 + 13 + 51)
+    bytes_in_dict += 12  # represnting the keys
+
+    bytes_in_dict = int(bytes_in_dict)
+
+    c_record = ConfigsRecord()
+    c_record.update(OrderedDict(data))
+
+    record_bytest_count = c_record.count_bytes()
+    assert bytes_in_dict == record_bytest_count
+
+
+def test_record_is_picklable() -> None:
+    """Test if RecordSet and *Record are picklable."""
+    # Prepare
+    p_record = ParametersRecord()
+    m_record = MetricsRecord({"aa": 123})
+    c_record = ConfigsRecord({"cc": bytes(9)})
+    rs = RecordSet()
+    rs.parameters_records["params"] = p_record
+    rs.metrics_records["metrics"] = m_record
+    rs.configs_records["configs"] = c_record
+
+    # Execute
+    pickle.dumps((p_record, m_record, c_record, rs))
+
+
+def test_recordset_repr() -> None:
+    """Test the string representation of RecordSet."""
+    # Prepare
+    kwargs = {
+        "parameters_records": {"params": ParametersRecord()},
+        "metrics_records": {"metrics": MetricsRecord({"aa": 123})},
+        "configs_records": {"configs": ConfigsRecord({"cc": bytes(9)})},
+    }
+    rs = RecordSet(**kwargs)  # type: ignore
+    expected = namedtuple("RecordSet", kwargs.keys())(**kwargs)
+
+    # Assert
+    assert str(rs) == str(expected)

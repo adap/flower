@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2022 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,9 +14,8 @@
 # ==============================================================================
 """Client-side message handler."""
 
-
 from logging import WARN
-from typing import Optional, Tuple, cast
+from typing import Optional, cast
 
 from flwr.client.client import (
     maybe_call_evaluate,
@@ -25,7 +24,7 @@ from flwr.client.client import (
     maybe_call_get_properties,
 )
 from flwr.client.numpy_client import NumPyClient
-from flwr.client.typing import ClientFn
+from flwr.client.typing import ClientFnExt
 from flwr.common import ConfigsRecord, Context, Message, Metadata, RecordSet, log
 from flwr.common.constant import MessageType, MessageTypeLegacy
 from flwr.common.recordset_compat import (
@@ -53,7 +52,7 @@ class UnknownServerMessage(Exception):
     """Exception indicating that the received message is unknown."""
 
 
-def handle_control_message(message: Message) -> Tuple[Optional[Message], int]:
+def handle_control_message(message: Message) -> tuple[Optional[Message], int]:
     """Handle control part of the incoming message.
 
     Parameters
@@ -81,7 +80,7 @@ def handle_control_message(message: Message) -> Tuple[Optional[Message], int]:
         reason = cast(int, disconnect_msg.disconnect_res.reason)
         recordset = RecordSet()
         recordset.configs_records["config"] = ConfigsRecord({"reason": reason})
-        out_message = message.create_reply(recordset, ttl="")
+        out_message = message.create_reply(recordset)
         # Return TaskRes and sleep duration
         return out_message, sleep_duration
 
@@ -90,10 +89,10 @@ def handle_control_message(message: Message) -> Tuple[Optional[Message], int]:
 
 
 def handle_legacy_message_from_msgtype(
-    client_fn: ClientFn, message: Message, context: Context
+    client_fn: ClientFnExt, message: Message, context: Context
 ) -> Message:
     """Handle legacy message in the inner most mod."""
-    client = client_fn(str(message.metadata.partition_id))
+    client = client_fn(context)
 
     # Check if NumPyClient is returend
     if isinstance(client, NumPyClient):
@@ -143,12 +142,12 @@ def handle_legacy_message_from_msgtype(
         raise ValueError(f"Invalid message type: {message_type}")
 
     # Return Message
-    return message.create_reply(out_recordset, ttl="")
+    return message.create_reply(out_recordset)
 
 
 def _reconnect(
     reconnect_msg: ServerMessage.ReconnectIns,
-) -> Tuple[ClientMessage, int]:
+) -> tuple[ClientMessage, int]:
     # Determine the reason for sending DisconnectRes message
     reason = Reason.ACK
     sleep_duration = None
@@ -172,6 +171,7 @@ def validate_out_message(out_message: Message, in_message_metadata: Metadata) ->
         and out_meta.reply_to_message == in_meta.message_id
         and out_meta.group_id == in_meta.group_id
         and out_meta.message_type == in_meta.message_type
+        and out_meta.created_at > in_meta.created_at
     ):
         return True
     return False

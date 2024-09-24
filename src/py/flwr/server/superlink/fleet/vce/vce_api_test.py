@@ -15,20 +15,34 @@
 """Test Fleet Simulation Engine API."""
 
 
-import asyncio
 import threading
+import time
 from itertools import cycle
 from json import JSONDecodeError
 from math import pi
 from pathlib import Path
 from time import sleep
-from typing import Dict, Optional, Set, Tuple
-from unittest import IsolatedAsyncioTestCase
+from typing import Optional
+from unittest import TestCase
 from uuid import UUID
 
-from flwr.common import GetPropertiesIns, Message, MessageTypeLegacy, Metadata
+from flwr.client import Client, ClientApp, NumPyClient
+from flwr.client.client_app import LoadClientAppError
+from flwr.common import (
+    DEFAULT_TTL,
+    Config,
+    ConfigsRecord,
+    Context,
+    GetPropertiesIns,
+    Message,
+    MessageTypeLegacy,
+    Metadata,
+    RecordSet,
+    Scalar,
+)
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
 from flwr.common.serde import message_from_taskres, message_to_taskins
+from flwr.common.typing import Run
 from flwr.server.superlink.fleet.vce.vce_api import (
     NodeToPartitionMapping,
     _register_nodes,
@@ -37,7 +51,33 @@ from flwr.server.superlink.fleet.vce.vce_api import (
 from flwr.server.superlink.state import InMemoryState, StateFactory
 
 
-def terminate_simulation(f_stop: asyncio.Event, sleep_duration: int) -> None:
+class DummyClient(NumPyClient):
+    """A dummy NumPyClient for tests."""
+
+    def __init__(self, state: RecordSet) -> None:
+        self.client_state = state
+
+    def get_properties(self, config: Config) -> dict[str, Scalar]:
+        """Return properties by doing a simple calculation."""
+        result = float(config["factor"]) * pi
+
+        # store something in context
+        self.client_state.configs_records["result"] = ConfigsRecord({"result": result})
+
+        return {"result": result}
+
+
+def get_dummy_client(context: Context) -> Client:  # pylint: disable=unused-argument
+    """Return a DummyClient converted to Client type."""
+    return DummyClient(state=context.state).to_client()
+
+
+dummy_client_app = ClientApp(
+    client_fn=get_dummy_client,
+)
+
+
+def terminate_simulation(f_stop: threading.Event, sleep_duration: int) -> None:
     """Set event to terminate Simulation Engine after `sleep_duration` seconds."""
     sleep(sleep_duration)
     f_stop.set()
@@ -46,8 +86,7 @@ def terminate_simulation(f_stop: asyncio.Event, sleep_duration: int) -> None:
 def init_state_factory_nodes_mapping(
     num_nodes: int,
     num_messages: int,
-    erroneous_message: Optional[bool] = False,
-) -> Tuple[StateFactory, NodeToPartitionMapping, Dict[UUID, float]]:
+) -> tuple[StateFactory, NodeToPartitionMapping, dict[UUID, float]]:
     """Instatiate StateFactory, register nodes and pre-insert messages in the state."""
     # Register a state and a run_id in it
     run_id = 1234
@@ -61,7 +100,6 @@ def init_state_factory_nodes_mapping(
         nodes_mapping=nodes_mapping,
         run_id=run_id,
         num_messages=num_messages,
-        erroneous_message=erroneous_message,
     )
     return state_factory, nodes_mapping, expected_results
 
@@ -72,15 +110,20 @@ def register_messages_into_state(
     nodes_mapping: NodeToPartitionMapping,
     run_id: int,
     num_messages: int,
-    erroneous_message: Optional[bool] = False,
-) -> Dict[UUID, float]:
+) -> dict[UUID, float]:
     """Register `num_messages` into the state factory."""
     state: InMemoryState = state_factory.state()  # type: ignore
-    state.run_ids.add(run_id)
+    state.run_ids[run_id] = Run(
+        run_id=run_id,
+        fab_id="Mock/mock",
+        fab_version="v1.0.0",
+        fab_hash="hash",
+        override_config={},
+    )
     # Artificially add TaskIns to state so they can be processed
     # by the Simulation Engine logic
     nodes_cycle = cycle(nodes_mapping.keys())  # we have more messages than supernodes
-    task_ids: Set[UUID] = set()  # so we can retrieve them later
+    task_ids: set[UUID] = set()  # so we can retrieve them later
     expected_results = {}
     for i in range(num_messages):
         dst_node_id = next(nodes_cycle)
@@ -97,16 +140,15 @@ def register_messages_into_state(
                 src_node_id=0,
                 dst_node_id=dst_node_id,  # indicate destination node
                 reply_to_message="",
-                ttl="",
-                message_type=(
-                    "a bad message"
-                    if erroneous_message
-                    else MessageTypeLegacy.GET_PROPERTIES
-                ),
+                ttl=DEFAULT_TTL,
+                message_type=MessageTypeLegacy.GET_PROPERTIES,
             ),
         )
         # Convert Message to TaskIns
         taskins = message_to_taskins(message)
+        # Normally recorded by the driver servicer
+        # but since we don't have one in this test, we do this manually
+        taskins.task.pushed_at = time.time()
         # Instert in state
         task_id = state.store_task_ins(taskins)
         if task_id:
@@ -131,7 +173,7 @@ def _autoresolve_app_dir(rel_client_app_dir: str = "backend") -> str:
 # pylint: disable=too-many-arguments
 def start_and_shutdown(
     backend: str = "ray",
-    client_app_attr: str = "raybackend_test:client_app",
+    client_app_attr: Optional[str] = None,
     app_dir: str = "",
     num_supernodes: Optional[int] = None,
     state_factory: Optional[StateFactory] = None,
@@ -141,15 +183,15 @@ def start_and_shutdown(
 ) -> None:
     """Start Simulation Engine and terminate after specified number of seconds.
 
-    Some tests need to be terminated by triggering externally an asyncio.Event. This
-    is enabled whtn passing `duration`>0.
+    Some tests need to be terminated by triggering externally an threading.Event. This
+    is enabled when passing `duration`>0.
     """
-    f_stop = asyncio.Event()
+    f_stop = threading.Event()
 
     if duration:
 
         # Setup thread that will set the f_stop event, triggering the termination of all
-        # asyncio logic in the Simulation Engine. It will also terminate the Backend.
+        # logic in the Simulation Engine. It will also terminate the Backend.
         termination_th = threading.Thread(
             target=terminate_simulation, args=(f_stop, duration)
         )
@@ -159,14 +201,19 @@ def start_and_shutdown(
     if not app_dir:
         app_dir = _autoresolve_app_dir()
 
+    run = Run(run_id=1234, fab_id="", fab_version="", fab_hash="", override_config={})
+
     start_vce(
         num_supernodes=num_supernodes,
+        client_app=None if client_app_attr else dummy_client_app,
         client_app_attr=client_app_attr,
         backend_name=backend,
         backend_config_json_stream=backend_config,
         state_factory=state_factory,
         app_dir=app_dir,
+        is_app=False,
         f_stop=f_stop,
+        run=run,
         existing_nodes_mapping=nodes_mapping,
     )
 
@@ -174,8 +221,8 @@ def start_and_shutdown(
         termination_th.join()
 
 
-class AsyncTestFleetSimulationEngineRayBackend(IsolatedAsyncioTestCase):
-    """A basic class that enables testing asyncio functionalities."""
+class TestFleetSimulationEngineRayBackend(TestCase):
+    """A basic class that enables testing functionalities."""
 
     def test_erroneous_no_supernodes_client_mapping(self) -> None:
         """Test with unset arguments."""
@@ -190,28 +237,9 @@ class AsyncTestFleetSimulationEngineRayBackend(IsolatedAsyncioTestCase):
         state_factory, nodes_mapping, _ = init_state_factory_nodes_mapping(
             num_nodes=num_nodes, num_messages=num_messages
         )
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(LoadClientAppError):
             start_and_shutdown(
                 client_app_attr="totally_fictitious_app:client",
-                state_factory=state_factory,
-                nodes_mapping=nodes_mapping,
-            )
-
-    def test_erroneous_messages(self) -> None:
-        """Test handling of error in async worker (consumer).
-
-        We register messages which will trigger an error when handling, triggering an
-        error.
-        """
-        num_messages = 100
-        num_nodes = 59
-
-        state_factory, nodes_mapping, _ = init_state_factory_nodes_mapping(
-            num_nodes=num_nodes, num_messages=num_messages, erroneous_message=True
-        )
-
-        with self.assertRaises(RuntimeError):
-            start_and_shutdown(
                 state_factory=state_factory,
                 nodes_mapping=nodes_mapping,
             )

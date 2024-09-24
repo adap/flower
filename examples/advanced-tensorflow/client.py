@@ -2,10 +2,8 @@ import argparse
 import os
 from pathlib import Path
 
-import tensorflow as tf
-
 import flwr as fl
-
+import tensorflow as tf
 from flwr_datasets import FederatedDataset
 
 # Make TensorFlow logs less verbose
@@ -123,7 +121,7 @@ def load_partition(idx: int):
     partition.set_format("numpy")
 
     # Divide data on each node: 80% train, 20% test
-    partition = partition.train_test_split(test_size=0.2)
+    partition = partition.train_test_split(test_size=0.2, seed=42)
     x_train, y_train = partition["train"]["img"] / 255.0, partition["train"]["label"]
     x_test, y_test = partition["test"]["img"] / 255.0, partition["test"]["label"]
     return x_train, y_train, x_test, y_test

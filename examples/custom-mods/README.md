@@ -1,3 +1,9 @@
+---
+tags: [mods, monitoring, app]
+dataset: [CIFAR-10]
+framework: [wandb, tensorboard]
+---
+
 # Using custom mods 🧪
 
 > 🧪 = This example covers experimental features that might change in future versions of Flower
@@ -207,7 +213,7 @@ app = fl.client.ClientApp(
     client_fn=client_fn,
     mods=[
         get_wandb_mod("Custom mods example"),
-     ],
+    ],
 )
 ```
 
@@ -288,7 +294,7 @@ $ tree .
 pip install -r requirements.txt
 ```
 
-For [W&B](wandb.ai) you will also need a valid account.
+For [W&B](https://wandb.ai) you will also need a valid account.
 
 ### Start the long-running Flower server (SuperLink)
 
@@ -328,7 +334,7 @@ flower-server-app server:app --insecure
 
 ### Check the results
 
-For W&B, you will need to login to the [website](wandb.ai).
+For W&B, you will need to login to the [website](https://wandb.ai).
 
 For TensorBoard, you will need to run the following command in your terminal:
 

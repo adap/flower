@@ -17,6 +17,7 @@
 import datetime
 import os
 import sys
+
 from git import Repo
 from sphinx.application import ConfigError
 
@@ -63,11 +64,14 @@ html_context["current_version"]["full_name"] = (
 
 # Make version list accessible for the html templates
 html_context["versions"] = list()
-versions = [
-    tag.name
-    for tag in repo.tags
-    if int(tag.name[1]) > 0 and int(tag.name.split(".")[1]) >= 5
-]
+versions = sorted(
+    [
+        tag.name
+        for tag in repo.tags
+        if int(tag.name[1]) > 0 and int(tag.name.split(".")[1]) >= 8
+    ],
+    key=lambda x: [int(part) for part in x[1:].split(".")],
+)
 versions.append("main")
 for version in versions:
     html_context["versions"].append({"name": version})
@@ -85,8 +89,16 @@ project = "Flower"
 copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
-# The full version, including alpha/beta/rc tags
-release = "1.8.0"
+# The full version of the next release, including alpha/beta/rc tags
+release = "1.12.0"
+# The current released version
+rst_prolog = """
+.. |stable_flwr_version| replace:: 1.11.1
+.. |stable_flwr_superlink_docker_digest| replace:: 4b317d5b6030710b476f4dbfab2c3a33021ad40a0fcfa54d7edd45e0c51d889c
+.. |ubuntu_version| replace:: 22.04
+.. |setuptools_version| replace:: 70.3.0
+.. |pip_version| replace:: 24.1.2
+"""
 
 # -- General configuration ---------------------------------------------------
 
@@ -108,6 +120,9 @@ extensions = [
     "sphinxcontrib.youtube",
     "sphinx_reredirects",
     "nbsphinx",
+    "sphinx_click",
+    "sphinx_substitution_extensions",
+    "sphinxext.opengraph",
 ]
 
 # Generate .rst files
@@ -122,6 +137,12 @@ autosummary_ignore_module_all = False
 # Make the flwr_datasets.federated_dataset.FederatedDataset appear as FederatedDataset
 # The full name is still at the top of the page
 add_module_names = False
+
+# Customizations for the sphinx_copybutton extension
+# Omit prompt text when copying code blocks
+copybutton_prompt_text = "$ "
+# Copy all lines when line continuation character is detected
+copybutton_line_continuation_character = "\\"
 
 
 def find_test_modules(package_path):
@@ -162,7 +183,6 @@ redirects = {
     # Renamed pages
     "installation": "how-to-install-flower.html",
     "configuring-clients.html": "how-to-configure-clients.html",
-    "quickstart_mxnet": "tutorial-quickstart-mxnet.html",
     "quickstart_pytorch_lightning": "tutorial-quickstart-pytorch-lightning.html",
     "quickstart_huggingface": "tutorial-quickstart-huggingface.html",
     "quickstart_pytorch": "tutorial-quickstart-pytorch.html",
@@ -194,7 +214,6 @@ redirects = {
     "quickstart-pandas": "tutorial-quickstart-pandas.html",
     "quickstart-fastai": "tutorial-quickstart-fastai.html",
     "quickstart-pytorch-lightning": "tutorial-quickstart-pytorch-lightning.html",
-    "quickstart-mxnet": "tutorial-quickstart-mxnet.html",
     "quickstart-scikitlearn": "tutorial-quickstart-scikitlearn.html",
     "quickstart-xgboost": "tutorial-quickstart-xgboost.html",
     "quickstart-android": "tutorial-quickstart-android.html",
@@ -231,8 +250,6 @@ redirects = {
     "creating-new-messages": "contributor-how-to-create-new-messages.html",
     "write-documentation": "contributor-how-to-write-documentation.html",
     "release-process": "contributor-how-to-release-flower.html",
-    # Restructuring: contributor explanations
-    "architecture": "contributor-explanation-architecture.html",
     # Restructuring: contributor references
     "good-first-contributions": "contributor-ref-good-first-contributions.html",
     "secagg": "contributor-ref-secure-aggregation-protocols.html",
@@ -240,6 +257,15 @@ redirects = {
     "people": "index.html",
     "organizations": "index.html",
     "publications": "index.html",
+    "quickstart_mxnet": "index.html",
+    "quickstart-mxnet": "index.html",
+    "tutorial-quickstart-mxnet": "index.html",
+    "example-mxnet-walk-through": "index.html",
+    "ref-api/flwr.simulation.run_simulation_from_cli": "index.html",
+    "contributor-how-to-create-new-messages": "index.html",
+    "example-jax-from-centralized-to-federated": "tutorial-quickstart-jax.html",
+    "architecture": "explanation-flower-architecture.html",
+    "contributor-explanation-architecture.html": "explanation-flower-architecture.html",
 }
 
 # -- Options for HTML output -------------------------------------------------
@@ -248,7 +274,7 @@ redirects = {
 # a list of builtin themes.
 #
 html_theme = "furo"
-html_title = f"Flower Framework"
+html_title = "Flower Framework"
 html_logo = "_static/flower-logo.png"
 html_favicon = "_static/favicon.ico"
 html_baseurl = "https://flower.ai/docs/framework/"

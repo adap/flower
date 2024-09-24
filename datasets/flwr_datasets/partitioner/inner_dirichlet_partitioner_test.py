@@ -15,7 +15,7 @@
 """Test DirichletPartitioner."""
 # pylint: disable=W0212
 import unittest
-from typing import List, Tuple, Union
+from typing import Union
 
 from datasets import Dataset
 from flwr_datasets.common.typing import NDArrayFloat, NDArrayInt
@@ -27,9 +27,9 @@ from flwr_datasets.partitioner.inner_dirichlet_partitioner import (
 def _dummy_setup(
     num_rows: int,
     partition_by: str,
-    partition_sizes: Union[List[int], NDArrayInt],
-    alpha: Union[float, List[float], NDArrayFloat],
-) -> Tuple[Dataset, InnerDirichletPartitioner]:
+    partition_sizes: Union[list[int], NDArrayInt],
+    alpha: Union[float, list[float], NDArrayFloat],
+) -> tuple[Dataset, InnerDirichletPartitioner]:
     """Create a dummy dataset and partitioner for testing."""
     data = {
         partition_by: [i % 3 for i in range(num_rows)],
@@ -58,7 +58,7 @@ class TestInnerDirichletPartitionerSuccess(unittest.TestCase):
         _, partitioner = _dummy_setup(num_rows, partition_by, partition_sizes, alpha)
         _ = partitioner.load_partition(0)
         self.assertEqual(
-            len(partitioner._node_id_to_indices.keys()), len(partition_sizes)
+            len(partitioner._partition_id_to_indices.keys()), len(partition_sizes)
         )
 
     def test_correct_partition_sizes(self) -> None:
@@ -71,7 +71,7 @@ class TestInnerDirichletPartitionerSuccess(unittest.TestCase):
         _, partitioner = _dummy_setup(num_rows, partition_by, partition_sizes, alpha)
         _ = partitioner.load_partition(0)
         sizes_created = [
-            len(indices) for indices in partitioner._node_id_to_indices.values()
+            len(indices) for indices in partitioner._partition_id_to_indices.values()
         ]
         self.assertEqual(sorted(sizes_created), partition_sizes)
 

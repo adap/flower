@@ -28,7 +28,7 @@ find ~/Library/Developer/Xcode/DerivedData -name "flwr.doccarchive" -exec rm -Rf
 # In case no XCode, please refer to: https://github.com/nodejs/node-gyp/issues/569.
 # Generate API reference for the Swift SDK by running `xcodebuild docbuild` in src directory.
 cd src/swift/flwr && \
-arch -x86_64 xcodebuild docbuild -scheme flwr -destination 'platform=iOS Simulator,name=iPhone 15 Pro Max,OS=17.0.1'
+arch -x86_64 xcodebuild docbuild -scheme flwr -destination 'platform=iOS Simulator,name=iPhone 15 Pro Max,OS=17.2'
 
 # Find the generated `doccarchive` file in XCode's derived data folder and copy it to the SwiftDoc directory.
 cd ../../../
