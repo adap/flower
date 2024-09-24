@@ -58,9 +58,9 @@ echo "- All Markdown checks passed"
 
 echo "- Start rST checks"
 
-echo "- rST: start"
+echo "- docstrfmt: start"
 docstrfmt --check doc/source
-echo "- rST: done"
+echo "- docstrfmt: done"
 
 echo "- All rST checks passed"
 
