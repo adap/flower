@@ -112,6 +112,7 @@ class TestClassConstrainedPartitioner(unittest.TestCase):
         partitioner.load_partition(0)
         expected_classes = set(
             range(10)
+            # pylint: disable=unsubscriptable-object
             if isinstance(dataset[partition_by][0], int)
             else [str(i) for i in range(10)]
         )
@@ -152,6 +153,7 @@ class TestClassConstrainedPartitioner(unittest.TestCase):
                     for i in range(num_classes_per_partition)
                 ]
             )
+            # pylint: disable=unsubscriptable-object
             if isinstance(dataset["labels"][0], str):
                 expected_labels = [str(label) for label in expected_labels]
             actual_labels = sorted(np.unique(partition["labels"]))
@@ -179,6 +181,7 @@ class TestClassConstrainedPartitioner(unittest.TestCase):
             "labels": np.array([num_unique_classes - 1] * (num_samples // 2)),
             "features": np.random.randn(num_samples // 2),
         }
+        # pylint: disable=unsubscriptable-object
         if isinstance(dataset_1["labels"][0], str):
             data["labels"] = data["labels"].astype(str)
         dataset_2 = Dataset.from_dict(data)
