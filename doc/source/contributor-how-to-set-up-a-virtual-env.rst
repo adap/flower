@@ -8,7 +8,7 @@ You can follow the instructions or choose your preferred setup.
 Python Version
 --------------
 
-Flower requires at least `Python 3.8 <https://docs.python.org/3.8/>`_, but `Python 3.10 <https://docs.python.org/3.10/>`_ or above is recommended.
+Flower requires at least `Python 3.9 <https://docs.python.org/3.9/>`_, but `Python 3.10 <https://docs.python.org/3.10/>`_ or above is recommended.
 
 .. note::
     Due to a known incompatibility with `ray <https://docs.ray.io/en/latest/>`_,

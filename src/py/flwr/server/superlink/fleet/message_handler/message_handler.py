@@ -16,7 +16,7 @@
 
 
 import time
-from typing import List, Optional
+from typing import Optional
 from uuid import UUID
 
 from flwr.common.serde import fab_to_proto, user_config_to_proto
@@ -83,7 +83,7 @@ def pull_task_ins(request: PullTaskInsRequest, state: State) -> PullTaskInsRespo
     node_id: Optional[int] = None if node.anonymous else node.node_id
 
     # Retrieve TaskIns from State
-    task_ins_list: List[TaskIns] = state.get_task_ins(node_id=node_id, limit=1)
+    task_ins_list: list[TaskIns] = state.get_task_ins(node_id=node_id, limit=1)
 
     # Build response
     response = PullTaskInsResponse(
