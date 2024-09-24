@@ -1,0 +1,43 @@
+name: Test Docker
+
+on:
+  push:
+
+jobs:
+  # parameters:
+    # if: github.repository == 'adap/flower'
+    # name: Collect docker build parameters
+    # runs-on: ubuntu-22.04
+    # timeout-minutes: 10
+    # outputs:
+    #   pip-version: ${{ steps.versions.outputs.pip-version }}
+    #   setuptools-version: ${{ steps.versions.outputs.setuptools-version }}
+    #   flwr-version-ref: ${{ steps.versions.outputs.flwr-version-ref }}
+    #   matrix: ${{ steps.versions.outputs.matrix }}
+    # steps:
+    #   - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+    #   - uses: ./.github/actions/bootstrap
+    #     id: bootstrap
+
+    #   - id: versions
+    #     run: |
+    #       echo "pip-version=${{ steps.bootstrap.outputs.pip-version }}" >> "$GITHUB_OUTPUT"
+    #       echo "setuptools-version=${{ steps.bootstrap.outputs.setuptools-version }}" >> "$GITHUB_OUTPUT"
+    #       echo "flwr-version-ref=git+${{ github.server_url }}/${{ github.repository }}.git@${{ github.sha }}" >> "$GITHUB_OUTPUT"
+    #       python dev/build-docker-image-matrix.py --flwr-version unstable --simple > matrix.json
+    #       echo "matrix=$(cat matrix.json)" >> $GITHUB_OUTPUT
+
+  build-docker-base-images:
+    name: Build base images
+    if: github.repository == 'adap/flower'
+    uses: ./.github/workflows/_docker-test.yml
+    # needs: parameters
+    with:
+      build-args: |
+        PIP_VERSION=24.1
+        SETUPTOOLS_VERSION=70
+        FLWR_VERSION=1.11.0
+    secrets:
+      dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}

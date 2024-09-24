@@ -1,0 +1,34 @@
+name: "format-docker-build-args"
+description: "Format the build args to work with the wretry.action"
+inputs:
+  build-args:
+    description: "List of build-time variables."
+outputs:
+  build-args:
+    description: "Build args formatted to work with the wretry.action"
+    value: ${{ steps.build-args.outputs.build-args }}
+runs:
+  using: "composite"
+  steps:
+    - id: build-args
+      shell: python
+      run: |
+        import os
+
+        # Adds two spaces to the line breaks to ensure proper indentation
+        # when passing the multi-line string to the wretry.action.
+        # Without it, the multi-line string is passed like this:
+        #
+        # build-args: |
+        #   ARG1=
+        # ARG2=
+        # ARG3=
+        #
+        # This causes the Docker action to interpret ARG2 and ARG3 as keys instead
+        # of values ​​of the multi-line string.
+        build_args = '''${{ inputs.build-args }}'''.replace("\n", "\n  ")
+
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+            print("build-args<<EOF", file=fh)
+            print(build_args, file=fh)
+            print("EOF", file=fh)
