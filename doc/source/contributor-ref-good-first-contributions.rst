@@ -15,11 +15,9 @@ they only touch non-core areas of the codebase. Good candidates to get started
 are:
 
 - Documentation: What's missing? What could be expressed more clearly? Are there any typos? You can also check-out our `contributing guide for translations <https://flower.ai/docs/baselines/how-to-contribute-translations.html>`_.
+- Strategies: Are there any strategies you'd like to use but isn't implemented yet? Take a look at existing strategies like `FedAvg <https://github.com/adap/flower/blob/main/src/py/flwr/server/strategy/fedavg.py>`_ to better understand how they work and check-out our `strategy implementation guide <https://flower.ai/docs/framework/how-to-implement-strategies.html>`_ for further information.
 - Baselines: See below.
 - Examples: See below.
-
-Another part of the codebase that can make for good first contributions would be strategies.
-You can already take a look at existing strategies like `FedAvg <https://github.com/adap/flower/blob/main/src/py/flwr/server/strategy/fedavg.py>`_ to better understand how they work and check-out our `strategy implementation guide <https://flower.ai/docs/framework/how-to-implement-strategies.html>`_ for further information.
 
 
 Request for Flower Baselines
@@ -37,7 +35,6 @@ Request for examples
 --------------------
 
 We wish we had more time to write usage examples because we believe they help
-users to get started with building what they want to build. Here are a few
-ideas where we'd be happy to accept a PR:
-
-- Android ONNX on-device training
+users to get started with building what they want to build. You can either open a
+PR if your project is self contained and in a good shape, or otherwise share it
+on the `Flower Discuss forum<https://discuss.flower.ai/c/example-projects>`_!
