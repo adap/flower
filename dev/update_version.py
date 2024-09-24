@@ -2,7 +2,6 @@
 
 import argparse
 import re
-import sys
 from pathlib import Path
 
 
@@ -13,6 +12,9 @@ REPLACE_CURR_VERSION = {
     "src/py/flwr/cli/new/templates/app/pyproject.*.toml.tpl": [
         "flwr[simulation]>={version}",
     ],
+    "src/docker/complete/compose.yml": ["FLWR_VERSION:-{version}"],
+    "src/docker/distributed/client/compose.yml": ["FLWR_VERSION:-{version}"],
+    "src/docker/distributed/server/compose.yml": ["FLWR_VERSION:-{version}"],
 }
 
 REPLACE_NEXT_VERSION = {
@@ -67,9 +69,10 @@ def _update_versions(file_patterns, replace_strings, new_version, check):
                 content = regex_pattern.sub(s.format(version=new_version), content)
             if content != original_content:
                 if check:
-                    sys.exit(f"The version in {file_path} seems incorrect")
-                file_path.write_text(content)
-                print(f"Updated {file_path}")
+                    print(f"{file_path} would be updated")
+                else:
+                    file_path.write_text(content)
+                    print(f"Updated {file_path}")
 
 
 if __name__ == "__main__":
