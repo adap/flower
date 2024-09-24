@@ -6,7 +6,9 @@ used to federate different kinds of existing machine learning pipelines, usually
 leveraging popular machine learning frameworks such as `PyTorch <https://pytorch.org/>`_
 or `TensorFlow <https://www.tensorflow.org/>`_.
 
-The following examples are available as standalone projects. Quickstart TensorFlow/Keras
+The following examples are available as standalone projects.
+
+Quickstart TensorFlow/Keras
 ---------------------------
 
 The TensorFlow/Keras quickstart example shows CIFAR-10 image classification with
