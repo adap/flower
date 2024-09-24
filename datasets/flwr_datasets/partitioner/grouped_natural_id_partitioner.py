@@ -15,7 +15,7 @@
 """Grouped natural id partitioner class that works with Hugging Face Datasets."""
 
 
-from typing import Any, Dict, List, Literal
+from typing import Any, Literal
 
 import numpy as np
 
@@ -72,9 +72,9 @@ class GroupedNaturalIdPartitioner(Partitioner):
         sort_unique_ids: bool = False,
     ) -> None:
         super().__init__()
-        self._partition_id_to_natural_ids: Dict[int, List[Any]] = {}
-        self._natural_id_to_partition_id: Dict[Any, int] = {}
-        self._partition_id_to_indices: Dict[int, NDArrayInt] = {}
+        self._partition_id_to_natural_ids: dict[int, list[Any]] = {}
+        self._natural_id_to_partition_id: dict[Any, int] = {}
+        self._partition_id_to_indices: dict[int, NDArrayInt] = {}
         self._partition_by = partition_by
         self._mode = mode
         self._sort_unique_ids = sort_unique_ids
@@ -211,7 +211,7 @@ class GroupedNaturalIdPartitioner(Partitioner):
         return len(self._partition_id_to_natural_ids)
 
     @property
-    def partition_id_to_natural_ids(self) -> Dict[int, List[Any]]:
+    def partition_id_to_natural_ids(self) -> dict[int, list[Any]]:
         """Partition id to the corresponding group of natural ids present.
 
         Natural ids are the unique values in `partition_by` column in dataset.
@@ -219,6 +219,6 @@ class GroupedNaturalIdPartitioner(Partitioner):
         return self._partition_id_to_natural_ids
 
     @property
-    def natural_id_to_partition_id(self) -> Dict[Any, int]:
+    def natural_id_to_partition_id(self) -> dict[Any, int]:
         """Natural id to the corresponding partition id."""
         return self._natural_id_to_partition_id
