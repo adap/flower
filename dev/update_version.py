@@ -77,15 +77,14 @@ def _update_versions(file_patterns, replace_strings, new_version, check):
                     file_path.write_text(content)
                     print(f"Updated {file_path}")
 
-    if wrong and check:
-        sys.exit("Some version haven't been updated.")
+    return wrong
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Utility used to bump the version of the package."
     )
-    parser.add_argument("current_version", help="Current version of the package.")
+    parser.add_argument("old_version", help="Current version of the package.")
     parser.add_argument(
         "--check", action="store_true", help="Fails if any file would be modified."
     )
@@ -102,8 +101,6 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    curr_version = args.current_version
-
     # Determine the type of version increment
     if args.major:
         increment = "major"
@@ -112,16 +109,25 @@ if __name__ == "__main__":
     else:
         increment = "minor"
 
-    next_version = _get_next_version(curr_version, increment)
+    curr_version = _get_next_version(args.old_version, increment)
+    next_version = _get_next_version(curr_version, "minor")
+
+    wrong = False
 
     # Update files with next version
     for file_pattern, strings in REPLACE_NEXT_VERSION.items():
-        _update_versions([file_pattern], strings, next_version, args.check)
+        if not _update_versions([file_pattern], strings, next_version, args.check):
+            wrong = True
 
     # Update files with current version
     for file_pattern, strings in REPLACE_CURR_VERSION.items():
-        _update_versions([file_pattern], strings, curr_version, args.check)
+        if not _update_versions([file_pattern], strings, curr_version, args.check):
+            wrong = True
 
     if args.examples:
         for file_pattern, strings in EXAMPLES.items():
-            _update_versions([file_pattern], strings, curr_version, args.check)
+            if not _update_versions([file_pattern], strings, curr_version, args.check):
+                wrong = True
+
+    if wrong:
+        sys.exit("Some version haven't been updated.")
