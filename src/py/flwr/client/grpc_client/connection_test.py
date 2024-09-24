@@ -17,8 +17,9 @@
 
 import concurrent.futures
 import socket
+from collections.abc import Iterator
 from contextlib import closing
-from typing import Iterator, cast
+from typing import cast
 from unittest.mock import patch
 
 import grpc
@@ -138,7 +139,7 @@ def test_integration_connection() -> None:
                 max_time=None,
             ),
         ) as conn:
-            receive, send, _, _, _ = conn
+            receive, send, _, _, _, _ = conn
 
             # Setup processing loop
             while True:

@@ -28,13 +28,13 @@ Use the following terminal command to start a Flower :code:`SuperNode` that has 
 .. code-block:: bash
 
     flower-superlink
-        --ssl-ca-certfile certificates/ca.crt 
-        --ssl-certfile certificates/server.pem 
+        --ssl-ca-certfile certificates/ca.crt
+        --ssl-certfile certificates/server.pem
         --ssl-keyfile certificates/server.key
         --auth-list-public-keys keys/client_public_keys.csv
         --auth-superlink-private-key keys/server_credentials
         --auth-superlink-public-key keys/server_credentials.pub
-    
+
 Let's break down the authentication flags:
 
 1. The first flag :code:`--auth-list-public-keys` expects a path to a CSV file storing all known node public keys. You need to store all known node public keys that are allowed to participate in a federation in one CSV file (:code:`.csv`).
@@ -56,8 +56,8 @@ Similar to the long-running Flower server (:code:`SuperLink`), you can easily en
 Use the following terminal command to start an authenticated :code:`SuperNode`:
 
 .. code-block:: bash
-    
-    flower-client-app client:app
+
+   flower-supernode
         --root-certificates certificates/ca.crt
         --superlink 127.0.0.1:9092
         --auth-supernode-private-key keys/client_credentials

@@ -16,8 +16,9 @@
 
 
 import base64
-from logging import WARNING
-from typing import Any, Callable, Optional, Sequence, Tuple, Union
+from collections.abc import Sequence
+from logging import INFO, WARNING
+from typing import Any, Callable, Optional, Union
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -34,8 +35,6 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
-    GetRunRequest,
-    GetRunResponse,
     PingRequest,
     PingResponse,
     PullTaskInsRequest,
@@ -44,6 +43,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.server.superlink.state import State
 
 _PUBLIC_KEY_HEADER = "public-key"
@@ -69,7 +69,7 @@ Response = Union[
 
 
 def _get_value_from_tuples(
-    key_string: str, tuples: Sequence[Tuple[str, Union[str, bytes]]]
+    key_string: str, tuples: Sequence[tuple[str, Union[str, bytes]]]
 ) -> bytes:
     value = next((value for key, value in tuples if key == key_string), "")
     if isinstance(value, str):
@@ -79,13 +79,13 @@ def _get_value_from_tuples(
 
 
 class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
-    """Server interceptor for client authentication."""
+    """Server interceptor for node authentication."""
 
     def __init__(self, state: State):
         self.state = state
 
-        self.client_public_keys = state.get_client_public_keys()
-        if len(self.client_public_keys) == 0:
+        self.node_public_keys = state.get_node_public_keys()
+        if len(self.node_public_keys) == 0:
             log(WARNING, "Authentication enabled, but no known public keys configured")
 
         private_key = self.state.get_server_private_key()
@@ -104,9 +104,9 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
     ) -> grpc.RpcMethodHandler:
         """Flower server interceptor authentication logic.
 
-        Intercept all unary calls from clients and authenticate clients by validating
-        auth metadata sent by the client. Continue RPC call if client is authenticated,
-        else, terminate RPC call by setting context to abort.
+        Intercept all unary calls from nodes and authenticate nodes by validating auth
+        metadata sent by the node. Continue RPC call if node is authenticated, else,
+        terminate RPC call by setting context to abort.
         """
         # One of the method handlers in
         # `flwr.server.superlink.fleet.grpc_rere.fleet_server.FleetServicer`
@@ -120,18 +120,24 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             request: Request,
             context: grpc.ServicerContext,
         ) -> Response:
-            client_public_key_bytes = base64.urlsafe_b64decode(
+            node_public_key_bytes = base64.urlsafe_b64decode(
                 _get_value_from_tuples(
                     _PUBLIC_KEY_HEADER, context.invocation_metadata()
                 )
             )
-            if client_public_key_bytes not in self.client_public_keys:
+            if node_public_key_bytes not in self.node_public_keys:
                 context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
 
             if isinstance(request, CreateNodeRequest):
-                return self._create_authenticated_node(
-                    client_public_key_bytes, request, context
+                response = self._create_authenticated_node(
+                    node_public_key_bytes, request, context
                 )
+                log(
+                    INFO,
+                    "AuthenticateServerInterceptor: Created node_id=%s",
+                    response.node.node_id,
+                )
+                return response
 
             # Verify hmac value
             hmac_value = base64.urlsafe_b64decode(
@@ -139,13 +145,13 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                     _AUTH_TOKEN_HEADER, context.invocation_metadata()
                 )
             )
-            public_key = bytes_to_public_key(client_public_key_bytes)
+            public_key = bytes_to_public_key(node_public_key_bytes)
 
             if not self._verify_hmac(public_key, request, hmac_value):
                 context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
 
             # Verify node_id
-            node_id = self.state.get_node_id(client_public_key_bytes)
+            node_id = self.state.get_node_id(node_public_key_bytes)
 
             if not self._verify_node_id(node_id, request):
                 context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
@@ -183,7 +189,8 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         self, public_key: ec.EllipticCurvePublicKey, request: Request, hmac_value: bytes
     ) -> bool:
         shared_secret = generate_shared_key(self.server_private_key, public_key)
-        return verify_hmac(shared_secret, request.SerializeToString(True), hmac_value)
+        message_bytes = request.SerializeToString(deterministic=True)
+        return verify_hmac(shared_secret, message_bytes, hmac_value)
 
     def _create_authenticated_node(
         self,

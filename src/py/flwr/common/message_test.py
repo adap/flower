@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 import time
 from collections import namedtuple
 from contextlib import ExitStack
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Optional
 
 import pytest
 
@@ -174,7 +174,6 @@ def test_create_reply(
                 "group_id": "group_xyz",
                 "ttl": 10.0,
                 "message_type": "request",
-                "partition_id": None,
             },
         ),
         (Error, {"code": 1, "reason": "reason_098"}),
@@ -194,7 +193,7 @@ def test_create_reply(
         ),
     ],
 )
-def test_repr(cls: type, kwargs: Dict[str, Any]) -> None:
+def test_repr(cls: type, kwargs: dict[str, Any]) -> None:
     """Test string representations of Metadata/Message/Error."""
     # Prepare
     anon_cls = namedtuple(cls.__qualname__, kwargs.keys())  # type: ignore

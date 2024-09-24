@@ -1,24 +1,48 @@
-"""$project_name: A Flower / TensorFlow app."""
+"""$project_name: A Flower / $framework_str app."""
 
 import os
 
-import tensorflow as tf
+import keras
+from keras import layers
 from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import IidPartitioner
 
 
 # Make TensorFlow log less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
+
 def load_model():
-    # Load model and data (MobileNetV2, CIFAR-10)
-    model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
+    # Define a simple CNN for CIFAR-10 and set Adam optimizer
+    model = keras.Sequential(
+        [
+            keras.Input(shape=(32, 32, 3)),
+            layers.Conv2D(32, kernel_size=(3, 3), activation="relu"),
+            layers.MaxPooling2D(pool_size=(2, 2)),
+            layers.Conv2D(64, kernel_size=(3, 3), activation="relu"),
+            layers.MaxPooling2D(pool_size=(2, 2)),
+            layers.Flatten(),
+            layers.Dropout(0.5),
+            layers.Dense(10, activation="softmax"),
+        ]
+    )
     model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
     return model
 
 
+fds = None  # Cache FederatedDataset
+
+
 def load_data(partition_id, num_partitions):
     # Download and partition dataset
-    fds = FederatedDataset(dataset="cifar10", partitioners={"train": num_partitions})
+    # Only initialize `FederatedDataset` once
+    global fds
+    if fds is None:
+        partitioner = IidPartitioner(num_partitions=num_partitions)
+        fds = FederatedDataset(
+            dataset="uoft-cs/cifar10",
+            partitioners={"train": partitioner},
+        )
     partition = fds.load_partition(partition_id, "train")
     partition.set_format("numpy")
 
