@@ -45,3 +45,4 @@ Run Flower using Docker Compose
 
    tutorial-quickstart-docker-compose
    run-quickstart-examples-docker-compose
+   tutorial-deploy-on-multiple-machines
