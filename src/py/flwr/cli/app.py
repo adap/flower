@@ -18,8 +18,8 @@ import typer
 from typer.main import get_command
 
 from .build import build
-from .list_apps import list_apps
 from .install import install
+from .list_apps import list_apps
 from .log import log
 from .new import new
 from .run import run
