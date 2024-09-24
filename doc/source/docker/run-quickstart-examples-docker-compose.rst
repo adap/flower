@@ -98,8 +98,8 @@ Limitations
      - Limitations
    * - quickstart-fastai
      - None
-   * - examples/quickstart-huggingface
-     - For CPU-only environments, it requires at least 32GB of memory.
+   * - quickstart-huggingface
+     - None
    * - quickstart-jax
      - The example has not yet been updated to work with the latest ``flwr`` version.
    * - quickstart-mlcube
@@ -109,7 +109,7 @@ Limitations
    * - quickstart-monai
      - None
    * - quickstart-pandas
-     - The example has not yet been updated to work with the latest ``flwr`` version.
+     - None
    * - quickstart-pytorch-lightning
      - Requires an older pip version that is not supported by the Flower Docker images.
    * - quickstart-pytorch
