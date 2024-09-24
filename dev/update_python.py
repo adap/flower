@@ -125,16 +125,11 @@ def _update_python_versions(
                     r"^(\s*python-version:\s*)" + re.escape(old_version) + r"(\s*)$",
                     r"\g<1>" + new_major_minor + r"\g<2>",
                 ),
-                # Remove old version from python version lists
                 (
-                    r"^(\s*python:\s*\[)([^\]]*?)("
-                    + re.escape(old_version)
-                    + r"'?,?\s*)([^\]]*?\])",
-                    lambda m: m.group(1)
-                    + re.sub(
-                        r",?\s*'?" + re.escape(old_version) + r"'?", "", m.group(2)
-                    )
-                    + m.group(4),
+                    r"(['\"]?)" + re.escape(old_version) + r"(['\"]?,?\s*)",
+                    lambda m: (
+                        "" if m.group(2).strip() == "," else ""
+                    ),  # Handle the case where a comma follows
                 ),
             ],
             # Shell scripts
@@ -165,8 +160,10 @@ def _update_python_versions(
             "dev/*.py": [
                 # Update version assignments
                 (
-                    r'(["\'])' + re.escape(old_version) + r'(\.\d+)?(["\'])',
-                    r"\g<1>" + new_major_minor + r"\g<3>",
+                    r'(["\'])' + re.escape(old_version) + r'(\.\d+)?(["\'],?)\s*\n?',
+                    lambda m: (
+                        "" if m.group(3) == "," else ""
+                    ),  # Remove version and handle comma if present
                 ),
             ],
             # Python files
