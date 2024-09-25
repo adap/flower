@@ -139,7 +139,12 @@ sphinxext-opengraph = "==0.9.1"
 docstrfmt = { git = "https://github.com/charlesbvll/docstrfmt.git", branch = "patch-1" }
 
 [tool.docstrfmt]
-extend_exclude = ["doc/source/conf.py", "doc/source/_templates/autosummary/*", "doc/source/ref-api/*"]
+extend_exclude = [
+    "doc/source/conf.py",
+    "doc/source/tutorial-quickstart-huggingface.rst",
+    "doc/source/_templates/autosummary/*",
+    "doc/source/ref-api/*",
+]
 
 [tool.isort]
 profile = "black"
