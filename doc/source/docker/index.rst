@@ -1,48 +1,48 @@
 Run Flower using Docker
 =======================
 
-Start your Flower journey with our pre-made Docker images on Docker Hub, supporting ``amd64``
-and ``arm64v8`` architectures.
+Start your Flower journey with our pre-made Docker images on Docker Hub, supporting
+``amd64`` and ``arm64v8`` architectures.
 
-Our Quickstart guide walks you through containerizing a Flower project and running it end to
-end using Docker.
+Our Quickstart guide walks you through containerizing a Flower project and running it
+end to end using Docker.
 
 Getting Started
 ---------------
 
 .. toctree::
-   :maxdepth: 1
+    :maxdepth: 1
 
-   tutorial-quickstart-docker
-
+    tutorial-quickstart-docker
 
 Running in Production
 ---------------------
 
 .. toctree::
-   :maxdepth: 1
+    :maxdepth: 1
 
-   enable-tls
-   persist-superlink-state
+    enable-tls
+    persist-superlink-state
 
 Advanced Options
 ----------------
 
 .. toctree::
-   :maxdepth: 1
+    :maxdepth: 1
 
-   set-environment-variables
-   run-as-root-user
-   run-as-subprocess
-   pin-version
-   use-a-different-version
+    set-environment-variables
+    run-as-root-user
+    run-as-subprocess
+    pin-version
+    use-a-different-version
 
 Run Flower using Docker Compose
 -------------------------------
 
 .. toctree::
-   :maxdepth: 1
 
-   tutorial-quickstart-docker-compose
-   run-quickstart-examples-docker-compose
-   tutorial-deploy-on-multiple-machines
+     :maxdepth: 1
+
+    tutorial-quickstart-docker-compose
+    run-quickstart-examples-docker-compose
+    tutorial-deploy-on-multiple-machines
