@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-09-24 00:29+0000\n"
+"POT-Creation-Date: 2024-09-25 00:30+0000\n"
 "PO-Revision-Date: 2023-09-05 17:54+0000\n"
 "Last-Translator: Charles Beauville <charles@flower.ai>\n"
 "Language: fr\n"
@@ -1522,7 +1522,7 @@ msgstr ""
 msgid "Setting up the repository"
 msgstr "Mise en place du référentiel"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:21
+#: ../../source/contributor-tutorial-contribute-on-github.rst:12
 msgid "**Create a GitHub account and setup Git**"
 msgstr "**Créer un compte GitHub et configurer Git**"
 
@@ -1571,7 +1571,7 @@ msgstr ""
 " des modifications localement et tu en gardes une trace à l'aide de Git, "
 "puis tu télécharges ton nouvel historique à nouveau sur GitHub."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:32
+#: ../../source/contributor-tutorial-contribute-on-github.rst:23
 msgid "**Forking the Flower repository**"
 msgstr "**Fourche le dépôt de Flower**"
 
@@ -1601,7 +1601,7 @@ msgstr ""
 " devrais voir dans le coin supérieur gauche que tu es en train de "
 "regarder ta propre version de Flower."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:47
+#: ../../source/contributor-tutorial-contribute-on-github.rst:34
 msgid "**Cloning your forked repository**"
 msgstr "**Clonage de ton dépôt forké**"
 
@@ -1635,7 +1635,7 @@ msgstr ""
 "Cela créera un dossier `flower/` (ou le nom de ta fourche si tu l'as "
 "renommée) dans le répertoire de travail actuel."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:66
+#: ../../source/contributor-tutorial-contribute-on-github.rst:49
 msgid "**Add origin**"
 msgstr "**Ajouter l'origine**"
 
@@ -1663,7 +1663,7 @@ msgstr ""
 "Une fois que le \\<URL\\> est copié, nous pouvons taper la commande "
 "suivante dans notre terminal :"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:90
+#: ../../source/contributor-tutorial-contribute-on-github.rst:68
 msgid "**Add upstream**"
 msgstr "**Ajouter en amont**"
 
@@ -1739,7 +1739,7 @@ msgstr ""
 msgid "And with Flower's repository:"
 msgstr "Et avec le référentiel de Flower :"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:122
+#: ../../source/contributor-tutorial-contribute-on-github.rst:114
 msgid "**Create a new branch**"
 msgstr "**Créer une nouvelle branche**"
 
@@ -1761,7 +1761,7 @@ msgstr ""
 "Pour ce faire, il suffit d'exécuter la commande suivante dans le "
 "répertoire du référentiel :"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:125
+#: ../../source/contributor-tutorial-contribute-on-github.rst:124
 msgid "**Make changes**"
 msgstr "**Apporter des modifications**"
 
@@ -1771,7 +1771,7 @@ msgstr ""
 "Écris du bon code et crée de merveilleuses modifications à l'aide de ton "
 "éditeur préféré !"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:138
+#: ../../source/contributor-tutorial-contribute-on-github.rst:127
 msgid "**Test and format your code**"
 msgstr "**Teste et mets en forme ton code**"
 
@@ -1789,7 +1789,7 @@ msgstr ""
 msgid "To do so, we have written a few scripts that you can execute:"
 msgstr "Pour ce faire, nous avons écrit quelques scripts que tu peux exécuter :"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:150
+#: ../../source/contributor-tutorial-contribute-on-github.rst:140
 msgid "**Stage changes**"
 msgstr "**Changements de scène**"
 
@@ -1815,7 +1815,7 @@ msgstr ""
 "version (last commit) et pour voir quels fichiers sont mis à disposition "
 "pour le commit, tu peux utiliser la commande :code:`git status`."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:160
+#: ../../source/contributor-tutorial-contribute-on-github.rst:152
 msgid "**Commit changes**"
 msgstr "**Commit changes**"
 
@@ -1838,7 +1838,7 @@ msgstr ""
 "commit. Il doit être écrit dans un style impératif et être concis. Un "
 "exemple serait :code:`git commit -m \"Ajouter des images au README\"`."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:171
+#: ../../source/contributor-tutorial-contribute-on-github.rst:162
 msgid "**Push the changes to the fork**"
 msgstr "**Pousser les changements vers la fourche**"
 
@@ -1865,7 +1865,7 @@ msgstr ""
 msgid "Creating and merging a pull request (PR)"
 msgstr "Créer et fusionner une pull request (PR)"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:206
+#: ../../source/contributor-tutorial-contribute-on-github.rst:176
 msgid "**Create the PR**"
 msgstr "**Créer le PR**"
 
@@ -1949,7 +1949,7 @@ msgstr ""
 " personne, tu as la possibilité de créer un brouillon de demande de "
 "traction :"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:209
+#: ../../source/contributor-tutorial-contribute-on-github.rst:208
 msgid "**Making new changes**"
 msgstr "**Faire de nouveaux changements**"
 
@@ -1963,7 +1963,7 @@ msgstr ""
 "toujours y pousser de nouveaux commits de la même manière qu'auparavant, "
 "en apportant des modifications à la branche associée au PR."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:231
+#: ../../source/contributor-tutorial-contribute-on-github.rst:211
 msgid "**Review the PR**"
 msgstr "**Review the PR**"
 
@@ -2008,7 +2008,7 @@ msgstr ""
 "Une fois que toutes les conversations ont été résolues, tu peux "
 "redemander un examen."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:251
+#: ../../source/contributor-tutorial-contribute-on-github.rst:233
 msgid "**Once the PR is merged**"
 msgstr "**Une fois que le PR est fusionné**"
 
@@ -2341,6 +2341,7 @@ msgstr "Devenez un·e contributeur·ice"
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:5
 #: ../../source/docker/run-as-subprocess.rst:11
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:15
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:22
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:12
 #: ../../source/docker/tutorial-quickstart-docker.rst:11
 msgid "Prerequisites"
@@ -3128,6 +3129,7 @@ msgid "Before you start, make sure that:"
 msgstr ""
 
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:19
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:26
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:16
 #: ../../source/docker/tutorial-quickstart-docker.rst:15
 msgid "The ``flwr`` CLI is :doc:`installed <../how-to-install-flower>` locally."
@@ -3346,6 +3348,209 @@ msgid ""
 "environment variables for a container."
 msgstr ""
 
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:3
+#, fuzzy
+msgid "Deploy Flower on Multiple Machines with Docker Compose"
+msgstr "Démarrage rapide XGBoost"
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:5
+msgid ""
+"This guide will help you set up a Flower project on multiple machines "
+"using Docker Compose."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:8
+msgid ""
+"You will learn how to run the Flower client and server components on two "
+"separate machines, with Flower configured to use TLS encryption and "
+"persist SuperLink state across restarts. A server consists of a SuperLink"
+" and ``SuperExec``. For more details about the Flower architecture, refer"
+" to the :doc:`../explanation-flower-architecture` explainer page."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:15
+msgid ""
+"This guide assumes you have completed the :doc:`tutorial-quickstart-"
+"docker-compose` tutorial. It is highly recommended that you follow and "
+"understand the contents of that tutorial before proceeding with this "
+"guide."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:24
+msgid "Before you begin, make sure you have the following prerequisites:"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:28
+msgid "The Docker daemon is running on your local machine and the remote machine."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:30
+msgid ""
+"Docker Compose V2 is installed on both your local machine and the remote "
+"machine."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:32
+msgid "You can connect to the remote machine from your local machine."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:33
+msgid "Ports ``9091`` and ``9093`` are accessible on the remote machine."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:37
+msgid ""
+"The guide uses the |quickstart_sklearn_tabular|_ example as an example "
+"project."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:40
+msgid ""
+"If your project has a different name or location, please remember to "
+"adjust the commands/paths accordingly."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:45
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:21
+#: ../../source/docker/tutorial-quickstart-docker.rst:19
+msgid "Step 1: Set Up"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:47
+msgid "Clone the Flower repository and change to the ``distributed`` directory:"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:55
+msgid "Get the IP address from the remote machine and save it for later."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:57
+msgid ""
+"Use the ``certs.yml`` Compose file to generate your own self-signed "
+"certificates. If you have certificates, you can continue with Step 2."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:62
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:215
+msgid "These certificates should be used only for development purposes."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:64
+msgid ""
+"For production environments, you may have to use dedicated services to "
+"obtain your certificates."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:67
+msgid ""
+"First, set the environment variables ``SUPERLINK_IP`` and "
+"``SUPEREXEC_IP`` with the IP address from the remote machine. For "
+"example, if the IP is ``192.168.2.33``, execute:"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:76
+msgid "Next, generate the self-signed certificates:"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:84
+msgid "Step 2: Copy the Server Compose Files"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:86
+msgid ""
+"Use the method that works best for you to copy the ``server`` directory, "
+"the certificates, and your Flower project to the remote machine."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:89
+msgid "For example, you can use ``scp`` to copy the directories:"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:100
+#, fuzzy
+msgid "Step 3: Start the Flower Server Components"
+msgstr "Démarrer le serveur"
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:102
+msgid ""
+"Log into the remote machine using ``ssh`` and run the following command "
+"to start the SuperLink and SuperExec services:"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:115
+msgid ""
+"The Path of the ``PROJECT_DIR`` should be relative to the location of the"
+" ``server`` Docker Compose files."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:118
+msgid "Go back to your terminal on your local machine."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:122
+#, fuzzy
+msgid "Step 4: Start the Flower Client Components"
+msgstr "Démarrer le serveur"
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:124
+msgid ""
+"On your local machine, run the following command to start the client "
+"components:"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:135
+msgid ""
+"The Path of the ``PROJECT_DIR`` should be relative to the location of the"
+" ``client`` Docker Compose files."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:140
+#, fuzzy
+msgid "Step 5: Run Your Flower Project"
+msgstr "Serveur de Flower"
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:142
+msgid ""
+"Specify the remote SuperExec IP addresses and the path to the root "
+"certificate in the ``[tool.flwr.federations.remote-superexec]`` table in "
+"the ``pyproject.toml`` file. Here, we have named our remote federation "
+"``remote-superexec``:"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:147
+#, fuzzy
+msgid "examples/quickstart-sklearn-tabular/pyproject.toml"
+msgstr "Démarrage rapide de scikit-learn"
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:156
+msgid ""
+"The Path of the ``root-certificates`` should be relative to the location "
+"of the ``pyproject.toml`` file."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:159
+msgid "To run the project, execute:"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:165
+msgid ""
+"That's it! With these steps, you've set up Flower on two separate "
+"machines and are ready to start using it."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:170
+msgid "Step 6: Clean Up"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:172
+#, fuzzy
+msgid "Shut down the Flower client components:"
+msgstr "Client de Flower"
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:179
+msgid "Shut down the Flower server components and delete the SuperLink state:"
+msgstr ""
+
 #: ../../source/docker/tutorial-quickstart-docker.rst:2
 #, fuzzy
 msgid "Quickstart with Docker"
@@ -3362,11 +3567,6 @@ msgstr ""
 msgid ""
 "This tutorial does not use production-ready settings, so you can focus on"
 " understanding the basic workflow that uses the minimum configurations."
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:21
-#: ../../source/docker/tutorial-quickstart-docker.rst:19
-msgid "Step 1: Set Up"
 msgstr ""
 
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:31
@@ -4096,10 +4296,6 @@ msgid ""
 " the ``certs.yml`` Compose file."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:215
-msgid "These certificates should be used only for development purposes."
-msgstr ""
-
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:217
 msgid ""
 "For production environments, use a service like `Let's Encrypt "
@@ -4608,7 +4804,7 @@ msgstr ""
 "getting/setting model parameters, one method for training the model, and "
 "one method for testing the model:"
 
-#: ../../source/example-pytorch-from-centralized-to-federated.rst:219
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:218
 msgid ":code:`set_parameters`"
 msgstr ":code:`set_parameters`"
 
@@ -4644,9 +4840,9 @@ msgstr ""
 ":code:`ndarray` NumPy (ce qui correspond à ce que "
 ":code:`flwr.client.NumPyClient` attend)"
 
-#: ../../source/example-pytorch-from-centralized-to-federated.rst:225
-#: ../../source/tutorial-quickstart-jax.rst:173
-#: ../../source/tutorial-quickstart-scikitlearn.rst:125
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:223
+#: ../../source/tutorial-quickstart-jax.rst:171
+#: ../../source/tutorial-quickstart-scikitlearn.rst:123
 msgid ":code:`fit`"
 msgstr ":code:`fit`"
 
@@ -4670,9 +4866,9 @@ msgstr "entraîne le modèle sur l'ensemble d'apprentissage local"
 msgid "get the updated local model weights and return them to the server"
 msgstr "récupère les poids du modèle local mis à jour et les renvoie au serveur"
 
-#: ../../source/example-pytorch-from-centralized-to-federated.rst:230
-#: ../../source/tutorial-quickstart-jax.rst:178
-#: ../../source/tutorial-quickstart-scikitlearn.rst:128
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:227
+#: ../../source/tutorial-quickstart-jax.rst:175
+#: ../../source/tutorial-quickstart-scikitlearn.rst:127
 msgid ":code:`evaluate`"
 msgstr ":code:`évaluer`"
 
@@ -4791,7 +4987,7 @@ msgid ""
 " individual's information remains hidden in the crowd."
 msgstr ""
 
-#: ../../source/explanation-differential-privacy.rst:-1
+#: ../../source/explanation-differential-privacy.rst:16
 msgid "DP Intro"
 msgstr ""
 
@@ -4904,8 +5100,8 @@ msgid ""
 "the client's data."
 msgstr ""
 
-#: ../../source/explanation-differential-privacy.rst:-1
 #: ../../source/explanation-differential-privacy.rst:68
+#: ../../source/explanation-differential-privacy.rst:71
 #: ../../source/how-to-use-differential-privacy.rst:11
 #, fuzzy
 msgid "Central Differential Privacy"
@@ -4933,7 +5129,7 @@ msgid ""
 "that larger updates are scaled down to fit within the norm `S`."
 msgstr ""
 
-#: ../../source/explanation-differential-privacy.rst:-1
+#: ../../source/explanation-differential-privacy.rst:84
 msgid "clipping"
 msgstr ""
 
@@ -4978,8 +5174,8 @@ msgid ""
 "others."
 msgstr ""
 
-#: ../../source/explanation-differential-privacy.rst:-1
 #: ../../source/explanation-differential-privacy.rst:105
+#: ../../source/explanation-differential-privacy.rst:110
 #: ../../source/how-to-use-differential-privacy.rst:96
 #, fuzzy
 msgid "Local Differential Privacy"
@@ -5266,7 +5462,7 @@ msgstr ""
 msgid "This is sometimes called a hub-and-spoke topology:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:24
+#: ../../source/explanation-flower-architecture.rst:18
 #, fuzzy
 msgid "Hub-and-spoke topology in federated learning"
 msgstr "Qu'est-ce que l'apprentissage fédéré ?"
@@ -5339,7 +5535,7 @@ msgid ""
 "`missing link` between all those SuperNodes."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:71
+#: ../../source/explanation-flower-architecture.rst:65
 #, fuzzy
 msgid "Basic Flower architecture"
 msgstr "Architecture florale"
@@ -5377,7 +5573,7 @@ msgid ""
 "SuperNodes."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:97
+#: ../../source/explanation-flower-architecture.rst:91
 #, fuzzy
 msgid "Multi-tenancy federated learning architecture"
 msgstr "Stratégie de moyenne fédérée."
@@ -5401,7 +5597,7 @@ msgid ""
 "their corresponding ``ClientApp``\\s:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:113
+#: ../../source/explanation-flower-architecture.rst:107
 #, fuzzy
 msgid "Multi-tenancy federated learning architecture - Run 1"
 msgstr "Stratégie de moyenne fédérée."
@@ -5418,7 +5614,7 @@ msgid ""
 " to participate in the training:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:125
+#: ../../source/explanation-flower-architecture.rst:119
 #, fuzzy
 msgid "Multi-tenancy federated learning architecture - Run 2"
 msgstr "Stratégie de moyenne fédérée."
@@ -5455,7 +5651,7 @@ msgid ""
 "developer machine."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:151
+#: ../../source/explanation-flower-architecture.rst:145
 msgid "Flower Deployment Engine with SuperExec"
 msgstr ""
 
@@ -8745,7 +8941,7 @@ msgid ""
 "adaptive clipping."
 msgstr ""
 
-#: ../../source/how-to-use-differential-privacy.rst:-1
+#: ../../source/how-to-use-differential-privacy.rst:25
 #, fuzzy
 msgid "server side clipping"
 msgstr "Logique côté serveur"
@@ -8776,7 +8972,7 @@ msgid ""
 ":code:`DifferentialPrivacyClientSideAdaptiveClipping`."
 msgstr ""
 
-#: ../../source/how-to-use-differential-privacy.rst:-1
+#: ../../source/how-to-use-differential-privacy.rst:57
 #, fuzzy
 msgid "client side clipping"
 msgstr "Logique côté client"
@@ -8804,7 +9000,7 @@ msgid ""
 "clipping norm value, sensitivity, epsilon, and delta."
 msgstr ""
 
-#: ../../source/how-to-use-differential-privacy.rst:-1
+#: ../../source/how-to-use-differential-privacy.rst:99
 msgid "local DP mod"
 msgstr ""
 
@@ -9271,6 +9467,10 @@ msgstr "Amélioration de la documentation"
 msgid "Optional argument"
 msgstr "Améliorations facultatives"
 
+#: ../../flwr install:1
+msgid "The source FAB file to install."
+msgstr ""
+
 #: ../../flwr log:1
 msgid "Get logs from a Flower project run."
 msgstr ""
@@ -9292,6 +9492,19 @@ msgstr ""
 #, fuzzy
 msgid "Required argument"
 msgstr "Amélioration de la documentation"
+
+#: ../../flwr log:1
+#, fuzzy
+msgid "The Flower run ID to query"
+msgstr "Rejoignez la communauté de Flower"
+
+#: ../../flwr log:1
+msgid "Path of the Flower project to run"
+msgstr ""
+
+#: ../../flwr log:1
+msgid "Name of the federation to run the app on"
+msgstr ""
 
 #: ../../flwr new:1
 #, fuzzy
@@ -9317,6 +9530,11 @@ msgstr ""
 msgid "The Flower username of the author"
 msgstr ""
 
+#: ../../flwr new:1
+#, fuzzy
+msgid "The name of the Flower App"
+msgstr "Chargement des données"
+
 #: ../../flwr run:1
 #, fuzzy
 msgid "Run Flower App."
@@ -9336,6 +9554,15 @@ msgstr ""
 msgid ""
 "Note that `key1`, `key2`, and `key3` in this example need to exist inside"
 " the `pyproject.toml` in order to be properly overriden."
+msgstr ""
+
+#: ../../flwr run:1
+#, fuzzy
+msgid "Path of the Flower App to run."
+msgstr "Chargement des données"
+
+#: ../../flwr run:1
+msgid "Name of the federation to run the app on."
 msgstr ""
 
 #: ../../source/ref-api-cli.rst:16
@@ -11905,7 +12132,7 @@ msgstr ""
 msgid "The encoding in which to encode the string."
 msgstr ""
 
-#: flwr.common.EventType.encode:9 of
+#: flwr.common.EventType.encode:5 of
 msgid "errors"
 msgstr ""
 
@@ -12081,7 +12308,7 @@ msgid ""
 "string."
 msgstr ""
 
-#: flwr.common.EventType.replace:5 of
+#: flwr.common.EventType.replace:3 of
 msgid "count"
 msgstr ""
 
@@ -12117,7 +12344,7 @@ msgid ""
 "strings and the original string."
 msgstr ""
 
-#: flwr.common.EventType.rsplit:7 flwr.common.EventType.split:7 of
+#: flwr.common.EventType.rsplit:3 flwr.common.EventType.split:3 of
 msgid "sep"
 msgstr ""
 
@@ -12132,7 +12359,7 @@ msgid ""
 " empty strings from the result."
 msgstr ""
 
-#: flwr.common.EventType.rsplit:11 flwr.common.EventType.split:11 of
+#: flwr.common.EventType.rsplit:9 flwr.common.EventType.split:9 of
 msgid "maxsplit"
 msgstr ""
 
@@ -12173,7 +12400,7 @@ msgid ""
 "remaining cased characters have lower case."
 msgstr ""
 
-#: flwr.common.EventType.translate:5 of
+#: flwr.common.EventType.translate:3 of
 #, fuzzy
 msgid "table"
 msgstr "Database"
@@ -23895,7 +24122,7 @@ msgstr ""
 "Oui, bien sûr, une liste d'exemples disponibles utilisant Flower dans un "
 "environnement blockchain est disponible ici :"
 
-#: ../../source/ref-faq.rst:29
+#: ../../source/ref-faq.rst:28
 msgid "`FLock: A Decentralised AI Training Platform <https://www.flock.io/#/>`_."
 msgstr ""
 
@@ -25009,7 +25236,7 @@ msgstr ""
 "paramètres du modèle, une méthode pour former le modèle, et une méthode "
 "pour tester le modèle :"
 
-#: ../../source/tutorial-quickstart-jax.rst:167
+#: ../../source/tutorial-quickstart-jax.rst:165
 msgid ":code:`set_parameters (optional)`"
 msgstr ":code:`set_parameters (optional)`"
 
@@ -25578,7 +25805,7 @@ msgstr ":code:`set_model_params()`"
 msgid "Sets the parameters of a :code:`sklearn` LogisticRegression model"
 msgstr "Définit les paramètres d'un modèle de régression logistique :code:`sklean`"
 
-#: ../../source/tutorial-quickstart-scikitlearn.rst:50
+#: ../../source/tutorial-quickstart-scikitlearn.rst:49
 msgid ":code:`set_initial_params()`"
 msgstr ":code:`set_initial_params()`"
 
@@ -25653,7 +25880,7 @@ msgstr ""
 msgid "return the model weight as a list of NumPy ndarrays"
 msgstr "renvoie le poids du modèle sous la forme d'une liste de ndarrays NumPy"
 
-#: ../../source/tutorial-quickstart-scikitlearn.rst:121
+#: ../../source/tutorial-quickstart-scikitlearn.rst:120
 msgid ":code:`set_parameters` (optional)"
 msgstr ":code:`set_parameters` (optionnel)"
 
@@ -28488,7 +28715,7 @@ msgstr ""
 "chose d'autre, comme la régression linéaire classique."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|e87b69b2ada74ea49412df16f4a0b9cc|"
+msgid "|b8714c45b74b4d8fb008e2ebb3bc1d44|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -28507,7 +28734,7 @@ msgstr ""
 " Go."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|33cacb7d985c4906b348515c1a5cd993|"
+msgid "|75f1561efcfd422ea67d28d1513120dc|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -28538,7 +28765,7 @@ msgstr ""
 "chanson."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|cc080a555947492fa66131dc3a967603|"
+msgid "|6a1f51b235304558a9bdaaabfc93b8d2|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -28559,7 +28786,7 @@ msgstr ""
 " données pour la même tâche."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|085c3e0fb8664c6aa06246636524b20b|"
+msgid "|35e70dab1fb544af9aa3a9c09c4f9797|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -28580,7 +28807,7 @@ msgstr ""
 "cloud."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|bfe69c74e48c45d49b50251c38c2a019|"
+msgid "|d7efb5705dd3467f991ed23746824a07|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -28601,7 +28828,7 @@ msgstr ""
 "appuyés."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|ebbecd651f0348d99c6511ea859bf4ca|"
+msgid "|94e7b021c7b540bfbedf7f082a41ff87|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -28626,7 +28853,7 @@ msgstr ""
 " sur un serveur centralisé."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|163117eb654a4273babba413cf8065f5|"
+msgid "|a80714782dde439ab73936518f91fc3c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -28645,7 +28872,7 @@ msgstr ""
 "suffisantes pour former un bon modèle."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|452ac3ba453b4cd1be27be1ba7560d64|"
+msgid "|c62080ca6197473da57d191c8225a9d9|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -28867,7 +29094,7 @@ msgstr ""
 "partir d'un point de contrôle précédemment sauvegardé."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|f403fcd69e4e44409627e748b404c086|"
+msgid "|21a8f1e6a5b14a7bbb8559979d0e8a2b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -28902,7 +29129,7 @@ msgstr ""
 "rendements décroissants."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|4b00fe63870145968f8443619a792a42|"
+msgid "|c310f2a22f7b4917bf42775aae7a1c09|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -28935,7 +29162,7 @@ msgstr ""
 "données locales, ou même de quelques étapes (mini-batchs)."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|368378731066486fa4397e89bc6b870c|"
+msgid "|a0c5b43401194535a8460bcf02e65f9a|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -28966,7 +29193,7 @@ msgstr ""
 " l'entraînement local."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|a66aa83d85bf4ffba7ed660b718066da|"
+msgid "|aabfdbd5564e41a790f8ea93cc21a444|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -29025,7 +29252,7 @@ msgstr ""
 "times as much as each of the 100 examples."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|82324b9af72a4582a81839d55caab767|"
+msgid "|c9cc8f160fa647b09e742fe4dc8edb54|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -29168,7 +29395,7 @@ msgstr ""
 "quel cadre de ML et n'importe quel langage de programmation."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|fbf2da0da3cc4f8ab3b3eff852d80c41|"
+msgid "|7e83aad011cd4907b2f02f907c6922e9|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -37529,5 +37756,47 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|ed9aae51da70428eab7eef32f21e819e|"
+#~ msgstr ""
+
+#~ msgid "|e87b69b2ada74ea49412df16f4a0b9cc|"
+#~ msgstr ""
+
+#~ msgid "|33cacb7d985c4906b348515c1a5cd993|"
+#~ msgstr ""
+
+#~ msgid "|cc080a555947492fa66131dc3a967603|"
+#~ msgstr ""
+
+#~ msgid "|085c3e0fb8664c6aa06246636524b20b|"
+#~ msgstr ""
+
+#~ msgid "|bfe69c74e48c45d49b50251c38c2a019|"
+#~ msgstr ""
+
+#~ msgid "|ebbecd651f0348d99c6511ea859bf4ca|"
+#~ msgstr ""
+
+#~ msgid "|163117eb654a4273babba413cf8065f5|"
+#~ msgstr ""
+
+#~ msgid "|452ac3ba453b4cd1be27be1ba7560d64|"
+#~ msgstr ""
+
+#~ msgid "|f403fcd69e4e44409627e748b404c086|"
+#~ msgstr ""
+
+#~ msgid "|4b00fe63870145968f8443619a792a42|"
+#~ msgstr ""
+
+#~ msgid "|368378731066486fa4397e89bc6b870c|"
+#~ msgstr ""
+
+#~ msgid "|a66aa83d85bf4ffba7ed660b718066da|"
+#~ msgstr ""
+
+#~ msgid "|82324b9af72a4582a81839d55caab767|"
+#~ msgstr ""
+
+#~ msgid "|fbf2da0da3cc4f8ab3b3eff852d80c41|"
 #~ msgstr ""
 
