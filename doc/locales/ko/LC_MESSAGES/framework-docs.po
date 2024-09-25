@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-24 00:29+0000\n"
+"POT-Creation-Date: 2024-09-25 00:30+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -1468,7 +1468,7 @@ msgstr ""
 msgid "Setting up the repository"
 msgstr "레포지토리 설정하기"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:21
+#: ../../source/contributor-tutorial-contribute-on-github.rst:12
 msgid "**Create a GitHub account and setup Git**"
 msgstr "**GitHub 계정을 만들고 Git을 설정합니다**"
 
@@ -1509,7 +1509,7 @@ msgstr ""
 "일반적인 Git 및 GitHub 워크플로우의 기본 개념은 다음과 같이 요약됩니다. GitHub의 원격 레포지토리에서 코드를 "
 "다운로드하고 로컬에서 변경한 후 Git을 사용하여 추적한 다음 새 기록을 다시 GitHub에 업로드하는 것입니다."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:32
+#: ../../source/contributor-tutorial-contribute-on-github.rst:23
 msgid "**Forking the Flower repository**"
 msgstr "**Flower 레포지토리 포크하기**"
 
@@ -1534,7 +1534,7 @@ msgstr ""
 "원하는 경우 이름을 변경할 수 있지만, 이 버전의 Flower는 자신의 계정(즉, 자신의 리포지토리 목록)에 위치하게 되므로 변경할"
 " 필요는 없습니다. 만들기가 완료되면 왼쪽 상단에Flower 버전이 표시되는 것을 볼 수 있습니다."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:47
+#: ../../source/contributor-tutorial-contribute-on-github.rst:34
 msgid "**Cloning your forked repository**"
 msgstr "**포크된 레포지토리 클론하기**"
 
@@ -1560,7 +1560,7 @@ msgid ""
 "it) folder in the current working directory."
 msgstr "현재 작업 디렉터리에``flower/``(또는 포크 이름을 변경한 경우 포크 이름) 폴더가 생성됩니다."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:66
+#: ../../source/contributor-tutorial-contribute-on-github.rst:49
 msgid "**Add origin**"
 msgstr "**origin 추가**"
 
@@ -1584,7 +1584,7 @@ msgid ""
 "terminal:"
 msgstr "\\<URL\\> 이 복사되면 터미널에 다음 명령을 입력하면 됩니다:"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:90
+#: ../../source/contributor-tutorial-contribute-on-github.rst:68
 msgid "**Add upstream**"
 msgstr "**Upstream 추가하기**"
 
@@ -1645,7 +1645,7 @@ msgstr "변경하기 전에 레포지토리를 최신 상태로 유지하세요:
 msgid "And with Flower's repository:"
 msgstr "Flower의 레포지토리도 있습니다:"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:122
+#: ../../source/contributor-tutorial-contribute-on-github.rst:114
 msgid "**Create a new branch**"
 msgstr "**새 브랜치 만들기**"
 
@@ -1662,7 +1662,7 @@ msgid ""
 "directory:"
 msgstr "이렇게 하려면 레포지토리 디렉토리에서 다음 명령을 실행하면 됩니다:"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:125
+#: ../../source/contributor-tutorial-contribute-on-github.rst:124
 msgid "**Make changes**"
 msgstr "**변경하기**"
 
@@ -1670,7 +1670,7 @@ msgstr "**변경하기**"
 msgid "Write great code and create wonderful changes using your favorite editor!"
 msgstr "선호하는 편집기를 사용하여 멋진 코드를 작성하고 훌륭한 변화를 만들어 보세요!"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:138
+#: ../../source/contributor-tutorial-contribute-on-github.rst:127
 msgid "**Test and format your code**"
 msgstr "**코드 테스트 및 서식 지정**"
 
@@ -1687,7 +1687,7 @@ msgstr ""
 msgid "To do so, we have written a few scripts that you can execute:"
 msgstr "이를 위해 실행할 수 있는 몇 가지 스크립트를 작성했습니다:"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:150
+#: ../../source/contributor-tutorial-contribute-on-github.rst:140
 msgid "**Stage changes**"
 msgstr "**변경사항 스테이징**"
 
@@ -1710,7 +1710,7 @@ msgstr ""
 "마지막 버전(마지막 커밋)과 비교하여 수정된 파일을 확인하고 커밋을 위해 스테이징된 파일을 확인하려면 :code:`git "
 "status` 명령을 사용하면 됩니다."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:160
+#: ../../source/contributor-tutorial-contribute-on-github.rst:152
 msgid "**Commit changes**"
 msgstr "**변경사항 커밋**"
 
@@ -1729,7 +1729,7 @@ msgstr ""
 "커밋의 내용을 다른 사람에게 설명하기 위해 \\<commit_message\\>가 있습니다. 명령형 스타일로 작성해야 하며 간결해야"
 " 합니다. 예를 들면 :code:`git commit -m \"Add images to README\"`."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:171
+#: ../../source/contributor-tutorial-contribute-on-github.rst:162
 msgid "**Push the changes to the fork**"
 msgstr "**변경 사항을 포크에 푸시**"
 
@@ -1752,7 +1752,7 @@ msgstr "이 작업이 완료되면 변경한 내용으로 포크된 레포지토
 msgid "Creating and merging a pull request (PR)"
 msgstr "pull request(PR) 만들기 및 병합하기"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:206
+#: ../../source/contributor-tutorial-contribute-on-github.rst:176
 msgid "**Create the PR**"
 msgstr "**PR 만들기**"
 
@@ -1823,7 +1823,7 @@ msgid ""
 "anyone, you have the option to create a draft pull request:"
 msgstr "PR이 아직 검토할 준비가 되지 않았고 다른 사람에게 알리고 싶지 않은 경우 pull request 초안을 만드는 옵션이 있습니다:"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:209
+#: ../../source/contributor-tutorial-contribute-on-github.rst:208
 msgid "**Making new changes**"
 msgstr "**new changes 만들기**"
 
@@ -1834,7 +1834,7 @@ msgid ""
 " associated with the PR."
 msgstr "PR이 초안으로 열렸든 아니든, PR과 연결된 브랜치를 변경하여 이전과 같은 방식으로 새 커밋을 푸시할 수 있습니다."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:231
+#: ../../source/contributor-tutorial-contribute-on-github.rst:211
 msgid "**Review the PR**"
 msgstr "**PR 검토하기**"
 
@@ -1870,7 +1870,7 @@ msgid ""
 "review."
 msgstr "모든 대화가 해결되면 검토를 다시 요청할 수 있습니다."
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:251
+#: ../../source/contributor-tutorial-contribute-on-github.rst:233
 msgid "**Once the PR is merged**"
 msgstr "**PR이 병합되면**"
 
@@ -2158,6 +2158,7 @@ msgstr "기여자로 시작하기"
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:5
 #: ../../source/docker/run-as-subprocess.rst:11
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:15
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:22
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:12
 #: ../../source/docker/tutorial-quickstart-docker.rst:11
 msgid "Prerequisites"
@@ -2972,6 +2973,7 @@ msgid "Before you start, make sure that:"
 msgstr "시작하기 전에 Docker daemon이 실행 중인지 확인하세요:"
 
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:19
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:26
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:16
 #: ../../source/docker/tutorial-quickstart-docker.rst:15
 msgid "The ``flwr`` CLI is :doc:`installed <../how-to-install-flower>` locally."
@@ -3188,6 +3190,207 @@ msgid ""
 "environment variables for a container."
 msgstr "Docker 컨테이너 내에서 변수를 설정하려면 ``-e <name>=<value>`` 플래그를 사용하면 됩니다."
 
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:3
+#, fuzzy
+msgid "Deploy Flower on Multiple Machines with Docker Compose"
+msgstr "빠른 시작 튜토리얼"
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:5
+msgid ""
+"This guide will help you set up a Flower project on multiple machines "
+"using Docker Compose."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:8
+msgid ""
+"You will learn how to run the Flower client and server components on two "
+"separate machines, with Flower configured to use TLS encryption and "
+"persist SuperLink state across restarts. A server consists of a SuperLink"
+" and ``SuperExec``. For more details about the Flower architecture, refer"
+" to the :doc:`../explanation-flower-architecture` explainer page."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:15
+msgid ""
+"This guide assumes you have completed the :doc:`tutorial-quickstart-"
+"docker-compose` tutorial. It is highly recommended that you follow and "
+"understand the contents of that tutorial before proceeding with this "
+"guide."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:24
+msgid "Before you begin, make sure you have the following prerequisites:"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:28
+msgid "The Docker daemon is running on your local machine and the remote machine."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:30
+msgid ""
+"Docker Compose V2 is installed on both your local machine and the remote "
+"machine."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:32
+msgid "You can connect to the remote machine from your local machine."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:33
+msgid "Ports ``9091`` and ``9093`` are accessible on the remote machine."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:37
+msgid ""
+"The guide uses the |quickstart_sklearn_tabular|_ example as an example "
+"project."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:40
+msgid ""
+"If your project has a different name or location, please remember to "
+"adjust the commands/paths accordingly."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:45
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:21
+#: ../../source/docker/tutorial-quickstart-docker.rst:19
+msgid "Step 1: Set Up"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:47
+msgid "Clone the Flower repository and change to the ``distributed`` directory:"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:55
+msgid "Get the IP address from the remote machine and save it for later."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:57
+msgid ""
+"Use the ``certs.yml`` Compose file to generate your own self-signed "
+"certificates. If you have certificates, you can continue with Step 2."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:62
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:215
+msgid "These certificates should be used only for development purposes."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:64
+msgid ""
+"For production environments, you may have to use dedicated services to "
+"obtain your certificates."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:67
+msgid ""
+"First, set the environment variables ``SUPERLINK_IP`` and "
+"``SUPEREXEC_IP`` with the IP address from the remote machine. For "
+"example, if the IP is ``192.168.2.33``, execute:"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:76
+msgid "Next, generate the self-signed certificates:"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:84
+msgid "Step 2: Copy the Server Compose Files"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:86
+msgid ""
+"Use the method that works best for you to copy the ``server`` directory, "
+"the certificates, and your Flower project to the remote machine."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:89
+msgid "For example, you can use ``scp`` to copy the directories:"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:100
+msgid "Step 3: Start the Flower Server Components"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:102
+msgid ""
+"Log into the remote machine using ``ssh`` and run the following command "
+"to start the SuperLink and SuperExec services:"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:115
+msgid ""
+"The Path of the ``PROJECT_DIR`` should be relative to the location of the"
+" ``server`` Docker Compose files."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:118
+msgid "Go back to your terminal on your local machine."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:122
+#, fuzzy
+msgid "Step 4: Start the Flower Client Components"
+msgstr "서버(SuperLink)"
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:124
+msgid ""
+"On your local machine, run the following command to start the client "
+"components:"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:135
+msgid ""
+"The Path of the ``PROJECT_DIR`` should be relative to the location of the"
+" ``client`` Docker Compose files."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:140
+#, fuzzy
+msgid "Step 5: Run Your Flower Project"
+msgstr "Flower SuperNode를 실행합니다."
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:142
+msgid ""
+"Specify the remote SuperExec IP addresses and the path to the root "
+"certificate in the ``[tool.flwr.federations.remote-superexec]`` table in "
+"the ``pyproject.toml`` file. Here, we have named our remote federation "
+"``remote-superexec``:"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:147
+msgid "examples/quickstart-sklearn-tabular/pyproject.toml"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:156
+msgid ""
+"The Path of the ``root-certificates`` should be relative to the location "
+"of the ``pyproject.toml`` file."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:159
+msgid "To run the project, execute:"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:165
+msgid ""
+"That's it! With these steps, you've set up Flower on two separate "
+"machines and are ready to start using it."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:170
+msgid "Step 6: Clean Up"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:172
+#, fuzzy
+msgid "Shut down the Flower client components:"
+msgstr "Flower 클라이언트 앱을 실행합니다."
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:179
+msgid "Shut down the Flower server components and delete the SuperLink state:"
+msgstr ""
+
 #: ../../source/docker/tutorial-quickstart-docker.rst:2
 #, fuzzy
 msgid "Quickstart with Docker"
@@ -3204,11 +3407,6 @@ msgstr ""
 msgid ""
 "This tutorial does not use production-ready settings, so you can focus on"
 " understanding the basic workflow that uses the minimum configurations."
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:21
-#: ../../source/docker/tutorial-quickstart-docker.rst:19
-msgid "Step 1: Set Up"
 msgstr ""
 
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:31
@@ -3942,10 +4140,6 @@ msgid ""
 " the ``certs.yml`` Compose file."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:215
-msgid "These certificates should be used only for development purposes."
-msgstr ""
-
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:217
 msgid ""
 "For production environments, use a service like `Let's Encrypt "
@@ -4398,7 +4592,7 @@ msgstr ""
 "code:`CifarClient`는 모델 파라미터를 가져오거나 설정하는 메서드 2개, 모델 학습을 위한 메서드 1개, 모델 테스트를"
 " 위한 메서드 1개 등 네 가지 메서드를 구현해야 합니다:"
 
-#: ../../source/example-pytorch-from-centralized-to-federated.rst:219
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:218
 msgid ":code:`set_parameters`"
 msgstr ":code:`set_parameters`"
 
@@ -4431,9 +4625,9 @@ msgstr ""
 "모델 매개변수를 가져와서 NumPy :code:`ndarray`의 목록으로 반환합니다(이는 "
 ":code:`flwr.client.NumPyClient`가 기대하는 바와 같습니다)"
 
-#: ../../source/example-pytorch-from-centralized-to-federated.rst:225
-#: ../../source/tutorial-quickstart-jax.rst:173
-#: ../../source/tutorial-quickstart-scikitlearn.rst:125
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:223
+#: ../../source/tutorial-quickstart-jax.rst:171
+#: ../../source/tutorial-quickstart-scikitlearn.rst:123
 msgid ":code:`fit`"
 msgstr ":code:`fit`"
 
@@ -4455,9 +4649,9 @@ msgstr "로컬 훈련 세트에서 모델을 훈련합니다"
 msgid "get the updated local model weights and return them to the server"
 msgstr "업데이트된 로컬 모델 가중치를 가져와 서버로 반환합니다"
 
-#: ../../source/example-pytorch-from-centralized-to-federated.rst:230
-#: ../../source/tutorial-quickstart-jax.rst:178
-#: ../../source/tutorial-quickstart-scikitlearn.rst:128
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:227
+#: ../../source/tutorial-quickstart-jax.rst:175
+#: ../../source/tutorial-quickstart-scikitlearn.rst:127
 msgid ":code:`evaluate`"
 msgstr ":code:`evaluate`"
 
@@ -4568,7 +4762,7 @@ msgstr ""
 "평균 소득 계산과 같은 모든 분석(M)이 두 데이터 세트에 대해 거의 동일한 결과를 산출하도록 보장합니다(O와 O' 는 비슷할 "
 "것입니다). 이렇게 하면 그룹 패턴은 보존하면서 개별 세부 정보는 가려져 개인의 정보가 군중 속에 숨겨집니다."
 
-#: ../../source/explanation-differential-privacy.rst:-1
+#: ../../source/explanation-differential-privacy.rst:16
 msgid "DP Intro"
 msgstr "DP 소개"
 
@@ -4707,8 +4901,8 @@ msgstr ""
 "**로컬 차등 프라이버시**: DP는 정보를 서버로 보내기 전에 클라이언트 측에서 적용되며, 서버로 전송되는 업데이트가 클라이언트 "
 "데이터에 대한 정보를 유출하는 것을 방지하는 것이 목표입니다."
 
-#: ../../source/explanation-differential-privacy.rst:-1
 #: ../../source/explanation-differential-privacy.rst:68
+#: ../../source/explanation-differential-privacy.rst:71
 #: ../../source/how-to-use-differential-privacy.rst:11
 msgid "Central Differential Privacy"
 msgstr "중앙 차등 프라이버시"
@@ -4743,7 +4937,7 @@ msgstr ""
 "개인정보 보호에 중요하고 견고성에 도움이 되는 경우가 많습니다. 이를 달성하기 위한 일반적인 접근 방식은 클라이언트 모델 업데이트의"
 " `L2` 규범을 제한하여 더 큰 업데이트가 규범 `S`에 맞도록 축소되도록 하는 것입니다."
 
-#: ../../source/explanation-differential-privacy.rst:-1
+#: ../../source/explanation-differential-privacy.rst:84
 msgid "clipping"
 msgstr "클리핑"
 
@@ -4795,8 +4989,8 @@ msgid ""
 "others."
 msgstr "고정 클리핑과 조정 클리핑 중 선택은 개인정보 보호 요구 사항, 데이터 배포, 모델 복잡성 등 다양한 요인에 따라 달라집니다."
 
-#: ../../source/explanation-differential-privacy.rst:-1
 #: ../../source/explanation-differential-privacy.rst:105
+#: ../../source/explanation-differential-privacy.rst:110
 #: ../../source/how-to-use-differential-privacy.rst:96
 msgid "Local Differential Privacy"
 msgstr "로컬 차등 프라이버시"
@@ -5064,7 +5258,7 @@ msgstr ""
 msgid "This is sometimes called a hub-and-spoke topology:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:24
+#: ../../source/explanation-flower-architecture.rst:18
 #, fuzzy
 msgid "Hub-and-spoke topology in federated learning"
 msgstr "연합 학습이란 무엇입니까?"
@@ -5137,7 +5331,7 @@ msgid ""
 "`missing link` between all those SuperNodes."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:71
+#: ../../source/explanation-flower-architecture.rst:65
 #, fuzzy
 msgid "Basic Flower architecture"
 msgstr "Flower 아키텍처"
@@ -5174,7 +5368,7 @@ msgid ""
 "SuperNodes."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:97
+#: ../../source/explanation-flower-architecture.rst:91
 msgid "Multi-tenancy federated learning architecture"
 msgstr ""
 
@@ -5196,7 +5390,7 @@ msgid ""
 "their corresponding ``ClientApp``\\s:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:113
+#: ../../source/explanation-flower-architecture.rst:107
 msgid "Multi-tenancy federated learning architecture - Run 1"
 msgstr ""
 
@@ -5212,7 +5406,7 @@ msgid ""
 " to participate in the training:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:125
+#: ../../source/explanation-flower-architecture.rst:119
 msgid "Multi-tenancy federated learning architecture - Run 2"
 msgstr ""
 
@@ -5248,7 +5442,7 @@ msgid ""
 "developer machine."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:151
+#: ../../source/explanation-flower-architecture.rst:145
 msgid "Flower Deployment Engine with SuperExec"
 msgstr ""
 
@@ -8419,7 +8613,7 @@ msgstr ""
 " 위한 :code:`DifferentialPrivacyServerSideFixedClipping`과 "
 ":code:`DifferentialPrivacyServerSideAdaptiveClipping`입니다."
 
-#: ../../source/how-to-use-differential-privacy.rst:-1
+#: ../../source/how-to-use-differential-privacy.rst:25
 msgid "server side clipping"
 msgstr "서버 측 클리핑"
 
@@ -8458,7 +8652,7 @@ msgstr ""
 " 해당 서버 측 래퍼 :code:`DifferentialPrivacyClientSideFixedClipping` 및 "
 ":code:`DifferentialPrivacyClientSideAdaptiveClipping`이 있습니다."
 
-#: ../../source/how-to-use-differential-privacy.rst:-1
+#: ../../source/how-to-use-differential-privacy.rst:57
 msgid "client side clipping"
 msgstr "클라이언트 측 클리핑"
 
@@ -8492,7 +8686,7 @@ msgstr ""
 "로컬 차분 프라이버시(DP)를 활용하고 클라이언트 모델 파라미터를 서버로 전송하기 전에 노이즈를 추가하려면 `LocalDpMod`를"
 " 사용하면 됩니다. 클리핑 노멀 값, 감도, 엡실론, 델타 등의 하이퍼파라미터를 설정해야 합니다."
 
-#: ../../source/how-to-use-differential-privacy.rst:-1
+#: ../../source/how-to-use-differential-privacy.rst:99
 msgid "local DP mod"
 msgstr "로컬 DP mod"
 
@@ -8923,6 +9117,10 @@ msgstr "빌드 전달인자"
 msgid "Optional argument"
 msgstr "선택적 개선 사항"
 
+#: ../../flwr install:1
+msgid "The source FAB file to install."
+msgstr ""
+
 #: ../../flwr log:1
 msgid "Get logs from a Flower project run."
 msgstr ""
@@ -8944,6 +9142,19 @@ msgstr "``DISTRO``"
 #, fuzzy
 msgid "Required argument"
 msgstr "빌드 전달인자"
+
+#: ../../flwr log:1
+#, fuzzy
+msgid "The Flower run ID to query"
+msgstr "Flower 커뮤니티 가입하기"
+
+#: ../../flwr log:1
+msgid "Path of the Flower project to run"
+msgstr ""
+
+#: ../../flwr log:1
+msgid "Name of the federation to run the app on"
+msgstr ""
 
 #: ../../flwr new:1
 #, fuzzy
@@ -8969,6 +9180,11 @@ msgstr ""
 msgid "The Flower username of the author"
 msgstr ""
 
+#: ../../flwr new:1
+#, fuzzy
+msgid "The name of the Flower App"
+msgstr "Flower 기본 이미지의 태그."
+
 #: ../../flwr run:1
 #, fuzzy
 msgid "Run Flower App."
@@ -8988,6 +9204,15 @@ msgstr ""
 msgid ""
 "Note that `key1`, `key2`, and `key3` in this example need to exist inside"
 " the `pyproject.toml` in order to be properly overriden."
+msgstr ""
+
+#: ../../flwr run:1
+#, fuzzy
+msgid "Path of the Flower App to run."
+msgstr "Flower 기본 이미지의 태그."
+
+#: ../../flwr run:1
+msgid "Name of the federation to run the app on."
 msgstr ""
 
 #: ../../source/ref-api-cli.rst:16
@@ -11684,7 +11909,7 @@ msgstr "인코딩"
 msgid "The encoding in which to encode the string."
 msgstr "문자열을 인코딩합니다."
 
-#: flwr.common.EventType.encode:9 of
+#: flwr.common.EventType.encode:5 of
 msgid "errors"
 msgstr "오류"
 
@@ -11878,7 +12103,7 @@ msgstr ""
 "문자열이 접미사 문자열로 끝나고 해당 접미사가 비어 있지 않으면 문자열[:-len(suffix)]을 반환합니다. 그렇지 않으면 원본"
 " 문자열의 복사본을 반환합니다."
 
-#: flwr.common.EventType.replace:5 of
+#: flwr.common.EventType.replace:3 of
 msgid "count"
 msgstr "카운트"
 
@@ -11918,7 +12143,7 @@ msgid ""
 "strings and the original string."
 msgstr "구분 기호를 찾을 수 없는 경우 빈 문자열 2개와 원래 문자열을 포함하는 3-tuple을 반환합니다."
 
-#: flwr.common.EventType.rsplit:7 flwr.common.EventType.split:7 of
+#: flwr.common.EventType.rsplit:3 flwr.common.EventType.split:3 of
 msgid "sep"
 msgstr "sep"
 
@@ -11935,7 +12160,7 @@ msgstr ""
 "None(기본값)으로 설정하면 모든 공백 문자(\\\\n \\\\r \\\\t \\\\f 및 공백 포함)를 분할하고 결과에서 빈 "
 "문자열을 삭제합니다."
 
-#: flwr.common.EventType.rsplit:11 flwr.common.EventType.split:11 of
+#: flwr.common.EventType.rsplit:9 flwr.common.EventType.split:9 of
 msgid "maxsplit"
 msgstr "maxsplit"
 
@@ -11981,7 +12206,7 @@ msgid ""
 "remaining cased characters have lower case."
 msgstr "보다 구체적으로, 단어는 대문자로 시작하고 나머지 모든 대소문자는 소문자로 표기합니다."
 
-#: flwr.common.EventType.translate:5 of
+#: flwr.common.EventType.translate:3 of
 msgid "table"
 msgstr "table"
 
@@ -21848,7 +22073,7 @@ msgid ""
 "blockchain environment is available here:"
 msgstr ""
 
-#: ../../source/ref-faq.rst:29
+#: ../../source/ref-faq.rst:28
 msgid "`FLock: A Decentralised AI Training Platform <https://www.flock.io/#/>`_."
 msgstr ""
 
@@ -22748,7 +22973,7 @@ msgstr ""
 "code:`FlowerClient`는 모델 매개변수를 가져오거나 설정하는 메서드 2개, 모델 학습을 위한 메서드 1개, 모델 "
 "테스트를 위한 메서드 1개 등 총 4개의 메서드를 구현해야 합니다:"
 
-#: ../../source/tutorial-quickstart-jax.rst:167
+#: ../../source/tutorial-quickstart-jax.rst:165
 msgid ":code:`set_parameters (optional)`"
 msgstr ":code:`set_parameters (선택사항)`"
 
@@ -23243,7 +23468,7 @@ msgstr ""
 msgid "Sets the parameters of a :code:`sklearn` LogisticRegression model"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-scikitlearn.rst:50
+#: ../../source/tutorial-quickstart-scikitlearn.rst:49
 msgid ":code:`set_initial_params()`"
 msgstr ""
 
@@ -23299,7 +23524,7 @@ msgstr ""
 msgid "return the model weight as a list of NumPy ndarrays"
 msgstr ""
 
-#: ../../source/tutorial-quickstart-scikitlearn.rst:121
+#: ../../source/tutorial-quickstart-scikitlearn.rst:120
 msgid ":code:`set_parameters` (optional)"
 msgstr ""
 
@@ -25394,7 +25619,7 @@ msgstr ""
 " 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|e87b69b2ada74ea49412df16f4a0b9cc|"
+msgid "|b8714c45b74b4d8fb008e2ebb3bc1d44|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -25411,7 +25636,7 @@ msgstr ""
 " 바둑과 같은 게임을 하는 것일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|33cacb7d985c4906b348515c1a5cd993|"
+msgid "|75f1561efcfd422ea67d28d1513120dc|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -25434,7 +25659,7 @@ msgstr ""
 "부르리는 것을 듣는 스마트 스피커에서 비롯됩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|cc080a555947492fa66131dc3a967603|"
+msgid "|6a1f51b235304558a9bdaaabfc93b8d2|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -25452,7 +25677,7 @@ msgstr ""
 "있습니다. 하지만 여러 조직이 모두 같은 작업을 위해 데이터를 생성하는 것일 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|085c3e0fb8664c6aa06246636524b20b|"
+msgid "|35e70dab1fb544af9aa3a9c09c4f9797|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -25470,7 +25695,7 @@ msgstr ""
 "서버는 데이터 센터 어딘가에 있을 수도 있고 클라우드 어딘가에 있을 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|bfe69c74e48c45d49b50251c38c2a019|"
+msgid "|d7efb5705dd3467f991ed23746824a07|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -25487,7 +25712,7 @@ msgstr ""
 " 우리가 기본적으로 사용해 온 머신러닝 방법입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|ebbecd651f0348d99c6511ea859bf4ca|"
+msgid "|94e7b021c7b540bfbedf7f082a41ff87|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -25509,7 +25734,7 @@ msgstr ""
 "트래픽을 분석하는 것이 있습니다. 이러한 사례에서 모든 데이터는 자연스럽게 중앙 서버에 존재합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|163117eb654a4273babba413cf8065f5|"
+msgid "|a80714782dde439ab73936518f91fc3c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -25526,7 +25751,7 @@ msgstr ""
 "좋은 모델을 훈련하기에 충분하지 않을 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|452ac3ba453b4cd1be27be1ba7560d64|"
+msgid "|c62080ca6197473da57d191c8225a9d9|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -25693,7 +25918,7 @@ msgstr ""
 "체크포인트에서 모델 매개변수를 초기화합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|f403fcd69e4e44409627e748b404c086|"
+msgid "|21a8f1e6a5b14a7bbb8559979d0e8a2b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -25720,7 +25945,7 @@ msgstr ""
 "개의 연결 노드만 사용합니다. 그 이유는 점점 더 많은 클라이언트 노드를 선택하면 학습의 효율성이 감소하기 때문입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|4b00fe63870145968f8443619a792a42|"
+msgid "|c310f2a22f7b4917bf42775aae7a1c09|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -25747,7 +25972,7 @@ msgstr ""
 "데이터에서 한 단계 정도로 짧거나 몇 단계(mini-batches)에 불과할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|368378731066486fa4397e89bc6b870c|"
+msgid "|a0c5b43401194535a8460bcf02e65f9a|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -25773,7 +25998,7 @@ msgstr ""
 "보냅니다. 보내는 모델 업데이트는 전체 모델 파라미터거나 로컬 교육 중에 누적된 그레디언트(gradient)일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|a66aa83d85bf4ffba7ed660b718066da|"
+msgid "|aabfdbd5564e41a790f8ea93cc21a444|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -25822,7 +26047,7 @@ msgstr ""
 "많은 영향을 미칩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|82324b9af72a4582a81839d55caab767|"
+msgid "|c9cc8f160fa647b09e742fe4dc8edb54|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -25941,7 +26166,7 @@ msgstr ""
 "사용자는 모든 워크로드, 머신러닝 프레임워크 및 모든 프로그래밍 언어를 통합할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|fbf2da0da3cc4f8ab3b3eff852d80c41|"
+msgid "|7e83aad011cd4907b2f02f907c6922e9|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -28119,5 +28344,47 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|ed9aae51da70428eab7eef32f21e819e|"
+#~ msgstr ""
+
+#~ msgid "|e87b69b2ada74ea49412df16f4a0b9cc|"
+#~ msgstr ""
+
+#~ msgid "|33cacb7d985c4906b348515c1a5cd993|"
+#~ msgstr ""
+
+#~ msgid "|cc080a555947492fa66131dc3a967603|"
+#~ msgstr ""
+
+#~ msgid "|085c3e0fb8664c6aa06246636524b20b|"
+#~ msgstr ""
+
+#~ msgid "|bfe69c74e48c45d49b50251c38c2a019|"
+#~ msgstr ""
+
+#~ msgid "|ebbecd651f0348d99c6511ea859bf4ca|"
+#~ msgstr ""
+
+#~ msgid "|163117eb654a4273babba413cf8065f5|"
+#~ msgstr ""
+
+#~ msgid "|452ac3ba453b4cd1be27be1ba7560d64|"
+#~ msgstr ""
+
+#~ msgid "|f403fcd69e4e44409627e748b404c086|"
+#~ msgstr ""
+
+#~ msgid "|4b00fe63870145968f8443619a792a42|"
+#~ msgstr ""
+
+#~ msgid "|368378731066486fa4397e89bc6b870c|"
+#~ msgstr ""
+
+#~ msgid "|a66aa83d85bf4ffba7ed660b718066da|"
+#~ msgstr ""
+
+#~ msgid "|82324b9af72a4582a81839d55caab767|"
+#~ msgstr ""
+
+#~ msgid "|fbf2da0da3cc4f8ab3b3eff852d80c41|"
 #~ msgstr ""
 
