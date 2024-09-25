@@ -1,7 +1,7 @@
 .. _quickstart-huggingface:
 
 Quickstart 🤗 Transformers
-=========================
+==========================
 
 In this federated learning tutorial we will learn how to train a large language model
 (LLM) on the `IMDB <https://huggingface.co/datasets/stanfordnlp/imdb>`_ dataset using
