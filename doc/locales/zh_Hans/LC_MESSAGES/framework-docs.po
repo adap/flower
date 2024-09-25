@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-24 00:29+0000\n"
+"POT-Creation-Date: 2024-09-25 00:30+0000\n"
 "PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language: zh_Hans\n"
@@ -1476,7 +1476,7 @@ msgstr ""
 msgid "Setting up the repository"
 msgstr "建立资源库"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:21
+#: ../../source/contributor-tutorial-contribute-on-github.rst:12
 msgid "**Create a GitHub account and setup Git**"
 msgstr "**创建 GitHub 账户并设置 Git**"
 
@@ -1515,7 +1515,7 @@ msgstr ""
 "通用的 Git 和 GitHub 工作流程背后的理念可以归结为：从 GitHub 上的远程仓库下载代码，在本地进行修改并使用 Git "
 "进行跟踪，然后将新的历史记录上传回 GitHub。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:32
+#: ../../source/contributor-tutorial-contribute-on-github.rst:23
 msgid "**Forking the Flower repository**"
 msgstr "**叉花仓库**"
 
@@ -1540,7 +1540,7 @@ msgstr ""
 "您可以更改名称，但没有必要，因为这个版本的 Flower "
 "将是您自己的，并位于您自己的账户中（即，在您自己的版本库列表中）。创建完成后，您会在左上角看到自己的 Flower 版本。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:47
+#: ../../source/contributor-tutorial-contribute-on-github.rst:34
 msgid "**Cloning your forked repository**"
 msgstr "**克隆你的分叉仓库**"
 
@@ -1567,7 +1567,7 @@ msgid ""
 "it) folder in the current working directory."
 msgstr "这将在当前工作目录下创建一个 `flower/`（如果重命名了，则使用 fork 的名称）文件夹。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:66
+#: ../../source/contributor-tutorial-contribute-on-github.rst:49
 msgid "**Add origin**"
 msgstr "**添加原产地**"
 
@@ -1591,7 +1591,7 @@ msgid ""
 "terminal:"
 msgstr "一旦复制了 \\<URL\\> ，我们就可以在终端中键入以下命令："
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:90
+#: ../../source/contributor-tutorial-contribute-on-github.rst:68
 msgid "**Add upstream**"
 msgstr "**增加上游**"
 
@@ -1650,7 +1650,7 @@ msgstr "在进行任何更改之前，请确保您的版本库是最新的："
 msgid "And with Flower's repository:"
 msgstr "还有Flower的存储库："
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:122
+#: ../../source/contributor-tutorial-contribute-on-github.rst:114
 msgid "**Create a new branch**"
 msgstr "**创建一个新分支**"
 
@@ -1667,7 +1667,7 @@ msgid ""
 "directory:"
 msgstr "为此，只需在版本库目录下运行以下命令即可："
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:125
+#: ../../source/contributor-tutorial-contribute-on-github.rst:124
 msgid "**Make changes**"
 msgstr "**进行修改**"
 
@@ -1675,7 +1675,7 @@ msgstr "**进行修改**"
 msgid "Write great code and create wonderful changes using your favorite editor!"
 msgstr "使用您最喜欢的编辑器编写优秀的代码并创建精彩的更改！"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:138
+#: ../../source/contributor-tutorial-contribute-on-github.rst:127
 msgid "**Test and format your code**"
 msgstr "**测试并格式化您的代码**"
 
@@ -1690,7 +1690,7 @@ msgstr "不要忘记测试和格式化您的代码！否则您的代码将无法
 msgid "To do so, we have written a few scripts that you can execute:"
 msgstr "为此，我们编写了一些脚本供您执行："
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:150
+#: ../../source/contributor-tutorial-contribute-on-github.rst:140
 msgid "**Stage changes**"
 msgstr "**舞台变化**"
 
@@ -1711,7 +1711,7 @@ msgid ""
 "the :code:`git status` command."
 msgstr "要查看与上一版本（上次提交）相比哪些文件已被修改，以及哪些文件处于提交阶段，可以使用 :code:`git status` 命令。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:160
+#: ../../source/contributor-tutorial-contribute-on-github.rst:152
 msgid "**Commit changes**"
 msgstr "**提交更改**"
 
@@ -1730,7 +1730,7 @@ msgstr ""
 "<commit_message\\> 用于向他人解释提交的作用。它应该以命令式风格书写，并且简明扼要。例如 :code:`git commit "
 "-m \"Add images to README\"`。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:171
+#: ../../source/contributor-tutorial-contribute-on-github.rst:162
 msgid "**Push the changes to the fork**"
 msgstr "**将更改推送到分叉**"
 
@@ -1751,7 +1751,7 @@ msgstr "完成此操作后，您将在 GitHub 上看到您的分叉仓库已根�
 msgid "Creating and merging a pull request (PR)"
 msgstr "创建和合并拉取请求 (PR)"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:206
+#: ../../source/contributor-tutorial-contribute-on-github.rst:176
 msgid "**Create the PR**"
 msgstr "**创建 PR**"
 
@@ -1820,7 +1820,7 @@ msgid ""
 "anyone, you have the option to create a draft pull request:"
 msgstr "如果您的 PR 尚未准备好接受审核，而且您不想通知任何人，您可以选择创建一个草案拉取请求："
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:209
+#: ../../source/contributor-tutorial-contribute-on-github.rst:208
 msgid "**Making new changes**"
 msgstr "**作出新的改变**"
 
@@ -1831,7 +1831,7 @@ msgid ""
 " associated with the PR."
 msgstr "一旦 PR 被打开（无论是否作为草案），你仍然可以像以前一样，通过修改与 PR 关联的分支来推送新的提交。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:231
+#: ../../source/contributor-tutorial-contribute-on-github.rst:211
 msgid "**Review the PR**"
 msgstr "**审查 PR**"
 
@@ -1867,7 +1867,7 @@ msgid ""
 "review."
 msgstr "一旦所有对话都得到解决，您就可以重新申请审核。"
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:251
+#: ../../source/contributor-tutorial-contribute-on-github.rst:233
 msgid "**Once the PR is merged**"
 msgstr "**一旦 PR 被合并**"
 
@@ -2180,6 +2180,7 @@ msgstr "成为贡献者"
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:5
 #: ../../source/docker/run-as-subprocess.rst:11
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:15
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:22
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:12
 #: ../../source/docker/tutorial-quickstart-docker.rst:11
 msgid "Prerequisites"
@@ -2991,6 +2992,7 @@ msgid "Before you start, make sure that:"
 msgstr "开始之前，请确保 Docker 守护进程正在运行："
 
 #: ../../source/docker/run-quickstart-examples-docker-compose.rst:19
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:26
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:16
 #: ../../source/docker/tutorial-quickstart-docker.rst:15
 msgid "The ``flwr`` CLI is :doc:`installed <../how-to-install-flower>` locally."
@@ -3210,6 +3212,209 @@ msgid ""
 "environment variables for a container."
 msgstr "要在 Docker 容器内设置变量，可以使用 ``-e <name>=<value>`` 标志。"
 
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:3
+#, fuzzy
+msgid "Deploy Flower on Multiple Machines with Docker Compose"
+msgstr "快速入门 iOS"
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:5
+msgid ""
+"This guide will help you set up a Flower project on multiple machines "
+"using Docker Compose."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:8
+msgid ""
+"You will learn how to run the Flower client and server components on two "
+"separate machines, with Flower configured to use TLS encryption and "
+"persist SuperLink state across restarts. A server consists of a SuperLink"
+" and ``SuperExec``. For more details about the Flower architecture, refer"
+" to the :doc:`../explanation-flower-architecture` explainer page."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:15
+msgid ""
+"This guide assumes you have completed the :doc:`tutorial-quickstart-"
+"docker-compose` tutorial. It is highly recommended that you follow and "
+"understand the contents of that tutorial before proceeding with this "
+"guide."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:24
+msgid "Before you begin, make sure you have the following prerequisites:"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:28
+msgid "The Docker daemon is running on your local machine and the remote machine."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:30
+msgid ""
+"Docker Compose V2 is installed on both your local machine and the remote "
+"machine."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:32
+msgid "You can connect to the remote machine from your local machine."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:33
+msgid "Ports ``9091`` and ``9093`` are accessible on the remote machine."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:37
+msgid ""
+"The guide uses the |quickstart_sklearn_tabular|_ example as an example "
+"project."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:40
+msgid ""
+"If your project has a different name or location, please remember to "
+"adjust the commands/paths accordingly."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:45
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:21
+#: ../../source/docker/tutorial-quickstart-docker.rst:19
+msgid "Step 1: Set Up"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:47
+msgid "Clone the Flower repository and change to the ``distributed`` directory:"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:55
+msgid "Get the IP address from the remote machine and save it for later."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:57
+msgid ""
+"Use the ``certs.yml`` Compose file to generate your own self-signed "
+"certificates. If you have certificates, you can continue with Step 2."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:62
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:215
+msgid "These certificates should be used only for development purposes."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:64
+msgid ""
+"For production environments, you may have to use dedicated services to "
+"obtain your certificates."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:67
+msgid ""
+"First, set the environment variables ``SUPERLINK_IP`` and "
+"``SUPEREXEC_IP`` with the IP address from the remote machine. For "
+"example, if the IP is ``192.168.2.33``, execute:"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:76
+msgid "Next, generate the self-signed certificates:"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:84
+msgid "Step 2: Copy the Server Compose Files"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:86
+msgid ""
+"Use the method that works best for you to copy the ``server`` directory, "
+"the certificates, and your Flower project to the remote machine."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:89
+msgid "For example, you can use ``scp`` to copy the directories:"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:100
+#, fuzzy
+msgid "Step 3: Start the Flower Server Components"
+msgstr "然后，我们启动服务器："
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:102
+msgid ""
+"Log into the remote machine using ``ssh`` and run the following command "
+"to start the SuperLink and SuperExec services:"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:115
+msgid ""
+"The Path of the ``PROJECT_DIR`` should be relative to the location of the"
+" ``server`` Docker Compose files."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:118
+msgid "Go back to your terminal on your local machine."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:122
+#, fuzzy
+msgid "Step 4: Start the Flower Client Components"
+msgstr "然后，我们启动服务器："
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:124
+msgid ""
+"On your local machine, run the following command to start the client "
+"components:"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:135
+msgid ""
+"The Path of the ``PROJECT_DIR`` should be relative to the location of the"
+" ``client`` Docker Compose files."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:140
+#, fuzzy
+msgid "Step 5: Run Your Flower Project"
+msgstr "Flower 服务器。"
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:142
+msgid ""
+"Specify the remote SuperExec IP addresses and the path to the root "
+"certificate in the ``[tool.flwr.federations.remote-superexec]`` table in "
+"the ``pyproject.toml`` file. Here, we have named our remote federation "
+"``remote-superexec``:"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:147
+#, fuzzy
+msgid "examples/quickstart-sklearn-tabular/pyproject.toml"
+msgstr "scikit-learn快速入门"
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:156
+msgid ""
+"The Path of the ``root-certificates`` should be relative to the location "
+"of the ``pyproject.toml`` file."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:159
+msgid "To run the project, execute:"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:165
+msgid ""
+"That's it! With these steps, you've set up Flower on two separate "
+"machines and are ready to start using it."
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:170
+msgid "Step 6: Clean Up"
+msgstr ""
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:172
+#, fuzzy
+msgid "Shut down the Flower client components:"
+msgstr "Flower 客户端。"
+
+#: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:179
+msgid "Shut down the Flower server components and delete the SuperLink state:"
+msgstr ""
+
 #: ../../source/docker/tutorial-quickstart-docker.rst:2
 #, fuzzy
 msgid "Quickstart with Docker"
@@ -3226,11 +3431,6 @@ msgstr ""
 msgid ""
 "This tutorial does not use production-ready settings, so you can focus on"
 " understanding the basic workflow that uses the minimum configurations."
-msgstr ""
-
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:21
-#: ../../source/docker/tutorial-quickstart-docker.rst:19
-msgid "Step 1: Set Up"
 msgstr ""
 
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:31
@@ -3969,10 +4169,6 @@ msgid ""
 " the ``certs.yml`` Compose file."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:215
-msgid "These certificates should be used only for development purposes."
-msgstr ""
-
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:217
 msgid ""
 "For production environments, use a service like `Let's Encrypt "
@@ -4406,7 +4602,7 @@ msgstr ""
 ":code:`Client`略微容易一些，因为它避免了一些不必要的操作。:code:`CifarClient` "
 "需要实现四个方法，两个用于获取/设置模型参数，一个用于训练模型，一个用于测试模型："
 
-#: ../../source/example-pytorch-from-centralized-to-federated.rst:219
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:218
 msgid ":code:`set_parameters`"
 msgstr ":code:`set_parameters`"
 
@@ -4439,9 +4635,9 @@ msgstr ""
 "获取模型参数，并以 NumPy :code:`ndarray`的列表形式返回（这正是 "
 ":code:`flwr.client.NumPyClient`所匹配的格式）"
 
-#: ../../source/example-pytorch-from-centralized-to-federated.rst:225
-#: ../../source/tutorial-quickstart-jax.rst:173
-#: ../../source/tutorial-quickstart-scikitlearn.rst:125
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:223
+#: ../../source/tutorial-quickstart-jax.rst:171
+#: ../../source/tutorial-quickstart-scikitlearn.rst:123
 msgid ":code:`fit`"
 msgstr ":code:`fit`"
 
@@ -4463,9 +4659,9 @@ msgstr "在本地训练集上训练模型"
 msgid "get the updated local model weights and return them to the server"
 msgstr "获取更新后的本地模型参数并发送回服务器"
 
-#: ../../source/example-pytorch-from-centralized-to-federated.rst:230
-#: ../../source/tutorial-quickstart-jax.rst:178
-#: ../../source/tutorial-quickstart-scikitlearn.rst:128
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:227
+#: ../../source/tutorial-quickstart-jax.rst:175
+#: ../../source/tutorial-quickstart-scikitlearn.rst:127
 msgid ":code:`evaluate`"
 msgstr ":code:`evaluate`"
 
@@ -4569,7 +4765,7 @@ msgstr ""
 "的数据）之外完全相同。差分隐私（DP）可以保证任何分析（M），比如计算平均收入，对两个数据集都会产生几乎相同的结果（O 和 O' "
 "将是相似的）。这既保留了群体模式，又掩盖了个人细节，确保个人的信息隐藏在人群中。"
 
-#: ../../source/explanation-differential-privacy.rst:-1
+#: ../../source/explanation-differential-privacy.rst:16
 #, fuzzy
 msgid "DP Intro"
 msgstr "DP 介绍"
@@ -4707,8 +4903,8 @@ msgid ""
 "the client's data."
 msgstr "**本地差分隐私**： 在向服务器发送任何信息之前，在客户端应用 DP，目的是防止向服务器发送的更新泄露任何有关客户端数据的信息。"
 
-#: ../../source/explanation-differential-privacy.rst:-1
 #: ../../source/explanation-differential-privacy.rst:68
+#: ../../source/explanation-differential-privacy.rst:71
 #: ../../source/how-to-use-differential-privacy.rst:11
 #, fuzzy
 msgid "Central Differential Privacy"
@@ -4740,7 +4936,7 @@ msgstr ""
 "虽然在联合学习中实现中央数据处理的方法有很多种，但我们将重点放在[2]和[3]提出的算法上。总体方法是剪辑客户端发送的模型更新，并在聚合模型中添加一定量的噪声。在每次迭代中，以特定概率随机选择一组客户端进行训练。每个客户端对自己的数据进行局部训练。然后，每个客户端的更新会被某个值`S`（灵敏度`S`）剪切。这将限制任何单个客户端的影响，这对隐私至关重要，通常也有利于稳健性。实现这一点的常用方法是限制客户机模型更新的"
 " `L2` 准则，确保较大的更新被缩减以适应 `S` 准则。"
 
-#: ../../source/explanation-differential-privacy.rst:-1
+#: ../../source/explanation-differential-privacy.rst:84
 #, fuzzy
 msgid "clipping"
 msgstr "剪贴"
@@ -4794,8 +4990,8 @@ msgid ""
 "others."
 msgstr "在固定剪切和自适应剪切之间做出选择取决于各种因素，如隐私要求、数据分布、模型复杂性等。"
 
-#: ../../source/explanation-differential-privacy.rst:-1
 #: ../../source/explanation-differential-privacy.rst:105
+#: ../../source/explanation-differential-privacy.rst:110
 #: ../../source/how-to-use-differential-privacy.rst:96
 #, fuzzy
 msgid "Local Differential Privacy"
@@ -5066,7 +5262,7 @@ msgstr ""
 msgid "This is sometimes called a hub-and-spoke topology:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:24
+#: ../../source/explanation-flower-architecture.rst:18
 #, fuzzy
 msgid "Hub-and-spoke topology in federated learning"
 msgstr "什么是联邦学习？"
@@ -5139,7 +5335,7 @@ msgid ""
 "`missing link` between all those SuperNodes."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:71
+#: ../../source/explanation-flower-architecture.rst:65
 #, fuzzy
 msgid "Basic Flower architecture"
 msgstr "Flower的架构"
@@ -5177,7 +5373,7 @@ msgid ""
 "SuperNodes."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:97
+#: ../../source/explanation-flower-architecture.rst:91
 #, fuzzy
 msgid "Multi-tenancy federated learning architecture"
 msgstr "使用联邦学习策略"
@@ -5201,7 +5397,7 @@ msgid ""
 "their corresponding ``ClientApp``\\s:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:113
+#: ../../source/explanation-flower-architecture.rst:107
 #, fuzzy
 msgid "Multi-tenancy federated learning architecture - Run 1"
 msgstr "使用联邦学习策略"
@@ -5218,7 +5414,7 @@ msgid ""
 " to participate in the training:"
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:125
+#: ../../source/explanation-flower-architecture.rst:119
 #, fuzzy
 msgid "Multi-tenancy federated learning architecture - Run 2"
 msgstr "使用联邦学习策略"
@@ -5255,7 +5451,7 @@ msgid ""
 "developer machine."
 msgstr ""
 
-#: ../../source/explanation-flower-architecture.rst:151
+#: ../../source/explanation-flower-architecture.rst:145
 msgid "Flower Deployment Engine with SuperExec"
 msgstr ""
 
@@ -8370,7 +8566,7 @@ msgstr ""
 ":code:`DifferentialPrivacyServerSideFixedClipping` 和 "
 ":code:`DifferentialPrivacyServerSideAdaptiveClipping` ，用于固定剪辑和自适应剪辑。"
 
-#: ../../source/how-to-use-differential-privacy.rst:-1
+#: ../../source/how-to-use-differential-privacy.rst:25
 #, fuzzy
 msgid "server side clipping"
 msgstr "服务器端逻辑"
@@ -8411,7 +8607,7 @@ msgstr ""
 ":code:`DifferentialPrivacyClientSideFixedClipping` 和 "
 ":code:`DifferentialPrivacyClientSideAdaptiveClipping`。"
 
-#: ../../source/how-to-use-differential-privacy.rst:-1
+#: ../../source/how-to-use-differential-privacy.rst:57
 #, fuzzy
 msgid "client side clipping"
 msgstr "客户端逻辑"
@@ -8448,7 +8644,7 @@ msgstr ""
 "要利用本地差分隐私（DP）并在将客户端模型参数传输到 Flower 服务器之前为其添加噪声，可以使用 "
 "`LocalDpMod`。需要设置以下超参数：剪切规范值、灵敏度、ε 和 delta。"
 
-#: ../../source/how-to-use-differential-privacy.rst:-1
+#: ../../source/how-to-use-differential-privacy.rst:99
 #, fuzzy
 msgid "local DP mod"
 msgstr "本地 DP 模式"
@@ -8875,6 +9071,10 @@ msgstr "参数解析器"
 msgid "Optional argument"
 msgstr "可选的改进措施"
 
+#: ../../flwr install:1
+msgid "The source FAB file to install."
+msgstr ""
+
 #: ../../flwr log:1
 msgid "Get logs from a Flower project run."
 msgstr ""
@@ -8896,6 +9096,19 @@ msgstr ""
 #, fuzzy
 msgid "Required argument"
 msgstr "构建文档"
+
+#: ../../flwr log:1
+#, fuzzy
+msgid "The Flower run ID to query"
+msgstr "加入 Flower 社区"
+
+#: ../../flwr log:1
+msgid "Path of the Flower project to run"
+msgstr ""
+
+#: ../../flwr log:1
+msgid "Name of the federation to run the app on"
+msgstr ""
 
 #: ../../flwr new:1
 #, fuzzy
@@ -8921,6 +9134,11 @@ msgstr ""
 msgid "The Flower username of the author"
 msgstr ""
 
+#: ../../flwr new:1
+#, fuzzy
+msgid "The name of the Flower App"
+msgstr "基础镜像的存储库名称。"
+
 #: ../../flwr run:1
 #, fuzzy
 msgid "Run Flower App."
@@ -8940,6 +9158,15 @@ msgstr ""
 msgid ""
 "Note that `key1`, `key2`, and `key3` in this example need to exist inside"
 " the `pyproject.toml` in order to be properly overriden."
+msgstr ""
+
+#: ../../flwr run:1
+#, fuzzy
+msgid "Path of the Flower App to run."
+msgstr "基础镜像的存储库名称。"
+
+#: ../../flwr run:1
+msgid "Name of the federation to run the app on."
 msgstr ""
 
 #: ../../source/ref-api-cli.rst:16
@@ -11859,7 +12086,7 @@ msgstr "编码"
 msgid "The encoding in which to encode the string."
 msgstr "字符串的编码。"
 
-#: flwr.common.EventType.encode:9 of
+#: flwr.common.EventType.encode:5 of
 #, fuzzy
 msgid "errors"
 msgstr "错误"
@@ -12071,7 +12298,7 @@ msgid ""
 "string."
 msgstr "如果字符串以后缀字符串结尾，且后缀不为空，则返回 string[:-len(suffix)]。否则，返回原始字符串的副本。"
 
-#: flwr.common.EventType.replace:5 of
+#: flwr.common.EventType.replace:3 of
 #, fuzzy
 msgid "count"
 msgstr "背景"
@@ -12113,7 +12340,7 @@ msgid ""
 "strings and the original string."
 msgstr "如果找不到分隔符，则返回一个包含两个空字符串和原始字符串的 3 元组。"
 
-#: flwr.common.EventType.rsplit:7 flwr.common.EventType.split:7 of
+#: flwr.common.EventType.rsplit:3 flwr.common.EventType.split:3 of
 #, fuzzy
 msgid "sep"
 msgstr "sep"
@@ -12131,7 +12358,7 @@ msgid ""
 " empty strings from the result."
 msgstr "当设置为 \"无\"（默认值）时，将对任何空白字符（包括 \\n \\r \\t \\f 和空格）进行分割，并从结果中剔除空字符串。"
 
-#: flwr.common.EventType.rsplit:11 flwr.common.EventType.split:11 of
+#: flwr.common.EventType.rsplit:9 flwr.common.EventType.split:9 of
 #, fuzzy
 msgid "maxsplit"
 msgstr "最大分割"
@@ -12181,7 +12408,7 @@ msgid ""
 "remaining cased characters have lower case."
 msgstr "更具体地说，单词以大写字母开头，其余所有大小写字符均为小写。"
 
-#: flwr.common.EventType.translate:5 of
+#: flwr.common.EventType.translate:3 of
 #, fuzzy
 msgid "table"
 msgstr "数据库"
@@ -24959,7 +25186,7 @@ msgid ""
 "blockchain environment is available here:"
 msgstr "当然可以。有关在区块链环境中使用 Flower 的可用示例列表，请点击此处："
 
-#: ../../source/ref-faq.rst:29
+#: ../../source/ref-faq.rst:28
 msgid "`FLock: A Decentralised AI Training Platform <https://www.flock.io/#/>`_."
 msgstr ""
 
@@ -25935,7 +26162,7 @@ msgstr ""
 ":code:`Client`更容易实现，因为它避免了一些不必要的操作。:code:`FlowerClient` "
 "需要实现四个方法，两个用于获取/设置模型参数，一个用于训练模型，一个用于测试模型："
 
-#: ../../source/tutorial-quickstart-jax.rst:167
+#: ../../source/tutorial-quickstart-jax.rst:165
 msgid ":code:`set_parameters (optional)`"
 msgstr ":code:`set_parameters (可选)`"
 
@@ -26455,7 +26682,7 @@ msgstr ":code:`set_model_params()`"
 msgid "Sets the parameters of a :code:`sklearn` LogisticRegression model"
 msgstr "设置:code:`sklean`的LogisticRegression模型的参数"
 
-#: ../../source/tutorial-quickstart-scikitlearn.rst:50
+#: ../../source/tutorial-quickstart-scikitlearn.rst:49
 msgid ":code:`set_initial_params()`"
 msgstr ":code:`set_initial_params()`"
 
@@ -26526,7 +26753,7 @@ msgstr ""
 msgid "return the model weight as a list of NumPy ndarrays"
 msgstr "以 NumPy ndarrays 列表形式返回模型参数"
 
-#: ../../source/tutorial-quickstart-scikitlearn.rst:121
+#: ../../source/tutorial-quickstart-scikitlearn.rst:120
 msgid ":code:`set_parameters` (optional)"
 msgstr ":code:`set_parameters` （可选）"
 
@@ -28994,7 +29221,7 @@ msgid ""
 msgstr "在机器学习中，我们有一个模型和数据。模型可以是一个神经网络（如图所示），也可以是其他东西，比如经典的线性回归。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|e87b69b2ada74ea49412df16f4a0b9cc|"
+msgid "|b8714c45b74b4d8fb008e2ebb3bc1d44|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -29009,7 +29236,7 @@ msgid ""
 msgstr "我们使用数据来训练模型，以完成一项有用的任务。任务可以是检测图像中的物体、转录音频或玩围棋等游戏。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|33cacb7d985c4906b348515c1a5cd993|"
+msgid "|75f1561efcfd422ea67d28d1513120dc|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -29030,7 +29257,7 @@ msgid ""
 msgstr "它源于智能手机上用户与应用程序的交互、汽车上传感器数据的收集、笔记本电脑上键盘输入的接收，或者智能扬声器上某人试着唱的歌。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|cc080a555947492fa66131dc3a967603|"
+msgid "|6a1f51b235304558a9bdaaabfc93b8d2|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -29048,7 +29275,7 @@ msgstr ""
 "\"通常不只是一个地方，而是很多地方。它可能是多个运行同一应用程序的设备。但也可能是多个组织，都在为同一任务生成数据。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|085c3e0fb8664c6aa06246636524b20b|"
+msgid "|35e70dab1fb544af9aa3a9c09c4f9797|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -29064,7 +29291,7 @@ msgid ""
 msgstr "因此，要使用机器学习或任何类型的数据分析，过去使用的方法是在中央服务器上收集所有数据。这个服务器可以在数据中心的某个地方，也可以在云端的某个地方。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|bfe69c74e48c45d49b50251c38c2a019|"
+msgid "|d7efb5705dd3467f991ed23746824a07|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -29079,7 +29306,7 @@ msgid ""
 msgstr "一旦所有数据都收集到一处，我们最终就可以使用机器学习算法在数据上训练我们的模型。这就是我们基本上一直依赖的机器学习方法。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|ebbecd651f0348d99c6511ea859bf4ca|"
+msgid "|94e7b021c7b540bfbedf7f082a41ff87|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -29099,7 +29326,7 @@ msgid ""
 msgstr "我们刚刚看到的经典机器学习方法可以在某些情况下使用。很好的例子包括对假日照片进行分类或分析网络流量。在这些案例中，所有数据自然都可以在中央服务器上获得。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|163117eb654a4273babba413cf8065f5|"
+msgid "|a80714782dde439ab73936518f91fc3c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -29114,7 +29341,7 @@ msgid ""
 msgstr "但这种方法并不适用于许多其他情况。例如，集中服务器上没有数据，或者一台服务器上的数据不足以训练出一个好的模型。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|452ac3ba453b4cd1be27be1ba7560d64|"
+msgid "|c62080ca6197473da57d191c8225a9d9|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -29262,7 +29489,7 @@ msgid ""
 msgstr "我们首先在服务器上初始化模型。这与经典的集中式学习完全相同：我们随机或从先前保存的检查点初始化模型参数。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|f403fcd69e4e44409627e748b404c086|"
+msgid "|21a8f1e6a5b14a7bbb8559979d0e8a2b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -29286,7 +29513,7 @@ msgid ""
 msgstr "接下来，我们会将全局模型的参数发送到连接的客户端节点（如智能手机等边缘设备或企业的服务器）。这是为了确保每个参与节点都使用相同的模型参数开始本地训练。我们通常只使用几个连接节点，而不是所有节点。这样做的原因是，选择越来越多的客户端节点会导致收益递减。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|4b00fe63870145968f8443619a792a42|"
+msgid "|c310f2a22f7b4917bf42775aae7a1c09|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -29312,7 +29539,7 @@ msgstr ""
 "（mini-batches）。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|368378731066486fa4397e89bc6b870c|"
+msgid "|a0c5b43401194535a8460bcf02e65f9a|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -29335,7 +29562,7 @@ msgid ""
 msgstr "经过本地训练后，每个客户节点最初收到的模型参数都会略有不同。参数之所以不同，是因为每个客户端节点的本地数据集中都有不同的数据。然后，客户端节点将这些模型更新发回服务器。它们发送的模型更新既可以是完整的模型参数，也可以只是本地训练过程中积累的梯度。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|a66aa83d85bf4ffba7ed660b718066da|"
+msgid "|aabfdbd5564e41a790f8ea93cc21a444|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -29381,7 +29608,7 @@ msgstr ""
 " 100 个示例的 10 倍。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|82324b9af72a4582a81839d55caab767|"
+msgid "|c9cc8f160fa647b09e742fe4dc8edb54|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -29488,7 +29715,7 @@ msgstr ""
 "为联邦学习、分析和评估提供了一种统一的方法。它允许用户联邦化任何工作负载、任何 ML 框架和任何编程语言。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|fbf2da0da3cc4f8ab3b3eff852d80c41|"
+msgid "|7e83aad011cd4907b2f02f907c6922e9|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -33368,5 +33595,47 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|ed9aae51da70428eab7eef32f21e819e|"
+#~ msgstr ""
+
+#~ msgid "|e87b69b2ada74ea49412df16f4a0b9cc|"
+#~ msgstr ""
+
+#~ msgid "|33cacb7d985c4906b348515c1a5cd993|"
+#~ msgstr ""
+
+#~ msgid "|cc080a555947492fa66131dc3a967603|"
+#~ msgstr ""
+
+#~ msgid "|085c3e0fb8664c6aa06246636524b20b|"
+#~ msgstr ""
+
+#~ msgid "|bfe69c74e48c45d49b50251c38c2a019|"
+#~ msgstr ""
+
+#~ msgid "|ebbecd651f0348d99c6511ea859bf4ca|"
+#~ msgstr ""
+
+#~ msgid "|163117eb654a4273babba413cf8065f5|"
+#~ msgstr ""
+
+#~ msgid "|452ac3ba453b4cd1be27be1ba7560d64|"
+#~ msgstr ""
+
+#~ msgid "|f403fcd69e4e44409627e748b404c086|"
+#~ msgstr ""
+
+#~ msgid "|4b00fe63870145968f8443619a792a42|"
+#~ msgstr ""
+
+#~ msgid "|368378731066486fa4397e89bc6b870c|"
+#~ msgstr ""
+
+#~ msgid "|a66aa83d85bf4ffba7ed660b718066da|"
+#~ msgstr ""
+
+#~ msgid "|82324b9af72a4582a81839d55caab767|"
+#~ msgstr ""
+
+#~ msgid "|fbf2da0da3cc4f8ab3b3eff852d80c41|"
 #~ msgstr ""
 
