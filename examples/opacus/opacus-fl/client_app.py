@@ -1,14 +1,11 @@
 """opacus: Training with Sample-Level Differential Privacy using Opacus Privacy Engine."""
 
-import argparse
 import warnings
-from collections import OrderedDict
 
 import torch
 from flwr.client import ClientApp, NumPyClient
-from flwr_datasets import FederatedDataset
 from opacus import PrivacyEngine
-from .task import train, test, Net, load_data, DEVICE, get_weights, set_weights
+from .task import train, test, Net, load_data, get_weights, set_weights
 from flwr.common import Context
 
 
@@ -76,7 +73,6 @@ class FlowerClient(NumPyClient):
 
 def client_fn(context: Context):
     partition_id = context.node_config["partition-id"]
-    # run_config = context.run_config
     noise_multiplier = 1.0 if partition_id % 2 == 0 else 1.5
 
     train_loader, test_loader = load_data(
