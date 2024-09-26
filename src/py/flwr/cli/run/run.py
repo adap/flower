@@ -73,7 +73,7 @@ def run(
             help="Use `--stream` with `flwr run` to display logs;\n "
             "logs are hidden by default.",
         ),
-    ] = True,
+    ] = False,
 ) -> None:
     """Run Flower App."""
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
