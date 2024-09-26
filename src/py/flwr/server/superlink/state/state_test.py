@@ -680,7 +680,7 @@ class StateTest(unittest.TestCase):
         assert err_taskres.task.HasField("error")
         assert err_taskres.task.error.code == ErrorCode.NODE_UNAVAILABLE
 
-    def test_store_task_res_taskins_expired(self) -> None:
+    def test_store_task_res_task_ins_expired(self) -> None:
         """Test behavior of store_task_res when the TaskIns it references is expired."""
         # Prepare
         state: State = self.state_factory()
@@ -690,18 +690,19 @@ class StateTest(unittest.TestCase):
         task_ins.task.created_at = time.time() - task_ins.task.ttl + 0.5
         task_ins_id = state.store_task_ins(task_ins)
 
-        # Wait for 0.5 second for TaskIns to expire
-        time.sleep(0.5)
+        with patch(
+            "time.time",
+            side_effect=lambda: task_ins.task.created_at + task_ins.task.ttl + 0.1,
+        ):  # Expired by 0.1 seconds
+            task = create_task_res(
+                producer_node_id=0,
+                anonymous=True,
+                ancestry=[str(task_ins_id)],
+                run_id=run_id,
+            )
 
-        task = create_task_res(
-            producer_node_id=0,
-            anonymous=True,
-            ancestry=[str(task_ins_id)],
-            run_id=run_id,
-        )
-
-        # Execute
-        result = state.store_task_res(task)
+            # Execute
+            result = state.store_task_res(task)
 
         # Assert
         assert result is None

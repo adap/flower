@@ -1,8 +1,8 @@
 Federated evaluation
 ====================
 
-There are two main approaches to evaluating models in federated learning systems: centralized (or server-side) evaluation and federated (or client-side) evaluation.
-
+There are two main approaches to evaluating models in federated learning systems:
+centralized (or server-side) evaluation and federated (or client-side) evaluation.
 
 Centralized Evaluation
 ----------------------
@@ -10,14 +10,16 @@ Centralized Evaluation
 Built-In Strategies
 ~~~~~~~~~~~~~~~~~~~
 
-All built-in strategies support centralized evaluation by providing an evaluation function during initialization.
-An evaluation function is any function that can take the current global model parameters as input and return evaluation results:
+All built-in strategies support centralized evaluation by providing an evaluation
+function during initialization. An evaluation function is any function that can take the
+current global model parameters as input and return evaluation results:
 
 .. code-block:: python
-    
+
     from flwr.common import NDArrays, Scalar
-    
+
     from typing import Dict, Optional, Tuple
+
 
     def get_evaluate_fn(model):
         """Return an evaluation function for server-side evaluation."""
@@ -38,6 +40,7 @@ An evaluation function is any function that can take the current global model pa
 
         return evaluate
 
+
     # Load and compile model for server-side parameter evaluation
     model = tf.keras.applications.EfficientNetB0(
         input_shape=(32, 32, 3), weights=None, classes=10
@@ -47,7 +50,7 @@ An evaluation function is any function that can take the current global model pa
 
     # Create strategy
     strategy = fl.server.strategy.FedAvg(
-        # ... other FedAvg arguments 
+        # ... other FedAvg arguments
         evaluate_fn=get_evaluate_fn(model),
     )
 
@@ -57,9 +60,10 @@ An evaluation function is any function that can take the current global model pa
 Custom Strategies
 ~~~~~~~~~~~~~~~~~
 
-The :code:`Strategy` abstraction provides a method called :code:`evaluate` that can directly be used to evaluate the current global model parameters.
-The current server implementation calls :code:`evaluate` after parameter aggregation and before federated evaluation (see next paragraph).
-
+The ``Strategy`` abstraction provides a method called ``evaluate`` that can directly be
+used to evaluate the current global model parameters. The current server implementation
+calls ``evaluate`` after parameter aggregation and before federated evaluation (see next
+paragraph).
 
 Federated Evaluation
 --------------------
@@ -67,7 +71,8 @@ Federated Evaluation
 Implementing Federated Evaluation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Client-side evaluation happens in the :code:`Client.evaluate` method and can be configured from the server side.
+Client-side evaluation happens in the ``Client.evaluate`` method and can be configured
+from the server side.
 
 .. code-block:: python
 
@@ -79,9 +84,11 @@ Client-side evaluation happens in the :code:`Client.evaluate` method and can be 
 
         def get_parameters(self, config):
             # ...
+            pass
 
         def fit(self, parameters, config):
             # ...
+            pass
 
         def evaluate(self, parameters, config):
             """Evaluate parameters on the locally held test set."""
@@ -100,12 +107,27 @@ Client-side evaluation happens in the :code:`Client.evaluate` method and can be 
 Configuring Federated Evaluation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Federated evaluation can be configured from the server side. Built-in strategies support the following arguments:
+Federated evaluation can be configured from the server side. Built-in strategies support
+the following arguments:
 
-- :code:`fraction_evaluate`: a :code:`float` defining the fraction of clients that will be selected for evaluation. If :code:`fraction_evaluate` is set to :code:`0.1` and :code:`100` clients are connected to the server, then :code:`10` will be randomly selected for evaluation. If :code:`fraction_evaluate` is set to :code:`0.0`, federated evaluation will be disabled. 
-- :code:`min_evaluate_clients`: an :code:`int`: the minimum number of clients to be selected for evaluation. If :code:`fraction_evaluate` is set to :code:`0.1`, :code:`min_evaluate_clients` is set to 20, and :code:`100` clients are connected to the server, then :code:`20` clients will be selected for evaluation.
-- :code:`min_available_clients`: an :code:`int` that defines the minimum number of clients which need to be connected to the server before a round of federated evaluation can start. If fewer than :code:`min_available_clients` are connected to the server, the server will wait until more clients are connected before it continues to sample clients for evaluation.
-- :code:`on_evaluate_config_fn`: a function that returns a configuration dictionary which will be sent to the selected clients. The function will be called during each round and provides a convenient way to customize client-side evaluation from the server side, for example, to configure the number of validation steps performed. 
+- ``fraction_evaluate``: a ``float`` defining the fraction of clients that will be
+  selected for evaluation. If ``fraction_evaluate`` is set to ``0.1`` and ``100``
+  clients are connected to the server, then ``10`` will be randomly selected for
+  evaluation. If ``fraction_evaluate`` is set to ``0.0``, federated evaluation will be
+  disabled.
+- ``min_evaluate_clients``: an ``int``: the minimum number of clients to be selected for
+  evaluation. If ``fraction_evaluate`` is set to ``0.1``, ``min_evaluate_clients`` is
+  set to 20, and ``100`` clients are connected to the server, then ``20`` clients will
+  be selected for evaluation.
+- ``min_available_clients``: an ``int`` that defines the minimum number of clients which
+  need to be connected to the server before a round of federated evaluation can start.
+  If fewer than ``min_available_clients`` are connected to the server, the server will
+  wait until more clients are connected before it continues to sample clients for
+  evaluation.
+- ``on_evaluate_config_fn``: a function that returns a configuration dictionary which
+  will be sent to the selected clients. The function will be called during each round
+  and provides a convenient way to customize client-side evaluation from the server
+  side, for example, to configure the number of validation steps performed.
 
 .. code-block:: python
 
@@ -117,6 +139,7 @@ Federated evaluation can be configured from the server side. Built-in strategies
         """
         val_steps = 5 if server_round < 4 else 10
         return {"val_steps": val_steps}
+
 
     # Create strategy
     strategy = fl.server.strategy.FedAvg(
@@ -130,11 +153,11 @@ Federated evaluation can be configured from the server side. Built-in strategies
     # Start Flower server for four rounds of federated learning
     fl.server.start_server(server_address="[::]:8080", strategy=strategy)
 
-
 Evaluating Local Model Updates During Training
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Model parameters can also be evaluated during training. :code:`Client.fit` can return arbitrary evaluation results as a dictionary:
+Model parameters can also be evaluated during training. ``Client.fit`` can return
+arbitrary evaluation results as a dictionary:
 
 .. code-block:: python
 
@@ -146,6 +169,7 @@ Model parameters can also be evaluated during training. :code:`Client.fit` can r
 
         def get_parameters(self, config):
             # ...
+            pass
 
         def fit(self, parameters, config):
             """Train parameters on the locally held training set."""
@@ -171,9 +195,12 @@ Model parameters can also be evaluated during training. :code:`Client.fit` can r
 
         def evaluate(self, parameters, config):
             # ...
-
+            pass
 
 Full Code Example
 -----------------
 
-For a full code example that uses both centralized and federated evaluation, see the *Advanced TensorFlow Example* (the same approach can be applied to workloads implemented in any other framework): https://github.com/adap/flower/tree/main/examples/advanced-tensorflow
+For a full code example that uses both centralized and federated evaluation, see the
+*Advanced TensorFlow Example* (the same approach can be applied to workloads implemented
+in any other framework):
+https://github.com/adap/flower/tree/main/examples/advanced-tensorflow
