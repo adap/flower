@@ -80,7 +80,7 @@ from .serde import (
 def test_serialisation_deserialisation() -> None:
     """Test if the np.ndarray is identical after (de-)serialization."""
     # Prepare
-    scalars = [True, b"bytestr", 3.14, 9000, "Hello"]
+    scalars = [True, b"bytestr", 3.14, 9000, "Hello", (1 << 63) + 1]
 
     for scalar in scalars:
         # Execute
@@ -178,7 +178,7 @@ class RecordMaker:
         elif dtype == str:
             ret = self.get_str(self.rng.randint(10, 100))
         elif dtype == int:
-            ret = self.rng.randint(-1 << 30, 1 << 30)
+            ret = self.rng.randint(-1 << 63, (1 << 64) - 1)
         elif dtype == float:
             ret = (self.rng.random() - 0.5) * (2.0 ** self.rng.randint(0, 50))
         elif dtype == bytes:
@@ -316,6 +316,7 @@ def test_metrics_record_serialization_deserialization() -> None:
     # Prepare
     maker = RecordMaker()
     original = maker.metrics_record()
+    original["uint64"] = (1 << 63) + 321
 
     # Execute
     proto = metrics_record_to_proto(original)
@@ -331,6 +332,7 @@ def test_configs_record_serialization_deserialization() -> None:
     # Prepare
     maker = RecordMaker()
     original = maker.configs_record()
+    original["uint64"] = (1 << 63) + 101
 
     # Execute
     proto = configs_record_to_proto(original)
