@@ -69,8 +69,9 @@ def run(
     stream: Annotated[
         bool,
         typer.Option(
-            "--stream/--show",
-            help="Flag to stream or print logs from the Flower run",
+            "--stream",
+            help="Use `--stream` with `flwr run` to display logs;\n "
+            "logs are hidden by default.",
         ),
     ] = True,
 ) -> None:
