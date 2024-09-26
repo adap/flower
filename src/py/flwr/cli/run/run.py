@@ -71,7 +71,7 @@ def run(
         typer.Option(
             "--stream",
             help="Use `--stream` with `flwr run` to display logs;\n "
-            "logs are hidden by default.",
+            "logs are not streamed by default.",
         ),
     ] = False,
 ) -> None:
