@@ -22,8 +22,8 @@ packages = ["."]
 publisher = "flwrlabs"
 
 [tool.flwr.app.components]
-serverapp = "opacus.server_app:app"
-clientapp = "opacus.client_app:app"
+serverapp = "opacus-fl.server_app:app"
+clientapp = "opacus-fl.client_app:app"
 
 [tool.flwr.app.config]
 num-server-rounds = 3
