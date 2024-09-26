@@ -36,7 +36,7 @@ class FlowerClient(NumPyClient):
 
     def fit(self, parameters, config):
         model = self.model
-        set_weights(self.model, parameters)
+        set_weights(model, parameters)
 
         optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
@@ -65,7 +65,8 @@ class FlowerClient(NumPyClient):
             print(f"Epsilon value for delta={self.target_delta} is {epsilon:.2f}")
         else:
             print("Epsilon value not available.")
-        return (self.get_parameters(config={}), len(self.train_loader), {})
+
+        return (get_weights(self.net), len(self.trainloader.dataset), {})
 
     def evaluate(self, parameters, config):
         set_weights(self.model, parameters)
