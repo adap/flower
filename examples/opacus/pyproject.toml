@@ -22,8 +22,8 @@ packages = ["."]
 publisher = "flwrlabs"
 
 [tool.flwr.app.components]
-serverapp = "tf_privacy.server_app:app"
-clientapp = "tf_privacy.client_app:app"
+serverapp = "opacus.server_app:app"
+clientapp = "opacus.client_app:app"
 
 [tool.flwr.app.config]
 num-server-rounds = 3
