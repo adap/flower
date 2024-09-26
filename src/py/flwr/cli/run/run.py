@@ -18,12 +18,10 @@ import hashlib
 import json
 import subprocess
 import sys
-import time
-from logging import DEBUG, INFO
+from logging import DEBUG
 from pathlib import Path
 from typing import Annotated, Any, Optional
 
-import grpc
 import typer
 
 from flwr.cli.build import build
@@ -36,7 +34,7 @@ from flwr.common.typing import Fab
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 
-from ..log import stream_logs
+from ..log import start_stream
 
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
@@ -198,20 +196,7 @@ def _run_with_superexec(
     typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
 
     if stream:
-        try:
-            while True:
-                log(INFO, "Starting logstream for run_id `%s`", res.run_id)
-                stream_logs(res.run_id, channel, CONN_REFRESH_PERIOD)
-                time.sleep(2)
-                log(INFO, "Reconnecting to logstream")
-        except KeyboardInterrupt:
-            log(INFO, "Exiting logstream")
-        except grpc.RpcError as e:
-            # pylint: disable=E1101
-            if e.code() == grpc.StatusCode.CANCELLED:
-                pass
-        finally:
-            channel.close()
+        start_stream(res.run_id, channel, CONN_REFRESH_PERIOD)
 
 
 def _run_without_superexec(
