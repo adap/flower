@@ -66,7 +66,7 @@ class FlowerClient(NumPyClient):
         else:
             print("Epsilon value not available.")
 
-        return (get_weights(self.net), len(self.trainloader.dataset), {})
+        return (get_weights(model), len(self.trainloader.dataset), {})
 
     def evaluate(self, parameters, config):
         set_weights(self.model, parameters)
