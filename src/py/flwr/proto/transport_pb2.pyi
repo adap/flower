@@ -402,19 +402,21 @@ global___ClientMessage = ClientMessage
 class Scalar(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     DOUBLE_FIELD_NUMBER: builtins.int
+    UINT64_FIELD_NUMBER: builtins.int
     SINT64_FIELD_NUMBER: builtins.int
     BOOL_FIELD_NUMBER: builtins.int
     STRING_FIELD_NUMBER: builtins.int
     BYTES_FIELD_NUMBER: builtins.int
     double: builtins.float
-    sint64: builtins.int
+    uint64: builtins.int
     """float float = 2;
     int32 int32 = 3;
     int64 int64 = 4;
     uint32 uint32 = 5;
-    uint64 uint64 = 6;
-    sint32 sint32 = 7;
     """
+
+    sint64: builtins.int
+    """sint32 sint32 = 7;"""
 
     bool: builtins.bool
     """fixed32 fixed32 = 9;
@@ -428,12 +430,13 @@ class Scalar(google.protobuf.message.Message):
     def __init__(self,
         *,
         double: builtins.float = ...,
+        uint64: builtins.int = ...,
         sint64: builtins.int = ...,
         bool: builtins.bool = ...,
         string: typing.Text = ...,
         bytes: builtins.bytes = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["bool",b"bool","bytes",b"bytes","double",b"double","scalar",b"scalar","sint64",b"sint64","string",b"string"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["bool",b"bool","bytes",b"bytes","double",b"double","scalar",b"scalar","sint64",b"sint64","string",b"string"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal["scalar",b"scalar"]) -> typing.Optional[typing_extensions.Literal["double","sint64","bool","string","bytes"]]: ...
+    def HasField(self, field_name: typing_extensions.Literal["bool",b"bool","bytes",b"bytes","double",b"double","scalar",b"scalar","sint64",b"sint64","string",b"string","uint64",b"uint64"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["bool",b"bool","bytes",b"bytes","double",b"double","scalar",b"scalar","sint64",b"sint64","string",b"string","uint64",b"uint64"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["scalar",b"scalar"]) -> typing.Optional[typing_extensions.Literal["double","uint64","sint64","bool","string","bytes"]]: ...
 global___Scalar = Scalar
