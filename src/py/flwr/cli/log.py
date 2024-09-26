@@ -26,18 +26,49 @@ import typer
 from flwr.cli.config_utils import load_and_validate
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log as logger
+from flwr.proto.exec_pb2 import StreamLogsRequest  # pylint: disable=E0611
+from flwr.proto.exec_pb2_grpc import ExecStub
 
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
 
-# pylint: disable=unused-argument
-def stream_logs(run_id: int, channel: grpc.Channel, period: int) -> None:
+def stream_logs(run_id: int, channel: grpc.Channel, duration: int) -> None:
     """Stream logs from the beginning of a run with connection refresh."""
+    start_time = time.time()
+    stub = ExecStub(channel)
+    req = StreamLogsRequest(run_id=run_id)
+
+    for res in stub.StreamLogs(req):
+        print(res.log_output)
+        if time.time() - start_time > duration:
+            break
 
 
-# pylint: disable=unused-argument
 def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
     """Print logs from the beginning of a run."""
+    stub = ExecStub(channel)
+    req = StreamLogsRequest(run_id=run_id)
+
+    try:
+        while True:
+            try:
+                # Enforce timeout for graceful exit
+                for res in stub.StreamLogs(req, timeout=timeout):
+                    print(res.log_output)
+            except grpc.RpcError as e:
+                # pylint: disable=E1101
+                if e.code() == grpc.StatusCode.DEADLINE_EXCEEDED:
+                    break
+                if e.code() == grpc.StatusCode.NOT_FOUND:
+                    logger(ERROR, "Invalid run_id `%s`, exiting", run_id)
+                    break
+                if e.code() == grpc.StatusCode.CANCELLED:
+                    break
+    except KeyboardInterrupt:
+        logger(DEBUG, "Stream interrupted by user")
+    finally:
+        channel.close()
+        logger(DEBUG, "Channel closed")
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
