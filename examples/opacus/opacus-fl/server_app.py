@@ -5,7 +5,7 @@ from typing import List, Tuple
 from flwr.common import Metrics, Context, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerConfig, ServerAppComponents
 from flwr.server.strategy import FedAvg
-from opacus.task import Net, get_weights
+from .task import Net, get_weights
 
 
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
