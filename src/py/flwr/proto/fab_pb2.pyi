@@ -33,13 +33,16 @@ global___Fab = Fab
 
 class GetFabRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    RUN_ID_FIELD_NUMBER: builtins.int
     HASH_STR_FIELD_NUMBER: builtins.int
+    run_id: builtins.int
     hash_str: typing.Text
     def __init__(self,
         *,
+        run_id: builtins.int = ...,
         hash_str: typing.Text = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["hash_str",b"hash_str"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["hash_str",b"hash_str","run_id",b"run_id"]) -> None: ...
 global___GetFabRequest = GetFabRequest
 
 class GetFabResponse(google.protobuf.message.Message):

@@ -88,7 +88,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
         Optional[Callable[[], Optional[int]]],
         Optional[Callable[[], None]],
         Optional[Callable[[int], Run]],
-        Optional[Callable[[str], Fab]],
+        Optional[Callable[[int, str], Fab]],
     ]
 ]:
     """Primitives for request/response-based interaction with a server.
@@ -292,9 +292,9 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
             user_config_from_proto(get_run_response.run.override_config),
         )
 
-    def get_fab(fab_hash: str) -> Fab:
+    def get_fab(run_id: int, fab_hash: str) -> Fab:
         # Call FleetAPI
-        get_fab_request = GetFabRequest(hash_str=fab_hash)
+        get_fab_request = GetFabRequest(run_id=run_id, hash_str=fab_hash)
         get_fab_response: GetFabResponse = retry_invoker.invoke(
             stub.GetFab,
             request=get_fab_request,
