@@ -4,6 +4,7 @@ isort:skip_file
 """
 import builtins
 import flwr.proto.fab_pb2
+import flwr.proto.node_pb2
 import flwr.proto.transport_pb2
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
@@ -128,13 +129,18 @@ global___CreateRunResponse = CreateRunResponse
 class GetRunRequest(google.protobuf.message.Message):
     """GetRun"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    NODE_FIELD_NUMBER: builtins.int
     RUN_ID_FIELD_NUMBER: builtins.int
+    @property
+    def node(self) -> flwr.proto.node_pb2.Node: ...
     run_id: builtins.int
     def __init__(self,
         *,
+        node: typing.Optional[flwr.proto.node_pb2.Node] = ...,
         run_id: builtins.int = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["node",b"node"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["node",b"node","run_id",b"run_id"]) -> None: ...
 global___GetRunRequest = GetRunRequest
 
 class GetRunResponse(google.protobuf.message.Message):
@@ -176,14 +182,19 @@ global___UpdateRunStatusResponse = UpdateRunStatusResponse
 class GetRunStatusRequest(google.protobuf.message.Message):
     """GetRunStatus"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    NODE_FIELD_NUMBER: builtins.int
     RUN_IDS_FIELD_NUMBER: builtins.int
+    @property
+    def node(self) -> flwr.proto.node_pb2.Node: ...
     @property
     def run_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]: ...
     def __init__(self,
         *,
+        node: typing.Optional[flwr.proto.node_pb2.Node] = ...,
         run_ids: typing.Optional[typing.Iterable[builtins.int]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["run_ids",b"run_ids"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["node",b"node"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["node",b"node","run_ids",b"run_ids"]) -> None: ...
 global___GetRunStatusRequest = GetRunStatusRequest
 
 class GetRunStatusResponse(google.protobuf.message.Message):
