@@ -18,6 +18,7 @@ syntax = "proto3";
 package flwr.proto;
 
 import "flwr/proto/fab.proto";
+import "flwr/proto/node.proto";
 import "flwr/proto/transport.proto";
 
 message Run {
@@ -47,7 +48,10 @@ message CreateRunRequest {
 message CreateRunResponse { uint64 run_id = 1; }
 
 // GetRun
-message GetRunRequest { uint64 run_id = 1; }
+message GetRunRequest {
+  Node node = 1;
+  uint64 run_id = 2;
+}
 message GetRunResponse { Run run = 1; }
 
 // UpdateRunStatus
@@ -58,5 +62,8 @@ message UpdateRunStatusRequest {
 message UpdateRunStatusResponse {}
 
 // GetRunStatus
-message GetRunStatusRequest { repeated uint64 run_ids = 1; }
+message GetRunStatusRequest {
+  Node node = 1;
+  repeated uint64 run_ids = 2;
+}
 message GetRunStatusResponse { map<uint64, RunStatus> run_status_dict = 1; }
