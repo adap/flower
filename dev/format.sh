@@ -36,3 +36,6 @@ python -m nbstripout examples/*/*.ipynb --extra-keys "$KEYS"
 
 # Markdown
 python -m mdformat --number doc/source examples
+
+# RST
+docstrfmt doc/source
