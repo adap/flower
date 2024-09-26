@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import uuid
+from collections.abc import Iterator
 from logging import DEBUG, ERROR
 from pathlib import Path
 from queue import Queue
