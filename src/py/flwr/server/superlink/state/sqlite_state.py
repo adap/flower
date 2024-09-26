@@ -782,8 +782,9 @@ class SqliteState(State):  # pylint: disable=R0904
         # Convert the uint64 value to sint64 for SQLite
         sint64_run_id = convert_uint64_to_sint64(run_id)
         query = "SELECT * FROM run WHERE run_id = ?;"
-        try:
-            row = self.query(query, (sint64_run_id,))[0]
+        rows = self.query(query, (sint64_run_id,))
+        if rows:
+            row = rows[0]
             return Run(
                 run_id=convert_sint64_to_uint64(row["run_id"]),
                 fab_id=row["fab_id"],
@@ -791,9 +792,8 @@ class SqliteState(State):  # pylint: disable=R0904
                 fab_hash=row["fab_hash"],
                 override_config=json.loads(row["override_config"]),
             )
-        except sqlite3.IntegrityError:
-            log(ERROR, "`run_id` does not exist.")
-            return None
+        log(ERROR, "`run_id` does not exist.")
+        return None
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""
