@@ -680,7 +680,7 @@ class StateTest(unittest.TestCase):
         assert err_taskres.task.HasField("error")
         assert err_taskres.task.error.code == ErrorCode.NODE_UNAVAILABLE
 
-    def test_store_task_res_taskins_expired(self) -> None:
+    def test_store_task_res_task_ins_expired(self) -> None:
         """Test behavior of store_task_res when the TaskIns it references is expired."""
         # Prepare
         state: State = self.state_factory()
