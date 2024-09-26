@@ -44,4 +44,4 @@ Request for examples
 We wish we had more time to write usage examples because we believe they help users to
 get started with building what they want to build. You can either open a PR if your
 project is self contained and in a good shape, or otherwise share it on the `Flower
-Discuss forum<https://discuss.flower.ai/c/example-projects>`_!
+Discuss forum <https://discuss.flower.ai/c/example-projects>`_!
