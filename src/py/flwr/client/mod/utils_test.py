@@ -16,7 +16,7 @@
 
 
 import unittest
-from typing import List, cast
+from typing import cast
 
 from flwr.client.typing import ClientAppCallable, Mod
 from flwr.common import (
@@ -43,7 +43,7 @@ def _increment_context_counter(context: Context) -> None:
     context.state.metrics_records[METRIC] = MetricsRecord({COUNTER: current_counter})
 
 
-def make_mock_mod(name: str, footprint: List[str]) -> Mod:
+def make_mock_mod(name: str, footprint: list[str]) -> Mod:
     """Make a mock mod."""
 
     def mod(message: Message, context: Context, app: ClientAppCallable) -> Message:
@@ -61,7 +61,7 @@ def make_mock_mod(name: str, footprint: List[str]) -> Mod:
     return mod
 
 
-def make_mock_app(name: str, footprint: List[str]) -> ClientAppCallable:
+def make_mock_app(name: str, footprint: list[str]) -> ClientAppCallable:
     """Make a mock app."""
 
     def app(message: Message, context: Context) -> Message:
@@ -97,7 +97,7 @@ class TestMakeApp(unittest.TestCase):
     def test_multiple_mods(self) -> None:
         """Test if multiple mods are called in the correct order."""
         # Prepare
-        footprint: List[str] = []
+        footprint: list[str] = []
         mock_app = make_mock_app("app", footprint)
         mock_mod_names = [f"mod{i}" for i in range(1, 15)]
         mock_mods = [make_mock_mod(name, footprint) for name in mock_mod_names]
@@ -127,7 +127,7 @@ class TestMakeApp(unittest.TestCase):
     def test_filter(self) -> None:
         """Test if a mod can filter incoming TaskIns."""
         # Prepare
-        footprint: List[str] = []
+        footprint: list[str] = []
         mock_app = make_mock_app("app", footprint)
         context = Context(node_id=0, node_config={}, state=RecordSet(), run_config={})
         message = _get_dummy_flower_message()

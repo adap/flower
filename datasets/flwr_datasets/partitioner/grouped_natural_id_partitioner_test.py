@@ -16,7 +16,7 @@
 
 
 import unittest
-from typing import List, Literal, Set
+from typing import Literal
 
 from parameterized import parameterized, parameterized_class
 
@@ -95,7 +95,7 @@ class TestGroupedNaturalIdPartitioner(unittest.TestCase):
         num_rows: int,
         num_unique_natural_id: int,
         group_size: int,
-        expected_num_unique_natural_ids: List[int],
+        expected_num_unique_natural_ids: list[int],
     ) -> None:
         """Test allow-smaller mode handles the remainder correctly."""
         dataset = _create_dataset(num_rows, num_unique_natural_id)
@@ -132,7 +132,7 @@ class TestGroupedNaturalIdPartitioner(unittest.TestCase):
         num_rows: int,
         num_unique_natural_id: int,
         group_size: int,
-        expected_num_unique_natural_ids: List[int],
+        expected_num_unique_natural_ids: list[int],
     ) -> None:
         """Test allow-bigger mode handles the remainder correctly."""
         dataset = _create_dataset(num_rows, num_unique_natural_id)
@@ -169,7 +169,7 @@ class TestGroupedNaturalIdPartitioner(unittest.TestCase):
         num_rows: int,
         num_unique_natural_id: int,
         group_size: int,
-        expected_num_unique_natural_ids: List[int],
+        expected_num_unique_natural_ids: list[int],
     ) -> None:
         """Test drop reminder mode."""
         dataset = _create_dataset(num_rows, num_unique_natural_id)
@@ -226,7 +226,7 @@ class TestGroupedNaturalIdPartitioner(unittest.TestCase):
         ]
 
         # Check for overlaps between partitions
-        seen_natural_ids: Set[str] = set()
+        seen_natural_ids: set[str] = set()
         for partition in partitions:
             natural_ids_in_partition = set(partition.unique("natural_id"))
 

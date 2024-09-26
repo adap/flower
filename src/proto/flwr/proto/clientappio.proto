@@ -45,9 +45,9 @@ message ClientAppOutputStatus {
 }
 
 message GetTokenRequest {}
-message GetTokenResponse { sint64 token = 1; }
+message GetTokenResponse { uint64 token = 1; }
 
-message PullClientAppInputsRequest { sint64 token = 1; }
+message PullClientAppInputsRequest { uint64 token = 1; }
 message PullClientAppInputsResponse {
   Message message = 1;
   Context context = 2;
@@ -56,7 +56,7 @@ message PullClientAppInputsResponse {
 }
 
 message PushClientAppOutputsRequest {
-  sint64 token = 1;
+  uint64 token = 1;
   Message message = 2;
   Context context = 3;
 }

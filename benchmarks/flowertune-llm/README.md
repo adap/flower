@@ -1,4 +1,4 @@
-![](_static/flower_llm.png)
+[![FlowerTune LLM Leaderboard](_static/flower_llm.png)](https://flower.ai/benchmarks/llm-leaderboard)
 
 # FlowerTune LLM Leaderboard
 
@@ -13,13 +13,13 @@ As the first step, please register for a Flower account on [flower.ai/login](htt
 Then, create a new Python environment and install Flower. 
 
 > [!TIP]
-> We recommend using `pyenv` and the `virtualenv` plugin to create your environment. Other manager such as Conda would likely work too. Check the [documentation](https://flower.ai/docs/framework/how-to-install-flower.html) for alternative ways of installing Flower.
+> We recommend using `pyenv` with the `virtualenv` plugin to create your environment. Other managers, such as Conda, will likely work as well. Check the [documentation](https://flower.ai/docs/framework/how-to-install-flower.html) for alternative ways to install Flower.
 
 ```shell
 pip install flwr
 ```
 
-On the new environment, create a new Flower project using the `FlowerTune` template. You will be prompted for a name to give to your project, your username, and for your choice of LLM challenge:
+In the new environment, create a new Flower project using the `FlowerTune` template. You will be prompted for a name to give to your project, your username, and for your choice of LLM challenge:
 ```shell
 flwr new --framework=FlowerTune
 ```
@@ -27,15 +27,16 @@ flwr new --framework=FlowerTune
 The `flwr new` command will generate a directory with the following structure:
 
 ```bash
-<project-name>
-       ├── README.md           # <- Instructions
-       ├── pyproject.toml      # <- Environment dependencies and configs
-       └── <project_name>
-                  ├── client_app.py   # <- Flower ClientApp build
-                  ├── dataset.py      # <- Dataset and tokenizer build
-                  ├── models.py       # <- Model build
-                  ├── server_app.py   # <- Flower ServerApp build
-                  └── strategy.py     # <- Flower strategy build
+<project_name>
+├── README.md           # Instructions
+├── pyproject.toml      # Environment dependencies and configs
+└── <project_name>
+    ├── __init__.py
+    ├── client_app.py   # Flower ClientApp build
+    ├── dataset.py      # Dataset and tokenizer build
+    ├── models.py       # Model build
+    ├── server_app.py   # Flower ServerApp build
+    └── strategy.py     # Flower strategy build
 ```
 
 This can serve as the starting point for you to build up your own federated LLM fine-tuning methods.

@@ -18,10 +18,9 @@ import re
 from enum import Enum
 from pathlib import Path
 from string import Template
-from typing import Dict, Optional
+from typing import Annotated, Optional
 
 import typer
-from typing_extensions import Annotated
 
 from ..utils import (
     is_valid_project_name,
@@ -70,7 +69,7 @@ def load_template(name: str) -> str:
         return tpl_file.read()
 
 
-def render_template(template: str, data: Dict[str, str]) -> str:
+def render_template(template: str, data: dict[str, str]) -> str:
     """Render template."""
     tpl_file = load_template(template)
     tpl = Template(tpl_file)
@@ -85,7 +84,7 @@ def create_file(file_path: Path, content: str) -> None:
     file_path.write_text(content)
 
 
-def render_and_create(file_path: Path, template: str, context: Dict[str, str]) -> None:
+def render_and_create(file_path: Path, template: str, context: dict[str, str]) -> None:
     """Render template and write to file."""
     content = render_template(template, context)
     create_file(file_path, content)
@@ -276,7 +275,7 @@ def new(
         )
     )
 
-    _add = "	huggingface-cli login\n" if framework_str == "flowertune" else ""
+    _add = "	huggingface-cli login\n" if llm_challenge_str else ""
     print(
         typer.style(
             f"	cd {package_name}\n" + "	pip install -e .\n" + _add + "	flwr run\n",
