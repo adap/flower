@@ -35,9 +35,6 @@ opacus
 └── README.md
 ```
 
-> \[!NOTE\]
-> Please note that, at the current state, users cannot set `NodeConfig` for simulated `ClientApp`s. For this reason, the hyperparameter `noise_multiplier` is set in the `client_fn` method based on a condition check on `partition_id`. This will be modified in a future version of Flower to allow users to set `NodeConfig` for simulated `ClientApp`s.
-
 ### Install dependencies and project
 
 Install the dependencies defined in `pyproject.toml` as well as the `opacus` package.
@@ -60,5 +57,8 @@ flwr run .
 You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
 ```bash
-flwr run . --run-config "num-server-rounds=5"
+flwr run . --run-config "max-grad-norm=1.0 num-server-rounds=5"
 ```
+
+> \[!NOTE\]
+> Please note that, at the current state, users cannot set `NodeConfig` for simulated `ClientApp`s. For this reason, the hyperparameter `noise_multiplier` is set in the `client_fn` method based on a condition check on `partition_id`. This will be modified in a future version of Flower to allow users to set `NodeConfig` for simulated `ClientApp`s.
