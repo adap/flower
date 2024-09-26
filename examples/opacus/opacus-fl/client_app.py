@@ -76,14 +76,12 @@ class FlowerClient(NumPyClient):
 def client_fn(context: Context):
     partition_id = context.node_config["partition-id"]
     # run_config = context.run_config
-    net = Net().to(DEVICE)
     noise_multiplier = 1.0 if partition_id % 2 == 0 else 1.5
 
     train_loader, test_loader = load_data(
         partition_id=partition_id, num_partitions=context.node_config["num-partitions"]
     )
     return FlowerClient(
-        net,
         train_loader,
         test_loader,
         context.run_config["target-delta"],
