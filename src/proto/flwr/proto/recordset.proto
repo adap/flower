@@ -17,8 +17,15 @@ syntax = "proto3";
 
 package flwr.proto;
 
+message Int {
+  oneof int {
+    sint64 sint64 = 1;
+    uint64 uint64 = 2;
+  }
+}
+
 message DoubleList { repeated double vals = 1; }
-message Sint64List { repeated sint64 vals = 1; }
+message IntList { repeated Int vals = 1; }
 message BoolList { repeated bool vals = 1; }
 message StringList { repeated string vals = 1; }
 message BytesList { repeated bytes vals = 1; }
@@ -35,10 +42,11 @@ message MetricsRecordValue {
     // Single element
     double double = 1;
     sint64 sint64 = 2;
+    uint64 uint64 = 3;
 
     // List types
     DoubleList double_list = 21;
-    Sint64List sint64_list = 22;
+    IntList int_list = 22;
   }
 }
 
@@ -47,16 +55,17 @@ message ConfigsRecordValue {
     // Single element
     double double = 1;
     sint64 sint64 = 2;
-    bool bool = 3;
-    string string = 4;
-    bytes bytes = 5;
+    uint64 uint64 = 3;
+    bool bool = 4;
+    string string = 5;
+    bytes bytes = 6;
 
     // List types
     DoubleList double_list = 21;
-    Sint64List sint64_list = 22;
-    BoolList bool_list = 23;
-    StringList string_list = 24;
-    BytesList bytes_list = 25;
+    IntList int_list = 22;
+    BoolList bool_list = 24;
+    StringList string_list = 25;
+    BytesList bytes_list = 26;
   }
 }
 
