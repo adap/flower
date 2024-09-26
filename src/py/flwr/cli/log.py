@@ -32,6 +32,28 @@ from flwr.proto.exec_pb2_grpc import ExecStub
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
 
+def start_stream(
+    run_id: int, channel: grpc.Channel, refresh_period: int = CONN_REFRESH_PERIOD
+) -> None:
+    """Start log streaming for a given run ID."""
+    try:
+        while True:
+            logger(INFO, "Starting logstream for run_id `%s`", run_id)
+            stream_logs(run_id, channel, refresh_period)
+            time.sleep(2)
+            logger(DEBUG, "Reconnecting to logstream")
+    except KeyboardInterrupt:
+        logger(INFO, "Exiting logstream")
+    except grpc.RpcError as e:
+        # pylint: disable=E1101
+        if e.code() == grpc.StatusCode.NOT_FOUND:
+            logger(ERROR, "Invalid run_id `%s`, exiting", run_id)
+        if e.code() == grpc.StatusCode.CANCELLED:
+            pass
+    finally:
+        channel.close()
+
+
 def stream_logs(run_id: int, channel: grpc.Channel, duration: int) -> None:
     """Stream logs from the beginning of a run with connection refresh."""
     start_time = time.time()
@@ -206,22 +228,7 @@ def _log_with_superexec(
     channel.subscribe(on_channel_state_change)
 
     if stream:
-        try:
-            while True:
-                logger(INFO, "Starting logstream for run_id `%s`", run_id)
-                stream_logs(run_id, channel, CONN_REFRESH_PERIOD)
-                time.sleep(2)
-                logger(DEBUG, "Reconnecting to logstream")
-        except KeyboardInterrupt:
-            logger(INFO, "Exiting logstream")
-        except grpc.RpcError as e:
-            # pylint: disable=E1101
-            if e.code() == grpc.StatusCode.NOT_FOUND:
-                logger(ERROR, "Invalid run_id `%s`, exiting", run_id)
-            if e.code() == grpc.StatusCode.CANCELLED:
-                pass
-        finally:
-            channel.close()
+        start_stream(run_id, channel, CONN_REFRESH_PERIOD)
     else:
         logger(INFO, "Printing logstream for run_id `%s`", run_id)
         print_logs(run_id, channel, timeout=5)
