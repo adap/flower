@@ -170,7 +170,7 @@ class RecordMaker:
             length = self.rng.randint(1, 10)
         return "".join(self.rng.choices(char_pool, k=length))
 
-    def get_value(self, dtype: type[T]) -> T:
+    def get_value(self, dtype: Union[type[T], str]) -> T:
         """Create a value of a given type."""
         ret: Any = None
         if dtype == bool:
@@ -178,11 +178,13 @@ class RecordMaker:
         elif dtype == str:
             ret = self.get_str(self.rng.randint(10, 100))
         elif dtype == int:
-            ret = self.rng.randint(-1 << 63, (1 << 64) - 1)
+            ret = self.rng.randint(-1 << 63, (1 << 63) - 1)
         elif dtype == float:
             ret = (self.rng.random() - 0.5) * (2.0 ** self.rng.randint(0, 50))
         elif dtype == bytes:
             ret = self.randbytes(self.rng.randint(10, 100))
+        elif dtype == "uint":
+            ret = self.rng.randint(0, (1 << 64) - 1)
         else:
             raise NotImplementedError(f"Unsupported dtype: {dtype}")
         return cast(T, ret)
@@ -317,6 +319,7 @@ def test_metrics_record_serialization_deserialization() -> None:
     maker = RecordMaker()
     original = maker.metrics_record()
     original["uint64"] = (1 << 63) + 321
+    original["list of uint64"] = [maker.get_value("uint") for _ in range(30)]
 
     # Execute
     proto = metrics_record_to_proto(original)
@@ -333,6 +336,7 @@ def test_configs_record_serialization_deserialization() -> None:
     maker = RecordMaker()
     original = maker.configs_record()
     original["uint64"] = (1 << 63) + 101
+    original["list of uint64"] = [maker.get_value("uint") for _ in range(100)]
 
     # Execute
     proto = configs_record_to_proto(original)
