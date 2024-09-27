@@ -34,6 +34,10 @@ from flwr.common.typing import Fab
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 
+from ..log import start_stream
+
+CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
+
 
 def on_channel_state_change(channel_connectivity: str) -> None:
     """Log channel connectivity."""
@@ -62,6 +66,14 @@ def run(
             "inside the `pyproject.toml` in order to be properly overriden.",
         ),
     ] = None,
+    stream: Annotated[
+        bool,
+        typer.Option(
+            "--stream",
+            help="Use `--stream` with `flwr run` to display logs;\n "
+            "logs are not streamed by default.",
+        ),
+    ] = False,
 ) -> None:
     """Run Flower App."""
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
@@ -117,7 +129,7 @@ def run(
         raise typer.Exit(code=1)
 
     if "address" in federation_config:
-        _run_with_superexec(app, federation_config, config_overrides)
+        _run_with_superexec(app, federation_config, config_overrides, stream)
     else:
         _run_without_superexec(app, federation_config, config_overrides, federation)
 
@@ -126,6 +138,7 @@ def _run_with_superexec(
     app: Path,
     federation_config: dict[str, Any],
     config_overrides: Optional[list[str]],
+    stream: bool,
 ) -> None:
 
     insecure_str = federation_config.get("insecure")
@@ -182,6 +195,9 @@ def _run_with_superexec(
     # Delete FAB file once it has been sent to the SuperExec
     fab_path.unlink()
     typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
+
+    if stream:
+        start_stream(res.run_id, channel, CONN_REFRESH_PERIOD)
 
 
 def _run_without_superexec(
