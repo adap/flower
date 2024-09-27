@@ -316,8 +316,8 @@ class Message:
         if message.metadata.ttl - max_allowed_ttl > TTL_TOLERANCE:
             log(
                 WARNING,
-                "The reply TTL of %s seconds exceeded the "
-                "allowed maximum of %s seconds."
+                "The reply TTL of %.2f seconds exceeded the "
+                "allowed maximum of %.2f seconds."
                 "The TTL has been updated to the allowed maximum.",
                 ttl,
                 max_allowed_ttl,
@@ -377,8 +377,8 @@ class Message:
         if message.metadata.ttl - max_allowed_ttl > TTL_TOLERANCE:
             log(
                 WARNING,
-                "The reply TTL of %s seconds exceeded the "
-                "allowed maximum of %s seconds."
+                "The reply TTL of %.2f seconds exceeded the "
+                "allowed maximum of %.2f seconds."
                 "The TTL has been updated to the allowed maximum.",
                 ttl,
                 max_allowed_ttl,
