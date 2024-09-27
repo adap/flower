@@ -304,25 +304,7 @@ class Message:
             )
             message.metadata.ttl = ttl
 
-        # Limit the reply TTL to not exceed the
-        # expiration time of the message it replies to.
-        # Condition: msg.metadata.ttl + msg.metadata.created_at ≥
-        #            reply_msg.metadata.ttl + reply_msg.metadata.created_at
-        # A small tolerance is introduced to account
-        # for floating-point precision issues.
-        max_allowed_ttl = (
-            self.metadata.created_at + self.metadata.ttl - message.metadata.created_at
-        )
-        if message.metadata.ttl - max_allowed_ttl > TTL_TOLERANCE:
-            log(
-                WARNING,
-                "The reply TTL of %.2f seconds exceeded the "
-                "allowed maximum of %.2f seconds."
-                "The TTL has been updated to the allowed maximum.",
-                ttl,
-                max_allowed_ttl,
-            )
-            message.metadata.ttl = max_allowed_ttl
+        self._limit_task_res_ttl(message)
 
         return message
 
@@ -365,25 +347,7 @@ class Message:
             )
             message.metadata.ttl = ttl
 
-        # Limit the TaskRes TTL to not exceed the
-        # expiration time of the TaskIns it replies to.
-        # Condition: msg.metadata.ttl + msg.metadata.created_at ≥
-        #            reply_msg.metadata.ttl + reply_msg.metadata.created_at
-        # A small tolerance is introduced to account
-        # for floating-point precision issues.
-        max_allowed_ttl = (
-            self.metadata.created_at + self.metadata.ttl - message.metadata.created_at
-        )
-        if message.metadata.ttl - max_allowed_ttl > TTL_TOLERANCE:
-            log(
-                WARNING,
-                "The reply TTL of %.2f seconds exceeded the "
-                "allowed maximum of %.2f seconds."
-                "The TTL has been updated to the allowed maximum.",
-                ttl,
-                max_allowed_ttl,
-            )
-            message.metadata.ttl = max_allowed_ttl
+        self._limit_task_res_ttl(message)
 
         return message
 
@@ -397,6 +361,30 @@ class Message:
             ]
         )
         return f"{self.__class__.__qualname__}({view})"
+
+    def _limit_task_res_ttl(self, message):
+        """
+        Limit the TaskRes TTL to not exceed the expiration time
+        of the TaskIns it replies to.
+
+        Parameters:
+            message: The message to which the TaskRes is replying.
+        """
+        # Calculate the maximum allowed TTL
+        max_allowed_ttl = (
+            self.metadata.created_at + self.metadata.ttl - message.metadata.created_at
+        )
+
+        if message.metadata.ttl - max_allowed_ttl > TTL_TOLERANCE:
+            log(
+                WARNING,
+                "The reply TTL of %.2f seconds exceeded the "
+                "allowed maximum of %.2f seconds. "
+                "The TTL has been updated to the allowed maximum.",
+                message.metadata.ttl,
+                max_allowed_ttl,
+            )
+            message.metadata.ttl = max_allowed_ttl
 
 
 def _create_reply_metadata(msg: Message, ttl: float) -> Metadata:
