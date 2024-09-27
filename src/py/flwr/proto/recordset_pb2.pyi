@@ -11,6 +11,22 @@ import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
+class Int(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    SINT64_FIELD_NUMBER: builtins.int
+    UINT64_FIELD_NUMBER: builtins.int
+    sint64: builtins.int
+    uint64: builtins.int
+    def __init__(self,
+        *,
+        sint64: builtins.int = ...,
+        uint64: builtins.int = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["int",b"int","sint64",b"sint64","uint64",b"uint64"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["int",b"int","sint64",b"sint64","uint64",b"uint64"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["int",b"int"]) -> typing.Optional[typing_extensions.Literal["sint64","uint64"]]: ...
+global___Int = Int
+
 class DoubleList(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     VALS_FIELD_NUMBER: builtins.int
@@ -23,17 +39,17 @@ class DoubleList(google.protobuf.message.Message):
     def ClearField(self, field_name: typing_extensions.Literal["vals",b"vals"]) -> None: ...
 global___DoubleList = DoubleList
 
-class Sint64List(google.protobuf.message.Message):
+class IntList(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     VALS_FIELD_NUMBER: builtins.int
     @property
-    def vals(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]: ...
+    def vals(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Int]: ...
     def __init__(self,
         *,
-        vals: typing.Optional[typing.Iterable[builtins.int]] = ...,
+        vals: typing.Optional[typing.Iterable[global___Int]] = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["vals",b"vals"]) -> None: ...
-global___Sint64List = Sint64List
+global___IntList = IntList
 
 class BoolList(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
@@ -96,39 +112,43 @@ class MetricsRecordValue(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     DOUBLE_FIELD_NUMBER: builtins.int
     SINT64_FIELD_NUMBER: builtins.int
+    UINT64_FIELD_NUMBER: builtins.int
     DOUBLE_LIST_FIELD_NUMBER: builtins.int
-    SINT64_LIST_FIELD_NUMBER: builtins.int
+    INT_LIST_FIELD_NUMBER: builtins.int
     double: builtins.float
     """Single element"""
 
     sint64: builtins.int
+    uint64: builtins.int
     @property
     def double_list(self) -> global___DoubleList:
         """List types"""
         pass
     @property
-    def sint64_list(self) -> global___Sint64List: ...
+    def int_list(self) -> global___IntList: ...
     def __init__(self,
         *,
         double: builtins.float = ...,
         sint64: builtins.int = ...,
+        uint64: builtins.int = ...,
         double_list: typing.Optional[global___DoubleList] = ...,
-        sint64_list: typing.Optional[global___Sint64List] = ...,
+        int_list: typing.Optional[global___IntList] = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["double",b"double","double_list",b"double_list","sint64",b"sint64","sint64_list",b"sint64_list","value",b"value"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["double",b"double","double_list",b"double_list","sint64",b"sint64","sint64_list",b"sint64_list","value",b"value"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal["value",b"value"]) -> typing.Optional[typing_extensions.Literal["double","sint64","double_list","sint64_list"]]: ...
+    def HasField(self, field_name: typing_extensions.Literal["double",b"double","double_list",b"double_list","int_list",b"int_list","sint64",b"sint64","uint64",b"uint64","value",b"value"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["double",b"double","double_list",b"double_list","int_list",b"int_list","sint64",b"sint64","uint64",b"uint64","value",b"value"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["value",b"value"]) -> typing.Optional[typing_extensions.Literal["double","sint64","uint64","double_list","int_list"]]: ...
 global___MetricsRecordValue = MetricsRecordValue
 
 class ConfigsRecordValue(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     DOUBLE_FIELD_NUMBER: builtins.int
     SINT64_FIELD_NUMBER: builtins.int
+    UINT64_FIELD_NUMBER: builtins.int
     BOOL_FIELD_NUMBER: builtins.int
     STRING_FIELD_NUMBER: builtins.int
     BYTES_FIELD_NUMBER: builtins.int
     DOUBLE_LIST_FIELD_NUMBER: builtins.int
-    SINT64_LIST_FIELD_NUMBER: builtins.int
+    INT_LIST_FIELD_NUMBER: builtins.int
     BOOL_LIST_FIELD_NUMBER: builtins.int
     STRING_LIST_FIELD_NUMBER: builtins.int
     BYTES_LIST_FIELD_NUMBER: builtins.int
@@ -136,6 +156,7 @@ class ConfigsRecordValue(google.protobuf.message.Message):
     """Single element"""
 
     sint64: builtins.int
+    uint64: builtins.int
     bool: builtins.bool
     string: typing.Text
     bytes: builtins.bytes
@@ -144,7 +165,7 @@ class ConfigsRecordValue(google.protobuf.message.Message):
         """List types"""
         pass
     @property
-    def sint64_list(self) -> global___Sint64List: ...
+    def int_list(self) -> global___IntList: ...
     @property
     def bool_list(self) -> global___BoolList: ...
     @property
@@ -155,18 +176,19 @@ class ConfigsRecordValue(google.protobuf.message.Message):
         *,
         double: builtins.float = ...,
         sint64: builtins.int = ...,
+        uint64: builtins.int = ...,
         bool: builtins.bool = ...,
         string: typing.Text = ...,
         bytes: builtins.bytes = ...,
         double_list: typing.Optional[global___DoubleList] = ...,
-        sint64_list: typing.Optional[global___Sint64List] = ...,
+        int_list: typing.Optional[global___IntList] = ...,
         bool_list: typing.Optional[global___BoolList] = ...,
         string_list: typing.Optional[global___StringList] = ...,
         bytes_list: typing.Optional[global___BytesList] = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["bool",b"bool","bool_list",b"bool_list","bytes",b"bytes","bytes_list",b"bytes_list","double",b"double","double_list",b"double_list","sint64",b"sint64","sint64_list",b"sint64_list","string",b"string","string_list",b"string_list","value",b"value"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["bool",b"bool","bool_list",b"bool_list","bytes",b"bytes","bytes_list",b"bytes_list","double",b"double","double_list",b"double_list","sint64",b"sint64","sint64_list",b"sint64_list","string",b"string","string_list",b"string_list","value",b"value"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal["value",b"value"]) -> typing.Optional[typing_extensions.Literal["double","sint64","bool","string","bytes","double_list","sint64_list","bool_list","string_list","bytes_list"]]: ...
+    def HasField(self, field_name: typing_extensions.Literal["bool",b"bool","bool_list",b"bool_list","bytes",b"bytes","bytes_list",b"bytes_list","double",b"double","double_list",b"double_list","int_list",b"int_list","sint64",b"sint64","string",b"string","string_list",b"string_list","uint64",b"uint64","value",b"value"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["bool",b"bool","bool_list",b"bool_list","bytes",b"bytes","bytes_list",b"bytes_list","double",b"double","double_list",b"double_list","int_list",b"int_list","sint64",b"sint64","string",b"string","string_list",b"string_list","uint64",b"uint64","value",b"value"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["value",b"value"]) -> typing.Optional[typing_extensions.Literal["double","sint64","uint64","bool","string","bytes","double_list","int_list","bool_list","string_list","bytes_list"]]: ...
 global___ConfigsRecordValue = ConfigsRecordValue
 
 class ParametersRecord(google.protobuf.message.Message):

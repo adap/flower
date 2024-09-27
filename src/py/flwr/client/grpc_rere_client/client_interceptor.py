@@ -31,6 +31,7 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_shared_key,
     public_key_to_bytes,
 )
+from flwr.proto.fab_pb2 import GetFabRequest  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
@@ -50,6 +51,7 @@ Request = Union[
     PushTaskResRequest,
     GetRunRequest,
     PingRequest,
+    GetFabRequest,
 ]
 
 
@@ -126,6 +128,7 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
                 PushTaskResRequest,
                 GetRunRequest,
                 PingRequest,
+                GetFabRequest,
             ),
         ):
             if self.shared_secret is None:

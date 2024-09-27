@@ -1,10 +1,9 @@
-##############################
- Get started as a contributor
-##############################
+Get started as a contributor
+############################
 
-***************
- Prerequisites
-***************
+
+Prerequisites
+*************
 
 -  `Python 3.9 <https://docs.python.org/3.9/>`_ or above
 -  `Poetry 1.3 <https://python-poetry.org/>`_ or above
@@ -16,39 +15,36 @@ Flower uses ``pyproject.toml`` to manage dependencies and configure
 development tools (the ones which support it). Poetry is a build tool
 which supports `PEP 517 <https://peps.python.org/pep-0517/>`_.
 
-*************************
- Developer Machine Setup
-*************************
+
+Developer Machine Setup
+***********************
 
 Preliminaries
-=============
+~~~~~~~~~~~~~
 
 Some system-wide dependencies are needed.
 
 For macOS
----------
++++++++++
 
--  Install `homebrew <https://brew.sh/>`_. Don't forget the
-   post-installation actions to add `brew` to your PATH.
+- Install `homebrew <https://brew.sh/>`_. Don't forget the post-installation actions to
+  add `brew` to your PATH.
+- Install `xz` (to install different Python versions) and `pandoc` to build the docs:
 
--  Install `xz` (to install different Python versions) and `pandoc` to
-   build the docs:
-
-   .. code::
+  ::
 
       $ brew install xz pandoc
 
 For Ubuntu
-----------
+++++++++++
 
-Ensure you system (Ubuntu 22.04+) is up-to-date, and you have all
-necessary packages:
+Ensure you system (Ubuntu 22.04+) is up-to-date, and you have all necessary packages:
 
-.. code::
+::
 
-   $ apt update
-   $ apt install build-essential zlib1g-dev libssl-dev libsqlite3-dev \
-                 libreadline-dev libbz2-dev libffi-dev liblzma-dev pandoc
+    $ apt update
+    $ apt install build-essential zlib1g-dev libssl-dev libsqlite3-dev \
+                  libreadline-dev libbz2-dev libffi-dev liblzma-dev pandoc
 
 Create Flower Dev Environment
 =============================
@@ -90,14 +86,13 @@ GitHub:
 
    (flower-<version>) $ ./dev/bootstrap.sh
 
-*********************
- Convenience Scripts
-*********************
 
-The Flower repository contains a number of convenience scripts to make
-recurring development tasks easier and less error-prone. See the
-``/dev`` subdirectory for a full list. The following scripts are amongst
-the most important ones:
+Convenience Scripts
+*******************
+
+The Flower repository contains a number of convenience scripts to make recurring
+development tasks easier and less error-prone. See the ``/dev`` subdirectory for a full
+list. The following scripts are amongst the most important ones:
 
 Create/Delete Virtual Environment
 =================================
@@ -113,93 +108,94 @@ Compile ProtoBuf Definitions
 
 .. code::
 
-   $ python -m flwr_tool.protoc
+    $ python -m flwr_tool.protoc
 
 Auto-Format Code
 ================
 
 .. code::
 
-   $ ./dev/format.sh
+    $ ./dev/format.sh
 
 Run Linters and Tests
 =====================
 
 .. code::
 
-   $ ./dev/test.sh
+    $ ./dev/test.sh
 
 Add a pre-commit hook
 =====================
 
-Developers may integrate a pre-commit hook into their workflow utilizing
-the `pre-commit <https://pre-commit.com/#install>`_ library. The
-pre-commit hook is configured to execute two primary operations:
-``./dev/format.sh`` and ``./dev/test.sh`` scripts.
+Developers may integrate a pre-commit hook into their workflow utilizing the `pre-commit
+<https://pre-commit.com/#install>`_ library. The pre-commit hook is configured to
+execute two primary operations: ``./dev/format.sh`` and ``./dev/test.sh`` scripts.
 
 There are multiple ways developers can use this:
 
-#. Install the pre-commit hook to your local git directory by simply
+1. Install the pre-commit hook to your local git directory by simply
    running:
 
    .. code::
 
-      $ pre-commit install
+   ::
 
-   -  Each ``git commit`` will trigger the execution of formatting and
-      linting/test scripts.
+       $ pre-commit install
 
-   -  If in a hurry, bypass the hook using ``--no-verify`` with the
-      ``git commit`` command.
+   - Each ``git commit`` will trigger the execution of formatting and linting/test
+     scripts.
+   - If in a hurry, bypass the hook using ``--no-verify`` with the ``git commit``
+     command.
 
-      .. code::
+     ::
 
          $ git commit --no-verify -m "Add new feature"
 
-#. For developers who prefer not to install the hook permanently, it is
-   possible to execute a one-time check prior to committing changes by
-   using the following command:
+2. For developers who prefer not to install the hook permanently, it is possible to
+   execute a one-time check prior to committing changes by using the following command:
 
-   .. code::
+   ::
 
-      $ pre-commit run --all-files
+       $ pre-commit run --all-files
 
-   This executes the formatting and linting checks/tests on all the
-   files without modifying the default behavior of ``git commit``.
+   This executes the formatting and linting checks/tests on all the files without
+   modifying the default behavior of ``git commit``.
 
 Run Github Actions (CI) locally
 ===============================
 
-Developers could run the full set of Github Actions workflows under
-their local environment by using `Act <https://github.com/nektos/act>`_.
-Please refer to the installation instructions under the linked
-repository and run the next command under Flower main cloned repository
-folder:
+Developers could run the full set of Github Actions workflows under their local
+environment by using `Act <https://github.com/nektos/act>`_. Please refer to the
+installation instructions under the linked repository and run the next command under
+Flower main cloned repository folder:
 
-.. code::
+::
 
-   $ act
+    $ act
 
-The Flower default workflow would run by setting up the required Docker
-machines underneath.
 
-***************
- Build Release
-***************
+Build Release
+*************
+
+The Flower default workflow would run by setting up the required Docker machines
+underneath.
 
 Flower uses Poetry to build releases. The necessary command is wrapped
 in a simple script:
 
-.. code::
+Flower uses Poetry to build releases. The necessary command is wrapped in a simple
+script:
 
-   $ ./dev/build.sh
+::
 
-The resulting ``.whl`` and ``.tar.gz`` releases will be stored in the
-``/dist`` subdirectory.
+    $ ./dev/build.sh
 
-*********************
- Build Documentation
-*********************
+The resulting ``.whl`` and ``.tar.gz`` releases will be stored in the ``/dist``
+subdirectory.
+
+
+Build Documentation
+*******************
 
 Flower's documentation uses `Sphinx <https://www.sphinx-doc.org/>`_.
 There's no convenience script to re-build the documentation yet, but
