@@ -317,7 +317,7 @@ class Message:
             log(
                 WARNING,
                 "The reply TTL %s exceeding the allowed maximum TTL %s."
-                "Updating TTL to the allowed maximum.",
+                "The TTL has been updated to the allowed maximum.",
                 ttl,
                 max_allowed_ttl,
             )
@@ -378,7 +378,7 @@ class Message:
             log(
                 WARNING,
                 "The reply TTL %s exceeding the allowed maximum TTL %s."
-                "Updating TTL to the allowed maximum.",
+                "The TTL has been updated to the allowed maximum.",
                 ttl,
                 max_allowed_ttl,
             )
