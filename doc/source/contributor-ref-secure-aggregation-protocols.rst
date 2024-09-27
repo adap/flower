@@ -1,13 +1,16 @@
 Secure Aggregation Protocols
 ============================
 
-Include SecAgg, SecAgg+, and LightSecAgg protocol. The LightSecAgg protocol has not been implemented yet, so its diagram and abstraction may not be accurate in practice.
-The SecAgg protocol can be considered as a special case of the SecAgg+ protocol.
+Include SecAgg, SecAgg+, and LightSecAgg protocol. The LightSecAgg protocol has not been
+implemented yet, so its diagram and abstraction may not be accurate in practice. The
+SecAgg protocol can be considered as a special case of the SecAgg+ protocol.
 
-The :code:`SecAgg+` abstraction
--------------------------------
+The ``SecAgg+`` abstraction
+---------------------------
 
-In this implementation, each client will be assigned with a unique index (int) for secure aggregation, and thus many python dictionaries used have keys of int type rather than ClientProxy type.
+In this implementation, each client will be assigned with a unique index (int) for
+secure aggregation, and thus many python dictionaries used have keys of int type rather
+than ClientProxy type.
 
 .. code-block:: python
 
@@ -15,9 +18,7 @@ In this implementation, each client will be assigned with a unique index (int) f
         """Abstract base class for the SecAgg+ protocol implementations."""
 
         @abstractmethod
-        def generate_graph(
-            self, clients: List[ClientProxy], k: int
-        ) -> ClientGraph:
+        def generate_graph(self, clients: List[ClientProxy], k: int) -> ClientGraph:
             """Build a k-degree undirected graph of clients.
             Each client will only generate pair-wise masks with its k neighbours.
             k is equal to the number of clients in SecAgg, i.e., a complete graph.
@@ -31,16 +32,16 @@ In this implementation, each client will be assigned with a unique index (int) f
 
         @abstractmethod
         def ask_keys(
-            self,
-            clients: List[ClientProxy], ask_keys_ins_list: List[AskKeysIns]
+            self, clients: List[ClientProxy], ask_keys_ins_list: List[AskKeysIns]
         ) -> AskKeysResultsAndFailures:
             """Ask public keys. (AskKeysIns is an empty class, and hence ask_keys_ins_list can be omitted.)"""
 
         @abstractmethod
         def share_keys(
             self,
-            clients: List[ClientProxy], public_keys_dict: Dict[int, AskKeysRes],
-            graph: ClientGraph
+            clients: List[ClientProxy],
+            public_keys_dict: Dict[int, AskKeysRes],
+            graph: ClientGraph,
         ) -> ShareKeysResultsAndFailures:
             """Send public keys."""
 
@@ -48,17 +49,18 @@ In this implementation, each client will be assigned with a unique index (int) f
         def ask_vectors(
             clients: List[ClientProxy],
             forward_packet_list_dict: Dict[int, List[ShareKeysPacket]],
-            client_instructions=None: Dict[int, FitIns]
+            client_instructions: Dict[int, FitIns] = None,
         ) -> AskVectorsResultsAndFailures:
             """Ask vectors of local model parameters.
             (If client_instructions is not None, local models will be trained in the ask vectors stage,
-            rather than trained parallelly as the protocol goes through the previous stages.)"""
+            rather than trained parallelly as the protocol goes through the previous stages.)
+            """
 
         @abstractmethod
         def unmask_vectors(
             clients: List[ClientProxy],
             dropout_clients: List[ClientProxy],
-            graph: ClientGraph
+            graph: ClientGraph,
         ) -> UnmaskVectorsResultsAndFailures:
             """Unmask and compute the aggregated model. UnmaskVectorRes contains shares of keys needed to generate masks."""
 
@@ -155,10 +157,12 @@ The Flower server will execute and process received results in the following ord
         deactivate P
         end
 
-The :code:`LightSecAgg` abstraction
------------------------------------
+The ``LightSecAgg`` abstraction
+-------------------------------
 
-In this implementation, each client will be assigned with a unique index (int) for secure aggregation, and thus many python dictionaries used have keys of int type rather than ClientProxy type.
+In this implementation, each client will be assigned with a unique index (int) for
+secure aggregation, and thus many python dictionaries used have keys of int type rather
+than ClientProxy type.
 
 .. code-block:: python
 
@@ -174,7 +178,8 @@ In this implementation, each client will be assigned with a unique index (int) f
         @abstractmethod
         def ask_encrypted_encoded_masks(
             self,
-            clients: List[ClientProxy], public_keys_dict: Dict[int, LightSecAggSetupConfigRes]
+            clients: List[ClientProxy],
+            public_keys_dict: Dict[int, LightSecAggSetupConfigRes],
         ) -> AskEncryptedEncodedMasksResultsAndFailures:
             """Ask encrypted encoded masks. The protocol adopts Diffie-Hellman keys to build pair-wise secured channels to transfer encoded mask."""
 
@@ -183,15 +188,16 @@ In this implementation, each client will be assigned with a unique index (int) f
             self,
             clients: List[ClientProxy],
             forward_packet_list_dict: Dict[int, List[EncryptedEncodedMasksPacket]],
-            client_instructions=None: Dict[int, FitIns]
+            client_instructions: Dict[int, FitIns] = None,
         ) -> AskMaskedModelsResultsAndFailures:
             """Ask the masked local models.
             (If client_instructions is not None, local models will be trained in the ask vectors stage,
-            rather than trained parallelly as the protocol goes through the previous stages.)"""
+            rather than trained parallelly as the protocol goes through the previous stages.)
+            """
 
         @abstractmethod
         def ask_aggregated_encoded_masks(
-            clients: List[ClientProxy]
+            clients: List[ClientProxy],
         ) -> AskAggregatedEncodedMasksResultsAndFailures:
             """Ask aggregated encoded masks"""
 
@@ -272,158 +278,157 @@ Types
 
 .. code-block:: python
 
-        # the SecAgg+ protocol
+    # the SecAgg+ protocol
 
-        ClientGraph = Dict[int, List[int]]
+    ClientGraph = Dict[int, List[int]]
 
-        SetupConfigResultsAndFailures = Tuple[
-            List[Tuple[ClientProxy, SetupConfigRes]], List[BaseException]
-        ]
+    SetupConfigResultsAndFailures = Tuple[
+        List[Tuple[ClientProxy, SetupConfigRes]], List[BaseException]
+    ]
 
-        AskKeysResultsAndFailures = Tuple[
-            List[Tuple[ClientProxy, AskKeysRes]], List[BaseException]
-        ]
+    AskKeysResultsAndFailures = Tuple[
+        List[Tuple[ClientProxy, AskKeysRes]], List[BaseException]
+    ]
 
-        ShareKeysResultsAndFailures = Tuple[
-            List[Tuple[ClientProxy, ShareKeysRes]], List[BaseException]
-        ]
+    ShareKeysResultsAndFailures = Tuple[
+        List[Tuple[ClientProxy, ShareKeysRes]], List[BaseException]
+    ]
 
-        AskVectorsResultsAndFailures = Tuple[
-            List[Tuple[ClientProxy, AskVectorsRes]], List[BaseException]
-        ]
+    AskVectorsResultsAndFailures = Tuple[
+        List[Tuple[ClientProxy, AskVectorsRes]], List[BaseException]
+    ]
 
-        UnmaskVectorsResultsAndFailures = Tuple[
-            List[Tuple[ClientProxy, UnmaskVectorsRes]], List[BaseException]
-        ]
+    UnmaskVectorsResultsAndFailures = Tuple[
+        List[Tuple[ClientProxy, UnmaskVectorsRes]], List[BaseException]
+    ]
 
-        FitResultsAndFailures = Tuple[
-            List[Tuple[ClientProxy, FitRes]], List[BaseException]
-        ]
+    FitResultsAndFailures = Tuple[List[Tuple[ClientProxy, FitRes]], List[BaseException]]
 
 
-        @dataclass
-        class SetupConfigIns:
-            sec_agg_cfg_dict: Dict[str, Scalar]
+    @dataclass
+    class SetupConfigIns:
+        sec_agg_cfg_dict: Dict[str, Scalar]
 
 
-        @dataclass
-        class SetupConfigRes:
-            pass
+    @dataclass
+    class SetupConfigRes:
+        pass
 
 
-        @dataclass
-        class AskKeysIns:
-            pass
+    @dataclass
+    class AskKeysIns:
+        pass
 
 
-        @dataclass
-        class AskKeysRes:
-            """Ask Keys Stage Response from client to server"""
-            pk1: bytes
-            pk2: bytes
+    @dataclass
+    class AskKeysRes:
+        """Ask Keys Stage Response from client to server"""
+
+        pk1: bytes
+        pk2: bytes
 
 
-        @dataclass
-        class ShareKeysIns:
-            public_keys_dict: Dict[int, AskKeysRes]
+    @dataclass
+    class ShareKeysIns:
+        public_keys_dict: Dict[int, AskKeysRes]
 
 
-        @dataclass
-        class ShareKeysPacket:
-            source: int
-            destination: int
-            ciphertext: bytes
+    @dataclass
+    class ShareKeysPacket:
+        source: int
+        destination: int
+        ciphertext: bytes
 
 
-        @dataclass
-        class ShareKeysRes:
-            share_keys_res_list: List[ShareKeysPacket]
+    @dataclass
+    class ShareKeysRes:
+        share_keys_res_list: List[ShareKeysPacket]
 
 
-        @dataclass
-        class AskVectorsIns:
-            ask_vectors_in_list: List[ShareKeysPacket]
-            fit_ins: FitIns
+    @dataclass
+    class AskVectorsIns:
+        ask_vectors_in_list: List[ShareKeysPacket]
+        fit_ins: FitIns
 
 
-        @dataclass
-        class AskVectorsRes:
-            parameters: Parameters
+    @dataclass
+    class AskVectorsRes:
+        parameters: Parameters
 
 
-        @dataclass
-        class UnmaskVectorsIns:
-            available_clients: List[int]
-            dropout_clients: List[int]
+    @dataclass
+    class UnmaskVectorsIns:
+        available_clients: List[int]
+        dropout_clients: List[int]
 
 
-        @dataclass
-        class UnmaskVectorsRes:
-            share_dict: Dict[int, bytes]
+    @dataclass
+    class UnmaskVectorsRes:
+        share_dict: Dict[int, bytes]
 
 
-        # the LightSecAgg protocol
+    # the LightSecAgg protocol
 
-        LightSecAggSetupConfigResultsAndFailures = Tuple[
-            List[Tuple[ClientProxy, LightSecAggSetupConfigRes]], List[BaseException]
-        ]
+    LightSecAggSetupConfigResultsAndFailures = Tuple[
+        List[Tuple[ClientProxy, LightSecAggSetupConfigRes]], List[BaseException]
+    ]
 
-        AskEncryptedEncodedMasksResultsAndFailures = Tuple[
-            List[Tuple[ClientProxy, AskEncryptedEncodedMasksRes]], List[BaseException]
-        ]
+    AskEncryptedEncodedMasksResultsAndFailures = Tuple[
+        List[Tuple[ClientProxy, AskEncryptedEncodedMasksRes]], List[BaseException]
+    ]
 
-        AskMaskedModelsResultsAndFailures = Tuple[
-            List[Tuple[ClientProxy, AskMaskedModelsRes]], List[BaseException]
-        ]
+    AskMaskedModelsResultsAndFailures = Tuple[
+        List[Tuple[ClientProxy, AskMaskedModelsRes]], List[BaseException]
+    ]
 
-        AskAggregatedEncodedMasksResultsAndFailures = Tuple[
-            List[Tuple[ClientProxy, AskAggregatedEncodedMasksRes]], List[BaseException]
-        ]
-
-
-        @dataclass
-        class LightSecAggSetupConfigIns:
-            sec_agg_cfg_dict: Dict[str, Scalar]
+    AskAggregatedEncodedMasksResultsAndFailures = Tuple[
+        List[Tuple[ClientProxy, AskAggregatedEncodedMasksRes]], List[BaseException]
+    ]
 
 
-        @dataclass
-        class LightSecAggSetupConfigRes:
-            pk: bytes
+    @dataclass
+    class LightSecAggSetupConfigIns:
+        sec_agg_cfg_dict: Dict[str, Scalar]
 
 
-        @dataclass
-        class AskEncryptedEncodedMasksIns:
-            public_keys_dict: Dict[int, LightSecAggSetupConfigRes]
+    @dataclass
+    class LightSecAggSetupConfigRes:
+        pk: bytes
 
 
-        @dataclass
-        class EncryptedEncodedMasksPacket:
-            source: int
-            destination: int
-            ciphertext: bytes
+    @dataclass
+    class AskEncryptedEncodedMasksIns:
+        public_keys_dict: Dict[int, LightSecAggSetupConfigRes]
 
 
-        @dataclass
-        class AskEncryptedEncodedMasksRes:
-            packet_list: List[EncryptedEncodedMasksPacket]
+    @dataclass
+    class EncryptedEncodedMasksPacket:
+        source: int
+        destination: int
+        ciphertext: bytes
 
 
-        @dataclass
-        class AskMaskedModelsIns:
-            packet_list: List[EncryptedEncodedMasksPacket]
-            fit_ins: FitIns
+    @dataclass
+    class AskEncryptedEncodedMasksRes:
+        packet_list: List[EncryptedEncodedMasksPacket]
 
 
-        @dataclass
-        class AskMaskedModelsRes:
-            parameters: Parameters
+    @dataclass
+    class AskMaskedModelsIns:
+        packet_list: List[EncryptedEncodedMasksPacket]
+        fit_ins: FitIns
 
 
-        @dataclass
-        class AskAggregatedEncodedMasksIns:
-            surviving_clients: List[int]
+    @dataclass
+    class AskMaskedModelsRes:
+        parameters: Parameters
 
 
-        @dataclass
-        class AskAggregatedEncodedMasksRes:
-            aggregated_encoded_mask: Parameters
+    @dataclass
+    class AskAggregatedEncodedMasksIns:
+        surviving_clients: List[int]
+
+
+    @dataclass
+    class AskAggregatedEncodedMasksRes:
+        aggregated_encoded_mask: Parameters
