@@ -105,11 +105,14 @@ global___LoginRequest = LoginRequest
 
 class LoginResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    AUTH_TYPE_FIELD_NUMBER: builtins.int
     AUTH_URL_FIELD_NUMBER: builtins.int
+    auth_type: typing.Text
     auth_url: typing.Text
     def __init__(self,
         *,
+        auth_type: typing.Text = ...,
         auth_url: typing.Text = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["auth_url",b"auth_url"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["auth_type",b"auth_type","auth_url",b"auth_url"]) -> None: ...
 global___LoginResponse = LoginResponse
