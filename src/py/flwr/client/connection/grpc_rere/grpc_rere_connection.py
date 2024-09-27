@@ -236,7 +236,7 @@ class GrpcRereConnection(Connection):
         task_res = message_to_taskres(message)
 
         # Serialize ProtoBuf to bytes
-        req = PushTaskResRequest(task_res_list=[task_res])
+        req = PushTaskResRequest(node=self.node, task_res_list=[task_res])
         self.retrier.invoke(self.api.PushTaskRes, req)
 
         # Cleanup
@@ -245,7 +245,7 @@ class GrpcRereConnection(Connection):
     def get_run(self, run_id: int) -> Run:
         """Get run info."""
         # Call FleetAPI
-        req = GetRunRequest(run_id=run_id)
+        req = GetRunRequest(node=self.node, run_id=run_id)
         res: GetRunResponse = self.retrier.invoke(
             self.api.GetRun,
             request=req,
@@ -263,7 +263,7 @@ class GrpcRereConnection(Connection):
     def get_fab(self, fab_hash: str) -> Fab:
         """Get FAB file."""
         # Call FleetAPI
-        req = GetFabRequest(hash_str=fab_hash)
+        req = GetFabRequest(node=self.node, hash_str=fab_hash)
         res: GetFabResponse = self.retrier.invoke(
             self.api.GetFab,
             request=req,
