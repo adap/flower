@@ -138,10 +138,13 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             # expiration time of the TaskIns it replies to.
             # Condition: TaskIns.created_at + TaskIns.ttl ≥
             #            TaskRes.created_at + TaskRes.ttl
+            # A small tolerance is introduced to account
+            # for floating-point precision issues.
+            tolerance = 1e-2
             max_allowed_ttl = (
                 task_ins.task.created_at + task_ins.task.ttl - task_res.task.created_at
             )
-            if task_res.task.ttl and task_res.task.ttl > max_allowed_ttl:
+            if task_res.task.ttl and (task_res.task.ttl - max_allowed_ttl) > tolerance:
                 log(
                     ERROR,
                     "Received TaskRes with TTL %s "

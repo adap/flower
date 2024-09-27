@@ -708,7 +708,7 @@ class StateTest(unittest.TestCase):
         assert result is None
 
     def test_store_task_res_limit_ttl(self) -> None:
-        """Test behavior of store_task_res to limit the TTL of TaskRes."""
+        """Test the behavior of store_task_res regarding the TTL limit of TaskRes."""
         # Prepare
         state: State = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {})
@@ -725,16 +725,23 @@ class StateTest(unittest.TestCase):
             run_id=run_id,
         )
         task_res.task.created_at = time.time() - 2
-        task_res.task.ttl = 8
+        task_res.task.ttl = 6
 
         # Execute
         state.store_task_res(task_res)
         if task_ins_id is not None:
-            res = state.get_task_res(task_ids={task_ins_id}, limit=None)[0]
+            res = state.get_task_res(task_ids={task_ins_id}, limit=None)
 
         # Assert
         tolerance = 1e-2
-        assert abs(res.task.ttl - 7) < tolerance
+        max_allowed_ttl = (
+            task_ins.task.created_at + task_ins.task.ttl - task_res.task.created_at
+        )
+
+        if task_res.task.ttl > max_allowed_ttl:
+            assert res is None
+        else:
+            assert abs(res[0].task.ttl - 6) < tolerance
 
 
 def create_task_ins(
