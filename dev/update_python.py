@@ -65,38 +65,6 @@ def _update_python_versions(
                     r"\g<1>" + new_full_version,
                 ),
             ],
-            # ReStructuredText files
-            "doc/source/*.rst": [
-                # Update Python full version in rst files
-                (
-                    r"(`Python\s*"
-                    + re.escape(new_major_minor)
-                    + r"\s*<https://docs.python.org/"
-                    + re.escape(new_major_minor)
-                    + r"/>`_)",
-                    r"`Python "
-                    + new_full_version
-                    + " <https://docs.python.org/"
-                    + new_major_minor
-                    + "/>`_",
-                ),
-            ],
-            # PO files for localization
-            "doc/locales/*/LC_MESSAGES/framework-docs.po": [
-                # Update Python version in localization files
-                (
-                    r"(`Python\s*"
-                    + re.escape(new_major_minor)
-                    + r"\s*<https://docs.python.org/"
-                    + re.escape(new_major_minor)
-                    + r"/>`_)",
-                    r"`Python "
-                    + new_full_version
-                    + " <https://docs.python.org/"
-                    + new_major_minor
-                    + "/>`_",
-                ),
-            ],
         }
     else:
         # Compute old_version as immediate previous minor version
