@@ -64,6 +64,14 @@ echo "- taplo: done"
 
 echo "- All TOML checks passed"
 
+echo "- Start rST checks"
+
+echo "- docstrfmt: start"
+docstrfmt --check doc/source
+echo "- docstrfmt: done"
+
+echo "- All rST checks passed"
+
 echo "- Start license checks"
 
 echo "- copyright: start"

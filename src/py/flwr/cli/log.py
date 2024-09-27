@@ -26,18 +26,71 @@ import typer
 from flwr.cli.config_utils import load_and_validate
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log as logger
+from flwr.proto.exec_pb2 import StreamLogsRequest  # pylint: disable=E0611
+from flwr.proto.exec_pb2_grpc import ExecStub
 
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
 
-# pylint: disable=unused-argument
-def stream_logs(run_id: int, channel: grpc.Channel, period: int) -> None:
+def start_stream(
+    run_id: int, channel: grpc.Channel, refresh_period: int = CONN_REFRESH_PERIOD
+) -> None:
+    """Start log streaming for a given run ID."""
+    try:
+        while True:
+            logger(INFO, "Starting logstream for run_id `%s`", run_id)
+            stream_logs(run_id, channel, refresh_period)
+            time.sleep(2)
+            logger(DEBUG, "Reconnecting to logstream")
+    except KeyboardInterrupt:
+        logger(INFO, "Exiting logstream")
+    except grpc.RpcError as e:
+        # pylint: disable=E1101
+        if e.code() == grpc.StatusCode.NOT_FOUND:
+            logger(ERROR, "Invalid run_id `%s`, exiting", run_id)
+        if e.code() == grpc.StatusCode.CANCELLED:
+            pass
+    finally:
+        channel.close()
+
+
+def stream_logs(run_id: int, channel: grpc.Channel, duration: int) -> None:
     """Stream logs from the beginning of a run with connection refresh."""
+    start_time = time.time()
+    stub = ExecStub(channel)
+    req = StreamLogsRequest(run_id=run_id)
+
+    for res in stub.StreamLogs(req):
+        print(res.log_output)
+        if time.time() - start_time > duration:
+            break
 
 
-# pylint: disable=unused-argument
 def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
     """Print logs from the beginning of a run."""
+    stub = ExecStub(channel)
+    req = StreamLogsRequest(run_id=run_id)
+
+    try:
+        while True:
+            try:
+                # Enforce timeout for graceful exit
+                for res in stub.StreamLogs(req, timeout=timeout):
+                    print(res.log_output)
+            except grpc.RpcError as e:
+                # pylint: disable=E1101
+                if e.code() == grpc.StatusCode.DEADLINE_EXCEEDED:
+                    break
+                if e.code() == grpc.StatusCode.NOT_FOUND:
+                    logger(ERROR, "Invalid run_id `%s`, exiting", run_id)
+                    break
+                if e.code() == grpc.StatusCode.CANCELLED:
+                    break
+    except KeyboardInterrupt:
+        logger(DEBUG, "Stream interrupted by user")
+    finally:
+        channel.close()
+        logger(DEBUG, "Channel closed")
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
@@ -175,22 +228,7 @@ def _log_with_superexec(
     channel.subscribe(on_channel_state_change)
 
     if stream:
-        try:
-            while True:
-                logger(INFO, "Starting logstream for run_id `%s`", run_id)
-                stream_logs(run_id, channel, CONN_REFRESH_PERIOD)
-                time.sleep(2)
-                logger(DEBUG, "Reconnecting to logstream")
-        except KeyboardInterrupt:
-            logger(INFO, "Exiting logstream")
-        except grpc.RpcError as e:
-            # pylint: disable=E1101
-            if e.code() == grpc.StatusCode.NOT_FOUND:
-                logger(ERROR, "Invalid run_id `%s`, exiting", run_id)
-            if e.code() == grpc.StatusCode.CANCELLED:
-                pass
-        finally:
-            channel.close()
+        start_stream(run_id, channel, CONN_REFRESH_PERIOD)
     else:
         logger(INFO, "Printing logstream for run_id `%s`", run_id)
         print_logs(run_id, channel, timeout=5)
