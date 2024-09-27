@@ -233,4 +233,5 @@ def test_reply_ttl_limitation(
 
     assert (
         abs(reply_message.metadata.ttl - expected_reply_ttl) <= TTL_TOLERANCE
-    ), f"Expected TTL to be <= {expected_reply_ttl}, but got {reply_message.metadata.ttl}"
+    ), f"Expected TTL to be <= {expected_reply_ttl}, "
+    " but got {reply_message.metadata.ttl}"

@@ -366,7 +366,8 @@ class Message:
         """Limit the TaskRes TTL to not exceed the expiration time of the TaskIns it
         replies to.
 
-        Parameters:
+        Parameters
+        ----------
             message: The message to which the TaskRes is replying.
         """
         # Calculate the maximum allowed TTL

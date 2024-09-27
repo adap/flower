@@ -143,9 +143,8 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             max_allowed_ttl = (
                 task_ins.task.created_at + task_ins.task.ttl - task_res.task.created_at
             )
-            if (
-                task_res.task.ttl
-                and (task_res.task.ttl - max_allowed_ttl) > TTL_TOLERANCE
+            if task_res.task.ttl and (
+                task_res.task.ttl - max_allowed_ttl > TTL_TOLERANCE
             ):
                 log(
                     ERROR,

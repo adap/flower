@@ -392,7 +392,7 @@ class SqliteState(State):  # pylint: disable=R0904
         max_allowed_ttl = (
             task_ins["created_at"] + task_ins["ttl"] - task_res.task.created_at
         )
-        if task_res.task.ttl and (task_res.task.ttl - max_allowed_ttl) > TTL_TOLERANCE:
+        if task_res.task.ttl and (task_res.task.ttl - max_allowed_ttl > TTL_TOLERANCE):
             log(
                 ERROR,
                 "Received TaskRes with TTL %.2f "
