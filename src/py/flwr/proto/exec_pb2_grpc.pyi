@@ -19,6 +19,11 @@ class ExecStub:
         flwr.proto.exec_pb2.StreamLogsResponse]
     """Start log stream upon request"""
 
+    Login: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.exec_pb2.LoginRequest,
+        flwr.proto.exec_pb2.LoginResponse]
+    """Start login upon request"""
+
 
 class ExecServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -35,6 +40,14 @@ class ExecServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> typing.Iterator[flwr.proto.exec_pb2.StreamLogsResponse]:
         """Start log stream upon request"""
+        pass
+
+    @abc.abstractmethod
+    def Login(self,
+        request: flwr.proto.exec_pb2.LoginRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.exec_pb2.LoginResponse:
+        """Start login upon request"""
         pass
 
 
