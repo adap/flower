@@ -20,9 +20,9 @@ import time
 from logging import WARNING
 from typing import Optional, cast
 
+from .constant import TTL_TOLERANCE
 from .logger import log
 from .record import RecordSet
-from .constant import TTL_TOLERANCE
 
 DEFAULT_TTL = 3600
 
@@ -316,7 +316,8 @@ class Message:
         if message.metadata.ttl - max_allowed_ttl > TTL_TOLERANCE:
             log(
                 WARNING,
-                "The reply TTL %.2f exceeding the allowed maximum TTL %.2f."
+                "The reply TTL of %s seconds exceeded the "
+                "allowed maximum of %s seconds."
                 "The TTL has been updated to the allowed maximum.",
                 ttl,
                 max_allowed_ttl,
@@ -376,7 +377,8 @@ class Message:
         if message.metadata.ttl - max_allowed_ttl > TTL_TOLERANCE:
             log(
                 WARNING,
-                "The reply TTL %.2f exceeding the allowed maximum TTL %.2f."
+                "The reply TTL of %s seconds exceeded the "
+                "allowed maximum of %s seconds."
                 "The TTL has been updated to the allowed maximum.",
                 ttl,
                 max_allowed_ttl,
