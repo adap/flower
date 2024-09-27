@@ -23,9 +23,9 @@ import pytest
 
 # pylint: enable=E0611
 from . import RecordSet
+from .constant import TTL_TOLERANCE
 from .message import Error, Message, Metadata
 from .serde_test import RecordMaker
-from .constant import TTL_TOLERANCE
 
 
 @pytest.mark.parametrize(

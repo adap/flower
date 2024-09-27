@@ -363,9 +363,8 @@ class Message:
         return f"{self.__class__.__qualname__}({view})"
 
     def _limit_task_res_ttl(self, message):
-        """
-        Limit the TaskRes TTL to not exceed the expiration time
-        of the TaskIns it replies to.
+        """Limit the TaskRes TTL to not exceed the expiration time of the TaskIns it
+        replies to.
 
         Parameters:
             message: The message to which the TaskRes is replying.
