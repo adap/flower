@@ -40,4 +40,7 @@ message StartRunResponse { uint64 run_id = 1; }
 message StreamLogsRequest { uint64 run_id = 1; }
 message StreamLogsResponse { string log_output = 1; }
 message LoginRequest {}
-message LoginResponse { string auth_type = 1; string auth_url = 2; }
+message LoginResponse {
+  string auth_type = 1;
+  string auth_url = 2;
+}
