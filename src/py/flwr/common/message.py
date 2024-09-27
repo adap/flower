@@ -20,8 +20,7 @@ import time
 from logging import WARNING
 from typing import Optional, cast
 
-from flwr.common import log
-
+from .logger import log
 from .record import RecordSet
 
 DEFAULT_TTL = 3600
