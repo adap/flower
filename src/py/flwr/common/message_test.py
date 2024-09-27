@@ -231,7 +231,7 @@ def test_reply_ttl_limitation(
     else:
         reply_message = message.create_reply(content=RecordSet(), ttl=reply_ttl)
 
-    assert (
-        abs(reply_message.metadata.ttl - expected_reply_ttl) <= TTL_TOLERANCE
-    ), f"Expected TTL to be <= {expected_reply_ttl}, "
-    " but got {reply_message.metadata.ttl}"
+    assert abs(reply_message.metadata.ttl - expected_reply_ttl) <= TTL_TOLERANCE, (
+        f"Expected TTL to be <= {expected_reply_ttl}, "
+        f"but got {reply_message.metadata.ttl}"
+    )
