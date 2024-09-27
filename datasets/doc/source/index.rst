@@ -3,14 +3,7 @@ Flower Datasets
 
 Flower Datasets (``flwr-datasets``) is a library that enables the quick and easy creation of datasets for federated learning/analytics/evaluation. It enables heterogeneity (non-iidness) simulation and division of datasets with the preexisting notion of IDs. The library was created by the ``Flower Labs`` team that also created `Flower <https://flower.ai>`_ : A Friendly Federated Learning Framework.
 
-.. raw:: html
-
-  <script
-    type="module"
-    src="https://gradio.s3-us-west-2.amazonaws.com/4.44.0/gradio.js"
-  ></script>
-
-  <gradio-app src="https://flwrlabs-federated-learning-datasets-by-flwr-datasets.hf.space"></gradio-app>
+Try out an interactive demo to generate code and visualize heterogeneous divisions at the :ref:`bottom of this page<demo>`.
 
 Flower Datasets Framework
 -------------------------
@@ -142,6 +135,19 @@ What makes Flower Datasets stand out from other libraries?
 
   * New custom partitioning schemes (``Partitioner`` subclasses) integrated with the whole ecosystem.
 
+
+.. _demo:
+Demo
+----
+
+.. raw:: html
+
+  <script
+    type="module"
+    src="https://gradio.s3-us-west-2.amazonaws.com/4.44.0/gradio.js"
+  ></script>
+
+  <gradio-app src="https://flwrlabs-federated-learning-datasets-by-flwr-datasets.hf.space"></gradio-app>
 
 Join the Flower Community
 -------------------------
