@@ -835,23 +835,28 @@ class SqliteState(State):  # pylint: disable=R0904
 
         # Check if the status transition is valid
         row = rows[0]
-        status = RunStatus(
+        current_status = RunStatus(
             status=determine_run_status(row),
             sub_status=row["sub_status"],
             details=row["details"],
         )
-        if not is_valid_transition(status, new_status):
+        if not is_valid_transition(current_status, new_status):
             log(
                 ERROR,
                 'Invalid status transition: from "%s" to "%s"',
-                status.status,
+                current_status.status,
                 new_status.status,
             )
             return False
 
         # Check if the sub-status is valid
-        if not has_valid_sub_status(status):
-            log(ERROR, 'Invalid run status: "%s:%s"', status.status, status.sub_status)
+        if not has_valid_sub_status(current_status):
+            log(
+                ERROR,
+                'Invalid sub-status "%s" for status "%s"',
+                current_status.sub_status,
+                current_status.status,
+            )
             return False
 
         # Update the status

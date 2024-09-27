@@ -403,23 +403,23 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                 return False
 
             # Check if the status transition is valid
-            status = self.run_ids[run_id].status
-            if not is_valid_transition(status, new_status):
+            current_status = self.run_ids[run_id].status
+            if not is_valid_transition(current_status, new_status):
                 log(
                     ERROR,
                     'Invalid status transition: from "%s" to "%s"',
-                    status.status,
+                    current_status.status,
                     new_status.status,
                 )
                 return False
 
             # Check if the sub-status is valid
-            if not has_valid_sub_status(status):
+            if not has_valid_sub_status(current_status):
                 log(
                     ERROR,
-                    'Invalid run status: "%s:%s"',
-                    status.status,
-                    status.sub_status,
+                    'Invalid sub-status "%s" for status "%s"',
+                    current_status.sub_status,
+                    current_status.status,
                 )
                 return False
 

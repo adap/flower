@@ -40,7 +40,6 @@ VALID_RUN_SUB_STATUSES = {
     SubStatus.COMPLETED,
     SubStatus.FAILED,
     SubStatus.STOPPED,
-    "",
 }
 
 
@@ -192,7 +191,7 @@ def is_valid_transition(current_status: RunStatus, new_status: RunStatus) -> boo
 
 
 def has_valid_sub_status(status: RunStatus) -> bool:
-    """Check if the 'sub_status' field of the given status info is valid.
+    """Check if the 'sub_status' field of the given status is valid.
 
     Parameters
     ----------
@@ -206,6 +205,9 @@ def has_valid_sub_status(status: RunStatus) -> bool:
 
     Notes
     -----
-    An empty string (i.e., "") is considered a valid sub-status.
+    Only an empty string (i.e., "") is considered a valid sub-status for
+    non-finished statuses. The sub-status of a finished status cannot be empty.
     """
-    return status.sub_status in VALID_RUN_SUB_STATUSES
+    if status.status == Status.FINISHED:
+        return status.sub_status in VALID_RUN_SUB_STATUSES
+    return status.sub_status == ""
