@@ -306,7 +306,7 @@ class Message:
         # Limit the reply TTL to not exceed the
         # expiration time of the message it replies to.
         # Condition: msg.metadata.ttl + msg.metadata.created_at ≥
-        #            reply_msg.metadata.ttl + reply_msg.metadata.created_at must
+        #            reply_msg.metadata.ttl + reply_msg.metadata.created_at
         max_allowed_ttl = (
             self.metadata.created_at + self.metadata.ttl - message.metadata.created_at
         )
@@ -364,7 +364,7 @@ class Message:
         # Limit the TaskRes TTL to not exceed the
         # expiration time of the TaskIns it replies to.
         # Condition: msg.metadata.ttl + msg.metadata.created_at ≥
-        #            reply_msg.metadata.ttl + reply_msg.metadata.created_at must
+        #            reply_msg.metadata.ttl + reply_msg.metadata.created_at
         max_allowed_ttl = (
             self.metadata.created_at + self.metadata.ttl - message.metadata.created_at
         )
