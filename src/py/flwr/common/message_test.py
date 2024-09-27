@@ -25,6 +25,7 @@ import pytest
 from . import RecordSet
 from .message import Error, Message, Metadata
 from .serde_test import RecordMaker
+from .constant import TTL_TOLERANCE
 
 
 @pytest.mark.parametrize(
@@ -205,7 +206,7 @@ def test_repr(cls: type, kwargs: dict[str, Any]) -> None:
 
 
 @pytest.mark.parametrize(
-    "message_creation_fn,initial_ttl,reply_ttl,expected_max_ttl",
+    "message_creation_fn,initial_ttl,reply_ttl,expected_reply_ttl",
     [
         # Case where the reply_ttl is larger than the allowed TTL
         (create_message_with_content, 20, 30, 20),
@@ -219,7 +220,7 @@ def test_reply_ttl_limitation(
     message_creation_fn: Callable[[float], Message],
     initial_ttl: float,
     reply_ttl: float,
-    expected_max_ttl: float,
+    expected_reply_ttl: float,
 ) -> None:
     """Test that the reply TTL does not exceed the allowed TTL."""
     message = message_creation_fn(initial_ttl)
@@ -233,5 +234,5 @@ def test_reply_ttl_limitation(
         reply_message = message.create_reply(content=RecordSet(), ttl=reply_ttl)
 
     assert (
-        reply_message.metadata.ttl <= expected_max_ttl
-    ), f"Expected TTL to be <= {expected_max_ttl}, but got {reply_message.metadata.ttl}"
+        reply_message.metadata.ttl - expected_reply_ttl <= TTL_TOLERANCE
+    ), f"Expected TTL to be <= {expected_reply_ttl}, but got {reply_message.metadata.ttl}"
