@@ -22,7 +22,7 @@ from typing import Optional
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
-from flwr.common.constant import NODE_ID_NUM_BYTES, RUN_ID_NUM_BYTES
+from flwr.common.constant import NODE_ID_NUM_BYTES, RUN_ID_NUM_BYTES, TTL_TOLERANCE
 from flwr.common.typing import Run, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state.state import State
@@ -140,15 +140,17 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             #            TaskRes.created_at + TaskRes.ttl
             # A small tolerance is introduced to account
             # for floating-point precision issues.
-            tolerance = 1e-2
             max_allowed_ttl = (
                 task_ins.task.created_at + task_ins.task.ttl - task_res.task.created_at
             )
-            if task_res.task.ttl and (task_res.task.ttl - max_allowed_ttl) > tolerance:
+            if (
+                task_res.task.ttl
+                and (task_res.task.ttl - max_allowed_ttl) > TTL_TOLERANCE
+            ):
                 log(
                     ERROR,
-                    "Received TaskRes with TTL %s "
-                    "exceeding the allowed maximum TTL %s.",
+                    "Received TaskRes with TTL %.2f "
+                    "exceeding the allowed maximum TTL %.2f.",
                     task_res.task.ttl,
                     max_allowed_ttl,
                 )

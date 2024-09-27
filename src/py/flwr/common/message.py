@@ -22,6 +22,7 @@ from typing import Optional, cast
 
 from .logger import log
 from .record import RecordSet
+from .constant import TTL_TOLERANCE
 
 DEFAULT_TTL = 3600
 
@@ -309,14 +310,13 @@ class Message:
         #            reply_msg.metadata.ttl + reply_msg.metadata.created_at
         # A small tolerance is introduced to account
         # for floating-point precision issues.
-        tolerance = 1e-2
         max_allowed_ttl = (
             self.metadata.created_at + self.metadata.ttl - message.metadata.created_at
         )
-        if message.metadata.ttl - max_allowed_ttl > tolerance:
+        if message.metadata.ttl - max_allowed_ttl > TTL_TOLERANCE:
             log(
                 WARNING,
-                "The reply TTL %s exceeding the allowed maximum TTL %s."
+                "The reply TTL %.2f exceeding the allowed maximum TTL %.2f."
                 "The TTL has been updated to the allowed maximum.",
                 ttl,
                 max_allowed_ttl,
@@ -370,14 +370,13 @@ class Message:
         #            reply_msg.metadata.ttl + reply_msg.metadata.created_at
         # A small tolerance is introduced to account
         # for floating-point precision issues.
-        tolerance = 1e-2
         max_allowed_ttl = (
             self.metadata.created_at + self.metadata.ttl - message.metadata.created_at
         )
-        if message.metadata.ttl - max_allowed_ttl > tolerance:
+        if message.metadata.ttl - max_allowed_ttl > TTL_TOLERANCE:
             log(
                 WARNING,
-                "The reply TTL %s exceeding the allowed maximum TTL %s."
+                "The reply TTL %.2f exceeding the allowed maximum TTL %.2f."
                 "The TTL has been updated to the allowed maximum.",
                 ttl,
                 max_allowed_ttl,
