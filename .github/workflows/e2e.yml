@@ -51,6 +51,55 @@ jobs:
       short_sha: ${{ steps.upload.outputs.SHORT_SHA }}
       dir: ${{ steps.upload.outputs.DIR }}
 
+  superexec:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    needs: wheel
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"]
+        directory: [e2e-bare-auth]
+        connection: [secure, insecure]
+        engine: [deployment-engine, simulation-engine]
+        authentication: [no-auth, client-auth]
+        exclude:
+          - connection: insecure
+            authentication: client-auth
+    name: |
+      SuperExec / 
+      Python ${{ matrix.python-version }} /
+      ${{ matrix.connection }} / 
+      ${{ matrix.authentication }} / 
+      ${{ matrix.engine }} 
+    defaults:
+      run:
+        working-directory: e2e/${{ matrix.directory }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+        with:
+          python-version: ${{ matrix.python-version }}
+          poetry-skip: 'true'
+      - name: Download and install Flower wheel from artifact store
+        if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
+        run: |
+          # Define base URL for wheel file
+          WHEEL_URL="https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}"
+          if [[ "${{ matrix.engine }}" == "simulation-engine" ]]; then
+            python -m pip install "flwr[simulation] @ ${WHEEL_URL}"
+          else
+            python -m pip install "${WHEEL_URL}"
+          fi
+      - name: >
+          Run SuperExec test / 
+          ${{ matrix.connection }} / 
+          ${{ matrix.authentication }} / 
+          ${{ matrix.engine }} 
+        working-directory: e2e/${{ matrix.directory }}
+        run: ./../test_superexec.sh "${{ matrix.connection }}" "${{ matrix.authentication}}" "${{ matrix.engine }}"
+
   frameworks:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
