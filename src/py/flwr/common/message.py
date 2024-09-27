@@ -17,8 +17,10 @@
 from __future__ import annotations
 
 import time
-import warnings
+from logging import WARNING
 from typing import Optional, cast
+
+from flwr.common import log
 
 from .record import RecordSet
 
@@ -289,13 +291,6 @@ class Message:
 
             ttl = msg.meta.ttl - (reply.meta.created_at - msg.meta.created_at)
         """
-        if ttl:
-            warnings.warn(
-                "A custom TTL was set, but note that the SuperLink does not enforce "
-                "the TTL yet. The SuperLink will start enforcing the TTL in a future "
-                "version of Flower.",
-                stacklevel=2,
-            )
         # If no TTL passed, use default for message creation (will update after
         # message creation)
         ttl_ = DEFAULT_TTL if ttl is None else ttl
@@ -308,6 +303,23 @@ class Message:
                 message.metadata.created_at - self.metadata.created_at
             )
             message.metadata.ttl = ttl
+
+        # Limit the reply TTL to not exceed the
+        # expiration time of the message it replies to.
+        # Condition: msg.metadata.ttl + msg.metadata.created_at ≥
+        #            reply_msg.metadata.ttl + reply_msg.metadata.created_at must
+        max_allowed_ttl = (
+            self.metadata.created_at + self.metadata.ttl - message.metadata.created_at
+        )
+        if message.metadata.ttl > max_allowed_ttl:
+            log(
+                WARNING,
+                "The reply TTL %s exceeding the allowed maximum TTL %s."
+                "Updating TTL to the allowed maximum.",
+                ttl,
+                max_allowed_ttl,
+            )
+            message.metadata.ttl = max_allowed_ttl
 
         return message
 
@@ -334,13 +346,6 @@ class Message:
         Message
             A new `Message` instance representing the reply.
         """
-        if ttl:
-            warnings.warn(
-                "A custom TTL was set, but note that the SuperLink does not enforce "
-                "the TTL yet. The SuperLink will start enforcing the TTL in a future "
-                "version of Flower.",
-                stacklevel=2,
-            )
         # If no TTL passed, use default for message creation (will update after
         # message creation)
         ttl_ = DEFAULT_TTL if ttl is None else ttl
@@ -356,6 +361,23 @@ class Message:
                 message.metadata.created_at - self.metadata.created_at
             )
             message.metadata.ttl = ttl
+
+        # Limit the TaskRes TTL to not exceed the
+        # expiration time of the TaskIns it replies to.
+        # Condition: msg.metadata.ttl + msg.metadata.created_at ≥
+        #            reply_msg.metadata.ttl + reply_msg.metadata.created_at must
+        max_allowed_ttl = (
+            self.metadata.created_at + self.metadata.ttl - message.metadata.created_at
+        )
+        if message.metadata.ttl > max_allowed_ttl:
+            log(
+                WARNING,
+                "The reply TTL %s exceeding the allowed maximum TTL %s."
+                "Updating TTL to the allowed maximum.",
+                ttl,
+                max_allowed_ttl,
+            )
+            message.metadata.ttl = max_allowed_ttl
 
         return message
 
