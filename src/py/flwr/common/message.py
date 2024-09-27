@@ -307,10 +307,13 @@ class Message:
         # expiration time of the message it replies to.
         # Condition: msg.metadata.ttl + msg.metadata.created_at ≥
         #            reply_msg.metadata.ttl + reply_msg.metadata.created_at
+        # A small tolerance is introduced to account
+        # for floating-point precision issues.
+        tolerance = 1e-2
         max_allowed_ttl = (
             self.metadata.created_at + self.metadata.ttl - message.metadata.created_at
         )
-        if message.metadata.ttl > max_allowed_ttl:
+        if message.metadata.ttl - max_allowed_ttl > tolerance:
             log(
                 WARNING,
                 "The reply TTL %s exceeding the allowed maximum TTL %s."
@@ -365,10 +368,13 @@ class Message:
         # expiration time of the TaskIns it replies to.
         # Condition: msg.metadata.ttl + msg.metadata.created_at ≥
         #            reply_msg.metadata.ttl + reply_msg.metadata.created_at
+        # A small tolerance is introduced to account
+        # for floating-point precision issues.
+        tolerance = 1e-2
         max_allowed_ttl = (
             self.metadata.created_at + self.metadata.ttl - message.metadata.created_at
         )
-        if message.metadata.ttl > max_allowed_ttl:
+        if message.metadata.ttl - max_allowed_ttl > tolerance:
             log(
                 WARNING,
                 "The reply TTL %s exceeding the allowed maximum TTL %s."
