@@ -713,16 +713,16 @@ class StateTest(unittest.TestCase):
         [  # type: ignore
             (
                 time.time() - 5,
-                10,
-                time.time() - 2,
-                6,
+                25,
+                time.time() - 4,
+                5,
                 True,
             ),  # TaskRes within allowed TTL
             (
                 time.time() - 5,
                 10,
-                time.time() - 2,
-                15,
+                time.time() - 4,
+                25,
                 False,
             ),  # TaskRes TTL exceeds max allowed TTL
         ]
