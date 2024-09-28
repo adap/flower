@@ -75,8 +75,8 @@ NUM_PARTITIONS_KEY = "num-partitions"
 GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY = "flower-version"
 GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY = "should-exit"
 
-# TTL
-TTL_TOLERANCE = 1e-2
+# Message TTL
+MESSAGE_TTL_TOLERANCE = 1e-2
 
 
 class MessageType:

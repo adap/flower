@@ -20,7 +20,7 @@ import time
 from logging import WARNING
 from typing import Optional, cast
 
-from .constant import TTL_TOLERANCE
+from .constant import MESSAGE_TTL_TOLERANCE
 from .logger import log
 from .record import RecordSet
 
@@ -375,7 +375,7 @@ class Message:
             self.metadata.created_at + self.metadata.ttl - message.metadata.created_at
         )
 
-        if message.metadata.ttl - max_allowed_ttl > TTL_TOLERANCE:
+        if message.metadata.ttl - max_allowed_ttl > MESSAGE_TTL_TOLERANCE:
             log(
                 WARNING,
                 "The reply TTL of %.2f seconds exceeded the "

@@ -23,7 +23,7 @@ import pytest
 
 # pylint: enable=E0611
 from . import RecordSet
-from .constant import TTL_TOLERANCE
+from .constant import MESSAGE_TTL_TOLERANCE
 from .message import Error, Message, Metadata
 from .serde_test import RecordMaker
 
@@ -231,7 +231,7 @@ def test_reply_ttl_limitation(
     else:
         reply_message = message.create_reply(content=RecordSet(), ttl=reply_ttl)
 
-    assert abs(reply_message.metadata.ttl - expected_reply_ttl) <= TTL_TOLERANCE, (
+    assert reply_message.metadata.ttl - expected_reply_ttl <= MESSAGE_TTL_TOLERANCE, (
         f"Expected TTL to be <= {expected_reply_ttl}, "
         f"but got {reply_message.metadata.ttl}"
     )
