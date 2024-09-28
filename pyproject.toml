@@ -137,10 +137,10 @@ docstrfmt = { git = "https://github.com/charlesbvll/docstrfmt.git", branch = "pa
 
 [tool.docstrfmt]
 extend_exclude = [
-    "doc/source/conf.py",
-    "doc/source/tutorial-quickstart-huggingface.rst",
-    "doc/source/_templates/autosummary/*",
-    "doc/source/ref-api/*",
+  "doc/source/conf.py",
+  "doc/source/tutorial-quickstart-huggingface.rst",
+  "doc/source/_templates/autosummary/*",
+  "doc/source/ref-api/*",
 ]
 
 [tool.isort]
