@@ -716,12 +716,14 @@ class StateTest(unittest.TestCase):
                 10,
                 time.time() - 2,
                 6,
+                True,
             ),  # TaskRes within allowed TTL
             (
                 time.time() - 5,
                 10,
                 time.time() - 2,
                 15,
+                False,
             ),  # TaskRes TTL exceeds max allowed TTL
         ]
     )
@@ -731,6 +733,7 @@ class StateTest(unittest.TestCase):
         task_ins_ttl: float,
         task_res_created_at: float,
         task_res_ttl: float,
+        expected_store_result: bool,
     ) -> None:
         """Test the behavior of store_task_res regarding the TTL limit of TaskRes."""
         # Prepare
@@ -755,14 +758,10 @@ class StateTest(unittest.TestCase):
         res = state.store_task_res(task_res)
 
         # Assert
-        max_allowed_ttl = (
-            task_ins.task.created_at + task_ins.task.ttl - task_res.task.created_at
-        )
-
-        if task_res.task.ttl > max_allowed_ttl:
-            assert res is None
-        else:
+        if expected_store_result:
             assert res is not None
+        else:
+            assert res is None
 
 
 def create_task_ins(
