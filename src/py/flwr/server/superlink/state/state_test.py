@@ -25,7 +25,7 @@ from unittest.mock import patch
 from parameterized import parameterized
 
 from flwr.common import DEFAULT_TTL
-from flwr.common.constant import MESSAGE_TTL_TOLERANCE, ErrorCode
+from flwr.common.constant import ErrorCode
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
     private_key_to_bytes,
@@ -759,7 +759,7 @@ class StateTest(unittest.TestCase):
             task_ins.task.created_at + task_ins.task.ttl - task_res.task.created_at
         )
 
-        if task_res.task.ttl - max_allowed_ttl > MESSAGE_TTL_TOLERANCE:
+        if task_res.task.ttl > max_allowed_ttl:
             assert res is None
         else:
             assert res is not None
