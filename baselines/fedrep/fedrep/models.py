@@ -67,7 +67,7 @@ class CNNCifar10ModelManager(ModelManager):
         super().__init__(model_split_class=CNNCifar10ModelSplit, **kwargs)
 
     def _create_model(self) -> nn.Module:
-        """Return CNNCifar10-v1 model to be splitted into head and body."""
+        """Return CNNCifar10 model to be splitted into head and body."""
         return CNNCifar10().to(self.device)
 
 
