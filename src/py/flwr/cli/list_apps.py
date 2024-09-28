@@ -15,10 +15,9 @@
 """Flower command line interface `build` command."""
 
 from pathlib import Path
-from typing import Optional
+from typing import Annotated, Optional
 
 import typer
-from typing import Annotated
 
 from .config_utils import load_and_validate
 
