@@ -315,8 +315,8 @@ class StateTest(unittest.TestCase):
         # Execute
         task_res_uuid = state.store_task_res(task_res)
 
-        if task_ins_id is not None:
-            task_res_list = state.get_task_res(task_ids={task_ins_id}, limit=None)
+        assert task_ins_id
+        task_res_list = state.get_task_res(task_ids={task_ins_id}, limit=None)
 
         # Assert
         retrieved_task_res = task_res_list[0]
