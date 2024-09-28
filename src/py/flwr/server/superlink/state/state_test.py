@@ -21,7 +21,6 @@ import unittest
 from abc import abstractmethod
 from datetime import datetime, timezone
 from unittest.mock import patch
-from uuid import uuid4
 
 from flwr.common import DEFAULT_TTL
 from flwr.common.constant import ErrorCode
@@ -302,7 +301,10 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: State = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {})
-        task_ins_id = uuid4()
+
+        task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
+        task_ins_id = state.store_task_ins(task_ins)
+
         task_res = create_task_res(
             producer_node_id=0,
             anonymous=True,
@@ -312,7 +314,9 @@ class StateTest(unittest.TestCase):
 
         # Execute
         task_res_uuid = state.store_task_res(task_res)
-        task_res_list = state.get_task_res(task_ids={task_ins_id}, limit=None)
+
+        if task_ins_id is not None:
+            task_res_list = state.get_task_res(task_ids={task_ins_id}, limit=None)
 
         # Assert
         retrieved_task_res = task_res_list[0]
@@ -507,11 +511,23 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: State = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {})
+
+        task_ins_0 = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
+        task_ins_1 = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
+        task_ins_id_0 = state.store_task_ins(task_ins_0)
+        task_ins_id_1 = state.store_task_ins(task_ins_1)
+
         task_0 = create_task_res(
-            producer_node_id=0, anonymous=True, ancestry=["1"], run_id=run_id
+            producer_node_id=0,
+            anonymous=True,
+            ancestry=[str(task_ins_id_0)],
+            run_id=run_id,
         )
         task_1 = create_task_res(
-            producer_node_id=0, anonymous=True, ancestry=["1"], run_id=run_id
+            producer_node_id=0,
+            anonymous=True,
+            ancestry=[str(task_ins_id_1)],
+            run_id=run_id,
         )
 
         # Store two tasks
@@ -663,6 +679,33 @@ class StateTest(unittest.TestCase):
         err_taskres = task_res_list[1]
         assert err_taskres.task.HasField("error")
         assert err_taskres.task.error.code == ErrorCode.NODE_UNAVAILABLE
+
+    def test_store_task_res_task_ins_expired(self) -> None:
+        """Test behavior of store_task_res when the TaskIns it references is expired."""
+        # Prepare
+        state: State = self.state_factory()
+        run_id = state.create_run(None, None, "9f86d08", {})
+
+        task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
+        task_ins.task.created_at = time.time() - task_ins.task.ttl + 0.5
+        task_ins_id = state.store_task_ins(task_ins)
+
+        with patch(
+            "time.time",
+            side_effect=lambda: task_ins.task.created_at + task_ins.task.ttl + 0.1,
+        ):  # Expired by 0.1 seconds
+            task = create_task_res(
+                producer_node_id=0,
+                anonymous=True,
+                ancestry=[str(task_ins_id)],
+                run_id=run_id,
+            )
+
+            # Execute
+            result = state.store_task_res(task)
+
+        # Assert
+        assert result is None
 
 
 def create_task_ins(
