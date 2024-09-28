@@ -22,7 +22,6 @@ from abc import abstractmethod
 from datetime import datetime, timezone
 from unittest.mock import patch
 
-
 from flwr.common import DEFAULT_TTL
 from flwr.common.constant import ErrorCode
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
