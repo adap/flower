@@ -36,21 +36,21 @@ def get_device(
     -------
         The selected or fallbacked device.
     """
-    if not use_cuda or not torch.cuda.is_available():
-        device = torch.device("cpu")
-    elif torch.cuda.is_available():
+    device = torch.device("cpu")
+    if use_cuda and torch.cuda.is_available():
         if specified_device is not None:
             cuda_visible_devices = os.environ.get("CUDA_VISIBLE_DEVICES")
             if cuda_visible_devices is not None:
                 devices = [int(d) for d in cuda_visible_devices.split(",")]
-                if specified_device not in devices:
+                if specified_device in devices:
+                    device = torch.device(f"cuda:{specified_device}")
+                else:
                     raise ValueError(
                         f"Specified device {specified_device}"
                         " not in CUDA_VISIBLE_DEVICES"
                     )
-                device = torch.device(f"cuda:{specified_device}")
             else:
-                print("CUDA_VISIBLE_DEVICES not set, using torch.device('cuda').")
+                print("CUDA_VISIBLE_DEVICES not exists, using torch.device('cuda').")
         else:
             device = torch.device("cuda")
 
