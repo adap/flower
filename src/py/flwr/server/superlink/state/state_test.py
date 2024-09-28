@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """Tests all state implemenations have to conform to."""
-# pylint: disable=invalid-name, disable=R0904
+# pylint: disable=invalid-name, disable=R0904,R0913
 
 import tempfile
 import time
