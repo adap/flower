@@ -47,73 +47,58 @@ Since we want to use :code:`xgboost` package to build up XGBoost trees, let's go
 
   $ pip install xgboost
 
-***************
- The ClientApp
-***************
 
-*Clients* are responsible for generating individual weight-updates for the model based on their local datasets.
-Now that we have all our dependencies installed, let's run a simple distributed training with two clients and one server.
+********************
+ The Configurations
+********************
 
-In a file called :code:`client.py`, import xgboost, Flower, Flower Datasets and other related functions:
+We define all required configurations/hyper-parameters in :code:`pyproject.toml`:
 
-.. code-block:: python
+.. code-block:: toml
 
-    import argparse
-    from typing import Union
-    from logging import INFO
-    from datasets import Dataset, DatasetDict
-    import xgboost as xgb
+    [tool.flwr.app.config]
+    # ServerApp
+    num-server-rounds = 3
+    fraction-fit = 0.1
+    fraction-evaluate = 0.1
 
-    import flwr as fl
-    from flwr_datasets import FederatedDataset
-    from flwr.common.logger import log
-    from flwr.common import (
-        Code,
-        EvaluateIns,
-        EvaluateRes,
-        FitIns,
-        FitRes,
-        GetParametersIns,
-        GetParametersRes,
-        Parameters,
-        Status,
-    )
-    from flwr_datasets.partitioner import IidPartitioner
+    # ClientApp
+    local-epochs = 1
+    params.objective = "binary:logistic"
+    params.eta = 0.1  # Learning rate
+    params.max-depth = 8
+    params.eval-metric = "auc"
+    params.nthread = 16
+    params.num-parallel-tree = 1
+    params.subsample = 1
+    params.tree-method = "hist"
 
-Dataset partition and hyper-parameter selection
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The :code:`local-epochs` represents the number of iterations for local tree boost.
+We use CPU for the training in default.
+One can shift it to GPU by setting :code:`tree_method` to :code:`gpu_hist`.
+We use AUC as evaluation metric.
 
-Prior to local training, we require loading the HIGGS dataset from Flower Datasets and conduct data partitioning for FL:
+
+**********
+ The Data
+**********
+This tutorial uses `Flower Datasets <https://flower.ai/docs/datasets/>`_
+to easily download and partition the `HIGGS` dataset.
 
 .. code-block:: python
 
     # Load (HIGGS) dataset and conduct partitioning
-    # We use a small subset (num_partitions=30) of the dataset for demonstration to speed up the data loading process.
-    partitioner = IidPartitioner(num_partitions=30)
+    # We use a small subset (num_partitions=20) of the dataset for demonstration to speed up the data loading process.
+    partitioner = IidPartitioner(num_partitions=20)
     fds = FederatedDataset(dataset="jxie/higgs", partitioners={"train": partitioner})
 
-    # Load the partition for this `node_id`
-    partition = fds.load_partition(partition_id=args.partition_id, split="train")
+    # Load the partition for this `partition_id`
+    partition = fds.load_partition(partition_id, split="train")
     partition.set_format("numpy")
 
-In this example, we split the dataset into 30 partitions with uniform distribution (:code:`IidPartitioner(num_partitions=30)`).
-Then, we load the partition for the given client based on :code:`partition_id`:
-
-.. code-block:: python
-
-    # We first define arguments parser for user to specify the client/partition ID.
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--partition-id",
-        default=0,
-        type=int,
-        help="Partition ID used for the current client.",
-    )
-    args = parser.parse_args()
-
-    # Load the partition for this `partition_id`.
-    partition = fds.load_partition(idx=args.partition_id, split="train")
-    partition.set_format("numpy")
+In this example, we split the dataset into 20 partitions with uniform distribution (`IidPartitioner
+<https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_).
+Then, we load the partition for the given client based on :code:`partition_id`.
 
 After that, we do train/test splitting on the given partition (client's local data), and transform data format for :code:`xgboost` package.
 
@@ -132,8 +117,7 @@ The functions of :code:`train_test_split` and :code:`transform_dataset_to_dmatri
 
 .. code-block:: python
 
-    # Define data partitioning related functions
-    def train_test_split(partition: Dataset, test_fraction: float, seed: int):
+    def train_test_split(partition, test_fraction, seed):
         """Split the data into train and validation set given split rate."""
         train_test = partition.train_test_split(test_size=test_fraction, seed=seed)
         partition_train = train_test["train"]
@@ -144,121 +128,85 @@ The functions of :code:`train_test_split` and :code:`transform_dataset_to_dmatri
 
         return partition_train, partition_test, num_train, num_test
 
-
-    def transform_dataset_to_dmatrix(data: Union[Dataset, DatasetDict]) -> xgb.core.DMatrix:
+    def transform_dataset_to_dmatrix(data):
         """Transform dataset to DMatrix format for xgboost."""
         x = data["inputs"]
         y = data["label"]
         new_data = xgb.DMatrix(x, label=y)
         return new_data
 
-Finally, we define the hyper-parameters used for XGBoost training.
+
+***************
+ The ClientApp
+***************
+
+*Clients* are responsible for generating individual weight-updates for the model based on their local datasets.
+Let's first see how we define Flower client for XGBoost.
+We follow the general rule to define :code:`FlowerClient` class inherited from :code:`fl.client.Client`.
 
 .. code-block:: python
 
-    num_local_round = 1
-    params = {
-        "objective": "binary:logistic",
-        "eta": 0.1,  # lr
-        "max_depth": 8,
-        "eval_metric": "auc",
-        "nthread": 16,
-        "num_parallel_tree": 1,
-        "subsample": 1,
-        "tree_method": "hist",
-    }
+    # Define Flower Client and client_fn
+    class FlowerClient(Client):
+        def __init__(
+            self,
+            train_dmatrix,
+            valid_dmatrix,
+            num_train,
+            num_val,
+            num_local_round,
+            params,
+        ):
+            self.train_dmatrix = train_dmatrix
+            self.valid_dmatrix = valid_dmatrix
+            self.num_train = num_train
+            self.num_val = num_val
+            self.num_local_round = num_local_round
+            self.params = params
 
-The :code:`num_local_round` represents the number of iterations for local tree boost.
-We use CPU for the training in default.
-One can shift it to GPU by setting :code:`tree_method` to :code:`gpu_hist`.
-We use AUC as evaluation metric.
+All required parameters defined above are passed to :code:`FlowerClient`'s constructor.
 
-
-Flower client definition for XGBoost
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-After loading the dataset we define the Flower client.
-We follow the general rule to define :code:`XgbClient` class inherited from :code:`fl.client.Client`.
+Then, we override :code:`fit` and :code:`evaluate` methods insides :code:`FlowerClient` class as follows.
 
 .. code-block:: python
 
-    class XgbClient(fl.client.Client):
-      def __init__(
-          self,
-          train_dmatrix,
-          valid_dmatrix,
-          num_train,
-          num_val,
-          num_local_round,
-          params,
-      ):
-          self.train_dmatrix = train_dmatrix
-          self.valid_dmatrix = valid_dmatrix
-          self.num_train = num_train
-          self.num_val = num_val
-          self.num_local_round = num_local_round
-          self.params = params
+      def fit(self, ins: FitIns) -> FitRes:
+          global_round = int(ins.config["global_round"])
+          if global_round == 1:
+              # First round local training
+              bst = xgb.train(
+                  self.params,
+                  self.train_dmatrix,
+                  num_boost_round=self.num_local_round,
+                  evals=[(self.valid_dmatrix, "validate"), (self.train_dmatrix, "train")],
+              )
+          else:
+              bst = xgb.Booster(params=self.params)
+              global_model = bytearray(ins.parameters.tensors[0])
 
-All required parameters defined above are passed to :code:`XgbClient`'s constructor.
+              # Load global model into booster
+              bst.load_model(global_model)
 
-Then, we override :code:`get_parameters`, :code:`fit` and :code:`evaluate` methods insides :code:`XgbClient` class as follows.
+              # Local training
+              bst = self._local_boost(bst)
 
-.. code-block:: python
+          # Save model
+          local_model = bst.save_raw("json")
+          local_model_bytes = bytes(local_model)
 
-    def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
-        _ = (self, ins)
-        return GetParametersRes(
-            status=Status(
-                code=Code.OK,
-                message="OK",
-            ),
-            parameters=Parameters(tensor_type="", tensors=[]),
-        )
-
-Unlike neural network training, XGBoost trees are not started from a specified random weights.
-In this case, we do not use :code:`get_parameters` and :code:`set_parameters` to initialise model parameters for XGBoost.
-As a result, let's return an empty tensor in :code:`get_parameters` when it is called by the server at the first round.
-
-.. code-block:: python
-
-    def fit(self, ins: FitIns) -> FitRes:
-        global_round = int(ins.config["global_round"])
-        if global_round == 1:
-            # First round local training
-            bst = xgb.train(
-                self.params,
-                self.train_dmatrix,
-                num_boost_round=self.num_local_round,
-                evals=[(self.valid_dmatrix, "validate"), (self.train_dmatrix, "train")],
-            )
-        else:
-            bst = xgb.Booster(params=self.params)
-            for item in ins.parameters.tensors:
-                global_model = bytearray(item)
-
-            # Load global model into booster
-            bst.load_model(global_model)
-
-            # Local training
-            bst = self._local_boost(bst)
-
-        # Save model
-        local_model = bst.save_raw("json")
-        local_model_bytes = bytes(local_model)
-
-        return FitRes(
-            status=Status(
-                code=Code.OK,
-                message="OK",
-            ),
-            parameters=Parameters(tensor_type="", tensors=[local_model_bytes]),
-            num_examples=self.num_train,
-            metrics={},
-        )
+          return FitRes(
+              status=Status(
+                  code=Code.OK,
+                  message="OK",
+              ),
+              parameters=Parameters(tensor_type="", tensors=[local_model_bytes]),
+              num_examples=self.num_train,
+              metrics={},
+          )
 
 In :code:`fit`, at the first round, we call :code:`xgb.train()` to build up the first set of trees.
 From the second round, we load the global model sent from server to new build Booster object,
-and then update model weights on local training data with function :code:`local_boost` as follows:
+and then update model weights on local training data with function :code:`_local_boost` as follows:
 
 .. code-block:: python
 
@@ -280,82 +228,52 @@ After training, the last :code:`N=num_local_round` trees will be extracted to se
 
 .. code-block:: python
 
-    def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
-        # Load global model
-        bst = xgb.Booster(params=self.params)
-        for para in ins.parameters.tensors:
-            para_b = bytearray(para)
-        bst.load_model(para_b)
+      def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
+          # Load global model
+          bst = xgb.Booster(params=self.params)
+          para_b = bytearray(ins.parameters.tensors[0])
+          bst.load_model(para_b)
 
-        # Run evaluation
-        eval_results = bst.eval_set(
-            evals=[(self.valid_dmatrix, "valid")],
-            iteration=bst.num_boosted_rounds() - 1,
-        )
-        auc = round(float(eval_results.split("\t")[1].split(":")[1]), 4)
+          # Run evaluation
+          eval_results = bst.eval_set(
+              evals=[(self.valid_dmatrix, "valid")],
+              iteration=bst.num_boosted_rounds() - 1,
+          )
+          auc = round(float(eval_results.split("\t")[1].split(":")[1]), 4)
 
-        global_round = ins.config["global_round"]
-        log(INFO, f"AUC = {auc} at round {global_round}")
-
-        return EvaluateRes(
-            status=Status(
-                code=Code.OK,
-                message="OK",
-            ),
-            loss=0.0,
-            num_examples=self.num_val,
-            metrics={"AUC": auc},
-        )
+          return EvaluateRes(
+              status=Status(
+                  code=Code.OK,
+                  message="OK",
+              ),
+              loss=0.0,
+              num_examples=self.num_val,
+              metrics={"AUC": auc},
+          )
 
 In :code:`evaluate`, after loading the global model, we call :code:`bst.eval_set` function to conduct evaluation on valid set.
 The AUC value will be returned.
 
-Now, we can create an instance of our class :code:`XgbClient` and add one line to actually run this client:
 
-.. code-block:: python
+***************
+ The ServerApp
+***************
 
-  fl.client.start_client(
-    server_address="127.0.0.1:8080",
-    client=XgbClient(
-        train_dmatrix,
-        valid_dmatrix,
-        num_train,
-        num_val,
-        num_local_round,
-        params,
-    ).to_client(),
-  )
-
-That's it for the client. We only have to implement :code:`Client` and call :code:`fl.client.start_client()`.
-The string :code:`"[::]:8080"` tells the client which server to connect to.
-In our case we can run the server and the client on the same machine, therefore we use
-:code:`"[::]:8080"`. If we run a truly federated workload with the server and
-clients running on different machines, all that needs to change is the
-:code:`server_address` we point the client at.
-
-
-Flower Server
-------------------
-
-These updates are then sent to the *server* which will aggregate them to produce a better model.
+After the local training on clients, the model updates are then sent to the *server* which will aggregate them to produce a better model.
 Finally, the *server* sends this improved version of the model back to each *client* to finish a complete FL round.
 
-In a file named :code:`server.py`, import Flower and FedXgbBagging from :code:`flwr.server.strategy`.
-
-We first define a strategy for XGBoost bagging aggregation.
+In a file named :code:`server_app.py`, we define a strategy for XGBoost bagging aggregation:
 
 .. code-block:: python
 
     # Define strategy
     strategy = FedXgbBagging(
-        fraction_fit=1.0,
-        min_fit_clients=2,
-        min_available_clients=2,
-        min_evaluate_clients=2,
-        fraction_evaluate=1.0,
+        fraction_fit=fraction_fit,
+        fraction_evaluate=fraction_evaluate,
         evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation,
         on_evaluate_config_fn=config_func,
         on_fit_config_fn=config_func,
+        initial_parameters=parameters,
     )
 
     def evaluate_metrics_aggregation(eval_metrics):
@@ -374,23 +292,12 @@ We first define a strategy for XGBoost bagging aggregation.
         }
         return config
 
-We use two clients for this example.
 An :code:`evaluate_metrics_aggregation` function is defined to collect and wighted average the AUC values from clients.
 The :code:`config_func` function is to return the current FL round number to client's :code:`fit()` and :code:`evaluate()` methods.
 
-Then, we start the server:
-
-.. code-block:: python
-
-    # Start Flower server
-    fl.server.start_server(
-        server_address="0.0.0.0:8080",
-        config=fl.server.ServerConfig(num_rounds=5),
-        strategy=strategy,
-    )
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Tree-based bagging aggregation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You must be curious about how bagging aggregation works. Let's look into the details.
 
@@ -558,108 +465,96 @@ After traversal of all clients' models, a new global model is generated,
 followed by the serialisation, and sending back to each client.
 
 
-Launch Federated XGBoost!
--------------------------------
+**************************
+ Launch Federated XGBoost!
+**************************
 
-With both client and server ready, we can now run everything and see federated
-learning in action. FL systems usually have a server and multiple clients. We
-therefore have to start the server first:
+To run the project, do:
 
-.. code-block:: shell
+.. code:: shell
 
-    $ python3 server.py
+   # Run with default arguments
+   $ flwr run .
 
-Once the server is running we can start the clients in different terminals.
-Open a new terminal and start the first client:
+With default arguments you will see an output like this one:
 
-.. code-block:: shell
+.. code:: shell
 
-    $ python3 client.py --partition-id=0
-
-Open another terminal and start the second client:
-
-.. code-block:: shell
-
-    $ python3 client.py --partition-id=1
-
-Each client will have its own dataset.
-You should now see how the training does in the very first terminal (the one that started the server):
-
-.. code-block:: shell
-
-    INFO :      Starting Flower server, config: num_rounds=5, no round_timeout
-    INFO :      Flower ECE: gRPC server running (5 rounds), SSL is disabled
+    Loading project configuration...
+    Success
+    INFO :      Starting Flower ServerApp, config: num_rounds=3, no round_timeout
+    INFO :
     INFO :      [INIT]
-    INFO :      Requesting initial parameters from one random client
-    INFO :      Received initial parameters from one random client
-    INFO :      Evaluating initial global parameters
+    INFO :      Using initial global parameters provided by strategy
+    INFO :      Starting evaluation of initial global parameters
+    INFO :      Evaluation returned no results (`None`)
     INFO :
     INFO :      [ROUND 1]
-    INFO :      configure_fit: strategy sampled 2 clients (out of 2)
+    INFO :      configure_fit: strategy sampled 2 clients (out of 20)
     INFO :      aggregate_fit: received 2 results and 0 failures
-    INFO :      configure_evaluate: strategy sampled 2 clients (out of 2)
+    INFO :      configure_evaluate: strategy sampled 2 clients (out of 20)
     INFO :      aggregate_evaluate: received 2 results and 0 failures
     INFO :
     INFO :      [ROUND 2]
-    INFO :      configure_fit: strategy sampled 2 clients (out of 2)
+    INFO :      configure_fit: strategy sampled 2 clients (out of 20)
     INFO :      aggregate_fit: received 2 results and 0 failures
-    INFO :      configure_evaluate: strategy sampled 2 clients (out of 2)
+    INFO :      configure_evaluate: strategy sampled 2 clients (out of 20)
     INFO :      aggregate_evaluate: received 2 results and 0 failures
     INFO :
     INFO :      [ROUND 3]
-    INFO :      configure_fit: strategy sampled 2 clients (out of 2)
+    INFO :      configure_fit: strategy sampled 2 clients (out of 20)
     INFO :      aggregate_fit: received 2 results and 0 failures
-    INFO :      configure_evaluate: strategy sampled 2 clients (out of 2)
-    INFO :      aggregate_evaluate: received 2 results and 0 failures
-    INFO :
-    INFO :      [ROUND 4]
-    INFO :      configure_fit: strategy sampled 2 clients (out of 2)
-    INFO :      aggregate_fit: received 2 results and 0 failures
-    INFO :      configure_evaluate: strategy sampled 2 clients (out of 2)
-    INFO :      aggregate_evaluate: received 2 results and 0 failures
-    INFO :
-    INFO :      [ROUND 5]
-    INFO :      configure_fit: strategy sampled 2 clients (out of 2)
-    INFO :      aggregate_fit: received 2 results and 0 failures
-    INFO :      configure_evaluate: strategy sampled 2 clients (out of 2)
+    INFO :      configure_evaluate: strategy sampled 2 clients (out of 20)
     INFO :      aggregate_evaluate: received 2 results and 0 failures
     INFO :
     INFO :      [SUMMARY]
-    INFO :      Run finished 5 round(s) in 1.67s
+    INFO :      Run finished 3 round(s) in 145.42s
     INFO :      	History (loss, distributed):
     INFO :      		round 1: 0
     INFO :      		round 2: 0
     INFO :      		round 3: 0
-    INFO :      		round 4: 0
-    INFO :      		round 5: 0
     INFO :      	History (metrics, distributed, evaluate):
-    INFO :      	{'AUC': [(1, 0.76755), (2, 0.775), (3, 0.77935), (4, 0.7836), (5, 0.7872)]}
+    INFO :      	{'AUC': [(1, 0.7664), (2, 0.77595), (3, 0.7826)]}
+    INFO :
 
 Congratulations!
 You've successfully built and run your first federated XGBoost system.
-The AUC values can be checked in :code:`metrics_distributed`.
+The AUC values can be checked in :code:`History (metrics, distributed, evaluate)`.
 One can see that the average AUC increases over FL rounds.
 
-The full `source code <https://github.com/adap/flower/blob/main/examples/xgboost-quickstart/>`_ for this example can be found in :code:`examples/xgboost-quickstart`.
+You can also override the parameters defined in the
+``[tool.flwr.app.config]`` section in ``pyproject.toml`` like this:
 
+.. code:: shell
 
-Comprehensive Federated XGBoost
------------------------------------
+   # Override some arguments
+   $ flwr run . --run-config "num-server-rounds=5 params.eta=0.05"
+
+.. note::
+
+   Check the full `source code
+   <https://github.com/adap/flower/blob/main/examples/xgboost-quickstart>`_
+   for this example in
+   ``examples/xgboost-quickstart`` in the Flower GitHub repository.
+
+********************************
+ Comprehensive Federated XGBoost
+********************************
 
 Now that you have known how federated XGBoost work with Flower, it's time to run some more comprehensive experiments by customising the experimental settings.
 In the xgboost-comprehensive example (`full code <https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive>`_),
 we provide more options to define various experimental setups, including aggregation strategies, data partitioning and centralised/distributed evaluation.
-We also support :doc:`Flower simulation <how-to-run-simulations>` making it easy to simulate large client cohorts in a resource-aware manner.
 Let's take a look!
 
+~~~~~~~~~~~~~~~
 Cyclic training
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 In addition to bagging aggregation, we offer a cyclic training scheme, which performs FL in a client-by-client fashion.
 Instead of aggregating multiple clients, there is only one single client participating in the training per round in the cyclic training scenario.
 The trained local XGBoost trees will be passed to the next client as an initialised model for next round's boosting.
 
-To do this, we first customise a :code:`ClientManager` in :code:`server_utils.py`:
+To do this, we first customise a :code:`ClientManager` in :code:`server_app.py`:
 
 .. code-block:: python
 
@@ -804,17 +699,17 @@ Also, the customised :code:`configure_fit` and :code:`configure_evaluate` method
           # Return client/config pairs
           return [(client, evaluate_ins) for client in sampled_clients]
 
-
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Customised data partitioning
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In :code:`dataset.py`, we have a function :code:`instantiate_partitioner` to instantiate the data partitioner
-based on the given :code:`num_partitions` and :code:`partitioner_type`.
+In :code:`task.py`, we have a function :code:`instantiate_fds` to instantiate Flower Datasets and the data partitioner
+based on the given :code:`partitioner_type` and :code:`num_partitions`.
 Currently, we provide four supported partitioner type to simulate the uniformity/non-uniformity in data quantity (uniform, linear, square, exponential).
 
 .. code-block:: python
 
+    from flwr_datasets import FederatedDataset
     from flwr_datasets.partitioner import (
         IidPartitioner,
         LinearPartitioner,
@@ -829,25 +724,31 @@ Currently, we provide four supported partitioner type to simulate the uniformity
         "exponential": ExponentialPartitioner,
     }
 
+    def instantiate_fds(partitioner_type, num_partitions):
+        """Initialize FederatedDataset."""
+        # Only initialize `FederatedDataset` once
+        global fds
+        if fds is None:
+            partitioner = CORRELATION_TO_PARTITIONER[partitioner_type](
+                num_partitions=num_partitions
+            )
+            fds = FederatedDataset(
+                dataset="jxie/higgs",
+                partitioners={"train": partitioner},
+                preprocessor=resplit,
+            )
+        return fds
 
-    def instantiate_partitioner(partitioner_type: str, num_partitions: int):
-        """Initialise partitioner based on selected partitioner type and number of
-        partitions."""
-        partitioner = CORRELATION_TO_PARTITIONER[partitioner_type](
-            num_partitions=num_partitions
-        )
-        return partitioner
-
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Customised centralised/distributed evaluation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To facilitate centralised evaluation, we define a function in :code:`server_utils.py`:
+To facilitate centralised evaluation, we define a function in :code:`server_app.py`:
 
 .. code-block:: python
 
-    def get_evaluate_fn(test_data):
-        """Return a function for centralised evaluation."""
+    def get_evaluate_fn(test_data, params):
+    """Return a function for centralised evaluation."""
 
         def evaluate_fn(
             server_round: int, parameters: Parameters, config: Dict[str, Scalar]
@@ -868,7 +769,6 @@ To facilitate centralised evaluation, we define a function in :code:`server_util
                     iteration=bst.num_boosted_rounds() - 1,
                 )
                 auc = round(float(eval_results.split("\t")[1].split(":")[1]), 4)
-                log(INFO, f"AUC = {auc} at round {server_round}")
 
                 return 0, {"AUC": auc}
 
@@ -878,429 +778,71 @@ This function returns a evaluation function which instantiates a :code:`Booster`
 The evaluation is conducted by calling :code:`eval_set()` method, and the tested AUC value is reported.
 
 As for distributed evaluation on the clients, it's same as the quick-start example by
-overriding the :code:`evaluate()` method insides the :code:`XgbClient` class in :code:`client_utils.py`.
+overriding the :code:`evaluate()` method insides the :code:`XgbClient` class in :code:`client_app.py`.
 
-Flower simulation
-~~~~~~~~~~~~~~~~~~~~
-We also provide an example code (:code:`sim.py`) to use the simulation capabilities of Flower to simulate federated XGBoost training on either a single machine or a cluster of machines.
+~~~~~~~~~~~~~~~~~~~
+Arguments explainer
+~~~~~~~~~~~~~~~~~~~
 
-.. code-block:: python
+We define all hyper-parameters under ``[tool.flwr.app.config]`` entry in ``pyproject.toml``:
 
-  from logging import INFO
-  import xgboost as xgb
-  from tqdm import tqdm
+.. code-block:: toml
 
-  import flwr as fl
-  from flwr_datasets import FederatedDataset
-  from flwr.common.logger import log
-  from flwr.server.strategy import FedXgbBagging, FedXgbCyclic
+    [tool.flwr.app.config]
+    # ServerApp
+    train-method = "bagging"  # Choose from [bagging, cyclic]
+    num-server-rounds = 3
+    fraction-fit = 1.0
+    fraction-evaluate = 1.0
+    centralised-eval = false
 
-  from dataset import (
-      instantiate_partitioner,
-      train_test_split,
-      transform_dataset_to_dmatrix,
-      separate_xy,
-      resplit,
-  )
-  from utils import (
-      sim_args_parser,
-      NUM_LOCAL_ROUND,
-      BST_PARAMS,
-  )
-  from server_utils import (
-      eval_config,
-      fit_config,
-      evaluate_metrics_aggregation,
-      get_evaluate_fn,
-      CyclicClientManager,
-  )
-  from client_utils import XgbClient
-
-After importing all required packages, we define a :code:`main()` function to perform the simulation process:
-
-.. code-block:: python
-
-  def main():
-    # Parse arguments for experimental settings
-    args = sim_args_parser()
-
-    # Load (HIGGS) dataset and conduct partitioning
-    partitioner = instantiate_partitioner(
-        partitioner_type=args.partitioner_type, num_partitions=args.pool_size
-    )
-    fds = FederatedDataset(
-        dataset="jxie/higgs",
-        partitioners={"train": partitioner},
-        resplitter=resplit,
-    )
-
-    # Load centralised test set
-    if args.centralised_eval or args.centralised_eval_client:
-        log(INFO, "Loading centralised test set...")
-        test_data = fds.load_split("test")
-        test_data.set_format("numpy")
-        num_test = test_data.shape[0]
-        test_dmatrix = transform_dataset_to_dmatrix(test_data)
-
-    # Load partitions and reformat data to DMatrix for xgboost
-    log(INFO, "Loading client local partitions...")
-    train_data_list = []
-    valid_data_list = []
-
-    # Load and process all client partitions. This upfront cost is amortized soon
-    # after the simulation begins since clients wont need to preprocess their partition.
-    for node_id in tqdm(range(args.pool_size), desc="Extracting client partition"):
-        # Extract partition for client with node_id
-        partition = fds.load_partition(node_id=node_id, split="train")
-        partition.set_format("numpy")
-
-        if args.centralised_eval_client:
-            # Use centralised test set for evaluation
-            train_data = partition
-            num_train = train_data.shape[0]
-            x_test, y_test = separate_xy(test_data)
-            valid_data_list.append(((x_test, y_test), num_test))
-        else:
-            # Train/test splitting
-            train_data, valid_data, num_train, num_val = train_test_split(
-                partition, test_fraction=args.test_fraction, seed=args.seed
-            )
-            x_valid, y_valid = separate_xy(valid_data)
-            valid_data_list.append(((x_valid, y_valid), num_val))
-
-        x_train, y_train = separate_xy(train_data)
-        train_data_list.append(((x_train, y_train), num_train))
-
-We first load the dataset and perform data partitioning, and the pre-processed data is stored in a :code:`list`.
-After the simulation begins, the clients won't need to pre-process their partitions again.
-
-Then, we define the strategies and other hyper-parameters:
-
-.. code-block:: python
-
-    # Define strategy
-    if args.train_method == "bagging":
-        # Bagging training
-        strategy = FedXgbBagging(
-            evaluate_function=get_evaluate_fn(test_dmatrix)
-            if args.centralised_eval
-            else None,
-            fraction_fit=(float(args.num_clients_per_round) / args.pool_size),
-            min_fit_clients=args.num_clients_per_round,
-            min_available_clients=args.pool_size,
-            min_evaluate_clients=args.num_evaluate_clients
-            if not args.centralised_eval
-            else 0,
-            fraction_evaluate=1.0 if not args.centralised_eval else 0.0,
-            on_evaluate_config_fn=eval_config,
-            on_fit_config_fn=fit_config,
-            evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation
-            if not args.centralised_eval
-            else None,
-        )
-    else:
-        # Cyclic training
-        strategy = FedXgbCyclic(
-            fraction_fit=1.0,
-            min_available_clients=args.pool_size,
-            fraction_evaluate=1.0,
-            evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation,
-            on_evaluate_config_fn=eval_config,
-            on_fit_config_fn=fit_config,
-        )
-
-    # Resources to be assigned to each virtual client
-    # In this example we use CPU by default
-    client_resources = {
-        "num_cpus": args.num_cpus_per_client,
-        "num_gpus": 0.0,
-    }
-
-    # Hyper-parameters for xgboost training
-    num_local_round = NUM_LOCAL_ROUND
-    params = BST_PARAMS
-
-    # Setup learning rate
-    if args.train_method == "bagging" and args.scaled_lr:
-        new_lr = params["eta"] / args.pool_size
-        params.update({"eta": new_lr})
-
-After that, we start the simulation by calling :code:`fl.simulation.start_simulation`:
-
-.. code-block:: python
-
-    # Start simulation
-    fl.simulation.start_simulation(
-        client_fn=get_client_fn(
-            train_data_list,
-            valid_data_list,
-            args.train_method,
-            params,
-            num_local_round,
-        ),
-        num_clients=args.pool_size,
-        client_resources=client_resources,
-        config=fl.server.ServerConfig(num_rounds=args.num_rounds),
-        strategy=strategy,
-        client_manager=CyclicClientManager() if args.train_method == "cyclic" else None,
-    )
-
-One of key parameters for :code:`start_simulation` is :code:`client_fn` which returns a function to construct a client.
-We define it as follows:
-
-.. code-block:: python
-
-  def get_client_fn(
-      train_data_list, valid_data_list, train_method, params, num_local_round
-  ):
-      """Return a function to construct a client.
-
-      The VirtualClientEngine will execute this function whenever a client is sampled by
-      the strategy to participate.
-      """
-
-      def client_fn(cid: str) -> fl.client.Client:
-          """Construct a FlowerClient with its own dataset partition."""
-          x_train, y_train = train_data_list[int(cid)][0]
-          x_valid, y_valid = valid_data_list[int(cid)][0]
-
-          # Reformat data to DMatrix
-          train_dmatrix = xgb.DMatrix(x_train, label=y_train)
-          valid_dmatrix = xgb.DMatrix(x_valid, label=y_valid)
-
-          # Fetch the number of examples
-          num_train = train_data_list[int(cid)][1]
-          num_val = valid_data_list[int(cid)][1]
-
-          # Create and return client
-          return XgbClient(
-              train_dmatrix,
-              valid_dmatrix,
-              num_train,
-              num_val,
-              num_local_round,
-              params,
-              train_method,
-          )
-
-      return client_fn
+    # ClientApp
+    partitioner-type = "uniform"  # Choose from [uniform, linear, square, exponential]
+    test-fraction = 0.2
+    seed = 42
+    centralised-eval-client = false
+    local-epochs = 1
+    scaled-lr = false
+    params.objective = "binary:logistic"
+    params.eta = 0.1  # Learning rate
+    params.max-depth = 8
+    params.eval-metric = "auc"
+    params.nthread = 16
+    params.num-parallel-tree = 1
+    params.subsample = 1
+    params.tree-method = "hist"
 
 
-
-Arguments parser
-~~~~~~~~~~~~~~~~~~~~~~
-
-In :code:`utils.py`, we define the arguments parsers for clients, server and simulation, allowing users to specify different experimental settings.
-Let's first see the sever side:
-
-.. code-block:: python
-
-    import argparse
-
-
-    def server_args_parser():
-      """Parse arguments to define experimental settings on server side."""
-      parser = argparse.ArgumentParser()
-
-      parser.add_argument(
-          "--train-method",
-          default="bagging",
-          type=str,
-          choices=["bagging", "cyclic"],
-          help="Training methods selected from bagging aggregation or cyclic training.",
-      )
-      parser.add_argument(
-          "--pool-size", default=2, type=int, help="Number of total clients."
-      )
-      parser.add_argument(
-          "--num-rounds", default=5, type=int, help="Number of FL rounds."
-      )
-      parser.add_argument(
-          "--num-clients-per-round",
-          default=2,
-          type=int,
-          help="Number of clients participate in training each round.",
-      )
-      parser.add_argument(
-          "--num-evaluate-clients",
-          default=2,
-          type=int,
-          help="Number of clients selected for evaluation.",
-      )
-      parser.add_argument(
-          "--centralised-eval",
-          action="store_true",
-          help="Conduct centralised evaluation (True), or client evaluation on hold-out data (False).",
-      )
-
-      args = parser.parse_args()
-      return args
-
-This allows user to specify training strategies / the number of total clients / FL rounds / participating clients / clients for evaluation,
-and evaluation fashion. Note that with :code:`--centralised-eval`, the sever will do centralised evaluation
+On the server side, we allow user to specify training strategies / FL rounds / participating clients / clients for evaluation,
+and evaluation fashion. Note that with :code:`centralised-eval = true`, the sever will do centralised evaluation
 and all functionalities for client evaluation will be disabled.
 
-Then, the argument parser on client side:
+On the client side, we can define various options for client data partitioning.
+Besides, clients also have an option to conduct evaluation on centralised test set by setting :code:`centralised-eval = true`,
+as well as an option to perform scaled learning rate based on the number of clients by setting :code:`scaled-lr = true`.
 
-.. code-block:: python
-
-    def client_args_parser():
-      """Parse arguments to define experimental settings on client side."""
-      parser = argparse.ArgumentParser()
-
-      parser.add_argument(
-          "--train-method",
-          default="bagging",
-          type=str,
-          choices=["bagging", "cyclic"],
-          help="Training methods selected from bagging aggregation or cyclic training.",
-      )
-      parser.add_argument(
-          "--num-partitions", default=10, type=int, help="Number of partitions."
-      )
-      parser.add_argument(
-          "--partitioner-type",
-          default="uniform",
-          type=str,
-          choices=["uniform", "linear", "square", "exponential"],
-          help="Partitioner types.",
-      )
-      parser.add_argument(
-          "--node-id",
-          default=0,
-          type=int,
-          help="Node ID used for the current client.",
-      )
-      parser.add_argument(
-          "--seed", default=42, type=int, help="Seed used for train/test splitting."
-      )
-      parser.add_argument(
-          "--test-fraction",
-          default=0.2,
-          type=float,
-          help="Test fraction for train/test splitting.",
-      )
-      parser.add_argument(
-          "--centralised-eval",
-          action="store_true",
-          help="Conduct evaluation on centralised test set (True), or on hold-out data (False).",
-      )
-      parser.add_argument(
-          "--scaled-lr",
-          action="store_true",
-          help="Perform scaled learning rate based on the number of clients (True).",
-      )
-
-      args = parser.parse_args()
-      return args
-
-This defines various options for client data partitioning.
-Besides, clients also have an option to conduct evaluation on centralised test set by setting :code:`--centralised-eval`,
-as well as an option to perform scaled learning rate based on the number of clients by setting :code:`--scaled-lr`.
-
-We also have an argument parser for simulation:
-
-.. code-block:: python
-
-  def sim_args_parser():
-      """Parse arguments to define experimental settings on server side."""
-      parser = argparse.ArgumentParser()
-
-      parser.add_argument(
-          "--train-method",
-          default="bagging",
-          type=str,
-          choices=["bagging", "cyclic"],
-          help="Training methods selected from bagging aggregation or cyclic training.",
-      )
-
-      # Server side
-      parser.add_argument(
-          "--pool-size", default=5, type=int, help="Number of total clients."
-      )
-      parser.add_argument(
-          "--num-rounds", default=30, type=int, help="Number of FL rounds."
-      )
-      parser.add_argument(
-          "--num-clients-per-round",
-          default=5,
-          type=int,
-          help="Number of clients participate in training each round.",
-      )
-      parser.add_argument(
-          "--num-evaluate-clients",
-          default=5,
-          type=int,
-          help="Number of clients selected for evaluation.",
-      )
-      parser.add_argument(
-          "--centralised-eval",
-          action="store_true",
-          help="Conduct centralised evaluation (True), or client evaluation on hold-out data (False).",
-      )
-      parser.add_argument(
-          "--num-cpus-per-client",
-          default=2,
-          type=int,
-          help="Number of CPUs used for per client.",
-      )
-
-      # Client side
-      parser.add_argument(
-          "--partitioner-type",
-          default="uniform",
-          type=str,
-          choices=["uniform", "linear", "square", "exponential"],
-          help="Partitioner types.",
-      )
-      parser.add_argument(
-          "--seed", default=42, type=int, help="Seed used for train/test splitting."
-      )
-      parser.add_argument(
-          "--test-fraction",
-          default=0.2,
-          type=float,
-          help="Test fraction for train/test splitting.",
-      )
-      parser.add_argument(
-          "--centralised-eval-client",
-          action="store_true",
-          help="Conduct evaluation on centralised test set (True), or on hold-out data (False).",
-      )
-      parser.add_argument(
-          "--scaled-lr",
-          action="store_true",
-          help="Perform scaled learning rate based on the number of clients (True).",
-      )
-
-      args = parser.parse_args()
-      return args
-
-This integrates all arguments for both client and server sides.
-
+~~~~~~~~~~~~~~~~~
 Example commands
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 
-To run a centralised evaluated experiment with bagging strategy on 5 clients with exponential distribution for 50 rounds,
-we first start the server as below:
-
-.. code-block:: shell
-
-    $ python3 server.py --train-method=bagging --pool-size=5 --num-rounds=50 --num-clients-per-round=5 --centralised-eval
-
-Then, on each client terminal, we start the clients:
+To run bagging aggregation for 5 rounds evaluated on centralised test set:
 
 .. code-block:: shell
 
-    $ python3 clients.py --train-method=bagging --num-partitions=5 --partitioner-type=exponential --node-id=NODE_ID
+  flwr run . --run-config "train-method='bagging' num-server-rounds=5 centralised-eval=true"
 
-To run the same experiment with Flower simulation:
+To run cyclic training with linear partitioner type evaluated on centralised test set:
 
 .. code-block:: shell
 
-    $ python3 sim.py --train-method=bagging --pool-size=5 --num-rounds=50 --num-clients-per-round=5 --partitioner-type=exponential --centralised-eval
+  flwr run . --run-config "train-method='cyclic' partitioner-type='linear' centralised-eval-client=true"
 
-The full `code <https://github.com/adap/flower/blob/main/examples/xgboost-comprehensive/>`_ for this comprehensive example can be found in :code:`examples/xgboost-comprehensive`.
+.. note::
+
+   The full `code
+   <https://github.com/adap/flower/blob/main/examples/xgboost-comprehensive/>`_
+   for this comprehensive example can be found
+   in :code:`examples/xgboost-comprehensive` in the Flower GitHub repository.
 
 ****************
  Video tutorial
