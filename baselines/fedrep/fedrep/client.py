@@ -159,7 +159,7 @@ class FedRepClient(BaseClient):
         """Return the current local body parameters."""
         return [
             val.cpu().numpy()
-            for _, val in self.model_manager.model.body.state_dict().items()
+            for val in self.model_manager.model.body.state_dict().values()
         ]
 
     def set_parameters(self, parameters: List[np.ndarray], evaluate=False) -> None:
@@ -211,8 +211,6 @@ def get_client_fn_simulation(
         A tuple containing the client function that creates Flower Clients and
         the DataLoader that will be used for testing
     """
-    global FEDERATED_DATASET
-
     assert config.model_name.lower() in [
         "cnncifar10",
         "cnncifar100",
@@ -247,6 +245,8 @@ def get_client_fn_simulation(
         shuffle=True,
         seed=config.dataset.seed,
     )
+
+    global FEDERATED_DATASET
     if FEDERATED_DATASET is None:
         FEDERATED_DATASET = FederatedDataset(
             dataset=config.dataset.name.lower(), partitioners={"train": partitioner}
@@ -273,7 +273,7 @@ def get_client_fn_simulation(
 
         partition = FEDERATED_DATASET.load_partition(cid_use)
         partition_train_test = partition.train_test_split(
-            train_size=config.dataset.fraction, seed=config.dataset.seed
+            train_size=config.dataset.fraction, shuffle=True, seed=config.dataset.seed
         )
 
         trainset = partition_train_test["train"].with_transform(apply_train_transforms)

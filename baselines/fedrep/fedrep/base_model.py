@@ -95,7 +95,7 @@ class ModelSplit(ABC, nn.Module):
         Args:
             state_dict: dictionary of the state to set the model body to.
         """
-        self.body.load_state_dict(state_dict, strict=True)
+        self._body.load_state_dict(state_dict, strict=True)
 
     @property
     def head(self) -> nn.Module:
@@ -109,10 +109,10 @@ class ModelSplit(ABC, nn.Module):
         Args:
             state_dict: dictionary of the state to set the model head to.
         """
-        self.head.load_state_dict(state_dict, strict=True)
+        self._head.load_state_dict(state_dict, strict=True)
 
     def get_parameters(self) -> List[np.ndarray]:
-        """Get model parameters (without fixed head).
+        """Get model parameters.
 
         Returns
         -------
@@ -132,35 +132,31 @@ class ModelSplit(ABC, nn.Module):
         Args:
             state_dict: dictionary of the state to set the model to.
         """
-        ordered_state_dict = OrderedDict(self.state_dict().copy())
-        # Update with the values of the state_dict
-        ordered_state_dict.update(dict(state_dict.items()))
-        self.load_state_dict(ordered_state_dict, strict=False)
+        self.load_state_dict(state_dict, strict=False)
 
     def enable_head(self) -> None:
         """Enable gradient tracking for the head parameters."""
-        for param in self.head.parameters():
+        for param in self._head.parameters():
             param.requires_grad = True
 
     def enable_body(self) -> None:
         """Enable gradient tracking for the body parameters."""
-        for param in self.body.parameters():
+        for param in self._body.parameters():
             param.requires_grad = True
 
     def disable_head(self) -> None:
         """Disable gradient tracking for the head parameters."""
-        for param in self.head.parameters():
+        for param in self._head.parameters():
             param.requires_grad = False
 
     def disable_body(self) -> None:
         """Disable gradient tracking for the body parameters."""
-        for param in self.body.parameters():
+        for param in self._body.parameters():
             param.requires_grad = False
 
     def forward(self, inputs: Any) -> Any:
         """Forward inputs through the body and the head."""
-        x = self.body(inputs)
-        return self.head(x)
+        return self.head(self.body(inputs))
 
 
 # pylint: disable=R0902, R0913, R0801
@@ -206,7 +202,7 @@ class ModelManager(ABC):
         """Return model to be splitted into head and body."""
 
     @property
-    def model(self) -> nn.Module:
+    def model(self) -> ModelSplit:
         """Return model."""
         return self._model
 
@@ -219,7 +215,7 @@ class ModelManager(ABC):
         """
         # Load client state (head) if client_save_path is not None and it is not empty
         if self.client_save_path is not None and os.path.isfile(self.client_save_path):
-            self.model.head.load_state_dict(torch.load(self.client_save_path))
+            self._model.head.load_state_dict(torch.load(self.client_save_path))
 
         num_local_epochs = DEFAULT_LOCAL_TRAIN_EPOCHS
         if hasattr(self.config, "num_local_epochs"):
@@ -230,8 +226,8 @@ class ModelManager(ABC):
             num_rep_epochs = int(self.config.num_rep_epochs)
 
         criterion = torch.nn.CrossEntropyLoss()
-        weights = [v for k, v in self.model.named_parameters() if "weight" in k]
-        biases = [v for k, v in self.model.named_parameters() if "bias" in k]
+        weights = [v for k, v in self._model.named_parameters() if "weight" in k]
+        biases = [v for k, v in self._model.named_parameters() if "bias" in k]
         optimizer = torch.optim.SGD(
             [
                 {"params": weights, "weight_decay": 1e-4},
@@ -243,18 +239,18 @@ class ModelManager(ABC):
         correct, total = 0, 0
         loss: torch.Tensor = 0.0
 
-        self.model.train()
+        self._model.train()
         for i in range(num_local_epochs + num_rep_epochs):
             if i < num_local_epochs:
-                self.model.disable_body()
-                self.model.enable_head()
+                self._model.disable_body()
+                self._model.enable_head()
             else:
-                self.model.enable_body()
-                self.model.disable_head()
+                self._model.enable_body()
+                self._model.disable_head()
             for batch in self.trainloader:
                 images = batch["img"]
                 labels = batch["label"]
-                outputs = self.model(images.to(self.device))
+                outputs = self._model(images.to(self.device))
                 labels = labels.to(self.device)
                 loss = criterion(outputs, labels)
                 optimizer.zero_grad()
@@ -265,7 +261,7 @@ class ModelManager(ABC):
 
         # Save client state (head)
         if self.client_save_path is not None:
-            torch.save(self.model.head.state_dict(), self.client_save_path)
+            torch.save(self._model.head.state_dict(), self.client_save_path)
 
         return {"loss": loss.item(), "accuracy": correct / total}
 
@@ -278,21 +274,21 @@ class ModelManager(ABC):
         """
         # Load client state (head)
         if self.client_save_path is not None and os.path.isfile(self.client_save_path):
-            self.model.head.load_state_dict(torch.load(self.client_save_path))
+            self._model.head.load_state_dict(torch.load(self.client_save_path))
 
         num_finetune_epochs = DEFAULT_FINETUNE_EPOCHS
         if hasattr(self.config, "num_finetune_epochs"):
             num_finetune_epochs = int(self.config.num_finetune_epochs)
 
         if num_finetune_epochs > 0 and self.config.get("enable_finetune", False):
-            optimizer = torch.optim.SGD(self.model.parameters(), lr=self.learning_rate)
+            optimizer = torch.optim.SGD(self._model.parameters(), lr=self.learning_rate)
             criterion = torch.nn.CrossEntropyLoss()
-            self.model.train()
+            self._model.train()
             for _ in range(num_finetune_epochs):
                 for batch in self.trainloader:
                     images = batch["img"].to(self.device)
                     labels = batch["label"].to(self.device)
-                    outputs = self.model(images)
+                    outputs = self._model(images)
                     loss = criterion(outputs, labels)
                     optimizer.zero_grad()
                     loss.backward()
@@ -301,12 +297,12 @@ class ModelManager(ABC):
         criterion = torch.nn.CrossEntropyLoss()
         correct, total, loss = 0, 0, 0.0
 
-        self.model.eval()
+        self._model.eval()
         with torch.no_grad():
             for batch in self.testloader:
                 images = batch["img"].to(self.device)
                 labels = batch["label"].to(self.device)
-                outputs = self.model(images)
+                outputs = self._model(images)
                 loss += criterion(outputs, labels).item()
                 total += labels.size(0)
                 correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
