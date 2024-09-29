@@ -101,6 +101,7 @@ jobs:
           attempt_delay: 9000 # 9 secs
           with: |
             pull: true
+            sbom: true
             platforms: ${{ matrix.platform.docker }}
             context: "{{defaultContext}}:${{ inputs.file-dir }}"
             outputs: type=image,name=${{ inputs.namespace-repository }},push-by-digest=true,name-canonical=true,push=true

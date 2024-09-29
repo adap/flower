@@ -8,11 +8,14 @@
  Federated XGBoost
 ******************
 
-EXtreme Gradient Boosting (**XGBoost**) is a robust and efficient implementation of gradient-boosted decision tree (**GBDT**), that maximises the computational boundaries for boosted tree methods.
-It's primarily designed to enhance both the performance and computational speed of machine learning models.
-In XGBoost, trees are constructed concurrently, unlike the sequential approach taken by GBDT.
+EXtreme Gradient Boosting (**XGBoost**) is a robust and efficient implementation of
+gradient-boosted decision tree (**GBDT**), that maximises the computational boundaries
+for boosted tree methods. It's primarily designed to enhance both the performance and
+computational speed of machine learning models. In XGBoost, trees are constructed
+concurrently, unlike the sequential approach taken by GBDT.
 
-Often, for tabular data on medium-sized datasets with fewer than 10k training examples, XGBoost surpasses the results of deep learning techniques.
+Often, for tabular data on medium-sized datasets with fewer than 10k training examples,
+XGBoost surpasses the results of deep learning techniques.
 
 ~~~~~~~~~~~~~~~~~~~~~~
 Why federated XGBoost?
@@ -20,19 +23,31 @@ Why federated XGBoost?
 
 Indeed, as the demand for data privacy and decentralized learning grows, there's an increasing requirement to implement federated XGBoost systems for specialised applications, like survival analysis and financial fraud detection.
 
-Federated learning ensures that raw data remains on the local device, making it an attractive approach for sensitive domains where data security and privacy are paramount.
-Given the robustness and efficiency of XGBoost, combining it with federated learning offers a promising solution for these specific challenges.
+Federated learning ensures that raw data remains on the local device, making it an
+attractive approach for sensitive domains where data security and privacy are paramount.
+Given the robustness and efficiency of XGBoost, combining it with federated learning
+offers a promising solution for these specific challenges.
 
 In this tutorial we will learn how to train a federated XGBoost model on HIGGS dataset using Flower and :code:`xgboost` package to perform a binary classification task.
 We use a simple example (`full code xgboost-quickstart <https://github.com/adap/flower/tree/main/examples/xgboost-quickstart>`_)
 to demonstrate how federated XGBoost works,
 and then we dive into a more complex example (`full code xgboost-comprehensive <https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive>`_) to run various experiments.
 
+In this tutorial we will learn how to train a federated XGBoost model on HIGGS dataset
+using Flower and ``xgboost`` package. We use a simple example (`full code
+xgboost-quickstart
+<https://github.com/adap/flower/tree/main/examples/xgboost-quickstart>`_) with two
+*clients* and one *server* to demonstrate how federated XGBoost works, and then we dive
+into a more complex example (`full code xgboost-comprehensive
+<https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive>`_) to run
+various experiments.
+
 ******************
  Environment Setup
 ******************
 
-First of all, it is recommended to create a virtual environment and run everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
+First of all, it is recommended to create a virtual environment and run everything
+within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
 
 We first need to install Flower and Flower Datasets. You can do this by running :
 
@@ -41,12 +56,12 @@ We first need to install Flower and Flower Datasets. You can do this by running 
   # In a new Python environment
   $ pip install flwr flwr-datasets
 
-Since we want to use :code:`xgboost` package to build up XGBoost trees, let's go ahead and install :code:`xgboost`:
+Since we want to use ``xgboost`` package to build up XGBoost trees, let's go ahead and
+install ``xgboost``:
 
 .. code-block:: shell
 
-  $ pip install xgboost
-
+    $ pip install xgboost
 
 ********************
  The Configurations
@@ -78,7 +93,6 @@ We use CPU for the training in default.
 One can shift it to GPU by setting :code:`tree_method` to :code:`gpu_hist`.
 We use AUC as evaluation metric.
 
-
 **********
  The Data
 **********
@@ -100,7 +114,8 @@ In this example, we split the dataset into 20 partitions with uniform distributi
 <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_).
 Then, we load the partition for the given client based on :code:`partition_id`.
 
-After that, we do train/test splitting on the given partition (client's local data), and transform data format for :code:`xgboost` package.
+After that, we do train/test splitting on the given partition (client's local data), and
+transform data format for ``xgboost`` package.
 
 .. code-block:: python
 
@@ -113,7 +128,8 @@ After that, we do train/test splitting on the given partition (client's local da
     train_dmatrix = transform_dataset_to_dmatrix(train_data)
     valid_dmatrix = transform_dataset_to_dmatrix(valid_data)
 
-The functions of :code:`train_test_split` and :code:`transform_dataset_to_dmatrix` are defined as below:
+The functions of ``train_test_split`` and ``transform_dataset_to_dmatrix`` are defined
+as below:
 
 .. code-block:: python
 
@@ -223,8 +239,8 @@ and then update model weights on local training data with function :code:`_local
 
         return bst
 
-Given :code:`num_local_round`, we update trees by calling :code:`bst_input.update` method.
-After training, the last :code:`N=num_local_round` trees will be extracted to send to the server.
+Given ``num_local_round``, we update trees by calling ``bst_input.update`` method. After
+training, the last ``N=num_local_round`` trees will be extracted to send to the server.
 
 .. code-block:: python
 
@@ -251,9 +267,8 @@ After training, the last :code:`N=num_local_round` trees will be extracted to se
               metrics={"AUC": auc},
           )
 
-In :code:`evaluate`, after loading the global model, we call :code:`bst.eval_set` function to conduct evaluation on valid set.
-The AUC value will be returned.
-
+In ``evaluate``, after loading the global model, we call ``bst.eval_set`` function to
+conduct evaluation on valid set. The AUC value will be returned.
 
 ***************
  The ServerApp
@@ -276,6 +291,7 @@ In a file named :code:`server_app.py`, we define a strategy for XGBoost bagging 
         initial_parameters=parameters,
     )
 
+
     def evaluate_metrics_aggregation(eval_metrics):
         """Return an aggregated metric (AUC) for evaluation."""
         total_num = sum([num for num, _ in eval_metrics])
@@ -284,6 +300,7 @@ In a file named :code:`server_app.py`, we define a strategy for XGBoost bagging 
         )
         metrics_aggregated = {"AUC": auc_aggregated}
         return metrics_aggregated
+
 
     def config_func(rnd: int) -> Dict[str, str]:
         """Return a configuration with global epochs."""
@@ -301,8 +318,9 @@ Tree-based bagging aggregation
 
 You must be curious about how bagging aggregation works. Let's look into the details.
 
-In file :code:`flwr.server.strategy.fedxgb_bagging.py`, we define :code:`FedXgbBagging` inherited from :code:`flwr.server.strategy.FedAvg`.
-Then, we override the :code:`aggregate_fit`, :code:`aggregate_evaluate` and :code:`evaluate` methods as follows:
+In file ``flwr.server.strategy.fedxgb_bagging.py``, we define ``FedXgbBagging``
+inherited from ``flwr.server.strategy.FedAvg``. Then, we override the ``aggregate_fit``,
+``aggregate_evaluate`` and ``evaluate`` methods as follows:
 
 .. code-block:: python
 
@@ -397,7 +415,8 @@ Then, we override the :code:`aggregate_fit`, :code:`aggregate_evaluate` and :cod
             loss, metrics = eval_res
             return loss, metrics
 
-In :code:`aggregate_fit`, we sequentially aggregate the clients' XGBoost trees by calling :code:`aggregate()` function:
+In ``aggregate_fit``, we sequentially aggregate the clients' XGBoost trees by calling
+``aggregate()`` function:
 
 .. code-block:: python
 
@@ -456,14 +475,13 @@ In :code:`aggregate_fit`, we sequentially aggregate the clients' XGBoost trees b
         )
         return tree_num, paral_tree_num
 
-In this function, we first fetch the number of trees and the number of parallel trees for the current and previous model
-by calling :code:`_get_tree_nums`.
-Then, the fetched information will be aggregated.
-After that, the trees (containing model weights) are aggregated to generate a new tree model.
+In this function, we first fetch the number of trees and the number of parallel trees
+for the current and previous model by calling ``_get_tree_nums``. Then, the fetched
+information will be aggregated. After that, the trees (containing model weights) are
+aggregated to generate a new tree model.
 
-After traversal of all clients' models, a new global model is generated,
-followed by the serialisation, and sending back to each client.
-
+After traversal of all clients' models, a new global model is generated, followed by the
+serialisation, and sending back to each client.
 
 **************************
  Launch Federated XGBoost!
@@ -550,154 +568,125 @@ Let's take a look!
 Cyclic training
 ~~~~~~~~~~~~~~~
 
-In addition to bagging aggregation, we offer a cyclic training scheme, which performs FL in a client-by-client fashion.
-Instead of aggregating multiple clients, there is only one single client participating in the training per round in the cyclic training scenario.
-The trained local XGBoost trees will be passed to the next client as an initialised model for next round's boosting.
+In addition to bagging aggregation, we offer a cyclic training scheme, which performs FL
+in a client-by-client fashion. Instead of aggregating multiple clients, there is only
+one single client participating in the training per round in the cyclic training
+scenario. The trained local XGBoost trees will be passed to the next client as an
+initialised model for next round's boosting.
 
 To do this, we first customise a :code:`ClientManager` in :code:`server_app.py`:
 
 .. code-block:: python
 
-  class CyclicClientManager(SimpleClientManager):
-      """Provides a cyclic client selection rule."""
+    class CyclicClientManager(SimpleClientManager):
+        """Provides a cyclic client selection rule."""
 
-      def sample(
-          self,
-          num_clients: int,
-          min_num_clients: Optional[int] = None,
-          criterion: Optional[Criterion] = None,
-      ) -> List[ClientProxy]:
-          """Sample a number of Flower ClientProxy instances."""
+        def sample(
+            self,
+            num_clients: int,
+            min_num_clients: Optional[int] = None,
+            criterion: Optional[Criterion] = None,
+        ) -> List[ClientProxy]:
+            """Sample a number of Flower ClientProxy instances."""
 
-          # Block until at least num_clients are connected.
-          if min_num_clients is None:
-              min_num_clients = num_clients
-          self.wait_for(min_num_clients)
+            # Block until at least num_clients are connected.
+            if min_num_clients is None:
+                min_num_clients = num_clients
+            self.wait_for(min_num_clients)
 
-          # Sample clients which meet the criterion
-          available_cids = list(self.clients)
-          if criterion is not None:
-              available_cids = [
-                  cid for cid in available_cids if criterion.select(self.clients[cid])
-              ]
+            # Sample clients which meet the criterion
+            available_cids = list(self.clients)
+            if criterion is not None:
+                available_cids = [
+                    cid for cid in available_cids if criterion.select(self.clients[cid])
+                ]
 
-          if num_clients > len(available_cids):
-              log(
-                  INFO,
-                  "Sampling failed: number of available clients"
-                  " (%s) is less than number of requested clients (%s).",
-                  len(available_cids),
-                  num_clients,
-              )
-              return []
+            if num_clients > len(available_cids):
+                log(
+                    INFO,
+                    "Sampling failed: number of available clients"
+                    " (%s) is less than number of requested clients (%s).",
+                    len(available_cids),
+                    num_clients,
+                )
+                return []
 
-          # Return all available clients
-          return [self.clients[cid] for cid in available_cids]
+            # Return all available clients
+            return [self.clients[cid] for cid in available_cids]
 
-The customised :code:`ClientManager` samples all available clients in each FL round based on the order of connection to the server.
-Then, we define a new strategy :code:`FedXgbCyclic` in :code:`flwr.server.strategy.fedxgb_cyclic.py`,
-in order to sequentially select only one client in given round and pass the received model to next client.
-
-.. code-block:: python
-
-  class FedXgbCyclic(FedAvg):
-      """Configurable FedXgbCyclic strategy implementation."""
-
-      # pylint: disable=too-many-arguments,too-many-instance-attributes, line-too-long
-      def __init__(
-          self,
-          **kwargs: Any,
-      ):
-          self.global_model: Optional[bytes] = None
-          super().__init__(**kwargs)
-
-      def aggregate_fit(
-          self,
-          server_round: int,
-          results: List[Tuple[ClientProxy, FitRes]],
-          failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-      ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-          """Aggregate fit results using bagging."""
-          if not results:
-              return None, {}
-          # Do not aggregate if there are failures and failures are not accepted
-          if not self.accept_failures and failures:
-              return None, {}
-
-          # Fetch the client model from last round as global model
-          for _, fit_res in results:
-              update = fit_res.parameters.tensors
-              for bst in update:
-                  self.global_model = bst
-
-          return (
-              Parameters(tensor_type="", tensors=[cast(bytes, self.global_model)]),
-              {},
-          )
-
-Unlike the original :code:`FedAvg`, we don't perform aggregation here.
-Instead, we just make a copy of the received client model as global model by overriding :code:`aggregate_fit`.
-
-Also, the customised :code:`configure_fit` and :code:`configure_evaluate` methods ensure the clients to be sequentially selected given FL round:
+The customised ``ClientManager`` samples all available clients in each FL round based on
+the order of connection to the server. Then, we define a new strategy ``FedXgbCyclic``
+in ``flwr.server.strategy.fedxgb_cyclic.py``, in order to sequentially select only one
+client in given round and pass the received model to next client.
 
 .. code-block:: python
 
-      def configure_fit(
-          self, server_round: int, parameters: Parameters, client_manager: ClientManager
-      ) -> List[Tuple[ClientProxy, FitIns]]:
-          """Configure the next round of training."""
-          config = {}
-          if self.on_fit_config_fn is not None:
-              # Custom fit config function provided
-              config = self.on_fit_config_fn(server_round)
-          fit_ins = FitIns(parameters, config)
+    class FedXgbCyclic(FedAvg):
+        """Configurable FedXgbCyclic strategy implementation."""
 
-          # Sample clients
-          sample_size, min_num_clients = self.num_fit_clients(
-              client_manager.num_available()
-          )
-          clients = client_manager.sample(
-              num_clients=sample_size,
-              min_num_clients=min_num_clients,
-          )
+        # pylint: disable=too-many-arguments,too-many-instance-attributes, line-too-long
+        def __init__(
+            self,
+            **kwargs: Any,
+        ):
+            self.global_model: Optional[bytes] = None
+            super().__init__(**kwargs)
 
-          # Sample the clients sequentially given server_round
-          sampled_idx = (server_round - 1) % len(clients)
-          sampled_clients = [clients[sampled_idx]]
+        def aggregate_fit(
+            self,
+            server_round: int,
+            results: List[Tuple[ClientProxy, FitRes]],
+            failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+        ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+            """Aggregate fit results using bagging."""
+            if not results:
+                return None, {}
+            # Do not aggregate if there are failures and failures are not accepted
+            if not self.accept_failures and failures:
+                return None, {}
 
-          # Return client/config pairs
-          return [(client, fit_ins) for client in sampled_clients]
+            # Fetch the client model from last round as global model
+            for _, fit_res in results:
+                update = fit_res.parameters.tensors
+                for bst in update:
+                    self.global_model = bst
 
-      def configure_evaluate(
-          self, server_round: int, parameters: Parameters, client_manager: ClientManager
-      ) -> List[Tuple[ClientProxy, EvaluateIns]]:
-          """Configure the next round of evaluation."""
-          # Do not configure federated evaluation if fraction eval is 0.
-          if self.fraction_evaluate == 0.0:
-              return []
+            return (
+                Parameters(tensor_type="", tensors=[cast(bytes, self.global_model)]),
+                {},
+            )
 
-          # Parameters and config
-          config = {}
-          if self.on_evaluate_config_fn is not None:
-              # Custom evaluation config function provided
-              config = self.on_evaluate_config_fn(server_round)
-          evaluate_ins = EvaluateIns(parameters, config)
+Unlike the original ``FedAvg``, we don't perform aggregation here. Instead, we just make
+a copy of the received client model as global model by overriding ``aggregate_fit``.
 
-          # Sample clients
-          sample_size, min_num_clients = self.num_evaluation_clients(
-              client_manager.num_available()
-          )
-          clients = client_manager.sample(
-              num_clients=sample_size,
-              min_num_clients=min_num_clients,
-          )
+Also, the customised ``configure_fit`` and ``configure_evaluate`` methods ensure the
+clients to be sequentially selected given FL round:
 
-          # Sample the clients sequentially given server_round
-          sampled_idx = (server_round - 1) % len(clients)
-          sampled_clients = [clients[sampled_idx]]
+.. code-block:: python
 
-          # Return client/config pairs
-          return [(client, evaluate_ins) for client in sampled_clients]
+    def configure_fit(
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
+    ) -> List[Tuple[ClientProxy, FitIns]]:
+        """Configure the next round of training."""
+        config = {}
+        if self.on_fit_config_fn is not None:
+            # Custom fit config function provided
+            config = self.on_fit_config_fn(server_round)
+        fit_ins = FitIns(parameters, config)
+
+        # Sample clients
+        sample_size, min_num_clients = self.num_fit_clients(client_manager.num_available())
+        clients = client_manager.sample(
+            num_clients=sample_size,
+            min_num_clients=min_num_clients,
+        )
+
+        # Sample the clients sequentially given server_round
+        sampled_idx = (server_round - 1) % len(clients)
+        sampled_clients = [clients[sampled_idx]]
+
+        # Return client/config pairs
+        return [(client, fit_ins) for client in sampled_clients]
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Customised data partitioning
@@ -774,8 +763,9 @@ To facilitate centralised evaluation, we define a function in :code:`server_app.
 
         return evaluate_fn
 
-This function returns a evaluation function which instantiates a :code:`Booster` object and loads the global model weights to it.
-The evaluation is conducted by calling :code:`eval_set()` method, and the tested AUC value is reported.
+This function returns a evaluation function which instantiates a ``Booster`` object and
+loads the global model weights to it. The evaluation is conducted by calling
+``eval_set()`` method, and the tested AUC value is reported.
 
 As for distributed evaluation on the clients, it's same as the quick-start example by
 overriding the :code:`evaluate()` method insides the :code:`XgbClient` class in :code:`client_app.py`.
@@ -832,7 +822,6 @@ To run bagging aggregation for 5 rounds evaluated on centralised test set:
   flwr run . --run-config "train-method='bagging' num-server-rounds=5 centralised-eval=true"
 
 To run cyclic training with linear partitioner type evaluated on centralised test set:
-
 .. code-block:: shell
 
   flwr run . --run-config "train-method='cyclic' partitioner-type='linear' centralised-eval-client=true"

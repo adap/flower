@@ -30,6 +30,7 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_shared_key,
     verify_hmac,
 )
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
@@ -56,6 +57,7 @@ Request = Union[
     PushTaskResRequest,
     GetRunRequest,
     PingRequest,
+    GetFabRequest,
 ]
 
 Response = Union[
@@ -65,6 +67,7 @@ Response = Union[
     PushTaskResResponse,
     GetRunResponse,
     PingResponse,
+    GetFabResponse,
 ]
 
 
@@ -173,6 +176,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             PushTaskResRequest,
             GetRunRequest,
             PingRequest,
+            GetFabRequest,
         ],
     ) -> bool:
         if node_id is None:
