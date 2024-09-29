@@ -25,7 +25,7 @@ from argparse import Namespace
 from logging import DEBUG, ERROR, INFO, WARNING
 from pathlib import Path
 from time import sleep
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 from flwr.cli.config_utils import load_and_validate
 from flwr.client import ClientApp
@@ -56,7 +56,7 @@ def _check_args_do_not_interfere(args: Namespace) -> bool:
     mode_one_args = ["app", "run_config"]
     mode_two_args = ["client_app", "server_app"]
 
-    def _resolve_message(conflict_keys: List[str]) -> str:
+    def _resolve_message(conflict_keys: list[str]) -> str:
         return ",".join([f"`--{key}`".replace("_", "-") for key in conflict_keys])
 
     # When passing `--app`, `--app-dir` is ignored
@@ -108,6 +108,11 @@ def _replace_keys(d: Any, match: str, target: str) -> Any:
 def run_simulation_from_cli() -> None:
     """Run Simulation Engine from the CLI."""
     args = _parse_args_run_simulation().parse_args()
+
+    event(
+        EventType.CLI_FLOWER_SIMULATION_ENTER,
+        event_details={"backend": args.backend, "num-supernodes": args.num_supernodes},
+    )
 
     # Add warnings for deprecated server_app and client_app arguments
     if args.server_app:
@@ -211,9 +216,11 @@ def run_simulation_from_cli() -> None:
         app_dir=app_dir,
         run=run,
         enable_tf_gpu_growth=args.enable_tf_gpu_growth,
+        delay_start=args.delay_start,
         verbose_logging=args.verbose,
         server_app_run_config=fused_config,
         is_app=is_app,
+        exit_event=EventType.CLI_FLOWER_SIMULATION_LEAVE,
     )
 
 
@@ -267,6 +274,11 @@ def run_simulation(
         When disabled, only INFO, WARNING and ERROR log messages will be shown. If
         enabled, DEBUG-level logs will be displayed.
     """
+    event(
+        EventType.PYTHON_API_RUN_SIMULATION_ENTER,
+        event_details={"backend": backend_name, "num-supernodes": num_supernodes},
+    )
+
     if enable_tf_gpu_growth:
         warn_deprecated_feature_with_example(
             "Passing `enable_tf_gpu_growth=True` is deprecated.",
@@ -284,6 +296,7 @@ def run_simulation(
         backend_config=backend_config,
         enable_tf_gpu_growth=enable_tf_gpu_growth,
         verbose_logging=verbose_logging,
+        exit_event=EventType.PYTHON_API_RUN_SIMULATION_LEAVE,
     )
 
 
@@ -297,7 +310,6 @@ def run_serverapp_th(
     f_stop: threading.Event,
     has_exception: threading.Event,
     enable_tf_gpu_growth: bool,
-    delay_launch: int = 3,
 ) -> threading.Thread:
     """Run SeverApp in a thread."""
 
@@ -353,7 +365,6 @@ def run_serverapp_th(
             server_app,
         ),
     )
-    sleep(delay_launch)
     serverapp_th.start()
     return serverapp_th
 
@@ -367,6 +378,8 @@ def _main_loop(
     is_app: bool,
     enable_tf_gpu_growth: bool,
     run: Run,
+    exit_event: EventType,
+    delay_start: int,
     flwr_dir: Optional[str] = None,
     client_app: Optional[ClientApp] = None,
     client_app_attr: Optional[str] = None,
@@ -374,7 +387,7 @@ def _main_loop(
     server_app_attr: Optional[str] = None,
     server_app_run_config: Optional[UserConfig] = None,
 ) -> None:
-    """Launch SuperLink with Simulation Engine, then ServerApp on a separate thread."""
+    """Start ServerApp on a separate thread, then launch Simulation Engine."""
     # Initialize StateFactory
     state_factory = StateFactory(":flwr-in-memory-state:")
 
@@ -382,6 +395,7 @@ def _main_loop(
     # A Threading event to indicate if an exception was raised in the ServerApp thread
     server_app_thread_has_exception = threading.Event()
     serverapp_th = None
+    success = True
     try:
         # Register run
         log(DEBUG, "Pre-registering run with id %s", run.run_id)
@@ -405,8 +419,10 @@ def _main_loop(
             enable_tf_gpu_growth=enable_tf_gpu_growth,
         )
 
-        # SuperLink with Simulation Engine
-        event(EventType.RUN_SUPERLINK_ENTER)
+        # Buffer time so the `ServerApp` in separate thread is ready
+        log(DEBUG, "Buffer time delay: %ds", delay_start)
+        sleep(delay_start)
+        # Start Simulation Engine
         vce.start_vce(
             num_supernodes=num_supernodes,
             client_app_attr=client_app_attr,
@@ -424,13 +440,13 @@ def _main_loop(
     except Exception as ex:
         log(ERROR, "An exception occurred !! %s", ex)
         log(ERROR, traceback.format_exc())
+        success = False
         raise RuntimeError("An error was encountered. Ending simulation.") from ex
 
     finally:
         # Trigger stop event
         f_stop.set()
-
-        event(EventType.RUN_SUPERLINK_LEAVE)
+        event(exit_event, event_details={"success": success})
         if serverapp_th:
             serverapp_th.join()
             if server_app_thread_has_exception.is_set():
@@ -442,6 +458,7 @@ def _main_loop(
 # pylint: disable=too-many-arguments,too-many-locals
 def _run_simulation(
     num_supernodes: int,
+    exit_event: EventType,
     client_app: Optional[ClientApp] = None,
     server_app: Optional[ServerApp] = None,
     backend_name: str = "ray",
@@ -453,6 +470,7 @@ def _run_simulation(
     flwr_dir: Optional[str] = None,
     run: Optional[Run] = None,
     enable_tf_gpu_growth: bool = False,
+    delay_start: int = 5,
     verbose_logging: bool = False,
     is_app: bool = False,
 ) -> None:
@@ -508,6 +526,8 @@ def _run_simulation(
         is_app,
         enable_tf_gpu_growth,
         run,
+        exit_event,
+        delay_start,
         flwr_dir,
         client_app,
         client_app_attr,
@@ -594,6 +614,13 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         "out-of-memory error because TensorFlow by default allocates all GPU memory."
         "Read more about how `tf.config.experimental.set_memory_growth()` works in "
         "the TensorFlow documentation: https://www.tensorflow.org/api/stable.",
+    )
+    parser.add_argument(
+        "--delay-start",
+        type=int,
+        default=3,
+        help="Buffer time (in seconds) to delay the start the simulation engine after "
+        "the `ServerApp`, which runs in a separate thread, has been launched.",
     )
     parser.add_argument(
         "--verbose",

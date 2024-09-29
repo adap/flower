@@ -15,7 +15,7 @@
 
 # hadolint global ignore=DL3008
 ARG DISTRO=ubuntu
-ARG DISTRO_VERSION=22.04
+ARG DISTRO_VERSION=24.04
 FROM $DISTRO:$DISTRO_VERSION AS python
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -50,22 +50,29 @@ RUN LATEST=$(pyenv latest -k ${PYTHON_VERSION}) \
 
 ENV PATH=/usr/local/bin/python/bin:$PATH
 
-# Upgrade system Python pip and setuptools
-# hadolint ignore=DL3013
-RUN pip install -U --no-cache-dir pip setuptools \
+ARG PIP_VERSION
+ARG SETUPTOOLS_VERSION
+# Keep the version of system Python pip and setuptools in sync with those installed in the
+# virtualenv.
+RUN pip install -U --no-cache-dir pip==${PIP_VERSION} setuptools==${SETUPTOOLS_VERSION} \
     # Use a virtual environment to ensure that Python packages are installed in the same location
     # regardless of whether the subsequent image build is run with the app or the root user
     && python -m venv /python/venv
 ENV PATH=/python/venv/bin:$PATH
 
-ARG PIP_VERSION
-ARG SETUPTOOLS_VERSION
-ARG FLWR_VERSION
-ARG FLWR_PACKAGE=flwr
 RUN pip install -U --no-cache-dir \
     pip==${PIP_VERSION} \
-    setuptools==${SETUPTOOLS_VERSION} \
-    ${FLWR_PACKAGE}==${FLWR_VERSION}
+    setuptools==${SETUPTOOLS_VERSION}
+
+ARG FLWR_VERSION
+ARG FLWR_VERSION_REF
+ARG FLWR_PACKAGE=flwr
+# hadolint ignore=DL3013
+RUN if [ -z "${FLWR_VERSION_REF}" ]; then \
+    pip install -U --no-cache-dir ${FLWR_PACKAGE}==${FLWR_VERSION}; \
+    else \
+    pip install -U --no-cache-dir ${FLWR_PACKAGE}@${FLWR_VERSION_REF}; \
+    fi
 
 FROM $DISTRO:$DISTRO_VERSION AS base
 
@@ -80,11 +87,10 @@ RUN  apt-get update \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
     # add non-root user
-    && adduser \
+    && useradd \
     --no-create-home \
-    --home /app \
-    --disabled-password \
-    --gecos "" \
+    --home-dir /app \
+    -c "" \
     --uid 49999 app \
     && mkdir -p /app \
     && chown -R app:app /app

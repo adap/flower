@@ -58,7 +58,7 @@ flwr run .
 You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
 ```bash
-flwr run . --run-config num-server-rounds=5,learning-rate=0.05
+flwr run . --run-config "num-server-rounds=5 learning-rate=0.05"
 ```
 
 > \[!TIP\]
@@ -67,4 +67,4 @@ flwr run . --run-config num-server-rounds=5,learning-rate=0.05
 ### Run with the Deployment Engine
 
 > \[!NOTE\]
-> An update to this example will show how to run this Flower project with the Deployment Engine and TLS certificates, or with Docker.
+> An update to this example will show how to run this Flower project with the Deployment Engine and TLS certificates.

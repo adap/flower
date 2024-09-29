@@ -25,7 +25,7 @@ import uuid
 from concurrent.futures import Future, ThreadPoolExecutor
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Optional, Union, cast
 
 from flwr.common.version import package_name, package_version
 
@@ -126,7 +126,7 @@ class EventType(str, Enum):
     # The type signature is not compatible with mypy, pylint and flake8
     # so each of those needs to be disabled for this line.
     # pylint: disable-next=no-self-argument,arguments-differ,line-too-long
-    def _generate_next_value_(name: str, start: int, count: int, last_values: List[Any]) -> Any:  # type: ignore # noqa: E501
+    def _generate_next_value_(name: str, start: int, count: int, last_values: list[Any]) -> Any:  # type: ignore # noqa: E501
         return name
 
     # Ping
@@ -158,37 +158,27 @@ class EventType(str, Enum):
 
     # --- Simulation Engine ------------------------------------------------------------
 
-    # Not yet implemented
+    # CLI: flower-simulation
+    CLI_FLOWER_SIMULATION_ENTER = auto()
+    CLI_FLOWER_SIMULATION_LEAVE = auto()
+
+    # Python API: `run_simulation`
+    PYTHON_API_RUN_SIMULATION_ENTER = auto()
+    PYTHON_API_RUN_SIMULATION_LEAVE = auto()
 
     # --- Deployment Engine ------------------------------------------------------------
 
-    # Driver API
-    RUN_DRIVER_API_ENTER = auto()
-    RUN_DRIVER_API_LEAVE = auto()
-
-    # Fleet API
-    RUN_FLEET_API_ENTER = auto()
-    RUN_FLEET_API_LEAVE = auto()
-
-    # Driver API and Fleet API
+    # CLI: `flower-superlink`
     RUN_SUPERLINK_ENTER = auto()
     RUN_SUPERLINK_LEAVE = auto()
 
-    # Driver: Driver
-    DRIVER_CONNECT = auto()
-    DRIVER_DISCONNECT = auto()
-
-    # Driver: start_driver
-    START_DRIVER_ENTER = auto()
-    START_DRIVER_LEAVE = auto()
-
-    # flower-server-app
-    RUN_SERVER_APP_ENTER = auto()
-    RUN_SERVER_APP_LEAVE = auto()
-
-    # SuperNode
+    # CLI: `flower-supernode`
     RUN_SUPERNODE_ENTER = auto()
     RUN_SUPERNODE_LEAVE = auto()
+
+    # CLI: `flower-server-app`
+    RUN_SERVER_APP_ENTER = auto()
+    RUN_SERVER_APP_LEAVE = auto()
 
     # --- DEPRECATED -------------------------------------------------------------------
 
@@ -199,7 +189,7 @@ class EventType(str, Enum):
 
 # Use the ThreadPoolExecutor with max_workers=1 to have a queue
 # and also ensure that telemetry calls are not blocking.
-state: Dict[str, Union[Optional[str], Optional[ThreadPoolExecutor]]] = {
+state: dict[str, Union[Optional[str], Optional[ThreadPoolExecutor]]] = {
     # Will be assigned ThreadPoolExecutor(max_workers=1)
     # in event() the first time it's required
     "executor": None,
@@ -211,7 +201,7 @@ state: Dict[str, Union[Optional[str], Optional[ThreadPoolExecutor]]] = {
 
 def event(
     event_type: EventType,
-    event_details: Optional[Dict[str, Any]] = None,
+    event_details: Optional[dict[str, Any]] = None,
 ) -> Future:  # type: ignore
     """Submit create_event to ThreadPoolExecutor to avoid blocking."""
     if state["executor"] is None:
@@ -223,7 +213,7 @@ def event(
     return result
 
 
-def create_event(event_type: EventType, event_details: Optional[Dict[str, Any]]) -> str:
+def create_event(event_type: EventType, event_details: Optional[dict[str, Any]]) -> str:
     """Create telemetry event."""
     if state["source"] is None:
         state["source"] = _get_source_id()
