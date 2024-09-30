@@ -9,7 +9,7 @@ To execute locally, run the following in CLI:
 # pulls the latest supernode and serverapp nightly
 docker compose build --pull 
 # pulls the latest superlink nightly
-docker compose up -d --remove-orphans --force-recreate --pull always 
+docker compose up -d --remove-orphans --force-recreate --build --pull always 
 ```
 
 To stop the containers, run:
