@@ -74,6 +74,7 @@ NUM_PARTITIONS_KEY = "num-partitions"
 
 GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY = "flower-version"
 GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY = "should-exit"
+GRPC_ADAPTER_METADATA_GRPC_MESSAGE_MODULE_KEY = "grpc-message-module"
 
 
 class MessageType:
