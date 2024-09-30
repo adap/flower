@@ -72,10 +72,7 @@ def main(cfg: DictConfig) -> None:
         for num_examples, metric in eval_metrics:
             weights.append(num_examples)
             accuracies.append(metric["accuracy"] * num_examples)
-        weights: np.ndarray = np.array(weights, dtype=np.float32)  # type: ignore
-        accuracies: np.ndarray = np.array(accuracies, dtype=np.float32)  # type: ignore
-        weights /= weights.sum()  # type: ignore
-        accuracy = np.sum(accuracies * weights).item()  # type: ignore
+        accuracy = sum(accuracies) / sum(weights)  
         return {"accuracy": accuracy}
 
     # Define your strategy
