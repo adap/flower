@@ -14,7 +14,7 @@ services:
     build:
       dockerfile: supernode.Dockerfile
     deploy:
-      # specify 2 containers with 2xCPUs (for 2 clients)
+      # specify 2 containers with 3xCPUs (for 2 clients)
       replicas: 2
       resources:
         limits:
