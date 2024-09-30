@@ -269,7 +269,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
         task_res = message_to_taskres(message)
 
         # Serialize ProtoBuf to bytes
-        request = PushTaskResRequest(task_res_list=[task_res])
+        request = PushTaskResRequest(node=node, task_res_list=[task_res])
         _ = retry_invoker.invoke(stub.PushTaskRes, request)
 
         # Cleanup
@@ -277,7 +277,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
 
     def get_run(run_id: int) -> Run:
         # Call FleetAPI
-        get_run_request = GetRunRequest(run_id=run_id)
+        get_run_request = GetRunRequest(node=node, run_id=run_id)
         get_run_response: GetRunResponse = retry_invoker.invoke(
             stub.GetRun,
             request=get_run_request,
@@ -294,7 +294,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
 
     def get_fab(fab_hash: str) -> Fab:
         # Call FleetAPI
-        get_fab_request = GetFabRequest(hash_str=fab_hash)
+        get_fab_request = GetFabRequest(node=node, hash_str=fab_hash)
         get_fab_response: GetFabResponse = retry_invoker.invoke(
             stub.GetFab,
             request=get_fab_request,

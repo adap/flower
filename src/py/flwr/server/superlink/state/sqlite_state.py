@@ -372,7 +372,18 @@ class SqliteState(State):  # pylint: disable=R0904
         # Create task_id
         task_id = uuid4()
 
-        # Store TaskIns
+        task_ins_id = task_res.task.ancestry[0]
+        task_ins = self.get_valid_task_ins(task_ins_id)
+        if task_ins is None:
+            log(
+                ERROR,
+                "Failed to store TaskRes: "
+                "TaskIns with task_id %s does not exist or has expired.",
+                task_ins_id,
+            )
+            return None
+
+        # Store TaskRes
         task_res.task_id = str(task_id)
         data = (task_res_to_dict(task_res),)
 
@@ -809,6 +820,33 @@ class SqliteState(State):  # pylint: disable=R0904
         except sqlite3.IntegrityError:
             log(ERROR, "`node_id` does not exist.")
             return False
+
+    def get_valid_task_ins(self, task_id: str) -> Optional[dict[str, Any]]:
+        """Check if the TaskIns exists and is valid (not expired).
+
+        Return TaskIns if valid.
+        """
+        query = """
+            SELECT *
+            FROM task_ins
+            WHERE task_id = :task_id
+        """
+        data = {"task_id": task_id}
+        rows = self.query(query, data)
+        if not rows:
+            # TaskIns does not exist
+            return None
+
+        task_ins = rows[0]
+        created_at = task_ins["created_at"]
+        ttl = task_ins["ttl"]
+        current_time = time.time()
+
+        # Check if TaskIns is expired
+        if ttl is not None and created_at + ttl <= current_time:
+            return None
+
+        return task_ins
 
 
 def dict_factory(
