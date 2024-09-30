@@ -6,6 +6,7 @@ from typing import Callable, Dict, List, Tuple, Type, Union
 
 import numpy as np
 import torch
+from datasets import concatenate_datasets
 from flwr.client import Client, NumPyClient
 from flwr.common import NDArrays, Scalar
 from flwr_datasets import FederatedDataset
@@ -249,7 +250,8 @@ def get_client_fn_simulation(
     global FEDERATED_DATASET
     if FEDERATED_DATASET is None:
         FEDERATED_DATASET = FederatedDataset(
-            dataset=config.dataset.name.lower(), partitioners={"train": partitioner}
+            dataset=config.dataset.name.lower(),
+            partitioners={"train": partitioner, "test": partitioner},
         )
 
     def apply_train_transforms(batch):
@@ -271,7 +273,13 @@ def get_client_fn_simulation(
         """Create a Flower client representing a single organization."""
         cid_use = int(cid)
 
-        partition = FEDERATED_DATASET.load_partition(cid_use)
+        partition = concatenate_datasets(
+            [
+                FEDERATED_DATASET.load_partition(cid_use, split="train"),
+                FEDERATED_DATASET.load_partition(cid_use, split="test"),
+            ]
+        )
+
         partition_train_test = partition.train_test_split(
             train_size=config.dataset.fraction, shuffle=True, seed=config.dataset.seed
         )
