@@ -64,5 +64,5 @@ following the `README.md` in [`evaluation`](https://github.com/adap/flower/tree/
 
 
 > [!NOTE]
-> If you have any questions about running FlowerTune LLM challenges or evaluation, please feel free to make posts at [Flower Discuss](https://discuss.flower.ai) forum, 
+> If you have any questions about running FlowerTune LLM challenges or evaluation, please feel free to make posts at our dedicated [FlowerTune Category](https://discuss.flower.ai/c/flowertune-llm-leaderboard/) on [Flower Discuss](https://discuss.flower.ai) forum, 
 or join our [Slack channel](https://flower.ai/join-slack/) to ask questions in the `#flowertune-llm-leaderboard` channel.
