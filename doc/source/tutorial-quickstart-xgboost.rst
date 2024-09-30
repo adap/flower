@@ -1,12 +1,10 @@
 .. _quickstart-xgboost:
 
-####################
- Quickstart XGBoost
-####################
+Quickstart XGBoost
+==================
 
-******************
- Federated XGBoost
-******************
+Federated XGBoost
+-----------------
 
 EXtreme Gradient Boosting (**XGBoost**) is a robust and efficient implementation of
 gradient-boosted decision tree (**GBDT**), that maximises the computational boundaries
@@ -17,34 +15,29 @@ concurrently, unlike the sequential approach taken by GBDT.
 Often, for tabular data on medium-sized datasets with fewer than 10k training examples,
 XGBoost surpasses the results of deep learning techniques.
 
-~~~~~~~~~~~~~~~~~~~~~~
 Why federated XGBoost?
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Indeed, as the demand for data privacy and decentralized learning grows, there's an increasing requirement to implement federated XGBoost systems for specialised applications, like survival analysis and financial fraud detection.
+Indeed, as the demand for data privacy and decentralized learning grows, there's an
+increasing requirement to implement federated XGBoost systems for specialised
+applications, like survival analysis and financial fraud detection.
 
 Federated learning ensures that raw data remains on the local device, making it an
 attractive approach for sensitive domains where data security and privacy are paramount.
 Given the robustness and efficiency of XGBoost, combining it with federated learning
 offers a promising solution for these specific challenges.
 
-In this tutorial we will learn how to train a federated XGBoost model on HIGGS dataset using Flower and :code:`xgboost` package to perform a binary classification task.
-We use a simple example (`full code xgboost-quickstart <https://github.com/adap/flower/tree/main/examples/xgboost-quickstart>`_)
-to demonstrate how federated XGBoost works,
-and then we dive into a more complex example (`full code xgboost-comprehensive <https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive>`_) to run various experiments.
-
 In this tutorial we will learn how to train a federated XGBoost model on HIGGS dataset
-using Flower and ``xgboost`` package. We use a simple example (`full code
-xgboost-quickstart
-<https://github.com/adap/flower/tree/main/examples/xgboost-quickstart>`_) with two
-*clients* and one *server* to demonstrate how federated XGBoost works, and then we dive
-into a more complex example (`full code xgboost-comprehensive
+using Flower and ``xgboost`` package to perform a binary classification task. We use a
+simple example (`full code xgboost-quickstart
+<https://github.com/adap/flower/tree/main/examples/xgboost-quickstart>`_) to demonstrate
+how federated XGBoost works, and then we dive into a more complex example (`full code
+xgboost-comprehensive
 <https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive>`_) to run
 various experiments.
 
-******************
- Environment Setup
-******************
+Environment Setup
+-----------------
 
 First of all, it is recommended to create a virtual environment and run everything
 within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
@@ -53,8 +46,8 @@ We first need to install Flower and Flower Datasets. You can do this by running 
 
 .. code-block:: shell
 
-  # In a new Python environment
-  $ pip install flwr flwr-datasets
+    # In a new Python environment
+    $ pip install flwr flwr-datasets
 
 Since we want to use ``xgboost`` package to build up XGBoost trees, let's go ahead and
 install ``xgboost``:
@@ -63,11 +56,10 @@ install ``xgboost``:
 
     $ pip install xgboost
 
-********************
- The Configurations
-********************
+The Configurations
+------------------
 
-We define all required configurations/hyper-parameters in :code:`pyproject.toml`:
+We define all required configurations/hyper-parameters in ``pyproject.toml``:
 
 .. code-block:: toml
 
@@ -88,16 +80,15 @@ We define all required configurations/hyper-parameters in :code:`pyproject.toml`
     params.subsample = 1
     params.tree-method = "hist"
 
-The :code:`local-epochs` represents the number of iterations for local tree boost.
-We use CPU for the training in default.
-One can shift it to GPU by setting :code:`tree_method` to :code:`gpu_hist`.
-We use AUC as evaluation metric.
+The ``local-epochs`` represents the number of iterations for local tree boost. We use
+CPU for the training in default. One can shift it to GPU by setting ``tree_method`` to
+``gpu_hist``. We use AUC as evaluation metric.
 
-**********
- The Data
-**********
-This tutorial uses `Flower Datasets <https://flower.ai/docs/datasets/>`_
-to easily download and partition the `HIGGS` dataset.
+The Data
+--------
+
+This tutorial uses `Flower Datasets <https://flower.ai/docs/datasets/>`_ to easily
+download and partition the `HIGGS` dataset.
 
 .. code-block:: python
 
@@ -110,9 +101,10 @@ to easily download and partition the `HIGGS` dataset.
     partition = fds.load_partition(partition_id, split="train")
     partition.set_format("numpy")
 
-In this example, we split the dataset into 20 partitions with uniform distribution (`IidPartitioner
+In this example, we split the dataset into 20 partitions with uniform distribution
+(`IidPartitioner
 <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_).
-Then, we load the partition for the given client based on :code:`partition_id`.
+Then, we load the partition for the given client based on ``partition_id``.
 
 After that, we do train/test splitting on the given partition (client's local data), and
 transform data format for ``xgboost`` package.
@@ -144,6 +136,7 @@ as below:
 
         return partition_train, partition_test, num_train, num_test
 
+
     def transform_dataset_to_dmatrix(data):
         """Transform dataset to DMatrix format for xgboost."""
         x = data["inputs"]
@@ -151,14 +144,13 @@ as below:
         new_data = xgb.DMatrix(x, label=y)
         return new_data
 
+The ClientApp
+-------------
 
-***************
- The ClientApp
-***************
-
-*Clients* are responsible for generating individual weight-updates for the model based on their local datasets.
-Let's first see how we define Flower client for XGBoost.
-We follow the general rule to define :code:`FlowerClient` class inherited from :code:`fl.client.Client`.
+*Clients* are responsible for generating individual weight-updates for the model based
+on their local datasets. Let's first see how we define Flower client for XGBoost. We
+follow the general rule to define ``FlowerClient`` class inherited from
+``fl.client.Client``.
 
 .. code-block:: python
 
@@ -180,49 +172,51 @@ We follow the general rule to define :code:`FlowerClient` class inherited from :
             self.num_local_round = num_local_round
             self.params = params
 
-All required parameters defined above are passed to :code:`FlowerClient`'s constructor.
+All required parameters defined above are passed to ``FlowerClient``'s constructor.
 
-Then, we override :code:`fit` and :code:`evaluate` methods insides :code:`FlowerClient` class as follows.
+Then, we override ``fit`` and ``evaluate`` methods insides ``FlowerClient`` class as
+follows.
 
 .. code-block:: python
 
-      def fit(self, ins: FitIns) -> FitRes:
-          global_round = int(ins.config["global_round"])
-          if global_round == 1:
-              # First round local training
-              bst = xgb.train(
-                  self.params,
-                  self.train_dmatrix,
-                  num_boost_round=self.num_local_round,
-                  evals=[(self.valid_dmatrix, "validate"), (self.train_dmatrix, "train")],
-              )
-          else:
-              bst = xgb.Booster(params=self.params)
-              global_model = bytearray(ins.parameters.tensors[0])
+    def fit(self, ins: FitIns) -> FitRes:
+        global_round = int(ins.config["global_round"])
+        if global_round == 1:
+            # First round local training
+            bst = xgb.train(
+                self.params,
+                self.train_dmatrix,
+                num_boost_round=self.num_local_round,
+                evals=[(self.valid_dmatrix, "validate"), (self.train_dmatrix, "train")],
+            )
+        else:
+            bst = xgb.Booster(params=self.params)
+            global_model = bytearray(ins.parameters.tensors[0])
 
-              # Load global model into booster
-              bst.load_model(global_model)
+            # Load global model into booster
+            bst.load_model(global_model)
 
-              # Local training
-              bst = self._local_boost(bst)
+            # Local training
+            bst = self._local_boost(bst)
 
-          # Save model
-          local_model = bst.save_raw("json")
-          local_model_bytes = bytes(local_model)
+        # Save model
+        local_model = bst.save_raw("json")
+        local_model_bytes = bytes(local_model)
 
-          return FitRes(
-              status=Status(
-                  code=Code.OK,
-                  message="OK",
-              ),
-              parameters=Parameters(tensor_type="", tensors=[local_model_bytes]),
-              num_examples=self.num_train,
-              metrics={},
-          )
+        return FitRes(
+            status=Status(
+                code=Code.OK,
+                message="OK",
+            ),
+            parameters=Parameters(tensor_type="", tensors=[local_model_bytes]),
+            num_examples=self.num_train,
+            metrics={},
+        )
 
-In :code:`fit`, at the first round, we call :code:`xgb.train()` to build up the first set of trees.
-From the second round, we load the global model sent from server to new build Booster object,
-and then update model weights on local training data with function :code:`_local_boost` as follows:
+In ``fit``, at the first round, we call ``xgb.train()`` to build up the first set of
+trees. From the second round, we load the global model sent from server to new build
+Booster object, and then update model weights on local training data with function
+``_local_boost`` as follows:
 
 .. code-block:: python
 
@@ -244,40 +238,40 @@ training, the last ``N=num_local_round`` trees will be extracted to send to the 
 
 .. code-block:: python
 
-      def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
-          # Load global model
-          bst = xgb.Booster(params=self.params)
-          para_b = bytearray(ins.parameters.tensors[0])
-          bst.load_model(para_b)
+    def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
+        # Load global model
+        bst = xgb.Booster(params=self.params)
+        para_b = bytearray(ins.parameters.tensors[0])
+        bst.load_model(para_b)
 
-          # Run evaluation
-          eval_results = bst.eval_set(
-              evals=[(self.valid_dmatrix, "valid")],
-              iteration=bst.num_boosted_rounds() - 1,
-          )
-          auc = round(float(eval_results.split("\t")[1].split(":")[1]), 4)
+        # Run evaluation
+        eval_results = bst.eval_set(
+            evals=[(self.valid_dmatrix, "valid")],
+            iteration=bst.num_boosted_rounds() - 1,
+        )
+        auc = round(float(eval_results.split("\t")[1].split(":")[1]), 4)
 
-          return EvaluateRes(
-              status=Status(
-                  code=Code.OK,
-                  message="OK",
-              ),
-              loss=0.0,
-              num_examples=self.num_val,
-              metrics={"AUC": auc},
-          )
+        return EvaluateRes(
+            status=Status(
+                code=Code.OK,
+                message="OK",
+            ),
+            loss=0.0,
+            num_examples=self.num_val,
+            metrics={"AUC": auc},
+        )
 
 In ``evaluate``, after loading the global model, we call ``bst.eval_set`` function to
 conduct evaluation on valid set. The AUC value will be returned.
 
-***************
- The ServerApp
-***************
+The ServerApp
+-------------
 
-After the local training on clients, the model updates are then sent to the *server* which will aggregate them to produce a better model.
-Finally, the *server* sends this improved version of the model back to each *client* to finish a complete FL round.
+After the local training on clients, the model updates are then sent to the *server*
+which will aggregate them to produce a better model. Finally, the *server* sends this
+improved version of the model back to each *client* to finish a complete FL round.
 
-In a file named :code:`server_app.py`, we define a strategy for XGBoost bagging aggregation:
+In a file named ``server_app.py``, we define a strategy for XGBoost bagging aggregation:
 
 .. code-block:: python
 
@@ -309,10 +303,10 @@ In a file named :code:`server_app.py`, we define a strategy for XGBoost bagging 
         }
         return config
 
-An :code:`evaluate_metrics_aggregation` function is defined to collect and wighted average the AUC values from clients.
-The :code:`config_func` function is to return the current FL round number to client's :code:`fit()` and :code:`evaluate()` methods.
+An ``evaluate_metrics_aggregation`` function is defined to collect and wighted average
+the AUC values from clients. The ``config_func`` function is to return the current FL
+round number to client's ``fit()`` and ``evaluate()`` methods.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Tree-based bagging aggregation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -483,20 +477,19 @@ aggregated to generate a new tree model.
 After traversal of all clients' models, a new global model is generated, followed by the
 serialisation, and sending back to each client.
 
-**************************
- Launch Federated XGBoost!
-**************************
+Launch Federated XGBoost!
+-------------------------
 
 To run the project, do:
 
-.. code:: shell
+.. code-block:: shell
 
-   # Run with default arguments
-   $ flwr run .
+    # Run with default arguments
+    $ flwr run .
 
 With default arguments you will see an output like this one:
 
-.. code:: shell
+.. code-block:: shell
 
     Loading project configuration...
     Success
@@ -527,44 +520,42 @@ With default arguments you will see an output like this one:
     INFO :
     INFO :      [SUMMARY]
     INFO :      Run finished 3 round(s) in 145.42s
-    INFO :      	History (loss, distributed):
-    INFO :      		round 1: 0
-    INFO :      		round 2: 0
-    INFO :      		round 3: 0
-    INFO :      	History (metrics, distributed, evaluate):
-    INFO :      	{'AUC': [(1, 0.7664), (2, 0.77595), (3, 0.7826)]}
+    INFO :              History (loss, distributed):
+    INFO :                      round 1: 0
+    INFO :                      round 2: 0
+    INFO :                      round 3: 0
+    INFO :              History (metrics, distributed, evaluate):
+    INFO :              {'AUC': [(1, 0.7664), (2, 0.77595), (3, 0.7826)]}
     INFO :
 
-Congratulations!
-You've successfully built and run your first federated XGBoost system.
-The AUC values can be checked in :code:`History (metrics, distributed, evaluate)`.
-One can see that the average AUC increases over FL rounds.
+Congratulations! You've successfully built and run your first federated XGBoost system.
+The AUC values can be checked in ``History (metrics, distributed, evaluate)``. One can
+see that the average AUC increases over FL rounds.
 
-You can also override the parameters defined in the
-``[tool.flwr.app.config]`` section in ``pyproject.toml`` like this:
+You can also override the parameters defined in the ``[tool.flwr.app.config]`` section
+in ``pyproject.toml`` like this:
 
-.. code:: shell
+.. code-block:: shell
 
-   # Override some arguments
-   $ flwr run . --run-config "num-server-rounds=5 params.eta=0.05"
+    # Override some arguments
+    $ flwr run . --run-config "num-server-rounds=5 params.eta=0.05"
 
 .. note::
 
-   Check the full `source code
-   <https://github.com/adap/flower/blob/main/examples/xgboost-quickstart>`_
-   for this example in
-   ``examples/xgboost-quickstart`` in the Flower GitHub repository.
+    Check the full `source code
+    <https://github.com/adap/flower/blob/main/examples/xgboost-quickstart>`_ for this
+    example in ``examples/xgboost-quickstart`` in the Flower GitHub repository.
 
-********************************
- Comprehensive Federated XGBoost
-********************************
+Comprehensive Federated XGBoost
+-------------------------------
 
-Now that you have known how federated XGBoost work with Flower, it's time to run some more comprehensive experiments by customising the experimental settings.
-In the xgboost-comprehensive example (`full code <https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive>`_),
-we provide more options to define various experimental setups, including aggregation strategies, data partitioning and centralised/distributed evaluation.
-Let's take a look!
+Now that you have known how federated XGBoost work with Flower, it's time to run some
+more comprehensive experiments by customising the experimental settings. In the
+xgboost-comprehensive example (`full code
+<https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive>`_), we provide
+more options to define various experimental setups, including aggregation strategies,
+data partitioning and centralised/distributed evaluation. Let's take a look!
 
-~~~~~~~~~~~~~~~
 Cyclic training
 ~~~~~~~~~~~~~~~
 
@@ -574,7 +565,7 @@ one single client participating in the training per round in the cyclic training
 scenario. The trained local XGBoost trees will be passed to the next client as an
 initialised model for next round's boosting.
 
-To do this, we first customise a :code:`ClientManager` in :code:`server_app.py`:
+To do this, we first customise a ``ClientManager`` in ``server_app.py``:
 
 .. code-block:: python
 
@@ -688,13 +679,13 @@ clients to be sequentially selected given FL round:
         # Return client/config pairs
         return [(client, fit_ins) for client in sampled_clients]
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Customised data partitioning
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In :code:`task.py`, we have a function :code:`instantiate_fds` to instantiate Flower Datasets and the data partitioner
-based on the given :code:`partitioner_type` and :code:`num_partitions`.
-Currently, we provide four supported partitioner type to simulate the uniformity/non-uniformity in data quantity (uniform, linear, square, exponential).
+In ``task.py``, we have a function ``instantiate_fds`` to instantiate Flower Datasets
+and the data partitioner based on the given ``partitioner_type`` and ``num_partitions``.
+Currently, we provide four supported partitioner type to simulate the
+uniformity/non-uniformity in data quantity (uniform, linear, square, exponential).
 
 .. code-block:: python
 
@@ -713,6 +704,7 @@ Currently, we provide four supported partitioner type to simulate the uniformity
         "exponential": ExponentialPartitioner,
     }
 
+
     def instantiate_fds(partitioner_type, num_partitions):
         """Initialize FederatedDataset."""
         # Only initialize `FederatedDataset` once
@@ -728,16 +720,15 @@ Currently, we provide four supported partitioner type to simulate the uniformity
             )
         return fds
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Customised centralised/distributed evaluation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To facilitate centralised evaluation, we define a function in :code:`server_app.py`:
+To facilitate centralised evaluation, we define a function in ``server_app.py``:
 
 .. code-block:: python
 
     def get_evaluate_fn(test_data, params):
-    """Return a function for centralised evaluation."""
+        """Return a function for centralised evaluation."""
 
         def evaluate_fn(
             server_round: int, parameters: Parameters, config: Dict[str, Scalar]
@@ -768,13 +759,14 @@ loads the global model weights to it. The evaluation is conducted by calling
 ``eval_set()`` method, and the tested AUC value is reported.
 
 As for distributed evaluation on the clients, it's same as the quick-start example by
-overriding the :code:`evaluate()` method insides the :code:`XgbClient` class in :code:`client_app.py`.
+overriding the ``evaluate()`` method insides the ``XgbClient`` class in
+``client_app.py``.
 
-~~~~~~~~~~~~~~~~~~~
 Arguments explainer
 ~~~~~~~~~~~~~~~~~~~
 
-We define all hyper-parameters under ``[tool.flwr.app.config]`` entry in ``pyproject.toml``:
+We define all hyper-parameters under ``[tool.flwr.app.config]`` entry in
+``pyproject.toml``:
 
 .. code-block:: toml
 
@@ -802,49 +794,49 @@ We define all hyper-parameters under ``[tool.flwr.app.config]`` entry in ``pypro
     params.subsample = 1
     params.tree-method = "hist"
 
+On the server side, we allow user to specify training strategies / FL rounds /
+participating clients / clients for evaluation, and evaluation fashion. Note that with
+``centralised-eval = true``, the sever will do centralised evaluation and all
+functionalities for client evaluation will be disabled.
 
-On the server side, we allow user to specify training strategies / FL rounds / participating clients / clients for evaluation,
-and evaluation fashion. Note that with :code:`centralised-eval = true`, the sever will do centralised evaluation
-and all functionalities for client evaluation will be disabled.
+On the client side, we can define various options for client data partitioning. Besides,
+clients also have an option to conduct evaluation on centralised test set by setting
+``centralised-eval = true``, as well as an option to perform scaled learning rate based
+on the number of clients by setting ``scaled-lr = true``.
 
-On the client side, we can define various options for client data partitioning.
-Besides, clients also have an option to conduct evaluation on centralised test set by setting :code:`centralised-eval = true`,
-as well as an option to perform scaled learning rate based on the number of clients by setting :code:`scaled-lr = true`.
-
-~~~~~~~~~~~~~~~~~
 Example commands
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 To run bagging aggregation for 5 rounds evaluated on centralised test set:
 
 .. code-block:: shell
 
-  flwr run . --run-config "train-method='bagging' num-server-rounds=5 centralised-eval=true"
+    flwr run . --run-config "train-method='bagging' num-server-rounds=5 centralised-eval=true"
 
 To run cyclic training with linear partitioner type evaluated on centralised test set:
 .. code-block:: shell
 
-  flwr run . --run-config "train-method='cyclic' partitioner-type='linear' centralised-eval-client=true"
+    flwr run . --run-config "train-method='cyclic' partitioner-type='linear'
+    centralised-eval-client=true"
 
 .. note::
 
-   The full `code
-   <https://github.com/adap/flower/blob/main/examples/xgboost-comprehensive/>`_
-   for this comprehensive example can be found
-   in :code:`examples/xgboost-comprehensive` in the Flower GitHub repository.
+    The full `code
+    <https://github.com/adap/flower/blob/main/examples/xgboost-comprehensive/>`_ for
+    this comprehensive example can be found in ``examples/xgboost-comprehensive`` in the
+    Flower GitHub repository.
 
-****************
- Video tutorial
-****************
+Video tutorial
+--------------
 
 .. note::
 
-   The video shown below shows how to setup a XGBoost + Flower project
-   using our previously recommended APIs. A new video tutorial will be
-   released that shows the new APIs (as the content above does)
+    The video shown below shows how to setup a XGBoost + Flower project using our
+    previously recommended APIs. A new video tutorial will be released that shows the
+    new APIs (as the content above does)
 
 .. meta::
-   :description: Check out this Federated Learning quickstart tutorial for using Flower with XGBoost to train classification models on trees.
+    :description: Check out this Federated Learning quickstart tutorial for using Flower with XGBoost to train classification models on trees.
 
-..  youtube:: AY1vpXUpesc
-   :width: 100%
+.. youtube:: AY1vpXUpesc
+    :width: 100%
