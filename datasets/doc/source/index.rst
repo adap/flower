@@ -135,6 +135,16 @@ What makes Flower Datasets stand out from other libraries?
 
   * New custom partitioning schemes (``Partitioner`` subclasses) integrated with the whole ecosystem.
 
+Join the Flower Community
+-------------------------
+
+The Flower Community is growing quickly - we're a friendly group of researchers, engineers, students, professionals, academics, and other enthusiasts.
+
+.. button-link:: https://flower.ai/join-slack
+    :color: primary
+    :shadow:
+
+    Join us on Slack
 
 .. _demo:
 Demo
@@ -148,14 +158,3 @@ Demo
   ></script>
 
   <gradio-app src="https://flwrlabs-federated-learning-datasets-by-flwr-datasets.hf.space"></gradio-app>
-
-Join the Flower Community
--------------------------
-
-The Flower Community is growing quickly - we're a friendly group of researchers, engineers, students, professionals, academics, and other enthusiasts.
-
-.. button-link:: https://flower.ai/join-slack
-    :color: primary
-    :shadow:
-
-    Join us on Slack
