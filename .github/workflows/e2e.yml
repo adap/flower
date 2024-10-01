@@ -82,6 +82,14 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           poetry-skip: 'true'
+      - name: Install Flower from repo
+        if: ${{ github.repository != 'adap/flower' || github.event.pull_request.head.repo.fork || github.actor == 'dependabot[bot]' }}
+        run: |
+          if [[ "${{ matrix.engine }}" == "simulation-engine" ]]; then
+            python -m pip install ".[simulation]"
+          else
+            python -m pip install .
+          fi
       - name: Download and install Flower wheel from artifact store
         if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         run: |
