@@ -2,7 +2,7 @@
 
 from logging import INFO
 import xgboost as xgb
-from datasets import Dataset, DatasetDict, concatenate_datasets
+from datasets import DatasetDict, concatenate_datasets
 
 from flwr.common import log
 from flwr_datasets import FederatedDataset
