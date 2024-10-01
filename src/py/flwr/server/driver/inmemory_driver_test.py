@@ -17,7 +17,7 @@
 
 import time
 import unittest
-from typing import Iterable, List, Tuple
+from collections.abc import Iterable
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
@@ -38,7 +38,7 @@ from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
 from .inmemory_driver import InMemoryDriver
 
 
-def push_messages(driver: InMemoryDriver, num_nodes: int) -> Tuple[Iterable[str], int]:
+def push_messages(driver: InMemoryDriver, num_nodes: int) -> tuple[Iterable[str], int]:
     """Help push messages to state."""
     for _ in range(num_nodes):
         driver.state.create_node(ping_interval=PING_MAX_INTERVAL)
@@ -55,7 +55,7 @@ def push_messages(driver: InMemoryDriver, num_nodes: int) -> Tuple[Iterable[str]
 
 def get_replies(
     driver: InMemoryDriver, msg_ids: Iterable[str], node_id: int
-) -> List[str]:
+) -> list[str]:
     """Help create message replies and pull taskres from state."""
     taskins = driver.state.get_task_ins(node_id, limit=len(list(msg_ids)))
     for taskin in taskins:
@@ -86,7 +86,11 @@ class TestInMemoryDriver(unittest.TestCase):
             for _ in range(self.num_nodes)
         ]
         self.state.get_run.return_value = Run(
-            run_id=61016, fab_id="mock/mock", fab_version="v1.0.0"
+            run_id=61016,
+            fab_id="mock/mock",
+            fab_version="v1.0.0",
+            fab_hash="9f86d08",
+            override_config={"test_key": "test_value"},
         )
         state_factory = MagicMock(state=lambda: self.state)
         self.driver = InMemoryDriver(run_id=61016, state_factory=state_factory)
@@ -98,6 +102,8 @@ class TestInMemoryDriver(unittest.TestCase):
         self.assertEqual(self.driver.run.run_id, 61016)
         self.assertEqual(self.driver.run.fab_id, "mock/mock")
         self.assertEqual(self.driver.run.fab_version, "v1.0.0")
+        self.assertEqual(self.driver.run.fab_hash, "9f86d08")
+        self.assertEqual(self.driver.run.override_config["test_key"], "test_value")
 
     def test_get_nodes(self) -> None:
         """Test retrieval of nodes."""
@@ -223,7 +229,7 @@ class TestInMemoryDriver(unittest.TestCase):
         # Prepare
         state = StateFactory("").state()
         self.driver = InMemoryDriver(
-            state.create_run("", ""), MagicMock(state=lambda: state)
+            state.create_run("", "", "", {}), MagicMock(state=lambda: state)
         )
         msg_ids, node_id = push_messages(self.driver, self.num_nodes)
         assert isinstance(state, SqliteState)
@@ -249,7 +255,7 @@ class TestInMemoryDriver(unittest.TestCase):
         # Prepare
         state_factory = StateFactory(":flwr-in-memory-state:")
         state = state_factory.state()
-        self.driver = InMemoryDriver(state.create_run("", ""), state_factory)
+        self.driver = InMemoryDriver(state.create_run("", "", "", {}), state_factory)
         msg_ids, node_id = push_messages(self.driver, self.num_nodes)
         assert isinstance(state, InMemoryState)
 

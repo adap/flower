@@ -11,11 +11,11 @@ clang-format --Werror --dry-run src/proto/flwr/proto/*
 echo "- clang-format:  done"
 
 echo "- isort: start"
-python -m isort --check-only --skip src/py/flwr/proto src/py/flwr e2e
+python -m isort --check-only --skip src/py/flwr/proto src/py/flwr benchmarks e2e
 echo "- isort: done"
 
 echo "- black: start"
-python -m black --exclude "src\/py\/flwr\/proto" --check src/py/flwr examples e2e
+python -m black --exclude "src\/py\/flwr\/proto" --check src/py/flwr benchmarks examples e2e
 echo "- black: done"
 
 echo "- init_py_check: start"
@@ -55,6 +55,14 @@ python -m mdformat --check --number doc/source examples
 echo "- mdformat: done"
 
 echo "- All Markdown checks passed"
+
+echo "- Start rST checks"
+
+echo "- docstrfmt: start"
+docstrfmt --check doc/source
+echo "- docstrfmt: done"
+
+echo "- All rST checks passed"
 
 echo "- Start license checks"
 

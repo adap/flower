@@ -4,14 +4,15 @@ isort:skip_file
 """
 import abc
 import flwr.proto.driver_pb2
+import flwr.proto.fab_pb2
 import flwr.proto.run_pb2
 import grpc
 
 class DriverStub:
     def __init__(self, channel: grpc.Channel) -> None: ...
     CreateRun: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.driver_pb2.CreateRunRequest,
-        flwr.proto.driver_pb2.CreateRunResponse]
+        flwr.proto.run_pb2.CreateRunRequest,
+        flwr.proto.run_pb2.CreateRunResponse]
     """Request run_id"""
 
     GetNodes: grpc.UnaryUnaryMultiCallable[
@@ -34,13 +35,18 @@ class DriverStub:
         flwr.proto.run_pb2.GetRunResponse]
     """Get run details"""
 
+    GetFab: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.fab_pb2.GetFabRequest,
+        flwr.proto.fab_pb2.GetFabResponse]
+    """Get FAB"""
+
 
 class DriverServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def CreateRun(self,
-        request: flwr.proto.driver_pb2.CreateRunRequest,
+        request: flwr.proto.run_pb2.CreateRunRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.driver_pb2.CreateRunResponse:
+    ) -> flwr.proto.run_pb2.CreateRunResponse:
         """Request run_id"""
         pass
 
@@ -74,6 +80,14 @@ class DriverServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.run_pb2.GetRunResponse:
         """Get run details"""
+        pass
+
+    @abc.abstractmethod
+    def GetFab(self,
+        request: flwr.proto.fab_pb2.GetFabRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.fab_pb2.GetFabResponse:
+        """Get FAB"""
         pass
 
 

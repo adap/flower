@@ -18,20 +18,9 @@
 import itertools
 import random
 import time
+from collections.abc import Generator, Iterable
 from dataclasses import dataclass
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Generator,
-    Iterable,
-    List,
-    Optional,
-    Tuple,
-    Type,
-    Union,
-    cast,
-)
+from typing import Any, Callable, Optional, Union, cast
 
 
 def exponential(
@@ -93,8 +82,8 @@ class RetryState:
     """State for callbacks in RetryInvoker."""
 
     target: Callable[..., Any]
-    args: Tuple[Any, ...]
-    kwargs: Dict[str, Any]
+    args: tuple[Any, ...]
+    kwargs: dict[str, Any]
     tries: int
     elapsed_time: float
     exception: Optional[Exception] = None
@@ -167,7 +156,7 @@ class RetryInvoker:
     def __init__(
         self,
         wait_gen_factory: Callable[[], Generator[float, None, None]],
-        recoverable_exceptions: Union[Type[Exception], Tuple[Type[Exception], ...]],
+        recoverable_exceptions: Union[type[Exception], tuple[type[Exception], ...]],
         max_tries: Optional[int],
         max_time: Optional[float],
         *,
@@ -244,7 +233,7 @@ class RetryInvoker:
         try_cnt = 0
         wait_generator = self.wait_gen_factory()
         start = time.monotonic()
-        ref_state: List[Optional[RetryState]] = [None]
+        ref_state: list[Optional[RetryState]] = [None]
 
         while True:
             try_cnt += 1

@@ -15,10 +15,11 @@
 """Provides class GrpcBridge."""
 
 
+from collections.abc import Iterator
 from dataclasses import dataclass
 from enum import Enum
 from threading import Condition
-from typing import Iterator, Optional
+from typing import Optional
 
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ClientMessage,
