@@ -83,7 +83,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           poetry-skip: 'true'
       - name: Install Flower from repo
-        if: ${{ github.repository != 'adap/flower' || github.event.pull_request.head.repo.fork || github.actor == 'dependabot[bot]' }}
+        # if: ${{ github.repository != 'adap/flower' || github.event.pull_request.head.repo.fork || github.actor == 'dependabot[bot]' }}
         working-directory: ./
         run: |
           if [[ "${{ matrix.engine }}" == "simulation-engine" ]]; then
@@ -91,16 +91,16 @@ jobs:
           else
             python -m pip install .
           fi
-      - name: Download and install Flower wheel from artifact store
-        if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
-        run: |
-          # Define base URL for wheel file
-          WHEEL_URL="https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}"
-          if [[ "${{ matrix.engine }}" == "simulation-engine" ]]; then
-            python -m pip install "flwr[simulation] @ ${WHEEL_URL}"
-          else
-            python -m pip install "${WHEEL_URL}"
-          fi
+      # - name: Download and install Flower wheel from artifact store
+      #   if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
+      #   run: |
+      #     # Define base URL for wheel file
+      #     WHEEL_URL="https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}"
+      #     if [[ "${{ matrix.engine }}" == "simulation-engine" ]]; then
+      #       python -m pip install "flwr[simulation] @ ${WHEEL_URL}"
+      #     else
+      #       python -m pip install "${WHEEL_URL}"
+      #     fi
       - name: >
           Run SuperExec test / 
           ${{ matrix.connection }} / 
