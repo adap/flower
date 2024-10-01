@@ -1,21 +1,25 @@
 Example: PyTorch - From Centralized To Federated
 ================================================
 
-This tutorial will show you how to use Flower to build a federated version of an existing machine learning workload.
-We are using PyTorch to train a Convolutional Neural Network on the CIFAR-10 dataset.
-First, we introduce this machine learning task with a centralized training approach based on the `Deep Learning with PyTorch <https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html>`_ tutorial.
-Then, we build upon the centralized training code to run the training in a federated fashion.
+This tutorial will show you how to use Flower to build a federated version of an
+existing machine learning workload. We are using PyTorch to train a Convolutional Neural
+Network on the CIFAR-10 dataset. First, we introduce this machine learning task with a
+centralized training approach based on the `Deep Learning with PyTorch
+<https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html>`_ tutorial. Then,
+we build upon the centralized training code to run the training in a federated fashion.
 
 Centralized Training
 --------------------
 
-We begin with a brief description of the centralized CNN training code.
-If you want a more in-depth explanation of what's going on then have a look at the official `PyTorch tutorial <https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html>`_.
+We begin with a brief description of the centralized CNN training code. If you want a
+more in-depth explanation of what's going on then have a look at the official `PyTorch
+tutorial <https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html>`_.
 
-Let's create a new file called :code:`cifar.py` with all the components required for a traditional (centralized) training on CIFAR-10. 
-First, all required packages (such as :code:`torch` and :code:`torchvision`) need to be imported.
-You can see that we do not import any package for federated learning.
-You can keep all these imports as they are even when we add the federated learning components at a later point.
+Let's create a new file called ``cifar.py`` with all the components required for a
+traditional (centralized) training on CIFAR-10. First, all required packages (such as
+``torch`` and ``torchvision``) need to be imported. You can see that we do not import
+any package for federated learning. You can keep all these imports as they are even when
+we add the federated learning components at a later point.
 
 .. code-block:: python
 
@@ -29,7 +33,9 @@ You can keep all these imports as they are even when we add the federated learni
     from torch import Tensor
     from torchvision.datasets import CIFAR10
 
-As already mentioned we will use the CIFAR-10 dataset for this machine learning workload. The model architecture (a very simple Convolutional Neural Network) is defined in :code:`class Net()`.
+As already mentioned we will use the CIFAR-10 dataset for this machine learning
+workload. The model architecture (a very simple Convolutional Neural Network) is defined
+in ``class Net()``.
 
 .. code-block:: python
 
@@ -53,13 +59,17 @@ As already mentioned we will use the CIFAR-10 dataset for this machine learning 
             x = self.fc3(x)
             return x
 
-The :code:`load_data()` function loads the CIFAR-10 training and test sets. The :code:`transform` normalized the data after loading. 
+The ``load_data()`` function loads the CIFAR-10 training and test sets. The
+``transform`` normalized the data after loading.
 
 .. code-block:: python
 
     DATA_ROOT = "~/data/cifar-10"
 
-    def load_data() -> Tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader, Dict]:
+
+    def load_data() -> (
+        Tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader, Dict]
+    ):
         """Load CIFAR-10 (training and test set)."""
         transform = transforms.Compose(
             [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
@@ -68,12 +78,15 @@ The :code:`load_data()` function loads the CIFAR-10 training and test sets. The 
         trainloader = torch.utils.data.DataLoader(trainset, batch_size=32, shuffle=True)
         testset = CIFAR10(DATA_ROOT, train=False, download=True, transform=transform)
         testloader = torch.utils.data.DataLoader(testset, batch_size=32, shuffle=False)
-        num_examples = {"trainset" : len(trainset), "testset" : len(testset)}
+        num_examples = {"trainset": len(trainset), "testset": len(testset)}
         return trainloader, testloader, num_examples
 
-We now need to define the training (function :code:`train()`) which loops over the training set, measures the loss, backpropagates it, and then takes one optimizer step for each batch of training examples.
+We now need to define the training (function ``train()``) which loops over the training
+set, measures the loss, backpropagates it, and then takes one optimizer step for each
+batch of training examples.
 
-The evaluation of the model is defined in the function :code:`test()`. The function loops over all test samples and measures the loss of the model based on the test dataset. 
+The evaluation of the model is defined in the function ``test()``. The function loops
+over all test samples and measures the loss of the model based on the test dataset.
 
 .. code-block:: python
 
@@ -133,7 +146,8 @@ The evaluation of the model is defined in the function :code:`test()`. The funct
         accuracy = correct / total
         return loss, accuracy
 
-Having defined the data loading, model architecture, training, and evaluation we can put everything together and train our CNN on CIFAR-10.
+Having defined the data loading, model architecture, training, and evaluation we can put
+everything together and train our CNN on CIFAR-10.
 
 .. code-block:: python
 
@@ -143,7 +157,7 @@ Having defined the data loading, model architecture, training, and evaluation we
         print("Load data")
         trainloader, testloader, _ = load_data()
         print("Start training")
-        net=Net().to(DEVICE)
+        net = Net().to(DEVICE)
         train(net=net, trainloader=trainloader, epochs=2, device=DEVICE)
         print("Evaluate model")
         loss, accuracy = test(net=net, testloader=testloader, device=DEVICE)
@@ -156,46 +170,57 @@ Having defined the data loading, model architecture, training, and evaluation we
 
 You can now run your machine learning workload:
 
-.. code-block:: python
+.. code-block:: bash
 
     python3 cifar.py
 
-So far, this should all look fairly familiar if you've used PyTorch before.
-Let's take the next step and use what we've built to create a simple federated learning system consisting of one server and two clients.
+So far, this should all look fairly familiar if you've used PyTorch before. Let's take
+the next step and use what we've built to create a simple federated learning system
+consisting of one server and two clients.
 
 Federated Training
 ------------------
 
-The simple machine learning project discussed in the previous section trains the model on a single dataset (CIFAR-10), we call this centralized learning.
-This concept of centralized learning, as shown in the previous section, is probably known to most of you, and many of you have used it previously.
-Normally, if you'd want to run machine learning workloads in a federated fashion, then you'd have to change most of your code and set everything up from scratch. This can be a considerable effort. 
+The simple machine learning project discussed in the previous section trains the model
+on a single dataset (CIFAR-10), we call this centralized learning. This concept of
+centralized learning, as shown in the previous section, is probably known to most of
+you, and many of you have used it previously. Normally, if you'd want to run machine
+learning workloads in a federated fashion, then you'd have to change most of your code
+and set everything up from scratch. This can be a considerable effort.
 
-However, with Flower you can evolve your pre-existing code into a federated learning setup without the need for a major rewrite.
+However, with Flower you can evolve your pre-existing code into a federated learning
+setup without the need for a major rewrite.
 
-The concept is easy to understand.
-We have to start a *server* and then use the code in :code:`cifar.py` for the *clients* that are connected to the *server*.
-The *server* sends model parameters to the clients. The *clients* run the training and update the parameters.
-The updated parameters are sent back to the *server* which averages all received parameter updates.
-This describes one round of the federated learning process and we repeat this for multiple rounds. 
+The concept is easy to understand. We have to start a *server* and then use the code in
+``cifar.py`` for the *clients* that are connected to the *server*. The *server* sends
+model parameters to the clients. The *clients* run the training and update the
+parameters. The updated parameters are sent back to the *server* which averages all
+received parameter updates. This describes one round of the federated learning process
+and we repeat this for multiple rounds.
 
-Our example consists of one *server* and two *clients*. Let's set up :code:`server.py` first. The *server* needs to import the Flower package :code:`flwr`.
-Next, we use the :code:`start_server` function to start a server and tell it to perform three rounds of federated learning.
+Our example consists of one *server* and two *clients*. Let's set up ``server.py``
+first. The *server* needs to import the Flower package ``flwr``. Next, we use the
+``start_server`` function to start a server and tell it to perform three rounds of
+federated learning.
 
 .. code-block:: python
 
     import flwr as fl
 
     if __name__ == "__main__":
-        fl.server.start_server(server_address="0.0.0.0:8080", config=fl.server.ServerConfig(num_rounds=3))
+        fl.server.start_server(
+            server_address="0.0.0.0:8080", config=fl.server.ServerConfig(num_rounds=3)
+        )
 
 We can already start the *server*:
 
-.. code-block:: python
+.. code-block:: bash
 
     python3 server.py
 
-Finally, we will define our *client* logic in :code:`client.py` and build upon the previously defined centralized training in :code:`cifar.py`.
-Our *client* needs to import :code:`flwr`, but also :code:`torch` to update the parameters on our PyTorch model:
+Finally, we will define our *client* logic in ``client.py`` and build upon the
+previously defined centralized training in ``cifar.py``. Our *client* needs to import
+``flwr``, but also ``torch`` to update the parameters on our PyTorch model:
 
 .. code-block:: python
 
@@ -210,28 +235,38 @@ Our *client* needs to import :code:`flwr`, but also :code:`torch` to update the 
 
     DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-Implementing a Flower *client* basically means implementing a subclass of either :code:`flwr.client.Client` or :code:`flwr.client.NumPyClient`.
-Our implementation will be based on :code:`flwr.client.NumPyClient` and we'll call it :code:`CifarClient`.
-:code:`NumPyClient` is slightly easier to implement than :code:`Client` if you use a framework with good NumPy interoperability (like PyTorch or TensorFlow/Keras) because it avoids some of the boilerplate that would otherwise be necessary.
-:code:`CifarClient` needs to implement four methods, two methods for getting/setting model parameters, one method for training the model, and one method for testing the model:
+Implementing a Flower *client* basically means implementing a subclass of either
+``flwr.client.Client`` or ``flwr.client.NumPyClient``. Our implementation will be based
+on ``flwr.client.NumPyClient`` and we'll call it ``CifarClient``. ``NumPyClient`` is
+slightly easier to implement than ``Client`` if you use a framework with good NumPy
+interoperability (like PyTorch or TensorFlow/Keras) because it avoids some of the
+boilerplate that would otherwise be necessary. ``CifarClient`` needs to implement four
+methods, two methods for getting/setting model parameters, one method for training the
+model, and one method for testing the model:
 
-#. :code:`set_parameters`
-    * set the model parameters on the local model that are received from the server
-    * loop over the list of model parameters received as NumPy :code:`ndarray`'s (think list of neural network layers)
-#. :code:`get_parameters`
-    * get the model parameters and return them as a list of NumPy :code:`ndarray`'s (which is what :code:`flwr.client.NumPyClient` expects)
-#. :code:`fit`
-    * update the parameters of the local model with the parameters received from the server
-    * train the model on the local training set
-    * get the updated local model weights and return them to the server
-#. :code:`evaluate`
-    * update the parameters of the local model with the parameters received from the server
-    * evaluate the updated model on the local test set
-    * return the local loss and accuracy to the server
+1. ``set_parameters``
+       - set the model parameters on the local model that are received from the server
+       - loop over the list of model parameters received as NumPy ``ndarray``'s (think
+         list of neural network layers)
+2. ``get_parameters``
+       - get the model parameters and return them as a list of NumPy ``ndarray``'s
+         (which is what ``flwr.client.NumPyClient`` expects)
+3. ``fit``
+       - update the parameters of the local model with the parameters received from the
+         server
+       - train the model on the local training set
+       - get the updated local model weights and return them to the server
+4. ``evaluate``
+       - update the parameters of the local model with the parameters received from the
+         server
+       - evaluate the updated model on the local test set
+       - return the local loss and accuracy to the server
 
-The two :code:`NumPyClient` methods :code:`fit` and :code:`evaluate` make use of the functions :code:`train()` and :code:`test()` previously defined in :code:`cifar.py`.
-So what we really do here is we tell Flower through our :code:`NumPyClient` subclass which of our already defined functions to call for training and evaluation.
-We included type annotations to give you a better understanding of the data types that get passed around.
+The two ``NumPyClient`` methods ``fit`` and ``evaluate`` make use of the functions
+``train()`` and ``test()`` previously defined in ``cifar.py``. So what we really do here
+is we tell Flower through our ``NumPyClient`` subclass which of our already defined
+functions to call for training and evaluation. We included type annotations to give you
+a better understanding of the data types that get passed around.
 
 .. code-block:: python
 
@@ -277,8 +312,10 @@ We included type annotations to give you a better understanding of the data type
             loss, accuracy = cifar.test(self.model, self.testloader, device=DEVICE)
             return float(loss), self.num_examples["testset"], {"accuracy": float(accuracy)}
 
-All that's left to do it to define a function that loads both model and data, creates a :code:`CifarClient`, and starts this client.
-You load your data and model by using :code:`cifar.py`. Start :code:`CifarClient` with the function :code:`fl.client.start_client()` by pointing it at the same IP address we used in :code:`server.py`: 
+All that's left to do it to define a function that loads both model and data, creates a
+``CifarClient``, and starts this client. You load your data and model by using
+``cifar.py``. Start ``CifarClient`` with the function ``fl.client.start_client()`` by
+pointing it at the same IP address we used in ``server.py``:
 
 .. code-block:: python
 
@@ -300,15 +337,20 @@ You load your data and model by using :code:`cifar.py`. Start :code:`CifarClient
 
 And that's it. You can now open two additional terminal windows and run
 
-.. code-block:: python
+.. code-block:: bash
 
     python3 client.py
 
-in each window (make sure that the server is running before you do so) and see your (previously centralized) PyTorch project run federated learning across two clients. Congratulations!
+in each window (make sure that the server is running before you do so) and see your
+(previously centralized) PyTorch project run federated learning across two clients.
+Congratulations!
 
 Next Steps
 ----------
 
-The full source code for this example: `PyTorch: From Centralized To Federated (Code) <https://github.com/adap/flower/blob/main/examples/pytorch-from-centralized-to-federated>`_.
-Our example is, of course, somewhat over-simplified because both clients load the exact same dataset, which isn't realistic.
-You're now prepared to explore this topic further. How about using different subsets of CIFAR-10 on each client? How about adding more clients?
+The full source code for this example: `PyTorch: From Centralized To Federated (Code)
+<https://github.com/adap/flower/blob/main/examples/pytorch-from-centralized-to-federated>`_.
+Our example is, of course, somewhat over-simplified because both clients load the exact
+same dataset, which isn't realistic. You're now prepared to explore this topic further.
+How about using different subsets of CIFAR-10 on each client? How about adding more
+clients?
