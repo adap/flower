@@ -24,10 +24,11 @@ from google.protobuf.message import Message as GrpcMessage
 
 from flwr.common import log
 from flwr.common.constant import (
+    GRPC_ADAPTER_METADATA_FLOWER_PACKAGE_NAME_KEY,
+    GRPC_ADAPTER_METADATA_FLOWER_PACKAGE_VERSION_KEY,
+    GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY,
     GRPC_ADAPTER_METADATA_MESSAGE_MODULE_KEY,
     GRPC_ADAPTER_METADATA_MESSAGE_QUALNAME_KEY,
-    GRPC_ADAPTER_METADATA_PACKAGE_NAME_KEY,
-    GRPC_ADAPTER_METADATA_PACKAGE_VERSION_KEY,
     GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY,
 )
 from flwr.common.version import package_name, package_version
@@ -68,8 +69,9 @@ class GrpcAdapter:
         req_cls = request.__class__
         container_req = MessageContainer(
             metadata={
-                GRPC_ADAPTER_METADATA_PACKAGE_NAME_KEY: package_name,
-                GRPC_ADAPTER_METADATA_PACKAGE_VERSION_KEY: package_version,
+                GRPC_ADAPTER_METADATA_FLOWER_PACKAGE_NAME_KEY: package_name,
+                GRPC_ADAPTER_METADATA_FLOWER_PACKAGE_VERSION_KEY: package_version,
+                GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY: package_version,
                 GRPC_ADAPTER_METADATA_MESSAGE_MODULE_KEY: req_cls.__module__,
                 GRPC_ADAPTER_METADATA_MESSAGE_QUALNAME_KEY: req_cls.__qualname__,
             },
