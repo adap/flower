@@ -73,6 +73,7 @@ NUM_PARTITIONS_KEY = "num-partitions"
 # Constants for keys in `metadata` of `MessageContainer` in `grpc-adapter`
 GRPC_ADAPTER_METADATA_PACKAGE_NAME_KEY = "flower-package-name"
 GRPC_ADAPTER_METADATA_PACKAGE_VERSION_KEY = "flower-package-version"
+GRPC_ADAPTER_METADATA_PACKAGE_VERSION_KEY = "flower-version"  # Deprecated
 GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY = "should-exit"
 GRPC_ADAPTER_METADATA_MESSAGE_MODULE_KEY = "grpc-message-module"
 GRPC_ADAPTER_METADATA_MESSAGE_QUALNAME_KEY = "grpc-message-qualname"
