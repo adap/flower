@@ -37,7 +37,7 @@ opacus
 
 ### Install dependencies and project
 
-Install the dependencies defined in `pyproject.toml` as well as the `opacus` package.
+Install the dependencies defined in `pyproject.toml` as well as the `opacus_fl` package.
 
 ```shell
 # From a new python environment, run:
