@@ -27,7 +27,7 @@ This will create a new directory called `opacus` containing the following files:
 
 ```shell
 opacus
-├── opacus-fl
+├── opacus_fl
 │   ├── client_app.py   # Defines your ClientApp
 │   ├── server_app.py   # Defines your ServerApp
 │   └── task.py         # Defines your model, training, and data loading
