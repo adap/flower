@@ -96,7 +96,8 @@ flwr run . --run-config "train-method='cyclic' partitioner-type='linear' central
 ```
 
 > \[!TIP\]
-> For a more detailed walk-through check our [XGBoost tutorial](https://flower.ai/docs/framework/tutorial-quickstart-xgboost.html)
+> For a more detailed walk-through check our [XGBoost tutorial](https://flower.ai/docs/framework/tutorial-quickstart-xgboost.html).
+> To extend the aggregation strategy for saving, logging, or other functions, please refer to our [advanced-pytorch](https://github.com/adap/flower/tree/main/examples/advanced-pytorch) example.
 
 ### Run with the Deployment Engine
 
