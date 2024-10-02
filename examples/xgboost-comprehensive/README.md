@@ -18,7 +18,7 @@ It differs from the [xgboost-quickstart](https://github.com/adap/flower/tree/mai
 
 ## Training Strategies
 
-This example provides two training strategies, **bagging aggregation** and **cyclic training**.
+This example provides two training strategies, [**bagging aggregation**](https://flower.ai/docs/framework/tutorial-quickstart-xgboost.html#tree-based-bagging-aggregation) and [**cyclic training**](https://flower.ai/docs/framework/tutorial-quickstart-xgboost.html#cyclic_training).
 
 ### Bagging Aggregation
 

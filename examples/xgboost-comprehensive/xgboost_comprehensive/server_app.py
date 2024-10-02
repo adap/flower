@@ -77,6 +77,11 @@ def get_evaluate_fn(test_data, params):
             )
             auc = round(float(eval_results.split("\t")[1].split(":")[1]), 4)
 
+            # Save results to disk.
+            # Note we add new entry to the same file with each call to this function.
+            with open(f"./centralised_eval.txt", "a", encoding="utf-8") as fp:
+                fp.write(f"Round:{server_round},AUC:{auc}\n")
+
             return 0, {"AUC": auc}
 
     return evaluate_fn
