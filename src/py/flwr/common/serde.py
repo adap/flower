@@ -33,12 +33,12 @@ from flwr.proto.recordset_pb2 import Array as ProtoArray
 from flwr.proto.recordset_pb2 import BoolList, BytesList
 from flwr.proto.recordset_pb2 import ConfigsRecord as ProtoConfigsRecord
 from flwr.proto.recordset_pb2 import ConfigsRecordValue as ProtoConfigsRecordValue
-from flwr.proto.recordset_pb2 import DoubleList, Int, IntList
+from flwr.proto.recordset_pb2 import DoubleList
 from flwr.proto.recordset_pb2 import MetricsRecord as ProtoMetricsRecord
 from flwr.proto.recordset_pb2 import MetricsRecordValue as ProtoMetricsRecordValue
 from flwr.proto.recordset_pb2 import ParametersRecord as ProtoParametersRecord
 from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
-from flwr.proto.recordset_pb2 import StringList
+from flwr.proto.recordset_pb2 import SintList, StringList, UintList
 from flwr.proto.run_pb2 import Run as ProtoRun
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import (
@@ -340,6 +340,7 @@ def metrics_from_proto(proto: Any) -> typing.Metrics:
 
 
 # === Scalar messages ===
+INT64_MAX_VALUE = 9223372036854775807  # (1 << 63) - 1
 
 
 def scalar_to_proto(scalar: typing.Scalar) -> Scalar:
@@ -354,9 +355,10 @@ def scalar_to_proto(scalar: typing.Scalar) -> Scalar:
         return Scalar(double=scalar)
 
     if isinstance(scalar, int):
-        if scalar >= 0:
-            return Scalar(uint64=scalar)  # Use uint64 for non-negative integers
-        return Scalar(sint64=scalar)  # Use sint64 for negative integers
+        # Use uint64 for integers larger than the maximum value of sint64
+        if scalar > INT64_MAX_VALUE:
+            return Scalar(uint64=scalar)
+        return Scalar(sint64=scalar)
 
     if isinstance(scalar, str):
         return Scalar(string=scalar)
@@ -378,14 +380,14 @@ def scalar_from_proto(scalar_msg: Scalar) -> typing.Scalar:
 
 _type_to_field: dict[type, str] = {
     float: "double",
-    int: "int",
+    int: "sint64",
     bool: "bool",
     str: "string",
     bytes: "bytes",
 }
 _list_type_to_class_and_field: dict[type, tuple[type[GrpcMessage], str]] = {
     float: (DoubleList, "double_list"),
-    int: (IntList, "int_list"),
+    int: (SintList, "sint_list"),
     bool: (BoolList, "bool_list"),
     str: (StringList, "string_list"),
     bytes: (BytesList, "bytes_list"),
@@ -393,17 +395,9 @@ _list_type_to_class_and_field: dict[type, tuple[type[GrpcMessage], str]] = {
 T = TypeVar("T")
 
 
-def int_to_proto(value: int) -> Int:
-    """Serialize a int to `Int`."""
-    if value >= 0:
-        return Int(uint64=value)
-    return Int(sint64=value)
-
-
-def int_from_proto(value_proto: Int) -> int:
-    """Deserialize a int from `Int`."""
-    fld = cast(str, value_proto.WhichOneof("int"))
-    return cast(int, getattr(value_proto, fld))
+def _is_uint64(value: Any) -> bool:
+    """Check if a value is uint64."""
+    return isinstance(value, int) and value > INT64_MAX_VALUE
 
 
 def _record_value_to_proto(
@@ -419,15 +413,16 @@ def _record_value_to_proto(
         # Note: `isinstance(False, int) == True`.
         if isinstance(value, t):
             fld = _type_to_field[t]
-            if t is int:
-                fld = "uint64" if cast(int, value) >= 0 else "sint64"
+            if t is int and _is_uint64(value):
+                fld = "uint64"
             arg[fld] = value
             return proto_class(**arg)
         # List
         if isinstance(value, list) and all(isinstance(item, t) for item in value):
             list_class, fld = _list_type_to_class_and_field[t]
-            if t is int:
-                value = [int_to_proto(v) for v in value]
+            # Use UintList if any element is of type `uint64`.
+            if t is int and any(_is_uint64(v) for v in value):
+                list_class, fld = UintList, "uint_list"
             arg[fld] = list_class(vals=value)
             return proto_class(**arg)
     # Invalid types
@@ -442,8 +437,6 @@ def _record_value_from_proto(value_proto: GrpcMessage) -> Any:
     value_field = cast(str, value_proto.WhichOneof("value"))
     if value_field.endswith("list"):
         value = list(getattr(value_proto, value_field).vals)
-        if value_field == "int_list":
-            value = [int_from_proto(v) for v in value]
     else:
         value = getattr(value_proto, value_field)
     return value
