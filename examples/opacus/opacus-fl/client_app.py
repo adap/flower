@@ -5,7 +5,7 @@ import warnings
 import torch
 from flwr.client import ClientApp, NumPyClient
 from opacus import PrivacyEngine
-from .task import train, test, Net, load_data, get_weights, set_weights
+from opacus_fl.task import train, test, Net, load_data, get_weights, set_weights
 from flwr.common import Context
 
 warnings.filterwarnings("ignore", category=UserWarning)
