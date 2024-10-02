@@ -27,8 +27,8 @@ clientapp = "opacus-fl.client_app:app"
 
 [tool.flwr.app.config]
 num-server-rounds = 3
-target-delta=1e-5
-max-grad-norm=1.0
+target-delta = 1e-5
+max-grad-norm = 1.0
 
 [tool.flwr.federations]
 default = "local-simulation"
