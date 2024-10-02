@@ -111,6 +111,11 @@ def worker(
             # Let backend process message
             out_mssg, updated_context = backend.process_message(message, context)
 
+            # Depending on the backend, it's easier to process results as they come
+            # instead of waiting for the result of the submitted clientapp+message
+            # because of this, the node_id in the message returned might be different
+            node_id = out_mssg.metadata.src_node_id
+
             # Update Context
             node_states[node_id].update_context(
                 task_ins.run_id, context=updated_context
