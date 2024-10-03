@@ -14,8 +14,8 @@
     <br /><br />
 </p>
 
-[![GitHub license](https://img.shields.io/github/license/adap/flower)](https://github.com/adap/flower/blob/main/LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/adap/flower/blob/main/CONTRIBUTING.md)
+[![GitHub license](https://img.shields.io/github/license/adap/flower)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 ![Build](https://github.com/adap/flower/actions/workflows/framework.yml/badge.svg)
 [![Downloads](https://static.pepy.tech/badge/flwr)](https://pepy.tech/project/flwr)
 [![Docker Hub](https://img.shields.io/badge/Docker%20Hub-flwr-blue)](https://hub.docker.com/u/flwr)
@@ -48,29 +48,29 @@ Flower's goal is to make federated learning accessible to everyone. This series 
 
 0. **What is Federated Learning?**
 
-   [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/doc/source/tutorial-series-what-is-federated-learning.ipynb) (or open the [Jupyter Notebook](https://github.com/adap/flower/blob/main/doc/source/tutorial-series-what-is-federated-learning.ipynb))
+   [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/doc/source/tutorial-series-what-is-federated-learning.ipynb) (or open the [Jupyter Notebook](doc/source/tutorial-series-what-is-federated-learning.ipynb))
 
 1. **An Introduction to Federated Learning**
 
-   [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/doc/source/tutorial-series-get-started-with-flower-pytorch.ipynb) (or open the [Jupyter Notebook](https://github.com/adap/flower/blob/main/doc/source/tutorial-series-get-started-with-flower-pytorch.ipynb))
+   [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/doc/source/tutorial-series-get-started-with-flower-pytorch.ipynb) (or open the [Jupyter Notebook](doc/source/tutorial-series-get-started-with-flower-pytorch.ipynb))
 
 2. **Using Strategies in Federated Learning**
 
-   [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/doc/source/tutorial-series-use-a-federated-learning-strategy-pytorch.ipynb) (or open the [Jupyter Notebook](https://github.com/adap/flower/blob/main/doc/source/tutorial-series-use-a-federated-learning-strategy-pytorch.ipynb))
+   [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/doc/source/tutorial-series-use-a-federated-learning-strategy-pytorch.ipynb) (or open the [Jupyter Notebook](doc/source/tutorial-series-use-a-federated-learning-strategy-pytorch.ipynb))
 
 3. **Building Strategies for Federated Learning**
 
-   [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/doc/source/tutorial-series-build-a-strategy-from-scratch-pytorch.ipynb) (or open the [Jupyter Notebook](https://github.com/adap/flower/blob/main/doc/source/tutorial-series-build-a-strategy-from-scratch-pytorch.ipynb))
+   [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/doc/source/tutorial-series-build-a-strategy-from-scratch-pytorch.ipynb) (or open the [Jupyter Notebook](doc/source/tutorial-series-build-a-strategy-from-scratch-pytorch.ipynb))
 
 4. **Custom Clients for Federated Learning**
 
-   [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/doc/source/tutorial-series-customize-the-client-pytorch.ipynb) (or open the [Jupyter Notebook](https://github.com/adap/flower/blob/main/doc/source/tutorial-series-customize-the-client-pytorch.ipynb))
+   [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/doc/source/tutorial-series-customize-the-client-pytorch.ipynb) (or open the [Jupyter Notebook](doc/source/tutorial-series-customize-the-client-pytorch.ipynb))
 
 Stay tuned, more tutorials are coming soon. Topics include **Privacy and Security in Federated Learning**, and **Scaling Federated Learning**.
 
 ## 30-Minute Federated Learning Tutorial
 
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/examples/flower-in-30-minutes/tutorial.ipynb) (or open the [Jupyter Notebook](https://github.com/adap/flower/blob/main/examples/flower-in-30-minutes/tutorial.ipynb))
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/examples/flower-in-30-minutes/tutorial.ipynb) (or open the [Jupyter Notebook](examples/flower-in-30-minutes/tutorial.ipynb))
 
 ## Documentation
 
@@ -92,27 +92,27 @@ Stay tuned, more tutorials are coming soon. Topics include **Privacy and Securit
 
 Flower Baselines is a collection of community-contributed projects that reproduce the experiments performed in popular federated learning publications. Researchers can build on Flower Baselines to quickly evaluate new ideas. The Flower community loves contributions! Make your work more visible and enable others to build on it by contributing it as a baseline!
 
-- [DASHA](https://github.com/adap/flower/tree/main/baselines/dasha)
-- [DepthFL](https://github.com/adap/flower/tree/main/baselines/depthfl)
-- [FedBN](https://github.com/adap/flower/tree/main/baselines/fedbn)
-- [FedMeta](https://github.com/adap/flower/tree/main/baselines/fedmeta)
-- [FedMLB](https://github.com/adap/flower/tree/main/baselines/fedmlb)
-- [FedPer](https://github.com/adap/flower/tree/main/baselines/fedper)
-- [FedProx](https://github.com/adap/flower/tree/main/baselines/fedprox)
-- [FedNova](https://github.com/adap/flower/tree/main/baselines/fednova)
-- [HeteroFL](https://github.com/adap/flower/tree/main/baselines/heterofl)
-- [FedAvgM](https://github.com/adap/flower/tree/main/baselines/fedavgm)
-- [FedStar](https://github.com/adap/flower/tree/main/baselines/fedstar)
-- [FedWav2vec2](https://github.com/adap/flower/tree/main/baselines/fedwav2vec2)
-- [FjORD](https://github.com/adap/flower/tree/main/baselines/fjord)
-- [MOON](https://github.com/adap/flower/tree/main/baselines/moon)
-- [niid-Bench](https://github.com/adap/flower/tree/main/baselines/niid_bench)
-- [TAMUNA](https://github.com/adap/flower/tree/main/baselines/tamuna)
-- [FedVSSL](https://github.com/adap/flower/tree/main/baselines/fedvssl)
-- [FedXGBoost](https://github.com/adap/flower/tree/main/baselines/hfedxgboost)
-- [FedPara](https://github.com/adap/flower/tree/main/baselines/fedpara)
-- [FedAvg](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/fedavg_mnist)
-- [FedOpt](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/adaptive_federated_optimization)
+- [DASHA](baselines/dasha/README.md)
+- [DepthFL](baselines/depthfl/README.md)
+- [FedBN](baselines/fedbn/README.md)
+- [FedMeta](baselines/fedmeta/README.md)
+- [FedMLB](baselines/fedmlb/README.md)
+- [FedPer](baselines/fedper/README.md)
+- [FedProx](baselines/fedprox/README.md)
+- [FedNova](baselines/fednova/README.md)
+- [HeteroFL](baselines/heterofl/README.md)
+- [FedAvgM](baselines/fedavgm/README.md)
+- [FedStar](baselines/fedstar/README.md)
+- [FedWav2vec2](baselines/fedwav2vec2/README.md)
+- [FjORD](baselines/fjord/README.md)
+- [MOON](baselines/moon/README.md)
+- [niid-Bench](baselines/niid_bench/README.md)
+- [TAMUNA](baselines/tamuna/README.md)
+- [FedVSSL](baselines/fedvssl/README.md)
+- [FedXGBoost](baselines/hfedxgboost/README.md)
+- [FedPara](baselines/fedpara/README.md)
+- [FedAvg](baselines/flwr_baselines/flwr_baselines/publications/fedavg_mnist/README.md)
+- [FedOpt](baselines/flwr_baselines/flwr_baselines/publications/adaptive_federated_optimization/README.md)
 
 Please refer to the [Flower Baselines Documentation](https://flower.ai/docs/baselines/) for a detailed categorization of baselines and for additional info including:
 * [How to use Flower Baselines](https://flower.ai/docs/baselines/how-to-use-baselines.html)
@@ -124,36 +124,36 @@ Several code examples show different usage scenarios of Flower (in combination w
 
 Quickstart examples:
 
-- [Quickstart (TensorFlow)](https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow)
-- [Quickstart (PyTorch)](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch)
-- [Quickstart (Hugging Face)](https://github.com/adap/flower/tree/main/examples/quickstart-huggingface)
-- [Quickstart (PyTorch Lightning)](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch-lightning)
-- [Quickstart (fastai)](https://github.com/adap/flower/tree/main/examples/quickstart-fastai)
-- [Quickstart (Pandas)](https://github.com/adap/flower/tree/main/examples/quickstart-pandas)
-- [Quickstart (JAX)](https://github.com/adap/flower/tree/main/examples/quickstart-jax)
-- [Quickstart (MONAI)](https://github.com/adap/flower/tree/main/examples/quickstart-monai)
-- [Quickstart (scikit-learn)](https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist)
-- [Quickstart (Android [TFLite])](https://github.com/adap/flower/tree/main/examples/android)
-- [Quickstart (iOS [CoreML])](https://github.com/adap/flower/tree/main/examples/ios)
-- [Quickstart (MLX)](https://github.com/adap/flower/tree/main/examples/quickstart-mlx)
-- [Quickstart (XGBoost)](https://github.com/adap/flower/tree/main/examples/xgboost-quickstart)
+- [Quickstart (TensorFlow)](examples/quickstart-tensorflow/README.md)
+- [Quickstart (PyTorch)](examples/quickstart-pytorch/README.md)
+- [Quickstart (Hugging Face)](examples/quickstart-huggingface/README.md)
+- [Quickstart (PyTorch Lightning)](examples/quickstart-pytorch-lightning/README.md)
+- [Quickstart (fastai)](examples/quickstart-fastai/README.md)
+- [Quickstart (Pandas)](examples/quickstart-pandas/README.md)
+- [Quickstart (JAX)](examples/quickstart-jax/README.md)
+- [Quickstart (MONAI)](examples/quickstart-monai/README.md)
+- [Quickstart (scikit-learn)](examples/sklearn-logreg-mnist/README.md)
+- [Quickstart (Android [TFLite])](examples/android/README.md)
+- [Quickstart (iOS [CoreML])](examples/ios/README.md)
+- [Quickstart (MLX)](examples/quickstart-mlx/README.md)
+- [Quickstart (XGBoost)](examples/xgboost-quickstart/README.md)
 
-Other [examples](https://github.com/adap/flower/tree/main/examples):
+Other [examples](examples):
 
-- [Raspberry Pi & Nvidia Jetson Tutorial](https://github.com/adap/flower/tree/main/examples/embedded-devices)
-- [PyTorch: From Centralized to Federated](https://github.com/adap/flower/tree/main/examples/pytorch-from-centralized-to-federated)
-- [Vertical FL](https://github.com/adap/flower/tree/main/examples/vertical-fl)
-- [Federated Finetuning of OpenAI's Whisper](https://github.com/adap/flower/tree/main/examples/whisper-federated-finetuning)
-- [Federated Finetuning of Large Language Model](https://github.com/adap/flower/tree/main/examples/flowertune-llm)
-- [Federated Finetuning of a Vision Transformer](https://github.com/adap/flower/tree/main/examples/flowertune-vit)
-- [Advanced Flower with TensorFlow/Keras](https://github.com/adap/flower/tree/main/examples/advanced-tensorflow)
-- [Advanced Flower with PyTorch](https://github.com/adap/flower/tree/main/examples/advanced-pytorch)
-- [Comprehensive Flower+XGBoost](https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive)
-- [Flower through Docker Compose and with Grafana dashboard](https://github.com/adap/flower/tree/main/examples/flower-via-docker-compose)
-- [Flower with KaplanMeierFitter from the lifelines library](https://github.com/adap/flower/tree/main/examples/federated-kaplan-meier-fitter)
-- [Sample Level Privacy with Opacus](https://github.com/adap/flower/tree/main/examples/opacus)
-- [Sample Level Privacy with TensorFlow-Privacy](https://github.com/adap/flower/tree/main/examples/tensorflow-privacy)
-- [Flower with a Tabular Dataset](https://github.com/adap/flower/tree/main/examples/fl-tabular)
+- [Raspberry Pi & Nvidia Jetson Tutorial](examples/embedded-devices/README.md)
+- [PyTorch: From Centralized to Federated](examples/pytorch-from-centralized-to-federated/README.md)
+- [Vertical FL](examples/vertical-fl/README.md)
+- [Federated Finetuning of OpenAI's Whisper](examples/whisper-federated-finetuning/README.md)
+- [Federated Finetuning of Large Language Model](examples/flowertune-llm/README.md)
+- [Federated Finetuning of a Vision Transformer](examples/flowertune-vit/README.md)
+- [Advanced Flower with TensorFlow/Keras](examples/advanced-tensorflow/README.md)
+- [Advanced Flower with PyTorch](examples/advanced-pytorch/README.md)
+- [Comprehensive Flower+XGBoost](examples/xgboost-comprehensive/README.md)
+- [Flower through Docker Compose and with Grafana dashboard](examples/flower-via-docker-compose/README.md)
+- [Flower with KaplanMeierFitter from the lifelines library](examples/federated-kaplan-meier-fitter/README.md)
+- [Sample Level Privacy with Opacus](examples/opacus/README.md)
+- [Sample Level Privacy with TensorFlow-Privacy](examples/tensorflow-privacy/README.md)
+- [Flower with a Tabular Dataset](examples/fl-tabular/README.md)
 
 ## Community
 
