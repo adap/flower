@@ -71,7 +71,7 @@ def main(cfg: DictConfig) -> None:
         for num_examples, metric in eval_metrics:
             weights.append(num_examples)
             accuracies.append(metric["accuracy"] * num_examples)
-        accuracy = sum(accuracies) / sum(weights) # type: ignore[arg-type]
+        accuracy = sum(accuracies) / sum(weights)  # type: ignore[arg-type]
         return {"accuracy": accuracy}
 
     # Define your strategy
