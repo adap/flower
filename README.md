@@ -102,6 +102,7 @@ Flower Baselines is a collection of community-contributed projects that reproduc
 - [FedNova](baselines/fednova/README.md)
 - [HeteroFL](baselines/heterofl/README.md)
 - [FedAvgM](baselines/fedavgm/README.md)
+- [FedRep](baselines/fedrep/README.md)
 - [FedStar](baselines/fedstar/README.md)
 - [FedWav2vec2](baselines/fedwav2vec2/README.md)
 - [FjORD](baselines/fjord/README.md)
