@@ -23,7 +23,9 @@ def save_results(dataset_name, category, run_name, dataset, acc):
     print(f"Accuracy: {acc}. ")
 
     # Save generations
-    generation_path = os.path.join(path, f"generation_{dataset_name}{cate_name}_{run_name}.jsonl")
+    generation_path = os.path.join(
+        path, f"generation_{dataset_name}{cate_name}_{run_name}.jsonl"
+    )
     dataset.to_json(generation_path, orient="records")
 
 

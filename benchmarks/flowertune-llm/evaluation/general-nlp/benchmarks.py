@@ -6,18 +6,78 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 from utils import format_answer, format_example, save_results
 
-from datasets import load_dataset, Dataset
-
+from datasets import Dataset, load_dataset
 
 INSTRUCTIONS = {
     "mmlu": "Answer the following multiple choice question.",
 }
 
 MMLU_CATEGORY = {
-    "stem": ["abstract_algebra", "anatomy", "astronomy", "college_biology", "college_chemistry", "college_computer_science", "college_mathematics", "college_physics", "computer_security", "conceptual_physics", "electrical_engineering", "elementary_mathematics", "high_school_biology", "high_school_chemistry", "high_school_computer_science", "high_school_mathematics", "high_school_physics", "high_school_statistics", "machine_learning"],
-    "social_sciences": ["econometrics", "high_school_geography", "high_school_government_and_politics", "high_school_macroeconomics", "high_school_microeconomics", "high_school_psychology", "human_sexuality", "professional_psychology", "public_relations", "security_studies", "sociology", "us_foreign_policy"],
-    "humanities": ["formal_logic", "high_school_european_history", "high_school_us_history", "high_school_world_history", "international_law", "jurisprudence", "logical_fallacies", "moral_disputes", "moral_scenarios", "philosophy", "prehistory", "professional_law", "world_religions"],
-    "other": ["business_ethics", "clinical_knowledge", "college_medicine", "global_facts", "human_aging", "management", "marketing", "medical_genetics", "miscellaneous", "nutrition", "professional_accounting", "professional_medicine", "virology"],
+    "stem": [
+        "abstract_algebra",
+        "anatomy",
+        "astronomy",
+        "college_biology",
+        "college_chemistry",
+        "college_computer_science",
+        "college_mathematics",
+        "college_physics",
+        "computer_security",
+        "conceptual_physics",
+        "electrical_engineering",
+        "elementary_mathematics",
+        "high_school_biology",
+        "high_school_chemistry",
+        "high_school_computer_science",
+        "high_school_mathematics",
+        "high_school_physics",
+        "high_school_statistics",
+        "machine_learning",
+    ],
+    "social_sciences": [
+        "econometrics",
+        "high_school_geography",
+        "high_school_government_and_politics",
+        "high_school_macroeconomics",
+        "high_school_microeconomics",
+        "high_school_psychology",
+        "human_sexuality",
+        "professional_psychology",
+        "public_relations",
+        "security_studies",
+        "sociology",
+        "us_foreign_policy",
+    ],
+    "humanities": [
+        "formal_logic",
+        "high_school_european_history",
+        "high_school_us_history",
+        "high_school_world_history",
+        "international_law",
+        "jurisprudence",
+        "logical_fallacies",
+        "moral_disputes",
+        "moral_scenarios",
+        "philosophy",
+        "prehistory",
+        "professional_law",
+        "world_religions",
+    ],
+    "other": [
+        "business_ethics",
+        "clinical_knowledge",
+        "college_medicine",
+        "global_facts",
+        "human_aging",
+        "management",
+        "marketing",
+        "medical_genetics",
+        "miscellaneous",
+        "nutrition",
+        "professional_accounting",
+        "professional_medicine",
+        "virology",
+    ],
 }
 
 
@@ -34,21 +94,21 @@ def infer_mmlu(model, tokenizer, batch_size, category, run_name):
             split="test",
             trust_remote_code=True,
         )
-        subset_df = pd.DataFrame(subset_data.map(lambda x: {'subset': subset, **x}))
+        subset_df = pd.DataFrame(subset_data.map(lambda x: {"subset": subset, **x}))
         dataframes.append(subset_df)
 
     dataset_df = pd.concat(dataframes, axis=0)
     dataset = Dataset.from_pandas(dataset_df)
-    if '__index_level_0__' in dataset.column_names:
-        dataset = dataset.remove_columns('__index_level_0__')
+    if "__index_level_0__" in dataset.column_names:
+        dataset = dataset.remove_columns("__index_level_0__")
 
     # Post process
     instruction = INSTRUCTIONS[name]
 
     def post_process(row):
-        options = [row['A'], row['B'], row['C'], row['D']]
-        row["prompt"] = format_example(row['input'], options)
-        row["gold"] = row['target']
+        options = [row["A"], row["B"], row["C"], row["D"]]
+        row["prompt"] = format_example(row["input"], options)
+        row["gold"] = row["target"]
         row["subset"] = row["subset"]
         row["prompt"] = f"{instruction}\n{row['prompt']}\nThe answer is:\n"
         return row
@@ -56,7 +116,9 @@ def infer_mmlu(model, tokenizer, batch_size, category, run_name):
     dataset = dataset.map(post_process)
 
     # Generate results
-    generate_results(name, run_name, dataset, model, tokenizer, batch_size, answer_type, category)
+    generate_results(
+        name, run_name, dataset, model, tokenizer, batch_size, answer_type, category
+    )
 
 
 def generate_results(
@@ -74,8 +136,8 @@ def generate_results(
 
 def inference(dataset, model, tokenizer, batch_size):
     columns_process = ["prompt", "gold"]
-    if 'subset' in dataset.features:
-        columns_process.append('subset')
+    if "subset" in dataset.features:
+        columns_process.append("subset")
     dataset_process = pd.DataFrame(dataset, columns=dataset.features)[columns_process]
     dataset_process = dataset_process.assign(output="Null")
     temperature = 1.0

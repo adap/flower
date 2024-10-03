@@ -4,7 +4,7 @@ import torch
 from peft import PeftModel
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
-from benchmarks import infer_mmlu, MMLU_CATEGORY
+from benchmarks import MMLU_CATEGORY, infer_mmlu
 
 # Fixed seed
 torch.manual_seed(2024)
