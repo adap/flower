@@ -7,7 +7,6 @@ from typing import Any, Dict, List, Optional, OrderedDict, Tuple, Union
 import numpy as np
 import torch
 import torch.nn as nn
-
 from omegaconf import DictConfig
 from torch import Tensor
 from torch.utils.data import DataLoader
