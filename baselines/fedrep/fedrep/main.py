@@ -9,7 +9,6 @@ from typing import List, Tuple
 
 import flwr as fl
 import hydra
-import numpy as np
 from flwr.common.parameter import ndarrays_to_parameters
 from flwr.common.typing import Metrics
 from hydra.core.hydra_config import HydraConfig
@@ -72,7 +71,7 @@ def main(cfg: DictConfig) -> None:
         for num_examples, metric in eval_metrics:
             weights.append(num_examples)
             accuracies.append(metric["accuracy"] * num_examples)
-        accuracy = sum(accuracies) / sum(weights)  
+        accuracy = sum(accuracies) / sum(weights)
         return {"accuracy": accuracy}
 
     # Define your strategy
