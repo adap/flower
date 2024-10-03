@@ -24,32 +24,32 @@ class DocstringExampleChecker(BaseChecker):
 
     name = "docstring-example"
     msgs = {
-        "C0001": (
-            'Docstring should contain at least one example using ">>>".',
+        "W9001": (
+            "Docstring should contain at least 1 example.",
             "docstring-example-missing",
-            'Ensure that each docstring contains an "Examples:" section with at least one code example.',
+            "Used when a docstring does not have the required number of examples.",
         ),
     }
 
-    def visit_functiondef(self, node: nodes.FunctionDef) -> None:
-        self.check_docstring(node)
-
-    def visit_classdef(self, node: nodes.ClassDef) -> None:
-        self.check_docstring(node)
-
     def check_docstring(self, node: nodes.NodeNG) -> None:
+        """Check that the docstring contains at least 1 example."""
         docstring = node.doc
         if docstring:
-            # Check if the docstring contains an "Examples:" section
-            examples_section = docstring.split("Examples:")
-            if len(examples_section) < 2:
+            examples = docstring.split("Examples:")
+            if len(examples) < 2:
                 self.add_message("docstring-example-missing", node=node)
             else:
-                # Count occurrences of the '>>>' code block in the Examples section
-                example_count = examples_section[1].count(">>>")
+                example_count = examples[1].count(">>>")
                 if example_count < 1:
                     self.add_message("docstring-example-missing", node=node)
 
+    def process_module(self, node: nodes.Module) -> None:
+        """Process a module to check docstrings."""
+        for child in node.get_children():
+            if isinstance(child, (nodes.FunctionDef, nodes.ClassDef)):
+                self.check_docstring(child)
+
 
 def register(linter):
+    """Register the checker to Pylint."""
     linter.register_checker(DocstringExampleChecker(linter))
