@@ -6,11 +6,11 @@ from typing import Callable, Dict, List, Tuple, Type, Union
 
 import numpy as np
 import torch
-from datasets import concatenate_datasets
 from flwr.client import Client, NumPyClient
 from flwr.common import NDArrays, Scalar
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import PathologicalPartitioner
+from flwr_datasets.preprocessor import Merger
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 from torchvision import transforms
@@ -238,15 +238,7 @@ def get_client_fn_simulation(
     if config.dataset.name.lower() == "cifar100":
         use_fine_label = True
 
-    partitioner_train = PathologicalPartitioner(
-        num_partitions=config.num_clients,
-        partition_by="fine_label" if use_fine_label else "label",
-        num_classes_per_partition=config.dataset.num_classes,
-        class_assignment_mode="random",
-        shuffle=True,
-        seed=config.dataset.seed,
-    )
-    partitioner_test = PathologicalPartitioner(
+    partitioner = PathologicalPartitioner(
         num_partitions=config.num_clients,
         partition_by="fine_label" if use_fine_label else "label",
         num_classes_per_partition=config.dataset.num_classes,
@@ -259,7 +251,8 @@ def get_client_fn_simulation(
     if FEDERATED_DATASET is None:
         FEDERATED_DATASET = FederatedDataset(
             dataset=config.dataset.name.lower(),
-            partitioners={"train": partitioner_train, "test": partitioner_test},
+            partitioners={"all": partitioner},
+            preprocessor=Merger({"all": ("train", "test")}),
         )
 
     def apply_train_transforms(batch):
@@ -281,12 +274,7 @@ def get_client_fn_simulation(
         """Create a Flower client representing a single organization."""
         cid_use = int(cid)
 
-        partition = concatenate_datasets(
-            [
-                FEDERATED_DATASET.load_partition(cid_use, split="train"),
-                FEDERATED_DATASET.load_partition(cid_use, split="test"),
-            ]
-        )
+        partition = FEDERATED_DATASET.load_partition(cid_use, split="all")
 
         partition_train_test = partition.train_test_split(
             train_size=config.dataset.fraction, shuffle=True, seed=config.dataset.seed
