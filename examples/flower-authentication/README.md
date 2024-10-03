@@ -7,7 +7,7 @@ framework: [torch, torchvision]
 # Flower Authentication with PyTorch 🧪
 
 > 🧪 = This example covers experimental features that might change in future versions of Flower
-> Please consult the regular PyTorch code examples ([quickstart](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch), [advanced](https://github.com/adap/flower/tree/main/examples/advanced-pytorch)) to learn how to use Flower with PyTorch.
+> Please consult the regular PyTorch code examples ([quickstart](../quickstart-pytorch/README.md), [advanced](../advanced-pytorch/README.md)) to learn how to use Flower with PyTorch.
 
 The following steps describe how to start a long-running Flower server (SuperLink) and a long-running Flower client (SuperNode) with authentication enabled.
 
