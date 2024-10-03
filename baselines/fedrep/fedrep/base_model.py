@@ -2,7 +2,7 @@
 
 import os
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Tuple, Union, OrderedDict
+from typing import Any, Dict, List, Optional, OrderedDict, Tuple, Union
 
 import numpy as np
 import torch
