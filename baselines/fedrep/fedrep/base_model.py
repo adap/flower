@@ -2,8 +2,7 @@
 
 import os
 from abc import ABC, abstractmethod
-from collections import OrderedDict
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union, OrderedDict
 
 import numpy as np
 import torch
@@ -89,7 +88,7 @@ class ModelSplit(ABC, nn.Module):
         return self._body
 
     @body.setter
-    def body(self, state_dict: "OrderedDict[str, Tensor]") -> None:
+    def body(self, state_dict: OrderedDict[str, Tensor]) -> None:
         """Set model body.
 
         Args:
@@ -103,7 +102,7 @@ class ModelSplit(ABC, nn.Module):
         return self._head
 
     @head.setter
-    def head(self, state_dict: "OrderedDict[str, Tensor]") -> None:
+    def head(self, state_dict: OrderedDict[str, Tensor]) -> None:
         """Set model head.
 
         Args:
