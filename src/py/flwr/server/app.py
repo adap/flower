@@ -38,6 +38,7 @@ from flwr.common.address import parse_address
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import (
     DRIVER_API_DEFAULT_ADDRESS,
+    EXEC_API_DEFAULT_ADDRESS,
     FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS,
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
     FLEET_API_REST_DEFAULT_ADDRESS,
@@ -56,6 +57,8 @@ from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
 from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
+from flwr.superexec.deployment import executor
+from flwr.superexec.exec_grpc import run_superexec_api_grpc
 
 from .client_manager import ClientManager
 from .history import History
@@ -225,7 +228,15 @@ def run_superlink() -> None:
         certificates=certificates,
     )
 
-    grpc_servers = [driver_server]
+    # Start Exec API
+    exec_server: grpc.Server = run_superexec_api_grpc(
+        address=EXEC_API_DEFAULT_ADDRESS,
+        executor=executor,
+        certificates=certificates,
+        config={},
+    )
+
+    grpc_servers = [exec_server, driver_server]
     bckg_threads = []
     if not args.fleet_api_address:
         if args.fleet_api_type in [
