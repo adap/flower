@@ -1,17 +1,19 @@
 Configure logging
 =================
 
-The Flower logger keeps track of all core events that take place in federated learning workloads.
-It presents information by default following a standard message format:
+The Flower logger keeps track of all core events that take place in federated learning
+workloads. It presents information by default following a standard message format:
 
 .. code-block:: python
 
     DEFAULT_FORMATTER = logging.Formatter(
-    "%(levelname)s %(name)s %(asctime)s | %(filename)s:%(lineno)d | %(message)s"
+        "%(levelname)s %(name)s %(asctime)s | %(filename)s:%(lineno)d | %(message)s"
     )
 
-containing relevant information including: log message level (e.g. :code:`INFO`, :code:`DEBUG`), a timestamp, the line where the logging took place from, as well as the log message itself.
-In this way, the logger would typically display information on your terminal as follows:
+containing relevant information including: log message level (e.g. ``INFO``, ``DEBUG``),
+a timestamp, the line where the logging took place from, as well as the log message
+itself. In this way, the logger would typically display information on your terminal as
+follows:
 
 .. code-block:: bash
 
@@ -29,29 +31,35 @@ In this way, the logger would typically display information on your terminal as 
     INFO flwr 2023-07-15 15:32:36,118 | server.py:125 | fit progress: (5, 358.6936808824539, {'accuracy': 0.3467}, 18.964264554999318)
     ...
 
-
 Saving log to file
--------------------
+------------------
 
-By default, the Flower log is outputted to the terminal where you launch your Federated Learning workload from. This applies for both gRPC-based federation (i.e. when you do :code:`fl.server.start_server`) and when using the :code:`VirtualClientEngine` (i.e. when you do :code:`fl.simulation.start_simulation`).
-In some situations you might want to save this log to disk. You can do so by calling the `fl.common.logger.configure() <https://github.com/adap/flower/blob/main/src/py/flwr/common/logger.py>`_ function. For example:
+By default, the Flower log is outputted to the terminal where you launch your Federated
+Learning workload from. This applies for both gRPC-based federation (i.e. when you do
+``fl.server.start_server``) and when using the ``VirtualClientEngine`` (i.e. when you do
+``fl.simulation.start_simulation``). In some situations you might want to save this log
+to disk. You can do so by calling the `fl.common.logger.configure()
+<https://github.com/adap/flower/blob/main/src/py/flwr/common/logger.py>`_ function. For
+example:
 
 .. code-block:: python
-        
-        import flwr as fl
-        
-        ...
 
-        # in your main file and before launching your experiment
-        # add an identifier to your logger
-        # then specify the name of the file where the log should be outputted to
-        fl.common.logger.configure(identifier="myFlowerExperiment", filename="log.txt")
+    import flwr as fl
 
-        # then start your workload
-        fl.simulation.start_simulation(...) # or fl.server.start_server(...)
+    ...
 
-With the above, Flower will record the log you see on your terminal to :code:`log.txt`. This file will be created in the same directory as were you are running the code from. 
-If we inspect we see the log above is also recorded but prefixing with :code:`identifier` each line:
+    # in your main file and before launching your experiment
+    # add an identifier to your logger
+    # then specify the name of the file where the log should be outputted to
+    fl.common.logger.configure(identifier="myFlowerExperiment", filename="log.txt")
+
+    # then start your workload
+    fl.simulation.start_simulation(...)  # or fl.server.start_server(...)
+
+With the above, Flower will record the log you see on your terminal to ``log.txt``. This
+file will be created in the same directory as were you are running the code from. If we
+inspect we see the log above is also recorded but prefixing with ``identifier`` each
+line:
 
 .. code-block:: bash
 
@@ -69,12 +77,11 @@ If we inspect we see the log above is also recorded but prefixing with :code:`id
     myFlowerExperiment | INFO flwr 2023-07-15 15:32:36,118 | server.py:125 | fit progress: (5, 358.6936808824539, {'accuracy': 0.3467}, 18.964264554999318)
     ...
 
-
 Log your own messages
 ---------------------
 
-You might expand the information shown by default with the Flower logger by adding more messages relevant to your application.
-You can achieve this easily as follows.
+You might expand the information shown by default with the Flower logger by adding more
+messages relevant to your application. You can achieve this easily as follows.
 
 .. code-block:: python
 
@@ -84,25 +91,31 @@ You can achieve this easily as follows.
 
     # For example, let's say you want to add to the log some info about the training on your client for debugging purposes
 
+
     class FlowerClient(fl.client.NumPyClient):
-        def __init__(self, cid: int ...):
+        def __init__(
+            self,
+            cid: int,
+            # ...
+        ):
             self.cid = cid
-            self.net = ...
-            ...
+            self.net = net
+            # ...
 
         def fit(self, parameters, config):
             log(INFO, f"Printing a custom INFO message at the start of fit() :)")
-            
+
             set_params(self.net, parameters)
 
             log(DEBUG, f"Client {self.cid} is doing fit() with config: {config}")
 
-            ...
+            # ...
 
-In this way your logger will show, in addition to the default messages, the ones introduced by the clients as specified above.
+In this way your logger will show, in addition to the default messages, the ones
+introduced by the clients as specified above.
 
 .. code-block:: bash
-    
+
     ...
     INFO flwr 2023-07-15 16:18:21,726 | server.py:89 | Initializing global parameters
     INFO flwr 2023-07-15 16:18:21,726 | server.py:276 | Requesting initial parameters from one random client
@@ -123,10 +136,13 @@ In this way your logger will show, in addition to the default messages, the ones
     DEBUG flwr 2023-07-15 16:18:28,617 | main.py:63 | Client 13 is doing fit() with config: {'epochs': 5, 'batch_size': 64}
     ...
 
-
 Log to a remote service
 -----------------------
 
-The :code:`fl.common.logger.configure` function, also allows specifying a host to which logs can be pushed (via :code:`POST`) through a native Python :code:`logging.handler.HTTPHandler`.
-This is a particularly useful feature in :code:`gRPC`-based Federated Learning workloads where otherwise gathering logs from all entities (i.e. the server and the clients) might be cumbersome.
-Note that in Flower simulation, the server automatically displays all logs. You can still specify a :code:`HTTPHandler` should you wish to backup or analyze the logs somewhere else.
+The ``fl.common.logger.configure`` function, also allows specifying a host to which logs
+can be pushed (via ``POST``) through a native Python ``logging.handler.HTTPHandler``.
+This is a particularly useful feature in ``gRPC``-based Federated Learning workloads
+where otherwise gathering logs from all entities (i.e. the server and the clients) might
+be cumbersome. Note that in Flower simulation, the server automatically displays all
+logs. You can still specify a ``HTTPHandler`` should you wish to backup or analyze the
+logs somewhere else.
