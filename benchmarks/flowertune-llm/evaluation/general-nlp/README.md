@@ -1,7 +1,7 @@
 # Evaluation for General NLP challenge
 
 We build up a multi-task language understanding pipeline to evaluate our fined-tuned LLMs.
-The [MMLU](https://huggingface.co/datasets/lukaemon/mmlu) dataset is used for this evaluation, encompassing three categories: STEM, social sciences, and humanities.
+The [MMLU](https://huggingface.co/datasets/lukaemon/mmlu) dataset is used for this evaluation, encompassing three categories: STEM, social sciences (SS), and humanities.
 
 
 ## Environment Setup
@@ -38,4 +38,4 @@ The model answers and accuracy values will be saved to `benchmarks/generation_{d
 
 
 > [!NOTE]
-> Please ensure that you provide all **three accuracy values (STEM, social sciences, humanities)** for three evaluation categories when submitting to the LLM Leaderboard (see the [`Make Submission`](https://github.com/adap/flower/tree/main/benchmarks/flowertune-llm/evaluation#make-submission-on-flowertune-llm-leaderboard) section).
+> Please ensure that you provide all **three accuracy values (STEM, SS, humanities)** for three evaluation categories when submitting to the LLM Leaderboard (see the [`Make Submission`](https://github.com/adap/flower/tree/main/benchmarks/flowertune-llm/evaluation#make-submission-on-flowertune-llm-leaderboard) section).
