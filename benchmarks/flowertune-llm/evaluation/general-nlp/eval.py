@@ -11,7 +11,7 @@ torch.manual_seed(2024)
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "--base-model-name-path", type=str, default="meta-llama/Llama-3.2-3B"
+    "--base-model-name-path", type=str, default="mistralai/Mistral-7B-v0.3"
 )
 parser.add_argument("--run-name", type=str, default="fl")
 parser.add_argument("--peft-path", type=str, default=None)
