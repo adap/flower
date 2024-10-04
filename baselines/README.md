@@ -2,7 +2,7 @@
 
 
 > [!NOTE] 
-> We are changing the way we structure the Flower baselines. While we complete the transition to the new format, you can still find the existing baselines in the `flwr_baselines` directory. Currently, you can make use of baselines for [FedAvg](flwr_baselines/flwr_baselines/publications/fedavg_mnist), [FedOpt](flwr_baselines/flwr_baselines/publications/adaptive_federated_optimization), and [LEAF-FEMNIST](flwr_baselines/flwr_baselines/publications/leaf/femnist).
+> We are changing the way we structure the Flower baselines. While we complete the transition to the new format, you can still find the existing baselines in the `flwr_baselines` directory. Currently, you can make use of baselines for [FedAvg](flwr_baselines/flwr_baselines/publications/fedavg_mnist/README.md), [FedOpt](flwr_baselines/flwr_baselines/publications/adaptive_federated_optimization/README.md), and [LEAF-FEMNIST](flwr_baselines/flwr_baselines/publications/leaf/femnist/README.md).
 
 
 ## Structure
