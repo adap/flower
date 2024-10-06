@@ -9,8 +9,8 @@ description = ""
 license = "Apache-2.0"
 dependencies = [
     "flwr[simulation]>=1.10.0",
-    "jax==0.4.31",
-    "jaxlib==0.4.31",
+    "jax==0.4.30",
+    "jaxlib==0.4.30",
     "scikit-learn==1.3.2",
 ]
 
