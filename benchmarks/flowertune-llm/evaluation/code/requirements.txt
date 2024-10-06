@@ -4,4 +4,5 @@ evaluate==0.3.0
 sentencepiece==0.2.0
 protobuf==5.27.1
 bitsandbytes==0.43.1
+hf_transfer==0.1.8
 git+https://github.com/bigcode-project/bigcode-evaluation-harness.git@0f3e95f0806e78a4f432056cdb1be93604a51d69
