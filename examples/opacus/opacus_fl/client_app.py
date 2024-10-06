@@ -3,9 +3,10 @@
 import warnings
 
 import torch
-from flwr.client import ClientApp, NumPyClient
 from opacus import PrivacyEngine
-from opacus_fl.task import train, test, Net, load_data, get_weights, set_weights
+from opacus_fl.task import Net, get_weights, load_data, set_weights, test, train
+
+from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
 
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -55,6 +56,7 @@ class FlowerClient(NumPyClient):
             privacy_engine,
             optimizer,
             self.target_delta,
+            device=self.device,
         )
 
         if epsilon is not None:
@@ -66,7 +68,7 @@ class FlowerClient(NumPyClient):
 
     def evaluate(self, parameters, config):
         set_weights(self.model, parameters)
-        loss, accuracy = test(self.model, self.test_loader)
+        loss, accuracy = test(self.model, self.test_loader, self.device)
         return loss, len(self.test_loader.dataset), {"accuracy": accuracy}
 
 

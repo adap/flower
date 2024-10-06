@@ -1,17 +1,17 @@
 """opacus: Training with Sample-Level Differential Privacy using Opacus Privacy Engine."""
 
-import torch.nn as nn
-import torch
-import torch.nn.functional as F
-from flwr_datasets import FederatedDataset
-from torchvision.transforms import Compose, Normalize, ToTensor
-from torch.utils.data import DataLoader
-from flwr_datasets.partitioner import IidPartitioner
-from tqdm import tqdm
 from collections import OrderedDict
 
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import IidPartitioner
+from torch.utils.data import DataLoader
+from torchvision.transforms import Compose, Normalize, ToTensor
+from tqdm import tqdm
+
 fds = None  # Cache FederatedDataset
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 class Net(nn.Module):
@@ -71,27 +71,30 @@ def load_data(partition_id: int, num_partitions: int):
     return train_loader, test_loader
 
 
-def train(net, train_loader, privacy_engine, optimizer, target_delta, epochs=1):
+def train(net, train_loader, privacy_engine, optimizer, target_delta, device, epochs=1):
     criterion = torch.nn.CrossEntropyLoss()
+    net.to(device)
+    net.train()
     for _ in range(epochs):
         for batch in tqdm(train_loader, "Training"):
             images = batch["img"]
             labels = batch["label"]
             optimizer.zero_grad()
-            criterion(net(images.to(DEVICE)), labels.to(DEVICE)).backward()
+            criterion(net(images.to(device)), labels.to(device)).backward()
             optimizer.step()
 
     epsilon = privacy_engine.get_epsilon(delta=target_delta)
     return epsilon
 
 
-def test(net, test_loader):
+def test(net, test_loader, device):
+    net.to(device)
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
     with torch.no_grad():
         for batch in tqdm(test_loader, "Testing"):
-            images = batch["img"].to(DEVICE)
-            labels = batch["label"].to(DEVICE)
+            images = batch["img"].to(device)
+            labels = batch["label"].to(device)
             outputs = net(images)
             loss += criterion(outputs, labels).item()
             correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()

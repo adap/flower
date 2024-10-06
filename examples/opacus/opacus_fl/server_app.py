@@ -2,10 +2,11 @@
 
 from typing import List, Tuple
 
-from flwr.common import Metrics, Context, ndarrays_to_parameters
-from flwr.server import ServerApp, ServerConfig, ServerAppComponents
-from flwr.server.strategy import FedAvg
 from opacus_fl.task import Net, get_weights
+
+from flwr.common import Context, Metrics, ndarrays_to_parameters
+from flwr.server import ServerApp, ServerAppComponents, ServerConfig
+from flwr.server.strategy import FedAvg
 
 
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
