@@ -18,7 +18,7 @@ It differs from the [xgboost-quickstart](https://github.com/adap/flower/tree/mai
 
 ## Training Strategies
 
-This example provides two training strategies, [**bagging aggregation**](https://flower.ai/docs/framework/tutorial-quickstart-xgboost.html#tree-based-bagging-aggregation) and [**cyclic training**](https://flower.ai/docs/framework/tutorial-quickstart-xgboost.html#cyclic_training).
+This example provides two training strategies, [**bagging aggregation**](https://flower.ai/docs/framework/tutorial-quickstart-xgboost.html#tree-based-bagging-aggregation) ([docs](https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedXgbBagging.html)) and [**cyclic training**](https://flower.ai/docs/framework/tutorial-quickstart-xgboost.html#cyclic_training) ([docs](https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedXgbCyclic.html)).
 
 ### Bagging Aggregation
 
@@ -108,7 +108,9 @@ flwr run . --run-config "train-method='cyclic' partitioner-type='linear' central
 
 ### Bagging aggregation experiment
 
-![](_static/xgboost_flower_auc_bagging.png)
+<div style="text-align: center;">
+<img src="_static/xgboost_flower_auc_bagging.png" alt="XGBoost with Flower and Bagging strategy" width="500"/>
+</div>
 
 The figure above shows the centralised tested AUC performance over FL rounds with bagging aggregation strategy on 4 experimental settings.
 One can see that all settings obtain stable performance boost over FL rounds (especially noticeable at the start of training).
@@ -116,7 +118,9 @@ As expected, uniform client distribution shows higher AUC values than square/exp
 
 ### Cyclic training experiment
 
-![](_static/xgboost_flower_auc_cyclic.png)
+<div style="text-align: center;">
+<img src="_static/xgboost_flower_auc_cyclic.png" alt="XGBoost with Flower and Cyclic strategy" width="500"/>
+</div>
 
 This figure shows the cyclic training results on centralised test set.
 The models with cyclic training requires more rounds to converge

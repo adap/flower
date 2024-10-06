@@ -3,9 +3,9 @@
 import warnings
 
 import xgboost as xgb
+from xgboost_comprehensive.task import load_data, replace_keys
+
 from flwr.client import Client, ClientApp
-from flwr.common.context import Context
-from flwr.common.config import unflatten_dict
 from flwr.common import (
     Code,
     EvaluateIns,
@@ -15,8 +15,8 @@ from flwr.common import (
     Parameters,
     Status,
 )
-
-from xgboost_comprehensive.task import load_data, replace_keys
+from flwr.common.config import unflatten_dict
+from flwr.common.context import Context
 
 warnings.filterwarnings("ignore", category=UserWarning)
 

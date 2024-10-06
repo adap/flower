@@ -1,10 +1,8 @@
 """xgboost_comprehensive: A Flower / XGBoost app."""
 
 from logging import INFO
-import xgboost as xgb
-from datasets import DatasetDict, concatenate_datasets
 
-from flwr.common import log
+import xgboost as xgb
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import (
     ExponentialPartitioner,
@@ -12,6 +10,9 @@ from flwr_datasets.partitioner import (
     LinearPartitioner,
     SquarePartitioner,
 )
+
+from datasets import DatasetDict, concatenate_datasets
+from flwr.common import log
 
 CORRELATION_TO_PARTITIONER = {
     "uniform": IidPartitioner,
