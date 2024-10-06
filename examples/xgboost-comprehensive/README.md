@@ -109,7 +109,7 @@ flwr run . --run-config "train-method='cyclic' partitioner-type='linear' central
 ### Bagging aggregation experiment
 
 <div style="text-align: center;">
-<img src="_static/xgboost_flower_auc_bagging.png" alt="XGBoost with Flower and Bagging strategy" width="500"/>
+<img src="_static/xgboost_flower_auc_bagging.png" alt="XGBoost with Flower and Bagging strategy" width="700"/>
 </div>
 
 The figure above shows the centralised tested AUC performance over FL rounds with bagging aggregation strategy on 4 experimental settings.
@@ -119,7 +119,7 @@ As expected, uniform client distribution shows higher AUC values than square/exp
 ### Cyclic training experiment
 
 <div style="text-align: center;">
-<img src="_static/xgboost_flower_auc_cyclic.png" alt="XGBoost with Flower and Cyclic strategy" width="500"/>
+<img src="_static/xgboost_flower_auc_cyclic.png" alt="XGBoost with Flower and Cyclic strategy" width="700"/>
 </div>
 
 This figure shows the cyclic training results on centralised test set.
