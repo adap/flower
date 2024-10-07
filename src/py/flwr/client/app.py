@@ -518,9 +518,9 @@ def start_client_internal(
                             reply_message, context = outputs.message, outputs.context
                         else:
                             # Load ClientApp instance
-                            client_app: ClientApp = load_client_app_fn(run.fab_hash)
-                            #     fab_id, fab_version
-                            # )
+                            client_app: ClientApp = load_client_app_fn(
+                                fab_id, fab_version, run.fab_hash
+                            )
 
                             # Execute ClientApp
                             reply_message = client_app(message=message, context=context)
