@@ -17,9 +17,11 @@
 from __future__ import annotations
 
 import time
-import warnings
+from logging import WARNING
 from typing import Optional, cast
 
+from .constant import MESSAGE_TTL_TOLERANCE
+from .logger import log
 from .record import RecordSet
 
 DEFAULT_TTL = 3600
@@ -289,13 +291,6 @@ class Message:
 
             ttl = msg.meta.ttl - (reply.meta.created_at - msg.meta.created_at)
         """
-        if ttl:
-            warnings.warn(
-                "A custom TTL was set, but note that the SuperLink does not enforce "
-                "the TTL yet. The SuperLink will start enforcing the TTL in a future "
-                "version of Flower.",
-                stacklevel=2,
-            )
         # If no TTL passed, use default for message creation (will update after
         # message creation)
         ttl_ = DEFAULT_TTL if ttl is None else ttl
@@ -308,6 +303,8 @@ class Message:
                 message.metadata.created_at - self.metadata.created_at
             )
             message.metadata.ttl = ttl
+
+        self._limit_task_res_ttl(message)
 
         return message
 
@@ -334,13 +331,6 @@ class Message:
         Message
             A new `Message` instance representing the reply.
         """
-        if ttl:
-            warnings.warn(
-                "A custom TTL was set, but note that the SuperLink does not enforce "
-                "the TTL yet. The SuperLink will start enforcing the TTL in a future "
-                "version of Flower.",
-                stacklevel=2,
-            )
         # If no TTL passed, use default for message creation (will update after
         # message creation)
         ttl_ = DEFAULT_TTL if ttl is None else ttl
@@ -357,6 +347,8 @@ class Message:
             )
             message.metadata.ttl = ttl
 
+        self._limit_task_res_ttl(message)
+
         return message
 
     def __repr__(self) -> str:
@@ -369,6 +361,31 @@ class Message:
             ]
         )
         return f"{self.__class__.__qualname__}({view})"
+
+    def _limit_task_res_ttl(self, message: Message) -> None:
+        """Limit the TaskRes TTL to not exceed the expiration time of the TaskIns it
+        replies to.
+
+        Parameters
+        ----------
+        message : Message
+            The message to which the TaskRes is replying.
+        """
+        # Calculate the maximum allowed TTL
+        max_allowed_ttl = (
+            self.metadata.created_at + self.metadata.ttl - message.metadata.created_at
+        )
+
+        if message.metadata.ttl - max_allowed_ttl > MESSAGE_TTL_TOLERANCE:
+            log(
+                WARNING,
+                "The reply TTL of %.2f seconds exceeded the "
+                "allowed maximum of %.2f seconds. "
+                "The TTL has been updated to the allowed maximum.",
+                message.metadata.ttl,
+                max_allowed_ttl,
+            )
+            message.metadata.ttl = max_allowed_ttl
 
 
 def _create_reply_metadata(msg: Message, ttl: float) -> Metadata:

@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """Tests all state implemenations have to conform to."""
-# pylint: disable=invalid-name, disable=R0904
+# pylint: disable=invalid-name, disable=R0904,R0913
 
 import tempfile
 import time
@@ -680,7 +680,7 @@ class StateTest(unittest.TestCase):
         assert err_taskres.task.HasField("error")
         assert err_taskres.task.error.code == ErrorCode.NODE_UNAVAILABLE
 
-    def test_store_task_res_taskins_expired(self) -> None:
+    def test_store_task_res_task_ins_expired(self) -> None:
         """Test behavior of store_task_res when the TaskIns it references is expired."""
         # Prepare
         state: State = self.state_factory()
@@ -690,50 +690,80 @@ class StateTest(unittest.TestCase):
         task_ins.task.created_at = time.time() - task_ins.task.ttl + 0.5
         task_ins_id = state.store_task_ins(task_ins)
 
-        # Wait for 0.5 second for TaskIns to expire
-        time.sleep(0.5)
+        with patch(
+            "time.time",
+            side_effect=lambda: task_ins.task.created_at + task_ins.task.ttl + 0.1,
+        ):  # Expired by 0.1 seconds
+            task = create_task_res(
+                producer_node_id=0,
+                anonymous=True,
+                ancestry=[str(task_ins_id)],
+                run_id=run_id,
+            )
 
-        task = create_task_res(
-            producer_node_id=0,
-            anonymous=True,
-            ancestry=[str(task_ins_id)],
-            run_id=run_id,
-        )
-
-        # Execute
-        result = state.store_task_res(task)
+            # Execute
+            result = state.store_task_res(task)
 
         # Assert
         assert result is None
 
     def test_store_task_res_limit_ttl(self) -> None:
-        """Test behavior of store_task_res to limit the TTL of TaskRes."""
-        # Prepare
-        state: State = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {})
+        """Test the behavior of store_task_res regarding the TTL limit of TaskRes."""
+        current_time = time.time()
 
-        task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
-        task_ins.task.created_at = time.time() - 5
-        task_ins.task.ttl = 10
-        task_ins_id = state.store_task_ins(task_ins)
+        test_cases = [
+            (
+                current_time - 5,
+                10,
+                current_time - 2,
+                6,
+                True,
+            ),  # TaskRes within allowed TTL
+            (
+                current_time - 5,
+                10,
+                current_time - 2,
+                15,
+                False,
+            ),  # TaskRes TTL exceeds max allowed TTL
+        ]
 
-        task_res = create_task_res(
-            producer_node_id=0,
-            anonymous=True,
-            ancestry=[str(task_ins_id)],
-            run_id=run_id,
-        )
-        task_res.task.created_at = time.time() - 2
-        task_res.task.ttl = 8
+        for (
+            task_ins_created_at,
+            task_ins_ttl,
+            task_res_created_at,
+            task_res_ttl,
+            expected_store_result,
+        ) in test_cases:
 
-        # Execute
-        state.store_task_res(task_res)
-        if task_ins_id is not None:
-            res = state.get_task_res(task_ids={task_ins_id}, limit=None)[0]
+            # Prepare
+            state: State = self.state_factory()
+            run_id = state.create_run(None, None, "9f86d08", {})
 
-        # Assert
-        tolerance = 1e-2
-        assert abs(res.task.ttl - 7) < tolerance
+            task_ins = create_task_ins(
+                consumer_node_id=0, anonymous=True, run_id=run_id
+            )
+            task_ins.task.created_at = task_ins_created_at
+            task_ins.task.ttl = task_ins_ttl
+            task_ins_id = state.store_task_ins(task_ins)
+
+            task_res = create_task_res(
+                producer_node_id=0,
+                anonymous=True,
+                ancestry=[str(task_ins_id)],
+                run_id=run_id,
+            )
+            task_res.task.created_at = task_res_created_at
+            task_res.task.ttl = task_res_ttl
+
+            # Execute
+            res = state.store_task_res(task_res)
+
+            # Assert
+            if expected_store_result:
+                assert res is not None
+            else:
+                assert res is None
 
     def test_get_task_ins_not_return_expired(self) -> None:
         """Test get_task_ins not to return expired tasks."""
@@ -754,36 +784,6 @@ class StateTest(unittest.TestCase):
         with patch("time.time", side_effect=lambda: task_ins.task.created_at + 6.1):
             task_ins_list = state.get_task_ins(node_id=1, limit=None)
             assert len(task_ins_list) == 0
-
-    def test_get_task_res_not_return_expired(self) -> None:
-        """Test get_task_res not to return TaskRes if its TaskIns is expired."""
-        # Prepare
-        consumer_node_id = 1
-        state = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {})
-        task_ins = create_task_ins(
-            consumer_node_id=consumer_node_id, anonymous=False, run_id=run_id
-        )
-        task_ins.task.created_at = time.time() - 5
-        task_ins.task.ttl = 5.1
-
-        task_id = state.store_task_ins(task_ins=task_ins)
-
-        task_res = create_task_res(
-            producer_node_id=100,
-            anonymous=False,
-            ancestry=[str(task_id)],
-            run_id=run_id,
-        )
-        _ = state.store_task_res(task_res=task_res)
-
-        with patch("time.time", side_effect=lambda: task_ins.task.created_at + 6.1):
-            # Execute
-            if task_id is not None:
-                task_res_list = state.get_task_res(task_ids={task_id}, limit=None)
-
-            # Assert
-            assert len(task_res_list) == 0
 
 
 def create_task_ins(

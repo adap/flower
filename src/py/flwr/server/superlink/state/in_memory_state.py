@@ -22,7 +22,11 @@ from typing import Optional
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
-from flwr.common.constant import NODE_ID_NUM_BYTES, RUN_ID_NUM_BYTES
+from flwr.common.constant import (
+    MESSAGE_TTL_TOLERANCE,
+    NODE_ID_NUM_BYTES,
+    RUN_ID_NUM_BYTES,
+)
 from flwr.common.typing import Run, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state.state import State
@@ -83,6 +87,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
 
         # Find TaskIns for node_id that were not delivered yet
         task_ins_list: list[TaskIns] = []
+        current_time = time.time()
         with self.lock:
             for _, task_ins in self.task_ins_store.items():
                 # pylint: disable=too-many-boolean-expressions
@@ -91,13 +96,13 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                     and task_ins.task.consumer.anonymous is False
                     and task_ins.task.consumer.node_id == node_id
                     and task_ins.task.delivered_at == ""
-                    and task_ins.task.created_at + task_ins.task.ttl > time.time()
+                    and task_ins.task.created_at + task_ins.task.ttl > current_time
                 ) or (
                     node_id is None  # Anonymous
                     and task_ins.task.consumer.anonymous is True
                     and task_ins.task.consumer.node_id == 0
                     and task_ins.task.delivered_at == ""
-                    and task_ins.task.created_at + task_ins.task.ttl > time.time()
+                    and task_ins.task.created_at + task_ins.task.ttl > current_time
                 ):
                     task_ins_list.append(task_ins)
                 if limit and len(task_ins_list) == limit:
@@ -136,22 +141,26 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                 )
                 return None
 
-            # Limit the TaskRes TTL to not exceed the
+            # Fail if the TaskRes TTL exceeds the
             # expiration time of the TaskIns it replies to.
             # Condition: TaskIns.created_at + TaskIns.ttl ≥
             #            TaskRes.created_at + TaskRes.ttl
+            # A small tolerance is introduced to account
+            # for floating-point precision issues.
             max_allowed_ttl = (
                 task_ins.task.created_at + task_ins.task.ttl - task_res.task.created_at
             )
-            if task_res.task.ttl > max_allowed_ttl:
+            if task_res.task.ttl and (
+                task_res.task.ttl - max_allowed_ttl > MESSAGE_TTL_TOLERANCE
+            ):
                 log(
                     WARNING,
-                    "Received TaskRes with TTL %s exceeding the allowed maximum TTL %s."
-                    "Updating TTL to the allowed maximum.",
+                    "Received TaskRes with TTL %.2f "
+                    "exceeding the allowed maximum TTL %.2f.",
                     task_res.task.ttl,
                     max_allowed_ttl,
                 )
-                task_res.task.ttl = max_allowed_ttl
+                return None
 
         # Validate run_id
         if task_res.run_id not in self.run_ids:

@@ -38,7 +38,7 @@ from flwr.proto.recordset_pb2 import MetricsRecord as ProtoMetricsRecord
 from flwr.proto.recordset_pb2 import MetricsRecordValue as ProtoMetricsRecordValue
 from flwr.proto.recordset_pb2 import ParametersRecord as ProtoParametersRecord
 from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
-from flwr.proto.recordset_pb2 import Sint64List, StringList
+from flwr.proto.recordset_pb2 import SintList, StringList, UintList
 from flwr.proto.run_pb2 import Run as ProtoRun
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import (
@@ -340,6 +340,7 @@ def metrics_from_proto(proto: Any) -> typing.Metrics:
 
 
 # === Scalar messages ===
+INT64_MAX_VALUE = 9223372036854775807  # (1 << 63) - 1
 
 
 def scalar_to_proto(scalar: typing.Scalar) -> Scalar:
@@ -354,6 +355,9 @@ def scalar_to_proto(scalar: typing.Scalar) -> Scalar:
         return Scalar(double=scalar)
 
     if isinstance(scalar, int):
+        # Use uint64 for integers larger than the maximum value of sint64
+        if scalar > INT64_MAX_VALUE:
+            return Scalar(uint64=scalar)
         return Scalar(sint64=scalar)
 
     if isinstance(scalar, str):
@@ -374,21 +378,26 @@ def scalar_from_proto(scalar_msg: Scalar) -> typing.Scalar:
 # === Record messages ===
 
 
-_type_to_field = {
+_type_to_field: dict[type, str] = {
     float: "double",
     int: "sint64",
     bool: "bool",
     str: "string",
     bytes: "bytes",
 }
-_list_type_to_class_and_field = {
+_list_type_to_class_and_field: dict[type, tuple[type[GrpcMessage], str]] = {
     float: (DoubleList, "double_list"),
-    int: (Sint64List, "sint64_list"),
+    int: (SintList, "sint_list"),
     bool: (BoolList, "bool_list"),
     str: (StringList, "string_list"),
     bytes: (BytesList, "bytes_list"),
 }
 T = TypeVar("T")
+
+
+def _is_uint64(value: Any) -> bool:
+    """Check if a value is uint64."""
+    return isinstance(value, int) and value > INT64_MAX_VALUE
 
 
 def _record_value_to_proto(
@@ -403,12 +412,18 @@ def _record_value_to_proto(
         # Single element
         # Note: `isinstance(False, int) == True`.
         if isinstance(value, t):
-            arg[_type_to_field[t]] = value
+            fld = _type_to_field[t]
+            if t is int and _is_uint64(value):
+                fld = "uint64"
+            arg[fld] = value
             return proto_class(**arg)
         # List
         if isinstance(value, list) and all(isinstance(item, t) for item in value):
-            list_class, field_name = _list_type_to_class_and_field[t]
-            arg[field_name] = list_class(vals=value)
+            list_class, fld = _list_type_to_class_and_field[t]
+            # Use UintList if any element is of type `uint64`.
+            if t is int and any(_is_uint64(v) for v in value):
+                list_class, fld = UintList, "uint_list"
+            arg[fld] = list_class(vals=value)
             return proto_class(**arg)
     # Invalid types
     raise TypeError(
