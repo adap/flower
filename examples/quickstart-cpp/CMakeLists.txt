@@ -67,7 +67,7 @@ target_include_directories(flwr PUBLIC
 ######################
 ### FLWR_CLIENT
 file(GLOB FLWR_CLIENT_SRCS src/*.cc)
-set(EXECUTABLE_NAME flwr_client)
+set(EXECUTABLE_NAME flower-supernode)
 add_executable(${EXECUTABLE_NAME} ${FLWR_CLIENT_SRCS})
 
 target_include_directories(${EXECUTABLE_NAME} PUBLIC

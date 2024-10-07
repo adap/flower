@@ -7,7 +7,7 @@ name = "py-server"
 version = "1.0.0"
 description = ""
 license = "Apache-2.0"
-dependencies = ["flwr[simulation]>=1.10.0", "numpy>=1.21.0"]
+dependencies = ["flwr>=1.11.1", "numpy>=1.21.0"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
@@ -21,9 +21,3 @@ clientapp = ""
 
 [tool.flwr.app.config]
 num-server-rounds = 3
-
-[tool.flwr.federations]
-default = "local-simulation"
-
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 10
