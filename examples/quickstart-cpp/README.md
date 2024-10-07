@@ -32,7 +32,7 @@ cmake --build build
 ## Run the `Flower SuperLink`, the two clients, and the `Flower ServerApp` in separate terminals
 
 ```bash
-flwr-superlink --insecure
+flower-superlink --insecure
 ```
 
 ```bash
@@ -44,5 +44,5 @@ build/flwr_client 1 127.0.0.1:9092
 ```
 
 ```bash
-flower-server-app server:app --insecure
+flower-server-app py-server --insecure
 ```
