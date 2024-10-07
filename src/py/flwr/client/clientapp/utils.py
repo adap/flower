@@ -18,7 +18,7 @@ from logging import DEBUG
 from pathlib import Path
 from typing import Callable, Optional
 
-from flwr.cli import build
+from flwr.cli.build import build
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common.config import get_flwr_dir, get_project_config, get_project_dir
 from flwr.common.logger import log
