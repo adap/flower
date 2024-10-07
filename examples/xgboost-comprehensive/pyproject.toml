@@ -25,21 +25,21 @@ clientapp = "xgboost_comprehensive.client_app:app"
 
 [tool.flwr.app.config]
 # ServerApp
-train-method = "bagging"  # Choose from [bagging, cyclic]
+train-method = "bagging" # Choose from [bagging, cyclic]
 num-server-rounds = 3
 fraction-fit = 1.0
 fraction-evaluate = 1.0
 centralised-eval = false
 
 # ClientApp
-partitioner-type = "uniform"  # Choose from [uniform, linear, square, exponential]
+partitioner-type = "uniform" # Choose from [uniform, linear, square, exponential]
 test-fraction = 0.2
 seed = 42
 centralised-eval-client = false
 local-epochs = 1
 scaled-lr = false
 params.objective = "binary:logistic"
-params.eta = 0.1  # Learning rate
+params.eta = 0.1 # Learning rate
 params.max-depth = 8
 params.eval-metric = "auc"
 params.nthread = 16
