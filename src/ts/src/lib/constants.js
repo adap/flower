@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.FLWR_HOME = exports.FAB_CONFIG_FILE = exports.APP_DIR = exports.PING_MAX_INTERVAL = exports.PING_RANDOM_RANGE = exports.PING_BASE_MULTIPLIER = exports.PING_CALL_TIMEOUT = exports.PING_DEFAULT_INTERVAL = void 0;
+exports.PING_DEFAULT_INTERVAL = 30;
+exports.PING_CALL_TIMEOUT = 5;
+exports.PING_BASE_MULTIPLIER = 0.8;
+exports.PING_RANDOM_RANGE = [-0.1, 0.1];
+exports.PING_MAX_INTERVAL = 1e300;
+exports.APP_DIR = "apps";
+exports.FAB_CONFIG_FILE = "pyproject.toml";
+exports.FLWR_HOME = "FLWR_HOME";
