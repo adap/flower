@@ -52,19 +52,20 @@ In this example, `SuperLink` and `ServerApp` use Flower's Python package, while 
 
 1. **Prepare for `SuperLink` and `ServerApp`**
 
-    In a new Python environment (Python 3.10.0 or higher), install the the project as defined in `pyproject.toml.` Install the dependencies defined in `pyproject.toml` as well as the `pytorchexample` package.
+   In a new Python environment (Python 3.10.0 or higher), install the the project as defined in `pyproject.toml.` Install the dependencies defined in `pyproject.toml` as well as the `pytorchexample` package.
 
-    ```bash
-    pip install -e py-server/
-    ```
+   ```bash
+   pip install -e py-server/
+   ```
+
 2. **Build the `SuperNode` executables**
 
-    Ensure you have [CMake installed](https://cliutils.gitlab.io/modern-cmake/chapters/intro/installing.html) in your system. Then, build the binaries:
+   Ensure you have [CMake installed](https://cliutils.gitlab.io/modern-cmake/chapters/intro/installing.html) in your system. Then, build the binaries:
 
-    ```bash
-    cmake -S . -B build
-    cmake --build build -j 4 # -j allows you to parallelize your build
-    ```
+   ```bash
+   cmake -S . -B build
+   cmake --build build -j 4 # -j allows you to parallelize your build
+   ```
 
 ## Run the project
 
@@ -83,7 +84,7 @@ build/flower-supernode 0 127.0.0.1:9092
 build/flower-supernode 1 127.0.0.1:9092
 ```
 
-Finally, launch the `ServerApp`. 
+Finally, launch the `ServerApp`.
 
 ```bash
 # From the python environment you created earlier
