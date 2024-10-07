@@ -71,7 +71,7 @@ def test_get_project_dir_invalid_fab_id() -> None:
 def test_get_project_dir_valid() -> None:
     """Test get_project_dir with an valid fab_id and version."""
     app_path = get_project_dir("app_name/user", "1.0.0", "abcd1234", flwr_dir=".")
-    assert app_path == Path("apps") / "app_name" / "user" / "1.0.0"
+    assert app_path == Path("apps") / "app_name.user.1.0.0.abcd1234"
 
 
 def test_get_project_config_file_not_found() -> None:
