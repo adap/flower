@@ -12,70 +12,114 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower command line interface `run` command."""
+"""Flower command line interface `log` command."""
 
-import hashlib
-import json
-import subprocess
 import sys
-from logging import DEBUG
+import time
+from logging import DEBUG, ERROR, INFO
 from pathlib import Path
-from typing import Annotated, Any, Optional
+from typing import Annotated, Optional
 
+import grpc
 import typer
 
-from flwr.cli.build import build
 from flwr.cli.config_utils import load_and_validate
-from flwr.common.config import flatten_dict, parse_config_args
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
-from flwr.common.logger import log
-from flwr.common.serde import fab_to_proto, user_config_to_proto
-from flwr.common.typing import Fab
-from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
+from flwr.common.logger import log as logger
+from flwr.proto.exec_pb2 import StreamLogsRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
-
-from ..log import start_stream
 
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
 
+def start_stream(
+    run_id: int, channel: grpc.Channel, refresh_period: int = CONN_REFRESH_PERIOD
+) -> None:
+    """Start log streaming for a given run ID."""
+    try:
+        while True:
+            logger(INFO, "Starting logstream for run_id `%s`", run_id)
+            stream_logs(run_id, channel, refresh_period)
+            time.sleep(2)
+            logger(DEBUG, "Reconnecting to logstream")
+    except KeyboardInterrupt:
+        logger(INFO, "Exiting logstream")
+    except grpc.RpcError as e:
+        # pylint: disable=E1101
+        if e.code() == grpc.StatusCode.NOT_FOUND:
+            logger(ERROR, "Invalid run_id `%s`, exiting", run_id)
+        if e.code() == grpc.StatusCode.CANCELLED:
+            pass
+    finally:
+        channel.close()
+
+
+def stream_logs(run_id: int, channel: grpc.Channel, duration: int) -> None:
+    """Stream logs from the beginning of a run with connection refresh."""
+    start_time = time.time()
+    stub = ExecStub(channel)
+    req = StreamLogsRequest(run_id=run_id)
+
+    for res in stub.StreamLogs(req):
+        print(res.log_output)
+        if time.time() - start_time > duration:
+            break
+
+
+def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
+    """Print logs from the beginning of a run."""
+    stub = ExecStub(channel)
+    req = StreamLogsRequest(run_id=run_id)
+
+    try:
+        while True:
+            try:
+                # Enforce timeout for graceful exit
+                for res in stub.StreamLogs(req, timeout=timeout):
+                    print(res.log_output)
+            except grpc.RpcError as e:
+                # pylint: disable=E1101
+                if e.code() == grpc.StatusCode.DEADLINE_EXCEEDED:
+                    break
+                if e.code() == grpc.StatusCode.NOT_FOUND:
+                    logger(ERROR, "Invalid run_id `%s`, exiting", run_id)
+                    break
+                if e.code() == grpc.StatusCode.CANCELLED:
+                    break
+    except KeyboardInterrupt:
+        logger(DEBUG, "Stream interrupted by user")
+    finally:
+        channel.close()
+        logger(DEBUG, "Channel closed")
+
+
 def on_channel_state_change(channel_connectivity: str) -> None:
     """Log channel connectivity."""
-    log(DEBUG, channel_connectivity)
+    logger(DEBUG, channel_connectivity)
 
 
-# pylint: disable-next=too-many-locals
-def run(
+def log(
+    run_id: Annotated[
+        int,
+        typer.Argument(help="The Flower run ID to query"),
+    ],
     app: Annotated[
         Path,
-        typer.Argument(help="Path of the Flower App to run."),
+        typer.Argument(help="Path of the Flower project to run"),
     ] = Path("."),
     federation: Annotated[
         Optional[str],
-        typer.Argument(help="Name of the federation to run the app on."),
-    ] = None,
-    config_overrides: Annotated[
-        Optional[list[str]],
-        typer.Option(
-            "--run-config",
-            "-c",
-            help="Override configuration key-value pairs, should be of the format:\n\n"
-            '`--run-config \'key1="value1" key2="value2"\' '
-            "--run-config 'key3=\"value3\"'`\n\n"
-            "Note that `key1`, `key2`, and `key3` in this example need to exist "
-            "inside the `pyproject.toml` in order to be properly overriden.",
-        ),
+        typer.Argument(help="Name of the federation to run the app on"),
     ] = None,
     stream: Annotated[
         bool,
         typer.Option(
-            "--stream",
-            help="Use `--stream` with `flwr run` to display logs;\n "
-            "logs are not streamed by default.",
+            "--stream/--show",
+            help="Flag to stream or print logs from the Flower run",
         ),
-    ] = False,
+    ] = True,
 ) -> None:
-    """Run Flower App."""
+    """Get logs from a Flower project run."""
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
     pyproject_path = app / "pyproject.toml" if app else None
@@ -120,7 +164,7 @@ def run(
             fed for fed in config["tool"]["flwr"]["federations"] if fed != "default"
         }
         typer.secho(
-            f"❌ There is no `{federation}` federation declared in "
+            f"❌ There is no `{federation}` federation declared in the "
             "`pyproject.toml`.\n The following federations were found:\n\n"
             + "\n".join(available_feds),
             fg=typer.colors.RED,
@@ -128,22 +172,27 @@ def run(
         )
         raise typer.Exit(code=1)
 
-    if "address" in federation_config:
-        _run_with_superexec(app, federation_config, config_overrides, stream)
-    else:
-        _run_without_superexec(app, federation_config, config_overrides, federation)
+    if "address" not in federation_config:
+        typer.secho(
+            "❌ `flwr log` currently works with `SuperExec`. Ensure that the correct"
+            "`SuperExec` address is provided in the `pyproject.toml`.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+
+    _log_with_superexec(federation_config, run_id, stream)
 
 
-def _run_with_superexec(
-    app: Path,
-    federation_config: dict[str, Any],
-    config_overrides: Optional[list[str]],
+# pylint: disable-next=too-many-branches
+def _log_with_superexec(
+    federation_config: dict[str, str],
+    run_id: int,
     stream: bool,
 ) -> None:
-
     insecure_str = federation_config.get("insecure")
     if root_certificates := federation_config.get("root-certificates"):
-        root_certificates_bytes = (app / root_certificates).read_bytes()
+        root_certificates_bytes = Path(root_certificates).read_bytes()
         if insecure := bool(insecure_str):
             typer.secho(
                 "❌ `root_certificates` were provided but the `insecure` parameter"
@@ -177,72 +226,9 @@ def _run_with_superexec(
         interceptors=None,
     )
     channel.subscribe(on_channel_state_change)
-    stub = ExecStub(channel)
-
-    fab_path = Path(build(app))
-    content = fab_path.read_bytes()
-    fab = Fab(hashlib.sha256(content).hexdigest(), content)
-
-    req = StartRunRequest(
-        fab=fab_to_proto(fab),
-        override_config=user_config_to_proto(parse_config_args(config_overrides)),
-        federation_config=user_config_to_proto(
-            flatten_dict(federation_config.get("options"))
-        ),
-    )
-    res = stub.StartRun(req)
-
-    # Delete FAB file once it has been sent to the SuperExec
-    fab_path.unlink()
-    typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
 
     if stream:
-        start_stream(res.run_id, channel, CONN_REFRESH_PERIOD)
-
-
-def _run_without_superexec(
-    app: Optional[Path],
-    federation_config: dict[str, Any],
-    config_overrides: Optional[list[str]],
-    federation: str,
-) -> None:
-    try:
-        num_supernodes = federation_config["options"]["num-supernodes"]
-        verbose: Optional[bool] = federation_config["options"].get("verbose")
-        backend_cfg = federation_config["options"].get("backend", {})
-    except KeyError as err:
-        typer.secho(
-            "❌ The project's `pyproject.toml` needs to declare the number of"
-            " SuperNodes in the simulation. To simulate 10 SuperNodes,"
-            " use the following notation:\n\n"
-            f"[tool.flwr.federations.{federation}]\n"
-            "options.num-supernodes = 10\n",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1) from err
-
-    command = [
-        "flower-simulation",
-        "--app",
-        f"{app}",
-        "--num-supernodes",
-        f"{num_supernodes}",
-    ]
-
-    if backend_cfg:
-        # Stringify as JSON
-        command.extend(["--backend-config", json.dumps(backend_cfg)])
-
-    if verbose:
-        command.extend(["--verbose"])
-
-    if config_overrides:
-        command.extend(["--run-config", f"{' '.join(config_overrides)}"])
-
-    # Run the simulation
-    subprocess.run(
-        command,
-        check=True,
-        text=True,
-    )
+        start_stream(run_id, channel, CONN_REFRESH_PERIOD)
+    else:
+        logger(INFO, "Printing logstream for run_id `%s`", run_id)
+        print_logs(run_id, channel, timeout=5)
