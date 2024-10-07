@@ -805,6 +805,7 @@ class StateTest(unittest.TestCase):
             ancestry=[str(task_id)],
             run_id=run_id,
         )
+        task_res.task.ttl = 0.1
         _ = state.store_task_res(task_res=task_res)
 
         with patch("time.time", side_effect=lambda: task_ins.task.created_at + 6.1):
