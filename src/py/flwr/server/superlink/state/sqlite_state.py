@@ -20,7 +20,7 @@ import re
 import sqlite3
 import time
 from collections.abc import Sequence
-from logging import DEBUG, ERROR
+from logging import DEBUG, ERROR, WARNING
 from typing import Any, Optional, Union, cast
 from uuid import UUID, uuid4
 
@@ -400,7 +400,7 @@ class SqliteState(State):  # pylint: disable=R0904
             task_res.task.ttl - max_allowed_ttl > MESSAGE_TTL_TOLERANCE
         ):
             log(
-                ERROR,
+                WARNING,
                 "Received TaskRes with TTL %.2f "
                 "exceeding the allowed maximum TTL %.2f.",
                 task_res.task.ttl,
