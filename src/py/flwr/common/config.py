@@ -22,7 +22,7 @@ from typing import Any, Optional, Union, cast, get_args
 import tomli
 
 from flwr.cli.config_utils import get_fab_config, validate_fields
-from flwr.common.constant import APP_DIR, FAB_CONFIG_FILE, FLWR_HOME
+from flwr.common.constant import APP_DIR, FAB_CONFIG_FILE, FAB_HASH_SHORT, FLWR_HOME
 from flwr.common.typing import Run, UserConfig, UserConfigValue
 
 
@@ -39,7 +39,10 @@ def get_flwr_dir(provided_path: Optional[str] = None) -> Path:
 
 
 def get_project_dir(
-    fab_id: str, fab_version: str, flwr_dir: Optional[Union[str, Path]] = None
+    fab_id: str,
+    fab_version: str,
+    fab_hash: str,
+    flwr_dir: Optional[Union[str, Path]] = None,
 ) -> Path:
     """Return the project directory based on the given fab_id and fab_version."""
     # Check the fab_id
@@ -50,7 +53,11 @@ def get_project_dir(
     publisher, project_name = fab_id.split("/")
     if flwr_dir is None:
         flwr_dir = get_flwr_dir()
-    return Path(flwr_dir) / APP_DIR / publisher / project_name / fab_version
+    return (
+        Path(flwr_dir)
+        / APP_DIR
+        / f"{publisher}.{project_name}.{fab_version}.{fab_hash[:FAB_HASH_SHORT]}"
+    )
 
 
 def get_project_config(project_dir: Union[str, Path]) -> dict[str, Any]:
