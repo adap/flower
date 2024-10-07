@@ -150,13 +150,13 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             if task_res.task.ttl and (
                 task_res.task.ttl - max_allowed_ttl > MESSAGE_TTL_TOLERANCE
             ):
-                # log(
-                #     ERROR,
-                #     "Received TaskRes with TTL %.2f "
-                #     "exceeding the allowed maximum TTL %.2f.",
-                #     task_res.task.ttl,
-                #     max_allowed_ttl,
-                # )
+                log(
+                    ERROR,
+                    "Received TaskRes with TTL %.2f "
+                    "exceeding the allowed maximum TTL %.2f.",
+                    task_res.task.ttl,
+                    max_allowed_ttl,
+                )
                 return None
 
         # Validate run_id
