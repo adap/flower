@@ -17,7 +17,7 @@
 
 import threading
 import time
-from logging import WARNING
+from logging import ERROR, WARNING
 from typing import Optional
 from uuid import UUID, uuid4
 
