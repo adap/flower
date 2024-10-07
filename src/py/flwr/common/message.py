@@ -368,7 +368,8 @@ class Message:
 
         Parameters
         ----------
-            message: The message to which the TaskRes is replying.
+        message : Message
+            The message to which the TaskRes is replying.
         """
         # Calculate the maximum allowed TTL
         max_allowed_ttl = (
