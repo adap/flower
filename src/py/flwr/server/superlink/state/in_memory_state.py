@@ -17,7 +17,7 @@
 
 import threading
 import time
-from logging import ERROR
+from logging import WARNING
 from typing import Optional
 from uuid import UUID, uuid4
 
@@ -151,7 +151,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                 task_res.task.ttl - max_allowed_ttl > MESSAGE_TTL_TOLERANCE
             ):
                 log(
-                    ERROR,
+                    WARNING,
                     "Received TaskRes with TTL %.2f "
                     "exceeding the allowed maximum TTL %.2f.",
                     task_res.task.ttl,
