@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """Tests all state implemenations have to conform to."""
-# pylint: disable=invalid-name, disable=R0904
+# pylint: disable=invalid-name, disable=R0904,R0913
 
 import tempfile
 import time
@@ -706,6 +706,64 @@ class StateTest(unittest.TestCase):
 
         # Assert
         assert result is None
+
+    def test_store_task_res_limit_ttl(self) -> None:
+        """Test the behavior of store_task_res regarding the TTL limit of TaskRes."""
+        current_time = time.time()
+
+        test_cases = [
+            (
+                current_time - 5,
+                10,
+                current_time - 2,
+                6,
+                True,
+            ),  # TaskRes within allowed TTL
+            (
+                current_time - 5,
+                10,
+                current_time - 2,
+                15,
+                False,
+            ),  # TaskRes TTL exceeds max allowed TTL
+        ]
+
+        for (
+            task_ins_created_at,
+            task_ins_ttl,
+            task_res_created_at,
+            task_res_ttl,
+            expected_store_result,
+        ) in test_cases:
+
+            # Prepare
+            state: State = self.state_factory()
+            run_id = state.create_run(None, None, "9f86d08", {})
+
+            task_ins = create_task_ins(
+                consumer_node_id=0, anonymous=True, run_id=run_id
+            )
+            task_ins.task.created_at = task_ins_created_at
+            task_ins.task.ttl = task_ins_ttl
+            task_ins_id = state.store_task_ins(task_ins)
+
+            task_res = create_task_res(
+                producer_node_id=0,
+                anonymous=True,
+                ancestry=[str(task_ins_id)],
+                run_id=run_id,
+            )
+            task_res.task.created_at = task_res_created_at
+            task_res.task.ttl = task_res_ttl
+
+            # Execute
+            res = state.store_task_res(task_res)
+
+            # Assert
+            if expected_store_result:
+                assert res is not None
+            else:
+                assert res is None
 
 
 def create_task_ins(

@@ -20,12 +20,16 @@ import re
 import sqlite3
 import time
 from collections.abc import Sequence
-from logging import DEBUG, ERROR
+from logging import DEBUG, ERROR, WARNING
 from typing import Any, Optional, Union, cast
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
-from flwr.common.constant import NODE_ID_NUM_BYTES, RUN_ID_NUM_BYTES
+from flwr.common.constant import (
+    MESSAGE_TTL_TOLERANCE,
+    NODE_ID_NUM_BYTES,
+    RUN_ID_NUM_BYTES,
+)
 from flwr.common.typing import Run, UserConfig
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
@@ -380,6 +384,27 @@ class SqliteState(State):  # pylint: disable=R0904
                 "Failed to store TaskRes: "
                 "TaskIns with task_id %s does not exist or has expired.",
                 task_ins_id,
+            )
+            return None
+
+        # Fail if the TaskRes TTL exceeds the
+        # expiration time of the TaskIns it replies to.
+        # Condition: TaskIns.created_at + TaskIns.ttl ≥
+        #            TaskRes.created_at + TaskRes.ttl
+        # A small tolerance is introduced to account
+        # for floating-point precision issues.
+        max_allowed_ttl = (
+            task_ins["created_at"] + task_ins["ttl"] - task_res.task.created_at
+        )
+        if task_res.task.ttl and (
+            task_res.task.ttl - max_allowed_ttl > MESSAGE_TTL_TOLERANCE
+        ):
+            log(
+                WARNING,
+                "Received TaskRes with TTL %.2f "
+                "exceeding the allowed maximum TTL %.2f.",
+                task_res.task.ttl,
+                max_allowed_ttl,
             )
             return None
 
