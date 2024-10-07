@@ -4,9 +4,9 @@ dataset: [Synthetic]
 framework: [C++]
 ---
 
-# Flower Clients in C++
+# Flower `SuperNodes` in C++
 
-In this example you will train a linear regression model on synthetic data using C++ `SuperNodes` that connect to a Flower `SuperLink` and receive messages from a `ServerApp`. Both `SuperLink` and `ServerApp` run in Python.
+In this example you will train a linear regression model on synthetic data using C++ `SuperNodes` (i.e. the "client side" in a Flower federation) that connect to a Flower `SuperLink` and receive messages from a `ServerApp`. Both `SuperLink` and `ServerApp` run in Python.
 
 ## Acknowledgements
 
