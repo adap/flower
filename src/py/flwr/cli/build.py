@@ -14,7 +14,10 @@
 # ==============================================================================
 """Flower command line interface `build` command."""
 
+import hashlib
 import os
+import shutil
+import tempfile
 import zipfile
 from pathlib import Path
 from typing import Annotated, Optional
@@ -86,11 +89,14 @@ def build(
     ignore_spec = _load_gitignore(app)
 
     # Set the name of the zip file
-    fab_filename = (
-        f"{conf['tool']['flwr']['app']['publisher']}"
-        f".{conf['project']['name']}"
-        f".{conf['project']['version'].replace('.', '-')}.fab"
-    )
+    # fab_filename = (
+    #     f"{conf['tool']['flwr']['app']['publisher']}"
+    #     f".{conf['project']['name']}"
+    #     f".{conf['project']['version'].replace('.', '-')}.fab"
+    # )
+    # Set date
+    fixed_date_time = (2024, 10, 1, 0, 0, 0)  # To revisit hardcoded date
+
     list_file_content = ""
 
     allowed_extensions = {".py", ".toml", ".md"}
@@ -105,32 +111,75 @@ def build(
 
     toml_contents = tomli_w.dumps(conf)
 
-    with zipfile.ZipFile(fab_filename, "w", zipfile.ZIP_DEFLATED) as fab_file:
-        fab_file.writestr("pyproject.toml", toml_contents)
+    # Create a temporary zip file and add the required files
+    with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as temp_file:
+        temp_filename = temp_file.name
 
-        # Continue with adding other files
-        for root, _, files in os.walk(app, topdown=True):
-            files = [
-                f
-                for f in files
-                if not ignore_spec.match_file(Path(root) / f)
-                and f != fab_filename
-                and Path(f).suffix in allowed_extensions
-                and f != "pyproject.toml"  # Exclude the original pyproject.toml
-            ]
+        with zipfile.ZipFile(temp_filename, "w", zipfile.ZIP_DEFLATED) as fab_file:
+            zip_info = zipfile.ZipInfo("pyproject.toml")
+            zip_info.date_time = fixed_date_time
+            fab_file.writestr(zip_info, toml_contents)
 
-            for file in files:
-                file_path = Path(root) / file
-                archive_path = file_path.relative_to(app)
-                fab_file.write(file_path, archive_path)
+            # fab_file.writestr("pyproject.toml", toml_contents)
 
-                # Calculate file info
-                sha256_hash = get_sha256_hash(file_path)
-                file_size_bits = os.path.getsize(file_path) * 8  # size in bits
-                list_file_content += f"{archive_path},{sha256_hash},{file_size_bits}\n"
+            # Continue with adding other files
+            for root, _, files in os.walk(app, topdown=True):
+                files = [
+                    f
+                    for f in files
+                    if not ignore_spec.match_file(Path(root) / f)
+                    and f != temp_filename
+                    and Path(f).suffix in allowed_extensions
+                    and f != "pyproject.toml"  # Exclude the original pyproject.toml
+                ]
 
-        # Add CONTENT and CONTENT.jwt to the zip file
-        fab_file.writestr(".info/CONTENT", list_file_content)
+                for file in files:
+                    file_path = Path(root) / file
+
+                    archive_path = file_path.relative_to(app)
+
+                    # Create a ZipInfo object for the file
+                    zip_info = zipfile.ZipInfo(str(archive_path))
+
+                    # Set the fixed date_time for the file entry
+                    zip_info.date_time = fixed_date_time
+
+                    # Read the file content manually
+                    with open(file_path, "rb") as f:
+                        file_contents = f.read()
+
+                    # Write the file to the zip using writestr with controlled metadata
+                    fab_file.writestr(zip_info, file_contents)
+
+                    # fab_file.write(file_path, archive_path)
+
+                    # Calculate file info
+                    sha256_hash = get_sha256_hash(file_path)
+                    file_size_bits = os.path.getsize(file_path) * 8  # size in bits
+                    list_file_content += (
+                        f"{archive_path},{sha256_hash},{file_size_bits}\n"
+                    )
+
+            # Add CONTENT and CONTENT.jwt to the zip file
+            # fab_file.writestr(".info/CONTENT", list_file_content)
+            zip_info = zipfile.ZipInfo(".info/CONTENT")
+            zip_info.date_time = fixed_date_time
+            fab_file.writestr(zip_info, list_file_content)
+
+    # Get hash of FAB file
+    content = Path(temp_filename).read_bytes()
+    fab_hash = hashlib.sha256(content).hexdigest()
+
+    # Set the name of the zip file
+    fab_filename = (
+        f"{conf['tool']['flwr']['app']['publisher']}"
+        f".{conf['project']['name']}"
+        f".{conf['project']['version'].replace('.', '-')}"
+        f".{fab_hash[:8]}.fab"
+    )
+
+    # Once the temporary zip file is created, rename it to the final filename
+    shutil.move(temp_filename, fab_filename)
 
     typer.secho(
         f"🎊 Successfully built {fab_filename}", fg=typer.colors.GREEN, bold=True
