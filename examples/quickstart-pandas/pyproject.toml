@@ -8,14 +8,14 @@ version = "1.0.0"
 description = "Federated Learning with Pandas and Flower (Quickstart Example)"
 license = "Apache-2.0"
 authors = [
-  { name = "The Flower Authors", email = "hello@flower.ai" },
-  { name = "Ragy Haddad", email = "ragy202@gmail.com" },
+    { name = "The Flower Authors", email = "hello@flower.ai" },
+    { name = "Ragy Haddad", email = "ragy202@gmail.com" },
 ]
 dependencies = [
-  "flwr[simulation]>=1.11.1",
-  "flwr-datasets[vision]>=0.3.0",
-  "numpy==1.24.4",
-  "pandas==2.0.0",
+    "flwr[simulation]>=1.11.1",
+    "flwr-datasets[vision]>=0.3.0",
+    "numpy==1.24.4",
+    "pandas==2.0.0",
 ]
 
 [tool.hatch.build.targets.wheel]
