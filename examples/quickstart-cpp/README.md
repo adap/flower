@@ -42,7 +42,7 @@ quickstart-cpp
 │   └── *.h                # Various header files defining your client-side behaviour
 ├── src
 │   └── *.cc               # Various source files defining your client-side behaviour
-├── CMakeLists.txt      # Project metadata like dependencies and configs
+├── CMakeLists.txt         # Tells CMake how to build the C++ project
 └── README.md
 ```
 
@@ -52,9 +52,7 @@ In this example, `SuperLink` and `ServerApp` use Flower's Python package, while 
 
 1. **Prepare for `SuperLink` and `ServerApp`**
 
-    In a new Python environment (Python 3.10.0 or higher), install the the project as defined in `pyproject.toml.`
-
-    Install the dependencies defined in `pyproject.toml` as well as the `pytorchexample` package.
+    In a new Python environment (Python 3.10.0 or higher), install the the project as defined in `pyproject.toml.` Install the dependencies defined in `pyproject.toml` as well as the `pytorchexample` package.
 
     ```bash
     pip install -e py-server/
