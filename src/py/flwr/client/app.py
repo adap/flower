@@ -197,7 +197,7 @@ def start_client_internal(
     *,
     server_address: str,
     node_config: UserConfig,
-    load_client_app_fn: Optional[Callable[[str, str], ClientApp]] = None,
+    load_client_app_fn: Optional[Callable[[str, str, str], ClientApp]] = None,
     client_fn: Optional[ClientFnExt] = None,
     client: Optional[Client] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
@@ -518,9 +518,9 @@ def start_client_internal(
                             reply_message, context = outputs.message, outputs.context
                         else:
                             # Load ClientApp instance
-                            client_app: ClientApp = load_client_app_fn(
-                                fab_id, fab_version
-                            )
+                            client_app: ClientApp = load_client_app_fn(run.fab_hash)
+                            #     fab_id, fab_version
+                            # )
 
                             # Execute ClientApp
                             reply_message = client_app(message=message, context=context)

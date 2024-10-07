@@ -18,13 +18,9 @@ from logging import DEBUG
 from pathlib import Path
 from typing import Callable, Optional
 
+from flwr.cli import build
 from flwr.client.client_app import ClientApp, LoadClientAppError
-from flwr.common.config import (
-    get_flwr_dir,
-    get_metadata_from_config,
-    get_project_config,
-    get_project_dir,
-)
+from flwr.common.config import get_flwr_dir, get_project_config, get_project_dir
 from flwr.common.logger import log
 from flwr.common.object_ref import load_app, validate
 
@@ -34,7 +30,7 @@ def get_load_client_app_fn(
     app_path: Optional[str],
     multi_app: bool,
     flwr_dir: Optional[str] = None,
-) -> Callable[[str, str], ClientApp]:
+) -> Callable[[str, str, str], ClientApp]:
     """Get the load_client_app_fn function.
 
     If `multi_app` is True, this function loads the specified ClientApp
@@ -55,7 +51,7 @@ def get_load_client_app_fn(
         if not valid and error_msg:
             raise LoadClientAppError(error_msg) from None
 
-    def _load(fab_id: str, fab_version: str) -> ClientApp:
+    def _load(fab_id: str, fab_version: str, fab_hash: str) -> ClientApp:
         runtime_app_dir = Path(app_path if app_path else "").absolute()
         # If multi-app feature is disabled
         if not multi_app:
@@ -63,15 +59,21 @@ def get_load_client_app_fn(
             client_app_ref = default_app_ref
         # If multi-app feature is enabled but app directory is provided
         elif app_path is not None:
+            _, this_fab_hash = build(runtime_app_dir)
             config = get_project_config(runtime_app_dir)
-            this_fab_version, this_fab_id = get_metadata_from_config(config)
 
-            if this_fab_version != fab_version or this_fab_id != fab_id:
+            if this_fab_hash != fab_hash:
                 raise LoadClientAppError(
-                    f"FAB ID or version mismatch: Expected FAB ID '{this_fab_id}' and "
-                    f"FAB version '{this_fab_version}', but received FAB ID '{fab_id}' "
-                    f"and FAB version '{fab_version}'.",
+                    f"FAB hash mismatch: Expected FAB hash '{this_fab_hash}' "
+                    f"but received FAB hash '{fab_hash}'.",
                 ) from None
+
+            # if this_fab_version != fab_version or this_fab_id != fab_id:
+            #     raise LoadClientAppError(
+            #         f"FAB ID or version mismatch: Expected FAB ID '{this_fab_id}' and "
+            #         f"FAB version '{this_fab_version}', but received FAB ID '{fab_id}' "
+            #         f"and FAB version '{fab_version}'.",
+            #     ) from None
 
             # log(WARN, "FAB ID is not provided; the default ClientApp will be loaded.")
 
@@ -81,7 +83,7 @@ def get_load_client_app_fn(
         else:
             try:
                 runtime_app_dir = get_project_dir(
-                    fab_id, fab_version, get_flwr_dir(flwr_dir)
+                    fab_id, fab_version, fab_hash, get_flwr_dir(flwr_dir)
                 )
                 config = get_project_config(runtime_app_dir)
             except Exception as e:

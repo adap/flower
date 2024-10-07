@@ -36,7 +36,7 @@ def build(
         Optional[Path],
         typer.Option(help="Path of the Flower App to bundle into a FAB"),
     ] = None,
-) -> str:
+) -> tuple[str, str]:
     """Build a Flower App into a Flower App Bundle (FAB).
 
     You can run ``flwr build`` without any arguments to bundle the app located in the
@@ -185,7 +185,7 @@ def build(
         f"🎊 Successfully built {fab_filename}", fg=typer.colors.GREEN, bold=True
     )
 
-    return fab_filename
+    return fab_filename, fab_hash
 
 
 def _load_gitignore(app: Path) -> pathspec.PathSpec:
