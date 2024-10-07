@@ -6,9 +6,7 @@ build-backend = "hatchling.build"
 name = "e2e-docker"
 version = "0.1.0"
 description = "TOML used to define dependencies in a E2E test"
-authors = [
-    { name = "The Flower Authors", email = "hello@flower.ai" },
-]
+authors = [{ name = "The Flower Authors", email = "hello@flower.ai" }]
 dependencies = [
     "flwr-datasets[vision]>=0.1.0,<1.0.0",
     "torch==2.2.1",

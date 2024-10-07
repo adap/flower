@@ -1,22 +1,28 @@
-from logging import INFO
+"""xgboost_comprehensive: A Flower / XGBoost app."""
 
-import flwr as fl
+import warnings
+
 import xgboost as xgb
+from xgboost_comprehensive.task import load_data, replace_keys
+
+from flwr.client import Client, ClientApp
 from flwr.common import (
     Code,
     EvaluateIns,
     EvaluateRes,
     FitIns,
     FitRes,
-    GetParametersIns,
-    GetParametersRes,
     Parameters,
     Status,
 )
-from flwr.common.logger import log
+from flwr.common.config import unflatten_dict
+from flwr.common.context import Context
+
+warnings.filterwarnings("ignore", category=UserWarning)
 
 
-class XgbClient(fl.client.Client):
+# Define Flower-Xgb Client and client_fn
+class XgbClient(Client):
     def __init__(
         self,
         train_dmatrix,
@@ -34,16 +40,6 @@ class XgbClient(fl.client.Client):
         self.num_local_round = num_local_round
         self.params = params
         self.train_method = train_method
-
-    def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
-        _ = (self, ins)
-        return GetParametersRes(
-            status=Status(
-                code=Code.OK,
-                message="OK",
-            ),
-            parameters=Parameters(tensor_type="", tensors=[]),
-        )
 
     def _local_boost(self, bst_input):
         # Update trees based on local training data.
@@ -75,8 +71,7 @@ class XgbClient(fl.client.Client):
             )
         else:
             bst = xgb.Booster(params=self.params)
-            for item in ins.parameters.tensors:
-                global_model = bytearray(item)
+            global_model = bytearray(ins.parameters.tensors[0])
 
             # Load global model into booster
             bst.load_model(global_model)
@@ -101,8 +96,7 @@ class XgbClient(fl.client.Client):
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         # Load global model
         bst = xgb.Booster(params=self.params)
-        for para in ins.parameters.tensors:
-            para_b = bytearray(para)
+        para_b = bytearray(ins.parameters.tensors[0])
         bst.load_model(para_b)
 
         # Run evaluation
@@ -111,9 +105,6 @@ class XgbClient(fl.client.Client):
             iteration=bst.num_boosted_rounds() - 1,
         )
         auc = round(float(eval_results.split("\t")[1].split(":")[1]), 4)
-
-        global_round = ins.config["global_round"]
-        log(INFO, f"AUC = {auc} at round {global_round}")
 
         return EvaluateRes(
             status=Status(
@@ -124,3 +115,51 @@ class XgbClient(fl.client.Client):
             num_examples=self.num_val,
             metrics={"AUC": auc},
         )
+
+
+def client_fn(context: Context):
+    # Load model and data
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
+
+    # Parse configs
+    cfg = replace_keys(unflatten_dict(context.run_config))
+    num_local_round = cfg["local_epochs"]
+    train_method = cfg["train_method"]
+    params = cfg["params"]
+    partitioner_type = cfg["partitioner_type"]
+    seed = cfg["seed"]
+    test_fraction = cfg["test_fraction"]
+    centralised_eval_client = cfg["centralised_eval_client"]
+
+    # Load training and validation data
+    train_dmatrix, valid_dmatrix, num_train, num_val = load_data(
+        partitioner_type,
+        partition_id,
+        num_partitions,
+        centralised_eval_client,
+        test_fraction,
+        seed,
+    )
+
+    # Setup learning rate
+    if cfg["scaled_lr"]:
+        new_lr = cfg["params"]["eta"] / num_partitions
+        cfg["params"].update({"eta": new_lr})
+
+    # Return Client instance
+    return XgbClient(
+        train_dmatrix,
+        valid_dmatrix,
+        num_train,
+        num_val,
+        num_local_round,
+        params,
+        train_method,
+    )
+
+
+# Flower ClientApp
+app = ClientApp(
+    client_fn,
+)
