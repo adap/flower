@@ -219,6 +219,15 @@ class Run:
 
 
 @dataclass
+class RunStatus:
+    """Run status information."""
+
+    status: str
+    sub_status: str
+    details: str
+
+
+@dataclass
 class Fab:
     """Fab file representation."""
 
