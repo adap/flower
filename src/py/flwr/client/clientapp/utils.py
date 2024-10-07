@@ -68,13 +68,6 @@ def get_load_client_app_fn(
                     f"but received FAB hash '{fab_hash}'.",
                 ) from None
 
-            # if this_fab_version != fab_version or this_fab_id != fab_id:
-            #     raise LoadClientAppError(
-            #         f"FAB ID or version mismatch: Expected FAB ID '{this_fab_id}' and "
-            #         f"FAB version '{this_fab_version}', but received FAB ID '{fab_id}' "
-            #         f"and FAB version '{fab_version}'.",
-            #     ) from None
-
             # log(WARN, "FAB ID is not provided; the default ClientApp will be loaded.")
 
             # Set app reference
