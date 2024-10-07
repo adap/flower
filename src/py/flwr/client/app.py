@@ -288,7 +288,7 @@ def start_client_internal(
 
             client_fn = single_client_factory
 
-        def _load_client_app(_1: str, _2: str) -> ClientApp:
+        def _load_client_app(_1: str, _2: str, _3: str) -> ClientApp:
             return ClientApp(client_fn=client_fn)
 
         load_client_app_fn = _load_client_app

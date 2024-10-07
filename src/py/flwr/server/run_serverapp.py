@@ -193,7 +193,7 @@ def run_server_app() -> None:
         else:
             fab_id, fab_version = run_.fab_id, run_.fab_version
 
-        app_path = str(get_project_dir(fab_id, fab_version, flwr_dir))
+        app_path = str(get_project_dir(fab_id, fab_version, run_.fab_hash, flwr_dir))
         config = get_project_config(app_path)
     else:
         # User provided `app_dir`, but not `--run-id`

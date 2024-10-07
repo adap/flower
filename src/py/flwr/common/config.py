@@ -134,7 +134,7 @@ def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> UserConfig:
     if not run.fab_id or not run.fab_version:
         return {}
 
-    project_dir = get_project_dir(run.fab_id, run.fab_version, flwr_dir)
+    project_dir = get_project_dir(run.fab_id, run.fab_version, run.fab_hash, flwr_dir)
 
     # Return empty dict if project directory does not exist
     if not project_dir.is_dir():
