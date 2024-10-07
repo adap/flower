@@ -299,6 +299,7 @@ class SqliteState(State):  # pylint: disable=R0904
                 WHERE consumer_anonymous == 1
                 AND   consumer_node_id == 0
                 AND   delivered_at = ""
+                AND   (created_at + ttl) > CAST(strftime('%s', 'now') AS REAL)
             """
         else:
             # Convert the uint64 value to sint64 for SQLite
@@ -311,6 +312,7 @@ class SqliteState(State):  # pylint: disable=R0904
                 WHERE consumer_anonymous == 0
                 AND   consumer_node_id == :node_id
                 AND   delivered_at = ""
+                AND   (created_at + ttl) > CAST(strftime('%s', 'now') AS REAL)
             """
 
         if limit is not None:
