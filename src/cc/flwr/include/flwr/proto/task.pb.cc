@@ -44,7 +44,7 @@ constexpr TaskIns::TaskIns(
   : task_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , group_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , task_(nullptr)
-  , run_id_(int64_t{0}){}
+  , run_id_(uint64_t{0u}){}
 struct TaskInsDefaultTypeInternal {
   constexpr TaskInsDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -59,7 +59,7 @@ constexpr TaskRes::TaskRes(
   : task_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , group_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , task_(nullptr)
-  , run_id_(int64_t{0}){}
+  , run_id_(uint64_t{0u}){}
 struct TaskResDefaultTypeInternal {
   constexpr TaskResDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -128,31 +128,29 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 const char descriptor_table_protodef_flwr_2fproto_2ftask_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
   "\n\025flwr/proto/task.proto\022\nflwr.proto\032\025flw"
   "r/proto/node.proto\032\032flwr/proto/recordset"
-  ".proto\032\032flwr/proto/transport.proto\032\026flwr"
-  "/proto/error.proto\"\211\002\n\004Task\022\"\n\010producer\030"
-  "\001 \001(\0132\020.flwr.proto.Node\022\"\n\010consumer\030\002 \001("
-  "\0132\020.flwr.proto.Node\022\022\n\ncreated_at\030\003 \001(\001\022"
-  "\024\n\014delivered_at\030\004 \001(\t\022\021\n\tpushed_at\030\005 \001(\001"
-  "\022\013\n\003ttl\030\006 \001(\001\022\020\n\010ancestry\030\007 \003(\t\022\021\n\ttask_"
-  "type\030\010 \001(\t\022(\n\trecordset\030\t \001(\0132\025.flwr.pro"
-  "to.RecordSet\022 \n\005error\030\n \001(\0132\021.flwr.proto"
-  ".Error\"\\\n\007TaskIns\022\017\n\007task_id\030\001 \001(\t\022\020\n\010gr"
-  "oup_id\030\002 \001(\t\022\016\n\006run_id\030\003 \001(\022\022\036\n\004task\030\004 \001"
-  "(\0132\020.flwr.proto.Task\"\\\n\007TaskRes\022\017\n\007task_"
-  "id\030\001 \001(\t\022\020\n\010group_id\030\002 \001(\t\022\016\n\006run_id\030\003 \001"
-  "(\022\022\036\n\004task\030\004 \001(\0132\020.flwr.proto.Taskb\006prot"
-  "o3"
+  ".proto\032\026flwr/proto/error.proto\"\211\002\n\004Task\022"
+  "\"\n\010producer\030\001 \001(\0132\020.flwr.proto.Node\022\"\n\010c"
+  "onsumer\030\002 \001(\0132\020.flwr.proto.Node\022\022\n\ncreat"
+  "ed_at\030\003 \001(\001\022\024\n\014delivered_at\030\004 \001(\t\022\021\n\tpus"
+  "hed_at\030\005 \001(\001\022\013\n\003ttl\030\006 \001(\001\022\020\n\010ancestry\030\007 "
+  "\003(\t\022\021\n\ttask_type\030\010 \001(\t\022(\n\trecordset\030\t \001("
+  "\0132\025.flwr.proto.RecordSet\022 \n\005error\030\n \001(\0132"
+  "\021.flwr.proto.Error\"\\\n\007TaskIns\022\017\n\007task_id"
+  "\030\001 \001(\t\022\020\n\010group_id\030\002 \001(\t\022\016\n\006run_id\030\003 \001(\004"
+  "\022\036\n\004task\030\004 \001(\0132\020.flwr.proto.Task\"\\\n\007Task"
+  "Res\022\017\n\007task_id\030\001 \001(\t\022\020\n\010group_id\030\002 \001(\t\022\016"
+  "\n\006run_id\030\003 \001(\004\022\036\n\004task\030\004 \001(\0132\020.flwr.prot"
+  "o.Taskb\006proto3"
   ;
-static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_flwr_2fproto_2ftask_2eproto_deps[4] = {
+static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_flwr_2fproto_2ftask_2eproto_deps[3] = {
   &::descriptor_table_flwr_2fproto_2ferror_2eproto,
   &::descriptor_table_flwr_2fproto_2fnode_2eproto,
   &::descriptor_table_flwr_2fproto_2frecordset_2eproto,
-  &::descriptor_table_flwr_2fproto_2ftransport_2eproto,
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_flwr_2fproto_2ftask_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_flwr_2fproto_2ftask_2eproto = {
-  false, false, 602, descriptor_table_protodef_flwr_2fproto_2ftask_2eproto, "flwr/proto/task.proto", 
-  &descriptor_table_flwr_2fproto_2ftask_2eproto_once, descriptor_table_flwr_2fproto_2ftask_2eproto_deps, 4, 3,
+  false, false, 574, descriptor_table_protodef_flwr_2fproto_2ftask_2eproto, "flwr/proto/task.proto", 
+  &descriptor_table_flwr_2fproto_2ftask_2eproto_once, descriptor_table_flwr_2fproto_2ftask_2eproto_deps, 3, 3,
   schemas, file_default_instances, TableStruct_flwr_2fproto_2ftask_2eproto::offsets,
   file_level_metadata_flwr_2fproto_2ftask_2eproto, file_level_enum_descriptors_flwr_2fproto_2ftask_2eproto, file_level_service_descriptors_flwr_2fproto_2ftask_2eproto,
 };
@@ -800,7 +798,7 @@ void TaskIns::Clear() {
     delete task_;
   }
   task_ = nullptr;
-  run_id_ = int64_t{0};
+  run_id_ = uint64_t{0u};
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -830,10 +828,10 @@ const char* TaskIns::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::in
         } else
           goto handle_unusual;
         continue;
-      // sint64 run_id = 3;
+      // uint64 run_id = 3;
       case 3:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
-          run_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarintZigZag64(&ptr);
+          run_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -895,10 +893,10 @@ failure:
         2, this->_internal_group_id(), target);
   }
 
-  // sint64 run_id = 3;
+  // uint64 run_id = 3;
   if (this->_internal_run_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteSInt64ToArray(3, this->_internal_run_id(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(3, this->_internal_run_id(), target);
   }
 
   // .flwr.proto.Task task = 4;
@@ -946,9 +944,9 @@ size_t TaskIns::ByteSizeLong() const {
         *task_);
   }
 
-  // sint64 run_id = 3;
+  // uint64 run_id = 3;
   if (this->_internal_run_id() != 0) {
-    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SInt64SizePlusOne(this->_internal_run_id());
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64SizePlusOne(this->_internal_run_id());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
@@ -1115,7 +1113,7 @@ void TaskRes::Clear() {
     delete task_;
   }
   task_ = nullptr;
-  run_id_ = int64_t{0};
+  run_id_ = uint64_t{0u};
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -1145,10 +1143,10 @@ const char* TaskRes::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::in
         } else
           goto handle_unusual;
         continue;
-      // sint64 run_id = 3;
+      // uint64 run_id = 3;
       case 3:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
-          run_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarintZigZag64(&ptr);
+          run_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1210,10 +1208,10 @@ failure:
         2, this->_internal_group_id(), target);
   }
 
-  // sint64 run_id = 3;
+  // uint64 run_id = 3;
   if (this->_internal_run_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteSInt64ToArray(3, this->_internal_run_id(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(3, this->_internal_run_id(), target);
   }
 
   // .flwr.proto.Task task = 4;
@@ -1261,9 +1259,9 @@ size_t TaskRes::ByteSizeLong() const {
         *task_);
   }
 
-  // sint64 run_id = 3;
+  // uint64 run_id = 3;
   if (this->_internal_run_id() != 0) {
-    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SInt64SizePlusOne(this->_internal_run_id());
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64SizePlusOne(this->_internal_run_id());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
