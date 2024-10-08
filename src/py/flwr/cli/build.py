@@ -158,7 +158,7 @@ def build(
     fab_hash = hashlib.sha256(content).hexdigest()
 
     # Set the name of the zip file
-    fab_filename = set_fab_filename(conf, fab_hash)
+    fab_filename = get_fab_filename(conf, fab_hash)
 
     # Once the temporary zip file is created, rename it to the final filename
     shutil.move(temp_filename, fab_filename)
