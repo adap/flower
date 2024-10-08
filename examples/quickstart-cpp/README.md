@@ -50,6 +50,9 @@ quickstart-cpp
 
 In this example, `SuperLink` and `ServerApp` use Flower's Python package, while the `SuperNodes` are C++ executables. We therefore need: (1) a Python environment with Flower installed; and (2) to build the `SuperNode` binaries.
 
+> \[!NOTE\]
+> Building the C++ components currently only works in Ubuntu 22.
+
 1. **Prepare for `SuperLink` and `ServerApp`**
 
    In a new Python environment (Python 3.10.0 or higher), install the the project as defined in `pyproject.toml.` Install the dependencies defined in `pyproject.toml` as well as the `pytorchexample` package.
@@ -59,9 +62,6 @@ In this example, `SuperLink` and `ServerApp` use Flower's Python package, while 
    ```
 
 2. **Build the `SuperNode` executables**
-
-   > \[!NOTE\]
-   > Building the C++ components currently only works in Ubuntu 22.
 
    Ensure you have `CMake` and other build tools installed in your system.
 
