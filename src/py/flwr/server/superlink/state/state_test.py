@@ -21,7 +21,6 @@ import unittest
 from abc import abstractmethod
 from datetime import datetime, timezone
 from unittest.mock import patch
-from uuid import UUID
 
 from flwr.common import DEFAULT_TTL
 from flwr.common.constant import ErrorCode
@@ -821,12 +820,8 @@ class StateTest(unittest.TestCase):
         """Test that get_task_res returns an empty result when the corresponding TaskIns
         does not exist."""
         # Prepare
-        consumer_node_id = 1
         state = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {})
-        task_ins = create_task_ins(
-            consumer_node_id=consumer_node_id, anonymous=False, run_id=run_id
-        )
         id = "5b0a3fc2-edba-4525-a89a-04b83420b7c8"
 
         task_res = create_task_res(
