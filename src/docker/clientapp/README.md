@@ -22,7 +22,7 @@
 - `unstable`
   - points to the last successful build of the `main` branch
 - `nightly`, `<version>.dev<YYYYMMDD>` e.g. `1.12.0.dev20240830`
-  - uses Python 3.11 and Ubuntu 22.04
+  - uses Python 3.11 and Ubuntu 24.04
 - `1.11.1`, `1.11.1-py3.11-ubuntu22.04`
 - `1.11.1-py3.10-ubuntu22.04`
 - `1.11.1-py3.9-ubuntu22.04`
