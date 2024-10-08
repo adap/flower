@@ -39,16 +39,20 @@ class InMemoryDriver(Driver):
         The identifier of the run.
     state_factory : StateFactory
         A StateFactory embedding a state that this driver can interface with.
+    pull_interval : float (default=0.1)
+        Sleep duration between calls to `pull_messages`.
     """
 
     def __init__(
         self,
         run_id: int,
         state_factory: StateFactory,
+        pull_interval: float = 0.1,
     ) -> None:
         self._run_id = run_id
         self._run: Optional[Run] = None
         self.state = state_factory.state()
+        self.pull_interval = pull_interval
         self.node = Node(node_id=0, anonymous=True)
 
     def _check_message(self, message: Message) -> None:
@@ -180,5 +184,5 @@ class InMemoryDriver(Driver):
             if len(msg_ids) == 0:
                 break
             # Sleep
-            time.sleep(3)
+            time.sleep(self.pull_interval)
         return ret
