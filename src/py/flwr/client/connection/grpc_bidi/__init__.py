@@ -15,8 +15,8 @@
 """Client-side part of the GrpcBidi transport layer."""
 
 
-from .grpc_bidi_connection import GrpcBidiConnection
+from .grpc_bidi_fleet_connection import GrpcBidiFleetConnection
 
 __all__ = [
-    "GrpcBidiConnection",
+    "GrpcBidiFleetConnection",
 ]

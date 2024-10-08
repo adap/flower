@@ -16,15 +16,15 @@
 
 
 from .fleet_connection import FleetConnection
-from .grpc_adapter import GrpcAdapterConnection
-from .grpc_bidi import GrpcBidiConnection
-from .grpc_rere import GrpcRereConnection
-from .rest.rest_connection import RestConnection
+from .grpc_adapter import GrpcAdapterFleetConnection
+from .grpc_bidi import GrpcBidiFleetConnection
+from .grpc_rere import GrpcRereFleetConnection
+from .rest.rest_fleet_connection import RestFleetConnection
 
 __all__ = [
     "FleetConnection",
-    "GrpcAdapterConnection",
-    "GrpcBidiConnection",
-    "GrpcRereConnection",
-    "RestConnection",
+    "GrpcAdapterFleetConnection",
+    "GrpcBidiFleetConnection",
+    "GrpcRereFleetConnection",
+    "RestFleetConnection",
 ]

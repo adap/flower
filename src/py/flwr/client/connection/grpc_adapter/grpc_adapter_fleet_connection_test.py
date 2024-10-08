@@ -19,7 +19,7 @@ import inspect
 
 from flwr.proto.fleet_pb2_grpc import FleetServicer
 
-from .grpc_adapter_connection import GrpcAdapterFleetAPI
+from .grpc_adapter_fleet_connection import GrpcAdapterFleetAPI
 
 
 def test_grpc_adapter_methods() -> None:

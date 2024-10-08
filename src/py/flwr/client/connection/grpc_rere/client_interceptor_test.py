@@ -51,7 +51,7 @@ from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=
 from flwr.proto.task_pb2 import Task, TaskIns  # pylint: disable=E0611
 
 from .client_interceptor import _AUTH_TOKEN_HEADER, _PUBLIC_KEY_HEADER, Request
-from .grpc_rere_connection import GrpcRereConnection
+from .grpc_rere_fleet_connection import GrpcRereFleetConnection
 
 
 class _MockServicer:
@@ -185,7 +185,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
         self._server.start()
         self._client_private_key, self._client_public_key = generate_key_pairs()
 
-        self._connection = GrpcRereConnection
+        self._connection = GrpcRereFleetConnection
         self._address = f"localhost:{port}"
 
     def test_client_auth_create_node(self) -> None:

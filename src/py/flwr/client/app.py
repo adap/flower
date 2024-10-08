@@ -64,9 +64,9 @@ from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from .clientapp.clientappio_servicer import ClientAppInputs, ClientAppIoServicer
 from .connection import (
     Connection,
-    GrpcAdapterConnection,
-    GrpcBidiConnection,
-    GrpcRereConnection,
+    GrpcAdapterFleetConnection,
+    GrpcBidiFleetConnection,
+    GrpcRereFleetConnection,
 )
 from .message_handler.message_handler import handle_control_message
 from .numpy_client import NumPyClient
@@ -752,7 +752,7 @@ def _init_connection(
         try:
             from requests.exceptions import RequestException
 
-            from .connection import RestConnection
+            from .connection import RestFleetConnection
         except ModuleNotFoundError:
             sys.exit(MISSING_EXTRA_REST)
         if server_address[:4] != "http":
@@ -760,13 +760,13 @@ def _init_connection(
                 "When using the REST API, please provide `https://` or "
                 "`http://` before the server address (e.g. `http://127.0.0.1:8080`)"
             )
-        connection, error_type = RestConnection, RequestException
+        connection, error_type = RestFleetConnection, RequestException
     elif transport == TRANSPORT_TYPE_GRPC_RERE:
-        connection, error_type = GrpcRereConnection, RpcError
+        connection, error_type = GrpcRereFleetConnection, RpcError
     elif transport == TRANSPORT_TYPE_GRPC_ADAPTER:
-        connection, error_type = GrpcAdapterConnection, RpcError
+        connection, error_type = GrpcAdapterFleetConnection, RpcError
     elif transport == TRANSPORT_TYPE_GRPC_BIDI:
-        connection, error_type = GrpcBidiConnection, RpcError
+        connection, error_type = GrpcBidiFleetConnection, RpcError
     else:
         raise ValueError(
             f"Unknown transport type: {transport} (possible: {TRANSPORT_TYPES})"

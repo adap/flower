@@ -49,7 +49,7 @@ from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.transport_pb2_grpc import FlowerServiceStub  # pylint: disable=E0611
 
-from ..connection import Connection
+from ..fleet_connection import FleetConnection
 
 # The following flags can be uncommented for debugging. Other possible values:
 # https://github.com/grpc/grpc/blob/master/doc/environment_variables.md
@@ -63,8 +63,8 @@ def on_channel_state_change(channel_connectivity: str) -> None:
     log(DEBUG, channel_connectivity)
 
 
-class GrpcBidiConnection(Connection):
-    """Grpc-bidi connection (will be deprecated)."""
+class GrpcBidiFleetConnection(FleetConnection):
+    """Grpc-bidi fleet connection (will be deprecated)."""
 
     def __init__(  # pylint: disable=R0913, R0914, R0915
         self,

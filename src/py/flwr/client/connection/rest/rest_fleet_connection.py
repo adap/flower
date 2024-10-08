@@ -41,7 +41,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 
-from ..grpc_rere import FleetAPI, GrpcRereConnection
+from ..grpc_rere import FleetAPI, GrpcRereFleetConnection
 
 if importlib.util.find_spec("requests"):
     import requests
@@ -59,8 +59,8 @@ PATH_GET_FAB: str = "/api/v0/fleet/get-fab"
 T = TypeVar("T", bound=GrpcMessage)
 
 
-class RestConnection(GrpcRereConnection):
-    """Rest connection based on GrpcRereConnection."""
+class RestFleetConnection(GrpcRereFleetConnection):
+    """Rest fleet connection based on GrpcRereFleetConnection."""
 
     @property
     def api(self) -> FleetAPI:

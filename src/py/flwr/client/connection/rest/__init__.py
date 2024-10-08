@@ -15,8 +15,8 @@
 """Client-side part of the REST transport layer."""
 
 
-from .rest_connection import RestConnection
+from .rest_fleet_connection import RestFleetConnection
 
 __all__ = [
-    "RestConnection",
+    "RestFleetConnection",
 ]

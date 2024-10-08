@@ -63,7 +63,7 @@ from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
-from ..connection import Connection
+from ..fleet_connection import FleetConnection
 from .client_interceptor import AuthenticateClientInterceptor
 from .fleet_api import FleetAPI
 
@@ -73,8 +73,8 @@ def on_channel_state_change(channel_connectivity: str) -> None:
     log(DEBUG, channel_connectivity)
 
 
-class GrpcRereConnection(Connection):
-    """Grpc-rere connection."""
+class GrpcRereFleetConnection(FleetConnection):
+    """Grpc-rere fleet connection."""
 
     def __init__(  # pylint: disable=R0913, R0914, R0915
         self,

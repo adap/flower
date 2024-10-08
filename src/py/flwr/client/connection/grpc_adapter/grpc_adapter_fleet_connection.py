@@ -53,7 +53,7 @@ from flwr.proto.grpcadapter_pb2 import MessageContainer  # pylint: disable=E0611
 from flwr.proto.grpcadapter_pb2_grpc import GrpcAdapterStub
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 
-from ..grpc_rere import FleetAPI, GrpcRereConnection
+from ..grpc_rere import FleetAPI, GrpcRereFleetConnection
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
@@ -64,8 +64,8 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 T = TypeVar("T", bound=GrpcMessage)
 
 
-class GrpcAdapterConnection(GrpcRereConnection):
-    """Grpc-adapter connection based on GrpcRereConnection."""
+class GrpcAdapterFleetConnection(GrpcRereFleetConnection):
+    """Grpc-adapter fleet connection based on GrpcRereFleetConnection."""
 
     @property
     def api(self) -> FleetAPI:

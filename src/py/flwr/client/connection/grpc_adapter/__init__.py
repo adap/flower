@@ -15,8 +15,8 @@
 """Client-side part of the GrpcAdapter transport layer."""
 
 
-from .grpc_adapter_connection import GrpcAdapterConnection
+from .grpc_adapter_fleet_connection import GrpcAdapterFleetConnection
 
 __all__ = [
-    "GrpcAdapterConnection",
+    "GrpcAdapterFleetConnection",
 ]
