@@ -26,7 +26,7 @@ import pathspec
 import tomli_w
 import typer
 
-from flwr.common.constant import FAB_DATE, FAB_HASH_TRUNCATION
+from flwr.common.constant import FAB_ALLOWED_EXTENSIONS, FAB_DATE, FAB_HASH_TRUNCATION
 
 from .config_utils import load_and_validate
 from .utils import get_sha256_hash, is_valid_project_name
@@ -102,8 +102,6 @@ def build(
 
     list_file_content = ""
 
-    allowed_extensions = {".py", ".toml", ".md"}
-
     # Remove the 'federations' field from 'tool.flwr' if it exists
     if (
         "tool" in conf
@@ -121,32 +119,27 @@ def build(
             write_to_zip(fab_file, "pyproject.toml", toml_contents)
 
             # Continue with adding other files
-            for root, _, files in os.walk(app, topdown=True):
-                files = [
-                    f
-                    for f in files
-                    if not ignore_spec.match_file(Path(root) / f)
-                    and f != temp_filename
-                    and Path(f).suffix in allowed_extensions
-                    and f != "pyproject.toml"  # Exclude the original pyproject.toml
-                ]
+            all_files = [
+                f
+                for f in app.rglob("*")
+                if not ignore_spec.match_file(f)
+                and f.name != temp_filename
+                and f.suffix in FAB_ALLOWED_EXTENSIONS
+                and f.name != "pyproject.toml"  # Exclude the original pyproject.toml
+            ]
 
-                for file in files:
-                    file_path = Path(root) / file
+            for file_path in all_files:
+                # Read the file content manually
+                with open(file_path, "rb") as f:
+                    file_contents = f.read()
 
-                    # Read the file content manually
-                    with open(file_path, "rb") as f:
-                        file_contents = f.read()
+                archive_path = file_path.relative_to(app)
+                write_to_zip(fab_file, str(archive_path), file_contents)
 
-                    archive_path = file_path.relative_to(app)
-                    write_to_zip(fab_file, str(archive_path), file_contents)
-
-                    # Calculate file info
-                    sha256_hash = get_sha256_hash(file_path)
-                    file_size_bits = os.path.getsize(file_path) * 8  # size in bits
-                    list_file_content += (
-                        f"{archive_path},{sha256_hash},{file_size_bits}\n"
-                    )
+                # Calculate file info
+                sha256_hash = get_sha256_hash(file_path)
+                file_size_bits = os.path.getsize(file_path) * 8  # size in bits
+                list_file_content += f"{archive_path},{sha256_hash},{file_size_bits}\n"
 
             # Add CONTENT and CONTENT.jwt to the zip file
             write_to_zip(fab_file, ".info/CONTENT", list_file_content)
