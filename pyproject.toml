@@ -43,12 +43,8 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed",
 ]
-packages = [
-    { include = "flwr", from = "src/py" },
-]
-exclude = [
-    "src/py/**/*_test.py",
-]
+packages = [{ include = "flwr", from = "src/py" }]
+exclude = ["src/py/**/*_test.py"]
 
 [tool.poetry.scripts]
 # `flwr` CLI
@@ -62,7 +58,7 @@ flower-superlink = "flwr.server.app:run_superlink"
 flower-supernode = "flwr.client.supernode.app:run_supernode"
 flower-server-app = "flwr.server.run_serverapp:run_server_app"
 flwr-clientapp = "flwr.client.clientapp:flwr_clientapp"
-flower-client-app = "flwr.client.supernode:run_client_app"  # Deprecated
+flower-client-app = "flwr.client.supernode:run_client_app" # Deprecated
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -96,6 +92,7 @@ types-setuptools = "==69.0.0.20240125"
 clang-format = "==17.0.6"
 isort = "==5.13.2"
 black = { version = "==24.2.0", extras = ["jupyter"] }
+taplo = "==0.9.3"
 docformatter = "==1.7.5"
 mypy = "==1.8.0"
 pylint = "==3.0.3"
@@ -160,10 +157,7 @@ disable = "duplicate-code,too-few-public-methods,useless-import-alias"
 [tool.pytest.ini_options]
 minversion = "6.2"
 addopts = "-qq"
-testpaths = [
-    "src/py/flwr",
-    "src/py/flwr_tool",
-]
+testpaths = ["src/py/flwr", "src/py/flwr_tool"]
 filterwarnings = "ignore::DeprecationWarning"
 
 [tool.pytest-watcher]
@@ -176,17 +170,12 @@ patterns = ["*.py"]
 ignore_patterns = []
 
 [tool.mypy]
-plugins = [
-    "numpy.typing.mypy_plugin",
-]
+plugins = ["numpy.typing.mypy_plugin"]
 ignore_missing_imports = true
 strict = true
 
 [[tool.mypy.overrides]]
-module = [
-    "importlib.metadata.*",
-    "importlib_metadata.*",
-]
+module = ["importlib.metadata.*", "importlib_metadata.*"]
 follow_imports = "skip"
 follow_imports_for_stubs = true
 disallow_untyped_calls = false
