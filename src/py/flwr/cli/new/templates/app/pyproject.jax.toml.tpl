@@ -9,8 +9,8 @@ description = ""
 license = "Apache-2.0"
 dependencies = [
     "flwr[simulation]>=1.10.0",
-    "jax==0.4.13",
-    "jaxlib==0.4.13",
+    "jax==0.4.30",
+    "jaxlib==0.4.30",
     "scikit-learn==1.3.2",
 ]
 
@@ -26,6 +26,7 @@ clientapp = "$import_name.client_app:app"
 
 [tool.flwr.app.config]
 num-server-rounds = 3
+input-dim = 3
 
 [tool.flwr.federations]
 default = "local-simulation"

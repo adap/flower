@@ -13,13 +13,13 @@ As the first step, please register for a Flower account on [flower.ai/login](htt
 Then, create a new Python environment and install Flower. 
 
 > [!TIP]
-> We recommend using `pyenv` with the `virtualenv` plugin to create your environment. Other managers, such as Conda, will likely work as well. Check the [documentation](https://flower.ai/docs/framework/how-to-install-flower.html) for alternative ways to install Flower.
+> We recommend using `pyenv` with the `virtualenv` plugin to create your environment with Python >= 3.10.0. Other managers, such as Conda, will likely work as well. Check the [documentation](https://flower.ai/docs/framework/how-to-install-flower.html) for alternative ways to install Flower.
 
 ```shell
 pip install flwr
 ```
 
-In the new environment, create a new Flower project using the `FlowerTune` template. You will be prompted for a name to give to your project, your username, and for your choice of LLM challenge:
+In the new environment, create a new Flower project using the `FlowerTune` template. You will be prompted for a name to give to your app/project, your username, and for your choice of LLM challenge:
 ```shell
 flwr new --framework=FlowerTune
 ```
@@ -42,7 +42,7 @@ The `flwr new` command will generate a directory with the following structure:
 This can serve as the starting point for you to build up your own federated LLM fine-tuning methods.
 
 > [!IMPORTANT]
-> Please note that if you intend to submit your project as an entry to the [LLM Leaderboard](https://flower.ai/benchmarks/llm-leaderboard) modifications to `[tool.flwr.app.config.static]` and `[tool.flwr.federations.local-simulation]` sections in the `pyproject.toml` are not allowed and will invalidate the submission.
+> Please note that if you intend to submit your project as an entry to the [LLM Leaderboard](https://flower.ai/benchmarks/llm-leaderboard) modifications to the `[tool.flwr.app.config.static]` section and `options.num-supernodes` under the `[tool.flwr.federations.local-simulation]` section in the `pyproject.toml` are not allowed and will invalidate the submission.
 
 
 ## Run FlowerTune LLM challenges
@@ -64,5 +64,5 @@ following the `README.md` in [`evaluation`](https://github.com/adap/flower/tree/
 
 
 > [!NOTE]
-> If you have any questions about running FlowerTune LLM challenges or evaluation, please feel free to make posts at [Flower Discuss](https://discuss.flower.ai) forum, 
+> If you have any questions about running FlowerTune LLM challenges or evaluation, please feel free to make posts at our dedicated [FlowerTune Category](https://discuss.flower.ai/c/flowertune-llm-leaderboard/) on [Flower Discuss](https://discuss.flower.ai) forum, 
 or join our [Slack channel](https://flower.ai/join-slack/) to ask questions in the `#flowertune-llm-leaderboard` channel.
