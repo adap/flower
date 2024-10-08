@@ -823,18 +823,18 @@ class StateTest(unittest.TestCase):
         # Prepare
         state = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {})
-        id = "5b0a3fc2-edba-4525-a89a-04b83420b7c8"
+        task_ins_id = "5b0a3fc2-edba-4525-a89a-04b83420b7c8"
 
         task_res = create_task_res(
             producer_node_id=100,
             anonymous=False,
-            ancestry=[str(id)],
+            ancestry=[str(task_ins_id)],
             run_id=run_id,
         )
         _ = state.store_task_res(task_res=task_res)
 
         # Execute
-        task_res_list = state.get_task_res(task_ids={UUID(id)}, limit=None)
+        task_res_list = state.get_task_res(task_ids={UUID(task_ins_id)}, limit=None)
 
         # Assert
         assert len(task_res_list) == 0
