@@ -217,7 +217,9 @@ def get_metadata_from_config(config: dict[str, Any]) -> tuple[str, str]:
     )
 
 
-def get_metadata_from_fab_file(fab_file: Union[Path, str]) -> tuple[str, str, str, str]:
+def get_metadata_from_fab_filename(
+    fab_file: Union[Path, str]
+) -> tuple[str, str, str, str]:
     """Extract metadata from the FAB filename."""
     if isinstance(fab_file, Path):
         fab_file_name = fab_file.stem

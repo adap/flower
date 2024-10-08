@@ -28,7 +28,7 @@ import typer
 from flwr.common.config import (
     get_flwr_dir,
     get_metadata_from_config,
-    get_metadata_from_fab_file,
+    get_metadata_from_fab_filename,
 )
 from flwr.common.constant import FAB_HASH_TRUNCATION
 
@@ -163,7 +163,7 @@ def validate_and_install(
 
     if fab_name:
         fab_publisher, fab_project_name, fab_version, fab_shorthash = (
-            get_metadata_from_fab_file(fab_name)
+            get_metadata_from_fab_filename(fab_name)
         )
         if (
             f"{fab_publisher}.{fab_project_name}.{fab_version}"
