@@ -15,8 +15,8 @@
 """."""
 
 
-from .connection import Connection
+from .fleet_connection import FleetConnection
 
 __all__ = [
-    "Connection",
+    "FleetConnection",
 ]

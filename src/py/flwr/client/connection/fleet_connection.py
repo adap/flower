@@ -27,7 +27,7 @@ from flwr.common.retry_invoker import RetryInvoker
 from flwr.common.typing import Fab, Run
 
 
-class Connection(ABC):
+class FleetConnection(ABC):
     """Abstract base class for SuperNode connections."""
 
     def __init__(  # pylint: disable=R0913, R0914, R0915
@@ -103,7 +103,7 @@ class Connection(ABC):
     def get_fab(self, fab_hash: str) -> Fab:
         """Get FAB file."""
 
-    def __enter__(self) -> Connection:
+    def __enter__(self) -> FleetConnection:
         """Enter the context."""
         return self
 
