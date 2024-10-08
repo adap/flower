@@ -25,7 +25,11 @@ from typing import IO, Annotated, Optional, Union
 
 import typer
 
-from flwr.common.config import get_flwr_dir, get_metadata_from_config
+from flwr.common.config import (
+    get_flwr_dir,
+    get_metadata_from_config,
+    get_metadata_from_fab_file,
+)
 from flwr.common.constant import FAB_HASH_TRUNCATION
 
 from .config_utils import load_and_validate
@@ -156,20 +160,33 @@ def validate_and_install(
     version, fab_id = get_metadata_from_config(config)
     publisher, project_name = fab_id.split("/")
 
-    if (
-        fab_name
-        and ".".join(fab_name.split(".")[:-1])
-        != f"{publisher}.{project_name}.{version.replace('.', '-')}"
-        and len(fab_name.split(".")[-1]) != FAB_HASH_TRUNCATION  # Verify hash length
-        and int(fab_name.split(".")[-1], 16)  # Verify hash is a valid hexadecimal
-    ):
-        typer.secho(
-            "❌ FAB file has incorrect name. The file name must follow the format "
-            "`<publisher>.<project_name>.<version>.<shorthash>.fab`.",
-            fg=typer.colors.RED,
-            bold=True,
+    if fab_name:
+        fab_publisher, fab_project_name, fab_version, fab_shorthash = (
+            get_metadata_from_fab_file(fab_name)
         )
-        raise typer.Exit(code=1)
+        if (
+            f"{fab_publisher}.{fab_project_name}.{fab_version}"
+            != f"{publisher}.{project_name}.{version}"
+            or len(fab_shorthash) != FAB_HASH_TRUNCATION  # Verify hash length
+        ):
+
+            typer.secho(
+                "❌ FAB file has incorrect name. The file name must follow the format "
+                "`<publisher>.<project_name>.<version>.<8hexchars>.fab`.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1)
+
+        try:
+            _ = int(fab_shorthash, 16)  # Verify hash is a valid hexadecimal
+        except ValueError as e:
+            typer.secho(
+                f"❌ FAB file has an invalid hexadecimal string `{fab_shorthash}`.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1) from e
 
     install_dir: Path = (
         (get_flwr_dir() if not flwr_dir else flwr_dir)
