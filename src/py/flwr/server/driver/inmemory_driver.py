@@ -39,7 +39,7 @@ class InMemoryDriver(Driver):
         The identifier of the run.
     state_factory : StateFactory
         A StateFactory embedding a state that this driver can interface with.
-    pull_interval: float (default=0.1)
+    pull_interval : float (default=0.1)
         Sleep duration between calls to `pull_messages`.
     """
 
