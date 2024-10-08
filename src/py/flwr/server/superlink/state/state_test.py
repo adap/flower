@@ -21,6 +21,7 @@ import unittest
 from abc import abstractmethod
 from datetime import datetime, timezone
 from unittest.mock import patch
+from uuid import UUID
 
 from flwr.common import DEFAULT_TTL
 from flwr.common.constant import ErrorCode
@@ -833,7 +834,7 @@ class StateTest(unittest.TestCase):
         _ = state.store_task_res(task_res=task_res)
 
         # Execute
-        task_res_list = state.get_task_res(task_ids={id}, limit=None)
+        task_res_list = state.get_task_res(task_ids={UUID(id)}, limit=None)
 
         # Assert
         assert len(task_res_list) == 0
