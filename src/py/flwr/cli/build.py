@@ -20,7 +20,7 @@ import shutil
 import tempfile
 import zipfile
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated, Optional, Union
 
 import pathspec
 import tomli_w
@@ -33,7 +33,7 @@ from .utils import get_sha256_hash, is_valid_project_name
 
 
 def write_to_zip(
-    zipfile_obj: zipfile.ZipFile, filename: str, contents: bytes | str
+    zipfile_obj: zipfile.ZipFile, filename: str, contents: Union[bytes, str]
 ) -> zipfile.ZipFile:
     """Set a fixed date and write contents to a zip file."""
     zip_info = zipfile.ZipInfo(filename)
