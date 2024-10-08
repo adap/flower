@@ -137,7 +137,7 @@ def install_from_fab(
 
 def validate_and_install(
     project_dir: Path,
-    fab_hash: str,  # pylint: disable=unused-argument
+    fab_hash: str,
     fab_name: Optional[str],
     flwr_dir: Optional[Path],
     skip_prompt: bool = False,
@@ -175,9 +175,7 @@ def validate_and_install(
     install_dir: Path = (
         (get_flwr_dir() if not flwr_dir else flwr_dir)
         / "apps"
-        / publisher
-        / project_name
-        / version
+        / f"{publisher}.{project_name}.{version}.{fab_hash[:FAB_HASH_TRUNCATION]}"
     )
     if install_dir.exists():
         if skip_prompt:

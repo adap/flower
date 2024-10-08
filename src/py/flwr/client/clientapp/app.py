@@ -132,8 +132,11 @@ def run_clientapp(  # pylint: disable=R0914
             )
 
             try:
-                # Load ClientApp
-                client_app: ClientApp = load_client_app_fn(run.fab_id, run.fab_version)
+                if fab:
+                    # Load ClientApp
+                    client_app: ClientApp = load_client_app_fn(
+                        run.fab_id, run.fab_version, fab.hash_str
+                    )
 
                 # Execute ClientApp
                 reply_message = client_app(message=message, context=context)
