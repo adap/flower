@@ -479,8 +479,8 @@ class SqliteState(State):  # pylint: disable=R0904
             )
             task_ins = dict_to_task_ins(row)
             if task_ins.task.created_at + task_ins.task.ttl <= time.time():
-                log(ERROR, "TaskIns with task_id %s is expired.", task_ins.task_id)
-                return []
+                log(WARNING, "TaskIns with task_id %s is expired.", task_ins.task_id)
+                continue
 
         # Retrieve all anonymous Tasks
         if len(task_ids) == 0:
