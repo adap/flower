@@ -35,4 +35,3 @@ default = "local-simulation"
 
 [tool.flwr.federations.local-simulation]
 options.num-supernodes = 3 # Note that this example will require changes to how VFL is implemented
-

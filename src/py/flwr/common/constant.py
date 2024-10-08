@@ -78,6 +78,9 @@ GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY = "should-exit"
 GRPC_ADAPTER_METADATA_MESSAGE_MODULE_KEY = "grpc-message-module"
 GRPC_ADAPTER_METADATA_MESSAGE_QUALNAME_KEY = "grpc-message-qualname"
 
+# Message TTL
+MESSAGE_TTL_TOLERANCE = 1e-1
+
 
 class MessageType:
     """Message type."""
