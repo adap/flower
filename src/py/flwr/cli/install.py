@@ -139,6 +139,7 @@ def install_from_fab(
     return installed_path
 
 
+# pylint: disable=too-many-locals
 def validate_and_install(
     project_dir: Path,
     fab_hash: str,  # pylint: disable=unused-argument
