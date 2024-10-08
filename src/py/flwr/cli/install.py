@@ -14,7 +14,7 @@
 # ==============================================================================
 """Flower command line interface `install` command."""
 
-
+import hashlib
 import shutil
 import subprocess
 import tempfile
@@ -26,6 +26,7 @@ from typing import IO, Annotated, Optional, Union
 import typer
 
 from flwr.common.config import get_flwr_dir
+from flwr.common.constant import FAB_HASH_TRUNCATION
 
 from .config_utils import load_and_validate
 from .utils import get_sha256_hash
@@ -91,9 +92,11 @@ def install_from_fab(
     fab_name: Optional[str]
     if isinstance(fab_file, bytes):
         fab_file_archive = BytesIO(fab_file)
+        fab_hash = hashlib.sha256(fab_file).hexdigest()
         fab_name = None
     elif isinstance(fab_file, Path):
         fab_file_archive = fab_file
+        fab_hash = hashlib.sha256(fab_file.read_bytes()).hexdigest()
         fab_name = fab_file.stem
     else:
         raise ValueError("fab_file must be either a Path or bytes")
@@ -126,7 +129,7 @@ def install_from_fab(
             shutil.rmtree(info_dir)
 
             installed_path = validate_and_install(
-                tmpdir_path, fab_name, flwr_dir, skip_prompt
+                tmpdir_path, fab_hash, fab_name, flwr_dir, skip_prompt
             )
 
     return installed_path
@@ -134,6 +137,7 @@ def install_from_fab(
 
 def validate_and_install(
     project_dir: Path,
+    fab_hash: str,  # pylint: disable=unused-argument
     fab_name: Optional[str],
     flwr_dir: Optional[Path],
     skip_prompt: bool = False,
@@ -155,11 +159,14 @@ def validate_and_install(
 
     if (
         fab_name
-        and fab_name != f"{publisher}.{project_name}.{version.replace('.', '-')}"
+        and ".".join(fab_name.split(".")[:-1])
+        != f"{publisher}.{project_name}.{version.replace('.', '-')}"
+        and len(fab_name.split(".")[-1]) != FAB_HASH_TRUNCATION  # Verify hash length
+        and int(fab_name.split(".")[-1], 16)  # Verify hash is a valid hexadecimal
     ):
         typer.secho(
             "❌ FAB file has incorrect name. The file name must follow the format "
-            "`<publisher>.<project_name>.<version>.fab`.",
+            "`<publisher>.<project_name>.<version>.<shorthash>.fab`.",
             fg=typer.colors.RED,
             bold=True,
         )
