@@ -42,8 +42,8 @@ def write_to_zip(
     return zipfile_obj
 
 
-def set_fab_filename(conf: dict[str, Any], fab_hash: str) -> str:
-    """Set the FAB filename based on the given config and FAB hash."""
+def get_fab_filename(conf: dict[str, Any], fab_hash: str) -> str:
+    """Get the FAB filename based on the given config and FAB hash."""
     publisher = conf["tool"]["flwr"]["app"]["publisher"]
     name = conf["project"]["name"]
     version = conf["project"]["version"].replace(".", "-")
