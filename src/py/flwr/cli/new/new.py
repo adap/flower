@@ -40,6 +40,7 @@ class MlFramework(str, Enum):
     JAX = "JAX"
     MLX = "MLX"
     NUMPY = "NumPy"
+    XGBOOST = "XGBoost"
     FLOWERTUNE = "FlowerTune"
     BASELINE = "Flower Baseline"
 
@@ -240,6 +241,7 @@ def new(
             MlFramework.HUGGINGFACE.value,
             MlFramework.MLX.value,
             MlFramework.TENSORFLOW.value,
+            MlFramework.XGBOOST.value,
         ]
         if framework_str in frameworks_with_tasks:
             files[f"{import_name}/task.py"] = {
