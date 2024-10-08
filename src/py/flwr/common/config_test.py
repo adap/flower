@@ -65,13 +65,13 @@ def test_get_flwr_dir_with_xdg_data_home() -> None:
 def test_get_project_dir_invalid_fab_id() -> None:
     """Test get_project_dir with an invalid fab_id."""
     with pytest.raises(ValueError):
-        get_project_dir("invalid_fab_id", "1.0.0")
+        get_project_dir("invalid_fab_id", "1.0.0", "abcd1234")
 
 
 def test_get_project_dir_valid() -> None:
     """Test get_project_dir with an valid fab_id and version."""
-    app_path = get_project_dir("app_name/user", "1.0.0", flwr_dir=".")
-    assert app_path == Path("apps") / "app_name" / "user" / "1.0.0"
+    app_path = get_project_dir("app_name/user", "1.0.0", "abcd1234", flwr_dir=".")
+    assert app_path == Path("apps") / "app_name.user.1.0.0.abcd1234"
 
 
 def test_get_project_config_file_not_found() -> None:

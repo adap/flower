@@ -55,7 +55,6 @@ def get_load_client_app_fn(
         if not valid and error_msg:
             raise LoadClientAppError(error_msg) from None
 
-    # pylint: disable=unused-argument
     def _load(fab_id: str, fab_version: str, fab_hash: str) -> ClientApp:
         runtime_app_dir = Path(app_path if app_path else "").absolute()
         # If multi-app feature is disabled
@@ -87,7 +86,12 @@ def get_load_client_app_fn(
                 )
                 config = get_project_config(runtime_app_dir)
             except Exception as e:
-                raise LoadClientAppError("Failed to load ClientApp") from e
+                raise LoadClientAppError(
+                    "Failed to load ClientApp."
+                    "Possible reasons for error include mismatched "
+                    "`fab_id`, `fab_version`, or `fab_hash` in "
+                    f"{str(get_flwr_dir(flwr_dir).resolve())}."
+                ) from e
 
             # Set app reference
             client_app_ref = config["tool"]["flwr"]["app"]["components"]["clientapp"]
