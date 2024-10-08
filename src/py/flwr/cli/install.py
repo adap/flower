@@ -25,7 +25,7 @@ from typing import IO, Annotated, Optional, Union
 
 import typer
 
-from flwr.common.config import get_flwr_dir
+from flwr.common.config import get_flwr_dir, get_metadata_from_config
 from flwr.common.constant import FAB_HASH_TRUNCATION
 
 from .config_utils import load_and_validate
@@ -153,9 +153,8 @@ def validate_and_install(
         )
         raise typer.Exit(code=1)
 
-    publisher = config["tool"]["flwr"]["app"]["publisher"]
-    project_name = config["project"]["name"]
-    version = config["project"]["version"]
+    version, fab_id = get_metadata_from_config(config)
+    publisher, project_name = fab_id.split("/")
 
     if (
         fab_name
