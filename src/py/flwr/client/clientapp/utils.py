@@ -82,7 +82,7 @@ def get_load_client_app_fn(
         else:
             try:
                 runtime_app_dir = get_project_dir(
-                    fab_id, fab_version, get_flwr_dir(flwr_dir)
+                    fab_id, fab_version, fab_hash, get_flwr_dir(flwr_dir)
                 )
                 config = get_project_config(runtime_app_dir)
             except Exception as e:
