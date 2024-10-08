@@ -20,7 +20,7 @@ import shutil
 import tempfile
 import zipfile
 from pathlib import Path
-from typing import Annotated, Optional, Union
+from typing import Annotated, Any, Optional, Union
 
 import pathspec
 import tomli_w
@@ -28,7 +28,7 @@ import typer
 
 from flwr.common.constant import FAB_ALLOWED_EXTENSIONS, FAB_DATE, FAB_HASH_TRUNCATION
 
-from .config_utils import load_and_validate
+from .config_utils import get_fab_metadata, load_and_validate
 from .utils import get_sha256_hash, is_valid_project_name
 
 
@@ -40,6 +40,15 @@ def write_to_zip(
     zip_info.date_time = FAB_DATE
     zipfile_obj.writestr(zip_info, contents)
     return zipfile_obj
+
+
+def set_fab_filename(conf: dict[str, Any], fab_hash: str) -> str:
+    """Set the FAB filename based on the given config and FAB hash."""
+    publisher = conf["tool"]["flwr"]["app"]["publisher"]
+    name = conf["project"]["name"]
+    version = conf["project"]["version"].replace(".", "-")
+    fab_hash_truncated = fab_hash[:FAB_HASH_TRUNCATION]
+    return f"{publisher}.{name}.{version}.{fab_hash_truncated}.fab"
 
 
 # pylint: disable=too-many-locals, too-many-statements
@@ -149,12 +158,7 @@ def build(
     fab_hash = hashlib.sha256(content).hexdigest()
 
     # Set the name of the zip file
-    fab_filename = (
-        f"{conf['tool']['flwr']['app']['publisher']}"
-        f".{conf['project']['name']}"
-        f".{conf['project']['version'].replace('.', '-')}"
-        f".{fab_hash[:FAB_HASH_TRUNCATION]}.fab"
-    )
+    fab_filename = set_fab_filename(conf, fab_hash)
 
     # Once the temporary zip file is created, rename it to the final filename
     shutil.move(temp_filename, fab_filename)
