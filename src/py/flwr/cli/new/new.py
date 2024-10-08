@@ -241,6 +241,7 @@ def new(
             MlFramework.MLX.value,
             MlFramework.TENSORFLOW.value,
             MlFramework.SKLEARN.value,
+            MlFramework.NUMPY.value,
         ]
         if framework_str in frameworks_with_tasks:
             files[f"{import_name}/task.py"] = {
