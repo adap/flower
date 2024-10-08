@@ -48,9 +48,6 @@ quickstart-cpp
 
 ### Install dependencies and project
 
-> [!NOTE]
-> Building the C++ components currently only works in Ubuntu 22.
-
 In this example, `SuperLink` and `ServerApp` use Flower's Python package, while the `SuperNodes` are C++ executables. We therefore need: (1) a Python environment with Flower installed; and (2) to build the `SuperNode` binaries.
 
 1. **Prepare for `SuperLink` and `ServerApp`**
@@ -63,8 +60,11 @@ In this example, `SuperLink` and `ServerApp` use Flower's Python package, while 
 
 2. **Build the `SuperNode` executables**
 
-   Ensure you have `CMake` and other build tools installed in your system. 
-   
+   > \[!NOTE\]
+   > Building the C++ components currently only works in Ubuntu 22.
+
+   Ensure you have `CMake` and other build tools installed in your system.
+
    ```shell
    sudo apt-get install -y clang-format cmake g++ clang-tidy cppcheck
    ```
