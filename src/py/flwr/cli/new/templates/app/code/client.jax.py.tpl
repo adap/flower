@@ -38,7 +38,6 @@ class FlowerClient(NumPyClient):
 
 
 def client_fn(context: Context):
-
     input_dim = context.run_config["input-dim"]
 
     # Return Client instance
