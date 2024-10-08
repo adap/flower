@@ -20,7 +20,12 @@ from typing import Callable, Optional
 
 from flwr.cli.build import build
 from flwr.client.client_app import ClientApp, LoadClientAppError
-from flwr.common.config import get_flwr_dir, get_project_config, get_project_dir
+from flwr.common.config import (
+    get_flwr_dir,
+    get_metadata_from_config,
+    get_project_config,
+    get_project_dir,
+)
 from flwr.common.logger import log
 from flwr.common.object_ref import load_app, validate
 
@@ -57,15 +62,17 @@ def get_load_client_app_fn(
         if not multi_app:
             # Set app reference
             client_app_ref = default_app_ref
-        # If multi-app feature is enabled but app directory is provided
+        # If multi-app feature is enabled but app directory is provided.
+        # `fab_hash` is not required since the app is loaded from `runtime_app_dir`.
         elif app_path is not None:
-            _, this_fab_hash = build(runtime_app_dir)
             config = get_project_config(runtime_app_dir)
+            this_fab_version, this_fab_id = get_metadata_from_config(config)
 
-            if this_fab_hash != fab_hash:
+            if this_fab_version != fab_version or this_fab_id != fab_id:
                 raise LoadClientAppError(
-                    f"FAB hash mismatch: Expected FAB hash '{this_fab_hash}' "
-                    f"but received FAB hash '{fab_hash}'.",
+                    f"FAB ID or version mismatch: Expected FAB ID '{this_fab_id}' and "
+                    f"FAB version '{this_fab_version}', but received FAB ID '{fab_id}' "
+                    f"and FAB version '{fab_version}'.",
                 ) from None
 
             # log(WARN, "FAB ID is not provided; the default ClientApp will be loaded.")
@@ -80,7 +87,12 @@ def get_load_client_app_fn(
                 )
                 config = get_project_config(runtime_app_dir)
             except Exception as e:
-                raise LoadClientAppError("Failed to load ClientApp") from e
+                raise LoadClientAppError(
+                    "Failed to load ClientApp."
+                    "Possible reasons for error include mismatched "
+                    "`fab_id`, `fab_version`, or `fab_hash` in "
+                    f"{str(get_flwr_dir(flwr_dir).resolve())}."
+                ) from e
 
             # Set app reference
             client_app_ref = config["tool"]["flwr"]["app"]["components"]["clientapp"]
