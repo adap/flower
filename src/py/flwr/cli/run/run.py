@@ -14,7 +14,6 @@
 # ==============================================================================
 """Flower command line interface `run` command."""
 
-import hashlib
 import json
 import subprocess
 import sys

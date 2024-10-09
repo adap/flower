@@ -28,7 +28,6 @@ import typer
 from flwr.common.config import (
     get_flwr_dir,
     get_metadata_from_config,
-    get_metadata_from_fab_filename,
 )
 from flwr.common.constant import FAB_HASH_TRUNCATION
 
@@ -142,7 +141,7 @@ def install_from_fab(
 # pylint: disable=too-many-locals
 def validate_and_install(
     project_dir: Path,
-    fab_hash: str,  # pylint: disable=unused-argument
+    fab_hash: str,
     fab_name: Optional[str],
     flwr_dir: Optional[Path],
     skip_prompt: bool = False,
@@ -160,10 +159,10 @@ def validate_and_install(
 
     version, fab_id = get_metadata_from_config(config)
     publisher, project_name = fab_id.split("/")
-    config_metadata = (publisher, project_name, version)
+    config_metadata = (publisher, project_name, version, fab_hash)
 
     if fab_name:
-        _ = get_metadata_from_fab_filename(fab_name, config_metadata)
+        _validate_fab_and_config_metadata(fab_name, config_metadata)
 
     install_dir: Path = (
         (get_flwr_dir() if not flwr_dir else flwr_dir)
@@ -226,3 +225,39 @@ def _verify_hashes(list_content: str, tmpdir: Path) -> bool:
         if not file_path.exists() or get_sha256_hash(file_path) != hash_expected:
             return False
     return True
+
+
+def _validate_fab_and_config_metadata(
+    fab_name: str, config_metadata: tuple[str, str, str, str]
+) -> None:
+    """Validate metadata from the FAB filename and config."""
+    publisher, project_name, version, fab_hash = config_metadata
+
+    fab_name = fab_name.removesuffix(".fab")
+
+    fab_publisher, fab_project_name, fab_version, fab_shorthash = fab_name.split(".")
+
+    # Check FAB filename format
+    if (
+        f"{fab_publisher}.{fab_project_name}.{fab_version}"
+        != f"{publisher}.{project_name}.{version}"
+        or len(fab_shorthash) != FAB_HASH_TRUNCATION  # Verify hash length
+    ):
+        raise ValueError(
+            "❌ FAB file has incorrect name. The file name must follow the format "
+            "`<publisher>.<project_name>.<version>.<8hexchars>.fab`.",
+        )
+
+    # Verify hash is a valid hexadecimal
+    try:
+        _ = int(fab_shorthash, 16)
+    except Exception as e:
+        raise ValueError(
+            "❌ FAB file has an invalid hexadecimal string `{fab_shorthash}`."
+        ) from e
+
+    # Verify shorthash matches
+    if fab_shorthash != fab_hash[:FAB_HASH_TRUNCATION]:
+        raise ValueError(
+            "❌ The hash in the FAB file name does not match the hash of the FAB."
+        )

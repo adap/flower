@@ -29,7 +29,7 @@ import typer
 from flwr.common.constant import FAB_ALLOWED_EXTENSIONS, FAB_DATE, FAB_HASH_TRUNCATION
 
 from .config_utils import load_and_validate
-from .utils import get_sha256_hash, is_valid_project_name
+from .utils import is_valid_project_name
 
 
 def write_to_zip(
