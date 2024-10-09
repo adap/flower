@@ -31,10 +31,20 @@ class DriverStub(object):
                 request_serializer=flwr_dot_proto_dot_driver__pb2.PushTaskInsRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_driver__pb2.PushTaskInsResponse.FromString,
                 )
+        self.PushMessages = channel.unary_unary(
+                '/flwr.proto.Driver/PushMessages',
+                request_serializer=flwr_dot_proto_dot_driver__pb2.PushMessagesRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_driver__pb2.PushMessagesResponse.FromString,
+                )
         self.PullTaskRes = channel.unary_unary(
                 '/flwr.proto.Driver/PullTaskRes',
                 request_serializer=flwr_dot_proto_dot_driver__pb2.PullTaskResRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_driver__pb2.PullTaskResResponse.FromString,
+                )
+        self.PullMessages = channel.unary_unary(
+                '/flwr.proto.Driver/PullMessages',
+                request_serializer=flwr_dot_proto_dot_driver__pb2.PullMessagesRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_driver__pb2.PullMessagesResponse.FromString,
                 )
         self.GetRun = channel.unary_unary(
                 '/flwr.proto.Driver/GetRun',
@@ -72,9 +82,21 @@ class DriverServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def PushMessages(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def PullTaskRes(self, request, context):
         """Get task results
         """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def PullMessages(self, request, context):
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -111,10 +133,20 @@ def add_DriverServicer_to_server(servicer, server):
                     request_deserializer=flwr_dot_proto_dot_driver__pb2.PushTaskInsRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_driver__pb2.PushTaskInsResponse.SerializeToString,
             ),
+            'PushMessages': grpc.unary_unary_rpc_method_handler(
+                    servicer.PushMessages,
+                    request_deserializer=flwr_dot_proto_dot_driver__pb2.PushMessagesRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_driver__pb2.PushMessagesResponse.SerializeToString,
+            ),
             'PullTaskRes': grpc.unary_unary_rpc_method_handler(
                     servicer.PullTaskRes,
                     request_deserializer=flwr_dot_proto_dot_driver__pb2.PullTaskResRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_driver__pb2.PullTaskResResponse.SerializeToString,
+            ),
+            'PullMessages': grpc.unary_unary_rpc_method_handler(
+                    servicer.PullMessages,
+                    request_deserializer=flwr_dot_proto_dot_driver__pb2.PullMessagesRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_driver__pb2.PullMessagesResponse.SerializeToString,
             ),
             'GetRun': grpc.unary_unary_rpc_method_handler(
                     servicer.GetRun,
@@ -188,6 +220,23 @@ class Driver(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
+    def PushMessages(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Driver/PushMessages',
+            flwr_dot_proto_dot_driver__pb2.PushMessagesRequest.SerializeToString,
+            flwr_dot_proto_dot_driver__pb2.PushMessagesResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
     def PullTaskRes(request,
             target,
             options=(),
@@ -201,6 +250,23 @@ class Driver(object):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.Driver/PullTaskRes',
             flwr_dot_proto_dot_driver__pb2.PullTaskResRequest.SerializeToString,
             flwr_dot_proto_dot_driver__pb2.PullTaskResResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def PullMessages(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Driver/PullMessages',
+            flwr_dot_proto_dot_driver__pb2.PullMessagesRequest.SerializeToString,
+            flwr_dot_proto_dot_driver__pb2.PullMessagesResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 

@@ -3,6 +3,7 @@
 isort:skip_file
 """
 import builtins
+import flwr.proto.message_pb2
 import flwr.proto.node_pb2
 import flwr.proto.task_pb2
 import google.protobuf.descriptor
@@ -91,3 +92,58 @@ class PullTaskResResponse(google.protobuf.message.Message):
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["task_res_list",b"task_res_list"]) -> None: ...
 global___PullTaskResResponse = PullTaskResResponse
+
+class PushMessagesRequest(google.protobuf.message.Message):
+    """PushMessages rmessages"""
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    MESSAGES_LIST_FIELD_NUMBER: builtins.int
+    @property
+    def messages_list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.message_pb2.Message]: ...
+    def __init__(self,
+        *,
+        messages_list: typing.Optional[typing.Iterable[flwr.proto.message_pb2.Message]] = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["messages_list",b"messages_list"]) -> None: ...
+global___PushMessagesRequest = PushMessagesRequest
+
+class PushMessagesResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    MESSAGE_IDS_FIELD_NUMBER: builtins.int
+    @property
+    def message_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
+    def __init__(self,
+        *,
+        message_ids: typing.Optional[typing.Iterable[typing.Text]] = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["message_ids",b"message_ids"]) -> None: ...
+global___PushMessagesResponse = PushMessagesResponse
+
+class PullMessagesRequest(google.protobuf.message.Message):
+    """PullMessages messages"""
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    NODE_FIELD_NUMBER: builtins.int
+    MESSAGE_IDS_FIELD_NUMBER: builtins.int
+    @property
+    def node(self) -> flwr.proto.node_pb2.Node: ...
+    @property
+    def message_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
+    def __init__(self,
+        *,
+        node: typing.Optional[flwr.proto.node_pb2.Node] = ...,
+        message_ids: typing.Optional[typing.Iterable[typing.Text]] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["node",b"node"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["message_ids",b"message_ids","node",b"node"]) -> None: ...
+global___PullMessagesRequest = PullMessagesRequest
+
+class PullMessagesResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    MESSAGES_LIST_FIELD_NUMBER: builtins.int
+    @property
+    def messages_list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.message_pb2.Message]: ...
+    def __init__(self,
+        *,
+        messages_list: typing.Optional[typing.Iterable[flwr.proto.message_pb2.Message]] = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["messages_list",b"messages_list"]) -> None: ...
+global___PullMessagesResponse = PullMessagesResponse
