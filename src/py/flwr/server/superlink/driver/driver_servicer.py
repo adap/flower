@@ -26,6 +26,10 @@ from flwr.common.logger import log
 from flwr.common.serde import (
     fab_from_proto,
     fab_to_proto,
+    message_from_proto,
+    message_from_taskres,
+    message_to_proto,
+    message_to_taskins,
     user_config_from_proto,
     user_config_to_proto,
 )
@@ -136,7 +140,32 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         self, request: PushMessagesRequest, context: grpc.ServicerContext
     ) -> PushMessagesResponse:
         """Push a set of Messages."""
-        return PushMessagesResponse(message_ids=[])
+        log(DEBUG, "DriverServicer.PushMessages")
+
+        # Init state
+        state: State = self.state_factory.state()
+
+        # Set pushed_at (timestamp in seconds)
+        pushed_at = time.time()
+
+        # Validate request and insert in State
+        _raise_if(len(request.messages_list) == 0, "`messages_list` must not be empty")
+        message_ids: list[Optional[UUID]] = []
+        for message_proto in request.messages_list:
+            message = message_from_proto(message_proto=message_proto)
+            task_ins = message_to_taskins(message=message)
+            task_ins.task.pushed_at = pushed_at
+            validation_errors = validate_task_ins_or_res(task_ins)
+            _raise_if(bool(validation_errors), ", ".join(validation_errors))
+            # Store
+            message_id: Optional[UUID] = state.store_task_ins(task_ins=task_ins)
+            message_ids.append(message_id)
+
+        return PushMessagesResponse(
+            message_ids=[
+                str(message_id) if message_id else "" for message_id in message_ids
+            ]
+        )
 
     def PullTaskRes(
         self, request: PullTaskResRequest, context: grpc.ServicerContext
@@ -174,7 +203,43 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         self, request: PullMessagesRequest, context: grpc.ServicerContext
     ) -> PullMessagesResponse:
         """Pull a set of Messages."""
-        return PullMessagesResponse(messages_list=[])
+        log(DEBUG, "DriverServicer.PullMessages")
+
+        # Convert each task_id str to UUID
+        message_ids: set[UUID] = {
+            UUID(message_id) for message_id in request.message_ids
+        }
+
+        # Init state
+        state: State = self.state_factory.state()
+
+        # Register callback
+        def on_rpc_done() -> None:
+            log(DEBUG, "DriverServicer.PullMessages callback: delete TaskIns/TaskRes")
+
+            if context.is_active():
+                return
+            if context.code() != grpc.StatusCode.OK:
+                return
+
+            # Delete delivered TaskIns and TaskRes
+            state.delete_tasks(task_ids=message_ids)
+
+        context.add_callback(on_rpc_done)
+
+        # Read from state
+        task_res_list: list[TaskRes] = state.get_task_res(
+            task_ids=message_ids, limit=None
+        )
+
+        # Convert to Messages
+        messages_list = []
+        for taksres in task_res_list:
+            message = message_from_taskres(taskres=taksres)
+            messages_list.append(message_to_proto(message))
+
+        context.set_code(grpc.StatusCode.OK)
+        return PullMessagesResponse(messages_list=messages_list)
 
     def GetRun(
         self, request: GetRunRequest, context: grpc.ServicerContext
