@@ -53,7 +53,7 @@ from flwr.proto.grpcadapter_pb2 import MessageContainer  # pylint: disable=E0611
 from flwr.proto.grpcadapter_pb2_grpc import GrpcAdapterStub
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 
-from ..grpc_rere import FleetAPI, GrpcRereFleetConnection
+from ..grpc_rere import FleetApi, GrpcRereFleetConnection
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
@@ -68,7 +68,7 @@ class GrpcAdapterFleetConnection(GrpcRereFleetConnection):
     """Grpc-adapter fleet connection based on GrpcRereFleetConnection."""
 
     @property
-    def api(self) -> FleetAPI:
+    def api(self) -> FleetApi:
         """The API proxy."""
         if self._api is None:
             # Initialize the connection to the SuperLink Fleet API server
@@ -89,11 +89,11 @@ class GrpcAdapterFleetConnection(GrpcRereFleetConnection):
                 max_message_length=self.max_message_length,
             )
             self.channel.subscribe(on_channel_state_change)
-            self._api = GrpcAdapterFleetAPI(self.channel)
+            self._api = GrpcAdapterFleetApi(self.channel)
         return self._api
 
 
-class GrpcAdapterFleetAPI(FleetAPI):
+class GrpcAdapterFleetApi(FleetApi):
     """Adapter class to send and receive gRPC messages via the ``GrpcAdapterStub``.
 
     This class utilizes the ``GrpcAdapterStub`` to send and receive gRPC messages

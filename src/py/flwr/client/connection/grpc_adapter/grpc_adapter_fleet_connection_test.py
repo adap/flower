@@ -19,7 +19,7 @@ import inspect
 
 from flwr.proto.fleet_pb2_grpc import FleetServicer
 
-from .grpc_adapter_fleet_connection import GrpcAdapterFleetAPI
+from .grpc_adapter_fleet_connection import GrpcAdapterFleetApi
 
 
 def test_grpc_adapter_methods() -> None:
@@ -27,7 +27,7 @@ def test_grpc_adapter_methods() -> None:
     # Prepare
     methods = {
         name
-        for name, ref in inspect.getmembers(GrpcAdapterFleetAPI)
+        for name, ref in inspect.getmembers(GrpcAdapterFleetApi)
         if inspect.isfunction(ref)
     }
     expected_methods = {

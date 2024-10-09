@@ -73,8 +73,8 @@ def on_channel_state_change(channel_connectivity: str) -> None:
     log(DEBUG, channel_connectivity)
 
 
-class GrpcRereFleetConnection(FleetConnection):
-    """Grpc-rere fleet connection."""
+class GrpcRereConnection(FleetConnection):
+    """Grpc-rere connection."""
 
     def __init__(  # pylint: disable=R0913, R0914, R0915
         self,

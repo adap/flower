@@ -60,7 +60,7 @@ T = TypeVar("T", bound=GrpcMessage)
 
 
 class RestFleetConnection(GrpcRereFleetConnection):
-    """Rest fleet connection based on GrpcRereFleetConnection."""
+    """Rest connection based on GrpcRereConnection."""
 
     @property
     def api(self) -> FleetApi:
@@ -87,12 +87,12 @@ class RestFleetConnection(GrpcRereFleetConnection):
                     "Client authentication is not supported for this transport type.",
                 )
 
-            self._api = RestFleetAPI(self.server_address, verify)
+            self._api = RestFleetApi(self.server_address, verify)
 
         return self._api
 
 
-class RestFleetAPI(FleetApi):
+class RestFleetApi(FleetApi):
     """Adapter class to send and receive gRPC messages via HTTP.
 
     This class utilizes the ``requests`` module to send and receive gRPC messages
