@@ -116,6 +116,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         # Return TaskIns
         return task_ins_list
 
+    # pylint: disable=R0911
     def store_task_res(self, task_res: TaskRes) -> Optional[UUID]:
         """Store one TaskRes."""
         # Validate task
