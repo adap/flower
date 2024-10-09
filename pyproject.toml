@@ -134,6 +134,7 @@ pre-commit = "==3.5.0"
 sphinx-substitution-extensions = "2022.02.16"
 sphinxext-opengraph = "==0.9.1"
 docstrfmt = { git = "https://github.com/charlesbvll/docstrfmt.git", branch = "patch-1" }
+docsig = "==0.64.0"
 
 [tool.docstrfmt]
 extend_exclude = [
@@ -224,3 +225,7 @@ convention = "numpy"
 
 [tool.ruff.per-file-ignores]
 "src/py/flwr/server/strategy/*.py" = ["E501"]
+
+[tool.docsig]
+ignore-no-params = true
+exclude = 'src/py/flwr/proto/.*|src/py/flwr/.*_test\.py|src/py/flwr/cli/new/templates/.*\.tpl'
