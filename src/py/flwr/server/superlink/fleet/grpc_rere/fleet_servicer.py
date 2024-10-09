@@ -99,12 +99,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         self, request: PullMessagesRequest, context: grpc.ServicerContext
     ) -> PullMessagesResponse:
         """Pull Messages."""
-        log(INFO, "[Fleet.PullMessages] node_id=%s", request.node.node_id)
-        log(DEBUG, "[Fleet.PullMessages] Request: %s", request)
-        return message_handler.pull_messages(
-            request=request,
-            state=self.state_factory.state(),
-        )
+        return PullMessagesResponse()
 
     def PushTaskRes(
         self, request: PushTaskResRequest, context: grpc.ServicerContext
@@ -127,18 +122,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         self, request: PushMessagesRequest, context: grpc.ServicerContext
     ) -> PushMessagesResponse:
         """Push Messages."""
-        if request.messages_list:
-            log(
-                INFO,
-                "[Fleet.PushMessages] Push results from node_id=%s",
-                request.messages_list[0].metadata.src_node_id,
-            )
-        else:
-            log(INFO, "[Fleet.PushMessages] No task results to push")
-        return message_handler.push_messages(
-            request=request,
-            state=self.state_factory.state(),
-        )
+        return PushMessagesResponse()
 
     def GetRun(
         self, request: GetRunRequest, context: grpc.ServicerContext
