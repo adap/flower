@@ -21,6 +21,7 @@ import unittest
 from abc import abstractmethod
 from datetime import datetime, timezone
 from unittest.mock import patch
+from uuid import UUID
 
 from flwr.common import DEFAULT_TTL
 from flwr.common.constant import ErrorCode
@@ -784,6 +785,91 @@ class StateTest(unittest.TestCase):
         with patch("time.time", side_effect=lambda: task_ins.task.created_at + 6.1):
             task_ins_list = state.get_task_ins(node_id=1, limit=None)
             assert len(task_ins_list) == 0
+
+    def test_get_task_res_not_return_expired(self) -> None:
+        """Test get_task_res not to return TaskRes if its TaskIns is expired."""
+        # Prepare
+        consumer_node_id = 1
+        state = self.state_factory()
+        run_id = state.create_run(None, None, "9f86d08", {})
+        task_ins = create_task_ins(
+            consumer_node_id=consumer_node_id, anonymous=False, run_id=run_id
+        )
+        task_ins.task.created_at = time.time() - 5
+        task_ins.task.ttl = 5.1
+
+        task_id = state.store_task_ins(task_ins=task_ins)
+
+        task_res = create_task_res(
+            producer_node_id=1,
+            anonymous=False,
+            ancestry=[str(task_id)],
+            run_id=run_id,
+        )
+        task_res.task.ttl = 0.1
+        _ = state.store_task_res(task_res=task_res)
+
+        with patch("time.time", side_effect=lambda: task_ins.task.created_at + 6.1):
+            # Execute
+            if task_id is not None:
+                task_res_list = state.get_task_res(task_ids={task_id}, limit=None)
+
+            # Assert
+            assert len(task_res_list) == 0
+
+    def test_get_task_res_returns_empty_for_missing_taskins(self) -> None:
+        """Test that get_task_res returns an empty result when the corresponding TaskIns
+        does not exist."""
+        # Prepare
+        state = self.state_factory()
+        run_id = state.create_run(None, None, "9f86d08", {})
+        task_ins_id = "5b0a3fc2-edba-4525-a89a-04b83420b7c8"
+
+        task_res = create_task_res(
+            producer_node_id=1,
+            anonymous=False,
+            ancestry=[str(task_ins_id)],
+            run_id=run_id,
+        )
+        _ = state.store_task_res(task_res=task_res)
+
+        # Execute
+        task_res_list = state.get_task_res(task_ids={UUID(task_ins_id)}, limit=None)
+
+        # Assert
+        assert len(task_res_list) == 0
+
+    def test_get_task_res_return_if_not_expired(self) -> None:
+        """Test get_task_res to return TaskRes if its TaskIns exists and is not
+        expired."""
+        # Prepare
+        consumer_node_id = 1
+        state = self.state_factory()
+        run_id = state.create_run(None, None, "9f86d08", {})
+        task_ins = create_task_ins(
+            consumer_node_id=consumer_node_id, anonymous=False, run_id=run_id
+        )
+        task_ins.task.created_at = time.time() - 5
+        task_ins.task.ttl = 7.1
+
+        task_id = state.store_task_ins(task_ins=task_ins)
+
+        task_res = create_task_res(
+            producer_node_id=1,
+            anonymous=False,
+            ancestry=[str(task_id)],
+            run_id=run_id,
+        )
+        task_res.task.ttl = 0.1
+        _ = state.store_task_res(task_res=task_res)
+
+        with patch("time.time", side_effect=lambda: task_ins.task.created_at + 6.1):
+            # Execute
+            if task_id is not None:
+                task_res_list = state.get_task_res(task_ids={task_id}, limit=None)
+
+            # Assert
+            assert len(task_res_list) != 0
 
 
 def create_task_ins(
