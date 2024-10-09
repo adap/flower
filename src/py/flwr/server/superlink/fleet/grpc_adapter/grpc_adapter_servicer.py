@@ -21,7 +21,15 @@ from typing import Callable, TypeVar
 import grpc
 from google.protobuf.message import Message as GrpcMessage
 
+from flwr.common.constant import (
+    GRPC_ADAPTER_METADATA_FLOWER_PACKAGE_NAME_KEY,
+    GRPC_ADAPTER_METADATA_FLOWER_PACKAGE_VERSION_KEY,
+    GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY,
+    GRPC_ADAPTER_METADATA_MESSAGE_MODULE_KEY,
+    GRPC_ADAPTER_METADATA_MESSAGE_QUALNAME_KEY,
+)
 from flwr.common.logger import log
+from flwr.common.version import package_name, package_version
 from flwr.proto import grpcadapter_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -52,9 +60,16 @@ def _handle(
 ) -> MessageContainer:
     req = request_type.FromString(msg_container.grpc_message_content)
     res = handler(req)
+    res_cls = res.__class__
     return MessageContainer(
-        metadata={},
-        grpc_message_name=res.__class__.__qualname__,
+        metadata={
+            GRPC_ADAPTER_METADATA_FLOWER_PACKAGE_NAME_KEY: package_name,
+            GRPC_ADAPTER_METADATA_FLOWER_PACKAGE_VERSION_KEY: package_version,
+            GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY: package_version,
+            GRPC_ADAPTER_METADATA_MESSAGE_MODULE_KEY: res_cls.__module__,
+            GRPC_ADAPTER_METADATA_MESSAGE_QUALNAME_KEY: res_cls.__qualname__,
+        },
+        grpc_message_name=res_cls.__qualname__,
         grpc_message_content=res.SerializeToString(),
     )
 

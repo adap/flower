@@ -79,6 +79,7 @@ def run_supernode() -> None:
         node_config=parse_config_args(
             [args.node_config] if args.node_config else args.node_config
         ),
+        flwr_path=args.flwr_dir,
         isolation=args.isolation,
         supernode_address=args.supernode_address,
     )

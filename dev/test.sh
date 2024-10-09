@@ -56,6 +56,14 @@ echo "- mdformat: done"
 
 echo "- All Markdown checks passed"
 
+echo "- Start TOML checks"
+
+echo "- taplo: start"
+taplo fmt --check
+echo "- taplo: done"
+
+echo "- All TOML checks passed"
+
 echo "- Start rST checks"
 
 echo "- docstrfmt: start"
