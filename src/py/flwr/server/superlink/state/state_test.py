@@ -872,8 +872,8 @@ class StateTest(unittest.TestCase):
             assert len(task_res_list) != 0
 
     def test_store_task_res_fail_if_consumer_producer_id_mismatch(self) -> None:
-        "Test store_task_res to fail if there is a mismatch between"
-        "the consumer_node_id of taskIns and the producer_node_id of taskRes."
+        """Test store_task_res to fail if there is a mismatch between the
+        consumer_node_id of taskIns and the producer_node_id of taskRes."""
         # Prepare
         consumer_node_id = 1
         state = self.state_factory()
