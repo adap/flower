@@ -160,34 +160,10 @@ def validate_and_install(
 
     version, fab_id = get_metadata_from_config(config)
     publisher, project_name = fab_id.split("/")
+    config_metadata = (publisher, project_name, version)
 
     if fab_name:
-        fab_publisher, fab_project_name, fab_version, fab_shorthash = (
-            get_metadata_from_fab_filename(fab_name)
-        )
-        if (
-            f"{fab_publisher}.{fab_project_name}.{fab_version}"
-            != f"{publisher}.{project_name}.{version}"
-            or len(fab_shorthash) != FAB_HASH_TRUNCATION  # Verify hash length
-        ):
-
-            typer.secho(
-                "❌ FAB file has incorrect name. The file name must follow the format "
-                "`<publisher>.<project_name>.<version>.<8hexchars>.fab`.",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-            raise typer.Exit(code=1)
-
-        try:
-            _ = int(fab_shorthash, 16)  # Verify hash is a valid hexadecimal
-        except ValueError as e:
-            typer.secho(
-                f"❌ FAB file has an invalid hexadecimal string `{fab_shorthash}`.",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-            raise typer.Exit(code=1) from e
+        _ = get_metadata_from_fab_filename(fab_name, config_metadata)
 
     install_dir: Path = (
         (get_flwr_dir() if not flwr_dir else flwr_dir)

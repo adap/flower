@@ -14,6 +14,7 @@
 # ==============================================================================
 """Provide functions for managing global Flower config."""
 
+import sys
 import os
 import re
 from pathlib import Path
@@ -22,7 +23,12 @@ from typing import Any, Optional, Union, cast, get_args
 import tomli
 
 from flwr.cli.config_utils import get_fab_config, validate_fields
-from flwr.common.constant import APP_DIR, FAB_CONFIG_FILE, FLWR_HOME
+from flwr.common.constant import (
+    APP_DIR,
+    FAB_CONFIG_FILE,
+    FAB_HASH_TRUNCATION,
+    FLWR_HOME,
+)
 from flwr.common.typing import Run, UserConfig, UserConfigValue
 
 
@@ -218,12 +224,42 @@ def get_metadata_from_config(config: dict[str, Any]) -> tuple[str, str]:
 
 
 def get_metadata_from_fab_filename(
-    fab_file: Union[Path, str]
-) -> tuple[str, str, str, str]:
+    fab_file: Union[Path, str], config_metadata: tuple[str, str, str]
+) -> Optional[tuple[str, str, str, str]]:
     """Extract metadata from the FAB filename."""
+
+    fab_file_name: str
+    publisher, project_name, version = config_metadata
+
     if isinstance(fab_file, Path):
         fab_file_name = fab_file.stem
     elif isinstance(fab_file, str):
         fab_file_name = fab_file.removesuffix(".fab")
-    publisher, project_name, version, shorthash = fab_file_name.split(".")
-    return publisher, project_name, version.replace("-", "."), shorthash
+
+    fab_publisher, fab_project_name, fab_version, fab_shorthash = fab_file_name.split(
+        "."
+    )
+
+    if (
+        f"{fab_publisher}.{fab_project_name}.{fab_version}"
+        != f"{publisher}.{project_name}.{version}"
+        or len(fab_shorthash) != FAB_HASH_TRUNCATION  # Verify hash length
+    ):
+        raise ValueError(
+            "❌ FAB file has incorrect name. The file name must follow the format "
+            "`<publisher>.<project_name>.<version>.<8hexchars>.fab`.",
+        )
+
+    try:
+        _ = int(fab_shorthash, 16)  # Verify hash is a valid hexadecimal
+    except Exception as e:
+        raise ValueError(
+            "❌ FAB file has an invalid hexadecimal string `{fab_shorthash}`."
+        ) from e
+
+    return (
+        fab_publisher,
+        fab_project_name,
+        fab_version.replace("-", "."),
+        fab_shorthash,
+    )

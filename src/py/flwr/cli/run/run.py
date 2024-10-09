@@ -179,9 +179,9 @@ def _run_with_superexec(
     channel.subscribe(on_channel_state_change)
     stub = ExecStub(channel)
 
-    fab_path = Path(build(app)[0])
-    content = fab_path.read_bytes()
-    fab = Fab(hashlib.sha256(content).hexdigest(), content)
+    fab_path, fab_hash = build(app)
+    content = Path(fab_path).read_bytes()
+    fab = Fab(fab_hash, content)
 
     req = StartRunRequest(
         fab=fab_to_proto(fab),

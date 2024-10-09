@@ -146,7 +146,7 @@ def build(
                 write_to_zip(fab_file, str(archive_path), file_contents)
 
                 # Calculate file info
-                sha256_hash = get_sha256_hash(file_path)
+                sha256_hash = hashlib.sha256(file_contents).hexdigest()
                 file_size_bits = os.path.getsize(file_path) * 8  # size in bits
                 list_file_content += f"{archive_path},{sha256_hash},{file_size_bits}\n"
 
