@@ -192,7 +192,7 @@ def _run_with_superexec(
     res = stub.StartRun(req)
 
     # Delete FAB file once it has been sent to the SuperExec
-    fab_path.unlink()
+    Path(fab_path).unlink()
     typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
 
     if stream:
