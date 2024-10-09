@@ -16,11 +16,11 @@
 
 
 import subprocess
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 
-from .exec_servicer import ExecServicer
+from .exec_servicer import ExecServicer, _capture_logs
 
 
 def test_start_run() -> None:
@@ -50,3 +50,20 @@ def test_start_run() -> None:
     response = servicer.StartRun(request, context_mock)
 
     assert response.run_id == 10
+
+
+def test_capture_logs() -> None:
+    """Test capture_logs function."""
+    run_res = Mock()
+    run_res.logs = []
+    with subprocess.Popen(
+        ["echo", "success"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    ) as proc:
+        run_res.proc = proc
+        _capture_logs(run_res)
+
+    assert len(run_res.logs) == 1
+    assert run_res.logs[0] == "success"

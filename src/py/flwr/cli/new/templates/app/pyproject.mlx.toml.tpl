@@ -28,6 +28,7 @@ clientapp = "$import_name.client_app:app"
 num-server-rounds = 3
 local-epochs = 1
 num-layers = 2
+input-dim = 784 # 28*28
 hidden-dim = 32
 batch-size = 256
 lr = 0.1
