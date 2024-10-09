@@ -189,6 +189,19 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             replied_task_ids: set[UUID] = set()
             for _, task_res in self.task_res_store.items():
                 reply_to = UUID(task_res.task.ancestry[0])
+
+                # Check if corresponding TaskIns exists and is not expired
+                task_ins = self.task_ins_store.get(reply_to)
+                if task_ins is None:
+                    log(WARNING, "TaskIns with task_id %s does not exist.", reply_to)
+                    task_ids.remove(reply_to)
+                    continue
+
+                if task_ins.task.created_at + task_ins.task.ttl <= time.time():
+                    log(WARNING, "TaskIns with task_id %s is expired.", reply_to)
+                    task_ids.remove(reply_to)
+                    continue
+
                 if reply_to in task_ids and task_res.task.delivered_at == "":
                     task_res_list.append(task_res)
                     replied_task_ids.add(reply_to)
