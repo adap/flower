@@ -14,11 +14,11 @@
 # ==============================================================================
 """Flower command line interface `install` command."""
 
-import zipfile
 import hashlib
 import shutil
 import subprocess
 import tempfile
+import zipfile
 from io import BytesIO
 from pathlib import Path
 from typing import IO, Annotated, Optional, Union
