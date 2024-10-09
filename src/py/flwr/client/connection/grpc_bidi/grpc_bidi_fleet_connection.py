@@ -77,7 +77,7 @@ class GrpcBidiFleetConnection(FleetConnection):
             tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey] | None
         ) = None,
     ) -> None:
-        """Initialize the GrpcRereConnection."""
+        """Initialize the GrpcBidiFleetConnection."""
         super().__init__(
             server_address=server_address,
             insecure=insecure,
