@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Connection for a gRPC request-response channel to the SuperLink."""
+"""Connection for a grpc-adapter request-response channel to the SuperLink."""
 
 
 from __future__ import annotations
