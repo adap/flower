@@ -63,9 +63,9 @@ from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
+from ..fleet_api import FleetApi
 from ..fleet_connection import FleetConnection
 from .client_interceptor import AuthenticateClientInterceptor
-from ..fleet_api import FleetApi
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:

@@ -16,20 +16,21 @@
 
 
 from typing import Any
+
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
     DeleteNodeRequest,
+    DeleteNodeResponse,
     PingRequest,
     PingResponse,
     PullTaskInsRequest,
-    DeleteNodeResponse,
+    PullTaskInsResponse,
     PushTaskResRequest,
     PushTaskResResponse,
-    PullTaskInsResponse,
 )
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
-from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 
 
 class FleetApi:
