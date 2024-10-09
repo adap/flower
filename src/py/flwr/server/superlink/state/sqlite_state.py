@@ -395,7 +395,8 @@ class SqliteState(State):  # pylint: disable=R0904
             task_ins
             and task_res
             and not (task_ins["consumer_anonymous"] or task_res.task.producer.anonymous)
-            and task_ins["consumer_node_id"] != task_res.task.producer.node_id
+            and convert_sint64_to_uint64(task_ins["consumer_node_id"])
+            != task_res.task.producer.node_id
         ):
             return None
 
