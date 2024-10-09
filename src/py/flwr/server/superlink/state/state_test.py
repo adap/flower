@@ -801,7 +801,7 @@ class StateTest(unittest.TestCase):
         task_id = state.store_task_ins(task_ins=task_ins)
 
         task_res = create_task_res(
-            producer_node_id=100,
+            producer_node_id=1,
             anonymous=False,
             ancestry=[str(task_id)],
             run_id=run_id,
@@ -826,7 +826,7 @@ class StateTest(unittest.TestCase):
         task_ins_id = "5b0a3fc2-edba-4525-a89a-04b83420b7c8"
 
         task_res = create_task_res(
-            producer_node_id=100,
+            producer_node_id=1,
             anonymous=False,
             ancestry=[str(task_ins_id)],
             run_id=run_id,
@@ -855,7 +855,7 @@ class StateTest(unittest.TestCase):
         task_id = state.store_task_ins(task_ins=task_ins)
 
         task_res = create_task_res(
-            producer_node_id=100,
+            producer_node_id=1,
             anonymous=False,
             ancestry=[str(task_id)],
             run_id=run_id,
