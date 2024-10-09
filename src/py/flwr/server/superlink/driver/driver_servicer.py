@@ -34,8 +34,12 @@ from flwr.proto import driver_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     GetNodesResponse,
+    PullMessagesRequest,
+    PullMessagesResponse,
     PullTaskResRequest,
     PullTaskResResponse,
+    PushMessagesRequest,
+    PushMessagesResponse,
     PushTaskInsRequest,
     PushTaskInsResponse,
 )
@@ -128,6 +132,12 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
             task_ids=[str(task_id) if task_id else "" for task_id in task_ids]
         )
 
+    def PushMessages(
+        self, request: PushMessagesRequest, context: grpc.ServicerContext
+    ) -> PushMessagesResponse:
+        """Push a set of Messages."""
+        return PushMessagesResponse(message_ids=[])
+
     def PullTaskRes(
         self, request: PullTaskResRequest, context: grpc.ServicerContext
     ) -> PullTaskResResponse:
@@ -159,6 +169,12 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
 
         context.set_code(grpc.StatusCode.OK)
         return PullTaskResResponse(task_res_list=task_res_list)
+
+    def PullMessages(
+        self, request: PullMessagesRequest, context: grpc.ServicerContext
+    ) -> PullMessagesResponse:
+        """Pull a set of Messages."""
+        return PullMessagesResponse(messages_list=[])
 
     def GetRun(
         self, request: GetRunRequest, context: grpc.ServicerContext
