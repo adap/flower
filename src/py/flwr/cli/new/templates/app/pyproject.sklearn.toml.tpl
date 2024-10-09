@@ -25,6 +25,8 @@ clientapp = "$import_name.client_app:app"
 
 [tool.flwr.app.config]
 num-server-rounds = 3
+penalty = "l2"
+local-epochs = 1
 
 [tool.flwr.federations]
 default = "local-simulation"

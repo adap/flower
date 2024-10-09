@@ -63,7 +63,10 @@ NODE_ID_NUM_BYTES = 8
 
 # Constants for FAB
 APP_DIR = "apps"
+FAB_ALLOWED_EXTENSIONS = {".py", ".toml", ".md"}
 FAB_CONFIG_FILE = "pyproject.toml"
+FAB_DATE = (2024, 10, 1, 0, 0, 0)
+FAB_HASH_TRUNCATION = 8
 FLWR_HOME = "FLWR_HOME"
 
 # Constants entries in Node config for Simulation
