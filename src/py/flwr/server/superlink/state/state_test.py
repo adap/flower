@@ -149,7 +149,7 @@ class StateTest(unittest.TestCase):
 
         # Insert one TaskRes and retrive it to mark it as delivered
         task_res_0 = create_task_res(
-            producer_node_id=100,
+            producer_node_id=consumer_node_id,
             anonymous=False,
             ancestry=[str(task_id_0)],
             run_id=run_id,
@@ -160,7 +160,7 @@ class StateTest(unittest.TestCase):
 
         # Insert one TaskRes, but don't retrive it
         task_res_1: TaskRes = create_task_res(
-            producer_node_id=100,
+            producer_node_id=consumer_node_id,
             anonymous=False,
             ancestry=[str(task_id_1)],
             run_id=run_id,
@@ -662,7 +662,7 @@ class StateTest(unittest.TestCase):
 
         # Create and store TaskRes
         task_res_0 = create_task_res(
-            producer_node_id=100,
+            producer_node_id=node_id_0,
             anonymous=False,
             ancestry=[str(task_id_0)],
             run_id=run_id,
