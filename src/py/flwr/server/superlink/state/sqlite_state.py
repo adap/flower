@@ -469,7 +469,6 @@ class SqliteState(State):  # pylint: disable=R0904
         task_ins_rows = self.query(query, task_ins_data)
 
         if not task_ins_rows:
-            log(ERROR, "TaskIns does not exist.")
             return []
 
         for row in task_ins_rows:
