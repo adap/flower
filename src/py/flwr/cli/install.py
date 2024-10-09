@@ -25,10 +25,7 @@ from typing import IO, Annotated, Optional, Union
 
 import typer
 
-from flwr.common.config import (
-    get_flwr_dir,
-    get_metadata_from_config,
-)
+from flwr.common.config import get_flwr_dir, get_metadata_from_config
 from flwr.common.constant import FAB_HASH_TRUNCATION
 
 from .config_utils import load_and_validate
