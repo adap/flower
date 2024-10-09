@@ -19,11 +19,9 @@ from __future__ import annotations
 
 import random
 import threading
-from collections.abc import Sequence
+from abc import abstractmethod
 from copy import copy
-from logging import DEBUG, ERROR
-from pathlib import Path
-from typing import cast
+from logging import ERROR
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -38,7 +36,6 @@ from flwr.common.constant import (
     PING_DEFAULT_INTERVAL,
     PING_RANDOM_RANGE,
 )
-from abc import abstractmethod
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
@@ -66,7 +63,7 @@ from .fleet_api import FleetApi
 from .fleet_connection import FleetConnection
 
 
-class ereFleetConnection(FleetConnection):
+class RereFleetConnection(FleetConnection):
     """Network-based request-response fleet connection."""
 
     def __init__(  # pylint: disable=R0913, R0914, R0915
@@ -80,7 +77,7 @@ class ereFleetConnection(FleetConnection):
             tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey] | None
         ) = None,
     ) -> None:
-        """Initialize the GrpcRereFleetConnection."""
+        """Initialize the RereFleetConnection."""
         super().__init__(
             server_address=server_address,
             insecure=insecure,
@@ -94,12 +91,11 @@ class ereFleetConnection(FleetConnection):
         self.ping_thread: threading.Thread | None = None
         self.ping_stop_event = threading.Event()
         self.channel: grpc.Channel | None = None
-        self._api: FleetApi | None = None
 
     @property
     @abstractmethod
     def api(self) -> FleetApi:
-        """The API proxy."""
+        """The proxy providing low-level access to the Fleet API server."""
 
     def ping(self) -> None:
         """Ping the SuperLink."""

@@ -41,7 +41,8 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 
-from ..grpc_rere import FleetApi, GrpcRereFleetConnection
+from ..fleet_api import FleetApi
+from ..rere_fleet_connection import RereFleetConnection
 
 if importlib.util.find_spec("requests"):
     import requests
@@ -59,12 +60,14 @@ PATH_GET_FAB: str = "/api/v0/fleet/get-fab"
 T = TypeVar("T", bound=GrpcMessage)
 
 
-class RestFleetConnection(GrpcRereFleetConnection):
-    """Rest fleet connection based on GrpcRereFleetConnection."""
+class RestFleetConnection(RereFleetConnection):
+    """Rest fleet connection based on RereFleetConnection."""
+
+    _api: FleetApi | None = None
 
     @property
     def api(self) -> FleetApi:
-        """The API proxy."""
+        """The proxy providing low-level access to the Fleet API server."""
         if self._api is None:
             # Initialize the connection to the SuperLink Fleet API server
 
@@ -87,12 +90,12 @@ class RestFleetConnection(GrpcRereFleetConnection):
                     "Client authentication is not supported for this transport type.",
                 )
 
-            self._api = RestFleetAPI(self.server_address, verify)
+            self._api = RestFleetApi(self.server_address, verify)
 
         return self._api
 
 
-class RestFleetAPI(FleetApi):
+class RestFleetApi(FleetApi):
     """Adapter class to send and receive gRPC messages via HTTP.
 
     This class utilizes the ``requests`` module to send and receive gRPC messages

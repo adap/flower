@@ -15,10 +15,8 @@
 """Client-side part of the GrpcRere transport layer."""
 
 
-from ..fleet_api import FleetApi
 from .grpc_rere_fleet_connection import GrpcRereFleetConnection
 
 __all__ = [
-    "FleetApi",
     "GrpcRereFleetConnection",
 ]

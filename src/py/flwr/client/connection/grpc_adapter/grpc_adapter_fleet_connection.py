@@ -53,7 +53,8 @@ from flwr.proto.grpcadapter_pb2 import MessageContainer  # pylint: disable=E0611
 from flwr.proto.grpcadapter_pb2_grpc import GrpcAdapterStub
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 
-from ..grpc_rere import FleetApi, GrpcRereFleetConnection
+from ..fleet_api import FleetApi
+from ..rere_fleet_connection import RereFleetConnection
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
@@ -64,12 +65,14 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 T = TypeVar("T", bound=GrpcMessage)
 
 
-class GrpcAdapterFleetConnection(GrpcRereFleetConnection):
-    """Grpc-adapter fleet connection based on GrpcRereFleetConnection."""
+class GrpcAdapterFleetConnection(RereFleetConnection):
+    """Grpc-adapter fleet connection based on RereFleetConnection."""
+
+    _api: FleetApi | None = None
 
     @property
     def api(self) -> FleetApi:
-        """The API proxy."""
+        """The proxy providing low-level access to the Fleet API server."""
         if self._api is None:
             # Initialize the connection to the SuperLink Fleet API server
             if not isinstance(self.root_certificates, str):
