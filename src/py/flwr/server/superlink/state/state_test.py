@@ -895,7 +895,7 @@ class StateTest(unittest.TestCase):
         task_res_uuid = state.store_task_res(task_res=task_res)
 
         # Assert
-        assert task_res_uuid == None
+        assert task_res_uuid is None
 
 
 def create_task_ins(
