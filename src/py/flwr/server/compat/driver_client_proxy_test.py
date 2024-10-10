@@ -52,8 +52,6 @@ ERROR_REPLY = Error(code=0, reason="mock error")
 
 RUN_ID = 61016
 NODE_ID = 1
-INSTRUCTION_MESSAGE_ID = "mock instruction message id"
-REPLY_MESSAGE_ID = "mock reply message id"
 
 
 class DriverClientProxyTestCase(unittest.TestCase):
@@ -77,7 +75,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
         """Test positive case."""
         # Prepare
         res = GetPropertiesRes(status=CLIENT_STATUS, properties=CLIENT_PROPERTIES)
-        self.driver.push_messages.side_effect = self._get_push_messages(res)
+        self.driver.send_and_receive.side_effect = self._exec_send_and_receive(res)
         request_properties: Config = {"tensor_type": "str"}
         ins = GetPropertiesIns(config=request_properties)
 
@@ -95,7 +93,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
             status=CLIENT_STATUS,
             parameters=MESSAGE_PARAMETERS,
         )
-        self.driver.push_messages.side_effect = self._get_push_messages(res)
+        self.driver.send_and_receive.side_effect = self._exec_send_and_receive(res)
         ins = GetParametersIns(config={})
 
         # Execute
@@ -114,7 +112,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
             num_examples=10,
             metrics={},
         )
-        self.driver.push_messages.side_effect = self._get_push_messages(res)
+        self.driver.send_and_receive.side_effect = self._exec_send_and_receive(res)
         parameters = flwr.common.ndarrays_to_parameters([np.ones((2, 2))])
         ins = FitIns(parameters, {})
 
@@ -134,7 +132,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
             num_examples=0,
             metrics={},
         )
-        self.driver.push_messages.side_effect = self._get_push_messages(res)
+        self.driver.send_and_receive.side_effect = self._exec_send_and_receive(res)
         parameters = Parameters(tensors=[b"random params%^&*F"], tensor_type="np")
         ins = EvaluateIns(parameters, {})
 
@@ -148,7 +146,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
     def test_get_properties_and_fail(self) -> None:
         """Test negative case."""
         # Prepare
-        self.driver.push_messages.side_effect = self._get_push_messages(
+        self.driver.send_and_receive.side_effect = self._exec_send_and_receive(
             None, error_reply=True
         )
         request_properties: Config = {"tensor_type": "str"}
@@ -163,7 +161,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
     def test_get_parameters_and_fail(self) -> None:
         """Test negative case."""
         # Prepare
-        self.driver.push_messages.side_effect = self._get_push_messages(
+        self.driver.send_and_receive.side_effect = self._exec_send_and_receive(
             None, error_reply=True
         )
         ins = GetParametersIns(config={})
@@ -177,7 +175,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
     def test_fit_and_fail(self) -> None:
         """Test negative case."""
         # Prepare
-        self.driver.push_messages.side_effect = self._get_push_messages(
+        self.driver.send_and_receive.side_effect = self._exec_send_and_receive(
             None, error_reply=True
         )
         parameters = flwr.common.ndarrays_to_parameters([np.ones((2, 2))])
@@ -190,7 +188,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
     def test_evaluate_and_fail(self) -> None:
         """Test negative case."""
         # Prepare
-        self.driver.push_messages.side_effect = self._get_push_messages(
+        self.driver.send_and_receive.side_effect = self._exec_send_and_receive(
             None, error_reply=True
         )
         parameters = Parameters(tensors=[b"random params%^&*F"], tensor_type="np")
@@ -229,15 +227,15 @@ class DriverClientProxyTestCase(unittest.TestCase):
         self.created_msg = Message(metadata=metadata, content=content)
         return self.created_msg
 
-    def _get_push_messages(
+    def _exec_send_and_receive(
         self,
         res: Union[GetParametersRes, GetPropertiesRes, FitRes, EvaluateRes, None],
         error_reply: bool = False,
-    ) -> Callable[[Iterable[Message]], Iterable[str]]:
-        """Get the push_messages function that sets the return value of pull_messages
-        when called."""
+    ) -> Callable[[Iterable[Message]], Iterable[Message]]:
+        """Get the generate_replies function that sets the return value of driver's
+        send_and_receive when called."""
 
-        def push_messages(messages: Iterable[Message]) -> Iterable[str]:
+        def generate_replies(messages: Iterable[Message]) -> Iterable[Message]:
             msg = list(messages)[0]
             if error_reply:
                 recordset = None
@@ -254,13 +252,11 @@ class DriverClientProxyTestCase(unittest.TestCase):
                 raise ValueError(f"Unsupported type: {type(res)}")
             if recordset is not None:
                 ret = msg.create_reply(recordset)
-            ret.metadata.__dict__["_message_id"] = REPLY_MESSAGE_ID
 
-            # Set the return value of `pull_messages`
-            self.driver.pull_messages.return_value = [ret]
-            return [INSTRUCTION_MESSAGE_ID]
+            # Reply messages given the push message
+            return [ret]
 
-        return push_messages
+        return generate_replies
 
     def _common_assertions(self, original_ins: Any) -> None:
         """Check common assertions."""
@@ -275,18 +271,9 @@ class DriverClientProxyTestCase(unittest.TestCase):
         self.assertEqual(self.called_times, 1)
         self.assertEqual(actual_ins, original_ins)
 
-        # Check if push_messages is called once with expected args/kwargs.
-        self.driver.push_messages.assert_called_once()
+        # Check if send_and_receive is called once with expected args/kwargs.
+        self.driver.send_and_receive.assert_called_once()
         try:
-            self.driver.push_messages.assert_any_call([self.created_msg])
+            self.driver.send_and_receive.assert_any_call([self.created_msg])
         except AssertionError:
-            self.driver.push_messages.assert_any_call(messages=[self.created_msg])
-
-        # Check if pull_messages is called once with expected args/kwargs.
-        self.driver.pull_messages.assert_called_once()
-        try:
-            self.driver.pull_messages.assert_called_with([INSTRUCTION_MESSAGE_ID])
-        except AssertionError:
-            self.driver.pull_messages.assert_called_with(
-                message_ids=[INSTRUCTION_MESSAGE_ID]
-            )
+            self.driver.send_and_receive.assert_any_call(messages=[self.created_msg])
