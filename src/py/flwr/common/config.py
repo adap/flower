@@ -218,7 +218,7 @@ def parse_config_args(
             toml_str = "\n".join(f"{k} = {v}" for k, v in matches)
             overrides.update(tomli.loads(toml_str))
 
-    return overrides
+    return flatten_dict(overrides)
 
 
 def get_metadata_from_config(config: dict[str, Any]) -> tuple[str, str]:
