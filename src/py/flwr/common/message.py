@@ -290,6 +290,11 @@ class Message:
             follows the equation:
 
             ttl = msg.meta.ttl - (reply.meta.created_at - msg.meta.created_at)
+
+        Returns
+        -------
+        message : Message
+            A Message containing only the relevant error and metadata.
         """
         # If no TTL passed, use default for message creation (will update after
         # message creation)
