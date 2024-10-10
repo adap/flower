@@ -231,6 +231,7 @@ def _validate_fab_and_config_metadata(
     fab_name = fab_name.removesuffix(".fab")
 
     fab_publisher, fab_project_name, fab_version, fab_shorthash = fab_name.split(".")
+    fab_version = fab_version.replace("-", ".")
 
     # Check FAB filename format
     if (
