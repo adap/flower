@@ -317,7 +317,7 @@ class StateTest(unittest.TestCase):
         task_res_uuid = state.store_task_res(task_res)
 
         assert task_ins_id
-        task_res_list = state.get_task_res(task_ids={task_ins_id}e)
+        task_res_list = state.get_task_res(task_ids={task_ins_id})
 
         # Assert
         retrieved_task_res = task_res_list[0]
