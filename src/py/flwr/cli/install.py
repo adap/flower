@@ -241,21 +241,30 @@ def _validate_fab_and_config_metadata(
         != f"{publisher}.{project_name}.{version}"
         or len(fab_shorthash) != FAB_HASH_TRUNCATION  # Verify hash length
     ):
-        raise ValueError(
+        typer.secho(
             "❌ FAB file has incorrect name. The file name must follow the format "
             "`<publisher>.<project_name>.<version>.<8hexchars>.fab`.",
+            fg=typer.colors.RED,
+            bold=True,
         )
+        raise typer.Exit(code=1)
 
     # Verify hash is a valid hexadecimal
     try:
         _ = int(fab_shorthash, 16)
     except Exception as e:
-        raise ValueError(
-            "❌ FAB file has an invalid hexadecimal string `{fab_shorthash}`."
-        ) from e
+        typer.secho(
+            f"❌ FAB file has an invalid hexadecimal string `{fab_shorthash}`.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1) from e
 
     # Verify shorthash matches
     if fab_shorthash != fab_hash[:FAB_HASH_TRUNCATION]:
-        raise ValueError(
-            "❌ The hash in the FAB file name does not match the hash of the FAB."
+        typer.secho(
+            "❌ The hash in the FAB file name does not match the hash of the FAB.",
+            fg=typer.colors.RED,
+            bold=True,
         )
+        raise typer.Exit(code=1)
