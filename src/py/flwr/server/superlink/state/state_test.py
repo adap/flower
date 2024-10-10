@@ -811,8 +811,8 @@ class StateTest(unittest.TestCase):
 
         with patch("time.time", side_effect=lambda: task_ins.task.created_at + 6.1):
             # Execute
-            if task_id is not None:
-                task_res_list = state.get_task_res(task_ids={task_id})
+            assert task_id is not None
+            task_res_list = state.get_task_res(task_ids={task_id})
 
             # Assert
             assert len(task_res_list) == 0
@@ -865,8 +865,8 @@ class StateTest(unittest.TestCase):
 
         with patch("time.time", side_effect=lambda: task_ins.task.created_at + 6.1):
             # Execute
-            if task_id is not None:
-                task_res_list = state.get_task_res(task_ids={task_id})
+            assert task_id is not None
+            task_res_list = state.get_task_res(task_ids={task_id})
 
             # Assert
             assert len(task_res_list) != 0
