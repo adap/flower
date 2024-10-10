@@ -227,15 +227,3 @@ def get_metadata_from_config(config: dict[str, Any]) -> tuple[str, str]:
         config["project"]["version"],
         f"{config['tool']['flwr']['app']['publisher']}/{config['project']['name']}",
     )
-
-
-def get_metadata_from_fab_filename(
-    fab_file: Union[Path, str]
-) -> tuple[str, str, str, str]:
-    """Extract metadata from the FAB filename."""
-    if isinstance(fab_file, Path):
-        fab_file_name = fab_file.stem
-    elif isinstance(fab_file, str):
-        fab_file_name = fab_file.removesuffix(".fab")
-    publisher, project_name, version, shorthash = fab_file_name.split(".")
-    return publisher, project_name, version.replace("-", "."), shorthash

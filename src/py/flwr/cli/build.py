@@ -29,7 +29,7 @@ import typer
 from flwr.common.constant import FAB_ALLOWED_EXTENSIONS, FAB_DATE, FAB_HASH_TRUNCATION
 
 from .config_utils import load_and_validate
-from .utils import get_sha256_hash, is_valid_project_name
+from .utils import is_valid_project_name
 
 
 def write_to_zip(
@@ -146,7 +146,7 @@ def build(
                 write_to_zip(fab_file, str(archive_path), file_contents)
 
                 # Calculate file info
-                sha256_hash = get_sha256_hash(file_path)
+                sha256_hash = hashlib.sha256(file_contents).hexdigest()
                 file_size_bits = os.path.getsize(file_path) * 8  # size in bits
                 list_file_content += f"{archive_path},{sha256_hash},{file_size_bits}\n"
 
