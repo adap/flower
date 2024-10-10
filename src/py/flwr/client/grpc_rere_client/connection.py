@@ -120,6 +120,9 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
         authentication from the cryptography library.
         Source: https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ec/
         Used to establish an authenticated connection with the server.
+    adapter_cls: Optional[Union[type[FleetStub], type[GrpcAdapter]]] (default: None)
+        A GrpcStub Class that can be used to send messages. By default the FleetStub
+        will be used.
 
     Returns
     -------
