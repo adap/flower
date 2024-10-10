@@ -26,6 +26,9 @@ service Exec {
 
   // Start log stream upon request
   rpc StreamLogs(StreamLogsRequest) returns (stream StreamLogsResponse) {}
+
+  // Start login upon request
+  rpc Login(LoginRequest) returns (LoginResponse) {}
 }
 
 message StartRunRequest {
@@ -36,3 +39,5 @@ message StartRunRequest {
 message StartRunResponse { uint64 run_id = 1; }
 message StreamLogsRequest { uint64 run_id = 1; }
 message StreamLogsResponse { string log_output = 1; }
+message LoginRequest {}
+message LoginResponse { string auth_url = 1; }
