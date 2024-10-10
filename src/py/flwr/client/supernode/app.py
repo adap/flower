@@ -18,7 +18,7 @@ import argparse
 import sys
 from logging import DEBUG, ERROR, INFO, WARN
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -30,6 +30,7 @@ from cryptography.hazmat.primitives.serialization import (
 from flwr.common import EventType, event
 from flwr.common.config import parse_config_args
 from flwr.common.constant import (
+    FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
@@ -43,8 +44,6 @@ from ..app import (
     start_client_internal,
 )
 from ..clientapp.utils import get_load_client_app_fn
-
-ADDRESS_FLEET_API_GRPC_RERE = "0.0.0.0:9092"
 
 
 def run_supernode() -> None:
@@ -77,7 +76,10 @@ def run_supernode() -> None:
         authentication_keys=authentication_keys,
         max_retries=args.max_retries,
         max_wait_time=args.max_wait_time,
-        node_config=parse_config_args([args.node_config]),
+        node_config=parse_config_args(
+            [args.node_config] if args.node_config else args.node_config
+        ),
+        flwr_path=args.flwr_dir,
         isolation=args.isolation,
         supernode_address=args.supernode_address,
     )
@@ -101,11 +103,11 @@ def run_client_app() -> None:
 
 def _warn_deprecated_server_arg(args: argparse.Namespace) -> None:
     """Warn about the deprecated argument `--server`."""
-    if args.server != ADDRESS_FLEET_API_GRPC_RERE:
+    if args.server != FLEET_API_GRPC_RERE_DEFAULT_ADDRESS:
         warn = "Passing flag --server is deprecated. Use --superlink instead."
         warn_deprecated_feature(warn)
 
-        if args.superlink != ADDRESS_FLEET_API_GRPC_RERE:
+        if args.superlink != FLEET_API_GRPC_RERE_DEFAULT_ADDRESS:
             # if `--superlink` also passed, then
             # warn user that this argument overrides what was passed with `--server`
             log(
@@ -245,12 +247,12 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument(
         "--server",
-        default=ADDRESS_FLEET_API_GRPC_RERE,
+        default=FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
         help="Server address",
     )
     parser.add_argument(
         "--superlink",
-        default=ADDRESS_FLEET_API_GRPC_RERE,
+        default=FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
         help="SuperLink Fleet API (gRPC-rere) address (IPv4, IPv6, or a domain name)",
     )
     parser.add_argument(
@@ -290,7 +292,7 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
 
 def _try_setup_client_authentication(
     args: argparse.Namespace,
-) -> Optional[Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
+) -> Optional[tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
     if not args.auth_supernode_private_key and not args.auth_supernode_public_key:
         return None
 

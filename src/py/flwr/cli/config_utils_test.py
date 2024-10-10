@@ -17,7 +17,7 @@
 import os
 import textwrap
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from .config_utils import load, validate, validate_fields
 
@@ -155,7 +155,7 @@ def test_load_pyproject_toml_from_path(tmp_path: Path) -> None:
 def test_validate_pyproject_toml_fields_empty() -> None:
     """Test that validate_pyproject_toml_fields fails correctly."""
     # Prepare
-    config: Dict[str, Any] = {}
+    config: dict[str, Any] = {}
 
     # Execute
     is_valid, errors, warnings = validate_fields(config)

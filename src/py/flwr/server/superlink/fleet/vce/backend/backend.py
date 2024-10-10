@@ -16,14 +16,14 @@
 
 
 from abc import ABC, abstractmethod
-from typing import Callable, Dict, Tuple
+from typing import Callable
 
 from flwr.client.client_app import ClientApp
 from flwr.common.context import Context
 from flwr.common.message import Message
 from flwr.common.typing import ConfigsRecordValues
 
-BackendConfig = Dict[str, Dict[str, ConfigsRecordValues]]
+BackendConfig = dict[str, dict[str, ConfigsRecordValues]]
 
 
 class Backend(ABC):
@@ -33,7 +33,7 @@ class Backend(ABC):
         """Construct a backend."""
 
     @abstractmethod
-    def build(self) -> None:
+    def build(self, app_fn: Callable[[], ClientApp]) -> None:
         """Build backend.
 
         Different components need to be in place before workers in a backend are ready
@@ -60,8 +60,7 @@ class Backend(ABC):
     @abstractmethod
     def process_message(
         self,
-        app: Callable[[], ClientApp],
         message: Message,
         context: Context,
-    ) -> Tuple[Message, Context]:
+    ) -> tuple[Message, Context]:
         """Submit a job to the backend."""

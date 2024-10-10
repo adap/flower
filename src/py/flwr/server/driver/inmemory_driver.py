@@ -17,7 +17,8 @@
 
 import time
 import warnings
-from typing import Iterable, List, Optional, cast
+from collections.abc import Iterable
+from typing import Optional, cast
 from uuid import UUID
 
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
@@ -38,16 +39,20 @@ class InMemoryDriver(Driver):
         The identifier of the run.
     state_factory : StateFactory
         A StateFactory embedding a state that this driver can interface with.
+    pull_interval : float (default=0.1)
+        Sleep duration between calls to `pull_messages`.
     """
 
     def __init__(
         self,
         run_id: int,
         state_factory: StateFactory,
+        pull_interval: float = 0.1,
     ) -> None:
         self._run_id = run_id
         self._run: Optional[Run] = None
         self.state = state_factory.state()
+        self.pull_interval = pull_interval
         self.node = Node(node_id=0, anonymous=True)
 
     def _check_message(self, message: Message) -> None:
@@ -112,7 +117,7 @@ class InMemoryDriver(Driver):
         )
         return Message(metadata=metadata, content=content)
 
-    def get_node_ids(self) -> List[int]:
+    def get_node_ids(self) -> list[int]:
         """Get node IDs."""
         self._init_run()
         return list(self.state.get_nodes(cast(Run, self._run).run_id))
@@ -123,7 +128,7 @@ class InMemoryDriver(Driver):
         This method takes an iterable of messages and sends each message
         to the node specified in `dst_node_id`.
         """
-        task_ids: List[str] = []
+        task_ids: list[str] = []
         for msg in messages:
             # Check message
             self._check_message(msg)
@@ -145,7 +150,7 @@ class InMemoryDriver(Driver):
         """
         msg_ids = {UUID(msg_id) for msg_id in message_ids}
         # Pull TaskRes
-        task_res_list = self.state.get_task_res(task_ids=msg_ids, limit=len(msg_ids))
+        task_res_list = self.state.get_task_res(task_ids=msg_ids)
         # Delete tasks in state
         self.state.delete_tasks(msg_ids)
         # Convert TaskRes to Message
@@ -169,7 +174,7 @@ class InMemoryDriver(Driver):
 
         # Pull messages
         end_time = time.time() + (timeout if timeout is not None else 0.0)
-        ret: List[Message] = []
+        ret: list[Message] = []
         while timeout is None or time.time() < end_time:
             res_msgs = self.pull_messages(msg_ids)
             ret.extend(res_msgs)
@@ -179,5 +184,5 @@ class InMemoryDriver(Driver):
             if len(msg_ids) == 0:
                 break
             # Sleep
-            time.sleep(3)
+            time.sleep(self.pull_interval)
         return ret

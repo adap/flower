@@ -22,7 +22,6 @@ class Distro:
 
 LATEST_SUPPORTED_PYTHON_VERSION = "3.11"
 SUPPORTED_PYTHON_VERSIONS = [
-    "3.8",
     "3.9",
     "3.10",
     LATEST_SUPPORTED_PYTHON_VERSION,
@@ -135,7 +134,7 @@ if __name__ == "__main__":
     ubuntu_base_images = generate_base_images(
         flwr_version,
         SUPPORTED_PYTHON_VERSIONS,
-        [Distro(DistroName.UBUNTU, "22.04")],
+        [Distro(DistroName.UBUNTU, "24.04")],
     )
     # alpine base images for the latest supported python version
     alpine_base_images = generate_base_images(
@@ -158,8 +157,12 @@ if __name__ == "__main__":
         + generate_binary_images(
             "supernode",
             base_images,
-            tag_latest_ubuntu_with_flwr_version,
-            lambda image: image.distro.name == DistroName.UBUNTU,
+            tag_latest_alpine_with_flwr_version,
+            lambda image: image.distro.name == DistroName.UBUNTU
+            or (
+                image.distro.name == DistroName.ALPINE
+                and image.python_version == LATEST_SUPPORTED_PYTHON_VERSION
+            ),
         )
         # ubuntu images for each supported python version
         + generate_binary_images(

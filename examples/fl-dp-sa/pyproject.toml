@@ -1,21 +1,40 @@
 [build-system]
-requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
+[project]
 name = "fl-dp-sa"
-version = "0.1.0"
-description = ""
+version = "1.0.0"
+description = "Central Differential Privacy and Secure Aggregation in Flower"
 license = "Apache-2.0"
-authors = [
-    "The Flower Authors <hello@flower.ai>",
+dependencies = [
+    "flwr[simulation]>=1.11.0",
+    "flwr-datasets[vision]>=0.3.0",
+    "torch==2.2.1",
+    "torchvision==0.17.1",
 ]
-readme = "README.md"
 
-[tool.poetry.dependencies]
-python = "^3.9"
-# Mandatory dependencies
-flwr = { version = "^1.8.0", extras = ["simulation"] }
-flwr-datasets = { version = "0.0.2", extras = ["vision"] }
-torch = "2.2.1"
-torchvision = "0.17.1"
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "flwrlabs"
+
+[tool.flwr.app.components]
+serverapp = "fl_dp_sa.server_app:app"
+clientapp = "fl_dp_sa.client_app:app"
+
+[tool.flwr.app.config]
+# Parameters for the DP
+noise-multiplier = 0.2
+clipping-norm = 10
+num-sampled-clients = 20
+# Parameters for the SecAgg+ protocol
+num-shares = 7
+reconstruction-threshold = 4
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 100

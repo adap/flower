@@ -18,20 +18,9 @@
 import itertools
 import random
 import time
+from collections.abc import Generator, Iterable
 from dataclasses import dataclass
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Generator,
-    Iterable,
-    List,
-    Optional,
-    Tuple,
-    Type,
-    Union,
-    cast,
-)
+from typing import Any, Callable, Optional, Union, cast
 
 
 def exponential(
@@ -49,6 +38,11 @@ def exponential(
         Factor by which the delay is multiplied after each retry.
     max_delay: Optional[float] (default: None)
         The maximum delay duration between two consecutive retries.
+
+    Returns
+    -------
+    Generator[float, None, None]
+        A generator for the delay between 2 retries.
     """
     delay = base_delay if max_delay is None else min(base_delay, max_delay)
     while True:
@@ -67,6 +61,11 @@ def constant(
     ----------
     interval: Union[float, Iterable[float]] (default: 1)
         A constant value to yield or an iterable of such values.
+
+    Returns
+    -------
+    Generator[float, None, None]
+        A generator for the delay between 2 retries.
     """
     if not isinstance(interval, Iterable):
         interval = itertools.repeat(interval)
@@ -84,6 +83,11 @@ def full_jitter(max_value: float) -> float:
     ----------
     max_value : float
         The upper limit for the randomized value.
+
+    Returns
+    -------
+    float
+        A random float that is less than max_value.
     """
     return random.uniform(0, max_value)
 
@@ -93,8 +97,8 @@ class RetryState:
     """State for callbacks in RetryInvoker."""
 
     target: Callable[..., Any]
-    args: Tuple[Any, ...]
-    kwargs: Dict[str, Any]
+    args: tuple[Any, ...]
+    kwargs: dict[str, Any]
     tries: int
     elapsed_time: float
     exception: Optional[Exception] = None
@@ -167,7 +171,7 @@ class RetryInvoker:
     def __init__(
         self,
         wait_gen_factory: Callable[[], Generator[float, None, None]],
-        recoverable_exceptions: Union[Type[Exception], Tuple[Type[Exception], ...]],
+        recoverable_exceptions: Union[type[Exception], tuple[type[Exception], ...]],
         max_tries: Optional[int],
         max_time: Optional[float],
         *,
@@ -244,7 +248,7 @@ class RetryInvoker:
         try_cnt = 0
         wait_generator = self.wait_gen_factory()
         start = time.monotonic()
-        ref_state: List[Optional[RetryState]] = [None]
+        ref_state: list[Optional[RetryState]] = [None]
 
         while True:
             try_cnt += 1

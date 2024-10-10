@@ -14,15 +14,14 @@
 # ==============================================================================
 """Flower command line interface `run` command."""
 
-import hashlib
+import json
 import subprocess
 import sys
 from logging import DEBUG
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Annotated, Any, Optional
 
 import typer
-from typing_extensions import Annotated
 
 from flwr.cli.build import build
 from flwr.cli.config_utils import load_and_validate
@@ -33,6 +32,10 @@ from flwr.common.serde import fab_to_proto, user_config_to_proto
 from flwr.common.typing import Fab
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
+
+from ..log import start_stream
+
+CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
@@ -51,7 +54,7 @@ def run(
         typer.Argument(help="Name of the federation to run the app on."),
     ] = None,
     config_overrides: Annotated[
-        Optional[List[str]],
+        Optional[list[str]],
         typer.Option(
             "--run-config",
             "-c",
@@ -62,6 +65,14 @@ def run(
             "inside the `pyproject.toml` in order to be properly overriden.",
         ),
     ] = None,
+    stream: Annotated[
+        bool,
+        typer.Option(
+            "--stream",
+            help="Use `--stream` with `flwr run` to display logs;\n "
+            "logs are not streamed by default.",
+        ),
+    ] = False,
 ) -> None:
     """Run Flower App."""
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
@@ -117,20 +128,22 @@ def run(
         raise typer.Exit(code=1)
 
     if "address" in federation_config:
-        _run_with_superexec(app, federation_config, config_overrides)
+        _run_with_superexec(app, federation_config, config_overrides, stream)
     else:
         _run_without_superexec(app, federation_config, config_overrides, federation)
 
 
+# pylint: disable=too-many-locals
 def _run_with_superexec(
-    app: Optional[Path],
-    federation_config: Dict[str, Any],
-    config_overrides: Optional[List[str]],
+    app: Path,
+    federation_config: dict[str, Any],
+    config_overrides: Optional[list[str]],
+    stream: bool,
 ) -> None:
 
     insecure_str = federation_config.get("insecure")
     if root_certificates := federation_config.get("root-certificates"):
-        root_certificates_bytes = Path(root_certificates).read_bytes()
+        root_certificates_bytes = (app / root_certificates).read_bytes()
         if insecure := bool(insecure_str):
             typer.secho(
                 "❌ `root_certificates` were provided but the `insecure` parameter"
@@ -166,9 +179,9 @@ def _run_with_superexec(
     channel.subscribe(on_channel_state_change)
     stub = ExecStub(channel)
 
-    fab_path = Path(build(app))
-    content = fab_path.read_bytes()
-    fab = Fab(hashlib.sha256(content).hexdigest(), content)
+    fab_path, fab_hash = build(app)
+    content = Path(fab_path).read_bytes()
+    fab = Fab(fab_hash, content)
 
     req = StartRunRequest(
         fab=fab_to_proto(fab),
@@ -180,18 +193,23 @@ def _run_with_superexec(
     res = stub.StartRun(req)
 
     # Delete FAB file once it has been sent to the SuperExec
-    fab_path.unlink()
+    Path(fab_path).unlink()
     typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
+
+    if stream:
+        start_stream(res.run_id, channel, CONN_REFRESH_PERIOD)
 
 
 def _run_without_superexec(
     app: Optional[Path],
-    federation_config: Dict[str, Any],
-    config_overrides: Optional[List[str]],
+    federation_config: dict[str, Any],
+    config_overrides: Optional[list[str]],
     federation: str,
 ) -> None:
     try:
         num_supernodes = federation_config["options"]["num-supernodes"]
+        verbose: Optional[bool] = federation_config["options"].get("verbose")
+        backend_cfg = federation_config["options"].get("backend", {})
     except KeyError as err:
         typer.secho(
             "❌ The project's `pyproject.toml` needs to declare the number of"
@@ -211,6 +229,13 @@ def _run_without_superexec(
         "--num-supernodes",
         f"{num_supernodes}",
     ]
+
+    if backend_cfg:
+        # Stringify as JSON
+        command.extend(["--backend-config", json.dumps(backend_cfg)])
+
+    if verbose:
+        command.extend(["--verbose"])
 
     if config_overrides:
         command.extend(["--run-config", f"{' '.join(config_overrides)}"])

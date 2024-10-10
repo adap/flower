@@ -17,7 +17,7 @@
 
 import time
 import unittest
-from typing import Iterable, List, Tuple
+from collections.abc import Iterable
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
@@ -38,7 +38,7 @@ from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
 from .inmemory_driver import InMemoryDriver
 
 
-def push_messages(driver: InMemoryDriver, num_nodes: int) -> Tuple[Iterable[str], int]:
+def push_messages(driver: InMemoryDriver, num_nodes: int) -> tuple[Iterable[str], int]:
     """Help push messages to state."""
     for _ in range(num_nodes):
         driver.state.create_node(ping_interval=PING_MAX_INTERVAL)
@@ -55,7 +55,7 @@ def push_messages(driver: InMemoryDriver, num_nodes: int) -> Tuple[Iterable[str]
 
 def get_replies(
     driver: InMemoryDriver, msg_ids: Iterable[str], node_id: int
-) -> List[str]:
+) -> list[str]:
     """Help create message replies and pull taskres from state."""
     taskins = driver.state.get_task_ins(node_id, limit=len(list(msg_ids)))
     for taskin in taskins:

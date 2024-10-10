@@ -16,13 +16,22 @@
 
 
 from logging import DEBUG, INFO
-from typing import Callable, Type, TypeVar
+from typing import Callable, TypeVar
 
 import grpc
 from google.protobuf.message import Message as GrpcMessage
 
+from flwr.common.constant import (
+    GRPC_ADAPTER_METADATA_FLOWER_PACKAGE_NAME_KEY,
+    GRPC_ADAPTER_METADATA_FLOWER_PACKAGE_VERSION_KEY,
+    GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY,
+    GRPC_ADAPTER_METADATA_MESSAGE_MODULE_KEY,
+    GRPC_ADAPTER_METADATA_MESSAGE_QUALNAME_KEY,
+)
 from flwr.common.logger import log
+from flwr.common.version import package_name, package_version
 from flwr.proto import grpcadapter_pb2_grpc  # pylint: disable=E0611
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
@@ -37,6 +46,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.grpcadapter_pb2 import MessageContainer  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.fleet.message_handler import message_handler
 from flwr.server.superlink.state import StateFactory
 
@@ -45,14 +55,21 @@ T = TypeVar("T", bound=GrpcMessage)
 
 def _handle(
     msg_container: MessageContainer,
-    request_type: Type[T],
+    request_type: type[T],
     handler: Callable[[T], GrpcMessage],
 ) -> MessageContainer:
     req = request_type.FromString(msg_container.grpc_message_content)
     res = handler(req)
+    res_cls = res.__class__
     return MessageContainer(
-        metadata={},
-        grpc_message_name=res.__class__.__qualname__,
+        metadata={
+            GRPC_ADAPTER_METADATA_FLOWER_PACKAGE_NAME_KEY: package_name,
+            GRPC_ADAPTER_METADATA_FLOWER_PACKAGE_VERSION_KEY: package_version,
+            GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY: package_version,
+            GRPC_ADAPTER_METADATA_MESSAGE_MODULE_KEY: res_cls.__module__,
+            GRPC_ADAPTER_METADATA_MESSAGE_QUALNAME_KEY: res_cls.__qualname__,
+        },
+        grpc_message_name=res_cls.__qualname__,
         grpc_message_content=res.SerializeToString(),
     )
 
@@ -60,10 +77,11 @@ def _handle(
 class GrpcAdapterServicer(grpcadapter_pb2_grpc.GrpcAdapterServicer):
     """Fleet API via GrpcAdapter servicer."""
 
-    def __init__(self, state_factory: StateFactory) -> None:
+    def __init__(self, state_factory: StateFactory, ffs_factory: FfsFactory) -> None:
         self.state_factory = state_factory
+        self.ffs_factory = ffs_factory
 
-    def SendReceive(
+    def SendReceive(  # pylint: disable=too-many-return-statements
         self, request: MessageContainer, context: grpc.ServicerContext
     ) -> MessageContainer:
         """."""
@@ -80,6 +98,8 @@ class GrpcAdapterServicer(grpcadapter_pb2_grpc.GrpcAdapterServicer):
             return _handle(request, PushTaskResRequest, self._push_task_res)
         if request.grpc_message_name == GetRunRequest.__qualname__:
             return _handle(request, GetRunRequest, self._get_run)
+        if request.grpc_message_name == GetFabRequest.__qualname__:
+            return _handle(request, GetFabRequest, self._get_fab)
         raise ValueError(f"Invalid grpc_message_name: {request.grpc_message_name}")
 
     def _create_node(self, request: CreateNodeRequest) -> CreateNodeResponse:
@@ -128,4 +148,12 @@ class GrpcAdapterServicer(grpcadapter_pb2_grpc.GrpcAdapterServicer):
         return message_handler.get_run(
             request=request,
             state=self.state_factory.state(),
+        )
+
+    def _get_fab(self, request: GetFabRequest) -> GetFabResponse:
+        """Get FAB."""
+        log(INFO, "GrpcAdapter.GetFab")
+        return message_handler.get_fab(
+            request=request,
+            ffs=self.ffs_factory.ffs(),
         )
