@@ -151,6 +151,11 @@ class SqliteState(State):  # pylint: disable=R0904
         ----------
         log_queries : bool
             Log each query which is executed.
+
+        Returns
+        -------
+        list[tuple[str]]
+            The list of all tables in the DB.
         """
         self.conn = sqlite3.connect(self.database_path)
         self.conn.execute("PRAGMA foreign_keys = ON;")
