@@ -267,6 +267,8 @@ def start_vce(
     existing_nodes_mapping: Optional[NodeToPartitionMapping] = None,
 ) -> None:
     """Start Fleet API with the Simulation Engine."""
+    nodes_mapping = {}
+
     if client_app_attr is not None and client_app is not None:
         raise ValueError(
             "Both `client_app_attr` and `client_app` are provided, "
@@ -340,17 +342,17 @@ def start_vce(
     # Load ClientApp if needed
     def _load() -> ClientApp:
 
+        if client_app:
+            return client_app
         if client_app_attr:
-            app = get_load_client_app_fn(
+            return get_load_client_app_fn(
                 default_app_ref=client_app_attr,
                 app_path=app_dir,
                 flwr_dir=flwr_dir,
                 multi_app=False,
             )(run.fab_id, run.fab_version, run.fab_hash)
 
-        if client_app:
-            app = client_app
-        return app
+        raise ValueError("Either `client_app_attr` or `client_app` must be provided")
 
     app_fn = _load
 

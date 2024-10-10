@@ -206,6 +206,7 @@ def parse_config_args(
     # Regular expression to capture key-value pairs with possible quoted values
     pattern = re.compile(r"(\S+?)=(\'[^\']*\'|\"[^\"]*\"|\S+)")
 
+    flat_overrides = {}
     for config_line in config:
         if config_line:
             # .toml files aren't allowed alongside other configs

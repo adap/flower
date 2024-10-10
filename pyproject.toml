@@ -95,7 +95,7 @@ black = { version = "==24.2.0", extras = ["jupyter"] }
 taplo = "==0.9.3"
 docformatter = "==1.7.5"
 mypy = "==1.8.0"
-pylint = "==3.0.3"
+pylint = "==3.3.1"
 flake8 = "==5.0.4"
 parameterized = "==0.9.0"
 pytest = "==7.4.4"
