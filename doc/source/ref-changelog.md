@@ -1,5 +1,244 @@
 # Changelog
 
+## Unreleased
+
+### Grouped
+
+- **Introduce SuperExec log streaming** ([#3584](https://github.com/adap/flower/pull/3584), [#4242](https://github.com/adap/flower/pull/4242), [#3611](https://github.com/adap/flower/pull/3611))
+
+  TODO Description
+
+<!-- - **feat(framework) Add SuperExec logcatcher** ([#3584](https://github.com/adap/flower/pull/3584))
+- **fix(framework:skip) Fix SuperExec log capturing** ([#4242](https://github.com/adap/flower/pull/4242))
+- **feat(framework) Add log functions to `flwr log`** ([#3611](https://github.com/adap/flower/pull/3611)) -->
+
+- flwr new templates
+- **refactor(framework) Update `sklearn` template** ([#4293](https://github.com/adap/flower/pull/4293))
+
+Docs
+- **docs(framework) Update quickstart tutorial documentation for Hugging Face with `flwr run`** ([#3341](https://github.com/adap/flower/pull/3341))
+- **docs(framework) Update Quickstart Tutorial documentation for TensorFlow with `flwr run`** ([#3338](https://github.com/adap/flower/pull/3338))
+
+CI/tooling
+- **ci(:skip) Add Python version updater** ([#4208](https://github.com/adap/flower/pull/4208))
+
+Drop 3.8
+- **ci(:skip) Use Python 3.9** ([#4193](https://github.com/adap/flower/pull/4193))
+
+### Ungrouped
+- **feat(datasets) Improve error message for incorrect dataset type** ([#4114](https://github.com/adap/flower/pull/4114))
+
+- **refactor(benchmarks) Update evaluation accuracy for general NLP challenge** ([#4286](https://github.com/adap/flower/pull/4286))
+
+- **feat(framework) Add FAB constants** ([#4303](https://github.com/adap/flower/pull/4303))
+
+- **fix(framework) Fix cpu/gpu specification in FlowerTune readme template** ([#4257](https://github.com/adap/flower/pull/4257))
+
+
+- **docs(framework:skip) Update source for translations (automated)** ([#4316](https://github.com/adap/flower/pull/4316))
+
+- **docs(datasets) Move out the HF space embedding to the bottom of the page** ([#4266](https://github.com/adap/flower/pull/4266))
+
+
+
+- **feat(examples) Update vertical-fl example** ([#3716](https://github.com/adap/flower/pull/3716))
+
+- **feat(benchmarks) Add LLM evaluation pipeline for Finance challenge** ([#3769](https://github.com/adap/flower/pull/3769))
+
+- **feat(framework:skip) Update default flwr version in Docker Compose to 1.11.1** ([#4191](https://github.com/adap/flower/pull/4191))
+
+- **docs(:skip) Remove default title for Flower documentation from `base.html` ** ([#3927](https://github.com/adap/flower/pull/3927))
+
+- **break(examples) Remove `simulation-` examples** ([#4188](https://github.com/adap/flower/pull/4188))
+
+- **refactor(examples) Update get/set parameters functions for `flowertune-llm` example** ([#4219](https://github.com/adap/flower/pull/4219))
+
+- **refactor(examples) Update XGBoost comprehensive example** ([#4234](https://github.com/adap/flower/pull/4234))
+
+- **refactor(framework) Update `NumPy` template** ([#4292](https://github.com/adap/flower/pull/4292))
+
+- **docs(framework) Update pytorch-lightning quickstart tutorial** ([#4152](https://github.com/adap/flower/pull/4152))
+
+- **docs(framework:skip) Update source for translations (automated)** ([#4259](https://github.com/adap/flower/pull/4259))
+
+- **ci(framework) Add FAB build/install test** ([#4314](https://github.com/adap/flower/pull/4314))
+
+- **docs(framework) Add Flower architecture explanation** ([#3270](https://github.com/adap/flower/pull/3270))
+
+- **ci(framework) Use Python 3.9 format** ([#4199](https://github.com/adap/flower/pull/4199))
+
+- **feat(baselines) Add FedRep Baseline** ([#3790](https://github.com/adap/flower/pull/3790))
+
+- **refactor(benchmarks) Update FlowerTune LLM Leaderboard instructions** ([#4272](https://github.com/adap/flower/pull/4272))
+
+- **docs(framework:skip) Update docker quickstart example table** ([#4251](https://github.com/adap/flower/pull/4251))
+
+- **ci(framework:skip) Refactor SuperExec e2e test** ([#4225](https://github.com/adap/flower/pull/4225))
+
+- **ci(framework:skip) Revert pyproject.toml version to next minor** ([#4174](https://github.com/adap/flower/pull/4174))
+
+- **refactor(framework) Migrate ID handling from sint64 to uint64** ([#4170](https://github.com/adap/flower/pull/4170))
+
+- **ci(:skip) Add TOML linting** ([#4203](https://github.com/adap/flower/pull/4203))
+
+- **feat(framework) Check TTL when retrieving TaskIns** ([#3620](https://github.com/adap/flower/pull/3620))
+
+- **ci(:skip) Enable SuperExec CI from fork** ([#4274](https://github.com/adap/flower/pull/4274))
+
+- **docs(framework:skip) Update source texts for translations (automated)** ([#4252](https://github.com/adap/flower/pull/4252))
+
+- **docs(datasets) Embed HF Space in the flwr-datasets docs** ([#4260](https://github.com/adap/flower/pull/4260))
+
+- **docs(glossary) Create a Federated Learning glossary** ([#4165](https://github.com/adap/flower/pull/4165))
+
+- **ci(framework:skip) Add job to update translation text** ([#3154](https://github.com/adap/flower/pull/3154))
+
+- **fix(framework:skip) Fix the `SqliteState.get_run` method** ([#4222](https://github.com/adap/flower/pull/4222))
+
+- **refactor(framework) Update dependency and fix a print issue for FlowerTune template** ([#4220](https://github.com/adap/flower/pull/4220))
+
+- **docs(framework:skip) Update source for translations (automated)** ([#4256](https://github.com/adap/flower/pull/4256))
+
+- **feat(framework) Add `GetFab` to node authentication** ([#4264](https://github.com/adap/flower/pull/4264))
+
+- **refactor(benchmarks) Add new evaluation metrics for general NLP challenge** ([#4282](https://github.com/adap/flower/pull/4282))
+
+- **docs(framework) Use Python 3.9 as default** ([#4196](https://github.com/adap/flower/pull/4196))
+
+- **fix(benchmarks) Update medical evaluation readme** ([#4171](https://github.com/adap/flower/pull/4171))
+
+- **refactor(datasets) Rename SizePartitioner to IdToSizeFncPartitioner** ([#4109](https://github.com/adap/flower/pull/4109))
+
+- **docs(framework) Update fastai quickstart tutorial** ([#4151](https://github.com/adap/flower/pull/4151))
+
+- **fix(framework:skip) Check `consumer_id` and `producer_id` when saving TaskRes** ([#4313](https://github.com/adap/flower/pull/4313))
+
+- **build(deps): bump docker/setup-buildx-action from 3.6.1 to 3.7.1** ([#4298](https://github.com/adap/flower/pull/4298))
+
+- **docs(framework:skip) Update stable version** ([#4181](https://github.com/adap/flower/pull/4181))
+
+- **refactor(benchmarks) Update llm leaderboard Readmes** ([#4228](https://github.com/adap/flower/pull/4228))
+
+- **ci(framework:skip) Add an upper bound to gRPC version** ([#4201](https://github.com/adap/flower/pull/4201))
+
+- **docs(framework:skip) Add `sphinxext-opengraph` to dev dependencies** ([#4212](https://github.com/adap/flower/pull/4212))
+
+- **fix(datasets) Fix pathological partitioner on string labels** ([#4253](https://github.com/adap/flower/pull/4253))
+
+- **refactor(benchmarks) Update Flower Discuss info in FlowerTune LLM Leaderboard readme** ([#4258](https://github.com/adap/flower/pull/4258))
+
+- **feat(framework) Add FAB hash to `flwr build/install`** ([#4304](https://github.com/adap/flower/pull/4304))
+
+- **feat(framework) Add logstream functionality to `flwr run`** ([#3613](https://github.com/adap/flower/pull/3613))
+
+- **docs(framework:skip) Update Sphinx and related dependencies to latest** ([#2938](https://github.com/adap/flower/pull/2938))
+
+- **feat(framework:skip) Add Docker Hub badge** ([#4192](https://github.com/adap/flower/pull/4192))
+
+- **ci(framework) Update typer to ^0.12.5** ([#4268](https://github.com/adap/flower/pull/4268))
+
+- **fix(examples:skip) Specify `min_fit_clients` in `FedAvg` in the Secure Aggregation example** ([#4247](https://github.com/adap/flower/pull/4247))
+
+- **fix(benchmarks) Update LLM Leaderboard readme** ([#4296](https://github.com/adap/flower/pull/4296))
+
+- **feat(framework) Verify message TTL when storing TaskIns and TaskRes** ([#3596](https://github.com/adap/flower/pull/3596))
+
+- **docs(framework) Add latest Hosted Weblate translation updates** ([#4070](https://github.com/adap/flower/pull/4070))
+
+- **refactor(examples) Update `quickstart-pandas` example** ([#4007](https://github.com/adap/flower/pull/4007))
+
+- **refactor(framework) Make `DriverClientProxy` use driver's `send_and_receive`** ([#4289](https://github.com/adap/flower/pull/4289))
+
+- **docs(glossary) Add Flower Datasets glossary entry** ([#4235](https://github.com/adap/flower/pull/4235))
+
+- **feat(datasets) Add SizePartitioner** ([#4111](https://github.com/adap/flower/pull/4111))
+
+- **docs(framework) Add new blockchain example to FAQ** ([#3993](https://github.com/adap/flower/pull/3993))
+
+- **fix(benchmarks) Update dependencies for LLM evaluation pipelines** ([#4287](https://github.com/adap/flower/pull/4287))
+
+- **refactor(framework) Move all address constants to `flwr.common.constant`** ([#4178](https://github.com/adap/flower/pull/4178))
+
+- **feat(framework:skip) Add SBOM to Docker images** ([#4136](https://github.com/adap/flower/pull/4136))
+
+- **refactor(framework) Update `torch` template** ([#4295](https://github.com/adap/flower/pull/4295))
+
+- **refactor(framework) Update `MLX` template** ([#4291](https://github.com/adap/flower/pull/4291))
+
+- **feat(framework) Add `flwr log`** ([#3577](https://github.com/adap/flower/pull/3577))
+
+- **refactor(framework) Update get/set parameter functions for FlowerTune template** ([#4217](https://github.com/adap/flower/pull/4217))
+
+- **docs(framework:skip) Add quickstarts to Docker READMEs** ([#4190](https://github.com/adap/flower/pull/4190))
+
+- **feat(framework) Limit TaskRes TTL when saving it** ([#3615](https://github.com/adap/flower/pull/3615))
+
+- **docs(framework:skip) Add docs for distributed Docker Compose guide** ([#3928](https://github.com/adap/flower/pull/3928))
+
+- **ci(framework) Use Python 3.9 as default in scripts** ([#4195](https://github.com/adap/flower/pull/4195))
+
+- **fix(framework:skip) Fix parameters and returns in docstrings** ([#4315](https://github.com/adap/flower/pull/4315))
+
+- **feat(framework) Add new RPCs to `Control` service** ([#4241](https://github.com/adap/flower/pull/4241))
+
+- **feat(framework:skip) Add gcc in Docker compose setup** ([#4187](https://github.com/adap/flower/pull/4187))
+
+- **break(datasets) Drop support for Python 3.8** ([#4213](https://github.com/adap/flower/pull/4213))
+
+- **fix(framework) Pass Flower path to the call to `start_client_internal()` in SuperNode** ([#4278](https://github.com/adap/flower/pull/4278))
+
+- **fix(framework:skip) Fix Docker Compose example** ([#4261](https://github.com/adap/flower/pull/4261))
+
+- **docs(framework:skip) Add unstable tag to Docker READMEs** ([#4177](https://github.com/adap/flower/pull/4177))
+
+- **feat(framework) Upgrade Ubuntu base image to version 24.04** ([#4226](https://github.com/adap/flower/pull/4226))
+
+- **feat(framework) Introduce `pull_interval` in `InMemoryDriver`** ([#4290](https://github.com/adap/flower/pull/4290))
+
+- **refactor(framework) Add further unit tests to sint64 to uint64 conversion utils** ([#4237](https://github.com/adap/flower/pull/4237))
+
+- **refactor(framework) Update `JAX` template** ([#4294](https://github.com/adap/flower/pull/4294))
+
+- **docs(framework:skip) Add 1.11.1 tag to Docker READMEs** ([#4176](https://github.com/adap/flower/pull/4176))
+
+- **refactor(examples) Make `quickstart-huggingface`use a smaller LM** ([#4206](https://github.com/adap/flower/pull/4206))
+
+- **feat(framework) Verify the TaskIns TTL when saving TaskRes** ([#3609](https://github.com/adap/flower/pull/3609))
+
+- **refactor(benchmarks) Update llm leaderboard readmes** ([#4249](https://github.com/adap/flower/pull/4249))
+
+- **fix(framework) Fix `aggregate_inplace()` in `strategy.py`** ([#3936](https://github.com/adap/flower/pull/3936))
+
+- **ci(framework:skip) Add rST formatting to docs** ([#4254](https://github.com/adap/flower/pull/4254))
+
+- **refactor(framework) Support uint64 in Scalar and ConfigsRecordValue** ([#4243](https://github.com/adap/flower/pull/4243))
+
+- **refactor(examples) Update `advanced-pytorch` example** ([#4130](https://github.com/adap/flower/pull/4130))
+
+- **ci(examples) Use Python 3.9 as min version** ([#4198](https://github.com/adap/flower/pull/4198))
+
+- **fix(datasets) Fix the scale of value axis when plotting in absolute sizes** ([#4255](https://github.com/adap/flower/pull/4255))
+
+- **docs(framework:skip) Update source for translations (automated)** ([#4263](https://github.com/adap/flower/pull/4263))
+
+- **feat(framework) Check TTL when retrieving TaskRes** ([#3635](https://github.com/adap/flower/pull/3635))
+
+- **feat(datasets) Add examples section to concatenate divisions** ([#4104](https://github.com/adap/flower/pull/4104))
+
+- **break(framework) Drop Python 3.8 support** ([#4180](https://github.com/adap/flower/pull/4180))
+
+- **ci(framework) Remove Python 3.8 tests** ([#4194](https://github.com/adap/flower/pull/4194))
+
+- **General improvements** ([#4239](https://github.com/adap/flower/pull/4239), [4276](https://github.com/adap/flower/pull/4276), [4204](https://github.com/adap/flower/pull/4204), [4184](https://github.com/adap/flower/pull/4184), [4227](https://github.com/adap/flower/pull/4227), [4183](https://github.com/adap/flower/pull/4183), [4202](https://github.com/adap/flower/pull/4202), [4250](https://github.com/adap/flower/pull/4250), [4267](https://github.com/adap/flower/pull/4267), [4246](https://github.com/adap/flower/pull/4246), [4240](https://github.com/adap/flower/pull/4240), [4265](https://github.com/adap/flower/pull/4265), [4238](https://github.com/adap/flower/pull/4238), [4275](https://github.com/adap/flower/pull/4275), [4318](https://github.com/adap/flower/pull/4318))
+
+- **docs(framework) Add quickstart examples Docker compose guide** ([#4189](https://github.com/adap/flower/pull/4189))
+
+- **docs(framework:skip) Update translations base text** ([#4210](https://github.com/adap/flower/pull/4210))
+
+- **feat(framework) Add FAB hash to `load_client_app_fn`** ([#4305](https://github.com/adap/flower/pull/4305))
+
+- **fix(framework:skip) Update Ubuntu versions in Docker READMEs** ([#4297](https://github.com/adap/flower/pull/4297))
+
 ## v1.11.1 (2024-09-11)
 
 ### Thanks to our contributors
