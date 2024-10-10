@@ -5,11 +5,13 @@ import warnings
 import torch
 from opacus import PrivacyEngine
 from opacus_fl.task import Net, get_weights, load_data, set_weights, test, train
+import logging
 
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
 
 warnings.filterwarnings("ignore", category=UserWarning)
+logging.getLogger("opacus").setLevel(logging.ERROR)
 
 
 class FlowerClient(NumPyClient):
