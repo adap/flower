@@ -156,7 +156,7 @@ class StateTest(unittest.TestCase):
         )
 
         _ = state.store_task_res(task_res=task_res_0)
-        _ = state.get_task_res(task_ids={task_id_0}, limit=None)
+        _ = state.get_task_res(task_ids={task_id_0})
 
         # Insert one TaskRes, but don't retrive it
         task_res_1: TaskRes = create_task_res(
@@ -317,7 +317,7 @@ class StateTest(unittest.TestCase):
         task_res_uuid = state.store_task_res(task_res)
 
         if task_ins_id is not None:
-            task_res_list = state.get_task_res(task_ids={task_ins_id}, limit=None)
+            task_res_list = state.get_task_res(task_ids={task_ins_id})
 
         # Assert
         retrieved_task_res = task_res_list[0]
@@ -673,7 +673,7 @@ class StateTest(unittest.TestCase):
         current_time = time.time()
         task_res_list: list[TaskRes] = []
         with patch("time.time", side_effect=lambda: current_time + 50):
-            task_res_list = state.get_task_res({task_id_0, task_id_1}, limit=None)
+            task_res_list = state.get_task_res({task_id_0, task_id_1})
 
         # Assert
         assert len(task_res_list) == 2
@@ -812,7 +812,7 @@ class StateTest(unittest.TestCase):
         with patch("time.time", side_effect=lambda: task_ins.task.created_at + 6.1):
             # Execute
             if task_id is not None:
-                task_res_list = state.get_task_res(task_ids={task_id}, limit=None)
+                task_res_list = state.get_task_res(task_ids={task_id})
 
             # Assert
             assert len(task_res_list) == 0
@@ -834,7 +834,7 @@ class StateTest(unittest.TestCase):
         _ = state.store_task_res(task_res=task_res)
 
         # Execute
-        task_res_list = state.get_task_res(task_ids={UUID(task_ins_id)}, limit=None)
+        task_res_list = state.get_task_res(task_ids={UUID(task_ins_id)})
 
         # Assert
         assert len(task_res_list) == 0
@@ -866,7 +866,7 @@ class StateTest(unittest.TestCase):
         with patch("time.time", side_effect=lambda: task_ins.task.created_at + 6.1):
             # Execute
             if task_id is not None:
-                task_res_list = state.get_task_res(task_ids={task_id}, limit=None)
+                task_res_list = state.get_task_res(task_ids={task_id})
 
             # Assert
             assert len(task_res_list) != 0
