@@ -19,6 +19,7 @@ from logging import ERROR
 from os import urandom
 from uuid import uuid4
 
+from typing import Union
 from flwr.common import log, now
 from flwr.common.constant import ErrorCode
 from flwr.proto.error_pb2 import Error  # pylint: disable=E0611
@@ -202,3 +203,8 @@ def make_taskres_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
             ),
         ),
     )
+
+
+def has_expired(task_ins_or_res: Union[TaskIns, TaskRes], current_time: float) -> bool:
+    """Check if the TaskIns/TaskRes has expired."""
+    return task_ins_or_res.task.ttl + task_ins_or_res.task.created_at < current_time

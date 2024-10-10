@@ -37,6 +37,7 @@ from .utils import (
     make_node_unavailable_taskres,
     make_taskins_unavailable_taskres,
     make_taskres_unavailable_taskres,
+    has_expired,
 )
 
 
@@ -258,6 +259,8 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             # Cleanup
             self.delete_tasks(set(ret.keys()))
 
+        return list(ret.values())
+
     def delete_tasks(self, task_ids: set[UUID]) -> None:
         """Delete all delivered TaskIns/TaskRes pairs."""
         task_ins_to_be_deleted: set[UUID] = set()
@@ -430,8 +433,3 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                 self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
                 return True
         return False
-
-
-def has_expired(task_ins_or_res: Union[TaskIns, TaskRes], current_time: float) -> bool:
-    """Check if the TaskIns/TaskRes has expired."""
-    return task_ins_or_res.task.ttl + task_ins_or_res.task.created_at < current_time
