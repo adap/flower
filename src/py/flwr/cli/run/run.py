@@ -14,7 +14,6 @@
 # ==============================================================================
 """Flower command line interface `run` command."""
 
-import hashlib
 import json
 import subprocess
 import sys
@@ -134,6 +133,7 @@ def run(
         _run_without_superexec(app, federation_config, config_overrides, federation)
 
 
+# pylint: disable=too-many-locals
 def _run_with_superexec(
     app: Path,
     federation_config: dict[str, Any],
@@ -179,9 +179,9 @@ def _run_with_superexec(
     channel.subscribe(on_channel_state_change)
     stub = ExecStub(channel)
 
-    fab_path = Path(build(app))
-    content = fab_path.read_bytes()
-    fab = Fab(hashlib.sha256(content).hexdigest(), content)
+    fab_path, fab_hash = build(app)
+    content = Path(fab_path).read_bytes()
+    fab = Fab(fab_hash, content)
 
     req = StartRunRequest(
         fab=fab_to_proto(fab),
@@ -193,7 +193,7 @@ def _run_with_superexec(
     res = stub.StartRun(req)
 
     # Delete FAB file once it has been sent to the SuperExec
-    fab_path.unlink()
+    Path(fab_path).unlink()
     typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
 
     if stream:

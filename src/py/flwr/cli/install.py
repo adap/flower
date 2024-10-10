@@ -14,7 +14,7 @@
 # ==============================================================================
 """Flower command line interface `install` command."""
 
-
+import hashlib
 import shutil
 import subprocess
 import tempfile
@@ -25,7 +25,8 @@ from typing import IO, Annotated, Optional, Union
 
 import typer
 
-from flwr.common.config import get_flwr_dir
+from flwr.common.config import get_flwr_dir, get_metadata_from_config
+from flwr.common.constant import FAB_HASH_TRUNCATION
 
 from .config_utils import load_and_validate
 from .utils import get_sha256_hash
@@ -91,9 +92,11 @@ def install_from_fab(
     fab_name: Optional[str]
     if isinstance(fab_file, bytes):
         fab_file_archive = BytesIO(fab_file)
+        fab_hash = hashlib.sha256(fab_file).hexdigest()
         fab_name = None
     elif isinstance(fab_file, Path):
         fab_file_archive = fab_file
+        fab_hash = hashlib.sha256(fab_file.read_bytes()).hexdigest()
         fab_name = fab_file.stem
     else:
         raise ValueError("fab_file must be either a Path or bytes")
@@ -126,14 +129,16 @@ def install_from_fab(
             shutil.rmtree(info_dir)
 
             installed_path = validate_and_install(
-                tmpdir_path, fab_name, flwr_dir, skip_prompt
+                tmpdir_path, fab_hash, fab_name, flwr_dir, skip_prompt
             )
 
     return installed_path
 
 
+# pylint: disable=too-many-locals
 def validate_and_install(
     project_dir: Path,
+    fab_hash: str,
     fab_name: Optional[str],
     flwr_dir: Optional[Path],
     skip_prompt: bool = False,
@@ -149,21 +154,12 @@ def validate_and_install(
         )
         raise typer.Exit(code=1)
 
-    publisher = config["tool"]["flwr"]["app"]["publisher"]
-    project_name = config["project"]["name"]
-    version = config["project"]["version"]
+    version, fab_id = get_metadata_from_config(config)
+    publisher, project_name = fab_id.split("/")
+    config_metadata = (publisher, project_name, version, fab_hash)
 
-    if (
-        fab_name
-        and fab_name != f"{publisher}.{project_name}.{version.replace('.', '-')}"
-    ):
-        typer.secho(
-            "❌ FAB file has incorrect name. The file name must follow the format "
-            "`<publisher>.<project_name>.<version>.fab`.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
+    if fab_name:
+        _validate_fab_and_config_metadata(fab_name, config_metadata)
 
     install_dir: Path = (
         (get_flwr_dir() if not flwr_dir else flwr_dir)
@@ -226,3 +222,49 @@ def _verify_hashes(list_content: str, tmpdir: Path) -> bool:
         if not file_path.exists() or get_sha256_hash(file_path) != hash_expected:
             return False
     return True
+
+
+def _validate_fab_and_config_metadata(
+    fab_name: str, config_metadata: tuple[str, str, str, str]
+) -> None:
+    """Validate metadata from the FAB filename and config."""
+    publisher, project_name, version, fab_hash = config_metadata
+
+    fab_name = fab_name.removesuffix(".fab")
+
+    fab_publisher, fab_project_name, fab_version, fab_shorthash = fab_name.split(".")
+    fab_version = fab_version.replace("-", ".")
+
+    # Check FAB filename format
+    if (
+        f"{fab_publisher}.{fab_project_name}.{fab_version}"
+        != f"{publisher}.{project_name}.{version}"
+        or len(fab_shorthash) != FAB_HASH_TRUNCATION  # Verify hash length
+    ):
+        typer.secho(
+            "❌ FAB file has incorrect name. The file name must follow the format "
+            "`<publisher>.<project_name>.<version>.<8hexchars>.fab`.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+
+    # Verify hash is a valid hexadecimal
+    try:
+        _ = int(fab_shorthash, 16)
+    except Exception as e:
+        typer.secho(
+            f"❌ FAB file has an invalid hexadecimal string `{fab_shorthash}`.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1) from e
+
+    # Verify shorthash matches
+    if fab_shorthash != fab_hash[:FAB_HASH_TRUNCATION]:
+        typer.secho(
+            "❌ The hash in the FAB file name does not match the hash of the FAB.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
