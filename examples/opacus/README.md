@@ -1,5 +1,5 @@
 ---
-tags: [dp, security, fds]
+tags: [DP, DP-SGD, basic, vision, fds, privacy]
 dataset: [CIFAR-10]
 framework: [opacus, torch]
 ---
@@ -10,57 +10,55 @@ In this example, we demonstrate how to train a model with differential privacy (
 
 For more information about DP in Flower please refer to the [tutorial](https://flower.ai/docs/framework/how-to-use-differential-privacy.html). For additional information about Opacus, visit the official [website](https://opacus.ai/).
 
-## Environments Setup
+## Set up the project
 
-Start by cloning the example. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
+### Clone the project
+
+Start by cloning the example project:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/opacus . && rm -rf flower && cd opacus
+git clone --depth=1 https://github.com/adap/flower.git \
+        && mv flower/examples/opacus . \
+        && rm -rf flower \
+        && cd opacus
 ```
 
 This will create a new directory called `opacus` containing the following files:
 
 ```shell
--- pyproject.toml
--- client.py
--- server.py
--- README.md
+opacus
+├── opacus_fl
+│   ├── client_app.py   # Defines your ClientApp
+│   ├── server_app.py   # Defines your ServerApp
+│   └── task.py         # Defines your model, training, and data loading
+├── pyproject.toml      # Project metadata like dependencies and configs
+└── README.md
 ```
 
-### Installing dependencies
+### Install dependencies and project
 
-Project dependencies are defined in `pyproject.toml`. Install them with:
+Install the dependencies defined in `pyproject.toml` as well as the `opacus_fl` package.
 
 ```shell
-pip install .
+# From a new python environment, run:
+pip install -e .
 ```
 
-## Run Flower with Opacus and Pytorch
+## Run the project
 
-### 1. Start the long-running Flower server (SuperLink)
+You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
+
+### Run with the Simulation Engine
 
 ```bash
-flower-superlink --insecure
+flwr run .
 ```
 
-### 2. Start the long-running Flower clients (SuperNodes)
-
-Start 2 Flower `SuperNodes` in 2 separate terminal windows, using:
+You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
 ```bash
-flower-client-app client:appA --insecure
+flwr run . --run-config "max-grad-norm=1.0 num-server-rounds=5"
 ```
 
-```bash
-flower-client-app client:appB --insecure
-```
-
-Opacus hyperparameters can be passed for each client in `ClientApp` instantiation (in `client.py`). In this example, `noise_multiplier=1.5` and `noise_multiplier=1` are used for the first and second client respectively.
-
-### 3. Run the Flower App
-
-With both the long-running server (SuperLink) and two clients (SuperNode) up and running, we can now run the actual Flower App:
-
-```bash
-flower-server-app server:app --insecure
-```
+> \[!NOTE\]
+> Please note that, at the current state, users cannot set `NodeConfig` for simulated `ClientApp`s. For this reason, the hyperparameter `noise_multiplier` is set in the `client_fn` method based on a condition check on `partition_id`. This will be modified in a future version of Flower to allow users to set `NodeConfig` for simulated `ClientApp`s.
