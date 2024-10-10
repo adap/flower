@@ -133,6 +133,8 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
                 GetRunRequest,
                 PingRequest,
                 GetFabRequest,
+                PullMessagesRequest,
+                PushMessagesRequest,
             ),
         ):
             if self.shared_secret is None:
