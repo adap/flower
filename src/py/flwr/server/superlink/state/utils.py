@@ -30,6 +30,13 @@ NODE_UNAVAILABLE_ERROR_REASON = (
     "Error: Node Unavailable - The destination node is currently unavailable. "
     "It exceeds the time limit specified in its last ping."
 )
+MESSAGE_UNAVAILABLE_ERROR_REASON = (
+    "Error: Message Unavailable - The requested message could not be found in the "
+    "database. It may have expired due to its TTL or never existed."
+)
+REPLY_MESSAGE_UNAVAILABLE_ERROR_REASON = (
+    "Error: Reply Message Unavailable - The reply message has expired."
+)
 
 
 def generate_rand_int_from_bytes(num_bytes: int) -> int:
@@ -143,6 +150,56 @@ def make_node_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
             task_type=ref_taskins.task.task_type,
             error=Error(
                 code=ErrorCode.NODE_UNAVAILABLE, reason=NODE_UNAVAILABLE_ERROR_REASON
+            ),
+        ),
+    )
+
+
+def make_taskins_unavailable_taskres(taskins_task_id: str) -> TaskRes:
+    """Generate a TaskRes with a taskins unavailable error."""
+    current_time = time.time()
+    return TaskRes(
+        task_id=str(uuid4()),
+        group_id="",  # Unknown group ID
+        run_id=0,  # Unknown run ID
+        task=Task(
+            # This function is only called by SuperLink, and thus it's the producer.
+            producer=Node(node_id=0, anonymous=False),
+            consumer=Node(node_id=0, anonymous=False),
+            created_at=current_time,
+            ttl=0,
+            ancestry=[taskins_task_id],
+            task_type="",  # Unknown message type
+            error=Error(
+                code=ErrorCode.MESSAGE_UNAVAILABLE,
+                reason=MESSAGE_UNAVAILABLE_ERROR_REASON,
+            ),
+        ),
+    )
+
+
+def make_taskres_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
+    """Generate a TaskRes with a reply message unavailable error from a TaskIns."""
+    current_time = time.time()
+    ttl = ref_taskins.task.ttl - (current_time - ref_taskins.task.created_at)
+    if ttl < 0:
+        log(ERROR, "Creating TaskRes for TaskIns that exceeds its TTL.")
+        ttl = 0
+    return TaskRes(
+        task_id=str(uuid4()),
+        group_id=ref_taskins.group_id,
+        run_id=ref_taskins.run_id,
+        task=Task(
+            # This function is only called by SuperLink, and thus it's the producer.
+            producer=Node(node_id=0, anonymous=False),
+            consumer=Node(node_id=0, anonymous=False),
+            created_at=current_time,
+            ttl=ttl,
+            ancestry=[ref_taskins.task_id],
+            task_type=ref_taskins.task.task_type,
+            error=Error(
+                code=ErrorCode.REPLY_MESSAGE_UNAVAILABLE,
+                reason=REPLY_MESSAGE_UNAVAILABLE_ERROR_REASON,
             ),
         ),
     )

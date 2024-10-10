@@ -125,6 +125,8 @@ class ErrorCode:
     LOAD_CLIENT_APP_EXCEPTION = 1
     CLIENT_APP_RAISED_EXCEPTION = 2
     NODE_UNAVAILABLE = 3
+    MESSAGE_UNAVAILABLE = 4
+    REPLY_MESSAGE_UNAVAILABLE = 5
 
     def __new__(cls) -> ErrorCode:
         """Prevent instantiation."""
