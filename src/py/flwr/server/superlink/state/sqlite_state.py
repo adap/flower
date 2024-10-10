@@ -449,7 +449,7 @@ class SqliteState(State):  # pylint: disable=R0904
         return task_id
 
     # pylint: disable-next=R0912,R0915,R0914
-    def get_task_res(self, task_ids: set[UUID], limit: Optional[int]) -> list[TaskRes]:
+    def get_task_res(self, task_ids: set[UUID]) -> list[TaskRes]:
         """Get TaskRes for task_ids.
 
         Usually, the Driver API calls this method to get results for instructions it has
@@ -464,9 +464,6 @@ class SqliteState(State):  # pylint: disable=R0904
         will only take effect if enough task_ids are in the set AND are currently
         available. If `limit` is set, it has to be greater than zero.
         """
-        if limit is not None and limit < 1:
-            raise AssertionError("`limit` must be >= 1")
-
         # Check if corresponding TaskIns exists and is not expired
         task_ids_placeholders = ",".join([f":id_{i}" for i in range(len(task_ids))])
         query = f"""
@@ -509,10 +506,6 @@ class SqliteState(State):  # pylint: disable=R0904
         """
 
         data: dict[str, Union[str, float, int]] = {}
-
-        if limit is not None:
-            query += " LIMIT :limit"
-            data["limit"] = limit
 
         query += ";"
 
@@ -588,9 +581,6 @@ class SqliteState(State):  # pylint: disable=R0904
 
         # Make TaskRes containing node unavailabe error
         for row in task_ins_rows:
-            if limit and len(result) == limit:
-                break
-
             for row in rows:
                 # Convert values from sint64 to uint64
                 convert_sint64_values_in_dict_to_uint64(
