@@ -113,9 +113,8 @@ def get_fused_config_from_dir(
         "config", {}
     )
     flat_default_config = flatten_dict(default_config)
-    flat_override_config = flatten_dict(override_config)
 
-    return fuse_dicts(flat_default_config, flat_override_config)
+    return fuse_dicts(flat_default_config, override_config)
 
 
 def get_fused_config_from_fab(fab_file: Union[Path, bytes], run: Run) -> UserConfig:
@@ -218,8 +217,9 @@ def parse_config_args(
             matches = pattern.findall(config_line)
             toml_str = "\n".join(f"{k} = {v}" for k, v in matches)
             overrides.update(tomli.loads(toml_str))
+            flat_overrides = flatten_dict(overrides)
 
-    return overrides
+    return flat_overrides
 
 
 def get_metadata_from_config(config: dict[str, Any]) -> tuple[str, str]:
