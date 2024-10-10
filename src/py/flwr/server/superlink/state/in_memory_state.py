@@ -18,7 +18,7 @@
 import threading
 import time
 from logging import ERROR, WARNING
-from typing import Optional
+from typing import Optional, Union
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
@@ -32,7 +32,12 @@ from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state.state import State
 from flwr.server.utils import validate_task_ins_or_res
 
-from .utils import generate_rand_int_from_bytes, make_node_unavailable_taskres
+from .utils import (
+    generate_rand_int_from_bytes,
+    make_node_unavailable_taskres,
+    make_taskins_unavailable_taskres,
+    make_taskres_unavailable_taskres,
+)
 
 
 class InMemoryState(State):  # pylint: disable=R0902,R0904
@@ -48,12 +53,13 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         self.run_ids: dict[int, Run] = {}
         self.task_ins_store: dict[UUID, TaskIns] = {}
         self.task_res_store: dict[UUID, TaskRes] = {}
+        self.task_ins_id_to_task_res_id: dict[UUID, UUID] = {}
 
         self.node_public_keys: set[bytes] = set()
         self.server_public_key: Optional[bytes] = None
         self.server_private_key: Optional[bytes] = None
 
-        self.lock = threading.Lock()
+        self.lock = threading.RLock()
 
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
         """Store one TaskIns."""
@@ -186,57 +192,71 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         task_res.task_id = str(task_id)
         with self.lock:
             self.task_res_store[task_id] = task_res
+            self.task_ins_id_to_task_res_id[UUID(task_ins_id)] = task_id
 
         # Return the new task_id
         return task_id
 
     def get_task_res(self, task_ids: set[UUID]) -> list[TaskRes]:
         """Get all TaskRes that have not been delivered yet."""
+        ret: dict[UUID, TaskRes] = {}
+        task_res_to_insert: list[TaskRes] = []
+        task_res_delivered: list[TaskRes] = []
+
         with self.lock:
-            # Find TaskRes that were not delivered yet
-            task_res_list: list[TaskRes] = []
-            replied_task_ids: set[UUID] = set()
-            for _, task_res in self.task_res_store.items():
-                reply_to = UUID(task_res.task.ancestry[0])
+            # Verify TaskIns IDs
+            current = now().timestamp()
+            for task_ins_id in list(task_ids):
+                # Generate error TaskRes if the task_ins doesn't exist or has expired
+                task_ins = self.task_ins_store.get(task_ins_id)
+                if task_ins is None or has_expired(task_ins, current):
+                    task_ids.remove(task_ins_id)
+                    task_res = make_taskins_unavailable_taskres(task_ins_id)
+                    # Insert the error TaskRes if the TaskIns exists and has expired
+                    if task_ins is not None:
+                        task_res_to_insert.append(task_res)
+                    ret[task_ins_id] = task_res
 
-                # Check if corresponding TaskIns exists and is not expired
-                task_ins = self.task_ins_store.get(reply_to)
-                if task_ins is None:
-                    log(WARNING, "TaskIns with task_id %s does not exist.", reply_to)
-                    task_ids.remove(reply_to)
-                    continue
+            # Find all TaskRes
+            for task_ins_id in list(task_ids):
+                task_res_id = self.task_ins_id_to_task_res_id.get(task_ins_id)
+                if task_res_id is not None:
+                    # Retrieve the TaskRes and mark as delivered
+                    task_res = self.task_res_store[task_res_id]
+                    task_res_delivered.append(task_res)
+                    # Check if the TaskRes has expired
+                    if has_expired(task_res, current):
+                        # No need to insert the error TaskRes
+                        task_res = make_taskres_unavailable_taskres(
+                            self.task_ins_store[task_ins_id]
+                        )
+                        task_res.task.delivered_at = now().isoformat()
+                    task_ids.remove(task_ins_id)
+                    ret[task_ins_id] = task_res
 
-                if task_ins.task.created_at + task_ins.task.ttl <= time.time():
-                    log(WARNING, "TaskIns with task_id %s is expired.", reply_to)
-                    task_ids.remove(reply_to)
-                    continue
-
-                if reply_to in task_ids and task_res.task.delivered_at == "":
-                    task_res_list.append(task_res)
-                    replied_task_ids.add(reply_to)
-
-            # Check if the node is offline
-            for task_id in task_ids - replied_task_ids:
-                task_ins = self.task_ins_store.get(task_id)
-                if task_ins is None:
-                    continue
+            # Check node availability
+            for task_ins_id in list(task_ids):
+                task_ins = self.task_ins_store[task_ins_id]
                 node_id = task_ins.task.consumer.node_id
                 online_until, _ = self.node_ids[node_id]
                 # Generate a TaskRes containing an error reply if the node is offline.
-                if online_until < time.time():
-                    err_taskres = make_node_unavailable_taskres(
-                        ref_taskins=task_ins,
-                    )
-                    self.task_res_store[UUID(err_taskres.task_id)] = err_taskres
-                    task_res_list.append(err_taskres)
+                if online_until < current:
+                    task_res = make_node_unavailable_taskres(task_ins)
+                    task_res_to_insert.append(task_res)
+                    ret[task_ins_id] = task_res
 
-            # Mark all of them as delivered
+            # Mark existing TaskRes to be returned as delivered
             delivered_at = now().isoformat()
-            for task_res in task_res_list:
+            for task_res in task_res_delivered:
                 task_res.task.delivered_at = delivered_at
 
-            # Return TaskRes
-            return task_res_list
+            # Store the error TaskRes
+            for task_res in task_res_to_insert:
+                task_res.task.delivered_at = delivered_at
+                self.task_res_store[UUID(task_res.task_id)] = task_res
+
+            # Cleanup
+            self.delete_tasks(set(ret.keys()))
 
     def delete_tasks(self, task_ids: set[UUID]) -> None:
         """Delete all delivered TaskIns/TaskRes pairs."""
@@ -410,3 +430,8 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                 self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
                 return True
         return False
+
+
+def has_expired(task_ins_or_res: Union[TaskIns, TaskRes], current_time: float) -> bool:
+    """Check if the TaskIns/TaskRes has expired."""
+    return task_ins_or_res.task.ttl + task_ins_or_res.task.created_at < current_time

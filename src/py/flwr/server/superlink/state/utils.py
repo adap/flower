@@ -15,12 +15,11 @@
 """Utility functions for State."""
 
 
-import time
 from logging import ERROR
 from os import urandom
 from uuid import uuid4
 
-from flwr.common import log
+from flwr.common import log, now
 from flwr.common.constant import ErrorCode
 from flwr.proto.error_pb2 import Error  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
@@ -132,7 +131,7 @@ def convert_sint64_values_in_dict_to_uint64(
 
 def make_node_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
     """Generate a TaskRes with a node unavailable error from a TaskIns."""
-    current_time = time.time()
+    current_time = now().timestamp()
     ttl = ref_taskins.task.ttl - (current_time - ref_taskins.task.created_at)
     if ttl < 0:
         log(ERROR, "Creating TaskRes for TaskIns that exceeds its TTL.")
@@ -155,9 +154,9 @@ def make_node_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
     )
 
 
-def make_taskins_unavailable_taskres(taskins_task_id: str) -> TaskRes:
+def make_taskins_unavailable_taskres(taskins_id: str) -> TaskRes:
     """Generate a TaskRes with a taskins unavailable error."""
-    current_time = time.time()
+    current_time = now().timestamp()
     return TaskRes(
         task_id=str(uuid4()),
         group_id="",  # Unknown group ID
@@ -168,7 +167,7 @@ def make_taskins_unavailable_taskres(taskins_task_id: str) -> TaskRes:
             consumer=Node(node_id=0, anonymous=False),
             created_at=current_time,
             ttl=0,
-            ancestry=[taskins_task_id],
+            ancestry=[taskins_id],
             task_type="",  # Unknown message type
             error=Error(
                 code=ErrorCode.MESSAGE_UNAVAILABLE,
@@ -180,7 +179,7 @@ def make_taskins_unavailable_taskres(taskins_task_id: str) -> TaskRes:
 
 def make_taskres_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
     """Generate a TaskRes with a reply message unavailable error from a TaskIns."""
-    current_time = time.time()
+    current_time = now().timestamp()
     ttl = ref_taskins.task.ttl - (current_time - ref_taskins.task.created_at)
     if ttl < 0:
         log(ERROR, "Creating TaskRes for TaskIns that exceeds its TTL.")
