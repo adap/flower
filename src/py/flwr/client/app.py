@@ -132,6 +132,11 @@ def start_client(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
+    authentication_keys : Optional[Tuple[PrivateKey, PublicKey]] (default: None)
+        Tuple containing the elliptic curve private key and public key for
+        authentication from the cryptography library.
+        Source: https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ec/
+        Used to establish an authenticated connection with the server.
     max_retries: Optional[int] (default: None)
         The maximum number of times the client will try to connect to the
         server before giving up in case of a connection error. If set to None,
@@ -249,6 +254,11 @@ def start_client_internal(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
+    authentication_keys : Optional[Tuple[PrivateKey, PublicKey]] (default: None)
+        Tuple containing the elliptic curve private key and public key for
+        authentication from the cryptography library.
+        Source: https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ec/
+        Used to establish an authenticated connection with the server.
     max_retries: Optional[int] (default: None)
         The maximum number of times the client will try to connect to the
         server before giving up in case of a connection error. If set to None,

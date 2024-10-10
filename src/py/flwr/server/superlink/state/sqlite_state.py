@@ -151,6 +151,11 @@ class SqliteState(State):  # pylint: disable=R0904
         ----------
         log_queries : bool
             Log each query which is executed.
+
+        Returns
+        -------
+        list[tuple[str]]
+            The list of all tables in the DB.
         """
         self.conn = sqlite3.connect(self.database_path)
         self.conn.execute("PRAGMA foreign_keys = ON;")
@@ -388,6 +393,16 @@ class SqliteState(State):  # pylint: disable=R0904
                 "TaskIns with task_id %s does not exist or has expired.",
                 task_ins_id,
             )
+            return None
+
+        # Ensure that the consumer_id of taskIns matches the producer_id of taskRes.
+        if (
+            task_ins
+            and task_res
+            and not (task_ins["consumer_anonymous"] or task_res.task.producer.anonymous)
+            and convert_sint64_to_uint64(task_ins["consumer_node_id"])
+            != task_res.task.producer.node_id
+        ):
             return None
 
         # Fail if the TaskRes TTL exceeds the
