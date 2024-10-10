@@ -14,6 +14,7 @@
 # ==============================================================================
 """SQLite based implemenation of server state."""
 
+# pylint: disable=too-many-lines
 
 import json
 import re
@@ -150,6 +151,11 @@ class SqliteState(State):  # pylint: disable=R0904
         ----------
         log_queries : bool
             Log each query which is executed.
+
+        Returns
+        -------
+        list[tuple[str]]
+            The list of all tables in the DB.
         """
         self.conn = sqlite3.connect(self.database_path)
         self.conn.execute("PRAGMA foreign_keys = ON;")
@@ -389,6 +395,16 @@ class SqliteState(State):  # pylint: disable=R0904
             )
             return None
 
+        # Ensure that the consumer_id of taskIns matches the producer_id of taskRes.
+        if (
+            task_ins
+            and task_res
+            and not (task_ins["consumer_anonymous"] or task_res.task.producer.anonymous)
+            and convert_sint64_to_uint64(task_ins["consumer_node_id"])
+            != task_res.task.producer.node_id
+        ):
+            return None
+
         # Fail if the TaskRes TTL exceeds the
         # expiration time of the TaskIns it replies to.
         # Condition: TaskIns.created_at + TaskIns.ttl ≥
@@ -432,7 +448,7 @@ class SqliteState(State):  # pylint: disable=R0904
 
         return task_id
 
-    # pylint: disable-next=R0914
+    # pylint: disable-next=R0912,R0915,R0914
     def get_task_res(self, task_ids: set[UUID], limit: Optional[int]) -> list[TaskRes]:
         """Get TaskRes for task_ids.
 
@@ -450,6 +466,35 @@ class SqliteState(State):  # pylint: disable=R0904
         """
         if limit is not None and limit < 1:
             raise AssertionError("`limit` must be >= 1")
+
+        # Check if corresponding TaskIns exists and is not expired
+        task_ids_placeholders = ",".join([f":id_{i}" for i in range(len(task_ids))])
+        query = f"""
+            SELECT *
+            FROM task_ins
+            WHERE task_id IN ({task_ids_placeholders})
+            AND (created_at + ttl) > CAST(strftime('%s', 'now') AS REAL)
+        """
+        query += ";"
+
+        task_ins_data = {}
+        for index, task_id in enumerate(task_ids):
+            task_ins_data[f"id_{index}"] = str(task_id)
+
+        task_ins_rows = self.query(query, task_ins_data)
+
+        if not task_ins_rows:
+            return []
+
+        for row in task_ins_rows:
+            # Convert values from sint64 to uint64
+            convert_sint64_values_in_dict_to_uint64(
+                row, ["run_id", "producer_node_id", "consumer_node_id"]
+            )
+            task_ins = dict_to_task_ins(row)
+            if task_ins.task.created_at + task_ins.task.ttl <= time.time():
+                log(WARNING, "TaskIns with task_id %s is expired.", task_ins.task_id)
+                task_ids.remove(UUID(task_ins.task_id))
 
         # Retrieve all anonymous Tasks
         if len(task_ids) == 0:

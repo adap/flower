@@ -116,6 +116,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         # Return TaskIns
         return task_ins_list
 
+    # pylint: disable=R0911
     def store_task_res(self, task_res: TaskRes) -> Optional[UUID]:
         """Store one TaskRes."""
         # Validate task
@@ -128,6 +129,17 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             # Check if the TaskIns it is replying to exists and is valid
             task_ins_id = task_res.task.ancestry[0]
             task_ins = self.task_ins_store.get(UUID(task_ins_id))
+
+            # Ensure that the consumer_id of taskIns matches the producer_id of taskRes.
+            if (
+                task_ins
+                and task_res
+                and not (
+                    task_ins.task.consumer.anonymous or task_res.task.producer.anonymous
+                )
+                and task_ins.task.consumer.node_id != task_res.task.producer.node_id
+            ):
+                return None
 
             if task_ins is None:
                 log(ERROR, "TaskIns with task_id %s does not exist.", task_ins_id)
@@ -189,6 +201,19 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             replied_task_ids: set[UUID] = set()
             for _, task_res in self.task_res_store.items():
                 reply_to = UUID(task_res.task.ancestry[0])
+
+                # Check if corresponding TaskIns exists and is not expired
+                task_ins = self.task_ins_store.get(reply_to)
+                if task_ins is None:
+                    log(WARNING, "TaskIns with task_id %s does not exist.", reply_to)
+                    task_ids.remove(reply_to)
+                    continue
+
+                if task_ins.task.created_at + task_ins.task.ttl <= time.time():
+                    log(WARNING, "TaskIns with task_id %s is expired.", reply_to)
+                    task_ids.remove(reply_to)
+                    continue
+
                 if reply_to in task_ids and task_res.task.delivered_at == "":
                     task_res_list.append(task_res)
                     replied_task_ids.add(reply_to)
