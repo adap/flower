@@ -116,6 +116,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         # Return TaskIns
         return task_ins_list
 
+    # pylint: disable=R0911
     def store_task_res(self, task_res: TaskRes) -> Optional[UUID]:
         """Store one TaskRes."""
         # Validate task
@@ -128,6 +129,17 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             # Check if the TaskIns it is replying to exists and is valid
             task_ins_id = task_res.task.ancestry[0]
             task_ins = self.task_ins_store.get(UUID(task_ins_id))
+
+            # Ensure that the consumer_id of taskIns matches the producer_id of taskRes.
+            if (
+                task_ins
+                and task_res
+                and not (
+                    task_ins.task.consumer.anonymous or task_res.task.producer.anonymous
+                )
+                and task_ins.task.consumer.node_id != task_res.task.producer.node_id
+            ):
+                return None
 
             if task_ins is None:
                 log(ERROR, "TaskIns with task_id %s does not exist.", task_ins_id)

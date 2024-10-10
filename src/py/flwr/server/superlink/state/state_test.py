@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """Tests all state implemenations have to conform to."""
-# pylint: disable=invalid-name, disable=R0904,R0913
+# pylint: disable=invalid-name, too-many-lines, R0904, R0913
 
 import tempfile
 import time
@@ -149,7 +149,7 @@ class StateTest(unittest.TestCase):
 
         # Insert one TaskRes and retrive it to mark it as delivered
         task_res_0 = create_task_res(
-            producer_node_id=100,
+            producer_node_id=consumer_node_id,
             anonymous=False,
             ancestry=[str(task_id_0)],
             run_id=run_id,
@@ -160,7 +160,7 @@ class StateTest(unittest.TestCase):
 
         # Insert one TaskRes, but don't retrive it
         task_res_1: TaskRes = create_task_res(
-            producer_node_id=100,
+            producer_node_id=consumer_node_id,
             anonymous=False,
             ancestry=[str(task_id_1)],
             run_id=run_id,
@@ -662,7 +662,7 @@ class StateTest(unittest.TestCase):
 
         # Create and store TaskRes
         task_res_0 = create_task_res(
-            producer_node_id=100,
+            producer_node_id=node_id_0,
             anonymous=False,
             ancestry=[str(task_id_0)],
             run_id=run_id,
@@ -870,6 +870,32 @@ class StateTest(unittest.TestCase):
 
             # Assert
             assert len(task_res_list) != 0
+
+    def test_store_task_res_fail_if_consumer_producer_id_mismatch(self) -> None:
+        """Test store_task_res to fail if there is a mismatch between the
+        consumer_node_id of taskIns and the producer_node_id of taskRes."""
+        # Prepare
+        consumer_node_id = 1
+        state = self.state_factory()
+        run_id = state.create_run(None, None, "9f86d08", {})
+        task_ins = create_task_ins(
+            consumer_node_id=consumer_node_id, anonymous=False, run_id=run_id
+        )
+
+        task_id = state.store_task_ins(task_ins=task_ins)
+
+        task_res = create_task_res(
+            producer_node_id=100,  # different than consumer_node_id
+            anonymous=False,
+            ancestry=[str(task_id)],
+            run_id=run_id,
+        )
+
+        # Execute
+        task_res_uuid = state.store_task_res(task_res=task_res)
+
+        # Assert
+        assert task_res_uuid is None
 
 
 def create_task_ins(
