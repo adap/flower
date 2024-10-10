@@ -135,6 +135,7 @@ sphinx-substitution-extensions = "2022.02.16"
 sphinxext-opengraph = "==0.9.1"
 docstrfmt = { git = "https://github.com/charlesbvll/docstrfmt.git", branch = "patch-1" }
 docsig = "==0.64.0"
+libcst = "==1.4.0"
 
 [tool.docstrfmt]
 extend_exclude = [
