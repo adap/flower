@@ -155,7 +155,7 @@ class SqliteState(State):  # pylint: disable=R0904
         Returns
         -------
         list[tuple[str]]
-            The list of all tables on the DB.
+            The list of all tables in the DB.
         """
         self.conn = sqlite3.connect(self.database_path)
         self.conn.execute("PRAGMA foreign_keys = ON;")
