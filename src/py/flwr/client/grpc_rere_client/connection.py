@@ -253,7 +253,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
         return in_message
 
     def send(message: Message) -> None:
-        """Send message reply back to server."""
+        """Send message reply to server."""
         # Get Node
         if node is None:
             log(ERROR, "Node instance missing")
