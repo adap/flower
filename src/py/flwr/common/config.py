@@ -217,8 +217,9 @@ def parse_config_args(
             matches = pattern.findall(config_line)
             toml_str = "\n".join(f"{k} = {v}" for k, v in matches)
             overrides.update(tomli.loads(toml_str))
+            flat_overrides = flatten_dict(overrides)
 
-    return overrides
+    return flat_overrides
 
 
 def get_metadata_from_config(config: dict[str, Any]) -> tuple[str, str]:
