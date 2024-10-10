@@ -164,9 +164,7 @@ def validate_and_install(
     install_dir: Path = (
         (get_flwr_dir() if not flwr_dir else flwr_dir)
         / "apps"
-        / publisher
-        / project_name
-        / version
+        / f"{publisher}.{project_name}.{version}.{fab_hash[:FAB_HASH_TRUNCATION]}"
     )
     if install_dir.exists():
         if skip_prompt:
