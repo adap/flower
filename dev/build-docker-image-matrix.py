@@ -29,6 +29,9 @@ SUPPORTED_PYTHON_VERSIONS = [
 
 DOCKERFILE_ROOT = "src/docker"
 
+UBUNTU_24_04 = Distro(DistroName.UBUNTU, "24.04")
+ALPINE_3_19 = Distro(DistroName.ALPINE, "3.19")
+
 
 @dataclass
 class BaseImage:
@@ -121,26 +124,23 @@ def tag_latest_ubuntu_with_flwr_version(image: BaseImage) -> List[str]:
         return [image.tag]
 
 
-if __name__ == "__main__":
-    arg_parser = argparse.ArgumentParser(
-        description="Generate Github Docker workflow matrix"
-    )
-    arg_parser.add_argument("--flwr-version", type=str, required=True)
-    args = arg_parser.parse_args()
-
-    flwr_version = args.flwr_version
+def generate_complete_matrix(flwr_version: str):
+    """Generates a matrix comprising Ubuntu and Alpine images. For Alpine, the matrix
+    includes only the latest supported Python version, whereas for Ubuntu, it includes all
+    supported Python versions.
+    """
 
     # ubuntu base images for each supported python version
     ubuntu_base_images = generate_base_images(
         flwr_version,
         SUPPORTED_PYTHON_VERSIONS,
-        [Distro(DistroName.UBUNTU, "24.04")],
+        [UBUNTU_24_04],
     )
     # alpine base images for the latest supported python version
     alpine_base_images = generate_base_images(
         flwr_version,
         [LATEST_SUPPORTED_PYTHON_VERSION],
-        [Distro(DistroName.ALPINE, "3.19")],
+        [ALPINE_3_19],
     )
 
     base_images = ubuntu_base_images + alpine_base_images
@@ -154,6 +154,7 @@ if __name__ == "__main__":
             lambda image: image.python_version == LATEST_SUPPORTED_PYTHON_VERSION,
         )
         # ubuntu images for each supported python version
+        # and alpine image for the latest supported python version
         + generate_binary_images(
             "supernode",
             base_images,
@@ -186,6 +187,53 @@ if __name__ == "__main__":
             lambda image: image.distro.name == DistroName.UBUNTU,
         )
     )
+
+    return base_images, binary_images
+
+
+def generate_ubuntu_python_latest_matrix(flwr_version: str):
+    """Generates a matrix comprising Ubuntu images. It includes only the latest supported Python
+    version.
+    """
+
+    # ubuntu base image for the latest supported python version
+    base_images = generate_base_images(
+        flwr_version,
+        [LATEST_SUPPORTED_PYTHON_VERSION],
+        [UBUNTU_24_04],
+    )
+
+    binary_images = (
+        # ubuntu and alpine images for the latest supported python version
+        generate_binary_images("superlink", base_images)
+        # ubuntu images for the latest supported python version
+        + generate_binary_images("supernode", base_images)
+        # ubuntu images for the latest supported python version
+        + generate_binary_images("serverapp", base_images)
+        # ubuntu images for the latest supported python version
+        + generate_binary_images("superexec", base_images)
+        # ubuntu images for the latest supported python version
+        + generate_binary_images("clientapp", base_images)
+    )
+
+    return base_images, binary_images
+
+
+if __name__ == "__main__":
+    arg_parser = argparse.ArgumentParser(
+        description="Generate Github Docker workflow matrix"
+    )
+    arg_parser.add_argument("--flwr-version", type=str, required=True)
+    arg_parser.add_argument("--simple", action="store_true")
+    args = arg_parser.parse_args()
+
+    flwr_version = args.flwr_version
+    simple = args.simple
+
+    if simple:
+        base_images, binary_images = generate_ubuntu_python_latest_matrix(flwr_version)
+    else:
+        base_images, binary_images = generate_complete_matrix(flwr_version)
 
     print(
         json.dumps(
