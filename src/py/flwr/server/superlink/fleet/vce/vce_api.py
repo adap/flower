@@ -350,7 +350,7 @@ def start_vce(
                 app_path=app_dir,
                 flwr_dir=flwr_dir,
                 multi_app=False,
-            )(run.fab_id, run.fab_version)
+            )(run.fab_id, run.fab_version, run.fab_hash)
 
         raise ValueError("Either `client_app_attr` or `client_app` must be provided")
 
