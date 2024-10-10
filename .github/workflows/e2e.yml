@@ -311,3 +311,39 @@ jobs:
           if grep -q "ERROR" flwr_output.log; then
             exit 1
           fi
+
+  build_and_install:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    needs: wheel
+    strategy:
+      matrix:
+        framework: ["numpy"]
+        python-version: ["3.9", "3.10", "3.11"]
+
+    name: |
+      Build & Install /
+      Python ${{ matrix.python-version }} /
+      ${{ matrix.framework }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+        with:
+          python-version: ${{ matrix.python-version }}
+          poetry-skip: 'true'
+      - name: Install Flower from repo
+        if: ${{ github.repository != 'adap/flower' || github.event.pull_request.head.repo.fork || github.actor == 'dependabot[bot]' }}
+        run: |
+          python -m pip install .
+      - name: Install Flower wheel from artifact store
+        if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
+        run: |
+          python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
+      - name: Create project, build, and install it
+        run: |
+          flwr new tmp-${{ matrix.framework }} --framework ${{ matrix.framework }} --username gh_ci
+          cd tmp-${{ matrix.framework }}
+          flwr build
+          flwr install *.fab

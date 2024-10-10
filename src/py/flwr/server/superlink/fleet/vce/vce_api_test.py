@@ -304,7 +304,7 @@ class TestFleetSimulationEngineRayBackend(TestCase):
         # Get all TaskRes
         state = state_factory.state()
         task_ids = set(expected_results.keys())
-        task_res_list = state.get_task_res(task_ids=task_ids, limit=len(task_ids))
+        task_res_list = state.get_task_res(task_ids=task_ids)
 
         # Check results by first converting to Message
         for task_res in task_res_list:
