@@ -190,11 +190,8 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         # Return the new task_id
         return task_id
 
-    def get_task_res(self, task_ids: set[UUID], limit: Optional[int]) -> list[TaskRes]:
+    def get_task_res(self, task_ids: set[UUID]) -> list[TaskRes]:
         """Get all TaskRes that have not been delivered yet."""
-        if limit is not None and limit < 1:
-            raise AssertionError("`limit` must be >= 1")
-
         with self.lock:
             # Find TaskRes that were not delivered yet
             task_res_list: list[TaskRes] = []
@@ -217,13 +214,9 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                 if reply_to in task_ids and task_res.task.delivered_at == "":
                     task_res_list.append(task_res)
                     replied_task_ids.add(reply_to)
-                if limit and len(task_res_list) == limit:
-                    break
 
             # Check if the node is offline
             for task_id in task_ids - replied_task_ids:
-                if limit and len(task_res_list) == limit:
-                    break
                 task_ins = self.task_ins_store.get(task_id)
                 if task_ins is None:
                     continue
