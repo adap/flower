@@ -20,7 +20,7 @@ import subprocess
 import sys
 from logging import DEBUG
 from pathlib import Path
-from typing import Annotated, Any, Optional
+from typing import Annotated, Any, Optional, Dict
 
 import typer
 
@@ -33,10 +33,18 @@ from flwr.common.serde import fab_to_proto, user_config_to_proto
 from flwr.common.typing import Fab
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
+from flwr.common.auth_plugin import SuperTokensUserPlugin, PublicKeyUserPlugin, UserAuthPlugin
 
 from ..log import start_stream
+from flwr.cli.run.user_interceptor import UserInterceptor
 
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
+
+
+auth_plugins: Dict[str, UserAuthPlugin] = {
+    "supertokens": SuperTokensUserPlugin,
+    "public-key": PublicKeyUserPlugin
+}
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
@@ -129,7 +137,11 @@ def run(
         raise typer.Exit(code=1)
 
     if "address" in federation_config:
-        _run_with_superexec(app, federation_config, config_overrides, stream)
+        auth_type = federation_config.get("authentication", {}).get("auth-type")
+        auth_plugin: Optional[UserAuthPlugin] = None
+        if auth_type is not None:
+            auth_plugin = auth_plugins.get(auth_type)(config, federation)
+        _run_with_superexec(app, federation_config, config_overrides, stream, auth_plugin)
     else:
         _run_without_superexec(app, federation_config, config_overrides, federation)
 
@@ -139,6 +151,7 @@ def _run_with_superexec(
     federation_config: dict[str, Any],
     config_overrides: Optional[list[str]],
     stream: bool,
+    auth_plugin: Optional[UserAuthPlugin] = None,
 ) -> None:
 
     insecure_str = federation_config.get("insecure")
@@ -174,7 +187,13 @@ def _run_with_superexec(
         insecure=insecure,
         root_certificates=root_certificates_bytes,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        interceptors=None,
+        interceptors=(
+            UserInterceptor(
+                auth_plugin
+            )
+            if auth_plugin is not None
+            else None
+        ),
     )
     channel.subscribe(on_channel_state_change)
     stub = ExecStub(channel)

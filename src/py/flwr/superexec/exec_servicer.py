@@ -21,10 +21,11 @@ import threading
 import time
 from collections.abc import Generator
 from logging import ERROR, INFO
-from typing import Any
+from typing import Any, Optional
 
 import grpc
 
+from flwr.common.auth_plugin import SuperExecAuthPlugin
 from flwr.common.logger import log
 from flwr.common.serde import user_config_from_proto
 from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
@@ -45,8 +46,9 @@ SELECT_TIMEOUT = 1  # Timeout for selecting ready-to-read file descriptors (in s
 class ExecServicer(exec_pb2_grpc.ExecServicer):
     """SuperExec API servicer."""
 
-    def __init__(self, executor: Executor) -> None:
+    def __init__(self, executor: Executor, auth_plugin: Optional[SuperExecAuthPlugin] = None) -> None:
         self.executor = executor
+        self.auth_plugin = auth_plugin
         self.runs: dict[int, RunTracker] = {}
 
     def StartRun(
@@ -108,8 +110,10 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
     ) -> LoginResponse:
         """Start login."""
         log(INFO, "ExecServicer.Login")
-
-        return LoginResponse(auth_url="")
+        if self.auth_plugin is not None:
+            return self.auth_plugin.send_auth_endpoint()
+        
+        context.abort(grpc.StatusCode.UNIMPLEMENTED, "SuperExec initialized without user authentication")
 
 
 def _capture_logs(

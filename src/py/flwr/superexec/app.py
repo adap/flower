@@ -16,21 +16,30 @@
 
 import argparse
 import sys
+import yaml
 from logging import INFO, WARN
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict, Any, Sequence, Type
 
 import grpc
 
+from flwr.superexec.superexec_interceptor import SuperExecInterceptor
 from flwr.common import EventType, event, log
 from flwr.common.address import parse_address
 from flwr.common.config import parse_config_args
 from flwr.common.constant import EXEC_API_DEFAULT_ADDRESS
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.object_ref import load_app, validate
+from flwr.common.auth_plugin import SuperTokensSuperExecPlugin, SuperExecAuthPlugin, PublicKeySuperExecPlugin
 
 from .exec_grpc import run_superexec_api_grpc
 from .executor import Executor
+
+
+auth_plugins: Dict[str, Type[SuperExecAuthPlugin]] = {
+    "supertokens": SuperTokensSuperExecPlugin,
+    "public-key": PublicKeySuperExecPlugin,
+}
 
 
 def run_superexec() -> None:
@@ -50,6 +59,11 @@ def run_superexec() -> None:
 
     # Obtain certificates
     certificates = _try_obtain_certificates(args)
+    
+    maybe_config = _try_obtain_config(args)
+    auth_plugin: Optional[SuperExecAuthPlugin] = None
+    if maybe_config is not None:
+        auth_plugin = _try_obtain_auth_config(maybe_config)
 
     # Start SuperExec API
     superexec_server: grpc.Server = run_superexec_api_grpc(
@@ -59,6 +73,7 @@ def run_superexec() -> None:
         config=parse_config_args(
             [args.executor_config] if args.executor_config else args.executor_config
         ),
+        auth_plugin=auth_plugin,
     )
 
     grpc_servers = [superexec_server]
@@ -125,7 +140,28 @@ def _parse_args_run_superexec() -> argparse.ArgumentParser:
         "to create a secure connection.",
         type=str,
     )
+    parser.add_argument(
+        "--config",
+        help="SuperExec config.yaml file (as a path str) "
+        "to configure SuperExec.",
+        type=str,
+        default=None,
+    )
     return parser
+
+
+def _try_obtain_config(args: argparse.Namespace) -> Optional[Dict[str, Any]]:
+    if args.config is not None:
+        with open(args.config, "r") as file:
+            config = yaml.safe_load(file)
+            return config
+    return None
+
+
+def _try_obtain_auth_config(config: Dict[str, Any]) -> Optional[SuperExecAuthPlugin]:
+    auth_config = config.get("authentication", {})
+    auth_plugin = auth_plugins.get(auth_config.get("plugin", ""))
+    return auth_plugin(auth_config)
 
 
 def _try_obtain_certificates(

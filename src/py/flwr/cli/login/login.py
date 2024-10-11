@@ -16,11 +16,31 @@
 
 import sys
 from pathlib import Path
-from typing import Annotated, Optional
+from flwr.common.logger import log
+from logging import DEBUG
+from typing import Annotated, Optional, Any
+
+from flwr.cli.build import build
+from flwr.cli.config_utils import load_and_validate
+from flwr.common.config import flatten_dict, parse_config_args
+from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
+from flwr.proto.exec_pb2 import LoginRequest, LoginResponse  # pylint: disable=E0611
+from flwr.proto.exec_pb2_grpc import ExecStub
+from flwr.common.auth_plugin import SuperTokensUserPlugin, PublicKeyUserPlugin, UserAuthPlugin
 
 import typer
+from tomli_w import dump
 
 from flwr.cli.config_utils import load_and_validate
+
+auth_plugins = {
+    "supertokens": SuperTokensUserPlugin,
+    "public-key": PublicKeyUserPlugin
+}
+
+def on_channel_state_change(channel_connectivity: str) -> None:
+    """Log channel connectivity."""
+    log(DEBUG, channel_connectivity)
 
 
 def login(
@@ -85,3 +105,67 @@ def login(
             bold=True,
         )
         raise typer.Exit(code=1)
+    
+    if "address" not in federation_config:
+        typer.secho(
+            f"❌ The federation `{federation}` does not have `SuperExec` "
+            "address in its config.\n Please specify the address in "
+            "`pyproject.toml` and try again.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+    
+    login_response = send_login_request(app, federation_config)
+    # login_response = LoginResponse(auth_type="supertokens", auth_url="https://api.flower.ai/auth/signin")
+    auth_plugin = auth_plugins[login_response.auth_type]
+    config = auth_plugin.login(login_response.auth_url, config, federation)
+
+    with open(pyproject_path, "wb") as config_file:
+        dump(config, config_file)
+
+    
+def send_login_request(app: Path, federation_config: dict[str, Any]) -> LoginResponse:
+    insecure_str = federation_config.get("insecure")
+    if root_certificates := federation_config.get("root-certificates"):
+        root_certificates_bytes = (app / root_certificates).read_bytes()
+        if insecure := bool(insecure_str):
+            typer.secho(
+                "❌ `root_certificates` were provided but the `insecure` parameter"
+                "is set to `True`.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1)
+    else:
+        root_certificates_bytes = None
+        if insecure_str is None:
+            typer.secho(
+                "❌ To disable TLS, set `insecure = true` in `pyproject.toml`.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1)
+        if not (insecure := bool(insecure_str)):
+            typer.secho(
+                "❌ No certificate were given yet `insecure` is set to `False`.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1)
+    
+    channel = create_channel(
+        server_address=federation_config["address"],
+        insecure=insecure,
+        root_certificates=root_certificates_bytes,
+        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
+        interceptors=None,
+    )
+    channel.subscribe(on_channel_state_change)
+    stub = ExecStub(channel)
+
+    req = LoginRequest()
+    res: LoginResponse = stub.Login(req)
+
+    return res
+    
