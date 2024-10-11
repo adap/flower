@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-27 00:30+0000\n"
+"POT-Creation-Date: 2024-10-10 00:29+0000\n"
 "PO-Revision-Date: 2024-05-25 11:09+0000\n"
 "Last-Translator: Gustavo Bertoli <gubertoli@gmail.com>\n"
 "Language: pt_BR\n"
@@ -1214,7 +1214,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/contributor-how-to-write-documentation.rst:10
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:193
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:196
 msgid ""
 "Note that, in order to build the documentation locally (with ``poetry run"
 " make html``, like described below), `Pandoc "
@@ -2121,28 +2121,28 @@ msgstr ""
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:61
 msgid ""
 "If you don't have ``pyenv`` installed, the following script that will "
-"install it, set it up, and create the virtual environment (with ``Python "
-"3.9.20`` by default):"
+"install it, set it up, and create the virtual environment (with "
+":substitution-code:`Python |python_full_version|` by default):"
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:68
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:69
 msgid ""
 "If you already have ``pyenv`` installed (along with the ``pyenv-"
 "virtualenv`` plugin), you can use the following convenience script (with "
-"``Python 3.9.20`` by default):"
+":substitution-code:`Python |python_full_version|` by default):"
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:75
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:77
 msgid ""
 "3. Install the Flower package in development mode (think ``pip install "
 "-e``) along with all necessary dependencies:"
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:83
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:85
 msgid "Convenience Scripts"
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:85
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:87
 msgid ""
 "The Flower repository contains a number of convenience scripts to make "
 "recurring development tasks easier and less error-prone. See the ``/dev``"
@@ -2150,27 +2150,27 @@ msgid ""
 " important ones:"
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:90
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:92
 msgid "Create/Delete Virtual Environment"
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:98
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:101
 msgid "Compile ProtoBuf Definitions"
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:105
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:108
 msgid "Auto-Format Code"
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:112
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:115
 msgid "Run Linters and Tests"
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:119
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:122
 msgid "Add a pre-commit hook"
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:121
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:124
 msgid ""
 "Developers may integrate a pre-commit hook into their workflow utilizing "
 "the `pre-commit <https://pre-commit.com/#install>`_ library. The pre-"
@@ -2178,44 +2178,44 @@ msgid ""
 "``./dev/format.sh`` and ``./dev/test.sh`` scripts."
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:125
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:128
 msgid "There are multiple ways developers can use this:"
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:127
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:130
 msgid "Install the pre-commit hook to your local git directory by simply running:"
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:133
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:136
 msgid ""
 "Each ``git commit`` will trigger the execution of formatting and "
 "linting/test scripts."
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:135
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:138
 msgid ""
 "If in a hurry, bypass the hook using ``--no-verify`` with the ``git "
 "commit`` command."
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:142
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:145
 msgid ""
 "For developers who prefer not to install the hook permanently, it is "
 "possible to execute a one-time check prior to committing changes by using"
 " the following command:"
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:149
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:152
 msgid ""
 "This executes the formatting and linting checks/tests on all the files "
 "without modifying the default behavior of ``git commit``."
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:153
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:156
 msgid "Run Github Actions (CI) locally"
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:155
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:158
 msgid ""
 "Developers could run the full set of Github Actions workflows under their"
 " local environment by using `Act <https://github.com/nektos/act>`_. "
@@ -2223,40 +2223,40 @@ msgid ""
 " and run the next command under Flower main cloned repository folder:"
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:164
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:167
 msgid ""
 "The Flower default workflow would run by setting up the required Docker "
 "machines underneath."
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:168
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:171
 msgid "Build Release"
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:170
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:173
 msgid ""
 "Flower uses Poetry to build releases. The necessary command is wrapped in"
 " a simple script:"
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:177
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:180
 msgid ""
 "The resulting ``.whl`` and ``.tar.gz`` releases will be stored in the "
 "``/dist`` subdirectory."
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:181
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:184
 msgid "Build Documentation"
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:183
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:186
 msgid ""
 "Flower's documentation uses `Sphinx <https://www.sphinx-doc.org/>`_. "
 "There's no convenience script to re-build the documentation yet, but it's"
 " pretty easy:"
 msgstr ""
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:191
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:194
 msgid "This will generate HTML documentation in ``doc/build/html``."
 msgstr ""
 
@@ -7074,7 +7074,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:28
-#: ../../source/how-to-upgrade-to-flower-next.rst:120
+#: ../../source/how-to-upgrade-to-flower-next.rst:121
 msgid "Required changes"
 msgstr ""
 
@@ -7278,7 +7278,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:121
-#: ../../source/how-to-upgrade-to-flower-next.rst:348
+#: ../../source/how-to-upgrade-to-flower-next.rst:349
 msgid "Further help"
 msgstr ""
 
@@ -7353,7 +7353,7 @@ msgid ""
 "``pyproject.toml``:"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:122
+#: ../../source/how-to-upgrade-to-flower-next.rst:123
 msgid ""
 "In Flower Next, the *infrastructure* and *application layers* have been "
 "decoupled. Instead of starting a client in code via ``start_client()``, "
@@ -7366,31 +7366,31 @@ msgid ""
 "way:"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:131
+#: ../../source/how-to-upgrade-to-flower-next.rst:132
 msgid "|clientapp_link|_"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:133
+#: ../../source/how-to-upgrade-to-flower-next.rst:134
 msgid ""
 "Wrap your existing client with |clientapp_link|_ instead of launching it "
 "via |startclient_link|_. Here's an example:"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:156
+#: ../../source/how-to-upgrade-to-flower-next.rst:157
 msgid "|serverapp_link|_"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:158
+#: ../../source/how-to-upgrade-to-flower-next.rst:159
 msgid ""
 "Wrap your existing strategy with |serverapp_link|_ instead of starting "
 "the server via |startserver_link|_. Here's an example:"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:179
+#: ../../source/how-to-upgrade-to-flower-next.rst:180
 msgid "Deployment"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:181
+#: ../../source/how-to-upgrade-to-flower-next.rst:182
 msgid ""
 "Run the ``SuperLink`` using |flowernext_superlink_link|_ before running, "
 "in sequence, |flowernext_clientapp_link|_ (2x) and "
@@ -7398,13 +7398,13 @@ msgid ""
 " `server.py` as Python scripts."
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:184
+#: ../../source/how-to-upgrade-to-flower-next.rst:185
 msgid ""
 "Here's an example to start the server without HTTPS (only for "
 "prototyping):"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:200
+#: ../../source/how-to-upgrade-to-flower-next.rst:201
 msgid ""
 "Here's another example to start with HTTPS. Use the ``--ssl-ca-"
 "certfile``, ``--ssl-certfile``, and ``--ssl-keyfile`` command line "
@@ -7412,18 +7412,18 @@ msgid ""
 "private key)."
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:228
+#: ../../source/how-to-upgrade-to-flower-next.rst:229
 msgid "Simulation in CLI"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:230
+#: ../../source/how-to-upgrade-to-flower-next.rst:231
 msgid ""
 "Wrap your existing client and strategy with |clientapp_link|_ and "
 "|serverapp_link|_, respectively. There is no need to use |startsim_link|_"
 " anymore. Here's an example:"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:263
+#: ../../source/how-to-upgrade-to-flower-next.rst:264
 msgid ""
 "Run |flower_simulation_link|_ in CLI and point to the ``server_app`` / "
 "``client_app`` object in the code instead of executing the Python script."
@@ -7431,24 +7431,24 @@ msgid ""
 "objects are in a ``sim.py`` module):"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:280
+#: ../../source/how-to-upgrade-to-flower-next.rst:281
 msgid ""
 "Set default resources for each |clientapp_link|_ using the ``--backend-"
 "config`` command line argument instead of setting the "
 "``client_resources`` argument in |startsim_link|_. Here's an example:"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:304
+#: ../../source/how-to-upgrade-to-flower-next.rst:305
 msgid "Simulation in a Notebook"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:306
+#: ../../source/how-to-upgrade-to-flower-next.rst:307
 msgid ""
 "Run |runsim_link|_ in your notebook instead of |startsim_link|_. Here's "
 "an example:"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:350
+#: ../../source/how-to-upgrade-to-flower-next.rst:351
 msgid ""
 "Some official `Flower code examples <https://flower.ai/docs/examples/>`_ "
 "are already updated to Flower Next so they can serve as a reference for "
@@ -7459,18 +7459,18 @@ msgid ""
 " or share and learn from others about migrating to Flower Next."
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:357
+#: ../../source/how-to-upgrade-to-flower-next.rst:358
 msgid "Important"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:359
+#: ../../source/how-to-upgrade-to-flower-next.rst:360
 msgid ""
 "As we continuously enhance Flower Next at a rapid pace, we'll be "
 "periodically updating this guide. Please feel free to share any feedback "
 "with us!"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:365
+#: ../../source/how-to-upgrade-to-flower-next.rst:366
 msgid "Happy migrating! 🚀"
 msgstr ""
 
@@ -24164,7 +24164,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|3a7aceef05f0421794726ac54aaf12fd|"
+msgid "|ac0a9766e26044d6aea222a829859b20|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -24179,7 +24179,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|d741075f8e624331b42c0746f7d258a0|"
+msgid "|36cd6e248b1443ce8a82b5a025bba368|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -24200,7 +24200,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|8fc92d668bcb42b8bda55143847f2329|"
+msgid "|bf4fb057f4774df39e1dcb5c71fd804a|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -24216,7 +24216,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|1c705d833a024f22adcaeb8ae3d13b0b|"
+msgid "|71bb9f3c74c04f959b9bc1f02b736c95|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -24232,7 +24232,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|77a037b546a84262b608e04bc82a2c96|"
+msgid "|7605632e1b0f49599ffacf841491fcfb|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -24247,7 +24247,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|f568e24c9fb0435690ac628210a4be96|"
+msgid "|91b1b5a7d3484eb7a2350c1923f18307|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -24267,7 +24267,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|a7bf029981514e2593aa3a2b48c9d76a|"
+msgid "|5405ed430e4746e28b083b146fb71731|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -24282,7 +24282,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|3f645ad807f84be8b1f8f3267173939c|"
+msgid "|a389e87dab394eb48a8949aa2397687b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -24422,7 +24422,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|a06a9dbd603f45819afd8e8cfc3c4b8f|"
+msgid "|89c412136a5146ec8dc32c0973729f12|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -24446,7 +24446,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|edcf9a04d96e42608fd01a333375febe|"
+msgid "|9503d3dc3a144e8aa295f8800cd8a766|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -24470,7 +24470,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|3dae22fe797043968e2b7aa7073c78bd|"
+msgid "|aadb59e29b9e445d8e239d9a8a7045cb|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -24493,7 +24493,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|ba178f75267d4ad8aa7363f20709195f|"
+msgid "|a7579ad7734347508e959d9e14f2f53d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -24531,7 +24531,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|c380c750bfd2444abce039a1c6fa8e60|"
+msgid "|73d15dd1d4fc41678b2d54815503fbe8|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -24625,7 +24625,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|e7cec00a114b48359935c6510595132e|"
+msgid "|55472eef61274ba1b739408607e109df|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -32704,5 +32704,63 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|797bf279c4894b5ead31dc9b0534ed62|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If you don't have ``pyenv`` installed,"
+#~ " the following script that will "
+#~ "install it, set it up, and create"
+#~ " the virtual environment (with ``Python "
+#~ "3.9.20`` by default):"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If you already have ``pyenv`` installed"
+#~ " (along with the ``pyenv-virtualenv`` "
+#~ "plugin), you can use the following "
+#~ "convenience script (with ``Python 3.9.20`` "
+#~ "by default):"
+#~ msgstr ""
+
+#~ msgid "|3a7aceef05f0421794726ac54aaf12fd|"
+#~ msgstr ""
+
+#~ msgid "|d741075f8e624331b42c0746f7d258a0|"
+#~ msgstr ""
+
+#~ msgid "|8fc92d668bcb42b8bda55143847f2329|"
+#~ msgstr ""
+
+#~ msgid "|1c705d833a024f22adcaeb8ae3d13b0b|"
+#~ msgstr ""
+
+#~ msgid "|77a037b546a84262b608e04bc82a2c96|"
+#~ msgstr ""
+
+#~ msgid "|f568e24c9fb0435690ac628210a4be96|"
+#~ msgstr ""
+
+#~ msgid "|a7bf029981514e2593aa3a2b48c9d76a|"
+#~ msgstr ""
+
+#~ msgid "|3f645ad807f84be8b1f8f3267173939c|"
+#~ msgstr ""
+
+#~ msgid "|a06a9dbd603f45819afd8e8cfc3c4b8f|"
+#~ msgstr ""
+
+#~ msgid "|edcf9a04d96e42608fd01a333375febe|"
+#~ msgstr ""
+
+#~ msgid "|3dae22fe797043968e2b7aa7073c78bd|"
+#~ msgstr ""
+
+#~ msgid "|ba178f75267d4ad8aa7363f20709195f|"
+#~ msgstr ""
+
+#~ msgid "|c380c750bfd2444abce039a1c6fa8e60|"
+#~ msgstr ""
+
+#~ msgid "|e7cec00a114b48359935c6510595132e|"
 #~ msgstr ""
 
