@@ -12,7 +12,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Introduce SuperExec log streaming** ([#3577](https://github.com/adap/flower/pull/3577), [#3584](https://github.com/adap/flower/pull/3584), [#4242](https://github.com/adap/flower/pull/4242), [#3611](https://github.com/adap/flower/pull/3611), [#3613](https://github.com/adap/flower/pull/3613))
 
-  Flower now supports log streaming from a remote SuperExec using the `flwr log` command. This new feature allows you to monitor logs from SuperExec in real time via `flwr log <run-id>` (or `flwr log <run-id> <app-dir> <federation>`.
+  Flower now supports log streaming from a remote SuperExec using the `flwr log` command. This new feature allows you to monitor logs from SuperExec in real time via `flwr log <run-id>` (or `flwr log <run-id> <app-dir> <federation>`).
 
 - **Improve `flwr new` templates** ([#4291](https://github.com/adap/flower/pull/4291), [#4292](https://github.com/adap/flower/pull/4292), [#4293](https://github.com/adap/flower/pull/4293), [#4294](https://github.com/adap/flower/pull/4294), [#4295](https://github.com/adap/flower/pull/4295))
 
