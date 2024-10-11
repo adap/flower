@@ -87,21 +87,23 @@ flower-superlink \
 In a new terminal window, start the first long-running Flower client (SuperNode):
 
 ```bash
-flower-client-app client:app \
+flower-supernode ./ \
     --root-certificates certificates/ca.crt \
-    --server 127.0.0.1:9092 \
+    --superlink 127.0.0.1:9092 \
     --auth-supernode-private-key keys/client_credentials_1 \
-    --auth-supernode-public-key keys/client_credentials_1.pub
+    --auth-supernode-public-key keys/client_credentials_1.pub \
+    --node-config "partition-id=0 num-partitions=2"
 ```
 
 In yet another new terminal window, start the second long-running Flower client:
 
 ```bash
-flower-client-app client:app \
+flower-supernode ./ \
     --root-certificates certificates/ca.crt \
-    --server 127.0.0.1:9092 \
+    --superlink 127.0.0.1:9092 \
     --auth-supernode-private-key keys/client_credentials_2 \
-    --auth-supernode-public-key keys/client_credentials_2.pub
+    --auth-supernode-public-key keys/client_credentials_2.pub \
+    --node-config "partition-id=1 num-partitions=2"
 ```
 
 If you generated more than 2 client credentials, you can add more clients by opening new terminal windows and running the command
@@ -109,8 +111,15 @@ above. Don't forget to specify the correct client private and public keys for ea
 
 ## Run the Flower App
 
-With both the long-running server (SuperLink) and two clients (SuperNode) up and running, we can now run the actual Flower ServerApp:
+With both the long-running server (SuperLink) and two clients (SuperNode) up and running, we can now run :
 
 ```bash
-flower-server-app server:app --root-certificates certificates/ca.crt --dir ./ --server 127.0.0.1:9091
+flower-superexec \
+    --executor-config 'root-certificates=\"../certificates/ca.crt\"' \
+    --ssl-ca-certfile certificates/ca.crt \
+    --ssl-certfile certificates/server.pem \
+    --ssl-keyfile certificates/server.key \
+    --executor flwr.superexec.deployment:executor
+
+flower-server-app ./ --root-certificates certificates/ca.crt --superlink 127.0.0.1:9091
 ```
