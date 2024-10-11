@@ -200,7 +200,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
         )
         self._common_assertions(ins)
 
-    def _create_message_dummy(  # pylint: disable=R0913
+    def _create_message_dummy(  # pylint: disable=R0913,too-many-positional-arguments
         self,
         content: RecordSet,
         message_type: str,
@@ -237,9 +237,9 @@ class DriverClientProxyTestCase(unittest.TestCase):
 
         def generate_replies(messages: Iterable[Message]) -> Iterable[Message]:
             msg = list(messages)[0]
+            recordset = None
             if error_reply:
-                recordset = None
-                ret = msg.create_error_reply(ERROR_REPLY)
+                pass
             elif isinstance(res, GetParametersRes):
                 recordset = compat.getparametersres_to_recordset(res, True)
             elif isinstance(res, GetPropertiesRes):
@@ -248,10 +248,11 @@ class DriverClientProxyTestCase(unittest.TestCase):
                 recordset = compat.fitres_to_recordset(res, True)
             elif isinstance(res, EvaluateRes):
                 recordset = compat.evaluateres_to_recordset(res)
-            else:
-                raise ValueError(f"Unsupported type: {type(res)}")
+
             if recordset is not None:
                 ret = msg.create_reply(recordset)
+            else:
+                ret = msg.create_error_reply(ERROR_REPLY)
 
             # Reply messages given the push message
             return [ret]
