@@ -36,7 +36,7 @@ class DPFedAvgFixed(Strategy):
     This class is deprecated and will be removed in a future release.
     """
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes
+    # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-positional-arguments
     def __init__(
         self,
         strategy: Strategy,
