@@ -542,6 +542,7 @@ def _run_fleet_api_grpc_adapter(
 
 
 # pylint: disable=import-outside-toplevel,too-many-arguments
+# pylint: disable=too-many-positional-arguments
 def _run_fleet_api_rest(
     host: str,
     port: int,

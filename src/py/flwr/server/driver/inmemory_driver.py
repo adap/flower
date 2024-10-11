@@ -82,7 +82,7 @@ class InMemoryDriver(Driver):
         self._init_run()
         return Run(**vars(cast(Run, self._run)))
 
-    def create_message(  # pylint: disable=too-many-arguments
+    def create_message(  # pylint: disable=too-many-arguments,R0917
         self,
         content: RecordSet,
         message_type: str,
