@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "authexample"
 version = "1.0.0"
-description = "Federated Learning with PyTorch and Flower (Quickstart Example)"
+description = "Federated Learning with PyTorch and authenticated Flower "
 license = "Apache-2.0"
 dependencies = [
     "flwr[simulation]>=1.11.0",
@@ -32,7 +32,8 @@ learning-rate = 0.1
 batch-size = 32
 
 [tool.flwr.federations]
-default = "local-simulation"
+default = "superexec"
 
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 10
+[tool.flwr.federations.superexec]
+address = "127.0.0.1:9093"
+root-certificates = "certificates/ca.crt"

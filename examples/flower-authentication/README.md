@@ -111,15 +111,20 @@ above. Don't forget to specify the correct client private and public keys for ea
 
 ## Run the Flower App
 
-With both the long-running server (SuperLink) and two clients (SuperNode) up and running, we can now run :
+With both the long-running server (SuperLink) and two clients (SuperNode) up and running, we can now start the SuperExec:
 
 ```bash
 flower-superexec \
-    --executor-config 'root-certificates=\"../certificates/ca.crt\"' \
     --ssl-ca-certfile certificates/ca.crt \
     --ssl-certfile certificates/server.pem \
     --ssl-keyfile certificates/server.key \
+    --executor-config '--executor-config 'root-certificates=\"certificates/ca.crt\"'' \
     --executor flwr.superexec.deployment:executor
 
-flower-server-app ./ --root-certificates certificates/ca.crt --superlink 127.0.0.1:9091
+```
+
+Then, we run the `flwr run` command:
+
+```bash
+flwr run . superexec
 ```
