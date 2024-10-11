@@ -4,19 +4,22 @@ dataset: [CIFAR-10]
 framework: [torch, torchvision]
 ---
 
-# Flower Authentication with PyTorch 🧪
+# Flower Federations with Authentication 🧪
 
-> 🧪 = This example covers experimental features that might change in future versions of Flower
-> Please consult the regular PyTorch code examples ([quickstart](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch), [advanced](https://github.com/adap/flower/tree/main/examples/advanced-pytorch)) to learn how to use Flower with PyTorch.
+> \[!NOTE\]
+> 🧪 = This example covers experimental features that might change in future versions of Flower.
+> Please consult the regular PyTorch examples ([quickstart](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch), [advanced](https://github.com/adap/flower/tree/main/examples/advanced-pytorch)) to learn how to use Flower with PyTorch.
 
-The following steps describe how to start a long-running Flower server (SuperLink) and a long-running Flower client (SuperNode) with authentication enabled.
+The following steps describe how to start a long-running Flower server (SuperLink+SuperExec) and a long-running Flower clients (SuperNode) with authentication enabled. The task is to train a simple CNN for image classification using PyTorch.
 
 ## Project Setup
 
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git _tmp && mv _tmp/examples/flower-authentication . && rm -rf _tmp && cd flower-authentication
+git clone --depth=1 https://github.com/adap/flower.git _tmp \
+        && mv _tmp/examples/flower-authentication . \
+        && rm -rf _tmp && cd flower-authentication
 ```
 
 This will create a new directory called `flower-authentication` with the following project structure:
@@ -67,8 +70,9 @@ Starting long-running Flower server-side components (SuperLink+SuperExec) and en
 `--auth-list-public-keys` containing file path to the known `client_public_keys.csv`, `--auth-superlink-private-key`
 containing file path to the SuperLink's private key `server_credentials`, and `--auth-superlink-public-key` containing file path to the SuperLink's public key `server_credentials.pub`. Notice that you can only enable authentication with a secure TLS connection.
 
+Let's first launche the `SuperLink`:
+
 ```bash
-# Launch the Superlink
 flower-superlink \
     --ssl-ca-certfile certificates/ca.crt \
     --ssl-certfile certificates/server.pem \
