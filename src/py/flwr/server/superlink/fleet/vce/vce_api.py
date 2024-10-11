@@ -172,6 +172,7 @@ def put_taskres_into_state(
             pass
 
 
+# pylint: disable=too-many-positional-arguments
 def run_api(
     app_fn: Callable[[], ClientApp],
     backend_fn: Callable[[], Backend],
@@ -251,7 +252,7 @@ def run_api(
 
 
 # pylint: disable=too-many-arguments,unused-argument,too-many-locals,too-many-branches
-# pylint: disable=too-many-statements
+# pylint: disable=too-many-statements,too-many-positional-arguments
 def start_vce(
     backend_name: str,
     backend_config_json_stream: str,

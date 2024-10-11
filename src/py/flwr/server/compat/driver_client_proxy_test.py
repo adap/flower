@@ -200,7 +200,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
         )
         self._common_assertions(ins)
 
-    def _create_message_dummy(  # pylint: disable=R0913
+    def _create_message_dummy(  # pylint: disable=R0913,too-many-positional-arguments
         self,
         content: RecordSet,
         message_type: str,
