@@ -59,14 +59,16 @@ Create Flower Dev Environment
    last point where all packages are installed.
 
 - If you don't have ``pyenv`` installed, the following script that will install it, set
-  it up, and create the virtual environment (with ``Python 3.9.20`` by default):
+  it up, and create the virtual environment (with :substitution-code:`Python
+  |python_full_version|` by default):
 
   ::
 
       $ ./dev/setup-defaults.sh <version> # once completed, run the bootstrap script
 
 - If you already have ``pyenv`` installed (along with the ``pyenv-virtualenv`` plugin),
-  you can use the following convenience script (with ``Python 3.9.20`` by default):
+  you can use the following convenience script (with :substitution-code:`Python
+  |python_full_version|` by default):
 
   ::
 
@@ -89,10 +91,11 @@ list. The following scripts are amongst the most important ones:
 Create/Delete Virtual Environment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-::
+.. code-block:: shell
+    :substitutions:
 
-    $ ./dev/venv-create.sh <version> # Default is 3.9.20
-    $ ./dev/venv-delete.sh <version> # Default is 3.9.20
+    $ ./dev/venv-create.sh <version> # Default is |python_full_version|
+    $ ./dev/venv-delete.sh <version> # Default is |python_full_version|
 
 Compile ProtoBuf Definitions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
