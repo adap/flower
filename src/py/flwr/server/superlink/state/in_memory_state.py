@@ -116,6 +116,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         # Return TaskIns
         return task_ins_list
 
+    # pylint: disable=R0911
     def store_task_res(self, task_res: TaskRes) -> Optional[UUID]:
         """Store one TaskRes."""
         # Validate task
@@ -128,6 +129,17 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             # Check if the TaskIns it is replying to exists and is valid
             task_ins_id = task_res.task.ancestry[0]
             task_ins = self.task_ins_store.get(UUID(task_ins_id))
+
+            # Ensure that the consumer_id of taskIns matches the producer_id of taskRes.
+            if (
+                task_ins
+                and task_res
+                and not (
+                    task_ins.task.consumer.anonymous or task_res.task.producer.anonymous
+                )
+                and task_ins.task.consumer.node_id != task_res.task.producer.node_id
+            ):
+                return None
 
             if task_ins is None:
                 log(ERROR, "TaskIns with task_id %s does not exist.", task_ins_id)
@@ -178,11 +190,8 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         # Return the new task_id
         return task_id
 
-    def get_task_res(self, task_ids: set[UUID], limit: Optional[int]) -> list[TaskRes]:
+    def get_task_res(self, task_ids: set[UUID]) -> list[TaskRes]:
         """Get all TaskRes that have not been delivered yet."""
-        if limit is not None and limit < 1:
-            raise AssertionError("`limit` must be >= 1")
-
         with self.lock:
             # Find TaskRes that were not delivered yet
             task_res_list: list[TaskRes] = []
@@ -205,13 +214,9 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                 if reply_to in task_ids and task_res.task.delivered_at == "":
                     task_res_list.append(task_res)
                     replied_task_ids.add(reply_to)
-                if limit and len(task_res_list) == limit:
-                    break
 
             # Check if the node is offline
             for task_id in task_ids - replied_task_ids:
-                if limit and len(task_res_list) == limit:
-                    break
                 task_ins = self.task_ins_store.get(task_id)
                 if task_ins is None:
                     continue
