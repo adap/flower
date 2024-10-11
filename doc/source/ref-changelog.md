@@ -10,7 +10,7 @@
 
 - **Improve `flwr new` templates** ([#4291](https://github.com/adap/flower/pull/4291), [#4292](https://github.com/adap/flower/pull/4292), [#4293](https://github.com/adap/flower/pull/4293), [#4294](https://github.com/adap/flower/pull/4294), [#4295](https://github.com/adap/flower/pull/4295))
 
-  The `flwr new` command templates for MLX, NumPy, sklearn, JAX, and torch have been updated to improve usability and consistency across frameworks. 
+  The `flwr new` command templates for MLX, NumPy, sklearn, JAX, and torch have been updated to improve usability and consistency across frameworks.
 
 - **Migrate ID Handling to Unsigned 64-bit Integers** ([#4170](https://github.com/adap/flower/pull/4170), [#4237](https://github.com/adap/flower/pull/4237), [#4243](https://github.com/adap/flower/pull/4243))
 
@@ -20,117 +20,55 @@
 
   A new Flower architecture explainer page with a step-by-step guide has been added to the `EXPLANATIONS` section of the Flower documentation. Feel free to check it out if you're interested!
 
+- **Introduce FedRep baseline** ([#3790](https://github.com/adap/flower/pull/3790))
+
+  FedRep is an FL algorithm that learns shared data representations across clients while allowing each to maintain personalized local models, balancing collaboration and individual adaptation. Read all the details in their paper: "Exploiting Shared Representations for Personalized Federated Learning" ([arxiv](https://arxiv.org/abs/2102.07078))
+
+- **Enhance Dataset Functionality and Documentation** ([#4114](https://github.com/adap/flower/pull/4114), [#4266](https://github.com/adap/flower/pull/4266), [#4260](https://github.com/adap/flower/pull/4260), [#4109](https://github.com/adap/flower/pull/4109), [#4253](https://github.com/adap/flower/pull/4253), [#4111](https://github.com/adap/flower/pull/4111), [#4255](https://github.com/adap/flower/pull/4255), [#4104](https://github.com/adap/flower/pull/4104))
+
+  A series of new partitioning features like `IdToSizeFncPartitioner` is introduced to Flower Datasets and a new examples section is added to the docstring for concatenating divisions. Fixed several issues including pathological partitioner behavior with string labels and plotting scale for absolute sizes. Enhanced error messages for incorrect dataset types. Additionally, we’ve embedded a Hugging Face Space directly in the documentation, offering a more interactive experience—be sure to explore it!
+
+- **Improve FlowerTune template and LLM evaluation pipelines** ([#4286](https://github.com/adap/flower/pull/4286), [#3769](https://github.com/adap/flower/pull/3769), [#4272](https://github.com/adap/flower/pull/4272), [#4257](https://github.com/adap/flower/pull/4257), [#4220](https://github.com/adap/flower/pull/4220), [#4282](https://github.com/adap/flower/pull/4282), [#4171](https://github.com/adap/flower/pull/4171), [#4228](https://github.com/adap/flower/pull/4228), [#4258](https://github.com/adap/flower/pull/4258), [#4296](https://github.com/adap/flower/pull/4296), [#4287](https://github.com/adap/flower/pull/4287), [#4217](https://github.com/adap/flower/pull/4217), [#4249](https://github.com/adap/flower/pull/4249), [#4324](https://github.com/adap/flower/pull/4324), [#4219](https://github.com/adap/flower/pull/4219))
+
+  Refined evaluation pipelines, metrics, and documentation for the upcoming FlowerTune LLM Leaderboard across multiple domains including Finance, Medical, and general NLP. Stay tuned for the official launch—we welcome all FL enthusiasts to participate in this exciting challenge!
+
+- **Enhance Docker Support and Documentation** ([#4191](https://github.com/adap/flower/pull/4191), [#4251](https://github.com/adap/flower/pull/4251), [#4190](https://github.com/adap/flower/pull/4190), [#3928](https://github.com/adap/flower/pull/3928), [#4298](https://github.com/adap/flower/pull/4298), [#4192](https://github.com/adap/flower/pull/4192), [#4136](https://github.com/adap/flower/pull/4136), [#4187](https://github.com/adap/flower/pull/4187), [#4261](https://github.com/adap/flower/pull/4261), [#4177](https://github.com/adap/flower/pull/4177), [#4176](https://github.com/adap/flower/pull/4176), [#4189](https://github.com/adap/flower/pull/4189), [#4297](https://github.com/adap/flower/pull/4297), [#4226](https://github.com/adap/flower/pull/4226))
+
+  Upgraded Ubuntu base image to 24.04, added SBOM and gcc to Docker images, and comprehensively updated Docker documentation including quickstart guides and distributed Docker Compose instructions.
+
+- **Introduce Flower glossary** ([#4165](https://github.com/adap/flower/pull/4165), [#4235](https://github.com/adap/flower/pull/4235))
+
+  Added a Federated Learning glossary in the Flower repository, located under the `flower/glossary/` folder. This resource aims to provide clear definitions and explanations of key FL concepts. Community contributions are highly welcomed to help expand and refine this knowledge base—feel free to check it out!
+
+- **Implement Message Time-to-Live (TTL)** ([#3620](https://github.com/adap/flower/pull/3620), [#3596](https://github.com/adap/flower/pull/3596), [#3615](https://github.com/adap/flower/pull/3615), [#3609](https://github.com/adap/flower/pull/3609), [#3635](https://github.com/adap/flower/pull/3635))
+
+  Added comprehensive TTL support for messages in Flower's SuperLink. Messages are now automatically expired and cleaned up based on configurable TTL values, available through the low-level API.
+
+- **Improve FAB handling** ([#4303](https://github.com/adap/flower/pull/4303), [#4264](https://github.com/adap/flower/pull/4264), [#4305](https://github.com/adap/flower/pull/4305), [#4304](https://github.com/adap/flower/pull/4304))
+
+  An 8-character hash is now appended to the FAB file name. The `flwr install` command installs FABs with a more flattened folder structure, reducing it from 3 levels to 1.
+
 - **Update documentation** ([#3341](https://github.com/adap/flower/pull/3341), [#3338](https://github.com/adap/flower/pull/3338), [#3927](https://github.com/adap/flower/pull/3927), [#4152](https://github.com/adap/flower/pull/4152), [#4151](https://github.com/adap/flower/pull/4151), [#3993](https://github.com/adap/flower/pull/3993))
 
   Updated quickstart tutorials (PyTorch Lightning, TensorFlow, Hugging Face, Fastai) to use the new `flwr run` command and removed default title from documentation base template. A new blockchain example has been added to FAQ.
 
-- **Drop Python 3.8 Support and Update Minimum Version to 3.9** ([#4180](https://github.com/adap/flower/pull/4180), [#4213](https://github.com/adap/flower/pull/4213), [#4193](https://github.com/adap/flower/pull/4193), [#4199](https://github.com/adap/flower/pull/4199), [#4196](https://github.com/adap/flower/pull/4196), [#4195](https://github.com/adap/flower/pull/4195), [#4198](https://github.com/adap/flower/pull/4198), [#4194](https://github.com/adap/flower/pull/4194))
+- **Update example projects** ([#3716](https://github.com/adap/flower/pull/3716), [#4007](https://github.com/adap/flower/pull/4007), [#4130](https://github.com/adap/flower/pull/4130), [#4234](https://github.com/adap/flower/pull/4234), [#4206](https://github.com/adap/flower/pull/4206), [#4188](https://github.com/adap/flower/pull/4188), [#4247](https://github.com/adap/flower/pull/4247))
 
-  Dropped support for Python 3.8 across the framework and datasets, updated CI and documentation to use Python 3.9 as the minimum supported version. Flower now supports Python 3.9 to 3.11.
+  Refreshed multiple example projects including vertical FL, PyTorc (advanced), Pandas, Secure Aggregation, and XGBoost examples. Optimized Hugging Face quickstart with a smaller language model and removed legacy simulation examples.
 
-Add FedRep baseline
-- **feat(baselines) Add FedRep Baseline** ([#3790](https://github.com/adap/flower/pull/3790))
+- **Update translations** ([#4070](https://github.com/adap/flower/pull/4070), [#4316](https://github.com/adap/flower/pull/4316), [#4252](https://github.com/adap/flower/pull/4252), [#4256](https://github.com/adap/flower/pull/4256), [#4210](https://github.com/adap/flower/pull/4210), [#4263](https://github.com/adap/flower/pull/4263), [#4259](https://github.com/adap/flower/pull/4259))
 
-Dataset
-- **feat(datasets) Improve error message for incorrect dataset type** ([#4114](https://github.com/adap/flower/pull/4114))
-- **docs(datasets) Move out the HF space embedding to the bottom of the page** ([#4266](https://github.com/adap/flower/pull/4266))
-- **docs(datasets) Embed HF Space in the flwr-datasets docs** ([#4260](https://github.com/adap/flower/pull/4260))
-- **refactor(datasets) Rename SizePartitioner to IdToSizeFncPartitioner** ([#4109](https://github.com/adap/flower/pull/4109))
-- **fix(datasets) Fix pathological partitioner on string labels** ([#4253](https://github.com/adap/flower/pull/4253))
-- **feat(datasets) Add SizePartitioner** ([#4111](https://github.com/adap/flower/pull/4111))
-- **fix(datasets) Fix the scale of value axis when plotting in absolute sizes** ([#4255](https://github.com/adap/flower/pull/4255))
-- **feat(datasets) Add examples section to concatenate divisions** ([#4104](https://github.com/adap/flower/pull/4104))
-
-LLM leaderboard
-- **refactor(benchmarks) Update evaluation accuracy for general NLP challenge** ([#4286](https://github.com/adap/flower/pull/4286))
-- **feat(benchmarks) Add LLM evaluation pipeline for Finance challenge** ([#3769](https://github.com/adap/flower/pull/3769))
-- **refactor(benchmarks) Update FlowerTune LLM Leaderboard instructions** ([#4272](https://github.com/adap/flower/pull/4272))
-- **fix(framework) Fix cpu/gpu specification in FlowerTune readme template** ([#4257](https://github.com/adap/flower/pull/4257))
-- **refactor(framework) Update dependency and fix a print issue for FlowerTune template** ([#4220](https://github.com/adap/flower/pull/4220))
-- **refactor(benchmarks) Add new evaluation metrics for general NLP challenge** ([#4282](https://github.com/adap/flower/pull/4282))
-- **fix(benchmarks) Update medical evaluation readme** ([#4171](https://github.com/adap/flower/pull/4171))
-- **refactor(benchmarks) Update llm leaderboard Readmes** ([#4228](https://github.com/adap/flower/pull/4228))
-- **refactor(benchmarks) Update Flower Discuss info in FlowerTune LLM Leaderboard readme** ([#4258](https://github.com/adap/flower/pull/4258))
-- **fix(benchmarks) Update LLM Leaderboard readme** ([#4296](https://github.com/adap/flower/pull/4296))
-- **fix(benchmarks) Update dependencies for LLM evaluation pipelines** ([#4287](https://github.com/adap/flower/pull/4287))
-- **refactor(framework) Update get/set parameter functions for FlowerTune template** ([#4217](https://github.com/adap/flower/pull/4217))
-- **refactor(benchmarks) Update llm leaderboard readmes** ([#4249](https://github.com/adap/flower/pull/4249))
-
-Update example projects
-- **feat(examples) Update vertical-fl example** ([#3716](https://github.com/adap/flower/pull/3716))
-- **refactor(examples) Update `quickstart-pandas` example** ([#4007](https://github.com/adap/flower/pull/4007))
-- **refactor(examples) Update `advanced-pytorch` example** ([#4130](https://github.com/adap/flower/pull/4130))
-- **refactor(examples) Update get/set parameters functions for `flowertune-llm` example** ([#4219](https://github.com/adap/flower/pull/4219))
-- **refactor(examples) Update XGBoost comprehensive example** ([#4234](https://github.com/adap/flower/pull/4234))
-- **refactor(examples) Make `quickstart-huggingface`use a smaller LM** ([#4206](https://github.com/adap/flower/pull/4206))
-- **break(examples) Remove `simulation-` examples** ([#4188](https://github.com/adap/flower/pull/4188))
-- **fix(examples:skip) Specify `min_fit_clients` in `FedAvg` in the Secure Aggregation example** ([#4247](https://github.com/adap/flower/pull/4247))
-
-Improve FAB handling
-- **feat(framework) Add FAB constants** ([#4303](https://github.com/adap/flower/pull/4303))
-- **feat(framework) Add `GetFab` to node authentication** ([#4264](https://github.com/adap/flower/pull/4264))
-- **feat(framework) Add FAB hash to `load_client_app_fn`** ([#4305](https://github.com/adap/flower/pull/4305))
-- **feat(framework) Add FAB hash to `flwr build/install`** ([#4304](https://github.com/adap/flower/pull/4304))
-
-Update translations
-- **docs(framework:skip) Update source for translations (automated)** ([#4316](https://github.com/adap/flower/pull/4316))
-- **docs(framework:skip) Update source texts for translations (automated)** ([#4252](https://github.com/adap/flower/pull/4252))
-- **docs(framework:skip) Update source for translations (automated)** ([#4256](https://github.com/adap/flower/pull/4256))
-<!-- korean translation -->
-- **docs(framework) Add latest Hosted Weblate translation updates** ([#4070](https://github.com/adap/flower/pull/4070))
-- **docs(framework:skip) Update translations base text** ([#4210](https://github.com/adap/flower/pull/4210))
-- **docs(framework:skip) Update source for translations (automated)** ([#4263](https://github.com/adap/flower/pull/4263))
-
-Docker
-- **feat(framework:skip) Update default flwr version in Docker Compose to 1.11.1** ([#4191](https://github.com/adap/flower/pull/4191))
-- **docs(framework:skip) Update source for translations (automated)** ([#4259](https://github.com/adap/flower/pull/4259))
-- **docs(framework:skip) Update docker quickstart example table** ([#4251](https://github.com/adap/flower/pull/4251))
-- **docs(framework:skip) Add quickstarts to Docker READMEs** ([#4190](https://github.com/adap/flower/pull/4190))
-- **docs(framework:skip) Add docs for distributed Docker Compose guide** ([#3928](https://github.com/adap/flower/pull/3928))
-- **build(deps): bump docker/setup-buildx-action from 3.6.1 to 3.7.1** ([#4298](https://github.com/adap/flower/pull/4298))
-- **feat(framework:skip) Add Docker Hub badge** ([#4192](https://github.com/adap/flower/pull/4192))
-- **feat(framework:skip) Add SBOM to Docker images** ([#4136](https://github.com/adap/flower/pull/4136))
-- **feat(framework:skip) Add gcc in Docker compose setup** ([#4187](https://github.com/adap/flower/pull/4187))
-- **fix(framework:skip) Fix Docker Compose example** ([#4261](https://github.com/adap/flower/pull/4261))
-- **docs(framework:skip) Add unstable tag to Docker READMEs** ([#4177](https://github.com/adap/flower/pull/4177))
-- **docs(framework:skip) Add 1.11.1 tag to Docker READMEs** ([#4176](https://github.com/adap/flower/pull/4176))
-- **docs(framework) Add quickstart examples Docker compose guide** ([#4189](https://github.com/adap/flower/pull/4189))
-- **fix(framework:skip) Update Ubuntu versions in Docker READMEs** ([#4297](https://github.com/adap/flower/pull/4297))
-- **feat(framework) Upgrade Ubuntu base image to version 24.04** ([#4226](https://github.com/adap/flower/pull/4226))
-
-Introduce Flower glossary
-- **docs(glossary) Create a Federated Learning glossary** ([#4165](https://github.com/adap/flower/pull/4165))
-- **docs(glossary) Add Flower Datasets glossary entry** ([#4235](https://github.com/adap/flower/pull/4235))
-
-Support Message TTL
-- **feat(framework) Check TTL when retrieving TaskIns** ([#3620](https://github.com/adap/flower/pull/3620))
-- **feat(framework) Verify message TTL when storing TaskIns and TaskRes** ([#3596](https://github.com/adap/flower/pull/3596))
-- **feat(framework) Limit TaskRes TTL when saving it** ([#3615](https://github.com/adap/flower/pull/3615))
-- **feat(framework) Verify the TaskIns TTL when saving TaskRes** ([#3609](https://github.com/adap/flower/pull/3609))
-- **feat(framework) Check TTL when retrieving TaskRes** ([#3635](https://github.com/adap/flower/pull/3635))
-
-Bugfixes
-- **fix(framework:skip) Fix the `SqliteState.get_run` method** ([#4222](https://github.com/adap/flower/pull/4222))
-- **fix(framework:skip) Check `consumer_id` and `producer_id` when saving TaskRes** ([#4313](https://github.com/adap/flower/pull/4313))
-- **fix(framework) Fix `aggregate_inplace()` in `strategy.py`** ([#3936](https://github.com/adap/flower/pull/3936))
-- **fix(framework) Pass Flower path to the call to `start_client_internal()` in SuperNode** ([#4278](https://github.com/adap/flower/pull/4278))
-- **fix(framework:skip) Update config utils to flatten overrides** ([#4319](https://github.com/adap/flower/pull/4319))
-
+- **Bugfixes** ([#4222](https://github.com/adap/flower/pull/4222), [#4313](https://github.com/adap/flower/pull/4313), [#3936](https://github.com/adap/flower/pull/3936), [#4278](https://github.com/adap/flower/pull/4278), [#4319](https://github.com/adap/flower/pull/4319))
 
 - **Improve CI pipeline and development tools** ([#4208](https://github.com/adap/flower/pull/4208), [#4225](https://github.com/adap/flower/pull/4225), [#4314](https://github.com/adap/flower/pull/4314), [#4174](https://github.com/adap/flower/pull/4174), [#4203](https://github.com/adap/flower/pull/4203), [#4274](https://github.com/adap/flower/pull/4274), [#3154](https://github.com/adap/flower/pull/3154), [#4201](https://github.com/adap/flower/pull/4201), [#4268](https://github.com/adap/flower/pull/4268), [#4254](https://github.com/adap/flower/pull/4254), [#3990](https://github.com/adap/flower/pull/3990), [#4212](https://github.com/adap/flower/pull/4212), [#2938](https://github.com/adap/flower/pull/2938))
 
 - **General improvements** ([#4239](https://github.com/adap/flower/pull/4239), [4276](https://github.com/adap/flower/pull/4276), [4204](https://github.com/adap/flower/pull/4204), [4184](https://github.com/adap/flower/pull/4184), [4227](https://github.com/adap/flower/pull/4227), [4183](https://github.com/adap/flower/pull/4183), [4202](https://github.com/adap/flower/pull/4202), [4250](https://github.com/adap/flower/pull/4250), [4267](https://github.com/adap/flower/pull/4267), [4246](https://github.com/adap/flower/pull/4246), [4240](https://github.com/adap/flower/pull/4240), [4265](https://github.com/adap/flower/pull/4265), [4238](https://github.com/adap/flower/pull/4238), [4275](https://github.com/adap/flower/pull/4275), [4318](https://github.com/adap/flower/pull/4318), [#4178](https://github.com/adap/flower/pull/4178), [#4315](https://github.com/adap/flower/pull/4315), [#4241](https://github.com/adap/flower/pull/4241), [#4289](https://github.com/adap/flower/pull/4289), [#4290](https://github.com/adap/flower/pull/4290), [#4181](https://github.com/adap/flower/pull/4181))
 
-<!--
-The following are added to **General improvements**
-- **refactor(framework) Move all address constants to `flwr.common.constant`** ([#4178](https://github.com/adap/flower/pull/4178))
-- **fix(framework:skip) Fix parameters and returns in docstrings** ([#4315](https://github.com/adap/flower/pull/4315))
-- **feat(framework) Add new RPCs to `Control` service** ([#4241](https://github.com/adap/flower/pull/4241))
-- **refactor(framework) Make `DriverClientProxy` use driver's `send_and_receive`** ([#4289](https://github.com/adap/flower/pull/4289))
-- **feat(framework) Introduce `pull_interval` in `InMemoryDriver`** ([#4290](https://github.com/adap/flower/pull/4290))
-- **docs(framework:skip) Update stable version** ([#4181](https://github.com/adap/flower/pull/4181)) -->
+### Incompatible changes
 
+- **Drop Python 3.8 Support and Update Minimum Version to 3.9** ([#4180](https://github.com/adap/flower/pull/4180), [#4213](https://github.com/adap/flower/pull/4213), [#4193](https://github.com/adap/flower/pull/4193), [#4199](https://github.com/adap/flower/pull/4199), [#4196](https://github.com/adap/flower/pull/4196), [#4195](https://github.com/adap/flower/pull/4195), [#4198](https://github.com/adap/flower/pull/4198), [#4194](https://github.com/adap/flower/pull/4194))
 
+  Dropped support for Python 3.8 across the framework and datasets, updated CI and documentation to use Python 3.9 as the minimum supported version. Flower now supports Python 3.9 to 3.11.
 
 ## v1.11.1 (2024-09-11)
 
