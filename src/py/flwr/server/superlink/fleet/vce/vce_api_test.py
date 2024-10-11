@@ -170,7 +170,7 @@ def _autoresolve_app_dir(rel_client_app_dir: str = "backend") -> str:
     return str(rel_app_dir.parent / rel_client_app_dir)
 
 
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-positional-arguments
 def start_and_shutdown(
     backend: str = "ray",
     client_app_attr: Optional[str] = None,
