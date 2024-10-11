@@ -11,7 +11,6 @@ from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
 
 warnings.filterwarnings("ignore", category=UserWarning)
-logging.getLogger("opacus").setLevel(logging.ERROR)
 
 
 class FlowerClient(NumPyClient):
