@@ -8,7 +8,7 @@ version = "1.0.0"
 description = ""
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.10.0",
+    "flwr[simulation]>=1.11.1",
     "flwr-datasets[vision]>=0.3.0",
     "scikit-learn>=1.1.1",
 ]
@@ -25,6 +25,8 @@ clientapp = "$import_name.client_app:app"
 
 [tool.flwr.app.config]
 num-server-rounds = 3
+penalty = "l2"
+local-epochs = 1
 
 [tool.flwr.federations]
 default = "local-simulation"
