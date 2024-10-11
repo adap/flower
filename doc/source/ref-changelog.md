@@ -1,6 +1,12 @@
 # Changelog
 
-## Unreleased
+## v1.12.0 (2024-10-11)
+
+### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Adam Narozniak`, `Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Heng Pan`, `Javier`, `Jiahao Tan`, `Julian Rußmeyer`, `Mohammad Naseri`, `Ray Sun`, `Robert Steiner`, `Yan Gao`, `xiliguguagua` <!---TOKEN_v1.12.0-->
 
 ### What's new?
 
