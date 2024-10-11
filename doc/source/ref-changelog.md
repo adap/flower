@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.12.0 (2024-10-11)
+## v1.12.0 (2024-10-14)
 
 ### Thanks to our contributors
 
