@@ -6,7 +6,7 @@
 
 We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
 
-`Adam Narozniak`, `Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Heng Pan`, `Javier`, `Jiahao Tan`, `Julian Rußmeyer`, `Mohammad Naseri`, `Ray Sun`, `Robert Steiner`, `Yan Gao`, `xiliguguagua` <!---TOKEN_v1.12.0-->
+`Adam Narozniak`, `Audris`, `Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Heng Pan`, `Javier`, `Jiahao Tan`, `Julian Rußmeyer`, `Mohammad Naseri`, `Ray Sun`, `Robert Steiner`, `Yan Gao`, `xiliguguagua` <!---TOKEN_v1.12.0-->
 
 ### What's new?
 
@@ -54,7 +54,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Updated quickstart tutorials (PyTorch Lightning, TensorFlow, Hugging Face, Fastai) to use the new `flwr run` command and removed default title from documentation base template. A new blockchain example has been added to FAQ.
 
-- **Update example projects** ([#3716](https://github.com/adap/flower/pull/3716), [#4007](https://github.com/adap/flower/pull/4007), [#4130](https://github.com/adap/flower/pull/4130), [#4234](https://github.com/adap/flower/pull/4234), [#4206](https://github.com/adap/flower/pull/4206), [#4188](https://github.com/adap/flower/pull/4188), [#4247](https://github.com/adap/flower/pull/4247))
+- **Update example projects** ([#3716](https://github.com/adap/flower/pull/3716), [#4007](https://github.com/adap/flower/pull/4007), [#4130](https://github.com/adap/flower/pull/4130), [#4234](https://github.com/adap/flower/pull/4234), [#4206](https://github.com/adap/flower/pull/4206), [#4188](https://github.com/adap/flower/pull/4188), [#4247](https://github.com/adap/flower/pull/4247), [#4331](https://github.com/adap/flower/pull/4331))
 
   Refreshed multiple example projects including vertical FL, PyTorch (advanced), Pandas, Secure Aggregation, and XGBoost examples. Optimized Hugging Face quickstart with a smaller language model and removed legacy simulation examples.
 
