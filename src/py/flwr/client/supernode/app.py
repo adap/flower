@@ -48,13 +48,12 @@ from ..clientapp.utils import get_load_client_app_fn
 
 def run_supernode() -> None:
     """Run Flower SuperNode."""
+    args = _parse_args_run_supernode().parse_args()
+    _warn_deprecated_server_arg(args)
+
     log(INFO, "Starting Flower SuperNode")
 
     event(EventType.RUN_SUPERNODE_ENTER)
-
-    args = _parse_args_run_supernode().parse_args()
-
-    _warn_deprecated_server_arg(args)
 
     root_certificates = _get_certificates(args)
     load_fn = get_load_client_app_fn(
@@ -178,14 +177,13 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         "--flwr-dir",
         default=None,
         help="""The path containing installed Flower Apps.
-    By default, this value is equal to:
+        If `--isolation` is set, use `$FLWR_HOME` or `$XDG_DATA_HOME` to specify the
+        directory instead. The default directory is:
 
         - `$FLWR_HOME/` if `$FLWR_HOME` is defined
         - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
         - `$HOME/.flwr/` in all other cases
-    . Note that if `--isolation` is used, setting a custom `flwr-dir` can only be done
-    via either `$FLWR_HOME` or `$XDG_DATA_HOME`.
-    """,
+        """,
     )
     parser.add_argument(
         "--isolation",
