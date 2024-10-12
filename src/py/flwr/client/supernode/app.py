@@ -183,6 +183,8 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         - `$FLWR_HOME/` if `$FLWR_HOME` is defined
         - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
         - `$HOME/.flwr/` in all other cases
+    . Note that if `--isolation` is used, setting a custom `flwr-dir` can only be done
+    via either `$FLWR_HOME` or `$XDG_DATA_HOME`.
     """,
     )
     parser.add_argument(
