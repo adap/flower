@@ -56,6 +56,14 @@ def run_supernode() -> None:
 
     _warn_deprecated_server_arg(args)
 
+    # Check if both `--flwr-dir` and `--isolation` were set
+    if args.flwr_dir is not None and args.isolation is not None:
+        log(
+            WARN,
+            "Both `--flwr-dir` and `--isolation` were specified. "
+            "Ignoring `--flwr-dir`.",
+        )
+
     root_certificates = _get_certificates(args)
     load_fn = get_load_client_app_fn(
         default_app_ref="",
