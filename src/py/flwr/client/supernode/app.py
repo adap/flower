@@ -177,8 +177,7 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         "--flwr-dir",
         default=None,
         help="""The path containing installed Flower Apps.
-        If `--isolation` is set, use `$FLWR_HOME` or `$XDG_DATA_HOME` to specify the
-        directory instead. The default directory is:
+        The default directory is:
 
         - `$FLWR_HOME/` if `$FLWR_HOME` is defined
         - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
