@@ -60,43 +60,43 @@ With default arguments you will see an output like this one:
 
 .. code-block:: shell
 
-     Loading project configuration...
-     Success
-     INFO :      Starting Flower ServerApp, config: num_rounds=3, no round_timeout
-     INFO :
-     INFO :      [INIT]
-     INFO :      Requesting initial parameters from one random client
-     INFO :      Received initial parameters from one random client
-     INFO :      Starting evaluation of initial global parameters
-     INFO :      Evaluation returned no results (`None`)
-     INFO :
-     INFO :      [ROUND 1]
-     INFO :      configure_fit: strategy sampled 10 clients (out of 10)
-     INFO :      aggregate_fit: received 10 results and 0 failures
-     WARNING :   No fit_metrics_aggregation_fn provided
-     INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
-     INFO :      aggregate_evaluate: received 10 results and 0 failures
-     WARNING :   No evaluate_metrics_aggregation_fn provided
-     INFO :
-     INFO :      [ROUND 2]
-     INFO :      configure_fit: strategy sampled 10 clients (out of 10)
-     INFO :      aggregate_fit: received 10 results and 0 failures
-     INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
-     INFO :      aggregate_evaluate: received 10 results and 0 failures
-     INFO :
-     INFO :      [ROUND 3]
-     INFO :      configure_fit: strategy sampled 10 clients (out of 10)
-     INFO :      aggregate_fit: received 10 results and 0 failures
-     INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
-     INFO :      aggregate_evaluate: received 10 results and 0 failures
-     INFO :
-     INFO :      [SUMMARY]
+    Loading project configuration...
+    Success
+    INFO :      Starting Flower ServerApp, config: num_rounds=3, no round_timeout
+    INFO :
+    INFO :      [INIT]
+    INFO :      Requesting initial parameters from one random client
+    INFO :      Received initial parameters from one random client
+    INFO :      Starting evaluation of initial global parameters
+    INFO :      Evaluation returned no results (`None`)
+    INFO :
+    INFO :      [ROUND 1]
+    INFO :      configure_fit: strategy sampled 10 clients (out of 10)
+    INFO :      aggregate_fit: received 10 results and 0 failures
+    WARNING :   No fit_metrics_aggregation_fn provided
+    INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
+    INFO :      aggregate_evaluate: received 10 results and 0 failures
+    WARNING :   No evaluate_metrics_aggregation_fn provided
+    INFO :
+    INFO :      [ROUND 2]
+    INFO :      configure_fit: strategy sampled 10 clients (out of 10)
+    INFO :      aggregate_fit: received 10 results and 0 failures
+    INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
+    INFO :      aggregate_evaluate: received 10 results and 0 failures
+    INFO :
+    INFO :      [ROUND 3]
+    INFO :      configure_fit: strategy sampled 10 clients (out of 10)
+    INFO :      aggregate_fit: received 10 results and 0 failures
+    INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
+    INFO :      aggregate_evaluate: received 10 results and 0 failures
+    INFO :
+    INFO :      [SUMMARY]
     INFO :      Run finished 3 round(s) in 19.41s
     INFO :          History (loss, distributed):
     INFO :                  round 1: 1.3447584261018466
     INFO :                  round 2: 0.9680018613482815
     INFO :                  round 3: 0.7667920399137523
-     INFO :
+    INFO :
 
 You can also override the parameters defined in the ``[tool.flwr.app.config]`` section
 in ``pyproject.toml`` like this:
