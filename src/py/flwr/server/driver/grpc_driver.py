@@ -27,23 +27,23 @@ from flwr.common.constant import DRIVER_API_DEFAULT_ADDRESS
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.serde import (
-    message_from_taskres,
-    message_to_taskins,
+    message_from_proto,
+    message_to_proto,
     user_config_from_proto,
 )
 from flwr.common.typing import Run
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     GetNodesResponse,
-    PullTaskResRequest,
-    PullTaskResResponse,
-    PushTaskInsRequest,
-    PushTaskInsResponse,
+    PullMessagesRequest,
+    PullMessagesResponse,
+    PushMessagesRequest,
+    PushMessagesResponse,
 )
 from flwr.proto.driver_pb2_grpc import DriverStub  # pylint: disable=E0611
+from flwr.proto.message_pb2 import Message as Message_pb  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
-from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 from .driver import Driver
 
@@ -209,20 +209,20 @@ class GrpcDriver(Driver):
         to the node specified in `dst_node_id`.
         """
         self._init_run()
-        # Construct TaskIns
-        task_ins_list: list[TaskIns] = []
+        # Construct Messages
+        message_proto_list: list[Message_pb] = []
         for msg in messages:
             # Check message
             self._check_message(msg)
-            # Convert Message to TaskIns
-            taskins = message_to_taskins(msg)
+            # Convert to proto
+            msg_proto = message_to_proto(msg)
             # Add to list
-            task_ins_list.append(taskins)
+            message_proto_list.append(msg_proto)
         # Call GrpcDriverStub method
-        res: PushTaskInsResponse = self._stub.PushTaskIns(
-            PushTaskInsRequest(task_ins_list=task_ins_list)
+        res: PushMessagesResponse = self._stub.PushMessages(
+            PushMessagesRequest(messages_list=message_proto_list)
         )
-        return list(res.task_ids)
+        return list(res.message_ids)
 
     def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
         """Pull messages based on message IDs.
@@ -232,11 +232,11 @@ class GrpcDriver(Driver):
         """
         self._init_run()
         # Pull TaskRes
-        res: PullTaskResResponse = self._stub.PullTaskRes(
-            PullTaskResRequest(node=self.node, task_ids=message_ids)
+        res: PullMessagesResponse = self._stub.PullMessages(
+            PullMessagesRequest(node=self.node, message_ids=message_ids)
         )
-        # Convert TaskRes to Message
-        msgs = [message_from_taskres(taskres) for taskres in res.task_res_list]
+        # Convert Message from Protobuf representation
+        msgs = [message_from_proto(msg_proto) for msg_proto in res.messages_list]
         return msgs
 
     def send_and_receive(
