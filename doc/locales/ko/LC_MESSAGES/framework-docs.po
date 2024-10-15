@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-10 00:29+0000\n"
+"POT-Creation-Date: 2024-10-11 00:29+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -9777,6 +9777,7 @@ msgstr "서버에서 받은 (전역) 모델 파라미터와 로컬 평가 프로
 #: flwr.client.numpy_client.NumPyClient.fit
 #: flwr.client.numpy_client.NumPyClient.get_parameters
 #: flwr.client.numpy_client.NumPyClient.get_properties
+#: flwr.common.message.Message.create_error_reply
 #: flwr.common.message.Message.create_reply flwr.server.app.start_server
 #: flwr.server.client_manager.ClientManager.num_available
 #: flwr.server.client_manager.ClientManager.register
@@ -9809,6 +9810,7 @@ msgstr "로컬 데이터 세트의 손실 및 평가에 사용된 로컬 데이�
 #: flwr.client.client.Client.get_properties
 #: flwr.client.numpy_client.NumPyClient.get_parameters
 #: flwr.client.numpy_client.NumPyClient.get_properties
+#: flwr.common.message.Message.create_error_reply
 #: flwr.common.message.Message.create_reply flwr.server.app.start_server
 #: flwr.server.client_manager.ClientManager.num_available
 #: flwr.server.client_manager.ClientManager.register
@@ -9889,7 +9891,7 @@ msgstr "클라이언트앱"
 msgid "Bases: :py:class:`object`"
 msgstr "Bases: :py:class:`object`"
 
-#: flwr.client.app.start_client:41 flwr.client.app.start_numpy_client:36
+#: flwr.client.app.start_client:46 flwr.client.app.start_numpy_client:36
 #: flwr.client.client_app.ClientApp:4
 #: flwr.client.client_app.ClientApp.evaluate:4
 #: flwr.client.client_app.ClientApp.query:4
@@ -10454,6 +10456,14 @@ msgstr ""
 
 #: flwr.client.app.start_client:31 of
 msgid ""
+"Tuple containing the elliptic curve private key and public key for "
+"authentication from the cryptography library. Source: "
+"https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ec/ Used "
+"to establish an authenticated connection with the server."
+msgstr ""
+
+#: flwr.client.app.start_client:36 of
+msgid ""
 "The maximum number of times the client will try to connect to the server "
 "before giving up in case of a connection error. If set to None, there is "
 "no limit to the number of tries."
@@ -10461,7 +10471,7 @@ msgstr ""
 "연결 오류 발생 시 클라이언트가 서버 연결을 포기하기 전에 시도하는 최대 횟수입니다. None으로 설정하면 시도 횟수에 제한이 "
 "없습니다."
 
-#: flwr.client.app.start_client:35 of
+#: flwr.client.app.start_client:40 of
 msgid ""
 "The maximum duration before the client stops trying to connect to the "
 "server in case of connection error. If set to None, there is no limit to "
@@ -10470,15 +10480,15 @@ msgstr ""
 "연결 오류 발생 시 클라이언트가 서버에 대한 연결을 시도하지 않는 최대 기간입니다. None으로 설정하면 총 시간에는 제한이 "
 "없습니다."
 
-#: flwr.client.app.start_client:42 flwr.client.app.start_numpy_client:37 of
+#: flwr.client.app.start_client:47 flwr.client.app.start_numpy_client:37 of
 msgid "Starting a gRPC client with an insecure server connection:"
 msgstr "안전하지 않은 서버 연결로 gRPC 클라이언트 시작하기:"
 
-#: flwr.client.app.start_client:49 flwr.client.app.start_numpy_client:44 of
+#: flwr.client.app.start_client:54 flwr.client.app.start_numpy_client:44 of
 msgid "Starting an SSL-enabled gRPC client using system certificates:"
 msgstr "시스템 인증서를 사용하여 SSL 사용 gRPC 클라이언트를 시작합니다:"
 
-#: flwr.client.app.start_client:60 flwr.client.app.start_numpy_client:52 of
+#: flwr.client.app.start_client:65 flwr.client.app.start_numpy_client:52 of
 msgid "Starting an SSL-enabled gRPC client using provided certificates:"
 msgstr "제공된 인증서를 사용하여 SSL 지원 gRPC 클라이언트를 시작합니다:"
 
@@ -12556,6 +12566,10 @@ msgstr ""
 msgid "ttl = msg.meta.ttl - (reply.meta.created_at - msg.meta.created_at)"
 msgstr "ttl = msg.meta.ttl - (reply.meta.created_at - msg.meta.created_at)"
 
+#: flwr.common.message.Message.create_error_reply:12 of
+msgid "**message** -- A Message containing only the relevant error and metadata."
+msgstr ""
+
 #: flwr.common.message.Message.create_reply:3 of
 msgid ""
 "The method generates a new `Message` as a reply to this message. It "
@@ -13365,6 +13379,11 @@ msgstr "적어도 1개의 `num_clients` 가 사용 가능해질 때까지 기다
 msgid "**num_available** -- The number of currently available clients."
 msgstr ""
 
+#: flwr.server.client_manager.ClientManager.register:3 of
+#, fuzzy
+msgid "The ClientProxy of the Client to register."
+msgstr "클라이언트 모델의 민감도입니다."
+
 #: flwr.server.client_manager.ClientManager.register:6
 #: flwr.server.client_manager.SimpleClientManager.register:6 of
 msgid ""
@@ -13377,6 +13396,11 @@ msgstr ""
 #: flwr.server.client_manager.SimpleClientManager.unregister:3 of
 msgid "This method is idempotent."
 msgstr ""
+
+#: flwr.server.client_manager.ClientManager.unregister:5 of
+#, fuzzy
+msgid "The ClientProxy of the Client to unregister."
+msgstr "클라이언트 모델의 민감도입니다."
 
 #: ../../source/ref-api/flwr.server.Driver.rst:2
 msgid "Driver"
@@ -25765,7 +25789,7 @@ msgstr ""
 " 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|ac0a9766e26044d6aea222a829859b20|"
+msgid "|baacd07e7c04488fa55ece85d70485c9|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -25782,7 +25806,7 @@ msgstr ""
 " 바둑과 같은 게임을 하는 것일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|36cd6e248b1443ce8a82b5a025bba368|"
+msgid "|f212313cd5ec4f80acf2f8967ab35833|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -25805,7 +25829,7 @@ msgstr ""
 "부르리는 것을 듣는 스마트 스피커에서 비롯됩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|bf4fb057f4774df39e1dcb5c71fd804a|"
+msgid "|36da818ac9a04f3eb98c9d3c4473fcc3|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -25823,7 +25847,7 @@ msgstr ""
 "있습니다. 하지만 여러 조직이 모두 같은 작업을 위해 데이터를 생성하는 것일 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|71bb9f3c74c04f959b9bc1f02b736c95|"
+msgid "|f56ea557472b4306a0a8d43c9ee9d1d2|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -25841,7 +25865,7 @@ msgstr ""
 "서버는 데이터 센터 어딘가에 있을 수도 있고 클라우드 어딘가에 있을 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|7605632e1b0f49599ffacf841491fcfb|"
+msgid "|f6ef0a4c20094c84b0fd2af316708b09|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -25858,7 +25882,7 @@ msgstr ""
 " 우리가 기본적으로 사용해 온 머신러닝 방법입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|91b1b5a7d3484eb7a2350c1923f18307|"
+msgid "|c67eea2dee8146dcaf9f805f642fd20d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -25880,7 +25904,7 @@ msgstr ""
 "트래픽을 분석하는 것이 있습니다. 이러한 사례에서 모든 데이터는 자연스럽게 중앙 서버에 존재합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|5405ed430e4746e28b083b146fb71731|"
+msgid "|6b8a1c5339c04aafb1d910a107bf42d1|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -25897,7 +25921,7 @@ msgstr ""
 "좋은 모델을 훈련하기에 충분하지 않을 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|a389e87dab394eb48a8949aa2397687b|"
+msgid "|104390652f3442bd88c94f861339cbcc|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -26064,7 +26088,7 @@ msgstr ""
 "체크포인트에서 모델 매개변수를 초기화합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|89c412136a5146ec8dc32c0973729f12|"
+msgid "|e93b954b703442548007f82660d808c1|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -26091,7 +26115,7 @@ msgstr ""
 "개의 연결 노드만 사용합니다. 그 이유는 점점 더 많은 클라이언트 노드를 선택하면 학습의 효율성이 감소하기 때문입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|9503d3dc3a144e8aa295f8800cd8a766|"
+msgid "|09467ff6f63f4c249120daec95bb58ca|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -26118,7 +26142,7 @@ msgstr ""
 "데이터에서 한 단계 정도로 짧거나 몇 단계(mini-batches)에 불과할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|aadb59e29b9e445d8e239d9a8a7045cb|"
+msgid "|2fc6ba6dfb374e7aa5215c5a5ef925c0|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -26144,7 +26168,7 @@ msgstr ""
 "보냅니다. 보내는 모델 업데이트는 전체 모델 파라미터거나 로컬 교육 중에 누적된 그레디언트(gradient)일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|a7579ad7734347508e959d9e14f2f53d|"
+msgid "|6fe79a9b16fb4c729b7553ec67418453|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -26193,7 +26217,7 @@ msgstr ""
 "많은 영향을 미칩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|73d15dd1d4fc41678b2d54815503fbe8|"
+msgid "|95990766efd74f4da951ddf730592939|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -26312,7 +26336,7 @@ msgstr ""
 "사용자는 모든 워크로드, 머신러닝 프레임워크 및 모든 프로그래밍 언어를 통합할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|55472eef61274ba1b739408607e109df|"
+msgid "|e8e382002603465a8038a91a158d6021|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -29296,5 +29320,47 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|e7cec00a114b48359935c6510595132e|"
+#~ msgstr ""
+
+#~ msgid "|ac0a9766e26044d6aea222a829859b20|"
+#~ msgstr ""
+
+#~ msgid "|36cd6e248b1443ce8a82b5a025bba368|"
+#~ msgstr ""
+
+#~ msgid "|bf4fb057f4774df39e1dcb5c71fd804a|"
+#~ msgstr ""
+
+#~ msgid "|71bb9f3c74c04f959b9bc1f02b736c95|"
+#~ msgstr ""
+
+#~ msgid "|7605632e1b0f49599ffacf841491fcfb|"
+#~ msgstr ""
+
+#~ msgid "|91b1b5a7d3484eb7a2350c1923f18307|"
+#~ msgstr ""
+
+#~ msgid "|5405ed430e4746e28b083b146fb71731|"
+#~ msgstr ""
+
+#~ msgid "|a389e87dab394eb48a8949aa2397687b|"
+#~ msgstr ""
+
+#~ msgid "|89c412136a5146ec8dc32c0973729f12|"
+#~ msgstr ""
+
+#~ msgid "|9503d3dc3a144e8aa295f8800cd8a766|"
+#~ msgstr ""
+
+#~ msgid "|aadb59e29b9e445d8e239d9a8a7045cb|"
+#~ msgstr ""
+
+#~ msgid "|a7579ad7734347508e959d9e14f2f53d|"
+#~ msgstr ""
+
+#~ msgid "|73d15dd1d4fc41678b2d54815503fbe8|"
+#~ msgstr ""
+
+#~ msgid "|55472eef61274ba1b739408607e109df|"
 #~ msgstr ""
 
