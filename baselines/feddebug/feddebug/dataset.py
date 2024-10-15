@@ -1,124 +1,243 @@
-"""Handle basic dataset creation.
-
-In case of PyTorch it should return dataloaders for your dataset (for both the clients
-and the server). If you are using a custom dataset class, this module is the place to
-define it. If your dataset requires to be downloaded (and this is not done
-automatically -- e.g. as it is the case for many dataset in TorchVision) and
-partitioned, please include all those functions and logic in the
-`dataset_preparation.py` module. You can use all those functions from functions/methods
-defined here of course.
-"""
 
 import random
+from functools import partial
+from typing import Any, Callable, Dict
+
+import numpy as np
+import torch
+from torch.utils.data import DataLoader
+from torchvision import transforms
+from flwr.common.logger import log
+from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import DirichletPartitioner, PathologicalPartitioner
 from logging import INFO, WARNING
 
-import torch
-from flwr.common.logger import log
 
-from feddebug.dataset_preparation import prepare_iid_dataset, prepare_niid_dataset
+class ClientsAndServerDatasets:
+    """Prepare the clients and server datasets for federated learning."""
 
+    def __init__(self, cfg: Any):
+        """
+        Initialize the dataset preparation.
 
-class NoisyDataset(torch.utils.data.Dataset):
-    """Dataset with noisy labels."""
-
-    def __init__(self, dataset, num_classes, noise_rate):
-        possible_noise_rates = [
-            0.1,
-            0.2,
-            0.3,
-            0.4,
-            0.5,
-            0.6,
-            0.7,
-            0.8,
-            0.9,
-            1,
-        ]
-        assert (
-            noise_rate in possible_noise_rates
-        ), f"Noise rate must be in \
-            /{possible_noise_rates} but got {noise_rate}"
-        self.dataset = dataset
-        self.num_classes = num_classes
-        self.class_ids = random.sample(
-            range(num_classes), int(noise_rate * num_classes)
-        )
-
-    def __len__(self):
-        """Return the size of total dataset."""
-        return len(self.dataset)
-
-    def __getitem__(self, idx):
-        """Return the item at the given index."""
-        x, y = self.dataset[idx]
-        if y in self.class_ids:
-            # random.seed(idx)
-            y_hat = random.randint(0, self.num_classes - 1)
-            if y_hat != y:
-                y = y_hat
-            else:
-                y = (y + 1) % self.num_classes
-        return x, y
-
-
-def _add_noise_in_data(client_data, noise_rate, num_classes):
-    return NoisyDataset(client_data, num_classes=num_classes, noise_rate=noise_rate)
-
-
-class ClientsAndServerDatasetsPrep:
-    """Prepare the clients and server datasets."""
-
-    def __init__(self, cfg):
-        self.client2data = {}
-        self.server_testdata = None
-        self.client2class = {}
+        Args:
+            cfg: Configuration object containing dataset and distribution parameters.
+        """
         self.cfg = cfg
-        self._setup()
-        self._make_faulty_clients()
+        self.transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
+        self.client_id_to_loader: Dict[str, DataLoader] = {}
+        self.server_testloader: DataLoader = None
 
-    def _make_faulty_clients(self):
-        """Make clients faulty."""
-        for cid in self.cfg.faulty_clients_ids:
-            self.client2data[cid] = _add_noise_in_data(
-                client_data=self.client2data[cid],
-                # label_col="label",
-                noise_rate=self.cfg.noise_rate,
-                num_classes=self.cfg.dataset.num_classes,
-            )
-            log(
-                WARNING,
-                f"      ************* Client {cid} is made noisy.   *************",
-            )
-            self.client2class[cid] = "noisy"
-        log(
-            INFO,
-            f"** All Malacious Clients are: {self.cfg.faulty_clients_ids}**",
+        self._set_distribution_partitioner()
+        self._load_datasets()
+        self._introduce_label_noise()
+
+    def _set_distribution_partitioner(self):
+        """Set the data distribution partitioner based on configuration."""
+        dist_type = self.cfg.data_dist.dist_type
+        if dist_type == 'non_iid_dirichlet':
+            self.data_dist_partitioner_func = self._dirichlet_data_distribution
+        elif dist_type.startswith('PathologicalPartitioner-'):
+            try:
+                num_classes = int(dist_type.split('-')[-1])
+            except ValueError:
+                raise ValueError(f"Invalid number of classes in distribution type: {dist_type}")
+            self.data_dist_partitioner_func = partial(self._pathological_partitioner, num_classes)
+        else:
+            raise ValueError(f"Unknown distribution type: {dist_type}")
+
+    def _dirichlet_data_distribution(self, target_label_col: str = "label") -> Dict[str, Any]:
+        """Partition data using Dirichlet distribution."""
+        partitioner = DirichletPartitioner(
+            num_partitions=self.cfg.num_clients,
+            partition_by=target_label_col,
+            alpha=self.cfg.dirichlet_alpha,
+            min_partition_size=0,
+            self_balancing=True,
+            shuffle=True,
         )
+        return self._partition_helper(partitioner)
 
-    def _setup_dataset(self):
-        self.client2class = {}
-        self.server_testdata = None
-        self.client2data = None
-        if self.cfg.data_dist.dist_type == "iid":
-            self.client2data, self.server_testdata, _ = prepare_iid_dataset(
-                dname=self.cfg.dataset.name,
-                dataset_dir=self.cfg.storage.dir,
-                num_clients=self.cfg.num_clients,
-            )
-        elif self.cfg.data_dist.dist_type == "niid":
-            self.client2data, self.server_testdata, _ = prepare_niid_dataset(
-                dname=self.cfg.dataset.name,
-                dataset_dir=self.cfg.storage.dir,
-                num_clients=self.cfg.num_clients,
-            )
+    def _pathological_partitioner(self, num_classes_per_partition: int, target_label_col: str = "label") -> Dict[str, Any]:
+        """Partition data using Pathological partitioner."""
+        partitioner = PathologicalPartitioner(
+            num_partitions=self.cfg.num_clients,
+            partition_by=target_label_col,
+            num_classes_per_partition=num_classes_per_partition,
+            shuffle=True,
+            class_assignment_mode='deterministic'
+        )
+        return self._partition_helper(partitioner)
 
-    def _setup(self):
-        self._setup_dataset()
+    def _partition_helper(self, partitioner: Any) -> Dict[str, Any]:
+        """
+        Helper function to partition the dataset using the specified partitioner.
 
-    def get_clients_server_data(self):
-        """Return the clients and server data for simulation."""
-        return {
-            "server_testdata": self.server_testdata,
-            "client2class": self.client2class,
-            "client2data": self.client2data,
+        Args:
+            partitioner: The partitioner instance to use.
+
+        Returns:
+            A dictionary with 'client2data' and 'server_data'.
+        """
+        fds = FederatedDataset(dataset=self.cfg.dname, partitioners={"train": partitioner})
+        server_data = fds.load_split("test")
+        return {'client2data': fds, 'server_data': server_data}
+
+    def _load_datasets(self):
+        """Load and partition the datasets based on the partitioner."""
+        supported_datasets = {"cifar10", "mnist"}  # Extend as needed
+        if self.cfg.dname.lower() not in supported_datasets:
+            raise ValueError(f"Dataset '{self.cfg.dname}' not supported.")
+
+        partitions = self.data_dist_partitioner_func(self.cfg)
+
+        # Apply transformations using with_transform
+        self.client_id_to_loader = {
+            client_id: self._create_dataloader(client_data)
+            for client_id, client_data in partitions['client2data'].items()
         }
+        self.server_testloader = self._create_dataloader(partitions['server_data'], batch_size=256, shuffle=False)
+
+    def _create_dataloader(self, dataset: Any, batch_size: int = 64, shuffle: bool = True) -> DataLoader:
+        """
+        Create a DataLoader with applied transformations.
+
+        Args:
+            dataset: The dataset to wrap in a DataLoader.
+            batch_size: Number of samples per batch.
+            shuffle: Whether to shuffle the data.
+
+        Returns:
+            A PyTorch DataLoader instance.
+        """
+        # Define the transformation function
+        def apply_transforms(batch: Dict[str, Any]) -> Dict[str, Any]:
+            batch["img"] = [self.transform(img) for img in batch["img"]]
+            return batch
+
+        # Apply transformations on-the-fly
+        transformed_dataset = dataset.with_transform(apply_transforms)
+
+        # Create DataLoader
+        dataloader = DataLoader(transformed_dataset, batch_size=batch_size, shuffle=shuffle)
+        return dataloader
+
+    def _introduce_label_noise(self):
+        """Introduce label noise to specified faulty clients."""
+        faulty_client_ids = self.cfg.faulty_clients_ids
+        noise_rate = self.cfg.noise_rate
+        num_classes = self.cfg.dataset.num_classes
+
+        if faulty_client_ids:
+            for client_id in faulty_client_ids:
+                if client_id in self.client_id_to_loader:
+                    # Modify the underlying dataset to introduce noise
+                    dataset = self.client_id_to_loader[client_id].dataset
+                    noisy_dataset = self._add_noise_in_data(
+                        dataset=dataset,
+                        noise_rate=noise_rate,
+                        num_classes=num_classes
+                    )
+                    # Recreate DataLoader with the noisy dataset
+                    self.client_id_to_loader[client_id] = DataLoader(noisy_dataset.with_transform(self._create_transform()),
+                                                                      batch_size=self.client_id_to_loader[client_id].batch_size,
+                                                                      shuffle=True)
+                    log(
+                        WARNING,
+                        f"************* Client {client_id} is made noisy. *************",
+                    )
+                else:
+                    log(
+                        WARNING,
+                        f"Client ID {client_id} not found in client data. Skipping noise addition.",
+                    )
+            log(
+                INFO,
+                f"** All Malicious Clients are: {faulty_client_ids} **",
+            )
+
+    def _create_transform(self) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
+        """
+        Create a transformation function to be used with with_transform.
+
+        Returns:
+            A callable that applies the necessary transformations to a batch.
+        """
+        def transform(batch: Dict[str, Any]) -> Dict[str, Any]:
+            batch["img"] = [self.transform(img) for img in batch["img"]]
+            return batch
+        return transform
+
+    def _add_noise_in_data(self, dataset: Any, noise_rate: float, num_classes: int) -> Any:
+        """
+        Introduce label noise by flipping labels based on the noise rate.
+
+        Args:
+            dataset: The dataset to modify.
+            noise_rate: Probability of flipping each label (0 <= noise_rate <= 1).
+            num_classes: Total number of classes in the dataset.
+
+        Returns:
+            The modified dataset with noisy labels.
+        """
+        def flip_labels(batch: Dict[str, Any]) -> Dict[str, Any]:
+            labels = np.array(batch['label'])
+            num_samples = len(labels)
+
+            # Determine which labels to flip based on noise_rate
+            flip_mask = np.random.rand(num_samples) < noise_rate
+            indices_to_flip = np.where(flip_mask)[0]
+
+            if len(indices_to_flip) == 0:
+                return batch  # No labels to flip
+
+            # Generate new labels ensuring they differ from current labels
+            new_labels = labels[indices_to_flip].copy()
+            for idx in indices_to_flip:
+                current_label = new_labels[idx]
+                possible_labels = list(range(num_classes))
+                possible_labels.remove(current_label)
+                new_labels[idx] = random.choice(possible_labels)
+
+            # Assign the new labels back to the batch
+            labels[indices_to_flip] = new_labels
+            batch['label'] = labels.tolist()
+            return batch
+
+        # Apply the label flipping function to the dataset in batches
+        noisy_dataset = dataset.map(
+            flip_labels,
+            batched=True,
+            batch_size=256,
+            num_proc=8
+        )
+        return noisy_dataset
+
+    def get_data(self) -> Dict[str, Any]:
+        """
+        Get the prepared client and server DataLoaders.
+
+        Returns:
+            A dictionary containing 'server_testloader' and 'client_id_to_loader'.
+        """
+        return {
+            "server_testloader": self.server_testloader,
+            "client_id_to_loader": self.client_id_to_loader,
+        }
+
+
+def get_clients_server_data(cfg: Any) -> Dict[str, Any]:
+    """
+    Prepare and retrieve the clients and server DataLoaders.
+
+    Args:
+        cfg: Configuration object containing dataset and distribution parameters.
+
+    Returns:
+        A dictionary containing 'server_testloader' and 'client_id_to_loader'.
+    """
+    ds_prep = ClientsAndServerDatasets(cfg)
+    return ds_prep.get_data()

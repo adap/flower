@@ -65,18 +65,13 @@ def run_simulation(cfg):
 
     ds_prep = ClientsAndServerDatasetsPrep(cfg)
     ds_dict = ds_prep.get_clients_server_data()
-    client2class = ds_dict["client2class"]
-
+    
     _flwr_fl_sim(cfg, ds_dict["client2data"], ds_dict["server_testdata"], train_cache)
 
     temp_input = None
-    if "pixel_values" in ds_dict["server_testdata"]:
-        temp_input = ds_dict["server_testdata"][0]["pixel_values"].clone().detach()
-    else:
-        temp_input = ds_dict["server_testdata"][0][0].clone().detach()
+    
 
     train_cache[cfg.exp_key] = {
-        "client2class": client2class,
         "train_cfg": cfg,
         "complete": True,
         "input_shape": temp_input.shape,
@@ -94,22 +89,22 @@ def main(cfg) -> None:
     ):
         start = time.time()
         run_simulation(cfg)
-        time.sleep(1)
-        print("\n")
-        run_fed_debug_differential_testing(cfg)
-        print(f"Total Time taken (training + testing): {time.time() - start}")
+    #     time.sleep(1)
+    #     print("\n")
+    #     run_fed_debug_differential_testing(cfg)
+    #     print(f"Total Time taken (training + testing): {time.time() - start}")
 
-    if cfg.vary_thresholds:
-        eval_na_threshold(cfg)
+    # if cfg.vary_thresholds:
+    #     eval_na_threshold(cfg)
 
-    if cfg.generate_table_csv:
-        utils.generate_table2_csv(cfg.storage.dir + cfg.storage.results_cache_name)
+    # if cfg.generate_table_csv:
+    #     utils.generate_table2_csv(cfg.storage.dir + cfg.storage.results_cache_name)
 
-    if cfg.generate_thresholds_exp_graph:
-        utils.gen_thresholds_exp_graph(
-            cache_path=cfg.storage.dir + cfg.storage.results_cache_name,
-            threshold_exp_key=cfg.threshold_variation_exp_key,
-        )
+    # if cfg.generate_thresholds_exp_graph:
+    #     utils.gen_thresholds_exp_graph(
+    #         cache_path=cfg.storage.dir + cfg.storage.results_cache_name,
+    #         threshold_exp_key=cfg.threshold_variation_exp_key,
+    #     )
 
 
 if __name__ == "__main__":

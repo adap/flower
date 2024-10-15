@@ -7,366 +7,343 @@ uncomment the lines below and tell us in the README.md (see the "Running the Exp
 block) that this file should be executed first.
 """
 
-import os
-import random
-import shutil
-import tarfile
-import urllib
 
+from functools import partial
+
+import torchvision.transforms as transforms
+from medmnist import INFO
+import medmnist
+from datasets import Dataset, DatasetDict
+import logging
 import torch
-import torchvision
-from PIL import Image
-from torch.utils.model_zoo import tqdm
-from torchvision.datasets import MNIST
-from torchvision.datasets.utils import check_integrity
+from collections import Counter
 
 
-def _gen_bar_updater():
-    pbar = tqdm(total=None)
-
-    def bar_update(count, block_size, total_size):
-        if pbar.total is None and total_size:
-            pbar.total = total_size
-        progress_bytes = count * block_size
-        pbar.update(progress_bytes - pbar.n)
-
-    return bar_update
+from torchvision.transforms import Compose, Resize, ToTensor, Normalize, RandomHorizontalFlip
 
 
-def download_url(url: str, root: str, filename=None, md5=None) -> None:
-    """Download a file from a url and place it in root.
 
-    Args:
-        url (str): URL to download file from
-        root (str): Directory to place downloaded file in
-        filename (str, optional): Name to save the file under.
-        If None, use the basename of the URL
-        md5 (str, optional): MD5 checksum of the download. If None, do not check
-    """
-    root = os.path.expanduser(root)
-    if not filename:
-        filename = os.path.basename(url)
-    fpath = os.path.join(root, filename)
-
-    os.makedirs(root, exist_ok=True)
-
-    # check if file is already present locally
-    if check_integrity(fpath, md5):
-        print("Using downloaded and verified file: " + fpath)
-    else:  # download the file
-        try:
-            print("Downloading " + url + " to " + fpath)
-            urllib.request.urlretrieve(url, fpath, reporthook=_gen_bar_updater())
-        except (urllib.error.URLError, IOError) as temp_except:
-            if url[:5] == "https":
-                url = url.replace("https:", "http:")
-                print(
-                    "Failed download. Trying https -> http instead."
-                    " Downloading " + url + " to " + fpath
-                )
-                urllib.request.urlretrieve(url, fpath, reporthook=_gen_bar_updater())
-            else:
-                raise temp_except
-        # check integrity of downloaded file
-        if not check_integrity(fpath, md5):
-            raise RuntimeError("File not found or faultyed.")
+from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import PathologicalPartitioner
+from flwr_datasets.partitioner import ShardPartitioner
+from flwr_datasets.partitioner import DirichletPartitioner
 
 
-def _is_tarxz(filename: str) -> bool:
-    return filename.endswith(".tar.xz")
+
+def _get_medmnist(data_flag='pathmnist', download=True):
+    info = INFO[data_flag]
+    n_channels = info['n_channels']
+    n_classes = len(info['label'])
+    print(
+        f"INFO: {info}, \n  n_channels: {n_channels},  \n n_classes: {n_classes}")
+
+    DataClass = getattr(medmnist, info['python_class'])
+
+    train_dataset = DataClass(
+        split='train',  download=download)
+    test_dataset = DataClass(
+        split='test',  download=download)
+
+    # Convert to Hugging Face Dataset format
+    def medmnist_to_hf_dataset(medmnist_dataset):
+        data_dict = {"image": [], "label": []}
+        for pixels, label in medmnist_dataset:
+            data_dict["image"].append(pixels)
+            data_dict["label"].append(label.item())
+        return Dataset.from_dict(data_dict)
+
+    hf_train_dataset = medmnist_to_hf_dataset(train_dataset)
+    hf_test_dataset = medmnist_to_hf_dataset(test_dataset)
+
+    # Combine datasets into a single dataset with splits
+    hf_dataset = DatasetDict({
+        "train": hf_train_dataset,
+        "test": hf_test_dataset
+    })
+
+    logging.info(f'conversion to hf_dataset done')
+    return hf_dataset
 
 
-def _is_tar(filename: str) -> bool:
-    return filename.endswith(".tar")
+def train_test_transforms_factory(cfg):
+    train_transforms = None
+    test_transforms = None
+    if cfg.dname == "cifar10":
+        def apply_train_transformCifar(example):
+            transform = Compose([
+                Resize((32, 32)),
+                RandomHorizontalFlip(),
+                ToTensor(),
+                Normalize((0.4914, 0.4822, 0.4465),
+                          (0.2023, 0.1994, 0.2010))
+            ])
+            example['pixel_values'] = [
+                transform(image.convert("RGB")) for image in example['img']]
+            example['label'] = torch.tensor(example['label'])
+            del example['img']
+            return example
 
+        def apply_test_transformCifar(example):
+            transform = Compose([
+                Resize((32, 32)),
+                ToTensor(),
+                Normalize((0.4914, 0.4822, 0.4465),
+                          (0.2023, 0.1994, 0.2010))
+            ])
 
-def _is_targz(filename: str) -> bool:
-    return filename.endswith(".tar.gz")
+            example['pixel_values'] = [
+                transform(image.convert("RGB")) for image in example['img']]
+            example['label'] = torch.tensor(example['label'])
+            del example['img']
+            return example
 
+        train_transforms = apply_train_transformCifar
+        test_transforms = apply_test_transformCifar
+    elif cfg.dname == "mnist":
+        def apply_train_transformMnist(example):
 
-def _is_tgz(filename: str) -> bool:
-    return filename.endswith(".tgz")
+            transform = Compose([
+                Resize((32, 32)),
+                ToTensor(),
+                Normalize((0.1307,), (0.3081,))
+            ])
+            example['pixel_values'] = [
+                transform(image.convert("RGB")) for image in example['image']]
+            # example['pixel_values'] = transform(example['image'].convert("RGB"))
+            example['label'] = torch.tensor(example['label'])
+            return example
 
+        def apply_test_transformMnist(example):
+            transform = Compose([
+                Resize((32, 32)),
+                ToTensor(),
+                Normalize((0.1307,), (0.3081,))
+            ])
+            example['pixel_values'] = [
+                transform(image.convert("RGB")) for image in example['image']]            
+            example['label'] = torch.tensor(example['label'])
+            del example['image']
+            return example
+        train_transforms = apply_train_transformMnist
+        test_transforms = apply_test_transformMnist
+    elif cfg.dname in ['pathmnist', 'organamnist']:
+        tfms = transforms.Compose([
+            Resize((32, 32)),
+            ToTensor(),
+            Normalize(mean=[.5], std=[.5])
+        ])
 
-def _extract_archive(
-    from_path: str, to_path=None, remove_finished: bool = False
-) -> None:
-    if to_path is None:
-        to_path = os.path.dirname(from_path)
-
-    if _is_tar(from_path):
-        with tarfile.open(from_path, "r") as tar:
-            tar.extractall(path=to_path)
-    elif _is_targz(from_path) or _is_tgz(from_path):
-        with tarfile.open(from_path, "r:gz") as tar:
-            tar.extractall(path=to_path)
-    elif _is_tarxz(from_path):
-        with tarfile.open(from_path, "r:xz") as tar:
-            tar.extractall(path=to_path)
-    else:
-        raise ValueError("Extraction of {} not supported".format(from_path))
-
-    if remove_finished:
-        os.remove(from_path)
-
-
-def _download_and__extract_archive(
-    url: str,
-    download_root: str,
-    extract_root=None,
-    filename=None,
-    md5=None,
-    remove_finished: bool = False,
-) -> None:
-    download_root = os.path.expanduser(download_root)
-    if extract_root is None:
-        extract_root = download_root
-    if not filename:
-        filename = os.path.basename(url)
-
-    download_url(url, download_root, filename, md5)
-
-    archive = os.path.join(download_root, filename)
-    print("Extracting {} to {}".format(archive, extract_root))
-    _extract_archive(archive, extract_root, remove_finished)
-
-
-class FEMNIST(MNIST):
-    """The dataset is derived from the Leaf repository.
-
-    (https://github.com/TalwalkarLab/leaf) pre-processing of the Extended MNIST dataset,
-    grouping examples by writer. Details about Leaf were published in "LEAF: A Benchmark
-    for Federated Settings"
-    https://arxiv.org/abs/1812.01097.
-    """
-
-    resources = [
-        (
-            "https://raw.githubusercontent.com/tao-shen/FEMNIST_pytorch/master/femnist.tar.gz",
-            "59c65cec646fc57fe92d27d83afdf0ed",
-        )
-    ]
-
-    def __init__(
-        self, root, train=True, transform=None, target_transform=None, download=True
-    ) -> None:
-        super(MNIST, self).__init__(root, transform=transform)
-        self.train = train
-        self.transform = transform
-        self.target_transform = target_transform
-
-        if self._check_legacy_exist():
-            self.data, self.targets, self.clients = self._load_legacy_data()
-            return
-
-        if download:
-            self.download()
-
-        if not self._check_exists():
-            raise RuntimeError(
-                "Dataset not found. You can use download=True to download it"
-            )
-
-        self.data, self.targets, self.clients = self._load_data()
-
-    def _check_exists(self) -> bool:
-        return os.path.isfile(
-            os.path.join(
-                self.processed_folder,
-                self.training_file if self.train else self.test_file,
-            )
-        )
-
-    def _load_data(self):
-        data_file = self.training_file if self.train else self.test_file
-        data, targets, clients = torch.load(
-            os.path.join(self.processed_folder, data_file)
-        )
-        return data, targets, clients
-
-    def __getitem__(self, index: int):
-        """Return the item at the given index."""
-        img, target = self.data[index], int(self.targets[index])
-        img = Image.fromarray(img.numpy(), mode="F")
-
-        if self.transform is not None:
-            img = self.transform(img)
-
-        if self.target_transform is not None:
-            target = self.target_transform(target)
-
-        return img, target
-
-    def download(self) -> None:
-        """Download the FEMNIST data if it doesn't exist in processed_folder already."""
-        if self._check_exists():
-            return
-
-        os.makedirs(self.raw_folder, exist_ok=True)
-        os.makedirs(self.processed_folder, exist_ok=True)
-
-        # download files
-        for url, md5 in self.resources:
-            filename = url.rpartition("/")[2]
-            _download_and__extract_archive(
-                url, download_root=self.raw_folder, filename=filename, md5=md5
-            )
-
-        fpath_train = os.path.join(self.raw_folder, self.training_file)
-        fpath_test = os.path.join(self.raw_folder, self.test_file)
-        shutil.move(fpath_train, self.processed_folder)
-        shutil.move(fpath_test, self.processed_folder)
-
-    def _load_legacy_data(self):
-        data_file = self.training_file if self.train else self.test_file
-        data, targets, clients = torch.load(
-            os.path.join(self.processed_folder, data_file)
-        )
-        return data, targets, clients
-
-    def __len__(self) -> int:
-        """Return the number of examples in the dataset."""
-        return len(self.data)
-
-
-def _get_train_val_datasets(dataset_name, data_dir):
-    resize_trasnform = torchvision.transforms.Resize((32, 32))
-    if dataset_name == "cifar10":
-        train_transforms = torchvision.transforms.Compose(
-            [
-                torchvision.transforms.RandomCrop(32, padding=4),
-                torchvision.transforms.RandomHorizontalFlip(),
-                torchvision.transforms.ToTensor(),
-                torchvision.transforms.Normalize(
-                    (0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)
-                ),
-            ]
-        )
-
-        test_transforms = torchvision.transforms.Compose(
-            [
-                torchvision.transforms.ToTensor(),
-                torchvision.transforms.Normalize(
-                    (0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)
-                ),
-            ]
-        )
-
-        train_dataset = torchvision.datasets.CIFAR10(
-            root=data_dir, train=True, download=True, transform=train_transforms
-        )
-
-        val_dataset = torchvision.datasets.CIFAR10(
-            root=data_dir, train=False, download=True, transform=test_transforms
-        )
-
-        return train_dataset, val_dataset, 10
-
-    elif dataset_name == "femnist":
-        transform = torchvision.transforms.Compose(
-            [
-                resize_trasnform,
-                torchvision.transforms.ToTensor(),
-                torchvision.transforms.Normalize((0.1307,), (0.3081,)),
-            ]
-        )
-
-        train_ds = FEMNIST(data_dir, train=True, transform=transform, download=True)
-        test_ds = FEMNIST(data_dir, train=False, transform=transform, download=True)
-        train_ds = SubsetToDataset(train_ds)
-        valid_ds = SubsetToDataset(test_ds)
-
-        return train_ds, valid_ds, 10
-
-    elif dataset_name == "mnist":
-        transform = torchvision.transforms.Compose(
-            [
-                resize_trasnform,
-                torchvision.transforms.ToTensor(),
-                torchvision.transforms.Normalize((0.1307,), (0.3081,)),
-            ]
-        )
-
-        train_ds = torchvision.datasets.MNIST(
-            root=data_dir, train=True, download=True, transform=transform
-        )
-
-        valid_ds = torchvision.datasets.MNIST(
-            root=data_dir, train=False, download=True, transform=transform
-        )
-
-        return train_ds, valid_ds, 10
+        def apply_transform(example):
+            example['pixel_values'] = [
+                tfms(image.convert('RGB')) for image in example['image']]
+            example['label'] = torch.tensor(example['label'])
+            del example['image']
+            return example
+        return {'train': apply_transform, 'test': apply_transform}
 
     else:
-        raise NotImplementedError(f"Dataset {dataset_name} not implemented.")
+        raise ValueError(f"Unknown dataset: {cfg.dname}")
+
+    return {'train': train_transforms, 'test': test_transforms}
 
 
-def _split_dataset_to_iid(dataset, clients):
-    parts = [len(dataset) // clients for _ in range(clients)]
-    parts[0] += len(dataset) % clients
-    print(f"Spliting Datasets {len(dataset)} into parts:{parts}")
-    subsets = torch.utils.data.random_split(dataset, parts)
-    return [SubsetToDataset(subset) for subset in subsets]
+def _initialize_image_dataset(cfg, dat_partitioner_func, fetch_only_test_data):
+    target_label_col = "label"
+
+    d = dat_partitioner_func(cfg, target_label_col, fetch_only_test_data)
+    transforms = train_test_transforms_factory(cfg=cfg)
+    d['client2data'] = {k: v.map(
+        transforms['train'], batched=True, batch_size=256, num_proc=8).with_format("torch") for k, v in d['client2data'].items()}
+    d['server_data'] = d['server_data'].map(
+        transforms['test'], batched=True, batch_size=256, num_proc=8).with_format("torch")
+    return d
 
 
-def _split_dataset_to_niid(dataset, clients, beta=3):
-    assert beta > 0 and beta < 4, "beta must be in (0,4)"
-    min_data = (len(dataset) // clients) // beta
-    max_data = len(dataset) // clients
-    parts = [random.randint(min_data, max_data) for _ in range(clients)]
-    remaining_data = len(dataset) - sum(parts)
-    i = 0
-    while remaining_data > 0:
-        parts[i] += 1
-        remaining_data -= 1
-        i += 1
-        if i == len(parts):
-            i = 0
-
-    assert sum(parts) == len(
-        dataset
-    ), f"Sum of parts is not equal to dataset size: {sum(parts)} != {len(dataset)}"
-
-    print(f"Spliting Datasets {len(dataset)} into parts:{parts}")
-    subsets = torch.utils.data.random_split(dataset, parts)
-    clients_datasets = [SubsetToDataset(subset) for subset in subsets]
-
-    assert sum(parts) == sum(
-        (len(d) for d in clients_datasets)
-    ), f"Sum of parts is not equal to dataset size: \
-        /{sum(parts)} != {sum([len(dataset) for dataset in clients_datasets])}"
-
-    return clients_datasets
+def _load_dist_based_clients_server_datasets(cfg, dat_partitioner_func, fetch_only_test_data=False):
+    """Load the dataset and return the dataload."""
+    if cfg.dname in ["cifar10", "mnist", 'pathmnist', 'organamnist']:
+        return _initialize_image_dataset(cfg, dat_partitioner_func, fetch_only_test_data)
+    else:
+        raise ValueError(f"Dataset {cfg.dname} not supported")
 
 
-class SubsetToDataset(torch.utils.data.Dataset):
-    """Convert a Subset to a Dataset."""
-
-    def __init__(self, subset, greyscale=False):
-        self.subset = subset
-        self.greyscale = greyscale
-
-    def __getitem__(self, index):
-        """Return the item at the given index."""
-        x, y = self.subset[index]
-        return x, y
-
-    def __len__(self):
-        """Return the length of the dataset."""
-        return len(self.subset)
+def getLabelsCount(partition, target_label_col):
+    label2count = Counter(example[target_label_col]  # type: ignore
+                          for example in partition)  # type: ignore
+    return dict(label2count)
 
 
-def prepare_iid_dataset(dname, dataset_dir, num_clients):
-    """Prepare the IID dataset."""
-    train, valid, num_classes = _get_train_val_datasets(dname, data_dir=dataset_dir)
-    clients_datasets = _split_dataset_to_iid(train, clients=num_clients)
-    client2dataset = {f"{cid}": d for cid, d in enumerate(clients_datasets)}
-    return client2dataset, valid, num_classes
+def _fix_partition(cfg, c_partition, target_label_col):
+    label2count = getLabelsCount(c_partition, target_label_col)
+
+    filtered_labels = {label: count for label,
+                       count in label2count.items() if count >= 10}
+
+    indices_to_select = [i for i, example in enumerate(
+        c_partition) if example[target_label_col] in filtered_labels]  # type: ignore
+
+    ds = c_partition.select(indices_to_select)
+
+    assert cfg.max_per_client_data_size > 0, f"max_per_client_data_size: {cfg.max_per_client_data_size}"
+
+    if len(ds) > cfg.max_per_client_data_size:
+        # ds = ds.shuffle()
+        ds = ds.select(range(cfg.max_per_client_data_size))
+
+    if len(ds) % cfg.batch_size == 1:
+        ds = ds.select(range(len(ds) - 1))
+
+    partition_labels_count = getLabelsCount(ds, target_label_col)
+    return {'partition': ds, 'partition_labels_count': partition_labels_count}
 
 
-def prepare_niid_dataset(dname, dataset_dir, num_clients):
-    """Prepare the non-IID dataset."""
-    train, valid, num_classes = _get_train_val_datasets(dname, data_dir=dataset_dir)
-    clients_datasets = _split_dataset_to_niid(train, clients=num_clients)
-    client2dataset = {f"{cid}": d for cid, d in enumerate(clients_datasets)}
-    return client2dataset, valid, num_classes
+def _partition_helper(partitioner, cfg, target_label_col, fetch_only_test_data, subtask):
+    # logging.info(f"Dataset name: {cfg.dname}")
+    clients_class = []
+    clients_data = []
+    server_data = None
+    fds = None
+    if cfg.dname in ['pathmnist', 'organamnist']:
+        hf_dataset = _get_medmnist(data_flag=cfg.dname, download=True)
+
+        partitioner.dataset = hf_dataset['train']
+        fds = partitioner
+        
+        logging.info(f'max data size {cfg.max_server_data_size}')
+
+        if cfg.max_server_data_size < len(hf_dataset['test']):
+            server_data = hf_dataset['test'].select(range(cfg.max_server_data_size))
+        else:
+            server_data = hf_dataset['test']
+    else:
+        if subtask is not None:
+            fds = FederatedDataset(dataset=cfg.dname, partitioners={
+                "train": partitioner}, subset=subtask)
+        else:
+            fds = FederatedDataset(dataset=cfg.dname, partitioners={
+                "train": partitioner})
+
+        server_data = fds.load_split("test").select(
+            range(cfg.max_server_data_size))
+
+    logging.info(
+        f"Partition helper: Keys in the dataset are: {server_data[0].keys()}")
+
+    for cid in range(cfg.num_clients):
+        client_partition = fds.load_partition(cid)
+        temp_dict = {}
+
+        if cfg.max_per_client_data_size > 0:
+            logging.info(f' Fixing partition for client {cid}')
+            temp_dict = _fix_partition(cfg, client_partition, target_label_col)
+        else:
+            logging.info(f' No data partition fix requried for client {cid}')
+            temp_dict = {'partition': client_partition, 'partition_labels_count': getLabelsCount(
+                client_partition, target_label_col)}
+
+        if len(temp_dict['partition']) >= cfg.batch_size:
+            clients_data.append(temp_dict['partition'])
+            clients_class.append(temp_dict['partition_labels_count'])
+
+    logging.info(f" -- fix partition is done --")
+    client2data = {f"{id}": v for id, v in enumerate(clients_data)}
+    client2class = {f"{id}": v for id, v in enumerate(clients_class)}
+    return {'client2data': client2data, 'server_data': server_data, 'client2class': client2class, 'fds': fds}
+
+
+def _dirichlet_data_distribution(cfg, target_label_col, fetch_only_test_data, subtask=None):
+    partitioner = DirichletPartitioner(
+        num_partitions=cfg.num_clients,
+        partition_by=target_label_col,
+        alpha=cfg.dirichlet_alpha,
+        min_partition_size=0,
+        self_balancing=True,
+        shuffle=True,
+    )
+    return _partition_helper(partitioner, cfg, target_label_col, fetch_only_test_data, subtask)
+
+
+def _sharded_data_distribution(num_classes_per_partition, cfg, target_label_col, fetch_only_test_data, subtask=None):
+    partitioner = ShardPartitioner(
+        num_partitions=cfg.num_clients,
+        partition_by=target_label_col,
+        shard_size=2000,
+        num_shards_per_partition=num_classes_per_partition,
+        shuffle=True
+    )
+    return _partition_helper(partitioner, cfg, target_label_col, fetch_only_test_data, subtask)
+
+
+def _pathological_partitioner(num_classes_per_partition, cfg, target_label_col, fetch_only_test_data, subtask=None):
+    partitioner = PathologicalPartitioner(
+        num_partitions=cfg.num_clients,
+        partition_by=target_label_col,
+        num_classes_per_partition=num_classes_per_partition,
+        shuffle=True,
+        class_assignment_mode='deterministic'
+    )
+    return _partition_helper(partitioner, cfg, target_label_col, fetch_only_test_data, subtask)
+
+
+class ClientsAndServerDatasets:
+    """Prepare the clients and server datasets."""
+
+    def __init__(self, cfg):
+        self.cfg = cfg
+        self.data_dist_partitioner_func = None
+        self._set_distriubtion_partitioner()
+        self._setup()
+
+    def _set_distriubtion_partitioner(self):
+        if self.cfg.data_dist.dist_type == 'non_iid_dirichlet':
+            self.data_dist_partitioner_func = _dirichlet_data_distribution
+        elif self.cfg.data_dist.dist_type == 'sharded-non-iid-1':
+            self.data_dist_partitioner_func = partial(
+                _sharded_data_distribution, 1)  # passing num_classes_per_partition
+        elif self.cfg.data_dist.dist_type == 'sharded-non-iid-2':
+            self.data_dist_partitioner_func = partial(
+                _sharded_data_distribution, 2)
+        elif self.cfg.data_dist.dist_type == 'sharded-non-iid-3':
+            self.data_dist_partitioner_func = partial(
+                _sharded_data_distribution, 3)
+        elif self.cfg.data_dist.dist_type == 'PathologicalPartitioner-1':
+            self.data_dist_partitioner_func = partial(
+                _pathological_partitioner, 1)
+        elif self.cfg.data_dist.dist_type == 'PathologicalPartitioner-2':
+            self.data_dist_partitioner_func = partial(
+                _pathological_partitioner, 2)
+        elif self.cfg.data_dist.dist_type == 'PathologicalPartitioner-3':
+            self.data_dist_partitioner_func = partial(
+                _pathological_partitioner, 3)
+        else:
+            raise ValueError(
+                f"Unknown distribution type: {self.cfg.data_dist.dist}")
+
+    def _setup_hugging_dataset(self):
+        d = _load_dist_based_clients_server_datasets(
+            self.cfg.data_dist, self.data_dist_partitioner_func)
+        self.client2data = d["client2data"]
+
+        self.server_testdata = d["server_data"]
+        self.client2class = d["client2class"]
+        self.fds = d["fds"]
+        logging.info(f"client2class: {self.client2class}")
+
+        logging.info(f"> client2class {self.client2class}")
+
+        data_per_client = [len(dl) for dl in self.client2data.values()]
+        logging.info(f"Data per client in experiment {data_per_client}")
+        min_data = min(len(dl) for dl in self.client2data.values())
+        logging.info(f"Min data on a client: {min_data}")
+
+    def _setup(self):
+        self._setup_hugging_dataset()
+
+    def get_data(self):
+        """Return the clients and server data for simulation."""
+        return {
+            "server_testdata": self.server_testdata,
+            "client2class": self.client2class,
+            "client2data": self.client2data,
+            "fds": self.fds
+        }
