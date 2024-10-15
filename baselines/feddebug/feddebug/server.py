@@ -13,7 +13,7 @@ import torch
 from flwr.common import ndarrays_to_parameters
 from flwr.common.logger import log
 
-from feddebug.models import global_model_eval, initialize_model
+from feddebug.models import test, initialize_model
 from feddebug.strategy import FedAvgSave
 from feddebug.utils import get_parameters, set_parameters
 
@@ -41,9 +41,7 @@ def _get_evaluate_gm_func(cfg, server_testdata):
         gm_dict = initialize_model(cfg.model.name, cfg.dataset)
         set_parameters(gm_dict["model"], parameters)
         gm_dict["model"].eval()  # type: ignore
-        d_res = global_model_eval(
-            cfg.model.arch, gm_dict, server_testdata, device=cfg.device
-        )
+        d_res = test(gm_dict['model'], server_testdata, device=cfg.device)
         loss = d_res["loss"]
         accuracy = d_res["accuracy"]
         del gm_dict["model"]
@@ -58,7 +56,7 @@ def _get_fit_config(cfg, server_round):
     config = {
         "server_round": server_round,  # The current round of federated learning
         "local_epochs": cfg.client.epochs,  #
-        "batch_size": cfg.data_dist.batch_size,
+        "batch_size": cfg.client.batch_size,
         "lr": cfg.client.lr,
     }
     random.seed(server_round)

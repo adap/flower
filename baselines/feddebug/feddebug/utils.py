@@ -164,7 +164,7 @@ def set_exp_key(cfg):
         f"{cfg.strategy.name}-(R{cfg.strategy.num_rounds}"
         f"-clientsPerR{cfg.strategy.clients_per_round})"
         f"-{cfg.data_dist.dist_type}{cfg.data_dist.dirichlet_alpha}"
-        f"-batch{cfg.data_dist.batch_size}-epochs{cfg.client.epochs}-"
+        f"-batch{cfg.client.batch_size}-epochs{cfg.client.epochs}-"
         f"lr{cfg.client.lr}"
     )
     return key

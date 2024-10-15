@@ -15,7 +15,7 @@ from flwr.common.logger import log
 
 from feddebug import server, utils
 from feddebug.client import gen_client_func
-from feddebug.dataset import ClientsAndServerDatasetsPrep
+from feddebug.dataset import ClientsAndServerDatasets
 from feddebug.differential_testing import (
     eval_na_threshold,
     run_fed_debug_differential_testing,
@@ -63,18 +63,15 @@ def run_simulation(cfg):
 
     log(DEBUG, f"Simulation Configuration: {cfg}")
 
-    ds_prep = ClientsAndServerDatasetsPrep(cfg)
-    ds_dict = ds_prep.get_clients_server_data()
+    ds_prep = ClientsAndServerDatasets(cfg)
+    ds_dict = ds_prep.get_data()
     
     _flwr_fl_sim(cfg, ds_dict["client2data"], ds_dict["server_testdata"], train_cache)
-
-    temp_input = None
-    
-
+  
     train_cache[cfg.exp_key] = {
         "train_cfg": cfg,
         "complete": True,
-        "input_shape": temp_input.shape,
+        "input_shape": ds_dict["server_testdata"].dataset[0]["image"].clone().detach().shape,
     }
     log(INFO, f"Training Complete for Experiment: {cfg.exp_key} ")
 

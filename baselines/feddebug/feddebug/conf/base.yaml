@@ -13,6 +13,8 @@ num_clients: 5
 client:
     epochs: 10
     lr: 0.001
+    batch_size: 512
+
 
 noise_rate: 1
 faulty_clients_ids: [0] # malacious client(s) ids in a list 
@@ -49,7 +51,6 @@ strategy:
 data_dist:
     dist_type: iid # change to "niid" for non-iid data distribution
     num_clients: ${num_clients}
-    batch_size: 512
     dirichlet_alpha: 1
     dname: ${dataset.name}
     mname: ${model.name}

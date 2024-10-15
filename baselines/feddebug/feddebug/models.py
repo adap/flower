@@ -7,13 +7,12 @@ the python code at all
 """
 
 import gc
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision
-from torch.utils.data import DataLoader
-
+from flwr.common.logger import log 
+from logging import INFO
 
 class LeNet(nn.Module):
     """LeNet model."""
@@ -39,8 +38,8 @@ class LeNet(nn.Module):
 
 
 def _get_inputs_labels_from_batch(batch):
-    if "pixel_values" in batch:
-        return batch["pixel_values"], batch["label"]
+    if "image" in batch:
+        return batch["image"], batch["label"]
     else:
         x, y = batch
         return x, y
@@ -105,7 +104,7 @@ def initialize_model(name, cfg_dataset):
 
 def _train(tconfig):
     """Train the network on the training set."""
-    trainloader = DataLoader(tconfig["train_data"], batch_size=tconfig["batch_size"])
+    trainloader = tconfig["train_data"]
     net = tconfig["model_dict"]["model"]
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(net.parameters(), lr=tconfig["lr"])
@@ -118,7 +117,6 @@ def _train(tconfig):
         for batch in trainloader:
             images, labels = _get_inputs_labels_from_batch(batch)
             images, labels = images.to(tconfig["device"]), labels.to(tconfig["device"])
-
             optimizer.zero_grad()
             outputs = net(images)
             loss = criterion(net(images), labels)
@@ -141,25 +139,8 @@ def _train(tconfig):
     return {"train_loss": epoch_loss, "train_accuracy": epoch_acc}
 
 
-def global_model_eval(arch, global_net_dict, server_testdata, device):
-    """Evaluate the global model on the server test data."""
-    eval_d = {}
-    if arch == "cnn":
-        eval_d = test(
-            global_net_dict["model"], test_data=server_testdata, device=device
-        )
-    return {
-        "loss": eval_d["eval_loss"],
-        "accuracy": eval_d["eval_accuracy"],
-    }
-
-
-def test(net, test_data, device):
+def test(net, testloader, device):
     """Evaluate the network on the entire test set."""
-    testloader = torch.utils.data.DataLoader(
-        test_data, batch_size=512, shuffle=False, num_workers=4
-    )
-
     criterion = torch.nn.CrossEntropyLoss()
     correct, total, loss = 0, 0, 0.0
     net.eval()
@@ -181,7 +162,7 @@ def test(net, test_data, device):
     accuracy = correct / total
     net = net.cpu()
     del net
-    return {"eval_loss": loss, "eval_accuracy": accuracy}
+    return {"loss": loss, "accuracy": accuracy}
 
 
 def train_neural_network(tconfig):
