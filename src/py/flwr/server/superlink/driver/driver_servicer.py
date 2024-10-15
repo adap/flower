@@ -32,8 +32,6 @@ from flwr.common.serde import (
 from flwr.common.typing import Fab
 from flwr.proto import driver_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
-    CreateRunRequest,
-    CreateRunResponse,
     GetNodesRequest,
     GetNodesResponse,
     PullTaskResRequest,
@@ -44,6 +42,8 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
+    CreateRunRequest,
+    CreateRunResponse,
     GetRunRequest,
     GetRunResponse,
     Run,
@@ -155,7 +155,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         context.add_callback(on_rpc_done)
 
         # Read from state
-        task_res_list: list[TaskRes] = state.get_task_res(task_ids=task_ids, limit=None)
+        task_res_list: list[TaskRes] = state.get_task_res(task_ids=task_ids)
 
         context.set_code(grpc.StatusCode.OK)
         return PullTaskResResponse(task_res_list=task_res_list)

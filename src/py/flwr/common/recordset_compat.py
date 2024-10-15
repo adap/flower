@@ -59,6 +59,11 @@ def parametersrecord_to_parameters(
     keep_input : bool
         A boolean indicating whether entries in the record should be deleted from the
         input dictionary immediately after adding them to the record.
+
+    Returns
+    -------
+    parameters : Parameters
+        The parameters in the legacy format Parameters.
     """
     parameters = Parameters(tensors=[], tensor_type="")
 
@@ -94,6 +99,11 @@ def parameters_to_parametersrecord(
         A boolean indicating whether parameters should be deleted from the input
         Parameters object (i.e. a list of serialized NumPy arrays) immediately after
         adding them to the record.
+
+    Returns
+    -------
+    ParametersRecord
+        The ParametersRecord containing the provided parameters.
     """
     tensor_type = parameters.tensor_type
 

@@ -17,7 +17,7 @@
 
 # pylint: disable=W0212
 import unittest
-from typing import Tuple, Union
+from typing import Union
 
 import numpy as np
 from numpy.typing import NDArray
@@ -33,7 +33,7 @@ def _dummy_setup(
     num_rows: int,
     partition_by: str,
     self_balancing: bool = True,
-) -> Tuple[Dataset, DirichletPartitioner]:
+) -> tuple[Dataset, DirichletPartitioner]:
     """Create a dummy dataset and partitioner for testing."""
     data = {
         partition_by: [i % 3 for i in range(num_rows)],

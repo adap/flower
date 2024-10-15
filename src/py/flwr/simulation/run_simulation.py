@@ -225,7 +225,7 @@ def run_simulation_from_cli() -> None:
 
 
 # Entry point from Python session (script or notebook)
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-positional-arguments
 def run_simulation(
     server_app: ServerApp,
     client_app: ClientApp,
@@ -300,7 +300,7 @@ def run_simulation(
     )
 
 
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-positional-arguments
 def run_serverapp_th(
     server_app_attr: Optional[str],
     server_app: Optional[ServerApp],
@@ -369,7 +369,7 @@ def run_serverapp_th(
     return serverapp_th
 
 
-# pylint: disable=too-many-locals
+# pylint: disable=too-many-locals,too-many-positional-arguments
 def _main_loop(
     num_supernodes: int,
     backend_name: str,
@@ -455,7 +455,7 @@ def _main_loop(
     log(DEBUG, "Stopping Simulation Engine now.")
 
 
-# pylint: disable=too-many-arguments,too-many-locals
+# pylint: disable=too-many-arguments,too-many-locals,too-many-positional-arguments
 def _run_simulation(
     num_supernodes: int,
     exit_event: EventType,
