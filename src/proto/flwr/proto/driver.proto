@@ -21,6 +21,7 @@ import "flwr/proto/node.proto";
 import "flwr/proto/task.proto";
 import "flwr/proto/run.proto";
 import "flwr/proto/fab.proto";
+import "flwr/proto/message.proto";
 
 service Driver {
   // Request run_id
@@ -31,9 +32,11 @@ service Driver {
 
   // Create one or more tasks
   rpc PushTaskIns(PushTaskInsRequest) returns (PushTaskInsResponse) {}
+  rpc PushMessages(PushMessagesRequest) returns (PushMessagesResponse) {}
 
   // Get task results
   rpc PullTaskRes(PullTaskResRequest) returns (PullTaskResResponse) {}
+  rpc PullMessages(PullMessagesRequest) returns (PullMessagesResponse) {}
 
   // Get run details
   rpc GetRun(GetRunRequest) returns (GetRunResponse) {}
@@ -56,3 +59,14 @@ message PullTaskResRequest {
   repeated string task_ids = 2;
 }
 message PullTaskResResponse { repeated TaskRes task_res_list = 1; }
+
+// PushMessages rmessages
+message PushMessagesRequest { repeated Message messages_list = 1; }
+message PushMessagesResponse { repeated string message_ids = 1; }
+
+// PullMessages messages
+message PullMessagesRequest {
+  Node node = 1;
+  repeated string message_ids = 2;
+}
+message PullMessagesResponse { repeated Message messages_list = 1; }
