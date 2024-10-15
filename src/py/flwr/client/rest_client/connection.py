@@ -82,7 +82,7 @@ T = TypeVar("T", bound=GrpcMessage)
 
 
 @contextmanager
-def http_request_response(  # pylint: disable=,R0913, R0914, R0915
+def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     server_address: str,
     insecure: bool,  # pylint: disable=unused-argument
     retry_invoker: RetryInvoker,
@@ -340,7 +340,7 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
         task_res = message_to_taskres(message)
 
         # Serialize ProtoBuf to bytes
-        req = PushTaskResRequest(task_res_list=[task_res])
+        req = PushTaskResRequest(node=node, task_res_list=[task_res])
 
         # Send the request
         res = _request(req, PushTaskResResponse, PATH_PUSH_TASK_RES)
@@ -356,7 +356,7 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
 
     def get_run(run_id: int) -> Run:
         # Construct the request
-        req = GetRunRequest(run_id=run_id)
+        req = GetRunRequest(node=node, run_id=run_id)
 
         # Send the request
         res = _request(req, GetRunResponse, PATH_GET_RUN)
@@ -373,7 +373,7 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
 
     def get_fab(fab_hash: str) -> Fab:
         # Construct the request
-        req = GetFabRequest(hash_str=fab_hash)
+        req = GetFabRequest(node=node, hash_str=fab_hash)
 
         # Send the request
         res = _request(req, GetFabResponse, PATH_GET_FAB)

@@ -34,7 +34,7 @@ def get_load_client_app_fn(
     app_path: Optional[str],
     multi_app: bool,
     flwr_dir: Optional[str] = None,
-) -> Callable[[str, str], ClientApp]:
+) -> Callable[[str, str, str], ClientApp]:
     """Get the load_client_app_fn function.
 
     If `multi_app` is True, this function loads the specified ClientApp
@@ -55,13 +55,14 @@ def get_load_client_app_fn(
         if not valid and error_msg:
             raise LoadClientAppError(error_msg) from None
 
-    def _load(fab_id: str, fab_version: str) -> ClientApp:
+    def _load(fab_id: str, fab_version: str, fab_hash: str) -> ClientApp:
         runtime_app_dir = Path(app_path if app_path else "").absolute()
         # If multi-app feature is disabled
         if not multi_app:
             # Set app reference
             client_app_ref = default_app_ref
-        # If multi-app feature is enabled but app directory is provided
+        # If multi-app feature is enabled but app directory is provided.
+        # `fab_hash` is not required since the app is loaded from `runtime_app_dir`.
         elif app_path is not None:
             config = get_project_config(runtime_app_dir)
             this_fab_version, this_fab_id = get_metadata_from_config(config)
@@ -81,11 +82,16 @@ def get_load_client_app_fn(
         else:
             try:
                 runtime_app_dir = get_project_dir(
-                    fab_id, fab_version, get_flwr_dir(flwr_dir)
+                    fab_id, fab_version, fab_hash, get_flwr_dir(flwr_dir)
                 )
                 config = get_project_config(runtime_app_dir)
             except Exception as e:
-                raise LoadClientAppError("Failed to load ClientApp") from e
+                raise LoadClientAppError(
+                    "Failed to load ClientApp."
+                    "Possible reasons for error include mismatched "
+                    "`fab_id`, `fab_version`, or `fab_hash` in "
+                    f"{str(get_flwr_dir(flwr_dir).resolve())}."
+                ) from e
 
             # Set app reference
             client_app_ref = config["tool"]["flwr"]["app"]["components"]["clientapp"]
