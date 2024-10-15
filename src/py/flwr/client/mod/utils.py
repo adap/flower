@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,13 +15,11 @@
 """Utility functions for mods."""
 
 
-from typing import List
-
 from flwr.client.typing import ClientAppCallable, Mod
 from flwr.common import Context, Message
 
 
-def make_ffn(ffn: ClientAppCallable, mods: List[Mod]) -> ClientAppCallable:
+def make_ffn(ffn: ClientAppCallable, mods: list[Mod]) -> ClientAppCallable:
     """."""
 
     def wrap_ffn(_ffn: ClientAppCallable, _mod: Mod) -> ClientAppCallable:

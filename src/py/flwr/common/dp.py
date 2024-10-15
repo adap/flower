@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2022 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,8 +14,6 @@
 # ==============================================================================
 """Building block functions for DP algorithms."""
 
-
-from typing import Tuple
 
 import numpy as np
 
@@ -41,7 +39,7 @@ def add_gaussian_noise(update: NDArrays, std_dev: float) -> NDArrays:
     return update_noised
 
 
-def clip_by_l2(update: NDArrays, threshold: float) -> Tuple[NDArrays, bool]:
+def clip_by_l2(update: NDArrays, threshold: float) -> tuple[NDArrays, bool]:
     """Scales the update so thats its L2 norm is upper-bound to threshold."""
     warn_deprecated_feature("`clip_by_l2` method")
     update_norm = _get_update_norm(update)

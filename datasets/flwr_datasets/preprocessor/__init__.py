@@ -20,7 +20,7 @@ from .merger import Merger
 from .preprocessor import Preprocessor
 
 __all__ = [
+    "Divider",
     "Merger",
     "Preprocessor",
-    "Divider",
 ]

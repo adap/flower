@@ -1,40 +1,18 @@
-"""$project_name: A Flower / Scikit-Learn app."""
+"""$project_name: A Flower / $framework_str app."""
 
 import warnings
 
-import numpy as np
-from flwr.client import NumPyClient, ClientApp
-from flwr_datasets import FederatedDataset
-from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
 
-
-def get_model_parameters(model):
-    if model.fit_intercept:
-        params = [
-            model.coef_,
-            model.intercept_,
-        ]
-    else:
-        params = [model.coef_]
-    return params
-
-
-def set_model_params(model, params):
-    model.coef_ = params[0]
-    if model.fit_intercept:
-        model.intercept_ = params[1]
-    return model
-
-
-def set_initial_params(model):
-    n_classes = 10  # MNIST has 10 classes
-    n_features = 784  # Number of features in dataset
-    model.classes_ = np.array([i for i in range(10)])
-
-    model.coef_ = np.zeros((n_classes, n_features))
-    if model.fit_intercept:
-        model.intercept_ = np.zeros((n_classes,))
+from flwr.client import ClientApp, NumPyClient
+from flwr.common import Context
+from $import_name.task import (
+    get_model,
+    get_model_params,
+    load_data,
+    set_initial_params,
+    set_model_params,
+)
 
 
 class FlowerClient(NumPyClient):
@@ -45,9 +23,6 @@ class FlowerClient(NumPyClient):
         self.y_train = y_train
         self.y_test = y_test
 
-    def get_parameters(self, config):
-        return get_model_parameters(self.model)
-
     def fit(self, parameters, config):
         set_model_params(self.model, parameters)
 
@@ -56,7 +31,7 @@ class FlowerClient(NumPyClient):
             warnings.simplefilter("ignore")
             self.model.fit(self.X_train, self.y_train)
 
-        return get_model_parameters(self.model), len(self.X_train), {}
+        return get_model_params(self.model), len(self.X_train), {}
 
     def evaluate(self, parameters, config):
         set_model_params(self.model, parameters)
@@ -66,23 +41,17 @@ class FlowerClient(NumPyClient):
 
         return loss, len(self.X_test), {"accuracy": accuracy}
 
-fds = FederatedDataset(dataset="mnist", partitioners={"train": 2})
 
-def client_fn(cid: str):
-    dataset = fds.load_partition(int(cid), "train").with_format("numpy")
+def client_fn(context: Context):
+    partition_id = context.node_config["partition-id"]
+    num_partitions = context.node_config["num-partitions"]
 
-    X, y = dataset["image"].reshape((len(dataset), -1)), dataset["label"]
-
-    # Split the on edge data: 80% train, 20% test
-    X_train, X_test = X[: int(0.8 * len(X))], X[int(0.8 * len(X)) :]
-    y_train, y_test = y[: int(0.8 * len(y))], y[int(0.8 * len(y)) :]
+    X_train, X_test, y_train, y_test = load_data(partition_id, num_partitions)
 
     # Create LogisticRegression Model
-    model = LogisticRegression(
-        penalty="l2",
-        max_iter=1,  # local epoch
-        warm_start=True,  # prevent refreshing weights when fitting
-    )
+    penalty = context.run_config["penalty"]
+    local_epochs = context.run_config["local-epochs"]
+    model = get_model(penalty, local_epochs)
 
     # Setting initial parameters, akin to model.compile for keras models
     set_initial_params(model)

@@ -13,32 +13,6 @@ import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-class CreateRunRequest(google.protobuf.message.Message):
-    """CreateRun"""
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    FAB_ID_FIELD_NUMBER: builtins.int
-    FAB_VERSION_FIELD_NUMBER: builtins.int
-    fab_id: typing.Text
-    fab_version: typing.Text
-    def __init__(self,
-        *,
-        fab_id: typing.Text = ...,
-        fab_version: typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["fab_id",b"fab_id","fab_version",b"fab_version"]) -> None: ...
-global___CreateRunRequest = CreateRunRequest
-
-class CreateRunResponse(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    RUN_ID_FIELD_NUMBER: builtins.int
-    run_id: builtins.int
-    def __init__(self,
-        *,
-        run_id: builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id"]) -> None: ...
-global___CreateRunResponse = CreateRunResponse
-
 class GetNodesRequest(google.protobuf.message.Message):
     """GetNodes messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor

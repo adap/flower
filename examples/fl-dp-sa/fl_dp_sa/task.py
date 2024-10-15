@@ -1,25 +1,22 @@
-"""fl_dp_sa: A Flower / PyTorch app."""
+"""fl_dp_sa: Flower Example using Differential Privacy and Secure Aggregation."""
 
 from collections import OrderedDict
-from logging import INFO
-from flwr_datasets import FederatedDataset
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from flwr.common.logger import log
+from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import IidPartitioner
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
 
 
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+fds = None  # Cache FederatedDataset
 
 
 class Net(nn.Module):
-    """Model."""
-
     def __init__(self) -> None:
-        super(Net, self).__init__()
+        super().__init__()
         self.conv1 = nn.Conv2d(1, 6, 3, padding=1)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(6, 16, 5)
@@ -37,9 +34,16 @@ class Net(nn.Module):
         return self.fc3(x)
 
 
-def load_data(partition_id):
+def load_data(partition_id: int, num_partitions: int):
     """Load partition MNIST data."""
-    fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
+
+    global fds
+    if fds is None:
+        partitioner = IidPartitioner(num_partitions=num_partitions)
+        fds = FederatedDataset(
+            dataset="ylecun/mnist",
+            partitioners={"train": partitioner},
+        )
     partition = fds.load_partition(partition_id)
     # Divide data on each node: 80% train, 20% test
     partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
@@ -71,8 +75,8 @@ def train(net, trainloader, valloader, epochs, device):
             loss.backward()
             optimizer.step()
 
-    train_loss, train_acc = test(net, trainloader)
-    val_loss, val_acc = test(net, valloader)
+    train_loss, train_acc = test(net, trainloader, device)
+    val_loss, val_acc = test(net, valloader, device)
 
     results = {
         "train_loss": train_loss,
@@ -83,17 +87,17 @@ def train(net, trainloader, valloader, epochs, device):
     return results
 
 
-def test(net, testloader):
+def test(net, testloader, device):
     """Validate the model on the test set."""
-    net.to(DEVICE)
+    net.to(device)
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
     with torch.no_grad():
         for batch in testloader:
-            images = batch["image"].to(DEVICE)
-            labels = batch["label"].to(DEVICE)
-            outputs = net(images.to(DEVICE))
-            labels = labels.to(DEVICE)
+            images = batch["image"].to(device)
+            labels = batch["label"].to(device)
+            outputs = net(images.to(device))
+            labels = labels.to(device)
             loss += criterion(outputs, labels).item()
             correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
     accuracy = correct / len(testloader.dataset)

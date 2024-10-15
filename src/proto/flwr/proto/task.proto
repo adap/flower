@@ -19,7 +19,6 @@ package flwr.proto;
 
 import "flwr/proto/node.proto";
 import "flwr/proto/recordset.proto";
-import "flwr/proto/transport.proto";
 import "flwr/proto/error.proto";
 
 message Task {
@@ -38,13 +37,13 @@ message Task {
 message TaskIns {
   string task_id = 1;
   string group_id = 2;
-  sint64 run_id = 3;
+  uint64 run_id = 3;
   Task task = 4;
 }
 
 message TaskRes {
   string task_id = 1;
   string group_id = 2;
-  sint64 run_id = 3;
+  uint64 run_id = 3;
   Task task = 4;
 }

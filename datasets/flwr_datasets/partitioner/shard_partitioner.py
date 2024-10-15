@@ -17,7 +17,7 @@
 
 # pylint: disable=R0912, R0914
 import math
-from typing import Dict, List, Optional
+from typing import Optional
 
 import numpy as np
 
@@ -149,15 +149,15 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
     ) -> None:
         super().__init__()
         # Attributes based on the constructor
-        _check_if_natual_number(num_partitions, "num_partitions")
+        _check_if_natural_number(num_partitions, "num_partitions")
         self._num_partitions = num_partitions
         self._partition_by = partition_by
-        _check_if_natual_number(
+        _check_if_natural_number(
             num_shards_per_partition, "num_shards_per_partition", True
         )
         self._num_shards_per_partition = num_shards_per_partition
         self._num_shards_used: Optional[int] = None
-        _check_if_natual_number(shard_size, "shard_size", True)
+        _check_if_natural_number(shard_size, "shard_size", True)
         self._shard_size = shard_size
         self._keep_incomplete_shard = keep_incomplete_shard
         self._shuffle = shuffle
@@ -165,7 +165,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
 
         # Utility attributes
         self._rng = np.random.default_rng(seed=self._seed)  # NumPy random generator
-        self._partition_id_to_indices: Dict[int, List[int]] = {}
+        self._partition_id_to_indices: dict[int, list[int]] = {}
         self._partition_id_to_indices_determined = False
 
     def load_partition(self, partition_id: int) -> datasets.Dataset:
@@ -299,7 +299,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         nid_to_shard_indices = np.split(
             shard_indices_array, indices_on_which_to_split_shards
         )[:-1]
-        partition_id_to_indices: Dict[int, List[int]] = {
+        partition_id_to_indices: dict[int, list[int]] = {
             cid: [] for cid in range(self._num_partitions)
         }
         # Compute partition_id to sample indices based on the shard indices
@@ -360,7 +360,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
                 )
 
 
-def _check_if_natual_number(
+def _check_if_natural_number(
     number: Optional[int], parameter_name: str, none_acceptable: bool = False
 ) -> None:
     if none_acceptable and number is None:

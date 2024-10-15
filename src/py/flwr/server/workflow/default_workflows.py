@@ -18,7 +18,7 @@
 import io
 import timeit
 from logging import INFO, WARN
-from typing import List, Optional, Tuple, Union, cast
+from typing import Optional, Union, cast
 
 import flwr.common.recordset_compat as compat
 from flwr.common import (
@@ -167,7 +167,7 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
     context.state.parameters_records[MAIN_PARAMS_RECORD] = paramsrecord
 
     # Evaluate initial parameters
-    log(INFO, "Evaluating initial global parameters")
+    log(INFO, "Starting evaluation of initial global parameters")
     parameters = compat.parametersrecord_to_parameters(paramsrecord, keep_input=True)
     res = context.strategy.evaluate(0, parameters=parameters)
     if res is not None:
@@ -179,6 +179,8 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
         )
         context.history.add_loss_centralized(server_round=0, loss=res[0])
         context.history.add_metrics_centralized(server_round=0, metrics=res[1])
+    else:
+        log(INFO, "Evaluation returned no results (`None`)")
 
 
 def default_centralized_evaluation_workflow(_: Driver, context: Context) -> None:
@@ -274,8 +276,8 @@ def default_fit_workflow(  # pylint: disable=R0914
     )
 
     # Aggregate training results
-    results: List[Tuple[ClientProxy, FitRes]] = []
-    failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]] = []
+    results: list[tuple[ClientProxy, FitRes]] = []
+    failures: list[Union[tuple[ClientProxy, FitRes], BaseException]] = []
     for msg in messages:
         if msg.has_content():
             proxy = node_id_to_proxy[msg.metadata.src_node_id]
@@ -360,8 +362,8 @@ def default_evaluate_workflow(driver: Driver, context: Context) -> None:
     )
 
     # Aggregate the evaluation results
-    results: List[Tuple[ClientProxy, EvaluateRes]] = []
-    failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]] = []
+    results: list[tuple[ClientProxy, EvaluateRes]] = []
+    failures: list[Union[tuple[ClientProxy, EvaluateRes], BaseException]] = []
     for msg in messages:
         if msg.has_content():
             proxy = node_id_to_proxy[msg.metadata.src_node_id]

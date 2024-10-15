@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,12 +17,13 @@
 import time
 from collections import namedtuple
 from contextlib import ExitStack
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Optional
 
 import pytest
 
 # pylint: enable=E0611
 from . import RecordSet
+from .constant import MESSAGE_TTL_TOLERANCE
 from .message import Error, Message, Metadata
 from .serde_test import RecordMaker
 
@@ -174,7 +175,6 @@ def test_create_reply(
                 "group_id": "group_xyz",
                 "ttl": 10.0,
                 "message_type": "request",
-                "partition_id": None,
             },
         ),
         (Error, {"code": 1, "reason": "reason_098"}),
@@ -194,7 +194,7 @@ def test_create_reply(
         ),
     ],
 )
-def test_repr(cls: type, kwargs: Dict[str, Any]) -> None:
+def test_repr(cls: type, kwargs: dict[str, Any]) -> None:
     """Test string representations of Metadata/Message/Error."""
     # Prepare
     anon_cls = namedtuple(cls.__qualname__, kwargs.keys())  # type: ignore
@@ -203,3 +203,35 @@ def test_repr(cls: type, kwargs: Dict[str, Any]) -> None:
 
     # Assert
     assert str(actual) == str(expected)
+
+
+@pytest.mark.parametrize(
+    "message_creation_fn,initial_ttl,reply_ttl,expected_reply_ttl",
+    [
+        # Case where the reply_ttl is larger than the allowed TTL
+        (create_message_with_content, 20, 30, 20),
+        (create_message_with_error, 20, 30, 20),
+        # Case where the reply_ttl is within the allowed range
+        (create_message_with_content, 20, 10, 10),
+        (create_message_with_error, 20, 10, 10),
+    ],
+)
+def test_reply_ttl_limitation(
+    message_creation_fn: Callable[[float], Message],
+    initial_ttl: float,
+    reply_ttl: float,
+    expected_reply_ttl: float,
+) -> None:
+    """Test that the reply TTL does not exceed the allowed TTL."""
+    message = message_creation_fn(initial_ttl)
+
+    if message.has_error():
+        dummy_error = Error(code=0, reason="test error")
+        reply_message = message.create_error_reply(dummy_error, ttl=reply_ttl)
+    else:
+        reply_message = message.create_reply(content=RecordSet(), ttl=reply_ttl)
+
+    assert reply_message.metadata.ttl - expected_reply_ttl <= MESSAGE_TTL_TOLERANCE, (
+        f"Expected TTL to be <= {expected_reply_ttl}, "
+        f"but got {reply_message.metadata.ttl}"
+    )

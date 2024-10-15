@@ -18,7 +18,7 @@
 import logging
 from logging import WARN, LogRecord
 from logging.handlers import HTTPHandler
-from typing import TYPE_CHECKING, Any, Dict, Optional, TextIO, Tuple
+from typing import TYPE_CHECKING, Any, Optional, TextIO
 
 # Create logger
 LOGGER_NAME = "flwr"
@@ -111,7 +111,7 @@ FLOWER_LOGGER.addHandler(console_handler)
 class CustomHTTPHandler(HTTPHandler):
     """Custom HTTPHandler which overrides the mapLogRecords method."""
 
-    # pylint: disable=too-many-arguments,bad-option-value,R1725
+    # pylint: disable=too-many-arguments,bad-option-value,R1725,R0917
     def __init__(
         self,
         identifier: str,
@@ -119,12 +119,12 @@ class CustomHTTPHandler(HTTPHandler):
         url: str,
         method: str = "GET",
         secure: bool = False,
-        credentials: Optional[Tuple[str, str]] = None,
+        credentials: Optional[tuple[str, str]] = None,
     ) -> None:
         super().__init__(host, url, method, secure, credentials)
         self.identifier = identifier
 
-    def mapLogRecord(self, record: LogRecord) -> Dict[str, Any]:
+    def mapLogRecord(self, record: LogRecord) -> dict[str, Any]:
         """Filter for the properties to be send to the logserver."""
         record_dict = record.__dict__
         return {
@@ -191,6 +191,44 @@ def warn_deprecated_feature(name: str) -> None:
         """DEPRECATED FEATURE: %s
 
             This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        """,
+        name,
+    )
+
+
+def warn_deprecated_feature_with_example(
+    deprecation_message: str, example_message: str, code_example: str
+) -> None:
+    """Warn if a feature is deprecated and show code example."""
+    log(
+        WARN,
+        """DEPRECATED FEATURE: %s
+
+            Check the following `FEATURE UPDATE` warning message for the preferred
+            new mechanism to use this feature in Flower.
+        """,
+        deprecation_message,
+    )
+    log(
+        WARN,
+        """FEATURE UPDATE: %s
+        ------------------------------------------------------------
+        %s
+        ------------------------------------------------------------
+        """,
+        example_message,
+        code_example,
+    )
+
+
+def warn_unsupported_feature(name: str) -> None:
+    """Warn the user when they use an unsupported feature."""
+    log(
+        WARN,
+        """UNSUPPORTED FEATURE: %s
+
+            This is an unsupported feature. It will be removed
             entirely in future versions of Flower.
         """,
         name,
