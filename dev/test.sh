@@ -19,7 +19,7 @@ python -m black --exclude "src\/py\/flwr\/proto" --check src/py/flwr benchmarks 
 echo "- black: done"
 
 echo "- init_py_check: start"
-python -m flwr_tool.init_py_check src/py/flwr src/py/flwr_tool
+flwr-dev check-init src/py/flwr src/py/flwr_tool
 echo "- init_py_check: done"
 
 echo "- docformatter: start"
@@ -79,7 +79,7 @@ echo "- All rST checks passed"
 echo "- Start license checks"
 
 echo "- copyright: start"
-python -m flwr_tool.check_copyright src/py/flwr
+flwr-dev check-copyrights src/py/flwr
 echo "- copyright: done"
 
 echo "- licensecheck: start"

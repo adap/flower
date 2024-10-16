@@ -30,7 +30,9 @@ jobs:
       - name: Install pandoc
         run: sudo apt install pandoc
       - name: Install Flower dependencies (mandatory only)
-        run: python -m poetry install --extras "simulation"
+        run: |
+          python -m poetry install --extras "simulation"
+          python -m pip install ./dev
       - name: Install Flower Datasets
         run: |
           cd datasets
