@@ -17,7 +17,15 @@
 
 from collections import OrderedDict
 from collections.abc import MutableMapping
-from typing import Any, TypeVar, cast
+from typing import (
+    Any,
+    MutableMapping,
+    OrderedDict,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 from google.protobuf.message import Message as GrpcMessage
 
@@ -30,7 +38,7 @@ from flwr.proto.message_pb2 import Message as ProtoMessage
 from flwr.proto.message_pb2 import Metadata as ProtoMetadata
 from flwr.proto.node_pb2 import Node
 from flwr.proto.recordset_pb2 import Array as ProtoArray
-from flwr.proto.recordset_pb2 import BoolList, BytesList
+from flwr.proto.recordset_pb2 import Bool, BytesList
 from flwr.proto.recordset_pb2 import ConfigsRecord as ProtoConfigsRecord
 from flwr.proto.recordset_pb2 import ConfigsRecordValue as ProtoConfigsRecordValue
 from flwr.proto.recordset_pb2 import DoubleList
@@ -63,6 +71,7 @@ from . import (
 )
 from .message import Error, Message, Metadata
 from .record.typeddict import TypedDict
+from .typing import ConfigsRecordValues
 
 #  === Parameters message ===
 
@@ -442,10 +451,10 @@ def _record_value_from_proto(value_proto: GrpcMessage) -> Any:
     return value
 
 
-def _record_value_dict_to_proto(
-    value_dict: TypedDict[str, Any],
+def record_value_dict_to_proto(
+    value_dict: Union[TypedDict[str, Any], dict[str, ConfigsRecordValues]],
     allowed_types: list[type],
-    value_proto_class: type[T],
+    value_proto_class: Type[T],
 ) -> dict[str, T]:
     """Serialize the record value dict to ProtoBuf.
 
@@ -462,7 +471,7 @@ def _record_value_dict_to_proto(
     return {k: proto(v) for k, v in value_dict.items()}
 
 
-def _record_value_dict_from_proto(
+def record_value_dict_from_proto(
     value_dict_proto: MutableMapping[str, Any]
 ) -> dict[str, Any]:
     """Deserialize the record value dict from ProtoBuf."""
@@ -507,7 +516,7 @@ def parameters_record_from_proto(
 def metrics_record_to_proto(record: MetricsRecord) -> ProtoMetricsRecord:
     """Serialize MetricsRecord to ProtoBuf."""
     return ProtoMetricsRecord(
-        data=_record_value_dict_to_proto(record, [float, int], ProtoMetricsRecordValue)
+        data=record_value_dict_to_proto(record, [float, int], ProtoMetricsRecordValue)
     )
 
 
@@ -516,7 +525,7 @@ def metrics_record_from_proto(record_proto: ProtoMetricsRecord) -> MetricsRecord
     return MetricsRecord(
         metrics_dict=cast(
             dict[str, typing.MetricsRecordValues],
-            _record_value_dict_from_proto(record_proto.data),
+            record_value_dict_from_proto(record_proto.data),
         ),
         keep_input=False,
     )
@@ -525,7 +534,7 @@ def metrics_record_from_proto(record_proto: ProtoMetricsRecord) -> MetricsRecord
 def configs_record_to_proto(record: ConfigsRecord) -> ProtoConfigsRecord:
     """Serialize ConfigsRecord to ProtoBuf."""
     return ProtoConfigsRecord(
-        data=_record_value_dict_to_proto(
+        data=record_value_dict_to_proto(
             record,
             [bool, int, float, str, bytes],
             ProtoConfigsRecordValue,
@@ -538,7 +547,7 @@ def configs_record_from_proto(record_proto: ProtoConfigsRecord) -> ConfigsRecord
     return ConfigsRecord(
         configs_dict=cast(
             dict[str, typing.ConfigsRecordValues],
-            _record_value_dict_from_proto(record_proto.data),
+            record_value_dict_from_proto(record_proto.data),
         ),
         keep_input=False,
     )
