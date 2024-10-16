@@ -1,9 +1,6 @@
 :og:description: Learn how to enable TLS for secure communication between Flower components, ensuring encrypted data transmission using PEM-encoded certificates and private keys.
-
-.. title:: How-to Tutorial: Enable TLS for Secure Connections in Flower
-
 .. meta::
-   :description: Learn how to enable TLS for secure communication between Flower components, ensuring encrypted data transmission using PEM-encoded certificates and private keys.
+    :description: Learn how to enable TLS for secure communication between Flower components, ensuring encrypted data transmission using PEM-encoded certificates and private keys.
 
 Enable TLS for Secure Connections
 =================================
