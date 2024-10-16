@@ -20,7 +20,7 @@ cd doc
 # Get a list of languages based on the folders in locales
 languages="en `find locales/ -mindepth 1 -maxdepth 1 -type d -exec basename '{}' \;`"
 # Get a list of tags, excluding those before v1.0.0
-versions="`git for-each-ref '--format=%(refname:lstrip=-1)' refs/tags/ | grep -iE '^v((([1-9]|[0-9]{2,}).*\.([8-9]|[0-9]{2,}).*)|([2-9]|[0-9]{2,}).*)$'`"
+versions="${1:-`git for-each-ref '--format=%(refname:lstrip=-1)' refs/tags/ | grep -iE '^v((([1-9]|[0-9]{2,}).*\.([8-9]|[0-9]{2,}).*)|([2-9]|[0-9]{2,}).*)$'`}"
 
 for current_version in ${versions}; do
  
@@ -50,23 +50,6 @@ for current_version in ${versions}; do
 
     fi
 
-    # Only for v1.5.0, update the versions listed in the switcher
-    if [ "$current_version" = "v1.5.0" ]; then
-      corrected_versions=$(cat <<-END
-html_context['versions'] = list()
-versions = [
-    tag.name
-    for tag in repo.tags
-    if int(tag.name[1]) > 0 and int(tag.name.split('.')[1]) >= 5
-]
-versions.append('main')
-for version in versions:
-    html_context['versions'].append({'name': version})
-END
-      )
-      echo "$corrected_versions" >> source/conf.py
-    fi
-    
     # Copy updated version of html files
     cp -r ${tmp_dir}/_templates source
  

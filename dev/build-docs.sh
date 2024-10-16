@@ -17,7 +17,7 @@ cd $ROOT
 cd doc
 
 if [ "$1" = true ]; then
-    ./build-versioned-docs.sh
+    ./build-versioned-docs.sh $2
 else
     make html
 fi
