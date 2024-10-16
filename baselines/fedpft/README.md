@@ -62,51 +62,54 @@ dataset: [CIFAR-100, Caltech101]
 To construct the Python environment, simply run:
 
 ```bash
-# Set directory to use python 3.10 (install with `pyenv install <version>` if you don't have it)
-pyenv local 3.10.12
+# Create the virtual environment
+pyenv virtualenv 3.10.14 <name-of-your-baseline-env>
 
-# Tell poetry to use python3.10
-poetry env use 3.10.12
+# Activate it
+pyenv activate <name-of-your-baseline-env>
 
-# Install
-poetry install
+# Install the baseline
+pip install -e .
 ```
-
 
 ## Running the Experiments
 
 To run this FedPFT with CIFAR-100 baseline, first ensure you have activated your Poetry environment (execute `poetry shell` from this directory), then:
 
 ```bash
-python -m fedpft.main # this will run using the default settings in the `conf/config.yaml`
+flwr run # this will run using the default settings set in `pyproject.toml`
 
 # you can override settings directly from the command line
-python -m fedpft.main dataset=Caltech101 model=clip # will set dataset to Caltech101 and the pre-trained model to Clip-ViT/B32
+flwr run --run-config "server-rounds=3"
 ```
 
 To run using FedAvg:
-```bash
-# this will use a frozen, pre-trained model and train the classifier head
-python -m fedpft.main strategy=FedAvg client=FedAvg num_rounds=20 dataset=Caltech101 model=clip num_gpus=0.2
 
+```bash
+# With CIFAR100 dataset
+flwr run --run-config "cifar-fedavg.toml"
+
+# With Caltech101 dataset
+flwr run --run-config "caltech-fedavg.toml"
 ```
 
-
 ## Expected Results
-
 
 With the following command, we run both FedPFT and FedAvg configurations. 
 
 ```bash
 # FedPFT
-python -m fedpft.main dataset=CIFAR100 model=resnet50
-python -m fedpft.main dataset=Caltech101 model=clip
+# CIFAR100
+flwr run
+# Caltech101
+flwr run --run-config "caltech-fedpft.toml"
 
 # FedAvg with pre-trained, frozen models
-python -m fedpft.main strategy=fedavg client=fedavg dataset=CIFAR100 model=resnet50 num_rounds=20 strategy.on_fit_config_fn.num_epochs=1 num_gpus=0.5
-python -m fedpft.main strategy=fedavg client=fedavg dataset=Caltech101 model=clip num_rounds=20 num_gpus=0.2
+# CIFAR100
+flwr run --run-config "cifar-fedavg.toml"
+# Caltech101
+flwr run --run-config "caltech-fedavg.toml"
 ```
 
-The above commands would generate results that you can plot and would look like the plot shown below. This plot was generated using the jupyter notebook in the `docs/` directory of this baseline after running the commands above.
-
 ![](_static/FedPft.png)
+
