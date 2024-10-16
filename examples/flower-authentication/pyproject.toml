@@ -3,16 +3,37 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "flower-client-authentication"
-version = "0.1.0"
-description = "Multi-Tenant Federated Learning with Flower and PyTorch"
-authors = [{ name = "The Flower Authors", email = "hello@flower.ai" }]
+name = "authexample"
+version = "1.0.0"
+description = "Federated Learning with PyTorch and authenticated Flower "
+license = "Apache-2.0"
 dependencies = [
-    "flwr-nightly[rest,simulation]",
-    "torch==1.13.1",
-    "torchvision==0.14.1",
-    "tqdm==4.66.3",
+    "flwr>=1.12.0",
+    "flwr-datasets[vision]>=0.3.0",
+    "torch==2.2.1",
+    "torchvision==0.17.1",
 ]
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
+
+[tool.flwr.app]
+publisher = "flwrlabs"
+
+[tool.flwr.app.components]
+serverapp = "authexample.server_app:app"
+clientapp = "authexample.client_app:app"
+
+[tool.flwr.app.config]
+num-server-rounds = 3
+fraction-evaluate = 0.5
+local-epochs = 1
+learning-rate = 0.1
+batch-size = 32
+
+[tool.flwr.federations]
+default = "superexec"
+
+[tool.flwr.federations.my-federation]
+address = "127.0.0.1:9093" # Address of the SuperExec
+root-certificates = "certificates/ca.crt"
