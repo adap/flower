@@ -14,18 +14,23 @@
 # ==============================================================================
 """SQLite based implemenation of server state."""
 
+# pylint: disable=too-many-lines
 
 import json
 import re
 import sqlite3
 import time
 from collections.abc import Sequence
-from logging import DEBUG, ERROR
+from logging import DEBUG, ERROR, WARNING
 from typing import Any, Optional, Union, cast
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
-from flwr.common.constant import NODE_ID_NUM_BYTES, RUN_ID_NUM_BYTES
+from flwr.common.constant import (
+    MESSAGE_TTL_TOLERANCE,
+    NODE_ID_NUM_BYTES,
+    RUN_ID_NUM_BYTES,
+)
 from flwr.common.typing import Run, UserConfig
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
@@ -146,6 +151,11 @@ class SqliteState(State):  # pylint: disable=R0904
         ----------
         log_queries : bool
             Log each query which is executed.
+
+        Returns
+        -------
+        list[tuple[str]]
+            The list of all tables in the DB.
         """
         self.conn = sqlite3.connect(self.database_path)
         self.conn.execute("PRAGMA foreign_keys = ON;")
@@ -295,6 +305,7 @@ class SqliteState(State):  # pylint: disable=R0904
                 WHERE consumer_anonymous == 1
                 AND   consumer_node_id == 0
                 AND   delivered_at = ""
+                AND   (created_at + ttl) > CAST(strftime('%s', 'now') AS REAL)
             """
         else:
             # Convert the uint64 value to sint64 for SQLite
@@ -307,6 +318,7 @@ class SqliteState(State):  # pylint: disable=R0904
                 WHERE consumer_anonymous == 0
                 AND   consumer_node_id == :node_id
                 AND   delivered_at = ""
+                AND   (created_at + ttl) > CAST(strftime('%s', 'now') AS REAL)
             """
 
         if limit is not None:
@@ -372,7 +384,49 @@ class SqliteState(State):  # pylint: disable=R0904
         # Create task_id
         task_id = uuid4()
 
-        # Store TaskIns
+        task_ins_id = task_res.task.ancestry[0]
+        task_ins = self.get_valid_task_ins(task_ins_id)
+        if task_ins is None:
+            log(
+                ERROR,
+                "Failed to store TaskRes: "
+                "TaskIns with task_id %s does not exist or has expired.",
+                task_ins_id,
+            )
+            return None
+
+        # Ensure that the consumer_id of taskIns matches the producer_id of taskRes.
+        if (
+            task_ins
+            and task_res
+            and not (task_ins["consumer_anonymous"] or task_res.task.producer.anonymous)
+            and convert_sint64_to_uint64(task_ins["consumer_node_id"])
+            != task_res.task.producer.node_id
+        ):
+            return None
+
+        # Fail if the TaskRes TTL exceeds the
+        # expiration time of the TaskIns it replies to.
+        # Condition: TaskIns.created_at + TaskIns.ttl ≥
+        #            TaskRes.created_at + TaskRes.ttl
+        # A small tolerance is introduced to account
+        # for floating-point precision issues.
+        max_allowed_ttl = (
+            task_ins["created_at"] + task_ins["ttl"] - task_res.task.created_at
+        )
+        if task_res.task.ttl and (
+            task_res.task.ttl - max_allowed_ttl > MESSAGE_TTL_TOLERANCE
+        ):
+            log(
+                WARNING,
+                "Received TaskRes with TTL %.2f "
+                "exceeding the allowed maximum TTL %.2f.",
+                task_res.task.ttl,
+                max_allowed_ttl,
+            )
+            return None
+
+        # Store TaskRes
         task_res.task_id = str(task_id)
         data = (task_res_to_dict(task_res),)
 
@@ -394,8 +448,8 @@ class SqliteState(State):  # pylint: disable=R0904
 
         return task_id
 
-    # pylint: disable-next=R0914
-    def get_task_res(self, task_ids: set[UUID], limit: Optional[int]) -> list[TaskRes]:
+    # pylint: disable-next=R0912,R0915,R0914
+    def get_task_res(self, task_ids: set[UUID]) -> list[TaskRes]:
         """Get TaskRes for task_ids.
 
         Usually, the Driver API calls this method to get results for instructions it has
@@ -410,8 +464,34 @@ class SqliteState(State):  # pylint: disable=R0904
         will only take effect if enough task_ids are in the set AND are currently
         available. If `limit` is set, it has to be greater than zero.
         """
-        if limit is not None and limit < 1:
-            raise AssertionError("`limit` must be >= 1")
+        # Check if corresponding TaskIns exists and is not expired
+        task_ids_placeholders = ",".join([f":id_{i}" for i in range(len(task_ids))])
+        query = f"""
+            SELECT *
+            FROM task_ins
+            WHERE task_id IN ({task_ids_placeholders})
+            AND (created_at + ttl) > CAST(strftime('%s', 'now') AS REAL)
+        """
+        query += ";"
+
+        task_ins_data = {}
+        for index, task_id in enumerate(task_ids):
+            task_ins_data[f"id_{index}"] = str(task_id)
+
+        task_ins_rows = self.query(query, task_ins_data)
+
+        if not task_ins_rows:
+            return []
+
+        for row in task_ins_rows:
+            # Convert values from sint64 to uint64
+            convert_sint64_values_in_dict_to_uint64(
+                row, ["run_id", "producer_node_id", "consumer_node_id"]
+            )
+            task_ins = dict_to_task_ins(row)
+            if task_ins.task.created_at + task_ins.task.ttl <= time.time():
+                log(WARNING, "TaskIns with task_id %s is expired.", task_ins.task_id)
+                task_ids.remove(UUID(task_ins.task_id))
 
         # Retrieve all anonymous Tasks
         if len(task_ids) == 0:
@@ -426,10 +506,6 @@ class SqliteState(State):  # pylint: disable=R0904
         """
 
         data: dict[str, Union[str, float, int]] = {}
-
-        if limit is not None:
-            query += " LIMIT :limit"
-            data["limit"] = limit
 
         query += ";"
 
@@ -505,9 +581,6 @@ class SqliteState(State):  # pylint: disable=R0904
 
         # Make TaskRes containing node unavailabe error
         for row in task_ins_rows:
-            if limit and len(result) == limit:
-                break
-
             for row in rows:
                 # Convert values from sint64 to uint64
                 convert_sint64_values_in_dict_to_uint64(
@@ -782,8 +855,9 @@ class SqliteState(State):  # pylint: disable=R0904
         # Convert the uint64 value to sint64 for SQLite
         sint64_run_id = convert_uint64_to_sint64(run_id)
         query = "SELECT * FROM run WHERE run_id = ?;"
-        try:
-            row = self.query(query, (sint64_run_id,))[0]
+        rows = self.query(query, (sint64_run_id,))
+        if rows:
+            row = rows[0]
             return Run(
                 run_id=convert_sint64_to_uint64(row["run_id"]),
                 fab_id=row["fab_id"],
@@ -791,9 +865,8 @@ class SqliteState(State):  # pylint: disable=R0904
                 fab_hash=row["fab_hash"],
                 override_config=json.loads(row["override_config"]),
             )
-        except sqlite3.IntegrityError:
-            log(ERROR, "`run_id` does not exist.")
-            return None
+        log(ERROR, "`run_id` does not exist.")
+        return None
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""
@@ -809,6 +882,33 @@ class SqliteState(State):  # pylint: disable=R0904
         except sqlite3.IntegrityError:
             log(ERROR, "`node_id` does not exist.")
             return False
+
+    def get_valid_task_ins(self, task_id: str) -> Optional[dict[str, Any]]:
+        """Check if the TaskIns exists and is valid (not expired).
+
+        Return TaskIns if valid.
+        """
+        query = """
+            SELECT *
+            FROM task_ins
+            WHERE task_id = :task_id
+        """
+        data = {"task_id": task_id}
+        rows = self.query(query, data)
+        if not rows:
+            # TaskIns does not exist
+            return None
+
+        task_ins = rows[0]
+        created_at = task_ins["created_at"]
+        ttl = task_ins["ttl"]
+        current_time = time.time()
+
+        # Check if TaskIns is expired
+        if ttl is not None and created_at + ttl <= current_time:
+            return None
+
+        return task_ins
 
 
 def dict_factory(

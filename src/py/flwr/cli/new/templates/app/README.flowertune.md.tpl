@@ -55,7 +55,7 @@ We use Mistral-7B model with 4-bit quantization as default. The estimated VRAM c
 | :--------: | :--------: | :--------: | :--------: | :--------: |
 |    VRAM    | ~25.50 GB  | ~17.30 GB  | ~22.80 GB  | ~17.40 GB  |
 
-You can adjust the CPU/GPU resources you assign to each of the clients based on your device, which are specified with `options.backend.clientapp-cpus` and `options.backend.clientapp-gpus` under `[tool.flwr.federations.local-simulation]` entry in `pyproject.toml`.
+You can adjust the CPU/GPU resources you assign to each of the clients based on your device, which are specified with `options.backend.client-resources.num-cpus` and `options.backend.client-resources.num-gpus` under `[tool.flwr.federations.local-simulation]` entry in `pyproject.toml`.
 
 
 ## Model saving
