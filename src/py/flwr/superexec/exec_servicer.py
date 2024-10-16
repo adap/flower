@@ -36,6 +36,7 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
 )
 
 from .executor import Executor, RunTracker
+from .state_factory import ExecStateFactory
 
 SELECT_TIMEOUT = 1  # Timeout for selecting ready-to-read file descriptors (in seconds)
 
@@ -43,8 +44,9 @@ SELECT_TIMEOUT = 1  # Timeout for selecting ready-to-read file descriptors (in s
 class ExecServicer(exec_pb2_grpc.ExecServicer):
     """SuperExec API servicer."""
 
-    def __init__(self, executor: Executor) -> None:
+    def __init__(self, executor: Executor, state_factory: ExecStateFactory) -> None:
         self.executor = executor
+        self.state_factory = state_factory
         self.runs: dict[int, RunTracker] = {}
 
     def StartRun(
@@ -64,6 +66,13 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             return StartRunResponse()
 
         self.runs[run.run_id] = run
+
+        state = self.state_factory.state()
+        state.store_run(
+            run.run_id,
+            user_config_from_proto(request.override_config),
+            request.fab.hash_str,
+        )
 
         # Start a background thread to capture the log output
         capture_thread = threading.Thread(
