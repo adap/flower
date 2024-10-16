@@ -131,6 +131,7 @@ def _train(tconfig):
             del images
             del labels
             gc.collect()
+            break
         epoch_loss /= total
         epoch_acc = correct / total
     net = net.cpu()

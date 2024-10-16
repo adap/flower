@@ -4,61 +4,46 @@ Needed only when the strategy is not yet implemented in Flower or because you wa
 extend or modify the functionality of an existing strategy.
 """
 
-import gc
-from logging import INFO
-
 import flwr as fl
-from flwr.common.logger import log
-
 from feddebug import utils
-from feddebug.models import initialize_model
+from feddebug.differential_testing import differential_testing_fl_clients
 
 
-class FedAvgSave(fl.server.strategy.FedAvg):
-    """SaveModelStrategy."""
-
-    def __init__(self, cfg, cache, *args, **kwargs):
+class FedAvgWithFedDebug(fl.server.strategy.FedAvg):
+    """FedAvg with Differential Testing."""
+    def __init__(self, num_bugs, num_inputs, input_shape, na_t, create_model_fn, device, fast, *args, **kwargs):
         """Initialize."""
         super().__init__(*args, **kwargs)
-        self.cfg = cfg
-        self.cache = cache
+        self.input_shape = input_shape
+        self.num_bugs = num_bugs
+        self.num_inputs = num_inputs
+        self.na_t = na_t
+        self.device = device
+        self.fast = fast
+        self.create_model_fn = create_model_fn
+
 
     def aggregate_fit(self, server_round, results, failures):
         """Aggregate clients updates."""
-        round_dict = {}
-        round_dict["client2ws"] = {
-            fit_res.metrics["cid"]: self.get_state_dict_from_parameters(
-                fit_res.parameters
-            )
-            for _, fit_res in results
-        }
-
-        client_ids = round_dict["client2ws"].keys()
-
-        log(INFO, f"participating clients: {client_ids}")
-
-        # client2num_examples save in round_dict from results
-        round_dict["client2num_examples"] = {
-            fit_res.metrics["cid"]: fit_res.num_examples for _, fit_res in results
-        }
-        aggregated_parameters, aggregated_metrics = super().aggregate_fit(
-            server_round, results, failures
-        )
-        round_key = f"{self.cfg.exp_key}-round:{server_round}"
-
-        if aggregated_parameters is not None:
-            round_dict["gm_ws"] = self.get_state_dict_from_parameters(
-                aggregated_parameters
-            )
-            self.cache[round_key] = round_dict
-            round_dict.clear()
-        del results
-        gc.collect()
+        potential_mal_clients = self._run_differential_testing_helper(results)
+        aggregated_parameters, aggregated_metrics = super(
+        ).aggregate_fit(server_round, results, failures)
+        # print(f"Potential Malicious Clients: {potential_mal_clients}, ")
+        # print(f"Aggregated Metrics: {aggregated_metrics}")
+        aggregated_metrics["potential_malicious_clients"] = potential_mal_clients
         return aggregated_parameters, aggregated_metrics
 
-    def get_state_dict_from_parameters(self, parameters):
+
+
+    def _get_model_from_parameters(self, parameters):
         """Convert parameters to state_dict."""
         ndarr = fl.common.parameters_to_ndarrays(parameters)
-        temp_net = initialize_model(self.cfg.model.name, self.cfg.dataset)["model"]
+        temp_net = self.create_model_fn() 
         utils.set_parameters(temp_net, ndarr)
-        return temp_net.state_dict()
+        return temp_net
+
+
+    def _run_differential_testing_helper(self, results):
+        client2model = {fit_res.metrics["cid"]: self._get_model_from_parameters(fit_res.parameters) for _, fit_res in results}
+        predicted_faulty_clients = differential_testing_fl_clients(client2model, self.num_bugs, self.num_inputs, self.input_shape, self.na_t, self.fast, self.device)
+        return predicted_faulty_clients

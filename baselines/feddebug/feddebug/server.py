@@ -14,7 +14,7 @@ from flwr.common import ndarrays_to_parameters
 from flwr.common.logger import log
 
 from feddebug.models import test, initialize_model
-from feddebug.strategy import FedAvgSave
+from feddebug.strategy import FedAvgWithFedDebug
 from feddebug.utils import get_parameters, set_parameters
 
 
@@ -65,14 +65,23 @@ def _get_fit_config(cfg, server_round):
     return config
 
 
-def get_strategy(cfg, server_testdata, cache):
+def get_strategy(cfg, server_testdata):
     """Return the strategy based on the configuration."""
+    def _create_model():
+        return initialize_model(cfg.model.name, cfg.dataset)["model"]
+
+    num_bugs = len(cfg.faulty_clients_ids)
     eval_gm_func = _get_evaluate_gm_func(cfg, server_testdata)
-    initial_net = initialize_model(cfg.model.name, cfg.dataset)["model"]
+    initial_net = _create_model()
     if cfg.strategy.name in ["fedavg"]:
-        strategy = FedAvgSave(
-            cfg=cfg,
-            cache=cache,
+        strategy = FedAvgWithFedDebug(
+            num_bugs=num_bugs,
+            num_inputs=cfg.num_inputs,
+            input_shape=server_testdata.dataset[0]["image"].clone().detach().shape,
+            na_t=cfg.neuron_activation_threshold,
+            create_model_fn=_create_model,
+            device=cfg.device,
+            fast=cfg.faster_input_generation,
             accept_failures=False,
             fraction_fit=0,
             fraction_evaluate=0.0,

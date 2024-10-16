@@ -12,10 +12,11 @@ defined here of course.
 import random
 import numpy as np
 from torch.utils.data import DataLoader
-from torchvision import transforms
 from flwr.common.logger import log
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import DirichletPartitioner, IidPartitioner
+from feddebug.utils import create_transform
+from torchvision import transforms
 from logging import INFO, WARNING
 
 
@@ -24,7 +25,6 @@ class ClientsAndServerDatasets:
     
     def __init__(self, cfg):
         self.cfg = cfg            
-        self.transform = self._create_transform()
         self.client_id_to_loader = {}
         self.server_testloader = None
         self.clients_and_server_raw_data = None
@@ -32,14 +32,6 @@ class ClientsAndServerDatasets:
         self._set_distribution_partitioner()
         self._load_datasets()
         self._introduce_label_noise()
-
-    def _create_transform(self):
-        """Creates and returns the transformation pipeline."""
-        return transforms.Compose([
-            transforms.Resize((32, 32)),
-            transforms.ToTensor(),
-            transforms.Normalize((0.5,), (0.5,)),
-        ])
     
     def _set_distribution_partitioner(self):
         """Set the data distribution partitioner based on configuration."""
@@ -100,9 +92,16 @@ class ClientsAndServerDatasets:
     def _create_dataloader(self, ds, batch_size=64, shuffle=True):
         """Create a DataLoader with applied transformations."""
         def apply_transforms(batch):
-            batch["image"] = [self.transform(img) for img in batch["image"]]
+            batch["image"] = [transform(img) for img in batch["image"]]
             return batch
 
+        temp_transform = create_transform()
+
+        transform = transforms.Compose([
+            transforms.Resize((32, 32)),
+            transforms.ToTensor(),
+            temp_transform,
+        ])
         transformed_dataset = ds.with_transform(apply_transforms)
         dataloader = DataLoader(transformed_dataset, batch_size=batch_size, shuffle=shuffle)
         return dataloader

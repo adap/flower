@@ -6,7 +6,9 @@ results, plotting.
 """
 
 import random
-from logging import INFO
+
+from logging import  INFO
+
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -14,6 +16,7 @@ import pandas as pd
 import torch
 from diskcache import Index
 from flwr.common.logger import log
+from torchvision import transforms
 
 
 def seed_everything(seed=786):
@@ -26,6 +29,29 @@ def seed_everything(seed=786):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
+
+
+
+
+def calculate_fault_localization_accuracy(true_faulty_clients, predicted_faulty_clients_on_each_input):
+    detection_acc = 0
+    for i, pred_faulty_clients in enumerate(predicted_faulty_clients_on_each_input):
+        log(INFO, f"I{i} Potential Malicious client(s) {pred_faulty_clients}")
+        correct_localize_faults = len(true_faulty_clients.intersection(pred_faulty_clients))
+        acc = (correct_localize_faults / len(true_faulty_clients)) * 100
+        detection_acc += acc
+    fault_localization_acc = detection_acc / len(
+        predicted_faulty_clients_on_each_input
+    )
+    return fault_localization_acc
+
+def create_transform():
+    """Creates and returns the transformation pipeline."""
+
+    tfms =  transforms.Compose([
+        transforms.Normalize((0.5,), (0.5,)),
+    ])
+    return tfms
 
 def _plot_line_plots(df_plot):
     fig, axs = plt.subplots(2, 2)

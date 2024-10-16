@@ -16,22 +16,22 @@ from flwr.common.logger import log
 from feddebug import server, utils
 from feddebug.client import gen_client_func
 from feddebug.dataset import ClientsAndServerDatasets
-from feddebug.differential_testing import (
-    eval_na_threshold,
-    run_fed_debug_differential_testing,
-)
-from feddebug.utils import seed_everything
-
-seed_everything(786)
+# from feddebug.differential_testing import (
+#     eval_na_threshold,
+#     run_fed_debug_differential_testing,
+# )
 
 
-def _flwr_fl_sim(cfg, client2data, server_data, cache):
+utils.seed_everything(786)
+
+
+def _flwr_fl_sim(cfg, client2data, server_data):
     client_app = fl.client.ClientApp(
         client_fn=partial(gen_client_func, cfg, client2data)
     )
     server_config = fl.server.ServerConfig(num_rounds=cfg.strategy.num_rounds)
     server_app = fl.server.ServerApp(
-        config=server_config, strategy=server.get_strategy(cfg, server_data, cache)
+        config=server_config, strategy=server.get_strategy(cfg, server_data)
     )
 
     fl.simulation.run_simulation(
@@ -54,24 +54,19 @@ def run_simulation(cfg):
 
     log(INFO, f" ***********  Starting Experiment: {cfg.exp_key} ***************")
 
-    if cfg.check_cache:
-        if cfg.exp_key in train_cache:
-            temp_dict = train_cache[cfg.exp_key]
-            if "complete" in temp_dict and temp_dict["complete"]:  # type: ignore
-                log(INFO, f"Experiment already completed: {cfg.exp_key}")
-                return
+    
 
     log(DEBUG, f"Simulation Configuration: {cfg}")
 
     ds_prep = ClientsAndServerDatasets(cfg)
     ds_dict = ds_prep.get_data()
+
     
-    _flwr_fl_sim(cfg, ds_dict["client2data"], ds_dict["server_testdata"], train_cache)
+    _flwr_fl_sim(cfg, ds_dict["client2data"], ds_dict["server_testdata"])
   
     train_cache[cfg.exp_key] = {
         "train_cfg": cfg,
         "complete": True,
-        "input_shape": ds_dict["server_testdata"].dataset[0]["image"].clone().detach().shape,
     }
     log(INFO, f"Training Complete for Experiment: {cfg.exp_key} ")
 
@@ -84,24 +79,17 @@ def main(cfg) -> None:
         and not cfg.vary_thresholds
         and not cfg.generate_table_csv
     ):
-        start = time.time()
         run_simulation(cfg)
-    #     time.sleep(1)
-    #     print("\n")
-    #     run_fed_debug_differential_testing(cfg)
-    #     print(f"Total Time taken (training + testing): {time.time() - start}")
+    
 
-    # if cfg.vary_thresholds:
-    #     eval_na_threshold(cfg)
+    if cfg.generate_table_csv:
+        utils.generate_table2_csv(cfg.storage.dir + cfg.storage.results_cache_name)
 
-    # if cfg.generate_table_csv:
-    #     utils.generate_table2_csv(cfg.storage.dir + cfg.storage.results_cache_name)
-
-    # if cfg.generate_thresholds_exp_graph:
-    #     utils.gen_thresholds_exp_graph(
-    #         cache_path=cfg.storage.dir + cfg.storage.results_cache_name,
-    #         threshold_exp_key=cfg.threshold_variation_exp_key,
-    #     )
+    if cfg.generate_thresholds_exp_graph:
+        utils.gen_thresholds_exp_graph(
+            cache_path=cfg.storage.dir + cfg.storage.results_cache_name,
+            threshold_exp_key=cfg.threshold_variation_exp_key,
+        )
 
 
 if __name__ == "__main__":
