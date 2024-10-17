@@ -1,3 +1,7 @@
+:og:description: Learn how to enable TLS for secure communication between Flower components, ensuring encrypted data transmission using PEM-encoded certificates and private keys.
+.. meta::
+    :description: Learn how to enable TLS for secure communication between Flower components, ensuring encrypted data transmission using PEM-encoded certificates and private keys.
+
 Enable TLS for Secure Connections
 =================================
 
