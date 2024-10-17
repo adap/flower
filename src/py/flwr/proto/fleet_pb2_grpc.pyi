@@ -30,6 +30,10 @@ class FleetStub:
     HTTP API path: /api/v1/fleet/pull-task-ins
     """
 
+    PullMessages: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.fleet_pb2.PullMessagesRequest,
+        flwr.proto.fleet_pb2.PullMessagesResponse]
+
     PushTaskRes: grpc.UnaryUnaryMultiCallable[
         flwr.proto.fleet_pb2.PushTaskResRequest,
         flwr.proto.fleet_pb2.PushTaskResResponse]
@@ -37,6 +41,10 @@ class FleetStub:
 
     HTTP API path: /api/v1/fleet/push-task-res
     """
+
+    PushMessages: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.fleet_pb2.PushMessagesRequest,
+        flwr.proto.fleet_pb2.PushMessagesResponse]
 
     GetRun: grpc.UnaryUnaryMultiCallable[
         flwr.proto.run_pb2.GetRunRequest,
@@ -79,6 +87,12 @@ class FleetServicer(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
+    def PullMessages(self,
+        request: flwr.proto.fleet_pb2.PullMessagesRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.fleet_pb2.PullMessagesResponse: ...
+
+    @abc.abstractmethod
     def PushTaskRes(self,
         request: flwr.proto.fleet_pb2.PushTaskResRequest,
         context: grpc.ServicerContext,
@@ -88,6 +102,12 @@ class FleetServicer(metaclass=abc.ABCMeta):
         HTTP API path: /api/v1/fleet/push-task-res
         """
         pass
+
+    @abc.abstractmethod
+    def PushMessages(self,
+        request: flwr.proto.fleet_pb2.PushMessagesRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.fleet_pb2.PushMessagesResponse: ...
 
     @abc.abstractmethod
     def GetRun(self,
