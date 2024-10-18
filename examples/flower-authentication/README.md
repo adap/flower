@@ -34,6 +34,7 @@ flower-authentication
 ├── pyproject.toml      # Project metadata like dependencies and configs
 ├── certificate.conf    # Configuration for OpenSSL
 ├── generate.sh         # Generate certificates and keys
+├── prepare_dataset.py  # Generate datasets for each SuperNode to use
 └── README.md
 ```
 
@@ -98,7 +99,7 @@ At this point your server-side is idling. First, let's connect two `SuperNodes`,
 
 ## Start the long-running Flower client-side (SuperNode)
 
-> [!NOTE]
+> \[!NOTE\]
 > Typically each `SuperNode` runs in a different entity/organization which has access to a dataset. In this example we are going to artificially create N dataset splits and saved them into a new directory called `datasets/`. Then, each `SuperNode` will be pointed to the dataset it should load. We provide a simple python script that does the download, partitione and saving of CIFAR-10.
 
 ```bash
@@ -113,7 +114,7 @@ flower-supernode \
     --superlink 127.0.0.1:9092 \
     --auth-supernode-private-key keys/client_credentials_1 \
     --auth-supernode-public-key keys/client_credentials_1.pub \
-    --node-config 'dataset-path="dataset/cifar10_part_1"'
+    --node-config 'dataset-path="datasets/cifar10_part_1"'
 ```
 
 In yet another new terminal window, start the second long-running Flower client:
@@ -124,7 +125,7 @@ flower-supernode \
     --superlink 127.0.0.1:9092 \
     --auth-supernode-private-key keys/client_credentials_2 \
     --auth-supernode-public-key keys/client_credentials_2.pub \
-    --node-config 'dataset-path="dataset/cifar10_part_2"'
+    --node-config 'dataset-path="datasets/cifar10_part_2"'
 ```
 
 If you generated more than 2 client credentials, you can add more clients by opening new terminal windows and running the command
@@ -132,7 +133,7 @@ above. Don't forget to specify the correct client private and public keys for ea
 
 ## Run the Flower App
 
-With both the long-running server-side (SuperLink+SuperExec) and two SuperNodes up and running, we can now start run.
+With both the long-running server-side (SuperLink+SuperExec) and two SuperNodes up and running, we can now start run. Note that the command below points to a federation named `my-federation`. Its entry point is defined in the `pyproject.toml`.
 
 ```bash
 flwr run . my-federation
