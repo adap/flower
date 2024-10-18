@@ -15,7 +15,7 @@ from flwr.common.logger import log
 
 from feddebug.models import test, initialize_model
 from feddebug.strategy import FedAvgWithFedDebug
-from feddebug.utils import get_parameters, set_parameters
+from feddebug.utils import get_parameters, set_parameters, calculate_localization_accuracy
 
 
 def _fit_metrics_aggregation_fn(metrics):
@@ -71,9 +71,15 @@ def get_strategy(cfg, server_testdata):
     
     def _callback_fed_debug_evaluate_fn(server_round, predicted_malicious_clients):
         """Callback function to evaluate the global model."""
-        log(INFO, f"FedDebug Round {server_round}: Potential Malicious Clients {predicted_malicious_clients}")
         true_malicious_clients = cfg.malicious_clients_ids
-        # log(INFO, f"F {server_round}: True Malicious Clients {true_malicious_clients}")
+
+        log(INFO, f"***FedDebug Output Round {server_round} ***")
+        log(INFO, f"Total Random Inputs = {cfg.feddebug.r_inputs}")
+        log(INFO, f"True Malicious Clients (Ground Truth) = {true_malicious_clients}")
+        log(INFO, f"Predicted Malicious Clients = {predicted_malicious_clients}")
+        localization_accuracy = calculate_localization_accuracy(true_malicious_clients, predicted_malicious_clients, total_r_inputs=cfg.feddebug.r_inputs)
+        log(INFO, f"FedDebug Localization Accuracy = {localization_accuracy}")
+
         
 
     

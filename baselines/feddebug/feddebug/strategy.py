@@ -41,14 +41,8 @@ class FedAvgWithFedDebug(fl.server.strategy.FedAvg):
         utils.set_parameters(temp_net, ndarr)
         return temp_net
 
-
     def _run_differential_testing_helper(self, results):
         client2model = {fit_res.metrics["cid"]: self._get_model_from_parameters(fit_res.parameters) for _, fit_res in results}
         predicted_faulty_clients_on_each_input = differential_testing_fl_clients(client2model, self.num_bugs, self.num_inputs, self.input_shape, self.na_t, self.fast, self.device)
-
-        # compute the probability of a client being malicious
-        prob_of_mal_clients = Counter([f"{s}" for s in predicted_faulty_clients_on_each_input])
-        
-        for cid in prob_of_mal_clients:
-            prob_of_mal_clients[cid] /= self.num_inputs
-        return dict(prob_of_mal_clients)
+        mal_clients_dict = Counter([f"{e}" for temp_set in predicted_faulty_clients_on_each_input for e in temp_set])
+        return dict(mal_clients_dict)
