@@ -17,7 +17,7 @@
 import argparse
 import time
 from logging import DEBUG, ERROR, INFO
-from typing import Optional, Tuple
+from typing import Optional
 
 import grpc
 
@@ -133,7 +133,9 @@ def run_clientapp(  # pylint: disable=R0914
 
             try:
                 # Load ClientApp
-                client_app: ClientApp = load_client_app_fn(run.fab_id, run.fab_version)
+                client_app: ClientApp = load_client_app_fn(
+                    run.fab_id, run.fab_version, fab.hash_str if fab else ""
+                )
 
                 # Execute ClientApp
                 reply_message = client_app(message=message, context=context)
@@ -196,7 +198,7 @@ def get_token(stub: grpc.Channel) -> Optional[int]:
 
 def pull_message(
     stub: grpc.Channel, token: int
-) -> Tuple[Message, Context, Run, Optional[Fab]]:
+) -> tuple[Message, Context, Run, Optional[Fab]]:
     """Pull message from SuperNode to ClientApp."""
     log(INFO, "Pulling ClientAppInputs for token %s", token)
     try:

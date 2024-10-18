@@ -16,11 +16,13 @@
 
 
 import base64
+import inspect
 import threading
 import unittest
+from collections.abc import Sequence
 from concurrent import futures
 from logging import DEBUG, INFO, WARN
-from typing import Optional, Sequence, Tuple, Union
+from typing import Optional, Union, get_args
 
 import grpc
 
@@ -46,6 +48,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResRequest,
     PushTaskResResponse,
 )
+from flwr.proto.fleet_pb2_grpc import FleetServicer
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns  # pylint: disable=E0611
@@ -60,7 +63,7 @@ class _MockServicer:
         """Initialize mock servicer."""
         self._lock = threading.Lock()
         self._received_client_metadata: Optional[
-            Sequence[Tuple[str, Union[str, bytes]]]
+            Sequence[tuple[str, Union[str, bytes]]]
         ] = None
         self.server_private_key, self.server_public_key = generate_key_pairs()
         self._received_message_bytes: bytes = b""
@@ -73,7 +76,7 @@ class _MockServicer:
         """Handle unary call."""
         with self._lock:
             self._received_client_metadata = context.invocation_metadata()
-            self._received_message_bytes = request.SerializeToString(True)
+            self._received_message_bytes = request.SerializeToString(deterministic=True)
 
             if isinstance(request, CreateNodeRequest):
                 context.send_initial_metadata(
@@ -105,7 +108,7 @@ class _MockServicer:
 
     def received_client_metadata(
         self,
-    ) -> Optional[Sequence[Tuple[str, Union[str, bytes]]]]:
+    ) -> Optional[Sequence[tuple[str, Union[str, bytes]]]]:
         """Return received client metadata."""
         with self._lock:
             return self._received_client_metadata
@@ -151,7 +154,7 @@ def _add_generic_handler(servicer: _MockServicer, server: grpc.Server) -> None:
 
 
 def _get_value_from_tuples(
-    key_string: str, tuples: Sequence[Tuple[str, Union[str, bytes]]]
+    key_string: str, tuples: Sequence[tuple[str, Union[str, bytes]]]
 ) -> bytes:
     value = next((value for key, value in tuples if key == key_string), "")
     if isinstance(value, str):
@@ -435,6 +438,20 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             create_node()
 
             assert self._servicer.received_client_metadata() is None
+
+    def test_fleet_requests_included(self) -> None:
+        """Test if all Fleet requests are included in the authentication mode."""
+        # Prepare
+        requests = get_args(Request)
+        rpc_names = {req.__qualname__.removesuffix("Request") for req in requests}
+        expected_rpc_names = {
+            name
+            for name, ref in inspect.getmembers(FleetServicer)
+            if inspect.isfunction(ref)
+        }
+
+        # Assert
+        assert expected_rpc_names == rpc_names
 
 
 if __name__ == "__main__":

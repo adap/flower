@@ -24,7 +24,7 @@ from logging import DEBUG, ERROR, INFO, WARN
 from pathlib import Path
 from queue import Empty, Queue
 from time import sleep
-from typing import Callable, Dict, Optional
+from typing import Callable, Optional
 
 from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
 from flwr.client.clientapp.utils import get_load_client_app_fn
@@ -44,7 +44,7 @@ from flwr.server.superlink.state import State, StateFactory
 
 from .backend import Backend, error_messages_backends, supported_backends
 
-NodeToPartitionMapping = Dict[int, int]
+NodeToPartitionMapping = dict[int, int]
 
 
 def _register_nodes(
@@ -64,9 +64,9 @@ def _register_node_states(
     nodes_mapping: NodeToPartitionMapping,
     run: Run,
     app_dir: Optional[str] = None,
-) -> Dict[int, NodeState]:
+) -> dict[int, NodeState]:
     """Create NodeState objects and pre-register the context for the run."""
-    node_states: Dict[int, NodeState] = {}
+    node_states: dict[int, NodeState] = {}
     num_partitions = len(set(nodes_mapping.values()))
     for node_id, partition_id in nodes_mapping.items():
         node_states[node_id] = NodeState(
@@ -89,7 +89,7 @@ def _register_node_states(
 def worker(
     taskins_queue: "Queue[TaskIns]",
     taskres_queue: "Queue[TaskRes]",
-    node_states: Dict[int, NodeState],
+    node_states: dict[int, NodeState],
     backend: Backend,
     f_stop: threading.Event,
 ) -> None:
@@ -172,12 +172,13 @@ def put_taskres_into_state(
             pass
 
 
+# pylint: disable=too-many-positional-arguments
 def run_api(
     app_fn: Callable[[], ClientApp],
     backend_fn: Callable[[], Backend],
     nodes_mapping: NodeToPartitionMapping,
     state_factory: StateFactory,
-    node_states: Dict[int, NodeState],
+    node_states: dict[int, NodeState],
     f_stop: threading.Event,
 ) -> None:
     """Run the VCE."""
@@ -251,7 +252,7 @@ def run_api(
 
 
 # pylint: disable=too-many-arguments,unused-argument,too-many-locals,too-many-branches
-# pylint: disable=too-many-statements
+# pylint: disable=too-many-statements,too-many-positional-arguments
 def start_vce(
     backend_name: str,
     backend_config_json_stream: str,
@@ -267,6 +268,8 @@ def start_vce(
     existing_nodes_mapping: Optional[NodeToPartitionMapping] = None,
 ) -> None:
     """Start Fleet API with the Simulation Engine."""
+    nodes_mapping = {}
+
     if client_app_attr is not None and client_app is not None:
         raise ValueError(
             "Both `client_app_attr` and `client_app` are provided, "
@@ -340,17 +343,17 @@ def start_vce(
     # Load ClientApp if needed
     def _load() -> ClientApp:
 
+        if client_app:
+            return client_app
         if client_app_attr:
-            app = get_load_client_app_fn(
+            return get_load_client_app_fn(
                 default_app_ref=client_app_attr,
                 app_path=app_dir,
                 flwr_dir=flwr_dir,
                 multi_app=False,
-            )(run.fab_id, run.fab_version)
+            )(run.fab_id, run.fab_version, run.fab_hash)
 
-        if client_app:
-            app = client_app
-        return app
+        raise ValueError("Either `client_app_attr` or `client_app` must be provided")
 
     app_fn = _load
 

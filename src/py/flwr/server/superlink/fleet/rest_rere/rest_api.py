@@ -18,7 +18,8 @@
 from __future__ import annotations
 
 import sys
-from typing import Awaitable, Callable, TypeVar
+from collections.abc import Awaitable
+from typing import Callable, TypeVar
 
 from google.protobuf.message import Message as GrpcMessage
 
