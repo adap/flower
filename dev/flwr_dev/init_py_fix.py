@@ -8,11 +8,11 @@ Example:
 
 import os
 import sys
-from typing import List
+from typing import Annotated, List
 
 import black
-
-from flwr_tool.init_py_check import get_all_var_list, get_init_dir_list_and_warnings
+import typer
+from flwr_dev.init_py_check import get_all_var_list, get_init_dir_list_and_warnings
 
 
 def fix_all_init_files(dir_list: List[str]) -> None:
@@ -57,13 +57,20 @@ def fix_all_init_files(dir_list: List[str]) -> None:
             print(warning)
 
 
+def fix_init(
+    paths: Annotated[list[str], typer.Argument(help="Path of the files to analyze")]
+):
+    """Sort variables inside __init__.py files."""
+    for path in paths:
+        abs_path: str = os.path.abspath(os.path.join(os.getcwd(), path))
+        _, init_dirs = get_init_dir_list_and_warnings(abs_path)
+        fix_all_init_files(init_dirs)
+
+
 if __name__ == "__main__":
     if len(sys.argv) == 0:
         raise Exception(  # pylint: disable=W0719
             "Please provide at least one directory path relative "
             "to your current working directory."
         )
-    for i, _ in enumerate(sys.argv):
-        abs_path: str = os.path.abspath(os.path.join(os.getcwd(), sys.argv[i]))
-        warnings, init_dirs = get_init_dir_list_and_warnings(abs_path)
-        fix_all_init_files(init_dirs)
+    fix_init(sys.argv)
