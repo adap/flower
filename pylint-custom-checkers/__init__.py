@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower docstring main package."""
+"""Flower docstring checker main package."""
 
 from flwr.common.version import package_version as _package_version
 
