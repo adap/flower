@@ -47,7 +47,8 @@ class FlowerClient(NumPyClient):
 def client_fn(context: Context):
     """Construct a Client that will be run in a ClientApp."""
 
-    # Read the node_config to fetch data partition associated to this node
+    # Read the node_config to get the path to the dataset the SuperNode running
+    # this ClientApp has access to
     dataset_path = context.node_config["dataset-path"]
 
     # Read run_config to fetch hyperparameters relevant to this run
