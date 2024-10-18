@@ -84,7 +84,7 @@ def load_data_to_disk(num_partitions: int = 2):
             dataset="uoft-cs/cifar10",
             partitioners={"train": partitioner},
         )
-    
+
     for partition_id in range(num_partitions):
         partition = fds.load_partition(partition_id)
         partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
