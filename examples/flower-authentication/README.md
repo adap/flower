@@ -92,7 +92,7 @@ flower-supernode ./ \
     --superlink 127.0.0.1:9092 \
     --auth-supernode-private-key keys/client_credentials_1 \
     --auth-supernode-public-key keys/client_credentials_1.pub \
-    --node-config "partition-id=0 num-partitions=2"
+    --node-config 'dataset-path="dataset/cifar10_1"'
 ```
 
 In yet another new terminal window, start the second long-running Flower client:
@@ -103,7 +103,7 @@ flower-supernode ./ \
     --superlink 127.0.0.1:9092 \
     --auth-supernode-private-key keys/client_credentials_2 \
     --auth-supernode-public-key keys/client_credentials_2.pub \
-    --node-config "partition-id=1 num-partitions=2"
+    --node-config 'dataset-path="dataset/cifar10_2"'
 ```
 
 If you generated more than 2 client credentials, you can add more clients by opening new terminal windows and running the command
