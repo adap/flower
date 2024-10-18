@@ -100,7 +100,7 @@ At this point your server-side is idling. First, let's connect two `SuperNodes`,
 ## Start the long-running Flower client-side (SuperNode)
 
 > \[!NOTE\]
-> Typically each `SuperNode` runs in a different entity/organization which has access to a dataset. In this example we are going to artificially create N dataset splits and saved them into a new directory called `datasets/`. Then, each `SuperNode` will be pointed to the dataset it should load via the `--node-config` argument. We provide a simple Python script that does the download, partitione and saving of CIFAR-10.
+> Typically each `SuperNode` runs in a different entity/organization which has access to a dataset. In this example we are going to artificially create N dataset splits and saved them into a new directory called `datasets/`. Then, each `SuperNode` will be pointed to the dataset it should load via the `--node-config` argument. We provide a script that does the download, partition and saving of CIFAR-10.
 
 ```bash
 python prepare_dataset.py
@@ -133,13 +133,13 @@ above. Don't forget to specify the correct client private and public keys for ea
 
 > \[!TIP\]
 > Note the `--node-config` passed when spawning the `SuperNode` is accessible to the `ClientApp` via the context. In this example, the `client_fn()` uses it to load the dataset and then proceed with the training of the model.
-
-```
-def client_fn(context: Context):
-    # retrieve the passed `--node-config`
-    dataset_path = context.node_config["dataset-path"]
-    # then load the dataset
-```
+> 
+> ```python
+> def client_fn(context: Context):
+>     # retrieve the passed `--node-config`
+>     dataset_path = context.node_config["dataset-path"]
+>     # then load the dataset
+> ```
 
 ## Run the Flower App
 
