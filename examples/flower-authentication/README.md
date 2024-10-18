@@ -98,6 +98,13 @@ At this point your server-side is idling. First, let's connect two `SuperNodes`,
 
 ## Start the long-running Flower client-side (SuperNode)
 
+> [!NOTE]
+> Typically each `SuperNode` runs in a different entity/organization which has access to a dataset. In this example we are going to artificially create N dataset splits and saved them into a new directory called `datasets/`. Then, each `SuperNode` will be pointed to the dataset it should load. We provide a simple python script that does the download, partitione and saving of CIFAR-10.
+
+```bash
+python prepare_dataset.py
+```
+
 In a new terminal window, start the first long-running Flower client (SuperNode):
 
 ```bash
@@ -106,7 +113,7 @@ flower-supernode \
     --superlink 127.0.0.1:9092 \
     --auth-supernode-private-key keys/client_credentials_1 \
     --auth-supernode-public-key keys/client_credentials_1.pub \
-    --node-config 'dataset-path="dataset/cifar10_1"'
+    --node-config 'dataset-path="dataset/cifar10_part_1"'
 ```
 
 In yet another new terminal window, start the second long-running Flower client:
@@ -117,7 +124,7 @@ flower-supernode \
     --superlink 127.0.0.1:9092 \
     --auth-supernode-private-key keys/client_credentials_2 \
     --auth-supernode-public-key keys/client_credentials_2.pub \
-    --node-config 'dataset-path="dataset/cifar10_2"'
+    --node-config 'dataset-path="dataset/cifar10_part_2"'
 ```
 
 If you generated more than 2 client credentials, you can add more clients by opening new terminal windows and running the command
