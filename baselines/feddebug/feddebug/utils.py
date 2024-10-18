@@ -30,9 +30,6 @@ def seed_everything(seed=786):
     torch.backends.cudnn.benchmark = False
 
 
-
-
-
 def calculate_fault_localization_accuracy(true_faulty_clients, predicted_faulty_clients_on_each_input):
     detection_acc = 0
     for i, pred_faulty_clients in enumerate(predicted_faulty_clients_on_each_input):
@@ -40,9 +37,7 @@ def calculate_fault_localization_accuracy(true_faulty_clients, predicted_faulty_
         correct_localize_faults = len(true_faulty_clients.intersection(pred_faulty_clients))
         acc = (correct_localize_faults / len(true_faulty_clients)) * 100
         detection_acc += acc
-    fault_localization_acc = detection_acc / len(
-        predicted_faulty_clients_on_each_input
-    )
+    fault_localization_acc = detection_acc / len(predicted_faulty_clients_on_each_input)
     return fault_localization_acc
 
 def create_transform():
@@ -117,7 +112,7 @@ def generate_table2_csv(cache_path):
         exp_dict = cache[k]
         cfg = exp_dict["debug_cfg"]
         table_d = {}
-        table_d["Faulty Clients"] = len(cfg.faulty_clients_ids)
+        table_d["Faulty Clients"] = len(cfg.malicious_clients_ids)
         table_d["Total Clients"] = cfg.num_clients
         table_d["Architecture"] = cfg.model.name
         table_d["Dataset"] = cfg.dataset.name
@@ -126,7 +121,7 @@ def generate_table2_csv(cache_path):
         ]
         table_d["Epochs"] = cfg.client.epochs
         table_d["Noise Rate"] = cfg.noise_rate
-        table_d["faulty_clients_ids"] = cfg.faulty_clients_ids
+        table_d["malicious_clients_ids"] = cfg.malicious_clients_ids
         table_d["Data Distribution"] = cfg.data_dist.dist_type
         table_d["Experiment Configuration Key"] = k
 
@@ -162,7 +157,7 @@ def gen_thresholds_exp_graph(cache_path, threshold_exp_key):
                 "Neuron Activation Threshold": na,
                 "Malacious Client(s) Localization Accuracy (%)": acc,
                 "Dataset": cfg.dataset.name,
-                "Faulty Client (s)": cfg.faulty_clients_ids,
+                "Faulty Client (s)": cfg.malicious_clients_ids,
                 "Model": cfg.model.name,
                 "Total Clients": cfg.num_clients,
                 "Epochs": cfg.client.epochs,
@@ -184,11 +179,10 @@ def set_exp_key(cfg):
     """Set the experiment key."""
     key = (
         f"{cfg.model.name}-{cfg.dataset.name}-"
-        f"faulty_clients[{cfg.faulty_clients_ids}]-"
+        f"faulty_clients[{cfg.malicious_clients_ids}]-"
         f"noise_rate{cfg.noise_rate}-"
         f"TClients{cfg.data_dist.num_clients}-"
-        f"{cfg.strategy.name}-(R{cfg.strategy.num_rounds}"
-        f"-clientsPerR{cfg.strategy.clients_per_round})"
+        f"-clientsPerR{cfg.clients_per_round})"
         f"-{cfg.data_dist.dist_type}{cfg.data_dist.dirichlet_alpha}"
         f"-batch{cfg.client.batch_size}-epochs{cfg.client.epochs}-"
         f"lr{cfg.client.lr}"

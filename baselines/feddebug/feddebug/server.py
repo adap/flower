@@ -4,7 +4,7 @@ Optionally, also define a new Server class (please note this is not needed in mo
 settings).
 """
 
-import gc
+
 import random
 from functools import partial
 from logging import INFO
@@ -20,6 +20,9 @@ from feddebug.utils import get_parameters, set_parameters
 
 def _fit_metrics_aggregation_fn(metrics):
     """Aggregate metrics recieved from client."""
+    
+    print("Metrics: ", metrics)
+    
     log(INFO, ">>   ------------------- Clients Metrics ------------- ")
     all_logs = {}
     for nk_points, metric_d in metrics:
@@ -36,18 +39,15 @@ def _fit_metrics_aggregation_fn(metrics):
     return {"loss": 0.0, "accuracy": 0.0}
 
 
+
+
 def _get_evaluate_gm_func(cfg, server_testdata):
     def _eval_gm(server_round, parameters, config):
         gm_dict = initialize_model(cfg.model.name, cfg.dataset)
         set_parameters(gm_dict["model"], parameters)
         gm_dict["model"].eval()  # type: ignore
         d_res = test(gm_dict['model'], server_testdata, device=cfg.device)
-        loss = d_res["loss"]
-        accuracy = d_res["accuracy"]
-        del gm_dict["model"]
-        torch.cuda.empty_cache()
-        gc.collect()
-        return loss, {"accuracy": accuracy, "loss": loss, "round": server_round}
+        return d_res["loss"], {"accuracy": d_res["accuracy"], "loss": d_res["loss"], "round": server_round}
 
     return _eval_gm
 
@@ -61,7 +61,6 @@ def _get_fit_config(cfg, server_round):
     }
     random.seed(server_round)
     torch.manual_seed(server_round)
-    gc.collect()
     return config
 
 
@@ -69,34 +68,19 @@ def get_strategy(cfg, server_testdata):
     """Return the strategy based on the configuration."""
     def _create_model():
         return initialize_model(cfg.model.name, cfg.dataset)["model"]
+    
+    def _callback_fed_debug_evaluate_fn(server_round, predicted_malicious_clients):
+        """Callback function to evaluate the global model."""
+        log(INFO, f"FedDebug Round {server_round}: Potential Malicious Clients {predicted_malicious_clients}")
+        true_malicious_clients = cfg.malicious_clients_ids
+        # log(INFO, f"F {server_round}: True Malicious Clients {true_malicious_clients}")
+        
 
-    num_bugs = len(cfg.faulty_clients_ids)
+    
+    num_bugs = len(cfg.malicious_clients_ids)
     eval_gm_func = _get_evaluate_gm_func(cfg, server_testdata)
     initial_net = _create_model()
-    if cfg.strategy.name in ["fedavg"]:
-        strategy = FedAvgWithFedDebug(
-            num_bugs=num_bugs,
-            num_inputs=cfg.num_inputs,
-            input_shape=server_testdata.dataset[0]["image"].clone().detach().shape,
-            na_t=cfg.neuron_activation_threshold,
-            create_model_fn=_create_model,
-            device=cfg.device,
-            fast=cfg.faster_input_generation,
-            accept_failures=False,
-            fraction_fit=0,
-            fraction_evaluate=0.0,
-            min_fit_clients=cfg.strategy.clients_per_round,
-            min_evaluate_clients=0,
-            min_available_clients=cfg.data_dist.num_clients,
-            initial_parameters=ndarrays_to_parameters(
-                ndarrays=get_parameters(initial_net)
-            ),
-            evaluate_fn=eval_gm_func,  # ignore
-            on_fit_config_fn=partial(
-                _get_fit_config, cfg
-            ),  # Pass the fit_config function
-            fit_metrics_aggregation_fn=_fit_metrics_aggregation_fn,
-        )
-        return strategy
-    else:
-        raise ValueError(f"Strategy {cfg.strategy.name} not supported")
+
+    strategy = FedAvgWithFedDebug(num_bugs=num_bugs, num_inputs=cfg.feddebug.r_inputs, input_shape=server_testdata.dataset[0]["image"].clone().detach().shape, na_t=cfg.feddebug.na_t, device=cfg.device, fast=cfg.feddebug.fast, callback_create_model_fn=_create_model, callback_fed_debug_evaluate_fn=_callback_fed_debug_evaluate_fn, accept_failures=False, fraction_fit=0, fraction_evaluate=0.0, min_fit_clients=cfg.clients_per_round, min_evaluate_clients=0, min_available_clients=cfg.num_clients, initial_parameters=ndarrays_to_parameters(ndarrays=get_parameters(initial_net)), evaluate_fn=eval_gm_func, on_fit_config_fn=partial(_get_fit_config, cfg), fit_metrics_aggregation_fn=_fit_metrics_aggregation_fn)
+
+    return strategy

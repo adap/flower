@@ -69,24 +69,24 @@ class ClientsAndServerDatasets:
 
     def _load_datasets(self):
         """Load and partition the datasets based on the partitioner."""
-        self._validate_dataset()
+        # self._validate_dataset()
         self.clients_and_server_raw_data = self.data_dist_partitioner_func(self.cfg)
 
         self._create_client_dataloaders()
         self.server_testloader = self._create_dataloader(self.clients_and_server_raw_data['server_data'], batch_size=512, shuffle=False)
 
-    def _validate_dataset(self):
-        """Validates if the selected dataset is supported."""
-        supported_datasets = {"cifar10", "mnist"}  # Extend as needed
-        if self.cfg.dataset.name.lower() not in supported_datasets:
-            raise ValueError(f"Dataset '{self.cfg.dataset.name}' not supported.")
+    # def _validate_dataset(self):
+    #     """Validates if the selected dataset is supported."""
+    #     supported_datasets = {"cifar10", "mnist"}  # Extend as needed
+    #     if self.cfg.dataset.name.lower() not in supported_datasets:
+    #         raise ValueError(f"Dataset '{self.cfg.dataset.name}' not supported.")
     
     def _create_client_dataloaders(self):
         """Create DataLoaders for each client."""
         self.client_id_to_loader = {
             client_id: self._create_dataloader(client_data, batch_size=self.cfg.client.batch_size)
             for client_id, client_data in self.clients_and_server_raw_data['client2data'].items()
-            if client_id not in self.cfg.faulty_clients_ids
+            if client_id not in self.cfg.malicious_clients_ids
         }
 
     def _create_dataloader(self, ds, batch_size=64, shuffle=True):
@@ -108,7 +108,7 @@ class ClientsAndServerDatasets:
 
     def _introduce_label_noise(self):
         """Introduce label noise to specified faulty clients."""
-        faulty_client_ids = self.cfg.faulty_clients_ids
+        faulty_client_ids = self.cfg.malicious_clients_ids
         noise_rate = self.cfg.noise_rate
         num_classes = self.cfg.dataset.num_classes
         client2data = self.clients_and_server_raw_data['client2data']

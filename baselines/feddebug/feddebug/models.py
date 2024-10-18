@@ -6,13 +6,11 @@ config. In this way, swapping your model for  another one can be done without ch
 the python code at all
 """
 
-import gc
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision
-from flwr.common.logger import log 
-from logging import INFO
+
 
 class LeNet(nn.Module):
     """LeNet model."""
@@ -128,15 +126,10 @@ def _train(tconfig):
             correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
             images = images.cpu()
             labels = labels.cpu()
-            del images
-            del labels
-            gc.collect()
             break
         epoch_loss /= total
         epoch_acc = correct / total
-    net = net.cpu()
-    del net
-    gc.collect()
+    net = net.cpu()    
     return {"train_loss": epoch_loss, "train_accuracy": epoch_acc}
 
 
@@ -157,12 +150,9 @@ def test(net, testloader, device):
             correct += (predicted == labels).sum().item()
             images = images.cpu()
             labels = labels.cpu()
-            del images
-            del labels
     loss /= len(testloader.dataset)
     accuracy = correct / total
     net = net.cpu()
-    del net
     return {"loss": loss, "accuracy": accuracy}
 
 

@@ -136,7 +136,7 @@ Total Time taken (training + testing): 97.98241376876831
 > The following commands may take time on larger models (e.g., ResNet) without GPU. Adjust the model and dataset to reproduce results from Table 2. Currently, I'm using MNIST with LeNet and 20 clients (including 5 malicious clients) to quickly run the baseline on CPU to avoid any hardware limitation.
 
 ```bash
-python -m feddebug.main --multirun device=cpu num_clients=20 model.name=lenet dataset.name=mnist total_faulty_clients=5 check_cache=True
+python -m feddebug.main --multirun device=cpu num_clients=20 model.name=lenet dataset.name=mnist total_malicious_clients=5 check_cache=True
 
 # to generate Table 2 csv. Open fed_debug_results.csv after  
 python -m feddebug.main generate_table_csv=True
@@ -155,7 +155,7 @@ Last Command Output
 Only execute the following commands after generating Table 2 results.
 
 ```bash
-python -m feddebug.main --multirun device=cuda  num_clients=10 model.name=densenet121,resnet18 dataset.name=cifar10,mnist total_faulty_clients=2 check_cache=True
+python -m feddebug.main --multirun device=cuda  num_clients=10 model.name=densenet121,resnet18 dataset.name=cifar10,mnist total_malicious_clients=2 check_cache=True
 
 python -m feddebug.main vary_thresholds=True device=cpu
 

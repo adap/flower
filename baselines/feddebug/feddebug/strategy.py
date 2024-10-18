@@ -7,11 +7,12 @@ extend or modify the functionality of an existing strategy.
 import flwr as fl
 from feddebug import utils
 from feddebug.differential_testing import differential_testing_fl_clients
+from collections import Counter
 
 
 class FedAvgWithFedDebug(fl.server.strategy.FedAvg):
     """FedAvg with Differential Testing."""
-    def __init__(self, num_bugs, num_inputs, input_shape, na_t, create_model_fn, device, fast, *args, **kwargs):
+    def __init__(self, num_bugs, num_inputs, input_shape, na_t, device, fast, callback_create_model_fn, callback_fed_debug_evaluate_fn, *args, **kwargs):
         """Initialize."""
         super().__init__(*args, **kwargs)
         self.input_shape = input_shape
@@ -20,7 +21,8 @@ class FedAvgWithFedDebug(fl.server.strategy.FedAvg):
         self.na_t = na_t
         self.device = device
         self.fast = fast
-        self.create_model_fn = create_model_fn
+        self.create_model_fn = callback_create_model_fn
+        self.callback_fed_debug_evaluate_fn = callback_fed_debug_evaluate_fn
 
 
     def aggregate_fit(self, server_round, results, failures):
@@ -28,12 +30,9 @@ class FedAvgWithFedDebug(fl.server.strategy.FedAvg):
         potential_mal_clients = self._run_differential_testing_helper(results)
         aggregated_parameters, aggregated_metrics = super(
         ).aggregate_fit(server_round, results, failures)
-        # print(f"Potential Malicious Clients: {potential_mal_clients}, ")
-        # print(f"Aggregated Metrics: {aggregated_metrics}")
         aggregated_metrics["potential_malicious_clients"] = potential_mal_clients
+        self.callback_fed_debug_evaluate_fn(server_round, potential_mal_clients)
         return aggregated_parameters, aggregated_metrics
-
-
 
     def _get_model_from_parameters(self, parameters):
         """Convert parameters to state_dict."""
@@ -45,5 +44,11 @@ class FedAvgWithFedDebug(fl.server.strategy.FedAvg):
 
     def _run_differential_testing_helper(self, results):
         client2model = {fit_res.metrics["cid"]: self._get_model_from_parameters(fit_res.parameters) for _, fit_res in results}
-        predicted_faulty_clients = differential_testing_fl_clients(client2model, self.num_bugs, self.num_inputs, self.input_shape, self.na_t, self.fast, self.device)
-        return predicted_faulty_clients
+        predicted_faulty_clients_on_each_input = differential_testing_fl_clients(client2model, self.num_bugs, self.num_inputs, self.input_shape, self.na_t, self.fast, self.device)
+
+        # compute the probability of a client being malicious
+        prob_of_mal_clients = Counter([f"{s}" for s in predicted_faulty_clients_on_each_input])
+        
+        for cid in prob_of_mal_clients:
+            prob_of_mal_clients[cid] /= self.num_inputs
+        return dict(prob_of_mal_clients)
