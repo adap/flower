@@ -133,7 +133,7 @@ above. Don't forget to specify the correct client private and public keys for ea
 
 > \[!TIP\]
 > Note the `--node-config` passed when spawning the `SuperNode` is accessible to the `ClientApp` via the context. In this example, the `client_fn()` uses it to load the dataset and then proceed with the training of the model.
-> 
+>
 > ```python
 > def client_fn(context: Context):
 >     # retrieve the passed `--node-config`
