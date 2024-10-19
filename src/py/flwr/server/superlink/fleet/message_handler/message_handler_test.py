@@ -17,16 +17,27 @@
 
 from unittest.mock import MagicMock
 
+from flwr.common import Message, Metadata, RecordSet
+from flwr.common.serde import message_to_proto
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
+    PullMessagesRequest,
     PullTaskInsRequest,
+    PushMessagesRequest,
     PushTaskResRequest,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 
-from .message_handler import create_node, delete_node, pull_task_ins, push_task_res
+from .message_handler import (
+    create_node,
+    delete_node,
+    pull_messages,
+    pull_task_ins,
+    push_messages,
+    push_task_res,
+)
 
 
 def test_create_node() -> None:
@@ -101,6 +112,24 @@ def test_pull_task_ins() -> None:
     state.get_task_res.assert_not_called()
 
 
+def test_pull_messages() -> None:
+    """Test pull_messages."""
+    # Prepare
+    request = PullMessagesRequest(node=Node(node_id=1, anonymous=False))
+    state = MagicMock()
+
+    # Execute
+    pull_messages(request=request, state=state)
+
+    # Assert
+    state.create_node.assert_not_called()
+    state.delete_node.assert_not_called()
+    state.store_task_ins.assert_not_called()
+    state.get_task_ins.assert_called_once()
+    state.store_task_res.assert_not_called()
+    state.get_task_res.assert_not_called()
+
+
 def test_push_task_res() -> None:
     """Test push_task_res."""
     # Prepare
@@ -118,6 +147,38 @@ def test_push_task_res() -> None:
 
     # Execute
     push_task_res(request=request, state=state)
+
+    # Assert
+    state.create_node.assert_not_called()
+    state.delete_node.assert_not_called()
+    state.store_task_ins.assert_not_called()
+    state.get_task_ins.assert_not_called()
+    state.store_task_res.assert_called_once()
+    state.get_task_res.assert_not_called()
+
+
+def test_push_messages() -> None:
+    """Test push_messages."""
+    # Prepare
+    msg = Message(
+        content=RecordSet(),
+        metadata=Metadata(
+            run_id=123,
+            message_id="",
+            group_id="",
+            src_node_id=0,
+            dst_node_id=0,
+            reply_to_message="",
+            ttl=123,
+            message_type="",
+        ),
+    )
+
+    request = PushMessagesRequest(messages_list=[message_to_proto(msg)])
+    state = MagicMock()
+
+    # Execute
+    push_messages(request=request, state=state)
 
     # Assert
     state.create_node.assert_not_called()
