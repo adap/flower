@@ -22,6 +22,7 @@ import pandas as pd
 from matplotlib import colors as mcolors
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 
 
 # pylint: disable=too-many-arguments,too-many-locals,too-many-branches
@@ -82,10 +83,11 @@ def _plot_bar(
     if "stacked" not in plot_kwargs:
         plot_kwargs["stacked"] = True
 
-    axis = dataframe.plot(
+    axis_df: Axes = dataframe.plot(
         ax=axis,
         **plot_kwargs,
     )
+    assert axis_df is not None, "axis is None after plotting using DataFrame.plot()"
 
     if legend:
         if legend_kwargs is None:
@@ -104,20 +106,22 @@ def _plot_bar(
             shift = min(0.05 + max_len_label_str / 100, 0.15)
             legend_kwargs["bbox_to_anchor"] = (1.0 + shift, 0.5)
 
-        handles, legend_labels = axis.get_legend_handles_labels()
-        _ = axis.figure.legend(
+        handles, legend_labels = axis_df.get_legend_handles_labels()
+        figure = axis_df.figure
+        assert isinstance(figure, Figure), "figure extraction from axes is not a Figure"
+        _ = figure.legend(
             handles=handles[::-1], labels=legend_labels[::-1], **legend_kwargs
         )
 
     # Heuristic to make the partition id on xticks non-overlapping
     if partition_id_axis == "x":
-        xticklabels = axis.get_xticklabels()
+        xticklabels = axis_df.get_xticklabels()
         if len(xticklabels) > 20:
             # Make every other xtick label not visible
             for i, label in enumerate(xticklabels):
                 if i % 2 == 1:
                     label.set_visible(False)
-    return axis
+    return axis_df
 
 
 def _initialize_figsize(
