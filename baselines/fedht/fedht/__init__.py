@@ -15,6 +15,7 @@
 """Contains the strategy abstraction and different implementations."""
 
 from flwr.server.strategy.fedavg import FedAvg as FedAvg
+
 from .fedht import FedHT as FedHT
 
 __all__ = [
