@@ -404,9 +404,11 @@ def hardthreshold(weights_prime, num_keep: int) -> NDArrays:
 def aggregate_hardthreshold(
     results: List[Tuple[NDArrays, int]], num_keep: int, iterht: bool
 ) -> NDArrays:
-    """
-    Applies hard thresholding to keep only the k largest weights in a client-weight vector. Fed-HT (Fed-IterHT) can be
-    found at https://arxiv.org/abs/2101.00052
+    """Applies hard thresholding to keep only the k largest weights in a
+    client-weight vector.
+
+    Fed-HT (Fed-IterHT) can be found at
+    https://arxiv.org/abs/2101.00052
     """
     if num_keep <= 0:
         raise ValueError("k must be a positive integer.")

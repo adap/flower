@@ -12,14 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Federated Hardthresholding (FedHT) 
-"""
+"""Federated Hardthresholding (FedHT)"""
 
 
 from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
-import numpy as np
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -41,7 +39,6 @@ from flwr.server.strategy.strategy import Strategy
 # from flwr.server.strategy.aggregate import aggregate_inplace, weighted_loss_avg, aggregate_hardthreshold
 from fedht.aggregate import (
     aggregate_hardthreshold,
-    aggregate_inplace,
     weighted_loss_avg,
 )
 
@@ -150,7 +147,9 @@ class FedHT(Strategy):
         return rep
 
     def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
-        """Return the sample size and the required number of available clients."""
+        """Return the sample size and the required number of available
+        clients.
+        """
         num_clients = int(num_available_clients * self.fraction_fit)
         return max(num_clients, self.min_fit_clients), self.min_available_clients
 

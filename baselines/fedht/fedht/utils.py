@@ -38,7 +38,6 @@ def partition_data(data, num_partitions):
     return partitionsX, partitionsy
 
 
-import numpy as np
 
 
 def sim_data(ni: int, num_clients: int, num_features: int, alpha=1, beta=1):

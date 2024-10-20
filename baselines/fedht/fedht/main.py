@@ -2,7 +2,8 @@
 Author: Chance Johnstone
 Purpose: main function for fedht baseline Simulation II example from Tong et al 2020
 
-Notes:
+Notes
+-----
 Code included in this baseline generated with the help of numerous 
 Flower, Python, and PyTorch resources.
 """
