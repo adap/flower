@@ -1,42 +1,119 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["poetry-core>=1.4.0"]
+build-backend = "poetry.masonry.api"
 
-[project]
+[tool.poetry]
 name = "fedht"
 version = "1.0.0"
-description = "implementing FedHT"
+description = "Federated nonconvex sparse learning"
 license = "Apache-2.0"
-dependencies = [
-    "flwr==1.11.0",
-    "flwr[simulation]>=1.9.0,<2.0",
-    "flwr-datasets[vision]>=0.0.2,<1.0.0",
-    "scikit-learn>=1.1.1",
-    "numpy>=1.21.0",
-    "matplotlib==3.9.2",
-    "hydra-core==1.3.2",
-    "torch==2.4.1",
-    "torchvision>=0.19.1",
-    "numpy>=1.26.4",
-    "poetry>=1.8.4"
+authors = ["Chancellor Johnstone <chancellor.johnstone@gmail.com>"]
+readme = "README.md"
+homepage = "https://flower.ai"
+repository = "https://github.com/adap/flower"
+documentation = "https://flower.ai"
+
+[tool.poetry.dependencies]
+python = ">=3.10.0, <3.11.0"  
+flwr = { extras = ["simulation"], version = "1.9.0" }
+flwr-datasets = { extras = ["vision"], version = ">=0.3.0" },
+scikit-learn>=1.1.1",
+matplotlib = "3.9.2",
+hydra-core = "1.3.2",
+torch = "2.4.1",
+torchvision = ">0.19.1",
+numpy = ">1.26.4"
 ]
 
-[project.optional-dependencies]
-dev = [
-    "isort==5.13.2",
-    "black==24.2.0",
-    "docformatter==1.7.5",
-    "mypy==1.8.0",
-    "pylint==3.2.6",
-    "flake8==5.0.4",
-    "pytest==6.2.4",
-    "pytest-watch==4.2.0",
-    "ruff==0.1.9",
-    "types-requests==2.31.0.20240125",
+[tool.poetry.dev-dependencies]
+isort = "==5.13.2"
+black = "==24.2.0"
+docformatter = "==1.7.5"
+mypy = "==1.4.1"
+pylint = "==2.8.2"
+flake8 = "==3.9.2"
+pytest = "==6.2.4"
+pytest-watch = "==4.2.0"
+ruff = "==0.0.272"
+types-requests = "==2.27.7"
+virtualenv = "==20.21.0"
+
+[tool.isort]
+line_length = 88
+indent = "    "
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+
+[tool.black]
+line-length = 88
+target-version = ["py38", "py39", "py310", "py311"]
+
+[tool.pytest.ini_options]
+minversion = "6.2"
+addopts = "-qq"
+testpaths = ["flwr_baselines"]
+
+[tool.mypy]
+ignore_missing_imports = true
+strict = false
+plugins = "numpy.typing.mypy_plugin"
+
+[tool.pylint."MESSAGES CONTROL"]
+good-names = "i,j,k,_,x,y,X,Y"
+signature-mutators = "hydra.main.main"
+
+[tool.pylint."TYPECHECK"]
+generated-members = "numpy.*, torch.*, tensorflow.*"
+
+[[tool.mypy.overrides]]
+module = ["importlib.metadata.*", "importlib_metadata.*"]
+follow_imports = "skip"
+follow_imports_for_stubs = true
+disallow_untyped_calls = false
+
+[[tool.mypy.overrides]]
+module = "torch.*"
+follow_imports = "skip"
+follow_imports_for_stubs = true
+
+[tool.docformatter]
+wrap-summaries = 88
+wrap-descriptions = 88
+
+[tool.ruff]
+target-version = "py38"
+line-length = 88
+select = ["D", "E", "F", "W", "B", "ISC", "C4"]
+fixable = ["D", "E", "F", "W", "B", "ISC", "C4"]
+ignore = ["B024", "B027"]
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "proto",
 ]
 
-[tool.hatch.build.targets.wheel]
-packages = ["."]
+[tool.ruff.pydocstyle]
+convention = "numpy"
 
 [tool.flwr.app]
 publisher = [
