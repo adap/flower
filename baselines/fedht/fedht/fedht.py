@@ -18,8 +18,8 @@
 
 from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple, Union
-import numpy as np
 
+import numpy as np
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -35,11 +35,15 @@ from flwr.common import (
 from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
+from flwr.server.strategy.strategy import Strategy
 
 # from flwr.server.strategy.aggregate import aggregate, aggregate_inplace, weighted_loss_avg
 #from flwr.server.strategy.aggregate import aggregate_inplace, weighted_loss_avg, aggregate_hardthreshold
-from fedht.aggregate import aggregate_inplace, weighted_loss_avg, aggregate_hardthreshold
-from flwr.server.strategy.strategy import Strategy
+from fedht.aggregate import (
+    aggregate_hardthreshold,
+    aggregate_inplace,
+    weighted_loss_avg,
+)
 
 WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
 Setting `min_available_clients` lower than `min_fit_clients` or

@@ -1,9 +1,9 @@
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader
-import torch.optim as optim
 import torch.optim as optim
 from omegaconf import DictConfig
+from torch.utils.data import DataLoader
+
 
 # model code initially pulled from fedprox baseline
 # generates multinomial logistic regression model via torch

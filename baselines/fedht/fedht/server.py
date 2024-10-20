@@ -1,7 +1,10 @@
 from collections import OrderedDict
-from fedht.model import test
 from typing import Dict
+
 import torch
+
+from fedht.model import test
+
 
 # send fit round for history
 def fit_round(server_round: int) -> Dict:

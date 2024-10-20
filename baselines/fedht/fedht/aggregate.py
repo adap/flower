@@ -17,9 +17,11 @@
 
 from functools import reduce
 from typing import Any, Callable, List, Tuple
+
 import numpy as np
 from flwr.common import FitRes, NDArray, NDArrays, parameters_to_ndarrays
 from flwr.server.client_proxy import ClientProxy
+
 
 def aggregate(results: List[Tuple[NDArrays, int]]) -> NDArrays:
     """Compute weighted average."""

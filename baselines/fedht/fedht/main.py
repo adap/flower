@@ -7,21 +7,24 @@ Code included in this baseline generated with the help of numerous
 Flower, Python, and PyTorch resources.
 """
 
-from fedht.utils import sim_data, MyDataset
-import flwr as fl
-from fedht.client import generate_client_fn_simII, generate_client_fn_mnist
-from fedht.server import get_evaluate_fn, fit_round
-from fedht.fedht import FedHT
-from fedht.model import LogisticRegression
-from flwr_datasets import FederatedDataset
-from flwr_datasets.partitioner import PathologicalPartitioner
 import pickle
 import random
-from torch.utils.data import DataLoader
+
+import flwr as fl
+import hydra
 import numpy as np
 from flwr.common import NDArrays, ndarrays_to_parameters
-import hydra
+from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import PathologicalPartitioner
 from omegaconf import DictConfig
+from torch.utils.data import DataLoader
+
+from fedht.client import generate_client_fn_mnist, generate_client_fn_simII
+from fedht.fedht import FedHT
+from fedht.model import LogisticRegression
+from fedht.server import fit_round, get_evaluate_fn
+from fedht.utils import MyDataset, sim_data
+
 
 @hydra.main(config_path="conf", config_name="base_mnist", version_base=None)
 def main(cfg: DictConfig):

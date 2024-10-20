@@ -1,5 +1,6 @@
-from torch.utils.data import Dataset
 import numpy as np
+from torch.utils.data import Dataset
+
 
 class MyDataset(Dataset):
     def __init__(self, features, labels):
@@ -32,6 +33,7 @@ def partition_data(data, num_partitions):
     return partitionsX, partitionsy
 
 import numpy as np
+
 
 def sim_data(ni: int, num_clients: int, num_features: int, alpha=1, beta=1):
     

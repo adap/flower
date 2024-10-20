@@ -1,13 +1,15 @@
-from fedht.model import train, test
-from flwr.common import Context
-from torch.utils.data import DataLoader
 from collections import OrderedDict
-import torch
-from flwr.client import Client,  NumPyClient
-from flwr.common import Context
 from typing import cast
-from fedht.utils import MyDataset
+
+import torch
+from flwr.client import Client, NumPyClient
+from flwr.common import Context
 from omegaconf import DictConfig
+from torch.utils.data import DataLoader
+
+from fedht.model import test, train
+from fedht.utils import MyDataset
+
 
 # SimII client
 class SimIIClient(NumPyClient):
