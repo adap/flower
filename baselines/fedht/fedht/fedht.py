@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Federated Hardthresholding (FedHT)"""
+"""Federated Hardthresholding (FedHT)."""
 
 
 from logging import WARNING
@@ -35,8 +35,6 @@ from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.strategy import Strategy
 
-# from flwr.server.strategy.aggregate import aggregate, aggregate_inplace, weighted_loss_avg
-# from flwr.server.strategy.aggregate import aggregate_inplace, weighted_loss_avg, aggregate_hardthreshold
 from fedht.aggregate import aggregate_hardthreshold, weighted_loss_avg
 
 WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
@@ -71,7 +69,8 @@ class FedHT(Strategy):
         Minimum number of clients used during validation. Defaults to 2.
     min_available_clients : int, optional
         Minimum number of total clients in the system. Defaults to 2.
-    evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]],Optional[Tuple[float, Dict[str, Scalar]]]]]
+    evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]],
+        Optional[Tuple[float, Dict[str, Scalar]]]]]
         Optional function used for validation. Defaults to None.
     on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
         Function used to configure training. Defaults to None.

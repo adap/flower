@@ -1,3 +1,5 @@
+"""Generate server for fedht baseline."""
+
 from collections import OrderedDict
 from typing import Dict
 

@@ -1,12 +1,4 @@
-"""
-Author: Chance Johnstone
-Purpose: main function for fedht baseline Simulation II example from Tong et al 2020
-
-Notes
------
-Code included in this baseline generated with the help of numerous 
-Flower, Python, and PyTorch resources.
-"""
+"""Run main for fedht baseline."""
 
 import pickle
 import random
@@ -29,14 +21,13 @@ from fedht.utils import MyDataset, sim_data
 
 @hydra.main(config_path="conf", config_name="base_mnist", version_base=None)
 def main(cfg: DictConfig):
-    """Main file for fedht baseline
+    """Run main file for fedht baseline.
 
     Parameters
     ----------
     cfg : DictConfig
-        Config file for federated baseline; read from fedht/conf
+        Config file for federated baseline; read from fedht/conf.
     """
-
     # set seed
     random.seed(2024)
 
@@ -53,7 +44,7 @@ def main(cfg: DictConfig):
         # load MNIST data
         num_features = 28 * 28
         num_classes = 10
-        dataset = FederatedDataset(dataset="mnist", partitioners={"train": num_classes})
+        dataset = FederatedDataset(dataset="mnist", partitioners={"train": partitioner})
         test_dataset = dataset.load_split("test").with_format("numpy")
         testloader = DataLoader(test_dataset, batch_size=cfg.batch_size, shuffle=False)
 

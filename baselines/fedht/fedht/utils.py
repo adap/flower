@@ -1,3 +1,5 @@
+"""Execute utility functions for fedht baseline."""
+
 import numpy as np
 from torch.utils.data import Dataset
 
@@ -10,7 +12,7 @@ class MyDataset(Dataset):
         self.data = {"image": features, "label": labels}
 
     def __len__(self):
-        """Returns length of features in data."""
+        """Return length of features in data."""
         return len(self.data["image"])
 
     def __getitem__(self, idx):

@@ -367,14 +367,14 @@ def _aggregate_n_closest_weights(
 
 # calls hardthreshold function for each list element in weights_all
 def hardthreshold_list(weights_all, num_keep: int) -> NDArrays:
-
+    """Call hardthreshold."""
     params = [hardthreshold(each, num_keep) for each in weights_all]
     return params
 
 
 # hardthreshold function applied to array
 def hardthreshold(weights_prime, num_keep: int) -> NDArrays:
-
+    """Perform hardthresholding on single array."""
     # check for len of array
     val_len = weights_prime.size
 
@@ -383,7 +383,7 @@ def hardthreshold(weights_prime, num_keep: int) -> NDArrays:
         if num_keep > val_len:
             params = weights_prime
             print(
-                "The number of parameters kept is greater than the length of the vector. All parameters will be kept."
+                "num_keep parameter greater than length of vector. All parameters kept."
             )
         else:
             # Compute the magnitudes
@@ -404,8 +404,7 @@ def hardthreshold(weights_prime, num_keep: int) -> NDArrays:
 def aggregate_hardthreshold(
     results: List[Tuple[NDArrays, int]], num_keep: int, iterht: bool
 ) -> NDArrays:
-    """Applies hard thresholding to keep only the k largest weights in a client-weight
-    vector.
+    """Apply hard thresholding to keep only the k largest weights.
 
     Fed-HT (Fed-IterHT) can be found at
     https://arxiv.org/abs/2101.00052
@@ -423,7 +422,7 @@ def aggregate_hardthreshold(
     # check for iterht=True; set in cfg
     if iterht:
         print(
-            f"{green}INFO {reset}:\t\tUsing Fed-IterHT for model aggregation with threshold = ",
+            f"{green}INFO {reset}:\t\tUsing Fed-IterHT with num_keep = ",
             num_keep,
         )
 
@@ -448,7 +447,7 @@ def aggregate_hardthreshold(
 
     else:
         print(
-            f"{green}INFO {reset}:\t\tUsing Fed-HT for model aggregation with threshold = ",
+            f"{green}INFO {reset}:\t\tUsing Fed-HT with num_keep = ",
             num_keep,
         )
 

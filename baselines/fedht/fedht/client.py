@@ -1,3 +1,5 @@
+"""Generate client for fedht baseline."""
+
 from collections import OrderedDict
 from typing import cast
 
@@ -13,6 +15,8 @@ from fedht.utils import MyDataset
 
 # SimII client
 class SimIIClient(NumPyClient):
+    """Define SimIIClient class."""
+
     def __init__(
         self,
         trainloader,
@@ -24,7 +28,6 @@ class SimIIClient(NumPyClient):
         cfg: DictConfig,
     ) -> None:
         """SimII client for simulation II experimentation."""
-
         self.trainloader = trainloader
         self.testloader = testloader
         self.model = model
@@ -35,6 +38,7 @@ class SimIIClient(NumPyClient):
 
     # get parameters from existing model
     def get_parameters(self, config):
+        """Get parameters."""
         return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
     def fit(self, parameters, config):
@@ -69,12 +73,11 @@ class SimIIClient(NumPyClient):
 def generate_client_fn_simII(
     dataset, num_features, num_classes, model, cfg: DictConfig
 ):
-    """Generates client function for simulated FL."""
+    """Generate client function for simulated FL."""
 
     # def client_fn(cid: int):
     def client_fn(context: Context) -> Client:
         """Define client function for centralized metrics."""
-
         # Get node_config value to fetch partition_id
         partition_id = cast(int, context.node_config["partition-id"])
 
@@ -96,6 +99,8 @@ def generate_client_fn_simII(
 
 # MNIST client
 class MnistClient(NumPyClient):
+    """Define MnistClient class."""
+
     def __init__(
         self,
         trainloader,
@@ -107,7 +112,6 @@ class MnistClient(NumPyClient):
         cfg: DictConfig,
     ) -> None:
         """MNIST client for MNIST experimentation."""
-
         self.trainloader = trainloader
         self.testloader = testloader
         self.model = model
@@ -138,7 +142,6 @@ class MnistClient(NumPyClient):
 
     def evaluate(self, parameters, config):
         """Evaluate model."""
-
         # set model parameters
         params_dict = zip(self.model.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
@@ -159,7 +162,6 @@ def generate_client_fn_mnist(
     # def client_fn(cid: int):
     def client_fn(context: Context) -> Client:
         """Define client function for centralized metrics."""
-
         # Get node_config value to fetch partition_id
         partition_id = cast(int, context.node_config["partition-id"])
 

@@ -1,3 +1,5 @@
+"""Define model for fedht baseline."""
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -8,14 +10,17 @@ from torch.utils.data import DataLoader
 # model code initially pulled from fedprox baseline
 # generates multinomial logistic regression model via torch
 class LogisticRegression(nn.Module):
+    """Define LogisticRegression class."""
 
     def __init__(self, num_features, num_classes: int) -> None:
+        """Define model."""
         super().__init__()
 
         # one single linear layer
         self.linear = nn.Linear(num_features, num_classes)
 
     def forward(self, input_tensor: torch.Tensor) -> torch.Tensor:
+        """Define forward pass."""
         # forward pass; sigmoid transform included in CBELoss criterion
         output_tensor = self.linear(torch.flatten(input_tensor, 1))
         return output_tensor
@@ -23,15 +28,15 @@ class LogisticRegression(nn.Module):
 
 # define train function that will be called by each client to train the model
 def train(model, trainloader: DataLoader, cfg: DictConfig) -> None:
-
+    """Train model."""
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(
         model.parameters(), lr=cfg.learning_rate, weight_decay=cfg.weight_decay
     )
 
     # train
-    for epoch in range(cfg.num_local_epochs):
-        for i, data in enumerate(trainloader):
+    for _epoch in range(cfg.num_local_epochs):
+        for _i, data in enumerate(trainloader):
 
             inputs, labels = data["image"], data["label"]
 
@@ -49,7 +54,7 @@ def train(model, trainloader: DataLoader, cfg: DictConfig) -> None:
 
 
 def test(model, testloader: DataLoader) -> None:
-
+    """Test model."""
     criterion = nn.CrossEntropyLoss()
 
     # initialize
@@ -58,7 +63,7 @@ def test(model, testloader: DataLoader) -> None:
     # put into evlauate mode
     model.eval()
     with torch.no_grad():
-        for i, data in enumerate(testloader):
+        for _i, data in enumerate(testloader):
 
             images, labels = data["image"], data["label"]
 
