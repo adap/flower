@@ -29,6 +29,13 @@ from fedht.utils import MyDataset, sim_data
 
 @hydra.main(config_path="conf", config_name="base_mnist", version_base=None)
 def main(cfg: DictConfig):
+    """Main file for fedht baseline
+
+    Parameters
+    ----------
+    cfg : DictConfig
+        Config file for federated baseline; read from fedht/conf
+    """
 
     # set seed
     random.seed(2024)
@@ -128,7 +135,7 @@ def main(cfg: DictConfig):
         client_resources={"num_cpus": cfg.client_resources.num_cpus},
     )
 
-    if cfg.iterht == True:
+    if cfg.iterht:
         iterstr = "iter"
     else:
         iterstr = ""

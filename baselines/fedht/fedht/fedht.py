@@ -37,10 +37,7 @@ from flwr.server.strategy.strategy import Strategy
 
 # from flwr.server.strategy.aggregate import aggregate, aggregate_inplace, weighted_loss_avg
 # from flwr.server.strategy.aggregate import aggregate_inplace, weighted_loss_avg, aggregate_hardthreshold
-from fedht.aggregate import (
-    aggregate_hardthreshold,
-    weighted_loss_avg,
-)
+from fedht.aggregate import aggregate_hardthreshold, weighted_loss_avg
 
 WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
 Setting `min_available_clients` lower than `min_fit_clients` or
@@ -147,9 +144,7 @@ class FedHT(Strategy):
         return rep
 
     def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
-        """Return the sample size and the required number of available
-        clients.
-        """
+        """Return the sample size and the required number of available clients."""
         num_clients = int(num_available_clients * self.fraction_fit)
         return max(num_clients, self.min_fit_clients), self.min_available_clients
 

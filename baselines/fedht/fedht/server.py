@@ -13,10 +13,11 @@ def fit_round(server_round: int) -> Dict:
 
 
 def get_evaluate_fn(testloader, model):
+    """Get evaluate function for centralized metrics."""
 
     # global evaluation
     def evaluate(server_round, parameters, config):  # type: ignore
-
+        """Define evaluate function for centralized metrics."""
         # set model parameters
         params_dict = zip(model.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})

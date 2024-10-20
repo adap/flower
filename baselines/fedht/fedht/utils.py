@@ -3,17 +3,23 @@ from torch.utils.data import Dataset
 
 
 class MyDataset(Dataset):
+    """Create an object with Dataset parent class for dataloader."""
+
     def __init__(self, features, labels):
+        """Initialize self with data object."""
         self.data = {"image": features, "label": labels}
 
     def __len__(self):
+        """Returns length of features in data."""
         return len(self.data["image"])
 
     def __getitem__(self, idx):
+        """Assign key."""
         return {key: value[idx] for key, value in self.data.items()}
 
 
 def partition_data(data, num_partitions):
+    """Partition data into clients."""
     # Calculate the size of each partition
     X, y = data
     partition_size = len(X) // num_partitions
@@ -38,10 +44,8 @@ def partition_data(data, num_partitions):
     return partitionsX, partitionsy
 
 
-
-
 def sim_data(ni: int, num_clients: int, num_features: int, alpha=1, beta=1):
-
+    """Simulate data for simII."""
     # generate client-based model coefs
     u = np.random.normal(0, alpha, num_clients)
     x = np.zeros((num_features, num_clients))
