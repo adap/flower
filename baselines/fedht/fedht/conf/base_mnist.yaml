@@ -1,0 +1,43 @@
+---
+num_clients: 10 # total number of clients
+num_local_epochs: 10 # number of local epochs
+batch_size: 50
+num_rounds: 100
+learning_rate: 0.003
+weight_decay: .000
+momentum: 0.5
+num_keep: 500
+agg: fedht
+iterht: False
+data: mnist
+
+client_resources:
+  num_cpus: 7
+
+use_cuda: false
+specified_device: null # the ID of cuda device, if null, then use defaults torch.device("cuda")
+
+dataset:
+  name: mnist
+  split: sample
+  num_classes: 10
+  seed: 42
+  num_clients: ${num_clients}
+  fraction: 0.8
+
+fit_config:
+  drop_client: false
+  epochs: ${num_local_epochs}
+  batch_size: ${batch_size}
+  learning_rate: ${learning_rate}
+  weight_decay: ${weight_decay}
+
+strategy:
+  fraction_fit: 1.0
+  fraction_evaluate: 1.0
+  min_fit_clients: 2
+  min_evaluate_clients: 2
+  min_available_clients: 2
+  evaluate_fn: null
+  on_fit_config_fn: null
+  on_evaluate_config_fn: null
