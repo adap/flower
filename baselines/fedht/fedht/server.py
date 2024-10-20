@@ -11,8 +11,8 @@ def fit_round(server_round: int) -> Dict:
     """Send round number to client."""
     return {"server_round": server_round}
 
-def get_evaluate_fn(testloader,
-                    model):   
+
+def get_evaluate_fn(testloader, model):
 
     # global evaluation
     def evaluate(server_round, parameters, config):  # type: ignore

@@ -18,7 +18,4 @@ from flwr.server.strategy.fedavg import FedAvg as FedAvg
 
 from .fedht import FedHT as FedHT
 
-__all__ = [
-    "FedAvg",
-    "FedHT"
-]
+__all__ = ["FedAvg", "FedHT"]

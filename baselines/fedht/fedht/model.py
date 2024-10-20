@@ -18,17 +18,18 @@ class LogisticRegression(nn.Module):
     def forward(self, input_tensor: torch.Tensor) -> torch.Tensor:
         # forward pass; sigmoid transform included in CBELoss criterion
         output_tensor = self.linear(torch.flatten(input_tensor, 1))
-        return output_tensor    
+        return output_tensor
+
 
 # define train function that will be called by each client to train the model
-def train(model,
-          trainloader: DataLoader,
-          cfg: DictConfig) -> None:
-    
+def train(model, trainloader: DataLoader, cfg: DictConfig) -> None:
+
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=cfg.learning_rate, weight_decay=cfg.weight_decay)
-    
-    # train 
+    optimizer = optim.SGD(
+        model.parameters(), lr=cfg.learning_rate, weight_decay=cfg.weight_decay
+    )
+
+    # train
     for epoch in range(cfg.num_local_epochs):
         for i, data in enumerate(trainloader):
 
@@ -39,25 +40,26 @@ def train(model,
 
             # Forward pass
             model.train()
-            
+
             loss = criterion(model(inputs.float()), labels.long())
 
             # Backward pass and optimization
             loss.backward()
             optimizer.step()
 
+
 def test(model, testloader: DataLoader) -> None:
-       
+
     criterion = nn.CrossEntropyLoss()
 
-    #initialize
+    # initialize
     correct, total, loss = 0, 0, 0.0
 
     # put into evlauate mode
     model.eval()
     with torch.no_grad():
         for i, data in enumerate(testloader):
-            
+
             images, labels = data["image"], data["label"]
 
             outputs = model(images.float())
@@ -65,10 +67,10 @@ def test(model, testloader: DataLoader) -> None:
             loss += criterion(outputs, labels.long()).item()
             _, predicted = torch.max(outputs.data, 1)
             correct += (predicted == labels).sum().item()
-     
+
     if len(testloader.dataset) == 0:
         raise ValueError("Testloader can't be 0, exiting...")
 
     loss /= len(testloader)
-    accuracy = correct / total 
+    accuracy = correct / total
     return loss, accuracy

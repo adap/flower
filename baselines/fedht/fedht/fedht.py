@@ -38,7 +38,7 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.strategy import Strategy
 
 # from flwr.server.strategy.aggregate import aggregate, aggregate_inplace, weighted_loss_avg
-#from flwr.server.strategy.aggregate import aggregate_inplace, weighted_loss_avg, aggregate_hardthreshold
+# from flwr.server.strategy.aggregate import aggregate_inplace, weighted_loss_avg, aggregate_hardthreshold
 from fedht.aggregate import (
     aggregate_hardthreshold,
     aggregate_inplace,
@@ -174,7 +174,7 @@ class FedHT(Strategy):
         if self.evaluate_fn is None:
             # No evaluation function provided
             return None
-        parameters_ndarrays = parameters_to_ndarrays(parameters)        
+        parameters_ndarrays = parameters_to_ndarrays(parameters)
         eval_res = self.evaluate_fn(server_round, parameters_ndarrays, {})
         if eval_res is None:
             return None
@@ -248,7 +248,9 @@ class FedHT(Strategy):
         ]
 
         # use hardthresholding
-        aggregated_ndarrays = aggregate_hardthreshold(weights_results, self.num_keep, self.iterht)
+        aggregated_ndarrays = aggregate_hardthreshold(
+            weights_results, self.num_keep, self.iterht
+        )
         parameters_aggregated = ndarrays_to_parameters(aggregated_ndarrays)
 
         # Aggregate custom metrics if aggregation fn was provided
