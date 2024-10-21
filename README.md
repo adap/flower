@@ -10,7 +10,8 @@
     <a href="https://flower.ai/blog">Blog</a> |
     <a href="https://flower.ai/docs/">Docs</a> |
     <a href="https://flower.ai/conf/flower-summit-2022">Conference</a> |
-    <a href="https://flower.ai/join-slack">Slack</a>
+    <a href="https://flower.ai/join-slack">Slack</a> |
+    <a href="https://gurubase.io/g/flower">Ask Flower Guru</a>
     <br /><br />
 </p>
 
@@ -20,6 +21,7 @@
 [![Downloads](https://static.pepy.tech/badge/flwr)](https://pepy.tech/project/flwr)
 [![Docker Hub](https://img.shields.io/badge/Docker%20Hub-flwr-blue)](https://hub.docker.com/u/flwr)
 [![Slack](https://img.shields.io/badge/Chat-Slack-red)](https://flower.ai/join-slack)
+[![](https://img.shields.io/badge/Gurubase-Ask%20Flower%20Guru-006BFF)](https://gurubase.io/g/flower)
 
 Flower (`flwr`) is a framework for building federated learning systems. The
 design of Flower is based on a few guiding principles:
