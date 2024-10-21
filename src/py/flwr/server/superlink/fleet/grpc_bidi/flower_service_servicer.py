@@ -20,7 +20,7 @@ Relevant knowledge for reading this modules code:
 
 import uuid
 from collections.abc import Iterator
-from typing import Callable
+from typing import Callable, Sequence, Union
 
 import grpc
 from iterators import TimeoutIterator
@@ -44,9 +44,13 @@ def default_bridge_factory() -> GrpcBridge:
     return GrpcBridge()
 
 
-def default_grpc_client_proxy_factory(cid: str, bridge: GrpcBridge) -> GrpcClientProxy:
+def default_grpc_client_proxy_factory(
+    cid: str,
+    bridge: GrpcBridge,
+    client_metadata: Sequence[tuple[str, Union[str, bytes]]],
+) -> GrpcClientProxy:
     """Return GrpcClientProxy instance."""
-    return GrpcClientProxy(cid=cid, bridge=bridge)
+    return GrpcClientProxy(cid=cid, bridge=bridge, client_metadata=client_metadata)
 
 
 def register_client_proxy(
@@ -102,8 +106,7 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
         cid: str = uuid.uuid4().hex
         bridge = self.grpc_bridge_factory()
         client_metadata = context.invocation_metadata() 
-        # client_metadata -> [('user-agent', 'grpc-python/1.67.0 grpc-c/44.0.0 (linux; chttp2)'), ('test_key_1', 'test_value_1'), ('test_key_2', 'test_value_2')]
-        client_proxy = self.client_proxy_factory(cid, bridge)
+        client_proxy = self.client_proxy_factory(cid, bridge, client_metadata)
         is_success = register_client_proxy(self.client_manager, client_proxy, context)
 
         if is_success:
