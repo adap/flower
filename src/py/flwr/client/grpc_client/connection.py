@@ -21,7 +21,7 @@ from contextlib import contextmanager
 from logging import DEBUG, ERROR
 from pathlib import Path
 from queue import Queue
-from typing import Callable, Optional, Union, cast
+from typing import Callable, Optional, Sequence, Union, cast
 
 from cryptography.hazmat.primitives.asymmetric import ec
 
@@ -69,6 +69,7 @@ def grpc_connection(  # pylint: disable=R0913, R0915
     authentication_keys: Optional[  # pylint: disable=unused-argument
         tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
+    client_metadata: Optional[Sequence[tuple[str, Union[str, bytes]]]] = None, # pylint: disable=unused-argument
 ) -> Iterator[
     tuple[
         Callable[[], Optional[Message]],
@@ -144,8 +145,6 @@ def grpc_connection(  # pylint: disable=R0913, R0915
     )
     stub = FlowerServiceStub(channel)
 
-    # Metadata for testing. This is not used in the actual implementation.
-    client_metadata = [("test_key_1", "test_value_1"), ("test_key_2", "test_value_2")]
     server_message_iterator: Iterator[ServerMessage] = stub.Join(iter(queue.get, None), metadata=client_metadata)
 
     def receive() -> Message:

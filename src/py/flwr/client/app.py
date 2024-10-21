@@ -359,6 +359,9 @@ def start_client_internal(
 
     runs: dict[int, Run] = {}
 
+    # Metadata for testing. This is not used in the actual implementation.
+    client_metadata = [("test_key_1", "test_value_1"), ("test_key_2", "test_value_2")]
+
     while not app_state_tracker.interrupt:
         sleep_duration: int = 0
         with connection(
@@ -368,6 +371,7 @@ def start_client_internal(
             grpc_max_message_length,
             root_certificates,
             authentication_keys,
+            client_metadata,
         ) as conn:
             receive, send, create_node, delete_node, get_run, get_fab = conn
 

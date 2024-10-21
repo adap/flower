@@ -22,7 +22,7 @@ from contextlib import contextmanager
 from copy import copy
 from logging import DEBUG, ERROR
 from pathlib import Path
-from typing import Callable, Optional, Union, cast
+from typing import Callable, Optional, Sequence, Union, cast
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -80,6 +80,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
     authentication_keys: Optional[
         tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
+    client_metadata: Optional[Sequence[tuple[str, Union[str, bytes]]]] = None,
     adapter_cls: Optional[Union[type[FleetStub], type[GrpcAdapter]]] = None,
 ) -> Iterator[
     tuple[

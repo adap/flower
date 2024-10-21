@@ -18,7 +18,7 @@
 from collections.abc import Iterator
 from contextlib import contextmanager
 from logging import ERROR
-from typing import Callable, Optional, Union
+from typing import Callable, Optional, Sequence, Union
 
 from cryptography.hazmat.primitives.asymmetric import ec
 
@@ -41,6 +41,7 @@ def grpc_adapter(  # pylint: disable=R0913
     authentication_keys: Optional[  # pylint: disable=unused-argument
         tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
+    client_metadata: Optional[Sequence[tuple[str, Union[str, bytes]]]] = None, # pylint: disable=unused-argument
 ) -> Iterator[
     tuple[
         Callable[[], Optional[Message]],
@@ -93,6 +94,7 @@ def grpc_adapter(  # pylint: disable=R0913
         max_message_length=max_message_length,
         root_certificates=root_certificates,
         authentication_keys=None,  # Authentication is not supported
+        client_metadata=client_metadata,
         adapter_cls=GrpcAdapter,
     ) as conn:
         yield conn
