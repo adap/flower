@@ -1,12 +1,28 @@
+// Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ==============================================================================
 import { Context, Message, MessageType, ClientFnExt, Mod, ClientAppCallable } from "./typing";
-import { Client } from "./client";
 import { handleLegacyMessageFromMsgType } from "./message_handler";
-import { warnDeprecatedFeature, warnPreviewFeature } from "./logger"; // Mock for warnings
+import { warnPreviewFeature } from "./logger";
+import { existsSync } from 'fs';
+import { join } from 'path';
+
 
 export function makeFFN(ffn: ClientAppCallable, mods: Mod[]): ClientAppCallable {
   function wrapFFN(_ffn: ClientAppCallable, _mod: Mod): ClientAppCallable {
     return function newFFN(message: Message, context: Context): Message {
-      return _mod(message, context, _ffn); // Call the mod with the message, context, and original ffn
+      return _mod(message, context, _ffn);
     };
   }
 
@@ -15,7 +31,7 @@ export function makeFFN(ffn: ClientAppCallable, mods: Mod[]): ClientAppCallable 
     ffn = wrapFFN(ffn, mod);
   }
 
-  return ffn; // Return the modified ffn
+  return ffn;
 }
 
 function alertErroneousClientFn(): void {
@@ -28,19 +44,6 @@ function inspectMaybeAdaptClientFnSignature(clientFn: ClientFnExt): ClientFnExt 
   if (clientFn.length !== 1) {
     alertErroneousClientFn();
   }
-
-  // const firstArg = clientFn.arguments[0];
-
-  // if (typeof firstArg === "string") {
-  //   warnDeprecatedFeature(
-  //     "`clientFn` now expects a signature `function clientFn(context: Context)`. The provided `clientFn` has a signature `function clientFn(cid: string)`"
-  //   );
-
-  //   return (context: Context): Client => {
-  //     const cid = context.nodeConfig["partition-id"] || context.nodeId;
-  //     return clientFn(cid as any);
-  //   };
-  // }
 
   return clientFn;
 }
@@ -154,4 +157,42 @@ function registrationError(fnName: string): Error {
     `  return message.createReply({ content: message.content });\n` +
     `});\n\`\`\`\n`
   );
+}
+
+
+async function loadApp(moduleAttributeStr: string): Promise<any> {
+  const [modulePath, attributePath] = moduleAttributeStr.split(':');
+
+  if (!modulePath || !attributePath) {
+    throw new Error(`Invalid format. Expected '<module>:<attribute>', got '${moduleAttributeStr}'`);
+  }
+
+  // Dynamically import the module
+  const moduleFullPath = join(process.cwd(), `${modulePath}.js`);
+  if (!existsSync(moduleFullPath)) {
+    throw new Error(`Module '${modulePath}' not found at '${moduleFullPath}'`);
+  }
+
+  const module = await import(moduleFullPath);
+
+  // Access the attribute
+  const attributes = attributePath.split('.');
+  let attribute = module;
+  for (const attr of attributes) {
+    if (attribute[attr] === undefined) {
+      throw new Error(`Attribute '${attr}' not found in module '${modulePath}'`);
+    }
+    attribute = attribute[attr];
+  }
+
+  return attribute;
+}
+
+export function getLoadClientAppFn(defaultAppRef: string, appPath: string | null): (fabId: string, fabVersion: string) => Promise<ClientApp> {
+  console.debug(`Flower SuperNode will load and validate ClientApp \`${defaultAppRef}\``);
+
+  return async function(fabId: string, fabVersion: string): Promise<ClientApp> {
+    const clientApp = await loadApp(defaultAppRef) as unknown as ClientApp;
+    return clientApp;
+  }
 }

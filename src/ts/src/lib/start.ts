@@ -1,3 +1,17 @@
+// Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ==============================================================================
 import { grpcRequestResponse } from "./connection";
 import { Client } from "./client";
 import { handleControlMessage } from "./message_handler";
@@ -46,7 +60,7 @@ export async function startClientInternal(
   serverAddress: string,
   nodeConfig: UserConfig,
   grpcMaxMessageLength: number = GRPC_MAX_MESSAGE_LENGTH,
-  loadClientAppFn: ((_1: string, _2: string) => ClientApp) | null = null,
+  loadClientAppFn: ((_1: string, _2: string) => Promise<ClientApp>) | null = null,
   clientFn: ClientFnExt | null = null,
   insecure: boolean | null = null,
   maxRetries: number | null = null,
@@ -78,8 +92,15 @@ export async function startClientInternal(
     }
     clientFn = singleClientFactory;
   }
-  function _loadClientApp(_fabId: string, _fabVersion: string): ClientApp {
-    return new ClientApp(clientFn!);
+  function _loadClientApp(_fabId: string, _fabVersion: string): Promise<ClientApp> {
+    return new Promise((resolve, reject) => {
+      try {
+        const clientApp = new ClientApp(clientFn!);
+        resolve(clientApp);
+      } catch (error) {
+        reject(error);
+      }
+    });
   }
   loadClientAppFn = _loadClientApp;
 
@@ -178,7 +199,7 @@ export async function startClientInternal(
         let context = nodeState.retrieveContext(nRunId);
         let replyMessage = message.createErrorReply({ code: ErrorCode.UNKNOWN, reason: "Unknown" } as LocalError);
         try {
-          const clientApp = loadClientAppFn(run.fabId, run.fabVersion);
+          const clientApp = await loadClientAppFn(run.fabId, run.fabVersion);
           replyMessage = clientApp.call(message, context);
         } catch (err) {
           let errorCode = ErrorCode.CLIENT_APP_RAISED_EXCEPTION;

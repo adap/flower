@@ -31,7 +31,6 @@ function AuthenticateClientInterceptor(privateKey, publicKey) {
             const postprocess = "pingInterval" in input;
             // Add HMAC to metadata if a shared secret exists
             if (sharedSecret !== null) {
-                // Assuming the message is already serialized and available at this point
                 const serializedMessage = method.I.toBinary(input);
                 const hmac = (0, crypto_helpers_1.computeHMAC)(sharedSecret, Buffer.from(serializedMessage));
                 metadata[exports.AUTH_TOKEN_HEADER] = base64UrlEncode(hmac);

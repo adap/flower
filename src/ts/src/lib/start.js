@@ -1,6 +1,20 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.startClientInternal = startClientInternal;
+// Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ==============================================================================
 const connection_1 = require("./connection");
 const message_handler_1 = require("./message_handler");
 const retry_invoker_1 = require("./retry_invoker");
@@ -52,7 +66,15 @@ async function startClientInternal(serverAddress, nodeConfig, grpcMaxMessageLeng
         clientFn = singleClientFactory;
     }
     function _loadClientApp(_fabId, _fabVersion) {
-        return new client_app_1.ClientApp(clientFn);
+        return new Promise((resolve, reject) => {
+            try {
+                const clientApp = new client_app_1.ClientApp(clientFn);
+                resolve(clientApp);
+            }
+            catch (error) {
+                reject(error);
+            }
+        });
     }
     loadClientAppFn = _loadClientApp;
     let appStateTracker = new AppStateTracker();
@@ -129,7 +151,7 @@ async function startClientInternal(serverAddress, nodeConfig, grpcMaxMessageLeng
                 let context = nodeState.retrieveContext(nRunId);
                 let replyMessage = message.createErrorReply({ code: typing_1.ErrorCode.UNKNOWN, reason: "Unknown" });
                 try {
-                    const clientApp = loadClientAppFn(run.fabId, run.fabVersion);
+                    const clientApp = await loadClientAppFn(run.fabId, run.fabVersion);
                     replyMessage = clientApp.call(message, context);
                 }
                 catch (err) {

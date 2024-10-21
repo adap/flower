@@ -23,5 +23,3 @@ coverage
 *.njsproj
 *.sln
 *.sw?
-
-!src/lib

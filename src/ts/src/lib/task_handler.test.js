@@ -1,9 +1,23 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const task_handler_1 = require("./task_handler"); // Adjust the path as necessary
-const recordset_1 = require("./recordset"); // Assuming RecordSet is in the same file
-const task_1 = require("../protos/flwr/proto/task"); // Adjust the import paths for Protobuf
-const fleet_1 = require("../protos/flwr/proto/fleet"); // Assuming PullTaskInsResponse is here
+// Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ==============================================================================
+const task_handler_1 = require("./task_handler");
+const recordset_1 = require("./recordset");
+const task_1 = require("../protos/flwr/proto/task");
+const fleet_1 = require("../protos/flwr/proto/fleet");
 const serde_1 = require("./serde");
 // Test for validateTaskIns: No task inside TaskIns
 describe("validateTaskIns - No task", () => {
