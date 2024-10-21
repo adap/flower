@@ -10,13 +10,12 @@ case "$1" in
                   --ssl-keyfile     ../certificates/server.key'
       client_arg='--root-certificates ../certificates/ca.crt'
       # For $exec_api_arg, note special ordering of single- and double-quotes
-      exec_api_arg='--executor-config 'root-certificates=\"../certificates/ca.crt\"''
-      exec_api_arg="$server_arg $exec_api_arg"
+      executor_arg='--executor-config 'root-certificates=\"../certificates/ca.crt\"''
       ;;
     insecure)
       server_arg='--insecure'
       client_arg=$server_arg
-      exec_api_arg=$server_arg
+      executor_arg=''
     ;;
 esac
 
@@ -43,11 +42,11 @@ esac
 # Set engine
 case "$3" in
     deployment-engine)
-      executor_arg='--executor flwr.superexec.deployment:executor'
+      executor_arg="$executor_arg --executor flwr.superexec.deployment:executor"
       ;;
     simulation-engine)
-      executor_arg='--executor flwr.superexec.simulation:executor
-                            --executor-config 'num-supernodes=10''
+      executor_arg="$executor_arg --executor flwr.superexec.simulation:executor
+                            --executor-config 'num-supernodes=10'"
       ;;
 esac
 
