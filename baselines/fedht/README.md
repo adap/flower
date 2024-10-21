@@ -82,18 +82,18 @@ pip install .
 ## Expected Results
 ### MNIST (`num_keep` = 500)
 ```
-python fedht.main --config-name base_mnist agg=fedavg num_keep=500 num_local_epochs=10 learning_rate=0.00005
-python fedht.main --config-name base_mnist agg=fedht num_keep=500 num_local_epochs=10 learning_rate=0.00005
-python fedht.main --config-name base_mnist agg=fedht iterht=True num_keep=500 num_local_epochs=10 learning_rate=0.00005
-python fedht.main --config-name base_mnist agg=fedht num_keep=500 num_local_epochs=1 learning_rate=0.00005
+python -m fedht.main --config-name base_mnist agg=fedavg num_keep=500 num_local_epochs=10 learning_rate=0.00005
+python -m fedht.main --config-name base_mnist agg=fedht num_keep=500 num_local_epochs=10 learning_rate=0.00005
+python -m fedht.main --config-name base_mnist agg=fedht iterht=True num_keep=500 num_local_epochs=10 learning_rate=0.00005
+python -m fedht.main --config-name base_mnist agg=fedht num_keep=500 num_local_epochs=1 learning_rate=0.00005
 ```
 <img src="fedht/loss_results_mnist.png" width="400"/> 
 
 ### Simulation II (`num_keep` = 200)
 ```
-python fedht.main -config-name base_simII agg=fedavg num_local_epochs=5 learning_rate=0.01
-python fedht.main -config-name base_simII agg=fedht num_local_epochs=5 learning_rate=0.01
-python fedht.main -config-name base_simII agg=fedht iterht=True num_local_epochs=5 learning_rate=0.01
-python fedht.main -config-name base_simII agg=fedht num_local_epochs=1 learning_rate=0.01
+python -m fedht.main -config-name base_simII agg=fedavg num_local_epochs=5 learning_rate=0.01
+python -m fedht.main -config-name base_simII agg=fedht num_local_epochs=5 learning_rate=0.01
+python -m fedht.main -config-name base_simII agg=fedht iterht=True num_local_epochs=5 learning_rate=0.01
+python -m fedht.main -config-name base_simII agg=fedht num_local_epochs=1 learning_rate=0.01
 ```
 <img src="fedht/loss_results_simII.png" width="400"/> 
