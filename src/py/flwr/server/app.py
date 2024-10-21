@@ -202,11 +202,11 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
 # pylint: disable=too-many-branches, too-many-locals, too-many-statements
 def run_superlink() -> None:
     """Run Flower SuperLink (Driver API and Fleet API)."""
+    args = _parse_args_run_superlink().parse_args()
+
     log(INFO, "Starting Flower SuperLink")
 
     event(EventType.RUN_SUPERLINK_ENTER)
-
-    args = _parse_args_run_superlink().parse_args()
 
     # Parse IP address
     driver_address, _, _ = _format_address(args.driver_api_address)
@@ -553,6 +553,7 @@ def _run_fleet_api_grpc_adapter(
 
 
 # pylint: disable=import-outside-toplevel,too-many-arguments
+# pylint: disable=too-many-positional-arguments
 def _run_fleet_api_rest(
     host: str,
     port: int,
