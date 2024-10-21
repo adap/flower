@@ -102,7 +102,7 @@ jobs:
             python -m pip install "${WHEEL_URL}"
           fi
       - name: >
-          Run SuperExec test / 
+          Run Exec API test / 
           ${{ matrix.connection }} / 
           ${{ matrix.authentication }} / 
           ${{ matrix.engine }} 

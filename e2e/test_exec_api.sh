@@ -45,8 +45,7 @@ case "$3" in
       executor_arg="$executor_arg --executor flwr.superexec.deployment:executor"
       ;;
     simulation-engine)
-      executor_arg="$executor_arg --executor flwr.superexec.simulation:executor
-                            --executor-config 'num-supernodes=10'"
+      executor_arg="$executor_arg --executor flwr.superexec.simulation:executor --executor-config 'num-supernodes=10'"
       ;;
 esac
 
