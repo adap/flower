@@ -78,4 +78,5 @@ def test(model, testloader: DataLoader) -> None:
 
     loss /= len(testloader)
     accuracy = correct / total
+    
     return loss, accuracy

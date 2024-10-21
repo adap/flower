@@ -14,7 +14,7 @@ repository = "https://github.com/adap/flower"
 documentation = "https://flower.ai"
 
 [tool.poetry.dependencies]
-python = ">=3.10.0, <3.11.0"  
+python = ">=3.10.0,<4.0"  
 flwr = { extras = ["simulation"], version = ">=1.11.0" }
 flwr-datasets = { extras = ["vision"], version = ">=0.3.0" }
 scikit-learn =">=1.1.1"

@@ -368,7 +368,7 @@ def _aggregate_n_closest_weights(
 # calls hardthreshold function for each list element in weights_all
 def hardthreshold_list(weights_all, num_keep: int) -> NDArrays:
     """Call hardthreshold."""
-    params = [hardthreshold(each, num_keep) for each in weights_all]
+    params: NDArrays = [hardthreshold(each, num_keep) for each in weights_all]
     return params
 
 
@@ -461,8 +461,7 @@ def aggregate_hardthreshold(
         reduce(np.add, layer_updates) / num_examples_total
         for layer_updates in zip(*weighted_weights2)
     ]
-    params = [hardthreshold_list(layer_updates, num_keep) for layer_updates in hold]
-
-    result: NDArrays = params
+    
+    result: NDArrays = [hardthreshold_list(layer_updates, num_keep) for layer_updates in hold]
 
     return result

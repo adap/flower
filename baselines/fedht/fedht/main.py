@@ -88,7 +88,7 @@ def main(cfg: DictConfig):
     # initialize global model to all zeros
     weights = np.zeros((num_classes, num_features))
     bias = np.zeros(num_classes)
-    init_params: NDArrays = (weights, bias)
+    init_params: NDArrays = [weights, bias]
     init_params = ndarrays_to_parameters(init_params)
 
     # define strategy: fedht
