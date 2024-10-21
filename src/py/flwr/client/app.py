@@ -22,7 +22,7 @@ from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from logging import ERROR, INFO, WARN
 from pathlib import Path
-from typing import Callable, Optional, Union, cast
+from typing import Callable, Optional, Sequence, Union, cast
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -97,6 +97,7 @@ def start_client(
     authentication_keys: Optional[
         tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
+    client_metadata: Optional[Sequence[tuple[str, Union[str, bytes]]]] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
 ) -> None:
@@ -183,6 +184,7 @@ def start_client(
         insecure=insecure,
         transport=transport,
         authentication_keys=authentication_keys,
+        client_metadata=client_metadata,
         max_retries=max_retries,
         max_wait_time=max_wait_time,
     )
@@ -207,6 +209,7 @@ def start_client_internal(
     authentication_keys: Optional[
         tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
+    client_metadata: Optional[Sequence[tuple[str, Union[str, bytes]]]] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
     flwr_path: Optional[Path] = None,
@@ -358,9 +361,6 @@ def start_client_internal(
     node_state: Optional[NodeState] = None
 
     runs: dict[int, Run] = {}
-
-    # Metadata for testing. This is not used in the actual implementation.
-    client_metadata = [("test_key_1", "test_value_1"), ("test_key_2", "test_value_2")]
 
     while not app_state_tracker.interrupt:
         sleep_duration: int = 0
