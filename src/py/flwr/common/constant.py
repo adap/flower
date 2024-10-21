@@ -60,20 +60,29 @@ PING_MAX_INTERVAL = 1e300
 # IDs
 RUN_ID_NUM_BYTES = 8
 NODE_ID_NUM_BYTES = 8
-GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY = "flower-version"
-GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY = "should-exit"
 
 # Constants for FAB
 APP_DIR = "apps"
+FAB_ALLOWED_EXTENSIONS = {".py", ".toml", ".md"}
 FAB_CONFIG_FILE = "pyproject.toml"
+FAB_DATE = (2024, 10, 1, 0, 0, 0)
+FAB_HASH_TRUNCATION = 8
 FLWR_HOME = "FLWR_HOME"
 
 # Constants entries in Node config for Simulation
 PARTITION_ID_KEY = "partition-id"
 NUM_PARTITIONS_KEY = "num-partitions"
 
-GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY = "flower-version"
+# Constants for keys in `metadata` of `MessageContainer` in `grpc-adapter`
+GRPC_ADAPTER_METADATA_FLOWER_PACKAGE_NAME_KEY = "flower-package-name"
+GRPC_ADAPTER_METADATA_FLOWER_PACKAGE_VERSION_KEY = "flower-package-version"
+GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY = "flower-version"  # Deprecated
 GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY = "should-exit"
+GRPC_ADAPTER_METADATA_MESSAGE_MODULE_KEY = "grpc-message-module"
+GRPC_ADAPTER_METADATA_MESSAGE_QUALNAME_KEY = "grpc-message-qualname"
+
+# Message TTL
+MESSAGE_TTL_TOLERANCE = 1e-1
 
 
 class MessageType:

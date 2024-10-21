@@ -98,7 +98,7 @@ class State(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get_task_res(self, task_ids: set[UUID], limit: Optional[int]) -> list[TaskRes]:
+    def get_task_res(self, task_ids: set[UUID]) -> list[TaskRes]:
         """Get TaskRes for task_ids.
 
         Usually, the Driver API calls this method to get results for instructions it has
@@ -106,12 +106,6 @@ class State(abc.ABC):  # pylint: disable=R0904
 
         Retrieves all TaskRes for the given `task_ids` and returns and empty list of
         none could be found.
-
-        Constraints
-        -----------
-        If `limit` is not `None`, return, at most, `limit` number of TaskRes. The limit
-        will only take effect if enough task_ids are in the set AND are currently
-        available. If `limit` is set, it has to be greater zero.
         """
 
     @abc.abstractmethod

@@ -102,6 +102,7 @@ Flower Baselines is a collection of community-contributed projects that reproduc
 - [FedNova](https://github.com/adap/flower/tree/main/baselines/fednova)
 - [HeteroFL](https://github.com/adap/flower/tree/main/baselines/heterofl)
 - [FedAvgM](https://github.com/adap/flower/tree/main/baselines/fedavgm)
+- [FedRep](https://github.com/adap/flower/tree/main/baselines/fedrep)
 - [FedStar](https://github.com/adap/flower/tree/main/baselines/fedstar)
 - [FedWav2vec2](https://github.com/adap/flower/tree/main/baselines/fedwav2vec2)
 - [FjORD](https://github.com/adap/flower/tree/main/baselines/fjord)

@@ -182,7 +182,7 @@ def _autoresolve_app_dir(rel_client_app_dir: str = "backend") -> str:
     return str(rel_app_dir.parent / rel_client_app_dir)
 
 
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-positional-arguments
 def start_and_shutdown(
     backend: str = "ray",
     client_app_attr: Optional[str] = None,
@@ -316,7 +316,7 @@ class TestFleetSimulationEngineRayBackend(TestCase):
         # Get all TaskRes
         state = state_factory.state()
         task_ids = set(expected_results.keys())
-        task_res_list = state.get_task_res(task_ids=task_ids, limit=len(task_ids))
+        task_res_list = state.get_task_res(task_ids=task_ids)
 
         # Check results by first converting to Message
         for task_res in task_res_list:
