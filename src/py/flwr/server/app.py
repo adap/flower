@@ -703,7 +703,7 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
 def _add_args_exec_api(parser: argparse.ArgumentParser) -> None:
     """Add command line arguments for Exec API."""
     parser.add_argument(
-        "--executor-api-address",
+        "--exec-api-address",
         help="Exec API server address (IPv4, IPv6, or a domain name)",
         default=EXEC_API_DEFAULT_ADDRESS,
     )
