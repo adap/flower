@@ -102,12 +102,12 @@ jobs:
             python -m pip install "${WHEEL_URL}"
           fi
       - name: >
-          Run SuperExec test / 
+          Run Exec API test / 
           ${{ matrix.connection }} / 
           ${{ matrix.authentication }} / 
           ${{ matrix.engine }} 
         working-directory: e2e/${{ matrix.directory }}
-        run: ./../test_superexec.sh "${{ matrix.connection }}" "${{ matrix.authentication}}" "${{ matrix.engine }}"
+        run: ./../test_exec_api.sh "${{ matrix.connection }}" "${{ matrix.authentication}}" "${{ matrix.engine }}"
 
   frameworks:
     runs-on: ubuntu-22.04
