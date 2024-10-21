@@ -144,7 +144,9 @@ def grpc_connection(  # pylint: disable=R0913, R0915
     )
     stub = FlowerServiceStub(channel)
 
-    server_message_iterator: Iterator[ServerMessage] = stub.Join(iter(queue.get, None))
+    # Metadata for testing. This is not used in the actual implementation.
+    client_metadata = [("test_key_1", "test_value_1"), ("test_key_2", "test_value_2")]
+    server_message_iterator: Iterator[ServerMessage] = stub.Join(iter(queue.get, None), metadata=client_metadata)
 
     def receive() -> Message:
         # Receive ServerMessage proto
