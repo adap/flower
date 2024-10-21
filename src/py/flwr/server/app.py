@@ -49,7 +49,6 @@ from flwr.common.constant import (
 )
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log
-from flwr.common.object_ref import load_app, validate
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     private_key_to_bytes,
     public_key_to_bytes,
@@ -58,8 +57,8 @@ from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
 from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
+from flwr.superexec.app import load_executor
 from flwr.superexec.exec_grpc import run_superexec_api_grpc
-from flwr.superexec.executor import Executor
 
 from .client_manager import ClientManager
 from .history import History
@@ -326,7 +325,7 @@ def run_superlink() -> None:
     # Start Exec API
     exec_server: grpc.Server = run_superexec_api_grpc(
         address=exec_address,
-        executor=_load_executor(args),
+        executor=load_executor(args),
         certificates=certificates,
         config=parse_config_args(
             [args.executor_config] if args.executor_config else args.executor_config
@@ -724,26 +723,3 @@ def _add_args_exec_api(parser: argparse.ArgumentParser) -> None:
         "For example:\n\n`--executor-config 'verbose=true "
         'root-certificates="certificates/superlink-ca.crt"\'`',
     )
-
-
-def _load_executor(
-    args: argparse.Namespace,
-) -> Executor:
-    """Get the executor plugin."""
-    executor_ref: str = args.executor
-    valid, error_msg = validate(executor_ref, project_dir=args.executor_dir)
-    if not valid and error_msg:
-        raise LoadExecutorError(error_msg) from None
-
-    executor = load_app(executor_ref, LoadExecutorError, args.executor_dir)
-
-    if not isinstance(executor, Executor):
-        raise LoadExecutorError(
-            f"Attribute {executor_ref} is not of type {Executor}",
-        ) from None
-
-    return executor
-
-
-class LoadExecutorError(Exception):
-    """Error when trying to load `Executor`."""
