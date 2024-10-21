@@ -26,7 +26,8 @@ from flwr.common import log, now
 from flwr.common.constant import (
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
-    RUN_ID_NUM_BYTES, Status,
+    RUN_ID_NUM_BYTES,
+    Status,
 )
 from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
