@@ -17,9 +17,9 @@
 
 from logging import ERROR
 from os import urandom
-from uuid import uuid4
+from uuid import uuid4, UUID
 
-from typing import Union
+from typing import Union, Optional
 from flwr.common import log, now
 from flwr.common.constant import ErrorCode
 from flwr.proto.error_pb2 import Error  # pylint: disable=E0611
@@ -155,7 +155,7 @@ def make_node_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
     )
 
 
-def make_taskins_unavailable_taskres(taskins_id: str) -> TaskRes:
+def make_taskins_unavailable_taskres(taskins_id: Union[str, UUID]) -> TaskRes:
     """Generate a TaskRes with a taskins unavailable error."""
     current_time = now().timestamp()
     return TaskRes(
@@ -168,7 +168,7 @@ def make_taskins_unavailable_taskres(taskins_id: str) -> TaskRes:
             consumer=Node(node_id=0, anonymous=False),
             created_at=current_time,
             ttl=0,
-            ancestry=[taskins_id],
+            ancestry=[str(taskins_id)],
             task_type="",  # Unknown message type
             error=Error(
                 code=ErrorCode.MESSAGE_UNAVAILABLE,
@@ -208,3 +208,72 @@ def make_taskres_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
 def has_expired(task_ins_or_res: Union[TaskIns, TaskRes], current_time: float) -> bool:
     """Check if the TaskIns/TaskRes has expired."""
     return task_ins_or_res.task.ttl + task_ins_or_res.task.created_at < current_time
+
+
+def verify_taskins_ids(
+    inquired_taskins_ids: set[UUID],
+    found_taskins_dict: dict[UUID, TaskIns],
+    current_time: Optional[float] = None,
+    update_set: bool = True,
+) -> dict[UUID, TaskRes]:
+    """Verify found TaskIns and generate error TaskRes for invalid ones.
+
+    Parameters
+    ----------
+    inquired_taskins_ids : set[str]
+        List of TaskIns IDs for which to generate error TaskRes if invalid.
+    found_taskins_dict : dict[UUID, TaskIns]
+        Dictionary containing all found TaskIns.
+    update_set : bool (default: True)
+        If True, the `inquired_taskins_ids` will be updated to remove invalid ones,
+        by default True.
+
+    Returns
+    -------
+    dict[UUID, TaskRes]
+        Dictionary of generated error TaskRes indexed by the corresponding TaskIns ID.
+    """
+    ret = {}
+    current = current_time if current else now().timestamp()
+    for taskins_id in list(inquired_taskins_ids):
+        # Generate error TaskRes if the task_ins doesn't exist or has expired
+        task_ins = found_taskins_dict.get(taskins_id)
+        if task_ins is None or has_expired(task_ins, current):
+            ret[taskins_id] = make_taskins_unavailable_taskres(taskins_id)
+            if update_set:
+                inquired_taskins_ids.remove(taskins_id)
+    return ret
+
+
+def verify_found_taskres(
+    inquired_taskres_ids: set[UUID],
+    found_taskres_dict: dict[UUID, TaskRes],
+    update_set: bool = True,
+) -> dict[UUID, TaskRes]:
+    """Verify found TaskRes and generate error TaskRes for invalid ones.
+
+    Parameters
+    ----------
+    inquired_taskres_ids : set[str]
+        List of TaskRes IDs for which to generate error TaskRes if invalid.
+    found_taskres_dict : dict[UUID, TaskRes]
+        Dictionary containing all found TaskRes indexed by the corresponding TaskIns ID.
+    update_set : bool (default: True)
+        If True, the `inquired_taskres_ids` will be updated to remove invalid ones,
+        by default True.
+
+    Returns
+    -------
+    dict[UUID, TaskRes]
+        Dictionary of generated error TaskRes indexed by the corresponding TaskRes ID.
+    """
+    ret = {}
+    current = now().timestamp()
+    for taskres_id in list(inquired_taskres_ids):
+        # Generate error TaskRes if the task_res doesn't exist or has expired
+        task_res = found_taskres_dict.get(taskres_id)
+        if task_res is None or has_expired(task_res, current):
+            ret[taskres_id] = make_taskins_unavailable_taskres(taskres_id)
+            if update_set:
+                inquired_taskres_ids.remove(taskres_id)
+    return ret

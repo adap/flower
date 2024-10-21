@@ -47,7 +47,8 @@ from .utils import (
     make_node_unavailable_taskres,
     make_taskins_unavailable_taskres,
     make_taskres_unavailable_taskres,
-    has_expired
+    has_expired,
+    verify_taskins_ids,
 )
 
 SQL_CREATE_TABLE_NODE = """
@@ -464,7 +465,7 @@ class SqliteState(State):  # pylint: disable=R0904
         task_ids_str = {str(task_id) for task_id in task_ids}
         ret: dict[UUID, TaskRes] = {}
         task_res_to_insert: list[TaskRes] = []
-        task_res_delivered: list[str] = []
+        task_res_delivered: list[TaskRes] = []
         
         # Verify TaskIns IDs
         current = now().timestamp()
@@ -474,23 +475,19 @@ class SqliteState(State):  # pylint: disable=R0904
             WHERE task_id IN ({",".join(["?"] * len(task_ids_str))});
         """
         rows = self.query(query, tuple(task_ids_str))
-        found_id_to_task_ins: dict[str, TaskIns] = {}
+        found_id_to_task_ins: dict[UUID, TaskIns] = {}
         for row in rows:
             convert_sint64_values_in_dict_to_uint64(
                 row, ["run_id", "producer_node_id", "consumer_node_id"]
             )
-            found_id_to_task_ins[row["task_id"]] = dict_to_task_ins(row)
-        for task_ins_id in list(task_ids_str):
-            # Retrieve TaskIns
-            task_ins = found_id_to_task_ins.get(task_ins_id)
-            # Generate error TaskRes if the task_ins doesn't exist or has expired
-            if task_ins is None or has_expired(task_ins, current):
-                task_ids_str.remove(task_ins_id)
-                task_res = make_taskins_unavailable_taskres(task_ins_id)
-                # Insert the error TaskRes if the TaskIns exists and has expired
-                if task_ins is not None:
-                    task_res_to_insert.append(task_res)
-                ret[task_ins_id] = task_res
+            found_id_to_task_ins[UUID(row["task_id"])] = dict_to_task_ins(row)
+            
+        err_invalid_taskins = verify_taskins_ids(
+            inquired_taskins_ids=task_ids,
+            found_taskins_dict=found_id_to_task_ins,
+        )
+        task_res_to_insert.extend(err_invalid_taskins.values())
+        ret.update(err_invalid_taskins)
         
         # Find all TaskRes
         query = f"""
@@ -543,94 +540,33 @@ class SqliteState(State):  # pylint: disable=R0904
                 ret[task_ins_id] = task_res
         
         # Mark existing TaskRes to be returned as delivered
-        # TODO
+        delivered_at = now().isoformat()
+        if task_res_delivered:
+            task_ids = [task_res.task_id for task_res in task_res_delivered]
+            query = f"""
+                UPDATE task_res
+                SET delivered_at = ?
+                WHERE task_id IN ({",".join(["?"] * len(task_ids))});
+            """
+            data = [delivered_at] + [str(task_id) for task_id in task_ids]
+            self.query(query, data)
         
         # Store the error TaskRes
-        # TODO
+        if task_res_to_insert:
+            data = [task_res_to_dict(task_res) for task_res in task_res_to_insert]
+            for task_res_dict in data:
+                task_res_dict["delivered_at"] = delivered_at
+                convert_uint64_values_in_dict_to_sint64(
+                    task_res_dict, ["run_id", "producer_node_id", "consumer_node_id"]
+                )
+            columns = ", ".join([f":{key}" for key in data[0]])
+            query = f"INSERT INTO task_res VALUES({columns});"
+            self.query(query, data)
         
         # Cleanup
         self.delete_tasks(set(ret.keys()))
 
-        if rows:
-            # Prepare query
-            found_task_ids = [row["task_id"] for row in rows]
-            placeholders = ",".join([f":id_{i}" for i in range(len(found_task_ids))])
-            query = f"""
-                UPDATE task_res
-                SET delivered_at = :delivered_at
-                WHERE task_id IN ({placeholders})
-                RETURNING *;
-            """
-
-            # Prepare data for query
-            delivered_at = now().isoformat()
-            data = {"delivered_at": delivered_at}
-            for index, task_id in enumerate(found_task_ids):
-                data[f"id_{index}"] = str(task_id)
-
-            # Run query
-            rows = self.query(query, data)
-
-            for row in rows:
-                # Convert values from sint64 to uint64
-                convert_sint64_values_in_dict_to_uint64(
-                    row, ["run_id", "producer_node_id", "consumer_node_id"]
-                )
-
-        result = [dict_to_task_res(row) for row in rows]
-
-        # 1. Query: Fetch consumer_node_id of remaining task_ids
-        # Assume the ancestry field only contains one element
-        data.clear()
-        replied_task_ids: set[UUID] = {UUID(str(row["ancestry"])) for row in rows}
-        remaining_task_ids = task_ids - replied_task_ids
-        placeholders = ",".join([f":id_{i}" for i in range(len(remaining_task_ids))])
-        query = f"""
-            SELECT consumer_node_id
-            FROM task_ins
-            WHERE task_id IN ({placeholders});
-        """
-        for index, task_id in enumerate(remaining_task_ids):
-            data[f"id_{index}"] = str(task_id)
-        node_ids = [int(row["consumer_node_id"]) for row in self.query(query, data)]
-
-        # 2. Query: Select offline nodes
-        placeholders = ",".join([f":id_{i}" for i in range(len(node_ids))])
-        query = f"""
-            SELECT node_id
-            FROM node
-            WHERE node_id IN ({placeholders})
-            AND online_until < :time;
-        """
-        data = {f"id_{i}": str(node_id) for i, node_id in enumerate(node_ids)}
-        data["time"] = time.time()
-        offline_node_ids = [int(row["node_id"]) for row in self.query(query, data)]
-
-        # 3. Query: Select TaskIns for offline nodes
-        placeholders = ",".join([f":id_{i}" for i in range(len(offline_node_ids))])
-        query = f"""
-            SELECT *
-            FROM task_ins
-            WHERE consumer_node_id IN ({placeholders});
-        """
-        data = {f"id_{i}": str(node_id) for i, node_id in enumerate(offline_node_ids)}
-        task_ins_rows = self.query(query, data)
-
-        # Make TaskRes containing node unavailabe error
-        for row in task_ins_rows:
-            for row in rows:
-                # Convert values from sint64 to uint64
-                convert_sint64_values_in_dict_to_uint64(
-                    row, ["run_id", "producer_node_id", "consumer_node_id"]
-                )
-
-            task_ins = dict_to_task_ins(row)
-            err_taskres = make_node_unavailable_taskres(
-                ref_taskins=task_ins,
-            )
-            result.append(err_taskres)
-
-        return result
+        return list(ret.values())
 
     def num_task_ins(self) -> int:
         """Calculate the number of task_ins in store.

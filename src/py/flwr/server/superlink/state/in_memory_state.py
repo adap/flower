@@ -35,9 +35,10 @@ from flwr.server.utils import validate_task_ins_or_res
 from .utils import (
     generate_rand_int_from_bytes,
     make_node_unavailable_taskres,
-    make_taskins_unavailable_taskres,
     make_taskres_unavailable_taskres,
     has_expired,
+    verify_taskins_ids,
+    make_taskins_unavailable_taskres,
 )
 
 
