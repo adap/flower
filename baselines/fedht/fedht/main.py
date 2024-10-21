@@ -7,6 +7,7 @@ import flwr as fl
 import hydra
 import numpy as np
 from flwr.common import NDArrays, ndarrays_to_parameters
+from flwr.server.strategy.strategy import Strategy
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import PathologicalPartitioner
 from omegaconf import DictConfig
@@ -88,8 +89,8 @@ def main(cfg: DictConfig):
     # initialize global model to all zeros
     weights = np.zeros((num_classes, num_features))
     bias = np.zeros(num_classes)
-    init_params: NDArrays = [weights, bias]
-    init_params = ndarrays_to_parameters(init_params)
+    init_params_arr: NDArrays = [weights, bias]
+    init_params = ndarrays_to_parameters(init_params_arr)
 
     # define strategy: fedht
     strategy_fedht = FedHT(
@@ -109,6 +110,7 @@ def main(cfg: DictConfig):
         initial_parameters=init_params,
     )
 
+    strategy: Strategy
     if cfg.agg == "fedht":
         strategy = strategy_fedht
     elif cfg.agg == "fedavg":

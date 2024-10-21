@@ -53,7 +53,7 @@ def train(model, trainloader: DataLoader, cfg: DictConfig) -> None:
             optimizer.step()
 
 
-def test(model, testloader: DataLoader) -> None:
+def test(model, testloader: DataLoader):
     """Test model."""
     criterion = nn.CrossEntropyLoss()
 
@@ -78,5 +78,5 @@ def test(model, testloader: DataLoader) -> None:
 
     loss /= len(testloader)
     accuracy = correct / total
-    
+
     return loss, accuracy
