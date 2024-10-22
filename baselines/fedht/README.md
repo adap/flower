@@ -73,12 +73,6 @@ The data generation procedure for the simulated dataset matches that of Simulati
 
 We note that in the current implementation, only weights (and not biases) of the model(s) are subject to hardthresholding; this practice aligns with sparse model literature. Additionally, the `num_keep` hardthresholding parameter is enforced at the output layer level, as opposed to constraining the number of parameters across the entire model. Specifically, for a fully connected layer with $i$ inputs and $j$ outputs, the $j$-th output's parameters are constrained by `num_keep`.
 
-## Install dependencies
-
-```bash
-pip install .
-```
-
 ## Expected Results
 ### MNIST (`num_keep` = 500)
 ```
