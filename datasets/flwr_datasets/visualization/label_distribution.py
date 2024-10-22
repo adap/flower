@@ -245,5 +245,7 @@ def plot_label_distributions(
             plot_kwargs,
             legend_kwargs,
         )
-    assert axis is not None
-    return axis.figure, axis, dataframe
+    assert axis is not None, "axis is None after plotting"
+    figure = axis.figure
+    assert isinstance(figure, Figure), "figure extraction from axes is not a Figure"
+    return figure, axis, dataframe
