@@ -68,10 +68,10 @@ pip install -e . --no-deps
 # Check if the first argument is 'insecure'
 if [ "$1" == "insecure" ]; then
   # If $1 is 'insecure', append the first line
-  echo -e $"\n[tool.flwr.federations.e2e]\naddress = \"127.0.0.1:9095\"\ninsecure = true" >> pyproject.toml
+  echo -e $"\n[tool.flwr.federations.e2e]\naddress = \"127.0.0.1:9093\"\ninsecure = true" >> pyproject.toml
 else
   # Otherwise, append the second line
-  echo -e $"\n[tool.flwr.federations.e2e]\naddress = \"127.0.0.1:9095\"\nroot-certificates = \"../certificates/ca.crt\"" >> pyproject.toml
+  echo -e $"\n[tool.flwr.federations.e2e]\naddress = \"127.0.0.1:9093\"\nroot-certificates = \"../certificates/ca.crt\"" >> pyproject.toml
 fi
 
 # Combine the arguments into a single command for flower-superlink
