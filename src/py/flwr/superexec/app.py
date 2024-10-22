@@ -54,7 +54,7 @@ def run_superexec() -> None:
     # Start SuperExec API
     superexec_server: grpc.Server = run_superexec_api_grpc(
         address=address,
-        executor=_load_executor(args),
+        executor=load_executor(args),
         certificates=certificates,
         config=parse_config_args(
             [args.executor_config] if args.executor_config else args.executor_config
@@ -163,7 +163,7 @@ def _try_obtain_certificates(
     )
 
 
-def _load_executor(
+def load_executor(
     args: argparse.Namespace,
 ) -> Executor:
     """Get the executor plugin."""
