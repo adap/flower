@@ -23,6 +23,7 @@ from typing import Optional
 from typing_extensions import override
 
 from flwr.cli.install import install_from_fab
+from flwr.common.constant import DRIVER_API_DEFAULT_ADDRESS
 from flwr.common.logger import log
 from flwr.common.typing import Fab, UserConfig
 from flwr.server.superlink.ffs import Ffs
@@ -37,14 +38,28 @@ class DeploymentEngine(Executor):
 
     Parameters
     ----------
+    superlink: str (default: "0.0.0.0:9091")
+        Address of the SuperLink to connect to.
+    root_certificates: Optional[str] (default: None)
+        Specifies the path to the PEM-encoded root certificate file for
+        establishing secure HTTPS connections.
     flwr_dir: Optional[str] (default: None)
         The path containing installed Flower Apps.
     """
 
     def __init__(
         self,
+        superlink: str = DRIVER_API_DEFAULT_ADDRESS,
+        root_certificates: Optional[str] = None,
         flwr_dir: Optional[str] = None,
     ) -> None:
+        self.superlink = superlink
+        if root_certificates is None:
+            self.root_certificates = None
+            self.root_certificates_bytes = None
+        else:
+            self.root_certificates = root_certificates
+            self.root_certificates_bytes = Path(root_certificates).read_bytes()
         self.flwr_dir = flwr_dir
         self.linkstate_factory: Optional[LinkStateFactory] = None
         self.ffs_factory: Optional[FfsFactory] = None
