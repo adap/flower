@@ -206,8 +206,8 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         ----------
         run_id : int
             The identifier of the run.
-        new_status_info : RunStatus
-            The new status info to be assigned to the run.
+        new_status : RunStatus
+            The new status to be assigned to the run.
 
         Returns
         -------
