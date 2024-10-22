@@ -50,7 +50,7 @@ exclude = ["src/py/**/*_test.py"]
 # `flwr` CLI
 flwr = "flwr.cli.app:app"
 # SuperExec (can run with either Deployment Engine or Simulation Engine)
-flower-superexec = "flwr.superexec.app:run_superexec"
+flower-superexec = "flwr.superexec.app:run_superexec" # Deprecated
 # Simulation Engine
 flower-simulation = "flwr.simulation.run_simulation:run_simulation_from_cli"
 # Deployment Engine
