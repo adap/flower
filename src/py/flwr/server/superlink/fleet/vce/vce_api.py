@@ -28,7 +28,7 @@ from typing import Callable, Optional
 
 from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
 from flwr.client.clientapp.utils import get_load_client_app_fn
-from flwr.client.node_state import NodeState
+from flwr.client.run_info_store import DeprecatedRunInfoStore
 from flwr.common.constant import (
     NUM_PARTITIONS_KEY,
     PARTITION_ID_KEY,
@@ -60,16 +60,16 @@ def _register_nodes(
     return nodes_mapping
 
 
-def _register_node_states(
+def _register_node_info_stores(
     nodes_mapping: NodeToPartitionMapping,
     run: Run,
     app_dir: Optional[str] = None,
-) -> dict[int, NodeState]:
-    """Create NodeState objects and pre-register the context for the run."""
-    node_states: dict[int, NodeState] = {}
+) -> dict[int, DeprecatedRunInfoStore]:
+    """Create DeprecatedRunInfoStore objects and register the context for the run."""
+    node_info_store: dict[int, DeprecatedRunInfoStore] = {}
     num_partitions = len(set(nodes_mapping.values()))
     for node_id, partition_id in nodes_mapping.items():
-        node_states[node_id] = NodeState(
+        node_info_store[node_id] = DeprecatedRunInfoStore(
             node_id=node_id,
             node_config={
                 PARTITION_ID_KEY: partition_id,
@@ -78,18 +78,18 @@ def _register_node_states(
         )
 
         # Pre-register Context objects
-        node_states[node_id].register_context(
+        node_info_store[node_id].register_context(
             run_id=run.run_id, run=run, app_dir=app_dir
         )
 
-    return node_states
+    return node_info_store
 
 
 # pylint: disable=too-many-arguments,too-many-locals
 def worker(
     taskins_queue: "Queue[TaskIns]",
     taskres_queue: "Queue[TaskRes]",
-    node_states: dict[int, NodeState],
+    node_info_store: dict[int, DeprecatedRunInfoStore],
     backend: Backend,
     f_stop: threading.Event,
 ) -> None:
@@ -103,7 +103,7 @@ def worker(
             node_id = task_ins.task.consumer.node_id
 
             # Retrieve context
-            context = node_states[node_id].retrieve_context(run_id=task_ins.run_id)
+            context = node_info_store[node_id].retrieve_context(run_id=task_ins.run_id)
 
             # Convert TaskIns to Message
             message = message_from_taskins(task_ins)
@@ -112,7 +112,7 @@ def worker(
             out_mssg, updated_context = backend.process_message(message, context)
 
             # Update Context
-            node_states[node_id].update_context(
+            node_info_store[node_id].update_context(
                 task_ins.run_id, context=updated_context
             )
         except Empty:
@@ -178,7 +178,7 @@ def run_api(
     backend_fn: Callable[[], Backend],
     nodes_mapping: NodeToPartitionMapping,
     state_factory: LinkStateFactory,
-    node_states: dict[int, NodeState],
+    node_info_stores: dict[int, DeprecatedRunInfoStore],
     f_stop: threading.Event,
 ) -> None:
     """Run the VCE."""
@@ -223,7 +223,7 @@ def run_api(
                     worker,
                     taskins_queue,
                     taskres_queue,
-                    node_states,
+                    node_info_stores,
                     backend,
                     f_stop,
                 )
@@ -312,8 +312,8 @@ def start_vce(
             num_nodes=num_supernodes, state_factory=state_factory
         )
 
-    # Construct mapping of NodeStates
-    node_states = _register_node_states(
+    # Construct mapping of DeprecatedRunInfoStore
+    node_info_stores = _register_node_info_stores(
         nodes_mapping=nodes_mapping, run=run, app_dir=app_dir if is_app else None
     )
 
@@ -376,7 +376,7 @@ def start_vce(
             backend_fn,
             nodes_mapping,
             state_factory,
-            node_states,
+            node_info_stores,
             f_stop,
         )
     except LoadClientAppError as loadapp_ex:
