@@ -36,7 +36,7 @@ class RunInfo:
     initial_run_config: UserConfig
 
 
-class NodeState:
+class DeprecatedRunInfoStore:
     """State of a node where client nodes execute runs."""
 
     def __init__(
