@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""In-memory State implementation."""
+"""In-memory LinkState implementation."""
 
 
 import threading
@@ -29,14 +29,14 @@ from flwr.common.constant import (
 )
 from flwr.common.typing import Run, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
-from flwr.server.superlink.state.state import State
+from flwr.server.superlink.linkstate.linkstate import LinkState
 from flwr.server.utils import validate_task_ins_or_res
 
 from .utils import generate_rand_int_from_bytes, make_node_unavailable_taskres
 
 
-class InMemoryState(State):  # pylint: disable=R0902,R0904
-    """In-memory State implementation."""
+class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
+    """In-memory LinkState implementation."""
 
     def __init__(self) -> None:
 
@@ -277,7 +277,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
     def create_node(
         self, ping_interval: float, public_key: Optional[bytes] = None
     ) -> int:
-        """Create, store in state, and return `node_id`."""
+        """Create, store in the link state, and return `node_id`."""
         # Sample a random int64 as node_id
         node_id = generate_rand_int_from_bytes(NODE_ID_NUM_BYTES)
 
@@ -365,7 +365,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
     def store_server_private_public_key(
         self, private_key: bytes, public_key: bytes
     ) -> None:
-        """Store `server_private_key` and `server_public_key` in state."""
+        """Store `server_private_key` and `server_public_key` in the link state."""
         with self.lock:
             if self.server_private_key is None and self.server_public_key is None:
                 self.server_private_key = private_key
@@ -382,12 +382,12 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         return self.server_public_key
 
     def store_node_public_keys(self, public_keys: set[bytes]) -> None:
-        """Store a set of `node_public_keys` in state."""
+        """Store a set of `node_public_keys` in the link state."""
         with self.lock:
             self.node_public_keys = public_keys
 
     def store_node_public_key(self, public_key: bytes) -> None:
-        """Store a `node_public_key` in state."""
+        """Store a `node_public_key` in the link state."""
         with self.lock:
             self.node_public_keys.add(public_key)
 

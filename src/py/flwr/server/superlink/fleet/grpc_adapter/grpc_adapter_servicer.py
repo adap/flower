@@ -48,7 +48,7 @@ from flwr.proto.grpcadapter_pb2 import MessageContainer  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.fleet.message_handler import message_handler
-from flwr.server.superlink.state import StateFactory
+from flwr.server.superlink.linkstate import LinkStateFactory
 
 T = TypeVar("T", bound=GrpcMessage)
 
@@ -77,7 +77,9 @@ def _handle(
 class GrpcAdapterServicer(grpcadapter_pb2_grpc.GrpcAdapterServicer):
     """Fleet API via GrpcAdapter servicer."""
 
-    def __init__(self, state_factory: StateFactory, ffs_factory: FfsFactory) -> None:
+    def __init__(
+        self, state_factory: LinkStateFactory, ffs_factory: FfsFactory
+    ) -> None:
         self.state_factory = state_factory
         self.ffs_factory = ffs_factory
 

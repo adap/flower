@@ -12,17 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower server state."""
+"""Flower LinkState."""
 
 
-from .in_memory_state import InMemoryState as InMemoryState
-from .sqlite_state import SqliteState as SqliteState
-from .state import State as State
-from .state_factory import StateFactory as StateFactory
+from .in_memory_linkstate import InMemoryLinkState as InMemoryLinkState
+from .linkstate import LinkState as LinkState
+from .linkstate_factory import LinkStateFactory as LinkStateFactory
+from .sqlite_linkstate import SqliteLinkState as SqliteLinkState
 
 __all__ = [
-    "InMemoryState",
-    "SqliteState",
-    "State",
-    "StateFactory",
+    "InMemoryLinkState",
+    "LinkState",
+    "LinkStateFactory",
+    "SqliteLinkState",
 ]
