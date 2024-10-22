@@ -416,7 +416,6 @@ def aggregate_hardthreshold(
     if num_keep <= 0:
         raise ValueError("k must be a positive integer.")
 
-    """Compute weighted average."""
     # Calculate the total number of examples used during training
     num_examples_total = sum(num_examples for (_, num_examples) in results)
 
@@ -438,10 +437,10 @@ def aggregate_hardthreshold(
         # ignoring second element in results[i] skips over number of observations
         # j: iterates through all layers of a model
         # k: iterates through the slices of each layer
-        for i in range(len(results)):
-            for j in range(len(results[i][0])):
-                for k in range(len(results[i][0][j])):
-                    results[i][0][j][k] = hardthreshold(results[i][0][j][k], num_keep)
+        for i, layer in enumerate(results):
+            for j, sub_layer in enumerate(layer[0]):
+                for k, weight in enumerate(sub_layer):
+                    results[i][0][j][k] = hardthreshold(weight, num_keep)
 
         weighted_weights1 = [
             [layer * num_examples for layer in weights]

@@ -26,24 +26,24 @@ def partition_data(data, num_partitions):
     X, y = data
     partition_size = len(X) // num_partitions
     # Create partitions
-    partitionsX = [
+    partitions_x = [
         X[i * partition_size : (i + 1) * partition_size] for i in range(num_partitions)
     ]
-    partitionsy = [
+    partitions_y = [
         y[i * partition_size : (i + 1) * partition_size] for i in range(num_partitions)
     ]
 
     # Handle any remaining items
     if len(data) % num_partitions != 0:
         # partitions[-1] = partitions[-1] + data[num_partitions * partition_size:]
-        partitionsX[-1] = np.vstack(
-            (partitionsX[-1], X[num_partitions * partition_size :])
+        partitions_x[-1] = np.vstack(
+            (partitions_x[-1], X[num_partitions * partition_size :])
         )
-        partitionsy[-1] = np.vstack(
-            (partitionsy[-1], y[num_partitions * partition_size :])
+        partitions_y[-1] = np.vstack(
+            (partitions_y[-1], y[num_partitions * partition_size :])
         )
 
-    return partitionsX, partitionsy
+    return partitions_x, partitions_y
 
 
 def sim_data(ni: int, num_clients: int, num_features: int, alpha=1, beta=1):
