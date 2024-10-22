@@ -29,7 +29,7 @@ from flwr.common.config import unflatten_dict
 from flwr.common.constant import RUN_ID_NUM_BYTES
 from flwr.common.logger import log
 from flwr.common.typing import UserConfig
-from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
+from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 
 from .executor import Executor, RunTracker
 

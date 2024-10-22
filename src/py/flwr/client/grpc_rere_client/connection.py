@@ -71,7 +71,7 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 
 
 @contextmanager
-def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
+def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     server_address: str,
     insecure: bool,
     retry_invoker: RetryInvoker,

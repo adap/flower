@@ -45,7 +45,7 @@ from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=
 from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 from flwr.server.app import _run_fleet_api_grpc_rere
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
-from flwr.server.superlink.state.state_factory import StateFactory
+from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 
 from .server_interceptor import (
     _AUTH_TOKEN_HEADER,
@@ -62,7 +62,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         self._node_private_key, self._node_public_key = generate_key_pairs()
         self._server_private_key, self._server_public_key = generate_key_pairs()
 
-        state_factory = StateFactory(":flwr-in-memory-state:")
+        state_factory = LinkStateFactory(":flwr-in-memory-state:")
         self.state = state_factory.state()
         ffs_factory = FfsFactory(".")
         self.ffs = ffs_factory.ffs()

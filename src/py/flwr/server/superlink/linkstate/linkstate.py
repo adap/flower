@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Abstract base class State."""
+"""Abstract base class LinkState."""
 
 
 import abc
@@ -23,8 +23,8 @@ from flwr.common.typing import Run, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 
-class State(abc.ABC):  # pylint: disable=R0904
-    """Abstract State."""
+class LinkState(abc.ABC):  # pylint: disable=R0904
+    """Abstract LinkState."""
 
     @abc.abstractmethod
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
@@ -32,8 +32,8 @@ class State(abc.ABC):  # pylint: disable=R0904
 
         Usually, the Driver API calls this to schedule instructions.
 
-        Stores the value of the `task_ins` in the state and, if successful, returns the
-        `task_id` (UUID) of the `task_ins`. If, for any reason,
+        Stores the value of the `task_ins` in the link state and, if successful,
+        returns the `task_id` (UUID) of the `task_ins`. If, for any reason,
         storing the `task_ins` fails, `None` is returned.
 
         Constraints
@@ -130,11 +130,11 @@ class State(abc.ABC):  # pylint: disable=R0904
     def create_node(
         self, ping_interval: float, public_key: Optional[bytes] = None
     ) -> int:
-        """Create, store in state, and return `node_id`."""
+        """Create, store in the link state, and return `node_id`."""
 
     @abc.abstractmethod
     def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
-        """Remove `node_id` from state."""
+        """Remove `node_id` from the link state."""
 
     @abc.abstractmethod
     def get_nodes(self, run_id: int) -> set[int]:
@@ -182,7 +182,7 @@ class State(abc.ABC):  # pylint: disable=R0904
     def store_server_private_public_key(
         self, private_key: bytes, public_key: bytes
     ) -> None:
-        """Store `server_private_key` and `server_public_key` in state."""
+        """Store `server_private_key` and `server_public_key` in the link state."""
 
     @abc.abstractmethod
     def get_server_private_key(self) -> Optional[bytes]:
@@ -194,11 +194,11 @@ class State(abc.ABC):  # pylint: disable=R0904
 
     @abc.abstractmethod
     def store_node_public_keys(self, public_keys: set[bytes]) -> None:
-        """Store a set of `node_public_keys` in state."""
+        """Store a set of `node_public_keys` in the link state."""
 
     @abc.abstractmethod
     def store_node_public_key(self, public_key: bytes) -> None:
-        """Store a `node_public_key` in state."""
+        """Store a `node_public_key` in the link state."""
 
     @abc.abstractmethod
     def get_node_public_keys(self) -> set[bytes]:
