@@ -90,7 +90,7 @@ def run(
 
 
 # pylint: disable-next=too-many-branches,too-many-statements,too-many-locals
-def run_server_app() -> None:
+def deprecated_run_server_app() -> None:
     """Run Flower server app."""
     event(EventType.RUN_SERVER_APP_ENTER)
 
