@@ -33,8 +33,8 @@ def server_fn(context: Context):
 
     # Define strategy
     strategy = FedAvg(
-        fraction_fit=0.5,
-        fraction_evaluate=1.0,
+        fraction_fit=0.4,
+        fraction_evaluate=0.5,
         evaluate_metrics_aggregation_fn=weighted_average,
         initial_parameters=initial_parameters,
     )

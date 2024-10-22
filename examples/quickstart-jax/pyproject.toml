@@ -8,7 +8,7 @@ version = "1.0.0"
 description = ""
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.11.0",
+    "flwr[simulation]>=1.12.0",
     "flwr-datasets[vision]>=0.4.0",
     "datasets>=2.21.0",
     "jax==0.4.31",
@@ -27,7 +27,7 @@ serverapp = "jaxexample.server_app:app"
 clientapp = "jaxexample.client_app:app"
 
 [tool.flwr.app.config]
-num-server-rounds = 3
+num-server-rounds = 5
 learning-rate = 0.1
 batch-size = 64
 
@@ -35,4 +35,4 @@ batch-size = 64
 default = "local-simulation"
 
 [tool.flwr.federations.local-simulation]
-options.num-supernodes = 10
+options.num-supernodes = 50
