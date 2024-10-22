@@ -51,14 +51,16 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
-from flwr.server.superlink.state import State, StateFactory
+from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.server.utils.validator import validate_task_ins_or_res
 
 
 class DriverServicer(driver_pb2_grpc.DriverServicer):
     """Driver API servicer."""
 
-    def __init__(self, state_factory: StateFactory, ffs_factory: FfsFactory) -> None:
+    def __init__(
+        self, state_factory: LinkStateFactory, ffs_factory: FfsFactory
+    ) -> None:
         self.state_factory = state_factory
         self.ffs_factory = ffs_factory
 
@@ -67,7 +69,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
     ) -> GetNodesResponse:
         """Get available nodes."""
         log(DEBUG, "DriverServicer.GetNodes")
-        state: State = self.state_factory.state()
+        state: LinkState = self.state_factory.state()
         all_ids: set[int] = state.get_nodes(request.run_id)
         nodes: list[Node] = [
             Node(node_id=node_id, anonymous=False) for node_id in all_ids
@@ -79,7 +81,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
     ) -> CreateRunResponse:
         """Create run ID."""
         log(DEBUG, "DriverServicer.CreateRun")
-        state: State = self.state_factory.state()
+        state: LinkState = self.state_factory.state()
         if request.HasField("fab"):
             fab = fab_from_proto(request.fab)
             ffs: Ffs = self.ffs_factory.ffs()
@@ -116,7 +118,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
             _raise_if(bool(validation_errors), ", ".join(validation_errors))
 
         # Init state
-        state: State = self.state_factory.state()
+        state: LinkState = self.state_factory.state()
 
         # Store each TaskIns
         task_ids: list[Optional[UUID]] = []
@@ -138,7 +140,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         task_ids: set[UUID] = {UUID(task_id) for task_id in request.task_ids}
 
         # Init state
-        state: State = self.state_factory.state()
+        state: LinkState = self.state_factory.state()
 
         # Register callback
         def on_rpc_done() -> None:
@@ -167,7 +169,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         log(DEBUG, "DriverServicer.GetRun")
 
         # Init state
-        state: State = self.state_factory.state()
+        state: LinkState = self.state_factory.state()
 
         # Retrieve run information
         run = state.get_run(request.run_id)
