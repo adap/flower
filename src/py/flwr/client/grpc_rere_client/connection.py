@@ -121,6 +121,8 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
         authentication from the cryptography library.
         Source: https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ec/
         Used to establish an authenticated connection with the server.
+    client_metadata : Optional[Sequence[tuple[str, Union[str, bytes]]]] (default: None)
+        Unused argument present for compatibility.
 
     Returns
     -------

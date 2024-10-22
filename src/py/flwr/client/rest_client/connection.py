@@ -131,6 +131,8 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
         Flower server. Bytes won't work for the REST API.
     authentication_keys : Optional[Tuple[PrivateKey, PublicKey]] (default: None)
         Client authentication is not supported for this transport type.
+    client_metadata : Optional[Sequence[tuple[str, Union[str, bytes]]]] (default: None)
+        Unused argument present for compatibilty.
 
     Returns
     -------
