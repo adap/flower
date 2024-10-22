@@ -368,7 +368,7 @@ def _aggregate_n_closest_weights(
 # calls hardthreshold function for each list element in weights_all
 def hardthreshold_list(weights_all, num_keep: int) -> NDArrays:
     """Call hardthreshold."""
-    params: NDArrays = [
+    params = [
         val
         for sublist in (hardthreshold(each, num_keep) for each in weights_all)
         for val in sublist
@@ -416,6 +416,7 @@ def aggregate_hardthreshold(
     if num_keep <= 0:
         raise ValueError("k must be a positive integer.")
 
+    """Compute weighted average."""
     # Calculate the total number of examples used during training
     num_examples_total = sum(num_examples for (_, num_examples) in results)
 
@@ -437,10 +438,10 @@ def aggregate_hardthreshold(
         # ignoring second element in results[i] skips over number of observations
         # j: iterates through all layers of a model
         # k: iterates through the slices of each layer
-        for i, layer in enumerate(results):
-            for j, sub_layer in enumerate(layer[0]):
-                for k, weight in enumerate(sub_layer):
-                    results[i][0][j][k] = hardthreshold(weight, num_keep)
+        for i in range(len(results)):
+            for j in range(len(results[i][0])):
+                for k in range(len(results[i][0][j])):
+                    results[i][0][j][k] = hardthreshold(results[i][0][j][k], num_keep)
 
         weighted_weights1 = [
             [layer * num_examples for layer in weights]
@@ -465,7 +466,7 @@ def aggregate_hardthreshold(
         for layer_updates in zip(*weighted_weights2)
     ]
 
-    result: NDArrays = [
+    new_result: NDArrays = [
         val
         for sublist in (
             hardthreshold_list(layer_updates, num_keep) for layer_updates in hold
@@ -473,4 +474,4 @@ def aggregate_hardthreshold(
         for val in sublist
     ]
 
-    return result
+    return new_result
