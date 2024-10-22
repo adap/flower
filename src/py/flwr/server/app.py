@@ -325,6 +325,8 @@ def run_superlink() -> None:
     # Start Exec API
     exec_server: grpc.Server = run_superexec_api_grpc(
         address=exec_address,
+        state_factory=state_factory,
+        ffs_factory=ffs_factory,
         executor=load_executor(args),
         certificates=certificates,
         config=parse_config_args(

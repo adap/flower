@@ -54,6 +54,8 @@ def run_superexec() -> None:
     # Start SuperExec API
     superexec_server: grpc.Server = run_superexec_api_grpc(
         address=address,
+        state_factory=None,
+        ffs_factory=None,
         executor=load_executor(args),
         certificates=certificates,
         config=parse_config_args(

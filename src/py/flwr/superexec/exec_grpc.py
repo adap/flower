@@ -23,7 +23,9 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
 from flwr.common.typing import UserConfig
 from flwr.proto.exec_pb2_grpc import add_ExecServicer_to_server
+from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.fleet.grpc_bidi.grpc_server import generic_create_grpc_server
+from flwr.server.superlink.linkstate import LinkStateFactory
 
 from .exec_servicer import ExecServicer
 from .executor import Executor
@@ -32,10 +34,17 @@ from .executor import Executor
 def run_superexec_api_grpc(
     address: str,
     executor: Executor,
+    state_factory: Optional[LinkStateFactory],
+    ffs_factory: Optional[FfsFactory],
     certificates: Optional[tuple[bytes, bytes, bytes]],
     config: UserConfig,
 ) -> grpc.Server:
     """Run SuperExec API (gRPC, request-response)."""
+    if state_factory and ffs_factory:
+        executor.initialize(
+            linkstate_factory=state_factory,
+            ffs_factory=ffs_factory,
+        )
     executor.set_config(config)
 
     exec_servicer: grpc.Server = ExecServicer(
