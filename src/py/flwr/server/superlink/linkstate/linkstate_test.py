@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests all state implemenations have to conform to."""
+"""Tests all LinkState implemenations have to conform to."""
 # pylint: disable=invalid-name, too-many-lines, R0904, R0913
 
 import tempfile
@@ -33,7 +33,11 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
-from flwr.server.superlink.linkstate import InMemoryLinkState, SqliteLinkState, LinkState
+from flwr.server.superlink.linkstate import (
+    InMemoryLinkState,
+    LinkState,
+    SqliteLinkState,
+)
 
 
 class StateTest(unittest.TestCase):

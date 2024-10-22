@@ -32,7 +32,11 @@ from flwr.common.serde import (
 )
 from flwr.common.typing import Run
 from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
-from flwr.server.superlink.linkstate import InMemoryLinkState, SqliteLinkState, LinkStateFactory
+from flwr.server.superlink.linkstate import (
+    InMemoryLinkState,
+    LinkStateFactory,
+    SqliteLinkState,
+)
 from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 
 from .inmemory_driver import InMemoryDriver

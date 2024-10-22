@@ -45,7 +45,7 @@ from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=
 from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 from flwr.server.app import _run_fleet_api_grpc_rere
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
-from flwr.server.superlink.linkstate.state_factory import LinkStateFactory
+from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 
 from .server_interceptor import (
     _AUTH_TOKEN_HEADER,

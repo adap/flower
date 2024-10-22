@@ -21,8 +21,8 @@ from typing import Optional
 from flwr.common.logger import log
 
 from .in_memory_linkstate import InMemoryLinkState
-from .sqlite_linkstate import SqliteLinkState
 from .linkstate import LinkState
+from .sqlite_linkstate import SqliteLinkState
 
 
 class LinkStateFactory:

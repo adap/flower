@@ -18,7 +18,7 @@
 import unittest
 
 from flwr.server.superlink.linkstate.sqlite_linkstate import task_ins_to_dict
-from flwr.server.superlink.linkstate.state_test import create_task_ins
+from flwr.server.superlink.linkstate.linkstate_test import create_task_ins
 
 
 class SqliteStateTest(unittest.TestCase):

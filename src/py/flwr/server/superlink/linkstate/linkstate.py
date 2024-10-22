@@ -32,8 +32,8 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
 
         Usually, the Driver API calls this to schedule instructions.
 
-        Stores the value of the `task_ins` in the link state and, if successful, returns the
-        `task_id` (UUID) of the `task_ins`. If, for any reason,
+        Stores the value of the `task_ins` in the link state and, if successful,
+        returns the `task_id` (UUID) of the `task_ins`. If, for any reason,
         storing the `task_ins` fails, `None` is returned.
 
         Constraints
