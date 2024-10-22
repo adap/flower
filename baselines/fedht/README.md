@@ -27,7 +27,7 @@ pyenv virtualenv 3.10.11 fedht-3.10.11
 pyenv activate fedht-3.10.11
 
 # Then install the project
-cd fedht && poetry install -e
+cd fedht && poetry install
 ```
 
 ## About this baseline
