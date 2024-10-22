@@ -19,7 +19,7 @@ case "$2" in
   rest)
     rest_arg_superlink="--fleet-api-type rest"
     rest_arg_supernode="--rest"
-    server_address="http://localhost:9093"
+    server_address="http://localhost:9095"
     server_app_address="127.0.0.1:9091"
     db_arg="--database :flwr-in-memory-state:"
     server_auth=""
