@@ -24,7 +24,7 @@ class ClientsAndServerDatasets:
     """Prepare the clients and server datasets for federated learning."""
     
     def __init__(self, cfg):
-        self.cfg = cfg            
+        self.cfg = cfg 
         self.client_id_to_loader = {}
         self.server_testloader = None
         self.clients_and_server_raw_data = None
@@ -35,23 +35,22 @@ class ClientsAndServerDatasets:
     
     def _set_distribution_partitioner(self):
         """Set the data distribution partitioner based on configuration."""
-        dist_type = self.cfg.data_dist.dist_type       
-        if dist_type == 'iid':
+                
+        if self.cfg.dist_type == 'iid':
             self.data_dist_partitioner_func = self._iid_data_distribution
-        elif dist_type == 'non_iid_dirichlet':
+        elif self.cfg.dist_type == 'non_iid':
             self.data_dist_partitioner_func = self._dirichlet_data_distribution
         else:
-            raise ValueError(f"Unknown distribution type: {dist_type}")
+            raise ValueError(f"Unknown distribution type: {self.cfg.dist_type}")
 
     def _dirichlet_data_distribution(self, target_label_col: str = "label"):
         """Partition data using Dirichlet distribution."""
         partitioner = DirichletPartitioner(
             num_partitions=self.cfg.num_clients,
             partition_by=target_label_col,
-            alpha=self.cfg.dirichlet_alpha,
+            alpha=0.8,
             min_partition_size=0,
             self_balancing=True,
-            shuffle=True,
         )
         return self._partition_helper(partitioner)
 
@@ -69,9 +68,7 @@ class ClientsAndServerDatasets:
 
     def _load_datasets(self):
         """Load and partition the datasets based on the partitioner."""
-        # self._validate_dataset()
-        self.clients_and_server_raw_data = self.data_dist_partitioner_func(self.cfg)
-
+        self.clients_and_server_raw_data = self.data_dist_partitioner_func()
         self._create_client_dataloaders()
         self.server_testloader = self._create_dataloader(self.clients_and_server_raw_data['server_data'], batch_size=512, shuffle=False)
 
@@ -123,12 +120,9 @@ class ClientsAndServerDatasets:
     def _add_noise_in_data(self, ds, noise_rate, num_classes):
         """Introduce label noise by flipping labels based on the noise rate."""
         def flip_labels(batch):
-            labels = np.array(batch['label'])
-            print(f"Total labels: {len(labels)}")
-            
+            labels = np.array(batch['label'])            
             flip_mask = np.random.rand(len(labels)) < noise_rate
             indices_to_flip = np.where(flip_mask)[0]
-            print(f"Total labels to flip: {len(indices_to_flip)}")
             if len(indices_to_flip) > 0:
                 new_labels = labels[indices_to_flip].copy()
                 for idx in indices_to_flip:
@@ -136,7 +130,6 @@ class ClientsAndServerDatasets:
                     possible_labels = list(range(num_classes))
                     possible_labels.remove(current_label)
                     new_labels[idx] = random.choice(possible_labels)
-                    print(f"Label flipped from {current_label} to {new_labels[idx]}")
 
                 labels[indices_to_flip] = new_labels
                 batch['label'] = labels

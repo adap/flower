@@ -1,6 +1,6 @@
 # General Configuration
-num_rounds: 25
-num_clients: 30
+num_rounds: 3
+num_clients: 10
 clients_per_round: ${num_clients}
 
 # Client Configuration
@@ -12,8 +12,7 @@ client:
 # Adversarial Settings
 noise_rate: 1
 malicious_clients_ids: [0] # Malicious (also called faulty) client IDs (Ground Truth). Default client 0 is malicious.
-total_malicious_clients: 3 # For inducing multiple malicious clients in Table 2.
-    # e.g., 2 means [0, 1] are malicious
+total_malicious_clients: null # For inducing multiple malicious clients in Table-2. e.g., 2 means clients [0, 1] are malicious
 feddebug:
     fast: true # to generate randome inputs faster
     r_inputs: 10 # use in FedDebug
@@ -41,15 +40,9 @@ dataset_classes:
     femnist: 10
     mnist: 10
 
-# Data Distribution Configuration
-data_dist:
-    dist_type: iid # Change to "niid" for non-iid data distribution
-    num_clients: ${num_clients}
-    dirichlet_alpha: 1
-    dname: ${dataset.name}
-    mname: ${model.name}
-    storage_dir: ${storage.dir}
-    max_server_data_size: 2048
+
+dist_type: 'non_iid' # Change to "iid" for iid data distribution. Change it to `non_iid` for non-iid data distribution.
+
 
 # Device and Resource Configuration
 device: cpu
@@ -66,9 +59,8 @@ storage:
     train_cache_name: cache_training_fed_debug
     results_cache_name: cache_fed_debug_results
 
-# Experiment Settings
-generate_table_csv: false
-generate_thresholds_exp_graph: false
+
+
 exp_key: "key_test" # This is the test key. It will be changed after running the experiment.
 
 # Logging Configuration (Hydra)

@@ -185,9 +185,9 @@ def set_exp_key(cfg):
         f"{cfg.model.name}-{cfg.dataset.name}-"
         f"faulty_clients[{cfg.malicious_clients_ids}]-"
         f"noise_rate{cfg.noise_rate}-"
-        f"TClients{cfg.data_dist.num_clients}-"
+        f"TClients{cfg.num_clients}-"
         f"-clientsPerR{cfg.clients_per_round})"
-        f"-{cfg.data_dist.dist_type}{cfg.data_dist.dirichlet_alpha}"
+        f"-{cfg.dist_type}"
         f"-batch{cfg.client.batch_size}-epochs{cfg.client.epochs}-"
         f"lr{cfg.client.lr}"
     )

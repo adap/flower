@@ -197,32 +197,3 @@ def differential_testing_fl_clients(client2model, num_bugs, num_inputs, input_sh
     return predicted_faulty_clients
 
 
-# def eval_na_threshold(cfg):
-#     """Evaluate the impact of Neuron Activation threshold on the debugging."""
-#     debug_results_cache = Index(cfg.storage.dir + cfg.storage.results_cache_name)
-#     na_cached_results_dict = debug_results_cache.get(cfg.threshold_variation_exp_key, {})
-
-#     for exp_key in cfg.threshold_exps_keys:
-#         cfg.exp_key = exp_key
-#         na2acc = {}
-#         for n_act_t in cfg.neuron_act_thresholds:
-#             temp_cfg = copy.deepcopy(cfg)
-#             temp_cfg.neuron_activation_threshold = n_act_t
-#             r2results = run_fed_debug_differential_testing(temp_cfg, store_in_cache=False)["round2debug_result"]
-
-#             all_accs = [r["accuracy"] for r in r2results]
-#             avg_accs = sum(all_accs) / len(all_accs)
-
-#             log(
-#                 INFO,
-#                 f"Neuron Activation threshold {n_act_t} "
-#                 f"and average malicious client localization accuracy is {avg_accs}.",
-#             )
-#             na2acc[n_act_t] = avg_accs
-
-#         na_cached_results_dict[cfg.exp_key] = {
-#             "cfg": debug_results_cache[exp_key]["debug_cfg"],
-#             "na2acc": na2acc,
-#         }
-
-#     debug_results_cache[cfg.threshold_variation_exp_key] = na_cached_results_dict
