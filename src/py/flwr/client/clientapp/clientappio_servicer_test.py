@@ -36,7 +36,7 @@ from flwr.proto.clientappio_pb2 import (
 )
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.run_pb2 import Run as ProtoRun
-from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
+from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 
 from .clientappio_servicer import ClientAppInputs, ClientAppIoServicer, ClientAppOutputs
 

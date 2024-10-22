@@ -15,14 +15,14 @@
 """Flower server state."""
 
 
-from .in_memory_state import InMemoryState as InMemoryState
-from .sqlite_state import SqliteState as SqliteState
-from .state import State as State
-from .state_factory import StateFactory as StateFactory
+from .in_memory_linkstate import InMemoryLinkState as InMemoryLinkState
+from .sqlite_linkstate import SqliteLinkState as SqliteLinkState
+from .linkstate import LinkState as LinkState
+from .state_factory import LinkStateFactory as LinkStateFactory
 
 __all__ = [
-    "InMemoryState",
-    "SqliteState",
-    "State",
-    "StateFactory",
+    "InMemoryLinkState",
+    "SqliteLinkState",
+    "LinkState",
+    "LinkStateFactory",
 ]

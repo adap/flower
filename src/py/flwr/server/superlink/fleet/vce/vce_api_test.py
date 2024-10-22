@@ -48,7 +48,7 @@ from flwr.server.superlink.fleet.vce.vce_api import (
     _register_nodes,
     start_vce,
 )
-from flwr.server.superlink.state import InMemoryState, StateFactory
+from flwr.server.superlink.linkstate import InMemoryLinkState, LinkStateFactory
 
 
 class DummyClient(NumPyClient):
@@ -86,11 +86,11 @@ def terminate_simulation(f_stop: threading.Event, sleep_duration: int) -> None:
 def init_state_factory_nodes_mapping(
     num_nodes: int,
     num_messages: int,
-) -> tuple[StateFactory, NodeToPartitionMapping, dict[UUID, float]]:
+) -> tuple[LinkStateFactory, NodeToPartitionMapping, dict[UUID, float]]:
     """Instatiate StateFactory, register nodes and pre-insert messages in the state."""
     # Register a state and a run_id in it
     run_id = 1234
-    state_factory = StateFactory(":flwr-in-memory-state:")
+    state_factory = LinkStateFactory(":flwr-in-memory-state:")
 
     # Register a few nodes
     nodes_mapping = _register_nodes(num_nodes=num_nodes, state_factory=state_factory)
@@ -106,13 +106,13 @@ def init_state_factory_nodes_mapping(
 
 # pylint: disable=too-many-locals
 def register_messages_into_state(
-    state_factory: StateFactory,
+    state_factory: LinkStateFactory,
     nodes_mapping: NodeToPartitionMapping,
     run_id: int,
     num_messages: int,
 ) -> dict[UUID, float]:
     """Register `num_messages` into the state factory."""
-    state: InMemoryState = state_factory.state()  # type: ignore
+    state: InMemoryLinkState = state_factory.state()  # type: ignore
     state.run_ids[run_id] = Run(
         run_id=run_id,
         fab_id="Mock/mock",
@@ -176,7 +176,7 @@ def start_and_shutdown(
     client_app_attr: Optional[str] = None,
     app_dir: str = "",
     num_supernodes: Optional[int] = None,
-    state_factory: Optional[StateFactory] = None,
+    state_factory: Optional[LinkStateFactory] = None,
     nodes_mapping: Optional[NodeToPartitionMapping] = None,
     duration: int = 0,
     backend_config: str = "{}",

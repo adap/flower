@@ -71,7 +71,7 @@ from .superlink.fleet.grpc_bidi.grpc_server import (
 )
 from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
 from .superlink.fleet.grpc_rere.server_interceptor import AuthenticateServerInterceptor
-from .superlink.state import StateFactory
+from .superlink.linkstate import LinkStateFactory
 
 DATABASE = ":flwr-in-memory-state:"
 BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
@@ -212,7 +212,7 @@ def run_superlink() -> None:
     certificates = _try_obtain_certificates(args)
 
     # Initialize StateFactory
-    state_factory = StateFactory(args.database)
+    state_factory = LinkStateFactory(args.database)
 
     # Initialize FfsFactory
     ffs_factory = FfsFactory(args.storage_dir)
@@ -489,7 +489,7 @@ def _try_obtain_certificates(
 
 def _run_fleet_api_grpc_rere(
     address: str,
-    state_factory: StateFactory,
+    state_factory: LinkStateFactory,
     ffs_factory: FfsFactory,
     certificates: Optional[tuple[bytes, bytes, bytes]],
     interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None,
@@ -517,7 +517,7 @@ def _run_fleet_api_grpc_rere(
 
 def _run_fleet_api_grpc_adapter(
     address: str,
-    state_factory: StateFactory,
+    state_factory: LinkStateFactory,
     ffs_factory: FfsFactory,
     certificates: Optional[tuple[bytes, bytes, bytes]],
 ) -> grpc.Server:
@@ -548,7 +548,7 @@ def _run_fleet_api_rest(
     port: int,
     ssl_keyfile: Optional[str],
     ssl_certfile: Optional[str],
-    state_factory: StateFactory,
+    state_factory: LinkStateFactory,
     ffs_factory: FfsFactory,
     num_workers: int,
 ) -> None:

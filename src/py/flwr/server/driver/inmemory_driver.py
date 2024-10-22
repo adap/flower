@@ -25,7 +25,7 @@ from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
 from flwr.common.serde import message_from_taskres, message_to_taskins
 from flwr.common.typing import Run
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.server.superlink.state import StateFactory
+from flwr.server.superlink.linkstate import LinkStateFactory
 
 from .driver import Driver
 
@@ -46,7 +46,7 @@ class InMemoryDriver(Driver):
     def __init__(
         self,
         run_id: int,
-        state_factory: StateFactory,
+        state_factory: LinkStateFactory,
         pull_interval: float = 0.1,
     ) -> None:
         self._run_id = run_id

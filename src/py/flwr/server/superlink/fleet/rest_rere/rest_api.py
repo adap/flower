@@ -40,7 +40,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.fleet.message_handler import message_handler
-from flwr.server.superlink.state import State
+from flwr.server.superlink.linkstate import LinkState
 
 try:
     from starlette.applications import Starlette
@@ -90,7 +90,7 @@ def rest_request_response(
 async def create_node(request: CreateNodeRequest) -> CreateNodeResponse:
     """Create Node."""
     # Get state from app
-    state: State = app.state.STATE_FACTORY.state()
+    state: LinkState = app.state.STATE_FACTORY.state()
 
     # Handle message
     return message_handler.create_node(request=request, state=state)
@@ -100,7 +100,7 @@ async def create_node(request: CreateNodeRequest) -> CreateNodeResponse:
 async def delete_node(request: DeleteNodeRequest) -> DeleteNodeResponse:
     """Delete Node Id."""
     # Get state from app
-    state: State = app.state.STATE_FACTORY.state()
+    state: LinkState = app.state.STATE_FACTORY.state()
 
     # Handle message
     return message_handler.delete_node(request=request, state=state)
@@ -110,7 +110,7 @@ async def delete_node(request: DeleteNodeRequest) -> DeleteNodeResponse:
 async def pull_task_ins(request: PullTaskInsRequest) -> PullTaskInsResponse:
     """Pull TaskIns."""
     # Get state from app
-    state: State = app.state.STATE_FACTORY.state()
+    state: LinkState = app.state.STATE_FACTORY.state()
 
     # Handle message
     return message_handler.pull_task_ins(request=request, state=state)
@@ -121,7 +121,7 @@ async def pull_task_ins(request: PullTaskInsRequest) -> PullTaskInsResponse:
 async def push_task_res(request: PushTaskResRequest) -> PushTaskResResponse:
     """Push TaskRes."""
     # Get state from app
-    state: State = app.state.STATE_FACTORY.state()
+    state: LinkState = app.state.STATE_FACTORY.state()
 
     # Handle message
     return message_handler.push_task_res(request=request, state=state)
@@ -131,7 +131,7 @@ async def push_task_res(request: PushTaskResRequest) -> PushTaskResResponse:
 async def ping(request: PingRequest) -> PingResponse:
     """Ping."""
     # Get state from app
-    state: State = app.state.STATE_FACTORY.state()
+    state: LinkState = app.state.STATE_FACTORY.state()
 
     # Handle message
     return message_handler.ping(request=request, state=state)
@@ -141,7 +141,7 @@ async def ping(request: PingRequest) -> PingResponse:
 async def get_run(request: GetRunRequest) -> GetRunResponse:
     """GetRun."""
     # Get state from app
-    state: State = app.state.STATE_FACTORY.state()
+    state: LinkState = app.state.STATE_FACTORY.state()
 
     # Handle message
     return message_handler.get_run(request=request, state=state)
