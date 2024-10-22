@@ -65,8 +65,7 @@ def _register_node_info_stores(
     run: Run,
     app_dir: Optional[str] = None,
 ) -> dict[int, DeprecatedRunInfoStore]:
-    """Create DeprecatedRunInfoStore objects and pre-register the context for the
-    run."""
+    """Create DeprecatedRunInfoStore objects and register the context for the run."""
     node_info_store: dict[int, DeprecatedRunInfoStore] = {}
     num_partitions = len(set(nodes_mapping.values()))
     for node_id, partition_id in nodes_mapping.items():
