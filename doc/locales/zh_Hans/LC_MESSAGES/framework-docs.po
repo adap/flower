@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-27 00:30+0000\n"
+"POT-Creation-Date: 2024-10-10 00:29+0000\n"
 "PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language: zh_Hans\n"
@@ -1271,7 +1271,7 @@ msgstr ""
 "Markdown（``.md`` 文件）。"
 
 #: ../../source/contributor-how-to-write-documentation.rst:10
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:193
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:196
 #, fuzzy
 msgid ""
 "Note that, in order to build the documentation locally (with ``poetry run"
@@ -2291,34 +2291,34 @@ msgstr ""
 #, fuzzy
 msgid ""
 "If you don't have ``pyenv`` installed, the following script that will "
-"install it, set it up, and create the virtual environment (with ``Python "
-"3.9.20`` by default):"
+"install it, set it up, and create the virtual environment (with "
+":substitution-code:`Python |python_full_version|` by default):"
 msgstr ""
 "如果没有安装 :code:`pyenv`，可以使用以下脚本安装 pyenv、设置并创建虚拟环境（默认使用 :code:`Python "
 "3.9.20）：："
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:68
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:69
 #, fuzzy
 msgid ""
 "If you already have ``pyenv`` installed (along with the ``pyenv-"
 "virtualenv`` plugin), you can use the following convenience script (with "
-"``Python 3.9.20`` by default):"
+":substitution-code:`Python |python_full_version|` by default):"
 msgstr ""
 "如果没有安装 :code:`pyenv`，可以使用以下脚本安装 pyenv、设置并创建虚拟环境（默认使用 :code:`Python "
 "3.9.20）：："
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:75
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:77
 #, fuzzy
 msgid ""
 "3. Install the Flower package in development mode (think ``pip install "
 "-e``) along with all necessary dependencies:"
 msgstr "第三，在开发模式下安装 Flower 软件包（想想 :code:`pip install -e`）以及所有必要的依赖项：："
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:83
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:85
 msgid "Convenience Scripts"
 msgstr "便捷脚本"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:85
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:87
 #, fuzzy
 msgid ""
 "The Flower repository contains a number of convenience scripts to make "
@@ -2327,28 +2327,28 @@ msgid ""
 " important ones:"
 msgstr "Flower 软件仓库包含大量便捷脚本，可使重复性开发任务更轻松、更不易出错。完整列表请参见 :code:`/dev` 子目录。以下是最重要的脚本："
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:90
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:92
 msgid "Create/Delete Virtual Environment"
 msgstr "创建/删除虚拟环境"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:98
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:101
 msgid "Compile ProtoBuf Definitions"
 msgstr "编译 ProtoBuf 定义"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:105
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:108
 msgid "Auto-Format Code"
 msgstr "自动格式化代码"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:112
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:115
 msgid "Run Linters and Tests"
 msgstr "运行分类器和测试"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:119
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:122
 #, fuzzy
 msgid "Add a pre-commit hook"
 msgstr "添加预先提交钩子"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:121
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:124
 #, fuzzy
 msgid ""
 "Developers may integrate a pre-commit hook into their workflow utilizing "
@@ -2360,31 +2360,31 @@ msgstr ""
 "库将预提交钩子集成到工作流程中。预提交钩子被配置为执行两个主要操作： `./dev/format.sh`` 和 ``./dev/test.sh``"
 " 脚本。"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:125
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:128
 #, fuzzy
 msgid "There are multiple ways developers can use this:"
 msgstr "开发人员可以通过多种方式使用它："
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:127
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:130
 #, fuzzy
 msgid "Install the pre-commit hook to your local git directory by simply running:"
 msgstr "在本地 git 目录中安装预提交钩子，只需运行"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:133
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:136
 #, fuzzy
 msgid ""
 "Each ``git commit`` will trigger the execution of formatting and "
 "linting/test scripts."
 msgstr "每次 \"git 提交 \"都会触发格式化和内核/测试脚本的执行。"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:135
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:138
 #, fuzzy
 msgid ""
 "If in a hurry, bypass the hook using ``--no-verify`` with the ``git "
 "commit`` command."
 msgstr "如果赶时间，可使用 ``--no-verify`` 和 ``git commit` 命令绕过钩子："
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:142
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:145
 #, fuzzy
 msgid ""
 "For developers who prefer not to install the hook permanently, it is "
@@ -2392,18 +2392,18 @@ msgid ""
 " the following command:"
 msgstr "对于不想永久安装钩子的开发人员，可以使用以下命令在提交更改之前执行一次性检查："
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:149
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:152
 #, fuzzy
 msgid ""
 "This executes the formatting and linting checks/tests on all the files "
 "without modifying the default behavior of ``git commit``."
 msgstr "这将在不修改 ``git commit`` 默认行为的情况下对所有文件执行格式化和词排检查/测试。"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:153
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:156
 msgid "Run Github Actions (CI) locally"
 msgstr "在本地运行 Github 操作 (CI)"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:155
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:158
 #, fuzzy
 msgid ""
 "Developers could run the full set of Github Actions workflows under their"
@@ -2414,35 +2414,35 @@ msgstr ""
 "开发人员可以使用 `Act <https://github.com/nektos/act>_` 在本地环境下运行全套 Github Actions"
 " 工作流程。请参考链接仓库下的安装说明，并在 Flower 主克隆仓库文件夹下运行下一条命令：："
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:164
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:167
 msgid ""
 "The Flower default workflow would run by setting up the required Docker "
 "machines underneath."
 msgstr "Flower 默认工作流程将通过在下面设置所需的 Docker 机器来运行。"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:168
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:171
 msgid "Build Release"
 msgstr "版本发布"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:170
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:173
 #, fuzzy
 msgid ""
 "Flower uses Poetry to build releases. The necessary command is wrapped in"
 " a simple script:"
 msgstr "Flower 使用 Poetry 创建发布版本。必要的命令封装在一个简单的脚本中：："
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:177
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:180
 #, fuzzy
 msgid ""
 "The resulting ``.whl`` and ``.tar.gz`` releases will be stored in the "
 "``/dist`` subdirectory."
 msgstr "生成的 :code:`.whl` 和 :code:`.tar.gz` 版本将存储在 :code:`/dist` 子目录中。"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:181
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:184
 msgid "Build Documentation"
 msgstr "构建文档"
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:183
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:186
 #, fuzzy
 msgid ""
 "Flower's documentation uses `Sphinx <https://www.sphinx-doc.org/>`_. "
@@ -2452,7 +2452,7 @@ msgstr ""
 "Flower 的文档使用 `Sphinx <https://www.sphinx-"
 "doc.org/>`_。目前还没有很方便的脚本来重新构建文档，不过这很容易：："
 
-#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:191
+#: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:194
 msgid "This will generate HTML documentation in ``doc/build/html``."
 msgstr "这将在 ``doc/build/html`` 中生成 HTML 文档。"
 
@@ -7926,7 +7926,7 @@ msgstr ""
 "}``（当使用``start_simulation``时）"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:28
-#: ../../source/how-to-upgrade-to-flower-next.rst:120
+#: ../../source/how-to-upgrade-to-flower-next.rst:121
 msgid "Required changes"
 msgstr "所需变更"
 
@@ -8170,7 +8170,7 @@ msgstr ""
 "...)``"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:121
-#: ../../source/how-to-upgrade-to-flower-next.rst:348
+#: ../../source/how-to-upgrade-to-flower-next.rst:349
 msgid "Further help"
 msgstr "更多帮助"
 
@@ -8265,7 +8265,7 @@ msgid ""
 "``pyproject.toml``:"
 msgstr "将 ``pyproject.toml`` 中的次要版本增加一个。"
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:122
+#: ../../source/how-to-upgrade-to-flower-next.rst:123
 #, fuzzy
 msgid ""
 "In Flower Next, the *infrastructure* and *application layers* have been "
@@ -8284,36 +8284,36 @@ msgstr ""
 "并通过命令行启动它。服务器和客户端的长期运行组件被称为超级链接（SuperLink）和超级节点（SuperNode）。以下是无需手动更新的非破坏性更改，可让您以传统方式和"
 " Flower Next 方式运行项目："
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:131
+#: ../../source/how-to-upgrade-to-flower-next.rst:132
 #, fuzzy
 msgid "|clientapp_link|_"
 msgstr "客户端"
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:133
+#: ../../source/how-to-upgrade-to-flower-next.rst:134
 #, fuzzy
 msgid ""
 "Wrap your existing client with |clientapp_link|_ instead of launching it "
 "via |startclient_link|_. Here's an example:"
 msgstr "用 |clientapp_link|_ 封装现有客户端，而不是通过 |startclient_link|_ 启动。下面是一个例子："
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:156
+#: ../../source/how-to-upgrade-to-flower-next.rst:157
 #, fuzzy
 msgid "|serverapp_link|_"
 msgstr "服务器"
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:158
+#: ../../source/how-to-upgrade-to-flower-next.rst:159
 #, fuzzy
 msgid ""
 "Wrap your existing strategy with |serverapp_link|_ instead of starting "
 "the server via |startserver_link|_. Here's an example:"
 msgstr "用 |serverapp_link|_ 包住现有策略，而不是通过 |startserver_link|_ 启动服务器。下面是一个例子："
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:179
+#: ../../source/how-to-upgrade-to-flower-next.rst:180
 #, fuzzy
 msgid "Deployment"
 msgstr "调配"
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:181
+#: ../../source/how-to-upgrade-to-flower-next.rst:182
 #, fuzzy
 msgid ""
 "Run the ``SuperLink`` using |flowernext_superlink_link|_ before running, "
@@ -8325,14 +8325,14 @@ msgstr ""
 "之前，使用 |flowernext_superlink_link|_ 运行 ``SuperLink`` 。无需将 |client.py` 和 "
 "`server.py` 作为 Python 脚本执行。"
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:184
+#: ../../source/how-to-upgrade-to-flower-next.rst:185
 #, fuzzy
 msgid ""
 "Here's an example to start the server without HTTPS (only for "
 "prototyping):"
 msgstr "下面是一个在不使用 HTTPS 的情况下启动服务器的示例（仅用于原型开发）："
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:200
+#: ../../source/how-to-upgrade-to-flower-next.rst:201
 #, fuzzy
 msgid ""
 "Here's another example to start with HTTPS. Use the ``--ssl-ca-"
@@ -8341,12 +8341,12 @@ msgid ""
 "private key)."
 msgstr "下面是另一个使用 HTTPS 的示例。使用 ``--certificates`` 命令行参数传递路径（CA 证书、服务器证书和服务器私钥）。"
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:228
+#: ../../source/how-to-upgrade-to-flower-next.rst:229
 #, fuzzy
 msgid "Simulation in CLI"
 msgstr "运行模拟"
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:230
+#: ../../source/how-to-upgrade-to-flower-next.rst:231
 #, fuzzy
 msgid ""
 "Wrap your existing client and strategy with |clientapp_link|_ and "
@@ -8356,7 +8356,7 @@ msgstr ""
 "分别用 |clientapp_link|_ 和 |serverapp_link|_ 封装现有的客户端和策略。无需再使用 "
 "|startsim_link|_。下面是一个示例："
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:263
+#: ../../source/how-to-upgrade-to-flower-next.rst:264
 #, fuzzy
 msgid ""
 "Run |flower_simulation_link|_ in CLI and point to the ``server_app`` / "
@@ -8368,7 +8368,7 @@ msgstr ""
 "/``client_app`` 对象，而不是执行 Python 脚本。下面是一个示例（假定 `server_app`` 和 "
 "`client_app`` 对象位于 `sim.py`` 模块中）："
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:280
+#: ../../source/how-to-upgrade-to-flower-next.rst:281
 #, fuzzy
 msgid ""
 "Set default resources for each |clientapp_link|_ using the ``--backend-"
@@ -8378,19 +8378,19 @@ msgstr ""
 "使用 ``--backend-config`` 命令行参数为每个 |clientapp_link|_ 设置默认资源，而不是在 "
 "|startsim_link|_ 中设置 ``client_resources`` 参数。下面是一个例子："
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:304
+#: ../../source/how-to-upgrade-to-flower-next.rst:305
 #, fuzzy
 msgid "Simulation in a Notebook"
 msgstr "笔记本中的模拟"
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:306
+#: ../../source/how-to-upgrade-to-flower-next.rst:307
 #, fuzzy
 msgid ""
 "Run |runsim_link|_ in your notebook instead of |startsim_link|_. Here's "
 "an example:"
 msgstr "在笔记本中运行 |runsim_link|_，而不是 |startsim_link|_。下面是一个例子："
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:350
+#: ../../source/how-to-upgrade-to-flower-next.rst:351
 #, fuzzy
 msgid ""
 "Some official `Flower code examples <https://flower.ai/docs/examples/>`_ "
@@ -8405,12 +8405,12 @@ msgstr ""
 " 已经更新到 Flower 1.0，它们可以作为使用 Flower 1.0 API 的参考。如果还有其他问题，请加入 Flower Slack "
 "<https://flower.ai/join-slack/>`_ 并使用 \"#questions``\"。"
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:357
+#: ../../source/how-to-upgrade-to-flower-next.rst:358
 #, fuzzy
 msgid "Important"
 msgstr "重要变更："
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:359
+#: ../../source/how-to-upgrade-to-flower-next.rst:360
 #, fuzzy
 msgid ""
 "As we continuously enhance Flower Next at a rapid pace, we'll be "
@@ -8418,7 +8418,7 @@ msgid ""
 "with us!"
 msgstr "随着 Flower Next 的不断快速改进，我们将定期更新本指南。如有任何反馈，请随时与我们分享！"
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:365
+#: ../../source/how-to-upgrade-to-flower-next.rst:366
 #, fuzzy
 msgid "Happy migrating! 🚀"
 msgstr "移民愉快！🚀"
@@ -29363,7 +29363,7 @@ msgid ""
 msgstr "在机器学习中，我们有一个模型和数据。模型可以是一个神经网络（如图所示），也可以是其他东西，比如经典的线性回归。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|3a7aceef05f0421794726ac54aaf12fd|"
+msgid "|ac0a9766e26044d6aea222a829859b20|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -29378,7 +29378,7 @@ msgid ""
 msgstr "我们使用数据来训练模型，以完成一项有用的任务。任务可以是检测图像中的物体、转录音频或玩围棋等游戏。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|d741075f8e624331b42c0746f7d258a0|"
+msgid "|36cd6e248b1443ce8a82b5a025bba368|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -29399,7 +29399,7 @@ msgid ""
 msgstr "它源于智能手机上用户与应用程序的交互、汽车上传感器数据的收集、笔记本电脑上键盘输入的接收，或者智能扬声器上某人试着唱的歌。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|8fc92d668bcb42b8bda55143847f2329|"
+msgid "|bf4fb057f4774df39e1dcb5c71fd804a|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -29417,7 +29417,7 @@ msgstr ""
 "\"通常不只是一个地方，而是很多地方。它可能是多个运行同一应用程序的设备。但也可能是多个组织，都在为同一任务生成数据。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|1c705d833a024f22adcaeb8ae3d13b0b|"
+msgid "|71bb9f3c74c04f959b9bc1f02b736c95|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -29433,7 +29433,7 @@ msgid ""
 msgstr "因此，要使用机器学习或任何类型的数据分析，过去使用的方法是在中央服务器上收集所有数据。这个服务器可以在数据中心的某个地方，也可以在云端的某个地方。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|77a037b546a84262b608e04bc82a2c96|"
+msgid "|7605632e1b0f49599ffacf841491fcfb|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -29448,7 +29448,7 @@ msgid ""
 msgstr "一旦所有数据都收集到一处，我们最终就可以使用机器学习算法在数据上训练我们的模型。这就是我们基本上一直依赖的机器学习方法。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|f568e24c9fb0435690ac628210a4be96|"
+msgid "|91b1b5a7d3484eb7a2350c1923f18307|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -29468,7 +29468,7 @@ msgid ""
 msgstr "我们刚刚看到的经典机器学习方法可以在某些情况下使用。很好的例子包括对假日照片进行分类或分析网络流量。在这些案例中，所有数据自然都可以在中央服务器上获得。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|a7bf029981514e2593aa3a2b48c9d76a|"
+msgid "|5405ed430e4746e28b083b146fb71731|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -29483,7 +29483,7 @@ msgid ""
 msgstr "但这种方法并不适用于许多其他情况。例如，集中服务器上没有数据，或者一台服务器上的数据不足以训练出一个好的模型。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|3f645ad807f84be8b1f8f3267173939c|"
+msgid "|a389e87dab394eb48a8949aa2397687b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -29631,7 +29631,7 @@ msgid ""
 msgstr "我们首先在服务器上初始化模型。这与经典的集中式学习完全相同：我们随机或从先前保存的检查点初始化模型参数。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|a06a9dbd603f45819afd8e8cfc3c4b8f|"
+msgid "|89c412136a5146ec8dc32c0973729f12|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -29655,7 +29655,7 @@ msgid ""
 msgstr "接下来，我们会将全局模型的参数发送到连接的客户端节点（如智能手机等边缘设备或企业的服务器）。这是为了确保每个参与节点都使用相同的模型参数开始本地训练。我们通常只使用几个连接节点，而不是所有节点。这样做的原因是，选择越来越多的客户端节点会导致收益递减。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|edcf9a04d96e42608fd01a333375febe|"
+msgid "|9503d3dc3a144e8aa295f8800cd8a766|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -29681,7 +29681,7 @@ msgstr ""
 "（mini-batches）。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|3dae22fe797043968e2b7aa7073c78bd|"
+msgid "|aadb59e29b9e445d8e239d9a8a7045cb|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -29704,7 +29704,7 @@ msgid ""
 msgstr "经过本地训练后，每个客户节点最初收到的模型参数都会略有不同。参数之所以不同，是因为每个客户端节点的本地数据集中都有不同的数据。然后，客户端节点将这些模型更新发回服务器。它们发送的模型更新既可以是完整的模型参数，也可以只是本地训练过程中积累的梯度。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|ba178f75267d4ad8aa7363f20709195f|"
+msgid "|a7579ad7734347508e959d9e14f2f53d|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -29750,7 +29750,7 @@ msgstr ""
 " 100 个示例的 10 倍。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|c380c750bfd2444abce039a1c6fa8e60|"
+msgid "|73d15dd1d4fc41678b2d54815503fbe8|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -29857,7 +29857,7 @@ msgstr ""
 "为联邦学习、分析和评估提供了一种统一的方法。它允许用户联邦化任何工作负载、任何 ML 框架和任何编程语言。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|e7cec00a114b48359935c6510595132e|"
+msgid "|55472eef61274ba1b739408607e109df|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -33900,5 +33900,47 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|797bf279c4894b5ead31dc9b0534ed62|"
+#~ msgstr ""
+
+#~ msgid "|3a7aceef05f0421794726ac54aaf12fd|"
+#~ msgstr ""
+
+#~ msgid "|d741075f8e624331b42c0746f7d258a0|"
+#~ msgstr ""
+
+#~ msgid "|8fc92d668bcb42b8bda55143847f2329|"
+#~ msgstr ""
+
+#~ msgid "|1c705d833a024f22adcaeb8ae3d13b0b|"
+#~ msgstr ""
+
+#~ msgid "|77a037b546a84262b608e04bc82a2c96|"
+#~ msgstr ""
+
+#~ msgid "|f568e24c9fb0435690ac628210a4be96|"
+#~ msgstr ""
+
+#~ msgid "|a7bf029981514e2593aa3a2b48c9d76a|"
+#~ msgstr ""
+
+#~ msgid "|3f645ad807f84be8b1f8f3267173939c|"
+#~ msgstr ""
+
+#~ msgid "|a06a9dbd603f45819afd8e8cfc3c4b8f|"
+#~ msgstr ""
+
+#~ msgid "|edcf9a04d96e42608fd01a333375febe|"
+#~ msgstr ""
+
+#~ msgid "|3dae22fe797043968e2b7aa7073c78bd|"
+#~ msgstr ""
+
+#~ msgid "|ba178f75267d4ad8aa7363f20709195f|"
+#~ msgstr ""
+
+#~ msgid "|c380c750bfd2444abce039a1c6fa8e60|"
+#~ msgstr ""
+
+#~ msgid "|e7cec00a114b48359935c6510595132e|"
 #~ msgstr ""
 

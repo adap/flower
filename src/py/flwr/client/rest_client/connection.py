@@ -82,7 +82,7 @@ T = TypeVar("T", bound=GrpcMessage)
 
 
 @contextmanager
-def http_request_response(  # pylint: disable=,R0913, R0914, R0915
+def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     server_address: str,
     insecure: bool,  # pylint: disable=unused-argument
     retry_invoker: RetryInvoker,

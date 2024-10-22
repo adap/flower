@@ -32,7 +32,7 @@ from flwr.common.typing import Fab, Run
 
 
 @contextmanager
-def grpc_adapter(  # pylint: disable=R0913
+def grpc_adapter(  # pylint: disable=R0913,too-many-positional-arguments
     server_address: str,
     insecure: bool,
     retry_invoker: RetryInvoker,

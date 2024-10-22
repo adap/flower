@@ -52,7 +52,7 @@ from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.typing import Fab, Run, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.server.superlink.fleet.grpc_bidi.grpc_server import generic_create_grpc_server
-from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
+from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 
 from .clientapp.clientappio_servicer import ClientAppInputs, ClientAppIoServicer
 from .grpc_adapter_client.connection import grpc_adapter
@@ -133,6 +133,11 @@ def start_client(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
+    authentication_keys : Optional[Tuple[PrivateKey, PublicKey]] (default: None)
+        Tuple containing the elliptic curve private key and public key for
+        authentication from the cryptography library.
+        Source: https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ec/
+        Used to establish an authenticated connection with the server.
     client_metadata : Optional[Sequence[tuple[str, Union[str, bytes]]]] (default: None)
         Metadata to be sent to the server in the form of key-value pairs. If provided, 
         GprcClientProxy retrieves this metadata, which can then be accessed through 
@@ -203,7 +208,7 @@ def start_client_internal(
     *,
     server_address: str,
     node_config: UserConfig,
-    load_client_app_fn: Optional[Callable[[str, str], ClientApp]] = None,
+    load_client_app_fn: Optional[Callable[[str, str, str], ClientApp]] = None,
     client_fn: Optional[ClientFnExt] = None,
     client: Optional[Client] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
@@ -256,6 +261,11 @@ def start_client_internal(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
+    authentication_keys : Optional[Tuple[PrivateKey, PublicKey]] (default: None)
+        Tuple containing the elliptic curve private key and public key for
+        authentication from the cryptography library.
+        Source: https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ec/
+        Used to establish an authenticated connection with the server.
     client_metadata : Optional[Sequence[tuple[str, Union[str, bytes]]]] (default: None)
         Metadata to be sent to the server in the form of key-value pairs. If provided, 
         GprcClientProxy retrieves this metadata, which can then be accessed through 
@@ -299,7 +309,7 @@ def start_client_internal(
 
             client_fn = single_client_factory
 
-        def _load_client_app(_1: str, _2: str) -> ClientApp:
+        def _load_client_app(_1: str, _2: str, _3: str) -> ClientApp:
             return ClientApp(client_fn=client_fn)
 
         load_client_app_fn = _load_client_app
@@ -531,7 +541,7 @@ def start_client_internal(
                         else:
                             # Load ClientApp instance
                             client_app: ClientApp = load_client_app_fn(
-                                fab_id, fab_version
+                                fab_id, fab_version, run.fab_hash
                             )
 
                             # Execute ClientApp

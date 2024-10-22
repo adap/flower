@@ -25,7 +25,7 @@ from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
 from flwr.common.serde import message_from_taskres, message_to_taskins
 from flwr.common.typing import Run
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.server.superlink.state import StateFactory
+from flwr.server.superlink.linkstate import LinkStateFactory
 
 from .driver import Driver
 
@@ -39,16 +39,20 @@ class InMemoryDriver(Driver):
         The identifier of the run.
     state_factory : StateFactory
         A StateFactory embedding a state that this driver can interface with.
+    pull_interval : float (default=0.1)
+        Sleep duration between calls to `pull_messages`.
     """
 
     def __init__(
         self,
         run_id: int,
-        state_factory: StateFactory,
+        state_factory: LinkStateFactory,
+        pull_interval: float = 0.1,
     ) -> None:
         self._run_id = run_id
         self._run: Optional[Run] = None
         self.state = state_factory.state()
+        self.pull_interval = pull_interval
         self.node = Node(node_id=0, anonymous=True)
 
     def _check_message(self, message: Message) -> None:
@@ -78,7 +82,7 @@ class InMemoryDriver(Driver):
         self._init_run()
         return Run(**vars(cast(Run, self._run)))
 
-    def create_message(  # pylint: disable=too-many-arguments
+    def create_message(  # pylint: disable=too-many-arguments,R0917
         self,
         content: RecordSet,
         message_type: str,
@@ -146,7 +150,7 @@ class InMemoryDriver(Driver):
         """
         msg_ids = {UUID(msg_id) for msg_id in message_ids}
         # Pull TaskRes
-        task_res_list = self.state.get_task_res(task_ids=msg_ids, limit=len(msg_ids))
+        task_res_list = self.state.get_task_res(task_ids=msg_ids)
         # Delete tasks in state
         self.state.delete_tasks(msg_ids)
         # Convert TaskRes to Message
@@ -180,5 +184,5 @@ class InMemoryDriver(Driver):
             if len(msg_ids) == 0:
                 break
             # Sleep
-            time.sleep(3)
+            time.sleep(self.pull_interval)
         return ret

@@ -40,7 +40,7 @@ from flwr.common.message import Error
 from flwr.common.serde import message_from_taskins, message_to_taskres
 from flwr.common.typing import Run
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
-from flwr.server.superlink.state import State, StateFactory
+from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 
 from .backend import Backend, error_messages_backends, supported_backends
 
@@ -48,7 +48,7 @@ NodeToPartitionMapping = dict[int, int]
 
 
 def _register_nodes(
-    num_nodes: int, state_factory: StateFactory
+    num_nodes: int, state_factory: LinkStateFactory
 ) -> NodeToPartitionMapping:
     """Register nodes with the StateFactory and create node-id:partition-id mapping."""
     nodes_mapping: NodeToPartitionMapping = {}
@@ -145,7 +145,7 @@ def worker(
 
 
 def add_taskins_to_queue(
-    state: State,
+    state: LinkState,
     queue: "Queue[TaskIns]",
     nodes_mapping: NodeToPartitionMapping,
     f_stop: threading.Event,
@@ -160,7 +160,7 @@ def add_taskins_to_queue(
 
 
 def put_taskres_into_state(
-    state: State, queue: "Queue[TaskRes]", f_stop: threading.Event
+    state: LinkState, queue: "Queue[TaskRes]", f_stop: threading.Event
 ) -> None:
     """Put TaskRes into State from a queue."""
     while not f_stop.is_set():
@@ -172,11 +172,12 @@ def put_taskres_into_state(
             pass
 
 
+# pylint: disable=too-many-positional-arguments
 def run_api(
     app_fn: Callable[[], ClientApp],
     backend_fn: Callable[[], Backend],
     nodes_mapping: NodeToPartitionMapping,
-    state_factory: StateFactory,
+    state_factory: LinkStateFactory,
     node_states: dict[int, NodeState],
     f_stop: threading.Event,
 ) -> None:
@@ -251,7 +252,7 @@ def run_api(
 
 
 # pylint: disable=too-many-arguments,unused-argument,too-many-locals,too-many-branches
-# pylint: disable=too-many-statements
+# pylint: disable=too-many-statements,too-many-positional-arguments
 def start_vce(
     backend_name: str,
     backend_config_json_stream: str,
@@ -263,10 +264,12 @@ def start_vce(
     client_app: Optional[ClientApp] = None,
     client_app_attr: Optional[str] = None,
     num_supernodes: Optional[int] = None,
-    state_factory: Optional[StateFactory] = None,
+    state_factory: Optional[LinkStateFactory] = None,
     existing_nodes_mapping: Optional[NodeToPartitionMapping] = None,
 ) -> None:
     """Start Fleet API with the Simulation Engine."""
+    nodes_mapping = {}
+
     if client_app_attr is not None and client_app is not None:
         raise ValueError(
             "Both `client_app_attr` and `client_app` are provided, "
@@ -300,7 +303,7 @@ def start_vce(
     if not state_factory:
         log(INFO, "A StateFactory was not supplied to the SimulationEngine.")
         # Create an empty in-memory state factory
-        state_factory = StateFactory(":flwr-in-memory-state:")
+        state_factory = LinkStateFactory(":flwr-in-memory-state:")
         log(INFO, "Created new %s.", state_factory.__class__.__name__)
 
     if num_supernodes:
@@ -340,17 +343,17 @@ def start_vce(
     # Load ClientApp if needed
     def _load() -> ClientApp:
 
+        if client_app:
+            return client_app
         if client_app_attr:
-            app = get_load_client_app_fn(
+            return get_load_client_app_fn(
                 default_app_ref=client_app_attr,
                 app_path=app_dir,
                 flwr_dir=flwr_dir,
                 multi_app=False,
-            )(run.fab_id, run.fab_version)
+            )(run.fab_id, run.fab_version, run.fab_hash)
 
-        if client_app:
-            app = client_app
-        return app
+        raise ValueError("Either `client_app_attr` or `client_app` must be provided")
 
     app_fn = _load
 
