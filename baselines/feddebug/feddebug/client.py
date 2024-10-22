@@ -4,14 +4,12 @@ Please overwrite `flwr.client.NumPyClient` or `flwr.client.Client` and create a 
 to instantiate your client.
 """
 
-import gc
 from logging import INFO
 
 import flwr as fl
-import torch
 from flwr.common.logger import log
 
-from feddebug.models import initialize_model, train_neural_network
+from feddebug.models import train_neural_network
 from feddebug.utils import get_parameters, set_parameters
 
 
@@ -41,22 +39,6 @@ class CNNFlowerClient(fl.client.NumPyClient):
 
         model_dict["model"] = model_dict["model"].cpu()
         parameters = get_parameters(model_dict["model"])
-        del model_dict["model"]
-        del model_dict
         client_train_dict = {"cid": self.args["cid"]} | train_dict
-        gc.collect()
         log(INFO, f"Client {self.args['cid']} trained.")
         return parameters, nk_client_data_points, client_train_dict
-
-
-def gen_client_func(cfg, client2data, cid):
-    """Give the new client."""
-    model_dict = initialize_model(cfg.model.name, cfg.dataset)
-    args = {
-        "cid": cid,
-        "model_dict": model_dict,
-        "client_data_train": client2data[cid],
-        "device": torch.device(cfg.device),
-    }
-    client = CNNFlowerClient(args).to_client()
-    return client

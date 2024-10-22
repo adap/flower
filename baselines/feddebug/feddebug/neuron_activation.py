@@ -54,5 +54,6 @@ class NeuronActivation:
 
 def get_neurons_activations(model, img):
     """Return the activations of all neurons in the model for the given input image."""
+    model = model.eval()
     neurons = NeuronActivation()
     return neurons.get_neurons_activations(model, img)

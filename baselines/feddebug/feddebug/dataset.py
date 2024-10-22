@@ -17,7 +17,7 @@ from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import DirichletPartitioner, IidPartitioner
 from feddebug.utils import create_transform
 from torchvision import transforms
-from logging import INFO, WARNING
+from logging import INFO
 
 
 class ClientsAndServerDatasets:
@@ -75,12 +75,7 @@ class ClientsAndServerDatasets:
         self._create_client_dataloaders()
         self.server_testloader = self._create_dataloader(self.clients_and_server_raw_data['server_data'], batch_size=512, shuffle=False)
 
-    # def _validate_dataset(self):
-    #     """Validates if the selected dataset is supported."""
-    #     supported_datasets = {"cifar10", "mnist"}  # Extend as needed
-    #     if self.cfg.dataset.name.lower() not in supported_datasets:
-    #         raise ValueError(f"Dataset '{self.cfg.dataset.name}' not supported.")
-    
+     
     def _create_client_dataloaders(self):
         """Create DataLoaders for each client."""
         self.client_id_to_loader = {
@@ -91,8 +86,13 @@ class ClientsAndServerDatasets:
 
     def _create_dataloader(self, ds, batch_size=64, shuffle=True):
         """Create a DataLoader with applied transformations."""
+
+        col = 'image' if 'image' in ds.column_names else 'img'
+
         def apply_transforms(batch):
-            batch["image"] = [transform(img) for img in batch["image"]]
+            batch["image"] = [transform(img) for img in batch[col]]
+            if col != 'image':
+                del batch[col]
             return batch
 
         temp_transform = create_transform()
@@ -124,9 +124,11 @@ class ClientsAndServerDatasets:
         """Introduce label noise by flipping labels based on the noise rate."""
         def flip_labels(batch):
             labels = np.array(batch['label'])
+            print(f"Total labels: {len(labels)}")
+            
             flip_mask = np.random.rand(len(labels)) < noise_rate
             indices_to_flip = np.where(flip_mask)[0]
-
+            print(f"Total labels to flip: {len(indices_to_flip)}")
             if len(indices_to_flip) > 0:
                 new_labels = labels[indices_to_flip].copy()
                 for idx in indices_to_flip:
@@ -134,6 +136,8 @@ class ClientsAndServerDatasets:
                     possible_labels = list(range(num_classes))
                     possible_labels.remove(current_label)
                     new_labels[idx] = random.choice(possible_labels)
+                    print(f"Label flipped from {current_label} to {new_labels[idx]}")
+
                 labels[indices_to_flip] = new_labels
                 batch['label'] = labels
             return batch
@@ -143,7 +147,4 @@ class ClientsAndServerDatasets:
 
     def get_data(self):
         """Get the prepared client and server DataLoaders."""
-        return {
-            "server_testdata": self.server_testloader,
-            "client2data": self.client_id_to_loader,
-        }
+        return {"server_testdata": self.server_testloader, "client2data": self.client_id_to_loader}

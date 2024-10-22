@@ -1,6 +1,6 @@
 # General Configuration
-num_rounds: 2
-num_clients: 5
+num_rounds: 25
+num_clients: 30
 clients_per_round: ${num_clients}
 
 # Client Configuration
@@ -12,7 +12,7 @@ client:
 # Adversarial Settings
 noise_rate: 1
 malicious_clients_ids: [0] # Malicious (also called faulty) client IDs (Ground Truth). Default client 0 is malicious.
-total_malicious_clients: null # For inducing multiple malicious clients in Table 2.
+total_malicious_clients: 3 # For inducing multiple malicious clients in Table 2.
     # e.g., 2 means [0, 1] are malicious
 feddebug:
     fast: true # to generate randome inputs faster
@@ -22,12 +22,12 @@ feddebug:
 
 # Model Configuration
 model:
-    name: lenet # Options: resnet34, resnet50, resnet101, resnet152, densenet121, vgg16, lenet
+    name: resnet18 # Options: resnet34, resnet50, resnet101, resnet152, densenet121, vgg16, lenet
     arch: cnn
 
 # Dataset Configuration
 dataset:
-    name: "mnist"
+    name: cifar10
     num_classes: ${dataset_classes.${dataset.name}}
     channels: ${dataset_channels.${dataset.name}}
 
@@ -57,7 +57,7 @@ total_gpus: 1
 total_cpus: 10
 
 client_resources:
-    num_cpus: 1
+    num_cpus: 2
     num_gpus: 0.2
 
 # Storage Configuration

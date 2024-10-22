@@ -2,16 +2,16 @@
 
 import itertools
 import time
-from logging import DEBUG, INFO, WARNING
 
 
 import torch
 import torch.nn.functional as F
-from flwr.common.logger import log
 
 
 from feddebug.neuron_activation import get_neurons_activations
 from feddebug.utils import seed_everything, create_transform
+from logging import DEBUG
+from flwr.common.logger import log
 
 seed_everything(786)
 

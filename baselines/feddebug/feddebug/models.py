@@ -126,7 +126,7 @@ def _train(tconfig):
             correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
             images = images.cpu()
             labels = labels.cpu()
-            break
+            # break
         epoch_loss /= total
         epoch_acc = correct / total
     net = net.cpu()    
@@ -137,8 +137,7 @@ def test(net, testloader, device):
     """Evaluate the network on the entire test set."""
     criterion = torch.nn.CrossEntropyLoss()
     correct, total, loss = 0, 0, 0.0
-    net.eval()
-    net = net.to(device)
+    net = net.to(device).eval()
     with torch.no_grad():
         for batch in testloader:
             images, labels = _get_inputs_labels_from_batch(batch)

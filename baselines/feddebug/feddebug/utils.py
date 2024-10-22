@@ -30,31 +30,18 @@ def seed_everything(seed=786):
     torch.backends.cudnn.benchmark = False
 
 
-def calculate_localization_accuracy(true_faulty_clients, predicted_faulty_clients, total_r_inputs):
+def calculate_localization_accuracy(true_faulty_clients, predicted_faulty_clients):
     """Calculate the fault localization accuracy."""   
-    true_pos = 0  # TP
-    false_neg = 0 # FN
-    false_pos = 0 # FP
-    true_neg = 0  # TN
+    true_preds = 0
+    total = 0
     for client, predicted_faulty_count in predicted_faulty_clients.items():
         if client in true_faulty_clients:
-            # Faulty Client
-            true_pos += predicted_faulty_count
-            false_neg += (total_r_inputs - predicted_faulty_count)
-        else:
-            # Non-Faulty Client
-            false_pos += predicted_faulty_count
-            true_neg += (total_r_inputs - predicted_faulty_count)
-    
-    total_predictions = true_pos + false_neg + false_pos + true_neg
-    if total_predictions == 0:
-        raise ValueError("Total number of predictions is zero, cannot compute accuracy.")
-    
-    accuracy = (true_pos + true_neg) / total_predictions
+            true_preds += predicted_faulty_count
+        
+        total += predicted_faulty_count
+          
+    accuracy = (true_preds / total) * 100
     return accuracy
-
-
-
 
 
 def create_transform():
