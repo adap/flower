@@ -17,6 +17,7 @@
 import argparse
 import csv
 import importlib.util
+import subprocess
 import sys
 import threading
 from collections.abc import Sequence
@@ -381,6 +382,20 @@ def _flwr_serverapp_scheduler(
                 "Connects to SuperLink on %s",
                 pending_run_id,
                 driver_api_address,
+            )
+            # Start ServerApp subprocess
+            command = [
+                "flwr-serverapp",
+                "--superlink",
+                driver_api_address,
+                "--run-id",
+                str(pending_run_id),
+            ]
+            subprocess.run(
+                command,
+                stdout=None,
+                stderr=None,
+                check=True,
             )
 
 
