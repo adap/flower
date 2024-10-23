@@ -69,5 +69,5 @@ message GetRunStatusRequest {
 message GetRunStatusResponse { map<uint64, RunStatus> run_status_dict = 1; }
 
 // GetPendingRun
-message GetPendingRunRequest { Node node = 1; }
+message GetPendingRunRequest { }
 message GetPendingRunResponse { uint64 run_id = 1; }
