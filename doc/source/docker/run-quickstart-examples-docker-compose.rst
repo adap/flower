@@ -37,8 +37,9 @@ Run the Quickstart Example
    into the example directory:
 
    .. code-block:: bash
+       :substitutions:
 
-       $ curl https://raw.githubusercontent.com/adap/flower/refs/heads/main/src/docker/complete/compose.yml \
+       $ curl https://raw.githubusercontent.com/adap/flower/refs/tags/v|stable_flwr_version|/src/docker/complete/compose.yml \
            -o compose.yml
 
 3. Build and start the services using the following command:
@@ -65,17 +66,11 @@ Run the Quickstart Example
        ``local-deployment`` with your chosen name in both the ``tool.flwr.federations.``
        string and the corresponding ``flwr run .`` command.
 
-5. Run the example:
+5. Run the example and follow the logs of the ServerApp:
 
    .. code-block:: bash
 
-       $ flwr run . local-deployment
-
-6. Follow the logs of the SuperExec service:
-
-   .. code-block:: bash
-
-       $ docker compose logs superexec -f
+       $ flwr run . local-deployment --stream
 
 That is all it takes! You can monitor the progress of the run through the logs of the
 SuperExec.
