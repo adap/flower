@@ -21,7 +21,8 @@ from os import urandom
 from uuid import uuid4
 
 from flwr.common import log
-from flwr.common.constant import ErrorCode
+from flwr.common.constant import ErrorCode, Status, SubStatus
+from flwr.common.typing import RunStatus
 from flwr.proto.error_pb2 import Error  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
@@ -30,6 +31,17 @@ NODE_UNAVAILABLE_ERROR_REASON = (
     "Error: Node Unavailable - The destination node is currently unavailable. "
     "It exceeds the time limit specified in its last ping."
 )
+
+VALID_RUN_STATUS_TRANSITIONS = {
+    (Status.PENDING, Status.STARTING),
+    (Status.STARTING, Status.RUNNING),
+    (Status.RUNNING, Status.FINISHED),
+}
+VALID_RUN_SUB_STATUSES = {
+    SubStatus.COMPLETED,
+    SubStatus.FAILED,
+    SubStatus.STOPPED,
+}
 
 
 def generate_rand_int_from_bytes(num_bytes: int) -> int:
@@ -146,3 +158,47 @@ def make_node_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
             ),
         ),
     )
+
+
+def is_valid_transition(current_status: RunStatus, new_status: RunStatus) -> bool:
+    """Check if a transition between two run statuses is valid.
+
+    Parameters
+    ----------
+    current_status : RunStatus
+        The current status of the run.
+    new_status : RunStatus
+        The new status to transition to.
+
+    Returns
+    -------
+    bool
+        True if the transition is valid, False otherwise.
+    """
+    return (
+        current_status.status,
+        new_status.status,
+    ) in VALID_RUN_STATUS_TRANSITIONS
+
+
+def has_valid_sub_status(status: RunStatus) -> bool:
+    """Check if the 'sub_status' field of the given status is valid.
+
+    Parameters
+    ----------
+    status : RunStatus
+        The status object to be checked.
+
+    Returns
+    -------
+    bool
+        True if the status object has a valid sub-status, False otherwise.
+
+    Notes
+    -----
+    Only an empty string (i.e., "") is considered a valid sub-status for
+    non-finished statuses. The sub-status of a finished status cannot be empty.
+    """
+    if status.status == Status.FINISHED:
+        return status.sub_status in VALID_RUN_SUB_STATUSES
+    return status.sub_status == ""

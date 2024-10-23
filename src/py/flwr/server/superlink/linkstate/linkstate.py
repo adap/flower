@@ -19,7 +19,7 @@ import abc
 from typing import Optional
 from uuid import UUID
 
-from flwr.common.typing import Run, UserConfig
+from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 
@@ -176,6 +176,43 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
             - `run_id`: The identifier of the run, same as the specified `run_id`.
             - `fab_id`: The identifier of the FAB used in the specified run.
             - `fab_version`: The version of the FAB used in the specified run.
+        """
+
+    @abc.abstractmethod
+    def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
+        """Retrieve the statuses for the specified runs.
+
+        Parameters
+        ----------
+        run_ids : set[int]
+            A set of run identifiers for which to retrieve statuses.
+
+        Returns
+        -------
+        dict[int, RunStatus]
+            A dictionary mapping each valid run ID to its corresponding status.
+
+        Notes
+        -----
+        Only valid run IDs that exist in the State will be included in the returned
+        dictionary. If a run ID is not found, it will be omitted from the result.
+        """
+
+    @abc.abstractmethod
+    def update_run_status(self, run_id: int, new_status: RunStatus) -> bool:
+        """Update the status of the run with the specified `run_id`.
+
+        Parameters
+        ----------
+        run_id : int
+            The identifier of the run.
+        new_status : RunStatus
+            The new status to be assigned to the run.
+
+        Returns
+        -------
+        bool
+            True if the status update is successful; False otherwise.
         """
 
     @abc.abstractmethod

@@ -24,12 +24,13 @@ from unittest.mock import patch
 from uuid import UUID
 
 from flwr.common import DEFAULT_TTL
-from flwr.common.constant import ErrorCode
+from flwr.common.constant import ErrorCode, Status, SubStatus
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
     private_key_to_bytes,
     public_key_to_bytes,
 )
+from flwr.common.typing import RunStatus
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
@@ -65,6 +66,82 @@ class StateTest(unittest.TestCase):
         assert run.run_id == run_id
         assert run.fab_hash == "9f86d08"
         assert run.override_config["test_key"] == "test_value"
+
+    def test_get_and_update_run_status(self) -> None:
+        """Test if get_run_status and update_run_status work correctly."""
+        # Prepare
+        state = self.state_factory()
+        run_id1 = state.create_run(None, None, "9f86d08", {"test_key": "test_value"})
+        run_id2 = state.create_run(None, None, "fffffff", {"mock_key": "mock_value"})
+        state.update_run_status(run_id2, RunStatus(Status.STARTING, "", ""))
+        state.update_run_status(run_id2, RunStatus(Status.RUNNING, "", ""))
+
+        # Execute
+        run_status_dict = state.get_run_status({run_id1, run_id2})
+        status1 = run_status_dict[run_id1]
+        status2 = run_status_dict[run_id2]
+
+        # Assert
+        assert status1.status == Status.PENDING
+        assert status2.status == Status.RUNNING
+
+    def test_status_transition_valid(self) -> None:
+        """Test valid run status transactions."""
+        # Prepare
+        state = self.state_factory()
+        run_id = state.create_run(None, None, "9f86d08", {"test_key": "test_value"})
+
+        # Execute and assert
+        status1 = state.get_run_status({run_id})[run_id]
+        assert state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+        status2 = state.get_run_status({run_id})[run_id]
+        assert state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        status3 = state.get_run_status({run_id})[run_id]
+        assert state.update_run_status(
+            run_id, RunStatus(Status.FINISHED, SubStatus.FAILED, "mock failure")
+        )
+        status4 = state.get_run_status({run_id})[run_id]
+
+        assert status1.status == Status.PENDING
+        assert status2.status == Status.STARTING
+        assert status3.status == Status.RUNNING
+        assert status4.status == Status.FINISHED
+
+    def test_status_transition_invalid(self) -> None:
+        """Test invalid run status transitions."""
+        # Prepare
+        state = self.state_factory()
+        run_id = state.create_run(None, None, "9f86d08", {"test_key": "test_value"})
+        run_statuses = [
+            RunStatus(Status.PENDING, "", ""),
+            RunStatus(Status.STARTING, "", ""),
+            RunStatus(Status.PENDING, "", ""),
+            RunStatus(Status.FINISHED, SubStatus.COMPLETED, ""),
+            RunStatus(Status.FINISHED, SubStatus.FAILED, ""),
+            RunStatus(Status.FINISHED, SubStatus.STOPPED, ""),
+        ]
+
+        # Execute and assert
+        # Cannot transition from RunStatus.PENDING
+        # to RunStatus.PENDING, RunStatus.RUNNING, or RunStatus.FINISHED
+        for run_status in [s for s in run_statuses if s.status != Status.STARTING]:
+            assert not state.update_run_status(run_id, run_status)
+        state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+        # Cannot transition from RunStatus.STARTING
+        # to RunStatus.PENDING, RunStatus.STARTING, or RunStatus.FINISHED
+        for run_status in [s for s in run_statuses if s.status != Status.RUNNING]:
+            assert not state.update_run_status(run_id, run_status)
+        state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        # Cannot transition from RunStatus.RUNNING
+        # to RunStatus.PENDING, RunStatus.STARTING, or RunStatus.RUNNING
+        for run_status in [s for s in run_statuses if s.status != Status.FINISHED]:
+            assert not state.update_run_status(run_id, run_status)
+        state.update_run_status(
+            run_id, RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
+        )
+        # Cannot transition to any status from RunStatus.FINISHED
+        for run_status in run_statuses:
+            assert not state.update_run_status(run_id, run_status)
 
     def test_get_task_ins_empty(self) -> None:
         """Validate that a new state has no TaskIns."""

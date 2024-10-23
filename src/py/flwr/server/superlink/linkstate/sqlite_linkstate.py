@@ -30,8 +30,9 @@ from flwr.common.constant import (
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
     RUN_ID_NUM_BYTES,
+    Status,
 )
-from flwr.common.typing import Run, UserConfig
+from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
@@ -44,6 +45,8 @@ from .utils import (
     convert_uint64_to_sint64,
     convert_uint64_values_in_dict_to_sint64,
     generate_rand_int_from_bytes,
+    has_valid_sub_status,
+    is_valid_transition,
     make_node_unavailable_taskres,
 )
 
@@ -79,7 +82,13 @@ CREATE TABLE IF NOT EXISTS run(
     fab_id                TEXT,
     fab_version           TEXT,
     fab_hash              TEXT,
-    override_config       TEXT
+    override_config       TEXT,
+    pending_at            TEXT,
+    starting_at           TEXT,
+    running_at            TEXT,
+    finished_at           TEXT,
+    sub_status            TEXT,
+    details               TEXT
 );
 """
 
@@ -133,7 +142,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         self,
         database_path: str,
     ) -> None:
-        """Initialize an SqliteState.
+        """Initialize an SqliteLinkState.
 
         Parameters
         ----------
@@ -773,26 +782,16 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         if self.query(query, (sint64_run_id,))[0]["COUNT(*)"] == 0:
             query = (
                 "INSERT INTO run "
-                "(run_id, fab_id, fab_version, fab_hash, override_config)"
-                "VALUES (?, ?, ?, ?, ?);"
+                "(run_id, fab_id, fab_version, fab_hash, override_config, pending_at, "
+                "starting_at, running_at, finished_at, sub_status, details)"
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
             )
             if fab_hash:
-                self.query(
-                    query,
-                    (sint64_run_id, "", "", fab_hash, json.dumps(override_config)),
-                )
-            else:
-                self.query(
-                    query,
-                    (
-                        sint64_run_id,
-                        fab_id,
-                        fab_version,
-                        "",
-                        json.dumps(override_config),
-                    ),
-                )
-            # Note: we need to return the uint64 value of the run_id
+                fab_id, fab_version = "", ""
+            override_config_json = json.dumps(override_config)
+            data = [sint64_run_id, fab_id, fab_version, fab_hash, override_config_json]
+            data += [now().isoformat(), "", "", "", "", ""]
+            self.query(query, tuple(data))
             return uint64_run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
@@ -867,6 +866,82 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             )
         log(ERROR, "`run_id` does not exist.")
         return None
+
+    def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
+        """Retrieve the statuses for the specified runs."""
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_run_ids = (convert_uint64_to_sint64(run_id) for run_id in set(run_ids))
+        query = f"SELECT * FROM run WHERE run_id IN ({','.join(['?'] * len(run_ids))});"
+        rows = self.query(query, tuple(sint64_run_ids))
+
+        return {
+            # Restore uint64 run IDs
+            convert_sint64_to_uint64(row["run_id"]): RunStatus(
+                status=determine_run_status(row),
+                sub_status=row["sub_status"],
+                details=row["details"],
+            )
+            for row in rows
+        }
+
+    def update_run_status(self, run_id: int, new_status: RunStatus) -> bool:
+        """Update the status of the run with the specified `run_id`."""
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_run_id = convert_uint64_to_sint64(run_id)
+        query = "SELECT * FROM run WHERE run_id = ?;"
+        rows = self.query(query, (sint64_run_id,))
+
+        # Check if the run_id exists
+        if not rows:
+            log(ERROR, "`run_id` is invalid")
+            return False
+
+        # Check if the status transition is valid
+        row = rows[0]
+        current_status = RunStatus(
+            status=determine_run_status(row),
+            sub_status=row["sub_status"],
+            details=row["details"],
+        )
+        if not is_valid_transition(current_status, new_status):
+            log(
+                ERROR,
+                'Invalid status transition: from "%s" to "%s"',
+                current_status.status,
+                new_status.status,
+            )
+            return False
+
+        # Check if the sub-status is valid
+        if not has_valid_sub_status(current_status):
+            log(
+                ERROR,
+                'Invalid sub-status "%s" for status "%s"',
+                current_status.sub_status,
+                current_status.status,
+            )
+            return False
+
+        # Update the status
+        query = "UPDATE run SET %s= ?, sub_status = ?, details = ? "
+        query += "WHERE run_id = ?;"
+
+        timestamp_fld = ""
+        if new_status.status == Status.STARTING:
+            timestamp_fld = "starting_at"
+        elif new_status.status == Status.RUNNING:
+            timestamp_fld = "running_at"
+        elif new_status.status == Status.FINISHED:
+            timestamp_fld = "finished_at"
+
+        data = (
+            now().isoformat(),
+            new_status.sub_status,
+            new_status.details,
+            sint64_run_id,
+        )
+        self.query(query % timestamp_fld, data)
+        return True
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""
@@ -1023,3 +1098,17 @@ def dict_to_task_res(task_dict: dict[str, Any]) -> TaskRes:
         ),
     )
     return result
+
+
+def determine_run_status(row: dict[str, Any]) -> str:
+    """Determine the status of the run based on timestamp fields."""
+    if row["pending_at"]:
+        if row["starting_at"]:
+            if row["running_at"]:
+                if row["finished_at"]:
+                    return Status.FINISHED
+                return Status.RUNNING
+            return Status.STARTING
+        return Status.PENDING
+    run_id = convert_sint64_to_uint64(row["run_id"])
+    raise sqlite3.IntegrityError(f"The run {run_id} does not have a valid status.")
