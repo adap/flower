@@ -38,6 +38,7 @@ from flwr.server.superlink.linkstate import (
     LinkState,
     SqliteLinkState,
 )
+from flwr.common import now
 
 
 class StateTest(unittest.TestCase):
@@ -790,8 +791,8 @@ class StateTest(unittest.TestCase):
             task_ins_list = state.get_task_ins(node_id=1, limit=None)
             assert len(task_ins_list) == 0
 
-    def test_get_task_res_not_return_expired(self) -> None:
-        """Test get_task_res not to return TaskRes if its TaskIns is expired."""
+    def test_get_task_res_expired_task_ins(self) -> None:
+        """Test get_task_res to return error TaskRes if its TaskIns has expired."""
         # Prepare
         consumer_node_id = 1
         state = self.state_factory()
@@ -813,13 +814,15 @@ class StateTest(unittest.TestCase):
         task_res.task.ttl = 0.1
         _ = state.store_task_res(task_res=task_res)
 
-        with patch("time.time", side_effect=lambda: task_ins.task.created_at + 6.1):
+        with patch("flwr.common.now", side_effect=lambda: task_ins.task.created_at + 6.1):
             # Execute
             assert task_id is not None
             task_res_list = state.get_task_res(task_ids={task_id})
 
             # Assert
-            assert len(task_res_list) == 0
+            assert len(task_res_list) == 1
+            assert task_res_list[0].task.HasField("error")
+            assert state.num_task_ins() == state.num_task_res() == 0
 
     def test_get_task_res_returns_empty_for_missing_taskins(self) -> None:
         """Test that get_task_res returns an empty result when the corresponding TaskIns
@@ -841,7 +844,9 @@ class StateTest(unittest.TestCase):
         task_res_list = state.get_task_res(task_ids={UUID(task_ins_id)})
 
         # Assert
-        assert len(task_res_list) == 0
+        assert len(task_res_list) == 1
+        assert task_res_list[0].task.HasField("error")
+        assert state.num_task_ins() == state.num_task_res() == 0
 
     def test_get_task_res_return_if_not_expired(self) -> None:
         """Test get_task_res to return TaskRes if its TaskIns exists and is not

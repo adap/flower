@@ -461,8 +461,6 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         none could be found.
         """
         ret: dict[UUID, TaskRes] = {}
-        task_res_to_insert: list[TaskRes] = []
-        task_res_delivered: list[TaskRes] = []
 
         # Verify TaskIns IDs
         current = now().timestamp()
@@ -479,7 +477,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             )
             found_task_ins_dict[UUID(row["task_id"])] = dict_to_task_ins(row)
 
-        ret, task_res_to_insert = verify_taskins_ids(
+        ret = verify_taskins_ids(
             inquired_taskins_ids=task_ids,
             found_taskins_dict=found_task_ins_dict,
             current_time=current,
@@ -517,7 +515,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             WHERE node_id IN ({",".join(["?"] * len(dst_node_ids))});
         """
         rows = self.query(query, tuple(dst_node_ids))
-        tmp_ret_dict, tmp_ret_list = check_node_availability_for_taskins(
+        tmp_ret_dict = check_node_availability_for_taskins(
             inquired_taskins_ids=task_ids,
             found_taskins_dict=found_task_ins_dict,
             node_id_to_online_until={
@@ -526,34 +524,22 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             current_time=current,
         )
         ret.update(tmp_ret_dict)
-        task_res_to_insert.extend(tmp_ret_list)
 
         # Mark existing TaskRes to be returned as delivered
         delivered_at = now().isoformat()
-        if task_res_delivered:
-            task_res_ids = [task_res.task_id for task_res in task_res_delivered]
-            query = f"""
-                UPDATE task_res
-                SET delivered_at = ?
-                WHERE task_id IN ({",".join(["?"] * len(task_res_ids))});
-            """
-            data: list[Any] = [delivered_at] + task_res_ids
-            self.query(query, data)
-
-        # Store the error TaskRes
-        if task_res_to_insert:
-            data = [task_res_to_dict(task_res) for task_res in task_res_to_insert]
-            for task_res_dict in data:
-                task_res_dict["delivered_at"] = delivered_at
-                convert_uint64_values_in_dict_to_sint64(
-                    task_res_dict, ["run_id", "producer_node_id", "consumer_node_id"]
-                )
-            columns = ", ".join([f":{key}" for key in data[0]])
-            query = f"INSERT INTO task_res VALUES({columns});"
-            self.query(query, data)
+        for task_res in ret.values():
+            task_res.task.delivered_at = delivered_at
+        task_res_ids = [task_res.task_id for task_res in ret.values()]
+        query = f"""
+            UPDATE task_res
+            SET delivered_at = ?
+            WHERE task_id IN ({",".join(["?"] * len(task_res_ids))});
+        """
+        data: list[Any] = [delivered_at] + task_res_ids
+        self.query(query, data)
 
         # Cleanup
-        self.delete_tasks(set(ret.keys()))
+        self._force_delete_tasks_by_ids(set(ret.keys()))
 
         return list(ret.values())
 
@@ -614,6 +600,32 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             self.conn.execute(query_2, data)
 
         return None
+
+    def _force_delete_tasks_by_ids(self, task_ids: set[UUID]) -> None:
+        """Delete tasks based on a set of TaskIns IDs."""
+        if not task_ids:
+            return
+        if self.conn is None:
+            raise AttributeError("LinkState not initialized")
+
+        placeholders = ",".join([f":id_{index}" for index in range(len(task_ids))])
+        data = {f"id_{index}": str(task_id) for index, task_id in enumerate(task_ids)}
+
+        # Delete task_ins
+        query_1 = f"""
+            DELETE FROM task_ins
+            WHERE task_id IN ({placeholders});
+        """
+
+        # Delete task_res
+        query_2 = f"""
+            DELETE FROM task_res
+            WHERE ancestry IN ({placeholders});
+        """
+
+        with self.conn:
+            self.conn.execute(query_1, data)
+            self.conn.execute(query_2, data)
 
     def create_node(
         self, ping_interval: float, public_key: Optional[bytes] = None

@@ -215,7 +215,7 @@ def verify_taskins_ids(
     found_taskins_dict: dict[UUID, TaskIns],
     current_time: Optional[float] = None,
     update_set: bool = True,
-) -> tuple[dict[UUID, TaskRes], list[TaskRes]]:
+) -> dict[UUID, TaskRes]:
     """Verify found TaskIns and generate error TaskRes for invalid ones.
 
     Parameters
@@ -233,19 +233,10 @@ def verify_taskins_ids(
 
     Returns
     -------
-    tuple[dict[UUID, TaskRes], list[TaskRes]]
-        A tuple containing:
-        - A dictionary of error TaskRes indexed by the corresponding TaskIns ID.
-        - A list of error TaskRes that should be inserted into the LinkState.
-
-    Note
-    ----
-    The TaskRes generated for invalid but yet existing TaskIns are expected to be
-    inserted into the LinkState. However, the TaskRes generated for non-existing
-    shouldn't be inserted into the LinkState as they do not correspond to any TaskIns.
+    dict[UUID, TaskRes]
+        A dictionary of error TaskRes indexed by the corresponding TaskIns ID.
     """
     ret_dict = {}
-    taskres_to_insert = []
     current = current_time if current_time else now().timestamp()
     for taskins_id in list(inquired_taskins_ids):
         # Generate error TaskRes if the task_ins doesn't exist or has expired
@@ -254,11 +245,8 @@ def verify_taskins_ids(
             if update_set:
                 inquired_taskins_ids.remove(taskins_id)
             taskres = make_taskins_unavailable_taskres(taskins_id)
-            # Insert the error TaskRes if the TaskIns exists and has expired
-            if taskins is not None:
-                taskres_to_insert.append(taskres)
             ret_dict[taskins_id] = taskres
-    return ret_dict, taskres_to_insert
+    return ret_dict
 
 
 def verify_found_taskres(
@@ -311,7 +299,7 @@ def check_node_availability_for_taskins(
     node_id_to_online_until: dict[int, float],
     current_time: Optional[float] = None,
     update_set: bool = True,
-) -> tuple[dict[UUID, TaskRes], list[TaskRes]]:
+) -> dict[UUID, TaskRes]:
     """Check node availability for TaskIns and generate error TaskRes if unavailable.
 
     Parameters
@@ -331,13 +319,10 @@ def check_node_availability_for_taskins(
 
     Returns
     -------
-    tuple[dict[UUID, TaskRes], list[TaskRes]]
-        A tuple containing:
-        - A dictionary of error TaskRes indexed by the corresponding TaskIns ID.
-        - A list of error TaskRes that should be inserted into the LinkState.
+    dict[UUID, TaskRes]
+        A dictionary of error TaskRes indexed by the corresponding TaskIns ID.
     """
     ret_dict = {}
-    taskres_to_insert = []
     current = current_time if current_time else now().timestamp()
     for taskins_id in list(inquired_taskins_ids):
         task_ins = found_taskins_dict[taskins_id]
@@ -348,6 +333,5 @@ def check_node_availability_for_taskins(
             if update_set:
                 inquired_taskins_ids.remove(taskins_id)
             task_res = make_node_unavailable_taskres(task_ins)
-            taskres_to_insert.append(task_res)
             ret_dict[taskins_id] = task_res
-    return ret_dict, taskres_to_insert
+    return ret_dict

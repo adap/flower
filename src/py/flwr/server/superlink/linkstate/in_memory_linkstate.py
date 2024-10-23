@@ -200,14 +200,12 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
     def get_task_res(self, task_ids: set[UUID]) -> list[TaskRes]:
         """Get all TaskRes that have not been delivered yet."""
         ret: dict[UUID, TaskRes] = {}
-        task_res_to_insert: list[TaskRes] = []
-        task_res_found: list[TaskRes] = []
 
         with self.lock:
             current = now().timestamp()
 
             # Verify TaskIns IDs
-            ret, task_res_to_insert = verify_taskins_ids(
+            ret = verify_taskins_ids(
                 inquired_taskins_ids=task_ids,
                 found_taskins_dict=self.task_ins_store,
                 current_time=current,
@@ -237,7 +235,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 self.task_ins_store[task_id].task.consumer.node_id
                 for task_id in task_ids
             }
-            tmp_ret_dict, tmp_ret_list = check_node_availability_for_taskins(
+            tmp_ret_dict = check_node_availability_for_taskins(
                 inquired_taskins_ids=task_ids,
                 found_taskins_dict=self.task_ins_store,
                 node_id_to_online_until={
@@ -246,20 +244,14 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 current_time=current,
             )
             ret.update(tmp_ret_dict)
-            task_res_to_insert.extend(tmp_ret_list)
 
             # Mark existing TaskRes to be returned as delivered
             delivered_at = now().isoformat()
             for task_res in task_res_found:
                 task_res.task.delivered_at = delivered_at
 
-            # Store the error TaskRes
-            for task_res in task_res_to_insert:
-                task_res.task.delivered_at = delivered_at
-                self.task_res_store[UUID(task_res.task_id)] = task_res
-
             # Cleanup
-            self.delete_tasks(set(ret.keys()))
+            self._force_delete_tasks_by_ids(set(ret.keys()))
 
         return list(ret.values())
 
@@ -282,8 +274,24 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
             for task_id in task_ins_to_be_deleted:
                 del self.task_ins_store[task_id]
+                del self.task_ins_id_to_task_res[task_id]
             for task_id in task_res_to_be_deleted:
                 del self.task_res_store[task_id]
+
+    def _force_delete_tasks_by_ids(self, task_ids: set[UUID]) -> None:
+        """Delete tasks based on a set of TaskIns IDs."""
+        if not task_ids:
+            return
+
+        with self.lock:
+            for task_id in task_ids:
+                # Delete TaskIns
+                if task_id in self.task_ins_store:
+                    del self.task_ins_store[task_id]
+                # Delete TaskRes
+                if task_id in self.task_ins_id_to_task_res:
+                    task_res = self.task_ins_id_to_task_res.pop(task_id)
+                    del self.task_res_store[UUID(task_res.task_id)]
 
     def num_task_ins(self) -> int:
         """Calculate the number of task_ins in store.
