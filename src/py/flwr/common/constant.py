@@ -83,6 +83,10 @@ GRPC_ADAPTER_METADATA_MESSAGE_QUALNAME_KEY = "grpc-message-qualname"
 # Message TTL
 MESSAGE_TTL_TOLERANCE = 1e-1
 
+# Isolation modes
+ISOLATION_MODE_SUBPROCESS = "subprocess"
+ISOLATION_MODE_PROCESS = "process"
+
 
 class MessageType:
     """Message type."""
