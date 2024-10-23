@@ -36,12 +36,12 @@ class ClientsAndServerDatasets:
     def _set_distribution_partitioner(self):
         """Set the data distribution partitioner based on configuration."""
                 
-        if self.cfg.dist_type == 'iid':
+        if self.cfg.distribution == 'iid':
             self.data_dist_partitioner_func = self._iid_data_distribution
-        elif self.cfg.dist_type == 'non_iid':
+        elif self.cfg.distribution == 'non_iid':
             self.data_dist_partitioner_func = self._dirichlet_data_distribution
         else:
-            raise ValueError(f"Unknown distribution type: {self.cfg.dist_type}")
+            raise ValueError(f"Unknown distribution type: {self.cfg.distribution}")
 
     def _dirichlet_data_distribution(self, target_label_col: str = "label"):
         """Partition data using Dirichlet distribution."""

@@ -1,5 +1,5 @@
 # General Configuration
-num_rounds: 3
+num_rounds: 5
 num_clients: 10
 clients_per_round: ${num_clients}
 
@@ -21,10 +21,10 @@ feddebug:
     na_t: 0.00 # neuron activation threshold
 
 # Model Configuration
-model_name: lenet # Options: lenet, resnet18, resnet34, resnet50, resnet101, resnet152, densenet121, vgg16
+model: lenet # Options: lenet, resnet18, resnet34, resnet50, resnet101, resnet152, densenet121, vgg16
 
 # Dataset Configuration
-dist_type: 'non_iid' # Change to "iid" for iid data distribution. Change it to `non_iid` for non-iid data distribution.
+distribution: 'iid' # Change to "iid" for iid data distribution. Change it to `non_iid` for non-iid data distribution.
 dataset_channels:
     cifar10: 3 # RGB
     mnist: 1

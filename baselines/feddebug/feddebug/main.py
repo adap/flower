@@ -8,6 +8,7 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 from logging import DEBUG, INFO
 import torch
 import hydra
+import time
 
 import flwr as fl
 from flwr.common.logger import log
@@ -63,7 +64,7 @@ def run_simulation(cfg):
     round2feddebug_accs = []
 
     def _create_model():
-        return initialize_model(cfg.model_name, cfg.dataset)
+        return initialize_model(cfg.model, cfg.dataset)
 
     def _get_fit_config(server_round):
         return {"server_round": server_round, "local_epochs": cfg.client.epochs, 
@@ -91,11 +92,13 @@ def run_simulation(cfg):
         true_malicious_clients = cfg.malicious_clients_ids
 
         log(INFO, f"***FedDebug Output Round {server_round} ***")
-        log(INFO, f"Total Random Inputs = {cfg.feddebug.r_inputs}")
         log(INFO, f"True Malicious Clients (Ground Truth) = {true_malicious_clients}")
-        log(INFO, f"Predicted Malicious Clients = {predicted_malicious_clients}")
+        log(INFO, f"Total Random Inputs = {cfg.feddebug.r_inputs}")
         localization_accuracy = utils.calculate_localization_accuracy(
             true_malicious_clients, predicted_malicious_clients)
+        
+        mal_probs = {c:v/cfg.feddebug.r_inputs for c,v in predicted_malicious_clients.items()}
+        log(INFO, f"Predicted Malicious Clients = {mal_probs}") 
         log(INFO, f"FedDebug Localization Accuracy = {localization_accuracy}")
         round2feddebug_accs.append(localization_accuracy)
 
@@ -127,7 +130,10 @@ def run_simulation(cfg):
 @hydra.main(config_path="conf", config_name="base", version_base=None)
 def main(cfg) -> None:
     """Run the baseline."""
+    
+    start_time = time.time()
     run_simulation(cfg)
+    log(INFO, f"Total Time Taken: {time.time() - start_time} seconds")
 
 
 if __name__ == "__main__":

@@ -17,25 +17,22 @@ dataset: [cifar10, femnist]
 **Abstract:** In Federated Learning (FL), clients independently train local models and share them with a central aggregator to build a global model. Impermissibility to access clients' data and collaborative training make FL appealing for applications with data-privacy concerns, such as medical imaging. However, these FL characteristics pose unprecedented challenges for debugging. When a global model's performance deteriorates, identifying the responsible rounds and clients is a major pain point. Developers resort to trial-and-error debugging with subsets of clients, hoping to increase the global model's accuracy or let future FL rounds retune the model, which are time-consuming and costly.
 We design a systematic fault localization framework, FedDebug, that advances the FL debugging on two novel fronts. First, FedDebug enables interactive debugging of realtime collaborative training in FL by leveraging record and replay techniques to construct a simulation that mirrors live FL. FedDebug's _breakpoint_ can help inspect an FL state (round, client, and global model) and move between rounds and clients' models seamlessly, enabling a fine-grained step-by-step inspection. Second, FedDebug automatically identifies the client(s) responsible for lowering the global model's performance without any testing data and labels---both are essential for existing debugging techniques. FedDebug's strengths come from adapting differential testing in conjunction with neuron activations to determine the client(s) deviating from normal behavior. FedDebug achieves 100% accuracy in finding a single faulty client and 90.3% accuracy in finding multiple faulty clients. FedDebug's interactive debugging incurs 1.2% overhead during training, while it localizes a faulty client in only 2.1% of a round's training time. With FedDebug, we bring effective debugging practices to federated learning, improving the quality and productivity of FL application developers.
 
-**<u>Application of FedDebug</u>:** We used FedDebug to detect backdoor attacks in Federated Learning, resulting in [Fed-Defender](https://dl.acm.org/doi/10.1145/3617574.3617858). The code is implemented using the Flower Framework in [this repository](https://github.com/warisgill/FedDefender). We plan to adapt Fed-Defender to Flower baseline guidelines soon.
+
 
 ## High Level Overview of FedDebug Differential Testing Approach
 
-![Malicious Client Localization](feddbug-approach.png)
+![Malicious Client Localization](/figures/feddbug-approach.png)
 
 ## About this baseline
 
 **What's implemented:**
 FedDebug is a systematic malicious client(s) localization framework designed to advance debugging in Federated Learning (FL). It enables interactive debugging of real-time collaborative training and automatically identifies clients responsible for lowering global model performance without requiring testing data or labels.
 
-This repository implements the FedDebug technique of localizing malicious client(s) in a generic way, allowing it to be used with various fusion techniques and CNN architectures. Specifically, it replicates the results presented in Table 2 and Figure 10 of the original paper. These results demonstrate FedDebug's ability to localize multiple faulty clients and its performance under different neuron activation thresholds. You can find the original code of FedDebug [here](https://github.com/SEED-VT/FedDebug).
+This repository implements the FedDebug technique of localizing malicious client(s) in a generic way, allowing it to be used with various fusion techniques and CNN architectures. You can find the original code of FedDebug [here](https://github.com/SEED-VT/FedDebug).
 
 
-**Datasets:** This baseline uses two datasets:
+**Flower Datasets:** This baseline integrates `flwr-datasets` and tested on CIFAR-10 and MNIST datasets. The code is designed to work with other datasets as well. You can easily extend the code to work with other datasets by following the Flower dataset guidelines.
 
-1. CIFAR-10: 50,000 training and 10,000 testing 32x32 RGB images across 10 classes.
-2. MNIST: 60,000 training and 10,000 testing images across 10 classes.
-2. FEMNIST: Over 340,000 training and 40,000 testing 28x28 grayscale images across 10 classes.
 
 **Hardware Setup:**
 These experiments were run on a machine with 8 CPU cores and an Nvidia Tesla P40 GPU.
@@ -47,19 +44,17 @@ These experiments were run on a machine with 8 CPU cores and an Nvidia Tesla P40
 ## Experimental Setup
 
 **Task:** Image classification, Malicious/Faulty Client (s) Removal, Debugging and Testing
-**Models:** This baseline implements two CNN architectures:
 
-1. ResNet
-2. DenseNet
-3. VGG
-**Dataset:** The datasets are partitioned among clients, and each client participates in the training (cross-silo). However, you can easily extend the code to work in cross-device settings. The non-IID is based on quantity-based imbalance ([niid_bench](https://arxiv.org/abs/2102.02079)).
+**Models:** This baseline implements two CNN architectures: LeNet and ResNet. Other CNN models (DeNseNet, VGG, etc.) are also supported. Check the `conf/base.yaml` file for more details.
+
+**Dataset:** The datasets are partitioned among clients, and each client participates in the training (cross-silo). However, you can easily extend the code to work in cross-device settings. This baseline uses Dirichlet partitioning to partition the datasets among clients for Non-IID experiments. However, orignal paper use quantity-based imbalance ([niid_bench](https://arxiv.org/abs/2102.02079)).
 
 | Dataset  | #classes | #clients | partitioning method |
 | :------- | :------: | :------: | :-----------------: |
 | CIFAR-10 |    10    |  30, 50  |   IID and Non-IID   |
-| FEMNIST  |    10    |  30, 50  |   IID and Non-IID   |
+| MNIST  |    10    |  30, 50  |   IID and Non-IID   |
   
-**Training Hyperparameters:**
+**FL Training Hyperparameters and FedDebug Configuration:**
 Default training hyperparameters are in `conf/base.yaml`.
 
 ## Environment Setup
@@ -91,104 +86,120 @@ This will create a basic Python environment with just Flower and additional pack
 ## Running the Experiments
 
 > [!NOTE]
-> You can run almost any evaluation from the paper by changing the parameters in `conf/base.yaml`. Also, you can change the resources (per client CPU and GPU) in conf/base.yaml to speed up the simulation. Please check flower simulation guide to for more detail ([Flower Framework main](https://flower.ai/docs/framework/how-to-run-simulations.html) ).
+> You can run almost any evaluation from the paper by changing the parameters in `conf/base.yaml`. Also, you can change the resources (per client CPU and GPU) in conf/base.yaml to speed up the simulation. Please check flower simulation guide to for more detail ([Flower Framework main](https://flower.ai/docs/framework/how-to-run-simulations.html)).
 
-The following command will run the default experimental setting in `conf/base.yaml` (LeNet, MNIST, with a total of 5 clients, where client-0 is malicious). FedDebug will identify client-0 as the malicious client. **The experiment took on average 62-90 seconds to complete.**
+The following command will run the default experimental setting in `conf/base.yaml` (LeNet, MNIST, with a total of 10 clients, where client-0 is malicious). FedDebug will identify client-0 as the malicious client. **The experiment took on average 60 seconds to complete.**
 
 ```bash
 python -m feddebug.main device=cpu 
 ```  
 
-Output
+Output of the last round will show the FedDebug output as follows:
 
-```output
+```log
 ... 
-
-[2024-08-23 20:29:29,920][flwr][INFO] - Training Complete for Experiment: lenet-mnist-faulty_clients[['0']]-noise_rate1-TClients5-fedavg-(R1-clientsPerR5)-iid1-batch512-epochs10-lr0.001 
-
-
-[2024-08-23 20:29:31,518][flwr][INFO] - True Malacious/Faulty Clients (i.e., Ground Truth) IDs are: ['0']
-[2024-08-23 20:29:31,518][flwr][INFO] - Now localizing above mentioned faulty clients using differential testing approach.
-[2024-08-23 20:29:36,920][flwr][INFO] - Generated 10 inputs in 0.011104822158813477 seconds.
-[2024-08-23 20:29:36,920][flwr][INFO] - Getting Neuron Activations for each client.
-100%|███████████████| 5/5 [00:04<00:00,  1.01it/s]
-[2024-08-23 20:29:41,852][flwr][INFO] - Faulty Client Localization Time: 4.931802749633789 seconds.
-[2024-08-23 20:29:41,852][flwr][INFO] - I0 Potential Malicious client(s) {'0'}
-[2024-08-23 20:29:41,852][flwr][INFO] - I1 Potential Malicious client(s) {'0'}
-[2024-08-23 20:29:41,852][flwr][INFO] - I2 Potential Malicious client(s) {'0'}
-[2024-08-23 20:29:41,853][flwr][INFO] - I3 Potential Malicious client(s) {'0'}
-[2024-08-23 20:29:41,853][flwr][INFO] - I4 Potential Malicious client(s) {'0'}
-[2024-08-23 20:29:41,853][flwr][INFO] - I5 Potential Malicious client(s) {'0'}
-[2024-08-23 20:29:41,853][flwr][INFO] - I6 Potential Malicious client(s) {'0'}
-[2024-08-23 20:29:41,853][flwr][INFO] - I7 Potential Malicious client(s) {'0'}
-[2024-08-23 20:29:41,853][flwr][INFO] - I8 Potential Malicious client(s) {'0'}
-[2024-08-23 20:29:41,853][flwr][INFO] - I9 Potential Malicious client(s) {'0'}
-[2024-08-23 20:29:41,853][flwr][INFO] - Fault Localization Accuracy: 100.0
-Total Time taken (training + testing): 97.98241376876831
-```
-
-## Expected Results  
-
-
-**FedDebug Table 2**
-
-> [!NOTE]
-> The following commands may take time on larger models (e.g., ResNet) without GPU. Adjust the model and dataset to reproduce results from Table 2. Currently, I'm using MNIST with LeNet and 20 clients (including 5 malicious clients) to quickly run the baseline on CPU to avoid any hardware limitation.
-
-```bash
-python -m feddebug.main --multirun device=cpu num_clients=20 model.name=lenet dataset.name=mnist total_malicious_clients=5 check_cache=True
-
-# to generate Table 2 csv. Open fed_debug_results.csv after  
-python -m feddebug.main generate_table_csv=True
-# Open fed_debug_results.csv to see the results.
-```
-
-Last Command Output
-
-```output
+[2024-10-23 12:34:23,548][flwr][INFO] - ***FedDebug Output Round 5 ***
+[2024-10-23 12:34:23,548][flwr][INFO] - True Malicious Clients (Ground Truth) = ['0']
+[2024-10-23 12:34:23,548][flwr][INFO] - Total Random Inputs = 10
+[2024-10-23 12:34:23,548][flwr][INFO] - Predicted Malicious Clients = {'0': 1.0}
+[2024-10-23 12:34:23,548][flwr][INFO] - FedDebug Localization Accuracy = 100.0
+[2024-10-23 12:34:24,381][flwr][INFO] - fit progress: (5, 0.0001550872877240181, {'accuracy': 0.9784, 'loss': 0.0001550872877240181, 'round': 5}, 38.79056127398508)
+[2024-10-23 12:34:24,381][flwr][INFO] - configure_evaluate: no clients selected, skipping evaluation
+[2024-10-23 12:34:24,381][flwr][INFO] - 
+[2024-10-23 12:34:24,381][flwr][INFO] - [SUMMARY]
 ...
-[flwr][INFO] - FedDebug’s malicious client(s) localization results svaed in fed_debug_results.csv.
 
 ```
+It predicts the malicious client(s) with 100% accuracy. `Predicted Malicious Clients = {'0': 1.0}`  means that client-0 is predicted as the malicious client with 1.0 probability. It will also generate a graph `iid-lenet-mnist.png` as shown below: 
+![FedDebug Malicious Client Localization IID-LeNet-MNIST](/figures/iid-lenet-mnist.png)
 
-**Neuron Activation Threshold Variation (Figure 10)**
-Only execute the following commands after generating Table 2 results.
+### a. Multiple Malicious Clients
+To test the localization of multiple malicious clients, you can change the `total_malicious_clients`. Total Time Taken: 46.7 seconds.
 
 ```bash
-python -m feddebug.main --multirun device=cuda  num_clients=10 model.name=densenet121,resnet18 dataset.name=cifar10,mnist total_malicious_clients=2 check_cache=True
+python -m feddebug.main device=cpu total_malicious_clients=2 dataset.name=cifar10
+```
+Now clients 0 and 1 are malicious. The output will show the FedDebug output as follows:
 
-python -m feddebug.main vary_thresholds=True device=cpu
-
-python -m feddebug.main generate_thresholds_exp_graph=True
+```log
+[2024-10-23 13:15:34,281][flwr][INFO] - ***FedDebug Output Round 5 ***
+[2024-10-23 13:15:34,281][flwr][INFO] - True Malicious Clients (Ground Truth) = ['0', '1']
+[2024-10-23 13:15:34,281][flwr][INFO] - Total Random Inputs = 10
+[2024-10-23 13:15:34,281][flwr][INFO] - Predicted Malicious Clients = {'1': 1.0, '0': 1.0}
+[2024-10-23 13:15:34,281][flwr][INFO] - FedDebug Localization Accuracy = 100.0
+[2024-10-23 13:15:35,300][flwr][INFO] - fit progress: (5, 0.003403955662250519, {'accuracy': 0.4162, 'loss': 0.003403955662250519, 'round': 5}, 38.767428478982765)
+[2024-10-23 13:15:35,301][flwr][INFO] - configure_evaluate: no clients selected, skipping evaluation
+[2024-10-23 13:15:35,301][flwr][INFO] - 
+[2024-10-23 13:15:35,301][flwr][INFO] - [SUMMARY]
 
 ```
+FedDebug predicts the malicious clients with 100% accuracy. `Predicted Malicious Clients = {'1': 1.0, '0': 1.0}` means that clients 0 and 1 are predicted as the malicious clients with 1.0 probability. It will also generate a graph `iid-lenet-cifar10.png` as shown below:
 
-Last Command Output
+![FedDebug Malicious Client Localization IID-LeNet-CIFAR10](/figures/iid-lenet-cifar10.png)
 
-```output
-[2024-08-23 20:19:35,895][flwr][INFO] - Fig 10 is generated: Figure-10.pdf
+
+### b. Changing the Model and Device
+To run the experiments with ResNet and Cuda with Non-IID distribution you can run the following command. Total Time Taken: 84 seconds.
+
+```bash
+python -m feddebug.main device=cuda model=resnet18 distribution=non_iid
+
+```
+Output
+```log
+[2024-10-23 13:26:13,632][flwr][INFO] - ***FedDebug Output Round 5 ***
+[2024-10-23 13:26:13,632][flwr][INFO] - True Malicious Clients (Ground Truth) = ['0']
+[2024-10-23 13:26:13,632][flwr][INFO] - Total Random Inputs = 10
+[2024-10-23 13:26:13,632][flwr][INFO] - Predicted Malicious Clients = {'0': 1.0}
+[2024-10-23 13:26:13,632][flwr][INFO] - FedDebug Localization Accuracy = 100.0
+[2024-10-23 13:26:14,539][flwr][INFO] - fit progress: (5, 0.0007687706857919693, {'accuracy': 0.9435, 'loss': 0.0007687706857919693, 'round': 5}, 75.04376274201786)
+[2024-10-23 13:26:14,539][flwr][INFO] - configure_evaluate: no clients selected, skipping evaluation
+[2024-10-23 13:26:14,545][flwr][INFO] - 
+[2024-10-23 13:26:14,545][flwr][INFO] - [SUMMARY]
+```
+Following is the graph `non_iid-resnet18-mnist.png` generated by the code:
+
+![FedDebug Malicious Client Localization Non-IID-ResNet18-CIFAR10](/figures/non_iid-resnet18-mnist.png)
+
+
+### C. Threshold Impact on Localization
+You can also test the impact of the neuron activation threshold on localization accuracy. Higher threshold decreases the localization accuracy. Total Time Taken: 84 seconds. 
+
+```bash
+python -m feddebug.main device=cuda model=resnet18 feddebug.na_t=0.9
 ```
 
-It will generate a PDF (Figure-10.pdf) containing Figure 10 graphs as shown below. Lower thresholds value yield better results during differential testing. 
+```log
+[2024-10-23 13:40:36,344][flwr][INFO] - ***FedDebug Output Round 5 ***
+[2024-10-23 13:40:36,344][flwr][INFO] - True Malicious Clients (Ground Truth) = ['0']
+[2024-10-23 13:40:36,344][flwr][INFO] - Total Random Inputs = 10
+[2024-10-23 13:40:36,344][flwr][INFO] - Predicted Malicious Clients = {'3': 1.0}
+[2024-10-23 13:40:36,344][flwr][INFO] - FedDebug Localization Accuracy = 0.0
+[2024-10-23 13:40:37,196][flwr][INFO] - fit progress: (5, 0.00036467308849096297, {'accuracy': 0.9861, 'loss': 0.00036467308849096297, 'round': 5}, 75.78151555598015)
+[2024-10-23 13:40:37,197][flwr][INFO] - configure_evaluate: no clients selected, skipping evaluation
+[2024-10-23 13:40:37,205][flwr][INFO] - 
+[2024-10-23 13:40:37,205][flwr][INFO] - [SUMMARY]
+```
 
-![Figure 10 of feddebug Paper](Figure-10.png)
+Following is the graph `iid-resnet18-mnist.png` generated by the code:
+![FedDebug Malicious Client Localization IID-ResNet18-MNIST](/figures/iid-resnet18-mnist.png)
+
 
 > [!WARNING]
-> It generates random inputs to localize malicious client(s). Thus, results might vary slightly on each run due to randomness.
+> FeDebug generates random inputs to localize malicious client(s). Thus, results might vary slightly on each run due to randomness.
 
-## Customizing Experiments
 
-You can customize various aspects of the experiments by modifying the `conf/base.yaml` file. This includes:
 
-- Changing the number of clients
-- Modifying the dataset partitioning method
-- Adjusting training hyperparameters
-- Changing the CNN architecture
-Remember to consult the Flower simulation guide for more details on resource allocation and advanced configurations.
+## Limitations and Discusion
+Compared to the current baseline, FedDebug was originally evaluated using a single round. It was not initially tested with Dirichlet partitioning for data distribution, which means it may deliver suboptimal performance under different data distribution settings. Enhancing FedDebug's performance could be achieved by generating more effective random inputs, for example, through the use of Generative Adversarial Networks (GANs).
+
+
+## Application of FedDebug  
+We used FedDebug to detect `backdoor attacks` in Federated Learning, resulting in [FedDefender](https://dl.acm.org/doi/10.1145/3617574.3617858). The code is implemented using the Flower Framework in [this repository](https://github.com/warisgill/FedDefender). We plan to adapt FedDefender to Flower baseline guidelines soon.
 
 ## Citation
 
-If you publish work that uses FedDebug, please cite FedDebug and Flower as follows:
+If you publish work that uses FedDebug, please cite FedDebug as follows:
 
 ```bibtex
 @inproceedings{gill2023feddebug,
@@ -198,13 +209,6 @@ If you publish work that uses FedDebug, please cite FedDebug and Flower as follo
   pages={512--523},
   year={2023},
   organization={IEEE}
-}
-
-@article{beutel2020flower,
-  title={Flower: A Friendly Federated Learning Research Framework},
-  author={Beutel, Daniel J and Topal, Taner and Mathur, Akhil and Qiu, Xinchi and Fernandez-Marques, Javier and Gao, Yan and Sani, Lorenzo and Kwing, Hei Li and Parcollet, Titouan and Gusmão, Pedro PB de and Lane, Nicholas D},
-  journal={arXiv preprint arXiv:2007.14390},
-  year={2020}
 }
 ```
 
