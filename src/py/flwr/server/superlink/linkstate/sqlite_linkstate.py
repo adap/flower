@@ -83,6 +83,14 @@ CREATE TABLE IF NOT EXISTS run(
 );
 """
 
+SQL_CREATE_TABLE_CONTEXT = """
+CREATE TABLE IF NOT EXISTS run(
+    run_id                INTEGER UNIQUE,
+    context               BLOB,
+    FOREIGN KEY(run_id) REFERENCES run(run_id)
+);
+"""
+
 SQL_CREATE_TABLE_TASK_INS = """
 CREATE TABLE IF NOT EXISTS task_ins(
     task_id                 TEXT UNIQUE,
@@ -166,6 +174,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         # Create each table if not exists queries
         cur.execute(SQL_CREATE_TABLE_RUN)
+        cur.execute(SQL_CREATE_TABLE_CONTEXT)
         cur.execute(SQL_CREATE_TABLE_TASK_INS)
         cur.execute(SQL_CREATE_TABLE_TASK_RES)
         cur.execute(SQL_CREATE_TABLE_NODE)
