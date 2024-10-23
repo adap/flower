@@ -202,7 +202,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         ret: dict[UUID, TaskRes] = {}
 
         with self.lock:
-            current = now().timestamp()
+            current = time.time()
 
             # Verify TaskIns IDs
             ret = verify_taskins_ids(

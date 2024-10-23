@@ -463,7 +463,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         ret: dict[UUID, TaskRes] = {}
 
         # Verify TaskIns IDs
-        current = now().timestamp()
+        current = time.time()
         query = f"""
             SELECT *
             FROM task_ins
@@ -510,7 +510,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             sint_node_id = convert_uint64_to_sint64(task_ins.task.consumer.node_id)
             dst_node_ids.add(sint_node_id)
         query = f"""
-            SELECT node_id
+            SELECT node_id, online_until
             FROM node
             WHERE node_id IN ({",".join(["?"] * len(dst_node_ids))});
         """
@@ -519,7 +519,8 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             inquired_taskins_ids=task_ids,
             found_taskins_dict=found_task_ins_dict,
             node_id_to_online_until={
-                row["node_id"]: row["online_until"] for row in rows
+                convert_sint64_to_uint64(row["node_id"]): row["online_until"]
+                for row in rows
             },
             current_time=current,
         )

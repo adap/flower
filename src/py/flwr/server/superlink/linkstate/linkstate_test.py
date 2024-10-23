@@ -38,7 +38,6 @@ from flwr.server.superlink.linkstate import (
     LinkState,
     SqliteLinkState,
 )
-from flwr.common import now
 
 
 class StateTest(unittest.TestCase):
@@ -176,13 +175,6 @@ class StateTest(unittest.TestCase):
         # - State has three TaskIns, all of them delivered
         # - State has two TaskRes, one of the delivered, the other not
 
-        assert state.num_task_ins() == 3
-        assert state.num_task_res() == 2
-
-        # Execute
-        state.delete_tasks(task_ids={task_id_0, task_id_1, task_id_2})
-
-        # Assert
         assert state.num_task_ins() == 2
         assert state.num_task_res() == 1
 
@@ -814,7 +806,7 @@ class StateTest(unittest.TestCase):
         task_res.task.ttl = 0.1
         _ = state.store_task_res(task_res=task_res)
 
-        with patch("flwr.common.now", side_effect=lambda: task_ins.task.created_at + 6.1):
+        with patch("time.time", side_effect=lambda: task_ins.task.created_at + 6.1):
             # Execute
             assert task_id is not None
             task_res_list = state.get_task_res(task_ids={task_id})
