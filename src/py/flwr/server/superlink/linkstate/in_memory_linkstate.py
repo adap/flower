@@ -487,7 +487,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         # Loop through all registered runs
         for run_id, run_rec in self.run_ids.items():
             # Break once a pending run is found
-            if run_rec.status == Status.PENDING:
+            if run_rec.status.status == Status.PENDING:
                 pending_run_id = run_id
                 break
 
