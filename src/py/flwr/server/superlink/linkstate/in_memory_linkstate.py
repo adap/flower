@@ -48,6 +48,7 @@ class RunRecord:
 
     run: Run
     status: RunStatus
+    pending_at: str
     starting_at: str
     running_at: str
     finished_at: str
