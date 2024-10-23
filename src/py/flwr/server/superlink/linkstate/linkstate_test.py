@@ -66,7 +66,7 @@ class StateTest(unittest.TestCase):
         assert run.run_id == run_id
         assert run.fab_hash == "9f86d08"
         assert run.override_config["test_key"] == "test_value"
-    
+
     def test_get_pending_run_id(self) -> None:
         """Test if get_pending_run_id works correctly."""
         # Prepare
@@ -77,6 +77,7 @@ class StateTest(unittest.TestCase):
 
         # Execute
         pending_run_id = state.get_pending_run_id()
+        assert pending_run_id is not None
         run_status_dict = state.get_run_status({pending_run_id})
         assert run_status_dict[pending_run_id].status == Status.PENDING
 
