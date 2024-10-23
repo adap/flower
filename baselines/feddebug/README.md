@@ -2,7 +2,7 @@
 title: FedDebug Systematic Debugging for Federated Learning Applications
 url: https://dl.acm.org/doi/abs/10.1109/ICSE48619.2023.00053
 labels: [malicious client, debugging, fault localization, image classification, data poisoning]
-dataset: [cifar10, femnist] 
+dataset: [cifar10, mnist] 
 ---
 
 # FedDebug: Systematic Debugging for Federated Learning Applications
@@ -19,7 +19,7 @@ We design a systematic fault localization framework, FedDebug, that advances the
 
 
 
-## High Level Overview of FedDebug Differential Testing Approach
+## High-Level Overview of FedDebug Differential Testing Approach
 
 ![Malicious Client Localization](figures/feddbug-approach.png)
 
@@ -28,7 +28,7 @@ We design a systematic fault localization framework, FedDebug, that advances the
 **What's implemented:**
 FedDebug is a systematic malicious client(s) localization framework designed to advance debugging in Federated Learning (FL). It enables interactive debugging of real-time collaborative training and automatically identifies clients responsible for lowering global model performance without requiring testing data or labels.
 
-This repository implements the FedDebug technique of localizing malicious client(s) in a generic way, allowing it to be used with various fusion techniques and CNN architectures. You can find the original code of FedDebug [here](https://github.com/SEED-VT/FedDebug).
+This repository implements the FedDebug technique of localizing malicious client(s) in a generic way, allowing it to be used with various fusion techniques (FedAvg, FedProx) and CNN architectures. You can find the original code of FedDebug [here](https://github.com/SEED-VT/FedDebug).
 
 
 **Flower Datasets:** This baseline integrates `flwr-datasets` and tested on CIFAR-10 and MNIST datasets. The code is designed to work with other datasets as well. You can easily extend the code to work with other datasets by following the Flower dataset guidelines.
@@ -43,16 +43,16 @@ These experiments were run on a machine with 8 CPU cores and an Nvidia Tesla P40
 
 ## Experimental Setup
 
-**Task:** Image classification, Malicious/Faulty Client (s) Removal, Debugging and Testing
+**Task:** Image classification, Malicious/Faulty Client(s) Removal, Debugging and Testing
 
-**Models:** This baseline implements two CNN architectures: LeNet and ResNet. Other CNN models (DeNseNet, VGG, etc.) are also supported. Check the `conf/base.yaml` file for more details.
+**Models:** This baseline implements two CNN architectures: LeNet and ResNet. Other CNN models (DenseNet, VGG, etc.) are also supported. Check the `conf/base.yaml` file for more details.
 
-**Dataset:** The datasets are partitioned among clients, and each client participates in the training (cross-silo). However, you can easily extend the code to work in cross-device settings. This baseline uses Dirichlet partitioning to partition the datasets among clients for Non-IID experiments. However, orignal paper use quantity-based imbalance ([niid_bench](https://arxiv.org/abs/2102.02079)).
+**Dataset:** The datasets are partitioned among clients, and each client participates in the training (cross-silo). However, you can easily extend the code to work in cross-device settings. This baseline uses Dirichlet partitioning to partition the datasets among clients for Non-IID experiments. However, the original paper uses quantity-based imbalance approach ([niid_bench](https://arxiv.org/abs/2102.02079)).
 
 | Dataset  | #classes | #clients | partitioning method |
 | :------- | :------: | :------: | :-----------------: |
-| CIFAR-10 |    10    |  30, 50  |   IID and Non-IID   |
-| MNIST  |    10    |  30, 50  |   IID and Non-IID   |
+| CIFAR-10 |    10    |  10  |   IID and Non-IID   |
+| MNIST  |    10    |  10  |   IID and Non-IID   |
   
 **FL Training Hyperparameters and FedDebug Configuration:**
 Default training hyperparameters are in `conf/base.yaml`.
@@ -86,12 +86,12 @@ This will create a basic Python environment with just Flower and additional pack
 ## Running the Experiments
 
 > [!NOTE]
-> You can run almost any evaluation from the paper by changing the parameters in `conf/base.yaml`. Also, you can change the resources (per client CPU and GPU) in conf/base.yaml to speed up the simulation. Please check flower simulation guide to for more detail ([Flower Framework main](https://flower.ai/docs/framework/how-to-run-simulations.html)).
+> You can run almost any evaluation from the paper by changing the parameters in `conf/base.yaml`. Also, you can change the resources (per client CPU and GPU) in conf/base.yaml to speed up the simulation. Please check the Flower simulation guide for more details ([Flower Framework main](https://flower.ai/docs/framework/how-to-run-simulations.html)).
 
 The following command will run the default experimental setting in `conf/base.yaml` (LeNet, MNIST, with a total of 10 clients, where client-0 is malicious). FedDebug will identify client-0 as the malicious client. **The experiment took on average 60 seconds to complete.**
 
 ```bash
-python -m feddebug.main device=cpu 
+python -m feddebug.main device=cpu
 ```  
 
 Output of the last round will show the FedDebug output as follows:
@@ -119,7 +119,7 @@ To test the localization of multiple malicious clients, you can change the `tota
 ```bash
 python -m feddebug.main device=cpu total_malicious_clients=2 dataset.name=cifar10
 ```
-Now clients 0 and 1 are malicious. The output will show the FedDebug output as follows:
+In this scenario, clients 0 and 1 are now malicious. The output will show the FedDebug output as follows:
 
 ```log
 [2024-10-23 13:15:34,281][flwr][INFO] - ***FedDebug Output Round 5 ***
@@ -163,7 +163,7 @@ Following is the graph `non_iid-resnet18-mnist.png` generated by the code:
 
 
 ### C. Threshold Impact on Localization
-You can also test the impact of the neuron activation threshold on localization accuracy. Higher threshold decreases the localization accuracy. Total Time Taken: 84 seconds. 
+You can also test the impact of the neuron activation threshold on localization accuracy. A higher threshold decreases the localization accuracy. Total Time Taken: 84 seconds. 
 
 ```bash
 python -m feddebug.main device=cuda model=resnet18 feddebug.na_t=0.9
@@ -186,12 +186,12 @@ Following is the graph `iid-resnet18-mnist.png` generated by the code:
 
 
 > [!WARNING]
-> FeDebug generates random inputs to localize malicious client(s). Thus, results might vary slightly on each run due to randomness.
+> FedDebug generates random inputs to localize malicious client(s). Thus, results might vary slightly on each run due to randomness.
 
 
 
-## Limitations and Discusion
-Compared to the current baseline, FedDebug was originally evaluated using a single round. It was not initially tested with Dirichlet partitioning for data distribution, which means it may deliver suboptimal performance under different data distribution settings. Enhancing FedDebug's performance could be achieved by generating more effective random inputs, for example, through the use of Generative Adversarial Networks (GANs).
+## Limitations and Discussion
+Compared to the current baseline, FedDebug was originally evaluated using only a single round of training. It was not initially tested with Dirichlet partitioning for data distribution, which means it may deliver suboptimal performance under different data distribution settings. Enhancing FedDebug's performance could be achieved by generating more effective random inputs, for example, through the use of Generative Adversarial Networks (GANs).
 
 
 ## Application of FedDebug  
@@ -203,7 +203,7 @@ If you publish work that uses FedDebug, please cite FedDebug as follows:
 
 ```bibtex
 @inproceedings{gill2023feddebug,
-  title={Feddebug: Systematic debugging for federated learning applications},
+  title={{Feddebug: Systematic Debugging for Federated Learning Applications}},
   author={Gill, Waris and Anwar, Ali and Gulzar, Muhammad Ali},
   booktitle={2023 IEEE/ACM 45th International Conference on Software Engineering (ICSE)},
   pages={512--523},
@@ -212,6 +212,8 @@ If you publish work that uses FedDebug, please cite FedDebug as follows:
 }
 ```
 
-## Questions and Feedback
 
-If you have any questions or feedback, feel free to contact me at: `waris@vt.edu`
+I am very grateful to [Javier Fernandez](https://www.linkedin.com/in/jafermarq/) for the guidance and support in creating this baseline.
+
+**Questions and Feedback:** If you have any questions or feedback, feel free to contact me at: `waris@vt.edu`
+
