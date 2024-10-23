@@ -376,8 +376,10 @@ def _flwr_serverapp_scheduler(
 
             log(
                 INFO,
-                "Launching `flwr-serverapp` subprocess with run-id: %d",
+                "Launching `flwr-serverapp` subprocess with run-id %d. "
+                "Connects to SuperLink on %s",
                 pending_run_id,
+                driver_api_address,
             )
 
 
