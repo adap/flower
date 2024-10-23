@@ -67,10 +67,12 @@ def run_serverapp(  # pylint: disable=R0914
         Unique identifier of a Run registered at the LinkState. If not supplied,
         this function will request a pending run to the LinkState.
     """
-    driver = GrpcDriver(
-        run_id=run_id,
+    _ = GrpcDriver(
+        run_id=run_id if run_id else 0,
         driver_service_address=superlink,
         root_certificates=None,
     )
 
-    log(INFO, driver.run)
+    # Then, GetServerInputs
+
+    # Then, run ServerApp
