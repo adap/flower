@@ -17,6 +17,7 @@
 import argparse
 import csv
 import importlib.util
+import subprocess
 import sys
 import threading
 from collections.abc import Sequence
@@ -49,6 +50,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
+    Status,
 )
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log
@@ -56,6 +58,7 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     private_key_to_bytes,
     public_key_to_bytes,
 )
+from flwr.common.typing import RunStatus
 from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
@@ -375,12 +378,30 @@ def _flwr_serverapp_scheduler(
 
         if pending_run_id:
 
+            # Set run as starting
+            state.update_run_status(
+                run_id=pending_run_id, new_status=RunStatus(Status.STARTING, "", "")
+            )
             log(
                 INFO,
                 "Launching `flwr-serverapp` subprocess with run-id %d. "
                 "Connects to SuperLink on %s",
                 pending_run_id,
                 driver_api_address,
+            )
+            # Start ServerApp subprocess
+            command = [
+                "flwr-serverapp",
+                "--superlink",
+                driver_api_address,
+                "--run-id",
+                str(pending_run_id),
+            ]
+            subprocess.run(
+                command,
+                stdout=None,
+                stderr=None,
+                check=True,
             )
 
 
