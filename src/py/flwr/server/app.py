@@ -42,6 +42,8 @@ from flwr.common.constant import (
     FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS,
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
     FLEET_API_REST_DEFAULT_ADDRESS,
+    ISOLATION_MODE_PROCESS,
+    ISOLATION_MODE_SUBPROCESS,
     MISSING_EXTRA_REST,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
@@ -633,6 +635,19 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         help="Fleet API server SSL CA certificate file (as a path str) "
         "to create a secure connection.",
         type=str,
+    )
+    parser.add_argument(
+        "--isolation",
+        default=ISOLATION_MODE_SUBPROCESS,
+        required=False,
+        choices=[
+            ISOLATION_MODE_SUBPROCESS,
+            ISOLATION_MODE_PROCESS,
+        ],
+        help="Isolation mode when running a `ServerApp` (`subprocess` by default, "
+        "possible values: `subprocess`, `process`). Use `subprocess` to configure "
+        "SuperLink to run a `ServerApp` in a subprocess. Use `process` to indicate "
+        "that a separate independent process gets created outside of SuperLink.",
     )
     parser.add_argument(
         "--database",
