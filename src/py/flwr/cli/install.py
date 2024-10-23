@@ -189,8 +189,16 @@ def validate_and_install(
             shutil.copy2(item, install_dir / item.name)
 
     try:
+        # Build wheel
         subprocess.run(
-            ["pip", "install", "-e", install_dir, "--no-deps"],
+            ["python", "-m", "hatchling", "build", "-d", install_dir, "-t", "wheel"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        # Install wheel
+        subprocess.run(
+            ["pip", "install", "-e", install_dir / "*.whl", "--no-deps"],
             capture_output=True,
             text=True,
             check=True,
