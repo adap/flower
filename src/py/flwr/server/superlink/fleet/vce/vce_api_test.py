@@ -124,13 +124,10 @@ def register_messages_into_state(
             override_config={},
         ),
         RunStatus(
-            status=Status.STARTING,
+            status=Status.PENDING,
             sub_status="",
             details="",
         ),
-        "",
-        "",
-        "",
     )
     # Artificially add TaskIns to state so they can be processed
     # by the Simulation Engine logic
