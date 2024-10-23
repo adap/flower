@@ -949,7 +949,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         # Fetch all runs with unset `starting_at` (i.e. they are in PENDING status)
         query = "SELECT * FROM run WHERE starting_at = '' LIMIT 1;"
-        rows = self.query(query, (query,))
+        rows = self.query(query)
         if rows:
             pending_run_id = convert_sint64_to_uint64(rows[0]["run_id"])
 
