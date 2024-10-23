@@ -48,10 +48,10 @@ class RunRecord:
 
     run: Run
     status: RunStatus
-    pending_at: str
-    starting_at: str
-    running_at: str
-    finished_at: str
+    pending_at: str = ""
+    starting_at: str = ""
+    running_at: str = ""
+    finished_at: str = ""
 
 
 class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
@@ -379,13 +379,11 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                         override_config=override_config,
                     ),
                     status=RunStatus(
-                        status=Status.STARTING,
+                        status=Status.PENDING,
                         sub_status="",
                         details="",
                     ),
-                    starting_at=now().isoformat(),
-                    running_at="",
-                    finished_at="",
+                    pending_at=now().isoformat(),
                 )
                 self.run_ids[run_id] = run_record
                 return run_id
@@ -473,7 +471,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
             # Update the status
             run_record = self.run_ids[run_id]
-            if new_status.status == Status.RUNNING:
+            if new_status.status == Status.STARTING:
+                run_record.starting_at = now().isoformat()
+            elif new_status.status == Status.RUNNING:
                 run_record.running_at = now().isoformat()
             elif new_status.status == Status.FINISHED:
                 run_record.finished_at = now().isoformat()

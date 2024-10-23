@@ -83,6 +83,7 @@ CREATE TABLE IF NOT EXISTS run(
     fab_version           TEXT,
     fab_hash              TEXT,
     override_config       TEXT,
+    pending_at            TEXT,
     starting_at           TEXT,
     running_at            TEXT,
     finished_at           TEXT,
@@ -781,15 +782,15 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         if self.query(query, (sint64_run_id,))[0]["COUNT(*)"] == 0:
             query = (
                 "INSERT INTO run "
-                "(run_id, fab_id, fab_version, fab_hash, override_config, "
+                "(run_id, fab_id, fab_version, fab_hash, override_config, pending_at, "
                 "starting_at, running_at, finished_at, sub_status, details)"
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
             )
             if fab_hash:
                 fab_id, fab_version = "", ""
             override_config_json = json.dumps(override_config)
             data = [sint64_run_id, fab_id, fab_version, fab_hash, override_config_json]
-            data += [now().isoformat(), "", "", "", ""]
+            data += [now().isoformat(), "", "", "", "", ""]
             self.query(query, tuple(data))
             return uint64_run_id
         log(ERROR, "Unexpected run creation failure.")
@@ -926,7 +927,9 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         query += "WHERE run_id = ?;"
 
         timestamp_fld = ""
-        if new_status.status == Status.RUNNING:
+        if new_status.status == Status.STARTING:
+            timestamp_fld = "starting_at"
+        elif new_status.status == Status.RUNNING:
             timestamp_fld = "running_at"
         elif new_status.status == Status.FINISHED:
             timestamp_fld = "finished_at"
@@ -1099,11 +1102,13 @@ def dict_to_task_res(task_dict: dict[str, Any]) -> TaskRes:
 
 def determine_run_status(row: dict[str, Any]) -> str:
     """Determine the status of the run based on timestamp fields."""
-    if row["starting_at"]:
-        if row["running_at"]:
-            if row["finished_at"]:
-                return Status.FINISHED
-            return Status.RUNNING
-        return Status.STARTING
+    if row["pending_at"]:
+        if row["starting_at"]:
+            if row["running_at"]:
+                if row["finished_at"]:
+                    return Status.FINISHED
+                return Status.RUNNING
+            return Status.STARTING
+        return Status.PENDING
     run_id = convert_sint64_to_uint64(row["run_id"])
     raise sqlite3.IntegrityError(f"The run {run_id} does not have a valid status.")

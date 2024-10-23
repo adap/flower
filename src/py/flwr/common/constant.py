@@ -133,6 +133,7 @@ class ErrorCode:
 class Status:
     """Run status."""
 
+    PENDING = "pending"
     STARTING = "starting"
     RUNNING = "running"
     FINISHED = "finished"
