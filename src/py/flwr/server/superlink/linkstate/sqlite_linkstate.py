@@ -870,9 +870,9 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
     def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
         """Retrieve the statuses for the specified runs."""
         # Convert the uint64 value to sint64 for SQLite
-        sint64_run_ids = tuple(convert_uint64_to_sint64(run_id) for run_id in run_ids)
+        sint64_run_ids = (convert_uint64_to_sint64(run_id) for run_id in set(run_ids))
         query = f"SELECT * FROM run WHERE run_id IN ({','.join(['?'] * len(run_ids))});"
-        rows = self.query(query, sint64_run_ids)
+        rows = self.query(query, tuple(sint64_run_ids))
 
         return {
             # Restore uint64 run IDs

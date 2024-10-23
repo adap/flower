@@ -436,7 +436,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         with self.lock:
             return {
                 run_id: self.run_ids[run_id].status
-                for run_id in run_ids
+                for run_id in set(run_ids)
                 if run_id in self.run_ids
             }
 
