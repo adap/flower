@@ -39,15 +39,13 @@ from flwr.server.utils.validator import validate_task_ins_or_res
 
 from .linkstate import LinkState
 from .utils import (
+    check_node_availability_for_taskins,
     convert_sint64_to_uint64,
     convert_sint64_values_in_dict_to_uint64,
     convert_uint64_to_sint64,
     convert_uint64_values_in_dict_to_sint64,
     generate_rand_int_from_bytes,
-    make_node_unavailable_taskres,
-    make_taskins_unavailable_taskres,
-    make_taskres_unavailable_taskres,
-    has_expired,
+    verify_found_taskres,
     verify_taskins_ids,
 )
 
@@ -462,95 +460,86 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         Retrieves all TaskRes for the given `task_ids` and returns and empty list if
         none could be found.
         """
-        task_ids_str = {str(task_id) for task_id in task_ids}
         ret: dict[UUID, TaskRes] = {}
         task_res_to_insert: list[TaskRes] = []
         task_res_delivered: list[TaskRes] = []
-        
+
         # Verify TaskIns IDs
         current = now().timestamp()
         query = f"""
             SELECT *
             FROM task_ins
-            WHERE task_id IN ({",".join(["?"] * len(task_ids_str))});
+            WHERE task_id IN ({",".join(["?"] * len(task_ids))});
         """
-        rows = self.query(query, tuple(task_ids_str))
-        found_id_to_task_ins: dict[UUID, TaskIns] = {}
+        rows = self.query(query, tuple(str(task_id) for task_id in task_ids))
+        found_task_ins_dict: dict[UUID, TaskIns] = {}
         for row in rows:
             convert_sint64_values_in_dict_to_uint64(
                 row, ["run_id", "producer_node_id", "consumer_node_id"]
             )
-            found_id_to_task_ins[UUID(row["task_id"])] = dict_to_task_ins(row)
-            
-        err_invalid_taskins = verify_taskins_ids(
+            found_task_ins_dict[UUID(row["task_id"])] = dict_to_task_ins(row)
+
+        ret, task_res_to_insert = verify_taskins_ids(
             inquired_taskins_ids=task_ids,
-            found_taskins_dict=found_id_to_task_ins,
+            found_taskins_dict=found_task_ins_dict,
+            current_time=current,
         )
-        task_res_to_insert.extend(err_invalid_taskins.values())
-        ret.update(err_invalid_taskins)
-        
+
         # Find all TaskRes
         query = f"""
             SELECT *
             FROM task_res
-            WHERE ancestry IN ({",".join(["?"] * len(task_ids_str))})
+            WHERE ancestry IN ({",".join(["?"] * len(task_ids))})
             AND delivered_at = "";
         """
-        rows = self.query(query, tuple(task_ids_str))
+        rows = self.query(query, tuple(str(task_id) for task_id in task_ids))
         for row in rows:
             convert_sint64_values_in_dict_to_uint64(
                 row, ["run_id", "producer_node_id", "consumer_node_id"]
             )
-        for row in rows:
-            task_res = dict_to_task_res(row)
-            task_res_delivered.append(task_res)
-            # Check if the TaskRes has expired
-            if has_expired(task_res, current):
-                # Get TaskIns
-                task_ins = found_id_to_task_ins[task_res.task.ancestry[0]]
-                # No need to insert the error TaskRes
-                task_res = make_taskres_unavailable_taskres(task_ins)
-                task_res.task.delivered_at = now().isoformat()
-            task_ids_str.remove(task_ins_id)
-            ret[task_ins_id] = task_res
+        tmp_ret_dict = verify_found_taskres(
+            inquired_taskins_ids=task_ids,
+            found_taskins_dict=found_task_ins_dict,
+            found_taskres_list=[dict_to_task_res(row) for row in rows],
+            current_time=current,
+        )
+        ret.update(tmp_ret_dict)
 
         # Check node availability
+        dst_node_ids: set[int] = set()
+        for task_ins_id in task_ids:
+            task_ins = found_task_ins_dict[task_ins_id]
+            sint_node_id = convert_uint64_to_sint64(task_ins.task.consumer.node_id)
+            dst_node_ids.add(sint_node_id)
         query = f"""
             SELECT node_id
             FROM node
-            WHERE node_id IN ({",".join(["?"] * len(task_ids_str))})
-            AND online_until < ?;
+            WHERE node_id IN ({",".join(["?"] * len(dst_node_ids))});
         """
-        data = []
-        for task_ins_id in task_ids_str:
-            task_ins = found_id_to_task_ins[task_ins_id]
-            sint_node_id = convert_uint64_to_sint64(task_ins.task.consumer.node_id)
-            data.append(sint_node_id)
-        data.append(current)
-        rows = self.query(query, tuple(data))
-        # Get offline nodes
-        offline_node_ids = {convert_sint64_to_uint64(row["node_id"]) for row in rows}
-        # Iterate over all remaining TaskIns
-        for task_ins_id in task_ids_str:
-            task_ins = found_id_to_task_ins[task_ins_id]
-            # Generate a TaskRes containing an error reply if the node is offline.
-            if task_ins.task.consumer.node_id in offline_node_ids:
-                task_res = make_node_unavailable_taskres(task_ins)
-                task_res_to_insert.append(task_res)
-                ret[task_ins_id] = task_res
-        
+        rows = self.query(query, tuple(dst_node_ids))
+        tmp_ret_dict, tmp_ret_list = check_node_availability_for_taskins(
+            inquired_taskins_ids=task_ids,
+            found_taskins_dict=found_task_ins_dict,
+            node_id_to_online_until={
+                row["node_id"]: row["online_until"] for row in rows
+            },
+            current_time=current,
+        )
+        ret.update(tmp_ret_dict)
+        task_res_to_insert.extend(tmp_ret_list)
+
         # Mark existing TaskRes to be returned as delivered
         delivered_at = now().isoformat()
         if task_res_delivered:
-            task_ids = [task_res.task_id for task_res in task_res_delivered]
+            task_res_ids = [task_res.task_id for task_res in task_res_delivered]
             query = f"""
                 UPDATE task_res
                 SET delivered_at = ?
-                WHERE task_id IN ({",".join(["?"] * len(task_ids))});
+                WHERE task_id IN ({",".join(["?"] * len(task_res_ids))});
             """
-            data = [delivered_at] + [str(task_id) for task_id in task_ids]
+            data: list[Any] = [delivered_at] + task_res_ids
             self.query(query, data)
-        
+
         # Store the error TaskRes
         if task_res_to_insert:
             data = [task_res_to_dict(task_res) for task_res in task_res_to_insert]
@@ -562,7 +551,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             columns = ", ".join([f":{key}" for key in data[0]])
             query = f"INSERT INTO task_res VALUES({columns});"
             self.query(query, data)
-        
+
         # Cleanup
         self.delete_tasks(set(ret.keys()))
 

@@ -17,9 +17,9 @@
 
 from logging import ERROR
 from os import urandom
-from uuid import uuid4, UUID
+from typing import Optional, Union
+from uuid import UUID, uuid4
 
-from typing import Union, Optional
 from flwr.common import log, now
 from flwr.common.constant import ErrorCode
 from flwr.proto.error_pb2 import Error  # pylint: disable=E0611
@@ -215,65 +215,139 @@ def verify_taskins_ids(
     found_taskins_dict: dict[UUID, TaskIns],
     current_time: Optional[float] = None,
     update_set: bool = True,
-) -> dict[UUID, TaskRes]:
+) -> tuple[dict[UUID, TaskRes], list[TaskRes]]:
     """Verify found TaskIns and generate error TaskRes for invalid ones.
 
     Parameters
     ----------
-    inquired_taskins_ids : set[str]
-        List of TaskIns IDs for which to generate error TaskRes if invalid.
+    inquired_taskins_ids : set[UUID]
+        Set of TaskIns IDs for which to generate error TaskRes if invalid.
     found_taskins_dict : dict[UUID, TaskIns]
-        Dictionary containing all found TaskIns.
+        Dictionary containing all found TaskIns indexed by their IDs.
+    current_time : Optional[float] (default: None)
+        The current time to check for expiration. If set to `None`, the current time
+        will automatically be set to the current timestamp using `now().timestamp()`.
     update_set : bool (default: True)
         If True, the `inquired_taskins_ids` will be updated to remove invalid ones,
         by default True.
 
     Returns
     -------
-    dict[UUID, TaskRes]
-        Dictionary of generated error TaskRes indexed by the corresponding TaskIns ID.
+    tuple[dict[UUID, TaskRes], list[TaskRes]]
+        A tuple containing:
+        - A dictionary of error TaskRes indexed by the corresponding TaskIns ID.
+        - A list of error TaskRes that should be inserted into the LinkState.
+
+    Note
+    ----
+    The TaskRes generated for invalid but yet existing TaskIns are expected to be
+    inserted into the LinkState. However, the TaskRes generated for non-existing
+    shouldn't be inserted into the LinkState as they do not correspond to any TaskIns.
     """
-    ret = {}
-    current = current_time if current else now().timestamp()
+    ret_dict = {}
+    taskres_to_insert = []
+    current = current_time if current_time else now().timestamp()
     for taskins_id in list(inquired_taskins_ids):
         # Generate error TaskRes if the task_ins doesn't exist or has expired
-        task_ins = found_taskins_dict.get(taskins_id)
-        if task_ins is None or has_expired(task_ins, current):
-            ret[taskins_id] = make_taskins_unavailable_taskres(taskins_id)
+        taskins = found_taskins_dict.get(taskins_id)
+        if taskins is None or has_expired(taskins, current):
             if update_set:
                 inquired_taskins_ids.remove(taskins_id)
-    return ret
+            taskres = make_taskins_unavailable_taskres(taskins_id)
+            # Insert the error TaskRes if the TaskIns exists and has expired
+            if taskins is not None:
+                taskres_to_insert.append(taskres)
+            ret_dict[taskins_id] = taskres
+    return ret_dict, taskres_to_insert
 
 
 def verify_found_taskres(
-    inquired_taskres_ids: set[UUID],
-    found_taskres_dict: dict[UUID, TaskRes],
+    inquired_taskins_ids: set[UUID],
+    found_taskins_dict: dict[UUID, TaskIns],
+    found_taskres_list: list[TaskRes],
+    current_time: Optional[float] = None,
     update_set: bool = True,
 ) -> dict[UUID, TaskRes]:
     """Verify found TaskRes and generate error TaskRes for invalid ones.
 
     Parameters
     ----------
-    inquired_taskres_ids : set[str]
-        List of TaskRes IDs for which to generate error TaskRes if invalid.
-    found_taskres_dict : dict[UUID, TaskRes]
-        Dictionary containing all found TaskRes indexed by the corresponding TaskIns ID.
+    inquired_taskins_ids : set[UUID]
+        Set of TaskIns IDs for which to generate error TaskRes if invalid.
+    found_taskins_dict : dict[UUID, TaskIns]
+        Dictionary containing all found TaskIns indexed by their IDs.
+    found_taskres_list : dict[TaskIns, TaskRes]
+        List of found TaskRes to be verified.
+    current_time : Optional[float] (default: None)
+        The current time to check for expiration. If set to `None`, the current time
+        will automatically be set to the current timestamp using `now().timestamp()`.
     update_set : bool (default: True)
-        If True, the `inquired_taskres_ids` will be updated to remove invalid ones,
-        by default True.
+        If True, the `inquired_taskins_ids` will be updated to remove ones
+        that have a TaskRes, by default True.
 
     Returns
     -------
     dict[UUID, TaskRes]
-        Dictionary of generated error TaskRes indexed by the corresponding TaskRes ID.
+        A dictionary of TaskRes indexed by the corresponding TaskIns ID.
     """
-    ret = {}
-    current = now().timestamp()
-    for taskres_id in list(inquired_taskres_ids):
-        # Generate error TaskRes if the task_res doesn't exist or has expired
-        task_res = found_taskres_dict.get(taskres_id)
-        if task_res is None or has_expired(task_res, current):
-            ret[taskres_id] = make_taskins_unavailable_taskres(taskres_id)
+    ret_dict: dict[UUID, TaskRes] = {}
+    current = current_time if current_time else now().timestamp()
+    for taskres in found_taskres_list:
+        taskins_id = UUID(taskres.task.ancestry[0])
+        if update_set:
+            inquired_taskins_ids.remove(taskins_id)
+        # Check if the TaskRes has expired
+        if has_expired(taskres, current):
+            # No need to insert the error TaskRes
+            taskres = make_taskres_unavailable_taskres(found_taskins_dict[taskins_id])
+            taskres.task.delivered_at = now().isoformat()
+        ret_dict[taskins_id] = taskres
+    return ret_dict
+
+
+def check_node_availability_for_taskins(
+    inquired_taskins_ids: set[UUID],
+    found_taskins_dict: dict[UUID, TaskIns],
+    node_id_to_online_until: dict[int, float],
+    current_time: Optional[float] = None,
+    update_set: bool = True,
+) -> tuple[dict[UUID, TaskRes], list[TaskRes]]:
+    """Check node availability for TaskIns and generate error TaskRes if unavailable.
+
+    Parameters
+    ----------
+    inquired_taskins_ids : set[UUID]
+        Set of TaskIns IDs for which to check destination node availability.
+    found_taskins_dict : dict[UUID, TaskIns]
+        Dictionary containing all found TaskIns indexed by their IDs.
+    node_id_to_online_until : dict[int, float]
+        Dictionary mapping node IDs to their online-until timestamps.
+    current_time : Optional[float] (default: None)
+        The current time to check for expiration. If set to `None`, the current time
+        will automatically be set to the current timestamp using `now().timestamp()`.
+    update_set : bool (default: True)
+        If True, the `inquired_taskins_ids` will be updated to remove invalid ones,
+        by default True.
+
+    Returns
+    -------
+    tuple[dict[UUID, TaskRes], list[TaskRes]]
+        A tuple containing:
+        - A dictionary of error TaskRes indexed by the corresponding TaskIns ID.
+        - A list of error TaskRes that should be inserted into the LinkState.
+    """
+    ret_dict = {}
+    taskres_to_insert = []
+    current = current_time if current_time else now().timestamp()
+    for taskins_id in list(inquired_taskins_ids):
+        task_ins = found_taskins_dict[taskins_id]
+        node_id = task_ins.task.consumer.node_id
+        online_until = node_id_to_online_until[node_id]
+        # Generate a TaskRes containing an error reply if the node is offline.
+        if online_until < current:
             if update_set:
-                inquired_taskres_ids.remove(taskres_id)
-    return ret
+                inquired_taskins_ids.remove(taskins_id)
+            task_res = make_node_unavailable_taskres(task_ins)
+            taskres_to_insert.append(task_res)
+            ret_dict[taskins_id] = task_res
+    return ret_dict, taskres_to_insert
