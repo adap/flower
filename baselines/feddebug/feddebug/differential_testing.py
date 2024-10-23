@@ -2,21 +2,37 @@
 
 import itertools
 import time
+from logging import DEBUG
+
 import torch
 import torch.nn.functional as F
-
-from logging import DEBUG
 from flwr.common.logger import log
 
 from feddebug.neuron_activation import get_neurons_activations
 from feddebug.utils import create_transform
 
 
+def _predict_func(model, input_tensor):
+    model.eval()
+    logits = model(input_tensor)
+    preds = torch.argmax(F.log_softmax(logits, dim=1), dim=1)
+    pred = preds.item()
+    return pred
+
+
 class InferenceGuidedInputGenerator:
     """Generate random inputs based on the feedback from the clients."""
 
-    def __init__(self, clients2models, input_shape, transform_func, k_gen_inputs=10,
-                 min_nclients_same_pred=3, time_delta=60, faster_input_generation=False):
+    def __init__(
+        self,
+        clients2models,
+        input_shape,
+        transform_func,
+        k_gen_inputs=10,
+        min_nclients_same_pred=3,
+        time_delta=60,
+        faster_input_generation=False,
+    ):
         self.clients2models = clients2models
         self.input_shape = input_shape
         self.transform = transform_func
@@ -57,16 +73,20 @@ class InferenceGuidedInputGenerator:
             if time.time() - start_time > timeout:
                 timeout += 60
                 self.min_nclients_same_pred -= 1
-                print(f">> Timeout: Number of distinct inputs: {len(random_inputs)}, "
-                      f"decreasing min_nclients_same_pred to {self.min_nclients_same_pred} "
-                      f"and extending timeout to {timeout} seconds")
+                print(
+                    f">> Timeout: Number of distinct inputs: {len(random_inputs)}, "
+                    f"decreasing min_nclients_same_pred "
+                    f"to {self.min_nclients_same_pred} "
+                    f"and extending timeout to {timeout} seconds"
+                )
 
         elapsed_time = time.time() - start_time
         return random_inputs, elapsed_time
 
     def _append_or_not(self, input_tensor, random_inputs, same_prediction_set):
-        preds = [self._predict_func(model, input_tensor)
-                 for model in self.clients2models.values()]
+        preds = [
+            _predict_func(model, input_tensor) for model in self.clients2models.values()
+        ]
         for ci1, pred1 in enumerate(preds):
             seq = {ci1}
             for ci2, pred2 in enumerate(preds):
@@ -74,16 +94,12 @@ class InferenceGuidedInputGenerator:
                     seq.add(ci2)
 
             seq_str = ",".join(map(str, seq))
-            if seq_str not in same_prediction_set and len(seq) >= self.min_nclients_same_pred:
+            if (
+                seq_str not in same_prediction_set
+                and len(seq) >= self.min_nclients_same_pred
+            ):
                 same_prediction_set.add(seq_str)
                 random_inputs.append(input_tensor)
-
-    def _predict_func(self, model, input_tensor):
-        model.eval()
-        logits = model(input_tensor)
-        preds = torch.argmax(F.log_softmax(logits, dim=1), dim=1)
-        pred = preds.item()
-        return pred
 
     def get_inputs(self):
         """Return generated random inputs."""
@@ -92,25 +108,26 @@ class InferenceGuidedInputGenerator:
         return self._generate_feedback_random_inputs()
 
 
+def _torch_intersection(client2tensors):
+    intersect = torch.ones_like(next(iter(client2tensors.values())), dtype=torch.bool)
+    for temp_t in client2tensors.values():
+        intersect = torch.logical_and(intersect, temp_t)
+    return intersect
+
+
+def _generate_leave_one_out_combinations(clients_ids):
+    """Generate and update all subsets of clients with a specified subset size."""
+    subset_size = len(clients_ids) - 1
+    subsets = [set(sub) for sub in itertools.combinations(clients_ids, subset_size)]
+    return subsets
+
+
 class FaultyClientDetector:
     """Faulty Client Localization using Neuron Activation."""
 
     def __init__(self, device):
         self.leave_1_out_combs = None
         self.device = device
-
-    def _generate_leave_one_out_combinations(self, clients_ids):
-        """Generate and update all subsets of clients with a specified subset size."""
-        subset_size = len(clients_ids) - 1
-        subsets = [set(sub) for sub in itertools.combinations(clients_ids, subset_size)]
-        return subsets
-
-    def _torch_intersection(self, client2tensors):
-        intersect = torch.ones_like(
-            next(iter(client2tensors.values())), dtype=torch.bool)
-        for temp_t in client2tensors.values():
-            intersect = torch.logical_and(intersect, temp_t)
-        return intersect
 
     def _get_clients_ids_with_highest_common_neurons(self, clients2neurons2boolact):
         def _count_common_neurons(comb):
@@ -121,7 +138,7 @@ class FaultyClientDetector:
             values.
             """
             c2act = {cid: clients2neurons2boolact[cid] for cid in comb}
-            intersect_tensor = self._torch_intersection(c2act)
+            intersect_tensor = _torch_intersection(c2act)
             return intersect_tensor.sum().item()
 
         count_of_common_neurons = [
@@ -145,30 +162,45 @@ class FaultyClientDetector:
         return client2acts
 
     def get_malicious_clients(self, client2acts, na_t, num_bugs):
-        """Identify potential malicious clients based on neuron activations and thresholds."""
+        """Identify potential malicious clients based on neuron activations."""
         potential_faulty_clients = None
         all_clients_ids = set(client2acts.keys())
-        self.leave_1_out_combs = self._generate_leave_one_out_combinations(
-            all_clients_ids)
+        self.leave_1_out_combs = _generate_leave_one_out_combinations(all_clients_ids)
         for _ in range(num_bugs):
-            client2_na = {cid: activations > na_t for cid,
-                          activations in client2acts.items()}
+            client2_na = {
+                cid: activations > na_t for cid, activations in client2acts.items()
+            }
             normal_clients_ids = self._get_clients_ids_with_highest_common_neurons(
-                client2_na)
+                client2_na
+            )
 
             potential_faulty_clients = all_clients_ids - normal_clients_ids
-            log(DEBUG, f"Malicious clients {potential_faulty_clients}")
-            self.leave_1_out_combs = self._generate_leave_one_out_combinations(
-                all_clients_ids - potential_faulty_clients)
+            log(DEBUG, "Malicious clients %s", potential_faulty_clients)
+            self.leave_1_out_combs = _generate_leave_one_out_combinations(
+                all_clients_ids - potential_faulty_clients
+            )
 
         return potential_faulty_clients
 
 
-def differential_testing_fl_clients(client2model, num_bugs, num_inputs, input_shape, na_threshold, faster_input_generation, device):
+def differential_testing_fl_clients(
+    client2model,
+    num_bugs,
+    num_inputs,
+    input_shape,
+    na_threshold,
+    faster_input_generation,
+    device,
+):
     """Differential Testing for FL Clients."""
-
-    generate_inputs = InferenceGuidedInputGenerator(clients2models=client2model, input_shape=input_shape, transform_func=create_transform(
-    ), k_gen_inputs=num_inputs, min_nclients_same_pred=3, faster_input_generation=faster_input_generation)
+    generate_inputs = InferenceGuidedInputGenerator(
+        clients2models=client2model,
+        input_shape=input_shape,
+        transform_func=create_transform(),
+        k_gen_inputs=num_inputs,
+        min_nclients_same_pred=3,
+        faster_input_generation=faster_input_generation,
+    )
     selected_inputs, _ = generate_inputs.get_inputs()
 
     predicted_faulty_clients = []
@@ -178,9 +210,11 @@ def differential_testing_fl_clients(client2model, num_bugs, num_inputs, input_sh
     for input_tensor in selected_inputs:
         # Get neuron activations for each client model
         client2acts = localize.get_client_neurons_activations(
-            client2model, input_tensor)
+            client2model, input_tensor
+        )
         # Identify potential malicious clients based on activations and thresholds
         potential_malicious_clients = localize.get_malicious_clients(
-            client2acts, na_threshold, num_bugs)
+            client2acts, na_threshold, num_bugs
+        )
         predicted_faulty_clients.append(potential_malicious_clients)
     return predicted_faulty_clients

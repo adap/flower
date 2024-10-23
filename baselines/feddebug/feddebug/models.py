@@ -14,6 +14,7 @@ import torchvision
 
 class LeNet(nn.Module):
     """LeNet model."""
+
     def __init__(self, config):
         super().__init__()
         self.conv1 = nn.Conv2d(config["channels"], 6, 5)
@@ -37,9 +38,8 @@ class LeNet(nn.Module):
 def _get_inputs_labels_from_batch(batch):
     if "image" in batch:
         return batch["image"], batch["label"]
-    else:
-        x, y = batch
-        return x, y
+    x, y = batch
+    return x, y
 
 
 def initialize_model(name, cfg):
@@ -52,17 +52,25 @@ def initialize_model(name, cfg):
         "resnet152": lambda: torchvision.models.resnet152(weights="IMAGENET1K_V1"),
         "densenet121": lambda: torchvision.models.densenet121(weights="IMAGENET1K_V1"),
         "vgg16": lambda: torchvision.models.vgg16(weights="IMAGENET1K_V1"),
-        "lenet": lambda: LeNet({"channels": cfg.channels, "num_classes": cfg.num_classes}),
+        "lenet": lambda: LeNet(
+            {"channels": cfg.channels, "num_classes": cfg.num_classes}
+        ),
     }
     model = model_functions[name]()
     # Modify model for grayscale input if necessary
     if cfg.channels == 1:
         if name.startswith("resnet"):
-            model.conv1 = torch.nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3, bias=False)
+            model.conv1 = torch.nn.Conv2d(
+                1, 64, kernel_size=7, stride=2, padding=3, bias=False
+            )
         elif name == "densenet121":
-            model.features[0] = torch.nn.Conv2d(1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
+            model.features[0] = torch.nn.Conv2d(
+                1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False
+            )
         elif name == "vgg16":
-            model.features[0] = torch.nn.Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            model.features[0] = torch.nn.Conv2d(
+                1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)
+            )
 
     # Modify final layer to match the number of classes
     if name.startswith("resnet"):
@@ -73,8 +81,8 @@ def initialize_model(name, cfg):
         model.classifier = torch.nn.Linear(num_ftrs, cfg.num_classes)
     elif name == "vgg16":
         num_ftrs = model.classifier[-1].in_features
-        model.classifier[-1] = torch.nn.Linear(num_ftrs, cfg.num_classes)    
-    
+        model.classifier[-1] = torch.nn.Linear(num_ftrs, cfg.num_classes)
+
     return model.cpu()
 
 
@@ -106,7 +114,7 @@ def _train(tconfig):
             # break
         epoch_loss /= total
         epoch_acc = correct / total
-    net = net.cpu()    
+    net = net.cpu()
     return {"train_loss": epoch_loss, "train_accuracy": epoch_acc}
 
 
