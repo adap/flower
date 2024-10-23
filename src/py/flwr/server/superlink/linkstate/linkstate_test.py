@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests all state implemenations have to conform to."""
+"""Tests all LinkState implemenations have to conform to."""
 # pylint: disable=invalid-name, too-many-lines, R0904, R0913
 
 import tempfile
@@ -33,7 +33,11 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
-from flwr.server.superlink.state import InMemoryState, SqliteState, State
+from flwr.server.superlink.linkstate import (
+    InMemoryLinkState,
+    LinkState,
+    SqliteLinkState,
+)
 
 
 class StateTest(unittest.TestCase):
@@ -43,14 +47,14 @@ class StateTest(unittest.TestCase):
     __test__ = False
 
     @abstractmethod
-    def state_factory(self) -> State:
+    def state_factory(self) -> LinkState:
         """Provide state implementation to test."""
         raise NotImplementedError()
 
     def test_create_and_get_run(self) -> None:
         """Test if create_run and get_run work correctly."""
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {"test_key": "test_value"})
 
         # Execute
@@ -188,7 +192,7 @@ class StateTest(unittest.TestCase):
         state = self.state_factory()
 
         # Assert
-        assert isinstance(state, State)
+        assert isinstance(state, LinkState)
 
     # TaskIns tests
     def test_task_ins_store_anonymous_and_retrieve_anonymous(self) -> None:
@@ -197,7 +201,7 @@ class StateTest(unittest.TestCase):
         Create anonymous task and retrieve it.
         """
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {})
         task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
 
@@ -212,7 +216,7 @@ class StateTest(unittest.TestCase):
     def test_task_ins_store_anonymous_and_fail_retrieving_identitiy(self) -> None:
         """Store anonymous TaskIns and fail to retrieve it."""
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {})
         task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
 
@@ -226,7 +230,7 @@ class StateTest(unittest.TestCase):
     def test_task_ins_store_identity_and_fail_retrieving_anonymous(self) -> None:
         """Store identity TaskIns and fail retrieving it as anonymous."""
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {})
         task_ins = create_task_ins(consumer_node_id=1, anonymous=False, run_id=run_id)
 
@@ -240,7 +244,7 @@ class StateTest(unittest.TestCase):
     def test_task_ins_store_identity_and_retrieve_identity(self) -> None:
         """Store identity TaskIns and retrieve it."""
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {})
         task_ins = create_task_ins(consumer_node_id=1, anonymous=False, run_id=run_id)
 
@@ -257,7 +261,7 @@ class StateTest(unittest.TestCase):
     def test_task_ins_store_delivered_and_fail_retrieving(self) -> None:
         """Fail retrieving delivered task."""
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {})
         task_ins = create_task_ins(consumer_node_id=1, anonymous=False, run_id=run_id)
 
@@ -278,7 +282,7 @@ class StateTest(unittest.TestCase):
     def test_get_task_ins_limit_throws_for_limit_zero(self) -> None:
         """Fail call with limit=0."""
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
 
         # Execute & Assert
         with self.assertRaises(AssertionError):
@@ -287,7 +291,7 @@ class StateTest(unittest.TestCase):
     def test_task_ins_store_invalid_run_id_and_fail(self) -> None:
         """Store TaskIns with invalid run_id and fail."""
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
         task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=61016)
 
         # Execute
@@ -300,7 +304,7 @@ class StateTest(unittest.TestCase):
     def test_task_res_store_and_retrieve_by_task_ins_id(self) -> None:
         """Store TaskRes retrieve it by task_ins_id."""
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {})
 
         task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
@@ -326,7 +330,7 @@ class StateTest(unittest.TestCase):
     def test_node_ids_initial_state(self) -> None:
         """Test retrieving all node_ids and empty initial state."""
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {})
 
         # Execute
@@ -338,7 +342,7 @@ class StateTest(unittest.TestCase):
     def test_create_node_and_get_nodes(self) -> None:
         """Test creating a client node."""
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {})
         node_ids = []
 
@@ -354,7 +358,7 @@ class StateTest(unittest.TestCase):
     def test_create_node_public_key(self) -> None:
         """Test creating a client node with public key."""
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
         public_key = b"mock"
         run_id = state.create_run(None, None, "9f86d08", {})
 
@@ -370,7 +374,7 @@ class StateTest(unittest.TestCase):
     def test_create_node_public_key_twice(self) -> None:
         """Test creating a client node with same public key twice."""
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
         public_key = b"mock"
         run_id = state.create_run(None, None, "9f86d08", {})
         node_id = state.create_node(ping_interval=10, public_key=public_key)
@@ -386,14 +390,14 @@ class StateTest(unittest.TestCase):
         assert retrieved_node_id == node_id
 
         # Assert node_ids and public_key_to_node_id are synced
-        if isinstance(state, InMemoryState):
+        if isinstance(state, InMemoryLinkState):
             assert len(state.node_ids) == 1
             assert len(state.public_key_to_node_id) == 1
 
     def test_delete_node(self) -> None:
         """Test deleting a client node."""
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {})
         node_id = state.create_node(ping_interval=10)
 
@@ -407,7 +411,7 @@ class StateTest(unittest.TestCase):
     def test_delete_node_public_key(self) -> None:
         """Test deleting a client node with public key."""
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
         public_key = b"mock"
         run_id = state.create_run(None, None, "9f86d08", {})
         node_id = state.create_node(ping_interval=10, public_key=public_key)
@@ -424,7 +428,7 @@ class StateTest(unittest.TestCase):
     def test_delete_node_public_key_none(self) -> None:
         """Test deleting a client node with public key."""
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
         public_key = b"mock"
         run_id = state.create_run(None, None, "9f86d08", {})
         node_id = 0
@@ -442,7 +446,7 @@ class StateTest(unittest.TestCase):
     def test_delete_node_wrong_public_key(self) -> None:
         """Test deleting a client node with wrong public key."""
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
         public_key = b"mock"
         wrong_public_key = b"mock_mock"
         run_id = state.create_run(None, None, "9f86d08", {})
@@ -461,7 +465,7 @@ class StateTest(unittest.TestCase):
     def test_get_node_id_wrong_public_key(self) -> None:
         """Test retrieving a client node with wrong public key."""
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
         public_key = b"mock"
         wrong_public_key = b"mock_mock"
         run_id = state.create_run(None, None, "9f86d08", {})
@@ -478,7 +482,7 @@ class StateTest(unittest.TestCase):
     def test_get_nodes_invalid_run_id(self) -> None:
         """Test retrieving all node_ids with invalid run_id."""
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
         state.create_run(None, None, "9f86d08", {})
         invalid_run_id = 61016
         state.create_node(ping_interval=10)
@@ -492,7 +496,7 @@ class StateTest(unittest.TestCase):
     def test_num_task_ins(self) -> None:
         """Test if num_tasks returns correct number of not delivered task_ins."""
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {})
         task_0 = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
         task_1 = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
@@ -510,7 +514,7 @@ class StateTest(unittest.TestCase):
     def test_num_task_res(self) -> None:
         """Test if num_tasks returns correct number of not delivered task_res."""
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {})
 
         task_ins_0 = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
@@ -544,7 +548,7 @@ class StateTest(unittest.TestCase):
     def test_server_private_public_key(self) -> None:
         """Test get server private and public key after inserting."""
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
         private_key, public_key = generate_key_pairs()
         private_key_bytes = private_key_to_bytes(private_key)
         public_key_bytes = public_key_to_bytes(public_key)
@@ -561,7 +565,7 @@ class StateTest(unittest.TestCase):
     def test_server_private_public_key_none(self) -> None:
         """Test get server private and public key without inserting."""
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
 
         # Execute
         server_private_key = state.get_server_private_key()
@@ -574,7 +578,7 @@ class StateTest(unittest.TestCase):
     def test_store_server_private_public_key_twice(self) -> None:
         """Test inserting private and public key twice."""
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
         private_key, public_key = generate_key_pairs()
         private_key_bytes = private_key_to_bytes(private_key)
         public_key_bytes = public_key_to_bytes(public_key)
@@ -594,7 +598,7 @@ class StateTest(unittest.TestCase):
     def test_node_public_keys(self) -> None:
         """Test store_node_public_keys and get_node_public_keys from state."""
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
         key_pairs = [generate_key_pairs() for _ in range(3)]
         public_keys = {public_key_to_bytes(pair[1]) for pair in key_pairs}
 
@@ -608,7 +612,7 @@ class StateTest(unittest.TestCase):
     def test_node_public_key(self) -> None:
         """Test store_node_public_key and get_node_public_keys from state."""
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
         key_pairs = [generate_key_pairs() for _ in range(3)]
         public_keys = {public_key_to_bytes(pair[1]) for pair in key_pairs}
 
@@ -623,7 +627,7 @@ class StateTest(unittest.TestCase):
     def test_acknowledge_ping(self) -> None:
         """Test if acknowledge_ping works and if get_nodes return online nodes."""
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {})
         node_ids = [state.create_node(ping_interval=10) for _ in range(100)]
         for node_id in node_ids[:70]:
@@ -642,7 +646,7 @@ class StateTest(unittest.TestCase):
     def test_node_unavailable_error(self) -> None:
         """Test if get_task_res return TaskRes containing node unavailable error."""
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {})
         node_id_0 = state.create_node(ping_interval=90)
         node_id_1 = state.create_node(ping_interval=30)
@@ -684,7 +688,7 @@ class StateTest(unittest.TestCase):
     def test_store_task_res_task_ins_expired(self) -> None:
         """Test behavior of store_task_res when the TaskIns it references is expired."""
         # Prepare
-        state: State = self.state_factory()
+        state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {})
 
         task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
@@ -738,7 +742,7 @@ class StateTest(unittest.TestCase):
         ) in test_cases:
 
             # Prepare
-            state: State = self.state_factory()
+            state: LinkState = self.state_factory()
             run_id = state.create_run(None, None, "9f86d08", {})
 
             task_ins = create_task_ins(
@@ -957,9 +961,9 @@ class InMemoryStateTest(StateTest):
 
     __test__ = True
 
-    def state_factory(self) -> State:
+    def state_factory(self) -> LinkState:
         """Return InMemoryState."""
-        return InMemoryState()
+        return InMemoryLinkState()
 
 
 class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
@@ -967,9 +971,9 @@ class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
 
     __test__ = True
 
-    def state_factory(self) -> SqliteState:
+    def state_factory(self) -> SqliteLinkState:
         """Return SqliteState with in-memory database."""
-        state = SqliteState(":memory:")
+        state = SqliteLinkState(":memory:")
         state.initialize()
         return state
 
@@ -990,11 +994,11 @@ class SqliteFileBasedTest(StateTest, unittest.TestCase):
 
     __test__ = True
 
-    def state_factory(self) -> SqliteState:
+    def state_factory(self) -> SqliteLinkState:
         """Return SqliteState with file-based database."""
         # pylint: disable-next=consider-using-with,attribute-defined-outside-init
         self.tmp_file = tempfile.NamedTemporaryFile()
-        state = SqliteState(database_path=self.tmp_file.name)
+        state = SqliteLinkState(database_path=self.tmp_file.name)
         state.initialize()
         return state
 

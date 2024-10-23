@@ -17,7 +17,7 @@
 
 from typing import cast
 
-from flwr.client.node_state import NodeState
+from flwr.client.run_info_store import DeprecatedRunInfoStore
 from flwr.common import ConfigsRecord, Context
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
@@ -34,32 +34,31 @@ def _run_dummy_task(context: Context) -> Context:
 
 
 def test_multirun_in_node_state() -> None:
-    """Test basic NodeState logic."""
+    """Test basic DeprecatedRunInfoStore logic."""
     # Tasks to perform
     tasks = [TaskIns(run_id=run_id) for run_id in [0, 1, 1, 2, 3, 2, 1, 5]]
     # the "tasks" is to count how many times each run is executed
     expected_values = {0: "1", 1: "1" * 3, 2: "1" * 2, 3: "1", 5: "1"}
 
-    # NodeState
-    node_state = NodeState(node_id=0, node_config={})
+    node_info_store = DeprecatedRunInfoStore(node_id=0, node_config={})
 
     for task in tasks:
         run_id = task.run_id
 
         # Register
-        node_state.register_context(run_id=run_id)
+        node_info_store.register_context(run_id=run_id)
 
         # Get run state
-        context = node_state.retrieve_context(run_id=run_id)
+        context = node_info_store.retrieve_context(run_id=run_id)
 
         # Run "task"
         updated_state = _run_dummy_task(context)
 
         # Update run state
-        node_state.update_context(run_id=run_id, context=updated_state)
+        node_info_store.update_context(run_id=run_id, context=updated_state)
 
     # Verify values
-    for run_id, run_info in node_state.run_infos.items():
+    for run_id, run_info in node_info_store.run_infos.items():
         assert (
             run_info.context.state.configs_records["counter"]["count"]
             == expected_values[run_id]

@@ -44,8 +44,8 @@ from flwr.server.run_serverapp import run as run_server_app
 from flwr.server.server_app import ServerApp
 from flwr.server.superlink.fleet import vce
 from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
-from flwr.server.superlink.state import StateFactory
-from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
+from flwr.server.superlink.linkstate import LinkStateFactory
+from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 from flwr.simulation.ray_transport.utils import (
     enable_tf_gpu_growth as enable_gpu_growth,
 )
@@ -389,7 +389,7 @@ def _main_loop(
 ) -> None:
     """Start ServerApp on a separate thread, then launch Simulation Engine."""
     # Initialize StateFactory
-    state_factory = StateFactory(":flwr-in-memory-state:")
+    state_factory = LinkStateFactory(":flwr-in-memory-state:")
 
     f_stop = threading.Event()
     # A Threading event to indicate if an exception was raised in the ServerApp thread

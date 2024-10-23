@@ -27,6 +27,7 @@ from flwr.common.address import parse_address
 from flwr.common.config import parse_config_args
 from flwr.common.constant import EXEC_API_DEFAULT_ADDRESS
 from flwr.common.exit_handlers import register_exit_handlers
+from flwr.common.logger import warn_deprecated_feature
 from flwr.common.object_ref import load_app, validate
 
 from .exec_grpc import run_superexec_api_grpc
@@ -36,6 +37,12 @@ from .executor import Executor
 def run_superexec() -> None:
     """Run Flower SuperExec."""
     log(INFO, "Starting Flower SuperExec")
+
+    warn_deprecated_feature(
+        "Manually launching the SuperExec is deprecated. Since `flwr 1.13.0` "
+        "the executor service runs in the SuperLink. Launching it manually is not "
+        "recommended."
+    )
 
     event(EventType.RUN_SUPEREXEC_ENTER)
 
@@ -54,7 +61,7 @@ def run_superexec() -> None:
     # Start SuperExec API
     superexec_server: grpc.Server = run_superexec_api_grpc(
         address=address,
-        executor=_load_executor(args),
+        executor=load_executor(args),
         certificates=certificates,
         config=parse_config_args(
             [args.executor_config] if args.executor_config else args.executor_config
@@ -163,7 +170,7 @@ def _try_obtain_certificates(
     )
 
 
-def _load_executor(
+def load_executor(
     args: argparse.Namespace,
 ) -> Executor:
     """Get the executor plugin."""
