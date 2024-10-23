@@ -480,7 +480,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             run_record.status = new_status
             return True
 
-    def get_pending_run_id(self) -> int | None:
+    def get_pending_run_id(self) -> Optional[int]:
         """Get the `run_id` of a run with `Status.PENDING` status, if any."""
         pending_run_id = None
 
