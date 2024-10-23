@@ -36,6 +36,11 @@ class DriverStub(object):
                 request_serializer=flwr_dot_proto_dot_driver__pb2.PullTaskResRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_driver__pb2.PullTaskResResponse.FromString,
                 )
+        self.GetPendingRun = channel.unary_unary(
+                '/flwr.proto.Driver/GetPendingRun',
+                request_serializer=flwr_dot_proto_dot_run__pb2.GetPendingRunRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_run__pb2.GetPendingRunResponse.FromString,
+                )
         self.GetRun = channel.unary_unary(
                 '/flwr.proto.Driver/GetRun',
                 request_serializer=flwr_dot_proto_dot_run__pb2.GetRunRequest.SerializeToString,
@@ -79,6 +84,13 @@ class DriverServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetPendingRun(self, request, context):
+        """Get runid of a pending run
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def GetRun(self, request, context):
         """Get run details
         """
@@ -115,6 +127,11 @@ def add_DriverServicer_to_server(servicer, server):
                     servicer.PullTaskRes,
                     request_deserializer=flwr_dot_proto_dot_driver__pb2.PullTaskResRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_driver__pb2.PullTaskResResponse.SerializeToString,
+            ),
+            'GetPendingRun': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetPendingRun,
+                    request_deserializer=flwr_dot_proto_dot_run__pb2.GetPendingRunRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_run__pb2.GetPendingRunResponse.SerializeToString,
             ),
             'GetRun': grpc.unary_unary_rpc_method_handler(
                     servicer.GetRun,
@@ -201,6 +218,23 @@ class Driver(object):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.Driver/PullTaskRes',
             flwr_dot_proto_dot_driver__pb2.PullTaskResRequest.SerializeToString,
             flwr_dot_proto_dot_driver__pb2.PullTaskResResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def GetPendingRun(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Driver/GetPendingRun',
+            flwr_dot_proto_dot_run__pb2.GetPendingRunRequest.SerializeToString,
+            flwr_dot_proto_dot_run__pb2.GetPendingRunResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 

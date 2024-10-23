@@ -30,6 +30,11 @@ class DriverStub:
         flwr.proto.driver_pb2.PullTaskResResponse]
     """Get task results"""
 
+    GetPendingRun: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.run_pb2.GetPendingRunRequest,
+        flwr.proto.run_pb2.GetPendingRunResponse]
+    """Get runid of a pending run"""
+
     GetRun: grpc.UnaryUnaryMultiCallable[
         flwr.proto.run_pb2.GetRunRequest,
         flwr.proto.run_pb2.GetRunResponse]
@@ -72,6 +77,14 @@ class DriverServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.driver_pb2.PullTaskResResponse:
         """Get task results"""
+        pass
+
+    @abc.abstractmethod
+    def GetPendingRun(self,
+        request: flwr.proto.run_pb2.GetPendingRunRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.run_pb2.GetPendingRunResponse:
+        """Get runid of a pending run"""
         pass
 
     @abc.abstractmethod

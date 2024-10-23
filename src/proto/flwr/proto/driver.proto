@@ -35,6 +35,9 @@ service Driver {
   // Get task results
   rpc PullTaskRes(PullTaskResRequest) returns (PullTaskResResponse) {}
 
+  // Get runid of a pending run
+  rpc GetPendingRun(GetPendingRunRequest) returns (GetPendingRunResponse) {}
+
   // Get run details
   rpc GetRun(GetRunRequest) returns (GetRunResponse) {}
 
