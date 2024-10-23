@@ -72,8 +72,8 @@ Step 2: Copy the Server Compose Files
 -------------------------------------
 
 Use the method that works best for you to copy the ``server`` directory, the
-certificates, and the ``pyproject.toml`` file of your Flower project to the
-remote machine.
+certificates, and the ``pyproject.toml`` file of your Flower project to the remote
+machine.
 
 For example, you can use ``scp`` to copy the directories:
 
@@ -91,18 +91,18 @@ Log into the remote machine using ``ssh`` and run the following command to start
 SuperLink and SuperExec services:
 
 .. code-block:: bash
-   :linenos:
+    :linenos:
 
-    $ ssh <your-remote-machine>
-    # In your remote machine
-    $ cd <path-to-``distributed``-directory>
-    $ export PROJECT_DIR=../
-    $ docker compose -f server/compose.yml up --build -d
+     $ ssh <your-remote-machine>
+     # In your remote machine
+     $ cd <path-to-``distributed``-directory>
+     $ export PROJECT_DIR=../
+     $ docker compose -f server/compose.yml up --build -d
 
 .. note::
 
-    The path to the ``PROJECT_DIR`` containing the ``pyproject.toml`` file should be relative to
-    the location of the server ``compose.yml`` file.
+    The path to the ``PROJECT_DIR`` containing the ``pyproject.toml`` file should be
+    relative to the location of the server ``compose.yml`` file.
 
 .. note::
 
@@ -132,8 +132,8 @@ On your local machine, run the following command to start the client components:
 
 .. note::
 
-    The path to the ``PROJECT_DIR`` containing the ``pyproject.toml`` file should be relative to
-    the location of the client ``compose.yml`` file.
+    The path to the ``PROJECT_DIR`` containing the ``pyproject.toml`` file should be
+    relative to the location of the client ``compose.yml`` file.
 
 Step 5: Run Your Flower Project
 -------------------------------

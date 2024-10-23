@@ -89,7 +89,8 @@ addresses in the ``pyproject.toml`` file.
        address = "127.0.0.1:9093"
        insecure = true
 
-2. Run the quickstart example, monitor the ServerApp logs and wait for the summary to appear:
+2. Run the quickstart example, monitor the ServerApp logs and wait for the summary to
+   appear:
 
    .. code-block:: bash
 

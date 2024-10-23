@@ -327,8 +327,8 @@ Step 6: Run the Quickstart Project
        address = "127.0.0.1:9093"
        insecure = true
 
-2. Run the ``quickstart-docker`` project and follow the ServerApp logs to
-   track the execution of the run:
+2. Run the ``quickstart-docker`` project and follow the ServerApp logs to track the
+   execution of the run:
 
    .. code-block:: bash
 
