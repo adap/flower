@@ -943,6 +943,18 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         self.query(query % timestamp_fld, data)
         return True
 
+    def get_pending_run_id(self) -> Optional[int]:
+        """Get the `run_id` of a run with `Status.PENDING` status, if any."""
+        pending_run_id = None
+
+        # Fetch all runs with unset `starting_at` (i.e. they are in PENDING status)
+        query = "SELECT * FROM run WHERE starting_at = '' LIMIT 1;"
+        rows = self.query(query)
+        if rows:
+            pending_run_id = convert_sint64_to_uint64(rows[0]["run_id"])
+
+        return pending_run_id
+
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""
         sint64_node_id = convert_uint64_to_sint64(node_id)

@@ -480,6 +480,19 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             run_record.status = new_status
             return True
 
+    def get_pending_run_id(self) -> Optional[int]:
+        """Get the `run_id` of a run with `Status.PENDING` status, if any."""
+        pending_run_id = None
+
+        # Loop through all registered runs
+        for run_id, run_rec in self.run_ids.items():
+            # Break once a pending run is found
+            if run_rec.status.status == Status.PENDING:
+                pending_run_id = run_id
+                break
+
+        return pending_run_id
+
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""
         with self.lock:

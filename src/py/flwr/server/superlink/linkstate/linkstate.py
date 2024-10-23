@@ -216,6 +216,17 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
+    def get_pending_run_id(self) -> Optional[int]:
+        """Get the `run_id` of a run with `Status.PENDING` status.
+
+        Returns
+        -------
+        Optional[int]
+            The `run_id` of a `Run` that is pending to be started; None if
+            there is no Run pending.
+        """
+
+    @abc.abstractmethod
     def store_server_private_public_key(
         self, private_key: bytes, public_key: bytes
     ) -> None:

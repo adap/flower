@@ -67,6 +67,26 @@ class StateTest(unittest.TestCase):
         assert run.fab_hash == "9f86d08"
         assert run.override_config["test_key"] == "test_value"
 
+    def test_get_pending_run_id(self) -> None:
+        """Test if get_pending_run_id works correctly."""
+        # Prepare
+        state = self.state_factory()
+        _ = state.create_run(None, None, "9f86d08", {"test_key": "test_value"})
+        run_id2 = state.create_run(None, None, "fffffff", {"mock_key": "mock_value"})
+        state.update_run_status(run_id2, RunStatus(Status.STARTING, "", ""))
+
+        # Execute
+        pending_run_id = state.get_pending_run_id()
+        assert pending_run_id is not None
+        run_status_dict = state.get_run_status({pending_run_id})
+        assert run_status_dict[pending_run_id].status == Status.PENDING
+
+        # Change state
+        state.update_run_status(pending_run_id, RunStatus(Status.STARTING, "", ""))
+        # Attempt get pending run
+        pending_run_id = state.get_pending_run_id()
+        assert pending_run_id is None
+
     def test_get_and_update_run_status(self) -> None:
         """Test if get_run_status and update_run_status work correctly."""
         # Prepare
