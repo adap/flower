@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""SQLite based implemenation of server state."""
+"""SQLite based implemenation of the link state."""
 
 # pylint: disable=too-many-lines
 
@@ -37,7 +37,7 @@ from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.utils.validator import validate_task_ins_or_res
 
-from .state import State
+from .linkstate import LinkState
 from .utils import (
     convert_sint64_to_uint64,
     convert_sint64_values_in_dict_to_uint64,
@@ -126,8 +126,8 @@ CREATE TABLE IF NOT EXISTS task_res(
 DictOrTuple = Union[tuple[Any, ...], dict[str, Any]]
 
 
-class SqliteState(State):  # pylint: disable=R0904
-    """SQLite-based state implementation."""
+class SqliteLinkState(LinkState):  # pylint: disable=R0904
+    """SQLite-based LinkState implementation."""
 
     def __init__(
         self,
@@ -183,7 +183,7 @@ class SqliteState(State):  # pylint: disable=R0904
     ) -> list[dict[str, Any]]:
         """Execute a SQL query."""
         if self.conn is None:
-            raise AttributeError("State is not initialized.")
+            raise AttributeError("LinkState is not initialized.")
 
         if data is None:
             data = []
@@ -216,9 +216,9 @@ class SqliteState(State):  # pylint: disable=R0904
 
         Usually, the Driver API calls this to schedule instructions.
 
-        Stores the value of the task_ins in the state and, if successful, returns the
-        task_id (UUID) of the task_ins. If, for any reason, storing the task_ins fails,
-        `None` is returned.
+        Stores the value of the task_ins in the link state and, if successful,
+        returns the task_id (UUID) of the task_ins. If, for any reason, storing
+        the task_ins fails, `None` is returned.
 
         Constraints
         -----------
@@ -645,7 +645,7 @@ class SqliteState(State):  # pylint: disable=R0904
         """
 
         if self.conn is None:
-            raise AttributeError("State not intitialized")
+            raise AttributeError("LinkState not intitialized")
 
         with self.conn:
             self.conn.execute(query_1, data)
@@ -656,7 +656,7 @@ class SqliteState(State):  # pylint: disable=R0904
     def create_node(
         self, ping_interval: float, public_key: Optional[bytes] = None
     ) -> int:
-        """Create, store in state, and return `node_id`."""
+        """Create, store in the link state, and return `node_id`."""
         # Sample a random uint64 as node_id
         uint64_node_id = generate_rand_int_from_bytes(NODE_ID_NUM_BYTES)
 
@@ -706,7 +706,7 @@ class SqliteState(State):  # pylint: disable=R0904
             params += (public_key,)  # type: ignore
 
         if self.conn is None:
-            raise AttributeError("State is not initialized.")
+            raise AttributeError("LinkState is not initialized.")
 
         try:
             with self.conn:
@@ -800,7 +800,7 @@ class SqliteState(State):  # pylint: disable=R0904
     def store_server_private_public_key(
         self, private_key: bytes, public_key: bytes
     ) -> None:
-        """Store `server_private_key` and `server_public_key` in state."""
+        """Store `server_private_key` and `server_public_key` in the link state."""
         query = "SELECT COUNT(*) FROM credential"
         count = self.query(query)[0]["COUNT(*)"]
         if count < 1:
@@ -833,13 +833,13 @@ class SqliteState(State):  # pylint: disable=R0904
         return public_key
 
     def store_node_public_keys(self, public_keys: set[bytes]) -> None:
-        """Store a set of `node_public_keys` in state."""
+        """Store a set of `node_public_keys` in the link state."""
         query = "INSERT INTO public_key (public_key) VALUES (?)"
         data = [(key,) for key in public_keys]
         self.query(query, data)
 
     def store_node_public_key(self, public_key: bytes) -> None:
-        """Store a `node_public_key` in state."""
+        """Store a `node_public_key` in the link state."""
         query = "INSERT INTO public_key (public_key) VALUES (:public_key)"
         self.query(query, {"public_key": public_key})
 
