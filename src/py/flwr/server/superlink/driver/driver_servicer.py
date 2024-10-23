@@ -44,6 +44,8 @@ from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
     CreateRunResponse,
+    GetPendingRunRequest,
+    GetPendingRunResponse,
     GetRunRequest,
     GetRunResponse,
     Run,
@@ -186,6 +188,12 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
                 fab_hash=run.fab_hash,
             )
         )
+
+    def GetPendingRun(
+        self, request: GetPendingRunRequest, context: grpc.ServicerContext
+    ) -> GetPendingRunResponse:
+        """Get run-id of a pending Run."""
+        raise NotImplementedError("GetPendingRun is not implemented.")
 
     def GetFab(
         self, request: GetFabRequest, context: grpc.ServicerContext
