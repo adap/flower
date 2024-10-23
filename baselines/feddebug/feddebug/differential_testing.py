@@ -2,18 +2,15 @@
 
 import itertools
 import time
-
-
 import torch
 import torch.nn.functional as F
 
-
-from feddebug.neuron_activation import get_neurons_activations
-from feddebug.utils import seed_everything, create_transform
 from logging import DEBUG
 from flwr.common.logger import log
 
-seed_everything(786)
+from feddebug.neuron_activation import get_neurons_activations
+from feddebug.utils import create_transform
+
 
 class InferenceGuidedInputGenerator:
     """Generate random inputs based on the feedback from the clients."""
@@ -137,6 +134,7 @@ class FaultyClientDetector:
         return val_clients_ids
 
     def get_client_neurons_activations(self, client2model, input_tensor):
+        """Get neuron activations for each client model."""
         client2acts = {}
         for cid, model in client2model.items():
             model = model.to(self.device)
@@ -147,6 +145,7 @@ class FaultyClientDetector:
         return client2acts
 
     def get_malicious_clients(self, client2acts, na_t, num_bugs):
+        """Identify potential malicious clients based on neuron activations and thresholds."""
         potential_faulty_clients = None
         all_clients_ids = set(client2acts.keys())
         self.leave_1_out_combs = self._generate_leave_one_out_combinations(
@@ -167,33 +166,21 @@ class FaultyClientDetector:
 
 def differential_testing_fl_clients(client2model, num_bugs, num_inputs, input_shape, na_threshold, faster_input_generation, device):
     """Differential Testing for FL Clients."""
-    generate_inputs = InferenceGuidedInputGenerator(
-        clients2models=client2model,
-        input_shape=input_shape,
-        transform_func=create_transform(),
-        k_gen_inputs=num_inputs,
-        min_nclients_same_pred=3,
-        faster_input_generation=faster_input_generation
-    )
 
-    # Generate selected inputs for analysis
+    generate_inputs = InferenceGuidedInputGenerator(clients2models=client2model, input_shape=input_shape, transform_func=create_transform(
+    ), k_gen_inputs=num_inputs, min_nclients_same_pred=3, faster_input_generation=faster_input_generation)
     selected_inputs, _ = generate_inputs.get_inputs()
 
     predicted_faulty_clients = []
     localize = FaultyClientDetector(device)
 
-    # Iterate over each input tensor to detect malicious clients
+    # Iterate over each random input tensor to detect malicious clients
     for input_tensor in selected_inputs:
         # Get neuron activations for each client model
         client2acts = localize.get_client_neurons_activations(
             client2model, input_tensor)
-
         # Identify potential malicious clients based on activations and thresholds
         potential_malicious_clients = localize.get_malicious_clients(
-            client2acts, na_threshold, num_bugs
-        )
-
+            client2acts, na_threshold, num_bugs)
         predicted_faulty_clients.append(potential_malicious_clients)
     return predicted_faulty_clients
-
-

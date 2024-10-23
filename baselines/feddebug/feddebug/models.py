@@ -14,7 +14,6 @@ import torchvision
 
 class LeNet(nn.Module):
     """LeNet model."""
-
     def __init__(self, config):
         super().__init__()
         self.conv1 = nn.Conv2d(config["channels"], 6, 5)
@@ -43,71 +42,49 @@ def _get_inputs_labels_from_batch(batch):
         return x, y
 
 
-def initialize_model(name, cfg_dataset):
+def initialize_model(name, cfg):
     """Initialize the model with the given name."""
-    model_dict = {"model": None, "num_classes": cfg_dataset.num_classes}
+    model_functions = {
+        "resnet18": lambda: torchvision.models.resnet18(weights="IMAGENET1K_V1"),
+        "resnet34": lambda: torchvision.models.resnet34(weights="IMAGENET1K_V1"),
+        "resnet50": lambda: torchvision.models.resnet50(weights="IMAGENET1K_V1"),
+        "resnet101": lambda: torchvision.models.resnet101(weights="IMAGENET1K_V1"),
+        "resnet152": lambda: torchvision.models.resnet152(weights="IMAGENET1K_V1"),
+        "densenet121": lambda: torchvision.models.densenet121(weights="IMAGENET1K_V1"),
+        "vgg16": lambda: torchvision.models.vgg16(weights="IMAGENET1K_V1"),
+        "lenet": lambda: LeNet({"channels": cfg.channels, "num_classes": cfg.num_classes}),
+    }
+    model = model_functions[name]()
+    # Modify model for grayscale input if necessary
+    if cfg.channels == 1:
+        if name.startswith("resnet"):
+            model.conv1 = torch.nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3, bias=False)
+        elif name == "densenet121":
+            model.features[0] = torch.nn.Conv2d(1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
+        elif name == "vgg16":
+            model.features[0] = torch.nn.Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
 
-    if name.find("resnet") != -1:
-        model = None
-        if name == "resnet18":
-            model = torchvision.models.resnet18(weights="IMAGENET1K_V1")
-        elif name == "resnet34":
-            model = torchvision.models.resnet34(weights="IMAGENET1K_V1")
-        elif name == "resnet50":
-            model = torchvision.models.resnet50(weights="IMAGENET1K_V1")
-        elif name == "resnet101":
-            model = torchvision.models.resnet101(weights="IMAGENET1K_V1")
-        elif name == "resnet152":
-            model = torchvision.models.resnet152(weights="IMAGENET1K_V1")
-
-        if cfg_dataset.channels == 1:
-            model.conv1 = torch.nn.Conv2d(  # type: ignore
-                1, 64, kernel_size=7, stride=2, padding=3, bias=False
-            )
-
-        # set_parameter_requires_grad(model, feature_extract)
+    # Modify final layer to match the number of classes
+    if name.startswith("resnet"):
         num_ftrs = model.fc.in_features
-        model.fc = torch.nn.Linear(num_ftrs, cfg_dataset.num_classes)
-        model_dict["model"] = model.cpu()
-
+        model.fc = torch.nn.Linear(num_ftrs, cfg.num_classes)
     elif name == "densenet121":
-        model = torchvision.models.densenet121(weights="IMAGENET1K_V1")
-        if cfg_dataset.channels == 1:
-            model.features[0] = torch.nn.Conv2d(
-                1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False
-            )
         num_ftrs = model.classifier.in_features
-        model.classifier = torch.nn.Linear(num_ftrs, cfg_dataset.num_classes)
-        model_dict["model"] = model.cpu()
+        model.classifier = torch.nn.Linear(num_ftrs, cfg.num_classes)
     elif name == "vgg16":
-        model = torchvision.models.vgg16(weights="IMAGENET1K_V1")
-        if cfg_dataset.channels == 1:
-            model.features[0] = torch.nn.Conv2d(
-                1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)
-            )
-
-        num_ftrs = model.classifier[6].in_features
-        model.classifier[6] = torch.nn.Linear(num_ftrs, cfg_dataset.num_classes)
-        model_dict["model"] = model.cpu()
-    elif name == "lenet":
-        config = {
-            "channels": cfg_dataset.channels,
-            "num_classes": cfg_dataset.num_classes,
-        }
-        model_dict["model"] = LeNet(config).cpu()
-    else:
-        raise ValueError(f"Model {name} not supported")
-    return model_dict
+        num_ftrs = model.classifier[-1].in_features
+        model.classifier[-1] = torch.nn.Linear(num_ftrs, cfg.num_classes)    
+    
+    return model.cpu()
 
 
 def _train(tconfig):
     """Train the network on the training set."""
     trainloader = tconfig["train_data"]
-    net = tconfig["model_dict"]["model"]
+    net = tconfig["model"]
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(net.parameters(), lr=tconfig["lr"])
-    net.train()
-    net = net.to(tconfig["device"])
+    net = net.to(tconfig["device"]).train()
     epoch_loss = 0
     epoch_acc = 0
     for _epoch in range(tconfig["epochs"]):

@@ -48,7 +48,7 @@ class ClientsAndServerDatasets:
         partitioner = DirichletPartitioner(
             num_partitions=self.cfg.num_clients,
             partition_by=target_label_col,
-            alpha=0.8,
+            alpha=2,
             min_partition_size=0,
             self_balancing=True,
         )
