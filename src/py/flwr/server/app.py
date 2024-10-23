@@ -20,9 +20,10 @@ import importlib.util
 import sys
 import threading
 from collections.abc import Sequence
-from logging import INFO, WARN
+from logging import DEBUG, INFO, WARN
 from os.path import isfile
 from pathlib import Path
+from time import sleep
 from typing import Optional
 
 import grpc
@@ -335,6 +336,15 @@ def run_superlink() -> None:
     )
     grpc_servers.append(exec_server)
 
+    if args.isolation == ISOLATION_MODE_SUBPROCESS:
+        # Scheduler thread
+        scheduler_th = threading.Thread(
+            target=_flwr_serverapp_scheduler,
+            args=(state_factory, args.driver_api_address),
+        )
+        scheduler_th.start()
+        bckg_threads.append(scheduler_th)
+
     # Graceful shutdown
     register_exit_handlers(
         event_type=EventType.RUN_SUPERLINK_LEAVE,
@@ -349,6 +359,29 @@ def run_superlink() -> None:
                 if not thread.is_alive():
                     sys.exit(1)
         driver_server.wait_for_termination(timeout=1)
+
+
+def _flwr_serverapp_scheduler(
+    state_factory: LinkStateFactory, driver_api_address: str
+) -> None:
+    log(DEBUG, "Started flwr-serverapp scheduler thread.")
+
+    state = state_factory.state()
+
+    # Periodically check for a pending run in the LinkState
+    while True:
+        sleep(3)
+        pending_run_id = state.get_pending_run_id()
+
+        if pending_run_id:
+
+            log(
+                INFO,
+                "Launching `flwr-serverapp` subprocess with run-id %d. "
+                "Connects to SuperLink on %s",
+                pending_run_id,
+                driver_api_address,
+            )
 
 
 def _format_address(address: str) -> tuple[str, str, int]:
