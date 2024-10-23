@@ -943,7 +943,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         self.query(query % timestamp_fld, data)
         return True
 
-    def get_pending_run_id(self) -> int | None:
+    def get_pending_run_id(self) -> Optional[int]:
         """Get the `run_id` of a run with `Status.PENDING` status, if any."""
         pending_run_id = None
 
