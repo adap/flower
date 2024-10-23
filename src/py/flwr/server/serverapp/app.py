@@ -39,7 +39,7 @@ def flwr_serverapp() -> None:
         type=int,
         required=False,
         help="Id of the Run this process should start. If not supplied, this "
-        "function will request a pending run to the LinkState. ",
+        "function will request a pending run to the LinkState.",
     )
     args = parser.parse_args()
 
