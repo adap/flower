@@ -8,7 +8,7 @@ framework: [torch, torchvision]
 
 > \[!NOTE\]
 > 🧪 = This example covers experimental features that might change in future versions of Flower.
-> Please consult the regular PyTorch examples ([quickstart](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch), [advanced](https://github.com/adap/flower/tree/main/examples/advanced-pytorch)) to learn how to use Flower with PyTorch.
+> Please consult the regular PyTorch examples ([quickstart](../quickstart-pytorch/README.md), [advanced](../advanced-pytorch/README.md)) to learn how to use Flower with PyTorch.
 
 The following steps describe how to start a long-running Flower server (SuperLink+SuperExec) and a long-running Flower clients (SuperNode) with authentication enabled. The task is to train a simple CNN for image classification using PyTorch.
 
