@@ -32,6 +32,7 @@ from flwr.common.object_ref import load_app, validate
 
 from .exec_grpc import run_superexec_api_grpc
 from .executor import Executor
+from .state_factory import ExecStateFactory
 
 
 def run_superexec() -> None:
@@ -58,6 +59,8 @@ def run_superexec() -> None:
     # Obtain certificates
     certificates = _try_obtain_certificates(args)
 
+    state_factory = ExecStateFactory(args.db_path)
+
     # Start SuperExec API
     superexec_server: grpc.Server = run_superexec_api_grpc(
         address=address,
@@ -66,6 +69,7 @@ def run_superexec() -> None:
         config=parse_config_args(
             [args.executor_config] if args.executor_config else args.executor_config
         ),
+        state_factory=state_factory,
     )
 
     grpc_servers = [superexec_server]
@@ -89,6 +93,12 @@ def _parse_args_run_superexec() -> argparse.ArgumentParser:
         "--address",
         help="SuperExec (gRPC) server address (IPv4, IPv6, or a domain name)",
         default=EXEC_API_DEFAULT_ADDRESS,
+    )
+    parser.add_argument(
+        "--db_path",
+        help="The path of the DB file to use in order to store run metadata. "
+        "By default it will store the metadata in memory.",
+        default=":flwr-in-memory-state:",
     )
     parser.add_argument(
         "--executor",
