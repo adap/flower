@@ -20,10 +20,11 @@ from logging import ERROR
 from os import urandom
 from uuid import uuid4
 
-from flwr.common import log
+from flwr.common import Context, log, serde
 from flwr.common.constant import ErrorCode, Status, SubStatus
 from flwr.common.typing import RunStatus
 from flwr.proto.error_pb2 import Error  # pylint: disable=E0611
+from flwr.proto.message_pb2 import Context as ProtoContext  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
 
@@ -133,6 +134,16 @@ def convert_sint64_values_in_dict_to_uint64(
     for key in keys:
         if key in data_dict:
             data_dict[key] = convert_sint64_to_uint64(data_dict[key])
+
+
+def context_to_bytes(context: Context) -> bytes:
+    """Serialize `Context` to bytes."""
+    return serde.context_to_proto(context).SerializeToString()
+
+
+def context_from_bytes(context_bytes: bytes) -> Context:
+    """Deserialize `Context` from bytes."""
+    return serde.context_from_proto(ProtoContext.FromString(context_bytes))
 
 
 def make_node_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:

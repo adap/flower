@@ -23,7 +23,7 @@ from datetime import datetime, timezone
 from unittest.mock import patch
 from uuid import UUID
 
-from flwr.common import DEFAULT_TTL
+from flwr.common import DEFAULT_TTL, Context, RecordSet
 from flwr.common.constant import ErrorCode, Status, SubStatus
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
@@ -31,9 +31,13 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     public_key_to_bytes,
 )
 from flwr.common.typing import RunStatus
-from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
+
+# pylint: disable=E0611
+from flwr.proto.node_pb2 import Node
+from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
+
+# pylint: enable=E0611
 from flwr.server.superlink.linkstate import (
     InMemoryLinkState,
     LinkState,
@@ -998,6 +1002,42 @@ class StateTest(unittest.TestCase):
         # Assert
         assert task_res_uuid is None
 
+    def test_get_set_serverapp_context(self) -> None:
+        """Test get and set serverapp context."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        context = Context(
+            node_id=0,
+            node_config={"mock": "mock"},
+            state=RecordSet(),
+            run_config={"test": "test"},
+        )
+        run_id = state.create_run(None, None, "9f86d08", {})
+
+        # Execute
+        init = state.get_serverapp_context(run_id)
+        state.set_serverapp_context(run_id, context)
+        retrieved_context = state.get_serverapp_context(run_id)
+
+        # Assert
+        assert init is None
+        assert retrieved_context == context
+
+    def test_set_context_invalid_run_id(self) -> None:
+        """Test set_serverapp_context with invalid run_id."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        context = Context(
+            node_id=0,
+            node_config={"mock": "mock"},
+            state=RecordSet(),
+            run_config={"test": "test"},
+        )
+
+        # Execute and assert
+        with self.assertRaises(ValueError):
+            state.set_serverapp_context(61016, context)  # Invalid run_id
+
 
 def create_task_ins(
     consumer_node_id: int,
@@ -1019,7 +1059,7 @@ def create_task_ins(
             producer=Node(node_id=0, anonymous=True),
             consumer=consumer,
             task_type="mock",
-            recordset=RecordSet(parameters={}, metrics={}, configs={}),
+            recordset=ProtoRecordSet(parameters={}, metrics={}, configs={}),
             ttl=DEFAULT_TTL,
             created_at=time.time(),
         ),
@@ -1044,7 +1084,7 @@ def create_task_res(
             consumer=Node(node_id=0, anonymous=True),
             ancestry=ancestry,
             task_type="mock",
-            recordset=RecordSet(parameters={}, metrics={}, configs={}),
+            recordset=ProtoRecordSet(parameters={}, metrics={}, configs={}),
             ttl=DEFAULT_TTL,
             created_at=time.time(),
         ),
@@ -1083,7 +1123,7 @@ class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 13
+        assert len(result) == 15
 
 
 class SqliteFileBasedTest(StateTest, unittest.TestCase):
@@ -1108,7 +1148,7 @@ class SqliteFileBasedTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 13
+        assert len(result) == 15
 
 
 if __name__ == "__main__":
