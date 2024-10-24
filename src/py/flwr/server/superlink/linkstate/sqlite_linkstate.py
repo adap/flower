@@ -26,7 +26,7 @@ from logging import DEBUG, ERROR, WARNING
 from typing import Any, Optional, Union, cast
 from uuid import UUID, uuid4
 
-from flwr.common import Context, RecordSet, log, now
+from flwr.common import Context, log, now
 from flwr.common.constant import (
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
@@ -987,33 +987,30 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             log(ERROR, "`node_id` does not exist.")
             return False
 
-    def get_serverapp_context(self, run_id: int) -> Context:
+    def get_serverapp_context(self, run_id: int) -> Optional[Context]:
         """Get the context for the specified `run_id`."""
         # Retrieve context if any
         query = "SELECT context FROM context WHERE run_id = ?;"
         rows = self.query(query, (convert_uint64_to_sint64(run_id),))
-        context = (
-            context_from_bytes(rows[0]["context"])
-            if rows
-            else Context(0, {}, RecordSet(), {})
-        )
+        context = context_from_bytes(rows[0]["context"]) if rows else None
         return context
 
     def set_serverapp_context(self, run_id: int, context: Context) -> None:
-        """Push ServerApp outputs to the link state."""
+        """Set the context for the specified `run_id`."""
         # Convert context to bytes
         context_bytes = context_to_bytes(context)
+        sint_run_id = convert_uint64_to_sint64(run_id)
 
         # Check if any existing Context assigned to the run_id
         query = "SELECT COUNT(*) FROM context WHERE run_id = ?;"
-        if self.query(query, (convert_uint64_to_sint64(run_id),))[0]["COUNT(*)"] > 0:
+        if self.query(query, (sint_run_id,))[0]["COUNT(*)"] > 0:
             # Update context
             query = "UPDATE context SET context = ? WHERE run_id = ?;"
-            self.query(query, (context_bytes, convert_uint64_to_sint64(run_id)))
+            self.query(query, (context_bytes, sint_run_id))
         else:
             # Store context
             query = "INSERT INTO context (run_id, context) VALUES (?, ?);"
-            self.query(query, (convert_uint64_to_sint64(run_id), context_bytes))
+            self.query(query, (sint_run_id, context_bytes))
 
     def get_valid_task_ins(self, task_id: str) -> Optional[dict[str, Any]]:
         """Check if the TaskIns exists and is valid (not expired).
