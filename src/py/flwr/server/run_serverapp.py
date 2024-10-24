@@ -46,6 +46,7 @@ from .driver.grpc_driver import GrpcDriver
 from .server_app import LoadServerAppError, ServerApp
 
 
+# pylint: disable-next=too-many-arguments,too-many-positional-arguments
 def run(
     driver: Driver,
     server_app_dir: str,
