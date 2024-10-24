@@ -3,7 +3,10 @@
 isort:skip_file
 """
 import builtins
+import flwr.proto.fab_pb2
+import flwr.proto.message_pb2
 import flwr.proto.node_pb2
+import flwr.proto.run_pb2
 import flwr.proto.task_pb2
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
@@ -91,3 +94,59 @@ class PullTaskResResponse(google.protobuf.message.Message):
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["task_res_list",b"task_res_list"]) -> None: ...
 global___PullTaskResResponse = PullTaskResResponse
+
+class PullServerAppInsRequest(google.protobuf.message.Message):
+    """PullServerAppIns messages"""
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    RUN_ID_FIELD_NUMBER: builtins.int
+    run_id: builtins.int
+    def __init__(self,
+        *,
+        run_id: builtins.int = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id"]) -> None: ...
+global___PullServerAppInsRequest = PullServerAppInsRequest
+
+class PullServerAppInsResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    RUN_FIELD_NUMBER: builtins.int
+    FAB_FIELD_NUMBER: builtins.int
+    CONTEXT_FIELD_NUMBER: builtins.int
+    @property
+    def run(self) -> flwr.proto.run_pb2.Run: ...
+    @property
+    def fab(self) -> flwr.proto.fab_pb2.Fab: ...
+    @property
+    def context(self) -> flwr.proto.message_pb2.Context: ...
+    def __init__(self,
+        *,
+        run: typing.Optional[flwr.proto.run_pb2.Run] = ...,
+        fab: typing.Optional[flwr.proto.fab_pb2.Fab] = ...,
+        context: typing.Optional[flwr.proto.message_pb2.Context] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["context",b"context","fab",b"fab","run",b"run"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["context",b"context","fab",b"fab","run",b"run"]) -> None: ...
+global___PullServerAppInsResponse = PullServerAppInsResponse
+
+class PushServerAppOutsRequest(google.protobuf.message.Message):
+    """PushServerAppOuts messages"""
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    RUN_ID_FIELD_NUMBER: builtins.int
+    CONTEXT_FIELD_NUMBER: builtins.int
+    run_id: builtins.int
+    @property
+    def context(self) -> flwr.proto.message_pb2.Context: ...
+    def __init__(self,
+        *,
+        run_id: builtins.int = ...,
+        context: typing.Optional[flwr.proto.message_pb2.Context] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["context",b"context"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["context",b"context","run_id",b"run_id"]) -> None: ...
+global___PushServerAppOutsRequest = PushServerAppOutsRequest
+
+class PushServerAppOutsResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    def __init__(self,
+        ) -> None: ...
+global___PushServerAppOutsResponse = PushServerAppOutsResponse
