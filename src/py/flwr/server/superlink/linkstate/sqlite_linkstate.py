@@ -1008,9 +1008,12 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             query = "UPDATE context SET context = ? WHERE run_id = ?;"
             self.query(query, (context_bytes, sint_run_id))
         else:
-            # Store context
-            query = "INSERT INTO context (run_id, context) VALUES (?, ?);"
-            self.query(query, (sint_run_id, context_bytes))
+            try:
+                # Store context
+                query = "INSERT INTO context (run_id, context) VALUES (?, ?);"
+                self.query(query, (sint_run_id, context_bytes))
+            except sqlite3.IntegrityError:
+                raise ValueError(f"Run {run_id} not found") from None
 
     def get_valid_task_ins(self, task_id: str) -> Optional[dict[str, Any]]:
         """Check if the TaskIns exists and is valid (not expired).

@@ -1023,6 +1023,21 @@ class StateTest(unittest.TestCase):
         assert init is None
         assert retrieved_context == context
 
+    def test_set_context_invalid_run_id(self) -> None:
+        """Test set_serverapp_context with invalid run_id."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        context = Context(
+            node_id=0,
+            node_config={"mock": "mock"},
+            state=RecordSet(),
+            run_config={"test": "test"},
+        )
+
+        # Execute and assert
+        with self.assertRaises(ValueError):
+            state.set_serverapp_context(61016, context)  # Invalid run_id
+
 
 def create_task_ins(
     consumer_node_id: int,
