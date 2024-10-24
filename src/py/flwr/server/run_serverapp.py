@@ -52,6 +52,7 @@ def run(
     server_app_run_config: UserConfig,
     server_app_attr: Optional[str] = None,
     loaded_server_app: Optional[ServerApp] = None,
+    context: Optional[Context] = None,
 ) -> None:
     """Run ServerApp with a given Driver."""
     if not (server_app_attr is None) ^ (loaded_server_app is None):
@@ -79,9 +80,13 @@ def run(
     server_app = _load()
 
     # Initialize Context
-    context = Context(
-        node_id=0, node_config={}, state=RecordSet(), run_config=server_app_run_config
-    )
+    if not context:
+        context = Context(
+            node_id=0,
+            node_config={},
+            state=RecordSet(),
+            run_config=server_app_run_config,
+        )
 
     # Call ServerApp
     server_app(driver=driver, context=context)
