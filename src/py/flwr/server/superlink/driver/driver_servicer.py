@@ -207,11 +207,13 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
     def PullServerAppIns(
         self, request: PullServerAppInsRequest, context: grpc.ServicerContext
     ) -> PullServerAppInsResponse:
+        """Pull ServerApp inputs."""
         raise NotImplementedError()
 
     def PushServerAppOuts(
         self, request: PushServerAppOutsRequest, context: grpc.ServicerContext
     ) -> PushServerAppOutsResponse:
+        """Push ServerApp outputs."""
         raise NotImplementedError()
 
 
