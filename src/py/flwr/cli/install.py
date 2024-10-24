@@ -189,8 +189,22 @@ def validate_and_install(
             shutil.copy2(item, install_dir / item.name)
 
     try:
+        # Build wheel
         subprocess.run(
-            ["pip", "install", "-e", install_dir, "--no-deps"],
+            ["python", "-m", "hatchling", "build", "-d", install_dir, "-t", "wheel"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        wheel_files = list(install_dir.glob("*.whl"))
+        if len(wheel_files) != 1:
+            raise RuntimeError(
+                f"Exactly one wheel file was expected, but {len(wheel_files)} "
+                "are present."
+            )
+        # Install wheel
+        subprocess.run(
+            ["pip", "install", wheel_files[0], "--no-deps"],
             capture_output=True,
             text=True,
             check=True,
