@@ -20,7 +20,7 @@ from os import urandom
 from typing import Optional, Union
 from uuid import UUID, uuid4
 
-from flwr.common import Context, log, serde, now
+from flwr.common import Context, log, now, serde
 from flwr.common.constant import ErrorCode, Status, SubStatus
 from flwr.common.typing import RunStatus
 from flwr.proto.error_pb2 import Error  # pylint: disable=E0611
