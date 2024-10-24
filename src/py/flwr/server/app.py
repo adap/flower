@@ -17,12 +17,14 @@
 import argparse
 import csv
 import importlib.util
+import subprocess
 import sys
 import threading
 from collections.abc import Sequence
-from logging import INFO, WARN
+from logging import DEBUG, INFO, WARN
 from os.path import isfile
 from pathlib import Path
+from time import sleep
 from typing import Optional
 
 import grpc
@@ -48,6 +50,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
+    Status,
 )
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log
@@ -55,6 +58,7 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     private_key_to_bytes,
     public_key_to_bytes,
 )
+from flwr.common.typing import RunStatus
 from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
@@ -335,6 +339,15 @@ def run_superlink() -> None:
     )
     grpc_servers.append(exec_server)
 
+    if args.isolation == ISOLATION_MODE_SUBPROCESS:
+        # Scheduler thread
+        scheduler_th = threading.Thread(
+            target=_flwr_serverapp_scheduler,
+            args=(state_factory, args.driver_api_address),
+        )
+        scheduler_th.start()
+        bckg_threads.append(scheduler_th)
+
     # Graceful shutdown
     register_exit_handlers(
         event_type=EventType.RUN_SUPERLINK_LEAVE,
@@ -349,6 +362,47 @@ def run_superlink() -> None:
                 if not thread.is_alive():
                     sys.exit(1)
         driver_server.wait_for_termination(timeout=1)
+
+
+def _flwr_serverapp_scheduler(
+    state_factory: LinkStateFactory, driver_api_address: str
+) -> None:
+    log(DEBUG, "Started flwr-serverapp scheduler thread.")
+
+    state = state_factory.state()
+
+    # Periodically check for a pending run in the LinkState
+    while True:
+        sleep(3)
+        pending_run_id = state.get_pending_run_id()
+
+        if pending_run_id:
+
+            # Set run as starting
+            state.update_run_status(
+                run_id=pending_run_id, new_status=RunStatus(Status.STARTING, "", "")
+            )
+            log(
+                INFO,
+                "Launching `flwr-serverapp` subprocess with run-id %d. "
+                "Connects to SuperLink on %s",
+                pending_run_id,
+                driver_api_address,
+            )
+            # Start ServerApp subprocess
+            command = [
+                "flwr-serverapp",
+                "--superlink",
+                driver_api_address,
+                "--run-id",
+                str(pending_run_id),
+            ]
+            subprocess.run(
+                command,
+                stdout=None,
+                stderr=None,
+                check=True,
+            )
 
 
 def _format_address(address: str) -> tuple[str, str, int]:
