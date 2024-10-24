@@ -40,14 +40,14 @@ class DriverStub:
         flwr.proto.fab_pb2.GetFabResponse]
     """Get FAB"""
 
-    PullServerAppProcessInputs: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.driver_pb2.PullServerAppProcessInputsRequest,
-        flwr.proto.driver_pb2.PullServerAppProcessInputsResponse]
+    PullServerAppInputs: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.driver_pb2.PullServerAppInputsRequest,
+        flwr.proto.driver_pb2.PullServerAppInputsResponse]
     """Pull ServerApp inputs"""
 
-    PushServerAppProcessOutputs: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.driver_pb2.PushServerAppProcessOutputsRequest,
-        flwr.proto.driver_pb2.PushServerAppProcessOutputsResponse]
+    PushServerAppOutputs: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.driver_pb2.PushServerAppOutputsRequest,
+        flwr.proto.driver_pb2.PushServerAppOutputsResponse]
     """Push ServerApp outputs"""
 
 
@@ -101,18 +101,18 @@ class DriverServicer(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def PullServerAppProcessInputs(self,
-        request: flwr.proto.driver_pb2.PullServerAppProcessInputsRequest,
+    def PullServerAppInputs(self,
+        request: flwr.proto.driver_pb2.PullServerAppInputsRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.driver_pb2.PullServerAppProcessInputsResponse:
+    ) -> flwr.proto.driver_pb2.PullServerAppInputsResponse:
         """Pull ServerApp inputs"""
         pass
 
     @abc.abstractmethod
-    def PushServerAppProcessOutputs(self,
-        request: flwr.proto.driver_pb2.PushServerAppProcessOutputsRequest,
+    def PushServerAppOutputs(self,
+        request: flwr.proto.driver_pb2.PushServerAppOutputsRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.driver_pb2.PushServerAppProcessOutputsResponse:
+    ) -> flwr.proto.driver_pb2.PushServerAppOutputsResponse:
         """Push ServerApp outputs"""
         pass
 

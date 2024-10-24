@@ -46,15 +46,15 @@ class DriverStub(object):
                 request_serializer=flwr_dot_proto_dot_fab__pb2.GetFabRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_fab__pb2.GetFabResponse.FromString,
                 )
-        self.PullServerAppProcessInputs = channel.unary_unary(
-                '/flwr.proto.Driver/PullServerAppProcessInputs',
-                request_serializer=flwr_dot_proto_dot_driver__pb2.PullServerAppProcessInputsRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_driver__pb2.PullServerAppProcessInputsResponse.FromString,
+        self.PullServerAppInputs = channel.unary_unary(
+                '/flwr.proto.Driver/PullServerAppInputs',
+                request_serializer=flwr_dot_proto_dot_driver__pb2.PullServerAppInputsRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_driver__pb2.PullServerAppInputsResponse.FromString,
                 )
-        self.PushServerAppProcessOutputs = channel.unary_unary(
-                '/flwr.proto.Driver/PushServerAppProcessOutputs',
-                request_serializer=flwr_dot_proto_dot_driver__pb2.PushServerAppProcessOutputsRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_driver__pb2.PushServerAppProcessOutputsResponse.FromString,
+        self.PushServerAppOutputs = channel.unary_unary(
+                '/flwr.proto.Driver/PushServerAppOutputs',
+                request_serializer=flwr_dot_proto_dot_driver__pb2.PushServerAppOutputsRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_driver__pb2.PushServerAppOutputsResponse.FromString,
                 )
 
 
@@ -103,14 +103,14 @@ class DriverServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def PullServerAppProcessInputs(self, request, context):
+    def PullServerAppInputs(self, request, context):
         """Pull ServerApp inputs
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def PushServerAppProcessOutputs(self, request, context):
+    def PushServerAppOutputs(self, request, context):
         """Push ServerApp outputs
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -150,15 +150,15 @@ def add_DriverServicer_to_server(servicer, server):
                     request_deserializer=flwr_dot_proto_dot_fab__pb2.GetFabRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_fab__pb2.GetFabResponse.SerializeToString,
             ),
-            'PullServerAppProcessInputs': grpc.unary_unary_rpc_method_handler(
-                    servicer.PullServerAppProcessInputs,
-                    request_deserializer=flwr_dot_proto_dot_driver__pb2.PullServerAppProcessInputsRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_driver__pb2.PullServerAppProcessInputsResponse.SerializeToString,
+            'PullServerAppInputs': grpc.unary_unary_rpc_method_handler(
+                    servicer.PullServerAppInputs,
+                    request_deserializer=flwr_dot_proto_dot_driver__pb2.PullServerAppInputsRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_driver__pb2.PullServerAppInputsResponse.SerializeToString,
             ),
-            'PushServerAppProcessOutputs': grpc.unary_unary_rpc_method_handler(
-                    servicer.PushServerAppProcessOutputs,
-                    request_deserializer=flwr_dot_proto_dot_driver__pb2.PushServerAppProcessOutputsRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_driver__pb2.PushServerAppProcessOutputsResponse.SerializeToString,
+            'PushServerAppOutputs': grpc.unary_unary_rpc_method_handler(
+                    servicer.PushServerAppOutputs,
+                    request_deserializer=flwr_dot_proto_dot_driver__pb2.PushServerAppOutputsRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_driver__pb2.PushServerAppOutputsResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -273,7 +273,7 @@ class Driver(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def PullServerAppProcessInputs(request,
+    def PullServerAppInputs(request,
             target,
             options=(),
             channel_credentials=None,
@@ -283,14 +283,14 @@ class Driver(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Driver/PullServerAppProcessInputs',
-            flwr_dot_proto_dot_driver__pb2.PullServerAppProcessInputsRequest.SerializeToString,
-            flwr_dot_proto_dot_driver__pb2.PullServerAppProcessInputsResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Driver/PullServerAppInputs',
+            flwr_dot_proto_dot_driver__pb2.PullServerAppInputsRequest.SerializeToString,
+            flwr_dot_proto_dot_driver__pb2.PullServerAppInputsResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def PushServerAppProcessOutputs(request,
+    def PushServerAppOutputs(request,
             target,
             options=(),
             channel_credentials=None,
@@ -300,8 +300,8 @@ class Driver(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Driver/PushServerAppProcessOutputs',
-            flwr_dot_proto_dot_driver__pb2.PushServerAppProcessOutputsRequest.SerializeToString,
-            flwr_dot_proto_dot_driver__pb2.PushServerAppProcessOutputsResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Driver/PushServerAppOutputs',
+            flwr_dot_proto_dot_driver__pb2.PushServerAppOutputsRequest.SerializeToString,
+            flwr_dot_proto_dot_driver__pb2.PushServerAppOutputsResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

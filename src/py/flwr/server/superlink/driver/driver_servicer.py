@@ -38,12 +38,12 @@ from flwr.proto import driver_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     GetNodesResponse,
-    PullServerAppProcessInputsRequest,
-    PullServerAppProcessInputsResponse,
+    PullServerAppInputsRequest,
+    PullServerAppInputsResponse,
     PullTaskResRequest,
     PullTaskResResponse,
-    PushServerAppProcessOutputsRequest,
-    PushServerAppProcessOutputsResponse,
+    PushServerAppOutputsRequest,
+    PushServerAppOutputsResponse,
     PushTaskInsRequest,
     PushTaskInsResponse,
 )
@@ -200,9 +200,9 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
 
         raise ValueError(f"Found no FAB with hash: {request.hash_str}")
 
-    def PullServerAppProcessInputs(
-        self, request: PullServerAppProcessInputsRequest, context: grpc.ServicerContext
-    ) -> PullServerAppProcessInputsResponse:
+    def PullServerAppInputs(
+        self, request: PullServerAppInputsRequest, context: grpc.ServicerContext
+    ) -> PullServerAppInputsResponse:
         """Pull ServerApp process inputs."""
         log(DEBUG, "DriverServicer.PullServerAppProcessInputs")
         state = self.state_factory.state()
@@ -232,9 +232,9 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
             fab=fab_to_proto(fab) if fab else None,
         )
 
-    def PushServerAppProcessOutputs(
-        self, request: PushServerAppProcessOutputsRequest, context: grpc.ServicerContext
-    ) -> PushServerAppProcessOutputsResponse:
+    def PushServerAppOutputs(
+        self, request: PushServerAppOutputsRequest, context: grpc.ServicerContext
+    ) -> PushServerAppOutputsResponse:
         """Push ServerApp process outputs."""
         log(DEBUG, "DriverServicer.PushServerAppProcessOutputs")
         state = self.state_factory.state()
