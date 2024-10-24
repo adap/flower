@@ -98,15 +98,15 @@ Output of the last round will show the FedDebug output as follows:
 
 ```log
 ... 
-[2024-10-23 12:34:23,548][flwr][INFO] - ***FedDebug Output Round 5 ***
-[2024-10-23 12:34:23,548][flwr][INFO] - True Malicious Clients (Ground Truth) = ['0']
-[2024-10-23 12:34:23,548][flwr][INFO] - Total Random Inputs = 10
-[2024-10-23 12:34:23,548][flwr][INFO] - Predicted Malicious Clients = {'0': 1.0}
-[2024-10-23 12:34:23,548][flwr][INFO] - FedDebug Localization Accuracy = 100.0
-[2024-10-23 12:34:24,381][flwr][INFO] - fit progress: (5, 0.0001550872877240181, {'accuracy': 0.9784, 'loss': 0.0001550872877240181, 'round': 5}, 38.79056127398508)
-[2024-10-23 12:34:24,381][flwr][INFO] - configure_evaluate: no clients selected, skipping evaluation
-[2024-10-23 12:34:24,381][flwr][INFO] - 
-[2024-10-23 12:34:24,381][flwr][INFO] - [SUMMARY]
+[2024-10-24 12:25:48,758][flwr][INFO] - ***FedDebug Output Round 5 ***
+[2024-10-24 12:25:48,758][flwr][INFO] - True Malicious Clients (Ground Truth) = ['0']
+[2024-10-24 12:25:48,758][flwr][INFO] - Total Random Inputs = 10
+[2024-10-24 12:25:48,758][flwr][INFO] - Predicted Malicious Clients = {'0': 1.0}
+[2024-10-24 12:25:48,758][flwr][INFO] - FedDebug Localization Accuracy = 100.0
+[2024-10-24 12:25:49,577][flwr][INFO] - fit progress: (5, 0.00015518503449857236, {'accuracy': 0.978, 'loss': 0.00015518503449857236, 'round': 5}, 39.02993568999227)
+[2024-10-24 12:25:49,577][flwr][INFO] - configure_evaluate: no clients selected, skipping evaluation
+[2024-10-24 12:25:49,577][flwr][INFO] - 
+[2024-10-24 12:25:49,577][flwr][INFO] - [SUMMARY]
 ...
 
 ```
@@ -122,18 +122,19 @@ python -m feddebug.main device=cpu total_malicious_clients=2 dataset.name=cifar1
 In this scenario, clients 0 and 1 are now malicious. The output will show the FedDebug output as follows:
 
 ```log
-[2024-10-23 13:15:34,281][flwr][INFO] - ***FedDebug Output Round 5 ***
-[2024-10-23 13:15:34,281][flwr][INFO] - True Malicious Clients (Ground Truth) = ['0', '1']
-[2024-10-23 13:15:34,281][flwr][INFO] - Total Random Inputs = 10
-[2024-10-23 13:15:34,281][flwr][INFO] - Predicted Malicious Clients = {'1': 1.0, '0': 1.0}
-[2024-10-23 13:15:34,281][flwr][INFO] - FedDebug Localization Accuracy = 100.0
-[2024-10-23 13:15:35,300][flwr][INFO] - fit progress: (5, 0.003403955662250519, {'accuracy': 0.4162, 'loss': 0.003403955662250519, 'round': 5}, 38.767428478982765)
-[2024-10-23 13:15:35,301][flwr][INFO] - configure_evaluate: no clients selected, skipping evaluation
-[2024-10-23 13:15:35,301][flwr][INFO] - 
-[2024-10-23 13:15:35,301][flwr][INFO] - [SUMMARY]
-
+...
+[2024-10-24 12:28:14,125][flwr][INFO] - ***FedDebug Output Round 5 ***
+[2024-10-24 12:28:14,125][flwr][INFO] - True Malicious Clients (Ground Truth) = ['0', '1']
+[2024-10-24 12:28:14,125][flwr][INFO] - Total Random Inputs = 10
+[2024-10-24 12:28:14,125][flwr][INFO] - Predicted Malicious Clients = {'0': 1.0, '1': 1.0}
+[2024-10-24 12:28:14,125][flwr][INFO] - FedDebug Localization Accuracy = 100.0
+[2024-10-24 12:28:15,148][flwr][INFO] - fit progress: (5, 0.003398957598209381, {'accuracy': 0.4151, 'loss': 0.003398957598209381, 'round': 5}, 35.81892481799878)
+[2024-10-24 12:28:15,148][flwr][INFO] - configure_evaluate: no clients selected, skipping evaluation
+[2024-10-24 12:28:15,148][flwr][INFO] - 
+[2024-10-24 12:28:15,148][flwr][INFO] - [SUMMARY]
+...
 ```
-FedDebug predicts the malicious clients with 100% accuracy. `Predicted Malicious Clients = {'1': 1.0, '0': 1.0}` means that clients 0 and 1 are predicted as the malicious clients with 1.0 probability. It will also generate a graph `iid-lenet-cifar10.png` as shown below:
+FedDebug predicts the malicious clients with 100% accuracy. `Predicted Malicious Clients = {'0': 1.0, '1': 1.0}` means that clients 0 and 1 are predicted as the malicious clients with 1.0 probability. It will also generate a graph `iid-lenet-cifar10.png` as shown below:
 
 ![FedDebug Malicious Client Localization IID-LeNet-CIFAR10](figures/iid-lenet-cifar10.png)
 
@@ -147,15 +148,16 @@ python -m feddebug.main device=cuda model=resnet18 distribution=non_iid
 ```
 Output
 ```log
-[2024-10-23 13:26:13,632][flwr][INFO] - ***FedDebug Output Round 5 ***
-[2024-10-23 13:26:13,632][flwr][INFO] - True Malicious Clients (Ground Truth) = ['0']
-[2024-10-23 13:26:13,632][flwr][INFO] - Total Random Inputs = 10
-[2024-10-23 13:26:13,632][flwr][INFO] - Predicted Malicious Clients = {'0': 1.0}
-[2024-10-23 13:26:13,632][flwr][INFO] - FedDebug Localization Accuracy = 100.0
-[2024-10-23 13:26:14,539][flwr][INFO] - fit progress: (5, 0.0007687706857919693, {'accuracy': 0.9435, 'loss': 0.0007687706857919693, 'round': 5}, 75.04376274201786)
-[2024-10-23 13:26:14,539][flwr][INFO] - configure_evaluate: no clients selected, skipping evaluation
-[2024-10-23 13:26:14,545][flwr][INFO] - 
-[2024-10-23 13:26:14,545][flwr][INFO] - [SUMMARY]
+...
+[2024-10-24 12:13:40,679][flwr][INFO] - ***FedDebug Output Round 5 ***
+[2024-10-24 12:13:40,679][flwr][INFO] - True Malicious Clients (Ground Truth) = ['0']
+[2024-10-24 12:13:40,679][flwr][INFO] - Total Random Inputs = 10
+[2024-10-24 12:13:40,679][flwr][INFO] - Predicted Malicious Clients = {'0': 1.0}
+[2024-10-24 12:13:40,679][flwr][INFO] - FedDebug Localization Accuracy = 100.0
+[2024-10-24 12:13:41,595][flwr][INFO] - fit progress: (5, 0.000987090128660202, {'accuracy': 0.8528, 'loss': 0.000987090128660202, 'round': 5}, 75.3773579710105)
+[2024-10-24 12:13:41,595][flwr][INFO] - configure_evaluate: no clients selected, skipping evaluation
+[2024-10-24 12:13:41,602][flwr][INFO] - 
+[2024-10-24 12:13:41,602][flwr][INFO] - [SUMMARY]
 ```
 Following is the graph `non_iid-resnet18-mnist.png` generated by the code:
 
@@ -166,19 +168,19 @@ Following is the graph `non_iid-resnet18-mnist.png` generated by the code:
 You can also test the impact of the neuron activation threshold on localization accuracy. A higher threshold decreases the localization accuracy. Total Time Taken: 84 seconds. 
 
 ```bash
-python -m feddebug.main device=cuda model=resnet18 feddebug.na_t=0.9
+python -m feddebug.main device=cuda model=resnet18 feddebug.na_t=0.7
 ```
 
 ```log
-[2024-10-23 13:40:36,344][flwr][INFO] - ***FedDebug Output Round 5 ***
-[2024-10-23 13:40:36,344][flwr][INFO] - True Malicious Clients (Ground Truth) = ['0']
-[2024-10-23 13:40:36,344][flwr][INFO] - Total Random Inputs = 10
-[2024-10-23 13:40:36,344][flwr][INFO] - Predicted Malicious Clients = {'3': 1.0}
-[2024-10-23 13:40:36,344][flwr][INFO] - FedDebug Localization Accuracy = 0.0
-[2024-10-23 13:40:37,196][flwr][INFO] - fit progress: (5, 0.00036467308849096297, {'accuracy': 0.9861, 'loss': 0.00036467308849096297, 'round': 5}, 75.78151555598015)
-[2024-10-23 13:40:37,197][flwr][INFO] - configure_evaluate: no clients selected, skipping evaluation
-[2024-10-23 13:40:37,205][flwr][INFO] - 
-[2024-10-23 13:40:37,205][flwr][INFO] - [SUMMARY]
+...
+[2024-10-24 12:21:26,923][flwr][INFO] - ***FedDebug Output Round 2 ***
+[2024-10-24 12:21:26,923][flwr][INFO] - True Malicious Clients (Ground Truth) = ['0']
+[2024-10-24 12:21:26,923][flwr][INFO] - Total Random Inputs = 10
+[2024-10-24 12:21:26,923][flwr][INFO] - Predicted Malicious Clients = {'5': 0.7, '0': 0.3}
+[2024-10-24 12:21:26,923][flwr][INFO] - FedDebug Localization Accuracy = 30.0
+[2024-10-24 12:21:27,773][flwr][INFO] - fit progress: (2, 0.001345307207107544, {'accuracy': 0.9497, 'loss': 0.001345307207107544, 'round': 2}, 31.669926984992344)
+[2024-10-24 12:21:27,773][flwr][INFO] - configure_evaluate: no clients selected, skipping evaluation
+[2024-10-24 12:21:27,773][flwr][INFO] - 
 ```
 
 Following is the graph `iid-resnet18-mnist.png` generated by the code:
