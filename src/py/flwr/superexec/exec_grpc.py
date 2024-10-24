@@ -56,7 +56,7 @@ def run_exec_api_grpc(
         certificates=certificates,
     )
 
-    log(INFO, "Flower ECE: Starting Exec API on %s", address)
+    log(INFO, "Flower Deployment Engine: Starting Exec API on %s", address)
     exec_grpc_server.start()
 
     return exec_grpc_server
