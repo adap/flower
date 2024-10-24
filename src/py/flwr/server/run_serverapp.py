@@ -234,7 +234,6 @@ def run_server_app() -> None:
         driver=driver,
         context=context,
         server_app_dir=app_path,
-        server_app_run_config=server_app_run_config,
         server_app_attr=server_app_attr,
     )
 
