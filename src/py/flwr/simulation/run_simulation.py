@@ -29,22 +29,23 @@ from typing import Any, Optional
 
 from flwr.cli.config_utils import load_and_validate
 from flwr.client import ClientApp
-from flwr.common import EventType, event, log
+from flwr.common import EventType, event, log, now
 from flwr.common.config import get_fused_config_from_dir, parse_config_args
-from flwr.common.constant import RUN_ID_NUM_BYTES
+from flwr.common.constant import RUN_ID_NUM_BYTES, Status
 from flwr.common.logger import (
     set_logger_propagation,
     update_console_handler,
     warn_deprecated_feature,
     warn_deprecated_feature_with_example,
 )
-from flwr.common.typing import Run, UserConfig
+from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.server.driver import Driver, InMemoryDriver
 from flwr.server.run_serverapp import run as run_server_app
 from flwr.server.server_app import ServerApp
 from flwr.server.superlink.fleet import vce
 from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
 from flwr.server.superlink.linkstate import LinkStateFactory
+from flwr.server.superlink.linkstate.in_memory_linkstate import RunRecord
 from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 from flwr.simulation.ray_transport.utils import (
     enable_tf_gpu_growth as enable_gpu_growth,
@@ -399,7 +400,14 @@ def _main_loop(
     try:
         # Register run
         log(DEBUG, "Pre-registering run with id %s", run.run_id)
-        state_factory.state().run_ids[run.run_id] = run  # type: ignore
+        init_status = RunStatus(Status.RUNNING, "", "")
+        state_factory.state().run_ids[run.run_id] = RunRecord(  # type: ignore
+            run=run,
+            status=init_status,
+            starting_at=now().isoformat(),
+            running_at=now().isoformat(),
+            finished_at="",
+        )
 
         if server_app_run_config is None:
             server_app_run_config = {}
