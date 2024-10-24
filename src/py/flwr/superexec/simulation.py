@@ -77,7 +77,6 @@ class SimulationEngine(Executor):
         self, linkstate_factory: LinkStateFactory, ffs_factory: FfsFactory
     ) -> None:
         """Initialize the executor with the necessary factories."""
-        pass
 
     @override
     def set_config(
