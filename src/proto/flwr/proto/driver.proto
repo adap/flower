@@ -43,12 +43,12 @@ service Driver {
   rpc GetFab(GetFabRequest) returns (GetFabResponse) {}
 
   // Pull ServerApp inputs
-  rpc PullServerAppIns(PullServerAppInsRequest)
-      returns (PullServerAppInsResponse) {}
+  rpc PullServerAppProcessInputs(PullServerAppProcessInputsRequest)
+      returns (PullServerAppProcessInputsResponse) {}
 
   // Push ServerApp outputs
-  rpc PushServerAppOuts(PushServerAppOutsRequest)
-      returns (PushServerAppOutsResponse) {}
+  rpc PushServerAppProcessOutputs(PushServerAppProcessOutputsRequest)
+      returns (PushServerAppProcessOutputsResponse) {}
 }
 
 // GetNodes messages
@@ -66,17 +66,17 @@ message PullTaskResRequest {
 }
 message PullTaskResResponse { repeated TaskRes task_res_list = 1; }
 
-// PullServerAppIns messages
-message PullServerAppInsRequest { uint64 run_id = 1; }
-message PullServerAppInsResponse {
+// PullServerAppProcessInputs messages
+message PullServerAppProcessInputsRequest { uint64 run_id = 1; }
+message PullServerAppProcessInputsResponse {
   Run run = 1;
   Fab fab = 2;
   Context context = 3;
 }
 
-// PushServerAppOuts messages
-message PushServerAppOutsRequest {
+// PushServerAppProcessOutputs messages
+message PushServerAppProcessOutputsRequest {
   uint64 run_id = 1;
   Context context = 2;
 }
-message PushServerAppOutsResponse {}
+message PushServerAppProcessOutputsResponse {}

@@ -95,8 +95,8 @@ class PullTaskResResponse(google.protobuf.message.Message):
     def ClearField(self, field_name: typing_extensions.Literal["task_res_list",b"task_res_list"]) -> None: ...
 global___PullTaskResResponse = PullTaskResResponse
 
-class PullServerAppInsRequest(google.protobuf.message.Message):
-    """PullServerAppIns messages"""
+class PullServerAppProcessInputsRequest(google.protobuf.message.Message):
+    """PullServerAppProcessInputs messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     RUN_ID_FIELD_NUMBER: builtins.int
     run_id: builtins.int
@@ -105,9 +105,9 @@ class PullServerAppInsRequest(google.protobuf.message.Message):
         run_id: builtins.int = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id"]) -> None: ...
-global___PullServerAppInsRequest = PullServerAppInsRequest
+global___PullServerAppProcessInputsRequest = PullServerAppProcessInputsRequest
 
-class PullServerAppInsResponse(google.protobuf.message.Message):
+class PullServerAppProcessInputsResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     RUN_FIELD_NUMBER: builtins.int
     FAB_FIELD_NUMBER: builtins.int
@@ -126,10 +126,10 @@ class PullServerAppInsResponse(google.protobuf.message.Message):
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["context",b"context","fab",b"fab","run",b"run"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["context",b"context","fab",b"fab","run",b"run"]) -> None: ...
-global___PullServerAppInsResponse = PullServerAppInsResponse
+global___PullServerAppProcessInputsResponse = PullServerAppProcessInputsResponse
 
-class PushServerAppOutsRequest(google.protobuf.message.Message):
-    """PushServerAppOuts messages"""
+class PushServerAppProcessOutputsRequest(google.protobuf.message.Message):
+    """PushServerAppProcessOutputs messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     RUN_ID_FIELD_NUMBER: builtins.int
     CONTEXT_FIELD_NUMBER: builtins.int
@@ -143,10 +143,10 @@ class PushServerAppOutsRequest(google.protobuf.message.Message):
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["context",b"context"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["context",b"context","run_id",b"run_id"]) -> None: ...
-global___PushServerAppOutsRequest = PushServerAppOutsRequest
+global___PushServerAppProcessOutputsRequest = PushServerAppProcessOutputsRequest
 
-class PushServerAppOutsResponse(google.protobuf.message.Message):
+class PushServerAppProcessOutputsResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     def __init__(self,
         ) -> None: ...
-global___PushServerAppOutsResponse = PushServerAppOutsResponse
+global___PushServerAppProcessOutputsResponse = PushServerAppProcessOutputsResponse
