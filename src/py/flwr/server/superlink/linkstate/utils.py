@@ -153,31 +153,6 @@ def context_from_bytes(context_bytes: bytes) -> Context:
     return serde.context_from_proto(ProtoContext.FromString(context_bytes))
 
 
-def make_node_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
-    """Generate a TaskRes with a node unavailable error from a TaskIns."""
-    current_time = now().timestamp()
-    ttl = ref_taskins.task.ttl - (current_time - ref_taskins.task.created_at)
-    if ttl < 0:
-        log(ERROR, "Creating TaskRes for TaskIns that exceeds its TTL.")
-        ttl = 0
-    return TaskRes(
-        task_id=str(uuid4()),
-        group_id=ref_taskins.group_id,
-        run_id=ref_taskins.run_id,
-        task=Task(
-            producer=Node(node_id=ref_taskins.task.consumer.node_id, anonymous=False),
-            consumer=Node(node_id=ref_taskins.task.producer.node_id, anonymous=False),
-            created_at=current_time,
-            ttl=ttl,
-            ancestry=[ref_taskins.task_id],
-            task_type=ref_taskins.task.task_type,
-            error=Error(
-                code=ErrorCode.NODE_UNAVAILABLE, reason=NODE_UNAVAILABLE_ERROR_REASON
-            ),
-        ),
-    )
-
-
 def is_valid_transition(current_status: RunStatus, new_status: RunStatus) -> bool:
     """Check if a transition between two run statuses is valid.
 
