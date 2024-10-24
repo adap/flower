@@ -109,20 +109,20 @@ global___PullServerAppProcessInputsRequest = PullServerAppProcessInputsRequest
 
 class PullServerAppProcessInputsResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    CONTEXT_FIELD_NUMBER: builtins.int
     RUN_FIELD_NUMBER: builtins.int
     FAB_FIELD_NUMBER: builtins.int
-    CONTEXT_FIELD_NUMBER: builtins.int
+    @property
+    def context(self) -> flwr.proto.message_pb2.Context: ...
     @property
     def run(self) -> flwr.proto.run_pb2.Run: ...
     @property
     def fab(self) -> flwr.proto.fab_pb2.Fab: ...
-    @property
-    def context(self) -> flwr.proto.message_pb2.Context: ...
     def __init__(self,
         *,
+        context: typing.Optional[flwr.proto.message_pb2.Context] = ...,
         run: typing.Optional[flwr.proto.run_pb2.Run] = ...,
         fab: typing.Optional[flwr.proto.fab_pb2.Fab] = ...,
-        context: typing.Optional[flwr.proto.message_pb2.Context] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["context",b"context","fab",b"fab","run",b"run"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["context",b"context","fab",b"fab","run",b"run"]) -> None: ...
