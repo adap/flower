@@ -70,5 +70,3 @@ do
     printf ",%s" "$(sed 's/.$//' < "${KEY_DIR}/client_credentials_$i.pub")" >> $KEY_DIR/client_public_keys.csv
 done
 printf "\n" >> $KEY_DIR/client_public_keys.csv
-
-python dataset.py $1
