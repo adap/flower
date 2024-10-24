@@ -40,7 +40,7 @@ from flwr.common.logger import (
 )
 from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.server.driver import Driver, InMemoryDriver
-from flwr.server.run_serverapp import run as run_server_app
+from flwr.server.run_serverapp import run
 from flwr.server.server_app import ServerApp
 from flwr.server.superlink.fleet import vce
 from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
@@ -342,7 +342,7 @@ def run_serverapp_th(
             )
 
             # Run ServerApp
-            run_server_app(
+            run(
                 driver=_driver,
                 context=context,
                 server_app_dir=_server_app_dir,
