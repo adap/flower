@@ -54,7 +54,7 @@ def run(
     server_app_attr: Optional[str] = None,
     loaded_server_app: Optional[ServerApp] = None,
     context: Optional[Context] = None,
-) -> None:
+) -> Context:
     """Run ServerApp with a given Driver."""
     if not (server_app_attr is None) ^ (loaded_server_app is None):
         raise ValueError(
@@ -93,6 +93,7 @@ def run(
     server_app(driver=driver, context=context)
 
     log(DEBUG, "ServerApp finished running.")
+    return context
 
 
 # pylint: disable-next=too-many-branches,too-many-statements,too-many-locals
