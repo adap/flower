@@ -460,14 +460,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
     # pylint: disable-next=R0912,R0915,R0914
     def get_task_res(self, task_ids: set[UUID]) -> list[TaskRes]:
-        """Get TaskRes for task_ids.
-
-        Usually, the Driver API calls this method to get results for instructions it has
-        previously scheduled.
-
-        Retrieves all TaskRes for the given `task_ids` and returns and empty list if
-        none could be found.
-        """
+        """Get TaskRes for the given TaskIns IDs."""
         ret: dict[UUID, TaskRes] = {}
 
         # Verify TaskIns IDs

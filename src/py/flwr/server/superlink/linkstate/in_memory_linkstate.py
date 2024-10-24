@@ -213,7 +213,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         return task_id
 
     def get_task_res(self, task_ids: set[UUID]) -> list[TaskRes]:
-        """Get all TaskRes that have not been delivered yet."""
+        """Get TaskRes for the given TaskIns IDs."""
         ret: dict[UUID, TaskRes] = {}
 
         with self.lock:
