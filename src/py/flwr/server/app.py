@@ -64,7 +64,7 @@ from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
 )
 from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
 from flwr.superexec.app import load_executor
-from flwr.superexec.exec_grpc import run_superexec_api_grpc
+from flwr.superexec.exec_grpc import run_exec_api_grpc
 
 from .client_manager import ClientManager
 from .history import History
@@ -329,8 +329,10 @@ def run_superlink() -> None:
         raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
 
     # Start Exec API
-    exec_server: grpc.Server = run_superexec_api_grpc(
+    exec_server: grpc.Server = run_exec_api_grpc(
         address=exec_address,
+        state_factory=state_factory,
+        ffs_factory=ffs_factory,
         executor=load_executor(args),
         certificates=certificates,
         config=parse_config_args(
