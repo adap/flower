@@ -19,6 +19,7 @@ import abc
 from typing import Optional
 from uuid import UUID
 
+from flwr.common import Context
 from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
@@ -270,3 +271,14 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         is_acknowledged : bool
             True if the ping is successfully acknowledged; otherwise, False.
         """
+
+    @abc.abstractmethod
+    def get_serverapp_context(self, run_id: int) -> Context:
+        """Get the context for the specified `run_id`.
+
+        If the context does not exist, an empty context is returned.
+        """
+
+    @abc.abstractmethod
+    def set_serverapp_context(self, run_id: int, context: Context) -> None:
+        """Set the context for the specified `run_id`."""
