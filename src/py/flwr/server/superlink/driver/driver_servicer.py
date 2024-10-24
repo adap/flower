@@ -34,8 +34,12 @@ from flwr.proto import driver_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     GetNodesResponse,
+    PullServerAppInputsRequest,
+    PullServerAppInputsResponse,
     PullTaskResRequest,
     PullTaskResResponse,
+    PushServerAppOutputsRequest,
+    PushServerAppOutputsResponse,
     PushTaskInsRequest,
     PushTaskInsResponse,
 )
@@ -199,6 +203,18 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
             return GetFabResponse(fab=fab_to_proto(fab))
 
         raise ValueError(f"Found no FAB with hash: {request.hash_str}")
+
+    def PullServerAppInputs(
+        self, request: PullServerAppInputsRequest, context: grpc.ServicerContext
+    ) -> PullServerAppInputsResponse:
+        """Pull ServerApp process inputs."""
+        raise NotImplementedError()
+
+    def PushServerAppOutputs(
+        self, request: PushServerAppOutputsRequest, context: grpc.ServicerContext
+    ) -> PushServerAppOutputsResponse:
+        """Push ServerApp process outputs."""
+        raise NotImplementedError()
 
 
 def _raise_if(validation_error: bool, detail: str) -> None:
