@@ -75,13 +75,15 @@ class DeploymentEngine(Executor):
     @property
     def linkstate(self) -> LinkState:
         """Return the LinkState."""
-        assert self.linkstate_factory is not None
+        if self.linkstate_factory is None:
+            raise RuntimeError("Executor is not initialized.")
         return self.linkstate_factory.state()
 
     @property
     def ffs(self) -> Ffs:
         """Return the Flower File Storage (FFS)."""
-        assert self.ffs_factory is not None
+        if self.ffs_factory is None:
+            raise RuntimeError("Executor is not initialized.")
         return self.ffs_factory.ffs()
 
     @override
