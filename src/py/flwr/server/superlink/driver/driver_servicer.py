@@ -17,7 +17,7 @@
 
 import threading
 import time
-from logging import DEBUG
+from logging import DEBUG, INFO
 from typing import Optional
 from uuid import UUID
 
@@ -216,21 +216,26 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
             if run_id is None:
                 return PullServerAppInputsResponse()
 
-            if not state.update_run_status(run_id, RunStatus(Status.STARTING, "", "")):
-                raise RuntimeError(f"Failed to start run {run_id}")
+            serverapp_ctxt = state.get_serverapp_context(run_id)
+            run = state.get_run(run_id)
+            fab = None
+            if run and run.fab_hash:
+                if result := ffs.get(run.fab_hash):
+                    fab = Fab(run.fab_hash, result[0])
 
-        serverapp_ctxt = state.get_serverapp_context(run_id)
-        run = state.get_run(run_id)
-        fab = None
-        if run and run.fab_hash:
-            if result := ffs.get(run.fab_hash):
-                fab = Fab(run.fab_hash, result[0])
+            if serverapp_ctxt and run and fab:
+                if state.update_run_status(run_id, RunStatus(Status.STARTING, "", "")):
+                    log(INFO, f"Starting run {run_id}")
 
-        return PullServerAppInputsResponse(
-            context=context_to_proto(serverapp_ctxt),
-            run=run_to_proto(run) if run else None,
-            fab=fab_to_proto(fab) if fab else None,
-        )
+                    return PullServerAppInputsResponse(
+                        context=(
+                            context_to_proto(serverapp_ctxt) if serverapp_ctxt else None
+                        ),
+                        run=run_to_proto(run),
+                        fab=fab_to_proto(fab),
+                    )
+
+        raise RuntimeError(f"Failed to start run {run_id}")
 
     def PushServerAppOutputs(
         self, request: PushServerAppOutputsRequest, context: grpc.ServicerContext
