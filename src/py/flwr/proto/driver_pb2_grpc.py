@@ -46,6 +46,16 @@ class DriverStub(object):
                 request_serializer=flwr_dot_proto_dot_fab__pb2.GetFabRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_fab__pb2.GetFabResponse.FromString,
                 )
+        self.PullServerAppProcessInputs = channel.unary_unary(
+                '/flwr.proto.Driver/PullServerAppProcessInputs',
+                request_serializer=flwr_dot_proto_dot_driver__pb2.PullServerAppProcessInputsRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_driver__pb2.PullServerAppProcessInputsResponse.FromString,
+                )
+        self.PushServerAppProcessOutputs = channel.unary_unary(
+                '/flwr.proto.Driver/PushServerAppProcessOutputs',
+                request_serializer=flwr_dot_proto_dot_driver__pb2.PushServerAppProcessOutputsRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_driver__pb2.PushServerAppProcessOutputsResponse.FromString,
+                )
 
 
 class DriverServicer(object):
@@ -93,6 +103,20 @@ class DriverServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def PullServerAppProcessInputs(self, request, context):
+        """Pull ServerApp inputs
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def PushServerAppProcessOutputs(self, request, context):
+        """Push ServerApp outputs
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_DriverServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -125,6 +149,16 @@ def add_DriverServicer_to_server(servicer, server):
                     servicer.GetFab,
                     request_deserializer=flwr_dot_proto_dot_fab__pb2.GetFabRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_fab__pb2.GetFabResponse.SerializeToString,
+            ),
+            'PullServerAppProcessInputs': grpc.unary_unary_rpc_method_handler(
+                    servicer.PullServerAppProcessInputs,
+                    request_deserializer=flwr_dot_proto_dot_driver__pb2.PullServerAppProcessInputsRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_driver__pb2.PullServerAppProcessInputsResponse.SerializeToString,
+            ),
+            'PushServerAppProcessOutputs': grpc.unary_unary_rpc_method_handler(
+                    servicer.PushServerAppProcessOutputs,
+                    request_deserializer=flwr_dot_proto_dot_driver__pb2.PushServerAppProcessOutputsRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_driver__pb2.PushServerAppProcessOutputsResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -235,5 +269,39 @@ class Driver(object):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.Driver/GetFab',
             flwr_dot_proto_dot_fab__pb2.GetFabRequest.SerializeToString,
             flwr_dot_proto_dot_fab__pb2.GetFabResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def PullServerAppProcessInputs(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Driver/PullServerAppProcessInputs',
+            flwr_dot_proto_dot_driver__pb2.PullServerAppProcessInputsRequest.SerializeToString,
+            flwr_dot_proto_dot_driver__pb2.PullServerAppProcessInputsResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def PushServerAppProcessOutputs(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Driver/PushServerAppProcessOutputs',
+            flwr_dot_proto_dot_driver__pb2.PushServerAppProcessOutputsRequest.SerializeToString,
+            flwr_dot_proto_dot_driver__pb2.PushServerAppProcessOutputsResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
