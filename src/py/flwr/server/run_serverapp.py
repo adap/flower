@@ -34,7 +34,6 @@ from flwr.common.config import (
 from flwr.common.constant import DRIVER_API_DEFAULT_ADDRESS
 from flwr.common.logger import log, update_console_handler, warn_deprecated_feature
 from flwr.common.object_ref import load_app
-from flwr.common.typing import UserConfig
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
@@ -49,11 +48,10 @@ from .server_app import LoadServerAppError, ServerApp
 # pylint: disable-next=too-many-arguments,too-many-positional-arguments
 def run(
     driver: Driver,
+    context: Context,
     server_app_dir: str,
-    server_app_run_config: UserConfig,
     server_app_attr: Optional[str] = None,
     loaded_server_app: Optional[ServerApp] = None,
-    context: Optional[Context] = None,
 ) -> Context:
     """Run ServerApp with a given Driver."""
     if not (server_app_attr is None) ^ (loaded_server_app is None):
@@ -79,15 +77,6 @@ def run(
         return server_app
 
     server_app = _load()
-
-    # Initialize Context
-    if not context:
-        context = Context(
-            node_id=0,
-            node_config={},
-            state=RecordSet(),
-            run_config=server_app_run_config,
-        )
 
     # Call ServerApp
     server_app(driver=driver, context=context)
@@ -232,9 +221,18 @@ def run_server_app() -> None:
         root_certificates,
     )
 
+    # Initialize Context
+    context = Context(
+        node_id=0,
+        node_config={},
+        state=RecordSet(),
+        run_config=server_app_run_config,
+    )
+
     # Run the ServerApp with the Driver
     run(
         driver=driver,
+        context=context,
         server_app_dir=app_path,
         server_app_run_config=server_app_run_config,
         server_app_attr=server_app_attr,

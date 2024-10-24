@@ -29,7 +29,7 @@ from typing import Any, Optional
 
 from flwr.cli.config_utils import load_and_validate
 from flwr.client import ClientApp
-from flwr.common import EventType, event, log, now
+from flwr.common import Context, EventType, RecordSet, event, log, now
 from flwr.common.config import get_fused_config_from_dir, parse_config_args
 from flwr.common.constant import RUN_ID_NUM_BYTES, Status
 from flwr.common.logger import (
@@ -333,11 +333,19 @@ def run_serverapp_th(
                 log(INFO, "Enabling GPU growth for Tensorflow on the server thread.")
                 enable_gpu_growth()
 
+            # Initialize Context
+            context = Context(
+                node_id=0,
+                node_config={},
+                state=RecordSet(),
+                run_config=_server_app_run_config,
+            )
+
             # Run ServerApp
             run_server_app(
                 driver=_driver,
+                context=context,
                 server_app_dir=_server_app_dir,
-                server_app_run_config=_server_app_run_config,
                 server_app_attr=_server_app_attr,
                 loaded_server_app=_server_app,
             )
