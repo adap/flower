@@ -230,21 +230,6 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             )
             ret.update(tmp_ret_dict)
 
-            # Check node availability
-            dst_node_ids = {
-                self.task_ins_store[task_id].task.consumer.node_id
-                for task_id in task_ids
-            }
-            tmp_ret_dict = check_node_availability_for_taskins(
-                inquired_taskins_ids=task_ids,
-                found_taskins_dict=self.task_ins_store,
-                node_id_to_online_until={
-                    node_id: self.node_ids[node_id][0] for node_id in dst_node_ids
-                },
-                current_time=current,
-            )
-            ret.update(tmp_ret_dict)
-
             # Mark existing TaskRes to be returned as delivered
             delivered_at = now().isoformat()
             for task_res in task_res_found:
