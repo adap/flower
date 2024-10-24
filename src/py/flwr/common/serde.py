@@ -564,7 +564,6 @@ def error_from_proto(error_proto: ProtoError) -> Error:
 
 def recordset_to_proto(recordset: RecordSet) -> ProtoRecordSet:
     """Serialize RecordSet to ProtoBuf."""
-    print(f"recordset_to_proto: {type(recordset)}")
     return ProtoRecordSet(
         parameters={
             k: parameters_record_to_proto(v)
@@ -839,8 +838,6 @@ def message_from_proto(message_proto: ProtoMessage) -> Message:
 
 def context_to_proto(context: Context) -> ProtoContext:
     """Serialize `Context` to ProtoBuf."""
-    print(f"context_to_proto: {type(context)}")
-    print(context)
     proto = ProtoContext(
         node_id=context.node_id,
         node_config=user_config_to_proto(context.node_config),
