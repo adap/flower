@@ -37,6 +37,8 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, Message, ev
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     CLIENTAPPIO_API_DEFAULT_ADDRESS,
+    ISOLATION_MODE_PROCESS,
+    ISOLATION_MODE_SUBPROCESS,
     MISSING_EXTRA_REST,
     RUN_ID_NUM_BYTES,
     TRANSPORT_TYPE_GRPC_ADAPTER,
@@ -61,9 +63,6 @@ from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
 from .numpy_client import NumPyClient
 from .run_info_store import DeprecatedRunInfoStore
-
-ISOLATION_MODE_SUBPROCESS = "subprocess"
-ISOLATION_MODE_PROCESS = "process"
 
 
 def _check_actionable_client(
