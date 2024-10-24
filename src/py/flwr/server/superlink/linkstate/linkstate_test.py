@@ -1015,12 +1015,12 @@ class StateTest(unittest.TestCase):
         run_id = state.create_run(None, None, "9f86d08", {})
 
         # Execute
-        empty_context = state.get_serverapp_context(run_id)
+        init = state.get_serverapp_context(run_id)
         state.set_serverapp_context(run_id, context)
         retrieved_context = state.get_serverapp_context(run_id)
 
         # Assert
-        assert empty_context == Context(0, {}, RecordSet(), {})
+        assert init is None
         assert retrieved_context == context
 
 
