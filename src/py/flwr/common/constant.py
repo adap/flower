@@ -83,6 +83,10 @@ GRPC_ADAPTER_METADATA_MESSAGE_QUALNAME_KEY = "grpc-message-qualname"
 # Message TTL
 MESSAGE_TTL_TOLERANCE = 1e-1
 
+# Isolation modes
+ISOLATION_MODE_SUBPROCESS = "subprocess"
+ISOLATION_MODE_PROCESS = "process"
+
 
 class MessageType:
     """Message type."""
@@ -126,5 +130,30 @@ class ErrorCode:
     NODE_UNAVAILABLE = 3
 
     def __new__(cls) -> ErrorCode:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+class Status:
+    """Run status."""
+
+    PENDING = "pending"
+    STARTING = "starting"
+    RUNNING = "running"
+    FINISHED = "finished"
+
+    def __new__(cls) -> Status:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+class SubStatus:
+    """Run sub-status."""
+
+    COMPLETED = "completed"
+    FAILED = "failed"
+    STOPPED = "stopped"
+
+    def __new__(cls) -> SubStatus:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
