@@ -227,16 +227,12 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             )
 
             # Find all TaskRes
-            task_res_found = [
-                self.task_ins_id_to_task_res[task_id]
-                for task_id in task_ids
-                if task_id in self.task_ins_id_to_task_res
-            ]
-            task_res_found = [
-                task_res
-                for task_res in task_res_found
-                if task_res.task.delivered_at == ""
-            ]
+            task_res_found: list[TaskRes] = []
+            for task_id in task_ids:
+                # If TaskRes exists and is not delivered, add it to the list
+                if task_res := self.task_ins_id_to_task_res.get(task_id):
+                    if task_res.task.delivered_at == "":
+                        task_res_found.append(task_res)
             tmp_ret_dict = verify_found_taskres(
                 inquired_taskins_ids=task_ids,
                 found_taskins_dict=self.task_ins_store,
