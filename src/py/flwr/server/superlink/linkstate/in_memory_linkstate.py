@@ -22,7 +22,7 @@ from logging import ERROR, WARNING
 from typing import Optional
 from uuid import UUID, uuid4
 
-from flwr.common import log, now
+from flwr.common import Context, log, now
 from flwr.common.constant import (
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
@@ -65,6 +65,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
         # Map run_id to RunRecord
         self.run_ids: dict[int, RunRecord] = {}
+        self.contexts: dict[int, Context] = {}
         self.task_ins_store: dict[UUID, TaskIns] = {}
         self.task_res_store: dict[UUID, TaskRes] = {}
 
@@ -500,3 +501,13 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
                 return True
         return False
+
+    def get_serverapp_context(self, run_id: int) -> Optional[Context]:
+        """Get the context for the specified `run_id`."""
+        return self.contexts.get(run_id)
+
+    def set_serverapp_context(self, run_id: int, context: Context) -> None:
+        """Set the context for the specified `run_id`."""
+        if run_id not in self.run_ids:
+            raise ValueError(f"Run {run_id} not found")
+        self.contexts[run_id] = context

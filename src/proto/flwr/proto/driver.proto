@@ -18,6 +18,7 @@ syntax = "proto3";
 package flwr.proto;
 
 import "flwr/proto/node.proto";
+import "flwr/proto/message.proto";
 import "flwr/proto/task.proto";
 import "flwr/proto/run.proto";
 import "flwr/proto/fab.proto";
@@ -40,6 +41,14 @@ service Driver {
 
   // Get FAB
   rpc GetFab(GetFabRequest) returns (GetFabResponse) {}
+
+  // Pull ServerApp inputs
+  rpc PullServerAppInputs(PullServerAppInputsRequest)
+      returns (PullServerAppInputsResponse) {}
+
+  // Push ServerApp outputs
+  rpc PushServerAppOutputs(PushServerAppOutputsRequest)
+      returns (PushServerAppOutputsResponse) {}
 }
 
 // GetNodes messages
@@ -56,3 +65,18 @@ message PullTaskResRequest {
   repeated string task_ids = 2;
 }
 message PullTaskResResponse { repeated TaskRes task_res_list = 1; }
+
+// PullServerAppInputs messages
+message PullServerAppInputsRequest { uint64 run_id = 1; }
+message PullServerAppInputsResponse {
+  Context context = 1;
+  Run run = 2;
+  Fab fab = 3;
+}
+
+// PushServerAppOutputs messages
+message PushServerAppOutputsRequest {
+  uint64 run_id = 1;
+  Context context = 2;
+}
+message PushServerAppOutputsResponse {}
