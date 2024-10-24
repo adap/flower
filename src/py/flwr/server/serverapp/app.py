@@ -15,9 +15,19 @@
 """Flower ServerApp process."""
 
 import argparse
-from logging import DEBUG, INFO
+from logging import DEBUG, ERROR, INFO
+from pathlib import Path
+from time import sleep
 from typing import Optional
 
+from flwr.cli.config_utils import get_fab_metadata
+from flwr.cli.install import install_from_fab
+from flwr.common.config import (
+    get_flwr_dir,
+    get_fused_config_from_dir,
+    get_project_config,
+    get_project_dir,
+)
 from flwr.common.logger import log
 from flwr.server.driver.grpc_driver import GrpcDriver
 
@@ -41,6 +51,17 @@ def flwr_serverapp() -> None:
         help="Id of the Run this process should start. If not supplied, this "
         "function will request a pending run to the LinkState.",
     )
+    parser.add_argument(
+        "--flwr-dir",
+        default=None,
+        help="""The path containing installed Flower Apps.
+    By default, this value is equal to:
+
+        - `$FLWR_HOME/` if `$FLWR_HOME` is defined
+        - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
+        - `$HOME/.flwr/` in all other cases
+    """,
+    )
     args = parser.parse_args()
 
     log(
@@ -50,12 +71,13 @@ def flwr_serverapp() -> None:
         args.superlink,
         args.run_id,
     )
-    run_serverapp(superlink=args.superlink, run_id=args.run_id)
+    run_serverapp(superlink=args.superlink, run_id=args.run_id, flwr_dir=args.flwr_dir)
 
 
 def run_serverapp(  # pylint: disable=R0914
     superlink: str,
     run_id: Optional[int] = None,
+    flwr_dir: Optional[str] = None,
 ) -> None:
     """Run Flower ServerApp process.
 
@@ -67,12 +89,70 @@ def run_serverapp(  # pylint: disable=R0914
         Unique identifier of a Run registered at the LinkState. If not supplied,
         this function will request a pending run to the LinkState.
     """
-    _ = GrpcDriver(
+    driver = GrpcDriver(
         run_id=run_id if run_id else 0,
         driver_service_address=superlink,
         root_certificates=None,
     )
 
-    # Then, GetServerInputs
+    # Resolve directory where FABs are installed
+    flwr_dir = get_flwr_dir(flwr_dir)
 
-    # Then, run ServerApp
+    only_once = run_id is not None
+
+    while True:
+
+        try:
+
+            # Pull ServerAppInputs from LinkState
+            serverapp_inputs = driver.pull_serverapp_inputs(run_id=run_id)
+
+            if serverapp_inputs is None:
+                sleep(3)
+                continue
+
+            context, run, fab = serverapp_inputs
+
+            log(DEBUG, "ServerApp process starts FAB installation.")
+            install_from_fab(fab.content, flwr_dir=flwr_dir, skip_prompt=True)
+
+            fab_id, fab_version = get_fab_metadata(fab.content)
+
+            app_path = str(get_project_dir(fab_id, fab_version, fab.fab_hash, flwr_dir))
+            config = get_project_config(app_path)
+
+            # Obtain server app reference and the run config
+            server_app_attr = config["tool"]["flwr"]["app"]["components"]["serverapp"]
+            server_app_run_config = get_fused_config_from_dir(
+                Path(app_path), driver.run.override_config
+            )
+
+            log(
+                DEBUG,
+                "Flower will load ServerApp `%s` in %s",
+                server_app_attr,
+                app_path,
+            )
+
+            # Load and run the ServerApp with the Driver
+            updated_context = run(
+                driver=driver,
+                server_app_dir=app_path,
+                server_app_run_config=server_app_run_config,
+                server_app_attr=server_app_attr,
+                context=context,
+            )
+
+            # Send resulting context
+            driver.push_serverapp_outputs(run_id=run_id, context=updated_context)
+
+        except Exception as ex:  # pylint: disable=broad-exception-caught
+            exc_entity = "ServerApp"
+            log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
+
+        # Stop the loop if `flwr-serverapp` is expected to process a single run
+        if only_once:
+            break
+
+        # Reset the run_id
+        run_id = None
