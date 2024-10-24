@@ -204,7 +204,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         self, request: PullServerAppInputsRequest, context: grpc.ServicerContext
     ) -> PullServerAppInputsResponse:
         """Pull ServerApp process inputs."""
-        log(DEBUG, "DriverServicer.PullServerAppProcessInputs")
+        log(DEBUG, "DriverServicer.PullServerAppInputs")
         state = self.state_factory.state()
         ffs = self.ffs_factory.ffs()
 
@@ -214,7 +214,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
             else:
                 run_id = state.get_pending_run_id()
             if run_id is None:
-                return PullServerAppProcessInputsResponse()
+                return PullServerAppInputsResponse()
 
             if not state.update_run_status(run_id, RunStatus(Status.STARTING, "", "")):
                 raise RuntimeError(f"Failed to start run {run_id}")
@@ -226,7 +226,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
             if result := ffs.get(run.fab_hash):
                 fab = Fab(run.fab_hash, result[0])
 
-        return PullServerAppProcessInputsResponse(
+        return PullServerAppInputsResponse(
             context=context_to_proto(serverapp_ctxt),
             run=run_to_proto(run) if run else None,
             fab=fab_to_proto(fab) if fab else None,
@@ -236,10 +236,10 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         self, request: PushServerAppOutputsRequest, context: grpc.ServicerContext
     ) -> PushServerAppOutputsResponse:
         """Push ServerApp process outputs."""
-        log(DEBUG, "DriverServicer.PushServerAppProcessOutputs")
+        log(DEBUG, "DriverServicer.PushServerAppOutputs")
         state = self.state_factory.state()
         state.set_serverapp_context(request.run_id, context_from_proto(request.context))
-        return PushServerAppProcessOutputsResponse()
+        return PushServerAppOutputsResponse()
 
 
 def _raise_if(validation_error: bool, detail: str) -> None:
