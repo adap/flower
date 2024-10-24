@@ -1,3 +1,7 @@
+:og:description: Learn how to aggregate custom evaluation results from federated clients in Flower using a strategy that customizes metrics like accuracy through weighted averaging.
+.. meta::
+    :description: Learn how to aggregate custom evaluation results from federated clients in Flower using a strategy that customizes metrics like accuracy through weighted averaging.
+
 Aggregate evaluation results
 ============================
 
