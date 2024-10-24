@@ -22,7 +22,7 @@ from logging import ERROR, WARNING
 from typing import Optional
 from uuid import UUID, uuid4
 
-from flwr.common import Context, RecordSet, log, now
+from flwr.common import Context, log, now
 from flwr.common.constant import (
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
@@ -502,9 +502,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 return True
         return False
 
-    def get_serverapp_context(self, run_id: int) -> Context:
+    def get_serverapp_context(self, run_id: int) -> Optional[Context]:
         """Get the context for the specified `run_id`."""
-        return self.contexts.get(run_id, Context(0, {}, RecordSet(), {}))
+        return self.contexts.get(run_id)
 
     def set_serverapp_context(self, run_id: int, context: Context) -> None:
         """Set the context for the specified `run_id`."""

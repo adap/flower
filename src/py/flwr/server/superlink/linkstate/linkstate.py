@@ -273,12 +273,29 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get_serverapp_context(self, run_id: int) -> Context:
+    def get_serverapp_context(self, run_id: int) -> Optional[Context]:
         """Get the context for the specified `run_id`.
 
-        If the context does not exist, an empty context is returned.
+        Parameters
+        ----------
+        run_id : int
+            The identifier of the run for which to retrieve the context.
+
+        Returns
+        -------
+        Optional[Context]
+            The context associated with the specified `run_id`, or `None` if no context
+            exists for the given `run_id`.
         """
 
     @abc.abstractmethod
     def set_serverapp_context(self, run_id: int, context: Context) -> None:
-        """Set the context for the specified `run_id`."""
+        """Set the context for the specified `run_id`.
+
+        Parameters
+        ----------
+        run_id : int
+            The identifier of the run for which to set the context.
+        context : Context
+            The context to be associated with the specified `run_id`.
+        """
