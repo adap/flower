@@ -39,7 +39,6 @@ from flwr.server.utils.validator import validate_task_ins_or_res
 
 from .linkstate import LinkState
 from .utils import (
-    check_node_availability_for_taskins,
     convert_sint64_to_uint64,
     convert_sint64_values_in_dict_to_uint64,
     convert_uint64_to_sint64,

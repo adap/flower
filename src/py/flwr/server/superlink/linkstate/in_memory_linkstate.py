@@ -33,7 +33,6 @@ from flwr.server.superlink.linkstate.linkstate import LinkState
 from flwr.server.utils import validate_task_ins_or_res
 
 from .utils import (
-    check_node_availability_for_taskins,
     generate_rand_int_from_bytes,
     verify_found_taskres,
     verify_taskins_ids,
