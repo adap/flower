@@ -19,7 +19,7 @@ Before you start, make sure that:
 
 - The ``flwr`` CLI is :doc:`installed <../how-to-install-flower>` locally.
 - The Docker daemon is running.
-- Docker Compose is `installed <https://docs.docker.com/compose/install/>`_.
+- Docker Compose V2 is `installed <https://docs.docker.com/compose/install/>`_.
 
 Run the Quickstart Example
 --------------------------
@@ -100,7 +100,7 @@ Limitations
     - - quickstart-huggingface
       - None
     - - quickstart-jax
-      - The example has not yet been updated to work with the latest ``flwr`` version.
+      - None
     - - quickstart-mlcube
       - The example has not yet been updated to work with the latest ``flwr`` version.
     - - quickstart-mlx
