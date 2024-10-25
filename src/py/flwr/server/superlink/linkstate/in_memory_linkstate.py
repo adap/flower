@@ -52,6 +52,7 @@ class RunRecord:
     starting_at: str = ""
     running_at: str = ""
     finished_at: str = ""
+    logs: dict[int, list[str]] = {}
 
 
 class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
@@ -511,3 +512,13 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         if run_id not in self.run_ids:
             raise ValueError(f"Run {run_id} not found")
         self.contexts[run_id] = context
+
+    def store_logs(self, run_id: int, node_id: int, logs: list[str]) -> None:
+        """Store logs for the specified `run_id`."""
+        if run_id not in self.run_ids:
+            raise ValueError(f"Run {run_id} not found")
+
+        self.run_ids[run_id].logs[node_id].extend(logs)
+
+    def get_logs(self, run_id: int) -> list[str]:
+        raise NotImplementedError

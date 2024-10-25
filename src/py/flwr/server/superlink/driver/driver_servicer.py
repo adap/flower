@@ -42,6 +42,8 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     PullServerAppInputsResponse,
     PullTaskResRequest,
     PullTaskResResponse,
+    PushLogsRequest,
+    PushLogsResponse,
     PushServerAppOutputsRequest,
     PushServerAppOutputsResponse,
     PushTaskInsRequest,
@@ -251,6 +253,15 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         state = self.state_factory.state()
         state.set_serverapp_context(request.run_id, context_from_proto(request.context))
         return PushServerAppOutputsResponse()
+
+    def PushLogs(
+        self, request: PushLogsRequest, context: grpc.ServicerContext
+    ) -> PushLogsResponse:
+        """Push logs."""
+        log(DEBUG, "DriverServicer.PushLogs")
+        state = self.state_factory.state()
+        state.store_logs(request.run_id, request.node.node_id, request.logs)
+        return PushLogsResponse()
 
 
 def _raise_if(validation_error: bool, detail: str) -> None:

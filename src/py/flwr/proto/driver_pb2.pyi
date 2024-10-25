@@ -150,3 +150,35 @@ class PushServerAppOutputsResponse(google.protobuf.message.Message):
     def __init__(self,
         ) -> None: ...
 global___PushServerAppOutputsResponse = PushServerAppOutputsResponse
+
+class PushLogsRequest(google.protobuf.message.Message):
+    """PushLogs messages"""
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    RUN_ID_FIELD_NUMBER: builtins.int
+    NODE_FIELD_NUMBER: builtins.int
+    LOGS_FIELD_NUMBER: builtins.int
+    run_id: builtins.int
+    @property
+    def node(self) -> flwr.proto.node_pb2.Node: ...
+    @property
+    def logs(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
+    def __init__(self,
+        *,
+        run_id: builtins.int = ...,
+        node: typing.Optional[flwr.proto.node_pb2.Node] = ...,
+        logs: typing.Optional[typing.Iterable[typing.Text]] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["node",b"node"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["logs",b"logs","node",b"node","run_id",b"run_id"]) -> None: ...
+global___PushLogsRequest = PushLogsRequest
+
+class PushLogsResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    STATUS_FIELD_NUMBER: builtins.int
+    status: typing.Text
+    def __init__(self,
+        *,
+        status: typing.Text = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["status",b"status"]) -> None: ...
+global___PushLogsResponse = PushLogsResponse

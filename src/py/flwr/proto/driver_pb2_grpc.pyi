@@ -50,6 +50,11 @@ class DriverStub:
         flwr.proto.driver_pb2.PushServerAppOutputsResponse]
     """Push ServerApp outputs"""
 
+    PushLogs: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.driver_pb2.PushLogsRequest,
+        flwr.proto.driver_pb2.PushLogsResponse]
+    """Push ServerApp logs"""
+
 
 class DriverServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -114,6 +119,14 @@ class DriverServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.driver_pb2.PushServerAppOutputsResponse:
         """Push ServerApp outputs"""
+        pass
+
+    @abc.abstractmethod
+    def PushLogs(self,
+        request: flwr.proto.driver_pb2.PushLogsRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.driver_pb2.PushLogsResponse:
+        """Push ServerApp logs"""
         pass
 
 
