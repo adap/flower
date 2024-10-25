@@ -125,7 +125,7 @@ class RereFleetConnection(FleetConnection):
         """Request to create a node."""
         # Call FleetAPI
         req = CreateNodeRequest(ping_interval=PING_DEFAULT_INTERVAL)
-        res: CreateNodeResponse = self.retrier.invoke(
+        res: CreateNodeResponse = self.retry_invoker.invoke(
             self.api.CreateNode,
             request=req,
         )
@@ -147,7 +147,7 @@ class RereFleetConnection(FleetConnection):
 
         # Call FleetAPI
         req = DeleteNodeRequest(node=self.node)
-        self.retrier.invoke(self.api.DeleteNode, request=req)
+        self.retry_invoker.invoke(self.api.DeleteNode, request=req)
 
         # Cleanup
         self.node = None
@@ -161,7 +161,7 @@ class RereFleetConnection(FleetConnection):
 
         # Request instructions (task) from server
         req = PullTaskInsRequest(node=self.node)
-        res = self.retrier.invoke(self.api.PullTaskIns, request=req)
+        res = self.retry_invoker.invoke(self.api.PullTaskIns, request=req)
 
         # Get the current TaskIns
         task_ins: TaskIns | None = get_task_ins(res)
@@ -207,7 +207,7 @@ class RereFleetConnection(FleetConnection):
 
         # Serialize ProtoBuf to bytes
         req = PushTaskResRequest(node=self.node, task_res_list=[task_res])
-        self.retrier.invoke(self.api.PushTaskRes, req)
+        self.retry_invoker.invoke(self.api.PushTaskRes, req)
 
         # Cleanup
         metadata = None
@@ -216,7 +216,7 @@ class RereFleetConnection(FleetConnection):
         """Get run info."""
         # Call FleetAPI
         req = GetRunRequest(node=self.node, run_id=run_id)
-        res: GetRunResponse = self.retrier.invoke(
+        res: GetRunResponse = self.retry_invoker.invoke(
             self.api.GetRun,
             request=req,
         )
@@ -234,7 +234,7 @@ class RereFleetConnection(FleetConnection):
         """Get FAB file."""
         # Call FleetAPI
         req = GetFabRequest(node=self.node, hash_str=fab_hash)
-        res: GetFabResponse = self.retrier.invoke(
+        res: GetFabResponse = self.retry_invoker.invoke(
             self.api.GetFab,
             request=req,
         )

@@ -111,8 +111,13 @@ class RestFleetApi(FleetApi):
             sys.exit(MISSING_EXTRA_REST)
 
     def _request(
-        self, req: GrpcMessage, res_type: type[T], api_path: str, timeout: float | None
+        self, req: GrpcMessage, res_type: type[T], api_path: str, **kwargs: Any
     ) -> T:
+        # Read kwargs
+        timeout = kwargs.pop("timeout", None)
+        for key in kwargs:  # Unsupported arguments
+            log(WARN, "Unsupported argument: `%s`", key)
+
         # Serialize the request
         req_bytes = req.SerializeToString()
 
@@ -159,47 +164,40 @@ class RestFleetApi(FleetApi):
         self, request: CreateNodeRequest, **kwargs: Any
     ) -> CreateNodeResponse:
         """."""
-        timeout = kwargs.pop("timeout", None)
-        return self._request(request, CreateNodeResponse, PATH_CREATE_NODE, timeout)
+        return self._request(request, CreateNodeResponse, PATH_CREATE_NODE, **kwargs)
 
     def DeleteNode(  # pylint: disable=C0103
         self, request: DeleteNodeRequest, **kwargs: Any
     ) -> DeleteNodeResponse:
         """."""
-        timeout = kwargs.pop("timeout", None)
-        return self._request(request, DeleteNodeResponse, PATH_DELETE_NODE, timeout)
+        return self._request(request, DeleteNodeResponse, PATH_DELETE_NODE, **kwargs)
 
     def Ping(  # pylint: disable=C0103
         self, request: PingRequest, **kwargs: Any
     ) -> PingResponse:
         """."""
-        timeout = kwargs.pop("timeout", None)
-        return self._request(request, PingResponse, PATH_PING, timeout)
+        return self._request(request, PingResponse, PATH_PING, **kwargs)
 
     def PullTaskIns(  # pylint: disable=C0103
         self, request: PullTaskInsRequest, **kwargs: Any
     ) -> PullTaskInsResponse:
         """."""
-        timeout = kwargs.pop("timeout", None)
-        return self._request(request, PullTaskInsResponse, PATH_PULL_TASK_INS, timeout)
+        return self._request(request, PullTaskInsResponse, PATH_PULL_TASK_INS, **kwargs)
 
     def PushTaskRes(  # pylint: disable=C0103
         self, request: PushTaskResRequest, **kwargs: Any
     ) -> PushTaskResResponse:
         """."""
-        timeout = kwargs.pop("timeout", None)
-        return self._request(request, PushTaskResResponse, PATH_PUSH_TASK_RES, timeout)
+        return self._request(request, PushTaskResResponse, PATH_PUSH_TASK_RES, **kwargs)
 
     def GetRun(  # pylint: disable=C0103
         self, request: GetRunRequest, **kwargs: Any
     ) -> GetRunResponse:
         """."""
-        timeout = kwargs.pop("timeout", None)
-        return self._request(request, GetRunResponse, PATH_GET_RUN, timeout)
+        return self._request(request, GetRunResponse, PATH_GET_RUN, **kwargs)
 
     def GetFab(  # pylint: disable=C0103
         self, request: GetFabRequest, **kwargs: Any
     ) -> GetFabResponse:
         """."""
-        timeout = kwargs.pop("timeout", None)
-        return self._request(request, GetFabResponse, PATH_GET_FAB, timeout)
+        return self._request(request, GetFabResponse, PATH_GET_FAB, **kwargs)
