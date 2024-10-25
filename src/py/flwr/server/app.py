@@ -380,10 +380,6 @@ def _flwr_serverapp_scheduler(
 
         if pending_run_id:
 
-            # Set run as starting
-            state.update_run_status(
-                run_id=pending_run_id, new_status=RunStatus(Status.STARTING, "", "")
-            )
             log(
                 INFO,
                 "Launching `flwr-serverapp` subprocess with run-id %d. "
