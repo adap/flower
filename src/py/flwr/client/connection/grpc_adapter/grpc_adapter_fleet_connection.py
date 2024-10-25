@@ -30,7 +30,7 @@ from flwr.common.constant import (
     GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY,
     GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY,
 )
-from flwr.common.grpc import create_channel
+from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.version import package_version
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -55,12 +55,6 @@ from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=
 
 from ..fleet_api import FleetApi
 from ..rere_fleet_connection import RereFleetConnection
-
-
-def on_channel_state_change(channel_connectivity: str) -> None:
-    """Log channel connectivity."""
-    log(DEBUG, channel_connectivity)
-
 
 T = TypeVar("T", bound=GrpcMessage)
 

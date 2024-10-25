@@ -18,24 +18,17 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from logging import DEBUG
 from pathlib import Path
 from typing import cast
 
 import grpc
 
-from flwr.common.grpc import create_channel
-from flwr.common.logger import log
+from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
 
 from ..fleet_api import FleetApi
 from ..rere_fleet_connection import RereFleetConnection
 from .client_interceptor import AuthenticateClientInterceptor
-
-
-def on_channel_state_change(channel_connectivity: str) -> None:
-    """Log channel connectivity."""
-    log(DEBUG, channel_connectivity)
 
 
 class GrpcRereFleetConnection(RereFleetConnection):

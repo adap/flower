@@ -38,7 +38,7 @@ from flwr.common import (
 from flwr.common import recordset_compat as compat
 from flwr.common import serde
 from flwr.common.constant import MessageType, MessageTypeLegacy
-from flwr.common.grpc import create_channel
+from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
 from flwr.common.retry_invoker import RetryInvoker
 from flwr.common.typing import Fab, Run
@@ -56,11 +56,6 @@ from ..fleet_connection import FleetConnection
 # import os
 # os.environ["GRPC_VERBOSITY"] = "debug"
 # os.environ["GRPC_TRACE"] = "tcp,http"
-
-
-def on_channel_state_change(channel_connectivity: str) -> None:
-    """Log channel connectivity."""
-    log(DEBUG, channel_connectivity)
 
 
 class GrpcBidiFleetConnection(FleetConnection):
