@@ -137,7 +137,7 @@ def run_serverapp(  # pylint: disable=R0914
             # Obtain server app reference and the run config
             server_app_attr = config["tool"]["flwr"]["app"]["components"]["serverapp"]
             server_app_run_config = get_fused_config_from_dir(
-                Path(app_path), driver.run.override_config
+                Path(app_path), run.override_config
             )
 
             # Update run_config in context
