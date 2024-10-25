@@ -225,7 +225,7 @@ class PathologicalPartitioner(Partitioner):
         if self._class_assignment_mode == "first-deterministic":
             # if self._first_class_deterministic_assignment:
             for partition_id in range(self._num_partitions):
-                label = partition_id % num_unique_classes
+                label = self._unique_labels[partition_id % num_unique_classes]
                 self._partition_id_to_unique_labels[partition_id].append(label)
 
                 while (

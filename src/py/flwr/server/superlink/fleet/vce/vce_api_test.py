@@ -40,15 +40,17 @@ from flwr.common import (
     RecordSet,
     Scalar,
 )
+from flwr.common.constant import Status
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
 from flwr.common.serde import message_from_taskres, message_to_taskins
-from flwr.common.typing import Run
+from flwr.common.typing import Run, RunStatus
 from flwr.server.superlink.fleet.vce.vce_api import (
     NodeToPartitionMapping,
     _register_nodes,
     start_vce,
 )
-from flwr.server.superlink.state import InMemoryState, StateFactory
+from flwr.server.superlink.linkstate import InMemoryLinkState, LinkStateFactory
+from flwr.server.superlink.linkstate.in_memory_linkstate import RunRecord
 
 
 class DummyClient(NumPyClient):
@@ -86,11 +88,11 @@ def terminate_simulation(f_stop: threading.Event, sleep_duration: int) -> None:
 def init_state_factory_nodes_mapping(
     num_nodes: int,
     num_messages: int,
-) -> tuple[StateFactory, NodeToPartitionMapping, dict[UUID, float]]:
+) -> tuple[LinkStateFactory, NodeToPartitionMapping, dict[UUID, float]]:
     """Instatiate StateFactory, register nodes and pre-insert messages in the state."""
     # Register a state and a run_id in it
     run_id = 1234
-    state_factory = StateFactory(":flwr-in-memory-state:")
+    state_factory = LinkStateFactory(":flwr-in-memory-state:")
 
     # Register a few nodes
     nodes_mapping = _register_nodes(num_nodes=num_nodes, state_factory=state_factory)
@@ -106,19 +108,26 @@ def init_state_factory_nodes_mapping(
 
 # pylint: disable=too-many-locals
 def register_messages_into_state(
-    state_factory: StateFactory,
+    state_factory: LinkStateFactory,
     nodes_mapping: NodeToPartitionMapping,
     run_id: int,
     num_messages: int,
 ) -> dict[UUID, float]:
     """Register `num_messages` into the state factory."""
-    state: InMemoryState = state_factory.state()  # type: ignore
-    state.run_ids[run_id] = Run(
-        run_id=run_id,
-        fab_id="Mock/mock",
-        fab_version="v1.0.0",
-        fab_hash="hash",
-        override_config={},
+    state: InMemoryLinkState = state_factory.state()  # type: ignore
+    state.run_ids[run_id] = RunRecord(
+        Run(
+            run_id=run_id,
+            fab_id="Mock/mock",
+            fab_version="v1.0.0",
+            fab_hash="hash",
+            override_config={},
+        ),
+        RunStatus(
+            status=Status.PENDING,
+            sub_status="",
+            details="",
+        ),
     )
     # Artificially add TaskIns to state so they can be processed
     # by the Simulation Engine logic
@@ -170,13 +179,13 @@ def _autoresolve_app_dir(rel_client_app_dir: str = "backend") -> str:
     return str(rel_app_dir.parent / rel_client_app_dir)
 
 
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-positional-arguments
 def start_and_shutdown(
     backend: str = "ray",
     client_app_attr: Optional[str] = None,
     app_dir: str = "",
     num_supernodes: Optional[int] = None,
-    state_factory: Optional[StateFactory] = None,
+    state_factory: Optional[LinkStateFactory] = None,
     nodes_mapping: Optional[NodeToPartitionMapping] = None,
     duration: int = 0,
     backend_config: str = "{}",
@@ -304,7 +313,7 @@ class TestFleetSimulationEngineRayBackend(TestCase):
         # Get all TaskRes
         state = state_factory.state()
         task_ids = set(expected_results.keys())
-        task_res_list = state.get_task_res(task_ids=task_ids, limit=len(task_ids))
+        task_res_list = state.get_task_res(task_ids=task_ids)
 
         # Check results by first converting to Message
         for task_res in task_res_list:
