@@ -147,6 +147,15 @@ CREATE TABLE IF NOT EXISTS task_res(
 );
 """
 
+SQL_CREATE_TABLE_LOGS = """
+CREATE TABLE IF NOT EXISTS logs(
+    run_id                  INTEGER UNIQUE,
+    node_id                 INTEGER,
+    created_at              REAL,
+    message                 TEXT
+);
+"""
+
 DictOrTuple = Union[tuple[Any, ...], dict[str, Any]]
 
 
@@ -1041,6 +1050,20 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             return None
 
         return task_ins
+
+    def store_logs(self, run_id: int, node_id: int, logs: str) -> None:
+        """Store logs for a specific run and node."""
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_run_id = convert_uint64_to_sint64(run_id)
+        sint64_node_id = convert_uint64_to_sint64(node_id)
+        current_time = now().isoformat()
+
+        query = (
+            "UPDATE logs "
+            "SET message = COALESCE(message, '') || ?, created_at = ? "
+            "WHERE run_id = ? AND node_id = ?"
+        )
+        self.query(query, (f"\n{logs}", current_time, sint64_run_id, sint64_node_id))
 
 
 def dict_factory(

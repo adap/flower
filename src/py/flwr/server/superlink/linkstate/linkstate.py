@@ -301,7 +301,7 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def store_logs(self, run_id: int, node_id: int, logs: list[str]) -> None:
+    def store_logs(self, run_id: int, node_id: int, logs: str) -> None:
         """Store the logs for the specified `run_id` and `node_id`.
 
         Parameters
@@ -310,8 +310,8 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
             The identifier of the run for which the logs are stored.
         node_id : int
             The identifier of the node for the run for which logs are stored.
-        logs : list[str]
-            A list of log messages to be stored.
+        logs : str
+            The log message to be stored.
         """
 
     @abc.abstractmethod
