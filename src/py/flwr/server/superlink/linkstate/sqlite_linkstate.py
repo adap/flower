@@ -19,15 +19,12 @@
 import json
 import re
 import sqlite3
-import threading
-import threading
 import time
 from collections.abc import Sequence
 from logging import DEBUG, ERROR, WARNING
 from typing import Any, Optional, Union, cast
 from uuid import UUID, uuid4
 
-from flwr.common import Context, log, now
 from flwr.common import Context, log, now
 from flwr.common.constant import (
     MESSAGE_TTL_TOLERANCE,
@@ -38,12 +35,6 @@ from flwr.common.constant import (
 from flwr.common.typing import Run, RunStatus, UserConfig
 
 # pylint: disable=E0611
-from flwr.proto.node_pb2 import Node
-from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
-
-# pylint: enable=E0611
-
 # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node
 from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
@@ -56,8 +47,6 @@ from .linkstate import LinkState
 from .utils import (
     context_from_bytes,
     context_to_bytes,
-    context_from_bytes,
-    context_to_bytes,
     convert_sint64_to_uint64,
     convert_sint64_values_in_dict_to_uint64,
     convert_uint64_to_sint64,
@@ -67,6 +56,9 @@ from .utils import (
     is_valid_transition,
     make_node_unavailable_taskres,
 )
+
+# pylint: enable=E0611
+
 
 SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
@@ -186,8 +178,6 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         """
         self.database_path = database_path
         self.conn: Optional[sqlite3.Connection] = None
-        self.lock = threading.RLock()
-        self.lock = threading.RLock()
 
     def initialize(self, log_queries: bool = False) -> list[tuple[str]]:
         """Create tables if they don't exist yet.
@@ -1007,31 +997,6 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         except sqlite3.IntegrityError:
             log(ERROR, "`node_id` does not exist.")
             return False
-
-    def get_serverapp_context(self, run_id: int) -> Optional[Context]:
-        """Get the context for the specified `run_id`."""
-        # Retrieve context if any
-        query = "SELECT context FROM context WHERE run_id = ?;"
-        rows = self.query(query, (convert_uint64_to_sint64(run_id),))
-        context = context_from_bytes(rows[0]["context"]) if rows else None
-        return context
-
-    def set_serverapp_context(self, run_id: int, context: Context) -> None:
-        """Set the context for the specified `run_id`."""
-        # Convert context to bytes
-        context_bytes = context_to_bytes(context)
-        sint_run_id = convert_uint64_to_sint64(run_id)
-
-        # Check if any existing Context assigned to the run_id
-        query = "SELECT COUNT(*) FROM context WHERE run_id = ?;"
-        if self.query(query, (sint_run_id,))[0]["COUNT(*)"] > 0:
-            # Update context
-            query = "UPDATE context SET context = ? WHERE run_id = ?;"
-            self.query(query, (context_bytes, sint_run_id))
-        else:
-            # Store context
-            query = "INSERT INTO context (run_id, context) VALUES (?, ?);"
-            self.query(query, (sint_run_id, context_bytes))
 
     def get_serverapp_context(self, run_id: int) -> Optional[Context]:
         """Get the context for the specified `run_id`."""

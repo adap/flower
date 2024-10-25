@@ -24,7 +24,6 @@ from unittest.mock import patch
 from uuid import UUID
 
 from flwr.common import DEFAULT_TTL, Context, RecordSet
-from flwr.common import DEFAULT_TTL, Context, RecordSet
 from flwr.common.constant import ErrorCode, Status, SubStatus
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
@@ -1061,7 +1060,6 @@ def create_task_ins(
             consumer=consumer,
             task_type="mock",
             recordset=ProtoRecordSet(parameters={}, metrics={}, configs={}),
-            recordset=ProtoRecordSet(parameters={}, metrics={}, configs={}),
             ttl=DEFAULT_TTL,
             created_at=time.time(),
         ),
@@ -1086,7 +1084,6 @@ def create_task_res(
             consumer=Node(node_id=0, anonymous=True),
             ancestry=ancestry,
             task_type="mock",
-            recordset=ProtoRecordSet(parameters={}, metrics={}, configs={}),
             recordset=ProtoRecordSet(parameters={}, metrics={}, configs={}),
             ttl=DEFAULT_TTL,
             created_at=time.time(),

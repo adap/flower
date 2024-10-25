@@ -40,12 +40,8 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     GetNodesResponse,
     PullServerAppInputsRequest,
     PullServerAppInputsResponse,
-    PullServerAppInputsRequest,
-    PullServerAppInputsResponse,
     PullTaskResRequest,
     PullTaskResResponse,
-    PushServerAppOutputsRequest,
-    PushServerAppOutputsResponse,
     PushServerAppOutputsRequest,
     PushServerAppOutputsResponse,
     PushTaskInsRequest,
@@ -229,7 +225,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
 
             if serverapp_ctxt and run and fab:
                 if state.update_run_status(run_id, RunStatus(Status.STARTING, "", "")):
-                    log(INFO, f"Starting run {run_id}")
+                    log(INFO, "Starting run %d", run_id)
 
                     return PullServerAppInputsResponse(
                         context=(
