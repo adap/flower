@@ -138,6 +138,7 @@ class RestFleetApi(FleetApi):
 
         # Check status code and headers
         if res.status_code != 200:
+            # pylint: disable-next=possibly-used-before-assignment
             raise HTTPError(f"Unexpected status code: {res.status_code}")
         if "content-type" not in res.headers:
             log(
@@ -145,6 +146,7 @@ class RestFleetApi(FleetApi):
                 "[Node] POST /%s: missing header `Content-Type`",
                 api_path,
             )
+            # pylint: disable-next=possibly-used-before-assignment
             raise InvalidHeader("Missing `Content-Type` header in the response")
         if res.headers["content-type"] != "application/protobuf":
             log(
@@ -152,6 +154,7 @@ class RestFleetApi(FleetApi):
                 "[Node] POST /%s: header `Content-Type` has wrong value",
                 api_path,
             )
+            # pylint: disable-next=possibly-used-before-assignment
             raise InvalidHeader(
                 "`Content-Type` header has wrong value, expected `application/protobuf`"
             )

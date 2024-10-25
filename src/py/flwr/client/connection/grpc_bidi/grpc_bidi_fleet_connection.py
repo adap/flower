@@ -66,7 +66,7 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 class GrpcBidiFleetConnection(FleetConnection):
     """Grpc-bidi fleet connection (will be deprecated)."""
 
-    def __init__(  # pylint: disable=R0913, R0914, R0915
+    def __init__(  # pylint: disable=R0913, R0914, R0915, R0917
         self,
         server_address: str,
         insecure: bool,
@@ -114,6 +114,10 @@ class GrpcBidiFleetConnection(FleetConnection):
         self.channel = channel
         self.queue = queue
         self.server_message_iterator = server_message_iterator
+
+    def ping(self) -> None:
+        """Ping the SuperLink."""
+        log(DEBUG, "Ping API is not supported by GrpcBidiConnection.")
 
     def create_node(self) -> int | None:
         """Request to create a node."""

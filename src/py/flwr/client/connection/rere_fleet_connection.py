@@ -66,7 +66,7 @@ from .fleet_connection import FleetConnection
 class RereFleetConnection(FleetConnection):
     """Network-based request-response fleet connection."""
 
-    def __init__(  # pylint: disable=R0913, R0914, R0915
+    def __init__(  # pylint: disable=R0913, R0914, R0915, R0917
         self,
         server_address: str,
         insecure: bool,
