@@ -205,17 +205,22 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
     ) -> PullServerAppInputsResponse:
         """Pull ServerApp process inputs."""
         log(DEBUG, "DriverServicer.PullServerAppInputs")
+        # Init access to LinkState and Ffs
         state = self.state_factory.state()
         ffs = self.ffs_factory.ffs()
 
+        # Lock access to LinkState, preventing obtaining the same pending run_id
         with self.lock:
+            # If run_id is provided, use it, otherwise use the pending run_id
             if request.HasField("run_id"):
                 run_id: Optional[int] = request.run_id
             else:
                 run_id = state.get_pending_run_id()
+            # If there's no pending run, return an empty response
             if run_id is None:
                 return PullServerAppInputsResponse()
 
+            # Retrieve Context, Run and Fab for the run_id
             serverapp_ctxt = state.get_serverapp_context(run_id)
             run = state.get_run(run_id)
             fab = None
@@ -223,7 +228,8 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
                 if result := ffs.get(run.fab_hash):
                     fab = Fab(run.fab_hash, result[0])
 
-            if serverapp_ctxt and run and fab:
+            if run and fab:
+                # Update run status to STARTING
                 if state.update_run_status(run_id, RunStatus(Status.STARTING, "", "")):
                     log(INFO, "Starting run %d", run_id)
 
@@ -235,6 +241,8 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
                         fab=fab_to_proto(fab),
                     )
 
+        # Raise an exception if the Run or Fab is not found,
+        # or if the status cannot be updated to STARTING
         raise RuntimeError(f"Failed to start run {run_id}")
 
     def PushServerAppOutputs(
