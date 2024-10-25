@@ -91,16 +91,7 @@ def run_serverapp(  # pylint: disable=R0914
     run_id: Optional[int] = None,
     flwr_dir: Optional[str] = None,
 ) -> None:
-    """Run Flower ServerApp process.
-
-    Parameters
-    ----------
-    superlink : str
-        Address of SuperLink
-    run_id : Optional[int] (default: None)
-        Unique identifier of a Run registered at the LinkState. If not supplied,
-        this function will request a pending run to the LinkState.
-    """
+    """Run Flower ServerApp process."""
     driver = GrpcDriver(
         run_id=run_id if run_id else 0,
         driver_service_address=superlink,
