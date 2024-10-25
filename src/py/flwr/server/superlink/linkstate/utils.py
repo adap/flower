@@ -197,8 +197,20 @@ def has_valid_sub_status(status: RunStatus) -> bool:
     return status.sub_status == ""
 
 
-def make_taskins_unavailable_taskres(taskins_id: Union[str, UUID]) -> TaskRes:
-    """Generate a TaskRes with a taskins unavailable error."""
+def create_taskres_for_unavailable_taskins(taskins_id: Union[str, UUID]) -> TaskRes:
+    """Generate a TaskRes with a TaskIns unavailable error.
+
+    Parameters
+    ----------
+    taskins_id : Union[str, UUID]
+        The ID of the unavailable TaskIns.
+
+    Returns
+    -------
+    TaskRes
+        A TaskRes with an error code MESSAGE_UNAVAILABLE to indicate that the
+        inquired TaskIns ID cannot be found (due to non-existence or expiration).
+    """
     current_time = now().timestamp()
     return TaskRes(
         task_id=str(uuid4()),
@@ -220,8 +232,20 @@ def make_taskins_unavailable_taskres(taskins_id: Union[str, UUID]) -> TaskRes:
     )
 
 
-def make_taskres_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
-    """Generate a TaskRes with a reply message unavailable error from a TaskIns."""
+def create_taskres_for_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
+    """Generate a TaskRes with a reply message unavailable error from a TaskIns.
+
+    Parameters
+    ----------
+    ref_taskins : TaskIns
+        The reference TaskIns object.
+
+    Returns
+    -------
+    TaskRes
+        The generated TaskRes with an error code REPLY_MESSAGE_UNAVAILABLE_ERROR_REASON,
+        indicating that the original TaskRes has expired.
+    """
     current_time = now().timestamp()
     ttl = ref_taskins.task.ttl - (current_time - ref_taskins.task.created_at)
     if ttl < 0:
@@ -286,7 +310,7 @@ def verify_taskins_ids(
         if taskins is None or has_expired(taskins, current):
             if update_set:
                 inquired_taskins_ids.remove(taskins_id)
-            taskres = make_taskins_unavailable_taskres(taskins_id)
+            taskres = create_taskres_for_unavailable_taskins(taskins_id)
             ret_dict[taskins_id] = taskres
     return ret_dict
 
@@ -329,7 +353,9 @@ def verify_found_taskres(
         # Check if the TaskRes has expired
         if has_expired(taskres, current):
             # No need to insert the error TaskRes
-            taskres = make_taskres_unavailable_taskres(found_taskins_dict[taskins_id])
+            taskres = create_taskres_for_unavailable_taskres(
+                found_taskins_dict[taskins_id]
+            )
             taskres.task.delivered_at = now().isoformat()
         ret_dict[taskins_id] = taskres
     return ret_dict
