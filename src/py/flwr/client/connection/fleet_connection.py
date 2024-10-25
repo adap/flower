@@ -85,7 +85,7 @@ class FleetConnection(ABC):
 
     @abstractmethod
     def delete_node(self) -> None:
-        """Request to create a node."""
+        """Request to delete a node."""
 
     @abstractmethod
     def receive(self) -> Message | None:
