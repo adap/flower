@@ -70,7 +70,7 @@ class FleetConnection(ABC):
         """
         self.server_address = server_address
         self.insecure = insecure
-        self.retrier = retry_invoker
+        self.retry_invoker = retry_invoker
         self.max_message_length = max_message_length
         self.root_certificates = root_certificates
         self.authentication_keys = authentication_keys
