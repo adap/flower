@@ -37,6 +37,7 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkStateFactory
 
+from .deployment import DeploymentEngine
 from .executor import Executor, RunTracker
 
 SELECT_TIMEOUT = 1  # Timeout for selecting ready-to-read file descriptors (in seconds)
@@ -63,25 +64,32 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         """Create run ID."""
         log(INFO, "ExecServicer.StartRun")
 
-        run = self.executor.start_run(
-            request.fab.content,
-            user_config_from_proto(request.override_config),
-            user_config_from_proto(request.federation_config),
-        )
+        if isinstance(self.executor, DeploymentEngine):
+            run_id = self.executor.register_run(
+                request.fab.content,
+                user_config_from_proto(request.override_config),
+            )
+        else:
+            run = self.executor.start_run(
+                request.fab.content,
+                user_config_from_proto(request.override_config),
+                user_config_from_proto(request.federation_config),
+            )
 
-        if run is None:
-            log(ERROR, "Executor failed to start run")
-            return StartRunResponse()
+            if run is None:
+                log(ERROR, "Executor failed to start run")
+                return StartRunResponse()
 
-        self.runs[run.run_id] = run
+            self.runs[run.run_id] = run
+            run_id = run.run_id
 
-        # Start a background thread to capture the log output
-        capture_thread = threading.Thread(
-            target=_capture_logs, args=(run,), daemon=True
-        )
-        capture_thread.start()
+            # Start a background thread to capture the log output
+            capture_thread = threading.Thread(
+                target=_capture_logs, args=(run,), daemon=True
+            )
+            capture_thread.start()
 
-        return StartRunResponse(run_id=run.run_id)
+        return StartRunResponse(run_id=run_id)
 
     def StreamLogs(  # pylint: disable=C0103
         self, request: StreamLogsRequest, context: grpc.ServicerContext

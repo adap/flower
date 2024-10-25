@@ -137,6 +137,26 @@ class DeploymentEngine(Executor):
         run_id = self.linkstate.create_run(None, None, fab_hash, override_config)
         return run_id
 
+    def register_run(
+        self,
+        fab_file: bytes,
+        override_config: UserConfig,
+    ) -> Optional[int]:
+        """Register a run."""
+        try:
+            # Install FAB to flwr dir
+            install_from_fab(fab_file, None, True)
+
+            # Call SuperLink to create run
+            run_id: int = self._create_run(
+                Fab(hashlib.sha256(fab_file).hexdigest(), fab_file), override_config
+            )
+            log(INFO, "Registered run %s", str(run_id))
+            return run_id
+        except Exception as e:
+            log(ERROR, "Could not register run: %s", str(e))
+            return None
+
     @override
     def start_run(
         self,
