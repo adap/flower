@@ -95,13 +95,14 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             )
             return None
         # Validate destination node ID
-        if task_ins.task.consumer.node_id not in self.node_ids:
-            log(
-                ERROR,
-                "Invalid destination node ID for TaskIns: %s",
-                task_ins.task.consumer.node_id,
-            )
-            return None
+        if not task_ins.task.consumer.anonymous:
+            if task_ins.task.consumer.node_id not in self.node_ids:
+                log(
+                    ERROR,
+                    "Invalid destination node ID for TaskIns: %s",
+                    task_ins.task.consumer.node_id,
+                )
+                return None
 
         # Create task_id
         task_id = uuid4()
