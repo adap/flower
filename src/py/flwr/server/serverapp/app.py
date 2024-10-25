@@ -41,6 +41,7 @@ from flwr.proto.driver_pb2 import (
     PushServerAppOutputsRequest,
 )
 from flwr.server.driver.grpc_driver import GrpcDriver
+from flwr.server.run_serverapp import run as run_
 
 
 def flwr_serverapp() -> None:
@@ -130,7 +131,7 @@ def run_serverapp(  # pylint: disable=R0914
 
             fab_id, fab_version = get_fab_metadata(fab.content)
 
-            app_path = str(get_project_dir(fab_id, fab_version, fab.fab_hash, flwr_dir))
+            app_path = str(get_project_dir(fab_id, fab_version, fab.hash_str, flwr_dir))
             config = get_project_config(app_path)
 
             # Obtain server app reference and the run config
@@ -138,6 +139,9 @@ def run_serverapp(  # pylint: disable=R0914
             server_app_run_config = get_fused_config_from_dir(
                 Path(app_path), driver.run.override_config
             )
+
+            # Update run_config in context
+            context.run_config = server_app_run_config
 
             log(
                 DEBUG,
@@ -147,10 +151,9 @@ def run_serverapp(  # pylint: disable=R0914
             )
 
             # Load and run the ServerApp with the Driver
-            updated_context = run(
+            updated_context = run_(
                 driver=driver,
                 server_app_dir=app_path,
-                server_app_run_config=server_app_run_config,
                 server_app_attr=server_app_attr,
                 context=context,
             )
