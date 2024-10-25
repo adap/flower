@@ -35,7 +35,7 @@ from flwr.common.serde import (
     fab_from_proto,
     run_from_proto,
 )
-from flwr.proto.driver_pb2 import (
+from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     PullServerAppInputsRequest,
     PullServerAppInputsResponse,
     PushServerAppOutputsRequest,
@@ -83,13 +83,13 @@ def flwr_serverapp() -> None:
         args.superlink,
         args.run_id,
     )
-    run_serverapp(superlink=args.superlink, run_id=args.run_id, flwr_dir=args.flwr_dir)
+    run_serverapp(superlink=args.superlink, run_id=args.run_id, flwr_dir_=args.flwr_dir)
 
 
-def run_serverapp(  # pylint: disable=R0914
+def run_serverapp(  # pylint: disable=R0914, disable=W0212
     superlink: str,
     run_id: Optional[int] = None,
-    flwr_dir: Optional[str] = None,
+    flwr_dir_: Optional[str] = None,
 ) -> None:
     """Run Flower ServerApp process."""
     driver = GrpcDriver(
@@ -99,7 +99,7 @@ def run_serverapp(  # pylint: disable=R0914
     )
 
     # Resolve directory where FABs are installed
-    flwr_dir = get_flwr_dir(flwr_dir)
+    flwr_dir = get_flwr_dir(flwr_dir_)
 
     only_once = run_id is not None
 
@@ -107,7 +107,11 @@ def run_serverapp(  # pylint: disable=R0914
 
         try:
             # Pull ServerAppInputs from LinkState
-            req = PullServerAppInputsRequest(run_id=run_id)
+            req = (
+                PullServerAppInputsRequest(run_id=run_id)
+                if run_id
+                else PullServerAppInputsRequest()
+            )
             res: PullServerAppInputsResponse = driver._stub.PullServerAppInputs(req)
             if not res.HasField("run"):
                 sleep(3)
@@ -151,8 +155,10 @@ def run_serverapp(  # pylint: disable=R0914
 
             # Send resulting context
             context_proto = context_to_proto(updated_context)
-            req = PushServerAppOutputsRequest(run_id=run_id, context=context_proto)
-            res: PullServerAppInputsResponse = driver._stub.PushServerAppOutputs(req)
+            out_req = PushServerAppOutputsRequest(
+                run_id=run.run_id, context=context_proto
+            )
+            _ = driver._stub.PushServerAppOutputs(out_req)
 
         except Exception as ex:  # pylint: disable=broad-exception-caught
             exc_entity = "ServerApp"

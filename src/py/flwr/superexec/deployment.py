@@ -153,7 +153,7 @@ class DeploymentEngine(Executor):
             )
             log(INFO, "Registered run %s", str(run_id))
             return run_id
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             log(ERROR, "Could not register run: %s", str(e))
             return None
 
