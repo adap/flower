@@ -69,6 +69,9 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
                 request.fab.content,
                 user_config_from_proto(request.override_config),
             )
+            if run_id is None:
+                log(ERROR, "Executor failed to start run")
+                return StartRunResponse()
         else:
             run = self.executor.start_run(
                 request.fab.content,
