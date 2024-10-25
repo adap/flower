@@ -75,8 +75,8 @@ Open your terminal and run:
     * | ``--insecure``: This flag tells the container to operate in an insecure mode, allowing
       | unencrypted communication.
 
-Step 3: Start the SuperNode
----------------------------
+Step 3: Start the SuperNodes
+----------------------------
 
 Start two SuperNode containers.
 
