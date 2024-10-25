@@ -34,6 +34,8 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StreamLogsRequest,
     StreamLogsResponse,
 )
+from flwr.server.superlink.ffs.ffs_factory import FfsFactory
+from flwr.server.superlink.linkstate import LinkStateFactory
 
 from .executor import Executor, RunTracker
 
@@ -43,8 +45,16 @@ SELECT_TIMEOUT = 1  # Timeout for selecting ready-to-read file descriptors (in s
 class ExecServicer(exec_pb2_grpc.ExecServicer):
     """SuperExec API servicer."""
 
-    def __init__(self, executor: Executor) -> None:
+    def __init__(
+        self,
+        linkstate_factory: LinkStateFactory,
+        ffs_factory: FfsFactory,
+        executor: Executor,
+    ) -> None:
+        self.linkstate_factory = linkstate_factory
+        self.ffs_factory = ffs_factory
         self.executor = executor
+        self.executor.initialize(linkstate_factory, ffs_factory)
         self.runs: dict[int, RunTracker] = {}
 
     def StartRun(

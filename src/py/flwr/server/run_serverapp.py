@@ -34,7 +34,6 @@ from flwr.common.config import (
 from flwr.common.constant import DRIVER_API_DEFAULT_ADDRESS
 from flwr.common.logger import log, update_console_handler, warn_deprecated_feature
 from flwr.common.object_ref import load_app
-from flwr.common.typing import UserConfig
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
@@ -46,13 +45,14 @@ from .driver.grpc_driver import GrpcDriver
 from .server_app import LoadServerAppError, ServerApp
 
 
+# pylint: disable-next=too-many-arguments,too-many-positional-arguments
 def run(
     driver: Driver,
+    context: Context,
     server_app_dir: str,
-    server_app_run_config: UserConfig,
     server_app_attr: Optional[str] = None,
     loaded_server_app: Optional[ServerApp] = None,
-) -> None:
+) -> Context:
     """Run ServerApp with a given Driver."""
     if not (server_app_attr is None) ^ (loaded_server_app is None):
         raise ValueError(
@@ -78,15 +78,11 @@ def run(
 
     server_app = _load()
 
-    # Initialize Context
-    context = Context(
-        node_id=0, node_config={}, state=RecordSet(), run_config=server_app_run_config
-    )
-
     # Call ServerApp
     server_app(driver=driver, context=context)
 
     log(DEBUG, "ServerApp finished running.")
+    return context
 
 
 # pylint: disable-next=too-many-branches,too-many-statements,too-many-locals
@@ -181,19 +177,17 @@ def run_server_app() -> None:
         )
         flwr_dir = get_flwr_dir(args.flwr_dir)
         run_ = driver.run
-        if run_.fab_hash:
-            fab_req = GetFabRequest(hash_str=run_.fab_hash)
-            # pylint: disable-next=W0212
-            fab_res: GetFabResponse = driver._stub.GetFab(fab_req)
-            if fab_res.fab.hash_str != run_.fab_hash:
-                raise ValueError("FAB hashes don't match.")
+        if not run_.fab_hash:
+            raise ValueError("FAB hash not provided.")
+        fab_req = GetFabRequest(hash_str=run_.fab_hash)
+        # pylint: disable-next=W0212
+        fab_res: GetFabResponse = driver._stub.GetFab(fab_req)
+        if fab_res.fab.hash_str != run_.fab_hash:
+            raise ValueError("FAB hashes don't match.")
+        install_from_fab(fab_res.fab.content, flwr_dir, True)
+        fab_id, fab_version = get_fab_metadata(fab_res.fab.content)
 
-            install_from_fab(fab_res.fab.content, flwr_dir, True)
-            fab_id, fab_version = get_fab_metadata(fab_res.fab.content)
-        else:
-            fab_id, fab_version = run_.fab_id, run_.fab_version
-
-        app_path = str(get_project_dir(fab_id, fab_version, flwr_dir))
+        app_path = str(get_project_dir(fab_id, fab_version, run_.fab_hash, flwr_dir))
         config = get_project_config(app_path)
     else:
         # User provided `app_dir`, but not `--run-id`
@@ -227,11 +221,19 @@ def run_server_app() -> None:
         root_certificates,
     )
 
+    # Initialize Context
+    context = Context(
+        node_id=0,
+        node_config={},
+        state=RecordSet(),
+        run_config=server_app_run_config,
+    )
+
     # Run the ServerApp with the Driver
     run(
         driver=driver,
+        context=context,
         server_app_dir=app_path,
-        server_app_run_config=server_app_run_config,
         server_app_attr=server_app_attr,
     )
 

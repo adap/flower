@@ -18,6 +18,7 @@ syntax = "proto3";
 package flwr.proto;
 
 import "flwr/proto/fab.proto";
+import "flwr/proto/node.proto";
 import "flwr/proto/transport.proto";
 
 message Run {
@@ -26,6 +27,15 @@ message Run {
   string fab_version = 3;
   map<string, Scalar> override_config = 4;
   string fab_hash = 5;
+}
+
+message RunStatus {
+  // "starting", "running", "finished"
+  string status = 1;
+  // "completed", "failed", "stopped" or "" (non-finished)
+  string sub_status = 2;
+  // failure details
+  string details = 3;
 }
 
 // CreateRun
@@ -38,5 +48,22 @@ message CreateRunRequest {
 message CreateRunResponse { uint64 run_id = 1; }
 
 // GetRun
-message GetRunRequest { uint64 run_id = 1; }
+message GetRunRequest {
+  Node node = 1;
+  uint64 run_id = 2;
+}
 message GetRunResponse { Run run = 1; }
+
+// UpdateRunStatus
+message UpdateRunStatusRequest {
+  uint64 run_id = 1;
+  RunStatus run_status = 2;
+}
+message UpdateRunStatusResponse {}
+
+// GetRunStatus
+message GetRunStatusRequest {
+  Node node = 1;
+  repeated uint64 run_ids = 2;
+}
+message GetRunStatusResponse { map<uint64, RunStatus> run_status_dict = 1; }
