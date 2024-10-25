@@ -19,6 +19,7 @@
 import json
 import re
 import sqlite3
+import threading
 import time
 from collections.abc import Sequence
 from logging import DEBUG, ERROR, WARNING
@@ -34,7 +35,6 @@ from flwr.common.constant import (
 )
 from flwr.common.typing import Run, RunStatus, UserConfig
 
-# pylint: disable=E0611
 # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node
 from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
@@ -56,9 +56,6 @@ from .utils import (
     is_valid_transition,
     make_node_unavailable_taskres,
 )
-
-# pylint: enable=E0611
-
 
 SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
@@ -99,14 +96,6 @@ CREATE TABLE IF NOT EXISTS run(
     finished_at           TEXT,
     sub_status            TEXT,
     details               TEXT
-);
-"""
-
-SQL_CREATE_TABLE_CONTEXT = """
-CREATE TABLE IF NOT EXISTS context(
-    run_id                INTEGER UNIQUE,
-    context               BLOB,
-    FOREIGN KEY(run_id) REFERENCES run(run_id)
 );
 """
 
@@ -178,6 +167,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         """
         self.database_path = database_path
         self.conn: Optional[sqlite3.Connection] = None
+        self.lock = threading.RLock()
 
     def initialize(self, log_queries: bool = False) -> list[tuple[str]]:
         """Create tables if they don't exist yet.
