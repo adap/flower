@@ -29,6 +29,17 @@ from flwr.common.config import (
     get_project_dir,
 )
 from flwr.common.logger import log
+from flwr.common.serde import (
+    context_from_proto,
+    context_to_proto,
+    fab_from_proto,
+    run_from_proto,
+)
+from flwr.proto.driver_pb2 import (
+    PullServerAppInputsRequest,
+    PullServerAppInputsResponse,
+    PushServerAppOutputsRequest,
+)
 from flwr.server.driver.grpc_driver import GrpcDriver
 
 
@@ -103,15 +114,16 @@ def run_serverapp(  # pylint: disable=R0914
     while True:
 
         try:
-
             # Pull ServerAppInputs from LinkState
-            serverapp_inputs = driver.pull_serverapp_inputs(run_id=run_id)
-
-            if serverapp_inputs is None:
+            req = PullServerAppInputsRequest(run_id=run_id)
+            res: PullServerAppInputsResponse = driver._stub.PullServerAppInputs(req)
+            if not res.HasField("run"):
                 sleep(3)
                 continue
 
-            context, run, fab = serverapp_inputs
+            context = context_from_proto(res.context)
+            run = run_from_proto(res.run)
+            fab = fab_from_proto(res.fab)
 
             log(DEBUG, "ServerApp process starts FAB installation.")
             install_from_fab(fab.content, flwr_dir=flwr_dir, skip_prompt=True)
@@ -144,7 +156,9 @@ def run_serverapp(  # pylint: disable=R0914
             )
 
             # Send resulting context
-            driver.push_serverapp_outputs(run_id=run_id, context=updated_context)
+            context_proto = context_to_proto(updated_context)
+            req = PushServerAppOutputsRequest(run_id=run_id, context=context_proto)
+            res: PullServerAppInputsResponse = driver._stub.PushServerAppOutputs(req)
 
         except Exception as ex:  # pylint: disable=broad-exception-caught
             exc_entity = "ServerApp"
