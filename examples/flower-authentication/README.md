@@ -90,9 +90,8 @@ flower-superexec \
     --ssl-ca-certfile certificates/ca.crt \
     --ssl-certfile certificates/server.pem \
     --ssl-keyfile certificates/server.key \
-    --executor-config '--executor-config 'root-certificates=\"certificates/ca.crt\"'' \
+    --executor-config "root-certificates='certificates/ca.crt'" \
     --executor flwr.superexec.deployment:executor
-
 ```
 
 At this point your server-side is idling. First, let's connect two `SuperNodes`, and then we'll start a run.

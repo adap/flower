@@ -29,6 +29,8 @@ from flwr.common.config import unflatten_dict
 from flwr.common.constant import RUN_ID_NUM_BYTES
 from flwr.common.logger import log
 from flwr.common.typing import UserConfig
+from flwr.server.superlink.ffs.ffs_factory import FfsFactory
+from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 
 from .executor import Executor, RunTracker
@@ -69,6 +71,12 @@ class SimulationEngine(Executor):
     ) -> None:
         self.num_supernodes = num_supernodes
         self.verbose = verbose
+
+    @override
+    def initialize(
+        self, linkstate_factory: LinkStateFactory, ffs_factory: FfsFactory
+    ) -> None:
+        """Initialize the executor with the necessary factories."""
 
     @override
     def set_config(
