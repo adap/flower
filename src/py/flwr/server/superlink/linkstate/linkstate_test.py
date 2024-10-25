@@ -1124,7 +1124,6 @@ class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
 
         # Assert
         assert len(result) == 15
-        assert len(result) == 15
 
 
 class SqliteFileBasedTest(StateTest, unittest.TestCase):
@@ -1149,7 +1148,6 @@ class SqliteFileBasedTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 15
         assert len(result) == 15
 
 

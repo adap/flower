@@ -202,7 +202,6 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         # Create each table if not exists queries
         cur.execute(SQL_CREATE_TABLE_RUN)
         cur.execute(SQL_CREATE_TABLE_CONTEXT)
-        cur.execute(SQL_CREATE_TABLE_CONTEXT)
         cur.execute(SQL_CREATE_TABLE_TASK_INS)
         cur.execute(SQL_CREATE_TABLE_TASK_RES)
         cur.execute(SQL_CREATE_TABLE_NODE)
@@ -1110,7 +1109,6 @@ def task_res_to_dict(task_msg: TaskRes) -> dict[str, Any]:
 
 def dict_to_task_ins(task_dict: dict[str, Any]) -> TaskIns:
     """Turn task_dict into protobuf message."""
-    recordset = ProtoRecordSet()
     recordset = ProtoRecordSet()
     recordset.ParseFromString(task_dict["recordset"])
 
