@@ -52,7 +52,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         the receiving end.
     """
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         run_id: int,
         message_id: str,

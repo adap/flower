@@ -21,7 +21,7 @@ For example, to change the user ID of all files in the ``certificates/`` directo
 can run ``sudo chown -R 49999:49999 certificates/*``.
 
 If you later want to delete the directory, you can change the user ID back to the
-current user ID by running ``sudo chown -R $USER:$(id -gn) state``.
+current user ID by running ``sudo chown -R $USER:$(id -gn) certificates``.
 
 SuperLink
 ---------

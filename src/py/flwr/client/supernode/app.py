@@ -31,6 +31,8 @@ from flwr.common import EventType, event
 from flwr.common.config import parse_config_args
 from flwr.common.constant import (
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
+    ISOLATION_MODE_PROCESS,
+    ISOLATION_MODE_SUBPROCESS,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
@@ -38,23 +40,26 @@ from flwr.common.constant import (
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature
 
-from ..app import (
-    ISOLATION_MODE_PROCESS,
-    ISOLATION_MODE_SUBPROCESS,
-    start_client_internal,
-)
+from ..app import start_client_internal
 from ..clientapp.utils import get_load_client_app_fn
 
 
 def run_supernode() -> None:
     """Run Flower SuperNode."""
+    args = _parse_args_run_supernode().parse_args()
+    _warn_deprecated_server_arg(args)
+
     log(INFO, "Starting Flower SuperNode")
 
     event(EventType.RUN_SUPERNODE_ENTER)
 
-    args = _parse_args_run_supernode().parse_args()
-
-    _warn_deprecated_server_arg(args)
+    # Check if both `--flwr-dir` and `--isolation` were set
+    if args.flwr_dir is not None and args.isolation is not None:
+        log(
+            WARN,
+            "Both `--flwr-dir` and `--isolation` were specified. "
+            "Ignoring `--flwr-dir`.",
+        )
 
     root_certificates = _get_certificates(args)
     load_fn = get_load_client_app_fn(
@@ -178,12 +183,12 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         "--flwr-dir",
         default=None,
         help="""The path containing installed Flower Apps.
-    By default, this value is equal to:
+        The default directory is:
 
         - `$FLWR_HOME/` if `$FLWR_HOME` is defined
         - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
         - `$HOME/.flwr/` in all other cases
-    """,
+        """,
     )
     parser.add_argument(
         "--isolation",
@@ -193,10 +198,10 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
             ISOLATION_MODE_SUBPROCESS,
             ISOLATION_MODE_PROCESS,
         ],
-        help="Isolation mode when running `ClientApp` (optional, possible values: "
-        "`subprocess`, `process`). By default, `ClientApp` runs in the same process "
+        help="Isolation mode when running a `ClientApp` (optional, possible values: "
+        "`subprocess`, `process`). By default, a `ClientApp` runs in the same process "
         "that executes the SuperNode. Use `subprocess` to configure SuperNode to run "
-        "`ClientApp` in a subprocess. Use `process` to indicate that a separate "
+        "a `ClientApp` in a subprocess. Use `process` to indicate that a separate "
         "independent process gets created outside of SuperNode.",
     )
     parser.add_argument(

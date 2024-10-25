@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "flwr"
-version = "1.12.0"
+version = "1.13.0"
 description = "Flower: A Friendly Federated Learning Framework"
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.ai>"]
@@ -50,13 +50,14 @@ exclude = ["src/py/**/*_test.py"]
 # `flwr` CLI
 flwr = "flwr.cli.app:app"
 # SuperExec (can run with either Deployment Engine or Simulation Engine)
-flower-superexec = "flwr.superexec.app:run_superexec"
+flower-superexec = "flwr.superexec.app:run_superexec" # Deprecated
 # Simulation Engine
 flower-simulation = "flwr.simulation.run_simulation:run_simulation_from_cli"
 # Deployment Engine
 flower-superlink = "flwr.server.app:run_superlink"
 flower-supernode = "flwr.client.supernode.app:run_supernode"
-flower-server-app = "flwr.server.run_serverapp:run_server_app"
+flwr-serverapp = "flwr.server.serverapp:flwr_serverapp"
+flower-server-app = "flwr.server.run_serverapp:run_server_app" # Deprecated
 flwr-clientapp = "flwr.client.clientapp:flwr_clientapp"
 flower-client-app = "flwr.client.supernode:run_client_app" # Deprecated
 
@@ -95,7 +96,7 @@ black = { version = "==24.2.0", extras = ["jupyter"] }
 taplo = "==0.9.3"
 docformatter = "==1.7.5"
 mypy = "==1.8.0"
-pylint = "==3.0.3"
+pylint = "==3.3.1"
 flake8 = "==5.0.4"
 parameterized = "==0.9.0"
 pytest = "==7.4.4"
@@ -133,7 +134,7 @@ licensecheck = "==2024"
 pre-commit = "==3.5.0"
 sphinx-substitution-extensions = "2022.02.16"
 sphinxext-opengraph = "==0.9.1"
-docstrfmt = { git = "https://github.com/charlesbvll/docstrfmt.git", branch = "patch-1" }
+docstrfmt = { git = "https://github.com/charlesbvll/docstrfmt.git", branch = "patch-2" }
 docsig = "==0.64.0"
 
 [tool.docstrfmt]

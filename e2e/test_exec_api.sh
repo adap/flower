@@ -9,14 +9,13 @@ case "$1" in
                   --ssl-certfile    ../certificates/server.pem
                   --ssl-keyfile     ../certificates/server.key'
       client_arg='--root-certificates ../certificates/ca.crt'
-      # For $superexec_arg, note special ordering of single- and double-quotes
-      superexec_arg='--executor-config 'root-certificates=\"../certificates/ca.crt\"''
-      superexec_arg="$server_arg $superexec_arg"
+      # For $executor_config, note special ordering of single- and double-quotes
+      executor_config='root-certificates="../certificates/ca.crt"'
       ;;
     insecure)
       server_arg='--insecure'
       client_arg=$server_arg
-      superexec_arg=$server_arg
+      executor_config=''
     ;;
 esac
 
@@ -43,11 +42,11 @@ esac
 # Set engine
 case "$3" in
     deployment-engine)
-      superexec_engine_arg='--executor flwr.superexec.deployment:executor'
+      executor_arg="--executor flwr.superexec.deployment:executor"
       ;;
     simulation-engine)
-      superexec_engine_arg='--executor flwr.superexec.simulation:executor
-                            --executor-config 'num-supernodes=10''
+      executor_config="$executor_config num-supernodes=10"
+      executor_arg="--executor flwr.superexec.simulation:executor"
       ;;
 esac
 
@@ -69,14 +68,17 @@ pip install -e . --no-deps
 # Check if the first argument is 'insecure'
 if [ "$1" == "insecure" ]; then
   # If $1 is 'insecure', append the first line
-  echo -e $"\n[tool.flwr.federations.superexec]\naddress = \"127.0.0.1:9093\"\ninsecure = true" >> pyproject.toml
+  echo -e $"\n[tool.flwr.federations.e2e]\naddress = \"127.0.0.1:9093\"\ninsecure = true" >> pyproject.toml
 else
   # Otherwise, append the second line
-  echo -e $"\n[tool.flwr.federations.superexec]\naddress = \"127.0.0.1:9093\"\nroot-certificates = \"../certificates/ca.crt\"" >> pyproject.toml
+  echo -e $"\n[tool.flwr.federations.e2e]\naddress = \"127.0.0.1:9093\"\nroot-certificates = \"../certificates/ca.crt\"" >> pyproject.toml
 fi
 
-timeout 2m flower-superlink $server_arg $server_auth &
-sl_pid=$!
+# Combine the arguments into a single command for flower-superlink
+combined_args="$server_arg $server_auth $exec_api_arg $executor_arg"
+
+timeout 2m flower-superlink $combined_args --executor-config "$executor_config" 2>&1 | tee flwr_output.log &
+sl_pid=$(pgrep -f "flower-superlink")
 sleep 2
 
 timeout 2m flower-supernode ./ $client_arg \
@@ -91,11 +93,7 @@ timeout 2m flower-supernode ./ $client_arg \
 cl2_pid=$!
 sleep 2
 
-timeout 2m flower-superexec $superexec_arg $superexec_engine_arg 2>&1 | tee flwr_output.log &
-se_pid=$(pgrep -f "flower-superexec")
-sleep 2
-
-timeout 1m flwr run --run-config num-server-rounds=1 ../e2e-tmp-test superexec
+timeout 1m flwr run --run-config num-server-rounds=1 ../e2e-tmp-test e2e
 
 # Initialize a flag to track if training is successful
 found_success=false
@@ -107,7 +105,7 @@ while [ "$found_success" = false ] && [ $elapsed -lt $timeout ]; do
     if grep -q "Run finished" flwr_output.log; then
         echo "Training worked correctly!"
         found_success=true
-        kill $cl1_pid; kill $cl2_pid; sleep 1; kill $sl_pid; kill $se_pid;
+        kill $cl1_pid; kill $cl2_pid; sleep 1; kill $sl_pid;
     else
         echo "Waiting for training ... ($elapsed seconds elapsed)"
     fi
@@ -118,5 +116,5 @@ done
 
 if [ "$found_success" = false ]; then
     echo "Training had an issue and timed out."
-    kill $cl1_pid; kill $cl2_pid; kill $sl_pid; kill $se_pid;
+    kill $cl1_pid; kill $cl2_pid; kill $sl_pid;
 fi

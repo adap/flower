@@ -60,7 +60,7 @@ def valid_certificates(certificates: tuple[bytes, bytes, bytes]) -> bool:
     return is_valid
 
 
-def start_grpc_server(  # pylint: disable=too-many-arguments
+def start_grpc_server(  # pylint: disable=too-many-arguments,R0917
     client_manager: ClientManager,
     server_address: str,
     max_concurrent_workers: int = 1000,
@@ -156,7 +156,7 @@ def start_grpc_server(  # pylint: disable=too-many-arguments
     return server
 
 
-def generic_create_grpc_server(  # pylint: disable=too-many-arguments
+def generic_create_grpc_server(  # pylint: disable=too-many-arguments,R0917
     servicer_and_add_fn: Union[
         tuple[FleetServicer, AddServicerToServerFn],
         tuple[GrpcAdapterServicer, AddServicerToServerFn],

@@ -206,6 +206,7 @@ def parse_config_args(
     # Regular expression to capture key-value pairs with possible quoted values
     pattern = re.compile(r"(\S+?)=(\'[^\']*\'|\"[^\"]*\"|\S+)")
 
+    flat_overrides = {}
     for config_line in config:
         if config_line:
             # .toml files aren't allowed alongside other configs
@@ -217,8 +218,9 @@ def parse_config_args(
             matches = pattern.findall(config_line)
             toml_str = "\n".join(f"{k} = {v}" for k, v in matches)
             overrides.update(tomli.loads(toml_str))
+            flat_overrides = flatten_dict(overrides)
 
-    return overrides
+    return flat_overrides
 
 
 def get_metadata_from_config(config: dict[str, Any]) -> tuple[str, str]:

@@ -22,7 +22,7 @@ import ray
 
 from flwr.client import Client, NumPyClient
 from flwr.client.client_app import ClientApp
-from flwr.client.node_state import NodeState
+from flwr.client.run_info_store import DeprecatedRunInfoStore
 from flwr.common import (
     DEFAULT_TTL,
     Config,
@@ -142,7 +142,7 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
     """Test that ClientProxies get the result of client job they submit.
 
     All jobs are submitted at the same time. Then fetched one at a time. This also tests
-    NodeState (at each Proxy) and RunState basic functionality.
+    DeprecatedRunInfoStore (at each Proxy) and RunState basic functionality.
     """
     proxies, _, _ = prep()
     run_id = 0
@@ -193,10 +193,10 @@ def test_cid_consistency_without_proxies() -> None:
     _, pool, mapping = prep()
     node_ids = list(mapping.keys())
 
-    # register node states
-    node_states: dict[int, NodeState] = {}
+    # register DeprecatedRunInfoStores
+    node_info_stores: dict[int, DeprecatedRunInfoStore] = {}
     for node_id, partition_id in mapping.items():
-        node_states[node_id] = NodeState(
+        node_info_stores[node_id] = DeprecatedRunInfoStore(
             node_id=node_id,
             node_config={
                 PARTITION_ID_KEY: str(partition_id),
@@ -228,8 +228,8 @@ def test_cid_consistency_without_proxies() -> None:
             ),
         )
         # register and retrieve context
-        node_states[node_id].register_context(run_id=run_id)
-        context = node_states[node_id].retrieve_context(run_id=run_id)
+        node_info_stores[node_id].register_context(run_id=run_id)
+        context = node_info_stores[node_id].retrieve_context(run_id=run_id)
         partition_id_str = str(context.node_config[PARTITION_ID_KEY])
         pool.submit_client_job(
             lambda a, c_fn, j_fn, nid_, state: a.run.remote(c_fn, j_fn, nid_, state),
