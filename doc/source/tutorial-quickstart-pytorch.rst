@@ -226,7 +226,7 @@ The ClientApp
 The main changes we have to make to use `PyTorch` with `Flower` will be found in the
 ``get_weights()`` and ``set_weights()`` functions. In ``get_weights()`` PyTorch model
 parameters are extracted and represented as a list of NumPy arrays. The
-``set_weights()`` function that's the oposite: given a list of NumPy arrays it applies
+``set_weights()`` function that's the opposite: given a list of NumPy arrays it applies
 them to an existing PyTorch model. Doing this in fairly easy in PyTorch.
 
 .. note::
