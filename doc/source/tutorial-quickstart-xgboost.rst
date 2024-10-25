@@ -399,7 +399,7 @@ We first define a strategy for XGBoost bagging aggregation.
         return config
 
 We use two clients for this example. An ``evaluate_metrics_aggregation`` function is
-defined to collect and wighted average the AUC values from clients. The ``config_func``
+defined to collect and weighted average the AUC values from clients. The ``config_func``
 function is to return the current FL round number to client's ``fit()`` and
 ``evaluate()`` methods.
 
