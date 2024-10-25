@@ -30,7 +30,7 @@ from flwr.common.typing import Fab, Run
 class FleetConnection(ABC):
     """Abstract base class for SuperNode connections."""
 
-    def __init__(  # pylint: disable=R0913, R0914, R0915
+    def __init__(  # pylint: disable=R0913, R0914, R0915, R0917
         self,
         server_address: str,
         insecure: bool,
