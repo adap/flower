@@ -4,7 +4,7 @@ import random
 from typing import List
 
 from flwr_datasets import FederatedDataset
-from flwr_datasets.partitioner import NaturalIdPartitioner
+from flwr_datasets.partitioner import GroupedNaturalIdPartitioner
 from transformers import WhisperProcessor
 
 from datasets import Dataset, concatenate_datasets
@@ -20,7 +20,9 @@ def load_data(
     # Only initialize `FederatedDataset` once
     global fds
     if fds is None:
-        partitioner = NaturalIdPartitioner(partition_by="speaker_id")
+        partitioner = GroupedNaturalIdPartitioner(
+            partition_by="speaker_id", group_size=30
+        )
         fds = FederatedDataset(
             dataset="speech_commands",
             subset="v0.02",
