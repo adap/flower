@@ -15,21 +15,25 @@
 """Driver API servicer."""
 
 
+import threading
 import time
-from logging import DEBUG
+from logging import DEBUG, INFO
 from typing import Optional
 from uuid import UUID
 
 import grpc
 
+from flwr.common.constant import Status
 from flwr.common.logger import log
 from flwr.common.serde import (
+    context_from_proto,
+    context_to_proto,
     fab_from_proto,
     fab_to_proto,
+    run_to_proto,
     user_config_from_proto,
-    user_config_to_proto,
 )
-from flwr.common.typing import Fab
+from flwr.common.typing import Fab, RunStatus
 from flwr.proto import driver_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
@@ -50,7 +54,6 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     CreateRunResponse,
     GetRunRequest,
     GetRunResponse,
-    Run,
 )
 from flwr.proto.task_pb2 import TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs import Ffs
@@ -67,6 +70,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
     ) -> None:
         self.state_factory = state_factory
         self.ffs_factory = ffs_factory
+        self.lock = threading.RLock()
 
     def GetNodes(
         self, request: GetNodesRequest, context: grpc.ServicerContext
@@ -181,15 +185,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         if run is None:
             return GetRunResponse()
 
-        return GetRunResponse(
-            run=Run(
-                run_id=run.run_id,
-                fab_id=run.fab_id,
-                fab_version=run.fab_version,
-                override_config=user_config_to_proto(run.override_config),
-                fab_hash=run.fab_hash,
-            )
-        )
+        return GetRunResponse(run=run_to_proto(run))
 
     def GetFab(
         self, request: GetFabRequest, context: grpc.ServicerContext
@@ -208,13 +204,53 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         self, request: PullServerAppInputsRequest, context: grpc.ServicerContext
     ) -> PullServerAppInputsResponse:
         """Pull ServerApp process inputs."""
-        raise NotImplementedError()
+        log(DEBUG, "DriverServicer.PullServerAppInputs")
+        # Init access to LinkState and Ffs
+        state = self.state_factory.state()
+        ffs = self.ffs_factory.ffs()
+
+        # Lock access to LinkState, preventing obtaining the same pending run_id
+        with self.lock:
+            # If run_id is provided, use it, otherwise use the pending run_id
+            if request.HasField("run_id"):
+                run_id: Optional[int] = request.run_id
+            else:
+                run_id = state.get_pending_run_id()
+            # If there's no pending run, return an empty response
+            if run_id is None:
+                return PullServerAppInputsResponse()
+
+            # Retrieve Context, Run and Fab for the run_id
+            serverapp_ctxt = state.get_serverapp_context(run_id)
+            run = state.get_run(run_id)
+            fab = None
+            if run and run.fab_hash:
+                if result := ffs.get(run.fab_hash):
+                    fab = Fab(run.fab_hash, result[0])
+            if run and fab:
+                # Update run status to STARTING
+                if state.update_run_status(run_id, RunStatus(Status.STARTING, "", "")):
+                    log(INFO, "Starting run %d", run_id)
+                    return PullServerAppInputsResponse(
+                        context=(
+                            context_to_proto(serverapp_ctxt) if serverapp_ctxt else None
+                        ),
+                        run=run_to_proto(run),
+                        fab=fab_to_proto(fab),
+                    )
+
+        # Raise an exception if the Run or Fab is not found,
+        # or if the status cannot be updated to STARTING
+        raise RuntimeError(f"Failed to start run {run_id}")
 
     def PushServerAppOutputs(
         self, request: PushServerAppOutputsRequest, context: grpc.ServicerContext
     ) -> PushServerAppOutputsResponse:
         """Push ServerApp process outputs."""
-        raise NotImplementedError()
+        log(DEBUG, "DriverServicer.PushServerAppOutputs")
+        state = self.state_factory.state()
+        state.set_serverapp_context(request.run_id, context_from_proto(request.context))
+        return PushServerAppOutputsResponse()
 
 
 def _raise_if(validation_error: bool, detail: str) -> None:
