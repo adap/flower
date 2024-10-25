@@ -136,7 +136,7 @@ class RereFleetConnection(FleetConnection):
         return self.node.node_id
 
     def delete_node(self) -> None:
-        """Request to create a node."""
+        """Request to delete a node."""
         # Get Node
         if self.node is None:
             log(ERROR, "Node instance missing")

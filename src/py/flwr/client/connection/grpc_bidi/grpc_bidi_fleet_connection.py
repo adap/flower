@@ -122,7 +122,7 @@ class GrpcBidiFleetConnection(FleetConnection):
         return -1
 
     def delete_node(self) -> None:
-        """Request to create a node."""
+        """Request to delete a node."""
         log(DEBUG, "DeleteNode API is not supported by GrpcBidiConnection.")
 
     def receive(self) -> Message | None:
