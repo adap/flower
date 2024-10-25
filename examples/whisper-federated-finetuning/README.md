@@ -122,9 +122,12 @@ In this example, we use the [GroupedNaturalIdPartitioner](https://flower.ai/docs
 
 ![Federated Whisper Finetuning pipeline](_static/federated_finetuning_flower_pipeline.png)
 
-The resulting data partitions are not equal-sized (which is what you'd often find in practice in the real world) because not all `speaker_id` contributed the same amount of audio clips when the [Speech Commands Dataset](https://arxiv.org/abs/1804.03209) was created. If we make a bar plot showing the amount of data each client has this is the result.
+The resulting data partitions are not equal-sized (which is what you'd often find in practice in the real world) because not all `speaker_id` contributed the same amount of audio clips when the [Speech Commands Dataset](https://arxiv.org/abs/1804.03209) was created. If we make a bar plot showing the amount of data each client/node has this is the result.
 
 ![Amount of data per client](_static/whisper_flower_data.png)
+
+> [!NOTE]
+> You can make create this plot or adjust it by running the [visualize_labels](visualize_labels.ipynb) notebook. It makes use of Flower Dataset's [visualization tools](https://flower.ai/docs/datasets/tutorial-visualize-label-distribution.html).
 
 An overview of the FL pipeline built with Flower for this example is illustrated above.
 
