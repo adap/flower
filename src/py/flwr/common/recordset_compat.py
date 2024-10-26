@@ -171,9 +171,7 @@ def _fit_or_evaluate_ins_to_recordset(
     parametersrecord = parameters_to_parametersrecord(ins.parameters, keep_input)
     recordset.parameters_records[f"{ins_str}.parameters"] = parametersrecord
 
-    recordset.configs_records[f"{ins_str}.config"] = ConfigsRecord(
-        ins.config  # type: ignore
-    )
+    recordset.configs_records[f"{ins_str}.config"] = ConfigsRecord(ins.config)
 
     return recordset
 
@@ -239,9 +237,7 @@ def fitres_to_recordset(fitres: FitRes, keep_input: bool) -> RecordSet:
 
     res_str = "fitres"
 
-    recordset.configs_records[f"{res_str}.metrics"] = ConfigsRecord(
-        fitres.metrics  # type: ignore
-    )
+    recordset.configs_records[f"{res_str}.metrics"] = ConfigsRecord(fitres.metrics)
     recordset.metrics_records[f"{res_str}.num_examples"] = MetricsRecord(
         {"num_examples": fitres.num_examples},
     )
@@ -311,7 +307,7 @@ def evaluateres_to_recordset(evaluateres: EvaluateRes) -> RecordSet:
 
     # metrics
     recordset.configs_records[f"{res_str}.metrics"] = ConfigsRecord(
-        evaluateres.metrics,  # type: ignore
+        evaluateres.metrics,
     )
 
     # status
@@ -336,7 +332,7 @@ def getparametersins_to_recordset(getparameters_ins: GetParametersIns) -> Record
     recordset = RecordSet()
 
     recordset.configs_records["getparametersins.config"] = ConfigsRecord(
-        getparameters_ins.config,  # type: ignore
+        getparameters_ins.config,
     )
     return recordset
 
@@ -386,7 +382,7 @@ def getpropertiesins_to_recordset(getpropertiesins: GetPropertiesIns) -> RecordS
     """Construct a RecordSet from a GetPropertiesRes object."""
     recordset = RecordSet()
     recordset.configs_records["getpropertiesins.config"] = ConfigsRecord(
-        getpropertiesins.config,  # type: ignore
+        getpropertiesins.config,
     )
     return recordset
 
@@ -408,7 +404,7 @@ def getpropertiesres_to_recordset(getpropertiesres: GetPropertiesRes) -> RecordS
     recordset = RecordSet()
     res_str = "getpropertiesres"
     recordset.configs_records[f"{res_str}.properties"] = ConfigsRecord(
-        getpropertiesres.properties,  # type: ignore
+        getpropertiesres.properties,
     )
     # status
     recordset = _embed_status_into_recordset(

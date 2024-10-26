@@ -61,7 +61,9 @@ class DummyClient(NumPyClient):
 
     def get_properties(self, config: Config) -> dict[str, Scalar]:
         """Return properties by doing a simple calculation."""
-        result = float(config["factor"]) * pi
+        factor = config["factor"]
+        assert isinstance(factor, float)
+        result = factor * pi
 
         # store something in context
         self.client_state.configs_records["result"] = ConfigsRecord({"result": result})

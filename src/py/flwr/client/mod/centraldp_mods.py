@@ -61,7 +61,10 @@ def fixedclipping_mod(
             f" the server side."
         )
 
-    clipping_norm = float(fit_ins.config[KEY_CLIPPING_NORM])
+    clipping_norm = fit_ins.config[KEY_CLIPPING_NORM]
+    if not isinstance(clipping_norm, float):
+        raise ValueError(f"{KEY_CLIPPING_NORM} should be a float value.")
+
     server_to_client_params = parameters_to_ndarrays(fit_ins.parameters)
 
     # Call inner app
@@ -124,9 +127,11 @@ def adaptiveclipping_mod(
             f"DifferentialPrivacyClientSideFixedClipping wrapper at"
             f" the server side."
         )
-    if not isinstance(fit_ins.config[KEY_CLIPPING_NORM], float):
+
+    clipping_norm = fit_ins.config[KEY_CLIPPING_NORM]
+    if not isinstance(clipping_norm, float):
         raise ValueError(f"{KEY_CLIPPING_NORM} should be a float value.")
-    clipping_norm = float(fit_ins.config[KEY_CLIPPING_NORM])
+
     server_to_client_params = parameters_to_ndarrays(fit_ins.parameters)
 
     # Call inner app

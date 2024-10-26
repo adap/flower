@@ -31,8 +31,8 @@ NDArrays = list[NDArray]
 # ProtoBuf considers to be "Scalar Value Types", even though some of them arguably do
 # not conform to other definitions of what a scalar is. Source:
 # https://developers.google.com/protocol-buffers/docs/overview#scalar
-Scalar = Union[bool, bytes, float, int, str]
-Value = Union[
+# Scalar = Union[bool, bytes, float, int, str]
+Scalar = Union[
     bool,
     bytes,
     float,
