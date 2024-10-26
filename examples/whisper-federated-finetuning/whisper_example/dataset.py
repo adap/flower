@@ -4,6 +4,7 @@ import random
 from typing import List
 
 from flwr_datasets import FederatedDataset
+from datasets import load_from_disk
 from flwr_datasets.partitioner import GroupedNaturalIdPartitioner
 from transformers import WhisperProcessor
 
@@ -47,6 +48,11 @@ def load_data(
         partition = concatenate_datasets([partition, silence_enc])
 
     return partition
+
+
+def load_data_from_disk(data_path):
+    """Load ddata from a partition explicitly saved to disk."""
+    return load_from_disk(data_path)
 
 
 def get_encoding_fn(processor):

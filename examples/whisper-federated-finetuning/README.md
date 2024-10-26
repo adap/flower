@@ -115,7 +115,7 @@ print(len(ids))
 # 2113  # <--- +1 since a "None" speaker is included (for clips to construct the _silence_ training examples)
 ```
 
-In this example, we use the [GroupedNaturalIdPartitioner](https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.GroupedNaturalIdPartitioner.html) from [Flower Datasets](https://flower.ai/docs/datasets/index.html) to partition the SpeepCommands dataset based on `speaker_id`. We will create 100 groups, each containing a varying number of speakers. Each `speaker_id` is only present in a single group. You can think of each group as an individual Federated Learning _node_ that contains several users/speakers. One way to think about this is to view each client as an office with several people working there, each interacting with the Keyword spotting system.
+In this example, we use the [GroupedNaturalIdPartitioner](https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.GroupedNaturalIdPartitioner.html) from [Flower Datasets](https://flower.ai/docs/datasets/index.html) to partition the SpeepCommands dataset based on `speaker_id`. We will create groups of 5 speakers, this will result in a total of 422 groups, each representing a node/client in the federation.. Each `speaker_id` is only present in a single group. You can think of each group as an individual Federated Learning _node_ that contains several users/speakers. One way to think about this is to view each client as an office with several people working there, each interacting with the Keyword spotting system.
 
 ![Federated Whisper Finetuning pipeline](_static/federated_finetuning_flower_pipeline.png)
 
@@ -143,7 +143,7 @@ The run is defined in the `pyproject.toml` which: specifies the paths to `Client
 > By default, it will run on CPU only. On a MacBook Pro M2, running 3 rounds of Flower FL should take ~10 min. Assuming the dataset has already been downloaded. Running on GPU is recommended.
 
 ```shell
-# Run with default settings
+# Run with default settings (21 clients per round out of 422)
 flwr run .
 ```
 
@@ -164,8 +164,9 @@ INFO :
 
 To run your `ClientApps` on GPU, you'll need to run it in another federation (see `local-sim-gpu` in `pyprojec.toml`). To adjust the degree of parallelism, consider updating the `option.backend` settings. `ClientApp` instances consume only 800MB of VRAM, which enables you to run several in parallel in the same GPU. By default, the command below will run `5xClientApp` in parallel for each GPU available.
 
-```
-# Run with GPU
+```shell
+# Run with GPU (21 clients per round out of 422)
+# (each active client gets allocated 20% available VRAM)
 flwr run . local-sim-gpu
 ```
 
@@ -252,7 +253,7 @@ This example will use the first approach (i.e. not using Docker).
 First, ensure your Rasberry Pi has been setup correctly. You'll need either a Rasbperry Pi 4 or 5. Using the code as-is, RAM usage on the Raspberry Pi does not exceed 1.5GB. Note that unlike in the previous sections of this example, clients for Raspberry Pi work better when using PyTorch 1.13.1 (or earlier versions to PyTorch 2.0 in general).
 
 > \[!TIP\]
-> Follow the `Setup your Pi` section in the [examples/embedded-devices]() example to set it up if you haven't done so already.
+> Follow the `Setup your Pi` section in the [examples/embedded-devices](<>) example to set it up if you haven't done so already.
 
 Second, generate and copy the a single data partition to your raspbery pi. Do so from your development machine (e.g. your laptop) as shown earlier in the [Run with the Deployment Engine](<>) section.
 

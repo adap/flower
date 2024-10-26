@@ -26,7 +26,7 @@ clientapp = "whisper_example.client_app:app"
 
 [tool.flwr.app.config]
 num-server-rounds = 3
-fraction-fit = 0.05 # sample 5% of clients in each round (5% of 70 is 3)
+fraction-fit = 0.05 # sample 5% of clients in each round (5% of 422 is 21)
 num-classes = 12
 batch-size = 8
 compile-model = false
@@ -39,13 +39,13 @@ default = "local-sim"
 
 
 [tool.flwr.federations.local-sim]
-options.num-supernodes = 70 # we are grouping 2112 speakers into groups of 30
+options.num-supernodes = 422 # we are grouping 2112 speakers into groups of 5
 options.backend.client-resources.num-cpus = 4
 options.backend.client-resources.num-gpus = 0.0
 options.backend.init-args.log-to-driver = false # set to true to enable all logs from simulation engine
 
 [tool.flwr.federations.local-sim-gpu]
-options.num-supernodes = 70 # we are grouping 2112 speakers into groups of 30
+options.num-supernodes = 422 # we are grouping 2112 speakers into groups of 5
 options.backend.client-resources.num-cpus = 2
 options.backend.client-resources.num-gpus = 0.2
 options.backend.init-args.log-to-driver = false # set to true to enable all logs from simulation engine
