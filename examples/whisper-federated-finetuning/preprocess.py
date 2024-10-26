@@ -1,17 +1,43 @@
+import argparse
 from multiprocessing import Pool
 from time import time
 
-from whisper_example.task import load_data
+import tomli
+from whisper_example.dataset import load_data
 
 from datasets import load_dataset
 
-TOTAL_TRAIN_PARTITIONS = 2112
+parser = argparse.ArgumentParser(description="Whisper preprocessing")
+
+parser.add_argument(
+    "--partition-id", type=int, help="The partition to create and save."
+)
+
+args = parser.parse_args()
 
 
-def process_one_partition(partition_id: int):
-    _ = load_data(
-        partition_id,
-    )
+# Open and read the pyproject.toml
+with open("pyproject.toml", "rb") as file:
+    flwr_config = tomli.load(file)["tool"]["flwr"]
+
+# Display
+print(flwr_config)
+remove_cols = flwr_config["app"]["config"]["remove-cols"]
+num_supernodes = flwr_config["federations"]["local-sim"]["options"]["num-supernodes"]
+
+# If specified one partition, only that one will be processed and saved to the current directory
+if args.partition_id:
+    print(f"Pre-processing partition {args.partition_id} only.")
+else:
+    print(f"Pre-processing dataset into {num_supernodes} partitions.")
+
+
+def process_one_partition(partition_id: int, save: bool = False):
+    pp = load_data(partition_id, remove_cols)
+    if save:
+        file_name = f"partition_{partition_id}"
+        pp.save_to_disk(file_name)
+        print(f"Saved partition to disk: {file_name}")
 
 
 if __name__ == "__main__":
@@ -22,8 +48,13 @@ if __name__ == "__main__":
     # Parallelize the processing of each partition in the dataset
     t_start = time()
     num_proc = None  # set it if you want to limit the number of processes
-    with Pool(num_proc) as pool:
-        pool.map(process_one_partition, range(TOTAL_TRAIN_PARTITIONS))
-    print(
-        f"Pre-processing {TOTAL_TRAIN_PARTITIONS} partitions took: {time() - t_start:.2f} s"
-    )
+
+    if args.partition_id:
+        process_one_partition(args.partition_id, True)
+
+    else:
+        with Pool(num_proc) as pool:
+            pool.map(process_one_partition, range(num_supernodes))
+        print(
+            f"Pre-processing {num_supernodes} partitions took: {time() - t_start:.2f} s"
+        )

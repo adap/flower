@@ -22,8 +22,8 @@ echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
 echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
 echo 'eval "$(pyenv init -)"' >> ~/.bashrc
 
-# Install python 3.9+
-pyenv install 3.9.17
+# Install python 3.10+
+pyenv install 3.10.14
 
 # Install pyenv virtual env plugin
 git clone https://github.com/pyenv/pyenv-virtualenv.git $(pyenv root)/plugins/pyenv-virtualenv
@@ -31,7 +31,7 @@ git clone https://github.com/pyenv/pyenv-virtualenv.git $(pyenv root)/plugins/py
 exec "$SHELL"
 
 # Create the environment
-pyenv virtualenv 3.9.17 flower-whisperer
+pyenv virtualenv 3.10.14 flower-whisperer
 ```
 
 ## Installing the dependencies for Whisper+Flower

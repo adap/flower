@@ -100,9 +100,6 @@ Centralized training is ok but in many settings it cannot be realised. Primarily
 
 There are a total of 2112 speakers in the `train` partition, which is the one we'll use in FL.
 
-> \[!CAUTION\]
-> Replace with FDS group partitioner code
-
 ```python
 from datasets import load_dataset
 sc_train = load_dataset("speech_commands", "v0.02", split="train", token=False)
@@ -143,11 +140,26 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 The run is defined in the `pyproject.toml` which: specifies the paths to `ClientApp` and `ServerApp` as well as their parameterization with configs in the `[tool.flwr.app.config]` block.
 
 > \[!NOTE\]
-> By default, it will run on CPU only. On a MacBook Pro M2, running 5 rounds of Flower FL should take ~10 min. Assuming the dataset has already been downloaded. Running on GPU is recommended.
+> By default, it will run on CPU only. On a MacBook Pro M2, running 3 rounds of Flower FL should take ~10 min. Assuming the dataset has already been downloaded. Running on GPU is recommended.
 
 ```shell
 # Run with default settings
 flwr run .
+```
+
+You can expect a summary at then showing federated metrics (i.e. the average training accuracy and loss across clients sampled in a round) looking like this:
+
+```shell
+INFO :      [SUMMARY]
+INFO :      Run finished 3 round(s) in 564.50s
+INFO :          History (metrics, distributed, fit):
+INFO :          {'train_accuracy': [(1, 0.637721849625075),
+INFO :                              (2, 0.8666815319504736),
+INFO :                              (3, 0.8912498749526644)],
+INFO :           'train_loss': [(1, 4.049714171341712),
+INFO :                          (2, 1.8473016127565092),
+INFO :                          (3, 2.5116721350250693)]}
+INFO :
 ```
 
 To run your `ClientApps` on GPU, you'll need to run it in another federation (see `local-sim-gpu` in `pyprojec.toml`). To adjust the degree of parallelism, consider updating the `option.backend` settings. `ClientApp` instances consume only 800MB of VRAM, which enables you to run several in parallel in the same GPU. By default, the command below will run `5xClientApp` in parallel for each GPU available.
@@ -166,9 +178,6 @@ flwr run . --run-config "num-server-rounds=10 fraction-fit=0.2"
 
 With just 5 FL rounds, the global model should be reaching ~97% validation accuracy. A test accuracy of 96% can be reached with 10 rounds of FL training using the default hyperparameters. On an RTX 3090Ti, each round takes ~40-50s depending on the amount of data the clients selected in a round have.
 
-> \[!CAUTION\]
-> Replace after group partitioner is introduced
-
 Run on GPU with central evaluation activated and for 10 rounds.
 
 ```shell
@@ -182,82 +191,78 @@ flwr run . local-sim-gpu --run-config "central-eval=true num-server-rounds=10"
 
 ### Run with the Deployment Engine
 
-> \[!CAUTION\]
-> Replace after deployment enginge consensus on instructions
+> \[!NOTE\]
+> The steps here outline the very few changes you need to make to the code provided in this example to run with the Deployment Engine instead of with the Simulation Engine. For a complete guide on how the Deployment Engine works, please check the [Flower Documenation](<>) which includes also [how to use Flower with Docker](https://flower.ai/docs/framework/docker/index.html).
 
-Running the exact same FL pipeline as in the simulation setting can be done wihtout requiring any change to the `ClientApp` and `ServerApp` design. To achieve this, you need to ...
+Running the exact same FL pipeline as in the simulation setting can be done wihtout requiring any change to the `ServerApp` design. For the `ClientApp` we need to slightly adjust the logic that loads the dataset. While in simulations we want to dynamically make a Python process to _behave_ like a particular client by loading its corresponding partition, in deployment mode we want the same client process (linked to a single `SuperNode`) to always use its own dataset that lives locally in the machine running the `SuperNode`.
 
-```bash
-# python client.py --server_address='localhost' --cid=50
-# This client runs on a NVIDIA RTX 3090Ti
-INFO flwr 2023-11-08 14:12:50,135 | grpc.py:49 | Opened insecure gRPC connection (no certificates were passed)
-DEBUG flwr 2023-11-08 14:12:50,136 | connection.py:42 | ChannelConnectivity.IDLE
-DEBUG flwr 2023-11-08 14:12:50,136 | connection.py:42 | ChannelConnectivity.CONNECTING
-DEBUG flwr 2023-11-08 14:12:50,140 | connection.py:42 | ChannelConnectivity.READY
-99%|████████████████████████| 920/925 [00:09<00:00, 93.39it/s, avg_loss=2.4414, avg_acc=0.1837]
-99%|████████████████████████| 920/925 [00:04<00:00, 216.93it/s, avg_loss=2.0191, avg_acc=0.3315]
-99%|████████████████████████| 920/925 [00:04<00:00, 214.29it/s, avg_loss=1.5950, avg_acc=0.5500]
-99%|████████████████████████| 920/925 [00:04<00:00, 212.70it/s, avg_loss=1.1883, avg_acc=0.7348]
-99%|████████████████████████| 920/925 [00:04<00:00, 208.69it/s, avg_loss=0.8466, avg_acc=0.8228]
-99%|████████████████████████| 920/925 [00:04<00:00, 206.31it/s, avg_loss=0.6353, avg_acc=0.8837]
-99%|████████████████████████| 920/925 [00:03<00:00, 266.73it/s, avg_loss=0.4842, avg_acc=0.9207]
-99%|████████████████████████| 920/925 [00:04<00:00, 212.13it/s, avg_loss=0.3519, avg_acc=0.9391]
-99%|████████████████████████| 920/925 [00:04<00:00, 213.17it/s, avg_loss=0.3233, avg_acc=0.9359]
-99%|████████████████████████| 920/925 [00:04<00:00, 205.12it/s, avg_loss=0.2646, avg_acc=0.9543]
-DEBUG flwr 2023-11-08 14:20:01,065 | connection.py:139 | gRPC channel closed
-INFO flwr 2023-11-08 14:20:01,065 | app.py:215 | Disconnect and shut down
+An obvious first step would be to generate N data partitions and assing each to a different `SuperNode`. Let's start with this step by means of the `preprocess.py` script. These are the steps we'll follow:
+
+1. Extract and save two partitions from the dataset. Each will be assigned to a different `SuperNode`.
+2. Modify the `client_fn` in `client_app.py` so directly loads the partition specified when launching the `SuperNode`.
+3. Copy the generate partition to the machine where the `SuperNode` is going to be executed.
+
+**1. Save a data partition**
+
+Run twice the following command, each time indicating a different partition id. Each time you run it a directory in the form `partition_<id>` will be created.
+
+```shell
+python preprocess.py --partition-id=5
+```
+
+**2. Adjust `client_fn`**
+
+Rename the `partition-id` key with something more meaningful such as `local-dataset` in file `whisper_example/client_app.py` and replace the call to `load_data` with `load_data_from_disk`. This will make your `ClientApp` use the dataset you point your `SuperNode` to when launching it:
+
+```python
+from whisper_example.dataset import load_data_from_disk
+
+def client_fn(context: Context):
+
+    # partition_id = context.node_config["partition-id"] # disable
+    local_data = context.node_config["local-data"]  # new line
+
+    # keep the same
+
+    # replace the `load_data` lines with this
+    partition = load_data_from_disk(local_data)
+    print(partition)
+```
+
+**3. Make data available to the SuperNode**
+
+You will need to copy the generated directory in step 1 to the machine that will run the `SuperNode`. You can use `scp` in order to do that.
+
+With steps 1-3 completed, you are ready to run Federated Wishper finetuning with Flower's Deployment Eninge. To connect a `SuperNode` to an existing federation (i.e. a running `SuperLink`) you'd do it like this assuming all the python dependencies (i.e. `flwr`, `transformers`, `torch` are installed -- see `pyproject.toml`):
+
+```shell
+flower-supernode --superlink="<SUPERLINK-IP>:9092" --isolation="subprocess" \
+                 --node-config="local-data='<path/to/local/partition>'"
 ```
 
 ### Federated Finetuning on Raspberry Pi
 
-> \[!CAUTION\]
-> Replace after deployment enginge consensus on instructions
+To launch a Flower `SuperNode` on a Raspberry Pi you'd typically follow the same steps you do on any other machine you'd like to connect to a federation. Largely speaking there are two ways of doing this:
 
-Setting up the environment for the Raspberry Pi is not that different from the steps you'd follow on any other Ubuntu machine (this example assumes your Raspberry Pi -- either 5 or 4 -- runs Ubuntu server 22.04/23.10 64bits). Using the code as-is, RAM usage on the Raspberry Pi does not exceed 1.5GB. Note that unlike in the previous sections of this example, clients for Raspberry Pi work better when using PyTorch 1.13.1 (or earlier versions to PyTorch 2.0 in general).
+1. Have a Python environment with Flower and relevant dependencies for your `ClientApp` installed.
+2. If you prefer using Docker, then defining a Dockerfile for your `SuperNode` using the provided based images is sufficient.
 
-> Please follow the steps [here](rpi_setup.md) if you are looking for a step-by-step guide on how to setup your Raspberry Pi to run this example.
+This example will use the first approach (i.e. not using Docker).
 
-In order to run this example on a Raspberry Pi, you'll need to follow the same steps as outlined above in the `non-simulated` section. First, launch the server on your development machine.
+First, ensure your Rasberry Pi has been setup correctly. You'll need either a Rasbperry Pi 4 or 5. Using the code as-is, RAM usage on the Raspberry Pi does not exceed 1.5GB. Note that unlike in the previous sections of this example, clients for Raspberry Pi work better when using PyTorch 1.13.1 (or earlier versions to PyTorch 2.0 in general).
 
-```bash
-# The server will wait until at least two clients are connected
-python server.py --server_addres=<YOUR_SERVER_IP>
+> \[!TIP\]
+> Follow the `Setup your Pi` section in the [examples/embedded-devices]() example to set it up if you haven't done so already.
+
+Second, generate and copy the a single data partition to your raspbery pi. Do so from your development machine (e.g. your laptop) as shown earlier in the [Run with the Deployment Engine](<>) section.
+
+```shell
+python preprocess.py --partition-id=5
 ```
 
-Then, on each of your Raspberry Pi do the following. If you only have one RPi, you can still run the example! But you will need two clients. In addition to the one on the Raspberry Pi, you could launch a client in a separate terminal on your development machine (as shown above in the `non-simulated` section).
+Finally, assuming you have a `SuperLink` running on a machine (e.g. your laptop) and which can be reached by your Raspberry Pi (e.g. because they are in the same network), launch the `SuperNode` as shown earlier:
 
-```bash
-# use a difference `--cid` (client id) to make this device load a particular dataset partition
-# we pass the `--no-compile` option since for RPi we are not using PyTorch 2.0+
-python client.py --server_address=<YOUR_SERVER_IP> --cid=0 --no-compile
-```
-
-The first time you run a client on the RPi, the dataset of a client needs to be extracted from the full train set and then pre-processed. The Raspberry Pi 5 is also faster in this pre-processing stage using `.filter()` and `.map()` of 🤗 HuggingFace Dataset. `map()` used `num_proc=4`:
-
-|                **Stage**                |                      Notes                       | **RPi 4** | **RPi 5** |
-| :-------------------------------------: | :----------------------------------------------: | --------- | --------- |
-| Filter through training set (~85k rows) |     doing `.filter()` in `client.client_fn`      | 1:58      | 0.37      |
-| Encode 845 rows with `WhisperProcessor` | doing `.map()` passing `utils.prepare_dataset()` | 1:55      | 1:06      |
-
-Some clients have more data than others, but on average, the RPi5 is 1.9x faster than an RPi4 when training the classification head given a frozen encoder. A client with 925 training examples needs ~20min on an RPi to complete an epoch of on-device finetuning.
-
-```bash
-# Running the 50-th client on a RPi 5 showed the following log (a RPi4 ran client 83)
-python client.py --cid=50 --server_address=<YOUR_SERVER_IP> --no-compile
-INFO flwr 2023-11-08 16:20:33,331 | grpc.py:49 | Opened insecure gRPC connection (no certificates were passed)
-DEBUG flwr 2023-11-08 16:20:33,333 | connection.py:42 | ChannelConnectivity.IDLE
-DEBUG flwr 2023-11-08 16:20:33,334 | connection.py:42 | ChannelConnectivity.CONNECTING
-DEBUG flwr 2023-11-08 16:20:33,349 | connection.py:42 | ChannelConnectivity.READY
-99%|████████████████████████████████████████| 920/925 [20:09<00:06,  1.31s/it, avg_loss=2.4392, avg_acc=0.1902]
-99%|████████████████████████████████████████| 920/925 [20:06<00:06,  1.31s/it, avg_loss=1.9830, avg_acc=0.3533]
-99%|████████████████████████████████████████| 920/925 [20:06<00:06,  1.31s/it, avg_loss=1.6069, avg_acc=0.5641]
-99%|████████████████████████████████████████| 920/925 [20:07<00:06,  1.31s/it, avg_loss=1.1933, avg_acc=0.7402]
-99%|████████████████████████████████████████| 920/925 [20:07<00:06,  1.31s/it, avg_loss=0.8749, avg_acc=0.8478]
-99%|████████████████████████████████████████| 920/925 [20:06<00:06,  1.31s/it, avg_loss=0.5933, avg_acc=0.9109]
-99%|████████████████████████████████████████| 920/925 [20:08<00:06,  1.31s/it, avg_loss=0.4882, avg_acc=0.9359]
-99%|████████████████████████████████████████| 920/925 [20:01<00:06,  1.31s/it, avg_loss=0.4022, avg_acc=0.9304]
-99%|████████████████████████████████████████| 920/925 [20:10<00:06,  1.32s/it, avg_loss=0.3219, avg_acc=0.9533]
-99%|████████████████████████████████████████| 920/925 [20:13<00:06,  1.32s/it, avg_loss=0.2729, avg_acc=0.9641]
-DEBUG flwr 2023-11-08 19:47:56,544 | connection.py:139 | gRPC channel closed
-INFO flwr 2023-11-08 19:47:56,544 | app.py:215 | Disconnect and shut down
+```shell
+flower-supernode --superlink="<SUPERLINK-IP>:9092" --isolation="subprocess" \
+                 --node-config="local-data='<path/to/local/partition>'"
 ```
