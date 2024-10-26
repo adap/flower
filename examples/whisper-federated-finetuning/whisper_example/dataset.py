@@ -22,7 +22,7 @@ def load_data(
     global fds
     if fds is None:
         partitioner = GroupedNaturalIdPartitioner(
-            partition_by="speaker_id", group_size=30
+            partition_by="speaker_id", group_size=5
         )
         fds = FederatedDataset(
             dataset="speech_commands",
