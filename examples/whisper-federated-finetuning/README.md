@@ -126,7 +126,7 @@ The resulting data partitions are not equal-sized (which is what you'd often fin
 
 ![Amount of data per client](_static/whisper_flower_data.png)
 
-> [!NOTE]
+> \[!NOTE\]
 > You can make create this plot or adjust it by running the [visualize_labels](visualize_labels.ipynb) notebook. It makes use of Flower Dataset's [visualization tools](https://flower.ai/docs/datasets/tutorial-visualize-label-distribution.html).
 
 An overview of the FL pipeline built with Flower for this example is illustrated above.
@@ -143,14 +143,14 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 The run is defined in the `pyproject.toml` which: specifies the paths to `ClientApp` and `ServerApp` as well as their parameterization with configs in the `[tool.flwr.app.config]` block.
 
 > \[!NOTE\]
-> By default, it will run on CPU only. On a MacBook Pro M2, running 5 rounds of Flower FL should take ~ min. Assuming the dataset has already been downloaded.
+> By default, it will run on CPU only. On a MacBook Pro M2, running 5 rounds of Flower FL should take ~10 min. Assuming the dataset has already been downloaded. Running on GPU is recommended.
 
 ```shell
 # Run with default settings
 flwr run .
 ```
 
-To run your `ClientApps` on GPU, you'll need to run it in another federation (see `local-sim-gpu` in `pyprojec.toml`). To adjust the degree of parallelism, consider updating the `option.backend` settings. `ClientApp` instances consume only 800MB of VRAM, which enables you to run several in parallel in the same GPU. By default, the command below will run `5xClientApp` in parallel.
+To run your `ClientApps` on GPU, you'll need to run it in another federation (see `local-sim-gpu` in `pyprojec.toml`). To adjust the degree of parallelism, consider updating the `option.backend` settings. `ClientApp` instances consume only 800MB of VRAM, which enables you to run several in parallel in the same GPU. By default, the command below will run `5xClientApp` in parallel for each GPU available.
 
 ```
 # Run with GPU
@@ -160,10 +160,11 @@ flwr run . local-sim-gpu
 You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
 ```bash
-flwr run . --run-config "num-server-rounds=5 fraction-fit=0.1"
+# Runs for 10 rounds and sampling 20% of the clients in each round
+flwr run . --run-config "num-server-rounds=10 fraction-fit=0.2"
 ```
 
-With just 5 FL rounds, the global model should be reaching ~95% validation accuracy. A test accuracy of 97% can be reached with 10 rounds of FL training using the default hyperparameters. On an RTX 3090Ti, each round takes ~20-30s depending on the amount of data the clients selected in a round have.
+With just 5 FL rounds, the global model should be reaching ~97% validation accuracy. A test accuracy of 96% can be reached with 10 rounds of FL training using the default hyperparameters. On an RTX 3090Ti, each round takes ~40-50s depending on the amount of data the clients selected in a round have.
 
 > \[!CAUTION\]
 > Replace after group partitioner is introduced
@@ -175,6 +176,9 @@ flwr run . local-sim-gpu --run-config "central-eval=true num-server-rounds=10"
 ```
 
 ![Global validation accuracy FL with Whisper model](_static/whisper_flower_acc.png)
+
+> \[!TIP\]
+> If you find this federated setup not that challenging, try reducing the sizes of the groups created by the `GroupedNaturalIdPartitioner`. That will increase the number of individual clients/nodes in the federation.
 
 ### Run with the Deployment Engine
 
