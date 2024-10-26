@@ -35,6 +35,7 @@ from .typing import (
     Parameters,
     Scalar,
     Status,
+    Value,
 )
 
 EMPTY_TENSOR_KEY = "_empty"
@@ -129,15 +130,33 @@ def _check_mapping_from_recordscalartype_to_scalar(
     record_data: Mapping[str, Union[ConfigsRecordValues, MetricsRecordValues]]
 ) -> dict[str, Scalar]:
     """Check mapping `common.*RecordValues` into `common.Scalar` is possible."""
-    for value in record_data.values():
-        if not isinstance(value, get_args(Scalar)):
+
+    # Filter out any list types
+    def is_valid(__v: Value) -> None:
+        """Check if value is of expected type."""
+        if not isinstance(__v, get_args(Value)):
             raise TypeError(
-                "There is not a 1:1 mapping between `common.Scalar` types and those "
-                "supported in `common.ConfigsRecordValues` or "
-                "`common.ConfigsRecordValues`. Consider casting your values to a type "
-                "supported by the `common.RecordSet` infrastructure. "
-                f"You used type: {type(value)}"
+                "Not all values are of valid type."
+                f" Expected `{Value}` but `{type(__v)}` was passed."
             )
+
+    for value in record_data.values():
+
+        if isinstance(value, list):
+
+            if len(value) > 0:
+                is_valid(value[0])
+                # all elements in the list must be of the same valid type
+                # this is needed for protobuf
+                value_type = type(value[0])
+                if not all(isinstance(v, value_type) for v in value):
+                    raise TypeError(
+                        "All values in a list must be of the same valid type. "
+                        f"One of {Value}."
+                    )
+        else:
+            is_valid(value)
+
     return cast(dict[str, Scalar], record_data)
 
 

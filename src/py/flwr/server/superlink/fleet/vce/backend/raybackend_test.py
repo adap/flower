@@ -88,7 +88,7 @@ def backend_build_process_and_termination(
 def _create_message_and_context() -> tuple[Message, Context, float]:
 
     # Construct a Message
-    mult_factor = 2024
+    mult_factor = 2024.0
     run_id = 0
     getproperties_ins = GetPropertiesIns(config={"factor": mult_factor})
     recordset = getpropertiesins_to_recordset(getproperties_ins)

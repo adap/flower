@@ -139,7 +139,7 @@ def register_messages_into_state(
     for i in range(num_messages):
         dst_node_id = next(nodes_cycle)
         # Construct a Message
-        mult_factor = 2024 + i
+        mult_factor = 2024.0 + i
         getproperties_ins = GetPropertiesIns(config={"factor": mult_factor})
         recordset = getpropertiesins_to_recordset(getproperties_ins)
         message = Message(

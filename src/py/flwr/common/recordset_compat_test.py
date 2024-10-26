@@ -71,7 +71,10 @@ def get_ndarrays() -> NDArrays:
 
 def _get_valid_fitins() -> FitIns:
     arrays = get_ndarrays()
-    return FitIns(parameters=ndarrays_to_parameters(arrays), config={"a": 1.0, "b": 0})
+    return FitIns(
+        parameters=ndarrays_to_parameters(arrays),
+        config={"a": 1.0, "b": 0, "c": [1.0, 2.0, 3.0]},
+    )
 
 
 def _get_valid_fitins_with_empty_ndarrays() -> FitIns:
@@ -82,7 +85,7 @@ def _get_valid_fitins_with_empty_ndarrays() -> FitIns:
 def _get_valid_fitres() -> FitRes:
     """Returnn Valid parameters but potentially invalid config."""
     arrays = get_ndarrays()
-    metrics: dict[str, Scalar] = {"a": 1.0, "b": 0}
+    metrics: dict[str, Scalar] = {"a": 1.0, "b": 0, "cc": [1.0, 2.0, 3.0]}
     return FitRes(
         parameters=ndarrays_to_parameters(arrays),
         num_examples=1,
@@ -98,7 +101,7 @@ def _get_valid_evaluateins() -> EvaluateIns:
 
 def _get_valid_evaluateres() -> EvaluateRes:
     """Return potentially invalid config."""
-    metrics: dict[str, Scalar] = {"a": 1.0, "b": 0}
+    metrics: dict[str, Scalar] = {"a": 1.0, "b": 0, "c": [1.0, 2.0, 3.0]}
     return EvaluateRes(
         num_examples=1,
         loss=0.1,
@@ -112,6 +115,7 @@ def _get_valid_getparametersins() -> GetParametersIns:
         "a": 1.0,
         "b": 3,
         "c": True,
+        "d": [True, False, True],
     }  # valid since both Ins/Res communicate over ConfigsRecord
 
     return GetParametersIns(config_dict)
@@ -135,6 +139,7 @@ def _get_valid_getpropertiesres() -> GetPropertiesRes:
         "a": 1.0,
         "b": 3,
         "c": True,
+        "d": [1, 2, 3],
     }  # valid since both Ins/Res communicate over ConfigsRecord
 
     return GetPropertiesRes(
