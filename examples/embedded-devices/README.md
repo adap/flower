@@ -28,7 +28,10 @@ What follows is a step-by-step guide on how to setup your client/s and the serve
 
 ## Clone this example
 
-Start with cloning this example on your laptop or desktop machine. Later you'll run the same command on your embedded devices. We have prepared a single line which you can copy and execute:
+> \[!NOTE\]
+> Cloning the example and installing the project is only needed for the machine that's going to start the run. The embedded devices would typically run a Flower `SuperNode` for which only `flwr` and relevant libraries needed to run the `ClientApp` (more on this later) are needed.
+
+Start with cloning this example on your laptop or desktop machine. We have prepared a single line which you can copy and execute:
 
 ```shell
 git clone --depth=1 https://github.com/adap/flower.git \
@@ -47,6 +50,12 @@ embedded-devices
 │   └── task.py         # Defines your model, training and data loading
 ├── pyproject.toml      # Project metadata like dependencies and configs
 └── README.md
+```
+
+Install the dependencies defined in `pyproject.toml` as well as the `embeddedexample` package.
+
+```bash
+pip install -e .
 ```
 
 ## Setting up a Raspberry Pi
@@ -164,40 +173,60 @@ embedded-devices
 
 8. **Run your FL experiments with Flower**. Follow the steps in the section below.
 
-## Running Embedded FL with Flower
+## Embedded Federated AI
 
-For this demo, we'll be using [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html), a popular dataset for image classification comprised of 10 classes (e.g. car, bird, airplane) and a total of 60K `32x32` RGB images. The training set contains 50K images. The server will automatically download the dataset should it not be found in `./data`. The clients do the same. The dataset is by default split into 50 partitions (each to be assigned to a different client). This can be controlled with the `NUM_CLIENTS` global variable in the client scripts. In this example, each device will play the role of a specific user (specified via `--cid` -- we'll show this later) and therefore only do local training with that portion of the data. For CIFAR-10, clients will be training a MobileNet-v2/3 model.
+For this demo, we'll be using [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html), a popular dataset for image classification comprised of 10 classes (e.g. car, bird, airplane) and a total of 60K `32x32` RGB images. The training set contains 50K images.
 
-You can run this example using MNIST and a smaller CNN model by passing flag `--mnist`. This is useful if you are using devices with a very limited amount of memory (e.g. RaspberryPi Zero) or if you want the training taking place on the embedded devices to be much faster (specially if these are CPU-only). The partitioning of the dataset is done in the same way.
+### Ensure your embedded devices have some data
 
-### Start your Flower Server
+Unless your devices already have some images that could be used to train a small CNN, we need to send a partition of the `CIFAR-10` dataset to each device that will run as a `SuperNode`. You can make use of the `generate_dataset.py` script to partition the `CIFAR-10` into N disjoint partitions that can be then given to each device in the federation.
 
-On the machine of your choice, launch the server:
-
-```bash
-# Launch your server.
-# Will wait for at least 2 clients to be connected, then will train for 3 FL rounds
-# The command below will sample all clients connected (since sample_fraction=1.0)
-# The server is dataset agnostic (use the same command for MNIST and CIFAR10)
-python server.py --rounds 3 --min_num_clients 2 --sample_fraction 1.0
+```shell
+# Partition the CIFAR-10 dataset into two partitions
+python generate_dataset.py --num-supernodes=2
 ```
 
-> If you are on macOS with Apple Silicon (i.e. M1, M2 chips), you might encounter a `grpcio`-related issue when launching your server. If you are in a conda environment you can solve this easily by doing: `pip uninstall grpcio` and then `conda install grpcio`.
+The above command will create two subdirectories in `./datasets`, one for each partition. Next, copy those dataset over to your devices. You can use `scp` for this. Like shown below. Repeat for all your devices.
 
-### Start the Flower Clients
-
-It's time to launch your clients! Ensure you have followed the setup stages outline above for the devices at your disposal.
-
-The first time you run this, the dataset will be downloaded. From the commands below, replace `<FRAMEWORK>` with either `pytorch` or `tf` to run the corresponding client Python file. In a FL setting, each client has its unique dataset. In this example you can simulate this by manually assigning an ID to a client (`cid`) which should be an integer `[0, NUM_CLIENTS-1]`, where `NUM_CLIENTS` is the total number of partitions or clients that could participate at any point. This is defined at the top of the client files and defaults to `50`. You can change this value to make each partition larger or smaller.
-
-Launch your Flower clients as follows. Remember that if you are using a Jetson device, you need first to run your Docker container (see tha last steps for the Jetson setup). If you are using Raspberry Pi Zero devices, it is normal if starting the clients take a few seconds.
-
-```bash
-# Run the default example (CIFAR-10)
-python3 client_<FRAMEWORK>.py --cid=<CLIENT_ID> --server_address=<SERVER_ADDRESS>
-
-# Use MNIST (and a smaller model) if your devices require a more lightweight workload
-python3 client_<FRAMEWORK>.py --cid=<CLIENT_ID> --server_address=<SERVER_ADDRESS> --mnist
+```shell
+# Copy one partition to a device
+scp -r datasets/cifar10_part_1 <user>@<device-ip>:/path/to/home
 ```
 
-Repeat the above for as many devices as you have. Pass a different `CLIENT_ID` to each device. You can naturally run this example using different types of devices (e.g. RPi, RPi Zero, Jetson) at the same time as long as they are training the same model. If you want to start more clients than the number of embedded devices you currently have access to, you can launch clients in your laptop: simply open a new terminal and run one of the `python3 client_<FRAMEWORK>.py ...` commands above.
+### Launching the Flower `SuperLink`
+
+On your development machine, launch the `SuperLink`. You will connnect Flower `SuperNodes` to it in the next step.
+
+```shell
+flower-superlink --insecure
+```
+
+### Connecting Flower `SuperNodes`
+
+With the `SuperLink` up and running, now let's launch a `SuperNode` on each embedded device. In order to do this ensure you know what the IP of the machine running the `SuperLink` is and that you have copied the data to the device. Note with `--node-config` we set a key named `dataset-path`. That's the one expected by the `client_fn()` in [client_app.py](embeddedexample/client_app.py). This file will be automatically delivered to the `SuperNode` so it knows how to execute the `ClientApp` logic.
+
+Ensure the Python environment you created earlier when setting up your device has all dependencies installed. For this example you'll need the following:
+
+```shell
+# after activating your environment
+pip install flwr torch torchvision datasets
+```
+
+Now, launch your `SuperNode` pointing it to the dataset you `scp`-ed earlier:
+
+```shell
+# Repeat for each embedded device (adjust SuperLink IP and dataset-path)
+flower-supernode --insecure --superlink="SUPERLINK_IP:9092" \
+                 --isolation="subprocess" \
+                 --node-config="dataset-path='path/to/cifar10_part_1'"
+```
+
+Repeat for each embedded device that you want to connect to the `SuperLink`.
+
+### Run the Flower App
+
+With both the long-running server (`SuperLink`) and two `SuperNodes` up and running, we can now start run. Note that the command below points to a federation named `embedded-federation`. Its entry point is defined in the `pyproject.toml`.
+
+```shell
+flwr run . embedded-federation
+```
