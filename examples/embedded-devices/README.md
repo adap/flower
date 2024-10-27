@@ -1,24 +1,25 @@
 ---
-tags: [basic, vision, fds]
+tags: [basic, vision, embedded]
 dataset: [CIFAR-10, MNIST]
-framework: [torch, tensorflow]
+framework: [torch]
 ---
 
-# Federated Learning on Embedded Devices with Flower
+# Federated AI with Embedded Devices using Flower
 
-This example will show you how Flower makes it very easy to run Federated Learning workloads on edge devices. Here we'll be showing how to use NVIDIA Jetson devices and Raspberry Pi as Flower clients. You can run this example using either PyTorch or Tensorflow. The FL workload (i.e. model, dataset and training loop) is mostly borrowed from the [quickstart-pytorch](https://github.com/adap/flower/tree/main/examples/simulation-pytorch) and [quickstart-tensorflow](https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow) examples.
+This example will show you how Flower makes it very easy to run Federated Learning workloads on edge devices. Here we'll be showing how to use Raspberry Pi as Flower clients, or better said, `SuperNodes`.  The FL workload (i.e. model, dataset and training loop) is mostly borrowed from the [quickstart-pytorch](https://github.com/adap/flower/tree/main/examples/simulation-pytorch) example, but you could adjust it to follow [quickstart-tensorflow](https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow) if you prefere using TensorFlow. The main difference compare to those examples is that here you'll learn how to use Flower's Deployment Engine to run FL across multiple embedded devices.
 
 ![Different was of running Flower FL on embedded devices](_static/diagram.png)
 
 ## Getting things ready
 
+> \[!NOTE\]
 > This example is designed for beginners that know a bit about Flower and/or ML but that are less familiar with embedded devices. If you already have a couple of devices up and running, clone this example and start the Flower clients after launching the Flower server.
 
 This tutorial allows for a variety of settings (some shown in the diagrams above). As long as you have access to one embedded device, you can follow along. This is a list of components that you'll need:
 
 - For Flower server: A machine running Linux/macOS/Windows (e.g. your laptop). You can run the server on an embedded device too!
-- For Flower clients (one or more): Raspberry Pi 4 (or Zero 2), or an NVIDIA Jetson Xavier-NX (or Nano), or anything similar to these.
-- A uSD card with 32GB or more. While 32GB is enough for the RPi, a larger 64GB uSD card works best for the NVIDIA Jetson.
+- For Flower clients (one or more): Raspberry Pi 5 or 4 (or Zero 2), or anything similar to these.
+- A uSD card with 32GB or more.
 - Software to flash the images to a uSD card:
   - For Raspberry Pi we recommend the [Raspberry Pi Imager](https://www.raspberrypi.com/software/)
   - For other devices [balenaEtcher](https://www.balena.io/etcher/) it's a great option.
@@ -29,71 +30,50 @@ What follows is a step-by-step guide on how to setup your client/s and the serve
 
 Start with cloning this example on your laptop or desktop machine. Later you'll run the same command on your embedded devices. We have prepared a single line which you can copy and execute:
 
-```bash
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/embedded-devices . && rm -rf flower && cd embedded-devices
+```shell
+git clone --depth=1 https://github.com/adap/flower.git \
+          && mv flower/examples/embedded-devices . \
+          && rm -rf flower && cd embedded-devices
 ```
 
-## Setting up the server
+This will create a new directory called `embedded-devices` with the following structure:
 
-The only requirement for the server is to have Flower installed alongside your ML framework of choice. Inside your Python environment run:
-
-```bash
-pip install -r requierments_pytorch.txt # to install Flower and PyTorch
-
-# or the below for TensorFlower
-# pip install -r requirements_tensorflow.txt
+```shell
+embedded-devices
+├── embeddedexample
+│   ├── __init__.py
+│   ├── client_app.py   # Defines your ClientApp
+│   ├── server_app.py   # Defines your ServerApp
+│   └── task.py         # Defines your model, training and data loading
+├── pyproject.toml      # Project metadata like dependencies and configs
+└── README.md
 ```
-
-If you are working on this tutorial on your laptop or desktop, it can host the Flower server that will orchestrate the entire FL process. You could also use an embedded device (e.g. a Raspberry Pi) as the Flower server. In order to do that, please follow the setup steps below.
 
 ## Setting up a Raspberry Pi
 
-> Wheter you use your RPi as a Flower server or a client, you need to follow these steps.
+> \[!TIP\]
+> This steps walk you through the process of setting up a Rapsberry Pi. If you have one already running and you have a Python environment with `flwr` installed already, you can skip this section entirely. Taking a quick look at the [Embedded Devices Setup](device_setup.md) page might be useful.
 
 ![alt text](_static/rpi_imager.png)
 
 1. **Installing Ubuntu server on your Raspberry Pi** is easy with the [Raspberry Pi Imager](https://www.raspberrypi.com/software/). Before starting ensure you have a uSD card attached to your PC/Laptop and that it has sufficient space (ideally larger than 16GB). Then:
 
-   - Click on `CHOOSE OS` > `Other general-pupose OS` > `Ubuntu` > `Ubuntu Server 22.04.03 LTS (64-bit)`. Other versions of `Ubuntu Server` would likely work but try to use a `64-bit` one.
+   - Click on `CHOOSE OS` > `Raspberry Pi OS (other)` > `Raspberry Pi OS Lite (64-bit)`. Other versions of `Raspberry Pi OS` or even `Ubuntu Server` would likely work but try to use a `64-bit` one.
    - Select the uSD you want to flash the OS onto. (This will be the uSD you insert in your Raspberry Pi)
-   - Click on the gear icon on the bottom right of the `Raspberry Pi Imager` window (the icon only appears after choosing your OS image). Here you can very conveniently set the username/password to access your device over ssh. You'll see I use as username `piubuntu` (you can choose something different) It's also the ideal place to select your WiFi network and add the password (this is of course not needed if you plan to connect the Raspberry Pi via ethernet). Click "save" when you are done.
-   - Finally, click on `WRITE` to start flashing Ubuntu onto the uSD card.
+   - After selecting your storage, click on `Next`. Then, you'll be asked if you want to edit the settings of the image you are about to flash. This allows you to setup a custom username and password as well as indicate to which WiFi network your device should connect to. In the screenshot you can see some dummy values. This tutorial doesn't make any assumptions on these values, set them according to your needs.
+   - Finally, complete the remaining steps to start flashing the chosen OS onto the uSD card.
 
-2. **Connecting to your Rapsberry Pi**
+2. **Preparations for your Flower experiments**
 
-   After `ssh`-ing into your Raspberry Pi for the first time, make sure your OS is up-to-date.
+   - SSH into your Rapsberry Pi.
+   - Follow the steps outlined in [Embedded Devices Setup](device_setup.md) to set it up for develpment. The objetive of this step is to have your Pi ready to join later as a Flower `SuperNode` to an existing federation.
 
-   - Run: `sudo apt update` to look for updates
-   - And then: `sudo apt upgrade -y` to apply updates (this might take a few minutes on the RPi Zero)
-   - Then reboot your RPi with `sudo reboot`. Then ssh into it again.
-
-3. **Preparations for your Flower experiments**
-
-   - Install `pip`. In the terminal type: `sudo apt install python3-pip -y`
-   - Now clone this directory. You just need to execute the `git clone` command shown at the top of this README.md on your device.
-   - Install Flower and your ML framework of choice: We have prepared some convenient installation scripts that will install everything you need. You are free to install other versions of these ML frameworks to suit your needs.
-     - If you want your clients to use PyTorch: `pip3 install -r requirements_pytorch.txt`
-     - If you want your clients to use TensorFlow: `pip3 install -r requirements_tf.txt`
-
-   > While preparing this example I noticed that installing TensorFlow on the **Raspberry pi Zero** would fail due to lack of RAM (it only has 512MB). A workaround is to create a `swap` disk partition (non-existant by default) so the OS can offload some elements to disk. I followed the steps described [in this blogpost](https://www.digitalocean.com/community/tutorials/how-to-add-swap-space-on-ubuntu-20-04) that I copy below. You can follow these steps if you often see your RPi Zero running out of memory:
-
-   ```bash
-   # Let's create a 1GB swap partition
-   sudo fallocate -l 1G /swapfile
-   sudo chmod 600 /swapfile
-   sudo mkswap /swapfile
-   # Enable swap
-   sudo swapon /swapfile # you should now be able to see the swap size on htop.
-   # make changes permanent after reboot
-   sudo cp /etc/fstab /etc/fstab.bak
-   echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
-   ```
-
-   Please note using swap as if it was RAM comes with a large penalty in terms of data movement.
-
-4. Run your Flower experiments following the steps in the [Running FL with Flower](https://github.com/adap/flower/tree/main/examples/embedded-devices#running-fl-training-with-flower) section.
+3. Run your Flower experiments following the steps in the [Running FL with Flower](https://github.com/adap/flower/tree/main/examples/embedded-devices#running-fl-training-with-flower) section.
 
 ## Setting up a Jetson Xavier-NX
+
+> \[!CAUTION\]
+> This needs to be either removed or updated with a Jetson Orin
 
 > These steps have been validated for a Jetson Xavier-NX Dev Kit. An identical setup is needed for a Jetson Nano once you get ssh access to it (i.e. jumping straight to point `4` below). For instructions on how to setup these devices please refer to the "getting started guides" for [Jetson Nano](https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit#intro).
 

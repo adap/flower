@@ -1,0 +1,39 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "embeddedexample"
+version = "1.0.0"
+description = "Federated AI with Embedded Devices using Flower"
+license = "Apache-2.0"
+dependencies = [
+    "flwr>=1.12.0",
+    "flwr-datasets[vision]>=0.3.0",
+    "torch==2.2.1",
+    "torchvision==0.17.1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "flwrlabs"
+
+[tool.flwr.app.components]
+serverapp = "embeddedexample.server_app:app"
+clientapp = "embeddedexample.client_app:app"
+
+[tool.flwr.app.config]
+num-server-rounds = 3
+fraction-evaluate = 0.5
+local-epochs = 1
+learning-rate = 0.1
+batch-size = 32
+
+[tool.flwr.federations]
+default = "remote-federation"
+
+[tool.flwr.federations.remote-federation]
+address = "localhost:9093"
+insecure = true
