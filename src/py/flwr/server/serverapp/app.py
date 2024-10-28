@@ -164,11 +164,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
 
         try:
             # Pull ServerAppInputs from LinkState
-            req = (
-                PullServerAppInputsRequest(run_id=run_id)
-                if run_id
-                else PullServerAppInputsRequest()
-            )
+            req = PullServerAppInputsRequest(run_id=run_id)
             res: PullServerAppInputsResponse = driver._stub.PullServerAppInputs(req)
             if not res.HasField("run"):
                 sleep(3)

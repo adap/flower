@@ -151,10 +151,10 @@ class DeploymentEngine(Executor):
             run_id: int = self._create_run(
                 Fab(hashlib.sha256(fab_file).hexdigest(), fab_file), override_config
             )
-            log(INFO, "Registered run %s", str(run_id))
+            log(INFO, "Registered run %d", run_id)
             return run_id
         except Exception as e:  # pylint: disable=broad-exception-caught
-            log(ERROR, "Could not register run: %s", str(e))
+            log(ERROR, "Could not register run: %s", str(e), exc_info=True)
             return None
 
     @override
