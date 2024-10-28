@@ -15,7 +15,9 @@
 """Flower ServerApp process."""
 
 import argparse
-from logging import DEBUG, ERROR, INFO
+import sys
+from logging import DEBUG, ERROR, INFO, WARN
+from os.path import isfile
 from pathlib import Path
 from time import sleep
 from typing import Optional
@@ -74,7 +76,23 @@ def flwr_serverapp() -> None:
         - `$HOME/.flwr/` in all other cases
     """,
     )
+    parser.add_argument(
+        "--insecure",
+        action="store_true",
+        help="Run the server without HTTPS, regardless of whether certificate "
+        "paths are provided. By default, the server runs with HTTPS enabled. "
+        "Use this flag only if you understand the risks.",
+    )
+    parser.add_argument(
+        "--root-certificates",
+        metavar="ROOT_CERT",
+        type=str,
+        help="Specifies the path to the PEM-encoded root certificate file for "
+        "establishing secure HTTPS connections.",
+    )
     args = parser.parse_args()
+
+    certificates = _try_obtain_certificates(args)
 
     log(
         DEBUG,
@@ -83,19 +101,58 @@ def flwr_serverapp() -> None:
         args.superlink,
         args.run_id,
     )
-    run_serverapp(superlink=args.superlink, run_id=args.run_id, flwr_dir_=args.flwr_dir)
+    run_serverapp(
+        superlink=args.superlink,
+        run_id=args.run_id,
+        flwr_dir_=args.flwr_dir,
+        certificates=certificates,
+    )
+
+
+def _try_obtain_certificates(
+    args: argparse.Namespace,
+) -> Optional[bytes]:
+
+    if args.insecure:
+        if args.root_certificates is not None:
+            sys.exit(
+                "Conflicting options: The '--insecure' flag disables HTTPS, "
+                "but '--root-certificates' was also specified. Please remove "
+                "the '--root-certificates' option when running in insecure mode, "
+                "or omit '--insecure' to use HTTPS."
+            )
+        log(
+            WARN,
+            "Option `--insecure` was set. Starting insecure HTTP channel to %s.",
+            args.superlink,
+        )
+        root_certificates = None
+    else:
+        # Load the certificates if provided, or load the system certificates
+        if not isfile(args.root_certificates):
+            sys.exit("Path argument `--root-certificates` does not point to a file.")
+        root_certificates = Path(args.root_certificates).read_bytes()
+        log(
+            DEBUG,
+            "Starting secure HTTPS channel to %s "
+            "with the following certificates: %s.",
+            args.superlink,
+            args.root_certificates,
+        )
+    return root_certificates
 
 
 def run_serverapp(  # pylint: disable=R0914, disable=W0212
     superlink: str,
     run_id: Optional[int] = None,
     flwr_dir_: Optional[str] = None,
+    certificates: Optional[bytes] = None,
 ) -> None:
     """Run Flower ServerApp process."""
     driver = GrpcDriver(
         run_id=run_id if run_id else 0,
         driver_service_address=superlink,
-        root_certificates=None,
+        root_certificates=certificates,
     )
 
     # Resolve directory where FABs are installed

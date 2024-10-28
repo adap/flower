@@ -365,7 +365,9 @@ def run_superlink() -> None:
 
 
 def _flwr_serverapp_scheduler(
-    state_factory: LinkStateFactory, driver_api_address: str
+    state_factory: LinkStateFactory,
+    driver_api_address: str,
+    ssl_ca_certfile: Optional[str],
 ) -> None:
     log(DEBUG, "Started flwr-serverapp scheduler thread.")
 
@@ -393,6 +395,11 @@ def _flwr_serverapp_scheduler(
                 "--run-id",
                 str(pending_run_id),
             ]
+
+            if ssl_ca_certfile:
+                command.append("--root-certificates")
+                command.append(ssl_ca_certfile)
+
             subprocess.run(
                 command,
                 stdout=None,
