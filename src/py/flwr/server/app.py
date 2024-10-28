@@ -343,7 +343,7 @@ def run_superlink() -> None:
         # Scheduler thread
         scheduler_th = threading.Thread(
             target=_flwr_serverapp_scheduler,
-            args=(state_factory, args.driver_api_address),
+            args=(state_factory, args.driver_api_address, args.ssl_ca_certfile),
         )
         scheduler_th.start()
         bckg_threads.append(scheduler_th)
@@ -399,6 +399,8 @@ def _flwr_serverapp_scheduler(
             if ssl_ca_certfile:
                 command.append("--root-certificates")
                 command.append(ssl_ca_certfile)
+            else:
+                command.append("--insecure")
 
             subprocess.run(
                 command,
