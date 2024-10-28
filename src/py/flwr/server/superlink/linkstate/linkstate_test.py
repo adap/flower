@@ -22,6 +22,7 @@ from abc import abstractmethod
 from datetime import datetime, timezone
 from unittest.mock import patch
 from uuid import UUID
+from flwr.common import now
 
 from flwr.common import DEFAULT_TTL, Context, RecordSet
 from flwr.common.constant import ErrorCode, Status, SubStatus
@@ -1038,6 +1039,63 @@ class StateTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             state.set_serverapp_context(61016, context)  # Invalid run_id
 
+    def test_add_serverapp_log_invalid_run_id(self) -> None:
+        """Test adding serverapp log with invalid run_id."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        invalid_run_id = 99999
+        log_entry = "Invalid log entry"
+
+        # Execute and assert
+        with self.assertRaises(ValueError):
+            state.add_serverapp_log(invalid_run_id, log_entry)
+
+    def test_get_serverapp_log_invalid_run_id(self) -> None:
+        """Test retrieving serverapp log with invalid run_id."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        invalid_run_id = 99999
+
+        # Execute and assert
+        with self.assertRaises(ValueError):
+            state.get_serverapp_log(invalid_run_id, after_timestamp=None)
+
+    def test_add_and_get_serverapp_log(self) -> None:
+        """Test adding and retrieving serverapp logs."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        run_id = state.create_run(None, None, "9f86d08", {})
+        log_entry_1 = "Log entry 1"
+        log_entry_2 = "Log entry 2"
+        timestamp = time.time()
+
+        # Execute
+        state.add_serverapp_log(run_id, log_entry_1)
+        state.add_serverapp_log(run_id, log_entry_2)
+        retrieved_logs = state.get_serverapp_log(run_id, after_timestamp=timestamp)
+
+        # Assert
+        assert log_entry_1 in retrieved_logs
+        assert log_entry_2 in retrieved_logs
+
+    def test_get_serverapp_log_after_timestamp(self) -> None:
+        """Test retrieving serverapp logs after a specific timestamp."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        run_id = state.create_run(None, None, "9f86d08", {})
+        log_entry_1 = "Log entry 1"
+        log_entry_2 = "Log entry 2"
+        state.add_serverapp_log(run_id, log_entry_1)
+        timestamp_2 = now().timestamp()
+        state.add_serverapp_log(run_id, log_entry_2)
+
+        # Execute
+        retrieved_logs = state.get_serverapp_log(run_id, after_timestamp=timestamp_2)
+
+        # Assert
+        assert log_entry_1 not in retrieved_logs
+        assert log_entry_2 in retrieved_logs
+
 
 def create_task_ins(
     consumer_node_id: int,
@@ -1149,7 +1207,6 @@ class SqliteFileBasedTest(StateTest, unittest.TestCase):
 
         # Assert
         assert len(result) == 15
-
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

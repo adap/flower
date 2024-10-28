@@ -17,7 +17,8 @@
 
 import threading
 import time
-from dataclasses import dataclass
+from bisect import bisect_right
+from dataclasses import dataclass, field
 from logging import ERROR, WARNING
 from typing import Optional
 from uuid import UUID, uuid4
@@ -52,6 +53,8 @@ class RunRecord:
     starting_at: str = ""
     running_at: str = ""
     finished_at: str = ""
+    logs: list[tuple[float, str]] = field(default_factory=list)
+    log_lock: threading.Lock = field(default_factory=threading.Lock)
 
 
 class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
@@ -511,3 +514,23 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         if run_id not in self.run_ids:
             raise ValueError(f"Run {run_id} not found")
         self.contexts[run_id] = context
+
+    def add_serverapp_log(self, run_id: int, log: str) -> None:
+        """Add a log entry to the serverapp logs for the specified `run_id`."""
+        if run_id not in self.run_ids:
+            raise ValueError(f"Run {run_id} not found")
+        run = self.run_ids[run_id]
+        with run.log_lock:
+            run.logs.append((now().timestamp(), log))
+
+    def get_serverapp_log(self, run_id: int, after_timestamp: Optional[float]) -> str:
+        """Get the serverapp logs for the specified `run_id`."""
+        if run_id not in self.run_ids:
+            raise ValueError(f"Run {run_id} not found")
+        run = self.run_ids[run_id]
+        if after_timestamp is None:
+            after_timestamp = 0.0
+        with run.log_lock:
+            # Find the index where the timestamp would be inserted
+            index = bisect_right(run.logs, (after_timestamp, ""))
+            return "".join(log for _, log in run.logs[index:])

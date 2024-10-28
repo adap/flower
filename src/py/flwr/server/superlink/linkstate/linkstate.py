@@ -299,3 +299,33 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         context : Context
             The context to be associated with the specified `run_id`.
         """
+
+    @abc.abstractmethod
+    def add_serverapp_log(self, run_id: int, log: str) -> None:
+        """Add a log entry to the serverapp logs for the specified `run_id`.
+
+        Parameters
+        ----------
+        run_id : int
+            The identifier of the run for which to add a log entry.
+        log : str
+            The log entry to be added to the serverapp logs.
+        """
+
+    @abc.abstractmethod
+    def get_serverapp_log(self, run_id: int, after_timestamp: Optional[float]) -> str:
+        """Get the serverapp logs for the specified `run_id`.
+
+        Parameters
+        ----------
+        run_id : int
+            The identifier of the run for which to retrieve the serverapp logs.
+
+        after_timestamp : Optional[float]
+            Retrieve logs after this timestamp. If set to `None`, retrieve all logs.
+
+        Returns
+        -------
+        str
+            The serverapp logs associated with the specified `run_id`.
+        """
