@@ -141,6 +141,7 @@ def _try_obtain_certificates(
         )
     return root_certificates
 
+
 def _try_obtain_certificates(
     args: argparse.Namespace,
 ) -> Optional[bytes]:
@@ -181,7 +182,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
     certificates: Optional[bytes] = None,
 ) -> None:
     """Run Flower ServerApp process."""
-    _ = GrpcDriver(
+    driver = GrpcDriver(
         run_id=run_id if run_id else 0,
         driver_service_address=superlink,
         root_certificates=certificates,
@@ -196,7 +197,11 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
 
         try:
             # Pull ServerAppInputs from LinkState
-            req = PullServerAppInputsRequest(run_id=run_id)
+            req = (
+                PullServerAppInputsRequest(run_id=run_id)
+                if run_id
+                else PullServerAppInputsRequest()
+            )
             res: PullServerAppInputsResponse = driver._stub.PullServerAppInputs(req)
             if not res.HasField("run"):
                 sleep(3)
