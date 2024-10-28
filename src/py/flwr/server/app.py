@@ -395,7 +395,6 @@ def _flwr_serverapp_scheduler(
                 "--run-id",
                 str(pending_run_id),
             ]
-
             if ssl_ca_certfile:
                 command.append("--root-certificates")
                 command.append(ssl_ca_certfile)

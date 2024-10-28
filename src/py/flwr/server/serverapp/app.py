@@ -141,6 +141,38 @@ def _try_obtain_certificates(
         )
     return root_certificates
 
+def _try_obtain_certificates(
+    args: argparse.Namespace,
+) -> Optional[bytes]:
+
+    if args.insecure:
+        if args.root_certificates is not None:
+            sys.exit(
+                "Conflicting options: The '--insecure' flag disables HTTPS, "
+                "but '--root-certificates' was also specified. Please remove "
+                "the '--root-certificates' option when running in insecure mode, "
+                "or omit '--insecure' to use HTTPS."
+            )
+        log(
+            WARN,
+            "Option `--insecure` was set. Starting insecure HTTP channel to %s.",
+            args.superlink,
+        )
+        root_certificates = None
+    else:
+        # Load the certificates if provided, or load the system certificates
+        if not isfile(args.root_certificates):
+            sys.exit("Path argument `--root-certificates` does not point to a file.")
+        root_certificates = Path(args.root_certificates).read_bytes()
+        log(
+            DEBUG,
+            "Starting secure HTTPS channel to %s "
+            "with the following certificates: %s.",
+            args.superlink,
+            args.root_certificates,
+        )
+    return root_certificates
+
 
 def run_serverapp(  # pylint: disable=R0914, disable=W0212
     superlink: str,
@@ -149,7 +181,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
     certificates: Optional[bytes] = None,
 ) -> None:
     """Run Flower ServerApp process."""
-    driver = GrpcDriver(
+    _ = GrpcDriver(
         run_id=run_id if run_id else 0,
         driver_service_address=superlink,
         root_certificates=certificates,
