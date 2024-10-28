@@ -343,7 +343,7 @@ def run_superlink() -> None:
         # Scheduler thread
         scheduler_th = threading.Thread(
             target=_flwr_serverapp_scheduler,
-            args=(state_factory, args.driver_api_address),
+            args=(state_factory, args.driver_api_address, args.ssl_ca_certfile),
         )
         scheduler_th.start()
         bckg_threads.append(scheduler_th)
@@ -365,7 +365,9 @@ def run_superlink() -> None:
 
 
 def _flwr_serverapp_scheduler(
-    state_factory: LinkStateFactory, driver_api_address: str
+    state_factory: LinkStateFactory,
+    driver_api_address: str,
+    ssl_ca_certfile: Optional[str],
 ) -> None:
     log(DEBUG, "Started flwr-serverapp scheduler thread.")
 
@@ -393,6 +395,12 @@ def _flwr_serverapp_scheduler(
                 "--run-id",
                 str(pending_run_id),
             ]
+            if ssl_ca_certfile:
+                command.append("--root-certificates")
+                command.append(ssl_ca_certfile)
+            else:
+                command.append("--insecure")
+
             subprocess.run(
                 command,
                 stdout=None,
