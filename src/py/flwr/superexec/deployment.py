@@ -21,7 +21,6 @@ from typing import Optional
 
 from typing_extensions import override
 
-from flwr.cli.install import install_from_fab
 from flwr.common.constant import DRIVER_API_DEFAULT_ADDRESS
 from flwr.common.logger import log
 from flwr.common.typing import Fab, UserConfig
@@ -145,8 +144,6 @@ class DeploymentEngine(Executor):
     ) -> Optional[int]:
         """Start run using the Flower Deployment Engine."""
         try:
-            # Install FAB to flwr dir
-            install_from_fab(fab_file, None, True)
 
             # Call SuperLink to create run
             run_id: int = self._create_run(

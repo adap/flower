@@ -15,9 +15,9 @@
 """Flower date utils."""
 
 
-from datetime import datetime, timezone
+import datetime
 
 
-def now() -> datetime:
+def now() -> datetime.datetime:
     """Construct a datetime from time.time() with time zone set to UTC."""
-    return datetime.now(tz=timezone.utc)
+    return datetime.datetime.now(tz=datetime.timezone.utc)

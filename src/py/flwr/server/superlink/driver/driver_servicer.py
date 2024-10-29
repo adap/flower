@@ -31,6 +31,7 @@ from flwr.common.serde import (
     context_to_proto,
     fab_from_proto,
     fab_to_proto,
+    run_status_from_proto,
     run_to_proto,
     user_config_from_proto,
 )
@@ -49,12 +50,18 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     PushTaskInsResponse,
 )
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
+from flwr.proto.log_pb2 import (  # pylint: disable=E0611
+    PushLogsRequest,
+    PushLogsResponse,
+)
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
     CreateRunResponse,
     GetRunRequest,
     GetRunResponse,
+    UpdateRunStatusRequest,
+    UpdateRunStatusResponse,
 )
 from flwr.proto.task_pb2 import TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs import Ffs
@@ -252,6 +259,26 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         state = self.state_factory.state()
         state.set_serverapp_context(request.run_id, context_from_proto(request.context))
         return PushServerAppOutputsResponse()
+
+    def UpdateRunStatus(
+        self, request: UpdateRunStatusRequest, context: grpc.ServicerContext
+    ) -> UpdateRunStatusResponse:
+        """Update the status of a run."""
+        log(DEBUG, "ControlServicer.UpdateRunStatus")
+        state = self.state_factory.state()
+
+        # Update the run status
+        state.update_run_status(
+            run_id=request.run_id, new_status=run_status_from_proto(request.run_status)
+        )
+        return UpdateRunStatusResponse()
+
+    def PushLogs(
+        self, request: PushLogsRequest, context: grpc.ServicerContext
+    ) -> PushLogsResponse:
+        """Push logs."""
+        log(DEBUG, "DriverServicer.PushLogs")
+        raise NotImplementedError()
 
 
 def _raise_if(validation_error: bool, detail: str) -> None:

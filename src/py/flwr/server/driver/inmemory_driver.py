@@ -35,8 +35,6 @@ class InMemoryDriver(Driver):
 
     Parameters
     ----------
-    run_id : int
-        The identifier of the run.
     state_factory : StateFactory
         A StateFactory embedding a state that this driver can interface with.
     pull_interval : float (default=0.1)
@@ -45,18 +43,15 @@ class InMemoryDriver(Driver):
 
     def __init__(
         self,
-        run_id: int,
         state_factory: LinkStateFactory,
         pull_interval: float = 0.1,
     ) -> None:
-        self._run_id = run_id
         self._run: Optional[Run] = None
         self.state = state_factory.state()
         self.pull_interval = pull_interval
         self.node = Node(node_id=0, anonymous=True)
 
     def _check_message(self, message: Message) -> None:
-        self._init_run()
         # Check if the message is valid
         if not (
             message.metadata.run_id == cast(Run, self._run).run_id
@@ -67,19 +62,18 @@ class InMemoryDriver(Driver):
         ):
             raise ValueError(f"Invalid message: {message}")
 
-    def _init_run(self) -> None:
+    def init_run(self, run_id: int) -> None:
         """Initialize the run."""
         if self._run is not None:
             return
-        run = self.state.get_run(self._run_id)
+        run = self.state.get_run(run_id)
         if run is None:
-            raise RuntimeError(f"Cannot find the run with ID: {self._run_id}")
+            raise RuntimeError(f"Cannot find the run with ID: {run_id}")
         self._run = run
 
     @property
     def run(self) -> Run:
         """Run ID."""
-        self._init_run()
         return Run(**vars(cast(Run, self._run)))
 
     def create_message(  # pylint: disable=too-many-arguments,R0917
@@ -95,7 +89,6 @@ class InMemoryDriver(Driver):
         This method constructs a new `Message` with given content and metadata.
         The `run_id` and `src_node_id` will be set automatically.
         """
-        self._init_run()
         if ttl:
             warnings.warn(
                 "A custom TTL was set, but note that the SuperLink does not enforce "
@@ -119,7 +112,6 @@ class InMemoryDriver(Driver):
 
     def get_node_ids(self) -> list[int]:
         """Get node IDs."""
-        self._init_run()
         return list(self.state.get_nodes(cast(Run, self._run).run_id))
 
     def push_messages(self, messages: Iterable[Message]) -> Iterable[str]:
