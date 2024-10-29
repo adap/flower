@@ -106,7 +106,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
                     log_output=log_msg,
                     latest_timestamp=latest_timestamp,
                 )
-                # Add a small epsilon to the latest timestamp to avoid getting 
+                # Add a small epsilon to the latest timestamp to avoid getting
                 # the same log
                 after_timestamp = max(latest_timestamp + 1e-6, after_timestamp)
 
