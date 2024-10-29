@@ -17,6 +17,7 @@ syntax = "proto3";
 
 package flwr.proto;
 
+import "flwr/proto/log.proto";
 import "flwr/proto/node.proto";
 import "flwr/proto/message.proto";
 import "flwr/proto/task.proto";
@@ -49,7 +50,7 @@ service Driver {
   // Push ServerApp outputs
   rpc PushServerAppOutputs(PushServerAppOutputsRequest)
       returns (PushServerAppOutputsResponse) {}
-  
+
   // Push ServerApp logs
   rpc PushLogs(PushLogsRequest) returns (PushLogsResponse) {}
 }
@@ -83,11 +84,3 @@ message PushServerAppOutputsRequest {
   Context context = 2;
 }
 message PushServerAppOutputsResponse {}
-
-// PushLogs messages
-message PushLogsRequest {
-  uint64 run_id = 1;
-  Node node = 2;
-  string logs = 3;
-}
-message PushLogsResponse {}
