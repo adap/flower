@@ -22,9 +22,8 @@ from abc import abstractmethod
 from datetime import datetime, timezone
 from unittest.mock import patch
 from uuid import UUID
-from flwr.common import now
 
-from flwr.common import DEFAULT_TTL, Context, RecordSet
+from flwr.common import DEFAULT_TTL, Context, RecordSet, now
 from flwr.common.constant import ErrorCode, Status, SubStatus
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
@@ -1067,7 +1066,7 @@ class StateTest(unittest.TestCase):
         run_id = state.create_run(None, None, "9f86d08", {})
         log_entry_1 = "Log entry 1"
         log_entry_2 = "Log entry 2"
-        timestamp = time.time()
+        timestamp = now().timestamp()
 
         # Execute
         state.add_serverapp_log(run_id, log_entry_1)
@@ -1181,7 +1180,7 @@ class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 15
+        assert len(result) == 17
 
 
 class SqliteFileBasedTest(StateTest, unittest.TestCase):
@@ -1206,7 +1205,8 @@ class SqliteFileBasedTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 15
+        assert len(result) == 17
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

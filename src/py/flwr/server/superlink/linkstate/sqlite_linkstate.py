@@ -1043,6 +1043,11 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         # Convert the uint64 value to sint64 for SQLite
         sint64_run_id = convert_uint64_to_sint64(run_id)
 
+        # Check if the run_id exists
+        query = "SELECT run_id FROM run WHERE run_id = ?;"
+        if not self.query(query, (sint64_run_id,)):
+            raise ValueError(f"Run {run_id} not found")
+
         # Retrieve logs
         if after_timestamp is None:
             after_timestamp = 0.0
