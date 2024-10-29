@@ -1027,7 +1027,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             except sqlite3.IntegrityError:
                 raise ValueError(f"Run {run_id} not found") from None
 
-    def add_serverapp_log(self, run_id: int, log: str) -> None:
+    def add_serverapp_log(self, run_id: int, log_message: str) -> None:
         """Add a log entry to the serverapp logs for the specified `run_id`."""
         # Convert the uint64 value to sint64 for SQLite
         sint64_run_id = convert_uint64_to_sint64(run_id)
@@ -1037,7 +1037,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             query = """
                 INSERT INTO logs (timestamp, run_id, node_id, log) VALUES (?, ?, ?, ?);
             """
-            self.query(query, (now().timestamp(), sint64_run_id, 0, log))
+            self.query(query, (now().timestamp(), sint64_run_id, 0, log_message))
         except sqlite3.IntegrityError:
             raise ValueError(f"Run {run_id} not found") from None
 

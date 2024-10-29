@@ -44,7 +44,7 @@ from .utils import (
 
 
 @dataclass
-class RunRecord:
+class RunRecord:  # pylint: disable=R0902
     """The record of a specific run, including its status and timestamps."""
 
     run: Run
@@ -515,13 +515,13 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             raise ValueError(f"Run {run_id} not found")
         self.contexts[run_id] = context
 
-    def add_serverapp_log(self, run_id: int, log: str) -> None:
+    def add_serverapp_log(self, run_id: int, log_message: str) -> None:
         """Add a log entry to the serverapp logs for the specified `run_id`."""
         if run_id not in self.run_ids:
             raise ValueError(f"Run {run_id} not found")
         run = self.run_ids[run_id]
         with run.log_lock:
-            run.logs.append((now().timestamp(), log))
+            run.logs.append((now().timestamp(), log_message))
 
     def get_serverapp_log(self, run_id: int, after_timestamp: Optional[float]) -> str:
         """Get the serverapp logs for the specified `run_id`."""

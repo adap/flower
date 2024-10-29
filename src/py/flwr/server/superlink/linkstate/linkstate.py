@@ -301,14 +301,14 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def add_serverapp_log(self, run_id: int, log: str) -> None:
+    def add_serverapp_log(self, run_id: int, log_message: str) -> None:
         """Add a log entry to the serverapp logs for the specified `run_id`.
 
         Parameters
         ----------
         run_id : int
             The identifier of the run for which to add a log entry.
-        log : str
+        log_message : str
             The log entry to be added to the serverapp logs.
         """
 
