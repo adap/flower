@@ -175,6 +175,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
             res: PullServerAppInputsResponse = driver._stub.PullServerAppInputs(req)
             if not res.HasField("run"):
                 sleep(3)
+                run_status = None
                 continue
 
             context = context_from_proto(res.context)
@@ -236,10 +237,13 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
             run_status = RunStatus(Status.FINISHED, SubStatus.FAILED, str(ex))
 
         finally:
-            run_status_proto = run_status_to_proto(run_status)
-            driver._stub.UpdateRunStatus(
-                UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
-            )
+            if run_status:
+                run_status_proto = run_status_to_proto(run_status)
+                driver._stub.UpdateRunStatus(
+                    UpdateRunStatusRequest(
+                        run_id=run.run_id, run_status=run_status_proto
+                    )
+                )
 
         # Stop the loop if `flwr-serverapp` is expected to process a single run
         if only_once:
