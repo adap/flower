@@ -15,6 +15,7 @@
 """SuperExec API servicer."""
 
 
+import time
 from collections.abc import Generator
 from logging import ERROR, INFO
 from typing import Any
@@ -82,57 +83,27 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         run_id = request.run_id
 
         # Exit if `run_id` not found
-        if request.run_id not in self.runs:
+        if not state.get_run(run_id):
             context.abort(grpc.StatusCode.NOT_FOUND, "Run ID not found")
 
-        last_sent_index = 0
+        after_timestamp = request.after_timestamp
         while context.is_active():
-            # Yield n'th row of logs, if n'th row < len(logs)
-            logs = self.runs[request.run_id].logs
-            for i in range(last_sent_index, len(logs)):
-                yield StreamLogsResponse(log_output=logs[i])
-            last_sent_index = len(logs)
+            log_msg, latest_timestamp = state.get_serverapp_log(run_id, after_timestamp)
+            if log_msg:
+                yield StreamLogsResponse(
+                    log_output=log_msg,
+                    latest_timestamp=latest_timestamp,
+                )
+                # Add a small epsilon to the latest timestamp to avoid getting
+                # the same log
+                after_timestamp = max(latest_timestamp + 1e-6, after_timestamp)
 
             # Wait for and continue to yield more log responses only if the
             # run isn't completed yet. If the run is finished, the entire log
             # is returned at this point and the server ends the stream.
-            if self.runs[request.run_id].proc.poll() is not None:
+            run_status = state.get_run_status({run_id})[run_id]
+            if run_status.status == Status.FINISHED:
                 log(INFO, "All logs for run ID `%s` returned", request.run_id)
-                context.set_code(grpc.StatusCode.OK)
                 context.cancel()
 
-            time.sleep(1.0)  # Sleep briefly to avoid busy waiting
-
-
-def _capture_logs(
-    run: RunTracker,
-) -> None:
-    while True:
-        # Explicitly check if Popen.poll() is None. Required for `pytest`.
-        if run.proc.poll() is None:
-            # Select streams only when ready to read
-            ready_to_read, _, _ = select.select(
-                [run.proc.stdout, run.proc.stderr],
-                [],
-                [],
-                SELECT_TIMEOUT,
-            )
-            # Read from std* and append to RunTracker.logs
-            for stream in ready_to_read:
-                # Flush stdout to view output in real time
-                readline = stream.readline()
-                sys.stdout.write(readline)
-                sys.stdout.flush()
-                # Append to logs
-                line = readline.rstrip()
-                if line:
-                    run.logs.append(f"{line}")
-
-        # Close std* to prevent blocking
-        elif run.proc.poll() is not None:
-            log(INFO, "Subprocess finished, exiting log capture")
-            if run.proc.stdout:
-                run.proc.stdout.close()
-            if run.proc.stderr:
-                run.proc.stderr.close()
-            break
+            time.sleep(0.5)  # Sleep briefly to avoid busy waiting
