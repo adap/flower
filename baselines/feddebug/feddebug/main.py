@@ -90,6 +90,7 @@ def run_simulation(cfg):
         utils.set_parameters(gm_model, parameters)
         d_res = test(gm_model, server_testdata, device=cfg.device)
         round2gm_accs.append(d_res["accuracy"])
+        log(DEBUG, "config: %s", config)
         return d_res["loss"], {
             "accuracy": d_res["accuracy"],
             "loss": d_res["loss"],

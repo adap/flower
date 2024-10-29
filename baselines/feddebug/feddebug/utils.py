@@ -87,7 +87,7 @@ def set_parameters(net, parameters):
 
 def plot_metrics(gm_accs, feddebug_accs, cfg):
     """Plot the metrics with legend and save the plot."""
-    fig, ax = plt.subplots(
+    fig, axis = plt.subplots(
         figsize=(3.5, 2.5)
     )  # Increase figure size for better readability
 
@@ -95,19 +95,19 @@ def plot_metrics(gm_accs, feddebug_accs, cfg):
     gm_accs = [x * 100 for x in gm_accs][1:]
 
     # Plot lines with distinct styles for better differentiation
-    ax.plot(gm_accs, label="Global Model", linestyle="-", linewidth=2)
-    ax.plot(feddebug_accs, label="FedDebug", linestyle="--", linewidth=2)
+    axis.plot(gm_accs, label="Global Model", linestyle="-", linewidth=2)
+    axis.plot(feddebug_accs, label="FedDebug", linestyle="--", linewidth=2)
 
     # Set labels with font settings
-    ax.set_xlabel("Training Round", fontsize=12)
-    ax.set_ylabel("Accuracy (%)", fontsize=12)
+    axis.set_xlabel("Training Round", fontsize=12)
+    axis.set_ylabel("Accuracy (%)", fontsize=12)
 
     # Set title with font settings
     title = f"{cfg.distribution}-{cfg.model}-{cfg.dataset.name}"
-    ax.set_title(title, fontsize=12)
+    axis.set_title(title, fontsize=12)
 
     # Set legend with better positioning and font size
-    ax.legend(fontsize=12, loc="lower right", frameon=False)
+    axis.legend(fontsize=12, loc="lower right", frameon=False)
     # change the font family to serif and font.serif to Times
 
     # Tight layout to avoid clipping
