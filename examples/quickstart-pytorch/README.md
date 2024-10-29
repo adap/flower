@@ -49,7 +49,7 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 ### Run with the Simulation Engine
 
 > \[!TIP\]
-> This example runs faster when the `ClientApp`s have access to a GPU. If your system has one, you can make use of it by configuring the `backend.client-resources` component in `pyproject.toml`. If you want to try running the example with GPU right away, use the `local-simulation-gpu` federation as shown below.
+> This example might run faster when the `ClientApp`s have access to a GPU. If your system has one, you can make use of it by configuring the `backend.client-resources` component in `pyproject.toml`. If you want to try running the example with GPU right away, use the `local-simulation-gpu` federation as shown below.
 
 ```bash
 # Run with the default federation (CPU only)
