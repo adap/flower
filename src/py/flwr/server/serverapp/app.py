@@ -129,12 +129,11 @@ def run_serverapp(  # pylint: disable=R0914
 ) -> None:
     """Run Flower ServerApp process."""
     _ = GrpcDriver(
-        run_id=run_id if run_id else 0,
         driver_service_address=superlink,
         root_certificates=certificates,
     )
 
-    log(INFO, "%s", flwr_dir_)
+    log(INFO, "%s, %d", flwr_dir_, run_id)
 
     # Then, GetServerInputs
 

@@ -5,6 +5,7 @@ isort:skip_file
 import abc
 import flwr.proto.driver_pb2
 import flwr.proto.fab_pb2
+import flwr.proto.log_pb2
 import flwr.proto.run_pb2
 import grpc
 
@@ -54,6 +55,11 @@ class DriverStub:
         flwr.proto.run_pb2.UpdateRunStatusRequest,
         flwr.proto.run_pb2.UpdateRunStatusResponse]
     """Update the status of a given run"""
+
+    PushLogs: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.log_pb2.PushLogsRequest,
+        flwr.proto.log_pb2.PushLogsResponse]
+    """Push ServerApp logs"""
 
 
 class DriverServicer(metaclass=abc.ABCMeta):
@@ -127,6 +133,14 @@ class DriverServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.run_pb2.UpdateRunStatusResponse:
         """Update the status of a given run"""
+        pass
+
+    @abc.abstractmethod
+    def PushLogs(self,
+        request: flwr.proto.log_pb2.PushLogsRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.log_pb2.PushLogsResponse:
+        """Push ServerApp logs"""
         pass
 
 
