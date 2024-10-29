@@ -40,6 +40,7 @@ from flwr.proto.recordset_pb2 import ParametersRecord as ProtoParametersRecord
 from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
 from flwr.proto.recordset_pb2 import SintList, StringList, UintList
 from flwr.proto.run_pb2 import Run as ProtoRun
+from flwr.proto.run_pb2 import RunStatus as ProtoRunStatus
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import (
     ClientMessage,
@@ -910,3 +911,24 @@ def clientappstatus_from_proto(
     if msg.code == ClientAppOutputCode.UNKNOWN_ERROR:
         code = typing.ClientAppOutputCode.UNKNOWN_ERROR
     return typing.ClientAppOutputStatus(code=code, message=msg.message)
+
+
+# === Run status ===
+
+
+def run_status_to_proto(run_status: typing.RunStatus) -> ProtoRunStatus:
+    """Serialize `RunStatus` to ProtoBuf."""
+    return ProtoRunStatus(
+        status=run_status.status,
+        sub_status=run_status.sub_status,
+        details=run_status.details,
+    )
+
+
+def run_status_from_proto(run_status_proto: ProtoRunStatus) -> typing.RunStatus:
+    """Deserialize `RunStatus` from ProtoBuf."""
+    return typing.RunStatus(
+        status=run_status_proto.status,
+        sub_status=run_status_proto.sub_status,
+        details=run_status_proto.details,
+    )
