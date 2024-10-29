@@ -17,6 +17,7 @@ syntax = "proto3";
 
 package flwr.proto;
 
+import "flwr/proto/log.proto";
 import "flwr/proto/node.proto";
 import "flwr/proto/message.proto";
 import "flwr/proto/task.proto";
@@ -53,6 +54,9 @@ service Driver {
   // Update the status of a given run
   rpc UpdateRunStatus(UpdateRunStatusRequest)
       returns (UpdateRunStatusResponse) {}
+
+  // Push ServerApp logs
+  rpc PushLogs(PushLogsRequest) returns (PushLogsResponse) {}
 }
 
 // GetNodes messages

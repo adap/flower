@@ -421,7 +421,8 @@ def _main_loop(
             server_app_run_config = {}
 
         # Initialize Driver
-        driver = InMemoryDriver(run_id=run.run_id, state_factory=state_factory)
+        driver = InMemoryDriver(state_factory=state_factory)
+        driver.init_run(run_id=run.run_id)
 
         # Get and run ServerApp thread
         serverapp_th = run_serverapp_th(

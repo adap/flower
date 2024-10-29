@@ -171,11 +171,11 @@ def run_server_app() -> None:
     if app_path is None:
         # User provided `--run-id`, but not `app_dir`
         driver = GrpcDriver(
-            run_id=args.run_id,
             driver_service_address=args.superlink,
             root_certificates=root_certificates,
         )
         flwr_dir = get_flwr_dir(args.flwr_dir)
+        driver.init_run(args.run_id)
         run_ = driver.run
         if not run_.fab_hash:
             raise ValueError("FAB hash not provided.")
@@ -193,7 +193,6 @@ def run_server_app() -> None:
         # User provided `app_dir`, but not `--run-id`
         # Create run if run_id is not provided
         driver = GrpcDriver(
-            run_id=0,  # Will be overwritten
             driver_service_address=args.superlink,
             root_certificates=root_certificates,
         )
@@ -204,8 +203,8 @@ def run_server_app() -> None:
         # Create run
         req = CreateRunRequest(fab_id=fab_id, fab_version=fab_version)
         res: CreateRunResponse = driver._stub.CreateRun(req)  # pylint: disable=W0212
-        # Overwrite driver._run_id
-        driver._run_id = res.run_id  # pylint: disable=W0212
+        # Fetch full `Run` using `run_id`
+        driver.init_run(res.run_id)  # pylint: disable=W0212
 
     # Obtain server app reference and the run config
     server_app_attr = config["tool"]["flwr"]["app"]["components"]["serverapp"]
