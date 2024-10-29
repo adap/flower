@@ -28,7 +28,7 @@ from flwr.server.superlink.ffs import Ffs
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 
-from .executor import Executor, RunTracker
+from .executor import Executor
 
 
 class DeploymentEngine(Executor):
@@ -141,7 +141,7 @@ class DeploymentEngine(Executor):
         fab_file: bytes,
         override_config: UserConfig,
         federation_config: UserConfig,
-    ) -> Optional[RunTracker]:
+    ) -> Optional[int]:
         """Start run using the Flower Deployment Engine."""
         try:
 
@@ -151,7 +151,7 @@ class DeploymentEngine(Executor):
             )
             log(INFO, "Created run %s", str(run_id))
 
-            return None
+            return run_id
         # pylint: disable-next=broad-except
         except Exception as e:
             log(ERROR, "Could not start run: %s", str(e))
