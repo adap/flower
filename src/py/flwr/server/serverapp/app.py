@@ -153,7 +153,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
     certificates: Optional[bytes] = None,
 ) -> None:
     """Run Flower ServerApp process."""
-    _ = GrpcDriver(
+    driver = GrpcDriver(
         driver_service_address=superlink,
         root_certificates=certificates,
     )
@@ -181,11 +181,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
             run = run_from_proto(res.run)
             fab = fab_from_proto(res.fab)
 
-            if not run_id:
-                # Since flwr-serverapp` was started without a run-id
-                # we need to update the driver object setting the run_id
-                # of the pending run this process is executing.
-                driver._run_id = run.run_id
+            driver.init_run(run.run_id)
 
             log(DEBUG, "ServerApp process starts FAB installation.")
             install_from_fab(fab.content, flwr_dir=flwr_dir, skip_prompt=True)
