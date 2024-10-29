@@ -22,6 +22,7 @@ from typing import Optional
 from uuid import UUID
 
 import grpc
+from google.protobuf.message import Message as GrpcMessage
 
 from flwr.common.constant import Status
 from flwr.common.logger import log
@@ -212,7 +213,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         # Lock access to LinkState, preventing obtaining the same pending run_id
         with self.lock:
             # If run_id is provided, use it, otherwise use the pending run_id
-            if request.HasField("run_id"):
+            if _has_field(request, "run_id"):
                 run_id: Optional[int] = request.run_id
             else:
                 run_id = state.get_pending_run_id()
@@ -256,3 +257,8 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
 def _raise_if(validation_error: bool, detail: str) -> None:
     if validation_error:
         raise ValueError(f"Malformed PushTaskInsRequest: {detail}")
+
+
+def _has_field(message: GrpcMessage, field_name: str) -> bool:
+    """Check if a certain field is set for the message, including scalar fields."""
+    return field_name in {fld.name for fld, _ in message.ListFields()}
