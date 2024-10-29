@@ -1074,8 +1074,7 @@ class StateTest(unittest.TestCase):
         retrieved_logs = state.get_serverapp_log(run_id, after_timestamp=timestamp)
 
         # Assert
-        assert log_entry_1 in retrieved_logs
-        assert log_entry_2 in retrieved_logs
+        assert log_entry_1 + log_entry_2 == retrieved_logs
 
     def test_get_serverapp_log_after_timestamp(self) -> None:
         """Test retrieving serverapp logs after a specific timestamp."""
@@ -1093,7 +1092,7 @@ class StateTest(unittest.TestCase):
 
         # Assert
         assert log_entry_1 not in retrieved_logs
-        assert log_entry_2 in retrieved_logs
+        assert log_entry_2 == retrieved_logs
 
 
 def create_task_ins(

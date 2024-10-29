@@ -103,8 +103,9 @@ SQL_CREATE_TABLE_LOGS = """
 CREATE TABLE IF NOT EXISTS logs (
     timestamp             REAL,
     run_id                INTEGER,
+    node_id               INTEGER,
     log                   TEXT,
-    PRIMARY KEY (timestamp, run_id),
+    PRIMARY KEY (timestamp, run_id, node_id),
     FOREIGN KEY (run_id) REFERENCES run(run_id)
 );
 """
@@ -1033,8 +1034,10 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         # Store log
         try:
-            query = "INSERT INTO logs (timestamp, run_id, log) VALUES (?, ?, ?);"
-            self.query(query, (now().timestamp(), sint64_run_id, log))
+            query = """
+                INSERT INTO logs (timestamp, run_id, node_id, log) VALUES (?, ?, ?, ?);
+            """
+            self.query(query, (now().timestamp(), sint64_run_id, 0, log))
         except sqlite3.IntegrityError:
             raise ValueError(f"Run {run_id} not found") from None
 
@@ -1051,9 +1054,12 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         # Retrieve logs
         if after_timestamp is None:
             after_timestamp = 0.0
-        query = "SELECT log FROM logs WHERE run_id = ? AND timestamp > ?;"
-        rows = self.query(query, (sint64_run_id, after_timestamp))
-        return "".join(row["log"] for row in rows)
+        query = """
+            SELECT log, timestamp FROM logs
+            WHERE run_id = ? AND node_id = ? AND timestamp > ?;
+        """
+        rows = self.query(query, (sint64_run_id, 0, after_timestamp))
+        return "".join(row["log"] for row in sorted(rows, key=lambda x: x["timestamp"]))
 
     def get_valid_task_ins(self, task_id: str) -> Optional[dict[str, Any]]:
         """Check if the TaskIns exists and is valid (not expired).
