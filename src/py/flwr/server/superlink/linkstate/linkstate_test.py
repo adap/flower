@@ -1071,9 +1071,12 @@ class StateTest(unittest.TestCase):
         # Execute
         state.add_serverapp_log(run_id, log_entry_1)
         state.add_serverapp_log(run_id, log_entry_2)
-        retrieved_logs = state.get_serverapp_log(run_id, after_timestamp=timestamp)
+        retrieved_logs, latest = state.get_serverapp_log(
+            run_id, after_timestamp=timestamp
+        )
 
         # Assert
+        assert latest > timestamp
         assert log_entry_1 + log_entry_2 == retrieved_logs
 
     def test_get_serverapp_log_after_timestamp(self) -> None:
@@ -1084,15 +1087,37 @@ class StateTest(unittest.TestCase):
         log_entry_1 = "Log entry 1"
         log_entry_2 = "Log entry 2"
         state.add_serverapp_log(run_id, log_entry_1)
-        timestamp_2 = now().timestamp()
+        timestamp = now().timestamp()
         state.add_serverapp_log(run_id, log_entry_2)
 
         # Execute
-        retrieved_logs = state.get_serverapp_log(run_id, after_timestamp=timestamp_2)
+        retrieved_logs, latest = state.get_serverapp_log(
+            run_id, after_timestamp=timestamp
+        )
 
         # Assert
+        assert latest > timestamp
         assert log_entry_1 not in retrieved_logs
         assert log_entry_2 == retrieved_logs
+
+    def test_get_serverapp_log_after_timestamp_no_logs(self) -> None:
+        """Test retrieving serverapp logs after a specific timestamp but no logs are
+        found."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        run_id = state.create_run(None, None, "9f86d08", {})
+        log_entry = "Log entry"
+        state.add_serverapp_log(run_id, log_entry)
+        timestamp = now().timestamp()
+
+        # Execute
+        retrieved_logs, latest = state.get_serverapp_log(
+            run_id, after_timestamp=timestamp
+        )
+
+        # Assert
+        assert latest == 0
+        assert retrieved_logs == ""
 
 
 def create_task_ins(

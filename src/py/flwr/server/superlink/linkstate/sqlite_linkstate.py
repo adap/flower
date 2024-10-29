@@ -1028,7 +1028,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                 raise ValueError(f"Run {run_id} not found") from None
 
     def add_serverapp_log(self, run_id: int, log_message: str) -> None:
-        """Add a log entry to the serverapp logs for the specified `run_id`."""
+        """Add a log entry to the ServerApp logs for the specified `run_id`."""
         # Convert the uint64 value to sint64 for SQLite
         sint64_run_id = convert_uint64_to_sint64(run_id)
 
@@ -1041,8 +1041,10 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         except sqlite3.IntegrityError:
             raise ValueError(f"Run {run_id} not found") from None
 
-    def get_serverapp_log(self, run_id: int, after_timestamp: Optional[float]) -> str:
-        """Get the serverapp logs for the specified `run_id`."""
+    def get_serverapp_log(
+        self, run_id: int, after_timestamp: Optional[float]
+    ) -> tuple[str, float]:
+        """Get the ServerApp logs for the specified `run_id`."""
         # Convert the uint64 value to sint64 for SQLite
         sint64_run_id = convert_uint64_to_sint64(run_id)
 
@@ -1059,7 +1061,9 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             WHERE run_id = ? AND node_id = ? AND timestamp > ?;
         """
         rows = self.query(query, (sint64_run_id, 0, after_timestamp))
-        return "".join(row["log"] for row in sorted(rows, key=lambda x: x["timestamp"]))
+        rows.sort(key=lambda x: x["timestamp"])
+        latest_timestamp = rows[-1]["timestamp"] if rows else 0.0
+        return "".join(row["log"] for row in rows), latest_timestamp
 
     def get_valid_task_ins(self, task_id: str) -> Optional[dict[str, Any]]:
         """Check if the TaskIns exists and is valid (not expired).

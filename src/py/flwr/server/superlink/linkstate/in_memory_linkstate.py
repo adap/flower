@@ -523,7 +523,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         with run.log_lock:
             run.logs.append((now().timestamp(), log_message))
 
-    def get_serverapp_log(self, run_id: int, after_timestamp: Optional[float]) -> str:
+    def get_serverapp_log(
+        self, run_id: int, after_timestamp: Optional[float]
+    ) -> tuple[str, float]:
         """Get the serverapp logs for the specified `run_id`."""
         if run_id not in self.run_ids:
             raise ValueError(f"Run {run_id} not found")
@@ -533,4 +535,5 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         with run.log_lock:
             # Find the index where the timestamp would be inserted
             index = bisect_right(run.logs, (after_timestamp, ""))
-            return "".join(log for _, log in run.logs[index:])
+            latest_timestamp = run.logs[-1][0] if index < len(run.logs) else 0.0
+            return "".join(log for _, log in run.logs[index:]), latest_timestamp
