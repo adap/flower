@@ -24,7 +24,7 @@ esac
 
 dir_arg="./.."
 
-timeout 2m flower-superlink --insecure $db_arg $rest_arg --isolation="process" &
+timeout 2m flower-superlink --insecure $db_arg $rest_arg --isolation="process"&
 sl_pid=$!
 echo "Starting SuperLink"
 sleep 3
@@ -62,7 +62,7 @@ echo "Starting new client"
 sleep 5
 
 # We start the server-app to begining the training
-timeout 2m flwr-serverapp $rest_arg --superlink $server_app_address &
+timeout 2m flower-server-app ./ $rest_arg --superlink $server_app_address &
 pid=$!
 echo "Starting server-app to start training"
 
