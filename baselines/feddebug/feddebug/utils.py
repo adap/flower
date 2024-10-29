@@ -9,7 +9,6 @@ import random
 from logging import INFO
 
 import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
 import numpy as np
 import torch
 from flwr.common.logger import log
@@ -88,7 +87,6 @@ def set_parameters(net, parameters):
 
 def plot_metrics(gm_accs, feddebug_accs, cfg):
     """Plot the metrics with legend and save the plot."""
-    
     fig, ax = plt.subplots(
         figsize=(3.5, 2.5)
     )  # Increase figure size for better readability
