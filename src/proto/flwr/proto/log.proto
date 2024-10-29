@@ -22,6 +22,6 @@ import "flwr/proto/node.proto";
 message PushLogsRequest {
   Node node = 1;
   uint64 run_id = 2;
-  string logs = 3;
+  repeated string logs = 3;
 }
 message PushLogsResponse {}

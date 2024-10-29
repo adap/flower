@@ -5,6 +5,7 @@ isort:skip_file
 import builtins
 import flwr.proto.node_pb2
 import google.protobuf.descriptor
+import google.protobuf.internal.containers
 import google.protobuf.message
 import typing
 import typing_extensions
@@ -19,12 +20,13 @@ class PushLogsRequest(google.protobuf.message.Message):
     @property
     def node(self) -> flwr.proto.node_pb2.Node: ...
     run_id: builtins.int
-    logs: typing.Text
+    @property
+    def logs(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
     def __init__(self,
         *,
         node: typing.Optional[flwr.proto.node_pb2.Node] = ...,
         run_id: builtins.int = ...,
-        logs: typing.Text = ...,
+        logs: typing.Optional[typing.Iterable[typing.Text]] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["node",b"node"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["logs",b"logs","node",b"node","run_id",b"run_id"]) -> None: ...
