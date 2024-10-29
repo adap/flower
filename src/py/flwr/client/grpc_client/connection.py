@@ -16,11 +16,12 @@
 
 
 import uuid
+from collections.abc import Iterator
 from contextlib import contextmanager
 from logging import DEBUG, ERROR
 from pathlib import Path
 from queue import Queue
-from typing import Callable, Iterator, Optional, Tuple, Union, cast
+from typing import Callable, Optional, Union, cast
 
 from cryptography.hazmat.primitives.asymmetric import ec
 
@@ -59,17 +60,17 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 
 
 @contextmanager
-def grpc_connection(  # pylint: disable=R0913, R0915
+def grpc_connection(  # pylint: disable=R0913,R0915,too-many-positional-arguments
     server_address: str,
     insecure: bool,
     retry_invoker: RetryInvoker,  # pylint: disable=unused-argument
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
     authentication_keys: Optional[  # pylint: disable=unused-argument
-        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
 ) -> Iterator[
-    Tuple[
+    tuple[
         Callable[[], Optional[Message]],
         Callable[[Message], None],
         Optional[Callable[[], Optional[int]]],

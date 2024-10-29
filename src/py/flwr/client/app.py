@@ -18,10 +18,11 @@ import signal
 import subprocess
 import sys
 import time
+from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from logging import ERROR, INFO, WARN
 from pathlib import Path
-from typing import Callable, ContextManager, Dict, Optional, Tuple, Type, Union, cast
+from typing import Callable, Optional, Union, cast
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -35,6 +36,9 @@ from flwr.client.typing import ClientFnExt
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, Message, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
+    CLIENTAPPIO_API_DEFAULT_ADDRESS,
+    ISOLATION_MODE_PROCESS,
+    ISOLATION_MODE_SUBPROCESS,
     MISSING_EXTRA_REST,
     RUN_ID_NUM_BYTES,
     TRANSPORT_TYPE_GRPC_ADAPTER,
@@ -50,20 +54,15 @@ from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.typing import Fab, Run, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.server.superlink.fleet.grpc_bidi.grpc_server import generic_create_grpc_server
-from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
+from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 
 from .clientapp.clientappio_servicer import ClientAppInputs, ClientAppIoServicer
 from .grpc_adapter_client.connection import grpc_adapter
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
-from .node_state import NodeState
 from .numpy_client import NumPyClient
-
-ADDRESS_CLIENTAPPIO_API_GRPC_RERE = "0.0.0.0:9094"
-
-ISOLATION_MODE_SUBPROCESS = "subprocess"
-ISOLATION_MODE_PROCESS = "process"
+from .run_info_store import DeprecatedRunInfoStore
 
 
 def _check_actionable_client(
@@ -95,7 +94,7 @@ def start_client(
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
     authentication_keys: Optional[
-        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
@@ -132,6 +131,11 @@ def start_client(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
+    authentication_keys : Optional[Tuple[PrivateKey, PublicKey]] (default: None)
+        Tuple containing the elliptic curve private key and public key for
+        authentication from the cryptography library.
+        Source: https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ec/
+        Used to establish an authenticated connection with the server.
     max_retries: Optional[int] (default: None)
         The maximum number of times the client will try to connect to the
         server before giving up in case of a connection error. If set to None,
@@ -197,7 +201,7 @@ def start_client_internal(
     *,
     server_address: str,
     node_config: UserConfig,
-    load_client_app_fn: Optional[Callable[[str, str], ClientApp]] = None,
+    load_client_app_fn: Optional[Callable[[str, str, str], ClientApp]] = None,
     client_fn: Optional[ClientFnExt] = None,
     client: Optional[Client] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
@@ -205,13 +209,13 @@ def start_client_internal(
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
     authentication_keys: Optional[
-        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
     flwr_path: Optional[Path] = None,
     isolation: Optional[str] = None,
-    supernode_address: Optional[str] = ADDRESS_CLIENTAPPIO_API_GRPC_RERE,
+    supernode_address: Optional[str] = CLIENTAPPIO_API_DEFAULT_ADDRESS,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -249,6 +253,11 @@ def start_client_internal(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
+    authentication_keys : Optional[Tuple[PrivateKey, PublicKey]] (default: None)
+        Tuple containing the elliptic curve private key and public key for
+        authentication from the cryptography library.
+        Source: https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ec/
+        Used to establish an authenticated connection with the server.
     max_retries: Optional[int] (default: None)
         The maximum number of times the client will try to connect to the
         server before giving up in case of a connection error. If set to None,
@@ -266,7 +275,7 @@ def start_client_internal(
         by the SueprNode and communicates using gRPC at the address
         `supernode_address`. If `process`, the `ClientApp` runs in a separate isolated
         process and communicates using gRPC at the address `supernode_address`.
-    supernode_address : Optional[str] (default: `ADDRESS_CLIENTAPPIO_API_GRPC_RERE`)
+    supernode_address : Optional[str] (default: `CLIENTAPPIO_API_DEFAULT_ADDRESS`)
         The SuperNode gRPC server address.
     """
     if insecure is None:
@@ -288,7 +297,7 @@ def start_client_internal(
 
             client_fn = single_client_factory
 
-        def _load_client_app(_1: str, _2: str) -> ClientApp:
+        def _load_client_app(_1: str, _2: str, _3: str) -> ClientApp:
             return ClientApp(client_fn=client_fn)
 
         load_client_app_fn = _load_client_app
@@ -354,10 +363,10 @@ def start_client_internal(
         on_backoff=_on_backoff,
     )
 
-    # NodeState gets initialized when the first connection is established
-    node_state: Optional[NodeState] = None
+    # DeprecatedRunInfoStore gets initialized when the first connection is established
+    run_info_store: Optional[DeprecatedRunInfoStore] = None
 
-    runs: Dict[int, Run] = {}
+    runs: dict[int, Run] = {}
 
     while not app_state_tracker.interrupt:
         sleep_duration: int = 0
@@ -372,7 +381,7 @@ def start_client_internal(
             receive, send, create_node, delete_node, get_run, get_fab = conn
 
             # Register node when connecting the first time
-            if node_state is None:
+            if run_info_store is None:
                 if create_node is None:
                     if transport not in ["grpc-bidi", None]:
                         raise NotImplementedError(
@@ -381,7 +390,7 @@ def start_client_internal(
                         )
                     # gRPC-bidi doesn't have the concept of node_id,
                     # so we set it to -1
-                    node_state = NodeState(
+                    run_info_store = DeprecatedRunInfoStore(
                         node_id=-1,
                         node_config={},
                     )
@@ -392,7 +401,7 @@ def start_client_internal(
                     )  # pylint: disable=not-callable
                     if node_id is None:
                         raise ValueError("Node registration failed")
-                    node_state = NodeState(
+                    run_info_store = DeprecatedRunInfoStore(
                         node_id=node_id,
                         node_config=node_config,
                     )
@@ -451,7 +460,7 @@ def start_client_internal(
                     run.fab_id, run.fab_version = fab_id, fab_version
 
                     # Register context for this run
-                    node_state.register_context(
+                    run_info_store.register_context(
                         run_id=run_id,
                         run=run,
                         flwr_path=flwr_path,
@@ -459,7 +468,7 @@ def start_client_internal(
                     )
 
                     # Retrieve context for this run
-                    context = node_state.retrieve_context(run_id=run_id)
+                    context = run_info_store.retrieve_context(run_id=run_id)
                     # Create an error reply message that will never be used to prevent
                     # the used-before-assignment linting error
                     reply_message = message.create_error_reply(
@@ -519,7 +528,7 @@ def start_client_internal(
                         else:
                             # Load ClientApp instance
                             client_app: ClientApp = load_client_app_fn(
-                                fab_id, fab_version
+                                fab_id, fab_version, run.fab_hash
                             )
 
                             # Execute ClientApp
@@ -532,7 +541,7 @@ def start_client_internal(
                             # Raise exception, crash process
                             raise ex
 
-                        # Don't update/change NodeState
+                        # Don't update/change DeprecatedRunInfoStore
 
                         e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
                         # Ex fmt: "<class 'ZeroDivisionError'>:<'division by zero'>"
@@ -557,7 +566,7 @@ def start_client_internal(
                         )
                     else:
                         # No exception, update node state
-                        node_state.update_context(
+                        run_info_store.update_context(
                             run_id=run_id,
                             context=context,
                         )
@@ -690,7 +699,7 @@ def start_numpy_client(
     )
 
 
-def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
+def _init_connection(transport: Optional[str], server_address: str) -> tuple[
     Callable[
         [
             str,
@@ -698,10 +707,10 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
             RetryInvoker,
             int,
             Union[bytes, str, None],
-            Optional[Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]],
+            Optional[tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]],
         ],
-        ContextManager[
-            Tuple[
+        AbstractContextManager[
+            tuple[
                 Callable[[], Optional[Message]],
                 Callable[[Message], None],
                 Optional[Callable[[], Optional[int]]],
@@ -712,7 +721,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
         ],
     ],
     str,
-    Type[Exception],
+    type[Exception],
 ]:
     # Parse IP address
     parsed_address = parse_address(server_address)
@@ -770,7 +779,7 @@ class _AppStateTracker:
         signal.signal(signal.SIGTERM, signal_handler)
 
 
-def run_clientappio_api_grpc(address: str) -> Tuple[grpc.Server, ClientAppIoServicer]:
+def run_clientappio_api_grpc(address: str) -> tuple[grpc.Server, ClientAppIoServicer]:
     """Run ClientAppIo API gRPC server."""
     clientappio_servicer: grpc.Server = ClientAppIoServicer()
     clientappio_add_servicer_to_server_fn = add_ClientAppIoServicer_to_server

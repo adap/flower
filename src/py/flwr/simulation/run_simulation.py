@@ -25,27 +25,28 @@ from argparse import Namespace
 from logging import DEBUG, ERROR, INFO, WARNING
 from pathlib import Path
 from time import sleep
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 from flwr.cli.config_utils import load_and_validate
 from flwr.client import ClientApp
-from flwr.common import EventType, event, log
+from flwr.common import Context, EventType, RecordSet, event, log, now
 from flwr.common.config import get_fused_config_from_dir, parse_config_args
-from flwr.common.constant import RUN_ID_NUM_BYTES
+from flwr.common.constant import RUN_ID_NUM_BYTES, Status
 from flwr.common.logger import (
     set_logger_propagation,
     update_console_handler,
     warn_deprecated_feature,
     warn_deprecated_feature_with_example,
 )
-from flwr.common.typing import Run, UserConfig
+from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.server.driver import Driver, InMemoryDriver
-from flwr.server.run_serverapp import run as run_server_app
+from flwr.server.run_serverapp import run as _run
 from flwr.server.server_app import ServerApp
 from flwr.server.superlink.fleet import vce
 from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
-from flwr.server.superlink.state import StateFactory
-from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
+from flwr.server.superlink.linkstate import LinkStateFactory
+from flwr.server.superlink.linkstate.in_memory_linkstate import RunRecord
+from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 from flwr.simulation.ray_transport.utils import (
     enable_tf_gpu_growth as enable_gpu_growth,
 )
@@ -56,7 +57,7 @@ def _check_args_do_not_interfere(args: Namespace) -> bool:
     mode_one_args = ["app", "run_config"]
     mode_two_args = ["client_app", "server_app"]
 
-    def _resolve_message(conflict_keys: List[str]) -> str:
+    def _resolve_message(conflict_keys: list[str]) -> str:
         return ",".join([f"`--{key}`".replace("_", "-") for key in conflict_keys])
 
     # When passing `--app`, `--app-dir` is ignored
@@ -108,6 +109,11 @@ def _replace_keys(d: Any, match: str, target: str) -> Any:
 def run_simulation_from_cli() -> None:
     """Run Simulation Engine from the CLI."""
     args = _parse_args_run_simulation().parse_args()
+
+    event(
+        EventType.CLI_FLOWER_SIMULATION_ENTER,
+        event_details={"backend": args.backend, "num-supernodes": args.num_supernodes},
+    )
 
     # Add warnings for deprecated server_app and client_app arguments
     if args.server_app:
@@ -177,7 +183,9 @@ def run_simulation_from_cli() -> None:
         client_app_attr = app_components["clientapp"]
         server_app_attr = app_components["serverapp"]
 
-        override_config = parse_config_args([args.run_config])
+        override_config = parse_config_args(
+            [args.run_config] if args.run_config else args.run_config
+        )
         fused_config = get_fused_config_from_dir(app_path, override_config)
         app_dir = args.app
         is_app = True
@@ -209,14 +217,16 @@ def run_simulation_from_cli() -> None:
         app_dir=app_dir,
         run=run,
         enable_tf_gpu_growth=args.enable_tf_gpu_growth,
+        delay_start=args.delay_start,
         verbose_logging=args.verbose,
         server_app_run_config=fused_config,
         is_app=is_app,
+        exit_event=EventType.CLI_FLOWER_SIMULATION_LEAVE,
     )
 
 
 # Entry point from Python session (script or notebook)
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-positional-arguments
 def run_simulation(
     server_app: ServerApp,
     client_app: ClientApp,
@@ -265,6 +275,11 @@ def run_simulation(
         When disabled, only INFO, WARNING and ERROR log messages will be shown. If
         enabled, DEBUG-level logs will be displayed.
     """
+    event(
+        EventType.PYTHON_API_RUN_SIMULATION_ENTER,
+        event_details={"backend": backend_name, "num-supernodes": num_supernodes},
+    )
+
     if enable_tf_gpu_growth:
         warn_deprecated_feature_with_example(
             "Passing `enable_tf_gpu_growth=True` is deprecated.",
@@ -282,10 +297,11 @@ def run_simulation(
         backend_config=backend_config,
         enable_tf_gpu_growth=enable_tf_gpu_growth,
         verbose_logging=verbose_logging,
+        exit_event=EventType.PYTHON_API_RUN_SIMULATION_LEAVE,
     )
 
 
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-positional-arguments
 def run_serverapp_th(
     server_app_attr: Optional[str],
     server_app: Optional[ServerApp],
@@ -295,7 +311,6 @@ def run_serverapp_th(
     f_stop: threading.Event,
     has_exception: threading.Event,
     enable_tf_gpu_growth: bool,
-    delay_launch: int = 3,
 ) -> threading.Thread:
     """Run SeverApp in a thread."""
 
@@ -318,11 +333,19 @@ def run_serverapp_th(
                 log(INFO, "Enabling GPU growth for Tensorflow on the server thread.")
                 enable_gpu_growth()
 
+            # Initialize Context
+            context = Context(
+                node_id=0,
+                node_config={},
+                state=RecordSet(),
+                run_config=_server_app_run_config,
+            )
+
             # Run ServerApp
-            run_server_app(
+            _run(
                 driver=_driver,
+                context=context,
                 server_app_dir=_server_app_dir,
-                server_app_run_config=_server_app_run_config,
                 server_app_attr=_server_app_attr,
                 loaded_server_app=_server_app,
             )
@@ -351,12 +374,11 @@ def run_serverapp_th(
             server_app,
         ),
     )
-    sleep(delay_launch)
     serverapp_th.start()
     return serverapp_th
 
 
-# pylint: disable=too-many-locals
+# pylint: disable=too-many-locals,too-many-positional-arguments
 def _main_loop(
     num_supernodes: int,
     backend_name: str,
@@ -365,6 +387,8 @@ def _main_loop(
     is_app: bool,
     enable_tf_gpu_growth: bool,
     run: Run,
+    exit_event: EventType,
+    delay_start: int,
     flwr_dir: Optional[str] = None,
     client_app: Optional[ClientApp] = None,
     client_app_attr: Optional[str] = None,
@@ -372,18 +396,26 @@ def _main_loop(
     server_app_attr: Optional[str] = None,
     server_app_run_config: Optional[UserConfig] = None,
 ) -> None:
-    """Launch SuperLink with Simulation Engine, then ServerApp on a separate thread."""
+    """Start ServerApp on a separate thread, then launch Simulation Engine."""
     # Initialize StateFactory
-    state_factory = StateFactory(":flwr-in-memory-state:")
+    state_factory = LinkStateFactory(":flwr-in-memory-state:")
 
     f_stop = threading.Event()
     # A Threading event to indicate if an exception was raised in the ServerApp thread
     server_app_thread_has_exception = threading.Event()
     serverapp_th = None
+    success = True
     try:
         # Register run
         log(DEBUG, "Pre-registering run with id %s", run.run_id)
-        state_factory.state().run_ids[run.run_id] = run  # type: ignore
+        init_status = RunStatus(Status.RUNNING, "", "")
+        state_factory.state().run_ids[run.run_id] = RunRecord(  # type: ignore
+            run=run,
+            status=init_status,
+            starting_at=now().isoformat(),
+            running_at=now().isoformat(),
+            finished_at="",
+        )
 
         if server_app_run_config is None:
             server_app_run_config = {}
@@ -403,8 +435,10 @@ def _main_loop(
             enable_tf_gpu_growth=enable_tf_gpu_growth,
         )
 
-        # SuperLink with Simulation Engine
-        event(EventType.RUN_SUPERLINK_ENTER)
+        # Buffer time so the `ServerApp` in separate thread is ready
+        log(DEBUG, "Buffer time delay: %ds", delay_start)
+        sleep(delay_start)
+        # Start Simulation Engine
         vce.start_vce(
             num_supernodes=num_supernodes,
             client_app_attr=client_app_attr,
@@ -422,13 +456,13 @@ def _main_loop(
     except Exception as ex:
         log(ERROR, "An exception occurred !! %s", ex)
         log(ERROR, traceback.format_exc())
+        success = False
         raise RuntimeError("An error was encountered. Ending simulation.") from ex
 
     finally:
         # Trigger stop event
         f_stop.set()
-
-        event(EventType.RUN_SUPERLINK_LEAVE)
+        event(exit_event, event_details={"success": success})
         if serverapp_th:
             serverapp_th.join()
             if server_app_thread_has_exception.is_set():
@@ -437,9 +471,10 @@ def _main_loop(
     log(DEBUG, "Stopping Simulation Engine now.")
 
 
-# pylint: disable=too-many-arguments,too-many-locals
+# pylint: disable=too-many-arguments,too-many-locals,too-many-positional-arguments
 def _run_simulation(
     num_supernodes: int,
+    exit_event: EventType,
     client_app: Optional[ClientApp] = None,
     server_app: Optional[ServerApp] = None,
     backend_name: str = "ray",
@@ -451,6 +486,7 @@ def _run_simulation(
     flwr_dir: Optional[str] = None,
     run: Optional[Run] = None,
     enable_tf_gpu_growth: bool = False,
+    delay_start: int = 5,
     verbose_logging: bool = False,
     is_app: bool = False,
 ) -> None:
@@ -506,6 +542,8 @@ def _run_simulation(
         is_app,
         enable_tf_gpu_growth,
         run,
+        exit_event,
+        delay_start,
         flwr_dir,
         client_app,
         client_app_attr,
@@ -592,6 +630,13 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         "out-of-memory error because TensorFlow by default allocates all GPU memory."
         "Read more about how `tf.config.experimental.set_memory_growth()` works in "
         "the TensorFlow documentation: https://www.tensorflow.org/api/stable.",
+    )
+    parser.add_argument(
+        "--delay-start",
+        type=int,
+        default=3,
+        help="Buffer time (in seconds) to delay the start the simulation engine after "
+        "the `ServerApp`, which runs in a separate thread, has been launched.",
     )
     parser.add_argument(
         "--verbose",

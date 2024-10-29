@@ -17,7 +17,6 @@
 
 import time
 import unittest
-from typing import List, Tuple
 
 from flwr.common import DEFAULT_TTL
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
@@ -52,12 +51,12 @@ class ValidatorTest(unittest.TestCase):
         """Test is_valid task_res."""
         # Prepare
         # (producer_node_id, anonymous, ancestry)
-        valid_res: List[Tuple[int, bool, List[str]]] = [
+        valid_res: list[tuple[int, bool, list[str]]] = [
             (0, True, ["1"]),
             (1, False, ["1"]),
         ]
 
-        invalid_res: List[Tuple[int, bool, List[str]]] = [
+        invalid_res: list[tuple[int, bool, list[str]]] = [
             (0, False, []),
             (0, False, ["1"]),
             (0, True, []),
@@ -76,6 +75,24 @@ class ValidatorTest(unittest.TestCase):
             msg = create_task_res(producer_node_id, anonymous, ancestry)
             val_errors = validate_task_ins_or_res(msg)
             self.assertTrue(val_errors, (producer_node_id, anonymous, ancestry))
+
+    def test_task_ttl_expired(self) -> None:
+        """Test validation for expired Task TTL."""
+        # Prepare an expired TaskIns
+        expired_task_ins = create_task_ins(0, True)
+        expired_task_ins.task.created_at = time.time() - 10  # 10 seconds ago
+        expired_task_ins.task.ttl = 6  # 6 seconds TTL
+
+        expired_task_res = create_task_res(0, True, ["1"])
+        expired_task_res.task.created_at = time.time() - 10  # 10 seconds ago
+        expired_task_res.task.ttl = 6  # 6 seconds TTL
+
+        # Execute & Assert
+        val_errors_ins = validate_task_ins_or_res(expired_task_ins)
+        self.assertIn("Task TTL has expired", val_errors_ins)
+
+        val_errors_res = validate_task_ins_or_res(expired_task_res)
+        self.assertIn("Task TTL has expired", val_errors_res)
 
 
 def create_task_ins(
@@ -110,7 +127,7 @@ def create_task_ins(
 def create_task_res(
     producer_node_id: int,
     anonymous: bool,
-    ancestry: List[str],
+    ancestry: list[str],
 ) -> TaskRes:
     """Create a TaskRes for testing."""
     task_res = TaskRes(

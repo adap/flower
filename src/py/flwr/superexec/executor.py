@@ -15,11 +15,13 @@
 """Execute and monitor a Flower run."""
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from subprocess import Popen
 from typing import Optional
 
 from flwr.common.typing import UserConfig
+from flwr.server.superlink.ffs.ffs_factory import FfsFactory
+from flwr.server.superlink.linkstate import LinkStateFactory
 
 
 @dataclass
@@ -28,10 +30,28 @@ class RunTracker:
 
     run_id: int
     proc: Popen  # type: ignore
+    logs: list[str] = field(default_factory=list)
 
 
 class Executor(ABC):
     """Execute and monitor a Flower run."""
+
+    @abstractmethod
+    def initialize(
+        self, linkstate_factory: LinkStateFactory, ffs_factory: FfsFactory
+    ) -> None:
+        """Initialize the executor with the necessary factories.
+
+        This method sets up the executor by providing it with the factories required
+        to access the LinkState and the Flower File Storage (FFS) in the SuperLink.
+
+        Parameters
+        ----------
+        linkstate_factory : LinkStateFactory
+            The factory to create access to the LinkState.
+        ffs_factory : FfsFactory
+            The factory to create access to the Flower File Storage (FFS).
+        """
 
     @abstractmethod
     def set_config(

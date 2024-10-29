@@ -15,7 +15,7 @@
 """Client-side message handler."""
 
 from logging import WARN
-from typing import Optional, Tuple, cast
+from typing import Optional, cast
 
 from flwr.client.client import (
     maybe_call_evaluate,
@@ -52,7 +52,7 @@ class UnknownServerMessage(Exception):
     """Exception indicating that the received message is unknown."""
 
 
-def handle_control_message(message: Message) -> Tuple[Optional[Message], int]:
+def handle_control_message(message: Message) -> tuple[Optional[Message], int]:
     """Handle control part of the incoming message.
 
     Parameters
@@ -147,7 +147,7 @@ def handle_legacy_message_from_msgtype(
 
 def _reconnect(
     reconnect_msg: ServerMessage.ReconnectIns,
-) -> Tuple[ClientMessage, int]:
+) -> tuple[ClientMessage, int]:
     # Determine the reason for sending DisconnectRes message
     reason = Reason.ACK
     sleep_duration = None

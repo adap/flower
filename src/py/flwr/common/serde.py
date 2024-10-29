@@ -15,7 +15,9 @@
 """ProtoBuf serialization and deserialization."""
 
 
-from typing import Any, Dict, List, MutableMapping, OrderedDict, Type, TypeVar, cast
+from collections import OrderedDict
+from collections.abc import MutableMapping
+from typing import Any, TypeVar, cast
 
 from google.protobuf.message import Message as GrpcMessage
 
@@ -36,8 +38,9 @@ from flwr.proto.recordset_pb2 import MetricsRecord as ProtoMetricsRecord
 from flwr.proto.recordset_pb2 import MetricsRecordValue as ProtoMetricsRecordValue
 from flwr.proto.recordset_pb2 import ParametersRecord as ProtoParametersRecord
 from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
-from flwr.proto.recordset_pb2 import Sint64List, StringList
+from flwr.proto.recordset_pb2 import SintList, StringList, UintList
 from flwr.proto.run_pb2 import Run as ProtoRun
+from flwr.proto.run_pb2 import RunStatus as ProtoRunStatus
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import (
     ClientMessage,
@@ -72,7 +75,7 @@ def parameters_to_proto(parameters: typing.Parameters) -> Parameters:
 
 def parameters_from_proto(msg: Parameters) -> typing.Parameters:
     """Deserialize `Parameters` from ProtoBuf."""
-    tensors: List[bytes] = list(msg.tensors)
+    tensors: list[bytes] = list(msg.tensors)
     return typing.Parameters(tensors=tensors, tensor_type=msg.tensor_type)
 
 
@@ -338,6 +341,7 @@ def metrics_from_proto(proto: Any) -> typing.Metrics:
 
 
 # === Scalar messages ===
+INT64_MAX_VALUE = 9223372036854775807  # (1 << 63) - 1
 
 
 def scalar_to_proto(scalar: typing.Scalar) -> Scalar:
@@ -352,6 +356,9 @@ def scalar_to_proto(scalar: typing.Scalar) -> Scalar:
         return Scalar(double=scalar)
 
     if isinstance(scalar, int):
+        # Use uint64 for integers larger than the maximum value of sint64
+        if scalar > INT64_MAX_VALUE:
+            return Scalar(uint64=scalar)
         return Scalar(sint64=scalar)
 
     if isinstance(scalar, str):
@@ -372,16 +379,16 @@ def scalar_from_proto(scalar_msg: Scalar) -> typing.Scalar:
 # === Record messages ===
 
 
-_type_to_field = {
+_type_to_field: dict[type, str] = {
     float: "double",
     int: "sint64",
     bool: "bool",
     str: "string",
     bytes: "bytes",
 }
-_list_type_to_class_and_field = {
+_list_type_to_class_and_field: dict[type, tuple[type[GrpcMessage], str]] = {
     float: (DoubleList, "double_list"),
-    int: (Sint64List, "sint64_list"),
+    int: (SintList, "sint_list"),
     bool: (BoolList, "bool_list"),
     str: (StringList, "string_list"),
     bytes: (BytesList, "bytes_list"),
@@ -389,8 +396,13 @@ _list_type_to_class_and_field = {
 T = TypeVar("T")
 
 
+def _is_uint64(value: Any) -> bool:
+    """Check if a value is uint64."""
+    return isinstance(value, int) and value > INT64_MAX_VALUE
+
+
 def _record_value_to_proto(
-    value: Any, allowed_types: List[type], proto_class: Type[T]
+    value: Any, allowed_types: list[type], proto_class: type[T]
 ) -> T:
     """Serialize `*RecordValue` to ProtoBuf.
 
@@ -401,12 +413,18 @@ def _record_value_to_proto(
         # Single element
         # Note: `isinstance(False, int) == True`.
         if isinstance(value, t):
-            arg[_type_to_field[t]] = value
+            fld = _type_to_field[t]
+            if t is int and _is_uint64(value):
+                fld = "uint64"
+            arg[fld] = value
             return proto_class(**arg)
         # List
         if isinstance(value, list) and all(isinstance(item, t) for item in value):
-            list_class, field_name = _list_type_to_class_and_field[t]
-            arg[field_name] = list_class(vals=value)
+            list_class, fld = _list_type_to_class_and_field[t]
+            # Use UintList if any element is of type `uint64`.
+            if t is int and any(_is_uint64(v) for v in value):
+                list_class, fld = UintList, "uint_list"
+            arg[fld] = list_class(vals=value)
             return proto_class(**arg)
     # Invalid types
     raise TypeError(
@@ -427,9 +445,9 @@ def _record_value_from_proto(value_proto: GrpcMessage) -> Any:
 
 def _record_value_dict_to_proto(
     value_dict: TypedDict[str, Any],
-    allowed_types: List[type],
-    value_proto_class: Type[T],
-) -> Dict[str, T]:
+    allowed_types: list[type],
+    value_proto_class: type[T],
+) -> dict[str, T]:
     """Serialize the record value dict to ProtoBuf.
 
     Note: `bool` MUST be put in the front of allowd_types if it exists.
@@ -447,7 +465,7 @@ def _record_value_dict_to_proto(
 
 def _record_value_dict_from_proto(
     value_dict_proto: MutableMapping[str, Any]
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Deserialize the record value dict from ProtoBuf."""
     return {k: _record_value_from_proto(v) for k, v in value_dict_proto.items()}
 
@@ -498,7 +516,7 @@ def metrics_record_from_proto(record_proto: ProtoMetricsRecord) -> MetricsRecord
     """Deserialize MetricsRecord from ProtoBuf."""
     return MetricsRecord(
         metrics_dict=cast(
-            Dict[str, typing.MetricsRecordValues],
+            dict[str, typing.MetricsRecordValues],
             _record_value_dict_from_proto(record_proto.data),
         ),
         keep_input=False,
@@ -520,7 +538,7 @@ def configs_record_from_proto(record_proto: ProtoConfigsRecord) -> ConfigsRecord
     """Deserialize ConfigsRecord from ProtoBuf."""
     return ConfigsRecord(
         configs_dict=cast(
-            Dict[str, typing.ConfigsRecordValues],
+            dict[str, typing.ConfigsRecordValues],
             _record_value_dict_from_proto(record_proto.data),
         ),
         keep_input=False,
@@ -893,3 +911,24 @@ def clientappstatus_from_proto(
     if msg.code == ClientAppOutputCode.UNKNOWN_ERROR:
         code = typing.ClientAppOutputCode.UNKNOWN_ERROR
     return typing.ClientAppOutputStatus(code=code, message=msg.message)
+
+
+# === Run status ===
+
+
+def run_status_to_proto(run_status: typing.RunStatus) -> ProtoRunStatus:
+    """Serialize `RunStatus` to ProtoBuf."""
+    return ProtoRunStatus(
+        status=run_status.status,
+        sub_status=run_status.sub_status,
+        details=run_status.details,
+    )
+
+
+def run_status_from_proto(run_status_proto: ProtoRunStatus) -> typing.RunStatus:
+    """Deserialize `RunStatus` from ProtoBuf."""
+    return typing.RunStatus(
+        status=run_status_proto.status,
+        sub_status=run_status_proto.sub_status,
+        details=run_status_proto.details,
+    )

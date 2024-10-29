@@ -17,7 +17,7 @@
 
 import time
 import unittest
-from typing import Iterable, List, Tuple
+from collections.abc import Iterable
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
@@ -32,13 +32,17 @@ from flwr.common.serde import (
 )
 from flwr.common.typing import Run
 from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
-from flwr.server.superlink.state import InMemoryState, SqliteState, StateFactory
-from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
+from flwr.server.superlink.linkstate import (
+    InMemoryLinkState,
+    LinkStateFactory,
+    SqliteLinkState,
+)
+from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 
 from .inmemory_driver import InMemoryDriver
 
 
-def push_messages(driver: InMemoryDriver, num_nodes: int) -> Tuple[Iterable[str], int]:
+def push_messages(driver: InMemoryDriver, num_nodes: int) -> tuple[Iterable[str], int]:
     """Help push messages to state."""
     for _ in range(num_nodes):
         driver.state.create_node(ping_interval=PING_MAX_INTERVAL)
@@ -55,7 +59,7 @@ def push_messages(driver: InMemoryDriver, num_nodes: int) -> Tuple[Iterable[str]
 
 def get_replies(
     driver: InMemoryDriver, msg_ids: Iterable[str], node_id: int
-) -> List[str]:
+) -> list[str]:
     """Help create message replies and pull taskres from state."""
     taskins = driver.state.get_task_ins(node_id, limit=len(list(msg_ids)))
     for taskin in taskins:
@@ -227,12 +231,12 @@ class TestInMemoryDriver(unittest.TestCase):
     def test_task_store_consistency_after_push_pull_sqlitestate(self) -> None:
         """Test tasks are deleted in sqlite state once messages are pulled."""
         # Prepare
-        state = StateFactory("").state()
+        state = LinkStateFactory("").state()
         self.driver = InMemoryDriver(
             state.create_run("", "", "", {}), MagicMock(state=lambda: state)
         )
         msg_ids, node_id = push_messages(self.driver, self.num_nodes)
-        assert isinstance(state, SqliteState)
+        assert isinstance(state, SqliteLinkState)
 
         # Check recorded
         task_ins = state.query("SELECT * FROM task_ins;")
@@ -253,11 +257,11 @@ class TestInMemoryDriver(unittest.TestCase):
     def test_task_store_consistency_after_push_pull_inmemory_state(self) -> None:
         """Test tasks are deleted in in-memory state once messages are pulled."""
         # Prepare
-        state_factory = StateFactory(":flwr-in-memory-state:")
+        state_factory = LinkStateFactory(":flwr-in-memory-state:")
         state = state_factory.state()
         self.driver = InMemoryDriver(state.create_run("", "", "", {}), state_factory)
         msg_ids, node_id = push_messages(self.driver, self.num_nodes)
-        assert isinstance(state, InMemoryState)
+        assert isinstance(state, InMemoryLinkState)
 
         # Check recorded
         self.assertEqual(len(state.task_ins_store), len(list(msg_ids)))

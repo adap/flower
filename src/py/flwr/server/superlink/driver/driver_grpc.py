@@ -15,7 +15,7 @@
 """Driver gRPC API."""
 
 from logging import INFO
-from typing import Optional, Tuple
+from typing import Optional
 
 import grpc
 
@@ -25,7 +25,7 @@ from flwr.proto.driver_pb2_grpc import (  # pylint: disable=E0611
     add_DriverServicer_to_server,
 )
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
-from flwr.server.superlink.state import StateFactory
+from flwr.server.superlink.linkstate import LinkStateFactory
 
 from ..fleet.grpc_bidi.grpc_server import generic_create_grpc_server
 from .driver_servicer import DriverServicer
@@ -33,9 +33,9 @@ from .driver_servicer import DriverServicer
 
 def run_driver_api_grpc(
     address: str,
-    state_factory: StateFactory,
+    state_factory: LinkStateFactory,
     ffs_factory: FfsFactory,
-    certificates: Optional[Tuple[bytes, bytes, bytes]],
+    certificates: Optional[tuple[bytes, bytes, bytes]],
 ) -> grpc.Server:
     """Run Driver API (gRPC, request-response)."""
     # Create Driver API gRPC server

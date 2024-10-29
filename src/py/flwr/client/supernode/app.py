@@ -18,7 +18,7 @@ import argparse
 import sys
 from logging import DEBUG, ERROR, INFO, WARN
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -30,6 +30,9 @@ from cryptography.hazmat.primitives.serialization import (
 from flwr.common import EventType, event
 from flwr.common.config import parse_config_args
 from flwr.common.constant import (
+    FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
+    ISOLATION_MODE_PROCESS,
+    ISOLATION_MODE_SUBPROCESS,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
@@ -37,25 +40,26 @@ from flwr.common.constant import (
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature
 
-from ..app import (
-    ISOLATION_MODE_PROCESS,
-    ISOLATION_MODE_SUBPROCESS,
-    start_client_internal,
-)
+from ..app import start_client_internal
 from ..clientapp.utils import get_load_client_app_fn
-
-ADDRESS_FLEET_API_GRPC_RERE = "0.0.0.0:9092"
 
 
 def run_supernode() -> None:
     """Run Flower SuperNode."""
+    args = _parse_args_run_supernode().parse_args()
+    _warn_deprecated_server_arg(args)
+
     log(INFO, "Starting Flower SuperNode")
 
     event(EventType.RUN_SUPERNODE_ENTER)
 
-    args = _parse_args_run_supernode().parse_args()
-
-    _warn_deprecated_server_arg(args)
+    # Check if both `--flwr-dir` and `--isolation` were set
+    if args.flwr_dir is not None and args.isolation is not None:
+        log(
+            WARN,
+            "Both `--flwr-dir` and `--isolation` were specified. "
+            "Ignoring `--flwr-dir`.",
+        )
 
     root_certificates = _get_certificates(args)
     load_fn = get_load_client_app_fn(
@@ -77,7 +81,10 @@ def run_supernode() -> None:
         authentication_keys=authentication_keys,
         max_retries=args.max_retries,
         max_wait_time=args.max_wait_time,
-        node_config=parse_config_args([args.node_config]),
+        node_config=parse_config_args(
+            [args.node_config] if args.node_config else args.node_config
+        ),
+        flwr_path=args.flwr_dir,
         isolation=args.isolation,
         supernode_address=args.supernode_address,
     )
@@ -101,11 +108,11 @@ def run_client_app() -> None:
 
 def _warn_deprecated_server_arg(args: argparse.Namespace) -> None:
     """Warn about the deprecated argument `--server`."""
-    if args.server != ADDRESS_FLEET_API_GRPC_RERE:
+    if args.server != FLEET_API_GRPC_RERE_DEFAULT_ADDRESS:
         warn = "Passing flag --server is deprecated. Use --superlink instead."
         warn_deprecated_feature(warn)
 
-        if args.superlink != ADDRESS_FLEET_API_GRPC_RERE:
+        if args.superlink != FLEET_API_GRPC_RERE_DEFAULT_ADDRESS:
             # if `--superlink` also passed, then
             # warn user that this argument overrides what was passed with `--server`
             log(
@@ -176,12 +183,12 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         "--flwr-dir",
         default=None,
         help="""The path containing installed Flower Apps.
-    By default, this value is equal to:
+        The default directory is:
 
         - `$FLWR_HOME/` if `$FLWR_HOME` is defined
         - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
         - `$HOME/.flwr/` in all other cases
-    """,
+        """,
     )
     parser.add_argument(
         "--isolation",
@@ -191,10 +198,10 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
             ISOLATION_MODE_SUBPROCESS,
             ISOLATION_MODE_PROCESS,
         ],
-        help="Isolation mode when running `ClientApp` (optional, possible values: "
-        "`subprocess`, `process`). By default, `ClientApp` runs in the same process "
+        help="Isolation mode when running a `ClientApp` (optional, possible values: "
+        "`subprocess`, `process`). By default, a `ClientApp` runs in the same process "
         "that executes the SuperNode. Use `subprocess` to configure SuperNode to run "
-        "`ClientApp` in a subprocess. Use `process` to indicate that a separate "
+        "a `ClientApp` in a subprocess. Use `process` to indicate that a separate "
         "independent process gets created outside of SuperNode.",
     )
     parser.add_argument(
@@ -245,12 +252,12 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument(
         "--server",
-        default=ADDRESS_FLEET_API_GRPC_RERE,
+        default=FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
         help="Server address",
     )
     parser.add_argument(
         "--superlink",
-        default=ADDRESS_FLEET_API_GRPC_RERE,
+        default=FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
         help="SuperLink Fleet API (gRPC-rere) address (IPv4, IPv6, or a domain name)",
     )
     parser.add_argument(
@@ -290,7 +297,7 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
 
 def _try_setup_client_authentication(
     args: argparse.Namespace,
-) -> Optional[Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
+) -> Optional[tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
     if not args.auth_supernode_private_key and not args.auth_supernode_public_key:
         return None
 

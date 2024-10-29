@@ -20,7 +20,7 @@ import subprocess
 from contextlib import closing
 from os.path import abspath, dirname, join
 from pathlib import Path
-from typing import Tuple, cast
+from typing import cast
 
 from flwr.server.client_manager import SimpleClientManager
 from flwr.server.superlink.fleet.grpc_bidi.grpc_server import (
@@ -31,7 +31,7 @@ from flwr.server.superlink.fleet.grpc_bidi.grpc_server import (
 root_dir = dirname(abspath(join(__file__, "../../../../../../..")))
 
 
-def load_certificates() -> Tuple[str, str, str]:
+def load_certificates() -> tuple[str, str, str]:
     """Generate and load SSL credentials/certificates.
 
     Utility function for loading for SSL-enabled gRPC servertests.

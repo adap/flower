@@ -11,8 +11,8 @@ import grpc
 class DriverStub:
     def __init__(self, channel: grpc.Channel) -> None: ...
     CreateRun: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.driver_pb2.CreateRunRequest,
-        flwr.proto.driver_pb2.CreateRunResponse]
+        flwr.proto.run_pb2.CreateRunRequest,
+        flwr.proto.run_pb2.CreateRunResponse]
     """Request run_id"""
 
     GetNodes: grpc.UnaryUnaryMultiCallable[
@@ -40,13 +40,28 @@ class DriverStub:
         flwr.proto.fab_pb2.GetFabResponse]
     """Get FAB"""
 
+    PullServerAppInputs: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.driver_pb2.PullServerAppInputsRequest,
+        flwr.proto.driver_pb2.PullServerAppInputsResponse]
+    """Pull ServerApp inputs"""
+
+    PushServerAppOutputs: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.driver_pb2.PushServerAppOutputsRequest,
+        flwr.proto.driver_pb2.PushServerAppOutputsResponse]
+    """Push ServerApp outputs"""
+
+    UpdateRunStatus: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.run_pb2.UpdateRunStatusRequest,
+        flwr.proto.run_pb2.UpdateRunStatusResponse]
+    """Update the status of a given run"""
+
 
 class DriverServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def CreateRun(self,
-        request: flwr.proto.driver_pb2.CreateRunRequest,
+        request: flwr.proto.run_pb2.CreateRunRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.driver_pb2.CreateRunResponse:
+    ) -> flwr.proto.run_pb2.CreateRunResponse:
         """Request run_id"""
         pass
 
@@ -88,6 +103,30 @@ class DriverServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.fab_pb2.GetFabResponse:
         """Get FAB"""
+        pass
+
+    @abc.abstractmethod
+    def PullServerAppInputs(self,
+        request: flwr.proto.driver_pb2.PullServerAppInputsRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.driver_pb2.PullServerAppInputsResponse:
+        """Pull ServerApp inputs"""
+        pass
+
+    @abc.abstractmethod
+    def PushServerAppOutputs(self,
+        request: flwr.proto.driver_pb2.PushServerAppOutputsRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.driver_pb2.PushServerAppOutputsResponse:
+        """Push ServerApp outputs"""
+        pass
+
+    @abc.abstractmethod
+    def UpdateRunStatus(self,
+        request: flwr.proto.run_pb2.UpdateRunStatusRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.run_pb2.UpdateRunStatusResponse:
+        """Update the status of a given run"""
         pass
 
 

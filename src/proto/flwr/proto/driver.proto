@@ -18,10 +18,10 @@ syntax = "proto3";
 package flwr.proto;
 
 import "flwr/proto/node.proto";
+import "flwr/proto/message.proto";
 import "flwr/proto/task.proto";
 import "flwr/proto/run.proto";
 import "flwr/proto/fab.proto";
-import "flwr/proto/transport.proto";
 
 service Driver {
   // Request run_id
@@ -41,19 +41,22 @@ service Driver {
 
   // Get FAB
   rpc GetFab(GetFabRequest) returns (GetFabResponse) {}
-}
 
-// CreateRun
-message CreateRunRequest {
-  string fab_id = 1;
-  string fab_version = 2;
-  map<string, Scalar> override_config = 3;
-  Fab fab = 4;
+  // Pull ServerApp inputs
+  rpc PullServerAppInputs(PullServerAppInputsRequest)
+      returns (PullServerAppInputsResponse) {}
+
+  // Push ServerApp outputs
+  rpc PushServerAppOutputs(PushServerAppOutputsRequest)
+      returns (PushServerAppOutputsResponse) {}
+
+  // Update the status of a given run
+  rpc UpdateRunStatus(UpdateRunStatusRequest)
+      returns (UpdateRunStatusResponse) {}
 }
-message CreateRunResponse { sint64 run_id = 1; }
 
 // GetNodes messages
-message GetNodesRequest { sint64 run_id = 1; }
+message GetNodesRequest { uint64 run_id = 1; }
 message GetNodesResponse { repeated Node nodes = 1; }
 
 // PushTaskIns messages
@@ -66,3 +69,18 @@ message PullTaskResRequest {
   repeated string task_ids = 2;
 }
 message PullTaskResResponse { repeated TaskRes task_res_list = 1; }
+
+// PullServerAppInputs messages
+message PullServerAppInputsRequest { uint64 run_id = 1; }
+message PullServerAppInputsResponse {
+  Context context = 1;
+  Run run = 2;
+  Fab fab = 3;
+}
+
+// PushServerAppOutputs messages
+message PushServerAppOutputsRequest {
+  uint64 run_id = 1;
+  Context context = 2;
+}
+message PushServerAppOutputsResponse {}
