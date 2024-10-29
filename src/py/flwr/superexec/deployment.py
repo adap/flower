@@ -15,14 +15,12 @@
 """Deployment engine executor."""
 
 import hashlib
-import subprocess
 from logging import ERROR, INFO
 from pathlib import Path
 from typing import Optional
 
 from typing_extensions import override
 
-from flwr.cli.install import install_from_fab
 from flwr.common.constant import DRIVER_API_DEFAULT_ADDRESS
 from flwr.common.logger import log
 from flwr.common.typing import Fab, UserConfig
@@ -146,8 +144,6 @@ class DeploymentEngine(Executor):
     ) -> Optional[RunTracker]:
         """Start run using the Flower Deployment Engine."""
         try:
-            # Install FAB to flwr dir
-            install_from_fab(fab_file, None, True)
 
             # Call SuperLink to create run
             run_id: int = self._create_run(
@@ -155,37 +151,7 @@ class DeploymentEngine(Executor):
             )
             log(INFO, "Created run %s", str(run_id))
 
-            command = [
-                "flower-server-app",
-                "--run-id",
-                str(run_id),
-                "--superlink",
-                str(self.superlink),
-            ]
-
-            if self.flwr_dir:
-                command.append("--flwr-dir")
-                command.append(self.flwr_dir)
-
-            if self.root_certificates is None:
-                command.append("--insecure")
-            else:
-                command.append("--root-certificates")
-                command.append(self.root_certificates)
-
-            # Execute the command
-            proc = subprocess.Popen(  # pylint: disable=consider-using-with
-                command,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-            )
-            log(INFO, "Started run %s", str(run_id))
-
-            return RunTracker(
-                run_id=run_id,
-                proc=proc,
-            )
+            return None
         # pylint: disable-next=broad-except
         except Exception as e:
             log(ERROR, "Could not start run: %s", str(e))
