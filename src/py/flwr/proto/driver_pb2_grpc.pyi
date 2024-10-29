@@ -56,6 +56,11 @@ class DriverStub:
         flwr.proto.run_pb2.UpdateRunStatusResponse]
     """Update the status of a given run"""
 
+    PushLogs: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.log_pb2.PushLogsRequest,
+        flwr.proto.log_pb2.PushLogsResponse]
+    """Push ServerApp logs"""
+
 
 class DriverServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -128,6 +133,14 @@ class DriverServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.run_pb2.UpdateRunStatusResponse:
         """Update the status of a given run"""
+        pass
+
+    @abc.abstractmethod
+    def PushLogs(self,
+        request: flwr.proto.log_pb2.PushLogsRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.log_pb2.PushLogsResponse:
+        """Push ServerApp logs"""
         pass
 
 
