@@ -30,18 +30,22 @@ from flwr.common.config import (
     get_project_config,
     get_project_dir,
 )
+from flwr.common.constant import Status, SubStatus
 from flwr.common.logger import log
 from flwr.common.serde import (
     context_from_proto,
     context_to_proto,
     fab_from_proto,
     run_from_proto,
+    run_status_to_proto,
 )
+from flwr.common.typing import RunStatus
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     PullServerAppInputsRequest,
     PullServerAppInputsResponse,
     PushServerAppOutputsRequest,
 )
+from flwr.proto.run_pb2 import UpdateRunStatusRequest  # pylint: disable=E0611
 from flwr.server.driver.grpc_driver import GrpcDriver
 from flwr.server.run_serverapp import run as run_
 
@@ -150,7 +154,6 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
 ) -> None:
     """Run Flower ServerApp process."""
     driver = GrpcDriver(
-        run_id=run_id if run_id else 0,
         driver_service_address=superlink,
         root_certificates=certificates,
     )
@@ -172,11 +175,14 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
             res: PullServerAppInputsResponse = driver._stub.PullServerAppInputs(req)
             if not res.HasField("run"):
                 sleep(3)
+                run_status = None
                 continue
 
             context = context_from_proto(res.context)
             run = run_from_proto(res.run)
             fab = fab_from_proto(res.fab)
+
+            driver.init_run(run.run_id)
 
             log(DEBUG, "ServerApp process starts FAB installation.")
             install_from_fab(fab.content, flwr_dir=flwr_dir, skip_prompt=True)
@@ -202,6 +208,12 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
                 app_path,
             )
 
+            # Change status to Running
+            run_status_proto = run_status_to_proto(RunStatus(Status.RUNNING, "", ""))
+            driver._stub.UpdateRunStatus(
+                UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
+            )
+
             # Load and run the ServerApp with the Driver
             updated_context = run_(
                 driver=driver,
@@ -217,9 +229,21 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
             )
             _ = driver._stub.PushServerAppOutputs(out_req)
 
+            run_status = RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
+
         except Exception as ex:  # pylint: disable=broad-exception-caught
             exc_entity = "ServerApp"
             log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
+            run_status = RunStatus(Status.FINISHED, SubStatus.FAILED, str(ex))
+
+        finally:
+            if run_status:
+                run_status_proto = run_status_to_proto(run_status)
+                driver._stub.UpdateRunStatus(
+                    UpdateRunStatusRequest(
+                        run_id=run.run_id, run_status=run_status_proto
+                    )
+                )
 
         # Stop the loop if `flwr-serverapp` is expected to process a single run
         if only_once:
