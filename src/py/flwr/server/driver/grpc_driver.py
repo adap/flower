@@ -60,7 +60,7 @@ class GrpcDriver(Driver):
 
     Parameters
     ----------
-    run_id : int
+    run_id : Optional[int]
         The identifier of the run.
     driver_service_address : str (default: "[::]:9091")
         The address (URL, IPv6, IPv4) of the SuperLink Driver API service.
@@ -72,7 +72,7 @@ class GrpcDriver(Driver):
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
-        run_id: int,
+        run_id: Optional[int],
         driver_service_address: str = DRIVER_API_DEFAULT_ADDRESS,
         root_certificates: Optional[bytes] = None,
     ) -> None:
@@ -120,6 +120,10 @@ class GrpcDriver(Driver):
         # Check if is initialized
         if self._run is not None:
             return
+
+        if self._run_id is None:
+            raise RuntimeError("`run_id` is unset. Cannot initialize run.")
+
         # Get the run info
         req = GetRunRequest(run_id=self._run_id)
         res: GetRunResponse = self._stub.GetRun(req)
@@ -171,6 +175,9 @@ class GrpcDriver(Driver):
         This method constructs a new `Message` with given content and metadata.
         The `run_id` and `src_node_id` will be set automatically.
         """
+        if self._run_id is None:
+            raise RuntimeError("`run_id` is unset. Cannot initialize run.")
+
         self._init_run()
         if ttl:
             warnings.warn(
@@ -195,6 +202,8 @@ class GrpcDriver(Driver):
 
     def get_node_ids(self) -> list[int]:
         """Get node IDs."""
+        if self._run_id is None:
+            raise RuntimeError("`run_id` is unset. Cannot initialize run.")
         self._init_run()
         # Call GrpcDriverStub method
         res: GetNodesResponse = self._stub.GetNodes(
