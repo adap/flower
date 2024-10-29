@@ -49,6 +49,10 @@ service Driver {
   // Push ServerApp outputs
   rpc PushServerAppOutputs(PushServerAppOutputsRequest)
       returns (PushServerAppOutputsResponse) {}
+
+  // Update the status of a given run
+  rpc UpdateRunStatus(UpdateRunStatusRequest)
+      returns (UpdateRunStatusResponse) {}
 }
 
 // GetNodes messages
