@@ -36,9 +36,9 @@ message StartRunRequest {
 message StartRunResponse { uint64 run_id = 1; }
 message StreamLogsRequest {
   uint64 run_id = 1;
-  float after_timestamp = 2;
+  double after_timestamp = 2;
 }
 message StreamLogsResponse {
   string log_output = 1;
-  float latest_timestamp = 2;
+  double latest_timestamp = 2;
 }

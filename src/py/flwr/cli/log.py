@@ -39,8 +39,8 @@ def start_stream(
     stub = ExecStub(channel)
     after_timestamp = 0.0
     try:
+        logger(INFO, "Starting logstream for run_id `%s`", run_id)
         while True:
-            logger(INFO, "Starting logstream for run_id `%s`", run_id)
             after_timestamp = stream_logs(run_id, stub, refresh_period, after_timestamp)
             time.sleep(0.5)
             logger(DEBUG, "Reconnecting to logstream")
@@ -84,7 +84,7 @@ def stream_logs(
     res = None
     try:
         for res in stub.StreamLogs(req, timeout=duration):
-            print(res.log_output)
+            print(res.log_output, end="")
     except grpc.RpcError as e:
         # pylint: disable=E1101
         if e.code() != grpc.StatusCode.DEADLINE_EXCEEDED:
@@ -93,7 +93,8 @@ def stream_logs(
         if res is not None:
             latest_timestamp = cast(float, res.latest_timestamp)
 
-    return max(latest_timestamp, after_timestamp)
+    # Add a small epsilon to the latest timestamp to avoid getting the same log
+    return max(latest_timestamp + 1e-6, after_timestamp)
 
 
 def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:

@@ -106,7 +106,9 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
                     log_output=log_msg,
                     latest_timestamp=latest_timestamp,
                 )
-                after_timestamp = max(latest_timestamp, after_timestamp)
+                # Add a small epsilon to the latest timestamp to avoid getting 
+                # the same log
+                after_timestamp = max(latest_timestamp + 1e-6, after_timestamp)
 
             # Wait for and continue to yield more log responses only if the
             # run isn't completed yet. If the run is finished, the entire log
