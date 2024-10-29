@@ -27,7 +27,11 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     PullTaskResRequest,
     PushTaskInsRequest,
 )
-from flwr.proto.run_pb2 import Run  # pylint: disable=E0611
+from flwr.proto.run_pb2 import (  # pylint: disable=E0611
+    GetRunRequest,
+    GetRunResponse,
+    Run,
+)
 from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 
 from .grpc_driver import GrpcDriver
@@ -38,21 +42,24 @@ class TestGrpcDriver(unittest.TestCase):
 
     def setUp(self) -> None:
         """Initialize mock GrpcDriverStub and Driver instance before each test."""
-        mock_response = Mock(
-            run=Run(
-                run_id=61016,
-                fab_id="mock/mock",
-                fab_version="v1.0.0",
-                fab_hash="9f86d08",
+
+        def _mock_fn(req: GetRunRequest) -> GetRunResponse:
+            return GetRunResponse(
+                run=Run(
+                    run_id=req.run_id,
+                    fab_id="mock/mock",
+                    fab_version="v1.0.0",
+                    fab_hash="9f86d08",
+                )
             )
-        )
+
         self.mock_stub = Mock()
         self.mock_channel = Mock()
-        self.mock_stub.GetRun.return_value = mock_response
-        mock_response.HasField.return_value = True
-        self.driver = GrpcDriver(run_id=61016)
+        self.mock_stub.GetRun.side_effect = _mock_fn
+        self.driver = GrpcDriver()
         self.driver._grpc_stub = self.mock_stub  # pylint: disable=protected-access
         self.driver._channel = self.mock_channel  # pylint: disable=protected-access
+        self.driver.init_run(run_id=61016)
 
     def test_init_grpc_driver(self) -> None:
         """Test GrpcDriverStub initialization."""
