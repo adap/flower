@@ -25,6 +25,7 @@ from typing import Any
 
 import grpc
 
+from flwr.common.constant import Status
 from flwr.common.logger import log
 from flwr.common.serde import user_config_from_proto
 from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
@@ -88,28 +89,34 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
     ) -> Generator[StreamLogsResponse, Any, None]:
         """Get logs."""
         log(INFO, "ExecServicer.StreamLogs")
+        state = self.linkstate_factory.state()
+
+        # Retrieve run ID
+        run_id = request.run_id
 
         # Exit if `run_id` not found
-        if request.run_id not in self.runs:
+        if not state.get_run(run_id):
             context.abort(grpc.StatusCode.NOT_FOUND, "Run ID not found")
 
-        last_sent_index = 0
+        after_timestamp = request.after_timestamp
         while context.is_active():
-            # Yield n'th row of logs, if n'th row < len(logs)
-            logs = self.runs[request.run_id].logs
-            for i in range(last_sent_index, len(logs)):
-                yield StreamLogsResponse(log_output=logs[i])
-            last_sent_index = len(logs)
+            log_msg, latest_timestamp = state.get_serverapp_log(run_id, after_timestamp)
+            if log_msg:
+                yield StreamLogsResponse(
+                    log_output=log_msg,
+                    latest_timestamp=latest_timestamp,
+                )
+                after_timestamp = max(latest_timestamp, after_timestamp)
 
             # Wait for and continue to yield more log responses only if the
             # run isn't completed yet. If the run is finished, the entire log
             # is returned at this point and the server ends the stream.
-            if self.runs[request.run_id].proc.poll() is not None:
+            run_status = state.get_run_status({run_id})[run_id]
+            if run_status.status == Status.FINISHED:
                 log(INFO, "All logs for run ID `%s` returned", request.run_id)
-                context.set_code(grpc.StatusCode.OK)
                 context.cancel()
 
-            time.sleep(1.0)  # Sleep briefly to avoid busy waiting
+            time.sleep(0.5)  # Sleep briefly to avoid busy waiting
 
 
 def _capture_logs(

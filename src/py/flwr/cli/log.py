@@ -88,7 +88,7 @@ def stream_logs(
     except grpc.RpcError as e:
         # pylint: disable=E1101
         if e.code() != grpc.StatusCode.DEADLINE_EXCEEDED:
-            logger(ERROR, "StreamLogs failed: %s", e)
+            raise e
     finally:
         if res is not None:
             latest_timestamp = cast(float, res.latest_timestamp)
