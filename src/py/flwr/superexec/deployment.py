@@ -15,7 +15,6 @@
 """Deployment engine executor."""
 
 import hashlib
-import subprocess
 from logging import ERROR, INFO
 from pathlib import Path
 from typing import Optional
@@ -137,26 +136,6 @@ class DeploymentEngine(Executor):
         run_id = self.linkstate.create_run(None, None, fab_hash, override_config)
         return run_id
 
-    def register_run(
-        self,
-        fab_file: bytes,
-        override_config: UserConfig,
-    ) -> Optional[int]:
-        """Register a run."""
-        try:
-            # Install FAB to flwr dir
-            install_from_fab(fab_file, None, True)
-
-            # Call SuperLink to create run
-            run_id: int = self._create_run(
-                Fab(hashlib.sha256(fab_file).hexdigest(), fab_file), override_config
-            )
-            log(INFO, "Registered run %d", run_id)
-            return run_id
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            log(ERROR, "Could not register run: %s", str(e), exc_info=True)
-            return None
-
     @override
     def start_run(
         self,
@@ -175,37 +154,7 @@ class DeploymentEngine(Executor):
             )
             log(INFO, "Created run %s", str(run_id))
 
-            command = [
-                "flower-server-app",
-                "--run-id",
-                str(run_id),
-                "--superlink",
-                str(self.superlink),
-            ]
-
-            if self.flwr_dir:
-                command.append("--flwr-dir")
-                command.append(self.flwr_dir)
-
-            if self.root_certificates is None:
-                command.append("--insecure")
-            else:
-                command.append("--root-certificates")
-                command.append(self.root_certificates)
-
-            # Execute the command
-            proc = subprocess.Popen(  # pylint: disable=consider-using-with
-                command,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-            )
-            log(INFO, "Started run %s", str(run_id))
-
-            return RunTracker(
-                run_id=run_id,
-                proc=proc,
-            )
+            return None
         # pylint: disable-next=broad-except
         except Exception as e:
             log(ERROR, "Could not start run: %s", str(e))
