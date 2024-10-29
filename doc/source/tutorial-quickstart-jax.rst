@@ -226,10 +226,10 @@ set that the client might have:
 
 Finally, we can construct a ``ClientApp`` using the ``FlowerClient`` defined above by
 means of a ``client_fn()`` callback. Note that the `context` enables you to get access
-to hyperparemeters defined in your ``pyproject.toml`` to configure the run. In this
+to hyperparameters defined in your ``pyproject.toml`` to configure the run. In this
 tutorial we access the ``local-epochs`` setting to control the number of epochs a
 ``ClientApp`` will perform when running the ``fit()`` method. You could define
-additioinal hyperparameters in ``pyproject.toml`` and access them here.
+additional hyperparameters in ``pyproject.toml`` and access them here.
 
 .. code-block:: python
 
