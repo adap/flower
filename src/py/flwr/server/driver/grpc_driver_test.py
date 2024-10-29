@@ -50,9 +50,10 @@ class TestGrpcDriver(unittest.TestCase):
         self.mock_channel = Mock()
         self.mock_stub.GetRun.return_value = mock_response
         mock_response.HasField.return_value = True
-        self.driver = GrpcDriver(run_id=61016)
+        self.driver = GrpcDriver()
         self.driver._grpc_stub = self.mock_stub  # pylint: disable=protected-access
         self.driver._channel = self.mock_channel  # pylint: disable=protected-access
+        self.driver.init_run(run_id=61016)
 
     def test_init_grpc_driver(self) -> None:
         """Test GrpcDriverStub initialization."""
