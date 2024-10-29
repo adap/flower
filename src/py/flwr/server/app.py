@@ -50,7 +50,6 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
-    Status,
 )
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log
@@ -58,7 +57,6 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     private_key_to_bytes,
     public_key_to_bytes,
 )
-from flwr.common.typing import RunStatus
 from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
@@ -345,7 +343,7 @@ def run_superlink() -> None:
         # Scheduler thread
         scheduler_th = threading.Thread(
             target=_flwr_serverapp_scheduler,
-            args=(state_factory, args.driver_api_address),
+            args=(state_factory, args.driver_api_address, args.ssl_ca_certfile),
         )
         scheduler_th.start()
         bckg_threads.append(scheduler_th)
@@ -367,7 +365,9 @@ def run_superlink() -> None:
 
 
 def _flwr_serverapp_scheduler(
-    state_factory: LinkStateFactory, driver_api_address: str
+    state_factory: LinkStateFactory,
+    driver_api_address: str,
+    ssl_ca_certfile: Optional[str],
 ) -> None:
     log(DEBUG, "Started flwr-serverapp scheduler thread.")
 
@@ -380,10 +380,6 @@ def _flwr_serverapp_scheduler(
 
         if pending_run_id:
 
-            # Set run as starting
-            state.update_run_status(
-                run_id=pending_run_id, new_status=RunStatus(Status.STARTING, "", "")
-            )
             log(
                 INFO,
                 "Launching `flwr-serverapp` subprocess with run-id %d. "
@@ -399,6 +395,12 @@ def _flwr_serverapp_scheduler(
                 "--run-id",
                 str(pending_run_id),
             ]
+            if ssl_ca_certfile:
+                command.append("--root-certificates")
+                command.append(ssl_ca_certfile)
+            else:
+                command.append("--insecure")
+
             subprocess.run(
                 command,
                 stdout=None,
