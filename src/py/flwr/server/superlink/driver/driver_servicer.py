@@ -43,14 +43,16 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     PullServerAppInputsResponse,
     PullTaskResRequest,
     PullTaskResResponse,
-    PushLogsRequest,
-    PushLogsResponse,
     PushServerAppOutputsRequest,
     PushServerAppOutputsResponse,
     PushTaskInsRequest,
     PushTaskInsResponse,
 )
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
+from flwr.proto.log_pb2 import (  # pylint: disable=E0611
+    PushLogsRequest,
+    PushLogsResponse,
+)
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
@@ -260,9 +262,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
     ) -> PushLogsResponse:
         """Push logs."""
         log(DEBUG, "DriverServicer.PushLogs")
-        state = self.state_factory.state()
-        state.store_logs(request.run_id, request.node.node_id, request.logs)
-        return PushLogsResponse()
+        raise NotImplementedError()
 
 
 def _raise_if(validation_error: bool, detail: str) -> None:
