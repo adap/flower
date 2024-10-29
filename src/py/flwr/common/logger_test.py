@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,17 +15,17 @@
 """Flower Logger tests."""
 
 
-import logging
 import sys
 from queue import Queue
-from .logger import log, mirror_output_to_queue, restore_output
+
+from .logger import mirror_output_to_queue, restore_output
 
 
 def test_mirror_output_to_queue() -> None:
     """Test that stdout and stderr are mirrored to the provided queue."""
     # Prepare
     log_queue: Queue[str] = Queue()
-    
+
     # Execute
     mirror_output_to_queue(log_queue)
     print("Test message")
@@ -41,8 +41,8 @@ def test_mirror_output_to_queue() -> None:
 def test_restore_output() -> None:
     """Test that stdout and stderr are restored after calling restore_output."""
     # Prepare
-    log_queue = Queue()
-    
+    log_queue: Queue[str] = Queue()
+
     # Execute
     mirror_output_to_queue(log_queue)
     print("Test message before restore")

@@ -42,34 +42,6 @@ else:
     StreamHandler = logging.StreamHandler
 
 
-class StreamToQueue(TextIO):
-    """The class mirroring output from a stream to a queue.
-
-    Parameters
-    ----------
-        stream : TextIO
-            The original output stream (e.g., sys.stdout).
-        log_queue : Queue
-            Queue to receive mirrored messages.
-    """
-
-    def __init__(self, stream: TextIO, log_queue: Queue[str]) -> None:
-        self.stream = stream
-        self.log_queue = log_queue
-
-    def write(self, message: str) -> None:
-        """Write message to stream and queue."""
-        self.stream.write(message)
-        self.stream.flush()
-        self.log_queue.put(message)
-
-    def __getattr__(self, attr: str) -> Any:
-        """Delegate attribute access to the original stream."""
-        if attr == "write":
-            return self.write
-        return getattr(self.stream, attr)
-
-
 class ConsoleHandler(StreamHandler):
     """Console handler that allows configurable formatting."""
 
@@ -293,8 +265,20 @@ def set_logger_propagation(
 
 def mirror_output_to_queue(log_queue: Queue[str]) -> None:
     """Mirror stdout and stderr output to the provided queue."""
-    sys.stdout = StreamToQueue(sys.stdout, log_queue)
-    sys.stderr = StreamToQueue(sys.stderr, log_queue)
+
+    def get_write_fn(stream: TextIO) -> Any:
+        original_write = stream.write
+
+        def fn(s: str) -> int:
+            ret = original_write(s)
+            stream.flush()
+            log_queue.put(s)
+            return ret
+
+        return fn
+
+    sys.stdout.write = get_write_fn(sys.stdout)  # type: ignore[method-assign]
+    sys.stderr.write = get_write_fn(sys.stderr)  # type: ignore[method-assign]
     console_handler.stream = sys.stdout
 
 
