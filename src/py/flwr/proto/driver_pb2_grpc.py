@@ -57,10 +57,10 @@ class DriverStub(object):
                 request_serializer=flwr_dot_proto_dot_driver__pb2.PushServerAppOutputsRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_driver__pb2.PushServerAppOutputsResponse.FromString,
                 )
-        self.PushLogs = channel.unary_unary(
-                '/flwr.proto.Driver/PushLogs',
-                request_serializer=flwr_dot_proto_dot_log__pb2.PushLogsRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_log__pb2.PushLogsResponse.FromString,
+        self.UpdateRunStatus = channel.unary_unary(
+                '/flwr.proto.Driver/UpdateRunStatus',
+                request_serializer=flwr_dot_proto_dot_run__pb2.UpdateRunStatusRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_run__pb2.UpdateRunStatusResponse.FromString,
                 )
 
 
@@ -123,8 +123,8 @@ class DriverServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def PushLogs(self, request, context):
-        """Push ServerApp logs
+    def UpdateRunStatus(self, request, context):
+        """Update the status of a given run
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -173,10 +173,10 @@ def add_DriverServicer_to_server(servicer, server):
                     request_deserializer=flwr_dot_proto_dot_driver__pb2.PushServerAppOutputsRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_driver__pb2.PushServerAppOutputsResponse.SerializeToString,
             ),
-            'PushLogs': grpc.unary_unary_rpc_method_handler(
-                    servicer.PushLogs,
-                    request_deserializer=flwr_dot_proto_dot_log__pb2.PushLogsRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_log__pb2.PushLogsResponse.SerializeToString,
+            'UpdateRunStatus': grpc.unary_unary_rpc_method_handler(
+                    servicer.UpdateRunStatus,
+                    request_deserializer=flwr_dot_proto_dot_run__pb2.UpdateRunStatusRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_run__pb2.UpdateRunStatusResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -325,7 +325,7 @@ class Driver(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def PushLogs(request,
+    def UpdateRunStatus(request,
             target,
             options=(),
             channel_credentials=None,
@@ -335,8 +335,8 @@ class Driver(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Driver/PushLogs',
-            flwr_dot_proto_dot_log__pb2.PushLogsRequest.SerializeToString,
-            flwr_dot_proto_dot_log__pb2.PushLogsResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Driver/UpdateRunStatus',
+            flwr_dot_proto_dot_run__pb2.UpdateRunStatusRequest.SerializeToString,
+            flwr_dot_proto_dot_run__pb2.UpdateRunStatusResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

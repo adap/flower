@@ -51,6 +51,10 @@ service Driver {
   rpc PushServerAppOutputs(PushServerAppOutputsRequest)
       returns (PushServerAppOutputsResponse) {}
 
+  // Update the status of a given run
+  rpc UpdateRunStatus(UpdateRunStatusRequest)
+      returns (UpdateRunStatusResponse) {}
+
   // Push ServerApp logs
   rpc PushLogs(PushLogsRequest) returns (PushLogsResponse) {}
 }
