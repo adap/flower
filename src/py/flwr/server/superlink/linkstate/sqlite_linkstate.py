@@ -99,6 +99,17 @@ CREATE TABLE IF NOT EXISTS run(
 );
 """
 
+SQL_CREATE_TABLE_LOGS = """
+CREATE TABLE IF NOT EXISTS logs (
+    timestamp             REAL,
+    run_id                INTEGER,
+    node_id               INTEGER,
+    log                   TEXT,
+    PRIMARY KEY (timestamp, run_id, node_id),
+    FOREIGN KEY (run_id) REFERENCES run(run_id)
+);
+"""
+
 SQL_CREATE_TABLE_CONTEXT = """
 CREATE TABLE IF NOT EXISTS context(
     run_id                INTEGER UNIQUE,
@@ -191,6 +202,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         # Create each table if not exists queries
         cur.execute(SQL_CREATE_TABLE_RUN)
+        cur.execute(SQL_CREATE_TABLE_LOGS)
         cur.execute(SQL_CREATE_TABLE_CONTEXT)
         cur.execute(SQL_CREATE_TABLE_TASK_INS)
         cur.execute(SQL_CREATE_TABLE_TASK_RES)
@@ -1014,6 +1026,44 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                 self.query(query, (sint_run_id, context_bytes))
             except sqlite3.IntegrityError:
                 raise ValueError(f"Run {run_id} not found") from None
+
+    def add_serverapp_log(self, run_id: int, log_message: str) -> None:
+        """Add a log entry to the ServerApp logs for the specified `run_id`."""
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_run_id = convert_uint64_to_sint64(run_id)
+
+        # Store log
+        try:
+            query = """
+                INSERT INTO logs (timestamp, run_id, node_id, log) VALUES (?, ?, ?, ?);
+            """
+            self.query(query, (now().timestamp(), sint64_run_id, 0, log_message))
+        except sqlite3.IntegrityError:
+            raise ValueError(f"Run {run_id} not found") from None
+
+    def get_serverapp_log(
+        self, run_id: int, after_timestamp: Optional[float]
+    ) -> tuple[str, float]:
+        """Get the ServerApp logs for the specified `run_id`."""
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_run_id = convert_uint64_to_sint64(run_id)
+
+        # Check if the run_id exists
+        query = "SELECT run_id FROM run WHERE run_id = ?;"
+        if not self.query(query, (sint64_run_id,)):
+            raise ValueError(f"Run {run_id} not found")
+
+        # Retrieve logs
+        if after_timestamp is None:
+            after_timestamp = 0.0
+        query = """
+            SELECT log, timestamp FROM logs
+            WHERE run_id = ? AND node_id = ? AND timestamp > ?;
+        """
+        rows = self.query(query, (sint64_run_id, 0, after_timestamp))
+        rows.sort(key=lambda x: x["timestamp"])
+        latest_timestamp = rows[-1]["timestamp"] if rows else 0.0
+        return "".join(row["log"] for row in rows), latest_timestamp
 
     def get_valid_task_ins(self, task_id: str) -> Optional[dict[str, Any]]:
         """Check if the TaskIns exists and is valid (not expired).
