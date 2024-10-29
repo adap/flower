@@ -19,7 +19,7 @@ Before you start, make sure that:
 
 - The ``flwr`` CLI is :doc:`installed <../how-to-install-flower>` locally.
 - The Docker daemon is running.
-- Docker Compose is `installed <https://docs.docker.com/compose/install/>`_.
+- Docker Compose V2 is `installed <https://docs.docker.com/compose/install/>`_.
 
 Run the Quickstart Example
 --------------------------
@@ -37,8 +37,9 @@ Run the Quickstart Example
    into the example directory:
 
    .. code-block:: bash
+       :substitutions:
 
-       $ curl https://raw.githubusercontent.com/adap/flower/refs/heads/main/src/docker/complete/compose.yml \
+       $ curl https://raw.githubusercontent.com/adap/flower/refs/tags/v|stable_flwr_version|/src/docker/complete/compose.yml \
            -o compose.yml
 
 3. Build and start the services using the following command:
@@ -65,17 +66,11 @@ Run the Quickstart Example
        ``local-deployment`` with your chosen name in both the ``tool.flwr.federations.``
        string and the corresponding ``flwr run .`` command.
 
-5. Run the example:
+5. Run the example and follow the logs of the ServerApp:
 
    .. code-block:: bash
 
-       $ flwr run . local-deployment
-
-6. Follow the logs of the SuperExec service:
-
-   .. code-block:: bash
-
-       $ docker compose logs superexec -f
+       $ flwr run . local-deployment --stream
 
 That is all it takes! You can monitor the progress of the run through the logs of the
 SuperExec.
@@ -105,7 +100,7 @@ Limitations
     - - quickstart-huggingface
       - None
     - - quickstart-jax
-      - The example has not yet been updated to work with the latest ``flwr`` version.
+      - None
     - - quickstart-mlcube
       - The example has not yet been updated to work with the latest ``flwr`` version.
     - - quickstart-mlx

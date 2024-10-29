@@ -44,7 +44,7 @@ def test_start_run() -> None:
     request.fab.content = b"test"
 
     # Create a instance of FlowerServiceServicer
-    servicer = ExecServicer(executor=executor)
+    servicer = ExecServicer(Mock(), Mock(), executor=executor)
 
     # Execute
     response = servicer.StartRun(request, context_mock)
