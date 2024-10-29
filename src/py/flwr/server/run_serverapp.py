@@ -203,7 +203,7 @@ def run_server_app() -> None:
         # Create run
         req = CreateRunRequest(fab_id=fab_id, fab_version=fab_version)
         res: CreateRunResponse = driver._stub.CreateRun(req)  # pylint: disable=W0212
-        # Overwrite driver._run_id
+        # Fetch full `Run` using `run_id`
         driver.init_run(res.run_id)  # pylint: disable=W0212
 
     # Obtain server app reference and the run config
