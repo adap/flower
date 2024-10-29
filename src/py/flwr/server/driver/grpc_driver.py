@@ -175,9 +175,6 @@ class GrpcDriver(Driver):
         This method constructs a new `Message` with given content and metadata.
         The `run_id` and `src_node_id` will be set automatically.
         """
-        if self._run_id is None:
-            raise RuntimeError("`run_id` is unset. Cannot initialize run.")
-
         self._init_run()
         if ttl:
             warnings.warn(
@@ -189,7 +186,7 @@ class GrpcDriver(Driver):
 
         ttl_ = DEFAULT_TTL if ttl is None else ttl
         metadata = Metadata(
-            run_id=self._run_id,
+            run_id=cast(Run, self._run).run_id,
             message_id="",  # Will be set by the server
             src_node_id=self.node.node_id,
             dst_node_id=dst_node_id,
@@ -202,12 +199,10 @@ class GrpcDriver(Driver):
 
     def get_node_ids(self) -> list[int]:
         """Get node IDs."""
-        if self._run_id is None:
-            raise RuntimeError("`run_id` is unset. Cannot initialize run.")
         self._init_run()
         # Call GrpcDriverStub method
         res: GetNodesResponse = self._stub.GetNodes(
-            GetNodesRequest(run_id=self._run_id)
+            GetNodesRequest(run_id=cast(Run, self._run).run_id)
         )
         return [node.node_id for node in res.nodes]
 
