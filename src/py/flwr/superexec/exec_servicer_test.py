@@ -36,7 +36,7 @@ def test_start_run() -> None:
         run_res.proc = proc
 
     executor = MagicMock()
-    executor.start_run = lambda _, __, ___: run_res
+    executor.start_run = lambda _, __, ___: run_res.run_id
 
     context_mock = MagicMock()
 
@@ -48,5 +48,4 @@ def test_start_run() -> None:
 
     # Execute
     response = servicer.StartRun(request, context_mock)
-
     assert response.run_id == 10
