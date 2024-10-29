@@ -299,32 +299,3 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         context : Context
             The context to be associated with the specified `run_id`.
         """
-
-    @abc.abstractmethod
-    def store_logs(self, run_id: int, node_id: int, logs: str) -> None:
-        """Store the logs for the specified `run_id` and `node_id`.
-
-        Parameters
-        ----------
-        run_id : int
-            The identifier of the run for which the logs are stored.
-        node_id : int
-            The identifier of the node for the run for which logs are stored.
-        logs : str
-            The log message to be stored.
-        """
-
-    @abc.abstractmethod
-    def get_logs(self, run_id: int) -> list[str]:
-        """Retrieve the logs for the specified `run_id`.
-
-        Parameters
-        ----------
-        run_id : int
-            The identifier of the run for which to retrieve the logs.
-
-        Returns
-        -------
-        logs : list[str]
-            The logs associated with the specified `run_id`.
-        """
