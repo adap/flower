@@ -58,7 +58,7 @@ case "$2" in
     ;;
 esac
 
-timeout 2m flower-superlink $server_arg $db_arg $rest_arg_superlink $server_auth &
+timeout 2m flower-superlink $server_arg $db_arg $rest_arg_superlink $server_auth --isolation="process" &
 sl_pid=$!
 sleep 3
 
@@ -70,7 +70,7 @@ timeout 2m flower-supernode ./ $client_arg $rest_arg_supernode --superlink $serv
 cl2_pid=$!
 sleep 3
 
-timeout 2m flower-server-app $server_dir $client_arg --superlink $server_app_address &
+timeout 2m flwr-serverapp $client_arg --superlink $server_app_address &
 pid=$!
 
 wait $pid
