@@ -22,7 +22,7 @@ from typing import Any
 
 import grpc
 
-from flwr.common.constant import Status
+from flwr.common.constant import LOG_STREAM_INTERVAL, Status
 from flwr.common.logger import log
 from flwr.common.serde import user_config_from_proto
 from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
@@ -36,8 +36,6 @@ from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkStateFactory
 
 from .executor import Executor
-
-SELECT_TIMEOUT = 1  # Timeout for selecting ready-to-read file descriptors (in seconds)
 
 
 class ExecServicer(exec_pb2_grpc.ExecServicer):
@@ -106,4 +104,4 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
                 log(INFO, "All logs for run ID `%s` returned", request.run_id)
                 context.cancel()
 
-            time.sleep(0.5)  # Sleep briefly to avoid busy waiting
+            time.sleep(LOG_STREAM_INTERVAL)  # Sleep briefly to avoid busy waiting

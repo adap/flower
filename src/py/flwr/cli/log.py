@@ -24,12 +24,11 @@ import grpc
 import typer
 
 from flwr.cli.config_utils import load_and_validate
+from flwr.common.constant import CONN_RECONNECT_INTERVAL, CONN_REFRESH_PERIOD
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log as logger
 from flwr.proto.exec_pb2 import StreamLogsRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
-
-CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
 
 def start_stream(
@@ -42,7 +41,7 @@ def start_stream(
         logger(INFO, "Starting logstream for run_id `%s`", run_id)
         while True:
             after_timestamp = stream_logs(run_id, stub, refresh_period, after_timestamp)
-            time.sleep(0.5)
+            time.sleep(CONN_RECONNECT_INTERVAL)
             logger(DEBUG, "Reconnecting to logstream")
     except KeyboardInterrupt:
         logger(INFO, "Exiting logstream")
