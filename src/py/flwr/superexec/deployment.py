@@ -15,23 +15,20 @@
 """Deployment engine executor."""
 
 import hashlib
-import subprocess
 from logging import ERROR, INFO
 from pathlib import Path
 from typing import Optional
 
 from typing_extensions import override
 
-from flwr.cli.install import install_from_fab
 from flwr.common.constant import DRIVER_API_DEFAULT_ADDRESS
-from flwr.common.grpc import create_channel
 from flwr.common.logger import log
-from flwr.common.serde import fab_to_proto, user_config_to_proto
 from flwr.common.typing import Fab, UserConfig
-from flwr.proto.driver_pb2_grpc import DriverStub
-from flwr.proto.run_pb2 import CreateRunRequest  # pylint: disable=E0611
+from flwr.server.superlink.ffs import Ffs
+from flwr.server.superlink.ffs.ffs_factory import FfsFactory
+from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 
-from .executor import Executor, RunTracker
+from .executor import Executor
 
 
 class DeploymentEngine(Executor):
@@ -62,7 +59,30 @@ class DeploymentEngine(Executor):
             self.root_certificates = root_certificates
             self.root_certificates_bytes = Path(root_certificates).read_bytes()
         self.flwr_dir = flwr_dir
-        self.stub: Optional[DriverStub] = None
+        self.linkstate_factory: Optional[LinkStateFactory] = None
+        self.ffs_factory: Optional[FfsFactory] = None
+
+    @override
+    def initialize(
+        self, linkstate_factory: LinkStateFactory, ffs_factory: FfsFactory
+    ) -> None:
+        """Initialize the executor with the necessary factories."""
+        self.linkstate_factory = linkstate_factory
+        self.ffs_factory = ffs_factory
+
+    @property
+    def linkstate(self) -> LinkState:
+        """Return the LinkState."""
+        if self.linkstate_factory is None:
+            raise RuntimeError("Executor is not initialized.")
+        return self.linkstate_factory.state()
+
+    @property
+    def ffs(self) -> Ffs:
+        """Return the Flower File Storage (FFS)."""
+        if self.ffs_factory is None:
+            raise RuntimeError("Executor is not initialized.")
+        return self.ffs_factory.ffs()
 
     @override
     def set_config(
@@ -101,32 +121,19 @@ class DeploymentEngine(Executor):
                 raise ValueError("The `flwr-dir` value should be of type `str`.")
             self.flwr_dir = str(flwr_dir)
 
-    def _connect(self) -> None:
-        if self.stub is not None:
-            return
-        channel = create_channel(
-            server_address=self.superlink,
-            insecure=(self.root_certificates_bytes is None),
-            root_certificates=self.root_certificates_bytes,
-        )
-        self.stub = DriverStub(channel)
-
     def _create_run(
         self,
         fab: Fab,
         override_config: UserConfig,
     ) -> int:
-        if self.stub is None:
-            self._connect()
+        fab_hash = self.ffs.put(fab.content, {})
+        if fab_hash != fab.hash_str:
+            raise RuntimeError(
+                f"FAB ({fab.hash_str}) hash from request doesn't match contents"
+            )
 
-        assert self.stub is not None
-
-        req = CreateRunRequest(
-            fab=fab_to_proto(fab),
-            override_config=user_config_to_proto(override_config),
-        )
-        res = self.stub.CreateRun(request=req)
-        return int(res.run_id)
+        run_id = self.linkstate.create_run(None, None, fab_hash, override_config)
+        return run_id
 
     @override
     def start_run(
@@ -134,11 +141,9 @@ class DeploymentEngine(Executor):
         fab_file: bytes,
         override_config: UserConfig,
         federation_config: UserConfig,
-    ) -> Optional[RunTracker]:
+    ) -> Optional[int]:
         """Start run using the Flower Deployment Engine."""
         try:
-            # Install FAB to flwr dir
-            install_from_fab(fab_file, None, True)
 
             # Call SuperLink to create run
             run_id: int = self._create_run(
@@ -146,37 +151,7 @@ class DeploymentEngine(Executor):
             )
             log(INFO, "Created run %s", str(run_id))
 
-            command = [
-                "flower-server-app",
-                "--run-id",
-                str(run_id),
-                "--superlink",
-                str(self.superlink),
-            ]
-
-            if self.flwr_dir:
-                command.append("--flwr-dir")
-                command.append(self.flwr_dir)
-
-            if self.root_certificates is None:
-                command.append("--insecure")
-            else:
-                command.append("--root-certificates")
-                command.append(self.root_certificates)
-
-            # Execute the command
-            proc = subprocess.Popen(  # pylint: disable=consider-using-with
-                command,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-            )
-            log(INFO, "Started run %s", str(run_id))
-
-            return RunTracker(
-                run_id=run_id,
-                proc=proc,
-            )
+            return run_id
         # pylint: disable-next=broad-except
         except Exception as e:
             log(ERROR, "Could not start run: %s", str(e))

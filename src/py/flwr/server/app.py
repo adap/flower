@@ -17,12 +17,14 @@
 import argparse
 import csv
 import importlib.util
+import subprocess
 import sys
 import threading
 from collections.abc import Sequence
-from logging import INFO, WARN
+from logging import DEBUG, INFO, WARN
 from os.path import isfile
 from pathlib import Path
+from time import sleep
 from typing import Optional
 
 import grpc
@@ -35,12 +37,15 @@ from cryptography.hazmat.primitives.serialization import (
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
-from flwr.common.config import get_flwr_dir
+from flwr.common.config import get_flwr_dir, parse_config_args
 from flwr.common.constant import (
     DRIVER_API_DEFAULT_ADDRESS,
+    EXEC_API_DEFAULT_ADDRESS,
     FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS,
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
     FLEET_API_REST_DEFAULT_ADDRESS,
+    ISOLATION_MODE_PROCESS,
+    ISOLATION_MODE_SUBPROCESS,
     MISSING_EXTRA_REST,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
@@ -56,6 +61,8 @@ from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
 from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
+from flwr.superexec.app import load_executor
+from flwr.superexec.exec_grpc import run_exec_api_grpc
 
 from .client_manager import ClientManager
 from .history import History
@@ -71,7 +78,7 @@ from .superlink.fleet.grpc_bidi.grpc_server import (
 )
 from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
 from .superlink.fleet.grpc_rere.server_interceptor import AuthenticateServerInterceptor
-from .superlink.state import StateFactory
+from .superlink.linkstate import LinkStateFactory
 
 DATABASE = ":flwr-in-memory-state:"
 BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
@@ -205,14 +212,15 @@ def run_superlink() -> None:
 
     event(EventType.RUN_SUPERLINK_ENTER)
 
-    # Parse IP address
+    # Parse IP addresses
     driver_address, _, _ = _format_address(args.driver_api_address)
+    exec_address, _, _ = _format_address(args.exec_api_address)
 
     # Obtain certificates
     certificates = _try_obtain_certificates(args)
 
     # Initialize StateFactory
-    state_factory = StateFactory(args.database)
+    state_factory = LinkStateFactory(args.database)
 
     # Initialize FfsFactory
     ffs_factory = FfsFactory(args.storage_dir)
@@ -224,8 +232,9 @@ def run_superlink() -> None:
         ffs_factory=ffs_factory,
         certificates=certificates,
     )
-
     grpc_servers = [driver_server]
+
+    # Start Fleet API
     bckg_threads = []
     if not args.fleet_api_address:
         if args.fleet_api_type in [
@@ -250,7 +259,6 @@ def run_superlink() -> None:
         )
         num_workers = 1
 
-    # Start Fleet API
     if args.fleet_api_type == TRANSPORT_TYPE_REST:
         if (
             importlib.util.find_spec("requests")
@@ -318,6 +326,28 @@ def run_superlink() -> None:
     else:
         raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
 
+    # Start Exec API
+    exec_server: grpc.Server = run_exec_api_grpc(
+        address=exec_address,
+        state_factory=state_factory,
+        ffs_factory=ffs_factory,
+        executor=load_executor(args),
+        certificates=certificates,
+        config=parse_config_args(
+            [args.executor_config] if args.executor_config else args.executor_config
+        ),
+    )
+    grpc_servers.append(exec_server)
+
+    if args.isolation == ISOLATION_MODE_SUBPROCESS:
+        # Scheduler thread
+        scheduler_th = threading.Thread(
+            target=_flwr_serverapp_scheduler,
+            args=(state_factory, args.driver_api_address, args.ssl_ca_certfile),
+        )
+        scheduler_th.start()
+        bckg_threads.append(scheduler_th)
+
     # Graceful shutdown
     register_exit_handlers(
         event_type=EventType.RUN_SUPERLINK_LEAVE,
@@ -332,6 +362,51 @@ def run_superlink() -> None:
                 if not thread.is_alive():
                     sys.exit(1)
         driver_server.wait_for_termination(timeout=1)
+
+
+def _flwr_serverapp_scheduler(
+    state_factory: LinkStateFactory,
+    driver_api_address: str,
+    ssl_ca_certfile: Optional[str],
+) -> None:
+    log(DEBUG, "Started flwr-serverapp scheduler thread.")
+
+    state = state_factory.state()
+
+    # Periodically check for a pending run in the LinkState
+    while True:
+        sleep(3)
+        pending_run_id = state.get_pending_run_id()
+
+        if pending_run_id:
+
+            log(
+                INFO,
+                "Launching `flwr-serverapp` subprocess with run-id %d. "
+                "Connects to SuperLink on %s",
+                pending_run_id,
+                driver_api_address,
+            )
+            # Start ServerApp subprocess
+            command = [
+                "flwr-serverapp",
+                "--superlink",
+                driver_api_address,
+                "--run-id",
+                str(pending_run_id),
+            ]
+            if ssl_ca_certfile:
+                command.append("--root-certificates")
+                command.append(ssl_ca_certfile)
+            else:
+                command.append("--insecure")
+
+            subprocess.run(
+                command,
+                stdout=None,
+                stderr=None,
+                check=True,
+            )
 
 
 def _format_address(address: str) -> tuple[str, str, int]:
@@ -489,7 +564,7 @@ def _try_obtain_certificates(
 
 def _run_fleet_api_grpc_rere(
     address: str,
-    state_factory: StateFactory,
+    state_factory: LinkStateFactory,
     ffs_factory: FfsFactory,
     certificates: Optional[tuple[bytes, bytes, bytes]],
     interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None,
@@ -517,7 +592,7 @@ def _run_fleet_api_grpc_rere(
 
 def _run_fleet_api_grpc_adapter(
     address: str,
-    state_factory: StateFactory,
+    state_factory: LinkStateFactory,
     ffs_factory: FfsFactory,
     certificates: Optional[tuple[bytes, bytes, bytes]],
 ) -> grpc.Server:
@@ -548,7 +623,7 @@ def _run_fleet_api_rest(
     port: int,
     ssl_keyfile: Optional[str],
     ssl_certfile: Optional[str],
-    state_factory: StateFactory,
+    state_factory: LinkStateFactory,
     ffs_factory: FfsFactory,
     num_workers: int,
 ) -> None:
@@ -587,6 +662,7 @@ def _parse_args_run_superlink() -> argparse.ArgumentParser:
     _add_args_common(parser=parser)
     _add_args_driver_api(parser=parser)
     _add_args_fleet_api(parser=parser)
+    _add_args_exec_api(parser=parser)
 
     return parser
 
@@ -617,6 +693,19 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         help="Fleet API server SSL CA certificate file (as a path str) "
         "to create a secure connection.",
         type=str,
+    )
+    parser.add_argument(
+        "--isolation",
+        default=ISOLATION_MODE_SUBPROCESS,
+        required=False,
+        choices=[
+            ISOLATION_MODE_SUBPROCESS,
+            ISOLATION_MODE_PROCESS,
+        ],
+        help="Isolation mode when running a `ServerApp` (`subprocess` by default, "
+        "possible values: `subprocess`, `process`). Use `subprocess` to configure "
+        "SuperLink to run a `ServerApp` in a subprocess. Use `process` to indicate "
+        "that a separate independent process gets created outside of SuperLink.",
     )
     parser.add_argument(
         "--database",
@@ -680,4 +769,30 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         default=1,
         type=int,
         help="Set the number of concurrent workers for the Fleet API server.",
+    )
+
+
+def _add_args_exec_api(parser: argparse.ArgumentParser) -> None:
+    """Add command line arguments for Exec API."""
+    parser.add_argument(
+        "--exec-api-address",
+        help="Exec API server address (IPv4, IPv6, or a domain name)",
+        default=EXEC_API_DEFAULT_ADDRESS,
+    )
+    parser.add_argument(
+        "--executor",
+        help="For example: `deployment:exec` or `project.package.module:wrapper.exec`. "
+        "The default is `flwr.superexec.deployment:executor`",
+        default="flwr.superexec.deployment:executor",
+    )
+    parser.add_argument(
+        "--executor-dir",
+        help="The directory for the executor.",
+        default=".",
+    )
+    parser.add_argument(
+        "--executor-config",
+        help="Key-value pairs for the executor config, separated by spaces. "
+        "For example:\n\n`--executor-config 'verbose=true "
+        'root-certificates="certificates/superlink-ca.crt"\'`',
     )

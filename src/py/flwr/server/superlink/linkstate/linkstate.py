@@ -12,19 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Abstract base class State."""
+"""Abstract base class LinkState."""
 
 
 import abc
 from typing import Optional
 from uuid import UUID
 
-from flwr.common.typing import Run, UserConfig
+from flwr.common import Context
+from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 
-class State(abc.ABC):  # pylint: disable=R0904
-    """Abstract State."""
+class LinkState(abc.ABC):  # pylint: disable=R0904
+    """Abstract LinkState."""
 
     @abc.abstractmethod
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
@@ -32,8 +33,8 @@ class State(abc.ABC):  # pylint: disable=R0904
 
         Usually, the Driver API calls this to schedule instructions.
 
-        Stores the value of the `task_ins` in the state and, if successful, returns the
-        `task_id` (UUID) of the `task_ins`. If, for any reason,
+        Stores the value of the `task_ins` in the link state and, if successful,
+        returns the `task_id` (UUID) of the `task_ins`. If, for any reason,
         storing the `task_ins` fails, `None` is returned.
 
         Constraints
@@ -130,11 +131,11 @@ class State(abc.ABC):  # pylint: disable=R0904
     def create_node(
         self, ping_interval: float, public_key: Optional[bytes] = None
     ) -> int:
-        """Create, store in state, and return `node_id`."""
+        """Create, store in the link state, and return `node_id`."""
 
     @abc.abstractmethod
     def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
-        """Remove `node_id` from state."""
+        """Remove `node_id` from the link state."""
 
     @abc.abstractmethod
     def get_nodes(self, run_id: int) -> set[int]:
@@ -179,10 +180,58 @@ class State(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
+    def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
+        """Retrieve the statuses for the specified runs.
+
+        Parameters
+        ----------
+        run_ids : set[int]
+            A set of run identifiers for which to retrieve statuses.
+
+        Returns
+        -------
+        dict[int, RunStatus]
+            A dictionary mapping each valid run ID to its corresponding status.
+
+        Notes
+        -----
+        Only valid run IDs that exist in the State will be included in the returned
+        dictionary. If a run ID is not found, it will be omitted from the result.
+        """
+
+    @abc.abstractmethod
+    def update_run_status(self, run_id: int, new_status: RunStatus) -> bool:
+        """Update the status of the run with the specified `run_id`.
+
+        Parameters
+        ----------
+        run_id : int
+            The identifier of the run.
+        new_status : RunStatus
+            The new status to be assigned to the run.
+
+        Returns
+        -------
+        bool
+            True if the status update is successful; False otherwise.
+        """
+
+    @abc.abstractmethod
+    def get_pending_run_id(self) -> Optional[int]:
+        """Get the `run_id` of a run with `Status.PENDING` status.
+
+        Returns
+        -------
+        Optional[int]
+            The `run_id` of a `Run` that is pending to be started; None if
+            there is no Run pending.
+        """
+
+    @abc.abstractmethod
     def store_server_private_public_key(
         self, private_key: bytes, public_key: bytes
     ) -> None:
-        """Store `server_private_key` and `server_public_key` in state."""
+        """Store `server_private_key` and `server_public_key` in the link state."""
 
     @abc.abstractmethod
     def get_server_private_key(self) -> Optional[bytes]:
@@ -194,11 +243,11 @@ class State(abc.ABC):  # pylint: disable=R0904
 
     @abc.abstractmethod
     def store_node_public_keys(self, public_keys: set[bytes]) -> None:
-        """Store a set of `node_public_keys` in state."""
+        """Store a set of `node_public_keys` in the link state."""
 
     @abc.abstractmethod
     def store_node_public_key(self, public_key: bytes) -> None:
-        """Store a `node_public_key` in state."""
+        """Store a `node_public_key` in the link state."""
 
     @abc.abstractmethod
     def get_node_public_keys(self) -> set[bytes]:
@@ -221,4 +270,67 @@ class State(abc.ABC):  # pylint: disable=R0904
         -------
         is_acknowledged : bool
             True if the ping is successfully acknowledged; otherwise, False.
+        """
+
+    @abc.abstractmethod
+    def get_serverapp_context(self, run_id: int) -> Optional[Context]:
+        """Get the context for the specified `run_id`.
+
+        Parameters
+        ----------
+        run_id : int
+            The identifier of the run for which to retrieve the context.
+
+        Returns
+        -------
+        Optional[Context]
+            The context associated with the specified `run_id`, or `None` if no context
+            exists for the given `run_id`.
+        """
+
+    @abc.abstractmethod
+    def set_serverapp_context(self, run_id: int, context: Context) -> None:
+        """Set the context for the specified `run_id`.
+
+        Parameters
+        ----------
+        run_id : int
+            The identifier of the run for which to set the context.
+        context : Context
+            The context to be associated with the specified `run_id`.
+        """
+
+    @abc.abstractmethod
+    def add_serverapp_log(self, run_id: int, log_message: str) -> None:
+        """Add a log entry to the ServerApp logs for the specified `run_id`.
+
+        Parameters
+        ----------
+        run_id : int
+            The identifier of the run for which to add a log entry.
+        log_message : str
+            The log entry to be added to the ServerApp logs.
+        """
+
+    @abc.abstractmethod
+    def get_serverapp_log(
+        self, run_id: int, after_timestamp: Optional[float]
+    ) -> tuple[str, float]:
+        """Get the ServerApp logs for the specified `run_id`.
+
+        Parameters
+        ----------
+        run_id : int
+            The identifier of the run for which to retrieve the ServerApp logs.
+
+        after_timestamp : Optional[float]
+            Retrieve logs after this timestamp. If set to `None`, retrieve all logs.
+
+        Returns
+        -------
+        tuple[str, float]
+            A tuple containing:
+            - The ServerApp logs associated with the specified `run_id`.
+            - The timestamp of the latest log entry in the returned logs.
+              Returns `0` if no logs are returned.
         """

@@ -29,23 +29,24 @@ from typing import Any, Optional
 
 from flwr.cli.config_utils import load_and_validate
 from flwr.client import ClientApp
-from flwr.common import EventType, event, log
+from flwr.common import Context, EventType, RecordSet, event, log, now
 from flwr.common.config import get_fused_config_from_dir, parse_config_args
-from flwr.common.constant import RUN_ID_NUM_BYTES
+from flwr.common.constant import RUN_ID_NUM_BYTES, Status
 from flwr.common.logger import (
     set_logger_propagation,
     update_console_handler,
     warn_deprecated_feature,
     warn_deprecated_feature_with_example,
 )
-from flwr.common.typing import Run, UserConfig
+from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.server.driver import Driver, InMemoryDriver
-from flwr.server.run_serverapp import run as run_server_app
+from flwr.server.run_serverapp import run as _run
 from flwr.server.server_app import ServerApp
 from flwr.server.superlink.fleet import vce
 from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
-from flwr.server.superlink.state import StateFactory
-from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
+from flwr.server.superlink.linkstate import LinkStateFactory
+from flwr.server.superlink.linkstate.in_memory_linkstate import RunRecord
+from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 from flwr.simulation.ray_transport.utils import (
     enable_tf_gpu_growth as enable_gpu_growth,
 )
@@ -332,11 +333,19 @@ def run_serverapp_th(
                 log(INFO, "Enabling GPU growth for Tensorflow on the server thread.")
                 enable_gpu_growth()
 
+            # Initialize Context
+            context = Context(
+                node_id=0,
+                node_config={},
+                state=RecordSet(),
+                run_config=_server_app_run_config,
+            )
+
             # Run ServerApp
-            run_server_app(
+            _run(
                 driver=_driver,
+                context=context,
                 server_app_dir=_server_app_dir,
-                server_app_run_config=_server_app_run_config,
                 server_app_attr=_server_app_attr,
                 loaded_server_app=_server_app,
             )
@@ -389,7 +398,7 @@ def _main_loop(
 ) -> None:
     """Start ServerApp on a separate thread, then launch Simulation Engine."""
     # Initialize StateFactory
-    state_factory = StateFactory(":flwr-in-memory-state:")
+    state_factory = LinkStateFactory(":flwr-in-memory-state:")
 
     f_stop = threading.Event()
     # A Threading event to indicate if an exception was raised in the ServerApp thread
@@ -399,13 +408,21 @@ def _main_loop(
     try:
         # Register run
         log(DEBUG, "Pre-registering run with id %s", run.run_id)
-        state_factory.state().run_ids[run.run_id] = run  # type: ignore
+        init_status = RunStatus(Status.RUNNING, "", "")
+        state_factory.state().run_ids[run.run_id] = RunRecord(  # type: ignore
+            run=run,
+            status=init_status,
+            starting_at=now().isoformat(),
+            running_at=now().isoformat(),
+            finished_at="",
+        )
 
         if server_app_run_config is None:
             server_app_run_config = {}
 
         # Initialize Driver
-        driver = InMemoryDriver(run_id=run.run_id, state_factory=state_factory)
+        driver = InMemoryDriver(state_factory=state_factory)
+        driver.init_run(run_id=run.run_id)
 
         # Get and run ServerApp thread
         serverapp_th = run_serverapp_th(

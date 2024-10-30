@@ -20,13 +20,13 @@ from typing import Optional
 
 from flwr.common.logger import log
 
-from .in_memory_state import InMemoryState
-from .sqlite_state import SqliteState
-from .state import State
+from .in_memory_linkstate import InMemoryLinkState
+from .linkstate import LinkState
+from .sqlite_linkstate import SqliteLinkState
 
 
-class StateFactory:
-    """Factory class that creates State instances.
+class LinkStateFactory:
+    """Factory class that creates LinkState instances.
 
     Parameters
     ----------
@@ -39,19 +39,19 @@ class StateFactory:
 
     def __init__(self, database: str) -> None:
         self.database = database
-        self.state_instance: Optional[State] = None
+        self.state_instance: Optional[LinkState] = None
 
-    def state(self) -> State:
+    def state(self) -> LinkState:
         """Return a State instance and create it, if necessary."""
         # InMemoryState
         if self.database == ":flwr-in-memory-state:":
             if self.state_instance is None:
-                self.state_instance = InMemoryState()
+                self.state_instance = InMemoryLinkState()
             log(DEBUG, "Using InMemoryState")
             return self.state_instance
 
         # SqliteState
-        state = SqliteState(self.database)
+        state = SqliteLinkState(self.database)
         state.initialize()
         log(DEBUG, "Using SqliteState")
         return state

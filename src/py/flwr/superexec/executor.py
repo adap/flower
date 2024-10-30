@@ -20,6 +20,8 @@ from subprocess import Popen
 from typing import Optional
 
 from flwr.common.typing import UserConfig
+from flwr.server.superlink.ffs.ffs_factory import FfsFactory
+from flwr.server.superlink.linkstate import LinkStateFactory
 
 
 @dataclass
@@ -33,6 +35,23 @@ class RunTracker:
 
 class Executor(ABC):
     """Execute and monitor a Flower run."""
+
+    @abstractmethod
+    def initialize(
+        self, linkstate_factory: LinkStateFactory, ffs_factory: FfsFactory
+    ) -> None:
+        """Initialize the executor with the necessary factories.
+
+        This method sets up the executor by providing it with the factories required
+        to access the LinkState and the Flower File Storage (FFS) in the SuperLink.
+
+        Parameters
+        ----------
+        linkstate_factory : LinkStateFactory
+            The factory to create access to the LinkState.
+        ffs_factory : FfsFactory
+            The factory to create access to the Flower File Storage (FFS).
+        """
 
     @abstractmethod
     def set_config(
@@ -53,7 +72,7 @@ class Executor(ABC):
         fab_file: bytes,
         override_config: UserConfig,
         federation_config: UserConfig,
-    ) -> Optional[RunTracker]:
+    ) -> Optional[int]:
         """Start a run using the given Flower FAB ID and version.
 
         This method creates a new run on the SuperLink, returns its run_id
@@ -70,7 +89,6 @@ class Executor(ABC):
 
         Returns
         -------
-        run_id : Optional[RunTracker]
-            The run_id and the associated process of the run created by the SuperLink,
-            or `None` if it fails.
+        run_id : Optional[int]
+            The run_id of the run created by the SuperLink, or `None` if it fails.
         """

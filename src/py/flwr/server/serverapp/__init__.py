@@ -12,17 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower server state."""
+"""Flower AppIO service."""
 
 
-from .in_memory_state import InMemoryState as InMemoryState
-from .sqlite_state import SqliteState as SqliteState
-from .state import State as State
-from .state_factory import StateFactory as StateFactory
+from .app import flwr_serverapp as flwr_serverapp
 
 __all__ = [
-    "InMemoryState",
-    "SqliteState",
-    "State",
-    "StateFactory",
+    "flwr_serverapp",
 ]
