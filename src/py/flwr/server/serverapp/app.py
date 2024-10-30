@@ -272,7 +272,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
 
             # Stop log uploader for this run
             if log_uploader:
-                stop_log_uploader(log_uploader)
+                stop_log_uploader(log_queue, log_uploader)
                 log_uploader = None
 
         # Stop the loop if `flwr-serverapp` is expected to process a single run

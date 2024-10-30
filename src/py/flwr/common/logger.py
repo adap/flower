@@ -271,7 +271,7 @@ def set_logger_propagation(
     return child_logger
 
 
-def mirror_output_to_queue(log_queue: Queue[str]) -> None:
+def mirror_output_to_queue(log_queue: Queue[Optional[str]]) -> None:
     """Mirror stdout and stderr output to the provided queue."""
 
     def get_write_fn(stream: TextIO) -> Any:
