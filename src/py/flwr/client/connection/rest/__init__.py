@@ -13,3 +13,10 @@
 # limitations under the License.
 # ==============================================================================
 """Client-side part of the REST transport layer."""
+
+
+from .rest_fleet_connection import RestFleetConnection
+
+__all__ = [
+    "RestFleetConnection",
+]
