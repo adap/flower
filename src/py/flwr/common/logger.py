@@ -336,9 +336,8 @@ def _log_uploader(
             except grpc.RpcError as e:
                 # Ignore minor network errors
                 # pylint: disable-next=no-member
-                if e.code() == grpc.StatusCode.UNAVAILABLE:
-                    pass
-                raise e
+                if e.code() != grpc.StatusCode.UNAVAILABLE:
+                    raise e
 
         if exit_flag:
             break
