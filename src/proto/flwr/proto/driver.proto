@@ -75,7 +75,7 @@ message PullTaskResRequest {
 message PullTaskResResponse { repeated TaskRes task_res_list = 1; }
 
 // PullServerAppInputs messages
-message PullServerAppInputsRequest { uint64 run_id = 1; }
+message PullServerAppInputsRequest {}
 message PullServerAppInputsResponse {
   Context context = 1;
   Run run = 2;

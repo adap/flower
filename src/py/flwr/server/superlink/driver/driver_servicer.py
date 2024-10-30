@@ -219,11 +219,8 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
 
         # Lock access to LinkState, preventing obtaining the same pending run_id
         with self.lock:
-            # If run_id is provided, use it, otherwise use the pending run_id
-            if _has_field(request, "run_id"):
-                run_id: Optional[int] = request.run_id
-            else:
-                run_id = state.get_pending_run_id()
+            # Attempt getting the run_id of a pending run
+            run_id = state.get_pending_run_id()
             # If there's no pending run, return an empty response
             if run_id is None:
                 return PullServerAppInputsResponse()
