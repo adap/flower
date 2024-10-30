@@ -278,7 +278,12 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
     ) -> PushLogsResponse:
         """Push logs."""
         log(DEBUG, "DriverServicer.PushLogs")
-        raise NotImplementedError()
+        state = self.state_factory.state()
+
+        # Add logs to LinkState
+        merged_logs = "".join(request.logs)
+        state.add_serverapp_log(request.run_id, merged_logs)
+        return PushLogsResponse()
 
 
 def _raise_if(validation_error: bool, detail: str) -> None:

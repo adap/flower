@@ -17,10 +17,20 @@
 
 import logging
 import sys
+import threading
+import time
 from logging import WARN, LogRecord
 from logging.handlers import HTTPHandler
-from queue import Queue
+from queue import Empty, Queue
 from typing import TYPE_CHECKING, Any, Optional, TextIO
+
+import grpc
+
+from flwr.proto.driver_pb2_grpc import DriverStub  # pylint: disable=E0611
+from flwr.proto.log_pb2 import PushLogsRequest  # pylint: disable=E0611
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+
+from .constant import LOG_UPLOAD_INTERVAL
 
 # Create logger
 LOGGER_NAME = "flwr"
@@ -263,7 +273,7 @@ def set_logger_propagation(
     return child_logger
 
 
-def mirror_output_to_queue(log_queue: Queue[str]) -> None:
+def mirror_output_to_queue(log_queue: Queue[Optional[str]]) -> None:
     """Mirror stdout and stderr output to the provided queue."""
 
     def get_write_fn(stream: TextIO) -> Any:
@@ -290,3 +300,65 @@ def restore_output() -> None:
     sys.stdout = sys.__stdout__
     sys.stderr = sys.__stderr__
     console_handler.stream = sys.stdout
+
+
+def _log_uploader(
+    log_queue: Queue[Optional[str]], node_id: int, run_id: int, stub: DriverStub
+) -> None:
+    """Upload logs to the SuperLink."""
+    exit_flag = False
+    node = Node(node_id=node_id, anonymous=False)
+    msgs: list[str] = []
+    while True:
+        # Fetch all messages from the queue
+        try:
+            while True:
+                msg = log_queue.get_nowait()
+                # Quit the loops if the returned message is `None`
+                # This is a signal that the run has finished
+                if msg is None:
+                    exit_flag = True
+                    break
+                msgs.append(msg)
+        except Empty:
+            pass
+
+        # Upload if any logs
+        if msgs:
+            req = PushLogsRequest(
+                node=node,
+                run_id=run_id,
+                logs=msgs,
+            )
+            try:
+                stub.PushLogs(req)
+                msgs.clear()
+            except grpc.RpcError as e:
+                # Ignore minor network errors
+                # pylint: disable-next=no-member
+                if e.code() != grpc.StatusCode.UNAVAILABLE:
+                    raise e
+
+        if exit_flag:
+            break
+
+        time.sleep(LOG_UPLOAD_INTERVAL)
+
+
+def start_log_uploader(
+    log_queue: Queue[Optional[str]], node_id: int, run_id: int, stub: DriverStub
+) -> threading.Thread:
+    """Start the log uploader thread and return it."""
+    thread = threading.Thread(
+        target=_log_uploader, args=(log_queue, node_id, run_id, stub)
+    )
+    thread.start()
+    return thread
+
+
+def stop_log_uploader(
+    log_queue: Queue[Optional[str]], log_uploader: threading.Thread
+) -> None:
+    """Stop the log uploader thread."""
+    log_queue.put(None)
+    log_uploader.join()
