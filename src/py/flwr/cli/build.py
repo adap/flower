@@ -81,7 +81,7 @@ def build(
     if not is_valid_project_name(app.name):
         typer.secho(
             f"❌ The project name {app.name} is invalid, "
-            "a valid project name must start with a letter or a hyphen, "
+            "a valid project name must start with a letter, "
             "and can only contain letters, digits, and hyphens.",
             fg=typer.colors.RED,
             bold=True,
