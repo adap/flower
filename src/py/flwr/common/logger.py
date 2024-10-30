@@ -24,6 +24,8 @@ from logging.handlers import HTTPHandler
 from queue import Empty, Queue
 from typing import TYPE_CHECKING, Any, Optional, TextIO
 
+import grpc
+
 from flwr.proto.driver_pb2_grpc import DriverStub  # pylint: disable=E0611
 from flwr.proto.log_pb2 import PushLogsRequest  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
@@ -306,8 +308,8 @@ def _log_uploader(
     """Upload logs to the SuperLink."""
     exit_flag = False
     node = Node(node_id=node_id, anonymous=False)
+    msgs: list[str] = []
     while True:
-        msgs: list[str] = []
         # Fetch all messages from the queue
         try:
             while True:
@@ -328,7 +330,15 @@ def _log_uploader(
                 run_id=run_id,
                 logs=msgs,
             )
-            stub.PushLogs(req)
+            try:
+                stub.PushLogs(req)
+                msgs.clear()
+            except grpc.RpcError as e:
+                # Ignore minor network errors
+                # pylint: disable-next=no-member
+                if e.code() == grpc.StatusCode.UNAVAILABLE:
+                    pass
+                raise e
 
         if exit_flag:
             break
