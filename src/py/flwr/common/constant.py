@@ -87,6 +87,11 @@ MESSAGE_TTL_TOLERANCE = 1e-1
 ISOLATION_MODE_SUBPROCESS = "subprocess"
 ISOLATION_MODE_PROCESS = "process"
 
+# Log streaming configurations
+CONN_REFRESH_PERIOD = 60  # Stream connection refresh period
+CONN_RECONNECT_INTERVAL = 0.5  # Reconnect interval between two stream connections
+LOG_STREAM_INTERVAL = 0.5  # Log stream interval for `ExecServicer.StreamLogs`
+
 
 class MessageType:
     """Message type."""

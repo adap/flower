@@ -15,12 +15,14 @@
 """SuperExec API servicer."""
 
 
+import time
 from collections.abc import Generator
 from logging import ERROR, INFO
 from typing import Any
 
 import grpc
 
+from flwr.common.constant import LOG_STREAM_INTERVAL, Status
 from flwr.common.logger import log
 from flwr.common.serde import user_config_from_proto
 from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
@@ -34,8 +36,6 @@ from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkStateFactory
 
 from .executor import Executor
-
-SELECT_TIMEOUT = 1  # Timeout for selecting ready-to-read file descriptors (in seconds)
 
 
 class ExecServicer(exec_pb2_grpc.ExecServicer):
@@ -75,5 +75,33 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
     ) -> Generator[StreamLogsResponse, Any, None]:
         """Get logs."""
         log(INFO, "ExecServicer.StreamLogs")
+        state = self.linkstate_factory.state()
 
-        yield StreamLogsResponse()
+        # Retrieve run ID
+        run_id = request.run_id
+
+        # Exit if `run_id` not found
+        if not state.get_run(run_id):
+            context.abort(grpc.StatusCode.NOT_FOUND, "Run ID not found")
+
+        after_timestamp = request.after_timestamp + 1e-6
+        while context.is_active():
+            log_msg, latest_timestamp = state.get_serverapp_log(run_id, after_timestamp)
+            if log_msg:
+                yield StreamLogsResponse(
+                    log_output=log_msg,
+                    latest_timestamp=latest_timestamp,
+                )
+                # Add a small epsilon to the latest timestamp to avoid getting
+                # the same log
+                after_timestamp = max(latest_timestamp + 1e-6, after_timestamp)
+
+            # Wait for and continue to yield more log responses only if the
+            # run isn't completed yet. If the run is finished, the entire log
+            # is returned at this point and the server ends the stream.
+            run_status = state.get_run_status({run_id})[run_id]
+            if run_status.status == Status.FINISHED:
+                log(INFO, "All logs for run ID `%s` returned", request.run_id)
+                context.cancel()
+
+            time.sleep(LOG_STREAM_INTERVAL)  # Sleep briefly to avoid busy waiting
