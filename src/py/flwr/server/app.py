@@ -382,9 +382,7 @@ def _flwr_serverapp_scheduler(
 
             log(
                 INFO,
-                "Launching `flwr-serverapp` subprocess with run-id %d. "
-                "Connects to SuperLink on %s",
-                pending_run_id,
+                "Launching `flwr-serverapp` subprocess. Connects to SuperLink on %s",
                 driver_api_address,
             )
             # Start ServerApp subprocess
@@ -392,8 +390,6 @@ def _flwr_serverapp_scheduler(
                 "flwr-serverapp",
                 "--superlink",
                 driver_api_address,
-                "--run-id",
-                str(pending_run_id),
             ]
             if ssl_ca_certfile:
                 command.append("--root-certificates")

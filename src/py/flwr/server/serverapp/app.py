@@ -74,11 +74,10 @@ def flwr_serverapp() -> None:
         help="Address of SuperLink's DriverAPI",
     )
     parser.add_argument(
-        "--run-id",
-        type=int,
-        required=False,
-        help="Id of the Run this process should start. If not supplied, this "
-        "function will request a pending run to the LinkState.",
+        "--run-once",
+        action="store_true",
+        help="When set, this process will start a single ServerApp "
+        "for a pending Run. If no pending run the process will exit. ",
     )
     parser.add_argument(
         "--flwr-dir",
@@ -111,15 +110,13 @@ def flwr_serverapp() -> None:
 
     log(
         DEBUG,
-        "Staring isolated `ServerApp` connected to SuperLink DriverAPI at %s "
-        "for run-id %s",
+        "Staring isolated `ServerApp` connected to SuperLink DriverAPI at %s",
         args.superlink,
-        args.run_id,
     )
     run_serverapp(
         superlink=args.superlink,
         log_queue=log_queue,
-        run_id=args.run_id,
+        run_once=args.run_once,
         flwr_dir_=args.flwr_dir,
         certificates=certificates,
     )
@@ -164,7 +161,7 @@ def _try_obtain_certificates(
 def run_serverapp(  # pylint: disable=R0914, disable=W0212
     superlink: str,
     log_queue: Queue[Optional[str]],
-    run_id: Optional[int] = None,
+    run_once: bool,
     flwr_dir_: Optional[str] = None,
     certificates: Optional[bytes] = None,
 ) -> None:
@@ -176,19 +173,13 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
 
     # Resolve directory where FABs are installed
     flwr_dir = get_flwr_dir(flwr_dir_)
-
-    only_once = run_id is not None
     log_uploader = None
 
     while True:
 
         try:
             # Pull ServerAppInputs from LinkState
-            req = (
-                PullServerAppInputsRequest(run_id=run_id)
-                if run_id
-                else PullServerAppInputsRequest()
-            )
+            req = PullServerAppInputsRequest()
             res: PullServerAppInputsResponse = driver._stub.PullServerAppInputs(req)
             if not res.HasField("run"):
                 sleep(3)
@@ -276,8 +267,5 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
                 log_uploader = None
 
         # Stop the loop if `flwr-serverapp` is expected to process a single run
-        if only_once:
+        if run_once:
             break
-
-        # Reset the run_id
-        run_id = None
