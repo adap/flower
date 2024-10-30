@@ -18,29 +18,30 @@ import sys
 import time
 from logging import DEBUG, ERROR, INFO
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated, Optional, cast
 
 import grpc
 import typer
 
 from flwr.cli.config_utils import load_and_validate
+from flwr.common.constant import CONN_RECONNECT_INTERVAL, CONN_REFRESH_PERIOD
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log as logger
 from flwr.proto.exec_pb2 import StreamLogsRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
-
-CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
 
 def start_stream(
     run_id: int, channel: grpc.Channel, refresh_period: int = CONN_REFRESH_PERIOD
 ) -> None:
     """Start log streaming for a given run ID."""
+    stub = ExecStub(channel)
+    after_timestamp = 0.0
     try:
+        logger(INFO, "Starting logstream for run_id `%s`", run_id)
         while True:
-            logger(INFO, "Starting logstream for run_id `%s`", run_id)
-            stream_logs(run_id, channel, refresh_period)
-            time.sleep(2)
+            after_timestamp = stream_logs(run_id, stub, refresh_period, after_timestamp)
+            time.sleep(CONN_RECONNECT_INTERVAL)
             logger(DEBUG, "Reconnecting to logstream")
     except KeyboardInterrupt:
         logger(INFO, "Exiting logstream")
@@ -54,16 +55,44 @@ def start_stream(
         channel.close()
 
 
-def stream_logs(run_id: int, channel: grpc.Channel, duration: int) -> None:
-    """Stream logs from the beginning of a run with connection refresh."""
-    start_time = time.time()
-    stub = ExecStub(channel)
-    req = StreamLogsRequest(run_id=run_id)
+def stream_logs(
+    run_id: int, stub: ExecStub, duration: int, after_timestamp: float
+) -> float:
+    """Stream logs from the beginning of a run with connection refresh.
 
-    for res in stub.StreamLogs(req):
-        print(res.log_output)
-        if time.time() - start_time > duration:
-            break
+    Parameters
+    ----------
+    run_id : int
+        The identifier of the run.
+    stub : ExecStub
+        The gRPC stub to interact with the Exec service.
+    duration : int
+        The timeout duration for each stream connection in seconds.
+    after_timestamp : float
+        The timestamp to start streaming logs from.
+
+    Returns
+    -------
+    float
+        The latest timestamp from the streamed logs or the provided `after_timestamp`
+        if no logs are returned.
+    """
+    req = StreamLogsRequest(run_id=run_id, after_timestamp=after_timestamp)
+
+    latest_timestamp = 0.0
+    res = None
+    try:
+        for res in stub.StreamLogs(req, timeout=duration):
+            print(res.log_output, end="")
+    except grpc.RpcError as e:
+        # pylint: disable=E1101
+        if e.code() != grpc.StatusCode.DEADLINE_EXCEEDED:
+            raise e
+    finally:
+        if res is not None:
+            latest_timestamp = cast(float, res.latest_timestamp)
+
+    return max(latest_timestamp, after_timestamp)
 
 
 def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
@@ -181,11 +210,11 @@ def log(
         )
         raise typer.Exit(code=1)
 
-    _log_with_superexec(federation_config, run_id, stream)
+    _log_with_exec_api(federation_config, run_id, stream)
 
 
 # pylint: disable-next=too-many-branches
-def _log_with_superexec(
+def _log_with_exec_api(
     federation_config: dict[str, str],
     run_id: int,
     stream: bool,
