@@ -22,8 +22,8 @@ from typing import Callable, Optional, Union
 
 from cryptography.hazmat.primitives.asymmetric import ec
 
-from flwr.client.grpc_rere_client.connection import grpc_request_response
-from flwr.client.grpc_rere_client.grpc_adapter import GrpcAdapter
+from flwr.client.connection.grpc_rere.connection import grpc_request_response
+from flwr.client.connection.grpc_rere.grpc_adapter import GrpcAdapter
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
 from flwr.common.message import Message

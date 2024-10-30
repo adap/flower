@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,32 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Contextmanager for a gRPC request-response channel to the Flower server."""
+"""Contextmanager for a REST request-response channel to the Flower server."""
 
 
 import random
+import sys
 import threading
-from collections.abc import Iterator, Sequence
+from collections.abc import Iterator
 from contextlib import contextmanager
 from copy import copy
-from logging import DEBUG, ERROR
-from pathlib import Path
-from typing import Callable, Optional, Union, cast
+from logging import ERROR, INFO, WARN
+from typing import Callable, Optional, TypeVar, Union
 
-import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
+from google.protobuf.message import Message as GrpcMessage
 
 from flwr.client.heartbeat import start_ping_loop
 from flwr.client.message_handler.message_handler import validate_out_message
 from flwr.client.message_handler.task_handler import get_task_ins, validate_task_ins
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import (
+    MISSING_EXTRA_REST,
     PING_BASE_MULTIPLIER,
     PING_CALL_TIMEOUT,
     PING_DEFAULT_INTERVAL,
     PING_RANDOM_RANGE,
 )
-from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
@@ -50,37 +50,49 @@ from flwr.common.typing import Fab, Run
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
+    CreateNodeResponse,
     DeleteNodeRequest,
+    DeleteNodeResponse,
     PingRequest,
     PingResponse,
     PullTaskInsRequest,
+    PullTaskInsResponse,
     PushTaskResRequest,
+    PushTaskResResponse,
 )
-from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
-from .client_interceptor import AuthenticateClientInterceptor
-from .grpc_adapter import GrpcAdapter
+try:
+    import requests
+except ModuleNotFoundError:
+    sys.exit(MISSING_EXTRA_REST)
 
 
-def on_channel_state_change(channel_connectivity: str) -> None:
-    """Log channel connectivity."""
-    log(DEBUG, channel_connectivity)
+PATH_CREATE_NODE: str = "api/v0/fleet/create-node"
+PATH_DELETE_NODE: str = "api/v0/fleet/delete-node"
+PATH_PULL_TASK_INS: str = "api/v0/fleet/pull-task-ins"
+PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
+PATH_PING: str = "api/v0/fleet/ping"
+PATH_GET_RUN: str = "/api/v0/fleet/get-run"
+PATH_GET_FAB: str = "/api/v0/fleet/get-fab"
+
+T = TypeVar("T", bound=GrpcMessage)
 
 
 @contextmanager
-def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
+def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     server_address: str,
-    insecure: bool,
+    insecure: bool,  # pylint: disable=unused-argument
     retry_invoker: RetryInvoker,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
-    root_certificates: Optional[Union[bytes, str]] = None,
-    authentication_keys: Optional[
+    root_certificates: Optional[
+        Union[bytes, str]
+    ] = None,  # pylint: disable=unused-argument
+    authentication_keys: Optional[  # pylint: disable=unused-argument
         tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
-    adapter_cls: Optional[Union[type[FleetStub], type[GrpcAdapter]]] = None,
 ) -> Iterator[
     tuple[
         Callable[[], Optional[Message]],
@@ -103,11 +115,10 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         If the Flower server runs on the same machine
         on port 8080, then `server_address` would be `"http://[::]:8080"`.
     insecure : bool
-        Starts an insecure gRPC connection when True. Enables HTTPS connection
-        when False, using system certificates if `root_certificates` is None.
+        Unused argument present for compatibilty.
     retry_invoker: RetryInvoker
         `RetryInvoker` object that will try to reconnect the client to the server
-        after gRPC errors. If None, the client will only try to
+        after REST connection errors. If None, the client will only try to
         reconnect once after a failure.
     max_message_length : int
         Ignored, only present to preserve API-compatibility.
@@ -116,13 +127,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         connection using the certificates will be established to an SSL-enabled
         Flower server. Bytes won't work for the REST API.
     authentication_keys : Optional[Tuple[PrivateKey, PublicKey]] (default: None)
-        Tuple containing the elliptic curve private key and public key for
-        authentication from the cryptography library.
-        Source: https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ec/
-        Used to establish an authenticated connection with the server.
-    adapter_cls: Optional[Union[type[FleetStub], type[GrpcAdapter]]] (default: None)
-        A GrpcStub Class that can be used to send messages. By default the FleetStub
-        will be used.
+        Client authentication is not supported for this transport type.
 
     Returns
     -------
@@ -132,28 +137,33 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     delete_node : Optional[Callable]
     get_run : Optional[Callable]
     """
-    if isinstance(root_certificates, str):
-        root_certificates = Path(root_certificates).read_bytes()
-
-    interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None
-    if authentication_keys is not None:
-        interceptors = AuthenticateClientInterceptor(
-            authentication_keys[0], authentication_keys[1]
-        )
-
-    channel = create_channel(
-        server_address=server_address,
-        insecure=insecure,
-        root_certificates=root_certificates,
-        max_message_length=max_message_length,
-        interceptors=interceptors,
+    log(
+        WARN,
+        """
+        EXPERIMENTAL: `rest` is an experimental feature, it might change
+        considerably in future versions of Flower
+        """,
     )
-    channel.subscribe(on_channel_state_change)
+
+    base_url = server_address
+
+    # NEVER SET VERIFY TO FALSE
+    # Otherwise any server can fake its identity
+    # Please refer to:
+    # https://requests.readthedocs.io/en/latest/user/advanced/#ssl-cert-verification
+    verify: Union[bool, str] = True
+    if isinstance(root_certificates, str):
+        verify = root_certificates
+    elif isinstance(root_certificates, bytes):
+        log(
+            ERROR,
+            "For the REST API, the root certificates "
+            "must be provided as a string path to the client.",
+        )
+    if authentication_keys is not None:
+        log(ERROR, "Client authentication is not supported for this transport type.")
 
     # Shared variables for inner functions
-    if adapter_cls is None:
-        adapter_cls = FleetStub
-    stub = adapter_cls(channel)
     metadata: Optional[Metadata] = None
     node: Optional[Node] = None
     ping_thread: Optional[threading.Thread] = None
@@ -162,6 +172,53 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     ###########################################################################
     # ping/create_node/delete_node/receive/send/get_run functions
     ###########################################################################
+
+    def _request(
+        req: GrpcMessage, res_type: type[T], api_path: str, retry: bool = True
+    ) -> Optional[T]:
+        # Serialize the request
+        req_bytes = req.SerializeToString()
+
+        # Send the request
+        def post() -> requests.Response:
+            return requests.post(
+                f"{base_url}/{api_path}",
+                data=req_bytes,
+                headers={
+                    "Accept": "application/protobuf",
+                    "Content-Type": "application/protobuf",
+                },
+                verify=verify,
+                timeout=None,
+            )
+
+        if retry:
+            res: requests.Response = retry_invoker.invoke(post)
+        else:
+            res = post()
+
+        # Check status code and headers
+        if res.status_code != 200:
+            return None
+        if "content-type" not in res.headers:
+            log(
+                WARN,
+                "[Node] POST /%s: missing header `Content-Type`",
+                api_path,
+            )
+            return None
+        if res.headers["content-type"] != "application/protobuf":
+            log(
+                WARN,
+                "[Node] POST /%s: header `Content-Type` has wrong value",
+                api_path,
+            )
+            return None
+
+        # Deserialize ProtoBuf from bytes
+        grpc_res = res_type()
+        grpc_res.ParseFromString(res.content)
+        return grpc_res
 
     def ping() -> None:
         # Get Node
@@ -172,8 +229,10 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         # Construct the ping request
         req = PingRequest(node=node, ping_interval=PING_DEFAULT_INTERVAL)
 
-        # Call FleetAPI
-        res: PingResponse = stub.Ping(req, timeout=PING_CALL_TIMEOUT)
+        # Send the request
+        res = _request(req, PingResponse, PATH_PING, retry=False)
+        if res is None:
+            return
 
         # Check if success
         if not res.success:
@@ -188,22 +247,21 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
     def create_node() -> Optional[int]:
         """Set create_node."""
-        # Call FleetAPI
-        create_node_request = CreateNodeRequest(ping_interval=PING_DEFAULT_INTERVAL)
-        create_node_response = retry_invoker.invoke(
-            stub.CreateNode,
-            request=create_node_request,
-        )
+        req = CreateNodeRequest(ping_interval=PING_DEFAULT_INTERVAL)
+
+        # Send the request
+        res = _request(req, CreateNodeResponse, PATH_CREATE_NODE)
+        if res is None:
+            return None
 
         # Remember the node and the ping-loop thread
         nonlocal node, ping_thread
-        node = cast(Node, create_node_response.node)
+        node = res.node
         ping_thread = start_ping_loop(ping, ping_stop_event)
         return node.node_id
 
     def delete_node() -> None:
         """Set delete_node."""
-        # Get Node
         nonlocal node
         if node is None:
             log(ERROR, "Node instance missing")
@@ -211,10 +269,16 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
         # Stop the ping-loop thread
         ping_stop_event.set()
+        if ping_thread is not None:
+            ping_thread.join()
 
-        # Call FleetAPI
-        delete_node_request = DeleteNodeRequest(node=node)
-        retry_invoker.invoke(stub.DeleteNode, request=delete_node_request)
+        # Send DeleteNode request
+        req = DeleteNodeRequest(node=node)
+
+        # Send the request
+        res = _request(req, DeleteNodeResponse, PATH_DELETE_NODE)
+        if res is None:
+            return
 
         # Cleanup
         node = None
@@ -227,11 +291,15 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             return None
 
         # Request instructions (task) from server
-        request = PullTaskInsRequest(node=node)
-        response = retry_invoker.invoke(stub.PullTaskIns, request=request)
+        req = PullTaskInsRequest(node=node)
+
+        # Send the request
+        res = _request(req, PullTaskInsResponse, PATH_PULL_TASK_INS)
+        if res is None:
+            return None
 
         # Get the current TaskIns
-        task_ins: Optional[TaskIns] = get_task_ins(response)
+        task_ins: Optional[TaskIns] = get_task_ins(res)
 
         # Discard the current TaskIns if not valid
         if task_ins is not None and not (
@@ -240,15 +308,14 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         ):
             task_ins = None
 
-        # Construct the Message
-        in_message = message_from_taskins(task_ins) if task_ins else None
-
-        # Remember `metadata` of the in message
+        # Return the Message if available
         nonlocal metadata
-        metadata = copy(in_message.metadata) if in_message else None
-
-        # Return the message if available
-        return in_message
+        message = None
+        if task_ins is not None:
+            message = message_from_taskins(task_ins)
+            metadata = copy(message.metadata)
+            log(INFO, "[Node] POST /%s: success", PATH_PULL_TASK_INS)
+        return message
 
     def send(message: Message) -> None:
         """Send task result back to server."""
@@ -257,7 +324,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             log(ERROR, "Node instance missing")
             return
 
-        # Get the metadata of the incoming message
+        # Get incoming message
         nonlocal metadata
         if metadata is None:
             log(ERROR, "No current message")
@@ -267,43 +334,56 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         if not validate_out_message(message, metadata):
             log(ERROR, "Invalid out message")
             return
+        metadata = None
 
         # Construct TaskRes
         task_res = message_to_taskres(message)
 
         # Serialize ProtoBuf to bytes
-        request = PushTaskResRequest(node=node, task_res_list=[task_res])
-        _ = retry_invoker.invoke(stub.PushTaskRes, request)
+        req = PushTaskResRequest(node=node, task_res_list=[task_res])
 
-        # Cleanup
-        metadata = None
+        # Send the request
+        res = _request(req, PushTaskResResponse, PATH_PUSH_TASK_RES)
+        if res is None:
+            return
 
-    def get_run(run_id: int) -> Run:
-        # Call FleetAPI
-        get_run_request = GetRunRequest(node=node, run_id=run_id)
-        get_run_response: GetRunResponse = retry_invoker.invoke(
-            stub.GetRun,
-            request=get_run_request,
+        log(
+            INFO,
+            "[Node] POST /%s: success, created result %s",
+            PATH_PUSH_TASK_RES,
+            res.results,  # pylint: disable=no-member
         )
 
-        # Return fab_id and fab_version
+    def get_run(run_id: int) -> Run:
+        # Construct the request
+        req = GetRunRequest(node=node, run_id=run_id)
+
+        # Send the request
+        res = _request(req, GetRunResponse, PATH_GET_RUN)
+        if res is None:
+            return Run(run_id, "", "", "", {})
+
         return Run(
             run_id,
-            get_run_response.run.fab_id,
-            get_run_response.run.fab_version,
-            get_run_response.run.fab_hash,
-            user_config_from_proto(get_run_response.run.override_config),
+            res.run.fab_id,
+            res.run.fab_version,
+            res.run.fab_hash,
+            user_config_from_proto(res.run.override_config),
         )
 
     def get_fab(fab_hash: str) -> Fab:
-        # Call FleetAPI
-        get_fab_request = GetFabRequest(node=node, hash_str=fab_hash)
-        get_fab_response: GetFabResponse = retry_invoker.invoke(
-            stub.GetFab,
-            request=get_fab_request,
-        )
+        # Construct the request
+        req = GetFabRequest(node=node, hash_str=fab_hash)
 
-        return Fab(get_fab_response.fab.hash_str, get_fab_response.fab.content)
+        # Send the request
+        res = _request(req, GetFabResponse, PATH_GET_FAB)
+        if res is None:
+            return Fab("", b"")
+
+        return Fab(
+            res.fab.hash_str,
+            res.fab.content,
+        )
 
     try:
         # Yield methods
