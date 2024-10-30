@@ -16,8 +16,10 @@
 
 
 import logging
+import sys
 from logging import WARN, LogRecord
 from logging.handlers import HTTPHandler
+from queue import Queue
 from typing import TYPE_CHECKING, Any, Optional, TextIO
 
 # Create logger
@@ -259,3 +261,32 @@ def set_logger_propagation(
     if not child_logger.propagate:
         child_logger.log(logging.DEBUG, "Logger propagate set to False")
     return child_logger
+
+
+def mirror_output_to_queue(log_queue: Queue[str]) -> None:
+    """Mirror stdout and stderr output to the provided queue."""
+
+    def get_write_fn(stream: TextIO) -> Any:
+        original_write = stream.write
+
+        def fn(s: str) -> int:
+            ret = original_write(s)
+            stream.flush()
+            log_queue.put(s)
+            return ret
+
+        return fn
+
+    sys.stdout.write = get_write_fn(sys.stdout)  # type: ignore[method-assign]
+    sys.stderr.write = get_write_fn(sys.stderr)  # type: ignore[method-assign]
+    console_handler.stream = sys.stdout
+
+
+def restore_output() -> None:
+    """Restore stdout and stderr.
+
+    This will stop mirroring output to queues.
+    """
+    sys.stdout = sys.__stdout__
+    sys.stderr = sys.__stderr__
+    console_handler.stream = sys.stdout
