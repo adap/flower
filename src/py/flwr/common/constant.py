@@ -87,6 +87,9 @@ MESSAGE_TTL_TOLERANCE = 1e-1
 ISOLATION_MODE_SUBPROCESS = "subprocess"
 ISOLATION_MODE_PROCESS = "process"
 
+# Log streaming
+LOG_UPLOAD_INTERVAL = 0.2
+
 
 class MessageType:
     """Message type."""

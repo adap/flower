@@ -19,6 +19,7 @@ import sys
 from logging import DEBUG, ERROR, INFO, WARN
 from os.path import isfile
 from pathlib import Path
+from queue import Queue
 from time import sleep
 from typing import Optional
 
@@ -31,7 +32,13 @@ from flwr.common.config import (
     get_project_dir,
 )
 from flwr.common.constant import Status, SubStatus
-from flwr.common.logger import log
+from flwr.common.logger import (
+    log,
+    mirror_output_to_queue,
+    restore_output,
+    start_log_uploader,
+    stop_log_uploader,
+)
 from flwr.common.serde import (
     context_from_proto,
     context_to_proto,
@@ -52,6 +59,10 @@ from flwr.server.run_serverapp import run as run_
 
 def flwr_serverapp() -> None:
     """Run process-isolated Flower ServerApp."""
+    # Capture stdout/stderr
+    log_queue: Queue[Optional[str]] = Queue()
+    mirror_output_to_queue(log_queue)
+
     log(INFO, "Starting Flower ServerApp")
 
     parser = argparse.ArgumentParser(
@@ -107,10 +118,14 @@ def flwr_serverapp() -> None:
     )
     run_serverapp(
         superlink=args.superlink,
+        log_queue=log_queue,
         run_id=args.run_id,
         flwr_dir_=args.flwr_dir,
         certificates=certificates,
     )
+
+    # Restore stdout/stderr
+    restore_output()
 
 
 def _try_obtain_certificates(
@@ -148,6 +163,7 @@ def _try_obtain_certificates(
 
 def run_serverapp(  # pylint: disable=R0914, disable=W0212
     superlink: str,
+    log_queue: Queue[Optional[str]],
     run_id: Optional[int] = None,
     flwr_dir_: Optional[str] = None,
     certificates: Optional[bytes] = None,
@@ -162,6 +178,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
     flwr_dir = get_flwr_dir(flwr_dir_)
 
     only_once = run_id is not None
+    log_uploader = None
 
     while True:
 
@@ -183,6 +200,14 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
             fab = fab_from_proto(res.fab)
 
             driver.init_run(run.run_id)
+
+            # Start log uploader for this run
+            log_uploader = start_log_uploader(
+                log_queue=log_queue,
+                node_id=0,
+                run_id=run.run_id,
+                stub=driver._stub,
+            )
 
             log(DEBUG, "ServerApp process starts FAB installation.")
             install_from_fab(fab.content, flwr_dir=flwr_dir, skip_prompt=True)
@@ -244,6 +269,11 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
                         run_id=run.run_id, run_status=run_status_proto
                     )
                 )
+
+            # Stop log uploader for this run
+            if log_uploader:
+                stop_log_uploader(log_uploader)
+                log_uploader = None
 
         # Stop the loop if `flwr-serverapp` is expected to process a single run
         if only_once:
