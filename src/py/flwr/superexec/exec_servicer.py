@@ -84,7 +84,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         if not state.get_run(run_id):
             context.abort(grpc.StatusCode.NOT_FOUND, "Run ID not found")
 
-        after_timestamp = request.after_timestamp
+        after_timestamp = request.after_timestamp + 1e-6
         while context.is_active():
             log_msg, latest_timestamp = state.get_serverapp_log(run_id, after_timestamp)
             if log_msg:

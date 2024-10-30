@@ -92,8 +92,7 @@ def stream_logs(
         if res is not None:
             latest_timestamp = cast(float, res.latest_timestamp)
 
-    # Add a small epsilon to the latest timestamp to avoid getting the same log
-    return max(latest_timestamp + 1e-6, after_timestamp)
+    return max(latest_timestamp, after_timestamp)
 
 
 def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
