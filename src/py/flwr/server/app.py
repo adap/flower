@@ -397,7 +397,7 @@ def _flwr_serverapp_scheduler(
             else:
                 command.append("--insecure")
 
-            subprocess.Popen(
+            subprocess.Popen(  # pylint: disable=consider-using-with
                 command,
                 text=True,
             )
