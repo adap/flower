@@ -397,11 +397,9 @@ def _flwr_serverapp_scheduler(
             else:
                 command.append("--insecure")
 
-            subprocess.run(
+            subprocess.Popen(
                 command,
-                stdout=None,
-                stderr=None,
-                check=True,
+                text=True,
             )
 
 
