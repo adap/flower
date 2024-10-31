@@ -17,7 +17,7 @@ Then, create a new Python environment and install Flower.
 
 ```shell
 # We use this dev version until flwr 1.13.0 is out
-pip install git+https://github.com/adap/flower.git@54c635b
+pip install git+https://github.com/adap/flower.git@d92453d
 ```
 
 In the new environment, create a new Flower project using the `FlowerTune` template. You will be prompted for a name to give to your app/project, your username, and for your choice of LLM challenge:
