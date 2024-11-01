@@ -368,11 +368,6 @@ def _aggregate_n_closest_weights(
 # calls hardthreshold function for each list element in weights_all
 def hardthreshold_list(weights_all, num_keep: int) -> NDArrays:
     """Call hardthreshold."""
-    # params = [
-    #     val
-    #     for sublist in (hardthreshold(each, num_keep) for each in weights_all)
-    #     for val in sublist
-    # ]
 
     params = [
         hardthreshold(each, num_keep) for each in weights_all
