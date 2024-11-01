@@ -22,7 +22,6 @@ from typing import Optional
 from uuid import UUID
 
 import grpc
-from google.protobuf.message import Message as GrpcMessage
 
 from flwr.common.constant import Status
 from flwr.common.logger import log
