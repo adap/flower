@@ -284,8 +284,3 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
 def _raise_if(validation_error: bool, detail: str) -> None:
     if validation_error:
         raise ValueError(f"Malformed PushTaskInsRequest: {detail}")
-
-
-def _has_field(message: GrpcMessage, field_name: str) -> bool:
-    """Check if a certain field is set for the message, including scalar fields."""
-    return field_name in {fld.name for fld, _ in message.ListFields()}
