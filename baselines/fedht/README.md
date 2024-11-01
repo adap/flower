@@ -85,9 +85,9 @@ python -m fedht.main --config-name base_mnist agg=fedht num_keep=500 num_local_e
 
 ### Simulation II (`num_keep` = 200)
 ```
-python -m fedht.main -config-name base_simII agg=fedavg num_local_epochs=5 learning_rate=0.01
-python -m fedht.main -config-name base_simII agg=fedht num_local_epochs=5 learning_rate=0.01
-python -m fedht.main -config-name base_simII agg=fedht iterht=True num_local_epochs=5 learning_rate=0.01
-python -m fedht.main -config-name base_simII agg=fedht num_local_epochs=1 learning_rate=0.01
+python -m fedht.main --config-name base_simII agg=fedavg num_local_epochs=5 learning_rate=0.01
+python -m fedht.main --config-name base_simII agg=fedht num_local_epochs=5 learning_rate=0.01
+python -m fedht.main --config-name base_simII agg=fedht iterht=True num_local_epochs=5 learning_rate=0.01
+python -m fedht.main --config-name base_simII agg=fedht num_local_epochs=1 learning_rate=0.01
 ```
 <img src="_static/loss_results_simII.png" width="400"/> 
