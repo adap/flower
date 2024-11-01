@@ -22,15 +22,15 @@ from unittest.mock import Mock, patch
 from flwr.common import DEFAULT_TTL, RecordSet
 from flwr.common.message import Error
 from flwr.common.serde import error_to_proto, recordset_to_proto
-from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
-    GetNodesRequest,
-    PullTaskResRequest,
-    PushTaskInsRequest,
-)
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
     GetRunResponse,
     Run,
+)
+from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
+    GetNodesRequest,
+    PullTaskResRequest,
+    PushTaskInsRequest,
 )
 from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 
