@@ -17,9 +17,19 @@
 import os
 import textwrap
 from pathlib import Path
-from typing import Any
+from typing import Any, Union
 
-from .config_utils import load, validate, validate_fields
+import click
+import pytest
+
+from .config_utils import (
+    load,
+    validate,
+    validate_certificates_in_project_config,
+    validate_federation_in_project_config,
+    validate_fields,
+    validate_project_config,
+)
 
 
 def test_load_pyproject_toml_load_from_cwd(tmp_path: Path) -> None:
@@ -328,3 +338,109 @@ def test_validate_pyproject_toml_fail() -> None:
     assert not is_valid
     assert len(errors) == 1
     assert len(warnings) == 0
+
+
+def test_validate_project_config_fail() -> None:
+    """Test that validate_project_config fails correctly."""
+    # Prepare
+    config = None
+    errors = ["Error"]
+    warnings = ["Warning"]
+
+    # Execute
+    with pytest.raises(click.exceptions.Exit) as excinfo:
+        _ = validate_project_config(config, errors, warnings)
+
+    # Assert
+    assert excinfo.value.exit_code == 1
+
+
+def test_validate_federation_in_project_config_fail() -> None:
+    """Test that validate_federation_in_config fails correctly."""
+
+    def run_and_assert_exit(
+        federation: Union[str, None], config: dict[str, Any]
+    ) -> None:
+        """Helper to execute validation and assert exit code is 1."""
+        with pytest.raises(click.exceptions.Exit) as excinfo:
+            validate_federation_in_project_config(federation, config)
+        assert excinfo.value.exit_code == 1
+
+    # Prepare - Test federation is None
+    config: dict[str, Any] = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "license": "",
+            "authors": [],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "components": {
+                        "serverapp": "flwr.cli.run:run",
+                        "clientapp": "flwr.cli.run:run",
+                    },
+                },
+                "federations": {},
+            },
+        },
+    }
+    federation = None
+
+    # Execute and assert
+    run_and_assert_exit(federation, config)
+
+    # Prepare - Test federation name is not in config
+    config["tool"]["flwr"]["federations"] = {"fed1": {}}
+    # Execute and assert
+    run_and_assert_exit(federation, config)
+
+    # Prepare - Test address is not in federation config
+    config["tool"]["flwr"]["federations"] = {"fed1": {"insecure": True}}
+    # Execute and assert
+    run_and_assert_exit(federation, config)
+
+
+def test_validate_certificates_in_project_config_fail(tmp_path: Path) -> None:
+    """Test that validate_certificates_in_project_config fails correctly."""
+
+    def run_and_assert_exit(app: Path, config: dict[str, Any]) -> None:
+        """Helper to execute validation and assert exit code is 1."""
+        with pytest.raises(click.exceptions.Exit) as excinfo:
+            validate_certificates_in_project_config(app, config)
+        assert excinfo.value.exit_code == 1
+
+    # Prepare
+    config: dict[str, Any] = {
+        "address": "localhost:8080",
+        "insecure": None,
+    }
+    dummy_cert = tmp_path / "dummy_cert.pem"
+    dummy_cert.write_text("dummy_cert")
+
+    # Current directory
+    origin = Path.cwd()
+
+    try:
+        # Change into the temporary directory
+        os.chdir(tmp_path)
+
+        # Test insecure is None and root_certificates is None
+        # Execute and assert
+        run_and_assert_exit(tmp_path, config)
+
+        # Test insecure is False and root_certificates is None
+        config["insecure"] = False
+        # Execute and assert
+        run_and_assert_exit(tmp_path, config)
+
+        # Test insecure is True, but root_certificates is not None
+        config["root-certificates"] = "dummy_cert.pem"
+        config["insecure"] = True
+        # Execute and assert
+        run_and_assert_exit(tmp_path, config)
+    finally:
+        os.chdir(origin)
