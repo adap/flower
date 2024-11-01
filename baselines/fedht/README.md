@@ -20,6 +20,13 @@ dataset: [MNIST]
 Once inside the fedht folder (where the pyproject.toml is), you can install the project using [poetry][https://github.com/pyenv/pyenv](https://github.com/python-poetry/poetry), which automatically creates a virtual enviornment.
  
 ```bash
+# Set python version
+pyenv install 3.11.3
+pyenv local 3.11.3
+
+# Tell poetry to use python 3.11
+poetry env use 3.11.3
+
 # Install the project
 poetry install
 
