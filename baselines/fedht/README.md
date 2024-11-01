@@ -17,7 +17,7 @@ dataset: [MNIST]
 
 # Environment Setup
 
-Create a new Python environment using [pyenv](https://github.com/pyenv/pyenv) and [virtualenv plugin](https://github.com/pyenv/pyenv-virtualenv). Alternatively, use a Python environment manager of your choice like [`venv`](https://docs.python.org/3/library/venv.html). Then install the project:
+Create a new Python environment using [pyenv](https://github.com/pyenv/pyenv) and [virtualenv plugin](https://github.com/pyenv/pyenv-virtualenv).
 
 ```bash
 # Create the environment
@@ -25,7 +25,25 @@ pyenv virtualenv 3.10.11 fedht-3.10.11
 
 # Activate it
 pyenv activate fedht-3.10.11
+```
 
+Alternatively, use a Python environment manager of your choice like [`venv`](https://docs.python.org/3/library/venv.html). You can utilize [`venv`](https://docs.python.org/3/library/venv.html) with following:
+
+```bash
+# Set local version of Python
+pyenv local 3.10.11
+
+# Install local version of Python
+pyenv install 3.10.11
+
+# Activate environment
+virtualenv venv
+.\venv\Scripts\activate
+```
+
+ Then install the project:
+ 
+```bash
 # Then install the project
 cd fedht && poetry install
 ```
