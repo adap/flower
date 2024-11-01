@@ -17,35 +17,14 @@ dataset: [MNIST]
 
 # Environment Setup
 
-Create a new Python environment using [pyenv](https://github.com/pyenv/pyenv) and [virtualenv plugin](https://github.com/pyenv/pyenv-virtualenv).
-
-```bash
-# Create the environment
-pyenv virtualenv 3.10.11 fedht-3.10.11
-
-# Activate it
-pyenv activate fedht-3.10.11
-```
-
-Alternatively, use a Python environment manager of your choice like [`venv`](https://docs.python.org/3/library/venv.html). You can utilize [`venv`](https://docs.python.org/3/library/venv.html) with following:
-
-```bash
-# Install local version of Python
-pyenv install 3.10.11
-
-# Set local version of Python
-pyenv local 3.10.11
-
-# Activate environment
-virtualenv venv
-.\venv\Scripts\activate
-```
-
- Then install the project:
+Once inside the fedht folder (where the pyproject.toml is), you can install the project using [poetry][https://github.com/pyenv/pyenv](https://github.com/python-poetry/poetry), which automatically creates a virtual enviornment.
  
 ```bash
-# Then install the project
-cd fedht && poetry install
+# Install the project
+poetry install
+
+# Activate virtual environment
+poetry shell
 ```
 
 ## About this baseline
