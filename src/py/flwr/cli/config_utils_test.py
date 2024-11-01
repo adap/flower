@@ -25,7 +25,7 @@ import pytest
 from .config_utils import (
     load,
     validate,
-    validate_certificates_in_project_config,
+    validate_certificate_in_federation_config,
     validate_federation_in_project_config,
     validate_fields,
     validate_project_config,
@@ -404,13 +404,13 @@ def test_validate_federation_in_project_config_fail() -> None:
     run_and_assert_exit(federation, config)
 
 
-def test_validate_certificates_in_project_config_fail(tmp_path: Path) -> None:
-    """Test that validate_certificates_in_project_config fails correctly."""
+def test_validate_certificate_in_federation_config_fail(tmp_path: Path) -> None:
+    """Test that validate_certificate_in_federation_config fails correctly."""
 
     def run_and_assert_exit(app: Path, config: dict[str, Any]) -> None:
         """Helper to execute validation and assert exit code is 1."""
         with pytest.raises(click.exceptions.Exit) as excinfo:
-            validate_certificates_in_project_config(app, config)
+            validate_certificate_in_federation_config(app, config)
         assert excinfo.value.exit_code == 1
 
     # Prepare
