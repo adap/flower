@@ -5,15 +5,15 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 """
 
 import time
-from pathlib import Path
 from logging import DEBUG, INFO
+from pathlib import Path
 
 import flwr as fl
 import hydra
-from hydra.core.hydra_config import HydraConfig
 import torch
 from flwr.common import ndarrays_to_parameters
 from flwr.common.logger import log
+from hydra.core.hydra_config import HydraConfig
 
 from feddebug import utils
 from feddebug.client import CNNFlowerClient
@@ -49,7 +49,7 @@ def run_simulation(cfg):
 
     cfg.malicious_clients_ids = [f"{c}" for c in cfg.malicious_clients_ids]
 
-    save_path = Path(HydraConfig.get().runtime.output_dir) 
+    save_path = Path(HydraConfig.get().runtime.output_dir)
 
     exp_key = utils.set_exp_key(cfg)
 

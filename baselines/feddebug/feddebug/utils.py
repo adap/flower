@@ -115,7 +115,7 @@ def plot_metrics(gm_accs, feddebug_accs, cfg, save_path):
 
     # Save the figure with a higher resolution for publication quality
     graph_path = save_path / f"{title}.png"
-    
+
     plt.savefig(graph_path, dpi=300, bbox_inches="tight")
     plt.close()
     log(INFO, "Saved plot at %s", graph_path)
