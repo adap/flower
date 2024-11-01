@@ -5,10 +5,12 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 """
 
 import time
+from pathlib import Path
 from logging import DEBUG, INFO
 
 import flwr as fl
 import hydra
+from hydra.core.hydra_config import HydraConfig
 import torch
 from flwr.common import ndarrays_to_parameters
 from flwr.common.logger import log
@@ -46,6 +48,8 @@ def run_simulation(cfg):
         cfg.malicious_clients_ids = list(range(cfg.total_malicious_clients))
 
     cfg.malicious_clients_ids = [f"{c}" for c in cfg.malicious_clients_ids]
+
+    save_path = Path(HydraConfig.get().runtime.output_dir) 
 
     exp_key = utils.set_exp_key(cfg)
 
@@ -150,7 +154,7 @@ def run_simulation(cfg):
         backend_config=utils.config_sim_resources(cfg),
     )
 
-    utils.plot_metrics(round2gm_accs, round2feddebug_accs, cfg)
+    utils.plot_metrics(round2gm_accs, round2feddebug_accs, cfg, save_path)
 
     log(INFO, "Training Complete for Experiment: %s", exp_key)
 

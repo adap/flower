@@ -85,7 +85,7 @@ def set_parameters(net, parameters):
     net.load_state_dict(new_state_dict, strict=True)
 
 
-def plot_metrics(gm_accs, feddebug_accs, cfg):
+def plot_metrics(gm_accs, feddebug_accs, cfg, save_path):
     """Plot the metrics with legend and save the plot."""
     fig, axis = plt.subplots(
         figsize=(3.5, 2.5)
@@ -114,7 +114,8 @@ def plot_metrics(gm_accs, feddebug_accs, cfg):
     fig.tight_layout()
 
     # Save the figure with a higher resolution for publication quality
-    fname = f"{title}.png"
-    plt.savefig(fname, dpi=300, bbox_inches="tight")
+    graph_path = save_path / f"{title}.png"
+    
+    plt.savefig(graph_path, dpi=300, bbox_inches="tight")
     plt.close()
-    log(INFO, "Saved plot at %s", fname)
+    log(INFO, "Saved plot at %s", graph_path)
