@@ -234,7 +234,6 @@ def validate_project_config(
     config: Union[dict[str, Any], None], errors: list[str], warnings: list[str]
 ) -> dict[str, Any]:
     """Validate and return the Flower project configuration."""
-
     if config is None:
         typer.secho(
             "Project configuration could not be loaded.\n"
@@ -262,7 +261,6 @@ def validate_federation_in_project_config(
     federation: Union[str, None], config: dict[str, Any]
 ) -> tuple[str, dict[str, Any]]:
     """Validate the federation name in the Flower project configuration."""
-
     federation = federation or config["tool"]["flwr"]["federations"].get("default")
 
     if federation is None:
@@ -306,7 +304,6 @@ def validate_certificate_in_federation_config(
     app: Path, federation_config: dict[str, Any]
 ) -> tuple[bool, Optional[bytes]]:
     """Validate the certificates in the Flower project configuration."""
-
     insecure_str = federation_config.get("insecure")
     if root_certificates := federation_config.get("root-certificates"):
         root_certificates_bytes = (app / root_certificates).read_bytes()

@@ -361,7 +361,7 @@ def test_validate_federation_in_project_config_fail() -> None:
     def run_and_assert_exit(
         federation: Union[str, None], config: dict[str, Any]
     ) -> None:
-        """Helper to execute validation and assert exit code is 1."""
+        """Execute validation and assert exit code is 1."""
         with pytest.raises(click.exceptions.Exit) as excinfo:
             validate_federation_in_project_config(federation, config)
         assert excinfo.value.exit_code == 1
@@ -408,7 +408,7 @@ def test_validate_certificate_in_federation_config_fail(tmp_path: Path) -> None:
     """Test that validate_certificate_in_federation_config fails correctly."""
 
     def run_and_assert_exit(app: Path, config: dict[str, Any]) -> None:
-        """Helper to execute validation and assert exit code is 1."""
+        """Execute validation and assert exit code is 1."""
         with pytest.raises(click.exceptions.Exit) as excinfo:
             validate_certificate_in_federation_config(app, config)
         assert excinfo.value.exit_code == 1
