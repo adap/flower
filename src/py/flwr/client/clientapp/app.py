@@ -54,7 +54,6 @@ from .utils import get_load_client_app_fn
 
 def flwr_clientapp() -> None:
     """Run process-isolated Flower ClientApp."""
-
     parser = argparse.ArgumentParser(
         description="Run a Flower ClientApp",
     )
