@@ -46,8 +46,9 @@ Run the Quickstart Example
    services using the following command:
 
    .. code-block:: bash
+       :substitutions:
 
-       $ export FLWR_VERSION="1.12.0" # update with your version
+       $ export FLWR_VERSION="|stable_flwr_version|" # update with your version
        $ docker compose up --build -d
 
 4. Append the following lines to the end of the ``pyproject.toml`` file and save it:
