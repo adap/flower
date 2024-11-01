@@ -19,7 +19,6 @@ We design a systematic fault localization framework, FedDebug, that advances the
 
 
 
-## High-Level Overview of FedDebug Differential Testing Approach
 
 <!-- ![Malicious Client Localization](_static/feddbug-approach.png) -->
 <img src="_static/feddbug-approach.png" alt="Malicious Client Localization" width="500"/>
