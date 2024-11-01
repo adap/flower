@@ -102,8 +102,8 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
     def get_task_res(self, task_ids: set[UUID]) -> list[TaskRes]:
         """Get TaskRes for task_ids.
 
-        Usually, the ServerAppIo API calls this method to get results for instructions it has
-        previously scheduled.
+        Usually, the ServerAppIo API calls this method to get results for instructions
+        it has previously scheduled.
 
         Retrieves all TaskRes for the given `task_ids` and returns and empty list of
         none could be found.
