@@ -167,7 +167,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
 ) -> None:
     """Run Flower ServerApp process."""
     driver = GrpcDriver(
-        driver_service_address=superlink,
+        serverappio_service_address=superlink,
         root_certificates=certificates,
     )
 
