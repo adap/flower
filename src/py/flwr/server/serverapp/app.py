@@ -16,17 +16,53 @@
 
 import argparse
 import sys
-from logging import DEBUG, INFO, WARN
+from logging import DEBUG, ERROR, INFO, WARN
 from os.path import isfile
 from pathlib import Path
+from queue import Queue
+from time import sleep
 from typing import Optional
 
-from flwr.common.logger import log
+from flwr.cli.config_utils import get_fab_metadata
+from flwr.cli.install import install_from_fab
+from flwr.common.config import (
+    get_flwr_dir,
+    get_fused_config_from_dir,
+    get_project_config,
+    get_project_dir,
+)
+from flwr.common.constant import Status, SubStatus
+from flwr.common.logger import (
+    log,
+    mirror_output_to_queue,
+    restore_output,
+    start_log_uploader,
+    stop_log_uploader,
+)
+from flwr.common.serde import (
+    context_from_proto,
+    context_to_proto,
+    fab_from_proto,
+    run_from_proto,
+    run_status_to_proto,
+)
+from flwr.common.typing import RunStatus
+from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
+    PullServerAppInputsRequest,
+    PullServerAppInputsResponse,
+    PushServerAppOutputsRequest,
+)
+from flwr.proto.run_pb2 import UpdateRunStatusRequest  # pylint: disable=E0611
 from flwr.server.driver.grpc_driver import GrpcDriver
+from flwr.server.run_serverapp import run as run_
 
 
 def flwr_serverapp() -> None:
     """Run process-isolated Flower ServerApp."""
+    # Capture stdout/stderr
+    log_queue: Queue[Optional[str]] = Queue()
+    mirror_output_to_queue(log_queue)
+
     log(INFO, "Starting Flower ServerApp")
 
     parser = argparse.ArgumentParser(
@@ -38,11 +74,10 @@ def flwr_serverapp() -> None:
         help="Address of SuperLink's DriverAPI",
     )
     parser.add_argument(
-        "--run-id",
-        type=int,
-        required=False,
-        help="Id of the Run this process should start. If not supplied, this "
-        "function will request a pending run to the LinkState.",
+        "--run-once",
+        action="store_true",
+        help="When set, this process will start a single ServerApp "
+        "for a pending Run. If no pending run the process will exit. ",
     )
     parser.add_argument(
         "--flwr-dir",
@@ -75,17 +110,19 @@ def flwr_serverapp() -> None:
 
     log(
         DEBUG,
-        "Staring isolated `ServerApp` connected to SuperLink DriverAPI at %s "
-        "for run-id %s",
+        "Staring isolated `ServerApp` connected to SuperLink DriverAPI at %s",
         args.superlink,
-        args.run_id,
     )
     run_serverapp(
         superlink=args.superlink,
-        run_id=args.run_id,
+        log_queue=log_queue,
+        run_once=args.run_once,
         flwr_dir_=args.flwr_dir,
         certificates=certificates,
     )
+
+    # Restore stdout/stderr
+    restore_output()
 
 
 def _try_obtain_certificates(
@@ -121,21 +158,114 @@ def _try_obtain_certificates(
     return root_certificates
 
 
-def run_serverapp(  # pylint: disable=R0914
+def run_serverapp(  # pylint: disable=R0914, disable=W0212
     superlink: str,
-    run_id: Optional[int] = None,
+    log_queue: Queue[Optional[str]],
+    run_once: bool,
     flwr_dir_: Optional[str] = None,
     certificates: Optional[bytes] = None,
 ) -> None:
     """Run Flower ServerApp process."""
-    _ = GrpcDriver(
-        run_id=run_id if run_id else 0,
+    driver = GrpcDriver(
         driver_service_address=superlink,
         root_certificates=certificates,
     )
 
-    log(INFO, "%s", flwr_dir_)
+    # Resolve directory where FABs are installed
+    flwr_dir = get_flwr_dir(flwr_dir_)
+    log_uploader = None
 
-    # Then, GetServerInputs
+    while True:
 
-    # Then, run ServerApp
+        try:
+            # Pull ServerAppInputs from LinkState
+            req = PullServerAppInputsRequest()
+            res: PullServerAppInputsResponse = driver._stub.PullServerAppInputs(req)
+            if not res.HasField("run"):
+                sleep(3)
+                run_status = None
+                continue
+
+            context = context_from_proto(res.context)
+            run = run_from_proto(res.run)
+            fab = fab_from_proto(res.fab)
+
+            driver.init_run(run.run_id)
+
+            # Start log uploader for this run
+            log_uploader = start_log_uploader(
+                log_queue=log_queue,
+                node_id=0,
+                run_id=run.run_id,
+                stub=driver._stub,
+            )
+
+            log(DEBUG, "ServerApp process starts FAB installation.")
+            install_from_fab(fab.content, flwr_dir=flwr_dir, skip_prompt=True)
+
+            fab_id, fab_version = get_fab_metadata(fab.content)
+
+            app_path = str(get_project_dir(fab_id, fab_version, fab.hash_str, flwr_dir))
+            config = get_project_config(app_path)
+
+            # Obtain server app reference and the run config
+            server_app_attr = config["tool"]["flwr"]["app"]["components"]["serverapp"]
+            server_app_run_config = get_fused_config_from_dir(
+                Path(app_path), run.override_config
+            )
+
+            # Update run_config in context
+            context.run_config = server_app_run_config
+
+            log(
+                DEBUG,
+                "Flower will load ServerApp `%s` in %s",
+                server_app_attr,
+                app_path,
+            )
+
+            # Change status to Running
+            run_status_proto = run_status_to_proto(RunStatus(Status.RUNNING, "", ""))
+            driver._stub.UpdateRunStatus(
+                UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
+            )
+
+            # Load and run the ServerApp with the Driver
+            updated_context = run_(
+                driver=driver,
+                server_app_dir=app_path,
+                server_app_attr=server_app_attr,
+                context=context,
+            )
+
+            # Send resulting context
+            context_proto = context_to_proto(updated_context)
+            out_req = PushServerAppOutputsRequest(
+                run_id=run.run_id, context=context_proto
+            )
+            _ = driver._stub.PushServerAppOutputs(out_req)
+
+            run_status = RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
+
+        except Exception as ex:  # pylint: disable=broad-exception-caught
+            exc_entity = "ServerApp"
+            log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
+            run_status = RunStatus(Status.FINISHED, SubStatus.FAILED, str(ex))
+
+        finally:
+            if run_status:
+                run_status_proto = run_status_to_proto(run_status)
+                driver._stub.UpdateRunStatus(
+                    UpdateRunStatusRequest(
+                        run_id=run.run_id, run_status=run_status_proto
+                    )
+                )
+
+            # Stop log uploader for this run
+            if log_uploader:
+                stop_log_uploader(log_queue, log_uploader)
+                log_uploader = None
+
+        # Stop the loop if `flwr-serverapp` is expected to process a single run
+        if run_once:
+            break

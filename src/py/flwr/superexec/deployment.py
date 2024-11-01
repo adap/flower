@@ -15,22 +15,21 @@
 """Deployment engine executor."""
 
 import hashlib
-import subprocess
 from logging import ERROR, INFO
 from pathlib import Path
 from typing import Optional
 
 from typing_extensions import override
 
-from flwr.cli.install import install_from_fab
-from flwr.common.constant import DRIVER_API_DEFAULT_ADDRESS
+from flwr.common import Context, RecordSet
+from flwr.common.constant import DRIVER_API_DEFAULT_ADDRESS, Status, SubStatus
 from flwr.common.logger import log
-from flwr.common.typing import Fab, UserConfig
+from flwr.common.typing import Fab, RunStatus, UserConfig
 from flwr.server.superlink.ffs import Ffs
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 
-from .executor import Executor, RunTracker
+from .executor import Executor
 
 
 class DeploymentEngine(Executor):
@@ -137,58 +136,41 @@ class DeploymentEngine(Executor):
         run_id = self.linkstate.create_run(None, None, fab_hash, override_config)
         return run_id
 
+    def _create_context(self, run_id: int) -> None:
+        """Register a Context for a Run."""
+        # Create an empty context for the Run
+        context = Context(node_id=0, node_config={}, state=RecordSet(), run_config={})
+
+        # Register the context at the LinkState
+        self.linkstate.set_serverapp_context(run_id=run_id, context=context)
+
     @override
     def start_run(
         self,
         fab_file: bytes,
         override_config: UserConfig,
         federation_config: UserConfig,
-    ) -> Optional[RunTracker]:
+    ) -> Optional[int]:
         """Start run using the Flower Deployment Engine."""
+        run_id = None
         try:
-            # Install FAB to flwr dir
-            install_from_fab(fab_file, None, True)
 
             # Call SuperLink to create run
-            run_id: int = self._create_run(
+            run_id = self._create_run(
                 Fab(hashlib.sha256(fab_file).hexdigest(), fab_file), override_config
             )
+
+            # Register context for the Run
+            self._create_context(run_id=run_id)
             log(INFO, "Created run %s", str(run_id))
 
-            command = [
-                "flower-server-app",
-                "--run-id",
-                str(run_id),
-                "--superlink",
-                str(self.superlink),
-            ]
-
-            if self.flwr_dir:
-                command.append("--flwr-dir")
-                command.append(self.flwr_dir)
-
-            if self.root_certificates is None:
-                command.append("--insecure")
-            else:
-                command.append("--root-certificates")
-                command.append(self.root_certificates)
-
-            # Execute the command
-            proc = subprocess.Popen(  # pylint: disable=consider-using-with
-                command,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-            )
-            log(INFO, "Started run %s", str(run_id))
-
-            return RunTracker(
-                run_id=run_id,
-                proc=proc,
-            )
+            return run_id
         # pylint: disable-next=broad-except
         except Exception as e:
             log(ERROR, "Could not start run: %s", str(e))
+            if run_id:
+                run_status = RunStatus(Status.FINISHED, SubStatus.FAILED, str(e))
+                self.linkstate.update_run_status(run_id, new_status=run_status)
             return None
 
 

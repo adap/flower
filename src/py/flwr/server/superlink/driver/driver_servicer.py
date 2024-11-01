@@ -50,6 +50,10 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     PushTaskInsResponse,
 )
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
+from flwr.proto.log_pb2 import (  # pylint: disable=E0611
+    PushLogsRequest,
+    PushLogsResponse,
+)
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
@@ -215,11 +219,8 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
 
         # Lock access to LinkState, preventing obtaining the same pending run_id
         with self.lock:
-            # If run_id is provided, use it, otherwise use the pending run_id
-            if _has_field(request, "run_id"):
-                run_id: Optional[int] = request.run_id
-            else:
-                run_id = state.get_pending_run_id()
+            # Attempt getting the run_id of a pending run
+            run_id = state.get_pending_run_id()
             # If there's no pending run, return an empty response
             if run_id is None:
                 return PullServerAppInputsResponse()
@@ -231,14 +232,12 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
             if run and run.fab_hash:
                 if result := ffs.get(run.fab_hash):
                     fab = Fab(run.fab_hash, result[0])
-            if run and fab:
+            if run and fab and serverapp_ctxt:
                 # Update run status to STARTING
                 if state.update_run_status(run_id, RunStatus(Status.STARTING, "", "")):
                     log(INFO, "Starting run %d", run_id)
                     return PullServerAppInputsResponse(
-                        context=(
-                            context_to_proto(serverapp_ctxt) if serverapp_ctxt else None
-                        ),
+                        context=context_to_proto(serverapp_ctxt),
                         run=run_to_proto(run),
                         fab=fab_to_proto(fab),
                     )
@@ -268,6 +267,18 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
             run_id=request.run_id, new_status=run_status_from_proto(request.run_status)
         )
         return UpdateRunStatusResponse()
+
+    def PushLogs(
+        self, request: PushLogsRequest, context: grpc.ServicerContext
+    ) -> PushLogsResponse:
+        """Push logs."""
+        log(DEBUG, "DriverServicer.PushLogs")
+        state = self.state_factory.state()
+
+        # Add logs to LinkState
+        merged_logs = "".join(request.logs)
+        state.add_serverapp_log(request.run_id, merged_logs)
+        return PushLogsResponse()
 
 
 def _raise_if(validation_error: bool, detail: str) -> None:

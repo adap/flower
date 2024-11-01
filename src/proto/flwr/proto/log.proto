@@ -17,28 +17,11 @@ syntax = "proto3";
 
 package flwr.proto;
 
-import "flwr/proto/fab.proto";
-import "flwr/proto/transport.proto";
+import "flwr/proto/node.proto";
 
-service Exec {
-  // Start run upon request
-  rpc StartRun(StartRunRequest) returns (StartRunResponse) {}
-
-  // Start log stream upon request
-  rpc StreamLogs(StreamLogsRequest) returns (stream StreamLogsResponse) {}
+message PushLogsRequest {
+  Node node = 1;
+  uint64 run_id = 2;
+  repeated string logs = 3;
 }
-
-message StartRunRequest {
-  Fab fab = 1;
-  map<string, Scalar> override_config = 2;
-  map<string, Scalar> federation_config = 3;
-}
-message StartRunResponse { uint64 run_id = 1; }
-message StreamLogsRequest {
-  uint64 run_id = 1;
-  double after_timestamp = 2;
-}
-message StreamLogsResponse {
-  string log_output = 1;
-  double latest_timestamp = 2;
-}
+message PushLogsResponse {}
