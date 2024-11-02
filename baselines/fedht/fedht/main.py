@@ -36,7 +36,6 @@ def main(cfg: DictConfig):
     # this vs. setting in cfg; what is preferred?
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(device)
-    
     if cfg.data == "mnist":
         # set up mnist data
         # set partitioner

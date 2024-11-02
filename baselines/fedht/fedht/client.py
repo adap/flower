@@ -152,7 +152,7 @@ class MnistClient(NumPyClient):
         self.model.load_state_dict(state_dict, strict=True)
 
         # need to change from log_loss to torch.loss and change other metrics
-        loss, accuracy = test(self.model, self.trainloader)
+        loss, accuracy = test(self.model, self.trainloader, self.device)
 
         return loss, self.num_obs, {"accuracy": accuracy}
 
