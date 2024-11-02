@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Driver API servicer."""
+"""ServerAppIo API servicer."""
 
 
 import threading
@@ -35,19 +35,7 @@ from flwr.common.serde import (
     user_config_from_proto,
 )
 from flwr.common.typing import Fab, RunStatus
-from flwr.proto import driver_pb2_grpc  # pylint: disable=E0611
-from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
-    GetNodesRequest,
-    GetNodesResponse,
-    PullServerAppInputsRequest,
-    PullServerAppInputsResponse,
-    PullTaskResRequest,
-    PullTaskResResponse,
-    PushServerAppOutputsRequest,
-    PushServerAppOutputsResponse,
-    PushTaskInsRequest,
-    PushTaskInsResponse,
-)
+from flwr.proto import serverappio_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.log_pb2 import (  # pylint: disable=E0611
     PushLogsRequest,
@@ -62,6 +50,18 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     UpdateRunStatusRequest,
     UpdateRunStatusResponse,
 )
+from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
+    GetNodesRequest,
+    GetNodesResponse,
+    PullServerAppInputsRequest,
+    PullServerAppInputsResponse,
+    PullTaskResRequest,
+    PullTaskResResponse,
+    PushServerAppOutputsRequest,
+    PushServerAppOutputsResponse,
+    PushTaskInsRequest,
+    PushTaskInsResponse,
+)
 from flwr.proto.task_pb2 import TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
@@ -69,8 +69,8 @@ from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.server.utils.validator import validate_task_ins_or_res
 
 
-class DriverServicer(driver_pb2_grpc.DriverServicer):
-    """Driver API servicer."""
+class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
+    """ServerAppIo API servicer."""
 
     def __init__(
         self, state_factory: LinkStateFactory, ffs_factory: FfsFactory
@@ -83,7 +83,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         self, request: GetNodesRequest, context: grpc.ServicerContext
     ) -> GetNodesResponse:
         """Get available nodes."""
-        log(DEBUG, "DriverServicer.GetNodes")
+        log(DEBUG, "ServerAppIoServicer.GetNodes")
         state: LinkState = self.state_factory.state()
         all_ids: set[int] = state.get_nodes(request.run_id)
         nodes: list[Node] = [
@@ -95,7 +95,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         self, request: CreateRunRequest, context: grpc.ServicerContext
     ) -> CreateRunResponse:
         """Create run ID."""
-        log(DEBUG, "DriverServicer.CreateRun")
+        log(DEBUG, "ServerAppIoServicer.CreateRun")
         state: LinkState = self.state_factory.state()
         if request.HasField("fab"):
             fab = fab_from_proto(request.fab)
@@ -119,7 +119,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         self, request: PushTaskInsRequest, context: grpc.ServicerContext
     ) -> PushTaskInsResponse:
         """Push a set of TaskIns."""
-        log(DEBUG, "DriverServicer.PushTaskIns")
+        log(DEBUG, "ServerAppIoServicer.PushTaskIns")
 
         # Set pushed_at (timestamp in seconds)
         pushed_at = time.time()
@@ -149,7 +149,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         self, request: PullTaskResRequest, context: grpc.ServicerContext
     ) -> PullTaskResResponse:
         """Pull a set of TaskRes."""
-        log(DEBUG, "DriverServicer.PullTaskRes")
+        log(DEBUG, "ServerAppIoServicer.PullTaskRes")
 
         # Convert each task_id str to UUID
         task_ids: set[UUID] = {UUID(task_id) for task_id in request.task_ids}
@@ -159,7 +159,10 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
 
         # Register callback
         def on_rpc_done() -> None:
-            log(DEBUG, "DriverServicer.PullTaskRes callback: delete TaskIns/TaskRes")
+            log(
+                DEBUG,
+                "ServerAppIoServicer.PullTaskRes callback: delete TaskIns/TaskRes",
+            )
 
             if context.is_active():
                 return
@@ -181,7 +184,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         self, request: GetRunRequest, context: grpc.ServicerContext
     ) -> GetRunResponse:
         """Get run information."""
-        log(DEBUG, "DriverServicer.GetRun")
+        log(DEBUG, "ServerAppIoServicer.GetRun")
 
         # Init state
         state: LinkState = self.state_factory.state()
@@ -198,7 +201,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         self, request: GetFabRequest, context: grpc.ServicerContext
     ) -> GetFabResponse:
         """Get FAB from Ffs."""
-        log(DEBUG, "DriverServicer.GetFab")
+        log(DEBUG, "ServerAppIoServicer.GetFab")
 
         ffs: Ffs = self.ffs_factory.ffs()
         if result := ffs.get(request.hash_str):
@@ -211,7 +214,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         self, request: PullServerAppInputsRequest, context: grpc.ServicerContext
     ) -> PullServerAppInputsResponse:
         """Pull ServerApp process inputs."""
-        log(DEBUG, "DriverServicer.PullServerAppInputs")
+        log(DEBUG, "ServerAppIoServicer.PullServerAppInputs")
         # Init access to LinkState and Ffs
         state = self.state_factory.state()
         ffs = self.ffs_factory.ffs()
@@ -249,7 +252,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         self, request: PushServerAppOutputsRequest, context: grpc.ServicerContext
     ) -> PushServerAppOutputsResponse:
         """Push ServerApp process outputs."""
-        log(DEBUG, "DriverServicer.PushServerAppOutputs")
+        log(DEBUG, "ServerAppIoServicer.PushServerAppOutputs")
         state = self.state_factory.state()
         state.set_serverapp_context(request.run_id, context_from_proto(request.context))
         return PushServerAppOutputsResponse()
@@ -271,7 +274,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         self, request: PushLogsRequest, context: grpc.ServicerContext
     ) -> PushLogsResponse:
         """Push logs."""
-        log(DEBUG, "DriverServicer.PushLogs")
+        log(DEBUG, "ServerAppIoServicer.PushLogs")
         state = self.state_factory.state()
 
         # Add logs to LinkState
