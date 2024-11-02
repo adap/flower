@@ -258,7 +258,7 @@ def validate_project_config(
 
 
 def validate_federation_in_project_config(
-    federation: Union[str, None], config: dict[str, Any]
+    federation: Optional[str], config: dict[str, Any]
 ) -> tuple[str, dict[str, Any]]:
     """Validate the federation name in the Flower project configuration."""
     federation = federation or config["tool"]["flwr"]["federations"].get("default")
@@ -275,6 +275,7 @@ def validate_federation_in_project_config(
 
     # Validate the federation exists in the configuration
     federation_config = config["tool"]["flwr"]["federations"].get(federation)
+    print(federation_config)
     if federation_config is None:
         available_feds = {
             fed for fed in config["tool"]["flwr"]["federations"] if fed != "default"
@@ -283,15 +284,6 @@ def validate_federation_in_project_config(
             f"❌ There is no `{federation}` federation declared in the "
             "`pyproject.toml`.\n The following federations were found:\n\n"
             + "\n".join(available_feds),
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
-
-    if "address" not in federation_config:
-        typer.secho(
-            "❌ `flwr log` currently works with Exec API. Ensure that the correct"
-            "Exec API address is provided in the `pyproject.toml`.",
             fg=typer.colors.RED,
             bold=True,
         )
@@ -309,7 +301,7 @@ def validate_certificate_in_federation_config(
         root_certificates_bytes = (app / root_certificates).read_bytes()
         if insecure := bool(insecure_str):
             typer.secho(
-                "❌ `root_certificates` were provided but the `insecure` parameter"
+                "❌ `root_certificates` were provided but the `insecure` parameter "
                 "is set to `True`.",
                 fg=typer.colors.RED,
                 bold=True,
