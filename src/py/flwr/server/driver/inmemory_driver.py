@@ -31,7 +31,7 @@ from .driver import Driver
 
 
 class InMemoryDriver(Driver):
-    """`InMemoryDriver` class provides an interface to the Driver API.
+    """`InMemoryDriver` class provides an interface to the ServerAppIo API.
 
     Parameters
     ----------

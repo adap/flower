@@ -26,9 +26,9 @@ from typing import TYPE_CHECKING, Any, Optional, TextIO
 
 import grpc
 
-from flwr.proto.driver_pb2_grpc import DriverStub  # pylint: disable=E0611
 from flwr.proto.log_pb2 import PushLogsRequest  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E0611
 
 from .constant import LOG_UPLOAD_INTERVAL
 
@@ -303,7 +303,7 @@ def restore_output() -> None:
 
 
 def _log_uploader(
-    log_queue: Queue[Optional[str]], node_id: int, run_id: int, stub: DriverStub
+    log_queue: Queue[Optional[str]], node_id: int, run_id: int, stub: ServerAppIoStub
 ) -> None:
     """Upload logs to the SuperLink."""
     exit_flag = False
@@ -346,7 +346,7 @@ def _log_uploader(
 
 
 def start_log_uploader(
-    log_queue: Queue[Optional[str]], node_id: int, run_id: int, stub: DriverStub
+    log_queue: Queue[Optional[str]], node_id: int, run_id: int, stub: ServerAppIoStub
 ) -> threading.Thread:
     """Start the log uploader thread and return it."""
     thread = threading.Thread(
