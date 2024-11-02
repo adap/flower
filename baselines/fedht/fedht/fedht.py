@@ -19,9 +19,6 @@ from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
 from flwr.common import (
-    EvaluateIns,
-    EvaluateRes,
-    FitIns,
     FitRes,
     MetricsAggregationFn,
     NDArrays,
