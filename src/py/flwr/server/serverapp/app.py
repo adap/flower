@@ -104,9 +104,9 @@ def flwr_serverapp() -> None:
     )
     args = parser.parse_args()
 
+    log(INFO, "Starting Flower ServerApp")
     certificates = _try_obtain_certificates(args)
 
-    log(INFO, "Starting Flower ServerApp")
     log(
         DEBUG,
         "Staring isolated `ServerApp` connected to SuperLink DriverAPI at %s",
