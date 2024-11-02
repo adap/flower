@@ -85,7 +85,10 @@ python -m fedht.main --config-name base_mnist agg=fedht num_keep=500 num_local_e
 python -m fedht.main --config-name base_mnist agg=fedht iterht=True num_keep=500 num_local_epochs=10 learning_rate=0.00005
 python -m fedht.main --config-name base_mnist agg=fedht num_keep=500 num_local_epochs=1 learning_rate=0.00005
 ```
-<img src="_static/loss_results_mnist.png" width="400"/> 
+
+| *Experiments: Comparison of Aggregation Approaches to Fed-HT for MNIST* |
+|:--:| 
+| ![loss_results_mnist.png](_static/loss_results_mnist.png) | 
 
 ### Simulation II (`num_keep` = 200)
 ```
@@ -94,4 +97,7 @@ python -m fedht.main --config-name base_simII agg=fedht num_local_epochs=5 learn
 python -m fedht.main --config-name base_simII agg=fedht iterht=True num_local_epochs=5 learning_rate=0.01
 python -m fedht.main --config-name base_simII agg=fedht num_local_epochs=1 learning_rate=0.01
 ```
-<img src="_static/loss_results_simII.png" width="400"/> 
+
+| *Experiments: Comparison of Aggregation Approaches to Fed-HT for Simulation II* |
+|:--:| 
+| ![loss_results_simII.png](_static/loss_results_simII.png) | 
