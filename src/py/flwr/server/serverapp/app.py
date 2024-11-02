@@ -63,8 +63,6 @@ def flwr_serverapp() -> None:
     log_queue: Queue[Optional[str]] = Queue()
     mirror_output_to_queue(log_queue)
 
-    log(INFO, "Starting Flower ServerApp")
-
     parser = argparse.ArgumentParser(
         description="Run a Flower ServerApp",
     )
@@ -106,6 +104,7 @@ def flwr_serverapp() -> None:
     )
     args = parser.parse_args()
 
+    log(INFO, "Starting Flower ServerApp")
     certificates = _try_obtain_certificates(args)
 
     log(
