@@ -44,7 +44,7 @@ assert (
     or (hist.losses_distributed[0][1] / hist.losses_distributed[-1][1]) >= 0.98
 )
 
-# The checks in record_state_metrics don't do anythinng if client's state has a single entry
+# The checks in record_state_metrics don't do anything if client's state has a single entry
 state_metrics_last_round = hist.metrics_distributed[STATE_VAR][-1]
 assert (
     len(state_metrics_last_round[1][0]) == 2 * state_metrics_last_round[0]
