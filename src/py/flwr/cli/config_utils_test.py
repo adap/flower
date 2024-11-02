@@ -357,7 +357,6 @@ def test_validate_project_config_fail() -> None:
 
 def test_validate_federation_in_project_config() -> None:
     """Test that validate_federation_in_config succeeds correctly."""
-
     # Prepare - Test federation is None
     config: dict[str, Any] = {
         "project": {
@@ -454,7 +453,6 @@ def test_validate_federation_in_project_config_fail() -> None:
 
 def test_validate_certificate_in_federation_config(tmp_path: Path) -> None:
     """Test that validate_certificate_in_federation_config succeeds correctly."""
-
     # Prepare
     config: dict[str, Any] = {
         "address": "127.0.0.1:9091",
