@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import IO, Any, Optional, Union, get_args
 
 import tomli
+import typer
 
 from flwr.common import object_ref
 from flwr.common.typing import UserConfigValue
@@ -227,3 +228,100 @@ def load_from_string(toml_content: str) -> Optional[dict[str, Any]]:
         return data
     except tomli.TOMLDecodeError:
         return None
+
+
+def validate_project_config(
+    config: Union[dict[str, Any], None], errors: list[str], warnings: list[str]
+) -> dict[str, Any]:
+    """Validate and return the Flower project configuration."""
+    if config is None:
+        typer.secho(
+            "Project configuration could not be loaded.\n"
+            "pyproject.toml is invalid:\n"
+            + "\n".join([f"- {line}" for line in errors]),
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+
+    if warnings:
+        typer.secho(
+            "Project configuration is missing the following "
+            "recommended properties:\n" + "\n".join([f"- {line}" for line in warnings]),
+            fg=typer.colors.RED,
+            bold=True,
+        )
+
+    typer.secho("Success", fg=typer.colors.GREEN)
+
+    return config
+
+
+def validate_federation_in_project_config(
+    federation: Optional[str], config: dict[str, Any]
+) -> tuple[str, dict[str, Any]]:
+    """Validate the federation name in the Flower project configuration."""
+    federation = federation or config["tool"]["flwr"]["federations"].get("default")
+
+    if federation is None:
+        typer.secho(
+            "❌ No federation name was provided and the project's `pyproject.toml` "
+            "doesn't declare a default federation (with an Exec API address or an "
+            "`options.num-supernodes` value).",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+
+    # Validate the federation exists in the configuration
+    federation_config = config["tool"]["flwr"]["federations"].get(federation)
+    print(federation_config)
+    if federation_config is None:
+        available_feds = {
+            fed for fed in config["tool"]["flwr"]["federations"] if fed != "default"
+        }
+        typer.secho(
+            f"❌ There is no `{federation}` federation declared in the "
+            "`pyproject.toml`.\n The following federations were found:\n\n"
+            + "\n".join(available_feds),
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+
+    return federation, federation_config
+
+
+def validate_certificate_in_federation_config(
+    app: Path, federation_config: dict[str, Any]
+) -> tuple[bool, Optional[bytes]]:
+    """Validate the certificates in the Flower project configuration."""
+    insecure_str = federation_config.get("insecure")
+    if root_certificates := federation_config.get("root-certificates"):
+        root_certificates_bytes = (app / root_certificates).read_bytes()
+        if insecure := bool(insecure_str):
+            typer.secho(
+                "❌ `root_certificates` were provided but the `insecure` parameter "
+                "is set to `True`.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1)
+    else:
+        root_certificates_bytes = None
+        if insecure_str is None:
+            typer.secho(
+                "❌ To disable TLS, set `insecure = true` in `pyproject.toml`.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1)
+        if not (insecure := bool(insecure_str)):
+            typer.secho(
+                "❌ No certificate were given yet `insecure` is set to `False`.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1)
+
+    return insecure, root_certificates_bytes
