@@ -24,7 +24,7 @@ import "flwr/proto/task.proto";
 import "flwr/proto/run.proto";
 import "flwr/proto/fab.proto";
 
-service Driver {
+service ServerAppIo {
   // Request run_id
   rpc CreateRun(CreateRunRequest) returns (CreateRunResponse) {}
 

@@ -22,7 +22,7 @@ from typing import Optional
 from typing_extensions import override
 
 from flwr.common import Context, RecordSet
-from flwr.common.constant import DRIVER_API_DEFAULT_ADDRESS, Status, SubStatus
+from flwr.common.constant import SERVERAPPIO_API_DEFAULT_ADDRESS, Status, SubStatus
 from flwr.common.logger import log
 from flwr.common.typing import Fab, RunStatus, UserConfig
 from flwr.server.superlink.ffs import Ffs
@@ -48,7 +48,7 @@ class DeploymentEngine(Executor):
 
     def __init__(
         self,
-        superlink: str = DRIVER_API_DEFAULT_ADDRESS,
+        superlink: str = SERVERAPPIO_API_DEFAULT_ADDRESS,
         root_certificates: Optional[str] = None,
         flwr_dir: Optional[str] = None,
     ) -> None:
@@ -98,7 +98,7 @@ class DeploymentEngine(Executor):
             A dictionary for configuration values.
             Supported configuration key/value pairs:
             - "superlink": str
-                The address of the SuperLink Driver API.
+                The address of the SuperLink ServerAppIo API.
             - "root-certificates": str
                 The path to the root certificates.
             - "flwr-dir": str

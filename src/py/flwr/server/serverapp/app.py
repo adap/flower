@@ -47,12 +47,12 @@ from flwr.common.serde import (
     run_status_to_proto,
 )
 from flwr.common.typing import RunStatus
-from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
+from flwr.proto.run_pb2 import UpdateRunStatusRequest  # pylint: disable=E0611
+from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PullServerAppInputsRequest,
     PullServerAppInputsResponse,
     PushServerAppOutputsRequest,
 )
-from flwr.proto.run_pb2 import UpdateRunStatusRequest  # pylint: disable=E0611
 from flwr.server.driver.grpc_driver import GrpcDriver
 from flwr.server.run_serverapp import run as run_
 
@@ -62,8 +62,6 @@ def flwr_serverapp() -> None:
     # Capture stdout/stderr
     log_queue: Queue[Optional[str]] = Queue()
     mirror_output_to_queue(log_queue)
-
-    log(INFO, "Starting Flower ServerApp")
 
     parser = argparse.ArgumentParser(
         description="Run a Flower ServerApp",
@@ -106,6 +104,7 @@ def flwr_serverapp() -> None:
     )
     args = parser.parse_args()
 
+    log(INFO, "Starting Flower ServerApp")
     certificates = _try_obtain_certificates(args)
 
     log(
@@ -167,7 +166,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
 ) -> None:
     """Run Flower ServerApp process."""
     driver = GrpcDriver(
-        driver_service_address=superlink,
+        serverappio_service_address=superlink,
         root_certificates=certificates,
     )
 
