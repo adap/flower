@@ -27,7 +27,7 @@ class LogisticRegression(nn.Module):
 
 
 # define train function that will be called by each client to train the model
-def train(model, trainloader: DataLoader, cfg: DictConfig) -> None:
+def train(model, trainloader: DataLoader, cfg: DictConfig, device: torch.device) -> None:
     """Train model."""
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(
@@ -38,7 +38,7 @@ def train(model, trainloader: DataLoader, cfg: DictConfig) -> None:
     for _epoch in range(cfg.num_local_epochs):
         for _i, data in enumerate(trainloader):
 
-            inputs, labels = data["image"], data["label"]
+            inputs, labels = data["image"].to(device), data["label"].to(device)
 
             # Zero the gradients
             optimizer.zero_grad()
@@ -53,7 +53,7 @@ def train(model, trainloader: DataLoader, cfg: DictConfig) -> None:
             optimizer.step()
 
 
-def test(model, testloader: DataLoader):
+def test(model, testloader: DataLoader, device: torch.device):
     """Test model."""
     criterion = nn.CrossEntropyLoss()
 
@@ -65,7 +65,7 @@ def test(model, testloader: DataLoader):
     with torch.no_grad():
         for _i, data in enumerate(testloader):
 
-            images, labels = data["image"], data["label"]
+            images, labels = data["image"].to(device), data["label"].to(device)
 
             outputs = model(images.float())
             total += labels.size(0)

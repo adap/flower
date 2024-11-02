@@ -13,6 +13,9 @@ data: simII
 
 client_resources:
   num_cpus: 4
+  num_gpus: .5
+
+server_device: cpu
 
 use_cuda: false
 specified_device: null # the ID of cuda device, if null, then use defaults torch.device("cuda")

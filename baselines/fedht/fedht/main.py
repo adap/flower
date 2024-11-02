@@ -2,6 +2,7 @@
 
 import pickle
 import random
+import torch
 
 import flwr as fl
 import hydra
@@ -32,6 +33,10 @@ def main(cfg: DictConfig):
     # set seed
     random.seed(2024)
 
+    # this vs. setting in cfg; what is preferred?
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    print(device)
+    
     if cfg.data == "mnist":
         # set up mnist data
         # set partitioner
@@ -59,6 +64,7 @@ def main(cfg: DictConfig):
             num_classes=num_classes,
             model=model,
             cfg=cfg,
+            device=device
         )
 
     elif cfg.data == "simII":
@@ -84,6 +90,7 @@ def main(cfg: DictConfig):
             num_classes=num_classes,
             model=model,
             cfg=cfg,
+            device=device
         )
 
     # initialize global model to all zeros
@@ -96,7 +103,7 @@ def main(cfg: DictConfig):
     strategy_fedht = FedHT(
         min_available_clients=cfg.strategy.min_available_clients,
         num_keep=cfg.num_keep,
-        evaluate_fn=get_evaluate_fn(testloader, model),
+        evaluate_fn=get_evaluate_fn(testloader, model, device),
         on_fit_config_fn=fit_round,
         iterht=cfg.iterht,
         initial_parameters=init_params,
@@ -105,7 +112,7 @@ def main(cfg: DictConfig):
     # define strategy: fedavg
     strategy_fedavg = fl.server.strategy.FedAvg(
         min_available_clients=cfg.strategy.min_available_clients,
-        evaluate_fn=get_evaluate_fn(testloader, model),
+        evaluate_fn=get_evaluate_fn(testloader, model, device),
         on_fit_config_fn=fit_round,
         initial_parameters=init_params,
     )
@@ -125,7 +132,10 @@ def main(cfg: DictConfig):
         num_clients=cfg.num_clients,
         config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
         strategy=strategy,
-        client_resources={"num_cpus": cfg.client_resources.num_cpus},
+        client_resources={
+            "num_cpus": cfg.client_resources.num_cpus,
+            "num_gpus": cfg.client_resources.num_gpus,
+        },
     )
 
     if cfg.iterht:

@@ -14,7 +14,7 @@ def fit_round(server_round: int) -> Dict:
     return {"server_round": server_round}
 
 
-def get_evaluate_fn(testloader, model):
+def get_evaluate_fn(testloader, model, device: torch.device):
     """Get evaluate function for centralized metrics."""
 
     # global evaluation
@@ -24,8 +24,9 @@ def get_evaluate_fn(testloader, model):
         params_dict = zip(model.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
         model.load_state_dict(state_dict, strict=True)
+        model.to(device)
 
-        loss, accuracy = test(model, testloader)
+        loss, accuracy = test(model, testloader, device)
         return loss, {"accuracy": accuracy}
 
     return evaluate

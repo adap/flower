@@ -26,6 +26,7 @@ class SimIIClient(NumPyClient):
         num_features,
         num_classes,
         cfg: DictConfig,
+        device
     ) -> None:
         """SimII client for simulation II experimentation."""
         self.trainloader = trainloader
@@ -35,6 +36,7 @@ class SimIIClient(NumPyClient):
         self.num_features = num_features
         self.num_classes = num_classes
         self.cfg = cfg
+        self.device = device
 
     # get parameters from existing model
     def get_parameters(self, config):
@@ -52,7 +54,7 @@ class SimIIClient(NumPyClient):
         self.model.train()
 
         # training for local epochs defined by config
-        train(self.model, self.trainloader, self.cfg)
+        train(self.model, self.trainloader, self.cfg, self.device)
 
         return self.get_parameters(self.model), self.num_obs, {}
 
@@ -64,14 +66,14 @@ class SimIIClient(NumPyClient):
         self.model.load_state_dict(state_dict, strict=True)
 
         # need to change from log_loss to torch.loss and change other metrics
-        loss, accuracy = test(self.model, self.trainloader)
+        loss, accuracy = test(self.model, self.trainloader, self.device)
 
         return loss, self.num_obs, {"accuracy": accuracy}
 
 
 # client fn for input into simulation
 def generate_client_fn_simII(
-    dataset, num_features, num_classes, model, cfg: DictConfig
+    dataset, num_features, num_classes, model, cfg: DictConfig, device: torch.device
 ):
     """Generate client function for simulated FL."""
 
@@ -91,7 +93,7 @@ def generate_client_fn_simII(
         testloader = DataLoader(test_dataset, batch_size=cfg.batch_size, shuffle=True)
 
         return SimIIClient(
-            trainloader, testloader, model, num_obs, num_features, num_classes, cfg
+            trainloader, testloader, model, num_obs, num_features, num_classes, cfg, device
         ).to_client()
 
     return client_fn
@@ -110,6 +112,7 @@ class MnistClient(NumPyClient):
         num_features,
         num_classes,
         cfg: DictConfig,
+        device
     ) -> None:
         """MNIST client for MNIST experimentation."""
         self.trainloader = trainloader
@@ -119,6 +122,7 @@ class MnistClient(NumPyClient):
         self.num_features = num_features
         self.num_classes = num_classes
         self.cfg = cfg
+        self.device = device
 
     # get parameters from existing model
     def get_parameters(self, config):
@@ -136,7 +140,7 @@ class MnistClient(NumPyClient):
         self.model.train()
 
         # training for local epochs defined by config
-        train(self.model, self.trainloader, self.cfg)
+        train(self.model, self.trainloader, self.cfg, self.device)
 
         return self.get_parameters(self.model), self.num_obs, {}
 
@@ -155,7 +159,7 @@ class MnistClient(NumPyClient):
 
 # client fn for input into simulation
 def generate_client_fn_mnist(
-    dataset, num_features, num_classes, model, cfg: DictConfig
+    dataset, num_features, num_classes, model, cfg: DictConfig, device: torch.device
 ):
     """Generate client function for simulated FL."""
 
@@ -177,7 +181,7 @@ def generate_client_fn_mnist(
         testloader = DataLoader(test_dataset, batch_size=cfg.batch_size, shuffle=True)
 
         return MnistClient(
-            trainloader, testloader, model, num_obs, num_features, num_classes, cfg
+            trainloader, testloader, model, num_obs, num_features, num_classes, cfg, device
         ).to_client()
 
     return client_fn
