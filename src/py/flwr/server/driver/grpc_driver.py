@@ -23,7 +23,7 @@ from typing import Optional, cast
 import grpc
 
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
-from flwr.common.constant import DRIVER_API_DEFAULT_ADDRESS
+from flwr.common.constant import SERVERAPPIO_API_DEFAULT_ADDRESS
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.serde import (
@@ -32,7 +32,9 @@ from flwr.common.serde import (
     user_config_from_proto,
 )
 from flwr.common.typing import Run
-from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     GetNodesResponse,
     PullTaskResRequest,
@@ -40,9 +42,7 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     PushTaskInsRequest,
     PushTaskInsResponse,
 )
-from flwr.proto.driver_pb2_grpc import DriverStub  # pylint: disable=E0611
-from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 from .driver import Driver
@@ -56,12 +56,12 @@ Call `connect()` on the `GrpcDriverStub` instance before calling any of the othe
 
 
 class GrpcDriver(Driver):
-    """`GrpcDriver` provides an interface to the Driver API.
+    """`GrpcDriver` provides an interface to the ServerAppIo API.
 
     Parameters
     ----------
-    driver_service_address : str (default: "[::]:9091")
-        The address (URL, IPv6, IPv4) of the SuperLink Driver API service.
+    serverappio_service_address : str (default: "[::]:9091")
+        The address (URL, IPv6, IPv4) of the SuperLink ServerAppIo API service.
     root_certificates : Optional[bytes] (default: None)
         The PEM-encoded root certificates as a byte string.
         If provided, a secure connection using the certificates will be
@@ -70,23 +70,23 @@ class GrpcDriver(Driver):
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
-        driver_service_address: str = DRIVER_API_DEFAULT_ADDRESS,
+        serverappio_service_address: str = SERVERAPPIO_API_DEFAULT_ADDRESS,
         root_certificates: Optional[bytes] = None,
     ) -> None:
-        self._addr = driver_service_address
+        self._addr = serverappio_service_address
         self._cert = root_certificates
         self._run: Optional[Run] = None
-        self._grpc_stub: Optional[DriverStub] = None
+        self._grpc_stub: Optional[ServerAppIoStub] = None
         self._channel: Optional[grpc.Channel] = None
         self.node = Node(node_id=0, anonymous=True)
 
     @property
     def _is_connected(self) -> bool:
-        """Check if connected to the Driver API server."""
+        """Check if connected to the ServerAppIo API server."""
         return self._channel is not None
 
     def _connect(self) -> None:
-        """Connect to the Driver API.
+        """Connect to the ServerAppIo API.
 
         This will not call GetRun.
         """
@@ -98,11 +98,11 @@ class GrpcDriver(Driver):
             insecure=(self._cert is None),
             root_certificates=self._cert,
         )
-        self._grpc_stub = DriverStub(self._channel)
+        self._grpc_stub = ServerAppIoStub(self._channel)
         log(DEBUG, "[Driver] Connected to %s", self._addr)
 
     def _disconnect(self) -> None:
-        """Disconnect from the Driver API."""
+        """Disconnect from the ServerAppIo API."""
         if not self._is_connected:
             log(DEBUG, "Already disconnected")
             return
@@ -137,11 +137,11 @@ class GrpcDriver(Driver):
         return Run(**vars(self._run))
 
     @property
-    def _stub(self) -> DriverStub:
-        """Driver stub."""
+    def _stub(self) -> ServerAppIoStub:
+        """ServerAppIo stub."""
         if not self._is_connected:
             self._connect()
-        return cast(DriverStub, self._grpc_stub)
+        return cast(ServerAppIoStub, self._grpc_stub)
 
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid

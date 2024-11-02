@@ -31,7 +31,7 @@ from flwr.common.config import (
     get_project_config,
     get_project_dir,
 )
-from flwr.common.constant import DRIVER_API_DEFAULT_ADDRESS
+from flwr.common.constant import SERVERAPPIO_API_DEFAULT_ADDRESS
 from flwr.common.logger import log, update_console_handler, warn_deprecated_feature
 from flwr.common.object_ref import load_app
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
@@ -45,7 +45,6 @@ from .driver.grpc_driver import GrpcDriver
 from .server_app import LoadServerAppError, ServerApp
 
 
-# pylint: disable-next=too-many-arguments,too-many-positional-arguments
 def run(
     driver: Driver,
     context: Context,
@@ -107,18 +106,18 @@ def run_server_app() -> None:
             "app by executing `flwr new` and following the prompt."
         )
 
-    if args.server != DRIVER_API_DEFAULT_ADDRESS:
+    if args.server != SERVERAPPIO_API_DEFAULT_ADDRESS:
         warn = "Passing flag --server is deprecated. Use --superlink instead."
         warn_deprecated_feature(warn)
 
-        if args.superlink != DRIVER_API_DEFAULT_ADDRESS:
+        if args.superlink != SERVERAPPIO_API_DEFAULT_ADDRESS:
             # if `--superlink` also passed, then
             # warn user that this argument overrides what was passed with `--server`
             log(
                 WARN,
                 "Both `--server` and `--superlink` were passed. "
-                "`--server` will be ignored. Connecting to the Superlink Driver API "
-                "at %s.",
+                "`--server` will be ignored. Connecting to the "
+                "SuperLink ServerAppIo API at %s.",
                 args.superlink,
             )
         else:
@@ -171,7 +170,7 @@ def run_server_app() -> None:
     if app_path is None:
         # User provided `--run-id`, but not `app_dir`
         driver = GrpcDriver(
-            driver_service_address=args.superlink,
+            serverappio_service_address=args.superlink,
             root_certificates=root_certificates,
         )
         flwr_dir = get_flwr_dir(args.flwr_dir)
@@ -193,7 +192,7 @@ def run_server_app() -> None:
         # User provided `app_dir`, but not `--run-id`
         # Create run if run_id is not provided
         driver = GrpcDriver(
-            driver_service_address=args.superlink,
+            serverappio_service_address=args.superlink,
             root_certificates=root_certificates,
         )
         # Load config from the project directory
@@ -275,13 +274,14 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--server",
-        default=DRIVER_API_DEFAULT_ADDRESS,
+        default=SERVERAPPIO_API_DEFAULT_ADDRESS,
         help="Server address",
     )
     parser.add_argument(
         "--superlink",
-        default=DRIVER_API_DEFAULT_ADDRESS,
-        help="SuperLink Driver API (gRPC-rere) address (IPv4, IPv6, or a domain name)",
+        default=SERVERAPPIO_API_DEFAULT_ADDRESS,
+        help="SuperLink ServerAppIo API (gRPC-rere) address "
+        "(IPv4, IPv6, or a domain name)",
     )
     parser.add_argument(
         "--run-id",
