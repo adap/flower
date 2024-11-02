@@ -19,13 +19,14 @@
 import json
 import re
 import sqlite3
+import threading
 import time
 from collections.abc import Sequence
 from logging import DEBUG, ERROR, WARNING
 from typing import Any, Optional, Union, cast
 from uuid import UUID, uuid4
 
-from flwr.common import log, now
+from flwr.common import Context, log, now
 from flwr.common.constant import (
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
@@ -33,13 +34,19 @@ from flwr.common.constant import (
     Status,
 )
 from flwr.common.typing import Run, RunStatus, UserConfig
-from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
+
+# pylint: disable=E0611
+from flwr.proto.node_pb2 import Node
+from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
+
+# pylint: enable=E0611
 from flwr.server.utils.validator import validate_task_ins_or_res
 
 from .linkstate import LinkState
 from .utils import (
+    context_from_bytes,
+    context_to_bytes,
     convert_sint64_to_uint64,
     convert_sint64_values_in_dict_to_uint64,
     convert_uint64_to_sint64,
@@ -89,6 +96,25 @@ CREATE TABLE IF NOT EXISTS run(
     finished_at           TEXT,
     sub_status            TEXT,
     details               TEXT
+);
+"""
+
+SQL_CREATE_TABLE_LOGS = """
+CREATE TABLE IF NOT EXISTS logs (
+    timestamp             REAL,
+    run_id                INTEGER,
+    node_id               INTEGER,
+    log                   TEXT,
+    PRIMARY KEY (timestamp, run_id, node_id),
+    FOREIGN KEY (run_id) REFERENCES run(run_id)
+);
+"""
+
+SQL_CREATE_TABLE_CONTEXT = """
+CREATE TABLE IF NOT EXISTS context(
+    run_id                INTEGER UNIQUE,
+    context               BLOB,
+    FOREIGN KEY(run_id) REFERENCES run(run_id)
 );
 """
 
@@ -152,6 +178,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         """
         self.database_path = database_path
         self.conn: Optional[sqlite3.Connection] = None
+        self.lock = threading.RLock()
 
     def initialize(self, log_queries: bool = False) -> list[tuple[str]]:
         """Create tables if they don't exist yet.
@@ -175,6 +202,8 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         # Create each table if not exists queries
         cur.execute(SQL_CREATE_TABLE_RUN)
+        cur.execute(SQL_CREATE_TABLE_LOGS)
+        cur.execute(SQL_CREATE_TABLE_CONTEXT)
         cur.execute(SQL_CREATE_TABLE_TASK_INS)
         cur.execute(SQL_CREATE_TABLE_TASK_RES)
         cur.execute(SQL_CREATE_TABLE_NODE)
@@ -223,7 +252,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
         """Store one TaskIns.
 
-        Usually, the Driver API calls this to schedule instructions.
+        Usually, the ServerAppIo API calls this to schedule instructions.
 
         Stores the value of the task_ins in the link state and, if successful,
         returns the task_id (UUID) of the task_ins. If, for any reason, storing
@@ -461,8 +490,8 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
     def get_task_res(self, task_ids: set[UUID]) -> list[TaskRes]:
         """Get TaskRes for task_ids.
 
-        Usually, the Driver API calls this method to get results for instructions it has
-        previously scheduled.
+        Usually, the ServerAppIo API calls this method to get results for instructions
+        it has previously scheduled.
 
         Retrieves all TaskRes for the given `task_ids` and returns and empty list if
         none could be found.
@@ -970,6 +999,72 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             log(ERROR, "`node_id` does not exist.")
             return False
 
+    def get_serverapp_context(self, run_id: int) -> Optional[Context]:
+        """Get the context for the specified `run_id`."""
+        # Retrieve context if any
+        query = "SELECT context FROM context WHERE run_id = ?;"
+        rows = self.query(query, (convert_uint64_to_sint64(run_id),))
+        context = context_from_bytes(rows[0]["context"]) if rows else None
+        return context
+
+    def set_serverapp_context(self, run_id: int, context: Context) -> None:
+        """Set the context for the specified `run_id`."""
+        # Convert context to bytes
+        context_bytes = context_to_bytes(context)
+        sint_run_id = convert_uint64_to_sint64(run_id)
+
+        # Check if any existing Context assigned to the run_id
+        query = "SELECT COUNT(*) FROM context WHERE run_id = ?;"
+        if self.query(query, (sint_run_id,))[0]["COUNT(*)"] > 0:
+            # Update context
+            query = "UPDATE context SET context = ? WHERE run_id = ?;"
+            self.query(query, (context_bytes, sint_run_id))
+        else:
+            try:
+                # Store context
+                query = "INSERT INTO context (run_id, context) VALUES (?, ?);"
+                self.query(query, (sint_run_id, context_bytes))
+            except sqlite3.IntegrityError:
+                raise ValueError(f"Run {run_id} not found") from None
+
+    def add_serverapp_log(self, run_id: int, log_message: str) -> None:
+        """Add a log entry to the ServerApp logs for the specified `run_id`."""
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_run_id = convert_uint64_to_sint64(run_id)
+
+        # Store log
+        try:
+            query = """
+                INSERT INTO logs (timestamp, run_id, node_id, log) VALUES (?, ?, ?, ?);
+            """
+            self.query(query, (now().timestamp(), sint64_run_id, 0, log_message))
+        except sqlite3.IntegrityError:
+            raise ValueError(f"Run {run_id} not found") from None
+
+    def get_serverapp_log(
+        self, run_id: int, after_timestamp: Optional[float]
+    ) -> tuple[str, float]:
+        """Get the ServerApp logs for the specified `run_id`."""
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_run_id = convert_uint64_to_sint64(run_id)
+
+        # Check if the run_id exists
+        query = "SELECT run_id FROM run WHERE run_id = ?;"
+        if not self.query(query, (sint64_run_id,)):
+            raise ValueError(f"Run {run_id} not found")
+
+        # Retrieve logs
+        if after_timestamp is None:
+            after_timestamp = 0.0
+        query = """
+            SELECT log, timestamp FROM logs
+            WHERE run_id = ? AND node_id = ? AND timestamp > ?;
+        """
+        rows = self.query(query, (sint64_run_id, 0, after_timestamp))
+        rows.sort(key=lambda x: x["timestamp"])
+        latest_timestamp = rows[-1]["timestamp"] if rows else 0.0
+        return "".join(row["log"] for row in rows), latest_timestamp
+
     def get_valid_task_ins(self, task_id: str) -> Optional[dict[str, Any]]:
         """Check if the TaskIns exists and is valid (not expired).
 
@@ -1054,7 +1149,7 @@ def task_res_to_dict(task_msg: TaskRes) -> dict[str, Any]:
 
 def dict_to_task_ins(task_dict: dict[str, Any]) -> TaskIns:
     """Turn task_dict into protobuf message."""
-    recordset = RecordSet()
+    recordset = ProtoRecordSet()
     recordset.ParseFromString(task_dict["recordset"])
 
     result = TaskIns(
@@ -1084,7 +1179,7 @@ def dict_to_task_ins(task_dict: dict[str, Any]) -> TaskIns:
 
 def dict_to_task_res(task_dict: dict[str, Any]) -> TaskRes:
     """Turn task_dict into protobuf message."""
-    recordset = RecordSet()
+    recordset = ProtoRecordSet()
     recordset.ParseFromString(task_dict["recordset"])
 
     result = TaskRes(

@@ -17,12 +17,13 @@
 
 import threading
 import time
-from dataclasses import dataclass
+from bisect import bisect_right
+from dataclasses import dataclass, field
 from logging import ERROR, WARNING
 from typing import Optional
 from uuid import UUID, uuid4
 
-from flwr.common import log, now
+from flwr.common import Context, log, now
 from flwr.common.constant import (
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
@@ -43,7 +44,7 @@ from .utils import (
 
 
 @dataclass
-class RunRecord:
+class RunRecord:  # pylint: disable=R0902
     """The record of a specific run, including its status and timestamps."""
 
     run: Run
@@ -52,6 +53,8 @@ class RunRecord:
     starting_at: str = ""
     running_at: str = ""
     finished_at: str = ""
+    logs: list[tuple[float, str]] = field(default_factory=list)
+    log_lock: threading.Lock = field(default_factory=threading.Lock)
 
 
 class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
@@ -65,6 +68,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
         # Map run_id to RunRecord
         self.run_ids: dict[int, RunRecord] = {}
+        self.contexts: dict[int, Context] = {}
         self.task_ins_store: dict[UUID, TaskIns] = {}
         self.task_res_store: dict[UUID, TaskRes] = {}
 
@@ -500,3 +504,36 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
                 return True
         return False
+
+    def get_serverapp_context(self, run_id: int) -> Optional[Context]:
+        """Get the context for the specified `run_id`."""
+        return self.contexts.get(run_id)
+
+    def set_serverapp_context(self, run_id: int, context: Context) -> None:
+        """Set the context for the specified `run_id`."""
+        if run_id not in self.run_ids:
+            raise ValueError(f"Run {run_id} not found")
+        self.contexts[run_id] = context
+
+    def add_serverapp_log(self, run_id: int, log_message: str) -> None:
+        """Add a log entry to the serverapp logs for the specified `run_id`."""
+        if run_id not in self.run_ids:
+            raise ValueError(f"Run {run_id} not found")
+        run = self.run_ids[run_id]
+        with run.log_lock:
+            run.logs.append((now().timestamp(), log_message))
+
+    def get_serverapp_log(
+        self, run_id: int, after_timestamp: Optional[float]
+    ) -> tuple[str, float]:
+        """Get the serverapp logs for the specified `run_id`."""
+        if run_id not in self.run_ids:
+            raise ValueError(f"Run {run_id} not found")
+        run = self.run_ids[run_id]
+        if after_timestamp is None:
+            after_timestamp = 0.0
+        with run.log_lock:
+            # Find the index where the timestamp would be inserted
+            index = bisect_right(run.logs, (after_timestamp, ""))
+            latest_timestamp = run.logs[-1][0] if index < len(run.logs) else 0.0
+            return "".join(log for _, log in run.logs[index:]), latest_timestamp
