@@ -18,14 +18,13 @@ syntax = "proto3";
 package flwr.proto;
 
 import "flwr/proto/fab.proto";
-import "flwr/proto/run.proto";
 import "flwr/proto/message.proto";
 
 service ClientAppIo {
   // Get token
   rpc GetToken(GetTokenRequest) returns (GetTokenResponse) {}
 
-  // Get Message, Context, and Run
+  // Get Message, Context and Fab
   rpc PullClientAppInputs(PullClientAppInputsRequest)
       returns (PullClientAppInputsResponse) {}
 
@@ -51,8 +50,7 @@ message PullClientAppInputsRequest { uint64 token = 1; }
 message PullClientAppInputsResponse {
   Message message = 1;
   Context context = 2;
-  Run run = 3;
-  Fab fab = 4;
+  Fab fab = 3;
 }
 
 message PushClientAppOutputsRequest {

@@ -16,7 +16,7 @@ class ClientAppIoStub:
     PullClientAppInputs: grpc.UnaryUnaryMultiCallable[
         flwr.proto.clientappio_pb2.PullClientAppInputsRequest,
         flwr.proto.clientappio_pb2.PullClientAppInputsResponse]
-    """Get Message, Context, and Run"""
+    """Get Message, Context and Fab"""
 
     PushClientAppOutputs: grpc.UnaryUnaryMultiCallable[
         flwr.proto.clientappio_pb2.PushClientAppOutputsRequest,
@@ -38,7 +38,7 @@ class ClientAppIoServicer(metaclass=abc.ABCMeta):
         request: flwr.proto.clientappio_pb2.PullClientAppInputsRequest,
         context: grpc.ServicerContext,
     ) -> flwr.proto.clientappio_pb2.PullClientAppInputsResponse:
-        """Get Message, Context, and Run"""
+        """Get Message, Context and Fab"""
         pass
 
     @abc.abstractmethod

@@ -496,7 +496,6 @@ def start_client_internal(
                                 clientapp_input=ClientAppInputs(
                                     message=message,
                                     context=context,
-                                    run=run,
                                     fab=fab,
                                     token=token,
                                 ),
