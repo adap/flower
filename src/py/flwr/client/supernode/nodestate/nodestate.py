@@ -17,7 +17,7 @@
 import abc
 from typing import Optional
 
-from ...clientapp.clientappio_servicer import ClientAppInputs, ClientAppOutputs
+from ...clientapp.clientappio_servicer import ClientAppInputs
 
 
 class NodeState(abc.ABC):
@@ -27,26 +27,34 @@ class NodeState(abc.ABC):
     def set_clientapp_inputs(  # pylint: disable=R0913
         self, token: int, clientapp_inputs: ClientAppInputs
     ) -> None:
-        """Set the clientapp inputs for a specified `run_id`.
+        """Set the ClientApp inputs for a specified `token`.
 
         Parameters
         ----------
         token : int
-            The unique token Run to be associated with the specified `ClientAppInputs`
+            The identifier of the ClientApp run for which to set the inputs.
         clientapp_inputs : ClientAppInputs
-            The clientapp inputs to be associated with the specified `run_id`
+            The inputs for the ClientApp to be associated with the specified `token`.
         """
 
     @abc.abstractmethod
     def get_clientapp_inputs(self, token: int) -> Optional[ClientAppInputs]:
-        """."""
+        """Get the ClientApp inputs for a specified `token`."""
 
-    @abc.abstractmethod
-    def set_clientapp_outputs(
-        self, run_id: int, clientapp_outputs: ClientAppOutputs
-    ) -> None:
-        """."""
+    # @abc.abstractmethod
+    # def set_clientapp_outputs(
+    #     self, token: int, clientapp_outputs: ClientAppOutputs
+    # ) -> None:
+    #     """Set the ClientApp outputs for a specified `token`.
 
-    @abc.abstractmethod
-    def get_clientapp_outputs(self, clientapp_outputs: ClientAppOutputs) -> None:
-        """."""
+    #     Parameters
+    #     ----------
+    #     token : int
+    #         The identifier of the ClientApp run for which to set the outputs.
+    #     clientapp_inputs : ClientAppInputs
+    #         The outputs from the ClientApp to be associated with the specified `token`.
+    #     """
+
+    # @abc.abstractmethod
+    # def get_clientapp_outputs(self, token: int) -> Optional[ClientAppOutputs]:
+    #     """Get the ClientApp outputs for a specified `token`."""

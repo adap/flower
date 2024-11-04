@@ -14,8 +14,10 @@
 # ==============================================================================
 """Flower NodeState."""
 
+from .in_memory_nodestate import InMemoryNodeState as InMemoryNodeState
 from .nodestate import NodeState as NodeState
 
 __all__ = [
     "NodeState",
+    "InMemoryNodeState",
 ]
