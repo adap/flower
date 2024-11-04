@@ -34,5 +34,11 @@ message StartRunRequest {
   map<string, Scalar> federation_config = 3;
 }
 message StartRunResponse { uint64 run_id = 1; }
-message StreamLogsRequest { uint64 run_id = 1; }
-message StreamLogsResponse { string log_output = 1; }
+message StreamLogsRequest {
+  uint64 run_id = 1;
+  double after_timestamp = 2;
+}
+message StreamLogsResponse {
+  string log_output = 1;
+  double latest_timestamp = 2;
+}
