@@ -10,7 +10,7 @@ Each builds for `amd64` and `arm64`.
 
 2. **Alpine Images**:
    - Used only for minimal images (e.g., SuperLink) where no extra dependencies are expected.
-   - Limited use due to dependency compilation complexity with `musl` and ML frameworks.
+   - Limited use due to dependency (in particular ML frameworks) compilation complexity with `musl`.
 
 Workflow Details:
 - **Stable Release**: Triggered on new releases. Builds full matrix (all Python versions, Ubuntu and Alpine).
