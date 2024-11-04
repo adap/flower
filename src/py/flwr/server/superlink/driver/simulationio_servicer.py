@@ -18,9 +18,6 @@ import threading
 from logging import DEBUG, INFO
 
 import grpc
-
-from flwr.proto import simulationio_pb2_grpc
-from flwr.proto.simulationio_pb2 import PullSimulationInputsRequest, PullSimulationInputsResponse, PushSimulationOutputsRequest, PushSimulationOutputsResponse
 from grpc import ServicerContext
 
 from flwr.common.constant import Status
@@ -32,26 +29,30 @@ from flwr.common.serde import (
     run_status_from_proto,
     run_to_proto,
 )
-
-from flwr.proto.run_pb2 import (  # pylint: disable=E0611
-    UpdateRunStatusRequest,
-    UpdateRunStatusResponse,
-)
 from flwr.common.typing import Fab, RunStatus
-
-from flwr.server.superlink.ffs.ffs import Ffs
-from flwr.server.superlink.ffs.ffs_factory import FfsFactory
-from flwr.server.superlink.linkstate import LinkStateFactory
-
+from flwr.proto import simulationio_pb2_grpc
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.log_pb2 import (  # pylint: disable=E0611
     PushLogsRequest,
     PushLogsResponse,
 )
+from flwr.proto.run_pb2 import (  # pylint: disable=E0611
+    UpdateRunStatusRequest,
+    UpdateRunStatusResponse,
+)
+from flwr.proto.simulationio_pb2 import (  # pylint: disable=E0611
+    PullSimulationInputsRequest,
+    PullSimulationInputsResponse,
+    PushSimulationOutputsRequest,
+    PushSimulationOutputsResponse,
+)
+from flwr.server.superlink.ffs.ffs import Ffs
+from flwr.server.superlink.ffs.ffs_factory import FfsFactory
+from flwr.server.superlink.linkstate import LinkStateFactory
+
 
 class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
     """SimulationIo API servicer."""
-
 
     def __init__(
         self, state_factory: LinkStateFactory, ffs_factory: FfsFactory
@@ -60,10 +61,10 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         self.ffs_factory = ffs_factory
         self.lock = threading.RLock()
 
-
-
-    def GetFab(
-        self, request: GetFabRequest, context: grpc.ServicerContext
+    def GetFab(  # pylint: disable=C0103
+        self,
+        request: GetFabRequest,
+        context: grpc.ServicerContext,  # pylint: disable=W0613
     ) -> GetFabResponse:
         """Get FAB from Ffs."""
         log(DEBUG, "SimultionIoServicer.GetFab")
@@ -74,8 +75,10 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
             return GetFabResponse(fab=fab_to_proto(fab))
 
         raise ValueError(f"Found no FAB with hash: {request.hash_str}")
-    
-    def PullSimulationInputs(self, request: PullSimulationInputsRequest, context: ServicerContext) -> PullSimulationInputsResponse:
+
+    def PullSimulationInputs(
+        self, request: PullSimulationInputsRequest, context: ServicerContext
+    ) -> PullSimulationInputsResponse:
         """Pull SimultionIo process inputs."""
         log(DEBUG, "SimultionIoServicer.SimultionIoInputs")
         # Init access to LinkState and Ffs
@@ -110,21 +113,21 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         # Raise an exception if the Run or Fab is not found,
         # or if the status cannot be updated to STARTING
         raise RuntimeError(f"Failed to start run {run_id}")
-    
 
-    def PushSimulationOutputs(self, request: PushSimulationOutputsRequest, context: ServicerContext) -> PushSimulationOutputsResponse:
+    def PushSimulationOutputs(
+        self, request: PushSimulationOutputsRequest, context: ServicerContext
+    ) -> PushSimulationOutputsResponse:
         """Push Simulation process outputs."""
         log(DEBUG, "SimultionIoServicer.PushSimulationOutputs")
         state = self.state_factory.state()
         state.set_serverapp_context(request.run_id, context_from_proto(request.context))
         return PushSimulationOutputsResponse()
-    
 
     def UpdateRunStatus(
         self, request: UpdateRunStatusRequest, context: grpc.ServicerContext
     ) -> UpdateRunStatusResponse:
         """Update the status of a run."""
-        log(DEBUG, "ControlServicer.UpdateRunStatus")
+        log(DEBUG, "SimultionIoServicer.UpdateRunStatus")
         state = self.state_factory.state()
 
         # Update the run status
