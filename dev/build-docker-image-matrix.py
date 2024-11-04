@@ -100,7 +100,7 @@ CUDA_VERSIONS_CONFIG = [
 ]
 
 
-def remove_path_version(version: str) -> str:
+def remove_patch_version(version: str) -> str:
     return ".".join(version.split(".")[0:2])
 
 
@@ -142,7 +142,7 @@ CUDA_VARIANTS = [
     Variant(
         Distro(DistroName.UBUNTU, ubuntu_version),
         lambda distro, _: f"{DOCKERFILE_ROOT}/base/{distro.name.value}-cuda",
-        lambda distro, flwr_version, python_version, extras: f"{flwr_version}-py{python_version}-cu{remove_path_version(extras.version)}-{distro.name.value}{distro.version}",
+        lambda distro, flwr_version, python_version, extras: f"{flwr_version}-py{python_version}-cu{remove_patch_version(extras.version)}-{distro.name.value}{distro.version}",
         lambda distro, flwr_version, python_version, extras: CUDA_BUILD_ARGS.format(
             python_version=python_version,
             flwr_version=flwr_version,
