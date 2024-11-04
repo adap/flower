@@ -34,7 +34,7 @@ services:
         RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
           && python -m pip install -U --no-cache-dir .
 
-        ENTRYPOINT ["flower-serverapp"]
+        ENTRYPOINT ["flwr-serverapp"]
     command:
       - --superlink
       - superlink:9091
