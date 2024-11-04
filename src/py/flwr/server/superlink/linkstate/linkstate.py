@@ -31,7 +31,7 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
         """Store one TaskIns.
 
-        Usually, the Driver API calls this to schedule instructions.
+        Usually, the ServerAppIo API calls this to schedule instructions.
 
         Stores the value of the `task_ins` in the link state and, if successful,
         returns the `task_id` (UUID) of the `task_ins`. If, for any reason,
@@ -102,8 +102,8 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
     def get_task_res(self, task_ids: set[UUID]) -> list[TaskRes]:
         """Get TaskRes for task_ids.
 
-        Usually, the Driver API calls this method to get results for instructions it has
-        previously scheduled.
+        Usually, the ServerAppIo API calls this method to get results for instructions
+        it has previously scheduled.
 
         Retrieves all TaskRes for the given `task_ids` and returns and empty list of
         none could be found.
@@ -298,4 +298,39 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
             The identifier of the run for which to set the context.
         context : Context
             The context to be associated with the specified `run_id`.
+        """
+
+    @abc.abstractmethod
+    def add_serverapp_log(self, run_id: int, log_message: str) -> None:
+        """Add a log entry to the ServerApp logs for the specified `run_id`.
+
+        Parameters
+        ----------
+        run_id : int
+            The identifier of the run for which to add a log entry.
+        log_message : str
+            The log entry to be added to the ServerApp logs.
+        """
+
+    @abc.abstractmethod
+    def get_serverapp_log(
+        self, run_id: int, after_timestamp: Optional[float]
+    ) -> tuple[str, float]:
+        """Get the ServerApp logs for the specified `run_id`.
+
+        Parameters
+        ----------
+        run_id : int
+            The identifier of the run for which to retrieve the ServerApp logs.
+
+        after_timestamp : Optional[float]
+            Retrieve logs after this timestamp. If set to `None`, retrieve all logs.
+
+        Returns
+        -------
+        tuple[str, float]
+            A tuple containing:
+            - The ServerApp logs associated with the specified `run_id`.
+            - The timestamp of the latest log entry in the returned logs.
+              Returns `0` if no logs are returned.
         """
