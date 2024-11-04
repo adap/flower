@@ -45,7 +45,7 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
-from .driver import Driver
+from .driver import DriverConnection
 
 ERROR_MESSAGE_DRIVER_NOT_CONNECTED = """
 [Driver] Error: Not connected.
@@ -55,7 +55,7 @@ Call `connect()` on the `GrpcDriverStub` instance before calling any of the othe
 """
 
 
-class GrpcDriver(Driver):
+class GrpcDriver(DriverConnection):
     """`GrpcDriver` provides an interface to the ServerAppIo API.
 
     Parameters

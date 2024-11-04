@@ -39,7 +39,7 @@ from flwr.common.logger import (
     warn_deprecated_feature_with_example,
 )
 from flwr.common.typing import Run, RunStatus, UserConfig
-from flwr.server.driver import Driver, InMemoryDriver
+from flwr.server.connection import DriverConnection, InMemoryDriver
 from flwr.server.run_serverapp import run as _run
 from flwr.server.server_app import ServerApp
 from flwr.server.superlink.fleet import vce
@@ -306,7 +306,7 @@ def run_serverapp_th(
     server_app_attr: Optional[str],
     server_app: Optional[ServerApp],
     server_app_run_config: UserConfig,
-    driver: Driver,
+    driver: DriverConnection,
     app_dir: str,
     f_stop: threading.Event,
     has_exception: threading.Event,
@@ -318,7 +318,7 @@ def run_serverapp_th(
         tf_gpu_growth: bool,
         stop_event: threading.Event,
         exception_event: threading.Event,
-        _driver: Driver,
+        _driver: DriverConnection,
         _server_app_dir: str,
         _server_app_run_config: UserConfig,
         _server_app_attr: Optional[str],

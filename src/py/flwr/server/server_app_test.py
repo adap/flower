@@ -21,7 +21,7 @@ import pytest
 
 from flwr.common import Context, RecordSet
 from flwr.server import ServerApp, ServerConfig
-from flwr.server.driver import Driver
+from flwr.server.connection import DriverConnection
 
 
 def test_server_app_custom_mode() -> None:
@@ -35,7 +35,7 @@ def test_server_app_custom_mode() -> None:
 
     # pylint: disable=unused-argument
     @app.main()
-    def custom_main(driver: Driver, context: Context) -> None:
+    def custom_main(driver: DriverConnection, context: Context) -> None:
         called["called"] = True
 
     # pylint: enable=unused-argument
@@ -56,7 +56,7 @@ def test_server_app_exception_when_both_modes() -> None:
     with pytest.raises(ValueError):
         # pylint: disable=unused-argument
         @app.main()
-        def custom_main(driver: Driver, context: Context) -> None:
+        def custom_main(driver: DriverConnection, context: Context) -> None:
             pass
 
         # pylint: enable=unused-argument

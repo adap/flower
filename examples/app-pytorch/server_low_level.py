@@ -12,14 +12,14 @@ from flwr.common import (
     NDArrays,
     RecordSet,
 )
-from flwr.server import Driver
+from flwr.server import DriverConnection
 
 # Run via `flower-server-app server:app`
 app = fl.server.ServerApp()
 
 
 @app.main()
-def main(driver: Driver, context: Context) -> None:
+def main(driver: DriverConnection, context: Context) -> None:
     """This is a stub example that simply sends and receives messages."""
     print("Starting test run")
     for server_round in range(3):

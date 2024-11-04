@@ -26,7 +26,7 @@ from flwr.server.strategy import Strategy
 
 from .client_manager import ClientManager
 from .compat import start_driver
-from .driver import Driver
+from .connection import DriverConnection
 from .server import Server
 from .server_config import ServerConfig
 from .typing import ServerAppCallable, ServerFn
@@ -106,7 +106,7 @@ class ServerApp:
         self._server_fn = server_fn
         self._main: Optional[ServerAppCallable] = None
 
-    def __call__(self, driver: Driver, context: Context) -> None:
+    def __call__(self, driver: DriverConnection, context: Context) -> None:
         """Execute `ServerApp`."""
         # Compatibility mode
         if not self._main:

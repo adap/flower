@@ -2,7 +2,7 @@ from typing import List, Tuple
 
 import flwr as fl
 from flwr.common import Context, Metrics, ndarrays_to_parameters
-from flwr.server import Driver, LegacyContext
+from flwr.server import DriverConnection, LegacyContext
 
 from task import Net, get_weights
 
@@ -48,7 +48,7 @@ app = fl.server.ServerApp()
 
 
 @app.main()
-def main(driver: Driver, context: Context) -> None:
+def main(driver: DriverConnection, context: Context) -> None:
     # Construct the LegacyContext
     context = LegacyContext(
         context=context,

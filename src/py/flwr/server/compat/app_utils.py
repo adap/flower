@@ -19,11 +19,11 @@ import threading
 
 from ..client_manager import ClientManager
 from ..compat.driver_client_proxy import DriverClientProxy
-from ..driver import Driver
+from ..connection import DriverConnection
 
 
 def start_update_client_manager_thread(
-    driver: Driver,
+    driver: DriverConnection,
     client_manager: ClientManager,
 ) -> tuple[threading.Thread, threading.Event]:
     """Periodically update the nodes list in the client manager in a thread.
@@ -66,7 +66,7 @@ def start_update_client_manager_thread(
 
 
 def _update_client_manager(
-    driver: Driver,
+    driver: DriverConnection,
     client_manager: ClientManager,
     f_stop: threading.Event,
 ) -> None:

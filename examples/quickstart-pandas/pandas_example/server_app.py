@@ -8,13 +8,13 @@ import numpy as np
 
 from flwr.common import Context, MessageType, RecordSet, Message
 from flwr.common.logger import log
-from flwr.server import Driver, ServerApp
+from flwr.server import DriverConnection, ServerApp
 
 app = ServerApp()
 
 
 @app.main()
-def main(driver: Driver, context: Context) -> None:
+def main(driver: DriverConnection, context: Context) -> None:
     """This `ServerApp` construct a histogram from partial-histograms reported by the
     `ClientApp`s."""
 

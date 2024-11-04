@@ -15,12 +15,12 @@
 """Flower driver SDK."""
 
 
-from .driver import Driver
+from .driver import DriverConnection
 from .grpc_driver import GrpcDriver
 from .inmemory_driver import InMemoryDriver
 
 __all__ = [
-    "Driver",
+    "DriverConnection",
     "GrpcDriver",
     "InMemoryDriver",
 ]

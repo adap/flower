@@ -19,9 +19,9 @@ from typing import Callable
 
 from flwr.common import Context
 
-from .driver import Driver
+from .connection import DriverConnection
 from .serverapp_components import ServerAppComponents
 
-ServerAppCallable = Callable[[Driver, Context], None]
-Workflow = Callable[[Driver, Context], None]
+ServerAppCallable = Callable[[DriverConnection, Context], None]
+Workflow = Callable[[DriverConnection, Context], None]
 ServerFn = Callable[[Context], ServerAppComponents]

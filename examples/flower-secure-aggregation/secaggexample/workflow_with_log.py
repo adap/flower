@@ -5,7 +5,7 @@ from logging import INFO
 import flwr.common.recordset_compat as compat
 from flwr.common import Context, log, parameters_to_ndarrays
 from flwr.common.secure_aggregation.quantization import quantize
-from flwr.server import Driver, LegacyContext
+from flwr.server import DriverConnection, LegacyContext
 from flwr.server.workflow.constant import MAIN_PARAMS_RECORD
 from flwr.server.workflow.secure_aggregation.secaggplus_workflow import (
     SecAggPlusWorkflow,
@@ -24,7 +24,7 @@ class SecAggPlusWorkflowWithLogs(SecAggPlusWorkflow):
 
     node_ids = []
 
-    def __call__(self, driver: Driver, context: Context) -> None:
+    def __call__(self, driver: DriverConnection, context: Context) -> None:
         first_3_params = get_weights(make_net())[0].flatten()[:3]
         _quantized = quantize(
             [first_3_params for _ in range(5)],
@@ -80,7 +80,7 @@ class SecAggPlusWorkflowWithLogs(SecAggPlusWorkflow):
         log(INFO, "")
 
     def setup_stage(
-        self, driver: Driver, context: LegacyContext, state: WorkflowState
+        self, driver: DriverConnection, context: LegacyContext, state: WorkflowState
     ) -> bool:
         ret = super().setup_stage(driver, context, state)
         self.node_ids = list(state.active_node_ids)
@@ -90,7 +90,7 @@ class SecAggPlusWorkflowWithLogs(SecAggPlusWorkflow):
         return ret
 
     def collect_masked_vectors_stage(
-        self, driver: Driver, context: LegacyContext, state: WorkflowState
+        self, driver: DriverConnection, context: LegacyContext, state: WorkflowState
     ) -> bool:
         ret = super().collect_masked_vectors_stage(driver, context, state)
         for node_id in state.sampled_node_ids - state.active_node_ids:

@@ -53,7 +53,7 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PullServerAppInputsResponse,
     PushServerAppOutputsRequest,
 )
-from flwr.server.driver.grpc_driver import GrpcDriver
+from flwr.server.connection.grpc_driver import GrpcDriver
 from flwr.server.run_serverapp import run as run_
 
 

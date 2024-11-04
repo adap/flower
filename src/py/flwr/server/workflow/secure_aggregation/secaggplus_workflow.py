@@ -55,7 +55,7 @@ from flwr.common.secure_aggregation.secaggplus_constants import (
 from flwr.common.secure_aggregation.secaggplus_utils import pseudo_rand_gen
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.compat.legacy_context import LegacyContext
-from flwr.server.driver import Driver
+from flwr.server.connection import DriverConnection
 
 from ..constant import MAIN_CONFIGS_RECORD, MAIN_PARAMS_RECORD
 from ..constant import Key as WorkflowKey
@@ -186,7 +186,7 @@ class SecAggPlusWorkflow:
 
         self._check_init_params()
 
-    def __call__(self, driver: Driver, context: Context) -> None:
+    def __call__(self, driver: DriverConnection, context: Context) -> None:
         """Run the SecAgg+ protocol."""
         if not isinstance(context, LegacyContext):
             raise TypeError(
@@ -279,7 +279,7 @@ class SecAggPlusWorkflow:
         return True
 
     def setup_stage(  # pylint: disable=R0912, R0914, R0915
-        self, driver: Driver, context: LegacyContext, state: WorkflowState
+        self, driver: DriverConnection, context: LegacyContext, state: WorkflowState
     ) -> bool:
         """Execute the 'setup' stage."""
         # Obtain fit instructions
@@ -406,7 +406,7 @@ class SecAggPlusWorkflow:
         return self._check_threshold(state)
 
     def share_keys_stage(  # pylint: disable=R0914
-        self, driver: Driver, context: LegacyContext, state: WorkflowState
+        self, driver: DriverConnection, context: LegacyContext, state: WorkflowState
     ) -> bool:
         """Execute the 'share keys' stage."""
         cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
@@ -476,7 +476,7 @@ class SecAggPlusWorkflow:
         return self._check_threshold(state)
 
     def collect_masked_vectors_stage(
-        self, driver: Driver, context: LegacyContext, state: WorkflowState
+        self, driver: DriverConnection, context: LegacyContext, state: WorkflowState
     ) -> bool:
         """Execute the 'collect masked vectors' stage."""
         cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
@@ -547,7 +547,7 @@ class SecAggPlusWorkflow:
         return self._check_threshold(state)
 
     def unmask_stage(  # pylint: disable=R0912, R0914, R0915
-        self, driver: Driver, context: LegacyContext, state: WorkflowState
+        self, driver: DriverConnection, context: LegacyContext, state: WorkflowState
     ) -> bool:
         """Execute the 'unmask' stage."""
         cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]

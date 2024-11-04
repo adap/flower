@@ -16,7 +16,7 @@ from flwr.common import (
     parameters_to_ndarrays,
 )
 from flwr.common.recordset_compat import fitins_to_recordset, recordset_to_fitres
-from flwr.server import Driver, History
+from flwr.server import DriverConnection, History
 from flwr.server.strategy.aggregate import aggregate
 
 from task import Net, get_weights
@@ -48,7 +48,7 @@ app = fl.server.ServerApp()
 
 
 @app.main()
-def main(driver: Driver, context: Context) -> None:
+def main(driver: DriverConnection, context: Context) -> None:
     """."""
     print("RUNNING!!!!!")
 

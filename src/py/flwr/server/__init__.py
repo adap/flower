@@ -21,7 +21,7 @@ from .app import start_server as start_server
 from .client_manager import ClientManager as ClientManager
 from .client_manager import SimpleClientManager as SimpleClientManager
 from .compat import LegacyContext as LegacyContext
-from .driver import Driver as Driver
+from .connection import DriverConnection as DriverConnection
 from .history import History as History
 from .server import Server as Server
 from .server_app import ServerApp as ServerApp
@@ -30,7 +30,7 @@ from .serverapp_components import ServerAppComponents as ServerAppComponents
 
 __all__ = [
     "ClientManager",
-    "Driver",
+    "DriverConnection",
     "History",
     "LegacyContext",
     "Server",

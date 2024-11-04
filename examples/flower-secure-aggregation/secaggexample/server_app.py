@@ -5,7 +5,7 @@ from typing import List, Tuple
 
 from flwr.common import Context, Metrics, ndarrays_to_parameters
 from flwr.common.logger import update_console_handler
-from flwr.server import Driver, LegacyContext, ServerApp, ServerConfig
+from flwr.server import DriverConnection, LegacyContext, ServerApp, ServerConfig
 from flwr.server.strategy import FedAvg
 from flwr.server.workflow import DefaultWorkflow, SecAggPlusWorkflow
 
@@ -28,7 +28,7 @@ app = ServerApp()
 
 
 @app.main()
-def main(driver: Driver, context: Context) -> None:
+def main(driver: DriverConnection, context: Context) -> None:
 
     is_demo = context.run_config["is-demo"]
 

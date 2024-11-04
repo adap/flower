@@ -25,13 +25,13 @@ from flwr.server.server import Server, init_defaults, run_fl
 from flwr.server.server_config import ServerConfig
 from flwr.server.strategy import Strategy
 
-from ..driver import Driver
+from ..connection import DriverConnection
 from .app_utils import start_update_client_manager_thread
 
 
 def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     *,
-    driver: Driver,
+    driver: DriverConnection,
     server: Optional[Server] = None,
     config: Optional[ServerConfig] = None,
     strategy: Optional[Strategy] = None,

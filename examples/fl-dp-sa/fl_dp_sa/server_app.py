@@ -4,7 +4,7 @@ from typing import List, Tuple
 
 from flwr.common import Context, Metrics, ndarrays_to_parameters
 from flwr.server import (
-    Driver,
+    DriverConnection,
     LegacyContext,
     ServerApp,
     ServerConfig,
@@ -36,7 +36,7 @@ app = ServerApp()
 
 
 @app.main()
-def main(driver: Driver, context: Context) -> None:
+def main(driver: DriverConnection, context: Context) -> None:
 
     # Initialize global model
     model_weights = get_weights(Net())

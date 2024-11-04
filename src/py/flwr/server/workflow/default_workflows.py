@@ -36,7 +36,7 @@ from flwr.common.constant import MessageType, MessageTypeLegacy
 from ..client_proxy import ClientProxy
 from ..compat.app_utils import start_update_client_manager_thread
 from ..compat.legacy_context import LegacyContext
-from ..driver import Driver
+from ..connection import DriverConnection
 from ..typing import Workflow
 from .constant import MAIN_CONFIGS_RECORD, MAIN_PARAMS_RECORD, Key
 
@@ -56,7 +56,7 @@ class DefaultWorkflow:
         self.fit_workflow: Workflow = fit_workflow
         self.evaluate_workflow: Workflow = evaluate_workflow
 
-    def __call__(self, driver: Driver, context: Context) -> None:
+    def __call__(self, driver: DriverConnection, context: Context) -> None:
         """Execute the workflow."""
         if not isinstance(context, LegacyContext):
             raise TypeError(
@@ -116,7 +116,7 @@ class DefaultWorkflow:
         thread.join()
 
 
-def default_init_params_workflow(driver: Driver, context: Context) -> None:
+def default_init_params_workflow(driver: DriverConnection, context: Context) -> None:
     """Execute the default workflow for parameters initialization."""
     if not isinstance(context, LegacyContext):
         raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
@@ -183,7 +183,7 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
         log(INFO, "Evaluation returned no results (`None`)")
 
 
-def default_centralized_evaluation_workflow(_: Driver, context: Context) -> None:
+def default_centralized_evaluation_workflow(_: DriverConnection, context: Context) -> None:
     """Execute the default workflow for centralized evaluation."""
     if not isinstance(context, LegacyContext):
         raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
@@ -216,7 +216,7 @@ def default_centralized_evaluation_workflow(_: Driver, context: Context) -> None
 
 
 def default_fit_workflow(  # pylint: disable=R0914
-    driver: Driver, context: Context
+    driver: DriverConnection, context: Context
 ) -> None:
     """Execute the default workflow for a single fit round."""
     if not isinstance(context, LegacyContext):
@@ -304,7 +304,7 @@ def default_fit_workflow(  # pylint: disable=R0914
 
 
 # pylint: disable-next=R0914
-def default_evaluate_workflow(driver: Driver, context: Context) -> None:
+def default_evaluate_workflow(driver: DriverConnection, context: Context) -> None:
     """Execute the default workflow for a single evaluate round."""
     if not isinstance(context, LegacyContext):
         raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")

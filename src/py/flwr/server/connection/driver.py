@@ -23,8 +23,8 @@ from flwr.common import Message, RecordSet
 from flwr.common.typing import Run
 
 
-class Driver(ABC):
-    """Abstract base Driver class for the ServerAppIo API."""
+class DriverConnection(ABC):
+    """Abstract base class for the ServerAppIo API."""
 
     @abstractmethod
     def init_run(self, run_id: int) -> None:
