@@ -277,7 +277,7 @@ if __name__ == "__main__":
         CUDA_VARIANTS,
     )
 
-    base_images = ubuntu_base_images + alpine_base_images  # + cuda_base_images
+    base_images = ubuntu_base_images + alpine_base_images
 
     binary_images = (
         # ubuntu and alpine images for the latest supported python version
