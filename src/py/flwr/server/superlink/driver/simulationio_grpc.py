@@ -55,7 +55,11 @@ def run_simulationio_api_grpc(
         certificates=certificates,
     )
 
-    log(INFO, "Flower ECE: Starting SimulationIo API (gRPC-rere) on %s", address)
+    log(
+        INFO,
+        "Flower Simulation Engine: Starting SimulationIo API (gRPC-rere) on %s",
+        address,
+    )
     simulationio_grpc_server.start()
 
     return simulationio_grpc_server

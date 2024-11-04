@@ -63,6 +63,7 @@ from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
 from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
 from flwr.superexec.app import load_executor
 from flwr.superexec.exec_grpc import run_exec_api_grpc
+from flwr.superexec.simulation import SimulationEngine
 
 from .client_manager import ClientManager
 from .history import History
@@ -70,6 +71,7 @@ from .server import Server, init_defaults, run_fl
 from .server_config import ServerConfig
 from .strategy import Strategy
 from .superlink.driver.serverappio_grpc import run_serverappio_api_grpc
+from .superlink.driver.simulationio_grpc import run_simulationio_api_grpc
 from .superlink.ffs.ffs_factory import FfsFactory
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
 from .superlink.fleet.grpc_bidi.grpc_server import (
@@ -225,119 +227,135 @@ def run_superlink() -> None:
     # Initialize FfsFactory
     ffs_factory = FfsFactory(args.storage_dir)
 
-    # Start ServerAppIo API
-    serverappio_server: grpc.Server = run_serverappio_api_grpc(
-        address=serverappio_address,
-        state_factory=state_factory,
-        ffs_factory=ffs_factory,
-        certificates=certificates,
-    )
-    grpc_servers = [serverappio_server]
-
-    # Start Fleet API
-    bckg_threads = []
-    if not args.fleet_api_address:
-        if args.fleet_api_type in [
-            TRANSPORT_TYPE_GRPC_RERE,
-            TRANSPORT_TYPE_GRPC_ADAPTER,
-        ]:
-            args.fleet_api_address = FLEET_API_GRPC_RERE_DEFAULT_ADDRESS
-        elif args.fleet_api_type == TRANSPORT_TYPE_REST:
-            args.fleet_api_address = FLEET_API_REST_DEFAULT_ADDRESS
-
-    fleet_address, host, port = _format_address(args.fleet_api_address)
-
-    num_workers = args.fleet_api_num_workers
-    if num_workers != 1:
-        log(
-            WARN,
-            "The Fleet API currently supports only 1 worker. "
-            "You have specified %d workers. "
-            "Support for multiple workers will be added in future releases. "
-            "Proceeding with a single worker.",
-            args.fleet_api_num_workers,
-        )
-        num_workers = 1
-
-    if args.fleet_api_type == TRANSPORT_TYPE_REST:
-        if (
-            importlib.util.find_spec("requests")
-            and importlib.util.find_spec("starlette")
-            and importlib.util.find_spec("uvicorn")
-        ) is None:
-            sys.exit(MISSING_EXTRA_REST)
-
-        _, ssl_certfile, ssl_keyfile = (
-            certificates if certificates is not None else (None, None, None)
-        )
-
-        fleet_thread = threading.Thread(
-            target=_run_fleet_api_rest,
-            args=(
-                host,
-                port,
-                ssl_keyfile,
-                ssl_certfile,
-                state_factory,
-                ffs_factory,
-                num_workers,
-            ),
-        )
-        fleet_thread.start()
-        bckg_threads.append(fleet_thread)
-    elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE:
-        maybe_keys = _try_setup_node_authentication(args, certificates)
-        interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None
-        if maybe_keys is not None:
-            (
-                node_public_keys,
-                server_private_key,
-                server_public_key,
-            ) = maybe_keys
-            state = state_factory.state()
-            state.store_node_public_keys(node_public_keys)
-            state.store_server_private_public_key(
-                private_key_to_bytes(server_private_key),
-                public_key_to_bytes(server_public_key),
-            )
-            log(
-                INFO,
-                "Node authentication enabled with %d known public keys",
-                len(node_public_keys),
-            )
-            interceptors = [AuthenticateServerInterceptor(state)]
-
-        fleet_server = _run_fleet_api_grpc_rere(
-            address=fleet_address,
-            state_factory=state_factory,
-            ffs_factory=ffs_factory,
-            certificates=certificates,
-            interceptors=interceptors,
-        )
-        grpc_servers.append(fleet_server)
-    elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_ADAPTER:
-        fleet_server = _run_fleet_api_grpc_adapter(
-            address=fleet_address,
-            state_factory=state_factory,
-            ffs_factory=ffs_factory,
-            certificates=certificates,
-        )
-        grpc_servers.append(fleet_server)
-    else:
-        raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
-
     # Start Exec API
+    executor = load_executor(args)
     exec_server: grpc.Server = run_exec_api_grpc(
         address=exec_address,
         state_factory=state_factory,
         ffs_factory=ffs_factory,
-        executor=load_executor(args),
+        executor=executor,
         certificates=certificates,
         config=parse_config_args(
             [args.executor_config] if args.executor_config else args.executor_config
         ),
     )
-    grpc_servers.append(exec_server)
+    grpc_servers = [exec_server]
+
+    # Determine Exec plugin
+    # If simulation is used, don't start ServerAppIo and Fleet APIs
+    sim_exec = isinstance(executor, SimulationEngine)
+
+    bckg_threads = []
+
+    if sim_exec:
+        simulationio_server: grpc.Server = run_simulationio_api_grpc(
+            address=serverappio_address,
+            state_factory=state_factory,
+            ffs_factory=ffs_factory,
+            certificates=certificates,
+        )
+        grpc_servers.append(simulationio_server)
+
+    else:
+        # Start ServerAppIo API
+        serverappio_server: grpc.Server = run_serverappio_api_grpc(
+            address=serverappio_address,
+            state_factory=state_factory,
+            ffs_factory=ffs_factory,
+            certificates=certificates,
+        )
+        grpc_servers.append(serverappio_server)
+
+        # Start Fleet API
+        if not args.fleet_api_address:
+            if args.fleet_api_type in [
+                TRANSPORT_TYPE_GRPC_RERE,
+                TRANSPORT_TYPE_GRPC_ADAPTER,
+            ]:
+                args.fleet_api_address = FLEET_API_GRPC_RERE_DEFAULT_ADDRESS
+            elif args.fleet_api_type == TRANSPORT_TYPE_REST:
+                args.fleet_api_address = FLEET_API_REST_DEFAULT_ADDRESS
+
+        fleet_address, host, port = _format_address(args.fleet_api_address)
+
+        num_workers = args.fleet_api_num_workers
+        if num_workers != 1:
+            log(
+                WARN,
+                "The Fleet API currently supports only 1 worker. "
+                "You have specified %d workers. "
+                "Support for multiple workers will be added in future releases. "
+                "Proceeding with a single worker.",
+                args.fleet_api_num_workers,
+            )
+            num_workers = 1
+
+        if args.fleet_api_type == TRANSPORT_TYPE_REST:
+            if (
+                importlib.util.find_spec("requests")
+                and importlib.util.find_spec("starlette")
+                and importlib.util.find_spec("uvicorn")
+            ) is None:
+                sys.exit(MISSING_EXTRA_REST)
+
+            _, ssl_certfile, ssl_keyfile = (
+                certificates if certificates is not None else (None, None, None)
+            )
+
+            fleet_thread = threading.Thread(
+                target=_run_fleet_api_rest,
+                args=(
+                    host,
+                    port,
+                    ssl_keyfile,
+                    ssl_certfile,
+                    state_factory,
+                    ffs_factory,
+                    num_workers,
+                ),
+            )
+            fleet_thread.start()
+            bckg_threads.append(fleet_thread)
+        elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE:
+            maybe_keys = _try_setup_node_authentication(args, certificates)
+            interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None
+            if maybe_keys is not None:
+                (
+                    node_public_keys,
+                    server_private_key,
+                    server_public_key,
+                ) = maybe_keys
+                state = state_factory.state()
+                state.store_node_public_keys(node_public_keys)
+                state.store_server_private_public_key(
+                    private_key_to_bytes(server_private_key),
+                    public_key_to_bytes(server_public_key),
+                )
+                log(
+                    INFO,
+                    "Node authentication enabled with %d known public keys",
+                    len(node_public_keys),
+                )
+                interceptors = [AuthenticateServerInterceptor(state)]
+
+            fleet_server = _run_fleet_api_grpc_rere(
+                address=fleet_address,
+                state_factory=state_factory,
+                ffs_factory=ffs_factory,
+                certificates=certificates,
+                interceptors=interceptors,
+            )
+            grpc_servers.append(fleet_server)
+        elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_ADAPTER:
+            fleet_server = _run_fleet_api_grpc_adapter(
+                address=fleet_address,
+                state_factory=state_factory,
+                ffs_factory=ffs_factory,
+                certificates=certificates,
+            )
+            grpc_servers.append(fleet_server)
+        else:
+            raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
 
     if args.isolation == ISOLATION_MODE_SUBPROCESS:
         # Scheduler thread
@@ -361,7 +379,7 @@ def run_superlink() -> None:
             for thread in bckg_threads:
                 if not thread.is_alive():
                     sys.exit(1)
-        serverappio_server.wait_for_termination(timeout=1)
+        exec_server.wait_for_termination(timeout=1)
 
 
 def _flwr_serverapp_scheduler(
