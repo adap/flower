@@ -183,7 +183,9 @@ def default_init_params_workflow(driver: DriverConnection, context: Context) -> 
         log(INFO, "Evaluation returned no results (`None`)")
 
 
-def default_centralized_evaluation_workflow(_: DriverConnection, context: Context) -> None:
+def default_centralized_evaluation_workflow(
+    _: DriverConnection, context: Context
+) -> None:
     """Execute the default workflow for centralized evaluation."""
     if not isinstance(context, LegacyContext):
         raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")

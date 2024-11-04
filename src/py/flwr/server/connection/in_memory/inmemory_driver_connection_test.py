@@ -42,7 +42,9 @@ from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 from .inmemory_driver_connection import InMemoryDriverConnection
 
 
-def push_messages(driver: InMemoryDriverConnection, num_nodes: int) -> tuple[Iterable[str], int]:
+def push_messages(
+    driver: InMemoryDriverConnection, num_nodes: int
+) -> tuple[Iterable[str], int]:
     """Help push messages to state."""
     for _ in range(num_nodes):
         driver.state.create_node(ping_interval=PING_MAX_INTERVAL)

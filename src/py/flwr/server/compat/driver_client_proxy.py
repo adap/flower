@@ -22,13 +22,15 @@ from flwr.common import Message, MessageType, MessageTypeLegacy, RecordSet
 from flwr.common import recordset_compat as compat
 from flwr.server.client_proxy import ClientProxy
 
-from ..connection.driver_connection import DriverConnection
+from ..connection import DriverConnection
 
 
 class DriverClientProxy(ClientProxy):
     """Flower client proxy which delegates work using the Driver API."""
 
-    def __init__(self, node_id: int, driver: DriverConnection, anonymous: bool, run_id: int):
+    def __init__(
+        self, node_id: int, driver: DriverConnection, anonymous: bool, run_id: int
+    ):
         super().__init__(str(node_id))
         self.node_id = node_id
         self.driver = driver

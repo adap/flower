@@ -40,8 +40,7 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     CreateRunResponse,
 )
 
-from .connection import DriverConnection
-from .connection.grpc_rere.grpc_rere_driver_connection import GrpcRereDriverConnection
+from .connection import DriverConnection, GrpcRereDriverConnection
 from .server_app import LoadServerAppError, ServerApp
 
 
