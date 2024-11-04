@@ -24,7 +24,7 @@ service ClientAppIo {
   // Get token
   rpc GetToken(GetTokenRequest) returns (GetTokenResponse) {}
 
-  // Get Message, Context and Fab
+  // Get Message, Context, and Fab
   rpc PullClientAppInputs(PullClientAppInputsRequest)
       returns (PullClientAppInputsResponse) {}
 
