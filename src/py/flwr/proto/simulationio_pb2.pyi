@@ -14,7 +14,7 @@ import typing_extensions
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class PullSimulationInputsRequest(google.protobuf.message.Message):
-    """PullServerAppInputs messages"""
+    """PullSimulationInputs messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     def __init__(self,
         ) -> None: ...
@@ -42,7 +42,7 @@ class PullSimulationInputsResponse(google.protobuf.message.Message):
 global___PullSimulationInputsResponse = PullSimulationInputsResponse
 
 class PushSimulationOutputsRequest(google.protobuf.message.Message):
-    """PushServerAppOutputs messages"""
+    """PushSimulationOutputs messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     RUN_ID_FIELD_NUMBER: builtins.int
     CONTEXT_FIELD_NUMBER: builtins.int

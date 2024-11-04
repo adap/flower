@@ -39,7 +39,7 @@ service SimulationIo {
   rpc PushLogs(PushLogsRequest) returns (PushLogsResponse) {}
 }
 
-// PullServerAppInputs messages
+// PullSimulationInputs messages
 message PullSimulationInputsRequest {}
 message PullSimulationInputsResponse {
   Context context = 1;
@@ -47,7 +47,7 @@ message PullSimulationInputsResponse {
   Fab fab = 3;
 }
 
-// PushServerAppOutputs messages
+// PushSimulationOutputs messages
 message PushSimulationOutputsRequest {
   uint64 run_id = 1;
   Context context = 2;
