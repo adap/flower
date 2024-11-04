@@ -39,10 +39,10 @@ from flwr.server.superlink.linkstate import (
 )
 from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 
-from .inmemory_driver import InMemoryDriver
+from .inmemory_driver_connection import InMemoryDriverConnection
 
 
-def push_messages(driver: InMemoryDriver, num_nodes: int) -> tuple[Iterable[str], int]:
+def push_messages(driver: InMemoryDriverConnection, num_nodes: int) -> tuple[Iterable[str], int]:
     """Help push messages to state."""
     for _ in range(num_nodes):
         driver.state.create_node(ping_interval=PING_MAX_INTERVAL)
@@ -58,7 +58,7 @@ def push_messages(driver: InMemoryDriver, num_nodes: int) -> tuple[Iterable[str]
 
 
 def get_replies(
-    driver: InMemoryDriver, msg_ids: Iterable[str], node_id: int
+    driver: InMemoryDriverConnection, msg_ids: Iterable[str], node_id: int
 ) -> list[str]:
     """Help create message replies and pull taskres from state."""
     taskins = driver.state.get_task_ins(node_id, limit=len(list(msg_ids)))
@@ -97,7 +97,7 @@ class TestInMemoryDriver(unittest.TestCase):
             override_config={"test_key": "test_value"},
         )
         state_factory = MagicMock(state=lambda: self.state)
-        self.driver = InMemoryDriver(state_factory=state_factory)
+        self.driver = InMemoryDriverConnection(state_factory=state_factory)
         self.driver.init_run(run_id=61016)
         self.driver.state = self.state
 
@@ -234,7 +234,7 @@ class TestInMemoryDriver(unittest.TestCase):
         # Prepare
         state = LinkStateFactory("").state()
         run_id = state.create_run("", "", "", {})
-        self.driver = InMemoryDriver(MagicMock(state=lambda: state))
+        self.driver = InMemoryDriverConnection(MagicMock(state=lambda: state))
         self.driver.init_run(run_id=run_id)
         msg_ids, node_id = push_messages(self.driver, self.num_nodes)
         assert isinstance(state, SqliteLinkState)
@@ -261,7 +261,7 @@ class TestInMemoryDriver(unittest.TestCase):
         state_factory = LinkStateFactory(":flwr-in-memory-state:")
         state = state_factory.state()
         run_id = state.create_run("", "", "", {})
-        self.driver = InMemoryDriver(state_factory)
+        self.driver = InMemoryDriverConnection(state_factory)
         self.driver.init_run(run_id=run_id)
         msg_ids, node_id = push_messages(self.driver, self.num_nodes)
         assert isinstance(state, InMemoryLinkState)

@@ -22,7 +22,7 @@ from flwr.common import Message, MessageType, MessageTypeLegacy, RecordSet
 from flwr.common import recordset_compat as compat
 from flwr.server.client_proxy import ClientProxy
 
-from ..connection.driver import DriverConnection
+from ..connection.driver_connection import DriverConnection
 
 
 class DriverClientProxy(ClientProxy):

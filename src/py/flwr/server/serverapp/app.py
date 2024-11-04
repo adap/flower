@@ -53,7 +53,7 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PullServerAppInputsResponse,
     PushServerAppOutputsRequest,
 )
-from flwr.server.connection.grpc_driver import GrpcDriver
+from flwr.server.connection.grpc_rere.grpc_rere_driver_connection import GrpcRereDriverConnection
 from flwr.server.run_serverapp import run as run_
 
 
@@ -165,7 +165,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
     certificates: Optional[bytes] = None,
 ) -> None:
     """Run Flower ServerApp process."""
-    driver = GrpcDriver(
+    driver = GrpcRereDriverConnection(
         serverappio_service_address=superlink,
         root_certificates=certificates,
     )

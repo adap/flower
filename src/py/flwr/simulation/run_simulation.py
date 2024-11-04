@@ -39,7 +39,7 @@ from flwr.common.logger import (
     warn_deprecated_feature_with_example,
 )
 from flwr.common.typing import Run, RunStatus, UserConfig
-from flwr.server.connection import DriverConnection, InMemoryDriver
+from flwr.server.connection import DriverConnection, InMemoryDriverConnection
 from flwr.server.run_serverapp import run as _run
 from flwr.server.server_app import ServerApp
 from flwr.server.superlink.fleet import vce
@@ -421,7 +421,7 @@ def _main_loop(
             server_app_run_config = {}
 
         # Initialize Driver
-        driver = InMemoryDriver(state_factory=state_factory)
+        driver = InMemoryDriverConnection(state_factory=state_factory)
         driver.init_run(run_id=run.run_id)
 
         # Get and run ServerApp thread

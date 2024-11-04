@@ -12,15 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""ServerApp IO."""
+"""Client-side part of the grpc-rere transport layer for ServerAppIo API."""
 
 
-from .driver_connection import DriverConnection
-from .grpc_rere.grpc_rere_driver_connection import GrpcRereDriverConnection
-from .in_memory.inmemory_driver_connection import InMemoryDriverConnection
+from .inmemory_driver_connection import InMemoryDriverConnection
 
 __all__ = [
-    "DriverConnection",
-    "GrpcRereDriverConnection",
     "InMemoryDriverConnection",
 ]

@@ -27,11 +27,11 @@ from flwr.common.typing import Run
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkStateFactory
 
-from .driver import DriverConnection
+from ..driver_connection import DriverConnection
 
 
-class InMemoryDriver(DriverConnection):
-    """`InMemoryDriver` class provides an interface to the ServerAppIo API.
+class InMemoryDriverConnection(DriverConnection):
+    """In memory driver connection.
 
     Parameters
     ----------

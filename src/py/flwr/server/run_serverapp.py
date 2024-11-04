@@ -41,7 +41,7 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 )
 
 from .connection import DriverConnection
-from .connection.grpc_driver import GrpcDriver
+from .connection.grpc_rere.grpc_rere_driver_connection import GrpcRereDriverConnection
 from .server_app import LoadServerAppError, ServerApp
 
 
@@ -169,7 +169,7 @@ def run_server_app() -> None:
     # Initialize GrpcDriver
     if app_path is None:
         # User provided `--run-id`, but not `app_dir`
-        driver = GrpcDriver(
+        driver = GrpcRereDriverConnection(
             serverappio_service_address=args.superlink,
             root_certificates=root_certificates,
         )
@@ -191,7 +191,7 @@ def run_server_app() -> None:
     else:
         # User provided `app_dir`, but not `--run-id`
         # Create run if run_id is not provided
-        driver = GrpcDriver(
+        driver = GrpcRereDriverConnection(
             serverappio_service_address=args.superlink,
             root_certificates=root_certificates,
         )

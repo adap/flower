@@ -34,7 +34,7 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 
-from .grpc_driver import GrpcDriver
+from .grpc_rere_driver_connection import GrpcRereDriverConnection
 
 
 class TestGrpcDriver(unittest.TestCase):
@@ -56,7 +56,7 @@ class TestGrpcDriver(unittest.TestCase):
         self.mock_stub = Mock()
         self.mock_channel = Mock()
         self.mock_stub.GetRun.side_effect = _mock_fn
-        self.driver = GrpcDriver()
+        self.driver = GrpcRereDriverConnection()
         self.driver._grpc_stub = self.mock_stub  # pylint: disable=protected-access
         self.driver._channel = self.mock_channel  # pylint: disable=protected-access
         self.driver.init_run(run_id=61016)
