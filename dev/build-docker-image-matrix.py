@@ -1,5 +1,21 @@
 """
 Usage: python dev/build-docker-image-matrix.py --flwr-version <flower version e.g. 1.13.0>
+
+Images are built in three workflows: stable, nightly, and unstable (main).
+Each builds for `amd64` and `arm64`.
+
+1. **Ubuntu Images**:
+   - Used for images where dependencies might be installed by users.
+   - Ubuntu uses `glibc`, compatible with most ML frameworks.
+
+2. **Alpine Images**:
+   - Used only for minimal images (e.g., SuperLink) where no extra dependencies are expected.
+   - Limited use due to dependency compilation complexity with `musl` and ML frameworks.
+
+Workflow Details:
+- **Stable Release**: Triggered on new releases. Builds full matrix (all Python versions, Ubuntu and Alpine).
+- **Nightly Release**: Daily trigger. Builds full matrix (latest Python, Ubuntu only).
+- **Unstable**: Triggered on main branch commits. Builds simplified matrix (latest Python, Ubuntu only).
 """
 
 import argparse
@@ -45,7 +61,9 @@ class Variant:
         return self.tag_fn(self.distro, flwr_version, python_version, self.extras)
 
     def build_args(self, flwr_version: str, python_version: str) -> str:
-        return self.build_args_fn(self.distro, flwr_version, python_version, self.extras)
+        return self.build_args_fn(
+            self.distro, flwr_version, python_version, self.extras
+        )
 
 
 @dataclass
