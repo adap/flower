@@ -16,7 +16,7 @@
 
 
 from logging import DEBUG, WARNING
-from typing import Optional
+from typing import Optional, cast
 
 import grpc
 
@@ -53,6 +53,13 @@ class SimulationIoConnection:
     def _is_connected(self) -> bool:
         """Check if connected to the SimulationIo API server."""
         return self._channel is not None
+
+    @property
+    def _stub(self) -> SimulationIoStub:
+        """SimulationIo stub."""
+        if not self._is_connected:
+            self._connect()
+        return cast(SimulationIoStub, self._grpc_stub)
 
     def _connect(self) -> None:
         """Connect to the SimulationIo API.
