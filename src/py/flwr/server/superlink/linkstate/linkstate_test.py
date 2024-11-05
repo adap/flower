@@ -1167,12 +1167,16 @@ class StateTest(unittest.TestCase):
         state.update_run_status(run_B, RunStatus(Status.RUNNING, "", ""))
 
         # Execute
-        fed_options_A = state.get_federation_options(run_A)
-        fed_options_B = state.get_federation_options(run_B)
+        fed_options_A = state.get_federation_options(run_id=run_A)
+        fed_options_B = state.get_federation_options(run_id=run_B)
 
         # Assert
         assert fed_options_A == ConfigsRecord()
         assert fed_options_B == fed_options
+
+        # Generate a run_id that doesn't exist. Then check None is returned
+        unique_int = next(num for num in range(0, 3) if num not in {run_A, run_B})
+        assert state.get_federation_options(run_id=unique_int) is None
 
 
 def create_task_ins(
