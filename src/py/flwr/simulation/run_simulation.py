@@ -88,10 +88,6 @@ def run_simulation_from_cli() -> None:
         backend_config_dict = _replace_keys(backend_config_dict, match="-", target="_")
         log(DEBUG, "backend_config_dict: %s", backend_config_dict)
 
-    if args.app and args.app_dir:
-        log(ERROR, "Either `--app` or `--app-dir` can be set, but not both.")
-        sys.exit("Simulation Engine cannot start.")
-
     run_id = (
         generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
         if args.run_id is None
@@ -125,7 +121,6 @@ def run_simulation_from_cli() -> None:
         [args.run_config] if args.run_config else args.run_config
     )
     fused_config = get_fused_config_from_dir(app_path, override_config)
-    app_dir = args.app
 
     # Create run
     run = Run(
@@ -142,7 +137,7 @@ def run_simulation_from_cli() -> None:
         num_supernodes=args.num_supernodes,
         backend_name=args.backend,
         backend_config=backend_config_dict,
-        app_dir=app_dir,
+        app_dir=args.app,
         run=run,
         enable_tf_gpu_growth=args.enable_tf_gpu_growth,
         delay_start=args.delay_start,
@@ -511,7 +506,7 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
     parser.add_argument(
         "--app",
         type=str,
-        default=None,
+        required=True,
         help="Path to a directory containing a FAB-like structure with a "
         "pyproject.toml.",
     )
@@ -562,13 +557,6 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         action="store_true",
         help="When unset, only INFO, WARNING and ERROR log messages will be shown. "
         "If set, DEBUG-level logs will be displayed. ",
-    )
-    parser.add_argument(
-        "--app-dir",
-        default="",
-        help="Add specified directory to the PYTHONPATH and load"
-        "ClientApp and ServerApp from there."
-        " Default: current working directory.",
     )
     parser.add_argument(
         "--flwr-dir",
