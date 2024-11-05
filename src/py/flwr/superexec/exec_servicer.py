@@ -78,7 +78,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         run = state.get_run(run_id)
         if run is None:
             context.abort(
-                grpc.StatusCode.NOT_FOUND, f"Cannot find the run with ID: {run_id}"
+                grpc.StatusCode.NOT_FOUND, f"Cannot find the Run with ID: {run_id}"
             )
 
         # Fuse overrides config from the request to `run_config`
@@ -88,9 +88,10 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         serverapp_context = state.get_serverapp_context(run_id)
         if serverapp_context is None:
             context.abort(
-                grpc.StatusCode.NOT_FOUND, f"Cannot find the context with ID: {run_id}"
+                grpc.StatusCode.NOT_FOUND, f"Cannot find the Context with ID: {run_id}"
             )
-            raise ValueError("ServerApp context not found")
+
+        serverapp_context = cast(Context, serverapp_context)
         serverapp_context.run_config = run_config
         state.set_serverapp_context(run_id, serverapp_context)
 
