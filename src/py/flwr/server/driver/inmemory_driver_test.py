@@ -97,7 +97,8 @@ class TestInMemoryDriver(unittest.TestCase):
             override_config={"test_key": "test_value"},
         )
         state_factory = MagicMock(state=lambda: self.state)
-        self.driver = InMemoryDriver(run_id=61016, state_factory=state_factory)
+        self.driver = InMemoryDriver(state_factory=state_factory)
+        self.driver.init_run(run_id=61016)
         self.driver.state = self.state
 
     def test_get_run(self) -> None:
@@ -232,9 +233,9 @@ class TestInMemoryDriver(unittest.TestCase):
         """Test tasks are deleted in sqlite state once messages are pulled."""
         # Prepare
         state = LinkStateFactory("").state()
-        self.driver = InMemoryDriver(
-            state.create_run("", "", "", {}), MagicMock(state=lambda: state)
-        )
+        run_id = state.create_run("", "", "", {})
+        self.driver = InMemoryDriver(MagicMock(state=lambda: state))
+        self.driver.init_run(run_id=run_id)
         msg_ids, node_id = push_messages(self.driver, self.num_nodes)
         assert isinstance(state, SqliteLinkState)
 
@@ -259,7 +260,9 @@ class TestInMemoryDriver(unittest.TestCase):
         # Prepare
         state_factory = LinkStateFactory(":flwr-in-memory-state:")
         state = state_factory.state()
-        self.driver = InMemoryDriver(state.create_run("", "", "", {}), state_factory)
+        run_id = state.create_run("", "", "", {})
+        self.driver = InMemoryDriver(state_factory)
+        self.driver.init_run(run_id=run_id)
         msg_ids, node_id = push_messages(self.driver, self.num_nodes)
         assert isinstance(state, InMemoryLinkState)
 
