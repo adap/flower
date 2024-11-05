@@ -26,6 +26,7 @@ from typing import Optional
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
+from flwr.common import EventType
 from flwr.common.config import (
     get_flwr_dir,
     get_fused_config_from_dir,
@@ -53,7 +54,7 @@ from flwr.proto.simulationio_pb2 import (  # pylint: disable=E0611
     PullSimulationInputsResponse,
     PushSimulationOutputsRequest,
 )
-from flwr.simulation.run_simulation import run_simulation_from_cli
+from flwr.simulation.run_simulation import _run_simulation
 from flwr.simulation.simulationio_connection import SimulationIoConnection
 
 
@@ -69,7 +70,7 @@ def flwr_simulation() -> None:
     parser.add_argument(
         "--superlink",
         type=str,
-        help="Address of SuperLink's DriverAPI",
+        help="Address of SuperLink's SimulationIO API",
     )
     parser.add_argument(
         "--run-once",
@@ -166,7 +167,7 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212
 ) -> None:
     """Run Flower Simulation process."""
     conn = SimulationIoConnection(
-        serverappio_service_address=superlink,
+        simulationio_service_address=superlink,
         root_certificates=certificates,
     )
 
@@ -177,7 +178,7 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212
     while True:
 
         try:
-            # Pull ServerAppInputs from LinkState
+            # Pull SimulationInputs from LinkState
             req = PullSimulationInputsRequest()
             res: PullSimulationInputsResponse = conn._grpc_stub.PullSimulationInputs(
                 req
@@ -191,8 +192,6 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212
             run = run_from_proto(res.run)
             fab = fab_from_proto(res.fab)
 
-            # driver.init_run(run.run_id)
-
             # Start log uploader for this run
             log_uploader = start_log_uploader(
                 log_queue=log_queue,
@@ -201,7 +200,7 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212
                 stub=conn._grpc_stub,
             )
 
-            log(DEBUG, "ServerApp process starts FAB installation.")
+            log(DEBUG, "Simulation process starts FAB installation.")
             install_from_fab(fab.content, flwr_dir=flwr_dir, skip_prompt=True)
 
             fab_id, fab_version = get_fab_metadata(fab.content)
@@ -209,19 +208,25 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212
             app_path = str(get_project_dir(fab_id, fab_version, fab.hash_str, flwr_dir))
             config = get_project_config(app_path)
 
-            # Obtain server app reference and the run config
-            server_app_attr = config["tool"]["flwr"]["app"]["components"]["serverapp"]
-            server_app_run_config = get_fused_config_from_dir(
-                Path(app_path), run.override_config
-            )
+            # Get ClientApp and SeverApp components
+            app_components = config["tool"]["flwr"]["app"]["components"]
+            client_app_attr = app_components["clientapp"]
+            server_app_attr = app_components["serverapp"]
+            fused_config = get_fused_config_from_dir(app_path, run.override_config)
 
             # Update run_config in context
-            context.run_config = server_app_run_config
+            context.run_config = fused_config
 
             log(
                 DEBUG,
                 "Flower will load ServerApp `%s` in %s",
                 server_app_attr,
+                app_path,
+            )
+            log(
+                DEBUG,
+                "Flower will load ClientApp `%s` in %s",
+                client_app_attr,
                 app_path,
             )
 
@@ -231,8 +236,25 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212
                 UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
             )
 
-            # Load and run the ServerApp with the Driver
-            _ = run_simulation_from_cli()
+            # Launch the simulation
+            num_supernodes = 10
+            backend = "ray"
+            enable_tf_gpu_growth = False
+            backend_config_dict = {}
+            _ = _run_simulation(
+                server_app_attr=server_app_attr,
+                client_app_attr=client_app_attr,
+                num_supernodes=num_supernodes,
+                backend_name=backend,
+                backend_config=backend_config_dict,
+                app_dir=app_path,
+                run=run,
+                enable_tf_gpu_growth=enable_tf_gpu_growth,
+                verbose_logging=False,
+                server_app_run_config=fused_config,
+                is_app=True,
+                exit_event=EventType.CLI_FLOWER_SIMULATION_LEAVE,
+            )
 
             # Send resulting context
             context_proto = None  # context_to_proto(updated_context)
