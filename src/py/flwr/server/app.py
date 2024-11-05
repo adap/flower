@@ -47,6 +47,7 @@ from flwr.common.constant import (
     ISOLATION_MODE_SUBPROCESS,
     MISSING_EXTRA_REST,
     SERVERAPPIO_API_DEFAULT_ADDRESS,
+    SIMULATIONIO_API_DEFAULT_ADDRESS,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
@@ -217,6 +218,7 @@ def run_superlink() -> None:
     # Parse IP addresses
     serverappio_address, _, _ = _format_address(args.serverappio_api_address)
     exec_address, _, _ = _format_address(args.exec_api_address)
+    simulationio_address, _, _ = _format_address(args.simulationio_api_address)
 
     # Obtain certificates
     certificates = _try_obtain_certificates(args)
@@ -249,7 +251,7 @@ def run_superlink() -> None:
 
     if sim_exec:
         simulationio_server: grpc.Server = run_simulationio_api_grpc(
-            address=serverappio_address,
+            address=simulationio_address,
             state_factory=state_factory,
             ffs_factory=ffs_factory,
             certificates=certificates,
@@ -679,6 +681,7 @@ def _parse_args_run_superlink() -> argparse.ArgumentParser:
     _add_args_serverappio_api(parser=parser)
     _add_args_fleet_api(parser=parser)
     _add_args_exec_api(parser=parser)
+    _add_args_simulationio_api(parser=parser)
 
     return parser
 
@@ -811,4 +814,12 @@ def _add_args_exec_api(parser: argparse.ArgumentParser) -> None:
         help="Key-value pairs for the executor config, separated by spaces. "
         "For example:\n\n`--executor-config 'verbose=true "
         'root-certificates="certificates/superlink-ca.crt"\'`',
+    )
+
+
+def _add_args_simulationio_api(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--simulationio-api-address",
+        help="SimulationIo API (gRPC) server address (IPv4, IPv6, or a domain name).",
+        default=SIMULATIONIO_API_DEFAULT_ADDRESS,
     )
