@@ -19,7 +19,7 @@ import argparse
 import sys
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
-from typing import Optional, cast
+from typing import Optional
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
@@ -205,7 +205,7 @@ def run_server_app() -> None:
         res: CreateRunResponse = driver._stub.CreateRun(req)  # pylint: disable=W0212
         # Fetch full `Run` using `run_id`
         driver.init_run(res.run_id)  # pylint: disable=W0212
-        run_id = cast(int, res.run_id)
+        run_id = res.run_id
 
     # Obtain server app reference and the run config
     server_app_attr = config["tool"]["flwr"]["app"]["components"]["serverapp"]
