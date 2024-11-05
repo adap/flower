@@ -180,9 +180,7 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212
         try:
             # Pull SimulationInputs from LinkState
             req = PullSimulationInputsRequest()
-            res: PullSimulationInputsResponse = conn._grpc_stub.PullSimulationInputs(
-                req
-            )
+            res: PullSimulationInputsResponse = conn._stub.PullSimulationInputs(req)
             if not res.HasField("run"):
                 sleep(3)
                 run_status = None
@@ -197,7 +195,7 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212
                 log_queue=log_queue,
                 node_id=0,
                 run_id=run.run_id,
-                stub=conn._grpc_stub,
+                stub=conn._stub,
             )
 
             log(DEBUG, "Simulation process starts FAB installation.")
@@ -232,7 +230,7 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212
 
             # Change status to Running
             run_status_proto = run_status_to_proto(RunStatus(Status.RUNNING, "", ""))
-            conn._grpc_stub.UpdateRunStatus(
+            conn._stub.UpdateRunStatus(
                 UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
             )
 
@@ -261,7 +259,7 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212
             out_req = PushSimulationOutputsRequest(
                 run_id=run.run_id, context=context_proto
             )
-            _ = conn._grpc_stub.PushSimulationOutputs(out_req)
+            _ = conn._stub.PushSimulationOutputs(out_req)
 
             run_status = RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
 
@@ -273,7 +271,7 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212
         finally:
             if run_status:
                 run_status_proto = run_status_to_proto(run_status)
-                conn._grpc_stub.UpdateRunStatus(
+                conn._stub.UpdateRunStatus(
                     UpdateRunStatusRequest(
                         run_id=run.run_id, run_status=run_status_proto
                     )
