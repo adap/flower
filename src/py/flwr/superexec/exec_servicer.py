@@ -17,14 +17,17 @@
 
 import time
 from collections.abc import Generator
-from logging import ERROR, INFO
-from typing import Any
+from logging import DEBUG, ERROR, INFO
+from typing import Any, cast
 
 import grpc
 
+from flwr.common import Context, RecordSet
+from flwr.common.config import get_fused_config_from_fab
 from flwr.common.constant import LOG_STREAM_INTERVAL, Status
 from flwr.common.logger import log
 from flwr.common.serde import user_config_from_proto
+from flwr.common.typing import Run
 from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StartRunRequest,
@@ -68,6 +71,29 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             log(ERROR, "Executor failed to start run")
             return StartRunResponse()
 
+        # Create a context for the `run_id`
+        self._create_context(run_id)
+
+        state = self.linkstate_factory.state()
+        run = state.get_run(run_id)
+        if run is None:
+            context.abort(
+                grpc.StatusCode.NOT_FOUND, f"Cannot find the run with ID: {run_id}"
+            )
+
+        # Fuse overrides config from the request to `run_config`
+        run_config = get_fused_config_from_fab(request.fab.content, run=cast(Run, run))
+
+        # Update `run_config` in context
+        serverapp_context = state.get_serverapp_context(run_id)
+        if serverapp_context is None:
+            context.abort(
+                grpc.StatusCode.NOT_FOUND, f"Cannot find the context with ID: {run_id}"
+            )
+            raise ValueError("ServerApp context not found")
+        serverapp_context.run_config = run_config
+        state.set_serverapp_context(run_id, serverapp_context)
+
         return StartRunResponse(run_id=run_id)
 
     def StreamLogs(  # pylint: disable=C0103
@@ -105,3 +131,13 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
                 context.cancel()
 
             time.sleep(LOG_STREAM_INTERVAL)  # Sleep briefly to avoid busy waiting
+
+    def _create_context(self, run_id: int) -> None:
+        """Register a Context for a Run."""
+        log(DEBUG, "ExecServicer._create_context")
+        # Create an empty context for the Run
+        context = Context(node_id=0, node_config={}, state=RecordSet(), run_config={})
+
+        # Register the context at the LinkState
+        state = self.linkstate_factory.state()
+        state.set_serverapp_context(run_id=run_id, context=context)

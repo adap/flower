@@ -27,7 +27,6 @@ from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.common.config import (
     get_flwr_dir,
-    get_fused_config_from_dir,
     get_project_config,
     get_project_dir,
 )
@@ -209,12 +208,6 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
 
             # Obtain server app reference and the run config
             server_app_attr = config["tool"]["flwr"]["app"]["components"]["serverapp"]
-            server_app_run_config = get_fused_config_from_dir(
-                Path(app_path), run.override_config
-            )
-
-            # Update run_config in context
-            context.run_config = server_app_run_config
 
             log(
                 DEBUG,
