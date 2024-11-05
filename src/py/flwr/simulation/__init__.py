@@ -19,6 +19,7 @@ import importlib
 
 from flwr.simulation.run_simulation import run_simulation
 from flwr.simulation.simulationio_connection import SimulationIoConnection
+from flwr.simulation.app import run_simulation as run_simulation_process
 
 is_ray_installed = importlib.util.find_spec("ray") is not None
 
@@ -41,4 +42,5 @@ __all__ = [
     "SimulationIoConnection",
     "run_simulation",
     "start_simulation",
+    "run_simulation_process"
 ]
