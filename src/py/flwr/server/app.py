@@ -71,7 +71,6 @@ from .server import Server, init_defaults, run_fl
 from .server_config import ServerConfig
 from .strategy import Strategy
 from .superlink.driver.serverappio_grpc import run_serverappio_api_grpc
-from .superlink.driver.simulationio_grpc import run_simulationio_api_grpc
 from .superlink.ffs.ffs_factory import FfsFactory
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
 from .superlink.fleet.grpc_bidi.grpc_server import (
@@ -81,6 +80,7 @@ from .superlink.fleet.grpc_bidi.grpc_server import (
 from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
 from .superlink.fleet.grpc_rere.server_interceptor import AuthenticateServerInterceptor
 from .superlink.linkstate import LinkStateFactory
+from .superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
 
 DATABASE = ":flwr-in-memory-state:"
 BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
