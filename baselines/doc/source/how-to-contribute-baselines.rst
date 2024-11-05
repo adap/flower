@@ -65,7 +65,7 @@ Flower is known and loved for its usability. Therefore, make sure that your base
     flwr run .
 
     # Run the baseline overriding the config
-    flwr run . --run-config lr=0.01,num-server-rounds=200
+    flwr run . --run-config "lr=0.01 num-server-rounds=200"
 
 
 We look forward to your contribution! 
