@@ -23,7 +23,7 @@ from datetime import datetime, timezone
 from unittest.mock import patch
 from uuid import UUID
 
-from flwr.common import DEFAULT_TTL, Context, RecordSet, now
+from flwr.common import DEFAULT_TTL, ConfigsRecord, Context, RecordSet, now
 from flwr.common.constant import ErrorCode, Status, SubStatus
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
@@ -1147,6 +1147,32 @@ class StateTest(unittest.TestCase):
         # Assert
         assert latest == 0
         assert retrieved_logs == ""
+
+    def test_create_run_with_and_without_federation_options(self) -> None:
+        """Test that the recording and fetching of federation options works."""
+        # Prepare
+        state = self.state_factory()
+        # A run w/o federation options
+        run_A = state.create_run(None, None, "9f86d08", {"test_key": "test_value"})
+        # A run w/ federation options
+        fed_options = ConfigsRecord({"setting-a": 123, "setting-b": [4, 5, 6]})
+        run_B = state.create_run(
+            None,
+            None,
+            "fffffff",
+            {"mock_key": "mock_value"},
+            federation_options=fed_options,
+        )
+        state.update_run_status(run_A, RunStatus(Status.STARTING, "", ""))
+        state.update_run_status(run_B, RunStatus(Status.RUNNING, "", ""))
+
+        # Execute
+        fed_options_A = state.get_federation_options(run_A)
+        fed_options_B = state.get_federation_options(run_B)
+
+        # Assert
+        assert fed_options_A == ConfigsRecord()
+        assert fed_options_B == fed_options
 
 
 def create_task_ins(

@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS run(
     finished_at           TEXT,
     sub_status            TEXT,
     details               TEXT,
-    federation_options    BLOB,
+    federation_options    BLOB
 );
 """
 
@@ -836,9 +836,9 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         if self.query(query, (sint64_run_id,))[0]["COUNT(*)"] == 0:
             query = (
                 "INSERT INTO run "
-                "(run_id, fab_id, fab_version, fab_hash, override_config, pending_at, "
-                "federation_options, starting_at, running_at, finished_at, sub_status, "
-                "details) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+                "(run_id, fab_id, fab_version, fab_hash, override_config, "
+                "federation_options, pending_at, starting_at, running_at, finished_at, "
+                "sub_status, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
             )
             if fab_hash:
                 fab_id, fab_version = "", ""
