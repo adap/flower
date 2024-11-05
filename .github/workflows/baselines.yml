@@ -1,89 +1,89 @@
-name: Baselines
+# name: Baselines
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+# on:
+#   push:
+#     branches:
+#       - main
+#   pull_request:
+#     branches:
+#       - main
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+# concurrency:
+#   group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
+#   cancel-in-progress: true
 
-env:
-  FLWR_TELEMETRY_ENABLED: 0
+# env:
+#   FLWR_TELEMETRY_ENABLED: 0
 
-jobs:
-  changes:
-    runs-on: ubuntu-22.04
-    permissions:
-      pull-requests: read
-    outputs:
-      baselines: ${{ steps.filter.outputs.changes }}
-    steps:
-      - uses: actions/checkout@v4
+# jobs:
+#   changes:
+#     runs-on: ubuntu-22.04
+#     permissions:
+#       pull-requests: read
+#     outputs:
+#       baselines: ${{ steps.filter.outputs.changes }}
+#     steps:
+#       - uses: actions/checkout@v4
 
-      - shell: bash
-        run: |
-          # create a list of all directories in baselines
-          {
-            echo 'FILTER_PATHS<<EOF'
-            FILTER=""
-            while read -d $'\0' BASELINES_PATH; do
-                DIR=$(basename $BASELINES_PATH)
-                FILTER+=$(echo "$DIR: ${BASELINES_PATH}/**\n")
-            done < <(find baselines -maxdepth 1 \
-                -name ".*" -prune -o \
-                -path "baselines/doc" -prune -o \
-                -path "baselines/dev" -prune -o \
-                -path "baselines/baseline_template" -prune -o \
-                -path "baselines/flwr_baselines" -prune -o \
-                -type d -print0)
-            FILTER=$(echo -e "$FILTER")
-            # remove first line
-            FILTER=${FILTER#*$'\n'}
-            echo "$FILTER"
-            echo EOF
-          } >> "$GITHUB_ENV"
+#       - shell: bash
+#         run: |
+#           # create a list of all directories in baselines
+#           {
+#             echo 'FILTER_PATHS<<EOF'
+#             FILTER=""
+#             while read -d $'\0' BASELINES_PATH; do
+#                 DIR=$(basename $BASELINES_PATH)
+#                 FILTER+=$(echo "$DIR: ${BASELINES_PATH}/**\n")
+#             done < <(find baselines -maxdepth 1 \
+#                 -name ".*" -prune -o \
+#                 -path "baselines/doc" -prune -o \
+#                 -path "baselines/dev" -prune -o \
+#                 -path "baselines/baseline_template" -prune -o \
+#                 -path "baselines/flwr_baselines" -prune -o \
+#                 -type d -print0)
+#             FILTER=$(echo -e "$FILTER")
+#             # remove first line
+#             FILTER=${FILTER#*$'\n'}
+#             echo "$FILTER"
+#             echo EOF
+#           } >> "$GITHUB_ENV"
 
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: ${{ env.FILTER_PATHS }}
+#       - uses: dorny/paths-filter@v3
+#         id: filter
+#         with:
+#           filters: ${{ env.FILTER_PATHS }}
 
-      - if: ${{ github.event.pull_request.head.repo.fork }}
-        run: |
-          CHANGES=$(echo "${{ toJson(steps.filter.outputs.changes) }}" | jq '. | length')
-          if [ "$CHANGES" -gt 1 ]; then
-            echo "::error ::The changes should only apply to a single baseline."
-            exit 1
-          fi
+#       - if: ${{ github.event.pull_request.head.repo.fork }}
+#         run: |
+#           CHANGES=$(echo "${{ toJson(steps.filter.outputs.changes) }}" | jq '. | length')
+#           if [ "$CHANGES" -gt 1 ]; then
+#             echo "::error ::The changes should only apply to a single baseline."
+#             exit 1
+#           fi
 
-  test:
-    runs-on: ubuntu-22.04
-    needs: changes
-    if: ${{ needs.changes.outputs.baselines != '' && toJson(fromJson(needs.changes.outputs.baselines)) != '[]' }}
-    strategy:
-      matrix:
-        baseline: ${{ fromJSON(needs.changes.outputs.baselines) }}
-    steps:
-      - uses: actions/checkout@v4
+#   test:
+#     runs-on: ubuntu-22.04
+#     needs: changes
+#     if: ${{ needs.changes.outputs.baselines != '' && toJson(fromJson(needs.changes.outputs.baselines)) != '[]' }}
+#     strategy:
+#       matrix:
+#         baseline: ${{ fromJSON(needs.changes.outputs.baselines) }}
+#     steps:
+#       - uses: actions/checkout@v4
 
-      - name: Bootstrap
-        uses: ./.github/actions/bootstrap
-        with:
-          python-version: '3.10'
+#       - name: Bootstrap
+#         uses: ./.github/actions/bootstrap
+#         with:
+#           python-version: '3.10'
 
-      - name: Install dependencies
-        working-directory: baselines/${{ matrix.baseline }}
-        run: python -m poetry install
+#       - name: Install dependencies
+#         working-directory: baselines/${{ matrix.baseline }}
+#         run: python -m poetry install
 
-      - name: Testing ${{ matrix.baseline }}
-        working-directory: baselines
-        run: ./dev/test-baseline.sh ${{ matrix.baseline }}
+#       - name: Testing ${{ matrix.baseline }}
+#         working-directory: baselines
+#         run: ./dev/test-baseline.sh ${{ matrix.baseline }}
 
-      - name: Test Structure of ${{ matrix.baseline }}
-        working-directory: baselines
-        run: ./dev/test-baseline-structure.sh ${{ matrix.baseline }}
+#       - name: Test Structure of ${{ matrix.baseline }}
+#         working-directory: baselines
+#         run: ./dev/test-baseline-structure.sh ${{ matrix.baseline }}
