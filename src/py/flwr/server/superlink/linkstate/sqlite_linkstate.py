@@ -271,7 +271,6 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         if any(errors):
             log(ERROR, errors)
             return None
-
         # Create task_id
         task_id = uuid4()
 
@@ -284,16 +283,36 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             data[0], ["run_id", "producer_node_id", "consumer_node_id"]
         )
 
+        # Validate run_id
+        query = "SELECT run_id FROM run WHERE run_id = ?;"
+        if not self.query(query, (data[0]["run_id"],)):
+            log(ERROR, "Invalid run ID for TaskIns: %s", task_ins.run_id)
+            return None
+        # Validate source node ID
+        if task_ins.task.producer.node_id != 0:
+            log(
+                ERROR,
+                "Invalid source node ID for TaskIns: %s",
+                task_ins.task.producer.node_id,
+            )
+            return None
+        # Validate destination node ID
+        query = "SELECT node_id FROM node WHERE node_id = ?;"
+        if not task_ins.task.consumer.anonymous:
+            if not self.query(query, (data[0]["consumer_node_id"],)):
+                log(
+                    ERROR,
+                    "Invalid destination node ID for TaskIns: %s",
+                    task_ins.task.consumer.node_id,
+                )
+                return None
+
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_ins VALUES({columns});"
 
         # Only invalid run_id can trigger IntegrityError.
         # This may need to be changed in the future version with more integrity checks.
-        try:
-            self.query(query, data)
-        except sqlite3.IntegrityError:
-            log(ERROR, "`run` is invalid")
-            return None
+        self.query(query, data)
 
         return task_id
 

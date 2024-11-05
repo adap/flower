@@ -21,7 +21,6 @@ import logging
 import sys
 import threading
 import traceback
-from argparse import Namespace
 from logging import DEBUG, ERROR, INFO, WARNING
 from pathlib import Path
 from time import sleep
@@ -35,7 +34,6 @@ from flwr.common.constant import RUN_ID_NUM_BYTES, Status
 from flwr.common.logger import (
     set_logger_propagation,
     update_console_handler,
-    warn_deprecated_feature,
     warn_deprecated_feature_with_example,
 )
 from flwr.common.typing import Run, RunStatus, UserConfig
@@ -50,47 +48,6 @@ from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 from flwr.simulation.ray_transport.utils import (
     enable_tf_gpu_growth as enable_gpu_growth,
 )
-
-
-def _check_args_do_not_interfere(args: Namespace) -> bool:
-    """Ensure decoupling of flags for different ways to start the simulation."""
-    mode_one_args = ["app", "run_config"]
-    mode_two_args = ["client_app", "server_app"]
-
-    def _resolve_message(conflict_keys: list[str]) -> str:
-        return ",".join([f"`--{key}`".replace("_", "-") for key in conflict_keys])
-
-    # When passing `--app`, `--app-dir` is ignored
-    if args.app and args.app_dir:
-        log(ERROR, "Either `--app` or `--app-dir` can be set, but not both.")
-        return False
-
-    if any(getattr(args, key) for key in mode_one_args):
-        if any(getattr(args, key) for key in mode_two_args):
-            log(
-                ERROR,
-                "Passing any of {%s} alongside with any of {%s}",
-                _resolve_message(mode_one_args),
-                _resolve_message(mode_two_args),
-            )
-            return False
-
-        if not args.app:
-            log(ERROR, "You need to pass --app")
-            return False
-
-        return True
-
-    # Ensure all args are set (required for the non-FAB mode of execution)
-    if not all(getattr(args, key) for key in mode_two_args):
-        log(
-            ERROR,
-            "Passing all of %s keys are required.",
-            _resolve_message(mode_two_args),
-        )
-        return False
-
-    return True
 
 
 def _replace_keys(d: Any, match: str, target: str) -> Any:
@@ -115,19 +72,6 @@ def run_simulation_from_cli() -> None:
         event_details={"backend": args.backend, "num-supernodes": args.num_supernodes},
     )
 
-    # Add warnings for deprecated server_app and client_app arguments
-    if args.server_app:
-        warn_deprecated_feature(
-            "The `--server-app` argument is deprecated. "
-            "Please use the `--app` argument instead."
-        )
-
-    if args.client_app:
-        warn_deprecated_feature(
-            "The `--client-app` argument is deprecated. "
-            "Use the `--app` argument instead."
-        )
-
     if args.enable_tf_gpu_growth:
         warn_deprecated_feature_with_example(
             "Passing `--enable-tf-gpu-growth` is deprecated.",
@@ -144,60 +88,39 @@ def run_simulation_from_cli() -> None:
         backend_config_dict = _replace_keys(backend_config_dict, match="-", target="_")
         log(DEBUG, "backend_config_dict: %s", backend_config_dict)
 
-    # We are supporting two modes for the CLI entrypoint:
-    # 1) Running an app dir containing a `pyproject.toml`
-    # 2) Running any ClientApp and SeverApp w/o pyproject.toml being present
-    # For 2), some CLI args are compulsory, but they are not required for 1)
-    # We first do these checks
-    args_check_pass = _check_args_do_not_interfere(args)
-    if not args_check_pass:
-        sys.exit("Simulation Engine cannot start.")
-
     run_id = (
         generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
         if args.run_id is None
         else args.run_id
     )
-    if args.app:
-        # Mode 1
-        app_path = Path(args.app)
-        if not app_path.is_dir():
-            log(ERROR, "--app is not a directory")
-            sys.exit("Simulation Engine cannot start.")
 
-        # Load pyproject.toml
-        config, errors, warnings = load_and_validate(
-            app_path / "pyproject.toml", check_module=False
-        )
-        if errors:
-            raise ValueError(errors)
+    app_path = Path(args.app)
+    if not app_path.is_dir():
+        log(ERROR, "--app is not a directory")
+        sys.exit("Simulation Engine cannot start.")
 
-        if warnings:
-            log(WARNING, warnings)
+    # Load pyproject.toml
+    config, errors, warnings = load_and_validate(
+        app_path / "pyproject.toml", check_module=False
+    )
+    if errors:
+        raise ValueError(errors)
 
-        if config is None:
-            raise ValueError("Config extracted from FAB's pyproject.toml is not valid")
+    if warnings:
+        log(WARNING, warnings)
 
-        # Get ClientApp and SeverApp components
-        app_components = config["tool"]["flwr"]["app"]["components"]
-        client_app_attr = app_components["clientapp"]
-        server_app_attr = app_components["serverapp"]
+    if config is None:
+        raise ValueError("Config extracted from FAB's pyproject.toml is not valid")
 
-        override_config = parse_config_args(
-            [args.run_config] if args.run_config else args.run_config
-        )
-        fused_config = get_fused_config_from_dir(app_path, override_config)
-        app_dir = args.app
-        is_app = True
+    # Get ClientApp and SeverApp components
+    app_components = config["tool"]["flwr"]["app"]["components"]
+    client_app_attr = app_components["clientapp"]
+    server_app_attr = app_components["serverapp"]
 
-    else:
-        # Mode 2
-        client_app_attr = args.client_app
-        server_app_attr = args.server_app
-        override_config = {}
-        fused_config = None
-        app_dir = args.app_dir
-        is_app = False
+    override_config = parse_config_args(
+        [args.run_config] if args.run_config else args.run_config
+    )
+    fused_config = get_fused_config_from_dir(app_path, override_config)
 
     # Create run
     run = Run(
@@ -214,13 +137,13 @@ def run_simulation_from_cli() -> None:
         num_supernodes=args.num_supernodes,
         backend_name=args.backend,
         backend_config=backend_config_dict,
-        app_dir=app_dir,
+        app_dir=args.app,
         run=run,
         enable_tf_gpu_growth=args.enable_tf_gpu_growth,
         delay_start=args.delay_start,
         verbose_logging=args.verbose,
         server_app_run_config=fused_config,
-        is_app=is_app,
+        is_app=True,
         exit_event=EventType.CLI_FLOWER_SIMULATION_LEAVE,
     )
 
@@ -583,19 +506,9 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
     parser.add_argument(
         "--app",
         type=str,
-        default=None,
+        required=True,
         help="Path to a directory containing a FAB-like structure with a "
         "pyproject.toml.",
-    )
-    parser.add_argument(
-        "--server-app",
-        help="(DEPRECATED: use --app instead) For example: `server:app` or "
-        "`project.package.module:wrapper.app`",
-    )
-    parser.add_argument(
-        "--client-app",
-        help="(DEPRECATED: use --app instead) For example: `client:app` or "
-        "`project.package.module:wrapper.app`",
     )
     parser.add_argument(
         "--num-supernodes",
@@ -644,13 +557,6 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         action="store_true",
         help="When unset, only INFO, WARNING and ERROR log messages will be shown. "
         "If set, DEBUG-level logs will be displayed. ",
-    )
-    parser.add_argument(
-        "--app-dir",
-        default="",
-        help="Add specified directory to the PYTHONPATH and load"
-        "ClientApp and ServerApp from there."
-        " Default: current working directory.",
     )
     parser.add_argument(
         "--flwr-dir",
