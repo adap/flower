@@ -1018,7 +1018,7 @@ class StateTest(unittest.TestCase):
         task_id = state.store_task_ins(task_ins=task_ins)
 
         task_res = create_task_res(
-            # different than consumer_node_id
+            # Different than consumer_node_id
             producer_node_id=100 if node_id != 100 else 101,
             anonymous=False,
             ancestry=[str(task_id)],
