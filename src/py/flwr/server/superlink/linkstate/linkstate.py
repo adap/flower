@@ -102,9 +102,9 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
     def get_task_res(self, task_ids: set[UUID]) -> list[TaskRes]:
         """Get TaskRes for the given TaskIns IDs.
 
-        This method is typically called by the ServerAppIo API to obtain results (TaskRes)
-        for previously scheduled tasks (TaskIns). For each task_id provided, this method
-        returns one of the following responses:
+        This method is typically called by the ServerAppIo API to obtain
+        results (TaskRes) for previously scheduled instructions (TaskIns).
+        For each task_id provided, this method returns one of the following responses:
 
         - An error TaskRes if the corresponding TaskIns does not exist or has expired.
         - An error TaskRes if the corresponding TaskRes exists but has expired.
