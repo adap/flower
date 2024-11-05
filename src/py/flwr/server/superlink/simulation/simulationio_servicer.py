@@ -31,7 +31,6 @@ from flwr.common.serde import (
 )
 from flwr.common.typing import Fab, RunStatus
 from flwr.proto import simulationio_pb2_grpc
-from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.log_pb2 import (  # pylint: disable=E0611
     PushLogsRequest,
     PushLogsResponse,
@@ -46,7 +45,6 @@ from flwr.proto.simulationio_pb2 import (  # pylint: disable=E0611
     PushSimulationOutputsRequest,
     PushSimulationOutputsResponse,
 )
-from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkStateFactory
 
@@ -60,21 +58,6 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         self.state_factory = state_factory
         self.ffs_factory = ffs_factory
         self.lock = threading.RLock()
-
-    def GetFab(  # pylint: disable=C0103
-        self,
-        request: GetFabRequest,
-        context: grpc.ServicerContext,  # pylint: disable=W0613
-    ) -> GetFabResponse:
-        """Get FAB from Ffs."""
-        log(DEBUG, "SimultionIoServicer.GetFab")
-
-        ffs: Ffs = self.ffs_factory.ffs()
-        if result := ffs.get(request.hash_str):
-            fab = Fab(request.hash_str, result[0])
-            return GetFabResponse(fab=fab_to_proto(fab))
-
-        raise ValueError(f"Found no FAB with hash: {request.hash_str}")
 
     def PullSimulationInputs(
         self, request: PullSimulationInputsRequest, context: ServicerContext
