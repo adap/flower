@@ -17,7 +17,7 @@
 
 import importlib
 
-from flwr.simulation.app import run_simulation as run_simulation_process
+from flwr.simulation.app import run_simulation_process
 from flwr.simulation.run_simulation import run_simulation
 from flwr.simulation.simulationio_connection import SimulationIoConnection
 

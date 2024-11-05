@@ -15,9 +15,253 @@
 """Flower Simulation process."""
 
 
+import argparse
+import sys
+from logging import DEBUG, ERROR, INFO, WARN
+from os.path import isfile
+from pathlib import Path
+from queue import Queue
+from time import sleep
+from typing import Optional
+
+from flwr.cli.config_utils import get_fab_metadata
+from flwr.cli.install import install_from_fab
+from flwr.common.config import (
+    get_flwr_dir,
+    get_fused_config_from_dir,
+    get_project_config,
+    get_project_dir,
+)
+from flwr.common.constant import Status, SubStatus
+from flwr.common.logger import (
+    log,
+    mirror_output_to_queue,
+    restore_output,
+    start_log_uploader,
+    stop_log_uploader,
+)
+from flwr.common.serde import (
+    context_from_proto,
+    fab_from_proto,
+    run_from_proto,
+    run_status_to_proto,
+)
+from flwr.common.typing import RunStatus
+from flwr.proto.run_pb2 import UpdateRunStatusRequest  # pylint: disable=E0611
+from flwr.proto.simulationio_pb2 import (  # pylint: disable=E0611
+    PullSimulationInputsRequest,
+    PullSimulationInputsResponse,
+    PushSimulationOutputsRequest,
+)
+from flwr.simulation.run_simulation import run_simulation_from_cli
+from flwr.simulation.simulationio_connection import SimulationIoConnection
+
+
 def flwr_simulation() -> None:
     """Run process-isolated Flower Simulation."""
+    # Capture stdout/stderr
+    log_queue: Queue[Optional[str]] = Queue()
+    mirror_output_to_queue(log_queue)
+
+    parser = argparse.ArgumentParser(
+        description="Run a Flower Simulation",
+    )
+    parser.add_argument(
+        "--superlink",
+        type=str,
+        help="Address of SuperLink's DriverAPI",
+    )
+    parser.add_argument(
+        "--run-once",
+        action="store_true",
+        help="When set, this process will start a single simulation "
+        "for a pending Run. If no pending run the process will exit. ",
+    )
+    parser.add_argument(
+        "--flwr-dir",
+        default=None,
+        help="""The path containing installed Flower Apps.
+    By default, this value is equal to:
+
+        - `$FLWR_HOME/` if `$FLWR_HOME` is defined
+        - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
+        - `$HOME/.flwr/` in all other cases
+    """,
+    )
+    parser.add_argument(
+        "--insecure",
+        action="store_true",
+        help="Run the server without HTTPS, regardless of whether certificate "
+        "paths are provided. By default, the server runs with HTTPS enabled. "
+        "Use this flag only if you understand the risks.",
+    )
+    parser.add_argument(
+        "--root-certificates",
+        metavar="ROOT_CERT",
+        type=str,
+        help="Specifies the path to the PEM-encoded root certificate file for "
+        "establishing secure HTTPS connections.",
+    )
+    args = parser.parse_args()
+
+    log(INFO, "Starting Flower Simulation")
+    certificates = _try_obtain_certificates(args)
+
+    log(
+        DEBUG,
+        "Staring isolated `Simulation` connected to SuperLink DriverAPI at %s",
+        args.superlink,
+    )
+    run_simulation_process(
+        superlink=args.superlink,
+        log_queue=log_queue,
+        run_once=args.run_once,
+        flwr_dir_=args.flwr_dir,
+        certificates=certificates,
+    )
+
+    # Restore stdout/stderr
+    restore_output()
 
 
-def run_simulation() -> None:
+def _try_obtain_certificates(
+    args: argparse.Namespace,
+) -> Optional[bytes]:
+
+    if args.insecure:
+        if args.root_certificates is not None:
+            sys.exit(
+                "Conflicting options: The '--insecure' flag disables HTTPS, "
+                "but '--root-certificates' was also specified. Please remove "
+                "the '--root-certificates' option when running in insecure mode, "
+                "or omit '--insecure' to use HTTPS."
+            )
+        log(
+            WARN,
+            "Option `--insecure` was set. Starting insecure HTTP channel to %s.",
+            args.superlink,
+        )
+        root_certificates = None
+    else:
+        # Load the certificates if provided, or load the system certificates
+        if not isfile(args.root_certificates):
+            sys.exit("Path argument `--root-certificates` does not point to a file.")
+        root_certificates = Path(args.root_certificates).read_bytes()
+        log(
+            DEBUG,
+            "Starting secure HTTPS channel to %s "
+            "with the following certificates: %s.",
+            args.superlink,
+            args.root_certificates,
+        )
+    return root_certificates
+
+
+def run_simulation_process(  # pylint: disable=R0914, disable=W0212
+    superlink: str,
+    log_queue: Queue[Optional[str]],
+    run_once: bool,
+    flwr_dir_: Optional[str] = None,
+    certificates: Optional[bytes] = None,
+) -> None:
     """Run Flower Simulation process."""
+    conn = SimulationIoConnection(
+        serverappio_service_address=superlink,
+        root_certificates=certificates,
+    )
+
+    # Resolve directory where FABs are installed
+    flwr_dir = get_flwr_dir(flwr_dir_)
+    log_uploader = None
+
+    while True:
+
+        try:
+            # Pull ServerAppInputs from LinkState
+            req = PullSimulationInputsRequest()
+            res: PullSimulationInputsResponse = conn._grpc_stub.PullSimulationInputs(
+                req
+            )
+            if not res.HasField("run"):
+                sleep(3)
+                run_status = None
+                continue
+
+            context = context_from_proto(res.context)
+            run = run_from_proto(res.run)
+            fab = fab_from_proto(res.fab)
+
+            # driver.init_run(run.run_id)
+
+            # Start log uploader for this run
+            log_uploader = start_log_uploader(
+                log_queue=log_queue,
+                node_id=0,
+                run_id=run.run_id,
+                stub=conn._grpc_stub,
+            )
+
+            log(DEBUG, "ServerApp process starts FAB installation.")
+            install_from_fab(fab.content, flwr_dir=flwr_dir, skip_prompt=True)
+
+            fab_id, fab_version = get_fab_metadata(fab.content)
+
+            app_path = str(get_project_dir(fab_id, fab_version, fab.hash_str, flwr_dir))
+            config = get_project_config(app_path)
+
+            # Obtain server app reference and the run config
+            server_app_attr = config["tool"]["flwr"]["app"]["components"]["serverapp"]
+            server_app_run_config = get_fused_config_from_dir(
+                Path(app_path), run.override_config
+            )
+
+            # Update run_config in context
+            context.run_config = server_app_run_config
+
+            log(
+                DEBUG,
+                "Flower will load ServerApp `%s` in %s",
+                server_app_attr,
+                app_path,
+            )
+
+            # Change status to Running
+            run_status_proto = run_status_to_proto(RunStatus(Status.RUNNING, "", ""))
+            conn._grpc_stub.UpdateRunStatus(
+                UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
+            )
+
+            # Load and run the ServerApp with the Driver
+            _ = run_simulation_from_cli()
+
+            # Send resulting context
+            context_proto = None  # context_to_proto(updated_context)
+            out_req = PushSimulationOutputsRequest(
+                run_id=run.run_id, context=context_proto
+            )
+            _ = conn._grpc_stub.PushSimulationOutputs(out_req)
+
+            run_status = RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
+
+        except Exception as ex:  # pylint: disable=broad-exception-caught
+            exc_entity = "Simulation"
+            log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
+            run_status = RunStatus(Status.FINISHED, SubStatus.FAILED, str(ex))
+
+        finally:
+            if run_status:
+                run_status_proto = run_status_to_proto(run_status)
+                conn._grpc_stub.UpdateRunStatus(
+                    UpdateRunStatusRequest(
+                        run_id=run.run_id, run_status=run_status_proto
+                    )
+                )
+
+            # Stop log uploader for this run
+            if log_uploader:
+                stop_log_uploader(log_queue, log_uploader)
+                log_uploader = None
+
+        # Stop the loop if `flwr-simulation` is expected to process a single run
+        if run_once:
+            break
