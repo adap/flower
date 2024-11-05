@@ -15,12 +15,7 @@
 """Test the SuperExec API servicer."""
 
 
-import subprocess
-from unittest.mock import MagicMock, Mock
-
-from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
-
-from .exec_servicer import ExecServicer
+from unittest.mock import MagicMock
 
 
 def test_start_run() -> None:
