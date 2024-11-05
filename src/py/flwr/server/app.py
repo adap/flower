@@ -357,14 +357,14 @@ def run_superlink() -> None:
         else:
             raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
 
-    if args.isolation == ISOLATION_MODE_SUBPROCESS:
-        # Scheduler thread
-        scheduler_th = threading.Thread(
-            target=_flwr_serverapp_scheduler,
-            args=(state_factory, args.serverappio_api_address, args.ssl_ca_certfile),
-        )
-        scheduler_th.start()
-        bckg_threads.append(scheduler_th)
+        if args.isolation == ISOLATION_MODE_SUBPROCESS:
+            # Scheduler thread
+            scheduler_th = threading.Thread(
+                target=_flwr_serverapp_scheduler,
+                args=(state_factory, args.serverappio_api_address, args.ssl_ca_certfile),
+            )
+            scheduler_th.start()
+            bckg_threads.append(scheduler_th)
 
     # Graceful shutdown
     register_exit_handlers(
