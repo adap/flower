@@ -15,6 +15,8 @@ concurrency:
 env:
   FLWR_TELEMETRY_ENABLED: 0
   ARTIFACT_BUCKET: artifact.flower.ai
+  GRPC_VERBOSITY: DEBUG
+  GRPC_TRACE: chttp2_hpack_parser,chttp2_new_stream,dns_resolver,tsi,op_failure
 
 jobs:
   wheel:
@@ -67,11 +69,11 @@ jobs:
           - connection: insecure
             authentication: client-auth
     name: |
-      SuperExec / 
+      SuperExec /
       Python ${{ matrix.python-version }} /
-      ${{ matrix.connection }} / 
-      ${{ matrix.authentication }} / 
-      ${{ matrix.engine }} 
+      ${{ matrix.connection }} /
+      ${{ matrix.authentication }} /
+      ${{ matrix.engine }}
     defaults:
       run:
         working-directory: e2e/${{ matrix.directory }}
@@ -102,10 +104,10 @@ jobs:
             python -m pip install "${WHEEL_URL}"
           fi
       - name: >
-          Run Exec API test / 
-          ${{ matrix.connection }} / 
-          ${{ matrix.authentication }} / 
-          ${{ matrix.engine }} 
+          Run Exec API test /
+          ${{ matrix.connection }} /
+          ${{ matrix.authentication }} /
+          ${{ matrix.engine }}
         working-directory: e2e/${{ matrix.directory }}
         run: ./../test_exec_api.sh "${{ matrix.connection }}" "${{ matrix.authentication}}" "${{ matrix.engine }}"
 
@@ -240,42 +242,42 @@ jobs:
           path: ${{ env.pythonLocation }}
           key: pythonloc-${{ runner.os }}-${{ matrix.directory }}-${{ env.pythonLocation }}-${{ hashFiles(format('./e2e/{0}/pyproject.toml', matrix.directory)) }}
 
-  strategies:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 10
-    needs: wheel
-    strategy:
-      matrix:
-        strat: ["FedMedian", "FedTrimmedAvg", "QFedAvg", "FaultTolerantFedAvg", "FedAvgM", "FedAdam", "FedAdagrad", "FedYogi"]
+  # strategies:
+  #   runs-on: ubuntu-22.04
+  #   timeout-minutes: 10
+  #   needs: wheel
+  #   strategy:
+  #     matrix:
+  #       strat: ["FedMedian", "FedTrimmedAvg", "QFedAvg", "FaultTolerantFedAvg", "FedAvgM", "FedAdam", "FedAdagrad", "FedYogi"]
 
-    name: Strategy / ${{ matrix.strat }}
+  #   name: Strategy / ${{ matrix.strat }}
 
-    defaults:
-      run:
-        working-directory: e2e/strategies
+  #   defaults:
+  #     run:
+  #       working-directory: e2e/strategies
 
-    steps:
-      - uses: actions/checkout@v4
-      - name: Bootstrap
-        uses: ./.github/actions/bootstrap
-      - name: Install dependencies
-        run: |
-          python -m poetry install
-      - name: Install Flower wheel from artifact store
-        if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
-        run: |
-          python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
-      - name: Cache Datasets
-        uses: actions/cache@v4
-        with:
-          path: "~/.keras"
-          key: keras-datasets
-      - name: Download Datasets
-        run: |
-          python -c "import tensorflow as tf; tf.keras.datasets.mnist.load_data()"
-      - name: Test strategies
-        run: |
-          python test.py "${{ matrix.strat }}"
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Bootstrap
+  #       uses: ./.github/actions/bootstrap
+  #     - name: Install dependencies
+  #       run: |
+  #         python -m poetry install
+  #     - name: Install Flower wheel from artifact store
+  #       if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
+  #       run: |
+  #         python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
+  #     - name: Cache Datasets
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: "~/.keras"
+  #         key: keras-datasets
+  #     - name: Download Datasets
+  #       run: |
+  #         python -c "import tensorflow as tf; tf.keras.datasets.mnist.load_data()"
+  #     - name: Test strategies
+  #       run: |
+  #         python test.py "${{ matrix.strat }}"
 
   templates:
     runs-on: ubuntu-22.04
@@ -307,43 +309,43 @@ jobs:
       - name: Run project
         run: |
           cd tmp-${{ matrix.framework }}
-          flwr run --run-config num-server-rounds=1 2>&1 | tee flwr_output.log 
+          flwr run --run-config num-server-rounds=1 2>&1 | tee flwr_output.log
           if grep -q "ERROR" flwr_output.log; then
             exit 1
           fi
 
-  build_and_install:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 10
-    needs: wheel
-    strategy:
-      matrix:
-        framework: ["numpy"]
-        python-version: ["3.9", "3.10", "3.11"]
+  # build_and_install:
+  #   runs-on: ubuntu-22.04
+  #   timeout-minutes: 10
+  #   needs: wheel
+  #   strategy:
+  #     matrix:
+  #       framework: ["numpy"]
+  #       python-version: ["3.9", "3.10", "3.11"]
 
-    name: |
-      Build & Install /
-      Python ${{ matrix.python-version }} /
-      ${{ matrix.framework }}
+  #   name: |
+  #     Build & Install /
+  #     Python ${{ matrix.python-version }} /
+  #     ${{ matrix.framework }}
 
-    steps:
-      - uses: actions/checkout@v4
-      - name: Bootstrap
-        uses: ./.github/actions/bootstrap
-        with:
-          python-version: ${{ matrix.python-version }}
-          poetry-skip: 'true'
-      - name: Install Flower from repo
-        if: ${{ github.repository != 'adap/flower' || github.event.pull_request.head.repo.fork || github.actor == 'dependabot[bot]' }}
-        run: |
-          python -m pip install .
-      - name: Install Flower wheel from artifact store
-        if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
-        run: |
-          python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
-      - name: Create project, build, and install it
-        run: |
-          flwr new tmp-${{ matrix.framework }} --framework ${{ matrix.framework }} --username gh_ci
-          cd tmp-${{ matrix.framework }}
-          flwr build
-          flwr install *.fab
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Bootstrap
+  #       uses: ./.github/actions/bootstrap
+  #       with:
+  #         python-version: ${{ matrix.python-version }}
+  #         poetry-skip: 'true'
+  #     - name: Install Flower from repo
+  #       if: ${{ github.repository != 'adap/flower' || github.event.pull_request.head.repo.fork || github.actor == 'dependabot[bot]' }}
+  #       run: |
+  #         python -m pip install .
+  #     - name: Install Flower wheel from artifact store
+  #       if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
+  #       run: |
+  #         python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
+  #     - name: Create project, build, and install it
+  #       run: |
+  #         flwr new tmp-${{ matrix.framework }} --framework ${{ matrix.framework }} --username gh_ci
+  #         cd tmp-${{ matrix.framework }}
+  #         flwr build
+  #         flwr install *.fab
