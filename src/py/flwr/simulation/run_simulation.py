@@ -301,7 +301,7 @@ def run_simulation(
     )
 
 
-# pylint: disable=too-many-arguments,too-many-positional-arguments
+# pylint: disable=too-many-arguments
 def run_serverapp_th(
     server_app_attr: Optional[str],
     server_app: Optional[ServerApp],
@@ -311,6 +311,7 @@ def run_serverapp_th(
     f_stop: threading.Event,
     has_exception: threading.Event,
     enable_tf_gpu_growth: bool,
+    run_id: int,
 ) -> threading.Thread:
     """Run SeverApp in a thread."""
 
@@ -335,6 +336,7 @@ def run_serverapp_th(
 
             # Initialize Context
             context = Context(
+                run_id=run_id,
                 node_id=0,
                 node_config={},
                 state=RecordSet(),
@@ -434,6 +436,7 @@ def _main_loop(
             f_stop=f_stop,
             has_exception=server_app_thread_has_exception,
             enable_tf_gpu_growth=enable_tf_gpu_growth,
+            run_id=run.run_id,
         )
 
         # Buffer time so the `ServerApp` in separate thread is ready

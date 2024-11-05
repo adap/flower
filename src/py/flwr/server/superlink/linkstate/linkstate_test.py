@@ -1007,6 +1007,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: LinkState = self.state_factory()
         context = Context(
+            run_id=0,
             node_id=0,
             node_config={"mock": "mock"},
             state=RecordSet(),
@@ -1028,6 +1029,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: LinkState = self.state_factory()
         context = Context(
+            run_id=0,
             node_id=0,
             node_config={"mock": "mock"},
             state=RecordSet(),
