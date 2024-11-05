@@ -45,9 +45,8 @@ from .inmemory_driver import InMemoryDriver
 def push_messages(driver: InMemoryDriver, num_nodes: int) -> tuple[Iterable[str], int]:
     """Help push messages to state."""
     for _ in range(num_nodes):
-        driver.state.create_node(ping_interval=PING_MAX_INTERVAL)
+        node_id = driver.state.create_node(ping_interval=PING_MAX_INTERVAL)
     num_messages = 3
-    node_id = 1
     msgs = [
         driver.create_message(RecordSet(), "message_type", node_id, "")
         for _ in range(num_messages)
