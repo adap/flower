@@ -15,14 +15,15 @@
 """Flower SimulationIo connection."""
 
 
-import grpc
 from logging import DEBUG, WARNING
+from typing import Optional
+
+import grpc
+
+from flwr.common.constant import SIMULATIONIO_API_DEFAULT_ADDRESS
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
-from typing import Optional
-from flwr.common.constant import SIMULATIONIO_API_DEFAULT_ADDRESS
 from flwr.proto.simulationio_pb2_grpc import SimulationIoStub  # pylint: disable=E0611
-
 
 
 class SimulationIoConnection:
@@ -50,11 +51,11 @@ class SimulationIoConnection:
 
     @property
     def _is_connected(self) -> bool:
-        """Check if connected to the ServerAppIo API server."""
+        """Check if connected to the SimulationIo API server."""
         return self._channel is not None
 
     def _connect(self) -> None:
-        """Connect to the ServerAppIo API.
+        """Connect to the SimulationIo API.
 
         This will not call GetRun.
         """
@@ -70,7 +71,7 @@ class SimulationIoConnection:
         log(DEBUG, "[SimulationIO] Connected to %s", self._addr)
 
     def _disconnect(self) -> None:
-        """Disconnect from the ServerAppIo API."""
+        """Disconnect from the SimulationIo API."""
         if not self._is_connected:
             log(DEBUG, "Already disconnected")
             return

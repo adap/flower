@@ -38,7 +38,7 @@ To install the necessary dependencies, install `flwr` with the `simulation` extr
 
 
 __all__ = [
-    "run_simulation",
     "SimulationIoConnection",
+    "run_simulation",
     "start_simulation",
 ]
