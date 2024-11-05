@@ -53,7 +53,7 @@ class Context:
     state: RecordSet
     run_config: UserConfig
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  # pylint: disable=too-many-arguments, too-many-positional-arguments
         self,
         run_id: int,
         node_id: int,

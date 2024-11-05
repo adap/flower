@@ -301,7 +301,7 @@ def run_simulation(
     )
 
 
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-positional-arguments
 def run_serverapp_th(
     server_app_attr: Optional[str],
     server_app: Optional[ServerApp],
