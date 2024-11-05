@@ -18,4 +18,49 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
+# Initialize variables
+enterprise_extensions_path=""
+
+# Function to display usage
+function usage() {
+    echo "Usage: $0 [--enterprise-extensions <path-to-enterprise-extensions>]"
+    exit 1
+}
+
+# Parse arguments
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --enterprise-extensions)
+            if [[ -n "$2" && ! "$2" =~ ^-- ]]; then
+                enterprise_extensions_path="$2"
+                shift 2
+            else
+                echo "Error: --enterprise-extensions requires a path as an argument."
+                usage
+            fi
+            ;;
+        *)
+            echo "Unknown parameter: $1"
+            usage
+            ;;
+    esac
+done
+
+# Display the path if provided
+if [[ -n "$enterprise_extensions_path" ]]; then
+    # Preparation with enterprise extensions
+    echo "Building with enterprise extensions located at: $enterprise_extensions_path"
+    (rm -r src/py/flwr_ee || true) &> /dev/null
+    cp -r $enterprise_extensions_path src/py/
+else
+    # Preparation without enterprise extensions
+    echo "Building without enterprise extensions."
+fi
+
+# Build commands
 python -m poetry build
+
+echo "Build complete."
+
+# Clean up enterprise extensions
+(rm -r src/py/flwr_ee || true) &> /dev/null

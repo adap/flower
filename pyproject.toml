@@ -84,6 +84,7 @@ uvicorn = { version = "^0.23.0", extras = ["standard"], optional = true }
 [tool.poetry.extras]
 simulation = ["ray"]
 rest = ["requests", "starlette", "uvicorn"]
+enterprise-license-checker = ["requests"]
 
 [tool.poetry.group.dev.dependencies]
 types-dataclasses = "==0.6.6"
