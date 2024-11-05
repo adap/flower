@@ -105,7 +105,7 @@ class TestMakeApp(unittest.TestCase):
         state = RecordSet()
         state.metrics_records[METRIC] = MetricsRecord({COUNTER: 0.0})
         context = Context(
-            run_id=0, node_id=0, node_config={}, state=state, run_config={}
+            run_id=1, node_id=0, node_config={}, state=state, run_config={}
         )
         message = _get_dummy_flower_message()
 
@@ -132,7 +132,7 @@ class TestMakeApp(unittest.TestCase):
         footprint: list[str] = []
         mock_app = make_mock_app("app", footprint)
         context = Context(
-            run_id=0, node_id=0, node_config={}, state=RecordSet(), run_config={}
+            run_id=1, node_id=0, node_config={}, state=RecordSet(), run_config={}
         )
         message = _get_dummy_flower_message()
 

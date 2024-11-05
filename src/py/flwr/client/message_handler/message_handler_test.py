@@ -143,7 +143,7 @@ def test_client_without_get_properties() -> None:
         client_fn=_get_client_fn(client),
         message=message,
         context=Context(
-            run_id=1123, node_id=1123, node_config={}, state=RecordSet(), run_config={}
+            run_id=2234, node_id=1123, node_config={}, state=RecordSet(), run_config={}
         ),
     )
 
@@ -209,7 +209,7 @@ def test_client_with_get_properties() -> None:
         client_fn=_get_client_fn(client),
         message=message,
         context=Context(
-            run_id=1123, node_id=1123, node_config={}, state=RecordSet(), run_config={}
+            run_id=2234, node_id=1123, node_config={}, state=RecordSet(), run_config={}
         ),
     )
 
