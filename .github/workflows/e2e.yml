@@ -183,6 +183,8 @@ jobs:
         working-directory: e2e/${{ matrix.directory }}
 
     steps:
+      - run:
+          echo "$HTTP_PROXY $HTTP_PROXY"
       - uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v5
