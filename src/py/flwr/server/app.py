@@ -361,7 +361,11 @@ def run_superlink() -> None:
             # Scheduler thread
             scheduler_th = threading.Thread(
                 target=_flwr_serverapp_scheduler,
-                args=(state_factory, args.serverappio_api_address, args.ssl_ca_certfile),
+                args=(
+                    state_factory,
+                    args.serverappio_api_address,
+                    args.ssl_ca_certfile,
+                ),
             )
             scheduler_th.start()
             bckg_threads.append(scheduler_th)
