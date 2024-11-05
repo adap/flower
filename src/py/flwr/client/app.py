@@ -416,6 +416,15 @@ def start_client_internal(
                         time.sleep(3)  # Wait for 3s before asking again
                         continue
 
+                    # Get run info
+                    run_id = message.metadata.run_id
+                    if run_id not in runs:
+                        if get_run is not None:
+                            runs[run_id] = get_run(run_id)
+                        # If get_run is None, i.e., in grpc-bidi mode
+                        else:
+                            runs[run_id] = Run(run_id, "", "", "", {})
+
                     log(INFO, "")
                     if len(message.metadata.group_id) > 0:
                         log(
@@ -436,15 +445,6 @@ def start_client_internal(
                     if out_message:
                         send(out_message)
                         break
-
-                    # Get run info
-                    run_id = message.metadata.run_id
-                    if run_id not in runs:
-                        if get_run is not None:
-                            runs[run_id] = get_run(run_id)
-                        # If get_run is None, i.e., in grpc-bidi mode
-                        else:
-                            runs[run_id] = Run(run_id, "", "", "", {})
 
                     run: Run = runs[run_id]
                     if get_fab is not None and run.fab_hash:
