@@ -24,7 +24,7 @@ class InMemoryNodeState(NodeState):
     def __init__(self) -> None:
 
         # Map run_id to node_id
-        self.node_id: int = None
+        self.node_id: int
 
     def set_node_id(self, node_id: int) -> None:
         """Set the node ID."""
