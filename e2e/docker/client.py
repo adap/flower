@@ -4,12 +4,12 @@ from collections import OrderedDict
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from flwr_datasets import FederatedDataset
 from torch.utils.data import DataLoader, Subset
 from torchvision.transforms import Compose, Normalize, ToTensor
 
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
-from flwr_datasets import FederatedDataset
 
 # #############################################################################
 # 1. Regular PyTorch pipeline: nn.Module, train, test, and DataLoader
