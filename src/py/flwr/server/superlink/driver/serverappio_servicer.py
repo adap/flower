@@ -26,6 +26,7 @@ import grpc
 from flwr.common.constant import Status
 from flwr.common.logger import log
 from flwr.common.serde import (
+    configs_record_from_proto,
     context_from_proto,
     context_to_proto,
     fab_from_proto,
@@ -112,7 +113,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             request.fab_version,
             fab_hash,
             user_config_from_proto(request.override_config),
-            request.federation_options,
+            configs_record_from_proto(request.federation_options),
         )
         return CreateRunResponse(run_id=run_id)
 
