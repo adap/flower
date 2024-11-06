@@ -324,3 +324,20 @@ def validate_certificate_in_federation_config(
             raise typer.Exit(code=1)
 
     return insecure, root_certificates_bytes
+
+
+def validate_and_get_fab_install_mode_in_federation_config(
+    federation_config: dict[str, Any]
+) -> str:
+    """Validate and get the FAB install mode in the Flower project configuration."""
+    fab_install_mode: str = federation_config.get("fab-install-mode", "autoinstall")
+    if fab_install_mode not in ["autoinstall", "preinstall"]:
+        typer.secho(
+            "❌ The `fab-install-mode` in the federation configuration must be either "
+            '"autoinstall" or "preinstall".',
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+
+    return fab_install_mode

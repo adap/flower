@@ -25,6 +25,7 @@ import typer
 from flwr.cli.build import build
 from flwr.cli.config_utils import (
     load_and_validate,
+    validate_and_get_fab_install_mode_in_federation_config,
     validate_certificate_in_federation_config,
     validate_federation_in_project_config,
     validate_project_config,
@@ -104,6 +105,10 @@ def _run_with_exec_api(
     insecure, root_certificates_bytes = validate_certificate_in_federation_config(
         app, federation_config
     )
+    fab_install_mode = validate_and_get_fab_install_mode_in_federation_config(
+        federation_config
+    )
+
     channel = create_channel(
         server_address=federation_config["address"],
         insecure=insecure,
@@ -115,7 +120,12 @@ def _run_with_exec_api(
     stub = ExecStub(channel)
 
     fab_path, fab_hash = build(app)
-    content = Path(fab_path).read_bytes()
+
+    if fab_install_mode == "preinstall":
+        content = b""  # Empty content as FAB is pre-installed
+    # When FAB install mode is "autoinstall"
+    else:
+        content = Path(fab_path).read_bytes()
     fab = Fab(fab_hash, content)
 
     req = StartRunRequest(
