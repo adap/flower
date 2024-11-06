@@ -14,6 +14,7 @@ authors = [
 dependencies = [
     "flwr[simulation,rest] @ {root:parent:parent:uri}",
     "scikit-learn>=1.1.1,<2.0.0",
+    "numpy<2.0.0",
 ]
 
 [tool.hatch.build.targets.wheel]
