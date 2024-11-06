@@ -840,6 +840,7 @@ def message_from_proto(message_proto: ProtoMessage) -> Message:
 def context_to_proto(context: Context) -> ProtoContext:
     """Serialize `Context` to ProtoBuf."""
     proto = ProtoContext(
+        run_id=context.run_id,
         node_id=context.node_id,
         node_config=user_config_to_proto(context.node_config),
         state=recordset_to_proto(context.state),
@@ -851,6 +852,7 @@ def context_to_proto(context: Context) -> ProtoContext:
 def context_from_proto(context_proto: ProtoContext) -> Context:
     """Deserialize `Context` from ProtoBuf."""
     context = Context(
+        run_id=context_proto.run_id,
         node_id=context_proto.node_id,
         node_config=user_config_from_proto(context_proto.node_config),
         state=recordset_from_proto(context_proto.state),
