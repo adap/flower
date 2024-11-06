@@ -26,5 +26,5 @@ class NodeState(abc.ABC):
         """Set the node ID."""
 
     @abc.abstractmethod
-    def get_node_id(self) -> Optional[int]:
+    def get_node_id(self) -> int:
         """Get the node ID."""

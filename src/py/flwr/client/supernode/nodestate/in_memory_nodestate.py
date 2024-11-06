@@ -25,13 +25,15 @@ class InMemoryNodeState(NodeState):
 
     def __init__(self) -> None:
 
-        # Store node_ids
+        # Store node_id
         self.node_id: Optional[int]
 
     def set_node_id(self, node_id: Optional[int]) -> None:
         """Set the node ID."""
         self.node_id = node_id
 
-    def get_node_id(self) -> Optional[int]:
+    def get_node_id(self) -> int:
         """Get the node ID."""
+        if self.node_id is None:
+            raise ValueError("Node ID not set")
         return self.node_id
