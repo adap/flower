@@ -20,11 +20,11 @@ import unittest
 from typing import Union
 
 import numpy as np
-from flwr_datasets.partitioner.dirichlet_partitioner import DirichletPartitioner
 from numpy.typing import NDArray
 from parameterized import parameterized
 
 from datasets import Dataset
+from flwr_datasets.partitioner.dirichlet_partitioner import DirichletPartitioner
 
 
 def _dummy_setup(

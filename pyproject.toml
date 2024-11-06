@@ -147,7 +147,7 @@ extend_exclude = [
 
 [tool.isort]
 profile = "black"
-known_first_party = ["flwr", "flwr_tool", "flwr_datasets"]
+known_first_party = ["flwr", "flwr_tool"]
 
 [tool.black]
 line-length = 88
