@@ -1027,7 +1027,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         """Retrieve the federation options for the specified `run_id`."""
         # Convert the uint64 value to sint64 for SQLite
         sint64_run_id = convert_uint64_to_sint64(run_id)
-        query = "SELECT * FROM run WHERE run_id = ?;"
+        query = "SELECT federation_options FROM run WHERE run_id = ?;"
         rows = self.query(query, (sint64_run_id,))
 
         # Check if the run_id exists
