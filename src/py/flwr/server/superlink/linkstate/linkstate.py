@@ -159,7 +159,7 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         fab_version: Optional[str],
         fab_hash: Optional[str],
         override_config: UserConfig,
-        federation_options: Optional[ConfigsRecord] = None,
+        federation_options: ConfigsRecord,
     ) -> int:
         """Create a new run for the specified `fab_hash`."""
 

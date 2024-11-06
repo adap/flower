@@ -821,7 +821,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         fab_version: Optional[str],
         fab_hash: Optional[str],
         override_config: UserConfig,
-        federation_options: Optional[ConfigsRecord] = None,
+        federation_options: ConfigsRecord,
     ) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
         # Sample a random int64 as run_id
@@ -843,14 +843,13 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             if fab_hash:
                 fab_id, fab_version = "", ""
             override_config_json = json.dumps(override_config)
-            fed_options = federation_options or ConfigsRecord()
             data = [
                 sint64_run_id,
                 fab_id,
                 fab_version,
                 fab_hash,
                 override_config_json,
-                configsrecord_to_bytes(fed_options),
+                configsrecord_to_bytes(federation_options),
             ]
             data += [
                 now().isoformat(),

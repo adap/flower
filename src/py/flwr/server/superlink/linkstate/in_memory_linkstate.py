@@ -387,7 +387,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         fab_version: Optional[str],
         fab_hash: Optional[str],
         override_config: UserConfig,
-        federation_options: Optional[ConfigsRecord] = None,
+        federation_options: ConfigsRecord,
     ) -> int:
         """Create a new run for the specified `fab_hash`."""
         # Sample a random int64 as run_id
@@ -413,7 +413,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 self.run_ids[run_id] = run_record
 
                 # Record federation options. Leave empty if not passed
-                self.federation_options[run_id] = federation_options or ConfigsRecord()
+                self.federation_options[run_id] = federation_options
                 return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
