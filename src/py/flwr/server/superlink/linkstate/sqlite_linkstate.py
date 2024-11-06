@@ -33,6 +33,7 @@ from flwr.common.constant import (
     RUN_ID_NUM_BYTES,
     Status,
 )
+from flwr.common.record import ConfigsRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
 
 # pylint: disable=E0611
@@ -45,6 +46,8 @@ from flwr.server.utils.validator import validate_task_ins_or_res
 
 from .linkstate import LinkState
 from .utils import (
+    configsrecord_from_bytes,
+    configsrecord_to_bytes,
     context_from_bytes,
     context_to_bytes,
     convert_sint64_to_uint64,
@@ -95,7 +98,8 @@ CREATE TABLE IF NOT EXISTS run(
     running_at            TEXT,
     finished_at           TEXT,
     sub_status            TEXT,
-    details               TEXT
+    details               TEXT,
+    federation_options    BLOB
 );
 """
 
@@ -810,12 +814,14 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             return uint64_node_id
         return None
 
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     def create_run(
         self,
         fab_id: Optional[str],
         fab_version: Optional[str],
         fab_hash: Optional[str],
         override_config: UserConfig,
+        federation_options: ConfigsRecord,
     ) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
         # Sample a random int64 as run_id
@@ -830,15 +836,29 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         if self.query(query, (sint64_run_id,))[0]["COUNT(*)"] == 0:
             query = (
                 "INSERT INTO run "
-                "(run_id, fab_id, fab_version, fab_hash, override_config, pending_at, "
-                "starting_at, running_at, finished_at, sub_status, details)"
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+                "(run_id, fab_id, fab_version, fab_hash, override_config, "
+                "federation_options, pending_at, starting_at, running_at, finished_at, "
+                "sub_status, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
             )
             if fab_hash:
                 fab_id, fab_version = "", ""
             override_config_json = json.dumps(override_config)
-            data = [sint64_run_id, fab_id, fab_version, fab_hash, override_config_json]
-            data += [now().isoformat(), "", "", "", "", ""]
+            data = [
+                sint64_run_id,
+                fab_id,
+                fab_version,
+                fab_hash,
+                override_config_json,
+                configsrecord_to_bytes(federation_options),
+            ]
+            data += [
+                now().isoformat(),
+                "",
+                "",
+                "",
+                "",
+                "",
+            ]
             self.query(query, tuple(data))
             return uint64_run_id
         log(ERROR, "Unexpected run creation failure.")
@@ -1002,6 +1022,21 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             pending_run_id = convert_sint64_to_uint64(rows[0]["run_id"])
 
         return pending_run_id
+
+    def get_federation_options(self, run_id: int) -> Optional[ConfigsRecord]:
+        """Retrieve the federation options for the specified `run_id`."""
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_run_id = convert_uint64_to_sint64(run_id)
+        query = "SELECT federation_options FROM run WHERE run_id = ?;"
+        rows = self.query(query, (sint64_run_id,))
+
+        # Check if the run_id exists
+        if not rows:
+            log(ERROR, "`run_id` is invalid")
+            return None
+
+        row = rows[0]
+        return configsrecord_from_bytes(row["federation_options"])
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""
