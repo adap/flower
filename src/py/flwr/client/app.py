@@ -37,6 +37,7 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, Message, ev
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     CLIENTAPPIO_API_DEFAULT_ADDRESS,
+    FAB_MODE_AUTOINSTALL,
     ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
     MISSING_EXTRA_REST,
@@ -216,6 +217,7 @@ def start_client_internal(
     flwr_path: Optional[Path] = None,
     isolation: Optional[str] = None,
     supernode_address: Optional[str] = CLIENTAPPIO_API_DEFAULT_ADDRESS,
+    fab_install_mode: Optional[str] = "autoinstall",
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -277,6 +279,11 @@ def start_client_internal(
         process and communicates using gRPC at the address `supernode_address`.
     supernode_address : Optional[str] (default: `CLIENTAPPIO_API_DEFAULT_ADDRESS`)
         The SuperNode gRPC server address.
+    fab_install_mode: Optional[str] (default: "autoinstall")
+        FAB install mode for SuperNode. Possible values are `autoinstall` and
+        `preinstall`. Defaults to `autoinstall`, which installs the FAB automatically
+        when the SuperNode receives the FAB. If `preinstall`, the FAB must be installed
+        before the SuperNode receives it.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -449,8 +456,9 @@ def start_client_internal(
                     run: Run = runs[run_id]
                     if get_fab is not None and run.fab_hash:
                         fab = get_fab(run.fab_hash)
-                        if not isolation:
-                            # If `ClientApp` runs in the same process, install the FAB
+                        if not isolation or fab_install_mode == FAB_MODE_AUTOINSTALL:
+                            # If `ClientApp` runs in the same process or FAB install
+                            # mode is `autoinstall`, install the FAB
                             install_from_fab(fab.content, flwr_path, True)
                         fab_id, fab_version = get_fab_metadata(fab.content)
                     else:

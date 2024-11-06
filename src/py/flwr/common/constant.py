@@ -93,6 +93,10 @@ CONN_RECONNECT_INTERVAL = 0.5  # Reconnect interval between two stream connectio
 LOG_STREAM_INTERVAL = 0.5  # Log stream interval for `ExecServicer.StreamLogs`
 LOG_UPLOAD_INTERVAL = 0.2  # Minimum interval between two log uploads
 
+# FAB install mode
+FAB_MODE_AUTOINSTALL = "autoinstall"
+FAB_MODE_PREINSTALL = "preinstall"
+
 
 class MessageType:
     """Message type."""
