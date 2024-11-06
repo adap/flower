@@ -33,4 +33,5 @@ class InMemoryNodeState(NodeState):
         self.node_id[run_id] = node_id
 
     def get_node_id(self, run_id: int) -> int:
+        """Get the node ID for a specified run ID."""
         return cast(int, self.node_id.get(run_id))

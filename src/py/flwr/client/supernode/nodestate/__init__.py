@@ -19,7 +19,7 @@ from .nodestate import NodeState as NodeState
 from .nodestate_factory import NodeStateFactory as NodeStateFactory
 
 __all__ = [
-    "NodeState",
     "InMemoryNodeState",
+    "NodeState",
     "NodeStateFactory",
 ]
