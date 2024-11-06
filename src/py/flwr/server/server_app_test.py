@@ -29,7 +29,9 @@ def test_server_app_custom_mode() -> None:
     # Prepare
     app = ServerApp()
     driver = MagicMock()
-    context = Context(node_id=0, node_config={}, state=RecordSet(), run_config={})
+    context = Context(
+        run_id=1, node_id=0, node_config={}, state=RecordSet(), run_config={}
+    )
 
     called = {"called": False}
 
