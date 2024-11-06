@@ -14,11 +14,10 @@
 # ==============================================================================
 """In-memory NodeState implementation."""
 
-import threading
-from typing import Optional
 
-from flwr.client.clientapp.clientappio_servicer import ClientAppInputs, ClientAppOutputs
-from flwr.client.supernode.nodestate import NodeState
+from typing import cast
+
+from flwr.client.supernode.nodestate.nodestate import NodeState
 
 
 class InMemoryNodeState(NodeState):
@@ -26,18 +25,12 @@ class InMemoryNodeState(NodeState):
 
     def __init__(self) -> None:
 
-        # Map token to clientapp_inputs/outputs
-        self.clientapp_inputs: dict[int, ClientAppInputs] = {}
-        self.clientapp_outputs: dict[int, ClientAppOutputs] = {}
+        # Map run_id to node_id
+        self.node_id: dict[int, int] = {}
 
-        self.lock = threading.Lock()
+    def set_node_id(self, run_id: int, node_id: int) -> None:
+        """Set the node ID for a specified run ID."""
+        self.node_id[run_id] = node_id
 
-    def set_clientapp_inputs(
-        self, token: int, clientapp_inputs: ClientAppInputs
-    ) -> None:
-        """Set the ClientAppInputs for the specified `token`."""
-        self.clientapp_inputs[token] = clientapp_inputs
-
-    def get_clientapp_inputs(self, token: int) -> Optional[ClientAppInputs]:
-        """Get the ClientAppInputs for the specified `token`."""
-        return self.clientapp_inputs.get(token)
+    def get_node_id(self, run_id: int) -> int:
+        return cast(int, self.node_id.get(run_id))

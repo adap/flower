@@ -15,46 +15,15 @@
 """Abstract base class NodeState."""
 
 import abc
-from typing import Optional
-
-from ...clientapp.clientappio_servicer import ClientAppInputs
 
 
 class NodeState(abc.ABC):
     """Abstract NodeState."""
 
     @abc.abstractmethod
-    def set_clientapp_inputs(  # pylint: disable=R0913
-        self, token: int, clientapp_inputs: ClientAppInputs
-    ) -> None:
-        """Set the ClientApp inputs for a specified `token`.
-
-        Parameters
-        ----------
-        token : int
-            The identifier of the ClientApp run for which to set the inputs.
-        clientapp_inputs : ClientAppInputs
-            The inputs for the ClientApp to be associated with the specified `token`.
-        """
+    def set_node_id(self, run_id: int, node_id: int) -> None:
+        """Set the node ID for a specified run ID."""
 
     @abc.abstractmethod
-    def get_clientapp_inputs(self, token: int) -> Optional[ClientAppInputs]:
-        """Get the ClientApp inputs for a specified `token`."""
-
-    # @abc.abstractmethod
-    # def set_clientapp_outputs(
-    #     self, token: int, clientapp_outputs: ClientAppOutputs
-    # ) -> None:
-    #     """Set the ClientApp outputs for a specified `token`.
-
-    #     Parameters
-    #     ----------
-    #     token : int
-    #         The identifier of the ClientApp run for which to set the outputs.
-    #     clientapp_inputs : ClientAppInputs
-    #         The outputs from the ClientApp to be associated with the specified `token`.
-    #     """
-
-    # @abc.abstractmethod
-    # def get_clientapp_outputs(self, token: int) -> Optional[ClientAppOutputs]:
-    #     """Get the ClientApp outputs for a specified `token`."""
+    def get_node_id(self, run_id: int) -> int:
+        """Get the node ID for a specified run ID."""

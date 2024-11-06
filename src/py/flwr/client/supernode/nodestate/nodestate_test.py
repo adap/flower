@@ -17,10 +17,7 @@
 import unittest
 from abc import abstractmethod
 
-from flwr.client.clientapp.clientappio_servicer import ClientAppInputs
 from flwr.client.supernode.nodestate import InMemoryNodeState, NodeState
-from flwr.common import Context, Message, typing
-from flwr.common.serde_test import RecordMaker
 
 
 class StateTest(unittest.TestCase):
@@ -29,50 +26,25 @@ class StateTest(unittest.TestCase):
     # This is to True in each child class
     __test__ = False
 
-    def setUp(self) -> None:
-        """Initialize."""
-        self.maker = RecordMaker()
-
     @abstractmethod
     def state_factory(self) -> NodeState:
         """Provide state implementation to test."""
         raise NotImplementedError()
 
-    def test_get_set_clientapp_inputs(self) -> None:
-        """Test set_clientapp_inputs."""
+    def test_get_set_node_id(self) -> None:
+        """Test set_node_id."""
         # Prepare
         state: NodeState = self.state_factory()
-        message = Message(
-            metadata=self.maker.metadata(),
-            content=self.maker.recordset(2, 2, 1),
-        )
-        context = Context(
-            node_id=1,
-            node_config={"nodeconfig1": 4.2},
-            state=self.maker.recordset(2, 2, 1),
-            run_config={"runconfig1": 6.1},
-        )
-        run = typing.Run(
-            run_id=1,
-            fab_id="lorem",
-            fab_version="ipsum",
-            fab_hash="dolor",
-            override_config=self.maker.user_config(),
-        )
-        fab = typing.Fab(
-            hash_str="abc123#$%",
-            content=b"\xf3\xf5\xf8\x98",
-        )
-        inputs = ClientAppInputs(message, context, run, fab, 1)
-        token = 123
+        run_id = 123
+        node_id = 234
 
         # Execute
-        state.set_clientapp_inputs(token, inputs)
-        retrieved_inputs = state.get_clientapp_inputs(token)
+        state.set_node_id(run_id, node_id)
+
+        retrieved_node_id = state.get_node_id(run_id)
 
         # Assert
-        assert retrieved_inputs is not None
-        self.assertEqual(inputs, retrieved_inputs)
+        assert node_id == retrieved_node_id
 
 
 class InMemoryStateTest(StateTest):
