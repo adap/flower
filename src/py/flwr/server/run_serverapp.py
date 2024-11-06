@@ -188,6 +188,7 @@ def run_server_app() -> None:
 
         app_path = str(get_project_dir(fab_id, fab_version, run_.fab_hash, flwr_dir))
         config = get_project_config(app_path)
+        run_id = run_.run_id
     else:
         # User provided `app_dir`, but not `--run-id`
         # Create run if run_id is not provided
@@ -204,6 +205,7 @@ def run_server_app() -> None:
         res: CreateRunResponse = driver._stub.CreateRun(req)  # pylint: disable=W0212
         # Fetch full `Run` using `run_id`
         driver.init_run(res.run_id)  # pylint: disable=W0212
+        run_id = res.run_id
 
     # Obtain server app reference and the run config
     server_app_attr = config["tool"]["flwr"]["app"]["components"]["serverapp"]
@@ -221,6 +223,7 @@ def run_server_app() -> None:
 
     # Initialize Context
     context = Context(
+        run_id=run_id,
         node_id=0,
         node_config={},
         state=RecordSet(),
