@@ -21,7 +21,6 @@ from typing import Optional
 
 from typing_extensions import override
 
-from flwr.common import Context, RecordSet
 from flwr.common.constant import SERVERAPPIO_API_DEFAULT_ADDRESS, Status, SubStatus
 from flwr.common.logger import log
 from flwr.common.typing import Fab, RunStatus, UserConfig
@@ -136,14 +135,6 @@ class DeploymentEngine(Executor):
         run_id = self.linkstate.create_run(None, None, fab_hash, override_config)
         return run_id
 
-    def _create_context(self, run_id: int) -> None:
-        """Register a Context for a Run."""
-        # Create an empty context for the Run
-        context = Context(node_id=0, node_config={}, state=RecordSet(), run_config={})
-
-        # Register the context at the LinkState
-        self.linkstate.set_serverapp_context(run_id=run_id, context=context)
-
     @override
     def start_run(
         self,
@@ -160,8 +151,6 @@ class DeploymentEngine(Executor):
                 Fab(hashlib.sha256(fab_file).hexdigest(), fab_file), override_config
             )
 
-            # Register context for the Run
-            self._create_context(run_id=run_id)
             log(INFO, "Created run %s", str(run_id))
 
             return run_id
