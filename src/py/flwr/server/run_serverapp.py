@@ -34,6 +34,7 @@ from flwr.common.config import (
 from flwr.common.constant import SERVERAPPIO_API_DEFAULT_ADDRESS
 from flwr.common.logger import log, update_console_handler, warn_deprecated_feature
 from flwr.common.object_ref import load_app
+from flwr.common.serde import configs_record_to_proto
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
@@ -202,7 +203,9 @@ def run_server_app() -> None:
 
         # Create run
         req = CreateRunRequest(
-            fab_id=fab_id, fab_version=fab_version, federation_options=ConfigsRecord()
+            fab_id=fab_id,
+            fab_version=fab_version,
+            federation_options=configs_record_to_proto(ConfigsRecord()),
         )
         res: CreateRunResponse = driver._stub.CreateRun(req)  # pylint: disable=W0212
         # Fetch full `Run` using `run_id`
