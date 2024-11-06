@@ -43,7 +43,7 @@ Step 1: Set Up
        $ export PROJECT_DIR=quickstart-compose
 
    Setting the ``PROJECT_DIR`` helps Docker Compose locate the ``pyproject.toml`` file,
-   allowing it to install dependencies in the SuperExec and SuperNode images correctly.
+   allowing it to install dependencies in the ClientApp and ServerApp images correctly.
 
 Step 2: Run Flower in Insecure Mode
 -----------------------------------
@@ -77,7 +77,7 @@ Step 3: Run the Quickstart Project
 Now that the Flower services have been started via Docker Compose, it is time to run the
 quickstart example.
 
-To ensure the ``flwr`` CLI connects to the SuperExec, you need to specify the SuperExec
+To ensure the ``flwr`` CLI connects to the SuperLink, you need to specify the SuperLink
 addresses in the ``pyproject.toml`` file.
 
 1. Add the following lines to the ``quickstart-compose/pyproject.toml``:
@@ -137,19 +137,15 @@ In the next step, change the application code.
 
        $ flwr run quickstart-compose local-deployment --stream
 
-   In the SuperExec logs, you should find the ``Get weights`` line:
+   In the ServerApp logs, you should find the ``Get weights`` line:
 
    .. code-block::
-       :emphasize-lines: 9
+       :emphasize-lines: 5
 
-       INFO :      Starting Flower SuperExec
-       WARNING :   Option `--insecure` was set. Starting insecure HTTP server.
-       INFO :      Starting Flower SuperExec gRPC server on 0.0.0.0:9093
-       INFO :      ExecServicer.StartRun
-       🎊 Successfully installed quickstart-compose to /app/.flwr/apps/flower/quickstart-compose/1.0.0.
-       INFO :      Created run -6767165609169293507
-       INFO :      Started run -6767165609169293507
-       WARNING :   Option `--insecure` was set. Starting insecure HTTP client connected to superlink:9091.
+       INFO :      Starting logstream for run_id `10386255862566726253`
+       INFO :      Starting Flower ServerApp
+       WARNING :   Option `--insecure` was set. Starting insecure HTTP channel to superlink:9091.
+       🎊 Successfully installed quickstart-compose to /app/.flwr/apps/flower.quickstart-compose.1.0.0.35361a47.
        Get weights
        INFO :      Starting Flower ServerApp, config: num_rounds=3, no round_timeout
 
@@ -187,7 +183,7 @@ service, ensuring that it maintains its state even after a restart.
 
    .. code-block:: bash
 
-       $ flwr run quickstart-compose local-deployment  --stream
+       $ flwr run quickstart-compose local-deployment --stream
 
 3. Check the content of the ``state`` directory:
 
@@ -229,7 +225,7 @@ Step 6: Run Flower with TLS
 
        [tool.flwr.federations.local-deployment-tls]
        address = "127.0.0.1:9093"
-       root-certificates = "../superexec-certificates/ca.crt"
+       root-certificates = "../superlink-certificates/ca.crt"
 
 3. Restart the services with TLS enabled:
 
@@ -339,18 +335,26 @@ Step 8: Persisting the SuperLink State and Enabling TLS
 To run Flower with persisted SuperLink state and enabled TLS, a slight change in the
 ``with-state.yml`` file is required:
 
-1. Comment out the lines 2-4 and uncomment the lines 5-9:
+1. Comment out the lines 2-8 and uncomment the lines 9-17:
 
    .. code-block:: yaml
        :caption: with-state.yml
        :linenos:
-       :emphasize-lines: 2-9
+       :emphasize-lines: 2-17
 
          superlink:
            # command:
-           #   - --insecure
-           #   - --database=state/state.db
+           # - --insecure
+           # - --executor
+           # - flwr.superexec.deployment:executor
+           # - --isolation
+           # - process
+           # - --database=state/state.db
            command:
+             - --executor
+             - flwr.superexec.deployment:executor
+             - --isolation
+             - process
              - --ssl-ca-certfile=certificates/ca.crt
              - --ssl-certfile=certificates/server.pem
              - --ssl-keyfile=certificates/server.key

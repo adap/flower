@@ -76,7 +76,7 @@ Run the Quickstart Example
        $ flwr run . local-deployment --stream
 
 That is all it takes! You can monitor the progress of the run through the logs of the
-SuperExec.
+ServerApp.
 
 Run a Different Quickstart Example
 ----------------------------------
