@@ -40,14 +40,12 @@ from flwr.common.constant import (
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature
 
+from ..app import start_client_internal
 from ..clientapp.utils import get_load_client_app_fn
 
 
 def run_supernode() -> None:
     """Run Flower SuperNode."""
-    # Import start_client_internal here to avoid circular imports
-    from ..app import start_client_internal  # pylint: disable=import-outside-toplevel
-
     args = _parse_args_run_supernode().parse_args()
     _warn_deprecated_server_arg(args)
 
