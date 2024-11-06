@@ -463,7 +463,7 @@ def start_client_internal(
 
                     # Set node_id for this run
                     if node_id is not None:
-                        state.set_node_id(run_id, node_id)
+                        state.set_node_id(node_id)
 
                     # Register context for this run
                     run_info_store.register_context(

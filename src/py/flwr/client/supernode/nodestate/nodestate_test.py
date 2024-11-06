@@ -35,13 +35,12 @@ class StateTest(unittest.TestCase):
         """Test set_node_id."""
         # Prepare
         state: NodeState = self.state_factory()
-        run_id = 123
-        node_id = 234
+        node_id = 123
 
         # Execute
-        state.set_node_id(run_id, node_id)
+        state.set_node_id(node_id)
 
-        retrieved_node_id = state.get_node_id(run_id)
+        retrieved_node_id = state.get_node_id()
 
         # Assert
         assert node_id == retrieved_node_id

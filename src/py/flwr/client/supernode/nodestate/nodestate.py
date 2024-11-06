@@ -21,9 +21,9 @@ class NodeState(abc.ABC):
     """Abstract NodeState."""
 
     @abc.abstractmethod
-    def set_node_id(self, run_id: int, node_id: int) -> None:
-        """Set the node ID for a specified run ID."""
+    def set_node_id(self, node_id: int) -> None:
+        """Set the node ID."""
 
     @abc.abstractmethod
-    def get_node_id(self, run_id: int) -> int:
-        """Get the node ID for a specified run ID."""
+    def get_node_id(self) -> int:
+        """Get the node ID."""

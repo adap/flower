@@ -15,8 +15,6 @@
 """In-memory NodeState implementation."""
 
 
-from typing import cast
-
 from flwr.client.supernode.nodestate.nodestate import NodeState
 
 
@@ -26,12 +24,12 @@ class InMemoryNodeState(NodeState):
     def __init__(self) -> None:
 
         # Map run_id to node_id
-        self.node_id: dict[int, int] = {}
+        self.node_id: int = None
 
-    def set_node_id(self, run_id: int, node_id: int) -> None:
-        """Set the node ID for a specified run ID."""
-        self.node_id[run_id] = node_id
+    def set_node_id(self, node_id: int) -> None:
+        """Set the node ID."""
+        self.node_id = node_id
 
-    def get_node_id(self, run_id: int) -> int:
-        """Get the node ID for a specified run ID."""
-        return cast(int, self.node_id.get(run_id))
+    def get_node_id(self) -> int:
+        """Get the node ID."""
+        return self.node_id
