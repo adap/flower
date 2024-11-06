@@ -29,10 +29,15 @@ from flwr.cli.config_utils import (
     validate_federation_in_project_config,
     validate_project_config,
 )
+from flwr.common import ConfigsRecord
 from flwr.common.config import flatten_dict, parse_config_args
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
-from flwr.common.serde import fab_to_proto, user_config_to_proto
+from flwr.common.serde import (
+    configs_record_to_proto,
+    fab_to_proto,
+    user_config_to_proto,
+)
 from flwr.common.typing import Fab
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
@@ -124,6 +129,7 @@ def _run_with_exec_api(
         federation_config=user_config_to_proto(
             flatten_dict(federation_config.get("options"))
         ),
+        federation_options=configs_record_to_proto(ConfigsRecord()),
     )
     res = stub.StartRun(req)
 
