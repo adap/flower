@@ -31,7 +31,7 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
         """Store one TaskIns.
 
-        Usually, the Driver API calls this to schedule instructions.
+        Usually, the ServerAppIo API calls this to schedule instructions.
 
         Stores the value of the `task_ins` in the link state and, if successful,
         returns the `task_id` (UUID) of the `task_ins`. If, for any reason,
@@ -102,8 +102,8 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
     def get_task_res(self, task_ids: set[UUID]) -> list[TaskRes]:
         """Get TaskRes for task_ids.
 
-        Usually, the Driver API calls this method to get results for instructions it has
-        previously scheduled.
+        Usually, the ServerAppIo API calls this method to get results for instructions
+        it has previously scheduled.
 
         Retrieves all TaskRes for the given `task_ids` and returns and empty list of
         none could be found.
