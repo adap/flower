@@ -49,7 +49,7 @@ def main(driver, context):
 
 if __name__ == "__main__":
     hist = fl.server.start_server(
-        server_address="0.0.0.0:8080",
+        server_address="127.0.0.1:8080",
         config=fl.server.ServerConfig(num_rounds=1),
         strategy=FedAnalytics(),
     )

@@ -24,7 +24,7 @@ esac
 
 dir_arg="./.."
 
-timeout 2m flower-superlink --insecure $db_arg $rest_arg &
+timeout 2m flower-superlink --insecure $db_arg $rest_arg --isolation="process"&
 sl_pid=$!
 echo "Starting SuperLink"
 sleep 3
@@ -45,7 +45,7 @@ echo "Killing Superlink"
 sleep 3
 
 # Restart superlink, the clients should now be able to reconnect to it
-timeout 2m flower-superlink --insecure $db_arg $rest_arg &
+timeout 2m flower-superlink --insecure $db_arg $rest_arg --isolation="process" &
 sl_pid=$!
 echo "Restarting Superlink"
 sleep 20

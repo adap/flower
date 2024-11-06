@@ -56,4 +56,4 @@ app = ClientApp(
 
 if __name__ == "__main__":
     # Start Flower client
-    start_client(server_address="0.0.0.0:8080", client=FlowerClient().to_client())
+    start_client(server_address="127.0.0.1:8080", client=FlowerClient().to_client())

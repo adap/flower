@@ -54,8 +54,6 @@ from .utils import get_load_client_app_fn
 
 def flwr_clientapp() -> None:
     """Run process-isolated Flower ClientApp."""
-    log(INFO, "Starting Flower ClientApp")
-
     parser = argparse.ArgumentParser(
         description="Run a Flower ClientApp",
     )
@@ -72,6 +70,7 @@ def flwr_clientapp() -> None:
     )
     args = parser.parse_args()
 
+    log(INFO, "Starting Flower ClientApp")
     log(
         DEBUG,
         "Staring isolated `ClientApp` connected to SuperNode ClientAppIo at %s "

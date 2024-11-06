@@ -83,6 +83,7 @@ class DeprecatedRunInfoStore:
             self.run_infos[run_id] = RunInfo(
                 initial_run_config=initial_run_config,
                 context=Context(
+                    run_id=run_id,
                     node_id=self.node_id,
                     node_config=self.node_config,
                     state=RecordSet(),

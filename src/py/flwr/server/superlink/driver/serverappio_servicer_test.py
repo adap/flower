@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""DriverServicer tests."""
+"""ServerAppIoServicer tests."""
 
 
-from flwr.server.superlink.driver.driver_servicer import _raise_if
+from flwr.server.superlink.driver.serverappio_servicer import _raise_if
 
 # pylint: disable=broad-except
 

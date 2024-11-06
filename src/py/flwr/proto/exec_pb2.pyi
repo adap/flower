@@ -78,21 +78,27 @@ global___StartRunResponse = StartRunResponse
 class StreamLogsRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     RUN_ID_FIELD_NUMBER: builtins.int
+    AFTER_TIMESTAMP_FIELD_NUMBER: builtins.int
     run_id: builtins.int
+    after_timestamp: builtins.float
     def __init__(self,
         *,
         run_id: builtins.int = ...,
+        after_timestamp: builtins.float = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["after_timestamp",b"after_timestamp","run_id",b"run_id"]) -> None: ...
 global___StreamLogsRequest = StreamLogsRequest
 
 class StreamLogsResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     LOG_OUTPUT_FIELD_NUMBER: builtins.int
+    LATEST_TIMESTAMP_FIELD_NUMBER: builtins.int
     log_output: typing.Text
+    latest_timestamp: builtins.float
     def __init__(self,
         *,
         log_output: typing.Text = ...,
+        latest_timestamp: builtins.float = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["log_output",b"log_output"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["latest_timestamp",b"latest_timestamp","log_output",b"log_output"]) -> None: ...
 global___StreamLogsResponse = StreamLogsResponse

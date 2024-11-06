@@ -17,12 +17,14 @@
 import argparse
 import csv
 import importlib.util
+import subprocess
 import sys
 import threading
 from collections.abc import Sequence
-from logging import INFO, WARN
+from logging import DEBUG, INFO, WARN
 from os.path import isfile
 from pathlib import Path
+from time import sleep
 from typing import Optional
 
 import grpc
@@ -37,7 +39,6 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.config import get_flwr_dir, parse_config_args
 from flwr.common.constant import (
-    DRIVER_API_DEFAULT_ADDRESS,
     EXEC_API_DEFAULT_ADDRESS,
     FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS,
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
@@ -45,6 +46,7 @@ from flwr.common.constant import (
     ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
     MISSING_EXTRA_REST,
+    SERVERAPPIO_API_DEFAULT_ADDRESS,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
@@ -60,14 +62,14 @@ from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
 )
 from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
 from flwr.superexec.app import load_executor
-from flwr.superexec.exec_grpc import run_superexec_api_grpc
+from flwr.superexec.exec_grpc import run_exec_api_grpc
 
 from .client_manager import ClientManager
 from .history import History
 from .server import Server, init_defaults, run_fl
 from .server_config import ServerConfig
 from .strategy import Strategy
-from .superlink.driver.driver_grpc import run_driver_api_grpc
+from .superlink.driver.serverappio_grpc import run_serverappio_api_grpc
 from .superlink.ffs.ffs_factory import FfsFactory
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
 from .superlink.fleet.grpc_bidi.grpc_server import (
@@ -203,7 +205,7 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
 
 # pylint: disable=too-many-branches, too-many-locals, too-many-statements
 def run_superlink() -> None:
-    """Run Flower SuperLink (Driver API and Fleet API)."""
+    """Run Flower SuperLink (ServerAppIo API and Fleet API)."""
     args = _parse_args_run_superlink().parse_args()
 
     log(INFO, "Starting Flower SuperLink")
@@ -211,7 +213,7 @@ def run_superlink() -> None:
     event(EventType.RUN_SUPERLINK_ENTER)
 
     # Parse IP addresses
-    driver_address, _, _ = _format_address(args.driver_api_address)
+    serverappio_address, _, _ = _format_address(args.serverappio_api_address)
     exec_address, _, _ = _format_address(args.exec_api_address)
 
     # Obtain certificates
@@ -223,14 +225,14 @@ def run_superlink() -> None:
     # Initialize FfsFactory
     ffs_factory = FfsFactory(args.storage_dir)
 
-    # Start Driver API
-    driver_server: grpc.Server = run_driver_api_grpc(
-        address=driver_address,
+    # Start ServerAppIo API
+    serverappio_server: grpc.Server = run_serverappio_api_grpc(
+        address=serverappio_address,
         state_factory=state_factory,
         ffs_factory=ffs_factory,
         certificates=certificates,
     )
-    grpc_servers = [driver_server]
+    grpc_servers = [serverappio_server]
 
     # Start Fleet API
     bckg_threads = []
@@ -325,8 +327,10 @@ def run_superlink() -> None:
         raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
 
     # Start Exec API
-    exec_server: grpc.Server = run_superexec_api_grpc(
+    exec_server: grpc.Server = run_exec_api_grpc(
         address=exec_address,
+        state_factory=state_factory,
+        ffs_factory=ffs_factory,
         executor=load_executor(args),
         certificates=certificates,
         config=parse_config_args(
@@ -334,6 +338,15 @@ def run_superlink() -> None:
         ),
     )
     grpc_servers.append(exec_server)
+
+    if args.isolation == ISOLATION_MODE_SUBPROCESS:
+        # Scheduler thread
+        scheduler_th = threading.Thread(
+            target=_flwr_serverapp_scheduler,
+            args=(state_factory, args.serverappio_api_address, args.ssl_ca_certfile),
+        )
+        scheduler_th.start()
+        bckg_threads.append(scheduler_th)
 
     # Graceful shutdown
     register_exit_handlers(
@@ -348,7 +361,46 @@ def run_superlink() -> None:
             for thread in bckg_threads:
                 if not thread.is_alive():
                     sys.exit(1)
-        driver_server.wait_for_termination(timeout=1)
+        serverappio_server.wait_for_termination(timeout=1)
+
+
+def _flwr_serverapp_scheduler(
+    state_factory: LinkStateFactory,
+    serverappio_api_address: str,
+    ssl_ca_certfile: Optional[str],
+) -> None:
+    log(DEBUG, "Started flwr-serverapp scheduler thread.")
+
+    state = state_factory.state()
+
+    # Periodically check for a pending run in the LinkState
+    while True:
+        sleep(3)
+        pending_run_id = state.get_pending_run_id()
+
+        if pending_run_id:
+
+            log(
+                INFO,
+                "Launching `flwr-serverapp` subprocess. Connects to SuperLink on %s",
+                serverappio_api_address,
+            )
+            # Start ServerApp subprocess
+            command = [
+                "flwr-serverapp",
+                "--superlink",
+                serverappio_api_address,
+            ]
+            if ssl_ca_certfile:
+                command.append("--root-certificates")
+                command.append(ssl_ca_certfile)
+            else:
+                command.append("--insecure")
+
+            subprocess.Popen(  # pylint: disable=consider-using-with
+                command,
+                text=True,
+            )
 
 
 def _format_address(address: str) -> tuple[str, str, int]:
@@ -569,7 +621,7 @@ def _run_fleet_api_rest(
     ffs_factory: FfsFactory,
     num_workers: int,
 ) -> None:
-    """Run Driver API (REST-based)."""
+    """Run ServerAppIo API (REST-based)."""
     try:
         import uvicorn
 
@@ -596,13 +648,13 @@ def _run_fleet_api_rest(
 
 
 def _parse_args_run_superlink() -> argparse.ArgumentParser:
-    """Parse command line arguments for both Driver API and Fleet API."""
+    """Parse command line arguments for both ServerAppIo API and Fleet API."""
     parser = argparse.ArgumentParser(
         description="Start a Flower SuperLink",
     )
 
     _add_args_common(parser=parser)
-    _add_args_driver_api(parser=parser)
+    _add_args_serverappio_api(parser=parser)
     _add_args_fleet_api(parser=parser)
     _add_args_exec_api(parser=parser)
 
@@ -681,11 +733,11 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
     )
 
 
-def _add_args_driver_api(parser: argparse.ArgumentParser) -> None:
+def _add_args_serverappio_api(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
-        "--driver-api-address",
-        help="Driver API (gRPC) server address (IPv4, IPv6, or a domain name).",
-        default=DRIVER_API_DEFAULT_ADDRESS,
+        "--serverappio-api-address",
+        help="ServerAppIo API (gRPC) server address (IPv4, IPv6, or a domain name).",
+        default=SERVERAPPIO_API_DEFAULT_ADDRESS,
     )
 
 

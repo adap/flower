@@ -173,13 +173,6 @@ if __name__ == "__main__":
         )
         # ubuntu images for each supported python version
         + generate_binary_images(
-            "superexec",
-            base_images,
-            tag_latest_ubuntu_with_flwr_version,
-            lambda image: image.distro.name == DistroName.UBUNTU,
-        )
-        # ubuntu images for each supported python version
-        + generate_binary_images(
             "clientapp",
             base_images,
             tag_latest_ubuntu_with_flwr_version,

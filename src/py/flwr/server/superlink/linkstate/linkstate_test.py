@@ -23,16 +23,21 @@ from datetime import datetime, timezone
 from unittest.mock import patch
 from uuid import UUID
 
-from flwr.common import DEFAULT_TTL
-from flwr.common.constant import ErrorCode
+from flwr.common import DEFAULT_TTL, Context, RecordSet, now
+from flwr.common.constant import ErrorCode, Status, SubStatus
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
     private_key_to_bytes,
     public_key_to_bytes,
 )
-from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.common.typing import RunStatus
+
+# pylint: disable=E0611
+from flwr.proto.node_pb2 import Node
+from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
+
+# pylint: enable=E0611
 from flwr.server.superlink.linkstate import (
     InMemoryLinkState,
     LinkState,
@@ -66,6 +71,102 @@ class StateTest(unittest.TestCase):
         assert run.fab_hash == "9f86d08"
         assert run.override_config["test_key"] == "test_value"
 
+    def test_get_pending_run_id(self) -> None:
+        """Test if get_pending_run_id works correctly."""
+        # Prepare
+        state = self.state_factory()
+        _ = state.create_run(None, None, "9f86d08", {"test_key": "test_value"})
+        run_id2 = state.create_run(None, None, "fffffff", {"mock_key": "mock_value"})
+        state.update_run_status(run_id2, RunStatus(Status.STARTING, "", ""))
+
+        # Execute
+        pending_run_id = state.get_pending_run_id()
+        assert pending_run_id is not None
+        run_status_dict = state.get_run_status({pending_run_id})
+        assert run_status_dict[pending_run_id].status == Status.PENDING
+
+        # Change state
+        state.update_run_status(pending_run_id, RunStatus(Status.STARTING, "", ""))
+        # Attempt get pending run
+        pending_run_id = state.get_pending_run_id()
+        assert pending_run_id is None
+
+    def test_get_and_update_run_status(self) -> None:
+        """Test if get_run_status and update_run_status work correctly."""
+        # Prepare
+        state = self.state_factory()
+        run_id1 = state.create_run(None, None, "9f86d08", {"test_key": "test_value"})
+        run_id2 = state.create_run(None, None, "fffffff", {"mock_key": "mock_value"})
+        state.update_run_status(run_id2, RunStatus(Status.STARTING, "", ""))
+        state.update_run_status(run_id2, RunStatus(Status.RUNNING, "", ""))
+
+        # Execute
+        run_status_dict = state.get_run_status({run_id1, run_id2})
+        status1 = run_status_dict[run_id1]
+        status2 = run_status_dict[run_id2]
+
+        # Assert
+        assert status1.status == Status.PENDING
+        assert status2.status == Status.RUNNING
+
+    def test_status_transition_valid(self) -> None:
+        """Test valid run status transactions."""
+        # Prepare
+        state = self.state_factory()
+        run_id = state.create_run(None, None, "9f86d08", {"test_key": "test_value"})
+
+        # Execute and assert
+        status1 = state.get_run_status({run_id})[run_id]
+        assert state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+        status2 = state.get_run_status({run_id})[run_id]
+        assert state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        status3 = state.get_run_status({run_id})[run_id]
+        assert state.update_run_status(
+            run_id, RunStatus(Status.FINISHED, SubStatus.FAILED, "mock failure")
+        )
+        status4 = state.get_run_status({run_id})[run_id]
+
+        assert status1.status == Status.PENDING
+        assert status2.status == Status.STARTING
+        assert status3.status == Status.RUNNING
+        assert status4.status == Status.FINISHED
+
+    def test_status_transition_invalid(self) -> None:
+        """Test invalid run status transitions."""
+        # Prepare
+        state = self.state_factory()
+        run_id = state.create_run(None, None, "9f86d08", {"test_key": "test_value"})
+        run_statuses = [
+            RunStatus(Status.PENDING, "", ""),
+            RunStatus(Status.STARTING, "", ""),
+            RunStatus(Status.PENDING, "", ""),
+            RunStatus(Status.FINISHED, SubStatus.COMPLETED, ""),
+            RunStatus(Status.FINISHED, SubStatus.FAILED, ""),
+            RunStatus(Status.FINISHED, SubStatus.STOPPED, ""),
+        ]
+
+        # Execute and assert
+        # Cannot transition from RunStatus.PENDING
+        # to RunStatus.PENDING, RunStatus.RUNNING, or RunStatus.FINISHED
+        for run_status in [s for s in run_statuses if s.status != Status.STARTING]:
+            assert not state.update_run_status(run_id, run_status)
+        state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+        # Cannot transition from RunStatus.STARTING
+        # to RunStatus.PENDING, RunStatus.STARTING, or RunStatus.FINISHED
+        for run_status in [s for s in run_statuses if s.status != Status.RUNNING]:
+            assert not state.update_run_status(run_id, run_status)
+        state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        # Cannot transition from RunStatus.RUNNING
+        # to RunStatus.PENDING, RunStatus.STARTING, or RunStatus.RUNNING
+        for run_status in [s for s in run_statuses if s.status != Status.FINISHED]:
+            assert not state.update_run_status(run_id, run_status)
+        state.update_run_status(
+            run_id, RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
+        )
+        # Cannot transition to any status from RunStatus.FINISHED
+        for run_status in run_statuses:
+            assert not state.update_run_status(run_id, run_status)
+
     def test_get_task_ins_empty(self) -> None:
         """Validate that a new state has no TaskIns."""
         # Prepare
@@ -91,11 +192,11 @@ class StateTest(unittest.TestCase):
     def test_store_task_ins_one(self) -> None:
         """Test store_task_ins."""
         # Prepare
-        consumer_node_id = 1
         state = self.state_factory()
+        node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {})
         task_ins = create_task_ins(
-            consumer_node_id=consumer_node_id, anonymous=False, run_id=run_id
+            consumer_node_id=node_id, anonymous=False, run_id=run_id
         )
 
         assert task_ins.task.created_at < time.time()  # pylint: disable=no-member
@@ -103,7 +204,7 @@ class StateTest(unittest.TestCase):
 
         # Execute
         state.store_task_ins(task_ins=task_ins)
-        task_ins_list = state.get_task_ins(node_id=consumer_node_id, limit=10)
+        task_ins_list = state.get_task_ins(node_id=node_id, limit=10)
 
         # Assert
         assert len(task_ins_list) == 1
@@ -123,20 +224,39 @@ class StateTest(unittest.TestCase):
         )
         assert actual_task.ttl > 0
 
+    def test_store_task_ins_invalid_node_id(self) -> None:
+        """Test store_task_ins with invalid node_id."""
+        # Prepare
+        state = self.state_factory()
+        node_id = state.create_node(1e3)
+        invalid_node_id = 61016 if node_id != 61016 else 61017
+        run_id = state.create_run(None, None, "9f86d08", {})
+        task_ins = create_task_ins(
+            consumer_node_id=invalid_node_id, anonymous=False, run_id=run_id
+        )
+        task_ins2 = create_task_ins(
+            consumer_node_id=node_id, anonymous=False, run_id=run_id
+        )
+        task_ins2.task.producer.node_id = 61016
+
+        # Execute and assert
+        assert state.store_task_ins(task_ins) is None
+        assert state.store_task_ins(task_ins2) is None
+
     def test_store_and_delete_tasks(self) -> None:
         """Test delete_tasks."""
         # Prepare
-        consumer_node_id = 1
         state = self.state_factory()
+        node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {})
         task_ins_0 = create_task_ins(
-            consumer_node_id=consumer_node_id, anonymous=False, run_id=run_id
+            consumer_node_id=node_id, anonymous=False, run_id=run_id
         )
         task_ins_1 = create_task_ins(
-            consumer_node_id=consumer_node_id, anonymous=False, run_id=run_id
+            consumer_node_id=node_id, anonymous=False, run_id=run_id
         )
         task_ins_2 = create_task_ins(
-            consumer_node_id=consumer_node_id, anonymous=False, run_id=run_id
+            consumer_node_id=node_id, anonymous=False, run_id=run_id
         )
 
         # Insert three TaskIns
@@ -149,11 +269,11 @@ class StateTest(unittest.TestCase):
         assert task_id_2
 
         # Get TaskIns to mark them delivered
-        _ = state.get_task_ins(node_id=consumer_node_id, limit=None)
+        _ = state.get_task_ins(node_id=node_id, limit=None)
 
         # Insert one TaskRes and retrive it to mark it as delivered
         task_res_0 = create_task_res(
-            producer_node_id=consumer_node_id,
+            producer_node_id=node_id,
             anonymous=False,
             ancestry=[str(task_id_0)],
             run_id=run_id,
@@ -164,7 +284,7 @@ class StateTest(unittest.TestCase):
 
         # Insert one TaskRes, but don't retrive it
         task_res_1: TaskRes = create_task_res(
-            producer_node_id=consumer_node_id,
+            producer_node_id=node_id,
             anonymous=False,
             ancestry=[str(task_id_1)],
             run_id=run_id,
@@ -231,8 +351,11 @@ class StateTest(unittest.TestCase):
         """Store identity TaskIns and fail retrieving it as anonymous."""
         # Prepare
         state: LinkState = self.state_factory()
+        node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {})
-        task_ins = create_task_ins(consumer_node_id=1, anonymous=False, run_id=run_id)
+        task_ins = create_task_ins(
+            consumer_node_id=node_id, anonymous=False, run_id=run_id
+        )
 
         # Execute
         _ = state.store_task_ins(task_ins)
@@ -245,12 +368,15 @@ class StateTest(unittest.TestCase):
         """Store identity TaskIns and retrieve it."""
         # Prepare
         state: LinkState = self.state_factory()
+        node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {})
-        task_ins = create_task_ins(consumer_node_id=1, anonymous=False, run_id=run_id)
+        task_ins = create_task_ins(
+            consumer_node_id=node_id, anonymous=False, run_id=run_id
+        )
 
         # Execute
         task_ins_uuid = state.store_task_ins(task_ins)
-        task_ins_list = state.get_task_ins(node_id=1, limit=None)
+        task_ins_list = state.get_task_ins(node_id=node_id, limit=None)
 
         # Assert
         assert len(task_ins_list) == 1
@@ -262,14 +388,17 @@ class StateTest(unittest.TestCase):
         """Fail retrieving delivered task."""
         # Prepare
         state: LinkState = self.state_factory()
+        node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {})
-        task_ins = create_task_ins(consumer_node_id=1, anonymous=False, run_id=run_id)
+        task_ins = create_task_ins(
+            consumer_node_id=node_id, anonymous=False, run_id=run_id
+        )
 
         # Execute
         _ = state.store_task_ins(task_ins)
 
         # 1st get: set to delivered
-        task_ins_list = state.get_task_ins(node_id=1, limit=None)
+        task_ins_list = state.get_task_ins(node_id=node_id, limit=None)
 
         assert len(task_ins_list) == 1
 
@@ -773,11 +902,11 @@ class StateTest(unittest.TestCase):
     def test_get_task_ins_not_return_expired(self) -> None:
         """Test get_task_ins not to return expired tasks."""
         # Prepare
-        consumer_node_id = 1
         state = self.state_factory()
+        node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {})
         task_ins = create_task_ins(
-            consumer_node_id=consumer_node_id, anonymous=False, run_id=run_id
+            consumer_node_id=node_id, anonymous=False, run_id=run_id
         )
         task_ins.task.created_at = time.time() - 5
         task_ins.task.ttl = 5.0
@@ -793,11 +922,11 @@ class StateTest(unittest.TestCase):
     def test_get_task_res_not_return_expired(self) -> None:
         """Test get_task_res not to return TaskRes if its TaskIns is expired."""
         # Prepare
-        consumer_node_id = 1
         state = self.state_factory()
+        node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {})
         task_ins = create_task_ins(
-            consumer_node_id=consumer_node_id, anonymous=False, run_id=run_id
+            consumer_node_id=node_id, anonymous=False, run_id=run_id
         )
         task_ins.task.created_at = time.time() - 5
         task_ins.task.ttl = 5.1
@@ -847,11 +976,11 @@ class StateTest(unittest.TestCase):
         """Test get_task_res to return TaskRes if its TaskIns exists and is not
         expired."""
         # Prepare
-        consumer_node_id = 1
         state = self.state_factory()
+        node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {})
         task_ins = create_task_ins(
-            consumer_node_id=consumer_node_id, anonymous=False, run_id=run_id
+            consumer_node_id=node_id, anonymous=False, run_id=run_id
         )
         task_ins.task.created_at = time.time() - 5
         task_ins.task.ttl = 7.1
@@ -859,7 +988,7 @@ class StateTest(unittest.TestCase):
         task_id = state.store_task_ins(task_ins=task_ins)
 
         task_res = create_task_res(
-            producer_node_id=1,
+            producer_node_id=node_id,
             anonymous=False,
             ancestry=[str(task_id)],
             run_id=run_id,
@@ -879,17 +1008,18 @@ class StateTest(unittest.TestCase):
         """Test store_task_res to fail if there is a mismatch between the
         consumer_node_id of taskIns and the producer_node_id of taskRes."""
         # Prepare
-        consumer_node_id = 1
         state = self.state_factory()
+        node_id = state.create_node(1e3)
         run_id = state.create_run(None, None, "9f86d08", {})
         task_ins = create_task_ins(
-            consumer_node_id=consumer_node_id, anonymous=False, run_id=run_id
+            consumer_node_id=node_id, anonymous=False, run_id=run_id
         )
 
         task_id = state.store_task_ins(task_ins=task_ins)
 
         task_res = create_task_res(
-            producer_node_id=100,  # different than consumer_node_id
+            # Different than consumer_node_id
+            producer_node_id=100 if node_id != 100 else 101,
             anonymous=False,
             ancestry=[str(task_id)],
             run_id=run_id,
@@ -900,6 +1030,125 @@ class StateTest(unittest.TestCase):
 
         # Assert
         assert task_res_uuid is None
+
+    def test_get_set_serverapp_context(self) -> None:
+        """Test get and set serverapp context."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        context = Context(
+            run_id=1,
+            node_id=0,
+            node_config={"mock": "mock"},
+            state=RecordSet(),
+            run_config={"test": "test"},
+        )
+        run_id = state.create_run(None, None, "9f86d08", {})
+
+        # Execute
+        init = state.get_serverapp_context(run_id)
+        state.set_serverapp_context(run_id, context)
+        retrieved_context = state.get_serverapp_context(run_id)
+
+        # Assert
+        assert init is None
+        assert retrieved_context == context
+
+    def test_set_context_invalid_run_id(self) -> None:
+        """Test set_serverapp_context with invalid run_id."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        context = Context(
+            run_id=1,
+            node_id=0,
+            node_config={"mock": "mock"},
+            state=RecordSet(),
+            run_config={"test": "test"},
+        )
+
+        # Execute and assert
+        with self.assertRaises(ValueError):
+            state.set_serverapp_context(61016, context)  # Invalid run_id
+
+    def test_add_serverapp_log_invalid_run_id(self) -> None:
+        """Test adding serverapp log with invalid run_id."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        invalid_run_id = 99999
+        log_entry = "Invalid log entry"
+
+        # Execute and assert
+        with self.assertRaises(ValueError):
+            state.add_serverapp_log(invalid_run_id, log_entry)
+
+    def test_get_serverapp_log_invalid_run_id(self) -> None:
+        """Test retrieving serverapp log with invalid run_id."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        invalid_run_id = 99999
+
+        # Execute and assert
+        with self.assertRaises(ValueError):
+            state.get_serverapp_log(invalid_run_id, after_timestamp=None)
+
+    def test_add_and_get_serverapp_log(self) -> None:
+        """Test adding and retrieving serverapp logs."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        run_id = state.create_run(None, None, "9f86d08", {})
+        log_entry_1 = "Log entry 1"
+        log_entry_2 = "Log entry 2"
+        timestamp = now().timestamp()
+
+        # Execute
+        state.add_serverapp_log(run_id, log_entry_1)
+        state.add_serverapp_log(run_id, log_entry_2)
+        retrieved_logs, latest = state.get_serverapp_log(
+            run_id, after_timestamp=timestamp
+        )
+
+        # Assert
+        assert latest > timestamp
+        assert log_entry_1 + log_entry_2 == retrieved_logs
+
+    def test_get_serverapp_log_after_timestamp(self) -> None:
+        """Test retrieving serverapp logs after a specific timestamp."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        run_id = state.create_run(None, None, "9f86d08", {})
+        log_entry_1 = "Log entry 1"
+        log_entry_2 = "Log entry 2"
+        state.add_serverapp_log(run_id, log_entry_1)
+        timestamp = now().timestamp()
+        state.add_serverapp_log(run_id, log_entry_2)
+
+        # Execute
+        retrieved_logs, latest = state.get_serverapp_log(
+            run_id, after_timestamp=timestamp
+        )
+
+        # Assert
+        assert latest > timestamp
+        assert log_entry_1 not in retrieved_logs
+        assert log_entry_2 == retrieved_logs
+
+    def test_get_serverapp_log_after_timestamp_no_logs(self) -> None:
+        """Test retrieving serverapp logs after a specific timestamp but no logs are
+        found."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        run_id = state.create_run(None, None, "9f86d08", {})
+        log_entry = "Log entry"
+        state.add_serverapp_log(run_id, log_entry)
+        timestamp = now().timestamp()
+
+        # Execute
+        retrieved_logs, latest = state.get_serverapp_log(
+            run_id, after_timestamp=timestamp
+        )
+
+        # Assert
+        assert latest == 0
+        assert retrieved_logs == ""
 
 
 def create_task_ins(
@@ -922,7 +1171,7 @@ def create_task_ins(
             producer=Node(node_id=0, anonymous=True),
             consumer=consumer,
             task_type="mock",
-            recordset=RecordSet(parameters={}, metrics={}, configs={}),
+            recordset=ProtoRecordSet(parameters={}, metrics={}, configs={}),
             ttl=DEFAULT_TTL,
             created_at=time.time(),
         ),
@@ -947,7 +1196,7 @@ def create_task_res(
             consumer=Node(node_id=0, anonymous=True),
             ancestry=ancestry,
             task_type="mock",
-            recordset=RecordSet(parameters={}, metrics={}, configs={}),
+            recordset=ProtoRecordSet(parameters={}, metrics={}, configs={}),
             ttl=DEFAULT_TTL,
             created_at=time.time(),
         ),
@@ -986,7 +1235,7 @@ class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 13
+        assert len(result) == 17
 
 
 class SqliteFileBasedTest(StateTest, unittest.TestCase):
@@ -1011,7 +1260,7 @@ class SqliteFileBasedTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 13
+        assert len(result) == 17
 
 
 if __name__ == "__main__":

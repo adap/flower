@@ -29,9 +29,11 @@ from flwr.common.config import unflatten_dict
 from flwr.common.constant import RUN_ID_NUM_BYTES
 from flwr.common.logger import log
 from flwr.common.typing import UserConfig
+from flwr.server.superlink.ffs.ffs_factory import FfsFactory
+from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 
-from .executor import Executor, RunTracker
+from .executor import Executor
 
 
 def _user_config_to_str(user_config: UserConfig) -> str:
@@ -69,6 +71,12 @@ class SimulationEngine(Executor):
     ) -> None:
         self.num_supernodes = num_supernodes
         self.verbose = verbose
+
+    @override
+    def initialize(
+        self, linkstate_factory: LinkStateFactory, ffs_factory: FfsFactory
+    ) -> None:
+        """Initialize the executor with the necessary factories."""
 
     @override
     def set_config(
@@ -117,7 +125,7 @@ class SimulationEngine(Executor):
         fab_file: bytes,
         override_config: UserConfig,
         federation_config: UserConfig,
-    ) -> Optional[RunTracker]:
+    ) -> Optional[int]:
         """Start run using the Flower Simulation Engine."""
         if self.num_supernodes is None:
             raise ValueError(
@@ -191,17 +199,14 @@ class SimulationEngine(Executor):
                 command.extend(["--run-config", f"{override_config_str}"])
 
             # Start Simulation
-            proc = subprocess.Popen(  # pylint: disable=consider-using-with
+            _ = subprocess.Popen(  # pylint: disable=consider-using-with
                 command,
                 text=True,
             )
 
             log(INFO, "Started run %s", str(run_id))
 
-            return RunTracker(
-                run_id=run_id,
-                proc=proc,
-            )
+            return run_id
 
         # pylint: disable-next=broad-except
         except Exception as e:

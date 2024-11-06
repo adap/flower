@@ -74,6 +74,7 @@ def get_test_handler(
 def _make_ctxt() -> Context:
     cfg = ConfigsRecord(SecAggPlusState().to_dict())
     return Context(
+        run_id=234,
         node_id=123,
         node_config={},
         state=RecordSet(configs_records={RECORD_KEY_STATE: cfg}),

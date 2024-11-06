@@ -503,6 +503,7 @@ def test_context_serialization_deserialization() -> None:
     # Prepare
     maker = RecordMaker()
     original = Context(
+        run_id=0,
         node_id=1,
         node_config=maker.user_config(),
         state=maker.recordset(1, 1, 1),

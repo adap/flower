@@ -17,22 +17,44 @@
 
 import threading
 import time
+from bisect import bisect_right
+from dataclasses import dataclass, field
 from logging import ERROR, WARNING
 from typing import Optional
 from uuid import UUID, uuid4
 
-from flwr.common import log, now
+from flwr.common import Context, log, now
 from flwr.common.constant import (
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
     RUN_ID_NUM_BYTES,
+    Status,
 )
-from flwr.common.typing import Run, UserConfig
+from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.linkstate.linkstate import LinkState
 from flwr.server.utils import validate_task_ins_or_res
 
-from .utils import generate_rand_int_from_bytes, make_node_unavailable_taskres
+from .utils import (
+    generate_rand_int_from_bytes,
+    has_valid_sub_status,
+    is_valid_transition,
+    make_node_unavailable_taskres,
+)
+
+
+@dataclass
+class RunRecord:  # pylint: disable=R0902
+    """The record of a specific run, including its status and timestamps."""
+
+    run: Run
+    status: RunStatus
+    pending_at: str = ""
+    starting_at: str = ""
+    running_at: str = ""
+    finished_at: str = ""
+    logs: list[tuple[float, str]] = field(default_factory=list)
+    log_lock: threading.Lock = field(default_factory=threading.Lock)
 
 
 class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
@@ -44,8 +66,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         self.node_ids: dict[int, tuple[float, float]] = {}
         self.public_key_to_node_id: dict[bytes, int] = {}
 
-        # Map run_id to (fab_id, fab_version)
-        self.run_ids: dict[int, Run] = {}
+        # Map run_id to RunRecord
+        self.run_ids: dict[int, RunRecord] = {}
+        self.contexts: dict[int, Context] = {}
         self.task_ins_store: dict[UUID, TaskIns] = {}
         self.task_res_store: dict[UUID, TaskRes] = {}
 
@@ -64,8 +87,25 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             return None
         # Validate run_id
         if task_ins.run_id not in self.run_ids:
-            log(ERROR, "`run_id` is invalid")
+            log(ERROR, "Invalid run ID for TaskIns: %s", task_ins.run_id)
             return None
+        # Validate source node ID
+        if task_ins.task.producer.node_id != 0:
+            log(
+                ERROR,
+                "Invalid source node ID for TaskIns: %s",
+                task_ins.task.producer.node_id,
+            )
+            return None
+        # Validate destination node ID
+        if not task_ins.task.consumer.anonymous:
+            if task_ins.task.consumer.node_id not in self.node_ids:
+                log(
+                    ERROR,
+                    "Invalid destination node ID for TaskIns: %s",
+                    task_ins.task.consumer.node_id,
+                )
+                return None
 
         # Create task_id
         task_id = uuid4()
@@ -351,13 +391,22 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
 
             if run_id not in self.run_ids:
-                self.run_ids[run_id] = Run(
-                    run_id=run_id,
-                    fab_id=fab_id if fab_id else "",
-                    fab_version=fab_version if fab_version else "",
-                    fab_hash=fab_hash if fab_hash else "",
-                    override_config=override_config,
+                run_record = RunRecord(
+                    run=Run(
+                        run_id=run_id,
+                        fab_id=fab_id if fab_id else "",
+                        fab_version=fab_version if fab_version else "",
+                        fab_hash=fab_hash if fab_hash else "",
+                        override_config=override_config,
+                    ),
+                    status=RunStatus(
+                        status=Status.PENDING,
+                        sub_status="",
+                        details="",
+                    ),
+                    pending_at=now().isoformat(),
                 )
+                self.run_ids[run_id] = run_record
                 return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
@@ -401,7 +450,69 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             if run_id not in self.run_ids:
                 log(ERROR, "`run_id` is invalid")
                 return None
-            return self.run_ids[run_id]
+            return self.run_ids[run_id].run
+
+    def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
+        """Retrieve the statuses for the specified runs."""
+        with self.lock:
+            return {
+                run_id: self.run_ids[run_id].status
+                for run_id in set(run_ids)
+                if run_id in self.run_ids
+            }
+
+    def update_run_status(self, run_id: int, new_status: RunStatus) -> bool:
+        """Update the status of the run with the specified `run_id`."""
+        with self.lock:
+            # Check if the run_id exists
+            if run_id not in self.run_ids:
+                log(ERROR, "`run_id` is invalid")
+                return False
+
+            # Check if the status transition is valid
+            current_status = self.run_ids[run_id].status
+            if not is_valid_transition(current_status, new_status):
+                log(
+                    ERROR,
+                    'Invalid status transition: from "%s" to "%s"',
+                    current_status.status,
+                    new_status.status,
+                )
+                return False
+
+            # Check if the sub-status is valid
+            if not has_valid_sub_status(current_status):
+                log(
+                    ERROR,
+                    'Invalid sub-status "%s" for status "%s"',
+                    current_status.sub_status,
+                    current_status.status,
+                )
+                return False
+
+            # Update the status
+            run_record = self.run_ids[run_id]
+            if new_status.status == Status.STARTING:
+                run_record.starting_at = now().isoformat()
+            elif new_status.status == Status.RUNNING:
+                run_record.running_at = now().isoformat()
+            elif new_status.status == Status.FINISHED:
+                run_record.finished_at = now().isoformat()
+            run_record.status = new_status
+            return True
+
+    def get_pending_run_id(self) -> Optional[int]:
+        """Get the `run_id` of a run with `Status.PENDING` status, if any."""
+        pending_run_id = None
+
+        # Loop through all registered runs
+        for run_id, run_rec in self.run_ids.items():
+            # Break once a pending run is found
+            if run_rec.status.status == Status.PENDING:
+                pending_run_id = run_id
+                break
+
+        return pending_run_id
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""
@@ -410,3 +521,36 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
                 return True
         return False
+
+    def get_serverapp_context(self, run_id: int) -> Optional[Context]:
+        """Get the context for the specified `run_id`."""
+        return self.contexts.get(run_id)
+
+    def set_serverapp_context(self, run_id: int, context: Context) -> None:
+        """Set the context for the specified `run_id`."""
+        if run_id not in self.run_ids:
+            raise ValueError(f"Run {run_id} not found")
+        self.contexts[run_id] = context
+
+    def add_serverapp_log(self, run_id: int, log_message: str) -> None:
+        """Add a log entry to the serverapp logs for the specified `run_id`."""
+        if run_id not in self.run_ids:
+            raise ValueError(f"Run {run_id} not found")
+        run = self.run_ids[run_id]
+        with run.log_lock:
+            run.logs.append((now().timestamp(), log_message))
+
+    def get_serverapp_log(
+        self, run_id: int, after_timestamp: Optional[float]
+    ) -> tuple[str, float]:
+        """Get the serverapp logs for the specified `run_id`."""
+        if run_id not in self.run_ids:
+            raise ValueError(f"Run {run_id} not found")
+        run = self.run_ids[run_id]
+        if after_timestamp is None:
+            after_timestamp = 0.0
+        with run.log_lock:
+            # Find the index where the timestamp would be inserted
+            index = bisect_right(run.logs, (after_timestamp, ""))
+            latest_timestamp = run.logs[-1][0] if index < len(run.logs) else 0.0
+            return "".join(log for _, log in run.logs[index:]), latest_timestamp
