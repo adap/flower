@@ -141,7 +141,9 @@ def load_app(  # pylint: disable= too-many-branches
         raise error_type(error_msg) from None
 
     module_str, _, attributes_str = module_attribute_str.partition(":")
-
+    print(f"{module_attribute_str = }")
+    print(f"{project_dir = }")
+    importlib.invalidate_caches()
     try:
         _set_sys_path(project_dir)
 
