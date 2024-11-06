@@ -15,7 +15,7 @@
 """SimulationIo API servicer."""
 
 import threading
-from logging import DEBUG, INFO
+from logging import DEBUG, ERROR, INFO
 
 import grpc
 from grpc import ServicerContext
@@ -23,6 +23,7 @@ from grpc import ServicerContext
 from flwr.common.constant import Status
 from flwr.common.logger import log
 from flwr.common.serde import (
+    configs_record_to_proto,
     context_from_proto,
     context_to_proto,
     fab_to_proto,
@@ -36,6 +37,8 @@ from flwr.proto.log_pb2 import (  # pylint: disable=E0611
     PushLogsResponse,
 )
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
+    GetFederationOptionsRequest,
+    GetFederationOptionsResponse,
     UpdateRunStatusRequest,
     UpdateRunStatusResponse,
 )
@@ -123,10 +126,26 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         self, request: PushLogsRequest, context: grpc.ServicerContext
     ) -> PushLogsResponse:
         """Push logs."""
-        log(DEBUG, "ServerAppIoServicer.PushLogs")
+        log(DEBUG, "SimultionIoServicer.PushLogs")
         state = self.state_factory.state()
 
         # Add logs to LinkState
         merged_logs = "".join(request.logs)
         state.add_serverapp_log(request.run_id, merged_logs)
         return PushLogsResponse()
+
+    def GetFederationOptions(
+        self, request: GetFederationOptionsRequest, context: ServicerContext
+    ) -> GetFederationOptionsResponse:
+        """Get Federation Options associated with a run."""
+        log(DEBUG, "SimultionIoServicer.GetFederationOptions")
+        state = self.state_factory.state()
+
+        federation_options = state.get_federation_options(request.run_id)
+        if federation_options:
+            return GetFederationOptionsResponse(
+                federation_options=configs_record_to_proto(federation_options)
+            )
+
+        log(ERROR, "Expected federation options to be set, but none available.")
+        return GetFederationOptionsResponse()
