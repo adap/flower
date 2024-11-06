@@ -62,10 +62,7 @@ class SimulationIoConnection:
         return cast(SimulationIoStub, self._grpc_stub)
 
     def _connect(self) -> None:
-        """Connect to the SimulationIo API.
-
-        This will not call GetRun.
-        """
+        """Connect to the SimulationIo API."""
         if self._is_connected:
             log(WARNING, "Already connected")
             return
