@@ -39,13 +39,16 @@ Run the Quickstart Example
    .. code-block:: bash
        :substitutions:
 
-       $ curl https://raw.githubusercontent.com/adap/flower/refs/tags/v|stable_flwr_version|/src/docker/complete/compose.yml \
+       $ curl https://raw.githubusercontent.com/adap/flower/24b2861465431a5ab234a8c4f76faea7a742b1fd/src/docker/complete/compose.yml \
            -o compose.yml
 
-3. Build and start the services using the following command:
+3. Export the version of Flower that your environment uses. Then, build and start the
+   services using the following command:
 
    .. code-block:: bash
+       :substitutions:
 
+       $ export FLWR_VERSION="|stable_flwr_version|" # update with your version
        $ docker compose up --build -d
 
 4. Append the following lines to the end of the ``pyproject.toml`` file and save it:
