@@ -66,6 +66,7 @@ class TestClientAppIoServicer(unittest.TestCase):
             content=self.maker.recordset(2, 2, 1),
         )
         context = Context(
+            run_id=1,
             node_id=1,
             node_config={"nodeconfig1": 4.2},
             state=self.maker.recordset(2, 2, 1),
@@ -122,6 +123,7 @@ class TestClientAppIoServicer(unittest.TestCase):
             content=self.maker.recordset(2, 2, 1),
         )
         context = Context(
+            run_id=1,
             node_id=1,
             node_config={"nodeconfig1": 4.2},
             state=self.maker.recordset(2, 2, 1),
@@ -186,6 +188,7 @@ class TestClientAppIoServicer(unittest.TestCase):
             content=self.maker.recordset(2, 2, 1),
         )
         context = Context(
+            run_id=1,
             node_id=1,
             node_config={"nodeconfig1": 4.2},
             state=self.maker.recordset(2, 2, 1),
