@@ -23,7 +23,7 @@ from typing import Optional
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
-from flwr.common import Context, EventType, RecordSet, event
+from flwr.common import ConfigsRecord, Context, EventType, RecordSet, event
 from flwr.common.config import (
     get_flwr_dir,
     get_fused_config_from_dir,
@@ -201,7 +201,9 @@ def run_server_app() -> None:
         fab_version, fab_id = get_metadata_from_config(config)
 
         # Create run
-        req = CreateRunRequest(fab_id=fab_id, fab_version=fab_version)
+        req = CreateRunRequest(
+            fab_id=fab_id, fab_version=fab_version, federation_options=ConfigsRecord()
+        )
         res: CreateRunResponse = driver._stub.CreateRun(req)  # pylint: disable=W0212
         # Fetch full `Run` using `run_id`
         driver.init_run(res.run_id)  # pylint: disable=W0212
