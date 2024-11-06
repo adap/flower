@@ -20,7 +20,7 @@ import unittest
 from typing import Union
 
 import numpy as np
-from numpy.typing import NDArray
+from flwr.common.typing import NDArrayFloat
 from parameterized import parameterized
 
 from datasets import Dataset
@@ -29,7 +29,7 @@ from flwr_datasets.partitioner.dirichlet_partitioner import DirichletPartitioner
 
 def _dummy_setup(
     num_partitions: int,
-    alpha: Union[float, NDArray[np.float64]],
+    alpha: Union[float, NDArrayFloat],
     num_rows: int,
     partition_by: str,
     self_balancing: bool = True,
