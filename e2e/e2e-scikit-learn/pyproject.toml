@@ -13,7 +13,6 @@ authors = [
 ]
 dependencies = [
     "flwr[simulation,rest] @ {root:parent:parent:uri}",
-    "flwr-datasets[vision]>=0.3.0",
     "scikit-learn>=1.1.1,<2.0.0",
     "numpy<2.0.0",
 ]
