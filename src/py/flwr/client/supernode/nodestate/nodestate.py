@@ -15,15 +15,16 @@
 """Abstract base class NodeState."""
 
 import abc
+from typing import Optional
 
 
 class NodeState(abc.ABC):
     """Abstract NodeState."""
 
     @abc.abstractmethod
-    def set_node_id(self, node_id: int) -> None:
+    def set_node_id(self, node_id: Optional[int]) -> None:
         """Set the node ID."""
 
     @abc.abstractmethod
-    def get_node_id(self) -> int:
+    def get_node_id(self) -> Optional[int]:
         """Get the node ID."""

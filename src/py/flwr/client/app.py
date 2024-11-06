@@ -370,7 +370,6 @@ def start_client_internal(
     state = state_factory.state()
 
     runs: dict[int, Run] = {}
-    node_id: Optional[int] = None
 
     while not app_state_tracker.interrupt:
         sleep_duration: int = 0
@@ -400,11 +399,12 @@ def start_client_internal(
                     )
                 else:
                     # Call create_node fn to register node
-                    node_id = create_node()  # pylint: disable=not-callable
-                    if node_id is None:
+                    # and store node_id in state
+                    state.set_node_id(create_node())
+                    if not state.get_node_id():
                         raise ValueError("Node registration failed")
                     run_info_store = DeprecatedRunInfoStore(
-                        node_id=node_id,
+                        node_id=cast(int, state.get_node_id()),
                         node_config=node_config,
                     )
 
@@ -460,10 +460,6 @@ def start_client_internal(
                         fab_id, fab_version = run.fab_id, run.fab_version
 
                     run.fab_id, run.fab_version = fab_id, fab_version
-
-                    # Set node_id for this run
-                    if node_id is not None:
-                        state.set_node_id(node_id)
 
                     # Register context for this run
                     run_info_store.register_context(

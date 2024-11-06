@@ -14,6 +14,7 @@
 # ==============================================================================
 """Factory class that creates NodeState instances."""
 
+import threading
 from typing import Optional
 
 from .in_memory_nodestate import InMemoryNodeState
@@ -25,9 +26,12 @@ class NodeStateFactory:
 
     def __init__(self) -> None:
         self.state_instance: Optional[NodeState] = None
+        self.lock = threading.RLock()
 
     def state(self) -> NodeState:
         """Return a State instance and create it, if necessary."""
-        if self.state_instance is None:
-            self.state_instance = InMemoryNodeState()
-        return self.state_instance
+        # Lock access to NodeStateFactory to prevent returning different instances
+        with self.lock:
+            if self.state_instance is None:
+                self.state_instance = InMemoryNodeState()
+            return self.state_instance

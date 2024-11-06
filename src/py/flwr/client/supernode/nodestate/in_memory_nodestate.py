@@ -15,6 +15,8 @@
 """In-memory NodeState implementation."""
 
 
+from typing import Optional
+
 from flwr.client.supernode.nodestate.nodestate import NodeState
 
 
@@ -22,13 +24,14 @@ class InMemoryNodeState(NodeState):
     """In-memory NodeState implementation."""
 
     def __init__(self) -> None:
-        # Map run_id to node_id
-        self.node_id: int
 
-    def set_node_id(self, node_id: int) -> None:
+        # Store node_ids
+        self.node_id: Optional[int]
+
+    def set_node_id(self, node_id: Optional[int]) -> None:
         """Set the node ID."""
         self.node_id = node_id
 
-    def get_node_id(self) -> int:
+    def get_node_id(self) -> Optional[int]:
         """Get the node ID."""
         return self.node_id
