@@ -139,7 +139,9 @@ class DeploymentEngine(Executor):
     def _create_context(self, run_id: int) -> None:
         """Register a Context for a Run."""
         # Create an empty context for the Run
-        context = Context(node_id=0, node_config={}, state=RecordSet(), run_config={})
+        context = Context(
+            run_id=run_id, node_id=0, node_config={}, state=RecordSet(), run_config={}
+        )
 
         # Register the context at the LinkState
         self.linkstate.set_serverapp_context(run_id=run_id, context=context)
