@@ -22,7 +22,6 @@ class InMemoryNodeState(NodeState):
     """In-memory NodeState implementation."""
 
     def __init__(self) -> None:
-
         # Map run_id to node_id
         self.node_id: int
 
