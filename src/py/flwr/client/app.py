@@ -400,9 +400,9 @@ def start_client_internal(
                 else:
                     # Call create_node fn to register node
                     # and store node_id in state
-                    if create_node() is None:
+                    if (node_id := create_node()) is None:
                         raise ValueError("Node creation failed")
-                    state.set_node_id(create_node())
+                    state.set_node_id(node_id)
                     run_info_store = DeprecatedRunInfoStore(
                         node_id=state.get_node_id(),
                         node_config=node_config,
