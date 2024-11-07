@@ -29,7 +29,7 @@ from flwr.common import ConfigsRecord
 from flwr.common.config import unflatten_dict
 from flwr.common.constant import RUN_ID_NUM_BYTES
 from flwr.common.logger import log
-from flwr.common.typing import ConfigsRecordValues, UserConfig
+from flwr.common.typing import UserConfig
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
@@ -165,10 +165,7 @@ class SimulationEngine(Executor):
                 )
 
             # Unflatten underlaying dict
-            c_record_data: dict[str, ConfigsRecordValues] = federation_options.__dict__[
-                "_data"
-            ]
-            fed_opt = unflatten_dict(c_record_data)
+            fed_opt = unflatten_dict(**federation_options)
 
             # Read data
             num_supernodes = fed_opt.get("num-supernodes", self.num_supernodes)
