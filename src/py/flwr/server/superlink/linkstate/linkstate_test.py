@@ -23,7 +23,7 @@ from datetime import datetime, timezone
 from unittest.mock import patch
 from uuid import UUID
 
-from flwr.common import DEFAULT_TTL, Context, RecordSet, now
+from flwr.common import DEFAULT_TTL, ConfigsRecord, Context, RecordSet, now
 from flwr.common.constant import ErrorCode, Status, SubStatus
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
@@ -60,7 +60,9 @@ class StateTest(unittest.TestCase):
         """Test if create_run and get_run work correctly."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {"test_key": "test_value"})
+        run_id = state.create_run(
+            None, None, "9f86d08", {"test_key": "test_value"}, ConfigsRecord()
+        )
 
         # Execute
         run = state.get_run(run_id)
@@ -75,8 +77,12 @@ class StateTest(unittest.TestCase):
         """Test if get_pending_run_id works correctly."""
         # Prepare
         state = self.state_factory()
-        _ = state.create_run(None, None, "9f86d08", {"test_key": "test_value"})
-        run_id2 = state.create_run(None, None, "fffffff", {"mock_key": "mock_value"})
+        _ = state.create_run(
+            None, None, "9f86d08", {"test_key": "test_value"}, ConfigsRecord()
+        )
+        run_id2 = state.create_run(
+            None, None, "fffffff", {"mock_key": "mock_value"}, ConfigsRecord()
+        )
         state.update_run_status(run_id2, RunStatus(Status.STARTING, "", ""))
 
         # Execute
@@ -95,8 +101,12 @@ class StateTest(unittest.TestCase):
         """Test if get_run_status and update_run_status work correctly."""
         # Prepare
         state = self.state_factory()
-        run_id1 = state.create_run(None, None, "9f86d08", {"test_key": "test_value"})
-        run_id2 = state.create_run(None, None, "fffffff", {"mock_key": "mock_value"})
+        run_id1 = state.create_run(
+            None, None, "9f86d08", {"test_key": "test_value"}, ConfigsRecord()
+        )
+        run_id2 = state.create_run(
+            None, None, "fffffff", {"mock_key": "mock_value"}, ConfigsRecord()
+        )
         state.update_run_status(run_id2, RunStatus(Status.STARTING, "", ""))
         state.update_run_status(run_id2, RunStatus(Status.RUNNING, "", ""))
 
@@ -113,7 +123,9 @@ class StateTest(unittest.TestCase):
         """Test valid run status transactions."""
         # Prepare
         state = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {"test_key": "test_value"})
+        run_id = state.create_run(
+            None, None, "9f86d08", {"test_key": "test_value"}, ConfigsRecord()
+        )
 
         # Execute and assert
         status1 = state.get_run_status({run_id})[run_id]
@@ -135,7 +147,9 @@ class StateTest(unittest.TestCase):
         """Test invalid run status transitions."""
         # Prepare
         state = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {"test_key": "test_value"})
+        run_id = state.create_run(
+            None, None, "9f86d08", {"test_key": "test_value"}, ConfigsRecord()
+        )
         run_statuses = [
             RunStatus(Status.PENDING, "", ""),
             RunStatus(Status.STARTING, "", ""),
@@ -194,7 +208,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state = self.state_factory()
         node_id = state.create_node(1e3)
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         task_ins = create_task_ins(
             consumer_node_id=node_id, anonymous=False, run_id=run_id
         )
@@ -230,7 +244,7 @@ class StateTest(unittest.TestCase):
         state = self.state_factory()
         node_id = state.create_node(1e3)
         invalid_node_id = 61016 if node_id != 61016 else 61017
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         task_ins = create_task_ins(
             consumer_node_id=invalid_node_id, anonymous=False, run_id=run_id
         )
@@ -248,7 +262,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state = self.state_factory()
         node_id = state.create_node(1e3)
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         task_ins_0 = create_task_ins(
             consumer_node_id=node_id, anonymous=False, run_id=run_id
         )
@@ -322,7 +336,7 @@ class StateTest(unittest.TestCase):
         """
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
 
         # Execute
@@ -337,7 +351,7 @@ class StateTest(unittest.TestCase):
         """Store anonymous TaskIns and fail to retrieve it."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
 
         # Execute
@@ -352,7 +366,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: LinkState = self.state_factory()
         node_id = state.create_node(1e3)
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         task_ins = create_task_ins(
             consumer_node_id=node_id, anonymous=False, run_id=run_id
         )
@@ -369,7 +383,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: LinkState = self.state_factory()
         node_id = state.create_node(1e3)
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         task_ins = create_task_ins(
             consumer_node_id=node_id, anonymous=False, run_id=run_id
         )
@@ -389,7 +403,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: LinkState = self.state_factory()
         node_id = state.create_node(1e3)
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         task_ins = create_task_ins(
             consumer_node_id=node_id, anonymous=False, run_id=run_id
         )
@@ -434,7 +448,7 @@ class StateTest(unittest.TestCase):
         """Store TaskRes retrieve it by task_ins_id."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
 
         task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
         task_ins_id = state.store_task_ins(task_ins)
@@ -460,7 +474,7 @@ class StateTest(unittest.TestCase):
         """Test retrieving all node_ids and empty initial state."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
 
         # Execute
         retrieved_node_ids = state.get_nodes(run_id)
@@ -472,7 +486,7 @@ class StateTest(unittest.TestCase):
         """Test creating a client node."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         node_ids = []
 
         # Execute
@@ -489,7 +503,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: LinkState = self.state_factory()
         public_key = b"mock"
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
 
         # Execute
         node_id = state.create_node(ping_interval=10, public_key=public_key)
@@ -505,7 +519,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: LinkState = self.state_factory()
         public_key = b"mock"
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         node_id = state.create_node(ping_interval=10, public_key=public_key)
 
         # Execute
@@ -527,7 +541,7 @@ class StateTest(unittest.TestCase):
         """Test deleting a client node."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         node_id = state.create_node(ping_interval=10)
 
         # Execute
@@ -542,7 +556,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: LinkState = self.state_factory()
         public_key = b"mock"
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         node_id = state.create_node(ping_interval=10, public_key=public_key)
 
         # Execute
@@ -559,7 +573,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: LinkState = self.state_factory()
         public_key = b"mock"
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         node_id = 0
 
         # Execute & Assert
@@ -578,7 +592,7 @@ class StateTest(unittest.TestCase):
         state: LinkState = self.state_factory()
         public_key = b"mock"
         wrong_public_key = b"mock_mock"
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         node_id = state.create_node(ping_interval=10, public_key=public_key)
 
         # Execute & Assert
@@ -597,7 +611,7 @@ class StateTest(unittest.TestCase):
         state: LinkState = self.state_factory()
         public_key = b"mock"
         wrong_public_key = b"mock_mock"
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
 
         # Execute
         state.create_node(ping_interval=10, public_key=public_key)
@@ -612,7 +626,7 @@ class StateTest(unittest.TestCase):
         """Test retrieving all node_ids with invalid run_id."""
         # Prepare
         state: LinkState = self.state_factory()
-        state.create_run(None, None, "9f86d08", {})
+        state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         invalid_run_id = 61016
         state.create_node(ping_interval=10)
 
@@ -626,7 +640,7 @@ class StateTest(unittest.TestCase):
         """Test if num_tasks returns correct number of not delivered task_ins."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         task_0 = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
         task_1 = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
 
@@ -644,7 +658,7 @@ class StateTest(unittest.TestCase):
         """Test if num_tasks returns correct number of not delivered task_res."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
 
         task_ins_0 = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
         task_ins_1 = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
@@ -757,7 +771,7 @@ class StateTest(unittest.TestCase):
         """Test if acknowledge_ping works and if get_nodes return online nodes."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         node_ids = [state.create_node(ping_interval=10) for _ in range(100)]
         for node_id in node_ids[:70]:
             state.acknowledge_ping(node_id, ping_interval=30)
@@ -776,7 +790,7 @@ class StateTest(unittest.TestCase):
         """Test if get_task_res return TaskRes containing node unavailable error."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         node_id_0 = state.create_node(ping_interval=90)
         node_id_1 = state.create_node(ping_interval=30)
         # Create and store TaskIns
@@ -818,7 +832,7 @@ class StateTest(unittest.TestCase):
         """Test behavior of store_task_res when the TaskIns it references is expired."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
 
         task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
         task_ins.task.created_at = time.time() - task_ins.task.ttl + 0.5
@@ -872,7 +886,7 @@ class StateTest(unittest.TestCase):
 
             # Prepare
             state: LinkState = self.state_factory()
-            run_id = state.create_run(None, None, "9f86d08", {})
+            run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
 
             task_ins = create_task_ins(
                 consumer_node_id=0, anonymous=True, run_id=run_id
@@ -904,7 +918,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state = self.state_factory()
         node_id = state.create_node(1e3)
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         task_ins = create_task_ins(
             consumer_node_id=node_id, anonymous=False, run_id=run_id
         )
@@ -924,7 +938,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state = self.state_factory()
         node_id = state.create_node(1e3)
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         task_ins = create_task_ins(
             consumer_node_id=node_id, anonymous=False, run_id=run_id
         )
@@ -955,7 +969,7 @@ class StateTest(unittest.TestCase):
         does not exist."""
         # Prepare
         state = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         task_ins_id = "5b0a3fc2-edba-4525-a89a-04b83420b7c8"
 
         task_res = create_task_res(
@@ -978,7 +992,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state = self.state_factory()
         node_id = state.create_node(1e3)
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         task_ins = create_task_ins(
             consumer_node_id=node_id, anonymous=False, run_id=run_id
         )
@@ -1010,7 +1024,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state = self.state_factory()
         node_id = state.create_node(1e3)
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         task_ins = create_task_ins(
             consumer_node_id=node_id, anonymous=False, run_id=run_id
         )
@@ -1042,7 +1056,7 @@ class StateTest(unittest.TestCase):
             state=RecordSet(),
             run_config={"test": "test"},
         )
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
 
         # Execute
         init = state.get_serverapp_context(run_id)
@@ -1094,7 +1108,7 @@ class StateTest(unittest.TestCase):
         """Test adding and retrieving serverapp logs."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         log_entry_1 = "Log entry 1"
         log_entry_2 = "Log entry 2"
         timestamp = now().timestamp()
@@ -1114,7 +1128,7 @@ class StateTest(unittest.TestCase):
         """Test retrieving serverapp logs after a specific timestamp."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         log_entry_1 = "Log entry 1"
         log_entry_2 = "Log entry 2"
         state.add_serverapp_log(run_id, log_entry_1)
@@ -1136,7 +1150,7 @@ class StateTest(unittest.TestCase):
         found."""
         # Prepare
         state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {})
+        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
         log_entry = "Log entry"
         state.add_serverapp_log(run_id, log_entry)
         timestamp = now().timestamp()
@@ -1149,6 +1163,31 @@ class StateTest(unittest.TestCase):
         # Assert
         assert latest == 0
         assert retrieved_logs == ""
+
+    def test_create_run_with_and_without_federation_options(self) -> None:
+        """Test that the recording and fetching of federation options works."""
+        # Prepare
+        state = self.state_factory()
+        # A run w/ federation options
+        fed_options = ConfigsRecord({"setting-a": 123, "setting-b": [4, 5, 6]})
+        run_id = state.create_run(
+            None,
+            None,
+            "fffffff",
+            {"mock_key": "mock_value"},
+            federation_options=fed_options,
+        )
+        state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+
+        # Execute
+        fed_options_fetched = state.get_federation_options(run_id=run_id)
+
+        # Assert
+        assert fed_options_fetched == fed_options
+
+        # Generate a run_id that doesn't exist. Then check None is returned
+        unique_int = next(num for num in range(0, 1) if num not in {run_id})
+        assert state.get_federation_options(run_id=unique_int) is None
 
 
 def create_task_ins(

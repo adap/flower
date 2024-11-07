@@ -30,6 +30,7 @@ from flwr.common.constant import (
     RUN_ID_NUM_BYTES,
     Status,
 )
+from flwr.common.record import ConfigsRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.linkstate.linkstate import LinkState
@@ -69,6 +70,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         # Map run_id to RunRecord
         self.run_ids: dict[int, RunRecord] = {}
         self.contexts: dict[int, Context] = {}
+        self.federation_options: dict[int, ConfigsRecord] = {}
         self.task_ins_store: dict[UUID, TaskIns] = {}
         self.task_res_store: dict[UUID, TaskRes] = {}
 
@@ -378,12 +380,14 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         """Retrieve stored `node_id` filtered by `node_public_keys`."""
         return self.public_key_to_node_id.get(node_public_key)
 
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     def create_run(
         self,
         fab_id: Optional[str],
         fab_version: Optional[str],
         fab_hash: Optional[str],
         override_config: UserConfig,
+        federation_options: ConfigsRecord,
     ) -> int:
         """Create a new run for the specified `fab_hash`."""
         # Sample a random int64 as run_id
@@ -407,6 +411,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                     pending_at=now().isoformat(),
                 )
                 self.run_ids[run_id] = run_record
+
+                # Record federation options. Leave empty if not passed
+                self.federation_options[run_id] = federation_options
                 return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
@@ -513,6 +520,14 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 break
 
         return pending_run_id
+
+    def get_federation_options(self, run_id: int) -> Optional[ConfigsRecord]:
+        """Retrieve the federation options for the specified `run_id`."""
+        with self.lock:
+            if run_id not in self.run_ids:
+                log(ERROR, "`run_id` is invalid")
+                return None
+            return self.federation_options[run_id]
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""
