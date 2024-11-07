@@ -45,6 +45,15 @@ class StateTest(unittest.TestCase):
         # Assert
         assert node_id == retrieved_node_id
 
+    def test_get_node_id_fails(self) -> None:
+        """Test get_node_id fails correctly if node_id is not set."""
+        # Prepare
+        state: NodeState = self.state_factory()
+
+        # Execute and assert
+        with self.assertRaises(ValueError):
+            state.get_node_id()
+
 
 class InMemoryStateTest(StateTest):
     """Test InMemoryState implementation."""
