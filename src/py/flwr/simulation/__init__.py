@@ -18,6 +18,7 @@
 import importlib
 
 from flwr.simulation.run_simulation import run_simulation
+from flwr.simulation.simulationio_connection import SimulationIoConnection
 
 is_ray_installed = importlib.util.find_spec("ray") is not None
 
@@ -37,6 +38,7 @@ To install the necessary dependencies, install `flwr` with the `simulation` extr
 
 
 __all__ = [
+    "SimulationIoConnection",
     "run_simulation",
     "start_simulation",
 ]

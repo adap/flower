@@ -20,12 +20,15 @@ from os import urandom
 from typing import Optional, Union
 from uuid import UUID, uuid4
 
-from flwr.common import Context, log, now, serde
+from flwr.common import ConfigsRecord, Context, log, now, serde
 from flwr.common.constant import ErrorCode, Status, SubStatus
 from flwr.common.typing import RunStatus
 from flwr.proto.error_pb2 import Error  # pylint: disable=E0611
 from flwr.proto.message_pb2 import Context as ProtoContext  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+
+# pylint: disable=E0611
+from flwr.proto.recordset_pb2 import ConfigsRecord as ProtoConfigsRecord
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
 
 NODE_UNAVAILABLE_ERROR_REASON = (
@@ -151,6 +154,18 @@ def context_to_bytes(context: Context) -> bytes:
 def context_from_bytes(context_bytes: bytes) -> Context:
     """Deserialize `Context` from bytes."""
     return serde.context_from_proto(ProtoContext.FromString(context_bytes))
+
+
+def configsrecord_to_bytes(configs_record: ConfigsRecord) -> bytes:
+    """Serialize a `ConfigsRecord` to bytes."""
+    return serde.configs_record_to_proto(configs_record).SerializeToString()
+
+
+def configsrecord_from_bytes(configsrecord_bytes: bytes) -> ConfigsRecord:
+    """Deserialize `ConfigsRecord` from bytes."""
+    return serde.configs_record_from_proto(
+        ProtoConfigsRecord.FromString(configsrecord_bytes)
+    )
 
 
 def is_valid_transition(current_status: RunStatus, new_status: RunStatus) -> bool:
