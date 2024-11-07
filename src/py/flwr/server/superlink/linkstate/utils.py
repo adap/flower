@@ -15,18 +15,15 @@
 """Utility functions for State."""
 
 
-import time
-from logging import ERROR
 from os import urandom
-from uuid import uuid4
 
-from flwr.common import Context, log, serde
-from flwr.common.constant import ErrorCode, Status, SubStatus
+from flwr.common import ConfigsRecord, Context, serde
+from flwr.common.constant import Status, SubStatus
 from flwr.common.typing import RunStatus
-from flwr.proto.error_pb2 import Error  # pylint: disable=E0611
 from flwr.proto.message_pb2 import Context as ProtoContext  # pylint: disable=E0611
-from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
+
+# pylint: disable=E0611
+from flwr.proto.recordset_pb2 import ConfigsRecord as ProtoConfigsRecord
 
 NODE_UNAVAILABLE_ERROR_REASON = (
     "Error: Node Unavailable - The destination node is currently unavailable. "
@@ -146,28 +143,15 @@ def context_from_bytes(context_bytes: bytes) -> Context:
     return serde.context_from_proto(ProtoContext.FromString(context_bytes))
 
 
-def make_node_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
-    """Generate a TaskRes with a node unavailable error from a TaskIns."""
-    current_time = time.time()
-    ttl = ref_taskins.task.ttl - (current_time - ref_taskins.task.created_at)
-    if ttl < 0:
-        log(ERROR, "Creating TaskRes for TaskIns that exceeds its TTL.")
-        ttl = 0
-    return TaskRes(
-        task_id=str(uuid4()),
-        group_id=ref_taskins.group_id,
-        run_id=ref_taskins.run_id,
-        task=Task(
-            producer=Node(node_id=ref_taskins.task.consumer.node_id, anonymous=False),
-            consumer=Node(node_id=ref_taskins.task.producer.node_id, anonymous=False),
-            created_at=current_time,
-            ttl=ttl,
-            ancestry=[ref_taskins.task_id],
-            task_type=ref_taskins.task.task_type,
-            error=Error(
-                code=ErrorCode.NODE_UNAVAILABLE, reason=NODE_UNAVAILABLE_ERROR_REASON
-            ),
-        ),
+def configsrecord_to_bytes(configs_record: ConfigsRecord) -> bytes:
+    """Serialize a `ConfigsRecord` to bytes."""
+    return serde.configs_record_to_proto(configs_record).SerializeToString()
+
+
+def configsrecord_from_bytes(configsrecord_bytes: bytes) -> ConfigsRecord:
+    """Deserialize `ConfigsRecord` from bytes."""
+    return serde.configs_record_from_proto(
+        ProtoConfigsRecord.FromString(configsrecord_bytes)
     )
 
 

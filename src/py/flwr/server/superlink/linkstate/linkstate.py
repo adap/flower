@@ -20,6 +20,7 @@ from typing import Optional
 from uuid import UUID
 
 from flwr.common import Context
+from flwr.common.record import ConfigsRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
@@ -152,12 +153,13 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """Retrieve stored `node_id` filtered by `node_public_keys`."""
 
     @abc.abstractmethod
-    def create_run(
+    def create_run(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         fab_id: Optional[str],
         fab_version: Optional[str],
         fab_hash: Optional[str],
         override_config: UserConfig,
+        federation_options: ConfigsRecord,
     ) -> int:
         """Create a new run for the specified `fab_hash`."""
 
@@ -225,6 +227,21 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         Optional[int]
             The `run_id` of a `Run` that is pending to be started; None if
             there is no Run pending.
+        """
+
+    @abc.abstractmethod
+    def get_federation_options(self, run_id: int) -> Optional[ConfigsRecord]:
+        """Retrieve the federation options for the specified `run_id`.
+
+        Parameters
+        ----------
+        run_id : int
+            The identifier of the run.
+
+        Returns
+        -------
+        Optional[ConfigsRecord]
+            The federation options for the run if it exists; None otherwise.
         """
 
     @abc.abstractmethod

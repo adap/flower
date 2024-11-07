@@ -21,7 +21,7 @@ from typing import Optional
 
 from typing_extensions import override
 
-from flwr.common import Context, RecordSet
+from flwr.common import ConfigsRecord, Context, RecordSet
 from flwr.common.constant import SERVERAPPIO_API_DEFAULT_ADDRESS, Status, SubStatus
 from flwr.common.logger import log
 from flwr.common.typing import Fab, RunStatus, UserConfig
@@ -133,13 +133,17 @@ class DeploymentEngine(Executor):
                 f"FAB ({fab.hash_str}) hash from request doesn't match contents"
             )
 
-        run_id = self.linkstate.create_run(None, None, fab_hash, override_config)
+        run_id = self.linkstate.create_run(
+            None, None, fab_hash, override_config, ConfigsRecord()
+        )
         return run_id
 
     def _create_context(self, run_id: int) -> None:
         """Register a Context for a Run."""
         # Create an empty context for the Run
-        context = Context(node_id=0, node_config={}, state=RecordSet(), run_config={})
+        context = Context(
+            run_id=run_id, node_id=0, node_config={}, state=RecordSet(), run_config={}
+        )
 
         # Register the context at the LinkState
         self.linkstate.set_serverapp_context(run_id=run_id, context=context)
