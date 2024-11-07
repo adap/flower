@@ -57,7 +57,6 @@ from .utils import (
     generate_rand_int_from_bytes,
     has_valid_sub_status,
     is_valid_transition,
-    make_node_unavailable_taskres,
 )
 
 SQL_CREATE_TABLE_NODE = """
@@ -639,20 +638,6 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         """
         data = {f"id_{i}": str(node_id) for i, node_id in enumerate(offline_node_ids)}
         task_ins_rows = self.query(query, data)
-
-        # Make TaskRes containing node unavailabe error
-        for row in task_ins_rows:
-            for row in rows:
-                # Convert values from sint64 to uint64
-                convert_sint64_values_in_dict_to_uint64(
-                    row, ["run_id", "producer_node_id", "consumer_node_id"]
-                )
-
-            task_ins = dict_to_task_ins(row)
-            err_taskres = make_node_unavailable_taskres(
-                ref_taskins=task_ins,
-            )
-            result.append(err_taskres)
 
         return result
 
