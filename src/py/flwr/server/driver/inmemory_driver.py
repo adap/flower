@@ -64,8 +64,6 @@ class InMemoryDriver(Driver):
 
     def set_run(self, run_id: int) -> None:
         """Initialize the run."""
-        if self._run is not None:
-            return
         run = self.state.get_run(run_id)
         if run is None:
             raise RuntimeError(f"Cannot find the run with ID: {run_id}")
