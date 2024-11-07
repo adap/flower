@@ -189,9 +189,6 @@ def load_app(  # pylint: disable= too-many-branches
 
 def _unload_modules(project_dir: Path) -> None:
     """Unload modules from the project directory."""
-    if project_dir is None:
-        return
-
     dir_str = str(project_dir.absolute())
     for name, m in list(sys.modules.items()):
         path: Optional[str] = getattr(m, "__file__", None)
