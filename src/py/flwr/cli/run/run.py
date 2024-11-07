@@ -18,7 +18,7 @@ import json
 import subprocess
 from logging import DEBUG
 from pathlib import Path
-from typing import Annotated, Any, Optional
+from typing import Annotated, Any, Optional, cast
 
 import typer
 
@@ -29,11 +29,16 @@ from flwr.cli.config_utils import (
     validate_federation_in_project_config,
     validate_project_config,
 )
+from flwr.common import ConfigsRecord
 from flwr.common.config import flatten_dict, parse_config_args
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
-from flwr.common.serde import fab_to_proto, user_config_to_proto
-from flwr.common.typing import Fab
+from flwr.common.serde import (
+    configs_record_to_proto,
+    fab_to_proto,
+    user_config_to_proto,
+)
+from flwr.common.typing import ConfigsRecordValues, Fab
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 
@@ -118,12 +123,14 @@ def _run_with_exec_api(
     content = Path(fab_path).read_bytes()
     fab = Fab(fab_hash, content)
 
+    # Cast UserConfig as a dict compatible with what `ConfigsRecord` expects
+    user_config_flat = cast(
+        dict[str, ConfigsRecordValues], flatten_dict(federation_config.get("options"))
+    )
     req = StartRunRequest(
         fab=fab_to_proto(fab),
         override_config=user_config_to_proto(parse_config_args(config_overrides)),
-        federation_config=user_config_to_proto(
-            flatten_dict(federation_config.get("options"))
-        ),
+        federation_options=configs_record_to_proto(ConfigsRecord(user_config_flat)),
     )
     res = stub.StartRun(req)
 
