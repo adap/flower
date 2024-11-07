@@ -32,6 +32,7 @@ from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
+from flwr.client.nodestate.nodestate_factory import NodeStateFactory
 from flwr.client.typing import ClientFnExt
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, Message, event
 from flwr.common.address import parse_address
@@ -365,6 +366,8 @@ def start_client_internal(
 
     # DeprecatedRunInfoStore gets initialized when the first connection is established
     run_info_store: Optional[DeprecatedRunInfoStore] = None
+    state_factory = NodeStateFactory()
+    state = state_factory.state()
 
     runs: dict[int, Run] = {}
 
@@ -396,13 +399,14 @@ def start_client_internal(
                     )
                 else:
                     # Call create_node fn to register node
-                    node_id: Optional[int] = (  # pylint: disable=assignment-from-none
-                        create_node()
-                    )  # pylint: disable=not-callable
-                    if node_id is None:
-                        raise ValueError("Node registration failed")
+                    # and store node_id in state
+                    if (node_id := create_node()) is None:
+                        raise ValueError(
+                            "Failed to register SuperNode with the SuperLink"
+                        )
+                    state.set_node_id(node_id)
                     run_info_store = DeprecatedRunInfoStore(
-                        node_id=node_id,
+                        node_id=state.get_node_id(),
                         node_config=node_config,
                     )
 
