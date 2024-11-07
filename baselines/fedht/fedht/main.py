@@ -143,7 +143,8 @@ def main(cfg: DictConfig):
         iterstr = ""
 
     filename = (
-        "simII_"
+        cfg.data
+        + "_"
         + cfg.agg
         + iterstr
         + "_local"
