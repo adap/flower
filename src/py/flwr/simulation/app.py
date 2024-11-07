@@ -32,6 +32,7 @@ from flwr.common.config import (
     get_fused_config_from_dir,
     get_project_config,
     get_project_dir,
+    unflatten_dict,
 )
 from flwr.common.constant import Status, SubStatus
 from flwr.common.logger import (
@@ -42,18 +43,24 @@ from flwr.common.logger import (
     stop_log_uploader,
 )
 from flwr.common.serde import (
+    configs_record_from_proto,
     context_from_proto,
     fab_from_proto,
     run_from_proto,
     run_status_to_proto,
 )
 from flwr.common.typing import RunStatus
-from flwr.proto.run_pb2 import UpdateRunStatusRequest  # pylint: disable=E0611
+from flwr.proto.run_pb2 import (  # pylint: disable=E0611
+    GetFederationOptionsRequest,
+    GetFederationOptionsResponse,
+    UpdateRunStatusRequest,
+)
 from flwr.proto.simulationio_pb2 import (  # pylint: disable=E0611
     PullSimulationInputsRequest,
     PullSimulationInputsResponse,
     PushSimulationOutputsRequest,
 )
+from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
 from flwr.simulation.run_simulation import _run_simulation
 from flwr.simulation.simulationio_connection import SimulationIoConnection
 
@@ -158,7 +165,7 @@ def _try_obtain_certificates(
     return root_certificates
 
 
-def run_simulation_process(  # pylint: disable=R0914, disable=W0212
+def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R0915
     superlink: str,
     log_queue: Queue[Optional[str]],
     run_once: bool,
@@ -203,7 +210,7 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212
 
             fab_id, fab_version = get_fab_metadata(fab.content)
 
-            app_path = str(get_project_dir(fab_id, fab_version, fab.hash_str, flwr_dir))
+            app_path = get_project_dir(fab_id, fab_version, fab.hash_str, flwr_dir)
             config = get_project_config(app_path)
 
             # Get ClientApp and SeverApp components
@@ -234,21 +241,37 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212
                 UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
             )
 
+            # Pull Federation Options
+            fed_opt_res: GetFederationOptionsResponse = conn._stub.GetFederationOptions(
+                GetFederationOptionsRequest(run_id=run.run_id)
+            )
+            federation_options = configs_record_from_proto(
+                fed_opt_res.federation_options
+            )
+
+            # Unflatten underlying dict
+            fed_opt = unflatten_dict({**federation_options})
+
+            # Extract configs values of interest
+            num_supernodes = fed_opt.get("num-supernodes")
+            if num_supernodes is None:
+                raise ValueError(
+                    "Federation options expects `num-supernodes` to be set."
+                )
+            backend_config: BackendConfig = fed_opt.get("backend", {})
+            verbose: bool = fed_opt.get("verbose", False)
+            enable_tf_gpu_growth: bool = fed_opt.get("enable_tf_gpu_growth", True)
+
             # Launch the simulation
-            num_supernodes = 10
-            backend = "ray"
-            enable_tf_gpu_growth = False
-            backend_config_dict = {}
-            _ = _run_simulation(
+            _run_simulation(
                 server_app_attr=server_app_attr,
                 client_app_attr=client_app_attr,
                 num_supernodes=num_supernodes,
-                backend_name=backend,
-                backend_config=backend_config_dict,
-                app_dir=app_path,
+                backend_config=backend_config,
+                app_dir=str(app_path),
                 run=run,
                 enable_tf_gpu_growth=enable_tf_gpu_growth,
-                verbose_logging=False,
+                verbose_logging=verbose,
                 server_app_run_config=fused_config,
                 is_app=True,
                 exit_event=EventType.CLI_FLOWER_SIMULATION_LEAVE,
