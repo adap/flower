@@ -86,7 +86,7 @@ class Executor(ABC):
         override_config: UserConfig
             The config overrides dict sent by the user (using `flwr run`).
         federation_options: ConfigsRecord
-            The federation options dict sent by the user (using `flwr run`).
+            The federation options sent by the user (using `flwr run`).
 
         Returns
         -------
