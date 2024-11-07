@@ -37,7 +37,6 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, Message, ev
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     CLIENTAPPIO_API_DEFAULT_ADDRESS,
-    FAB_MODE_AUTOINSTALL,
     ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
     MISSING_EXTRA_REST,
@@ -456,9 +455,8 @@ def start_client_internal(
                     run: Run = runs[run_id]
                     if get_fab is not None and run.fab_hash:
                         fab = get_fab(run.fab_hash)
-                        if not isolation or fab_install_mode == FAB_MODE_AUTOINSTALL:
-                            # If `ClientApp` runs in the same process or FAB install
-                            # mode is `autoinstall`, install the FAB
+                        if not isolation:
+                            # If `ClientApp` runs in the same process, install the FAB
                             install_from_fab(fab.content, flwr_path, True)
                         fab_id, fab_version = get_fab_metadata(fab.content)
                     else:
