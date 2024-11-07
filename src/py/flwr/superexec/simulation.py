@@ -198,7 +198,6 @@ class SimulationEngine(Executor):
                 override_config_str = _user_config_to_str(override_config)
                 command.extend(["--run-config", f"{override_config_str}"])
 
-            print(command)
             # Start Simulation
             _ = subprocess.Popen(  # pylint: disable=consider-using-with
                 command,
