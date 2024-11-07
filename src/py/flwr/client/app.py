@@ -455,16 +455,13 @@ def start_client_internal(
                             runs[run_id] = Run(run_id, "", "", "", {})
 
                     run: Run = runs[run_id]
+                    fab: Optional[Fab]
                     if get_fab is not None and run.fab_hash:
-                        fab = get_fab(run.fab_hash)
-                        if not isolation:
-                            # If `ClientApp` runs in the same process, install the FAB
-                            install_from_fab(fab.content, flwr_path, True)
                         if fab_install_mode == FAB_MODE_PREINSTALL:
                             log(
                                 DEBUG,
-                                "SuperNode running in %s mode, "
-                                "retrieving FAB hash %s from %s",
+                                "SuperNode running in `%s` mode, "
+                                "retrieving FAB with hash %s from %s",
                                 FAB_MODE_PREINSTALL,
                                 run.fab_hash,
                                 flwr_path,
@@ -472,8 +469,17 @@ def start_client_internal(
                             installed_fab = get_project_dir_from_hash(
                                 run.fab_hash, flwr_path
                             )
-                            fab.content = Path(installed_fab).read_bytes()
+                            # Get content from installed FAB and create Fab instance
+                            fab_content = Path(installed_fab).read_bytes()
+                            fab = Fab(run.fab_hash, fab_content)
+                        else:
+                            # Retrieve FAB from SuperLink
+                            fab = get_fab(run.fab_hash)
                         fab_id, fab_version = get_fab_metadata(fab.content)
+                        if not isolation:
+                            # If `ClientApp` runs in the same process, install the FAB
+                            install_from_fab(fab.content, flwr_path, True)
+
                     else:
                         fab = None
                         fab_id, fab_version = run.fab_id, run.fab_version
