@@ -65,6 +65,21 @@ def get_project_dir(
     )
 
 
+def get_project_dir_from_hash(
+    fab_hash: str,
+    flwr_dir: Optional[Union[str, Path]] = None,
+) -> Path:
+    """Return the project directory based on the given fab_hash."""
+    if len(fab_hash) != 64:
+        raise ValueError(f"Invalid FAB hash: {fab_hash}")
+    if flwr_dir is None:
+        flwr_dir = get_flwr_dir()
+    for subfolder in Path(flwr_dir).glob(f"{APP_DIR}/*"):
+        if fab_hash.startswith(subfolder.name.split(".")[-1]):
+            return subfolder
+    raise FileNotFoundError(f"Cannot find project directory for FAB hash: {fab_hash}")
+
+
 def get_project_config(project_dir: Union[str, Path]) -> dict[str, Any]:
     """Return pyproject.toml in the given project directory."""
     # Load pyproject.toml file

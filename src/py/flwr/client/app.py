@@ -20,7 +20,7 @@ import sys
 import time
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
-from logging import ERROR, INFO, WARN
+from logging import DEBUG, ERROR, INFO, WARN
 from pathlib import Path
 from typing import Callable, Optional, Union, cast
 
@@ -35,8 +35,10 @@ from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.typing import ClientFnExt
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, Message, event
 from flwr.common.address import parse_address
+from flwr.common.config import get_project_dir_from_hash
 from flwr.common.constant import (
     CLIENTAPPIO_API_DEFAULT_ADDRESS,
+    FAB_MODE_PREINSTALL,
     ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
     MISSING_EXTRA_REST,
@@ -458,6 +460,19 @@ def start_client_internal(
                         if not isolation:
                             # If `ClientApp` runs in the same process, install the FAB
                             install_from_fab(fab.content, flwr_path, True)
+                        if fab_install_mode == FAB_MODE_PREINSTALL:
+                            log(
+                                DEBUG,
+                                "SuperNode running in %s mode, "
+                                "retrieving FAB hash %s from %s",
+                                FAB_MODE_PREINSTALL,
+                                run.fab_hash,
+                                flwr_path,
+                            )
+                            installed_fab = get_project_dir_from_hash(
+                                run.fab_hash, flwr_path
+                            )
+                            fab.content = Path(installed_fab).read_bytes()
                         fab_id, fab_version = get_fab_metadata(fab.content)
                     else:
                         fab = None
