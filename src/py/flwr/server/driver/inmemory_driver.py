@@ -62,7 +62,7 @@ class InMemoryDriver(Driver):
         ):
             raise ValueError(f"Invalid message: {message}")
 
-    def init_run(self, run_id: int) -> None:
+    def set_run(self, run_id: int) -> None:
         """Initialize the run."""
         if self._run is not None:
             return
