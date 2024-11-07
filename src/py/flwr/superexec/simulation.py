@@ -165,7 +165,7 @@ class SimulationEngine(Executor):
                 )
 
             # Unflatten underlaying dict
-            fed_opt = unflatten_dict(**federation_options)
+            fed_opt = unflatten_dict({**federation_options})
 
             # Read data
             num_supernodes = fed_opt.get("num-supernodes", self.num_supernodes)
