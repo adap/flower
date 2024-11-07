@@ -24,7 +24,7 @@ from unittest.mock import patch
 from uuid import UUID
 
 from flwr.common import DEFAULT_TTL, ConfigsRecord, Context, RecordSet, now
-from flwr.common.constant import ErrorCode, Status, SubStatus
+from flwr.common.constant import Status, SubStatus
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
     private_key_to_bytes,
@@ -785,48 +785,6 @@ class StateTest(unittest.TestCase):
 
         # Assert
         self.assertSetEqual(actual_node_ids, set(node_ids[70:]))
-
-    def test_node_unavailable_error(self) -> None:
-        """Test if get_task_res return TaskRes containing node unavailable error."""
-        # Prepare
-        state: LinkState = self.state_factory()
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        node_id_0 = state.create_node(ping_interval=90)
-        node_id_1 = state.create_node(ping_interval=30)
-        # Create and store TaskIns
-        task_ins_0 = create_task_ins(
-            consumer_node_id=node_id_0, anonymous=False, run_id=run_id
-        )
-        task_ins_1 = create_task_ins(
-            consumer_node_id=node_id_1, anonymous=False, run_id=run_id
-        )
-        task_id_0 = state.store_task_ins(task_ins=task_ins_0)
-        task_id_1 = state.store_task_ins(task_ins=task_ins_1)
-        assert task_id_0 is not None and task_id_1 is not None
-
-        # Get TaskIns to mark them delivered
-        state.get_task_ins(node_id=node_id_0, limit=None)
-
-        # Create and store TaskRes
-        task_res_0 = create_task_res(
-            producer_node_id=node_id_0,
-            anonymous=False,
-            ancestry=[str(task_id_0)],
-            run_id=run_id,
-        )
-        state.store_task_res(task_res_0)
-
-        # Execute
-        current_time = time.time()
-        task_res_list: list[TaskRes] = []
-        with patch("time.time", side_effect=lambda: current_time + 50):
-            task_res_list = state.get_task_res({task_id_0, task_id_1})
-
-        # Assert
-        assert len(task_res_list) == 2
-        err_taskres = task_res_list[1]
-        assert err_taskres.task.HasField("error")
-        assert err_taskres.task.error.code == ErrorCode.NODE_UNAVAILABLE
 
     def test_store_task_res_task_ins_expired(self) -> None:
         """Test behavior of store_task_res when the TaskIns it references is expired."""

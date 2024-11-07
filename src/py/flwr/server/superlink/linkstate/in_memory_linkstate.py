@@ -40,7 +40,6 @@ from .utils import (
     generate_rand_int_from_bytes,
     has_valid_sub_status,
     is_valid_transition,
-    make_node_unavailable_taskres,
 )
 
 
@@ -256,21 +255,6 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 if reply_to in task_ids and task_res.task.delivered_at == "":
                     task_res_list.append(task_res)
                     replied_task_ids.add(reply_to)
-
-            # Check if the node is offline
-            for task_id in task_ids - replied_task_ids:
-                task_ins = self.task_ins_store.get(task_id)
-                if task_ins is None:
-                    continue
-                node_id = task_ins.task.consumer.node_id
-                online_until, _ = self.node_ids[node_id]
-                # Generate a TaskRes containing an error reply if the node is offline.
-                if online_until < time.time():
-                    err_taskres = make_node_unavailable_taskres(
-                        ref_taskins=task_ins,
-                    )
-                    self.task_res_store[UUID(err_taskres.task_id)] = err_taskres
-                    task_res_list.append(err_taskres)
 
             # Mark all of them as delivered
             delivered_at = now().isoformat()
