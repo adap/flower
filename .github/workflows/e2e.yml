@@ -63,6 +63,7 @@ jobs:
         connection: [secure, insecure]
         engine: [deployment-engine, simulation-engine]
         authentication: [no-auth, client-auth]
+        fab-install: [manual, auto]
         exclude:
           - connection: insecure
             authentication: client-auth
@@ -71,7 +72,8 @@ jobs:
       Python ${{ matrix.python-version }} /
       ${{ matrix.connection }} / 
       ${{ matrix.authentication }} / 
-      ${{ matrix.engine }} 
+      ${{ matrix.engine }} /
+      ${{ matrix.fab-install }}
     defaults:
       run:
         working-directory: e2e/${{ matrix.directory }}
@@ -107,7 +109,7 @@ jobs:
           ${{ matrix.authentication }} / 
           ${{ matrix.engine }} 
         working-directory: e2e/${{ matrix.directory }}
-        run: ./../test_exec_api.sh "${{ matrix.connection }}" "${{ matrix.authentication}}" "${{ matrix.engine }}"
+        run: ./../test_exec_api.sh "${{ matrix.connection }}" "${{ matrix.authentication}}" "${{ matrix.engine }}" "${{ matrix.fab-install }}"
 
   frameworks:
     runs-on: ubuntu-22.04

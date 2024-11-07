@@ -52,10 +52,10 @@ esac
 
 # Set FAB install mode
 case $4 in
-    preinstalled)
+    manual)
       fab_install_arg="preinstall"
       ;;
-    autoinstalled)
+    auto)
       fab_install_arg="autoinstall"
       ;;
 esac
