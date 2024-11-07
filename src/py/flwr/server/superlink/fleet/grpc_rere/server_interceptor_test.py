@@ -20,6 +20,7 @@ import unittest
 
 import grpc
 
+from flwr.common import ConfigsRecord
 from flwr.common.constant import FLEET_API_GRPC_RERE_DEFAULT_ADDRESS
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     compute_hmac,
@@ -334,7 +335,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         self.state.create_node(
             ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
         )
-        run_id = self.state.create_run("", "", "", {})
+        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
         request = GetRunRequest(run_id=run_id)
         shared_secret = generate_shared_key(
             self._node_private_key, self._server_public_key
@@ -365,7 +366,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         self.state.create_node(
             ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
         )
-        run_id = self.state.create_run("", "", "", {})
+        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
         request = GetRunRequest(run_id=run_id)
         node_private_key, _ = generate_key_pairs()
         shared_secret = generate_shared_key(node_private_key, self._server_public_key)
