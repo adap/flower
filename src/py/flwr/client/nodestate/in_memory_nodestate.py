@@ -24,7 +24,6 @@ class InMemoryNodeState(NodeState):
     """In-memory NodeState implementation."""
 
     def __init__(self) -> None:
-
         # Store node_id
         self.node_id: Optional[int]
 
