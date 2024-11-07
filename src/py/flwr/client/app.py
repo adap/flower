@@ -401,7 +401,7 @@ def start_client_internal(
                     # Call create_node fn to register node
                     # and store node_id in state
                     if (node_id := create_node()) is None:
-                        raise ValueError("Node creation failed")
+                        raise ValueError("Failed to register SuperNode with the SuperLink")
                     state.set_node_id(node_id)
                     run_info_store = DeprecatedRunInfoStore(
                         node_id=state.get_node_id(),
