@@ -78,15 +78,15 @@ def build(
         )
         raise typer.Exit(code=1)
 
-    if not is_valid_project_name(app.name):
-        typer.secho(
-            f"❌ The project name {app.name} is invalid, "
-            "a valid project name must start with a letter, "
-            "and can only contain letters, digits, and hyphens.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
+    # if not is_valid_project_name(app.name):
+    #     typer.secho(
+    #         f"❌ The project name {app.name} is invalid, "
+    #         "a valid project name must start with a letter, "
+    #         "and can only contain letters, digits, and hyphens.",
+    #         fg=typer.colors.RED,
+    #         bold=True,
+    #     )
+    #     raise typer.Exit(code=1)
 
     conf, errors, warnings = load_and_validate(app / "pyproject.toml")
     if conf is None:

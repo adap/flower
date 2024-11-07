@@ -50,6 +50,15 @@ case "$3" in
       ;;
 esac
 
+# Set FAB install mode
+case $4 in
+    preinstalled)
+      fab_install_arg="preinstall"
+      ;;
+    autoinstalled)
+      fab_install_arg="autoinstall"
+      ;;
+esac
 
 # Create and install Flower app
 flwr new e2e-tmp-test --framework numpy --username flwrlabs
@@ -84,13 +93,15 @@ sleep 2
 if [ "$3" = "deployment-engine" ]; then
   timeout 2m flower-supernode ./ $client_arg \
       --superlink $server_address $client_auth_1 \
-      --node-config "partition-id=0 num-partitions=2" --max-retries 0 &
+      --node-config "partition-id=0 num-partitions=2" --max-retries 0 \
+      --fab-install-mode $fab_install_arg &
   cl1_pid=$!
   sleep 2
 
   timeout 2m flower-supernode ./ $client_arg \
       --superlink $server_address $client_auth_2 \
-      --node-config "partition-id=1 num-partitions=2" --max-retries 0 &
+      --node-config "partition-id=1 num-partitions=2" --max-retries 0 \
+      --fab-install-mode $fab_install_arg &
   cl2_pid=$!
   sleep 2
 fi

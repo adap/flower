@@ -28,6 +28,7 @@ import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 from grpc import RpcError
 
+from flwr.cli.build import build
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.client.client import Client
@@ -466,11 +467,21 @@ def start_client_internal(
                                 run.fab_hash,
                                 flwr_path,
                             )
-                            installed_fab = get_project_dir_from_hash(
+                            installed_fab_path = get_project_dir_from_hash(
                                 run.fab_hash, flwr_path
                             )
                             # Get content from installed FAB and create Fab instance
-                            fab_content = Path(installed_fab).read_bytes()
+                            log(INFO, installed_fab_path)
+                            fab_path, fab_hash = build(installed_fab_path)
+                            fab_content = Path(fab_path).read_bytes()
+                            # fab_content = Path(
+                            #     f"{str(installed_fab_path)}.fab"
+                            # ).read_bytes()
+                            if fab_hash != run.fab_hash:
+                                raise ValueError(
+                                    f"FAB hash mismatch. Expected: {run.fab_hash}, "
+                                    f"Found: {fab_hash}"
+                                )
                             fab = Fab(run.fab_hash, fab_content)
                         else:
                             # Retrieve FAB from SuperLink
