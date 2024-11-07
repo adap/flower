@@ -101,13 +101,27 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
 
     @abc.abstractmethod
     def get_task_res(self, task_ids: set[UUID]) -> list[TaskRes]:
-        """Get TaskRes for task_ids.
+        """Get TaskRes for the given TaskIns IDs.
 
-        Usually, the ServerAppIo API calls this method to get results for instructions
-        it has previously scheduled.
+        This method is typically called by the ServerAppIo API to obtain
+        results (TaskRes) for previously scheduled instructions (TaskIns).
+        For each task_id provided, this method returns one of the following responses:
 
-        Retrieves all TaskRes for the given `task_ids` and returns and empty list of
-        none could be found.
+        - An error TaskRes if the corresponding TaskIns does not exist or has expired.
+        - An error TaskRes if the corresponding TaskRes exists but has expired.
+        - The valid TaskRes if the TaskIns has a corresponding valid TaskRes.
+        - Nothing if the TaskIns is still valid and waiting for a TaskRes.
+
+        Parameters
+        ----------
+        task_ids : set[UUID]
+            A set of TaskIns IDs for which to retrieve results (TaskRes).
+
+        Returns
+        -------
+        list[TaskRes]
+            A list of TaskRes corresponding to the given task IDs. If no
+            TaskRes could be found for any of the task IDs, an empty list is returned.
         """
 
     @abc.abstractmethod
