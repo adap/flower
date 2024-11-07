@@ -67,7 +67,7 @@ jobs:
           - connection: insecure
             authentication: client-auth
     name: |
-      SuperExec / 
+      Exec API / 
       Python ${{ matrix.python-version }} /
       ${{ matrix.connection }} / 
       ${{ matrix.authentication }} / 
