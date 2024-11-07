@@ -222,14 +222,6 @@ def _set_sys_path(directory: Optional[Union[str, Path]]) -> None:
     _current_sys_path = str(directory)
 
 
-def _unset_sys_path() -> None:
-    """Unset the system path."""
-    global _current_sys_path  # pylint: disable=global-statement
-    if _current_sys_path is not None:
-        sys.path.remove(_current_sys_path)
-        _current_sys_path = None
-
-
 def _find_attribute_in_module(file_path: str, attribute_name: str) -> bool:
     """Check if attribute_name exists in module's abstract symbolic tree."""
     with open(file_path, encoding="utf-8") as file:
