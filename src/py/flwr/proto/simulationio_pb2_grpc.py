@@ -36,6 +36,11 @@ class SimulationIoStub(object):
                 request_serializer=flwr_dot_proto_dot_log__pb2.PushLogsRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_log__pb2.PushLogsResponse.FromString,
                 )
+        self.GetFederationOptions = channel.unary_unary(
+                '/flwr.proto.SimulationIo/GetFederationOptions',
+                request_serializer=flwr_dot_proto_dot_run__pb2.GetFederationOptionsRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_run__pb2.GetFederationOptionsResponse.FromString,
+                )
 
 
 class SimulationIoServicer(object):
@@ -69,6 +74,13 @@ class SimulationIoServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetFederationOptions(self, request, context):
+        """Get Federation Options
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_SimulationIoServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -91,6 +103,11 @@ def add_SimulationIoServicer_to_server(servicer, server):
                     servicer.PushLogs,
                     request_deserializer=flwr_dot_proto_dot_log__pb2.PushLogsRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_log__pb2.PushLogsResponse.SerializeToString,
+            ),
+            'GetFederationOptions': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetFederationOptions,
+                    request_deserializer=flwr_dot_proto_dot_run__pb2.GetFederationOptionsRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_run__pb2.GetFederationOptionsResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -167,5 +184,22 @@ class SimulationIo(object):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.SimulationIo/PushLogs',
             flwr_dot_proto_dot_log__pb2.PushLogsRequest.SerializeToString,
             flwr_dot_proto_dot_log__pb2.PushLogsResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def GetFederationOptions(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.SimulationIo/GetFederationOptions',
+            flwr_dot_proto_dot_run__pb2.GetFederationOptionsRequest.SerializeToString,
+            flwr_dot_proto_dot_run__pb2.GetFederationOptionsResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
