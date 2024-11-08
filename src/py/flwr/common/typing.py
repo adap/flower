@@ -24,7 +24,7 @@ import numpy.typing as npt
 
 NDArray = npt.NDArray[Any]
 NDArrayInt = npt.NDArray[np.int_]
-NDArrayFloat = npt.NDArray[np.float_]
+NDArrayFloat = npt.NDArray[np.float64]
 NDArrays = list[NDArray]
 
 # The following union type contains Python types corresponding to ProtoBuf types that
