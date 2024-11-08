@@ -33,7 +33,12 @@ for current_version in ${versions}; do
   git checkout --force ${current_version}
 
   # Downgrade numpy for versions between v1.8.0 and v1.12.0 to avoid conflicts in docs
-  if [[ "${current_version}" = "v1.8.0"  || "${current_version}" = "v1.9.0"  || "${current_version}" = "v1.10.0" || "${current_version}" = "v1.11.0" || "${current_version}" = "v1.11.1" || "${current_version}" = "v1.12.0" ]]; then
+  if [ "$current_version" = "v1.8.0"  ] || \
+     [ "$current_version" = "v1.9.0"  ] || \
+     [ "$current_version" = "v1.10.0" ] || \
+     [ "$current_version" = "v1.11.0" ] || \
+     [ "$current_version" = "v1.11.1" ] || \
+     [ "$current_version" = "v1.12.0" ]; then
     echo "INFO: Using numpy version ${numpy_version_1} for ${current_version} docs"
     pip install "numpy==${numpy_version_1}"
   else
