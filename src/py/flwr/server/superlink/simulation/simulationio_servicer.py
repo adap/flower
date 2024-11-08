@@ -147,6 +147,7 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
                 grpc.StatusCode.FAILED_PRECONDITION,
                 "Expected federation options to be set, but none available.",
             )
+            return GetFederationOptionsResponse()
         return GetFederationOptionsResponse(
             federation_options=configs_record_to_proto(federation_options)
         )
