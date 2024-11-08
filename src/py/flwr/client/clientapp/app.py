@@ -85,8 +85,8 @@ def flwr_clientapp() -> None:
     )
     run_clientapp(
         supernode=args.supernode,
+        run_once=(args.token is not None),
         token=args.token,
-        run_once=args.run_once,
         flwr_dir_=args.flwr_dir,
         certificates=certificates,
     )
@@ -99,7 +99,7 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 
 def run_clientapp(  # pylint: disable=R0914
     supernode: str,
-    run_once: bool,  # pylint: disable=W0613
+    run_once: bool,
     token: Optional[int] = None,
     flwr_dir_: Optional[str] = None,
     certificates: Optional[bytes] = None,
@@ -110,8 +110,15 @@ def run_clientapp(  # pylint: disable=R0914
     ----------
     supernode : str
         Address of SuperNode
+    run_once : bool
+        Boolean flag to run the ClientApp process only once for a single message.
     token : Optional[int] (default: None)
         Unique SuperNode token for ClientApp-SuperNode authentication
+    flwr_dir_ : Optional[str] (default: None)
+        Directory where FABs are installed
+    certificates : Optional[bytes] (default: None)
+        Root certificates for establishing secure HTTPS connection between SuperNode
+        and `flwr-clientapp` process
     """
     channel = create_channel(
         server_address=supernode,
@@ -126,7 +133,6 @@ def run_clientapp(  # pylint: disable=R0914
     try:
         stub = ClientAppIoStub(channel)
 
-        only_once = token is not None
         while True:
             # If token is not set, loop until token is received from SuperNode
             while token is None:
@@ -187,7 +193,7 @@ def run_clientapp(  # pylint: disable=R0914
 
             # Stop the loop if `flwr-clientapp` is expected to process only a single
             # message
-            if only_once:
+            if run_once:
                 break
 
     except KeyboardInterrupt:
