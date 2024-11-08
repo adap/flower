@@ -15,7 +15,7 @@
 """SimulationIo API servicer."""
 
 import threading
-from logging import DEBUG, ERROR, INFO
+from logging import DEBUG, INFO
 
 import grpc
 from grpc import ServicerContext
@@ -142,10 +142,11 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         state = self.state_factory.state()
 
         federation_options = state.get_federation_options(request.run_id)
-        if federation_options:
-            return GetFederationOptionsResponse(
-                federation_options=configs_record_to_proto(federation_options)
+        if federation_options is None:
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                "Expected federation options to be set, but none available.",
             )
-
-        log(ERROR, "Expected federation options to be set, but none available.")
-        return GetFederationOptionsResponse()
+        return GetFederationOptionsResponse(
+            federation_options=configs_record_to_proto(federation_options)
+        )
