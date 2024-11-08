@@ -29,7 +29,7 @@ from flwr_datasets.partitioner.dirichlet_partitioner import DirichletPartitioner
 
 def _dummy_setup(
     num_partitions: int,
-    alpha: Union[float, NDArray[np.float_]],
+    alpha: Union[float, NDArray[np.float64]],
     num_rows: int,
     partition_by: str,
     self_balancing: bool = True,
