@@ -695,6 +695,17 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         "Use this flag only if you understand the risks.",
     )
     parser.add_argument(
+        "--flwr-dir",
+        default=None,
+        help="""The path containing installed Flower Apps.
+        The default directory is:
+
+        - `$FLWR_HOME/` if `$FLWR_HOME` is defined
+        - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
+        - `$HOME/.flwr/` in all other cases
+        """,
+    )
+    parser.add_argument(
         "--ssl-certfile",
         help="Fleet API server SSL certificate file (as a path str) "
         "to create a secure connection.",
