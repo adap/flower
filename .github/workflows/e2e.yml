@@ -347,3 +347,59 @@ jobs:
           cd tmp-${{ matrix.framework }}
           flwr build
           flwr install *.fab
+
+  numpy:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    needs: wheel
+    strategy:
+      fail-fast: false
+      matrix:
+        numpy-version: ["1.26"]
+        python-version: ["3.11"]
+        directory: [e2e-bare-auth]
+        connection: [insecure]
+        engine: [deployment-engine, simulation-engine]
+        authentication: [no-auth]
+    name: |
+      NumPy ${{ matrix.numpy-version }} / 
+      Python ${{ matrix.python-version }} /
+      ${{ matrix.connection }} / 
+      ${{ matrix.authentication }} / 
+      ${{ matrix.engine }} 
+    defaults:
+      run:
+        working-directory: e2e/${{ matrix.directory }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+        with:
+          python-version: ${{ matrix.python-version }}
+          poetry-skip: 'true'
+      - name: Install Flower from repo
+        if: ${{ github.repository != 'adap/flower' || github.event.pull_request.head.repo.fork || github.actor == 'dependabot[bot]' }}
+        working-directory: ./
+        run: |
+          if [[ "${{ matrix.engine }}" == "simulation-engine" ]]; then
+            python -m pip install ".[simulation]" "numpy>=${{ matrix.numpy-version }},<2.0"
+          else
+            python -m pip install . "numpy>=${{ matrix.numpy-version }},<2.0"
+          fi
+      - name: Download and install Flower wheel from artifact store
+        if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
+        run: |
+          # Define base URL for wheel file
+          WHEEL_URL="https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}"
+          if [[ "${{ matrix.engine }}" == "simulation-engine" ]]; then
+            python -m pip install "flwr[simulation] @ ${WHEEL_URL}" "numpy>=${{ matrix.numpy-version }},<2.0"
+          else
+            python -m pip install "${WHEEL_URL}" "numpy>=${{ matrix.numpy-version }},<2.0"
+          fi
+      - name: >
+          Run Flower - NumPy 1.26 test / 
+          ${{ matrix.connection }} / 
+          ${{ matrix.authentication }} / 
+          ${{ matrix.engine }} 
+        working-directory: e2e/${{ matrix.directory }}
+        run: ./../test_exec_api.sh "${{ matrix.connection }}" "${{ matrix.authentication}}" "${{ matrix.engine }}"
