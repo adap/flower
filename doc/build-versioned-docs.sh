@@ -24,6 +24,7 @@ versions="`git for-each-ref '--format=%(refname:lstrip=-1)' refs/tags/ | grep -i
 
 # Set the numpy version to use for v1.8.0 to v1.12.0
 numpy_version_1="1.26.4"
+numpy_version_2=$(python -c "import numpy; print(numpy.__version__)")
 
 for current_version in ${versions}; do
  
@@ -32,16 +33,17 @@ for current_version in ${versions}; do
   git checkout --force ${current_version}
 
   # Downgrade numpy for versions between v1.8.0 and v1.12.0 to avoid conflicts in docs
-  if [[ "$current_version" = "v1.8.0"  || \
-        "$current_version" = "v1.9.0"  || \
-        "$current_version" = "v1.10.0" || \
-        "$current_version" = "v1.11.0" || \
-        "$current_version" = "v1.11.1" || \
-        "$current_version" = "v1.12.0" ]]; then
-    echo "INFO: Downgrading numpy to ${numpy_version_1} to avoid conflicts in docs"
+  if [[ "${current_version}" = "v1.8.0"  || \
+        "${current_version}" = "v1.9.0"  || \
+        "${current_version}" = "v1.10.0" || \
+        "${current_version}" = "v1.11.0" || \
+        "${current_version}" = "v1.11.1" || \
+        "${current_version}" = "v1.12.0" ]]; then
+    echo "INFO: Using numpy version ${numpy_version_1} for ${current_version} docs"
     pip install "numpy==${numpy_version_1}"
   else
-    pip install -U numpy
+    echo "INFO: Using numpy version ${numpy_version_2} for ${current_version} docs"
+    pip install "numpy==${numpy_version_2}"
   fi
   echo "INFO: Building sites for ${current_version}"
  
