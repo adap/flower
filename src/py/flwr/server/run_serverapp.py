@@ -174,7 +174,7 @@ def run_server_app() -> None:
             root_certificates=root_certificates,
         )
         flwr_dir = get_flwr_dir(args.flwr_dir)
-        driver.init_run(args.run_id)
+        driver.set_run(args.run_id)
         run_ = driver.run
         if not run_.fab_hash:
             raise ValueError("FAB hash not provided.")
@@ -204,7 +204,7 @@ def run_server_app() -> None:
         req = CreateRunRequest(fab_id=fab_id, fab_version=fab_version)
         res: CreateRunResponse = driver._stub.CreateRun(req)  # pylint: disable=W0212
         # Fetch full `Run` using `run_id`
-        driver.init_run(res.run_id)  # pylint: disable=W0212
+        driver.set_run(res.run_id)  # pylint: disable=W0212
         run_id = res.run_id
 
     # Obtain server app reference and the run config

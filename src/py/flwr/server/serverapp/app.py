@@ -189,7 +189,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
             run = run_from_proto(res.run)
             fab = fab_from_proto(res.fab)
 
-            driver.init_run(run.run_id)
+            driver.set_run(run.run_id)
 
             # Start log uploader for this run
             log_uploader = start_log_uploader(

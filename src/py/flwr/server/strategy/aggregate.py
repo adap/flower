@@ -48,12 +48,12 @@ def aggregate_inplace(results: list[tuple[ClientProxy, FitRes]]) -> NDArrays:
     num_examples_total = sum(fit_res.num_examples for (_, fit_res) in results)
 
     # Compute scaling factors for each result
-    scaling_factors = [
-        fit_res.num_examples / num_examples_total for _, fit_res in results
-    ]
+    scaling_factors = np.asarray(
+        [fit_res.num_examples / num_examples_total for _, fit_res in results]
+    )
 
     def _try_inplace(
-        x: NDArray, y: Union[NDArray, float], np_binary_op: np.ufunc
+        x: NDArray, y: Union[NDArray, np.float64], np_binary_op: np.ufunc
     ) -> NDArray:
         return (  # type: ignore[no-any-return]
             np_binary_op(x, y, out=x)
