@@ -20,7 +20,7 @@ import sys
 import time
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
-from logging import ERROR, INFO, WARN
+from logging import DEBUG, ERROR, INFO, WARN
 from pathlib import Path
 from typing import Callable, Optional, Union, cast
 
@@ -28,6 +28,7 @@ import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 from grpc import RpcError
 
+from flwr.cli.build import build
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.client.client import Client
@@ -36,8 +37,10 @@ from flwr.client.nodestate.nodestate_factory import NodeStateFactory
 from flwr.client.typing import ClientFnExt
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, Message, event
 from flwr.common.address import parse_address
+from flwr.common.config import get_project_dir_from_hash
 from flwr.common.constant import (
     CLIENTAPPIO_API_DEFAULT_ADDRESS,
+    FAB_MODE_PREINSTALL,
     ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
     MISSING_EXTRA_REST,
@@ -217,6 +220,7 @@ def start_client_internal(
     flwr_path: Optional[Path] = None,
     isolation: Optional[str] = None,
     supernode_address: Optional[str] = CLIENTAPPIO_API_DEFAULT_ADDRESS,
+    fab_install_mode: Optional[str] = "autoinstall",
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -278,6 +282,11 @@ def start_client_internal(
         process and communicates using gRPC at the address `supernode_address`.
     supernode_address : Optional[str] (default: `CLIENTAPPIO_API_DEFAULT_ADDRESS`)
         The SuperNode gRPC server address.
+    fab_install_mode: Optional[str] (default: "autoinstall")
+        FAB install mode for SuperNode. Possible values are `autoinstall` and
+        `preinstall`. Defaults to `autoinstall`, which installs the FAB automatically
+        when the SuperNode receives the FAB. If `preinstall`, the FAB must be installed
+        before the SuperNode receives it.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -451,12 +460,41 @@ def start_client_internal(
                             runs[run_id] = Run(run_id, "", "", "", {})
 
                     run: Run = runs[run_id]
+                    fab: Optional[Fab]
                     if get_fab is not None and run.fab_hash:
-                        fab = get_fab(run.fab_hash)
+                        if fab_install_mode == FAB_MODE_PREINSTALL:
+                            log(
+                                DEBUG,
+                                "SuperNode running in `%s` mode, "
+                                "retrieving FAB with hash %s from %s",
+                                FAB_MODE_PREINSTALL,
+                                run.fab_hash,
+                                flwr_path,
+                            )
+                            installed_fab_path = get_project_dir_from_hash(
+                                run.fab_hash, flwr_path
+                            )
+                            # Get content from installed FAB and create Fab instance
+                            log(INFO, installed_fab_path)
+                            fab_path, fab_hash = build(installed_fab_path)
+                            fab_content = Path(fab_path).read_bytes()
+                            # fab_content = Path(
+                            #     f"{str(installed_fab_path)}.fab"
+                            # ).read_bytes()
+                            if fab_hash != run.fab_hash:
+                                raise ValueError(
+                                    f"FAB hash mismatch. Expected: {run.fab_hash}, "
+                                    f"Found: {fab_hash}"
+                                )
+                            fab = Fab(run.fab_hash, fab_content)
+                        else:
+                            # Retrieve FAB from SuperLink
+                            fab = get_fab(run.fab_hash)
+                        fab_id, fab_version = get_fab_metadata(fab.content)
                         if not isolation:
                             # If `ClientApp` runs in the same process, install the FAB
                             install_from_fab(fab.content, flwr_path, True)
-                        fab_id, fab_version = get_fab_metadata(fab.content)
+
                     else:
                         fab = None
                         fab_id, fab_version = run.fab_id, run.fab_version

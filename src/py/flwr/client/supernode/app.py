@@ -30,6 +30,8 @@ from cryptography.hazmat.primitives.serialization import (
 from flwr.common import EventType, event
 from flwr.common.config import parse_config_args
 from flwr.common.constant import (
+    FAB_MODE_AUTOINSTALL,
+    FAB_MODE_PREINSTALL,
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
     ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
@@ -87,6 +89,7 @@ def run_supernode() -> None:
         flwr_path=args.flwr_dir,
         isolation=args.isolation,
         supernode_address=args.supernode_address,
+        fab_install_mode=args.fab_install_mode,
     )
 
     # Graceful shutdown
@@ -208,6 +211,20 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         "--supernode-address",
         default="0.0.0.0:9094",
         help="Set the SuperNode gRPC server address. Defaults to `0.0.0.0:9094`.",
+    )
+    parser.add_argument(
+        "--fab-install-mode",
+        default=FAB_MODE_AUTOINSTALL,
+        required=False,
+        choices=[
+            FAB_MODE_AUTOINSTALL,
+            FAB_MODE_PREINSTALL,
+        ],
+        help="Set the FAB install mode when running a `ClientApp` (optional, possible "
+        "values: `autoinstall`, `preinstall`). By default, the FAB install mode is "
+        "`autoinstall`. Use `autoinstall` to automatically install the FAB when the "
+        "SuperNode starts. Use `preinstall` to indicate that the FAB is already "
+        "installed and the SuperNode should not attempt to install it.",
     )
 
     return parser
