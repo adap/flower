@@ -22,11 +22,21 @@ languages="en `find locales/ -mindepth 1 -maxdepth 1 -type d -exec basename '{}'
 # Get a list of tags, excluding those before v1.0.0
 versions="`git for-each-ref '--format=%(refname:lstrip=-1)' refs/tags/ | grep -iE '^v((([1-9]|[0-9]{2,}).*\.([8-9]|[0-9]{2,}).*)|([2-9]|[0-9]{2,}).*)$'`"
 
+# Set the numpy version to use for v1.8.0 to v1.12.0
+numpy_version_1="1.26.4"
+
 for current_version in ${versions}; do
  
   # Make the current language available to conf.py
   export current_version
   git checkout --force ${current_version}
+
+  # Downgrade numpy for versions between v1.8.0 and v1.12.0 to avoid conflicts in docs
+  if [[ "$(printf '%s\n' "$current_version" "v1.8.0" "v1.12.0" | sort -V | head -n1)" == "v1.8.0" && \
+    "$(printf '%s\n' "$current_version" "v1.8.0" "v1.12.0" | sort -V | tail -n1)" == "v1.12.0" ]]; then
+    echo "INFO: Downgrading numpy to ${numpy_version_1} to avoid conflicts in docs"
+    pip install "numpy==${numpy_version_1}"
+  fi
   echo "INFO: Building sites for ${current_version}"
  
   for current_language in ${languages}; do
