@@ -18,15 +18,22 @@
 import time
 from collections.abc import Generator
 from logging import ERROR, INFO
-from typing import Any
+from typing import Any, cast
 
 import grpc
 
 from flwr.common.constant import LOG_STREAM_INTERVAL, Status
 from flwr.common.logger import log
-from flwr.common.serde import configs_record_from_proto, user_config_from_proto
+from flwr.common.serde import (
+    configs_record_from_proto,
+    run_status_to_proto,
+    scalar_from_proto,
+    user_config_from_proto,
+)
 from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
+    ListRequest,
+    ListResponse,
     StartRunRequest,
     StartRunResponse,
     StreamLogsRequest,
@@ -105,3 +112,33 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
                 context.cancel()
 
             time.sleep(LOG_STREAM_INTERVAL)  # Sleep briefly to avoid busy waiting
+
+    def List(self, request: ListRequest, context: grpc.ServicerContext) -> ListResponse:
+        """Handle flwr list command."""
+        log(INFO, "ExecServicer.List")
+        state = self.linkstate_factory.state()
+
+        # Handle `flwr list --runs`
+        if request.option == "--runs":
+            run_ids = state.get_run_ids()
+            run_status_dict = state.get_run_status(run_ids)
+            return ListResponse(
+                run_status_dict={
+                    run_id: run_status_to_proto(run_status)
+                    for run_id, run_status in run_status_dict.items()
+                }
+            )
+        # Handle `flwr list --run-id <run_id>`
+        if request.option == "--run-id":
+            run_id = cast(int, scalar_from_proto(request.value))
+            if not isinstance(run_id, int):
+                context.abort(grpc.StatusCode.INVALID_ARGUMENT, "Invalid run ID")
+
+            status = state.get_run_status({run_id}).get(run_id)
+            return ListResponse(
+                run_status_dict={run_id: run_status_to_proto(status)} if status else {}
+            )
+
+        # Unknown option
+        context.abort(grpc.StatusCode.INVALID_ARGUMENT, "Invalid option")
+        return ListResponse()

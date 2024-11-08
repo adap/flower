@@ -5,6 +5,7 @@ isort:skip_file
 import builtins
 import flwr.proto.fab_pb2
 import flwr.proto.recordset_pb2
+import flwr.proto.run_pb2
 import flwr.proto.transport_pb2
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
@@ -88,3 +89,46 @@ class StreamLogsResponse(google.protobuf.message.Message):
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["latest_timestamp",b"latest_timestamp","log_output",b"log_output"]) -> None: ...
 global___StreamLogsResponse = StreamLogsResponse
+
+class ListRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    OPTION_FIELD_NUMBER: builtins.int
+    VALUE_FIELD_NUMBER: builtins.int
+    option: typing.Text
+    @property
+    def value(self) -> flwr.proto.transport_pb2.Scalar: ...
+    def __init__(self,
+        *,
+        option: typing.Text = ...,
+        value: typing.Optional[flwr.proto.transport_pb2.Scalar] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["option",b"option","value",b"value"]) -> None: ...
+global___ListRequest = ListRequest
+
+class ListResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    class RunStatusDictEntry(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        KEY_FIELD_NUMBER: builtins.int
+        VALUE_FIELD_NUMBER: builtins.int
+        key: builtins.int
+        @property
+        def value(self) -> flwr.proto.run_pb2.RunStatus: ...
+        def __init__(self,
+            *,
+            key: builtins.int = ...,
+            value: typing.Optional[flwr.proto.run_pb2.RunStatus] = ...,
+            ) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+
+    RUN_STATUS_DICT_FIELD_NUMBER: builtins.int
+    @property
+    def run_status_dict(self) -> google.protobuf.internal.containers.MessageMap[builtins.int, flwr.proto.run_pb2.RunStatus]: ...
+    def __init__(self,
+        *,
+        run_status_dict: typing.Optional[typing.Mapping[builtins.int, flwr.proto.run_pb2.RunStatus]] = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["run_status_dict",b"run_status_dict"]) -> None: ...
+global___ListResponse = ListResponse

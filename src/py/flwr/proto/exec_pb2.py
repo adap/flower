@@ -15,9 +15,10 @@ _sym_db = _symbol_database.Default()
 from flwr.proto import fab_pb2 as flwr_dot_proto_dot_fab__pb2
 from flwr.proto import transport_pb2 as flwr_dot_proto_dot_transport__pb2
 from flwr.proto import recordset_pb2 as flwr_dot_proto_dot_recordset__pb2
+from flwr.proto import run_pb2 as flwr_dot_proto_dot_run__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15\x66lwr/proto/exec.proto\x12\nflwr.proto\x1a\x14\x66lwr/proto/fab.proto\x1a\x1a\x66lwr/proto/transport.proto\x1a\x1a\x66lwr/proto/recordset.proto\"\xfb\x01\n\x0fStartRunRequest\x12\x1c\n\x03\x66\x61\x62\x18\x01 \x01(\x0b\x32\x0f.flwr.proto.Fab\x12H\n\x0foverride_config\x18\x02 \x03(\x0b\x32/.flwr.proto.StartRunRequest.OverrideConfigEntry\x12\x35\n\x12\x66\x65\x64\x65ration_options\x18\x03 \x01(\x0b\x32\x19.flwr.proto.ConfigsRecord\x1aI\n\x13OverrideConfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.flwr.proto.Scalar:\x02\x38\x01\"\"\n\x10StartRunResponse\x12\x0e\n\x06run_id\x18\x01 \x01(\x04\"<\n\x11StreamLogsRequest\x12\x0e\n\x06run_id\x18\x01 \x01(\x04\x12\x17\n\x0f\x61\x66ter_timestamp\x18\x02 \x01(\x01\"B\n\x12StreamLogsResponse\x12\x12\n\nlog_output\x18\x01 \x01(\t\x12\x18\n\x10latest_timestamp\x18\x02 \x01(\x01\x32\xa0\x01\n\x04\x45xec\x12G\n\x08StartRun\x12\x1b.flwr.proto.StartRunRequest\x1a\x1c.flwr.proto.StartRunResponse\"\x00\x12O\n\nStreamLogs\x12\x1d.flwr.proto.StreamLogsRequest\x1a\x1e.flwr.proto.StreamLogsResponse\"\x00\x30\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15\x66lwr/proto/exec.proto\x12\nflwr.proto\x1a\x14\x66lwr/proto/fab.proto\x1a\x1a\x66lwr/proto/transport.proto\x1a\x1a\x66lwr/proto/recordset.proto\x1a\x14\x66lwr/proto/run.proto\"\xfb\x01\n\x0fStartRunRequest\x12\x1c\n\x03\x66\x61\x62\x18\x01 \x01(\x0b\x32\x0f.flwr.proto.Fab\x12H\n\x0foverride_config\x18\x02 \x03(\x0b\x32/.flwr.proto.StartRunRequest.OverrideConfigEntry\x12\x35\n\x12\x66\x65\x64\x65ration_options\x18\x03 \x01(\x0b\x32\x19.flwr.proto.ConfigsRecord\x1aI\n\x13OverrideConfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.flwr.proto.Scalar:\x02\x38\x01\"\"\n\x10StartRunResponse\x12\x0e\n\x06run_id\x18\x01 \x01(\x04\"<\n\x11StreamLogsRequest\x12\x0e\n\x06run_id\x18\x01 \x01(\x04\x12\x17\n\x0f\x61\x66ter_timestamp\x18\x02 \x01(\x01\"B\n\x12StreamLogsResponse\x12\x12\n\nlog_output\x18\x01 \x01(\t\x12\x18\n\x10latest_timestamp\x18\x02 \x01(\x01\"@\n\x0bListRequest\x12\x0e\n\x06option\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.flwr.proto.Scalar\"\xa1\x01\n\x0cListResponse\x12\x44\n\x0frun_status_dict\x18\x01 \x03(\x0b\x32+.flwr.proto.ListResponse.RunStatusDictEntry\x1aK\n\x12RunStatusDictEntry\x12\x0b\n\x03key\x18\x01 \x01(\x04\x12$\n\x05value\x18\x02 \x01(\x0b\x32\x15.flwr.proto.RunStatus:\x02\x38\x01\x32\xdd\x01\n\x04\x45xec\x12G\n\x08StartRun\x12\x1b.flwr.proto.StartRunRequest\x1a\x1c.flwr.proto.StartRunResponse\"\x00\x12O\n\nStreamLogs\x12\x1d.flwr.proto.StreamLogsRequest\x1a\x1e.flwr.proto.StreamLogsResponse\"\x00\x30\x01\x12;\n\x04List\x12\x17.flwr.proto.ListRequest\x1a\x18.flwr.proto.ListResponse\"\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -26,16 +27,24 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
   _globals['_STARTRUNREQUEST_OVERRIDECONFIGENTRY']._options = None
   _globals['_STARTRUNREQUEST_OVERRIDECONFIGENTRY']._serialized_options = b'8\001'
-  _globals['_STARTRUNREQUEST']._serialized_start=116
-  _globals['_STARTRUNREQUEST']._serialized_end=367
-  _globals['_STARTRUNREQUEST_OVERRIDECONFIGENTRY']._serialized_start=294
-  _globals['_STARTRUNREQUEST_OVERRIDECONFIGENTRY']._serialized_end=367
-  _globals['_STARTRUNRESPONSE']._serialized_start=369
-  _globals['_STARTRUNRESPONSE']._serialized_end=403
-  _globals['_STREAMLOGSREQUEST']._serialized_start=405
-  _globals['_STREAMLOGSREQUEST']._serialized_end=465
-  _globals['_STREAMLOGSRESPONSE']._serialized_start=467
-  _globals['_STREAMLOGSRESPONSE']._serialized_end=533
-  _globals['_EXEC']._serialized_start=536
-  _globals['_EXEC']._serialized_end=696
+  _globals['_LISTRESPONSE_RUNSTATUSDICTENTRY']._options = None
+  _globals['_LISTRESPONSE_RUNSTATUSDICTENTRY']._serialized_options = b'8\001'
+  _globals['_STARTRUNREQUEST']._serialized_start=138
+  _globals['_STARTRUNREQUEST']._serialized_end=389
+  _globals['_STARTRUNREQUEST_OVERRIDECONFIGENTRY']._serialized_start=316
+  _globals['_STARTRUNREQUEST_OVERRIDECONFIGENTRY']._serialized_end=389
+  _globals['_STARTRUNRESPONSE']._serialized_start=391
+  _globals['_STARTRUNRESPONSE']._serialized_end=425
+  _globals['_STREAMLOGSREQUEST']._serialized_start=427
+  _globals['_STREAMLOGSREQUEST']._serialized_end=487
+  _globals['_STREAMLOGSRESPONSE']._serialized_start=489
+  _globals['_STREAMLOGSRESPONSE']._serialized_end=555
+  _globals['_LISTREQUEST']._serialized_start=557
+  _globals['_LISTREQUEST']._serialized_end=621
+  _globals['_LISTRESPONSE']._serialized_start=624
+  _globals['_LISTRESPONSE']._serialized_end=785
+  _globals['_LISTRESPONSE_RUNSTATUSDICTENTRY']._serialized_start=710
+  _globals['_LISTRESPONSE_RUNSTATUSDICTENTRY']._serialized_end=785
+  _globals['_EXEC']._serialized_start=788
+  _globals['_EXEC']._serialized_end=1009
 # @@protoc_insertion_point(module_scope)
