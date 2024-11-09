@@ -62,7 +62,7 @@ def flwr_clientapp() -> None:
     parser.add_argument(
         "--supernode",
         type=str,
-        help="Address of SuperNode ClientAppIo gRPC servicer",
+        help="Address of SuperNode's ClientAppIo API",
     )
     parser.add_argument(
         "--token",
@@ -78,7 +78,7 @@ def flwr_clientapp() -> None:
 
     log(
         DEBUG,
-        "Staring isolated `ClientApp` connected to SuperNode ClientAppIo at %s "
+        "Staring isolated `ClientApp` connected to SuperNode ClientAppIo API at %s "
         "with token %s",
         args.supernode,
         args.token,

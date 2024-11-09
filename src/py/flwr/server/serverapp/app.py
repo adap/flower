@@ -68,7 +68,7 @@ def flwr_serverapp() -> None:
     parser.add_argument(
         "--superlink",
         type=str,
-        help="Address of SuperLink's ServerAppIo gRPC servicer",
+        help="Address of SuperLink's ServerAppIo API",
     )
     add_args_flwr_app_common(parser=parser, flwr_app="ServerApp")
     args = parser.parse_args()
@@ -78,7 +78,7 @@ def flwr_serverapp() -> None:
 
     log(
         DEBUG,
-        "Staring isolated `ServerApp` connected to SuperLink ServerAppIo at %s",
+        "Staring isolated `ServerApp` connected to SuperLink ServerAppIo API at %s",
         args.superlink,
     )
     run_serverapp(
