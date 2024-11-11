@@ -22,13 +22,14 @@ import time
 from logging import WARN, LogRecord
 from logging.handlers import HTTPHandler
 from queue import Empty, Queue
-from typing import TYPE_CHECKING, Any, Optional, TextIO
+from typing import TYPE_CHECKING, Any, Optional, TextIO, Union
 
 import grpc
 
 from flwr.proto.log_pb2 import PushLogsRequest  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E0611
+from flwr.proto.simulationio_pb2_grpc import SimulationIoStub  # pylint: disable=E0611
 
 from .constant import LOG_UPLOAD_INTERVAL
 
@@ -346,7 +347,10 @@ def _log_uploader(
 
 
 def start_log_uploader(
-    log_queue: Queue[Optional[str]], node_id: int, run_id: int, stub: ServerAppIoStub
+    log_queue: Queue[Optional[str]],
+    node_id: int,
+    run_id: int,
+    stub: Union[ServerAppIoStub, SimulationIoStub],
 ) -> threading.Thread:
     """Start the log uploader thread and return it."""
     thread = threading.Thread(

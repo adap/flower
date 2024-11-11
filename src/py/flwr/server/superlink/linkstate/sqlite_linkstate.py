@@ -902,6 +902,12 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         result: set[bytes] = {row["public_key"] for row in rows}
         return result
 
+    def get_run_ids(self) -> set[int]:
+        """Retrieve all run IDs."""
+        query = "SELECT run_id FROM run;"
+        rows = self.query(query)
+        return {convert_sint64_to_uint64(row["run_id"]) for row in rows}
+
     def get_run(self, run_id: int) -> Optional[Run]:
         """Retrieve information about the run with the specified `run_id`."""
         # Convert the uint64 value to sint64 for SQLite
