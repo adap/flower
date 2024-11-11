@@ -419,6 +419,7 @@ def _flwr_scheduler(
             # Start subprocess
             command = [
                 cmd,
+                "--run-once",
                 "--superlink",
                 io_api_address,
             ]
