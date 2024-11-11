@@ -91,7 +91,7 @@ def flwr_serverapp() -> None:
         superlink=args.superlink,
         log_queue=log_queue,
         run_once=args.run_once,
-        flwr_dir_=args.flwr_dir,
+        flwr_dir=args.flwr_dir,
         certificates=certificates,
     )
 
@@ -103,7 +103,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
     superlink: str,
     log_queue: Queue[Optional[str]],
     run_once: bool,
-    flwr_dir_: Optional[str] = None,
+    flwr_dir: Optional[str] = None,
     certificates: Optional[bytes] = None,
 ) -> None:
     """Run Flower ServerApp process."""
@@ -113,7 +113,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
     )
 
     # Resolve directory where FABs are installed
-    flwr_dir = get_flwr_dir(flwr_dir_)
+    flwr_dir_ = get_flwr_dir(flwr_dir)
     log_uploader = None
 
     while True:
@@ -142,11 +142,13 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
             )
 
             log(DEBUG, "ServerApp process starts FAB installation.")
-            install_from_fab(fab.content, flwr_dir=flwr_dir, skip_prompt=True)
+            install_from_fab(fab.content, flwr_dir=flwr_dir_, skip_prompt=True)
 
             fab_id, fab_version = get_fab_metadata(fab.content)
 
-            app_path = str(get_project_dir(fab_id, fab_version, fab.hash_str, flwr_dir))
+            app_path = str(
+                get_project_dir(fab_id, fab_version, fab.hash_str, flwr_dir_)
+            )
             config = get_project_config(app_path)
 
             # Obtain server app reference and the run config

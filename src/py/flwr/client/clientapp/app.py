@@ -86,7 +86,7 @@ def flwr_clientapp() -> None:
         supernode=args.supernode,
         run_once=(args.token is not None),
         token=args.token,
-        flwr_dir_=args.flwr_dir,
+        flwr_dir=args.flwr_dir,
     )
 
 
@@ -99,7 +99,7 @@ def run_clientapp(  # pylint: disable=R0914
     supernode: str,
     run_once: bool,
     token: Optional[int] = None,
-    flwr_dir_: Optional[str] = None,
+    flwr_dir: Optional[str] = None,
 ) -> None:
     """Run Flower ClientApp process."""
     channel = create_channel(
@@ -109,7 +109,7 @@ def run_clientapp(  # pylint: disable=R0914
     channel.subscribe(on_channel_state_change)
 
     # Resolve directory where FABs are installed
-    flwr_dir = get_flwr_dir(flwr_dir_)
+    flwr_dir_ = get_flwr_dir(flwr_dir)
 
     try:
         stub = ClientAppIoStub(channel)
@@ -126,13 +126,13 @@ def run_clientapp(  # pylint: disable=R0914
             # Install FAB, if provided
             if fab:
                 log(DEBUG, "Flower ClientApp starts FAB installation.")
-                install_from_fab(fab.content, flwr_dir=flwr_dir, skip_prompt=True)
+                install_from_fab(fab.content, flwr_dir=flwr_dir_, skip_prompt=True)
 
             load_client_app_fn = get_load_client_app_fn(
                 default_app_ref="",
                 app_path=None,
                 multi_app=True,
-                flwr_dir=str(flwr_dir),
+                flwr_dir=str(flwr_dir_),
             )
 
             try:
