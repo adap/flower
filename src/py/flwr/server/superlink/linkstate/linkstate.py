@@ -164,6 +164,10 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """Create a new run for the specified `fab_hash`."""
 
     @abc.abstractmethod
+    def get_run_ids(self) -> set[int]:
+        """Retrieve all run IDs."""
+
+    @abc.abstractmethod
     def get_run(self, run_id: int) -> Optional[Run]:
         """Retrieve information about the run with the specified `run_id`.
 
@@ -175,10 +179,7 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         Returns
         -------
         Optional[Run]
-            A dataclass instance containing three elements if `run_id` is valid:
-            - `run_id`: The identifier of the run, same as the specified `run_id`.
-            - `fab_id`: The identifier of the FAB used in the specified run.
-            - `fab_version`: The version of the FAB used in the specified run.
+            The `Run` instance if found; otherwise, `None`.
         """
 
     @abc.abstractmethod

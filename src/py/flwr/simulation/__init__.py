@@ -17,6 +17,7 @@
 
 import importlib
 
+from flwr.simulation.app import run_simulation_process
 from flwr.simulation.run_simulation import run_simulation
 from flwr.simulation.simulationio_connection import SimulationIoConnection
 
@@ -40,5 +41,6 @@ To install the necessary dependencies, install `flwr` with the `simulation` extr
 __all__ = [
     "SimulationIoConnection",
     "run_simulation",
+    "run_simulation_process",
     "start_simulation",
 ]
