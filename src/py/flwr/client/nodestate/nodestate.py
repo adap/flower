@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,15 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Datasets type definitions."""
+"""Abstract base class NodeState."""
+
+import abc
+from typing import Optional
 
 
-from typing import Any
+class NodeState(abc.ABC):
+    """Abstract NodeState."""
 
-import numpy as np
-import numpy.typing as npt
+    @abc.abstractmethod
+    def set_node_id(self, node_id: Optional[int]) -> None:
+        """Set the node ID."""
 
-NDArray = npt.NDArray[Any]
-NDArrayInt = npt.NDArray[np.int_]
-NDArrayFloat = npt.NDArray[np.float64]
-NDArrays = list[NDArray]
+    @abc.abstractmethod
+    def get_node_id(self) -> int:
+        """Get the node ID."""

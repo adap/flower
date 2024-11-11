@@ -112,12 +112,8 @@ class GrpcDriver(Driver):
         channel.close()
         log(DEBUG, "[Driver] Disconnected")
 
-    def init_run(self, run_id: int) -> None:
-        """Initialize the run."""
-        # Check if is initialized
-        if self._run is not None:
-            return
-
+    def set_run(self, run_id: int) -> None:
+        """Set the run."""
         # Get the run info
         req = GetRunRequest(run_id=run_id)
         res: GetRunResponse = self._stub.GetRun(req)

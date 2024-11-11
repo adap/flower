@@ -153,7 +153,7 @@ class DeploymentEngine(Executor):
         self,
         fab_file: bytes,
         override_config: UserConfig,
-        federation_config: UserConfig,
+        federation_options: ConfigsRecord,
     ) -> Optional[int]:
         """Start run using the Flower Deployment Engine."""
         run_id = None
