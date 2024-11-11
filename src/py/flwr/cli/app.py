@@ -20,9 +20,9 @@ from typer.main import get_command
 from .build import build
 from .install import install
 from .log import log
+from .ls import ls
 from .new import new
 from .run import run
-from .ls import ls
 
 app = typer.Typer(
     help=typer.style(

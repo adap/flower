@@ -12,11 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+"""Flower command line interface `ls` command."""
 
 
-from typing import Optional, Annotated
+from logging import DEBUG
 from pathlib import Path
+from typing import Annotated, Any, Optional
+
+import grpc
 import typer
+from rich.console import Console
+from rich.table import Table
+from rich.text import Text
+
+from flwr.cli.config_utils import (
+    load_and_validate,
+    validate_certificate_in_federation_config,
+    validate_federation_in_project_config,
+    validate_project_config,
+)
+from flwr.common.constant import FAB_CONFIG_FILE, SubStatus
+from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
+from flwr.common.logger import log
+from flwr.common.serde import run_status_from_proto, scalar_to_proto
+from flwr.common.typing import RunStatus
+from flwr.proto.exec_pb2 import ListRequest, ListResponse  # pylint: disable=E0611
+from flwr.proto.exec_pb2_grpc import ExecStub
 
 
 def ls(
@@ -44,22 +65,42 @@ def ls(
     ] = None,
 ) -> None:
     """List runs."""
+    # Load and validate federation config
+    typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
+
+    pyproject_path = app / FAB_CONFIG_FILE if app else None
+    config, errors, warnings = load_and_validate(path=pyproject_path)
+    config = validate_project_config(config, errors, warnings)
+    federation, federation_config = validate_federation_in_project_config(
+        federation, config
+    )
+
+    if "address" not in federation_config:
+        typer.secho(
+            "❌ `flwr log` currently works with Exec API. Ensure that the correct"
+            "Exec API address is provided in the `pyproject.toml`.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+
     try:
         if runs and run_id is not None:
-            raise ValueError("The options '--runs' and '--run-id' are mutually exclusive.")
+            raise ValueError(
+                "The options '--runs' and '--run-id' are mutually exclusive."
+            )
 
-        if runs:
-            # Logic to list all runs
-            typer.echo(f"📄 Listing all runs for app at {app} with federation '{federation}'")
-            # [Your code to list runs goes here]
+        channel = _init_channel(app, federation_config)
+        stub = ExecStub(channel)
 
-        elif run_id is not None:
-            # Logic to display information about a specific run ID
-            typer.echo(f"🔍 Displaying information for run ID {run_id} in app at {app} with federation '{federation}'")
-            # [Your code to display run information goes here]
-
+        # Display information about a specific run ID
+        if run_id is not None:
+            typer.echo(f"🔍 Displaying information for run ID {run_id}...")
+            _display_one_run(stub, run_id)
+        # By default, list all runs
         else:
-            raise ValueError("You must specify either '--runs' or '--run-id'.")
+            typer.echo("📄 Listing all runs...")
+            _list_runs(stub)
 
     except ValueError as err:
         typer.secho(
@@ -68,4 +109,92 @@ def ls(
             bold=True,
         )
         raise typer.Exit(code=1) from err
+    finally:
+        channel.close()
 
+
+def on_channel_state_change(channel_connectivity: str) -> None:
+    """Log channel connectivity."""
+    log(DEBUG, channel_connectivity)
+
+
+def _init_channel(app: Path, federation_config: dict[str, Any]) -> grpc.Channel:
+    """Initialize gRPC channel to the Exec API."""
+    insecure, root_certificates_bytes = validate_certificate_in_federation_config(
+        app, federation_config
+    )
+    channel = create_channel(
+        server_address=federation_config["address"],
+        insecure=insecure,
+        root_certificates=root_certificates_bytes,
+        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
+        interceptors=None,
+    )
+    channel.subscribe(on_channel_state_change)
+    return channel
+
+
+def _format_run_table(run_status_dict: dict[int, RunStatus]) -> Table:
+    """Format run status as a rich Table."""
+    table = Table(header_style="bold cyan")
+
+    # Add columns
+    table.add_column(Text("Run ID", justify="center"), style="bright_white")
+    table.add_column(Text("Status", justify="center"))
+    table.add_column(Text("Details", justify="center"))
+
+    # Add rows
+    for run_id, run_status in run_status_dict.items():
+        # Combine status and sub-status into a single string
+        if run_status.sub_status == "":
+            status_text = run_status.status
+        else:
+            status_text = f"{run_status.status}:{run_status.sub_status}"
+
+        # Style the status based on its value
+        sub_status = run_status.sub_status
+        if sub_status == SubStatus.COMPLETED:
+            status_style = "green"
+        elif sub_status == SubStatus.FAILED:
+            status_style = "red"
+        else:
+            status_style = "yellow"
+
+        table.add_row(
+            f"[bold]{run_id}[/bold]",
+            f"[{status_style}]{status_text}[/{status_style}]",
+            run_status.details,
+        )
+    return table
+
+
+def _list_runs(
+    stub: ExecStub,
+) -> None:
+    """List all runs."""
+    res: ListResponse = stub.List(ListRequest(option="--runs"))
+    statuses: dict[int, RunStatus] = {
+        run_id: run_status_from_proto(proto)
+        for run_id, proto in res.run_status_dict.items()
+    }
+
+    Console().print(_format_run_table(statuses))
+
+
+def _display_one_run(
+    stub: ExecStub,
+    run_id: int,
+) -> None:
+    """Display information about a specific run."""
+    res: ListResponse = stub.List(
+        ListRequest(option="--run-id", value=scalar_to_proto(run_id))
+    )
+    if not res.run_status_dict:
+        raise ValueError(f"Run ID {run_id} not found")
+
+    statuses: dict[int, RunStatus] = {
+        run_id: run_status_from_proto(proto)
+        for run_id, proto in res.run_status_dict.items()
+    }
+
+    Console().print(_format_run_table(statuses))
