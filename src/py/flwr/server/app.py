@@ -215,6 +215,12 @@ def run_superlink() -> None:
 
     event(EventType.RUN_SUPERLINK_ENTER)
 
+    # Warn unused options
+    if args.flwr_dir is not None:
+        log(
+            WARN, "The `--flwr-dir` option is currently not in use and will be ignored."
+        )
+
     # Parse IP addresses
     serverappio_address, _, _ = _format_address(args.serverappio_api_address)
     exec_address, _, _ = _format_address(args.exec_api_address)
