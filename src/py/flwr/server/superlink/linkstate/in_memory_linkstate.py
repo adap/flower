@@ -435,6 +435,11 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         """Retrieve all currently stored `node_public_keys` as a set."""
         return self.node_public_keys
 
+    def get_run_ids(self) -> set[int]:
+        """Retrieve all run IDs."""
+        with self.lock:
+            return set(self.run_ids.keys())
+
     def get_run(self, run_id: int) -> Optional[Run]:
         """Retrieve information about the run with the specified `run_id`."""
         with self.lock:
