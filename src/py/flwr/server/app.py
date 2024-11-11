@@ -215,6 +215,12 @@ def run_superlink() -> None:
 
     event(EventType.RUN_SUPERLINK_ENTER)
 
+    # Warn unused options
+    if args.flwr_dir is not None:
+        log(
+            WARN, "The `--flwr-dir` option is currently not in use and will be ignored."
+        )
+
     # Parse IP addresses
     serverappio_address, _, _ = _format_address(args.serverappio_api_address)
     exec_address, _, _ = _format_address(args.exec_api_address)
@@ -701,6 +707,17 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         help="Run the server without HTTPS, regardless of whether certificate "
         "paths are provided. By default, the server runs with HTTPS enabled. "
         "Use this flag only if you understand the risks.",
+    )
+    parser.add_argument(
+        "--flwr-dir",
+        default=None,
+        help="""The path containing installed Flower Apps.
+        The default directory is:
+
+        - `$FLWR_HOME/` if `$FLWR_HOME` is defined
+        - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
+        - `$HOME/.flwr/` in all other cases
+        """,
     )
     parser.add_argument(
         "--ssl-certfile",
