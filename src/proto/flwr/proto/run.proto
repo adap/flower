@@ -19,6 +19,7 @@ package flwr.proto;
 
 import "flwr/proto/fab.proto";
 import "flwr/proto/node.proto";
+import "flwr/proto/recordset.proto";
 import "flwr/proto/transport.proto";
 
 message Run {
@@ -67,3 +68,7 @@ message GetRunStatusRequest {
   repeated uint64 run_ids = 2;
 }
 message GetRunStatusResponse { map<uint64, RunStatus> run_status_dict = 1; }
+
+// Get Federation Options associated with run
+message GetFederationOptionsRequest { uint64 run_id = 1; }
+message GetFederationOptionsResponse { ConfigsRecord federation_options = 1; }
