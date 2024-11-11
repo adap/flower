@@ -91,6 +91,17 @@ class StateTest(unittest.TestCase):
         assert run_id1 in run_ids
         assert run_id2 in run_ids
 
+    def test_get_all_run_ids_empty(self) -> None:
+        """Test if get_run_ids works correctly when no runs are present."""
+        # Prepare
+        state = self.state_factory()
+
+        # Execute
+        run_ids = state.get_run_ids()
+
+        # Assert
+        assert len(run_ids) == 0
+
     def test_get_pending_run_id(self) -> None:
         """Test if get_pending_run_id works correctly."""
         # Prepare
