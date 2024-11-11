@@ -85,7 +85,9 @@ class GrpcDriver(Driver):
             recoverable_exceptions=grpc.RpcError,
             max_tries=None,
             max_time=None,
-            should_giveup=lambda e: e.code() != grpc.StatusCode.UNAVAILABLE,  # type: ignore
+            should_giveup=(
+                lambda e: e.code() != grpc.StatusCode.UNAVAILABLE  # type: ignore
+            ),
         )
 
     @property
