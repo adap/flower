@@ -77,7 +77,7 @@ def try_obtain_certificates(
         root_certificates = Path(args.root_certificates).read_bytes()
         log(
             DEBUG,
-            "Starting secure HTTPS channel " "with the following certificates: %s.",
+            "Starting secure HTTPS channel with the following certificates: %s.",
             args.root_certificates,
         )
     return root_certificates
