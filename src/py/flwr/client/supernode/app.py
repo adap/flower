@@ -251,25 +251,6 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         "establishing secure HTTPS connections.",
     )
     parser.add_argument(
-        "--ssl-certfile",
-        help="ClientAppIo API server SSL certificate file (as a path str) "
-        "to create a secure connection.",
-        type=str,
-        default=None,
-    )
-    parser.add_argument(
-        "--ssl-keyfile",
-        help="ClientAppIo API server SSL private key file (as a path str) "
-        "to create a secure connection.",
-        type=str,
-    )
-    parser.add_argument(
-        "--ssl-ca-certfile",
-        help="ClientAppIo API server SSL CA certificate file (as a path str) "
-        "to create a secure connection.",
-        type=str,
-    )
-    parser.add_argument(
         "--server",
         default=FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
         help="Server address",
