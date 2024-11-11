@@ -106,22 +106,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
     flwr_dir_: Optional[str] = None,
     certificates: Optional[bytes] = None,
 ) -> None:
-    """Run Flower ServerApp process.
-
-    Parameters
-    ----------
-    superlink: str
-        Address of SuperLink's ServerAppIo gRPC servicer
-    log_queue: Queue[Optional[str]]
-        Queue to capture logs
-    run_once: bool
-        Boolean flag to run the ServerApp process only once for a single run
-    flwr_dir_: Optional[str] (default=None)
-        Directory where FABs are installed
-    certificates: Optional[bytes] (default=None)
-        Root certificates for establishing secure HTTPS connection between SuperLink
-        and `flwr-serverapp` process
-    """
+    """Run Flower ServerApp process."""
     driver = GrpcDriver(
         serverappio_service_address=superlink,
         root_certificates=certificates,
