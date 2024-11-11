@@ -1,6 +1,10 @@
 services:
   superlink:
     command:
+      - --executor
+      - flwr.superexec.deployment:executor
+      - --isolation
+      - process
       - --ssl-ca-certfile=certificates/ca.crt
       - --ssl-certfile=certificates/server.pem
       - --ssl-keyfile=certificates/server.key
@@ -12,24 +16,15 @@ services:
       - source: superlink-keyfile
         target: /app/certificates/server.key
 
-  superexec:
+  serverapp:
     command:
-      - --executor
-      - flwr.superexec.deployment:executor
-      - --executor-config
-      - superlink="superlink:9091" root-certificates="certificates/superlink-ca.crt"
-      - --ssl-ca-certfile=certificates/ca.crt
-      - --ssl-certfile=certificates/server.pem
-      - --ssl-keyfile=certificates/server.key
+      - --superlink
+      - superlink:9091
+      - --root-certificates
+      - certificates/ca.crt
     secrets:
       - source: superlink-ca-certfile
-        target: /app/certificates/superlink-ca.crt
-      - source: superexec-ca-certfile
         target: /app/certificates/ca.crt
-      - source: superexec-certfile
-        target: /app/certificates/server.pem
-      - source: superexec-keyfile
-        target: /app/certificates/server.key
 
   supernode-1:
     command:
@@ -88,9 +83,3 @@ secrets:
     file: ./superlink-certificates/server.pem
   superlink-keyfile:
     file: ./superlink-certificates/server.key
-  superexec-ca-certfile:
-    file: ./superexec-certificates/ca.crt
-  superexec-certfile:
-    file: ./superexec-certificates/server.pem
-  superexec-keyfile:
-    file: ./superexec-certificates/server.key

@@ -200,7 +200,7 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
             # Start log uploader for this run
             log_uploader = start_log_uploader(
                 log_queue=log_queue,
-                node_id=0,
+                node_id=context.node_id,
                 run_id=run.run_id,
                 stub=conn._stub,
             )
