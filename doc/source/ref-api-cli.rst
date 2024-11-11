@@ -63,7 +63,15 @@ flower-server-app
 flower-superexec
 ----------------
 
+.. warning::
+
+    Note that from version ``1.13.0``, ``flower-superexec`` is deprecated. Instead, you
+    only need to execute |flower_superlink_link|_.
+
 .. argparse::
     :module: flwr.superexec.app
-    :func: _parse_args_run_superexec
     :prog: flower-superexec
+
+.. |flower_superlink_link| replace:: ``flower-superlink``
+
+.. _flower_superlink_link: ref-api-cli.html#flower-superlink
