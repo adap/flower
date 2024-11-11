@@ -21,9 +21,10 @@ from typing import Optional
 
 from typing_extensions import override
 
-from flwr.common.constant import DRIVER_API_DEFAULT_ADDRESS
+from flwr.common import ConfigsRecord, Context, RecordSet
+from flwr.common.constant import SERVERAPPIO_API_DEFAULT_ADDRESS, Status, SubStatus
 from flwr.common.logger import log
-from flwr.common.typing import Fab, UserConfig
+from flwr.common.typing import Fab, RunStatus, UserConfig
 from flwr.server.superlink.ffs import Ffs
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
@@ -47,7 +48,7 @@ class DeploymentEngine(Executor):
 
     def __init__(
         self,
-        superlink: str = DRIVER_API_DEFAULT_ADDRESS,
+        superlink: str = SERVERAPPIO_API_DEFAULT_ADDRESS,
         root_certificates: Optional[str] = None,
         flwr_dir: Optional[str] = None,
     ) -> None:
@@ -97,7 +98,7 @@ class DeploymentEngine(Executor):
             A dictionary for configuration values.
             Supported configuration key/value pairs:
             - "superlink": str
-                The address of the SuperLink Driver API.
+                The address of the SuperLink ServerAppIo API.
             - "root-certificates": str
                 The path to the root certificates.
             - "flwr-dir": str
@@ -132,29 +133,48 @@ class DeploymentEngine(Executor):
                 f"FAB ({fab.hash_str}) hash from request doesn't match contents"
             )
 
-        run_id = self.linkstate.create_run(None, None, fab_hash, override_config)
+        run_id = self.linkstate.create_run(
+            None, None, fab_hash, override_config, ConfigsRecord()
+        )
         return run_id
+
+    def _create_context(self, run_id: int) -> None:
+        """Register a Context for a Run."""
+        # Create an empty context for the Run
+        context = Context(
+            run_id=run_id, node_id=0, node_config={}, state=RecordSet(), run_config={}
+        )
+
+        # Register the context at the LinkState
+        self.linkstate.set_serverapp_context(run_id=run_id, context=context)
 
     @override
     def start_run(
         self,
         fab_file: bytes,
         override_config: UserConfig,
-        federation_config: UserConfig,
+        federation_options: ConfigsRecord,
     ) -> Optional[int]:
         """Start run using the Flower Deployment Engine."""
+        run_id = None
         try:
 
             # Call SuperLink to create run
-            run_id: int = self._create_run(
+            run_id = self._create_run(
                 Fab(hashlib.sha256(fab_file).hexdigest(), fab_file), override_config
             )
+
+            # Register context for the Run
+            self._create_context(run_id=run_id)
             log(INFO, "Created run %s", str(run_id))
 
             return run_id
         # pylint: disable-next=broad-except
         except Exception as e:
             log(ERROR, "Could not start run: %s", str(e))
+            if run_id:
+                run_status = RunStatus(Status.FINISHED, SubStatus.FAILED, str(e))
+                self.linkstate.update_run_status(run_id, new_status=run_status)
             return None
 
 

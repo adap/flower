@@ -150,12 +150,6 @@ class EventType(str, Enum):
 
     # Not yet implemented
 
-    # --- SuperExec --------------------------------------------------------------------
-
-    # SuperExec
-    RUN_SUPEREXEC_ENTER = auto()
-    RUN_SUPEREXEC_LEAVE = auto()
-
     # --- Simulation Engine ------------------------------------------------------------
 
     # CLI: flower-simulation

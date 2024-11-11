@@ -22,15 +22,15 @@ from unittest.mock import Mock, patch
 from flwr.common import DEFAULT_TTL, RecordSet
 from flwr.common.message import Error
 from flwr.common.serde import error_to_proto, recordset_to_proto
-from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
-    GetNodesRequest,
-    PullTaskResRequest,
-    PushTaskInsRequest,
-)
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
     GetRunResponse,
     Run,
+)
+from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
+    GetNodesRequest,
+    PullTaskResRequest,
+    PushTaskInsRequest,
 )
 from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 
@@ -59,7 +59,7 @@ class TestGrpcDriver(unittest.TestCase):
         self.driver = GrpcDriver()
         self.driver._grpc_stub = self.mock_stub  # pylint: disable=protected-access
         self.driver._channel = self.mock_channel  # pylint: disable=protected-access
-        self.driver.init_run(run_id=61016)
+        self.driver.set_run(run_id=61016)
 
     def test_init_grpc_driver(self) -> None:
         """Test GrpcDriverStub initialization."""

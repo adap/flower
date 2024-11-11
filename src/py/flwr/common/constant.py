@@ -41,13 +41,14 @@ TRANSPORT_TYPES = [
 # SuperNode
 CLIENTAPPIO_API_DEFAULT_ADDRESS = "0.0.0.0:9094"
 # SuperLink
-DRIVER_API_DEFAULT_ADDRESS = "0.0.0.0:9091"
+SERVERAPPIO_API_DEFAULT_ADDRESS = "0.0.0.0:9091"
 FLEET_API_GRPC_RERE_DEFAULT_ADDRESS = "0.0.0.0:9092"
 FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS = (
     "[::]:8080"  # IPv6 to keep start_server compatible
 )
 FLEET_API_REST_DEFAULT_ADDRESS = "0.0.0.0:9095"
 EXEC_API_DEFAULT_ADDRESS = "0.0.0.0:9093"
+SIMULATIONIO_API_DEFAULT_ADDRESS = "0.0.0.0:9096"
 
 # Constants for ping
 PING_DEFAULT_INTERVAL = 30
@@ -86,6 +87,12 @@ MESSAGE_TTL_TOLERANCE = 1e-1
 # Isolation modes
 ISOLATION_MODE_SUBPROCESS = "subprocess"
 ISOLATION_MODE_PROCESS = "process"
+
+# Log streaming configurations
+CONN_REFRESH_PERIOD = 60  # Stream connection refresh period
+CONN_RECONNECT_INTERVAL = 0.5  # Reconnect interval between two stream connections
+LOG_STREAM_INTERVAL = 0.5  # Log stream interval for `ExecServicer.StreamLogs`
+LOG_UPLOAD_INTERVAL = 0.2  # Minimum interval between two log uploads
 
 
 class MessageType:
@@ -127,7 +134,6 @@ class ErrorCode:
     UNKNOWN = 0
     LOAD_CLIENT_APP_EXCEPTION = 1
     CLIENT_APP_RAISED_EXCEPTION = 2
-    NODE_UNAVAILABLE = 3
 
     def __new__(cls) -> ErrorCode:
         """Prevent instantiation."""

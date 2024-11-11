@@ -21,7 +21,7 @@ from collections.abc import Iterable
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
-from flwr.common import RecordSet
+from flwr.common import ConfigsRecord, RecordSet
 from flwr.common.constant import NODE_ID_NUM_BYTES, PING_MAX_INTERVAL
 from flwr.common.message import Error
 from flwr.common.serde import (
@@ -45,9 +45,8 @@ from .inmemory_driver import InMemoryDriver
 def push_messages(driver: InMemoryDriver, num_nodes: int) -> tuple[Iterable[str], int]:
     """Help push messages to state."""
     for _ in range(num_nodes):
-        driver.state.create_node(ping_interval=PING_MAX_INTERVAL)
+        node_id = driver.state.create_node(ping_interval=PING_MAX_INTERVAL)
     num_messages = 3
-    node_id = 1
     msgs = [
         driver.create_message(RecordSet(), "message_type", node_id, "")
         for _ in range(num_messages)
@@ -98,7 +97,7 @@ class TestInMemoryDriver(unittest.TestCase):
         )
         state_factory = MagicMock(state=lambda: self.state)
         self.driver = InMemoryDriver(state_factory=state_factory)
-        self.driver.init_run(run_id=61016)
+        self.driver.set_run(run_id=61016)
         self.driver.state = self.state
 
     def test_get_run(self) -> None:
@@ -233,9 +232,9 @@ class TestInMemoryDriver(unittest.TestCase):
         """Test tasks are deleted in sqlite state once messages are pulled."""
         # Prepare
         state = LinkStateFactory("").state()
-        run_id = state.create_run("", "", "", {})
+        run_id = state.create_run("", "", "", {}, ConfigsRecord())
         self.driver = InMemoryDriver(MagicMock(state=lambda: state))
-        self.driver.init_run(run_id=run_id)
+        self.driver.set_run(run_id=run_id)
         msg_ids, node_id = push_messages(self.driver, self.num_nodes)
         assert isinstance(state, SqliteLinkState)
 
@@ -260,9 +259,9 @@ class TestInMemoryDriver(unittest.TestCase):
         # Prepare
         state_factory = LinkStateFactory(":flwr-in-memory-state:")
         state = state_factory.state()
-        run_id = state.create_run("", "", "", {})
+        run_id = state.create_run("", "", "", {}, ConfigsRecord())
         self.driver = InMemoryDriver(state_factory)
-        self.driver.init_run(run_id=run_id)
+        self.driver.set_run(run_id=run_id)
         msg_ids, node_id = push_messages(self.driver, self.num_nodes)
         assert isinstance(state, InMemoryLinkState)
 

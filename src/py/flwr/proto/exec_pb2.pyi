@@ -4,6 +4,7 @@ isort:skip_file
 """
 import builtins
 import flwr.proto.fab_pb2
+import flwr.proto.recordset_pb2
 import flwr.proto.transport_pb2
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
@@ -30,38 +31,23 @@ class StartRunRequest(google.protobuf.message.Message):
         def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
         def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 
-    class FederationConfigEntry(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor
-        KEY_FIELD_NUMBER: builtins.int
-        VALUE_FIELD_NUMBER: builtins.int
-        key: typing.Text
-        @property
-        def value(self) -> flwr.proto.transport_pb2.Scalar: ...
-        def __init__(self,
-            *,
-            key: typing.Text = ...,
-            value: typing.Optional[flwr.proto.transport_pb2.Scalar] = ...,
-            ) -> None: ...
-        def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
-
     FAB_FIELD_NUMBER: builtins.int
     OVERRIDE_CONFIG_FIELD_NUMBER: builtins.int
-    FEDERATION_CONFIG_FIELD_NUMBER: builtins.int
+    FEDERATION_OPTIONS_FIELD_NUMBER: builtins.int
     @property
     def fab(self) -> flwr.proto.fab_pb2.Fab: ...
     @property
     def override_config(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, flwr.proto.transport_pb2.Scalar]: ...
     @property
-    def federation_config(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, flwr.proto.transport_pb2.Scalar]: ...
+    def federation_options(self) -> flwr.proto.recordset_pb2.ConfigsRecord: ...
     def __init__(self,
         *,
         fab: typing.Optional[flwr.proto.fab_pb2.Fab] = ...,
         override_config: typing.Optional[typing.Mapping[typing.Text, flwr.proto.transport_pb2.Scalar]] = ...,
-        federation_config: typing.Optional[typing.Mapping[typing.Text, flwr.proto.transport_pb2.Scalar]] = ...,
+        federation_options: typing.Optional[flwr.proto.recordset_pb2.ConfigsRecord] = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["fab",b"fab"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["fab",b"fab","federation_config",b"federation_config","override_config",b"override_config"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["fab",b"fab","federation_options",b"federation_options"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["fab",b"fab","federation_options",b"federation_options","override_config",b"override_config"]) -> None: ...
 global___StartRunRequest = StartRunRequest
 
 class StartRunResponse(google.protobuf.message.Message):
@@ -78,21 +64,27 @@ global___StartRunResponse = StartRunResponse
 class StreamLogsRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     RUN_ID_FIELD_NUMBER: builtins.int
+    AFTER_TIMESTAMP_FIELD_NUMBER: builtins.int
     run_id: builtins.int
+    after_timestamp: builtins.float
     def __init__(self,
         *,
         run_id: builtins.int = ...,
+        after_timestamp: builtins.float = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["after_timestamp",b"after_timestamp","run_id",b"run_id"]) -> None: ...
 global___StreamLogsRequest = StreamLogsRequest
 
 class StreamLogsResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     LOG_OUTPUT_FIELD_NUMBER: builtins.int
+    LATEST_TIMESTAMP_FIELD_NUMBER: builtins.int
     log_output: typing.Text
+    latest_timestamp: builtins.float
     def __init__(self,
         *,
         log_output: typing.Text = ...,
+        latest_timestamp: builtins.float = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["log_output",b"log_output"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["latest_timestamp",b"latest_timestamp","log_output",b"log_output"]) -> None: ...
 global___StreamLogsResponse = StreamLogsResponse
