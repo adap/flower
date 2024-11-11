@@ -140,5 +140,5 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             )
 
         # Unknown option
-        context.abort(grpc.StatusCode.INVALID_ARGUMENT, "Invalid option")
+        context.abort(grpc.StatusCode.UNIMPLEMENTED, "Invalid option")
         return ListResponse()
