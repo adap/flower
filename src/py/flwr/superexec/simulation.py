@@ -25,6 +25,7 @@ from typing_extensions import override
 
 from flwr.cli.config_utils import load_and_validate
 from flwr.cli.install import install_from_fab
+from flwr.common import ConfigsRecord
 from flwr.common.config import unflatten_dict
 from flwr.common.constant import RUN_ID_NUM_BYTES
 from flwr.common.logger import log
@@ -124,7 +125,7 @@ class SimulationEngine(Executor):
         self,
         fab_file: bytes,
         override_config: UserConfig,
-        federation_config: UserConfig,
+        federation_options: ConfigsRecord,
     ) -> Optional[int]:
         """Start run using the Flower Simulation Engine."""
         if self.num_supernodes is None:
@@ -163,14 +164,13 @@ class SimulationEngine(Executor):
                     "Config extracted from FAB's pyproject.toml is not valid"
                 )
 
-            # Flatten federated config
-            federation_config_flat = unflatten_dict(federation_config)
+            # Unflatten underlaying dict
+            fed_opt = unflatten_dict({**federation_options})
 
-            num_supernodes = federation_config_flat.get(
-                "num-supernodes", self.num_supernodes
-            )
-            backend_cfg = federation_config_flat.get("backend", {})
-            verbose: Optional[bool] = federation_config_flat.get("verbose")
+            # Read data
+            num_supernodes = fed_opt.get("num-supernodes", self.num_supernodes)
+            backend_cfg = fed_opt.get("backend", {})
+            verbose: Optional[bool] = fed_opt.get("verbose")
 
             # In Simulation there is no SuperLink, still we create a run_id
             run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)

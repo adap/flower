@@ -5,6 +5,7 @@ isort:skip_file
 import builtins
 import flwr.proto.fab_pb2
 import flwr.proto.node_pb2
+import flwr.proto.recordset_pb2
 import flwr.proto.transport_pb2
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
@@ -223,3 +224,28 @@ class GetRunStatusResponse(google.protobuf.message.Message):
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["run_status_dict",b"run_status_dict"]) -> None: ...
 global___GetRunStatusResponse = GetRunStatusResponse
+
+class GetFederationOptionsRequest(google.protobuf.message.Message):
+    """Get Federation Options associated with run"""
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    RUN_ID_FIELD_NUMBER: builtins.int
+    run_id: builtins.int
+    def __init__(self,
+        *,
+        run_id: builtins.int = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id"]) -> None: ...
+global___GetFederationOptionsRequest = GetFederationOptionsRequest
+
+class GetFederationOptionsResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    FEDERATION_OPTIONS_FIELD_NUMBER: builtins.int
+    @property
+    def federation_options(self) -> flwr.proto.recordset_pb2.ConfigsRecord: ...
+    def __init__(self,
+        *,
+        federation_options: typing.Optional[flwr.proto.recordset_pb2.ConfigsRecord] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["federation_options",b"federation_options"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["federation_options",b"federation_options"]) -> None: ...
+global___GetFederationOptionsResponse = GetFederationOptionsResponse
