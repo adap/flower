@@ -86,12 +86,9 @@ jobs:
       namespace-repository: ${{ matrix.images.namespace_repository }}
       file-dir: ${{ matrix.images.file_dir }}
       build-args: |
-        PYTHON_VERSION=${{ matrix.images.python_version }}
         PIP_VERSION=${{ needs.parameters.outputs.pip-version }}
         SETUPTOOLS_VERSION=${{ needs.parameters.outputs.setuptools-version }}
-        DISTRO=${{ matrix.images.distro.name }}
-        DISTRO_VERSION=${{ matrix.images.distro.version }}
-        FLWR_VERSION=${{ matrix.images.flwr_version }}
+        ${{ matrix.images.build_args }}
       tags: ${{ matrix.images.tag }}
     secrets:
       dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}

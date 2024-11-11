@@ -215,6 +215,12 @@ def run_superlink() -> None:
 
     event(EventType.RUN_SUPERLINK_ENTER)
 
+    # Warn unused options
+    if args.flwr_dir is not None:
+        log(
+            WARN, "The `--flwr-dir` option is currently not in use and will be ignored."
+        )
+
     # Parse IP addresses
     serverappio_address, _, _ = _format_address(args.serverappio_api_address)
     exec_address, _, _ = _format_address(args.exec_api_address)
@@ -359,18 +365,23 @@ def run_superlink() -> None:
         else:
             raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
 
-        if args.isolation == ISOLATION_MODE_SUBPROCESS:
-            # Scheduler thread
-            scheduler_th = threading.Thread(
-                target=_flwr_serverapp_scheduler,
-                args=(
-                    state_factory,
-                    args.serverappio_api_address,
-                    args.ssl_ca_certfile,
-                ),
-            )
-            scheduler_th.start()
-            bckg_threads.append(scheduler_th)
+    if args.isolation == ISOLATION_MODE_SUBPROCESS:
+
+        address = simulationio_address if sim_exec else serverappio_address
+        cmd = "flwr-simulation" if sim_exec else "flwr-serverapp"
+
+        # Scheduler thread
+        scheduler_th = threading.Thread(
+            target=_flwr_scheduler,
+            args=(
+                state_factory,
+                address,
+                args.ssl_ca_certfile,
+                cmd,
+            ),
+        )
+        scheduler_th.start()
+        bckg_threads.append(scheduler_th)
 
     # Graceful shutdown
     register_exit_handlers(
@@ -388,12 +399,13 @@ def run_superlink() -> None:
         exec_server.wait_for_termination(timeout=1)
 
 
-def _flwr_serverapp_scheduler(
+def _flwr_scheduler(
     state_factory: LinkStateFactory,
-    serverappio_api_address: str,
+    io_api_address: str,
     ssl_ca_certfile: Optional[str],
+    cmd: str,
 ) -> None:
-    log(DEBUG, "Started flwr-serverapp scheduler thread.")
+    log(DEBUG, "Started %s scheduler thread.", cmd)
 
     state = state_factory.state()
 
@@ -406,14 +418,16 @@ def _flwr_serverapp_scheduler(
 
             log(
                 INFO,
-                "Launching `flwr-serverapp` subprocess. Connects to SuperLink on %s",
-                serverappio_api_address,
+                "Launching %s subprocess. Connects to SuperLink on %s",
+                cmd,
+                io_api_address,
             )
-            # Start ServerApp subprocess
+            # Start subprocess
             command = [
-                "flwr-serverapp",
+                cmd,
+                "--run-once",
                 "--superlink",
-                serverappio_api_address,
+                io_api_address,
             ]
             if ssl_ca_certfile:
                 command.append("--root-certificates")
@@ -693,6 +707,17 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         help="Run the server without HTTPS, regardless of whether certificate "
         "paths are provided. By default, the server runs with HTTPS enabled. "
         "Use this flag only if you understand the risks.",
+    )
+    parser.add_argument(
+        "--flwr-dir",
+        default=None,
+        help="""The path containing installed Flower Apps.
+        The default directory is:
+
+        - `$FLWR_HOME/` if `$FLWR_HOME` is defined
+        - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
+        - `$HOME/.flwr/` in all other cases
+        """,
     )
     parser.add_argument(
         "--ssl-certfile",
