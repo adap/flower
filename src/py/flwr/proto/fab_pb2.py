@@ -15,7 +15,7 @@ _sym_db = _symbol_database.Default()
 from flwr.proto import node_pb2 as flwr_dot_proto_dot_node__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14\x66lwr/proto/fab.proto\x12\nflwr.proto\x1a\x15\x66lwr/proto/node.proto\"(\n\x03\x46\x61\x62\x12\x10\n\x08hash_str\x18\x01 \x01(\t\x12\x0f\n\x07\x63ontent\x18\x02 \x01(\x0c\"A\n\rGetFabRequest\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\x12\x10\n\x08hash_str\x18\x02 \x01(\t\".\n\x0eGetFabResponse\x12\x1c\n\x03\x66\x61\x62\x18\x01 \x01(\x0b\x32\x0f.flwr.proto.Fabb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14\x66lwr/proto/fab.proto\x12\nflwr.proto\x1a\x15\x66lwr/proto/node.proto\"5\n\x03\x46\x61\x62\x12\x10\n\x08hash_str\x18\x01 \x01(\t\x12\x0f\n\x07\x63ontent\x18\x02 \x01(\x0c\x12\x0b\n\x03whl\x18\x03 \x01(\x0c\"A\n\rGetFabRequest\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\x12\x10\n\x08hash_str\x18\x02 \x01(\t\".\n\x0eGetFabResponse\x12\x1c\n\x03\x66\x61\x62\x18\x01 \x01(\x0b\x32\x0f.flwr.proto.Fabb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -23,9 +23,9 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'flwr.proto.fab_pb2', _globa
 if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
   _globals['_FAB']._serialized_start=59
-  _globals['_FAB']._serialized_end=99
-  _globals['_GETFABREQUEST']._serialized_start=101
-  _globals['_GETFABREQUEST']._serialized_end=166
-  _globals['_GETFABRESPONSE']._serialized_start=168
-  _globals['_GETFABRESPONSE']._serialized_end=214
+  _globals['_FAB']._serialized_end=112
+  _globals['_GETFABREQUEST']._serialized_start=114
+  _globals['_GETFABREQUEST']._serialized_end=179
+  _globals['_GETFABRESPONSE']._serialized_start=181
+  _globals['_GETFABRESPONSE']._serialized_end=227
 # @@protoc_insertion_point(module_scope)

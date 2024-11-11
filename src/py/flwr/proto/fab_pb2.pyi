@@ -15,6 +15,7 @@ class Fab(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     HASH_STR_FIELD_NUMBER: builtins.int
     CONTENT_FIELD_NUMBER: builtins.int
+    WHL_FIELD_NUMBER: builtins.int
     hash_str: typing.Text
     """This field is the hash of the data field. It is used to identify the data.
     The hash is calculated using the SHA-256 algorithm and is represented as a
@@ -24,12 +25,16 @@ class Fab(google.protobuf.message.Message):
     content: builtins.bytes
     """This field contains the fab file contents a one bytes blob."""
 
+    whl: builtins.bytes
+    """This field carries a Python wheel"""
+
     def __init__(self,
         *,
         hash_str: typing.Text = ...,
         content: builtins.bytes = ...,
+        whl: builtins.bytes = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["content",b"content","hash_str",b"hash_str"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["content",b"content","hash_str",b"hash_str","whl",b"whl"]) -> None: ...
 global___Fab = Fab
 
 class GetFabRequest(google.protobuf.message.Message):
