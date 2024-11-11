@@ -70,7 +70,13 @@ def flwr_serverapp() -> None:
         type=str,
         help="Address of SuperLink's ServerAppIo API",
     )
-    add_args_flwr_app_common(parser=parser, flwr_app="ServerApp")
+    parser.add_argument(
+        "--run-once",
+        action="store_true",
+        help="When set, this process will start a single ServerApp for a pending Run. "
+        "If there is no pending Run, the process will exit.",
+    )
+    add_args_flwr_app_common(parser=parser)
     args = parser.parse_args()
 
     log(INFO, "Starting Flower ServerApp")

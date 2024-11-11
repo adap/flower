@@ -24,14 +24,8 @@ from typing import Optional
 from flwr.common.logger import log
 
 
-def add_args_flwr_app_common(parser: argparse.ArgumentParser, flwr_app: str) -> None:
+def add_args_flwr_app_common(parser: argparse.ArgumentParser) -> None:
     """Add common Flower arguments for flwr-*app to the provided parser."""
-    parser.add_argument(
-        "--run-once",
-        action="store_true",
-        help=f"When set, this process will start a single {flwr_app} "
-        "for a pending Run. If no pending run the process will exit. ",
-    )
     parser.add_argument(
         "--flwr-dir",
         default=None,
