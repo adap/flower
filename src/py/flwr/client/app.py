@@ -310,7 +310,7 @@ def start_client_internal(
                 f"{ISOLATION_MODE_SUBPROCESS} or {ISOLATION_MODE_PROCESS}",
             )
         _clientappio_grpc_server, clientappio_servicer = run_clientappio_api_grpc(
-            address=supernode_address,
+            address=supernode_address
         )
     supernode_address = cast(str, supernode_address)
 
