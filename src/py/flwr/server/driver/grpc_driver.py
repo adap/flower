@@ -26,6 +26,7 @@ from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
 from flwr.common.constant import SERVERAPPIO_API_DEFAULT_ADDRESS
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
+from flwr.common.retry_invoker import RetryInvoker, exponential
 from flwr.common.serde import (
     message_from_taskres,
     message_to_taskins,
@@ -79,6 +80,13 @@ class GrpcDriver(Driver):
         self._grpc_stub: Optional[ServerAppIoStub] = None
         self._channel: Optional[grpc.Channel] = None
         self.node = Node(node_id=0, anonymous=True)
+        self._retry_invoker = RetryInvoker(
+            wait_gen_factory=exponential,
+            recoverable_exceptions=grpc.RpcError,
+            max_tries=None,
+            max_time=None,
+            should_giveup=lambda e: e.code() != grpc.StatusCode.UNAVAILABLE,  # type: ignore
+        )
 
     @property
     def _is_connected(self) -> bool:
@@ -116,7 +124,7 @@ class GrpcDriver(Driver):
         """Set the run."""
         # Get the run info
         req = GetRunRequest(run_id=run_id)
-        res: GetRunResponse = self._stub.GetRun(req)
+        res: GetRunResponse = self._retry_invoker.invoke(self._stub.GetRun, req)
         if not res.HasField("run"):
             raise RuntimeError(f"Cannot find the run with ID: {run_id}")
         self._run = Run(
@@ -188,9 +196,8 @@ class GrpcDriver(Driver):
     def get_node_ids(self) -> list[int]:
         """Get node IDs."""
         # Call GrpcDriverStub method
-        res: GetNodesResponse = self._stub.GetNodes(
-            GetNodesRequest(run_id=cast(Run, self._run).run_id)
-        )
+        req = GetNodesRequest(run_id=cast(Run, self._run).run_id)
+        res: GetNodesResponse = self._retry_invoker.invoke(self._stub.GetNodes, req)
         return [node.node_id for node in res.nodes]
 
     def push_messages(self, messages: Iterable[Message]) -> Iterable[str]:
@@ -209,8 +216,9 @@ class GrpcDriver(Driver):
             # Add to list
             task_ins_list.append(taskins)
         # Call GrpcDriverStub method
-        res: PushTaskInsResponse = self._stub.PushTaskIns(
-            PushTaskInsRequest(task_ins_list=task_ins_list)
+        req = PushTaskInsRequest(task_ins_list=task_ins_list)
+        res: PushTaskInsResponse = self._retry_invoker.invoke(
+            self._stub.PushTaskIns, req
         )
         return list(res.task_ids)
 
@@ -221,8 +229,9 @@ class GrpcDriver(Driver):
         set of given message IDs.
         """
         # Pull TaskRes
-        res: PullTaskResResponse = self._stub.PullTaskRes(
-            PullTaskResRequest(node=self.node, task_ids=message_ids)
+        req = PullTaskResRequest(node=self.node, task_ids=message_ids)
+        res: PullTaskResResponse = self._retry_invoker.invoke(
+            self._stub.PullTaskRes, req
         )
         # Convert TaskRes to Message
         msgs = [message_from_taskres(taskres) for taskres in res.task_res_list]
