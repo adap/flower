@@ -114,11 +114,11 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             time.sleep(LOG_STREAM_INTERVAL)  # Sleep briefly to avoid busy waiting
 
     def List(self, request: ListRequest, context: grpc.ServicerContext) -> ListResponse:
-        """Handle flwr list command."""
+        """Handle `flwr ls` command."""
         log(INFO, "ExecServicer.List")
         state = self.linkstate_factory.state()
 
-        # Handle `flwr list --runs`
+        # Handle `flwr ls --runs`
         if request.option == "--runs":
             run_ids = state.get_run_ids()
             run_status_dict = state.get_run_status(run_ids)
@@ -128,7 +128,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
                     for run_id, run_status in run_status_dict.items()
                 }
             )
-        # Handle `flwr list --run-id <run_id>`
+        # Handle `flwr ls --run-id <run_id>`
         if request.option == "--run-id":
             run_id = cast(int, scalar_from_proto(request.value))
             if not isinstance(run_id, int):
