@@ -17,6 +17,7 @@
 import argparse
 import sys
 from logging import DEBUG, ERROR, INFO, WARN
+from os.path import isfile
 from pathlib import Path
 from typing import Optional
 
@@ -69,6 +70,8 @@ def run_supernode() -> None:
         multi_app=True,
     )
     authentication_keys = _try_setup_client_authentication(args)
+    # Obtain certificates for ClientAppIo API server
+    certificates = _try_obtain_certificates(args)
 
     log(DEBUG, "Isolation mode: %s", args.isolation)
 
@@ -87,6 +90,7 @@ def run_supernode() -> None:
         flwr_path=args.flwr_dir,
         isolation=args.isolation,
         supernode_address=args.supernode_address,
+        certificates=certificates,
     )
 
     # Graceful shutdown
@@ -251,6 +255,25 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         "establishing secure HTTPS connections.",
     )
     parser.add_argument(
+        "--ssl-certfile",
+        help="ClientAppIo API server SSL certificate file (as a path str) "
+        "to create a secure connection.",
+        type=str,
+        default=None,
+    )
+    parser.add_argument(
+        "--ssl-keyfile",
+        help="ClientAppIo API server SSL private key file (as a path str) "
+        "to create a secure connection.",
+        type=str,
+    )
+    parser.add_argument(
+        "--ssl-ca-certfile",
+        help="ClientAppIo API server SSL CA certificate file (as a path str) "
+        "to create a secure connection.",
+        type=str,
+    )
+    parser.add_argument(
         "--server",
         default=FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
         help="Server address",
@@ -340,4 +363,39 @@ def _try_setup_client_authentication(
     return (
         ssh_private_key,
         ssh_public_key,
+    )
+
+
+def _try_obtain_certificates(
+    args: argparse.Namespace,
+) -> Optional[tuple[bytes, bytes, bytes]]:
+    # Obtain certificates
+    if args.insecure:
+        log(WARN, "Option `--insecure` was set. Starting insecure HTTP server.")
+        return None
+    # Check if certificates are provided
+    if args.ssl_certfile and args.ssl_keyfile and args.ssl_ca_certfile:
+        if not isfile(args.ssl_ca_certfile):
+            sys.exit("Path argument `--ssl-ca-certfile` does not point to a file.")
+        if not isfile(args.ssl_certfile):
+            sys.exit("Path argument `--ssl-certfile` does not point to a file.")
+        if not isfile(args.ssl_keyfile):
+            sys.exit("Path argument `--ssl-keyfile` does not point to a file.")
+        certificates = (
+            Path(args.ssl_ca_certfile).read_bytes(),  # CA certificate
+            Path(args.ssl_certfile).read_bytes(),  # server certificate
+            Path(args.ssl_keyfile).read_bytes(),  # server private key
+        )
+        return certificates
+    if args.ssl_certfile or args.ssl_keyfile or args.ssl_ca_certfile:
+        sys.exit(
+            "You need to provide valid file paths to `--ssl-certfile`, "
+            "`--ssl-keyfile`, and `—-ssl-ca-certfile` to create a secure "
+            "connection in Fleet API server (gRPC-rere)."
+        )
+    sys.exit(
+        "Certificates are required unless running in insecure mode. "
+        "Please provide certificate paths to `--ssl-certfile`, "
+        "`--ssl-keyfile`, and `—-ssl-ca-certfile` or run the server "
+        "in insecure mode using '--insecure' if you understand the risks."
     )

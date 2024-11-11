@@ -67,8 +67,8 @@ def try_obtain_certificates(
             )
         log(
             WARN,
-            "Option `--insecure` was set. Starting insecure HTTP channel to %s.",
-            args.superlink,
+            "Option `--insecure` was set. Starting insecure HTTP channel.",  # to %s.",
+            # args.superlink,
         )
         root_certificates = None
     else:
@@ -78,9 +78,9 @@ def try_obtain_certificates(
         root_certificates = Path(args.root_certificates).read_bytes()
         log(
             DEBUG,
-            "Starting secure HTTPS channel to %s "
+            "Starting secure HTTPS channel "  # to %s "
             "with the following certificates: %s.",
-            args.superlink,
+            # args.superlink,
             args.root_certificates,
         )
     return root_certificates
