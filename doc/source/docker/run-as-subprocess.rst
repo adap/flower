@@ -47,7 +47,7 @@ to execute the ClientApp as a subprocess:
         --detach \
         flwr_supernode:0.0.1 \
         --insecure \
-        --superlink superlink:9092 \
-        --node-config "partition-id=1 num-partitions=2" \
+        --superlink <superlink-address>:9092 \
+        --node-config <node-config> \
         --supernode-address localhost:9094 \
         --isolation subprocess

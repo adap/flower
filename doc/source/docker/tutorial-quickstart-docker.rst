@@ -54,19 +54,25 @@ Open your terminal and run:
     :substitutions:
 
     $ docker run --rm \
-          -p 9091:9091 -p 9092:9092 \
+          -p 9091:9091 -p 9092:9092 -p 9093:9093 \
           --network flwr-network \
           --name superlink \
           --detach \
-          flwr/superlink:|stable_flwr_version| --insecure
+          flwr/superlink:|stable_flwr_version| \
+          --insecure \
+          --executor \
+          flwr.superexec.deployment:executor \
+          --isolation \
+          process
 
 .. dropdown:: Understand the command
 
     * ``docker run``: This tells Docker to run a container from an image.
     * ``--rm``: Remove the container once it is stopped or the command exits.
-    * | ``-p 9091:9091 -p 9092:9092``: Map port ``9091`` and ``9092`` of the container to the same port of
-      | the host machine, allowing other services to access the Driver API on
-      | ``http://localhost:9091`` and the Fleet API on ``http://localhost:9092``.
+    * | ``-p 9091:9091 -p 9092:9092 -p 9093:9093``: Map port ``9091``, ``9092`` and ``9093`` of the
+      | container to the same port of the host machine, allowing other services to access the
+      | Driver API on ``http://localhost:9091``, the Fleet API on ``http://localhost:9092`` and
+      | the ExecAPI on ``http://localhost:9093``.
     * ``--network flwr-network``: Make the container join the network named ``flwr-network``.
     * ``--name superlink``: Assign the name ``superlink`` to the container.
     * ``--detach``: Run the container in the background, freeing up the terminal.
@@ -74,6 +80,10 @@ Open your terminal and run:
       | tag of the image. The tag :substitution-code:`|stable_flwr_version|` represents a :doc:`specific version <pin-version>` of the image.
     * | ``--insecure``: This flag tells the container to operate in an insecure mode, allowing
       | unencrypted communication.
+    * | ``--executor flwr.superexec.deployment:executor`` Use the
+      | ``flwr.superexec.deployment:executor`` executor to run the ServerApp.
+    * | ``--isolation process``: Tells the SuperLink that the ServerApp is created by separate
+      | independent process. The SuperLink does not attempt to create it.
 
 Step 3: Start the SuperNode
 ---------------------------
@@ -107,8 +117,8 @@ Start two SuperNode containers.
        * ``--network flwr-network``: Make the container join the network named ``flwr-network``.
        * ``--name supernode-1``: Assign the name ``supernode-1`` to the container.
        * ``--detach``: Run the container in the background, freeing up the terminal.
-       * | ``flwr/supernode:|stable_flwr_version|``: This is the name of the image to be run and the specific tag
-         | of the image.
+       * | :substitution-code:`flwr/supernode:|stable_flwr_version|`: This is the name of the
+         | image to be run and the specific tag of the image.
        * | ``--insecure``: This flag tells the container to operate in an insecure mode, allowing
          | unencrypted communication.
        * | ``--superlink superlink:9092``: Connect to the SuperLink's Fleet API at the address
@@ -165,7 +175,7 @@ required dependencies.
    .. dropdown:: Understand the Dockerfile
 
        * | :substitution-code:`FROM flwr/clientapp:|stable_flwr_version|`: This line specifies that the Docker image
-         | to be built from is the ``flwr/clientapp image``, version :substitution-code:`|stable_flwr_version|`.
+         | to be built from is the ``flwr/clientapp`` image, version :substitution-code:`|stable_flwr_version|`.
        * | ``WORKDIR /app``: Set the working directory for the container to ``/app``.
          | Any subsequent commands that reference a directory will be relative to this directory.
        * | ``COPY pyproject.toml .``: Copy the ``pyproject.toml`` file
@@ -232,23 +242,23 @@ required dependencies.
            flwr_clientapp:0.0.1 \
            --supernode supernode-2:9095
 
-Step 5: Start the SuperExec
----------------------------
+Step 5: Start a ServerApp
+-------------------------
 
-The procedure for building and running a SuperExec image is almost identical to the
+The procedure for building and running a ServerApp image is almost identical to the
 ClientApp image.
 
 Similar to the ClientApp image, you will need to create a Dockerfile that extends the
-SuperExec image and installs the required FAB dependencies.
+ServerApp image and installs the required FAB dependencies.
 
-1. Create a SuperExec Dockerfile called ``Dockerfile.superexec`` and paste the following
+1. Create a ServerApp Dockerfile called ``Dockerfile.serverapp`` and paste the following
    code in:
 
    .. code-block:: dockerfile
-       :caption: Dockerfile.superexec
+       :caption: Dockerfile.serverapp
        :substitutions:
 
-       FROM flwr/superexec:|stable_flwr_version|
+       FROM flwr/serverapp:|stable_flwr_version|
 
        WORKDIR /app
 
@@ -256,12 +266,12 @@ SuperExec image and installs the required FAB dependencies.
        RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
           && python -m pip install -U --no-cache-dir .
 
-       ENTRYPOINT ["flower-superexec", "--executor", "flwr.superexec.deployment:executor"]
+       ENTRYPOINT ["flwr-serverapp"]
 
    .. dropdown:: Understand the Dockerfile
 
-       * | :substitution-code:`FROM flwr/superexec:|stable_flwr_version|`: This line specifies that the Docker image
-         | to be built from is the ``flwr/superexec image``, version :substitution-code:`|stable_flwr_version|`.
+       * | :substitution-code:`FROM flwr/serverapp:|stable_flwr_version|`: This line specifies that the Docker image
+         | to be built from is the ``flwr/serverapp`` image, version :substitution-code:`|stable_flwr_version|`.
        * | ``WORKDIR /app``: Set the working directory for the container to ``/app``.
          | Any subsequent commands that reference a directory will be relative to this directory.
        * | ``COPY pyproject.toml .``: Copy the ``pyproject.toml`` file
@@ -273,47 +283,41 @@ SuperExec image and installs the required FAB dependencies.
          |
          | The ``-U`` flag indicates that any existing packages should be upgraded, and
          | ``--no-cache-dir`` prevents pip from using the cache to speed up the installation.
-       * | ``ENTRYPOINT ["flower-superexec"``: Set the command ``flower-superexec`` to be
+       * | ``ENTRYPOINT ["flwr-serverapp"]``: Set the command ``flwr-serverapp`` to be
          | the default command run when the container is started.
-         |
-         | ``"--executor", "flwr.superexec.deployment:executor"]`` Use the
-         | ``flwr.superexec.deployment:executor`` executor to run the ServerApps.
 
 2. Afterward, in the directory that holds the Dockerfile, execute this Docker command to
-   build the SuperExec image:
+   build the ServerApp image:
 
    .. code-block:: bash
 
-       $ docker build -f Dockerfile.superexec -t flwr_superexec:0.0.1 .
+       $ docker build -f Dockerfile.serverapp -t flwr_serverapp:0.0.1 .
 
-3. Start the SuperExec container:
+3. Start the ServerApp container:
 
    .. code-block:: bash
 
        $ docker run --rm \
-          -p 9093:9093 \
            --network flwr-network \
-           --name superexec \
+           --name serverapp \
            --detach \
-           flwr_superexec:0.0.1 \
+           flwr_serverapp:0.0.1 \
            --insecure \
-           --executor-config superlink=\"superlink:9091\"
+           --superlink superlink:9091
 
    .. dropdown:: Understand the command
 
        * ``docker run``: This tells Docker to run a container from an image.
        * ``--rm``: Remove the container once it is stopped or the command exits.
-       * | ``-p 9093:9093``: Map port ``9093`` of the container to the same port of
-         | the host machine, allowing you to access the SuperExec API on ``http://localhost:9093``.
        * ``--network flwr-network``: Make the container join the network named ``flwr-network``.
-       * ``--name superexec``: Assign the name ``superexec`` to the container.
+       * ``--name serverapp``: Assign the name ``serverapp`` to the container.
        * ``--detach``: Run the container in the background, freeing up the terminal.
-       * | ``flwr_superexec:0.0.1``: This is the name of the image to be run and the specific tag
+       * | ``flwr_serverapp:0.0.1``: This is the name of the image to be run and the specific tag
          | of the image.
        * | ``--insecure``: This flag tells the container to operate in an insecure mode, allowing
          | unencrypted communication.
-       * | ``--executor-config superlink=\"superlink:9091\"``: Configure the SuperExec executor to
-         | connect to the SuperLink running on port ``9091``.
+       * | ``--superlink superlink:9091``: Connect to the SuperLink's Driver API at the address
+         | ``superlink:9091``.
 
 Step 6: Run the Quickstart Project
 ----------------------------------
@@ -347,17 +351,25 @@ Step 7: Update the Application
        partition_train_test = partition.train_test_split(test_size=0.2, seed=43)
        # ...
 
-2. Stop the current ClientApp containers:
+2. Stop the current ClientApp and ServerApp containers:
 
    .. code-block:: bash
 
-       $ docker stop $(docker ps -a -q  --filter ancestor=flwr_clientapp:0.0.1)
+       $ docker stop $(docker ps -a -q  --filter ancestor=flwr_clientapp:0.0.1) serverapp
 
-3. Rebuild the FAB and ClientApp image:
+3. Rebuild ClientApp and ServerApp image:
+
+   .. note::
+
+       If you have modified the dependencies listed in your ``pyproject.toml`` file, it
+       is essential to rebuild images.
+
+       If you haven't made any changes, you can skip this step.
 
    .. code-block:: bash
 
-       $ docker build -f Dockerfile.clientapp -t flwr_clientapp:0.0.1 .
+       $ docker build -f Dockerfile.clientapp -t flwr_clientapp:0.0.1 . && \
+         docker build -f Dockerfile.serverapp -t flwr_serverapp:0.0.1 .
 
 4. Launch two new ClientApp containers based on the newly built image:
 
@@ -373,6 +385,13 @@ Step 7: Update the Application
            --detach \
            flwr_clientapp:0.0.1 \
            --supernode supernode-2:9095
+       $ docker run --rm \
+           --network flwr-network \
+           --name serverapp \
+           --detach \
+           flwr_serverapp:0.0.1 \
+           --insecure \
+           --superlink superlink:9091
 
 5. Run the updated project:
 
@@ -390,7 +409,7 @@ Remove the containers and the bridge network:
     $ docker stop $(docker ps -a -q  --filter ancestor=flwr_clientapp:0.0.1) \
        supernode-1 \
        supernode-2 \
-       superexec \
+       serverapp \
        superlink
     $ docker network rm flwr-network
 

@@ -38,7 +38,8 @@ of the container:
          flwr/superlink:|stable_flwr_version| \
          --ssl-ca-certfile certificates/ca.crt \
          --ssl-certfile certificates/server.pem \
-         --ssl-keyfile certificates/server.key
+         --ssl-keyfile certificates/server.key \
+         <additional-args>
 
 .. dropdown:: Understanding the command
 
@@ -85,7 +86,8 @@ Assuming that the ``ca.crt`` certificate already exists locally, we can use the 
     $ docker run --rm \
          --volume ./ca.crt:/app/ca.crt/:ro \
          flwr/supernode:|stable_flwr_version| \
-         --root-certificates ca.crt
+         --root-certificates ca.crt \
+         <additional-args>
 
 .. dropdown:: Understanding the command
 
@@ -100,53 +102,3 @@ Assuming that the ``ca.crt`` certificate already exists locally, we can use the 
       | inside the container.
       |
       | The ``ca.crt`` file is used to verify the identity of the SuperLink.
-
-SuperExec
----------
-
-Assuming all files we need are in the local ``certificates`` directory where the
-SuperExec will be executed from, we can use the flag ``--volume`` to mount the local
-directory into the ``/app/certificates/`` directory of the container:
-
-.. code-block:: bash
-    :substitutions:
-
-    $ docker run --rm \
-         --volume ./certificates/:/app/certificates/:ro \
-         flwr/superexec:|stable_flwr_version| \
-         --ssl-ca-certfile certificates/ca.crt \
-         --ssl-certfile certificates/server.pem \
-         --ssl-keyfile certificates/server.key \
-         --executor-config \
-         root-certificates=\"certificates/superlink_ca.crt\"
-
-.. dropdown:: Understanding the command
-
-    * ``docker run``: This tells Docker to run a container from an image.
-    * ``--rm``: Remove the container once it is stopped or the command exits.
-    * | ``--volume ./certificates/:/app/certificates/:ro``: Mount the ``certificates`` directory in
-      | the current working directory of the host machine as a read-only volume at the
-      | ``/app/certificates`` directory inside the container.
-      |
-      | This allows the container to access the TLS certificates that are stored in the certificates
-      | directory.
-    * | :substitution-code:`flwr/superexec:|stable_flwr_version|`: The name of the image to be run and the specific
-      | tag of the image. The tag :substitution-code:`|stable_flwr_version|` represents a specific version of the image.
-    * | ``--ssl-ca-certfile certificates/ca.crt``: Specify the location of the CA certificate file
-      | inside the container.
-      |
-      | The ``certificates/ca.crt`` file is a certificate that is used to verify the identity of the
-      | SuperExec.
-    * | ``--ssl-certfile certificates/server.pem``: Specify the location of the SuperExec's
-      | TLS certificate file inside the container.
-      |
-      | The ``certificates/server.pem`` file is used to identify the SuperExec and to encrypt the
-      | data that is transmitted over the network.
-    * | ``--ssl-keyfile certificates/server.key``: Specify the location of the SuperExec's
-      | TLS private key file inside the container.
-      |
-      | The ``certificates/server.key`` file is used to decrypt the data that is transmitted over
-      | the network.
-    * | ``--executor-config root-certificates=\"certificates/superlink_ca.crt\"``: Specify the
-      | location of the CA certificate file inside the container that the SuperExec executor
-      | should use to verify the SuperLink's identity.

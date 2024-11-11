@@ -25,7 +25,7 @@ This will output
 .. code-block:: bash
     :substitutions:
 
-    flwr/superlink@sha256:|stable__flwr_superlink_docker_digest|
+    flwr/superlink@sha256:|stable_flwr_superlink_docker_digest|
 
 Next, we can pin the digest when running a new SuperLink container:
 
@@ -33,5 +33,5 @@ Next, we can pin the digest when running a new SuperLink container:
     :substitutions:
 
     $ docker run \
-         --rm flwr/superlink@sha256:|latest_version_docker_sha| \
-         [OPTIONS]
+         --rm flwr/superlink@sha256:|stable_flwr_superlink_docker_digest| \
+         <additional-args>
