@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,15 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Datasets type definitions."""
+"""Flower NodeState."""
 
+from .in_memory_nodestate import InMemoryNodeState as InMemoryNodeState
+from .nodestate import NodeState as NodeState
+from .nodestate_factory import NodeStateFactory as NodeStateFactory
 
-from typing import Any
-
-import numpy as np
-import numpy.typing as npt
-
-NDArray = npt.NDArray[Any]
-NDArrayInt = npt.NDArray[np.int_]
-NDArrayFloat = npt.NDArray[np.float64]
-NDArrays = list[NDArray]
+__all__ = [
+    "InMemoryNodeState",
+    "NodeState",
+    "NodeStateFactory",
+]
