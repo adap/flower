@@ -30,12 +30,12 @@ def add_args_flwr_app_common(parser: argparse.ArgumentParser) -> None:
         "--flwr-dir",
         default=None,
         help="""The path containing installed Flower Apps.
-    By default, this value is equal to:
+        By default, this value is equal to:
 
-        - `$FLWR_HOME/` if `$FLWR_HOME` is defined
-        - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
-        - `$HOME/.flwr/` in all other cases
-    """,
+            - `$FLWR_HOME/` if `$FLWR_HOME` is defined
+            - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
+            - `$HOME/.flwr/` in all other cases
+        """,
     )
     parser.add_argument(
         "--insecure",
@@ -67,8 +67,7 @@ def try_obtain_certificates(
             )
         log(
             WARN,
-            "Option `--insecure` was set. Starting insecure HTTP channel.",  # to %s.",
-            # args.superlink,
+            "Option `--insecure` was set. Starting insecure HTTP channel.",
         )
         root_certificates = None
     else:
@@ -78,9 +77,7 @@ def try_obtain_certificates(
         root_certificates = Path(args.root_certificates).read_bytes()
         log(
             DEBUG,
-            "Starting secure HTTPS channel "  # to %s "
-            "with the following certificates: %s.",
-            # args.superlink,
+            "Starting secure HTTPS channel " "with the following certificates: %s.",
             args.root_certificates,
         )
     return root_certificates
