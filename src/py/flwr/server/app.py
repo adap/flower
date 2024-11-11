@@ -412,6 +412,7 @@ def _flwr_serverapp_scheduler(
             # Start ServerApp subprocess
             command = [
                 "flwr-serverapp",
+                "--run-once",
                 "--superlink",
                 serverappio_api_address,
             ]
