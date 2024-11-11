@@ -78,7 +78,7 @@ def flwr_clientapp() -> None:
 
     log(
         DEBUG,
-        "Staring isolated `ClientApp` connected to SuperNode ClientAppIo API at %s "
+        "Starting isolated `ClientApp` connected to SuperNode's ClientAppIo API at %s "
         "with token %s",
         args.supernode,
         args.token,
