@@ -217,7 +217,7 @@ def start_client_internal(
     flwr_path: Optional[Path] = None,
     isolation: Optional[str] = None,
     supernode_address: Optional[str] = CLIENTAPPIO_API_DEFAULT_ADDRESS,
-    certificates: Optional[tuple[bytes, bytes, bytes]],
+    certificates: Optional[tuple[bytes, bytes, bytes]] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
