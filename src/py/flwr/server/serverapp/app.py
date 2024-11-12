@@ -23,7 +23,7 @@ from typing import Optional
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
-from flwr.common.args import add_args_flwr_app_common, try_obtain_certificates
+from flwr.common.args import add_args_flwr_app_common, try_obtain_root_certificates
 from flwr.common.config import (
     get_flwr_dir,
     get_fused_config_from_dir,
@@ -80,7 +80,7 @@ def flwr_serverapp() -> None:
     args = parser.parse_args()
 
     log(INFO, "Starting Flower ServerApp")
-    certificates = try_obtain_certificates(args)
+    certificates = try_obtain_root_certificates(args, args.superlink)
 
     log(
         DEBUG,
