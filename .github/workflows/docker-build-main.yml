@@ -14,7 +14,6 @@ jobs:
     outputs:
       pip-version: ${{ steps.versions.outputs.pip-version }}
       setuptools-version: ${{ steps.versions.outputs.setuptools-version }}
-      flwr-version-ref: ${{ steps.versions.outputs.flwr-version-ref }}
       matrix: ${{ steps.versions.outputs.matrix }}
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -26,8 +25,8 @@ jobs:
         run: |
           echo "pip-version=${{ steps.bootstrap.outputs.pip-version }}" >> "$GITHUB_OUTPUT"
           echo "setuptools-version=${{ steps.bootstrap.outputs.setuptools-version }}" >> "$GITHUB_OUTPUT"
-          echo "flwr-version-ref=git+${{ github.server_url }}/${{ github.repository }}.git@${{ github.sha }}" >> "$GITHUB_OUTPUT"
-          python dev/build-docker-image-matrix.py --flwr-version unstable --simple > matrix.json
+          FLWR_VERSION_REF="git+${{ github.server_url }}/${{ github.repository }}.git@${{ github.sha }}"
+          python dev/build-docker-image-matrix.py --flwr-version "${FLWR_VERSION_REF}" --matrix unstable > matrix.json
           echo "matrix=$(cat matrix.json)" >> $GITHUB_OUTPUT
 
   build-docker-base-images:
@@ -35,14 +34,17 @@ jobs:
     if: github.repository == 'adap/flower'
     uses: ./.github/workflows/_docker-build.yml
     needs: parameters
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.parameters.outputs.matrix).base }}
     with:
-      namespace-repository: ${{ fromJson(needs.parameters.outputs.matrix).base.images[0].namespace_repository }}
-      file-dir: ${{ fromJson(needs.parameters.outputs.matrix).base.images[0].file_dir }}
+      namespace-repository: ${{ matrix.images.namespace_repository }}
+      file-dir: ${{ matrix.images.file_dir }}
       build-args: |
         PIP_VERSION=${{ needs.parameters.outputs.pip-version }}
         SETUPTOOLS_VERSION=${{ needs.parameters.outputs.setuptools-version }}
-        FLWR_VERSION_REF=${{ needs.parameters.outputs.flwr-version-ref }}
-      tags: unstable
+        ${{ matrix.images.build_args_encoded }}
+      tags: ${{ matrix.images.tags_encoded }}
     secrets:
       dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
       dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -58,8 +60,8 @@ jobs:
     with:
       namespace-repository: ${{ matrix.images.namespace_repository }}
       file-dir: ${{ matrix.images.file_dir }}
-      build-args: BASE_IMAGE=unstable
-      tags: unstable
+      build-args: BASE_IMAGE=${{ matrix.images.base_image }}
+      tags: ${{ matrix.images.tags_encoded }}
     secrets:
       dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
       dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}

@@ -13,8 +13,6 @@ jobs:
     name: Relase nightly on PyPI
     if: github.repository == 'adap/flower'
     outputs:
-      name: ${{ steps.release.outputs.name }}
-      version: ${{ steps.release.outputs.version }}
       skip: ${{ steps.release.outputs.skip }}
       pip-version: ${{ steps.release.outputs.pip-version }}
       setuptools-version: ${{ steps.release.outputs.setuptools-version }}
@@ -34,11 +32,12 @@ jobs:
             echo "skip=true" >> $GITHUB_OUTPUT
           fi
 
-          echo "name=$(poetry version | awk {'print $1'})" >> $GITHUB_OUTPUT
-          echo "version=$(poetry version -s)" >> $GITHUB_OUTPUT
           echo "pip-version=${{ steps.bootstrap.outputs.pip-version }}" >> "$GITHUB_OUTPUT"
           echo "setuptools-version=${{ steps.bootstrap.outputs.setuptools-version }}" >> "$GITHUB_OUTPUT"
-          python dev/build-docker-image-matrix.py --flwr-version nightly --simple > matrix.json
+
+          NAME=$(poetry version | awk {'print $1'})
+          VERSION=$(poetry version -s)
+          python dev/build-docker-image-matrix.py --flwr-version "${VERSION}" --matrix nightly --flwr-package "${NAME}" > matrix.json
           echo "matrix=$(cat matrix.json)" >> $GITHUB_OUTPUT
 
   build-docker-base-images:
@@ -46,17 +45,17 @@ jobs:
     if: github.repository == 'adap/flower' && needs.release-nightly.outputs.skip != 'true'
     uses: ./.github/workflows/_docker-build.yml
     needs: release-nightly
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.release-nightly.outputs.matrix).base }}
     with:
-      namespace-repository: ${{ fromJson(needs.release-nightly.outputs.matrix).base.images[0].namespace_repository }}
-      file-dir: ${{ fromJson(needs.release-nightly.outputs.matrix).base.images[0].file_dir }}
+      namespace-repository: ${{ matrix.images.namespace_repository }}
+      file-dir: ${{ matrix.images.file_dir }}
       build-args: |
         PIP_VERSION=${{ needs.release-nightly.outputs.pip-version }}
         SETUPTOOLS_VERSION=${{ needs.release-nightly.outputs.setuptools-version }}
-        FLWR_VERSION=${{ needs.release-nightly.outputs.version }}
-        FLWR_PACKAGE=${{ needs.release-nightly.outputs.name }}
-      tags: |
-        ${{ needs.release-nightly.outputs.version }}
-        nightly
+        ${{ matrix.images.build_args_encoded }}
+      tags: ${{ matrix.images.tags_encoded }}
     secrets:
       dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
       dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -72,10 +71,8 @@ jobs:
     with:
       namespace-repository: ${{ matrix.images.namespace_repository }}
       file-dir: ${{ matrix.images.file_dir }}
-      build-args: BASE_IMAGE=${{ needs.release-nightly.outputs.version }}
-      tags: |
-        ${{ needs.release-nightly.outputs.version }}
-        nightly
+      build-args: BASE_IMAGE=${{ matrix.images.base_image }}
+      tags: ${{ matrix.images.tags_encoded }}
     secrets:
       dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
       dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}

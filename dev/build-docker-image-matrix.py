@@ -29,7 +29,7 @@ from typing import Any, Callable, Dict, List, Optional
 # class DistroName(StrEnum):
 #     ALPINE = "alpine"
 #     UBUNTU = "ubuntu"
-assert sys.version_info < (3, 10), "Script requires Python 3.9 or lower."
+assert sys.version_info < (3, 11), "Script requires Python 3.9 or lower."
 
 
 class DistroName(str, Enum):
@@ -146,7 +146,7 @@ class BinaryImage:
     namespace_repository: str
     file_dir: str
     base_image: str
-    tags: List[str]
+    tags_encoded: str
 
 
 def new_binary_image(
@@ -317,7 +317,7 @@ DISTRO_VERSION={distro_version}
 #
 # Build matrix for unstable releases
 #
-def build_unstable_matrix(flwr_version: str) -> List[BaseImage]:
+def build_unstable_matrix(flwr_version_ref: str) -> List[BaseImage]:
     @dataclass
     class UnstableBaseImageBuildArgs:
         variant: Variant
@@ -325,7 +325,7 @@ def build_unstable_matrix(flwr_version: str) -> List[BaseImage]:
         flwr_version_ref: str
 
     cpu_ubuntu_build_args_variant = UnstableBaseImageBuildArgs(
-        UBUNTU_VARIANT, LATEST_SUPPORTED_PYTHON_VERSION, flwr_version
+        UBUNTU_VARIANT, LATEST_SUPPORTED_PYTHON_VERSION, flwr_version_ref
     )
 
     cpu_build_args = """PYTHON_VERSION={python_version}
@@ -347,7 +347,7 @@ DISTRO_VERSION={distro_version}
     )
 
     cuda_build_args_variant = UnstableBaseImageBuildArgs(
-        LATEST_SUPPORTED_CUDA_VERSION, LATEST_SUPPORTED_PYTHON_VERSION, flwr_version
+        LATEST_SUPPORTED_CUDA_VERSION, LATEST_SUPPORTED_PYTHON_VERSION, flwr_version_ref
     )
 
     cuda_build_args = cpu_build_args + """CUDA_VERSION={cuda_version}"""
@@ -412,7 +412,7 @@ DISTRO_VERSION={distro_version}
 
     cpu_base_image = BaseImage(
         file_dir_fn=lambda args: f"{DOCKERFILE_ROOT}/base/{args.variant.distro.name.value}",
-        tags_fn=lambda args: ["nightly", args.flwr_version],
+        tags_fn=lambda args: [args.flwr_version, "nightly"],
         build_args_fn=lambda args: cpu_build_args.format(
             python_version=args.python_version,
             flwr_version=args.flwr_version,
@@ -434,7 +434,7 @@ DISTRO_VERSION={distro_version}
 
     cuda_base_image = BaseImage(
         file_dir_fn=lambda args: f"{DOCKERFILE_ROOT}/base/{args.variant.distro.name.value}-cuda",
-        tags_fn=lambda args: ["nightly-cuda", f"{args.flwr_version}-cuda"],
+        tags_fn=lambda args: [f"{args.flwr_version}-cuda", "nightly-cuda"],
         build_args_fn=lambda args: cuda_build_args.format(
             python_version=args.python_version,
             flwr_version=args.flwr_version,
@@ -474,7 +474,7 @@ if __name__ == "__main__":
         description="Generate Github Docker workflow matrix"
     )
     arg_parser.add_argument("--flwr-version", type=str, required=True)
-    arg_parser.add_argument("--flwr-package", type=str)
+    arg_parser.add_argument("--flwr-package", type=str, default="flwr")
     arg_parser.add_argument(
         "--matrix", choices=["stable", "nightly", "unstable"], default="stable"
     )
@@ -488,10 +488,6 @@ if __name__ == "__main__":
     if matrix == "stable":
         base_images, binary_images = build_stable_matrix(flwr_version)
     elif matrix == "nightly":
-        if flwr_package is None:
-            arg_parser.error(
-                "flag `--matrix nightly` requires to specify `--flwr-package`"
-            )
         base_images, binary_images = build_nightly_matrix(flwr_version, flwr_package)
     else:
         base_images, binary_images = build_unstable_matrix(flwr_version)
