@@ -183,6 +183,35 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
+    def get_run_timestamps(self, run_id: int) -> tuple[str, str, str, str]:
+        """Retrieve the timestamps for the specified `run_id`.
+
+        Parameters
+        ----------
+        run_id : int
+            The identifier of the run.
+
+        Returns
+        -------
+        tuple[str, str, str, str]
+            A tuple containing four ISO format timestamps, representing:
+            - pending_at : str
+                The timestamp when the run was created.
+            - starting_at : str
+                The timestamp when the run started.
+            - running_at : str
+                The timestamp when the run began running.
+            - finished_at : str
+                The timestamp when the run finished.
+
+        Notes
+        -----
+        If a particular timestamp is not available (e.g., if the run is still
+        starting and doesn't have a `running_at` timestamp), an empty
+        string will be returned for that timestamp.
+        """
+
+    @abc.abstractmethod
     def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
         """Retrieve the statuses for the specified runs.
 
