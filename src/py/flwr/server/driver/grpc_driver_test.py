@@ -223,15 +223,20 @@ class TestGrpcDriver(unittest.TestCase):
         # Prepare
         grpc_exc = grpc.RpcError()
         grpc_exc.code = lambda: grpc.StatusCode.UNAVAILABLE
-        self.mock_stub.GetNodes.side_effect = [
+        original_get_nodes = self.mock_stub.GetNodes
+        original_get_nodes.side_effect = [
             grpc_exc,
             Mock(nodes=[Mock(node_id=404)]),
         ]
-
+        self.mock_stub.GetNodes = (
+            lambda *args, **kwargs: self.driver._retry_invoker.invoke(
+                original_get_nodes, *args, **kwargs
+            )
+        )
         # Execute
         with patch("time.sleep", side_effect=lambda t: None):
             node_ids = self.driver.get_node_ids()
 
         # Assert
         self.assertIn(404, node_ids)
-        self.assertEqual(self.mock_stub.GetNodes.call_count, 2)
+        self.assertEqual(original_get_nodes.call_count, 2)
