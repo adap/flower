@@ -218,6 +218,7 @@ def start_client_internal(
     isolation: Optional[str] = None,
     supernode_address: Optional[str] = CLIENTAPPIO_API_DEFAULT_ADDRESS,
     certificates: Optional[tuple[bytes, bytes, bytes]] = None,
+    ssl_ca_certfile: Optional[str] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -281,6 +282,8 @@ def start_client_internal(
         The SuperNode gRPC server address.
     certificates : Optional[Tuple[bytes, bytes, bytes]] (default: None)
         Tuple containing the CA certificate, server certificate, and server private key.
+    ssl_ca_certfile : Optional[str] (default: None)
+        The path to the CA certificate file used by `flwr-clientapp` in subprocess mode.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -520,6 +523,12 @@ def start_client_internal(
                                     "--token",
                                     str(token),
                                 ]
+                                if ssl_ca_certfile:
+                                    command.append("--root-certificates")
+                                    command.append(ssl_ca_certfile)
+                                else:
+                                    command.append("--insecure")
+
                                 subprocess.run(
                                     command,
                                     stdout=None,

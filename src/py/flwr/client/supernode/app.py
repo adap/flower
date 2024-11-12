@@ -94,6 +94,7 @@ def run_supernode() -> None:
         isolation=args.isolation,
         supernode_address=args.supernode_address,
         certificates=server_certificates,
+        ssl_ca_certfile=args.ssl_ca_certfile,
     )
 
     # Graceful shutdown
