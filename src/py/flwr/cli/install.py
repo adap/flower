@@ -206,7 +206,7 @@ def validate_and_install(
         raise typer.Exit(code=1) from e
 
     typer.secho(
-        f"🎊 Successfully installed {project_name} from {install_whl}.",
+        f"🎊 Successfully installed {project_name}.",
         fg=typer.colors.GREEN,
         bold=True,
     )
