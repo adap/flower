@@ -59,7 +59,7 @@ message ListResponse {
     string starting_at = 4;
     string running_at = 5;
     string finished_at = 6;
-    string elapsed_time = 7;
+    string now = 7;
   }
 
   map<uint64, RunInfo> run_info_dict = 1;

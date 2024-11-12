@@ -18,15 +18,17 @@
 import time
 from collections.abc import Generator
 from logging import ERROR, INFO
-from typing import Any, cast
+from typing import Any
 
 import grpc
 
+from flwr.common import now
 from flwr.common.constant import LOG_STREAM_INTERVAL, Status
 from flwr.common.logger import log
 from flwr.common.serde import (
     configs_record_from_proto,
     run_status_to_proto,
+    run_to_proto,
     scalar_from_proto,
     user_config_from_proto,
 )
@@ -40,7 +42,7 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StreamLogsResponse,
 )
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
-from flwr.server.superlink.linkstate import LinkStateFactory
+from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 
 from .executor import Executor
 
@@ -121,24 +123,38 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         # Handle `flwr ls --runs`
         if request.option == "--runs":
             run_ids = state.get_run_ids()
-            run_status_dict = state.get_run_status(run_ids)
-            return ListResponse(
-                run_status_dict={
-                    run_id: run_status_to_proto(run_status)
-                    for run_id, run_status in run_status_dict.items()
-                }
-            )
+            return _list_runs(run_ids, state)
         # Handle `flwr ls --run-id <run_id>`
         if request.option == "--run-id":
-            run_id = cast(int, scalar_from_proto(request.value))
+            run_id = scalar_from_proto(request.value)
             if not isinstance(run_id, int):
                 context.abort(grpc.StatusCode.INVALID_ARGUMENT, "Invalid run ID")
-
-            status = state.get_run_status({run_id}).get(run_id)
-            return ListResponse(
-                run_status_dict={run_id: run_status_to_proto(status)} if status else {}
-            )
+                return ListResponse()
+            return _list_runs({run_id}, state)
 
         # Unknown option
         context.abort(grpc.StatusCode.UNIMPLEMENTED, "Invalid option")
         return ListResponse()
+
+
+def _list_runs(run_ids: set[int], state: LinkState) -> ListResponse:
+    """Create response for `flwr ls --runs` and `flwr ls --run-id <run_id>`."""
+    run_status_dict = state.get_run_status(run_ids)
+    run_info_dict: dict[int, ListResponse.RunInfo] = {}
+    for run_id, run_status in run_status_dict.items():
+        run = state.get_run(run_id)
+        # Very unlikely, as we just retrieved the run status
+        if not run:
+            continue
+        timestamps = state.get_run_timestamps(run_id)
+        run_info_dict[run_id] = ListResponse.RunInfo(
+            run=run_to_proto(run),
+            status=run_status_to_proto(run_status),
+            pending_at=timestamps[0],
+            starting_at=timestamps[1],
+            running_at=timestamps[2],
+            finished_at=timestamps[3],
+            now=now().isoformat(),
+        )
+
+    return ListResponse(run_info_dict=run_info_dict)
