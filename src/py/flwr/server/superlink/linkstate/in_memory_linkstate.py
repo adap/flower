@@ -446,6 +446,20 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 return None
             return self.run_ids[run_id].run
 
+    def get_run_timestamps(self, run_id: int) -> tuple[str, str, str, str]:
+        """Retrieve the timestamps for the specified `run_id`."""
+        with self.lock:
+            if run_id not in self.run_ids:
+                log(ERROR, "`run_id` is invalid")
+                return "", "", "", ""
+            run_record = self.run_ids[run_id]
+            return (
+                run_record.pending_at,
+                run_record.starting_at,
+                run_record.running_at,
+                run_record.finished_at,
+            )
+
     def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
         """Retrieve the statuses for the specified runs."""
         with self.lock:

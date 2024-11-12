@@ -935,6 +935,26 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         log(ERROR, "`run_id` does not exist.")
         return None
 
+    def get_run_timestamps(self, run_id: int) -> tuple[str, str, str, str]:
+        """Retrieve the timestamps for the specified `run_id`."""
+        # Convert the uint64 value to sint64 for SQLite
+        sint64_run_id = convert_uint64_to_sint64(run_id)
+        query = """
+            SELECT pending_at, starting_at, running_at, finished_at
+            FROM run WHERE run_id = ?;
+        """
+        rows = self.query(query, (sint64_run_id,))
+        if rows:
+            row = rows[0]
+            return (
+                row["pending_at"],
+                row["starting_at"],
+                row["running_at"],
+                row["finished_at"],
+            )
+        log(ERROR, "`run_id` is invalid")
+        return ("", "", "", "")
+
     def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
         """Retrieve the statuses for the specified runs."""
         # Convert the uint64 value to sint64 for SQLite
