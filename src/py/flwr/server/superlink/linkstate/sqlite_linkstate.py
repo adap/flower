@@ -1255,10 +1255,10 @@ def dict_to_task_res(task_dict: dict[str, Any]) -> TaskRes:
 def determine_run_status(row: dict[str, Any]) -> str:
     """Determine the status of the run based on timestamp fields."""
     if row["pending_at"]:
+        if row["finished_at"]:
+            return Status.FINISHED
         if row["starting_at"]:
             if row["running_at"]:
-                if row["finished_at"]:
-                    return Status.FINISHED
                 return Status.RUNNING
             return Status.STARTING
         return Status.PENDING
