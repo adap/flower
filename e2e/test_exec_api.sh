@@ -82,15 +82,15 @@ sl_pid=$(pgrep -f "flower-superlink")
 sleep 2
 
 if [ "$3" = "deployment-engine" ]; then
-  timeout 2m flower-supernode ./ $client_arg \
+  timeout 2m flower-supernode ./ $client_arg $server_arg \
       --superlink $server_address $client_auth_1 \
-      --node-config "partition-id=0 num-partitions=2" --max-retries 0 $server_arg &
+      --node-config "partition-id=0 num-partitions=2" --max-retries 0 &
   cl1_pid=$!
   sleep 2
 
-  timeout 2m flower-supernode ./ $client_arg \
+  timeout 2m flower-supernode ./ $client_arg $server_arg \
       --superlink $server_address $client_auth_2 \
-      --node-config "partition-id=1 num-partitions=2" --max-retries 0 $server_arg &
+      --node-config "partition-id=1 num-partitions=2" --max-retries 0 &
   cl2_pid=$!
   sleep 2
 fi
