@@ -23,6 +23,8 @@ from datetime import datetime, timezone
 from unittest.mock import patch
 from uuid import UUID
 
+from parameterized import parameterized
+
 from flwr.common import DEFAULT_TTL, ConfigsRecord, Context, RecordSet, now
 from flwr.common.constant import Status, SubStatus
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
@@ -148,7 +150,10 @@ class StateTest(unittest.TestCase):
         assert status1.status == Status.PENDING
         assert status2.status == Status.RUNNING
 
-    def test_status_transition_valid(self) -> None:
+    @parameterized.expand([(0,), (1,), (2,)])  # type: ignore
+    def test_status_transition_valid(
+        self, num_transitions_before_finishing: int
+    ) -> None:
         """Test valid run status transactions."""
         # Prepare
         state = self.state_factory()
@@ -157,20 +162,25 @@ class StateTest(unittest.TestCase):
         )
 
         # Execute and assert
-        status1 = state.get_run_status({run_id})[run_id]
-        assert state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        status2 = state.get_run_status({run_id})[run_id]
-        assert state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
-        status3 = state.get_run_status({run_id})[run_id]
+        status = state.get_run_status({run_id})[run_id]
+        assert status.status == Status.PENDING
+
+        if num_transitions_before_finishing > 0:
+            assert state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+            status = state.get_run_status({run_id})[run_id]
+            assert status.status == Status.STARTING
+
+        if num_transitions_before_finishing > 1:
+            assert state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+            status = state.get_run_status({run_id})[run_id]
+            assert status.status == Status.RUNNING
+
         assert state.update_run_status(
             run_id, RunStatus(Status.FINISHED, SubStatus.FAILED, "mock failure")
         )
-        status4 = state.get_run_status({run_id})[run_id]
 
-        assert status1.status == Status.PENDING
-        assert status2.status == Status.STARTING
-        assert status3.status == Status.RUNNING
-        assert status4.status == Status.FINISHED
+        status = state.get_run_status({run_id})[run_id]
+        assert status.status == Status.FINISHED
 
     def test_status_transition_invalid(self) -> None:
         """Test invalid run status transitions."""
@@ -184,18 +194,16 @@ class StateTest(unittest.TestCase):
             RunStatus(Status.STARTING, "", ""),
             RunStatus(Status.PENDING, "", ""),
             RunStatus(Status.FINISHED, SubStatus.COMPLETED, ""),
-            RunStatus(Status.FINISHED, SubStatus.FAILED, ""),
-            RunStatus(Status.FINISHED, SubStatus.STOPPED, ""),
         ]
 
         # Execute and assert
-        # Cannot transition from RunStatus.PENDING
-        # to RunStatus.PENDING, RunStatus.RUNNING, or RunStatus.FINISHED
+        # Cannot transition from RunStatus.PENDING to RunStatus.PENDING,
+        # RunStatus.RUNNING, or RunStatus.FINISHED with COMPLETED substatus
         for run_status in [s for s in run_statuses if s.status != Status.STARTING]:
             assert not state.update_run_status(run_id, run_status)
         state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        # Cannot transition from RunStatus.STARTING
-        # to RunStatus.PENDING, RunStatus.STARTING, or RunStatus.FINISHED
+        # Cannot transition from RunStatus.STARTING to RunStatus.PENDING,
+        # RunStatus.STARTING, or RunStatus.FINISHED with COMPLETED substatus
         for run_status in [s for s in run_statuses if s.status != Status.RUNNING]:
             assert not state.update_run_status(run_id, run_status)
         state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
@@ -207,6 +215,10 @@ class StateTest(unittest.TestCase):
             run_id, RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
         )
         # Cannot transition to any status from RunStatus.FINISHED
+        run_statuses += [
+            RunStatus(Status.FINISHED, SubStatus.FAILED, ""),
+            RunStatus(Status.FINISHED, SubStatus.STOPPED, ""),
+        ]
         for run_status in run_statuses:
             assert not state.update_run_status(run_id, run_status)
 
