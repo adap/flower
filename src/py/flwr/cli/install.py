@@ -199,7 +199,7 @@ def validate_and_install(
         )
     except subprocess.CalledProcessError as e:
         typer.secho(
-            f"❌ Failed to `pip install` whell {install_whl}:\n{e.stderr}",
+            f"❌ Failed to `pip install` wheel {install_whl}:\n{e.stderr}",
             fg=typer.colors.RED,
             bold=True,
         )
