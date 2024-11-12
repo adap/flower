@@ -15,9 +15,7 @@
 """Flower ServerApp process."""
 
 import argparse
-import sys
-from logging import DEBUG, ERROR, INFO, WARN
-from os.path import isfile
+from logging import DEBUG, ERROR, INFO
 from pathlib import Path
 from queue import Queue
 from time import sleep
@@ -25,6 +23,7 @@ from typing import Optional
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
+from flwr.common.args import add_args_flwr_app_common, try_obtain_certificates
 from flwr.common.config import (
     get_flwr_dir,
     get_fused_config_from_dir,
@@ -69,54 +68,30 @@ def flwr_serverapp() -> None:
     parser.add_argument(
         "--superlink",
         type=str,
-        help="Address of SuperLink's DriverAPI",
+        help="Address of SuperLink's ServerAppIo API",
     )
     parser.add_argument(
         "--run-once",
         action="store_true",
-        help="When set, this process will start a single ServerApp "
-        "for a pending Run. If no pending run the process will exit. ",
+        help="When set, this process will start a single ServerApp for a pending Run. "
+        "If there is no pending Run, the process will exit.",
     )
-    parser.add_argument(
-        "--flwr-dir",
-        default=None,
-        help="""The path containing installed Flower Apps.
-    By default, this value is equal to:
-
-        - `$FLWR_HOME/` if `$FLWR_HOME` is defined
-        - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
-        - `$HOME/.flwr/` in all other cases
-    """,
-    )
-    parser.add_argument(
-        "--insecure",
-        action="store_true",
-        help="Run the server without HTTPS, regardless of whether certificate "
-        "paths are provided. By default, the server runs with HTTPS enabled. "
-        "Use this flag only if you understand the risks.",
-    )
-    parser.add_argument(
-        "--root-certificates",
-        metavar="ROOT_CERT",
-        type=str,
-        help="Specifies the path to the PEM-encoded root certificate file for "
-        "establishing secure HTTPS connections.",
-    )
+    add_args_flwr_app_common(parser=parser)
     args = parser.parse_args()
 
     log(INFO, "Starting Flower ServerApp")
-    certificates = _try_obtain_certificates(args)
+    certificates = try_obtain_certificates(args)
 
     log(
         DEBUG,
-        "Staring isolated `ServerApp` connected to SuperLink DriverAPI at %s",
+        "Starting isolated `ServerApp` connected to SuperLink's ServerAppIo API at %s",
         args.superlink,
     )
     run_serverapp(
         superlink=args.superlink,
         log_queue=log_queue,
         run_once=args.run_once,
-        flwr_dir_=args.flwr_dir,
+        flwr_dir=args.flwr_dir,
         certificates=certificates,
     )
 
@@ -124,44 +99,11 @@ def flwr_serverapp() -> None:
     restore_output()
 
 
-def _try_obtain_certificates(
-    args: argparse.Namespace,
-) -> Optional[bytes]:
-
-    if args.insecure:
-        if args.root_certificates is not None:
-            sys.exit(
-                "Conflicting options: The '--insecure' flag disables HTTPS, "
-                "but '--root-certificates' was also specified. Please remove "
-                "the '--root-certificates' option when running in insecure mode, "
-                "or omit '--insecure' to use HTTPS."
-            )
-        log(
-            WARN,
-            "Option `--insecure` was set. Starting insecure HTTP channel to %s.",
-            args.superlink,
-        )
-        root_certificates = None
-    else:
-        # Load the certificates if provided, or load the system certificates
-        if not isfile(args.root_certificates):
-            sys.exit("Path argument `--root-certificates` does not point to a file.")
-        root_certificates = Path(args.root_certificates).read_bytes()
-        log(
-            DEBUG,
-            "Starting secure HTTPS channel to %s "
-            "with the following certificates: %s.",
-            args.superlink,
-            args.root_certificates,
-        )
-    return root_certificates
-
-
 def run_serverapp(  # pylint: disable=R0914, disable=W0212
     superlink: str,
     log_queue: Queue[Optional[str]],
     run_once: bool,
-    flwr_dir_: Optional[str] = None,
+    flwr_dir: Optional[str] = None,
     certificates: Optional[bytes] = None,
 ) -> None:
     """Run Flower ServerApp process."""
@@ -171,7 +113,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
     )
 
     # Resolve directory where FABs are installed
-    flwr_dir = get_flwr_dir(flwr_dir_)
+    flwr_dir_ = get_flwr_dir(flwr_dir)
     log_uploader = None
 
     while True:
@@ -200,11 +142,13 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
             )
 
             log(DEBUG, "ServerApp process starts FAB installation.")
-            install_from_fab(fab.content, flwr_dir=flwr_dir, skip_prompt=True)
+            install_from_fab(fab.content, flwr_dir=flwr_dir_, skip_prompt=True)
 
             fab_id, fab_version = get_fab_metadata(fab.content)
 
-            app_path = str(get_project_dir(fab_id, fab_version, fab.hash_str, flwr_dir))
+            app_path = str(
+                get_project_dir(fab_id, fab_version, fab.hash_str, flwr_dir_)
+            )
             config = get_project_config(app_path)
 
             # Obtain server app reference and the run config
