@@ -316,7 +316,7 @@ ServerApp image and installs the required FAB dependencies.
          | of the image.
        * | ``--insecure``: This flag tells the container to operate in an insecure mode, allowing
          | unencrypted communication.
-       * | ``--superlink superlink:9091``: Connect to the SuperLink's Driver API at the address
+       * | ``--superlink superlink:9091``: Connect to the SuperLink's ServerAppIO API at the address
          | ``superlink:9091``.
 
 Step 6: Run the Quickstart Project
