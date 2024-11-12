@@ -34,6 +34,9 @@ VALID_RUN_STATUS_TRANSITIONS = {
     (Status.PENDING, Status.STARTING),
     (Status.STARTING, Status.RUNNING),
     (Status.RUNNING, Status.FINISHED),
+    # Any non-FINISHED status can transition to FINISHED
+    (Status.PENDING, Status.FINISHED),
+    (Status.STARTING, Status.FINISHED),
 }
 VALID_RUN_SUB_STATUSES = {
     SubStatus.COMPLETED,
@@ -170,6 +173,14 @@ def is_valid_transition(current_status: RunStatus, new_status: RunStatus) -> boo
     bool
         True if the transition is valid, False otherwise.
     """
+    # Transition to FINISHED from a non-RUNNING status is only allowed
+    # if the sub-status is not COMPLETED
+    if (
+        current_status.status in [Status.PENDING, Status.STARTING]
+        and new_status.status == Status.FINISHED
+    ):
+        return new_status.sub_status != SubStatus.COMPLETED
+
     return (
         current_status.status,
         new_status.status,
