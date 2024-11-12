@@ -116,6 +116,7 @@ class ListResponse(google.protobuf.message.Message):
         STARTING_AT_FIELD_NUMBER: builtins.int
         RUNNING_AT_FIELD_NUMBER: builtins.int
         FINISHED_AT_FIELD_NUMBER: builtins.int
+        ELAPSED_TIME_FIELD_NUMBER: builtins.int
         @property
         def run(self) -> flwr.proto.run_pb2.Run: ...
         @property
@@ -124,6 +125,7 @@ class ListResponse(google.protobuf.message.Message):
         starting_at: typing.Text
         running_at: typing.Text
         finished_at: typing.Text
+        elapsed_time: typing.Text
         def __init__(self,
             *,
             run: typing.Optional[flwr.proto.run_pb2.Run] = ...,
@@ -132,9 +134,10 @@ class ListResponse(google.protobuf.message.Message):
             starting_at: typing.Text = ...,
             running_at: typing.Text = ...,
             finished_at: typing.Text = ...,
+            elapsed_time: typing.Text = ...,
             ) -> None: ...
         def HasField(self, field_name: typing_extensions.Literal["run",b"run","status",b"status"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal["finished_at",b"finished_at","pending_at",b"pending_at","run",b"run","running_at",b"running_at","starting_at",b"starting_at","status",b"status"]) -> None: ...
+        def ClearField(self, field_name: typing_extensions.Literal["elapsed_time",b"elapsed_time","finished_at",b"finished_at","pending_at",b"pending_at","run",b"run","running_at",b"running_at","starting_at",b"starting_at","status",b"status"]) -> None: ...
 
     class RunInfoDictEntry(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
