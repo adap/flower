@@ -232,7 +232,7 @@ class Run:  # pylint: disable=too-many-instance-attributes
     status: RunStatus
 
     @classmethod
-    def create_empty(cls, run_id) -> "Run":
+    def create_empty(cls, run_id: int) -> "Run":
         """Return an empty Run instance."""
         return cls(
             run_id=run_id,
