@@ -60,8 +60,6 @@ Open your terminal and run:
           --detach \
           flwr/superlink:|stable_flwr_version| \
           --insecure \
-          --executor \
-          flwr.superexec.deployment:executor \
           --isolation \
           process
 
@@ -80,8 +78,6 @@ Open your terminal and run:
       | tag of the image. The tag :substitution-code:`|stable_flwr_version|` represents a :doc:`specific version <pin-version>` of the image.
     * | ``--insecure``: This flag tells the container to operate in an insecure mode, allowing
       | unencrypted communication.
-    * | ``--executor flwr.superexec.deployment:executor`` Use the
-      | ``flwr.superexec.deployment:executor`` executor to run the ServerApp.
     * | ``--isolation process``: Tells the SuperLink that the ServerApp is created by separate
       | independent process. The SuperLink does not attempt to create it.
 
