@@ -2,10 +2,9 @@
 
 from typing import List, Tuple
 
-from flwr.common import Context, Metrics, ndarrays_to_parameters
+from flwr.common import Context, Metrics
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
-from flwr.server.strategy import FedAvg
-from fedlc.model import get_weights, initialize_model
+from flwr.server.strategy import FedAvg, FedProx
 
 
 # Define metric aggregation function
@@ -24,21 +23,24 @@ def server_fn(context: Context):
     # Read from config
     num_rounds = context.run_config["num-server-rounds"]
     fraction_fit = context.run_config["fraction-fit"]
-    print(f"context in client: ", context)
-
-    # Initialize model parameters
-    net = initialize_model("resnet18", channels=3, num_classes=10)
-    ndarrays = get_weights(net)
-    parameters = ndarrays_to_parameters(ndarrays)
+    fraction_evaluate = context.run_config["fraction-evaluate"]
+    proximal_mu = context.run_config["proximal-mu"]
 
     # Define strategy
-    strategy = FedAvg(
-        fraction_fit=float(fraction_fit),
-        fraction_evaluate=1.0,
-        min_available_clients=2,
-        initial_parameters=parameters,
-        evaluate_metrics_aggregation_fn=weighted_average,
-    )
+    if context.run_config["strategy"] == "fedprox":
+        strategy = FedProx(
+            fraction_fit=float(fraction_fit),
+            fraction_evaluate=float(fraction_evaluate),
+            evaluate_metrics_aggregation_fn=weighted_average,
+            proximal_mu=float(proximal_mu),
+        )
+    else:
+        # default to FedAvg
+        strategy = FedAvg(
+            fraction_fit=float(fraction_fit),
+            fraction_evaluate=float(fraction_evaluate),
+            evaluate_metrics_aggregation_fn=weighted_average,
+        )
     config = ServerConfig(num_rounds=int(num_rounds))
 
     return ServerAppComponents(strategy=strategy, config=config)

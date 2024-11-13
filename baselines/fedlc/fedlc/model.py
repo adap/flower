@@ -8,7 +8,7 @@ from torch import nn
 import torchvision
 
 # implementation from feddebug repo
-def initialize_model(name, channels, num_classes):
+def initialize_model(name, num_channels, num_classes):
     """Initialize the model with the given name."""
     model_functions = {
         "resnet18": lambda: torchvision.models.resnet18(),
@@ -20,7 +20,7 @@ def initialize_model(name, channels, num_classes):
     }
     model = model_functions[name]()
     # Modify model for grayscale input if necessary
-    if channels == 1:
+    if num_channels == 1:
         if name.startswith("resnet"):
             model.conv1 = torch.nn.Conv2d(
                 1, 64, kernel_size=7, stride=2, padding=3, bias=False
@@ -53,6 +53,9 @@ def train(net, trainloader, epochs, device, learning_rate):
             images = batch["img"]
             labels = batch["label"]
             optimizer.zero_grad()
+            # print(type(images))
+            # print('images: ', images.shape)
+            # print('labels: ', labels.shape)
             loss = criterion(net(images.to(device)), labels.to(device))
             loss.backward()
             optimizer.step()
@@ -65,6 +68,7 @@ def train(net, trainloader, epochs, device, learning_rate):
 def test(net, testloader, device):
     """Validate the model on the test set."""
     net.to(device)
+    net.eval()
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
     with torch.no_grad():
