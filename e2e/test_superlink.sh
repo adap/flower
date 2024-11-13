@@ -66,7 +66,7 @@ timeout 2m flower-supernode ./ $client_arg $rest_arg_supernode --superlink $serv
 cl1_pid=$!
 sleep 3
 
-timeout 2m flower-supernode ./ $client_arg $rest_arg_supernode --superlink $server_address $client_auth_2 --supernode-address localhostL9095 &
+timeout 2m flower-supernode ./ $client_arg $rest_arg_supernode --superlink $server_address $client_auth_2 --supernode-address localhost:9095 &
 cl2_pid=$!
 sleep 3
 

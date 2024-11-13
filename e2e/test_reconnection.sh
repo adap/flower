@@ -56,7 +56,7 @@ echo "Killing first client"
 sleep 3
 
 # Starting new client, this is so we have enough clients to start the server-app
-timeout 2m flower-supernode ./ --insecure $rest_arg --superlink $server_address --supernode-address localhost:9096 &
+timeout 2m flower-supernode ./ --insecure $rest_arg --superlink $server_address --supernode-address localhost:9094 &
 cl1_pid=$!
 echo "Starting new client"
 sleep 5
