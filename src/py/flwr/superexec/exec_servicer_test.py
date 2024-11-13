@@ -16,9 +16,17 @@
 
 
 import subprocess
+import unittest
+from datetime import datetime
 from unittest.mock import MagicMock, Mock
 
+import grpc
+
+from flwr.common import ConfigsRecord, now
+from flwr.common.serde import scalar_to_proto
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
+from flwr.server.superlink.ffs.ffs_factory import FfsFactory
+from flwr.server.superlink.linkstate import LinkStateFactory
 
 from .exec_servicer import ExecServicer
 
@@ -49,3 +57,63 @@ def test_start_run() -> None:
     # Execute
     response = servicer.StartRun(request, context_mock)
     assert response.run_id == 10
+
+
+class TestExecServicer(unittest.TestCase):
+    """Test the Exec API servicer."""
+
+    def setUp(self) -> None:
+        """Set up test fixtures."""
+        self.servicer = ExecServicer(
+            linkstate_factory=LinkStateFactory(":flwr-in-memory-state:"),
+            ffs_factory=FfsFactory("./tmp"),
+            executor=Mock(),
+        )
+        self.state = self.servicer.linkstate_factory.state()
+
+    def test_list_runs(self) -> None:
+        """Test List method of ExecServicer with --runs option."""
+        # Prepare
+        run_ids = set()
+        for _ in range(3):
+            run_id = self.state.create_run(
+                "mock fabid", "mock fabver", "fake hash", {}, ConfigsRecord()
+            )
+            run_ids.add(run_id)
+
+        # Execute
+        response = self.servicer.List(Mock(option="--runs"), Mock())
+        retrieved_timestamp = datetime.fromisoformat(response.now).timestamp()
+
+        # Assert
+        self.assertLess(abs(retrieved_timestamp - now().timestamp()), 1e-3)
+        self.assertEqual(set(response.run_dict.keys()), run_ids)
+
+    def test_list_run_id(self) -> None:
+        """Test List method of ExecServicer with --run-id option."""
+        # Prepare
+        for _ in range(3):
+            run_id = self.state.create_run(
+                "mock fabid", "mock fabver", "fake hash", {}, ConfigsRecord()
+            )
+
+        # Execute
+        response = self.servicer.List(
+            Mock(option="--run-id", value=scalar_to_proto(run_id)), Mock()
+        )
+        retrieved_timestamp = datetime.fromisoformat(response.now).timestamp()
+
+        # Assert
+        self.assertLess(abs(retrieved_timestamp - now().timestamp()), 1e-3)
+        self.assertEqual(set(response.run_dict.keys()), {run_id})
+
+    def test_list_invalid_option(self) -> None:
+        """Test List method of ExecServicer with invalid option."""
+        # Execute
+        mock_context = Mock()
+        self.servicer.List(Mock(option="--invalid"), mock_context)
+
+        # Assert
+        mock_context.abort.assert_called_once_with(
+            grpc.StatusCode.UNIMPLEMENTED, "Invalid option"
+        )
