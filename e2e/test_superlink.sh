@@ -63,7 +63,7 @@ pip install -e . --no-deps
 
 # Check if the first argument is 'insecure'
 if [ "$server_arg" == "--insecure" ]; then
-  # If $1 is 'insecure', append the first line
+  # If $server_arg is '--insecure', append the first line
   echo -e $"\n[tool.flwr.federations.e2e]\naddress = \"127.0.0.1:9093\"\ninsecure = true" >> pyproject.toml
 else
   # Otherwise, append the second line
