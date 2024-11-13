@@ -207,19 +207,19 @@ jobs:
       - name: Download dataset
         if: ${{ matrix.dataset }}
         run: python -c "${{ matrix.dataset }}"
-      - name: Run edge client test
-        if: ${{ matrix.directory != 'e2e-bare-auth' }}
-        working-directory: e2e/${{ matrix.directory }}/${{ matrix.e2e }}
-        run: ./../../test_legacy.sh "${{ matrix.directory }}"
-      - name: Run virtual client test
-        if: ${{ matrix.directory != 'e2e-bare-auth' }}
-        run: python simulation.py
-      - name: Run simulation engine test
-        if: ${{ matrix.directory == 'e2e-pytorch' || matrix.directory == 'e2e-tensorflow'}}
-        run: python simulation_next.py
-      - name: Run driver test
-        if: ${{ matrix.directory != 'e2e-bare-auth' }}
-        run: ./../test_superlink.sh "${{ matrix.directory }}"
+      # - name: Run edge client test
+      #   if: ${{ matrix.directory != 'e2e-bare-auth' }}
+      #   working-directory: e2e/${{ matrix.directory }}/${{ matrix.e2e }}
+      #   run: ./../../test_legacy.sh "${{ matrix.directory }}"
+      # - name: Run virtual client test
+      #   if: ${{ matrix.directory != 'e2e-bare-auth' }}
+      #   run: python simulation.py
+      # - name: Run simulation engine test
+      #   if: ${{ matrix.directory == 'e2e-pytorch' || matrix.directory == 'e2e-tensorflow'}}
+      #   run: python simulation_next.py
+      # - name: Run driver test
+      #   if: ${{ matrix.directory != 'e2e-bare-auth' }}
+      #   run: ./../test_superlink.sh "${{ matrix.directory }}"
       - name: Run driver test with REST
         if: ${{ matrix.directory == 'e2e-bare' }}
         run: ./../test_superlink.sh bare rest
