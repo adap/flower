@@ -34,8 +34,8 @@ from flwr.cli.config_utils import (
 from flwr.common.constant import FAB_CONFIG_FILE, SubStatus
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
-from flwr.common.serde import run_status_from_proto, scalar_to_proto
-from flwr.common.typing import RunStatus
+from flwr.common.serde import run_from_proto, scalar_to_proto
+from flwr.common.typing import Run
 from flwr.proto.exec_pb2 import ListRequest, ListResponse  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 
@@ -134,25 +134,29 @@ def _init_channel(app: Path, federation_config: dict[str, Any]) -> grpc.Channel:
     return channel
 
 
-def _format_run_table(run_status_dict: dict[int, RunStatus]) -> Table:
+def _format_run_table(run_dict: dict[int, Run]) -> Table:
     """Format run status as a rich Table."""
     table = Table(header_style="bold cyan")
 
     # Add columns
     table.add_column(Text("Run ID", justify="center"), style="bright_white")
+    table.add_column(Text("FAB", justify="center"))
     table.add_column(Text("Status", justify="center"))
-    table.add_column(Text("Details", justify="center"))
+    table.add_column(Text("Created At", justify="center"))
+    table.add_column(Text("Running At", justify="center"))
+    table.add_column(Text("Finished At", justify="center"))
+    table.add_column(Text("Elapsed Time", justify="center"))
 
     # Add rows
-    for run_id, run_status in run_status_dict.items():
+    for run_id, run in run_dict.items():
         # Combine status and sub-status into a single string
-        if run_status.sub_status == "":
-            status_text = run_status.status
+        if run.status.sub_status == "":
+            status_text = run.status.status
         else:
-            status_text = f"{run_status.status}:{run_status.sub_status}"
+            status_text = f"{run.status.status}:{run.status.sub_status}"
 
         # Style the status based on its value
-        sub_status = run_status.sub_status
+        sub_status = run.status.sub_status
         if sub_status == SubStatus.COMPLETED:
             status_style = "green"
         elif sub_status == SubStatus.FAILED:
@@ -162,8 +166,9 @@ def _format_run_table(run_status_dict: dict[int, RunStatus]) -> Table:
 
         table.add_row(
             f"[bold]{run_id}[/bold]",
+            f"{run.fab_id} (v{run.fab_version})",
             f"[{status_style}]{status_text}[/{status_style}]",
-            run_status.details,
+            
         )
     return table
 
@@ -173,12 +178,12 @@ def _list_runs(
 ) -> None:
     """List all runs."""
     res: ListResponse = stub.List(ListRequest(option="--runs"))
-    statuses: dict[int, RunStatus] = {
-        run_id: run_status_from_proto(proto)
-        for run_id, proto in res.run_status_dict.items()
+    run_dict = {
+        run_id: run_from_proto(proto)
+        for run_id, proto in res.run_dict.items()
     }
 
-    Console().print(_format_run_table(statuses))
+    Console().print(_format_run_table(run_dict))
 
 
 def _display_one_run(
@@ -189,12 +194,12 @@ def _display_one_run(
     res: ListResponse = stub.List(
         ListRequest(option="--run-id", value=scalar_to_proto(run_id))
     )
-    if not res.run_status_dict:
+    if not res.run_dict:
         raise ValueError(f"Run ID {run_id} not found")
 
-    statuses: dict[int, RunStatus] = {
-        run_id: run_status_from_proto(proto)
-        for run_id, proto in res.run_status_dict.items()
+    run_dict = {
+        run_id: run_from_proto(proto)
+        for run_id, proto in res.run_dict.items()
     }
 
-    Console().print(_format_run_table(statuses))
+    Console().print(_format_run_table(run_dict))
