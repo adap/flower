@@ -79,6 +79,12 @@ class SimulationEngine(Executor):
     ) -> Optional[int]:
         """Start run using the Flower Simulation Engine."""
         try:
+            # Check that num-supernodes is set
+            if "num-supernoces" not in federation_options:
+                raise ValueError(
+                    "Federation options doesn't contain key `num-supernodes`."
+                )
+
             # Create run
             fab = Fab(hashlib.sha256(fab_file).hexdigest(), fab_file)
             fab_hash = self.ffs.put(fab.content, {})
