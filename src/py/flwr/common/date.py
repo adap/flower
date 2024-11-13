@@ -31,8 +31,7 @@ def format_timedelta(td: datetime.timedelta) -> str:
 
     if days > 0:
         return f"{days}d {hours:02}:{minutes:02}:{seconds:02}"
-    else:
-        return f"{hours:02}:{minutes:02}:{seconds:02}"
+    return f"{hours:02}:{minutes:02}:{seconds:02}"
 
 
 def isoformat8601_utc(dt: datetime.datetime) -> str:
