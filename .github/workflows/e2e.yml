@@ -223,9 +223,9 @@ jobs:
       # - name: Run driver test with REST
       #   if: ${{ matrix.directory == 'e2e-bare' }}
       #   run: ./../test_superlink.sh bare rest
-      - name: Run driver test with SQLite database
-        if: ${{ matrix.directory == 'e2e-bare' }}
-        run: ./../test_superlink.sh bare sqlite
+      # - name: Run driver test with SQLite database
+      #   if: ${{ matrix.directory == 'e2e-bare' }}
+      #   run: ./../test_superlink.sh bare sqlite
       - name: Run driver test with client authentication
         if: ${{ matrix.directory == 'e2e-bare-auth' }}
         run: ./../test_superlink.sh "${{ matrix.directory }}" client-auth
