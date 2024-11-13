@@ -330,7 +330,7 @@ def _main_loop(
         log(DEBUG, "Pre-registering run with id %s", run.run_id)
         run.status = RunStatus(Status.RUNNING, "", "")
         run.starting_at = now().isoformat()
-        run.running_at = now().isoformat()
+        run.running_at = run.starting_at
         state_factory.state().run_ids[run.run_id] = RunRecord(run=run)  # type: ignore
 
         if server_app_run_config is None:
