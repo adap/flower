@@ -1,0 +1,15 @@
+alg = "fedavg"
+alpha = 0.5
+local-epochs = 2
+learning-rate = 0.03
+momentum=0.9
+weight-decay = 5e-4
+seed = 0
+num-server-rounds = 1000
+fraction-fit = 0.1
+dataset-partition-by = "label"
+dataset = "cifar10"
+num-classes = 10
+batch-size = 64
+num-classes-per-partition = 5
+model-name = "vgg11"
