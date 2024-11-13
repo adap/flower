@@ -89,7 +89,7 @@ timeout 2m flower-supernode ./ $client_arg $rest_arg_supernode \
 cl2_pid=$!
 sleep 3
 
-timeout 1m flwr run . e2e
+timeout 1m flwr run "." e2e
 
 # Initialize a flag to track if training is successful
 found_success=false
