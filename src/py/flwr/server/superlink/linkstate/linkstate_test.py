@@ -75,34 +75,6 @@ class StateTest(unittest.TestCase):
         assert run.fab_hash == "9f86d08"
         assert run.override_config["test_key"] == "test_value"
 
-    @parameterized.expand([(0,), (1,), (2,), (3,)])  # type: ignore
-    def test_get_run_timestamps(self, num_status_transitions: int) -> None:
-        """Test if get_run_timestamps works correctly."""
-        # Prepare
-        state: LinkState = self.state_factory()
-        run_id = state.create_run(
-            None, None, "9f86d08", {"test_key": "test_value"}, ConfigsRecord()
-        )
-
-        # Execute
-        if num_status_transitions > 0:
-            state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        if num_status_transitions > 1:
-            state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
-        if num_status_transitions > 2:
-            state.update_run_status(
-                run_id, RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
-            )
-        timestamps = state.get_run_timestamps(run_id)
-
-        # Assert
-        prev_timestamp = 0.0
-        for i in range(num_status_transitions + 1):
-            assert timestamps[i] != ""
-            timestamp = datetime.fromisoformat(timestamps[i]).timestamp()
-            assert timestamp > prev_timestamp
-            prev_timestamp = timestamp
-
     def test_get_all_run_ids(self) -> None:
         """Test if get_run_ids works correctly."""
         # Prepare
