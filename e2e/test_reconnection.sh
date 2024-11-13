@@ -40,18 +40,8 @@ check_and_kill() {
 pip install -e . --no-deps
 
 # Append the federations config to pyproject.toml
-#--- echo -e $"\n[tool.flwr.federations.e2e]\naddress = \"127.0.0.1:9093\"\ninsecure = true" >> pyproject.toml
-#--- sleep 1
-
-# flower-superlink --insecure & 
-# flower-supernode --insecure --isolation="subprocess" \
-#   --node-config="partition-id=1 num-partitions=10" \
-#   --supernode-address="localhost:9094" &
-# flower-supernode --insecure --isolation="subprocess" \
-#   --node-config="partition-id=1 num-partitions=10" \
-#   --supernode-address="localhost:9095" &
-# set -x
-# flwr run . e2e
+echo -e $"\n[tool.flwr.federations.e2e]\naddress = \"127.0.0.1:9093\"\ninsecure = true" >> pyproject.toml
+sleep 1
 
 timeout 10m flower-superlink --insecure $db_arg $rest_arg --executor flwr.superexec.deployment:executor &
 sl_pids=$(pgrep -f "flower-superlink")
@@ -61,7 +51,6 @@ sleep 3
 timeout 10m flower-supernode ./ --insecure $rest_arg --superlink $server_address \
   --isolation="subprocess" --supernode-address="localhost:9094" &
 cl1_pid=$!
-# cl1_pids=$(pgrep -f "flower-supernode")
 echo "Starting first client"
 sleep 3
 
@@ -145,18 +134,3 @@ if [ "$found_success" = false ]; then
     check_and_kill "$cl1_pids"
     check_and_kill "$sl_pids"
 fi
-
-kill $cl1_pid; kill $cl2_pid
-sleep 3
-# for pid in $sl_pids; do
-#     echo "Attempting to kill process ID: $pid"
-#     kill $pid
-#     if kill $pid 2>/dev/null; then
-#         echo "Process $pid successfully killed."
-#     else
-#         echo "Failed to kill process $pid or it may have already terminated."
-#     fi
-# done 
-check_and_kill "$cl1_pids"
-check_and_kill "$sl_pids"
-#-- # check_and_kill "$sl2_pid"
