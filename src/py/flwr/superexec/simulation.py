@@ -81,7 +81,7 @@ class SimulationEngine(Executor):
         """Start run using the Flower Simulation Engine."""
         try:
             # Check that num-supernodes is set
-            if "num-supernoces" not in federation_options:
+            if "num-supernodes" not in federation_options:
                 raise ValueError(
                     "Federation options doesn't contain key `num-supernodes`."
                 )
