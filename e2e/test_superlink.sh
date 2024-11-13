@@ -62,7 +62,7 @@ esac
 pip install -e . --no-deps
 
 # Check if the first argument is 'insecure'
-if [ "$server_arg" == "--insecure" ]; then
+if [ "$server_arg" = "--insecure" ]; then
   # If $server_arg is '--insecure', append the first line
   echo -e $"\n[tool.flwr.federations.e2e]\naddress = \"127.0.0.1:9093\"\ninsecure = true" >> pyproject.toml
 else
@@ -88,9 +88,6 @@ timeout 2m flower-supernode ./ $client_arg $rest_arg_supernode \
   --max-retries 0 &
 cl2_pid=$!
 sleep 3
-
-echo "List files"
-ls
 
 timeout 1m flwr run "." e2e
 
