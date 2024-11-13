@@ -29,12 +29,12 @@ sl_pid=$!
 echo "Starting SuperLink"
 sleep 3
 
-timeout 2m flower-supernode ./ --insecure $rest_arg --superlink $server_address &
+timeout 2m flower-supernode ./ --insecure $rest_arg --superlink $server_address --supernode-address localhost:9094 &
 cl1_pid=$!
 echo "Starting first client"
 sleep 3
 
-timeout 2m flower-supernode ./ --insecure $rest_arg --superlink $server_address &
+timeout 2m flower-supernode ./ --insecure $rest_arg --superlink $server_address --supernode-address localhost:9095 &
 cl2_pid=$!
 echo "Starting second client"
 sleep 3
@@ -56,7 +56,7 @@ echo "Killing first client"
 sleep 3
 
 # Starting new client, this is so we have enough clients to start the server-app
-timeout 2m flower-supernode ./ --insecure $rest_arg --superlink $server_address &
+timeout 2m flower-supernode ./ --insecure $rest_arg --superlink $server_address --supernode-address localhost:9096 &
 cl1_pid=$!
 echo "Starting new client"
 sleep 5
@@ -74,7 +74,7 @@ echo "Killing first client"
 sleep 1
 
 # Restart first client so enough clients are connected to continue the FL rounds
-timeout 2m flower-supernode ./ --insecure $rest_arg --superlink $server_address &
+timeout 2m flower-supernode ./ --insecure $rest_arg --superlink $server_address --supernode-address localhost:9094 &
 cl1_pid=$!
 echo "Starting new client"
 
