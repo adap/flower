@@ -21,6 +21,7 @@ from typing import Optional
 
 from typing_extensions import override
 
+from flwr.cli.config_utils import get_fab_metadata
 from flwr.common import ConfigsRecord, Context, RecordSet
 from flwr.common.logger import log
 from flwr.common.typing import Fab, UserConfig
@@ -129,9 +130,10 @@ class SimulationEngine(Executor):
                 raise RuntimeError(
                     f"FAB ({fab.hash_str}) hash from request doesn't match contents"
                 )
+            fab_id, fab_version = get_fab_metadata(fab.content)
 
             run_id = self.linkstate.create_run(
-                None, None, fab_hash, override_config, federation_options
+                fab_id, fab_version, fab_hash, override_config, federation_options
             )
 
             # Create an empty context for the Run
