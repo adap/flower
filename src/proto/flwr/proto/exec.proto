@@ -52,15 +52,6 @@ message ListRequest {
   Scalar value = 2;
 }
 message ListResponse {
-  message RunInfo {
-    Run run = 1;
-    RunStatus status = 2;
-    string pending_at = 3;
-    string starting_at = 4;
-    string running_at = 5;
-    string finished_at = 6;
-    string now = 7;
-  }
-
-  map<uint64, RunInfo> run_info_dict = 1;
+  map<uint64, Run> run_dict = 1;
+  string now = 2;
 }

@@ -27,7 +27,6 @@ from flwr.common.constant import LOG_STREAM_INTERVAL, Status
 from flwr.common.logger import log
 from flwr.common.serde import (
     configs_record_from_proto,
-    run_status_to_proto,
     run_to_proto,
     scalar_from_proto,
     user_config_from_proto,
@@ -139,22 +138,8 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
 def _list_runs(run_ids: set[int], state: LinkState) -> ListResponse:
     """Create response for `flwr ls --runs` and `flwr ls --run-id <run_id>`."""
-    run_status_dict = state.get_run_status(run_ids)
-    run_info_dict: dict[int, ListResponse.RunInfo] = {}
-    for run_id, run_status in run_status_dict.items():
-        run = state.get_run(run_id)
-        # Very unlikely, as we just retrieved the run status
-        if not run:
-            continue
-        timestamps = state.get_run_timestamps(run_id)
-        run_info_dict[run_id] = ListResponse.RunInfo(
-            run=run_to_proto(run),
-            status=run_status_to_proto(run_status),
-            pending_at=timestamps[0],
-            starting_at=timestamps[1],
-            running_at=timestamps[2],
-            finished_at=timestamps[3],
-            now=now().isoformat(),
-        )
-
-    return ListResponse(run_info_dict=run_info_dict)
+    run_dict = {run_id: state.get_run(run_id) for run_id in run_ids}
+    return ListResponse(
+        run_dict={run_id: run_to_proto(run) for run_id, run in run_dict.items() if run},
+        now=now().isoformat(),
+    )
