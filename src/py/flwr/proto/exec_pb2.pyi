@@ -90,7 +90,7 @@ class StreamLogsResponse(google.protobuf.message.Message):
     def ClearField(self, field_name: typing_extensions.Literal["latest_timestamp",b"latest_timestamp","log_output",b"log_output"]) -> None: ...
 global___StreamLogsResponse = StreamLogsResponse
 
-class ListRequest(google.protobuf.message.Message):
+class ListRunsRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     OPTION_FIELD_NUMBER: builtins.int
     VALUE_FIELD_NUMBER: builtins.int
@@ -104,9 +104,9 @@ class ListRequest(google.protobuf.message.Message):
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["option",b"option","value",b"value"]) -> None: ...
-global___ListRequest = ListRequest
+global___ListRunsRequest = ListRunsRequest
 
-class ListResponse(google.protobuf.message.Message):
+class ListRunsResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     class RunDictEntry(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
@@ -134,4 +134,4 @@ class ListResponse(google.protobuf.message.Message):
         now: typing.Text = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["now",b"now","run_dict",b"run_dict"]) -> None: ...
-global___ListResponse = ListResponse
+global___ListRunsResponse = ListRunsResponse

@@ -24,10 +24,10 @@ class ExecStub(object):
                 request_serializer=flwr_dot_proto_dot_exec__pb2.StreamLogsRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_exec__pb2.StreamLogsResponse.FromString,
                 )
-        self.List = channel.unary_unary(
-                '/flwr.proto.Exec/List',
-                request_serializer=flwr_dot_proto_dot_exec__pb2.ListRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_exec__pb2.ListResponse.FromString,
+        self.ListRuns = channel.unary_unary(
+                '/flwr.proto.Exec/ListRuns',
+                request_serializer=flwr_dot_proto_dot_exec__pb2.ListRunsRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_exec__pb2.ListRunsResponse.FromString,
                 )
 
 
@@ -48,7 +48,7 @@ class ExecServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def List(self, request, context):
+    def ListRuns(self, request, context):
         """flwr ls command
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -68,10 +68,10 @@ def add_ExecServicer_to_server(servicer, server):
                     request_deserializer=flwr_dot_proto_dot_exec__pb2.StreamLogsRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_exec__pb2.StreamLogsResponse.SerializeToString,
             ),
-            'List': grpc.unary_unary_rpc_method_handler(
-                    servicer.List,
-                    request_deserializer=flwr_dot_proto_dot_exec__pb2.ListRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_exec__pb2.ListResponse.SerializeToString,
+            'ListRuns': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListRuns,
+                    request_deserializer=flwr_dot_proto_dot_exec__pb2.ListRunsRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_exec__pb2.ListRunsResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -118,7 +118,7 @@ class Exec(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def List(request,
+    def ListRuns(request,
             target,
             options=(),
             channel_credentials=None,
@@ -128,8 +128,8 @@ class Exec(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Exec/List',
-            flwr_dot_proto_dot_exec__pb2.ListRequest.SerializeToString,
-            flwr_dot_proto_dot_exec__pb2.ListResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Exec/ListRuns',
+            flwr_dot_proto_dot_exec__pb2.ListRunsRequest.SerializeToString,
+            flwr_dot_proto_dot_exec__pb2.ListRunsResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

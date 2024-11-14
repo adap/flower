@@ -30,7 +30,7 @@ service Exec {
   rpc StreamLogs(StreamLogsRequest) returns (stream StreamLogsResponse) {}
 
   // flwr ls command
-  rpc List(ListRequest) returns (ListResponse) {}
+  rpc ListRuns(ListRunsRequest) returns (ListRunsResponse) {}
 }
 
 message StartRunRequest {
@@ -47,11 +47,11 @@ message StreamLogsResponse {
   string log_output = 1;
   double latest_timestamp = 2;
 }
-message ListRequest {
+message ListRunsRequest {
   string option = 1;
   Scalar value = 2;
 }
-message ListResponse {
+message ListRunsResponse {
   map<uint64, Run> run_dict = 1;
   string now = 2;
 }
