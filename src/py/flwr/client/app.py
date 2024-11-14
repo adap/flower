@@ -217,6 +217,8 @@ def start_client_internal(
     flwr_path: Optional[Path] = None,
     isolation: Optional[str] = None,
     supernode_address: Optional[str] = CLIENTAPPIO_API_DEFAULT_ADDRESS,
+    certificates: Optional[tuple[bytes, bytes, bytes]] = None,
+    ssl_ca_certfile: Optional[str] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -278,6 +280,10 @@ def start_client_internal(
         process and communicates using gRPC at the address `supernode_address`.
     supernode_address : Optional[str] (default: `CLIENTAPPIO_API_DEFAULT_ADDRESS`)
         The SuperNode gRPC server address.
+    certificates : Optional[Tuple[bytes, bytes, bytes]] (default: None)
+        Tuple containing the CA certificate, server certificate, and server private key.
+    ssl_ca_certfile : Optional[str] (default: None)
+        The path to the CA certificate file used by `flwr-clientapp` in subprocess mode.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -310,7 +316,8 @@ def start_client_internal(
                 f"{ISOLATION_MODE_SUBPROCESS} or {ISOLATION_MODE_PROCESS}",
             )
         _clientappio_grpc_server, clientappio_servicer = run_clientappio_api_grpc(
-            address=supernode_address
+            address=supernode_address,
+            certificates=certificates,
         )
     supernode_address = cast(str, supernode_address)
 
@@ -516,6 +523,12 @@ def start_client_internal(
                                     "--token",
                                     str(token),
                                 ]
+                                if ssl_ca_certfile:
+                                    command.append("--root-certificates")
+                                    command.append(ssl_ca_certfile)
+                                else:
+                                    command.append("--insecure")
+
                                 subprocess.run(
                                     command,
                                     stdout=None,
@@ -783,7 +796,10 @@ class _AppStateTracker:
         signal.signal(signal.SIGTERM, signal_handler)
 
 
-def run_clientappio_api_grpc(address: str) -> tuple[grpc.Server, ClientAppIoServicer]:
+def run_clientappio_api_grpc(
+    address: str,
+    certificates: Optional[tuple[bytes, bytes, bytes]],
+) -> tuple[grpc.Server, ClientAppIoServicer]:
     """Run ClientAppIo API gRPC server."""
     clientappio_servicer: grpc.Server = ClientAppIoServicer()
     clientappio_add_servicer_to_server_fn = add_ClientAppIoServicer_to_server
@@ -794,6 +810,7 @@ def run_clientappio_api_grpc(address: str) -> tuple[grpc.Server, ClientAppIoServ
         ),
         server_address=address,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
+        certificates=certificates,
     )
     log(INFO, "Starting Flower ClientAppIo gRPC server on %s", address)
     clientappio_grpc_server.start()
