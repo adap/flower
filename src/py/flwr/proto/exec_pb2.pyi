@@ -92,18 +92,15 @@ global___StreamLogsResponse = StreamLogsResponse
 
 class ListRunsRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    OPTION_FIELD_NUMBER: builtins.int
-    VALUE_FIELD_NUMBER: builtins.int
-    option: typing.Text
-    @property
-    def value(self) -> flwr.proto.transport_pb2.Scalar: ...
+    RUN_ID_FIELD_NUMBER: builtins.int
+    run_id: builtins.int
     def __init__(self,
         *,
-        option: typing.Text = ...,
-        value: typing.Optional[flwr.proto.transport_pb2.Scalar] = ...,
+        run_id: typing.Optional[builtins.int] = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["option",b"option","value",b"value"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["_run_id",b"_run_id","run_id",b"run_id"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["_run_id",b"_run_id","run_id",b"run_id"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["_run_id",b"_run_id"]) -> typing.Optional[typing_extensions.Literal["run_id"]]: ...
 global___ListRunsRequest = ListRunsRequest
 
 class ListRunsResponse(google.protobuf.message.Message):

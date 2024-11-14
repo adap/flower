@@ -28,7 +28,6 @@ from flwr.common.logger import log
 from flwr.common.serde import (
     configs_record_from_proto,
     run_to_proto,
-    scalar_from_proto,
     user_config_from_proto,
 )
 from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
@@ -122,23 +121,13 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         state = self.linkstate_factory.state()
 
         # Handle `flwr ls --runs`
-        if request.option == "--runs":
-            run_ids = state.get_run_ids()
-            return _list_runs(run_ids, state)
+        if not request.HasField("run_id"):
+            return _create_list_runs_response(state.get_run_ids(), state)
         # Handle `flwr ls --run-id <run_id>`
-        if request.option == "--run-id":
-            run_id = scalar_from_proto(request.value)
-            if not isinstance(run_id, int):
-                context.abort(grpc.StatusCode.INVALID_ARGUMENT, "Invalid run ID")
-                return ListRunsResponse()
-            return _list_runs({run_id}, state)
-
-        # Unknown option
-        context.abort(grpc.StatusCode.UNIMPLEMENTED, "Invalid option")
-        return ListRunsResponse()
+        return _create_list_runs_response({request.run_id}, state)
 
 
-def _list_runs(run_ids: set[int], state: LinkState) -> ListRunsResponse:
+def _create_list_runs_response(run_ids: set[int], state: LinkState) -> ListRunsResponse:
     """Create response for `flwr ls --runs` and `flwr ls --run-id <run_id>`."""
     run_dict = {run_id: state.get_run(run_id) for run_id in run_ids}
     return ListRunsResponse(

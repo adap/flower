@@ -20,11 +20,11 @@ import unittest
 from datetime import datetime
 from unittest.mock import MagicMock, Mock
 
-import grpc
-
 from flwr.common import ConfigsRecord, now
-from flwr.common.serde import scalar_to_proto
-from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
+from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
+    ListRunsRequest,
+    StartRunRequest,
+)
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkStateFactory
 
@@ -82,7 +82,7 @@ class TestExecServicer(unittest.TestCase):
             run_ids.add(run_id)
 
         # Execute
-        response = self.servicer.ListRuns(Mock(option="--runs"), Mock())
+        response = self.servicer.ListRuns(ListRunsRequest(), Mock())
         retrieved_timestamp = datetime.fromisoformat(response.now).timestamp()
 
         # Assert
@@ -98,22 +98,9 @@ class TestExecServicer(unittest.TestCase):
             )
 
         # Execute
-        response = self.servicer.ListRuns(
-            Mock(option="--run-id", value=scalar_to_proto(run_id)), Mock()
-        )
+        response = self.servicer.ListRuns(ListRunsRequest(run_id=run_id), Mock())
         retrieved_timestamp = datetime.fromisoformat(response.now).timestamp()
 
         # Assert
         self.assertLess(abs(retrieved_timestamp - now().timestamp()), 1e-3)
         self.assertEqual(set(response.run_dict.keys()), {run_id})
-
-    def test_list_invalid_option(self) -> None:
-        """Test List method of ExecServicer with invalid option."""
-        # Execute
-        mock_context = Mock()
-        self.servicer.ListRuns(Mock(option="--invalid"), mock_context)
-
-        # Assert
-        mock_context.abort.assert_called_once_with(
-            grpc.StatusCode.UNIMPLEMENTED, "Invalid option"
-        )
