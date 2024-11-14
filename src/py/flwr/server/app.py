@@ -792,6 +792,7 @@ def _add_args_exec_api(parser: argparse.ArgumentParser) -> None:
 def _add_args_simulationio_api(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--simulationio-api-address",
-        help="SimulationIo API (gRPC) server address (IPv4, IPv6, or a domain name).",
         default=SIMULATIONIO_API_DEFAULT_ADDRESS,
+        help="SimulationIo API (gRPC) server address (IPv4, IPv6, or a domain name)."
+        f"By default, it is set to {SIMULATIONIO_API_DEFAULT_ADDRESS}.",
     )
