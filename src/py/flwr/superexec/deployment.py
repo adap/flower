@@ -38,7 +38,7 @@ class DeploymentEngine(Executor):
 
     Parameters
     ----------
-    superlink: str (default: "0.0.0.0:9091")
+    serverappio_api_address: str (default: "0.0.0.0:9091")
         Address of the SuperLink to connect to.
     root_certificates: Optional[str] (default: None)
         Specifies the path to the PEM-encoded root certificate file for
@@ -49,11 +49,11 @@ class DeploymentEngine(Executor):
 
     def __init__(
         self,
-        superlink: str = SERVERAPPIO_API_DEFAULT_ADDRESS,
+        serverappio_api_address: str = SERVERAPPIO_API_DEFAULT_ADDRESS,
         root_certificates: Optional[str] = None,
         flwr_dir: Optional[str] = None,
     ) -> None:
-        self.superlink = superlink
+        self.serverappio_api_address = serverappio_api_address
         if root_certificates is None:
             self.root_certificates = None
             self.root_certificates_bytes = None
@@ -110,7 +110,7 @@ class DeploymentEngine(Executor):
         if superlink_address := config.get("superlink"):
             if not isinstance(superlink_address, str):
                 raise ValueError("The `superlink` value should be of type `str`.")
-            self.superlink = superlink_address
+            self.serverappio_api_address = superlink_address
         if root_certificates := config.get("root-certificates"):
             if not isinstance(root_certificates, str):
                 raise ValueError(
