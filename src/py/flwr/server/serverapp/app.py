@@ -30,10 +30,7 @@ from flwr.common.config import (
     get_project_config,
     get_project_dir,
 )
-from flwr.common.constant import (
-    Status,
-    SubStatus,
-)
+from flwr.common.constant import Status, SubStatus
 from flwr.common.logger import (
     log,
     mirror_output_to_queue,
