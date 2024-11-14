@@ -31,7 +31,7 @@ from flwr.common.config import (
     get_project_config,
     get_project_dir,
 )
-from flwr.common.constant import SERVERAPPIO_API_DEFAULT_ADDRESS
+from flwr.common.constant import SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS
 from flwr.common.logger import log, update_console_handler, warn_deprecated_feature
 from flwr.common.object_ref import load_app
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
@@ -106,11 +106,11 @@ def run_server_app() -> None:
             "app by executing `flwr new` and following the prompt."
         )
 
-    if args.server != SERVERAPPIO_API_DEFAULT_ADDRESS:
+    if args.server != SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS:
         warn = "Passing flag --server is deprecated. Use --superlink instead."
         warn_deprecated_feature(warn)
 
-        if args.superlink != SERVERAPPIO_API_DEFAULT_ADDRESS:
+        if args.superlink != SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS:
             # if `--superlink` also passed, then
             # warn user that this argument overrides what was passed with `--server`
             log(
@@ -277,12 +277,12 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--server",
-        default=SERVERAPPIO_API_DEFAULT_ADDRESS,
+        default=SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
         help="Server address",
     )
     parser.add_argument(
         "--superlink",
-        default=SERVERAPPIO_API_DEFAULT_ADDRESS,
+        default=SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
         help="SuperLink ServerAppIo API (gRPC-rere) address "
         "(IPv4, IPv6, or a domain name)",
     )
