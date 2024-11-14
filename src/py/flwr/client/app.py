@@ -217,7 +217,7 @@ def start_client_internal(
     max_wait_time: Optional[float] = None,
     flwr_path: Optional[Path] = None,
     isolation: Optional[str] = None,
-    supernode_address: Optional[str] = CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
+    clientappio_api_address: Optional[str] = CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     certificates: Optional[tuple[bytes, bytes, bytes]] = None,
     ssl_ca_certfile: Optional[str] = None,
 ) -> None:
@@ -277,9 +277,9 @@ def start_client_internal(
         `process`. Defaults to `None`, which runs the `ClientApp` in the same process
         as the SuperNode. If `subprocess`, the `ClientApp` runs in a subprocess started
         by the SueprNode and communicates using gRPC at the address
-        `supernode_address`. If `process`, the `ClientApp` runs in a separate isolated
-        process and communicates using gRPC at the address `supernode_address`.
-    supernode_address : Optional[str]
+        `clientappio_api_address`. If `process`, the `ClientApp` runs in a separate isolated
+        process and communicates using gRPC at the address `clientappio_api_address`.
+    clientappio_api_address : Optional[str]
         (default: `CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS`)
         The SuperNode gRPC server address.
     certificates : Optional[Tuple[bytes, bytes, bytes]] (default: None)
@@ -312,16 +312,16 @@ def start_client_internal(
         load_client_app_fn = _load_client_app
 
     if isolation:
-        if supernode_address is None:
+        if clientappio_api_address is None:
             raise ValueError(
-                f"`supernode_address` required when `isolation` is "
+                f"`clientappio_api_address` required when `isolation` is "
                 f"{ISOLATION_MODE_SUBPROCESS} or {ISOLATION_MODE_PROCESS}",
             )
         _clientappio_grpc_server, clientappio_servicer = run_clientappio_api_grpc(
-            address=supernode_address,
+            address=clientappio_api_address,
             certificates=certificates,
         )
-    supernode_address = cast(str, supernode_address)
+    clientappio_api_address = cast(str, clientappio_api_address)
 
     # At this point, only `load_client_app_fn` should be used
     # Both `client` and `client_fn` must not be used directly
@@ -519,9 +519,9 @@ def start_client_internal(
                             if start_subprocess:
                                 io_address = (
                                     CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS
-                                    if supernode_address
+                                    if clientappio_api_address
                                     == CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS
-                                    else supernode_address
+                                    else clientappio_api_address
                                 )
                                 # Start ClientApp subprocess
                                 command = [
