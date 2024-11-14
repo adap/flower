@@ -23,7 +23,11 @@ from typing_extensions import override
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.common import ConfigsRecord, Context, RecordSet
-from flwr.common.constant import SERVERAPPIO_API_DEFAULT_ADDRESS, Status, SubStatus
+from flwr.common.constant import (
+    SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
+    Status,
+    SubStatus,
+)
 from flwr.common.logger import log
 from flwr.common.typing import Fab, RunStatus, UserConfig
 from flwr.server.superlink.ffs import Ffs
@@ -38,7 +42,7 @@ class DeploymentEngine(Executor):
 
     Parameters
     ----------
-    superlink: str (default: "0.0.0.0:9091")
+    superlink: str (default: "127.0.0.1:9091")
         Address of the SuperLink to connect to.
     root_certificates: Optional[str] (default: None)
         Specifies the path to the PEM-encoded root certificate file for
@@ -49,7 +53,7 @@ class DeploymentEngine(Executor):
 
     def __init__(
         self,
-        superlink: str = SERVERAPPIO_API_DEFAULT_ADDRESS,
+        superlink: str = SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
         root_certificates: Optional[str] = None,
         flwr_dir: Optional[str] = None,
     ) -> None:
