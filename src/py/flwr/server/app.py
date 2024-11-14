@@ -47,7 +47,6 @@ from flwr.common.constant import (
     ISOLATION_MODE_SUBPROCESS,
     MISSING_EXTRA_REST,
     SERVERAPPIO_API_DEFAULT_ADDRESS,
-    SERVERAPPIO_CLIENT_DEFAULT_ADDRESS,
     SIMULATIONIO_API_DEFAULT_ADDRESS,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
@@ -368,12 +367,7 @@ def run_superlink() -> None:
 
     if args.isolation == ISOLATION_MODE_SUBPROCESS:
 
-        serverappio_client_address = (
-            SERVERAPPIO_CLIENT_DEFAULT_ADDRESS
-            if serverappio_address == SERVERAPPIO_API_DEFAULT_ADDRESS
-            else serverappio_address
-        )
-        address = simulationio_address if sim_exec else serverappio_client_address
+        address = simulationio_address if sim_exec else serverappio_address
         cmd = "flwr-simulation" if sim_exec else "flwr-serverapp"
 
         # Scheduler thread
@@ -738,8 +732,9 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
 def _add_args_serverappio_api(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--serverappio-api-address",
-        help="ServerAppIo API (gRPC) server address (IPv4, IPv6, or a domain name).",
         default=SERVERAPPIO_API_DEFAULT_ADDRESS,
+        help="ServerAppIo API (gRPC) server address (IPv4, IPv6, or a domain name). "
+        f"By default, it is set to {SERVERAPPIO_API_DEFAULT_ADDRESS}.",
     )
 
 
