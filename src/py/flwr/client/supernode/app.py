@@ -34,7 +34,7 @@ from flwr.common.args import (
 )
 from flwr.common.config import parse_config_args
 from flwr.common.constant import (
-    CLIENTAPPIO_API_DEFAULT_ADDRESS,
+    CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
     ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
@@ -180,9 +180,9 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--clientappio-api-address",
-        default=CLIENTAPPIO_API_DEFAULT_ADDRESS,
+        default=CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
         help="ClientAppIo API (gRPC) server address (IPv4, IPv6, or a domain name). "
-        f"By default, it is set to {CLIENTAPPIO_API_DEFAULT_ADDRESS}.",
+        f"By default, it is set to {CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS}.",
     )
 
     return parser

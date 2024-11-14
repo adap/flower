@@ -37,7 +37,8 @@ from flwr.client.typing import ClientFnExt
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, Message, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
-    CLIENTAPPIO_API_DEFAULT_ADDRESS,
+    CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS,
+    CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
     MISSING_EXTRA_REST,
@@ -216,7 +217,7 @@ def start_client_internal(
     max_wait_time: Optional[float] = None,
     flwr_path: Optional[Path] = None,
     isolation: Optional[str] = None,
-    supernode_address: Optional[str] = CLIENTAPPIO_API_DEFAULT_ADDRESS,
+    supernode_address: Optional[str] = CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     certificates: Optional[tuple[bytes, bytes, bytes]] = None,
     ssl_ca_certfile: Optional[str] = None,
 ) -> None:
@@ -278,7 +279,8 @@ def start_client_internal(
         by the SueprNode and communicates using gRPC at the address
         `supernode_address`. If `process`, the `ClientApp` runs in a separate isolated
         process and communicates using gRPC at the address `supernode_address`.
-    supernode_address : Optional[str] (default: `CLIENTAPPIO_API_DEFAULT_ADDRESS`)
+    supernode_address : Optional[str]
+        (default: `CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS`)
         The SuperNode gRPC server address.
     certificates : Optional[Tuple[bytes, bytes, bytes]] (default: None)
         Tuple containing the CA certificate, server certificate, and server private key.
@@ -515,11 +517,17 @@ def start_client_internal(
                             )
 
                             if start_subprocess:
+                                io_address = (
+                                    CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS
+                                    if supernode_address
+                                    == CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS
+                                    else supernode_address
+                                )
                                 # Start ClientApp subprocess
                                 command = [
                                     "flwr-clientapp",
-                                    "--supernode",
-                                    supernode_address,
+                                    "--clientappio-api-address",
+                                    io_address,
                                     "--token",
                                     str(token),
                                 ]
