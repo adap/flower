@@ -39,6 +39,7 @@ from flwr.common.address import parse_address
 from flwr.common.args import try_obtain_server_certificates
 from flwr.common.config import get_flwr_dir, parse_config_args
 from flwr.common.constant import (
+    CLIENT_OCTET,
     EXEC_API_DEFAULT_SERVER_ADDRESS,
     FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS,
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
@@ -46,7 +47,7 @@ from flwr.common.constant import (
     ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
     MISSING_EXTRA_REST,
-    SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
+    SERVER_OCTET,
     SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
     SIMULATIONIO_API_DEFAULT_SERVER_ADDRESS,
     TRANSPORT_TYPE_GRPC_ADAPTER,
@@ -368,15 +369,11 @@ def run_superlink() -> None:
 
     if args.isolation == ISOLATION_MODE_SUBPROCESS:
 
-        address = (
-            simulationio_address
-            if sim_exec
-            else (
-                SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS
-                if serverappio_address == SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS
-                else serverappio_address
-            )
+        _octet, _colon, _port = serverappio_address.rpartition(":")
+        io_address = (
+            f"{CLIENT_OCTET}:{_port}" if _octet == SERVER_OCTET else serverappio_address
         )
+        address = simulationio_address if sim_exec else io_address
         cmd = "flwr-simulation" if sim_exec else "flwr-serverapp"
 
         # Scheduler thread
