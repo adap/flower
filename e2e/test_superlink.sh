@@ -61,6 +61,9 @@ esac
 # Install Flower app
 pip install -e . --no-deps
 
+# Remove any duplicates
+sed -i '/^\[tool\.flwr\.federations\.e2e\]/,/^$/d' pyproject.toml
+
 # Check if the first argument is 'insecure'
 if [ "$server_arg" = "--insecure" ]; then
   # If $server_arg is '--insecure', append the first line
