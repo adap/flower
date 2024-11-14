@@ -17,7 +17,7 @@ Design Stateful ClientApps
 
 .. _recordset: ref-api/flwr.common.RecordSet.html#recordset
 
-By design, ClientApp_ objects are stateles. This means that the ``ClientApp`` object is
+By design, ClientApp_ objects are stateless. This means that the ``ClientApp`` object is
 recreated each time a new ``Message`` is to be processed. This behaviour is identical
 with Flower's Simulation Engine and Deployment Engine. For the former, it allows to
 simulate the running of large number of nodes without having on a single machine or
