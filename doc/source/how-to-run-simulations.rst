@@ -1,10 +1,6 @@
 Run simulations
 ===============
 
-.. youtube:: cRebUIGB5RU
-    :url_parameters: ?list=PLNG4feLHqCWlnj8a_E1A_n5zr2-8pafTB
-    :width: 100%
-
 Simulating Federated Learning workloads is useful for a multitude of use-cases: you
 might want to run your workload on a large cohort of clients but without having to
 source, configure and mange a large number of physical devices; you might want to run
@@ -13,147 +9,208 @@ having to go through a complex setup process; you might want to validate your al
 on different scenarios at varying levels of data and system heterogeneity, client
 availability, privacy budgets, etc. These are among some of the use-cases where
 simulating FL workloads makes sense. Flower can accommodate these scenarios by means of
-its `VirtualClientEngine
-<contributor-explanation-architecture.html#virtual-client-engine>`_ or VCE.
+its `Simulation Engine <contributor-explanation-architecture.html#simulation-engine>`_ .
 
-The ``VirtualClientEngine`` schedules, launches and manages `virtual` clients. These
-clients are identical to `non-virtual` clients (i.e. the ones you launch via the command
-`flwr.client.start_client <ref-api-flwr.html#start-client>`_) in the sense that they can
-be configure by creating a class inheriting, for example, from `flwr.client.NumPyClient
-<ref-api-flwr.html#flwr.client.NumPyClient>`_ and therefore behave in an identical way.
-In addition to that, clients managed by the ``VirtualClientEngine`` are:
+The ``SimulationEngine`` schedules, launches and manages ``ClientApp`` instances. It
+does so by first stargin a ``Backend``, which contains several workers (i.e. Python
+processes) that can execute a ``ClientApp`` by passing it a ``Context`` and a
+``Message``. These ``ClientApp`` objects are identical to those used by Flower's
+`Deployment Engine <contributor-explanation-architecture.html>`_, making alternating
+between _simulation_ to _deployment_ an effortless process. The execution of
+``ClientApp`` objects through Flower's ``Simulation Engine`` is:
 
-- resource-aware: this means that each client gets assigned a portion of the compute and
-  memory on your system. You as a user can control this at the beginning of the
-  simulation and allows you to control the degree of parallelism of your Flower FL
-  simulation. The fewer the resources per client, the more clients can run concurrently
-  on the same hardware.
-- self-managed: this means that you as a user do not need to launch clients manually,
-  instead this gets delegated to ``VirtualClientEngine``'s internals.
-- ephemeral: this means that a client is only materialized when it is required in the FL
-  process (e.g. to do `fit() <ref-api-flwr.html#flwr.client.Client.fit>`_). The object
-  is destroyed afterwards, releasing the resources it was assigned and allowing in this
-  way other clients to participate.
+- resource-aware: this means that each backend cowrking executing ``ClientApps`` gets
+  assigned a portion of the compute and memory on your system. You can define these at
+  the beginning of the simulation, allowing you to control the degree of parallelism of
+  your simulation. The fewer the resources per backend worker, the more ``ClientApps``
+  can run concurrently on the same hardware.
+- batchable: When there are more ``ClientApps`` to execute than workers the backend has,
+  ``ClientApps`` are queued and executed as soon as resources get freed. This means that
+  ``ClientApps`` are typically executed in batches of N, where N is the number of
+  backend workers.
+- self-managed: this means that you as a user do not need to launch nodes or
+  ``ClientApps`` manually, instead this gets delegated to ``Simulation Engine``'s
+  internals.
+- ephemeral: this means that a ``ClientApp`` is only materialized when it is required by
+  the application (e.g. to do `fit() <ref-api-flwr.html#flwr.client.Client.fit>`_). The
+  object is destroyed afterwards, releasing the resources it was assigned and allowing
+  in this way other clients to participate.
 
-The ``VirtualClientEngine`` implements `virtual` clients using `Ray
+.. note::
+
+    You can preserver the state (e.g. internal variables, parts of a ML model,
+    intermediate results) of a ``ClientApp`` by saving it to its ``Context``. Check the
+    `Designing Stateful Clients <how-to-design-stateful-clients.rst>`_ guide.
+
+The ``Simulation Engine`` delegates to a ``Backend`` the role of spawning and managing
+``ClientApps``. The default backend is the ``RayBackend`` which uses `Ray
 <https://www.ray.io/>`_, an open-source framework for scalable Python workloads. In
-particular, Flower's ``VirtualClientEngine`` makes use of `Actors
-<https://docs.ray.io/en/latest/ray-core/actors.html>`_ to spawn `virtual` clients and
-run their workload.
+particular, each worker is an `Actor
+<https://docs.ray.io/en/latest/ray-core/actors.html>`_ capable of spawning a
+``ClientApp`` given its ``Context`` and a ``Message`` to process.
 
 Launch your Flower simulation
 -----------------------------
 
-Running Flower simulations still require you to define your client class, a strategy,
-and utility functions to download and load (and potentially partition) your dataset.
-With that out of the way, launching your simulation is done with `start_simulation
-<ref-api-flwr.html#flwr.simulation.start_simulation>`_ and a minimal example looks as
-follows:
+Running a simulation is straightforward, in fact it is the default mode of operation for
+`flwr run <ref-api-cli.html#flwr-run>`_. Therfore, running Flower simulations primarily
+require you to first define a ``ClientApp`` and a ``ServerApp``. A convenient way to
+generate a minimal, but fully functional, Flower app is by means of the `flwr new
+<ref-api-cli.html#flwr-new>`_ command. There are multiple templates to choose from. The
+example below uses the ``PyTorch`` template. With that out of the way, launching your
+simulation is done with `start_simulation
+<ref-api-flwr.html#flwr.simulation.start_simulation>`_ and a minimal example is shown
+below.
 
-.. code-block:: python
+.. tip::
 
-    import flwr as fl
-    from flwr.server.strategy import FedAvg
+    If you haven't already, install flower via ``pip install -U flwr`` on a Python
+    environement.
 
+.. code-block:: shell
 
-    def client_fn(cid: str):
-        # Return a standard Flower client
-        return MyFlowerClient().to_client()
+    # or simply execute `flwr run` for a fully interactive process
+    flwr new my-app --framework="PyTorch" --username="alice"
 
+Then follow the instructions shown after completing the ``flwr new`` command. When you
+execute ``flwr run``, you'll be using the ``Simulation Egnine``.
 
-    # Launch the simulation
-    hist = fl.simulation.start_simulation(
-        client_fn=client_fn,  # A function to run a _virtual_ client when required
-        num_clients=50,  # Total number of clients available
-        config=fl.server.ServerConfig(num_rounds=3),  # Specify number of FL rounds
-        strategy=FedAvg(),  # A Flower strategy
-    )
+If we take a look at the `pyproject.toml` that was generated from the ``flwr new``
+command (and loaded upon ``flwr run`` execution), we see that a _default_ federation is
+defined. It sets the number of supernodes to 10.
 
-VirtualClientEngine resources
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. code-block:: toml
 
-By default the VCE has access to all system resources (i.e. all CPUs, all GPUs, etc)
-since that is also the default behavior when starting Ray. However, in some settings you
-might want to limit how many of your system resources are used for simulation. You can
-do this via the ``ray_init_args`` input argument to ``start_simulation`` which the VCE
-internally passes to Ray's ``ray.init`` command. For a complete list of settings you can
-configure check the `ray.init
-<https://docs.ray.io/en/latest/ray-core/api/doc/ray.init.html#ray-init>`_ documentation.
-Do not set ``ray_init_args`` if you want the VCE to use all your system's CPUs and GPUs.
+    [tool.flwr.federations]
+    default = "local-simulation"
 
-.. code-block:: python
+    [tool.flwr.federations.local-simulation]
+    options.num-supernodes = 10
 
-    import flwr as fl
+You can modify the size of your simulations by adjusting ``options.num-supernodes``.
 
-    # Launch the simulation by limiting resources visible to Flower's VCE
-    hist = fl.simulation.start_simulation(
-        # ...
-        # Out of all CPUs and GPUs available in your system,
-        # only 8xCPUs and 1xGPUs would be used for simulation.
-        ray_init_args={"num_cpus": 8, "num_gpus": 1}
-    )
-
-Assigning client resources
+Defining backend resources
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-By default the ``VirtualClientEngine`` assigns a single CPU core (and nothing else) to
-each virtual client. This means that if your system has 10 cores, that many virtual
-clients can be concurrently running.
+By default the ``Simulation Engine`` assigns a two CPU cores to each backend worker.
+This means that if your system has 10 CPU cores, five backend workers can be running in
+parallel, each executing a different ``ClientApp`` instance.
 
-More often than not, you would probably like to adjust the resources your clients get
-assigned based on the complexity (i.e. compute and memory footprint) of your FL
-workload. You can do so when starting your simulation by setting the argument
-`client_resources` to `start_simulation
-<ref-api-flwr.html#flwr.simulation.start_simulation>`_. Two keys are internally used by
-Ray to schedule and spawn workloads (in our case Flower clients):
+More often than not, you would probably like to adjust the resources your ``ClientApp``
+get assigned based on the complexity (i.e. compute and memory footprint) of your
+workload. You can do so by adjusting the backend resources for your federation.
 
-- ``num_cpus`` indicates the number of CPU cores a client would get.
-- ``num_gpus`` indicates the **ratio** of GPU memory a client gets assigned.
+.. caution::
 
-Let's see a few examples:
+    Note that the resources the backend assigns to each worker (and hence to each
+    ``ClientApp`` being executed) is performed in a _soft_ manner. This means that the
+    resources are primarily taken into account in order to control the degree of
+    parallelism at which ``ClientApp`` instances should be executed. Resource
+    assignation is **not strict**, meaning that if you specified your ``ClientApp`` to
+    make use of 25% of the available VRAM but it ends up using 50%, it might make other
+    ``ClientApp`` instances running to crash.
 
-.. code-block:: python
+Customizing resources can be done directly on the `pyproject.toml` of your app.
 
-    import flwr as fl
+.. code-block:: toml
 
-    # each client gets 1xCPU (this is the default if no resources are specified)
-    my_client_resources = {"num_cpus": 1, "num_gpus": 0.0}
-    # each client gets 2xCPUs and half a GPU. (with a single GPU, 2 clients run concurrently)
-    my_client_resources = {"num_cpus": 2, "num_gpus": 0.5}
-    # 10 client can run concurrently on a single GPU, but only if you have 20 CPU threads.
-    my_client_resources = {"num_cpus": 2, "num_gpus": 0.1}
+    [tool.flwr.federations.local-simulation]
+    options.num-supernodes = 10
+    options.backend.client-resources.num-cpus = 1 # each ClientApp assumes to use 1CPUs (default is 2)
+    options.backend.client-resources.num-gpus = 0.0 # no GPU access to the ClientApp (default is 0.0)
 
-    # Launch the simulation
-    hist = fl.simulation.start_simulation(
-        # ...
-        client_resources=my_client_resources  # A Python dict specifying CPU/GPU resources
-    )
+With the above backend settings, your simulation will run as many ``ClientApps`` in
+parallel as CPUs you have in your system. GPU resources for your ``ClientApp`` can be
+assigned by specifying the **ratio** of VRAM each should make use of.
 
-While the ``client_resources`` can be used to control the degree of concurrency in your
-FL simulation, this does not stop you from running dozens, hundreds or even thousands of
-clients in the same round and having orders of magnitude more `dormant` (i.e. not
-participating in a round) clients. Let's say you want to have 100 clients per round but
-your system can only accommodate 8 clients concurrently. The ``VirtualClientEngine``
-will schedule 100 jobs to run (each simulating a client sampled by the strategy) and
-then will execute them in a resource-aware manner in batches of 8.
+.. code-block:: toml
 
-To understand all the intricate details on how resources are used to schedule FL clients
-and how to define custom resources, please take a look at the `Ray documentation
-<https://docs.ray.io/en/latest/ray-core/scheduling/resources.html>`_.
+    [tool.flwr.federations.local-simulation]
+    options.num-supernodes = 10
+    options.backend.client-resources.num-cpus = 1 # each ClientApp assumes to use 1CPUs (default is 2)
+    options.backend.client-resources.num-gpus = 0.25 # each ClientApp uses 25% of VRAM (default is 0.0)
+
+Let's see how the above configurate results in a different number of ``ClientApps``
+running in parallel depending on the resources available in your system. If your system
+has:
+
+- 10x CPUs and 1x GPU: at most 4 ``ClientApps`` will run in parallel since each require
+  25% of the available VRAM.
+- 10x CPUs and 2x GPUs: at most 8 ``ClientApps`` will run in parallel.
+- 6x CPUs and 2x GPUs: at most 6 ``ClientApps`` will run in parallel.
+- 10x CPUs but 0x GPUs: you won't be able to run the simulation since not a single
+  ``ClientApp`` will be able to run.
+
+A generalization of this is given by the following equation. It gives the maximum number
+of ``ClientApps`` that can be executed in parallel on available CPU cores (SYS_CPUS) and
+VRAM (SYS_GPUS).
+
+.. math::
+
+    N = \min\left(\left\lfloor \frac{\text{SYS_CPUS}}{\text{num_cpus}} \right\rfloor, \left\lfloor \frac{\text{SYS_GPUS}}{\text{num_gpus}} \right\rfloor\right)
+
+Both ``num_cpus`` (an integer higher than 1) and ``num_gpus`` (a non-negative real
+number) should be set in a per ``ClientApp`` basis. If, for example you want only a
+single ``ClientApp`` to run in each GPU, then set ``num_gpus=1.0``. If, for example a
+``ClientApp`` requires access to two whole GPUs you'd set ``num_gpus=2``.
+
+While the ``options.backend.client-resources`` can be used to control the degree of
+concurrency in your simulations, this does not stop you from running hundreds or even
+thousands of clients in the same round and having orders of magnitude more `dormant`
+(i.e. not participating in a round) clients. Let's say you want to have 100 clients per
+round but your system can only accommodate 8 clients concurrently. The
+``SimulationEngine`` will schedule 100 ``ClientApps`` to run and then will execute them
+in a resource-aware manner in batches of 8.
+
+Simulation Engine resources
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+By default the ``SimulationEngine`` has **access to all system resources** (i.e. all
+CPUs, all GPUs). However, in some settings you might want to limit how many of your
+system resources are used for simulation. You can do this in the ``pyproject.toml`` of
+your app.
+
+.. code-block:: toml
+
+    [tool.flwr.federations.local-simulation]
+    options.num-supernodes = 10
+    options.backend.client-resources.num-cpus = 1 # Each ClientApp will get assigned 1 CPU core
+    options.backend.client-resources.num-gpus = 0.5 # Each ClientApp will get 50% of each available GPU
+    options.backend.init_args.num_cpus = 1
+    options.backend.init_args.num_gpus = 1
+
+With the above setup, the Backend will be initialized with a single CPU and GPU.
+Therefore, even if more CPUs and GPUs are avaialabel in your system, they will not be
+used for the simulation. The example above results in a singe ``ClientApp`` running at
+any give point.
+
+For a complete list of settings you can configure check the `ray.init
+<https://docs.ray.io/en/latest/ray-core/api/doc/ray.init.html#ray-init>`_ documentation.
+
+For the highest performance, do not set ``options.backend.init_args``.
 
 Simulation examples
 ~~~~~~~~~~~~~~~~~~~
 
-A few ready-to-run complete examples for Flower simulation in Tensorflow/Keras and
-PyTorch are provided in the `Flower repository <https://github.com/adap/flower>`_. You
-can run them on Google Colab too:
+In addition to the quickstart tutorials in the documentation (e.g `quickstart PyTorch
+Tutorial <tutorial-quickstart-pytorch.html>`_, `quickstart JAX
+<tutorial-quickstart-jax.html>`_), most examples in the Flower repository are
+simulation-ready.
 
-- `Tensorflow/Keras Simulation
-  <https://github.com/adap/flower/tree/main/examples/simulation-tensorflow>`_: 100
-  clients collaboratively train a MLP model on MNIST.
-- `PyTorch Simulation
-  <https://github.com/adap/flower/tree/main/examples/simulation-pytorch>`_: 100 clients
-  collaboratively train a CNN model on MNIST.
+- `Quickstart Tensorflow/Keras
+  <https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow>`_.
+- `Quickstart Pytorch
+  <https://github.com/adap/flower/tree/main/examples/quickstart-pytorch>`_
+- `Advanced PyTorch
+  <https://github.com/adap/flower/tree/main/examples/advanced-pytorch>`_
+- `Quickstart MLX <https://github.com/adap/flower/tree/main/examples/quickstart-mlx>`_
+- `ViT finetuning <https://github.com/adap/flower/tree/main/examples/flowertune-vit>`_
+
+The complete list of examples can be found in `the Flower GitHub
+<https://github.com/adap/flower/tree/main/examples>`_.
+
+Simulation with Colab/Jupyter
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Multi-node Flower simulations
 -----------------------------
