@@ -86,7 +86,9 @@ sleep 5
 
 # set -x
 # We execute `flwr run` to begin the training
-timeout 2m flwr run . e2e &
+ls
+cat pyproject.toml
+timeout 2m flwr run "." e2e &
 echo "Executing flwr run to start training"
 sleep 10
 
