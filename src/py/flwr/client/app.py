@@ -37,12 +37,13 @@ from flwr.client.typing import ClientFnExt
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, Message, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
-    CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS,
+    CLIENT_OCTET,
     CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
     MISSING_EXTRA_REST,
     RUN_ID_NUM_BYTES,
+    SERVER_OCTET,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_BIDI,
     TRANSPORT_TYPE_GRPC_RERE,
@@ -517,10 +518,12 @@ def start_client_internal(
                             )
 
                             if start_subprocess:
+                                _octet, _colon, _port = (
+                                    clientappio_api_address.rpartition(":")
+                                )
                                 io_address = (
-                                    CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS
-                                    if clientappio_api_address
-                                    == CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS
+                                    f"{CLIENT_OCTET}:{_port}"
+                                    if _octet == SERVER_OCTET
                                     else clientappio_api_address
                                 )
                                 # Start ClientApp subprocess
