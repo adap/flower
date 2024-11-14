@@ -30,6 +30,7 @@ from flwr.common.constant import (
     RUN_ID_NUM_BYTES,
     Status,
 )
+from flwr.common.record import ConfigsRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.linkstate.linkstate import LinkState
@@ -39,7 +40,6 @@ from .utils import (
     generate_rand_int_from_bytes,
     has_valid_sub_status,
     is_valid_transition,
-    make_node_unavailable_taskres,
 )
 
 
@@ -69,6 +69,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         # Map run_id to RunRecord
         self.run_ids: dict[int, RunRecord] = {}
         self.contexts: dict[int, Context] = {}
+        self.federation_options: dict[int, ConfigsRecord] = {}
         self.task_ins_store: dict[UUID, TaskIns] = {}
         self.task_res_store: dict[UUID, TaskRes] = {}
 
@@ -87,8 +88,25 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             return None
         # Validate run_id
         if task_ins.run_id not in self.run_ids:
-            log(ERROR, "`run_id` is invalid")
+            log(ERROR, "Invalid run ID for TaskIns: %s", task_ins.run_id)
             return None
+        # Validate source node ID
+        if task_ins.task.producer.node_id != 0:
+            log(
+                ERROR,
+                "Invalid source node ID for TaskIns: %s",
+                task_ins.task.producer.node_id,
+            )
+            return None
+        # Validate destination node ID
+        if not task_ins.task.consumer.anonymous:
+            if task_ins.task.consumer.node_id not in self.node_ids:
+                log(
+                    ERROR,
+                    "Invalid destination node ID for TaskIns: %s",
+                    task_ins.task.consumer.node_id,
+                )
+                return None
 
         # Create task_id
         task_id = uuid4()
@@ -238,21 +256,6 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                     task_res_list.append(task_res)
                     replied_task_ids.add(reply_to)
 
-            # Check if the node is offline
-            for task_id in task_ids - replied_task_ids:
-                task_ins = self.task_ins_store.get(task_id)
-                if task_ins is None:
-                    continue
-                node_id = task_ins.task.consumer.node_id
-                online_until, _ = self.node_ids[node_id]
-                # Generate a TaskRes containing an error reply if the node is offline.
-                if online_until < time.time():
-                    err_taskres = make_node_unavailable_taskres(
-                        ref_taskins=task_ins,
-                    )
-                    self.task_res_store[UUID(err_taskres.task_id)] = err_taskres
-                    task_res_list.append(err_taskres)
-
             # Mark all of them as delivered
             delivered_at = now().isoformat()
             for task_res in task_res_list:
@@ -361,12 +364,14 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         """Retrieve stored `node_id` filtered by `node_public_keys`."""
         return self.public_key_to_node_id.get(node_public_key)
 
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     def create_run(
         self,
         fab_id: Optional[str],
         fab_version: Optional[str],
         fab_hash: Optional[str],
         override_config: UserConfig,
+        federation_options: ConfigsRecord,
     ) -> int:
         """Create a new run for the specified `fab_hash`."""
         # Sample a random int64 as run_id
@@ -390,6 +395,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                     pending_at=now().isoformat(),
                 )
                 self.run_ids[run_id] = run_record
+
+                # Record federation options. Leave empty if not passed
+                self.federation_options[run_id] = federation_options
                 return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
@@ -426,6 +434,11 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
     def get_node_public_keys(self) -> set[bytes]:
         """Retrieve all currently stored `node_public_keys` as a set."""
         return self.node_public_keys
+
+    def get_run_ids(self) -> set[int]:
+        """Retrieve all run IDs."""
+        with self.lock:
+            return set(self.run_ids.keys())
 
     def get_run(self, run_id: int) -> Optional[Run]:
         """Retrieve information about the run with the specified `run_id`."""
@@ -496,6 +509,14 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 break
 
         return pending_run_id
+
+    def get_federation_options(self, run_id: int) -> Optional[ConfigsRecord]:
+        """Retrieve the federation options for the specified `run_id`."""
+        with self.lock:
+            if run_id not in self.run_ids:
+                log(ERROR, "`run_id` is invalid")
+                return None
+            return self.federation_options[run_id]
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""

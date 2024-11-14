@@ -71,7 +71,7 @@ jobs:
 
       - id: matrix
         run: |
-           python dev/build-docker-image-matrix.py --flwr-version "${{ needs.publish.outputs.flwr-version }}" > matrix.json
+           python dev/build-docker-image-matrix.py --flwr-version "${{ needs.publish.outputs.flwr-version }}" --matrix stable > matrix.json
            echo "matrix=$(cat matrix.json)" >> $GITHUB_OUTPUT
 
   build-base-images:
@@ -86,13 +86,10 @@ jobs:
       namespace-repository: ${{ matrix.images.namespace_repository }}
       file-dir: ${{ matrix.images.file_dir }}
       build-args: |
-        PYTHON_VERSION=${{ matrix.images.python_version }}
         PIP_VERSION=${{ needs.parameters.outputs.pip-version }}
         SETUPTOOLS_VERSION=${{ needs.parameters.outputs.setuptools-version }}
-        DISTRO=${{ matrix.images.distro.name }}
-        DISTRO_VERSION=${{ matrix.images.distro.version }}
-        FLWR_VERSION=${{ matrix.images.flwr_version }}
-      tags: ${{ matrix.images.tag }}
+        ${{ matrix.images.build_args_encoded }}
+      tags: ${{ matrix.images.tags_encoded }}
     secrets:
       dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
       dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -109,7 +106,7 @@ jobs:
       namespace-repository: ${{ matrix.images.namespace_repository }}
       file-dir: ${{ matrix.images.file_dir }}
       build-args: BASE_IMAGE=${{ matrix.images.base_image }}
-      tags: ${{ matrix.images.tags }}
+      tags: ${{ matrix.images.tags_encoded }}
     secrets:
       dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
       dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}

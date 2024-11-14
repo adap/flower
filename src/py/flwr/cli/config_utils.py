@@ -275,7 +275,6 @@ def validate_federation_in_project_config(
 
     # Validate the federation exists in the configuration
     federation_config = config["tool"]["flwr"]["federations"].get(federation)
-    print(federation_config)
     if federation_config is None:
         available_feds = {
             fed for fed in config["tool"]["flwr"]["federations"] if fed != "default"
