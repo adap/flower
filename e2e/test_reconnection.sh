@@ -36,6 +36,8 @@ check_and_kill() {
   done
 }
 
+ls
+
 # Install Flower app
 pip install -e . --no-deps
 
@@ -112,7 +114,7 @@ sleep 10
 
 # Initialize a flag to track if training is successful
 found_success=false
-timeout=360  # Timeout after 360 seconds
+timeout=120  # Timeout after 120 seconds
 elapsed=0
 
 # Check for "Success" in a loop with a timeout

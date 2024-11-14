@@ -70,19 +70,19 @@ else
   echo -e $"\n[tool.flwr.federations.e2e]\naddress = \"127.0.0.1:9093\"\nroot-certificates = \"certificates/ca.crt\"" >> pyproject.toml
 fi
 
-timeout 2m flower-superlink $server_arg $db_arg $rest_arg_superlink $server_auth \
+timeout 5m flower-superlink $server_arg $db_arg $rest_arg_superlink $server_auth \
   2>&1 | tee flwr_output.log &
 sl_pid=$(pgrep -f "flower-superlink")
 sleep 3
 
-timeout 2m flower-supernode ./ $client_arg $rest_arg_supernode \
+timeout 5m flower-supernode ./ $client_arg $rest_arg_supernode \
   --superlink $server_address $client_auth_1 \
   --isolation="subprocess" --supernode-address "localhost:9094" \
   --max-retries 0 &
 cl1_pid=$!
 sleep 3
 
-timeout 2m flower-supernode ./ $client_arg $rest_arg_supernode \
+timeout 5m flower-supernode ./ $client_arg $rest_arg_supernode \
   --superlink $server_address $client_auth_2 \
   --isolation="subprocess" --supernode-address "localhost:9095" \
   --max-retries 0 &
@@ -95,7 +95,7 @@ timeout 1m flwr run "." e2e
 
 # Initialize a flag to track if training is successful
 found_success=false
-timeout=360  # Timeout after 360 seconds
+timeout=240  # Timeout after 240 seconds
 elapsed=0
 
 # Check for "Success" in a loop with a timeout
