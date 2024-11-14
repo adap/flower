@@ -39,6 +39,7 @@ from flwr.common import (
     Metadata,
     RecordSet,
     Scalar,
+    now,
 )
 from flwr.common.constant import Status
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
@@ -122,11 +123,15 @@ def register_messages_into_state(
             fab_version="v1.0.0",
             fab_hash="hash",
             override_config={},
-        ),
-        RunStatus(
-            status=Status.PENDING,
-            sub_status="",
-            details="",
+            pending_at=now().isoformat(),
+            starting_at="",
+            running_at="",
+            finished_at="",
+            status=RunStatus(
+                status=Status.PENDING,
+                sub_status="",
+                details="",
+            ),
         ),
     )
     # Artificially add TaskIns to state so they can be processed
@@ -210,7 +215,7 @@ def start_and_shutdown(
     if not app_dir:
         app_dir = _autoresolve_app_dir()
 
-    run = Run(run_id=1234, fab_id="", fab_version="", fab_hash="", override_config={})
+    run = Run.create_empty(run_id=1234)
 
     start_vce(
         num_supernodes=num_supernodes,

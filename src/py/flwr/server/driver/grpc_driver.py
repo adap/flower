@@ -26,11 +26,7 @@ from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
 from flwr.common.constant import SERVERAPPIO_API_DEFAULT_ADDRESS
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
-from flwr.common.serde import (
-    message_from_taskres,
-    message_to_taskins,
-    user_config_from_proto,
-)
+from flwr.common.serde import message_from_taskres, message_to_taskins, run_from_proto
 from flwr.common.typing import Run
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
@@ -119,13 +115,7 @@ class GrpcDriver(Driver):
         res: GetRunResponse = self._stub.GetRun(req)
         if not res.HasField("run"):
             raise RuntimeError(f"Cannot find the run with ID: {run_id}")
-        self._run = Run(
-            run_id=res.run.run_id,
-            fab_id=res.run.fab_id,
-            fab_version=res.run.fab_version,
-            fab_hash=res.run.fab_hash,
-            override_config=user_config_from_proto(res.run.override_config),
-        )
+        self._run = run_from_proto(res.run)
 
     @property
     def run(self) -> Run:

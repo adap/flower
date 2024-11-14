@@ -208,7 +208,16 @@ class ClientMessage:
 
 
 @dataclass
-class Run:
+class RunStatus:
+    """Run status information."""
+
+    status: str
+    sub_status: str
+    details: str
+
+
+@dataclass
+class Run:  # pylint: disable=too-many-instance-attributes
     """Run details."""
 
     run_id: int
@@ -216,15 +225,27 @@ class Run:
     fab_version: str
     fab_hash: str
     override_config: UserConfig
+    pending_at: str
+    starting_at: str
+    running_at: str
+    finished_at: str
+    status: RunStatus
 
-
-@dataclass
-class RunStatus:
-    """Run status information."""
-
-    status: str
-    sub_status: str
-    details: str
+    @classmethod
+    def create_empty(cls, run_id: int) -> "Run":
+        """Return an empty Run instance."""
+        return cls(
+            run_id=run_id,
+            fab_id="",
+            fab_version="",
+            fab_hash="",
+            override_config={},
+            pending_at="",
+            starting_at="",
+            running_at="",
+            finished_at="",
+            status=RunStatus(status="", sub_status="", details=""),
+        )
 
 
 @dataclass

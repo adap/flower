@@ -41,11 +41,7 @@ from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
-from flwr.common.serde import (
-    message_from_taskins,
-    message_to_taskres,
-    user_config_from_proto,
-)
+from flwr.common.serde import message_from_taskins, message_to_taskres, run_from_proto
 from flwr.common.typing import Fab, Run
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -287,13 +283,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         )
 
         # Return fab_id and fab_version
-        return Run(
-            run_id,
-            get_run_response.run.fab_id,
-            get_run_response.run.fab_version,
-            get_run_response.run.fab_hash,
-            user_config_from_proto(get_run_response.run.override_config),
-        )
+        return run_from_proto(get_run_response.run)
 
     def get_fab(fab_hash: str) -> Fab:
         # Call FleetAPI
