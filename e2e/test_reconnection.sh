@@ -97,20 +97,19 @@ timeout 2m flwr run "." e2e &
 echo "Executing flwr run to start training"
 sleep 10
 
-#-- # Kill first client as soon as the training starts, the flwr-serverapp should just 
-#-- # receive a failure in this case and continue the rounds when enough clients are 
-#-- # connected
-#-- kill $cl1_pid
-#-- # check_and_kill "$cl1_pids"
-#-- echo "Killing first client"
-#-- sleep 3
-#-- 
-#-- # Restart first client so enough clients are connected to continue the FL rounds
-#-- timeout 5m flower-supernode ./ --insecure $rest_arg --superlink $server_address \
-#--   --isolation="subprocess" --supernode-address "localhost:9094" &
-#-- cl1_pid=$!
-#-- echo "Starting new client"
-#-- sleep 5
+# Kill first client as soon as the training starts, the flwr-serverapp should just 
+# receive a failure in this case and continue the rounds when enough clients are 
+# connected
+kill $cl1_pid
+echo "Killing first client"
+sleep 3
+
+# Restart first client so enough clients are connected to continue the FL rounds
+timeout 5m flower-supernode ./ --insecure $rest_arg --superlink $server_address \
+  --isolation="subprocess" --supernode-address "localhost:9094" &
+cl1_pid=$!
+echo "Starting new client"
+sleep 5
 
 # Initialize a flag to track if training is successful
 found_success=false
