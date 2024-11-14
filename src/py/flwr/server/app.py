@@ -39,16 +39,16 @@ from flwr.common.address import parse_address
 from flwr.common.args import try_obtain_server_certificates
 from flwr.common.config import get_flwr_dir, parse_config_args
 from flwr.common.constant import (
-    EXEC_API_DEFAULT_ADDRESS,
+    EXEC_API_DEFAULT_SERVER_ADDRESS,
     FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS,
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
     FLEET_API_REST_DEFAULT_ADDRESS,
     ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
     MISSING_EXTRA_REST,
-    SERVERAPPIO_API_DEFAULT_ADDRESS,
-    SERVERAPPIO_CLIENT_DEFAULT_ADDRESS,
-    SIMULATIONIO_API_DEFAULT_ADDRESS,
+    SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
+    SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
+    SIMULATIONIO_API_DEFAULT_SERVER_ADDRESS,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
@@ -368,12 +368,15 @@ def run_superlink() -> None:
 
     if args.isolation == ISOLATION_MODE_SUBPROCESS:
 
-        serverappio_client_address = (
-            SERVERAPPIO_CLIENT_DEFAULT_ADDRESS
-            if serverappio_address == SERVERAPPIO_API_DEFAULT_ADDRESS
-            else serverappio_address
+        address = (
+            simulationio_address
+            if sim_exec
+            else (
+                SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS
+                if serverappio_address == SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS
+                else serverappio_address
+            )
         )
-        address = simulationio_address if sim_exec else serverappio_client_address
         cmd = "flwr-simulation" if sim_exec else "flwr-serverapp"
 
         # Scheduler thread
@@ -432,7 +435,7 @@ def _flwr_scheduler(
             command = [
                 cmd,
                 "--run-once",
-                "--superlink",
+                "--serverappio-api-address",
                 io_api_address,
             ]
             if ssl_ca_certfile:
@@ -738,8 +741,9 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
 def _add_args_serverappio_api(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--serverappio-api-address",
-        help="ServerAppIo API (gRPC) server address (IPv4, IPv6, or a domain name).",
-        default=SERVERAPPIO_API_DEFAULT_ADDRESS,
+        default=SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
+        help="ServerAppIo API (gRPC) server address (IPv4, IPv6, or a domain name). "
+        f"By default, it is set to {SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS}.",
     )
 
 
@@ -772,8 +776,9 @@ def _add_args_exec_api(parser: argparse.ArgumentParser) -> None:
     """Add command line arguments for Exec API."""
     parser.add_argument(
         "--exec-api-address",
-        help="Exec API server address (IPv4, IPv6, or a domain name)",
-        default=EXEC_API_DEFAULT_ADDRESS,
+        help="Exec API server address (IPv4, IPv6, or a domain name) "
+        f"By default, it is set to {EXEC_API_DEFAULT_SERVER_ADDRESS}.",
+        default=EXEC_API_DEFAULT_SERVER_ADDRESS,
     )
     parser.add_argument(
         "--executor",
@@ -797,6 +802,7 @@ def _add_args_exec_api(parser: argparse.ArgumentParser) -> None:
 def _add_args_simulationio_api(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--simulationio-api-address",
-        help="SimulationIo API (gRPC) server address (IPv4, IPv6, or a domain name).",
-        default=SIMULATIONIO_API_DEFAULT_ADDRESS,
+        default=SIMULATIONIO_API_DEFAULT_SERVER_ADDRESS,
+        help="SimulationIo API (gRPC) server address (IPv4, IPv6, or a domain name)."
+        f"By default, it is set to {SIMULATIONIO_API_DEFAULT_SERVER_ADDRESS}.",
     )
