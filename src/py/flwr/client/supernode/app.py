@@ -28,7 +28,10 @@ from cryptography.hazmat.primitives.serialization import (
 )
 
 from flwr.common import EventType, event
-from flwr.common.args import try_obtain_root_certificates
+from flwr.common.args import (
+    try_obtain_root_certificates,
+    try_obtain_server_certificates,
+)
 from flwr.common.config import parse_config_args
 from flwr.common.constant import (
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
@@ -63,6 +66,8 @@ def run_supernode() -> None:
         )
 
     root_certificates = try_obtain_root_certificates(args, args.superlink)
+    # Obtain certificates for ClientAppIo API server
+    server_certificates = try_obtain_server_certificates(args, TRANSPORT_TYPE_GRPC_RERE)
     load_fn = get_load_client_app_fn(
         default_app_ref="",
         app_path=args.app,
@@ -88,6 +93,8 @@ def run_supernode() -> None:
         flwr_path=args.flwr_dir,
         isolation=args.isolation,
         supernode_address=args.supernode_address,
+        certificates=server_certificates,
+        ssl_ca_certfile=args.ssl_ca_certfile,
     )
 
     # Graceful shutdown
@@ -215,6 +222,25 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         type=str,
         help="Specifies the path to the PEM-encoded root certificate file for "
         "establishing secure HTTPS connections.",
+    )
+    parser.add_argument(
+        "--ssl-certfile",
+        help="ClientAppIo API server SSL certificate file (as a path str) "
+        "to create a secure connection.",
+        type=str,
+        default=None,
+    )
+    parser.add_argument(
+        "--ssl-keyfile",
+        help="ClientAppIo API server SSL private key file (as a path str) "
+        "to create a secure connection.",
+        type=str,
+    )
+    parser.add_argument(
+        "--ssl-ca-certfile",
+        help="ClientAppIo API server SSL CA certificate file (as a path str) "
+        "to create a secure connection.",
+        type=str,
     )
     parser.add_argument(
         "--server",
