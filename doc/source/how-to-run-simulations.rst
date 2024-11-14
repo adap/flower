@@ -193,7 +193,7 @@ Simulation examples
 ~~~~~~~~~~~~~~~~~~~
 
 In addition to the quickstart tutorials in the documentation (e.g `quickstart PyTorch
-Tutorial <tutorial-quickstart-pytorch.html>`_, `quickstart JAX
+Tutorial <tutorial-quickstart-pytorch.html>`_, `quickstart JAX Tutorial
 <tutorial-quickstart-jax.html>`_), most examples in the Flower repository are
 simulation-ready.
 
@@ -211,6 +211,43 @@ The complete list of examples can be found in `the Flower GitHub
 
 Simulation with Colab/Jupyter
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The preferred way of running simulations should always be ``flwr run``. However, the
+core functionality of the ``Simulation Engine`` can be used from whithin a Google Colab
+or Jupyter environment by means of `run_simulation
+<ref-api-flwr.html#flwr.simulation.run_simulation>`_.
+
+.. code-block:: python
+
+    from flwr.simulation import run_simulation
+
+    # Concstruct the ClientApp passing the client generation function
+    client_app = ClientApp(client_fn=client_fn)
+
+    # Create your ServerApp passing the server generation function
+    server_app = ServerApp(server_fn=server_fn)
+
+    run_simulation(
+        server_app=server_app,
+        client_app=client_app,
+        num_supernodes=10,  # equivalent to setting `num-supernodes`` in the pyproject.toml
+        backend_config={"backend_config": {"num_cpus": 1, "num_gpus": 0.0}},
+    )
+
+With ``run_simulation`` you can also control the amount of resources for your
+``ClientApp`` instances. Do so by setting ``backend_config``. If unset, the default
+resources are assinged (i.e. 2xCPUs per ``ClientApp`` and no GPU).
+
+.. code-block:: python
+
+    run_simulation(
+        # ...
+        backend_config={"backend_config": {"num_cpus": 2, "num_gpus": 0.25}}
+    )
+
+Refer to the `30 minutes Federated AI Tutorial
+<https://colab.research.google.com/github/adap/flower/blob/main/examples/flower-in-30-minutes/tutorial.ipynb>`_
+for a complete example on how to run Flower Simulations in Colab.
 
 Multi-node Flower simulations
 -----------------------------
