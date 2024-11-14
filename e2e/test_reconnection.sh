@@ -54,13 +54,13 @@ echo "Starting SuperLink"
 sleep 3
 
 timeout 10m flower-supernode ./ --insecure $rest_arg --superlink $server_address \
-  --isolation="subprocess" --supernode-address="localhost:9094" &
+  --isolation="subprocess" --clientappio-api-address="localhost:9094" &
 cl1_pid=$!
 echo "Starting first client"
 sleep 3
 
 timeout 10m flower-supernode ./ --insecure $rest_arg --superlink $server_address \
-  --isolation="subprocess" --supernode-address="localhost:9095" &
+  --isolation="subprocess" --clientappio-api-address="localhost:9095" &
 cl2_pid=$!
 echo "Starting second client"
 sleep 3
@@ -84,7 +84,7 @@ sleep 5
 
 # Starting new client, this is so we have enough clients to execute `flwr run`
 timeout 10m flower-supernode ./ --insecure $rest_arg --superlink $server_address \
-  --isolation="subprocess" --supernode-address "localhost:9094" &
+  --isolation="subprocess" --clientappio-api-address "localhost:9094" &
 cl1_pid=$!
 echo "Starting new client"
 sleep 5
@@ -106,7 +106,7 @@ sleep 3
 
 # Restart first client so enough clients are connected to continue the FL rounds
 timeout 5m flower-supernode ./ --insecure $rest_arg --superlink $server_address \
-  --isolation="subprocess" --supernode-address "localhost:9094" &
+  --isolation="subprocess" --clientappio-api-address "localhost:9094" &
 cl1_pid=$!
 echo "Starting new client"
 sleep 5
