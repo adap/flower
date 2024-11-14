@@ -87,7 +87,7 @@ sleep 3
 
 timeout 5m flower-supernode ./ $client_arg $server_arg $rest_arg_supernode \
   --superlink $server_address $client_auth_2 \
-  --isolation="subprocess" --supernode-address "localhost:9095" \
+  --isolation="subprocess" --supernode-address "localhost:9096" \
   --max-retries 0 &
 cl2_pid=$!
 sleep 3
