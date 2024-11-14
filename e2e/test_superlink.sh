@@ -80,20 +80,18 @@ sleep 3
 
 timeout 5m flower-supernode ./ $client_arg $server_arg $rest_arg_supernode \
   --superlink $server_address $client_auth_1 \
-  --isolation="subprocess" --supernode-address "localhost:9094" \
+  --isolation="subprocess" --clientappio-api-address "localhost:9094" \
   --max-retries 0 &
 cl1_pid=$!
 sleep 3
 
 timeout 5m flower-supernode ./ $client_arg $server_arg $rest_arg_supernode \
   --superlink $server_address $client_auth_2 \
-  --isolation="subprocess" --supernode-address "localhost:9096" \
+  --isolation="subprocess" --clientappio-api-address "localhost:9096" \
   --max-retries 0 &
 cl2_pid=$!
 sleep 3
 
-ls
-cat pyproject.toml
 timeout 1m flwr run "." e2e
 
 # Initialize a flag to track if training is successful
