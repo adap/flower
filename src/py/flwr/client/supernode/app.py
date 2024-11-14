@@ -93,7 +93,7 @@ def run_supernode() -> None:
         ),
         flwr_path=args.flwr_dir,
         isolation=args.isolation,
-        supernode_address=args.supernode_address,
+        supernode_address=args.clientappio_api_address,
         certificates=server_certificates,
         ssl_ca_certfile=args.ssl_ca_certfile,
     )
