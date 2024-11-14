@@ -92,8 +92,6 @@ timeout 5m flower-supernode ./ $client_arg $server_arg $rest_arg_supernode \
 cl2_pid=$!
 sleep 3
 
-ls
-cat pyproject.toml
 timeout 1m flwr run "." e2e
 
 # Initialize a flag to track if training is successful
