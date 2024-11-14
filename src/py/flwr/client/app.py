@@ -278,8 +278,9 @@ def start_client_internal(
         `process`. Defaults to `None`, which runs the `ClientApp` in the same process
         as the SuperNode. If `subprocess`, the `ClientApp` runs in a subprocess started
         by the SueprNode and communicates using gRPC at the address
-        `clientappio_api_address`. If `process`, the `ClientApp` runs in a separate isolated
-        process and communicates using gRPC at the address `clientappio_api_address`.
+        `clientappio_api_address`. If `process`, the `ClientApp` runs in a separate
+        isolated process and communicates using gRPC at the address
+        `clientappio_api_address`.
     clientappio_api_address : Optional[str]
         (default: `CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS`)
         The SuperNode gRPC server address.
