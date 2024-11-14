@@ -38,7 +38,10 @@ from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
 from flwr.common.serde import run_from_proto, scalar_to_proto
 from flwr.common.typing import Run
-from flwr.proto.exec_pb2 import ListRequest, ListResponse  # pylint: disable=E0611
+from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
+    ListRunsRequest,
+    ListRunsResponse,
+)
 from flwr.proto.exec_pb2_grpc import ExecStub
 
 
@@ -205,7 +208,7 @@ def _list_runs(
     stub: ExecStub,
 ) -> None:
     """List all runs."""
-    res: ListResponse = stub.List(ListRequest(option="--runs"))
+    res: ListRunsResponse = stub.ListRuns(ListRunsRequest(option="--runs"))
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
     Console().print(_format_run_table(run_dict, res.now))
@@ -216,8 +219,8 @@ def _display_one_run(
     run_id: int,
 ) -> None:
     """Display information about a specific run."""
-    res: ListResponse = stub.List(
-        ListRequest(option="--run-id", value=scalar_to_proto(run_id))
+    res: ListRunsResponse = stub.ListRuns(
+        ListRunsRequest(option="--run-id", value=scalar_to_proto(run_id))
     )
     if not res.run_dict:
         raise ValueError(f"Run ID {run_id} not found")
