@@ -39,6 +39,9 @@ check_and_kill() {
 # Install Flower app
 pip install -e . --no-deps
 
+# Remove any duplicates
+sed -i '/^\[tool\.flwr\.federations\.e2e\]/,/^$/d' pyproject.toml
+
 # Append the federations config to pyproject.toml
 echo -e $"\n[tool.flwr.federations.e2e]\naddress = \"127.0.0.1:9093\"\ninsecure = true" >> pyproject.toml
 sleep 1
