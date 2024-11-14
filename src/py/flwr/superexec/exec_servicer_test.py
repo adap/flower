@@ -82,7 +82,7 @@ class TestExecServicer(unittest.TestCase):
             run_ids.add(run_id)
 
         # Execute
-        response = self.servicer.List(Mock(option="--runs"), Mock())
+        response = self.servicer.ListRuns(Mock(option="--runs"), Mock())
         retrieved_timestamp = datetime.fromisoformat(response.now).timestamp()
 
         # Assert
@@ -98,7 +98,7 @@ class TestExecServicer(unittest.TestCase):
             )
 
         # Execute
-        response = self.servicer.List(
+        response = self.servicer.ListRuns(
             Mock(option="--run-id", value=scalar_to_proto(run_id)), Mock()
         )
         retrieved_timestamp = datetime.fromisoformat(response.now).timestamp()
@@ -111,7 +111,7 @@ class TestExecServicer(unittest.TestCase):
         """Test List method of ExecServicer with invalid option."""
         # Execute
         mock_context = Mock()
-        self.servicer.List(Mock(option="--invalid"), mock_context)
+        self.servicer.ListRuns(Mock(option="--invalid"), mock_context)
 
         # Assert
         mock_context.abort.assert_called_once_with(

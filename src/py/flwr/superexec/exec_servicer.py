@@ -33,8 +33,8 @@ from flwr.common.serde import (
 )
 from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
-    ListRequest,
-    ListResponse,
+    ListRunsRequest,
+    ListRunsResponse,
     StartRunRequest,
     StartRunResponse,
     StreamLogsRequest,
@@ -114,7 +114,9 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
             time.sleep(LOG_STREAM_INTERVAL)  # Sleep briefly to avoid busy waiting
 
-    def List(self, request: ListRequest, context: grpc.ServicerContext) -> ListResponse:
+    def ListRuns(
+        self, request: ListRunsRequest, context: grpc.ServicerContext
+    ) -> ListRunsResponse:
         """Handle `flwr ls` command."""
         log(INFO, "ExecServicer.List")
         state = self.linkstate_factory.state()
@@ -128,18 +130,18 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             run_id = scalar_from_proto(request.value)
             if not isinstance(run_id, int):
                 context.abort(grpc.StatusCode.INVALID_ARGUMENT, "Invalid run ID")
-                return ListResponse()
+                return ListRunsResponse()
             return _list_runs({run_id}, state)
 
         # Unknown option
         context.abort(grpc.StatusCode.UNIMPLEMENTED, "Invalid option")
-        return ListResponse()
+        return ListRunsResponse()
 
 
-def _list_runs(run_ids: set[int], state: LinkState) -> ListResponse:
+def _list_runs(run_ids: set[int], state: LinkState) -> ListRunsResponse:
     """Create response for `flwr ls --runs` and `flwr ls --run-id <run_id>`."""
     run_dict = {run_id: state.get_run(run_id) for run_id in run_ids}
-    return ListResponse(
+    return ListRunsResponse(
         run_dict={run_id: run_to_proto(run) for run_id, run in run_dict.items() if run},
         now=now().isoformat(),
     )
