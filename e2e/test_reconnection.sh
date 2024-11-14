@@ -118,7 +118,6 @@ while [ "$found_success" = false ] && [ $elapsed -lt $timeout ]; do
         found_success=true
         kill $cl1_pid; kill $cl2_pid
         sleep 3
-        check_and_kill "$cl1_pids"
         check_and_kill "$sl_pids"
     else
         echo "Waiting for training ... ($elapsed seconds elapsed)"
@@ -132,6 +131,5 @@ if [ "$found_success" = false ]; then
     echo "Training had an issue and timed out."
     kill $cl1_pid; kill $cl2_pid
     sleep 3
-    check_and_kill "$cl1_pids"
     check_and_kill "$sl_pids"
 fi
