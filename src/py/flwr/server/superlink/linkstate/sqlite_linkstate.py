@@ -922,6 +922,15 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                 fab_version=row["fab_version"],
                 fab_hash=row["fab_hash"],
                 override_config=json.loads(row["override_config"]),
+                pending_at=row["pending_at"],
+                starting_at=row["starting_at"],
+                running_at=row["running_at"],
+                finished_at=row["finished_at"],
+                status=RunStatus(
+                    status=determine_run_status(row),
+                    sub_status=row["sub_status"],
+                    details=row["details"],
+                ),
             )
         log(ERROR, "`run_id` does not exist.")
         return None

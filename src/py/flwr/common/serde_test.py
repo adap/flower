@@ -529,6 +529,11 @@ def test_run_serialization_deserialization() -> None:
         fab_version="ipsum",
         fab_hash="hash",
         override_config=maker.user_config(),
+        pending_at="2021-01-01T00:00:00Z",
+        starting_at="2021-01-02T23:02:11Z",
+        running_at="2021-01-03T12:00:50Z",
+        finished_at="",
+        status=typing.RunStatus(status="running", sub_status="", details="OK"),
     )
 
     # Execute

@@ -448,7 +448,7 @@ def start_client_internal(
                             runs[run_id] = get_run(run_id)
                         # If get_run is None, i.e., in grpc-bidi mode
                         else:
-                            runs[run_id] = Run(run_id, "", "", "", {})
+                            runs[run_id] = Run.create_empty(run_id=run_id)
 
                     run: Run = runs[run_id]
                     if get_fab is not None and run.fab_hash:
