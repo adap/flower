@@ -19,30 +19,30 @@ Design Stateful ClientApps
 
 By design, ClientApp_ objects are stateless. This means that the ``ClientApp`` object is
 recreated each time a new ``Message`` is to be processed. This behaviour is identical
-with Flower's Simulation Engine and Deployment Engine. For the former, it allows to
-simulate the running of large number of nodes without having on a single machine or
-across multiple machines. For the latter, it enables each ``SuperNode`` to be part of
+with Flower's Simulation Engine and Deployment Engine. For the former, it allows us to
+simulate the running of a large number of nodes on a single machine or across multiple 
+machines. For the latter, it enables each ``SuperNode`` to be part of
 multiple runs, each running a different ``ClientApp``.
 
-When a ``ClientApp`` is exectued it receives a Context_. This context is unique for each
+When a ``ClientApp`` is executed it receives a Context_. This context is unique for each
 ``ClientApp``, meaning that subsequent executions of the same ``ClientApp`` from the
-same node wil receive the same ``Context`` object. In the context, the ``.state`` is an
-attribute of type Context_ that can be used to store information that you would like the
+same node will receive the same ``Context`` object. In the ``Context``, the ``.state``
+attribute can be used to store information that you would like the
 ``ClientApp`` to have access to for the duration of the run. This could be anything from
-intermediate results such as the historic of training losses (e.g. as a list of `float`
-values with a new entry appened each time the ``ClientApp`` is executed), certain parts
+intermediate results such as the history of training losses (e.g. as a list of `float`
+values with a new entry appended each time the ``ClientApp`` is executed), certain parts
 of the model that should persist at the client side, or some other arbitrary Python
-objects. These last would need to be serialized before saving it into the context.
+objects. These items would need to be serialized before saving them into the context.
 
 Saving metrics to the context
 -----------------------------
 
 This section will demonstrate how to save metrics such as accuracy/loss values to the
-Context_ so they can be used in subsequent executions fo the ``ClientApp``. If your
-``ClientApp`` makes us of NumPyClient_ then entire object is also re-created for
-eachcalls to methods like ``fit()`` or ``evaluate()``.
+Context_ so they can be used in subsequent executions of the ``ClientApp``. If your
+``ClientApp`` makes use of NumPyClient_ then entire object is also re-created for
+each call to methods like ``fit()`` or ``evaluate()``.
 
-Let's being with a simple setting in which ``ClientApp`` is defined as follows. The
+Let's begin with a simple setting in which ``ClientApp`` is defined as follows. The
 ``evaluate()`` method only generates a random number and prints it.
 
 .. tip::
@@ -57,7 +57,7 @@ Let's being with a simple setting in which ``ClientApp`` is defined as follows. 
     from flwr.client import ClientApp, NumPyClient
 
 
-    def SimpleClient(NumPyClient):
+    class SimpleClient(NumPyClient):
 
         def __init__(self):
             self.n_val = []
@@ -103,7 +103,7 @@ persists in the context. To do that, you'll need to do two key things:
         def evaluate(self, parameters, config):
             n = random.randint(0, 10)  # Generate a random integer between 0 and 10
             # Add results into a `ConfigsRecord` object under the "n_val" key
-            # Noe a `ConfigsRecord` is a special type of python Dictionary
+            # Note a `ConfigsRecord` is a special type of python Dictionary
             eval_metrics = self.client_state.configs_records["eval_metrics"]
             if "n_val" not in eval_metrics:
                 eval_metrics["n_val"] = [n]
@@ -120,9 +120,9 @@ persists in the context. To do that, you'll need to do two key things:
     # Finally, construct the clinetapp instance by means of the `client_fn` callback
     app = ClientApp(client_fn=client_fn)
 
-If you run the app. You'll see an output similar to the one below. See how after each
+If you run the app, you'll see an output similar to the one below. See how after each
 round the `n_val` entry in the context gets one additional integer ? Note that the order
-at which the `ClientApp` logs these messages might differ slightly between rounds.
+in which the `ClientApp` logs these messages might differ slightly between rounds.
 
 .. code-block:: shell
 
