@@ -19,10 +19,10 @@ Why Federated XGBoost?
 ~~~~~~~~~~~~~~~~~~~~~~
 
 As the demand for data privacy and decentralized learning grows, there's an increasing
-requirement to implement Federated XGBoost systems for specialised applications, like
+requirement to implement federated XGBoost systems for specialised applications, like
 survival analysis and financial fraud detection.
 
-Federated Learning ensures that raw data remains on the local device, making it an
+Federated learning ensures that raw data remains on the local device, making it an
 attractive approach for sensitive domains where data privacy is paramount. Given the
 robustness and efficiency of XGBoost, combining it with federated learning offers a
 promising solution for these specific challenges.
@@ -56,8 +56,8 @@ install ``xgboost``:
 
     $ pip install xgboost
 
-Configurations
-~~~~~~~~~~~~~~
+The Configurations
+~~~~~~~~~~~~~~~~~~
 
 We define all required configurations / hyper-parameters inside the ``pyproject.toml``
 file:
@@ -85,8 +85,8 @@ The ``local-epochs`` represents the number of iterations for local tree boost. W
 CPU for the training in default. One can assign it to a GPU by setting ``tree_method``
 to ``gpu_hist``. We use AUC as evaluation metric.
 
-Data
-~~~~
+The Data
+~~~~~~~~
 
 This tutorial uses `Flower Datasets <https://flower.ai/docs/datasets/>`_ to easily
 download and partition the `HIGGS` dataset.
@@ -145,8 +145,8 @@ as below:
         new_data = xgb.DMatrix(x, label=y)
         return new_data
 
-ClientApp
-~~~~~~~~~
+The ClientApp
+~~~~~~~~~~~~~
 
 *Clients* are responsible for generating individual weight-updates for the model based
 on their local datasets. Let's first see how we define Flower client for XGBoost. We
@@ -265,8 +265,8 @@ training, the last ``N=num_local_round`` trees will be extracted to send to the 
 In ``evaluate``, after loading the global model, we call ``bst.eval_set`` function to
 conduct evaluation on valid set. The AUC value will be returned.
 
-ServerApp
-~~~~~~~~~
+The ServerApp
+~~~~~~~~~~~~~
 
 After the local training on clients, clients' model updates are sent to the *server*,
 which aggregates them to produce a better model. Finally, the *server* sends this
