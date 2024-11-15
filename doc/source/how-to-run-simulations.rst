@@ -12,35 +12,37 @@ simulating FL workloads makes sense. Flower can accommodate these scenarios by m
 its `Simulation Engine <contributor-explanation-architecture.html#simulation-engine>`_ .
 
 The ``SimulationEngine`` schedules, launches and manages ``ClientApp`` instances. It
-does so by first stargin a ``Backend``, which contains several workers (i.e. Python
-processes) that can execute a ``ClientApp`` by passing it a ``Context`` and a
-``Message``. These ``ClientApp`` objects are identical to those used by Flower's
-`Deployment Engine <contributor-explanation-architecture.html>`_, making alternating
-between _simulation_ to _deployment_ an effortless process. The execution of
-``ClientApp`` objects through Flower's ``Simulation Engine`` is:
+does so through a ``Backend``, which contains several workers (i.e. Python processes)
+that can execute a ``ClientApp`` by passing it a ``Context`` and a ``Message``. These
+``ClientApp`` objects are identical to those used by Flower's `Deployment Engine
+<contributor-explanation-architecture.html>`_, making alternating between _simulation_
+to _deployment_ an effortless process. The execution of ``ClientApp`` objects through
+Flower's ``Simulation Engine`` is:
 
-- resource-aware: this means that each backend cowrking executing ``ClientApps`` gets
-  assigned a portion of the compute and memory on your system. You can define these at
-  the beginning of the simulation, allowing you to control the degree of parallelism of
-  your simulation. The fewer the resources per backend worker, the more ``ClientApps``
-  can run concurrently on the same hardware.
-- batchable: When there are more ``ClientApps`` to execute than workers the backend has,
-  ``ClientApps`` are queued and executed as soon as resources get freed. This means that
-  ``ClientApps`` are typically executed in batches of N, where N is the number of
+- **Resource-aware**: Each backend worker executing ``ClientApps`` gets assigned a
+  portion of the compute and memory on your system. You can define these at the
+  beginning of the simulation, allowing you to control the degree of parallelism of your
+  simulation. The fewer the resources per backend worker, the more ``ClientApps`` can
+  run concurrently on the same hardware. More on this later.
+- **Batchable**: When there are more ``ClientApps`` to execute than workers the backend
+  has, ``ClientApps`` are queued and executed as soon as resources get freed. This means
+  that ``ClientApps`` are typically executed in batches of N, where N is the number of
   backend workers.
-- self-managed: this means that you as a user do not need to launch nodes or
+- **Self-managed**: this means that you as a user do not need to launch nodes or
   ``ClientApps`` manually, instead this gets delegated to ``Simulation Engine``'s
   internals.
-- ephemeral: this means that a ``ClientApp`` is only materialized when it is required by
-  the application (e.g. to do `fit() <ref-api-flwr.html#flwr.client.Client.fit>`_). The
-  object is destroyed afterwards, releasing the resources it was assigned and allowing
-  in this way other clients to participate.
+- **Ephemeral**: this means that a ``ClientApp`` is only materialized when it is
+  required by the application (e.g. to do `fit()
+  <ref-api-flwr.html#flwr.client.Client.fit>`_). The object is destroyed afterwards,
+  releasing the resources it was assigned and allowing in this way other clients to
+  participate.
 
 .. note::
 
-    You can preserver the state (e.g. internal variables, parts of a ML model,
+    You can preserve the state (e.g. internal variables, parts of a ML model,
     intermediate results) of a ``ClientApp`` by saving it to its ``Context``. Check the
-    `Designing Stateful Clients <how-to-design-stateful-clients.rst>`_ guide.
+    `Designing Stateful Clients <how-to-design-stateful-clients.rst>`_ guide for a
+    complete walkthrough.
 
 The ``Simulation Engine`` delegates to a ``Backend`` the role of spawning and managing
 ``ClientApps``. The default backend is the ``RayBackend`` which uses `Ray
@@ -57,10 +59,7 @@ Running a simulation is straightforward, in fact it is the default mode of opera
 require you to first define a ``ClientApp`` and a ``ServerApp``. A convenient way to
 generate a minimal, but fully functional, Flower app is by means of the `flwr new
 <ref-api-cli.html#flwr-new>`_ command. There are multiple templates to choose from. The
-example below uses the ``PyTorch`` template. With that out of the way, launching your
-simulation is done with `start_simulation
-<ref-api-flwr.html#flwr.simulation.start_simulation>`_ and a minimal example is shown
-below.
+example below uses the ``PyTorch`` template. A minimal example is shown below.
 
 .. tip::
 
@@ -89,8 +88,10 @@ defined. It sets the number of supernodes to 10.
 
 You can modify the size of your simulations by adjusting ``options.num-supernodes``.
 
-Defining backend resources
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. _clientappresources:
+
+Defining ``ClientApp`` resources
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 By default the ``Simulation Engine`` assigns a two CPU cores to each backend worker.
 This means that if your system has 10 CPU cores, five backend workers can be running in
@@ -103,7 +104,7 @@ workload. You can do so by adjusting the backend resources for your federation.
 .. caution::
 
     Note that the resources the backend assigns to each worker (and hence to each
-    ``ClientApp`` being executed) is performed in a _soft_ manner. This means that the
+    ``ClientApp`` being executed) is performed in a *soft* manner. This means that the
     resources are primarily taken into account in order to control the degree of
     parallelism at which ``ClientApp`` instances should be executed. Resource
     assignation is **not strict**, meaning that if you specified your ``ClientApp`` to
@@ -129,6 +130,14 @@ assigned by specifying the **ratio** of VRAM each should make use of.
     options.num-supernodes = 10
     options.backend.client-resources.num-cpus = 1 # each ClientApp assumes to use 1CPUs (default is 2)
     options.backend.client-resources.num-gpus = 0.25 # each ClientApp uses 25% of VRAM (default is 0.0)
+
+.. note::
+
+    If you are using TensorFlow, you need to `enable memory growth
+    <https://www.tensorflow.org/guide/gpu#limiting_gpu_memory_growth>`_ so multiple
+    ``ClientApp`` instances can share a GPU. This needs to be done before launching the
+    simulation. To do so, set the environment variable
+    ``TF_FORCE_GPU_ALLOW_GROWTH="1"``.
 
 Let's see how the above configurate results in a different number of ``ClientApps``
 running in parallel depending on the resources available in your system. If your system
@@ -209,8 +218,8 @@ simulation-ready.
 The complete list of examples can be found in `the Flower GitHub
 <https://github.com/adap/flower/tree/main/examples>`_.
 
-Simulation with Colab/Jupyter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Simulation in Colab/Jupyter
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The preferred way of running simulations should always be ``flwr run``. However, the
 core functionality of the ``Simulation Engine`` can be used from whithin a Google Colab
@@ -242,7 +251,7 @@ resources are assinged (i.e. 2xCPUs per ``ClientApp`` and no GPU).
 
     run_simulation(
         # ...
-        backend_config={"backend_config": {"num_cpus": 2, "num_gpus": 0.25}}
+        backend_config={"client_resources": {"num_cpus": 2, "num_gpus": 0.25}}
     )
 
 Refer to the `30 minutes Federated AI Tutorial
@@ -252,134 +261,82 @@ for a complete example on how to run Flower Simulations in Colab.
 Multi-node Flower simulations
 -----------------------------
 
-Flower's ``VirtualClientEngine`` allows you to run FL simulations across multiple
-compute nodes. Before starting your multi-node simulation ensure that you:
+Flower's ``SimulationEngine`` allows you to run FL simulations across multiple compute
+nodes. Before starting your multi-node simulation ensure that you:
 
 1. Have the same Python environment in all nodes.
 2. Have a copy of your code (e.g. your entire repo) in all nodes.
-3. Have a copy of your dataset in all nodes (more about this in :ref:`simulation
-   considerations <considerations-for-simulations>`)
-4. Pass ``ray_init_args={"address"="auto"}`` to `start_simulation
-   <ref-api-flwr.html#flwr.simulation.start_simulation>`_ so the ``VirtualClientEngine``
-   attaches to a running Ray instance.
-5. Start Ray on you head node: on the terminal type ``ray start --head``. This command
+3. Have a copy of your dataset in all nodes. If you are using partitions from `Flower
+   Datasets <https://flower.ai/docs/datasets>`_, ensure they are the same.
+4. Start Ray on you head node: on the terminal type ``ray start --head``. This command
    will print a few lines, one of which indicates how to attach other nodes to the head
    node.
-6. Attach other nodes to the head node: copy the command shown after starting the head
+5. Attach other nodes to the head node: copy the command shown after starting the head
    and execute it on terminal of a new node: for example ``ray start
    --address='192.168.1.132:6379'``
 
 With all the above done, you can run your code from the head node as you would if the
-simulation was running on a single node.
+simulation was running on a single node. In other words:
+
+.. code-block:: shell
+
+    # From your head node, launch the simulation
+    flwr run .
 
 Once your simulation is finished, if you'd like to dismantle your cluster you simply
 need to run the command ``ray stop`` in each node's terminal (including the head node).
 
-Multi-node simulation good-to-know
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Here we list a few interesting functionality when running multi-node FL simulations:
-
-User ``ray status`` to check all nodes connected to your head node as well as the total
-resources available to the ``VirtualClientEngine``.
-
-When attaching a new node to the head, all its resources (i.e. all CPUs, all GPUs) will
-be visible by the head node. This means that the ``VirtualClientEngine`` can schedule as
-many `virtual` clients as that node can possible run. In some settings you might want to
-exclude certain resources from the simulation. You can do this by appending
-`--num-cpus=<NUM_CPUS_FROM_NODE>` and/or `--num-gpus=<NUM_GPUS_FROM_NODE>` in any ``ray
-start`` command (including when starting the head)
-
-.. _considerations-for-simulations:
-
-Considerations for simulations
-------------------------------
-
 .. note::
 
-    We are actively working on these fronts so to make it trivial to run any FL workload
-    with Flower simulation.
+    When attaching a new node to the head, all its resources (i.e. all CPUs, all GPUs)
+    will be visible by the head node. This means that the ``Simulation Engine`` can
+    schedule as many ``ClientApp`` instances as that node can possible run. In some
+    settings you might want to exclude certain resources from the simulation. You can do
+    this by appending `--num-cpus=<NUM_CPUS_FROM_NODE>` and/or
+    `--num-gpus=<NUM_GPUS_FROM_NODE>` in any ``ray start`` command (including when
+    starting the head)
 
-The current VCE allows you to run Federated Learning workloads in simulation mode
-whether you are prototyping simple scenarios on your personal laptop or you want to
-train a complex FL pipeline across multiple high-performance GPU nodes. While we add
-more capabilities to the VCE, the points below highlight some of the considerations to
-keep in mind when designing your FL pipeline with Flower. We also highlight a couple of
-current limitations in our implementation.
+FAQ for Simulations
+-------------------
 
-GPU resources
-~~~~~~~~~~~~~
+.. dropdown:: Can I make my ``ClientApp`` instances stateful ?
 
-The VCE assigns a share of GPU memory to a client that specifies the key ``num_gpus`` in
-``client_resources``. This being said, Ray (used internally by the VCE) is by default:
+    Yes. Use the ``state`` attribute of the `Context <ref-api-flwr.html#flwr.common.Context>`_ object that is passed to the ``ClientApp`` in order to save variables, parameters or results to it. Read the `Designing Stateful Clients <how-to-design-stateful-clients.rst>`_ guide for a complete walkthrough.
 
-- not aware of the total VRAM available on the GPUs. This means that if you set
-  ``num_gpus=0.5`` and you have two GPUs in your system with different (e.g. 32GB and
-  8GB) VRAM amounts, they both would run 2 clients concurrently.
-- not aware of other unrelated (i.e. not created by the VCE) workloads are running on
-  the GPU. Two takeaways from this are:
+.. dropdown:: Can I run multiple simulations on the same machine?
 
-  - Your Flower server might need a GPU to evaluate the `global model` after aggregation
-    (by instance when making use of the `evaluate method
-    <how-to-implement-strategies.html#the-evaluate-method>`_)
-  - If you want to run several independent Flower simulations on the same machine you
-    need to mask-out your GPUs with ``CUDA_VISIBLE_DEVICES="<GPU_IDs>"`` when launching
-    your experiment.
+    Yes, but bear in mind that each simulation isn't aware of the resource usage of the other. If your simulations make use of GPUs, consider setting the ``CUDA_VISIBLE_DEVICES`` environment variable to make each simulation use a different set of the available GPUs. Export such environment variable before starting ``flwr run``.
 
-In addition, the GPU resource limits passed to ``client_resources`` are not `enforced`
-(i.e. they can be exceeded) which can result in the situation of client using more VRAM
-than the ratio specified when starting the simulation.
+.. dropdown:: Are the CPU/GPU resources set for each ``ClientApp`` enforced?
 
-TensorFlow with GPUs
-++++++++++++++++++++
+    No. They are exclusively used by the simulation backend to control how many workers can be created on startup. Let's say N backend workers are launched, then at most N ``ClientApp`` instances will be running in parallel. It is your resposability to ensure ``ClientApp`` instances have enough resources to execute their workload (e.g. finetune a transformer model).
 
-When `using a GPU with TensorFlow <https://www.tensorflow.org/guide/gpu>`_ nearly your
-entire GPU memory of all your GPUs visible to the process will be mapped. This is done
-by TensorFlow for optimization purposes. However, in settings such as FL simulations
-where we want to split the GPU into multiple `virtual` clients, this is not a desirable
-mechanism. Luckily we can disable this default behavior by `enabling memory growth
-<https://www.tensorflow.org/guide/gpu#limiting_gpu_memory_growth>`_.
+.. dropdown:: My ``ClientApp`` is triggering OOM on my GPU, what should I do?
 
-This would need to be done in the main process (which is where the server would run) and
-in each Actor created by the VCE. By means of ``actor_kwargs`` we can pass the reserved
-key `"on_actor_init_fn"` in order to specify a function to be executed upon actor
-initialization. In this case, to enable GPU growth for TF workloads. It would look as
-follows:
+    It is likely that your `num_gpus` setting which controls the number of ``ClientApp`` instances that can share a GPU is too low (meaning too many ``ClientApps`` share the same GPU). Try the following:
 
-.. code-block:: python
+    1. set you ``num_gpus=1``, this will make a single ``ClientApp`` to run in a GPU.
+    2. Inspect how much VRAM is being used (use ``nvidia-smi`` for this).
+    3. Based on the VRAM you see your single ``ClientApp`` using, calculate how many more would fit without in the remaining VRAM. One divided by the total number of ``ClientApps`` is the ``num_gpus`` value you should set.
 
-    import flwr as fl
-    from flwr.simulation.ray_transport.utils import enable_tf_gpu_growth
+    Refer to :ref:`clientappresources` for more details.
 
-    # Enable GPU growth in the main thread (the one used by the
-    # server to quite likely run global evaluation using GPU)
-    enable_tf_gpu_growth()
+    If your ``ClientApp`` is using TensorFlow, make sure you are exporting ``TF_FORCE_GPU_ALLOW_GROWTH="1"`` before starting your simulation. For more details check
 
-    # Start Flower simulation
-    hist = fl.simulation.start_simulation(
-        # ...
-        actor_kwargs={
-            "on_actor_init_fn": enable_tf_gpu_growth  # <-- To be executed upon actor init.
-        },
-    )
+.. dropdown:: How do I know what's the right ``num_cpus`` and ``num_gpus`` for my ``ClientApp``?
 
-This is precisely the mechanism used in `Tensorflow/Keras Simulation
-<https://github.com/adap/flower/tree/main/examples/simulation-tensorflow>`_ example.
+    A good practice is to start by running the simulation for a few rounds with higher ``num_cpus`` and ``num_gpus`` than what is really needed (e.g. ``num_cpus=8`` and, if you have a GPU, ``num_gpus=1``). Then monitor your CPU and GPU utilization. For this, you can make use of tools such as ``htop`` and ``nvidia-smi``. If you see overall resource utilization remains low, try lowering ``num_cpus`` and ``num_gpus`` (recall this will make more ``ClientApp`` instances to run in parallel) until you see a satisfactory system resource utilization.
 
-Multi-node setups
-~~~~~~~~~~~~~~~~~
+    Note that if the workload on your ``ClientApp`` instances is not homogeneous (i.e. some come with a larger compute or memory footprint), you'd probably want to focus on those when coming up with a good value for ``num_gpus`` and ``num_cpus``.
 
-- The VCE does not currently offer a way to control on which node a particular `virtual`
-  client is executed. In other words, if more than a single node have the resources
-  needed by a client to run, then any of those nodes could get the client workload
-  scheduled onto. Later in the FL process (i.e. in a different round) the same client
-  could be executed by a different node. Depending on how your clients access their
-  datasets, this might require either having a copy of all dataset partitions on all
-  nodes or a dataset serving mechanism (e.g. using nfs, a database) to circumvent data
-  duplication.
-- By definition virtual clients are `stateless` due to their ephemeral nature. A client
-  state can be implemented as part of the Flower client class but users need to ensure
-  this saved to persistent storage (e.g. a database, disk) and that can be retrieve
-  later by the same client regardless on which node it is running from. This is related
-  to the point above also since, in some way, the client's dataset could be seen as a
-  type of `state`.
+.. dropdown:: Can I assign different resources to each ``ClientApp`` instance?
+
+    No. All ``ClientApp`` objects are assumed to make use of the same ``num_cpus`` and ``num_gpus``. When setting these values (refer to :ref:`clientappresources` for more details), ensure the ``ClientApp`` with the largest memory footprint (either RAM or VRAM) can run in your system with others like it in parallel.
+
+.. dropdown:: My ``SeverApp`` also needs to make us of the GPU (e.g to do evaluation of the *global model* after aggregation), is this GPU usage taken into account by the ``SimulationEngine``?
+
+    No. The ``SimulationEngine`` only manages ``ClientApps`` and therefore is only aware of the system resources they require. If your ``ServerApp`` makes use of substantial compute or memory resources, factor that into account when setting ``num_cpus`` and ``num_gpus``.
+
+.. dropdown:: Can I indicate in what resource a specific instance of a ``ClientApp`` should run? can I do resource placement?
+
+    Currently the placement of ``ClientApp`` instances is managed by the ``RayBackend`` (the only backend available as of ``flwr==1.13.0``) and cannot be customized. Implementing a *custom* backend would be a way of achieving resource placement.
