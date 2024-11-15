@@ -519,7 +519,7 @@ def start_client_internal(
                                 # Start ClientApp subprocess
                                 command = [
                                     "flwr-clientapp",
-                                    "--supernode",
+                                    "--clientappio-api-address",
                                     clientappio_api_address,
                                     "--token",
                                     str(token),
