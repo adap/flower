@@ -30,7 +30,12 @@ from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
 from flwr.client import ClientFnExt
 from flwr.common import EventType, event
 from flwr.common.constant import NODE_ID_NUM_BYTES
-from flwr.common.logger import log, set_logger_propagation, warn_unsupported_feature
+from flwr.common.logger import (
+    log,
+    set_logger_propagation,
+    warn_deprecated_feature,
+    warn_unsupported_feature,
+)
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.server import Server, init_defaults, run_fl
@@ -108,6 +113,11 @@ def start_simulation(
 ) -> History:
     """Start a Ray-based Flower simulation server.
 
+    Warning
+    -------
+    This function is deprecated since 1.13.0. Use :code: `flwr run` to start a Flower
+    simulation.
+
     Parameters
     ----------
     client_fn : ClientFnExt
@@ -182,6 +192,17 @@ def start_simulation(
     hist : flwr.server.history.History
         Object containing metrics from training.
     """  # noqa: E501
+    msg = (
+        "flwr.simulation.start_simulation() is deprecated."
+        "\n\tInstead, use the `flwr run` CLI command to start a local simulation "
+        "as shown below:"
+        "\n\n\t\t$ flower-supernode --insecure --superlink='<IP>:<PORT>'"
+        "\n\n\tTo view all available options, run:"
+        "\n\n\t\t$ flower-supernode --help"
+        "\n\n\tUsing `start_client()` is deprecated."
+    )
+    warn_deprecated_feature(name=msg)
+
     # pylint: disable-msg=too-many-locals
     event(
         EventType.START_SIMULATION_ENTER,
