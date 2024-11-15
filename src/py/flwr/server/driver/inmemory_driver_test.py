@@ -277,6 +277,6 @@ class TestInMemoryDriver(unittest.TestCase):
         reply_tos = get_replies(self.driver, msg_ids, node_id)
 
         # Assert
-        self.assertEqual(reply_tos, msg_ids)
+        self.assertEqual(set(reply_tos), set(msg_ids))
         self.assertEqual(len(state.task_res_store), 0)
         self.assertEqual(len(state.task_ins_store), 0)

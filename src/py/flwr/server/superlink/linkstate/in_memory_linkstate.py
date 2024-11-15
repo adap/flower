@@ -40,6 +40,8 @@ from .utils import (
     generate_rand_int_from_bytes,
     has_valid_sub_status,
     is_valid_transition,
+    verify_found_taskres,
+    verify_taskins_ids,
 )
 
 
@@ -67,12 +69,13 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         self.federation_options: dict[int, ConfigsRecord] = {}
         self.task_ins_store: dict[UUID, TaskIns] = {}
         self.task_res_store: dict[UUID, TaskRes] = {}
+        self.task_ins_id_to_task_res_id: dict[UUID, UUID] = {}
 
         self.node_public_keys: set[bytes] = set()
         self.server_public_key: Optional[bytes] = None
         self.server_private_key: Optional[bytes] = None
 
-        self.lock = threading.Lock()
+        self.lock = threading.RLock()
 
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
         """Store one TaskIns."""
@@ -222,42 +225,50 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         task_res.task_id = str(task_id)
         with self.lock:
             self.task_res_store[task_id] = task_res
+            self.task_ins_id_to_task_res_id[UUID(task_ins_id)] = task_id
 
         # Return the new task_id
         return task_id
 
     def get_task_res(self, task_ids: set[UUID]) -> list[TaskRes]:
-        """Get all TaskRes that have not been delivered yet."""
+        """Get TaskRes for the given TaskIns IDs."""
+        ret: dict[UUID, TaskRes] = {}
+
         with self.lock:
-            # Find TaskRes that were not delivered yet
-            task_res_list: list[TaskRes] = []
-            replied_task_ids: set[UUID] = set()
-            for _, task_res in self.task_res_store.items():
-                reply_to = UUID(task_res.task.ancestry[0])
+            current = time.time()
 
-                # Check if corresponding TaskIns exists and is not expired
-                task_ins = self.task_ins_store.get(reply_to)
-                if task_ins is None:
-                    log(WARNING, "TaskIns with task_id %s does not exist.", reply_to)
-                    task_ids.remove(reply_to)
-                    continue
+            # Verify TaskIns IDs
+            ret = verify_taskins_ids(
+                inquired_taskins_ids=task_ids,
+                found_taskins_dict=self.task_ins_store,
+                current_time=current,
+            )
 
-                if task_ins.task.created_at + task_ins.task.ttl <= time.time():
-                    log(WARNING, "TaskIns with task_id %s is expired.", reply_to)
-                    task_ids.remove(reply_to)
-                    continue
+            # Find all TaskRes
+            task_res_found: list[TaskRes] = []
+            for task_id in task_ids:
+                # If TaskRes exists and is not delivered, add it to the list
+                if task_res_id := self.task_ins_id_to_task_res_id.get(task_id):
+                    task_res = self.task_res_store[task_res_id]
+                    if task_res.task.delivered_at == "":
+                        task_res_found.append(task_res)
+            tmp_ret_dict = verify_found_taskres(
+                inquired_taskins_ids=task_ids,
+                found_taskins_dict=self.task_ins_store,
+                found_taskres_list=task_res_found,
+                current_time=current,
+            )
+            ret.update(tmp_ret_dict)
 
-                if reply_to in task_ids and task_res.task.delivered_at == "":
-                    task_res_list.append(task_res)
-                    replied_task_ids.add(reply_to)
-
-            # Mark all of them as delivered
+            # Mark existing TaskRes to be returned as delivered
             delivered_at = now().isoformat()
-            for task_res in task_res_list:
+            for task_res in task_res_found:
                 task_res.task.delivered_at = delivered_at
 
-            # Return TaskRes
-            return task_res_list
+            # Cleanup
+            self._force_delete_tasks_by_ids(set(ret.keys()))
+
+        return list(ret.values())
 
     def delete_tasks(self, task_ids: set[UUID]) -> None:
         """Delete all delivered TaskIns/TaskRes pairs."""
@@ -278,8 +289,24 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
             for task_id in task_ins_to_be_deleted:
                 del self.task_ins_store[task_id]
+                del self.task_ins_id_to_task_res_id[task_id]
             for task_id in task_res_to_be_deleted:
                 del self.task_res_store[task_id]
+
+    def _force_delete_tasks_by_ids(self, task_ids: set[UUID]) -> None:
+        """Delete tasks based on a set of TaskIns IDs."""
+        if not task_ids:
+            return
+
+        with self.lock:
+            for task_id in task_ids:
+                # Delete TaskIns
+                if task_id in self.task_ins_store:
+                    del self.task_ins_store[task_id]
+                # Delete TaskRes
+                if task_id in self.task_ins_id_to_task_res_id:
+                    task_res_id = self.task_ins_id_to_task_res_id.pop(task_id)
+                    del self.task_res_store[task_res_id]
 
     def num_task_ins(self) -> int:
         """Calculate the number of task_ins in store.
