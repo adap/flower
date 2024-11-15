@@ -30,7 +30,12 @@ from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
 from flwr.client import ClientFnExt
 from flwr.common import EventType, event
 from flwr.common.constant import NODE_ID_NUM_BYTES
-from flwr.common.logger import log, set_logger_propagation, warn_unsupported_feature
+from flwr.common.logger import (
+    log,
+    set_logger_propagation,
+    warn_deprecated_feature,
+    warn_unsupported_feature,
+)
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.server import Server, init_defaults, run_fl
@@ -108,6 +113,11 @@ def start_simulation(
 ) -> History:
     """Start a Ray-based Flower simulation server.
 
+    Warning
+    -------
+    This function is deprecated since 1.13.0. Use :code: `flwr run` to start a Flower
+    simulation.
+
     Parameters
     ----------
     client_fn : ClientFnExt
@@ -183,6 +193,16 @@ def start_simulation(
         Object containing metrics from training.
     """  # noqa: E501
     # pylint: disable-msg=too-many-locals
+    msg = (
+        "flwr.simulation.start_simulation() is deprecated."
+        "\n\tInstead, use the `flwr run` CLI command to start a local simulation "
+        "in your Flower app, as shown for example below:"
+        "\n\n\t\t$ flwr new  # Create a new Flower app from a template"
+        "\n\n\t\t$ flwr run  # Run the Flower app in Simulation Mode"
+        "\n\n\tUsing `start_simulation()` is deprecated."
+    )
+    warn_deprecated_feature(name=msg)
+
     event(
         EventType.START_SIMULATION_ENTER,
         {"num_clients": len(clients_ids) if clients_ids is not None else num_clients},
