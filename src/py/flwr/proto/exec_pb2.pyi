@@ -5,6 +5,7 @@ isort:skip_file
 import builtins
 import flwr.proto.fab_pb2
 import flwr.proto.recordset_pb2
+import flwr.proto.run_pb2
 import flwr.proto.transport_pb2
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
@@ -88,3 +89,46 @@ class StreamLogsResponse(google.protobuf.message.Message):
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["latest_timestamp",b"latest_timestamp","log_output",b"log_output"]) -> None: ...
 global___StreamLogsResponse = StreamLogsResponse
+
+class ListRunsRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    RUN_ID_FIELD_NUMBER: builtins.int
+    run_id: builtins.int
+    def __init__(self,
+        *,
+        run_id: typing.Optional[builtins.int] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["_run_id",b"_run_id","run_id",b"run_id"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["_run_id",b"_run_id","run_id",b"run_id"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["_run_id",b"_run_id"]) -> typing.Optional[typing_extensions.Literal["run_id"]]: ...
+global___ListRunsRequest = ListRunsRequest
+
+class ListRunsResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    class RunDictEntry(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        KEY_FIELD_NUMBER: builtins.int
+        VALUE_FIELD_NUMBER: builtins.int
+        key: builtins.int
+        @property
+        def value(self) -> flwr.proto.run_pb2.Run: ...
+        def __init__(self,
+            *,
+            key: builtins.int = ...,
+            value: typing.Optional[flwr.proto.run_pb2.Run] = ...,
+            ) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+
+    RUN_DICT_FIELD_NUMBER: builtins.int
+    NOW_FIELD_NUMBER: builtins.int
+    @property
+    def run_dict(self) -> google.protobuf.internal.containers.MessageMap[builtins.int, flwr.proto.run_pb2.Run]: ...
+    now: typing.Text
+    def __init__(self,
+        *,
+        run_dict: typing.Optional[typing.Mapping[builtins.int, flwr.proto.run_pb2.Run]] = ...,
+        now: typing.Text = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["now",b"now","run_dict",b"run_dict"]) -> None: ...
+global___ListRunsResponse = ListRunsResponse
