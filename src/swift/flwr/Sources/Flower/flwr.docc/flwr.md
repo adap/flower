@@ -1,6 +1,6 @@
 # ``flwr``
 
-Seamlessly integrate Flower federated learning framework into your existing machine learning project.
+Seamlessly integrate Flower federated AI framework into your existing machine learning project.
 
 ## Overview
 
