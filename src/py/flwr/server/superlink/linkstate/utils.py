@@ -23,10 +23,15 @@ from uuid import UUID, uuid4
 from flwr.common import ConfigsRecord, Context, log, now, serde
 from flwr.common.constant import ErrorCode, Status, SubStatus
 from flwr.common.typing import RunStatus
-from flwr.proto.message_pb2 import Context as ProtoContext  # pylint: disable=E0611
 
 # pylint: disable=E0611
+from flwr.proto.error_pb2 import Error
+from flwr.proto.message_pb2 import Context as ProtoContext
+from flwr.proto.node_pb2 import Node
 from flwr.proto.recordset_pb2 import ConfigsRecord as ProtoConfigsRecord
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
+
+# pylint: enable=E0611
 
 NODE_UNAVAILABLE_ERROR_REASON = (
     "Error: Node Unavailable - The destination node is currently unavailable. "

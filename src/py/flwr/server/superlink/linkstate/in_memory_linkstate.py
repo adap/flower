@@ -69,7 +69,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         self.federation_options: dict[int, ConfigsRecord] = {}
         self.task_ins_store: dict[UUID, TaskIns] = {}
         self.task_res_store: dict[UUID, TaskRes] = {}
-        self.task_ins_id_to_task_res: dict[UUID, TaskRes] = {}
+        self.task_ins_id_to_task_res_id: dict[UUID, UUID] = {}
 
         self.node_public_keys: set[bytes] = set()
         self.server_public_key: Optional[bytes] = None
@@ -225,7 +225,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         task_res.task_id = str(task_id)
         with self.lock:
             self.task_res_store[task_id] = task_res
-            self.task_ins_id_to_task_res[UUID(task_ins_id)] = task_res
+            self.task_ins_id_to_task_res_id[UUID(task_ins_id)] = task_id
 
         # Return the new task_id
         return task_id
@@ -248,7 +248,8 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             task_res_found: list[TaskRes] = []
             for task_id in task_ids:
                 # If TaskRes exists and is not delivered, add it to the list
-                if task_res := self.task_ins_id_to_task_res.get(task_id):
+                if task_res_id := self.task_ins_id_to_task_res_id.get(task_id):
+                    task_res = self.task_res_store[task_res_id]
                     if task_res.task.delivered_at == "":
                         task_res_found.append(task_res)
             tmp_ret_dict = verify_found_taskres(
@@ -288,7 +289,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
             for task_id in task_ins_to_be_deleted:
                 del self.task_ins_store[task_id]
-                del self.task_ins_id_to_task_res[task_id]
+                del self.task_ins_id_to_task_res_id[task_id]
             for task_id in task_res_to_be_deleted:
                 del self.task_res_store[task_id]
 
@@ -303,9 +304,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 if task_id in self.task_ins_store:
                     del self.task_ins_store[task_id]
                 # Delete TaskRes
-                if task_id in self.task_ins_id_to_task_res:
-                    task_res = self.task_ins_id_to_task_res.pop(task_id)
-                    del self.task_res_store[UUID(task_res.task_id)]
+                if task_id in self.task_ins_id_to_task_res_id:
+                    task_res_id = self.task_ins_id_to_task_res_id.pop(task_id)
+                    del self.task_res_store[task_res_id]
 
     def num_task_ins(self) -> int:
         """Calculate the number of task_ins in store.
