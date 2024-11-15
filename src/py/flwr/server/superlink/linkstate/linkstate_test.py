@@ -350,13 +350,6 @@ class StateTest(unittest.TestCase):
         # - State has three TaskIns, all of them delivered
         # - State has two TaskRes, one of the delivered, the other not
 
-        assert state.num_task_ins() == 3
-        assert state.num_task_res() == 2
-
-        # Execute
-        state.delete_tasks(task_ids={task_id_0, task_id_1, task_id_2})
-
-        # Assert
         assert state.num_task_ins() == 2
         assert state.num_task_res() == 1
 
@@ -932,8 +925,8 @@ class StateTest(unittest.TestCase):
             task_ins_list = state.get_task_ins(node_id=1, limit=None)
             assert len(task_ins_list) == 0
 
-    def test_get_task_res_not_return_expired(self) -> None:
-        """Test get_task_res not to return TaskRes if its TaskIns is expired."""
+    def test_get_task_res_expired_task_ins(self) -> None:
+        """Test get_task_res to return error TaskRes if its TaskIns has expired."""
         # Prepare
         state = self.state_factory()
         node_id = state.create_node(1e3)
@@ -961,7 +954,9 @@ class StateTest(unittest.TestCase):
             task_res_list = state.get_task_res(task_ids={task_id})
 
             # Assert
-            assert len(task_res_list) == 0
+            assert len(task_res_list) == 1
+            assert task_res_list[0].task.HasField("error")
+            assert state.num_task_ins() == state.num_task_res() == 0
 
     def test_get_task_res_returns_empty_for_missing_taskins(self) -> None:
         """Test that get_task_res returns an empty result when the corresponding TaskIns
@@ -983,7 +978,9 @@ class StateTest(unittest.TestCase):
         task_res_list = state.get_task_res(task_ids={UUID(task_ins_id)})
 
         # Assert
-        assert len(task_res_list) == 0
+        assert len(task_res_list) == 1
+        assert task_res_list[0].task.HasField("error")
+        assert state.num_task_ins() == state.num_task_res() == 0
 
     def test_get_task_res_return_if_not_expired(self) -> None:
         """Test get_task_res to return TaskRes if its TaskIns exists and is not
