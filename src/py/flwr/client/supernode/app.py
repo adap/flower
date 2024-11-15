@@ -66,7 +66,7 @@ def run_supernode() -> None:
             "Ignoring `--flwr-dir`.",
         )
 
-    # Warn deprecated argument
+    # Exit if unsupported argument is passed by the user
     if args.app is not None:
         log(
             ERROR,
