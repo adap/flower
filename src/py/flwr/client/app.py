@@ -37,11 +37,13 @@ from flwr.client.typing import ClientFnExt
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, Message, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
-    CLIENTAPPIO_API_DEFAULT_ADDRESS,
+    CLIENT_OCTET,
+    CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
     MISSING_EXTRA_REST,
     RUN_ID_NUM_BYTES,
+    SERVER_OCTET,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_BIDI,
     TRANSPORT_TYPE_GRPC_RERE,
@@ -216,7 +218,7 @@ def start_client_internal(
     max_wait_time: Optional[float] = None,
     flwr_path: Optional[Path] = None,
     isolation: Optional[str] = None,
-    clientappio_api_address: Optional[str] = CLIENTAPPIO_API_DEFAULT_ADDRESS,
+    clientappio_api_address: Optional[str] = CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     certificates: Optional[tuple[bytes, bytes, bytes]] = None,
     ssl_ca_certfile: Optional[str] = None,
 ) -> None:
@@ -279,7 +281,8 @@ def start_client_internal(
         `clientappio_api_address`. If `process`, the `ClientApp` runs in a separate
         isolated process and communicates using gRPC at the address
         `clientappio_api_address`.
-    clientappio_api_address : Optional[str] (default: `CLIENTAPPIO_API_DEFAULT_ADDRESS`)
+    clientappio_api_address : Optional[str]
+        (default: `CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS`)
         The SuperNode gRPC server address.
     certificates : Optional[Tuple[bytes, bytes, bytes]] (default: None)
         Tuple containing the CA certificate, server certificate, and server private key.
@@ -516,11 +519,19 @@ def start_client_internal(
                             )
 
                             if start_subprocess:
+                                _octet, _colon, _port = (
+                                    clientappio_api_address.rpartition(":")
+                                )
+                                io_address = (
+                                    f"{CLIENT_OCTET}:{_port}"
+                                    if _octet == SERVER_OCTET
+                                    else clientappio_api_address
+                                )
                                 # Start ClientApp subprocess
                                 command = [
                                     "flwr-clientapp",
                                     "--clientappio-api-address",
-                                    clientappio_api_address,
+                                    io_address,
                                     "--token",
                                     str(token),
                                 ]

@@ -34,6 +34,7 @@ from flwr.common.args import (
 )
 from flwr.common.config import parse_config_args
 from flwr.common.constant import (
+    CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
     ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
@@ -165,22 +166,22 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--isolation",
-        default=None,
+        default=ISOLATION_MODE_SUBPROCESS,
         required=False,
         choices=[
             ISOLATION_MODE_SUBPROCESS,
             ISOLATION_MODE_PROCESS,
         ],
-        help="Isolation mode when running a `ClientApp` (optional, possible values: "
-        "`subprocess`, `process`). By default, a `ClientApp` runs in the same process "
-        "that executes the SuperNode. Use `subprocess` to configure SuperNode to run "
-        "a `ClientApp` in a subprocess. Use `process` to indicate that a separate "
-        "independent process gets created outside of SuperNode.",
+        help="Isolation mode when running a `ClientApp` (`subprocess` by default, "
+        "possible values: `subprocess`, `process`). Use `subprocess` to configure "
+        "SuperNode to run a `ClientApp` in a subprocess. Use `process` to indicate "
+        "that a separate independent process gets created outside of SuperNode.",
     )
     parser.add_argument(
         "--clientappio-api-address",
-        default="0.0.0.0:9094",
-        help="Set the SuperNode gRPC server address. Defaults to `0.0.0.0:9094`.",
+        default=CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
+        help="ClientAppIo API (gRPC) server address (IPv4, IPv6, or a domain name). "
+        f"By default, it is set to {CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS}.",
     )
 
     return parser
