@@ -66,12 +66,23 @@ def run_supernode() -> None:
             "Ignoring `--flwr-dir`.",
         )
 
+    # Exit if unsupported argument is passed by the user
+    if args.app is not None:
+        log(
+            ERROR,
+            "The `app` argument is deprecated. The SuperNode now automatically "
+            "uses the ClientApp delivered from the SuperLink. Providing the app "
+            "directory manually is no longer supported. Please remove the `app` "
+            "argument from your command.",
+        )
+        sys.exit(1)
+
     root_certificates = try_obtain_root_certificates(args, args.superlink)
     # Obtain certificates for ClientAppIo API server
     server_certificates = try_obtain_server_certificates(args, TRANSPORT_TYPE_GRPC_RERE)
     load_fn = get_load_client_app_fn(
         default_app_ref="",
-        app_path=args.app,
+        app_path=None,
         flwr_dir=args.flwr_dir,
         multi_app=True,
     )
@@ -145,12 +156,12 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         "app",
         nargs="?",
         default=None,
-        help="Specify the path of the Flower App to load and run the `ClientApp`. "
-        "The `pyproject.toml` file must be located in the root of this path. "
-        "When this argument is provided, the SuperNode will exclusively respond to "
-        "messages from the corresponding `ServerApp` by matching the FAB ID and FAB "
-        "version. An error will be raised if a message is received from any other "
-        "`ServerApp`.",
+        help=(
+            "(REMOVED) This argument is removed. The SuperNode now automatically "
+            "uses the ClientApp delivered from the SuperLink, so there is no need to "
+            "provide the app directory manually. This argument will be removed in a "
+            "future version."
+        ),
     )
     _parse_args_common(parser)
     parser.add_argument(
