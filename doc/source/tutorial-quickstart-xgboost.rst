@@ -721,7 +721,7 @@ uniformity/non-uniformity in data quantity (uniform, linear, square, exponential
         return fds
 
 Customised Centralised / Distributed Evaluation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To facilitate centralised evaluation, we define a function in ``server_app.py``:
 
