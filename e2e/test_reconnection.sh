@@ -46,7 +46,7 @@ sed -i '/^\[tool\.flwr\.federations\.e2e\]/,/^$/d' pyproject.toml
 echo -e $"\n[tool.flwr.federations.e2e]\naddress = \"127.0.0.1:9093\"\ninsecure = true" >> pyproject.toml
 sleep 1
 
-timeout 10m flower-superlink --insecure $db_arg $rest_arg --executor flwr.superexec.deployment:executor &
+timeout 10m flower-superlink --insecure $db_arg $rest_arg &
 sl_pids=$(pgrep -f "flower-superlink")
 echo "Starting SuperLink"
 sleep 3
@@ -69,8 +69,7 @@ echo "Killing Superlink"
 sleep 3
 
 # Restart superlink, the clients should now be able to reconnect to it
-timeout 10m flower-superlink --insecure $db_arg $rest_arg --executor flwr.superexec.deployment:executor \
-  2>&1 | tee flwr_output.log &
+timeout 10m flower-superlink --insecure $db_arg $rest_arg 2>&1 | tee flwr_output.log &
 sl_pids=$(pgrep -f "flower-superlink")
 echo "Restarting Superlink"
 sleep 20
