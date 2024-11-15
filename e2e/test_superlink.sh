@@ -58,25 +58,64 @@ case "$2" in
     ;;
 esac
 
-timeout 2m flower-superlink $server_arg $db_arg $rest_arg_superlink $server_auth --isolation="process" &
-sl_pid=$!
+# Install Flower app
+pip install -e . --no-deps
+
+# Remove any duplicates
+sed -i '/^\[tool\.flwr\.federations\.e2e\]/,/^$/d' pyproject.toml
+
+# Check if the first argument is 'insecure'
+if [ "$server_arg" = "--insecure" ]; then
+  # If $server_arg is '--insecure', append the first line
+  echo -e $"\n[tool.flwr.federations.e2e]\naddress = \"127.0.0.1:9093\"\ninsecure = true" >> pyproject.toml
+else
+  # Otherwise, append the second line
+  echo -e $"\n[tool.flwr.federations.e2e]\naddress = \"127.0.0.1:9093\"\nroot-certificates = \"certificates/ca.crt\"" >> pyproject.toml
+fi
+
+timeout 5m flower-superlink $server_arg $db_arg $rest_arg_superlink $server_auth \
+  2>&1 | tee flwr_output.log &
+sl_pid=$(pgrep -f "flower-superlink")
 sleep 3
 
-timeout 2m flower-supernode ./ $client_arg $server_arg $rest_arg_supernode --superlink $server_address $client_auth_1 &
+timeout 5m flower-supernode $client_arg $server_arg $rest_arg_supernode \
+  --superlink $server_address $client_auth_1 \
+  --isolation="subprocess" --clientappio-api-address "localhost:9094" \
+  --max-retries 0 &
 cl1_pid=$!
 sleep 3
 
-timeout 2m flower-supernode ./ $client_arg $server_arg $rest_arg_supernode --superlink $server_address $client_auth_2 &
+timeout 5m flower-supernode $client_arg $server_arg $rest_arg_supernode \
+  --superlink $server_address $client_auth_2 \
+  --isolation="subprocess" --clientappio-api-address "localhost:9096" \
+  --max-retries 0 &
 cl2_pid=$!
 sleep 3
 
-timeout 2m flower-server-app $server_dir $client_arg --superlink $server_app_address &
-pid=$!
+timeout 1m flwr run "." e2e
 
-wait $pid
-res=$?
+# Initialize a flag to track if training is successful
+found_success=false
+timeout=240  # Timeout after 240 seconds
+elapsed=0
 
-if [[ "$res" = "0" ]];
-  then echo "Training worked correctly"; kill $cl1_pid; kill $cl2_pid; kill $sl_pid;
-  else echo "Training had an issue" && exit 1;
+# Check for "Success" in a loop with a timeout
+while [ "$found_success" = false ] && [ $elapsed -lt $timeout ]; do
+    if grep -q "Run finished" flwr_output.log; then
+        echo "Training worked correctly!"
+        found_success=true
+        kill $cl1_pid; kill $cl2_pid;
+        sleep 1; kill $sl_pid;
+    else
+        echo "Waiting for training ... ($elapsed seconds elapsed)"
+    fi
+    # Sleep for a short period and increment the elapsed time
+    sleep 2
+    elapsed=$((elapsed + 2))
+done
+
+if [ "$found_success" = false ]; then
+    echo "Training had an issue and timed out."
+    kill $cl1_pid; kill $cl2_pid;
+    kill $sl_pid;
 fi
