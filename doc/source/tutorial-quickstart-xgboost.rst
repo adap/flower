@@ -4,7 +4,7 @@ Quickstart XGBoost
 ==================
 
 XGBoost
------------------
+-------
 
 EXtreme Gradient Boosting (**XGBoost**) is a robust and efficient implementation of
 gradient-boosted decision tree (**GBDT**), that maximises the computational boundaries
@@ -18,29 +18,29 @@ XGBoost surpasses the results of deep learning techniques.
 Why Federated XGBoost?
 ~~~~~~~~~~~~~~~~~~~~~~
 
-As the demand for data privacy and decentralized learning grows, there's an
-increasing requirement to implement Federated XGBoost systems for specialised
-applications, like survival analysis and financial fraud detection.
+As the demand for data privacy and decentralized learning grows, there's an increasing
+requirement to implement Federated XGBoost systems for specialised applications, like
+survival analysis and financial fraud detection.
 
 Federated Learning ensures that raw data remains on the local device, making it an
-attractive approach for sensitive domains where data privacy is paramount. Given
-the robustness and efficiency of XGBoost, combining it with federated learning
-offers a promising solution for these specific challenges.
+attractive approach for sensitive domains where data privacy is paramount. Given the
+robustness and efficiency of XGBoost, combining it with federated learning offers a
+promising solution for these specific challenges.
 
 Environment Setup
 -----------------
 
-In this tutorial, we learn how to train a federated XGBoost model on the HIGGS
-dataset using Flower and the ``xgboost`` package to perform a binary classification task.
-We use a simple example (`full code xgboost-quickstart
+In this tutorial, we learn how to train a federated XGBoost model on the HIGGS dataset
+using Flower and the ``xgboost`` package to perform a binary classification task. We use
+a simple example (`full code xgboost-quickstart
 <https://github.com/adap/flower/tree/main/examples/xgboost-quickstart>`_) to demonstrate
 how federated XGBoost works, and then we dive into a more complex comprehensive example
 (`full code xgboost-comprehensive
 <https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive>`_) to run
 various experiments.
 
-It is recommended to create a virtual environment and run everything
-within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
+It is recommended to create a virtual environment and run everything within a
+:doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
 
 We first need to install Flower and Flower Datasets. You can do this by running :
 
@@ -57,9 +57,10 @@ install ``xgboost``:
     $ pip install xgboost
 
 Configurations
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
-We define all required configurations / hyper-parameters inside the ``pyproject.toml`` file:
+We define all required configurations / hyper-parameters inside the ``pyproject.toml``
+file:
 
 .. code-block:: toml
 
@@ -81,11 +82,11 @@ We define all required configurations / hyper-parameters inside the ``pyproject.
     params.tree-method = "hist"
 
 The ``local-epochs`` represents the number of iterations for local tree boost. We use
-CPU for the training in default. One can assign it to a GPU by setting ``tree_method`` to
-``gpu_hist``. We use AUC as evaluation metric.
+CPU for the training in default. One can assign it to a GPU by setting ``tree_method``
+to ``gpu_hist``. We use AUC as evaluation metric.
 
 Data
-~~~~~~~~~~~~~~~
+~~~~
 
 This tutorial uses `Flower Datasets <https://flower.ai/docs/datasets/>`_ to easily
 download and partition the `HIGGS` dataset.
@@ -145,7 +146,7 @@ as below:
         return new_data
 
 ClientApp
-~~~~~~~~~~~~~~~
+~~~~~~~~~
 
 *Clients* are responsible for generating individual weight-updates for the model based
 on their local datasets. Let's first see how we define Flower client for XGBoost. We
@@ -265,13 +266,14 @@ In ``evaluate``, after loading the global model, we call ``bst.eval_set`` functi
 conduct evaluation on valid set. The AUC value will be returned.
 
 ServerApp
-~~~~~~~~~~~~~~~
+~~~~~~~~~
 
 After the local training on clients, clients' model updates are sent to the *server*,
 which aggregates them to produce a better model. Finally, the *server* sends this
 improved model version back to each *client* to complete a federated round.
 
-In the file named ``server_app.py``, we define a strategy for XGBoost bagging aggregation:
+In the file named ``server_app.py``, we define a strategy for XGBoost bagging
+aggregation:
 
 .. code-block:: python
 
@@ -549,8 +551,8 @@ in ``pyproject.toml`` like this:
 Comprehensive Federated XGBoost
 -------------------------------
 
-Now that you know how federated XGBoost works with Flower, it's time to run some
-more comprehensive experiments by customising the experimental settings. In the
+Now that you know how federated XGBoost works with Flower, it's time to run some more
+comprehensive experiments by customising the experimental settings. In the
 xgboost-comprehensive example (`full code
 <https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive>`_), we provide
 more options to define various experimental setups, including aggregation strategies,
@@ -721,7 +723,7 @@ uniformity/non-uniformity in data quantity (uniform, linear, square, exponential
         return fds
 
 Customised Centralised / Distributed Evaluation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To facilitate centralised evaluation, we define a function in ``server_app.py``:
 
@@ -754,8 +756,8 @@ To facilitate centralised evaluation, we define a function in ``server_app.py``:
 
         return evaluate_fn
 
-This function returns an evaluation function, which instantiates a ``Booster`` object and
-loads the global model weights to it. The evaluation is conducted by calling
+This function returns an evaluation function, which instantiates a ``Booster`` object
+and loads the global model weights to it. The evaluation is conducted by calling
 ``eval_set()`` method, and the tested AUC value is reported.
 
 As for distributed evaluation on the clients, it's same as the quick-start example by
