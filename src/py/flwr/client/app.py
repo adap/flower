@@ -104,6 +104,11 @@ def start_client(
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
+    Warning
+    -------
+    This function is deprecated since 1.13.0. Use :code:`flower-supernode` command
+    instead to start a SuperNode.
+
     Parameters
     ----------
     server_address : str
@@ -178,6 +183,17 @@ def start_client(
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
+    msg = (
+        "flwr.client.start_client() is deprecated."
+        "\n\tInstead, use the `flower-supernode` CLI command to start a SuperNode "
+        "as shown below:"
+        "\n\n\t\t$ flower-supernode --insecure --superlink='<IP>:<PORT>'"
+        "\n\n\tTo view all available options, run:"
+        "\n\n\t\t$ flower-supernode --help"
+        "\n\n\tUsing `start_client()` is deprecated."
+    )
+    warn_deprecated_feature(name=msg)
+
     event(EventType.START_CLIENT_ENTER)
     start_client_internal(
         server_address=server_address,
