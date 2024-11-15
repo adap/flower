@@ -12,371 +12,264 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower simulation app."""
+"""Flower Simulation process."""
 
 
-import asyncio
-import logging
-import sys
-import threading
-import traceback
-import warnings
-from logging import ERROR, INFO
-from typing import Any, Optional, Union
+import argparse
+from logging import DEBUG, ERROR, INFO
+from queue import Queue
+from time import sleep
+from typing import Optional
 
-import ray
-from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
-
-from flwr.client import ClientFnExt
-from flwr.common import EventType, event
-from flwr.common.constant import NODE_ID_NUM_BYTES
-from flwr.common.logger import log, set_logger_propagation, warn_unsupported_feature
-from flwr.server.client_manager import ClientManager
-from flwr.server.history import History
-from flwr.server.server import Server, init_defaults, run_fl
-from flwr.server.server_config import ServerConfig
-from flwr.server.strategy import Strategy
-from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
-from flwr.simulation.ray_transport.ray_actor import (
-    ClientAppActor,
-    VirtualClientEngineActor,
-    VirtualClientEngineActorPool,
-    pool_size_from_resources,
+from flwr.cli.config_utils import get_fab_metadata
+from flwr.cli.install import install_from_fab
+from flwr.common import EventType
+from flwr.common.args import try_obtain_root_certificates
+from flwr.common.config import (
+    get_flwr_dir,
+    get_fused_config_from_dir,
+    get_project_config,
+    get_project_dir,
+    unflatten_dict,
 )
-from flwr.simulation.ray_transport.ray_client_proxy import RayActorClientProxy
-
-INVALID_ARGUMENTS_START_SIMULATION = """
-INVALID ARGUMENTS ERROR
-
-Invalid Arguments in method:
-
-`start_simulation(
-    *,
-    client_fn: ClientFn,
-    num_clients: int,
-    clients_ids: Optional[List[str]] = None,
-    client_resources: Optional[Dict[str, float]] = None,
-    server: Optional[Server] = None,
-    config: ServerConfig = None,
-    strategy: Optional[Strategy] = None,
-    client_manager: Optional[ClientManager] = None,
-    ray_init_args: Optional[Dict[str, Any]] = None,
-) -> None:`
-
-REASON:
-    Method requires:
-        - Either `num_clients`[int] or `clients_ids`[List[str]]
-        to be set exclusively.
-        OR
-        - `len(clients_ids)` == `num_clients`
-
-"""
-
-NodeToPartitionMapping = dict[int, int]
-
-
-def _create_node_id_to_partition_mapping(
-    num_clients: int,
-) -> NodeToPartitionMapping:
-    """Generate a node_id:partition_id mapping."""
-    nodes_mapping: NodeToPartitionMapping = {}  # {node-id; partition-id}
-    for i in range(num_clients):
-        while True:
-            node_id = generate_rand_int_from_bytes(NODE_ID_NUM_BYTES)
-            if node_id not in nodes_mapping:
-                break
-        nodes_mapping[node_id] = i
-    return nodes_mapping
+from flwr.common.constant import Status, SubStatus
+from flwr.common.logger import (
+    log,
+    mirror_output_to_queue,
+    restore_output,
+    start_log_uploader,
+    stop_log_uploader,
+)
+from flwr.common.serde import (
+    configs_record_from_proto,
+    context_from_proto,
+    fab_from_proto,
+    run_from_proto,
+    run_status_to_proto,
+)
+from flwr.common.typing import RunStatus
+from flwr.proto.run_pb2 import (  # pylint: disable=E0611
+    GetFederationOptionsRequest,
+    GetFederationOptionsResponse,
+    UpdateRunStatusRequest,
+)
+from flwr.proto.simulationio_pb2 import (  # pylint: disable=E0611
+    PullSimulationInputsRequest,
+    PullSimulationInputsResponse,
+    PushSimulationOutputsRequest,
+)
+from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
+from flwr.simulation.run_simulation import _run_simulation
+from flwr.simulation.simulationio_connection import SimulationIoConnection
 
 
-# pylint: disable=too-many-arguments,too-many-statements,too-many-branches
-def start_simulation(
-    *,
-    client_fn: ClientFnExt,
-    num_clients: int,
-    clients_ids: Optional[list[str]] = None,  # UNSUPPORTED, WILL BE REMOVED
-    client_resources: Optional[dict[str, float]] = None,
-    server: Optional[Server] = None,
-    config: Optional[ServerConfig] = None,
-    strategy: Optional[Strategy] = None,
-    client_manager: Optional[ClientManager] = None,
-    ray_init_args: Optional[dict[str, Any]] = None,
-    keep_initialised: Optional[bool] = False,
-    actor_type: type[VirtualClientEngineActor] = ClientAppActor,
-    actor_kwargs: Optional[dict[str, Any]] = None,
-    actor_scheduling: Union[str, NodeAffinitySchedulingStrategy] = "DEFAULT",
-) -> History:
-    """Start a Ray-based Flower simulation server.
+def flwr_simulation() -> None:
+    """Run process-isolated Flower Simulation."""
+    # Capture stdout/stderr
+    log_queue: Queue[Optional[str]] = Queue()
+    mirror_output_to_queue(log_queue)
 
-    Parameters
-    ----------
-    client_fn : ClientFnExt
-        A function creating `Client` instances. The function must have the signature
-        `client_fn(context: Context). It should return
-        a single client instance of type `Client`. Note that the created client
-        instances are ephemeral and will often be destroyed after a single method
-        invocation. Since client instances are not long-lived, they should not attempt
-        to carry state over method invocations. Any state required by the instance
-        (model, dataset, hyperparameters, ...) should be (re-)created in either the
-        call to `client_fn` or the call to any of the client methods (e.g., load
-        evaluation data in the `evaluate` method itself).
-    num_clients : int
-        The total number of clients in this simulation.
-    clients_ids : Optional[List[str]]
-        UNSUPPORTED, WILL BE REMOVED. USE `num_clients` INSTEAD.
-        List `client_id`s for each client. This is only required if
-        `num_clients` is not set. Setting both `num_clients` and `clients_ids`
-        with `len(clients_ids)` not equal to `num_clients` generates an error.
-        Using this argument will raise an error.
-    client_resources : Optional[Dict[str, float]] (default: `{"num_cpus": 1, "num_gpus": 0.0}`)
-        CPU and GPU resources for a single client. Supported keys
-        are `num_cpus` and `num_gpus`. To understand the GPU utilization caused by
-        `num_gpus`, as well as using custom resources, please consult the Ray
-        documentation.
-    server : Optional[flwr.server.Server] (default: None).
-        An implementation of the abstract base class `flwr.server.Server`. If no
-        instance is provided, then `start_server` will create one.
-    config: ServerConfig (default: None).
-        Currently supported values are `num_rounds` (int, default: 1) and
-        `round_timeout` in seconds (float, default: None).
-    strategy : Optional[flwr.server.Strategy] (default: None)
-        An implementation of the abstract base class `flwr.server.Strategy`. If
-        no strategy is provided, then `start_server` will use
-        `flwr.server.strategy.FedAvg`.
-    client_manager : Optional[flwr.server.ClientManager] (default: None)
-        An implementation of the abstract base class `flwr.server.ClientManager`.
-        If no implementation is provided, then `start_simulation` will use
-        `flwr.server.client_manager.SimpleClientManager`.
-    ray_init_args : Optional[Dict[str, Any]] (default: None)
-        Optional dictionary containing arguments for the call to `ray.init`.
-        If ray_init_args is None (the default), Ray will be initialized with
-        the following default args:
-
-        { "ignore_reinit_error": True, "include_dashboard": False }
-
-        An empty dictionary can be used (ray_init_args={}) to prevent any
-        arguments from being passed to ray.init.
-    keep_initialised: Optional[bool] (default: False)
-        Set to True to prevent `ray.shutdown()` in case `ray.is_initialized()=True`.
-
-    actor_type: VirtualClientEngineActor (default: ClientAppActor)
-        Optionally specify the type of actor to use. The actor object, which
-        persists throughout the simulation, will be the process in charge of
-        executing a ClientApp wrapping input argument `client_fn`.
-
-    actor_kwargs: Optional[Dict[str, Any]] (default: None)
-        If you want to create your own Actor classes, you might need to pass
-        some input argument. You can use this dictionary for such purpose.
-
-    actor_scheduling: Optional[Union[str, NodeAffinitySchedulingStrategy]]
-        (default: "DEFAULT")
-        Optional string ("DEFAULT" or "SPREAD") for the VCE to choose in which
-        node the actor is placed. If you are an advanced user needed more control
-        you can use lower-level scheduling strategies to pin actors to specific
-        compute nodes (e.g. via NodeAffinitySchedulingStrategy). Please note this
-        is an advanced feature. For all details, please refer to the Ray documentation:
-        https://docs.ray.io/en/latest/ray-core/scheduling/index.html
-
-    Returns
-    -------
-    hist : flwr.server.history.History
-        Object containing metrics from training.
-    """  # noqa: E501
-    # pylint: disable-msg=too-many-locals
-    event(
-        EventType.START_SIMULATION_ENTER,
-        {"num_clients": len(clients_ids) if clients_ids is not None else num_clients},
+    parser = argparse.ArgumentParser(
+        description="Run a Flower Simulation",
     )
-
-    if clients_ids is not None:
-        warn_unsupported_feature(
-            "Passing `clients_ids` to `start_simulation` is deprecated and not longer "
-            "used by `start_simulation`. Use `num_clients` exclusively instead."
-        )
-        log(ERROR, "`clients_ids` argument used.")
-        sys.exit()
-
-    # Set logger propagation
-    loop: Optional[asyncio.AbstractEventLoop] = None
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        loop = None
-    finally:
-        if loop and loop.is_running():
-            # Set logger propagation to False to prevent duplicated log output in Colab.
-            logger = logging.getLogger("flwr")
-            _ = set_logger_propagation(logger, False)
-
-    # Initialize server and server config
-    initialized_server, initialized_config = init_defaults(
-        server=server,
-        config=config,
-        strategy=strategy,
-        client_manager=client_manager,
+    parser.add_argument(
+        "--superlink",
+        type=str,
+        help="Address of SuperLink's SimulationIO API",
     )
+    parser.add_argument(
+        "--run-once",
+        action="store_true",
+        help="When set, this process will start a single simulation "
+        "for a pending Run. If no pending run the process will exit. ",
+    )
+    parser.add_argument(
+        "--flwr-dir",
+        default=None,
+        help="""The path containing installed Flower Apps.
+    By default, this value is equal to:
+
+        - `$FLWR_HOME/` if `$FLWR_HOME` is defined
+        - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
+        - `$HOME/.flwr/` in all other cases
+    """,
+    )
+    parser.add_argument(
+        "--insecure",
+        action="store_true",
+        help="Run the server without HTTPS, regardless of whether certificate "
+        "paths are provided. By default, the server runs with HTTPS enabled. "
+        "Use this flag only if you understand the risks.",
+    )
+    parser.add_argument(
+        "--root-certificates",
+        metavar="ROOT_CERT",
+        type=str,
+        help="Specifies the path to the PEM-encoded root certificate file for "
+        "establishing secure HTTPS connections.",
+    )
+    args = parser.parse_args()
+
+    log(INFO, "Starting Flower Simulation")
+    certificates = try_obtain_root_certificates(args, args.superlink)
 
     log(
-        INFO,
-        "Starting Flower simulation, config: %s",
-        initialized_config,
+        DEBUG,
+        "Staring isolated `Simulation` connected to SuperLink DriverAPI at %s",
+        args.superlink,
+    )
+    run_simulation_process(
+        simulationio_api_address=args.superlink,
+        log_queue=log_queue,
+        run_once=args.run_once,
+        flwr_dir_=args.flwr_dir,
+        certificates=certificates,
     )
 
-    # Create node-id to partition-id mapping
-    nodes_mapping = _create_node_id_to_partition_mapping(num_clients)
+    # Restore stdout/stderr
+    restore_output()
 
-    # Default arguments for Ray initialization
-    if not ray_init_args:
-        ray_init_args = {
-            "ignore_reinit_error": True,
-            "include_dashboard": False,
-        }
 
-    # Shut down Ray if it has already been initialized (unless asked not to)
-    if ray.is_initialized() and not keep_initialised:
-        ray.shutdown()
-
-    # Initialize Ray
-    ray.init(**ray_init_args)
-    cluster_resources = ray.cluster_resources()
-    log(
-        INFO,
-        "Flower VCE: Ray initialized with resources: %s",
-        cluster_resources,
+def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R0915
+    simulationio_api_address: str,
+    log_queue: Queue[Optional[str]],
+    run_once: bool,
+    flwr_dir_: Optional[str] = None,
+    certificates: Optional[bytes] = None,
+) -> None:
+    """Run Flower Simulation process."""
+    conn = SimulationIoConnection(
+        simulationio_service_address=simulationio_api_address,
+        root_certificates=certificates,
     )
 
-    log(
-        INFO,
-        "Optimize your simulation with Flower VCE: "
-        "https://flower.ai/docs/framework/how-to-run-simulations.html",
-    )
+    # Resolve directory where FABs are installed
+    flwr_dir = get_flwr_dir(flwr_dir_)
+    log_uploader = None
 
-    # Log the resources that a single client will be able to use
-    if client_resources is None:
-        log(
-            INFO,
-            "No `client_resources` specified. Using minimal resources for clients.",
-        )
-        client_resources = {"num_cpus": 1, "num_gpus": 0.0}
+    while True:
 
-    # Each client needs at the very least one CPU
-    if "num_cpus" not in client_resources:
-        warnings.warn(
-            "No `num_cpus` specified in `client_resources`. "
-            "Using `num_cpus=1` for each client.",
-            stacklevel=2,
-        )
-        client_resources["num_cpus"] = 1
+        try:
+            # Pull SimulationInputs from LinkState
+            req = PullSimulationInputsRequest()
+            res: PullSimulationInputsResponse = conn._stub.PullSimulationInputs(req)
+            if not res.HasField("run"):
+                sleep(3)
+                run_status = None
+                continue
 
-    log(
-        INFO,
-        "Flower VCE: Resources for each Virtual Client: %s",
-        client_resources,
-    )
+            context = context_from_proto(res.context)
+            run = run_from_proto(res.run)
+            fab = fab_from_proto(res.fab)
 
-    actor_args = {} if actor_kwargs is None else actor_kwargs
+            # Start log uploader for this run
+            log_uploader = start_log_uploader(
+                log_queue=log_queue,
+                node_id=context.node_id,
+                run_id=run.run_id,
+                stub=conn._stub,
+            )
 
-    # An actor factory. This is called N times to add N actors
-    # to the pool. If at some point the pool can accommodate more actors
-    # this will be called again.
-    def create_actor_fn() -> type[VirtualClientEngineActor]:
-        return actor_type.options(  # type: ignore
-            **client_resources,
-            scheduling_strategy=actor_scheduling,
-        ).remote(**actor_args)
+            log(DEBUG, "Simulation process starts FAB installation.")
+            install_from_fab(fab.content, flwr_dir=flwr_dir, skip_prompt=True)
 
-    # Instantiate ActorPool
-    pool = VirtualClientEngineActorPool(
-        create_actor_fn=create_actor_fn,
-        client_resources=client_resources,
-    )
+            fab_id, fab_version = get_fab_metadata(fab.content)
 
-    f_stop = threading.Event()
+            app_path = get_project_dir(fab_id, fab_version, fab.hash_str, flwr_dir)
+            config = get_project_config(app_path)
 
-    # Periodically, check if the cluster has grown (i.e. a new
-    # node has been added). If this happens, we likely want to grow
-    # the actor pool by adding more Actors to it.
-    def update_resources(f_stop: threading.Event) -> None:
-        """Periodically check if more actors can be added to the pool.
+            # Get ClientApp and SeverApp components
+            app_components = config["tool"]["flwr"]["app"]["components"]
+            client_app_attr = app_components["clientapp"]
+            server_app_attr = app_components["serverapp"]
+            fused_config = get_fused_config_from_dir(app_path, run.override_config)
 
-        If so, extend the pool.
-        """
-        if not f_stop.is_set():
-            num_max_actors = pool_size_from_resources(client_resources)
-            if num_max_actors > pool.num_actors:
-                num_new = num_max_actors - pool.num_actors
-                log(
-                    INFO, "The cluster expanded. Adding %s actors to the pool.", num_new
+            # Update run_config in context
+            context.run_config = fused_config
+
+            log(
+                DEBUG,
+                "Flower will load ServerApp `%s` in %s",
+                server_app_attr,
+                app_path,
+            )
+            log(
+                DEBUG,
+                "Flower will load ClientApp `%s` in %s",
+                client_app_attr,
+                app_path,
+            )
+
+            # Change status to Running
+            run_status_proto = run_status_to_proto(RunStatus(Status.RUNNING, "", ""))
+            conn._stub.UpdateRunStatus(
+                UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
+            )
+
+            # Pull Federation Options
+            fed_opt_res: GetFederationOptionsResponse = conn._stub.GetFederationOptions(
+                GetFederationOptionsRequest(run_id=run.run_id)
+            )
+            federation_options = configs_record_from_proto(
+                fed_opt_res.federation_options
+            )
+
+            # Unflatten underlying dict
+            fed_opt = unflatten_dict({**federation_options})
+
+            # Extract configs values of interest
+            num_supernodes = fed_opt.get("num-supernodes")
+            if num_supernodes is None:
+                raise ValueError(
+                    "Federation options expects `num-supernodes` to be set."
                 )
-                pool.add_actors_to_pool(num_actors=num_new)
+            backend_config: BackendConfig = fed_opt.get("backend", {})
+            verbose: bool = fed_opt.get("verbose", False)
+            enable_tf_gpu_growth: bool = fed_opt.get("enable_tf_gpu_growth", True)
 
-            threading.Timer(10, update_resources, [f_stop]).start()
+            # Launch the simulation
+            _run_simulation(
+                server_app_attr=server_app_attr,
+                client_app_attr=client_app_attr,
+                num_supernodes=num_supernodes,
+                backend_config=backend_config,
+                app_dir=str(app_path),
+                run=run,
+                enable_tf_gpu_growth=enable_tf_gpu_growth,
+                verbose_logging=verbose,
+                server_app_run_config=fused_config,
+                is_app=True,
+                exit_event=EventType.CLI_FLOWER_SIMULATION_LEAVE,
+            )
 
-    update_resources(f_stop)
+            # Send resulting context
+            context_proto = None  # context_to_proto(updated_context)
+            out_req = PushSimulationOutputsRequest(
+                run_id=run.run_id, context=context_proto
+            )
+            _ = conn._stub.PushSimulationOutputs(out_req)
 
-    log(
-        INFO,
-        "Flower VCE: Creating %s with %s actors",
-        pool.__class__.__name__,
-        pool.num_actors,
-    )
+            run_status = RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
 
-    # Register one RayClientProxy object for each client with the ClientManager
-    for node_id, partition_id in nodes_mapping.items():
-        client_proxy = RayActorClientProxy(
-            client_fn=client_fn,
-            node_id=node_id,
-            partition_id=partition_id,
-            num_partitions=num_clients,
-            actor_pool=pool,
-        )
-        initialized_server.client_manager().register(client=client_proxy)
+        except Exception as ex:  # pylint: disable=broad-exception-caught
+            exc_entity = "Simulation"
+            log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
+            run_status = RunStatus(Status.FINISHED, SubStatus.FAILED, str(ex))
 
-    hist = History()
-    # pylint: disable=broad-except
-    try:
-        # Start training
-        hist = run_fl(
-            server=initialized_server,
-            config=initialized_config,
-        )
-    except Exception as ex:
-        log(ERROR, ex)
-        log(ERROR, traceback.format_exc())
-        log(
-            ERROR,
-            "Your simulation crashed :(. This could be because of several reasons. "
-            "The most common are: "
-            "\n\t > Sometimes, issues in the simulation code itself can cause crashes. "
-            "It's always a good idea to double-check your code for any potential bugs "
-            "or inconsistencies that might be contributing to the problem. "
-            "For example: "
-            "\n\t\t - You might be using a class attribute in your clients that "
-            "hasn't been defined."
-            "\n\t\t - There could be an incorrect method call to a 3rd party library "
-            "(e.g., PyTorch)."
-            "\n\t\t - The return types of methods in your clients/strategies might be "
-            "incorrect."
-            "\n\t > Your system couldn't fit a single VirtualClient: try lowering "
-            "`client_resources`."
-            "\n\t > All the actors in your pool crashed. This could be because: "
-            "\n\t\t - You clients hit an out-of-memory (OOM) error and actors couldn't "
-            "recover from it. Try launching your simulation with more generous "
-            "`client_resources` setting (i.e. it seems %s is "
-            "not enough for your run). Use fewer concurrent actors. "
-            "\n\t\t - You were running a multi-node simulation and all worker nodes "
-            "disconnected. The head node might still be alive but cannot accommodate "
-            "any actor with resources: %s."
-            "\nTake a look at the Flower simulation examples for guidance "
-            "<https://flower.ai/docs/framework/how-to-run-simulations.html>.",
-            client_resources,
-            client_resources,
-        )
-        raise RuntimeError("Simulation crashed.") from ex
+        finally:
+            if run_status:
+                run_status_proto = run_status_to_proto(run_status)
+                conn._stub.UpdateRunStatus(
+                    UpdateRunStatusRequest(
+                        run_id=run.run_id, run_status=run_status_proto
+                    )
+                )
 
-    finally:
-        # Stop time monitoring resources in cluster
-        f_stop.set()
-        event(EventType.START_SIMULATION_LEAVE)
+            # Stop log uploader for this run
+            if log_uploader:
+                stop_log_uploader(log_queue, log_uploader)
+                log_uploader = None
 
-    return hist
+        # Stop the loop if `flwr-simulation` is expected to process a single run
+        if run_once:
+            break

@@ -12,35 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower command line interface."""
+"""Flower NodeState."""
 
-import typer
-from typer.main import get_command
+from .in_memory_nodestate import InMemoryNodeState as InMemoryNodeState
+from .nodestate import NodeState as NodeState
+from .nodestate_factory import NodeStateFactory as NodeStateFactory
 
-from .build import build
-from .install import install
-from .log import log
-from .ls import ls
-from .new import new
-from .run import run
-
-app = typer.Typer(
-    help=typer.style(
-        "flwr is the Flower command line interface.",
-        fg=typer.colors.BRIGHT_YELLOW,
-        bold=True,
-    ),
-    no_args_is_help=True,
-)
-
-app.command()(new)
-app.command()(run)
-app.command()(build)
-app.command()(install)
-app.command()(log)
-app.command()(ls)
-
-typer_click_object = get_command(app)
-
-if __name__ == "__main__":
-    app()
+__all__ = [
+    "InMemoryNodeState",
+    "NodeState",
+    "NodeStateFactory",
+]

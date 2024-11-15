@@ -12,35 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower command line interface."""
+"""In-memory NodeState implementation."""
 
-import typer
-from typer.main import get_command
 
-from .build import build
-from .install import install
-from .log import log
-from .ls import ls
-from .new import new
-from .run import run
+from typing import Optional
 
-app = typer.Typer(
-    help=typer.style(
-        "flwr is the Flower command line interface.",
-        fg=typer.colors.BRIGHT_YELLOW,
-        bold=True,
-    ),
-    no_args_is_help=True,
-)
+from flwr.client.nodestate.nodestate import NodeState
 
-app.command()(new)
-app.command()(run)
-app.command()(build)
-app.command()(install)
-app.command()(log)
-app.command()(ls)
 
-typer_click_object = get_command(app)
+class InMemoryNodeState(NodeState):
+    """In-memory NodeState implementation."""
 
-if __name__ == "__main__":
-    app()
+    def __init__(self) -> None:
+        # Store node_id
+        self.node_id: Optional[int] = None
+
+    def set_node_id(self, node_id: Optional[int]) -> None:
+        """Set the node ID."""
+        self.node_id = node_id
+
+    def get_node_id(self) -> int:
+        """Get the node ID."""
+        if self.node_id is None:
+            raise ValueError("Node ID not set")
+        return self.node_id

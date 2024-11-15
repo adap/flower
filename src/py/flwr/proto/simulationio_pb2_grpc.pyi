@@ -30,6 +30,11 @@ class SimulationIoStub:
         flwr.proto.log_pb2.PushLogsResponse]
     """Push ServerApp logs"""
 
+    GetFederationOptions: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.run_pb2.GetFederationOptionsRequest,
+        flwr.proto.run_pb2.GetFederationOptionsResponse]
+    """Get Federation Options"""
+
 
 class SimulationIoServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -62,6 +67,14 @@ class SimulationIoServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.log_pb2.PushLogsResponse:
         """Push ServerApp logs"""
+        pass
+
+    @abc.abstractmethod
+    def GetFederationOptions(self,
+        request: flwr.proto.run_pb2.GetFederationOptionsRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.run_pb2.GetFederationOptionsResponse:
+        """Get Federation Options"""
         pass
 
 

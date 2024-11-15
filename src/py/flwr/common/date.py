@@ -21,3 +21,21 @@ import datetime
 def now() -> datetime.datetime:
     """Construct a datetime from time.time() with time zone set to UTC."""
     return datetime.datetime.now(tz=datetime.timezone.utc)
+
+
+def format_timedelta(td: datetime.timedelta) -> str:
+    """Format a timedelta as a string."""
+    days = td.days
+    hours, remainder = divmod(td.seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+
+    if days > 0:
+        return f"{days}d {hours:02}:{minutes:02}:{seconds:02}"
+    return f"{hours:02}:{minutes:02}:{seconds:02}"
+
+
+def isoformat8601_utc(dt: datetime.datetime) -> str:
+    """Return the datetime formatted as an ISO 8601 string with a trailing 'Z'."""
+    if dt.tzinfo != datetime.timezone.utc:
+        raise ValueError("Expected datetime with timezone set to UTC")
+    return dt.isoformat(timespec="seconds").replace("+00:00", "Z")

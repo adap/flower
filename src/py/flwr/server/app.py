@@ -22,7 +22,6 @@ import sys
 import threading
 from collections.abc import Sequence
 from logging import DEBUG, INFO, WARN
-from os.path import isfile
 from pathlib import Path
 from time import sleep
 from typing import Optional
@@ -37,17 +36,20 @@ from cryptography.hazmat.primitives.serialization import (
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
+from flwr.common.args import try_obtain_server_certificates
 from flwr.common.config import get_flwr_dir, parse_config_args
 from flwr.common.constant import (
-    EXEC_API_DEFAULT_ADDRESS,
+    CLIENT_OCTET,
+    EXEC_API_DEFAULT_SERVER_ADDRESS,
     FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS,
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
     FLEET_API_REST_DEFAULT_ADDRESS,
     ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
     MISSING_EXTRA_REST,
-    SERVERAPPIO_API_DEFAULT_ADDRESS,
-    SIMULATIONIO_API_DEFAULT_ADDRESS,
+    SERVER_OCTET,
+    SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
+    SIMULATIONIO_API_DEFAULT_SERVER_ADDRESS,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
@@ -215,13 +217,19 @@ def run_superlink() -> None:
 
     event(EventType.RUN_SUPERLINK_ENTER)
 
+    # Warn unused options
+    if args.flwr_dir is not None:
+        log(
+            WARN, "The `--flwr-dir` option is currently not in use and will be ignored."
+        )
+
     # Parse IP addresses
     serverappio_address, _, _ = _format_address(args.serverappio_api_address)
     exec_address, _, _ = _format_address(args.exec_api_address)
     simulationio_address, _, _ = _format_address(args.simulationio_api_address)
 
     # Obtain certificates
-    certificates = _try_obtain_certificates(args)
+    certificates = try_obtain_server_certificates(args, args.fleet_api_type)
 
     # Initialize StateFactory
     state_factory = LinkStateFactory(args.database)
@@ -359,18 +367,27 @@ def run_superlink() -> None:
         else:
             raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
 
-        if args.isolation == ISOLATION_MODE_SUBPROCESS:
-            # Scheduler thread
-            scheduler_th = threading.Thread(
-                target=_flwr_serverapp_scheduler,
-                args=(
-                    state_factory,
-                    args.serverappio_api_address,
-                    args.ssl_ca_certfile,
-                ),
-            )
-            scheduler_th.start()
-            bckg_threads.append(scheduler_th)
+    if args.isolation == ISOLATION_MODE_SUBPROCESS:
+
+        _octet, _colon, _port = serverappio_address.rpartition(":")
+        io_address = (
+            f"{CLIENT_OCTET}:{_port}" if _octet == SERVER_OCTET else serverappio_address
+        )
+        address = simulationio_address if sim_exec else io_address
+        cmd = "flwr-simulation" if sim_exec else "flwr-serverapp"
+
+        # Scheduler thread
+        scheduler_th = threading.Thread(
+            target=_flwr_scheduler,
+            args=(
+                state_factory,
+                address,
+                args.ssl_ca_certfile,
+                cmd,
+            ),
+        )
+        scheduler_th.start()
+        bckg_threads.append(scheduler_th)
 
     # Graceful shutdown
     register_exit_handlers(
@@ -388,12 +405,13 @@ def run_superlink() -> None:
         exec_server.wait_for_termination(timeout=1)
 
 
-def _flwr_serverapp_scheduler(
+def _flwr_scheduler(
     state_factory: LinkStateFactory,
-    serverappio_api_address: str,
+    io_api_address: str,
     ssl_ca_certfile: Optional[str],
+    cmd: str,
 ) -> None:
-    log(DEBUG, "Started flwr-serverapp scheduler thread.")
+    log(DEBUG, "Started %s scheduler thread.", cmd)
 
     state = state_factory.state()
 
@@ -406,14 +424,16 @@ def _flwr_serverapp_scheduler(
 
             log(
                 INFO,
-                "Launching `flwr-serverapp` subprocess. Connects to SuperLink on %s",
-                serverappio_api_address,
+                "Launching %s subprocess. Connects to SuperLink on %s",
+                cmd,
+                io_api_address,
             )
-            # Start ServerApp subprocess
+            # Start subprocess
             command = [
-                "flwr-serverapp",
-                "--superlink",
-                serverappio_api_address,
+                cmd,
+                "--run-once",
+                "--serverappio-api-address",
+                io_api_address,
             ]
             if ssl_ca_certfile:
                 command.append("--root-certificates")
@@ -524,60 +544,6 @@ def _try_setup_node_authentication(
             ssh_private_key,
             ssh_public_key,
         )
-
-
-def _try_obtain_certificates(
-    args: argparse.Namespace,
-) -> Optional[tuple[bytes, bytes, bytes]]:
-    # Obtain certificates
-    if args.insecure:
-        log(WARN, "Option `--insecure` was set. Starting insecure HTTP server.")
-        return None
-    # Check if certificates are provided
-    if args.fleet_api_type in [TRANSPORT_TYPE_GRPC_RERE, TRANSPORT_TYPE_GRPC_ADAPTER]:
-        if args.ssl_certfile and args.ssl_keyfile and args.ssl_ca_certfile:
-            if not isfile(args.ssl_ca_certfile):
-                sys.exit("Path argument `--ssl-ca-certfile` does not point to a file.")
-            if not isfile(args.ssl_certfile):
-                sys.exit("Path argument `--ssl-certfile` does not point to a file.")
-            if not isfile(args.ssl_keyfile):
-                sys.exit("Path argument `--ssl-keyfile` does not point to a file.")
-            certificates = (
-                Path(args.ssl_ca_certfile).read_bytes(),  # CA certificate
-                Path(args.ssl_certfile).read_bytes(),  # server certificate
-                Path(args.ssl_keyfile).read_bytes(),  # server private key
-            )
-            return certificates
-        if args.ssl_certfile or args.ssl_keyfile or args.ssl_ca_certfile:
-            sys.exit(
-                "You need to provide valid file paths to `--ssl-certfile`, "
-                "`--ssl-keyfile`, and `—-ssl-ca-certfile` to create a secure "
-                "connection in Fleet API server (gRPC-rere)."
-            )
-    if args.fleet_api_type == TRANSPORT_TYPE_REST:
-        if args.ssl_certfile and args.ssl_keyfile:
-            if not isfile(args.ssl_certfile):
-                sys.exit("Path argument `--ssl-certfile` does not point to a file.")
-            if not isfile(args.ssl_keyfile):
-                sys.exit("Path argument `--ssl-keyfile` does not point to a file.")
-            certificates = (
-                b"",
-                Path(args.ssl_certfile).read_bytes(),  # server certificate
-                Path(args.ssl_keyfile).read_bytes(),  # server private key
-            )
-            return certificates
-        if args.ssl_certfile or args.ssl_keyfile:
-            sys.exit(
-                "You need to provide valid file paths to `--ssl-certfile` "
-                "and `--ssl-keyfile` to create a secure connection "
-                "in Fleet API server (REST, experimental)."
-            )
-    sys.exit(
-        "Certificates are required unless running in insecure mode. "
-        "Please provide certificate paths to `--ssl-certfile`, "
-        "`--ssl-keyfile`, and `—-ssl-ca-certfile` or run the server "
-        "in insecure mode using '--insecure' if you understand the risks."
-    )
 
 
 def _run_fleet_api_grpc_rere(
@@ -695,6 +661,17 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         "Use this flag only if you understand the risks.",
     )
     parser.add_argument(
+        "--flwr-dir",
+        default=None,
+        help="""The path containing installed Flower Apps.
+        The default directory is:
+
+        - `$FLWR_HOME/` if `$FLWR_HOME` is defined
+        - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
+        - `$HOME/.flwr/` in all other cases
+        """,
+    )
+    parser.add_argument(
         "--ssl-certfile",
         help="Fleet API server SSL certificate file (as a path str) "
         "to create a secure connection.",
@@ -761,8 +738,9 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
 def _add_args_serverappio_api(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--serverappio-api-address",
-        help="ServerAppIo API (gRPC) server address (IPv4, IPv6, or a domain name).",
-        default=SERVERAPPIO_API_DEFAULT_ADDRESS,
+        default=SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
+        help="ServerAppIo API (gRPC) server address (IPv4, IPv6, or a domain name). "
+        f"By default, it is set to {SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS}.",
     )
 
 
@@ -795,8 +773,9 @@ def _add_args_exec_api(parser: argparse.ArgumentParser) -> None:
     """Add command line arguments for Exec API."""
     parser.add_argument(
         "--exec-api-address",
-        help="Exec API server address (IPv4, IPv6, or a domain name)",
-        default=EXEC_API_DEFAULT_ADDRESS,
+        help="Exec API server address (IPv4, IPv6, or a domain name) "
+        f"By default, it is set to {EXEC_API_DEFAULT_SERVER_ADDRESS}.",
+        default=EXEC_API_DEFAULT_SERVER_ADDRESS,
     )
     parser.add_argument(
         "--executor",
@@ -820,6 +799,7 @@ def _add_args_exec_api(parser: argparse.ArgumentParser) -> None:
 def _add_args_simulationio_api(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--simulationio-api-address",
-        help="SimulationIo API (gRPC) server address (IPv4, IPv6, or a domain name).",
-        default=SIMULATIONIO_API_DEFAULT_ADDRESS,
+        default=SIMULATIONIO_API_DEFAULT_SERVER_ADDRESS,
+        help="SimulationIo API (gRPC) server address (IPv4, IPv6, or a domain name)."
+        f"By default, it is set to {SIMULATIONIO_API_DEFAULT_SERVER_ADDRESS}.",
     )

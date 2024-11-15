@@ -861,6 +861,12 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         result: set[bytes] = {row["public_key"] for row in rows}
         return result
 
+    def get_run_ids(self) -> set[int]:
+        """Retrieve all run IDs."""
+        query = "SELECT run_id FROM run;"
+        rows = self.query(query)
+        return {convert_sint64_to_uint64(row["run_id"]) for row in rows}
+
     def get_run(self, run_id: int) -> Optional[Run]:
         """Retrieve information about the run with the specified `run_id`."""
         # Convert the uint64 value to sint64 for SQLite
@@ -875,6 +881,15 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                 fab_version=row["fab_version"],
                 fab_hash=row["fab_hash"],
                 override_config=json.loads(row["override_config"]),
+                pending_at=row["pending_at"],
+                starting_at=row["starting_at"],
+                running_at=row["running_at"],
+                finished_at=row["finished_at"],
+                status=RunStatus(
+                    status=determine_run_status(row),
+                    sub_status=row["sub_status"],
+                    details=row["details"],
+                ),
             )
         log(ERROR, "`run_id` does not exist.")
         return None
@@ -1208,10 +1223,10 @@ def dict_to_task_res(task_dict: dict[str, Any]) -> TaskRes:
 def determine_run_status(row: dict[str, Any]) -> str:
     """Determine the status of the run based on timestamp fields."""
     if row["pending_at"]:
+        if row["finished_at"]:
+            return Status.FINISHED
         if row["starting_at"]:
             if row["running_at"]:
-                if row["finished_at"]:
-                    return Status.FINISHED
                 return Status.RUNNING
             return Status.STARTING
         return Status.PENDING

@@ -12,35 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower command line interface."""
+"""Abstract base class NodeState."""
 
-import typer
-from typer.main import get_command
+import abc
+from typing import Optional
 
-from .build import build
-from .install import install
-from .log import log
-from .ls import ls
-from .new import new
-from .run import run
 
-app = typer.Typer(
-    help=typer.style(
-        "flwr is the Flower command line interface.",
-        fg=typer.colors.BRIGHT_YELLOW,
-        bold=True,
-    ),
-    no_args_is_help=True,
-)
+class NodeState(abc.ABC):
+    """Abstract NodeState."""
 
-app.command()(new)
-app.command()(run)
-app.command()(build)
-app.command()(install)
-app.command()(log)
-app.command()(ls)
+    @abc.abstractmethod
+    def set_node_id(self, node_id: Optional[int]) -> None:
+        """Set the node ID."""
 
-typer_click_object = get_command(app)
-
-if __name__ == "__main__":
-    app()
+    @abc.abstractmethod
+    def get_node_id(self) -> int:
+        """Get the node ID."""

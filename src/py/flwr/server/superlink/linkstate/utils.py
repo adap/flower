@@ -23,13 +23,10 @@ from uuid import UUID, uuid4
 from flwr.common import ConfigsRecord, Context, log, now, serde
 from flwr.common.constant import ErrorCode, Status, SubStatus
 from flwr.common.typing import RunStatus
-from flwr.proto.error_pb2 import Error  # pylint: disable=E0611
 from flwr.proto.message_pb2 import Context as ProtoContext  # pylint: disable=E0611
-from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 
 # pylint: disable=E0611
 from flwr.proto.recordset_pb2 import ConfigsRecord as ProtoConfigsRecord
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
 
 NODE_UNAVAILABLE_ERROR_REASON = (
     "Error: Node Unavailable - The destination node is currently unavailable. "
@@ -40,6 +37,9 @@ VALID_RUN_STATUS_TRANSITIONS = {
     (Status.PENDING, Status.STARTING),
     (Status.STARTING, Status.RUNNING),
     (Status.RUNNING, Status.FINISHED),
+    # Any non-FINISHED status can transition to FINISHED
+    (Status.PENDING, Status.FINISHED),
+    (Status.STARTING, Status.FINISHED),
 }
 VALID_RUN_SUB_STATUSES = {
     SubStatus.COMPLETED,
@@ -183,6 +183,14 @@ def is_valid_transition(current_status: RunStatus, new_status: RunStatus) -> boo
     bool
         True if the transition is valid, False otherwise.
     """
+    # Transition to FINISHED from a non-RUNNING status is only allowed
+    # if the sub-status is not COMPLETED
+    if (
+        current_status.status in [Status.PENDING, Status.STARTING]
+        and new_status.status == Status.FINISHED
+    ):
+        return new_status.sub_status != SubStatus.COMPLETED
+
     return (
         current_status.status,
         new_status.status,
