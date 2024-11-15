@@ -20,7 +20,7 @@ from typing import Optional, cast
 
 import grpc
 
-from flwr.common.constant import SIMULATIONIO_API_DEFAULT_ADDRESS
+from flwr.common.constant import SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.proto.simulationio_pb2_grpc import SimulationIoStub  # pylint: disable=E0611
@@ -41,7 +41,7 @@ class SimulationIoConnection:
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
-        simulationio_service_address: str = SIMULATIONIO_API_DEFAULT_ADDRESS,
+        simulationio_service_address: str = SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS,
         root_certificates: Optional[bytes] = None,
     ) -> None:
         self._addr = simulationio_service_address

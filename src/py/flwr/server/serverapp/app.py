@@ -30,7 +30,11 @@ from flwr.common.config import (
     get_project_config,
     get_project_dir,
 )
-from flwr.common.constant import Status, SubStatus
+from flwr.common.constant import (
+    SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
+    Status,
+    SubStatus,
+)
 from flwr.common.logger import (
     log,
     mirror_output_to_queue,
@@ -67,8 +71,10 @@ def flwr_serverapp() -> None:
     )
     parser.add_argument(
         "--serverappio-api-address",
+        default=SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
         type=str,
-        help="Address of SuperLink's ServerAppIo API",
+        help="Address of SuperLink's ServerAppIo API (IPv4, IPv6, or a domain name)."
+        f"By default, it is set to {SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS}.",
     )
     parser.add_argument(
         "--run-once",
