@@ -119,7 +119,7 @@ def flwr_simulation() -> None:
         args.superlink,
     )
     run_simulation_process(
-        superlink=args.superlink,
+        simulationio_api_address=args.superlink,
         log_queue=log_queue,
         run_once=args.run_once,
         flwr_dir_=args.flwr_dir,
@@ -131,7 +131,7 @@ def flwr_simulation() -> None:
 
 
 def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R0915
-    superlink: str,
+    simulationio_api_address: str,
     log_queue: Queue[Optional[str]],
     run_once: bool,
     flwr_dir_: Optional[str] = None,
@@ -139,7 +139,7 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
 ) -> None:
     """Run Flower Simulation process."""
     conn = SimulationIoConnection(
-        simulationio_service_address=superlink,
+        simulationio_service_address=simulationio_api_address,
         root_certificates=certificates,
     )
 
