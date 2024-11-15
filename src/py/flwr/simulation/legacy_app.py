@@ -192,6 +192,7 @@ def start_simulation(
     hist : flwr.server.history.History
         Object containing metrics from training.
     """  # noqa: E501
+    # pylint: disable-msg=too-many-locals
     msg = (
         "flwr.simulation.start_simulation() is deprecated."
         "\n\tInstead, use the `flwr run` CLI command to start a local simulation "
@@ -202,7 +203,6 @@ def start_simulation(
     )
     warn_deprecated_feature(name=msg)
 
-    # pylint: disable-msg=too-many-locals
     event(
         EventType.START_SIMULATION_ENTER,
         {"num_clients": len(clients_ids) if clients_ids is not None else num_clients},
