@@ -66,24 +66,7 @@ def flwr_serverapp() -> None:
     log_queue: Queue[Optional[str]] = Queue()
     mirror_output_to_queue(log_queue)
 
-    parser = argparse.ArgumentParser(
-        description="Run a Flower ServerApp",
-    )
-    parser.add_argument(
-        "--serverappio-api-address",
-        default=SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
-        type=str,
-        help="Address of SuperLink's ServerAppIo API (IPv4, IPv6, or a domain name)."
-        f"By default, it is set to {SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS}.",
-    )
-    parser.add_argument(
-        "--run-once",
-        action="store_true",
-        help="When set, this process will start a single ServerApp for a pending Run. "
-        "If there is no pending Run, the process will exit.",
-    )
-    add_args_flwr_app_common(parser=parser)
-    args = parser.parse_args()
+    args = _parse_args_run_flwr_serverapp().parse_args()
 
     log(INFO, "Starting Flower ServerApp")
     certificates = try_obtain_root_certificates(args, args.serverappio_api_address)
@@ -218,3 +201,25 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
         # Stop the loop if `flwr-serverapp` is expected to process a single run
         if run_once:
             break
+
+
+def _parse_args_run_flwr_serverapp() -> argparse.ArgumentParser:
+    """Parse flwr-serverapp command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Run a Flower ServerApp",
+    )
+    parser.add_argument(
+        "--serverappio-api-address",
+        default=SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
+        type=str,
+        help="Address of SuperLink's ServerAppIo API (IPv4, IPv6, or a domain name)."
+        f"By default, it is set to {SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS}.",
+    )
+    parser.add_argument(
+        "--run-once",
+        action="store_true",
+        help="When set, this process will start a single ServerApp for a pending Run. "
+        "If there is no pending Run, the process will exit.",
+    )
+    add_args_flwr_app_common(parser=parser)
+    return parser
