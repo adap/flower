@@ -86,23 +86,23 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
     :maxdepth: 1
     :caption: How-to guides
 
-     how-to-install-flower
-     how-to-configure-clients
-     how-to-design-stateful-clients
-     how-to-use-strategies
-     how-to-implement-strategies
-     how-to-aggregate-evaluation-results
-     how-to-save-and-load-model-checkpoints
-     how-to-run-simulations
-     how-to-monitor-simulation
-     how-to-configure-logging
-     how-to-enable-ssl-connections
-     how-to-use-built-in-mods
-     how-to-use-differential-privacy
-     how-to-authenticate-supernodes
-     docker/index
-     how-to-upgrade-to-flower-1.0
-     how-to-upgrade-to-flower-next
+    how-to-install-flower
+    how-to-configure-clients
+    how-to-design-stateful-clients
+    how-to-use-strategies
+    how-to-implement-strategies
+    how-to-aggregate-evaluation-results
+    how-to-save-and-load-model-checkpoints
+    how-to-run-simulations
+    how-to-monitor-simulation
+    how-to-configure-logging
+    how-to-enable-ssl-connections
+    how-to-use-built-in-mods
+    how-to-use-differential-privacy
+    how-to-authenticate-supernodes
+    docker/index
+    how-to-upgrade-to-flower-1.0
+    how-to-upgrade-to-flower-next
 
 .. toctree::
     :maxdepth: 1
