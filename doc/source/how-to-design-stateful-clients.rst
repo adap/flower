@@ -145,8 +145,8 @@ in which the `ClientApp` logs these messages might differ slightly between round
 Saving model parameters to the context
 --------------------------------------
 
-Using ConfigsRecord_ or MetricsRecord_ to save "simple" components (e.g. list of
-`floats`, strings, booleans, etc) is fine. Flower has a specific type of record, a
+Using ConfigsRecord_ or MetricsRecord_ to save "simple" components  is fine (e.g., float, integer, boolean, string, 
+bytes, and lists of these types. Note that MetricsRecord_ only supports float, integer, and lists of these types) Flower has a specific type of record, a
 ParametersRecord_, for storing model parameters or more generally data arrays.
 
 Let's see a couple of examples of how to save NumPy arrays first and then how to save
