@@ -23,7 +23,7 @@ from typing import Optional, cast
 import grpc
 
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
-from flwr.common.constant import SERVERAPPIO_API_DEFAULT_ADDRESS
+from flwr.common.constant import SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.serde import message_from_taskres, message_to_taskins, run_from_proto
@@ -66,7 +66,7 @@ class GrpcDriver(Driver):
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
-        serverappio_service_address: str = SERVERAPPIO_API_DEFAULT_ADDRESS,
+        serverappio_service_address: str = SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
         root_certificates: Optional[bytes] = None,
     ) -> None:
         self._addr = serverappio_service_address
