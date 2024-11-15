@@ -315,18 +315,14 @@ def start_client_internal(
 
     if isolation:
         if clientappio_api_address is None:
-        if clientappio_api_address is None:
             raise ValueError(
-                f"`clientappio_api_address` required when `isolation` is "
                 f"`clientappio_api_address` required when `isolation` is "
                 f"{ISOLATION_MODE_SUBPROCESS} or {ISOLATION_MODE_PROCESS}",
             )
         _clientappio_grpc_server, clientappio_servicer = run_clientappio_api_grpc(
             address=clientappio_api_address,
-            address=clientappio_api_address,
             certificates=certificates,
         )
-    clientappio_api_address = cast(str, clientappio_api_address)
     clientappio_api_address = cast(str, clientappio_api_address)
 
     # At this point, only `load_client_app_fn` should be used
@@ -534,8 +530,6 @@ def start_client_internal(
                                 # Start ClientApp subprocess
                                 command = [
                                     "flwr-clientapp",
-                                    "--clientappio-api-address",
-                                    clientappio_api_address,
                                     "--clientappio-api-address",
                                     io_address,
                                     "--token",
