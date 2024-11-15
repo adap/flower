@@ -127,18 +127,20 @@ clientapp = "fedlc.client_app:app"
 [tool.flwr.app.config]
 # Strategy
 strategy = "fedavg"
-num-server-rounds = 10
+num-server-rounds = 3
 fraction-fit = 1.0
 fraction-evaluate = 1.0
 batch-size = 128
 local-epochs = 1
 learning-rate = 0.01
 seed = 0
-proximal_mu = 1.0
+proximal-mu = 1.0
+save-params-every = 1
+checkpoint-dir-path = "checkpoints"
 
 # Data
 dataset-partition-by = "label"
-dataset = "uoft-cs/cifar10"
+dataset = "cifar10"
 num-classes = 10
 num-channels = 3
 dirichlet-alpha = 0.05
@@ -147,9 +149,14 @@ dirichlet-alpha = 0.05
 model-name = "resnet18"
 
 [tool.flwr.federations]
-default = "local-simulation"
+default = "cpu-simulation"
 
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 20
-options.backend.client-resources.num-cpus = 1
+[tool.flwr.federations.cpu-simulation]
+options.num-supernodes = 10
+options.backend.client-resources.num-cpus = 1.0
 options.backend.client-resources.num-gpus = 0.0
+
+[tool.flwr.federations.gpu-simulation-xl]
+options.num-supernodes = 20
+options.backend.client-resources.num-cpus = 1.0
+options.backend.client-resources.num-gpus = 0.5

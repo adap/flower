@@ -13,6 +13,7 @@ def load_data(dataset: str, partition_id: int, num_partitions: int, batch_size: 
     """Load partition CIFAR10 data."""
     # Only initialize `FederatedDataset` once
     global FDS  # pylint: disable=global-statement
+
     if FDS is None:
         dirichlet_partitioner = DirichletPartitioner(
             num_partitions=num_partitions, alpha=dirichlet_alpha, partition_by="label"

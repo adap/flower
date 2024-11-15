@@ -4,8 +4,10 @@ from typing import List, Tuple
 
 from flwr.common import Context, Metrics
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
-from flwr.server.strategy import FedAvg, FedProx
-
+from .strategy import CheckpointedFedAvg, CheckpointedFedProx
+from flwr.common.logger import log
+from logging import INFO, DEBUG
+from fedlc.model import initialize_model
 
 # Define metric aggregation function
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
@@ -15,7 +17,9 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     examples = [num_examples for num_examples, _ in metrics]
 
     # Aggregate and return custom metric (weighted average)
-    return {"accuracy": sum(accuracies) / sum(examples)}
+    weighted_accuracy = sum(accuracies) / sum(examples)
+    log(INFO, f"Weighted average accuracy: {weighted_accuracy}")
+    return {"accuracy": weighted_accuracy}
 
 
 def server_fn(context: Context):
@@ -25,10 +29,20 @@ def server_fn(context: Context):
     fraction_fit = context.run_config["fraction-fit"]
     fraction_evaluate = context.run_config["fraction-evaluate"]
     proximal_mu = context.run_config["proximal-mu"]
+    save_params_every = context.run_config["save-params-every"]
+    log(DEBUG, f"Saving params every {save_params_every} rounds")
+
+    num_classes = int(context.run_config["num-classes"])
+    num_channels = int(context.run_config["num-channels"])
+    model_name = str(context.run_config["model-name"])
+
+    net = initialize_model(model_name, num_channels, num_classes)
 
     # Define strategy
     if context.run_config["strategy"] == "fedprox":
-        strategy = FedProx(
+        strategy = CheckpointedFedProx(
+            net=net,
+            run_config=context.run_config,
             fraction_fit=float(fraction_fit),
             fraction_evaluate=float(fraction_evaluate),
             evaluate_metrics_aggregation_fn=weighted_average,
@@ -36,7 +50,9 @@ def server_fn(context: Context):
         )
     else:
         # default to FedAvg
-        strategy = FedAvg(
+        strategy = CheckpointedFedAvg(
+            net=net, 
+            run_config=context.run_config,
             fraction_fit=float(fraction_fit),
             fraction_evaluate=float(fraction_evaluate),
             evaluate_metrics_aggregation_fn=weighted_average,
@@ -44,7 +60,6 @@ def server_fn(context: Context):
     config = ServerConfig(num_rounds=int(num_rounds))
 
     return ServerAppComponents(strategy=strategy, config=config)
-
 
 # Create ServerApp
 app = ServerApp(server_fn=server_fn)

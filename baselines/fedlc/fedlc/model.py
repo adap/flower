@@ -7,7 +7,8 @@ import torch.nn.functional as F
 from torch import nn
 import torchvision
 
-# implementation from feddebug repo
+# Adapted from FedDebug baseline implementation
+# https://github.com/adap/flower/blob/main/baselines/feddebug/feddebug/models.py
 def initialize_model(name, num_channels, num_classes):
     """Initialize the model with the given name."""
     model_functions = {
