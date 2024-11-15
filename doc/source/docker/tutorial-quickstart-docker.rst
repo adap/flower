@@ -81,8 +81,8 @@ Open your terminal and run:
     * | ``--isolation process``: Tells the SuperLink that the ServerApp is created by separate
       | independent process. The SuperLink does not attempt to create it.
 
-Step 3: Start the SuperNode
----------------------------
+Step 3: Start the SuperNodes
+----------------------------
 
 Start two SuperNode containers.
 
@@ -100,7 +100,7 @@ Start two SuperNode containers.
            --insecure \
            --superlink superlink:9092 \
            --node-config "partition-id=0 num-partitions=2" \
-           --supernode-address 0.0.0.0:9094 \
+           --clientappio-api-address 0.0.0.0:9094 \
            --isolation process
 
    .. dropdown:: Understand the command
@@ -121,8 +121,8 @@ Start two SuperNode containers.
          | ``superlink:9092``.
        * | ``--node-config "partition-id=0 num-partitions=2"``: Set the partition ID to ``0`` and the
          | number of partitions to ``2`` for the SuperNode configuration.
-       * | ``--supernode-address 0.0.0.0:9094``: Set the address and port number that the SuperNode
-         | is listening on.
+       * | ``--clientappio-api-address 0.0.0.0:9094``: Set the address and port number that the
+         | SuperNode is listening on to communicate with the ClientApp.
        * | ``--isolation process``: Tells the SuperNode that the ClientApp is created by separate
          | independent process. The SuperNode does not attempt to create it.
 
@@ -140,7 +140,7 @@ Start two SuperNode containers.
            --insecure \
            --superlink superlink:9092 \
            --node-config "partition-id=1 num-partitions=2" \
-           --supernode-address 0.0.0.0:9095 \
+           --clientappio-api-address 0.0.0.0:9095 \
            --isolation process
 
 Step 4: Start the ClientApp
@@ -151,11 +151,11 @@ base for building your own ClientApp image. In order to install the FAB dependen
 you will need to create a Dockerfile that extends the ClientApp image and installs the
 required dependencies.
 
-1. Create a ClientApp Dockerfile called ``Dockerfile.clientapp`` and paste the following
+1. Create a ClientApp Dockerfile called ``clientapp.Dockerfile`` and paste the following
    code into it:
 
    .. code-block:: dockerfile
-       :caption: Dockerfile.clientapp
+       :caption: clientapp.Dockerfile
        :linenos:
        :substitutions:
 
@@ -199,7 +199,7 @@ required dependencies.
 
    .. code-block:: bash
 
-       $ docker build -f Dockerfile.clientapp -t flwr_clientapp:0.0.1 .
+       $ docker build -f clientapp.Dockerfile -t flwr_clientapp:0.0.1 .
 
    .. note::
 
@@ -215,7 +215,8 @@ required dependencies.
            --network flwr-network \
            --detach \
            flwr_clientapp:0.0.1  \
-           --supernode supernode-1:9094
+           --insecure \
+           --clientappio-api-address supernode-1:9094
 
    .. dropdown:: Understand the command
 
@@ -223,10 +224,12 @@ required dependencies.
        * ``--rm``: Remove the container once it is stopped or the command exits.
        * ``--network flwr-network``: Make the container join the network named ``flwr-network``.
        * ``--detach``: Run the container in the background, freeing up the terminal.
+       * | ``--insecure``: This flag tells the container to operate in an insecure mode, allowing
+         | unencrypted communication.
        * | ``flwr_clientapp:0.0.1``: This is the name of the image to be run and the specific tag
          | of the image.
-       * | ``--supernode supernode-1:9094``: Connect to the SuperNode's Fleet API at the address
-         | ``supernode-1:9094``.
+       * | ``--clientappio-api-address supernode-1:9094``: Connect to the SuperNode's ClientAppIO
+         | API at the address ``supernode-1:9094``.
 
 4. Start the second ClientApp container:
 
@@ -236,7 +239,8 @@ required dependencies.
            --network flwr-network \
            --detach \
            flwr_clientapp:0.0.1 \
-           --supernode supernode-2:9095
+           --insecure \
+           --clientappio-api-address supernode-2:9095
 
 Step 5: Start a ServerApp
 -------------------------
@@ -247,11 +251,11 @@ ClientApp image.
 Similar to the ClientApp image, you will need to create a Dockerfile that extends the
 ServerApp image and installs the required FAB dependencies.
 
-1. Create a ServerApp Dockerfile called ``Dockerfile.serverapp`` and paste the following
+1. Create a ServerApp Dockerfile called ``serverapp.Dockerfile`` and paste the following
    code in:
 
    .. code-block:: dockerfile
-       :caption: Dockerfile.serverapp
+       :caption: serverapp.Dockerfile
        :substitutions:
 
        FROM flwr/serverapp:|stable_flwr_version|
@@ -287,7 +291,7 @@ ServerApp image and installs the required FAB dependencies.
 
    .. code-block:: bash
 
-       $ docker build -f Dockerfile.serverapp -t flwr_serverapp:0.0.1 .
+       $ docker build -f serverapp.Dockerfile -t flwr_serverapp:0.0.1 .
 
 3. Start the ServerApp container:
 
@@ -299,7 +303,7 @@ ServerApp image and installs the required FAB dependencies.
            --detach \
            flwr_serverapp:0.0.1 \
            --insecure \
-           --superlink superlink:9091
+           --serverappio-api-address superlink:9091
 
    .. dropdown:: Understand the command
 
@@ -312,8 +316,8 @@ ServerApp image and installs the required FAB dependencies.
          | of the image.
        * | ``--insecure``: This flag tells the container to operate in an insecure mode, allowing
          | unencrypted communication.
-       * | ``--superlink superlink:9091``: Connect to the SuperLink's ServerAppIO API at the address
-         | ``superlink:9091``.
+       * | ``--serverappio-api-address superlink:9091``: Connect to the SuperLink's ServerAppIO API
+         | at the address ``superlink:9091``.
 
 Step 6: Run the Quickstart Project
 ----------------------------------
@@ -364,8 +368,8 @@ Step 7: Update the Application
 
    .. code-block:: bash
 
-       $ docker build -f Dockerfile.clientapp -t flwr_clientapp:0.0.1 . && \
-         docker build -f Dockerfile.serverapp -t flwr_serverapp:0.0.1 .
+       $ docker build -f clientapp.Dockerfile -t flwr_clientapp:0.0.1 . && \
+         docker build -f serverapp.Dockerfile -t flwr_serverapp:0.0.1 .
 
 4. Launch two new ClientApp containers based on the newly built image:
 
@@ -375,19 +379,21 @@ Step 7: Update the Application
            --network flwr-network \
            --detach \
            flwr_clientapp:0.0.1  \
-           --supernode supernode-1:9094
+           --insecure \
+           --clientappio-api-address supernode-1:9094
        $ docker run --rm \
            --network flwr-network \
            --detach \
            flwr_clientapp:0.0.1 \
-           --supernode supernode-2:9095
+           --insecure \
+           --clientappio-api-address supernode-2:9095
        $ docker run --rm \
            --network flwr-network \
            --name serverapp \
            --detach \
            flwr_serverapp:0.0.1 \
            --insecure \
-           --superlink superlink:9091
+           ----serverappio-api-address superlink:9091
 
 5. Run the updated project:
 
