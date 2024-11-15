@@ -150,7 +150,7 @@ Using ConfigsRecord_ or MetricsRecord_ to save "simple" components (e.g. list of
 ParametersRecord_, for storing model parameters or more generally data arrays.
 
 Let's see a couple of examples of how to save NumPy arrays first and then how to save
-parameters of a PyTorch and TensorFlow model.
+parameters of PyTorch and TensorFlow models.
 
 .. note::
 
@@ -163,7 +163,7 @@ Saving NumPy arrays to the context
 
 Elements stored in a `ParametersRecord` are of type Array_, which is a data structure
 that holds ``bytes`` and metadata that can be used for deserialization. Let's see how to
-create an ``Array`` from a numpy array and insert it into a ``ParametersRecord``. Here
+create an ``Array`` from a NumPy array and insert it into a ``ParametersRecord``. Here
 we will make use of the built-in serialization and deserialization mechanisms in Flower,
 namely the ``flwr.common.array_from_numpy`` function and the `numpy()` method of an
 Array_ object.
@@ -190,7 +190,7 @@ Let's see how to use those functions to store a NumPy array into the context.
     #        [ 0.32991896,  0.55540414,  0.44085534],
     #        [-0.10758364,  1.97619858, -0.37120501]])
 
-    # Now, let's serialize it an construct an Array
+    # Now, let's serialize it and construct an Array
     arr = array_from_numpy(arr_np)
 
     # If we print it (note the binary data)
@@ -254,12 +254,12 @@ example for how to do this.
     p_record = ParametersRecord()
     for k, v in model.state_dict().items():
         # Convert to NumPy, then to Array. Add to record
-        p_record[k] = array_from_numpy(v.numpy())
+        p_record[k] = array_from_numpy(v.detach().cpu().numpy())
 
     # Add to a context
     context.state.parameters_records["net_parameters"] = p_record
 
-Let say now you want to apply the parameters stored in your context to a new instnace of
+Let say now you want to apply the parameters stored in your context to a new instance of
 the model (as it happens each time a ``ClientApp`` is executed). You will need to:
 
 1. Deserialize each element in your specific ``ParametersRecord``
@@ -275,23 +275,23 @@ the model (as it happens each time a ``ClientApp`` is executed). You will need t
     for k, v in p_record.items():
         state_dict[k] = torch.from_numpy(v.numpy())
 
-    # Applpy state dict to a new model instance
+    # Apply state dict to a new model instance
     model_ = Net()
     model_.load_state_dict(state_dict)
     # now this model has the exact same parameters as the one created earlier
     # You can verify this by doing
     for p, p_ in zip(model.state_dict().values(), model_.state_dict().values()):
-        assert torch.allclose(p, p_), "state_dict do not match"
+        assert torch.allclose(p, p_), "`state_dict`s do not match"
 
 And that's it! Recall that even though this example shows how to store the entire
-`state_dict` in a ``ParametersRecord``, you can just save part of it. The process would
+``state_dict`` in a ``ParametersRecord``, you can just save part of it. The process would
 be identical, but you might need to adjust how it is loaded into an existing model using
 PyTorch APIs.
 
 Saving Tensorflow/Keras parameters to the context
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Follow the same steps as done above but replace the `state_dict` logic with simply
+Follow the same steps as done above but replace the ``state_dict`` logic with simply
 `get_weights() <https://www.tensorflow.org/api_docs/python/tf/keras/Layer#get_weights>`_
 to convert the model parameters to a list of NumPy arrays that can then be serialized
 into an ``Array``. Then, after deserialization, use `set_weights()
