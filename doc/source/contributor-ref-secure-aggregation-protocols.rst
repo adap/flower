@@ -12,150 +12,46 @@ In this implementation, each client will be assigned with a unique index (int) f
 secure aggregation, and thus many python dictionaries used have keys of int type rather
 than ClientProxy type.
 
-.. code-block:: python
-
-    class SecAggPlusProtocol(ABC):
-        """Abstract base class for the SecAgg+ protocol implementations."""
-
-        @abstractmethod
-        def generate_graph(self, clients: List[ClientProxy], k: int) -> ClientGraph:
-            """Build a k-degree undirected graph of clients.
-            Each client will only generate pair-wise masks with its k neighbours.
-            k is equal to the number of clients in SecAgg, i.e., a complete graph.
-            This function may need extra inputs to decide on the generation of the graph."""
-
-        @abstractmethod
-        def setup_config(
-            self, clients: List[ClientProxy], config_dict: Dict[str, Scalar]
-        ) -> SetupConfigResultsAndFailures:
-            """Configure the next round of secure aggregation. (SetupConfigRes is an empty class.)"""
-
-        @abstractmethod
-        def ask_keys(
-            self, clients: List[ClientProxy], ask_keys_ins_list: List[AskKeysIns]
-        ) -> AskKeysResultsAndFailures:
-            """Ask public keys. (AskKeysIns is an empty class, and hence ask_keys_ins_list can be omitted.)"""
-
-        @abstractmethod
-        def share_keys(
-            self,
-            clients: List[ClientProxy],
-            public_keys_dict: Dict[int, AskKeysRes],
-            graph: ClientGraph,
-        ) -> ShareKeysResultsAndFailures:
-            """Send public keys."""
-
-        @abstractmethod
-        def ask_vectors(
-            clients: List[ClientProxy],
-            forward_packet_list_dict: Dict[int, List[ShareKeysPacket]],
-            client_instructions: Dict[int, FitIns] = None,
-        ) -> AskVectorsResultsAndFailures:
-            """Ask vectors of local model parameters.
-            (If client_instructions is not None, local models will be trained in the ask vectors stage,
-            rather than trained parallelly as the protocol goes through the previous stages.)
-            """
-
-        @abstractmethod
-        def unmask_vectors(
-            clients: List[ClientProxy],
-            dropout_clients: List[ClientProxy],
-            graph: ClientGraph,
-        ) -> UnmaskVectorsResultsAndFailures:
-            """Unmask and compute the aggregated model. UnmaskVectorRes contains shares of keys needed to generate masks."""
-
 The Flower server will execute and process received results in the following order:
 
 .. mermaid::
-
     sequenceDiagram
-        participant S as Flower Server
-        participant P as SecAgg+ Protocol
-        participant C1 as Flower Client
-        participant C2 as Flower Client
-        participant C3 as Flower Client
+        participant ServerApp as ServerApp (in SuperLink)
+        participant SecAggPlusWorkflow
+        participant ClientApp as secaggplus_mod
+        participant RealClientApp as ClientApp (in SuperNode)
 
-        S->>P: generate_graph
-        activate P
-        P-->>S: client_graph
-        deactivate P
+        ServerApp->>SecAggPlusWorkflow: invoke
 
-        Note left of P: Stage 0:<br/>Setup Config
-        rect rgb(249, 219, 130)
-        S->>P: setup_config<br/>clients, config_dict
-        activate P
-        P->>C1: SetupConfigIns
-        deactivate P
-        P->>C2: SetupConfigIns
-        P->>C3: SetupConfigIns
-        C1->>P: SetupConfigRes (empty)
-        C2->>P: SetupConfigRes (empty)
-        C3->>P: SetupConfigRes (empty)
-        activate P
-        P-->>S: None
-        deactivate P
+        rect rgb(245, 245, 245)
+        note over SecAggPlusWorkflow,ClientApp: Stage 0: Setup
+        SecAggPlusWorkflow-->>ClientApp: Send SecAgg+ configuration
+        ClientApp-->>SecAggPlusWorkflow: Send public keys
         end
 
-        Note left of P: Stage 1:<br/>Ask Keys
-        rect rgb(249, 219, 130)
-        S->>P: ask_keys<br/>clients
-        activate P
-        P->>C1: AskKeysIns (empty)
-        deactivate P
-        P->>C2: AskKeysIns (empty)
-        P->>C3: AskKeysIns (empty)
-        C1->>P: AskKeysRes
-        C2->>P: AskKeysRes
-        C3->>P: AskKeysRes
-        activate P
-        P-->>S: public keys
-        deactivate P
+        rect rgb(230, 230, 230)
+        note over SecAggPlusWorkflow,ClientApp: Stage 1: Share Keys
+        SecAggPlusWorkflow-->>ClientApp: Broadcast public keys
+        ClientApp-->>SecAggPlusWorkflow: Send encrypted private key shares
         end
 
-        Note left of P: Stage 2:<br/>Share Keys
-        rect rgb(249, 219, 130)
-        S->>P: share_keys<br/>clients, public_keys_dict,<br/>client_graph
-        activate P
-        P->>C1: ShareKeysIns
-        deactivate P
-        P->>C2: ShareKeysIns
-        P->>C3: ShareKeysIns
-        C1->>P: ShareKeysRes
-        C2->>P: ShareKeysRes
-        C3->>P: ShareKeysRes
-        activate P
-        P-->>S: encryted key shares
-        deactivate P
+        rect rgb(245, 245, 245)
+        note over SecAggPlusWorkflow,RealClientApp: Stage 2: Collect Masked Vectors
+        SecAggPlusWorkflow-->>ClientApp: Forward the received shares
+        ClientApp->>RealClientApp: fit instruction
+        activate RealClientApp
+        RealClientApp->>ClientApp: updated model
+        deactivate RealClientApp
+        ClientApp-->>SecAggPlusWorkflow: Send masked model parameters
         end
 
-        Note left of P: Stage 3:<br/>Ask Vectors
-        rect rgb(249, 219, 130)
-        S->>P: ask_vectors<br/>clients,<br/>forward_packet_list_dict
-        activate P
-        P->>C1: AskVectorsIns
-        deactivate P
-        P->>C2: AskVectorsIns
-        P->>C3: AskVectorsIns
-        C1->>P: AskVectorsRes
-        C2->>P: AskVectorsRes
-        activate P
-        P-->>S: masked vectors
-        deactivate P
+        rect rgb(230, 230, 230)
+        note over SecAggPlusWorkflow,ClientApp: Stage 3: Unmask
+        SecAggPlusWorkflow-->>ClientApp: Request private key shares
+        ClientApp-->>SecAggPlusWorkflow: Send private key shares
         end
-
-        Note left of P: Stage 4:<br/>Unmask Vectors
-        rect rgb(249, 219, 130)
-        S->>P: unmask_vectors<br/>clients, dropped_clients,<br/>client_graph
-        activate P
-        P->>C1: UnmaskVectorsIns
-        deactivate P
-        P->>C2: UnmaskVectorsIns
-        C1->>P: UnmaskVectorsRes
-        C2->>P: UnmaskVectorsRes
-        activate P
-        P-->>S: key shares
-        deactivate P
-        end
+        SecAggPlusWorkflow->>SecAggPlusWorkflow: Unmask Aggregated Model
+        SecAggPlusWorkflow->>ServerApp: Aggregated Model
 
 The ``LightSecAgg`` abstraction
 -------------------------------
