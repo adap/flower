@@ -90,7 +90,9 @@ Deprecated Commands
     only need to execute |flower_superlink_link|_.
 
 .. |flower_superlink_link| replace:: ``flower-superlink``
+
 .. |flwr_run_link| replace:: ``flwr run``
 
 .. _flower_superlink_link: ref-api-cli.html#flower-superlink
+
 .. _flwr_run_link: ref-api-cli.html#flwr-run
