@@ -20,6 +20,7 @@ package flwr.proto;
 import "flwr/proto/fab.proto";
 import "flwr/proto/transport.proto";
 import "flwr/proto/recordset.proto";
+import "flwr/proto/run.proto";
 
 service Exec {
   // Start run upon request
@@ -27,6 +28,9 @@ service Exec {
 
   // Start log stream upon request
   rpc StreamLogs(StreamLogsRequest) returns (stream StreamLogsResponse) {}
+
+  // flwr ls command
+  rpc ListRuns(ListRunsRequest) returns (ListRunsResponse) {}
 }
 
 message StartRunRequest {
@@ -42,4 +46,9 @@ message StreamLogsRequest {
 message StreamLogsResponse {
   string log_output = 1;
   double latest_timestamp = 2;
+}
+message ListRunsRequest { optional uint64 run_id = 1; }
+message ListRunsResponse {
+  map<uint64, Run> run_dict = 1;
+  string now = 2;
 }

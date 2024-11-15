@@ -28,9 +28,13 @@ from cryptography.hazmat.primitives.serialization import (
 )
 
 from flwr.common import EventType, event
-from flwr.common.args import try_obtain_root_certificates
+from flwr.common.args import (
+    try_obtain_root_certificates,
+    try_obtain_server_certificates,
+)
 from flwr.common.config import parse_config_args
 from flwr.common.constant import (
+    CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
     ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
@@ -62,10 +66,23 @@ def run_supernode() -> None:
             "Ignoring `--flwr-dir`.",
         )
 
+    # Exit if unsupported argument is passed by the user
+    if args.app is not None:
+        log(
+            ERROR,
+            "The `app` argument is deprecated. The SuperNode now automatically "
+            "uses the ClientApp delivered from the SuperLink. Providing the app "
+            "directory manually is no longer supported. Please remove the `app` "
+            "argument from your command.",
+        )
+        sys.exit(1)
+
     root_certificates = try_obtain_root_certificates(args, args.superlink)
+    # Obtain certificates for ClientAppIo API server
+    server_certificates = try_obtain_server_certificates(args, TRANSPORT_TYPE_GRPC_RERE)
     load_fn = get_load_client_app_fn(
         default_app_ref="",
-        app_path=args.app,
+        app_path=None,
         flwr_dir=args.flwr_dir,
         multi_app=True,
     )
@@ -87,7 +104,9 @@ def run_supernode() -> None:
         ),
         flwr_path=args.flwr_dir,
         isolation=args.isolation,
-        supernode_address=args.supernode_address,
+        clientappio_api_address=args.clientappio_api_address,
+        certificates=server_certificates,
+        ssl_ca_certfile=args.ssl_ca_certfile,
     )
 
     # Graceful shutdown
@@ -137,12 +156,12 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         "app",
         nargs="?",
         default=None,
-        help="Specify the path of the Flower App to load and run the `ClientApp`. "
-        "The `pyproject.toml` file must be located in the root of this path. "
-        "When this argument is provided, the SuperNode will exclusively respond to "
-        "messages from the corresponding `ServerApp` by matching the FAB ID and FAB "
-        "version. An error will be raised if a message is received from any other "
-        "`ServerApp`.",
+        help=(
+            "(REMOVED) This argument is removed. The SuperNode now automatically "
+            "uses the ClientApp delivered from the SuperLink, so there is no need to "
+            "provide the app directory manually. This argument will be removed in a "
+            "future version."
+        ),
     )
     _parse_args_common(parser)
     parser.add_argument(
@@ -158,22 +177,22 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--isolation",
-        default=None,
+        default=ISOLATION_MODE_SUBPROCESS,
         required=False,
         choices=[
             ISOLATION_MODE_SUBPROCESS,
             ISOLATION_MODE_PROCESS,
         ],
-        help="Isolation mode when running a `ClientApp` (optional, possible values: "
-        "`subprocess`, `process`). By default, a `ClientApp` runs in the same process "
-        "that executes the SuperNode. Use `subprocess` to configure SuperNode to run "
-        "a `ClientApp` in a subprocess. Use `process` to indicate that a separate "
-        "independent process gets created outside of SuperNode.",
+        help="Isolation mode when running a `ClientApp` (`subprocess` by default, "
+        "possible values: `subprocess`, `process`). Use `subprocess` to configure "
+        "SuperNode to run a `ClientApp` in a subprocess. Use `process` to indicate "
+        "that a separate independent process gets created outside of SuperNode.",
     )
     parser.add_argument(
-        "--supernode-address",
-        default="0.0.0.0:9094",
-        help="Set the SuperNode gRPC server address. Defaults to `0.0.0.0:9094`.",
+        "--clientappio-api-address",
+        default=CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
+        help="ClientAppIo API (gRPC) server address (IPv4, IPv6, or a domain name). "
+        f"By default, it is set to {CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS}.",
     )
 
     return parser
@@ -215,6 +234,25 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         type=str,
         help="Specifies the path to the PEM-encoded root certificate file for "
         "establishing secure HTTPS connections.",
+    )
+    parser.add_argument(
+        "--ssl-certfile",
+        help="ClientAppIo API server SSL certificate file (as a path str) "
+        "to create a secure connection.",
+        type=str,
+        default=None,
+    )
+    parser.add_argument(
+        "--ssl-keyfile",
+        help="ClientAppIo API server SSL private key file (as a path str) "
+        "to create a secure connection.",
+        type=str,
+    )
+    parser.add_argument(
+        "--ssl-ca-certfile",
+        help="ClientAppIo API server SSL CA certificate file (as a path str) "
+        "to create a secure connection.",
+        type=str,
     )
     parser.add_argument(
         "--server",
