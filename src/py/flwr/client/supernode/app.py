@@ -157,7 +157,7 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         nargs="?",
         default=None,
         help=(
-            "(DEPRECATED) This argument is deprecated. The SuperNode now automatically "
+            "(REMOVED) This argument is removed. The SuperNode now automatically "
             "uses the ClientApp delivered from the SuperLink, so there is no need to "
             "provide the app directory manually. This argument will be removed in a "
             "future version."
