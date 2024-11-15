@@ -18,7 +18,7 @@ services:
 
   serverapp:
     command:
-      - --superlink
+      - --serverappio-api-address
       - superlink:9091
       - --root-certificates
       - certificates/ca.crt
@@ -30,33 +30,51 @@ services:
     command:
       - --superlink
       - superlink:9092
-      - --supernode-address
+      - --clientappio-api-address
       - 0.0.0.0:9094
       - --isolation
       - process
       - --node-config
       - "partition-id=0 num-partitions=2"
+      - --ssl-ca-certfile=certificates/ca.crt
+      - --ssl-certfile=certificates/server.pem
+      - --ssl-keyfile=certificates/server.key
       - --root-certificates
-      - certificates/ca.crt
+      - certificates/superlink-ca.crt
     secrets:
       - source: superlink-ca-certfile
+        target: /app/certificates/superlink-ca.crt
+      - source: supernode-ca-certfile
         target: /app/certificates/ca.crt
+      - source: supernode-certfile
+        target: /app/certificates/server.pem
+      - source: supernode-keyfile
+        target: /app/certificates/server.key
 
   supernode-2:
     command:
       - --superlink
       - superlink:9092
-      - --supernode-address
+      - --clientappio-api-address
       - 0.0.0.0:9095
       - --isolation
       - process
       - --node-config
       - "partition-id=1 num-partitions=2"
+      - --ssl-ca-certfile=certificates/ca.crt
+      - --ssl-certfile=certificates/server.pem
+      - --ssl-keyfile=certificates/server.key
       - --root-certificates
-      - certificates/ca.crt
+      - certificates/superlink-ca.crt
     secrets:
       - source: superlink-ca-certfile
+        target: /app/certificates/superlink-ca.crt
+      - source: supernode-ca-certfile
         target: /app/certificates/ca.crt
+      - source: supernode-certfile
+        target: /app/certificates/server.pem
+      - source: supernode-keyfile
+        target: /app/certificates/server.key
 
   # uncomment to enable TLS on another SuperNode
   #
@@ -64,16 +82,57 @@ services:
   #   command:
   #     - --superlink
   #     - superlink:9092
-  #     - --supernode-address
+  #     - --clientappio-api-address
   #     - 0.0.0.0:9096
   #     - --isolation
   #     - process
   #     - --node-config
   #     - "partition-id=1 num-partitions=2"
+  #     - --ssl-ca-certfile=certificates/ca.crt
+  #     - --ssl-certfile=certificates/server.pem
+  #     - --ssl-keyfile=certificates/server.key
+  #     - --root-certificates
+  #     - certificates/superlink-ca.crt
+  #   secrets:
+  #     - source: superlink-ca-certfile
+  #       target: /app/certificates/superlink-ca.crt
+  #     - source: supernode-ca-certfile
+  #       target: /app/certificates/ca.crt
+  #     - source: supernode-certfile
+  #       target: /app/certificates/server.pem
+  #     - source: supernode-keyfile
+  #       target: /app/certificates/server.key
+
+  clientapp-1:
+    command:
+      - --clientappio-api-address
+      - supernode-1:9094
+      - --root-certificates
+      - certificates/ca.crt
+    secrets:
+      - source: supernode-ca-certfile
+        target: /app/certificates/ca.crt
+
+  clientapp-2:
+    command:
+      - --clientappio-api-address
+      - supernode-2:9095
+      - --root-certificates
+      - certificates/ca.crt
+    secrets:
+      - source: supernode-ca-certfile
+        target: /app/certificates/ca.crt
+
+  # uncomment to enable TLS on another ClientApp
+  #
+  # clientapp-3:
+  #   command:
+  #     - --clientappio-api-address
+  #     - supernode-3:9096
   #     - --root-certificates
   #     - certificates/ca.crt
   #   secrets:
-  #     - source: superlink-ca-certfile
+  #     - source: supernode-ca-certfile
   #       target: /app/certificates/ca.crt
 
 secrets:
@@ -83,3 +142,9 @@ secrets:
     file: ./superlink-certificates/server.pem
   superlink-keyfile:
     file: ./superlink-certificates/server.key
+  supernode-ca-certfile:
+    file: ./supernode-certificates/ca.crt
+  supernode-certfile:
+    file: ./supernode-certificates/server.pem
+  supernode-keyfile:
+    file: ./supernode-certificates/server.key
