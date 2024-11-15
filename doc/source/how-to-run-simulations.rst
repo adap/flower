@@ -8,29 +8,27 @@ workloads as fast as possible on the compute systems you have access to without 
 through a complex setup process; you might want to validate your algorithm in different
 scenarios at varying levels of data and system heterogeneity, client availability,
 privacy budgets, etc. These are among some of the use cases where simulating FL
-workloads makes sense. Flower can accommodate these scenarios by means of its
-`Simulation Engine <contributor-explanation-architecture.html#simulation-engine>`_.
+workloads makes sense.
 
-The ``SimulationEngine`` schedules, launches, and manages ``ClientApp`` instances. It
-does so through a ``Backend``, which contains several workers (i.e., Python processes)
-that can execute a ``ClientApp`` by passing it a ``Context`` and a ``Message``. These
-``ClientApp`` objects are identical to those used by Flower's `Deployment Engine
-<contributor-explanation-architecture.html>`_, making alternating between _simulation_
-and _deployment_ an effortless process. The execution of ``ClientApp`` objects through
-Flower's ``Simulation Engine`` is:
+Flower's ``Simulation Engine`` schedules, launches, and manages ``ClientApp`` instances.
+It does so through a ``Backend``, which contains several workers (i.e., Python
+processes) that can execute a ``ClientApp`` by passing it a ``Context`` and a
+``Message``. These ``ClientApp`` objects are identical to those used by Flower's
+`Deployment Engine <contributor-explanation-architecture.html>`_, making alternating
+between *simulation* and *deployment* an effortless process. The execution of
+``ClientApp`` objects through Flower's ``Simulation Engine`` is:
 
 - **Resource-aware**: Each backend worker executing ``ClientApps`` gets assigned a
   portion of the compute and memory on your system. You can define these at the
   beginning of the simulation, allowing you to control the degree of parallelism of your
   simulation. The fewer the resources per backend worker, the more ``ClientApps`` can
-  run concurrently on the same hardware. More on this later.
-- **Batchable**: When there are more ``ClientApps`` to execute than the workers the
-  backend has, ``ClientApps`` are queued and executed as soon as resources are freed.
-  This means that ``ClientApps`` are typically executed in batches of N, where N is the
-  number of backend workers.
-- **Self-managed**: This means that you, as a user, do not need to launch nodes or
-  ``ClientApps`` manually; instead, this gets delegated to ``Simulation Engine``'s
-  internals.
+  run concurrently on the same hardware.
+- **Batchable**: When there are more ``ClientApps`` to execute than backend workers,
+  ``ClientApps`` are queued and executed as soon as resources are freed. This means that
+  ``ClientApps`` are typically executed in batches of N, where N is the number of
+  backend workers.
+- **Self-managed**: This means that you, as a user, do not need to launch ``ClientApps``
+  manually; instead, this gets delegated to ``Simulation Engine``'s internals.
 - **Ephemeral**: This means that a ``ClientApp`` is only materialized when it is
   required by the application (e.g., to do `fit()
   <ref-api-flwr.html#flwr.client.Client.fit>`_). The object is destroyed afterward,
@@ -58,7 +56,7 @@ for `flwr run <ref-api-cli.html#flwr-run>`_. Therefore, running Flower simulatio
 primarily requires you to first define a ``ClientApp`` and a ``ServerApp``. A convenient
 way to generate a minimal but fully functional Flower app is by means of the `flwr new
 <ref-api-cli.html#flwr-new>`_ command. There are multiple templates to choose from. The
-example below uses the ``PyTorch`` template. A minimal example is shown below.
+example below uses the ``PyTorch`` template.
 
 .. tip::
 
@@ -70,11 +68,11 @@ example below uses the ``PyTorch`` template. A minimal example is shown below.
     # or simply execute `flwr run` for a fully interactive process
     flwr new my-app --framework="PyTorch" --username="alice"
 
-Then follow the instructions shown after completing the ``flwr new`` command. When you
+Then, follow the instructions shown after completing the ``flwr new`` command. When you
 execute ``flwr run``, you'll be using the ``Simulation Engine``.
 
-If we take a look at the `pyproject.toml` that was generated from the ``flwr new``
-command (and loaded upon ``flwr run`` execution), we see that a _default_ federation is
+If we take a look at the ``pyproject.toml`` that was generated from the ``flwr new``
+command (and loaded upon ``flwr run`` execution), we see that a *default* federation is
 defined. It sets the number of supernodes to 10.
 
 .. code-block:: toml
@@ -106,11 +104,11 @@ workload. You can do so by adjusting the backend resources for your federation.
     ``ClientApp`` being executed) are assigned in a *soft* manner. This means that the
     resources are primarily taken into account in order to control the degree of
     parallelism at which ``ClientApp`` instances should be executed. Resource assignment
-    is **not strict**, meaning that if you specified your ``ClientApp`` to make use of
-    25% of the available VRAM but it ends up using 50%, it might cause other
-    ``ClientApp`` instances to crash.
+    is **not strict**, meaning that if you specified your ``ClientApp`` is assumed to
+    make use of 25% of the available VRAM but it ends up using 50%, it might cause other
+    ``ClientApp`` instances to crash throwing an out-of-memory (OOM) error..
 
-Customizing resources can be done directly in the `pyproject.toml` of your app.
+Customizing resources can be done directly in the ``pyproject.toml`` of your app.
 
 .. code-block:: toml
 
@@ -146,8 +144,8 @@ has:
   25% of the available VRAM.
 - 10x CPUs and 2x GPUs: at most 8 ``ClientApps`` will run in parallel.
 - 6x CPUs and 2x GPUs: at most 6 ``ClientApps`` will run in parallel.
-- 10x CPUs but 0x GPUs: you won't be able to run the simulation since not a single
-  ``ClientApp`` will be able to run.
+- 10x CPUs but 0x GPUs: you won't be able to run the simulation since not even the
+  resources for a single ``ClientApp`` can be met.
 
 A generalization of this is given by the following equation. It gives the maximum number
 of ``ClientApps`` that can be executed in parallel on available CPU cores (SYS_CPUS) and
@@ -164,19 +162,19 @@ single ``ClientApp`` to run on each GPU, then set ``num_gpus=1.0``. If, for exam
 
 While the ``options.backend.client-resources`` can be used to control the degree of
 concurrency in your simulations, this does not stop you from running hundreds or even
-thousands of clients in the same round and having orders of magnitude more `dormant`
+thousands of clients in the same round and having orders of magnitude more *dormant*
 (i.e., not participating in a round) clients. Let's say you want to have 100 clients per
-round but your system can only accommodate 8 clients concurrently. The
-``SimulationEngine`` will schedule 100 ``ClientApps`` to run and then will execute them
-in a resource-aware manner in batches of 8.
+round but your system can only accommodate 8 clients concurrently. The ``Simulation
+Engine`` will schedule 100 ``ClientApps`` to run and then will execute them in a
+resource-aware manner in batches of 8.
 
 Simulation Engine resources
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-By default, the ``SimulationEngine`` has **access to all system resources** (i.e., all
+By default, the ``Simulation Engine`` has **access to all system resources** (i.e., all
 CPUs, all GPUs). However, in some settings, you might want to limit how many of your
 system resources are used for simulation. You can do this in the ``pyproject.toml`` of
-your app.
+your app by setting the ``options.backend.init_args`` variable.
 
 .. code-block:: toml
 
@@ -184,8 +182,8 @@ your app.
     options.num-supernodes = 10
     options.backend.client-resources.num-cpus = 1 # Each ClientApp will get assigned 1 CPU core
     options.backend.client-resources.num-gpus = 0.5 # Each ClientApp will get 50% of each available GPU
-    options.backend.init_args.num_cpus = 1
-    options.backend.init_args.num_gpus = 1
+    options.backend.init_args.num_cpus = 1 # Only expose 1 CPU to the simulation
+    options.backend.init_args.num_gpus = 1 # Expose a single GPU to the simulation
 
 With the above setup, the Backend will be initialized with a single CPU and GPU.
 Therefore, even if more CPUs and GPUs are available in your system, they will not be
@@ -239,7 +237,6 @@ or Jupyter environment by means of `run_simulation
         server_app=server_app,
         client_app=client_app,
         num_supernodes=10,  # equivalent to setting `num-supernodes` in the pyproject.toml
-        backend_config={"backend_config": {"num_cpus": 1, "num_gpus": 0.0}},
     )
 
 With ``run_simulation``, you can also control the amount of resources for your
@@ -260,7 +257,7 @@ for a complete example on how to run Flower Simulations in Colab.
 Multi-node Flower simulations
 -----------------------------
 
-Flower's ``SimulationEngine`` allows you to run FL simulations across multiple compute
+Flower's ``Simulation Engine`` allows you to run FL simulations across multiple compute
 nodes. Before starting your multi-node simulation, ensure that you:
 
 1. Have the same Python environment on all nodes.
@@ -332,9 +329,9 @@ FAQ for Simulations
 
     No. All ``ClientApp`` objects are assumed to make use of the same ``num_cpus`` and ``num_gpus``. When setting these values (refer to :ref:`clientappresources` for more details), ensure the ``ClientApp`` with the largest memory footprint (either RAM or VRAM) can run in your system with others like it in parallel.
 
-.. dropdown:: My ``ServerApp`` also needs to make use of the GPU (e.g., to do evaluation of the *global model* after aggregation). Is this GPU usage taken into account by the ``SimulationEngine``?
+.. dropdown:: My ``ServerApp`` also needs to make use of the GPU (e.g., to do evaluation of the *global model* after aggregation). Is this GPU usage taken into account by the ``Simulation Engine``?
 
-    No. The ``SimulationEngine`` only manages ``ClientApps`` and therefore is only aware of the system resources they require. If your ``ServerApp`` makes use of substantial compute or memory resources, factor that into account when setting ``num_cpus`` and ``num_gpus``.
+    No. The ``Simulation Engine`` only manages ``ClientApps`` and therefore is only aware of the system resources they require. If your ``ServerApp`` makes use of substantial compute or memory resources, factor that into account when setting ``num_cpus`` and ``num_gpus``.
 
 .. dropdown:: Can I indicate on what resource a specific instance of a ``ClientApp`` should run? Can I do resource placement?
 
