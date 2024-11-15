@@ -74,18 +74,10 @@ Deprecated Commands
 ``flower-server-app``
 ---------------------
 
-.. note::
+.. warning::
 
-    Note that since version ``1.11.0``, ``flower-server-app`` no longer supports passing
-    a reference to a `ServerApp` attribute. Instead, you need to pass the path to Flower
-    app via the argument ``--app``. This is the path to a directory containing a
-    `pyproject.toml`. You can create a valid Flower app by executing ``flwr new`` and
-    following the prompt.
-
-.. argparse::
-    :module: flwr.server.run_serverapp
-    :func: _parse_args_run_server_app
-    :prog: flower-server-app
+    Note that from version ``1.13.0``, ``flower-server-app`` is removed. Instead, you
+    only need to execute |flwr_run_link|_ to start the run.
 
 .. _flower-superexec-apiref:
 
@@ -98,5 +90,7 @@ Deprecated Commands
     only need to execute |flower_superlink_link|_.
 
 .. |flower_superlink_link| replace:: ``flower-superlink``
+.. |flwr_run_link| replace:: ``flwr run``
 
 .. _flower_superlink_link: ref-api-cli.html#flower-superlink
+.. _flwr_run_link: ref-api-cli.html#flwr-run
