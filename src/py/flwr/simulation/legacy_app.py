@@ -195,11 +195,10 @@ def start_simulation(
     msg = (
         "flwr.simulation.start_simulation() is deprecated."
         "\n\tInstead, use the `flwr run` CLI command to start a local simulation "
-        "as shown below:"
-        "\n\n\t\t$ flower-supernode --insecure --superlink='<IP>:<PORT>'"
-        "\n\n\tTo view all available options, run:"
-        "\n\n\t\t$ flower-supernode --help"
-        "\n\n\tUsing `start_client()` is deprecated."
+        "in your Flower app, as shown for example below:"
+        "\n\n\t\t$ flwr new  # Create a new Flower app from a template"
+        "\n\n\t\t$ flwr run  # Run the Flower app in Simulation Mode"
+        "\n\n\tUsing `start_simulation()` is deprecated."
     )
     warn_deprecated_feature(name=msg)
 
