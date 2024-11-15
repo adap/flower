@@ -76,7 +76,7 @@ Deprecated Commands
 
 .. warning::
 
-    Note that from version ``1.13.0``, ``flower-server-app`` is removed. Instead, you
+    Note that from version ``1.13.0``, ``flower-server-app`` is deprecated. Instead, you
     only need to execute |flwr_run_link|_ to start the run.
 
 .. _flower-superexec-apiref:
@@ -86,7 +86,7 @@ Deprecated Commands
 
 .. warning::
 
-    Note that from version ``1.13.0``, ``flower-superexec`` is removed. Instead, you
+    Note that from version ``1.13.0``, ``flower-superexec`` is deprecated. Instead, you
     only need to execute |flower_superlink_link|_.
 
 .. |flower_superlink_link| replace:: ``flower-superlink``
