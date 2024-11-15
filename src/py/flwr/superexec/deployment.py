@@ -58,7 +58,6 @@ class DeploymentEngine(Executor):
         flwr_dir: Optional[str] = None,
     ) -> None:
         self.serverappio_api_address = serverappio_api_address
-        self.serverappio_api_address = serverappio_api_address
         if root_certificates is None:
             self.root_certificates = None
             self.root_certificates_bytes = None
@@ -115,7 +114,6 @@ class DeploymentEngine(Executor):
         if superlink_address := config.get("superlink"):
             if not isinstance(superlink_address, str):
                 raise ValueError("The `superlink` value should be of type `str`.")
-            self.serverappio_api_address = superlink_address
             self.serverappio_api_address = superlink_address
         if root_certificates := config.get("root-certificates"):
             if not isinstance(root_certificates, str):
