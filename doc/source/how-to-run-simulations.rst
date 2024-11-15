@@ -105,10 +105,30 @@ is defined. It sets the number of supernodes to 10.
 
 You can modify the size of your simulations by adjusting ``options.num-supernodes``.
 
+Simulation examples
+~~~~~~~~~~~~~~~~~~~
+
+In addition to the quickstart tutorials in the documentation (e.g., `quickstart PyTorch
+Tutorial <tutorial-quickstart-pytorch.html>`_, `quickstart JAX Tutorial
+<tutorial-quickstart-jax.html>`_), most examples in the Flower repository are
+simulation-ready.
+
+- `Quickstart TensorFlow/Keras
+  <https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow>`_.
+- `Quickstart PyTorch
+  <https://github.com/adap/flower/tree/main/examples/quickstart-pytorch>`_
+- `Advanced PyTorch
+  <https://github.com/adap/flower/tree/main/examples/advanced-pytorch>`_
+- `Quickstart MLX <https://github.com/adap/flower/tree/main/examples/quickstart-mlx>`_
+- `ViT fine-tuning <https://github.com/adap/flower/tree/main/examples/flowertune-vit>`_
+
+The complete list of examples can be found in `the Flower GitHub
+<https://github.com/adap/flower/tree/main/examples>`_.
+
 .. _clientappresources:
 
 Defining ``ClientApp`` resources
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------
 
 By default, the ``Simulation Engine`` assigns two CPU cores to each backend worker. This
 means that if your system has 10 CPU cores, five backend workers can be running in
@@ -189,7 +209,7 @@ Engine`` will schedule 100 ``ClientApps`` to run and then will execute them in a
 resource-aware manner in batches of 8.
 
 Simulation Engine resources
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------
 
 By default, the ``Simulation Engine`` has **access to all system resources** (i.e., all
 CPUs, all GPUs). However, in some settings, you might want to limit how many of your
@@ -215,28 +235,8 @@ For a complete list of settings you can configure, check the `ray.init
 
 For the highest performance, do not set ``options.backend.init_args``.
 
-Simulation examples
-~~~~~~~~~~~~~~~~~~~
-
-In addition to the quickstart tutorials in the documentation (e.g., `quickstart PyTorch
-Tutorial <tutorial-quickstart-pytorch.html>`_, `quickstart JAX Tutorial
-<tutorial-quickstart-jax.html>`_), most examples in the Flower repository are
-simulation-ready.
-
-- `Quickstart TensorFlow/Keras
-  <https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow>`_.
-- `Quickstart PyTorch
-  <https://github.com/adap/flower/tree/main/examples/quickstart-pytorch>`_
-- `Advanced PyTorch
-  <https://github.com/adap/flower/tree/main/examples/advanced-pytorch>`_
-- `Quickstart MLX <https://github.com/adap/flower/tree/main/examples/quickstart-mlx>`_
-- `ViT fine-tuning <https://github.com/adap/flower/tree/main/examples/flowertune-vit>`_
-
-The complete list of examples can be found in `the Flower GitHub
-<https://github.com/adap/flower/tree/main/examples>`_.
-
 Simulation in Colab/Jupyter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------
 
 The preferred way of running simulations should always be |flwr_run_link|_. However, the
 core functionality of the ``Simulation Engine`` can be used from within a Google Colab
@@ -274,6 +274,8 @@ Refer to the `30 minutes Federated AI Tutorial
 <https://colab.research.google.com/github/adap/flower/blob/main/examples/flower-in-30-minutes/tutorial.ipynb>`_
 for a complete example on how to run Flower Simulations in Colab.
 
+.. _multinodesimulations:
+
 Multi-node Flower simulations
 -----------------------------
 
@@ -284,7 +286,9 @@ starting your multi-node simulation, ensure that you:
 1. Have the same Python environment on all nodes.
 2. Have a copy of your code on all nodes.
 3. Have a copy of your dataset on all nodes. If you are using partitions from `Flower
-   Datasets <https://flower.ai/docs/datasets>`_, ensure they are the same.
+   Datasets <https://flower.ai/docs/datasets>`_, ensure the partitioning strategy its
+   parameterization are the same. The expectation is that the i-th dataset partition is
+   identical in all nodes.
 4. Start Ray on your head node: on the terminal, type ``ray start --head``. This command
    will print a few lines, one of which indicates how to attach other nodes to the head
    node.
@@ -310,8 +314,8 @@ need to run the command ``ray stop`` in each node's terminal (including the head
     will be visible by the head node. This means that the ``Simulation Engine`` can
     schedule as many ``ClientApp`` instances as that node can possibly run. In some
     settings, you might want to exclude certain resources from the simulation. You can
-    do this by appending `--num-cpus=<NUM_CPUS_FROM_NODE>` and/or
-    `--num-gpus=<NUM_GPUS_FROM_NODE>` in any ``ray start`` command (including when
+    do this by appending ``--num-cpus=<NUM_CPUS_FROM_NODE>`` and/or
+    ``--num-gpus=<NUM_GPUS_FROM_NODE>`` in any ``ray start`` command (including when
     starting the head).
 
 FAQ for Simulations
@@ -319,7 +323,7 @@ FAQ for Simulations
 
 .. dropdown:: Can I make my ``ClientApp`` instances stateful?
 
-    Yes. Use the ``state`` attribute of the `Context <ref-api-flwr.html#flwr.common.Context>`_ object that is passed to the ``ClientApp`` to save variables, parameters, or results to it. Read the `Designing Stateful Clients <how-to-design-stateful-clients.rst>`_ guide for a complete walkthrough.
+    Yes. Use the ``state`` attribute of the |context_link|_ object that is passed to the ``ClientApp`` to save variables, parameters, or results to it. Read the `Designing Stateful Clients <how-to-design-stateful-clients.rst>`_ guide for a complete walkthrough.
 
 .. dropdown:: Can I run multiple simulations on the same machine?
 
@@ -350,6 +354,10 @@ FAQ for Simulations
 .. dropdown:: Can I assign different resources to each ``ClientApp`` instance?
 
     No. All ``ClientApp`` objects are assumed to make use of the same ``num_cpus`` and ``num_gpus``. When setting these values (refer to :ref:`clientappresources` for more details), ensure the ``ClientApp`` with the largest memory footprint (either RAM or VRAM) can run in your system with others like it in parallel.
+
+.. dropdown:: Can I run single simulation accross multiple compute nodes (e.g. GPU servers)?
+
+    Yes. If you are using the ``RayBackend`` (the *default* backend) you can first interconnect your nodes through Ray's cli and then launch the simulation. Refer to :ref:`multinodesimulations` for a step-by-step guide.
 
 .. dropdown:: My ``ServerApp`` also needs to make use of the GPU (e.g., to do evaluation of the *global model* after aggregation). Is this GPU usage taken into account by the ``Simulation Engine``?
 
