@@ -18,17 +18,17 @@ processes) that can execute a ``ClientApp`` by passing it a ``Context`` and a
 between *simulation* and *deployment* an effortless process. The execution of
 ``ClientApp`` objects through Flower's ``Simulation Engine`` is:
 
-- **Resource-aware**: Each backend worker executing ``ClientApps`` gets assigned a
+- **Resource-aware**: Each backend worker executing ``ClientApp``\s gets assigned a
   portion of the compute and memory on your system. You can define these at the
   beginning of the simulation, allowing you to control the degree of parallelism of your
-  simulation. The fewer the resources per backend worker, the more ``ClientApps`` can
+  simulation. For a fixed total pool of resources, the fewer the resources per backend worker, the more ``ClientApps`` can
   run concurrently on the same hardware.
 - **Batchable**: When there are more ``ClientApps`` to execute than backend workers,
   ``ClientApps`` are queued and executed as soon as resources are freed. This means that
   ``ClientApps`` are typically executed in batches of N, where N is the number of
   backend workers.
 - **Self-managed**: This means that you, as a user, do not need to launch ``ClientApps``
-  manually; instead, this gets delegated to ``Simulation Engine``'s internals.
+  manually; instead, the ``Simulation Engine``'s internals orchestrates the execution of all ``ClientApp``\s.
 - **Ephemeral**: This means that a ``ClientApp`` is only materialized when it is
   required by the application (e.g., to do `fit()
   <ref-api-flwr.html#flwr.client.Client.fit>`_). The object is destroyed afterward,
@@ -106,7 +106,7 @@ workload. You can do so by adjusting the backend resources for your federation.
     parallelism at which ``ClientApp`` instances should be executed. Resource assignment
     is **not strict**, meaning that if you specified your ``ClientApp`` is assumed to
     make use of 25% of the available VRAM but it ends up using 50%, it might cause other
-    ``ClientApp`` instances to crash throwing an out-of-memory (OOM) error..
+    ``ClientApp`` instances to crash throwing an out-of-memory (OOM) error.
 
 Customizing resources can be done directly in the ``pyproject.toml`` of your app.
 
@@ -142,8 +142,8 @@ has:
 
 - 10x CPUs and 1x GPU: at most 4 ``ClientApps`` will run in parallel since each requires
   25% of the available VRAM.
-- 10x CPUs and 2x GPUs: at most 8 ``ClientApps`` will run in parallel.
-- 6x CPUs and 2x GPUs: at most 6 ``ClientApps`` will run in parallel.
+- 10x CPUs and 2x GPUs: at most 8 ``ClientApps`` will run in parallel (VRAM-limited).
+- 6x CPUs and 4x GPUs: at most 6 ``ClientApps`` will run in parallel (CPU-limited).
 - 10x CPUs but 0x GPUs: you won't be able to run the simulation since not even the
   resources for a single ``ClientApp`` can be met.
 
@@ -258,17 +258,17 @@ Multi-node Flower simulations
 -----------------------------
 
 Flower's ``Simulation Engine`` allows you to run FL simulations across multiple compute
-nodes. Before starting your multi-node simulation, ensure that you:
+nodes so that you're not restricted to running simulations on a _single_ machine. Before starting your multi-node simulation, ensure that you:
 
 1. Have the same Python environment on all nodes.
-2. Have a copy of your code (e.g., your entire repo) on all nodes.
+2. Have a copy of your code on all nodes.
 3. Have a copy of your dataset on all nodes. If you are using partitions from `Flower
    Datasets <https://flower.ai/docs/datasets>`_, ensure they are the same.
 4. Start Ray on your head node: on the terminal, type ``ray start --head``. This command
    will print a few lines, one of which indicates how to attach other nodes to the head
    node.
 5. Attach other nodes to the head node: copy the command shown after starting the head
-   and execute it on the terminal of a new node. For example: ``ray start
+   and execute it on the terminal of a new node (before executing ``flwr run``). For example: ``ray start
    --address='192.168.1.132:6379'``.
 
 With all the above done, you can run your code from the head node as you would if the
@@ -277,7 +277,7 @@ simulation were running on a single node. In other words:
 .. code-block:: shell
 
     # From your head node, launch the simulation
-    flwr run .
+    flwr run
 
 Once your simulation is finished, if you'd like to dismantle your cluster, you simply
 need to run the command ``ray stop`` in each node's terminal (including the head node).
