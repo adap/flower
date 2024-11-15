@@ -123,13 +123,8 @@ def run_simulation_from_cli() -> None:
     fused_config = get_fused_config_from_dir(app_path, override_config)
 
     # Create run
-    run = Run(
-        run_id=run_id,
-        fab_id="",
-        fab_version="",
-        fab_hash="",
-        override_config=override_config,
-    )
+    run = Run.create_empty(run_id)
+    run.override_config = override_config
 
     _run_simulation(
         server_app_attr=server_app_attr,
@@ -333,14 +328,10 @@ def _main_loop(
     try:
         # Register run
         log(DEBUG, "Pre-registering run with id %s", run.run_id)
-        init_status = RunStatus(Status.RUNNING, "", "")
-        state_factory.state().run_ids[run.run_id] = RunRecord(  # type: ignore
-            run=run,
-            status=init_status,
-            starting_at=now().isoformat(),
-            running_at=now().isoformat(),
-            finished_at="",
-        )
+        run.status = RunStatus(Status.RUNNING, "", "")
+        run.starting_at = now().isoformat()
+        run.running_at = run.starting_at
+        state_factory.state().run_ids[run.run_id] = RunRecord(run=run)  # type: ignore
 
         if server_app_run_config is None:
             server_app_run_config = {}
@@ -457,9 +448,7 @@ def _run_simulation(
     # If no `Run` object is set, create one
     if run is None:
         run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
-        run = Run(
-            run_id=run_id, fab_id="", fab_version="", fab_hash="", override_config={}
-        )
+        run = Run.create_empty(run_id=run_id)
 
     args = (
         num_supernodes,

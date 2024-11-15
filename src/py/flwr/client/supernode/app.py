@@ -28,6 +28,10 @@ from cryptography.hazmat.primitives.serialization import (
 )
 
 from flwr.common import EventType, event
+from flwr.common.args import (
+    try_obtain_root_certificates,
+    try_obtain_server_certificates,
+)
 from flwr.common.config import parse_config_args
 from flwr.common.constant import (
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
@@ -61,7 +65,9 @@ def run_supernode() -> None:
             "Ignoring `--flwr-dir`.",
         )
 
-    root_certificates = _get_certificates(args)
+    root_certificates = try_obtain_root_certificates(args, args.superlink)
+    # Obtain certificates for ClientAppIo API server
+    server_certificates = try_obtain_server_certificates(args, TRANSPORT_TYPE_GRPC_RERE)
     load_fn = get_load_client_app_fn(
         default_app_ref="",
         app_path=args.app,
@@ -86,7 +92,9 @@ def run_supernode() -> None:
         ),
         flwr_path=args.flwr_dir,
         isolation=args.isolation,
-        supernode_address=args.supernode_address,
+        clientappio_api_address=args.clientappio_api_address,
+        certificates=server_certificates,
+        ssl_ca_certfile=args.ssl_ca_certfile,
     )
 
     # Graceful shutdown
@@ -124,41 +132,6 @@ def _warn_deprecated_server_arg(args: argparse.Namespace) -> None:
             )
         else:
             args.superlink = args.server
-
-
-def _get_certificates(args: argparse.Namespace) -> Optional[bytes]:
-    """Load certificates if specified in args."""
-    # Obtain certificates
-    if args.insecure:
-        if args.root_certificates is not None:
-            sys.exit(
-                "Conflicting options: The '--insecure' flag disables HTTPS, "
-                "but '--root-certificates' was also specified. Please remove "
-                "the '--root-certificates' option when running in insecure mode, "
-                "or omit '--insecure' to use HTTPS."
-            )
-        log(
-            WARN,
-            "Option `--insecure` was set. "
-            "Starting insecure HTTP client connected to %s.",
-            args.superlink,
-        )
-        root_certificates = None
-    else:
-        # Load the certificates if provided, or load the system certificates
-        cert_path = args.root_certificates
-        if cert_path is None:
-            root_certificates = None
-        else:
-            root_certificates = Path(cert_path).read_bytes()
-        log(
-            DEBUG,
-            "Starting secure HTTPS client connected to %s "
-            "with the following certificates: %s.",
-            args.superlink,
-            cert_path,
-        )
-    return root_certificates
 
 
 def _parse_args_run_supernode() -> argparse.ArgumentParser:
@@ -205,7 +178,7 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         "independent process gets created outside of SuperNode.",
     )
     parser.add_argument(
-        "--supernode-address",
+        "--clientappio-api-address",
         default="0.0.0.0:9094",
         help="Set the SuperNode gRPC server address. Defaults to `0.0.0.0:9094`.",
     )
@@ -249,6 +222,25 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         type=str,
         help="Specifies the path to the PEM-encoded root certificate file for "
         "establishing secure HTTPS connections.",
+    )
+    parser.add_argument(
+        "--ssl-certfile",
+        help="ClientAppIo API server SSL certificate file (as a path str) "
+        "to create a secure connection.",
+        type=str,
+        default=None,
+    )
+    parser.add_argument(
+        "--ssl-keyfile",
+        help="ClientAppIo API server SSL private key file (as a path str) "
+        "to create a secure connection.",
+        type=str,
+    )
+    parser.add_argument(
+        "--ssl-ca-certfile",
+        help="ClientAppIo API server SSL CA certificate file (as a path str) "
+        "to create a secure connection.",
+        type=str,
     )
     parser.add_argument(
         "--server",

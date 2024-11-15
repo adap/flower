@@ -48,11 +48,6 @@ class RunRecord:  # pylint: disable=R0902
     """The record of a specific run, including its status and timestamps."""
 
     run: Run
-    status: RunStatus
-    pending_at: str = ""
-    starting_at: str = ""
-    running_at: str = ""
-    finished_at: str = ""
     logs: list[tuple[float, str]] = field(default_factory=list)
     log_lock: threading.Lock = field(default_factory=threading.Lock)
 
@@ -386,13 +381,16 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                         fab_version=fab_version if fab_version else "",
                         fab_hash=fab_hash if fab_hash else "",
                         override_config=override_config,
+                        pending_at=now().isoformat(),
+                        starting_at="",
+                        running_at="",
+                        finished_at="",
+                        status=RunStatus(
+                            status=Status.PENDING,
+                            sub_status="",
+                            details="",
+                        ),
                     ),
-                    status=RunStatus(
-                        status=Status.PENDING,
-                        sub_status="",
-                        details="",
-                    ),
-                    pending_at=now().isoformat(),
                 )
                 self.run_ids[run_id] = run_record
 
@@ -452,7 +450,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         """Retrieve the statuses for the specified runs."""
         with self.lock:
             return {
-                run_id: self.run_ids[run_id].status
+                run_id: self.run_ids[run_id].run.status
                 for run_id in set(run_ids)
                 if run_id in self.run_ids
             }
@@ -466,7 +464,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 return False
 
             # Check if the status transition is valid
-            current_status = self.run_ids[run_id].status
+            current_status = self.run_ids[run_id].run.status
             if not is_valid_transition(current_status, new_status):
                 log(
                     ERROR,
@@ -489,12 +487,12 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             # Update the status
             run_record = self.run_ids[run_id]
             if new_status.status == Status.STARTING:
-                run_record.starting_at = now().isoformat()
+                run_record.run.starting_at = now().isoformat()
             elif new_status.status == Status.RUNNING:
-                run_record.running_at = now().isoformat()
+                run_record.run.running_at = now().isoformat()
             elif new_status.status == Status.FINISHED:
-                run_record.finished_at = now().isoformat()
-            run_record.status = new_status
+                run_record.run.finished_at = now().isoformat()
+            run_record.run.status = new_status
             return True
 
     def get_pending_run_id(self) -> Optional[int]:
@@ -504,7 +502,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         # Loop through all registered runs
         for run_id, run_rec in self.run_ids.items():
             # Break once a pending run is found
-            if run_rec.status.status == Status.PENDING:
+            if run_rec.run.status.status == Status.PENDING:
                 pending_run_id = run_id
                 break
 

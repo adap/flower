@@ -16,10 +16,7 @@
 
 
 import argparse
-import sys
-from logging import DEBUG, ERROR, INFO, WARN
-from os.path import isfile
-from pathlib import Path
+from logging import DEBUG, ERROR, INFO
 from queue import Queue
 from time import sleep
 from typing import Optional
@@ -27,6 +24,7 @@ from typing import Optional
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.common import EventType
+from flwr.common.args import try_obtain_root_certificates
 from flwr.common.config import (
     get_flwr_dir,
     get_fused_config_from_dir,
@@ -113,7 +111,7 @@ def flwr_simulation() -> None:
     args = parser.parse_args()
 
     log(INFO, "Starting Flower Simulation")
-    certificates = _try_obtain_certificates(args)
+    certificates = try_obtain_root_certificates(args, args.superlink)
 
     log(
         DEBUG,
@@ -121,7 +119,7 @@ def flwr_simulation() -> None:
         args.superlink,
     )
     run_simulation_process(
-        superlink=args.superlink,
+        simulationio_api_address=args.superlink,
         log_queue=log_queue,
         run_once=args.run_once,
         flwr_dir_=args.flwr_dir,
@@ -132,41 +130,8 @@ def flwr_simulation() -> None:
     restore_output()
 
 
-def _try_obtain_certificates(
-    args: argparse.Namespace,
-) -> Optional[bytes]:
-
-    if args.insecure:
-        if args.root_certificates is not None:
-            sys.exit(
-                "Conflicting options: The '--insecure' flag disables HTTPS, "
-                "but '--root-certificates' was also specified. Please remove "
-                "the '--root-certificates' option when running in insecure mode, "
-                "or omit '--insecure' to use HTTPS."
-            )
-        log(
-            WARN,
-            "Option `--insecure` was set. Starting insecure HTTP channel to %s.",
-            args.superlink,
-        )
-        root_certificates = None
-    else:
-        # Load the certificates if provided, or load the system certificates
-        if not isfile(args.root_certificates):
-            sys.exit("Path argument `--root-certificates` does not point to a file.")
-        root_certificates = Path(args.root_certificates).read_bytes()
-        log(
-            DEBUG,
-            "Starting secure HTTPS channel to %s "
-            "with the following certificates: %s.",
-            args.superlink,
-            args.root_certificates,
-        )
-    return root_certificates
-
-
 def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R0915
-    superlink: str,
+    simulationio_api_address: str,
     log_queue: Queue[Optional[str]],
     run_once: bool,
     flwr_dir_: Optional[str] = None,
@@ -174,7 +139,7 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
 ) -> None:
     """Run Flower Simulation process."""
     conn = SimulationIoConnection(
-        simulationio_service_address=superlink,
+        simulationio_service_address=simulationio_api_address,
         root_certificates=certificates,
     )
 
