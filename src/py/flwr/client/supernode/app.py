@@ -166,17 +166,16 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--isolation",
-        default=None,
+        default=ISOLATION_MODE_SUBPROCESS,
         required=False,
         choices=[
             ISOLATION_MODE_SUBPROCESS,
             ISOLATION_MODE_PROCESS,
         ],
-        help="Isolation mode when running a `ClientApp` (optional, possible values: "
-        "`subprocess`, `process`). By default, a `ClientApp` runs in the same process "
-        "that executes the SuperNode. Use `subprocess` to configure SuperNode to run "
-        "a `ClientApp` in a subprocess. Use `process` to indicate that a separate "
-        "independent process gets created outside of SuperNode.",
+        help="Isolation mode when running a `ClientApp` (`subprocess` by default, "
+        "possible values: `subprocess`, `process`). Use `subprocess` to configure "
+        "SuperNode to run a `ClientApp` in a subprocess. Use `process` to indicate "
+        "that a separate independent process gets created outside of SuperNode.",
     )
     parser.add_argument(
         "--clientappio-api-address",
