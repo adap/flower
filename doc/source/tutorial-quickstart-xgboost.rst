@@ -310,7 +310,7 @@ the AUC values from clients. The ``config_func`` function is to return the curre
 round number to client's ``fit()`` and ``evaluate()`` methods.
 
 Tree-based Bagging Aggregation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+++++++++++++++++++++++++++++++
 
 You must be curious about how bagging aggregation works. Let's look into the details.
 
