@@ -66,7 +66,7 @@ def flwr_serverapp() -> None:
         description="Run a Flower ServerApp",
     )
     parser.add_argument(
-        "--superlink",
+        "--serverappio-api-address",
         type=str,
         help="Address of SuperLink's ServerAppIo API",
     )
@@ -80,15 +80,15 @@ def flwr_serverapp() -> None:
     args = parser.parse_args()
 
     log(INFO, "Starting Flower ServerApp")
-    certificates = try_obtain_root_certificates(args, args.superlink)
+    certificates = try_obtain_root_certificates(args, args.serverappio_api_address)
 
     log(
         DEBUG,
         "Starting isolated `ServerApp` connected to SuperLink's ServerAppIo API at %s",
-        args.superlink,
+        args.serverappio_api_address,
     )
     run_serverapp(
-        serverappio_api_address=args.superlink,
+        serverappio_api_address=args.serverappio_api_address,
         log_queue=log_queue,
         run_once=args.run_once,
         flwr_dir=args.flwr_dir,

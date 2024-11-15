@@ -92,7 +92,7 @@ def run_supernode() -> None:
         ),
         flwr_path=args.flwr_dir,
         isolation=args.isolation,
-        clientappio_api_address=args.supernode_address,
+        clientappio_api_address=args.clientappio_api_address,
         certificates=server_certificates,
         ssl_ca_certfile=args.ssl_ca_certfile,
     )
@@ -178,7 +178,7 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         "independent process gets created outside of SuperNode.",
     )
     parser.add_argument(
-        "--supernode-address",
+        "--clientappio-api-address",
         default="0.0.0.0:9094",
         help="Set the SuperNode gRPC server address. Defaults to `0.0.0.0:9094`.",
     )

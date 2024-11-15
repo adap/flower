@@ -426,7 +426,7 @@ def _flwr_scheduler(
             command = [
                 cmd,
                 "--run-once",
-                "--superlink",
+                "--serverappio-api-address",
                 io_api_address,
             ]
             if ssl_ca_certfile:
