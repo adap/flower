@@ -79,6 +79,7 @@ For example, you can use ``scp`` to copy the directories:
 
     $ scp -r ./server \
            ./superlink-certificates \
+           ./supernode-certificates \
            ../../../examples/quickstart-sklearn-tabular/pyproject.toml remote:~/distributed
 
 Step 3: Start the Flower Server Components

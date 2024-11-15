@@ -239,16 +239,11 @@ Step 6: Run Flower with TLS
 
        $ flwr run quickstart-compose local-deployment-tls --stream
 
-Step 7: Add another SuperNode
------------------------------
+Step 7: Add another SuperNode and ClientApp
+-------------------------------------------
 
-You can add more SuperNodes and ClientApps by duplicating their definitions in the
-``compose.yml`` file.
-
-Just give each new SuperNode and ClientApp service a unique service name like
-``supernode-3``, ``clientapp-3``, etc.
-
-In ``compose.yml``, add the following:
+You can add more SuperNodes and ClientApps by uncommenting their definitions in the
+``compose.yml`` file:
 
 .. code-block:: yaml
     :caption: compose.yml
@@ -262,7 +257,7 @@ In ``compose.yml``, add the following:
           - --insecure
           - --superlink
           - superlink:9092
-          - --supernode-address
+          - --clientappio-api-address
           - 0.0.0.0:9096
           - --isolation
           - process
@@ -291,7 +286,8 @@ In ``compose.yml``, add the following:
 
             ENTRYPOINT ["flwr-clientapp"]
         command:
-          - --supernode
+          - --insecure
+          - --clientappio-api-address
           - supernode-3:9096
         deploy:
           resources:
@@ -301,12 +297,8 @@ In ``compose.yml``, add the following:
         depends_on:
           - supernode-3
 
-If you also want to enable TLS for the new SuperNodes, duplicate the SuperNode
-definition for each new SuperNode service in the ``with-tls.yml`` file.
-
-Make sure that the names of the services match with the one in the ``compose.yml`` file.
-
-In ``with-tls.yml``, add the following:
+If you also want to enable TLS for the new SuperNode and ClientApp, uncomment their
+definitions in the ``with-tls.yml`` file:
 
 .. code-block:: yaml
     :caption: with-tls.yml
@@ -317,17 +309,44 @@ In ``with-tls.yml``, add the following:
         command:
           - --superlink
           - superlink:9092
-          - --supernode-address
+          - --clientappio-api-address
           - 0.0.0.0:9096
           - --isolation
           - process
           - --node-config
           - "partition-id=1 num-partitions=2"
+          - --ssl-ca-certfile=certificates/ca.crt
+          - --ssl-certfile=certificates/server.pem
+          - --ssl-keyfile=certificates/server.key
+          - --root-certificates
+          - certificates/superlink-ca.crt
+        secrets:
+          - source: superlink-ca-certfile
+            target: /app/certificates/superlink-ca.crt
+          - source: supernode-ca-certfile
+            target: /app/certificates/ca.crt
+          - source: supernode-certfile
+            target: /app/certificates/server.pem
+          - source: supernode-keyfile
+            target: /app/certificates/server.key
+
+      clientapp-3:
+        command:
+          - --clientappio-api-address
+          - supernode-3:9096
           - --root-certificates
           - certificates/ca.crt
         secrets:
-          - source: superlink-ca-certfile
+          - source: supernode-ca-certfile
             target: /app/certificates/ca.crt
+
+Restart the services with:
+
+.. code-block:: bash
+
+    $ docker compose up --build -d
+    # or with TLS enabled
+    $ docker compose -f compose.yml -f with-tls.yml up --build -d
 
 Step 8: Persisting the SuperLink State and Enabling TLS
 -------------------------------------------------------
