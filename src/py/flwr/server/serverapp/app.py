@@ -67,7 +67,6 @@ def flwr_serverapp() -> None:
     )
     parser.add_argument(
         "--serverappio-api-address",
-        "--serverappio-api-address",
         type=str,
         help="Address of SuperLink's ServerAppIo API",
     )
