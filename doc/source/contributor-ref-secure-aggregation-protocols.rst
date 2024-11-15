@@ -15,6 +15,7 @@ than ClientProxy type.
 The Flower server will execute and process received results in the following order:
 
 .. mermaid::
+
     sequenceDiagram
         participant ServerApp as ServerApp (in SuperLink)
         participant SecAggPlusWorkflow
@@ -23,19 +24,19 @@ The Flower server will execute and process received results in the following ord
 
         ServerApp->>SecAggPlusWorkflow: invoke
 
-        rect rgb(245, 245, 245)
+        rect rgb(235, 235, 235)
         note over SecAggPlusWorkflow,ClientApp: Stage 0: Setup
         SecAggPlusWorkflow-->>ClientApp: Send SecAgg+ configuration
         ClientApp-->>SecAggPlusWorkflow: Send public keys
         end
 
-        rect rgb(230, 230, 230)
+        rect rgb(220, 220, 220)
         note over SecAggPlusWorkflow,ClientApp: Stage 1: Share Keys
         SecAggPlusWorkflow-->>ClientApp: Broadcast public keys
         ClientApp-->>SecAggPlusWorkflow: Send encrypted private key shares
         end
 
-        rect rgb(245, 245, 245)
+        rect rgb(235, 235, 235)
         note over SecAggPlusWorkflow,RealClientApp: Stage 2: Collect Masked Vectors
         SecAggPlusWorkflow-->>ClientApp: Forward the received shares
         ClientApp->>RealClientApp: fit instruction
@@ -45,7 +46,7 @@ The Flower server will execute and process received results in the following ord
         ClientApp-->>SecAggPlusWorkflow: Send masked model parameters
         end
 
-        rect rgb(230, 230, 230)
+        rect rgb(220, 220, 220)
         note over SecAggPlusWorkflow,ClientApp: Stage 3: Unmask
         SecAggPlusWorkflow-->>ClientApp: Request private key shares
         ClientApp-->>SecAggPlusWorkflow: Send private key shares
