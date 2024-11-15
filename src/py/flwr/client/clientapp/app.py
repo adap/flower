@@ -60,7 +60,7 @@ def flwr_clientapp() -> None:
         description="Run a Flower ClientApp",
     )
     parser.add_argument(
-        "--supernode",
+        "--clientappio-api-address",
         type=str,
         help="Address of SuperNode's ClientAppIo API",
     )
@@ -74,17 +74,17 @@ def flwr_clientapp() -> None:
     args = parser.parse_args()
 
     log(INFO, "Starting Flower ClientApp")
-    certificates = try_obtain_root_certificates(args, args.supernode)
+    certificates = try_obtain_root_certificates(args, args.clientappio_api_address)
 
     log(
         DEBUG,
         "Starting isolated `ClientApp` connected to SuperNode's ClientAppIo API at %s "
         "with token %s",
-        args.supernode,
+        args.clientappio_api_address,
         args.token,
     )
     run_clientapp(
-        clientappio_api_address=args.supernode,
+        clientappio_api_address=args.clientappio_api_address,
         run_once=(args.token is not None),
         token=args.token,
         flwr_dir=args.flwr_dir,
