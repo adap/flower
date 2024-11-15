@@ -20,27 +20,27 @@ Design Stateful ClientApps
 By design, ClientApp_ objects are stateless. This means that the ``ClientApp`` object is
 recreated each time a new ``Message`` is to be processed. This behaviour is identical
 with Flower's Simulation Engine and Deployment Engine. For the former, it allows us to
-simulate the running of a large number of nodes on a single machine or across multiple 
-machines. For the latter, it enables each ``SuperNode`` to be part of
-multiple runs, each running a different ``ClientApp``.
+simulate the running of a large number of nodes on a single machine or across multiple
+machines. For the latter, it enables each ``SuperNode`` to be part of multiple runs,
+each running a different ``ClientApp``.
 
 When a ``ClientApp`` is executed it receives a Context_. This context is unique for each
 ``ClientApp``, meaning that subsequent executions of the same ``ClientApp`` from the
 same node will receive the same ``Context`` object. In the ``Context``, the ``.state``
-attribute can be used to store information that you would like the
-``ClientApp`` to have access to for the duration of the run. This could be anything from
-intermediate results such as the history of training losses (e.g. as a list of `float`
-values with a new entry appended each time the ``ClientApp`` is executed), certain parts
-of the model that should persist at the client side, or some other arbitrary Python
-objects. These items would need to be serialized before saving them into the context.
+attribute can be used to store information that you would like the ``ClientApp`` to have
+access to for the duration of the run. This could be anything from intermediate results
+such as the history of training losses (e.g. as a list of `float` values with a new
+entry appended each time the ``ClientApp`` is executed), certain parts of the model that
+should persist at the client side, or some other arbitrary Python objects. These items
+would need to be serialized before saving them into the context.
 
 Saving metrics to the context
 -----------------------------
 
 This section will demonstrate how to save metrics such as accuracy/loss values to the
 Context_ so they can be used in subsequent executions of the ``ClientApp``. If your
-``ClientApp`` makes use of NumPyClient_ then entire object is also re-created for
-each call to methods like ``fit()`` or ``evaluate()``.
+``ClientApp`` makes use of NumPyClient_ then entire object is also re-created for each
+call to methods like ``fit()`` or ``evaluate()``.
 
 Let's begin with a simple setting in which ``ClientApp`` is defined as follows. The
 ``evaluate()`` method only generates a random number and prints it.
@@ -145,9 +145,10 @@ in which the `ClientApp` logs these messages might differ slightly between round
 Saving model parameters to the context
 --------------------------------------
 
-Using ConfigsRecord_ or MetricsRecord_ to save "simple" components  is fine (e.g., float, integer, boolean, string, 
-bytes, and lists of these types. Note that MetricsRecord_ only supports float, integer, and lists of these types) Flower has a specific type of record, a
-ParametersRecord_, for storing model parameters or more generally data arrays.
+Using ConfigsRecord_ or MetricsRecord_ to save "simple" components is fine (e.g., float,
+integer, boolean, string, bytes, and lists of these types. Note that MetricsRecord_ only
+supports float, integer, and lists of these types) Flower has a specific type of record,
+a ParametersRecord_, for storing model parameters or more generally data arrays.
 
 Let's see a couple of examples of how to save NumPy arrays first and then how to save
 parameters of PyTorch and TensorFlow models.
@@ -284,9 +285,9 @@ the model (as it happens each time a ``ClientApp`` is executed). You will need t
         assert torch.allclose(p, p_), "`state_dict`s do not match"
 
 And that's it! Recall that even though this example shows how to store the entire
-``state_dict`` in a ``ParametersRecord``, you can just save part of it. The process would
-be identical, but you might need to adjust how it is loaded into an existing model using
-PyTorch APIs.
+``state_dict`` in a ``ParametersRecord``, you can just save part of it. The process
+would be identical, but you might need to adjust how it is loaded into an existing model
+using PyTorch APIs.
 
 Saving Tensorflow/Keras parameters to the context
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
