@@ -55,7 +55,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_REST,
 )
 from flwr.common.exit_handlers import register_exit_handlers
-from flwr.common.logger import log
+from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     private_key_to_bytes,
     public_key_to_bytes,
@@ -100,6 +100,11 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     certificates: Optional[tuple[bytes, bytes, bytes]] = None,
 ) -> History:
     """Start a Flower server using the gRPC transport layer.
+
+    Warning
+    -------
+    This function is deprecated since 1.13.0. Use the :code:`flower-superlink` command
+    instead to start a SuperLink.
 
     Parameters
     ----------
@@ -158,6 +163,17 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     >>>     )
     >>> )
     """
+    msg = (
+        "flwr.server.start_server() is deprecated."
+        "\n\tInstead, use the `flower-superlink` CLI command to start a SuperLink "
+        "as shown below:"
+        "\n\n\t\t$ flower-superlink --insecure"
+        "\n\n\tTo view usage and all available options, run:"
+        "\n\n\t\t$ flower-superlink --help"
+        "\n\n\tUsing `start_server()` is deprecated."
+    )
+    warn_deprecated_feature(name=msg)
+
     event(EventType.START_SERVER_ENTER)
 
     # Parse IP address
