@@ -83,7 +83,6 @@ def flwr_clientapp() -> None:
         "Starting isolated `ClientApp` connected to SuperNode's ClientAppIo API at %s "
         "with token %s",
         args.clientappio_api_address,
-        args.clientappio_api_address,
         args.token,
     )
     run_clientapp(
