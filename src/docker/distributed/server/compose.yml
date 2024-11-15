@@ -1,6 +1,6 @@
 services:
   superlink:
-    image: flwr/superlink:${FLWR_VERSION:-nightly}
+    image: flwr/superlink:${FLWR_VERSION:-1.13.0}
     command:
       - --executor
       - flwr.superexec.deployment:executor
@@ -27,7 +27,7 @@ services:
     build:
       context: ${PROJECT_DIR:-.}
       dockerfile_inline: |
-        FROM flwr/serverapp:${FLWR_VERSION:-nightly}
+        FROM flwr/serverapp:${FLWR_VERSION:-1.13.0}
 
         WORKDIR /app
         COPY --chown=app:app pyproject.toml .
@@ -36,7 +36,7 @@ services:
 
         ENTRYPOINT ["flwr-serverapp"]
     command:
-      - --superlink
+      - --serverappio-api-address
       - superlink:9091
       - --root-certificates
       - certificates/ca.crt

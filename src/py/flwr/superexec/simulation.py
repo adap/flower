@@ -21,6 +21,7 @@ from typing import Optional
 
 from typing_extensions import override
 
+from flwr.cli.config_utils import get_fab_metadata
 from flwr.common import ConfigsRecord, Context, RecordSet
 from flwr.common.logger import log
 from flwr.common.typing import Fab, UserConfig
@@ -32,21 +33,11 @@ from .executor import Executor
 
 
 class SimulationEngine(Executor):
-    """Simulation engine executor.
-
-    Parameters
-    ----------
-    num_supernodes: Opitonal[str] (default: None)
-        Total number of nodes to involve in the simulation.
-    """
+    """Simulation engine executor."""
 
     def __init__(
         self,
-        num_supernodes: Optional[int] = None,
-        verbose: Optional[bool] = False,
     ) -> None:
-        self.num_supernodes = num_supernodes
-        self.verbose = verbose
         self.linkstate_factory: Optional[LinkStateFactory] = None
         self.ffs_factory: Optional[FfsFactory] = None
 
@@ -77,40 +68,7 @@ class SimulationEngine(Executor):
         self,
         config: UserConfig,
     ) -> None:
-        """Set executor config arguments.
-
-        Parameters
-        ----------
-        config : UserConfig
-            A dictionary for configuration values.
-            Supported configuration key/value pairs:
-            - "num-supernodes": int
-                Number of nodes to register for the simulation.
-            - "verbose": bool
-                Set verbosity of logs.
-        """
-        if num_supernodes := config.get("num-supernodes"):
-            if not isinstance(num_supernodes, int):
-                raise ValueError("The `num-supernodes` value should be of type `int`.")
-            self.num_supernodes = num_supernodes
-        elif self.num_supernodes is None:
-            log(
-                ERROR,
-                "To start a run with the simulation plugin, please specify "
-                "the number of SuperNodes. This can be done by using the "
-                "`--executor-config` argument when launching the SuperExec.",
-            )
-            raise ValueError(
-                "`num-supernodes` must not be `None`, it must be a valid "
-                "positive integer."
-            )
-
-        if verbose := config.get("verbose"):
-            if not isinstance(verbose, bool):
-                raise ValueError(
-                    "The `verbose` value must be a string `true` or `false`."
-                )
-            self.verbose = verbose
+        """Set executor config arguments."""
 
     # pylint: disable=too-many-locals
     @override
@@ -122,6 +80,12 @@ class SimulationEngine(Executor):
     ) -> Optional[int]:
         """Start run using the Flower Simulation Engine."""
         try:
+            # Check that num-supernodes is set
+            if "num-supernodes" not in federation_options:
+                raise ValueError(
+                    "Federation options doesn't contain key `num-supernodes`."
+                )
+
             # Create run
             fab = Fab(hashlib.sha256(fab_file).hexdigest(), fab_file)
             fab_hash = self.ffs.put(fab.content, {})
@@ -129,9 +93,10 @@ class SimulationEngine(Executor):
                 raise RuntimeError(
                     f"FAB ({fab.hash_str}) hash from request doesn't match contents"
                 )
+            fab_id, fab_version = get_fab_metadata(fab.content)
 
             run_id = self.linkstate.create_run(
-                None, None, fab_hash, override_config, federation_options
+                fab_id, fab_version, fab_hash, override_config, federation_options
             )
 
             # Create an empty context for the Run

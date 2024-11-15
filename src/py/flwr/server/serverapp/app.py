@@ -30,7 +30,11 @@ from flwr.common.config import (
     get_project_config,
     get_project_dir,
 )
-from flwr.common.constant import Status, SubStatus
+from flwr.common.constant import (
+    SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
+    Status,
+    SubStatus,
+)
 from flwr.common.logger import (
     log,
     mirror_output_to_queue,
@@ -62,33 +66,18 @@ def flwr_serverapp() -> None:
     log_queue: Queue[Optional[str]] = Queue()
     mirror_output_to_queue(log_queue)
 
-    parser = argparse.ArgumentParser(
-        description="Run a Flower ServerApp",
-    )
-    parser.add_argument(
-        "--superlink",
-        type=str,
-        help="Address of SuperLink's ServerAppIo API",
-    )
-    parser.add_argument(
-        "--run-once",
-        action="store_true",
-        help="When set, this process will start a single ServerApp for a pending Run. "
-        "If there is no pending Run, the process will exit.",
-    )
-    add_args_flwr_app_common(parser=parser)
-    args = parser.parse_args()
+    args = _parse_args_run_flwr_serverapp().parse_args()
 
     log(INFO, "Starting Flower ServerApp")
-    certificates = try_obtain_root_certificates(args, args.superlink)
+    certificates = try_obtain_root_certificates(args, args.serverappio_api_address)
 
     log(
         DEBUG,
         "Starting isolated `ServerApp` connected to SuperLink's ServerAppIo API at %s",
-        args.superlink,
+        args.serverappio_api_address,
     )
     run_serverapp(
-        superlink=args.superlink,
+        serverappio_api_address=args.serverappio_api_address,
         log_queue=log_queue,
         run_once=args.run_once,
         flwr_dir=args.flwr_dir,
@@ -100,7 +89,7 @@ def flwr_serverapp() -> None:
 
 
 def run_serverapp(  # pylint: disable=R0914, disable=W0212
-    superlink: str,
+    serverappio_api_address: str,
     log_queue: Queue[Optional[str]],
     run_once: bool,
     flwr_dir: Optional[str] = None,
@@ -108,7 +97,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
 ) -> None:
     """Run Flower ServerApp process."""
     driver = GrpcDriver(
-        serverappio_service_address=superlink,
+        serverappio_service_address=serverappio_api_address,
         root_certificates=certificates,
     )
 
@@ -212,3 +201,25 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
         # Stop the loop if `flwr-serverapp` is expected to process a single run
         if run_once:
             break
+
+
+def _parse_args_run_flwr_serverapp() -> argparse.ArgumentParser:
+    """Parse flwr-serverapp command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Run a Flower ServerApp",
+    )
+    parser.add_argument(
+        "--serverappio-api-address",
+        default=SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
+        type=str,
+        help="Address of SuperLink's ServerAppIo API (IPv4, IPv6, or a domain name)."
+        f"By default, it is set to {SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS}.",
+    )
+    parser.add_argument(
+        "--run-once",
+        action="store_true",
+        help="When set, this process will start a single ServerApp for a pending Run. "
+        "If there is no pending Run, the process will exit.",
+    )
+    add_args_flwr_app_common(parser=parser)
+    return parser

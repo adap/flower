@@ -1,7 +1,7 @@
 services:
   # create a SuperLink service
   superlink:
-    image: flwr/superlink:${FLWR_VERSION:-nightly}
+    image: flwr/superlink:${FLWR_VERSION:-1.13.0}
     command:
       - --insecure
       - --executor
@@ -16,7 +16,7 @@ services:
     build:
       context: ${PROJECT_DIR:-.}
       dockerfile_inline: |
-        FROM flwr/serverapp:${FLWR_VERSION:-nightly}
+        FROM flwr/serverapp:${FLWR_VERSION:-1.13.0}
 
         # gcc is required for the fastai quickstart example
         USER root
@@ -34,19 +34,19 @@ services:
         ENTRYPOINT ["flwr-serverapp"]
     command:
       - --insecure
-      - --superlink
+      - --serverappio-api-address
       - superlink:9091
     depends_on:
       - superlink
 
   # create a two SuperNode service with different node configs
   supernode-1:
-    image: flwr/supernode:${FLWR_VERSION:-nightly}
+    image: flwr/supernode:${FLWR_VERSION:-1.13.0}
     command:
       - --insecure
       - --superlink
       - superlink:9092
-      - --supernode-address
+      - --clientappio-api-address
       - 0.0.0.0:9094
       - --isolation
       - process
@@ -56,12 +56,12 @@ services:
       - superlink
 
   supernode-2:
-    image: flwr/supernode:${FLWR_VERSION:-nightly}
+    image: flwr/supernode:${FLWR_VERSION:-1.13.0}
     command:
       - --insecure
       - --superlink
       - superlink:9092
-      - --supernode-address
+      - --clientappio-api-address
       - 0.0.0.0:9095
       - --isolation
       - process
@@ -73,12 +73,12 @@ services:
   # uncomment to add another SuperNode
   #
   # supernode-3:
-  #   image: flwr/supernode:${FLWR_VERSION:-nightly}
+  #   image: flwr/supernode:${FLWR_VERSION:-1.13.0}
   #   command:
   #     - --insecure
   #     - --superlink
   #     - superlink:9092
-  #     - --supernode-address
+  #     - --clientappio-api-address
   #     - 0.0.0.0:9096
   #     - --isolation
   #     - process
@@ -91,7 +91,7 @@ services:
     build:
       context: ${PROJECT_DIR:-.}
       dockerfile_inline: |
-        FROM flwr/clientapp:${FLWR_VERSION:-nightly}
+        FROM flwr/clientapp:${FLWR_VERSION:-1.13.0}
 
         # gcc is required for the fastai quickstart example
         USER root
@@ -108,7 +108,8 @@ services:
 
         ENTRYPOINT ["flwr-clientapp"]
     command:
-      - --supernode
+      - --insecure
+      - --clientappio-api-address
       - supernode-1:9094
     deploy:
       resources:
@@ -122,7 +123,7 @@ services:
     build:
       context: ${PROJECT_DIR:-.}
       dockerfile_inline: |
-        FROM flwr/clientapp:${FLWR_VERSION:-nightly}
+        FROM flwr/clientapp:${FLWR_VERSION:-1.13.0}
 
         # gcc is required for the fastai quickstart example
         USER root
@@ -139,7 +140,8 @@ services:
 
         ENTRYPOINT ["flwr-clientapp"]
     command:
-      - --supernode
+      - --insecure
+      - --clientappio-api-address
       - supernode-2:9095
     deploy:
       resources:
@@ -155,7 +157,7 @@ services:
   #   build:
   #     context: ${PROJECT_DIR:-.}
   #     dockerfile_inline: |
-  #       FROM flwr/clientapp:${FLWR_VERSION:-nightly}
+  #       FROM flwr/clientapp:${FLWR_VERSION:-1.13.0}
 
   #       # gcc is required for the fastai quickstart example
   #       USER root
@@ -172,7 +174,8 @@ services:
 
   #       ENTRYPOINT ["flwr-clientapp"]
   #   command:
-  #     - --supernode
+  #     - --insecure
+  #     - --clientappio-api-address
   #     - supernode-3:9096
   #   deploy:
   #     resources:
