@@ -46,18 +46,18 @@ sed -i '/^\[tool\.flwr\.federations\.e2e\]/,/^$/d' pyproject.toml
 echo -e $"\n[tool.flwr.federations.e2e]\naddress = \"127.0.0.1:9093\"\ninsecure = true" >> pyproject.toml
 sleep 1
 
-timeout 10m flower-superlink --insecure $db_arg $rest_arg --executor flwr.superexec.deployment:executor &
+timeout 10m flower-superlink --insecure $db_arg $rest_arg &
 sl_pids=$(pgrep -f "flower-superlink")
 echo "Starting SuperLink"
 sleep 3
 
-timeout 10m flower-supernode ./ --insecure $rest_arg --superlink $server_address \
+timeout 10m flower-supernode --insecure $rest_arg --superlink $server_address \
   --isolation="subprocess" --clientappio-api-address="localhost:9094" &
 cl1_pid=$!
 echo "Starting first client"
 sleep 3
 
-timeout 10m flower-supernode ./ --insecure $rest_arg --superlink $server_address \
+timeout 10m flower-supernode --insecure $rest_arg --superlink $server_address \
   --isolation="subprocess" --clientappio-api-address="localhost:9095" &
 cl2_pid=$!
 echo "Starting second client"
@@ -69,8 +69,7 @@ echo "Killing Superlink"
 sleep 3
 
 # Restart superlink, the clients should now be able to reconnect to it
-timeout 10m flower-superlink --insecure $db_arg $rest_arg --executor flwr.superexec.deployment:executor \
-  2>&1 | tee flwr_output.log &
+timeout 10m flower-superlink --insecure $db_arg $rest_arg 2>&1 | tee flwr_output.log &
 sl_pids=$(pgrep -f "flower-superlink")
 echo "Restarting Superlink"
 sleep 20
@@ -81,7 +80,7 @@ echo "Killing second client"
 sleep 5
 
 # Starting new client, this is so we have enough clients to execute `flwr run`
-timeout 10m flower-supernode ./ --insecure $rest_arg --superlink $server_address \
+timeout 10m flower-supernode --insecure $rest_arg --superlink $server_address \
   --isolation="subprocess" --clientappio-api-address "localhost:9094" &
 cl1_pid=$!
 echo "Starting new client"
@@ -100,7 +99,7 @@ echo "Killing first client"
 sleep 3
 
 # Restart first client so enough clients are connected to continue the FL rounds
-timeout 5m flower-supernode ./ --insecure $rest_arg --superlink $server_address \
+timeout 5m flower-supernode --insecure $rest_arg --superlink $server_address \
   --isolation="subprocess" --clientappio-api-address "localhost:9094" &
 cl1_pid=$!
 echo "Starting new client"
@@ -118,7 +117,6 @@ while [ "$found_success" = false ] && [ $elapsed -lt $timeout ]; do
         found_success=true
         kill $cl1_pid; kill $cl2_pid
         sleep 3
-        check_and_kill "$cl1_pids"
         check_and_kill "$sl_pids"
     else
         echo "Waiting for training ... ($elapsed seconds elapsed)"
@@ -132,6 +130,5 @@ if [ "$found_success" = false ]; then
     echo "Training had an issue and timed out."
     kill $cl1_pid; kill $cl2_pid
     sleep 3
-    check_and_kill "$cl1_pids"
     check_and_kill "$sl_pids"
 fi

@@ -26,7 +26,7 @@ from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import Context, Message
 from flwr.common.args import add_args_flwr_app_common, try_obtain_root_certificates
 from flwr.common.config import get_flwr_dir
-from flwr.common.constant import ErrorCode
+from flwr.common.constant import CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS, ErrorCode
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.message import Error
@@ -61,8 +61,10 @@ def flwr_clientapp() -> None:
     )
     parser.add_argument(
         "--clientappio-api-address",
+        default=CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS,
         type=str,
-        help="Address of SuperNode's ClientAppIo API",
+        help="Address of SuperNode's ClientAppIo API (IPv4, IPv6, or a domain name)."
+        f"By default, it is set to {CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS}.",
     )
     parser.add_argument(
         "--token",
@@ -84,7 +86,7 @@ def flwr_clientapp() -> None:
         args.token,
     )
     run_clientapp(
-        supernode=args.clientappio_api_address,
+        clientappio_api_address=args.clientappio_api_address,
         run_once=(args.token is not None),
         token=args.token,
         flwr_dir=args.flwr_dir,
@@ -98,7 +100,7 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 
 
 def run_clientapp(  # pylint: disable=R0914
-    supernode: str,
+    clientappio_api_address: str,
     run_once: bool,
     token: Optional[int] = None,
     flwr_dir: Optional[str] = None,
@@ -106,7 +108,7 @@ def run_clientapp(  # pylint: disable=R0914
 ) -> None:
     """Run Flower ClientApp process."""
     channel = create_channel(
-        server_address=supernode,
+        server_address=clientappio_api_address,
         insecure=(certificates is None),
         root_certificates=certificates,
     )
