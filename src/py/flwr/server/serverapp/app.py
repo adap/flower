@@ -88,7 +88,7 @@ def flwr_serverapp() -> None:
         args.superlink,
     )
     run_serverapp(
-        superlink=args.superlink,
+        serverappio_api_address=args.superlink,
         log_queue=log_queue,
         run_once=args.run_once,
         flwr_dir=args.flwr_dir,
@@ -100,7 +100,7 @@ def flwr_serverapp() -> None:
 
 
 def run_serverapp(  # pylint: disable=R0914, disable=W0212
-    superlink: str,
+    serverappio_api_address: str,
     log_queue: Queue[Optional[str]],
     run_once: bool,
     flwr_dir: Optional[str] = None,
@@ -108,7 +108,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
 ) -> None:
     """Run Flower ServerApp process."""
     driver = GrpcDriver(
-        serverappio_service_address=superlink,
+        serverappio_service_address=serverappio_api_address,
         root_certificates=certificates,
     )
 

@@ -84,7 +84,7 @@ def flwr_clientapp() -> None:
         args.token,
     )
     run_clientapp(
-        supernode=args.supernode,
+        clientappio_api_address=args.supernode,
         run_once=(args.token is not None),
         token=args.token,
         flwr_dir=args.flwr_dir,
@@ -98,7 +98,7 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 
 
 def run_clientapp(  # pylint: disable=R0914
-    supernode: str,
+    clientappio_api_address: str,
     run_once: bool,
     token: Optional[int] = None,
     flwr_dir: Optional[str] = None,
@@ -106,7 +106,7 @@ def run_clientapp(  # pylint: disable=R0914
 ) -> None:
     """Run Flower ClientApp process."""
     channel = create_channel(
-        server_address=supernode,
+        server_address=clientappio_api_address,
         insecure=(certificates is None),
         root_certificates=certificates,
     )
