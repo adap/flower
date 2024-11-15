@@ -1,3 +1,23 @@
+.. |clientapp_link| replace:: ``ClientApp``
+
+.. |message_link| replace:: ``Message``
+
+.. |context_link| replace:: ``Context``
+
+.. |flwr_run_link| replace:: ``flwr run``
+
+.. |flwr_new_link| replace:: ``flwr new``
+
+.. _clientapp_link: ref-api/flwr.client.ClientApp.html
+
+.. _context_link: ref-api/flwr.common.Context.html
+
+.. _flwr_new_link: ref-api-cli.html#flwr-new
+
+.. _flwr_run_link: ref-api-cli.html#flwr-run
+
+.. _message_link: ref-api/flwr.common.Message.html
+
 Run simulations
 ===============
 
@@ -10,10 +30,10 @@ scenarios at varying levels of data and system heterogeneity, client availabilit
 privacy budgets, etc. These are among some of the use cases where simulating FL
 workloads makes sense.
 
-Flower's ``Simulation Engine`` schedules, launches, and manages ``ClientApp`` instances.
-It does so through a ``Backend``, which contains several workers (i.e., Python
-processes) that can execute a ``ClientApp`` by passing it a ``Context`` and a
-``Message``. These ``ClientApp`` objects are identical to those used by Flower's
+Flower's ``Simulation Engine`` schedules, launches, and manages |clientapp_link|_
+instances. It does so through a ``Backend``, which contains several workers (i.e.,
+Python processes) that can execute a ``ClientApp`` by passing it a |context_link|_ and a
+|message_link|_. These ``ClientApp`` objects are identical to those used by Flower's
 `Deployment Engine <contributor-explanation-architecture.html>`_, making alternating
 between *simulation* and *deployment* an effortless process. The execution of
 ``ClientApp`` objects through Flower's ``Simulation Engine`` is:
@@ -21,14 +41,15 @@ between *simulation* and *deployment* an effortless process. The execution of
 - **Resource-aware**: Each backend worker executing ``ClientApp``\s gets assigned a
   portion of the compute and memory on your system. You can define these at the
   beginning of the simulation, allowing you to control the degree of parallelism of your
-  simulation. For a fixed total pool of resources, the fewer the resources per backend worker, the more ``ClientApps`` can
-  run concurrently on the same hardware.
+  simulation. For a fixed total pool of resources, the fewer the resources per backend
+  worker, the more ``ClientApps`` can run concurrently on the same hardware.
 - **Batchable**: When there are more ``ClientApps`` to execute than backend workers,
   ``ClientApps`` are queued and executed as soon as resources are freed. This means that
   ``ClientApps`` are typically executed in batches of N, where N is the number of
   backend workers.
 - **Self-managed**: This means that you, as a user, do not need to launch ``ClientApps``
-  manually; instead, the ``Simulation Engine``'s internals orchestrates the execution of all ``ClientApp``\s.
+  manually; instead, the ``Simulation Engine``'s internals orchestrates the execution of
+  all ``ClientApp``\s.
 - **Ephemeral**: This means that a ``ClientApp`` is only materialized when it is
   required by the application (e.g., to do `fit()
   <ref-api-flwr.html#flwr.client.Client.fit>`_). The object is destroyed afterward,
@@ -52,11 +73,10 @@ Launch your Flower simulation
 -----------------------------
 
 Running a simulation is straightforward; in fact, it is the default mode of operation
-for `flwr run <ref-api-cli.html#flwr-run>`_. Therefore, running Flower simulations
-primarily requires you to first define a ``ClientApp`` and a ``ServerApp``. A convenient
-way to generate a minimal but fully functional Flower app is by means of the `flwr new
-<ref-api-cli.html#flwr-new>`_ command. There are multiple templates to choose from. The
-example below uses the ``PyTorch`` template.
+for |flwr_run_link|_. Therefore, running Flower simulations primarily requires you to
+first define a ``ClientApp`` and a ``ServerApp``. A convenient way to generate a minimal
+but fully functional Flower app is by means of the |flwr_new_link|_ command. There are
+multiple templates to choose from. The example below uses the ``PyTorch`` template.
 
 .. tip::
 
@@ -68,12 +88,12 @@ example below uses the ``PyTorch`` template.
     # or simply execute `flwr run` for a fully interactive process
     flwr new my-app --framework="PyTorch" --username="alice"
 
-Then, follow the instructions shown after completing the ``flwr new`` command. When you
-execute ``flwr run``, you'll be using the ``Simulation Engine``.
+Then, follow the instructions shown after completing the |flwr_new_link|_ command. When
+you execute |flwr_run_link|_, you'll be using the ``Simulation Engine``.
 
-If we take a look at the ``pyproject.toml`` that was generated from the ``flwr new``
-command (and loaded upon ``flwr run`` execution), we see that a *default* federation is
-defined. It sets the number of supernodes to 10.
+If we take a look at the ``pyproject.toml`` that was generated from the |flwr_new_link|_
+command (and loaded upon |flwr_run_link|_ execution), we see that a *default* federation
+is defined. It sets the number of supernodes to 10.
 
 .. code-block:: toml
 
@@ -218,7 +238,7 @@ The complete list of examples can be found in `the Flower GitHub
 Simulation in Colab/Jupyter
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The preferred way of running simulations should always be ``flwr run``. However, the
+The preferred way of running simulations should always be |flwr_run_link|_. However, the
 core functionality of the ``Simulation Engine`` can be used from within a Google Colab
 or Jupyter environment by means of `run_simulation
 <ref-api-flwr.html#flwr.simulation.run_simulation>`_.
@@ -258,7 +278,8 @@ Multi-node Flower simulations
 -----------------------------
 
 Flower's ``Simulation Engine`` allows you to run FL simulations across multiple compute
-nodes so that you're not restricted to running simulations on a _single_ machine. Before starting your multi-node simulation, ensure that you:
+nodes so that you're not restricted to running simulations on a _single_ machine. Before
+starting your multi-node simulation, ensure that you:
 
 1. Have the same Python environment on all nodes.
 2. Have a copy of your code on all nodes.
@@ -268,8 +289,9 @@ nodes so that you're not restricted to running simulations on a _single_ machine
    will print a few lines, one of which indicates how to attach other nodes to the head
    node.
 5. Attach other nodes to the head node: copy the command shown after starting the head
-   and execute it on the terminal of a new node (before executing ``flwr run``). For example: ``ray start
-   --address='192.168.1.132:6379'``.
+   and execute it on the terminal of a new node (before executing |flwr_run_link|_). For
+   example: ``ray start --address='192.168.1.132:6379'``. Note that to be able to attach
+   nodes to the head node they should be discoverable by each other.
 
 With all the above done, you can run your code from the head node as you would if the
 simulation were running on a single node. In other words:
@@ -301,7 +323,7 @@ FAQ for Simulations
 
 .. dropdown:: Can I run multiple simulations on the same machine?
 
-    Yes, but bear in mind that each simulation isn't aware of the resource usage of the other. If your simulations make use of GPUs, consider setting the ``CUDA_VISIBLE_DEVICES`` environment variable to make each simulation use a different set of the available GPUs. Export such an environment variable before starting ``flwr run``.
+    Yes, but bear in mind that each simulation isn't aware of the resource usage of the other. If your simulations make use of GPUs, consider setting the ``CUDA_VISIBLE_DEVICES`` environment variable to make each simulation use a different set of the available GPUs. Export such an environment variable before starting |flwr_run_link|_.
 
 .. dropdown:: Are the CPU/GPU resources set for each ``ClientApp`` enforced?
 
