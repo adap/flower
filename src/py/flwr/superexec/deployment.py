@@ -15,22 +15,26 @@
 """Deployment engine executor."""
 
 import hashlib
-import subprocess
 from logging import ERROR, INFO
 from pathlib import Path
 from typing import Optional
 
 from typing_extensions import override
 
-from flwr.cli.install import install_from_fab
-from flwr.common.constant import DRIVER_API_DEFAULT_ADDRESS
+from flwr.cli.config_utils import get_fab_metadata
+from flwr.common import ConfigsRecord, Context, RecordSet
+from flwr.common.constant import (
+    SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
+    Status,
+    SubStatus,
+)
 from flwr.common.logger import log
-from flwr.common.typing import Fab, UserConfig
+from flwr.common.typing import Fab, RunStatus, UserConfig
 from flwr.server.superlink.ffs import Ffs
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 
-from .executor import Executor, RunTracker
+from .executor import Executor
 
 
 class DeploymentEngine(Executor):
@@ -38,7 +42,7 @@ class DeploymentEngine(Executor):
 
     Parameters
     ----------
-    superlink: str (default: "0.0.0.0:9091")
+    serverappio_api_address: str (default: "127.0.0.1:9091")
         Address of the SuperLink to connect to.
     root_certificates: Optional[str] (default: None)
         Specifies the path to the PEM-encoded root certificate file for
@@ -49,11 +53,11 @@ class DeploymentEngine(Executor):
 
     def __init__(
         self,
-        superlink: str = DRIVER_API_DEFAULT_ADDRESS,
+        serverappio_api_address: str = SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
         root_certificates: Optional[str] = None,
         flwr_dir: Optional[str] = None,
     ) -> None:
-        self.superlink = superlink
+        self.serverappio_api_address = serverappio_api_address
         if root_certificates is None:
             self.root_certificates = None
             self.root_certificates_bytes = None
@@ -99,7 +103,7 @@ class DeploymentEngine(Executor):
             A dictionary for configuration values.
             Supported configuration key/value pairs:
             - "superlink": str
-                The address of the SuperLink Driver API.
+                The address of the SuperLink ServerAppIo API.
             - "root-certificates": str
                 The path to the root certificates.
             - "flwr-dir": str
@@ -110,7 +114,7 @@ class DeploymentEngine(Executor):
         if superlink_address := config.get("superlink"):
             if not isinstance(superlink_address, str):
                 raise ValueError("The `superlink` value should be of type `str`.")
-            self.superlink = superlink_address
+            self.serverappio_api_address = superlink_address
         if root_certificates := config.get("root-certificates"):
             if not isinstance(root_certificates, str):
                 raise ValueError(
@@ -133,62 +137,50 @@ class DeploymentEngine(Executor):
             raise RuntimeError(
                 f"FAB ({fab.hash_str}) hash from request doesn't match contents"
             )
+        fab_id, fab_version = get_fab_metadata(fab.content)
 
-        run_id = self.linkstate.create_run(None, None, fab_hash, override_config)
+        run_id = self.linkstate.create_run(
+            fab_id, fab_version, fab_hash, override_config, ConfigsRecord()
+        )
         return run_id
+
+    def _create_context(self, run_id: int) -> None:
+        """Register a Context for a Run."""
+        # Create an empty context for the Run
+        context = Context(
+            run_id=run_id, node_id=0, node_config={}, state=RecordSet(), run_config={}
+        )
+
+        # Register the context at the LinkState
+        self.linkstate.set_serverapp_context(run_id=run_id, context=context)
 
     @override
     def start_run(
         self,
         fab_file: bytes,
         override_config: UserConfig,
-        federation_config: UserConfig,
-    ) -> Optional[RunTracker]:
+        federation_options: ConfigsRecord,
+    ) -> Optional[int]:
         """Start run using the Flower Deployment Engine."""
+        run_id = None
         try:
-            # Install FAB to flwr dir
-            install_from_fab(fab_file, None, True)
 
             # Call SuperLink to create run
-            run_id: int = self._create_run(
+            run_id = self._create_run(
                 Fab(hashlib.sha256(fab_file).hexdigest(), fab_file), override_config
             )
+
+            # Register context for the Run
+            self._create_context(run_id=run_id)
             log(INFO, "Created run %s", str(run_id))
 
-            command = [
-                "flower-server-app",
-                "--run-id",
-                str(run_id),
-                "--superlink",
-                str(self.superlink),
-            ]
-
-            if self.flwr_dir:
-                command.append("--flwr-dir")
-                command.append(self.flwr_dir)
-
-            if self.root_certificates is None:
-                command.append("--insecure")
-            else:
-                command.append("--root-certificates")
-                command.append(self.root_certificates)
-
-            # Execute the command
-            proc = subprocess.Popen(  # pylint: disable=consider-using-with
-                command,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-            )
-            log(INFO, "Started run %s", str(run_id))
-
-            return RunTracker(
-                run_id=run_id,
-                proc=proc,
-            )
+            return run_id
         # pylint: disable-next=broad-except
         except Exception as e:
             log(ERROR, "Could not start run: %s", str(e))
+            if run_id:
+                run_status = RunStatus(Status.FINISHED, SubStatus.FAILED, str(e))
+                self.linkstate.update_run_status(run_id, new_status=run_status)
             return None
 
 

@@ -188,23 +188,25 @@ def validate_and_install(
         else:
             shutil.copy2(item, install_dir / item.name)
 
+    whl_file = config["tool"]["flwr"]["app"]["whl"]
+    install_whl = install_dir / whl_file
     try:
         subprocess.run(
-            ["pip", "install", "-e", install_dir, "--no-deps"],
+            ["pip", "install", "--no-deps", install_whl],
             capture_output=True,
             text=True,
             check=True,
         )
     except subprocess.CalledProcessError as e:
         typer.secho(
-            f"❌ Failed to `pip install` package(s) from {install_dir}:\n{e.stderr}",
+            f"❌ Failed to install {project_name}:\n{e.stderr}",
             fg=typer.colors.RED,
             bold=True,
         )
         raise typer.Exit(code=1) from e
 
     typer.secho(
-        f"🎊 Successfully installed {project_name} to {install_dir}.",
+        f"🎊 Successfully installed {project_name}.",
         fg=typer.colors.GREEN,
         bold=True,
     )
