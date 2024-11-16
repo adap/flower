@@ -23,18 +23,15 @@ class SimIIClient(NumPyClient):
         testloader,
         model,
         num_obs,
-        num_features,
-        num_classes,
-        cfg: DictConfig,
-        device
+        cfg: DictConfig
     ) -> None:
         """SimII client for simulation II experimentation."""
         self.trainloader = trainloader
         self.testloader = testloader
         self.model = model
         self.num_obs = num_obs
-        self.num_features = num_features
-        self.num_classes = num_classes
+        self.num_features = cfg.num_features
+        self.num_classes = cfg.num_classes
         self.cfg = cfg
 
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -74,7 +71,7 @@ class SimIIClient(NumPyClient):
 
 # client fn for input into simulation
 def generate_client_fn_simII(
-    dataset, num_features, num_classes, model, cfg: DictConfig
+    dataset, model, cfg: DictConfig
 ):
     """Generate client function for simulated FL."""
 
@@ -94,7 +91,7 @@ def generate_client_fn_simII(
         testloader = DataLoader(test_dataset, batch_size=cfg.batch_size, shuffle=True)
 
         return SimIIClient(
-            trainloader, testloader, model, num_obs, num_features, num_classes, cfg
+            trainloader, testloader, model, num_obs, cfg
         ).to_client()
 
     return client_fn
@@ -110,18 +107,15 @@ class MnistClient(NumPyClient):
         testloader,
         model,
         num_obs,
-        num_features,
-        num_classes,
-        cfg: DictConfig,
-        device
+        cfg: DictConfig
     ) -> None:
         """MNIST client for MNIST experimentation."""
         self.trainloader = trainloader
         self.testloader = testloader
         self.model = model
         self.num_obs = num_obs
-        self.num_features = num_features
-        self.num_classes = num_classes
+        self.num_features = cfg.num_features
+        self.num_classes = cfg.num_classes
         self.cfg = cfg
 
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -161,7 +155,7 @@ class MnistClient(NumPyClient):
 
 # client fn for input into simulation
 def generate_client_fn_mnist(
-    dataset, num_features, num_classes, model, cfg: DictConfig
+    dataset, model, cfg: DictConfig
 ):
     """Generate client function for simulated FL."""
 
@@ -183,7 +177,7 @@ def generate_client_fn_mnist(
         testloader = DataLoader(test_dataset, batch_size=cfg.batch_size, shuffle=True)
 
         return MnistClient(
-            trainloader, testloader, model, num_obs, num_features, num_classes, cfg
+            trainloader, testloader, model, num_obs, cfg
         ).to_client()
 
     return client_fn

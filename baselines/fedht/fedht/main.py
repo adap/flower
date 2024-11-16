@@ -59,8 +59,6 @@ def main(cfg: DictConfig):
         # set client function
         client_fn = generate_client_fn_mnist(
             dataset,
-            num_features=num_features,
-            num_classes=num_classes,
             model=model,
             cfg=cfg
         )
@@ -84,8 +82,6 @@ def main(cfg: DictConfig):
         # set client function
         client_fn = generate_client_fn_simII(
             dataset,
-            num_features=num_features,
-            num_classes=num_classes,
             model=model,
             cfg=cfg
         )
