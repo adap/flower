@@ -37,11 +37,11 @@ class SimIIClient(NumPyClient):
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # get parameters from existing model
-    def get_parameters(self, config):
+    def get_parameters(self):
         """Get parameters."""
         return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
-    def fit(self, parameters, config):
+    def fit(self, parameters):
         """Fit model."""
         # set model parameters
         params_dict = zip(self.model.state_dict().keys(), parameters)
@@ -124,11 +124,11 @@ class MnistClient(NumPyClient):
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # get parameters from existing model
-    def get_parameters(self, config):
+    def get_parameters(self):
         """Get parameters."""
         return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
-    def fit(self, parameters, config):
+    def fit(self, parameters):
         """Fit model."""
         # set model parameters
         params_dict = zip(self.model.state_dict().keys(), parameters)

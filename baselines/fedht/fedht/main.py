@@ -53,9 +53,6 @@ def main(cfg: DictConfig):
         test_dataset = dataset.load_split("test").with_format("numpy")
         testloader = DataLoader(test_dataset, batch_size=cfg.batch_size, shuffle=False)
 
-        # define model
-        model = LogisticRegression(num_features, num_classes)
-
         # set client function
         client_fn = generate_client_fn_mnist(
             dataset,
