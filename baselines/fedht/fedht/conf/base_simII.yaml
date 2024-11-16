@@ -1,6 +1,9 @@
 ---
 num_clients: 25 # total number of clients
 num_local_epochs: 10 # number of local epochs
+num_obs: 1000
+num_features: 1000
+num_classes: 2
 batch_size: 50
 num_rounds: 100
 learning_rate: 0.0001
