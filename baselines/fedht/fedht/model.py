@@ -34,6 +34,8 @@ def train(model, trainloader: DataLoader, cfg: DictConfig, device: torch.device)
         model.parameters(), lr=cfg.learning_rate, weight_decay=cfg.weight_decay
     )
 
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
     # train
     for _epoch in range(cfg.num_local_epochs):
         for _i, data in enumerate(trainloader):
@@ -55,6 +57,9 @@ def train(model, trainloader: DataLoader, cfg: DictConfig, device: torch.device)
 
 def test(model, testloader: DataLoader, device: torch.device):
     """Test model."""
+
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
     criterion = nn.CrossEntropyLoss()
 
     # initialize

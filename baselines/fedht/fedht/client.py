@@ -23,7 +23,8 @@ class SimIIClient(NumPyClient):
         testloader,
         model,
         num_obs,
-        cfg: DictConfig
+        cfg: DictConfig,
+        device
     ) -> None:
         """SimII client for simulation II experimentation."""
         self.trainloader = trainloader
@@ -33,15 +34,14 @@ class SimIIClient(NumPyClient):
         self.num_features = cfg.num_features
         self.num_classes = cfg.num_classes
         self.cfg = cfg
-
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.device = device
 
     # get parameters from existing model
-    def get_parameters(self):
+    def get_parameters(self, config):
         """Get parameters."""
         return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
-    def fit(self, parameters):
+    def fit(self, parameters, config):
         """Fit model."""
         # set model parameters
         params_dict = zip(self.model.state_dict().keys(), parameters)
@@ -90,11 +90,12 @@ def generate_client_fn_simII(
         trainloader = DataLoader(train_dataset, batch_size=cfg.batch_size, shuffle=True)
         testloader = DataLoader(test_dataset, batch_size=cfg.batch_size, shuffle=True)
 
-        # define model
-        model = LogisticRegression(cfg.num_features, cfg.num_classes)
+        # define model and set device
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        model = LogisticRegression(cfg.num_features, cfg.num_classes).to(device)
 
         return SimIIClient(
-            trainloader, testloader, model, num_obs, cfg
+            trainloader, testloader, model, num_obs, cfg, device
         ).to_client()
 
     return client_fn
@@ -110,7 +111,8 @@ class MnistClient(NumPyClient):
         testloader,
         model,
         num_obs,
-        cfg: DictConfig
+        cfg: DictConfig,
+        device
     ) -> None:
         """MNIST client for MNIST experimentation."""
         self.trainloader = trainloader
@@ -120,15 +122,14 @@ class MnistClient(NumPyClient):
         self.num_features = cfg.num_features
         self.num_classes = cfg.num_classes
         self.cfg = cfg
-
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.device = device
 
     # get parameters from existing model
-    def get_parameters(self):
+    def get_parameters(self, config):
         """Get parameters."""
         return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
-    def fit(self, parameters):
+    def fit(self, parameters, config):
         """Fit model."""
         # set model parameters
         params_dict = zip(self.model.state_dict().keys(), parameters)
@@ -179,11 +180,12 @@ def generate_client_fn_mnist(
         trainloader = DataLoader(train_dataset, batch_size=cfg.batch_size, shuffle=True)
         testloader = DataLoader(test_dataset, batch_size=cfg.batch_size, shuffle=True)
 
-        # define model
-        model = LogisticRegression(cfg.num_features, cfg.num_classes)
+        # define model and set device
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        model = LogisticRegression(cfg.num_features, cfg.num_classes).to(device)
 
         return MnistClient(
-            trainloader, testloader, model, num_obs, cfg
+            trainloader, testloader, model, num_obs, cfg, device
         ).to_client()
 
     return client_fn

@@ -1,12 +1,10 @@
 """Federated Hardthresholding (FedHT)."""
 
 from logging import WARNING
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 from flwr.common import (
     FitRes,
-    MetricsAggregationFn,
-    NDArrays,
     Parameters,
     Scalar,
     ndarrays_to_parameters,
@@ -16,7 +14,7 @@ from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.fedavg import FedAvg
 
-from fedht.aggregate import aggregate_hardthreshold, weighted_loss_avg
+from fedht.aggregate import aggregate_hardthreshold
 
 WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
 Setting `min_available_clients` lower than `min_fit_clients` or

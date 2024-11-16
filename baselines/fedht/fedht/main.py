@@ -16,8 +16,7 @@ from torch.utils.data import DataLoader
 
 from fedht.client import generate_client_fn_mnist, generate_client_fn_simII
 from fedht.fedht import FedHT
-from fedht.model import LogisticRegression
-from fedht.server import fit_round, get_evaluate_fn
+from fedht.server import fit_round, gen_evaluate_fn
 from fedht.utils import MyDataset, sim_data
 
 
@@ -90,7 +89,7 @@ def main(cfg: DictConfig):
         strategy = FedHT(
             min_available_clients=cfg.strategy.min_available_clients,
             num_keep=cfg.num_keep,
-            evaluate_fn=get_evaluate_fn(testloader, device),
+            evaluate_fn=gen_evaluate_fn(testloader, cfg, device),
             on_fit_config_fn=fit_round,
             iterht=cfg.iterht,
             initial_parameters=init_params,
@@ -99,7 +98,7 @@ def main(cfg: DictConfig):
         # define strategy: fedavg
         strategy = fl.server.strategy.FedAvg(
             min_available_clients=cfg.strategy.min_available_clients,
-            evaluate_fn=get_evaluate_fn(testloader, device),
+            evaluate_fn=gen_evaluate_fn(testloader, cfg, device),
             on_fit_config_fn=fit_round,
             initial_parameters=init_params,
         )

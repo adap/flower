@@ -13,12 +13,11 @@ def fit_round(server_round: int) -> Dict:
     """Send round number to client."""
     return {"server_round": server_round}
 
-
-def get_evaluate_fn(testloader, device: torch.device):
+def gen_evaluate_fn(testloader, cfg, device: torch.device):
     """Get evaluate function for centralized metrics."""
 
     # global evaluation
-    def evaluate(server_round, parameters, cfg):  # type: ignore
+    def evaluate(server_round, parameters, config):  # type: ignore
         """Define evaluate function for centralized metrics."""
 
         # define model
