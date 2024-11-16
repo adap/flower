@@ -17,9 +17,19 @@
 import os
 import textwrap
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
-from .config_utils import load, validate, validate_fields
+import click
+import pytest
+
+from .config_utils import (
+    load,
+    validate,
+    validate_certificate_in_federation_config,
+    validate_federation_in_project_config,
+    validate_fields,
+    validate_project_config,
+)
 
 
 def test_load_pyproject_toml_load_from_cwd(tmp_path: Path) -> None:
@@ -328,3 +338,205 @@ def test_validate_pyproject_toml_fail() -> None:
     assert not is_valid
     assert len(errors) == 1
     assert len(warnings) == 0
+
+
+def test_validate_project_config_fail() -> None:
+    """Test that validate_project_config fails correctly."""
+    # Prepare
+    config = None
+    errors = ["Error"]
+    warnings = ["Warning"]
+
+    # Execute
+    with pytest.raises(click.exceptions.Exit) as excinfo:
+        _ = validate_project_config(config, errors, warnings)
+
+    # Assert
+    assert excinfo.value.exit_code == 1
+
+
+def test_validate_federation_in_project_config() -> None:
+    """Test that validate_federation_in_config succeeds correctly."""
+    # Prepare - Test federation is None
+    config: dict[str, Any] = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "license": "",
+            "authors": [],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "components": {
+                        "serverapp": "flwr.cli.run:run",
+                        "clientapp": "flwr.cli.run:run",
+                    },
+                },
+                "federations": {
+                    "default": "default_federation",
+                    "default_federation": {"default_key": "default_val"},
+                },
+            },
+        },
+    }
+    federation = None
+
+    # Execute
+    federation, federation_config = validate_federation_in_project_config(
+        federation, config
+    )
+
+    # Assert
+    assert federation == "default_federation"
+    assert federation_config == {"default_key": "default_val"}
+
+    federation = "new_federation"
+    config["tool"]["flwr"]["federations"]["new_federation"] = {"new_key": "new_val"}
+
+    # Execute
+    federation, federation_config = validate_federation_in_project_config(
+        federation, config
+    )
+
+    # Assert
+    assert federation == "new_federation"
+    assert federation_config == {"new_key": "new_val"}
+
+
+def test_validate_federation_in_project_config_fail() -> None:
+    """Test that validate_federation_in_config fails correctly."""
+
+    def run_and_assert_exit(federation: Optional[str], config: dict[str, Any]) -> None:
+        """Execute validation and assert exit code is 1."""
+        with pytest.raises(click.exceptions.Exit) as excinfo:
+            validate_federation_in_project_config(federation, config)
+        assert excinfo.value.exit_code == 1
+
+    # Prepare
+    config: dict[str, Any] = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "license": "",
+            "authors": [],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "components": {
+                        "serverapp": "flwr.cli.run:run",
+                        "clientapp": "flwr.cli.run:run",
+                    },
+                },
+                "federations": {},
+            },
+        },
+    }
+    federation = None
+
+    # Test federation is None and no default federation is declared
+    # Execute and assert
+    run_and_assert_exit(federation, config)
+
+    # Prepare - Test federation name is not in config
+    federation = "fed_not_in_config"
+    config["tool"]["flwr"]["federations"] = {"fed_in_config": {}}
+
+    # Execute and assert
+    run_and_assert_exit(federation, config)
+
+
+def test_validate_certificate_in_federation_config(tmp_path: Path) -> None:
+    """Test that validate_certificate_in_federation_config succeeds correctly."""
+    # Prepare
+    config: dict[str, Any] = {
+        "address": "127.0.0.1:9091",
+        "root-certificates": "dummy_cert.pem",
+    }
+    dummy_cert = tmp_path / "dummy_cert.pem"
+    dummy_cert.write_text("dummy_cert")
+
+    # Current directory
+    origin = Path.cwd()
+
+    try:
+        # Change into the temporary directory
+        os.chdir(tmp_path)
+
+        # Test insecure is not declared and root_certificates is present
+        # Execute
+        insecure, root_cert = validate_certificate_in_federation_config(
+            tmp_path, config
+        )
+        # Assert
+        assert not insecure
+        assert root_cert == b"dummy_cert"
+
+        # Test insecure is False and root_certificates is present
+        config["insecure"] = False
+        # Execute
+        insecure, root_cert = validate_certificate_in_federation_config(
+            tmp_path, config
+        )
+        # Assert
+        assert not insecure
+        assert root_cert == b"dummy_cert"
+
+        # Test insecure is True and root_certificates is None
+        config["insecure"] = True
+        config.pop("root-certificates")
+
+        # Execute
+        insecure, root_cert = validate_certificate_in_federation_config(
+            tmp_path, config
+        )
+        # Assert
+        assert insecure
+        assert root_cert is None
+    finally:
+        os.chdir(origin)
+
+
+def test_validate_certificate_in_federation_config_fail(tmp_path: Path) -> None:
+    """Test that validate_certificate_in_federation_config fails correctly."""
+
+    def run_and_assert_exit(app: Path, config: dict[str, Any]) -> None:
+        """Execute validation and assert exit code is 1."""
+        with pytest.raises(click.exceptions.Exit) as excinfo:
+            validate_certificate_in_federation_config(app, config)
+        assert excinfo.value.exit_code == 1
+
+    # Prepare
+    config: dict[str, Any] = {"address": "localhost:8080"}
+    dummy_cert = tmp_path / "dummy_cert.pem"
+    dummy_cert.write_text("dummy_cert")
+
+    # Current directory
+    origin = Path.cwd()
+
+    try:
+        # Change into the temporary directory
+        os.chdir(tmp_path)
+
+        # Test insecure is None and root_certificates is None
+        config["insecure"] = None
+        # Execute and assert
+        run_and_assert_exit(tmp_path, config)
+
+        # Test insecure is False, but root_certificates is None
+        config["insecure"] = False
+        # Execute and assert
+        run_and_assert_exit(tmp_path, config)
+
+        # Test insecure is True, but root_certificates is not None
+        config["root-certificates"] = "dummy_cert.pem"
+        config["insecure"] = True
+        # Execute and assert
+        run_and_assert_exit(tmp_path, config)
+    finally:
+        os.chdir(origin)

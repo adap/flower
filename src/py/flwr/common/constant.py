@@ -38,17 +38,30 @@ TRANSPORT_TYPES = [
 ]
 
 # Addresses
+# Ports
+CLIENTAPPIO_PORT = "9094"
+SERVERAPPIO_PORT = "9091"
+FLEETAPI_GRPC_RERE_PORT = "9092"
+FLEETAPI_PORT = "9095"
+EXEC_API_PORT = "9093"
+SIMULATIONIO_PORT = "9096"
+# Octets
+SERVER_OCTET = "0.0.0.0"
+CLIENT_OCTET = "127.0.0.1"
 # SuperNode
-CLIENTAPPIO_API_DEFAULT_ADDRESS = "0.0.0.0:9094"
-# SuperExec
-EXEC_API_DEFAULT_ADDRESS = "0.0.0.0:9093"
+CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS = f"{SERVER_OCTET}:{CLIENTAPPIO_PORT}"
+CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS = f"{CLIENT_OCTET}:{CLIENTAPPIO_PORT}"
 # SuperLink
-DRIVER_API_DEFAULT_ADDRESS = "0.0.0.0:9091"
-FLEET_API_GRPC_RERE_DEFAULT_ADDRESS = "0.0.0.0:9092"
+SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS = f"{SERVER_OCTET}:{SERVERAPPIO_PORT}"
+SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS = f"{CLIENT_OCTET}:{SERVERAPPIO_PORT}"
+FLEET_API_GRPC_RERE_DEFAULT_ADDRESS = f"{SERVER_OCTET}:{FLEETAPI_GRPC_RERE_PORT}"
 FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS = (
     "[::]:8080"  # IPv6 to keep start_server compatible
 )
-FLEET_API_REST_DEFAULT_ADDRESS = "0.0.0.0:9093"
+FLEET_API_REST_DEFAULT_ADDRESS = f"{SERVER_OCTET}:{FLEETAPI_PORT}"
+EXEC_API_DEFAULT_SERVER_ADDRESS = f"{SERVER_OCTET}:{EXEC_API_PORT}"
+SIMULATIONIO_API_DEFAULT_SERVER_ADDRESS = f"{SERVER_OCTET}:{SIMULATIONIO_PORT}"
+SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS = f"{CLIENT_OCTET}:{SIMULATIONIO_PORT}"
 
 # Constants for ping
 PING_DEFAULT_INTERVAL = 30
@@ -60,20 +73,39 @@ PING_MAX_INTERVAL = 1e300
 # IDs
 RUN_ID_NUM_BYTES = 8
 NODE_ID_NUM_BYTES = 8
-GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY = "flower-version"
-GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY = "should-exit"
 
 # Constants for FAB
 APP_DIR = "apps"
+FAB_ALLOWED_EXTENSIONS = {".py", ".toml", ".md"}
 FAB_CONFIG_FILE = "pyproject.toml"
+FAB_DATE = (2024, 10, 1, 0, 0, 0)
+FAB_HASH_TRUNCATION = 8
 FLWR_HOME = "FLWR_HOME"
 
 # Constants entries in Node config for Simulation
 PARTITION_ID_KEY = "partition-id"
 NUM_PARTITIONS_KEY = "num-partitions"
 
-GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY = "flower-version"
+# Constants for keys in `metadata` of `MessageContainer` in `grpc-adapter`
+GRPC_ADAPTER_METADATA_FLOWER_PACKAGE_NAME_KEY = "flower-package-name"
+GRPC_ADAPTER_METADATA_FLOWER_PACKAGE_VERSION_KEY = "flower-package-version"
+GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY = "flower-version"  # Deprecated
 GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY = "should-exit"
+GRPC_ADAPTER_METADATA_MESSAGE_MODULE_KEY = "grpc-message-module"
+GRPC_ADAPTER_METADATA_MESSAGE_QUALNAME_KEY = "grpc-message-qualname"
+
+# Message TTL
+MESSAGE_TTL_TOLERANCE = 1e-1
+
+# Isolation modes
+ISOLATION_MODE_SUBPROCESS = "subprocess"
+ISOLATION_MODE_PROCESS = "process"
+
+# Log streaming configurations
+CONN_REFRESH_PERIOD = 60  # Stream connection refresh period
+CONN_RECONNECT_INTERVAL = 0.5  # Reconnect interval between two stream connections
+LOG_STREAM_INTERVAL = 0.5  # Log stream interval for `ExecServicer.StreamLogs`
+LOG_UPLOAD_INTERVAL = 0.2  # Minimum interval between two log uploads
 
 
 class MessageType:
@@ -115,8 +147,34 @@ class ErrorCode:
     UNKNOWN = 0
     LOAD_CLIENT_APP_EXCEPTION = 1
     CLIENT_APP_RAISED_EXCEPTION = 2
-    NODE_UNAVAILABLE = 3
+    MESSAGE_UNAVAILABLE = 3
+    REPLY_MESSAGE_UNAVAILABLE = 4
 
     def __new__(cls) -> ErrorCode:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+class Status:
+    """Run status."""
+
+    PENDING = "pending"
+    STARTING = "starting"
+    RUNNING = "running"
+    FINISHED = "finished"
+
+    def __new__(cls) -> Status:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+class SubStatus:
+    """Run sub-status."""
+
+    COMPLETED = "completed"
+    FAILED = "failed"
+    STOPPED = "stopped"
+
+    def __new__(cls) -> SubStatus:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")

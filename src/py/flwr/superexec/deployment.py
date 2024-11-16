@@ -15,23 +15,26 @@
 """Deployment engine executor."""
 
 import hashlib
-import subprocess
 from logging import ERROR, INFO
 from pathlib import Path
 from typing import Optional
 
 from typing_extensions import override
 
-from flwr.cli.install import install_from_fab
-from flwr.common.constant import DRIVER_API_DEFAULT_ADDRESS
-from flwr.common.grpc import create_channel
+from flwr.cli.config_utils import get_fab_metadata
+from flwr.common import ConfigsRecord, Context, RecordSet
+from flwr.common.constant import (
+    SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
+    Status,
+    SubStatus,
+)
 from flwr.common.logger import log
-from flwr.common.serde import fab_to_proto, user_config_to_proto
-from flwr.common.typing import Fab, UserConfig
-from flwr.proto.driver_pb2 import CreateRunRequest  # pylint: disable=E0611
-from flwr.proto.driver_pb2_grpc import DriverStub
+from flwr.common.typing import Fab, RunStatus, UserConfig
+from flwr.server.superlink.ffs import Ffs
+from flwr.server.superlink.ffs.ffs_factory import FfsFactory
+from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 
-from .executor import Executor, RunTracker
+from .executor import Executor
 
 
 class DeploymentEngine(Executor):
@@ -39,7 +42,7 @@ class DeploymentEngine(Executor):
 
     Parameters
     ----------
-    superlink: str (default: "0.0.0.0:9091")
+    serverappio_api_address: str (default: "127.0.0.1:9091")
         Address of the SuperLink to connect to.
     root_certificates: Optional[str] (default: None)
         Specifies the path to the PEM-encoded root certificate file for
@@ -50,11 +53,11 @@ class DeploymentEngine(Executor):
 
     def __init__(
         self,
-        superlink: str = DRIVER_API_DEFAULT_ADDRESS,
+        serverappio_api_address: str = SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
         root_certificates: Optional[str] = None,
         flwr_dir: Optional[str] = None,
     ) -> None:
-        self.superlink = superlink
+        self.serverappio_api_address = serverappio_api_address
         if root_certificates is None:
             self.root_certificates = None
             self.root_certificates_bytes = None
@@ -62,7 +65,30 @@ class DeploymentEngine(Executor):
             self.root_certificates = root_certificates
             self.root_certificates_bytes = Path(root_certificates).read_bytes()
         self.flwr_dir = flwr_dir
-        self.stub: Optional[DriverStub] = None
+        self.linkstate_factory: Optional[LinkStateFactory] = None
+        self.ffs_factory: Optional[FfsFactory] = None
+
+    @override
+    def initialize(
+        self, linkstate_factory: LinkStateFactory, ffs_factory: FfsFactory
+    ) -> None:
+        """Initialize the executor with the necessary factories."""
+        self.linkstate_factory = linkstate_factory
+        self.ffs_factory = ffs_factory
+
+    @property
+    def linkstate(self) -> LinkState:
+        """Return the LinkState."""
+        if self.linkstate_factory is None:
+            raise RuntimeError("Executor is not initialized.")
+        return self.linkstate_factory.state()
+
+    @property
+    def ffs(self) -> Ffs:
+        """Return the Flower File Storage (FFS)."""
+        if self.ffs_factory is None:
+            raise RuntimeError("Executor is not initialized.")
+        return self.ffs_factory.ffs()
 
     @override
     def set_config(
@@ -77,7 +103,7 @@ class DeploymentEngine(Executor):
             A dictionary for configuration values.
             Supported configuration key/value pairs:
             - "superlink": str
-                The address of the SuperLink Driver API.
+                The address of the SuperLink ServerAppIo API.
             - "root-certificates": str
                 The path to the root certificates.
             - "flwr-dir": str
@@ -88,7 +114,7 @@ class DeploymentEngine(Executor):
         if superlink_address := config.get("superlink"):
             if not isinstance(superlink_address, str):
                 raise ValueError("The `superlink` value should be of type `str`.")
-            self.superlink = superlink_address
+            self.serverappio_api_address = superlink_address
         if root_certificates := config.get("root-certificates"):
             if not isinstance(root_certificates, str):
                 raise ValueError(
@@ -101,83 +127,60 @@ class DeploymentEngine(Executor):
                 raise ValueError("The `flwr-dir` value should be of type `str`.")
             self.flwr_dir = str(flwr_dir)
 
-    def _connect(self) -> None:
-        if self.stub is not None:
-            return
-        channel = create_channel(
-            server_address=self.superlink,
-            insecure=(self.root_certificates_bytes is None),
-            root_certificates=self.root_certificates_bytes,
-        )
-        self.stub = DriverStub(channel)
-
     def _create_run(
         self,
         fab: Fab,
         override_config: UserConfig,
     ) -> int:
-        if self.stub is None:
-            self._connect()
+        fab_hash = self.ffs.put(fab.content, {})
+        if fab_hash != fab.hash_str:
+            raise RuntimeError(
+                f"FAB ({fab.hash_str}) hash from request doesn't match contents"
+            )
+        fab_id, fab_version = get_fab_metadata(fab.content)
 
-        assert self.stub is not None
-
-        req = CreateRunRequest(
-            fab=fab_to_proto(fab),
-            override_config=user_config_to_proto(override_config),
+        run_id = self.linkstate.create_run(
+            fab_id, fab_version, fab_hash, override_config, ConfigsRecord()
         )
-        res = self.stub.CreateRun(request=req)
-        return int(res.run_id)
+        return run_id
+
+    def _create_context(self, run_id: int) -> None:
+        """Register a Context for a Run."""
+        # Create an empty context for the Run
+        context = Context(
+            run_id=run_id, node_id=0, node_config={}, state=RecordSet(), run_config={}
+        )
+
+        # Register the context at the LinkState
+        self.linkstate.set_serverapp_context(run_id=run_id, context=context)
 
     @override
     def start_run(
         self,
         fab_file: bytes,
         override_config: UserConfig,
-        federation_config: UserConfig,
-    ) -> Optional[RunTracker]:
+        federation_options: ConfigsRecord,
+    ) -> Optional[int]:
         """Start run using the Flower Deployment Engine."""
+        run_id = None
         try:
-            # Install FAB to flwr dir
-            install_from_fab(fab_file, None, True)
 
             # Call SuperLink to create run
-            run_id: int = self._create_run(
+            run_id = self._create_run(
                 Fab(hashlib.sha256(fab_file).hexdigest(), fab_file), override_config
             )
+
+            # Register context for the Run
+            self._create_context(run_id=run_id)
             log(INFO, "Created run %s", str(run_id))
 
-            command = [
-                "flower-server-app",
-                "--run-id",
-                str(run_id),
-                "--superlink",
-                str(self.superlink),
-            ]
-
-            if self.flwr_dir:
-                command.append("--flwr-dir")
-                command.append(self.flwr_dir)
-
-            if self.root_certificates is None:
-                command.append("--insecure")
-            else:
-                command.append("--root-certificates")
-                command.append(self.root_certificates)
-
-            # Execute the command
-            proc = subprocess.Popen(  # pylint: disable=consider-using-with
-                command,
-                text=True,
-            )
-            log(INFO, "Started run %s", str(run_id))
-
-            return RunTracker(
-                run_id=run_id,
-                proc=proc,
-            )
+            return run_id
         # pylint: disable-next=broad-except
         except Exception as e:
             log(ERROR, "Could not start run: %s", str(e))
+            if run_id:
+                run_status = RunStatus(Status.FINISHED, SubStatus.FAILED, str(e))
+                self.linkstate.update_run_status(run_id, new_status=run_status)
             return None
 
 

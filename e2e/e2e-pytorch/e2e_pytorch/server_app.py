@@ -61,7 +61,7 @@ if __name__ == "__main__":
     )
 
     hist = fl.server.start_server(
-        server_address="0.0.0.0:8080",
+        server_address="127.0.0.1:8080",
         config=fl.server.ServerConfig(num_rounds=3),
         strategy=strategy,
     )
@@ -72,7 +72,7 @@ if __name__ == "__main__":
     )
 
     if STATE_VAR in hist.metrics_distributed:
-        # The checks in record_state_metrics don't do anythinng if client's state has a single entry
+        # The checks in record_state_metrics don't do anything if client's state has a single entry
         state_metrics_last_round = hist.metrics_distributed[STATE_VAR][-1]
         assert (
             len(state_metrics_last_round[1][0]) == 2 * state_metrics_last_round[0]

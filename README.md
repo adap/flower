@@ -1,4 +1,4 @@
-# Flower: A Friendly Federated Learning Framework
+# Flower: A Friendly Federated AI Framework
 
 <p align="center">
   <a href="https://flower.ai/">
@@ -18,9 +18,10 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/adap/flower/blob/main/CONTRIBUTING.md)
 ![Build](https://github.com/adap/flower/actions/workflows/framework.yml/badge.svg)
 [![Downloads](https://static.pepy.tech/badge/flwr)](https://pepy.tech/project/flwr)
+[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-flwr-blue)](https://hub.docker.com/u/flwr)
 [![Slack](https://img.shields.io/badge/Chat-Slack-red)](https://flower.ai/join-slack)
 
-Flower (`flwr`) is a framework for building federated learning systems. The
+Flower (`flwr`) is a framework for building federated AI systems. The
 design of Flower is based on a few guiding principles:
 
 - **Customizable**: Federated learning systems vary wildly from one use case to
@@ -101,6 +102,7 @@ Flower Baselines is a collection of community-contributed projects that reproduc
 - [FedNova](https://github.com/adap/flower/tree/main/baselines/fednova)
 - [HeteroFL](https://github.com/adap/flower/tree/main/baselines/heterofl)
 - [FedAvgM](https://github.com/adap/flower/tree/main/baselines/fedavgm)
+- [FedRep](https://github.com/adap/flower/tree/main/baselines/fedrep)
 - [FedStar](https://github.com/adap/flower/tree/main/baselines/fedstar)
 - [FedWav2vec2](https://github.com/adap/flower/tree/main/baselines/fedwav2vec2)
 - [FjORD](https://github.com/adap/flower/tree/main/baselines/fjord)

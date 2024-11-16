@@ -28,9 +28,16 @@ from cryptography.hazmat.primitives.serialization import (
 )
 
 from flwr.common import EventType, event
+from flwr.common.args import (
+    try_obtain_root_certificates,
+    try_obtain_server_certificates,
+)
 from flwr.common.config import parse_config_args
 from flwr.common.constant import (
+    CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
+    ISOLATION_MODE_PROCESS,
+    ISOLATION_MODE_SUBPROCESS,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
@@ -38,28 +45,44 @@ from flwr.common.constant import (
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature
 
-from ..app import (
-    ISOLATION_MODE_PROCESS,
-    ISOLATION_MODE_SUBPROCESS,
-    start_client_internal,
-)
+from ..app import start_client_internal
 from ..clientapp.utils import get_load_client_app_fn
 
 
 def run_supernode() -> None:
     """Run Flower SuperNode."""
+    args = _parse_args_run_supernode().parse_args()
+    _warn_deprecated_server_arg(args)
+
     log(INFO, "Starting Flower SuperNode")
 
     event(EventType.RUN_SUPERNODE_ENTER)
 
-    args = _parse_args_run_supernode().parse_args()
+    # Check if both `--flwr-dir` and `--isolation` were set
+    if args.flwr_dir is not None and args.isolation is not None:
+        log(
+            WARN,
+            "Both `--flwr-dir` and `--isolation` were specified. "
+            "Ignoring `--flwr-dir`.",
+        )
 
-    _warn_deprecated_server_arg(args)
+    # Exit if unsupported argument is passed by the user
+    if args.app is not None:
+        log(
+            ERROR,
+            "The `app` argument is deprecated. The SuperNode now automatically "
+            "uses the ClientApp delivered from the SuperLink. Providing the app "
+            "directory manually is no longer supported. Please remove the `app` "
+            "argument from your command.",
+        )
+        sys.exit(1)
 
-    root_certificates = _get_certificates(args)
+    root_certificates = try_obtain_root_certificates(args, args.superlink)
+    # Obtain certificates for ClientAppIo API server
+    server_certificates = try_obtain_server_certificates(args, TRANSPORT_TYPE_GRPC_RERE)
     load_fn = get_load_client_app_fn(
         default_app_ref="",
-        app_path=args.app,
+        app_path=None,
         flwr_dir=args.flwr_dir,
         multi_app=True,
     )
@@ -79,8 +102,11 @@ def run_supernode() -> None:
         node_config=parse_config_args(
             [args.node_config] if args.node_config else args.node_config
         ),
+        flwr_path=args.flwr_dir,
         isolation=args.isolation,
-        supernode_address=args.supernode_address,
+        clientappio_api_address=args.clientappio_api_address,
+        certificates=server_certificates,
+        ssl_ca_certfile=args.ssl_ca_certfile,
     )
 
     # Graceful shutdown
@@ -120,41 +146,6 @@ def _warn_deprecated_server_arg(args: argparse.Namespace) -> None:
             args.superlink = args.server
 
 
-def _get_certificates(args: argparse.Namespace) -> Optional[bytes]:
-    """Load certificates if specified in args."""
-    # Obtain certificates
-    if args.insecure:
-        if args.root_certificates is not None:
-            sys.exit(
-                "Conflicting options: The '--insecure' flag disables HTTPS, "
-                "but '--root-certificates' was also specified. Please remove "
-                "the '--root-certificates' option when running in insecure mode, "
-                "or omit '--insecure' to use HTTPS."
-            )
-        log(
-            WARN,
-            "Option `--insecure` was set. "
-            "Starting insecure HTTP client connected to %s.",
-            args.superlink,
-        )
-        root_certificates = None
-    else:
-        # Load the certificates if provided, or load the system certificates
-        cert_path = args.root_certificates
-        if cert_path is None:
-            root_certificates = None
-        else:
-            root_certificates = Path(cert_path).read_bytes()
-        log(
-            DEBUG,
-            "Starting secure HTTPS client connected to %s "
-            "with the following certificates: %s.",
-            args.superlink,
-            cert_path,
-        )
-    return root_certificates
-
-
 def _parse_args_run_supernode() -> argparse.ArgumentParser:
     """Parse flower-supernode command line arguments."""
     parser = argparse.ArgumentParser(
@@ -165,43 +156,43 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         "app",
         nargs="?",
         default=None,
-        help="Specify the path of the Flower App to load and run the `ClientApp`. "
-        "The `pyproject.toml` file must be located in the root of this path. "
-        "When this argument is provided, the SuperNode will exclusively respond to "
-        "messages from the corresponding `ServerApp` by matching the FAB ID and FAB "
-        "version. An error will be raised if a message is received from any other "
-        "`ServerApp`.",
+        help=(
+            "(REMOVED) This argument is removed. The SuperNode now automatically "
+            "uses the ClientApp delivered from the SuperLink, so there is no need to "
+            "provide the app directory manually. This argument will be removed in a "
+            "future version."
+        ),
     )
     _parse_args_common(parser)
     parser.add_argument(
         "--flwr-dir",
         default=None,
         help="""The path containing installed Flower Apps.
-    By default, this value is equal to:
+        The default directory is:
 
         - `$FLWR_HOME/` if `$FLWR_HOME` is defined
         - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
         - `$HOME/.flwr/` in all other cases
-    """,
+        """,
     )
     parser.add_argument(
         "--isolation",
-        default=None,
+        default=ISOLATION_MODE_SUBPROCESS,
         required=False,
         choices=[
             ISOLATION_MODE_SUBPROCESS,
             ISOLATION_MODE_PROCESS,
         ],
-        help="Isolation mode when running `ClientApp` (optional, possible values: "
-        "`subprocess`, `process`). By default, `ClientApp` runs in the same process "
-        "that executes the SuperNode. Use `subprocess` to configure SuperNode to run "
-        "`ClientApp` in a subprocess. Use `process` to indicate that a separate "
-        "independent process gets created outside of SuperNode.",
+        help="Isolation mode when running a `ClientApp` (`subprocess` by default, "
+        "possible values: `subprocess`, `process`). Use `subprocess` to configure "
+        "SuperNode to run a `ClientApp` in a subprocess. Use `process` to indicate "
+        "that a separate independent process gets created outside of SuperNode.",
     )
     parser.add_argument(
-        "--supernode-address",
-        default="0.0.0.0:9094",
-        help="Set the SuperNode gRPC server address. Defaults to `0.0.0.0:9094`.",
+        "--clientappio-api-address",
+        default=CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
+        help="ClientAppIo API (gRPC) server address (IPv4, IPv6, or a domain name). "
+        f"By default, it is set to {CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS}.",
     )
 
     return parser
@@ -243,6 +234,25 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         type=str,
         help="Specifies the path to the PEM-encoded root certificate file for "
         "establishing secure HTTPS connections.",
+    )
+    parser.add_argument(
+        "--ssl-certfile",
+        help="ClientAppIo API server SSL certificate file (as a path str) "
+        "to create a secure connection.",
+        type=str,
+        default=None,
+    )
+    parser.add_argument(
+        "--ssl-keyfile",
+        help="ClientAppIo API server SSL private key file (as a path str) "
+        "to create a secure connection.",
+        type=str,
+    )
+    parser.add_argument(
+        "--ssl-ca-certfile",
+        help="ClientAppIo API server SSL CA certificate file (as a path str) "
+        "to create a secure connection.",
+        type=str,
     )
     parser.add_argument(
         "--server",
