@@ -45,7 +45,7 @@ than or equal to the values of `min_fit_clients` and `min_evaluate_clients`.
 class FedHT(FedAvg):
     """Federated Hardthreshold strategy.
 
-    Implementation based on https://arxiv.org/abs/1602.05629
+    Implementation based on https://arxiv.org/abs/2101.00052
 
     Parameters
     ----------
