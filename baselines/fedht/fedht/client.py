@@ -36,7 +36,8 @@ class SimIIClient(NumPyClient):
         self.num_features = num_features
         self.num_classes = num_classes
         self.cfg = cfg
-        self.device = device
+
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # get parameters from existing model
     def get_parameters(self, config):
@@ -73,7 +74,7 @@ class SimIIClient(NumPyClient):
 
 # client fn for input into simulation
 def generate_client_fn_simII(
-    dataset, num_features, num_classes, model, cfg: DictConfig, device: torch.device
+    dataset, num_features, num_classes, model, cfg: DictConfig
 ):
     """Generate client function for simulated FL."""
 
@@ -93,7 +94,7 @@ def generate_client_fn_simII(
         testloader = DataLoader(test_dataset, batch_size=cfg.batch_size, shuffle=True)
 
         return SimIIClient(
-            trainloader, testloader, model, num_obs, num_features, num_classes, cfg, device
+            trainloader, testloader, model, num_obs, num_features, num_classes, cfg
         ).to_client()
 
     return client_fn
@@ -122,7 +123,8 @@ class MnistClient(NumPyClient):
         self.num_features = num_features
         self.num_classes = num_classes
         self.cfg = cfg
-        self.device = device
+
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # get parameters from existing model
     def get_parameters(self, config):
@@ -159,7 +161,7 @@ class MnistClient(NumPyClient):
 
 # client fn for input into simulation
 def generate_client_fn_mnist(
-    dataset, num_features, num_classes, model, cfg: DictConfig, device: torch.device
+    dataset, num_features, num_classes, model, cfg: DictConfig
 ):
     """Generate client function for simulated FL."""
 
@@ -181,7 +183,7 @@ def generate_client_fn_mnist(
         testloader = DataLoader(test_dataset, batch_size=cfg.batch_size, shuffle=True)
 
         return MnistClient(
-            trainloader, testloader, model, num_obs, num_features, num_classes, cfg, device
+            trainloader, testloader, model, num_obs, num_features, num_classes, cfg
         ).to_client()
 
     return client_fn

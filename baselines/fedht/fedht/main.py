@@ -33,7 +33,7 @@ def main(cfg: DictConfig):
     # set seed
     random.seed(2024)
 
-    # this vs. setting in cfg; what is preferred?
+    # set device to cuda:0, if available
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     if cfg.data == "mnist":
@@ -47,8 +47,8 @@ def main(cfg: DictConfig):
         )
 
         # load MNIST data
-        num_features = 28 * 28
-        num_classes = 10
+        num_features = cfg.num_features
+        num_classes = cfg.num_classes
         dataset = FederatedDataset(dataset="mnist", partitioners={"train": partitioner})
         test_dataset = dataset.load_split("test").with_format("numpy")
         testloader = DataLoader(test_dataset, batch_size=cfg.batch_size, shuffle=False)
@@ -62,17 +62,16 @@ def main(cfg: DictConfig):
             num_features=num_features,
             num_classes=num_classes,
             model=model,
-            cfg=cfg,
-            device=device
+            cfg=cfg
         )
 
     elif cfg.data == "simII":
 
         # simulate data from Simulation II in Tong et al
-        num_obs = 1000
+        num_obs = cfg.num_obs
         num_clients = cfg.num_clients
-        num_features = 1000
-        num_classes = 2
+        num_features = cfg.num_features
+        num_classes = cfg.num_classes
 
         dataset = sim_data(num_obs, num_clients, num_features, 1, 1)
         X_test, y_test = sim_data(num_obs, 1, num_features, 1, 1)
@@ -88,8 +87,7 @@ def main(cfg: DictConfig):
             num_features=num_features,
             num_classes=num_classes,
             model=model,
-            cfg=cfg,
-            device=device
+            cfg=cfg
         )
 
     # initialize global model to all zeros
@@ -98,33 +96,29 @@ def main(cfg: DictConfig):
     init_params_arr: NDArrays = [weights, bias]
     init_params = ndarrays_to_parameters(init_params_arr)
 
-    # define strategy: fedht
-    strategy_fedht = FedHT(
-        min_available_clients=cfg.strategy.min_available_clients,
-        num_keep=cfg.num_keep,
-        evaluate_fn=get_evaluate_fn(testloader, model, device),
-        on_fit_config_fn=fit_round,
-        iterht=cfg.iterht,
-        initial_parameters=init_params,
-    )
-
-    # define strategy: fedavg
-    strategy_fedavg = fl.server.strategy.FedAvg(
-        min_available_clients=cfg.strategy.min_available_clients,
-        evaluate_fn=get_evaluate_fn(testloader, model, device),
-        on_fit_config_fn=fit_round,
-        initial_parameters=init_params,
-    )
-
     strategy: Strategy
     if cfg.agg == "fedht":
-        strategy = strategy_fedht
+        # define strategy: fedht
+        strategy = FedHT(
+            min_available_clients=cfg.strategy.min_available_clients,
+            num_keep=cfg.num_keep,
+            evaluate_fn=get_evaluate_fn(testloader, model, device),
+            on_fit_config_fn=fit_round,
+            iterht=cfg.iterht,
+            initial_parameters=init_params,
+        )
     elif cfg.agg == "fedavg":
-        strategy = strategy_fedavg
+        # define strategy: fedavg
+        strategy = fl.server.strategy.FedAvg(
+            min_available_clients=cfg.strategy.min_available_clients,
+            evaluate_fn=get_evaluate_fn(testloader, model, device),
+            on_fit_config_fn=fit_round,
+            initial_parameters=init_params,
+        )
     else:
         print("Must select either fedht or fedavg for the aggregation strategy.")
 
-    # # start simulation
+    # start simulation
     random.seed(2025)
     hist_mnist = fl.simulation.start_simulation(
         client_fn=client_fn,
