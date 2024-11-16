@@ -193,7 +193,7 @@ flwr run . local-sim-gpu --run-config "central-eval=true num-server-rounds=10"
 ### Run with the Deployment Engine
 
 > \[!NOTE\]
-> The steps here outline the very few changes you need to make to the code provided in this example to run with the Deployment Engine instead of with the Simulation Engine. For a complete guide on how the Deployment Engine works, please check the [Flower Documenation](<>) which includes also [how to use Flower with Docker](https://flower.ai/docs/framework/docker/index.html).
+> The steps here outline the very few changes you need to make to the code provided in this example to run with the Deployment Engine instead of with the Simulation Engine. For a complete guide on how the Deployment Engine works, please check the [Flower Architecture Overview](https://flower.ai/docs/framework/explanation-flower-architecture.html) and also [how to use Flower with Docker](https://flower.ai/docs/framework/docker/index.html).
 
 Running the exact same FL pipeline as in the simulation setting can be done wihtout requiring any change to the `ServerApp` design. For the `ClientApp` we need to slightly adjust the logic that loads the dataset. While in simulations we want to dynamically make a Python process to _behave_ like a particular client by loading its corresponding partition, in deployment mode we want the same client process (linked to a single `SuperNode`) to always use its own dataset that lives locally in the machine running the `SuperNode`.
 
@@ -237,7 +237,7 @@ You will need to copy the generated directory in step 1 to the machine that will
 With steps 1-3 completed, you are ready to run Federated Wishper finetuning with Flower's Deployment Eninge. To connect a `SuperNode` to an existing federation (i.e. a running `SuperLink`) you'd do it like this assuming all the python dependencies (i.e. `flwr`, `transformers`, `torch` are installed -- see `pyproject.toml`):
 
 ```shell
-flower-supernode --superlink="<SUPERLINK-IP>:9092" --isolation="subprocess" \
+flower-supernode --superlink="<SUPERLINK-IP>:9092" \
                  --node-config="local-data='<path/to/local/partition>'"
 ```
 
@@ -264,6 +264,6 @@ python preprocess.py --partition-id=5
 Finally, assuming you have a `SuperLink` running on a machine (e.g. your laptop) and which can be reached by your Raspberry Pi (e.g. because they are in the same network), launch the `SuperNode` as shown earlier:
 
 ```shell
-flower-supernode --superlink="<SUPERLINK-IP>:9092" --isolation="subprocess" \
+flower-supernode --superlink="<SUPERLINK-IP>:9092" \
                  --node-config="local-data='<path/to/local/partition>'"
 ```
