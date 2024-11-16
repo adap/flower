@@ -223,20 +223,24 @@ class TestGrpcDriver(unittest.TestCase):
         # Prepare
         grpc_exc = grpc.RpcError()
         grpc_exc.code = lambda: grpc.StatusCode.UNAVAILABLE
-        original_get_nodes = self.mock_stub.GetNodes
-        original_get_nodes.side_effect = [
+        mock_get_nodes = Mock()
+        mock_get_nodes.side_effect = [
             grpc_exc,
             Mock(nodes=[Mock(node_id=404)]),
         ]
-        self.mock_stub.GetNodes = (
-            lambda *args, **kwargs: self.driver._retry_invoker.invoke(
-                original_get_nodes, *args, **kwargs
+        # Make pylint happy
+        # pylint: disable=protected-access
+        self.driver._grpc_stub = Mock(
+            GetNodes=lambda *args, **kwargs: self.driver._retry_invoker.invoke(
+                mock_get_nodes, *args, **kwargs
             )
         )
+        # pylint: enable=protected-access
+
         # Execute
-        with patch("time.sleep", side_effect=lambda t: None):
+        with patch("time.sleep", side_effect=lambda _: None):
             node_ids = self.driver.get_node_ids()
 
         # Assert
         self.assertIn(404, node_ids)
-        self.assertEqual(original_get_nodes.call_count, 2)
+        self.assertEqual(mock_get_nodes.call_count, 2)
