@@ -177,6 +177,9 @@ pip install -e .
 
 For this demo, we'll be using [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html), a popular dataset for image classification comprised of 10 classes (e.g. car, bird, airplane) and a total of 60K `32x32` RGB images. The training set contains 50K images.
 
+> \[!TIP\]
+> Refer to the [Flower Architecture](https://flower.ai/docs/framework/explanation-flower-architecture.html) page for an overview of the different components involved in a federation.
+
 ### Ensure your embedded devices have some data
 
 Unless your devices already have some images that could be used to train a small CNN, we need to send a partition of the `CIFAR-10` dataset to each device that will run as a `SuperNode`. You can make use of the `generate_dataset.py` script to partition the `CIFAR-10` into N disjoint partitions that can be then given to each device in the federation.
@@ -217,7 +220,6 @@ Now, launch your `SuperNode` pointing it to the dataset you `scp`-ed earlier:
 ```shell
 # Repeat for each embedded device (adjust SuperLink IP and dataset-path)
 flower-supernode --insecure --superlink="SUPERLINK_IP:9092" \
-                 --isolation="subprocess" \
                  --node-config="dataset-path='path/to/cifar10_part_1'"
 ```
 
