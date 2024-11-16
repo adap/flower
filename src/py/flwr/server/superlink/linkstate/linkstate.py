@@ -20,6 +20,7 @@ from typing import Optional
 from uuid import UUID
 
 from flwr.common import Context
+from flwr.common.record import ConfigsRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
@@ -31,7 +32,7 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
         """Store one TaskIns.
 
-        Usually, the Driver API calls this to schedule instructions.
+        Usually, the ServerAppIo API calls this to schedule instructions.
 
         Stores the value of the `task_ins` in the link state and, if successful,
         returns the `task_id` (UUID) of the `task_ins`. If, for any reason,
@@ -100,13 +101,27 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
 
     @abc.abstractmethod
     def get_task_res(self, task_ids: set[UUID]) -> list[TaskRes]:
-        """Get TaskRes for task_ids.
+        """Get TaskRes for the given TaskIns IDs.
 
-        Usually, the Driver API calls this method to get results for instructions it has
-        previously scheduled.
+        This method is typically called by the ServerAppIo API to obtain
+        results (TaskRes) for previously scheduled instructions (TaskIns).
+        For each task_id provided, this method returns one of the following responses:
 
-        Retrieves all TaskRes for the given `task_ids` and returns and empty list of
-        none could be found.
+        - An error TaskRes if the corresponding TaskIns does not exist or has expired.
+        - An error TaskRes if the corresponding TaskRes exists but has expired.
+        - The valid TaskRes if the TaskIns has a corresponding valid TaskRes.
+        - Nothing if the TaskIns is still valid and waiting for a TaskRes.
+
+        Parameters
+        ----------
+        task_ids : set[UUID]
+            A set of TaskIns IDs for which to retrieve results (TaskRes).
+
+        Returns
+        -------
+        list[TaskRes]
+            A list of TaskRes corresponding to the given task IDs. If no
+            TaskRes could be found for any of the task IDs, an empty list is returned.
         """
 
     @abc.abstractmethod
@@ -152,14 +167,19 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """Retrieve stored `node_id` filtered by `node_public_keys`."""
 
     @abc.abstractmethod
-    def create_run(
+    def create_run(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         fab_id: Optional[str],
         fab_version: Optional[str],
         fab_hash: Optional[str],
         override_config: UserConfig,
+        federation_options: ConfigsRecord,
     ) -> int:
         """Create a new run for the specified `fab_hash`."""
+
+    @abc.abstractmethod
+    def get_run_ids(self) -> set[int]:
+        """Retrieve all run IDs."""
 
     @abc.abstractmethod
     def get_run(self, run_id: int) -> Optional[Run]:
@@ -173,10 +193,7 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         Returns
         -------
         Optional[Run]
-            A dataclass instance containing three elements if `run_id` is valid:
-            - `run_id`: The identifier of the run, same as the specified `run_id`.
-            - `fab_id`: The identifier of the FAB used in the specified run.
-            - `fab_version`: The version of the FAB used in the specified run.
+            The `Run` instance if found; otherwise, `None`.
         """
 
     @abc.abstractmethod
@@ -225,6 +242,21 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         Optional[int]
             The `run_id` of a `Run` that is pending to be started; None if
             there is no Run pending.
+        """
+
+    @abc.abstractmethod
+    def get_federation_options(self, run_id: int) -> Optional[ConfigsRecord]:
+        """Retrieve the federation options for the specified `run_id`.
+
+        Parameters
+        ----------
+        run_id : int
+            The identifier of the run.
+
+        Returns
+        -------
+        Optional[ConfigsRecord]
+            The federation options for the run if it exists; None otherwise.
         """
 
     @abc.abstractmethod
@@ -298,4 +330,39 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
             The identifier of the run for which to set the context.
         context : Context
             The context to be associated with the specified `run_id`.
+        """
+
+    @abc.abstractmethod
+    def add_serverapp_log(self, run_id: int, log_message: str) -> None:
+        """Add a log entry to the ServerApp logs for the specified `run_id`.
+
+        Parameters
+        ----------
+        run_id : int
+            The identifier of the run for which to add a log entry.
+        log_message : str
+            The log entry to be added to the ServerApp logs.
+        """
+
+    @abc.abstractmethod
+    def get_serverapp_log(
+        self, run_id: int, after_timestamp: Optional[float]
+    ) -> tuple[str, float]:
+        """Get the ServerApp logs for the specified `run_id`.
+
+        Parameters
+        ----------
+        run_id : int
+            The identifier of the run for which to retrieve the ServerApp logs.
+
+        after_timestamp : Optional[float]
+            Retrieve logs after this timestamp. If set to `None`, retrieve all logs.
+
+        Returns
+        -------
+        tuple[str, float]
+            A tuple containing:
+            - The ServerApp logs associated with the specified `run_id`.
+            - The timestamp of the latest log entry in the returned logs.
+              Returns `0` if no logs are returned.
         """
