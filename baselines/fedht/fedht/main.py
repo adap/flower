@@ -104,7 +104,7 @@ def main(cfg: DictConfig):
             initial_parameters=init_params,
         )
     else:
-        print("Must select either fedht or fedavg for the aggregation strategy.")
+        raise ValueError("Must select either fedht or fedavg for the aggregation strategy in this baseline.")
 
     # start simulation
     random.seed(2025)
