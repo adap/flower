@@ -3,9 +3,8 @@
 from collections import OrderedDict
 
 import torch
-import torch.nn.functional as F
-from torch import nn
 import torchvision
+
 
 # Adapted from FedDebug baseline implementation
 # https://github.com/adap/flower/blob/main/baselines/feddebug/feddebug/models.py
@@ -41,12 +40,10 @@ def initialize_model(name, num_channels, num_classes):
     return model
 
 
-def train(net, trainloader, epochs, device, learning_rate):
+def train(net, trainloader, epochs, device, learning_rate, criterion):
     """Train the model on the training set."""
-    net.to(device)  # move model to GPU if available
-    criterion = torch.nn.CrossEntropyLoss()
-    criterion.to(device)
-    optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate) # momentum=0.9??
+    net.to(device)
+    optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate, momentum=0.9)
     net.train()
     running_loss = 0.0
     for _ in range(epochs):
@@ -54,10 +51,8 @@ def train(net, trainloader, epochs, device, learning_rate):
             images = batch["img"]
             labels = batch["label"]
             optimizer.zero_grad()
-            # print(type(images))
-            # print('images: ', images.shape)
-            # print('labels: ', labels.shape)
-            loss = criterion(net(images.to(device)), labels.to(device))
+            logits = net(images.to(device))
+            loss = criterion(logits, labels.to(device))
             loss.backward()
             optimizer.step()
             running_loss += loss.item()
@@ -84,29 +79,16 @@ def test(net, testloader, device):
     return loss, accuracy
 
 
-def get_weights(net):
+def get_parameters(net):
     """Extract model parameters as numpy arrays from state_dict."""
     return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
 
-def set_weights(net, parameters):
+def set_parameters(net, parameters):
     """Apply parameters to an existing model."""
     params_dict = zip(net.state_dict().keys(), parameters)
     state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
     net.load_state_dict(state_dict, strict=True)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 # implementation from DASHA paper
-

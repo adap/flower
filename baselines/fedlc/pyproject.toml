@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "fedlc"
 version = "1.0.0"
-description = ""
+description = "FedLC"
 license = "Apache-2.0"
 dependencies = [
     "flwr[simulation]>=1.12.0",
@@ -126,10 +126,10 @@ clientapp = "fedlc.client_app:app"
 
 [tool.flwr.app.config]
 # Strategy
-strategy = "fedavg"
-num-server-rounds = 3
-fraction-fit = 1.0
-fraction-evaluate = 1.0
+strategy = "fedavg" # fedprox
+use-logit-correction = true
+num-server-rounds = 400
+clients-per-round = 20
 batch-size = 128
 local-epochs = 1
 learning-rate = 0.01
@@ -137,6 +137,7 @@ seed = 0
 proximal-mu = 1.0
 save-params-every = 1
 checkpoint-dir-path = "checkpoints"
+use-last-checkpoint = false
 
 # Data
 dataset-partition-by = "label"
@@ -148,15 +149,18 @@ dirichlet-alpha = 0.05
 # Model
 model-name = "resnet18"
 
+# FedLC specific
+tau = 0.1
+
 [tool.flwr.federations]
 default = "cpu-simulation"
 
 [tool.flwr.federations.cpu-simulation]
-options.num-supernodes = 10
+options.num-supernodes = 20
 options.backend.client-resources.num-cpus = 1.0
 options.backend.client-resources.num-gpus = 0.0
 
-[tool.flwr.federations.gpu-simulation-xl]
+[tool.flwr.federations.gpu-simulation]
 options.num-supernodes = 20
 options.backend.client-resources.num-cpus = 1.0
 options.backend.client-resources.num-gpus = 0.5

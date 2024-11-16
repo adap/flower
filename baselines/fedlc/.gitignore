@@ -161,3 +161,4 @@ cython_debug/
 
 # Custom
 checkpoints/
+results/

@@ -1,8 +1,8 @@
 ---
-title: title of the paper # TODO
-url: https://arxiv.org/abs/2007.14390 # TODO: update with the link to your paper
-labels: [label1, label2] # TODO: please add between 4 and 10 single-word (maybe two-words) labels (e.g. system heterogeneity, image classification, asynchronous, weight sharing, cross-silo). Do not use "". Remove this comment once you are done.
-dataset: [dataset1, dataset2] # TODO: list of datasets you include in your baseline. Do not use "". Remove this comment once you are done.
+title: Federated Learning with Label Distribution Skew via Logits Calibration 
+url: https://arxiv.org/abs/2209.00189
+labels: [data heterogeneity, image classification] 
+dataset: [cifar10] 
 ---
 
 > [!IMPORTANT]
@@ -47,37 +47,32 @@ cd .. # so you are in the `flower/baselines` directory
 ./dev/test-baseline.sh fedlc
 ```
 
-> [!IMPORTANT]
-> When you open a PR to get the baseline merged into the main Flower repository, the `./dev/test-baseline.sh` script will run. Only if test pass, the baseline can be merged.
-> Some issues highlighted by the tests script are easier than others to fix. Do not hesitate in reaching out for help to us (e.g. as a comment in your PR) if you are stuck with these.
-> Before opening your PR, please remove the code snippet above as well all the [!IMPORTANT] message blocks. Yes, including this one.
-
-# :warning: _*Title of your baseline*_ # Also copy this title to the `description` in the `[project]` section of your `pyproject.toml`.
+# Federated Learning with Label Distribution Skew via Logits Calibration
 
 > [!NOTE]
 > If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
-**Paper:** :warning: _*add the URL of the paper page (not to the .pdf). For instance if you link a paper on ArXiv, add here the URL to the abstract page (e.g. [paper](https://arxiv.org/abs/1512.03385)). If your paper is in from a journal or conference proceedings, please follow the same logic.*_
+**Paper:** https://arxiv.org/abs/2209.00189
 
-**Authors:** :warning: _*list authors of the paper*_
+**Authors:** Jie Zhang, Zhiqi Li, Bo Li, Jianghe Xu, Shuang Wu, Shouhong Ding, Chao Wu
 
-**Abstract:** :warning: _*add here the abstract of the paper you are implementing*_
+**Abstract:** Traditional federated optimization methods perform poorly with heterogeneous data (ie, accuracy reduction), especially for highly skewed data. In this paper, we investigate the label distribution skew in FL, where the distribution of labels varies across clients. First, we investigate the label distribution skew from a statistical view. We demonstrate both theoretically and empirically that previous methods based on softmax cross-entropy are not suitable, which can result in local models heavily overfitting to minority classes and missing classes. Additionally, we theoretically introduce a deviation bound to measure the deviation of the gradient after local update. At last, we propose FedLC (\textbf {Fed} erated learning via\textbf {L} ogits\textbf {C} alibration), which calibrates the logits before softmax cross-entropy according to the probability of occurrence of each class. FedLC applies a fine-grained calibrated cross-entropy loss to local update by adding a pairwise label margin. Extensive experiments on federated datasets and real-world datasets demonstrate that FedLC leads to a more accurate global model and much improved performance. Furthermore, integrating other FL methods into our approach can further enhance the performance of the global model.
 
 ## About this baseline
 
-**What’s implemented:** :warning: _*Concisely describe what experiment(s) (e.g. Figure 1, Table 2, etc) in the publication can be replicated by running the code. Please only use a few sentences. ”*_
+**What’s implemented:** This repo contains an implementation for FedLC (Federated Learning with Logits Correction) introduced by the paper. It also contains code to replicate Table 1 for CIFAR10 and CIFAR100 datasets, Table 5 for CIFAR10 showing performance of FedLC for different local epochs and Table 6 showing test accuracy with different number of clients.
 
-**Datasets:** :warning: _*List the datasets you used (if you used a medium to large dataset, >10GB please also include the sizes of the dataset). We highly recommend using [FlowerDatasets](https://flower.ai/docs/datasets/index.html) to download and partition your dataset. If you have other ways to download the data, you can also use `FlowerDatasets` to partiion it.*_
+**Datasets:** CIFAR10
 
-**Hardware Setup:** :warning: _*Give some details about the hardware (e.g. a server with 8x V100 32GB and 256GB of RAM) you used to run the experiments for this baseline. Indicate how long it took to run the experiments. Someone out there might not have access to the same resources you have so, could you list the absolute minimum hardware needed to run the experiment in a reasonable amount of time ? (e.g. minimum is 1x 16GB GPU otherwise a client model can’t be trained with a sufficiently large batch size). Could you test this works too?*_
+**Hardware Setup:** The paper uses 8x V100 GPU set up. However, due to resource constraints, the experiments were run with 1xRTX3090 GPU. FedLC on CIFAR10 with 20 clients and 400 rounds took __ seconds. 
 
-**Contributors:** :warning: _*let the world know who contributed to this baseline. This could be either your name, your name and affiliation at the time, or your GitHub profile name if you prefer. If multiple contributors signed up for this baseline, please list yourself and your colleagues*_
+**Contributors:** [@flydump](https://github.com/flydump)
 
 ## Experimental Setup
 
-**Task:** :warning: _*what’s the primary task that is being federated? (e.g. image classification, next-word prediction). If you have experiments for several, please list them*_
+**Task:** Image classification
 
-**Model:** :warning: _*provide details about the model you used in your experiments (if more than use a list). If your model is small, describing it as a table would be :100:. Some FL methods do not use an off-the-shelve model (e.g. ResNet18) instead they create your own. If this is your case, please provide a summary here and give pointers to where in the paper (e.g. Appendix B.4) is detailed.*_
+**Model:** ResNet-18
 
 **Dataset:** :warning: _*Earlier you listed already the datasets that your baseline uses. Now you should include a breakdown of the details about each of them. Please include information about: how the dataset is partitioned (e.g. LDA with alpha 0.1 as default and all clients have the same number of training examples; or each client gets assigned a different number of samples following a power-law distribution with each client only instances of 2 classes)? if your dataset is naturally partitioned just state “naturally partitioned”; how many partitions there are (i.e. how many clients)? Please include this an all information relevant about the dataset and its partitioning into a table.*_
 
@@ -87,9 +82,6 @@ cd .. # so you are in the `flower/baselines` directory
 
 :warning: _Specify the steps to create and activate your environment and install the baseline project. Most baselines are expected to require minimal steps as shown below. These instructions should be comprehensive enough so anyone can run them (if non standard, describe them step-by-step)._
 
-:warning: _The dependencies for your baseline are listed in the `pyproject.toml`, extend it with additional packages needed for your baseline._
-
-:warning: \_Baselines should use Python 3.10, [pyenv](https://github.com/pyenv/pyenv), and the [virtualenv](https://github.com/pyenv/pyenv-virtualenv) plugging.
 
 ```bash
 # Create the virtual environment
@@ -101,8 +93,6 @@ pyenv activate <name-of-your-baseline-env>
 # Install the baseline
 pip install -e .
 ```
-
-:warning: _If your baseline requires running some script before starting an experiment, please indicate so here_.
 
 ## Running the Experiments
 
