@@ -20,6 +20,7 @@ import unittest
 
 import grpc
 
+from flwr.common import ConfigsRecord
 from flwr.common.constant import FLEET_API_GRPC_RERE_DEFAULT_ADDRESS
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     compute_hmac,
@@ -45,7 +46,7 @@ from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=
 from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 from flwr.server.app import _run_fleet_api_grpc_rere
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
-from flwr.server.superlink.state.state_factory import StateFactory
+from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 
 from .server_interceptor import (
     _AUTH_TOKEN_HEADER,
@@ -62,7 +63,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         self._node_private_key, self._node_public_key = generate_key_pairs()
         self._server_private_key, self._server_public_key = generate_key_pairs()
 
-        state_factory = StateFactory(":flwr-in-memory-state:")
+        state_factory = LinkStateFactory(":flwr-in-memory-state:")
         self.state = state_factory.state()
         ffs_factory = FfsFactory(".")
         self.ffs = ffs_factory.ffs()
@@ -334,7 +335,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         self.state.create_node(
             ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
         )
-        run_id = self.state.create_run("", "", "", {})
+        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
         request = GetRunRequest(run_id=run_id)
         shared_secret = generate_shared_key(
             self._node_private_key, self._server_public_key
@@ -365,7 +366,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         self.state.create_node(
             ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
         )
-        run_id = self.state.create_run("", "", "", {})
+        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
         request = GetRunRequest(run_id=run_id)
         node_private_key, _ = generate_key_pairs()
         shared_secret = generate_shared_key(node_private_key, self._server_public_key)

@@ -38,8 +38,9 @@ from flwr.proto.recordset_pb2 import MetricsRecord as ProtoMetricsRecord
 from flwr.proto.recordset_pb2 import MetricsRecordValue as ProtoMetricsRecordValue
 from flwr.proto.recordset_pb2 import ParametersRecord as ProtoParametersRecord
 from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
-from flwr.proto.recordset_pb2 import Sint64List, StringList
+from flwr.proto.recordset_pb2 import SintList, StringList, UintList
 from flwr.proto.run_pb2 import Run as ProtoRun
+from flwr.proto.run_pb2 import RunStatus as ProtoRunStatus
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import (
     ClientMessage,
@@ -340,6 +341,7 @@ def metrics_from_proto(proto: Any) -> typing.Metrics:
 
 
 # === Scalar messages ===
+INT64_MAX_VALUE = 9223372036854775807  # (1 << 63) - 1
 
 
 def scalar_to_proto(scalar: typing.Scalar) -> Scalar:
@@ -354,6 +356,9 @@ def scalar_to_proto(scalar: typing.Scalar) -> Scalar:
         return Scalar(double=scalar)
 
     if isinstance(scalar, int):
+        # Use uint64 for integers larger than the maximum value of sint64
+        if scalar > INT64_MAX_VALUE:
+            return Scalar(uint64=scalar)
         return Scalar(sint64=scalar)
 
     if isinstance(scalar, str):
@@ -374,21 +379,26 @@ def scalar_from_proto(scalar_msg: Scalar) -> typing.Scalar:
 # === Record messages ===
 
 
-_type_to_field = {
+_type_to_field: dict[type, str] = {
     float: "double",
     int: "sint64",
     bool: "bool",
     str: "string",
     bytes: "bytes",
 }
-_list_type_to_class_and_field = {
+_list_type_to_class_and_field: dict[type, tuple[type[GrpcMessage], str]] = {
     float: (DoubleList, "double_list"),
-    int: (Sint64List, "sint64_list"),
+    int: (SintList, "sint_list"),
     bool: (BoolList, "bool_list"),
     str: (StringList, "string_list"),
     bytes: (BytesList, "bytes_list"),
 }
 T = TypeVar("T")
+
+
+def _is_uint64(value: Any) -> bool:
+    """Check if a value is uint64."""
+    return isinstance(value, int) and value > INT64_MAX_VALUE
 
 
 def _record_value_to_proto(
@@ -403,12 +413,18 @@ def _record_value_to_proto(
         # Single element
         # Note: `isinstance(False, int) == True`.
         if isinstance(value, t):
-            arg[_type_to_field[t]] = value
+            fld = _type_to_field[t]
+            if t is int and _is_uint64(value):
+                fld = "uint64"
+            arg[fld] = value
             return proto_class(**arg)
         # List
         if isinstance(value, list) and all(isinstance(item, t) for item in value):
-            list_class, field_name = _list_type_to_class_and_field[t]
-            arg[field_name] = list_class(vals=value)
+            list_class, fld = _list_type_to_class_and_field[t]
+            # Use UintList if any element is of type `uint64`.
+            if t is int and any(_is_uint64(v) for v in value):
+                list_class, fld = UintList, "uint_list"
+            arg[fld] = list_class(vals=value)
             return proto_class(**arg)
     # Invalid types
     raise TypeError(
@@ -824,6 +840,7 @@ def message_from_proto(message_proto: ProtoMessage) -> Message:
 def context_to_proto(context: Context) -> ProtoContext:
     """Serialize `Context` to ProtoBuf."""
     proto = ProtoContext(
+        run_id=context.run_id,
         node_id=context.node_id,
         node_config=user_config_to_proto(context.node_config),
         state=recordset_to_proto(context.state),
@@ -835,6 +852,7 @@ def context_to_proto(context: Context) -> ProtoContext:
 def context_from_proto(context_proto: ProtoContext) -> Context:
     """Deserialize `Context` from ProtoBuf."""
     context = Context(
+        run_id=context_proto.run_id,
         node_id=context_proto.node_id,
         node_config=user_config_from_proto(context_proto.node_config),
         state=recordset_from_proto(context_proto.state),
@@ -854,6 +872,11 @@ def run_to_proto(run: typing.Run) -> ProtoRun:
         fab_version=run.fab_version,
         fab_hash=run.fab_hash,
         override_config=user_config_to_proto(run.override_config),
+        pending_at=run.pending_at,
+        starting_at=run.starting_at,
+        running_at=run.running_at,
+        finished_at=run.finished_at,
+        status=run_status_to_proto(run.status),
     )
     return proto
 
@@ -866,6 +889,11 @@ def run_from_proto(run_proto: ProtoRun) -> typing.Run:
         fab_version=run_proto.fab_version,
         fab_hash=run_proto.fab_hash,
         override_config=user_config_from_proto(run_proto.override_config),
+        pending_at=run_proto.pending_at,
+        starting_at=run_proto.starting_at,
+        running_at=run_proto.running_at,
+        finished_at=run_proto.finished_at,
+        status=run_status_from_proto(run_proto.status),
     )
     return run
 
@@ -895,3 +923,24 @@ def clientappstatus_from_proto(
     if msg.code == ClientAppOutputCode.UNKNOWN_ERROR:
         code = typing.ClientAppOutputCode.UNKNOWN_ERROR
     return typing.ClientAppOutputStatus(code=code, message=msg.message)
+
+
+# === Run status ===
+
+
+def run_status_to_proto(run_status: typing.RunStatus) -> ProtoRunStatus:
+    """Serialize `RunStatus` to ProtoBuf."""
+    return ProtoRunStatus(
+        status=run_status.status,
+        sub_status=run_status.sub_status,
+        details=run_status.details,
+    )
+
+
+def run_status_from_proto(run_status_proto: ProtoRunStatus) -> typing.RunStatus:
+    """Deserialize `RunStatus` from ProtoBuf."""
+    return typing.RunStatus(
+        status=run_status_proto.status,
+        sub_status=run_status_proto.sub_status,
+        details=run_status_proto.details,
+    )

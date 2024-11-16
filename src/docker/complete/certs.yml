@@ -36,9 +36,9 @@ services:
         IP.2 = $${SUPERLINK_IP}
         EOF
 
-        ARG SUPEREXEC_IP=127.0.0.1
+        ARG SUPERNODE_IP=127.0.0.1
 
-        COPY <<-EOF superexec-certificate.conf
+        COPY <<-EOF supernode-certificate.conf
         [req]
         default_bits = 4096
         prompt = no
@@ -55,9 +55,11 @@ services:
         subjectAltName = @alt_names
 
         [alt_names]
-        DNS.0 = superexec
+        DNS.0 = supernode-1
+        DNS.1 = supernode-2
+        DNS.2 = supernode-3
         IP.1 = ::1
-        IP.2 = $${SUPEREXEC_IP}
+        IP.2 = $${SUPERNODE_IP}
         EOF
 
         COPY --chmod=744 <<-'EOF' generate.sh
@@ -113,7 +115,7 @@ services:
               -extensions req_ext
         }
         generate superlink-certificates superlink-certificate.conf
-        generate superexec-certificates superexec-certificate.conf
+        generate supernode-certificates supernode-certificate.conf
         EOF
 
         WORKDIR /app
@@ -121,4 +123,4 @@ services:
         ENTRYPOINT ["./script/generate.sh"]
     volumes:
       - ./superlink-certificates/:/app/superlink-certificates/:rw
-      - ./superexec-certificates/:/app/superexec-certificates/:rw
+      - ./supernode-certificates/:/app/supernode-certificates/:rw

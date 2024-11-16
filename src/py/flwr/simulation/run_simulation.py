@@ -21,7 +21,6 @@ import logging
 import sys
 import threading
 import traceback
-from argparse import Namespace
 from logging import DEBUG, ERROR, INFO, WARNING
 from pathlib import Path
 from time import sleep
@@ -29,67 +28,26 @@ from typing import Any, Optional
 
 from flwr.cli.config_utils import load_and_validate
 from flwr.client import ClientApp
-from flwr.common import EventType, event, log
+from flwr.common import Context, EventType, RecordSet, event, log, now
 from flwr.common.config import get_fused_config_from_dir, parse_config_args
-from flwr.common.constant import RUN_ID_NUM_BYTES
+from flwr.common.constant import RUN_ID_NUM_BYTES, Status
 from flwr.common.logger import (
     set_logger_propagation,
     update_console_handler,
-    warn_deprecated_feature,
     warn_deprecated_feature_with_example,
 )
-from flwr.common.typing import Run, UserConfig
+from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.server.driver import Driver, InMemoryDriver
-from flwr.server.run_serverapp import run as run_server_app
+from flwr.server.run_serverapp import run as _run
 from flwr.server.server_app import ServerApp
 from flwr.server.superlink.fleet import vce
 from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
-from flwr.server.superlink.state import StateFactory
-from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
+from flwr.server.superlink.linkstate import LinkStateFactory
+from flwr.server.superlink.linkstate.in_memory_linkstate import RunRecord
+from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 from flwr.simulation.ray_transport.utils import (
     enable_tf_gpu_growth as enable_gpu_growth,
 )
-
-
-def _check_args_do_not_interfere(args: Namespace) -> bool:
-    """Ensure decoupling of flags for different ways to start the simulation."""
-    mode_one_args = ["app", "run_config"]
-    mode_two_args = ["client_app", "server_app"]
-
-    def _resolve_message(conflict_keys: list[str]) -> str:
-        return ",".join([f"`--{key}`".replace("_", "-") for key in conflict_keys])
-
-    # When passing `--app`, `--app-dir` is ignored
-    if args.app and args.app_dir:
-        log(ERROR, "Either `--app` or `--app-dir` can be set, but not both.")
-        return False
-
-    if any(getattr(args, key) for key in mode_one_args):
-        if any(getattr(args, key) for key in mode_two_args):
-            log(
-                ERROR,
-                "Passing any of {%s} alongside with any of {%s}",
-                _resolve_message(mode_one_args),
-                _resolve_message(mode_two_args),
-            )
-            return False
-
-        if not args.app:
-            log(ERROR, "You need to pass --app")
-            return False
-
-        return True
-
-    # Ensure all args are set (required for the non-FAB mode of execution)
-    if not all(getattr(args, key) for key in mode_two_args):
-        log(
-            ERROR,
-            "Passing all of %s keys are required.",
-            _resolve_message(mode_two_args),
-        )
-        return False
-
-    return True
 
 
 def _replace_keys(d: Any, match: str, target: str) -> Any:
@@ -114,19 +72,6 @@ def run_simulation_from_cli() -> None:
         event_details={"backend": args.backend, "num-supernodes": args.num_supernodes},
     )
 
-    # Add warnings for deprecated server_app and client_app arguments
-    if args.server_app:
-        warn_deprecated_feature(
-            "The `--server-app` argument is deprecated. "
-            "Please use the `--app` argument instead."
-        )
-
-    if args.client_app:
-        warn_deprecated_feature(
-            "The `--client-app` argument is deprecated. "
-            "Use the `--app` argument instead."
-        )
-
     if args.enable_tf_gpu_growth:
         warn_deprecated_feature_with_example(
             "Passing `--enable-tf-gpu-growth` is deprecated.",
@@ -143,69 +88,43 @@ def run_simulation_from_cli() -> None:
         backend_config_dict = _replace_keys(backend_config_dict, match="-", target="_")
         log(DEBUG, "backend_config_dict: %s", backend_config_dict)
 
-    # We are supporting two modes for the CLI entrypoint:
-    # 1) Running an app dir containing a `pyproject.toml`
-    # 2) Running any ClientApp and SeverApp w/o pyproject.toml being present
-    # For 2), some CLI args are compulsory, but they are not required for 1)
-    # We first do these checks
-    args_check_pass = _check_args_do_not_interfere(args)
-    if not args_check_pass:
-        sys.exit("Simulation Engine cannot start.")
-
     run_id = (
         generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
         if args.run_id is None
         else args.run_id
     )
-    if args.app:
-        # Mode 1
-        app_path = Path(args.app)
-        if not app_path.is_dir():
-            log(ERROR, "--app is not a directory")
-            sys.exit("Simulation Engine cannot start.")
 
-        # Load pyproject.toml
-        config, errors, warnings = load_and_validate(
-            app_path / "pyproject.toml", check_module=False
-        )
-        if errors:
-            raise ValueError(errors)
+    app_path = Path(args.app)
+    if not app_path.is_dir():
+        log(ERROR, "--app is not a directory")
+        sys.exit("Simulation Engine cannot start.")
 
-        if warnings:
-            log(WARNING, warnings)
+    # Load pyproject.toml
+    config, errors, warnings = load_and_validate(
+        app_path / "pyproject.toml", check_module=False
+    )
+    if errors:
+        raise ValueError(errors)
 
-        if config is None:
-            raise ValueError("Config extracted from FAB's pyproject.toml is not valid")
+    if warnings:
+        log(WARNING, warnings)
 
-        # Get ClientApp and SeverApp components
-        app_components = config["tool"]["flwr"]["app"]["components"]
-        client_app_attr = app_components["clientapp"]
-        server_app_attr = app_components["serverapp"]
+    if config is None:
+        raise ValueError("Config extracted from FAB's pyproject.toml is not valid")
 
-        override_config = parse_config_args(
-            [args.run_config] if args.run_config else args.run_config
-        )
-        fused_config = get_fused_config_from_dir(app_path, override_config)
-        app_dir = args.app
-        is_app = True
+    # Get ClientApp and SeverApp components
+    app_components = config["tool"]["flwr"]["app"]["components"]
+    client_app_attr = app_components["clientapp"]
+    server_app_attr = app_components["serverapp"]
 
-    else:
-        # Mode 2
-        client_app_attr = args.client_app
-        server_app_attr = args.server_app
-        override_config = {}
-        fused_config = None
-        app_dir = args.app_dir
-        is_app = False
+    override_config = parse_config_args(
+        [args.run_config] if args.run_config else args.run_config
+    )
+    fused_config = get_fused_config_from_dir(app_path, override_config)
 
     # Create run
-    run = Run(
-        run_id=run_id,
-        fab_id="",
-        fab_version="",
-        fab_hash="",
-        override_config=override_config,
-    )
+    run = Run.create_empty(run_id)
+    run.override_config = override_config
 
     _run_simulation(
         server_app_attr=server_app_attr,
@@ -213,19 +132,19 @@ def run_simulation_from_cli() -> None:
         num_supernodes=args.num_supernodes,
         backend_name=args.backend,
         backend_config=backend_config_dict,
-        app_dir=app_dir,
+        app_dir=args.app,
         run=run,
         enable_tf_gpu_growth=args.enable_tf_gpu_growth,
         delay_start=args.delay_start,
         verbose_logging=args.verbose,
         server_app_run_config=fused_config,
-        is_app=is_app,
+        is_app=True,
         exit_event=EventType.CLI_FLOWER_SIMULATION_LEAVE,
     )
 
 
 # Entry point from Python session (script or notebook)
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-positional-arguments
 def run_simulation(
     server_app: ServerApp,
     client_app: ClientApp,
@@ -300,7 +219,7 @@ def run_simulation(
     )
 
 
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-positional-arguments
 def run_serverapp_th(
     server_app_attr: Optional[str],
     server_app: Optional[ServerApp],
@@ -310,6 +229,7 @@ def run_serverapp_th(
     f_stop: threading.Event,
     has_exception: threading.Event,
     enable_tf_gpu_growth: bool,
+    run_id: int,
 ) -> threading.Thread:
     """Run SeverApp in a thread."""
 
@@ -332,11 +252,20 @@ def run_serverapp_th(
                 log(INFO, "Enabling GPU growth for Tensorflow on the server thread.")
                 enable_gpu_growth()
 
+            # Initialize Context
+            context = Context(
+                run_id=run_id,
+                node_id=0,
+                node_config={},
+                state=RecordSet(),
+                run_config=_server_app_run_config,
+            )
+
             # Run ServerApp
-            run_server_app(
+            _run(
                 driver=_driver,
+                context=context,
                 server_app_dir=_server_app_dir,
-                server_app_run_config=_server_app_run_config,
                 server_app_attr=_server_app_attr,
                 loaded_server_app=_server_app,
             )
@@ -369,7 +298,7 @@ def run_serverapp_th(
     return serverapp_th
 
 
-# pylint: disable=too-many-locals
+# pylint: disable=too-many-locals,too-many-positional-arguments
 def _main_loop(
     num_supernodes: int,
     backend_name: str,
@@ -389,7 +318,7 @@ def _main_loop(
 ) -> None:
     """Start ServerApp on a separate thread, then launch Simulation Engine."""
     # Initialize StateFactory
-    state_factory = StateFactory(":flwr-in-memory-state:")
+    state_factory = LinkStateFactory(":flwr-in-memory-state:")
 
     f_stop = threading.Event()
     # A Threading event to indicate if an exception was raised in the ServerApp thread
@@ -399,13 +328,17 @@ def _main_loop(
     try:
         # Register run
         log(DEBUG, "Pre-registering run with id %s", run.run_id)
-        state_factory.state().run_ids[run.run_id] = run  # type: ignore
+        run.status = RunStatus(Status.RUNNING, "", "")
+        run.starting_at = now().isoformat()
+        run.running_at = run.starting_at
+        state_factory.state().run_ids[run.run_id] = RunRecord(run=run)  # type: ignore
 
         if server_app_run_config is None:
             server_app_run_config = {}
 
         # Initialize Driver
-        driver = InMemoryDriver(run_id=run.run_id, state_factory=state_factory)
+        driver = InMemoryDriver(state_factory=state_factory)
+        driver.set_run(run_id=run.run_id)
 
         # Get and run ServerApp thread
         serverapp_th = run_serverapp_th(
@@ -417,6 +350,7 @@ def _main_loop(
             f_stop=f_stop,
             has_exception=server_app_thread_has_exception,
             enable_tf_gpu_growth=enable_tf_gpu_growth,
+            run_id=run.run_id,
         )
 
         # Buffer time so the `ServerApp` in separate thread is ready
@@ -455,7 +389,7 @@ def _main_loop(
     log(DEBUG, "Stopping Simulation Engine now.")
 
 
-# pylint: disable=too-many-arguments,too-many-locals
+# pylint: disable=too-many-arguments,too-many-locals,too-many-positional-arguments
 def _run_simulation(
     num_supernodes: int,
     exit_event: EventType,
@@ -514,9 +448,7 @@ def _run_simulation(
     # If no `Run` object is set, create one
     if run is None:
         run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
-        run = Run(
-            run_id=run_id, fab_id="", fab_version="", fab_hash="", override_config={}
-        )
+        run = Run.create_empty(run_id=run_id)
 
     args = (
         num_supernodes,
@@ -566,19 +498,9 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
     parser.add_argument(
         "--app",
         type=str,
-        default=None,
+        required=True,
         help="Path to a directory containing a FAB-like structure with a "
         "pyproject.toml.",
-    )
-    parser.add_argument(
-        "--server-app",
-        help="(DEPRECATED: use --app instead) For example: `server:app` or "
-        "`project.package.module:wrapper.app`",
-    )
-    parser.add_argument(
-        "--client-app",
-        help="(DEPRECATED: use --app instead) For example: `client:app` or "
-        "`project.package.module:wrapper.app`",
     )
     parser.add_argument(
         "--num-supernodes",
@@ -627,13 +549,6 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         action="store_true",
         help="When unset, only INFO, WARNING and ERROR log messages will be shown. "
         "If set, DEBUG-level logs will be displayed. ",
-    )
-    parser.add_argument(
-        "--app-dir",
-        default="",
-        help="Add specified directory to the PYTHONPATH and load"
-        "ClientApp and ServerApp from there."
-        " Default: current working directory.",
     )
     parser.add_argument(
         "--flwr-dir",

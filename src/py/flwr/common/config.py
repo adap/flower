@@ -22,7 +22,13 @@ from typing import Any, Optional, Union, cast, get_args
 import tomli
 
 from flwr.cli.config_utils import get_fab_config, validate_fields
-from flwr.common.constant import APP_DIR, FAB_CONFIG_FILE, FLWR_HOME
+from flwr.common import ConfigsRecord
+from flwr.common.constant import (
+    APP_DIR,
+    FAB_CONFIG_FILE,
+    FAB_HASH_TRUNCATION,
+    FLWR_HOME,
+)
 from flwr.common.typing import Run, UserConfig, UserConfigValue
 
 
@@ -39,7 +45,10 @@ def get_flwr_dir(provided_path: Optional[str] = None) -> Path:
 
 
 def get_project_dir(
-    fab_id: str, fab_version: str, flwr_dir: Optional[Union[str, Path]] = None
+    fab_id: str,
+    fab_version: str,
+    fab_hash: str,
+    flwr_dir: Optional[Union[str, Path]] = None,
 ) -> Path:
     """Return the project directory based on the given fab_id and fab_version."""
     # Check the fab_id
@@ -50,7 +59,11 @@ def get_project_dir(
     publisher, project_name = fab_id.split("/")
     if flwr_dir is None:
         flwr_dir = get_flwr_dir()
-    return Path(flwr_dir) / APP_DIR / publisher / project_name / fab_version
+    return (
+        Path(flwr_dir)
+        / APP_DIR
+        / f"{publisher}.{project_name}.{fab_version}.{fab_hash[:FAB_HASH_TRUNCATION]}"
+    )
 
 
 def get_project_config(project_dir: Union[str, Path]) -> dict[str, Any]:
@@ -127,7 +140,7 @@ def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> UserConfig:
     if not run.fab_id or not run.fab_version:
         return {}
 
-    project_dir = get_project_dir(run.fab_id, run.fab_version, flwr_dir)
+    project_dir = get_project_dir(run.fab_id, run.fab_version, run.fab_hash, flwr_dir)
 
     # Return empty dict if project directory does not exist
     if not project_dir.is_dir():
@@ -194,6 +207,7 @@ def parse_config_args(
     # Regular expression to capture key-value pairs with possible quoted values
     pattern = re.compile(r"(\S+?)=(\'[^\']*\'|\"[^\"]*\"|\S+)")
 
+    flat_overrides = {}
     for config_line in config:
         if config_line:
             # .toml files aren't allowed alongside other configs
@@ -205,8 +219,9 @@ def parse_config_args(
             matches = pattern.findall(config_line)
             toml_str = "\n".join(f"{k} = {v}" for k, v in matches)
             overrides.update(tomli.loads(toml_str))
+            flat_overrides = flatten_dict(overrides)
 
-    return overrides
+    return flat_overrides
 
 
 def get_metadata_from_config(config: dict[str, Any]) -> tuple[str, str]:
@@ -215,3 +230,12 @@ def get_metadata_from_config(config: dict[str, Any]) -> tuple[str, str]:
         config["project"]["version"],
         f"{config['tool']['flwr']['app']['publisher']}/{config['project']['name']}",
     )
+
+
+def user_config_to_configsrecord(config: UserConfig) -> ConfigsRecord:
+    """Construct a `ConfigsRecord` out of a `UserConfig`."""
+    c_record = ConfigsRecord()
+    for k, v in config.items():
+        c_record[k] = v
+
+    return c_record

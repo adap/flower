@@ -15,100 +15,60 @@
 """Simulation engine executor."""
 
 
-import json
-import subprocess
-import sys
-from logging import ERROR, INFO, WARN
+import hashlib
+from logging import ERROR, INFO
 from typing import Optional
 
 from typing_extensions import override
 
-from flwr.cli.config_utils import load_and_validate
-from flwr.cli.install import install_from_fab
-from flwr.common.config import unflatten_dict
-from flwr.common.constant import RUN_ID_NUM_BYTES
+from flwr.cli.config_utils import get_fab_metadata
+from flwr.common import ConfigsRecord, Context, RecordSet
 from flwr.common.logger import log
-from flwr.common.typing import UserConfig
-from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
+from flwr.common.typing import Fab, UserConfig
+from flwr.server.superlink.ffs import Ffs
+from flwr.server.superlink.ffs.ffs_factory import FfsFactory
+from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 
-from .executor import Executor, RunTracker
-
-
-def _user_config_to_str(user_config: UserConfig) -> str:
-    """Convert override user config to string."""
-    user_config_list_str = []
-    for key, value in user_config.items():
-        if isinstance(value, bool):
-            user_config_list_str.append(f"{key}={str(value).lower()}")
-        elif isinstance(value, (int, float)):
-            user_config_list_str.append(f"{key}={value}")
-        elif isinstance(value, str):
-            user_config_list_str.append(f'{key}="{value}"')
-        else:
-            raise ValueError(
-                "Only types `bool`, `float`, `int` and `str` are supported"
-            )
-
-    user_config_str = ",".join(user_config_list_str)
-    return user_config_str
+from .executor import Executor
 
 
 class SimulationEngine(Executor):
-    """Simulation engine executor.
-
-    Parameters
-    ----------
-    num_supernodes: Opitonal[str] (default: None)
-        Total number of nodes to involve in the simulation.
-    """
+    """Simulation engine executor."""
 
     def __init__(
         self,
-        num_supernodes: Optional[int] = None,
-        verbose: Optional[bool] = False,
     ) -> None:
-        self.num_supernodes = num_supernodes
-        self.verbose = verbose
+        self.linkstate_factory: Optional[LinkStateFactory] = None
+        self.ffs_factory: Optional[FfsFactory] = None
+
+    @override
+    def initialize(
+        self, linkstate_factory: LinkStateFactory, ffs_factory: FfsFactory
+    ) -> None:
+        """Initialize the executor with the necessary factories."""
+        self.linkstate_factory = linkstate_factory
+        self.ffs_factory = ffs_factory
+
+    @property
+    def linkstate(self) -> LinkState:
+        """Return the LinkState."""
+        if self.linkstate_factory is None:
+            raise RuntimeError("Executor is not initialized.")
+        return self.linkstate_factory.state()
+
+    @property
+    def ffs(self) -> Ffs:
+        """Return the Flower File Storage (FFS)."""
+        if self.ffs_factory is None:
+            raise RuntimeError("Executor is not initialized.")
+        return self.ffs_factory.ffs()
 
     @override
     def set_config(
         self,
         config: UserConfig,
     ) -> None:
-        """Set executor config arguments.
-
-        Parameters
-        ----------
-        config : UserConfig
-            A dictionary for configuration values.
-            Supported configuration key/value pairs:
-            - "num-supernodes": int
-                Number of nodes to register for the simulation.
-            - "verbose": bool
-                Set verbosity of logs.
-        """
-        if num_supernodes := config.get("num-supernodes"):
-            if not isinstance(num_supernodes, int):
-                raise ValueError("The `num-supernodes` value should be of type `int`.")
-            self.num_supernodes = num_supernodes
-        elif self.num_supernodes is None:
-            log(
-                ERROR,
-                "To start a run with the simulation plugin, please specify "
-                "the number of SuperNodes. This can be done by using the "
-                "`--executor-config` argument when launching the SuperExec.",
-            )
-            raise ValueError(
-                "`num-supernodes` must not be `None`, it must be a valid "
-                "positive integer."
-            )
-
-        if verbose := config.get("verbose"):
-            if not isinstance(verbose, bool):
-                raise ValueError(
-                    "The `verbose` value must be a string `true` or `false`."
-                )
-            self.verbose = verbose
+        """Set executor config arguments."""
 
     # pylint: disable=too-many-locals
     @override
@@ -116,92 +76,44 @@ class SimulationEngine(Executor):
         self,
         fab_file: bytes,
         override_config: UserConfig,
-        federation_config: UserConfig,
-    ) -> Optional[RunTracker]:
+        federation_options: ConfigsRecord,
+    ) -> Optional[int]:
         """Start run using the Flower Simulation Engine."""
-        if self.num_supernodes is None:
-            raise ValueError(
-                "Error in `SuperExec` (`SimulationEngine` executor):\n\n"
-                "`num-supernodes` must not be `None`, it must be a valid "
-                "positive integer. In order to start this simulation executor "
-                "with a specified number of `SuperNodes`, you can either provide "
-                "a `--executor` that has been initialized with a number of nodes "
-                "to the `flower-superexec` CLI, or `--executor-config num-supernodes=N`"
-                "to the `flower-superexec` CLI."
-            )
         try:
-
-            # Install FAB to flwr dir
-            fab_path = install_from_fab(fab_file, None, True)
-
-            # Install FAB Python package
-            subprocess.run(
-                [sys.executable, "-m", "pip", "install", "--no-deps", str(fab_path)],
-                stdout=None if self.verbose else subprocess.DEVNULL,
-                stderr=None if self.verbose else subprocess.DEVNULL,
-                check=True,
-            )
-
-            # Load and validate config
-            config, errors, warnings = load_and_validate(fab_path / "pyproject.toml")
-            if errors:
-                raise ValueError(errors)
-
-            if warnings:
-                log(WARN, warnings)
-
-            if config is None:
+            # Check that num-supernodes is set
+            if "num-supernodes" not in federation_options:
                 raise ValueError(
-                    "Config extracted from FAB's pyproject.toml is not valid"
+                    "Federation options doesn't contain key `num-supernodes`."
                 )
 
-            # Flatten federated config
-            federation_config_flat = unflatten_dict(federation_config)
+            # Create run
+            fab = Fab(hashlib.sha256(fab_file).hexdigest(), fab_file)
+            fab_hash = self.ffs.put(fab.content, {})
+            if fab_hash != fab.hash_str:
+                raise RuntimeError(
+                    f"FAB ({fab.hash_str}) hash from request doesn't match contents"
+                )
+            fab_id, fab_version = get_fab_metadata(fab.content)
 
-            num_supernodes = federation_config_flat.get(
-                "num-supernodes", self.num_supernodes
+            run_id = self.linkstate.create_run(
+                fab_id, fab_version, fab_hash, override_config, federation_options
             )
-            backend_cfg = federation_config_flat.get("backend", {})
-            verbose: Optional[bool] = federation_config_flat.get("verbose")
 
-            # In Simulation there is no SuperLink, still we create a run_id
-            run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
+            # Create an empty context for the Run
+            context = Context(
+                run_id=run_id,
+                node_id=0,
+                node_config={},
+                state=RecordSet(),
+                run_config={},
+            )
+
+            # Register the context at the LinkState
+            self.linkstate.set_serverapp_context(run_id=run_id, context=context)
+
             log(INFO, "Created run %s", str(run_id))
 
-            # Prepare commnand
-            command = [
-                "flower-simulation",
-                "--app",
-                f"{str(fab_path)}",
-                "--num-supernodes",
-                f"{num_supernodes}",
-                "--run-id",
-                str(run_id),
-            ]
-
-            if backend_cfg:
-                # Stringify as JSON
-                command.extend(["--backend-config", json.dumps(backend_cfg)])
-
-            if verbose:
-                command.extend(["--verbose"])
-
-            if override_config:
-                override_config_str = _user_config_to_str(override_config)
-                command.extend(["--run-config", f"{override_config_str}"])
-
-            # Start Simulation
-            proc = subprocess.Popen(  # pylint: disable=consider-using-with
-                command,
-                text=True,
-            )
-
-            log(INFO, "Started run %s", str(run_id))
-
-            return RunTracker(
-                run_id=run_id,
-                proc=proc,
-            )
+            return run_id
 
         # pylint: disable-next=broad-except
         except Exception as e:

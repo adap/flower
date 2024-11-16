@@ -8,15 +8,17 @@ version = "1.0.0"
 description = ""
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.11.1",
+    "flwr[simulation]>=1.12.0",
     "flwr-datasets>=0.3.0",
+    "torch==2.3.1",
     "trl==0.8.1",
     "bitsandbytes==0.43.0",
     "scipy==1.13.0",
     "peft==0.6.2",
-    "transformers==4.39.3",
+    "transformers==4.43.1",
     "sentencepiece==0.2.0",
     "omegaconf==2.3.0",
+    "hf_transfer==0.1.8",
 ]
 
 [tool.hatch.build.targets.wheel]

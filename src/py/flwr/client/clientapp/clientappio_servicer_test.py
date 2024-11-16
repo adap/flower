@@ -36,7 +36,7 @@ from flwr.proto.clientappio_pb2 import (
 )
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.run_pb2 import Run as ProtoRun
-from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
+from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 
 from .clientappio_servicer import ClientAppInputs, ClientAppIoServicer, ClientAppOutputs
 
@@ -66,6 +66,7 @@ class TestClientAppIoServicer(unittest.TestCase):
             content=self.maker.recordset(2, 2, 1),
         )
         context = Context(
+            run_id=1,
             node_id=1,
             node_config={"nodeconfig1": 4.2},
             state=self.maker.recordset(2, 2, 1),
@@ -77,6 +78,11 @@ class TestClientAppIoServicer(unittest.TestCase):
             fab_version="ipsum",
             fab_hash="dolor",
             override_config=self.maker.user_config(),
+            pending_at="2021-01-01T00:00:00Z",
+            starting_at="",
+            running_at="",
+            finished_at="",
+            status=typing.RunStatus(status="pending", sub_status="", details=""),
         )
         fab = typing.Fab(
             hash_str="abc123#$%",
@@ -122,6 +128,7 @@ class TestClientAppIoServicer(unittest.TestCase):
             content=self.maker.recordset(2, 2, 1),
         )
         context = Context(
+            run_id=1,
             node_id=1,
             node_config={"nodeconfig1": 4.2},
             state=self.maker.recordset(2, 2, 1),
@@ -186,6 +193,7 @@ class TestClientAppIoServicer(unittest.TestCase):
             content=self.maker.recordset(2, 2, 1),
         )
         context = Context(
+            run_id=1,
             node_id=1,
             node_config={"nodeconfig1": 4.2},
             state=self.maker.recordset(2, 2, 1),
