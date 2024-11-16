@@ -59,7 +59,6 @@ def main(cfg: DictConfig):
         # set client function
         client_fn = generate_client_fn_mnist(
             dataset,
-            model=model,
             cfg=cfg
         )
 
@@ -76,13 +75,9 @@ def main(cfg: DictConfig):
         test_dataset = MyDataset(X_test[0, :, :], y_test[:, 0])
         testloader = DataLoader(test_dataset, batch_size=cfg.batch_size, shuffle=False)
 
-        # define model
-        model = LogisticRegression(num_features, num_classes)
-
         # set client function
         client_fn = generate_client_fn_simII(
             dataset,
-            model=model,
             cfg=cfg
         )
 
@@ -98,7 +93,7 @@ def main(cfg: DictConfig):
         strategy = FedHT(
             min_available_clients=cfg.strategy.min_available_clients,
             num_keep=cfg.num_keep,
-            evaluate_fn=get_evaluate_fn(testloader, model, device),
+            evaluate_fn=get_evaluate_fn(testloader, device),
             on_fit_config_fn=fit_round,
             iterht=cfg.iterht,
             initial_parameters=init_params,
@@ -107,7 +102,7 @@ def main(cfg: DictConfig):
         # define strategy: fedavg
         strategy = fl.server.strategy.FedAvg(
             min_available_clients=cfg.strategy.min_available_clients,
-            evaluate_fn=get_evaluate_fn(testloader, model, device),
+            evaluate_fn=get_evaluate_fn(testloader, device),
             on_fit_config_fn=fit_round,
             initial_parameters=init_params,
         )

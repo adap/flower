@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 
 from fedht.model import test, train
 from fedht.utils import MyDataset
-
+from fedht.model import LogisticRegression
 
 # SimII client
 class SimIIClient(NumPyClient):
@@ -71,7 +71,7 @@ class SimIIClient(NumPyClient):
 
 # client fn for input into simulation
 def generate_client_fn_simII(
-    dataset, model, cfg: DictConfig
+    dataset, cfg: DictConfig
 ):
     """Generate client function for simulated FL."""
 
@@ -89,6 +89,9 @@ def generate_client_fn_simII(
         )
         trainloader = DataLoader(train_dataset, batch_size=cfg.batch_size, shuffle=True)
         testloader = DataLoader(test_dataset, batch_size=cfg.batch_size, shuffle=True)
+
+        # define model
+        model = LogisticRegression(cfg.num_features, cfg.num_classes)
 
         return SimIIClient(
             trainloader, testloader, model, num_obs, cfg
@@ -155,7 +158,7 @@ class MnistClient(NumPyClient):
 
 # client fn for input into simulation
 def generate_client_fn_mnist(
-    dataset, model, cfg: DictConfig
+    dataset, cfg: DictConfig
 ):
     """Generate client function for simulated FL."""
 
@@ -175,6 +178,9 @@ def generate_client_fn_mnist(
         )
         trainloader = DataLoader(train_dataset, batch_size=cfg.batch_size, shuffle=True)
         testloader = DataLoader(test_dataset, batch_size=cfg.batch_size, shuffle=True)
+
+        # define model
+        model = LogisticRegression(cfg.num_features, cfg.num_classes)
 
         return MnistClient(
             trainloader, testloader, model, num_obs, cfg
