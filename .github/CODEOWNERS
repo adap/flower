@@ -1,16 +1,16 @@
 # Details: https://help.github.com/en/articles/about-code-owners
 
 # Default code owners
-* @danieljanes @tanertopal
+* @tanertopal @danieljanes
 
 # README.md
 README.md @jafermarq @tanertopal @danieljanes
 
 # Flower Baselines
-/baselines @jafermarq @danieljanes
+/baselines @jafermarq @tanertopal @danieljanes
 
 # Flower Benchmarks
-/benchmarks @jafermarq @danieljanes
+/benchmarks @jafermarq @tanertopal @danieljanes
 
 # Flower Datasets
 /datasets @jafermarq @tanertopal @danieljanes
