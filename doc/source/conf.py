@@ -269,6 +269,7 @@ redirects = {
     "architecture": "explanation-flower-architecture.html",
     "contributor-explanation-architecture.html": "explanation-flower-architecture.html",
     "how-to-configure-logging": "index.html",
+    "how-to-monitor-simulation": "how-to-run-simulations.html",
 }
 
 # -- Options for HTML output -------------------------------------------------
