@@ -28,7 +28,7 @@ Flower Examples Documentation
 -----------------------------
 
 Welcome to Flower Examples' documentation. `Flower <https://flower.ai>`_ is
-a friendly federated learning framework.
+a friendly federated AI framework.
 
 Join the Flower Community
 -------------------------
