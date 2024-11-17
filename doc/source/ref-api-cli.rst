@@ -1,10 +1,13 @@
 Flower CLI reference
 ====================
 
+Basic Commands
+--------------
+
 .. _flwr-apiref:
 
 ``flwr`` CLI
-------------
+~~~~~~~~~~~~
 
 .. click:: flwr.cli.app:typer_click_object
     :prog: flwr
@@ -13,7 +16,7 @@ Flower CLI reference
 .. _flower-superlink-apiref:
 
 ``flower-superlink``
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
 .. argparse::
     :module: flwr.server.app
@@ -23,7 +26,7 @@ Flower CLI reference
 .. _flower-supernode-apiref:
 
 ``flower-supernode``
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
 .. argparse::
     :module: flwr.client.supernode.app
@@ -31,12 +34,12 @@ Flower CLI reference
     :prog: flower-supernode
 
 Advanced Commands
-=================
+-----------------
 
 .. _flwr-serverapp-apiref:
 
 ``flwr-serverapp``
-------------------
+~~~~~~~~~~~~~~~~~~
 
 .. argparse::
     :module: flwr.server.serverapp.app
@@ -46,7 +49,7 @@ Advanced Commands
 .. _flwr-clientapp-apiref:
 
 ``flwr-clientapp``
-------------------
+~~~~~~~~~~~~~~~~~~
 
 .. argparse::
     :module: flwr.client.clientapp.app
@@ -54,12 +57,12 @@ Advanced Commands
     :prog: flwr-clientapp
 
 Technical Commands
-==================
+------------------
 
 .. _flower-simulation-apiref:
 
 ``flower-simulation``
----------------------
+~~~~~~~~~~~~~~~~~~~~~
 
 .. argparse::
     :module: flwr.simulation.run_simulation
@@ -67,12 +70,12 @@ Technical Commands
     :prog: flower-simulation
 
 Deprecated Commands
-===================
+-------------------
 
 .. _flower-server-app-apiref:
 
 ``flower-server-app``
----------------------
+~~~~~~~~~~~~~~~~~~~~~
 
 .. warning::
 
@@ -82,7 +85,7 @@ Deprecated Commands
 .. _flower-superexec-apiref:
 
 ``flower-superexec``
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
 .. warning::
 

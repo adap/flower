@@ -1,4 +1,4 @@
-Design Stateful ClientApps
+Design stateful ClientApps
 ==========================
 
 .. _array: ref-api/flwr.common.Array.html
