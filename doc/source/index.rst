@@ -134,7 +134,7 @@ Information-oriented API reference and other reference material.
     :caption: API reference
     :recursive:
 
-       flwr
+    flwr
 
 .. toctree::
     :maxdepth: 2
