@@ -186,7 +186,6 @@ along the way.
     :maxdepth: 1
     :caption: Contributor references
 
-    fed/index
     contributor-ref-good-first-contributions
     contributor-ref-secure-aggregation-protocols
 
