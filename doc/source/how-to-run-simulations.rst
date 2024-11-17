@@ -329,9 +329,9 @@ FAQ for Simulations
 
     Yes, but bear in mind that each simulation isn't aware of the resource usage of the other. If your simulations make use of GPUs, consider setting the ``CUDA_VISIBLE_DEVICES`` environment variable to make each simulation use a different set of the available GPUs. Export such an environment variable before starting |flwr_run_link|_.
 
-.. dropdown:: Are the CPU/GPU resources set for each ``ClientApp`` enforced?
+.. dropdown:: Do the CPU/GPU resources set for each ``ClientApp`` restrict how much compute/memory these make use of?
 
-    No. They are exclusively used by the simulation backend to control how many workers can be created on startup. Let's say N backend workers are launched, then at most N ``ClientApp`` instances will be running in parallel. It is your responsibility to ensure ``ClientApp`` instances have enough resources to execute their workload (e.g., fine-tune a transformer model).
+    No. These resources are exclusively used by the simulation backend to control how many workers can be created on startup. Let's say N backend workers are launched, then at most N ``ClientApp`` instances will be running in parallel. It is your responsibility to ensure ``ClientApp`` instances have enough resources to execute their workload (e.g., fine-tune a transformer model).
 
 .. dropdown:: My ``ClientApp`` is triggering OOM on my GPU. What should I do?
 
