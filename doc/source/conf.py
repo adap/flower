@@ -268,6 +268,7 @@ redirects = {
     "example-jax-from-centralized-to-federated": "tutorial-quickstart-jax.html",
     "architecture": "explanation-flower-architecture.html",
     "contributor-explanation-architecture.html": "explanation-flower-architecture.html",
+    "how-to-configure-logging": "index.html",
 }
 
 # -- Options for HTML output -------------------------------------------------
