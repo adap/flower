@@ -270,6 +270,9 @@ redirects = {
     "contributor-explanation-architecture.html": "explanation-flower-architecture.html",
     "how-to-configure-logging": "index.html",
     "how-to-monitor-simulation": "how-to-run-simulations.html",
+    "fed/index": "index.html",
+    "fed/0000-20200102-fed-template": "index.html",
+    "fed/0001-20220311-flower-enhancement-doc": "index.html",
 }
 
 # -- Options for HTML output -------------------------------------------------
