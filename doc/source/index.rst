@@ -43,21 +43,9 @@ A learning-oriented series of federated learning tutorials, the best place to st
 
 .. toctree::
     :maxdepth: 1
-    :caption: Quickstart tutorials
     :hidden:
 
-    tutorial-quickstart-pytorch
-    tutorial-quickstart-tensorflow
-    tutorial-quickstart-mlx
-    tutorial-quickstart-huggingface
-    tutorial-quickstart-jax
-    tutorial-quickstart-pandas
-    tutorial-quickstart-fastai
-    tutorial-quickstart-pytorch-lightning
-    tutorial-quickstart-scikitlearn
-    tutorial-quickstart-xgboost
-    tutorial-quickstart-android
-    tutorial-quickstart-ios
+    tutorial-quickstart
 
 QUICKSTART TUTORIALS: :doc:`PyTorch <tutorial-quickstart-pytorch>` | :doc:`TensorFlow
 <tutorial-quickstart-tensorflow>` | :doc:`MLX <tutorial-quickstart-mlx>` | :doc:`🤗
@@ -77,77 +65,41 @@ And TensorFlow:
 .. youtube:: FGTc2TQq7VM
     :width: 80%
 
-How-to guides
-~~~~~~~~~~~~~
-
-Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
+Build Flower apps
+~~~~~~~~~~~~~~~~~
 
 .. toctree::
-    :maxdepth: 1
-    :caption: How-to guides
+    :titlesonly:
 
-    how-to-install-flower
-    how-to-configure-clients
-    how-to-design-stateful-clients
-    how-to-use-strategies
-    how-to-implement-strategies
-    how-to-aggregate-evaluation-results
-    how-to-save-and-load-model-checkpoints
-    how-to-run-simulations
-    how-to-monitor-simulation
-    how-to-configure-logging
-    how-to-enable-ssl-connections
-    how-to-use-built-in-mods
-    how-to-use-differential-privacy
-    how-to-authenticate-supernodes
-    how-to-implement-fedbn
-    docker/index
-    how-to-upgrade-to-flower-1.0
-    how-to-upgrade-to-flower-next
+    build
 
-Explanations
-~~~~~~~~~~~~
-
-Understanding-oriented concept guides explain and discuss key topics and underlying
-ideas behind Flower and collaborative AI.
+Simulate using the Flower Simulation Engine
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. toctree::
-    :maxdepth: 1
-    :caption: Explanations
+    :titlesonly:
 
-    explanation-federated-evaluation
-    explanation-differential-privacy
-    explanation-flower-architecture
+    simulate
 
-References
-~~~~~~~~~~
-
-Information-oriented API reference and other reference material.
-
-.. autosummary::
-    :toctree: ref-api
-    :template: autosummary/module.rst
-    :caption: API reference
-    :recursive:
-
-       flwr
+Deploy using the Flower Deployment Engine
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. toctree::
+    :titlesonly:
+
+    deploy
+
+Reference
+~~~~~~~~~
+
+.. toctree::
+    :titlesonly:
     :maxdepth: 2
 
-    ref-api-cli
+    reference
 
-.. toctree::
-    :maxdepth: 1
-    :caption: Reference docs
-
-    ref-example-projects
-    ref-telemetry
-    ref-changelog
-    ref-faq
-
-Contributor docs
-----------------
+Contribute
+~~~~~~~~~~
 
 The Flower community welcomes contributions. The following docs are intended to help
 along the way.

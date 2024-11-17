@@ -1,6 +1,10 @@
-==========
 Contribute
 ==========
+
+Contributor docs
+----------------
+
+The Flower community welcomes contributions. The following docs are intended to help along the way.
 
 .. toctree::
     :titlesonly:
