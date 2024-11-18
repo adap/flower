@@ -311,6 +311,7 @@ def _wrap_stub(stub: ServerAppIoStub, retry_invoker: RetryInvoker) -> None:
             original_method, *args, **kwargs
         )
 
-    for method_name in stub.__dict__:
+    for method_name in vars(stub):
         method = getattr(stub, method_name)
-        setattr(stub, method_name, make_lambda(method))
+        if callable(method):
+            setattr(stub, method_name, make_lambda(method))
