@@ -85,7 +85,8 @@ dictionaries:
             strategy=strategy,  # <-- pass the custom strategy here
         )
 
+
     # Create ServerApp
     app = ServerApp(
-      server_fn=server_fn,
+        server_fn=server_fn,
     )
