@@ -257,6 +257,12 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
             run_status = RunStatus(Status.FINISHED, SubStatus.FAILED, str(ex))
 
         finally:
+            # Stop log uploader for this run and upload final logs
+            if log_uploader:
+                stop_log_uploader(log_queue, log_uploader)
+                log_uploader = None
+
+            # Update run status
             if run_status:
                 run_status_proto = run_status_to_proto(run_status)
                 conn._stub.UpdateRunStatus(
@@ -264,11 +270,6 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
                         run_id=run.run_id, run_status=run_status_proto
                     )
                 )
-
-            # Stop log uploader for this run
-            if log_uploader:
-                stop_log_uploader(log_queue, log_uploader)
-                log_uploader = None
 
         # Stop the loop if `flwr-simulation` is expected to process a single run
         if run_once:
