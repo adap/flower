@@ -23,9 +23,9 @@ dictionary in Python:
         "optimizer": "sgd",  # str key, str value
     }
 
-Flower serializes these configuration dictionaries (or *config dict* for short)
-to their ProtoBuf representation, transports them to the client using gRPC, and
-then deserializes them back to Python dictionaries.
+Flower serializes these configuration dictionaries (or *config dict* for
+short) to their ProtoBuf representation, transports them to the client using
+gRPC, and then deserializes them back to Python dictionaries.
 
 .. note::
 
@@ -174,8 +174,11 @@ To use this custom strategy:
 Summary of Enhancements
 -----------------------
 
-- **ServerApp Usage**: Allows modular configuration using `server_fn`.
-- **Dynamic Configurations**: Enables per-round adjustments via functions.
-- **Advanced Customization**: Supports client-specific strategies.
-- **Client-Side Integration**: Configurations accessible in `fit` and
-  `evaluate`.
+- **ServerApp Usage**:
+  - Modular server configuration using `server_fn`.
+- **Dynamic Configurations**:
+  - Enables per-round adjustments via functions.
+- **Advanced Customization**:
+  - Supports client-specific strategies.
+- **Client-Side Integration**:
+  - Configurations accessible in `fit` and `evaluate`.
