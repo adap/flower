@@ -256,7 +256,7 @@ Simulation in CLI
   respectively. There is no need to use |startsim_link|_ anymore. Here's an example:
 
 .. code-block:: python
-    :emphasize-lines: 7,11,14
+    :emphasize-lines: 8,13,16
 
     # Regular Flower client implementation
     class FlowerClient(NumPyClient):
