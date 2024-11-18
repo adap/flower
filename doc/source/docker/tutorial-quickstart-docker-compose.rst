@@ -43,7 +43,7 @@ Step 1: Set Up
        $ export PROJECT_DIR=quickstart-compose
 
    Setting the ``PROJECT_DIR`` helps Docker Compose locate the ``pyproject.toml`` file,
-   allowing it to install dependencies in the ClientApp and ServerApp images correctly.
+   allowing it to install dependencies in the ServerApp and ClientApp images correctly.
 
 Step 2: Run Flower in Insecure Mode
 -----------------------------------
