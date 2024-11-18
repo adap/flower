@@ -62,5 +62,5 @@ flwr run . --run-config num-server-rounds=10
 
 ### Run with the Deployment Engine
 
-> \[!NOTE\]
+> [!NOTE]
 > An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.

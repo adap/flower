@@ -6,7 +6,7 @@ framework: [torch, torchvision]
 
 # Federated Learning with PyTorch and Flower (Advanced Example)
 
-> \[!TIP\]
+> [!TIP]
 > This example shows intermediate and advanced functionality of Flower. It you are new to Flower, it is recommended to start from the [quickstart-pytorch](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch) example or the [quickstart PyTorch tutorial](https://flower.ai/docs/framework/tutorial-quickstart-pytorch.html).
 
 This example shows how to extend your `ClientApp` and `ServerApp` capabilities compared to what's shown in the [`quickstart-pytorch`](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch) example. In particular, it will show how the `ClientApp`'s state (and object of type [RecordSet](https://flower.ai/docs/framework/ref-api/flwr.common.RecordSet.html)) can be used to enable stateful clients, facilitating the design of personalized federated learning strategies, among others. The `ServerApp` in this example makes use of a custom strategy derived from the built-in [FedAvg](https://flower.ai/docs/framework/ref-api/flwr.server.strategy.FedAvg.html). In addition, it will also showcase how to:
@@ -30,14 +30,14 @@ advanced-pytorch
 └── README.md
 ```
 
-> \[!NOTE\]
+> [!NOTE]
 > By default this example will log metrics to Weights & Biases. For this, you need to ensure that your system has logged in. Often it's as simple as executing `wandb login` on the terminal after installing `wandb`. Please, refer to this [quickstart guide](https://docs.wandb.ai/quickstart#2-log-in-to-wb) for more information.
 
 This examples uses [Flower Datasets](https://flower.ai/docs/datasets/) with the [Dirichlet Partitioner](https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.DirichletPartitioner.html#flwr_datasets.partitioner.DirichletPartitioner) to partition the [Fashion-MNIST](https://huggingface.co/datasets/zalando-datasets/fashion_mnist) dataset in a non-IID fashion into 50 partitions.
 
 ![](_static/fmnist_50_lda.png)
 
-> \[!TIP\]
+> [!TIP]
 > You can use Flower Datasets [built-in visualization tools](https://flower.ai/docs/datasets/tutorial-visualize-label-distribution.html) to easily generate plots like the one above.
 
 ### Install dependencies and project
@@ -62,7 +62,7 @@ By default, the metrics: {`centralized_accuracy`, `centralized_loss`, `federated
 
 With default parameters, 25% of the total 50 nodes (see `num-supernodes` in `pyproject.toml`) will be sampled for `fit` and 50% for an `evaluate` round. By default `ClientApp` objects will run on CPU.
 
-> \[!TIP\]
+> [!TIP]
 > To run your `ClientApps` on GPU or to adjust the degree or parallelism of your simulation, edit the `[tool.flwr.federations.local-simulation]` section in the `pyproject.tom`.
 
 ```bash
@@ -86,5 +86,5 @@ flwr run . --run-config "num-server-rounds=5 fraction-fit=0.5"
 
 ### Run with the Deployment Engine
 
-> \[!NOTE\]
+> [!NOTE]
 > An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.

@@ -68,5 +68,5 @@ flwr run . --run-config is-demo=false
 
 ### Run with the Deployment Engine
 
-> \[!NOTE\]
+> [!NOTE]
 > An update to this example will show how to run this Flower project with the Deployment Engine and TLS certificates, or with Docker.

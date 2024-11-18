@@ -1151,7 +1151,7 @@ We would like to give our **special thanks** to all the contributors who made Fl
 
 - **New FedAvgM strategy (Federated Averaging with Server Momentum)** ([#1076](https://github.com/adap/flower/pull/1076))
 
-  The new `FedAvgM` strategy implements Federated Averaging with Server Momentum \[Hsu et al., 2019\].
+  The new `FedAvgM` strategy implements Federated Averaging with Server Momentum [Hsu et al., 2019].
 
 - **New advanced PyTorch code example** ([#1007](https://github.com/adap/flower/pull/1007))
 
@@ -1218,7 +1218,7 @@ We would like to give our **special thanks** to all the contributors who made Fl
 
   A new code example (`quickstart_mlcube`) demonstrates usage of MLCube with Flower.
 
-- **SSL-enabled server and client** ([#842](https://github.com/adap/flower/pull/842),  [#844](https://github.com/adap/flower/pull/844),  [#845](https://github.com/adap/flower/pull/845), [#847](https://github.com/adap/flower/pull/847), [#993](https://github.com/adap/flower/pull/993), [#994](https://github.com/adap/flower/pull/994))
+- **SSL-enabled server and client** ([#842](https://github.com/adap/flower/pull/842), [#844](https://github.com/adap/flower/pull/844), [#845](https://github.com/adap/flower/pull/845), [#847](https://github.com/adap/flower/pull/847), [#993](https://github.com/adap/flower/pull/993), [#994](https://github.com/adap/flower/pull/994))
 
   SSL enables secure encrypted connections between clients and servers. This release open-sources the Flower secure gRPC implementation to make encrypted communication channels accessible to all Flower users.
 

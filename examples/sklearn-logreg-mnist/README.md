@@ -58,10 +58,10 @@ You can also override some of the settings for your `ClientApp` and `ServerApp` 
 flwr run . --run-config "num-server-rounds=5 fraction-fit=0.25"
 ```
 
-> \[!TIP\]
+> [!TIP]
 > For a more detailed walk-through check our [quickstart PyTorch tutorial](https://flower.ai/docs/framework/tutorial-quickstart-scikitlearn.html)
 
 ### Run with the Deployment Engine
 
-> \[!NOTE\]
+> [!NOTE]
 > An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.
