@@ -1,5 +1,101 @@
 # Changelog
 
+## Unreleased
+
+### What's new?
+
+- **Introduce `flwr ls` command** ([#4460](https://github.com/adap/flower/pull/4460), [#4459](https://github.com/adap/flower/pull/4459), [#4477](https://github.com/adap/flower/pull/4477))
+
+  The `flwr ls` command is now available with the following usage options:
+
+  - `flwr ls --runs`: Lists all runs.
+  - `flwr ls --run-id <run-id>`: Displays details for a specific run.
+
+  This command provides information including the run ID, FAB ID and version, run status, elapsed time, and timestamps for when the run was created, started running, and finished.
+
+- **Refactor SuperLink to manage ServerApp processes** ([#4358](https://github.com/adap/flower/pull/4358), [#4403](https://github.com/adap/flower/pull/4403), [#4406](https://github.com/adap/flower/pull/4406), [#4357](https://github.com/adap/flower/pull/4357), [#4359](https://github.com/adap/flower/pull/4359), [#4354](https://github.com/adap/flower/pull/4354), [#4229](https://github.com/adap/flower/pull/4229), [#4283](https://github.com/adap/flower/pull/4283), [#4352](https://github.com/adap/flower/pull/4352))
+
+  SuperExec has been integrated into SuperLink, enabling SuperLink to directly manage ServerApp processes (`flwr-serverapp`). The `flwr` CLI now targets SuperLink's Exec API. Additionally, SuperLink introduces two isolation modes for running ServerApps: `subprocess` (default) and `process`, which can be specified using the `--isolation {subprocess,process}` flag.
+
+- **Introduce `flwr-serverapp` command** ([#4394](https://github.com/adap/flower/pull/4394), [#4370](https://github.com/adap/flower/pull/4370), [#4367](https://github.com/adap/flower/pull/4367), [#4350](https://github.com/adap/flower/pull/4350), [#4364](https://github.com/adap/flower/pull/4364), [#4400](https://github.com/adap/flower/pull/4400), [#4363](https://github.com/adap/flower/pull/4363), [#4401](https://github.com/adap/flower/pull/4401), [#4388](https://github.com/adap/flower/pull/4388), [#4402](https://github.com/adap/flower/pull/4402))
+
+  The `flwr-serverapp` command has been introduced as a CLI entry point that runs a `ServerApp` process. This process communicates with SuperLink to load and execute the `ServerApp` object, enabling isolated execution and more flexible deployment.
+
+- **Improve simulation engine and introduce `flwr-simulation` command** ([#4433](https://github.com/adap/flower/pull/4433), [#4486](https://github.com/adap/flower/pull/4486), [#4448](https://github.com/adap/flower/pull/4448), [#4427](https://github.com/adap/flower/pull/4427), [#4438](https://github.com/adap/flower/pull/4438), [#4421](https://github.com/adap/flower/pull/4421), [#4430](https://github.com/adap/flower/pull/4430), [#4462](https://github.com/adap/flower/pull/4462))
+
+  The simulation engine has been significantly improved, resulting in dramatically faster simulations. Additionally, the `flwr-simulation` command has been introduced to enhance maintainability and provide a dedicated entry point for running simulations.
+
+- **Improve SuperLink message management** ([#4378](https://github.com/adap/flower/pull/4378), [#4369](https://github.com/adap/flower/pull/4369))
+
+  SuperLink now validates the destination node ID of instruction messages and checks the TTL (time-to-live) for reply messages. When pulling reply messages, an error reply will be generated and returned if the corresponding instruction message does not exist, has expired, or if the reply message exists but has expired.
+
+- **Introduce FedDebug baseline** ([#3783](https://github.com/adap/flower/pull/3783))
+
+  FedDebug is a framework that enhances debugging in Federated Learning by enabling interactive inspection of the training process and automatically identifying clients responsible for degrading the global model's performance—all without requiring testing data or labels.
+  Read all the details in the [paper](https://ieeexplore.ieee.org/abstract/document/10172839).
+
+- **Update documentation** ([#4511](https://github.com/adap/flower/pull/4511), [#4010](https://github.com/adap/flower/pull/4010), [#4396](https://github.com/adap/flower/pull/4396), [#4499](https://github.com/adap/flower/pull/4499), [#4269](https://github.com/adap/flower/pull/4269), [#3340](https://github.com/adap/flower/pull/3340), [#4482](https://github.com/adap/flower/pull/4482), [#4387](https://github.com/adap/flower/pull/4387), [#4342](https://github.com/adap/flower/pull/4342), [#4492](https://github.com/adap/flower/pull/4492), [#4474](https://github.com/adap/flower/pull/4474), [#4500](https://github.com/adap/flower/pull/4500), [#4514](https://github.com/adap/flower/pull/4514), [#4236](https://github.com/adap/flower/pull/4236), [#4112](https://github.com/adap/flower/pull/4112), [#3367](https://github.com/adap/flower/pull/3367), [#4501](https://github.com/adap/flower/pull/4501), [#4373](https://github.com/adap/flower/pull/4373), [#4409](https://github.com/adap/flower/pull/4409), [#4356](https://github.com/adap/flower/pull/4356), [#4520](https://github.com/adap/flower/pull/4520), [#4524](https://github.com/adap/flower/pull/4524), [#4525](https://github.com/adap/flower/pull/4525), [#4526](https://github.com/adap/flower/pull/4526), [#4527](https://github.com/adap/flower/pull/4527))
+
+  Multiple documentation pages and tutorials have been updated to improve clarity, fix typos, and incorporate user feedback. Key updates include adding a guide for designing stateful `ClientApp` objects, updating the XGBoost, scikit-learn, and JAX quickstart tutorials to use `flwr run`, updating DP guide, removing outdated pages, updating Docker READMEs, marking legacy functions as deprecated, and etc.
+
+- **Update examples** ([#4510](https://github.com/adap/flower/pull/4510), [#4368](https://github.com/adap/flower/pull/4368), [#4121](https://github.com/adap/flower/pull/4121), [#4329](https://github.com/adap/flower/pull/4329), [#4382](https://github.com/adap/flower/pull/4382), [#4248](https://github.com/adap/flower/pull/4248), [#4395](https://github.com/adap/flower/pull/4395), [#4386](https://github.com/adap/flower/pull/4386))
+
+  Multiple examples have been updated for improved usability and correctness. Updates include the `30-minute-tutorial`, `quickstart-jax`, `quickstart-pytorch`, and `advanced-tensorflow` examples.
+
+- **Improve Docker support** ([#4506](https://github.com/adap/flower/pull/4506), [#4424](https://github.com/adap/flower/pull/4424), [#4224](https://github.com/adap/flower/pull/4224), [#4413](https://github.com/adap/flower/pull/4413), [#4414](https://github.com/adap/flower/pull/4414), [#4336](https://github.com/adap/flower/pull/4336))
+
+  Docker images and configurations have been updated, including updating Docker Compose files to version 1.13.0, refactoring the Docker build matrix for better maintainability, updating `docker/build-push-action` to v6.9.0, and improving Docker documentation.
+
+- **Allow app installation without internet access** ([#4479](https://github.com/adap/flower/pull/4479), [#4475](https://github.com/adap/flower/pull/4475))
+
+  The `flwr build` command now includes a wheel file in the FAB, enabling Flower app installation in environments without internet access via `flwr install`.
+
+- **Improve `flwr log` command** ([#4391](https://github.com/adap/flower/pull/4391), [#4411](https://github.com/adap/flower/pull/4411), [#4390](https://github.com/adap/flower/pull/4390), [#4397](https://github.com/adap/flower/pull/4397))
+
+- **Refactor SuperNode for better maintainability and efficiency** ([#4439](https://github.com/adap/flower/pull/4439), [#4348](https://github.com/adap/flower/pull/4348), [#4512](https://github.com/adap/flower/pull/4512), [#4485](https://github.com/adap/flower/pull/4485))
+
+- **Add secure connection to `flwr-clientapp`** ([#4481](https://github.com/adap/flower/pull/4481))
+
+- **Support NumPy `2.0`** ([#4440](https://github.com/adap/flower/pull/4440))
+
+- **Update infrastructure and CI/CD** ([#4466](https://github.com/adap/flower/pull/4466), [#4419](https://github.com/adap/flower/pull/4419), [#4338](https://github.com/adap/flower/pull/4338), [#4334](https://github.com/adap/flower/pull/4334), [#4456](https://github.com/adap/flower/pull/4456), [#4446](https://github.com/adap/flower/pull/4446), [#4415](https://github.com/adap/flower/pull/4415))
+
+- **Bugfixes** ([#4404](https://github.com/adap/flower/pull/4404), [#4518](https://github.com/adap/flower/pull/4518), [#4452](https://github.com/adap/flower/pull/4452), [#4376](https://github.com/adap/flower/pull/4376), [#4493](https://github.com/adap/flower/pull/4493), [#4436](https://github.com/adap/flower/pull/4436), [#4410](https://github.com/adap/flower/pull/4410), [#4442](https://github.com/adap/flower/pull/4442), [#4375](https://github.com/adap/flower/pull/4375), [#4515](https://github.com/adap/flower/pull/4515))
+
+- **General improvements** ([#4454](https://github.com/adap/flower/pull/4454), [#4365](https://github.com/adap/flower/pull/4365), [#4423](https://github.com/adap/flower/pull/4423), [#4516](https://github.com/adap/flower/pull/4516), [#4509](https://github.com/adap/flower/pull/4509), [#4498](https://github.com/adap/flower/pull/4498), [#4371](https://github.com/adap/flower/pull/4371), [#4449](https://github.com/adap/flower/pull/4449), [#4488](https://github.com/adap/flower/pull/4488), [#4478](https://github.com/adap/flower/pull/4478), [#4392](https://github.com/adap/flower/pull/4392), [#4483](https://github.com/adap/flower/pull/4483), [#4517](https://github.com/adap/flower/pull/4517), [#4330](https://github.com/adap/flower/pull/4330), [#4458](https://github.com/adap/flower/pull/4458), [#4347](https://github.com/adap/flower/pull/4347), [#4429](https://github.com/adap/flower/pull/4429), [#4463](https://github.com/adap/flower/pull/4463), [#4496](https://github.com/adap/flower/pull/4496), [#4508](https://github.com/adap/flower/pull/4508), [#4444](https://github.com/adap/flower/pull/4444), [#4417](https://github.com/adap/flower/pull/4417), [#4504](https://github.com/adap/flower/pull/4504), [#4418](https://github.com/adap/flower/pull/4418), [#4480](https://github.com/adap/flower/pull/4480), [#4455](https://github.com/adap/flower/pull/4455), [#4468](https://github.com/adap/flower/pull/4468), [#4385](https://github.com/adap/flower/pull/4385), [#4487](https://github.com/adap/flower/pull/4487), [#4393](https://github.com/adap/flower/pull/4393), [#4489](https://github.com/adap/flower/pull/4489), [#4389](https://github.com/adap/flower/pull/4389), [#4507](https://github.com/adap/flower/pull/4507), [#4469](https://github.com/adap/flower/pull/4469), [#4340](https://github.com/adap/flower/pull/4340), [#4353](https://github.com/adap/flower/pull/4353), [#4494](https://github.com/adap/flower/pull/4494), [#4461](https://github.com/adap/flower/pull/4461), [#4362](https://github.com/adap/flower/pull/4362), [#4473](https://github.com/adap/flower/pull/4473), [#4405](https://github.com/adap/flower/pull/4405))
+
+  As always, many parts of the Flower framework and quality infrastructure were improved and updated.
+
+### Deprecations
+
+- **Deprecate Python 3.9**
+
+  Flower is deprecating support for Python 3.9 as several of its dependencies are phasing out compatibility with this version. While no immediate changes have been made, users are encouraged to plan for upgrading to a supported Python version.
+
+### Incompatible changes
+
+- **Remove `flower-server-app` command** ([#4490](https://github.com/adap/flower/pull/4490))
+
+  The `flower-server-app` command has been removed. To start a Flower app, please use the `flwr run` command instead.
+
+- **Remove app support for `flower-supernode` command** ([#4497](https://github.com/adap/flower/pull/4497))
+
+  The usage of `flower-supernode <app-dir>` has been removed. SuperNode will now load the FAB delivered by SuperLink, and it is no longer possible to directly specify an app directory.
+
+- **Remove support for non-app simulations** ([#4431](https://github.com/adap/flower/pull/4431))
+
+  The simulation engine (via `flower-simulation`) now exclusively supports passing an app.
+
+- **Rename CLI arguments for `flower-superlink` command** ([#4412](https://github.com/adap/flower/pull/4412))
+
+  The `--driver-api-address` argument has been renamed to `--serverappio-api-address` in the `flower-superlink` command to reflect the renaming of the `Driver` service to the `ServerAppIo` service.
+
+- **Rename CLI arguments for `flwr-serverapp` and `flwr-clientapp` commands** ([#4495](https://github.com/adap/flower/pull/4495))
+
+  The CLI arguments have been renamed for clarity and consistency. Specifically, `--superlink` for `flwr-serverapp` is now `--serverappio-api-address`, and `--supernode` for `flwr-clientapp` is now `--clientappio-api-address`.
+
+- **Drop support for Python 3.8 in Flower Datasets** ([#4341](https://github.com/adap/flower/pull/4341))
+
 ## v1.12.0 (2024-10-14)
 
 ### Thanks to our contributors
