@@ -267,7 +267,9 @@ redirects = {
     "contributor-how-to-create-new-messages": "index.html",
     "example-jax-from-centralized-to-federated": "tutorial-quickstart-jax.html",
     "architecture": "explanation-flower-architecture.html",
-    "contributor-explanation-architecture.html": "explanation-flower-architecture.html",
+    "contributor-explanation-architecture": "explanation-flower-architecture.html",
+    "example-pytorch-from-centralized-to-federated": "tutorial-quickstart-pytorch.html",
+    "example-fedbn-pytorch-from-centralized-to-federated": "how-to-implement-fedbn.html",
 }
 
 # -- Options for HTML output -------------------------------------------------
