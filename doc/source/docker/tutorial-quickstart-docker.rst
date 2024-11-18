@@ -79,7 +79,8 @@ Open your terminal and run:
     * | ``--insecure``: This flag tells the container to operate in an insecure mode, allowing
       | unencrypted communication.
     * | ``--isolation process``: Tells the SuperLink that the ServerApp is created by separate
-      | independent process. The SuperLink does not attempt to create it.
+      | independent process. The SuperLink does not attempt to create it. You can learn more about
+      | the different process modes here: :doc:`run-as-subprocess`.
 
 Step 3: Start the SuperNodes
 ----------------------------
