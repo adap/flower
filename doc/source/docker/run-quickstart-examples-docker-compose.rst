@@ -122,4 +122,4 @@ Limitations
     - - quickstart-tabnet
       - The example has not yet been updated to work with the latest ``flwr`` version.
     - - quickstart-tensorflow
-      - Only runs on AMD64.
+      - None
