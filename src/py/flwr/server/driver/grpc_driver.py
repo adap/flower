@@ -23,7 +23,7 @@ from typing import Any, Optional, cast
 import grpc
 
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
-from flwr.common.constant import SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS
+from flwr.common.constant import MAX_RETRY_DELAY, SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
@@ -292,7 +292,7 @@ def _make_simple_grpc_retry_invoker() -> RetryInvoker:
             )
 
     return RetryInvoker(
-        wait_gen_factory=lambda: exponential(max_delay=20),
+        wait_gen_factory=lambda: exponential(max_delay=MAX_RETRY_DELAY),
         recoverable_exceptions=grpc.RpcError,
         max_tries=None,
         max_time=None,
