@@ -25,7 +25,7 @@ Refer to the [How to Run Simulations Guide](https://flower.ai/docs/framework/how
 ## Resources
 
 - Check the Flower website -> [flower.ai](https://flower.ai/)
-- Check the documentation -> https://flower.ai/docs/
-- Check the Flower GitHub repo -> https://github.com/adap/flower
-- Join the Community! -> https://flower.ai/join-slack/
-- Get your questions answered! -> https://discuss.flower.dev/
+- Check the documentation -> [flower.ai/docs](https://flower.ai/docs/)
+- Check the Flower GitHub repo -> [Flower GitHub](https://github.com/adap/flower), give us a ⭐️!!
+- Join the Community! -> [Flower Slack](https://flower.ai/join-slack/)
+- Get your questions answered! -> [Flower Discuss](https://discuss.flower.dev/)
