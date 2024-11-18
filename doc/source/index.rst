@@ -94,8 +94,6 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
     how-to-aggregate-evaluation-results
     how-to-save-and-load-model-checkpoints
     how-to-run-simulations
-    how-to-monitor-simulation
-    how-to-configure-logging
     how-to-enable-ssl-connections
     how-to-use-built-in-mods
     how-to-use-differential-privacy
@@ -130,7 +128,7 @@ Information-oriented API reference and other reference material.
     :caption: API reference
     :recursive:
 
-       flwr
+    flwr
 
 .. toctree::
     :maxdepth: 2
@@ -181,7 +179,6 @@ along the way.
     :maxdepth: 1
     :caption: Contributor references
 
-    fed/index
     contributor-ref-good-first-contributions
     contributor-ref-secure-aggregation-protocols
 
