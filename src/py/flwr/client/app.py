@@ -41,6 +41,7 @@ from flwr.common.constant import (
     CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
+    MAX_RETRY_DELAY,
     MISSING_EXTRA_REST,
     RUN_ID_NUM_BYTES,
     SERVER_OCTET,
@@ -373,7 +374,7 @@ def start_client_internal(
             )
 
     retry_invoker = RetryInvoker(
-        wait_gen_factory=exponential,
+        wait_gen_factory=lambda: exponential(max_delay=MAX_RETRY_DELAY),
         recoverable_exceptions=connection_error_type,
         max_tries=max_retries + 1 if max_retries is not None else None,
         max_time=max_wait_time,

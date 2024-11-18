@@ -9031,7 +9031,7 @@ msgstr "플라워 프레임워크 문서"
 #: ../../source/index.rst:7
 msgid ""
 "Welcome to Flower's documentation. `Flower <https://flower.ai>`_ is a "
-"friendly federated learning framework."
+"friendly federated AI framework."
 msgstr "Flower 문서에 오신 것을 환영합니다. Flower <https://flower.ai>`_는 편한 연합 학습 프레임워크입니다."
 
 #: ../../source/index.rst:11
