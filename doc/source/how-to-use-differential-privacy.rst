@@ -50,7 +50,7 @@ the corresponding input parameters.
     from flwr.server.strategy import DifferentialPrivacyClientSideFixedClipping
 
     # Create the strategy
-    strategy = fl.server.strategy.FedAvg(...)
+    strategy = flwr.server.strategy.FedAvg(...)
 
     # Wrap the strategy with the DifferentialPrivacyServerSideFixedClipping wrapper
     dp_strategy = DifferentialPrivacyServerSideFixedClipping(
@@ -102,7 +102,7 @@ the matching ``fixedclipping_mod`` to perform the client-side clipping:
     from flwr.client.mod import fixedclipping_mod
 
     # Add fixedclipping_mod to the client-side mods
-    app = fl.client.ClientApp(
+    app = flwr.client.ClientApp(
         client_fn=client_fn,
         mods=[
             fixedclipping_mod,
@@ -132,7 +132,7 @@ Below is a code example that shows how to use ``LocalDpMod``:
     local_dp_obj = LocalDpMod(cfg.clipping_norm, cfg.sensitivity, cfg.epsilon, cfg.delta)
     # Add local_dp_obj to the client-side mods
 
-    app = fl.client.ClientApp(
+    app = flwr.client.ClientApp(
         client_fn=client_fn,
         mods=[local_dp_obj],
     )
@@ -148,4 +148,4 @@ For ensuring data instance-level privacy during local model training on the clie
 consider leveraging privacy engines such as Opacus and TensorFlow Privacy. For examples
 of using Flower with these engines, please refer to the Flower examples directory
 (`Opacus <https://github.com/adap/flower/tree/main/examples/opacus>`_, `Tensorflow
-Privacy <https://github.com/adap/flower/tree/main/examples/dp-sgd-mnist>`_).
+Privacy <https://github.com/adap/flower/tree/main/examples/tensorflow-privacy>`_).
