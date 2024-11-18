@@ -16,7 +16,8 @@ current global model parameters as input and return evaluation results:
 
 .. code-block:: python
 
-    from flwr.common import NDArrays, Scalar
+    from flwr.common import Context, NDArrays, Scalar
+    from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 
     from typing import Dict, Optional, Tuple
 
@@ -41,21 +42,28 @@ current global model parameters as input and return evaluation results:
         return evaluate
 
 
-    # Load and compile model for server-side parameter evaluation
-    model = tf.keras.applications.EfficientNetB0(
-        input_shape=(32, 32, 3), weights=None, classes=10
-    )
-    model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
+    def server_fn(context: Context):
+        # Read from config
+        num_rounds = context.run_config["num-server-rounds"]
+
+        # Load and compile model for server-side parameter evaluation
+        model = tf.keras.applications.EfficientNetB0(
+            input_shape=(32, 32, 3), weights=None, classes=10
+        )
+        model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
+
+        # Create strategy
+        strategy = fl.server.strategy.FedAvg(
+            # ... other FedAvg arguments
+            evaluate_fn=get_evaluate_fn(model),
+        )
+        config = ServerConfig(num_rounds=num_rounds)
+
+        return ServerAppComponents(strategy=strategy, config=config)
 
 
-    # Create strategy
-    strategy = fl.server.strategy.FedAvg(
-        # ... other FedAvg arguments
-        evaluate_fn=get_evaluate_fn(model),
-    )
-
-    # Start Flower server for four rounds of federated learning
-    fl.server.start_server(server_address="[::]:8080", strategy=strategy)
+    # Create ServerApp
+    app = ServerApp(server_fn=server_fn)
 
 Custom Strategies
 ~~~~~~~~~~~~~~~~~
@@ -76,7 +84,10 @@ from the server side.
 
 .. code-block:: python
 
-    class CifarClient(fl.client.NumPyClient):
+    from flwr.client import NumPyClient
+
+
+    class CifarClient(NumPyClient):
         def __init__(self, model, x_train, y_train, x_test, y_test):
             self.model = model
             self.x_train, self.y_train = x_train, y_train
@@ -131,6 +142,10 @@ the following arguments:
 
 .. code-block:: python
 
+    from flwr.common import Context
+    from flwr.server import ServerApp, ServerAppComponents, ServerConfig
+
+
     def evaluate_config(server_round: int):
         """Return evaluation configuration dict for each round.
         Perform five local evaluation steps on each client (i.e., use five
@@ -150,8 +165,15 @@ the following arguments:
         on_evaluate_config_fn=evaluate_config,
     )
 
-    # Start Flower server for four rounds of federated learning
-    fl.server.start_server(server_address="[::]:8080", strategy=strategy)
+
+    def server_fn(context: Context):
+        num_rounds = context.run_config["num-server-rounds"]
+        config = ServerConfig(num_rounds=num_rounds)
+        return ServerAppComponents(strategy=strategy, config=config)
+
+
+    # Create ServerApp
+    app = ServerApp(server_fn=server_fn)
 
 Evaluating Local Model Updates During Training
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -161,7 +183,10 @@ arbitrary evaluation results as a dictionary:
 
 .. code-block:: python
 
-    class CifarClient(fl.client.NumPyClient):
+    from flwr.client import NumPyClient
+
+
+    class CifarClient(NumPyClient):
         def __init__(self, model, x_train, y_train, x_test, y_test):
             self.model = model
             self.x_train, self.y_train = x_train, y_train
