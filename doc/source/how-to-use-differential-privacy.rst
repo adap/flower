@@ -47,10 +47,10 @@ the corresponding input parameters.
 
 .. code-block:: python
 
-    from flwr.server.strategy import DifferentialPrivacyClientSideFixedClipping
+    from flwr.server.strategy import DifferentialPrivacyClientSideFixedClipping, FedAvg
 
     # Create the strategy
-    strategy = flwr.server.strategy.FedAvg(...)
+    strategy = FedAvg(...)
 
     # Wrap the strategy with the DifferentialPrivacyServerSideFixedClipping wrapper
     dp_strategy = DifferentialPrivacyServerSideFixedClipping(
@@ -81,10 +81,10 @@ wrapper class and, on the client, ``fixedclipping_mod``:
 
 .. code-block:: python
 
-    from flwr.server.strategy import DifferentialPrivacyClientSideFixedClipping
+    from flwr.server.strategy import DifferentialPrivacyClientSideFixedClipping, FedAvg
 
     # Create the strategy
-    strategy = fl.server.strategy.FedAvg(...)
+    strategy = FedAvg(...)
 
     # Wrap the strategy with the DifferentialPrivacyClientSideFixedClipping wrapper
     dp_strategy = DifferentialPrivacyClientSideFixedClipping(
@@ -99,10 +99,11 @@ the matching ``fixedclipping_mod`` to perform the client-side clipping:
 
 .. code-block:: python
 
+    from flwr.client import ClientApp
     from flwr.client.mod import fixedclipping_mod
 
     # Add fixedclipping_mod to the client-side mods
-    app = flwr.client.ClientApp(
+    app = ClientApp(
         client_fn=client_fn,
         mods=[
             fixedclipping_mod,
@@ -126,15 +127,18 @@ Below is a code example that shows how to use ``LocalDpMod``:
 
 .. code-block:: python
 
-    from flwr.client.mod.localdp_mod import LocalDpMod
+    from flwr.client import ClientApp
+    from flwr.client.mod import LocalDpMod
 
     # Create an instance of the mod with the required params
     local_dp_obj = LocalDpMod(cfg.clipping_norm, cfg.sensitivity, cfg.epsilon, cfg.delta)
-    # Add local_dp_obj to the client-side mods
 
-    app = flwr.client.ClientApp(
+    # Add local_dp_obj to the client-side mods
+    app = ClientApp(
         client_fn=client_fn,
-        mods=[local_dp_obj],
+        mods=[
+            local_dp_obj,
+        ],
     )
 
 Please note that the order of mods, especially those that modify parameters, is
