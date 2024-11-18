@@ -1,17 +1,17 @@
-Configure clients
+Configure Clients
 =================
 
-Along with model parameters, Flower can send configuration values to clients.
-Configuration values can be used for various purposes. They are, for example, a popular
-way to control client-side hyperparameters from the server.
+Flower provides the ability to send configuration values to clients, allowing 
+server-side control over client behavior. This feature enables flexible and 
+dynamic adjustment of client-side hyperparameters, improving collaboration 
+and experimentation.
 
 Configuration values
 --------------------
 
 Configuration values are represented as a dictionary with ``str`` keys and values of
-type ``bool``, ``bytes``, ``double`` (64-bit precision float), ``int``, or ``str`` (or
-equivalent types in different languages). Here is an example of a configuration
-dictionary in Python:
+type ``bool``, ``bytes``, ``float``, ``int``, or ``str`` (or equivalent types in 
+different languages). Here is an example of a configuration dictionary in Python:
 
 .. code-block:: python
 
@@ -22,122 +22,160 @@ dictionary in Python:
         "optimizer": "sgd",  # str key, str value
     }
 
-Flower serializes these configuration dictionaries (or *config dict* for short) to their
-ProtoBuf representation, transports them to the client using gRPC, and then deserializes
-them back to Python dictionaries.
+Flower serializes these configuration dictionaries (or *config dict* for short) to 
+their ProtoBuf representation, transports them to the client using gRPC, and then 
+deserializes them back to Python dictionaries.
 
 .. note::
 
-    Currently, there is no support for directly sending collection types (e.g., ``Set``,
-    ``List``, ``Map``) as values in configuration dictionaries. There are several
-    workarounds to send collections as values by converting them to one of the supported
-    value types (and converting them back on the client-side).
+    Currently, there is no support for directly sending collection types (e.g., 
+    ``Set``, ``List``, ``Map``) as values in configuration dictionaries. To send 
+    collections, convert them to a supported type (e.g., JSON string) and decode 
+    on the client side.
 
-    One can, for example, convert a list of floating-point numbers to a JSON string,
-    then send the JSON string using the configuration dictionary, and then convert the
-    JSON string back to a list of floating-point numbers on the client.
+    Example:
 
-Configuration through built-in strategies
------------------------------------------
+    .. code-block:: python
 
-The easiest way to send configuration values to clients is to use a built-in strategy
-like ``FedAvg``. Built-in strategies support so-called configuration functions. A
-configuration function is a function that the built-in strategy calls to get the
-configuration dictionary for the current round. It then forwards the configuration
-dictionary to all the clients selected during that round.
+        import json
 
-Let's start with a simple example. Imagine we want to send (a) the batch size that the
-client should use, (b) the current global round of federated learning, and (c) the
-number of epochs to train on the client-side. Our configuration function could look like
-this:
+        # On the server
+        config_dict = {"data_splits": json.dumps([0.8, 0.1, 0.1])}
+
+        # On the client
+        data_splits = json.loads(config["data_splits"])
+
+Using Built-in Strategies for Configuration
+-------------------------------------------
+
+Flower supports configuration functions to dynamically adjust parameters sent to 
+clients. Built-in strategies like ``FedAvg`` allow for setting configuration 
+values for each round via a function.
+
+Example: Sending Training Configurations
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Imagine we want to send (a) the batch size, (b) the current global round, and (c) 
+the number of local epochs. Our configuration function could look like this:
 
 .. code-block:: python
 
     def fit_config(server_round: int):
-        """Return training configuration dict for each round."""
-        config = {
+        """Generate training configuration for each round."""
+        return {
             "batch_size": 32,
             "current_round": server_round,
             "local_epochs": 2,
         }
-        return config
 
-To make the built-in strategies use this function, we can pass it to ``FedAvg`` during
-initialization using the parameter ``on_fit_config_fn``:
+To use this function with a built-in strategy like ``FedAvg``, pass it during 
+initialization:
 
 .. code-block:: python
 
     strategy = FedAvg(
-        ...,  # Other FedAvg parameters
-        on_fit_config_fn=fit_config,  # The fit_config function we defined earlier
+        on_fit_config_fn=fit_config  # Assign the configuration function
     )
 
-One the client side, we receive the configuration dictionary in ``fit``:
+With the latest version of Flower, you no longer use `fl.server.start_server`. 
+Instead, the server is defined as a `ServerApp`:
+
+.. code-block:: python
+
+    from flwr.server import ServerApp, ServerAppComponents
+    from flwr.server.strategy import FedAvg
+
+    def server_fn(context):
+        """Define server behavior."""
+        strategy = FedAvg(
+            on_fit_config_fn=fit_config,
+            # Additional parameters...
+        )
+        return ServerAppComponents(strategy=strategy)
+
+    app = ServerApp(server_fn=server_fn)
+
+Client-Side Configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+On the client side, configurations are received as input to the `fit` and `evaluate` 
+methods. For example:
 
 .. code-block:: python
 
     class FlowerClient(flwr.client.NumPyClient):
-        def fit(parameters, config):
-            print(config["batch_size"])  # Prints `32`
-            print(config["current_round"])  # Prints `1`/`2`/`...`
-            print(config["local_epochs"])  # Prints `2`
-            # ... (rest of `fit` method)
+        def fit(self, parameters, config):
+            print(config["batch_size"])  # Output: 32
+            print(config["current_round"])  # Output: current round number
+            print(config["local_epochs"])  # Output: 2
+            # Training logic here
 
-There is also an `on_evaluate_config_fn` to configure evaluation, which works the same
-way. They are separate functions because one might want to send different configuration
-values to `evaluate` (for example, to use a different batch size).
+        def evaluate(self, parameters, config):
+            # Handle evaluation configurations if needed
+            pass
 
-The built-in strategies call this function every round (that is, every time
-`Strategy.configure_fit` or `Strategy.configure_evaluate` runs). Calling
-`on_evaluate_config_fn` every round allows us to vary/change the config dict over
-consecutive rounds. If we wanted to implement a hyperparameter schedule, for example, to
-increase the number of local epochs during later rounds, we could do the following:
+Dynamic Configurations per Round
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Configuration functions are called at the beginning of every round. This allows for 
+dynamic adjustments based on progress. For example, increasing the number of local 
+epochs in later rounds:
 
 .. code-block:: python
 
     def fit_config(server_round: int):
-        """Return training configuration dict for each round."""
-        config = {
+        """Dynamic configuration for training."""
+        return {
             "batch_size": 32,
             "current_round": server_round,
-            "local_epochs": 1 if server_round < 2 else 2,
+            "local_epochs": 1 if server_round < 3 else 2,
         }
-        return config
 
-The ``FedAvg`` strategy will call this function *every round*.
+Customizing Client Configurations
+---------------------------------
 
-Configuring individual clients
-------------------------------
+In some cases, it may be necessary to send different configurations to individual 
+clients. To achieve this, you can create a custom strategy by extending a built-in 
+one, such as ``FedAvg``:
 
-In some cases, it is necessary to send different configuration values to different
-clients.
-
-This can be achieved by customizing an existing strategy or by :doc:`implementing a
-custom strategy from scratch <how-to-implement-strategies>`. Here's a nonsensical
-example that customizes ``FedAvg`` by adding a custom ``"hello": "world"`` configuration
-key/value pair to the config dict of a *single client* (only the first client in the
-list, the other clients in this round to not receive this "special" config value):
+Example: Client-Specific Configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
 
-    class CustomClientConfigStrategy(fl.server.strategy.FedAvg):
-        def configure_fit(
-            self, server_round: int, parameters: Parameters, client_manager: ClientManager
-        ) -> List[Tuple[ClientProxy, FitIns]]:
+    from flwr.server.strategy import FedAvg
+
+    class CustomClientConfigStrategy(FedAvg):
+        def configure_fit(self, server_round, parameters, client_manager):
             client_instructions = super().configure_fit(
                 server_round, parameters, client_manager
             )
 
-            # Add special "hello": "world" config key/value pair,
-            # but only to the first client in the list
-            _, fit_ins = client_instructions[0]  # First (ClientProxy, FitIns) pair
-            fit_ins.config["hello"] = "world"  # Change config for this client only
+            # Modify configuration for a specific client
+            client_proxy, fit_ins = client_instructions[0]
+            fit_ins.config["special_key"] = "special_value"
 
             return client_instructions
 
+To use this custom strategy:
 
-    # Create strategy and run server
-    strategy = CustomClientConfigStrategy(
-        # ... (same arguments as plain FedAvg here)
-    )
-    fl.server.start_server(strategy=strategy)
+.. code-block:: python
+
+    def server_fn(context):
+        strategy = CustomClientConfigStrategy(
+            # Other FedAvg parameters
+        )
+        return ServerAppComponents(strategy=strategy)
+
+    app = ServerApp(server_fn=server_fn)
+
+Summary of Enhancements
+-----------------------
+
+- **ServerApp Usage**: Modular server configuration using `server_fn`.
+- **Dynamic Configurations**: Adjust settings per round via configuration functions.
+- **Advanced Customization**: Create custom strategies for per-client configuration.
+- **Seamless Client-Side Integration**: Use configurations directly in `fit` and `evaluate`.
+
+Flower 1.13 builds on the flexibility of previous versions, introducing modularity and 
+enhanced customization for federated learning workflows.
