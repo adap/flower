@@ -59,7 +59,7 @@ def main(cfg: DictConfig):
     elif cfg.data == "simII":
 
         # set seed
-        random.seed(2024)
+        np.random.seed(2024)
 
         # simulate data from Simulation II in Tong et al
         num_obs = cfg.num_obs
@@ -107,7 +107,7 @@ def main(cfg: DictConfig):
         raise ValueError("Must select either fedht or fedavg for the aggregation strategy in this baseline.")
 
     # start simulation
-    random.seed(2025)
+    np.random.seed(2025)
     hist_mnist = fl.simulation.start_simulation(
         client_fn=client_fn,
         num_clients=cfg.num_clients,
