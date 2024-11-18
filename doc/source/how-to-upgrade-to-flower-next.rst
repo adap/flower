@@ -124,9 +124,12 @@ In Flower Next, the *infrastructure* and *application layers* have been decouple
 Instead of starting a client in code via ``start_client()``, you create a
 |clientapp_link|_ and start it via the command line. Instead of starting a server in
 code via ``start_server()``, you create a |serverapp_link|_ and start it via the command
-line. The long-running components of server and client are called SuperLink and
-SuperNode. The following non-breaking changes that require manual updates and allow you
-to run your project both in the traditional way and in the Flower Next way:
+line. The long-running components of server and client are called `SuperLink` and
+`SuperNode`, for more details please see the `Flower Architecture`_. The following
+non-breaking changes that require manual updates and allow you to run your project both
+in the traditional way and in the Flower Next way:
+
+.. _flower architecture: explanation-flower-architecture.rst
 
 |clientapp_link|_
 ~~~~~~~~~~~~~~~~~
@@ -135,9 +138,19 @@ to run your project both in the traditional way and in the Flower Next way:
   |startclient_link|_. Here's an example:
 
 .. code-block:: python
-    :emphasize-lines: 5,11
+    :emphasize-lines: 2,6
 
-    # Flower 1.8
+    # Flower v1.11+
+    def client_fn(context: flwr.common.Context):
+        return flwr.client.FlowerClient().to_client()
+
+
+    app = flwr.client.ClientApp(
+        client_fn=client_fn,
+    )
+
+
+    # Flower v1.8 - v1.10
     def client_fn(cid: str):
         return flwr.client.FlowerClient().to_client()
 
@@ -146,7 +159,7 @@ to run your project both in the traditional way and in the Flower Next way:
         client_fn=client_fn,
     )
 
-    # Flower 1.7
+    # Flower v1.7
     if __name__ == "__main__":
         flwr.client.start_client(
             server_address="127.0.0.1:8080",
@@ -160,15 +173,26 @@ to run your project both in the traditional way and in the Flower Next way:
   |startserver_link|_. Here's an example:
 
 .. code-block:: python
-    :emphasize-lines: 2,9
+    :emphasize-lines: 2,5,11
 
-    # Flower 1.8
+    # Flower v1.11+
+    def server_fn(context: flwr.common.Context):
+        strategy = flwr.server.strategy.FedAvg()
+        config = flwr.server.ServerConfig()
+        return flwr.server.ServerAppComponents(strategy=strategy, config=config)
+
+
+    app = flwr.server.ServerApp(
+        server_fn=server_fn,
+    )
+
+    # Flower v1.8 - v1.11
     app = flwr.server.ServerApp(
         config=config,
         strategy=strategy,
     )
 
-    # Flower 1.7
+    # Flower v1.7
     if __name__ == "__main__":
         flwr.server.start_server(
             server_address="0.0.0.0:8080",
@@ -232,7 +256,7 @@ Simulation in CLI
   respectively. There is no need to use |startsim_link|_ anymore. Here's an example:
 
 .. code-block:: python
-    :emphasize-lines: 9,13,20
+    :emphasize-lines: 7,11,14
 
     # Regular Flower client implementation
     class FlowerClient(NumPyClient):
@@ -240,7 +264,22 @@ Simulation in CLI
         pass
 
 
-    # Flower 1.8
+    # Flower v1.11+
+    def client_fn(context: flwr.common.Context):
+        return flwr.client.FlowerClient().to_client()
+
+
+    app = flwr.client.ClientApp(
+        client_fn=client_fn,
+    )
+
+    server_app = flwr.server.ServerApp(
+        config=config,
+        strategy=strategy,
+    )
+
+
+    # Flower v1.8 - v1.10
     def client_fn(cid: str):
         return FlowerClient().to_client()
 
@@ -254,7 +293,7 @@ Simulation in CLI
         strategy=strategy,
     )
 
-    # Flower 1.7
+    # Flower v1.7
     if __name__ == "__main__":
         hist = flwr.simulation.start_simulation(
             num_clients=100,
@@ -267,7 +306,7 @@ Simulation in CLI
 
 .. code-block:: bash
 
-    # Flower 1.8
+    # Flower v1.8
     $ flower-simulation \
         --server-app=sim:server_app \
         --client-app=sim:client_app \
@@ -275,7 +314,7 @@ Simulation in CLI
 
 .. code-block:: bash
 
-    # Flower 1.7
+    # Flower v1.7
     $ python sim.py
 
 - Set default resources for each |clientapp_link|_ using the ``--backend-config``
@@ -283,9 +322,9 @@ Simulation in CLI
   |startsim_link|_. Here's an example:
 
 .. code-block:: bash
-    :emphasize-lines: 6
+    :emphasize-lines:
 
-    # Flower 1.8
+    # Flower v1.8
     $ flower-simulation \
         --client-app=sim:client_app \
         --server-app=sim:server_app \
@@ -293,9 +332,9 @@ Simulation in CLI
         --backend-config='{"client_resources": {"num_cpus": 2, "num_gpus": 0.25}}'
 
 .. code-block:: python
-    :emphasize-lines: 5
+    :emphasize-lines:
 
-    # Flower 1.7 (in `sim.py`)
+    # Flower v1.7 (in `sim.py`)
     if __name__ == "__main__":
         hist = flwr.simulation.start_simulation(
             num_clients=100, client_resources={"num_cpus": 2, "num_gpus": 0.25}, ...
@@ -307,7 +346,7 @@ Simulation in a Notebook
 - Run |runsim_link|_ in your notebook instead of |startsim_link|_. Here's an example:
 
 .. code-block:: python
-    :emphasize-lines: 19,27
+    :emphasize-lines: 21
 
     NUM_CLIENTS = 10  # Replace by any integer greater than zero
 
@@ -328,7 +367,7 @@ Simulation in a Notebook
 
     backend_config = {"client_resources": {"num_cpus": 2, "num_gpus": 0.25}}
 
-    # Flower 1.8
+    # Flower v1.8
     flwr.simulation.run_simulation(
         server_app=server_app,
         client_app=client_app,
@@ -336,7 +375,7 @@ Simulation in a Notebook
         backend_config=backend_config,
     )
 
-    # Flower 1.7
+    # Flower v1.7
     flwr.simulation.start_simulation(
         client_fn=client_fn,
         num_clients=NUM_CLIENTS,
