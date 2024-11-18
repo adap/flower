@@ -5,14 +5,16 @@ This tutorial will show you how to use Flower to build a federated version of an
 existing machine learning workload with `FedBN <https://github.com/med-air/FedBN>`_, a
 federated training method designed for non-IID data. We are using PyTorch to train a
 Convolutional Neural Network (with Batch Normalization layers) on the CIFAR-10 dataset.
-When applying FedBN, only minor changes are needed compared to :doc:`Quickstart PyTorch <tutorial-quickstart-pytorch>`.
+When applying FedBN, only minor changes are needed compared to :doc:`Quickstart PyTorch
+<tutorial-quickstart-pytorch>`.
 
 Model
 -----
 
-A full introduction to federated learning with PyTorch and Flower can be found in :doc:`Quickstart PyTorch <tutorial-quickstart-pytorch>`.
-This how-to guide varies only a few details in ``task.py``.
-FedBN requires a model architecture (defined in class ``Net()``) that uses Batch Normalization layers:
+A full introduction to federated learning with PyTorch and Flower can be found in
+:doc:`Quickstart PyTorch <tutorial-quickstart-pytorch>`. This how-to guide varies only a
+few details in ``task.py``. FedBN requires a model architecture (defined in class
+``Net()``) that uses Batch Normalization layers:
 
 .. code-block:: python
 
@@ -40,7 +42,8 @@ FedBN requires a model architecture (defined in class ``Net()``) that uses Batch
             x = self.fc3(x)
             return x
 
-Try editing the model architecture, then run the project to ensure everything still works:
+Try editing the model architecture, then run the project to ensure everything still
+works:
 
 .. code-block:: bash
 
@@ -51,13 +54,13 @@ So far this should all look fairly familiar if you've used Flower with PyTorch b
 FedBN
 -----
 
-To adopt FedBN, only the ``get_parameters`` and ``set_parameters`` functions in ``task.py`` need
-to be revised. FedBN only changes the client-side by excluding batch normalization parameters from
-being exchanged with the server.
+To adopt FedBN, only the ``get_parameters`` and ``set_parameters`` functions in
+``task.py`` need to be revised. FedBN only changes the client-side by excluding batch
+normalization parameters from being exchanged with the server.
 
-We revise the *client* logic by changing ``get_parameters`` and
-``set_parameters`` in ``task.py``. The batch normalization parameters are excluded from
-model parameter list when sending to or receiving from the server:
+We revise the *client* logic by changing ``get_parameters`` and ``set_parameters`` in
+``task.py``. The batch normalization parameters are excluded from model parameter list
+when sending to or receiving from the server:
 
 .. code-block:: python
 
@@ -95,7 +98,6 @@ Your PyTorch project now runs federated learning with FedBN. Congratulations!
 Next Steps
 ----------
 
-The example is of course over-simplified since all clients load the exact
-same dataset. This isn't realistic. You now have the tools to explore this topic further.
-How about using different subsets of CIFAR-10 on each client? How about adding more
-clients?
+The example is of course over-simplified since all clients load the exact same dataset.
+This isn't realistic. You now have the tools to explore this topic further. How about
+using different subsets of CIFAR-10 on each client? How about adding more clients?
