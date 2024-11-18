@@ -4,6 +4,7 @@ from collections import OrderedDict
 from typing import cast
 
 import torch
+import copy
 from flwr.client import Client, NumPyClient
 from flwr.common import Context
 from omegaconf import DictConfig
@@ -82,7 +83,7 @@ def generate_client_fn_simII(
         partition_id = cast(int, context.node_config["partition-id"])
 
         # Load the partition data
-        X_train, y_train = dataset
+        X_train, y_train = copy.deepcopy(dataset)
         num_obs = X_train.shape[1]
         test_dataset = train_dataset = MyDataset(
             X_train[int(partition_id), :, :], y_train[:, int(partition_id)]

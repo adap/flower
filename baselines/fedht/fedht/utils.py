@@ -1,6 +1,7 @@
 """Execute utility functions for fedht baseline."""
 
 import numpy as np
+import random
 from torch.utils.data import Dataset
 
 
@@ -48,6 +49,9 @@ def partition_data(data, num_partitions):
 
 def sim_data(ni: int, num_clients: int, num_features: int, alpha=1, beta=1):
     """Simulate data for simII."""
+
+    random.seed(2024)
+
     # generate client-based model coefs
     u = np.random.normal(0, alpha, num_clients)
     x = np.zeros((num_features, num_clients))
@@ -77,5 +81,4 @@ def sim_data(ni: int, num_clients: int, num_features: int, alpha=1, beta=1):
         y[mask, j] = 1
         y[~mask, j] = 0
 
-    # might need to adjust; vague data generating process
-    return z, y
+    return z.copy(), y.copy()

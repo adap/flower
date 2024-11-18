@@ -29,8 +29,6 @@ def main(cfg: DictConfig):
     cfg : DictConfig
         Config file for federated baseline; read from fedht/conf.
     """
-    # set seed
-    random.seed(2024)
 
     # set device to cuda:0, if available
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -60,6 +58,9 @@ def main(cfg: DictConfig):
 
     elif cfg.data == "simII":
 
+        # set seed
+        random.seed(2024)
+
         # simulate data from Simulation II in Tong et al
         num_obs = cfg.num_obs
         num_clients = cfg.num_clients
@@ -81,7 +82,7 @@ def main(cfg: DictConfig):
     weights = np.zeros((num_classes, num_features))
     bias = np.zeros(num_classes)
     init_params_arr: NDArrays = [weights, bias]
-    init_params = ndarrays_to_parameters(init_params_arr)
+    init_params = ndarrays_to_parameters(init_params_arr.copy())
 
     strategy: Strategy
     if cfg.agg == "fedht":
