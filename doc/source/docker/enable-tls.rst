@@ -24,7 +24,7 @@ Transport Layer Security (TLS) for each Flower component to ensure secure commun
 
 .. tab-set::
 
-    .. tab-item:: Enable TLS in Isolation Mode ``subprocess``
+    .. tab-item:: Isolation Mode ``subprocess``
 
         By default, the ServerApp is executed as a subprocess within the SuperLink Docker
         container, and the ClientApp is run as a subprocess within the SuperNode Docker
@@ -136,7 +136,7 @@ Transport Layer Security (TLS) for each Flower component to ensure secure commun
               |
               | The ``ca.crt`` file is used to verify the identity of the SuperLink.
 
-    .. tab-item:: Enable TLS in Isolation Mode ``process``
+    .. tab-item:: Isolation Mode ``process``
 
         In isolation mode ``process``, the ServerApp and ClientApp run in their own processes.
         Unlike in isolation mode ``subprocess``, the SuperLink or SuperNode does not attempt to

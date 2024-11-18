@@ -123,7 +123,7 @@ Start two SuperNode containers.
        * | ``--node-config "partition-id=0 num-partitions=2"``: Set the partition ID to ``0`` and the
          | number of partitions to ``2`` for the SuperNode configuration.
        * | ``--clientappio-api-address 0.0.0.0:9094``: Set the address and port number that the
-         | SuperNode is listening on to communicate with the ClientApp. If 
+         | SuperNode is listening on to communicate with the ClientApp. If
          | two SuperNodes are started on the same machine, set two different port numbers for each SuperNode.
          | (E.g. In the next step, we set the second SuperNode container to listen on port 9095)
        * | ``--isolation process``: Tells the SuperNode that the ClientApp is created by separate
