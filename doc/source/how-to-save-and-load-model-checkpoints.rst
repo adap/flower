@@ -44,9 +44,17 @@ returns those aggregated weights to the caller (i.e., the server):
 
 
     # Create strategy and pass into ServerApp
-    strategy = SaveModelStrategy(
-        # (same arguments as FedAvg here)
-    )
+    def server_fn(context):
+        strategy = SaveModelStrategy(
+            # (same arguments as FedAvg here)
+        )
+        config = ServerConfig(
+            # (your server configs here, like `num-server-rounds`)
+        )
+        return ServerAppComponents(strategy=strategy, config=config)
+
+
+    app = ServerApp(server_fn=server_fn)
 
 Save and Load PyTorch Checkpoints
 ---------------------------------
