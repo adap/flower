@@ -1,4 +1,4 @@
-"""tfexample: A Flower / TensorFlow app."""
+"""tensorflow-example: A Flower / TensorFlow app."""
 
 import json
 import os
@@ -17,7 +17,7 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 
 def load_model(learning_rate: float = 0.001):
-    # Define a simple CNN for CIFAR-10 and set Adam optimizer
+    # Define a simple CNN for FashionMNIST and set Adam optimizer
     model = keras.Sequential(
         [
             keras.Input(shape=(28, 28, 1)),
@@ -69,7 +69,7 @@ def load_data(partition_id, num_partitions):
     return x_train, y_train, x_test, y_test
 
 
-def create_run_dir(config: UserConfig) -> Path:
+def create_run_dir(config: UserConfig) -> tuple[Path, str]:
     """Create a directory where to save results from this run."""
     # Create output directory given current timestamp
     current_time = datetime.now()
