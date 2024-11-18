@@ -1,30 +1,30 @@
-Run ClientApp or ServerApp as a Subprocess
+Run ServerApp or ClientApp as a Subprocess
 ==========================================
 
-The SuperLink and SuperNode components support two distinct process modes, allowing for
+The SuperLink and SuperNode components support two distinct isolation modes, allowing for
 flexible deployment and control:
 
 1. Subprocess Mode: In this configuration (default), the SuperLink and SuperNode take
-   responsibility for launching the Server and ClientApp processes internally. This
-   differs from process mode ``isolation`` by using separate containers, as demonstrated
+   responsibility for launching the ServerApp and ClientApp processes internally. This
+   differs from the ``process`` isolation-mode which uses separate containers, as demonstrated
    in the :doc:`tutorial-quickstart-docker` guide.
 
-   This approach reduces the number of running containers, which can be beneficial for
+   Using the ``subprocess`` approach reduces the number of running containers, which can be beneficial for
    environments with limited resources. However, it also means that the applications are
    not isolated from their parent containers, which may introduce additional security
    concerns.
 
-2. Isolation Mode: In this mode, the Server and ClientApp run in completely separate
+2. Process Mode: In this mode, the ServerApp and ClientApps run in completely separate
    processes. Unlike the alternative Subprocess mode, the SuperLink or SuperNode does
    not attempt to create or manage these processes. Instead, they must be started
    externally.
 
-These modes can be mixed for added flexibility. For instance, you can run the SuperLink
-in ``subprocess`` mode while keeping the SuperNode in ``isolation`` mode, or vice versa.
+Both modes can be mixed for added flexibility. For instance, you can run the SuperLink
+in ``subprocess`` mode while keeping the SuperNode in ``process`` mode, or vice versa.
 It is also possible to configure both to run entirely in ``isolation`` mode, depending
 on your specific requirements.
 
-To run the SuperLink and SuperNode in process mode ``isolation``, refer to the
+To run the SuperLink and SuperNode in isolation mode ``process``, refer to the
 :doc:`tutorial-quickstart-docker` guide. To run them in ``subprocess`` mode, follow the
 instructions below.
 
@@ -61,7 +61,8 @@ instructions below.
 
         **Run the ClientApp as a Subprocess**
 
-        Start the SuperNode and run the ClientApp as a subprocess:
+        Start the SuperNode and run the ClientApp as a subprocess (note that
+        the subprocess mode is the default, so you do not have to explicitly set the ``--isolation`` flag):
 
         .. code-block:: shell
 
@@ -76,7 +77,7 @@ instructions below.
         **Prerequisites**
 
         1. Before running the ServerApp as a subprocess, ensure that the FAB dependencies have
-        been installed in the SuperLink images. This can be done by extending the SuperLink
+        been installed in the SuperLink images. Similar to the SuperNode, this can be done by extending the SuperLink
         image:
 
         .. code-block:: dockerfile
@@ -102,7 +103,7 @@ instructions below.
 
         **Run the ServerApp as a Subprocess**
 
-        Start the SuperLink and run the ServerApp as a subprocess:
+        Start the SuperLink and run the ServerApp as a subprocess (Like the SuperNode, the subprocess mode is the default mode when starting the SuperLink. You do not have to explicitly set the `--isolation` argument):
 
         .. code-block:: shell
 

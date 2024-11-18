@@ -70,7 +70,7 @@ Open your terminal and run:
     * | ``-p 9091:9091 -p 9092:9092 -p 9093:9093``: Map port ``9091``, ``9092`` and ``9093`` of the
       | container to the same port of the host machine, allowing other services to access the
       | ServerAppIO API on ``http://localhost:9091``, the Fleet API on ``http://localhost:9092`` and
-      | the ExecAPI on ``http://localhost:9093``.
+      | the Exec API on ``http://localhost:9093``.
     * ``--network flwr-network``: Make the container join the network named ``flwr-network``.
     * ``--name superlink``: Assign the name ``superlink`` to the container.
     * ``--detach``: Run the container in the background, freeing up the terminal.
@@ -123,7 +123,9 @@ Start two SuperNode containers.
        * | ``--node-config "partition-id=0 num-partitions=2"``: Set the partition ID to ``0`` and the
          | number of partitions to ``2`` for the SuperNode configuration.
        * | ``--clientappio-api-address 0.0.0.0:9094``: Set the address and port number that the
-         | SuperNode is listening on to communicate with the ClientApp.
+         | SuperNode is listening on to communicate with the ClientApp. If 
+         | two SuperNodes are started on the same machine, set two different port numbers for each SuperNode.
+         | (E.g. In the next step, we set the second SuperNode container to listen on port 9095)
        * | ``--isolation process``: Tells the SuperNode that the ClientApp is created by separate
          | independent process. The SuperNode does not attempt to create it.
 
