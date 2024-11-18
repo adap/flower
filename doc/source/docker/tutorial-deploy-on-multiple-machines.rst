@@ -6,8 +6,8 @@ Compose.
 
 You will learn how to run the Flower client and server components on two separate
 machines, with Flower configured to use TLS encryption and persist SuperLink state
-across restarts. A server consists of a SuperLink and a ServerApp. For more details about
-the Flower architecture, refer to the :doc:`../explanation-flower-architecture`
+across restarts. A server consists of a SuperLink and a ServerApp. For more details
+about the Flower architecture, refer to the :doc:`../explanation-flower-architecture`
 explainer page.
 
 This guide assumes you have completed the :doc:`tutorial-quickstart-docker-compose`

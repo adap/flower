@@ -354,24 +354,20 @@ Step 8: Persisting the SuperLink State and Enabling TLS
 To run Flower with persisted SuperLink state and enabled TLS, a slight change in the
 ``with-state.yml`` file is required:
 
-1. Comment out the lines 2-8 and uncomment the lines 9-17:
+1. Comment out the lines 2-6 and uncomment the lines 7-13:
 
    .. code-block:: yaml
        :caption: with-state.yml
        :linenos:
-       :emphasize-lines: 2-17
+       :emphasize-lines: 2-13
 
          superlink:
            # command:
            # - --insecure
-           # - --executor
-           # - flwr.superexec.deployment:executor
            # - --isolation
            # - process
            # - --database=state/state.db
            command:
-             - --executor
-             - flwr.superexec.deployment:executor
              - --isolation
              - process
              - --ssl-ca-certfile=certificates/ca.crt
