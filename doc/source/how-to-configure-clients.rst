@@ -9,9 +9,10 @@ and experimentation.
 Configuration values
 --------------------
 
-Configuration values are represented as a dictionary with ``str`` keys and values of
-type ``bool``, ``bytes``, ``float``, ``int``, or ``str`` (or equivalent types in 
-different languages). Here is an example of a configuration dictionary in Python:
+Configuration values are represented as a dictionary with ``str`` keys and 
+values of type ``bool``, ``bytes``, ``float``, ``int``, or ``str`` (or 
+equivalent types in different languages). Here is an example of a configuration 
+dictionary in Python:
 
 .. code-block:: python
 
@@ -22,9 +23,9 @@ different languages). Here is an example of a configuration dictionary in Python
         "optimizer": "sgd",  # str key, str value
     }
 
-Flower serializes these configuration dictionaries (or *config dict* for short) to 
-their ProtoBuf representation, transports them to the client using gRPC, and then 
-deserializes them back to Python dictionaries.
+Flower serializes these configuration dictionaries (or *config dict* for short) 
+to their ProtoBuf representation, transports them to the client using gRPC, and 
+then deserializes them back to Python dictionaries.
 
 .. note::
 
@@ -55,8 +56,9 @@ values for each round via a function.
 Example: Sending Training Configurations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Imagine we want to send (a) the batch size, (b) the current global round, and (c) 
-the number of local epochs. Our configuration function could look like this:
+Imagine we want to send (a) the batch size, (b) the current global round, and 
+(c) the number of local epochs. Our configuration function could look like 
+this:
 
 .. code-block:: python
 
@@ -98,8 +100,8 @@ Instead, the server is defined as a `ServerApp`:
 Client-Side Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-On the client side, configurations are received as input to the `fit` and `evaluate` 
-methods. For example:
+On the client side, configurations are received as input to the `fit` and 
+`evaluate` methods. For example:
 
 .. code-block:: python
 
@@ -117,9 +119,9 @@ methods. For example:
 Dynamic Configurations per Round
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Configuration functions are called at the beginning of every round. This allows for 
-dynamic adjustments based on progress. For example, increasing the number of local 
-epochs in later rounds:
+Configuration functions are called at the beginning of every round. This 
+allows for dynamic adjustments based on progress. For example, increasing 
+the number of local epochs in later rounds:
 
 .. code-block:: python
 
@@ -134,9 +136,9 @@ epochs in later rounds:
 Customizing Client Configurations
 ---------------------------------
 
-In some cases, it may be necessary to send different configurations to individual 
-clients. To achieve this, you can create a custom strategy by extending a built-in 
-one, such as ``FedAvg``:
+In some cases, it may be necessary to send different configurations to 
+individual clients. To achieve this, you can create a custom strategy by 
+extending a built-in one, such as ``FedAvg``:
 
 Example: Client-Specific Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -175,7 +177,4 @@ Summary of Enhancements
 - **ServerApp Usage**: Modular server configuration using `server_fn`.
 - **Dynamic Configurations**: Adjust settings per round via configuration functions.
 - **Advanced Customization**: Create custom strategies for per-client configuration.
-- **Seamless Client-Side Integration**: Use configurations directly in `fit` and `evaluate`.
-
-Flower 1.13 builds on the flexibility of previous versions, introducing modularity and 
-enhanced customization for federated learning workflows.
+- **Client-Side Integration**: Use configurations directly in `fit` and `evaluate`.
