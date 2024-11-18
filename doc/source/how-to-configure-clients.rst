@@ -1,17 +1,17 @@
 Configure Clients
 =================
 
-Flower provides the ability to send configuration values to clients, allowing 
-server-side control over client behavior. This feature enables flexible and 
-dynamic adjustment of client-side hyperparameters, improving collaboration 
-and experimentation.
+Flower provides the ability to send configuration values to clients, allowing
+server-side control over client behavior. This feature enables flexible and
+dynamic adjustment of client-side hyperparameters, improving collaboration and
+experimentation.
 
 Configuration values
 --------------------
 
-Configuration values are represented as a dictionary with ``str`` keys and 
-values of type ``bool``, ``bytes``, ``float``, ``int``, or ``str`` (or 
-equivalent types in different languages). Here is an example of a configuration 
+Configuration values are represented as a dictionary with ``str`` keys and
+values of type ``bool``, ``bytes``, ``float``, ``int``, or ``str`` (or
+equivalent types in different languages). Here is an example of a configuration
 dictionary in Python:
 
 .. code-block:: python
@@ -23,16 +23,16 @@ dictionary in Python:
         "optimizer": "sgd",  # str key, str value
     }
 
-Flower serializes these configuration dictionaries (or *config dict* for short) 
-to their ProtoBuf representation, transports them to the client using gRPC, and 
+Flower serializes these configuration dictionaries (or *config dict* for short)
+to their ProtoBuf representation, transports them to the client using gRPC, and
 then deserializes them back to Python dictionaries.
 
 .. note::
 
-    Currently, there is no support for directly sending collection types (e.g., 
-    ``Set``, ``List``, ``Map``) as values in configuration dictionaries. To send 
-    collections, convert them to a supported type (e.g., JSON string) and decode 
-    on the client side.
+    Currently, there is no support for directly sending collection types (e.g.,
+    ``Set``, ``List``, ``Map``) as values in configuration dictionaries. To
+    send collections, convert them to a supported type (e.g., JSON string) and
+    decode on the client side.
 
     Example:
 
@@ -49,15 +49,15 @@ then deserializes them back to Python dictionaries.
 Using Built-in Strategies for Configuration
 -------------------------------------------
 
-Flower supports configuration functions to dynamically adjust parameters sent to 
-clients. Built-in strategies like ``FedAvg`` allow for setting configuration 
+Flower supports configuration functions to dynamically adjust parameters sent
+to clients. Built-in strategies like ``FedAvg`` allow for setting configuration
 values for each round via a function.
 
 Example: Sending Training Configurations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Imagine we want to send (a) the batch size, (b) the current global round, and 
-(c) the number of local epochs. Our configuration function could look like 
+Imagine we want to send (a) the batch size, (b) the current global round, and
+(c) the number of local epochs. Our configuration function could look like
 this:
 
 .. code-block:: python
@@ -70,7 +70,7 @@ this:
             "local_epochs": 2,
         }
 
-To use this function with a built-in strategy like ``FedAvg``, pass it during 
+To use this function with a built-in strategy like ``FedAvg``, pass it during
 initialization:
 
 .. code-block:: python
@@ -79,7 +79,7 @@ initialization:
         on_fit_config_fn=fit_config  # Assign the configuration function
     )
 
-With the latest version of Flower, you no longer use `fl.server.start_server`. 
+With the latest version of Flower, you no longer use `fl.server.start_server`.
 Instead, the server is defined as a `ServerApp`:
 
 .. code-block:: python
@@ -100,7 +100,7 @@ Instead, the server is defined as a `ServerApp`:
 Client-Side Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-On the client side, configurations are received as input to the `fit` and 
+On the client side, configurations are received as input to the `fit` and
 `evaluate` methods. For example:
 
 .. code-block:: python
@@ -119,8 +119,8 @@ On the client side, configurations are received as input to the `fit` and
 Dynamic Configurations per Round
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Configuration functions are called at the beginning of every round. This 
-allows for dynamic adjustments based on progress. For example, increasing 
+Configuration functions are called at the beginning of every round. This
+allows for dynamic adjustments based on progress. For example, increasing
 the number of local epochs in later rounds:
 
 .. code-block:: python
@@ -136,8 +136,8 @@ the number of local epochs in later rounds:
 Customizing Client Configurations
 ---------------------------------
 
-In some cases, it may be necessary to send different configurations to 
-individual clients. To achieve this, you can create a custom strategy by 
+In some cases, it may be necessary to send different configurations to
+individual clients. To achieve this, you can create a custom strategy by
 extending a built-in one, such as ``FedAvg``:
 
 Example: Client-Specific Configuration
@@ -174,7 +174,8 @@ To use this custom strategy:
 Summary of Enhancements
 -----------------------
 
-- **ServerApp Usage**: Modular server configuration using `server_fn`.
-- **Dynamic Configurations**: Adjust settings per round via configuration functions.
-- **Advanced Customization**: Create custom strategies for per-client configuration.
-- **Client-Side Integration**: Use configurations directly in `fit` and `evaluate`.
+- **ServerApp Usage**: Allows modular configuration using `server_fn`.
+- **Dynamic Configurations**: Enables per-round adjustments via functions.
+- **Advanced Customization**: Supports client-specific strategies.
+- **Client-Side Integration**: Configurations accessible in `fit` and
+  `evaluate`.
