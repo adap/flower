@@ -37,6 +37,10 @@ Let's dive in!
 
 .. |flowernext_serverapp_link| replace:: ``flower-server-app``
 
+.. |flowernext_superlink_link| replace:: ``flower-superlink``
+
+.. |flowernext_supernode_link| replace:: ``flower-supernode``
+
 .. |flower_architecture_link| replace:: Flower Architecture
 
 .. |flower_how_to_run_simulations_link| replace:: How-to Run Simulations
@@ -56,6 +60,8 @@ Let's dive in!
 .. _flowernext_serverapp_link: ref-api-cli.html#flower-server-app
 
 .. _flowernext_superlink_link: ref-api-cli.html#flower-superlink
+
+.. _flowernext_supernode_link: ref-api-cli.html#flower-supernode
 
 .. _runsim_link: ref-api/flwr.simulation.run_simulation.html
 
@@ -210,55 +216,36 @@ Deployment
 ~~~~~~~~~~
 
 - Run the ``SuperLink`` using |flowernext_superlink_link|_ before running, in sequence,
-  |flowernext_clientapp_link|_ (2x) and |flowernext_serverapp_link|_. There is no need
-  to execute `client.py` and `server.py` as Python scripts.
+  |flowernext_supernode_link|_ (2x).
 - Here's an example to start the server without HTTPS (only for prototyping):
 
 .. code-block:: bash
-    :emphasize-lines: 2,6,14,22
+    :emphasize-lines: 2,5,12
 
     # Start a Superlink
     $ flower-superlink --insecure
 
-    # Flower v1.13
     # In a new terminal window, start a long-running SuperNode
     $ flower-supernode \
          --insecure \
          --superlink 127.0.0.1:9092 \
          --node-config "partition-id=0 num-partitions=2" \
-         --supernode-address 127.0.0.1:9094 \
-         --isolation subprocess
+         --supernode-address 127.0.0.1:9094
 
     # In another terminal window, start another long-running SuperNode (at least 2 SuperNodes are required)
     $ flower-supernode \
          --insecure \
          --superlink 127.0.0.1:9092 \
          --node-config "partition-id=1 num-partitions=2" \
-         --supernode-address 127.0.0.1:9095 \
-         --isolation subprocess
+         --supernode-address 127.0.0.1:9095
 
-    # In a new terminal, start the SuperExec process with the following command:
-    $ flower-superexec \
-        --insecure \
-        --executor flwr.superexec.deployment:executor \
-        --executor-config 'superlink="127.0.0.1:9091"'
-
-    # Flower up to v1.12
-    # In a new terminal window, start a long-running SuperNode
-    $ flower-client-app client:app --insecure
-
-    # In another terminal window, start another long-running SuperNode (at least 2 SuperNodes are required)
-    $ flower-client-app client:app --insecure
-
-    # In yet another terminal window, run the ServerApp (this starts the actual training run)
-    $ flower-server-app server:app --insecure
 
 - Here's another example to start with HTTPS. Use the ``--ssl-ca-certfile``,
   ``--ssl-certfile``, and ``--ssl-keyfile`` command line options to pass paths to (CA
   certificate, server certificate, and server private key).
 
 .. code-block:: bash
-    :emphasize-lines: 2,9,17,25
+    :emphasize-lines: 2,8,15
 
     # Start a secure Superlink
     $ flower-superlink \
@@ -266,13 +253,11 @@ Deployment
         --ssl-certfile <your-server-cert-filepath> \
         --ssl-keyfile <your-privatekey-filepath>
 
-    # Flower v1.13
     # In a new terminal window, start a long-running SuperNode
     $ flower-supernode \
          --superlink 127.0.0.1:9092 \
          --node-config "partition-id=0 num-partitions=2" \
          --supernode-address 127.0.0.1:9094 \
-         --isolation subprocess \
          --root-certificates <your-ca-cert-filepath>
 
     # In another terminal window, start another long-running SuperNode (at least 2 SuperNodes are required)
@@ -280,30 +265,9 @@ Deployment
          --superlink 127.0.0.1:9092 \
          --node-config "partition-id=1 num-partitions=2" \
          --supernode-address 127.0.0.1:9095 \
-         --isolation subprocess \
          --root-certificates <your-ca-cert-filepath>
 
-    # In a new terminal, start the SuperExec process with the following command:
-    $ flower-superexec \
-        --executor flwr.superexec.deployment:executor \
-        --executor-config 'superlink="127.0.0.1:9091"' \
-        --root-certificates <your-ca-cert-filepath>
 
-    # Flower up to v1.12
-    # In a new terminal window, start a long-running secure SuperNode
-    $ flower-client-app client:app \
-        --root-certificates <your-ca-cert-filepath> \
-        --superlink 127.0.0.1:9092
-
-    # In another terminal window, start another long-running secure SuperNode (at least 2 SuperNodes are required)
-    $ flower-client-app client:app \
-        --root-certificates <your-ca-cert-filepath> \
-        --superlink 127.0.0.1:9092
-
-    # In yet another terminal window, run the ServerApp (this starts the actual training run)
-    $ flower-server-app server:app \
-        --root-certificates <your-ca-cert-filepath> \
-        --superlink 127.0.0.1:9091
 
 Simulation in CLI
 ~~~~~~~~~~~~~~~~~
