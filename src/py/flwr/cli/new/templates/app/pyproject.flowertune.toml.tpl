@@ -10,6 +10,7 @@ license = "Apache-2.0"
 dependencies = [
     "flwr[simulation]>=1.12.0",
     "flwr-datasets>=0.3.0",
+    "torch==2.3.1",
     "trl==0.8.1",
     "bitsandbytes==0.43.0",
     "scipy==1.13.0",

@@ -40,7 +40,7 @@ from flwr.common.recordset_compat import (
     recordset_to_getpropertiesres,
 )
 from flwr.common.recordset_compat_test import _get_valid_getpropertiesins
-from flwr.simulation.app import (
+from flwr.simulation.legacy_app import (
     NodeToPartitionMapping,
     _create_node_id_to_partition_mapping,
 )

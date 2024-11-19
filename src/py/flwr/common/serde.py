@@ -840,6 +840,7 @@ def message_from_proto(message_proto: ProtoMessage) -> Message:
 def context_to_proto(context: Context) -> ProtoContext:
     """Serialize `Context` to ProtoBuf."""
     proto = ProtoContext(
+        run_id=context.run_id,
         node_id=context.node_id,
         node_config=user_config_to_proto(context.node_config),
         state=recordset_to_proto(context.state),
@@ -851,6 +852,7 @@ def context_to_proto(context: Context) -> ProtoContext:
 def context_from_proto(context_proto: ProtoContext) -> Context:
     """Deserialize `Context` from ProtoBuf."""
     context = Context(
+        run_id=context_proto.run_id,
         node_id=context_proto.node_id,
         node_config=user_config_from_proto(context_proto.node_config),
         state=recordset_from_proto(context_proto.state),
@@ -870,6 +872,11 @@ def run_to_proto(run: typing.Run) -> ProtoRun:
         fab_version=run.fab_version,
         fab_hash=run.fab_hash,
         override_config=user_config_to_proto(run.override_config),
+        pending_at=run.pending_at,
+        starting_at=run.starting_at,
+        running_at=run.running_at,
+        finished_at=run.finished_at,
+        status=run_status_to_proto(run.status),
     )
     return proto
 
@@ -882,6 +889,11 @@ def run_from_proto(run_proto: ProtoRun) -> typing.Run:
         fab_version=run_proto.fab_version,
         fab_hash=run_proto.fab_hash,
         override_config=user_config_from_proto(run_proto.override_config),
+        pending_at=run_proto.pending_at,
+        starting_at=run_proto.starting_at,
+        running_at=run_proto.running_at,
+        finished_at=run_proto.finished_at,
+        status=run_status_from_proto(run_proto.status),
     )
     return run
 

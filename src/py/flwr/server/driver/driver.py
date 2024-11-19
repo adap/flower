@@ -24,10 +24,10 @@ from flwr.common.typing import Run
 
 
 class Driver(ABC):
-    """Abstract base Driver class for the Driver API."""
+    """Abstract base Driver class for the ServerAppIo API."""
 
     @abstractmethod
-    def init_run(self, run_id: int) -> None:
+    def set_run(self, run_id: int) -> None:
         """Request a run to the SuperLink with a given `run_id`.
 
         If a Run with the specified `run_id` exists, a local Run

@@ -19,18 +19,20 @@ import time
 import unittest
 from unittest.mock import Mock, patch
 
+import grpc
+
 from flwr.common import DEFAULT_TTL, RecordSet
 from flwr.common.message import Error
 from flwr.common.serde import error_to_proto, recordset_to_proto
-from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
-    GetNodesRequest,
-    PullTaskResRequest,
-    PushTaskInsRequest,
-)
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
     GetRunResponse,
     Run,
+)
+from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
+    GetNodesRequest,
+    PullTaskResRequest,
+    PushTaskInsRequest,
 )
 from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 
@@ -59,7 +61,7 @@ class TestGrpcDriver(unittest.TestCase):
         self.driver = GrpcDriver()
         self.driver._grpc_stub = self.mock_stub  # pylint: disable=protected-access
         self.driver._channel = self.mock_channel  # pylint: disable=protected-access
-        self.driver.init_run(run_id=61016)
+        self.driver.set_run(run_id=61016)
 
     def test_init_grpc_driver(self) -> None:
         """Test GrpcDriverStub initialization."""
@@ -215,3 +217,30 @@ class TestGrpcDriver(unittest.TestCase):
 
         # Assert
         self.mock_channel.close.assert_not_called()
+
+    def test_simple_retry_mechanism_get_nodes(self) -> None:
+        """Test retry mechanism with the get_node_ids method."""
+        # Prepare
+        grpc_exc = grpc.RpcError()
+        grpc_exc.code = lambda: grpc.StatusCode.UNAVAILABLE
+        mock_get_nodes = Mock()
+        mock_get_nodes.side_effect = [
+            grpc_exc,
+            Mock(nodes=[Mock(node_id=404)]),
+        ]
+        # Make pylint happy
+        # pylint: disable=protected-access
+        self.driver._grpc_stub = Mock(
+            GetNodes=lambda *args, **kwargs: self.driver._retry_invoker.invoke(
+                mock_get_nodes, *args, **kwargs
+            )
+        )
+        # pylint: enable=protected-access
+
+        # Execute
+        with patch("time.sleep", side_effect=lambda _: None):
+            node_ids = self.driver.get_node_ids()
+
+        # Assert
+        self.assertIn(404, node_ids)
+        self.assertEqual(mock_get_nodes.call_count, 2)

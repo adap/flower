@@ -14,16 +14,20 @@
 # ==============================================================================
 """Flower command line interface `log` command."""
 
-import sys
 import time
 from logging import DEBUG, ERROR, INFO
 from pathlib import Path
-from typing import Annotated, Optional, cast
+from typing import Annotated, Any, Optional, cast
 
 import grpc
 import typer
 
-from flwr.cli.config_utils import load_and_validate
+from flwr.cli.config_utils import (
+    load_and_validate,
+    validate_certificate_in_federation_config,
+    validate_federation_in_project_config,
+    validate_project_config,
+)
 from flwr.common.constant import CONN_RECONNECT_INTERVAL, CONN_REFRESH_PERIOD
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log as logger
@@ -153,100 +157,33 @@ def log(
 
     pyproject_path = app / "pyproject.toml" if app else None
     config, errors, warnings = load_and_validate(path=pyproject_path)
-
-    if config is None:
-        typer.secho(
-            "Project configuration could not be loaded.\n"
-            "pyproject.toml is invalid:\n"
-            + "\n".join([f"- {line}" for line in errors]),
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        sys.exit()
-
-    if warnings:
-        typer.secho(
-            "Project configuration is missing the following "
-            "recommended properties:\n" + "\n".join([f"- {line}" for line in warnings]),
-            fg=typer.colors.RED,
-            bold=True,
-        )
-
-    typer.secho("Success", fg=typer.colors.GREEN)
-
-    federation = federation or config["tool"]["flwr"]["federations"].get("default")
-
-    if federation is None:
-        typer.secho(
-            "❌ No federation name was provided and the project's `pyproject.toml` "
-            "doesn't declare a default federation (with a SuperExec address or an "
-            "`options.num-supernodes` value).",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
-
-    # Validate the federation exists in the configuration
-    federation_config = config["tool"]["flwr"]["federations"].get(federation)
-    if federation_config is None:
-        available_feds = {
-            fed for fed in config["tool"]["flwr"]["federations"] if fed != "default"
-        }
-        typer.secho(
-            f"❌ There is no `{federation}` federation declared in the "
-            "`pyproject.toml`.\n The following federations were found:\n\n"
-            + "\n".join(available_feds),
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
+    config = validate_project_config(config, errors, warnings)
+    federation, federation_config = validate_federation_in_project_config(
+        federation, config
+    )
 
     if "address" not in federation_config:
         typer.secho(
-            "❌ `flwr log` currently works with `SuperExec`. Ensure that the correct"
-            "`SuperExec` address is provided in the `pyproject.toml`.",
+            "❌ `flwr log` currently works with Exec API. Ensure that the correct"
+            "Exec API address is provided in the `pyproject.toml`.",
             fg=typer.colors.RED,
             bold=True,
         )
         raise typer.Exit(code=1)
 
-    _log_with_exec_api(federation_config, run_id, stream)
+    _log_with_exec_api(app, federation_config, run_id, stream)
 
 
-# pylint: disable-next=too-many-branches
 def _log_with_exec_api(
-    federation_config: dict[str, str],
+    app: Path,
+    federation_config: dict[str, Any],
     run_id: int,
     stream: bool,
 ) -> None:
-    insecure_str = federation_config.get("insecure")
-    if root_certificates := federation_config.get("root-certificates"):
-        root_certificates_bytes = Path(root_certificates).read_bytes()
-        if insecure := bool(insecure_str):
-            typer.secho(
-                "❌ `root_certificates` were provided but the `insecure` parameter"
-                "is set to `True`.",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-            raise typer.Exit(code=1)
-    else:
-        root_certificates_bytes = None
-        if insecure_str is None:
-            typer.secho(
-                "❌ To disable TLS, set `insecure = true` in `pyproject.toml`.",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-            raise typer.Exit(code=1)
-        if not (insecure := bool(insecure_str)):
-            typer.secho(
-                "❌ No certificate were given yet `insecure` is set to `False`.",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-            raise typer.Exit(code=1)
 
+    insecure, root_certificates_bytes = validate_certificate_in_federation_config(
+        app, federation_config
+    )
     channel = create_channel(
         server_address=federation_config["address"],
         insecure=insecure,
