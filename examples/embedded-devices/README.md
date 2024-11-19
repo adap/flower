@@ -1,6 +1,6 @@
 ---
 tags: [basic, vision, embedded]
-dataset: [CIFAR-10, MNIST]
+dataset: [Fashion-MNIST]
 framework: [torch]
 ---
 
@@ -79,113 +79,19 @@ pip install -e .
 
 3. Run your Flower experiments following the steps in the [Running FL with Flower](https://github.com/adap/flower/tree/main/examples/embedded-devices#running-fl-training-with-flower) section.
 
-## Setting up a Jetson Xavier-NX
-
-> \[!CAUTION\]
-> This needs to be either removed or updated with a Jetson Orin
-
-> These steps have been validated for a Jetson Xavier-NX Dev Kit. An identical setup is needed for a Jetson Nano once you get ssh access to it (i.e. jumping straight to point `4` below). For instructions on how to setup these devices please refer to the "getting started guides" for [Jetson Nano](https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit#intro).
-
-1. **Install JetPack 5.1.2 on your Jetson device**
-
-   - Download the JetPack 5.1.2 image from [NVIDIA-embedded](https://developer.nvidia.com/embedded/jetpack-sdk-512), note that you might need an NVIDIA developer account. You can find the download link under the `SD Card Image Method` section on NVIDIA's site. This image comes with Docker pre-installed as well as PyTorch+Torchvision and TensorFlow compiled with GPU support.
-
-   - Extract the image (~18GB and named `sd-blob.img`) and flash it onto the uSD card using [balenaEtcher](https://www.balena.io/etcher/) (or equivalent).
-
-2. **Follow [the instructions](https://developer.nvidia.com/embedded/learn/get-started-jetson-xavier-nx-devkit) to set up the device.** The first time you boot your Xavier-NX you should plug it into a display to complete the installation process. After that, a display is no longer needed for this example but you could still use it instead of connecting to your device over ssh.
-
-3. **Setup Docker**: Docker comes pre-installed with the Ubuntu image provided by NVIDIA. But for convenience, we will create a new user group and add our user to it (with the idea of not having to use `sudo` for every command involving docker (e.g. `docker run`, `docker ps`, etc)). More details about what this entails can be found in the [Docker documentation](https://docs.docker.com/engine/install/linux-postinstall/). You can achieve this by doing:
-
-   ```bash
-   sudo usermod -aG docker $USER
-   # apply changes to current shell (or logout/reboot)
-   newgrp docker
-   ```
-
-4. **Update OS and install utilities.** Then, install some useful utilities:
-
-   ```bash
-   sudo apt update && sudo apt upgrade -y
-   # now reboot
-   sudo reboot
-   ```
-
-   Login again and (optional) install the following packages:
-
-   <img align="right" style="padding-top: 40px; padding-left: 15px" width="575" height="380" src="_static/tmux_jtop_view.gif">
-
-   - [jtop](https://github.com/rbonghi/jetson_stats),  to monitor CPU/GPU utilization, power consumption and, many more. You can read more about it in [this blog post](https://jetsonhacks.com/2023/02/07/jtop-the-ultimate-tool-for-monitoring-nvidia-jetson-devices/).
-
-     ```bash
-     # First we need to install pip3
-     sudo apt install python3-pip -y
-     # finally, install jtop
-     sudo pip3 install -U jetson-stats
-     # now reboot (or run `sudo systemctl restart jtop.service` and login again)
-     sudo reboot
-     ```
-
-     Now you have installed `jtop`, just launch it by running the `jtop` command on your terminal. An interactive panel similar to the one shown on the right will show up. `jtop` allows you to monitor and control many features of your Jetson device. Read more in the [jtop documentation](https://rnext.it/jetson_stats/jtop/jtop.html)
-
-   - [TMUX](https://github.com/tmux/tmux/wiki), a terminal multiplexer. As its name suggests, it allows you to device a single terminal window into multiple panels. In this way, you could (for example) use one panel to show your terminal and another to show `jtop`. That's precisely what the visualization on the right shows.
-
-     ```bash
-     # install tmux
-     sudo apt install tmux -y
-     # add mouse support
-     echo set -g mouse on > ~/.tmux.conf
-     ```
-
-5. **Power modes**. The Jetson devices can operate at different power modes, each making use of more or less CPU cores clocked at different frequencies. The right power mode might very much depend on the application and scenario. When power consumption is not a limiting factor, we could use the highest 15W mode using all 6 CPU cores. On the other hand, if the devices are battery-powered we might want to make use of a low-power mode using 10W and 2 CPU cores. All the details regarding the different power modes of a Jetson Xavier-NX can be found [here](https://docs.nvidia.com/jetson/l4t/index.html#page/Tegra%2520Linux%2520Driver%2520Package%2520Development%2520Guide%2Fpower_management_jetson_xavier.html%23wwpID0E0NO0HA). For this demo, we'll be setting the device to high-performance mode:
-
-   ```bash
-   sudo /usr/sbin/nvpmodel -m 2 # 15W with 6cpus @ 1.4GHz
-   ```
-
-   Jetson Stats (that you launch via `jtop`) also allows you to see and set the power mode on your device. Navigate to the `CTRL` panel and click on one of the `NVM modes` available.
-
-6. **Build base client image**. Before running a Flower client, we need to install `Flower` and other ML dependencies (i.e. Pytorch or Tensorflow). Instead of installing this manually via `pip3 install ...`, let's use the pre-built Docker images provided by NVIDIA. In this way, we can be confident that the ML infrastructure is optimized for these devices. Build your Flower client image with:
-
-   ```bash
-   # On your Jetson's terminal run
-   ./build_jetson_flower_client.sh --pytorch # or --tensorflow
-   # Bear in mind this might take a few minutes since the base images need to be donwloaded (~7GB) and decompressed.
-   # To the above script pass the additional flag `--no-cache` to re-build the image.
-   ```
-
-   Once your script is finished, verify your `flower_client` Docker image is present. If you type `docker images` you'll see something like the following:
-
-   ```bash
-   REPOSITORY      TAG       IMAGE ID       CREATED          SIZE
-   flower_client   latest    87e935a8ee37   18 seconds ago   12.6GB
-   ```
-
-7. **Access your client image**. Before launching the Flower client, we need to run the image we just created. To keep things simpler, let's run the image in interactive mode (`-it`), mount the entire repository you cloned inside the `/client` directory of your container (`` -v `pwd`:/client ``), and use the NVIDIA runtime so we can access the GPU `--runtime nvidia`:
-
-   ```bash
-   # first ensure you are in the `embedded-devices` directory. If you are not, use the `cd` command to navigate to it
-
-   # run the client container (this won't launch your Flower client, it will just "take you inside docker". The client can be run following the steps in the next section of the readme)
-   docker run -it --rm --runtime nvidia -v `pwd`:/client flower_client
-   # this will take you to a shell that looks something like this:
-   root@6e6ce826b8bb:/client# <here you can run python commands or any command as usual>
-   ```
-
-8. **Run your FL experiments with Flower**. Follow the steps in the section below.
-
 ## Embedded Federated AI
 
-For this demo, we'll be using [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html), a popular dataset for image classification comprised of 10 classes (e.g. car, bird, airplane) and a total of 60K `32x32` RGB images. The training set contains 50K images.
+For this demo, we'll be using [Fashion-MNIST](https://huggingface.co/datasets/zalando-datasets/fashion_mnist), a popular dataset for image classification comprised of 10 classes (e.g. boot, dress, trouser) and a total of 70K `28x28` greyscale images. The training set contains 60K images.
 
 > \[!TIP\]
 > Refer to the [Flower Architecture](https://flower.ai/docs/framework/explanation-flower-architecture.html) page for an overview of the different components involved in a federation.
 
 ### Ensure your embedded devices have some data
 
-Unless your devices already have some images that could be used to train a small CNN, we need to send a partition of the `CIFAR-10` dataset to each device that will run as a `SuperNode`. You can make use of the `generate_dataset.py` script to partition the `CIFAR-10` into N disjoint partitions that can be then given to each device in the federation.
+Unless your devices already have some images that could be used to train a small CNN, we need to send a partition of the `Fashion-MNIST` dataset to each device that will run as a `SuperNode`. You can make use of the `generate_dataset.py` script to partition the `Fashion-MNIST` into N disjoint partitions that can be then given to each device in the federation.
 
 ```shell
-# Partition the CIFAR-10 dataset into two partitions
+# Partition the Fashion-MNIST dataset into two partitions
 python generate_dataset.py --num-supernodes=2
 ```
 
@@ -193,7 +99,7 @@ The above command will create two subdirectories in `./datasets`, one for each p
 
 ```shell
 # Copy one partition to a device
-scp -r datasets/cifar10_part_1 <user>@<device-ip>:/path/to/home
+scp -r datasets/fashionmnist_part_1 <user>@<device-ip>:/path/to/home
 ```
 
 ### Launching the Flower `SuperLink`
@@ -208,11 +114,15 @@ flower-superlink --insecure
 
 With the `SuperLink` up and running, now let's launch a `SuperNode` on each embedded device. In order to do this ensure you know what the IP of the machine running the `SuperLink` is and that you have copied the data to the device. Note with `--node-config` we set a key named `dataset-path`. That's the one expected by the `client_fn()` in [client_app.py](embeddedexample/client_app.py). This file will be automatically delivered to the `SuperNode` so it knows how to execute the `ClientApp` logic.
 
+> \[!NOTE\]
+> You don't need to clone this example to your embedded devices running as Flower `SuperNodes`. The code they will execute (in [embeddedexamples/client_app.py](embeddedexamples/client_app.py)) will automatically be delivered.
+
 Ensure the Python environment you created earlier when setting up your device has all dependencies installed. For this example you'll need the following:
 
 ```shell
-# after activating your environment
-pip install flwr torch torchvision datasets
+# After activating your environment
+pip install -U flwr
+pip install torch torchvision datasets
 ```
 
 Now, launch your `SuperNode` pointing it to the dataset you `scp`-ed earlier:
@@ -220,14 +130,14 @@ Now, launch your `SuperNode` pointing it to the dataset you `scp`-ed earlier:
 ```shell
 # Repeat for each embedded device (adjust SuperLink IP and dataset-path)
 flower-supernode --insecure --superlink="SUPERLINK_IP:9092" \
-                 --node-config="dataset-path='path/to/cifar10_part_1'"
+                 --node-config="dataset-path='path/to/fashionmnist_part_1'"
 ```
 
 Repeat for each embedded device that you want to connect to the `SuperLink`.
 
 ### Run the Flower App
 
-With both the long-running server (`SuperLink`) and two `SuperNodes` up and running, we can now start run. Note that the command below points to a federation named `embedded-federation`. Its entry point is defined in the `pyproject.toml`.
+With both the long-running server (`SuperLink`) and two `SuperNodes` up and running, we can now start run. Note that the command below points to a federation named `embedded-federation`. Its entry point is defined in the `pyproject.toml`. Run the following from your development machine where you have cloned this example to, e.g. your laptop.
 
 ```shell
 flwr run . embedded-federation

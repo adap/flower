@@ -1,4 +1,4 @@
-"""pytorchexample: A Flower / PyTorch app."""
+"""embeddedexample: A Flower / PyTorch app."""
 
 from typing import List, Tuple
 

@@ -7,20 +7,20 @@ DATASET_DIRECTORY = "datasets"
 
 
 def save_dataset_to_disk(num_partitions: int):
-    """This function downloads the CIFAR-10 dataset and generates N partitions.
+    """This function downloads the Fashion-MNIST dataset and generates N partitions.
 
     Each will be saved into the DATASET_DIRECTORY.
     """
     partitioner = IidPartitioner(num_partitions=num_partitions)
     fds = FederatedDataset(
-        dataset="uoft-cs/cifar10",
+        dataset="zalando-datasets/fashion_mnist",
         partitioners={"train": partitioner},
     )
 
     for partition_id in range(num_partitions):
         partition = fds.load_partition(partition_id)
         partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
-        file_path = f"./{DATASET_DIRECTORY}/cifar10_part_{partition_id + 1}"
+        file_path = f"./{DATASET_DIRECTORY}/fashionmnist_part_{partition_id + 1}"
         partition_train_test.save_to_disk(file_path)
         print(f"Written: {file_path}")
 
@@ -28,7 +28,7 @@ def save_dataset_to_disk(num_partitions: int):
 if __name__ == "__main__":
     # Initialize argument parser
     parser = argparse.ArgumentParser(
-        description="Save CIFAR-10 dataset partitions to disk"
+        description="Save Fashion-MNIST dataset partitions to disk"
     )
 
     # Add an optional positional argument for number of partitions

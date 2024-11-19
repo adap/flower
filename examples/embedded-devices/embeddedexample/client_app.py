@@ -1,4 +1,4 @@
-"""pytorchexample: A Flower / PyTorch app."""
+"""embeddedexample: A Flower / PyTorch app."""
 
 import torch
 from flwr.client import ClientApp, NumPyClient
