@@ -35,27 +35,32 @@ instantiated as follows:
             fraction_evaluate=1.0,
         )
 
+        # Create and return ServerAppComponents
         return ServerAppComponents(strategy=strategy, config=config)
 
 
     # Create ServerApp
     app = ServerApp(server_fn=server_fn)
 
-A Strategy needs to be instantiated inside a function (e.g. ``server_fn`` in this
-example) that takes ``Context`` and returns a ``ServerAppComponents`` object. The
-parameters of the strategy can be customized by accessing them from the ``Context``
-object, which in turn contains the values specified in the ``[tool.flwr.app.config]``
-table in your ``pyproject.toml`` (a snippet is shown below).
+To make the ``ServerApp`` use this strategy, pass a ``server_fn`` function to the
+``ServerApp`` constructor. The ``server_fn`` function should return a
+``ServerAppComponents`` object that contains the strategy instance and a
+``ServerConfig`` instance.
 
-.. code-block:: python
+Both ``Strategy`` and ``ServerConfig`` classes can be configured with parameters. The
+``Context`` object passed to ``server_fn`` contains the values specified in the
+``[tool.flwr.app.config]`` table in your ``pyproject.toml`` (a snippet is shown below).
+To access these values, use ``context.run_config``.
 
-    ...
+.. code-block:: toml
+
+    # ...
+
     [tool.flwr.app.config]
     num - server - rounds = 10
     fraction - fit = 0.5
 
-The ``server_fn`` function needs to be passed to a ``ServerApp`` object (e.g. named
-``app`` in this example) which is placed at the bottom of the file.
+    # ...
 
 Customize an existing strategy with callback functions
 ------------------------------------------------------
@@ -95,15 +100,18 @@ client. It must return a dictionary of arbitrary configuration values ``client.f
 
 
     def server_fn(context: Context):
-        # Optional context-based parameters specification
+        # Read num_rounds from context
         num_rounds = context.run_config["num-server-rounds"]
         config = ServerConfig(num_rounds=num_rounds)
 
+        # Instantiate FedAvg strategy
         strategy = FedAvg(
             fraction_fit=context.run_config["fraction-fit"],
             fraction_evaluate=1.0,
             on_fit_config_fn=get_on_fit_config_fn(),
         )
+
+        # Create and return ServerAppComponents
         return ServerAppComponents(strategy=strategy, config=config)
 
 
