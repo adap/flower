@@ -237,7 +237,6 @@ Deployment
          --node-config "partition-id=1 num-partitions=2" \
          --supernode-address 127.0.0.1:9095
 
-
 - Here's another example to start with HTTPS. Use the ``--ssl-ca-certfile``,
   ``--ssl-certfile``, and ``--ssl-keyfile`` command line options to pass paths to (CA
   certificate, server certificate, and server private key).
@@ -264,8 +263,6 @@ Deployment
          --node-config "partition-id=1 num-partitions=2" \
          --supernode-address 127.0.0.1:9095 \
          --root-certificates <your-ca-cert-filepath>
-
-
 
 Simulation in CLI
 ~~~~~~~~~~~~~~~~~
