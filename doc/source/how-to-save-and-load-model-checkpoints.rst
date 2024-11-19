@@ -48,9 +48,7 @@ returns those aggregated weights to the caller (i.e., the server):
         strategy = SaveModelStrategy(
             # (same arguments as FedAvg here)
         )
-        config = ServerConfig(
-            # (your server configs here, like `num-server-rounds`)
-        )
+        config = ServerConfig(num_rounds=3)
         return ServerAppComponents(strategy=strategy, config=config)
 
 
