@@ -82,10 +82,12 @@ def try_obtain_root_certificates(
         if root_cert_path is None:
             log(
                 ERROR,
-                "'--root-certificates' are required if not running with "
-                "'--insecure' mode.",
+                "Root certificates are required unless running in insecure mode. "
+                "Please provide a certificate path to `--root-certificates` or run "
+                "the client in insecure mode using '--insecure' if you understand "
+                "the risks.",
             )
-            return None
+            sys.exit(1)
         if not isfile(root_cert_path):
             log(ERROR, "Path argument `--root-certificates` does not point to a file.")
             return None
@@ -148,9 +150,11 @@ def try_obtain_server_certificates(
                 "and `--ssl-keyfile` to create a secure connection "
                 "in Fleet API server (REST, experimental)."
             )
-    sys.exit(
+    log(
+        ERROR,
         "Certificates are required unless running in insecure mode. "
         "Please provide certificate paths to `--ssl-certfile`, "
         "`--ssl-keyfile`, and `—-ssl-ca-certfile` or run the server "
-        "in insecure mode using '--insecure' if you understand the risks."
+        "in insecure mode using '--insecure' if you understand the risks.",
     )
+    sys.exit(1)
