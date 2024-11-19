@@ -49,7 +49,7 @@ def partition_data(data, num_partitions):
 def sim_data(ni: int, num_clients: int, num_features: int, alpha=1, beta=1):
     """Simulate data for simII."""
 
-    np.random.seed(2025)
+    # np.random.seed(2025)
     
     # generate client-based model coefs
     u = np.random.normal(0, alpha, num_clients)

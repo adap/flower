@@ -67,8 +67,17 @@ def main(cfg: DictConfig):
         num_features = cfg.num_features
         num_classes = cfg.num_classes
 
-        dataset = sim_data(num_obs, num_clients, num_features, 1, 1)
-        X_test, y_test = sim_data(num_obs, 1, num_features, 1, 1)
+        # import data from fedht/data folder
+        with open('fedht/data/simII_train.pkl', 'rb') as file:
+            dataset = pickle.load(file)
+        
+        with open('fedht/data/simII_test.pkl', 'rb') as file:
+            test_dataset = pickle.load(file)
+
+        X_test, y_test = test_dataset
+
+        # dataset = sim_data(num_obs, num_clients, num_features, 1, 1)
+        # X_test, y_test = sim_data(num_obs, 1, num_features, 1, 1)
         test_dataset = MyDataset(X_test[0, :, :], y_test[:, 0])
         testloader = DataLoader(test_dataset, batch_size=cfg.batch_size, shuffle=False)
 
