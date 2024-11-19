@@ -1,6 +1,6 @@
 services:
   supernode-1:
-    image: flwr/supernode:${FLWR_VERSION:-1.13.0}
+    image: flwr/supernode:${FLWR_VERSION:-1.14.0}
     command:
       - --superlink
       - ${SUPERLINK_IP:-127.0.0.1}:9092
@@ -26,7 +26,7 @@ services:
         target: /app/certificates/server.key
 
   supernode-2:
-    image: flwr/supernode:${FLWR_VERSION:-1.13.0}
+    image: flwr/supernode:${FLWR_VERSION:-1.14.0}
     command:
       - --superlink
       - ${SUPERLINK_IP:-127.0.0.1}:9092
@@ -54,7 +54,7 @@ services:
   # uncomment to add another SuperNode
   #
   # supernode-3:
-  #   image: flwr/supernode:${FLWR_VERSION:-1.13.0}
+  #   image: flwr/supernode:${FLWR_VERSION:-1.14.0}
   #   command:
   #     - --superlink
   #     - ${SUPERLINK_IP:-127.0.0.1}:9092
@@ -83,7 +83,7 @@ services:
     build:
       context: ${PROJECT_DIR:-.}
       dockerfile_inline: |
-        FROM flwr/clientapp:${FLWR_VERSION:-1.13.0}
+        FROM flwr/clientapp:${FLWR_VERSION:-1.14.0}
 
         WORKDIR /app
         COPY --chown=app:app pyproject.toml .
@@ -111,7 +111,7 @@ services:
     build:
       context: ${PROJECT_DIR:-.}
       dockerfile_inline: |
-        FROM flwr/clientapp:${FLWR_VERSION:-1.13.0}
+        FROM flwr/clientapp:${FLWR_VERSION:-1.14.0}
 
         WORKDIR /app
         COPY --chown=app:app pyproject.toml .
@@ -141,7 +141,7 @@ services:
   #   build:
   #     context: ${PROJECT_DIR:-.}
   #     dockerfile_inline: |
-  #       FROM flwr/clientapp:${FLWR_VERSION:-1.13.0}
+  #       FROM flwr/clientapp:${FLWR_VERSION:-1.14.0}
 
   #       WORKDIR /app
   #       COPY --chown=app:app pyproject.toml .
