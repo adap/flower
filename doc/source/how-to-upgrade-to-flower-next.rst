@@ -31,8 +31,6 @@ Let's dive in!
 
 .. |runsim_link| replace:: ``run_simulation()``
 
-.. |flowernext_superlink_link| replace:: ``flower-superlink``
-
 .. |flowernext_clientapp_link| replace:: ``flower-client-app``
 
 .. |flowernext_serverapp_link| replace:: ``flower-server-app``
