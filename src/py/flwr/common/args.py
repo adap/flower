@@ -49,13 +49,6 @@ def add_args_flwr_app_common(parser: argparse.ArgumentParser) -> None:
         "paths are provided. By default, the server runs with HTTPS enabled. "
         "Use this flag only if you understand the risks.",
     )
-    parser.add_argument(
-        "--root-certificates",
-        metavar="ROOT_CERT",
-        type=str,
-        help="Specifies the path to the PEM-encoded root certificate file for "
-        "establishing secure HTTPS connections.",
-    )
 
 
 def try_obtain_root_certificates(
