@@ -28,6 +28,47 @@ instructions below.
 
 .. tab-set::
 
+    .. tab-item:: ServerApp
+
+        **Prerequisites**
+
+        1. Before running the ServerApp as a subprocess, ensure that the FAB dependencies have
+        been installed in the SuperLink images. This can be done by extending the SuperLink image:
+
+        .. code-block:: dockerfile
+            :caption: superlink.Dockerfile
+            :linenos:
+            :substitutions:
+
+            FROM flwr/superlink:|stable_flwr_version|
+
+            WORKDIR /app
+            COPY pyproject.toml .
+            RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
+                && python -m pip install -U --no-cache-dir .
+
+            ENTRYPOINT ["flower-superlink"]
+
+        2. Next, build the SuperLink Docker image by running the following command in the
+        directory where Dockerfile is located:
+
+        .. code-block:: shell
+
+            $ docker build -f superlink.Dockerfile -t flwr_superlink:0.0.1 .
+
+        **Run the ServerApp as a Subprocess**
+
+        Start the SuperLink and run the ServerApp as a subprocess (note that
+        the subprocess mode is the default, so you do not have to explicitly set the ``--isolation`` flag):
+
+        .. code-block:: shell
+
+            $ docker run --rm \
+                -p 9091:9091 -p 9092:9092 -p 9093:9093 \
+                --detach \
+                flwr_superlink:0.0.1 \
+                --insecure
+
     .. tab-item:: ClientApp
 
         **Prerequisites**
@@ -69,45 +110,3 @@ instructions below.
                 flwr_supernode:0.0.1 \
                 --insecure \
                 --superlink <superlink-address>:9092
-
-    .. tab-item:: ServerApp
-
-        **Prerequisites**
-
-        1. Before running the ServerApp as a subprocess, ensure that the FAB dependencies have
-        been installed in the SuperLink images. Similar to the SuperNode, this can be done by extending the SuperLink
-        image:
-
-        .. code-block:: dockerfile
-            :caption: superlink.Dockerfile
-            :linenos:
-            :substitutions:
-
-            FROM flwr/superlink:|stable_flwr_version|
-
-            WORKDIR /app
-            COPY pyproject.toml .
-            RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
-                && python -m pip install -U --no-cache-dir .
-
-            ENTRYPOINT ["flower-superlink"]
-
-        2. Next, build the SuperLink Docker image by running the following command in the
-        directory where Dockerfile is located:
-
-        .. code-block:: shell
-
-            $ docker build -f superlink.Dockerfile -t flwr_superlink:0.0.1 .
-
-        **Run the ServerApp as a Subprocess**
-
-        Start the SuperLink and run the ServerApp as a subprocess (Like the SuperNode, the subprocess mode
-        is the default mode when starting the SuperLink. You do not have to explicitly set the `--isolation` argument):
-
-        .. code-block:: shell
-
-            $ docker run --rm \
-                -p 9091:9091 -p 9092:9092 -p 9093:9093 \
-                --detach \
-                flwr_superlink:0.0.1 \
-                --insecure

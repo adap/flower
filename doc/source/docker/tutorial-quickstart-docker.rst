@@ -146,13 +146,98 @@ Start two SuperNode containers.
            --clientappio-api-address 0.0.0.0:9095 \
            --isolation process
 
-Step 4: Start the ClientApp
+Step 4: Start a ServerApp
+-------------------------
+
+The ServerApp Docker image comes with a pre-installed version of Flower and serves as a
+base for building your own ServerApp image. In order to install the FAB dependencies,
+you will need to create a Dockerfile that extends the ServerApp image and installs the
+required dependencies.
+
+1. Create a ServerApp Dockerfile called ``serverapp.Dockerfile`` and paste the following
+   code in:
+
+   .. code-block:: dockerfile
+       :caption: serverapp.Dockerfile
+       :substitutions:
+
+       FROM flwr/serverapp:|stable_flwr_version|
+
+       WORKDIR /app
+
+       COPY pyproject.toml .
+       RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
+          && python -m pip install -U --no-cache-dir .
+
+       ENTRYPOINT ["flwr-serverapp"]
+
+   .. dropdown:: Understand the Dockerfile
+
+       * | :substitution-code:`FROM flwr/serverapp:|stable_flwr_version|`: This line specifies that the Docker image
+         | to be built from is the ``flwr/serverapp`` image, version :substitution-code:`|stable_flwr_version|`.
+       * | ``WORKDIR /app``: Set the working directory for the container to ``/app``.
+         | Any subsequent commands that reference a directory will be relative to this directory.
+       * | ``COPY pyproject.toml .``: Copy the ``pyproject.toml`` file
+         | from the current working directory into the container's ``/app`` directory.
+       * | ``RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml``: Remove the ``flwr`` dependency
+         | from the ``pyproject.toml``.
+       * | ``python -m pip install -U --no-cache-dir .``: Run the ``pip`` install command to
+         | install the dependencies defined in the ``pyproject.toml`` file
+         |
+         | The ``-U`` flag indicates that any existing packages should be upgraded, and
+         | ``--no-cache-dir`` prevents pip from using the cache to speed up the installation.
+       * | ``ENTRYPOINT ["flwr-serverapp"]``: Set the command ``flwr-serverapp`` to be
+         | the default command run when the container is started.
+
+   .. important::
+
+       Note that `flwr <https://pypi.org/project/flwr/>`__ is already installed in the
+       ``flwr/clientapp`` base image, so only other package dependencies such as
+       ``flwr-datasets``, ``torch``, etc., need to be installed. As a result, the
+       ``flwr`` dependency is removed from the ``pyproject.toml`` after it has been
+       copied into the Docker image (see line 5).
+
+2. Afterward, in the directory that holds the Dockerfile, execute this Docker command to
+   build the ServerApp image:
+
+   .. code-block:: bash
+
+       $ docker build -f serverapp.Dockerfile -t flwr_serverapp:0.0.1 .
+
+3. Start the ServerApp container:
+
+   .. code-block:: bash
+
+       $ docker run --rm \
+           --network flwr-network \
+           --name serverapp \
+           --detach \
+           flwr_serverapp:0.0.1 \
+           --insecure \
+           --serverappio-api-address superlink:9091
+
+   .. dropdown:: Understand the command
+
+       * ``docker run``: This tells Docker to run a container from an image.
+       * ``--rm``: Remove the container once it is stopped or the command exits.
+       * ``--network flwr-network``: Make the container join the network named ``flwr-network``.
+       * ``--name serverapp``: Assign the name ``serverapp`` to the container.
+       * ``--detach``: Run the container in the background, freeing up the terminal.
+       * | ``flwr_serverapp:0.0.1``: This is the name of the image to be run and the specific tag
+         | of the image.
+       * | ``--insecure``: This flag tells the container to operate in an insecure mode, allowing
+         | unencrypted communication. Secure connections will be added in future releases.
+       * | ``--serverappio-api-address superlink:9091``: Connect to the SuperLink's ServerAppIO API
+         | at the address ``superlink:9091``.
+
+Step 5: Start the ClientApp
 ---------------------------
 
-The ClientApp Docker image comes with a pre-installed version of Flower and serves as a
-base for building your own ClientApp image. In order to install the FAB dependencies,
-you will need to create a Dockerfile that extends the ClientApp image and installs the
-required dependencies.
+The procedure for building and running a ClientApp image is almost identical to the
+ServerApp image.
+
+Similar to the ServerApp image, you will need to create a Dockerfile that extends the
+ClientApp image and installs the required FAB dependencies.
 
 1. Create a ClientApp Dockerfile called ``clientapp.Dockerfile`` and paste the following
    code into it:
@@ -188,14 +273,6 @@ required dependencies.
          | ``--no-cache-dir`` prevents pip from using the cache to speed up the installation.
        * | ``ENTRYPOINT ["flwr-clientapp"]``: Set the command ``flwr-clientapp`` to be
          | the default command run when the container is started.
-
-   .. important::
-
-       Note that `flwr <https://pypi.org/project/flwr/>`__ is already installed in the
-       ``flwr/clientapp`` base image, so only other package dependencies such as
-       ``flwr-datasets``, ``torch``, etc., need to be installed. As a result, the
-       ``flwr`` dependency is removed from the ``pyproject.toml`` after it has been
-       copied into the Docker image (see line 5).
 
 2. Next, build the ClientApp Docker image by running the following command in the
    directory where the Dockerfile is located:
@@ -245,83 +322,6 @@ required dependencies.
            --insecure \
            --clientappio-api-address supernode-2:9095
 
-Step 5: Start a ServerApp
--------------------------
-
-The procedure for building and running a ServerApp image is almost identical to the
-ClientApp image.
-
-Similar to the ClientApp image, you will need to create a Dockerfile that extends the
-ServerApp image and installs the required FAB dependencies.
-
-1. Create a ServerApp Dockerfile called ``serverapp.Dockerfile`` and paste the following
-   code in:
-
-   .. code-block:: dockerfile
-       :caption: serverapp.Dockerfile
-       :substitutions:
-
-       FROM flwr/serverapp:|stable_flwr_version|
-
-       WORKDIR /app
-
-       COPY pyproject.toml .
-       RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
-          && python -m pip install -U --no-cache-dir .
-
-       ENTRYPOINT ["flwr-serverapp"]
-
-   .. dropdown:: Understand the Dockerfile
-
-       * | :substitution-code:`FROM flwr/serverapp:|stable_flwr_version|`: This line specifies that the Docker image
-         | to be built from is the ``flwr/serverapp`` image, version :substitution-code:`|stable_flwr_version|`.
-       * | ``WORKDIR /app``: Set the working directory for the container to ``/app``.
-         | Any subsequent commands that reference a directory will be relative to this directory.
-       * | ``COPY pyproject.toml .``: Copy the ``pyproject.toml`` file
-         | from the current working directory into the container's ``/app`` directory.
-       * | ``RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml``: Remove the ``flwr`` dependency
-         | from the ``pyproject.toml``.
-       * | ``python -m pip install -U --no-cache-dir .``: Run the ``pip`` install command to
-         | install the dependencies defined in the ``pyproject.toml`` file
-         |
-         | The ``-U`` flag indicates that any existing packages should be upgraded, and
-         | ``--no-cache-dir`` prevents pip from using the cache to speed up the installation.
-       * | ``ENTRYPOINT ["flwr-serverapp"]``: Set the command ``flwr-serverapp`` to be
-         | the default command run when the container is started.
-
-2. Afterward, in the directory that holds the Dockerfile, execute this Docker command to
-   build the ServerApp image:
-
-   .. code-block:: bash
-
-       $ docker build -f serverapp.Dockerfile -t flwr_serverapp:0.0.1 .
-
-3. Start the ServerApp container:
-
-   .. code-block:: bash
-
-       $ docker run --rm \
-           --network flwr-network \
-           --name serverapp \
-           --detach \
-           flwr_serverapp:0.0.1 \
-           --insecure \
-           --serverappio-api-address superlink:9091
-
-   .. dropdown:: Understand the command
-
-       * ``docker run``: This tells Docker to run a container from an image.
-       * ``--rm``: Remove the container once it is stopped or the command exits.
-       * ``--network flwr-network``: Make the container join the network named ``flwr-network``.
-       * ``--name serverapp``: Assign the name ``serverapp`` to the container.
-       * ``--detach``: Run the container in the background, freeing up the terminal.
-       * | ``flwr_serverapp:0.0.1``: This is the name of the image to be run and the specific tag
-         | of the image.
-       * | ``--insecure``: This flag tells the container to operate in an insecure mode, allowing
-         | unencrypted communication. Secure connections will be added in future releases.
-       * | ``--serverappio-api-address superlink:9091``: Connect to the SuperLink's ServerAppIO API
-         | at the address ``superlink:9091``.
-
 Step 6: Run the Quickstart Project
 ----------------------------------
 
@@ -356,28 +356,36 @@ Step 7: Update the Application
 
 2. Stop the current ServerApp and ClientApp containers:
 
+   .. note::
+
+       If you have modified the dependencies listed in your ``pyproject.toml`` file, it
+       is essential to rebuild images.
+
+       If you haven’t made any changes, you can skip steps 2 through 4.
+
    .. code-block:: bash
 
        $ docker stop $(docker ps -a -q  --filter ancestor=flwr_clientapp:0.0.1) serverapp
 
 3. Rebuild ServerApp and ClientApp images:
 
-   .. note::
+   .. code-block:: bash
 
-       If you have modified the dependencies listed in your ``pyproject.toml`` file, it
-       is essential to rebuild images.
+       $ docker build -f clientapp.Dockerfile -t flwr_clientapp:0.0.1 . && \
+         docker build -f serverapp.Dockerfile -t flwr_serverapp:0.0.1 .
 
-       If you haven't made any changes, you can skip this step.
+4. Launch one new ServerApp and two new ClientApp containers based on the newly built
+   image:
 
    .. code-block:: bash
 
-       $ docker build -f clientapp.Dockerfile -t flwr_serverapp:0.0.1 . && \
-         docker build -f serverapp.Dockerfile -t flwr_clientapp:0.0.1 .
-
-4. Launch two new ClientApp containers based on the newly built image:
-
-   .. code-block:: bash
-
+       $ docker run --rm \
+           --network flwr-network \
+           --name serverapp \
+           --detach \
+           flwr_serverapp:0.0.1 \
+           --insecure \
+           --serverappio-api-address superlink:9091
        $ docker run --rm \
            --network flwr-network \
            --detach \
@@ -390,13 +398,6 @@ Step 7: Update the Application
            flwr_clientapp:0.0.1 \
            --insecure \
            --clientappio-api-address supernode-2:9095
-       $ docker run --rm \
-           --network flwr-network \
-           --name serverapp \
-           --detach \
-           flwr_serverapp:0.0.1 \
-           --insecure \
-           ----serverappio-api-address superlink:9091
 
 5. Run the updated project:
 

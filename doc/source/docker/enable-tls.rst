@@ -32,13 +32,12 @@ Transport Layer Security (TLS) for each Flower component to ensure secure commun
         :doc:`run-as-subprocess`.
 
         To enable TLS between the SuperLink and SuperNode, as well as between the SuperLink and the ``flwr``
-        CLI, you will need two sets of PEM-encoded root certificates, private keys, and certificate chains.
+        CLI, you will need a PEM-encoded root certificate, private key, and certificate chain.
 
         **SuperLink**
 
-        Assuming all files we need are in the local ``superlink-certificates`` and
-        ``supernode-certificates`` directories, we can use the flag ``--volume`` to mount the
-        local directories into the SuperNode container:
+        Assuming all files we need are in the local ``superlink-certificates`` directory,
+        we can use the flag ``--volume`` to mount the local directories into the SuperLink container:
 
         .. code-block:: bash
 
@@ -81,14 +80,8 @@ Transport Layer Security (TLS) for each Flower component to ensure secure commun
 
         .. note::
 
-            If you're generating self-signed certificates and the ``ca.crt`` certificate or the
-            ``supernode-certificates`` directory doesn't exist on the SuperNode, you can copy it over
-            after the generation step.
-
-        .. note::
-
-            Each SuperNode can have its own set of keys and certificates, or they can all share
-            the same set.
+            If you're generating self-signed certificates and the ``ca.crt`` certificate doesn't
+            exist on the SuperNode, you can copy it over after the generation step.
 
         .. code-block:: bash
 
@@ -123,12 +116,11 @@ Transport Layer Security (TLS) for each Flower component to ensure secure commun
 
         **SuperLink and ServerApp**
 
-        To enable TLS between all Flower components, you will need two sets of PEM-encoded root
-        certificates, private keys, and certificate chains.
+        To enable TLS between the SuperLink and SuperNode, as well as between the SuperLink and the ``flwr``
+        CLI, you will need a PEM-encoded root certificate, private key, and certificate chain.
 
-        Assuming all files we need are in the local ``superlink-certificates``
-        directory, we can use the flag ``--volume`` to mount the
-        local directory into the SuperLink container:
+        Assuming all files we need are in the local ``superlink-certificates`` directory, we can
+        use the flag ``--volume`` to mount the local directory into the SuperLink container:
 
 
         .. code-block:: bash
@@ -188,20 +180,14 @@ Transport Layer Security (TLS) for each Flower component to ensure secure commun
             * ``--rm``: Remove the container once it is stopped or the command exits.
             * ``<serverapp-image>``: The name of your ServerApp image to be run.
             * | ``--insecure``:  This flag tells the container to operate in an insecure mode, allowing
-         | unencrypted communication. Secure connections will be added in future releases.
+              | unencrypted communication. Secure connections will be added in future releases.
 
         **SuperNode and ClientApp**
 
         .. note::
 
-            If you're generating self-signed certificates and the ``ca.crt`` certificate 
-            doesn't exist on the SuperNode, you can copy it over
-            after the generation step.
-
-        .. note::
-
-            Each SuperNode can have its own set of certificates, or they can all share
-            the same set.
+            If you're generating self-signed certificates and the ``ca.crt`` certificate doesn't
+            exist on the SuperNode, you can copy it over after the generation step.
 
         Start the SuperNode container:
 
@@ -246,7 +232,7 @@ Transport Layer Security (TLS) for each Flower component to ensure secure commun
             * ``--rm``: Remove the container once it is stopped or the command exits.
             * ``<clientapp-image>``: The name of your ClientApp image to be run.
             * | ``--insecure``:  This flag tells the container to operate in an insecure mode, allowing
-         | unencrypted communication. Secure connections will be added in future releases.
+              | unencrypted communication. Secure connections will be added in future releases.
 
 Append the following lines to the end of the ``pyproject.toml`` file and save it:
 
