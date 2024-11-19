@@ -219,6 +219,30 @@ Deployment
     # Start a Superlink
     $ flower-superlink --insecure
 
+    # Flower v1.13
+    # In a new terminal window, start a long-running SuperNode
+    $ flower-supernode \
+         --insecure \
+         --superlink 127.0.0.1:9092 \
+         --node-config "partition-id=0 num-partitions=2" \
+         --supernode-address 127.0.0.1:9094 \
+         --isolation subprocess
+
+    # In another terminal window, start another long-running SuperNode (at least 2 SuperNodes are required)
+    $ flower-supernode \
+         --insecure \
+         --superlink 127.0.0.1:9092 \
+         --node-config "partition-id=1 num-partitions=2" \
+         --supernode-address 127.0.0.1:9095 \
+         --isolation subprocess
+
+    # In a new terminal, start the SuperExec process with the following command:
+    $ flower-superexec \
+        --insecure \
+        --executor flwr.superexec.deployment:executor \
+        --executor-config 'superlink="127.0.0.1:9091"'
+
+    # Flower up to v1.12
     # In a new terminal window, start a long-running SuperNode
     $ flower-client-app client:app --insecure
 
@@ -240,6 +264,30 @@ Deployment
         --ssl-certfile <your-server-cert-filepath> \
         --ssl-keyfile <your-privatekey-filepath>
 
+    # Flower v1.13
+    # In a new terminal window, start a long-running SuperNode
+    $ flower-supernode \
+         --superlink 127.0.0.1:9092 \
+         --node-config "partition-id=0 num-partitions=2" \
+         --supernode-address 127.0.0.1:9094 \
+         --isolation subprocess \
+         --root-certificates <your-ca-cert-filepath>
+
+    # In another terminal window, start another long-running SuperNode (at least 2 SuperNodes are required)
+    $ flower-supernode \
+         --superlink 127.0.0.1:9092 \
+         --node-config "partition-id=1 num-partitions=2" \
+         --supernode-address 127.0.0.1:9095 \
+         --isolation subprocess \
+         --root-certificates <your-ca-cert-filepath>
+
+    # In a new terminal, start the SuperExec process with the following command:
+    $ flower-superexec \
+        --executor flwr.superexec.deployment:executor \
+        --executor-config 'superlink="127.0.0.1:9091"' \
+        --root-certificates <your-ca-cert-filepath>
+
+    # Flower up to v1.12
     # In a new terminal window, start a long-running secure SuperNode
     $ flower-client-app client:app \
         --root-certificates <your-ca-cert-filepath> \
