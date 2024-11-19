@@ -288,7 +288,7 @@ def run_superlink() -> None:
             address=serverappio_address,
             state_factory=state_factory,
             ffs_factory=ffs_factory,
-            certificates=certificates,
+            certificates=None,  # ServerAppIo API doesn't support SSL yet
         )
         grpc_servers.append(serverappio_server)
 
@@ -398,7 +398,6 @@ def run_superlink() -> None:
             args=(
                 state_factory,
                 address,
-                args.ssl_ca_certfile,
                 cmd,
             ),
         )
@@ -424,7 +423,6 @@ def run_superlink() -> None:
 def _flwr_scheduler(
     state_factory: LinkStateFactory,
     io_api_address: str,
-    ssl_ca_certfile: Optional[str],
     cmd: str,
 ) -> None:
     log(DEBUG, "Started %s scheduler thread.", cmd)
@@ -450,12 +448,8 @@ def _flwr_scheduler(
                 "--run-once",
                 "--serverappio-api-address",
                 io_api_address,
+                "--insecure",
             ]
-            if ssl_ca_certfile:
-                command.append("--root-certificates")
-                command.append(ssl_ca_certfile)
-            else:
-                command.append("--insecure")
 
             subprocess.Popen(  # pylint: disable=consider-using-with
                 command,
