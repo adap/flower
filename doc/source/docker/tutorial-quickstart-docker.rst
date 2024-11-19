@@ -228,7 +228,7 @@ required dependencies.
        * ``--network flwr-network``: Make the container join the network named ``flwr-network``.
        * ``--detach``: Run the container in the background, freeing up the terminal.
        * | ``--insecure``: This flag tells the container to operate in an insecure mode, allowing
-         | unencrypted communication.
+         | unencrypted communication. Secure connections will be added in future releases.
        * | ``flwr_clientapp:0.0.1``: This is the name of the image to be run and the specific tag
          | of the image.
        * | ``--clientappio-api-address supernode-1:9094``: Connect to the SuperNode's ClientAppIO
@@ -318,7 +318,7 @@ ServerApp image and installs the required FAB dependencies.
        * | ``flwr_serverapp:0.0.1``: This is the name of the image to be run and the specific tag
          | of the image.
        * | ``--insecure``: This flag tells the container to operate in an insecure mode, allowing
-         | unencrypted communication.
+         | unencrypted communication. Secure connections will be added in future releases.
        * | ``--serverappio-api-address superlink:9091``: Connect to the SuperLink's ServerAppIO API
          | at the address ``superlink:9091``.
 
@@ -354,13 +354,13 @@ Step 7: Update the Application
        partition_train_test = partition.train_test_split(test_size=0.2, seed=43)
        # ...
 
-2. Stop the current ClientApp and ServerApp containers:
+2. Stop the current ServerApp and ClientApp containers:
 
    .. code-block:: bash
 
        $ docker stop $(docker ps -a -q  --filter ancestor=flwr_clientapp:0.0.1) serverapp
 
-3. Rebuild ClientApp and ServerApp image:
+3. Rebuild ServerApp and ClientApp images:
 
    .. note::
 
@@ -371,8 +371,8 @@ Step 7: Update the Application
 
    .. code-block:: bash
 
-       $ docker build -f clientapp.Dockerfile -t flwr_clientapp:0.0.1 . && \
-         docker build -f serverapp.Dockerfile -t flwr_serverapp:0.0.1 .
+       $ docker build -f clientapp.Dockerfile -t flwr_serverapp:0.0.1 . && \
+         docker build -f serverapp.Dockerfile -t flwr_clientapp:0.0.1 .
 
 4. Launch two new ClientApp containers based on the newly built image:
 
