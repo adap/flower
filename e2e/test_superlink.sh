@@ -78,14 +78,14 @@ timeout 5m flower-superlink $server_arg $db_arg $rest_arg_superlink $server_auth
 sl_pid=$(pgrep -f "flower-superlink")
 sleep 3
 
-timeout 5m flower-supernode $client_arg $server_arg $rest_arg_supernode \
+timeout 5m flower-supernode $client_arg $rest_arg_supernode \
   --superlink $server_address $client_auth_1 \
   --clientappio-api-address "localhost:9094" \
   --max-retries 0 &
 cl1_pid=$!
 sleep 3
 
-timeout 5m flower-supernode $client_arg $server_arg $rest_arg_supernode \
+timeout 5m flower-supernode $client_arg $rest_arg_supernode \
   --superlink $server_address $client_auth_2 \
   --clientappio-api-address "localhost:9096" \
   --max-retries 0 &
