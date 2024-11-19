@@ -93,12 +93,8 @@ Transport Layer Security (TLS) for each Flower component to ensure secure commun
         .. code-block:: bash
 
             $ docker run --rm \
-                --volume ./supernode-certificates/:/app/certificates/:ro \
                 --volume ./superlink-certificates/ca.crt:/app/ca.crt/:ro \
                 <supernode-image> \
-                --ssl-ca-certfile certificates/ca.crt \
-                --ssl-certfile certificates/server.pem \
-                --ssl-keyfile certificates/server.key \
                 --root-certificates ca.crt \
                 <additional-args>
 
@@ -106,31 +102,10 @@ Transport Layer Security (TLS) for each Flower component to ensure secure commun
 
             * ``docker run``: This tells Docker to run a container from an image.
             * ``--rm``: Remove the container once it is stopped or the command exits.
-            * | ``--volume ./supernode-certificates/:/app/certificates/:ro``: Mount the ``supernode-certificates``
-              | directory in the current working directory of the host machine as a read-only volume at the
-              | ``/app/certificates`` directory inside the container.
-              |
-              | This allows the container to access the TLS certificates that are stored in the certificates
-              | directory.
             * | ``--volume ./superlink-certificates/ca.crt:/app/ca.crt/:ro``: Mount the ``ca.crt``
               | file from the ``superlink-certificates`` directory of the host machine as a read-only
               | volume at the ``/app/ca.crt`` directory inside the container.
             * ``<supernode-image>``: The name of your SuperNode image to be run.
-            * | ``--ssl-ca-certfile certificates/ca.crt``: Specify the location of the CA certificate file
-              | inside the container.
-              |
-              | The ``certificates/ca.crt`` file is a certificate that is used to verify the identity of the
-              | SuperNode.
-            * | ``--ssl-certfile certificates/server.pem``: Specify the location of the SuperNode's
-              | TLS certificate file inside the container.
-              |
-              | The ``certificates/server.pem`` file is used to identify the SuperNode and to encrypt the
-              | data that is transmitted over the network.
-            * | ``--ssl-keyfile certificates/server.key``: Specify the location of the SuperNode's
-              | TLS private key file inside the container.
-              |
-              | The ``certificates/server.key`` file is used to decrypt the data that is transmitted over
-              | the network.
             * | ``--root-certificates ca.crt``: This specifies the location of the CA certificate file
               | inside the container.
               |
@@ -151,11 +126,10 @@ Transport Layer Security (TLS) for each Flower component to ensure secure commun
         To enable TLS between all Flower components, you will need two sets of PEM-encoded root
         certificates, private keys, and certificate chains.
 
-        Assuming all files we need are in the local ``superlink-certificates`` and
-        ``supernode-certificates`` directories, we can use the flag ``--volume`` to mount the
-        local directories into the SuperNode container:
+        Assuming all files we need are in the local ``superlink-certificates``
+        directory, we can use the flag ``--volume`` to mount the
+        local directory into the SuperLink container:
 
-        Start the SuperLink container:
 
         .. code-block:: bash
             :substitutions:
@@ -204,35 +178,29 @@ Transport Layer Security (TLS) for each Flower component to ensure secure commun
         .. code-block:: bash
 
             $ docker run --rm \
-                --volume ./superlink-certificates/ca.crt:/app/ca.crt:ro \
                 <serverapp-image> \
-                --root-certificates ca.crt \
+                --insecure \
                 <additional-args>
 
         .. dropdown:: Understand the command
 
             * ``docker run``: This tells Docker to run a container from an image.
             * ``--rm``: Remove the container once it is stopped or the command exits.
-            * | ``--volume ./superlink-certificates/ca.crt:/app/ca.crt:ro``: Mount the ``ca.crt`` file from
-              | the ``superlink-certificates`` directory of the host machine as a read-only volume at the
-              | ``/app/ca.crt`` directory inside the container.
             * ``<serverapp-image>``: The name of your ServerApp image to be run.
-            * | ``--root-certificates ca.crt``: This specifies the location of the CA
-              | certificate file inside the container.
-              |
-              | The ``ca.crt`` file is used to verify the identity of the SuperLink.
+            * | ``--insecure``:  This flag tells the container to operate in an insecure mode, allowing
+         | unencrypted communication. Secure connections will be added in future releases.
 
         **SuperNode and ClientApp**
 
         .. note::
 
-            If you're generating self-signed certificates and the ``ca.crt`` certificate or the
-            ``supernode-certificates`` directory doesn't exist on the SuperNode, you can copy it over
+            If you're generating self-signed certificates and the ``ca.crt`` certificate 
+            doesn't exist on the SuperNode, you can copy it over
             after the generation step.
 
         .. note::
 
-            Each SuperNode can have its own set of keys and certificates, or they can all share
+            Each SuperNode can have its own set of certificates, or they can all share
             the same set.
 
         Start the SuperNode container:
@@ -241,12 +209,8 @@ Transport Layer Security (TLS) for each Flower component to ensure secure commun
             :substitutions:
 
             $ docker run --rm \
-                --volume ./supernode-certificates/:/app/certificates/:ro \
                 --volume ./superlink-certificates/ca.crt:/app/ca.crt/:ro \
                 flwr/supernode:|stable_flwr_version| \
-                --ssl-ca-certfile=certificates/ca.crt \
-                --ssl-certfile=certificates/server.pem \
-                --ssl-keyfile=certificates/server.key \
                 --root-certificates ca.crt \
                 --isolation process \
                 <additional-args>
@@ -255,32 +219,11 @@ Transport Layer Security (TLS) for each Flower component to ensure secure commun
 
             * ``docker run``: This tells Docker to run a container from an image.
             * ``--rm``: Remove the container once it is stopped or the command exits.
-            * | ``--volume ./supernode-certificates/:/app/certificates/:ro``: Mount the ``supernode-certificates``
-              | directory in the current working directory of the host machine as a read-only volume at the
-              | ``/app/certificates`` directory inside the container.
-              |
-              | This allows the container to access the TLS certificates that are stored in the certificates
-              | directory.
             * | ``--volume ./superlink-certificates/ca.crt:/app/ca.crt/:ro``: Mount the ``ca.crt`` file from the
               | ``superlink-certificates`` directory of the host machine as a read-only volume at the ``/app/ca.crt``
               | directory inside the container.
             * | :substitution-code:`flwr/supernode:|stable_flwr_version|`: The name of the image to be run and the specific
               | tag of the image. The tag :substitution-code:`|stable_flwr_version|` represents a specific version of the image.
-            * | ``--ssl-ca-certfile certificates/ca.crt``: Specify the location of the CA certificate file
-              | inside the container.
-              |
-              | The ``certificates/ca.crt`` file is a certificate that is used to verify the identity of the
-              | SuperNode.
-            * | ``--ssl-certfile certificates/server.pem``: Specify the location of the SuperNode's
-              | TLS certificate file inside the container.
-              |
-              | The ``certificates/server.pem`` file is used to identify the SuperNode and to encrypt the
-              | data that is transmitted over the network.
-            * | ``--ssl-keyfile certificates/server.key``: Specify the location of the SuperNode's
-              | TLS private key file inside the container.
-              |
-              | The ``certificates/server.key`` file is used to decrypt the data that is transmitted over
-              | the network.
             * | ``--root-certificates ca.crt``: This specifies the location of the CA certificate file
               | inside the container.
               |
@@ -293,23 +236,17 @@ Transport Layer Security (TLS) for each Flower component to ensure secure commun
         .. code-block:: bash
 
             $ docker run --rm \
-                --volume ./supernode-certificates/ca.crt:/app/ca.crt:ro \
                 <clientapp-image> \
-                --root-certificates ca.crt \
+                --insecure \
                 <additional-args>
 
         .. dropdown:: Understand the command
 
             * ``docker run``: This tells Docker to run a container from an image.
             * ``--rm``: Remove the container once it is stopped or the command exits.
-            * | ``--volume ./supernode-certificates/ca.crt:/app/ca.crt:ro``: Mount the ``ca.crt`` file from
-              | the ``supernode-certificates`` directory of the host machine as a read-only volume at the
-              | ``/app/ca.crt`` directory inside the container.
             * ``<clientapp-image>``: The name of your ClientApp image to be run.
-            * | ``--root-certificates ca.crt``: This specifies the location of the CA
-              | certificate file inside the container.
-              |
-              | The ``ca.crt`` file is used to verify the identity of the SuperNode.
+            * | ``--insecure``:  This flag tells the container to operate in an insecure mode, allowing
+         | unencrypted communication. Secure connections will be added in future releases.
 
 Append the following lines to the end of the ``pyproject.toml`` file and save it:
 
