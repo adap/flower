@@ -8,8 +8,8 @@
 
   The `flwr ls` command is now available with the following usage options:
 
-  - `flwr ls --runs`: Lists all runs.
-  - `flwr ls --run-id <run-id>`: Displays details for a specific run.
+  - `flwr ls --runs [<app>] [<federation>]`: Lists all runs.
+  - `flwr ls --run-id <run-id> [<app>] [<federation>]`: Displays details for a specific run.
 
   This command provides information including the run ID, FAB ID and version, run status, elapsed time, and timestamps for when the run was created, started running, and finished.
 
