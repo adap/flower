@@ -215,6 +215,7 @@ Deployment
 - Here's an example to start the server without HTTPS (only for prototyping):
 
 .. code-block:: bash
+    :emphasize-lines: 2,6,14,22
 
     # Start a Superlink
     $ flower-superlink --insecure
@@ -257,6 +258,7 @@ Deployment
   certificate, server certificate, and server private key).
 
 .. code-block:: bash
+    :emphasize-lines: 2,9,17,25
 
     # Start a secure Superlink
     $ flower-superlink \
