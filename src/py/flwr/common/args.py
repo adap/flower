@@ -72,20 +72,18 @@ def try_obtain_root_certificates(
         )
         root_certificates = None
     else:
+        # Load the certificates if provided, or load the system certificates
         if root_cert_path is None:
             log(
-                ERROR,
-                "Root certificates are required unless running in insecure mode. "
-                "Please provide a certificate path to `--root-certificates` or run "
-                "the client in insecure mode using '--insecure' if you understand "
-                "the risks.",
+                WARN,
+                "Both `--insecure` and `--root-certificates` were not set. "
+                "Using system certificates.",
             )
-            sys.exit(1)
-        if not isfile(root_cert_path):
-            log(ERROR, "Path argument `--root-certificates` does not point to a file.")
-            sys.exit(1)
-        # Load the certificates if provided, or load the system certificates
-        root_certificates = Path(root_cert_path).read_bytes()
+            root_certificates = None
+        elif not isfile(root_cert_path):
+            sys.exit("Path argument `--root-certificates` does not point to a file.")
+        else:
+            root_certificates = Path(root_cert_path).read_bytes()
         log(
             DEBUG,
             "Starting secure HTTPS channel to %s "
