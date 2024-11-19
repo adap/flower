@@ -29,10 +29,12 @@ instantiated as follows:
         num_rounds = context.run_config["num-server-rounds"]
         config = ServerConfig(num_rounds=num_rounds)
 
+        # Instantiate FedAvg strategy
         strategy = FedAvg(
             fraction_fit=context.run_config["fraction-fit"],
             fraction_evaluate=1.0,
         )
+
         return ServerAppComponents(strategy=strategy, config=config)
 
 
