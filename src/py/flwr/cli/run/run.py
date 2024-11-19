@@ -125,6 +125,10 @@ def _run_with_exec_api(
 
     fab_path, fab_hash = build(app)
     content = Path(fab_path).read_bytes()
+
+    # Delete FAB file once the bytes is computed
+    Path(fab_path).unlink()
+
     fab = Fab(fab_hash, content)
 
     # Construct a `ConfigsRecord` out of a flattened `UserConfig`
@@ -138,8 +142,6 @@ def _run_with_exec_api(
     )
     res = stub.StartRun(req)
 
-    # Delete FAB file once it has been sent to the Exec API
-    Path(fab_path).unlink()
     typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
 
     if stream:
