@@ -15,6 +15,7 @@
 """Flower ClientApp process."""
 
 import argparse
+import sys
 import time
 from logging import DEBUG, ERROR, INFO
 from typing import Optional
@@ -57,9 +58,15 @@ from .utils import get_load_client_app_fn
 def flwr_clientapp() -> None:
     """Run process-isolated Flower ClientApp."""
     args = _parse_args_run_flwr_clientapp().parse_args()
+    if not args.insecure:
+        log(
+            ERROR,
+            "flwr-clientapp does not support TLS yet. "
+            "Please use the '--insecure' flag.",
+        )
+        sys.exit(1)
 
     log(INFO, "Starting Flower ClientApp")
-
     log(
         DEBUG,
         "Starting isolated `ClientApp` connected to SuperNode's ClientAppIo API at %s "
