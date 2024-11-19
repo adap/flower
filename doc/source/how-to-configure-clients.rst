@@ -8,17 +8,21 @@ adjustment of client-side hyperparameters, improving collaboration and experimen
 Configuration values
 --------------------
 
-Configuration values are represented as a dictionary with ``str`` keys and values of
-type ``bool``, ``bytes``, ``float``, ``int``, or ``str`` (or equivalent types in
-different languages). Here is an example of a configuration dictionary in Python:
+FitConfig and EvaluateConfig are dictionaries containing configuration values that the
+server sends to clients during federated learning rounds. These values must be of type
+``Scalar``, which includes ``bool``, ``bytes``, ``float``, ``int``, or ``str`` (or
+equivalent types in different languages). Scalar is the value type directly supported by
+Flower for these configurations.
+
+For example, a FitConfig dictionary might look like this:
 
 .. code-block:: python
 
-    config_dict = {
-        "dropout": True,  # str key, bool value
-        "learning_rate": 0.01,  # str key, float value
-        "batch_size": 32,  # str key, int value
-        "optimizer": "sgd",  # str key, str value
+    config = {
+        "batch_size": 32,  # int value
+        "learning_rate": 0.01,  # float value
+        "optimizer": "sgd",  # str value
+        "dropout": True,  # bool value
     }
 
 Flower serializes these configuration dictionaries (or *config dict* for short) to their
@@ -43,12 +47,114 @@ them back to Python dictionaries.
         # On the client
         data_splits = json.loads(config["data_splits"])
 
-Using Built-in Strategies for Configuration
--------------------------------------------
+Configuration through Built-in Strategies
+-----------------------------------------
 
-Flower supports configuration functions to dynamically adjust parameters sent to
-clients. Built-in strategies like ``FedAvg`` allow for setting configuration values for
-each round via a function.
+Flower provides configuration options to control client behavior dynamically through
+"FitConfig" and "EvaluateConfig". These configurations allow server-side control over
+client-side parameters such as batch size, number of local epochs, learning rate, and
+evaluation settings, improving collaboration and experimentation.
+
+FitConfig and EvaluateConfig
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+FitConfig and EvaluateConfig are dictionaries containing configuration values that the
+server sends to clients during federated learning rounds. These dictionaries enable the
+server to adjust client-side hyperparameters and monitor progress effectively.
+
+FitConfig
++++++++++
+
+FitConfig specifies the hyperparameters for training rounds, such as the batch size,
+number of local epochs, and other parameters that influence training.
+
+For example, a `fit_config` callback might look like this:
+
+.. code-block:: python
+
+    import json
+
+
+    def fit_config(server_round: int):
+        """Generate training configuration for each round."""
+        # Create the configuration dictionary
+        config = {
+            "batch_size": 32,
+            "current_round": server_round,
+            "local_epochs": 2,
+            "data_splits": json.dumps([0.8, 0.1, 0.1]),  # Example of serialized list
+        }
+        return config
+
+You can then pass this `fit_config` callback to a built-in strategy such as `FedAvg`:
+
+.. code-block:: python
+
+    from flwr.server.strategy import FedAvg
+
+    strategy = FedAvg(on_fit_config_fn=fit_config)  # Assign the fit_config function
+
+On the client side, the configuration is received in the `fit` method, where it can be
+deserialized and applied:
+
+.. code-block:: python
+
+    import json
+
+
+    class FlowerClient(flwr.client.NumPyClient):
+        def fit(self, parameters, config):
+            # Access and use the configuration values
+            batch_size = config["batch_size"]
+            local_epochs = config["local_epochs"]
+            data_splits = json.loads(config["data_splits"])  # Deserialize JSON
+            print(f"Training with batch size {batch_size}, epochs {local_epochs}")
+            print(f"Data splits: {data_splits}")
+            # Training logic here
+
+EvaluateConfig
+++++++++++++++
+
+EvaluateConfig specifies hyperparameters for the evaluation process, such as the batch
+size, evaluation frequency, or metrics to compute during evaluation.
+
+For example, an `evaluate_config` callback might look like this:
+
+.. code-block:: python
+
+    def evaluate_config(server_round: int):
+        """Generate evaluation configuration for each round."""
+        # Create the configuration dictionary
+        config = {
+            "batch_size": 64,
+            "current_round": server_round,
+            "metrics": ["accuracy"],  # Example metrics to compute
+        }
+        return config
+
+You can pass this `evaluate_config` callback to a built-in strategy like `FedAvg`:
+
+.. code-block:: python
+
+    strategy = FedAvg(
+        on_evaluate_config_fn=evaluate_config  # Assign the evaluate_config function
+    )
+
+On the client side, the configuration is received in the `evaluate` method, where it can
+be applied during the evaluation process:
+
+.. code-block:: python
+
+    class FlowerClient(flwr.client.NumPyClient):
+        def evaluate(self, parameters, config):
+            # Access and use the configuration values
+            batch_size = config["batch_size"]
+            current_round = config["current_round"]
+            metrics = config["metrics"]
+            print(f"Evaluating with batch size {batch_size}")
+            print(f"Metrics to compute: {metrics}")
+            # Evaluation logic here
+            return 0.5, {"accuracy": 0.85}  # Example return values
 
 Example: Sending Training Configurations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -67,14 +173,8 @@ number of local epochs. Our configuration function could look like this:
         }
 
 To use this function with a built-in strategy like ``FedAvg``, pass it during
-initialization:
-
-.. code-block:: python
-
-    strategy = FedAvg(on_fit_config_fn=fit_config)  # Assign the configuration function
-
-With the latest version of Flower, you no longer use `fl.server.start_server`. Instead,
-the server is defined as a `ServerApp`:
+initialization of the server. With the latest version of Flower, you no longer use
+`fl.server.start_server`. Instead, the server is defined as a `ServerApp`:
 
 .. code-block:: python
 
@@ -88,13 +188,13 @@ the server is defined as a `ServerApp`:
             on_fit_config_fn=fit_config,
             # Additional parameters...
         )
-        return ServerAppComponents(strategy=strategy)
+        return ServerAppComponents(strategy=strategy, ...)
 
 
     app = ServerApp(server_fn=server_fn)
 
 Client-Side Configuration
-~~~~~~~~~~~~~~~~~~~~~~~~~
++++++++++++++++++++++++++
 
 On the client side, configurations are received as input to the `fit` and `evaluate`
 methods. For example:
@@ -113,7 +213,7 @@ methods. For example:
             pass
 
 Dynamic Configurations per Round
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+++++++++++++++++++++++++++++++++
 
 Configuration functions are called at the beginning of every round. This allows for
 dynamic adjustments based on progress. For example, increasing the number of local
@@ -164,7 +264,7 @@ To use this custom strategy:
         strategy = CustomClientConfigStrategy(
             # Other FedAvg parameters
         )
-        return ServerAppComponents(strategy=strategy)
+        return ServerAppComponents(strategy=strategy, ...)
 
 
     app = ServerApp(server_fn=server_fn)
