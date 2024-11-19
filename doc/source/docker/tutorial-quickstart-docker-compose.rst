@@ -297,8 +297,8 @@ You can add more SuperNodes and ClientApps by uncommenting their definitions in 
         depends_on:
           - supernode-3
 
-If you also want to enable TLS for the new SuperNode and ClientApp, uncomment their
-definitions in the ``with-tls.yml`` file:
+If you also want to enable TLS for the new SuperNode, uncomment the
+definition in the ``with-tls.yml`` file:
 
 .. code-block:: yaml
     :caption: with-tls.yml
@@ -315,30 +315,11 @@ definitions in the ``with-tls.yml`` file:
           - process
           - --node-config
           - "partition-id=1 num-partitions=2"
-          - --ssl-ca-certfile=certificates/ca.crt
-          - --ssl-certfile=certificates/server.pem
-          - --ssl-keyfile=certificates/server.key
           - --root-certificates
           - certificates/superlink-ca.crt
         secrets:
           - source: superlink-ca-certfile
             target: /app/certificates/superlink-ca.crt
-          - source: supernode-ca-certfile
-            target: /app/certificates/ca.crt
-          - source: supernode-certfile
-            target: /app/certificates/server.pem
-          - source: supernode-keyfile
-            target: /app/certificates/server.key
-
-      clientapp-3:
-        command:
-          - --clientappio-api-address
-          - supernode-3:9096
-          - --root-certificates
-          - certificates/ca.crt
-        secrets:
-          - source: supernode-ca-certfile
-            target: /app/certificates/ca.crt
 
 Restart the services with:
 
