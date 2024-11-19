@@ -69,7 +69,7 @@ dictionaries:
             )
 
             # Return aggregated loss and metrics (i.e., aggregated accuracy)
-            return float(aggregated_loss), {"accuracy": aggregated_accuracy}
+            return float(aggregated_loss), {"accuracy": float(aggregated_accuracy)}
 
 
     def server_fn(context: Context) -> ServerAppComponents:
@@ -78,7 +78,9 @@ dictionaries:
         config = ServerConfig(num_rounds=num_rounds)
 
         # Define strategy
-        strategy = AggregateCustomMetricStrategy()
+        strategy = AggregateCustomMetricStrategy(
+            # (same arguments as FedAvg here)
+        )
 
         return ServerAppComponents(
             config=config,
