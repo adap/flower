@@ -44,9 +44,7 @@ def set_weights(net, parameters):
 def load_data_from_disk(path: str, batch_size: int):
     """Load a dataset in Huggingface format from disk and creates dataloaders."""
     partition_train_test = load_from_disk(path)
-    pytorch_transforms = Compose(
-        [ToTensor(), Normalize((0.5,), (0.5,))]
-    )
+    pytorch_transforms = Compose([ToTensor(), Normalize((0.5,), (0.5,))])
 
     def apply_transforms(batch):
         """Apply transforms to the partition from FederatedDataset."""
