@@ -39,10 +39,10 @@ instantiated as follows:
     # Create ServerApp
     app = ServerApp(server_fn=server_fn)
 
-A Strategy needs to be instantiated inside a function that takes ``Context`` and returns
-``ServerAppComponents`` (e.g. named ``server_fn`` in this example). The parameters of
-the strategy can be customized by accessing them from the context or or hard-coding
-directly in the function. The ``server_fn`` function needs to be passed to a
+A Strategy needs to be instantiated inside a function (e.g. ``server_fn`` in this example) that takes ``Context`` and returns a
+``ServerAppComponents`` object. The parameters of
+the strategy can be customized by accessing them from the ``Context`` object,
+which in turn contains the values specified in the ``[tool.flwr.app.config]`` table in your ``pyproject.toml``. The ``server_fn`` function needs to be passed to a
 ``ServerApp`` object (e.g. named ``app`` in this example) which is placed at the bottom
 of the file.
 
@@ -50,13 +50,13 @@ Customize an existing strategy with callback functions
 ------------------------------------------------------
 
 Existing strategies provide several ways to customize their behavior. Callback functions
-allow strategies to call user-provided code during execution. This approach enables
-modifying the strategy's partial behavior without rewriting the whole class from zero.
+allow strategies to call user-provided code during execution. This approach enables you to
+modify the strategy's partial behavior without rewriting the whole class from zero.
 
 Configuring client fit and client evaluate
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The server can pass e.g. new configuration values to the client each round by providing
+The server can pass new configuration values to the client each round by providing
 a function to ``on_fit_config_fn``. The provided function will be called by the strategy
 and must return a dictionary of configuration key value pairs that will be sent to the
 client. It must return a dictionary of arbitrary configuration values ``client.fit`` and
@@ -103,8 +103,8 @@ The ``on_fit_config_fn`` can be used to pass arbitrary configuration values from
 to client and potentially change these values each round, for example, to adjust the
 learning rate. The client will receive the dictionary returned by the
 ``on_fit_config_fn`` in its own ``client.fit()`` function. And while the values can be
-also passed directly form via the context this function can be a place of adding some
-randomness that can't be achieved by the context, which is static.
+also passed directly via the context this function can be a place to implement
+finer control over the `fit` behaviour that may not be achieved by the context, which sets fixed values.
 
 Similar to ``on_fit_config_fn``, there is also ``on_evaluate_config_fn`` to customize
 the configuration sent to ``client.evaluate()``
