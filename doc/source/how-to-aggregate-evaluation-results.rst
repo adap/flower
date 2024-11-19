@@ -13,11 +13,10 @@ by returning a dictionary:
 
 .. code-block:: python
 
-    class CifarClient(fl.client.NumPyClient):
+    from flwr.client import NumPyClient
 
-        def get_parameters(self, config):
-            # ...
-            pass
+
+    class FlowerClient(NumPyClient):
 
         def fit(self, parameters, config):
             # ...
@@ -41,7 +40,10 @@ dictionaries:
 
 .. code-block:: python
 
-    class AggregateCustomMetricStrategy(fl.server.strategy.FedAvg):
+    from flwr.server.strategy import FedAvg
+
+
+    class AggregateCustomMetricStrategy(FedAvg):
         def aggregate_evaluate(
             self,
             server_round: int,
@@ -89,6 +91,4 @@ dictionaries:
 
 
     # Create ServerApp
-    app = ServerApp(
-        server_fn=server_fn,
-    )
+    app = ServerApp(server_fn=server_fn)
