@@ -77,17 +77,9 @@ def run_supernode() -> None:
         )
         sys.exit(1)
 
-    # If neither `--insecure` nor `--root-cetificates` aren set, exit
-    if not (args.insecure) and args.root_certificates is None:
-        log(
-            ERROR,
-            "'--root-certificates' are required if not running with '--insecure'.",
-        )
-        sys.exit(1)
-
-    root_certificates = try_obtain_root_certificates(args, args.superlink)
     # Obtain certificates for ClientAppIo API server
     server_certificates = try_obtain_server_certificates(args, TRANSPORT_TYPE_GRPC_RERE)
+    root_certificates = try_obtain_root_certificates(args, args.superlink)
     load_fn = get_load_client_app_fn(
         default_app_ref="",
         app_path=None,
