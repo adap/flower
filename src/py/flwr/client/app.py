@@ -41,6 +41,7 @@ from flwr.common.constant import (
     CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
+    MAX_RETRY_DELAY,
     MISSING_EXTRA_REST,
     RUN_ID_NUM_BYTES,
     SERVER_OCTET,
@@ -235,8 +236,6 @@ def start_client_internal(
     flwr_path: Optional[Path] = None,
     isolation: Optional[str] = None,
     clientappio_api_address: Optional[str] = CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
-    certificates: Optional[tuple[bytes, bytes, bytes]] = None,
-    ssl_ca_certfile: Optional[str] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -300,10 +299,6 @@ def start_client_internal(
     clientappio_api_address : Optional[str]
         (default: `CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS`)
         The SuperNode gRPC server address.
-    certificates : Optional[Tuple[bytes, bytes, bytes]] (default: None)
-        Tuple containing the CA certificate, server certificate, and server private key.
-    ssl_ca_certfile : Optional[str] (default: None)
-        The path to the CA certificate file used by `flwr-clientapp` in subprocess mode.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -337,7 +332,7 @@ def start_client_internal(
             )
         _clientappio_grpc_server, clientappio_servicer = run_clientappio_api_grpc(
             address=clientappio_api_address,
-            certificates=certificates,
+            certificates=None,
         )
     clientappio_api_address = cast(str, clientappio_api_address)
 
@@ -373,7 +368,7 @@ def start_client_internal(
             )
 
     retry_invoker = RetryInvoker(
-        wait_gen_factory=exponential,
+        wait_gen_factory=lambda: exponential(max_delay=MAX_RETRY_DELAY),
         recoverable_exceptions=connection_error_type,
         max_tries=max_retries + 1 if max_retries is not None else None,
         max_time=max_wait_time,
@@ -551,11 +546,7 @@ def start_client_internal(
                                     "--token",
                                     str(token),
                                 ]
-                                if ssl_ca_certfile:
-                                    command.append("--root-certificates")
-                                    command.append(ssl_ca_certfile)
-                                else:
-                                    command.append("--insecure")
+                                command.append("--insecure")
 
                                 subprocess.run(
                                     command,

@@ -155,6 +155,11 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     ping_thread: Optional[threading.Thread] = None
     ping_stop_event = threading.Event()
 
+    # Restrict retries to cases where the status code is UNAVAILABLE
+    retry_invoker.should_giveup = (
+        lambda e: e.code() != grpc.StatusCode.UNAVAILABLE  # type: ignore
+    )
+
     ###########################################################################
     # ping/create_node/delete_node/receive/send/get_run functions
     ###########################################################################

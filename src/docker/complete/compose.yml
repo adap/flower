@@ -4,8 +4,6 @@ services:
     image: flwr/superlink:${FLWR_VERSION:-1.13.0}
     command:
       - --insecure
-      - --executor
-      - flwr.superexec.deployment:executor
       - --isolation
       - process
     ports:
