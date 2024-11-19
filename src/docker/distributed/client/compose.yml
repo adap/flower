@@ -10,20 +10,11 @@ services:
       - process
       - --node-config
       - "partition-id=0 num-partitions=2"
-      - --ssl-ca-certfile=certificates/ca.crt
-      - --ssl-certfile=certificates/server.pem
-      - --ssl-keyfile=certificates/server.key
       - --root-certificates
       - certificates/superlink-ca.crt
     secrets:
       - source: superlink-ca-certfile
         target: /app/certificates/superlink-ca.crt
-      - source: supernode-ca-certfile
-        target: /app/certificates/ca.crt
-      - source: supernode-certfile
-        target: /app/certificates/server.pem
-      - source: supernode-keyfile
-        target: /app/certificates/server.key
 
   supernode-2:
     image: flwr/supernode:${FLWR_VERSION:-1.13.0}
@@ -36,20 +27,11 @@ services:
       - process
       - --node-config
       - "partition-id=1 num-partitions=2"
-      - --ssl-ca-certfile=certificates/ca.crt
-      - --ssl-certfile=certificates/server.pem
-      - --ssl-keyfile=certificates/server.key
       - --root-certificates
       - certificates/superlink-ca.crt
     secrets:
       - source: superlink-ca-certfile
         target: /app/certificates/superlink-ca.crt
-      - source: supernode-ca-certfile
-        target: /app/certificates/ca.crt
-      - source: supernode-certfile
-        target: /app/certificates/server.pem
-      - source: supernode-keyfile
-        target: /app/certificates/server.key
 
   # uncomment to add another SuperNode
   #
@@ -64,20 +46,11 @@ services:
   #     - process
   #     - --node-config
   #     - "partition-id=1 num-partitions=2"
-  #     - --ssl-ca-certfile=certificates/ca.crt
-  #     - --ssl-certfile=certificates/server.pem
-  #     - --ssl-keyfile=certificates/server.key
   #     - --root-certificates
   #     - certificates/superlink-ca.crt
   #   secrets:
   #     - source: superlink-ca-certfile
   #       target: /app/certificates/superlink-ca.crt
-  #     - source: supernode-ca-certfile
-  #       target: /app/certificates/ca.crt
-  #     - source: supernode-certfile
-  #       target: /app/certificates/server.pem
-  #     - source: supernode-keyfile
-  #       target: /app/certificates/server.key
 
   clientapp-1:
     build:
@@ -92,10 +65,9 @@ services:
 
         ENTRYPOINT ["flwr-clientapp"]
     command:
+      - --insecure
       - --clientappio-api-address
       - supernode-1:9094
-      - --root-certificates
-      - certificates/ca.crt
     deploy:
       resources:
         limits:
@@ -103,9 +75,6 @@ services:
     stop_signal: SIGINT
     depends_on:
       - supernode-1
-    secrets:
-      - source: supernode-ca-certfile
-        target: /app/certificates/ca.crt
 
   clientapp-2:
     build:
@@ -120,10 +89,9 @@ services:
 
         ENTRYPOINT ["flwr-clientapp"]
     command:
+      - --insecure
       - --clientappio-api-address
       - supernode-2:9095
-      - --root-certificates
-      - certificates/ca.crt
     deploy:
       resources:
         limits:
@@ -131,9 +99,6 @@ services:
     stop_signal: SIGINT
     depends_on:
       - supernode-2
-    secrets:
-      - source: supernode-ca-certfile
-        target: /app/certificates/ca.crt
 
   # uncomment to add another ClientApp
   #
@@ -150,10 +115,9 @@ services:
 
   #       ENTRYPOINT ["flwr-clientapp"]
   #   command:
+  #     - --insecure
   #     - --clientappio-api-address
   #     - supernode-3:9096
-  #     - --root-certificates
-  #     - certificates/ca.crt
   #   deploy:
   #     resources:
   #       limits:
@@ -161,16 +125,7 @@ services:
   #   stop_signal: SIGINT
   #   depends_on:
   #     - supernode-3
-  #   secrets:
-  #     - source: supernode-ca-certfile
-  #       target: /app/certificates/ca.crt
 
 secrets:
   superlink-ca-certfile:
     file: ../superlink-certificates/ca.crt
-  supernode-ca-certfile:
-    file: ../supernode-certificates/ca.crt
-  supernode-certfile:
-    file: ../supernode-certificates/server.pem
-  supernode-keyfile:
-    file: ../supernode-certificates/server.key
