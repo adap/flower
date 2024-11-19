@@ -15,6 +15,7 @@
 """Flower ServerApp process."""
 
 import argparse
+import sys
 from logging import DEBUG, ERROR, INFO
 from pathlib import Path
 from queue import Queue
@@ -23,7 +24,7 @@ from typing import Optional
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
-from flwr.common.args import add_args_flwr_app_common, try_obtain_root_certificates
+from flwr.common.args import add_args_flwr_app_common
 from flwr.common.config import (
     get_flwr_dir,
     get_fused_config_from_dir,
@@ -69,7 +70,14 @@ def flwr_serverapp() -> None:
     args = _parse_args_run_flwr_serverapp().parse_args()
 
     log(INFO, "Starting Flower ServerApp")
-    certificates = try_obtain_root_certificates(args, args.serverappio_api_address)
+
+    if not args.insecure:
+        log(
+            ERROR,
+            "`flwr-serverapp` does not support TLS yet. "
+            "Please use the '--insecure' flag.",
+        )
+        sys.exit(1)
 
     log(
         DEBUG,
@@ -81,7 +89,7 @@ def flwr_serverapp() -> None:
         log_queue=log_queue,
         run_once=args.run_once,
         flwr_dir=args.flwr_dir,
-        certificates=certificates,
+        certificates=None,
     )
 
     # Restore stdout/stderr
