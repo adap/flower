@@ -83,7 +83,7 @@ def run_supernode() -> None:
             ERROR,
             "'--root-certificates' are required if not running with '--insecure'.",
         )
-        return
+        sys.exit(1)
 
     root_certificates = try_obtain_root_certificates(args, args.superlink)
     # Obtain certificates for ClientAppIo API server
