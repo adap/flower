@@ -1,6 +1,15 @@
 Upgrade to Flower 1.0
 =====================
 
+.. note::
+
+    This guide is for users who have already worked with Flower 0.x and want to upgrade
+    to Flower 1.0. Newer versions of Flower (1.12+) are based on a new architecture
+    (previously called Flower Next) and not covered in this guide. After upgrading
+    Flower 0.x projects to Flower 1.0, please refer to :doc:`Upgrade to Flower Next
+    <how-to-upgrade-to-flower-next>` to make your project compatible with the lastest
+    version of Flower.
+
 Flower 1.0 is here. Along with new features, Flower 1.0 provides a stable foundation for
 future growth. Compared to Flower 0.19 (and other 0.x series releases), there are a few
 breaking changes that make it necessary to change the code of existing 0.x-series
