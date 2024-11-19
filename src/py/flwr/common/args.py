@@ -90,7 +90,7 @@ def try_obtain_root_certificates(
             sys.exit(1)
         if not isfile(root_cert_path):
             log(ERROR, "Path argument `--root-certificates` does not point to a file.")
-            return None
+            sys.exit(1)
         # Load the certificates if provided, or load the system certificates
         root_certificates = Path(root_cert_path).read_bytes()
         log(
