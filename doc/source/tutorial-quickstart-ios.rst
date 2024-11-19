@@ -6,6 +6,14 @@ Quickstart iOS
 .. meta::
     :description: Read this Federated Learning quickstart tutorial for creating an iOS app using Flower to train a neural network on MNIST.
 
+.. warning::
+
+    The experimental Flower iOS SDK is not compatible with the latest version of Flower.
+    iOS support is currently being reworked and will be released in 2025.
+
+    This quickstart tutorial is kept for historical purposes and will be updated once
+    the new iOS SDK is released.
+
 In this tutorial we will learn how to train a Neural Network on MNIST using Flower and
 CoreML on iOS devices.
 

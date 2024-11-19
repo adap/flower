@@ -17,15 +17,16 @@
 import time
 import warnings
 from collections.abc import Iterable
-from logging import DEBUG, WARNING
-from typing import Optional, cast
+from logging import DEBUG, INFO, WARN, WARNING
+from typing import Any, Optional, cast
 
 import grpc
 
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
-from flwr.common.constant import SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS
+from flwr.common.constant import MAX_RETRY_DELAY, SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
+from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.serde import message_from_taskres, message_to_taskins, run_from_proto
 from flwr.common.typing import Run
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
@@ -75,6 +76,7 @@ class GrpcDriver(Driver):
         self._grpc_stub: Optional[ServerAppIoStub] = None
         self._channel: Optional[grpc.Channel] = None
         self.node = Node(node_id=0, anonymous=True)
+        self._retry_invoker = _make_simple_grpc_retry_invoker()
 
     @property
     def _is_connected(self) -> bool:
@@ -95,6 +97,7 @@ class GrpcDriver(Driver):
             root_certificates=self._cert,
         )
         self._grpc_stub = ServerAppIoStub(self._channel)
+        _wrap_stub(self._grpc_stub, self._retry_invoker)
         log(DEBUG, "[Driver] Connected to %s", self._addr)
 
     def _disconnect(self) -> None:
@@ -255,3 +258,60 @@ class GrpcDriver(Driver):
             return
         # Disconnect
         self._disconnect()
+
+
+def _make_simple_grpc_retry_invoker() -> RetryInvoker:
+    """Create a simple gRPC retry invoker."""
+
+    def _on_sucess(retry_state: RetryState) -> None:
+        if retry_state.tries > 1:
+            log(
+                INFO,
+                "Connection successful after %.2f seconds and %s tries.",
+                retry_state.elapsed_time,
+                retry_state.tries,
+            )
+
+    def _on_backoff(retry_state: RetryState) -> None:
+        if retry_state.tries == 1:
+            log(WARN, "Connection attempt failed, retrying...")
+        else:
+            log(
+                WARN,
+                "Connection attempt failed, retrying in %.2f seconds",
+                retry_state.actual_wait,
+            )
+
+    def _on_giveup(retry_state: RetryState) -> None:
+        if retry_state.tries > 1:
+            log(
+                WARN,
+                "Giving up reconnection after %.2f seconds and %s tries.",
+                retry_state.elapsed_time,
+                retry_state.tries,
+            )
+
+    return RetryInvoker(
+        wait_gen_factory=lambda: exponential(max_delay=MAX_RETRY_DELAY),
+        recoverable_exceptions=grpc.RpcError,
+        max_tries=None,
+        max_time=None,
+        on_success=_on_sucess,
+        on_backoff=_on_backoff,
+        on_giveup=_on_giveup,
+        should_giveup=lambda e: e.code() != grpc.StatusCode.UNAVAILABLE,  # type: ignore
+    )
+
+
+def _wrap_stub(stub: ServerAppIoStub, retry_invoker: RetryInvoker) -> None:
+    """Wrap the gRPC stub with a retry invoker."""
+
+    def make_lambda(original_method: Any) -> Any:
+        return lambda *args, **kwargs: retry_invoker.invoke(
+            original_method, *args, **kwargs
+        )
+
+    for method_name in vars(stub):
+        method = getattr(stub, method_name)
+        if callable(method):
+            setattr(stub, method_name, make_lambda(method))
