@@ -80,6 +80,10 @@ def try_obtain_root_certificates(
         root_certificates = None
     else:
         # Load the certificates if provided, or load the system certificates
+        if not root_cert_path:
+            sys.exit(
+                "'--root-certificates' are required if not running with '--insecure'."
+            )
         if not isfile(root_cert_path):
             sys.exit("Path argument `--root-certificates` does not point to a file.")
         root_certificates = Path(root_cert_path).read_bytes()
