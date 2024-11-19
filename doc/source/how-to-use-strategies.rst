@@ -57,8 +57,8 @@ To access these values, use ``context.run_config``.
     # ...
 
     [tool.flwr.app.config]
-    num - server - rounds = 10
-    fraction - fit = 0.5
+    num-server-rounds = 10
+    fraction-fit = 0.5
 
     # ...
 
