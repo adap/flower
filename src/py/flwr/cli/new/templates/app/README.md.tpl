@@ -14,7 +14,7 @@ In the `$project_name` directory, use `flwr run` to run a local simulation:
 flwr run .
 ```
 
-Refer to the [How to Run Simulations Guide](https://flower.ai/docs/framework/how-to-run-simulations.html) in the documentation for advice on how to optimize your simulations.
+Refer to the [How to Run Simulations](https://flower.ai/docs/framework/how-to-run-simulations.html) guide in the documentation for advice on how to optimize your simulations.
 
 ## Run with the Deployment Engine
 
@@ -25,7 +25,7 @@ Refer to the [How to Run Simulations Guide](https://flower.ai/docs/framework/how
 
 - Flower website: [flower.ai](https://flower.ai/)
 - Check the documentation: [flower.ai/docs](https://flower.ai/docs/)
-- Check the Flower GitHub repo: [GitHub](https://github.com/adap/flower), give us a ⭐️ !
-- Join the Community!
+- Give Flower a ⭐️ on GitHub: [GitHub](https://github.com/adap/flower)
+- Join the Flower community!
   - [Flower Slack](https://flower.ai/join-slack/)
   - [Flower Discuss](https://discuss.flower.ai/)
