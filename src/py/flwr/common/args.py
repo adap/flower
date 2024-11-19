@@ -16,7 +16,7 @@
 
 import argparse
 import sys
-from logging import DEBUG, WARN
+from logging import DEBUG, ERROR, WARN
 from os.path import isfile
 from pathlib import Path
 from typing import Optional
@@ -79,9 +79,17 @@ def try_obtain_root_certificates(
         )
         root_certificates = None
     else:
-        # Load the certificates if provided, or load the system certificates
+        if root_cert_path is None:
+            log(
+                ERROR,
+                "'--root-certificates' are required if not running with "
+                "'--insecure' mode.",
+            )
+            return None
         if not isfile(root_cert_path):
-            sys.exit("Path argument `--root-certificates` does not point to a file.")
+            log(ERROR, "Path argument `--root-certificates` does not point to a file.")
+            return None
+        # Load the certificates if provided, or load the system certificates
         root_certificates = Path(root_cert_path).read_bytes()
         log(
             DEBUG,
