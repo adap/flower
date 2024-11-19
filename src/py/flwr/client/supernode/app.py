@@ -77,7 +77,7 @@ def run_supernode() -> None:
         )
         sys.exit(1)
 
-    # If neither `--insecure` nor `--root-cetificates` arent' set, exit
+    # If neither `--insecure` nor `--root-cetificates` aren set, exit
     if not (args.insecure) and args.root_certificates is None:
         log(
             ERROR,
