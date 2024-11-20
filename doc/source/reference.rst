@@ -2,7 +2,7 @@ Reference
 =========
 
 References
-~~~~~~~~~~
+----------
 
 Information-oriented API reference and other reference material.
 

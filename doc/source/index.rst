@@ -55,15 +55,23 @@ Transformers <tutorial-quickstart-huggingface>` | :doc:`JAX <tutorial-quickstart
 <tutorial-quickstart-scikitlearn>` | :doc:`XGBoost <tutorial-quickstart-xgboost>` |
 :doc:`Android <tutorial-quickstart-android>` | :doc:`iOS <tutorial-quickstart-ios>`
 
-.. We also made video tutorials for PyTorch:
+..
+    We also made video tutorials for PyTorch:
 
-.. .. youtube:: jOmmuzMIQ4c
-..     :width: 80%
+..
+    .. youtube:: jOmmuzMIQ4c
 
-.. And TensorFlow:
+..
+    :width: 80%
 
-.. .. youtube:: FGTc2TQq7VM
-..     :width: 80%
+..
+    And TensorFlow:
+
+..
+    .. youtube:: FGTc2TQq7VM
+
+..
+    :width: 80%
 
 Build a Flower app
 ~~~~~~~~~~~~~~~~~~

@@ -2,7 +2,7 @@ Build
 =====
 
 How-to guides
-~~~~~~~~~~~~~
+-------------
 
 Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
 
@@ -23,7 +23,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
     how-to-upgrade-to-flower-next
 
 Explanations
-~~~~~~~~~~~~
+------------
 
 Understanding-oriented concept guides explain and discuss key topics and underlying
 ideas behind Flower and collaborative AI.
