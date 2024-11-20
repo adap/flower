@@ -11,4 +11,5 @@ Example
     :substitutions:
 
     $ docker run -e FLWR_TELEMETRY_ENABLED=0 -e FLWR_TELEMETRY_LOGGING=0 \
-         --rm flwr/superlink:|stable_flwr_version|
+         --rm flwr/superlink:|stable_flwr_version| \
+         <additional-args>
