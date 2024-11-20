@@ -460,10 +460,7 @@ learn from others about migrating to Flower 1.13.
 
 .. admonition:: Important
 
-    As we continuously enhance Flower 1.13 at a rapid pace, we'll be periodically
+    As we continuously enhance Flower at a rapid pace, we'll be periodically
     updating this guide. Please feel free to share any feedback with us!
-
-..
-    [TODO] Add links to Flower Next 101 and Flower Glossary
 
 Happy migrating! 🚀
