@@ -19,9 +19,9 @@ Let's dive in!
     - https://stackoverflow.com/q/71651598
     - https://github.com/jgm/pandoc/issues/3973#issuecomment-337087394
 
-.. |clientapp_link| replace:: ``ClientApp()``
+.. |clientapp_link| replace:: ``ClientApp``
 
-.. |serverapp_link| replace:: ``ServerApp()``
+.. |serverapp_link| replace:: ``ServerApp``
 
 .. |startclient_link| replace:: ``start_client()``
 
@@ -126,9 +126,9 @@ updates and allow you to run your project both in the traditional way and in the
 .. code-block:: python
     :emphasize-lines: 2,6
 
-    # Flower v1.11+
+    # Flower v1.10+
     def client_fn(context: flwr.common.Context):
-        return flwr.client.FlowerClient().to_client()
+        return FlowerClient().to_client()
 
 
     app = flwr.client.ClientApp(
@@ -136,9 +136,9 @@ updates and allow you to run your project both in the traditional way and in the
     )
 
 
-    # Flower v1.8 - v1.10
+    # Flower v1.8 - v1.9
     def client_fn(cid: str):
-        return flwr.client.FlowerClient().to_client()
+        return FlowerClient().to_client()
 
 
     app = flwr.client.ClientApp(
@@ -149,7 +149,7 @@ updates and allow you to run your project both in the traditional way and in the
     if __name__ == "__main__":
         flwr.client.start_client(
             server_address="127.0.0.1:8080",
-            client=flwr.client.FlowerClient().to_client(),
+            client=FlowerClient().to_client(),
         )
 
 |serverapp_link|_
@@ -161,18 +161,18 @@ updates and allow you to run your project both in the traditional way and in the
 .. code-block:: python
     :emphasize-lines: 2,8
 
-    # Flower v1.11+
+    # Flower v1.10+
     def server_fn(context: flwr.common.Context):
         strategy = flwr.server.strategy.FedAvg()
         config = flwr.server.ServerConfig()
-        return flwr.server.ServerAppComponents(strategy=strategy, config=config)
+        return flwr.server.ServerAppComponents(config=config, strategy=strategy)
 
 
     app = flwr.server.ServerApp(
         server_fn=server_fn,
     )
 
-    # Flower v1.8 - v1.11
+    # Flower v1.8 - v1.9
     app = flwr.server.ServerApp(
         config=config,
         strategy=strategy,
@@ -189,9 +189,16 @@ updates and allow you to run your project both in the traditional way and in the
 Deployment
 ~~~~~~~~~~
 
-- Run the ``SuperLink`` using |flowernext_superlink_link|_ before running, in sequence,
-  |flowernext_supernode_link|_ (2x).
+- In CLI, start the SuperLink using |flowernext_superlink_link|_. Then, start two
+  SuperNodes using |flowernext_supernode_link|_ (2x). There is no need to run
+  ``flower-server-app`` and ``flower-client-app``, or execute ``client.py`` and
+  ``server.py`` as Python scripts.
 - Here's an example to start the server without HTTPS (only for prototyping):
+
+.. tip::
+
+    For a comprehensive walk-through on how to run Flower deployment using Docker,
+    please refer to the :doc:`docker/index` guide.
 
 .. code-block:: bash
     :emphasize-lines: 2,5,12
@@ -203,15 +210,15 @@ Deployment
     $ flower-supernode \
          --insecure \
          --superlink 127.0.0.1:9092 \
-         --node-config "..." \
-         --supernode-address 127.0.0.1:9094
+         --supernode-address 127.0.0.1:9094 \
+         <other-args>
 
     # In another terminal window, start another long-running SuperNode (at least 2 SuperNodes are required)
     $ flower-supernode \
          --insecure \
          --superlink 127.0.0.1:9092 \
-         --node-config "..." \
-         --supernode-address 127.0.0.1:9095
+         --supernode-address 127.0.0.1:9095 \
+         <other-args>
 
 - Here's another example to start with HTTPS. Use the ``--ssl-ca-certfile``,
   ``--ssl-certfile``, and ``--ssl-keyfile`` command line options to pass paths to (CA
@@ -229,16 +236,16 @@ Deployment
     # In a new terminal window, start a long-running SuperNode
     $ flower-supernode \
          --superlink 127.0.0.1:9092 \
-         --node-config "..." \
          --supernode-address 127.0.0.1:9094 \
-         --root-certificates <your-ca-cert-filepath>
+         --root-certificates <your-ca-cert-filepath> \
+         <other-args>
 
     # In another terminal window, start another long-running SuperNode (at least 2 SuperNodes are required)
     $ flower-supernode \
          --superlink 127.0.0.1:9092 \
-         --node-config "..." \
          --supernode-address 127.0.0.1:9095 \
-         --root-certificates <your-ca-cert-filepath>
+         --root-certificates <your-ca-cert-filepath> \
+         <other-args>
 
 Simulation in CLI
 ~~~~~~~~~~~~~~~~~
@@ -248,11 +255,11 @@ respectively. There is no need to use |startsim_link|_ anymore. Here's an exampl
 
 .. tip::
 
-    For more advanced information regarding Flower simulation please read the
-    |flower_how_to_run_simulations_link|_ guide.
+    For a comprehensive walk-through on how to run Flower simulations please refer to
+    the |flower_how_to_run_simulations_link|_ guide.
 
 .. code-block:: python
-    :emphasize-lines: 9,13,18,25
+    :emphasize-lines: 8,12,17,23
 
     # Regular Flower client implementation
     class FlowerClient(NumPyClient):
@@ -260,10 +267,9 @@ respectively. There is no need to use |startsim_link|_ anymore. Here's an exampl
         pass
 
 
-    # Flower v1.11+
-    # [file: client_app.py]
+    # Flower v1.10+
     def client_fn(context: flwr.common.Context):
-        return flwr.client.FlowerClient().to_client()
+        return FlowerClient().to_client()
 
 
     app = flwr.client.ClientApp(
@@ -271,7 +277,6 @@ respectively. There is no need to use |startsim_link|_ anymore. Here's an exampl
     )
 
 
-    # [file: server_app.py]
     def server_fn(context: flwr.common.Context):
         strategy = flwr.server.strategy.FedAvg(...)
         config = flwr.server.ServerConfig(...)
@@ -283,7 +288,7 @@ respectively. There is no need to use |startsim_link|_ anymore. Here's an exampl
     )
 
 
-    # Flower v1.8 - v1.10
+    # Flower v1.8 - v1.9
     def client_fn(cid: str):
         return FlowerClient().to_client()
 
@@ -297,6 +302,7 @@ respectively. There is no need to use |startsim_link|_ anymore. Here's an exampl
         strategy=strategy,
     )
 
+
     # Flower v1.7
     if __name__ == "__main__":
         hist = flwr.simulation.start_simulation(
@@ -306,12 +312,12 @@ respectively. There is no need to use |startsim_link|_ anymore. Here's an exampl
 
 Depending on your Flower version, you can run your simulation as follows:
 
-- for Flower versions 1.11 and onwards, run ``flwr run`` in CLI.
-- for Flower versions between 1.8 to 1.10, run |flower_simulation_link|_ in CLI and
+- For Flower versions 1.11 and onwards, run ``flwr run`` in CLI.
+- For Flower versions between 1.8 to 1.10, run |flower_simulation_link|_ in CLI and
   point to the ``server_app`` / ``client_app`` object in the code instead of executing
   the Python script. In the code snippet below, there is an example (assuming the
   ``server_app`` and ``client_app`` objects are in a ``sim.py`` module).
-- for Flower versions before 1.8, run the Python script directly.
+- For Flower versions before 1.8, run the Python script directly.
 
 .. code-block:: bash
     :emphasize-lines: 2
@@ -332,19 +338,19 @@ Depending on your Flower version, you can run your simulation as follows:
 
 Depending on your Flower version, you can also define the default resources as follows:
 
-- for Flower versions 1.11 and onwards, you can edit your pyproject.toml file and then
-  run ``flwr run`` in CLI as shown in the example below.
-- for Flower versions between 1.8 to 1.10, you can adjust the resources for each
+- For Flower versions 1.11 and onwards, you can edit your ``pyproject.toml`` file and
+  then run ``flwr run`` in CLI as shown in the example below.
+- For Flower versions between 1.8 to 1.10, you can adjust the resources for each
   |clientapp_link|_ using the ``--backend-config`` command line argument instead of
   setting the ``client_resources`` argument in |startsim_link|_.
-- for Flower versions before 1.8, you need to run |startsim_link|_ and pass a dictionary
+- For Flower versions before 1.8, you need to run |startsim_link|_ and pass a dictionary
   of the required resources to the ``client_resources`` argument.
 
 .. code-block:: bash
     :emphasize-lines: 2,8
 
     # Flower v.1.11+
-    # pyproject.toml
+    # [file: pyproject.toml]
     [tool.flwr.federations.local-sim-gpu]
     options.num-supernodes = 10
     options.backend.client-resources.num-cpus = 2
@@ -371,11 +377,11 @@ Simulation in a Notebook
 To run your simulation from within a notebook, please consider the following examples
 depending on your Flower version:
 
-- for Flower versions 1.11 and onwards, you need to run |runsim_link|_ in your notebook
+- For Flower versions 1.11 and onwards, you need to run |runsim_link|_ in your notebook
   instead of |startsim_link|_.
-- for Flower versions between 1.8 to 1.10, you need to run |runsim_link|_ in your
+- For Flower versions between 1.8 to 1.10, you need to run |runsim_link|_ in your
   notebook instead of |startsim_link|_ and configure the resources.
-- for Flower versions before 1.8, you need to run |startsim_link|_ and pass a dictionary
+- For Flower versions before 1.8, you need to run |startsim_link|_ and pass a dictionary
   of the required resources to the ``client_resources`` argument.
 
 .. tip::
@@ -386,9 +392,9 @@ depending on your Flower version:
 .. code-block:: python
     :emphasize-lines: 2,6,10,14
 
-    # Flower v1.11+
+    # Flower v1.10+
     def client_fn(context: flwr.common.Context):
-        return flwr.client.FlowerClient().to_client()
+        return FlowerClient().to_client()
 
 
     client_app = flwr.server.ClientApp(
