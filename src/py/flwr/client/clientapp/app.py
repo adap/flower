@@ -24,10 +24,11 @@ import grpc
 
 from flwr.cli.install import install_from_fab
 from flwr.client.client_app import ClientApp, LoadClientAppError
-from flwr.common import Context, Message
+from flwr.common import Context, EventType, Message, event
 from flwr.common.args import add_args_flwr_app_common
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS, ErrorCode
+from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.message import Error
@@ -67,6 +68,7 @@ def flwr_clientapp() -> None:
         sys.exit(1)
 
     log(INFO, "Starting Flower ClientApp")
+    event(EventType.RUN_CLIENT_APP_ENTER)
     log(
         DEBUG,
         "Starting isolated `ClientApp` connected to SuperNode's ClientAppIo API at %s "
@@ -81,6 +83,8 @@ def flwr_clientapp() -> None:
         flwr_dir=args.flwr_dir,
         certificates=None,
     )
+    # Graceful shutdown
+    register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
