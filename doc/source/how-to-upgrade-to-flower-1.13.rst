@@ -8,9 +8,7 @@ starting from version 1.8.
 
 .. note::
 
-    This guide shows how to reuse pre-``1.13`` Flower code with minimum code changes. In
-    another guide, we will show how to run Flower 1.13 end-to-end with pure Flower 1.13
-    APIs.
+    This guide shows how to reuse pre-``1.13`` Flower code with minimum code changes.
 
 Let's dive in!
 
