@@ -24,7 +24,7 @@ sequence:
 .. code-block:: bash
 
     $ cd examples/advanced-tensorflow/certificates && \
-      ./generate.sh
+        ./generate.sh
 
 This will generate the certificates in
 ``examples/advanced-tensorflow/.cache/certificates``.
@@ -39,8 +39,10 @@ using the scripts mentioned in this guide.
 Server (SuperLink)
 ------------------
 
-Navigate to ``examples/advanced-tensorflow`` and use the following terminal command to
-start a server (SuperLink) that uses the previously generated certificates:
+Navigate to the ``examples/advanced-tensorflow`` folder (`here
+<https://github.com/adap/flower/tree/main/examples/advanced-tensorflow>`_) and use the
+following terminal command to start a server (SuperLink) that uses the previously
+generated certificates:
 
 .. code-block:: bash
 
@@ -79,8 +81,9 @@ In another terminal, start a second SuperNode that uses the same certificates:
         --clientappio-api-address 0.0.0.0:9096 \
         --node-config="partition-id=1 num-partitions=10"
 
-Note that in the second SuperNode, you must specify a different port for the
-``ClientAppIO`` API address to avoid clashing with the first SuperNode.
+Note that in the second SuperNode, if you run both on the same machine, you must specify
+a different port for the ``ClientAppIO`` API address to avoid clashing with the first
+SuperNode.
 
 Executing ``flwr run`` with TLS
 -------------------------------
