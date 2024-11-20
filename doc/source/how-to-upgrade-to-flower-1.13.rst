@@ -3,12 +3,12 @@ Upgrade to Flower 1.13
 
 Welcome to the migration guide for updating Flower to Flower 1.13! Whether you're a
 seasoned user or just getting started, this guide will help you smoothly transition your
-existing setup to take advantage of the latest features and improvements in Flower 1.13,
-starting from version 1.8.
+existing setup to take advantage of the latest features and improvements in Flower 1.13.
 
 .. note::
 
-    This guide shows how to reuse pre-``1.13`` Flower code with minimum code changes.
+    This guide shows how to make pre-``1.13`` Flower code compatible with Flower 1.13
+    (and later) with only minimal code changes.
 
 Let's dive in!
 
@@ -84,6 +84,8 @@ or if you need Flower 1.13 with simulation:
 
     $ python -m pip install -U "flwr[simulation]"
 
+Ensure you set the following version constraint in your ``requirements.txt``
+
 .. code-block::
 
     # Without simulation support
@@ -97,10 +99,14 @@ or ``pyproject.toml``:
 .. code-block:: toml
 
     # Without simulation support
-    dependencies = ["flwr>=1.13,2.0"]
+    dependencies = [
+        "flwr>=1.13,2.0",
+    ]
 
     # With simulation support
-    dependencies = ["flwr[simulation]>=1.13,2.0"]
+    dependencies = [
+        "flwr[simulation]>=1.13,2.0",
+    ]
 
 Required changes
 ----------------
