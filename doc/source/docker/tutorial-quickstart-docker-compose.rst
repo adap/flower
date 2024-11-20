@@ -297,8 +297,8 @@ You can add more SuperNodes and ClientApps by uncommenting their definitions in 
         depends_on:
           - supernode-3
 
-If you also want to enable TLS for the new SuperNode, uncomment the
-definition in the ``with-tls.yml`` file:
+If you also want to enable TLS for the new SuperNode, uncomment the definition in the
+``with-tls.yml`` file:
 
 .. code-block:: yaml
     :caption: with-tls.yml
