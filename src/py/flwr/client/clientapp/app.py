@@ -68,7 +68,7 @@ def flwr_clientapp() -> None:
         sys.exit(1)
 
     log(INFO, "Starting Flower ClientApp")
-    event(EventType.RUN_CLIENT_APP_ENTER)
+    event(EventType.FLWR_CLIENTAPP_ENTER)
     log(
         DEBUG,
         "Starting isolated `ClientApp` connected to SuperNode's ClientAppIo API at %s "
@@ -84,7 +84,7 @@ def flwr_clientapp() -> None:
         certificates=None,
     )
     # Graceful shutdown
-    register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
+    register_exit_handlers(event_type=EventType.FLWR_CLIENTAPP_LEAVE)
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
