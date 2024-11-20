@@ -229,14 +229,14 @@ Deployment
     $ flower-supernode \
          --insecure \
          --superlink 127.0.0.1:9092 \
-         --supernode-address 127.0.0.1:9094 \
+         --clientappio-api-address 127.0.0.1:9094 \
          <other-args>
 
     # In another terminal window, start another long-running SuperNode (at least 2 SuperNodes are required)
     $ flower-supernode \
          --insecure \
          --superlink 127.0.0.1:9092 \
-         --supernode-address 127.0.0.1:9095 \
+         --clientappio-api-address 127.0.0.1:9095 \
          <other-args>
 
 - Here's another example to start both SuperLink and SuperNodes with HTTPS. Use the
@@ -255,14 +255,14 @@ Deployment
     # In a new terminal window, start a long-running SuperNode
     $ flower-supernode \
          --superlink 127.0.0.1:9092 \
-         --supernode-address 127.0.0.1:9094 \
+         --clientappio-api-address 127.0.0.1:9094 \
          --root-certificates <your-ca-cert-filepath> \
          <other-args>
 
     # In another terminal window, start another long-running SuperNode (at least 2 SuperNodes are required)
     $ flower-supernode \
          --superlink 127.0.0.1:9092 \
-         --supernode-address 127.0.0.1:9095 \
+         --clientappio-api-address 127.0.0.1:9095 \
          --root-certificates <your-ca-cert-filepath> \
          <other-args>
 
