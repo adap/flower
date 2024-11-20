@@ -34,6 +34,7 @@ services:
       - --insecure
       - --serverappio-api-address
       - superlink:9091
+    restart: on-failure:3
     depends_on:
       - superlink
 
