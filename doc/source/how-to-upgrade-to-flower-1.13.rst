@@ -111,19 +111,24 @@ or ``pyproject.toml``:
 Required changes
 ----------------
 
-From Flower 1.8, the *infrastructure* and *application layers* have been decoupled. In
-Flower 1.13, we further enforce this separation. Instead of starting a client in code
-via ``start_client()``, you create a |clientapp_link|_. Instead of starting a server in
-code via ``start_server()``, you create a |serverapp_link|_. Both ``ClientApp`` and
-``ServerApp`` are started by the long-running components of the server and client: the
-`SuperNode` and `SuperLink`, respectively.
+Starting with Flower 1.8, the *infrastructure* and *application layers* have been
+decoupled. Flower 1.13 enforces this separation further. Among other things, this allows
+you to run the exact same code in a simulation as in a real deployment.
+
+Instead of starting a client in code via ``start_client()``, you create a
+|clientapp_link|_. Instead of starting a server in code via ``start_server()``, you
+create a |serverapp_link|_. Both ``ClientApp`` and ``ServerApp`` are started by the
+long-running components of the server and client: the `SuperLink` and `SuperNode`,
+respectively.
 
 .. tip::
 
-    For more details please see the |flower_architecture_link|_ .
+    For more details on SuperLink and SuperNode, please see the
+    |flower_architecture_link|_ .
 
-The following non-breaking changes that require manual updates and allow you to run your
-project both in the traditional way and in the Flower 1.13 way:
+The following non-breaking changes require manual updates and allow you to run your
+project both in the traditional (now deprecated) way and in the new (recommended) Flower
+1.13 way:
 
 |clientapp_link|_
 ~~~~~~~~~~~~~~~~~
@@ -132,30 +137,30 @@ project both in the traditional way and in the Flower 1.13 way:
   |startclient_link|_. Here's an example:
 
 .. code-block:: python
-    :emphasize-lines: 2,6
+    :emphasize-lines: 6,10
 
-    # Flower v1.10+
-    def client_fn(context: flwr.common.Context):
+    from flwr.client import ClientApp, start_client
+    from flwr.common import Context
+
+
+    # Flower 1.10 and later (recommended)
+    def client_fn(context: Context):
         return FlowerClient().to_client()
 
 
-    app = flwr.client.ClientApp(
-        client_fn=client_fn,
-    )
+    app = ClientApp(client_fn=client_fn)
 
 
-    # Flower v1.8 - v1.9
-    def client_fn(cid: str):
-        return FlowerClient().to_client()
+    # # Flower 1.8 - 1.9 (deprecated, no longer supported)
+    # def client_fn(cid: str):
+    #     return FlowerClient().to_client()
+    #
+    # app = ClientApp(client_fn=client_fn)
 
 
-    app = flwr.client.ClientApp(
-        client_fn=client_fn,
-    )
-
-    # Flower v1.7
+    # Flower 1.7 (deprecated, only for backwards-compatibility)
     if __name__ == "__main__":
-        flwr.client.start_client(
+        start_client(
             server_address="127.0.0.1:8080",
             client=FlowerClient().to_client(),
         )
@@ -167,28 +172,33 @@ project both in the traditional way and in the Flower 1.13 way:
   |startserver_link|_. Here's an example:
 
 .. code-block:: python
-    :emphasize-lines: 2,8
+    :emphasize-lines: 7,13
 
-    # Flower v1.10+
-    def server_fn(context: flwr.common.Context):
-        strategy = flwr.server.strategy.FedAvg()
-        config = flwr.server.ServerConfig()
-        return flwr.server.ServerAppComponents(config=config, strategy=strategy)
+    from flwr.common import Context
+    from flwr.server import ServerApp, ServerAppComponents, ServerConfig, start_server
+    from flwr.server.strategy import FedAvg
 
 
-    app = flwr.server.ServerApp(
-        server_fn=server_fn,
-    )
+    # Flower 1.10 and later (recommended)
+    def server_fn(context: Context):
+        strategy = FedAvg()
+        config = ServerConfig()
+        return ServerAppComponents(config=config, strategy=strategy)
 
-    # Flower v1.8 - v1.9
-    app = flwr.server.ServerApp(
-        config=config,
-        strategy=strategy,
-    )
 
-    # Flower v1.7
+    app = ServerApp(server_fn=server_fn)
+
+
+    # # Flower 1.8 - 1.9 (deprecated, no longer supported)
+    # app = flwr.server.ServerApp(
+    #     config=config,
+    #     strategy=strategy,
+    # )
+
+
+    # Flower 1.7 (deprecated, only for backwards-compatibility)
     if __name__ == "__main__":
-        flwr.server.start_server(
+        start_server(
             server_address="0.0.0.0:8080",
             config=config,
             strategy=strategy,
