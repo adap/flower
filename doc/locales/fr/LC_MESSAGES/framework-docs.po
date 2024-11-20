@@ -9571,6 +9571,14 @@ msgstr ""
 
 #: flwr.client.app.start_client:41 of
 msgid ""
+"Tuple containing the elliptic curve private key and public key for "
+"authentication from the cryptography library. Source: "
+"https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ec/ Used "
+"to establish an authenticated connection with the server."
+msgstr ""
+
+#: flwr.client.app.start_client:36 of
+msgid ""
 "The maximum number of times the client will try to connect to the server "
 "before giving up in case of a connection error. If set to None, there is "
 "no limit to the number of tries."
