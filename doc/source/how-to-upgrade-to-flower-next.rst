@@ -74,9 +74,6 @@ Let's dive in!
 Install update
 --------------
 
-Using pip
-~~~~~~~~~
-
 Here's how to update an existing installation of Flower to Flower Next with ``pip``:
 
 .. code-block:: bash
@@ -88,8 +85,6 @@ or if you need Flower Next with simulation:
 .. code-block:: bash
 
     $ python -m pip install -U "flwr[simulation]"
-
-Ensure you set the following version constraint in your ``requirements.txt``
 
 .. code-block::
 
@@ -108,26 +103,6 @@ or ``pyproject.toml``:
 
     # With simulation support
     dependencies = ["flwr[simulation]>=1.8,2.0"]
-
-Using Poetry
-~~~~~~~~~~~~
-
-Update the ``flwr`` dependency in ``pyproject.toml`` and then reinstall (don't forget to
-delete ``poetry.lock`` via ``rm poetry.lock`` before running ``poetry install``).
-
-Ensure you set the following version constraint in your ``pyproject.toml``:
-
-.. code-block:: toml
-    :substitutions:
-
-     [tool.poetry.dependencies]
-     python = "^|python_version|"
-
-     # Without simulation support
-     flwr = ">=1.8,<2.0"
-
-     # With simulation support
-     flwr = { version = ">=1.8,<2.0", extras = ["simulation"] }
 
 Required changes
 ----------------
@@ -227,14 +202,14 @@ Deployment
     $ flower-supernode \
          --insecure \
          --superlink 127.0.0.1:9092 \
-         --node-config "partition-id=0 num-partitions=2" \
+         --node-config "..." \
          --supernode-address 127.0.0.1:9094
 
     # In another terminal window, start another long-running SuperNode (at least 2 SuperNodes are required)
     $ flower-supernode \
          --insecure \
          --superlink 127.0.0.1:9092 \
-         --node-config "partition-id=1 num-partitions=2" \
+         --node-config "..." \
          --supernode-address 127.0.0.1:9095
 
 - Here's another example to start with HTTPS. Use the ``--ssl-ca-certfile``,
@@ -253,14 +228,14 @@ Deployment
     # In a new terminal window, start a long-running SuperNode
     $ flower-supernode \
          --superlink 127.0.0.1:9092 \
-         --node-config "partition-id=0 num-partitions=2" \
+         --node-config "..." \
          --supernode-address 127.0.0.1:9094 \
          --root-certificates <your-ca-cert-filepath>
 
     # In another terminal window, start another long-running SuperNode (at least 2 SuperNodes are required)
     $ flower-supernode \
          --superlink 127.0.0.1:9092 \
-         --node-config "partition-id=1 num-partitions=2" \
+         --node-config "..." \
          --supernode-address 127.0.0.1:9095 \
          --root-certificates <your-ca-cert-filepath>
 
@@ -269,6 +244,11 @@ Simulation in CLI
 
 Wrap your existing client and strategy with |clientapp_link|_ and |serverapp_link|_,
 respectively. There is no need to use |startsim_link|_ anymore. Here's an example:
+
+.. tip::
+
+    For more advanced information regarding Flower simulation please read the
+    |flower_how_to_run_simulations_link|_ guide.
 
 .. code-block:: python
     :emphasize-lines: 9,13,18,25
@@ -390,25 +370,22 @@ Simulation in a Notebook
 To run your simulation from within a notebook, please consider the following examples
 depending on your Flower version:
 
-- for Flower versions 1.11 and onwards, you first need to edit your pyproject.toml file
-  as shown in the example below and run |runsim_link|_ in your notebook instead of
-  |startsim_link|_.
+- for Flower versions 1.11 and onwards, you need to run |runsim_link|_ in your notebook
+  instead of |startsim_link|_.
 - for Flower versions between 1.8 to 1.10, you need to run |runsim_link|_ in your
   notebook instead of |startsim_link|_ and configure the resources.
 - for Flower versions before 1.8, you need to run |startsim_link|_ and pass a dictionary
   of the required resources to the ``client_resources`` argument.
 
+.. tip::
+
+    For more advanced information regarding Flower simulation please read the
+    |flower_how_to_run_simulations_link|_ guide.
+
 .. code-block:: python
-    :emphasize-lines: 2,9,13,17,21
+    :emphasize-lines: 2,6,10,14
 
     # Flower v1.11+
-    # pyproject.toml
-    [tool.flwr.federations.local - sim - gpu]
-    options.num - supernodes = 10
-    options.backend.client - resources.num - cpus = 2
-    options.backend.client - resources.num - gpus = 0.25
-
-
     def client_fn(context: flwr.common.Context):
         return flwr.client.FlowerClient().to_client()
 
@@ -463,9 +440,6 @@ depending on your Flower version:
         strategy=strategy,
         client_resources=backend_config["client_resources"],
     )
-
-For more advanced information regarding Flower simulation please read the
-|flower_how_to_run_simulations_link|_ guide.
 
 Further help
 ------------
