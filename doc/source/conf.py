@@ -19,7 +19,6 @@ import os
 import sys
 
 from git import Repo
-from sphinx.application import ConfigError
 
 # Configuration file for the Sphinx documentation builder.
 #
@@ -231,6 +230,7 @@ redirects = {
     "logging": "how-to-configure-logging.html",
     "ssl-enabled-connections": "how-to-enable-ssl-connections.html",
     "upgrade-to-flower-1.0": "how-to-upgrade-to-flower-1.0.html",
+    "how-to-upgrade-to-flower-next": "how-to-upgrade-to-flower-1.13.html",
     # Restructuring: explanations
     "evaluation": "explanation-federated-evaluation.html",
     "differential-privacy-wrappers": "explanation-differential-privacy.html",
