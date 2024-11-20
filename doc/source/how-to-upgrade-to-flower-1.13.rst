@@ -1,16 +1,16 @@
-Upgrade to Flower Next
+Upgrade to Flower 1.13
 ======================
 
-Welcome to the migration guide for updating Flower to Flower Next! Whether you're a
+Welcome to the migration guide for updating Flower to Flower 1.13! Whether you're a
 seasoned user or just getting started, this guide will help you smoothly transition your
-existing setup to take advantage of the latest features and improvements in Flower Next,
+existing setup to take advantage of the latest features and improvements in Flower 1.13,
 starting from version 1.8.
 
 .. note::
 
     This guide shows how to reuse pre-``1.8`` Flower code with minimum code changes by
-    using the *compatibility layer* in Flower Next. In another guide, we will show how
-    to run Flower Next end-to-end with pure Flower Next APIs.
+    using the *compatibility layer* in Flower 1.13. In another guide, we will show how
+    to run Flower 1.13 end-to-end with pure Flower 1.13 APIs.
 
 Let's dive in!
 
@@ -74,13 +74,13 @@ Let's dive in!
 Install update
 --------------
 
-Here's how to update an existing installation of Flower to Flower Next with ``pip``:
+Here's how to update an existing installation of Flower to Flower 1.13 with ``pip``:
 
 .. code-block:: bash
 
     $ python -m pip install -U flwr
 
-or if you need Flower Next with simulation:
+or if you need Flower 1.13 with simulation:
 
 .. code-block:: bash
 
@@ -107,14 +107,14 @@ or ``pyproject.toml``:
 Required changes
 ----------------
 
-In Flower Next, the *infrastructure* and *application layers* have been decoupled.
+In Flower 1.13, the *infrastructure* and *application layers* have been decoupled.
 Instead of starting a client in code via ``start_client()``, you create a
 |clientapp_link|_ and start it via the command line. Instead of starting a server in
 code via ``start_server()``, you create a |serverapp_link|_ and start it via the command
 line. The long-running components of server and client are called `SuperLink` and
 `SuperNode`, for more details please see the |flower_architecture_link|_ . The following
 non-breaking changes that require manual updates and allow you to run your project both
-in the traditional way and in the Flower Next way:
+in the traditional way and in the Flower 1.13 way:
 
 |clientapp_link|_
 ~~~~~~~~~~~~~~~~~
@@ -445,15 +445,15 @@ Further help
 ------------
 
 Some official `Flower code examples <https://flower.ai/docs/examples/>`_ are already
-updated to Flower Next so they can serve as a reference for using the Flower Next API.
+updated to Flower 1.13 so they can serve as a reference for using the Flower 1.13 API.
 If there are further questions, `join the Flower Slack <https://flower.ai/join-slack/>`_
 and use the channel ``#questions``. You can also `participate in Flower Discuss
 <https://discuss.flower.ai/>`_ where you can find us answering questions, or share and
-learn from others about migrating to Flower Next.
+learn from others about migrating to Flower 1.13.
 
 .. admonition:: Important
 
-    As we continuously enhance Flower Next at a rapid pace, we'll be periodically
+    As we continuously enhance Flower 1.13 at a rapid pace, we'll be periodically
     updating this guide. Please feel free to share any feedback with us!
 
 ..
