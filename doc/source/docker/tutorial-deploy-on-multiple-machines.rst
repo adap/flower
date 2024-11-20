@@ -85,7 +85,7 @@ Step 3: Start the Flower Server Components
 ------------------------------------------
 
 Log into the remote machine using ``ssh`` and run the following command to start the
-SuperLink and ServerApp services:
+SuperLink and ``ServerApp`` services:
 
 .. code-block:: bash
     :linenos:
