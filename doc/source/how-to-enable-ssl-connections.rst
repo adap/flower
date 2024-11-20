@@ -23,8 +23,8 @@ sequence:
 
 .. code-block:: bash
 
-    cd examples/advanced-tensorflow/certificates
-    ./generate.sh
+    $ cd examples/advanced-tensorflow/certificates && \
+      ./generate.sh
 
 This will generate the certificates in
 ``examples/advanced-tensorflow/.cache/certificates``.
@@ -39,8 +39,8 @@ using the scripts mentioned in this guide.
 Server (SuperLink)
 ------------------
 
-Use the following terminal command to start a sever (SuperLink) that uses the previously
-generated certificates:
+Navigate to ``examples/advanced-tensorflow`` and use the following terminal command to
+start a server (SuperLink) that uses the previously generated certificates:
 
 .. code-block:: bash
 
@@ -52,8 +52,8 @@ generated certificates:
 When providing certificates, the server expects a tuple of three certificates paths: CA
 certificate, server certificate and server private key.
 
-Client (SuperNode)
-------------------
+Clients (SuperNode)
+-------------------
 
 Use the following terminal command to start a client (SuperNode) that uses the
 previously generated certificates:
@@ -62,17 +62,57 @@ previously generated certificates:
 
     $ flower-supernode \
         --root-certificates .cache/certificates/ca.crt \
-        --superlink 127.0.0.1:9092
+        --superlink 127.0.0.1:9092 \
+        --clientappio-api-address 0.0.0.0:9095 \
+        --node-config="partition-id=0 num-partitions=10"
 
 When setting ``root_certificates``, the client expects a file path to PEM-encoded root
 certificates.
+
+In another terminal, start a second SuperNode that uses the same certificates:
+
+.. code-block:: bash
+
+    $ flower-supernode \
+        --root-certificates .cache/certificates/ca.crt \
+        --superlink 127.0.0.1:9092 \
+        --clientappio-api-address 0.0.0.0:9096 \
+        --node-config="partition-id=1 num-partitions=10"
+
+Note that in the second SuperNode, you must specify a different port for the
+``ClientAppIO`` API address to avoid clashing with the first SuperNode.
+
+Executing ``flwr run`` with TLS
+-------------------------------
+
+The root certificates used for executing ``flwr run`` is specified in the
+``pyproject.toml`` of your app.
+
+.. code-block:: toml
+
+    [tool.flwr.federations.local-deployment]
+    address = "127.0.0.1:9093"
+    root-certificates = "./.cache/certificates/ca.crt"
+
+Note that the path to the ``root-certificates`` is relative to the root of the project.
+Now, you can run the example by executing the following:
+
+.. code-block:: bash
+
+    $ flwr run . local-deployment --stream
 
 Conclusion
 ----------
 
 You should now have learned how to generate self-signed certificates using the given
-script, start an TLS-enabled server and have a client establish a secure connection to
-it.
+script, start an TLS-enabled server and have two clients establish secure connections to
+it. You should also have learned how to run your Flower project using ``flwr run`` with
+TLS enabled.
+
+.. note::
+
+    For running a Docker setup with TLS enabled, please refer to
+    :doc:`docker/enable-tls`.
 
 Additional resources
 --------------------
