@@ -43,7 +43,8 @@ Step 1: Set Up
        $ export PROJECT_DIR=quickstart-compose
 
    Setting the ``PROJECT_DIR`` helps Docker Compose locate the ``pyproject.toml`` file,
-   allowing it to install dependencies in the ServerApp and ClientApp images correctly.
+   allowing it to install dependencies in the ``ServerApp`` and ``ClientApp`` images
+   correctly.
 
 Step 2: Run Flower in Insecure Mode
 -----------------------------------
@@ -89,8 +90,8 @@ addresses in the ``pyproject.toml`` file.
        address = "127.0.0.1:9093"
        insecure = true
 
-2. Run the quickstart example, monitor the ServerApp logs and wait for the summary to
-   appear:
+2. Run the quickstart example, monitor the ``ServerApp`` logs and wait for the summary
+   to appear:
 
    .. code-block:: bash
 
@@ -137,7 +138,7 @@ In the next step, change the application code.
 
        $ flwr run quickstart-compose local-deployment --stream
 
-   In the ServerApp logs, you should find the ``Get weights`` line:
+   In the ``ServerApp`` logs, you should find the ``Get weights`` line:
 
    .. code-block::
        :emphasize-lines: 5

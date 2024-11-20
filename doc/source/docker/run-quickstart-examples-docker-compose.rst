@@ -69,7 +69,7 @@ Run the Quickstart Example
        ``local-deployment`` with your chosen name in both the ``tool.flwr.federations.``
        string and the corresponding ``flwr run .`` command.
 
-5. Run the example and follow the logs of the ServerApp:
+5. Run the example and follow the logs of the ``ServerApp`` :
 
    .. code-block:: bash
 

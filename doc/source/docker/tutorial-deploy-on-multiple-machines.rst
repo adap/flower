@@ -151,7 +151,7 @@ Here, we have named our remote federation ``remote-deployment``:
     The path of the ``root-certificates`` should be relative to the location of the
     ``pyproject.toml`` file.
 
-Run the project and follow the ServerApp logs:
+Run the project and follow the ``ServerApp`` logs:
 
 .. code-block:: bash
 
