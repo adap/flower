@@ -50,6 +50,11 @@ class Partitioner(ABC):
                 "created partitions (in case the partitioning scheme needs to create "
                 "the full partitioning also in order to return a single partition)."
             )
+        if not isinstance(value, Dataset):
+            raise TypeError(
+                f"The dataset object you want to assign to the partitioner should be "
+                f"of type `datasets.Dataset` but given {type(value)}."
+            )
         self._dataset = value
 
     @abstractmethod

@@ -17,7 +17,7 @@
 import hashlib
 import re
 from pathlib import Path
-from typing import Callable, List, Optional, cast
+from typing import Callable, Optional, cast
 
 import typer
 
@@ -40,7 +40,7 @@ def prompt_text(
     return cast(str, result)
 
 
-def prompt_options(text: str, options: List[str]) -> str:
+def prompt_options(text: str, options: list[str]) -> str:
     """Ask user to select one of the given options and return the selected item."""
     # Turn options into a list with index as in " [ 0] quickstart-pytorch"
     options_formatted = [

@@ -40,6 +40,7 @@ def main(driver: Driver, context: Context) -> None:
     strategy = FedAvg(
         # Select all available clients
         fraction_fit=1.0,
+        min_fit_clients=5,
         # Disable evaluation in demo
         fraction_evaluate=(0.0 if is_demo else context.run_config["fraction-evaluate"]),
         min_available_clients=5,

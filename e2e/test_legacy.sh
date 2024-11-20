@@ -1,28 +1,19 @@
 #!/bin/bash
 set -e
 
-case "$1" in
-  framework-pandas)
-    server_file="server.py"
-    ;;
-  bare-https)
-    ./generate.sh
-    server_file="server.py"
-    ;;
-  *)
-    server_file="../server.py"
-    ;;
-esac
+if [ "$1" = "e2e-bare-https" ]; then
+  ./../generate.sh
+fi
 
 # run the first command in background and save output to a temporary file:
-timeout 2m python $server_file &
+timeout 2m python server_app.py &
 pid=$!
 sleep 3
 
-python client.py &
+python client_app.py &
 sleep 3
 
-python client.py &
+python client_app.py &
 sleep 3
 
 wait $pid

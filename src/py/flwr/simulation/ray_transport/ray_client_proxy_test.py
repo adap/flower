@@ -17,13 +17,12 @@
 
 from math import pi
 from random import shuffle
-from typing import Dict, List, Tuple, Type
 
 import ray
 
 from flwr.client import Client, NumPyClient
 from flwr.client.client_app import ClientApp
-from flwr.client.node_state import NodeState
+from flwr.client.run_info_store import DeprecatedRunInfoStore
 from flwr.common import (
     DEFAULT_TTL,
     Config,
@@ -32,6 +31,7 @@ from flwr.common import (
     Message,
     MessageTypeLegacy,
     Metadata,
+    RecordSet,
     Scalar,
 )
 from flwr.common.constant import NUM_PARTITIONS_KEY, PARTITION_ID_KEY
@@ -40,7 +40,7 @@ from flwr.common.recordset_compat import (
     recordset_to_getpropertiesres,
 )
 from flwr.common.recordset_compat_test import _get_valid_getpropertiesins
-from flwr.simulation.app import (
+from flwr.simulation.legacy_app import (
     NodeToPartitionMapping,
     _create_node_id_to_partition_mapping,
 )
@@ -55,15 +55,15 @@ from flwr.simulation.ray_transport.ray_client_proxy import RayActorClientProxy
 class DummyClient(NumPyClient):
     """A dummy NumPyClient for tests."""
 
-    def __init__(self, node_id: int) -> None:
+    def __init__(self, node_id: int, state: RecordSet) -> None:
         self.node_id = node_id
+        self.client_state = state
 
-    def get_properties(self, config: Config) -> Dict[str, Scalar]:
+    def get_properties(self, config: Config) -> dict[str, Scalar]:
         """Return properties by doing a simple calculation."""
         result = self.node_id * pi
-
         # store something in context
-        self.context.state.configs_records["result"] = ConfigsRecord(
+        self.client_state.configs_records["result"] = ConfigsRecord(
             {"result": str(result)}
         )
         return {"result": result}
@@ -71,18 +71,18 @@ class DummyClient(NumPyClient):
 
 def get_dummy_client(context: Context) -> Client:
     """Return a DummyClient converted to Client type."""
-    return DummyClient(context.node_id).to_client()
+    return DummyClient(context.node_id, state=context.state).to_client()
 
 
 def prep(
-    actor_type: Type[VirtualClientEngineActor] = ClientAppActor,
-) -> Tuple[
-    List[RayActorClientProxy], VirtualClientEngineActorPool, NodeToPartitionMapping
+    actor_type: type[VirtualClientEngineActor] = ClientAppActor,
+) -> tuple[
+    list[RayActorClientProxy], VirtualClientEngineActorPool, NodeToPartitionMapping
 ]:  # pragma: no cover
     """Prepare ClientProxies and pool for tests."""
     client_resources = {"num_cpus": 1, "num_gpus": 0.0}
 
-    def create_actor_fn() -> Type[VirtualClientEngineActor]:
+    def create_actor_fn() -> type[VirtualClientEngineActor]:
         return actor_type.options(**client_resources).remote()  # type: ignore
 
     # Create actor pool
@@ -142,7 +142,7 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
     """Test that ClientProxies get the result of client job they submit.
 
     All jobs are submitted at the same time. Then fetched one at a time. This also tests
-    NodeState (at each Proxy) and RunState basic functionality.
+    DeprecatedRunInfoStore (at each Proxy) and RunState basic functionality.
     """
     proxies, _, _ = prep()
     run_id = 0
@@ -185,7 +185,6 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
                 "result"
             ]["result"]
         )
-
     ray.shutdown()
 
 
@@ -194,10 +193,10 @@ def test_cid_consistency_without_proxies() -> None:
     _, pool, mapping = prep()
     node_ids = list(mapping.keys())
 
-    # register node states
-    node_states: Dict[int, NodeState] = {}
+    # register DeprecatedRunInfoStores
+    node_info_stores: dict[int, DeprecatedRunInfoStore] = {}
     for node_id, partition_id in mapping.items():
-        node_states[node_id] = NodeState(
+        node_info_stores[node_id] = DeprecatedRunInfoStore(
             node_id=node_id,
             node_config={
                 PARTITION_ID_KEY: str(partition_id),
@@ -229,8 +228,8 @@ def test_cid_consistency_without_proxies() -> None:
             ),
         )
         # register and retrieve context
-        node_states[node_id].register_context(run_id=run_id)
-        context = node_states[node_id].retrieve_context(run_id=run_id)
+        node_info_stores[node_id].register_context(run_id=run_id)
+        context = node_info_stores[node_id].retrieve_context(run_id=run_id)
         partition_id_str = str(context.node_config[PARTITION_ID_KEY])
         pool.submit_client_job(
             lambda a, c_fn, j_fn, nid_, state: a.run.remote(c_fn, j_fn, nid_, state),

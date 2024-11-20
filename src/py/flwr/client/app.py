@@ -15,23 +15,36 @@
 """Flower client app."""
 
 import signal
+import subprocess
 import sys
 import time
+from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from logging import ERROR, INFO, WARN
 from pathlib import Path
-from typing import Callable, ContextManager, Dict, Optional, Tuple, Type, Union
+from typing import Callable, Optional, Union, cast
 
+import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 from grpc import RpcError
 
+from flwr.cli.config_utils import get_fab_metadata
+from flwr.cli.install import install_from_fab
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
+from flwr.client.nodestate.nodestate_factory import NodeStateFactory
 from flwr.client.typing import ClientFnExt
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, Message, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
+    CLIENT_OCTET,
+    CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
+    ISOLATION_MODE_PROCESS,
+    ISOLATION_MODE_SUBPROCESS,
+    MAX_RETRY_DELAY,
     MISSING_EXTRA_REST,
+    RUN_ID_NUM_BYTES,
+    SERVER_OCTET,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_BIDI,
     TRANSPORT_TYPE_GRPC_RERE,
@@ -42,14 +55,18 @@ from flwr.common.constant import (
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
-from flwr.common.typing import Run, UserConfig
+from flwr.common.typing import Fab, Run, UserConfig
+from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
+from flwr.server.superlink.fleet.grpc_bidi.grpc_server import generic_create_grpc_server
+from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 
+from .clientapp.clientappio_servicer import ClientAppInputs, ClientAppIoServicer
 from .grpc_adapter_client.connection import grpc_adapter
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
-from .node_state import NodeState
 from .numpy_client import NumPyClient
+from .run_info_store import DeprecatedRunInfoStore
 
 
 def _check_actionable_client(
@@ -81,12 +98,17 @@ def start_client(
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
     authentication_keys: Optional[
-        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
+
+    Warning
+    -------
+    This function is deprecated since 1.13.0. Use :code:`flower-supernode` command
+    instead to start a SuperNode.
 
     Parameters
     ----------
@@ -118,6 +140,11 @@ def start_client(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
+    authentication_keys : Optional[Tuple[PrivateKey, PublicKey]] (default: None)
+        Tuple containing the elliptic curve private key and public key for
+        authentication from the cryptography library.
+        Source: https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ec/
+        Used to establish an authenticated connection with the server.
     max_retries: Optional[int] (default: None)
         The maximum number of times the client will try to connect to the
         server before giving up in case of a connection error. If set to None,
@@ -157,8 +184,19 @@ def start_client(
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
+    msg = (
+        "flwr.client.start_client() is deprecated."
+        "\n\tInstead, use the `flower-supernode` CLI command to start a SuperNode "
+        "as shown below:"
+        "\n\n\t\t$ flower-supernode --insecure --superlink='<IP>:<PORT>'"
+        "\n\n\tTo view all available options, run:"
+        "\n\n\t\t$ flower-supernode --help"
+        "\n\n\tUsing `start_client()` is deprecated."
+    )
+    warn_deprecated_feature(name=msg)
+
     event(EventType.START_CLIENT_ENTER)
-    _start_client_internal(
+    start_client_internal(
         server_address=server_address,
         node_config={},
         load_client_app_fn=None,
@@ -179,11 +217,11 @@ def start_client(
 # pylint: disable=too-many-branches
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
-def _start_client_internal(
+def start_client_internal(
     *,
     server_address: str,
     node_config: UserConfig,
-    load_client_app_fn: Optional[Callable[[str, str], ClientApp]] = None,
+    load_client_app_fn: Optional[Callable[[str, str, str], ClientApp]] = None,
     client_fn: Optional[ClientFnExt] = None,
     client: Optional[Client] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
@@ -191,11 +229,13 @@ def _start_client_internal(
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
     authentication_keys: Optional[
-        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
     flwr_path: Optional[Path] = None,
+    isolation: Optional[str] = None,
+    clientappio_api_address: Optional[str] = CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -233,6 +273,11 @@ def _start_client_internal(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
+    authentication_keys : Optional[Tuple[PrivateKey, PublicKey]] (default: None)
+        Tuple containing the elliptic curve private key and public key for
+        authentication from the cryptography library.
+        Source: https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ec/
+        Used to establish an authenticated connection with the server.
     max_retries: Optional[int] (default: None)
         The maximum number of times the client will try to connect to the
         server before giving up in case of a connection error. If set to None,
@@ -243,6 +288,17 @@ def _start_client_internal(
         If set to None, there is no limit to the total time.
     flwr_path: Optional[Path] (default: None)
         The fully resolved path containing installed Flower Apps.
+    isolation : Optional[str] (default: None)
+        Isolation mode for `ClientApp`. Possible values are `subprocess` and
+        `process`. Defaults to `None`, which runs the `ClientApp` in the same process
+        as the SuperNode. If `subprocess`, the `ClientApp` runs in a subprocess started
+        by the SueprNode and communicates using gRPC at the address
+        `clientappio_api_address`. If `process`, the `ClientApp` runs in a separate
+        isolated process and communicates using gRPC at the address
+        `clientappio_api_address`.
+    clientappio_api_address : Optional[str]
+        (default: `CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS`)
+        The SuperNode gRPC server address.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -263,10 +319,22 @@ def _start_client_internal(
 
             client_fn = single_client_factory
 
-        def _load_client_app(_1: str, _2: str) -> ClientApp:
+        def _load_client_app(_1: str, _2: str, _3: str) -> ClientApp:
             return ClientApp(client_fn=client_fn)
 
         load_client_app_fn = _load_client_app
+
+    if isolation:
+        if clientappio_api_address is None:
+            raise ValueError(
+                f"`clientappio_api_address` required when `isolation` is "
+                f"{ISOLATION_MODE_SUBPROCESS} or {ISOLATION_MODE_PROCESS}",
+            )
+        _clientappio_grpc_server, clientappio_servicer = run_clientappio_api_grpc(
+            address=clientappio_api_address,
+            certificates=None,
+        )
+    clientappio_api_address = cast(str, clientappio_api_address)
 
     # At this point, only `load_client_app_fn` should be used
     # Both `client` and `client_fn` must not be used directly
@@ -300,7 +368,7 @@ def _start_client_internal(
             )
 
     retry_invoker = RetryInvoker(
-        wait_gen_factory=exponential,
+        wait_gen_factory=lambda: exponential(max_delay=MAX_RETRY_DELAY),
         recoverable_exceptions=connection_error_type,
         max_tries=max_retries + 1 if max_retries is not None else None,
         max_time=max_wait_time,
@@ -318,10 +386,12 @@ def _start_client_internal(
         on_backoff=_on_backoff,
     )
 
-    # NodeState gets initialized when the first connection is established
-    node_state: Optional[NodeState] = None
+    # DeprecatedRunInfoStore gets initialized when the first connection is established
+    run_info_store: Optional[DeprecatedRunInfoStore] = None
+    state_factory = NodeStateFactory()
+    state = state_factory.state()
 
-    runs: Dict[int, Run] = {}
+    runs: dict[int, Run] = {}
 
     while not app_state_tracker.interrupt:
         sleep_duration: int = 0
@@ -333,10 +403,10 @@ def _start_client_internal(
             root_certificates,
             authentication_keys,
         ) as conn:
-            receive, send, create_node, delete_node, get_run = conn
+            receive, send, create_node, delete_node, get_run, get_fab = conn
 
             # Register node when connecting the first time
-            if node_state is None:
+            if run_info_store is None:
                 if create_node is None:
                     if transport not in ["grpc-bidi", None]:
                         raise NotImplementedError(
@@ -345,23 +415,25 @@ def _start_client_internal(
                         )
                     # gRPC-bidi doesn't have the concept of node_id,
                     # so we set it to -1
-                    node_state = NodeState(
+                    run_info_store = DeprecatedRunInfoStore(
                         node_id=-1,
                         node_config={},
                     )
                 else:
                     # Call create_node fn to register node
-                    node_id: Optional[int] = (  # pylint: disable=assignment-from-none
-                        create_node()
-                    )  # pylint: disable=not-callable
-                    if node_id is None:
-                        raise ValueError("Node registration failed")
-                    node_state = NodeState(
-                        node_id=node_id,
+                    # and store node_id in state
+                    if (node_id := create_node()) is None:
+                        raise ValueError(
+                            "Failed to register SuperNode with the SuperLink"
+                        )
+                    state.set_node_id(node_id)
+                    run_info_store = DeprecatedRunInfoStore(
+                        node_id=state.get_node_id(),
                         node_config=node_config,
                     )
 
             app_state_tracker.register_signal_handler()
+            # pylint: disable=too-many-nested-blocks
             while not app_state_tracker.interrupt:
                 try:
                     # Receive
@@ -398,16 +470,31 @@ def _start_client_internal(
                             runs[run_id] = get_run(run_id)
                         # If get_run is None, i.e., in grpc-bidi mode
                         else:
-                            runs[run_id] = Run(run_id, "", "", {})
+                            runs[run_id] = Run.create_empty(run_id=run_id)
+
+                    run: Run = runs[run_id]
+                    if get_fab is not None and run.fab_hash:
+                        fab = get_fab(run.fab_hash)
+                        if not isolation:
+                            # If `ClientApp` runs in the same process, install the FAB
+                            install_from_fab(fab.content, flwr_path, True)
+                        fab_id, fab_version = get_fab_metadata(fab.content)
+                    else:
+                        fab = None
+                        fab_id, fab_version = run.fab_id, run.fab_version
+
+                    run.fab_id, run.fab_version = fab_id, fab_version
 
                     # Register context for this run
-                    node_state.register_context(
-                        run_id=run_id, run=runs[run_id], flwr_path=flwr_path
+                    run_info_store.register_context(
+                        run_id=run_id,
+                        run=run,
+                        flwr_path=flwr_path,
+                        fab=fab,
                     )
 
                     # Retrieve context for this run
-                    context = node_state.retrieve_context(run_id=run_id)
-
+                    context = run_info_store.retrieve_context(run_id=run_id)
                     # Create an error reply message that will never be used to prevent
                     # the used-before-assignment linting error
                     reply_message = message.create_error_reply(
@@ -416,14 +503,72 @@ def _start_client_internal(
 
                     # Handle app loading and task message
                     try:
-                        # Load ClientApp instance
-                        run: Run = runs[run_id]
-                        client_app: ClientApp = load_client_app_fn(
-                            run.fab_id, run.fab_version
-                        )
+                        if isolation:
+                            # Two isolation modes:
+                            # 1. `subprocess`: SuperNode is starting the ClientApp
+                            #    process as a subprocess.
+                            # 2. `process`: ClientApp process gets started separately
+                            #    (via `flwr-clientapp`), for example, in a separate
+                            #    Docker container.
 
-                        # Execute ClientApp
-                        reply_message = client_app(message=message, context=context)
+                            # Generate SuperNode token
+                            token: int = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
+
+                            # Mode 1: SuperNode starts ClientApp as subprocess
+                            start_subprocess = isolation == ISOLATION_MODE_SUBPROCESS
+
+                            # Share Message and Context with servicer
+                            clientappio_servicer.set_inputs(
+                                clientapp_input=ClientAppInputs(
+                                    message=message,
+                                    context=context,
+                                    run=run,
+                                    fab=fab,
+                                    token=token,
+                                ),
+                                token_returned=start_subprocess,
+                            )
+
+                            if start_subprocess:
+                                _octet, _colon, _port = (
+                                    clientappio_api_address.rpartition(":")
+                                )
+                                io_address = (
+                                    f"{CLIENT_OCTET}:{_port}"
+                                    if _octet == SERVER_OCTET
+                                    else clientappio_api_address
+                                )
+                                # Start ClientApp subprocess
+                                command = [
+                                    "flwr-clientapp",
+                                    "--clientappio-api-address",
+                                    io_address,
+                                    "--token",
+                                    str(token),
+                                ]
+                                command.append("--insecure")
+
+                                subprocess.run(
+                                    command,
+                                    stdout=None,
+                                    stderr=None,
+                                    check=True,
+                                )
+                            else:
+                                # Wait for output to become available
+                                while not clientappio_servicer.has_outputs():
+                                    time.sleep(0.1)
+
+                            outputs = clientappio_servicer.get_outputs()
+                            reply_message, context = outputs.message, outputs.context
+                        else:
+                            # Load ClientApp instance
+                            client_app: ClientApp = load_client_app_fn(
+                                fab_id, fab_version, run.fab_hash
+                            )
+
+                            # Execute ClientApp
+                            reply_message = client_app(message=message, context=context)
                     except Exception as ex:  # pylint: disable=broad-exception-caught
 
                         # Legacy grpc-bidi
@@ -432,7 +577,7 @@ def _start_client_internal(
                             # Raise exception, crash process
                             raise ex
 
-                        # Don't update/change NodeState
+                        # Don't update/change DeprecatedRunInfoStore
 
                         e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
                         # Ex fmt: "<class 'ZeroDivisionError'>:<'division by zero'>"
@@ -457,7 +602,7 @@ def _start_client_internal(
                         )
                     else:
                         # No exception, update node state
-                        node_state.update_context(
+                        run_info_store.update_context(
                             run_id=run_id,
                             context=context,
                         )
@@ -469,6 +614,7 @@ def _start_client_internal(
                 except StopIteration:
                     sleep_duration = 0
                     break
+            # pylint: enable=too-many-nested-blocks
 
             # Unregister node
             if delete_node is not None and app_state_tracker.is_connected:
@@ -589,7 +735,7 @@ def start_numpy_client(
     )
 
 
-def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
+def _init_connection(transport: Optional[str], server_address: str) -> tuple[
     Callable[
         [
             str,
@@ -597,20 +743,21 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
             RetryInvoker,
             int,
             Union[bytes, str, None],
-            Optional[Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]],
+            Optional[tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]],
         ],
-        ContextManager[
-            Tuple[
+        AbstractContextManager[
+            tuple[
                 Callable[[], Optional[Message]],
                 Callable[[Message], None],
                 Optional[Callable[[], Optional[int]]],
                 Optional[Callable[[], None]],
                 Optional[Callable[[int], Run]],
+                Optional[Callable[[str], Fab]],
             ]
         ],
     ],
     str,
-    Type[Exception],
+    type[Exception],
 ]:
     # Parse IP address
     parsed_address = parse_address(server_address)
@@ -666,3 +813,24 @@ class _AppStateTracker:
 
         signal.signal(signal.SIGINT, signal_handler)
         signal.signal(signal.SIGTERM, signal_handler)
+
+
+def run_clientappio_api_grpc(
+    address: str,
+    certificates: Optional[tuple[bytes, bytes, bytes]],
+) -> tuple[grpc.Server, ClientAppIoServicer]:
+    """Run ClientAppIo API gRPC server."""
+    clientappio_servicer: grpc.Server = ClientAppIoServicer()
+    clientappio_add_servicer_to_server_fn = add_ClientAppIoServicer_to_server
+    clientappio_grpc_server = generic_create_grpc_server(
+        servicer_and_add_fn=(
+            clientappio_servicer,
+            clientappio_add_servicer_to_server_fn,
+        ),
+        server_address=address,
+        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
+        certificates=certificates,
+    )
+    log(INFO, "Starting Flower ClientAppIo gRPC server on %s", address)
+    clientappio_grpc_server.start()
+    return clientappio_grpc_server, clientappio_servicer

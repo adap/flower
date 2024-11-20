@@ -15,10 +15,10 @@
 """LinearPartitioner class."""
 
 
-from flwr_datasets.partitioner.size_partitioner import SizePartitioner
+from flwr_datasets.partitioner.id_to_size_fnc_partitioner import IdToSizeFncPartitioner
 
 
-class LinearPartitioner(SizePartitioner):
+class LinearPartitioner(IdToSizeFncPartitioner):
     """Partitioner creates partitions of size that are linearly correlated with id.
 
     The amount of data each client gets is linearly correlated with the partition ID.

@@ -16,7 +16,7 @@
 
 
 from collections import Counter
-from typing import Dict, List, Optional, Union
+from typing import Optional, Union
 
 import numpy as np
 
@@ -182,7 +182,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         self._num_unique_labels: int = 0
         self._num_columns: int = 0
         self._partition_id_to_indices_determined = False
-        self._partition_id_to_indices: Dict[int, List[int]] = {}
+        self._partition_id_to_indices: dict[int, list[int]] = {}
 
     def load_partition(self, partition_id: int) -> datasets.Dataset:
         """Load a partition based on the partition index.

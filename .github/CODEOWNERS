@@ -1,13 +1,16 @@
 # Details: https://help.github.com/en/articles/about-code-owners
 
 # Default code owners
-* @danieljanes @tanertopal
+* @tanertopal @danieljanes
 
 # README.md
 README.md @jafermarq @tanertopal @danieljanes
 
 # Flower Baselines
 /baselines @jafermarq @tanertopal @danieljanes
+
+# Flower Benchmarks
+/benchmarks @jafermarq @tanertopal @danieljanes
 
 # Flower Datasets
 /datasets @jafermarq @tanertopal @danieljanes
@@ -27,3 +30,9 @@ README.md @jafermarq @tanertopal @danieljanes
 # GitHub Actions and Workflows
 /.github/workflows @Robert-Steiner @tanertopal @danieljanes
 /.github/actions @Robert-Steiner @tanertopal @danieljanes
+
+# Docker-related files
+/.devcontainer @Robert-Steiner @Moep90 @tanertopal @danieljanes
+**/Dockerfile @Robert-Steiner @Moep90 @tanertopal @danieljanes
+**/*.Dockerfile @Robert-Steiner @Moep90 @tanertopal @danieljanes
+/src/docker @Robert-Steiner @Moep90 @tanertopal @danieljanes

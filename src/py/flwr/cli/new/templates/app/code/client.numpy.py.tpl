@@ -1,16 +1,15 @@
 """$project_name: A Flower / $framework_str app."""
 
-from flwr.client import NumPyClient, ClientApp
+from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
-import numpy as np
+from $import_name.task import get_dummy_model
 
 
 class FlowerClient(NumPyClient):
-    def get_parameters(self, config):
-        return [np.ones((1, 1))]
 
     def fit(self, parameters, config):
-        return ([np.ones((1, 1))], 1, {})
+        model = get_dummy_model()
+        return [model], 1, {}
 
     def evaluate(self, parameters, config):
         return float(0.0), 1, {"accuracy": float(1.0)}

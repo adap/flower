@@ -10,9 +10,11 @@ This code exemplifies a federated learning setup using the Flower framework on t
 
 This example uses [Flower Datasets](https://flower.ai/docs/datasets/) to download, partition and preprocess the dataset.
 
-## Environments Setup
+## Set up the project
 
-Start by cloning the example. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
+### Clone the project
+
+Start by cloning the example project:
 
 ```shell
 git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/fl-tabular . && rm -rf flower && cd fl-tabular
@@ -21,25 +23,44 @@ git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/fl-
 This will create a new directory called `fl-tabular` containing the following files:
 
 ```shell
--- pyproject.toml
--- client.py
--- server.py
--- task.py
--- README.md
+fl-tabular
+├── fltabular
+│   ├── client_app.py   # Defines your ClientApp
+│   ├── server_app.py   # Defines your ServerApp
+│   └── task.py         # Defines your model, training and data loading
+├── pyproject.toml      # Project metadata like dependencies and configs
+└── README.md
 ```
 
-### Installing dependencies
+### Install dependencies and project
 
-Project dependencies are defined in `pyproject.toml`. Install them with:
+Install the dependencies defined in `pyproject.toml` as well as the `fltabular` package.
 
 ```shell
-pip install .
+# From a new python environment, run:
+pip install -e .
 ```
 
-## Running Code
+## Run the Example
 
-### Federated Using Flower Simulation
+You can run your `ClientApp` and `ServerApp` in both _simulation_ and
+_deployment_ mode without making changes to the code. If you are starting
+with Flower, we recommend you using the _simulation_ model as it requires
+fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
+
+### Run with the Simulation Engine
 
 ```bash
-flower-simulation --server-app server:app --client-app client:app --num-supernodes 5
+flwr run .
 ```
+
+You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
+
+```bash
+flwr run . --run-config num-server-rounds=10
+```
+
+### Run with the Deployment Engine
+
+> \[!NOTE\]
+> An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.

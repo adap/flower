@@ -18,6 +18,8 @@
 from .dirichlet_partitioner import DirichletPartitioner
 from .distribution_partitioner import DistributionPartitioner
 from .exponential_partitioner import ExponentialPartitioner
+from .grouped_natural_id_partitioner import GroupedNaturalIdPartitioner
+from .id_to_size_fnc_partitioner import IdToSizeFncPartitioner
 from .iid_partitioner import IidPartitioner
 from .inner_dirichlet_partitioner import InnerDirichletPartitioner
 from .linear_partitioner import LinearPartitioner
@@ -32,6 +34,8 @@ __all__ = [
     "DirichletPartitioner",
     "DistributionPartitioner",
     "ExponentialPartitioner",
+    "GroupedNaturalIdPartitioner",
+    "IdToSizeFncPartitioner",
     "IidPartitioner",
     "InnerDirichletPartitioner",
     "LinearPartitioner",

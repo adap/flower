@@ -16,21 +16,22 @@
 
 import time
 import warnings
-from logging import DEBUG, WARNING
-from typing import Iterable, List, Optional, cast
+from collections.abc import Iterable
+from logging import DEBUG, INFO, WARN, WARNING
+from typing import Any, Optional, cast
 
 import grpc
 
-from flwr.common import DEFAULT_TTL, EventType, Message, Metadata, RecordSet, event
+from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
+from flwr.common.constant import MAX_RETRY_DELAY, SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
-from flwr.common.serde import (
-    message_from_taskres,
-    message_to_taskins,
-    user_config_from_proto,
-)
+from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
+from flwr.common.serde import message_from_taskres, message_to_taskins, run_from_proto
 from flwr.common.typing import Run
-from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     GetNodesResponse,
     PullTaskResRequest,
@@ -38,14 +39,10 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     PushTaskInsRequest,
     PushTaskInsResponse,
 )
-from flwr.proto.driver_pb2_grpc import DriverStub  # pylint: disable=E0611
-from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 from .driver import Driver
-
-DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
 
 ERROR_MESSAGE_DRIVER_NOT_CONNECTED = """
 [Driver] Error: Not connected.
@@ -56,14 +53,12 @@ Call `connect()` on the `GrpcDriverStub` instance before calling any of the othe
 
 
 class GrpcDriver(Driver):
-    """`GrpcDriver` provides an interface to the Driver API.
+    """`GrpcDriver` provides an interface to the ServerAppIo API.
 
     Parameters
     ----------
-    run_id : int
-        The identifier of the run.
-    driver_service_address : str (default: "[::]:9091")
-        The address (URL, IPv6, IPv4) of the SuperLink Driver API service.
+    serverappio_service_address : str (default: "[::]:9091")
+        The address (URL, IPv6, IPv4) of the SuperLink ServerAppIo API service.
     root_certificates : Optional[bytes] (default: None)
         The PEM-encoded root certificates as a byte string.
         If provided, a secure connection using the certificates will be
@@ -72,29 +67,27 @@ class GrpcDriver(Driver):
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
-        run_id: int,
-        driver_service_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
+        serverappio_service_address: str = SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
         root_certificates: Optional[bytes] = None,
     ) -> None:
-        self._run_id = run_id
-        self._addr = driver_service_address
+        self._addr = serverappio_service_address
         self._cert = root_certificates
         self._run: Optional[Run] = None
-        self._grpc_stub: Optional[DriverStub] = None
+        self._grpc_stub: Optional[ServerAppIoStub] = None
         self._channel: Optional[grpc.Channel] = None
         self.node = Node(node_id=0, anonymous=True)
+        self._retry_invoker = _make_simple_grpc_retry_invoker()
 
     @property
     def _is_connected(self) -> bool:
-        """Check if connected to the Driver API server."""
+        """Check if connected to the ServerAppIo API server."""
         return self._channel is not None
 
     def _connect(self) -> None:
-        """Connect to the Driver API.
+        """Connect to the ServerAppIo API.
 
         This will not call GetRun.
         """
-        event(EventType.DRIVER_CONNECT)
         if self._is_connected:
             log(WARNING, "Already connected")
             return
@@ -103,12 +96,12 @@ class GrpcDriver(Driver):
             insecure=(self._cert is None),
             root_certificates=self._cert,
         )
-        self._grpc_stub = DriverStub(self._channel)
+        self._grpc_stub = ServerAppIoStub(self._channel)
+        _wrap_stub(self._grpc_stub, self._retry_invoker)
         log(DEBUG, "[Driver] Connected to %s", self._addr)
 
     def _disconnect(self) -> None:
-        """Disconnect from the Driver API."""
-        event(EventType.DRIVER_DISCONNECT)
+        """Disconnect from the ServerAppIo API."""
         if not self._is_connected:
             log(DEBUG, "Already disconnected")
             return
@@ -118,40 +111,32 @@ class GrpcDriver(Driver):
         channel.close()
         log(DEBUG, "[Driver] Disconnected")
 
-    def _init_run(self) -> None:
-        # Check if is initialized
-        if self._run is not None:
-            return
+    def set_run(self, run_id: int) -> None:
+        """Set the run."""
         # Get the run info
-        req = GetRunRequest(run_id=self._run_id)
+        req = GetRunRequest(run_id=run_id)
         res: GetRunResponse = self._stub.GetRun(req)
         if not res.HasField("run"):
-            raise RuntimeError(f"Cannot find the run with ID: {self._run_id}")
-        self._run = Run(
-            run_id=res.run.run_id,
-            fab_id=res.run.fab_id,
-            fab_version=res.run.fab_version,
-            override_config=user_config_from_proto(res.run.override_config),
-        )
+            raise RuntimeError(f"Cannot find the run with ID: {run_id}")
+        self._run = run_from_proto(res.run)
 
     @property
     def run(self) -> Run:
         """Run information."""
-        self._init_run()
         return Run(**vars(self._run))
 
     @property
-    def _stub(self) -> DriverStub:
-        """Driver stub."""
+    def _stub(self) -> ServerAppIoStub:
+        """ServerAppIo stub."""
         if not self._is_connected:
             self._connect()
-        return cast(DriverStub, self._grpc_stub)
+        return cast(ServerAppIoStub, self._grpc_stub)
 
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid
         if not (
             # Assume self._run being initialized
-            message.metadata.run_id == self._run_id
+            message.metadata.run_id == cast(Run, self._run).run_id
             and message.metadata.src_node_id == self.node.node_id
             and message.metadata.message_id == ""
             and message.metadata.reply_to_message == ""
@@ -159,7 +144,7 @@ class GrpcDriver(Driver):
         ):
             raise ValueError(f"Invalid message: {message}")
 
-    def create_message(  # pylint: disable=too-many-arguments
+    def create_message(  # pylint: disable=too-many-arguments,R0917
         self,
         content: RecordSet,
         message_type: str,
@@ -172,7 +157,6 @@ class GrpcDriver(Driver):
         This method constructs a new `Message` with given content and metadata.
         The `run_id` and `src_node_id` will be set automatically.
         """
-        self._init_run()
         if ttl:
             warnings.warn(
                 "A custom TTL was set, but note that the SuperLink does not enforce "
@@ -183,7 +167,7 @@ class GrpcDriver(Driver):
 
         ttl_ = DEFAULT_TTL if ttl is None else ttl
         metadata = Metadata(
-            run_id=self._run_id,
+            run_id=cast(Run, self._run).run_id,
             message_id="",  # Will be set by the server
             src_node_id=self.node.node_id,
             dst_node_id=dst_node_id,
@@ -194,12 +178,11 @@ class GrpcDriver(Driver):
         )
         return Message(metadata=metadata, content=content)
 
-    def get_node_ids(self) -> List[int]:
+    def get_node_ids(self) -> list[int]:
         """Get node IDs."""
-        self._init_run()
         # Call GrpcDriverStub method
         res: GetNodesResponse = self._stub.GetNodes(
-            GetNodesRequest(run_id=self._run_id)
+            GetNodesRequest(run_id=cast(Run, self._run).run_id)
         )
         return [node.node_id for node in res.nodes]
 
@@ -209,9 +192,8 @@ class GrpcDriver(Driver):
         This method takes an iterable of messages and sends each message
         to the node specified in `dst_node_id`.
         """
-        self._init_run()
         # Construct TaskIns
-        task_ins_list: List[TaskIns] = []
+        task_ins_list: list[TaskIns] = []
         for msg in messages:
             # Check message
             self._check_message(msg)
@@ -231,7 +213,6 @@ class GrpcDriver(Driver):
         This method is used to collect messages from the SuperLink that correspond to a
         set of given message IDs.
         """
-        self._init_run()
         # Pull TaskRes
         res: PullTaskResResponse = self._stub.PullTaskRes(
             PullTaskResRequest(node=self.node, task_ids=message_ids)
@@ -257,7 +238,7 @@ class GrpcDriver(Driver):
 
         # Pull messages
         end_time = time.time() + (timeout if timeout is not None else 0.0)
-        ret: List[Message] = []
+        ret: list[Message] = []
         while timeout is None or time.time() < end_time:
             res_msgs = self.pull_messages(msg_ids)
             ret.extend(res_msgs)
@@ -277,3 +258,60 @@ class GrpcDriver(Driver):
             return
         # Disconnect
         self._disconnect()
+
+
+def _make_simple_grpc_retry_invoker() -> RetryInvoker:
+    """Create a simple gRPC retry invoker."""
+
+    def _on_sucess(retry_state: RetryState) -> None:
+        if retry_state.tries > 1:
+            log(
+                INFO,
+                "Connection successful after %.2f seconds and %s tries.",
+                retry_state.elapsed_time,
+                retry_state.tries,
+            )
+
+    def _on_backoff(retry_state: RetryState) -> None:
+        if retry_state.tries == 1:
+            log(WARN, "Connection attempt failed, retrying...")
+        else:
+            log(
+                WARN,
+                "Connection attempt failed, retrying in %.2f seconds",
+                retry_state.actual_wait,
+            )
+
+    def _on_giveup(retry_state: RetryState) -> None:
+        if retry_state.tries > 1:
+            log(
+                WARN,
+                "Giving up reconnection after %.2f seconds and %s tries.",
+                retry_state.elapsed_time,
+                retry_state.tries,
+            )
+
+    return RetryInvoker(
+        wait_gen_factory=lambda: exponential(max_delay=MAX_RETRY_DELAY),
+        recoverable_exceptions=grpc.RpcError,
+        max_tries=None,
+        max_time=None,
+        on_success=_on_sucess,
+        on_backoff=_on_backoff,
+        on_giveup=_on_giveup,
+        should_giveup=lambda e: e.code() != grpc.StatusCode.UNAVAILABLE,  # type: ignore
+    )
+
+
+def _wrap_stub(stub: ServerAppIoStub, retry_invoker: RetryInvoker) -> None:
+    """Wrap the gRPC stub with a retry invoker."""
+
+    def make_lambda(original_method: Any) -> Any:
+        return lambda *args, **kwargs: retry_invoker.invoke(
+            original_method, *args, **kwargs
+        )
+
+    for method_name in vars(stub):
+        method = getattr(stub, method_name)
+        if callable(method):
+            setattr(stub, method_name, make_lambda(method))

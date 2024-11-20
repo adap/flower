@@ -16,7 +16,6 @@
 
 
 import threading
-from typing import Dict, Tuple
 
 from ..client_manager import ClientManager
 from ..compat.driver_client_proxy import DriverClientProxy
@@ -26,7 +25,7 @@ from ..driver import Driver
 def start_update_client_manager_thread(
     driver: Driver,
     client_manager: ClientManager,
-) -> Tuple[threading.Thread, threading.Event]:
+) -> tuple[threading.Thread, threading.Event]:
     """Periodically update the nodes list in the client manager in a thread.
 
     This function starts a thread that periodically uses the associated driver to
@@ -73,7 +72,7 @@ def _update_client_manager(
 ) -> None:
     """Update the nodes list in the client manager."""
     # Loop until the driver is disconnected
-    registered_nodes: Dict[int, DriverClientProxy] = {}
+    registered_nodes: dict[int, DriverClientProxy] = {}
     while not f_stop.is_set():
         all_node_ids = set(driver.get_node_ids())
         dead_nodes = set(registered_nodes).difference(all_node_ids)

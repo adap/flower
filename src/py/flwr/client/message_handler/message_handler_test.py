@@ -19,7 +19,6 @@ import time
 import unittest
 import uuid
 from copy import copy
-from typing import List
 
 from flwr.client import Client
 from flwr.client.typing import ClientFnExt
@@ -143,7 +142,9 @@ def test_client_without_get_properties() -> None:
     actual_msg = handle_legacy_message_from_msgtype(
         client_fn=_get_client_fn(client),
         message=message,
-        context=Context(node_id=1123, node_config={}, state=RecordSet(), run_config={}),
+        context=Context(
+            run_id=2234, node_id=1123, node_config={}, state=RecordSet(), run_config={}
+        ),
     )
 
     # Assert
@@ -207,7 +208,9 @@ def test_client_with_get_properties() -> None:
     actual_msg = handle_legacy_message_from_msgtype(
         client_fn=_get_client_fn(client),
         message=message,
-        context=Context(node_id=1123, node_config={}, state=RecordSet(), run_config={}),
+        context=Context(
+            run_id=2234, node_id=1123, node_config={}, state=RecordSet(), run_config={}
+        ),
     )
 
     # Assert
@@ -294,7 +297,7 @@ class TestMessageValidation(unittest.TestCase):
         msg = Message(metadata=self.valid_out_metadata, content=RecordSet())
 
         # Execute
-        invalid_metadata_list: List[Metadata] = []
+        invalid_metadata_list: list[Metadata] = []
         attrs = list(vars(self.valid_out_metadata).keys())
         for attr in attrs:
             if attr == "_partition_id":
