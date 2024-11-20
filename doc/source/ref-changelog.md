@@ -12,14 +12,14 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Introduce `flwr ls` command** ([#4460](https://github.com/adap/flower/pull/4460), [#4459](https://github.com/adap/flower/pull/4459), [#4477](https://github.com/adap/flower/pull/4477))
 
-  The `flwr ls` command is now available with the following usage options:
+  The `flwr ls` command is now available to display details about all runs (or one specific run). It supports the following usage options:
 
   - `flwr ls --runs [<app>] [<federation>]`: Lists all runs.
   - `flwr ls --run-id <run-id> [<app>] [<federation>]`: Displays details for a specific run.
 
   This command provides information including the run ID, FAB ID and version, run status, elapsed time, and timestamps for when the run was created, started running, and finished.
 
-- **Refactor SuperLink to manage ServerApp processes** ([#4358](https://github.com/adap/flower/pull/4358), [#4403](https://github.com/adap/flower/pull/4403), [#4406](https://github.com/adap/flower/pull/4406), [#4357](https://github.com/adap/flower/pull/4357), [#4359](https://github.com/adap/flower/pull/4359), [#4354](https://github.com/adap/flower/pull/4354), [#4229](https://github.com/adap/flower/pull/4229), [#4283](https://github.com/adap/flower/pull/4283), [#4352](https://github.com/adap/flower/pull/4352))
+- **Fuse SuperLink and SuperExec** ([#4358](https://github.com/adap/flower/pull/4358), [#4403](https://github.com/adap/flower/pull/4403), [#4406](https://github.com/adap/flower/pull/4406), [#4357](https://github.com/adap/flower/pull/4357), [#4359](https://github.com/adap/flower/pull/4359), [#4354](https://github.com/adap/flower/pull/4354), [#4229](https://github.com/adap/flower/pull/4229), [#4283](https://github.com/adap/flower/pull/4283), [#4352](https://github.com/adap/flower/pull/4352))
 
   SuperExec has been integrated into SuperLink, enabling SuperLink to directly manage ServerApp processes (`flwr-serverapp`). The `flwr` CLI now targets SuperLink's Exec API. Additionally, SuperLink introduces two isolation modes for running ServerApps: `subprocess` (default) and `process`, which can be specified using the `--isolation {subprocess,process}` flag.
 
