@@ -39,7 +39,7 @@ Run the Quickstart Example
    .. code-block:: bash
        :substitutions:
 
-       $ curl https://raw.githubusercontent.com/adap/flower/24b2861465431a5ab234a8c4f76faea7a742b1fd/src/docker/complete/compose.yml \
+       $ curl https://raw.githubusercontent.com/adap/flower/refs/tags/v|stable_flwr_version|/src/docker/complete/compose.yml \
            -o compose.yml
 
 3. Export the version of Flower that your environment uses. Then, build and start the
