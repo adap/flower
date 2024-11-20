@@ -207,20 +207,20 @@ project both in the traditional (now deprecated) way and in the new (recommended
 Deployment
 ~~~~~~~~~~
 
-- In CLI, start the SuperLink using |flower_superlink_link|_. Then, start two SuperNodes
-  using |flower_supernode_link|_ (2x). There is no need to run ``flower-server-app`` and
-  ``flower-client-app``, or execute ``client.py`` and ``server.py`` as Python scripts.
-- Here's an example to start the server without HTTPS (only for prototyping):
+- In a terminal window, start the SuperLink using |flower_superlink_link|_. Then, in two
+  additional terminal windows, start two SuperNodes using |flower_supernode_link|_ (2x).
+  There is no need to directly run ``client.py`` and ``server.py`` as Python scripts.
+- Here's an example to start the server without HTTPS (insecure mode, only for prototyping):
 
 .. tip::
 
-    For a comprehensive walk-through on how to run Flower deployment using Docker,
+    For a comprehensive walk-through on how to deploy Flower using Docker,
     please refer to the :doc:`docker/index` guide.
 
 .. code-block:: bash
     :emphasize-lines: 2,5,12
 
-    # Start a Superlink
+    # Start a SuperLink
     $ flower-superlink --insecure
 
     # In a new terminal window, start a long-running SuperNode
@@ -244,7 +244,7 @@ Deployment
 .. code-block:: bash
     :emphasize-lines: 2,8,15
 
-    # Start a secure Superlink
+    # Start a secure SuperLink
     $ flower-superlink \
         --ssl-ca-certfile <your-ca-cert-filepath> \
         --ssl-certfile <your-server-cert-filepath> \
