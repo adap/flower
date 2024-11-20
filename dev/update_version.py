@@ -29,6 +29,7 @@ REPLACE_NEXT_VERSION = {
 
 EXAMPLES = {
     "examples/*/pyproject.toml": [
+        "flwr[simulation]=={version}",
         "flwr[simulation]>={version}",
     ],
 }
@@ -102,9 +103,7 @@ if __name__ == "__main__":
         "--check", action="store_true", help="Fails if any file would be modified."
     )
     parser.add_argument(
-        "--no_examples",
-        action="store_true",
-        help="Also modify flwr version in examples.",
+        "--examples", action="store_true", help="Also modify flwr version in examples."
     )
 
     group = parser.add_mutually_exclusive_group()
@@ -142,7 +141,7 @@ if __name__ == "__main__":
         if not _update_versions([file_pattern], strings, curr_version, args.check):
             wrong = True
 
-    if not args.no_examples:
+    if args.examples:
         for file_pattern, strings in EXAMPLES.items():
             if not _update_versions([file_pattern], strings, curr_version, args.check):
                 wrong = True
