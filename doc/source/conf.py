@@ -197,7 +197,6 @@ redirects = {
     "apiref-binaries": "ref-api-cli.html",
     "fedbn-example-pytorch-from-centralized-to-federated": "example-fedbn-pytorch-from-centralized-to-federated.html",
     "how-to-use-built-in-middleware-layers": "how-to-use-built-in-mods.html",
-    "how-to-upgrade-to-flower-next": "how-to-upgrade-to-flower-1.13.html",
     # Restructuring: tutorials
     "tutorial/Flower-0-What-is-FL": "tutorial-series-what-is-federated-learning.html",
     "tutorial/Flower-1-Intro-to-FL-PyTorch": "tutorial-series-get-started-with-flower-pytorch.html",
@@ -231,6 +230,7 @@ redirects = {
     "logging": "how-to-configure-logging.html",
     "ssl-enabled-connections": "how-to-enable-ssl-connections.html",
     "upgrade-to-flower-1.0": "how-to-upgrade-to-flower-1.0.html",
+    "how-to-upgrade-to-flower-next": "how-to-upgrade-to-flower-1.13.html",
     # Restructuring: explanations
     "evaluation": "explanation-federated-evaluation.html",
     "differential-privacy-wrappers": "explanation-differential-privacy.html",
