@@ -8,8 +8,8 @@ starting from version 1.8.
 
 .. note::
 
-    This guide shows how to reuse pre-``1.8`` Flower code with minimum code changes by
-    using the *compatibility layer* in Flower 1.13. In another guide, we will show how
+    This guide shows how to reuse pre-``1.13`` Flower code with minimum code changes.
+    In another guide, we will show how
     to run Flower 1.13 end-to-end with pure Flower 1.13 APIs.
 
 Let's dive in!
@@ -89,30 +89,31 @@ or if you need Flower 1.13 with simulation:
 .. code-block::
 
     # Without simulation support
-    flwr>=1.8,<2.0
+    flwr>=1.13,<2.0
 
     # With simulation support
-    flwr[simulation]>=1.8, <2.0
+    flwr[simulation]>=1.13, <2.0
 
 or ``pyproject.toml``:
 
 .. code-block:: toml
 
     # Without simulation support
-    dependencies = ["flwr>=1.8,2.0"]
+    dependencies = ["flwr>=1.13,2.0"]
 
     # With simulation support
-    dependencies = ["flwr[simulation]>=1.8,2.0"]
+    dependencies = ["flwr[simulation]>=1.13,2.0"]
 
 Required changes
 ----------------
 
-In Flower 1.13, the *infrastructure* and *application layers* have been decoupled.
+From Flower 1.8, the *infrastructure* and *application layers* have been decoupled.
+In Flower 1.13, we further enforce this separation. 
 Instead of starting a client in code via ``start_client()``, you create a
-|clientapp_link|_ and start it via the command line. Instead of starting a server in
-code via ``start_server()``, you create a |serverapp_link|_ and start it via the command
-line. The long-running components of server and client are called `SuperLink` and
-`SuperNode`, for more details please see the |flower_architecture_link|_ . The following
+|clientapp_link|_. Instead of starting a server in
+code via ``start_server()``, you create a |serverapp_link|_. Both ``ClientApp`` and ``ServerApp`` 
+are started by the long-running components of the server and client: the `SuperNode` and
+`SuperLink`, respectively. For more details please see the |flower_architecture_link|_ . The following
 non-breaking changes that require manual updates and allow you to run your project both
 in the traditional way and in the Flower 1.13 way:
 
