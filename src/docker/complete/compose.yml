@@ -4,8 +4,6 @@ services:
     image: flwr/superlink:${FLWR_VERSION:-1.13.0}
     command:
       - --insecure
-      - --executor
-      - flwr.superexec.deployment:executor
       - --isolation
       - process
     ports:
@@ -36,6 +34,7 @@ services:
       - --insecure
       - --serverappio-api-address
       - superlink:9091
+    restart: on-failure:3
     depends_on:
       - superlink
 
