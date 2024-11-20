@@ -42,37 +42,37 @@ the ``ServerApp`` and the ``ClientApp`` is done via the ``SuperLink`` and the
     sequenceDiagram
         participant ServerApp as ServerApp (in SuperLink)
         participant SecAggPlusWorkflow
-        participant ClientApp as secaggplus_mod
-        participant RealClientApp as ClientApp (in SuperNode)
+        participant Mod as secaggplus_mod
+        participant ClientApp as ClientApp (in SuperNode)
 
-        ServerApp->>SecAggPlusWorkflow: invoke
+        ServerApp->>SecAggPlusWorkflow: Invoke
 
         rect rgb(235, 235, 235)
-        note over SecAggPlusWorkflow,ClientApp: Stage 0: Setup
-        SecAggPlusWorkflow-->>ClientApp: Send SecAgg+ configuration
-        ClientApp-->>SecAggPlusWorkflow: Send public keys
+        note over SecAggPlusWorkflow,Mod: Stage 0: Setup
+        SecAggPlusWorkflow-->>Mod: Send SecAgg+ configuration
+        Mod-->>SecAggPlusWorkflow: Send public keys
         end
 
         rect rgb(220, 220, 220)
-        note over SecAggPlusWorkflow,ClientApp: Stage 1: Share Keys
-        SecAggPlusWorkflow-->>ClientApp: Broadcast public keys
-        ClientApp-->>SecAggPlusWorkflow: Send encrypted private key shares
+        note over SecAggPlusWorkflow,Mod: Stage 1: Share Keys
+        SecAggPlusWorkflow-->>Mod: Broadcast public keys
+        Mod-->>SecAggPlusWorkflow: Send encrypted private key shares
         end
 
         rect rgb(235, 235, 235)
-        note over SecAggPlusWorkflow,RealClientApp: Stage 2: Collect Masked Vectors
-        SecAggPlusWorkflow-->>ClientApp: Forward the received shares
-        ClientApp->>RealClientApp: fit instruction
-        activate RealClientApp
-        RealClientApp->>ClientApp: updated model
-        deactivate RealClientApp
-        ClientApp-->>SecAggPlusWorkflow: Send masked model parameters
+        note over SecAggPlusWorkflow,ClientApp: Stage 2: Collect Masked Vectors
+        SecAggPlusWorkflow-->>Mod: Forward the received shares
+        Mod->>ClientApp: Fit instructions
+        activate ClientApp
+        ClientApp->>Mod: Updated model
+        deactivate ClientApp
+        Mod-->>SecAggPlusWorkflow: Send masked model parameters
         end
 
         rect rgb(220, 220, 220)
-        note over SecAggPlusWorkflow,ClientApp: Stage 3: Unmask
-        SecAggPlusWorkflow-->>ClientApp: Request private key shares
-        ClientApp-->>SecAggPlusWorkflow: Send private key shares
+        note over SecAggPlusWorkflow,Mod: Stage 3: Unmask
+        SecAggPlusWorkflow-->>Mod: Request private key shares
+        Mod-->>SecAggPlusWorkflow: Send private key shares
         end
-        SecAggPlusWorkflow->>SecAggPlusWorkflow: Unmask Aggregated Model
-        SecAggPlusWorkflow->>ServerApp: Aggregated Model
+        SecAggPlusWorkflow->>SecAggPlusWorkflow: Unmask aggregated model
+        SecAggPlusWorkflow->>ServerApp: Aggregated model
