@@ -266,8 +266,8 @@ Deployment
          --root-certificates <your-ca-cert-filepath> \
          <other-args>
 
-Simulation in CLI
-~~~~~~~~~~~~~~~~~
+Simulation (CLI)
+~~~~~~~~~~~~~~~~
 
 Wrap your existing client and strategy with |clientapp_link|_ and |serverapp_link|_,
 respectively. There is no need to use |startsim_link|_ anymore. Here's an example:
@@ -333,12 +333,13 @@ respectively. There is no need to use |startsim_link|_ anymore. Here's an exampl
 
 Depending on your Flower version, you can run your simulation as follows:
 
-- For Flower versions 1.11 and onwards, run ``flwr run`` in CLI.
-- For Flower versions between 1.8 to 1.10, run |flower_simulation_link|_ in CLI and
-  point to the ``server_app`` / ``client_app`` object in the code instead of executing
-  the Python script. In the code snippet below, there is an example (assuming the
-  ``server_app`` and ``client_app`` objects are in a ``sim.py`` module).
-- For Flower versions before 1.8, run the Python script directly.
+- For Flower 1.11 and later, run ``flwr run`` in the terminal. This is the recommended
+  way to start simulations, other ways are deprecated and no longer recommended.
+- DEPRECATED For Flower versions between 1.8 and 1.10, run |flower_simulation_link|_ in
+  the terminal and point to the ``server_app`` / ``client_app`` object in the code
+  instead of executing the Python script. In the code snippet below, there is an example
+  (assuming the ``server_app`` and ``client_app`` objects are in a ``sim.py`` module).
+- DEPRECATED For Flower versions before 1.8, run the Python script directly.
 
 .. code-block:: bash
     :emphasize-lines: 2
@@ -347,11 +348,11 @@ Depending on your Flower version, you can run your simulation as follows:
     $ flwr run
 
 
-    # Flower 1.8 - 1.10 (deprecated, no longer supported)
-    $ flower-simulation \
-        --server-app=sim:server_app \
-        --client-app=sim:client_app \
-        --num-supernodes=10
+    # # Flower 1.8 - 1.10 (deprecated, no longer supported)
+    # $ flower-simulation \
+    #     --server-app=sim:server_app \
+    #     --client-app=sim:client_app \
+    #     --num-supernodes=10
 
 
     # Flower 1.7 (deprecated)
@@ -359,13 +360,13 @@ Depending on your Flower version, you can run your simulation as follows:
 
 Depending on your Flower version, you can also define the default resources as follows:
 
-- For Flower versions 1.11 and onwards, you can edit your ``pyproject.toml`` file and
-  then run ``flwr run`` in CLI as shown in the example below.
-- For Flower versions between 1.8 to 1.10, you can adjust the resources for each
-  |clientapp_link|_ using the ``--backend-config`` command line argument instead of
+- For Flower 1.11 and later, you can edit your ``pyproject.toml`` file and then run
+  ``flwr run`` in the terminal as shown in the example below.
+- DEPRECATED For Flower versions between 1.8 and 1.10, you can adjust the resources for
+  each |clientapp_link|_ using the ``--backend-config`` command line argument instead of
   setting the ``client_resources`` argument in |startsim_link|_.
-- For Flower versions before 1.8, you need to run |startsim_link|_ and pass a dictionary
-  of the required resources to the ``client_resources`` argument.
+- DEPRECATED For Flower versions before 1.8, you need to run |startsim_link|_ and pass a
+  dictionary of the required resources to the ``client_resources`` argument.
 
 .. code-block:: bash
     :emphasize-lines: 2,8
@@ -379,12 +380,12 @@ Depending on your Flower version, you can also define the default resources as f
 
     $ flwr run
 
-    # Flower 1.8 - 1.10 (deprecated, no longer supported)
-    $ flower-simulation \
-        --client-app=sim:client_app \
-        --server-app=sim:server_app \
-        --num-supernodes=10 \
-        --backend-config='{"client_resources": {"num_cpus": 2, "num_gpus": 0.25}}'
+    # # Flower 1.8 - 1.10 (deprecated, no longer supported)
+    # $ flower-simulation \
+    #     --client-app=sim:client_app \
+    #     --server-app=sim:server_app \
+    #     --num-supernodes=10 \
+    #     --backend-config='{"client_resources": {"num_cpus": 2, "num_gpus": 0.25}}'
 
 .. code-block:: python
 
@@ -394,18 +395,18 @@ Depending on your Flower version, you can also define the default resources as f
             num_clients=10, client_resources={"num_cpus": 2, "num_gpus": 0.25}, ...
         )
 
-Simulation in a Notebook
-~~~~~~~~~~~~~~~~~~~~~~~~
+Simulation (Notebook)
+~~~~~~~~~~~~~~~~~~~~~
 
 To run your simulation from within a notebook, please consider the following examples
 depending on your Flower version:
 
-- For Flower versions 1.11 and onwards, you need to run |runsim_link|_ in your notebook
-  instead of |startsim_link|_.
-- For Flower versions between 1.8 to 1.10, you need to run |runsim_link|_ in your
-  notebook instead of |startsim_link|_ and configure the resources.
-- For Flower versions before 1.8, you need to run |startsim_link|_ and pass a dictionary
-  of the required resources to the ``client_resources`` argument.
+- For Flower 1.11 and later, you need to run |runsim_link|_ in your notebook instead of
+  |startsim_link|_.
+- DEPRECATED For Flower versions between 1.8 and 1.10, you need to run |runsim_link|_ in
+  your notebook instead of |startsim_link|_ and configure the resources.
+- DEPRECATED For Flower versions before 1.8, you need to run |startsim_link|_ and pass a
+  dictionary of the required resources to the ``client_resources`` argument.
 
 .. tip::
 
@@ -413,7 +414,7 @@ depending on your Flower version:
     |flower_how_to_run_simulations_link|_ guide.
 
 .. code-block:: python
-    :emphasize-lines: 2,6,10,14
+    :emphasize-lines: 10,12,14-17
 
     from flwr.client import ClientApp
     from flwr.common import Context
@@ -422,9 +423,7 @@ depending on your Flower version:
 
 
     # Flower 1.10 and later (recommended)
-    def client_fn(context: Context):
-        return FlowerClient().to_client()
-
+    # Omitted: client_fn and server_fn
 
     client_app = ClientApp(client_fn=client_fn)
 
@@ -460,7 +459,8 @@ depending on your Flower version:
     #     backend_config=backend_config,
     # )
 
-    # Flower v1.7
+
+    # Flower v1.7 (deprecated)
     NUM_CLIENTS = 10  # Replace by any integer greater than zero
     backend_config = {"client_resources": {"num_cpus": 2, "num_gpus": 0.25}}
     start_simulation(
@@ -474,12 +474,12 @@ depending on your Flower version:
 Further help
 ------------
 
-Some official `Flower code examples <https://flower.ai/docs/examples/>`_ are already
+Most official `Flower code examples <https://flower.ai/docs/examples/>`_ are already
 updated to Flower 1.13 so they can serve as a reference for using the Flower 1.13 API.
 If there are further questions, `join the Flower Slack <https://flower.ai/join-slack/>`_
-and use the channel ``#questions``. You can also `participate in Flower Discuss
-<https://discuss.flower.ai/>`_ where you can find us answering questions, or share and
-learn from others about migrating to Flower 1.13.
+(and use the channel ``#questions``) or post them on `Flower Discuss
+<https://discuss.flower.ai/>`_ where you can find the community posting and answering
+questions.
 
 .. admonition:: Important
 
