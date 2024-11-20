@@ -231,6 +231,7 @@ redirects = {
     "ssl-enabled-connections": "how-to-enable-ssl-connections.html",
     "upgrade-to-flower-1.0": "how-to-upgrade-to-flower-1.0.html",
     "how-to-upgrade-to-flower-next": "how-to-upgrade-to-flower-1.13.html",
+    "how-to-enable-ssl-connections.html": "how-to-enable-tls-connections.html",
     # Restructuring: explanations
     "evaluation": "explanation-federated-evaluation.html",
     "differential-privacy-wrappers": "explanation-differential-privacy.html",

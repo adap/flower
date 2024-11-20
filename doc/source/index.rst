@@ -94,7 +94,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
     how-to-aggregate-evaluation-results
     how-to-save-and-load-model-checkpoints
     how-to-run-simulations
-    how-to-enable-ssl-connections
+    how-to-enable-tls-connections
     how-to-use-built-in-mods
     how-to-use-differential-privacy
     how-to-authenticate-supernodes
