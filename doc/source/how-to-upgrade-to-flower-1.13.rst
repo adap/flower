@@ -31,15 +31,11 @@ Let's dive in!
 
 .. |flower_how_to_run_simulations_link| replace:: How-to Run Simulations
 
-.. |flower_simulation_link| replace:: ``flower-simulation``
-
 .. _clientapp_link: ref-api/flwr.client.ClientApp.html
 
 .. _flower_architecture_link: explanation-flower-architecture.html
 
 .. _flower_how_to_run_simulations_link: how-to-run-simulations.html
-
-.. _flower_simulation_link: ref-api-cli.html#flower-simulation
 
 .. _flower_superlink_link: ref-api-cli.html#flower-superlink
 
@@ -315,9 +311,9 @@ Depending on your Flower version, you can run your simulation as follows:
 
 - For Flower 1.11 and later, run ``flwr run`` in the terminal. This is the recommended
   way to start simulations, other ways are deprecated and no longer recommended.
-- DEPRECATED For Flower versions between 1.8 and 1.10, run |flower_simulation_link|_ in
-  the terminal and point to the ``server_app`` / ``client_app`` object in the code
-  instead of executing the Python script. In the code snippet below, there is an example
+- DEPRECATED For Flower versions between 1.8 and 1.10, run ``flower-simulation`` in the
+  terminal and point to the ``server_app`` / ``client_app`` object in the code instead
+  of executing the Python script. In the code snippet below, there is an example
   (assuming the ``server_app`` and ``client_app`` objects are in a ``sim.py`` module).
 - DEPRECATED For Flower versions before 1.8, run the Python script directly.
 
