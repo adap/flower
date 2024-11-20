@@ -89,10 +89,10 @@ copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version of the next release, including alpha/beta/rc tags
-release = "1.13.0"
+release = "unstable"
 # The current released version
 rst_prolog = """
-.. |stable_flwr_version| replace:: 1.12.0
+.. |stable_flwr_version| replace:: unstable
 .. |stable_flwr_superlink_docker_digest| replace:: 4b317d5b6030710b476f4dbfab2c3a33021ad40a0fcfa54d7edd45e0c51d889c
 .. |ubuntu_version| replace:: 24.04
 .. |setuptools_version| replace:: 70.3.0
@@ -230,6 +230,7 @@ redirects = {
     "logging": "how-to-configure-logging.html",
     "ssl-enabled-connections": "how-to-enable-ssl-connections.html",
     "upgrade-to-flower-1.0": "how-to-upgrade-to-flower-1.0.html",
+    "how-to-upgrade-to-flower-next": "how-to-upgrade-to-flower-1.13.html",
     "how-to-enable-ssl-connections.html": "how-to-enable-tls-connections.html",
     # Restructuring: explanations
     "evaluation": "explanation-federated-evaluation.html",
