@@ -1,7 +1,7 @@
-Enable SSL connections
+Enable TLS connections
 ======================
 
-This guide describes how to a SSL-enabled secure Flower server (``SuperLink``) can be
+This guide describes how to a TLS-enabled secure Flower server (``SuperLink``) can be
 started and how a Flower client (``SuperNode``) can establish a secure connections to
 it.
 
@@ -9,13 +9,13 @@ A complete code example demonstrating a secure connection can be found `here
 <https://github.com/adap/flower/tree/main/examples/advanced-tensorflow>`_.
 
 The code example comes with a ``README.md`` file which explains how to start it.
-Although it is already SSL-enabled, it might be less descriptive on how it does so.
+Although it is already TLS-enabled, it might be less descriptive on how it does so.
 Stick to this guide for a deeper introduction to the topic.
 
 Certificates
 ------------
 
-Using SSL-enabled connections requires certificates to be passed to the server and
+Using TLS-enabled connections requires certificates to be passed to the server and
 client. For the purpose of this guide we are going to generate self-signed certificates.
 As this can become quite complex we are going to ask you to run the script in
 ``examples/advanced-tensorflow/certificates/generate.sh`` with the following command
@@ -29,7 +29,7 @@ sequence:
 This will generate the certificates in
 ``examples/advanced-tensorflow/.cache/certificates``.
 
-The approach for generating SSL certificates in the context of this example can serve as
+The approach for generating TLS certificates in the context of this example can serve as
 an inspiration and starting point, but it should not be used as a reference for
 production environments. Please refer to other sources regarding the issue of correctly
 generating certificates for production environments. For non-critical prototyping or
@@ -44,10 +44,10 @@ generated certificates:
 
 .. code-block:: bash
 
-    flower-superlink
-      --ssl-ca-certfile certificates/ca.crt
-      --ssl-certfile certificates/server.pem
-      --ssl-keyfile certificates/server.key
+    $ flower-superlink \
+        --ssl-ca-certfile .cache/certificates/ca.crt \
+        --ssl-certfile .cache/certificates/server.pem \
+        --ssl-keyfile .cache/certificates/server.key
 
 When providing certificates, the server expects a tuple of three certificates paths: CA
 certificate, server certificate and server private key.
@@ -60,9 +60,9 @@ previously generated certificates:
 
 .. code-block:: bash
 
-    flower-supernode
-         --root-certificates certificates/ca.crt
-         --superlink 127.0.0.1:9092
+    $ flower-supernode \
+        --root-certificates .cache/certificates/ca.crt \
+        --superlink 127.0.0.1:9092
 
 When setting ``root_certificates``, the client expects a file path to PEM-encoded root
 certificates.
@@ -71,7 +71,7 @@ Conclusion
 ----------
 
 You should now have learned how to generate self-signed certificates using the given
-script, start an SSL-enabled server and have a client establish a secure connection to
+script, start an TLS-enabled server and have a client establish a secure connection to
 it.
 
 Additional resources
