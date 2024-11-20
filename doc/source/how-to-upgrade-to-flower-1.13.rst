@@ -155,6 +155,7 @@ project both in the traditional (now deprecated) way and in the new (recommended
     # def client_fn(cid: str):
     #     return FlowerClient().to_client()
     #
+    #
     # app = ClientApp(client_fn=client_fn)
 
 
@@ -210,12 +211,13 @@ Deployment
 - In a terminal window, start the SuperLink using |flower_superlink_link|_. Then, in two
   additional terminal windows, start two SuperNodes using |flower_supernode_link|_ (2x).
   There is no need to directly run ``client.py`` and ``server.py`` as Python scripts.
-- Here's an example to start the server without HTTPS (insecure mode, only for prototyping):
+- Here's an example to start the server without HTTPS (insecure mode, only for
+  prototyping):
 
 .. tip::
 
-    For a comprehensive walk-through on how to deploy Flower using Docker,
-    please refer to the :doc:`docker/index` guide.
+    For a comprehensive walk-through on how to deploy Flower using Docker, please refer
+    to the :doc:`docker/index` guide.
 
 .. code-block:: bash
     :emphasize-lines: 2,5,12
@@ -237,9 +239,9 @@ Deployment
          --supernode-address 127.0.0.1:9095 \
          <other-args>
 
-- Here's another example to start with HTTPS. Use the ``--ssl-ca-certfile``,
-  ``--ssl-certfile``, and ``--ssl-keyfile`` command line options to pass paths to (CA
-  certificate, server certificate, and server private key).
+- Here's another example to start both SuperLink and SuperNodes with HTTPS. Use the
+  ``--ssl-ca-certfile``, ``--ssl-certfile``, and ``--ssl-keyfile`` command line options
+  to pass paths to (CA certificate, server certificate, and server private key).
 
 .. code-block:: bash
     :emphasize-lines: 2,8,15
@@ -276,7 +278,14 @@ respectively. There is no need to use |startsim_link|_ anymore. Here's an exampl
     |flower_how_to_run_simulations_link|_ guide.
 
 .. code-block:: python
-    :emphasize-lines: 8,12,17,23
+    :emphasize-lines: 9,15,19,22,28
+
+    from flwr.client import ClientApp
+    from flwr.common import Context
+    from flwr.server import ServerApp, ServerAppComponents, ServerConfig
+    from flwr.server.strategy import FedAvg
+    from flwr.simulation import start_simulation
+
 
     # Regular Flower client implementation
     class FlowerClient(NumPyClient):
@@ -284,45 +293,40 @@ respectively. There is no need to use |startsim_link|_ anymore. Here's an exampl
         pass
 
 
-    # Flower v1.10+
-    def client_fn(context: flwr.common.Context):
+    # Flower 1.10 and later (recommended)
+    def client_fn(context: Context):
         return FlowerClient().to_client()
 
 
-    app = flwr.client.ClientApp(
-        client_fn=client_fn,
-    )
+    app = ClientApp(client_fn=client_fn)
 
 
-    def server_fn(context: flwr.common.Context):
-        strategy = flwr.server.strategy.FedAvg(...)
-        config = flwr.server.ServerConfig(...)
-        return flwr.server.ServerAppComponents(strategy=strategy, config=config)
+    def server_fn(context: Context):
+        strategy = FedAvg(...)
+        config = ServerConfig(...)
+        return ServerAppComponents(strategy=strategy, config=config)
 
 
-    server_app = flwr.server.ServerApp(
-        server_fn=server_fn,
-    )
+    server_app = ServerApp(server_fn=server_fn)
 
 
-    # Flower v1.8 - v1.9
-    def client_fn(cid: str):
-        return FlowerClient().to_client()
+    # # Flower 1.8 - 1.9 (deprecated, no longer supported)
+    # def client_fn(cid: str):
+    #     return FlowerClient().to_client()
+    #
+    #
+    # client_app = ClientApp(client_fn=client_fn)
+    #
+    #
+    # server_app = ServerApp(
+    #     config=config,
+    #     strategy=strategy,
+    # )
 
 
-    client_app = flwr.client.ClientApp(
-        client_fn=client_fn,
-    )
-
-    server_app = flwr.server.ServerApp(
-        config=config,
-        strategy=strategy,
-    )
-
-
-    # Flower v1.7
+    # Flower 1.7 (deprecated, only for backwards-compatibility)
     if __name__ == "__main__":
-        hist = flwr.simulation.start_simulation(
+        hist = start_simulation(
             num_clients=10,
             # ...
         )
@@ -339,18 +343,18 @@ Depending on your Flower version, you can run your simulation as follows:
 .. code-block:: bash
     :emphasize-lines: 2
 
-    # Flower v1.11+
+    # Flower 1.11 and later (recommended)
     $ flwr run
 
 
-    # Flower v1.8 - v1.10
+    # Flower 1.8 - 1.10 (deprecated, no longer supported)
     $ flower-simulation \
         --server-app=sim:server_app \
         --client-app=sim:client_app \
         --num-supernodes=10
 
 
-    # Flower v1.7
+    # Flower 1.7 (deprecated)
     $ python sim.py
 
 Depending on your Flower version, you can also define the default resources as follows:
@@ -366,7 +370,7 @@ Depending on your Flower version, you can also define the default resources as f
 .. code-block:: bash
     :emphasize-lines: 2,8
 
-    # Flower v.1.11+
+    # Flower 1.11 and later (recommended)
     # [file: pyproject.toml]
     [tool.flwr.federations.local-sim-gpu]
     options.num-supernodes = 10
@@ -375,16 +379,18 @@ Depending on your Flower version, you can also define the default resources as f
 
     $ flwr run
 
-    # Flower v1.8 - v1.10
+    # Flower 1.8 - 1.10 (deprecated, no longer supported)
     $ flower-simulation \
         --client-app=sim:client_app \
         --server-app=sim:server_app \
         --num-supernodes=10 \
         --backend-config='{"client_resources": {"num_cpus": 2, "num_gpus": 0.25}}'
 
-    # Flower v1.7 (in `sim.py`)
+.. code-block:: python
+
+    # Flower 1.7 (in `sim.py`, deprecated)
     if __name__ == "__main__":
-        hist = flwr.simulation.start_simulation(
+        hist = start_simulation(
             num_clients=10, client_resources={"num_cpus": 2, "num_gpus": 0.25}, ...
         )
 
@@ -409,55 +415,55 @@ depending on your Flower version:
 .. code-block:: python
     :emphasize-lines: 2,6,10,14
 
-    # Flower v1.10+
-    def client_fn(context: flwr.common.Context):
+    from flwr.client import ClientApp
+    from flwr.common import Context
+    from flwr.server import ServerApp
+    from flwr.simulation import run_simulation, start_simulation
+
+
+    # Flower 1.10 and later (recommended)
+    def client_fn(context: Context):
         return FlowerClient().to_client()
 
 
-    client_app = flwr.server.ClientApp(
-        client_fn=client_fn,
-    )
+    client_app = ClientApp(client_fn=client_fn)
 
-    server_app = flwr.server.ServerApp(
-        server_fn=server_fn,
-    )
+    server_app = ServerApp(server_fn=server_fn)
 
-    flwr.simulation.run_simulation(
+    run_simulation(
         server_app=server_app,
         client_app=client_app,
     )
 
 
-    # Flower v1.8 - v1.10
-    NUM_CLIENTS = 10  # Replace by any integer greater than zero
-    backend_config = {"client_resources": {"num_cpus": 2, "num_gpus": 0.25}}
-
-
-    def client_fn(cid: str):
-        # ...
-        return FlowerClient().to_client()
-
-
-    client_app = flwr.client.ClientApp(
-        client_fn=client_fn,
-    )
-
-    server_app = flwr.server.ServerApp(
-        config=config,
-        strategy=strategy,
-    )
-
-    flwr.simulation.run_simulation(
-        server_app=server_app,
-        client_app=client_app,
-        num_supernodes=NUM_CLIENTS,
-        backend_config=backend_config,
-    )
+    # # Flower v1.8 - v1.10 (deprecated, no longer supported)
+    # NUM_CLIENTS = 10  # Replace by any integer greater than zero
+    # backend_config = {"client_resources": {"num_cpus": 2, "num_gpus": 0.25}}
+    #
+    #
+    # def client_fn(cid: str):
+    #     # ...
+    #     return FlowerClient().to_client()
+    #
+    #
+    # client_app = ClientApp(client_fn=client_fn)
+    #
+    # server_app = ServerApp(
+    #     config=config,
+    #     strategy=strategy,
+    # )
+    #
+    # run_simulation(
+    #     server_app=server_app,
+    #     client_app=client_app,
+    #     num_supernodes=NUM_CLIENTS,
+    #     backend_config=backend_config,
+    # )
 
     # Flower v1.7
     NUM_CLIENTS = 10  # Replace by any integer greater than zero
     backend_config = {"client_resources": {"num_cpus": 2, "num_gpus": 0.25}}
-    flwr.simulation.start_simulation(
+    start_simulation(
         client_fn=client_fn,
         num_clients=NUM_CLIENTS,
         config=config,
