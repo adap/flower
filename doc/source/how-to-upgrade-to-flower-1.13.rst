@@ -29,13 +29,13 @@ Let's dive in!
 
 .. |runsim_link| replace:: ``run_simulation()``
 
-.. |flowernext_clientapp_link| replace:: ``flower-client-app``
+.. |flower_clientapp_link| replace:: ``flower-client-app``
 
-.. |flowernext_serverapp_link| replace:: ``flower-server-app``
+.. |flower_serverapp_link| replace:: ``flower-server-app``
 
-.. |flowernext_superlink_link| replace:: ``flower-superlink``
+.. |flower_superlink_link| replace:: ``flower-superlink``
 
-.. |flowernext_supernode_link| replace:: ``flower-supernode``
+.. |flower_supernode_link| replace:: ``flower-supernode``
 
 .. |flower_architecture_link| replace:: Flower Architecture
 
@@ -47,17 +47,17 @@ Let's dive in!
 
 .. _flower_architecture_link: explanation-flower-architecture.html
 
+.. _flower_clientapp_link: ref-api-cli.html#flower-client-app
+
 .. _flower_how_to_run_simulations_link: how-to-run-simulations.html
+
+.. _flower_serverapp_link: ref-api-cli.html#flower-server-app
 
 .. _flower_simulation_link: ref-api-cli.html#flower-simulation
 
-.. _flowernext_clientapp_link: ref-api-cli.html#flower-client-app
+.. _flower_superlink_link: ref-api-cli.html#flower-superlink
 
-.. _flowernext_serverapp_link: ref-api-cli.html#flower-server-app
-
-.. _flowernext_superlink_link: ref-api-cli.html#flower-superlink
-
-.. _flowernext_supernode_link: ref-api-cli.html#flower-supernode
+.. _flower_supernode_link: ref-api-cli.html#flower-supernode
 
 .. _runsim_link: ref-api/flwr.simulation.run_simulation.html
 
@@ -110,10 +110,14 @@ Flower 1.13, we further enforce this separation. Instead of starting a client in
 via ``start_client()``, you create a |clientapp_link|_. Instead of starting a server in
 code via ``start_server()``, you create a |serverapp_link|_. Both ``ClientApp`` and
 ``ServerApp`` are started by the long-running components of the server and client: the
-`SuperNode` and `SuperLink`, respectively. For more details please see the
-|flower_architecture_link|_ . The following non-breaking changes that require manual
-updates and allow you to run your project both in the traditional way and in the Flower
-1.13 way:
+`SuperNode` and `SuperLink`, respectively.
+
+.. tip::
+
+    For more details please see the |flower_architecture_link|_ .
+
+The following non-breaking changes that require manual updates and allow you to run your
+project both in the traditional way and in the Flower 1.13 way:
 
 |clientapp_link|_
 ~~~~~~~~~~~~~~~~~
@@ -187,10 +191,9 @@ updates and allow you to run your project both in the traditional way and in the
 Deployment
 ~~~~~~~~~~
 
-- In CLI, start the SuperLink using |flowernext_superlink_link|_. Then, start two
-  SuperNodes using |flowernext_supernode_link|_ (2x). There is no need to run
-  ``flower-server-app`` and ``flower-client-app``, or execute ``client.py`` and
-  ``server.py`` as Python scripts.
+- In CLI, start the SuperLink using |flower_superlink_link|_. Then, start two SuperNodes
+  using |flower_supernode_link|_ (2x). There is no need to run ``flower-server-app`` and
+  ``flower-client-app``, or execute ``client.py`` and ``server.py`` as Python scripts.
 - Here's an example to start the server without HTTPS (only for prototyping):
 
 .. tip::
@@ -253,8 +256,8 @@ respectively. There is no need to use |startsim_link|_ anymore. Here's an exampl
 
 .. tip::
 
-    For a comprehensive walk-through on how to run Flower simulations please refer to
-    the |flower_how_to_run_simulations_link|_ guide.
+    For a comprehensive guide on how to setup and run Flower simulations please read the
+    |flower_how_to_run_simulations_link|_ guide.
 
 .. code-block:: python
     :emphasize-lines: 8,12,17,23
@@ -384,7 +387,7 @@ depending on your Flower version:
 
 .. tip::
 
-    For more advanced information regarding Flower simulation please read the
+    For a comprehensive guide on how to setup and run Flower simulations please read the
     |flower_how_to_run_simulations_link|_ guide.
 
 .. code-block:: python
@@ -458,7 +461,7 @@ learn from others about migrating to Flower 1.13.
 
 .. admonition:: Important
 
-    As we continuously enhance Flower at a rapid pace, we'll be periodically
-    updating this guide. Please feel free to share any feedback with us!
+    As we continuously enhance Flower at a rapid pace, we'll be periodically updating
+    this guide. Please feel free to share any feedback with us!
 
 Happy migrating! 🚀
