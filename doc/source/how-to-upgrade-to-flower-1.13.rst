@@ -21,17 +21,7 @@ Let's dive in!
 
 .. |serverapp_link| replace:: ``ServerApp``
 
-.. |startclient_link| replace:: ``start_client()``
-
-.. |startserver_link| replace:: ``start_server()``
-
-.. |startsim_link| replace:: ``start_simulation()``
-
 .. |runsim_link| replace:: ``run_simulation()``
-
-.. |flower_clientapp_link| replace:: ``flower-client-app``
-
-.. |flower_serverapp_link| replace:: ``flower-server-app``
 
 .. |flower_superlink_link| replace:: ``flower-superlink``
 
@@ -47,11 +37,7 @@ Let's dive in!
 
 .. _flower_architecture_link: explanation-flower-architecture.html
 
-.. _flower_clientapp_link: ref-api-cli.html#flower-client-app
-
 .. _flower_how_to_run_simulations_link: how-to-run-simulations.html
-
-.. _flower_serverapp_link: ref-api-cli.html#flower-server-app
 
 .. _flower_simulation_link: ref-api-cli.html#flower-simulation
 
@@ -62,12 +48,6 @@ Let's dive in!
 .. _runsim_link: ref-api/flwr.simulation.run_simulation.html
 
 .. _serverapp_link: ref-api/flwr.server.ServerApp.html
-
-.. _startclient_link: ref-api/flwr.client.start_client.html
-
-.. _startserver_link: ref-api/flwr.server.start_server.html
-
-.. _startsim_link: ref-api/flwr.simulation.start_simulation.html
 
 Install update
 --------------
@@ -134,7 +114,7 @@ project both in the traditional (now deprecated) way and in the new (recommended
 ~~~~~~~~~~~~~~~~~
 
 - Wrap your existing client with |clientapp_link|_ instead of launching it via
-  |startclient_link|_. Here's an example:
+  ``start_client()``. Here's an example:
 
 .. code-block:: python
     :emphasize-lines: 6,10
@@ -170,7 +150,7 @@ project both in the traditional (now deprecated) way and in the new (recommended
 ~~~~~~~~~~~~~~~~~
 
 - Wrap your existing strategy with |serverapp_link|_ instead of starting the server via
-  |startserver_link|_. Here's an example:
+  ``start_server()``. Here's an example:
 
 .. code-block:: python
     :emphasize-lines: 7,13
@@ -270,7 +250,7 @@ Simulation (CLI)
 ~~~~~~~~~~~~~~~~
 
 Wrap your existing client and strategy with |clientapp_link|_ and |serverapp_link|_,
-respectively. There is no need to use |startsim_link|_ anymore. Here's an example:
+respectively. There is no need to use ``start_simulation()`` anymore. Here's an example:
 
 .. tip::
 
@@ -364,9 +344,9 @@ Depending on your Flower version, you can also define the default resources as f
   ``flwr run`` in the terminal as shown in the example below.
 - DEPRECATED For Flower versions between 1.8 and 1.10, you can adjust the resources for
   each |clientapp_link|_ using the ``--backend-config`` command line argument instead of
-  setting the ``client_resources`` argument in |startsim_link|_.
-- DEPRECATED For Flower versions before 1.8, you need to run |startsim_link|_ and pass a
-  dictionary of the required resources to the ``client_resources`` argument.
+  setting the ``client_resources`` argument in ``start_simulation()``.
+- DEPRECATED For Flower versions before 1.8, you need to run ``start_simulation()`` and
+  pass a dictionary of the required resources to the ``client_resources`` argument.
 
 .. code-block:: bash
     :emphasize-lines: 2,8
@@ -402,11 +382,11 @@ To run your simulation from within a notebook, please consider the following exa
 depending on your Flower version:
 
 - For Flower 1.11 and later, you need to run |runsim_link|_ in your notebook instead of
-  |startsim_link|_.
+  ``start_simulation()``.
 - DEPRECATED For Flower versions between 1.8 and 1.10, you need to run |runsim_link|_ in
-  your notebook instead of |startsim_link|_ and configure the resources.
-- DEPRECATED For Flower versions before 1.8, you need to run |startsim_link|_ and pass a
-  dictionary of the required resources to the ``client_resources`` argument.
+  your notebook instead of ``start_simulation()`` and configure the resources.
+- DEPRECATED For Flower versions before 1.8, you need to run ``start_simulation()`` and
+  pass a dictionary of the required resources to the ``client_resources`` argument.
 
 .. tip::
 
