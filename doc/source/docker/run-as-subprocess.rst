@@ -1,53 +1,112 @@
-Run ClientApp as a Subprocess
-=============================
+Run ServerApp or ClientApp as a Subprocess
+==========================================
 
-In this mode, the ClientApp is executed as a subprocess within the SuperNode Docker
-container, rather than running in a separate container. This approach reduces the number
-of running containers, which can be beneficial for environments with limited resources.
-However, it also means that the ClientApp is no longer isolated from the SuperNode,
-which may introduce additional security concerns.
+The SuperLink and SuperNode components support two distinct isolation modes, allowing
+for flexible deployment and control:
 
-Prerequisites
--------------
+1. Subprocess Mode: In this configuration (default), the SuperLink and SuperNode take
+   responsibility for launching the ServerApp and ClientApp processes internally. This
+   differs from the ``process`` isolation-mode which uses separate containers, as
+   demonstrated in the :doc:`tutorial-quickstart-docker` guide.
 
-1. Before running the ClientApp as a subprocess, ensure that the FAB dependencies have
-   been installed in the SuperNode images. This can be done by extending the SuperNode
-   image:
+   Using the ``subprocess`` approach reduces the number of running containers, which can
+   be beneficial for environments with limited resources. However, it also means that
+   the applications are not isolated from their parent containers, which may introduce
+   additional security concerns.
 
-   .. code-block:: dockerfile
-       :caption: Dockerfile.supernode
-       :linenos:
-       :substitutions:
+2. Process Mode: In this mode, the ServerApp and ClientApps run in completely separate
+   processes. Unlike the alternative Subprocess mode, the SuperLink or SuperNode does
+   not attempt to create or manage these processes. Instead, they must be started
+   externally.
 
-       FROM flwr/supernode:|stable_flwr_version|
+Both modes can be mixed for added flexibility. For instance, you can run the SuperLink
+in ``subprocess`` mode while keeping the SuperNode in ``process`` mode, or vice versa.
 
-       WORKDIR /app
-       COPY pyproject.toml .
-       RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
-           && python -m pip install -U --no-cache-dir .
+To run the SuperLink and SuperNode in isolation mode ``process``, refer to the
+:doc:`tutorial-quickstart-docker` guide. To run them in ``subprocess`` mode, follow the
+instructions below.
 
-       ENTRYPOINT ["flower-supernode"]
+.. tab-set::
 
-2. Next, build the SuperNode Docker image by running the following command in the
-   directory where Dockerfile is located:
+    .. tab-item:: ServerApp
 
-   .. code-block:: shell
+        **Prerequisites**
 
-       $ docker build -f Dockerfile.supernode -t flwr_supernode:0.0.1 .
+        1. Before running the ServerApp as a subprocess, ensure that the FAB dependencies have
+        been installed in the SuperLink images. This can be done by extending the SuperLink image:
 
-Run the ClientApp as a Subprocess
----------------------------------
+        .. code-block:: dockerfile
+            :caption: superlink.Dockerfile
+            :linenos:
+            :substitutions:
 
-Start the SuperNode with the flag ``--isolation subprocess``, which tells the SuperNode
-to execute the ClientApp as a subprocess:
+            FROM flwr/superlink:|stable_flwr_version|
 
-.. code-block:: shell
+            WORKDIR /app
+            COPY pyproject.toml .
+            RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
+                && python -m pip install -U --no-cache-dir .
 
-    $ docker run --rm \
-        --detach \
-        flwr_supernode:0.0.1 \
-        --insecure \
-        --superlink superlink:9092 \
-        --node-config "partition-id=1 num-partitions=2" \
-        --supernode-address localhost:9094 \
-        --isolation subprocess
+            ENTRYPOINT ["flower-superlink"]
+
+        2. Next, build the SuperLink Docker image by running the following command in the
+        directory where Dockerfile is located:
+
+        .. code-block:: shell
+
+            $ docker build -f superlink.Dockerfile -t flwr_superlink:0.0.1 .
+
+        **Run the ServerApp as a Subprocess**
+
+        Start the SuperLink and run the ServerApp as a subprocess (note that
+        the subprocess mode is the default, so you do not have to explicitly set the ``--isolation`` flag):
+
+        .. code-block:: shell
+
+            $ docker run --rm \
+                -p 9091:9091 -p 9092:9092 -p 9093:9093 \
+                --detach \
+                flwr_superlink:0.0.1 \
+                --insecure
+
+    .. tab-item:: ClientApp
+
+        **Prerequisites**
+
+        1. Before running the ClientApp as a subprocess, ensure that the FAB dependencies have
+        been installed in the SuperNode images. This can be done by extending the SuperNode
+        image:
+
+        .. code-block:: dockerfile
+            :caption: supernode.Dockerfile
+            :linenos:
+            :substitutions:
+
+            FROM flwr/supernode:|stable_flwr_version|
+
+            WORKDIR /app
+            COPY pyproject.toml .
+            RUN sed -i 's/.*flwr\[simulation\].*//' pyproject.toml \
+                && python -m pip install -U --no-cache-dir .
+
+            ENTRYPOINT ["flower-supernode"]
+
+        2. Next, build the SuperNode Docker image by running the following command in the
+        directory where Dockerfile is located:
+
+        .. code-block:: shell
+
+            $ docker build -f supernode.Dockerfile -t flwr_supernode:0.0.1 .
+
+        **Run the ClientApp as a Subprocess**
+
+        Start the SuperNode and run the ClientApp as a subprocess (note that
+        the subprocess mode is the default, so you do not have to explicitly set the ``--isolation`` flag):
+
+        .. code-block:: shell
+
+            $ docker run --rm \
+                --detach \
+                flwr_supernode:0.0.1 \
+                --insecure \
+                --superlink <superlink-address>:9092
