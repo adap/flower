@@ -66,13 +66,14 @@ Step 1: Set Up
 
    .. code-block:: bash
 
-       $ docker compose -f certs.yml -f ../complete/certs.yml up --build
+       $ docker compose -f certs.yml -f ../complete/certs.yml run --rm --build gen-certs
 
 Step 2: Copy the Server Compose Files
 -------------------------------------
 
 Use the method that works best for you to copy the ``server`` directory, the
-certificates, and your Flower project to the remote machine.
+certificates, and the ``pyproject.toml`` file of your Flower project to the remote
+machine.
 
 For example, you can use ``scp`` to copy the directories:
 
@@ -81,7 +82,7 @@ For example, you can use ``scp`` to copy the directories:
     $ scp -r ./server \
            ./superexec-certificates \
            ./superlink-certificates \
-           ../../../examples/quickstart-sklearn-tabular remote:~/distributed
+           ../../../examples/quickstart-sklearn-tabular/pyproject.toml remote:~/distributed
 
 Step 3: Start the Flower Server Components
 ------------------------------------------
@@ -90,17 +91,31 @@ Log into the remote machine using ``ssh`` and run the following command to start
 SuperLink and SuperExec services:
 
 .. code-block:: bash
+    :linenos:
 
-    $ ssh <your-remote-machine>
-    # In your remote machine
-    $ cd <path-to-``distributed``-directory>
-    $ export PROJECT_DIR=../quickstart-sklearn-tabular
-    $ docker compose -f server/compose.yml up --build -d
+     $ ssh <your-remote-machine>
+     # In your remote machine
+     $ cd <path-to-``distributed``-directory>
+     $ export PROJECT_DIR=../
+     $ docker compose -f server/compose.yml up --build -d
 
 .. note::
 
-    The Path of the ``PROJECT_DIR`` should be relative to the location of the ``server``
-    Docker Compose files.
+    The path to the ``PROJECT_DIR`` containing the ``pyproject.toml`` file should be
+    relative to the location of the server ``compose.yml`` file.
+
+.. note::
+
+    When working with Docker Compose on Linux, you may need to create the ``state``
+    directory first and change its ownership to ensure proper access and permissions.
+    After exporting the ``PROJECT_DIR`` (after line 4), run the following commands:
+
+    .. code-block:: bash
+
+        $ mkdir server/state
+        $ sudo chown -R 49999:49999 server/state
+
+    For more information, consult the following page: :doc:`persist-superlink-state`.
 
 Go back to your terminal on your local machine.
 
@@ -117,8 +132,8 @@ On your local machine, run the following command to start the client components:
 
 .. note::
 
-    The Path of the ``PROJECT_DIR`` should be relative to the location of the ``client``
-    Docker Compose files.
+    The path to the ``PROJECT_DIR`` containing the ``pyproject.toml`` file should be
+    relative to the location of the client ``compose.yml`` file.
 
 Step 5: Run Your Flower Project
 -------------------------------
@@ -136,14 +151,14 @@ we have named our remote federation ``remote-superexec``:
 
 .. note::
 
-    The Path of the ``root-certificates`` should be relative to the location of the
+    The path of the ``root-certificates`` should be relative to the location of the
     ``pyproject.toml`` file.
 
-To run the project, execute:
+Run the project and follow the ServerApp logs:
 
 .. code-block:: bash
 
-    $ flwr run ../../../examples/quickstart-sklearn-tabular remote-superexec
+    $ flwr run ../../../examples/quickstart-sklearn-tabular remote-superexec --stream
 
 That's it! With these steps, you've set up Flower on two separate machines and are ready
 to start using it.

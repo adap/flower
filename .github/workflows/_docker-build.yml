@@ -93,10 +93,10 @@ jobs:
           password: ${{ secrets.dockerhub-token }}
 
       - name: Build and push
-        uses: Wandalen/wretry.action@6feedb7dedadeb826de0f45ff482b53b379a7844 # v3.5.0
+        uses: Wandalen/wretry.action@8ceaefd717b7cdae4f2637f9a433242ade421a0a # v3.7.2
         id: build
         with:
-          action: docker/build-push-action@5cd11c3a4ced054e52742c5fd54dca954e0edd85 # v6.7.0
+          action: docker/build-push-action@4f58ea79222b3b9dc2c8bbdd6debcef730109a75 # v6.9.0
           attempt_limit: 60 # 60 attempts * (9 secs delay + 1 sec retry) = ~10 mins
           attempt_delay: 9000 # 9 secs
           with: |
@@ -115,7 +115,7 @@ jobs:
           touch "/tmp/digests/${digest#sha256:}"
 
       - name: Upload digest
-        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
           name: digests-${{ steps.build-id.outputs.id }}-${{ matrix.platform.name }}
           path: /tmp/digests/*

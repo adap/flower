@@ -8940,7 +8940,7 @@ msgstr "Flower 框架文档"
 #: ../../source/index.rst:7
 msgid ""
 "Welcome to Flower's documentation. `Flower <https://flower.ai>`_ is a "
-"friendly federated learning framework."
+"friendly federated AI framework."
 msgstr "欢迎访问 Flower 文档。`Flower <https://flower.ai>`_ 是一个友好的联邦学习框架。"
 
 #: ../../source/index.rst:11

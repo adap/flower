@@ -22,6 +22,7 @@ from typing import Any, Optional, Union, cast, get_args
 import tomli
 
 from flwr.cli.config_utils import get_fab_config, validate_fields
+from flwr.common import ConfigsRecord
 from flwr.common.constant import (
     APP_DIR,
     FAB_CONFIG_FILE,
@@ -206,6 +207,7 @@ def parse_config_args(
     # Regular expression to capture key-value pairs with possible quoted values
     pattern = re.compile(r"(\S+?)=(\'[^\']*\'|\"[^\"]*\"|\S+)")
 
+    flat_overrides = {}
     for config_line in config:
         if config_line:
             # .toml files aren't allowed alongside other configs
@@ -228,3 +230,12 @@ def get_metadata_from_config(config: dict[str, Any]) -> tuple[str, str]:
         config["project"]["version"],
         f"{config['tool']['flwr']['app']['publisher']}/{config['project']['name']}",
     )
+
+
+def user_config_to_configsrecord(config: UserConfig) -> ConfigsRecord:
+    """Construct a `ConfigsRecord` out of a `UserConfig`."""
+    c_record = ConfigsRecord()
+    for k, v in config.items():
+        c_record[k] = v
+
+    return c_record

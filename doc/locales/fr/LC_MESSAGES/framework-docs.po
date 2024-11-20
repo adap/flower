@@ -9294,10 +9294,10 @@ msgstr "Rédiger de la documentation"
 #: ../../source/index.rst:7
 msgid ""
 "Welcome to Flower's documentation. `Flower <https://flower.ai>`_ is a "
-"friendly federated learning framework."
+"friendly federated AI framework."
 msgstr ""
 "Bienvenue sur la documentation de Flower. `Flower <https://flower.ai>`_ "
-"est un framework de federated learning convivial et facile à utiliser."
+"est un framework de federated AI convivial et facile à utiliser."
 
 #: ../../source/index.rst:11
 msgid "Join the Flower Community"

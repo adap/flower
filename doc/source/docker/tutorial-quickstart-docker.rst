@@ -34,7 +34,6 @@ Step 1: Set Up
              flwr run
 
        $ cd quickstart-docker
-       $ pip install -e .
 
 2. Create a new Docker bridge network called ``flwr-network``:
 
@@ -324,21 +323,16 @@ Step 6: Run the Quickstart Project
    .. code-block:: toml
        :caption: pyproject.toml
 
-       [tool.flwr.federations.docker]
+       [tool.flwr.federations.local-deployment]
        address = "127.0.0.1:9093"
        insecure = true
 
-2. Run the ``quickstart-docker`` project by executing the command:
+2. Run the ``quickstart-docker`` project and follow the ServerApp logs to track the
+   execution of the run:
 
    .. code-block:: bash
 
-       $ flwr run . docker
-
-3. Follow the SuperExec logs to track the execution of the run:
-
-   .. code-block:: bash
-
-       $ docker logs -f superexec
+       $ flwr run . local-deployment --stream
 
 Step 7: Update the Application
 ------------------------------
@@ -384,7 +378,7 @@ Step 7: Update the Application
 
    .. code-block:: bash
 
-       $ flwr run . docker
+       $ flwr run . local-deployment --stream
 
 Step 8: Clean Up
 ----------------
