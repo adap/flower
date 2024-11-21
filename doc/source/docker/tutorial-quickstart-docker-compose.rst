@@ -24,8 +24,9 @@ Step 1: Set Up
 1. Clone the Docker Compose ``complete`` directory:
 
    .. code-block:: bash
+       :substitutions:
 
-       $ git clone --depth=1 https://github.com/adap/flower.git _tmp \
+       $ git clone --depth=1 --branch v|stable_flwr_version| https://github.com/adap/flower.git _tmp \
                    && mv _tmp/src/docker/complete . \
                    && rm -rf _tmp && cd complete
 
