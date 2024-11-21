@@ -70,12 +70,17 @@ def _add_shorlog(new_version: str, shortlog: str) -> None:
     with open(CHANGELOG_FILE, encoding="utf-8") as file:
         content = file.readlines()
 
+    token_exists = any(token in line for line in content)
+
     with open(CHANGELOG_FILE, "w", encoding="utf-8") as file:
         for line in content:
             if token in line:
-                file.write(f"{shortlog} {token}\n")
-            elif "## Unreleased" in line:
+                token_exists = True
+                file.write(line)
+            elif "## Unreleased" in line and not token_exists:
+                # Add the new entry under "## Unreleased"
                 file.write(f"## {new_version} ({current_date})\n{entry}\n")
+                token_exists = True
             else:
                 file.write(line)
 
@@ -181,11 +186,11 @@ def _update_changelog(prs: Set[PullRequest]) -> None:
             parsed_title = _extract_changelog_entry(pr_info)
 
             # Skip if PR should be skipped or already in changelog
-            if (
-                parsed_title.get("scope", "unknown") == "skip"
-                or f"#{pr_info.number}]" in content
-            ):
-                continue
+            # if (
+            #     parsed_title.get("scope", "unknown") == "skip"
+            #     or f"#{pr_info.number}]" in content
+            # ):
+            #     continue
 
             pr_type = parsed_title.get("type", "unknown")
             if pr_type == "feat":
