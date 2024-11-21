@@ -37,13 +37,15 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.fleet.message_handler import message_handler
-from flwr.server.superlink.state import StateFactory
+from flwr.server.superlink.linkstate import LinkStateFactory
 
 
 class FleetServicer(fleet_pb2_grpc.FleetServicer):
     """Fleet API servicer."""
 
-    def __init__(self, state_factory: StateFactory, ffs_factory: FfsFactory) -> None:
+    def __init__(
+        self, state_factory: LinkStateFactory, ffs_factory: FfsFactory
+    ) -> None:
         self.state_factory = state_factory
         self.ffs_factory = ffs_factory
 

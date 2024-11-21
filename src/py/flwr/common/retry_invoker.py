@@ -38,6 +38,11 @@ def exponential(
         Factor by which the delay is multiplied after each retry.
     max_delay: Optional[float] (default: None)
         The maximum delay duration between two consecutive retries.
+
+    Returns
+    -------
+    Generator[float, None, None]
+        A generator for the delay between 2 retries.
     """
     delay = base_delay if max_delay is None else min(base_delay, max_delay)
     while True:
@@ -56,6 +61,11 @@ def constant(
     ----------
     interval: Union[float, Iterable[float]] (default: 1)
         A constant value to yield or an iterable of such values.
+
+    Returns
+    -------
+    Generator[float, None, None]
+        A generator for the delay between 2 retries.
     """
     if not isinstance(interval, Iterable):
         interval = itertools.repeat(interval)
@@ -73,6 +83,11 @@ def full_jitter(max_value: float) -> float:
     ----------
     max_value : float
         The upper limit for the randomized value.
+
+    Returns
+    -------
+    float
+        A random float that is less than max_value.
     """
     return random.uniform(0, max_value)
 
