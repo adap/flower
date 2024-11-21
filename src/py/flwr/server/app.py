@@ -389,11 +389,10 @@ def run_superlink() -> None:
         io_address = (
             f"{CLIENT_OCTET}:{_port}" if _octet == SERVER_OCTET else serverappio_address
         )
-        address = (
-            f"--simulationio-api-address {simulationio_address}"
-            if sim_exec
-            else f"--serverappio-api-address {io_address}"
+        address_arg = (
+            "--simulation-api-address" if sim_exec else "--serverappio-api-address"
         )
+        address = simulationio_address if sim_exec else io_address
         cmd = "flwr-simulation" if sim_exec else "flwr-serverapp"
 
         # Scheduler thread
@@ -401,6 +400,7 @@ def run_superlink() -> None:
             target=_flwr_scheduler,
             args=(
                 state_factory,
+                address_arg,
                 address,
                 cmd,
             ),
@@ -426,6 +426,7 @@ def run_superlink() -> None:
 
 def _flwr_scheduler(
     state_factory: LinkStateFactory,
+    io_api_arg: str,
     io_api_address: str,
     cmd: str,
 ) -> None:
@@ -450,6 +451,7 @@ def _flwr_scheduler(
             command = [
                 cmd,
                 "--run-once",
+                io_api_arg,
                 io_api_address,
                 "--insecure",
             ]
