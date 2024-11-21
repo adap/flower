@@ -186,11 +186,11 @@ def _update_changelog(prs: Set[PullRequest]) -> None:
             parsed_title = _extract_changelog_entry(pr_info)
 
             # Skip if PR should be skipped or already in changelog
-            # if (
-            #     parsed_title.get("scope", "unknown") == "skip"
-            #     or f"#{pr_info.number}]" in content
-            # ):
-            #     continue
+            if (
+                parsed_title.get("scope", "unknown") == "skip"
+                or f"#{pr_info.number}]" in content
+            ):
+                continue
 
             pr_type = parsed_title.get("type", "unknown")
             if pr_type == "feat":
