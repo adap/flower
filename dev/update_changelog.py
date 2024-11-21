@@ -18,10 +18,14 @@
 
 import pathlib
 import re
-import tomllib
+
+try:
+    import tomllib
+except ModuleNotFoundError:
+    import tomli as tomllib
 from datetime import date
 from sys import argv
-from typing import Dict, Optional, Set, Tuple
+from typing import Optional
 
 from github import Github
 from github.PullRequest import PullRequest
@@ -49,14 +53,14 @@ PATTERN_TEMPLATE = CONFIG["pattern_template"]
 PATTERN = PATTERN_TEMPLATE.format(types=TYPES, projects=PROJECTS, scope=SCOPE)
 
 
-def _get_latest_tag(gh_api: Github) -> Tuple[Repository, Optional[Tag]]:
+def _get_latest_tag(gh_api: Github) -> tuple[Repository, Optional[Tag]]:
     """Retrieve the latest tag from the GitHub repository."""
     repo = gh_api.get_repo(REPO_NAME)
     tags = repo.get_tags()
     return repo, tags[0] if tags.totalCount > 0 else None
 
 
-def _add_shorlog(new_version: str, shortlog: str) -> None:
+def _add_shortlog(new_version: str, shortlog: str) -> None:
     """Update the markdown file with the new version or update existing logs."""
     token = f"<!---TOKEN_{new_version}-->"
     entry = (
@@ -87,7 +91,7 @@ def _add_shorlog(new_version: str, shortlog: str) -> None:
 
 def _get_pull_requests_since_tag(
     repo: Repository, tag: Tag
-) -> Tuple[str, Set[PullRequest]]:
+) -> tuple[str, set[PullRequest]]:
     """Get a list of pull requests merged into the main branch since a given tag."""
     commit_shas = set()
     contributors = set()
@@ -136,7 +140,7 @@ def _format_pr_reference(title: str, number: int, url: str) -> str:
 
 def _extract_changelog_entry(
     pr_info: PullRequest,
-) -> Dict[str, str]:
+) -> dict[str, str]:
     """Extract the changelog entry from a pull request's body."""
     # Use regex search to find matches
     match = re.search(PATTERN, pr_info.title)
@@ -163,7 +167,7 @@ def _extract_changelog_entry(
     }
 
 
-def _update_changelog(prs: Set[PullRequest]) -> None:
+def _update_changelog(prs: set[PullRequest]) -> bool:
     """Update the changelog file with entries from provided pull requests."""
     breaking_changes = False
     unknown_changes = False
@@ -174,7 +178,7 @@ def _update_changelog(prs: Set[PullRequest]) -> None:
 
         if unreleased_index == -1:
             print("Unreleased header not found in the changelog.")
-            return
+            return False
 
         # Find the end of the Unreleased section
         next_header_index = content.find("## ", unreleased_index + 1)
@@ -245,6 +249,7 @@ def _update_changelog(prs: Set[PullRequest]) -> None:
         file.seek(0)
         file.write(content)
         file.truncate()
+    return True
 
 
 def _insert_entry_no_desc(
@@ -279,16 +284,13 @@ def main() -> None:
         return
 
     shortlog, prs = _get_pull_requests_since_tag(repo, latest_tag)
-    _update_changelog(prs)
-
-    new_version = _bump_minor_version(latest_tag)
-    if not new_version:
-        print("Wrong tag format.")
-        return
-
-    _add_shorlog(new_version, shortlog)
-
-    print("Changelog updated succesfully.")
+    if _update_changelog(prs):
+        new_version = _bump_minor_version(latest_tag)
+        if not new_version:
+            print("Wrong tag format.")
+            return
+        _add_shortlog(new_version, shortlog)
+        print("Changelog updated succesfully.")
 
 
 if __name__ == "__main__":
