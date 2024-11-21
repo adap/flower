@@ -5,7 +5,7 @@ This page lists the recommended datasets for federated learning research, which 
 
 .. note::
 
-    All datasets from HuggingFace Hub can be used with our library. This page presents just a set of datasets we collected that you might find useful.
+    All datasets from `HuggingFace Hub <https://huggingface.co/datasets>`_ can be used with our library. This page presents just a set of datasets we collected that you might find useful.
 
 For more information about any dataset, visit its page by clicking the dataset name.
 
