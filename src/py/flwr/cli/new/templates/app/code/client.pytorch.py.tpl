@@ -1,17 +1,10 @@
 """$project_name: A Flower / $framework_str app."""
 
 import torch
-from flwr.client import NumPyClient, ClientApp
-from flwr.common import Context
 
-from $import_name.task import (
-    Net,
-    load_data,
-    get_weights,
-    set_weights,
-    train,
-    test,
-)
+from flwr.client import ClientApp, NumPyClient
+from flwr.common import Context
+from $import_name.task import Net, get_weights, load_data, set_weights, test, train
 
 
 # Define Flower Client and client_fn
@@ -32,7 +25,11 @@ class FlowerClient(NumPyClient):
             self.local_epochs,
             self.device,
         )
-        return get_weights(self.net), len(self.trainloader.dataset), {"train_loss": train_loss}
+        return (
+            get_weights(self.net),
+            len(self.trainloader.dataset),
+            {"train_loss": train_loss},
+        )
 
     def evaluate(self, parameters, config):
         set_weights(self.net, parameters)

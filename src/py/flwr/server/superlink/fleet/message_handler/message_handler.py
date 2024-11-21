@@ -43,12 +43,12 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs import Ffs
-from flwr.server.superlink.state import State
+from flwr.server.superlink.linkstate import LinkState
 
 
 def create_node(
     request: CreateNodeRequest,  # pylint: disable=unused-argument
-    state: State,
+    state: LinkState,
 ) -> CreateNodeResponse:
     """."""
     # Create node
@@ -56,7 +56,7 @@ def create_node(
     return CreateNodeResponse(node=Node(node_id=node_id, anonymous=False))
 
 
-def delete_node(request: DeleteNodeRequest, state: State) -> DeleteNodeResponse:
+def delete_node(request: DeleteNodeRequest, state: LinkState) -> DeleteNodeResponse:
     """."""
     # Validate node_id
     if request.node.anonymous or request.node.node_id == 0:
@@ -69,14 +69,14 @@ def delete_node(request: DeleteNodeRequest, state: State) -> DeleteNodeResponse:
 
 def ping(
     request: PingRequest,  # pylint: disable=unused-argument
-    state: State,  # pylint: disable=unused-argument
+    state: LinkState,  # pylint: disable=unused-argument
 ) -> PingResponse:
     """."""
     res = state.acknowledge_ping(request.node.node_id, request.ping_interval)
     return PingResponse(success=res)
 
 
-def pull_task_ins(request: PullTaskInsRequest, state: State) -> PullTaskInsResponse:
+def pull_task_ins(request: PullTaskInsRequest, state: LinkState) -> PullTaskInsResponse:
     """Pull TaskIns handler."""
     # Get node_id if client node is not anonymous
     node = request.node  # pylint: disable=no-member
@@ -92,7 +92,7 @@ def pull_task_ins(request: PullTaskInsRequest, state: State) -> PullTaskInsRespo
     return response
 
 
-def push_task_res(request: PushTaskResRequest, state: State) -> PushTaskResResponse:
+def push_task_res(request: PushTaskResRequest, state: LinkState) -> PushTaskResResponse:
     """Push TaskRes handler."""
     # pylint: disable=no-member
     task_res: TaskRes = request.task_res_list[0]
@@ -113,7 +113,7 @@ def push_task_res(request: PushTaskResRequest, state: State) -> PushTaskResRespo
 
 
 def get_run(
-    request: GetRunRequest, state: State  # pylint: disable=W0613
+    request: GetRunRequest, state: LinkState  # pylint: disable=W0613
 ) -> GetRunResponse:
     """Get run information."""
     run = state.get_run(request.run_id)

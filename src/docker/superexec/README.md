@@ -1,3 +1,11 @@
+# Deprecation Notice
+
+Starting with Flower version 1.13.0, the `flwr/superexec` Docker image has been deprecated because the SuperExec has been removed in Flower 1.13 (to be precise: the functionalities of the SuperExec have been merged into the SuperLink).
+Its functionality has been merged into [`flwr/superlink`](https://hub.docker.com/r/flwr/superlink) image.
+
+To migrate your Docker setup to the latest version, please follow the
+[Quickstart with Docker](https://flower.ai/docs/framework/docker/tutorial-quickstart-docker.html) guide.
+
 # Flower SuperExec
 
 <p align="center">
@@ -21,8 +29,11 @@
 
 - `unstable`
   - points to the last successful build of the `main` branch
-- `nightly`, `<version>.dev<YYYYMMDD>` e.g. `1.12.0.dev20240830`
-  - uses Python 3.11 and Ubuntu 22.04
+- `nightly`, `<version>.dev<YYYYMMDD>` e.g. `1.13.0.dev20241014`
+  - uses Python 3.11 and Ubuntu 24.04
+- `1.12.0`, `1.12.0-py3.11-ubuntu24.04`
+- `1.12.0-py3.10-ubuntu24.04`
+- `1.12.0-py3.9-ubuntu24.04`
 - `1.11.1`, `1.11.1-py3.11-ubuntu22.04`
 - `1.11.1-py3.10-ubuntu22.04`
 - `1.11.1-py3.9-ubuntu22.04`

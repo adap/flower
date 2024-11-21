@@ -15,7 +15,6 @@
 """Flower ClientProxy implementation for Driver API."""
 
 
-import time
 from typing import Optional
 
 from flwr import common
@@ -24,8 +23,6 @@ from flwr.common import recordset_compat as compat
 from flwr.server.client_proxy import ClientProxy
 
 from ..driver.driver import Driver
-
-SLEEP_TIME = 1
 
 
 class DriverClientProxy(ClientProxy):
@@ -122,29 +119,18 @@ class DriverClientProxy(ClientProxy):
             ttl=timeout,
         )
 
-        # Push message
-        message_ids = list(self.driver.push_messages(messages=[message]))
-        if len(message_ids) != 1:
-            raise ValueError("Unexpected number of message_ids")
+        # Send message and wait for reply
+        messages = list(self.driver.send_and_receive(messages=[message]))
 
-        message_id = message_ids[0]
-        if message_id == "":
-            raise ValueError(f"Failed to send message to node {self.node_id}")
+        # A single reply is expected
+        if len(messages) != 1:
+            raise ValueError(f"Expected one Message but got: {len(messages)}")
 
-        if timeout:
-            start_time = time.time()
-
-        while True:
-            messages = list(self.driver.pull_messages(message_ids))
-            if len(messages) == 1:
-                msg: Message = messages[0]
-                if msg.has_error():
-                    raise ValueError(
-                        f"Message contains an Error (reason: {msg.error.reason}). "
-                        "It originated during client-side execution of a message."
-                    )
-                return msg.content
-
-            if timeout is not None and time.time() > start_time + timeout:
-                raise RuntimeError("Timeout reached")
-            time.sleep(SLEEP_TIME)
+        # Only messages without errors can be handled beyond these point
+        msg: Message = messages[0]
+        if msg.has_error():
+            raise ValueError(
+                f"Message contains an Error (reason: {msg.error.reason}). "
+                "It originated during client-side execution of a message."
+            )
+        return msg.content

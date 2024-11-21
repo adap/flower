@@ -24,10 +24,14 @@ from google.protobuf.message import Message as GrpcMessage
 
 from flwr.common import log
 from flwr.common.constant import (
+    GRPC_ADAPTER_METADATA_FLOWER_PACKAGE_NAME_KEY,
+    GRPC_ADAPTER_METADATA_FLOWER_PACKAGE_VERSION_KEY,
     GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY,
+    GRPC_ADAPTER_METADATA_MESSAGE_MODULE_KEY,
+    GRPC_ADAPTER_METADATA_MESSAGE_QUALNAME_KEY,
     GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY,
 )
-from flwr.common.version import package_version
+from flwr.common.version import package_name, package_version
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
@@ -62,9 +66,16 @@ class GrpcAdapter:
         self, request: GrpcMessage, response_type: type[T], **kwargs: Any
     ) -> T:
         # Serialize request
+        req_cls = request.__class__
         container_req = MessageContainer(
-            metadata={GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY: package_version},
-            grpc_message_name=request.__class__.__qualname__,
+            metadata={
+                GRPC_ADAPTER_METADATA_FLOWER_PACKAGE_NAME_KEY: package_name,
+                GRPC_ADAPTER_METADATA_FLOWER_PACKAGE_VERSION_KEY: package_version,
+                GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY: package_version,
+                GRPC_ADAPTER_METADATA_MESSAGE_MODULE_KEY: req_cls.__module__,
+                GRPC_ADAPTER_METADATA_MESSAGE_QUALNAME_KEY: req_cls.__qualname__,
+            },
+            grpc_message_name=req_cls.__qualname__,
             grpc_message_content=request.SerializeToString(),
         )
 
