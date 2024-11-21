@@ -117,15 +117,15 @@ def flwr_simulation() -> None:
     args = parser.parse_args()
 
     log(INFO, "Starting Flower Simulation")
-    certificates = try_obtain_root_certificates(args, args.superlink)
+    certificates = try_obtain_root_certificates(args, args.simulationio_api_address)
 
     log(
         DEBUG,
         "Staring isolated `Simulation` connected to SuperLink DriverAPI at %s",
-        args.superlink,
+        args.simulationio_api_address,
     )
     run_simulation_process(
-        simulationio_api_address=args.superlink,
+        simulationio_api_address=args.simulationio_api_address,
         log_queue=log_queue,
         run_once=args.run_once,
         flwr_dir_=args.flwr_dir,
