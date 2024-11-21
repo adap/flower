@@ -66,6 +66,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: '${{ env.branch-name }}'
+          force_with_lease: true
 
       - name: Create Pull Request
         if: steps.calculate_diff.outputs.additions > 228 && steps.calculate_diff.outputs.deletions > 60
