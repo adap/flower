@@ -32,7 +32,11 @@ from flwr.common.config import (
     get_project_dir,
     unflatten_dict,
 )
-from flwr.common.constant import Status, SubStatus
+from flwr.common.constant import (
+    SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS,
+    Status,
+    SubStatus,
+)
 from flwr.common.logger import (
     log,
     mirror_output_to_queue,
@@ -73,9 +77,11 @@ def flwr_simulation() -> None:
         description="Run a Flower Simulation",
     )
     parser.add_argument(
-        "--superlink",
+        "--simulationio-api-address",
+        default=SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS,
         type=str,
-        help="Address of SuperLink's SimulationIO API",
+        help="Address of SuperLink's SimulationIO API (IPv4, IPv6, or a domain name)."
+        f"By default, it is set to {SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS}.",
     )
     parser.add_argument(
         "--run-once",
