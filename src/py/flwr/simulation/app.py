@@ -231,7 +231,7 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
                 )
             backend_config: BackendConfig = fed_opt.get("backend", {})
             verbose: bool = fed_opt.get("verbose", False)
-            enable_tf_gpu_growth: bool = fed_opt.get("enable_tf_gpu_growth", True)
+            enable_tf_gpu_growth: bool = fed_opt.get("enable_tf_gpu_growth", False)
 
             # Launch the simulation
             _run_simulation(
