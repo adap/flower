@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### What's new?
+
+### Other changes
+
+### Documentation improvements
+
+### Incompatible changes
+
 ## v1.13.0 (2024-11-20)
 
 ### Thanks to our contributors
