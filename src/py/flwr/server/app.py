@@ -278,7 +278,7 @@ def run_superlink() -> None:
             address=simulationio_address,
             state_factory=state_factory,
             ffs_factory=ffs_factory,
-            certificates=certificates,
+            certificates=None,  # SimulationAppIo API doesn't support SSL yet
         )
         grpc_servers.append(simulationio_server)
 
