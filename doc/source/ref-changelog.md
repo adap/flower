@@ -1,8 +1,16 @@
 # Changelog
 
-## Unreleased
+## v1.14.0 (2024-11-21)
+
+### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Charles Beauville`, `Heng Pan`, `Robert Steiner` <!---TOKEN_v1.14.0-->
 
 ### What's new?
+
+- **feat(examples:skip) Update advanced-tf example to 1.13** ([#4557](https://github.com/adap/flower/pull/4557))
 
 ### Other changes
 

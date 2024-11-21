@@ -987,7 +987,7 @@ path = "doc/source/ref-changelog.md"
 path = "datasets/doc/source/ref-changelog.md"
 
 [projects.examples]
-path = "doc/source/ref-changelog.md"
+path = "examples/doc/source/ref-changelog.md"
 
 [projects.baselines]
-path = "doc/source/ref-changelog.md"
+path = "baselines/doc/source/ref-changelog.md"

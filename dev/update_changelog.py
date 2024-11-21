@@ -187,7 +187,9 @@ def _update_changelog(prs: set[PullRequest]) -> list[str]:
             unreleased_index = content.find("## Unreleased")
 
             if unreleased_index == -1:
-                print(f"Unreleased header not found in the changelog for {project_key}.")
+                print(
+                    f"Unreleased header not found in the changelog for {project_key}."
+                )
                 fails.append(project_key)
                 continue
 
@@ -309,8 +311,8 @@ def main() -> None:
     shortlog, prs = _get_pull_requests_since_tag(repo, latest_tag)
     fails = _update_changelog(prs)
     if len(fails) > 0:
-      print(f"Update failed for: {fails}")
-      
+        print(f"Update failed for: {fails}")
+
     new_version = _bump_minor_version(latest_tag)
     if not new_version:
         print("Wrong tag format.")
