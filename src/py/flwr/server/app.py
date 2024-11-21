@@ -390,7 +390,7 @@ def run_superlink() -> None:
             f"{CLIENT_OCTET}:{_port}" if _octet == SERVER_OCTET else serverappio_address
         )
         address_arg = (
-            "--simulation-api-address" if sim_exec else "--serverappio-api-address"
+            "--simulationio-api-address" if sim_exec else "--serverappio-api-address"
         )
         address = simulationio_address if sim_exec else io_address
         cmd = "flwr-simulation" if sim_exec else "flwr-serverapp"
