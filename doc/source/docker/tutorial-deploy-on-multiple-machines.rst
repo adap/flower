@@ -6,7 +6,7 @@ Compose.
 
 You will learn how to run the Flower client and server components on two separate
 machines, with Flower configured to use TLS encryption and persist SuperLink state
-across restarts. A server consists of a SuperLink and ``SuperExec``. For more details
+across restarts. A server consists of a SuperLink and a ``ServerApp``. For more details
 about the Flower architecture, refer to the :doc:`../explanation-flower-architecture`
 explainer page.
 
@@ -53,14 +53,12 @@ Step 1: Set Up
        For production environments, you may have to use dedicated services to obtain
        your certificates.
 
-   First, set the environment variables ``SUPERLINK_IP`` and ``SUPEREXEC_IP`` with the
-   IP address from the remote machine. For example, if the IP is ``192.168.2.33``,
-   execute:
+   First, set the environment variable ``SUPERLINK_IP`` with the IP address from the
+   remote machine. For example, if the IP is ``192.168.2.33``, execute:
 
    .. code-block:: bash
 
        $ export SUPERLINK_IP=192.168.2.33
-       $ export SUPEREXEC_IP=192.168.2.33
 
    Next, generate the self-signed certificates:
 
@@ -80,7 +78,6 @@ For example, you can use ``scp`` to copy the directories:
 .. code-block:: bash
 
     $ scp -r ./server \
-           ./superexec-certificates \
            ./superlink-certificates \
            ../../../examples/quickstart-sklearn-tabular/pyproject.toml remote:~/distributed
 
@@ -88,7 +85,7 @@ Step 3: Start the Flower Server Components
 ------------------------------------------
 
 Log into the remote machine using ``ssh`` and run the following command to start the
-SuperLink and SuperExec services:
+SuperLink and ``ServerApp`` services:
 
 .. code-block:: bash
     :linenos:
@@ -138,27 +135,27 @@ On your local machine, run the following command to start the client components:
 Step 5: Run Your Flower Project
 -------------------------------
 
-Specify the remote SuperExec IP addresses and the path to the root certificate in the
-``[tool.flwr.federations.remote-superexec]`` table in the ``pyproject.toml`` file. Here,
-we have named our remote federation ``remote-superexec``:
+Specify the remote SuperLink IP addresses and the path to the root certificate in the
+``[tool.flwr.federations.remote-deployment]`` table in the ``pyproject.toml`` file.
+Here, we have named our remote federation ``remote-deployment``:
 
 .. code-block:: toml
     :caption: examples/quickstart-sklearn-tabular/pyproject.toml
 
-    [tool.flwr.federations.remote-superexec]
+    [tool.flwr.federations.remote-deployment]
     address = "192.168.2.33:9093"
-    root-certificates = "../../src/docker/distributed/superexec-certificates/ca.crt"
+    root-certificates = "../../src/docker/distributed/superlink-certificates/ca.crt"
 
 .. note::
 
     The path of the ``root-certificates`` should be relative to the location of the
     ``pyproject.toml`` file.
 
-Run the project and follow the ServerApp logs:
+Run the project and follow the ``ServerApp`` logs:
 
 .. code-block:: bash
 
-    $ flwr run ../../../examples/quickstart-sklearn-tabular remote-superexec --stream
+    $ flwr run ../../../examples/quickstart-sklearn-tabular remote-deployment --stream
 
 That's it! With these steps, you've set up Flower on two separate machines and are ready
 to start using it.
