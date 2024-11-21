@@ -38,8 +38,9 @@ Step 1: Set Up
 1. Clone the Flower repository and change to the ``distributed`` directory:
 
    .. code-block:: bash
+       :substitutions:
 
-       $ git clone --depth=1 https://github.com/adap/flower.git
+       $ git clone --depth=1 --branch v|stable_flwr_version| https://github.com/adap/flower.git
        $ cd flower/src/docker/distributed
 
 2. Get the IP address from the remote machine and save it for later.
