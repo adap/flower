@@ -24,6 +24,7 @@ from typing import Optional
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.common import EventType
+from flwr.common.args import add_args_flwr_app_common
 from flwr.common.config import (
     get_flwr_dir,
     get_fused_config_from_dir,
@@ -72,22 +73,8 @@ def flwr_simulation() -> None:
     log_queue: Queue[Optional[str]] = Queue()
     mirror_output_to_queue(log_queue)
 
-    parser = argparse.ArgumentParser(
-        description="Run a Flower Simulation",
-    )
-    parser.add_argument(
-        "--simulationio-api-address",
-        default=SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS,
-        type=str,
-        help="Address of SuperLink's SimulationIO API (IPv4, IPv6, or a domain name)."
-        f"By default, it is set to {SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS}.",
-    )
-    parser.add_argument(
-        "--run-once",
-        action="store_true",
-        help="When set, this process will start a single simulation "
-        "for a pending Run. If no pending run the process will exit. ",
-    )
+    args = _parse_args_run_flwr_simulation().parse_args()
+
     parser.add_argument(
         "--flwr-dir",
         default=None,
@@ -279,3 +266,25 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
         # Stop the loop if `flwr-simulation` is expected to process a single run
         if run_once:
             break
+
+
+def _parse_args_run_flwr_simulation() -> argparse.ArgumentParser:
+    """Parse flwr-simulation command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Run a Flower Simulation",
+    )
+    parser.add_argument(
+        "--simulationio-api-address",
+        default=SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS,
+        type=str,
+        help="Address of SuperLink's SimulationIO API (IPv4, IPv6, or a domain name)."
+        f"By default, it is set to {SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS}.",
+    )
+    parser.add_argument(
+        "--run-once",
+        action="store_true",
+        help="When set, this process will start a single simulation "
+        "for a pending Run. If no pending run the process will exit. ",
+    )
+    add_args_flwr_app_common(parser=parser)
+    return parser
