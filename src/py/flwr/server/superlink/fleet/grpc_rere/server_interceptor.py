@@ -45,7 +45,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
-from flwr.server.superlink.state import State
+from flwr.server.superlink.linkstate import LinkState
 
 _PUBLIC_KEY_HEADER = "public-key"
 _AUTH_TOKEN_HEADER = "auth-token"
@@ -84,7 +84,7 @@ def _get_value_from_tuples(
 class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
     """Server interceptor for node authentication."""
 
-    def __init__(self, state: State):
+    def __init__(self, state: LinkState):
         self.state = state
 
         self.node_public_keys = state.get_node_public_keys()

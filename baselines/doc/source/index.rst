@@ -1,7 +1,7 @@
 Flower Baselines Documentation
 ==============================
 
-Welcome to Flower Baselines' documentation. `Flower <https://flower.ai>`_ is a friendly federated learning framework.
+Welcome to Flower Baselines' documentation. `Flower <https://flower.ai>`_ is a friendly federated AI framework.
 
 
 Join the Flower Community

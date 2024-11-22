@@ -51,10 +51,10 @@ the corresponding input parameters.
 
 .. code-block:: python
 
-    from flwr.server.strategy import DifferentialPrivacyClientSideFixedClipping
+    from flwr.server.strategy import DifferentialPrivacyClientSideFixedClipping, FedAvg
 
     # Create the strategy
-    strategy = fl.server.strategy.FedAvg(...)
+    strategy = FedAvg(...)
 
     # Wrap the strategy with the DifferentialPrivacyServerSideFixedClipping wrapper
     dp_strategy = DifferentialPrivacyServerSideFixedClipping(
@@ -85,10 +85,10 @@ wrapper class and, on the client, ``fixedclipping_mod``:
 
 .. code-block:: python
 
-    from flwr.server.strategy import DifferentialPrivacyClientSideFixedClipping
+    from flwr.server.strategy import DifferentialPrivacyClientSideFixedClipping, FedAvg
 
     # Create the strategy
-    strategy = fl.server.strategy.FedAvg(...)
+    strategy = FedAvg(...)
 
     # Wrap the strategy with the DifferentialPrivacyClientSideFixedClipping wrapper
     dp_strategy = DifferentialPrivacyClientSideFixedClipping(
@@ -103,10 +103,11 @@ the matching ``fixedclipping_mod`` to perform the client-side clipping:
 
 .. code-block:: python
 
+    from flwr.client import ClientApp
     from flwr.client.mod import fixedclipping_mod
 
     # Add fixedclipping_mod to the client-side mods
-    app = fl.client.ClientApp(
+    app = ClientApp(
         client_fn=client_fn,
         mods=[
             fixedclipping_mod,
@@ -130,15 +131,18 @@ Below is a code example that shows how to use ``LocalDpMod``:
 
 .. code-block:: python
 
-    from flwr.client.mod.localdp_mod import LocalDpMod
+    from flwr.client import ClientApp
+    from flwr.client.mod import LocalDpMod
 
     # Create an instance of the mod with the required params
     local_dp_obj = LocalDpMod(cfg.clipping_norm, cfg.sensitivity, cfg.epsilon, cfg.delta)
-    # Add local_dp_obj to the client-side mods
 
-    app = fl.client.ClientApp(
+    # Add local_dp_obj to the client-side mods
+    app = ClientApp(
         client_fn=client_fn,
-        mods=[local_dp_obj],
+        mods=[
+            local_dp_obj,
+        ],
     )
 
 Please note that the order of mods, especially those that modify parameters, is
@@ -152,4 +156,4 @@ For ensuring data instance-level privacy during local model training on the clie
 consider leveraging privacy engines such as Opacus and TensorFlow Privacy. For examples
 of using Flower with these engines, please refer to the Flower examples directory
 (`Opacus <https://github.com/adap/flower/tree/main/examples/opacus>`_, `Tensorflow
-Privacy <https://github.com/adap/flower/tree/main/examples/dp-sgd-mnist>`_).
+Privacy <https://github.com/adap/flower/tree/main/examples/tensorflow-privacy>`_).

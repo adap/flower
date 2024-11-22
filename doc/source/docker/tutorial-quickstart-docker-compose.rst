@@ -20,7 +20,7 @@ Before you start, make sure that:
 
 - The ``flwr`` CLI is :doc:`installed <../how-to-install-flower>` locally.
 - The Docker daemon is running.
-- Docker Compose is `installed <https://docs.docker.com/compose/install/>`_.
+- Docker Compose V2 is `installed <https://docs.docker.com/compose/install/>`_.
 
 Step 1: Set Up
 --------------
@@ -28,8 +28,9 @@ Step 1: Set Up
 1. Clone the Docker Compose ``complete`` directory:
 
    .. code-block:: bash
+       :substitutions:
 
-       $ git clone --depth=1 https://github.com/adap/flower.git _tmp \
+       $ git clone --depth=1 --branch v|stable_flwr_version| https://github.com/adap/flower.git _tmp \
                    && mv _tmp/src/docker/complete . \
                    && rm -rf _tmp && cd complete
 
@@ -47,7 +48,8 @@ Step 1: Set Up
        $ export PROJECT_DIR=quickstart-compose
 
    Setting the ``PROJECT_DIR`` helps Docker Compose locate the ``pyproject.toml`` file,
-   allowing it to install dependencies in the SuperExec and SuperNode images correctly.
+   allowing it to install dependencies in the ``ServerApp`` and ``ClientApp`` images
+   correctly.
 
 Step 2: Run Flower in Insecure Mode
 -----------------------------------
@@ -67,12 +69,11 @@ Open your terminal and run:
 
 .. code-block:: bash
 
-    $ docker compose -f compose.yml up --build -d
+    $ docker compose up --build -d
 
 .. dropdown:: Understand the command
 
     * ``docker compose``: The Docker command to run the Docker Compose tool.
-    * ``-f compose.yml``: Specify the YAML file that contains the basic Flower service definitions.
     * ``--build``: Rebuild the images for each service if they don't already exist.
     * ``-d``: Detach the containers from the terminal and run them in the background.
 
@@ -82,7 +83,7 @@ Step 3: Run the Quickstart Project
 Now that the Flower services have been started via Docker Compose, it is time to run the
 quickstart example.
 
-To ensure the ``flwr`` CLI connects to the SuperExec, you need to specify the SuperExec
+To ensure the ``flwr`` CLI connects to the SuperLink, you need to specify the SuperLink
 addresses in the ``pyproject.toml`` file.
 
 1. Add the following lines to the ``quickstart-compose/pyproject.toml``:
@@ -90,21 +91,16 @@ addresses in the ``pyproject.toml`` file.
    .. code-block:: toml
        :caption: quickstart-compose/pyproject.toml
 
-       [tool.flwr.federations.docker-compose]
+       [tool.flwr.federations.local-deployment]
        address = "127.0.0.1:9093"
        insecure = true
 
-2. Execute the command to run the quickstart example:
+2. Run the quickstart example, monitor the ``ServerApp`` logs and wait for the summary
+   to appear:
 
    .. code-block:: bash
 
-       $ flwr run quickstart-compose docker-compose
-
-3. Monitor the SuperExec logs and wait for the summary to appear:
-
-   .. code-block:: bash
-
-       $ docker compose logs superexec -f
+       $ flwr run quickstart-compose local-deployment --stream
 
 Step 4: Update the Application
 ------------------------------
@@ -139,30 +135,25 @@ In the next step, change the application code.
 
    .. code-block:: bash
 
-       $ docker compose -f compose.yml up --build -d
+       $ docker compose up --build -d
 
 3. Run the updated quickstart example:
 
    .. code-block:: bash
 
-       $ flwr run quickstart-compose docker-compose
-       $ docker compose logs superexec -f
+       $ flwr run quickstart-compose local-deployment --stream
 
-   In the SuperExec logs, you should find the ``Get weights`` line:
+   In the ``ServerApp`` logs, you should find the ``Get weights`` line:
 
    .. code-block::
-       :emphasize-lines: 9
+       :emphasize-lines: 5
 
-       superexec-1  | INFO :      Starting Flower SuperExec
-       superexec-1  | WARNING :   Option `--insecure` was set. Starting insecure HTTP server.
-       superexec-1  | INFO :      Starting Flower SuperExec gRPC server on 0.0.0.0:9093
-       superexec-1  | INFO :      ExecServicer.StartRun
-       superexec-1  | 🎊 Successfully installed quickstart-compose to /app/.flwr/apps/flower/quickstart-compose/1.0.0.
-       superexec-1  | INFO :      Created run -6767165609169293507
-       superexec-1  | INFO :      Started run -6767165609169293507
-       superexec-1  | WARNING :   Option `--insecure` was set. Starting insecure HTTP client connected to superlink:9091.
-       superexec-1  | Get weights
-       superexec-1  | INFO :      Starting Flower ServerApp, config: num_rounds=3, no round_timeout
+       INFO :      Starting logstream for run_id `10386255862566726253`
+       INFO :      Starting Flower ServerApp
+       WARNING :   Option `--insecure` was set. Starting insecure HTTP channel to superlink:9091.
+       🎊 Successfully installed quickstart-compose to /app/.flwr/apps/flower.quickstart-compose.1.0.0.35361a47.
+       Get weights
+       INFO :      Starting Flower ServerApp, config: num_rounds=3, no round_timeout
 
 Step 5: Persisting the SuperLink State
 --------------------------------------
@@ -198,7 +189,7 @@ service, ensuring that it maintains its state even after a restart.
 
    .. code-block:: bash
 
-       $ flwr run quickstart-compose docker-compose
+       $ flwr run quickstart-compose local-deployment --stream
 
 3. Check the content of the ``state`` directory:
 
@@ -231,16 +222,16 @@ Step 6: Run Flower with TLS
 
    .. code-block:: bash
 
-       $ docker compose -f certs.yml up --build
+       $ docker compose -f certs.yml run --rm --build gen-certs
 
 2. Add the following lines to the ``quickstart-compose/pyproject.toml``:
 
    .. code-block:: toml
        :caption: quickstart-compose/pyproject.toml
 
-       [tool.flwr.federations.docker-compose-tls]
+       [tool.flwr.federations.local-deployment-tls]
        address = "127.0.0.1:9093"
-       root-certificates = "../superexec-certificates/ca.crt"
+       root-certificates = "../superlink-certificates/ca.crt"
 
 3. Restart the services with TLS enabled:
 
@@ -252,19 +243,13 @@ Step 6: Run Flower with TLS
 
    .. code-block:: bash
 
-       $ flwr run quickstart-compose docker-compose-tls
-       $ docker compose logs superexec -f
+       $ flwr run quickstart-compose local-deployment-tls --stream
 
-Step 7: Add another SuperNode
------------------------------
+Step 7: Add another SuperNode and ClientApp
+-------------------------------------------
 
-You can add more SuperNodes and ClientApps by duplicating their definitions in the
-``compose.yml`` file.
-
-Just give each new SuperNode and ClientApp service a unique service name like
-``supernode-3``, ``clientapp-3``, etc.
-
-In ``compose.yml``, add the following:
+You can add more SuperNodes and ClientApps by uncommenting their definitions in the
+``compose.yml`` file:
 
 .. code-block:: yaml
     :caption: compose.yml
@@ -278,7 +263,7 @@ In ``compose.yml``, add the following:
           - --insecure
           - --superlink
           - superlink:9092
-          - --supernode-address
+          - --clientappio-api-address
           - 0.0.0.0:9096
           - --isolation
           - process
@@ -307,7 +292,8 @@ In ``compose.yml``, add the following:
 
             ENTRYPOINT ["flwr-clientapp"]
         command:
-          - --supernode
+          - --insecure
+          - --clientappio-api-address
           - supernode-3:9096
         deploy:
           resources:
@@ -317,12 +303,8 @@ In ``compose.yml``, add the following:
         depends_on:
           - supernode-3
 
-If you also want to enable TLS for the new SuperNodes, duplicate the SuperNode
-definition for each new SuperNode service in the ``with-tls.yml`` file.
-
-Make sure that the names of the services match with the one in the ``compose.yml`` file.
-
-In ``with-tls.yml``, add the following:
+If you also want to enable TLS for the new SuperNode, uncomment the definition in the
+``with-tls.yml`` file:
 
 .. code-block:: yaml
     :caption: with-tls.yml
@@ -333,17 +315,25 @@ In ``with-tls.yml``, add the following:
         command:
           - --superlink
           - superlink:9092
-          - --supernode-address
+          - --clientappio-api-address
           - 0.0.0.0:9096
           - --isolation
           - process
           - --node-config
           - "partition-id=1 num-partitions=2"
           - --root-certificates
-          - certificates/ca.crt
+          - certificates/superlink-ca.crt
         secrets:
           - source: superlink-ca-certfile
-            target: /app/certificates/ca.crt
+            target: /app/certificates/superlink-ca.crt
+
+Restart the services with:
+
+.. code-block:: bash
+
+    $ docker compose up --build -d
+    # or with TLS enabled
+    $ docker compose -f compose.yml -f with-tls.yml up --build -d
 
 Step 8: Persisting the SuperLink State and Enabling TLS
 -------------------------------------------------------
@@ -351,18 +341,22 @@ Step 8: Persisting the SuperLink State and Enabling TLS
 To run Flower with persisted SuperLink state and enabled TLS, a slight change in the
 ``with-state.yml`` file is required:
 
-1. Comment out the lines 2-4 and uncomment the lines 5-9:
+1. Comment out the lines 2-6 and uncomment the lines 7-13:
 
    .. code-block:: yaml
        :caption: with-state.yml
        :linenos:
-       :emphasize-lines: 2-9
+       :emphasize-lines: 2-13
 
          superlink:
            # command:
-           #   - --insecure
-           #   - --database=state/state.db
+           # - --insecure
+           # - --isolation
+           # - process
+           # - --database=state/state.db
            command:
+             - --isolation
+             - process
              - --ssl-ca-certfile=certificates/ca.crt
              - --ssl-certfile=certificates/server.pem
              - --ssl-keyfile=certificates/server.key
@@ -380,8 +374,7 @@ To run Flower with persisted SuperLink state and enabled TLS, a slight change in
 
    .. code-block:: bash
 
-       $ flwr run quickstart-compose docker-compose-tls
-       $ docker compose logs superexec -f
+       $ flwr run quickstart-compose local-deployment-tls --stream
 
 Step 9: Merge Multiple Compose Files
 ------------------------------------
@@ -406,7 +399,6 @@ Remove all services and volumes:
 .. code-block:: bash
 
     $ docker compose down -v
-    $ docker compose -f certs.yml down -v
 
 Where to Go Next
 ----------------

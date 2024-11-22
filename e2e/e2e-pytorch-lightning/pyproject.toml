@@ -9,8 +9,8 @@ description = "Federated Learning E2E test with Flower and PyTorch Lightning"
 license = "Apache-2.0"
 dependencies = [
     "flwr[simulation] @ {root:parent:parent:uri}",
-    "pytorch-lightning==2.2.4",
-    "torchvision==0.14.1",
+    "pytorch-lightning==2.4.0",
+    "torchvision>=0.20.1,<0.21.0",
 ]
 
 [tool.hatch.build.targets.wheel]
