@@ -106,6 +106,13 @@ def flwr_simulation() -> None:
         "paths are provided. By default, the server runs with HTTPS enabled. "
         "Use this flag only if you understand the risks.",
     )
+    parser.add_argument(
+        "--root-certificates",
+        metavar="ROOT_CERT",
+        type=str,
+        help="Specifies the path to the PEM-encoded root certificate file for "
+        "establishing secure HTTPS connections.",
+    )
     args = parser.parse_args()
 
     log(INFO, "Starting Flower Simulation")
