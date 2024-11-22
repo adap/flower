@@ -1,11 +1,13 @@
 Contribute
 ==========
 
-Contributor docs
-----------------
-
 The Flower community welcomes contributions. The following docs are intended to help
 along the way.
+
+Tutorials
+---------
+
+A learning-oriented series of tutorials, the best place to start.
 
 .. toctree::
     :titlesonly:
@@ -14,9 +16,13 @@ along the way.
     contributor-tutorial-contribute-on-github
     contributor-tutorial-get-started-as-a-contributor
 
+How-to guides
+-------------
+
+Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
+
 .. toctree::
     :titlesonly:
-    :caption: Contributor how-to guides
 
     contributor-how-to-install-development-versions
     contributor-how-to-set-up-a-virtual-env
@@ -26,11 +32,22 @@ along the way.
     contributor-how-to-contribute-translations
     contributor-how-to-build-docker-images
 
+Explanations
+------------
+
+Understanding-oriented concept guides explain and discuss key topics and underlying
+ideas behind Flower and collaborative AI.
+
 .. toctree::
     :titlesonly:
     :caption: Contributor explanations
 
     contributor-explanation-public-and-private-apis
+
+References
+----------
+
+Information-oriented API reference and other reference material.
 
 .. toctree::
     :titlesonly:
