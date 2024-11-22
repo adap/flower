@@ -69,14 +69,14 @@ Run the Quickstart Example
        ``local-deployment`` with your chosen name in both the ``tool.flwr.federations.``
        string and the corresponding ``flwr run .`` command.
 
-5. Run the example and follow the logs of the ServerApp:
+5. Run the example and follow the logs of the ``ServerApp`` :
 
    .. code-block:: bash
 
        $ flwr run . local-deployment --stream
 
 That is all it takes! You can monitor the progress of the run through the logs of the
-SuperExec.
+``ServerApp``.
 
 Run a Different Quickstart Example
 ----------------------------------
