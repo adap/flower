@@ -1,6 +1,6 @@
-:og:description: Learn how to configure environment variables in Flower Docker containers using the -e flag to customize settings like telemetry and logging for your federated learning setup.
+:og:description: Use the -e flag to configure environment variables in Flower Docker containers, customizing telemetry, logging, and other settings for federated learning.
 .. meta::
-    :description: Learn how to configure environment variables in Flower Docker containers using the -e flag to customize settings like telemetry and logging for your federated learning setup.
+    :description: Use the -e flag to configure environment variables in Flower Docker containers, customizing telemetry, logging, and other settings for federated learning.
 
 Set Environment Variables
 =========================

@@ -1,6 +1,6 @@
-:og:description: Follow this quickstart guide to containerize a Flower federated learning project and run it end to end using Docker, this includes the setup for SuperLink, SuperNode, and ClientApp.
+:og:description: Containerize a Flower federated learning project and run it end-to-end with this guide, including SuperLink, SuperNode, ServerApp, and ClientApp setup.
 .. meta::
-    :description: Follow this quickstart guide to containerize a Flower federated learning project and run it end to end using Docker, this includes the setup for SuperLink, SuperNode, and ClientApp.
+    :description: Containerize a Flower federated learning project and run it end-to-end with this guide, including SuperLink, SuperNode, ServerApp, and ClientApp setup.
 
 Quickstart with Docker
 ======================
