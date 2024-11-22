@@ -75,33 +75,6 @@ def flwr_simulation() -> None:
 
     args = _parse_args_run_flwr_simulation().parse_args()
 
-    parser.add_argument(
-        "--flwr-dir",
-        default=None,
-        help="""The path containing installed Flower Apps.
-    By default, this value is equal to:
-
-        - `$FLWR_HOME/` if `$FLWR_HOME` is defined
-        - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
-        - `$HOME/.flwr/` in all other cases
-    """,
-    )
-    parser.add_argument(
-        "--insecure",
-        action="store_true",
-        help="Run the server without HTTPS, regardless of whether certificate "
-        "paths are provided. By default, the server runs with HTTPS enabled. "
-        "Use this flag only if you understand the risks.",
-    )
-    parser.add_argument(
-        "--root-certificates",
-        metavar="ROOT_CERT",
-        type=str,
-        help="Specifies the path to the PEM-encoded root certificate file for "
-        "establishing secure HTTPS connections.",
-    )
-    args = parser.parse_args()
-
     log(INFO, "Starting Flower Simulation")
 
     if not args.insecure:
