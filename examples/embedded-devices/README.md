@@ -17,7 +17,7 @@ This example will show you how Flower makes it very easy to run Federated Learni
 
 This tutorial allows for a variety of settings (some shown in the diagrams above). As long as you have access to one embedded device, you can follow along. This is a list of components that you'll need:
 
-- For Flower server: A machine running Linux/macOS/Windows (e.g. your laptop). You can run the server on an embedded device too!
+- For Flower server: A machine running Linux/macOS (e.g. your laptop). You can run the server on an embedded device too!
 - For Flower clients (one or more): Raspberry Pi 5 or 4 (or Zero 2), or anything similar to these.
 - A uSD card with 32GB or more.
 - Software to flash the images to a uSD card:
@@ -105,6 +105,9 @@ scp -r datasets/fashionmnist_part_1 <user>@<device-ip>:/path/to/home
 ### Launching the Flower `SuperLink`
 
 On your development machine, launch the `SuperLink`. You will connnect Flower `SuperNodes` to it in the next step.
+
+> [!NOTE]
+> If you decide to run the `SuperLink` in a different machine, you'll need to adjust the `address` under the `[tool.flwr.federations.embedded-federation]` tag in the `pyproject.toml`.
 
 ```shell
 flower-superlink --insecure
