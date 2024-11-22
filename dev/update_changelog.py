@@ -203,10 +203,7 @@ def _update_changelog(prs: set[PullRequest]) -> list[str]:
 
                 # Skip if PR is from another project, marked as skipped,
                 # or already in changelog
-                if parsed_title.get("project", "framework") not in [
-                    "baselines",
-                    "examples",
-                ] and (
+                if (
                     parsed_title.get("project", "framework") != project_key
                     or parsed_title.get("scope", "unknown") == "skip"
                     or f"#{pr_info.number}]" in content
@@ -274,7 +271,7 @@ def _update_changelog(prs: set[PullRequest]) -> list[str]:
             file.seek(0)
             file.write(content)
             file.truncate()
-        return fails
+    return fails
 
 
 def _insert_entry_no_desc(
