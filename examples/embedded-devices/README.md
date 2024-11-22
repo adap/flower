@@ -106,7 +106,7 @@ scp -r datasets/fashionmnist_part_1 <user>@<device-ip>:/path/to/home
 
 On your development machine, launch the `SuperLink`. You will connnect Flower `SuperNodes` to it in the next step.
 
-> [!NOTE]
+> \[!NOTE\]
 > If you decide to run the `SuperLink` in a different machine, you'll need to adjust the `address` under the `[tool.flwr.federations.embedded-federation]` tag in the `pyproject.toml`.
 
 ```shell

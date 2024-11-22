@@ -14,6 +14,12 @@ dependencies = [
     "torchvision==0.17.1",
 ]
 
+[tool.hatch.build]
+exclude = [
+    "datasets/*", # Exclude datasets from FAB (if generated in this directory)
+    "_static/*", # Exclude images in README from FAB
+]
+
 [tool.hatch.build.targets.wheel]
 packages = ["."]
 
@@ -35,5 +41,5 @@ batch-size = 32
 default = "embedded-federation"
 
 [tool.flwr.federations.embedded-federation]
-address = "localhost:9093"
+address = "49.12.200.204:9093"
 insecure = true
