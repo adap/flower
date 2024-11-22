@@ -278,16 +278,15 @@ def new(
     )
 
     _add = "	huggingface-cli login\n" if llm_challenge_str else ""
-    print(
-        typer.style(
-            f"	cd {package_name}\n" + "	pip install -e .",
-            fg=typer.colors.BRIGHT_CYAN,
-            bold=True,
-        ),
-        typer.style("# Optional if dependencies are installed\n", dim=True),
-        typer.style(
-            _add + "	flwr run\n",
-            fg=typer.colors.BRIGHT_CYAN,
-            bold=True,
-        ),
+    _prompt = typer.style(
+        f"	cd {package_name}\n" + "	pip install -e .",
+        fg=typer.colors.BRIGHT_CYAN,
+        bold=True,
     )
+    _prompt += typer.style("# Optional if dependencies are installed\n", dim=True)
+    _prompt += typer.style(
+        _add + "	flwr run\n",
+        fg=typer.colors.BRIGHT_CYAN,
+        bold=True,
+    )
+    print(_prompt)
