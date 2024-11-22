@@ -1,6 +1,6 @@
-:og:description: Learn how to configure clients in Flower by sending customizable parameters from the server to control client-side hyperparameters using configuration dictionaries and built-in strategies.
+:og:description: Configure Flower clients by sending parameters from the server to control client-side hyperparameters using configuration dictionaries and strategies.
 .. meta::
-    :description: Learn how to configure clients in Flower by sending customizable parameters from the server to control client-side hyperparameters using configuration dictionaries and built-in strategies.
+    :description: Configure Flower clients by sending parameters from the server to control client-side hyperparameters using configuration dictionaries and strategies.
 
 Configure Clients
 =================

@@ -1,6 +1,6 @@
-:og:description: Learn how to apply differential privacy in Flower, using server-side and client-side clipping techniques or local DP for enhanced data security during federated learning.
+:og:description: Apply differential privacy in Flower with server-side/client-side clipping or local DP techniques to enhance data security in federated learning.
 .. meta::
-    :description: Learn how to apply differential privacy in Flower, using server-side and client-side clipping techniques or local DP for enhanced data security during federated learning.
+    :description: Apply differential privacy in Flower with server-side/client-side clipping or local DP techniques to enhance data security in federated learning.
 
 Use Differential Privacy
 ========================

@@ -1,3 +1,7 @@
+:og:description: Discover Flower’s stateless ClientApp design, enabling efficient simulations and deployments with context objects for seamless data persistence and flexibility.
+.. meta::
+    :description: Discover Flower’s stateless ClientApp design, enabling efficient simulations and deployments with context objects for seamless data persistence and flexibility.
+
 Design stateful ClientApps
 ==========================
 

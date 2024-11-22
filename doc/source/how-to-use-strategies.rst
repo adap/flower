@@ -1,6 +1,6 @@
-:og:description: Learn to customize federated learning in Flower using built-in strategies, callback functions, and novel server-side strategy implementation techniques for maximum flexibility and control.
+:og:description: Customize federated learning in Flower with built-in strategies, callbacks, and custom server-side implementations for maximum flexibility and control.
 .. meta::
-    :description: Learn to customize federated learning in Flower using built-in strategies, callback functions, and novel server-side strategy implementation techniques for maximum flexibility and control.
+    :description: Customize federated learning in Flower with built-in strategies, callbacks, and custom server-side implementations for maximum flexibility and control.
 
 Use strategies
 ==============
