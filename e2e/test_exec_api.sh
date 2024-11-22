@@ -74,7 +74,7 @@ else
 fi
 
 if [ "$3" = "simulation-engine" ]; then
-  echo -e $"options.num-supernodes = 2" >> pyproject.toml
+  echo -e $"options.num-supernodes = 10" >> pyproject.toml
 fi
 
 # Combine the arguments into a single command for flower-superlink
