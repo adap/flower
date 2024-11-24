@@ -13,11 +13,10 @@ by returning a dictionary:
 
 .. code-block:: python
 
-    class CifarClient(fl.client.NumPyClient):
+    from flwr.client import NumPyClient
 
-        def get_parameters(self, config):
-            # ...
-            pass
+
+    class FlowerClient(NumPyClient):
 
         def fit(self, parameters, config):
             # ...
@@ -34,14 +33,17 @@ by returning a dictionary:
 
             # Return results, including the custom accuracy metric
             num_examples_test = len(self.x_test)
-            return loss, num_examples_test, {"accuracy": accuracy}
+            return float(loss), num_examples_test, {"accuracy": float(accuracy)}
 
 The server can then use a customized strategy to aggregate the metrics provided in these
 dictionaries:
 
 .. code-block:: python
 
-    class AggregateCustomMetricStrategy(fl.server.strategy.FedAvg):
+    from flwr.server.strategy import FedAvg
+
+
+    class AggregateCustomMetricStrategy(FedAvg):
         def aggregate_evaluate(
             self,
             server_round: int,
@@ -69,11 +71,24 @@ dictionaries:
             )
 
             # Return aggregated loss and metrics (i.e., aggregated accuracy)
-            return aggregated_loss, {"accuracy": aggregated_accuracy}
+            return float(aggregated_loss), {"accuracy": float(aggregated_accuracy)}
 
 
-    # Create strategy and run server
-    strategy = AggregateCustomMetricStrategy(
-        # (same arguments as FedAvg here)
-    )
-    fl.server.start_server(strategy=strategy)
+    def server_fn(context: Context) -> ServerAppComponents:
+        # Read federation rounds from config
+        num_rounds = context.run_config["num-server-rounds"]
+        config = ServerConfig(num_rounds=num_rounds)
+
+        # Define strategy
+        strategy = AggregateCustomMetricStrategy(
+            # (same arguments as FedAvg here)
+        )
+
+        return ServerAppComponents(
+            config=config,
+            strategy=strategy,  # <-- pass the custom strategy here
+        )
+
+
+    # Create ServerApp
+    app = ServerApp(server_fn=server_fn)

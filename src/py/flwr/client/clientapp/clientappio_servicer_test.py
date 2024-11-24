@@ -78,6 +78,11 @@ class TestClientAppIoServicer(unittest.TestCase):
             fab_version="ipsum",
             fab_hash="dolor",
             override_config=self.maker.user_config(),
+            pending_at="2021-01-01T00:00:00Z",
+            starting_at="",
+            running_at="",
+            finished_at="",
+            status=typing.RunStatus(status="pending", sub_status="", details=""),
         )
         fab = typing.Fab(
             hash_str="abc123#$%",

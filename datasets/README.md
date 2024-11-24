@@ -6,7 +6,7 @@
 ![Downloads](https://pepy.tech/badge/flwr-datasets)
 [![Slack](https://img.shields.io/badge/Chat-Slack-red)](https://flower.ai/join-slack)
 
-Flower Datasets (`flwr-datasets`) is a library to quickly and easily create datasets for federated learning, federated evaluation, and federated analytics. It was created by the `Flower Labs` team that also created Flower: A Friendly Federated Learning Framework.
+Flower Datasets (`flwr-datasets`) is a library to quickly and easily create datasets for federated learning, federated evaluation, and federated analytics. It was created by the `Flower Labs` team that also created Flower: A Friendly Federated AI Framework.
 
 
 > [!TIP]

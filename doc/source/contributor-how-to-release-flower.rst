@@ -10,9 +10,9 @@ During the release
 The version number of a release is stated in ``pyproject.toml``. To release a new
 version of Flower, the following things need to happen (in that order):
 
-1. Run ``python3 src/py/flwr_tool/update_changelog.py <YOUR_GH_TOKEN>`` in order to add
-   every new change to the changelog (feel free to make manual changes to the changelog
-   afterwards until it looks good).
+1. Run ``python3 ./dev/update_changelog.py <YOUR_GH_TOKEN>`` in order to add every new
+   change to the changelog (feel free to make manual changes to the changelog afterwards
+   until it looks good).
 2. Once the changelog has been updated with all the changes, run
    ``./dev/prepare-release-changelog.sh v<NEW_VERSION>``, where ``<NEW_VERSION>`` is the
    version stated in ``pyproject.toml`` (notice the ``v`` added before it). This will

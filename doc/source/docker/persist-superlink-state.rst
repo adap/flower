@@ -31,7 +31,7 @@ specify the name of the database file.
     $ docker run --rm \
          --volume ./state/:/app/state flwr/superlink:|stable_flwr_version| \
          --database state.db \
-         ...
+         <additional-args>
 
 As soon as the SuperLink starts, the file ``state.db`` is created in the ``state``
 directory on your host system. If the file already exists, the SuperLink tries to

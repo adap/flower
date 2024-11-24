@@ -5,6 +5,7 @@ isort:skip_file
 import builtins
 import flwr.proto.fab_pb2
 import flwr.proto.node_pb2
+import flwr.proto.recordset_pb2
 import flwr.proto.transport_pb2
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
@@ -36,12 +37,23 @@ class Run(google.protobuf.message.Message):
     FAB_VERSION_FIELD_NUMBER: builtins.int
     OVERRIDE_CONFIG_FIELD_NUMBER: builtins.int
     FAB_HASH_FIELD_NUMBER: builtins.int
+    PENDING_AT_FIELD_NUMBER: builtins.int
+    STARTING_AT_FIELD_NUMBER: builtins.int
+    RUNNING_AT_FIELD_NUMBER: builtins.int
+    FINISHED_AT_FIELD_NUMBER: builtins.int
+    STATUS_FIELD_NUMBER: builtins.int
     run_id: builtins.int
     fab_id: typing.Text
     fab_version: typing.Text
     @property
     def override_config(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, flwr.proto.transport_pb2.Scalar]: ...
     fab_hash: typing.Text
+    pending_at: typing.Text
+    starting_at: typing.Text
+    running_at: typing.Text
+    finished_at: typing.Text
+    @property
+    def status(self) -> global___RunStatus: ...
     def __init__(self,
         *,
         run_id: builtins.int = ...,
@@ -49,8 +61,14 @@ class Run(google.protobuf.message.Message):
         fab_version: typing.Text = ...,
         override_config: typing.Optional[typing.Mapping[typing.Text, flwr.proto.transport_pb2.Scalar]] = ...,
         fab_hash: typing.Text = ...,
+        pending_at: typing.Text = ...,
+        starting_at: typing.Text = ...,
+        running_at: typing.Text = ...,
+        finished_at: typing.Text = ...,
+        status: typing.Optional[global___RunStatus] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["fab_hash",b"fab_hash","fab_id",b"fab_id","fab_version",b"fab_version","override_config",b"override_config","run_id",b"run_id"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["status",b"status"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["fab_hash",b"fab_hash","fab_id",b"fab_id","fab_version",b"fab_version","finished_at",b"finished_at","override_config",b"override_config","pending_at",b"pending_at","run_id",b"run_id","running_at",b"running_at","starting_at",b"starting_at","status",b"status"]) -> None: ...
 global___Run = Run
 
 class RunStatus(google.protobuf.message.Message):
@@ -223,3 +241,28 @@ class GetRunStatusResponse(google.protobuf.message.Message):
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["run_status_dict",b"run_status_dict"]) -> None: ...
 global___GetRunStatusResponse = GetRunStatusResponse
+
+class GetFederationOptionsRequest(google.protobuf.message.Message):
+    """Get Federation Options associated with run"""
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    RUN_ID_FIELD_NUMBER: builtins.int
+    run_id: builtins.int
+    def __init__(self,
+        *,
+        run_id: builtins.int = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id"]) -> None: ...
+global___GetFederationOptionsRequest = GetFederationOptionsRequest
+
+class GetFederationOptionsResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    FEDERATION_OPTIONS_FIELD_NUMBER: builtins.int
+    @property
+    def federation_options(self) -> flwr.proto.recordset_pb2.ConfigsRecord: ...
+    def __init__(self,
+        *,
+        federation_options: typing.Optional[flwr.proto.recordset_pb2.ConfigsRecord] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["federation_options",b"federation_options"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["federation_options",b"federation_options"]) -> None: ...
+global___GetFederationOptionsResponse = GetFederationOptionsResponse

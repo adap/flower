@@ -16,7 +16,7 @@ Run the Docker image with the ``-u`` flag and specify ``root`` as the username:
 .. code-block:: bash
     :substitutions:
 
-    $ docker run --rm -u root flwr/superlink:|stable_flwr_version|
+    $ docker run --rm -u root flwr/superlink:|stable_flwr_version| <additional-args>
 
 This command will run the Docker container with root user privileges.
 

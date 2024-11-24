@@ -55,8 +55,8 @@ def validate(
         specified attribute within it.
     project_dir : Optional[Union[str, Path]] (default: None)
         The directory containing the module. If None, the current working directory
-        is used. If `check_module` is True, the `project_dir` will be inserted into
-        the system path, and the previously inserted `project_dir` will be removed.
+        is used. If `check_module` is True, the `project_dir` will be temporarily
+        inserted into the system path and then removed after the validation is complete.
 
     Returns
     -------
@@ -66,8 +66,8 @@ def validate(
 
     Note
     ----
-    This function will modify `sys.path` by inserting the provided `project_dir`
-    and removing the previously inserted `project_dir`.
+    This function will temporarily modify `sys.path` by inserting the provided
+    `project_dir`, which will be removed after the validation is complete.
     """
     module_str, _, attributes_str = module_attribute_str.partition(":")
     if not module_str:
@@ -82,11 +82,19 @@ def validate(
         )
 
     if check_module:
+        if project_dir is None:
+            project_dir = Path.cwd()
+        project_dir = Path(project_dir).absolute()
         # Set the system path
-        _set_sys_path(project_dir)
+        sys.path.insert(0, str(project_dir))
 
         # Load module
         module = find_spec(module_str)
+
+        # Unset the system path
+        sys.path.remove(str(project_dir))
+
+        # Check if the module and the attribute exist
         if module and module.origin:
             if not _find_attribute_in_module(module.origin, attributes_str):
                 return (
@@ -133,8 +141,10 @@ def load_app(  # pylint: disable= too-many-branches
 
     Note
     ----
-    This function will modify `sys.path` by inserting the provided `project_dir`
-    and removing the previously inserted `project_dir`.
+    - This function will unload all modules in the previously provided `project_dir`,
+      if it is invoked again.
+    - This function will modify `sys.path` by inserting the provided `project_dir`
+      and removing the previously inserted `project_dir`.
     """
     valid, error_msg = validate(module_attribute_str, check_module=False)
     if not valid and error_msg:
@@ -143,8 +153,19 @@ def load_app(  # pylint: disable= too-many-branches
     module_str, _, attributes_str = module_attribute_str.partition(":")
 
     try:
+        # Initialize project path
+        if project_dir is None:
+            project_dir = Path.cwd()
+        project_dir = Path(project_dir).absolute()
+
+        # Unload modules if the project directory has changed
+        if _current_sys_path and _current_sys_path != str(project_dir):
+            _unload_modules(Path(_current_sys_path))
+
+        # Set the system path
         _set_sys_path(project_dir)
 
+        # Import the module
         if module_str not in sys.modules:
             module = importlib.import_module(module_str)
         # Hack: `tabnet` does not work with `importlib.reload`
@@ -160,15 +181,7 @@ def load_app(  # pylint: disable= too-many-branches
             module = sys.modules[module_str]
         else:
             module = sys.modules[module_str]
-
-            if project_dir is None:
-                project_dir = Path.cwd()
-
-            # Reload cached modules in the project directory
-            for m in list(sys.modules.values()):
-                path: Optional[str] = getattr(m, "__file__", None)
-                if path is not None and path.startswith(str(project_dir)):
-                    importlib.reload(m)
+            _reload_modules(project_dir)
 
     except ModuleNotFoundError as err:
         raise error_type(
@@ -187,6 +200,24 @@ def load_app(  # pylint: disable= too-many-branches
         ) from err
 
     return attribute
+
+
+def _unload_modules(project_dir: Path) -> None:
+    """Unload modules from the project directory."""
+    dir_str = str(project_dir.absolute())
+    for name, m in list(sys.modules.items()):
+        path: Optional[str] = getattr(m, "__file__", None)
+        if path is not None and path.startswith(dir_str):
+            del sys.modules[name]
+
+
+def _reload_modules(project_dir: Path) -> None:
+    """Reload modules from the project directory."""
+    dir_str = str(project_dir.absolute())
+    for m in list(sys.modules.values()):
+        path: Optional[str] = getattr(m, "__file__", None)
+        if path is not None and path.startswith(dir_str):
+            importlib.reload(m)
 
 
 def _set_sys_path(directory: Optional[Union[str, Path]]) -> None:
