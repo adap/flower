@@ -23,7 +23,6 @@ from typing import Any, Optional
 import grpc
 
 from flwr.common import now
-from flwr.common.auth_plugin import ExecAuthPlugin
 from flwr.common.constant import LOG_STREAM_INTERVAL, Status
 from flwr.common.logger import log
 from flwr.common.serde import (
@@ -58,13 +57,11 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         linkstate_factory: LinkStateFactory,
         ffs_factory: FfsFactory,
         executor: Executor,
-        auth_plugin: Optional[ExecAuthPlugin] = None,
     ) -> None:
         self.linkstate_factory = linkstate_factory
         self.ffs_factory = ffs_factory
         self.executor = executor
         self.executor.initialize(linkstate_factory, ffs_factory)
-        self.auth_plugin = auth_plugin
 
     def StartRun(
         self, request: StartRunRequest, context: grpc.ServicerContext
