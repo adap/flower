@@ -59,13 +59,7 @@ message ListRunsResponse {
 }
 
 message LoginRequest {}
-message LoginResponse { 
-  map<string, string> login_details = 1; 
-}
+message LoginResponse { map<string, string> login_details = 1; }
 
-message GetAuthTokenRequest { 
-  map<string, string> auth_details = 1; 
-}
-message GetAuthTokenResponse { 
-  map<string, string> auth_tokens = 1;
-}
+message GetAuthTokenRequest { map<string, string> auth_details = 1; }
+message GetAuthTokenResponse { map<string, string> auth_tokens = 1; }
