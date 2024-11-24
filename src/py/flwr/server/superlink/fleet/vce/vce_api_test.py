@@ -39,16 +39,19 @@ from flwr.common import (
     Metadata,
     RecordSet,
     Scalar,
+    now,
 )
+from flwr.common.constant import Status
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
 from flwr.common.serde import message_from_taskres, message_to_taskins
-from flwr.common.typing import Run
+from flwr.common.typing import Run, RunStatus
 from flwr.server.superlink.fleet.vce.vce_api import (
     NodeToPartitionMapping,
     _register_nodes,
     start_vce,
 )
 from flwr.server.superlink.linkstate import InMemoryLinkState, LinkStateFactory
+from flwr.server.superlink.linkstate.in_memory_linkstate import RunRecord
 
 
 class DummyClient(NumPyClient):
@@ -113,12 +116,23 @@ def register_messages_into_state(
 ) -> dict[UUID, float]:
     """Register `num_messages` into the state factory."""
     state: InMemoryLinkState = state_factory.state()  # type: ignore
-    state.run_ids[run_id] = Run(
-        run_id=run_id,
-        fab_id="Mock/mock",
-        fab_version="v1.0.0",
-        fab_hash="hash",
-        override_config={},
+    state.run_ids[run_id] = RunRecord(
+        Run(
+            run_id=run_id,
+            fab_id="Mock/mock",
+            fab_version="v1.0.0",
+            fab_hash="hash",
+            override_config={},
+            pending_at=now().isoformat(),
+            starting_at="",
+            running_at="",
+            finished_at="",
+            status=RunStatus(
+                status=Status.PENDING,
+                sub_status="",
+                details="",
+            ),
+        ),
     )
     # Artificially add TaskIns to state so they can be processed
     # by the Simulation Engine logic
@@ -201,7 +215,7 @@ def start_and_shutdown(
     if not app_dir:
         app_dir = _autoresolve_app_dir()
 
-    run = Run(run_id=1234, fab_id="", fab_version="", fab_hash="", override_config={})
+    run = Run.create_empty(run_id=1234)
 
     start_vce(
         num_supernodes=num_supernodes,

@@ -170,8 +170,18 @@ class FedAdam(FedOpt):
             for x, y in zip(self.v_t, delta_t)
         ]
 
+        # Compute the bias-corrected learning rate, `eta_norm` for improving convergence
+        # in the early rounds of FL training. This `eta_norm` is `\alpha_t` in Kingma &
+        # Ba, 2014 (http://arxiv.org/abs/1412.6980) "Adam: A Method for Stochastic
+        # Optimization" in the formula line right before Section 2.1.
+        eta_norm = (
+            self.eta
+            * np.sqrt(1 - np.power(self.beta_2, server_round + 1.0))
+            / (1 - np.power(self.beta_1, server_round + 1.0))
+        )
+
         new_weights = [
-            x + self.eta * y / (np.sqrt(z) + self.tau)
+            x + eta_norm * y / (np.sqrt(z) + self.tau)
             for x, y, z in zip(self.current_weights, self.m_t, self.v_t)
         ]
 

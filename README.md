@@ -1,4 +1,4 @@
-# Flower: A Friendly Federated Learning Framework
+# Flower: A Friendly Federated AI Framework
 
 <p align="center">
   <a href="https://flower.ai/">
@@ -21,7 +21,7 @@
 [![Docker Hub](https://img.shields.io/badge/Docker%20Hub-flwr-blue)](https://hub.docker.com/u/flwr)
 [![Slack](https://img.shields.io/badge/Chat-Slack-red)](https://flower.ai/join-slack)
 
-Flower (`flwr`) is a framework for building federated learning systems. The
+Flower (`flwr`) is a framework for building federated AI systems. The
 design of Flower is based on a few guiding principles:
 
 - **Customizable**: Federated learning systems vary wildly from one use case to
