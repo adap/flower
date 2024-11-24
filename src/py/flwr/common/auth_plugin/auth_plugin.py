@@ -15,27 +15,23 @@
 """Abstract classes for Flower User Auth Plugin."""
 
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
+from typing import Any, Optional, Union
 
 import grpc
 
-from flwr.proto.exec_pb2 import (
-    GetAuthTokenRequest,
-    GetAuthTokenResponse,
-    LoginRequest,
-    LoginResponse,
-)
+from flwr.proto.exec_pb2 import GetAuthTokenRequest, GetAuthTokenResponse, LoginResponse
 from flwr.proto.exec_pb2_grpc import ExecStub
 
-Metadata = List[Any]
+Metadata = list[Any]
 
 
 class ExecAuthPlugin(ABC):
     """Abstract Flower Exec API Auth Plugin class."""
 
     @abstractmethod
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         pass
 
     @abstractmethod
@@ -44,7 +40,7 @@ class ExecAuthPlugin(ABC):
         pass
 
     @abstractmethod
-    def authenticate(self, metadata: Sequence[Tuple[str, Union[str, bytes]]]):
+    def authenticate(self, metadata: Sequence[tuple[str, Union[str, bytes]]]):
         """Authenticate auth tokens in the provided metadata."""
         pass
 
@@ -56,7 +52,7 @@ class ExecAuthPlugin(ABC):
         pass
 
     @abstractmethod
-    def refresh_token(self, context: grpc.ServicerContext) -> Optional[Tuple[str, str]]:
+    def refresh_token(self, context: grpc.ServicerContext) -> Optional[tuple[str, str]]:
         """Refresh auth tokens in the provided metadata."""
         pass
 
@@ -67,8 +63,8 @@ class UserAuthPlugin(ABC):
     @staticmethod
     @abstractmethod
     def login(
-        login_details: Dict[str, str],
-        config: Dict[str, Any],
+        login_details: dict[str, str],
+        config: dict[str, Any],
         federation: str,
         exec_stub: ExecStub,
     ):
@@ -76,8 +72,8 @@ class UserAuthPlugin(ABC):
         pass
 
     @abstractmethod
-    def __init__(self, config: Dict[str, Any], config_path: Path):
-        """Abstract constructor (init)"""
+    def __init__(self, config: dict[str, Any], config_path: Path):
+        """Abstract constructor (init)."""
         pass
 
     @abstractmethod

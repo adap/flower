@@ -12,25 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Abstract classes for Flower User Auth Plugin."""
+"""Flower User Auth Plugin for Keycloak."""
 
 import time
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
+from typing import Any, Union
 
 import grpc
 import typer
-from requests import get, post
+from requests import post
 from tomli_w import dump
 
-from flwr.cli.utils import prompt_text
 from flwr.common.auth_plugin import ExecAuthPlugin, Metadata, UserAuthPlugin
-from flwr.proto.exec_pb2 import (
-    GetAuthTokenRequest,
-    GetAuthTokenResponse,
-    LoginRequest,
-    LoginResponse,
-)
+from flwr.proto.exec_pb2 import GetAuthTokenRequest, GetAuthTokenResponse, LoginResponse
 from flwr.proto.exec_pb2_grpc import ExecStub
 
 _AUTH_TOKEN_HEADER = "access-token"
@@ -38,7 +33,7 @@ _REFRESH_TOKEN_HEADER = "refresh-token"
 
 
 def _get_value_from_tuples(
-    key_string: str, tuples: Sequence[Tuple[str, Union[str, bytes]]]
+    key_string: str, tuples: Sequence[tuple[str, Union[str, bytes]]]
 ) -> bytes:
     value = next((value for key, value in tuples if key == key_string), "")
     if isinstance(value, str):
@@ -48,9 +43,9 @@ def _get_value_from_tuples(
 
 
 class KeycloakExecPlugin(ExecAuthPlugin):
-    """Abstract Flower Exec API Auth Plugin class."""
+    """Keycloak Exec API Auth Plugin class."""
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.auth_url = config.get(
             "auth_url",
             "https://idms-dev.flower.blue/realms/flwr-framework/protocol/openid-connect/auth/device",
@@ -93,7 +88,7 @@ class KeycloakExecPlugin(ExecAuthPlugin):
         else:
             return LoginResponse(login_details={})
 
-    def authenticate(self, metadata: Sequence[Tuple[str, Union[str, bytes]]]) -> bool:
+    def authenticate(self, metadata: Sequence[tuple[str, Union[str, bytes]]]) -> bool:
         """Authenticate auth tokens in the provided metadata."""
         access_token = _get_value_from_tuples(_AUTH_TOKEN_HEADER, metadata)
 
@@ -180,8 +175,7 @@ class KeycloakExecPlugin(ExecAuthPlugin):
 class KeycloakUserPlugin(UserAuthPlugin):
     """Abstract Flower User Auth Plugin class."""
 
-    def __init__(self, config: Dict[str, Any], config_path: Path):
-        """Constructor for SuperTokensUserPlugin."""
+    def __init__(self, config: dict[str, Any], config_path: Path):
         self.access_token = config["access-token"]
         self.refresh_token = config["refresh-token"]
         self.config = config
@@ -189,11 +183,11 @@ class KeycloakUserPlugin(UserAuthPlugin):
 
     @staticmethod
     def login(
-        login_details: Dict[str, str],
-        config: Dict[str, Any],
+        login_details: dict[str, str],
+        config: dict[str, Any],
         federation: str,
         exec_stub: ExecStub,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Read relevant auth details from federation config."""
         timeout = int(login_details.get("expires_in", "600"))
         interval = int(login_details.get("interval", "5"))
@@ -209,7 +203,8 @@ class KeycloakUserPlugin(UserAuthPlugin):
             raise typer.Exit(code=1)
 
         typer.secho(
-            f"Please login with your user credentials here: {verification_uri_complete}",
+            "Please login with your user credentials here: ",
+            f"{verification_uri_complete}",
             fg=typer.colors.BLUE,
         )
         start_time = time.time()
@@ -231,7 +226,8 @@ class KeycloakUserPlugin(UserAuthPlugin):
                 config["refresh-token"] = refresh_token
 
                 typer.secho(
-                    f"Login successful. You can now execute an authenticated `flwr run` to the SuperLink.",
+                    "Login successful. You can now execute an authenticated "
+                    "`flwr run` to the SuperLink.",
                     fg=typer.colors.GREEN,
                     bold=False,
                 )
@@ -240,7 +236,7 @@ class KeycloakUserPlugin(UserAuthPlugin):
             time.sleep(interval)
 
         typer.secho(
-            f"❌ Timeout, failed to sign in.",
+            "❌ Timeout, failed to sign in.",
             fg=typer.colors.RED,
             bold=True,
         )
