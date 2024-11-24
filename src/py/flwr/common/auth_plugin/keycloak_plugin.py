@@ -46,20 +46,11 @@ class KeycloakExecPlugin(ExecAuthPlugin):
     """Keycloak Exec API Auth Plugin class."""
 
     def __init__(self, config: dict[str, Any]):
-        self.auth_url = config.get(
-            "auth_url",
-            "https://idms-dev.flower.blue/realms/flwr-framework/protocol/openid-connect/auth/device",
-        )
-        self.token_url = config.get(
-            "token_url",
-            "https://idms-dev.flower.blue/realms/flwr-framework/protocol/openid-connect/token",
-        )
+        self.auth_url = config.get("auth_url", "")
+        self.token_url = config.get("token_url", "")
         self.keycloak_client_id = config.get("client_id", "")
         self.keycloak_client_secret = config.get("client_secret", "")
-        self.validate_url = config.get(
-            "validate_url",
-            "https://idms-dev.flower.blue/realms/flwr-framework/protocol/openid-connect/userinfo",
-        )
+        self.validate_url = config.get("validate_url", "")
 
     def send_auth_endpoint(self) -> LoginResponse:
         """Send relevant auth url as a LoginResponse."""
