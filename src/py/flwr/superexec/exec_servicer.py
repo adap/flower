@@ -18,7 +18,7 @@
 import time
 from collections.abc import Generator
 from logging import ERROR, INFO
-from typing import Any, Optional
+from typing import Any
 
 import grpc
 
