@@ -32,7 +32,7 @@ fraction-evaluate = 0.1
 # ClientApp
 local-epochs = 1
 params.objective = "binary:logistic"
-params.eta = 0.1  # Learning rate
+params.eta = 0.1 # Learning rate
 params.max-depth = 8
 params.eval-metric = "auc"
 params.nthread = 16

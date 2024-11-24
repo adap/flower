@@ -22,4 +22,11 @@ import "flwr/proto/run.proto";
 service Control {
   // Request to create a new run
   rpc CreateRun(CreateRunRequest) returns (CreateRunResponse) {}
+
+  // Get the status of a given run
+  rpc GetRunStatus(GetRunStatusRequest) returns (GetRunStatusResponse) {}
+
+  // Update the status of a given run
+  rpc UpdateRunStatus(UpdateRunStatusRequest)
+      returns (UpdateRunStatusResponse) {}
 }

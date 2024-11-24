@@ -19,10 +19,19 @@ class ExecStub:
         flwr.proto.exec_pb2.StreamLogsResponse]
     """Start log stream upon request"""
 
+    ListRuns: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.exec_pb2.ListRunsRequest,
+        flwr.proto.exec_pb2.ListRunsResponse]
+    """flwr ls command"""
+
     Login: grpc.UnaryUnaryMultiCallable[
         flwr.proto.exec_pb2.LoginRequest,
         flwr.proto.exec_pb2.LoginResponse]
     """Start login upon request"""
+
+    GetAuthToken: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.exec_pb2.GetAuthTokenRequest,
+        flwr.proto.exec_pb2.GetAuthTokenResponse]
 
 
 class ExecServicer(metaclass=abc.ABCMeta):
@@ -43,12 +52,26 @@ class ExecServicer(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
+    def ListRuns(self,
+        request: flwr.proto.exec_pb2.ListRunsRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.exec_pb2.ListRunsResponse:
+        """flwr ls command"""
+        pass
+
+    @abc.abstractmethod
     def Login(self,
         request: flwr.proto.exec_pb2.LoginRequest,
         context: grpc.ServicerContext,
     ) -> flwr.proto.exec_pb2.LoginResponse:
         """Start login upon request"""
         pass
+
+    @abc.abstractmethod
+    def GetAuthToken(self,
+        request: flwr.proto.exec_pb2.GetAuthTokenRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.exec_pb2.GetAuthTokenResponse: ...
 
 
 def add_ExecServicer_to_server(servicer: ExecServicer, server: grpc.Server) -> None: ...
