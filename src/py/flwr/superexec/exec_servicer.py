@@ -135,22 +135,14 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
     ) -> LoginResponse:
         """Start login."""
         log(INFO, "ExecServicer.Login")
-
-        context.abort(
-            grpc.StatusCode.UNIMPLEMENTED,
-            "SuperExec initialized without user authentication",
-        )
+        return LoginResponse(login_details={})
 
     def GetAuthToken(
         self, request: GetAuthTokenRequest, context: grpc.ServicerContext
     ) -> GetAuthTokenResponse:
         """Get auth token."""
         log(INFO, "ExecServicer.GetAuthToken")
-
-        context.abort(
-            grpc.StatusCode.UNIMPLEMENTED,
-            "SuperExec initialized without user authentication",
-        )
+        return GetAuthTokenResponse(auth_tokens={})
 
 
 def _create_list_runs_response(run_ids: set[int], state: LinkState) -> ListRunsResponse:
