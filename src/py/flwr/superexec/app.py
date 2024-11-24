@@ -16,8 +16,9 @@
 
 import argparse
 import sys
-import yaml
 from logging import INFO
+
+import yaml
 
 from flwr.common import log
 from flwr.common.object_ref import load_app, validate

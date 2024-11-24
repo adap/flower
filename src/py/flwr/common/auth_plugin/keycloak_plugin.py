@@ -14,17 +14,24 @@
 # ==============================================================================
 """Abstract classes for Flower User Auth Plugin."""
 
-from flwr.common.auth_plugin import ExecAuthPlugin, UserAuthPlugin, Metadata
-from typing import Optional, Sequence, Tuple, Union, Any, List, Dict
-from flwr.cli.utils import prompt_text
-from requests import post, get
-from flwr.proto.exec_pb2_grpc import ExecStub
-from pathlib import Path
-import typer
-from tomli_w import dump
-import grpc
 import time
-from flwr.proto.exec_pb2 import LoginRequest, LoginResponse, GetAuthTokenRequest, GetAuthTokenResponse
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
+
+import grpc
+import typer
+from requests import get, post
+from tomli_w import dump
+
+from flwr.cli.utils import prompt_text
+from flwr.common.auth_plugin import ExecAuthPlugin, Metadata, UserAuthPlugin
+from flwr.proto.exec_pb2 import (
+    GetAuthTokenRequest,
+    GetAuthTokenResponse,
+    LoginRequest,
+    LoginResponse,
+)
+from flwr.proto.exec_pb2_grpc import ExecStub
 
 _AUTH_TOKEN_HEADER = "access-token"
 _REFRESH_TOKEN_HEADER = "refresh-token"
@@ -45,24 +52,22 @@ class KeycloakExecPlugin(ExecAuthPlugin):
 
     def __init__(self, config: Dict[str, Any]):
         self.auth_url = config.get(
-            "auth_url", 
-            "https://idms-dev.flower.blue/realms/flwr-framework/protocol/openid-connect/auth/device"
+            "auth_url",
+            "https://idms-dev.flower.blue/realms/flwr-framework/protocol/openid-connect/auth/device",
         )
         self.token_url = config.get(
             "token_url",
-            "https://idms-dev.flower.blue/realms/flwr-framework/protocol/openid-connect/token"
+            "https://idms-dev.flower.blue/realms/flwr-framework/protocol/openid-connect/token",
         )
         self.keycloak_client_id = config.get("client_id", "")
         self.keycloak_client_secret = config.get("client_secret", "")
         self.validate_url = config.get(
-            "validate_url", 
-            "https://idms-dev.flower.blue/realms/flwr-framework/protocol/openid-connect/userinfo"
+            "validate_url",
+            "https://idms-dev.flower.blue/realms/flwr-framework/protocol/openid-connect/userinfo",
         )
 
     def send_auth_endpoint(self) -> LoginResponse:
-        """
-        Send relevant auth url as a LoginResponse.
-        """
+        """Send relevant auth url as a LoginResponse."""
         payload = {
             "client_id": self.keycloak_client_id,
             "client_secret": self.keycloak_client_secret,
@@ -89,40 +94,34 @@ class KeycloakExecPlugin(ExecAuthPlugin):
             return LoginResponse(login_details={})
 
     def authenticate(self, metadata: Sequence[Tuple[str, Union[str, bytes]]]) -> bool:
-        """
-        Authenticate auth tokens in the provided metadata.
-        """
-        access_token = _get_value_from_tuples(
-            _AUTH_TOKEN_HEADER, metadata
-        )
+        """Authenticate auth tokens in the provided metadata."""
+        access_token = _get_value_from_tuples(_AUTH_TOKEN_HEADER, metadata)
 
         if not access_token:
             return False
-            
-        headers = {
-            'Authorization': access_token.decode('utf-8')
-        }
+
+        headers = {"Authorization": access_token.decode("utf-8")}
 
         response = post(self.validate_url, headers=headers)
         if response.status_code == 200:
             return True
         return False
-    
-    def get_auth_token_response(self, request: GetAuthTokenRequest) -> GetAuthTokenResponse:
-        """
-        Send relevant tokens as a GetAuthTokenResponse.
-        """
+
+    def get_auth_token_response(
+        self, request: GetAuthTokenRequest
+    ) -> GetAuthTokenResponse:
+        """Send relevant tokens as a GetAuthTokenResponse."""
         device_code = request.auth_details.get("device_code")
         if device_code is None:
             return GetAuthTokenResponse(auth_tokens={})
-        
+
         payload = {
             "client_id": self.keycloak_client_id,
             "client_secret": self.keycloak_client_secret,
             "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
-            "device_code": device_code
+            "device_code": device_code,
         }
-        
+
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
         response = post(self.token_url, data=payload, headers=headers)
@@ -137,15 +136,11 @@ class KeycloakExecPlugin(ExecAuthPlugin):
             return GetAuthTokenResponse(auth_tokens=auth_tokens)
         else:
             return GetAuthTokenResponse(auth_tokens={})
-        
+
     def refresh_token(self, context: grpc.ServicerContext) -> bool:
-        """
-        Refresh auth tokens in the provided metadata.
-        """
+        """Refresh auth tokens in the provided metadata."""
         metadata = context.invocation_metadata()
-        refresh_token = _get_value_from_tuples(
-            _REFRESH_TOKEN_HEADER, metadata
-        )
+        refresh_token = _get_value_from_tuples(_REFRESH_TOKEN_HEADER, metadata)
         if not refresh_token:
             return False
 
@@ -153,14 +148,14 @@ class KeycloakExecPlugin(ExecAuthPlugin):
             "client_id": self.keycloak_client_id,
             "client_secret": self.keycloak_client_secret,
             "grant_type": "refresh_token",
-            "refresh_token": refresh_token.decode('utf-8')
+            "refresh_token": refresh_token.decode("utf-8"),
         }
 
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
         response = post(self.token_url, data=payload, headers=headers)
         if response.status_code == 200:
-            
+
             data = response.json()
             access_token = data.get("access_token")
             refresh_token = data.get("refresh_token")
@@ -186,17 +181,20 @@ class KeycloakUserPlugin(UserAuthPlugin):
     """Abstract Flower User Auth Plugin class."""
 
     def __init__(self, config: Dict[str, Any], config_path: Path):
-        """Constructor for SuperTokensUserPlugin"""
+        """Constructor for SuperTokensUserPlugin."""
         self.access_token = config["access-token"]
         self.refresh_token = config["refresh-token"]
         self.config = config
         self.config_path = config_path
 
     @staticmethod
-    def login(login_details: Dict[str, str], config: Dict[str, Any], federation: str, exec_stub: ExecStub) -> Dict[str, Any]:
-        """
-        Read relevant auth details from federation config.
-        """
+    def login(
+        login_details: Dict[str, str],
+        config: Dict[str, Any],
+        federation: str,
+        exec_stub: ExecStub,
+    ) -> Dict[str, Any]:
+        """Read relevant auth details from federation config."""
         timeout = int(login_details.get("expires_in", "600"))
         interval = int(login_details.get("interval", "5"))
         device_code = login_details.get("device_code")
@@ -209,14 +207,19 @@ class KeycloakUserPlugin(UserAuthPlugin):
                 bold=True,
             )
             raise typer.Exit(code=1)
-        
-        typer.secho(f"Please login with your user credentials here: {verification_uri_complete}", fg=typer.colors.BLUE)
+
+        typer.secho(
+            f"Please login with your user credentials here: {verification_uri_complete}",
+            fg=typer.colors.BLUE,
+        )
         start_time = time.time()
         time.sleep(interval)
 
         while (time.time() - start_time) < timeout:
             auth_details = {"device_code": device_code}
-            res: GetAuthTokenResponse = exec_stub.GetAuthToken(GetAuthTokenRequest(auth_details=auth_details))
+            res: GetAuthTokenResponse = exec_stub.GetAuthToken(
+                GetAuthTokenRequest(auth_details=auth_details)
+            )
 
             access_token = res.auth_tokens.get("access_token")
             refresh_token = res.auth_tokens.get("refresh_token")
@@ -233,41 +236,42 @@ class KeycloakUserPlugin(UserAuthPlugin):
                     bold=False,
                 )
                 return config
-            
+
             time.sleep(interval)
-        
+
         typer.secho(
             f"❌ Timeout, failed to sign in.",
             fg=typer.colors.RED,
             bold=True,
         )
         raise typer.Exit(code=1)
-            
 
     def provide_auth_details(self, metadata) -> Metadata:
-        """
-        Provide relevant auth tokens in the metadata.
-        """
+        """Provide relevant auth tokens in the metadata."""
         metadata.append(
             (
                 _AUTH_TOKEN_HEADER,
-                self.access_token.encode('utf-8'),
+                self.access_token.encode("utf-8"),
             )
         )
         metadata.append(
             (
                 _REFRESH_TOKEN_HEADER,
-                self.refresh_token.encode('utf-8'),
+                self.refresh_token.encode("utf-8"),
             )
         )
         return metadata
-    
-    def save_refreshed_auth_tokens(self, metadata: Sequence[tuple[str, Union[str, bytes]]]) -> None:
-        """
-        Provide refreshed auth tokens to the config file.
-        """
-        access_token = _get_value_from_tuples(_AUTH_TOKEN_HEADER, metadata).decode('utf-8')
-        refresh_token = _get_value_from_tuples(_REFRESH_TOKEN_HEADER, metadata).decode('utf-8')
+
+    def save_refreshed_auth_tokens(
+        self, metadata: Sequence[tuple[str, Union[str, bytes]]]
+    ) -> None:
+        """Provide refreshed auth tokens to the config file."""
+        access_token = _get_value_from_tuples(_AUTH_TOKEN_HEADER, metadata).decode(
+            "utf-8"
+        )
+        refresh_token = _get_value_from_tuples(_REFRESH_TOKEN_HEADER, metadata).decode(
+            "utf-8"
+        )
         self.config["access-token"] = access_token
         self.config["refresh-token"] = refresh_token
 

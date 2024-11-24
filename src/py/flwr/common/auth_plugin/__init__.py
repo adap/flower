@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@
 
 
 from .auth_plugin import ExecAuthPlugin as ExecAuthPlugin
-from .auth_plugin import UserAuthPlugin as UserAuthPlugin
 from .auth_plugin import Metadata as Metadata
+from .auth_plugin import UserAuthPlugin as UserAuthPlugin
 from .keycloak_plugin import KeycloakExecPlugin as KeycloakExecPlugin
 from .keycloak_plugin import KeycloakUserPlugin as KeycloakUserPlugin
 
 __all__ = [
     "ExecAuthPlugin",
-    "UserAuthPlugin",
-    "Metadata",
-    "KeycloakUserPlugin",
     "KeycloakExecPlugin",
+    "KeycloakUserPlugin",
+    "Metadata",
+    "UserAuthPlugin",
 ]

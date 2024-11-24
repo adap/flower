@@ -26,7 +26,7 @@ def prompt_text(
     text: str,
     predicate: Callable[[str], bool] = lambda _: True,
     default: Optional[str] = None,
-    hide_input = False,
+    hide_input=False,
 ) -> str:
     """Ask user to enter text input."""
     while True:

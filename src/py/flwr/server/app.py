@@ -19,15 +19,15 @@ import csv
 import importlib.util
 import subprocess
 import sys
-import yaml
 import threading
 from collections.abc import Sequence
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from time import sleep
-from typing import Optional, Dict, Any, Sequence, Type
+from typing import Any, Dict, Optional, Sequence, Type
 
 import grpc
+import yaml
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.serialization import (
@@ -35,10 +35,10 @@ from cryptography.hazmat.primitives.serialization import (
     load_ssh_public_key,
 )
 
-from flwr.superexec.exec_interceptor import SuperExecInterceptor
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.args import try_obtain_server_certificates
+from flwr.common.auth_plugin import ExecAuthPlugin, KeycloakExecPlugin
 from flwr.common.config import get_flwr_dir, parse_config_args
 from flwr.common.constant import (
     CLIENT_OCTET,
@@ -62,13 +62,13 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     private_key_to_bytes,
     public_key_to_bytes,
 )
-from flwr.common.auth_plugin import ExecAuthPlugin, KeycloakExecPlugin
 from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
 from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
 from flwr.superexec.app import load_executor
 from flwr.superexec.exec_grpc import run_exec_api_grpc
+from flwr.superexec.exec_interceptor import SuperExecInterceptor
 from flwr.superexec.simulation import SimulationEngine
 
 from .client_manager import ClientManager
@@ -568,7 +568,7 @@ def _try_setup_node_authentication(
             ssh_private_key,
             ssh_public_key,
         )
-    
+
 
 def _try_obtain_config(args: argparse.Namespace) -> Optional[Dict[str, Any]]:
     if args.config is not None:
@@ -773,8 +773,7 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument(
         "--config",
-        help="SuperLink config.yaml file (as a path str) "
-        "to configure SuperLink.",
+        help="SuperLink config.yaml file (as a path str) " "to configure SuperLink.",
         type=str,
         default=None,
     )

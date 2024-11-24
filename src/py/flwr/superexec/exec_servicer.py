@@ -22,8 +22,8 @@ from typing import Any, Optional
 
 import grpc
 
-from flwr.common.auth_plugin import ExecAuthPlugin
 from flwr.common import now
+from flwr.common.auth_plugin import ExecAuthPlugin
 from flwr.common.constant import LOG_STREAM_INTERVAL, Status
 from flwr.common.logger import log
 from flwr.common.serde import (
@@ -33,16 +33,16 @@ from flwr.common.serde import (
 )
 from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
+    GetAuthTokenRequest,
+    GetAuthTokenResponse,
     ListRunsRequest,
     ListRunsResponse,
+    LoginRequest,
+    LoginResponse,
     StartRunRequest,
     StartRunResponse,
     StreamLogsRequest,
     StreamLogsResponse,
-    LoginRequest,
-    LoginResponse,
-    GetAuthTokenRequest,
-    GetAuthTokenResponse
 )
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
@@ -58,7 +58,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         linkstate_factory: LinkStateFactory,
         ffs_factory: FfsFactory,
         executor: Executor,
-        auth_plugin: Optional[ExecAuthPlugin] = None
+        auth_plugin: Optional[ExecAuthPlugin] = None,
     ) -> None:
         self.linkstate_factory = linkstate_factory
         self.ffs_factory = ffs_factory
@@ -132,7 +132,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             return _create_list_runs_response(state.get_run_ids(), state)
         # Handle `flwr ls --run-id <run_id>`
         return _create_list_runs_response({request.run_id}, state)
-    
+
     def Login(
         self, request: LoginRequest, context: grpc.ServicerContext
     ) -> LoginResponse:
@@ -141,8 +141,11 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         if self.auth_plugin is not None:
             return self.auth_plugin.send_auth_endpoint()
 
-        context.abort(grpc.StatusCode.UNIMPLEMENTED, "SuperExec initialized without user authentication")
-    
+        context.abort(
+            grpc.StatusCode.UNIMPLEMENTED,
+            "SuperExec initialized without user authentication",
+        )
+
     def GetAuthToken(
         self, request: GetAuthTokenRequest, context: grpc.ServicerContext
     ) -> GetAuthTokenResponse:
@@ -152,7 +155,10 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         if self.auth_plugin is not None:
             return self.auth_plugin.get_auth_token_response(request)
 
-        context.abort(grpc.StatusCode.UNIMPLEMENTED, "SuperExec initialized without user authentication")
+        context.abort(
+            grpc.StatusCode.UNIMPLEMENTED,
+            "SuperExec initialized without user authentication",
+        )
 
 
 def _create_list_runs_response(run_ids: set[int], state: LinkState) -> ListRunsResponse:

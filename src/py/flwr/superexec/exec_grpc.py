@@ -19,15 +19,15 @@ from typing import Optional, Sequence
 
 import grpc
 
-from flwr.common.auth_plugin import ExecAuthPlugin
-from flwr.superexec.exec_interceptor import SuperExecInterceptor
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
+from flwr.common.auth_plugin import ExecAuthPlugin
 from flwr.common.logger import log
 from flwr.common.typing import UserConfig
 from flwr.proto.exec_pb2_grpc import add_ExecServicer_to_server
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.fleet.grpc_bidi.grpc_server import generic_create_grpc_server
 from flwr.server.superlink.linkstate import LinkStateFactory
+from flwr.superexec.exec_interceptor import SuperExecInterceptor
 
 from .exec_servicer import ExecServicer
 from .executor import Executor
@@ -54,9 +54,7 @@ def run_exec_api_grpc(
     )
     interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None
     if auth_plugin is not None:
-        interceptors = [
-            SuperExecInterceptor(auth_plugin)
-        ]
+        interceptors = [SuperExecInterceptor(auth_plugin)]
     exec_add_servicer_to_server_fn = add_ExecServicer_to_server
     exec_grpc_server = generic_create_grpc_server(
         servicer_and_add_fn=(exec_servicer, exec_add_servicer_to_server_fn),

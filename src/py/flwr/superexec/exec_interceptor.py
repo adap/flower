@@ -17,13 +17,13 @@
 
 import base64
 from logging import WARNING
-from typing import Any, Callable, Sequence, Set, Tuple, Union, Type
+from typing import Any, Callable, Sequence, Set, Tuple, Type, Union
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 
-from flwr.common.logger import log
 from flwr.common.auth_plugin import ExecAuthPlugin
+from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     bytes_to_private_key,
     bytes_to_public_key,
@@ -31,14 +31,14 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     verify_hmac,
 )
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
+    GetAuthTokenRequest,
+    GetAuthTokenResponse,
+    LoginRequest,
+    LoginResponse,
     StartRunRequest,
     StartRunResponse,
     StreamLogsRequest,
     StreamLogsResponse,
-    LoginRequest,
-    LoginResponse,
-    GetAuthTokenRequest,
-    GetAuthTokenResponse
 )
 
 _AUTH_TOKEN_HEADER = "access-token"
@@ -51,14 +51,17 @@ Request = Union[
     GetAuthTokenRequest,
 ]
 
-Response = Union[StartRunResponse, StreamLogsResponse, LoginResponse, GetAuthTokenResponse]
+Response = Union[
+    StartRunResponse, StreamLogsResponse, LoginResponse, GetAuthTokenResponse
+]
 
 
 class SuperExecInterceptor(grpc.ServerInterceptor):  # type: ignore
     """SuperExec interceptor for user authentication."""
 
     def __init__(
-        self, auth_plugin: ExecAuthPlugin,
+        self,
+        auth_plugin: ExecAuthPlugin,
     ):
         self.auth_plugin = auth_plugin
 
@@ -68,6 +71,7 @@ class SuperExecInterceptor(grpc.ServerInterceptor):  # type: ignore
         handler_call_details: grpc.HandlerCallDetails,
     ) -> grpc.RpcMethodHandler:
         """Flower server interceptor authentication logic.
+
         Intercept all unary calls from users and authenticate users by validating auth
         metadata sent by the user. Continue RPC call if user is authenticated, else,
         terminate RPC call by setting context to abort.
@@ -84,13 +88,15 @@ class SuperExecInterceptor(grpc.ServerInterceptor):  # type: ignore
             request: Request,
             context: grpc.ServicerContext,
         ) -> Response:
-            if isinstance(request, (LoginRequest, GetAuthTokenRequest)) or self.auth_plugin.authenticate(context.invocation_metadata()):
+            if isinstance(
+                request, (LoginRequest, GetAuthTokenRequest)
+            ) or self.auth_plugin.authenticate(context.invocation_metadata()):
                 return method_handler.unary_unary(request, context)  # type: ignore
 
             if self.auth_plugin.refresh_token(context):
                 print(context)
                 return method_handler.unary_unary(request, context)  # type: ignore
-            
+
             context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
 
         return grpc.unary_unary_rpc_method_handler(

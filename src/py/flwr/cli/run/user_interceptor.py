@@ -22,6 +22,7 @@ from typing import Any, Callable, Union
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 
+from flwr.common.auth_plugin import UserAuthPlugin
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     compute_hmac,
     generate_shared_key,
@@ -31,7 +32,6 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StartRunRequest,
     StreamLogsRequest,
 )
-from flwr.common.auth_plugin import UserAuthPlugin
 
 Request = Union[
     StartRunRequest,
@@ -46,6 +46,7 @@ class _ClientCallDetails(
     grpc.ClientCallDetails,  # type: ignore
 ):
     """Details for each client call.
+
     The class will be passed on as the first argument in continuation function.
     In our case, `RunInterceptor` adds new metadata to the construct.
     """
@@ -54,10 +55,7 @@ class _ClientCallDetails(
 class UserInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ignore
     """User interceptor for user authentication."""
 
-    def __init__(
-        self,
-        auth_plugin: UserAuthPlugin
-    ):
+    def __init__(self, auth_plugin: UserAuthPlugin):
         self.auth_plugin = auth_plugin
 
     def intercept_unary_unary(
@@ -67,6 +65,7 @@ class UserInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ignore
         request: Request,
     ) -> grpc.Call:
         """Flower SuperExec Run interceptor.
+
         Intercept unary call from user and add necessary authentication header in the
         RPC metadata.
         """
@@ -87,5 +86,5 @@ class UserInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ignore
         print(response.initial_metadata())
         if response.initial_metadata():
             self.auth_plugin.save_refreshed_auth_tokens(response.initial_metadata())
-        
+
         return response

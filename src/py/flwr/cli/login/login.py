@@ -15,27 +15,26 @@
 """Flower command line interface `login` command."""
 
 import sys
-from pathlib import Path
-from flwr.common.logger import log
 from logging import DEBUG
-from typing import Annotated, Optional, Any
-
-from flwr.cli.build import build
-from flwr.cli.config_utils import load_and_validate
-from flwr.common.config import flatten_dict, parse_config_args, get_flwr_dir
-from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
-from flwr.proto.exec_pb2 import LoginRequest, LoginResponse  # pylint: disable=E0611
-from flwr.proto.exec_pb2_grpc import ExecStub
-from flwr.common.auth_plugin import UserAuthPlugin, KeycloakUserPlugin
+from pathlib import Path
+from typing import Annotated, Any, Optional
 
 import typer
 from tomli_w import dump
 
+from flwr.cli.build import build
 from flwr.cli.config_utils import load_and_validate
+from flwr.common.auth_plugin import KeycloakUserPlugin, UserAuthPlugin
+from flwr.common.config import flatten_dict, get_flwr_dir, parse_config_args
+from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
+from flwr.common.logger import log
+from flwr.proto.exec_pb2 import LoginRequest, LoginResponse  # pylint: disable=E0611
+from flwr.proto.exec_pb2_grpc import ExecStub
 
 auth_plugins = {
     "keycloak": KeycloakUserPlugin,
 }
+
 
 def on_channel_state_change(channel_connectivity: str) -> None:
     """Log channel connectivity."""

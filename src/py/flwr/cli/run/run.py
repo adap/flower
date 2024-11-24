@@ -18,7 +18,7 @@ import json
 import subprocess
 from logging import DEBUG
 from pathlib import Path
-from typing import Annotated, Any, Optional, Dict
+from typing import Annotated, Any, Dict, Optional
 
 import typer
 
@@ -29,11 +29,13 @@ from flwr.cli.config_utils import (
     validate_federation_in_project_config,
     validate_project_config,
 )
+from flwr.cli.run.user_interceptor import UserInterceptor
+from flwr.common.auth_plugin import KeycloakUserPlugin, UserAuthPlugin
 from flwr.common.config import (
     flatten_dict,
+    get_flwr_dir,
     parse_config_args,
     user_config_to_configsrecord,
-    get_flwr_dir
 )
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
@@ -45,10 +47,8 @@ from flwr.common.serde import (
 from flwr.common.typing import Fab
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
-from flwr.common.auth_plugin import UserAuthPlugin, KeycloakUserPlugin
 
 from ..log import start_stream
-from flwr.cli.run.user_interceptor import UserInterceptor
 
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
@@ -124,14 +124,16 @@ def run(
                     key, value = line.split("=", 1)
                     # Remove quotes and whitespace from keys and values
                     config_dict[key.strip()] = value.strip().strip('"')
-        
+
         print(config_dict)
         auth_type = config_dict.get("auth-type")
         print(auth_type)
         auth_plugin: Optional[UserAuthPlugin] = None
         if auth_type is not None:
             auth_plugin = auth_plugins.get(auth_type)(config_dict, credential)
-        _run_with_exec_api(app, federation_config, config_overrides, stream, auth_plugin)
+        _run_with_exec_api(
+            app, federation_config, config_overrides, stream, auth_plugin
+        )
     else:
         _run_without_exec_api(app, federation_config, config_overrides, federation)
 
@@ -154,11 +156,7 @@ def _run_with_exec_api(
         root_certificates=root_certificates_bytes,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
         interceptors=(
-            UserInterceptor(
-                auth_plugin
-            )
-            if auth_plugin is not None
-            else None
+            UserInterceptor(auth_plugin) if auth_plugin is not None else None
         ),
     )
     channel.subscribe(on_channel_state_change)
