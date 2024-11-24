@@ -26,12 +26,14 @@ def prompt_text(
     text: str,
     predicate: Callable[[str], bool] = lambda _: True,
     default: Optional[str] = None,
+    hide_input = False,
 ) -> str:
     """Ask user to enter text input."""
     while True:
         result = typer.prompt(
             typer.style(f"\n💬 {text}", fg=typer.colors.MAGENTA, bold=True),
             default=default,
+            hide_input=hide_input,
         )
         if predicate(result) and len(result) > 0:
             break

@@ -1,5 +1,7 @@
 [build-system]
-requires = ["hatchling"]
+requires = [
+    "hatchling",
+]
 build-backend = "hatchling.build"
 
 [project]
@@ -15,7 +17,9 @@ dependencies = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["."]
+packages = [
+    ".",
+]
 
 [tool.flwr.app]
 publisher = "flwrlabs"
@@ -32,12 +36,23 @@ learning-rate = 0.1
 batch-size = 32
 
 [tool.flwr.federations]
-default = "local-simulation"
+default = "my-federation"
 
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 10
+[tool.flwr.federations.local-simulation.options]
+num-supernodes = 10
 
-[tool.flwr.federations.local-simulation-gpu]
-options.num-supernodes = 10
-options.backend.client-resources.num-cpus = 2 # each ClientApp assumes to use 2CPUs
-options.backend.client-resources.num-gpus = 0.2 # at most 5 ClientApp will run in a given GPU
+[tool.flwr.federations.local-simulation-gpu.options]
+num-supernodes = 10
+
+[tool.flwr.federations.local-simulation-gpu.options.backend.client-resources]
+num-cpus = 2
+num-gpus = 0.2
+
+[tool.flwr.federations.my-federation]
+address = "127.0.0.1:9093"
+root-certificates = "certificates/ca.crt"
+
+[tool.flwr.federations.my-federation.authentication]
+auth-type = "keycloak"
+access-token = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJFaFhvTHdoRFV3Vng0bkI5bHNTYzlJS3p3QkJTX0hrTTY3Rm5aN2NLQzhFIn0.eyJleHAiOjE3MzI0NjYxMzEsImlhdCI6MTczMjQ2NTgzMSwiYXV0aF90aW1lIjoxNzMyNDY1NTM3LCJqdGkiOiJkZTA0ZmJkOS0zYmZhLTQ5M2YtOTc1ZC01ZDAxMGNlMTRkMTMiLCJpc3MiOiJodHRwczovL2lkbXMtZGV2LmZsb3dlci5ibHVlL3JlYWxtcy9mbHdyLWZyYW1ld29yayIsImF1ZCI6WyJyZWFsbS1tYW5hZ2VtZW50IiwiYWNjb3VudCJdLCJzdWIiOiI3YmZhMzFkYS1jYWFhLTRjZmMtYWFjMC1mZDlmNGNjNTFiNzAiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJ0ZXN0MTIzIiwic2lkIjoiZTc4NTNhNGItNTBmNi00Njk3LTllMTItZTNiZjIzZDdlNGUzIiwiYWNyIjoiMCIsImFsbG93ZWQtb3JpZ2lucyI6WyIvKiJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsib2ZmbGluZV9hY2Nlc3MiLCJkZWZhdWx0LXJvbGVzLWZsd3ItZnJhbWV3b3JrIiwidW1hX2F1dGhvcml6YXRpb24iXX0sInJlc291cmNlX2FjY2VzcyI6eyJyZWFsbS1tYW5hZ2VtZW50Ijp7InJvbGVzIjpbInZpZXctaWRlbnRpdHktcHJvdmlkZXJzIiwidmlldy1yZWFsbSIsIm1hbmFnZS1pZGVudGl0eS1wcm92aWRlcnMiLCJpbXBlcnNvbmF0aW9uIiwicmVhbG0tYWRtaW4iLCJjcmVhdGUtY2xpZW50IiwibWFuYWdlLXVzZXJzIiwicXVlcnktcmVhbG1zIiwidmlldy1hdXRob3JpemF0aW9uIiwicXVlcnktY2xpZW50cyIsInF1ZXJ5LXVzZXJzIiwibWFuYWdlLWV2ZW50cyIsIm1hbmFnZS1yZWFsbSIsInZpZXctZXZlbnRzIiwidmlldy11c2VycyIsInZpZXctY2xpZW50cyIsIm1hbmFnZS1hdXRob3JpemF0aW9uIiwibWFuYWdlLWNsaWVudHMiLCJxdWVyeS1ncm91cHMiXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoicHJvZmlsZSBlbWFpbCBvcGVuaWQiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsIm5hbWUiOiJGbG93ZXIgRnJhbWV3b3JrIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiZmx3ci1mcmFtZXdvcmstcmVhbG0tYWRtaW4iLCJnaXZlbl9uYW1lIjoiRmxvd2VyIiwiZmFtaWx5X25hbWUiOiJGcmFtZXdvcmsiLCJlbWFpbCI6ImZsd3ItZnJhbWV3b3JrQHh5ei5jb20ifQ.YUmJFhOCCqh6qLXTDbcpeAWsx41_gR1WqzbMLQLNmMNsT1mrCj6fNW9AO7ZznQyQKfFBj6yW4xMBtDVcVGLjB9n-rz8THX8Dwo2RHUjeIe9rKZ2V_6SaokGJzjuWYmZCtB9Bcps9ZiWugyQ-KZVjtDub4wJ8HjAxdtBGtBTx9oj8FdlB7xT_cFehoFXk7N7cmQw9PK7b5V5JpiWIb4SYgOAAllX3JYl5lbAhP3eFqQ-YSMtB5O6fp25KojDFHN-QbLW_xILqnYdHm0K9wXOXXXfwOLbAtQyAPApIHKKRJn1n1PW7JTkNZisObQD_ejKwOa1K6dZ8ak1-_kDBepcr2w"
+refresh-token = "eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJhY2ZiMjRmOC0zMDY0LTQwMDMtYTY0My02OTg3OTliYmZmMmQifQ.eyJleHAiOjE3MzI0Njc2MzEsImlhdCI6MTczMjQ2NTgzMSwianRpIjoiODM5YjI0ZjctY2QzYS00NzY3LWEwY2YtZDQ3MDNmZmYzYTNhIiwiaXNzIjoiaHR0cHM6Ly9pZG1zLWRldi5mbG93ZXIuYmx1ZS9yZWFsbXMvZmx3ci1mcmFtZXdvcmsiLCJhdWQiOiJodHRwczovL2lkbXMtZGV2LmZsb3dlci5ibHVlL3JlYWxtcy9mbHdyLWZyYW1ld29yayIsInN1YiI6IjdiZmEzMWRhLWNhYWEtNGNmYy1hYWMwLWZkOWY0Y2M1MWI3MCIsInR5cCI6IlJlZnJlc2giLCJhenAiOiJ0ZXN0MTIzIiwic2lkIjoiZTc4NTNhNGItNTBmNi00Njk3LTllMTItZTNiZjIzZDdlNGUzIiwic2NvcGUiOiJ3ZWItb3JpZ2lucyBwcm9maWxlIGVtYWlsIGFjciBiYXNpYyBvcGVuaWQgcm9sZXMifQ.pGyp5rC3T4hpVfnIa41DPR7HCN1ZsE79EoEEmdmr20geBjNaI4j6QhTRpJrvRwa8jK2NwKSiS8GcoCTSvzMcTQ"

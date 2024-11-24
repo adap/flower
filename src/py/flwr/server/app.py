@@ -19,12 +19,13 @@ import csv
 import importlib.util
 import subprocess
 import sys
+import yaml
 import threading
 from collections.abc import Sequence
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from time import sleep
-from typing import Optional
+from typing import Optional, Dict, Any, Sequence, Type
 
 import grpc
 from cryptography.exceptions import UnsupportedAlgorithm
@@ -34,6 +35,7 @@ from cryptography.hazmat.primitives.serialization import (
     load_ssh_public_key,
 )
 
+from flwr.superexec.exec_interceptor import SuperExecInterceptor
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.args import try_obtain_server_certificates
@@ -60,6 +62,7 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     private_key_to_bytes,
     public_key_to_bytes,
 )
+from flwr.common.auth_plugin import ExecAuthPlugin, KeycloakExecPlugin
 from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
@@ -87,6 +90,11 @@ from .superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
 
 DATABASE = ":flwr-in-memory-state:"
 BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
+
+
+auth_plugins: Dict[str, Type[ExecAuthPlugin]] = {
+    "keycloak": KeycloakExecPlugin,
+}
 
 
 def start_server(  # pylint: disable=too-many-arguments,too-many-locals
@@ -247,6 +255,11 @@ def run_superlink() -> None:
     # Obtain certificates
     certificates = try_obtain_server_certificates(args, args.fleet_api_type)
 
+    maybe_config = _try_obtain_config(args)
+    auth_plugin: Optional[ExecAuthPlugin] = None
+    if maybe_config is not None:
+        auth_plugin = _try_obtain_auth_config(maybe_config)
+
     # Initialize StateFactory
     state_factory = LinkStateFactory(args.database)
 
@@ -264,6 +277,7 @@ def run_superlink() -> None:
         config=parse_config_args(
             [args.executor_config] if args.executor_config else args.executor_config
         ),
+        auth_plugin=auth_plugin,
     )
     grpc_servers = [exec_server]
 
@@ -554,6 +568,20 @@ def _try_setup_node_authentication(
             ssh_private_key,
             ssh_public_key,
         )
+    
+
+def _try_obtain_config(args: argparse.Namespace) -> Optional[Dict[str, Any]]:
+    if args.config is not None:
+        with open(args.config, "r") as file:
+            config = yaml.safe_load(file)
+            return config
+    return None
+
+
+def _try_obtain_auth_config(config: Dict[str, Any]) -> Optional[ExecAuthPlugin]:
+    auth_config = config.get("authentication", {})
+    auth_plugin = auth_plugins.get(auth_config.get("plugin", ""))
+    return auth_plugin(auth_config)
 
 
 def _run_fleet_api_grpc_rere(
@@ -742,6 +770,13 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         "--auth-superlink-public-key",
         type=str,
         help="The SuperLink's public key (as a path str) to enable authentication.",
+    )
+    parser.add_argument(
+        "--config",
+        help="SuperLink config.yaml file (as a path str) "
+        "to configure SuperLink.",
+        type=str,
+        default=None,
     )
 
 

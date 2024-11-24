@@ -31,6 +31,11 @@ service Exec {
 
   // flwr ls command
   rpc ListRuns(ListRunsRequest) returns (ListRunsResponse) {}
+
+  // Start login upon request
+  rpc Login(LoginRequest) returns (LoginResponse) {}
+
+  rpc GetAuthToken(GetAuthTokenRequest) returns (GetAuthTokenResponse) {}
 }
 
 message StartRunRequest {
@@ -51,4 +56,16 @@ message ListRunsRequest { optional uint64 run_id = 1; }
 message ListRunsResponse {
   map<uint64, Run> run_dict = 1;
   string now = 2;
+}
+
+message LoginRequest {}
+message LoginResponse { 
+  map<string, string> login_details = 1; 
+}
+
+message GetAuthTokenRequest { 
+  map<string, string> auth_details = 1; 
+}
+message GetAuthTokenResponse { 
+  map<string, string> auth_tokens = 1;
 }

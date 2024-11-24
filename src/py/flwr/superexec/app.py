@@ -16,6 +16,7 @@
 
 import argparse
 import sys
+import yaml
 from logging import INFO
 
 from flwr.common import log

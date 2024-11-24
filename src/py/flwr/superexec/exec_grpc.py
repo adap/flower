@@ -15,10 +15,12 @@
 """SuperExec gRPC API."""
 
 from logging import INFO
-from typing import Optional
+from typing import Optional, Sequence
 
 import grpc
 
+from flwr.common.auth_plugin import ExecAuthPlugin
+from flwr.superexec.exec_interceptor import SuperExecInterceptor
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
 from flwr.common.typing import UserConfig
@@ -39,6 +41,7 @@ def run_exec_api_grpc(
     ffs_factory: FfsFactory,
     certificates: Optional[tuple[bytes, bytes, bytes]],
     config: UserConfig,
+    auth_plugin: Optional[ExecAuthPlugin] = None,
 ) -> grpc.Server:
     """Run Exec API (gRPC, request-response)."""
     executor.set_config(config)
@@ -47,13 +50,20 @@ def run_exec_api_grpc(
         linkstate_factory=state_factory,
         ffs_factory=ffs_factory,
         executor=executor,
+        auth_plugin=auth_plugin,
     )
+    interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None
+    if auth_plugin is not None:
+        interceptors = [
+            SuperExecInterceptor(auth_plugin)
+        ]
     exec_add_servicer_to_server_fn = add_ExecServicer_to_server
     exec_grpc_server = generic_create_grpc_server(
         servicer_and_add_fn=(exec_servicer, exec_add_servicer_to_server_fn),
         server_address=address,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
         certificates=certificates,
+        interceptors=interceptors,
     )
 
     log(INFO, "Flower Deployment Engine: Starting Exec API on %s", address)

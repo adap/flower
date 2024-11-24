@@ -132,3 +132,84 @@ class ListRunsResponse(google.protobuf.message.Message):
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["now",b"now","run_dict",b"run_dict"]) -> None: ...
 global___ListRunsResponse = ListRunsResponse
+
+class LoginRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    def __init__(self,
+        ) -> None: ...
+global___LoginRequest = LoginRequest
+
+class LoginResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    class LoginDetailsEntry(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        KEY_FIELD_NUMBER: builtins.int
+        VALUE_FIELD_NUMBER: builtins.int
+        key: typing.Text
+        value: typing.Text
+        def __init__(self,
+            *,
+            key: typing.Text = ...,
+            value: typing.Text = ...,
+            ) -> None: ...
+        def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+
+    LOGIN_DETAILS_FIELD_NUMBER: builtins.int
+    @property
+    def login_details(self) -> google.protobuf.internal.containers.ScalarMap[typing.Text, typing.Text]: ...
+    def __init__(self,
+        *,
+        login_details: typing.Optional[typing.Mapping[typing.Text, typing.Text]] = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["login_details",b"login_details"]) -> None: ...
+global___LoginResponse = LoginResponse
+
+class GetAuthTokenRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    class AuthDetailsEntry(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        KEY_FIELD_NUMBER: builtins.int
+        VALUE_FIELD_NUMBER: builtins.int
+        key: typing.Text
+        value: typing.Text
+        def __init__(self,
+            *,
+            key: typing.Text = ...,
+            value: typing.Text = ...,
+            ) -> None: ...
+        def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+
+    AUTH_DETAILS_FIELD_NUMBER: builtins.int
+    @property
+    def auth_details(self) -> google.protobuf.internal.containers.ScalarMap[typing.Text, typing.Text]: ...
+    def __init__(self,
+        *,
+        auth_details: typing.Optional[typing.Mapping[typing.Text, typing.Text]] = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["auth_details",b"auth_details"]) -> None: ...
+global___GetAuthTokenRequest = GetAuthTokenRequest
+
+class GetAuthTokenResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    class AuthTokensEntry(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        KEY_FIELD_NUMBER: builtins.int
+        VALUE_FIELD_NUMBER: builtins.int
+        key: typing.Text
+        value: typing.Text
+        def __init__(self,
+            *,
+            key: typing.Text = ...,
+            value: typing.Text = ...,
+            ) -> None: ...
+        def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+
+    AUTH_TOKENS_FIELD_NUMBER: builtins.int
+    @property
+    def auth_tokens(self) -> google.protobuf.internal.containers.ScalarMap[typing.Text, typing.Text]: ...
+    def __init__(self,
+        *,
+        auth_tokens: typing.Optional[typing.Mapping[typing.Text, typing.Text]] = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["auth_tokens",b"auth_tokens"]) -> None: ...
+global___GetAuthTokenResponse = GetAuthTokenResponse
