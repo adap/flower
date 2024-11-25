@@ -1,4 +1,5 @@
 :og:description: Persist SuperLink state in Flower by saving it to a local directory, ensuring data retention across Docker container restarts.
+.. title:: Persist SuperLink State in Flower
 .. meta::
     :description: Persist SuperLink state in Flower by saving it to a local directory, ensuring data retention across Docker container restarts.
 

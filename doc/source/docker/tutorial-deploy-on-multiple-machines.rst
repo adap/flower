@@ -1,4 +1,5 @@
 :og:description: Deploy a Flower project on multiple machines using Docker Compose to configure server and client components with TLS encryption and persistent SuperLink state.
+.. title:: Deploy Flower on Multiple Machines with Docker Compose
 .. meta::
     :description: Deploy a Flower project on multiple machines using Docker Compose to configure server and client components with TLS encryption and persistent SuperLink state.
 
