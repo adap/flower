@@ -18,31 +18,31 @@ def evaluation_metrics(y_true, classes, predicted_test):
 
     cnf_matrix = confusion_matrix(y_true, classes)
 
-    FP = cnf_matrix.sum(axis=0) - np.diag(cnf_matrix)
-    FN = cnf_matrix.sum(axis=1) - np.diag(cnf_matrix)
-    TP = np.diag(cnf_matrix)
-    TN = cnf_matrix.sum() - (FP + FN + TP)
+    false_p = cnf_matrix.sum(axis=0) - np.diag(cnf_matrix)
+    false_n = cnf_matrix.sum(axis=1) - np.diag(cnf_matrix)
+    true_p = np.diag(cnf_matrix)
+    true_n = cnf_matrix.sum() - (false_p + false_n + true_p)
 
-    FP = FP.astype(float)
-    FN = FN.astype(float)
-    TP = TP.astype(float)
-    TN = TN.astype(float)
+    false_p = false_p.astype(float)
+    false_n = false_n.astype(float)
+    true_p = true_p.astype(float)
+    true_n = true_n.astype(float)
 
     # true positive rate - TPR
-    TPR = TP / (TP + FN)
-    print("TPR: ", np.mean(TPR))
+    tpr = true_p / (true_p + false_n)
+    print("TPR: ", np.mean(tpr))
 
     # false positive rate - FPR
-    FPR = FP / (FP + TN)
-    print("FPR: ", np.mean(FPR))
+    fpr = false_p / (false_p + true_n)
+    print("FPR: ", np.mean(fpr))
 
     # F1 Score
-    f1 = f1_score(y_true, classes, average="weighted")
-    print("F1 score: %f" % f1)
+    fsc = f1_score(y_true, classes, average="weighted")
+    print("F1 score: %f" % fsc)
 
     auc = roc_auc_score(y_true, predicted_test, multi_class="ovr")
     print("AUC Score: %f" % auc)
-    eval_metrics = (accuracy, f1)
+    eval_metrics = (accuracy, fsc)
 
     return eval_metrics
 

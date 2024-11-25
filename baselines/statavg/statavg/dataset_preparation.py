@@ -14,7 +14,7 @@ def get_split_dataset(
 ) -> Tuple[DataFrame, DataFrame]:
     """Load and split datsaet to train (client) and test (server)."""
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    dataset_path = os.path.join(script_dir, "dataset", "dataset.csv")
+    dataset_path = os.path.join(script_dir, path_to_dataset, "dataset.csv")
     dataset = pd.read_csv(dataset_path)
 
     # remove NaN
@@ -28,7 +28,7 @@ def get_split_dataset(
 
     # stratified split
     if include_testset.flag:
-        trainset, testset, Y_train, Y_test = train_test_split(
+        trainset, testset, _, _ = train_test_split(
             dataset, Y, test_size=include_testset.ratio, stratify=Y, random_state=41
         )
         res = trainset, testset
@@ -43,20 +43,20 @@ def split_clients_data(
     X: DataFrame, Y: DataFrame, num_partitions: int
 ) -> List[DataFrame]:
     """Perform stratified split based on labels."""
-    X_curr = X
-    Y_curr = Y
+    x_curr = X
+    y_curr = Y
     partition_dataset = []
     for _ in range(num_partitions - 1):
-        X_curr, X_temp, Y_curr, Y_temp = train_test_split(
-            X_curr,
-            Y_curr,
+        x_curr, x_temp, y_curr, _ = train_test_split(
+            x_curr,
+            y_curr,
             test_size=1 / num_partitions,
-            stratify=Y_curr,
+            stratify=y_curr,
             random_state=41,
         )
-        partition_dataset.append(X_temp)
+        partition_dataset.append(x_temp)
         num_partitions = num_partitions - 1
-    partition_dataset.append(X_curr)
+    partition_dataset.append(x_curr)
     return partition_dataset
 
 

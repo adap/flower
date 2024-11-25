@@ -34,29 +34,31 @@ def get_evaluate_fn(
 
     def evalaute_fn(server_round, parameters, config):
         """Evaluate the test set (if provided)."""
+        _, _ = server_round, config
+
         if testset.empty:
             # this implies that testset is not used
             # and thus, included_testset from config file is False
-            pass
+            return None, {"accuracy": None}
+
+        y_test = testset[["type"]]
+        enc_y = LabelEncoder()
+        y_test = enc_y.fit_transform(y_test.to_numpy().reshape(-1))
+        x_test = testset.drop(["type"], axis=1).to_numpy()
+
+        # normalization
+        # Check if the directory of the scaler exists and pick a scaler
+        # of an arbitrary user. It's the same for all users.
+        if not os.path.exists(scaler_path):
+            scaler = StandardScaler()
+            x_test = scaler.fit_transform(x_test)
         else:
-            Y_test = testset[["type"]]
-            enc_Y = LabelEncoder()
-            Y_test = enc_Y.fit_transform(Y_test.to_numpy().reshape(-1))
-            X_test = testset.drop(["type"], axis=1).to_numpy()
+            scaler = joblib.load(f"{scaler_path}/client_1/scaler.joblib")
+            x_test = scaler.transform(x_test)
 
-            # normalization
-            # Check if the directory of the scaler exists and pick a scaler
-            # of an arbitrary user. It's the same for all users.
-            if not os.path.exists(scaler_path):
-                scaler = StandardScaler()
-                X_test = scaler.fit_transform(X_test)
-            else:
-                scaler = joblib.load(f"{scaler_path}/client_1/scaler.joblib")
-                X_test = scaler.transform(X_test)
-
-            model = get_model(input_shape, num_classes)
-            model.set_weights(parameters)
-            loss, accuracy = model.evaluate(X_test, Y_test)
-            return loss, {"accuracy": accuracy}
+        model = get_model(input_shape, num_classes)
+        model.set_weights(parameters)
+        loss, accuracy = model.evaluate(x_test, y_test)
+        return loss, {"accuracy": accuracy}
 
     return evalaute_fn

@@ -29,3 +29,14 @@ config_fit:
 client_resources:
   num_cpus: 2
   num_gpus: 0.0
+
+# strategy name
+strategy_name: 'statavg'
+
+# strategy
+strategy:
+  _target_: statavg.strategy.CustomStatAvg
+  min_fit_clients: ${num_clients}
+  fit_metrics_aggregation_fn:
+    _target_: statavg.strategy.CustomStatAvg.get_average_statistics
+    _partial_: true

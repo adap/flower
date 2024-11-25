@@ -9,12 +9,12 @@ import flwr as fl
 import hydra
 from flwr.simulation.ray_transport.utils import enable_tf_gpu_growth
 from hydra.core.hydra_config import HydraConfig
+from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 
 from .client import get_client_fn
 from .dataset_preparation import prepare_dataset
 from .server import get_evaluate_fn, get_on_fit_config_fn
-from .strategy import CustomStatAvg
 from .utils import plot_accuracy
 
 # Optional: Force TensorFlow to use the CPU only
@@ -44,17 +44,20 @@ def main(cfg: DictConfig):
 
     # 3. Define your clients
     client_fn = get_client_fn(
-        trainset, cfg.scaler_save_path, cfg.val_ratio, cfg.learning_rate
+        trainset,
+        cfg.scaler_save_path,
+        cfg.val_ratio,
+        cfg.strategy_name,
+        cfg.learning_rate,
     )
 
     # 4. Define your strategy
-    strategy = CustomStatAvg(
-        min_fit_clients=cfg.num_clients,
+    strategy = instantiate(
+        cfg.strategy,
         on_fit_config_fn=get_on_fit_config_fn(cfg.config_fit),
         evaluate_fn=get_evaluate_fn(
             testset, cfg.input_shape, cfg.num_classes, cfg.scaler_save_path
         ),
-        fit_metrics_aggregation_fn=CustomStatAvg.get_average_statistics,
     )
 
     # 5. Start Simulation
@@ -75,8 +78,8 @@ def main(cfg: DictConfig):
     # 6. Save your results
     results = {"history": history}
     results_path = f"{str(save_path)}/results.pickle"
-    with open(results_path, "wb") as f:
-        pickle.dump(results, f)
+    with open(results_path, "wb") as file:
+        pickle.dump(results, file)
 
     # Plot averaged accuracy
     plot_accuracy(results_path)

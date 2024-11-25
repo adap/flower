@@ -1,0 +1,19 @@
+num_rounds: 4
+num_clients: 5
+val_ratio: 0.2
+learning_rate: 0.002
+scaler_save_path: scalers
+path_to_dataset: dataset
+include_testset:
+  flag: true
+  ratio: 0.15
+delete_scaler_dir: true
+input_shape: 8
+num_classes: 6
+config_fit:
+  batch_size: 512
+  local_epochs: 2
+  total_rounds: ${num_rounds}
+client_resources:
+  num_cpus: 2
+  num_gpus: 0.0

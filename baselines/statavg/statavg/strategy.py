@@ -36,7 +36,7 @@ class CustomStatAvg(fl.server.strategy.FedAvg):
         """Aggregate both parameters and local statistics."""
         # thats to prevent aggregate_fit from making aggregations
         if server_round > 1:
-            self.fit_metrics_aggregation_fn = {}
+            self.fit_metrics_aggregation_fn = None
 
         parameters_aggregated, self.metrics_aggregated = super().aggregate_fit(
             server_round, results, failures
@@ -89,9 +89,7 @@ class CustomStatAvg(fl.server.strategy.FedAvg):
             return None, {}
 
         # Call aggregate_evaluate from base class (FedAvg) to aggregate loss and metrics
-        aggregated_loss, aggregated_metrics = super().aggregate_evaluate(
-            server_round, results, failures
-        )
+        aggregated_loss, _ = super().aggregate_evaluate(server_round, results, failures)
 
         # Weigh accuracy of each client by number of examples used
         accuracies = [r.metrics["accuracy"] * r.num_examples for _, r in results]
@@ -99,9 +97,7 @@ class CustomStatAvg(fl.server.strategy.FedAvg):
 
         # Aggregate and print custom metric
         aggregated_accuracy = sum(accuracies) / sum(examples)
-        print(
-            f"Round {server_round} accuracy aggregated from client results: {aggregated_accuracy}"
-        )
+        print(f"Round {server_round}, aggr. client accuracy: {aggregated_accuracy}")
 
         # Return aggregated loss and metrics (i.e., aggregated accuracy)
         return aggregated_loss, {"accuracy": aggregated_accuracy}
@@ -130,10 +126,18 @@ class CustomStatAvg(fl.server.strategy.FedAvg):
             for v, m, n in zip(var, mean, num_examples)
         ) / (sum(num_examples))
 
+        # check the type (in case where the stats are floats)
+        mean_global = (
+            mean_global.tolist() if isinstance(mean_global, np.ndarray) else mean_global
+        )
+        var_global = (
+            var_global.tolist() if isinstance(var_global, np.ndarray) else var_global
+        )
+
         # Convert the global mean and variances to json then to Dict[str, Scalar]
         stats_global = {
-            "mean_global": mean_global.tolist(),
-            "var_global": var_global.tolist(),
+            "mean_global": mean_global,
+            "var_global": var_global,
         }
         json_stats_global = json.dumps(stats_global)
 
@@ -141,3 +145,32 @@ class CustomStatAvg(fl.server.strategy.FedAvg):
         metrics_global = {json_stats_global: 0}
 
         return metrics_global
+
+
+# Class for implementing FedAvg including the method aggregate_evaluate
+class FedAvgAggrEv(fl.server.strategy.FedAvg):
+    """FedAvg with aggregate_evaluate."""
+
+    def aggregate_evaluate(
+        self,
+        server_round: int,
+        results,
+        failures,
+    ):
+        """Calculate a weighted average of the clients' accuracy."""
+        if not results:
+            return None, {}
+
+        # Call aggregate_evaluate from base class (FedAvg) to aggregate loss and metrics
+        aggregated_loss, _ = super().aggregate_evaluate(server_round, results, failures)
+
+        # Weigh accuracy of each client by number of examples used
+        accuracies = [r.metrics["accuracy"] * r.num_examples for _, r in results]
+        examples = [r.num_examples for _, r in results]
+
+        # Aggregate and print custom metric
+        aggregated_accuracy = sum(accuracies) / sum(examples)
+        print(f"Round {server_round}, aggr. client accuracy: {aggregated_accuracy}")
+
+        # Return aggregated loss and metrics (i.e., aggregated accuracy)
+        return aggregated_loss, {"accuracy": aggregated_accuracy}

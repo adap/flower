@@ -2,7 +2,7 @@
 
 import json
 import os
-from typing import Dict, Tuple
+from typing import Any, Callable, Dict, Tuple
 
 import flwr as fl
 import joblib
@@ -18,16 +18,19 @@ from .models import get_model
 
 
 # Define Flower client
+# pylint: disable=too-many-instance-attributes
 class Client(fl.client.NumPyClient):
     """Client class that will implement StatAvg."""
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         trainset: DataFrame,
         save_path: str,
         val_ratio: float,
-        client_id: str,
+        client_id: int,
         learning_rate: float,
+        strategy_name: str,
     ) -> None:
 
         # load trainset
@@ -37,19 +40,19 @@ class Client(fl.client.NumPyClient):
         self.client_id = client_id
         self.val_ratio = val_ratio
         self.learning_rate = learning_rate
+        self._strategy_name = strategy_name
 
         # path to save scalers
         script_dir = os.path.dirname(os.path.abspath(__file__))
         self.dir_path = os.path.join(script_dir, save_path, f"client_{self.client_id}")
-        # self.dir_path = script_dir + save_path + f'/client_{self.client_id}'
 
         # preprocess and split the dataset
-        self.X_train, self.Y_train, self.X_val, self.Y_val = preprocess_and_split(
+        self.x_train, self.y_train, self.x_val, self.y_val = preprocess_and_split(
             self.data, val_ratio
         )
 
         # get the model
-        self.model = get_model(self.X_train.shape[1], len(self.Y_train.value_counts()))
+        self.model = get_model(self.x_train.shape[1], len(self.y_train.value_counts()))
 
         opt = tf.keras.optimizers.Adam(
             learning_rate=self.learning_rate, beta_1=0.99, beta_2=0.999, epsilon=1e-08
@@ -68,32 +71,32 @@ class Client(fl.client.NumPyClient):
 
     def resample(self) -> None:
         """Perform resampling using SMOTE."""
-        sm = SMOTE(random_state=42)
-        self.X_train, self.Y_train = sm.fit_resample(self.X_train, self.Y_train)
+        smo = SMOTE(random_state=42)
+        self.x_train, self.y_train = smo.fit_resample(self.x_train, self.y_train)
 
     def normalize_data(self) -> None:
         """Scales/normalize data (z-score)."""
         # Check if the directory of the scaler exists
-        if not os.path.exists(self.dir_path):
-            # this will be executed only on the first round
-            # since the directory does not exist yet
+        if not os.path.exists(self.dir_path) or self._strategy_name == "fedavg":
+            # this will be executed only on the first round iff 'statavg'
+            # since the scaler directory does not exist yet
             scaler = StandardScaler()
-            self.X_train = scaler.fit_transform(self.X_train)
-            self.X_val = scaler.transform(self.X_val)
+            self.x_train = scaler.fit_transform(self.x_train)
+            self.x_val = scaler.transform(self.x_val)
             self.scaler_first_r = scaler
         else:
             scaler = joblib.load(f"{self.dir_path}/scaler.joblib")
-            self.X_train = scaler.transform(self.X_train)
-            self.X_val = scaler.transform(self.X_val)
+            self.x_train = scaler.transform(self.x_train)
+            self.x_val = scaler.transform(self.x_val)
             # in case the directory already exists from previous experiments,
             # the following line is used to prevent error at the 1st round
             self.scaler_first_r = scaler
 
     def encode_labels(self) -> None:
         """Encode the labels."""
-        enc_Y = LabelEncoder()
-        self.Y_train = enc_Y.fit_transform(self.Y_train.to_numpy().reshape(-1))
-        self.Y_val = enc_Y.transform(self.Y_val.to_numpy().reshape(-1))
+        enc_y = LabelEncoder()
+        self.y_train = enc_y.fit_transform(self.y_train.to_numpy().reshape(-1))
+        self.y_val = enc_y.transform(self.y_val.to_numpy().reshape(-1))
 
     def get_parameters(self, config):
         """Get the training parameters."""
@@ -101,7 +104,7 @@ class Client(fl.client.NumPyClient):
 
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
-    ) -> Tuple[NDArrays, int, Dict[str, int]]:
+    ) -> Tuple[NDArrays, int, Dict[str, Scalar]]:
         """Create a Dict with local statistics and sends it to the server.
 
         At the 1st round: Receives aggregated statistics from the server.
@@ -109,11 +112,11 @@ class Client(fl.client.NumPyClient):
         """
         # the client statistics are saved as a Dict[str, int] only at 1st round
         metrics = {}
-        if config["current_round"] == 1:
+        if config["current_round"] == 1 and self._strategy_name == "statavg":
             metrics = configure_metrics(self.scaler_first_r)
 
         # read the global statistics only at 2nd round
-        if config["current_round"] == 2:
+        if config["current_round"] == 2 and self._strategy_name == "statavg":
             for key, val in config.items():
                 if val == 0:
                     stats_global = json.loads(key)
@@ -133,7 +136,7 @@ class Client(fl.client.NumPyClient):
             #             Save the scaler/statistics
             # -------------------------------------------------
             # since Flower does not persist state within different rounds
-            # the global statistics that each client has received
+            # the global statistics recieved by each client
             # are saved in a dedicated directory.
             # In subsequent rounds (>2), clients load the saved scalers and retrieve
             # the global statistics.
@@ -145,33 +148,31 @@ class Client(fl.client.NumPyClient):
         # set weights and fit
         self.model.set_weights(parameters)
         self.model.fit(
-            self.X_train,
-            self.Y_train,
+            self.x_train,
+            self.y_train,
             epochs=config["local_epochs"],
             batch_size=config["batch_size"],
             verbose=0,
         )
 
-        return self.model.get_weights(), len(self.X_train), metrics
+        weights = self.model.get_weights()  # type: ignore
+
+        return weights, len(self.x_train), metrics  # type: ignore
 
     def evaluate(
         self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[float, int, Dict]:
-        """Evaluate using the validation set: X_val."""
+        """Evaluate using the validation set: x_val."""
         self.model.set_weights(parameters)
-        loss, accuracy = self.model.evaluate(self.X_val, self.Y_val, verbose=0)
-        # predicted_test = self.model.predict(self.X_val, verbose=0)
-        # predicted_classes = np.argmax(predicted_test,axis=1)
-        # eval_metrics = evaluation_metrics(self.Y_val, predicted_classes,
-        # predicted_test)
+        loss, accuracy = self.model.evaluate(self.x_val, self.y_val, verbose=0)
 
-        return loss, len(self.X_val), {"accuracy": accuracy}
+        return loss, len(self.x_val), {"accuracy": accuracy}
 
 
 def preprocess_and_split(
     data: DataFrame, val_ratio: float
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """Preprocess ans split data into train and val sets."""
+) -> Tuple[np.ndarray, DataFrame, np.ndarray, DataFrame]:
+    """Preprocess and split data into train and val sets."""
     # keep label('type')
     Y = data[["type"]]
 
@@ -179,12 +180,12 @@ def preprocess_and_split(
     data = data.drop(["type"], axis=1)
 
     # train-test splitting
-    X_train, X_val, Y_train, Y_val = train_test_split(
+    x_train, x_val, y_train, y_val = train_test_split(
         data, Y, test_size=val_ratio, stratify=Y, random_state=42
     )
-    X_train = X_train.to_numpy()
-    X_val = X_val.to_numpy()
-    return X_train, Y_train, X_val, Y_val
+    x_train = x_train.to_numpy()
+    x_val = x_val.to_numpy()
+    return x_train, y_train, x_val, y_val
 
 
 def configure_metrics(scaler: StandardScaler) -> Dict[str, int]:
@@ -203,8 +204,12 @@ def configure_metrics(scaler: StandardScaler) -> Dict[str, int]:
 
 
 def get_client_fn(
-    trainset: DataFrame, save_path: str, val_ratio: float, learning_rate: float = 0.002
-) -> Client:
+    trainset: DataFrame,
+    save_path: str,
+    val_ratio: float,
+    strategy_name: str,
+    learning_rate: float = 0.002,
+) -> Callable[[str], Any]:
     """trainset: the training dataset.
 
     save_path: the path to save local statistics of the dataset, i.e., scaler.
@@ -219,6 +224,7 @@ def get_client_fn(
             val_ratio=val_ratio,
             client_id=int(cid),
             learning_rate=learning_rate,
+            strategy_name=strategy_name,
         ).to_client()
 
     return client_fn

@@ -1,8 +1,8 @@
 ---
 title: StatAvg - Mitigating Data Heterogeneity in Federated Learning for Intrusion Detection Systems
 url: https://arxiv.org/abs/2405.13062
-labels: [intrusion detection system, non-iid data, statistical averaging] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. system heterogeneity, image classification, asynchronous, weight sharing, cross-silo). Do not use ""
-dataset: [TON_IoT] # list of datasets you include in your baseline. Do not use ""
+labels: [intrusion detection, non-iid data, statistical averaging]
+dataset: [TON_IoT]
 ---
 
 # StatAvg: Mitigating Data Heterogeneity in Federated Learning for Intrusion Detection Systems
@@ -19,11 +19,11 @@ dataset: [TON_IoT] # list of datasets you include in your baseline. Do not use "
 
 **What’s implemented:** The code in this directory replicates the experiments in the above paper for TON IoT datasets, which proposed the StatAvg algorithm. It replicates the Figure 3 of the paper.
 
-**Datasets:** TON IoT dataset (linux memory logs). Online at https://research.unsw.edu.au/projects/toniot-datasets
+**Datasets:** TON IoT dataset (linux memory logs). Online [here](https://research.unsw.edu.au/projects/toniot-datasets).
 
 **Hardware Setup:**  These experiments were run on a desktop machine with 16 CPU threads. Any machine with 4 CPU cores or more would be able to run it in a reasonable amount of time.
 
-**Contributors:** TBD
+**Contributors:** Pavlos Bouzinis (Metamind Innovations)
 
 
 ## Experimental Setup
@@ -57,15 +57,17 @@ To construct the Python environment, simply run:
 # Set directory to use python 3.10 (install with `pyenv install <version>` if you don't have it)
 pyenv local 3.10.13
 
-# Tell poetry to use python3.10
+# Tell poetry to use python 3.10
 poetry env use 3.10.13
 
 # Install
 poetry install
 ```
 
+## Dataset Preparation
+You can download the TON_IoT dataset by accessing the following [link](https://research.unsw.edu.au/projects/toniot-datasets). Please navigate to `TON_IoT datasets/Train_Test_datasets/Train_Test_Linux_dataset` and download the file `Train_test_linux_memory.csv`. Then, rename the downloaded file to `dataset.csv` and place it in the `dataset/` directory. If you want to run the experiments with your own data, ensure your dataset is also named `dataset.csv` and located in the same directory. The dataset is preprocessed using `dataset_preparation.py`, which you can modify if you wish to add custom preprocessing steps.
+
 ## Running the Experiments
-Firstly, ensure that the dataset is located at `dataset/dataset.csv`. If you want to run the experiments with your own data, place your dataset in this path.
 To run StatAvg with TON IoT baseline, ensure you have activated your Poetry environment (execute `poetry shell` from this directory), then:
 
 ```bash
@@ -87,15 +89,23 @@ To reproduce the results of the paper (Fig. 3., StatAvg), simply run:
 ```bash
 python -m statavg.main   # default settings
 ```
+You can also reproduce the results with FedAvg as a baseline by running:
+
+```bash
+python -m statavg.main --config-name fedavg    # run with FedAvg
+```
+
 The expected results should look similar to the following figure:
 <p align="center">
   <b>Testing Accuracy vs Rounds for StatAvg</b><br>
-  <img src="_static/fig_statavg.png" alt="StatAvg Figure"/>
+  <img src="_static/fig.png" alt="StatAvg Figure"/>
 </p>
 
+It is noted that the results are saved into a pickle file in the directory `outputs/`, which will be automatically created when the experiments are run.
 In the paper, server-side evaluation is not implemented, as it is considered that the server does not own any data. However, it can be enabled by executing:
 
 ```bash
 # enable server-side evaluation with the data ratio of your preference. Default settings do not include this option.
 python -m statavg.main include_testset.flag=true include_testset.ratio=0.15
 ```
+Disclaimer: Please note that since the experiments were conducted for the paper, the dataset authors have slightly modified the dataset. While this modification may lead to minor differences in accuracy, `StatAvg` should still consistently outperform `FedAvg` as demonstrated in the paper.
