@@ -64,6 +64,7 @@ Information-oriented API reference and other reference material.
    :caption: Reference docs
 
    ref-telemetry
+   recommended-fl-datasets
 
 Main features
 -------------
