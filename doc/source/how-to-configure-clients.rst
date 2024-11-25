@@ -1,4 +1,5 @@
 :og:description: Configure Flower clients by sending parameters from the server to control client-side hyperparameters using configuration dictionaries and strategies.
+.. title:: Configure Federated Learning Clients in Flower
 .. meta::
     :description: Configure Flower clients by sending parameters from the server to control client-side hyperparameters using configuration dictionaries and strategies.
 

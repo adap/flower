@@ -1,4 +1,5 @@
-:og:description: Learn how to use built-in modifiers to enhance the behaviour of a ClientApp in Flower for federated learning. 
+:og:description: Learn how to use built-in modifiers to enhance the behaviour of a ClientApp in Flower for federated learning.
+.. title:: Use Built-in Mods to Customize Clients in Flower
 .. meta::
     :description: Learn how to use built-in modifiers to enhance the behaviour of a ClientApp in Flower for federated learning.
 

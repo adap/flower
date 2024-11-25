@@ -1,4 +1,5 @@
 :og:description: Upgrade seamlessly to Flower 1.13 with this guide for transitioning your setup to the latest features and enhancements.
+.. title:: Guide for Upgrading to Flower 1.13
 .. meta::
     :description: Upgrade seamlessly to Flower 1.13 with this guide for transitioning your setup to the latest features and enhancements.
 

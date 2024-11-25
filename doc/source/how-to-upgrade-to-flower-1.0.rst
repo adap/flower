@@ -1,4 +1,5 @@
 :og:description: Upgrade seamlessly from Flower 0.x to Flower 1.0 with this guide.
+.. title:: Guide for Upgrading from Flower 0.x to Flower 1.0
 .. meta::
     :description: Upgrade seamlessly from Flower 0.x to Flower 1.0 with this guide.
 

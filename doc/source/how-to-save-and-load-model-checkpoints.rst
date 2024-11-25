@@ -1,4 +1,5 @@
 :og:description: Save and load model checkpoints in Flower with custom strategies, including PyTorch checkpoints, for efficient federated learning workflows.
+.. title:: Save and Load Federated Model Checkpoints in Flower
 .. meta::
     :description: Save and load model checkpoints in Flower with custom strategies, including PyTorch checkpoints, for efficient federated learning workflows.
 
