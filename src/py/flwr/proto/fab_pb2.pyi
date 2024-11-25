@@ -3,6 +3,7 @@
 isort:skip_file
 """
 import builtins
+import flwr.proto.node_pb2
 import google.protobuf.descriptor
 import google.protobuf.message
 import typing
@@ -33,13 +34,18 @@ global___Fab = Fab
 
 class GetFabRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    NODE_FIELD_NUMBER: builtins.int
     HASH_STR_FIELD_NUMBER: builtins.int
+    @property
+    def node(self) -> flwr.proto.node_pb2.Node: ...
     hash_str: typing.Text
     def __init__(self,
         *,
+        node: typing.Optional[flwr.proto.node_pb2.Node] = ...,
         hash_str: typing.Text = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["hash_str",b"hash_str"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["node",b"node"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["hash_str",b"hash_str","node",b"node"]) -> None: ...
 global___GetFabRequest = GetFabRequest
 
 class GetFabResponse(google.protobuf.message.Message):

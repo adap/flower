@@ -240,6 +240,8 @@ def new(
             MlFramework.HUGGINGFACE.value,
             MlFramework.MLX.value,
             MlFramework.TENSORFLOW.value,
+            MlFramework.SKLEARN.value,
+            MlFramework.NUMPY.value,
         ]
         if framework_str in frameworks_with_tasks:
             files[f"{import_name}/task.py"] = {
@@ -275,7 +277,7 @@ def new(
         )
     )
 
-    _add = "	huggingface-cli login\n" if framework_str == "flowertune" else ""
+    _add = "	huggingface-cli login\n" if llm_challenge_str else ""
     print(
         typer.style(
             f"	cd {package_name}\n" + "	pip install -e .\n" + _add + "	flwr run\n",

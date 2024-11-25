@@ -16,12 +16,13 @@
 
 
 import base64
+import inspect
 import threading
 import unittest
 from collections.abc import Sequence
 from concurrent import futures
 from logging import DEBUG, INFO, WARN
-from typing import Optional, Union
+from typing import Optional, Union, get_args
 
 import grpc
 
@@ -47,6 +48,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResRequest,
     PushTaskResResponse,
 )
+from flwr.proto.fleet_pb2_grpc import FleetServicer
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns  # pylint: disable=E0611
@@ -436,6 +438,20 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             create_node()
 
             assert self._servicer.received_client_metadata() is None
+
+    def test_fleet_requests_included(self) -> None:
+        """Test if all Fleet requests are included in the authentication mode."""
+        # Prepare
+        requests = get_args(Request)
+        rpc_names = {req.__qualname__.removesuffix("Request") for req in requests}
+        expected_rpc_names = {
+            name
+            for name, ref in inspect.getmembers(FleetServicer)
+            if inspect.isfunction(ref)
+        }
+
+        # Assert
+        assert expected_rpc_names == rpc_names
 
 
 if __name__ == "__main__":

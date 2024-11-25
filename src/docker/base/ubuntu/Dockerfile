@@ -15,7 +15,7 @@
 
 # hadolint global ignore=DL3008
 ARG DISTRO=ubuntu
-ARG DISTRO_VERSION=22.04
+ARG DISTRO_VERSION=24.04
 FROM $DISTRO:$DISTRO_VERSION AS python
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -87,11 +87,10 @@ RUN  apt-get update \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
     # add non-root user
-    && adduser \
+    && useradd \
     --no-create-home \
-    --home /app \
-    --disabled-password \
-    --gecos "" \
+    --home-dir /app \
+    -c "" \
     --uid 49999 app \
     && mkdir -p /app \
     && chown -R app:app /app

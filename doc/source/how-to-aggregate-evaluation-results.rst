@@ -1,24 +1,26 @@
 Aggregate evaluation results
 ============================
 
-The Flower server does not prescribe a way to aggregate evaluation results, but it enables the user to fully customize result aggregation.
-
+The Flower server does not prescribe a way to aggregate evaluation results, but it
+enables the user to fully customize result aggregation.
 
 Aggregate Custom Evaluation Results
 -----------------------------------
 
-The same :code:`Strategy`-customization approach can be used to aggregate custom evaluation results coming from individual clients.
-Clients can return custom metrics to the server by returning a dictionary:
+The same ``Strategy``-customization approach can be used to aggregate custom evaluation
+results coming from individual clients. Clients can return custom metrics to the server
+by returning a dictionary:
 
 .. code-block:: python
 
-    class CifarClient(fl.client.NumPyClient):
+    from flwr.client import NumPyClient
 
-        def get_parameters(self, config):
-            # ...
+
+    class FlowerClient(NumPyClient):
 
         def fit(self, parameters, config):
             # ...
+            pass
 
         def evaluate(self, parameters, config):
             """Evaluate parameters on the locally held test set."""
@@ -31,13 +33,17 @@ Clients can return custom metrics to the server by returning a dictionary:
 
             # Return results, including the custom accuracy metric
             num_examples_test = len(self.x_test)
-            return loss, num_examples_test, {"accuracy": accuracy}
+            return float(loss), num_examples_test, {"accuracy": float(accuracy)}
 
-The server can then use a customized strategy to aggregate the metrics provided in these dictionaries:
+The server can then use a customized strategy to aggregate the metrics provided in these
+dictionaries:
 
 .. code-block:: python
 
-    class AggregateCustomMetricStrategy(fl.server.strategy.FedAvg):
+    from flwr.server.strategy import FedAvg
+
+
+    class AggregateCustomMetricStrategy(FedAvg):
         def aggregate_evaluate(
             self,
             server_round: int,
@@ -50,7 +56,9 @@ The server can then use a customized strategy to aggregate the metrics provided 
                 return None, {}
 
             # Call aggregate_evaluate from base class (FedAvg) to aggregate loss and metrics
-            aggregated_loss, aggregated_metrics = super().aggregate_evaluate(server_round, results, failures)
+            aggregated_loss, aggregated_metrics = super().aggregate_evaluate(
+                server_round, results, failures
+            )
 
             # Weigh accuracy of each client by number of examples used
             accuracies = [r.metrics["accuracy"] * r.num_examples for _, r in results]
@@ -58,13 +66,29 @@ The server can then use a customized strategy to aggregate the metrics provided 
 
             # Aggregate and print custom metric
             aggregated_accuracy = sum(accuracies) / sum(examples)
-            print(f"Round {server_round} accuracy aggregated from client results: {aggregated_accuracy}")
+            print(
+                f"Round {server_round} accuracy aggregated from client results: {aggregated_accuracy}"
+            )
 
             # Return aggregated loss and metrics (i.e., aggregated accuracy)
-            return aggregated_loss, {"accuracy": aggregated_accuracy}
+            return float(aggregated_loss), {"accuracy": float(aggregated_accuracy)}
 
-    # Create strategy and run server
-    strategy = AggregateCustomMetricStrategy(
-        # (same arguments as FedAvg here)
-    )
-    fl.server.start_server(strategy=strategy)
+
+    def server_fn(context: Context) -> ServerAppComponents:
+        # Read federation rounds from config
+        num_rounds = context.run_config["num-server-rounds"]
+        config = ServerConfig(num_rounds=num_rounds)
+
+        # Define strategy
+        strategy = AggregateCustomMetricStrategy(
+            # (same arguments as FedAvg here)
+        )
+
+        return ServerAppComponents(
+            config=config,
+            strategy=strategy,  # <-- pass the custom strategy here
+        )
+
+
+    # Create ServerApp
+    app = ServerApp(server_fn=server_fn)
