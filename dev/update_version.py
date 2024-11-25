@@ -128,7 +128,8 @@ if __name__ == "__main__":
         increment = "minor"
 
     curr_version = _get_next_version(args.old_version, increment)
-    next_version = _get_next_version(curr_version, "minor")
+    # next_version = _get_next_version(curr_version, "minor")
+    next_version = "1.13.1"
 
     wrong = False
 
