@@ -1,4 +1,5 @@
 :og:description: Enable TLS in Flower for secure communication with encrypted data transmission using PEM-encoded certificates and private keys.
+.. title:: Enable TLS Connections in Containerized Flower Deployments
 .. meta::
     :description: Enable TLS in Flower for secure communication with encrypted data transmission using PEM-encoded certificates and private keys.
 
