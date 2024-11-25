@@ -1,0 +1,32 @@
+num_rounds: 15
+num_clients: 20
+clients_per_round: ${num_clients}
+client:
+  epochs: 5
+  lr: 0.001
+  batch_size: 32
+noise_rate: 1
+malicious_clients_ids:
+- 0
+total_malicious_clients: null
+feddefender:
+  fast: true
+  r_inputs: 10
+  na_t: 0.0
+theta: 0.5
+model: convnet
+distribution: iid
+dataset_channels:
+  mnist: 1
+dataset_classes:
+  mnist: 10
+dataset:
+  name: mnist
+  num_classes: ${dataset_classes.${dataset.name}}
+  channels: ${dataset_channels.${dataset.name}}
+device: cpu
+total_gpus: 1
+total_cpus: 10
+client_resources:
+  num_cpus: 2
+  num_gpus: 0.2
