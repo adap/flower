@@ -93,7 +93,7 @@ jobs:
           password: ${{ secrets.dockerhub-token }}
 
       - name: Build and push
-        uses: Wandalen/wretry.action@8ceaefd717b7cdae4f2637f9a433242ade421a0a # v3.7.2
+        uses: Wandalen/wretry.action@ffdd254f4eaf1562b8a2c66aeaa37f1ff2231179 # v3.7.3
         id: build
         with:
           action: docker/build-push-action@4f58ea79222b3b9dc2c8bbdd6debcef730109a75 # v6.9.0
