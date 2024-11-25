@@ -1,5 +1,4 @@
 :og:description: Learn to build a federated ML workload using Flower with FedBN for non-IID data. Train a CNN with PyTorch on CIFAR-10 with minimal changes from the Quickstart.
-.. title:: Federated a Machine Learnign Workload with FedBN
 .. meta::
     :description: Learn to build a federated ML workload using Flower with FedBN for non-IID data. Train a CNN with PyTorch on CIFAR-10 with minimal changes from the Quickstart.
 

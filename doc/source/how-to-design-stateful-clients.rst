@@ -1,5 +1,4 @@
 :og:description: Build statelful ClientApps in Flower with context objects, enabling efficient simulations and deployments.
-.. title:: Build Stateful ClientApps in Flower
 .. meta::
     :description: Build stateful ClientApps in Flower with context objects, enabling efficient simulations and deployments.
 

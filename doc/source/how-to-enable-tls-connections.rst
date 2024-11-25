@@ -1,5 +1,4 @@
 :og:description:  Guide to starting a TLS-secured Flower server (“SuperLink”) and connecting a Flower client (“SuperNode”) with secure connections.
-.. title:: Enable Server-Client TLS Connections in Flower
 .. meta::
     :description: Guide to starting a TLS-secured Flower server (“SuperLink”) and connecting a Flower client (“SuperNode”) with secure connections.
 

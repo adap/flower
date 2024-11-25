@@ -1,5 +1,4 @@
 :og:description: Enable authentication for SuperNodes and SuperLink in Flower with public key authentication, securing federated learning via TLS connections.
-.. title:: Authenticate SuperNodes and SuperLink in Flower
 .. meta::
     :description: Enable authentication for SuperNodes and SuperLink in Flower with public key authentication, securing federated learning via TLS connections.
 
