@@ -32,7 +32,11 @@ from flwr.common.config import (
     get_project_dir,
     unflatten_dict,
 )
-from flwr.common.constant import Status, SubStatus
+from flwr.common.constant import (
+    SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS,
+    Status,
+    SubStatus,
+)
 from flwr.common.logger import (
     log,
     mirror_output_to_queue,
@@ -73,9 +77,11 @@ def flwr_simulation() -> None:
         description="Run a Flower Simulation",
     )
     parser.add_argument(
-        "--superlink",
+        "--simulationio-api-address",
+        default=SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS,
         type=str,
-        help="Address of SuperLink's SimulationIO API",
+        help="Address of SuperLink's SimulationIO API (IPv4, IPv6, or a domain name)."
+        f"By default, it is set to {SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS}.",
     )
     parser.add_argument(
         "--run-once",
@@ -111,15 +117,15 @@ def flwr_simulation() -> None:
     args = parser.parse_args()
 
     log(INFO, "Starting Flower Simulation")
-    certificates = try_obtain_root_certificates(args, args.superlink)
+    certificates = try_obtain_root_certificates(args, args.simulationio_api_address)
 
     log(
         DEBUG,
         "Staring isolated `Simulation` connected to SuperLink DriverAPI at %s",
-        args.superlink,
+        args.simulationio_api_address,
     )
     run_simulation_process(
-        simulationio_api_address=args.superlink,
+        simulationio_api_address=args.simulationio_api_address,
         log_queue=log_queue,
         run_once=args.run_once,
         flwr_dir_=args.flwr_dir,
@@ -225,7 +231,7 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
                 )
             backend_config: BackendConfig = fed_opt.get("backend", {})
             verbose: bool = fed_opt.get("verbose", False)
-            enable_tf_gpu_growth: bool = fed_opt.get("enable_tf_gpu_growth", True)
+            enable_tf_gpu_growth: bool = fed_opt.get("enable_tf_gpu_growth", False)
 
             # Launch the simulation
             _run_simulation(
