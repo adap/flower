@@ -12,10 +12,16 @@ jobs:
       contents: write
       pull-requests: write
     env:
-      branch-name: auto-update-trans-text
+      base-branch: main # The base branch for the PR
     name: Update text
     steps:
       - uses: actions/checkout@v4
+
+      - name: Generate unique branch name
+        id: generate_branch
+        run: |
+          export BRANCH_NAME="auto-update-trans-text-$(date +'%Y%m%d-%H%M%S')"
+          echo "branch-name=$BRANCH_NAME" >> $GITHUB_ENV
 
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
@@ -65,15 +71,15 @@ jobs:
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: '${{ env.branch-name }}'
-          force_with_lease: true
+          branch: ${{ env.branch-name }}
 
       - name: Create Pull Request
         if: steps.calculate_diff.outputs.additions > 228 && steps.calculate_diff.outputs.deletions > 60
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          branch: '${{ env.branch-name }}'
+          branch: ${{ env.branch-name }}
+          base: ${{ env.base-branch }}
           delete-branch: true
           title: 'docs(framework:skip) Update source texts for translations (automated)'
           body: 'This PR is auto-generated to update text and language files.'
