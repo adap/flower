@@ -182,12 +182,12 @@ def run_simulation(
         `flwr.common.typing.ConfigsRecordValues`.
 
     enable_tf_gpu_growth : bool (default: False)
-        A boolean to indicate whether to enable GPU growth on the main thread. This is
-        desirable if you make use of a TensorFlow model on your `ServerApp` while
-        having your `ClientApp` running on the same GPU. Without enabling this, you
-        might encounter an out-of-memory error because TensorFlow, by default, allocates
-        all GPU memory. Read more about how `tf.config.experimental.set_memory_growth()`
-        works in the TensorFlow documentation: https://www.tensorflow.org/api/stable.
+        (Deprecated) A boolean to indicate whether to enable GPU growth on the main
+        thread. This is desirable if you make use of a TensorFlow model on your
+        `ServerApp` while having your `ClientApp` running on the same GPU. Without
+        enabling this, you might encounter an out-of-memory error because TensorFlow,
+        by default, allocates all GPU memory. Read more about in the TensorFlow
+        documentation: https://www.tensorflow.org/api/stable.
 
     verbose_logging : bool (default: False)
         When disabled, only INFO, WARNING and ERROR log messages will be shown. If
@@ -530,12 +530,12 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
     parser.add_argument(
         "--enable-tf-gpu-growth",
         action="store_true",
-        help="Enables GPU growth on the main thread. This is desirable if you make "
-        "use of a TensorFlow model on your `ServerApp` while having your `ClientApp` "
-        "running on the same GPU. Without enabling this, you might encounter an "
-        "out-of-memory error because TensorFlow by default allocates all GPU memory."
-        "Read more about how `tf.config.experimental.set_memory_growth()` works in "
-        "the TensorFlow documentation: https://www.tensorflow.org/api/stable.",
+        help="(Deprecated) Enables GPU growth on the main thread. This is desirable if "
+        "you make use of a TensorFlow model on your `ServerApp` while having your "
+        "`ClientApp` running on the same GPU. Without enabling this, you might "
+        "encounter an out-of-memory error because TensorFlow by default allocates all "
+        "GPU memory. Read more about how `tf.config.experimental.set_memory_growth()` "
+        "works in the TensorFlow documentation: https://www.tensorflow.org/api/stable.",
     )
     parser.add_argument(
         "--delay-start",
