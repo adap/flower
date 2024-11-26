@@ -14,8 +14,8 @@
 # ==============================================================================
 """Flower Simulation process."""
 
-
 import argparse
+import sys
 from logging import DEBUG, ERROR, INFO
 from queue import Queue
 from time import sleep
@@ -24,7 +24,6 @@ from typing import Optional
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.common import EventType
-from flwr.common.args import try_obtain_root_certificates
 from flwr.common.config import (
     get_flwr_dir,
     get_fused_config_from_dir,
@@ -117,11 +116,19 @@ def flwr_simulation() -> None:
     args = parser.parse_args()
 
     log(INFO, "Starting Flower Simulation")
-    certificates = try_obtain_root_certificates(args, args.simulationio_api_address)
+
+    if not args.insecure:
+        log(
+            ERROR,
+            "`flwr-simulation` does not support TLS yet. "
+            "Please use the '--insecure' flag.",
+        )
+        sys.exit(1)
 
     log(
         DEBUG,
-        "Staring isolated `Simulation` connected to SuperLink DriverAPI at %s",
+        "Starting isolated `Simulation` connected to SuperLink SimulationAppIo API "
+        "at %s",
         args.simulationio_api_address,
     )
     run_simulation_process(
@@ -129,7 +136,7 @@ def flwr_simulation() -> None:
         log_queue=log_queue,
         run_once=args.run_once,
         flwr_dir_=args.flwr_dir,
-        certificates=certificates,
+        certificates=None,
     )
 
     # Restore stdout/stderr
