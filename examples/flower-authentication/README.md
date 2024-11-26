@@ -65,9 +65,9 @@ The script also generates a CSV file that includes each of the generated (client
 ./generate.sh {your_number_of_clients}
 ```
 
-## Start the long-running Flower server-side (SuperLink)
+## Start the long-running Flower server (SuperLink)
 
-Starting long-running Flower server-side components (SuperLink) and enable authentication is very easy; all you need to do is type
+Starting long-running Flower server component (SuperLink) and enable authentication is very easy; all you need to do is type
 `--auth-list-public-keys` containing file path to the known `client_public_keys.csv`, `--auth-superlink-private-key`
 containing file path to the SuperLink's private key `server_credentials`, and `--auth-superlink-public-key` containing file path to the SuperLink's public key `server_credentials.pub`. Notice that you can only enable authentication with a secure TLS connection.
 
@@ -85,7 +85,7 @@ flower-superlink \
 
 At this point your server-side is idling. Next, let's connect two `SuperNode`s, and then we'll start a run.
 
-## Start the long-running Flower client-side (SuperNode)
+## Start the long-running Flower client (SuperNode)
 
 > \[!NOTE\]
 > Typically each `SuperNode` runs in a different entity/organization which has access to a dataset. In this example we are going to artificially create N dataset splits and saved them into a new directory called `datasets/`. Then, each `SuperNode` will be pointed to the dataset it should load via the `--node-config` argument. We provide a script that does the download, partition and saving of CIFAR-10.
@@ -99,7 +99,6 @@ In a new terminal window, start the first long-running Flower client (SuperNode)
 ```bash
 flower-supernode \
     --root-certificates certificates/ca.crt \
-    --superlink 127.0.0.1:9092 \
     --auth-supernode-private-key keys/client_credentials_1 \
     --auth-supernode-public-key keys/client_credentials_1.pub \
     --node-config 'dataset-path="datasets/cifar10_part_1"' \
@@ -111,7 +110,6 @@ In yet another new terminal window, start the second long-running Flower client:
 ```bash
 flower-supernode \
     --root-certificates certificates/ca.crt \
-    --superlink 127.0.0.1:9092 \
     --auth-supernode-private-key keys/client_credentials_2 \
     --auth-supernode-public-key keys/client_credentials_2.pub \
     --node-config 'dataset-path="datasets/cifar10_part_2"' \
