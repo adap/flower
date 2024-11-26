@@ -41,7 +41,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
                             `num_unique_labels_per_partition` x `num_partitions`
         ( `num_unique_labels`, ---------------------------------------------------- ),
                                             `num_unique_labels`
-        the label_id at the i'th row is assigned to the partition_id based on the 
+        the label_id at the i'th row is assigned to the partition_id based on the
         following approach.
 
         First, for an i'th row, generate a list of `id`s according to the formula:
