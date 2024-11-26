@@ -202,7 +202,7 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
             # Export variable for TF that will enable GPU growth
             # https://www.tensorflow.org/guide/gpu#limiting_gpu_memory_growth
             os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = fed_opt.get(
-                "enable_tf_gpu_growth", False
+                "enable_tf_gpu_growth", "False"
             )
             # Launch the simulation
             _run_simulation(
