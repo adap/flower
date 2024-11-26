@@ -127,7 +127,8 @@ def flwr_simulation() -> None:
 
     log(
         DEBUG,
-        "Starting isolated `Simulation` connected to SuperLink SimulationAppIo API at %s",
+        "Starting isolated `Simulation` connected to SuperLink SimulationAppIo API "
+        "at %s",
         args.simulationio_api_address,
     )
     run_simulation_process(
