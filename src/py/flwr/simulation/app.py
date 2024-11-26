@@ -267,12 +267,5 @@ def _parse_args_run_flwr_simulation() -> argparse.ArgumentParser:
         help="When set, this process will start a single simulation "
         "for a pending Run. If no pending run the process will exit. ",
     )
-    parser.add_argument(
-        "--root-certificates",
-        metavar="ROOT_CERT",
-        type=str,
-        help="Specifies the path to the PEM-encoded root certificate file for "
-        "establishing secure HTTPS connections.",
-    )
     add_args_flwr_app_common(parser=parser)
     return parser
