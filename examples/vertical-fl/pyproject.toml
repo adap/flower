@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "PyTorch Vertical FL with Flower"
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.13.0",
+    "flwr[simulation]>=1.13.1",
     "flwr-datasets>=0.3.0",
     "numpy==1.24.4",
     "pandas==2.0.3",
