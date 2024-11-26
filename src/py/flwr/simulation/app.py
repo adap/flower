@@ -14,7 +14,9 @@
 # ==============================================================================
 """Flower Simulation process."""
 
+
 import argparse
+import os
 import sys
 from logging import DEBUG, ERROR, INFO
 from queue import Queue
@@ -198,8 +200,11 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
                 )
             backend_config: BackendConfig = fed_opt.get("backend", {})
             verbose: bool = fed_opt.get("verbose", False)
-            enable_tf_gpu_growth: bool = fed_opt.get("enable_tf_gpu_growth", False)
-
+            # Export variable for TF that will enable GPU growth
+            # https://www.tensorflow.org/guide/gpu#limiting_gpu_memory_growth
+            os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = fed_opt.get(
+                "enable_tf_gpu_growth", "False"
+            )
             # Launch the simulation
             _run_simulation(
                 server_app_attr=server_app_attr,
@@ -208,7 +213,6 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
                 backend_config=backend_config,
                 app_dir=str(app_path),
                 run=run,
-                enable_tf_gpu_growth=enable_tf_gpu_growth,
                 verbose_logging=verbose,
                 server_app_run_config=fused_config,
                 is_app=True,
