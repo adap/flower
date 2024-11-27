@@ -21,7 +21,11 @@ from typing import Any, Union
 
 import grpc
 
-from flwr.proto.exec_pb2 import GetAuthTokenRequest, GetAuthTokenResponse, LoginResponse  # type: ignore
+from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
+    GetAuthTokenRequest,
+    GetAuthTokenResponse,
+    LoginResponse,
+)
 from flwr.proto.exec_pb2_grpc import ExecStub
 
 Metadata = list[Any]

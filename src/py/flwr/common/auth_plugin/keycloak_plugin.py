@@ -25,7 +25,11 @@ from requests import post
 from tomli_w import dump
 
 from flwr.common.auth_plugin import ExecAuthPlugin, Metadata, UserAuthPlugin
-from flwr.proto.exec_pb2 import GetAuthTokenRequest, GetAuthTokenResponse, LoginResponse  # type: ignore
+from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
+    GetAuthTokenRequest,
+    GetAuthTokenResponse,
+    LoginResponse,
+)
 from flwr.proto.exec_pb2_grpc import ExecStub
 
 _AUTH_TOKEN_HEADER = "access-token"
@@ -76,7 +80,7 @@ class KeycloakExecPlugin(ExecAuthPlugin):
                 "interval": str(interval),
             }
             return LoginResponse(login_details=login_details)
-        
+
         return LoginResponse(login_details={})
 
     def authenticate(self, metadata: Sequence[tuple[str, Union[str, bytes]]]) -> bool:
@@ -120,7 +124,7 @@ class KeycloakExecPlugin(ExecAuthPlugin):
                 "refresh_token": refresh_token,
             }
             return GetAuthTokenResponse(auth_tokens=auth_tokens)
-        
+
         return GetAuthTokenResponse(auth_tokens={})
 
     def refresh_token(self, context: grpc.ServicerContext) -> bool:
@@ -159,7 +163,7 @@ class KeycloakExecPlugin(ExecAuthPlugin):
                 )
             )
             return True
-        
+
         return False
 
 
