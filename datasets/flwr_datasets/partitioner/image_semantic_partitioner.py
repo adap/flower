@@ -75,26 +75,34 @@ class ImageSemanticPartitioner(Partitioner):
     efficient_net_type: int
         The type of pretrained EfficientNet model.
         Options: [0, 1, 2, 3, 4, 5, 6, 7], corresponding to EfficientNet B0-B7 models.
+        Defaults to 7.
     batch_size: int
         The batch size for EfficientNet extracting embeddings.
-    pca_components: int
+        Defaults to 32.
+    pca_components: Optional[int]
         The number of PCA components for dimensionality reduction.
+        Defaults to None.
     gmm_max_iter: int
         The maximum number of iterations for the GMM algorithm.
+        Defaults to 100.
     gmm_init_params: str
         The initialization method for the GMM algorithm.
         Options: ["random", "kmeans", "k-means++"]
+        Defaults to "random".
     use_cuda: bool
         Whether to use CUDA for computation acceleration.
+        Defaults to False.
     image_column_name: Optional[str]
         The name of the image column in the dataset. If not set, the first image column
         is used.
+        Defaults to None.
     kl_pairwise_batch_size: int
         The batch size for computing pairwise KL-divergence of two label clusters.
-        Defaults to 32.
+        Defaults to 10.
     shuffle: bool
         Whether to randomize the order of samples. Shuffling applied after the
         samples assignment to partitions.
+        Defaults to True.
     rng_seed: Optional[int]
         Seed used for numpy random number generator,
         which used throughout the process. Defaults to None.
@@ -133,14 +141,14 @@ class ImageSemanticPartitioner(Partitioner):
         self,
         num_partitions: int,
         partition_by: str,
-        efficient_net_type: int = 3,
+        efficient_net_type: int = 7,
         batch_size: int = 32,
-        pca_components: int = 256,
+        pca_components: Optional[int] = None,
         gmm_max_iter: int = 100,
         gmm_init_params: str = "random",
         use_cuda: bool = False,
         image_column_name: Optional[str] = None,
-        kl_pairwise_batch_size: int = 32,
+        kl_pairwise_batch_size: int = 10,
         shuffle: bool = True,
         rng_seed: Optional[int] = None,
         pca_seed: Optional[int] = None,
@@ -215,11 +223,11 @@ class ImageSemanticPartitioner(Partitioner):
             from sklearn.preprocessing import StandardScaler
             from torch.distributions import MultivariateNormal, kl_divergence
             from torchvision import models
-        except ImportError:
+        except ImportError as err:
             raise ImportError(
                 "ImageSemanticPartitioner requires scikit-learn, torch, "
                 "torchvision, scipy, and numpy."
-            ) from None
+            ) from err
         efficient_nets_dict = [
             (models.efficientnet_b0, models.EfficientNet_B0_Weights.DEFAULT),
             (models.efficientnet_b1, models.EfficientNet_B1_Weights.DEFAULT),
@@ -310,7 +318,10 @@ class ImageSemanticPartitioner(Partitioner):
             embedding_list
         )
 
-        if 0 < self._pca_components < embeddings_scaled.shape[1]:
+        if self._pca_components is None or (
+            isinstance(self._pca_components, int)
+            and 0 < self._pca_components < embeddings_scaled.shape[1]
+        ):
             pca = PCA(n_components=self._pca_components, random_state=self._pca_seed)
             # 100000 refers to official implementation
             pca.fit(_subsample(embeddings_scaled, 100000))
@@ -528,7 +539,7 @@ class ImageSemanticPartitioner(Partitioner):
             )
         if self._gmm_max_iter <= 0:
             raise ValueError("The gmm max iter needs to be greater than zero.")
-        if self._pca_components <= 0:
+        if self._pca_components is not None and self._pca_components <= 0:
             raise ValueError("The pca components needs to be greater than zero.")
         if self._rng_seed and not isinstance(self._rng_seed, int):
             raise TypeError("The rng seed needs to be an integer.")
