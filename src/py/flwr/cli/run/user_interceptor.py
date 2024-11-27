@@ -83,7 +83,6 @@ class UserInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ignore
         )
 
         response = continuation(client_call_details, request)
-        print(response.initial_metadata())
         if response.initial_metadata():
             self.auth_plugin.save_refreshed_auth_tokens(response.initial_metadata())
 

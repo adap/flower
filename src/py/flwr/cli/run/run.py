@@ -125,9 +125,7 @@ def run(
                     # Remove quotes and whitespace from keys and values
                     config_dict[key.strip()] = value.strip().strip('"')
 
-        print(config_dict)
         auth_type = config_dict.get("auth-type")
-        print(auth_type)
         auth_plugin: Optional[UserAuthPlugin] = None
         if auth_type is not None:
             auth_plugin = auth_plugins.get(auth_type)(config_dict, credential)
