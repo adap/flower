@@ -25,7 +25,7 @@ from requests import post
 from tomli_w import dump
 
 from flwr.common.auth_plugin import ExecAuthPlugin, Metadata, UserAuthPlugin
-from flwr.proto.exec_pb2 import GetAuthTokenRequest, GetAuthTokenResponse, LoginResponse
+from flwr.proto.exec_pb2 import GetAuthTokenRequest, GetAuthTokenResponse, LoginResponse  # type: ignore
 from flwr.proto.exec_pb2_grpc import ExecStub
 
 _AUTH_TOKEN_HEADER = "access-token"
@@ -61,7 +61,7 @@ class KeycloakExecPlugin(ExecAuthPlugin):
 
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
-        response = post(self.auth_url, data=payload, headers=headers)
+        response = post(self.auth_url, data=payload, headers=headers, timeout=10)
         if response.status_code == 200:
             data = response.json()
             device_code = data.get("device_code")
@@ -76,8 +76,8 @@ class KeycloakExecPlugin(ExecAuthPlugin):
                 "interval": str(interval),
             }
             return LoginResponse(login_details=login_details)
-        else:
-            return LoginResponse(login_details={})
+        
+        return LoginResponse(login_details={})
 
     def authenticate(self, metadata: Sequence[tuple[str, Union[str, bytes]]]) -> bool:
         """Authenticate auth tokens in the provided metadata."""
@@ -88,7 +88,7 @@ class KeycloakExecPlugin(ExecAuthPlugin):
 
         headers = {"Authorization": access_token.decode("utf-8")}
 
-        response = post(self.validate_url, headers=headers)
+        response = post(self.validate_url, headers=headers, timeout=10)
         if response.status_code == 200:
             return True
         return False
@@ -110,7 +110,7 @@ class KeycloakExecPlugin(ExecAuthPlugin):
 
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
-        response = post(self.token_url, data=payload, headers=headers)
+        response = post(self.token_url, data=payload, headers=headers, timeout=10)
         if response.status_code == 200:
             data = response.json()
             access_token = data.get("access_token")
@@ -120,8 +120,8 @@ class KeycloakExecPlugin(ExecAuthPlugin):
                 "refresh_token": refresh_token,
             }
             return GetAuthTokenResponse(auth_tokens=auth_tokens)
-        else:
-            return GetAuthTokenResponse(auth_tokens={})
+        
+        return GetAuthTokenResponse(auth_tokens={})
 
     def refresh_token(self, context: grpc.ServicerContext) -> bool:
         """Refresh auth tokens in the provided metadata."""
@@ -139,7 +139,7 @@ class KeycloakExecPlugin(ExecAuthPlugin):
 
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
-        response = post(self.token_url, data=payload, headers=headers)
+        response = post(self.token_url, data=payload, headers=headers, timeout=10)
         if response.status_code == 200:
 
             data = response.json()
@@ -159,8 +159,8 @@ class KeycloakExecPlugin(ExecAuthPlugin):
                 )
             )
             return True
-        else:
-            return False
+        
+        return False
 
 
 class KeycloakUserPlugin(UserAuthPlugin):
