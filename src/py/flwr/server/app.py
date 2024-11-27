@@ -66,7 +66,6 @@ from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
 from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
 from flwr.superexec.app import load_executor
 from flwr.superexec.exec_grpc import run_exec_api_grpc
-from flwr.superexec.simulation import SimulationEngine
 
 from .client_manager import ClientManager
 from .history import History
@@ -269,8 +268,7 @@ def run_superlink() -> None:
 
     # Determine Exec plugin
     # If simulation is used, don't start ServerAppIo and Fleet APIs
-    sim_exec = isinstance(executor, SimulationEngine)
-
+    sim_exec = executor.__class__.__qualname__ == "SimulationEngine"
     bckg_threads = []
 
     if sim_exec:

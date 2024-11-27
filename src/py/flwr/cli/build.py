@@ -19,18 +19,14 @@ import os
 import shutil
 import tempfile
 import zipfile
-from logging import DEBUG, ERROR
 from pathlib import Path
 from typing import Annotated, Any, Optional, Union
 
 import pathspec
 import tomli_w
 import typer
-from hatchling.builders.wheel import WheelBuilder
-from hatchling.metadata.core import ProjectMetadata
 
 from flwr.common.constant import FAB_ALLOWED_EXTENSIONS, FAB_DATE, FAB_HASH_TRUNCATION
-from flwr.common.logger import log
 
 from .config_utils import load_and_validate
 from .utils import is_valid_project_name
@@ -53,27 +49,6 @@ def get_fab_filename(conf: dict[str, Any], fab_hash: str) -> str:
     version = conf["project"]["version"].replace(".", "-")
     fab_hash_truncated = fab_hash[:FAB_HASH_TRUNCATION]
     return f"{publisher}.{name}.{version}.{fab_hash_truncated}.fab"
-
-
-def _build_app_wheel(app: Path) -> Path:
-    """Build app as a wheel and return its path."""
-    # Path to your project directory
-    app_dir = str(app.resolve())
-    try:
-
-        # Initialize the WheelBuilder
-        builder = WheelBuilder(
-            app_dir, metadata=ProjectMetadata(root=app_dir, plugin_manager=None)
-        )
-
-        # Build
-        whl_path = Path(next(builder.build(directory=app_dir)))
-        log(DEBUG, "Wheel succesfully built: %s", str(whl_path))
-    except Exception as ex:
-        log(ERROR, "Exception encountered when building wheel.", exc_info=ex)
-        raise typer.Exit(code=1) from ex
-
-    return whl_path
 
 
 # pylint: disable=too-many-locals, too-many-statements
@@ -131,12 +106,6 @@ def build(
             bold=True,
         )
 
-    # Build wheel
-    whl_path = _build_app_wheel(app)
-
-    # Add path to .whl to `[tool.flwr.app]`
-    conf["tool"]["flwr"]["app"]["whl"] = str(whl_path.name)
-
     # Load .gitignore rules if present
     ignore_spec = _load_gitignore(app)
 
@@ -168,9 +137,6 @@ def build(
                 and f.name != "pyproject.toml"  # Exclude the original pyproject.toml
             ]
 
-            # Include FAB .whl
-            all_files.append(whl_path)
-
             for file_path in all_files:
                 # Read the file content manually
                 with open(file_path, "rb") as f:
@@ -186,9 +152,6 @@ def build(
 
             # Add CONTENT and CONTENT.jwt to the zip file
             write_to_zip(fab_file, ".info/CONTENT", list_file_content)
-
-    # Erase FAB .whl in app directory
-    whl_path.unlink()
 
     # Get hash of FAB file
     content = Path(temp_filename).read_bytes()
