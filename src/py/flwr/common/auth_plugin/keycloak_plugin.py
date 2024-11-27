@@ -24,13 +24,14 @@ import typer
 from requests import post
 from tomli_w import dump
 
-from flwr.common.auth_plugin import ExecAuthPlugin, Metadata, UserAuthPlugin
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     GetAuthTokenRequest,
     GetAuthTokenResponse,
     LoginResponse,
 )
 from flwr.proto.exec_pb2_grpc import ExecStub
+
+from .auth_plugin import ExecAuthPlugin, Metadata, UserAuthPlugin
 
 _AUTH_TOKEN_HEADER = "access-token"
 _REFRESH_TOKEN_HEADER = "refresh-token"
