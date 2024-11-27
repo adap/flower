@@ -36,7 +36,7 @@ poetry shell
 
 ## About this baseline
 
-The purpose of this baseline is 1) implement the federated aggregation strategies introduced in Tong et. al. 2020, and 2) showcase the aggregation strategies with the datasets included in the paper. The two strategies introduced include Fed-HT and FedIter-HT. Fed-HT and FedIter-HT both apply hardthresholding (restricted by the hardthresholding parameter $\tau$) following the aggregation step. FedIter-HT, additionally, applies hardthresholding to each client model prior to aggregation. We also include FedAvg and Distributed-IHT , i.e., Fed-HT with `num_local_epochs` set to 1.
+The purpose of this baseline is 1) implement the federated aggregation strategies introduced in Tong et. al. 2020, and 2) showcase the aggregation strategies with the datasets included in the paper. The two strategies introduced include Fed-HT and FedIter-HT. Fed-HT and FedIter-HT both apply hardthresholding (restricted by the hardthresholding parameter $\tau$) following the aggregation step. FedIter-HT, additionally, applies hardthresholding to each client model prior to aggregation. We also include results using FedAvg.
 
 Two federated classification models are implemented, the first using the well-known MNIST dataset (with 10 clients) and the second using a simulated dataset (with 25 clients).
 
@@ -80,22 +80,21 @@ We note that in the current implementation, only weights (and not biases) of the
 ## Expected Results
 ### MNIST (`num_keep` = 500)
 ```
-python -m fedht.main --config-name base_mnist agg=fedavg num_keep=500 num_local_epochs=10 learning_rate=0.00005
-python -m fedht.main --config-name base_mnist agg=fedht num_keep=500 num_local_epochs=10 learning_rate=0.00005
-python -m fedht.main --config-name base_mnist agg=fedht iterht=True num_keep=500 num_local_epochs=10 learning_rate=0.00005
-python -m fedht.main --config-name base_mnist agg=fedht num_keep=500 num_local_epochs=1 learning_rate=0.00005
+python -m fedht.main --config-name base_mnist agg=fedavg num_keep=500 num_local_epochs=5 learning_rate=0.00001
+python -m fedht.main --config-name base_mnist agg=fedht num_keep=500 num_local_epochs=5 learning_rate=0.00001
+python -m fedht.main --config-name base_mnist agg=fedht iterht=True num_keep=500 num_local_epochs=5 learning_rate=0.00001
 ```
 
 | *Experiments: Comparison of Aggregation Approaches to Fed-HT for MNIST* |
 |:--:| 
-| ![loss_results_mnist.png](_static/loss_results_mnist.png) | 
+| ![loss_results_mnist.png](_static/loss_results_mnist_centralized.png) | 
+| ![loss_results_mnist.png](_static/loss_results_mnist_distributed.png) | 
 
 ### Simulation II (`num_keep` = 200)
 ```
 python -m fedht.main --config-name base_simII agg=fedavg num_local_epochs=2 learning_rate=0.00001
 python -m fedht.main --config-name base_simII agg=fedht num_local_epochs=2 learning_rate=0.00001
 python -m fedht.main --config-name base_simII agg=fedht iterht=True num_local_epochs=2 learning_rate=0.00001
-python -m fedht.main --config-name base_simII agg=fedht num_local_epochs=1 learning_rate=0.00001
 ```
 
 | *Experiments: Comparison of Aggregation Approaches to Fed-HT for Simulation II* |

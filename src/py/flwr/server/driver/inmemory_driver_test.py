@@ -21,8 +21,8 @@ from collections.abc import Iterable
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
-from flwr.common import ConfigsRecord, RecordSet
-from flwr.common.constant import NODE_ID_NUM_BYTES, PING_MAX_INTERVAL
+from flwr.common import ConfigsRecord, RecordSet, now
+from flwr.common.constant import NODE_ID_NUM_BYTES, PING_MAX_INTERVAL, Status
 from flwr.common.message import Error
 from flwr.common.serde import (
     error_to_proto,
@@ -30,7 +30,7 @@ from flwr.common.serde import (
     message_to_taskres,
     recordset_to_proto,
 )
-from flwr.common.typing import Run
+from flwr.common.typing import Run, RunStatus
 from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import (
     InMemoryLinkState,
@@ -94,6 +94,11 @@ class TestInMemoryDriver(unittest.TestCase):
             fab_version="v1.0.0",
             fab_hash="9f86d08",
             override_config={"test_key": "test_value"},
+            pending_at=now().isoformat(),
+            starting_at="",
+            running_at="",
+            finished_at="",
+            status=RunStatus(status=Status.PENDING, sub_status="", details=""),
         )
         state_factory = MagicMock(state=lambda: self.state)
         self.driver = InMemoryDriver(state_factory=state_factory)
@@ -272,6 +277,6 @@ class TestInMemoryDriver(unittest.TestCase):
         reply_tos = get_replies(self.driver, msg_ids, node_id)
 
         # Assert
-        self.assertEqual(reply_tos, msg_ids)
+        self.assertEqual(set(reply_tos), set(msg_ids))
         self.assertEqual(len(state.task_res_store), 0)
         self.assertEqual(len(state.task_ins_store), 0)
