@@ -14,9 +14,9 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Resolved an issue that prevented SuperLink from functioning correctly when using the `SimulationEngine` executor.
 
-- **Fix FAB file packaging** ([#4571](https://github.com/adap/flower/pull/4571))
+- **Improve FAB build and install** ([#4571](https://github.com/adap/flower/pull/4571))
 
-  Resolved an issue where all files, including datasets, were unnecessarily included in the FAB file. The `flwr` CLI commands now correctly pack only the necessary files, such as `.md`, `.toml` and `.py`, ensuring more efficient and accurate packaging.
+  An updated FAB build and install process produces smaller FAB files and doesn't rely on `pip install` any more. It also resolves an issue where all files were unnecessarily included in the FAB file. The `flwr` CLI commands now correctly pack only the necessary files, such as `.md`, `.toml` and `.py`, ensuring more efficient and accurate packaging.
 
 - **Update** `embedded-devices` **example** ([#4381](https://github.com/adap/flower/pull/4381))
 
