@@ -82,7 +82,7 @@ def ls(
 
     if "address" not in federation_config:
         typer.secho(
-            "❌ `flwr log` currently works with Exec API. Ensure that the correct"
+            "❌ `flwr ls` currently works with Exec API. Ensure that the correct"
             "Exec API address is provided in the `pyproject.toml`.",
             fg=typer.colors.RED,
             bold=True,

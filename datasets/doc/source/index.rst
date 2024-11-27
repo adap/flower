@@ -63,6 +63,7 @@ Information-oriented API reference and other reference material.
    :maxdepth: 1
    :caption: Reference docs
 
+   recommended-fl-datasets
    ref-telemetry
 
 Main features
