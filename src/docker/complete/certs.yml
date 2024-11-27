@@ -36,10 +36,6 @@ services:
         IP.2 = $${SUPERLINK_IP}
         EOF
 
-        ARG SUPEREXEC_IP=127.0.0.1
-
-
-
         COPY --chmod=744 <<-'EOF' generate.sh
         #!/bin/bash
         # This script will generate all certificates if ca.crt does not exist

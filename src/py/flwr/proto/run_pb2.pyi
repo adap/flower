@@ -37,12 +37,23 @@ class Run(google.protobuf.message.Message):
     FAB_VERSION_FIELD_NUMBER: builtins.int
     OVERRIDE_CONFIG_FIELD_NUMBER: builtins.int
     FAB_HASH_FIELD_NUMBER: builtins.int
+    PENDING_AT_FIELD_NUMBER: builtins.int
+    STARTING_AT_FIELD_NUMBER: builtins.int
+    RUNNING_AT_FIELD_NUMBER: builtins.int
+    FINISHED_AT_FIELD_NUMBER: builtins.int
+    STATUS_FIELD_NUMBER: builtins.int
     run_id: builtins.int
     fab_id: typing.Text
     fab_version: typing.Text
     @property
     def override_config(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, flwr.proto.transport_pb2.Scalar]: ...
     fab_hash: typing.Text
+    pending_at: typing.Text
+    starting_at: typing.Text
+    running_at: typing.Text
+    finished_at: typing.Text
+    @property
+    def status(self) -> global___RunStatus: ...
     def __init__(self,
         *,
         run_id: builtins.int = ...,
@@ -50,8 +61,14 @@ class Run(google.protobuf.message.Message):
         fab_version: typing.Text = ...,
         override_config: typing.Optional[typing.Mapping[typing.Text, flwr.proto.transport_pb2.Scalar]] = ...,
         fab_hash: typing.Text = ...,
+        pending_at: typing.Text = ...,
+        starting_at: typing.Text = ...,
+        running_at: typing.Text = ...,
+        finished_at: typing.Text = ...,
+        status: typing.Optional[global___RunStatus] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["fab_hash",b"fab_hash","fab_id",b"fab_id","fab_version",b"fab_version","override_config",b"override_config","run_id",b"run_id"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["status",b"status"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["fab_hash",b"fab_hash","fab_id",b"fab_id","fab_version",b"fab_version","finished_at",b"finished_at","override_config",b"override_config","pending_at",b"pending_at","run_id",b"run_id","running_at",b"running_at","starting_at",b"starting_at","status",b"status"]) -> None: ...
 global___Run = Run
 
 class RunStatus(google.protobuf.message.Message):
