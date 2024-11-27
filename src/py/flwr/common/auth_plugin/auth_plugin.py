@@ -17,7 +17,7 @@
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Union
 
 import grpc
 
@@ -40,7 +40,7 @@ class ExecAuthPlugin(ABC):
         pass
 
     @abstractmethod
-    def authenticate(self, metadata: Sequence[tuple[str, Union[str, bytes]]]):
+    def authenticate(self, metadata: Sequence[tuple[str, Union[str, bytes]]]) -> bool:
         """Authenticate auth tokens in the provided metadata."""
         pass
 
@@ -52,7 +52,7 @@ class ExecAuthPlugin(ABC):
         pass
 
     @abstractmethod
-    def refresh_token(self, context: grpc.ServicerContext) -> Optional[tuple[str, str]]:
+    def refresh_token(self, context: grpc.ServicerContext) -> bool:
         """Refresh auth tokens in the provided metadata."""
         pass
 
@@ -67,7 +67,7 @@ class UserAuthPlugin(ABC):
         config: dict[str, Any],
         federation: str,
         exec_stub: ExecStub,
-    ):
+    ) -> dict[str, Any]:
         """Read relevant auth details from federation config."""
         pass
 
@@ -77,7 +77,7 @@ class UserAuthPlugin(ABC):
         pass
 
     @abstractmethod
-    def provide_auth_details(self, metadata) -> Metadata:
+    def provide_auth_details(self, metadata: Metadata) -> Metadata:
         """Provide relevant auth tokens in the metadata."""
         pass
 

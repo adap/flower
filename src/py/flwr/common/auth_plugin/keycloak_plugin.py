@@ -194,7 +194,7 @@ class KeycloakUserPlugin(UserAuthPlugin):
             raise typer.Exit(code=1)
 
         typer.secho(
-            "Please login with your user credentials here: ",
+            "Please login with your user credentials here: "
             f"{verification_uri_complete}",
             fg=typer.colors.BLUE,
         )
@@ -233,7 +233,7 @@ class KeycloakUserPlugin(UserAuthPlugin):
         )
         raise typer.Exit(code=1)
 
-    def provide_auth_details(self, metadata) -> Metadata:
+    def provide_auth_details(self, metadata: Metadata) -> Metadata:
         """Provide relevant auth tokens in the metadata."""
         metadata.append(
             (
