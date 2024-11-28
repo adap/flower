@@ -572,7 +572,7 @@ class IncorrectUsageFederatedDatasets(unittest.TestCase):
     def test_incorrect_two_partitioners(self) -> None:
         """Test if the method raises ValueError with incorrect partitioners."""
         partitioner = IidPartitioner(num_partitions=10)
-        partitioners: dict[str, Partitioner | int] = {
+        partitioners: dict[str, Union[Partitioner, int]] = {
             "train": partitioner,
             "test": partitioner,
         }
@@ -593,7 +593,7 @@ class IncorrectUsageFederatedDatasets(unittest.TestCase):
     def test_incorrect_three_partitioners(self) -> None:
         """Test if the method raises ValueError with incorrect partitioners."""
         partitioner = IidPartitioner(num_partitions=10)
-        partitioners: dict[str, int | Partitioner] = {
+        partitioners: dict[str, Union[int, Partitioner]] = {
             "train1": partitioner,
             "train2": 10,
             "test": partitioner,
