@@ -105,7 +105,9 @@ def run(
     )
 
     if "address" in federation_config:
-        auth_plugin: Optional[UserAuthPlugin] = _try_obtain_credentials(federation_config)
+        auth_plugin: Optional[UserAuthPlugin] = _try_obtain_credentials(
+            federation_config
+        )
         _run_with_exec_api(
             app, federation_config, config_overrides, stream, auth_plugin
         )
@@ -113,7 +115,9 @@ def run(
         _run_without_exec_api(app, federation_config, config_overrides, federation)
 
 
-def _try_obtain_credentials(federation_config: dict[str, Any]) -> Optional[UserAuthPlugin]:
+def _try_obtain_credentials(
+    federation_config: dict[str, Any]
+) -> Optional[UserAuthPlugin]:
     base_path = get_flwr_dir()
     credentials_dir = base_path / ".credentials"
     credentials_dir.mkdir(parents=True, exist_ok=True)
@@ -123,7 +127,7 @@ def _try_obtain_credentials(federation_config: dict[str, Any]) -> Optional[UserA
 
     if not credential.exists():
         return None
-    
+
     with credential.open("r", encoding="utf-8") as file:
         for line in file:
             line = line.strip()
@@ -140,7 +144,7 @@ def _try_obtain_credentials(federation_config: dict[str, Any]) -> Optional[UserA
     auth_plugin_class = auth_plugins.get(auth_type)
     if auth_plugin_class is not None:
         auth_plugin = auth_plugin_class(config_dict, credential)
-    
+
     return auth_plugin
 
 
