@@ -15,10 +15,13 @@
 """Flower command line interface `ls` command."""
 
 
+import json
+import re
 from datetime import datetime, timedelta
+from enum import Enum
 from logging import DEBUG
 from pathlib import Path
-from typing import Annotated, Any, Optional
+from typing import Annotated, Any, Dict, List, Optional, Tuple
 
 import grpc
 import typer
@@ -45,6 +48,13 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 
 
+class OutputFormat(str, Enum):
+    """."""
+
+    table = "table"  # pylint: disable=invalid-name
+    json = "json"  # pylint: disable=invalid-name
+
+
 def ls(
     app: Annotated[
         Path,
@@ -68,6 +78,14 @@ def ls(
             help="Specific run ID to display",
         ),
     ] = None,
+    ls_format: Annotated[
+        OutputFormat,
+        typer.Option(
+            "--format",
+            case_sensitive=False,
+            help="Format output using 'table' or 'json'",
+        ),
+    ] = OutputFormat.table,
 ) -> None:
     """List runs."""
     # Load and validate federation config
@@ -101,11 +119,13 @@ def ls(
         # Display information about a specific run ID
         if run_id is not None:
             typer.echo(f"🔍 Displaying information for run ID {run_id}...")
-            _display_one_run(stub, run_id)
+            _display_one_run(
+                stub, run_id, ls_format if ls_format is not None else "table"
+            )
         # By default, list all runs
         else:
             typer.echo("📄 Listing all runs...")
-            _list_runs(stub)
+            _list_runs(stub, ls_format if ls_format is not None else "table")
 
     except ValueError as err:
         typer.secho(
@@ -139,24 +159,13 @@ def _init_channel(app: Path, federation_config: dict[str, Any]) -> grpc.Channel:
     return channel
 
 
-def _format_run_table(run_dict: dict[int, Run], now_isoformat: str) -> Table:
+def _format_run(run_dict: dict[int, Run], now_isoformat: str) -> List[Tuple[str, ...]]:
     """Format run status as a rich Table."""
-    table = Table(header_style="bold cyan", show_lines=True)
 
     def _format_datetime(dt: Optional[datetime]) -> str:
         return isoformat8601_utc(dt).replace("T", " ") if dt else "N/A"
 
-    # Add columns
-    table.add_column(
-        Text("Run ID", justify="center"), style="bright_white", overflow="fold"
-    )
-    table.add_column(Text("FAB", justify="center"), style="dim white")
-    table.add_column(Text("Status", justify="center"))
-    table.add_column(Text("Elapsed", justify="center"), style="blue")
-    table.add_column(Text("Created At", justify="center"), style="dim white")
-    table.add_column(Text("Running At", justify="center"), style="dim white")
-    table.add_column(Text("Finished At", justify="center"), style="dim white")
-
+    _list: List[Tuple[str, ...]] = []
     # Add rows
     for run in sorted(
         run_dict.values(), key=lambda x: datetime.fromisoformat(x.pending_at)
@@ -192,32 +201,78 @@ def _format_run_table(run_dict: dict[int, Run], now_isoformat: str) -> Table:
                 end_time = datetime.fromisoformat(now_isoformat)
             elapsed_time = end_time - running_at
 
-        table.add_row(
-            f"[bold]{run.run_id}[/bold]",
-            f"{run.fab_id} (v{run.fab_version})",
-            f"[{status_style}]{status_text}[/{status_style}]",
-            format_timedelta(elapsed_time),
-            _format_datetime(pending_at),
-            _format_datetime(running_at),
-            _format_datetime(finished_at),
+        _list.append(
+            (
+                f"[bold]{run.run_id}[/bold]",
+                f"{run.fab_id} (v{run.fab_version})",
+                f"[{status_style}]{status_text}[/{status_style}]",
+                format_timedelta(elapsed_time),
+                _format_datetime(pending_at),
+                _format_datetime(running_at),
+                _format_datetime(finished_at),
+            )
         )
+    return _list
+
+
+def _to_table(run_list: List[Tuple[str, ...]]) -> Table:
+    """."""
+    table = Table(header_style="bold cyan", show_lines=True)
+
+    # Add columns
+    table.add_column(
+        Text("Run ID", justify="center"), style="bright_white", overflow="fold"
+    )
+    table.add_column(Text("FAB", justify="center"), style="dim white")
+    table.add_column(Text("Status", justify="center"))
+    table.add_column(Text("Elapsed", justify="center"), style="blue")
+    table.add_column(Text("Created At", justify="center"), style="dim white")
+    table.add_column(Text("Running At", justify="center"), style="dim white")
+    table.add_column(Text("Finished At", justify="center"), style="dim white")
+
+    for row in run_list:
+        table.add_row(*row)
+
     return table
 
 
-def _list_runs(
-    stub: ExecStub,
-) -> None:
+def _to_json(run_list: List[Tuple[str, ...]]) -> str:
+    """."""
+
+    def _remove_bbcode_tags(strings: Tuple[str, ...]) -> Tuple[str, ...]:
+        """Remove BBCode tags from the provided text."""
+        # Regular expression pattern to match BBCode tags
+        bbcode_pattern = re.compile(r"\[/?\w+\]")
+        # Substitute BBCode tags with an empty string
+        return tuple(bbcode_pattern.sub("", s) for s in strings)
+
+    runs_dict: Dict[str, Dict[str, str]] = {}
+    for row in run_list:
+        row = _remove_bbcode_tags(row)
+        run_id, fab, status, elapsed, created_at, running_at, finished_at = row
+        runs_dict[run_id] = {
+            "FAB": fab,
+            "Status": status,
+            "Elapsed": elapsed,
+            "Created At": created_at,
+            "Running At": running_at,
+            "Finished At": finished_at,
+        }
+    return json.dumps(runs_dict)
+
+
+def _list_runs(stub: ExecStub, format: str) -> None:
     """List all runs."""
     res: ListRunsResponse = stub.ListRuns(ListRunsRequest())
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
-    Console().print(_format_run_table(run_dict, res.now))
+    if format == "table":
+        Console().print(_to_table(_format_run(run_dict, res.now)))
+    else:
+        Console().print_json(_to_json(_format_run(run_dict, res.now)))
 
 
-def _display_one_run(
-    stub: ExecStub,
-    run_id: int,
-) -> None:
+def _display_one_run(stub: ExecStub, run_id: int, format: str) -> None:
     """Display information about a specific run."""
     res: ListRunsResponse = stub.ListRuns(ListRunsRequest(run_id=run_id))
     if not res.run_dict:
@@ -225,4 +280,7 @@ def _display_one_run(
 
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
-    Console().print(_format_run_table(run_dict, res.now))
+    if format == "table":
+        Console().print(_to_table(_format_run(run_dict, res.now)))
+    else:
+        Console().print_json(_to_json(_format_run(run_dict, res.now)))
