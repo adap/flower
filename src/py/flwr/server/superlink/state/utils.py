@@ -100,11 +100,6 @@ def convert_uint64_values_in_dict_to_sint64(
         A dictionary where the values are integers to be converted.
     keys : list[str]
         A list of keys in the dictionary whose values need to be converted.
-
-    Returns
-    -------
-    None
-        This function does not return a value. It modifies `data_dict` in place.
     """
     for key in keys:
         if key in data_dict:
@@ -122,11 +117,6 @@ def convert_sint64_values_in_dict_to_uint64(
         A dictionary where the values are integers to be converted.
     keys : list[str]
         A list of keys in the dictionary whose values need to be converted.
-
-    Returns
-    -------
-    None
-        This function does not return a value. It modifies `data_dict` in place.
     """
     for key in keys:
         if key in data_dict:

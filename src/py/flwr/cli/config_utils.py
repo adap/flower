@@ -90,6 +90,16 @@ def load_and_validate(
 ) -> tuple[Optional[dict[str, Any]], list[str], list[str]]:
     """Load and validate pyproject.toml as dict.
 
+    Parameters
+    ----------
+    path : Optional[Path] (default: None)
+        The path of the Flower App config file to load. By default it
+        will try to use `pyproject.toml` inside the current directory.
+    check_module: bool (default: True)
+        Whether the validity of the Python module should be checked.
+        This requires the project to be installed in the currently
+        running environment. True by default.
+
     Returns
     -------
     Tuple[Optional[config], List[str], List[str]]

@@ -155,7 +155,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         context.add_callback(on_rpc_done)
 
         # Read from state
-        task_res_list: list[TaskRes] = state.get_task_res(task_ids=task_ids, limit=None)
+        task_res_list: list[TaskRes] = state.get_task_res(task_ids=task_ids)
 
         context.set_code(grpc.StatusCode.OK)
         return PullTaskResResponse(task_res_list=task_res_list)

@@ -48,7 +48,7 @@ from flwr.simulation.ray_transport.ray_actor import VirtualClientEngineActorPool
 class RayActorClientProxy(ClientProxy):
     """Flower client proxy which delegates work using Ray."""
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         client_fn: ClientFnExt,
         node_id: int,

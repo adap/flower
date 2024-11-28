@@ -106,15 +106,16 @@ delete ``poetry.lock`` via ``rm poetry.lock`` before running ``poetry install``)
 Ensure you set the following version constraint in your ``pyproject.toml``:
 
 .. code-block:: toml
+    :substitutions:
 
-    [tool.poetry.dependencies]
-    python = "^3.9"
+     [tool.poetry.dependencies]
+     python = "^|python_version|"
 
-    # Without simulation support
-    flwr = ">=1.8,<2.0"
+     # Without simulation support
+     flwr = ">=1.8,<2.0"
 
-    # With simulation support
-    flwr = { version = ">=1.8,<2.0", extras = ["simulation"] }
+     # With simulation support
+     flwr = { version = ">=1.8,<2.0", extras = ["simulation"] }
 
 Required changes
 ----------------

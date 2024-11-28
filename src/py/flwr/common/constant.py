@@ -63,7 +63,10 @@ NODE_ID_NUM_BYTES = 8
 
 # Constants for FAB
 APP_DIR = "apps"
+FAB_ALLOWED_EXTENSIONS = {".py", ".toml", ".md"}
 FAB_CONFIG_FILE = "pyproject.toml"
+FAB_DATE = (2024, 10, 1, 0, 0, 0)
+FAB_HASH_TRUNCATION = 8
 FLWR_HOME = "FLWR_HOME"
 
 # Constants entries in Node config for Simulation
@@ -77,6 +80,9 @@ GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY = "flower-version"  # Deprecated
 GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY = "should-exit"
 GRPC_ADAPTER_METADATA_MESSAGE_MODULE_KEY = "grpc-message-module"
 GRPC_ADAPTER_METADATA_MESSAGE_QUALNAME_KEY = "grpc-message-qualname"
+
+# Message TTL
+MESSAGE_TTL_TOLERANCE = 1e-1
 
 
 class MessageType:

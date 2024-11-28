@@ -158,7 +158,7 @@ class GrpcDriver(Driver):
         ):
             raise ValueError(f"Invalid message: {message}")
 
-    def create_message(  # pylint: disable=too-many-arguments
+    def create_message(  # pylint: disable=too-many-arguments,R0917
         self,
         content: RecordSet,
         message_type: str,

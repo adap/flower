@@ -48,7 +48,7 @@ class NodeState:
         self.node_config = node_config
         self.run_infos: dict[int, RunInfo] = {}
 
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     def register_context(
         self,
         run_id: int,

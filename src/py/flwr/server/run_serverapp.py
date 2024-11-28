@@ -181,19 +181,17 @@ def run_server_app() -> None:
         )
         flwr_dir = get_flwr_dir(args.flwr_dir)
         run_ = driver.run
-        if run_.fab_hash:
-            fab_req = GetFabRequest(hash_str=run_.fab_hash)
-            # pylint: disable-next=W0212
-            fab_res: GetFabResponse = driver._stub.GetFab(fab_req)
-            if fab_res.fab.hash_str != run_.fab_hash:
-                raise ValueError("FAB hashes don't match.")
+        if not run_.fab_hash:
+            raise ValueError("FAB hash not provided.")
+        fab_req = GetFabRequest(hash_str=run_.fab_hash)
+        # pylint: disable-next=W0212
+        fab_res: GetFabResponse = driver._stub.GetFab(fab_req)
+        if fab_res.fab.hash_str != run_.fab_hash:
+            raise ValueError("FAB hashes don't match.")
+        install_from_fab(fab_res.fab.content, flwr_dir, True)
+        fab_id, fab_version = get_fab_metadata(fab_res.fab.content)
 
-            install_from_fab(fab_res.fab.content, flwr_dir, True)
-            fab_id, fab_version = get_fab_metadata(fab_res.fab.content)
-        else:
-            fab_id, fab_version = run_.fab_id, run_.fab_version
-
-        app_path = str(get_project_dir(fab_id, fab_version, flwr_dir))
+        app_path = str(get_project_dir(fab_id, fab_version, run_.fab_hash, flwr_dir))
         config = get_project_config(app_path)
     else:
         # User provided `app_dir`, but not `--run-id`

@@ -2,6 +2,8 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
+taplo fmt
+
 # Python
 python -m flwr_tool.check_copyright src/py/flwr
 python -m flwr_tool.init_py_fix src/py/flwr
