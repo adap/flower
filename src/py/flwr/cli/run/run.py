@@ -18,7 +18,7 @@ import json
 import subprocess
 from logging import DEBUG
 from pathlib import Path
-from typing import Annotated, Any, Optional
+from typing import Annotated, Any, Dict, Optional
 
 import typer
 
@@ -29,8 +29,11 @@ from flwr.cli.config_utils import (
     validate_federation_in_project_config,
     validate_project_config,
 )
+from flwr.cli.run.user_interceptor import UserInterceptor
+from flwr.common.auth_plugin import KeycloakUserPlugin, UserAuthPlugin
 from flwr.common.config import (
     flatten_dict,
+    get_flwr_dir,
     parse_config_args,
     user_config_to_configsrecord,
 )
@@ -48,6 +51,11 @@ from flwr.proto.exec_pb2_grpc import ExecStub
 from ..log import start_stream
 
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
+
+
+auth_plugins: Dict[str, UserAuthPlugin] = {
+    "keycloak": KeycloakUserPlugin,
+}
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
@@ -97,7 +105,33 @@ def run(
     )
 
     if "address" in federation_config:
-        _run_with_exec_api(app, federation_config, config_overrides, stream)
+        base_path = get_flwr_dir()
+        credentials_dir = base_path / ".credentials"
+        credentials_dir.mkdir(parents=True, exist_ok=True)
+
+        credential = credentials_dir / federation_config["address"]
+
+        config_dict = {}
+        with credential.open("r", encoding="utf-8") as file:
+            for line in file:
+                # Ignore empty lines and comments
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+
+                # Split the key and value
+                if "=" in line:
+                    key, value = line.split("=", 1)
+                    # Remove quotes and whitespace from keys and values
+                    config_dict[key.strip()] = value.strip().strip('"')
+
+        auth_type = config_dict.get("auth-type")
+        auth_plugin: Optional[UserAuthPlugin] = None
+        if auth_type is not None:
+            auth_plugin = auth_plugins.get(auth_type)(config_dict, credential)
+        _run_with_exec_api(
+            app, federation_config, config_overrides, stream, auth_plugin
+        )
     else:
         _run_without_exec_api(app, federation_config, config_overrides, federation)
 
@@ -108,6 +142,7 @@ def _run_with_exec_api(
     federation_config: dict[str, Any],
     config_overrides: Optional[list[str]],
     stream: bool,
+    auth_plugin: Optional[UserAuthPlugin] = None,
 ) -> None:
 
     insecure, root_certificates_bytes = validate_certificate_in_federation_config(
@@ -118,7 +153,9 @@ def _run_with_exec_api(
         insecure=insecure,
         root_certificates=root_certificates_bytes,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        interceptors=None,
+        interceptors=(
+            UserInterceptor(auth_plugin) if auth_plugin is not None else None
+        ),
     )
     channel.subscribe(on_channel_state_change)
     stub = ExecStub(channel)
