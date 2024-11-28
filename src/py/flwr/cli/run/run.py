@@ -18,7 +18,7 @@ import json
 import subprocess
 from logging import DEBUG
 from pathlib import Path
-from typing import Annotated, Any, Dict, Optional
+from typing import Annotated, Any, Optional
 
 import typer
 
@@ -53,7 +53,7 @@ from ..log import start_stream
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
 
-auth_plugins: Dict[str, UserAuthPlugin] = {
+auth_plugins: dict[str, type[UserAuthPlugin]] = {
     "keycloak": KeycloakUserPlugin,
 }
 
@@ -125,10 +125,12 @@ def run(
                     # Remove quotes and whitespace from keys and values
                     config_dict[key.strip()] = value.strip().strip('"')
 
-        auth_type = config_dict.get("auth-type")
+        auth_type = config_dict.get("auth-type", "")
         auth_plugin: Optional[UserAuthPlugin] = None
-        if auth_type is not None:
-            auth_plugin = auth_plugins.get(auth_type)(config_dict, credential)
+
+        auth_plugin_class = auth_plugins.get(auth_type)
+        if auth_plugin_class is not None:
+            auth_plugin = auth_plugin_class(config_dict, credential)
         _run_with_exec_api(
             app, federation_config, config_overrides, stream, auth_plugin
         )

@@ -15,19 +15,12 @@
 """Flower run interceptor."""
 
 
-import base64
 import collections
 from typing import Any, Callable, Union
 
 import grpc
-from cryptography.hazmat.primitives.asymmetric import ec
 
 from flwr.common.auth_plugin import UserAuthPlugin
-from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
-    compute_hmac,
-    generate_shared_key,
-    public_key_to_bytes,
-)
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StartRunRequest,
     StreamLogsRequest,

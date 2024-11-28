@@ -22,10 +22,9 @@ from typing import Annotated, Any, Optional
 import typer
 from tomli_w import dump
 
-from flwr.cli.build import build
 from flwr.cli.config_utils import load_and_validate
-from flwr.common.auth_plugin import KeycloakUserPlugin, UserAuthPlugin
-from flwr.common.config import flatten_dict, get_flwr_dir, parse_config_args
+from flwr.common.auth_plugin import KeycloakUserPlugin
+from flwr.common.config import get_flwr_dir
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
 from flwr.proto.exec_pb2 import LoginRequest, LoginResponse  # pylint: disable=E0611
@@ -41,7 +40,7 @@ def on_channel_state_change(channel_connectivity: str) -> None:
     log(DEBUG, channel_connectivity)
 
 
-def login(
+def login(  # pylint: disable=R0914
     app: Annotated[
         Path,
         typer.Argument(help="Path of the Flower App to run."),
@@ -114,12 +113,13 @@ def login(
         )
         raise typer.Exit(code=1)
 
-    stub = create_exec_stub(app, federation_config)
+    stub = _create_exec_stub(app, federation_config)
     login_request = LoginRequest()
     login_response: LoginResponse = stub.Login(login_request)
-    # login_response = LoginResponse(auth_type="supertokens", auth_url="https://api.flower.ai/auth/signin")
     auth_plugin = auth_plugins[login_response.login_details.get("auth_type", "")]
-    config = auth_plugin.login(login_response.login_details, config, federation, stub)
+    config = auth_plugin.login(
+        dict(login_response.login_details), config, federation, stub
+    )
 
     base_path = get_flwr_dir()
     credentials_dir = base_path / ".credentials"
@@ -131,7 +131,7 @@ def login(
         dump(config, config_file)
 
 
-def create_exec_stub(app: Path, federation_config: dict[str, Any]) -> ExecStub:
+def _create_exec_stub(app: Path, federation_config: dict[str, Any]) -> ExecStub:
     insecure_str = federation_config.get("insecure")
     if root_certificates := federation_config.get("root-certificates"):
         root_certificates_bytes = (app / root_certificates).read_bytes()
