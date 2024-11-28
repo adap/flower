@@ -105,37 +105,43 @@ def run(
     )
 
     if "address" in federation_config:
-        base_path = get_flwr_dir()
-        credentials_dir = base_path / ".credentials"
-        credentials_dir.mkdir(parents=True, exist_ok=True)
-
-        credential = credentials_dir / federation_config["address"]
-
-        config_dict = {}
-        with credential.open("r", encoding="utf-8") as file:
-            for line in file:
-                # Ignore empty lines and comments
-                line = line.strip()
-                if not line or line.startswith("#"):
-                    continue
-
-                # Split the key and value
-                if "=" in line:
-                    key, value = line.split("=", 1)
-                    # Remove quotes and whitespace from keys and values
-                    config_dict[key.strip()] = value.strip().strip('"')
-
-        auth_type = config_dict.get("auth-type", "")
-        auth_plugin: Optional[UserAuthPlugin] = None
-
-        auth_plugin_class = auth_plugins.get(auth_type)
-        if auth_plugin_class is not None:
-            auth_plugin = auth_plugin_class(config_dict, credential)
+        auth_plugin: Optional[UserAuthPlugin] = _try_obtain_credentials(federation_config)
         _run_with_exec_api(
             app, federation_config, config_overrides, stream, auth_plugin
         )
     else:
         _run_without_exec_api(app, federation_config, config_overrides, federation)
+
+
+def _try_obtain_credentials(federation_config: dict[str, Any]) -> Optional[UserAuthPlugin]:
+    base_path = get_flwr_dir()
+    credentials_dir = base_path / ".credentials"
+    credentials_dir.mkdir(parents=True, exist_ok=True)
+
+    credential = credentials_dir / federation_config["address"]
+    config_dict = {}
+
+    if not credential.exists():
+        return None
+    
+    with credential.open("r", encoding="utf-8") as file:
+        for line in file:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+
+            if "=" in line:
+                key, value = line.split("=", 1)
+                config_dict[key.strip()] = value.strip().strip('"')
+
+    auth_type = config_dict.get("auth-type", "")
+    auth_plugin: Optional[UserAuthPlugin] = None
+
+    auth_plugin_class = auth_plugins.get(auth_type)
+    if auth_plugin_class is not None:
+        auth_plugin = auth_plugin_class(config_dict, credential)
+    
+    return auth_plugin
 
 
 # pylint: disable-next=too-many-locals
