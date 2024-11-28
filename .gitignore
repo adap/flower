@@ -183,3 +183,6 @@ app/src/main/assets
 /captures
 .externalNativeBuild
 .cxx
+
+# Pyright
+pyrightconfig.json
