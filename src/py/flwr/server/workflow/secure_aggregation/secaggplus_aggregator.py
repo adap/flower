@@ -19,7 +19,7 @@
 import random
 from dataclasses import dataclass, field
 from logging import DEBUG, ERROR, INFO, WARN
-from typing import Optional, Union, cast
+from typing import Optional, Union, cast, Callable
 
 import flwr.common.recordset_compat as compat
 from flwr.common import (
@@ -41,7 +41,6 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_shared_key,
 )
 from flwr.common.secure_aggregation.ndarrays_arithmetic import (
-    factor_extract,
     get_parameters_shape,
     parameters_addition,
     parameters_mod,
@@ -54,22 +53,18 @@ from flwr.common.secure_aggregation.secaggplus_constants import (
     Stage,
 )
 from flwr.common.secure_aggregation.secaggplus_utils import pseudo_rand_gen
-from flwr.server.client_proxy import ClientProxy
-from flwr.server.compat.legacy_context import LegacyContext
 from flwr.server.driver import Driver
-
-from ..constant import MAIN_CONFIGS_RECORD, MAIN_PARAMS_RECORD
-from ..constant import Key as WorkflowKey
 
 
 @dataclass
-class WorkflowState:  # pylint: disable=R0902
-    """The state of the SecAgg+ protocol."""
+class SecAggPlusAggregatorState:  # pylint: disable=R0902
+    """The state of the SecAgg+ aggregator."""
 
     # nid_to_proxies: dict[int, ClientProxy] = field(default_factory=dict)
     # nid_to_fitins: dict[int, RecordSet] = field(default_factory=dict)
-    sampled_node_ids: set[int] = field(default_factory=set)
-    group_id: str = ""
+    messages: list[Message]
+    sampled_node_ids: set[int]
+    current_stage: Stage = Stage.SETUP
     active_node_ids: set[int] = field(default_factory=set)
     num_shares: int = 0
     threshold: int = 0
@@ -82,6 +77,7 @@ class WorkflowState:  # pylint: disable=R0902
     forward_srcs: dict[int, list[int]] = field(default_factory=dict)
     forward_ciphertexts: dict[int, list[bytes]] = field(default_factory=dict)
     aggregate_ndarrays: NDArrays = field(default_factory=list)
+    aggregated_vector: NDArrays = field(default_factory=list)
 
 
 class SecAggPlusAggregator:
@@ -177,6 +173,9 @@ class SecAggPlusAggregator:
         quantization_range: int = 4194304,
         modulus_range: int = 4294967296,
         timeout: Optional[float] = None,
+        on_send: Optional[Callable[[list[Message], SecAggPlusAggregatorState], None]] = None,
+        on_receive: Optional[Callable[[list[Message], SecAggPlusAggregatorState], None]] = None,
+        on_stage_complete: Optional[Callable[[bool, SecAggPlusAggregatorState], None]] = None,
     ) -> None:
         self.num_shares = num_shares
         self.reconstruction_threshold = reconstruction_threshold
@@ -187,12 +186,14 @@ class SecAggPlusAggregator:
         self.timeout = timeout
         self.driver = driver
         self.context = context
+        self.on_send = on_send
+        self.on_receive = on_receive
+        self.on_stage_complete = on_stage_complete
 
         self._check_init_params()
     
     def aggregate(self, messages: list[Message]) -> Message:
-        state = WorkflowState()
-        state.active_node_ids = {msg.metadata.dst_node_id for msg in messages}
+        state = SecAggPlusAggregatorState(messages=messages, sampled_node_ids={msg.metadata.dst_node_id for msg in messages})
         
         steps = (
             self.setup_stage,
@@ -202,7 +203,10 @@ class SecAggPlusAggregator:
         )
         log(INFO, "Secure aggregation commencing.")
         for step in steps:
-            if not step(self.driver, self.context, state):
+            res = step(self.driver, state)
+            if self.on_stage_complete:
+                self.on_stage_complete(res, state)
+            if not res:
                 log(INFO, "Secure aggregation halted.")
                 return
         log(INFO, "Secure aggregation completed.")
@@ -270,7 +274,7 @@ class SecAggPlusAggregator:
         if bin(self.modulus_range).count("1") != 1:
             raise ValueError("`modulus_range` must be a power of 2.")
 
-    def _check_threshold(self, state: WorkflowState) -> bool:
+    def _check_threshold(self, state: SecAggPlusAggregatorState) -> bool:
         for node_id in state.sampled_node_ids:
             active_neighbors = state.nid_to_neighbours[node_id] & state.active_node_ids
             if len(active_neighbors) < state.threshold:
@@ -278,11 +282,11 @@ class SecAggPlusAggregator:
                 return False
         return True
 
-
     def setup_stage(  # pylint: disable=R0912, R0914, R0915
-        self, driver: Driver, context: Context, state: WorkflowState
+        self, driver: Driver, state: SecAggPlusAggregatorState
     ) -> bool:
         """Execute the 'setup' stage."""
+        state.current_stage = Stage.SETUP
         # Obtain fit instructions
         # cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
         # current_round = cast(int, cfg[WorkflowKey.CURRENT_ROUND])
@@ -310,7 +314,7 @@ class SecAggPlusAggregator:
         # state.nid_to_proxies = {proxy.node_id: proxy for proxy, _ in proxy_fitins_lst}
 
         # Protocol config
-        sampled_node_ids = list(state.active_node_ids)
+        sampled_node_ids = list(state.sampled_node_ids)
         num_samples = len(sampled_node_ids)
         if num_samples < 2:
             log(ERROR, "The number of samples should be greater than 1.")
@@ -331,7 +335,7 @@ class SecAggPlusAggregator:
             state.threshold = max(state.threshold, 2)
         else:
             state.threshold = self.reconstruction_threshold
-        # state.active_node_ids = set(sampled_node_ids)
+        state.active_node_ids = set(sampled_node_ids)
         state.clipping_range = self.clipping_range
         state.quantization_range = self.quantization_range
         state.mod_range = self.modulus_range
@@ -375,19 +379,30 @@ class SecAggPlusAggregator:
                 content=content,
                 message_type=MessageType.TRAIN,
                 dst_node_id=nid,
-                # group_id=str(cfg[WorkflowKey.CURRENT_ROUND]),
+                group_id="",
             )
+        msgs = [make(node_id) for node_id in state.active_node_ids]
+
+        # Trigger the event handler before sending messages
+        if self.on_send:
+            self.on_send(msgs, state)
 
         log(
             DEBUG,
             "[Stage 0] Sending configurations to %s clients.",
             len(state.active_node_ids),
         )
-        msgs = driver.send_and_receive(
-            [make(node_id) for node_id in state.active_node_ids], timeout=self.timeout
+        replies = driver.send_and_receive(
+            msgs, timeout=self.timeout
         )
+        del msgs
+        
+        # Trigger the event handler after receiving replies
+        if self.on_receive:
+            self.on_receive(replies, state)
+        
         state.active_node_ids = {
-            msg.metadata.src_node_id for msg in msgs if not msg.has_error()
+            msg.metadata.src_node_id for msg in replies if not msg.has_error()
         }
         log(
             DEBUG,
@@ -395,10 +410,10 @@ class SecAggPlusAggregator:
             len(state.active_node_ids),
         )
 
-        for msg in msgs:
-            if msg.has_error():
-                state.failures.append(Exception(msg.error))
-                continue
+        for msg in replies:
+            # if msg.has_error():
+            #     state.failures.append(Exception(msg.error))
+            #     continue
             key_dict = msg.content.configs_records[RECORD_KEY_CONFIGS]
             node_id = msg.metadata.src_node_id
             pk1, pk2 = key_dict[Key.PUBLIC_KEY_1], key_dict[Key.PUBLIC_KEY_2]
@@ -407,10 +422,10 @@ class SecAggPlusAggregator:
         return self._check_threshold(state)
 
     def share_keys_stage(  # pylint: disable=R0914
-        self, driver: Driver, context: LegacyContext, state: WorkflowState
+        self, driver: Driver, state: SecAggPlusAggregatorState
     ) -> bool:
         """Execute the 'share keys' stage."""
-        cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
+        state.current_stage = Stage.SHARE_KEYS
 
         def make(nid: int) -> Message:
             neighbours = state.nid_to_neighbours[nid] & state.active_node_ids
@@ -423,8 +438,13 @@ class SecAggPlusAggregator:
                 content=content,
                 message_type=MessageType.TRAIN,
                 dst_node_id=nid,
-                group_id=str(cfg[WorkflowKey.CURRENT_ROUND]),
+                group_id="",
             )
+        msgs = [make(node_id) for node_id in state.active_node_ids]
+
+        # Trigger the event handler before sending messages
+        if self.on_send:
+            self.on_send(msgs, state)
 
         # Broadcast public keys to clients and receive secret key shares
         log(
@@ -432,11 +452,17 @@ class SecAggPlusAggregator:
             "[Stage 1] Forwarding public keys to %s clients.",
             len(state.active_node_ids),
         )
-        msgs = driver.send_and_receive(
-            [make(node_id) for node_id in state.active_node_ids], timeout=self.timeout
+        replies = driver.send_and_receive(
+            msgs, timeout=self.timeout
         )
+        del msgs
+        
+        # Trigger the event handler after receiving replies
+        if self.on_receive:
+            self.on_receive(replies, state)
+
         state.active_node_ids = {
-            msg.metadata.src_node_id for msg in msgs if not msg.has_error()
+            msg.metadata.src_node_id for msg in replies if not msg.has_error()
         }
         log(
             DEBUG,
@@ -454,10 +480,10 @@ class SecAggPlusAggregator:
         fwd_srcs: dict[int, list[int]] = {
             nid: [] for nid in state.active_node_ids
         }  # dest node ID -> list of src node IDs
-        for msg in msgs:
-            if msg.has_error():
-                state.failures.append(Exception(msg.error))
-                continue
+        for msg in replies:
+            # if msg.has_error():
+            #     state.failures.append(Exception(msg.error))
+            #     continue
             node_id = msg.metadata.src_node_id
             res_dict = msg.content.configs_records[RECORD_KEY_CONFIGS]
             dst_lst = cast(list[int], res_dict[Key.DESTINATION_LIST])
@@ -477,38 +503,44 @@ class SecAggPlusAggregator:
         return self._check_threshold(state)
 
     def collect_masked_vectors_stage(
-        self, driver: Driver, context: LegacyContext, state: WorkflowState
+        self, driver: Driver, state: SecAggPlusAggregatorState
     ) -> bool:
         """Execute the 'collect masked vectors' stage."""
-        cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
+        state.current_stage = Stage.COLLECT_MASKED_VECTORS
 
         # Send secret key shares to clients (plus FitIns) and collect masked vectors
-        def make(nid: int) -> Message:
+        def make(msg: Message) -> Message:
+            nid = msg.metadata.dst_node_id
             cfgs_dict = {
                 Key.STAGE: Stage.COLLECT_MASKED_VECTORS,
                 Key.CIPHERTEXT_LIST: state.forward_ciphertexts[nid],
                 Key.SOURCE_LIST: state.forward_srcs[nid],
             }
             cfgs_record = ConfigsRecord(cfgs_dict)  # type: ignore
-            content = state.nid_to_fitins[nid]
-            content.configs_records[RECORD_KEY_CONFIGS] = cfgs_record
-            return driver.create_message(
-                content=content,
-                message_type=MessageType.TRAIN,
-                dst_node_id=nid,
-                group_id=str(cfg[WorkflowKey.CURRENT_ROUND]),
-            )
+            msg.content.configs_records[RECORD_KEY_CONFIGS] = cfgs_record
+            return msg
+        msgs = [make(msg) for msg in state.messages if msg.metadata.dst_node_id in state.active_node_ids]
+
+        # Trigger the event handler before sending messages
+        if self.on_send:
+            self.on_send(msgs, state)
 
         log(
             DEBUG,
             "[Stage 2] Forwarding encrypted key shares to %s clients.",
             len(state.active_node_ids),
         )
-        msgs = driver.send_and_receive(
-            [make(node_id) for node_id in state.active_node_ids], timeout=self.timeout
+        replies = driver.send_and_receive(
+            msgs, timeout=self.timeout
         )
+        del msgs
+        
+        # Trigger the event handler after receiving replies
+        if self.on_receive:
+            self.on_receive(replies, state)
+
         state.active_node_ids = {
-            msg.metadata.src_node_id for msg in msgs if not msg.has_error()
+            msg.metadata.src_node_id for msg in replies if not msg.has_error()
         }
         log(
             DEBUG,
@@ -517,14 +549,14 @@ class SecAggPlusAggregator:
         )
 
         # Clear cache
-        del state.forward_ciphertexts, state.forward_srcs, state.nid_to_fitins
+        del state.forward_ciphertexts, state.forward_srcs
 
         # Sum collected masked vectors and compute active/dead node IDs
         masked_vector = None
-        for msg in msgs:
-            if msg.has_error():
-                state.failures.append(Exception(msg.error))
-                continue
+        for msg in replies:
+            # if msg.has_error():
+            #     state.failures.append(Exception(msg.error))
+            #     continue
             res_dict = msg.content.configs_records[RECORD_KEY_CONFIGS]
             bytes_list = cast(list[bytes], res_dict[Key.MASKED_PARAMETERS])
             client_masked_vec = [bytes_to_ndarray(b) for b in bytes_list]
@@ -537,22 +569,21 @@ class SecAggPlusAggregator:
             state.aggregate_ndarrays = masked_vector
 
         # Backward compatibility with Strategy
-        for msg in msgs:
-            if msg.has_error():
-                state.failures.append(Exception(msg.error))
-                continue
-            fitres = compat.recordset_to_fitres(msg.content, True)
-            proxy = state.nid_to_proxies[msg.metadata.src_node_id]
-            state.legacy_results.append((proxy, fitres))
+        # for msg in replies:
+        #     if msg.has_error():
+        #         state.failures.append(Exception(msg.error))
+        #         continue
+        #     fitres = compat.recordset_to_fitres(msg.content, True)
+        #     proxy = state.nid_to_proxies[msg.metadata.src_node_id]
+        #     state.legacy_results.append((proxy, fitres))
 
         return self._check_threshold(state)
 
     def unmask_stage(  # pylint: disable=R0912, R0914, R0915
-        self, driver: Driver, context: LegacyContext, state: WorkflowState
+        self, driver: Driver, state: SecAggPlusAggregatorState
     ) -> bool:
         """Execute the 'unmask' stage."""
-        cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
-        current_round = cast(int, cfg[WorkflowKey.CURRENT_ROUND])
+        state.current_stage = Stage.UNMASK
 
         # Construct active node IDs and dead node IDs
         active_nids = state.active_node_ids
@@ -572,19 +603,30 @@ class SecAggPlusAggregator:
                 content=content,
                 message_type=MessageType.TRAIN,
                 dst_node_id=nid,
-                group_id=str(current_round),
+                group_id="",
             )
+        msgs = [make(node_id) for node_id in state.active_node_ids]
+        
+        # Trigger the event handler before sending messages
+        if self.on_send:
+            self.on_send(msgs, state)
 
         log(
             DEBUG,
             "[Stage 3] Requesting key shares from %s clients to remove masks.",
             len(state.active_node_ids),
         )
-        msgs = driver.send_and_receive(
-            [make(node_id) for node_id in state.active_node_ids], timeout=self.timeout
+        replies = driver.send_and_receive(
+            msgs, timeout=self.timeout
         )
+        del msgs
+        
+        # Trigger the event handler after receiving replies
+        if self.on_receive:
+            self.on_receive(replies, state)
+        
         state.active_node_ids = {
-            msg.metadata.src_node_id for msg in msgs if not msg.has_error()
+            msg.metadata.src_node_id for msg in replies if not msg.has_error()
         }
         log(
             DEBUG,
@@ -596,10 +638,10 @@ class SecAggPlusAggregator:
         collected_shares_dict: dict[int, list[bytes]] = {}
         for nid in state.sampled_node_ids:
             collected_shares_dict[nid] = []
-        for msg in msgs:
-            if msg.has_error():
-                state.failures.append(Exception(msg.error))
-                continue
+        for msg in replies:
+            # if msg.has_error():
+            #     state.failures.append(Exception(msg.error))
+            #     continue
             res_dict = msg.content.configs_records[RECORD_KEY_CONFIGS]
             nids = cast(list[int], res_dict[Key.NODE_ID_LIST])
             shares = cast(list[bytes], res_dict[Key.SHARE_LIST])
@@ -644,9 +686,11 @@ class SecAggPlusAggregator:
                             masked_vector, pairwise_mask
                         )
         recon_parameters = parameters_mod(masked_vector, state.mod_range)
-        q_total_ratio, recon_parameters = factor_extract(recon_parameters)
-        inv_dq_total_ratio = state.quantization_range / q_total_ratio
-        # recon_parameters = parameters_divide(recon_parameters, total_weights_factor)
+        
+        # # Weighted average calculation
+        # q_total_ratio, recon_parameters = factor_extract(recon_parameters)
+        # inv_dq_total_ratio = state.quantization_range / q_total_ratio
+
         aggregated_vector = dequantize(
             recon_parameters,
             state.clipping_range,
@@ -655,35 +699,36 @@ class SecAggPlusAggregator:
         offset = -(len(active_nids) - 1) * state.clipping_range
         for vec in aggregated_vector:
             vec += offset
-            vec *= inv_dq_total_ratio
+            # vec *= inv_dq_total_ratio
+        state.aggregated_vector = aggregated_vector
 
         # Backward compatibility with Strategy
-        results = state.legacy_results
-        parameters = ndarrays_to_parameters(aggregated_vector)
-        for _, fitres in results:
-            fitres.parameters = parameters
+        # results = state.legacy_results
+        # parameters = ndarrays_to_parameters(aggregated_vector)
+        # for _, fitres in results:
+        #     fitres.parameters = parameters
 
-        # No exception/failure handling currently
-        log(
-            INFO,
-            "aggregate_fit: received %s results and %s failures",
-            len(results),
-            len(state.failures),
-        )
-        aggregated_result = context.strategy.aggregate_fit(
-            current_round, results, state.failures  # type: ignore
-        )
-        parameters_aggregated, metrics_aggregated = aggregated_result
+        # # No exception/failure handling currently
+        # log(
+        #     INFO,
+        #     "aggregate_fit: received %s results and %s failures",
+        #     len(results),
+        #     len(state.failures),
+        # )
+        # aggregated_result = context.strategy.aggregate_fit(
+        #     current_round, results, state.failures  # type: ignore
+        # )
+        # parameters_aggregated, metrics_aggregated = aggregated_result
 
-        # Update the parameters and write history
-        if parameters_aggregated:
-            paramsrecord = compat.parameters_to_parametersrecord(
-                parameters_aggregated, True
-            )
-            context.state.parameters_records[MAIN_PARAMS_RECORD] = paramsrecord
-            context.history.add_metrics_distributed_fit(
-                server_round=current_round, metrics=metrics_aggregated
-            )
+        # # Update the parameters and write history
+        # if parameters_aggregated:
+        #     paramsrecord = compat.parameters_to_parametersrecord(
+        #         parameters_aggregated, True
+        #     )
+        #     context.state.parameters_records[MAIN_PARAMS_RECORD] = paramsrecord
+        #     context.history.add_metrics_distributed_fit(
+        #         server_round=current_round, metrics=metrics_aggregated
+        #     )
         return True
 
 

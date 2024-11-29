@@ -446,6 +446,7 @@ def _collect_masked_vectors(
 
     # Fit
     ratio = num_examples / state.max_weight
+    scaled_ratio = ratio * state.clipping_range
     if ratio > 1:
         log(
             WARNING,
@@ -454,18 +455,15 @@ def _collect_masked_vectors(
             num_examples,
             state.max_weight,
         )
-    q_ratio = round(ratio * state.target_range)
-    dq_ratio = q_ratio / state.target_range
 
     parameters = parameters_to_ndarrays(updated_parameters)
-    parameters = parameters_multiply(parameters, dq_ratio)
+    parameters = parameters_multiply(parameters, ratio)
+    parameters = factor_combine(scaled_ratio, parameters)
 
     # Quantize parameter update (vector)
     quantized_parameters = quantize(
         parameters, state.clipping_range, state.target_range
     )
-
-    quantized_parameters = factor_combine(q_ratio, quantized_parameters)
 
     dimensions_list: list[tuple[int, ...]] = [a.shape for a in quantized_parameters]
 

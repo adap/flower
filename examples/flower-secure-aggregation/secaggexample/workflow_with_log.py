@@ -3,14 +3,15 @@
 from logging import INFO
 
 import flwr.common.recordset_compat as compat
-from flwr.common import Context, log, parameters_to_ndarrays
+from flwr.common import Context, log, parameters_to_ndarrays, Message
 from flwr.common.secure_aggregation.quantization import quantize
 from flwr.server import Driver, LegacyContext
 from flwr.server.workflow.constant import MAIN_PARAMS_RECORD
 from flwr.server.workflow.secure_aggregation.secaggplus_workflow import (
     SecAggPlusWorkflow,
-    WorkflowState,
 )
+from flwr.common.secure_aggregation.secaggplus_constants import Stage
+from flwr.server.workflow.secure_aggregation.secaggplus_aggregator import SecAggPlusAggregatorState
 
 from secaggexample.task import get_weights, make_net
 
@@ -78,26 +79,44 @@ class SecAggPlusWorkflowWithLogs(SecAggPlusWorkflow):
             "########################### Secure Aggregation End ###########################",
         )
         log(INFO, "")
+    
+    def on_stage_complete(self, success: bool, state: SecAggPlusAggregatorState) -> None:
+        super().on_send(success, state)
+        if not success:
+            return
+        if state.current_stage == Stage.SETUP:
+            self.node_ids = list(state.sampled_node_ids)
+            self._nid_to_fitins[self.node_ids[0]].configs_records["fitins.config"][
+                "drop"
+            ] = True
+        elif state.current_stage == Stage.COLLECT_MASKED_VECTORS:
+            for node_id in state.sampled_node_ids - state.active_node_ids:
+                log(INFO, "Client %s dropped out.", self.node_ids.index(node_id))
+            log(
+                INFO,
+                "Obtained sum of masked parameters: %s...",
+                state.aggregate_ndarrays[1].flatten()[:3],
+            )
 
-    def setup_stage(
-        self, driver: Driver, context: LegacyContext, state: WorkflowState
-    ) -> bool:
-        ret = super().setup_stage(driver, context, state)
-        self.node_ids = list(state.active_node_ids)
-        state.nid_to_fitins[self.node_ids[0]].configs_records["fitins.config"][
-            "drop"
-        ] = True
-        return ret
+    # def setup_stage(
+    #     self, driver: Driver, context: LegacyContext, state: WorkflowState
+    # ) -> bool:
+    #     ret = super().setup_stage(driver, context, state)
+    #     self.node_ids = list(state.active_node_ids)
+    #     state.nid_to_fitins[self.node_ids[0]].configs_records["fitins.config"][
+    #         "drop"
+    #     ] = True
+    #     return ret
 
-    def collect_masked_vectors_stage(
-        self, driver: Driver, context: LegacyContext, state: WorkflowState
-    ) -> bool:
-        ret = super().collect_masked_vectors_stage(driver, context, state)
-        for node_id in state.sampled_node_ids - state.active_node_ids:
-            log(INFO, "Client %s dropped out.", self.node_ids.index(node_id))
-        log(
-            INFO,
-            "Obtained sum of masked parameters: %s...",
-            state.aggregate_ndarrays[1].flatten()[:3],
-        )
-        return ret
+    # def collect_masked_vectors_stage(
+    #     self, driver: Driver, context: LegacyContext, state: WorkflowState
+    # ) -> bool:
+    #     ret = super().collect_masked_vectors_stage(driver, context, state)
+    #     for node_id in state.sampled_node_ids - state.active_node_ids:
+    #         log(INFO, "Client %s dropped out.", self.node_ids.index(node_id))
+    #     log(
+    #         INFO,
+    #         "Obtained sum of masked parameters: %s...",
+    #         state.aggregate_ndarrays[1].flatten()[:3],
+    #     )
+    #     return ret
