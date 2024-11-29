@@ -42,22 +42,9 @@ A learning-oriented series of federated learning tutorials, the best place to st
     tutorial-series-customize-the-client-pytorch
 
 .. toctree::
-    :maxdepth: 1
-    :caption: Quickstart tutorials
-    :hidden:
+   :titlesonly:
 
-    tutorial-quickstart-pytorch
-    tutorial-quickstart-tensorflow
-    tutorial-quickstart-mlx
-    tutorial-quickstart-huggingface
-    tutorial-quickstart-jax
-    tutorial-quickstart-pandas
-    tutorial-quickstart-fastai
-    tutorial-quickstart-pytorch-lightning
-    tutorial-quickstart-scikitlearn
-    tutorial-quickstart-xgboost
-    tutorial-quickstart-android
-    tutorial-quickstart-ios
+   tutorial-quickstart
 
 QUICKSTART TUTORIALS: :doc:`PyTorch <tutorial-quickstart-pytorch>` | :doc:`TensorFlow
 <tutorial-quickstart-tensorflow>` | :doc:`MLX <tutorial-quickstart-mlx>` | :doc:`🤗
