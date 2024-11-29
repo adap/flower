@@ -7,25 +7,20 @@ This guide will explain the best practices we found when adding datasets ourselv
 
 Dataset contribution process
 ----------------------------
-The contribution contains three steps: first, on your development machine transform your dataset into a ``datasets.Dataset`` object, the preferred format for datasets in HF Hub; second, upload the dataset to HuggingFace Hub and detail it its readme how can be used with Flower Dataset; third, share your dataset with us and we will add it to the `recommended FL dataset list <https://flower.ai/docs/datasets/recommended-fl-datasets.html>`_```
-
-1. Create the dataset locally.
-
-We recommend that you do not upload custom scripts to HuggingFace Hub; instead, create the dataset locally and upload the data, which will speed up the processing time each time the data set is downloaded.
-
-2. Contribute to HuggingFace Hub.
-
-Each dataset in the HF Hub is a Git repository with a specific structure and readme file, and HuggingFace provides an API to push the dataset and, alternatively, a user interface directly in the website to populate the information in the readme file.
-
-
+The contribution contains three steps: first, on your development machine transform your dataset into a ``datasets.Dataset`` object, the preferred format for datasets in HF Hub; second, upload the dataset to HuggingFace Hub and detail it its readme how can be used with Flower Dataset; third, share your dataset with us and we will add it to the `recommended FL dataset list <https://flower.ai/docs/datasets/recommended-fl-datasets.html>`_ 
 
 Creating a dataset locally
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 You can create a local dataset directly using the `datasets` library or load it in any custom way and transform it to the `datasets.Dataset` from other Python objects.
 To complete this step, we recommend reading our guide available here: :doc:`how-to-use-with-local-data` or/and reading the guide from HF `Create a dataset <https://huggingface.co/docs/datasets/create_dataset>`_.
 
+.. tip::
+    We recommend that you do not upload custom scripts to HuggingFace Hub; instead, create the dataset locally and upload the data, which will speed up the processing time each time the data set is downloaded.
+
 Contribution to the HuggingFace Hub
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Each dataset in the HF Hub is a Git repository with a specific structure and readme file, and HuggingFace provides an API to push the dataset and, alternatively, a user interface directly in the website to populate the information in the readme file.
+
 Contributions to the HuggingFace Hub come down to:
 
 1. creating an HF repository for the dataset.
