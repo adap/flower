@@ -49,4 +49,8 @@ Note that the push of the dataset is straightforward, and here's what it could l
 
 To make the dataset easily accessible in FL we recommend adding the "Use in FL" section. Here's an example of how it is done in `one of our reps  <https://huggingface.co/datasets/flwrlabs/cinic10#use-in-fl>`_ for the cinic10 dataset.
 
-That's it! You have successfully contributed a dataset to the HuggingFace Hub. If you want the dataset listed in our `recommended FL dataset list <https://flower.ai/docs/datasets/recommended-fl-datasets.html>`_  , please send a PR or ping us in `Slack <https://flower.ai/join-slack/>`_ #contributions channel.
+Increasing visibility of the dataset
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+If you want the dataset listed in our `recommended FL dataset list <https://flower.ai/docs/datasets/recommended-fl-datasets.html>`_  , please send a PR or ping us in `Slack <https://flower.ai/join-slack/>`_ #contributions channel.
+
+That's it! You have successfully contributed a dataset to the HuggingFace Hub and made it available for FL community. Thank you for your contribution!
