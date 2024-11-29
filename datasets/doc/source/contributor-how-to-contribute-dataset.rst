@@ -1,13 +1,13 @@
 How to contribute a dataset
 ===========================
 
-To make a dataset available in Flower Dataset (`flwr-datasets`), you need to add the dataset to `HuggingFace Hub <https://huggingface.co/>`_ .
+To make a dataset available in Flower Dataset (`flwr-datasets`) for other in the community to use, it needs to be added to `HuggingFace Hub <https://huggingface.co/>`_ .
 
 This guide will explain the best practices we found when adding datasets ourselves and point to the HFs guides. To see the datasets added by Flower, visit https://huggingface.co/flwrlabs.
 
 Dataset contribution process
 ----------------------------
-The contribution contains two steps:
+The contribution contains three steps: first, on your development machine transform your dataset into a ``datasets.Dataset`` object, the preferred format for datasets in HF Hub; second, upload the dataset to HuggingFace Hub and detail it its readme how can be used with Flower Dataset; third, share your dataset with us and we will add it to the `recommended FL dataset list <https://flower.ai/docs/datasets/recommended-fl-datasets.html>`_```
 
 1. Create the dataset locally.
 
