@@ -1,7 +1,7 @@
 How to contribute a dataset
 ===========================
 
-To make a dataset available in Flower Dataset (`flwr-datasets`), you need to add the dataset to `HuggingFace Hub <https://huggingface.co/>`_ .
+To make a dataset available in Flower Dataset (`flwr-datasets`), you need to add the dataset to `HuggingFace Hub <https://huggingface.co/datasets>`_ .
 
 This guide will explain the best practices we found when adding datasets ourselves and point to the HFs guides. To see the datasets added by Flower, visit https://huggingface.co/flwrlabs.
 
@@ -12,7 +12,7 @@ The contribution contains three steps: first, on your development machine transf
 Creating a dataset locally
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 You can create a local dataset directly using the `datasets` library or load it in any custom way and transform it to the `datasets.Dataset` from other Python objects.
-To complete this step, we recommend reading our guide available here: :doc:`how-to-use-with-local-data` or/and reading the guide from HF `Create a dataset <https://huggingface.co/docs/datasets/create_dataset>`_.
+To complete this step, we recommend reading our :doc:`how-to-use-with-local-data` guide or/and the `Create a dataset <https://huggingface.co/docs/datasets/create_dataset>`_ guide from HF.
 
 .. tip::
     We recommend that you do not upload custom scripts to HuggingFace Hub; instead, create the dataset locally and upload the data, which will speed up the processing time each time the data set is downloaded.
@@ -47,7 +47,7 @@ Note that the push of the dataset is straightforward, and here's what it could l
     # Push the dataset to the HuggingFace Hub
     dataset.push_to_hub("you-hf-username/your-ds-name")
 
-To make the dataset easily accessible in FL we recommend adding the "Use in FL" section. Here's an example of how it is done in `one of our reps  <https://huggingface.co/datasets/flwrlabs/cinic10#use-in-fl>`_ for the cinic10 dataset.
+To make the dataset easily accessible in FL we recommend adding the "Use in FL" section. Here's an example of how it is done in `one of our repos  <https://huggingface.co/datasets/flwrlabs/cinic10#use-in-fl>`_ for the cinic10 dataset.
 
 Increasing visibility of the dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
