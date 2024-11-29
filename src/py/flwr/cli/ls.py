@@ -16,7 +16,9 @@
 
 
 import json
+import os
 import re
+import sys
 from datetime import datetime, timedelta
 from enum import Enum
 from logging import DEBUG
@@ -38,7 +40,7 @@ from flwr.cli.config_utils import (
 from flwr.common.constant import FAB_CONFIG_FILE, SubStatus
 from flwr.common.date import format_timedelta, isoformat8601_utc
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
-from flwr.common.logger import log
+from flwr.common.logger import log, restore_output
 from flwr.common.serde import run_from_proto
 from flwr.common.typing import Run
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
@@ -88,6 +90,11 @@ def ls(
     ] = OutputFormat.table,
 ) -> None:
     """List runs."""
+    suppress_output = ls_format == OutputFormat.json
+    if suppress_output:
+        sys.stdout = open(os.devnull, "w", encoding="utf-8")
+        sys.stderr = open(os.devnull, "w", encoding="utf-8")
+
     # Load and validate federation config
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
@@ -119,12 +126,14 @@ def ls(
         # Display information about a specific run ID
         if run_id is not None:
             typer.echo(f"🔍 Displaying information for run ID {run_id}...")
+            restore_output()
             _display_one_run(
                 stub, run_id, ls_format if ls_format is not None else "table"
             )
         # By default, list all runs
         else:
             typer.echo("📄 Listing all runs...")
+            restore_output()
             _list_runs(stub, ls_format if ls_format is not None else "table")
 
     except ValueError as err:
