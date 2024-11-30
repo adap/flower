@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-11-28 00:32+0000\n"
+"POT-Creation-Date: 2024-11-30 00:31+0000\n"
 "PO-Revision-Date: 2023-09-05 17:54+0000\n"
 "Last-Translator: Charles Beauville <charles@flower.ai>\n"
 "Language: fr\n"
@@ -1353,10 +1353,10 @@ msgid "Where to start"
 msgstr "Par où commencer"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:11
+#, fuzzy
 msgid ""
-"Until the Flower core library matures it will be easier to get PR's "
-"accepted if they only touch non-core areas of the codebase. Good "
-"candidates to get started are:"
+"In general, it is easier to get PR's accepted if they only touch non-core"
+" areas of the codebase. Good candidates to get started are:"
 msgstr ""
 "Jusqu'à ce que la bibliothèque centrale de Flower arrive à maturité, il "
 "sera plus facile de faire accepter les RP s'ils ne touchent que des zones"
@@ -1370,36 +1370,44 @@ msgstr ""
 "exprimé plus clairement ?"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:15
+#, python-format
+msgid ""
+"Open issues: Issues with the tag `good first issue "
+"<https://github.com/adap/flower/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22>`_."
+msgstr ""
+
+#: ../../source/contributor-ref-good-first-contributions.rst:17
 msgid "Baselines: See below."
 msgstr "Références : voir ci-dessous."
 
-#: ../../source/contributor-ref-good-first-contributions.rst:16
+#: ../../source/contributor-ref-good-first-contributions.rst:18
 msgid "Examples: See below."
 msgstr "Exemples : voir ci-dessous."
 
-#: ../../source/contributor-ref-good-first-contributions.rst:19
-msgid "Request for Flower Baselines"
-msgstr "Demande pour une nouvelle Flower Baseline"
-
 #: ../../source/contributor-ref-good-first-contributions.rst:21
 #, fuzzy
+msgid "Flower Baselines"
+msgstr "Demande pour une nouvelle Flower Baseline"
+
+#: ../../source/contributor-ref-good-first-contributions.rst:23
+#, fuzzy
 msgid ""
-"If you are not familiar with Flower Baselines, you should probably check-"
-"out our `contributing guide for baselines "
-"<https://flower.ai/docs/baselines/how-to-contribute-baselines.html>`_."
+"If you are not familiar with Flower Baselines, please check our "
+"`contributing guide for baselines <https://flower.ai/docs/baselines/how-"
+"to-contribute-baselines.html>`_."
 msgstr ""
 "Si tu n'es pas familier avec les Flower Baselines, tu devrais "
 "probablement consulter notre `guide de contribution pour les baselines "
 "<https://flower.ai/docs/baselines/how-to-contribute-baselines.html>`_."
 
-#: ../../source/contributor-ref-good-first-contributions.rst:25
+#: ../../source/contributor-ref-good-first-contributions.rst:26
 #, fuzzy
 msgid ""
-"You should then check out the open `issues "
+"Then take a look at the open `issues "
 "<https://github.com/adap/flower/issues?q=is%3Aopen+is%3Aissue+label%3A%22new+baseline%22>`_"
-" for baseline requests. If you find a baseline that you'd like to work on"
-" and that has no assignees, feel free to assign it to yourself and start "
-"working on it!"
+" for baseline requests. If you find a baseline that you'd like to work "
+"on, and it has no assignees, feel free to assign it to yourself and get "
+"started!"
 msgstr ""
 "Tu devrais ensuite consulter les `issues ouvertes "
 "<https://github.com/adap/flower/issues?q=is%3Aopen+is%3Aissue+label%3A%22new+baseline%22>`_"
@@ -1407,42 +1415,32 @@ msgstr ""
 " laquelle tu aimerais travailler et qui n'a pas d'assignés, n'hésite pas "
 "à te l'attribuer et à commencer à travailler dessus !"
 
-#: ../../source/contributor-ref-good-first-contributions.rst:30
+#: ../../source/contributor-ref-good-first-contributions.rst:31
+#, fuzzy
 msgid ""
-"Otherwise, if you don't find a baseline you'd like to work on, be sure to"
-" open a new issue with the baseline request template!"
+"If you don't find the baseline you'd like to work on, be sure to open a "
+"new issue with the baseline request template!"
 msgstr ""
 "Sinon, si tu ne trouves pas de ligne de base sur laquelle tu aimerais "
 "travailler, n'oublie pas d'ouvrir un nouveau problème à l'aide du modèle "
 "de demande de ligne de base !"
 
-#: ../../source/contributor-ref-good-first-contributions.rst:34
-msgid "Request for examples"
-msgstr "Demande pour un nouveau Flower Example"
+#: ../../source/contributor-ref-good-first-contributions.rst:35
+#, fuzzy
+msgid "Usage examples"
+msgstr "Exemples de PyTorch"
 
-#: ../../source/contributor-ref-good-first-contributions.rst:36
+#: ../../source/contributor-ref-good-first-contributions.rst:37
+#, fuzzy
 msgid ""
-"We wish we had more time to write usage examples because we believe they "
-"help users to get started with building what they want to build. Here are"
-" a few ideas where we'd be happy to accept a PR:"
+"We wish we had more time to write usage examples because they help users "
+"to get started with building what they want. If you notice any missing "
+"examples that could help others, feel free to contribute!"
 msgstr ""
 "Nous aimerions avoir plus de temps pour écrire des exemples d'utilisation"
 " car nous pensons qu'ils aident les utilisateurs à commencer à construire"
 " ce qu'ils veulent construire. Voici quelques idées pour lesquelles nous "
 "serions heureux d'accepter un RP :"
-
-#: ../../source/contributor-ref-good-first-contributions.rst:40
-msgid "Llama 2 fine-tuning, with Hugging Face Transformers and PyTorch"
-msgstr "LLaMA 2 fine-tuning avec Hugging Face et PyTorch"
-
-#: ../../source/contributor-ref-good-first-contributions.rst:41
-#: ../../source/tutorial-quickstart-xgboost.rst:7
-msgid "XGBoost"
-msgstr "XGBoost"
-
-#: ../../source/contributor-ref-good-first-contributions.rst:42
-msgid "Android ONNX on-device training"
-msgstr "Training sur téléphone à l'aide d'Android ONNX"
 
 #: ../../source/contributor-ref-secure-aggregation-protocols.rst:2
 msgid "Secure Aggregation Protocols"
@@ -26487,6 +26485,10 @@ msgstr ""
 msgid "Quickstart XGBoost"
 msgstr "Démarrage rapide XGBoost"
 
+#: ../../source/tutorial-quickstart-xgboost.rst:7
+msgid "XGBoost"
+msgstr "XGBoost"
+
 #: ../../source/tutorial-quickstart-xgboost.rst:9
 msgid ""
 "EXtreme Gradient Boosting (**XGBoost**) is a robust and efficient "
@@ -28906,7 +28908,7 @@ msgstr ""
 "chose d'autre, comme la régression linéaire classique."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|f150b8d6e0074250822c9f6f7a8de3e0|"
+msgid "|80152fa658904be08c849b4a594b76e1|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -28925,7 +28927,7 @@ msgstr ""
 " Go."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|72772d10debc4abd8373c0bc82985422|"
+msgid "|35b60a1068f944ce937ac2988661aad5|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -28957,7 +28959,7 @@ msgstr ""
 "chanson."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|5815398552ad41d290a3a2631fe8f6ca|"
+msgid "|efead7f2c2224b60b7b42705004c15e6|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -28978,7 +28980,7 @@ msgstr ""
 " données pour la même tâche."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|e6ac20744bf149378be20ac3dc309356|"
+msgid "|5421fee4e7ed450c903cbcd8a9d8a5d4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -29000,7 +29002,7 @@ msgstr ""
 "cloud."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|a4011ef443c14725b15a8cf33b0e3443|"
+msgid "|811fcf35e9214bd5b4e613e41f7c0a27|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -29021,7 +29023,7 @@ msgstr ""
 "appuyés."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|a22faa3617404c06803731525e1c609f|"
+msgid "|e61d38b0948f4c07a7257755f3799b54|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -29047,7 +29049,7 @@ msgstr ""
 " sur un serveur centralisé."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|84a5c9b5041c43c3beab9786197c3e4e|"
+msgid "|e82c29351e2e480087c61b939eb7c041|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -29066,7 +29068,7 @@ msgstr ""
 "suffisantes pour former un bon modèle."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|b5c4be0b52d4493ba8c4af14d7c2db97|"
+msgid "|21ca40f4fb1a405c89098fd1d24880a4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -29297,7 +29299,7 @@ msgstr ""
 "partir d'un point de contrôle précédemment sauvegardé."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|c1c784183d18481186ff65dc261d1335|"
+msgid "|1351a2629c2c46d981b13b19f9fa45f0|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -29332,7 +29334,7 @@ msgstr ""
 "rendements décroissants."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|669fcd1f44ab42f5bbd196c3cf1ecbc2|"
+msgid "|124c2c188b994c7ab1c862cfdb326923|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -29365,7 +29367,7 @@ msgstr ""
 "données locales, ou même de quelques étapes (mini-batchs)."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|edfb08758c9441afb6736045a59e154c|"
+msgid "|42e1951c36f2406e93c7ae0ec5b299f9|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -29396,7 +29398,7 @@ msgstr ""
 " l'entraînement local."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|82338b8bbad24d5ea9df3801aab37852|"
+msgid "|ec637b8a84234d068995ee1ccb2dd3b1|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -29456,7 +29458,7 @@ msgstr ""
 "times as much as each of the 100 examples."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|518d994dd2c844898b441da03b858326|"
+msgid "|5bceb9d16b1a4d2db18d8a5b2f0cacb3|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -29600,7 +29602,7 @@ msgstr ""
 "quel cadre de ML et n'importe quel langage de programmation."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|7bfcfcb57ae5403f8e18486f45ca48b4|"
+msgid "|502b10044e864ca2b15282a393ab7faf|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -30664,15 +30666,13 @@ msgstr ""
 #~ " doit être installé sur le système."
 
 #~ msgid "Llama 2 fine-tuning, with Hugging Face Transformers and PyTorch"
-#~ msgstr "Un fine-tuning de LLaMA 2 avec Hugging Face et PyTorch"
+#~ msgstr "LLaMA 2 fine-tuning avec Hugging Face et PyTorch"
 
 #~ msgid "XGBoost"
 #~ msgstr "XGBoost"
 
 #~ msgid "Android ONNX on-device training"
-#~ msgstr ""
-#~ "Utiliser Android ONNX pour faire du "
-#~ "training directement sur le téléphone"
+#~ msgstr "Training sur téléphone à l'aide d'Android ONNX"
 
 #~ msgid "Contribute on GitHub"
 #~ msgstr "Contribuer sur GitHub"
@@ -42957,5 +42957,53 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|4ab50bc01a9f426a91a2c0cbc3ab7a84|"
+#~ msgstr ""
+
+#~ msgid "Request for Flower Baselines"
+#~ msgstr "Demande pour une nouvelle Flower Baseline"
+
+#~ msgid "Request for examples"
+#~ msgstr "Demande pour un nouveau Flower Example"
+
+#~ msgid "|f150b8d6e0074250822c9f6f7a8de3e0|"
+#~ msgstr ""
+
+#~ msgid "|72772d10debc4abd8373c0bc82985422|"
+#~ msgstr ""
+
+#~ msgid "|5815398552ad41d290a3a2631fe8f6ca|"
+#~ msgstr ""
+
+#~ msgid "|e6ac20744bf149378be20ac3dc309356|"
+#~ msgstr ""
+
+#~ msgid "|a4011ef443c14725b15a8cf33b0e3443|"
+#~ msgstr ""
+
+#~ msgid "|a22faa3617404c06803731525e1c609f|"
+#~ msgstr ""
+
+#~ msgid "|84a5c9b5041c43c3beab9786197c3e4e|"
+#~ msgstr ""
+
+#~ msgid "|b5c4be0b52d4493ba8c4af14d7c2db97|"
+#~ msgstr ""
+
+#~ msgid "|c1c784183d18481186ff65dc261d1335|"
+#~ msgstr ""
+
+#~ msgid "|669fcd1f44ab42f5bbd196c3cf1ecbc2|"
+#~ msgstr ""
+
+#~ msgid "|edfb08758c9441afb6736045a59e154c|"
+#~ msgstr ""
+
+#~ msgid "|82338b8bbad24d5ea9df3801aab37852|"
+#~ msgstr ""
+
+#~ msgid "|518d994dd2c844898b441da03b858326|"
+#~ msgstr ""
+
+#~ msgid "|7bfcfcb57ae5403f8e18486f45ca48b4|"
 #~ msgstr ""
 
