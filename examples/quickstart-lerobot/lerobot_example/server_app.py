@@ -1,4 +1,4 @@
-"""huggingface_example: A Flower / Hugging Face app."""
+"""huggingface_example: A Flower / Hugging Face LeRobot app."""
 
 from flwr.common import Context, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
