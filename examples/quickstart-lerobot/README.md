@@ -10,8 +10,6 @@ This is an introductory example to using [🤗LeRobot](https://huggingface.co/le
 
 In this example, we will federate the training of a [Diffusion](https://arxiv.org/abs/2303.04137) policy on the [PushT](https://huggingface.co/datasets/lerobot/pusht/tree/v1.3) dataset. The data will be downloaded and partitioned using [Flower Datasets](https://flower.ai/docs/datasets/). This example runs best when a GPU is available.
 
-https://github.com/user-attachments/assets/a9771310-e48d-4426-9cc5-850b2efabae3
-
 ## Set up the project
 
 ### Clone the project
@@ -92,6 +90,8 @@ outputs/train/lerobot_federated_example/20241130/18/45
 Earlier in the training cycles, rollouts will show that client evaluations are struggling to complete the task. See example below:
 
 
+
 However later on after about 20,000 cumulative training cycles, which is (server rounds) X (local epochs) X (clients sampled to train in each server round), 
 all clients begin to show progress and solve the pusht task. Example follows:
 
+https://github.com/user-attachments/assets/a9771310-e48d-4426-9cc5-850b2efabae3
