@@ -89,6 +89,7 @@ outputs/train/lerobot_federated_example/20241130/18/45
 
 Earlier in the training cycles, rollouts will show that client evaluations are struggling to complete the task. See example below:
 
+https://github.com/user-attachments/assets/34fcedbb-0f04-4d73-b5e0-7367dc3c647b
 
 
 However later on after about 20,000 cumulative training cycles, which is (server rounds) X (local epochs) X (clients sampled to train in each server round), 
