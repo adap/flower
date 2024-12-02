@@ -40,7 +40,7 @@ app = typer.Typer(
 @app.callback()
 def main(
     version: bool = typer.Option(False, "--version", help="Show the version and exit.")
-):
+) -> None:
     """Print the version of the package."""
     if version:
         typer.echo(package_version)
