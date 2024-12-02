@@ -88,8 +88,8 @@ def generate_client_fn_simII(
         test_dataset = train_dataset = MyDataset(
             X_train[int(partition_id), :, :], y_train[:, int(partition_id)]
         )
-        trainloader = DataLoader(train_dataset, batch_size=cfg.batch_size, shuffle=True)
-        testloader = DataLoader(test_dataset, batch_size=cfg.batch_size, shuffle=True)
+        trainloader = DataLoader(train_dataset, batch_size=cfg.batch_size, shuffle=False)
+        testloader = DataLoader(test_dataset, batch_size=cfg.batch_size, shuffle=False)
 
         # define model and set device
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")

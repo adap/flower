@@ -49,12 +49,12 @@ def partition_data(data, num_partitions):
 def sim_data(ni: int, num_clients: int, num_features: int, alpha=1, beta=1):
     """Simulate data for simII."""
 
-    np.random.seed(2025)
+    np.random.seed(2024)
     
     # generate client-based model coefs
     u = np.random.normal(0, alpha, num_clients)
     x = np.zeros((num_features, num_clients))
-    x[0:99, :] = np.random.multivariate_normal(u, np.diag(np.ones(num_clients)), 99)
+    x[0:100, :] = np.random.multivariate_normal(u, np.diag(np.ones(num_clients)), 100)
 
     # generate train observations
     ivec = np.arange(1, num_features + 1)
@@ -89,7 +89,9 @@ def sim_data(ni: int, num_clients: int, num_features: int, alpha=1, beta=1):
     # B = np.random.normal(0, beta, num_features)
     # v = np.random.multivariate_normal(B, np.diag(np.ones(num_features)), num_clients)
 
-    error = np.random.multivariate_normal(u, np.diag(np.ones(num_clients)), ntest)
+    error2 = np.random.multivariate_normal(u, np.diag(np.ones(num_clients)), ntest)
+    xtest = np.zeros((num_features, num_clients))
+    xtest[0:100, :] = np.random.multivariate_normal(u, np.diag(np.ones(num_clients)), 100)
     ztest = np.zeros((num_clients, ntest, num_features))
     ytest = np.zeros((ni, num_clients))
 
@@ -97,7 +99,7 @@ def sim_data(ni: int, num_clients: int, num_features: int, alpha=1, beta=1):
     for i in range(ztest.shape[0]):
         # train
         ztest[i, :, :] = np.random.multivariate_normal(v[i], vari, ntest)
-        hold = np.matmul(ztest[i, :, :], x[:, i]) + error[:, i]
+        hold = np.matmul(ztest[i, :, :], xtest[:, i]) + error2[:, i]
         ytest[:, i] = np.exp(hold) / (1 + np.exp(hold))
 
     for j in range(num_clients):

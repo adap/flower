@@ -3,6 +3,7 @@
 import pickle
 import random
 import torch
+import gzip
 
 import flwr as fl
 import hydra
@@ -68,23 +69,21 @@ def main(cfg: DictConfig):
         num_classes = cfg.num_classes
 
         # import data from fedht/data folder
-        with open('fedht/data/simII_train.pkl', 'rb') as file:
-            dataset = pickle.load(file)
+        # with open('fedht/data/simII_train.pkl', 'rb') as file:
+        #     dataset = pickle.load(file)
         
-        with open('fedht/data/simII_test.pkl', 'rb') as file:
-            test_dataset = pickle.load(file)
+        # with open('fedht/data/simII_test.pkl', 'rb') as file:
+        #     test_dataset = pickle.load(file)
 
-        X_test, y_test = test_dataset
-
-        # dataset = sim_data(num_obs, num_clients, num_features, 1, 1)
-        # X_test, y_test = sim_data(num_obs, 1, num_features, 1, 1)
-        # test_dataset = MyDataset(X_test[0, :, :], y_test[:, 0])
+        # simulate data
+        X_train, y_train, X_test, y_test = sim_data(200, num_clients, 1000, 1, 1)
+        train_dataset = X_train, y_train
         test_dataset = MyDataset(X_test, y_test[:,0])
         testloader = DataLoader(test_dataset, batch_size=cfg.batch_size, shuffle=False)
 
         # set client function
         client_fn = generate_client_fn_simII(
-            dataset,
+            train_dataset,
             cfg=cfg
         )
 
