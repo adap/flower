@@ -433,14 +433,13 @@ def _collect_masked_vectors(
         state.rd_seed_share_dict[src] = rd_seed_share
         state.sk1_share_dict[src] = sk1_share
 
-    # Fit
+    # Get the reply message
     msg = get_reply()
 
     # Retrieve all the parameters from the message
     all_weights: NDArrays = []
-    pr_keys = list(msg.content.parameters_records.keys())  # In case of instable order
-    for pr_key in pr_keys:
-        pr = msg.content.parameters_records[pr_key]
+    # Stable iteration order since Python 3.7+
+    for pr in msg.content.parameters_records.values():
         for arr in pr.values():
             all_weights.append(arr.numpy())
 
@@ -470,8 +469,7 @@ def _collect_masked_vectors(
 
     # Assign the masked quantized parameters back to the message
     idx = 0
-    for pr_key in pr_keys:
-        pr = msg.content.parameters_records[pr_key]
+    for pr in msg.content.parameters_records.values():
         for arr_key in pr:
             pr[arr_key] = array_from_numpy(q_all_weights[idx])
             idx += 1
