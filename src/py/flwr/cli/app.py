@@ -26,7 +26,6 @@ from .ls import ls
 from .new import new
 from .run import run
 
-
 app = typer.Typer(
     help=typer.style(
         "flwr is the Flower command line interface.",
