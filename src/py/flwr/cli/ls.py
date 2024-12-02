@@ -51,7 +51,7 @@ from flwr.proto.exec_pb2_grpc import ExecStub
 
 
 class OutputFormat(str, Enum):
-    """."""
+    """Define output format for `flwr ls` command."""
 
     table = "table"  # pylint: disable=invalid-name
     json = "json"  # pylint: disable=invalid-name
@@ -276,7 +276,7 @@ def _to_table(run_list: list[tuple[str, ...]]) -> Table:
 
 
 def _to_json(run_list: list[tuple[str, ...]]) -> str:
-    """."""
+    """Format run status list to a JSON formatted string."""
 
     def _remove_bbcode_tags(strings: tuple[str, ...]) -> tuple[str, ...]:
         """Remove BBCode tags from the provided text."""
