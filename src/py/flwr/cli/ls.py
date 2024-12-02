@@ -15,21 +15,21 @@
 """Flower command line interface `ls` command."""
 
 
+import io
 import json
-import os
 import re
-import sys
 from datetime import datetime, timedelta
 from enum import Enum
 from logging import DEBUG
 from pathlib import Path
-from typing import Annotated, Any, List, Optional, Tuple
+from typing import Annotated, Any, List, Optional, Tuple, Union
 
 import grpc
 import typer
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
+from typer import Exit
 
 from flwr.cli.config_utils import (
     load_and_validate,
@@ -40,7 +40,7 @@ from flwr.cli.config_utils import (
 from flwr.common.constant import FAB_CONFIG_FILE, SubStatus
 from flwr.common.date import format_timedelta, isoformat8601_utc
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
-from flwr.common.logger import log, restore_output
+from flwr.common.logger import log, redirect_output, remove_emojis, restore_output
 from flwr.common.serde import run_from_proto
 from flwr.common.typing import Run
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
@@ -57,7 +57,7 @@ class OutputFormat(str, Enum):
     json = "json"  # pylint: disable=invalid-name
 
 
-def ls(
+def ls(  # pylint: disable=too-many-locals, too-many-branches
     app: Annotated[
         Path,
         typer.Argument(help="Path of the Flower project"),
@@ -91,60 +91,68 @@ def ls(
 ) -> None:
     """List runs."""
     suppress_output = ls_format == OutputFormat.json
-    if suppress_output:
-        sys.stdout = open(os.devnull, "w", encoding="utf-8")
-        sys.stderr = open(os.devnull, "w", encoding="utf-8")
-
-    # Load and validate federation config
-    typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
-
-    pyproject_path = app / FAB_CONFIG_FILE if app else None
-    config, errors, warnings = load_and_validate(path=pyproject_path)
-    config = validate_project_config(config, errors, warnings)
-    federation, federation_config = validate_federation_in_project_config(
-        federation, config
-    )
-
-    if "address" not in federation_config:
-        typer.secho(
-            "❌ `flwr ls` currently works with Exec API. Ensure that the correct"
-            "Exec API address is provided in the `pyproject.toml`.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
-
+    captured_output = io.StringIO()
     try:
-        if runs and run_id is not None:
-            raise ValueError(
-                "The options '--runs' and '--run-id' are mutually exclusive."
-            )
+        if suppress_output:
+            redirect_output(captured_output)
 
-        channel = _init_channel(app, federation_config)
-        stub = ExecStub(channel)
+        # Load and validate federation config
+        typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
-        # Display information about a specific run ID
-        if run_id is not None:
-            typer.echo(f"🔍 Displaying information for run ID {run_id}...")
-            restore_output()
-            _display_one_run(
-                stub, run_id, ls_format if ls_format is not None else "table"
-            )
-        # By default, list all runs
-        else:
-            typer.echo("📄 Listing all runs...")
-            restore_output()
-            _list_runs(stub, ls_format if ls_format is not None else "table")
-
-    except ValueError as err:
-        typer.secho(
-            f"❌ {err}",
-            fg=typer.colors.RED,
-            bold=True,
+        pyproject_path = app / FAB_CONFIG_FILE if app else None
+        config, errors, warnings = load_and_validate(path=pyproject_path)
+        config = validate_project_config(config, errors, warnings)
+        federation, federation_config = validate_federation_in_project_config(
+            federation, config
         )
-        raise typer.Exit(code=1) from err
+
+        if "address" not in federation_config:
+            typer.secho(
+                "❌ `flwr ls` currently works with Exec API. Ensure that the correct"
+                "Exec API address is provided in the `pyproject.toml`.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1)
+
+        try:
+            if runs and run_id is not None:
+                raise ValueError(
+                    "The options '--runs' and '--run-id' are mutually exclusive."
+                )
+
+            channel = _init_channel(app, federation_config)
+            stub = ExecStub(channel)
+
+            # Display information about a specific run ID
+            if run_id is not None:
+                typer.echo(f"🔍 Displaying information for run ID {run_id}...")
+                restore_output()
+                _display_one_run(stub, run_id, ls_format)
+            # By default, list all runs
+            else:
+                typer.echo("📄 Listing all runs...")
+                restore_output()
+                _list_runs(stub, ls_format)
+
+        except ValueError as err:
+            typer.secho(
+                f"❌ {err}",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1) from err
+        finally:
+            channel.close()
+    except (typer.Exit, SystemExit, Exception) as e:  # pylint: disable=broad-except
+        if suppress_output:
+            restore_output()
+            e_message = captured_output.getvalue()
+            _print_json_error(e_message, e)
     finally:
-        channel.close()
+        if suppress_output:
+            restore_output()
+        captured_output.close()
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
@@ -333,3 +341,15 @@ def _display_one_run(stub: ExecStub, run_id: int, ls_format: str) -> None:
         Console().print(_to_table(_format_run(run_dict, res.now)))
     else:
         Console().print_json(_to_json(_format_run(run_dict, res.now)))
+
+
+def _print_json_error(msg: str, e: Union[Exit, SystemExit, Exception]) -> None:
+    """Print error message as JSON."""
+    Console().print_json(
+        json.dumps(
+            {
+                "success": "false",
+                "error-message": remove_emojis(str(msg) + "\n" + str(e)),
+            }
+        )
+    )
