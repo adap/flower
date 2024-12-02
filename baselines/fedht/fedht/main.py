@@ -78,7 +78,8 @@ def main(cfg: DictConfig):
 
         # dataset = sim_data(num_obs, num_clients, num_features, 1, 1)
         # X_test, y_test = sim_data(num_obs, 1, num_features, 1, 1)
-        test_dataset = MyDataset(X_test[0, :, :], y_test[:, 0])
+        # test_dataset = MyDataset(X_test[0, :, :], y_test[:, 0])
+        test_dataset = MyDataset(X_test, y_test[:,0])
         testloader = DataLoader(test_dataset, batch_size=cfg.batch_size, shuffle=False)
 
         # set client function
