@@ -15,6 +15,7 @@
 """Flower command line interface `ls` command."""
 
 
+import json
 from datetime import datetime, timedelta
 from logging import DEBUG
 from pathlib import Path
@@ -255,20 +256,61 @@ def _to_table(run_list: list[tuple[str, ...]]) -> Table:
     return table
 
 
-def _list_runs(
-    stub: ExecStub,
-) -> None:
+def _to_json(run_list: list[tuple[str, ...]]) -> str:
+    """."""
+
+    def _remove_bbcode_tags(strings: tuple[str, ...]) -> tuple[str, ...]:
+        """Remove BBCode tags from the provided text."""
+        # Regular expression pattern to match BBCode tags
+        bbcode_pattern = re.compile(r"\[/?\w+\]")
+        # Substitute BBCode tags with an empty string
+        return tuple(bbcode_pattern.sub("", s) for s in strings)
+
+    # runs_dict: Dict[str, list[Dict[str, str]]] = {"runs": []}
+    runs_list = []
+    for row in run_list:
+        row = _remove_bbcode_tags(row)
+        (
+            run_id,
+            fab_id,
+            fab_version,
+            fab_hash,
+            status_text,
+            elapsed,
+            created_at,
+            running_at,
+            finished_at,
+        ) = row
+        runs_list.append(
+            {
+                "run-id": run_id,
+                "fab-id": fab_id,
+                "fab-name": fab_id.split("/")[-1],
+                "fab-version": fab_version,
+                "fab-hash": fab_hash[:8],
+                "status": status_text,
+                "elapsed": elapsed,
+                "created-at": created_at,
+                "running-at": running_at,
+                "finished-at": finished_at,
+            }
+        )
+
+    return json.dumps({"runs": runs_list})
+
+
+def _list_runs(stub: ExecStub, ls_format: str = "table") -> None:
     """List all runs."""
     res: ListRunsResponse = stub.ListRuns(ListRunsRequest())
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
-    Console().print(_to_table(_format_run(run_dict, res.now)))
+    if ls_format == "table":
+        Console().print(_to_table(_format_run(run_dict, res.now)))
+    else:
+        Console().print_json(_to_json(_format_run(run_dict, res.now)))
 
 
-def _display_one_run(
-    stub: ExecStub,
-    run_id: int,
-) -> None:
+def _display_one_run(stub: ExecStub, run_id: int, ls_format: str = "table") -> None:
     """Display information about a specific run."""
     res: ListRunsResponse = stub.ListRuns(ListRunsRequest(run_id=run_id))
     if not res.run_dict:
@@ -276,7 +318,10 @@ def _display_one_run(
 
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
-    Console().print(_to_table(_format_run(run_dict, res.now)))
+    if ls_format == "table":
+        Console().print(_to_table(_format_run(run_dict, res.now)))
+    else:
+        Console().print_json(_to_json(_format_run(run_dict, res.now)))
 
 
 def _print_json_error() -> None:
