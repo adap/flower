@@ -23,7 +23,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 from logging import DEBUG
 from pathlib import Path
-from typing import Annotated, Any, Dict, List, Optional, Tuple
+from typing import Annotated, Any, List, Optional, Tuple
 
 import grpc
 import typer
@@ -212,8 +212,10 @@ def _format_run(run_dict: dict[int, Run], now_isoformat: str) -> List[Tuple[str,
 
         _list.append(
             (
-                f"[bold]{run.run_id}[/bold]",
-                f"{run.fab_id} (v{run.fab_version})",
+                f"{run.run_id}",
+                f"{run.fab_id}",
+                f"{run.fab_version}",
+                f"{run.fab_hash}",
                 f"[{status_style}]{status_text}[/{status_style}]",
                 format_timedelta(elapsed_time),
                 _format_datetime(pending_at),
@@ -240,7 +242,27 @@ def _to_table(run_list: List[Tuple[str, ...]]) -> Table:
     table.add_column(Text("Finished At", justify="center"), style="dim white")
 
     for row in run_list:
-        table.add_row(*row)
+        (
+            run_id,
+            fab_id,
+            fab_version,
+            _,
+            status_text,
+            elapsed,
+            created_at,
+            running_at,
+            finished_at,
+        ) = row
+        formatted_row = (
+            f"[bold]{run_id}[/bold]",
+            f"{fab_id} (v{fab_version})",
+            status_text,
+            elapsed,
+            created_at,
+            running_at,
+            finished_at,
+        )
+        table.add_row(*formatted_row)
 
     return table
 
@@ -255,33 +277,51 @@ def _to_json(run_list: List[Tuple[str, ...]]) -> str:
         # Substitute BBCode tags with an empty string
         return tuple(bbcode_pattern.sub("", s) for s in strings)
 
-    runs_dict: Dict[str, Dict[str, str]] = {}
+    # runs_dict: Dict[str, list[Dict[str, str]]] = {"runs": []}
+    runs_list = []
     for row in run_list:
         row = _remove_bbcode_tags(row)
-        run_id, fab, status, elapsed, created_at, running_at, finished_at = row
-        runs_dict[run_id] = {
-            "FAB": fab,
-            "Status": status,
-            "Elapsed": elapsed,
-            "Created At": created_at,
-            "Running At": running_at,
-            "Finished At": finished_at,
-        }
-    return json.dumps(runs_dict)
+        (
+            run_id,
+            fab_id,
+            fab_version,
+            fab_hash,
+            status_text,
+            elapsed,
+            created_at,
+            running_at,
+            finished_at,
+        ) = row
+        runs_list.append(
+            {
+                "run-id": run_id,
+                "fab-id": fab_id,
+                "fab-name": fab_id.split("/")[-1],
+                "fab-version": fab_version,
+                "fab-hash": fab_hash[:8],
+                "status": status_text,
+                "elapsed": elapsed,
+                "created-at": created_at,
+                "running-at": running_at,
+                "finished-at": finished_at,
+            }
+        )
+
+    return json.dumps({"runs": runs_list})
 
 
-def _list_runs(stub: ExecStub, format: str) -> None:
+def _list_runs(stub: ExecStub, ls_format: str) -> None:
     """List all runs."""
     res: ListRunsResponse = stub.ListRuns(ListRunsRequest())
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
-    if format == "table":
+    if ls_format == "table":
         Console().print(_to_table(_format_run(run_dict, res.now)))
     else:
         Console().print_json(_to_json(_format_run(run_dict, res.now)))
 
 
-def _display_one_run(stub: ExecStub, run_id: int, format: str) -> None:
+def _display_one_run(stub: ExecStub, run_id: int, ls_format: str) -> None:
     """Display information about a specific run."""
     res: ListRunsResponse = stub.ListRuns(ListRunsRequest(run_id=run_id))
     if not res.run_dict:
@@ -289,7 +329,7 @@ def _display_one_run(stub: ExecStub, run_id: int, format: str) -> None:
 
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
-    if format == "table":
+    if ls_format == "table":
         Console().print(_to_table(_format_run(run_dict, res.now)))
     else:
         Console().print_json(_to_json(_format_run(run_dict, res.now)))
