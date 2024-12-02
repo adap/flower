@@ -18,20 +18,10 @@
 import os
 from dataclasses import dataclass, field
 from logging import DEBUG, WARNING
-from typing import Any, cast
+from typing import Any, Callable, cast
 
 from flwr.client.typing import ClientAppCallable
-from flwr.common import (
-    ConfigsRecord,
-    Context,
-    Message,
-    Parameters,
-    RecordSet,
-    ndarray_to_bytes,
-    parameters_to_ndarrays,
-)
-from flwr.common import recordset_compat as compat
-from flwr.common.constant import MessageType
+from flwr.common import ConfigsRecord, Context, Message, RecordSet, array_from_numpy
 from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.shamir import create_shares
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
@@ -45,10 +35,8 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     public_key_to_bytes,
 )
 from flwr.common.secure_aggregation.ndarrays_arithmetic import (
-    factor_combine,
     parameters_addition,
     parameters_mod,
-    parameters_multiply,
     parameters_subtraction,
 )
 from flwr.common.secure_aggregation.quantization import quantize
@@ -63,7 +51,7 @@ from flwr.common.secure_aggregation.secaggplus_utils import (
     share_keys_plaintext_concat,
     share_keys_plaintext_separate,
 )
-from flwr.common.typing import ConfigsRecordValues
+from flwr.common.typing import ConfigsRecordValues, NDArrays
 
 
 @dataclass
@@ -80,7 +68,6 @@ class SecAggPlusState:
     clipping_range: float = 0.0
     target_range: int = 0
     mod_range: int = 0
-    max_weight: float = 0.0
 
     # Secret key (sk) and public key (pk)
     sk1: bytes = b""
@@ -133,24 +120,32 @@ class SecAggPlusState:
         return ret
 
 
-def secaggplus_mod(
+def secaggplus_base_mod(
     msg: Message,
     ctxt: Context,
     call_next: ClientAppCallable,
 ) -> Message:
-    """Handle incoming message and return results, following the SecAgg+ protocol."""
-    # Ignore non-fit messages
-    if msg.metadata.message_type != MessageType.TRAIN:
-        return call_next(msg, ctxt)
+    """Handle incoming message and return results, following the SecAgg+ protocol.
+
+    This modifier should be used with the `SecAggPlusAggregator` on the ServerApp side.
+    This modifier will not be active
+    """
+    # Do nothing if the message does not contain the required configs
+    if RECORD_KEY_CONFIGS not in msg.content.configs_records:
+        log(
+            WARNING,
+            "Secure Aggregation is not active. This may impact data privacy.",
+        )
+        call_next(msg, ctxt)
+
+    # Retrieve incoming configs
+    configs = msg.content.configs_records[RECORD_KEY_CONFIGS]
 
     # Retrieve local state
     if RECORD_KEY_STATE not in ctxt.state.configs_records:
         ctxt.state.configs_records[RECORD_KEY_STATE] = ConfigsRecord({})
     state_dict = ctxt.state.configs_records[RECORD_KEY_STATE]
     state = SecAggPlusState(**state_dict)
-
-    # Retrieve incoming configs
-    configs = msg.content.configs_records[RECORD_KEY_CONFIGS]
 
     # Check the validity of the next stage
     check_stage(state.current_stage, configs)
@@ -169,14 +164,10 @@ def secaggplus_mod(
     elif state.current_stage == Stage.SHARE_KEYS:
         res = _share_keys(state, configs)
     elif state.current_stage == Stage.COLLECT_MASKED_VECTORS:
-        out_msg = call_next(msg, ctxt)
-        out_content = out_msg.content
-        fitres = compat.recordset_to_fitres(out_content, keep_input=True)
-        res = _collect_masked_vectors(
-            state, configs, fitres.num_examples, fitres.parameters
-        )
-        for p_record in out_content.parameters_records.values():
-            p_record.clear()
+        reply = _collect_masked_vectors(lambda: call_next(msg, ctxt), state, configs)
+        # Save state
+        ctxt.state.configs_records[RECORD_KEY_STATE] = ConfigsRecord(state.to_dict())
+        return reply
     elif state.current_stage == Stage.UNMASK:
         res = _unmask(state, configs)
     else:
@@ -325,7 +316,6 @@ def _setup(
     state.clipping_range = cast(float, sec_agg_param_dict[Key.CLIPPING_RANGE])
     state.target_range = cast(int, sec_agg_param_dict[Key.TARGET_RANGE])
     state.mod_range = cast(int, sec_agg_param_dict[Key.MOD_RANGE])
-    state.max_weight = cast(float, sec_agg_param_dict[Key.MAX_WEIGHT])
 
     # Dictionaries containing node IDs as keys
     # and their respective secret shares as values.
@@ -411,11 +401,10 @@ def _share_keys(
 
 # pylint: disable-next=too-many-locals
 def _collect_masked_vectors(
+    get_reply: Callable[[], Message],
     state: SecAggPlusState,
     configs: ConfigsRecord,
-    num_examples: int,
-    updated_parameters: Parameters,
-) -> dict[str, ConfigsRecordValues]:
+) -> Message:
     log(DEBUG, "Node %d: starting stage 2...", state.nid)
     available_clients: list[int] = []
     ciphertexts = cast(list[bytes], configs[Key.CIPHERTEXT_LIST])
@@ -445,33 +434,24 @@ def _collect_masked_vectors(
         state.sk1_share_dict[src] = sk1_share
 
     # Fit
-    ratio = num_examples / state.max_weight
-    if ratio > 1:
-        log(
-            WARNING,
-            "Potential overflow warning: the provided weight (%s) exceeds the specified"
-            " max_weight (%s). This may lead to overflow issues.",
-            num_examples,
-            state.max_weight,
-        )
-    q_ratio = round(ratio * state.target_range)
-    dq_ratio = q_ratio / state.target_range
+    msg = get_reply()
 
-    parameters = parameters_to_ndarrays(updated_parameters)
-    parameters = parameters_multiply(parameters, dq_ratio)
+    # Retrieve all the parameters from the message
+    all_weights: NDArrays = []
+    pr_keys = list(msg.content.parameters_records.keys())  # In case of instable order
+    for pr_key in pr_keys:
+        pr = msg.content.parameters_records[pr_key]
+        for arr in pr.values():
+            all_weights.append(arr.numpy())
 
     # Quantize parameter update (vector)
-    quantized_parameters = quantize(
-        parameters, state.clipping_range, state.target_range
-    )
+    q_all_weights = quantize(all_weights, state.clipping_range, state.target_range)
 
-    quantized_parameters = factor_combine(q_ratio, quantized_parameters)
-
-    dimensions_list: list[tuple[int, ...]] = [a.shape for a in quantized_parameters]
+    dimensions_list: list[tuple[int, ...]] = [a.shape for a in q_all_weights]
 
     # Add private mask
     private_mask = pseudo_rand_gen(state.rd_seed, state.mod_range, dimensions_list)
-    quantized_parameters = parameters_addition(quantized_parameters, private_mask)
+    q_all_weights = parameters_addition(q_all_weights, private_mask)
 
     for node_id in available_clients:
         # Add pairwise masks
@@ -481,20 +461,23 @@ def _collect_masked_vectors(
         )
         pairwise_mask = pseudo_rand_gen(shared_key, state.mod_range, dimensions_list)
         if state.nid > node_id:
-            quantized_parameters = parameters_addition(
-                quantized_parameters, pairwise_mask
-            )
+            q_all_weights = parameters_addition(q_all_weights, pairwise_mask)
         else:
-            quantized_parameters = parameters_subtraction(
-                quantized_parameters, pairwise_mask
-            )
+            q_all_weights = parameters_subtraction(q_all_weights, pairwise_mask)
 
     # Take mod of final weight update vector and return to server
-    quantized_parameters = parameters_mod(quantized_parameters, state.mod_range)
+    q_all_weights = parameters_mod(q_all_weights, state.mod_range)
+
+    # Assign the masked quantized parameters back to the message
+    idx = 0
+    for pr_key in pr_keys:
+        pr = msg.content.parameters_records[pr_key]
+        for arr_key in pr:
+            pr[arr_key] = array_from_numpy(q_all_weights[idx])
+            idx += 1
+
     log(DEBUG, "Node %d: stage 2 completed, uploading masked parameters...", state.nid)
-    return {
-        Key.MASKED_PARAMETERS: [ndarray_to_bytes(arr) for arr in quantized_parameters]
-    }
+    return msg
 
 
 def _unmask(
