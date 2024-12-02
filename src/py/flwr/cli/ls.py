@@ -22,7 +22,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 from logging import DEBUG
 from pathlib import Path
-from typing import Annotated, Any, List, Optional, Tuple, Union
+from typing import Annotated, Any, Optional, Union
 
 import grpc
 import typer
@@ -176,13 +176,13 @@ def _init_channel(app: Path, federation_config: dict[str, Any]) -> grpc.Channel:
     return channel
 
 
-def _format_run(run_dict: dict[int, Run], now_isoformat: str) -> List[Tuple[str, ...]]:
+def _format_run(run_dict: dict[int, Run], now_isoformat: str) -> list[tuple[str, ...]]:
     """Format run status as a rich Table."""
 
     def _format_datetime(dt: Optional[datetime]) -> str:
         return isoformat8601_utc(dt).replace("T", " ") if dt else "N/A"
 
-    _list: List[Tuple[str, ...]] = []
+    _list: list[tuple[str, ...]] = []
     # Add rows
     for run in sorted(
         run_dict.values(), key=lambda x: datetime.fromisoformat(x.pending_at)
@@ -234,7 +234,7 @@ def _format_run(run_dict: dict[int, Run], now_isoformat: str) -> List[Tuple[str,
     return _list
 
 
-def _to_table(run_list: List[Tuple[str, ...]]) -> Table:
+def _to_table(run_list: list[tuple[str, ...]]) -> Table:
     """."""
     table = Table(header_style="bold cyan", show_lines=True)
 
@@ -275,10 +275,10 @@ def _to_table(run_list: List[Tuple[str, ...]]) -> Table:
     return table
 
 
-def _to_json(run_list: List[Tuple[str, ...]]) -> str:
+def _to_json(run_list: list[tuple[str, ...]]) -> str:
     """."""
 
-    def _remove_bbcode_tags(strings: Tuple[str, ...]) -> Tuple[str, ...]:
+    def _remove_bbcode_tags(strings: tuple[str, ...]) -> tuple[str, ...]:
         """Remove BBCode tags from the provided text."""
         # Regular expression pattern to match BBCode tags
         bbcode_pattern = re.compile(r"\[/?\w+\]")
