@@ -49,14 +49,14 @@ def partition_data(data, num_partitions):
 def sim_data(ni: int, num_clients: int, num_features: int, alpha=1, beta=1):
     """Simulate data for simII."""
 
-    # np.random.seed(2025)
+    np.random.seed(2025)
     
     # generate client-based model coefs
     u = np.random.normal(0, alpha, num_clients)
     x = np.zeros((num_features, num_clients))
     x[0:99, :] = np.random.multivariate_normal(u, np.diag(np.ones(num_clients)), 99)
 
-    # generate observations
+    # generate train observations
     ivec = np.arange(1, num_features + 1)
     vari = np.diag(1 / (ivec**1.2))
 
@@ -69,6 +69,7 @@ def sim_data(ni: int, num_clients: int, num_features: int, alpha=1, beta=1):
 
     # (num_clients, ni, num_feaures)
     for i in range(z.shape[0]):
+        # train
         z[i, :, :] = np.random.multivariate_normal(v[i], vari, ni)
         hold = np.matmul(z[i, :, :], x[:, i]) + error[:, i]
         y[:, i] = np.exp(hold) / (1 + np.exp(hold))
@@ -80,4 +81,36 @@ def sim_data(ni: int, num_clients: int, num_features: int, alpha=1, beta=1):
         y[mask, j] = 1
         y[~mask, j] = 0
 
-    return z.copy(), y.copy()
+    # generate test observations
+    ntest = ni
+    ivec = np.arange(1, num_features + 1)
+    vari = np.diag(1 / (ivec**1.2))
+
+    # B = np.random.normal(0, beta, num_features)
+    # v = np.random.multivariate_normal(B, np.diag(np.ones(num_features)), num_clients)
+
+    error = np.random.multivariate_normal(u, np.diag(np.ones(num_clients)), ntest)
+    ztest = np.zeros((num_clients, ntest, num_features))
+    ytest = np.zeros((ni, num_clients))
+
+    # (num_clients, ni, num_feaures)
+    for i in range(ztest.shape[0]):
+        # train
+        ztest[i, :, :] = np.random.multivariate_normal(v[i], vari, ntest)
+        hold = np.matmul(ztest[i, :, :], x[:, i]) + error[:, i]
+        ytest[:, i] = np.exp(hold) / (1 + np.exp(hold))
+
+    for j in range(num_clients):
+        top_indices = np.argpartition(ytest[:, j], -100)[-100:]
+        mask = np.zeros(ytest[:, j].shape, dtype=bool)
+        mask[top_indices] = True
+        ytest[mask, j] = 1
+        ytest[~mask, j] = 0
+
+    zstack = []
+    ystack = []
+    for i in range(z.shape[0]):
+        zstack = np.vstack(ztest[i, :, :])
+        ystack = np.vstack(ytest[:, i])
+
+    return z.copy(), y.copy(), zstack.copy(), ystack.copy()
