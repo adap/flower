@@ -17,6 +17,9 @@ examples/**/dataset/**
 # Flower Baselines
 baselines/datasets/leaf
 
+# Exclude ee package
+src/py/flwr/ee
+
 # macOS
 .DS_Store
 
