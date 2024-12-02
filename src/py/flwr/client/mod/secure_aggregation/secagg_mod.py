@@ -26,5 +26,9 @@ def secagg_mod(
     ctxt: Context,
     call_next: ClientAppCallable,
 ) -> Message:
-    """Handle incoming message and return results, following the SecAgg protocol."""
+    """Handle incoming message and return results, following the SecAgg protocol.
+
+    This modifier acts as a wrapper around `secaggplus_mod` since the SecAgg protocol
+    is a subset of the SecAgg+ protocol.
+    """
     return secaggplus_mod(msg, ctxt, call_next)

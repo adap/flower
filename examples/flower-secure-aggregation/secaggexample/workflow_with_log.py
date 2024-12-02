@@ -11,7 +11,9 @@ from flwr.server.workflow.secure_aggregation.secaggplus_workflow import (
     SecAggPlusWorkflow,
 )
 from flwr.common.secure_aggregation.secaggplus_constants import Stage
-from flwr.server.workflow.secure_aggregation.secaggplus_aggregator import SecAggPlusAggregatorState
+from flwr.server.workflow.secure_aggregation.secaggplus_aggregator import (
+    SecAggPlusAggregatorState,
+)
 
 from secaggexample.task import get_weights, make_net
 
@@ -79,9 +81,11 @@ class SecAggPlusWorkflowWithLogs(SecAggPlusWorkflow):
             "########################### Secure Aggregation End ###########################",
         )
         log(INFO, "")
-    
-    def on_stage_complete(self, success: bool, state: SecAggPlusAggregatorState) -> None:
-        super().on_send(success, state)
+
+    def on_stage_complete(
+        self, success: bool, state: SecAggPlusAggregatorState
+    ) -> None:
+        super().on_stage_complete(success, state)
         if not success:
             return
         if state.current_stage == Stage.SETUP:
@@ -95,28 +99,5 @@ class SecAggPlusWorkflowWithLogs(SecAggPlusWorkflow):
             log(
                 INFO,
                 "Obtained sum of masked parameters: %s...",
-                state.aggregate_ndarrays[1].flatten()[:3],
+                state.aggregated_vector[1].flatten()[:3],
             )
-
-    # def setup_stage(
-    #     self, driver: Driver, context: LegacyContext, state: WorkflowState
-    # ) -> bool:
-    #     ret = super().setup_stage(driver, context, state)
-    #     self.node_ids = list(state.active_node_ids)
-    #     state.nid_to_fitins[self.node_ids[0]].configs_records["fitins.config"][
-    #         "drop"
-    #     ] = True
-    #     return ret
-
-    # def collect_masked_vectors_stage(
-    #     self, driver: Driver, context: LegacyContext, state: WorkflowState
-    # ) -> bool:
-    #     ret = super().collect_masked_vectors_stage(driver, context, state)
-    #     for node_id in state.sampled_node_ids - state.active_node_ids:
-    #         log(INFO, "Client %s dropped out.", self.node_ids.index(node_id))
-    #     log(
-    #         INFO,
-    #         "Obtained sum of masked parameters: %s...",
-    #         state.aggregate_ndarrays[1].flatten()[:3],
-    #     )
-    #     return ret
