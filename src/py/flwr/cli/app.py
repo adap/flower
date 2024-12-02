@@ -17,12 +17,15 @@
 import typer
 from typer.main import get_command
 
+from flwr.common.version import package_version
+
 from .build import build
 from .install import install
 from .log import log
 from .ls import ls
 from .new import new
 from .run import run
+
 
 app = typer.Typer(
     help=typer.style(
@@ -31,7 +34,19 @@ app = typer.Typer(
         bold=True,
     ),
     no_args_is_help=True,
+    invoke_without_command=True,
 )
+
+
+@app.callback()
+def main(
+    version: bool = typer.Option(False, "--version", help="Show the version and exit.")
+):
+    """Print the version of the package."""
+    if version:
+        typer.echo(package_version)
+        raise typer.Exit()
+
 
 app.command()(new)
 app.command()(run)
