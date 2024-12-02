@@ -8,7 +8,7 @@ version = "1.0.0"
 description = ""
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.13.0",
+    "flwr[simulation]>=1.13.1",
     "flwr-datasets>=0.3.0",
     "torch==2.2.1",
     "transformers>=4.30.0,<5.0",

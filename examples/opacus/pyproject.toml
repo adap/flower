@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "Sample-level Differential Privacy with Opacus in Flower"
 
 dependencies = [
-    "flwr[simulation]>=1.13.0",
+    "flwr[simulation]>=1.13.1",
     "flwr-datasets[vision]>=0.3.0",
     "torch==2.1.1",
     "torchvision==0.16.1",

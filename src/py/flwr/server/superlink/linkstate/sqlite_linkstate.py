@@ -19,7 +19,6 @@
 import json
 import re
 import sqlite3
-import threading
 import time
 from collections.abc import Sequence
 from logging import DEBUG, ERROR, WARNING
@@ -183,7 +182,6 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         """
         self.database_path = database_path
         self.conn: Optional[sqlite3.Connection] = None
-        self.lock = threading.RLock()
 
     def initialize(self, log_queries: bool = False) -> list[tuple[str]]:
         """Create tables if they don't exist yet.
@@ -216,7 +214,6 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         cur.execute(SQL_CREATE_TABLE_PUBLIC_KEY)
         cur.execute(SQL_CREATE_INDEX_ONLINE_UNTIL)
         res = cur.execute("SELECT name FROM sqlite_schema;")
-
         return res.fetchall()
 
     def query(
