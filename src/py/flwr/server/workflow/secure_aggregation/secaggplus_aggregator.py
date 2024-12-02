@@ -16,6 +16,7 @@
 
 
 import random
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from logging import DEBUG, ERROR, INFO, WARN
 from typing import Callable, Optional, Union, cast
@@ -59,7 +60,7 @@ class SecAggPlusAggregatorState:  # pylint: disable=R0902
     messages: list[Message]
     sampled_node_ids: set[int]
     message_type: str
-    current_stage: Stage = Stage.SETUP
+    current_stage: str = Stage.SETUP
     active_node_ids: set[int] = field(default_factory=set)
     num_shares: int = 0
     threshold: int = 0
@@ -74,11 +75,11 @@ class SecAggPlusAggregatorState:  # pylint: disable=R0902
     prs_info: dict[str, tuple[list[str], list[list[int]]]] = field(default_factory=dict)
 
 
-MessagesHandler = Callable[[list[Message], SecAggPlusAggregatorState], None]
+MessagesHandler = Callable[[Iterable[Message], SecAggPlusAggregatorState], None]
 StageCompletionHandler = Callable[[bool, SecAggPlusAggregatorState], None]
 
 
-class SecAggPlusAggregator:
+class SecAggPlusAggregator:  # pylint: disable=too-many-instance-attributes
     """The aggregator for the SecAgg+ protocol.
 
     Please use with the `secaggplus_base_mod` modifier on the ClientApp side.
@@ -138,12 +139,12 @@ class SecAggPlusAggregator:
     on_send : Optional[MessagesHandler] (default: None)
         A callback function to be invoked before messages are sent out via the driver.
         The function receives two arguments:
-        - A list of `Message` objects that are about to be sent.
+        - An iterable of `Message` objects that are about to be sent.
         - The current state of the `SecAggPlusAggregator`.
     on_receive : Optional[MessagesHandler] (default: None)
         A callback function to be invoked after reply messages are received via the
         driver. The function receives two arguments:
-        - A list of `Message` objects that have been received.
+        - An iterable of `Message` objects that have been received.
         - The current state of the `SecAggPlusAggregator`.
     on_stage_complete : Optional[StageCompletionHandler] (default: None)
         A callback function to be invoked when a stage is completed, regardless of
@@ -202,13 +203,15 @@ class SecAggPlusAggregator:
 
         self._check_init_params()
 
-    def aggregate(self, messages: list[Message]) -> Message:
+    def aggregate(self, messages: list[Message]) -> Optional[Message]:
         """Send the messages and aggregate the reply messages."""
         if len(messages) == 0:
             raise ValueError("No messages to aggregate.")
-        msg_type = messages[0].metadata.message_type
+        msg_type = ""
         for msg in messages:
-            if msg.metadata.message_type != msg_type:
+            if msg_type == "":
+                msg_type = msg.metadata.message_type
+            elif msg.metadata.message_type != msg_type:
                 raise ValueError("All messages must have the same message type.")
 
         state = SecAggPlusAggregatorState(
@@ -230,7 +233,7 @@ class SecAggPlusAggregator:
                 self.on_stage_complete(res, state)
             if not res:
                 log(INFO, "Secure aggregation halted.")
-                return
+                return None
         agg_msg = self.driver.create_message(
             content=RecordSet(),
             message_type=msg_type,

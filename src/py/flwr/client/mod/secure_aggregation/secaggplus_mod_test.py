@@ -36,7 +36,8 @@ from flwr.common.secure_aggregation.secaggplus_constants import (
 )
 from flwr.common.typing import ConfigsRecordValues
 
-from .secaggplus_mod import SecAggPlusState, check_configs, secaggplus_mod
+from .secaggplus_base_mod import SecAggPlusState, check_configs
+from .secaggplus_mod import secaggplus_mod
 
 
 def get_test_handler(

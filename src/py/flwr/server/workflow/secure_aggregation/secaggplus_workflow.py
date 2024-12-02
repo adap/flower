@@ -15,6 +15,7 @@
 """Workflow for the SecAgg+ protocol."""
 
 
+from collections.abc import Iterable
 from logging import INFO
 from typing import Optional, Union, cast
 
@@ -43,7 +44,7 @@ from ..constant import Key as WorkflowKey
 from .secaggplus_aggregator import SecAggPlusAggregator, SecAggPlusAggregatorState
 
 
-class SecAggPlusWorkflow:
+class SecAggPlusWorkflow:  # pylint: disable=too-many-instance-attributes
     """The workflow for the SecAgg+ protocol.
 
     Please use with the `secaggplus_mod` modifier on the ClientApp side.
@@ -176,7 +177,7 @@ class SecAggPlusWorkflow:
         )
         if not proxy_fitins_lst:
             log(INFO, "configure_fit: no clients selected, cancel")
-            return False
+            return
         log(
             INFO,
             "configure_fit: strategy sampled %s clients (out of %s)",
@@ -189,8 +190,6 @@ class SecAggPlusWorkflow:
             for proxy, fitins in proxy_fitins_lst
         }
         self._nid_to_proxies = {proxy.node_id: proxy for proxy, _ in proxy_fitins_lst}
-        self._legacy_results: list[tuple[ClientProxy, FitRes]] = []
-        self._legacy_failures: list[Exception] = []
 
         # Create the aggregator
         aggregator = SecAggPlusAggregator(
@@ -219,7 +218,15 @@ class SecAggPlusWorkflow:
             ]
         )
 
-    def on_send(self, msgs: list[Message], state: SecAggPlusAggregatorState) -> None:
+        # Clean up
+        self._legacy_results.clear()
+        self._legacy_failures.clear()
+        self._nid_to_fitins.clear()
+        self._nid_to_proxies.clear()
+
+    def on_send(
+        self, msgs: Iterable[Message], state: SecAggPlusAggregatorState
+    ) -> None:
         """Handle messages to be sent."""
         if state.current_stage == Stage.COLLECT_MASKED_VECTORS:
             for msg in msgs:
@@ -227,7 +234,9 @@ class SecAggPlusWorkflow:
                 cfg[Key.MAX_WEIGHT] = self.max_weight
                 cfg[Key.CLIPPING_RANGE] = self.clipping_range
 
-    def on_receive(self, msgs: list[Message], state: SecAggPlusAggregatorState) -> None:
+    def on_receive(
+        self, msgs: Iterable[Message], state: SecAggPlusAggregatorState
+    ) -> None:
         """Handle received reply messages."""
         for msg in msgs:
             if msg.has_error():
@@ -270,7 +279,9 @@ class SecAggPlusWorkflow:
             len(self._legacy_failures),
         )
         aggregated_result = context.strategy.aggregate_fit(
-            self._current_round, self._legacy_results, self._legacy_failures  # type: ignore
+            self._current_round,
+            self._legacy_results,
+            self._legacy_failures,  # type: ignore
         )
         parameters_aggregated, metrics_aggregated = aggregated_result
 
