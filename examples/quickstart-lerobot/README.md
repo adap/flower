@@ -30,7 +30,8 @@ quickstart-lerobot
 │   ├── __init__.py
 │   ├── client_app.py   # Defines your ClientApp
 │   ├── server_app.py   # Defines your ServerApp
-│   └── task.py         # Defines your model, training and data loading
+│   ├── task.py         # Defines your model, training and data loading
+|   └── configs/		# configuration files for policy training and gym environment
 ├── pyproject.toml      # Project metadata like dependencies and configs
 └── README.md
 ```
