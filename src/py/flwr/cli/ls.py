@@ -182,7 +182,7 @@ def _format_run(run_dict: dict[int, Run], now_isoformat: str) -> list[tuple[str,
     def _format_datetime(dt: Optional[datetime]) -> str:
         return isoformat8601_utc(dt).replace("T", " ") if dt else "N/A"
 
-    _list: list[tuple[str, ...]] = []
+    run_status_list: list[tuple[str, ...]] = []
     # Add rows
     for run in sorted(
         run_dict.values(), key=lambda x: datetime.fromisoformat(x.pending_at)
@@ -218,7 +218,7 @@ def _format_run(run_dict: dict[int, Run], now_isoformat: str) -> list[tuple[str,
                 end_time = datetime.fromisoformat(now_isoformat)
             elapsed_time = end_time - running_at
 
-        _list.append(
+        run_status_list.append(
             (
                 f"{run.run_id}",
                 f"{run.fab_id}",
@@ -231,7 +231,7 @@ def _format_run(run_dict: dict[int, Run], now_isoformat: str) -> list[tuple[str,
                 _format_datetime(finished_at),
             )
         )
-    return _list
+    return run_status_list
 
 
 def _to_table(run_list: list[tuple[str, ...]]) -> Table:
