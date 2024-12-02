@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-28 00:32+0000\n"
+"POT-Creation-Date: 2024-11-30 00:31+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -1326,10 +1326,10 @@ msgid "Where to start"
 msgstr "시작 위치"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:11
+#, fuzzy
 msgid ""
-"Until the Flower core library matures it will be easier to get PR's "
-"accepted if they only touch non-core areas of the codebase. Good "
-"candidates to get started are:"
+"In general, it is easier to get PR's accepted if they only touch non-core"
+" areas of the codebase. Good candidates to get started are:"
 msgstr ""
 "Flower 코어 라이브러리가 완성될 때까지는 코드베이스의 비핵심 영역만 건드리는 것이 PR을 승인받기가 더 쉬울 것입니다. "
 "시작하기에 좋은 후보자는 다음과 같습니다:"
@@ -1339,71 +1339,71 @@ msgid "Documentation: What's missing? What could be expressed more clearly?"
 msgstr "문서: 무엇이 누락되었나요? 무엇을 더 명확하게 표현할 수 있을까요?"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:15
+#, python-format
+msgid ""
+"Open issues: Issues with the tag `good first issue "
+"<https://github.com/adap/flower/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22>`_."
+msgstr ""
+
+#: ../../source/contributor-ref-good-first-contributions.rst:17
 msgid "Baselines: See below."
 msgstr "Baselines: 아래를 참조하세요."
 
-#: ../../source/contributor-ref-good-first-contributions.rst:16
+#: ../../source/contributor-ref-good-first-contributions.rst:18
 msgid "Examples: See below."
 msgstr "예시: 아래를 참조하세요."
 
-#: ../../source/contributor-ref-good-first-contributions.rst:19
-msgid "Request for Flower Baselines"
+#: ../../source/contributor-ref-good-first-contributions.rst:21
+#, fuzzy
+msgid "Flower Baselines"
 msgstr "Flower Baselines 요청"
 
-#: ../../source/contributor-ref-good-first-contributions.rst:21
+#: ../../source/contributor-ref-good-first-contributions.rst:23
+#, fuzzy
 msgid ""
-"If you are not familiar with Flower Baselines, you should probably check-"
-"out our `contributing guide for baselines "
-"<https://flower.ai/docs/baselines/how-to-contribute-baselines.html>`_."
+"If you are not familiar with Flower Baselines, please check our "
+"`contributing guide for baselines <https://flower.ai/docs/baselines/how-"
+"to-contribute-baselines.html>`_."
 msgstr ""
 "Flower Baseline에 익숙하지 않다면 ' Baseline 기여 가이드 "
 "<https://flower.ai/docs/baselines/how-to-contribute-baselines.html>`_를 "
 "확인해보세요."
 
-#: ../../source/contributor-ref-good-first-contributions.rst:25
+#: ../../source/contributor-ref-good-first-contributions.rst:26
+#, fuzzy
 msgid ""
-"You should then check out the open `issues "
+"Then take a look at the open `issues "
 "<https://github.com/adap/flower/issues?q=is%3Aopen+is%3Aissue+label%3A%22new+baseline%22>`_"
-" for baseline requests. If you find a baseline that you'd like to work on"
-" and that has no assignees, feel free to assign it to yourself and start "
-"working on it!"
+" for baseline requests. If you find a baseline that you'd like to work "
+"on, and it has no assignees, feel free to assign it to yourself and get "
+"started!"
 msgstr ""
 "그런 다음 오픈 된 `issues "
 "<https://github.com/adap/flower/issues?q=is%3Aopen+is%3Aissue+label%3A%22new+baseline%22>`_에서"
 " baseline 요청을 확인해야 합니다. 작업하고 싶은 기준선을 찾았지만 담당자가 없는 경우, 자유롭게 자신에게 할당하고 작업을 "
 "시작하세요!"
 
-#: ../../source/contributor-ref-good-first-contributions.rst:30
+#: ../../source/contributor-ref-good-first-contributions.rst:31
+#, fuzzy
 msgid ""
-"Otherwise, if you don't find a baseline you'd like to work on, be sure to"
-" open a new issue with the baseline request template!"
+"If you don't find the baseline you'd like to work on, be sure to open a "
+"new issue with the baseline request template!"
 msgstr "그렇지 않으면 작업하고 싶은 baseline을 찾지 못하면 baseline 요청 템플릿으로 새 이슈를 열어야 합니다!"
 
-#: ../../source/contributor-ref-good-first-contributions.rst:34
-msgid "Request for examples"
-msgstr "예시 요청"
+#: ../../source/contributor-ref-good-first-contributions.rst:35
+#, fuzzy
+msgid "Usage examples"
+msgstr "예시"
 
-#: ../../source/contributor-ref-good-first-contributions.rst:36
+#: ../../source/contributor-ref-good-first-contributions.rst:37
+#, fuzzy
 msgid ""
-"We wish we had more time to write usage examples because we believe they "
-"help users to get started with building what they want to build. Here are"
-" a few ideas where we'd be happy to accept a PR:"
+"We wish we had more time to write usage examples because they help users "
+"to get started with building what they want. If you notice any missing "
+"examples that could help others, feel free to contribute!"
 msgstr ""
 "사용 예시는 사용자가 원하는 것을 구축하는 데 도움이 된다고 생각하기 때문에 더 많은 시간을 할애하여 작성할 수 있었으면 합니다. "
 "다음은 저희가 기꺼이 PR을 수락할 수 있는 몇 가지 아이디어입니다:"
-
-#: ../../source/contributor-ref-good-first-contributions.rst:40
-msgid "Llama 2 fine-tuning, with Hugging Face Transformers and PyTorch"
-msgstr "Llama 2 미세 조정, Hugging Face Transformer와 파이토치 포함"
-
-#: ../../source/contributor-ref-good-first-contributions.rst:41
-#: ../../source/tutorial-quickstart-xgboost.rst:7
-msgid "XGBoost"
-msgstr "XGBoost"
-
-#: ../../source/contributor-ref-good-first-contributions.rst:42
-msgid "Android ONNX on-device training"
-msgstr "Android ONNX 온디바이스 훈련"
 
 #: ../../source/contributor-ref-secure-aggregation-protocols.rst:2
 msgid "Secure Aggregation Protocols"
@@ -24222,6 +24222,10 @@ msgstr ""
 msgid "Quickstart XGBoost"
 msgstr ""
 
+#: ../../source/tutorial-quickstart-xgboost.rst:7
+msgid "XGBoost"
+msgstr "XGBoost"
+
 #: ../../source/tutorial-quickstart-xgboost.rst:9
 msgid ""
 "EXtreme Gradient Boosting (**XGBoost**) is a robust and efficient "
@@ -25984,7 +25988,7 @@ msgstr ""
 " 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|f150b8d6e0074250822c9f6f7a8de3e0|"
+msgid "|80152fa658904be08c849b4a594b76e1|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -26001,7 +26005,7 @@ msgstr ""
 " 바둑과 같은 게임을 하는 것일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|72772d10debc4abd8373c0bc82985422|"
+msgid "|35b60a1068f944ce937ac2988661aad5|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -26027,7 +26031,7 @@ msgstr ""
 "부르리는 것을 듣는 스마트 스피커에서 비롯됩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|5815398552ad41d290a3a2631fe8f6ca|"
+msgid "|efead7f2c2224b60b7b42705004c15e6|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -26045,7 +26049,7 @@ msgstr ""
 "있습니다. 하지만 여러 조직이 모두 같은 작업을 위해 데이터를 생성하는 것일 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|e6ac20744bf149378be20ac3dc309356|"
+msgid "|5421fee4e7ed450c903cbcd8a9d8a5d4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -26064,7 +26068,7 @@ msgstr ""
 "서버는 데이터 센터 어딘가에 있을 수도 있고 클라우드 어딘가에 있을 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|a4011ef443c14725b15a8cf33b0e3443|"
+msgid "|811fcf35e9214bd5b4e613e41f7c0a27|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -26081,7 +26085,7 @@ msgstr ""
 " 우리가 기본적으로 사용해 온 머신러닝 방법입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|a22faa3617404c06803731525e1c609f|"
+msgid "|e61d38b0948f4c07a7257755f3799b54|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -26104,7 +26108,7 @@ msgstr ""
 "트래픽을 분석하는 것이 있습니다. 이러한 사례에서 모든 데이터는 자연스럽게 중앙 서버에 존재합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|84a5c9b5041c43c3beab9786197c3e4e|"
+msgid "|e82c29351e2e480087c61b939eb7c041|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -26121,7 +26125,7 @@ msgstr ""
 "좋은 모델을 훈련하기에 충분하지 않을 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|b5c4be0b52d4493ba8c4af14d7c2db97|"
+msgid "|21ca40f4fb1a405c89098fd1d24880a4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -26300,7 +26304,7 @@ msgstr ""
 "체크포인트에서 모델 매개변수를 초기화합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|c1c784183d18481186ff65dc261d1335|"
+msgid "|1351a2629c2c46d981b13b19f9fa45f0|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -26328,7 +26332,7 @@ msgstr ""
 "개의 연결 노드만 사용합니다. 그 이유는 점점 더 많은 클라이언트 노드를 선택하면 학습의 효율성이 감소하기 때문입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|669fcd1f44ab42f5bbd196c3cf1ecbc2|"
+msgid "|124c2c188b994c7ab1c862cfdb326923|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -26355,7 +26359,7 @@ msgstr ""
 "데이터에서 한 단계 정도로 짧거나 몇 단계(mini-batches)에 불과할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|edfb08758c9441afb6736045a59e154c|"
+msgid "|42e1951c36f2406e93c7ae0ec5b299f9|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -26381,7 +26385,7 @@ msgstr ""
 "보냅니다. 보내는 모델 업데이트는 전체 모델 파라미터거나 로컬 교육 중에 누적된 그레디언트(gradient)일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|82338b8bbad24d5ea9df3801aab37852|"
+msgid "|ec637b8a84234d068995ee1ccb2dd3b1|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -26431,7 +26435,7 @@ msgstr ""
 "많은 영향을 미칩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|518d994dd2c844898b441da03b858326|"
+msgid "|5bceb9d16b1a4d2db18d8a5b2f0cacb3|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -26551,7 +26555,7 @@ msgstr ""
 "사용자는 모든 워크로드, 머신러닝 프레임워크 및 모든 프로그래밍 언어를 통합할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|7bfcfcb57ae5403f8e18486f45ca48b4|"
+msgid "|502b10044e864ca2b15282a393ab7faf|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -33426,5 +33430,56 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|4ab50bc01a9f426a91a2c0cbc3ab7a84|"
+#~ msgstr ""
+
+#~ msgid "Request for examples"
+#~ msgstr "예시 요청"
+
+#~ msgid "Llama 2 fine-tuning, with Hugging Face Transformers and PyTorch"
+#~ msgstr "Llama 2 미세 조정, Hugging Face Transformer와 파이토치 포함"
+
+#~ msgid "Android ONNX on-device training"
+#~ msgstr "Android ONNX 온디바이스 훈련"
+
+#~ msgid "|f150b8d6e0074250822c9f6f7a8de3e0|"
+#~ msgstr ""
+
+#~ msgid "|72772d10debc4abd8373c0bc82985422|"
+#~ msgstr ""
+
+#~ msgid "|5815398552ad41d290a3a2631fe8f6ca|"
+#~ msgstr ""
+
+#~ msgid "|e6ac20744bf149378be20ac3dc309356|"
+#~ msgstr ""
+
+#~ msgid "|a4011ef443c14725b15a8cf33b0e3443|"
+#~ msgstr ""
+
+#~ msgid "|a22faa3617404c06803731525e1c609f|"
+#~ msgstr ""
+
+#~ msgid "|84a5c9b5041c43c3beab9786197c3e4e|"
+#~ msgstr ""
+
+#~ msgid "|b5c4be0b52d4493ba8c4af14d7c2db97|"
+#~ msgstr ""
+
+#~ msgid "|c1c784183d18481186ff65dc261d1335|"
+#~ msgstr ""
+
+#~ msgid "|669fcd1f44ab42f5bbd196c3cf1ecbc2|"
+#~ msgstr ""
+
+#~ msgid "|edfb08758c9441afb6736045a59e154c|"
+#~ msgstr ""
+
+#~ msgid "|82338b8bbad24d5ea9df3801aab37852|"
+#~ msgstr ""
+
+#~ msgid "|518d994dd2c844898b441da03b858326|"
+#~ msgstr ""
+
+#~ msgid "|7bfcfcb57ae5403f8e18486f45ca48b4|"
 #~ msgstr ""
 
