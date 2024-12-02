@@ -283,8 +283,7 @@ def run_superlink() -> None:
 
     # Determine Exec plugin
     # If simulation is used, don't start ServerAppIo and Fleet APIs
-    sim_exec = isinstance(executor, SimulationEngine)
-
+    sim_exec = executor.__class__.__qualname__ == "SimulationEngine"
     bckg_threads = []
 
     if sim_exec:
@@ -292,7 +291,7 @@ def run_superlink() -> None:
             address=simulationio_address,
             state_factory=state_factory,
             ffs_factory=ffs_factory,
-            certificates=certificates,
+            certificates=None,  # SimulationAppIo API doesn't support SSL yet
         )
         grpc_servers.append(simulationio_server)
 
@@ -376,7 +375,7 @@ def run_superlink() -> None:
                     "Node authentication enabled with %d known public keys",
                     len(node_public_keys),
                 )
-                interceptors = [AuthenticateServerInterceptor(state)]
+                interceptors = [AuthenticateServerInterceptor(state_factory)]
 
             fleet_server = _run_fleet_api_grpc_rere(
                 address=fleet_address,
@@ -403,6 +402,9 @@ def run_superlink() -> None:
         io_address = (
             f"{CLIENT_OCTET}:{_port}" if _octet == SERVER_OCTET else serverappio_address
         )
+        address_arg = (
+            "--simulationio-api-address" if sim_exec else "--serverappio-api-address"
+        )
         address = simulationio_address if sim_exec else io_address
         cmd = "flwr-simulation" if sim_exec else "flwr-serverapp"
 
@@ -411,6 +413,7 @@ def run_superlink() -> None:
             target=_flwr_scheduler,
             args=(
                 state_factory,
+                address_arg,
                 address,
                 cmd,
             ),
@@ -436,6 +439,7 @@ def run_superlink() -> None:
 
 def _flwr_scheduler(
     state_factory: LinkStateFactory,
+    io_api_arg: str,
     io_api_address: str,
     cmd: str,
 ) -> None:
@@ -460,7 +464,7 @@ def _flwr_scheduler(
             command = [
                 cmd,
                 "--run-once",
-                "--serverappio-api-address",
+                io_api_arg,
                 io_api_address,
                 "--insecure",
             ]
