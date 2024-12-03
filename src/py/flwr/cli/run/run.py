@@ -101,8 +101,8 @@ def run(
             _run_with_exec_api(app, federation_config, config_overrides, stream)
         else:
             _run_without_exec_api(app, federation_config, config_overrides, federation)
-    # pylint: disable=broad-except
-    except (typer.Exit, SystemExit, Exception) as e:  # pylint: disable=unused-variable
+    # pylint: disable=broad-except, unused-variable
+    except (typer.Exit, SystemExit, Exception):
         _print_json_error()
 
 
