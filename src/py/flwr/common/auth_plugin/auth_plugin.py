@@ -73,7 +73,7 @@ class CliAuthPlugin(ABC):
 
     @abstractmethod
     def write_token_to_metadata(self, metadata: Sequence[tuple[str, Union[str, bytes]]]) -> None:
-        """Provide relevant auth tokens in the metadata."""
+        """Write relevant auth tokens to the provided metadata."""
 
     @abstractmethod
     def store_refresh_token(
