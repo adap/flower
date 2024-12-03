@@ -36,6 +36,8 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     ListRunsResponse,
     StartRunRequest,
     StartRunResponse,
+    StopRunRequest,
+    StopRunResponse,
     StreamLogsRequest,
     StreamLogsResponse,
 )
@@ -125,6 +127,22 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             return _create_list_runs_response(state.get_run_ids(), state)
         # Handle `flwr ls --run-id <run_id>`
         return _create_list_runs_response({request.run_id}, state)
+
+    def StopRun(
+        self, request: StopRunRequest, context: grpc.ServicerContext
+    ) -> StopRunResponse:
+        """Stop a given run ID."""
+        log(INFO, "ExecServicer.StopRun")
+        state = self.linkstate_factory.state()
+
+        # Retrieve run ID
+        run_id = request.run_id
+
+        # Exit if `run_id` not found
+        if not state.get_run(run_id):
+            context.abort(grpc.StatusCode.NOT_FOUND, "Run ID not found")
+
+        return StopRunResponse(success=self.executor.stop_run(run_id))
 
 
 def _create_list_runs_response(run_ids: set[int], state: LinkState) -> ListRunsResponse:

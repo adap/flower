@@ -93,3 +93,23 @@ class Executor(ABC):
         run_id : Optional[int]
             The run_id of the run created by the SuperLink, or `None` if it fails.
         """
+
+    @abstractmethod
+    def stop_run(
+        self,
+        run_id: int,
+    ) -> bool:
+        """Stop a run using the given run_id.
+
+        This method changes the RunStatus of the run to `FINISHED:STOPPED`.
+
+        Parameters
+        ----------
+        run_id : int
+            The run_id of the run to be stopped.
+
+        Returns
+        -------
+        bool
+            `True` if the run was stopped successfully, `False` otherwise.
+        """

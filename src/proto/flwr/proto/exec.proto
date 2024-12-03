@@ -31,6 +31,9 @@ service Exec {
 
   // flwr ls command
   rpc ListRuns(ListRunsRequest) returns (ListRunsResponse) {}
+
+  // Stop run upon request
+  rpc StopRun(StopRunRequest) returns (StopRunResponse) {}
 }
 
 message StartRunRequest {
@@ -52,3 +55,5 @@ message ListRunsResponse {
   map<uint64, Run> run_dict = 1;
   string now = 2;
 }
+message StopRunRequest { uint64 run_id = 1; }
+message StopRunResponse { bool success = 1; }
