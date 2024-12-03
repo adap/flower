@@ -16,14 +16,16 @@
 
 import argparse
 import sys
+import threading
 from logging import DEBUG, ERROR, INFO
 from pathlib import Path
 from queue import Queue
 from time import sleep
-from typing import Optional
+from typing import Optional, Union
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
+from flwr.common import Context
 from flwr.common.args import add_args_flwr_app_common
 from flwr.common.config import (
     get_flwr_dir,
@@ -64,6 +66,7 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PushServerAppOutputsRequest,
 )
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
+from flwr.server.driver import Driver
 from flwr.server.driver.grpc_driver import GrpcDriver
 from flwr.server.run_serverapp import run as run_
 
@@ -119,6 +122,39 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
     # Resolve directory where FABs are installed
     flwr_dir_ = get_flwr_dir(flwr_dir)
     log_uploader = None
+
+    stop_thread = threading.Event()
+
+    # Store the result of `run_`
+    run_result: dict[str, Union[Context, Exception]] = {}
+
+    # Function to wrap `run_` execution
+    def _run_thread_function(
+        driver: Driver,
+        context: Context,
+        server_app_dir: str,
+        server_app_attr: Optional[str],
+    ) -> None:
+        """."""
+        try:
+            # Run the blocking `run_` function
+            updated_context = run_(
+                driver=driver,
+                server_app_dir=server_app_dir,
+                server_app_attr=server_app_attr,
+                context=context,
+            )
+            run_result["updated_context"] = updated_context
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            run_result["exception"] = e  # Save the exception
+        finally:
+            stop_thread.set()  # Signal completion to the main thread
+
+    # Function to run in parallel for monitoring
+    def _check_stopped_run_thread_function(run_id: int, stub: ServerAppIoStub) -> None:
+        """."""
+        _check_stopped_run(run_id, stub)
+        stop_thread.set()  # Signal an interruption
 
     while True:
 
@@ -178,14 +214,34 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
             driver._stub.UpdateRunStatus(
                 UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
             )
-
-            # Load and run the ServerApp with the Driver
-            updated_context = run_(
-                driver=driver,
-                server_app_dir=app_path,
-                server_app_attr=server_app_attr,
-                context=context,
+            run_thread = threading.Thread(
+                target=_run_thread_function,
+                args=(driver, context, app_path, server_app_attr),
+                daemon=True,
             )
+            run_thread.start()
+
+            check_thread = threading.Thread(
+                target=_check_stopped_run_thread_function,
+                args=(run.run_id, driver._stub),
+                daemon=True,
+            )
+            check_thread.start()
+
+            # Wait for either `run_` to complete or the interrupt event
+            while run_thread.is_alive():
+                if stop_thread.is_set():
+                    raise RunStopException("X")
+
+            if isinstance(run_result["updated_context"], Context):
+                updated_context = run_result["updated_context"]
+            # # Load and run the ServerApp with the Driver
+            # updated_context = run_(
+            #     driver=driver,
+            #     server_app_dir=app_path,
+            #     server_app_attr=server_app_attr,
+            #     context=context,
+            # )
 
             # Send resulting context
             context_proto = context_to_proto(updated_context)
