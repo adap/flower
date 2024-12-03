@@ -91,7 +91,7 @@ def run(
         ),
     ] = False,
     output_format: Annotated[
-        CliOutputFormat,
+        str,
         typer.Option(
             "--format",
             case_sensitive=False,
@@ -121,11 +121,17 @@ def run(
         else:
             _run_without_exec_api(app, federation_config, config_overrides, federation)
     # pylint: disable=broad-except
-    except (typer.Exit, SystemExit, Exception) as e:
+    except (typer.Exit, Exception) as err:
         if suppress_output:
             restore_output()
             e_message = captured_output.getvalue()
-            _print_json_error(e_message, e)
+            _print_json_error(e_message, err)
+        else:
+            typer.secho(
+                f"{err}",
+                fg=typer.colors.RED,
+                bold=True,
+            )
     finally:
         if suppress_output:
             restore_output()
@@ -138,7 +144,7 @@ def _run_with_exec_api(
     federation_config: dict[str, Any],
     config_overrides: Optional[list[str]],
     stream: bool,
-    output_format: CliOutputFormat,
+    output_format: str,
 ) -> None:
 
     insecure, root_certificates_bytes = validate_certificate_in_federation_config(
