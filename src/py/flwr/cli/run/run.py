@@ -17,7 +17,6 @@
 import io
 import json
 import subprocess
-from enum import Enum
 from logging import DEBUG
 from pathlib import Path
 from typing import Annotated, Any, Optional, Union
@@ -39,6 +38,7 @@ from flwr.common.config import (
     parse_config_args,
     user_config_to_configsrecord,
 )
+from flwr.common.constant import CliOutputFormat
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log, redirect_output, remove_emojis, restore_output
 from flwr.common.serde import (
@@ -58,13 +58,6 @@ CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds
 def on_channel_state_change(channel_connectivity: str) -> None:
     """Log channel connectivity."""
     log(DEBUG, channel_connectivity)
-
-
-class OutputFormat(str, Enum):
-    """Define output format for `flwr run` command."""
-
-    default = "default"  # pylint: disable=invalid-name
-    json = "json"  # pylint: disable=invalid-name
 
 
 # pylint: disable-next=too-many-locals
@@ -98,16 +91,16 @@ def run(
         ),
     ] = False,
     output_format: Annotated[
-        OutputFormat,
+        CliOutputFormat,
         typer.Option(
             "--format",
             case_sensitive=False,
             help="Format output using 'default' view or 'json'",
         ),
-    ] = OutputFormat.default,
+    ] = CliOutputFormat.default,
 ) -> None:
     """Run Flower App."""
-    suppress_output = output_format == OutputFormat.json
+    suppress_output = output_format == CliOutputFormat.json
     captured_output = io.StringIO()
     try:
         if suppress_output:
@@ -127,7 +120,8 @@ def run(
             )
         else:
             _run_without_exec_api(app, federation_config, config_overrides, federation)
-    except (typer.Exit, SystemExit, Exception) as e:  # pylint: disable=broad-except
+    # pylint: disable=broad-except
+    except (typer.Exit, SystemExit, Exception) as e:
         if suppress_output:
             restore_output()
             e_message = captured_output.getvalue()
@@ -144,7 +138,7 @@ def _run_with_exec_api(
     federation_config: dict[str, Any],
     config_overrides: Optional[list[str]],
     stream: bool,
-    output_format: OutputFormat,
+    output_format: CliOutputFormat,
 ) -> None:
 
     insecure, root_certificates_bytes = validate_certificate_in_federation_config(
@@ -186,7 +180,7 @@ def _run_with_exec_api(
         typer.secho("❌ Failed to start run", fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
-    if output_format == OutputFormat.json:
+    if output_format == CliOutputFormat.json:
         run_output = json.dumps(
             {
                 "success": "true" if res.HasField("run_id") else "false",
