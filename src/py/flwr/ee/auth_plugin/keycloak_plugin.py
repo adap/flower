@@ -237,8 +237,7 @@ class KeycloakCliPlugin(CliAuthPlugin):
                 config[_REFRESH_TOKEN] = refresh_token
 
                 typer.secho(
-                    "Login successful. You can now execute an authenticated "
-                    "`flwr run` to the SuperLink.",
+                    "✅ Login successful.",
                     fg=typer.colors.GREEN,
                     bold=False,
                 )

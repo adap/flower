@@ -18,6 +18,7 @@ import sys
 from logging import DEBUG
 from pathlib import Path
 from typing import Annotated, Any, Optional
+from flwr.common.address import parse_address
 
 import typer
 from tomli_w import dump
@@ -84,7 +85,13 @@ def login(  # pylint: disable=R0914
     credentials_dir = base_path / ".credentials"
     credentials_dir.mkdir(parents=True, exist_ok=True)
 
-    credential = credentials_dir / federation_config["address"]
+    parsed_address = parse_address(federation_config["address"])
+    if not parsed_address:
+        sys.exit(f"Server IP address ({federation_config["address"]}) cannot be parsed.")
+    host, port, is_v6 = parsed_address
+    address = f"[{host}]/{port}" if is_v6 else f"{host}/{port}"
+
+    credential = credentials_dir / address
 
     with open(credential, "wb") as config_file:
         dump(config, config_file)
