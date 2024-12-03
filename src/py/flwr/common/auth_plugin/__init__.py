@@ -15,10 +15,10 @@
 """Auth plugin components."""
 
 
-from .auth_plugin import ExecAuthPlugin as ExecAuthPlugin
 from .auth_plugin import CliAuthPlugin as CliAuthPlugin
+from .auth_plugin import ExecAuthPlugin as ExecAuthPlugin
 
 __all__ = [
-    "ExecAuthPlugin",
     "CliAuthPlugin",
+    "ExecAuthPlugin",
 ]

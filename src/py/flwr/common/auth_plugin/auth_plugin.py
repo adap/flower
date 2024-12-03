@@ -28,6 +28,7 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.exec_pb2_grpc import ExecStub
 
+
 class ExecAuthPlugin(ABC):
     """Abstract Flower Auth Plugin class for ExecServicer."""
 
@@ -40,7 +41,9 @@ class ExecAuthPlugin(ABC):
         """Send relevant login details as a LoginResponse."""
 
     @abstractmethod
-    def validate_token_in_metadata(self, metadata: Sequence[tuple[str, Union[str, bytes]]]) -> bool:
+    def validate_token_in_metadata(
+        self, metadata: Sequence[tuple[str, Union[str, bytes]]]
+    ) -> bool:
         """Authenticate auth tokens in the provided metadata."""
 
     @abstractmethod
@@ -72,11 +75,17 @@ class CliAuthPlugin(ABC):
         """Abstract constructor (init)."""
 
     @abstractmethod
-    def write_token_to_metadata(self, metadata: Sequence[tuple[str, Union[str, bytes]]]) -> None:
+    def write_token_to_metadata(
+        self, metadata: Sequence[tuple[str, Union[str, bytes]]]
+    ) -> None:
         """Write relevant auth tokens to the provided metadata."""
 
     @abstractmethod
     def store_refresh_token(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
     ) -> None:
-        """Store refresh tokens in the .credentials/ folder within the Flower directory."""
+        """Store refresh tokens from the provided metadata.
+
+        The tokens will be stored in the .credentials/ folder inside the Flower
+        directory.
+        """
