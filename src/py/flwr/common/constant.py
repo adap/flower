@@ -17,8 +17,6 @@
 
 from __future__ import annotations
 
-from enum import Enum
-
 MISSING_EXTRA_REST = """
 Extra dependencies required for using the REST-based Fleet API are missing.
 
@@ -185,7 +183,7 @@ class SubStatus:
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
 
 
-class CliOutputFormat(str, Enum):
+class CliOutputFormat:
     """Define output format for `flwr` CLI commands."""
 
     DEFAULT = "default"
