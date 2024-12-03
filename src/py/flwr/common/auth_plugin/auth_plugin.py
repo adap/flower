@@ -55,7 +55,7 @@ class ExecAuthPlugin(ABC):
 
 
 class CliAuthPlugin(ABC):
-    """Abstract Flower CLI Auth Plugin class."""
+    """Abstract Flower Auth Plugin class for CLI."""
 
     @staticmethod
     @abstractmethod
