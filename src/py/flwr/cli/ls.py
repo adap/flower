@@ -301,13 +301,13 @@ def _to_json(run_list: list[tuple[str, ...]]) -> str:
 
 def _list_runs(
     stub: ExecStub,
-    output_format: str = CliOutputFormat.default,
+    output_format: str = CliOutputFormat.DEFAULT,
 ) -> None:
     """List all runs."""
     res: ListRunsResponse = stub.ListRuns(ListRunsRequest())
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
-    if output_format == CliOutputFormat.json:
+    if output_format == CliOutputFormat.JSON:
         Console().print_json(_to_json(_format_runs(run_dict, res.now)))
     else:
         Console().print(_to_table(_format_runs(run_dict, res.now)))
@@ -316,7 +316,7 @@ def _list_runs(
 def _display_one_run(
     stub: ExecStub,
     run_id: int,
-    output_format: str = CliOutputFormat.default,
+    output_format: str = CliOutputFormat.DEFAULT,
 ) -> None:
     """Display information about a specific run."""
     res: ListRunsResponse = stub.ListRuns(ListRunsRequest(run_id=run_id))
@@ -325,7 +325,7 @@ def _display_one_run(
 
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
-    if output_format == CliOutputFormat.json:
+    if output_format == CliOutputFormat.JSON:
         Console().print_json(_to_json(_format_runs(run_dict, res.now)))
     else:
         Console().print(_to_table(_format_runs(run_dict, res.now)))
