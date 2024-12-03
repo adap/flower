@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Aggregator for the SecAgg+ protocol."""
+"""."""
 
 
 import random
@@ -84,8 +84,8 @@ class SecAggPlusAggregator:  # pylint: disable=too-many-instance-attributes
 
     Please use with the `secaggplus_base_mod` modifier on the ClientApp side.
 
-    The SecAgg+ protocol ensures the secure summation of integer vectors owned by
-    multiple parties, without accessing any individual integer vector. This aggregator
+    The SecAgg+ protocol ensures the secure summation of vectors owned by
+    multiple parties, without accessing any individual vector. This aggregator
     allows the Serverapp to compute the sum of all ParametersRecords across all
     ClientApps, ensuring individual contributions remain private.
 
@@ -95,11 +95,10 @@ class SecAggPlusAggregator:  # pylint: disable=too-many-instance-attributes
     - 'share keys': Broadcast public keys among clients and collect encrypted secret
       key shares.
     - 'collect masked vectors': Forward encrypted secret key shares to target clients
-      and collect masked model parameters.
-    - 'unmask': Collect secret key shares to decrypt and aggregate the model parameters.
+      and collect masked vectors.
+    - 'unmask': Collect secret key shares to decrypt and aggregate the vectors.
 
-    Only the aggregated model parameters are exposed and passed to
-    `Strategy.aggregate_fit`, ensuring individual data privacy.
+    Only the aggregated vector is exposed, ensuring individual data privacy.
 
     Parameters
     ----------
@@ -121,12 +120,12 @@ class SecAggPlusAggregator:  # pylint: disable=too-many-instance-attributes
         for the recovery of contributions from dropped clients during aggregation,
         without compromising individual client data.
     clipping_range : float, optional (default: 8.0)
-        The range within which model parameters are clipped before quantization.
-        This parameter ensures each model parameter is bounded within
+        The range within which vector entries are clipped before quantization.
+        This parameter ensures each vector entry is bounded within
         [-clipping_range, clipping_range], facilitating quantization.
     quantization_range : int, optional (default: 4194304, this equals 2**22)
-        The size of the range into which floating-point model parameters are quantized,
-        mapping each parameter to an integer in [0, quantization_range-1]. This
+        The size of the range into which floating-point vector entries are quantized,
+        mapping each entry to an integer in [0, quantization_range-1]. This
         facilitates cryptographic operations on the model updates.
     modulus_range : int, optional (default: 4294967296, this equals 2**32)
         The range of values from which random mask entries are uniformly sampled
