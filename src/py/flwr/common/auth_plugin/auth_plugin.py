@@ -75,7 +75,7 @@ class CliAuthPlugin(ABC):
         """Abstract constructor (init)."""
 
     @abstractmethod
-    def write_token_to_metadata(
+    def write_tokens_to_metadata(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
     ) -> None:
         """Write relevant auth tokens to the provided metadata."""
