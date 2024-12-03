@@ -97,10 +97,10 @@ def run(
             case_sensitive=False,
             help="Format output using 'default' view or 'json'",
         ),
-    ] = CliOutputFormat.default,
+    ] = CliOutputFormat.DEFAULT,
 ) -> None:
     """Run Flower App."""
-    suppress_output = output_format == CliOutputFormat.json
+    suppress_output = output_format == CliOutputFormat.JSON
     captured_output = io.StringIO()
     try:
         if suppress_output:
@@ -180,7 +180,7 @@ def _run_with_exec_api(
         typer.secho("❌ Failed to start run", fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
-    if output_format == CliOutputFormat.json:
+    if output_format == CliOutputFormat.JSON:
         run_output = json.dumps(
             {
                 "success": "true" if res.HasField("run_id") else "false",
