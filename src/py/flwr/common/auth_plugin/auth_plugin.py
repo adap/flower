@@ -28,22 +28,22 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.exec_pb2_grpc import ExecStub
 
-Metadata = list[Any]
-
 
 class ExecAuthPlugin(ABC):
-    """Abstract Flower Exec API Auth Plugin class."""
+    """Abstract Flower Auth Plugin class for ExecServicer."""
 
     @abstractmethod
     def __init__(self, config: dict[str, Any]):
         """Abstract constructor (init)."""
 
     @abstractmethod
-    def send_auth_endpoint(self) -> LoginResponse:
+    def get_login_response(self) -> LoginResponse:
         """Send relevant login details as a LoginResponse."""
 
     @abstractmethod
-    def authenticate(self, metadata: Sequence[tuple[str, Union[str, bytes]]]) -> bool:
+    def validate_token_in_metadata(
+        self, metadata: Sequence[tuple[str, Union[str, bytes]]]
+    ) -> bool:
         """Authenticate auth tokens in the provided metadata."""
 
     @abstractmethod
@@ -57,8 +57,8 @@ class ExecAuthPlugin(ABC):
         """Refresh auth tokens in the provided metadata."""
 
 
-class UserAuthPlugin(ABC):
-    """Abstract Flower User Auth Plugin class."""
+class CliAuthPlugin(ABC):
+    """Abstract Flower Auth Plugin class for CLI."""
 
     @staticmethod
     @abstractmethod
@@ -68,18 +68,24 @@ class UserAuthPlugin(ABC):
         federation: str,
         exec_stub: ExecStub,
     ) -> dict[str, Any]:
-        """Read relevant auth details from federation config."""
+        """Login logic to log in user to the SuperLink."""
 
     @abstractmethod
     def __init__(self, config: dict[str, Any], config_path: Path):
         """Abstract constructor (init)."""
 
     @abstractmethod
-    def provide_auth_details(self, metadata: Metadata) -> Metadata:
-        """Provide relevant auth tokens in the metadata."""
-
-    @abstractmethod
-    def save_refreshed_auth_tokens(
+    def write_token_to_metadata(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
     ) -> None:
-        """Provide refreshed auth tokens to the config file."""
+        """Write relevant auth tokens to the provided metadata."""
+
+    @abstractmethod
+    def store_refresh_token(
+        self, metadata: Sequence[tuple[str, Union[str, bytes]]]
+    ) -> None:
+        """Store refresh tokens from the provided metadata.
+
+        The tokens will be stored in the .credentials/ folder inside the Flower
+        directory.
+        """

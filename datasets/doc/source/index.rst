@@ -66,6 +66,13 @@ Information-oriented API reference and other reference material.
    recommended-fl-datasets
    ref-telemetry
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Contributor tutorials
+
+   contributor-how-to-contribute-dataset
+
+
 Main features
 -------------
 Flower Datasets library supports:

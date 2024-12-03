@@ -12,13 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Auth plugin components."""
+"""Flower EE auth plugin constants."""
 
-
-from .auth_plugin import CliAuthPlugin as CliAuthPlugin
-from .auth_plugin import ExecAuthPlugin as ExecAuthPlugin
-
-__all__ = [
-    "CliAuthPlugin",
-    "ExecAuthPlugin",
-]
+_ACCESS_TOKEN = "access_token"
+_REFRESH_TOKEN = "refresh_token"
+_AUTH_URL = "auth_url"
+_TOKEN_URL = "token_url"
+_VALIDATE_URL = "validate_url"
+_CLIENT_ID = "client_id"
+_CLIENT_SECRET = "client_secret"
+_DEVICE_CODE = "device_code"
+_VERIFICATION_URI_COMPLETE = "verification_uri_complete"
+_EXPIRES_IN = "expires_in"
+_INTERVAL = "interval"
+_AUTH_TYPE = "auth_type"
+_GRANT_TYPE = "grant_type"
+_DEVICE_FLOW_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:device_code"

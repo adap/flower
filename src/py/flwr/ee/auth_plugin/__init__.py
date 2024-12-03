@@ -12,13 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Auth plugin components."""
+"""Flower EE auth plugins."""
 
-
-from .auth_plugin import CliAuthPlugin as CliAuthPlugin
-from .auth_plugin import ExecAuthPlugin as ExecAuthPlugin
+from .keycloak_plugin import KeycloakCliPlugin as KeycloakCliPlugin
+from .keycloak_plugin import KeycloakExecPlugin as KeycloakExecPlugin
 
 __all__ = [
-    "CliAuthPlugin",
-    "ExecAuthPlugin",
+    "KeycloakCliPlugin",
+    "KeycloakExecPlugin",
 ]

@@ -73,7 +73,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         )
         self.state.store_node_public_keys({public_key_to_bytes(self._node_public_key)})
 
-        self._server_interceptor = AuthenticateServerInterceptor(self.state)
+        self._server_interceptor = AuthenticateServerInterceptor(state_factory)
         self._server: grpc.Server = _run_fleet_api_grpc_rere(
             FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
             state_factory,
