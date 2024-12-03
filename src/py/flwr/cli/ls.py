@@ -255,7 +255,9 @@ def _to_table(run_list: list[tuple[str, ...]]) -> Table:
     return table
 
 
-def _list_runs(stub: ExecStub) -> None:
+def _list_runs(
+    stub: ExecStub,
+) -> None:
     """List all runs."""
     res: ListRunsResponse = stub.ListRuns(ListRunsRequest())
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
@@ -263,7 +265,10 @@ def _list_runs(stub: ExecStub) -> None:
     Console().print(_to_table(_format_run(run_dict, res.now)))
 
 
-def _display_one_run(stub: ExecStub, run_id: int) -> None:
+def _display_one_run(
+    stub: ExecStub,
+    run_id: int,
+) -> None:
     """Display information about a specific run."""
     res: ListRunsResponse = stub.ListRuns(ListRunsRequest(run_id=run_id))
     if not res.run_dict:
