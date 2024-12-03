@@ -29,7 +29,7 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 
 class ExecAuthPlugin(ABC):
-    """Abstract Flower Exec API Auth Plugin class."""
+    """Abstract Flower Auth Plugin class for ExecServicer."""
 
     @abstractmethod
     def __init__(self, config: dict[str, Any]):
