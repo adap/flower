@@ -135,12 +135,15 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         log(INFO, "ExecServicer.StopRun")
         state = self.linkstate_factory.state()
 
-        # Retrieve run ID
-        run_id = request.run_id
-
         # Exit if `run_id` not found
-        if not state.get_run(run_id):
+        if not state.get_run(request.run_id):
             context.abort(grpc.StatusCode.NOT_FOUND, "Run ID not found")
+
+        run_status = state.get_run_status({request.run_id})[request.run_id]
+
+        if run_status.status == Status.FINISHED:
+            log(ERROR, "Run ID `%s` is already finished", request.run_id)
+            return StopRunResponse(success=False)
 
         return StopRunResponse(
             success=state.update_run_status(
