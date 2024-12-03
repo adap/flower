@@ -55,6 +55,7 @@ CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds
 
 try:
     from flwr.ee.auth_plugin import get_cli_auth_plugins
+
     auth_plugins = get_cli_auth_plugins()
 except ImportError:
     auth_plugins = []
@@ -167,9 +168,7 @@ def _run_with_exec_api(
         insecure=insecure,
         root_certificates=root_certificates_bytes,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        interceptors=(
-            CliInterceptor(auth_plugin) if auth_plugin is not None else None
-        ),
+        interceptors=(CliInterceptor(auth_plugin) if auth_plugin is not None else None),
     )
     channel.subscribe(on_channel_state_change)
     stub = ExecStub(channel)

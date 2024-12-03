@@ -18,12 +18,16 @@ import sys
 from logging import DEBUG
 from pathlib import Path
 from typing import Annotated, Any, Optional
-from flwr.common.address import parse_address
 
 import typer
 from tomli_w import dump
 
-from flwr.cli.config_utils import load_and_validate, validate_project_config, validate_federation_in_project_config
+from flwr.cli.config_utils import (
+    load_and_validate,
+    validate_federation_in_project_config,
+    validate_project_config,
+)
+from flwr.common.address import parse_address
 from flwr.common.config import get_flwr_dir
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
@@ -32,6 +36,7 @@ from flwr.proto.exec_pb2_grpc import ExecStub
 
 try:
     from flwr.ee.auth_plugin import get_cli_auth_plugins
+
     auth_plugins = get_cli_auth_plugins()
 except ImportError:
     auth_plugins = []
@@ -84,10 +89,10 @@ def login(  # pylint: disable=R0914
     base_path = get_flwr_dir()
     credentials_dir = base_path / ".credentials"
     credentials_dir.mkdir(parents=True, exist_ok=True)
-
-    parsed_address = parse_address(federation_config["address"])
+    server_address = federation_config["address"]
+    parsed_address = parse_address(server_address)
     if not parsed_address:
-        sys.exit(f"Server IP address ({federation_config["address"]}) cannot be parsed.")
+        sys.exit(f"Server IP address ({server_address}) cannot be parsed.")
     host, port, is_v6 = parsed_address
     address = f"[{host}]/{port}" if is_v6 else f"{host}/{port}"
 
