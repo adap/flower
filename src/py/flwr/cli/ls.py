@@ -136,7 +136,7 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches
             raise typer.Exit(code=1) from err
         finally:
             channel.close()
-    except (typer.Exit, SystemExit, Exception) as e:  # pylint: disable=broad-except
+    except (typer.Exit, Exception) as e:  # pylint: disable=broad-except
         if suppress_output:
             restore_output()
             e_message = captured_output.getvalue()

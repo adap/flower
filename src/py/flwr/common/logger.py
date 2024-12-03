@@ -309,6 +309,7 @@ def redirect_output(output_buffer: StringIO) -> None:
     """Redirect stdout and stderr to text I/O buffer."""
     sys.stdout = output_buffer
     sys.stderr = output_buffer
+    console_handler.stream = sys.stdout
 
 
 def _log_uploader(
