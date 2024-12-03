@@ -70,3 +70,15 @@ flwr run . --run-config is-demo=false
 
 > \[!NOTE\]
 > An update to this example will show how to run this Flower project with the Deployment Engine and TLS certificates, or with Docker.
+
+
+## Advanced: Use with Low-level API
+
+### Update the `pyproject.toml` file
+Change the `[tool.flwr.app.components]` section as follows.
+
+```
+[tool.flwr.app.components]
+serverapp = "secaggexample.server_app_low_level:app"
+clientapp = "secaggexample.client_app_low_level:app"
+```

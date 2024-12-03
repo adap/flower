@@ -21,8 +21,8 @@ packages = ["."]
 publisher = "flwrlabs"
 
 [tool.flwr.app.components]
-serverapp = "secaggexample.server_app:app"
-clientapp = "secaggexample.client_app:app"
+serverapp = "secaggexample.server_app_low_level:app"
+clientapp = "secaggexample.client_app_low_level:app"
 
 
 [tool.flwr.app.config]

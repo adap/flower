@@ -2,20 +2,20 @@
 
 from logging import INFO
 
+from secaggexample.task import get_weights, make_net
+
 import flwr.common.recordset_compat as compat
-from flwr.common import Context, log, parameters_to_ndarrays, Message
+from flwr.common import Context, Message, log, parameters_to_ndarrays
 from flwr.common.secure_aggregation.quantization import quantize
+from flwr.common.secure_aggregation.secaggplus_constants import Stage
 from flwr.server import Driver, LegacyContext
 from flwr.server.workflow.constant import MAIN_PARAMS_RECORD
-from flwr.server.workflow.secure_aggregation.secaggplus_workflow import (
-    SecAggPlusWorkflow,
-)
-from flwr.common.secure_aggregation.secaggplus_constants import Stage
 from flwr.server.workflow.secure_aggregation.secaggplus_aggregator import (
     SecAggPlusAggregatorState,
 )
-
-from secaggexample.task import get_weights, make_net
+from flwr.server.workflow.secure_aggregation.secaggplus_workflow import (
+    SecAggPlusWorkflow,
+)
 
 
 class SecAggPlusWorkflowWithLogs(SecAggPlusWorkflow):
