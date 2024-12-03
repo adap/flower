@@ -192,7 +192,7 @@ def _run_with_exec_api(
                 "success": "true" if res.HasField("run_id") else "false",
                 "run-id": res.run_id if res.HasField("run_id") else None,
                 "fab-id": fab_id,
-                "fab-name": fab_id.split("/")[-1],
+                "fab-name": fab_id.rsplit("/", maxsplit=1)[-1],
                 "fab-version": fab_version,
                 "fab-hash": fab_hash[:8],
                 "fab-filename": fab_path,
