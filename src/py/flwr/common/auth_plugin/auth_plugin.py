@@ -41,10 +41,10 @@ class ExecAuthPlugin(ABC):
         """Send relevant login details as a LoginResponse."""
 
     @abstractmethod
-    def validate_token_in_metadata(
+    def validate_tokens_in_metadata(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
     ) -> bool:
-        """Authenticate auth tokens in the provided metadata."""
+        """Validate the auth tokens in the provided metadata."""
 
     @abstractmethod
     def get_auth_token_response(
