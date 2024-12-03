@@ -26,9 +26,7 @@ from flwr.common import now
 from flwr.common.constant import LOG_STREAM_INTERVAL, Status
 from flwr.common.logger import log
 from flwr.common.serde import (
-    configs_record_from_proto,
     run_to_proto,
-    user_config_from_proto,
 )
 from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
@@ -65,11 +63,11 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         """Create run ID."""
         log(INFO, "ExecServicer.StartRun")
 
-        run_id = self.executor.start_run(
-            request.fab.content,
-            user_config_from_proto(request.override_config),
-            configs_record_from_proto(request.federation_options),
-        )
+        run_id = None  # self.executor.start_run(
+        #     request.fab.content,
+        #     user_config_from_proto(request.override_config),
+        #     configs_record_from_proto(request.federation_options),
+        # )
 
         if run_id is None:
             log(ERROR, "Executor failed to start run")
