@@ -77,7 +77,7 @@ def stop(
 
         # Stop the specified run ID
         if run_id is not None:
-            typer.echo(f"✋ Stopping run ID {run_id}...")
+            typer.secho(f"✋ Stopping run ID {run_id}...", fg=typer.colors.GREEN)
             _stop_run(stub, run_id)
 
     except ValueError as err:

@@ -199,8 +199,11 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
 
         except RunStopException as ex:
             exc_entity = "ServerApp"
-            log(INFO, "%s stopped from user-issued command", exc_entity, exc_info=ex)
+            log(DEBUG, "%s stopped from user-issued command", exc_entity, exc_info=ex)
             run_status = None
+            if run_once:
+                break
+            continue
 
         except Exception as ex:  # pylint: disable=broad-exception-caught
             exc_entity = "ServerApp"
