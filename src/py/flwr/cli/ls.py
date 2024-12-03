@@ -118,7 +118,7 @@ def ls(
         finally:
             channel.close()
     # pylint: disable=broad-except, unused-variable
-    except (typer.Exit, SystemExit, Exception):
+    except (typer.Exit, Exception):
         _print_json_error()
 
 
