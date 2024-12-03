@@ -13,10 +13,6 @@ app = ClientApp(mods=[secaggplus_base_mod])
 @app.query()
 def simple_query(msg: Message, ctxt: Context) -> Message:
     """Simple query function."""
-    if msg.metadata.group_id == "drop":
-        print("Dropping out")
-        return msg.create_error_reply("Dropping out")
-
     pr = ParametersRecord()
     pr["simple_array"] = array_from_numpy(np.array([0.5, 1, 2]))
     print(f"Sending simple array: {pr['simple_array'].numpy()}")

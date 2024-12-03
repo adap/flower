@@ -37,6 +37,7 @@ def main(driver: Driver, context: Context) -> None:
         num_shares=context.run_config["num-shares"],
         reconstruction_threshold=context.run_config["reconstruction-threshold"],
         timeout=context.run_config["timeout"],
+        clipping_range=8.0,
         on_send=on_send,
         on_receive=on_receive,
         on_stage_complete=on_stage_complete,
