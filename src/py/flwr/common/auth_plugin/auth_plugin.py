@@ -47,10 +47,10 @@ class ExecAuthPlugin(ABC):
         """Validate the auth tokens in the provided metadata."""
 
     @abstractmethod
-    def get_auth_token_response(
+    def get_auth_tokens(
         self, request: GetAuthTokenRequest
     ) -> GetAuthTokenResponse:
-        """Send relevant tokens as a GetAuthTokenResponse."""
+        """Get the relevant auth tokens."""
 
     @abstractmethod
     def refresh_token(self, context: grpc.ServicerContext) -> bool:
