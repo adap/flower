@@ -28,48 +28,51 @@ disable_progress_bar()
 fds = None  # Cache FederatedDataset
 
 
-# Create a directory to store the training checkpoint.
-timestr = time.strftime("%Y%m%d/%H/%M")
-output_directory = Path("outputs/train/lerobot_federated_example") / timestr
-output_directory.mkdir(parents=True, exist_ok=True)
+def get_output_dir() -> Path:
+    # Create a directory to store the training checkpoint.
+    timestr = time.strftime("%Y%m%d/%H/%M")
+    output_directory = Path("outputs/train/lerobot_federated_example") / timestr
+    output_directory.mkdir(parents=True, exist_ok=True)
 
-# Number of offline training steps (we'll only do offline training for this example.)
-# Adjust as you prefer. 5000 steps are needed to get something worth evaluating.
-# training_steps = 5000
+    # Number of offline training steps (we'll only do offline training for this example.)
+    # Adjust as you prefer. 5000 steps are needed to get something worth evaluating.
+    # training_steps = 5000
+    return output_directory
 
-log_freq = 250
 
-# Set up the dataset.
-delta_timestamps = {
-    # Load the previous image and state at -0.1 seconds before current frame,
-    # then load current image and state corresponding to 0.0 second.
-    "observation.image": [-0.1, 0.0],
-    "observation.state": [-0.1, 0.0],
-    # Load the previous action (-0.1), the next action to be executed (0.0),
-    # and 14 future actions with a 0.1 seconds spacing. All these actions will be
-    # used to supervise the policy.
-    "action": [
-        -0.1,
-        0.0,
-        0.1,
-        0.2,
-        0.3,
-        0.4,
-        0.5,
-        0.6,
-        0.7,
-        0.8,
-        0.9,
-        1.0,
-        1.1,
-        1.2,
-        1.3,
-        1.4,
-    ],
-}
+def get_delta_timestamps():
+    # Set up the dataset.
+    delta_timestamps = {
+        # Load the previous image and state at -0.1 seconds before current frame,
+        # then load current image and state corresponding to 0.0 second.
+        "observation.image": [-0.1, 0.0],
+        "observation.state": [-0.1, 0.0],
+        # Load the previous action (-0.1), the next action to be executed (0.0),
+        # and 14 future actions with a 0.1 seconds spacing. All these actions will be
+        # used to supervise the policy.
+        "action": [
+            -0.1,
+            0.0,
+            0.1,
+            0.2,
+            0.3,
+            0.4,
+            0.5,
+            0.6,
+            0.7,
+            0.8,
+            0.9,
+            1.0,
+            1.1,
+            1.2,
+            1.3,
+            1.4,
+        ],
+    }
+    return delta_timestamps
 
 def get_dataset():
-    dataset = LeRobotDataset("lerobot/pusht", delta_timestamps=delta_timestamps)
+    dataset = LeRobotDataset("lerobot/pusht", delta_timestamps=get_delta_timestamps())
     return dataset
 
 def load_data(
@@ -84,7 +87,7 @@ def load_data(
         fds = FederatedLeRobotDataset(
             dataset="lerobot/pusht",
             partitioners={"train": partitioner},
-            delta_timestamps=delta_timestamps,
+            delta_timestamps=get_delta_timestamps(),
         )
     partition = fds.load_partition(partition_id)
 
@@ -99,9 +102,9 @@ def load_data(
     )
 
     # LeRobot pusht test samples are not loaded but rather generated via gym
-    testloader = None
+    # therefore no need to return a testloader
 
-    return trainloader, testloader
+    return trainloader
 
 
 def get_model(model_name: str = None, dataset = None):
@@ -124,7 +127,10 @@ def set_params(model, parameters) -> None:
     model.load_state_dict(state_dict, strict=True)
 
 
-def train(partition_id: int = None, net = None, trainloader = None, epochs = None, device = None) -> None:
+def train(partition_id: int = None, net = None, trainloader = None, epochs = None, device = None, output_dir = None) -> None:
+    # how frequently (train steps) to print train progress log
+    log_freq = 250
+
     # in lerobot terminology policy is the neural network
     policy = net
     policy.train()
@@ -155,11 +161,11 @@ def train(partition_id: int = None, net = None, trainloader = None, epochs = Non
     # Save a policy checkpoint.
     timestr = time.strftime("%Y%m%d-%H%M%S")
     net.save_pretrained(
-        output_directory / f"client_{partition_id}" / f"checkpoint_{timestr}"
+        output_dir / f"client_{partition_id}" / f"checkpoint_{timestr}"
     )
 
 
-def test(partition_id: int, net, device) -> tuple[Any | float, Any]:
+def test(partition_id: int, net, device, output_dir = None) -> tuple[Any | float, Any]:
     # in lerobot terminology policy is the neural network
     policy = net
     policy.eval()
@@ -242,7 +248,7 @@ def test(partition_id: int, net, device) -> tuple[Any | float, Any]:
 
     timestr = time.strftime("%Y%m%d-%H%M%S")
     # Encode all frames into a mp4 video.
-    video_dir = output_directory / f"client_{partition_id}"
+    video_dir = output_dir / f"client_{partition_id}"
     video_dir.mkdir(parents=True, exist_ok=True)
     video_path =  video_dir / f"rollout_{timestr}.mp4"
     imageio.mimsave(str(video_path), numpy.stack(frames), fps=fps)
