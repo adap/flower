@@ -143,14 +143,14 @@ def _init_channel(app: Path, federation_config: dict[str, Any]) -> grpc.Channel:
     return channel
 
 
-def _format_run(run_dict: dict[int, Run], now_isoformat: str) -> list[tuple[str, ...]]:
-    """Format run status to a list."""
+def _format_runs(run_dict: dict[int, Run], now_isoformat: str) -> list[tuple[str, ...]]:
+    """Format runs to a list."""
     table = Table(header_style="bold cyan", show_lines=True)
 
     def _format_datetime(dt: Optional[datetime]) -> str:
         return isoformat8601_utc(dt).replace("T", " ") if dt else "N/A"
 
-    run_status_list: list[tuple[str, ...]] = []
+    run_list: list[tuple[str, ...]] = []
 
     # Add columns
     table.add_column(
@@ -198,7 +198,7 @@ def _format_run(run_dict: dict[int, Run], now_isoformat: str) -> list[tuple[str,
                 end_time = datetime.fromisoformat(now_isoformat)
             elapsed_time = end_time - running_at
 
-        run_status_list.append(
+        run_list.append(
             (
                 f"{run.run_id}",
                 f"{run.fab_id}",
@@ -211,11 +211,11 @@ def _format_run(run_dict: dict[int, Run], now_isoformat: str) -> list[tuple[str,
                 _format_datetime(finished_at),
             )
         )
-    return run_status_list
+    return run_list
 
 
 def _to_table(run_list: list[tuple[str, ...]]) -> Table:
-    """Format run status list to a rich Table."""
+    """Format the provided run list to a rich Table."""
     table = Table(header_style="bold cyan", show_lines=True)
 
     # Add columns
@@ -262,7 +262,7 @@ def _list_runs(
     res: ListRunsResponse = stub.ListRuns(ListRunsRequest())
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
-    Console().print(_to_table(_format_run(run_dict, res.now)))
+    Console().print(_to_table(_format_runs(run_dict, res.now)))
 
 
 def _display_one_run(
@@ -276,7 +276,7 @@ def _display_one_run(
 
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
-    Console().print(_to_table(_format_run(run_dict, res.now)))
+    Console().print(_to_table(_format_runs(run_dict, res.now)))
 
 
 def _print_json_error() -> None:
