@@ -168,13 +168,26 @@ def _init_channel(app: Path, federation_config: dict[str, Any]) -> grpc.Channel:
     return channel
 
 
-def _format_run(run_dict: dict[int, Run], now_isoformat: str) -> list[tuple[str, ...]]:
-    """Format run status as a rich Table."""
+def _format_runs(run_dict: dict[int, Run], now_isoformat: str) -> list[tuple[str, ...]]:
+    """Format runs to a list."""
+    table = Table(header_style="bold cyan", show_lines=True)
 
     def _format_datetime(dt: Optional[datetime]) -> str:
         return isoformat8601_utc(dt).replace("T", " ") if dt else "N/A"
 
-    run_status_list: list[tuple[str, ...]] = []
+    run_list: list[tuple[str, ...]] = []
+
+    # Add columns
+    table.add_column(
+        Text("Run ID", justify="center"), style="bright_white", overflow="fold"
+    )
+    table.add_column(Text("FAB", justify="center"), style="dim white")
+    table.add_column(Text("Status", justify="center"))
+    table.add_column(Text("Elapsed", justify="center"), style="blue")
+    table.add_column(Text("Created At", justify="center"), style="dim white")
+    table.add_column(Text("Running At", justify="center"), style="dim white")
+    table.add_column(Text("Finished At", justify="center"), style="dim white")
+
     # Add rows
     for run in sorted(
         run_dict.values(), key=lambda x: datetime.fromisoformat(x.pending_at)
@@ -210,7 +223,7 @@ def _format_run(run_dict: dict[int, Run], now_isoformat: str) -> list[tuple[str,
                 end_time = datetime.fromisoformat(now_isoformat)
             elapsed_time = end_time - running_at
 
-        run_status_list.append(
+        run_list.append(
             (
                 f"{run.run_id}",
                 f"{run.fab_id}",
@@ -223,11 +236,11 @@ def _format_run(run_dict: dict[int, Run], now_isoformat: str) -> list[tuple[str,
                 _format_datetime(finished_at),
             )
         )
-    return run_status_list
+    return run_list
 
 
 def _to_table(run_list: list[tuple[str, ...]]) -> Table:
-    """."""
+    """Format the provided run list to a rich Table."""
     table = Table(header_style="bold cyan", show_lines=True)
 
     # Add columns
@@ -277,7 +290,6 @@ def _to_json(run_list: list[tuple[str, ...]]) -> str:
         # Substitute BBCode tags with an empty string
         return tuple(bbcode_pattern.sub("", s) for s in strings)
 
-    # runs_dict: Dict[str, list[Dict[str, str]]] = {"runs": []}
     runs_list = []
     for row in run_list:
         row = _remove_bbcode_tags(row)
@@ -310,18 +322,25 @@ def _to_json(run_list: list[tuple[str, ...]]) -> str:
     return json.dumps({"runs": runs_list})
 
 
-def _list_runs(stub: ExecStub, output_format: str) -> None:
+def _list_runs(
+    stub: ExecStub,
+    output_format: str = CliOutputFormat.default,
+) -> None:
     """List all runs."""
     res: ListRunsResponse = stub.ListRuns(ListRunsRequest())
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
     if output_format == CliOutputFormat.json:
-        Console().print_json(_to_json(_format_run(run_dict, res.now)))
+        Console().print_json(_to_json(_format_runs(run_dict, res.now)))
     else:
-        Console().print(_to_table(_format_run(run_dict, res.now)))
+        Console().print(_to_table(_format_runs(run_dict, res.now)))
 
 
-def _display_one_run(stub: ExecStub, run_id: int, output_format: str) -> None:
+def _display_one_run(
+    stub: ExecStub,
+    run_id: int,
+    output_format: str = CliOutputFormat.default,
+) -> None:
     """Display information about a specific run."""
     res: ListRunsResponse = stub.ListRuns(ListRunsRequest(run_id=run_id))
     if not res.run_dict:
@@ -330,9 +349,9 @@ def _display_one_run(stub: ExecStub, run_id: int, output_format: str) -> None:
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
     if output_format == CliOutputFormat.json:
-        Console().print_json(_to_json(_format_run(run_dict, res.now)))
+        Console().print_json(_to_json(_format_runs(run_dict, res.now)))
     else:
-        Console().print(_to_table(_format_run(run_dict, res.now)))
+        Console().print(_to_table(_format_runs(run_dict, res.now)))
 
 
 def _print_json_error(msg: str, e: Union[Exit, SystemExit, Exception]) -> None:
