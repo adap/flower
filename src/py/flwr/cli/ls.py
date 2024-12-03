@@ -136,11 +136,17 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches
             raise typer.Exit(code=1) from err
         finally:
             channel.close()
-    except (typer.Exit, Exception) as e:  # pylint: disable=broad-except
+    except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
         if suppress_output:
             restore_output()
             e_message = captured_output.getvalue()
-            _print_json_error(e_message, e)
+            _print_json_error(e_message, err)
+        else:
+            typer.secho(
+                f"{err}",
+                fg=typer.colors.RED,
+                bold=True,
+            )
     finally:
         if suppress_output:
             restore_output()
