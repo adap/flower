@@ -183,19 +183,5 @@ class DeploymentEngine(Executor):
                 self.linkstate.update_run_status(run_id, new_status=run_status)
             return None
 
-    @override
-    def stop_run(
-        self,
-        run_id: int,
-    ) -> bool:
-        """Stop a run using the given run_id."""
-        try:
-            run_status = RunStatus(Status.FINISHED, SubStatus.STOPPED, "")
-            return self.linkstate.update_run_status(run_id, new_status=run_status)
-        # pylint: disable-next=broad-except
-        except Exception as e:
-            log(ERROR, "Could not stop run: %s", str(e))
-            return False
-
 
 executor = DeploymentEngine()
