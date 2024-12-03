@@ -34,7 +34,7 @@ from flwr.cli.config_utils import (
     validate_federation_in_project_config,
     validate_project_config,
 )
-from flwr.common.constant import FAB_CONFIG_FILE, SubStatus
+from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat, SubStatus
 from flwr.common.date import format_timedelta, isoformat8601_utc
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
@@ -267,7 +267,6 @@ def _to_json(run_list: list[tuple[str, ...]]) -> str:
         # Substitute BBCode tags with an empty string
         return tuple(bbcode_pattern.sub("", s) for s in strings)
 
-    # runs_dict: Dict[str, list[Dict[str, str]]] = {"runs": []}
     runs_list = []
     for row in run_list:
         row = _remove_bbcode_tags(row)
@@ -300,18 +299,20 @@ def _to_json(run_list: list[tuple[str, ...]]) -> str:
     return json.dumps({"runs": runs_list})
 
 
-def _list_runs(stub: ExecStub, ls_format: str = "table") -> None:
+def _list_runs(stub: ExecStub, output_format: str = CliOutputFormat.default) -> None:
     """List all runs."""
     res: ListRunsResponse = stub.ListRuns(ListRunsRequest())
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
-    if ls_format == "table":
-        Console().print(_to_table(_format_run(run_dict, res.now)))
-    else:
+    if output_format == CliOutputFormat.json:
         Console().print_json(_to_json(_format_run(run_dict, res.now)))
+    else:
+        Console().print(_to_table(_format_run(run_dict, res.now)))
 
 
-def _display_one_run(stub: ExecStub, run_id: int, ls_format: str = "table") -> None:
+def _display_one_run(
+    stub: ExecStub, run_id: int, output_format: str = CliOutputFormat.default
+) -> None:
     """Display information about a specific run."""
     res: ListRunsResponse = stub.ListRuns(ListRunsRequest(run_id=run_id))
     if not res.run_dict:
@@ -319,10 +320,10 @@ def _display_one_run(stub: ExecStub, run_id: int, ls_format: str = "table") -> N
 
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
-    if ls_format == "table":
-        Console().print(_to_table(_format_run(run_dict, res.now)))
-    else:
+    if output_format == CliOutputFormat.json:
         Console().print_json(_to_json(_format_run(run_dict, res.now)))
+    else:
+        Console().print(_to_table(_format_run(run_dict, res.now)))
 
 
 def _print_json_error() -> None:
