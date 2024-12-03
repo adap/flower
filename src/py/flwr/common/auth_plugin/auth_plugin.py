@@ -79,4 +79,4 @@ class CliAuthPlugin(ABC):
     def store_refresh_token(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
     ) -> None:
-        """Store refresh tokens to .credentials."""
+        """Store refresh tokens in the .credentials/ folder within the Flower directory."""
