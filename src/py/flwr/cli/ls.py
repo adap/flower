@@ -19,7 +19,6 @@ import io
 import json
 import re
 from datetime import datetime, timedelta
-from enum import Enum
 from logging import DEBUG
 from pathlib import Path
 from typing import Annotated, Any, Optional, Union
@@ -37,7 +36,7 @@ from flwr.cli.config_utils import (
     validate_federation_in_project_config,
     validate_project_config,
 )
-from flwr.common.constant import FAB_CONFIG_FILE, SubStatus
+from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat, SubStatus
 from flwr.common.date import format_timedelta, isoformat8601_utc
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log, redirect_output, remove_emojis, restore_output
@@ -48,13 +47,6 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     ListRunsResponse,
 )
 from flwr.proto.exec_pb2_grpc import ExecStub
-
-
-class OutputFormat(str, Enum):
-    """Define output format for `flwr ls` command."""
-
-    table = "table"  # pylint: disable=invalid-name
-    json = "json"  # pylint: disable=invalid-name
 
 
 def ls(  # pylint: disable=too-many-locals, too-many-branches
@@ -80,17 +72,17 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches
             help="Specific run ID to display",
         ),
     ] = None,
-    ls_format: Annotated[
-        OutputFormat,
+    output_format: Annotated[
+        CliOutputFormat,
         typer.Option(
             "--format",
             case_sensitive=False,
-            help="Format output using 'table' or 'json'",
+            help="Format output using 'default' view or 'json'",
         ),
-    ] = OutputFormat.table,
+    ] = CliOutputFormat.default,
 ) -> None:
     """List runs."""
-    suppress_output = ls_format == OutputFormat.json
+    suppress_output = output_format == CliOutputFormat.json
     captured_output = io.StringIO()
     try:
         if suppress_output:
@@ -128,12 +120,12 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches
             if run_id is not None:
                 typer.echo(f"🔍 Displaying information for run ID {run_id}...")
                 restore_output()
-                _display_one_run(stub, run_id, ls_format)
+                _display_one_run(stub, run_id, output_format)
             # By default, list all runs
             else:
                 typer.echo("📄 Listing all runs...")
                 restore_output()
-                _list_runs(stub, ls_format)
+                _list_runs(stub, output_format)
 
         except ValueError as err:
             typer.secho(
@@ -318,18 +310,18 @@ def _to_json(run_list: list[tuple[str, ...]]) -> str:
     return json.dumps({"runs": runs_list})
 
 
-def _list_runs(stub: ExecStub, ls_format: str) -> None:
+def _list_runs(stub: ExecStub, output_format: str) -> None:
     """List all runs."""
     res: ListRunsResponse = stub.ListRuns(ListRunsRequest())
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
-    if ls_format == "table":
-        Console().print(_to_table(_format_run(run_dict, res.now)))
-    else:
+    if output_format == CliOutputFormat.json:
         Console().print_json(_to_json(_format_run(run_dict, res.now)))
+    else:
+        Console().print(_to_table(_format_run(run_dict, res.now)))
 
 
-def _display_one_run(stub: ExecStub, run_id: int, ls_format: str) -> None:
+def _display_one_run(stub: ExecStub, run_id: int, output_format: str) -> None:
     """Display information about a specific run."""
     res: ListRunsResponse = stub.ListRuns(ListRunsRequest(run_id=run_id))
     if not res.run_dict:
@@ -337,10 +329,10 @@ def _display_one_run(stub: ExecStub, run_id: int, ls_format: str) -> None:
 
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
-    if ls_format == "table":
-        Console().print(_to_table(_format_run(run_dict, res.now)))
-    else:
+    if output_format == CliOutputFormat.json:
         Console().print_json(_to_json(_format_run(run_dict, res.now)))
+    else:
+        Console().print(_to_table(_format_run(run_dict, res.now)))
 
 
 def _print_json_error(msg: str, e: Union[Exit, SystemExit, Exception]) -> None:
