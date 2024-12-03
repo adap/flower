@@ -17,6 +17,8 @@
 
 from __future__ import annotations
 
+from flwr.common.typing import RunStatus
+
 MISSING_EXTRA_REST = """
 Extra dependencies required for using the REST-based Fleet API are missing.
 
@@ -181,3 +183,7 @@ class SubStatus:
     def __new__(cls) -> SubStatus:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+# Stopped run status
+STOPPED_RUN_STATUS = RunStatus(Status.FINISHED, SubStatus.STOPPED, "")

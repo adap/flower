@@ -33,6 +33,7 @@ from flwr.common.config import (
 )
 from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
+    STOPPED_RUN_STATUS,
     Status,
     SubStatus,
 )
@@ -48,15 +49,21 @@ from flwr.common.serde import (
     context_to_proto,
     fab_from_proto,
     run_from_proto,
+    run_status_from_proto,
     run_status_to_proto,
 )
 from flwr.common.typing import RunStatus
-from flwr.proto.run_pb2 import UpdateRunStatusRequest  # pylint: disable=E0611
+from flwr.proto.run_pb2 import (  # pylint: disable=E0611
+    GetRunStatusRequest,
+    GetRunStatusResponse,
+    UpdateRunStatusRequest,
+)
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PullServerAppInputsRequest,
     PullServerAppInputsResponse,
     PushServerAppOutputsRequest,
 )
+from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
 from flwr.server.driver.grpc_driver import GrpcDriver
 from flwr.server.run_serverapp import run as run_
 
@@ -128,6 +135,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
             run = run_from_proto(res.run)
             fab = fab_from_proto(res.fab)
 
+            _check_stopped_run(run.run_id, driver._stub)
             driver.set_run(run.run_id)
 
             # Start log uploader for this run
@@ -166,6 +174,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
 
             # Change status to Running
             run_status_proto = run_status_to_proto(RunStatus(Status.RUNNING, "", ""))
+            _check_stopped_run(run.run_id, driver._stub)
             driver._stub.UpdateRunStatus(
                 UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
             )
@@ -183,9 +192,15 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
             out_req = PushServerAppOutputsRequest(
                 run_id=run.run_id, context=context_proto
             )
+            _check_stopped_run(run.run_id, driver._stub)
             _ = driver._stub.PushServerAppOutputs(out_req)
 
             run_status = RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
+
+        except RunStopException as ex:
+            exc_entity = "ServerApp"
+            log(INFO, "%s stopped from user-issued command", exc_entity, exc_info=ex)
+            run_status = None
 
         except Exception as ex:  # pylint: disable=broad-exception-caught
             exc_entity = "ServerApp"
@@ -232,3 +247,15 @@ def _parse_args_run_flwr_serverapp() -> argparse.ArgumentParser:
     )
     add_args_flwr_app_common(parser=parser)
     return parser
+
+
+def _check_stopped_run(run_id: int, stub: ServerAppIoStub) -> None:
+    """Check if the given run ID is stopped."""
+    res: GetRunStatusResponse = stub.GetRunStatus(GetRunStatusRequest(run_id=run_id))
+    run_status = run_status_from_proto(res.run_status)
+    if run_status == STOPPED_RUN_STATUS:
+        raise RunStopException(f"Run ID {run_id} is stopped.")
+
+
+class RunStopException(Exception):
+    """Raised when a run is stopped."""
