@@ -22,17 +22,18 @@ from typing import Annotated, Any, Optional
 import typer
 from tomli_w import dump
 
-from flwr.cli.config_utils import load_and_validate
-from flwr.common.auth_plugin import KeycloakUserPlugin
+from flwr.cli.config_utils import load_and_validate, validate_project_config, validate_federation_in_project_config
 from flwr.common.config import get_flwr_dir
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
 from flwr.proto.exec_pb2 import LoginRequest, LoginResponse  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 
-auth_plugins = {
-    "keycloak": KeycloakUserPlugin,
-}
+try:
+    from flwr.ee.auth_plugin import get_cli_auth_plugins
+    auth_plugins = get_cli_auth_plugins()
+except ImportError:
+    auth_plugins = []
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
@@ -56,52 +57,10 @@ def login(  # pylint: disable=R0914
     pyproject_path = app / "pyproject.toml" if app else None
     config, errors, warnings = load_and_validate(path=pyproject_path)
 
-    if config is None:
-        typer.secho(
-            "Project configuration could not be loaded.\n"
-            "pyproject.toml is invalid:\n"
-            + "\n".join([f"- {line}" for line in errors]),
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        sys.exit()
-
-    if warnings:
-        typer.secho(
-            "Project configuration is missing the following "
-            "recommended properties:\n" + "\n".join([f"- {line}" for line in warnings]),
-            fg=typer.colors.RED,
-            bold=True,
-        )
-
-    typer.secho("Success", fg=typer.colors.GREEN)
-
-    federation = federation or config["tool"]["flwr"]["federations"].get("default")
-
-    if federation is None:
-        typer.secho(
-            "❌ No federation name was provided and the project's `pyproject.toml` "
-            "doesn't declare a default federation (with a SuperExec address or an "
-            "`options.num-supernodes` value).",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
-
-    # Validate the federation exists in the configuration
-    federation_config = config["tool"]["flwr"]["federations"].get(federation)
-    if federation_config is None:
-        available_feds = {
-            fed for fed in config["tool"]["flwr"]["federations"] if fed != "default"
-        }
-        typer.secho(
-            f"❌ There is no `{federation}` federation declared in "
-            "`pyproject.toml`.\n The following federations were found:\n\n"
-            + "\n".join(available_feds),
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
+    config = validate_project_config(config, errors, warnings)
+    federation, federation_config = validate_federation_in_project_config(
+        federation, config
+    )
 
     if "address" not in federation_config:
         typer.secho(

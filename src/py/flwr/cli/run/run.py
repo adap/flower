@@ -29,8 +29,8 @@ from flwr.cli.config_utils import (
     validate_federation_in_project_config,
     validate_project_config,
 )
-from flwr.cli.run.user_interceptor import UserInterceptor
-from flwr.common.auth_plugin import KeycloakUserPlugin, UserAuthPlugin
+from flwr.cli.run.cli_interceptor import CliInterceptor
+from flwr.common.auth_plugin import CliAuthPlugin
 from flwr.common.config import (
     flatten_dict,
     get_flwr_dir,
@@ -53,9 +53,11 @@ from ..log import start_stream
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
 
-auth_plugins: dict[str, type[UserAuthPlugin]] = {
-    "keycloak": KeycloakUserPlugin,
-}
+try:
+    from flwr.ee.auth_plugin import get_cli_auth_plugins
+    auth_plugins = get_cli_auth_plugins()
+except ImportError:
+    auth_plugins = []
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
@@ -105,7 +107,7 @@ def run(
     )
 
     if "address" in federation_config:
-        auth_plugin: Optional[UserAuthPlugin] = _try_obtain_credentials(
+        auth_plugin: Optional[CliAuthPlugin] = _try_obtain_credentials(
             federation_config
         )
         _run_with_exec_api(
@@ -117,7 +119,7 @@ def run(
 
 def _try_obtain_credentials(
     federation_config: dict[str, Any]
-) -> Optional[UserAuthPlugin]:
+) -> Optional[CliAuthPlugin]:
     base_path = get_flwr_dir()
     credentials_dir = base_path / ".credentials"
     credentials_dir.mkdir(parents=True, exist_ok=True)
@@ -139,7 +141,7 @@ def _try_obtain_credentials(
                 config_dict[key.strip()] = value.strip().strip('"')
 
     auth_type = config_dict.get("auth-type", "")
-    auth_plugin: Optional[UserAuthPlugin] = None
+    auth_plugin: Optional[CliAuthPlugin] = None
 
     auth_plugin_class = auth_plugins.get(auth_type)
     if auth_plugin_class is not None:
@@ -154,7 +156,7 @@ def _run_with_exec_api(
     federation_config: dict[str, Any],
     config_overrides: Optional[list[str]],
     stream: bool,
-    auth_plugin: Optional[UserAuthPlugin] = None,
+    auth_plugin: Optional[CliAuthPlugin] = None,
 ) -> None:
 
     insecure, root_certificates_bytes = validate_certificate_in_federation_config(
@@ -166,7 +168,7 @@ def _run_with_exec_api(
         root_certificates=root_certificates_bytes,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
         interceptors=(
-            UserInterceptor(auth_plugin) if auth_plugin is not None else None
+            CliInterceptor(auth_plugin) if auth_plugin is not None else None
         ),
     )
     channel.subscribe(on_channel_state_change)

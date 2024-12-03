@@ -20,7 +20,7 @@ from typing import Any, Callable, Union
 
 import grpc
 
-from flwr.common.auth_plugin import UserAuthPlugin
+from flwr.common.auth_plugin import CliAuthPlugin
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StartRunRequest,
     StreamLogsRequest,
@@ -45,10 +45,10 @@ class _ClientCallDetails(
     """
 
 
-class UserInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ignore
-    """User interceptor for user authentication."""
+class CliInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ignore
+    """CLI interceptor for user authentication."""
 
-    def __init__(self, auth_plugin: UserAuthPlugin):
+    def __init__(self, auth_plugin: CliAuthPlugin):
         self.auth_plugin = auth_plugin
 
     def intercept_unary_unary(
@@ -64,9 +64,9 @@ class UserInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ignore
         """
         metadata = []
         if client_call_details.metadata is not None:
-            metadata = list(client_call_details.metadata)
+            metadata = client_call_details.metadata
 
-        self.auth_plugin.provide_auth_details(metadata)
+        self.auth_plugin.write_token_to_metadata(metadata)
 
         client_call_details = _ClientCallDetails(
             client_call_details.method,
@@ -77,6 +77,6 @@ class UserInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ignore
 
         response = continuation(client_call_details, request)
         if response.initial_metadata():
-            self.auth_plugin.save_refreshed_auth_tokens(response.initial_metadata())
+            self.auth_plugin.store_refresh_token(response.initial_metadata())
 
         return response
