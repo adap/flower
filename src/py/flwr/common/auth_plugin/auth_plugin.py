@@ -53,8 +53,8 @@ class ExecAuthPlugin(ABC):
         """Get the relevant auth tokens."""
 
     @abstractmethod
-    def refresh_token(self, context: grpc.ServicerContext) -> bool:
-        """Refresh auth tokens in the provided metadata."""
+    def refresh_tokens(self, context: grpc.ServicerContext) -> bool:
+        """Refresh auth tokens in the metadata of the provided context."""
 
 
 class CliAuthPlugin(ABC):
