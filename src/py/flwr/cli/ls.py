@@ -299,7 +299,10 @@ def _to_json(run_list: list[tuple[str, ...]]) -> str:
     return json.dumps({"runs": runs_list})
 
 
-def _list_runs(stub: ExecStub, output_format: str = CliOutputFormat.default) -> None:
+def _list_runs(
+    stub: ExecStub,
+    output_format: str = CliOutputFormat.default,
+) -> None:
     """List all runs."""
     res: ListRunsResponse = stub.ListRuns(ListRunsRequest())
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
@@ -311,7 +314,9 @@ def _list_runs(stub: ExecStub, output_format: str = CliOutputFormat.default) -> 
 
 
 def _display_one_run(
-    stub: ExecStub, run_id: int, output_format: str = CliOutputFormat.default
+    stub: ExecStub,
+    run_id: int,
+    output_format: str = CliOutputFormat.default,
 ) -> None:
     """Display information about a specific run."""
     res: ListRunsResponse = stub.ListRuns(ListRunsRequest(run_id=run_id))
