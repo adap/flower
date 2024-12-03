@@ -81,7 +81,7 @@ class CliAuthPlugin(ABC):
         """Write relevant auth tokens to the provided metadata."""
 
     @abstractmethod
-    def store_refresh_token(
+    def store_refresh_tokens(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
     ) -> None:
         """Store refresh tokens from the provided metadata.
