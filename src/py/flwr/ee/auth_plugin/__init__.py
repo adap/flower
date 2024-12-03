@@ -14,10 +14,10 @@
 # ==============================================================================
 """Flower EE auth plugins."""
 
-from .keycloak_plugin import KeycloakExecPlugin as KeycloakExecPlugin
 from .keycloak_plugin import KeycloakCliPlugin as KeycloakCliPlugin
+from .keycloak_plugin import KeycloakExecPlugin as KeycloakExecPlugin
 
 __all__ = [
-    "KeycloakExecPlugin",
     "KeycloakCliPlugin",
+    "KeycloakExecPlugin",
 ]

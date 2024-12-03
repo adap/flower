@@ -24,6 +24,7 @@ import typer
 from requests import post
 from tomli_w import dump
 
+from flwr.common.auth_plugin import CliAuthPlugin, ExecAuthPlugin
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     GetAuthTokenRequest,
     GetAuthTokenResponse,
@@ -31,9 +32,22 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.exec_pb2_grpc import ExecStub
 
-from flwr.common.auth_plugin import ExecAuthPlugin, CliAuthPlugin
-
-from .constant import _ACCESS_TOKEN, _REFRESH_TOKEN, _CLIENT_ID, _AUTH_URL, _CLIENT_SECRET, _TOKEN_URL, _VALIDATE_URL, _DEVICE_CODE, _VERIFICATION_URI_COMPLETE, _EXPIRES_IN, _INTERVAL, _AUTH_TYPE, _GRANT_TYPE, _DEVICE_FLOW_GRANT_TYPE
+from .constant import (
+    _ACCESS_TOKEN,
+    _AUTH_TYPE,
+    _AUTH_URL,
+    _CLIENT_ID,
+    _CLIENT_SECRET,
+    _DEVICE_CODE,
+    _DEVICE_FLOW_GRANT_TYPE,
+    _EXPIRES_IN,
+    _GRANT_TYPE,
+    _INTERVAL,
+    _REFRESH_TOKEN,
+    _TOKEN_URL,
+    _VALIDATE_URL,
+    _VERIFICATION_URI_COMPLETE,
+)
 
 
 def _get_value_from_tuples(
@@ -83,7 +97,9 @@ class KeycloakExecPlugin(ExecAuthPlugin):
 
         return LoginResponse(login_details={})
 
-    def validate_token_in_metadata(self, metadata: Sequence[tuple[str, Union[str, bytes]]]) -> bool:
+    def validate_token_in_metadata(
+        self, metadata: Sequence[tuple[str, Union[str, bytes]]]
+    ) -> bool:
         """Authenticate auth tokens in the provided metadata."""
         access_token = _get_value_from_tuples(_ACCESS_TOKEN, metadata)
 
@@ -237,7 +253,8 @@ class KeycloakCliPlugin(CliAuthPlugin):
         )
         raise typer.Exit(code=1)
 
-    def write_token_to_metadata(self, metadata: Sequence[tuple[str, Union[str, bytes]]]
+    def write_token_to_metadata(
+        self, metadata: Sequence[tuple[str, Union[str, bytes]]]
     ) -> None:
         """Write relevant auth tokens to the provided metadata."""
         metadata.append(
@@ -262,12 +279,8 @@ class KeycloakCliPlugin(CliAuthPlugin):
         The tokens will be stored in the .credentials/ folder inside the Flower
         directory.
         """
-        access_token = _get_value_from_tuples(_ACCESS_TOKEN, metadata).decode(
-            "utf-8"
-        )
-        refresh_token = _get_value_from_tuples(_REFRESH_TOKEN, metadata).decode(
-            "utf-8"
-        )
+        access_token = _get_value_from_tuples(_ACCESS_TOKEN, metadata).decode("utf-8")
+        refresh_token = _get_value_from_tuples(_REFRESH_TOKEN, metadata).decode("utf-8")
         self.config[_ACCESS_TOKEN] = access_token
         self.config[_REFRESH_TOKEN] = refresh_token
 
