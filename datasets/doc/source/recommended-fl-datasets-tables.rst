@@ -1,5 +1,5 @@
 Image Datasets
-^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~
 
 .. list-table:: Image Datasets
    :widths: 40 40 20
@@ -68,7 +68,7 @@ Image Datasets
      - 32x32
 
 Audio Datasets
-^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~
 
 .. list-table:: Audio Datasets
    :widths: 35 30 15
@@ -94,7 +94,7 @@ Audio Datasets
      - clean/other
 
 Tabular Datasets
-^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~
 
 
 .. list-table:: Tabular Datasets
@@ -111,7 +111,7 @@ Tabular Datasets
      - train 150
 
 Text Datasets
-^^^^^^^^^^^^^
+~~~~~~~~~~~~
 
 .. list-table:: Text Datasets
    :widths: 40 30 30
