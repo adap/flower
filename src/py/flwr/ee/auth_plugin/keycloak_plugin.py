@@ -113,9 +113,7 @@ class KeycloakExecPlugin(ExecAuthPlugin):
             return True
         return False
 
-    def get_auth_tokens(
-        self, request: GetAuthTokensRequest
-    ) -> GetAuthTokensResponse:
+    def get_auth_tokens(self, request: GetAuthTokensRequest) -> GetAuthTokensResponse:
         """Send relevant tokens as a GetAuthTokenResponse."""
         device_code = request.auth_details.get(DEVICE_CODE)
         if device_code is None:
