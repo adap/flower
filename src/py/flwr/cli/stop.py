@@ -30,11 +30,15 @@ from flwr.cli.config_utils import (
 from flwr.common.constant import FAB_CONFIG_FILE
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
-from flwr.proto.exec_pb2_grpc import ExecStub
 from flwr.proto.exec_pb2 import StopRunRequest, StopRunResponse  # pylint: disable=E0611
+from flwr.proto.exec_pb2_grpc import ExecStub
 
 
 def stop(
+    run_id: Annotated[
+        int,
+        typer.Argument(help="The Flower run ID to stop"),
+    ],
     app: Annotated[
         Path,
         typer.Argument(help="Path of the Flower project"),
@@ -42,13 +46,6 @@ def stop(
     federation: Annotated[
         Optional[str],
         typer.Argument(help="Name of the federation"),
-    ] = None,
-    run_id: Annotated[
-        Optional[int],
-        typer.Option(
-            "--run-id",
-            help="Specific run ID to display",
-        ),
     ] = None,
 ) -> None:
     """Stop a run."""
