@@ -33,9 +33,9 @@ service Exec {
   rpc ListRuns(ListRunsRequest) returns (ListRunsResponse) {}
 
   // Start login upon request
-  rpc Login(LoginRequest) returns (LoginResponse) {}
+  rpc GetLoginDetails(GetLoginDetailsRequest) returns (GetLoginDetailsResponse) {}
 
-  rpc GetAuthToken(GetAuthTokenRequest) returns (GetAuthTokenResponse) {}
+  rpc GetAuthTokens(GetAuthTokensRequest) returns (GetAuthTokensResponse) {}
 }
 
 message StartRunRequest {
@@ -58,8 +58,8 @@ message ListRunsResponse {
   string now = 2;
 }
 
-message LoginRequest {}
-message LoginResponse { map<string, string> login_details = 1; }
+message GetLoginDetailsRequest {}
+message GetLoginDetailsResponse { map<string, string> login_details = 1; }
 
-message GetAuthTokenRequest { map<string, string> auth_details = 1; }
-message GetAuthTokenResponse { map<string, string> auth_tokens = 1; }
+message GetAuthTokensRequest { map<string, string> auth_details = 1; }
+message GetAuthTokensResponse { map<string, string> auth_tokens = 1; }
