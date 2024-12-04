@@ -31,6 +31,7 @@ from flwr.cli.config_utils import (
 )
 from flwr.cli.run.cli_interceptor import CliInterceptor
 from flwr.common.auth_plugin import CliAuthPlugin
+from flwr.common.constant import AUTH_TYPE, CREDENTIALS_DIR
 from flwr.common.config import (
     flatten_dict,
     get_flwr_dir,
@@ -122,7 +123,7 @@ def _try_obtain_credentials(
     federation_config: dict[str, Any]
 ) -> Optional[CliAuthPlugin]:
     base_path = get_flwr_dir()
-    credentials_dir = base_path / ".credentials"
+    credentials_dir = base_path / CREDENTIALS_DIR
     credentials_dir.mkdir(parents=True, exist_ok=True)
 
     credential = credentials_dir / federation_config["address"]
@@ -141,7 +142,7 @@ def _try_obtain_credentials(
                 key, value = line.split("=", 1)
                 config_dict[key.strip()] = value.strip().strip('"')
 
-    auth_type = config_dict.get("auth-type", "")
+    auth_type = config_dict.get(AUTH_TYPE, "")
     auth_plugin: Optional[CliAuthPlugin] = None
 
     auth_plugin_class = auth_plugins.get(auth_type)

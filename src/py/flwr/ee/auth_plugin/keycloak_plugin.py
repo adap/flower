@@ -27,9 +27,9 @@ from tomli_w import dump
 from flwr.common.auth_plugin import CliAuthPlugin, ExecAuthPlugin
 from flwr.common.constant import AUTH_TYPE
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
-    GetAuthTokenRequest,
-    GetAuthTokenResponse,
-    LoginResponse,
+    GetAuthTokensRequest,
+    GetAuthTokensResponse,
+    GetLoginDetailsResponse,
 )
 from flwr.proto.exec_pb2_grpc import ExecStub
 
@@ -70,7 +70,7 @@ class KeycloakExecPlugin(ExecAuthPlugin):
         self.keycloak_client_secret = config.get(CLIENT_SECRET, "")
         self.validate_url = config.get(VALIDATE_URL, "")
 
-    def get_login_response(self) -> LoginResponse:
+    def get_login_response(self) -> GetLoginDetailsResponse:
         """Send relevant auth url as a LoginResponse."""
         payload = {
             CLIENT_ID: self.keycloak_client_id,
@@ -93,9 +93,9 @@ class KeycloakExecPlugin(ExecAuthPlugin):
                 EXPIRES_IN: str(expires_in),
                 INTERVAL: str(interval),
             }
-            return LoginResponse(login_details=login_details)
+            return GetLoginDetailsResponse(login_details=login_details)
 
-        return LoginResponse(login_details={})
+        return GetLoginDetailsResponse(login_details={})
 
     def validate_token_in_metadata(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
@@ -114,12 +114,12 @@ class KeycloakExecPlugin(ExecAuthPlugin):
         return False
 
     def get_auth_token_response(
-        self, request: GetAuthTokenRequest
-    ) -> GetAuthTokenResponse:
+        self, request: GetAuthTokensRequest
+    ) -> GetAuthTokensResponse:
         """Send relevant tokens as a GetAuthTokenResponse."""
         device_code = request.auth_details.get(DEVICE_CODE)
         if device_code is None:
-            return GetAuthTokenResponse(auth_tokens={})
+            return GetAuthTokensResponse(auth_tokens={})
 
         payload = {
             CLIENT_ID: self.keycloak_client_id,
@@ -139,9 +139,9 @@ class KeycloakExecPlugin(ExecAuthPlugin):
                 ACCESS_TOKEN: access_token,
                 REFRESH_TOKEN: refresh_token,
             }
-            return GetAuthTokenResponse(auth_tokens=auth_tokens)
+            return GetAuthTokensResponse(auth_tokens=auth_tokens)
 
-        return GetAuthTokenResponse(auth_tokens={})
+        return GetAuthTokensResponse(auth_tokens={})
 
     def refresh_token(self, context: grpc.ServicerContext) -> bool:
         """Refresh auth tokens in the provided metadata."""
@@ -223,8 +223,8 @@ class KeycloakCliPlugin(CliAuthPlugin):
 
         while (time.time() - start_time) < timeout:
             auth_details = {DEVICE_CODE: device_code}
-            res: GetAuthTokenResponse = exec_stub.GetAuthToken(
-                GetAuthTokenRequest(auth_details=auth_details)
+            res: GetAuthTokensResponse = exec_stub.GetAuthTokens(
+                GetAuthTokensRequest(auth_details=auth_details)
             )
 
             access_token = res.auth_tokens.get(ACCESS_TOKEN)

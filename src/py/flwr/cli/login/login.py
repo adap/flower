@@ -31,7 +31,7 @@ from flwr.common.config import get_flwr_dir
 from flwr.common.constant import AUTH_TYPE, CREDENTIALS_DIR
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
-from flwr.proto.exec_pb2 import LoginRequest, LoginResponse  # pylint: disable=E0611
+from flwr.proto.exec_pb2 import GetLoginDetailsRequest, GetLoginDetailsResponse  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 from flwr.server.app import _format_address
 
@@ -84,8 +84,8 @@ def login(  # pylint: disable=R0914
         raise typer.Exit(code=1)
 
     stub = _create_exec_stub(app, federation_config)
-    login_request = LoginRequest()
-    login_response: LoginResponse = stub.Login(login_request)
+    login_request = GetLoginDetailsRequest()
+    login_response: GetLoginDetailsResponse = stub.GetLoginDetails(login_request)
     auth_plugin = get_cli_auth_plugins()[
         login_response.login_details.get(AUTH_TYPE, "")
     ]

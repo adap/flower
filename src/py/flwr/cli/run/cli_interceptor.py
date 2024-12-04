@@ -66,7 +66,7 @@ class CliInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ignore
         if client_call_details.metadata is not None:
             metadata = client_call_details.metadata
 
-        self.auth_plugin.write_token_to_metadata(metadata)
+        self.auth_plugin.write_tokens_to_metadata(metadata)
 
         client_call_details = _ClientCallDetails(
             client_call_details.method,
@@ -77,6 +77,6 @@ class CliInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ignore
 
         response = continuation(client_call_details, request)
         if response.initial_metadata():
-            self.auth_plugin.store_refresh_token(response.initial_metadata())
+            self.auth_plugin.store_refresh_tokens(response.initial_metadata())
 
         return response
