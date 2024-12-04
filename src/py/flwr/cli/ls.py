@@ -139,12 +139,14 @@ def _init_channel(app: Path, federation_config: dict[str, Any]) -> grpc.Channel:
     return channel
 
 
-def _format_run_table(run_dict: dict[int, Run], now_isoformat: str) -> Table:
-    """Format run status as a rich Table."""
+def _format_runs(run_dict: dict[int, Run], now_isoformat: str) -> list[tuple[str, ...]]:
+    """Format runs to a list."""
     table = Table(header_style="bold cyan", show_lines=True)
 
     def _format_datetime(dt: Optional[datetime]) -> str:
         return isoformat8601_utc(dt).replace("T", " ") if dt else "N/A"
+
+    run_list: list[tuple[str, ...]] = []
 
     # Add columns
     table.add_column(
@@ -192,15 +194,60 @@ def _format_run_table(run_dict: dict[int, Run], now_isoformat: str) -> Table:
                 end_time = datetime.fromisoformat(now_isoformat)
             elapsed_time = end_time - running_at
 
-        table.add_row(
-            f"[bold]{run.run_id}[/bold]",
-            f"{run.fab_id} (v{run.fab_version})",
-            f"[{status_style}]{status_text}[/{status_style}]",
-            format_timedelta(elapsed_time),
-            _format_datetime(pending_at),
-            _format_datetime(running_at),
-            _format_datetime(finished_at),
+        run_list.append(
+            (
+                f"{run.run_id}",
+                f"{run.fab_id}",
+                f"{run.fab_version}",
+                f"{run.fab_hash}",
+                f"[{status_style}]{status_text}[/{status_style}]",
+                format_timedelta(elapsed_time),
+                _format_datetime(pending_at),
+                _format_datetime(running_at),
+                _format_datetime(finished_at),
+            )
         )
+    return run_list
+
+
+def _to_table(run_list: list[tuple[str, ...]]) -> Table:
+    """Format the provided run list to a rich Table."""
+    table = Table(header_style="bold cyan", show_lines=True)
+
+    # Add columns
+    table.add_column(
+        Text("Run ID", justify="center"), style="bright_white", overflow="fold"
+    )
+    table.add_column(Text("FAB", justify="center"), style="dim white")
+    table.add_column(Text("Status", justify="center"))
+    table.add_column(Text("Elapsed", justify="center"), style="blue")
+    table.add_column(Text("Created At", justify="center"), style="dim white")
+    table.add_column(Text("Running At", justify="center"), style="dim white")
+    table.add_column(Text("Finished At", justify="center"), style="dim white")
+
+    for row in run_list:
+        (
+            run_id,
+            fab_id,
+            fab_version,
+            _,
+            status_text,
+            elapsed,
+            created_at,
+            running_at,
+            finished_at,
+        ) = row
+        formatted_row = (
+            f"[bold]{run_id}[/bold]",
+            f"{fab_id} (v{fab_version})",
+            status_text,
+            elapsed,
+            created_at,
+            running_at,
+            finished_at,
+        )
+        table.add_row(*formatted_row)
+
     return table
 
 
@@ -211,7 +258,7 @@ def _list_runs(
     res: ListRunsResponse = stub.ListRuns(ListRunsRequest())
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
-    Console().print(_format_run_table(run_dict, res.now))
+    Console().print(_to_table(_format_runs(run_dict, res.now)))
 
 
 def _display_one_run(
@@ -225,4 +272,4 @@ def _display_one_run(
 
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
-    Console().print(_format_run_table(run_dict, res.now))
+    Console().print(_to_table(_format_runs(run_dict, res.now)))
