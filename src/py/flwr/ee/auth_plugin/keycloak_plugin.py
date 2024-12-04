@@ -55,7 +55,7 @@ def _get_value_from_tuples(
 ) -> bytes:
     value = next((value for key, value in tuples if key == key_string), "")
     if isinstance(value, str):
-        return value.encode()
+        return value.encode("utf-8")
 
     return value
 
@@ -71,7 +71,7 @@ class KeycloakExecPlugin(ExecAuthPlugin):
         self.validate_url = config.get(VALIDATE_URL, "")
 
     def get_login_details(self) -> GetLoginDetailsResponse:
-        """Send relevant auth url as a GetLoginDetailsResponse."""
+        """Get the GetLoginDetailsResponse containing the login details."""
         payload = {
             CLIENT_ID: self.keycloak_client_id,
             CLIENT_SECRET: self.keycloak_client_secret,
@@ -97,10 +97,10 @@ class KeycloakExecPlugin(ExecAuthPlugin):
 
         return GetLoginDetailsResponse(login_details={})
 
-    def validate_token_in_metadata(
+    def validate_tokens_in_metadata(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
     ) -> bool:
-        """Authenticate auth tokens in the provided metadata."""
+        """Validate the auth tokens in the provided metadata."""
         access_token = _get_value_from_tuples(ACCESS_TOKEN, metadata)
 
         if not access_token:
@@ -114,7 +114,7 @@ class KeycloakExecPlugin(ExecAuthPlugin):
         return False
 
     def get_auth_tokens(self, request: GetAuthTokensRequest) -> GetAuthTokensResponse:
-        """Send relevant tokens as a GetAuthTokenResponse."""
+        """Get the relevant auth tokens."""
         device_code = request.auth_details.get(DEVICE_CODE)
         if device_code is None:
             return GetAuthTokensResponse(auth_tokens={})
@@ -142,7 +142,7 @@ class KeycloakExecPlugin(ExecAuthPlugin):
         return GetAuthTokensResponse(auth_tokens={})
 
     def refresh_tokens(self, context: grpc.ServicerContext) -> bool:
-        """Refresh auth tokens in the provided metadata."""
+        """Refresh auth tokens in the metadata of the provided context."""
         metadata = context.invocation_metadata()
         refresh_token = _get_value_from_tuples(REFRESH_TOKEN, metadata)
         if not refresh_token:

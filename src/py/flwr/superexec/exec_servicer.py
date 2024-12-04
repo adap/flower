@@ -141,7 +141,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         self, request: GetAuthTokensRequest, context: grpc.ServicerContext
     ) -> GetAuthTokensResponse:
         """Get auth token."""
-        log(INFO, "ExecServicer.GetAuthToken")
+        log(INFO, "ExecServicer.GetAuthTokens")
         return GetAuthTokensResponse(auth_tokens={})
 
 
