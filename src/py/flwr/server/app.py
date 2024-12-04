@@ -360,7 +360,7 @@ def run_superlink() -> None:
                     "Node authentication enabled with %d known public keys",
                     len(node_public_keys),
                 )
-                interceptors = [AuthenticateServerInterceptor(state)]
+                interceptors = [AuthenticateServerInterceptor(state_factory)]
 
             fleet_server = _run_fleet_api_grpc_rere(
                 address=fleet_address,
