@@ -75,13 +75,11 @@ class CliAuthPlugin(ABC):
     @abstractmethod
     def write_tokens_to_metadata(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
-    ) -> None:
+    ) -> Sequence[tuple[str, Union[str, bytes]]]:
         """Write relevant auth tokens to the provided metadata."""
 
     @abstractmethod
-    def store_refresh_tokens(
-        self, metadata: Sequence[tuple[str, Union[str, bytes]]]
-    ) -> None:
+    def store_tokens(self, metadata: dict[str, Any]) -> None:
         """Store refresh tokens from the provided metadata.
 
         The tokens will be stored in the .credentials/ folder inside the Flower
