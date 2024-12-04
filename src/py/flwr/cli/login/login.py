@@ -74,9 +74,8 @@ def login(  # pylint: disable=R0914
 
     if "address" not in federation_config:
         typer.secho(
-            f"❌ The federation `{federation}` does not have `SuperExec` "
-            "address in its config.\n Please specify the address in "
-            "`pyproject.toml` and try again.",
+            "❌ `flwr login` currently works with Exec API. Ensure that the correct"
+            "Exec API address is provided in the `pyproject.toml`.",
             fg=typer.colors.RED,
             bold=True,
         )
