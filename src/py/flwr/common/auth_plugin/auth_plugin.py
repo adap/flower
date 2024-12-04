@@ -22,9 +22,9 @@ from typing import Any, Union
 import grpc
 
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
-    GetAuthTokenRequest,
-    GetAuthTokenResponse,
-    LoginResponse,
+    GetAuthTokensRequest,
+    GetAuthTokensResponse,
+    GetLoginDetailsResponse,
 )
 from flwr.proto.exec_pb2_grpc import ExecStub
 
@@ -37,24 +37,24 @@ class ExecAuthPlugin(ABC):
         """Abstract constructor (init)."""
 
     @abstractmethod
-    def get_login_response(self) -> LoginResponse:
+    def get_login_details(self) -> GetLoginDetailsResponse:
         """Send relevant login details as a LoginResponse."""
 
     @abstractmethod
-    def validate_token_in_metadata(
+    def validate_tokens_in_metadata(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
     ) -> bool:
-        """Authenticate auth tokens in the provided metadata."""
+        """Validate the auth tokens in the provided metadata."""
 
     @abstractmethod
-    def get_auth_token_response(
-        self, request: GetAuthTokenRequest
-    ) -> GetAuthTokenResponse:
-        """Send relevant tokens as a GetAuthTokenResponse."""
+    def get_auth_tokens(
+        self, request: GetAuthTokensRequest
+    ) -> GetAuthTokensResponse:
+        """Get the relevant auth tokens."""
 
     @abstractmethod
-    def refresh_token(self, context: grpc.ServicerContext) -> bool:
-        """Refresh auth tokens in the provided metadata."""
+    def refresh_tokens(self, context: grpc.ServicerContext) -> bool:
+        """Refresh auth tokens in the metadata of the provided context."""
 
 
 class CliAuthPlugin(ABC):
@@ -75,13 +75,13 @@ class CliAuthPlugin(ABC):
         """Abstract constructor (init)."""
 
     @abstractmethod
-    def write_token_to_metadata(
+    def write_tokens_to_metadata(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
     ) -> None:
         """Write relevant auth tokens to the provided metadata."""
 
     @abstractmethod
-    def store_refresh_token(
+    def store_refresh_tokens(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
     ) -> None:
         """Store refresh tokens from the provided metadata.
