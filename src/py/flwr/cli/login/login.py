@@ -61,7 +61,7 @@ def login(  # pylint: disable=R0914
         typer.Argument(help="Name of the federation to login into."),
     ] = None,
 ) -> None:
-    """Login to Flower SuperExec."""
+    """Login to Flower SuperLink."""
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
     pyproject_path = app / "pyproject.toml" if app else None
