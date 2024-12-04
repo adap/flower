@@ -70,52 +70,56 @@ def ls(
     ] = None,
 ) -> None:
     """List runs."""
-    # Load and validate federation config
-    typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
-
-    pyproject_path = app / FAB_CONFIG_FILE if app else None
-    config, errors, warnings = load_and_validate(path=pyproject_path)
-    config = validate_project_config(config, errors, warnings)
-    federation, federation_config = validate_federation_in_project_config(
-        federation, config
-    )
-
-    if "address" not in federation_config:
-        typer.secho(
-            "❌ `flwr ls` currently works with Exec API. Ensure that the correct"
-            "Exec API address is provided in the `pyproject.toml`.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
-
     try:
-        if runs and run_id is not None:
-            raise ValueError(
-                "The options '--runs' and '--run-id' are mutually exclusive."
-            )
+        # Load and validate federation config
+        typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
-        channel = _init_channel(app, federation_config)
-        stub = ExecStub(channel)
-
-        # Display information about a specific run ID
-        if run_id is not None:
-            typer.echo(f"🔍 Displaying information for run ID {run_id}...")
-            _display_one_run(stub, run_id)
-        # By default, list all runs
-        else:
-            typer.echo("📄 Listing all runs...")
-            _list_runs(stub)
-
-    except ValueError as err:
-        typer.secho(
-            f"❌ {err}",
-            fg=typer.colors.RED,
-            bold=True,
+        pyproject_path = app / FAB_CONFIG_FILE if app else None
+        config, errors, warnings = load_and_validate(path=pyproject_path)
+        config = validate_project_config(config, errors, warnings)
+        federation, federation_config = validate_federation_in_project_config(
+            federation, config
         )
-        raise typer.Exit(code=1) from err
-    finally:
-        channel.close()
+
+        if "address" not in federation_config:
+            typer.secho(
+                "❌ `flwr ls` currently works with Exec API. Ensure that the correct"
+                "Exec API address is provided in the `pyproject.toml`.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1)
+
+        try:
+            if runs and run_id is not None:
+                raise ValueError(
+                    "The options '--runs' and '--run-id' are mutually exclusive."
+                )
+
+            channel = _init_channel(app, federation_config)
+            stub = ExecStub(channel)
+
+            # Display information about a specific run ID
+            if run_id is not None:
+                typer.echo(f"🔍 Displaying information for run ID {run_id}...")
+                _display_one_run(stub, run_id)
+            # By default, list all runs
+            else:
+                typer.echo("📄 Listing all runs...")
+                _list_runs(stub)
+
+        except ValueError as err:
+            typer.secho(
+                f"❌ {err}",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1) from err
+        finally:
+            channel.close()
+    # pylint: disable=broad-except, unused-variable
+    except (typer.Exit, Exception):
+        _print_json_error()
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
@@ -273,3 +277,7 @@ def _display_one_run(
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
     Console().print(_to_table(_format_runs(run_dict, res.now)))
+
+
+def _print_json_error() -> None:
+    """Print error message as JSON."""
