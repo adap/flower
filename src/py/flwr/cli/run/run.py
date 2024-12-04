@@ -87,19 +87,23 @@ def run(
     ] = False,
 ) -> None:
     """Run Flower App."""
-    typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
+    try:
+        typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
-    pyproject_path = app / "pyproject.toml" if app else None
-    config, errors, warnings = load_and_validate(path=pyproject_path)
-    config = validate_project_config(config, errors, warnings)
-    federation, federation_config = validate_federation_in_project_config(
-        federation, config
-    )
+        pyproject_path = app / "pyproject.toml" if app else None
+        config, errors, warnings = load_and_validate(path=pyproject_path)
+        config = validate_project_config(config, errors, warnings)
+        federation, federation_config = validate_federation_in_project_config(
+            federation, config
+        )
 
-    if "address" in federation_config:
-        _run_with_exec_api(app, federation_config, config_overrides, stream)
-    else:
-        _run_without_exec_api(app, federation_config, config_overrides, federation)
+        if "address" in federation_config:
+            _run_with_exec_api(app, federation_config, config_overrides, stream)
+        else:
+            _run_without_exec_api(app, federation_config, config_overrides, federation)
+    # pylint: disable=broad-except, unused-variable
+    except (typer.Exit, SystemExit, Exception):
+        _print_json_error()
 
 
 # pylint: disable-next=too-many-locals
@@ -142,7 +146,11 @@ def _run_with_exec_api(
     )
     res = stub.StartRun(req)
 
-    typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
+    if res.HasField("run_id"):
+        typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
+    else:
+        typer.secho("❌ Failed to start run", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
 
     if stream:
         start_stream(res.run_id, channel, CONN_REFRESH_PERIOD)
@@ -194,3 +202,7 @@ def _run_without_exec_api(
         check=True,
         text=True,
     )
+
+
+def _print_json_error() -> None:
+    """Print error message as JSON."""
