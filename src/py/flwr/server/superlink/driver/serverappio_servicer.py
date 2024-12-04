@@ -32,6 +32,7 @@ from flwr.common.serde import (
     fab_from_proto,
     fab_to_proto,
     run_status_from_proto,
+    run_status_to_proto,
     run_to_proto,
     user_config_from_proto,
 )
@@ -291,7 +292,13 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> GetRunStatusResponse:
         """Get the status of a run."""
         log(DEBUG, "ServerAppIoServicer.GetRunStatus")
-        raise NotImplementedError()
+        state = self.state_factory.state()
+
+        # Get run status from LinkState
+        run_status = run_status_to_proto(
+            state.get_run_status({request.run_id})[request.run_id]
+        )
+        return GetRunStatusResponse(run_status=run_status)
 
 
 def _raise_if(validation_error: bool, detail: str) -> None:
