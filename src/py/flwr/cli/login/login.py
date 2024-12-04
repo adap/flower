@@ -19,7 +19,6 @@ from pathlib import Path
 from typing import Annotated, Any, Optional
 
 import typer
-from tomli_w import dump
 
 from flwr.cli.config_utils import (
     load_and_validate,
@@ -27,13 +26,14 @@ from flwr.cli.config_utils import (
     validate_project_config,
 )
 from flwr.common.auth_plugin import CliAuthPlugin
-from flwr.common.config import get_flwr_dir
-from flwr.common.constant import AUTH_TYPE, CREDENTIALS_DIR
+from flwr.common.constant import AUTH_TYPE
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
-from flwr.proto.exec_pb2 import GetLoginDetailsRequest, GetLoginDetailsResponse  # pylint: disable=E0611
+from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
+    GetLoginDetailsRequest,
+    GetLoginDetailsResponse,
+)
 from flwr.proto.exec_pb2_grpc import ExecStub
-from flwr.server.app import _format_address
 
 try:
     from flwr.ee.auth_plugin import get_cli_auth_plugins
@@ -93,16 +93,7 @@ def login(  # pylint: disable=R0914
         dict(login_response.login_details), config, federation, stub
     )
 
-    base_path = get_flwr_dir()
-    credentials_dir = base_path / CREDENTIALS_DIR
-    credentials_dir.mkdir(parents=True, exist_ok=True)
-    server_address = federation_config["address"]
-    address, _, _ = _format_address(server_address)
-
-    credential = credentials_dir / address
-
-    with open(credential, "wb") as config_file:
-        dump(config, config_file)
+    auth_plugin.store_tokens(config)
 
 
 def _create_exec_stub(app: Path, federation_config: dict[str, Any]) -> ExecStub:

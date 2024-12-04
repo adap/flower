@@ -77,6 +77,7 @@ class CliInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ignore
 
         response = continuation(client_call_details, request)
         if response.initial_metadata():
-            self.auth_plugin.store_refresh_tokens(response.initial_metadata())
+            metadata = dict(response.initial_metadata())
+            self.auth_plugin.store_tokens(metadata)
 
         return response

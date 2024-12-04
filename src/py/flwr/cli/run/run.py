@@ -34,14 +34,13 @@ from flwr.cli.config_utils import (
 )
 from flwr.cli.run.cli_interceptor import CliInterceptor
 from flwr.common.auth_plugin import CliAuthPlugin
-from flwr.common.constant import AUTH_TYPE, CREDENTIALS_DIR
 from flwr.common.config import (
     flatten_dict,
     get_flwr_dir,
     parse_config_args,
     user_config_to_configsrecord,
 )
-from flwr.common.constant import CliOutputFormat
+from flwr.common.constant import AUTH_TYPE, CREDENTIALS_DIR, CliOutputFormat
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log, redirect_output, remove_emojis, restore_output
 from flwr.common.serde import (
@@ -52,6 +51,7 @@ from flwr.common.serde import (
 from flwr.common.typing import Fab
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
+from flwr.server.app import _format_address
 
 from ..log import start_stream
 
@@ -158,7 +158,10 @@ def _try_obtain_credentials(
     credentials_dir = base_path / CREDENTIALS_DIR
     credentials_dir.mkdir(parents=True, exist_ok=True)
 
-    credential = credentials_dir / federation_config["address"]
+    server_address = federation_config["address"]
+    address, _, _ = _format_address(server_address)
+
+    credential = credentials_dir / address
     config_dict = {}
 
     if not credential.exists():
