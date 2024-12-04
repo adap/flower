@@ -20,10 +20,12 @@ from .keycloak_plugin import KeycloakCliPlugin, KeycloakExecPlugin
 
 
 def get_cli_auth_plugins() -> dict[str, type[CliAuthPlugin]]:
+    """Return all CLI authentication plugins."""
     return {"keycloak": KeycloakCliPlugin}
 
 
 def get_exec_auth_plugins() -> dict[str, type[ExecAuthPlugin]]:
+    """Return all Exec API authentication plugins."""
     return {"keycloak": KeycloakExecPlugin}
 
 

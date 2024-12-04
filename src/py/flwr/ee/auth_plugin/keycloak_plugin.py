@@ -25,6 +25,7 @@ from requests import post
 from tomli_w import dump
 
 from flwr.common.auth_plugin import CliAuthPlugin, ExecAuthPlugin
+from flwr.common.constant import AUTH_TYPE
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     GetAuthTokenRequest,
     GetAuthTokenResponse,
@@ -33,20 +34,19 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 
 from .constant import (
-    _ACCESS_TOKEN,
-    _AUTH_TYPE,
-    _AUTH_URL,
-    _CLIENT_ID,
-    _CLIENT_SECRET,
-    _DEVICE_CODE,
-    _DEVICE_FLOW_GRANT_TYPE,
-    _EXPIRES_IN,
-    _GRANT_TYPE,
-    _INTERVAL,
-    _REFRESH_TOKEN,
-    _TOKEN_URL,
-    _VALIDATE_URL,
-    _VERIFICATION_URI_COMPLETE,
+    ACCESS_TOKEN,
+    AUTH_URL,
+    CLIENT_ID,
+    CLIENT_SECRET,
+    DEVICE_CODE,
+    DEVICE_FLOW_GRANT_TYPE,
+    EXPIRES_IN,
+    GRANT_TYPE,
+    INTERVAL,
+    REFRESH_TOKEN,
+    TOKEN_URL,
+    VALIDATE_URL,
+    VERIFICATION_URI_COMPLETE,
 )
 
 
@@ -64,17 +64,17 @@ class KeycloakExecPlugin(ExecAuthPlugin):
     """Flower Keycloak Auth Plugin for ExecServicer."""
 
     def __init__(self, config: dict[str, Any]):
-        self.auth_url = config.get(_AUTH_URL, "")
-        self.token_url = config.get(_TOKEN_URL, "")
-        self.keycloak_client_id = config.get(_CLIENT_ID, "")
-        self.keycloak_client_secret = config.get(_CLIENT_SECRET, "")
-        self.validate_url = config.get(_VALIDATE_URL, "")
+        self.auth_url = config.get(AUTH_URL, "")
+        self.token_url = config.get(TOKEN_URL, "")
+        self.keycloak_client_id = config.get(CLIENT_ID, "")
+        self.keycloak_client_secret = config.get(CLIENT_SECRET, "")
+        self.validate_url = config.get(VALIDATE_URL, "")
 
     def get_login_response(self) -> LoginResponse:
         """Send relevant auth url as a LoginResponse."""
         payload = {
-            _CLIENT_ID: self.keycloak_client_id,
-            _CLIENT_SECRET: self.keycloak_client_secret,
+            CLIENT_ID: self.keycloak_client_id,
+            CLIENT_SECRET: self.keycloak_client_secret,
         }
 
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
@@ -82,16 +82,16 @@ class KeycloakExecPlugin(ExecAuthPlugin):
         response = post(self.auth_url, data=payload, headers=headers, timeout=10)
         if response.status_code == 200:
             data = response.json()
-            device_code = data.get(_DEVICE_CODE)
-            verification_uri_complete = data.get(_VERIFICATION_URI_COMPLETE)
-            expires_in = data.get(_EXPIRES_IN)
-            interval = data.get(_INTERVAL)
+            device_code = data.get(DEVICE_CODE)
+            verification_uri_complete = data.get(VERIFICATION_URI_COMPLETE)
+            expires_in = data.get(EXPIRES_IN)
+            interval = data.get(INTERVAL)
             login_details = {
-                _AUTH_TYPE: "keycloak",
-                _DEVICE_CODE: str(device_code),
-                _VERIFICATION_URI_COMPLETE: str(verification_uri_complete),
-                _EXPIRES_IN: str(expires_in),
-                _INTERVAL: str(interval),
+                AUTH_TYPE: "keycloak",
+                DEVICE_CODE: str(device_code),
+                VERIFICATION_URI_COMPLETE: str(verification_uri_complete),
+                EXPIRES_IN: str(expires_in),
+                INTERVAL: str(interval),
             }
             return LoginResponse(login_details=login_details)
 
@@ -101,7 +101,7 @@ class KeycloakExecPlugin(ExecAuthPlugin):
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
     ) -> bool:
         """Authenticate auth tokens in the provided metadata."""
-        access_token = _get_value_from_tuples(_ACCESS_TOKEN, metadata)
+        access_token = _get_value_from_tuples(ACCESS_TOKEN, metadata)
 
         if not access_token:
             return False
@@ -117,15 +117,15 @@ class KeycloakExecPlugin(ExecAuthPlugin):
         self, request: GetAuthTokenRequest
     ) -> GetAuthTokenResponse:
         """Send relevant tokens as a GetAuthTokenResponse."""
-        device_code = request.auth_details.get(_DEVICE_CODE)
+        device_code = request.auth_details.get(DEVICE_CODE)
         if device_code is None:
             return GetAuthTokenResponse(auth_tokens={})
 
         payload = {
-            _CLIENT_ID: self.keycloak_client_id,
-            _CLIENT_SECRET: self.keycloak_client_secret,
-            _GRANT_TYPE: _DEVICE_FLOW_GRANT_TYPE,
-            _DEVICE_CODE: device_code,
+            CLIENT_ID: self.keycloak_client_id,
+            CLIENT_SECRET: self.keycloak_client_secret,
+            GRANT_TYPE: DEVICE_FLOW_GRANT_TYPE,
+            DEVICE_CODE: device_code,
         }
 
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
@@ -133,11 +133,11 @@ class KeycloakExecPlugin(ExecAuthPlugin):
         response = post(self.token_url, data=payload, headers=headers, timeout=10)
         if response.status_code == 200:
             data = response.json()
-            access_token = data.get(_ACCESS_TOKEN)
-            refresh_token = data.get(_REFRESH_TOKEN)
+            access_token = data.get(ACCESS_TOKEN)
+            refresh_token = data.get(REFRESH_TOKEN)
             auth_tokens = {
-                _ACCESS_TOKEN: access_token,
-                _REFRESH_TOKEN: refresh_token,
+                ACCESS_TOKEN: access_token,
+                REFRESH_TOKEN: refresh_token,
             }
             return GetAuthTokenResponse(auth_tokens=auth_tokens)
 
@@ -146,15 +146,15 @@ class KeycloakExecPlugin(ExecAuthPlugin):
     def refresh_token(self, context: grpc.ServicerContext) -> bool:
         """Refresh auth tokens in the provided metadata."""
         metadata = context.invocation_metadata()
-        refresh_token = _get_value_from_tuples(_REFRESH_TOKEN, metadata)
+        refresh_token = _get_value_from_tuples(REFRESH_TOKEN, metadata)
         if not refresh_token:
             return False
 
         payload = {
-            _CLIENT_ID: self.keycloak_client_id,
-            _CLIENT_SECRET: self.keycloak_client_secret,
-            _GRANT_TYPE: _REFRESH_TOKEN,
-            _REFRESH_TOKEN: refresh_token.decode("utf-8"),
+            CLIENT_ID: self.keycloak_client_id,
+            CLIENT_SECRET: self.keycloak_client_secret,
+            GRANT_TYPE: REFRESH_TOKEN,
+            REFRESH_TOKEN: refresh_token.decode("utf-8"),
         }
 
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
@@ -163,17 +163,17 @@ class KeycloakExecPlugin(ExecAuthPlugin):
         if response.status_code == 200:
 
             data = response.json()
-            access_token = data.get(_ACCESS_TOKEN)
-            refresh_token = data.get(_REFRESH_TOKEN)
+            access_token = data.get(ACCESS_TOKEN)
+            refresh_token = data.get(REFRESH_TOKEN)
 
             context.send_initial_metadata(
                 (
                     (
-                        _ACCESS_TOKEN,
+                        ACCESS_TOKEN,
                         access_token,
                     ),
                     (
-                        _REFRESH_TOKEN,
+                        REFRESH_TOKEN,
                         refresh_token,
                     ),
                 )
@@ -187,8 +187,8 @@ class KeycloakCliPlugin(CliAuthPlugin):
     """Flower Keycloak Auth Plugin for CLI."""
 
     def __init__(self, config: dict[str, Any], config_path: Path):
-        self.access_token = config[_ACCESS_TOKEN]
-        self.refresh_token = config[_REFRESH_TOKEN]
+        self.access_token = config[ACCESS_TOKEN]
+        self.refresh_token = config[REFRESH_TOKEN]
         self.config = config
         self.config_path = config_path
 
@@ -200,10 +200,10 @@ class KeycloakCliPlugin(CliAuthPlugin):
         exec_stub: ExecStub,
     ) -> dict[str, Any]:
         """Login logic to log in user to the SuperLink."""
-        timeout = int(login_details.get(_EXPIRES_IN, "600"))
-        interval = int(login_details.get(_INTERVAL, "5"))
-        device_code = login_details.get(_DEVICE_CODE)
-        verification_uri_complete = login_details.get(_VERIFICATION_URI_COMPLETE)
+        timeout = int(login_details.get(EXPIRES_IN, "600"))
+        interval = int(login_details.get(INTERVAL, "5"))
+        device_code = login_details.get(DEVICE_CODE)
+        verification_uri_complete = login_details.get(VERIFICATION_URI_COMPLETE)
 
         if device_code is None or verification_uri_complete is None:
             typer.secho(
@@ -222,19 +222,19 @@ class KeycloakCliPlugin(CliAuthPlugin):
         time.sleep(interval)
 
         while (time.time() - start_time) < timeout:
-            auth_details = {_DEVICE_CODE: device_code}
+            auth_details = {DEVICE_CODE: device_code}
             res: GetAuthTokenResponse = exec_stub.GetAuthToken(
                 GetAuthTokenRequest(auth_details=auth_details)
             )
 
-            access_token = res.auth_tokens.get(_ACCESS_TOKEN)
-            refresh_token = res.auth_tokens.get(_REFRESH_TOKEN)
+            access_token = res.auth_tokens.get(ACCESS_TOKEN)
+            refresh_token = res.auth_tokens.get(REFRESH_TOKEN)
 
             if access_token and refresh_token:
                 config = {}
-                config[_AUTH_TYPE] = "keycloak"
-                config[_ACCESS_TOKEN] = access_token
-                config[_REFRESH_TOKEN] = refresh_token
+                config[AUTH_TYPE] = "keycloak"
+                config[ACCESS_TOKEN] = access_token
+                config[REFRESH_TOKEN] = refresh_token
 
                 typer.secho(
                     "✅ Login successful.",
@@ -258,13 +258,13 @@ class KeycloakCliPlugin(CliAuthPlugin):
         """Write relevant auth tokens to the provided metadata."""
         metadata.append(
             (
-                _ACCESS_TOKEN,
+                ACCESS_TOKEN,
                 self.access_token.encode("utf-8"),
             )
         )
         metadata.append(
             (
-                _REFRESH_TOKEN,
+                REFRESH_TOKEN,
                 self.refresh_token.encode("utf-8"),
             )
         )
@@ -278,10 +278,10 @@ class KeycloakCliPlugin(CliAuthPlugin):
         The tokens will be stored in the .credentials/ folder inside the Flower
         directory.
         """
-        access_token = _get_value_from_tuples(_ACCESS_TOKEN, metadata).decode("utf-8")
-        refresh_token = _get_value_from_tuples(_REFRESH_TOKEN, metadata).decode("utf-8")
-        self.config[_ACCESS_TOKEN] = access_token
-        self.config[_REFRESH_TOKEN] = refresh_token
+        access_token = _get_value_from_tuples(ACCESS_TOKEN, metadata).decode("utf-8")
+        refresh_token = _get_value_from_tuples(REFRESH_TOKEN, metadata).decode("utf-8")
+        self.config[ACCESS_TOKEN] = access_token
+        self.config[REFRESH_TOKEN] = refresh_token
 
         with open(self.config_path, "wb") as config_file:
             dump(self.config, config_file)

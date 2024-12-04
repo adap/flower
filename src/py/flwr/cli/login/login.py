@@ -14,7 +14,6 @@
 # ==============================================================================
 """Flower command line interface `login` command."""
 
-import sys
 from logging import DEBUG
 from pathlib import Path
 from typing import Annotated, Any, Optional
@@ -27,14 +26,14 @@ from flwr.cli.config_utils import (
     validate_federation_in_project_config,
     validate_project_config,
 )
-from flwr.common.address import parse_address
+from flwr.common.auth_plugin import CliAuthPlugin
 from flwr.common.config import get_flwr_dir
-from flwr.common.constant import CREDENTIALS_DIR
+from flwr.common.constant import AUTH_TYPE, CREDENTIALS_DIR
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
-from flwr.server.app import _format_address
 from flwr.common.logger import log
 from flwr.proto.exec_pb2 import LoginRequest, LoginResponse  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
+from flwr.server.app import _format_address
 
 try:
     from flwr.ee.auth_plugin import get_cli_auth_plugins
@@ -43,9 +42,10 @@ except ImportError:
 
 This is a feature available only in the enterprise extension.
 """
-    def get_cli_auth_plugins() -> dict[str, type[CliAuthPlugin]]:
-        raise ImportError(AUTH_PLUGIN_IMPORT_ERROR)
 
+    def get_cli_auth_plugins() -> dict[str, type[CliAuthPlugin]]:
+        """Return all CLI authentication plugins."""
+        raise ImportError(AUTH_PLUGIN_IMPORT_ERROR)
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
@@ -86,7 +86,9 @@ def login(  # pylint: disable=R0914
     stub = _create_exec_stub(app, federation_config)
     login_request = LoginRequest()
     login_response: LoginResponse = stub.Login(login_request)
-    auth_plugin = auth_plugins[login_response.login_details.get("auth_type", "")]
+    auth_plugin = get_cli_auth_plugins()[
+        login_response.login_details.get(AUTH_TYPE, "")
+    ]
     config = auth_plugin.login(
         dict(login_response.login_details), config, federation, stub
     )
