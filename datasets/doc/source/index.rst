@@ -157,7 +157,7 @@ used with Flower Datasets ``flwr-datasets``.
 
     All datasets from `HuggingFace Hub <https://huggingface.co/datasets>`_ can be used with our library. This page presents just a set of datasets we collected that you might find useful.
 
-For more information about any dataset, visit its page by clicking the dataset name. For more information how to use the
+For more information about any dataset, visit its page by clicking the dataset name. 
 
 .. include:: recommended-fl-datasets-tables.rst
 
