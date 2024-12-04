@@ -15,16 +15,19 @@
 """Flower command line interface `ls` command."""
 
 
+import io
+import json
 from datetime import datetime, timedelta
 from logging import DEBUG
 from pathlib import Path
-from typing import Annotated, Any, Optional
+from typing import Annotated, Any, Optional, Union
 
 import grpc
 import typer
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
+from typer import Exit
 
 from flwr.cli.config_utils import (
     load_and_validate,
@@ -32,10 +35,10 @@ from flwr.cli.config_utils import (
     validate_federation_in_project_config,
     validate_project_config,
 )
-from flwr.common.constant import FAB_CONFIG_FILE, SubStatus
+from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat, SubStatus
 from flwr.common.date import format_timedelta, isoformat8601_utc
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
-from flwr.common.logger import log
+from flwr.common.logger import log, redirect_output, remove_emojis, restore_output
 from flwr.common.serde import run_from_proto
 from flwr.common.typing import Run
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
@@ -44,8 +47,10 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.exec_pb2_grpc import ExecStub
 
+_RunListType = tuple[int, str, str, str, str, str, str, str, str]
 
-def ls(
+
+def ls(  # pylint: disable=too-many-locals, too-many-branches
     app: Annotated[
         Path,
         typer.Argument(help="Path of the Flower project"),
@@ -68,9 +73,22 @@ def ls(
             help="Specific run ID to display",
         ),
     ] = None,
+    output_format: Annotated[
+        str,
+        typer.Option(
+            "--format",
+            case_sensitive=False,
+            help="Format output using 'default' view or 'json'",
+        ),
+    ] = CliOutputFormat.DEFAULT,
 ) -> None:
     """List runs."""
+    suppress_output = output_format == CliOutputFormat.JSON
+    captured_output = io.StringIO()
     try:
+        if suppress_output:
+            redirect_output(captured_output)
+
         # Load and validate federation config
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
@@ -102,11 +120,13 @@ def ls(
             # Display information about a specific run ID
             if run_id is not None:
                 typer.echo(f"🔍 Displaying information for run ID {run_id}...")
-                _display_one_run(stub, run_id)
+                restore_output()
+                _display_one_run(stub, run_id, output_format)
             # By default, list all runs
             else:
                 typer.echo("📄 Listing all runs...")
-                _list_runs(stub)
+                restore_output()
+                _list_runs(stub, output_format)
 
         except ValueError as err:
             typer.secho(
@@ -117,9 +137,21 @@ def ls(
             raise typer.Exit(code=1) from err
         finally:
             channel.close()
-    # pylint: disable=broad-except, unused-variable
-    except (typer.Exit, Exception):
-        _print_json_error()
+    except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
+        if suppress_output:
+            restore_output()
+            e_message = captured_output.getvalue()
+            _print_json_error(e_message, err)
+        else:
+            typer.secho(
+                f"{err}",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+    finally:
+        if suppress_output:
+            restore_output()
+        captured_output.close()
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
@@ -143,25 +175,13 @@ def _init_channel(app: Path, federation_config: dict[str, Any]) -> grpc.Channel:
     return channel
 
 
-def _format_runs(run_dict: dict[int, Run], now_isoformat: str) -> list[tuple[str, ...]]:
+def _format_runs(run_dict: dict[int, Run], now_isoformat: str) -> list[_RunListType]:
     """Format runs to a list."""
-    table = Table(header_style="bold cyan", show_lines=True)
 
     def _format_datetime(dt: Optional[datetime]) -> str:
         return isoformat8601_utc(dt).replace("T", " ") if dt else "N/A"
 
-    run_list: list[tuple[str, ...]] = []
-
-    # Add columns
-    table.add_column(
-        Text("Run ID", justify="center"), style="bright_white", overflow="fold"
-    )
-    table.add_column(Text("FAB", justify="center"), style="dim white")
-    table.add_column(Text("Status", justify="center"))
-    table.add_column(Text("Elapsed", justify="center"), style="blue")
-    table.add_column(Text("Created At", justify="center"), style="dim white")
-    table.add_column(Text("Running At", justify="center"), style="dim white")
-    table.add_column(Text("Finished At", justify="center"), style="dim white")
+    run_list: list[_RunListType] = []
 
     # Add rows
     for run in sorted(
@@ -172,15 +192,6 @@ def _format_runs(run_dict: dict[int, Run], now_isoformat: str) -> list[tuple[str
             status_text = run.status.status
         else:
             status_text = f"{run.status.status}:{run.status.sub_status}"
-
-        # Style the status based on its value
-        sub_status = run.status.sub_status
-        if sub_status == SubStatus.COMPLETED:
-            status_style = "green"
-        elif sub_status == SubStatus.FAILED:
-            status_style = "red"
-        else:
-            status_style = "yellow"
 
         # Convert isoformat to datetime
         pending_at = datetime.fromisoformat(run.pending_at) if run.pending_at else None
@@ -200,11 +211,11 @@ def _format_runs(run_dict: dict[int, Run], now_isoformat: str) -> list[tuple[str
 
         run_list.append(
             (
-                f"{run.run_id}",
-                f"{run.fab_id}",
-                f"{run.fab_version}",
-                f"{run.fab_hash}",
-                f"[{status_style}]{status_text}[/{status_style}]",
+                run.run_id,
+                run.fab_id,
+                run.fab_version,
+                run.fab_hash,
+                status_text,
                 format_timedelta(elapsed_time),
                 _format_datetime(pending_at),
                 _format_datetime(running_at),
@@ -214,7 +225,7 @@ def _format_runs(run_dict: dict[int, Run], now_isoformat: str) -> list[tuple[str
     return run_list
 
 
-def _to_table(run_list: list[tuple[str, ...]]) -> Table:
+def _to_table(run_list: list[_RunListType]) -> Table:
     """Format the provided run list to a rich Table."""
     table = Table(header_style="bold cyan", show_lines=True)
 
@@ -241,10 +252,19 @@ def _to_table(run_list: list[tuple[str, ...]]) -> Table:
             running_at,
             finished_at,
         ) = row
+        # Style the status based on its value
+        sub_status = status_text.rsplit(":", maxsplit=1)[-1]
+        if sub_status == SubStatus.COMPLETED:
+            status_style = "green"
+        elif sub_status == SubStatus.FAILED:
+            status_style = "red"
+        else:
+            status_style = "yellow"
+
         formatted_row = (
             f"[bold]{run_id}[/bold]",
             f"{fab_id} (v{fab_version})",
-            status_text,
+            f"[{status_style}]{status_text}[/{status_style}]",
             elapsed,
             created_at,
             running_at,
@@ -255,19 +275,58 @@ def _to_table(run_list: list[tuple[str, ...]]) -> Table:
     return table
 
 
+def _to_json(run_list: list[_RunListType]) -> str:
+    """Format run status list to a JSON formatted string."""
+    runs_list = []
+    for row in run_list:
+        (
+            run_id,
+            fab_id,
+            fab_version,
+            fab_hash,
+            status_text,
+            elapsed,
+            created_at,
+            running_at,
+            finished_at,
+        ) = row
+        runs_list.append(
+            {
+                "run-id": run_id,
+                "fab-id": fab_id,
+                "fab-name": fab_id.split("/")[-1],
+                "fab-version": fab_version,
+                "fab-hash": fab_hash[:8],
+                "status": status_text,
+                "elapsed": elapsed,
+                "created-at": created_at,
+                "running-at": running_at,
+                "finished-at": finished_at,
+            }
+        )
+
+    return json.dumps({"runs": runs_list})
+
+
 def _list_runs(
     stub: ExecStub,
+    output_format: str = CliOutputFormat.DEFAULT,
 ) -> None:
     """List all runs."""
     res: ListRunsResponse = stub.ListRuns(ListRunsRequest())
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
-    Console().print(_to_table(_format_runs(run_dict, res.now)))
+    formatted_runs = _format_runs(run_dict, res.now)
+    if output_format == CliOutputFormat.JSON:
+        Console().print_json(_to_json(formatted_runs))
+    else:
+        Console().print(_to_table(formatted_runs))
 
 
 def _display_one_run(
     stub: ExecStub,
     run_id: int,
+    output_format: str = CliOutputFormat.DEFAULT,
 ) -> None:
     """Display information about a specific run."""
     res: ListRunsResponse = stub.ListRuns(ListRunsRequest(run_id=run_id))
@@ -276,8 +335,20 @@ def _display_one_run(
 
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
-    Console().print(_to_table(_format_runs(run_dict, res.now)))
+    formatted_runs = _format_runs(run_dict, res.now)
+    if output_format == CliOutputFormat.JSON:
+        Console().print_json(_to_json(formatted_runs))
+    else:
+        Console().print(_to_table(formatted_runs))
 
 
-def _print_json_error() -> None:
+def _print_json_error(msg: str, e: Union[Exit, Exception]) -> None:
     """Print error message as JSON."""
+    Console().print_json(
+        json.dumps(
+            {
+                "success": False,
+                "error-message": remove_emojis(str(msg) + "\n" + str(e)),
+            }
+        )
+    )
