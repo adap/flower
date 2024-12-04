@@ -29,15 +29,15 @@ class ExecStub(object):
                 request_serializer=flwr_dot_proto_dot_exec__pb2.ListRunsRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_exec__pb2.ListRunsResponse.FromString,
                 )
-        self.Login = channel.unary_unary(
-                '/flwr.proto.Exec/Login',
-                request_serializer=flwr_dot_proto_dot_exec__pb2.LoginRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_exec__pb2.LoginResponse.FromString,
+        self.GetLoginDetails = channel.unary_unary(
+                '/flwr.proto.Exec/GetLoginDetails',
+                request_serializer=flwr_dot_proto_dot_exec__pb2.GetLoginDetailsRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_exec__pb2.GetLoginDetailsResponse.FromString,
                 )
-        self.GetAuthToken = channel.unary_unary(
-                '/flwr.proto.Exec/GetAuthToken',
-                request_serializer=flwr_dot_proto_dot_exec__pb2.GetAuthTokenRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_exec__pb2.GetAuthTokenResponse.FromString,
+        self.GetAuthTokens = channel.unary_unary(
+                '/flwr.proto.Exec/GetAuthTokens',
+                request_serializer=flwr_dot_proto_dot_exec__pb2.GetAuthTokensRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_exec__pb2.GetAuthTokensResponse.FromString,
                 )
 
 
@@ -65,14 +65,14 @@ class ExecServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def Login(self, request, context):
+    def GetLoginDetails(self, request, context):
         """Start login upon request
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def GetAuthToken(self, request, context):
+    def GetAuthTokens(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -96,15 +96,15 @@ def add_ExecServicer_to_server(servicer, server):
                     request_deserializer=flwr_dot_proto_dot_exec__pb2.ListRunsRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_exec__pb2.ListRunsResponse.SerializeToString,
             ),
-            'Login': grpc.unary_unary_rpc_method_handler(
-                    servicer.Login,
-                    request_deserializer=flwr_dot_proto_dot_exec__pb2.LoginRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_exec__pb2.LoginResponse.SerializeToString,
+            'GetLoginDetails': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetLoginDetails,
+                    request_deserializer=flwr_dot_proto_dot_exec__pb2.GetLoginDetailsRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_exec__pb2.GetLoginDetailsResponse.SerializeToString,
             ),
-            'GetAuthToken': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetAuthToken,
-                    request_deserializer=flwr_dot_proto_dot_exec__pb2.GetAuthTokenRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_exec__pb2.GetAuthTokenResponse.SerializeToString,
+            'GetAuthTokens': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetAuthTokens,
+                    request_deserializer=flwr_dot_proto_dot_exec__pb2.GetAuthTokensRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_exec__pb2.GetAuthTokensResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -168,7 +168,7 @@ class Exec(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def Login(request,
+    def GetLoginDetails(request,
             target,
             options=(),
             channel_credentials=None,
@@ -178,14 +178,14 @@ class Exec(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Exec/Login',
-            flwr_dot_proto_dot_exec__pb2.LoginRequest.SerializeToString,
-            flwr_dot_proto_dot_exec__pb2.LoginResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Exec/GetLoginDetails',
+            flwr_dot_proto_dot_exec__pb2.GetLoginDetailsRequest.SerializeToString,
+            flwr_dot_proto_dot_exec__pb2.GetLoginDetailsResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def GetAuthToken(request,
+    def GetAuthTokens(request,
             target,
             options=(),
             channel_credentials=None,
@@ -195,8 +195,8 @@ class Exec(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Exec/GetAuthToken',
-            flwr_dot_proto_dot_exec__pb2.GetAuthTokenRequest.SerializeToString,
-            flwr_dot_proto_dot_exec__pb2.GetAuthTokenResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Exec/GetAuthTokens',
+            flwr_dot_proto_dot_exec__pb2.GetAuthTokensRequest.SerializeToString,
+            flwr_dot_proto_dot_exec__pb2.GetAuthTokensResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
