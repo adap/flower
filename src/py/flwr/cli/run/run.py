@@ -23,7 +23,6 @@ from typing import Annotated, Any, Optional, Union
 
 import typer
 from rich.console import Console
-from typer import Exit
 
 from flwr.cli.build import build
 from flwr.cli.config_utils import (
@@ -120,8 +119,7 @@ def run(
             )
         else:
             _run_without_exec_api(app, federation_config, config_overrides, federation)
-    # pylint: disable=broad-except
-    except (typer.Exit, Exception) as err:
+    except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
         if suppress_output:
             restore_output()
             e_message = captured_output.getvalue()
@@ -253,12 +251,12 @@ def _run_without_exec_api(
     )
 
 
-def _print_json_error(msg: str, e: Union[Exit, SystemExit, Exception]) -> None:
+def _print_json_error(msg: str, e: Union[typer.Exit, Exception]) -> None:
     """Print error message as JSON."""
     Console().print_json(
         json.dumps(
             {
-                "success": "false",
+                "success": False,
                 "error-message": remove_emojis(str(msg) + "\n" + str(e)),
             }
         )
