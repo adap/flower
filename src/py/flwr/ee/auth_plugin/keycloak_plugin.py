@@ -18,12 +18,11 @@ import json
 import time
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Optional, Union, cast
+from typing import Any, Union, cast
 
 import grpc
 import typer
 from requests import post
-from tomli_w import dump
 
 from flwr.common.auth_plugin import CliAuthPlugin, ExecAuthPlugin
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
@@ -168,10 +167,10 @@ class KeycloakExecPlugin(ExecAuthPlugin):
 class KeycloakCliPlugin(CliAuthPlugin):
     """Flower Keycloak Auth Plugin for CLI."""
 
-    def __init__(self, config: dict[str, Any], config_path: Path):
-        self.access_token_bytes = cast(str, config[ACCESS_TOKEN]).encode("utf-8")
-        self.refresh_token_bytes = cast(str, config[REFRESH_TOKEN]).encode("utf-8")
-        self.config = config
+    def __init__(self, config_path: Path):
+        self.access_token = ""
+        self.refresh_token = ""
+        self.config: dict[str, Any] = {}
         self.config_path = config_path
 
     @staticmethod
@@ -240,14 +239,14 @@ class KeycloakCliPlugin(CliAuthPlugin):
     ) -> Sequence[tuple[str, Union[str, bytes]]]:
         """Write relevant auth tokens to the provided metadata."""
         return list(metadata) + [
-            (ACCESS_TOKEN, self.access_token_bytes),
-            (REFRESH_TOKEN, self.refresh_token_bytes),
+            (ACCESS_TOKEN, self.access_token.encode("utf-8")),
+            (REFRESH_TOKEN, self.refresh_token.encode("utf-8")),
         ]
 
     def store_tokens(self, config: dict[str, Any]) -> None:
         """Store the tokens from the provided config.
 
-        The tokens will be stored in the .credentials/ folder inside the Flower
+        The tokens will be stored in the `.credentials/` folder inside the Flower
         directory.
         """
         self.config[ACCESS_TOKEN] = config.get(ACCESS_TOKEN, "")
@@ -255,3 +254,15 @@ class KeycloakCliPlugin(CliAuthPlugin):
 
         with open(self.config_path, "w") as config_file:
             json.dump(self.config, config_file, indent=4)
+
+    def load_tokens(self) -> None:
+        """Load the tokens for this plugin.
+
+        The tokens will be loaded from the `.credentials/` folder inside the Flower
+        directory.
+        """
+        with open(self.config_path, "r") as config_file:
+            self.config = json.load(config_file)
+
+        self.access_token = cast(str, self.config[ACCESS_TOKEN])
+        self.refresh_token = cast(str, self.config[REFRESH_TOKEN])
