@@ -14,10 +14,11 @@
 # ==============================================================================
 """Flower User Auth Plugin for Keycloak."""
 
+import json
 import time
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Union
+from typing import Any, Optional, Union, cast
 
 import grpc
 import typer
@@ -50,28 +51,18 @@ from .constant import (
 )
 
 
-def _get_value_from_tuples(
-    key_string: str, tuples: Sequence[tuple[str, Union[str, bytes]]]
-) -> bytes:
-    value = next((value for key, value in tuples if key == key_string), "")
-    if isinstance(value, str):
-        return value.encode()
-
-    return value
-
-
 class KeycloakExecPlugin(ExecAuthPlugin):
     """Flower Keycloak Auth Plugin for ExecServicer."""
 
     def __init__(self, config: dict[str, Any]):
-        self.auth_url = config.get(AUTH_URL, "")
-        self.token_url = config.get(TOKEN_URL, "")
-        self.keycloak_client_id = config.get(CLIENT_ID, "")
-        self.keycloak_client_secret = config.get(CLIENT_SECRET, "")
-        self.validate_url = config.get(VALIDATE_URL, "")
+        self.auth_url: str = config.get(AUTH_URL, "")
+        self.token_url: str = config.get(TOKEN_URL, "")
+        self.keycloak_client_id: str = config.get(CLIENT_ID, "")
+        self.keycloak_client_secret: str = config.get(CLIENT_SECRET, "")
+        self.validate_url: str = config.get(VALIDATE_URL, "")
 
     def get_login_details(self) -> GetLoginDetailsResponse:
-        """Send relevant auth url as a GetLoginDetailsResponse."""
+        """Get the GetLoginDetailsResponse containing the login details."""
         payload = {
             CLIENT_ID: self.keycloak_client_id,
             CLIENT_SECRET: self.keycloak_client_secret,
@@ -81,32 +72,32 @@ class KeycloakExecPlugin(ExecAuthPlugin):
 
         response = post(self.auth_url, data=payload, headers=headers, timeout=10)
         if response.status_code == 200:
-            data = response.json()
-            device_code = data.get(DEVICE_CODE)
-            verification_uri_complete = data.get(VERIFICATION_URI_COMPLETE)
-            expires_in = data.get(EXPIRES_IN)
-            interval = data.get(INTERVAL)
+            data: dict[str, Any] = response.json()
+            device_code: str = data[DEVICE_CODE]
+            verification_uri_complete: str = data[VERIFICATION_URI_COMPLETE]
+            expires_in: str = data[EXPIRES_IN]
+            interval: str = data[INTERVAL]
             login_details = {
                 AUTH_TYPE: "keycloak",
-                DEVICE_CODE: str(device_code),
-                VERIFICATION_URI_COMPLETE: str(verification_uri_complete),
-                EXPIRES_IN: str(expires_in),
-                INTERVAL: str(interval),
+                DEVICE_CODE: device_code,
+                VERIFICATION_URI_COMPLETE: verification_uri_complete,
+                EXPIRES_IN: expires_in,
+                INTERVAL: interval,
             }
             return GetLoginDetailsResponse(login_details=login_details)
 
         return GetLoginDetailsResponse(login_details={})
 
-    def validate_token_in_metadata(
+    def validate_tokens_in_metadata(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
     ) -> bool:
-        """Authenticate auth tokens in the provided metadata."""
-        access_token = _get_value_from_tuples(ACCESS_TOKEN, metadata)
-
-        if not access_token:
+        """Validate the auth tokens in the provided metadata."""
+        metadata_dict = dict(metadata)
+        if ACCESS_TOKEN not in metadata_dict:
             return False
+        access_token_bytes: bytes = metadata_dict[ACCESS_TOKEN]
 
-        headers = {"Authorization": access_token.decode("utf-8")}
+        headers = {"Authorization": access_token_bytes.decode("utf-8")}
 
         response = post(self.validate_url, headers=headers, timeout=10)
         if response.status_code == 200:
@@ -114,7 +105,7 @@ class KeycloakExecPlugin(ExecAuthPlugin):
         return False
 
     def get_auth_tokens(self, request: GetAuthTokensRequest) -> GetAuthTokensResponse:
-        """Send relevant tokens as a GetAuthTokenResponse."""
+        """Get the relevant auth tokens."""
         device_code = request.auth_details.get(DEVICE_CODE)
         if device_code is None:
             return GetAuthTokensResponse(auth_tokens={})
@@ -130,9 +121,9 @@ class KeycloakExecPlugin(ExecAuthPlugin):
 
         response = post(self.token_url, data=payload, headers=headers, timeout=10)
         if response.status_code == 200:
-            data = response.json()
-            access_token = data.get(ACCESS_TOKEN)
-            refresh_token = data.get(REFRESH_TOKEN)
+            data: dict[str, Any] = response.json()
+            access_token: str = data[ACCESS_TOKEN]
+            refresh_token: str = data[REFRESH_TOKEN]
             auth_tokens = {
                 ACCESS_TOKEN: access_token,
                 REFRESH_TOKEN: refresh_token,
@@ -142,17 +133,17 @@ class KeycloakExecPlugin(ExecAuthPlugin):
         return GetAuthTokensResponse(auth_tokens={})
 
     def refresh_tokens(self, context: grpc.ServicerContext) -> bool:
-        """Refresh auth tokens in the provided metadata."""
-        metadata = context.invocation_metadata()
-        refresh_token = _get_value_from_tuples(REFRESH_TOKEN, metadata)
-        if not refresh_token:
+        """Refresh auth tokens in the metadata of the provided context."""
+        metadata_dict = dict(context.invocation_metadata())
+        if REFRESH_TOKEN not in metadata_dict:
             return False
+        refresh_token_bytes: bytes = metadata_dict[REFRESH_TOKEN]
 
         payload = {
             CLIENT_ID: self.keycloak_client_id,
             CLIENT_SECRET: self.keycloak_client_secret,
             GRANT_TYPE: REFRESH_TOKEN,
-            REFRESH_TOKEN: refresh_token.decode("utf-8"),
+            REFRESH_TOKEN: refresh_token_bytes.decode("utf-8"),
         }
 
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
@@ -160,22 +151,15 @@ class KeycloakExecPlugin(ExecAuthPlugin):
         response = post(self.token_url, data=payload, headers=headers, timeout=10)
         if response.status_code == 200:
 
-            data = response.json()
-            access_token = data.get(ACCESS_TOKEN)
-            refresh_token = data.get(REFRESH_TOKEN)
+            data: dict[str, Any] = response.json()
+            new_access_token: str = data[ACCESS_TOKEN]
+            new_refresh_token: str = data[REFRESH_TOKEN]
 
-            context.send_initial_metadata(
-                (
-                    (
-                        ACCESS_TOKEN,
-                        access_token,
-                    ),
-                    (
-                        REFRESH_TOKEN,
-                        refresh_token,
-                    ),
-                )
+            metadata_sent = (
+                (ACCESS_TOKEN, new_access_token),
+                (REFRESH_TOKEN, new_refresh_token),
             )
+            context.send_initial_metadata(metadata_sent)
             return True
 
         return False
@@ -185,8 +169,8 @@ class KeycloakCliPlugin(CliAuthPlugin):
     """Flower Keycloak Auth Plugin for CLI."""
 
     def __init__(self, config: dict[str, Any], config_path: Path):
-        self.access_token = config[ACCESS_TOKEN]
-        self.refresh_token = config[REFRESH_TOKEN]
+        self.access_token_bytes = cast(str, config[ACCESS_TOKEN]).encode("utf-8")
+        self.refresh_token_bytes = cast(str, config[REFRESH_TOKEN]).encode("utf-8")
         self.config = config
         self.config_path = config_path
 
@@ -253,34 +237,21 @@ class KeycloakCliPlugin(CliAuthPlugin):
 
     def write_tokens_to_metadata(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
-    ) -> None:
+    ) -> Sequence[tuple[str, Union[str, bytes]]]:
         """Write relevant auth tokens to the provided metadata."""
-        metadata.append(
-            (
-                ACCESS_TOKEN,
-                self.access_token.encode("utf-8"),
-            )
-        )
-        metadata.append(
-            (
-                REFRESH_TOKEN,
-                self.refresh_token.encode("utf-8"),
-            )
-        )
-        return metadata
+        return list(metadata) + [
+            (ACCESS_TOKEN, self.access_token_bytes),
+            (REFRESH_TOKEN, self.refresh_token_bytes),
+        ]
 
-    def store_refresh_tokens(
-        self, metadata: Sequence[tuple[str, Union[str, bytes]]]
-    ) -> None:
-        """Store refresh tokens from the provided metadata.
+    def store_tokens(self, config: dict[str, Any]) -> None:
+        """Store the tokens from the provided config.
 
         The tokens will be stored in the .credentials/ folder inside the Flower
         directory.
         """
-        access_token = _get_value_from_tuples(ACCESS_TOKEN, metadata).decode("utf-8")
-        refresh_token = _get_value_from_tuples(REFRESH_TOKEN, metadata).decode("utf-8")
-        self.config[ACCESS_TOKEN] = access_token
-        self.config[REFRESH_TOKEN] = refresh_token
+        self.config[ACCESS_TOKEN] = config.get(ACCESS_TOKEN, "")
+        self.config[REFRESH_TOKEN] = config.get(REFRESH_TOKEN, "")
 
-        with open(self.config_path, "wb") as config_file:
-            dump(self.config, config_file)
+        with open(self.config_path, "w") as config_file:
+            json.dump(self.config, config_file, indent=4)

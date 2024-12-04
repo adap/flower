@@ -14,6 +14,8 @@
 # ==============================================================================
 """Flower EE auth plugin constants."""
 
+
+# Constants for Keycloak plugins
 ACCESS_TOKEN = "access_token"
 REFRESH_TOKEN = "refresh_token"
 AUTH_URL = "auth_url"
