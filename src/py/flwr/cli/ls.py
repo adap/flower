@@ -305,7 +305,7 @@ def _to_json(run_list: list[_RunListType]) -> str:
             }
         )
 
-    return json.dumps({"runs": runs_list})
+    return json.dumps({"success": True, "runs": runs_list})
 
 
 def _list_runs(
