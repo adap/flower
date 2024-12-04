@@ -132,6 +132,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         self, request: StopRunRequest, context: grpc.ServicerContext
     ) -> StopRunResponse:
         """Stop a given run ID."""
+        log(INFO, "ExecServicer.StopRun")
         raise NotImplementedError()
 
 
