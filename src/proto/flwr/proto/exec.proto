@@ -32,10 +32,11 @@ service Exec {
   // flwr ls command
   rpc ListRuns(ListRunsRequest) returns (ListRunsResponse) {}
 
-  // Start login upon request
+  // Get login details upon request
   rpc GetLoginDetails(GetLoginDetailsRequest)
       returns (GetLoginDetailsResponse) {}
 
+  // Get auth tokens upon request
   rpc GetAuthTokens(GetAuthTokensRequest) returns (GetAuthTokensResponse) {}
 }
 
