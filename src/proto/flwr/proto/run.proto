@@ -68,9 +68,7 @@ message UpdateRunStatusRequest {
 message UpdateRunStatusResponse {}
 
 // GetRunStatus
-message GetRunStatusRequest {
-  uint64 run_id = 1;
-}
+message GetRunStatusRequest { uint64 run_id = 1; }
 message GetRunStatusResponse { RunStatus run_status = 1; }
 
 // Get Federation Options associated with run

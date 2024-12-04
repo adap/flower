@@ -56,8 +56,7 @@ service ServerAppIo {
       returns (UpdateRunStatusResponse) {}
 
   // Get the status of a given run
-  rpc GetRunStatus(GetRunStatusRequest)
-      returns (GetRunStatusResponse) {}
+  rpc GetRunStatus(GetRunStatusRequest) returns (GetRunStatusResponse) {}
 
   // Push ServerApp logs
   rpc PushLogs(PushLogsRequest) returns (PushLogsResponse) {}
