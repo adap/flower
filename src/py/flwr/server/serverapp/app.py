@@ -15,17 +15,18 @@
 """Flower ServerApp process."""
 
 import argparse
+import os
+import signal
 import sys
 import threading
 from logging import DEBUG, ERROR, INFO
 from pathlib import Path
 from queue import Queue
 from time import sleep
-from typing import Optional, Union
+from typing import Any, NoReturn, Optional
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
-from flwr.common import Context
 from flwr.common.args import add_args_flwr_app_common
 from flwr.common.config import (
     get_flwr_dir,
@@ -66,7 +67,6 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PushServerAppOutputsRequest,
 )
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
-from flwr.server.driver import Driver
 from flwr.server.driver.grpc_driver import GrpcDriver
 from flwr.server.run_serverapp import run as run_
 
@@ -123,38 +123,11 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
     flwr_dir_ = get_flwr_dir(flwr_dir)
     log_uploader = None
 
-    stop_thread = threading.Event()
-
-    # Store the result of `run_`
-    run_result: dict[str, Union[Context, Exception]] = {}
-
-    # Function to wrap `run_` execution
-    def _run_thread_function(
-        driver: Driver,
-        context: Context,
-        server_app_dir: str,
-        server_app_attr: Optional[str],
-    ) -> None:
-        """."""
-        try:
-            # Run the blocking `run_` function
-            updated_context = run_(
-                driver=driver,
-                server_app_dir=server_app_dir,
-                server_app_attr=server_app_attr,
-                context=context,
-            )
-            run_result["updated_context"] = updated_context
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            run_result["exception"] = e  # Save the exception
-        finally:
-            stop_thread.set()  # Signal completion to the main thread
-
     # Function to run in parallel for monitoring
-    def _check_stopped_run_thread_function(run_id: int, stub: ServerAppIoStub) -> None:
+    def _monitor_fn(run_id: int, stub: ServerAppIoStub) -> None:
         """."""
-        _check_stopped_run(run_id, stub)
-        stop_thread.set()  # Signal an interruption
+        if _is_run_stopped(run_id, stub):
+            os.kill(os.getpid(), signal.SIGINT)
 
     while True:
 
@@ -171,7 +144,8 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
             run = run_from_proto(res.run)
             fab = fab_from_proto(res.fab)
 
-            _check_stopped_run(run.run_id, driver._stub)
+            if _is_run_stopped(run.run_id, driver._stub):
+                raise RunStopException
             driver.set_run(run.run_id)
 
             # Start log uploader for this run
@@ -210,45 +184,35 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
 
             # Change status to Running
             run_status_proto = run_status_to_proto(RunStatus(Status.RUNNING, "", ""))
-            _check_stopped_run(run.run_id, driver._stub)
+            if _is_run_stopped(run.run_id, driver._stub):
+                raise RunStopException
             driver._stub.UpdateRunStatus(
                 UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
             )
-            run_thread = threading.Thread(
-                target=_run_thread_function,
-                args=(driver, context, app_path, server_app_attr),
-                daemon=True,
-            )
-            run_thread.start()
 
-            check_thread = threading.Thread(
-                target=_check_stopped_run_thread_function,
+            # Start monitoring thread
+            run_monitor_th = threading.Thread(
+                target=_monitor_fn,
                 args=(run.run_id, driver._stub),
                 daemon=True,
             )
-            check_thread.start()
+            run_monitor_th.start()
 
-            # Wait for either `run_` to complete or the interrupt event
-            while run_thread.is_alive():
-                if stop_thread.is_set():
-                    raise RunStopException("X")
-
-            if isinstance(run_result["updated_context"], Context):
-                updated_context = run_result["updated_context"]
-            # # Load and run the ServerApp with the Driver
-            # updated_context = run_(
-            #     driver=driver,
-            #     server_app_dir=app_path,
-            #     server_app_attr=server_app_attr,
-            #     context=context,
-            # )
+            # Load and run the ServerApp with the Driver
+            updated_context = run_(
+                driver=driver,
+                server_app_dir=app_path,
+                server_app_attr=server_app_attr,
+                context=context,
+            )
 
             # Send resulting context
             context_proto = context_to_proto(updated_context)
             out_req = PushServerAppOutputsRequest(
                 run_id=run.run_id, context=context_proto
             )
-            _check_stopped_run(run.run_id, driver._stub)
+            if _is_run_stopped(run.run_id, driver._stub):
+                raise RunStopException
             _ = driver._stub.PushServerAppOutputs(out_req)
 
             run_status = RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
@@ -281,6 +245,8 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
                     )
                 )
 
+            run_monitor_th.join()
+
         # Stop the loop if `flwr-serverapp` is expected to process a single run
         if run_once:
             break
@@ -308,13 +274,21 @@ def _parse_args_run_flwr_serverapp() -> argparse.ArgumentParser:
     return parser
 
 
-def _check_stopped_run(run_id: int, stub: ServerAppIoStub) -> None:
+def _is_run_stopped(run_id: int, stub: ServerAppIoStub) -> bool:
     """Check if the given run ID is stopped."""
     res: GetRunStatusResponse = stub.GetRunStatus(GetRunStatusRequest(run_id=run_id))
     run_status = run_status_from_proto(res.run_status)
-    if run_status == STOPPED_RUN_STATUS:
-        raise RunStopException(f"Run ID {run_id} is stopped.")
+    return run_status == STOPPED_RUN_STATUS
 
 
-class RunStopException(Exception):
+class RunStopException(BaseException):
     """Raised when a run is stopped."""
+
+
+def signal_handler(sig: Any, frame: Any) -> NoReturn:
+    """."""
+    raise RunStopException
+
+
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
