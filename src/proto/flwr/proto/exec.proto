@@ -33,7 +33,8 @@ service Exec {
   rpc ListRuns(ListRunsRequest) returns (ListRunsResponse) {}
 
   // Start login upon request
-  rpc GetLoginDetails(GetLoginDetailsRequest) returns (GetLoginDetailsResponse) {}
+  rpc GetLoginDetails(GetLoginDetailsRequest)
+      returns (GetLoginDetailsResponse) {}
 
   rpc GetAuthTokens(GetAuthTokensRequest) returns (GetAuthTokensResponse) {}
 }
