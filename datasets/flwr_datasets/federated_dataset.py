@@ -341,9 +341,8 @@ class FederatedDataset:
     def _check_partitioners_correctness(self) -> None:
         """Check if the partitioners are correctly specified.
 
-        Check if the multiple partitioner objects are not the same Python object, which
-        is not allowed, as the partitioner objects should be independent (one
-        partitioner per split).
+        Check if each partitioner is a different Python object. Using the same partitioner
+        for different splits is not allowed.
         """
         partitioners_keys = list(self._partitioners.keys())
         for i, first_split in enumerate(partitioners_keys):
