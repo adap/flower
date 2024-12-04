@@ -22,6 +22,7 @@ import typer
 
 from flwr.cli.config_utils import (
     load_and_validate,
+    validate_certificate_in_federation_config,
     validate_federation_in_project_config,
     validate_project_config,
 )
@@ -97,38 +98,13 @@ def login(  # pylint: disable=R0914
 
 
 def _create_exec_stub(app: Path, federation_config: dict[str, Any]) -> ExecStub:
-    insecure_str = federation_config.get("insecure")
-    if root_certificates := federation_config.get("root-certificates"):
-        root_certificates_bytes = (app / root_certificates).read_bytes()
-        if insecure := bool(insecure_str):
-            typer.secho(
-                "❌ `root_certificates` were provided but the `insecure` parameter"
-                "is set to `True`.",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-            raise typer.Exit(code=1)
-    else:
-        root_certificates_bytes = None
-        if insecure_str is None:
-            typer.secho(
-                "❌ To disable TLS, set `insecure = true` in `pyproject.toml`.",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-            raise typer.Exit(code=1)
-        if not (insecure := bool(insecure_str)):
-            typer.secho(
-                "❌ No certificate were given yet `insecure` is set to `False`.",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-            raise typer.Exit(code=1)
-
+    insecure, root_certificates = validate_certificate_in_federation_config(
+        app, federation_config
+    )
     channel = create_channel(
         server_address=federation_config["address"],
         insecure=insecure,
-        root_certificates=root_certificates_bytes,
+        root_certificates=root_certificates,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
         interceptors=None,
     )
