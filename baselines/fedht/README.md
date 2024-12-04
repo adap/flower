@@ -92,11 +92,12 @@ python -m fedht.main --config-name base_mnist agg=fedht iterht=True num_keep=500
 
 ### Simulation II (`num_keep` = 200)
 ```
-python -m fedht.main --config-name base_simII agg=fedavg num_local_epochs=2 learning_rate=0.00001
-python -m fedht.main --config-name base_simII agg=fedht num_local_epochs=2 learning_rate=0.00001
-python -m fedht.main --config-name base_simII agg=fedht iterht=True num_local_epochs=2 learning_rate=0.00001
+python -m fedht.main --config-name base_simII agg=fedavg num_local_epochs=2 learning_rate=0.0001
+python -m fedht.main --config-name base_simII agg=fedht num_local_epochs=2 learning_rate=0.0001
+python -m fedht.main --config-name base_simII agg=fedht iterht=True num_local_epochs=2 learning_rate=0.0001
 ```
 
 | *Experiments: Comparison of Aggregation Approaches to Fed-HT for Simulation II* |
 |:--:| 
-| ![loss_results_simII.png](_static/loss_results_simII.png) | 
+| ![loss_results_simII.png](_static/loss_results_simII_centralized.png) | 
+| ![loss_results_simII.png](_static/loss_results_simII_distributed.png) |
