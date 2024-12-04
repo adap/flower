@@ -99,8 +99,8 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
     how-to-use-differential-privacy
     how-to-authenticate-supernodes
     how-to-implement-fedbn
-    docker/index
     how-to-run-flower-on-azure
+    docker/index
     how-to-upgrade-to-flower-1.0
     how-to-upgrade-to-flower-1.13
 
