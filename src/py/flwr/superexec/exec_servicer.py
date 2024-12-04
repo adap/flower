@@ -23,13 +23,14 @@ from typing import Any
 import grpc
 
 from flwr.common import now
-from flwr.common.constant import LOG_STREAM_INTERVAL, STOPPED_RUN_STATUS, Status
+from flwr.common.constant import LOG_STREAM_INTERVAL, Status, SubStatus
 from flwr.common.logger import log
 from flwr.common.serde import (
     configs_record_from_proto,
     run_to_proto,
     user_config_from_proto,
 )
+from flwr.common.typing import RunStatus
 from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     ListRunsRequest,
@@ -147,7 +148,8 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
         return StopRunResponse(
             success=state.update_run_status(
-                run_id=request.run_id, new_status=STOPPED_RUN_STATUS
+                run_id=request.run_id,
+                new_status=RunStatus(Status.FINISHED, SubStatus.STOPPED, ""),
             )
         )
 

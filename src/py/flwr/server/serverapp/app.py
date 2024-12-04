@@ -36,7 +36,6 @@ from flwr.common.config import (
 )
 from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
-    STOPPED_RUN_STATUS,
     Status,
     SubStatus,
 )
@@ -138,9 +137,15 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=too-many-sta
             run = run_from_proto(res.run)
             fab = fab_from_proto(res.fab)
 
-            # _kill_if_stop(run.run_id, driver._stub)
-            if _is_run_stopped(run.run_id, driver._stub):
-                raise RunStopException
+            stop_event = threading.Event()
+            # Start monitoring thread
+            run_monitor_th = threading.Thread(
+                target=_monitor_fn,
+                args=(run.run_id, driver._stub, stop_event),
+                daemon=True,
+            )
+            run_monitor_th.start()
+
             driver.set_run(run.run_id)
 
             # Start log uploader for this run
@@ -179,18 +184,9 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=too-many-sta
 
             # Change status to Running
             run_status_proto = run_status_to_proto(RunStatus(Status.RUNNING, "", ""))
-            if _is_run_stopped(run.run_id, driver._stub):
-                raise RunStopException
             driver._stub.UpdateRunStatus(
                 UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
             )
-
-            # Start monitoring thread
-            run_monitor_th = threading.Thread(
-                target=_monitor_fn,
-                args=(run.run_id, driver._stub),
-            )
-            run_monitor_th.start()
 
             # Load and run the ServerApp with the Driver
             updated_context = run_(
@@ -205,20 +201,20 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=too-many-sta
             out_req = PushServerAppOutputsRequest(
                 run_id=run.run_id, context=context_proto
             )
-            # _kill_if_stop(run.run_id, driver._stub)
-            if _is_run_stopped(run.run_id, driver._stub):
-                raise RunStopException
             _ = driver._stub.PushServerAppOutputs(out_req)
 
             run_status = RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
+            stop_event.set()
 
         except RunStopException:
             exc_entity = "ServerApp"
-            log(INFO, "%s stopped from user-issued command", exc_entity)
+            log(
+                INFO,
+                "%s stopped from user-issued command for run_id %s",
+                exc_entity,
+                run.run_id,
+            )
             run_status = None
-            # if run_once:
-            #     break
-            # continue
 
         except Exception as ex:  # pylint: disable=broad-exception-caught
             exc_entity = "ServerApp"
@@ -240,13 +236,9 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=too-many-sta
                     )
                 )
 
-            run_monitor_th.join()
-
         # Stop the loop if `flwr-serverapp` is expected to process a single run
         if run_once:
             break
-
-        sleep(3)
 
 
 def _parse_args_run_flwr_serverapp() -> argparse.ArgumentParser:
@@ -271,26 +263,20 @@ def _parse_args_run_flwr_serverapp() -> argparse.ArgumentParser:
     return parser
 
 
-def _is_run_stopped(run_id: int, stub: ServerAppIoStub) -> bool:
-    """Check if the given run ID is stopped."""
-    res: GetRunStatusResponse = stub.GetRunStatus(GetRunStatusRequest(run_id=run_id))
-    run_status = run_status_from_proto(res.run_status)
-    return run_status == STOPPED_RUN_STATUS
-
-
-def _kill_if_stop(run_id: int, stub: ServerAppIoStub) -> None:
+def _monitor_fn(
+    run_id: int, stub: ServerAppIoStub, stop_event: threading.Event
+) -> None:
     """."""
-    if _is_run_stopped(run_id, stub):
-        os.kill(os.getpid(), signal.SIGINT)
+    req = GetRunStatusRequest(run_id=run_id)
 
-
-def _monitor_fn(run_id: int, stub: ServerAppIoStub) -> None:
-    """."""
-    while True:
-        try:
-            _kill_if_stop(run_id, stub)
-        except RunStopException:
-            print("RunStopException caught in monitor_fn")
+    while not stop_event.is_set():
+        res: GetRunStatusResponse = stub.GetRunStatus(req)
+        run_status = run_status_from_proto(res.run_status)
+        is_stopped = (run_status.status == Status.FINISHED) & (
+            run_status.sub_status == SubStatus.STOPPED
+        )
+        if is_stopped:
+            os.kill(os.getpid(), signal.SIGINT)
             break
         sleep(3)
 

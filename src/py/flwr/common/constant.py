@@ -194,7 +194,3 @@ class CliOutputFormat:
     def __new__(cls) -> CliOutputFormat:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
-
-
-# Stopped run status
-STOPPED_RUN_STATUS = RunStatus(Status.FINISHED, SubStatus.STOPPED, "")
