@@ -142,7 +142,11 @@ def _run_with_exec_api(
     )
     res = stub.StartRun(req)
 
-    typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
+    if res.HasField("run_id"):
+        typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
+    else:
+        typer.secho("❌ Failed to start run", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
 
     if stream:
         start_stream(res.run_id, channel, CONN_REFRESH_PERIOD)
