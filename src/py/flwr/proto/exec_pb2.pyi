@@ -132,3 +132,30 @@ class ListRunsResponse(google.protobuf.message.Message):
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["now",b"now","run_dict",b"run_dict"]) -> None: ...
 global___ListRunsResponse = ListRunsResponse
+
+class StopRunRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    RUN_ID_FIELD_NUMBER: builtins.int
+    FAB_FIELD_NUMBER: builtins.int
+    run_id: builtins.int
+    @property
+    def fab(self) -> flwr.proto.fab_pb2.Fab: ...
+    def __init__(self,
+        *,
+        run_id: builtins.int = ...,
+        fab: typing.Optional[flwr.proto.fab_pb2.Fab] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["fab",b"fab"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["fab",b"fab","run_id",b"run_id"]) -> None: ...
+global___StopRunRequest = StopRunRequest
+
+class StopRunResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    SUCCESS_FIELD_NUMBER: builtins.int
+    success: builtins.bool
+    def __init__(self,
+        *,
+        success: builtins.bool = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["success",b"success"]) -> None: ...
+global___StopRunResponse = StopRunResponse

@@ -19,11 +19,6 @@ class ControlStub(object):
                 request_serializer=flwr_dot_proto_dot_run__pb2.CreateRunRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_run__pb2.CreateRunResponse.FromString,
                 )
-        self.GetRunStatus = channel.unary_unary(
-                '/flwr.proto.Control/GetRunStatus',
-                request_serializer=flwr_dot_proto_dot_run__pb2.GetRunStatusRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_run__pb2.GetRunStatusResponse.FromString,
-                )
         self.UpdateRunStatus = channel.unary_unary(
                 '/flwr.proto.Control/UpdateRunStatus',
                 request_serializer=flwr_dot_proto_dot_run__pb2.UpdateRunStatusRequest.SerializeToString,
@@ -36,13 +31,6 @@ class ControlServicer(object):
 
     def CreateRun(self, request, context):
         """Request to create a new run
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def GetRunStatus(self, request, context):
-        """Get the status of a given run
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -62,11 +50,6 @@ def add_ControlServicer_to_server(servicer, server):
                     servicer.CreateRun,
                     request_deserializer=flwr_dot_proto_dot_run__pb2.CreateRunRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_run__pb2.CreateRunResponse.SerializeToString,
-            ),
-            'GetRunStatus': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetRunStatus,
-                    request_deserializer=flwr_dot_proto_dot_run__pb2.GetRunStatusRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_run__pb2.GetRunStatusResponse.SerializeToString,
             ),
             'UpdateRunStatus': grpc.unary_unary_rpc_method_handler(
                     servicer.UpdateRunStatus,
@@ -97,23 +80,6 @@ class Control(object):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.Control/CreateRun',
             flwr_dot_proto_dot_run__pb2.CreateRunRequest.SerializeToString,
             flwr_dot_proto_dot_run__pb2.CreateRunResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def GetRunStatus(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Control/GetRunStatus',
-            flwr_dot_proto_dot_run__pb2.GetRunStatusRequest.SerializeToString,
-            flwr_dot_proto_dot_run__pb2.GetRunStatusResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 

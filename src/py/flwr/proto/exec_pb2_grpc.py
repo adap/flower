@@ -19,6 +19,11 @@ class ExecStub(object):
                 request_serializer=flwr_dot_proto_dot_exec__pb2.StartRunRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_exec__pb2.StartRunResponse.FromString,
                 )
+        self.StopRun = channel.unary_unary(
+                '/flwr.proto.Exec/StopRun',
+                request_serializer=flwr_dot_proto_dot_exec__pb2.StopRunRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_exec__pb2.StopRunResponse.FromString,
+                )
         self.StreamLogs = channel.unary_stream(
                 '/flwr.proto.Exec/StreamLogs',
                 request_serializer=flwr_dot_proto_dot_exec__pb2.StreamLogsRequest.SerializeToString,
@@ -36,6 +41,13 @@ class ExecServicer(object):
 
     def StartRun(self, request, context):
         """Start run upon request
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def StopRun(self, request, context):
+        """Stop run upon request
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -62,6 +74,11 @@ def add_ExecServicer_to_server(servicer, server):
                     servicer.StartRun,
                     request_deserializer=flwr_dot_proto_dot_exec__pb2.StartRunRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_exec__pb2.StartRunResponse.SerializeToString,
+            ),
+            'StopRun': grpc.unary_unary_rpc_method_handler(
+                    servicer.StopRun,
+                    request_deserializer=flwr_dot_proto_dot_exec__pb2.StopRunRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_exec__pb2.StopRunResponse.SerializeToString,
             ),
             'StreamLogs': grpc.unary_stream_rpc_method_handler(
                     servicer.StreamLogs,
@@ -97,6 +114,23 @@ class Exec(object):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.Exec/StartRun',
             flwr_dot_proto_dot_exec__pb2.StartRunRequest.SerializeToString,
             flwr_dot_proto_dot_exec__pb2.StartRunResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def StopRun(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Exec/StopRun',
+            flwr_dot_proto_dot_exec__pb2.StopRunRequest.SerializeToString,
+            flwr_dot_proto_dot_exec__pb2.StopRunResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
