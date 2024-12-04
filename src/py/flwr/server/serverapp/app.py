@@ -106,7 +106,7 @@ def flwr_serverapp() -> None:
     restore_output()
 
 
-def run_serverapp(  # pylint: disable=R0914, disable=W0212
+def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=too-many-statements
     serverappio_api_address: str,
     log_queue: Queue[Optional[str]],
     run_once: bool,
@@ -123,12 +123,6 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
     flwr_dir_ = get_flwr_dir(flwr_dir)
     log_uploader = None
 
-    # Function to run in parallel for monitoring
-    def _monitor_fn(run_id: int, stub: ServerAppIoStub) -> None:
-        """."""
-        if _is_run_stopped(run_id, stub):
-            os.kill(os.getpid(), signal.SIGINT)
-
     while True:
 
         try:
@@ -144,6 +138,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
             run = run_from_proto(res.run)
             fab = fab_from_proto(res.fab)
 
+            # _kill_if_stop(run.run_id, driver._stub)
             if _is_run_stopped(run.run_id, driver._stub):
                 raise RunStopException
             driver.set_run(run.run_id)
@@ -194,7 +189,6 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
             run_monitor_th = threading.Thread(
                 target=_monitor_fn,
                 args=(run.run_id, driver._stub),
-                daemon=True,
             )
             run_monitor_th.start()
 
@@ -211,19 +205,20 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
             out_req = PushServerAppOutputsRequest(
                 run_id=run.run_id, context=context_proto
             )
+            # _kill_if_stop(run.run_id, driver._stub)
             if _is_run_stopped(run.run_id, driver._stub):
                 raise RunStopException
             _ = driver._stub.PushServerAppOutputs(out_req)
 
             run_status = RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
 
-        except RunStopException as ex:
+        except RunStopException:
             exc_entity = "ServerApp"
-            log(DEBUG, "%s stopped from user-issued command", exc_entity, exc_info=ex)
+            log(INFO, "%s stopped from user-issued command", exc_entity)
             run_status = None
-            if run_once:
-                break
-            continue
+            # if run_once:
+            #     break
+            # continue
 
         except Exception as ex:  # pylint: disable=broad-exception-caught
             exc_entity = "ServerApp"
@@ -250,6 +245,8 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
         # Stop the loop if `flwr-serverapp` is expected to process a single run
         if run_once:
             break
+
+        sleep(3)
 
 
 def _parse_args_run_flwr_serverapp() -> argparse.ArgumentParser:
@@ -279,6 +276,23 @@ def _is_run_stopped(run_id: int, stub: ServerAppIoStub) -> bool:
     res: GetRunStatusResponse = stub.GetRunStatus(GetRunStatusRequest(run_id=run_id))
     run_status = run_status_from_proto(res.run_status)
     return run_status == STOPPED_RUN_STATUS
+
+
+def _kill_if_stop(run_id: int, stub: ServerAppIoStub) -> None:
+    """."""
+    if _is_run_stopped(run_id, stub):
+        os.kill(os.getpid(), signal.SIGINT)
+
+
+def _monitor_fn(run_id: int, stub: ServerAppIoStub) -> None:
+    """."""
+    while True:
+        try:
+            _kill_if_stop(run_id, stub)
+        except RunStopException:
+            print("RunStopException caught in monitor_fn")
+            break
+        sleep(3)
 
 
 class RunStopException(BaseException):
