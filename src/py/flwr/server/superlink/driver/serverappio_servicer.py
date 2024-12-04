@@ -263,7 +263,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         self, request: UpdateRunStatusRequest, context: grpc.ServicerContext
     ) -> UpdateRunStatusResponse:
         """Update the status of a run."""
-        log(DEBUG, "ControlServicer.UpdateRunStatus")
+        log(DEBUG, "ServerAppIoServicer.UpdateRunStatus")
         state = self.state_factory.state()
 
         # Update the run status
