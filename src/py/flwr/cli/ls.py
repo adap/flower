@@ -16,7 +16,6 @@
 
 
 import json
-import re
 from datetime import datetime, timedelta
 from logging import DEBUG
 from pathlib import Path
@@ -34,6 +33,7 @@ from flwr.cli.config_utils import (
     validate_federation_in_project_config,
     validate_project_config,
 )
+from flwr.cli.utils import remove_bbcode_tags
 from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat, SubStatus
 from flwr.common.date import format_timedelta, isoformat8601_utc
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
@@ -260,16 +260,9 @@ def _to_table(run_list: list[tuple[str, ...]]) -> Table:
 def _to_json(run_list: list[tuple[str, ...]]) -> str:
     """Format run status list to a JSON formatted string."""
 
-    def _remove_bbcode_tags(strings: tuple[str, ...]) -> tuple[str, ...]:
-        """Remove BBCode tags from the provided text."""
-        # Regular expression pattern to match BBCode tags
-        bbcode_pattern = re.compile(r"\[/?\w+\]")
-        # Substitute BBCode tags with an empty string
-        return tuple(bbcode_pattern.sub("", s) for s in strings)
-
     runs_list = []
     for row in run_list:
-        row = _remove_bbcode_tags(row)
+        row = remove_bbcode_tags(row)
         (
             run_id,
             fab_id,

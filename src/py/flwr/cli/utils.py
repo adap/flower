@@ -136,3 +136,11 @@ def get_sha256_hash(file_path: Path) -> str:
                 break
             sha256.update(data)
     return sha256.hexdigest()
+
+
+def remove_bbcode_tags(strings: tuple[str, ...]) -> tuple[str, ...]:
+    """Remove BBCode tags from the provided text."""
+    # Regular expression pattern to match BBCode tags
+    bbcode_pattern = re.compile(r"\[/?\w+\]")
+    # Substitute BBCode tags with an empty string
+    return tuple(bbcode_pattern.sub("", s) for s in strings)
