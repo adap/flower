@@ -78,13 +78,13 @@ Main features
 Flower Datasets library supports:
 
 - **Downloading datasets** - choose the dataset from Hugging Face's ``dataset`` (`link <https://huggingface.co/datasets>`_)(*)
-- **Partitioning datasets** - choose one of the implemented partitioning scheme or create your own.
+- **Partitioning datasets** - choose one of the implemented partitioning schemes or create your own.
 - **Creating centralized datasets** - leave parts of the dataset unpartitioned (e.g. for centralized evaluation)
 - **Visualization of the partitioned datasets** - visualize the label distribution of the partitioned dataset (and compare the results on different parameters of the same partitioning schemes, different datasets, different partitioning schemes, or any mix of them)
 
 .. note::
 
-  (*) Once the dataset is available on HuggingFace Hub it can be **immediately** used in ``Flower Datasets`` (no approval from the Flower team needed, no custom code needed).
+  (*) Once the dataset is available on HuggingFace Hub, it can be **immediately** used in ``Flower Datasets`` without requiring approval from the Flower team or the need for custom code.
 
 
 .. image:: ./_static/readme/comparison_of_partitioning_schemes.png
@@ -101,7 +101,7 @@ Thanks to using Hugging Face's ``datasets`` used under the hood, Flower Datasets
 - Jax
 - Arrow
 
-Here are a few of the ``Partitioner`` s that are available: (for a full list see `link <ref-api/flwr_datasets.partitioner.html#module-flwr_datasets.partitioner>`_ )
+Here are a few of the ``Partitioners`` that are available: (for a full list see `link <ref-api/flwr_datasets.partitioner.html#module-flwr_datasets.partitioner>`_ )
 
 * Partitioner (the abstract base class) ``Partitioner``
 * IID partitioning ``IidPartitioner(num_partitions)``
@@ -127,7 +127,7 @@ What makes Flower Datasets stand out from other libraries?
 
 * Access to the largest online repository of datasets:
 
-  * The library functionality is independent of the dataset, so you can use any dataset available on `🤗Hugging Face Datasets <https://huggingface.co/datasets>`_, which means that others can immediately benefit from the dataset you added.
+  * The library functionality is independent of the dataset, so you can use any dataset available on `🤗Hugging Face Datasets <https://huggingface.co/datasets>`_. This means that others can immediately benefit from the dataset you added.
 
   * Out-of-the-box reproducibility across different projects.
 
