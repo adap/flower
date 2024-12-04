@@ -15,17 +15,19 @@
 """Flower command line interface `ls` command."""
 
 
+import io
 import json
 from datetime import datetime, timedelta
 from logging import DEBUG
 from pathlib import Path
-from typing import Annotated, Any, Optional
+from typing import Annotated, Any, Optional, Union
 
 import grpc
 import typer
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
+from typer import Exit
 
 from flwr.cli.config_utils import (
     load_and_validate,
@@ -36,7 +38,7 @@ from flwr.cli.config_utils import (
 from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat, SubStatus
 from flwr.common.date import format_timedelta, isoformat8601_utc
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
-from flwr.common.logger import log
+from flwr.common.logger import log, redirect_output, remove_emojis, restore_output
 from flwr.common.serde import run_from_proto
 from flwr.common.typing import Run
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
@@ -48,7 +50,7 @@ from flwr.proto.exec_pb2_grpc import ExecStub
 _RunListType = tuple[int, str, str, str, str, str, str, str, str]
 
 
-def ls(
+def ls(  # pylint: disable=too-many-locals, too-many-branches
     app: Annotated[
         Path,
         typer.Argument(help="Path of the Flower project"),
@@ -71,9 +73,22 @@ def ls(
             help="Specific run ID to display",
         ),
     ] = None,
+    output_format: Annotated[
+        str,
+        typer.Option(
+            "--format",
+            case_sensitive=False,
+            help="Format output using 'default' view or 'json'",
+        ),
+    ] = CliOutputFormat.DEFAULT,
 ) -> None:
     """List runs."""
+    suppress_output = output_format == CliOutputFormat.JSON
+    captured_output = io.StringIO()
     try:
+        if suppress_output:
+            redirect_output(captured_output)
+
         # Load and validate federation config
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
@@ -105,11 +120,13 @@ def ls(
             # Display information about a specific run ID
             if run_id is not None:
                 typer.echo(f"🔍 Displaying information for run ID {run_id}...")
-                _display_one_run(stub, run_id)
+                restore_output()
+                _display_one_run(stub, run_id, output_format)
             # By default, list all runs
             else:
                 typer.echo("📄 Listing all runs...")
-                _list_runs(stub)
+                restore_output()
+                _list_runs(stub, output_format)
 
         except ValueError as err:
             typer.secho(
@@ -120,9 +137,21 @@ def ls(
             raise typer.Exit(code=1) from err
         finally:
             channel.close()
-    # pylint: disable=broad-except
-    except (typer.Exit, Exception):
-        _print_json_error()
+    except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
+        if suppress_output:
+            restore_output()
+            e_message = captured_output.getvalue()
+            _print_json_error(e_message, err)
+        else:
+            typer.secho(
+                f"{err}",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+    finally:
+        if suppress_output:
+            restore_output()
+        captured_output.close()
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
@@ -313,5 +342,13 @@ def _display_one_run(
         Console().print(_to_table(formatted_runs))
 
 
-def _print_json_error() -> None:
+def _print_json_error(msg: str, e: Union[Exit, Exception]) -> None:
     """Print error message as JSON."""
+    Console().print_json(
+        json.dumps(
+            {
+                "success": False,
+                "error-message": remove_emojis(str(msg) + "\n" + str(e)),
+            }
+        )
+    )
