@@ -22,9 +22,9 @@ from typing import Any, Union
 import grpc
 
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
-    GetAuthTokenRequest,
-    GetAuthTokenResponse,
-    LoginResponse,
+    GetAuthTokensRequest,
+    GetAuthTokensResponse,
+    GetLoginDetailsResponse,
 )
 from flwr.proto.exec_pb2_grpc import ExecStub
 
@@ -37,7 +37,7 @@ class ExecAuthPlugin(ABC):
         """Abstract constructor (init)."""
 
     @abstractmethod
-    def get_login_response(self) -> LoginResponse:
+    def get_login_details(self) -> GetLoginDetailsResponse:
         """Send relevant login details as a LoginResponse."""
 
     @abstractmethod
@@ -48,8 +48,8 @@ class ExecAuthPlugin(ABC):
 
     @abstractmethod
     def get_auth_tokens(
-        self, request: GetAuthTokenRequest
-    ) -> GetAuthTokenResponse:
+        self, request: GetAuthTokensRequest
+    ) -> GetAuthTokensResponse:
         """Get the relevant auth tokens."""
 
     @abstractmethod
