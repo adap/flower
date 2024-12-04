@@ -38,10 +38,14 @@ from flwr.proto.exec_pb2_grpc import ExecStub
 
 try:
     from flwr.ee.auth_plugin import get_cli_auth_plugins
-
-    auth_plugins = get_cli_auth_plugins()
 except ImportError:
-    auth_plugins = []
+    AUTH_PLUGIN_IMPORT_ERROR: str = """Unable to import module `flwr.ee.auth_plugin`.
+
+This is a feature available only in the enterprise extension.
+"""
+    def get_cli_auth_plugins() -> dict[str, type[CliAuthPlugin]]:
+        raise ImportError(AUTH_PLUGIN_IMPORT_ERROR)
+
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
@@ -59,7 +63,7 @@ def login(  # pylint: disable=R0914
         typer.Argument(help="Name of the federation to login into."),
     ] = None,
 ) -> None:
-    """Login to Flower SuperExec."""
+    """Login to Flower SuperLink."""
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
     pyproject_path = app / "pyproject.toml" if app else None
@@ -72,9 +76,8 @@ def login(  # pylint: disable=R0914
 
     if "address" not in federation_config:
         typer.secho(
-            f"❌ The federation `{federation}` does not have `SuperExec` "
-            "address in its config.\n Please specify the address in "
-            "`pyproject.toml` and try again.",
+            "❌ `flwr login` currently works with Exec API. Ensure that the correct"
+            "Exec API address is provided in the `pyproject.toml`.",
             fg=typer.colors.RED,
             bold=True,
         )
