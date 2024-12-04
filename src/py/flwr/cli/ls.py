@@ -259,7 +259,6 @@ def _to_table(run_list: list[tuple[str, ...]]) -> Table:
 
 def _to_json(run_list: list[tuple[str, ...]]) -> str:
     """Format run status list to a JSON formatted string."""
-
     runs_list = []
     for row in run_list:
         row = remove_bbcode_tags(row)
