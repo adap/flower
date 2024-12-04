@@ -119,7 +119,7 @@ def ls(
             raise typer.Exit(code=1) from err
         finally:
             channel.close()
-    # pylint: disable=broad-except, unused-variable
+    # pylint: disable=broad-except
     except (typer.Exit, Exception):
         _print_json_error()
 
