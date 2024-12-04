@@ -12,13 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Auth plugin components."""
-
-
-from .auth_plugin import CliAuthPlugin as CliAuthPlugin
-from .auth_plugin import ExecAuthPlugin as ExecAuthPlugin
-
-__all__ = [
-    "CliAuthPlugin",
-    "ExecAuthPlugin",
-]
+"""Flower enterprise extension."""
