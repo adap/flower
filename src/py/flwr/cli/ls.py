@@ -342,7 +342,7 @@ def _display_one_run(
         Console().print(_to_table(formatted_runs))
 
 
-def _print_json_error(msg: str, e: Union[Exit, SystemExit, Exception]) -> None:
+def _print_json_error(msg: str, e: Union[Exit, Exception]) -> None:
     """Print error message as JSON."""
     Console().print_json(
         json.dumps(
