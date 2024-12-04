@@ -29,7 +29,9 @@ from flwr.cli.config_utils import (
 )
 from flwr.common.address import parse_address
 from flwr.common.config import get_flwr_dir
+from flwr.common.constant import CREDENTIALS_DIR
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
+from flwr.server.app import _format_address
 from flwr.common.logger import log
 from flwr.proto.exec_pb2 import LoginRequest, LoginResponse  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
@@ -87,14 +89,10 @@ def login(  # pylint: disable=R0914
     )
 
     base_path = get_flwr_dir()
-    credentials_dir = base_path / ".credentials"
+    credentials_dir = base_path / CREDENTIALS_DIR
     credentials_dir.mkdir(parents=True, exist_ok=True)
     server_address = federation_config["address"]
-    parsed_address = parse_address(server_address)
-    if not parsed_address:
-        sys.exit(f"Server IP address ({server_address}) cannot be parsed.")
-    host, port, is_v6 = parsed_address
-    address = f"[{host}]/{port}" if is_v6 else f"{host}/{port}"
+    address, _, _ = _format_address(server_address)
 
     credential = credentials_dir / address
 
