@@ -154,6 +154,20 @@ The Flower Community is growing quickly - we're a friendly group of researchers,
 
     Join us on Slack
 
+Recommended FL Datasets
+-----------------------
+
+Below we present a list of recommended datasets for federated learning research, which can be
+used with Flower Datasets ``flwr-datasets``.
+
+.. note::
+
+    All datasets from `HuggingFace Hub <https://huggingface.co/datasets>`_ can be used with our library. This page presents just a set of datasets we collected that you might find useful.
+
+For more information about any dataset, visit its page by clicking the dataset name. 
+
+.. include:: recommended-fl-datasets-tables.rst
+
 .. _demo:
 Demo
 ----
