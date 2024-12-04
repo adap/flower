@@ -38,7 +38,7 @@ message StartRunRequest {
   map<string, Scalar> override_config = 2;
   ConfigsRecord federation_options = 3;
 }
-message StartRunResponse { uint64 run_id = 1; }
+message StartRunResponse { optional uint64 run_id = 1; }
 message StreamLogsRequest {
   uint64 run_id = 1;
   double after_timestamp = 2;
