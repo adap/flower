@@ -126,11 +126,14 @@ def run(
         )
 
         if "address" in federation_config:
-            auth_plugin: Optional[CliAuthPlugin] = _try_obtain_credentials(
-                federation_config
-            )
+            auth_plugin = _try_obtain_credentials(federation_config)
             _run_with_exec_api(
-                app, federation_config, config_overrides, stream, auth_plugin
+                app,
+                federation_config,
+                config_overrides,
+                stream,
+                output_format,
+                auth_plugin,
             )
         else:
             _run_without_exec_api(app, federation_config, config_overrides, federation)
@@ -187,7 +190,7 @@ def _try_obtain_credentials(
     return auth_plugin
 
 
-# pylint: disable-next=too-many-locals
+# pylint: disable-next=R0913, R0914, R0917
 def _run_with_exec_api(
     app: Path,
     federation_config: dict[str, Any],
