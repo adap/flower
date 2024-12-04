@@ -38,7 +38,7 @@ class ExecAuthPlugin(ABC):
 
     @abstractmethod
     def get_login_details(self) -> GetLoginDetailsResponse:
-        """Send relevant login details as a GetLoginDetailsResponse."""
+        """Get the GetLoginDetailsResponse containing the login details."""
 
     @abstractmethod
     def validate_tokens_in_metadata(
