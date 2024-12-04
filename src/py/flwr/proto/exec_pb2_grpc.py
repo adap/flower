@@ -66,14 +66,15 @@ class ExecServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def GetLoginDetails(self, request, context):
-        """Start login upon request
+        """Get login details upon request
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def GetAuthTokens(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Get auth tokens upon request
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')

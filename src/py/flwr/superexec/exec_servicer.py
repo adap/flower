@@ -34,10 +34,10 @@ from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     GetAuthTokensRequest,
     GetAuthTokensResponse,
-    ListRunsRequest,
-    ListRunsResponse,
     GetLoginDetailsRequest,
     GetLoginDetailsResponse,
+    ListRunsRequest,
+    ListRunsResponse,
     StartRunRequest,
     StartRunResponse,
     StreamLogsRequest,
