@@ -94,7 +94,7 @@ Audio Datasets
      - clean/other
 
 Tabular Datasets
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 
 .. list-table:: Tabular Datasets
@@ -111,7 +111,7 @@ Tabular Datasets
      - train 150
 
 Text Datasets
-~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 .. list-table:: Text Datasets
    :widths: 40 30 30
