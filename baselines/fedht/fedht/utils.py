@@ -49,7 +49,7 @@ def partition_data(data, num_partitions):
 def sim_data(ni: int, num_clients: int, num_features: int, alpha=1, beta=1):
     """Simulate data for simII."""
 
-    np.random.seed(2024)
+    np.random.seed(2025)
     
     # generate client-based model coefs
     u = np.random.normal(0, alpha, num_clients)
@@ -85,9 +85,6 @@ def sim_data(ni: int, num_clients: int, num_features: int, alpha=1, beta=1):
     ntest = ni
     ivec = np.arange(1, num_features + 1)
     vari = np.diag(1 / (ivec**1.2))
-
-    # B = np.random.normal(0, beta, num_features)
-    # v = np.random.multivariate_normal(B, np.diag(np.ones(num_features)), num_clients)
 
     error2 = np.random.multivariate_normal(u, np.diag(np.ones(num_clients)), ntest)
     xtest = np.zeros((num_features, num_clients))
