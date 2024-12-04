@@ -85,11 +85,3 @@ class CliAuthPlugin(ABC):
         The tokens will be stored in the `.credentials/` folder inside the Flower
         directory.
         """
-
-    @abstractmethod
-    def load_tokens(self) -> None:
-        """Load the tokens for this plugin.
-
-        The tokens will be loaded from the `.credentials/` folder inside the Flower
-        directory.
-        """
