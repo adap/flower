@@ -36,10 +36,14 @@ from flwr.proto.exec_pb2_grpc import ExecStub
 
 try:
     from flwr.ee.auth_plugin import get_cli_auth_plugins
-
-    auth_plugins = get_cli_auth_plugins()
 except ImportError:
-    auth_plugins = []
+    AUTH_PLUGIN_IMPORT_ERROR: str = """Unable to import module `flwr.ee.auth_plugin`.
+
+This is a feature available only in the enterprise extension.
+"""
+    def get_cli_auth_plugins() -> dict[str, type[CliAuthPlugin]]:
+        raise ImportError(AUTH_PLUGIN_IMPORT_ERROR)
+
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
