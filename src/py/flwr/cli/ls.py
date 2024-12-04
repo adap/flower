@@ -287,10 +287,11 @@ def _list_runs(
     res: ListRunsResponse = stub.ListRuns(ListRunsRequest())
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
+    formatted_runs = _format_runs(run_dict, res.now)
     if output_format == CliOutputFormat.JSON:
-        Console().print_json(_to_json(_format_runs(run_dict, res.now)))
+        Console().print_json(_to_json(formatted_runs))
     else:
-        Console().print(_to_table(_format_runs(run_dict, res.now)))
+        Console().print(_to_table(formatted_runs))
 
 
 def _display_one_run(
@@ -305,10 +306,11 @@ def _display_one_run(
 
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
+    formatted_runs = _format_runs(run_dict, res.now)
     if output_format == CliOutputFormat.JSON:
-        Console().print_json(_to_json(_format_runs(run_dict, res.now)))
+        Console().print_json(_to_json(formatted_runs))
     else:
-        Console().print(_to_table(_format_runs(run_dict, res.now)))
+        Console().print(_to_table(formatted_runs))
 
 
 def _print_json_error() -> None:
