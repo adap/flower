@@ -33,7 +33,6 @@ from flwr.cli.config_utils import (
     validate_federation_in_project_config,
     validate_project_config,
 )
-from flwr.cli.utils import remove_bbcode_tags
 from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat, SubStatus
 from flwr.common.date import format_timedelta, isoformat8601_utc
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
@@ -147,23 +146,11 @@ def _init_channel(app: Path, federation_config: dict[str, Any]) -> grpc.Channel:
 
 def _format_runs(run_dict: dict[int, Run], now_isoformat: str) -> list[tuple[str, ...]]:
     """Format runs to a list."""
-    table = Table(header_style="bold cyan", show_lines=True)
 
     def _format_datetime(dt: Optional[datetime]) -> str:
         return isoformat8601_utc(dt).replace("T", " ") if dt else "N/A"
 
     run_list: list[tuple[str, ...]] = []
-
-    # Add columns
-    table.add_column(
-        Text("Run ID", justify="center"), style="bright_white", overflow="fold"
-    )
-    table.add_column(Text("FAB", justify="center"), style="dim white")
-    table.add_column(Text("Status", justify="center"))
-    table.add_column(Text("Elapsed", justify="center"), style="blue")
-    table.add_column(Text("Created At", justify="center"), style="dim white")
-    table.add_column(Text("Running At", justify="center"), style="dim white")
-    table.add_column(Text("Finished At", justify="center"), style="dim white")
 
     # Add rows
     for run in sorted(
@@ -174,15 +161,6 @@ def _format_runs(run_dict: dict[int, Run], now_isoformat: str) -> list[tuple[str
             status_text = run.status.status
         else:
             status_text = f"{run.status.status}:{run.status.sub_status}"
-
-        # Style the status based on its value
-        sub_status = run.status.sub_status
-        if sub_status == SubStatus.COMPLETED:
-            status_style = "green"
-        elif sub_status == SubStatus.FAILED:
-            status_style = "red"
-        else:
-            status_style = "yellow"
 
         # Convert isoformat to datetime
         pending_at = datetime.fromisoformat(run.pending_at) if run.pending_at else None
@@ -206,7 +184,7 @@ def _format_runs(run_dict: dict[int, Run], now_isoformat: str) -> list[tuple[str
                 f"{run.fab_id}",
                 f"{run.fab_version}",
                 f"{run.fab_hash}",
-                f"[{status_style}]{status_text}[/{status_style}]",
+                f"{status_text}",
                 format_timedelta(elapsed_time),
                 _format_datetime(pending_at),
                 _format_datetime(running_at),
@@ -243,10 +221,19 @@ def _to_table(run_list: list[tuple[str, ...]]) -> Table:
             running_at,
             finished_at,
         ) = row
+        # Style the status based on its value
+        sub_status = status_text.rsplit(":", maxsplit=1)[-1]
+        if sub_status == SubStatus.COMPLETED:
+            status_style = "green"
+        elif sub_status == SubStatus.FAILED:
+            status_style = "red"
+        else:
+            status_style = "yellow"
+
         formatted_row = (
             f"[bold]{run_id}[/bold]",
             f"{fab_id} (v{fab_version})",
-            status_text,
+            f"[{status_style}]{status_text}[/{status_style}]",
             elapsed,
             created_at,
             running_at,
@@ -261,7 +248,6 @@ def _to_json(run_list: list[tuple[str, ...]]) -> str:
     """Format run status list to a JSON formatted string."""
     runs_list = []
     for row in run_list:
-        row = remove_bbcode_tags(row)
         (
             run_id,
             fab_id,
