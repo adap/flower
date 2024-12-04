@@ -45,6 +45,8 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.exec_pb2_grpc import ExecStub
 
+_RunListType = tuple[int, str, str, str, str, str, str, str, str]
+
 
 def ls(
     app: Annotated[
@@ -144,13 +146,13 @@ def _init_channel(app: Path, federation_config: dict[str, Any]) -> grpc.Channel:
     return channel
 
 
-def _format_runs(run_dict: dict[int, Run], now_isoformat: str) -> list[tuple[str, ...]]:
+def _format_runs(run_dict: dict[int, Run], now_isoformat: str) -> list[_RunListType]:
     """Format runs to a list."""
 
     def _format_datetime(dt: Optional[datetime]) -> str:
         return isoformat8601_utc(dt).replace("T", " ") if dt else "N/A"
 
-    run_list: list[tuple[str, ...]] = []
+    run_list: list[_RunListType] = []
 
     # Add rows
     for run in sorted(
@@ -180,11 +182,11 @@ def _format_runs(run_dict: dict[int, Run], now_isoformat: str) -> list[tuple[str
 
         run_list.append(
             (
-                f"{run.run_id}",
-                f"{run.fab_id}",
-                f"{run.fab_version}",
-                f"{run.fab_hash}",
-                f"{status_text}",
+                run.run_id,
+                run.fab_id,
+                run.fab_version,
+                run.fab_hash,
+                status_text,
                 format_timedelta(elapsed_time),
                 _format_datetime(pending_at),
                 _format_datetime(running_at),
@@ -194,7 +196,7 @@ def _format_runs(run_dict: dict[int, Run], now_isoformat: str) -> list[tuple[str
     return run_list
 
 
-def _to_table(run_list: list[tuple[str, ...]]) -> Table:
+def _to_table(run_list: list[_RunListType]) -> Table:
     """Format the provided run list to a rich Table."""
     table = Table(header_style="bold cyan", show_lines=True)
 
@@ -244,7 +246,7 @@ def _to_table(run_list: list[tuple[str, ...]]) -> Table:
     return table
 
 
-def _to_json(run_list: list[tuple[str, ...]]) -> str:
+def _to_json(run_list: list[_RunListType]) -> str:
     """Format run status list to a JSON formatted string."""
     runs_list = []
     for row in run_list:
