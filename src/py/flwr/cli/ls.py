@@ -365,7 +365,7 @@ def _print_json_error(msg: str, e: Union[Exit, SystemExit, Exception]) -> None:
     Console().print_json(
         json.dumps(
             {
-                "success": "false",
+                "success": False,
                 "error-message": remove_emojis(str(msg) + "\n" + str(e)),
             }
         )
