@@ -80,7 +80,7 @@ class CliAuthPlugin(ABC):
 
     @abstractmethod
     def store_tokens(self, metadata: dict[str, Any]) -> None:
-        """Store refresh tokens from the provided metadata.
+        """Store the tokens from the provided metadata.
 
         The tokens will be stored in the .credentials/ folder inside the Flower
         directory.
