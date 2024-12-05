@@ -18,11 +18,12 @@
 import time
 from collections.abc import Generator
 from logging import ERROR, INFO
-from typing import Any
+from typing import Any, Optional
 
 import grpc
 
 from flwr.common import now
+from flwr.common.auth_plugin import ExecAuthPlugin
 from flwr.common.constant import LOG_STREAM_INTERVAL, Status
 from flwr.common.logger import log
 from flwr.common.serde import (
@@ -57,11 +58,13 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         linkstate_factory: LinkStateFactory,
         ffs_factory: FfsFactory,
         executor: Executor,
+        auth_plugin: Optional[ExecAuthPlugin] = None,
     ) -> None:
         self.linkstate_factory = linkstate_factory
         self.ffs_factory = ffs_factory
         self.executor = executor
         self.executor.initialize(linkstate_factory, ffs_factory)
+        self.auth_plugin = auth_plugin
 
     def StartRun(
         self, request: StartRunRequest, context: grpc.ServicerContext
@@ -135,14 +138,26 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
     ) -> GetLoginDetailsResponse:
         """Start login."""
         log(INFO, "ExecServicer.GetLoginDetails")
-        return GetLoginDetailsResponse(login_details={})
+        if self.auth_plugin is not None:
+            return self.auth_plugin.get_login_details()
+
+        context.abort(
+            grpc.StatusCode.UNIMPLEMENTED,
+            "ExecServicer initialized without user authentication",
+        )
 
     def GetAuthTokens(
         self, request: GetAuthTokensRequest, context: grpc.ServicerContext
     ) -> GetAuthTokensResponse:
         """Get auth token."""
         log(INFO, "ExecServicer.GetAuthTokens")
-        return GetAuthTokensResponse(auth_tokens={})
+        if self.auth_plugin is not None:
+            return self.auth_plugin.get_auth_tokens(request)
+
+        context.abort(
+            grpc.StatusCode.UNIMPLEMENTED,
+            "ExecServicer initialized without user authentication",
+        )
 
 
 def _create_list_runs_response(run_ids: set[int], state: LinkState) -> ListRunsResponse:
