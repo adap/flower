@@ -188,6 +188,7 @@ class QFedAvg(FedAvg):
             raise AttributeError("QffedAvg pre_weights are None in aggregate_fit")
 
         weights_before = self.pre_weights
+        loss = 0.0 # Default loss value
         eval_result = self.evaluate(
             server_round, ndarrays_to_parameters(weights_before)
         )
