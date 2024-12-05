@@ -200,26 +200,46 @@ global___UpdateRunStatusResponse = UpdateRunStatusResponse
 class GetRunStatusRequest(google.protobuf.message.Message):
     """GetRunStatus"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    RUN_ID_FIELD_NUMBER: builtins.int
-    run_id: builtins.int
+    NODE_FIELD_NUMBER: builtins.int
+    RUN_IDS_FIELD_NUMBER: builtins.int
+    @property
+    def node(self) -> flwr.proto.node_pb2.Node: ...
+    @property
+    def run_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]: ...
     def __init__(self,
         *,
-        run_id: builtins.int = ...,
+        node: typing.Optional[flwr.proto.node_pb2.Node] = ...,
+        run_ids: typing.Optional[typing.Iterable[builtins.int]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["node",b"node"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["node",b"node","run_ids",b"run_ids"]) -> None: ...
 global___GetRunStatusRequest = GetRunStatusRequest
 
 class GetRunStatusResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    RUN_STATUS_FIELD_NUMBER: builtins.int
+    class RunStatusDictEntry(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        KEY_FIELD_NUMBER: builtins.int
+        VALUE_FIELD_NUMBER: builtins.int
+        key: builtins.int
+        @property
+        def value(self) -> global___RunStatus: ...
+        def __init__(self,
+            *,
+            key: builtins.int = ...,
+            value: typing.Optional[global___RunStatus] = ...,
+            ) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+
+    RUN_STATUS_DICT_FIELD_NUMBER: builtins.int
     @property
-    def run_status(self) -> global___RunStatus: ...
+    def run_status_dict(self) -> google.protobuf.internal.containers.MessageMap[builtins.int, global___RunStatus]: ...
     def __init__(self,
         *,
-        run_status: typing.Optional[global___RunStatus] = ...,
+        run_status_dict: typing.Optional[typing.Mapping[builtins.int, global___RunStatus]] = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["run_status",b"run_status"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["run_status",b"run_status"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["run_status_dict",b"run_status_dict"]) -> None: ...
 global___GetRunStatusResponse = GetRunStatusResponse
 
 class GetFederationOptionsRequest(google.protobuf.message.Message):
