@@ -146,7 +146,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         """Get auth token."""
         log(INFO, "ExecServicer.GetAuthTokens")
         return GetAuthTokensResponse(auth_tokens={})
-    
+
     def StopRun(
         self, request: StopRunRequest, context: grpc.ServicerContext
     ) -> StopRunResponse:
