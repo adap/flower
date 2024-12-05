@@ -45,6 +45,7 @@ from flwr.common.serde import (
     message_to_proto,
     user_config_from_proto,
 )
+from flwr.common.serde import message_from_taskins, message_to_taskres, run_from_proto
 from flwr.common.typing import Fab, Run
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -70,7 +71,7 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 
 
 @contextmanager
-def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
+def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     server_address: str,
     insecure: bool,
     retry_invoker: RetryInvoker,
@@ -157,6 +158,11 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
     node: Optional[Node] = None
     ping_thread: Optional[threading.Thread] = None
     ping_stop_event = threading.Event()
+
+    # Restrict retries to cases where the status code is UNAVAILABLE
+    retry_invoker.should_giveup = (
+        lambda e: e.code() != grpc.StatusCode.UNAVAILABLE  # type: ignore
+    )
 
     ###########################################################################
     # ping/create_node/delete_node/receive/send/get_run functions
@@ -287,13 +293,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
         )
 
         # Return fab_id and fab_version
-        return Run(
-            run_id,
-            get_run_response.run.fab_id,
-            get_run_response.run.fab_version,
-            get_run_response.run.fab_hash,
-            user_config_from_proto(get_run_response.run.override_config),
-        )
+        return run_from_proto(get_run_response.run)
 
     def get_fab(fab_hash: str) -> Fab:
         # Call FleetAPI
