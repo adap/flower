@@ -257,7 +257,7 @@ def _bump_minor_version(tag: Tag) -> Optional[str]:
     match = re.match(r"v(\d+)\.(\d+)\.(\d+)", tag.name)
     if match is None:
         return None
-    major, minor, _ = [int(x) for x in match.groups()]
+    major, minor, _ = (int(x) for x in match.groups())
     # Increment the minor version and reset patch version
     new_version = f"v{major}.{minor + 1}.0"
     return new_version

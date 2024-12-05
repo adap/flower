@@ -1,5 +1,7 @@
-"""
-Usage: python dev/build-docker-image-matrix.py --flwr-version <flower version e.g. 1.13.0>
+"""Build Docker image matrix.
+
+Usage:
+python dev/build-docker-image-matrix.py --flwr-version <flower version e.g. 1.13.0>
 
 Images are built in three workflows: stable, nightly, and unstable (main).
 Each builds for `amd64` and `arm64`.
@@ -9,13 +11,18 @@ Each builds for `amd64` and `arm64`.
    - Ubuntu uses `glibc`, compatible with most ML frameworks.
 
 2. **Alpine Images**:
-   - Used only for minimal images (e.g., SuperLink) where no extra dependencies are expected.
-   - Limited use due to dependency (in particular ML frameworks) compilation complexity with `musl`.
+   - Used only for minimal images (e.g., SuperLink)
+   where no extra dependencies are expected.
+   - Limited use due to dependency (in particular ML frameworks)
+   compilation complexity with `musl`.
 
 Workflow Details:
-- **Stable Release**: Triggered on new releases. Builds full matrix (all Python versions, Ubuntu and Alpine).
-- **Nightly Release**: Daily trigger. Builds full matrix (latest Python, Ubuntu only).
-- **Unstable**: Triggered on main branch commits. Builds simplified matrix (latest Python, Ubuntu only).
+- **Stable Release**: Triggered on new releases.
+  Builds full matrix (all Python versions, Ubuntu and Alpine).
+- **Nightly Release**: Daily trigger.
+  Builds full matrix (latest Python, Ubuntu only).
+- **Unstable**: Triggered on main branch commits.
+  Builds simplified matrix (latest Python, Ubuntu only).
 """
 
 import json
@@ -119,7 +126,7 @@ def _remove_patch_version(version: str) -> str:
 
 
 @dataclass
-class _BaseImageBuilder:
+class _BaseImageBuilder:  # pylint: disable=too-many-instance-attributes
     file_dir_fn: Callable[[Any], str]
     tags_fn: Callable[[Any], list[str]]
     build_args_fn: Callable[[Any], str]
@@ -136,18 +143,22 @@ class _BaseImage(_BaseImageBuilder):
 
     @property
     def file_dir(self) -> str:
+        """File directory."""
         return self.file_dir_fn(self.build_args)
 
     @property
-    def tags(self) -> str:
+    def tags(self) -> list[str]:
+        """Get list of tags."""
         return self.tags_fn(self.build_args)
 
     @property
     def tags_encoded(self) -> str:
+        """Encoded tags."""
         return "\n".join(self.tags)
 
     @property
     def build_args_encoded(self) -> str:
+        """Build arguments."""
         return self.build_args_fn(self.build_args)
 
 
@@ -163,16 +174,16 @@ def _new_binary_image(
     name: str,
     base_image: _BaseImage,
     tags_fn: Optional[Callable],
-) -> dict[str, Any]:
+) -> _BinaryImage:
     tags = []
     if tags_fn is not None:
         tags += tags_fn(base_image) or []
 
     return _BinaryImage(
-        f"flwr/{name}",
-        f"{DOCKERFILE_ROOT}/{name}",
-        base_image.tags[0],
-        "\n".join(tags),
+        namespace_repository=f"flwr/{name}",
+        file_dir=f"{DOCKERFILE_ROOT}/{name}",
+        base_image=base_image.tags[0],
+        tags_encoded="\n".join(tags),
     )
 
 
@@ -181,7 +192,7 @@ def _generate_binary_images(
     base_images: list[_BaseImage],
     tags_fn: Optional[Callable] = None,
     filter_func: Optional[Callable] = None,
-) -> list[dict[str, Any]]:
+) -> list[_BinaryImage]:
     filter_func = filter_func or (lambda _: True)
 
     return [
@@ -197,8 +208,7 @@ def _tag_latest_alpine_with_flwr_version(image: _BaseImage) -> list[str]:
         and image.build_args.python_version == LATEST_SUPPORTED_PYTHON_VERSION
     ):
         return image.tags + [image.build_args.flwr_version]
-    else:
-        return image.tags
+    return image.tags
 
 
 def _tag_latest_ubuntu_with_flwr_version(image: _BaseImage) -> list[str]:
@@ -208,16 +218,17 @@ def _tag_latest_ubuntu_with_flwr_version(image: _BaseImage) -> list[str]:
         and isinstance(image.build_args.variant.extras, _CpuVariant)
     ):
         return image.tags + [image.build_args.flwr_version]
-    else:
-        return image.tags
+    return image.tags
 
 
 #
 # Build matrix for stable releases
 #
-def _build_stable_matrix(flwr_version: str) -> list[_BaseImage]:
+def _build_stable_matrix(
+    flwr_version: str,
+) -> tuple[list[_BaseImage], list[_BinaryImage]]:
     @dataclass
-    class StableBaseImageBuildArgs:
+    class _StableBaseImageBuildArgs:
         variant: _Variant
         python_version: str
         flwr_version: str
@@ -229,19 +240,22 @@ DISTRO_VERSION={distro_version}
 """
 
     cpu_build_args_variants = [
-        StableBaseImageBuildArgs(UBUNTU_VARIANT, python_version, flwr_version)
+        _StableBaseImageBuildArgs(UBUNTU_VARIANT, python_version, flwr_version)
         for python_version in SUPPORTED_PYTHON_VERSIONS
     ] + [
-        StableBaseImageBuildArgs(
+        _StableBaseImageBuildArgs(
             ALPINE_VARIANT, LATEST_SUPPORTED_PYTHON_VERSION, flwr_version
         )
     ]
 
     cpu_base_images = [
         _BaseImage(
-            file_dir_fn=lambda args: f"{DOCKERFILE_ROOT}/base/{args.variant.distro.name.value}",
+            file_dir_fn=lambda args: (
+                f"{DOCKERFILE_ROOT}/base/{args.variant.distro.name.value}"
+            ),
             tags_fn=lambda args: [
-                f"{args.flwr_version}-py{args.python_version}-{args.variant.distro.name.value}{args.variant.distro.version}"
+                f"{args.flwr_version}-py{args.python_version}-"
+                f"{args.variant.distro.name.value}{args.variant.distro.version}"
             ],
             build_args_fn=lambda args: cpu_build_args.format(
                 python_version=args.python_version,
@@ -255,18 +269,22 @@ DISTRO_VERSION={distro_version}
     ]
 
     cuda_build_args_variants = [
-        StableBaseImageBuildArgs(variant, python_version, flwr_version)
+        _StableBaseImageBuildArgs(variant, python_version, flwr_version)
         for variant in CUDA_VARIANTS
         for python_version in SUPPORTED_PYTHON_VERSIONS
     ]
 
     cuda_build_args = cpu_build_args + """CUDA_VERSION={cuda_version}"""
 
-    cuda_base_image = [
+    _cuda_base_image = [
         _BaseImage(
-            file_dir_fn=lambda args: f"{DOCKERFILE_ROOT}/base/{args.variant.distro.name.value}-cuda",
+            file_dir_fn=lambda args: (
+                f"{DOCKERFILE_ROOT}/base/{args.variant.distro.name.value}-cuda"
+            ),
             tags_fn=lambda args: [
-                f"{args.flwr_version}-py{args.python_version}-cu{_remove_patch_version(args.variant.extras.version)}-{args.variant.distro.name.value}{args.variant.distro.version}",
+                f"{args.flwr_version}-py{args.python_version}-"
+                f"cu{_remove_patch_version(args.variant.extras.version)}-"
+                f"{args.variant.distro.name.value}{args.variant.distro.version}",
             ],
             build_args_fn=lambda args: cuda_build_args.format(
                 python_version=args.python_version,
@@ -329,14 +347,16 @@ DISTRO_VERSION={distro_version}
 #
 # Build matrix for unstable releases
 #
-def _build_unstable_matrix(flwr_version_ref: str) -> list[_BaseImage]:
+def _build_unstable_matrix(
+    flwr_version_ref: str,
+) -> tuple[list[_BaseImage], list[_BinaryImage]]:
     @dataclass
-    class UnstableBaseImageBuildArgs:
+    class _UnstableBaseImageBuildArgs:
         variant: _Variant
         python_version: str
         flwr_version_ref: str
 
-    cpu_ubuntu_build_args_variant = UnstableBaseImageBuildArgs(
+    cpu_ubuntu_build_args_variant = _UnstableBaseImageBuildArgs(
         UBUNTU_VARIANT, LATEST_SUPPORTED_PYTHON_VERSION, flwr_version_ref
     )
 
@@ -347,7 +367,9 @@ DISTRO_VERSION={distro_version}
 """
 
     cpu_base_image = _BaseImage(
-        file_dir_fn=lambda args: f"{DOCKERFILE_ROOT}/base/{args.variant.distro.name.value}",
+        file_dir_fn=lambda args: (
+            f"{DOCKERFILE_ROOT}/base/{args.variant.distro.name.value}"
+        ),
         tags_fn=lambda _: ["unstable"],
         build_args_fn=lambda args: cpu_build_args.format(
             python_version=args.python_version,
@@ -358,14 +380,16 @@ DISTRO_VERSION={distro_version}
         build_args=cpu_ubuntu_build_args_variant,
     )
 
-    cuda_build_args_variant = UnstableBaseImageBuildArgs(
+    cuda_build_args_variant = _UnstableBaseImageBuildArgs(
         LATEST_SUPPORTED_CUDA_VERSION, LATEST_SUPPORTED_PYTHON_VERSION, flwr_version_ref
     )
 
     cuda_build_args = cpu_build_args + """CUDA_VERSION={cuda_version}"""
 
-    cuda_base_image = _BaseImage(
-        file_dir_fn=lambda args: f"{DOCKERFILE_ROOT}/base/{args.variant.distro.name.value}-cuda",
+    _cuda_base_image = _BaseImage(
+        file_dir_fn=lambda args: (
+            f"{DOCKERFILE_ROOT}/base/{args.variant.distro.name.value}-cuda"
+        ),
         tags_fn=lambda _: ["unstable-cuda"],
         build_args_fn=lambda args: cuda_build_args.format(
             python_version=args.python_version,
@@ -403,15 +427,17 @@ DISTRO_VERSION={distro_version}
 #
 # Build matrix for nightly releases
 #
-def _build_nightly_matrix(flwr_version: str, flwr_package: str) -> list[_BaseImage]:
+def _build_nightly_matrix(
+    flwr_version: str, flwr_package: str
+) -> tuple[list[_BaseImage], list[_BinaryImage]]:
     @dataclass
-    class NightlyBaseImageBuildArgs:
+    class _NightlyBaseImageBuildArgs:
         variant: _Variant
         python_version: str
         flwr_version: str
         flwr_package: str
 
-    cpu_ubuntu_build_args_variant = NightlyBaseImageBuildArgs(
+    cpu_ubuntu_build_args_variant = _NightlyBaseImageBuildArgs(
         UBUNTU_VARIANT, LATEST_SUPPORTED_PYTHON_VERSION, flwr_version, flwr_package
     )
 
@@ -423,7 +449,9 @@ DISTRO_VERSION={distro_version}
 """
 
     cpu_base_image = _BaseImage(
-        file_dir_fn=lambda args: f"{DOCKERFILE_ROOT}/base/{args.variant.distro.name.value}",
+        file_dir_fn=lambda args: (
+            f"{DOCKERFILE_ROOT}/base/{args.variant.distro.name.value}"
+        ),
         tags_fn=lambda args: [args.flwr_version, "nightly"],
         build_args_fn=lambda args: cpu_build_args.format(
             python_version=args.python_version,
@@ -435,7 +463,7 @@ DISTRO_VERSION={distro_version}
         build_args=cpu_ubuntu_build_args_variant,
     )
 
-    cuda_build_args_variant = NightlyBaseImageBuildArgs(
+    cuda_build_args_variant = _NightlyBaseImageBuildArgs(
         LATEST_SUPPORTED_CUDA_VERSION,
         LATEST_SUPPORTED_PYTHON_VERSION,
         flwr_version,
@@ -444,8 +472,10 @@ DISTRO_VERSION={distro_version}
 
     cuda_build_args = cpu_build_args + """CUDA_VERSION={cuda_version}"""
 
-    cuda_base_image = _BaseImage(
-        file_dir_fn=lambda args: f"{DOCKERFILE_ROOT}/base/{args.variant.distro.name.value}-cuda",
+    _cuda_base_image = _BaseImage(
+        file_dir_fn=lambda args: (
+            f"{DOCKERFILE_ROOT}/base/{args.variant.distro.name.value}-cuda"
+        ),
         tags_fn=lambda args: [f"{args.flwr_version}-cuda", "nightly-cuda"],
         build_args_fn=lambda args: cuda_build_args.format(
             python_version=args.python_version,
@@ -502,23 +532,19 @@ def build_images(
         json.dumps(
             {
                 "base": {
-                    "images": list(
-                        map(
-                            lambda image: asdict(
-                                image,
-                                dict_factory=lambda x: {
-                                    k: v
-                                    for (k, v) in x
-                                    if v is not None and callable(v) is False
-                                },
-                            ),
-                            base_images,
+                    "images": [
+                        asdict(
+                            image,
+                            dict_factory=lambda x: {
+                                k: v
+                                for (k, v) in x
+                                if v is not None and callable(v) is False
+                            },
                         )
-                    )
+                        for image in base_images
+                    ]
                 },
-                "binary": {
-                    "images": list(map(lambda image: asdict(image), binary_images))
-                },
+                "binary": {"images": [asdict(image) for image in binary_images]},
             }
         )
     )

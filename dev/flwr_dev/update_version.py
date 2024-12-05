@@ -78,13 +78,14 @@ def _update_versions(file_patterns, replace_strings, new_version, check):
     return wrong
 
 
-if __name__ == "__main__":
+# pylint: disable=too-many-branches
+def _main():
     conf_path = Path("doc/source/conf.py")
 
     if not conf_path.is_file():
         raise FileNotFoundError(f"{conf_path} not found!")
 
-    content = conf_path.read_text()
+    content = conf_path.read_text(encoding="utf-8")
 
     # Search for the current non-updated version
     match = re.search(r"\.\.\s*\|stable_flwr_version\|\s*replace::\s*(\S+)", content)
@@ -94,7 +95,10 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--old_version",
-        help="Current (non-updated) version of the package, soon to be the old version.",
+        help=(
+            "Current (non-updated) version of the package, "
+            "soon to be the old version."
+        ),
         default=match.group(1) if match else None,
     )
     parser.add_argument(
@@ -148,3 +152,7 @@ if __name__ == "__main__":
 
     if wrong and args.check:
         sys.exit("Some version haven't been updated.")
+
+
+if __name__ == "__main__":
+    _main()
