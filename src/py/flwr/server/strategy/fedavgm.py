@@ -123,9 +123,7 @@ class FedAvgM(FedAvg):
         rep = f"FedAvgM(accept_failures={self.accept_failures})"
         return rep
 
-    def initialize_parameters(
-        self, client_manager: ClientManager
-    ) -> Optional[Parameters]:
+    def initialize_parameters(self) -> Optional[Parameters]:
         """Initialize global model parameters."""
         return self.initial_parameters
 
