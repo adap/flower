@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Annotated, Any, Optional
 
 import typer
+from tomli_w import dump
 
 from flwr.cli.config_utils import (
     load_and_validate,
@@ -26,14 +27,13 @@ from flwr.cli.config_utils import (
     validate_project_config,
 )
 from flwr.common.auth_plugin import CliAuthPlugin
-from flwr.common.constant import AUTH_TYPE
+from flwr.common.config import get_flwr_dir
+from flwr.common.constant import AUTH_TYPE, CREDENTIALS_DIR
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
-from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
-    GetLoginDetailsRequest,
-    GetLoginDetailsResponse,
-)
+from flwr.proto.exec_pb2 import GetLoginDetailsRequest, GetLoginDetailsResponse  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
+
 
 try:
     from flwr.ee.auth_plugin import get_cli_auth_plugins

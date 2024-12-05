@@ -72,10 +72,10 @@ class KeycloakExecPlugin(ExecAuthPlugin):
         response = post(self.auth_url, data=payload, headers=headers, timeout=10)
         if response.status_code == 200:
             data: dict[str, Any] = response.json()
-            device_code: str = data[DEVICE_CODE]
-            verification_uri_complete: str = data[VERIFICATION_URI_COMPLETE]
-            expires_in: str = data[EXPIRES_IN]
-            interval: str = data[INTERVAL]
+            device_code = str(data[DEVICE_CODE])
+            verification_uri_complete = str(data[VERIFICATION_URI_COMPLETE])
+            expires_in = str(data[EXPIRES_IN])
+            interval = str(data[INTERVAL])
             login_details = {
                 AUTH_TYPE: "keycloak",
                 DEVICE_CODE: device_code,

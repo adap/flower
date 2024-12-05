@@ -14,10 +14,22 @@
 # ==============================================================================
 """Flower EE auth plugins."""
 
-from .keycloak_plugin import KeycloakCliPlugin as KeycloakCliPlugin
-from .keycloak_plugin import KeycloakExecPlugin as KeycloakExecPlugin
+from flwr.common.auth_plugin import CliAuthPlugin, ExecAuthPlugin
+
+from .keycloak_plugin import KeycloakCliPlugin, KeycloakExecPlugin
+
+
+def get_cli_auth_plugins() -> dict[str, type[CliAuthPlugin]]:
+    """Return all CLI authentication plugins."""
+    return {"keycloak": KeycloakCliPlugin}
+
+
+def get_exec_auth_plugins() -> dict[str, type[ExecAuthPlugin]]:
+    """Return all Exec API authentication plugins."""
+    return {"keycloak": KeycloakExecPlugin}
+
 
 __all__ = [
-    "KeycloakCliPlugin",
-    "KeycloakExecPlugin",
+    "get_cli_auth_plugins",
+    "get_exec_auth_plugins",
 ]
