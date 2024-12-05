@@ -112,7 +112,7 @@ class TestExecServicer(unittest.TestCase):
         """Test StopRun method of ExecServicer."""
         # Prepare
         run_id = self.state.create_run(
-            "mock fabid", "mock fabver", "fake hash", {}, ConfigsRecord()
+            "mock_fabid", "mock_fabver", "fake_hash", {}, ConfigsRecord()
         )
         self.servicer.executor = MagicMock()
         expected_run_status = RunStatus(Status.FINISHED, SubStatus.STOPPED, "")
