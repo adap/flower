@@ -187,7 +187,7 @@ def _run_with_exec_api(
     if output_format == CliOutputFormat.JSON:
         run_output = json.dumps(
             {
-                "success": "true" if res.HasField("run_id") else "false",
+                "success": res.HasField("run_id"),
                 "run-id": res.run_id if res.HasField("run_id") else None,
                 "fab-id": fab_id,
                 "fab-name": fab_id.rsplit("/", maxsplit=1)[-1],
