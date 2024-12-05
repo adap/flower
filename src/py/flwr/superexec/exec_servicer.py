@@ -32,6 +32,10 @@ from flwr.common.serde import (
 )
 from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
+    GetAuthTokensRequest,
+    GetAuthTokensResponse,
+    GetLoginDetailsRequest,
+    GetLoginDetailsResponse,
     ListRunsRequest,
     ListRunsResponse,
     StartRunRequest,
@@ -125,6 +129,20 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             return _create_list_runs_response(state.get_run_ids(), state)
         # Handle `flwr ls --run-id <run_id>`
         return _create_list_runs_response({request.run_id}, state)
+
+    def GetLoginDetails(
+        self, request: GetLoginDetailsRequest, context: grpc.ServicerContext
+    ) -> GetLoginDetailsResponse:
+        """Start login."""
+        log(INFO, "ExecServicer.GetLoginDetails")
+        return GetLoginDetailsResponse(login_details={})
+
+    def GetAuthTokens(
+        self, request: GetAuthTokensRequest, context: grpc.ServicerContext
+    ) -> GetAuthTokensResponse:
+        """Get auth token."""
+        log(INFO, "ExecServicer.GetAuthToken")
+        return GetAuthTokensResponse(auth_tokens={})
 
 
 def _create_list_runs_response(run_ids: set[int], state: LinkState) -> ListRunsResponse:
