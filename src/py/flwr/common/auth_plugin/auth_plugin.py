@@ -19,7 +19,6 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any, Optional, Union
 
-
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     GetAuthTokensRequest,
     GetAuthTokensResponse,
