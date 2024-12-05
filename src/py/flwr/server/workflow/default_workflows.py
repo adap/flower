@@ -121,9 +121,7 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
     if not isinstance(context, LegacyContext):
         raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
 
-    parameters = context.strategy.initialize_parameters(
-        client_manager=context.client_manager
-    )
+    parameters = context.strategy.initialize_parameters()
     if parameters is not None:
         log(INFO, "Using initial global parameters provided by strategy")
         paramsrecord = compat.parameters_to_parametersrecord(
