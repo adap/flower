@@ -213,6 +213,7 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
                 server_app_run_config=fused_config,
                 is_app=True,
                 exit_event=EventType.CLI_FLOWER_SIMULATION_LEAVE,
+                conn=conn,
             )
 
             # Send resulting context
