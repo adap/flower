@@ -15,11 +15,14 @@
 """Flower Simulation process."""
 
 import argparse
+import os
+import signal
 import sys
+import threading
 from logging import DEBUG, ERROR, INFO
 from queue import Queue
 from time import sleep
-from typing import Optional
+from typing import Any, NoReturn, Optional
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
@@ -37,6 +40,7 @@ from flwr.common.constant import (
     Status,
     SubStatus,
 )
+from flwr.common.exit_handlers import RunStopException
 from flwr.common.logger import (
     log,
     mirror_output_to_queue,
@@ -49,12 +53,15 @@ from flwr.common.serde import (
     context_from_proto,
     fab_from_proto,
     run_from_proto,
+    run_status_from_proto,
     run_status_to_proto,
 )
 from flwr.common.typing import RunStatus
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetFederationOptionsRequest,
     GetFederationOptionsResponse,
+    GetRunStatusRequest,
+    GetRunStatusResponse,
     UpdateRunStatusRequest,
 )
 from flwr.proto.simulationio_pb2 import (  # pylint: disable=E0611
@@ -62,6 +69,7 @@ from flwr.proto.simulationio_pb2 import (  # pylint: disable=E0611
     PullSimulationInputsResponse,
     PushSimulationOutputsRequest,
 )
+from flwr.proto.simulationio_pb2_grpc import SimulationIoStub
 from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
 from flwr.simulation.run_simulation import _run_simulation
 from flwr.simulation.simulationio_connection import SimulationIoConnection
@@ -134,6 +142,15 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
             context = context_from_proto(res.context)
             run = run_from_proto(res.run)
             fab = fab_from_proto(res.fab)
+
+            stop_event = threading.Event()
+            # Start monitoring thread
+            run_monitor_th = threading.Thread(
+                target=_monitor_fn,
+                args=(run.run_id, conn._stub, stop_event),
+                daemon=True,
+            )
+            run_monitor_th.start()
 
             # Start log uploader for this run
             log_uploader = start_log_uploader(
@@ -223,6 +240,17 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
             _ = conn._stub.PushSimulationOutputs(out_req)
 
             run_status = RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
+            stop_event.set()
+
+        except RunStopException:
+            exc_entity = "Simulation"
+            log(
+                INFO,
+                "%s stopped from user-issued command for run_id %s",
+                exc_entity,
+                run.run_id,
+            )
+            run_status = None
 
         except Exception as ex:  # pylint: disable=broad-exception-caught
             exc_entity = "Simulation"
@@ -269,3 +297,30 @@ def _parse_args_run_flwr_simulation() -> argparse.ArgumentParser:
     )
     add_args_flwr_app_common(parser=parser)
     return parser
+
+
+def _monitor_fn(
+    run_id: int, stub: SimulationIoStub, stop_event: threading.Event
+) -> None:
+    """."""
+    req = GetRunStatusRequest(run_id=run_id)
+
+    while not stop_event.is_set():
+        res: GetRunStatusResponse = stub.GetRunStatus(req)
+        run_status = run_status_from_proto(res.run_status)
+        is_stopped = (run_status.status == Status.FINISHED) & (
+            run_status.sub_status == SubStatus.STOPPED
+        )
+        if is_stopped:
+            os.kill(os.getpid(), signal.SIGINT)
+            break
+        sleep(3)
+
+
+def signal_handler(sig: Any, frame: Any) -> NoReturn:
+    """."""
+    raise RunStopException
+
+
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)

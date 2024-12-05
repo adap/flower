@@ -39,6 +39,7 @@ from flwr.common.constant import (
     Status,
     SubStatus,
 )
+from flwr.common.exit_handlers import RunStopException
 from flwr.common.logger import (
     log,
     mirror_output_to_queue,
@@ -279,10 +280,6 @@ def _monitor_fn(
             os.kill(os.getpid(), signal.SIGINT)
             break
         sleep(3)
-
-
-class RunStopException(BaseException):
-    """Raised when a run is stopped."""
 
 
 def signal_handler(sig: Any, frame: Any) -> NoReturn:

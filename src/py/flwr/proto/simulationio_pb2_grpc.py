@@ -31,6 +31,11 @@ class SimulationIoStub(object):
                 request_serializer=flwr_dot_proto_dot_run__pb2.UpdateRunStatusRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_run__pb2.UpdateRunStatusResponse.FromString,
                 )
+        self.GetRunStatus = channel.unary_unary(
+                '/flwr.proto.SimulationIo/GetRunStatus',
+                request_serializer=flwr_dot_proto_dot_run__pb2.GetRunStatusRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_run__pb2.GetRunStatusResponse.FromString,
+                )
         self.PushLogs = channel.unary_unary(
                 '/flwr.proto.SimulationIo/PushLogs',
                 request_serializer=flwr_dot_proto_dot_log__pb2.PushLogsRequest.SerializeToString,
@@ -67,6 +72,13 @@ class SimulationIoServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetRunStatus(self, request, context):
+        """Get the status of a given run
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def PushLogs(self, request, context):
         """Push ServerApp logs
         """
@@ -98,6 +110,11 @@ def add_SimulationIoServicer_to_server(servicer, server):
                     servicer.UpdateRunStatus,
                     request_deserializer=flwr_dot_proto_dot_run__pb2.UpdateRunStatusRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_run__pb2.UpdateRunStatusResponse.SerializeToString,
+            ),
+            'GetRunStatus': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetRunStatus,
+                    request_deserializer=flwr_dot_proto_dot_run__pb2.GetRunStatusRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_run__pb2.GetRunStatusResponse.SerializeToString,
             ),
             'PushLogs': grpc.unary_unary_rpc_method_handler(
                     servicer.PushLogs,
@@ -167,6 +184,23 @@ class SimulationIo(object):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.SimulationIo/UpdateRunStatus',
             flwr_dot_proto_dot_run__pb2.UpdateRunStatusRequest.SerializeToString,
             flwr_dot_proto_dot_run__pb2.UpdateRunStatusResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def GetRunStatus(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.SimulationIo/GetRunStatus',
+            flwr_dot_proto_dot_run__pb2.GetRunStatusRequest.SerializeToString,
+            flwr_dot_proto_dot_run__pb2.GetRunStatusResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 

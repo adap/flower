@@ -85,3 +85,7 @@ def register_exit_handlers(
         SIGTERM,
         graceful_exit_handler,  # type: ignore
     )
+
+
+class RunStopException(BaseException):
+    """Raised when a run is stopped."""
