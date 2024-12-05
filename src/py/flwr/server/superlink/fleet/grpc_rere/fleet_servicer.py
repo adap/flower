@@ -112,7 +112,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
                 "[Fleet.PushTaskRes] Push results from node_id=%s",
                 request.task_res_list[0].task.producer.node_id,
             )
-            _abort_if_run_stopped(request.task_res_list[0].run_id, state, context)
+            # _abort_if_run_stopped(request.task_res_list[0].run_id, state, context)
         else:
             log(INFO, "[Fleet.PushTaskRes] No task results to push")
         return message_handler.push_task_res(
