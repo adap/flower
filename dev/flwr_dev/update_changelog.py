@@ -25,8 +25,9 @@ except ModuleNotFoundError:
     import tomli as tomllib
 from datetime import date
 from sys import argv
-from typing import Optional
+from typing import Annotated, Optional
 
+import typer
 from github import Github
 from github.PullRequest import PullRequest
 from github.Repository import Repository
@@ -274,10 +275,14 @@ def _bump_minor_version(tag: Tag) -> Optional[str]:
     return new_version
 
 
-def main() -> None:
+def generate_changelog(
+    gh_token: Annotated[
+        str, typer.Argument(help="A GitHub API token with read access.")
+    ]
+):
     """Update changelog using the descriptions of PRs since the latest tag."""
     # Initialize GitHub Client with provided token (as argument)
-    gh_api = Github(argv[1])
+    gh_api = Github(gh_token)
     repo, latest_tag = _get_latest_tag(gh_api)
     if not latest_tag:
         print("No tags found in the repository.")
@@ -294,4 +299,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    generate_changelog(argv[1])

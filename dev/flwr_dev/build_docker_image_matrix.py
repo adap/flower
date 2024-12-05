@@ -473,22 +473,17 @@ DISTRO_VERSION={distro_version}
     return base_images, binary_images
 
 
-if __name__ == "__main__":
-    arg_parser = argparse.ArgumentParser(
-        description="Generate Github Docker workflow matrix"
-    )
-    arg_parser.add_argument("--flwr-version", type=str, required=True)
-    arg_parser.add_argument("--flwr-package", type=str, default="flwr")
-    arg_parser.add_argument(
-        "--matrix", choices=["stable", "nightly", "unstable"], default="stable"
-    )
-
-    args = arg_parser.parse_args()
-
-    flwr_version = args.flwr_version
-    flwr_package = args.flwr_package
-    matrix = args.matrix
-
+def build_images(
+    flwr_version: str = typer.Option(..., help="The Flower version"),
+    flwr_package: str = typer.Option("flwr", help="The Flower package"),
+    matrix: str = typer.Option(
+        "stable",
+        help="The workflow matrix type",
+        case_sensitive=False,
+        show_choices=True,
+        choices=["stable", "nightly", "unstable"],
+    ),
+):
     if matrix == "stable":
         base_images, binary_images = build_stable_matrix(flwr_version)
     elif matrix == "nightly":
@@ -520,3 +515,7 @@ if __name__ == "__main__":
             }
         )
     )
+
+
+if __name__ == "__main__":
+    typer.run(build_images)
