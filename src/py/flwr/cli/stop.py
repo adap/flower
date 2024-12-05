@@ -30,11 +30,12 @@ from flwr.cli.config_utils import (
 from flwr.common.constant import FAB_CONFIG_FILE
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
+from flwr.proto.exec_pb2 import StopRunRequest, StopRunResponse  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 
 
 def stop(
-    run_id: Annotated[  # pylint: disable=unused-argument
+    run_id: Annotated[
         int,
         typer.Argument(help="The Flower run ID to stop"),
     ],
@@ -48,13 +49,6 @@ def stop(
     ] = None,
 ) -> None:
     """Stop a run."""
-    typer.secho(
-        "\n\nWARNING: `flwr stop` is not yet implemented and "
-        "will be available in a future release.\n\n",
-        fg=typer.colors.RED,
-        bold=True,
-    )
-
     # Load and validate federation config
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
@@ -76,7 +70,12 @@ def stop(
 
     try:
         channel = _init_channel(app, federation_config)
-        stub = ExecStub(channel)  # pylint: disable=unused-variable # noqa: F841
+        stub = ExecStub(channel)
+
+        # Stop the specified run ID
+        if run_id is not None:
+            typer.secho(f"✋ Stopping run ID {run_id}...", fg=typer.colors.GREEN)
+            _stop_run(stub, run_id)
 
     except ValueError as err:
         typer.secho(
@@ -111,7 +110,19 @@ def _init_channel(app: Path, federation_config: dict[str, Any]) -> grpc.Channel:
 
 
 def _stop_run(
-    stub: ExecStub,  # pylint: disable=unused-argument
-    run_id: int,  # pylint: disable=unused-argument
+    stub: ExecStub,
+    run_id: int,
 ) -> None:
     """Stop a run."""
+    # Stop run
+    res: StopRunResponse = stub.StopRun(StopRunRequest(run_id=run_id))
+
+    if not res.success:
+        typer.secho(
+            f"❌ Failed to stop run ID {run_id}",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+
+    typer.secho(f"✅ Successfully stopped run ID {run_id}", fg=typer.colors.GREEN)
