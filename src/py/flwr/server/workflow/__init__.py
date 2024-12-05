@@ -16,10 +16,11 @@
 
 
 from .default_workflows import DefaultWorkflow
-from .secure_aggregation import SecAggPlusWorkflow, SecAggWorkflow
+from .secure_aggregation import SecAggPlusAggregator, SecAggPlusWorkflow, SecAggWorkflow
 
 __all__ = [
     "DefaultWorkflow",
+    "SecAggPlusAggregator",
     "SecAggPlusWorkflow",
     "SecAggWorkflow",
 ]
