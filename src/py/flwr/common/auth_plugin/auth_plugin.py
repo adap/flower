@@ -79,9 +79,9 @@ class CliAuthPlugin(ABC):
         """Write relevant auth tokens to the provided metadata."""
 
     @abstractmethod
-    def store_tokens(self, metadata: dict[str, Any]) -> None:
-        """Store refresh tokens from the provided metadata.
+    def store_tokens(self, config: dict[str, Any]) -> None:
+        """Store the tokens from the provided config.
 
-        The tokens will be stored in the .credentials/ folder inside the Flower
-        directory.
+        The tokens will be saved as a JSON file in the `.credentials/` folder inside the
+        Flower directory.
         """
