@@ -26,6 +26,9 @@ service Exec {
   // Start run upon request
   rpc StartRun(StartRunRequest) returns (StartRunResponse) {}
 
+  // Stop run upon request
+  rpc StopRun(StopRunRequest) returns (StopRunResponse) {}
+
   // Start log stream upon request
   rpc StreamLogs(StreamLogsRequest) returns (stream StreamLogsResponse) {}
 
@@ -52,3 +55,5 @@ message ListRunsResponse {
   map<uint64, Run> run_dict = 1;
   string now = 2;
 }
+message StopRunRequest { uint64 run_id = 1; }
+message StopRunResponse { bool success = 1; }

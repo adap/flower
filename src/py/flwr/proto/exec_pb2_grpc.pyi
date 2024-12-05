@@ -14,6 +14,11 @@ class ExecStub:
         flwr.proto.exec_pb2.StartRunResponse]
     """Start run upon request"""
 
+    StopRun: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.exec_pb2.StopRunRequest,
+        flwr.proto.exec_pb2.StopRunResponse]
+    """Stop run upon request"""
+
     StreamLogs: grpc.UnaryStreamMultiCallable[
         flwr.proto.exec_pb2.StreamLogsRequest,
         flwr.proto.exec_pb2.StreamLogsResponse]
@@ -32,6 +37,14 @@ class ExecServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.exec_pb2.StartRunResponse:
         """Start run upon request"""
+        pass
+
+    @abc.abstractmethod
+    def StopRun(self,
+        request: flwr.proto.exec_pb2.StopRunRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.exec_pb2.StopRunResponse:
+        """Stop run upon request"""
         pass
 
     @abc.abstractmethod
