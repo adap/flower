@@ -143,7 +143,6 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             )
 
         run_status = state.get_run_status({request.run_id})[request.run_id]
-
         if run_status.status == Status.FINISHED:
             context.abort(
                 grpc.StatusCode.FAILED_PRECONDITION,
@@ -154,7 +153,6 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             run_id=request.run_id,
             new_status=RunStatus(Status.FINISHED, SubStatus.STOPPED, ""),
         )
-
         return StopRunResponse(success=update_success)
 
 
