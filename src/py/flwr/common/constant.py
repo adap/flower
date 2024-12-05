@@ -112,6 +112,7 @@ MAX_RETRY_DELAY = 20  # Maximum delay duration between two consecutive retries.
 
 AUTH_TYPE = "auth_type"
 
+
 class MessageType:
     """Message type."""
 

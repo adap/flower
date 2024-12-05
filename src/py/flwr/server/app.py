@@ -41,6 +41,7 @@ from flwr.common.args import try_obtain_server_certificates
 from flwr.common.auth_plugin import ExecAuthPlugin
 from flwr.common.config import get_flwr_dir, parse_config_args
 from flwr.common.constant import (
+    AUTH_TYPE,
     CLIENT_OCTET,
     EXEC_API_DEFAULT_SERVER_ADDRESS,
     FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS,
@@ -82,8 +83,6 @@ from .superlink.fleet.grpc_bidi.grpc_server import (
     start_grpc_server,
 )
 from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
-from flwr.common.auth_plugin import ExecAuthPlugin
-from flwr.common.constant import AUTH_TYPE
 from .superlink.fleet.grpc_rere.server_interceptor import AuthenticateServerInterceptor
 from .superlink.linkstate import LinkStateFactory
 from .superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
@@ -103,6 +102,7 @@ except ImportError:
     def get_exec_auth_plugins() -> dict[str, type[ExecAuthPlugin]]:
         """Return all Exec API authentication plugins."""
         raise ImportError(AUTH_PLUGIN_IMPORT_ERROR)
+
 
 def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     *,

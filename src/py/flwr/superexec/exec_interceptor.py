@@ -77,7 +77,9 @@ class ExecInterceptor(grpc.ServerInterceptor):  # type: ignore
         ) -> Response:
             if isinstance(
                 request, (GetAuthTokensRequest, GetAuthTokensRequest)
-            ) or self.auth_plugin.validate_tokens_in_metadata(context.invocation_metadata()):
+            ) or self.auth_plugin.validate_tokens_in_metadata(
+                context.invocation_metadata()
+            ):
                 return method_handler.unary_unary(request, context)  # type: ignore
 
             if self.auth_plugin.refresh_tokens(context):
