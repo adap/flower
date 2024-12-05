@@ -18,12 +18,10 @@ Workflow Details:
 - **Unstable**: Triggered on main branch commits. Builds simplified matrix (latest Python, Ubuntu only).
 """
 
-import sys
-import argparse
 import json
 from dataclasses import asdict, dataclass, field
-from enum import Enum
-from typing import Annotated, Any, Callable, Optional
+from enum import StrEnum
+from typing import Any, Callable, Optional
 
 import typer
 
@@ -31,10 +29,10 @@ import typer
 # class DistroName(StrEnum):
 #     ALPINE = "alpine"
 #     UBUNTU = "ubuntu"
-assert sys.version_info < (3, 11), "Script requires Python 3.9 or lower."
+# assert sys.version_info < (3, 11), "Script requires Python 3.9 or lower."
 
 
-class _DistroName(str, Enum):
+class _DistroName(StrEnum):
     ALPINE = "alpine"
     UBUNTU = "ubuntu"
 
@@ -56,18 +54,18 @@ DOCKERFILE_ROOT = "src/docker"
 
 
 @dataclass
-class Variant:
-    distro: Distro
+class _Variant:
+    distro: _Distro
     extras: Optional[Any] = None
 
 
 @dataclass
-class CpuVariant:
+class _CpuVariant:
     pass
 
 
 @dataclass
-class CudaVariant:
+class _CudaVariant:
     version: str
 
 
@@ -77,41 +75,41 @@ CUDA_VERSIONS_CONFIG = [
     ("12.1.0", "22.04"),
     ("12.3.2", "22.04"),
 ]
-LATEST_SUPPORTED_CUDA_VERSION = Variant(
-    Distro(DistroName.UBUNTU, "22.04"),
-    CudaVariant(version="12.4.1"),
+LATEST_SUPPORTED_CUDA_VERSION = _Variant(
+    _Distro(_DistroName.UBUNTU, "22.04"),
+    _CudaVariant(version="12.4.1"),
 )
 
 # ubuntu base image
-UBUNTU_VARIANT = Variant(
-    Distro(DistroName.UBUNTU, "24.04"),
-    CpuVariant(),
+UBUNTU_VARIANT = _Variant(
+    _Distro(_DistroName.UBUNTU, "24.04"),
+    _CpuVariant(),
 )
 
 
 # alpine base image
-ALPINE_VARIANT = Variant(
-    Distro(DistroName.ALPINE, "3.19"),
-    CpuVariant(),
+ALPINE_VARIANT = _Variant(
+    _Distro(_DistroName.ALPINE, "3.19"),
+    _CpuVariant(),
 )
 
 
 # ubuntu cuda base images
 CUDA_VARIANTS = [
-    Variant(
-        Distro(DistroName.UBUNTU, ubuntu_version),
-        CudaVariant(version=cuda_version),
+    _Variant(
+        _Distro(_DistroName.UBUNTU, ubuntu_version),
+        _CudaVariant(version=cuda_version),
     )
     for (cuda_version, ubuntu_version) in CUDA_VERSIONS_CONFIG
 ] + [LATEST_SUPPORTED_CUDA_VERSION]
 
 
-def remove_patch_version(version: str) -> str:
+def _remove_patch_version(version: str) -> str:
     return ".".join(version.split(".")[0:2])
 
 
 @dataclass
-class BaseImageBuilder:
+class _BaseImageBuilder:
     file_dir_fn: Callable[[Any], str]
     tags_fn: Callable[[Any], list[str]]
     build_args_fn: Callable[[Any], str]
@@ -123,7 +121,7 @@ class BaseImageBuilder:
 
 
 @dataclass
-class BaseImage(BaseImageBuilder):
+class _BaseImage(_BaseImageBuilder):
     namespace_repository: str = "flwr/base"
 
     @property
@@ -185,7 +183,7 @@ def _generate_binary_images(
 
 def _tag_latest_alpine_with_flwr_version(image: _BaseImage) -> list[str]:
     if (
-        image.build_args.variant.distro.name == DistroName.ALPINE
+        image.build_args.variant.distro.name == _DistroName.ALPINE
         and image.build_args.python_version == LATEST_SUPPORTED_PYTHON_VERSION
     ):
         return image.tags + [image.build_args.flwr_version]
@@ -195,9 +193,9 @@ def _tag_latest_alpine_with_flwr_version(image: _BaseImage) -> list[str]:
 
 def _tag_latest_ubuntu_with_flwr_version(image: _BaseImage) -> list[str]:
     if (
-        image.build_args.variant.distro.name == DistroName.UBUNTU
+        image.build_args.variant.distro.name == _DistroName.UBUNTU
         and image.build_args.python_version == LATEST_SUPPORTED_PYTHON_VERSION
-        and isinstance(image.build_args.variant.extras, CpuVariant)
+        and isinstance(image.build_args.variant.extras, _CpuVariant)
     ):
         return image.tags + [image.build_args.flwr_version]
     else:
@@ -207,10 +205,10 @@ def _tag_latest_ubuntu_with_flwr_version(image: _BaseImage) -> list[str]:
 #
 # Build matrix for stable releases
 #
-def build_stable_matrix(flwr_version: str) -> List[BaseImage]:
+def _build_stable_matrix(flwr_version: str) -> list[_BaseImage]:
     @dataclass
     class StableBaseImageBuildArgs:
-        variant: Variant
+        variant: _Variant
         python_version: str
         flwr_version: str
 
@@ -230,7 +228,7 @@ DISTRO_VERSION={distro_version}
     ]
 
     cpu_base_images = [
-        BaseImage(
+        _BaseImage(
             file_dir_fn=lambda args: f"{DOCKERFILE_ROOT}/base/{args.variant.distro.name.value}",
             tags_fn=lambda args: [
                 f"{args.flwr_version}-py{args.python_version}-{args.variant.distro.name.value}{args.variant.distro.version}"
@@ -255,10 +253,10 @@ DISTRO_VERSION={distro_version}
     cuda_build_args = cpu_build_args + """CUDA_VERSION={cuda_version}"""
 
     cuda_base_image = [
-        BaseImage(
+        _BaseImage(
             file_dir_fn=lambda args: f"{DOCKERFILE_ROOT}/base/{args.variant.distro.name.value}-cuda",
             tags_fn=lambda args: [
-                f"{args.flwr_version}-py{args.python_version}-cu{remove_patch_version(args.variant.extras.version)}-{args.variant.distro.name.value}{args.variant.distro.version}",
+                f"{args.flwr_version}-py{args.python_version}-cu{_remove_patch_version(args.variant.extras.version)}-{args.variant.distro.name.value}{args.variant.distro.version}",
             ],
             build_args_fn=lambda args: cuda_build_args.format(
                 python_version=args.python_version,
@@ -277,41 +275,41 @@ DISTRO_VERSION={distro_version}
 
     binary_images = (
         # ubuntu and alpine images for the latest supported python version
-        generate_binary_images(
+        _generate_binary_images(
             "superlink",
             base_images,
-            tag_latest_alpine_with_flwr_version,
+            _tag_latest_alpine_with_flwr_version,
             lambda image: image.build_args.python_version
             == LATEST_SUPPORTED_PYTHON_VERSION
-            and isinstance(image.build_args.variant.extras, CpuVariant),
+            and isinstance(image.build_args.variant.extras, _CpuVariant),
         )
         # ubuntu images for each supported python version
-        + generate_binary_images(
+        + _generate_binary_images(
             "supernode",
             base_images,
-            tag_latest_alpine_with_flwr_version,
+            _tag_latest_alpine_with_flwr_version,
             lambda image: (
-                image.build_args.variant.distro.name == DistroName.UBUNTU
-                and isinstance(image.build_args.variant.extras, CpuVariant)
+                image.build_args.variant.distro.name == _DistroName.UBUNTU
+                and isinstance(image.build_args.variant.extras, _CpuVariant)
             )
             or (
-                image.build_args.variant.distro.name == DistroName.ALPINE
+                image.build_args.variant.distro.name == _DistroName.ALPINE
                 and image.build_args.python_version == LATEST_SUPPORTED_PYTHON_VERSION
             ),
         )
         # ubuntu images for each supported python version
-        + generate_binary_images(
+        + _generate_binary_images(
             "serverapp",
             base_images,
-            tag_latest_ubuntu_with_flwr_version,
-            lambda image: image.build_args.variant.distro.name == DistroName.UBUNTU,
+            _tag_latest_ubuntu_with_flwr_version,
+            lambda image: image.build_args.variant.distro.name == _DistroName.UBUNTU,
         )
         # ubuntu images for each supported python version
-        + generate_binary_images(
+        + _generate_binary_images(
             "clientapp",
             base_images,
-            tag_latest_ubuntu_with_flwr_version,
-            lambda image: image.build_args.variant.distro.name == DistroName.UBUNTU,
+            _tag_latest_ubuntu_with_flwr_version,
+            lambda image: image.build_args.variant.distro.name == _DistroName.UBUNTU,
         )
     )
 
@@ -321,10 +319,10 @@ DISTRO_VERSION={distro_version}
 #
 # Build matrix for unstable releases
 #
-def build_unstable_matrix(flwr_version_ref: str) -> List[BaseImage]:
+def _build_unstable_matrix(flwr_version_ref: str) -> list[_BaseImage]:
     @dataclass
     class UnstableBaseImageBuildArgs:
-        variant: Variant
+        variant: _Variant
         python_version: str
         flwr_version_ref: str
 
@@ -338,7 +336,7 @@ DISTRO={distro_name}
 DISTRO_VERSION={distro_version}
 """
 
-    cpu_base_image = BaseImage(
+    cpu_base_image = _BaseImage(
         file_dir_fn=lambda args: f"{DOCKERFILE_ROOT}/base/{args.variant.distro.name.value}",
         tags_fn=lambda _: ["unstable"],
         build_args_fn=lambda args: cpu_build_args.format(
@@ -356,7 +354,7 @@ DISTRO_VERSION={distro_version}
 
     cuda_build_args = cpu_build_args + """CUDA_VERSION={cuda_version}"""
 
-    cuda_base_image = BaseImage(
+    cuda_base_image = _BaseImage(
         file_dir_fn=lambda args: f"{DOCKERFILE_ROOT}/base/{args.variant.distro.name.value}-cuda",
         tags_fn=lambda _: ["unstable-cuda"],
         build_args_fn=lambda args: cuda_build_args.format(
@@ -373,20 +371,20 @@ DISTRO_VERSION={distro_version}
     base_images = [cpu_base_image]
 
     binary_images = (
-        generate_binary_images(
+        _generate_binary_images(
             "superlink",
             base_images,
             lambda image: image.tags,
-            lambda image: isinstance(image.build_args.variant.extras, CpuVariant),
+            lambda image: isinstance(image.build_args.variant.extras, _CpuVariant),
         )
-        + generate_binary_images(
+        + _generate_binary_images(
             "supernode",
             base_images,
             lambda image: image.tags,
-            lambda image: isinstance(image.build_args.variant.extras, CpuVariant),
+            lambda image: isinstance(image.build_args.variant.extras, _CpuVariant),
         )
-        + generate_binary_images("serverapp", base_images, lambda image: image.tags)
-        + generate_binary_images("clientapp", base_images, lambda image: image.tags)
+        + _generate_binary_images("serverapp", base_images, lambda image: image.tags)
+        + _generate_binary_images("clientapp", base_images, lambda image: image.tags)
     )
 
     return base_images, binary_images
@@ -395,10 +393,10 @@ DISTRO_VERSION={distro_version}
 #
 # Build matrix for nightly releases
 #
-def build_nightly_matrix(flwr_version: str, flwr_package: str) -> List[BaseImage]:
+def _build_nightly_matrix(flwr_version: str, flwr_package: str) -> list[_BaseImage]:
     @dataclass
     class NightlyBaseImageBuildArgs:
-        variant: Variant
+        variant: _Variant
         python_version: str
         flwr_version: str
         flwr_package: str
@@ -414,7 +412,7 @@ DISTRO={distro_name}
 DISTRO_VERSION={distro_version}
 """
 
-    cpu_base_image = BaseImage(
+    cpu_base_image = _BaseImage(
         file_dir_fn=lambda args: f"{DOCKERFILE_ROOT}/base/{args.variant.distro.name.value}",
         tags_fn=lambda args: [args.flwr_version, "nightly"],
         build_args_fn=lambda args: cpu_build_args.format(
@@ -436,7 +434,7 @@ DISTRO_VERSION={distro_version}
 
     cuda_build_args = cpu_build_args + """CUDA_VERSION={cuda_version}"""
 
-    cuda_base_image = BaseImage(
+    cuda_base_image = _BaseImage(
         file_dir_fn=lambda args: f"{DOCKERFILE_ROOT}/base/{args.variant.distro.name.value}-cuda",
         tags_fn=lambda args: [f"{args.flwr_version}-cuda", "nightly-cuda"],
         build_args_fn=lambda args: cuda_build_args.format(
@@ -454,20 +452,20 @@ DISTRO_VERSION={distro_version}
     base_images = [cpu_base_image]
 
     binary_images = (
-        generate_binary_images(
+        _generate_binary_images(
             "superlink",
             base_images,
             lambda image: image.tags,
-            lambda image: isinstance(image.build_args.variant.extras, CpuVariant),
+            lambda image: isinstance(image.build_args.variant.extras, _CpuVariant),
         )
-        + generate_binary_images(
+        + _generate_binary_images(
             "supernode",
             base_images,
             lambda image: image.tags,
-            lambda image: isinstance(image.build_args.variant.extras, CpuVariant),
+            lambda image: isinstance(image.build_args.variant.extras, _CpuVariant),
         )
-        + generate_binary_images("serverapp", base_images, lambda image: image.tags)
-        + generate_binary_images("clientapp", base_images, lambda image: image.tags)
+        + _generate_binary_images("serverapp", base_images, lambda image: image.tags)
+        + _generate_binary_images("clientapp", base_images, lambda image: image.tags)
     )
 
     return base_images, binary_images
@@ -484,12 +482,13 @@ def build_images(
         choices=["stable", "nightly", "unstable"],
     ),
 ):
+    """Build updated docker images."""
     if matrix == "stable":
-        base_images, binary_images = build_stable_matrix(flwr_version)
+        base_images, binary_images = _build_stable_matrix(flwr_version)
     elif matrix == "nightly":
-        base_images, binary_images = build_nightly_matrix(flwr_version, flwr_package)
+        base_images, binary_images = _build_nightly_matrix(flwr_version, flwr_package)
     else:
-        base_images, binary_images = build_unstable_matrix(flwr_version)
+        base_images, binary_images = _build_unstable_matrix(flwr_version)
 
     print(
         json.dumps(
