@@ -74,6 +74,7 @@ message PushTaskInsResponse { repeated string task_ids = 2; }
 message PullTaskResRequest {
   Node node = 1;
   repeated string task_ids = 2;
+  uint64 run_id = 3;
 }
 message PullTaskResResponse { repeated TaskRes task_res_list = 1; }
 

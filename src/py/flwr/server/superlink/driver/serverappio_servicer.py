@@ -89,6 +89,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         """Get available nodes."""
         log(DEBUG, "ServerAppIoServicer.GetNodes")
         state: LinkState = self.state_factory.state()
+        _abort_if_run_stopped(request.run_id, state, context)
         all_ids: set[int] = state.get_nodes(request.run_id)
         nodes: list[Node] = [
             Node(node_id=node_id, anonymous=False) for node_id in all_ids
@@ -143,6 +144,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         # Store each TaskIns
         task_ids: list[Optional[UUID]] = []
         for task_ins in request.task_ins_list:
+            _abort_if_run_stopped(task_ins.run_id, state, context)
             task_id: Optional[UUID] = state.store_task_ins(task_ins=task_ins)
             task_ids.append(task_id)
 
@@ -161,6 +163,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         # Init state
         state: LinkState = self.state_factory.state()
+        _abort_if_run_stopped(request.run_id, state, context)
 
         # Register callback
         def on_rpc_done() -> None:
@@ -259,6 +262,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         """Push ServerApp process outputs."""
         log(DEBUG, "ServerAppIoServicer.PushServerAppOutputs")
         state = self.state_factory.state()
+        _abort_if_run_stopped(request.run_id, state, context)
         state.set_serverapp_context(request.run_id, context_from_proto(request.context))
         return PushServerAppOutputsResponse()
 
@@ -304,3 +308,11 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 def _raise_if(validation_error: bool, detail: str) -> None:
     if validation_error:
         raise ValueError(f"Malformed PushTaskInsRequest: {detail}")
+
+
+def _abort_if_run_stopped(
+    run_id: int, state: LinkState, context: grpc.ServicerContext
+) -> None:
+    run_status = state.get_run_status({run_id})[run_id]
+    if (run_status.status == Status.FINISHED) & (run_status.sub_status == "STOPPED"):
+        context.abort(grpc.StatusCode.PERMISSION_DENIED, "Run is stopped")
