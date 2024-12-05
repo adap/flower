@@ -23,13 +23,14 @@ from typing import Any
 import grpc
 
 from flwr.common import now
-from flwr.common.constant import LOG_STREAM_INTERVAL, Status
+from flwr.common.constant import LOG_STREAM_INTERVAL, Status, SubStatus
 from flwr.common.logger import log
 from flwr.common.serde import (
     configs_record_from_proto,
     run_to_proto,
     user_config_from_proto,
 )
+from flwr.common.typing import RunStatus
 from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     ListRunsRequest,
@@ -133,7 +134,26 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
     ) -> StopRunResponse:
         """Stop a given run ID."""
         log(INFO, "ExecServicer.StopRun")
-        raise NotImplementedError()
+        state = self.linkstate_factory.state()
+
+        # Exit if `run_id` not found
+        if not state.get_run(request.run_id):
+            context.abort(
+                grpc.StatusCode.NOT_FOUND, f"Run ID {request.run_id} not found"
+            )
+
+        run_status = state.get_run_status({request.run_id})[request.run_id]
+        if run_status.status == Status.FINISHED:
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                f"Run ID {request.run_id} is already finished",
+            )
+
+        update_success = state.update_run_status(
+            run_id=request.run_id,
+            new_status=RunStatus(Status.FINISHED, SubStatus.STOPPED, ""),
+        )
+        return StopRunResponse(success=update_success)
 
 
 def _create_list_runs_response(run_ids: set[int], state: LinkState) -> ListRunsResponse:
