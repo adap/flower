@@ -26,6 +26,10 @@ echo "- docformatter: start"
 python -m docformatter -c -r src/py/flwr e2e -e src/py/flwr/proto
 echo "- docformatter:  done"
 
+echo "- docsig: start"
+docsig src/py/flwr
+echo "- docsig:  done"
+
 echo "- ruff: start"
 python -m ruff check src/py/flwr
 echo "- ruff: done"
@@ -55,6 +59,22 @@ python -m mdformat --check --number doc/source examples
 echo "- mdformat: done"
 
 echo "- All Markdown checks passed"
+
+echo "- Start TOML checks"
+
+echo "- taplo: start"
+taplo fmt --check
+echo "- taplo: done"
+
+echo "- All TOML checks passed"
+
+echo "- Start rST checks"
+
+echo "- docstrfmt: start"
+docstrfmt --check doc/source
+echo "- docstrfmt: done"
+
+echo "- All rST checks passed"
 
 echo "- Start license checks"
 

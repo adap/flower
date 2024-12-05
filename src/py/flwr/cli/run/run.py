@@ -14,25 +14,44 @@
 # ==============================================================================
 """Flower command line interface `run` command."""
 
-import hashlib
+import io
 import json
 import subprocess
-import sys
 from logging import DEBUG
 from pathlib import Path
-from typing import Annotated, Any, Optional
+from typing import Annotated, Any, Optional, Union
 
 import typer
+from rich.console import Console
 
 from flwr.cli.build import build
-from flwr.cli.config_utils import load_and_validate
-from flwr.common.config import flatten_dict, parse_config_args
+from flwr.cli.config_utils import (
+    get_fab_metadata,
+    load_and_validate,
+    validate_certificate_in_federation_config,
+    validate_federation_in_project_config,
+    validate_project_config,
+)
+from flwr.common.config import (
+    flatten_dict,
+    parse_config_args,
+    user_config_to_configsrecord,
+)
+from flwr.common.constant import CliOutputFormat
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
-from flwr.common.logger import log
-from flwr.common.serde import fab_to_proto, user_config_to_proto
+from flwr.common.logger import log, redirect_output, remove_emojis, restore_output
+from flwr.common.serde import (
+    configs_record_to_proto,
+    fab_to_proto,
+    user_config_to_proto,
+)
 from flwr.common.typing import Fab
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
+
+from ..log import start_stream
+
+CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
@@ -62,100 +81,73 @@ def run(
             "inside the `pyproject.toml` in order to be properly overriden.",
         ),
     ] = None,
+    stream: Annotated[
+        bool,
+        typer.Option(
+            "--stream",
+            help="Use `--stream` with `flwr run` to display logs;\n "
+            "logs are not streamed by default.",
+        ),
+    ] = False,
+    output_format: Annotated[
+        str,
+        typer.Option(
+            "--format",
+            case_sensitive=False,
+            help="Format output using 'default' view or 'json'",
+        ),
+    ] = CliOutputFormat.DEFAULT,
 ) -> None:
     """Run Flower App."""
-    typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
+    suppress_output = output_format == CliOutputFormat.JSON
+    captured_output = io.StringIO()
+    try:
+        if suppress_output:
+            redirect_output(captured_output)
+        typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
-    pyproject_path = app / "pyproject.toml" if app else None
-    config, errors, warnings = load_and_validate(path=pyproject_path)
-
-    if config is None:
-        typer.secho(
-            "Project configuration could not be loaded.\n"
-            "pyproject.toml is invalid:\n"
-            + "\n".join([f"- {line}" for line in errors]),
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        sys.exit()
-
-    if warnings:
-        typer.secho(
-            "Project configuration is missing the following "
-            "recommended properties:\n" + "\n".join([f"- {line}" for line in warnings]),
-            fg=typer.colors.RED,
-            bold=True,
+        pyproject_path = app / "pyproject.toml" if app else None
+        config, errors, warnings = load_and_validate(path=pyproject_path)
+        config = validate_project_config(config, errors, warnings)
+        federation, federation_config = validate_federation_in_project_config(
+            federation, config
         )
 
-    typer.secho("Success", fg=typer.colors.GREEN)
-
-    federation = federation or config["tool"]["flwr"]["federations"].get("default")
-
-    if federation is None:
-        typer.secho(
-            "❌ No federation name was provided and the project's `pyproject.toml` "
-            "doesn't declare a default federation (with a SuperExec address or an "
-            "`options.num-supernodes` value).",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
-
-    # Validate the federation exists in the configuration
-    federation_config = config["tool"]["flwr"]["federations"].get(federation)
-    if federation_config is None:
-        available_feds = {
-            fed for fed in config["tool"]["flwr"]["federations"] if fed != "default"
-        }
-        typer.secho(
-            f"❌ There is no `{federation}` federation declared in "
-            "`pyproject.toml`.\n The following federations were found:\n\n"
-            + "\n".join(available_feds),
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
-
-    if "address" in federation_config:
-        _run_with_superexec(app, federation_config, config_overrides)
-    else:
-        _run_without_superexec(app, federation_config, config_overrides, federation)
+        if "address" in federation_config:
+            _run_with_exec_api(
+                app, federation_config, config_overrides, stream, output_format
+            )
+        else:
+            _run_without_exec_api(app, federation_config, config_overrides, federation)
+    except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
+        if suppress_output:
+            restore_output()
+            e_message = captured_output.getvalue()
+            _print_json_error(e_message, err)
+        else:
+            typer.secho(
+                f"{err}",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+    finally:
+        if suppress_output:
+            restore_output()
+        captured_output.close()
 
 
-def _run_with_superexec(
+# pylint: disable-next=too-many-locals
+def _run_with_exec_api(
     app: Path,
     federation_config: dict[str, Any],
     config_overrides: Optional[list[str]],
+    stream: bool,
+    output_format: str,
 ) -> None:
 
-    insecure_str = federation_config.get("insecure")
-    if root_certificates := federation_config.get("root-certificates"):
-        root_certificates_bytes = (app / root_certificates).read_bytes()
-        if insecure := bool(insecure_str):
-            typer.secho(
-                "❌ `root_certificates` were provided but the `insecure` parameter"
-                "is set to `True`.",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-            raise typer.Exit(code=1)
-    else:
-        root_certificates_bytes = None
-        if insecure_str is None:
-            typer.secho(
-                "❌ To disable TLS, set `insecure = true` in `pyproject.toml`.",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-            raise typer.Exit(code=1)
-        if not (insecure := bool(insecure_str)):
-            typer.secho(
-                "❌ No certificate were given yet `insecure` is set to `False`.",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-            raise typer.Exit(code=1)
-
+    insecure, root_certificates_bytes = validate_certificate_in_federation_config(
+        app, federation_config
+    )
     channel = create_channel(
         server_address=federation_config["address"],
         insecure=insecure,
@@ -166,25 +158,52 @@ def _run_with_superexec(
     channel.subscribe(on_channel_state_change)
     stub = ExecStub(channel)
 
-    fab_path = Path(build(app))
-    content = fab_path.read_bytes()
-    fab = Fab(hashlib.sha256(content).hexdigest(), content)
+    fab_path, fab_hash = build(app)
+    content = Path(fab_path).read_bytes()
+    fab_id, fab_version = get_fab_metadata(Path(fab_path))
+
+    # Delete FAB file once the bytes is computed
+    Path(fab_path).unlink()
+
+    fab = Fab(fab_hash, content)
+
+    # Construct a `ConfigsRecord` out of a flattened `UserConfig`
+    fed_conf = flatten_dict(federation_config.get("options", {}))
+    c_record = user_config_to_configsrecord(fed_conf)
 
     req = StartRunRequest(
         fab=fab_to_proto(fab),
         override_config=user_config_to_proto(parse_config_args(config_overrides)),
-        federation_config=user_config_to_proto(
-            flatten_dict(federation_config.get("options"))
-        ),
+        federation_options=configs_record_to_proto(c_record),
     )
     res = stub.StartRun(req)
 
-    # Delete FAB file once it has been sent to the SuperExec
-    fab_path.unlink()
-    typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
+    if res.HasField("run_id"):
+        typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
+    else:
+        typer.secho("❌ Failed to start run", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+
+    if output_format == CliOutputFormat.JSON:
+        run_output = json.dumps(
+            {
+                "success": res.HasField("run_id"),
+                "run-id": res.run_id if res.HasField("run_id") else None,
+                "fab-id": fab_id,
+                "fab-name": fab_id.rsplit("/", maxsplit=1)[-1],
+                "fab-version": fab_version,
+                "fab-hash": fab_hash[:8],
+                "fab-filename": fab_path,
+            }
+        )
+        restore_output()
+        Console().print_json(run_output)
+
+    if stream:
+        start_stream(res.run_id, channel, CONN_REFRESH_PERIOD)
 
 
-def _run_without_superexec(
+def _run_without_exec_api(
     app: Optional[Path],
     federation_config: dict[str, Any],
     config_overrides: Optional[list[str]],
@@ -229,4 +248,16 @@ def _run_without_superexec(
         command,
         check=True,
         text=True,
+    )
+
+
+def _print_json_error(msg: str, e: Union[typer.Exit, Exception]) -> None:
+    """Print error message as JSON."""
+    Console().print_json(
+        json.dumps(
+            {
+                "success": False,
+                "error-message": remove_emojis(str(msg) + "\n" + str(e)),
+            }
+        )
     )

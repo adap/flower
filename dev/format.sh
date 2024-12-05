@@ -2,6 +2,8 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
+taplo fmt
+
 # Python
 flwr-dev check-copyrights src/py/flwr
 flwr-dev fix-init src/py/flwr
@@ -36,3 +38,6 @@ python -m nbstripout examples/*/*.ipynb --extra-keys "$KEYS"
 
 # Markdown
 python -m mdformat --number doc/source examples
+
+# RST
+docstrfmt doc/source
