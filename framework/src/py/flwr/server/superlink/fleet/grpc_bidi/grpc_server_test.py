@@ -28,7 +28,7 @@ from flwr.server.superlink.fleet.grpc_bidi.grpc_server import (
     valid_certificates,
 )
 
-root_dir = dirname(abspath(join(__file__, "../../../../../../..")))
+root_dir = dirname(abspath(join(__file__, "../../../../../../../..")))
 
 
 def load_certificates() -> tuple[str, str, str]:
