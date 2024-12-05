@@ -49,7 +49,7 @@ struct TableStruct_flwr_2fproto_2frecordset_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[17]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[18]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -103,12 +103,15 @@ extern RecordSet_MetricsEntry_DoNotUseDefaultTypeInternal _RecordSet_MetricsEntr
 class RecordSet_ParametersEntry_DoNotUse;
 struct RecordSet_ParametersEntry_DoNotUseDefaultTypeInternal;
 extern RecordSet_ParametersEntry_DoNotUseDefaultTypeInternal _RecordSet_ParametersEntry_DoNotUse_default_instance_;
-class Sint64List;
-struct Sint64ListDefaultTypeInternal;
-extern Sint64ListDefaultTypeInternal _Sint64List_default_instance_;
+class SintList;
+struct SintListDefaultTypeInternal;
+extern SintListDefaultTypeInternal _SintList_default_instance_;
 class StringList;
 struct StringListDefaultTypeInternal;
 extern StringListDefaultTypeInternal _StringList_default_instance_;
+class UintList;
+struct UintListDefaultTypeInternal;
+extern UintListDefaultTypeInternal _UintList_default_instance_;
 }  // namespace proto
 }  // namespace flwr
 PROTOBUF_NAMESPACE_OPEN
@@ -127,8 +130,9 @@ template<> ::flwr::proto::RecordSet* Arena::CreateMaybeMessage<::flwr::proto::Re
 template<> ::flwr::proto::RecordSet_ConfigsEntry_DoNotUse* Arena::CreateMaybeMessage<::flwr::proto::RecordSet_ConfigsEntry_DoNotUse>(Arena*);
 template<> ::flwr::proto::RecordSet_MetricsEntry_DoNotUse* Arena::CreateMaybeMessage<::flwr::proto::RecordSet_MetricsEntry_DoNotUse>(Arena*);
 template<> ::flwr::proto::RecordSet_ParametersEntry_DoNotUse* Arena::CreateMaybeMessage<::flwr::proto::RecordSet_ParametersEntry_DoNotUse>(Arena*);
-template<> ::flwr::proto::Sint64List* Arena::CreateMaybeMessage<::flwr::proto::Sint64List>(Arena*);
+template<> ::flwr::proto::SintList* Arena::CreateMaybeMessage<::flwr::proto::SintList>(Arena*);
 template<> ::flwr::proto::StringList* Arena::CreateMaybeMessage<::flwr::proto::StringList>(Arena*);
+template<> ::flwr::proto::UintList* Arena::CreateMaybeMessage<::flwr::proto::UintList>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace flwr {
 namespace proto {
@@ -291,24 +295,24 @@ class DoubleList final :
 };
 // -------------------------------------------------------------------
 
-class Sint64List final :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:flwr.proto.Sint64List) */ {
+class SintList final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:flwr.proto.SintList) */ {
  public:
-  inline Sint64List() : Sint64List(nullptr) {}
-  ~Sint64List() override;
-  explicit constexpr Sint64List(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  inline SintList() : SintList(nullptr) {}
+  ~SintList() override;
+  explicit constexpr SintList(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
-  Sint64List(const Sint64List& from);
-  Sint64List(Sint64List&& from) noexcept
-    : Sint64List() {
+  SintList(const SintList& from);
+  SintList(SintList&& from) noexcept
+    : SintList() {
     *this = ::std::move(from);
   }
 
-  inline Sint64List& operator=(const Sint64List& from) {
+  inline SintList& operator=(const SintList& from) {
     CopyFrom(from);
     return *this;
   }
-  inline Sint64List& operator=(Sint64List&& from) noexcept {
+  inline SintList& operator=(SintList&& from) noexcept {
     if (this == &from) return *this;
     if (GetOwningArena() == from.GetOwningArena()
   #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
@@ -331,20 +335,20 @@ class Sint64List final :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return default_instance().GetMetadata().reflection;
   }
-  static const Sint64List& default_instance() {
+  static const SintList& default_instance() {
     return *internal_default_instance();
   }
-  static inline const Sint64List* internal_default_instance() {
-    return reinterpret_cast<const Sint64List*>(
-               &_Sint64List_default_instance_);
+  static inline const SintList* internal_default_instance() {
+    return reinterpret_cast<const SintList*>(
+               &_SintList_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     1;
 
-  friend void swap(Sint64List& a, Sint64List& b) {
+  friend void swap(SintList& a, SintList& b) {
     a.Swap(&b);
   }
-  inline void Swap(Sint64List* other) {
+  inline void Swap(SintList* other) {
     if (other == this) return;
     if (GetOwningArena() == other->GetOwningArena()) {
       InternalSwap(other);
@@ -352,7 +356,7 @@ class Sint64List final :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(Sint64List* other) {
+  void UnsafeArenaSwap(SintList* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
     InternalSwap(other);
@@ -360,17 +364,17 @@ class Sint64List final :
 
   // implements Message ----------------------------------------------
 
-  inline Sint64List* New() const final {
-    return new Sint64List();
+  inline SintList* New() const final {
+    return new SintList();
   }
 
-  Sint64List* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<Sint64List>(arena);
+  SintList* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<SintList>(arena);
   }
   using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
-  void CopyFrom(const Sint64List& from);
+  void CopyFrom(const SintList& from);
   using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
-  void MergeFrom(const Sint64List& from);
+  void MergeFrom(const SintList& from);
   private:
   static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to, const ::PROTOBUF_NAMESPACE_ID::Message& from);
   public:
@@ -387,13 +391,13 @@ class Sint64List final :
   void SharedCtor();
   void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(Sint64List* other);
+  void InternalSwap(SintList* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "flwr.proto.Sint64List";
+    return "flwr.proto.SintList";
   }
   protected:
-  explicit Sint64List(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+  explicit SintList(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                        bool is_message_owned = false);
   private:
   static void ArenaDtor(void* object);
@@ -434,7 +438,7 @@ class Sint64List final :
   ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int64 >*
       mutable_vals();
 
-  // @@protoc_insertion_point(class_scope:flwr.proto.Sint64List)
+  // @@protoc_insertion_point(class_scope:flwr.proto.SintList)
  private:
   class _Internal;
 
@@ -442,6 +446,163 @@ class Sint64List final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int64 > vals_;
+  mutable std::atomic<int> _vals_cached_byte_size_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_flwr_2fproto_2frecordset_2eproto;
+};
+// -------------------------------------------------------------------
+
+class UintList final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:flwr.proto.UintList) */ {
+ public:
+  inline UintList() : UintList(nullptr) {}
+  ~UintList() override;
+  explicit constexpr UintList(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  UintList(const UintList& from);
+  UintList(UintList&& from) noexcept
+    : UintList() {
+    *this = ::std::move(from);
+  }
+
+  inline UintList& operator=(const UintList& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline UintList& operator=(UintList&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const UintList& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const UintList* internal_default_instance() {
+    return reinterpret_cast<const UintList*>(
+               &_UintList_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    2;
+
+  friend void swap(UintList& a, UintList& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(UintList* other) {
+    if (other == this) return;
+    if (GetOwningArena() == other->GetOwningArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(UintList* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline UintList* New() const final {
+    return new UintList();
+  }
+
+  UintList* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<UintList>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const UintList& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom(const UintList& from);
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to, const ::PROTOBUF_NAMESPACE_ID::Message& from);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(UintList* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "flwr.proto.UintList";
+  }
+  protected:
+  explicit UintList(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kValsFieldNumber = 1,
+  };
+  // repeated uint64 vals = 1;
+  int vals_size() const;
+  private:
+  int _internal_vals_size() const;
+  public:
+  void clear_vals();
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_vals(int index) const;
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
+      _internal_vals() const;
+  void _internal_add_vals(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
+      _internal_mutable_vals();
+  public:
+  ::PROTOBUF_NAMESPACE_ID::uint64 vals(int index) const;
+  void set_vals(int index, ::PROTOBUF_NAMESPACE_ID::uint64 value);
+  void add_vals(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
+      vals() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
+      mutable_vals();
+
+  // @@protoc_insertion_point(class_scope:flwr.proto.UintList)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 > vals_;
   mutable std::atomic<int> _vals_cached_byte_size_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_flwr_2fproto_2frecordset_2eproto;
@@ -496,7 +657,7 @@ class BoolList final :
                &_BoolList_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    2;
+    3;
 
   friend void swap(BoolList& a, BoolList& b) {
     a.Swap(&b);
@@ -652,7 +813,7 @@ class StringList final :
                &_StringList_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    3;
+    4;
 
   friend void swap(StringList& a, StringList& b) {
     a.Swap(&b);
@@ -810,7 +971,7 @@ class BytesList final :
                &_BytesList_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    4;
+    5;
 
   friend void swap(BytesList& a, BytesList& b) {
     a.Swap(&b);
@@ -968,7 +1129,7 @@ class Array final :
                &_Array_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    5;
+    6;
 
   friend void swap(Array& a, Array& b) {
     a.Swap(&b);
@@ -1171,8 +1332,10 @@ class MetricsRecordValue final :
   enum ValueCase {
     kDouble = 1,
     kSint64 = 2,
+    kUint64 = 3,
     kDoubleList = 21,
-    kSint64List = 22,
+    kSintList = 22,
+    kUintList = 23,
     VALUE_NOT_SET = 0,
   };
 
@@ -1181,7 +1344,7 @@ class MetricsRecordValue final :
                &_MetricsRecordValue_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    6;
+    7;
 
   friend void swap(MetricsRecordValue& a, MetricsRecordValue& b) {
     a.Swap(&b);
@@ -1254,8 +1417,10 @@ class MetricsRecordValue final :
   enum : int {
     kDoubleFieldNumber = 1,
     kSint64FieldNumber = 2,
+    kUint64FieldNumber = 3,
     kDoubleListFieldNumber = 21,
-    kSint64ListFieldNumber = 22,
+    kSintListFieldNumber = 22,
+    kUintListFieldNumber = 23,
   };
   // double double = 1;
   bool has_double_() const;
@@ -1283,6 +1448,19 @@ class MetricsRecordValue final :
   void _internal_set_sint64(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
+  // uint64 uint64 = 3;
+  bool has_uint64() const;
+  private:
+  bool _internal_has_uint64() const;
+  public:
+  void clear_uint64();
+  ::PROTOBUF_NAMESPACE_ID::uint64 uint64() const;
+  void set_uint64(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_uint64() const;
+  void _internal_set_uint64(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
   // .flwr.proto.DoubleList double_list = 21;
   bool has_double_list() const;
   private:
@@ -1301,23 +1479,41 @@ class MetricsRecordValue final :
       ::flwr::proto::DoubleList* double_list);
   ::flwr::proto::DoubleList* unsafe_arena_release_double_list();
 
-  // .flwr.proto.Sint64List sint64_list = 22;
-  bool has_sint64_list() const;
+  // .flwr.proto.SintList sint_list = 22;
+  bool has_sint_list() const;
   private:
-  bool _internal_has_sint64_list() const;
+  bool _internal_has_sint_list() const;
   public:
-  void clear_sint64_list();
-  const ::flwr::proto::Sint64List& sint64_list() const;
-  PROTOBUF_MUST_USE_RESULT ::flwr::proto::Sint64List* release_sint64_list();
-  ::flwr::proto::Sint64List* mutable_sint64_list();
-  void set_allocated_sint64_list(::flwr::proto::Sint64List* sint64_list);
+  void clear_sint_list();
+  const ::flwr::proto::SintList& sint_list() const;
+  PROTOBUF_MUST_USE_RESULT ::flwr::proto::SintList* release_sint_list();
+  ::flwr::proto::SintList* mutable_sint_list();
+  void set_allocated_sint_list(::flwr::proto::SintList* sint_list);
   private:
-  const ::flwr::proto::Sint64List& _internal_sint64_list() const;
-  ::flwr::proto::Sint64List* _internal_mutable_sint64_list();
+  const ::flwr::proto::SintList& _internal_sint_list() const;
+  ::flwr::proto::SintList* _internal_mutable_sint_list();
   public:
-  void unsafe_arena_set_allocated_sint64_list(
-      ::flwr::proto::Sint64List* sint64_list);
-  ::flwr::proto::Sint64List* unsafe_arena_release_sint64_list();
+  void unsafe_arena_set_allocated_sint_list(
+      ::flwr::proto::SintList* sint_list);
+  ::flwr::proto::SintList* unsafe_arena_release_sint_list();
+
+  // .flwr.proto.UintList uint_list = 23;
+  bool has_uint_list() const;
+  private:
+  bool _internal_has_uint_list() const;
+  public:
+  void clear_uint_list();
+  const ::flwr::proto::UintList& uint_list() const;
+  PROTOBUF_MUST_USE_RESULT ::flwr::proto::UintList* release_uint_list();
+  ::flwr::proto::UintList* mutable_uint_list();
+  void set_allocated_uint_list(::flwr::proto::UintList* uint_list);
+  private:
+  const ::flwr::proto::UintList& _internal_uint_list() const;
+  ::flwr::proto::UintList* _internal_mutable_uint_list();
+  public:
+  void unsafe_arena_set_allocated_uint_list(
+      ::flwr::proto::UintList* uint_list);
+  ::flwr::proto::UintList* unsafe_arena_release_uint_list();
 
   void clear_value();
   ValueCase value_case() const;
@@ -1326,8 +1522,10 @@ class MetricsRecordValue final :
   class _Internal;
   void set_has_double_();
   void set_has_sint64();
+  void set_has_uint64();
   void set_has_double_list();
-  void set_has_sint64_list();
+  void set_has_sint_list();
+  void set_has_uint_list();
 
   inline bool has_value() const;
   inline void clear_has_value();
@@ -1340,8 +1538,10 @@ class MetricsRecordValue final :
       ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized _constinit_;
     double double__;
     ::PROTOBUF_NAMESPACE_ID::int64 sint64_;
+    ::PROTOBUF_NAMESPACE_ID::uint64 uint64_;
     ::flwr::proto::DoubleList* double_list_;
-    ::flwr::proto::Sint64List* sint64_list_;
+    ::flwr::proto::SintList* sint_list_;
+    ::flwr::proto::UintList* uint_list_;
   } value_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::uint32 _oneof_case_[1];
@@ -1396,14 +1596,16 @@ class ConfigsRecordValue final :
   enum ValueCase {
     kDouble = 1,
     kSint64 = 2,
-    kBool = 3,
-    kString = 4,
-    kBytes = 5,
+    kUint64 = 3,
+    kBool = 4,
+    kString = 5,
+    kBytes = 6,
     kDoubleList = 21,
-    kSint64List = 22,
-    kBoolList = 23,
-    kStringList = 24,
-    kBytesList = 25,
+    kSintList = 22,
+    kUintList = 23,
+    kBoolList = 24,
+    kStringList = 25,
+    kBytesList = 26,
     VALUE_NOT_SET = 0,
   };
 
@@ -1412,7 +1614,7 @@ class ConfigsRecordValue final :
                &_ConfigsRecordValue_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    7;
+    8;
 
   friend void swap(ConfigsRecordValue& a, ConfigsRecordValue& b) {
     a.Swap(&b);
@@ -1485,14 +1687,16 @@ class ConfigsRecordValue final :
   enum : int {
     kDoubleFieldNumber = 1,
     kSint64FieldNumber = 2,
-    kBoolFieldNumber = 3,
-    kStringFieldNumber = 4,
-    kBytesFieldNumber = 5,
+    kUint64FieldNumber = 3,
+    kBoolFieldNumber = 4,
+    kStringFieldNumber = 5,
+    kBytesFieldNumber = 6,
     kDoubleListFieldNumber = 21,
-    kSint64ListFieldNumber = 22,
-    kBoolListFieldNumber = 23,
-    kStringListFieldNumber = 24,
-    kBytesListFieldNumber = 25,
+    kSintListFieldNumber = 22,
+    kUintListFieldNumber = 23,
+    kBoolListFieldNumber = 24,
+    kStringListFieldNumber = 25,
+    kBytesListFieldNumber = 26,
   };
   // double double = 1;
   bool has_double_() const;
@@ -1520,7 +1724,20 @@ class ConfigsRecordValue final :
   void _internal_set_sint64(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
-  // bool bool = 3;
+  // uint64 uint64 = 3;
+  bool has_uint64() const;
+  private:
+  bool _internal_has_uint64() const;
+  public:
+  void clear_uint64();
+  ::PROTOBUF_NAMESPACE_ID::uint64 uint64() const;
+  void set_uint64(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_uint64() const;
+  void _internal_set_uint64(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // bool bool = 4;
   bool has_bool_() const;
   private:
   bool _internal_has_bool_() const;
@@ -1533,7 +1750,7 @@ class ConfigsRecordValue final :
   void _internal_set_bool_(bool value);
   public:
 
-  // string string = 4;
+  // string string = 5;
   bool has_string() const;
   private:
   bool _internal_has_string() const;
@@ -1551,7 +1768,7 @@ class ConfigsRecordValue final :
   std::string* _internal_mutable_string();
   public:
 
-  // bytes bytes = 5;
+  // bytes bytes = 6;
   bool has_bytes() const;
   private:
   bool _internal_has_bytes() const;
@@ -1587,25 +1804,43 @@ class ConfigsRecordValue final :
       ::flwr::proto::DoubleList* double_list);
   ::flwr::proto::DoubleList* unsafe_arena_release_double_list();
 
-  // .flwr.proto.Sint64List sint64_list = 22;
-  bool has_sint64_list() const;
+  // .flwr.proto.SintList sint_list = 22;
+  bool has_sint_list() const;
   private:
-  bool _internal_has_sint64_list() const;
+  bool _internal_has_sint_list() const;
   public:
-  void clear_sint64_list();
-  const ::flwr::proto::Sint64List& sint64_list() const;
-  PROTOBUF_MUST_USE_RESULT ::flwr::proto::Sint64List* release_sint64_list();
-  ::flwr::proto::Sint64List* mutable_sint64_list();
-  void set_allocated_sint64_list(::flwr::proto::Sint64List* sint64_list);
+  void clear_sint_list();
+  const ::flwr::proto::SintList& sint_list() const;
+  PROTOBUF_MUST_USE_RESULT ::flwr::proto::SintList* release_sint_list();
+  ::flwr::proto::SintList* mutable_sint_list();
+  void set_allocated_sint_list(::flwr::proto::SintList* sint_list);
   private:
-  const ::flwr::proto::Sint64List& _internal_sint64_list() const;
-  ::flwr::proto::Sint64List* _internal_mutable_sint64_list();
+  const ::flwr::proto::SintList& _internal_sint_list() const;
+  ::flwr::proto::SintList* _internal_mutable_sint_list();
   public:
-  void unsafe_arena_set_allocated_sint64_list(
-      ::flwr::proto::Sint64List* sint64_list);
-  ::flwr::proto::Sint64List* unsafe_arena_release_sint64_list();
+  void unsafe_arena_set_allocated_sint_list(
+      ::flwr::proto::SintList* sint_list);
+  ::flwr::proto::SintList* unsafe_arena_release_sint_list();
 
-  // .flwr.proto.BoolList bool_list = 23;
+  // .flwr.proto.UintList uint_list = 23;
+  bool has_uint_list() const;
+  private:
+  bool _internal_has_uint_list() const;
+  public:
+  void clear_uint_list();
+  const ::flwr::proto::UintList& uint_list() const;
+  PROTOBUF_MUST_USE_RESULT ::flwr::proto::UintList* release_uint_list();
+  ::flwr::proto::UintList* mutable_uint_list();
+  void set_allocated_uint_list(::flwr::proto::UintList* uint_list);
+  private:
+  const ::flwr::proto::UintList& _internal_uint_list() const;
+  ::flwr::proto::UintList* _internal_mutable_uint_list();
+  public:
+  void unsafe_arena_set_allocated_uint_list(
+      ::flwr::proto::UintList* uint_list);
+  ::flwr::proto::UintList* unsafe_arena_release_uint_list();
+
+  // .flwr.proto.BoolList bool_list = 24;
   bool has_bool_list() const;
   private:
   bool _internal_has_bool_list() const;
@@ -1623,7 +1858,7 @@ class ConfigsRecordValue final :
       ::flwr::proto::BoolList* bool_list);
   ::flwr::proto::BoolList* unsafe_arena_release_bool_list();
 
-  // .flwr.proto.StringList string_list = 24;
+  // .flwr.proto.StringList string_list = 25;
   bool has_string_list() const;
   private:
   bool _internal_has_string_list() const;
@@ -1641,7 +1876,7 @@ class ConfigsRecordValue final :
       ::flwr::proto::StringList* string_list);
   ::flwr::proto::StringList* unsafe_arena_release_string_list();
 
-  // .flwr.proto.BytesList bytes_list = 25;
+  // .flwr.proto.BytesList bytes_list = 26;
   bool has_bytes_list() const;
   private:
   bool _internal_has_bytes_list() const;
@@ -1666,11 +1901,13 @@ class ConfigsRecordValue final :
   class _Internal;
   void set_has_double_();
   void set_has_sint64();
+  void set_has_uint64();
   void set_has_bool_();
   void set_has_string();
   void set_has_bytes();
   void set_has_double_list();
-  void set_has_sint64_list();
+  void set_has_sint_list();
+  void set_has_uint_list();
   void set_has_bool_list();
   void set_has_string_list();
   void set_has_bytes_list();
@@ -1686,11 +1923,13 @@ class ConfigsRecordValue final :
       ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized _constinit_;
     double double__;
     ::PROTOBUF_NAMESPACE_ID::int64 sint64_;
+    ::PROTOBUF_NAMESPACE_ID::uint64 uint64_;
     bool bool__;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr string_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr bytes_;
     ::flwr::proto::DoubleList* double_list_;
-    ::flwr::proto::Sint64List* sint64_list_;
+    ::flwr::proto::SintList* sint_list_;
+    ::flwr::proto::UintList* uint_list_;
     ::flwr::proto::BoolList* bool_list_;
     ::flwr::proto::StringList* string_list_;
     ::flwr::proto::BytesList* bytes_list_;
@@ -1750,7 +1989,7 @@ class ParametersRecord final :
                &_ParametersRecord_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    8;
+    9;
 
   friend void swap(ParametersRecord& a, ParametersRecord& b) {
     a.Swap(&b);
@@ -1953,7 +2192,7 @@ class MetricsRecord final :
                &_MetricsRecord_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    10;
+    11;
 
   friend void swap(MetricsRecord& a, MetricsRecord& b) {
     a.Swap(&b);
@@ -2134,7 +2373,7 @@ class ConfigsRecord final :
                &_ConfigsRecord_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    12;
+    13;
 
   friend void swap(ConfigsRecord& a, ConfigsRecord& b) {
     a.Swap(&b);
@@ -2365,7 +2604,7 @@ class RecordSet final :
                &_RecordSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    16;
+    17;
 
   friend void swap(RecordSet& a, RecordSet& b) {
     a.Swap(&b);
@@ -2577,52 +2816,103 @@ DoubleList::mutable_vals() {
 
 // -------------------------------------------------------------------
 
-// Sint64List
+// SintList
 
 // repeated sint64 vals = 1;
-inline int Sint64List::_internal_vals_size() const {
+inline int SintList::_internal_vals_size() const {
   return vals_.size();
 }
-inline int Sint64List::vals_size() const {
+inline int SintList::vals_size() const {
   return _internal_vals_size();
 }
-inline void Sint64List::clear_vals() {
+inline void SintList::clear_vals() {
   vals_.Clear();
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 Sint64List::_internal_vals(int index) const {
+inline ::PROTOBUF_NAMESPACE_ID::int64 SintList::_internal_vals(int index) const {
   return vals_.Get(index);
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 Sint64List::vals(int index) const {
-  // @@protoc_insertion_point(field_get:flwr.proto.Sint64List.vals)
+inline ::PROTOBUF_NAMESPACE_ID::int64 SintList::vals(int index) const {
+  // @@protoc_insertion_point(field_get:flwr.proto.SintList.vals)
   return _internal_vals(index);
 }
-inline void Sint64List::set_vals(int index, ::PROTOBUF_NAMESPACE_ID::int64 value) {
+inline void SintList::set_vals(int index, ::PROTOBUF_NAMESPACE_ID::int64 value) {
   vals_.Set(index, value);
-  // @@protoc_insertion_point(field_set:flwr.proto.Sint64List.vals)
+  // @@protoc_insertion_point(field_set:flwr.proto.SintList.vals)
 }
-inline void Sint64List::_internal_add_vals(::PROTOBUF_NAMESPACE_ID::int64 value) {
+inline void SintList::_internal_add_vals(::PROTOBUF_NAMESPACE_ID::int64 value) {
   vals_.Add(value);
 }
-inline void Sint64List::add_vals(::PROTOBUF_NAMESPACE_ID::int64 value) {
+inline void SintList::add_vals(::PROTOBUF_NAMESPACE_ID::int64 value) {
   _internal_add_vals(value);
-  // @@protoc_insertion_point(field_add:flwr.proto.Sint64List.vals)
+  // @@protoc_insertion_point(field_add:flwr.proto.SintList.vals)
 }
 inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int64 >&
-Sint64List::_internal_vals() const {
+SintList::_internal_vals() const {
   return vals_;
 }
 inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int64 >&
-Sint64List::vals() const {
-  // @@protoc_insertion_point(field_list:flwr.proto.Sint64List.vals)
+SintList::vals() const {
+  // @@protoc_insertion_point(field_list:flwr.proto.SintList.vals)
   return _internal_vals();
 }
 inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int64 >*
-Sint64List::_internal_mutable_vals() {
+SintList::_internal_mutable_vals() {
   return &vals_;
 }
 inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int64 >*
-Sint64List::mutable_vals() {
-  // @@protoc_insertion_point(field_mutable_list:flwr.proto.Sint64List.vals)
+SintList::mutable_vals() {
+  // @@protoc_insertion_point(field_mutable_list:flwr.proto.SintList.vals)
+  return _internal_mutable_vals();
+}
+
+// -------------------------------------------------------------------
+
+// UintList
+
+// repeated uint64 vals = 1;
+inline int UintList::_internal_vals_size() const {
+  return vals_.size();
+}
+inline int UintList::vals_size() const {
+  return _internal_vals_size();
+}
+inline void UintList::clear_vals() {
+  vals_.Clear();
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 UintList::_internal_vals(int index) const {
+  return vals_.Get(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 UintList::vals(int index) const {
+  // @@protoc_insertion_point(field_get:flwr.proto.UintList.vals)
+  return _internal_vals(index);
+}
+inline void UintList::set_vals(int index, ::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  vals_.Set(index, value);
+  // @@protoc_insertion_point(field_set:flwr.proto.UintList.vals)
+}
+inline void UintList::_internal_add_vals(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  vals_.Add(value);
+}
+inline void UintList::add_vals(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_add_vals(value);
+  // @@protoc_insertion_point(field_add:flwr.proto.UintList.vals)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
+UintList::_internal_vals() const {
+  return vals_;
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
+UintList::vals() const {
+  // @@protoc_insertion_point(field_list:flwr.proto.UintList.vals)
+  return _internal_vals();
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
+UintList::_internal_mutable_vals() {
+  return &vals_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
+UintList::mutable_vals() {
+  // @@protoc_insertion_point(field_mutable_list:flwr.proto.UintList.vals)
   return _internal_mutable_vals();
 }
 
@@ -3104,6 +3394,44 @@ inline void MetricsRecordValue::set_sint64(::PROTOBUF_NAMESPACE_ID::int64 value)
   // @@protoc_insertion_point(field_set:flwr.proto.MetricsRecordValue.sint64)
 }
 
+// uint64 uint64 = 3;
+inline bool MetricsRecordValue::_internal_has_uint64() const {
+  return value_case() == kUint64;
+}
+inline bool MetricsRecordValue::has_uint64() const {
+  return _internal_has_uint64();
+}
+inline void MetricsRecordValue::set_has_uint64() {
+  _oneof_case_[0] = kUint64;
+}
+inline void MetricsRecordValue::clear_uint64() {
+  if (_internal_has_uint64()) {
+    value_.uint64_ = uint64_t{0u};
+    clear_has_value();
+  }
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 MetricsRecordValue::_internal_uint64() const {
+  if (_internal_has_uint64()) {
+    return value_.uint64_;
+  }
+  return uint64_t{0u};
+}
+inline void MetricsRecordValue::_internal_set_uint64(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  if (!_internal_has_uint64()) {
+    clear_value();
+    set_has_uint64();
+  }
+  value_.uint64_ = value;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 MetricsRecordValue::uint64() const {
+  // @@protoc_insertion_point(field_get:flwr.proto.MetricsRecordValue.uint64)
+  return _internal_uint64();
+}
+inline void MetricsRecordValue::set_uint64(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_uint64(value);
+  // @@protoc_insertion_point(field_set:flwr.proto.MetricsRecordValue.uint64)
+}
+
 // .flwr.proto.DoubleList double_list = 21;
 inline bool MetricsRecordValue::_internal_has_double_list() const {
   return value_case() == kDoubleList;
@@ -3178,77 +3506,151 @@ inline ::flwr::proto::DoubleList* MetricsRecordValue::mutable_double_list() {
   return _msg;
 }
 
-// .flwr.proto.Sint64List sint64_list = 22;
-inline bool MetricsRecordValue::_internal_has_sint64_list() const {
-  return value_case() == kSint64List;
+// .flwr.proto.SintList sint_list = 22;
+inline bool MetricsRecordValue::_internal_has_sint_list() const {
+  return value_case() == kSintList;
 }
-inline bool MetricsRecordValue::has_sint64_list() const {
-  return _internal_has_sint64_list();
+inline bool MetricsRecordValue::has_sint_list() const {
+  return _internal_has_sint_list();
 }
-inline void MetricsRecordValue::set_has_sint64_list() {
-  _oneof_case_[0] = kSint64List;
+inline void MetricsRecordValue::set_has_sint_list() {
+  _oneof_case_[0] = kSintList;
 }
-inline void MetricsRecordValue::clear_sint64_list() {
-  if (_internal_has_sint64_list()) {
+inline void MetricsRecordValue::clear_sint_list() {
+  if (_internal_has_sint_list()) {
     if (GetArenaForAllocation() == nullptr) {
-      delete value_.sint64_list_;
+      delete value_.sint_list_;
     }
     clear_has_value();
   }
 }
-inline ::flwr::proto::Sint64List* MetricsRecordValue::release_sint64_list() {
-  // @@protoc_insertion_point(field_release:flwr.proto.MetricsRecordValue.sint64_list)
-  if (_internal_has_sint64_list()) {
+inline ::flwr::proto::SintList* MetricsRecordValue::release_sint_list() {
+  // @@protoc_insertion_point(field_release:flwr.proto.MetricsRecordValue.sint_list)
+  if (_internal_has_sint_list()) {
     clear_has_value();
-      ::flwr::proto::Sint64List* temp = value_.sint64_list_;
+      ::flwr::proto::SintList* temp = value_.sint_list_;
     if (GetArenaForAllocation() != nullptr) {
       temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
     }
-    value_.sint64_list_ = nullptr;
+    value_.sint_list_ = nullptr;
     return temp;
   } else {
     return nullptr;
   }
 }
-inline const ::flwr::proto::Sint64List& MetricsRecordValue::_internal_sint64_list() const {
-  return _internal_has_sint64_list()
-      ? *value_.sint64_list_
-      : reinterpret_cast< ::flwr::proto::Sint64List&>(::flwr::proto::_Sint64List_default_instance_);
+inline const ::flwr::proto::SintList& MetricsRecordValue::_internal_sint_list() const {
+  return _internal_has_sint_list()
+      ? *value_.sint_list_
+      : reinterpret_cast< ::flwr::proto::SintList&>(::flwr::proto::_SintList_default_instance_);
 }
-inline const ::flwr::proto::Sint64List& MetricsRecordValue::sint64_list() const {
-  // @@protoc_insertion_point(field_get:flwr.proto.MetricsRecordValue.sint64_list)
-  return _internal_sint64_list();
+inline const ::flwr::proto::SintList& MetricsRecordValue::sint_list() const {
+  // @@protoc_insertion_point(field_get:flwr.proto.MetricsRecordValue.sint_list)
+  return _internal_sint_list();
 }
-inline ::flwr::proto::Sint64List* MetricsRecordValue::unsafe_arena_release_sint64_list() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:flwr.proto.MetricsRecordValue.sint64_list)
-  if (_internal_has_sint64_list()) {
+inline ::flwr::proto::SintList* MetricsRecordValue::unsafe_arena_release_sint_list() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:flwr.proto.MetricsRecordValue.sint_list)
+  if (_internal_has_sint_list()) {
     clear_has_value();
-    ::flwr::proto::Sint64List* temp = value_.sint64_list_;
-    value_.sint64_list_ = nullptr;
+    ::flwr::proto::SintList* temp = value_.sint_list_;
+    value_.sint_list_ = nullptr;
     return temp;
   } else {
     return nullptr;
   }
 }
-inline void MetricsRecordValue::unsafe_arena_set_allocated_sint64_list(::flwr::proto::Sint64List* sint64_list) {
+inline void MetricsRecordValue::unsafe_arena_set_allocated_sint_list(::flwr::proto::SintList* sint_list) {
   clear_value();
-  if (sint64_list) {
-    set_has_sint64_list();
-    value_.sint64_list_ = sint64_list;
+  if (sint_list) {
+    set_has_sint_list();
+    value_.sint_list_ = sint_list;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:flwr.proto.MetricsRecordValue.sint64_list)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:flwr.proto.MetricsRecordValue.sint_list)
 }
-inline ::flwr::proto::Sint64List* MetricsRecordValue::_internal_mutable_sint64_list() {
-  if (!_internal_has_sint64_list()) {
+inline ::flwr::proto::SintList* MetricsRecordValue::_internal_mutable_sint_list() {
+  if (!_internal_has_sint_list()) {
     clear_value();
-    set_has_sint64_list();
-    value_.sint64_list_ = CreateMaybeMessage< ::flwr::proto::Sint64List >(GetArenaForAllocation());
+    set_has_sint_list();
+    value_.sint_list_ = CreateMaybeMessage< ::flwr::proto::SintList >(GetArenaForAllocation());
   }
-  return value_.sint64_list_;
+  return value_.sint_list_;
 }
-inline ::flwr::proto::Sint64List* MetricsRecordValue::mutable_sint64_list() {
-  ::flwr::proto::Sint64List* _msg = _internal_mutable_sint64_list();
-  // @@protoc_insertion_point(field_mutable:flwr.proto.MetricsRecordValue.sint64_list)
+inline ::flwr::proto::SintList* MetricsRecordValue::mutable_sint_list() {
+  ::flwr::proto::SintList* _msg = _internal_mutable_sint_list();
+  // @@protoc_insertion_point(field_mutable:flwr.proto.MetricsRecordValue.sint_list)
+  return _msg;
+}
+
+// .flwr.proto.UintList uint_list = 23;
+inline bool MetricsRecordValue::_internal_has_uint_list() const {
+  return value_case() == kUintList;
+}
+inline bool MetricsRecordValue::has_uint_list() const {
+  return _internal_has_uint_list();
+}
+inline void MetricsRecordValue::set_has_uint_list() {
+  _oneof_case_[0] = kUintList;
+}
+inline void MetricsRecordValue::clear_uint_list() {
+  if (_internal_has_uint_list()) {
+    if (GetArenaForAllocation() == nullptr) {
+      delete value_.uint_list_;
+    }
+    clear_has_value();
+  }
+}
+inline ::flwr::proto::UintList* MetricsRecordValue::release_uint_list() {
+  // @@protoc_insertion_point(field_release:flwr.proto.MetricsRecordValue.uint_list)
+  if (_internal_has_uint_list()) {
+    clear_has_value();
+      ::flwr::proto::UintList* temp = value_.uint_list_;
+    if (GetArenaForAllocation() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    value_.uint_list_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::flwr::proto::UintList& MetricsRecordValue::_internal_uint_list() const {
+  return _internal_has_uint_list()
+      ? *value_.uint_list_
+      : reinterpret_cast< ::flwr::proto::UintList&>(::flwr::proto::_UintList_default_instance_);
+}
+inline const ::flwr::proto::UintList& MetricsRecordValue::uint_list() const {
+  // @@protoc_insertion_point(field_get:flwr.proto.MetricsRecordValue.uint_list)
+  return _internal_uint_list();
+}
+inline ::flwr::proto::UintList* MetricsRecordValue::unsafe_arena_release_uint_list() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:flwr.proto.MetricsRecordValue.uint_list)
+  if (_internal_has_uint_list()) {
+    clear_has_value();
+    ::flwr::proto::UintList* temp = value_.uint_list_;
+    value_.uint_list_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void MetricsRecordValue::unsafe_arena_set_allocated_uint_list(::flwr::proto::UintList* uint_list) {
+  clear_value();
+  if (uint_list) {
+    set_has_uint_list();
+    value_.uint_list_ = uint_list;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:flwr.proto.MetricsRecordValue.uint_list)
+}
+inline ::flwr::proto::UintList* MetricsRecordValue::_internal_mutable_uint_list() {
+  if (!_internal_has_uint_list()) {
+    clear_value();
+    set_has_uint_list();
+    value_.uint_list_ = CreateMaybeMessage< ::flwr::proto::UintList >(GetArenaForAllocation());
+  }
+  return value_.uint_list_;
+}
+inline ::flwr::proto::UintList* MetricsRecordValue::mutable_uint_list() {
+  ::flwr::proto::UintList* _msg = _internal_mutable_uint_list();
+  // @@protoc_insertion_point(field_mutable:flwr.proto.MetricsRecordValue.uint_list)
   return _msg;
 }
 
@@ -3341,7 +3743,45 @@ inline void ConfigsRecordValue::set_sint64(::PROTOBUF_NAMESPACE_ID::int64 value)
   // @@protoc_insertion_point(field_set:flwr.proto.ConfigsRecordValue.sint64)
 }
 
-// bool bool = 3;
+// uint64 uint64 = 3;
+inline bool ConfigsRecordValue::_internal_has_uint64() const {
+  return value_case() == kUint64;
+}
+inline bool ConfigsRecordValue::has_uint64() const {
+  return _internal_has_uint64();
+}
+inline void ConfigsRecordValue::set_has_uint64() {
+  _oneof_case_[0] = kUint64;
+}
+inline void ConfigsRecordValue::clear_uint64() {
+  if (_internal_has_uint64()) {
+    value_.uint64_ = uint64_t{0u};
+    clear_has_value();
+  }
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ConfigsRecordValue::_internal_uint64() const {
+  if (_internal_has_uint64()) {
+    return value_.uint64_;
+  }
+  return uint64_t{0u};
+}
+inline void ConfigsRecordValue::_internal_set_uint64(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  if (!_internal_has_uint64()) {
+    clear_value();
+    set_has_uint64();
+  }
+  value_.uint64_ = value;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ConfigsRecordValue::uint64() const {
+  // @@protoc_insertion_point(field_get:flwr.proto.ConfigsRecordValue.uint64)
+  return _internal_uint64();
+}
+inline void ConfigsRecordValue::set_uint64(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_uint64(value);
+  // @@protoc_insertion_point(field_set:flwr.proto.ConfigsRecordValue.uint64)
+}
+
+// bool bool = 4;
 inline bool ConfigsRecordValue::_internal_has_bool_() const {
   return value_case() == kBool;
 }
@@ -3379,7 +3819,7 @@ inline void ConfigsRecordValue::set_bool_(bool value) {
   // @@protoc_insertion_point(field_set:flwr.proto.ConfigsRecordValue.bool)
 }
 
-// string string = 4;
+// string string = 5;
 inline bool ConfigsRecordValue::_internal_has_string() const {
   return value_case() == kString;
 }
@@ -3461,7 +3901,7 @@ inline void ConfigsRecordValue::set_allocated_string(std::string* string) {
   // @@protoc_insertion_point(field_set_allocated:flwr.proto.ConfigsRecordValue.string)
 }
 
-// bytes bytes = 5;
+// bytes bytes = 6;
 inline bool ConfigsRecordValue::_internal_has_bytes() const {
   return value_case() == kBytes;
 }
@@ -3617,81 +4057,155 @@ inline ::flwr::proto::DoubleList* ConfigsRecordValue::mutable_double_list() {
   return _msg;
 }
 
-// .flwr.proto.Sint64List sint64_list = 22;
-inline bool ConfigsRecordValue::_internal_has_sint64_list() const {
-  return value_case() == kSint64List;
+// .flwr.proto.SintList sint_list = 22;
+inline bool ConfigsRecordValue::_internal_has_sint_list() const {
+  return value_case() == kSintList;
 }
-inline bool ConfigsRecordValue::has_sint64_list() const {
-  return _internal_has_sint64_list();
+inline bool ConfigsRecordValue::has_sint_list() const {
+  return _internal_has_sint_list();
 }
-inline void ConfigsRecordValue::set_has_sint64_list() {
-  _oneof_case_[0] = kSint64List;
+inline void ConfigsRecordValue::set_has_sint_list() {
+  _oneof_case_[0] = kSintList;
 }
-inline void ConfigsRecordValue::clear_sint64_list() {
-  if (_internal_has_sint64_list()) {
+inline void ConfigsRecordValue::clear_sint_list() {
+  if (_internal_has_sint_list()) {
     if (GetArenaForAllocation() == nullptr) {
-      delete value_.sint64_list_;
+      delete value_.sint_list_;
     }
     clear_has_value();
   }
 }
-inline ::flwr::proto::Sint64List* ConfigsRecordValue::release_sint64_list() {
-  // @@protoc_insertion_point(field_release:flwr.proto.ConfigsRecordValue.sint64_list)
-  if (_internal_has_sint64_list()) {
+inline ::flwr::proto::SintList* ConfigsRecordValue::release_sint_list() {
+  // @@protoc_insertion_point(field_release:flwr.proto.ConfigsRecordValue.sint_list)
+  if (_internal_has_sint_list()) {
     clear_has_value();
-      ::flwr::proto::Sint64List* temp = value_.sint64_list_;
+      ::flwr::proto::SintList* temp = value_.sint_list_;
     if (GetArenaForAllocation() != nullptr) {
       temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
     }
-    value_.sint64_list_ = nullptr;
+    value_.sint_list_ = nullptr;
     return temp;
   } else {
     return nullptr;
   }
 }
-inline const ::flwr::proto::Sint64List& ConfigsRecordValue::_internal_sint64_list() const {
-  return _internal_has_sint64_list()
-      ? *value_.sint64_list_
-      : reinterpret_cast< ::flwr::proto::Sint64List&>(::flwr::proto::_Sint64List_default_instance_);
+inline const ::flwr::proto::SintList& ConfigsRecordValue::_internal_sint_list() const {
+  return _internal_has_sint_list()
+      ? *value_.sint_list_
+      : reinterpret_cast< ::flwr::proto::SintList&>(::flwr::proto::_SintList_default_instance_);
 }
-inline const ::flwr::proto::Sint64List& ConfigsRecordValue::sint64_list() const {
-  // @@protoc_insertion_point(field_get:flwr.proto.ConfigsRecordValue.sint64_list)
-  return _internal_sint64_list();
+inline const ::flwr::proto::SintList& ConfigsRecordValue::sint_list() const {
+  // @@protoc_insertion_point(field_get:flwr.proto.ConfigsRecordValue.sint_list)
+  return _internal_sint_list();
 }
-inline ::flwr::proto::Sint64List* ConfigsRecordValue::unsafe_arena_release_sint64_list() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:flwr.proto.ConfigsRecordValue.sint64_list)
-  if (_internal_has_sint64_list()) {
+inline ::flwr::proto::SintList* ConfigsRecordValue::unsafe_arena_release_sint_list() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:flwr.proto.ConfigsRecordValue.sint_list)
+  if (_internal_has_sint_list()) {
     clear_has_value();
-    ::flwr::proto::Sint64List* temp = value_.sint64_list_;
-    value_.sint64_list_ = nullptr;
+    ::flwr::proto::SintList* temp = value_.sint_list_;
+    value_.sint_list_ = nullptr;
     return temp;
   } else {
     return nullptr;
   }
 }
-inline void ConfigsRecordValue::unsafe_arena_set_allocated_sint64_list(::flwr::proto::Sint64List* sint64_list) {
+inline void ConfigsRecordValue::unsafe_arena_set_allocated_sint_list(::flwr::proto::SintList* sint_list) {
   clear_value();
-  if (sint64_list) {
-    set_has_sint64_list();
-    value_.sint64_list_ = sint64_list;
+  if (sint_list) {
+    set_has_sint_list();
+    value_.sint_list_ = sint_list;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:flwr.proto.ConfigsRecordValue.sint64_list)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:flwr.proto.ConfigsRecordValue.sint_list)
 }
-inline ::flwr::proto::Sint64List* ConfigsRecordValue::_internal_mutable_sint64_list() {
-  if (!_internal_has_sint64_list()) {
+inline ::flwr::proto::SintList* ConfigsRecordValue::_internal_mutable_sint_list() {
+  if (!_internal_has_sint_list()) {
     clear_value();
-    set_has_sint64_list();
-    value_.sint64_list_ = CreateMaybeMessage< ::flwr::proto::Sint64List >(GetArenaForAllocation());
+    set_has_sint_list();
+    value_.sint_list_ = CreateMaybeMessage< ::flwr::proto::SintList >(GetArenaForAllocation());
   }
-  return value_.sint64_list_;
+  return value_.sint_list_;
 }
-inline ::flwr::proto::Sint64List* ConfigsRecordValue::mutable_sint64_list() {
-  ::flwr::proto::Sint64List* _msg = _internal_mutable_sint64_list();
-  // @@protoc_insertion_point(field_mutable:flwr.proto.ConfigsRecordValue.sint64_list)
+inline ::flwr::proto::SintList* ConfigsRecordValue::mutable_sint_list() {
+  ::flwr::proto::SintList* _msg = _internal_mutable_sint_list();
+  // @@protoc_insertion_point(field_mutable:flwr.proto.ConfigsRecordValue.sint_list)
   return _msg;
 }
 
-// .flwr.proto.BoolList bool_list = 23;
+// .flwr.proto.UintList uint_list = 23;
+inline bool ConfigsRecordValue::_internal_has_uint_list() const {
+  return value_case() == kUintList;
+}
+inline bool ConfigsRecordValue::has_uint_list() const {
+  return _internal_has_uint_list();
+}
+inline void ConfigsRecordValue::set_has_uint_list() {
+  _oneof_case_[0] = kUintList;
+}
+inline void ConfigsRecordValue::clear_uint_list() {
+  if (_internal_has_uint_list()) {
+    if (GetArenaForAllocation() == nullptr) {
+      delete value_.uint_list_;
+    }
+    clear_has_value();
+  }
+}
+inline ::flwr::proto::UintList* ConfigsRecordValue::release_uint_list() {
+  // @@protoc_insertion_point(field_release:flwr.proto.ConfigsRecordValue.uint_list)
+  if (_internal_has_uint_list()) {
+    clear_has_value();
+      ::flwr::proto::UintList* temp = value_.uint_list_;
+    if (GetArenaForAllocation() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    value_.uint_list_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::flwr::proto::UintList& ConfigsRecordValue::_internal_uint_list() const {
+  return _internal_has_uint_list()
+      ? *value_.uint_list_
+      : reinterpret_cast< ::flwr::proto::UintList&>(::flwr::proto::_UintList_default_instance_);
+}
+inline const ::flwr::proto::UintList& ConfigsRecordValue::uint_list() const {
+  // @@protoc_insertion_point(field_get:flwr.proto.ConfigsRecordValue.uint_list)
+  return _internal_uint_list();
+}
+inline ::flwr::proto::UintList* ConfigsRecordValue::unsafe_arena_release_uint_list() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:flwr.proto.ConfigsRecordValue.uint_list)
+  if (_internal_has_uint_list()) {
+    clear_has_value();
+    ::flwr::proto::UintList* temp = value_.uint_list_;
+    value_.uint_list_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void ConfigsRecordValue::unsafe_arena_set_allocated_uint_list(::flwr::proto::UintList* uint_list) {
+  clear_value();
+  if (uint_list) {
+    set_has_uint_list();
+    value_.uint_list_ = uint_list;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:flwr.proto.ConfigsRecordValue.uint_list)
+}
+inline ::flwr::proto::UintList* ConfigsRecordValue::_internal_mutable_uint_list() {
+  if (!_internal_has_uint_list()) {
+    clear_value();
+    set_has_uint_list();
+    value_.uint_list_ = CreateMaybeMessage< ::flwr::proto::UintList >(GetArenaForAllocation());
+  }
+  return value_.uint_list_;
+}
+inline ::flwr::proto::UintList* ConfigsRecordValue::mutable_uint_list() {
+  ::flwr::proto::UintList* _msg = _internal_mutable_uint_list();
+  // @@protoc_insertion_point(field_mutable:flwr.proto.ConfigsRecordValue.uint_list)
+  return _msg;
+}
+
+// .flwr.proto.BoolList bool_list = 24;
 inline bool ConfigsRecordValue::_internal_has_bool_list() const {
   return value_case() == kBoolList;
 }
@@ -3765,7 +4279,7 @@ inline ::flwr::proto::BoolList* ConfigsRecordValue::mutable_bool_list() {
   return _msg;
 }
 
-// .flwr.proto.StringList string_list = 24;
+// .flwr.proto.StringList string_list = 25;
 inline bool ConfigsRecordValue::_internal_has_string_list() const {
   return value_case() == kStringList;
 }
@@ -3839,7 +4353,7 @@ inline ::flwr::proto::StringList* ConfigsRecordValue::mutable_string_list() {
   return _msg;
 }
 
-// .flwr.proto.BytesList bytes_list = 25;
+// .flwr.proto.BytesList bytes_list = 26;
 inline bool ConfigsRecordValue::_internal_has_bytes_list() const {
   return value_case() == kBytesList;
 }
@@ -4211,6 +4725,8 @@ RecordSet::mutable_configs() {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

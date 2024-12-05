@@ -30,19 +30,32 @@ struct DoubleListDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DoubleListDefaultTypeInternal _DoubleList_default_instance_;
-constexpr Sint64List::Sint64List(
+constexpr SintList::SintList(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : vals_()
   , _vals_cached_byte_size_(0){}
-struct Sint64ListDefaultTypeInternal {
-  constexpr Sint64ListDefaultTypeInternal()
+struct SintListDefaultTypeInternal {
+  constexpr SintListDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
-  ~Sint64ListDefaultTypeInternal() {}
+  ~SintListDefaultTypeInternal() {}
   union {
-    Sint64List _instance;
+    SintList _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT Sint64ListDefaultTypeInternal _Sint64List_default_instance_;
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT SintListDefaultTypeInternal _SintList_default_instance_;
+constexpr UintList::UintList(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : vals_()
+  , _vals_cached_byte_size_(0){}
+struct UintListDefaultTypeInternal {
+  constexpr UintListDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~UintListDefaultTypeInternal() {}
+  union {
+    UintList _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT UintListDefaultTypeInternal _UintList_default_instance_;
 constexpr BoolList::BoolList(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : vals_(){}
@@ -227,7 +240,7 @@ struct RecordSetDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT RecordSetDefaultTypeInternal _RecordSet_default_instance_;
 }  // namespace proto
 }  // namespace flwr
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_flwr_2fproto_2frecordset_2eproto[17];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_flwr_2fproto_2frecordset_2eproto[18];
 static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_flwr_2fproto_2frecordset_2eproto = nullptr;
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_flwr_2fproto_2frecordset_2eproto = nullptr;
 
@@ -240,12 +253,19 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_flwr_2fproto_2frecordset_2epro
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::flwr::proto::DoubleList, vals_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::flwr::proto::Sint64List, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::flwr::proto::SintList, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::flwr::proto::Sint64List, vals_),
+  PROTOBUF_FIELD_OFFSET(::flwr::proto::SintList, vals_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::flwr::proto::UintList, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::flwr::proto::UintList, vals_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::flwr::proto::BoolList, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -287,6 +307,8 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_flwr_2fproto_2frecordset_2epro
   ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
   ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
   ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
+  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
+  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
   PROTOBUF_FIELD_OFFSET(::flwr::proto::MetricsRecordValue, value_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::flwr::proto::ConfigsRecordValue, _internal_metadata_),
@@ -294,6 +316,8 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_flwr_2fproto_2frecordset_2epro
   PROTOBUF_FIELD_OFFSET(::flwr::proto::ConfigsRecordValue, _oneof_case_[0]),
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
+  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
+  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
   ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
   ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
   ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
@@ -389,27 +413,29 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_flwr_2fproto_2frecordset_2epro
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::flwr::proto::DoubleList)},
-  { 7, -1, -1, sizeof(::flwr::proto::Sint64List)},
-  { 14, -1, -1, sizeof(::flwr::proto::BoolList)},
-  { 21, -1, -1, sizeof(::flwr::proto::StringList)},
-  { 28, -1, -1, sizeof(::flwr::proto::BytesList)},
-  { 35, -1, -1, sizeof(::flwr::proto::Array)},
-  { 45, -1, -1, sizeof(::flwr::proto::MetricsRecordValue)},
-  { 56, -1, -1, sizeof(::flwr::proto::ConfigsRecordValue)},
-  { 73, -1, -1, sizeof(::flwr::proto::ParametersRecord)},
-  { 81, 89, -1, sizeof(::flwr::proto::MetricsRecord_DataEntry_DoNotUse)},
-  { 91, -1, -1, sizeof(::flwr::proto::MetricsRecord)},
-  { 98, 106, -1, sizeof(::flwr::proto::ConfigsRecord_DataEntry_DoNotUse)},
-  { 108, -1, -1, sizeof(::flwr::proto::ConfigsRecord)},
-  { 115, 123, -1, sizeof(::flwr::proto::RecordSet_ParametersEntry_DoNotUse)},
-  { 125, 133, -1, sizeof(::flwr::proto::RecordSet_MetricsEntry_DoNotUse)},
-  { 135, 143, -1, sizeof(::flwr::proto::RecordSet_ConfigsEntry_DoNotUse)},
-  { 145, -1, -1, sizeof(::flwr::proto::RecordSet)},
+  { 7, -1, -1, sizeof(::flwr::proto::SintList)},
+  { 14, -1, -1, sizeof(::flwr::proto::UintList)},
+  { 21, -1, -1, sizeof(::flwr::proto::BoolList)},
+  { 28, -1, -1, sizeof(::flwr::proto::StringList)},
+  { 35, -1, -1, sizeof(::flwr::proto::BytesList)},
+  { 42, -1, -1, sizeof(::flwr::proto::Array)},
+  { 52, -1, -1, sizeof(::flwr::proto::MetricsRecordValue)},
+  { 65, -1, -1, sizeof(::flwr::proto::ConfigsRecordValue)},
+  { 84, -1, -1, sizeof(::flwr::proto::ParametersRecord)},
+  { 92, 100, -1, sizeof(::flwr::proto::MetricsRecord_DataEntry_DoNotUse)},
+  { 102, -1, -1, sizeof(::flwr::proto::MetricsRecord)},
+  { 109, 117, -1, sizeof(::flwr::proto::ConfigsRecord_DataEntry_DoNotUse)},
+  { 119, -1, -1, sizeof(::flwr::proto::ConfigsRecord)},
+  { 126, 134, -1, sizeof(::flwr::proto::RecordSet_ParametersEntry_DoNotUse)},
+  { 136, 144, -1, sizeof(::flwr::proto::RecordSet_MetricsEntry_DoNotUse)},
+  { 146, 154, -1, sizeof(::flwr::proto::RecordSet_ConfigsEntry_DoNotUse)},
+  { 156, -1, -1, sizeof(::flwr::proto::RecordSet)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::flwr::proto::_DoubleList_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::flwr::proto::_Sint64List_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::flwr::proto::_SintList_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::flwr::proto::_UintList_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::flwr::proto::_BoolList_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::flwr::proto::_StringList_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::flwr::proto::_BytesList_default_instance_),
@@ -429,49 +455,53 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 
 const char descriptor_table_protodef_flwr_2fproto_2frecordset_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
   "\n\032flwr/proto/recordset.proto\022\nflwr.proto"
-  "\"\032\n\nDoubleList\022\014\n\004vals\030\001 \003(\001\"\032\n\nSint64Li"
-  "st\022\014\n\004vals\030\001 \003(\022\"\030\n\010BoolList\022\014\n\004vals\030\001 \003"
-  "(\010\"\032\n\nStringList\022\014\n\004vals\030\001 \003(\t\"\031\n\tBytesL"
-  "ist\022\014\n\004vals\030\001 \003(\014\"B\n\005Array\022\r\n\005dtype\030\001 \001("
-  "\t\022\r\n\005shape\030\002 \003(\005\022\r\n\005stype\030\003 \001(\t\022\014\n\004data\030"
-  "\004 \001(\014\"\237\001\n\022MetricsRecordValue\022\020\n\006double\030\001"
-  " \001(\001H\000\022\020\n\006sint64\030\002 \001(\022H\000\022-\n\013double_list\030"
-  "\025 \001(\0132\026.flwr.proto.DoubleListH\000\022-\n\013sint6"
-  "4_list\030\026 \001(\0132\026.flwr.proto.Sint64ListH\000B\007"
-  "\n\005value\"\331\002\n\022ConfigsRecordValue\022\020\n\006double"
-  "\030\001 \001(\001H\000\022\020\n\006sint64\030\002 \001(\022H\000\022\016\n\004bool\030\003 \001(\010"
-  "H\000\022\020\n\006string\030\004 \001(\tH\000\022\017\n\005bytes\030\005 \001(\014H\000\022-\n"
-  "\013double_list\030\025 \001(\0132\026.flwr.proto.DoubleLi"
-  "stH\000\022-\n\013sint64_list\030\026 \001(\0132\026.flwr.proto.S"
-  "int64ListH\000\022)\n\tbool_list\030\027 \001(\0132\024.flwr.pr"
-  "oto.BoolListH\000\022-\n\013string_list\030\030 \001(\0132\026.fl"
-  "wr.proto.StringListH\000\022+\n\nbytes_list\030\031 \001("
-  "\0132\025.flwr.proto.BytesListH\000B\007\n\005value\"M\n\020P"
-  "arametersRecord\022\021\n\tdata_keys\030\001 \003(\t\022&\n\013da"
-  "ta_values\030\002 \003(\0132\021.flwr.proto.Array\"\217\001\n\rM"
-  "etricsRecord\0221\n\004data\030\001 \003(\0132#.flwr.proto."
-  "MetricsRecord.DataEntry\032K\n\tDataEntry\022\013\n\003"
-  "key\030\001 \001(\t\022-\n\005value\030\002 \001(\0132\036.flwr.proto.Me"
-  "tricsRecordValue:\0028\001\"\217\001\n\rConfigsRecord\0221"
-  "\n\004data\030\001 \003(\0132#.flwr.proto.ConfigsRecord."
-  "DataEntry\032K\n\tDataEntry\022\013\n\003key\030\001 \001(\t\022-\n\005v"
-  "alue\030\002 \001(\0132\036.flwr.proto.ConfigsRecordVal"
-  "ue:\0028\001\"\227\003\n\tRecordSet\0229\n\nparameters\030\001 \003(\013"
-  "2%.flwr.proto.RecordSet.ParametersEntry\022"
-  "3\n\007metrics\030\002 \003(\0132\".flwr.proto.RecordSet."
-  "MetricsEntry\0223\n\007configs\030\003 \003(\0132\".flwr.pro"
-  "to.RecordSet.ConfigsEntry\032O\n\017ParametersE"
-  "ntry\022\013\n\003key\030\001 \001(\t\022+\n\005value\030\002 \001(\0132\034.flwr."
-  "proto.ParametersRecord:\0028\001\032I\n\014MetricsEnt"
-  "ry\022\013\n\003key\030\001 \001(\t\022(\n\005value\030\002 \001(\0132\031.flwr.pr"
-  "oto.MetricsRecord:\0028\001\032I\n\014ConfigsEntry\022\013\n"
-  "\003key\030\001 \001(\t\022(\n\005value\030\002 \001(\0132\031.flwr.proto.C"
-  "onfigsRecord:\0028\001b\006proto3"
+  "\"\032\n\nDoubleList\022\014\n\004vals\030\001 \003(\001\"\030\n\010SintList"
+  "\022\014\n\004vals\030\001 \003(\022\"\030\n\010UintList\022\014\n\004vals\030\001 \003(\004"
+  "\"\030\n\010BoolList\022\014\n\004vals\030\001 \003(\010\"\032\n\nStringList"
+  "\022\014\n\004vals\030\001 \003(\t\"\031\n\tBytesList\022\014\n\004vals\030\001 \003("
+  "\014\"B\n\005Array\022\r\n\005dtype\030\001 \001(\t\022\r\n\005shape\030\002 \003(\005"
+  "\022\r\n\005stype\030\003 \001(\t\022\014\n\004data\030\004 \001(\014\"\330\001\n\022Metric"
+  "sRecordValue\022\020\n\006double\030\001 \001(\001H\000\022\020\n\006sint64"
+  "\030\002 \001(\022H\000\022\020\n\006uint64\030\003 \001(\004H\000\022-\n\013double_lis"
+  "t\030\025 \001(\0132\026.flwr.proto.DoubleListH\000\022)\n\tsin"
+  "t_list\030\026 \001(\0132\024.flwr.proto.SintListH\000\022)\n\t"
+  "uint_list\030\027 \001(\0132\024.flwr.proto.UintListH\000B"
+  "\007\n\005value\"\222\003\n\022ConfigsRecordValue\022\020\n\006doubl"
+  "e\030\001 \001(\001H\000\022\020\n\006sint64\030\002 \001(\022H\000\022\020\n\006uint64\030\003 "
+  "\001(\004H\000\022\016\n\004bool\030\004 \001(\010H\000\022\020\n\006string\030\005 \001(\tH\000\022"
+  "\017\n\005bytes\030\006 \001(\014H\000\022-\n\013double_list\030\025 \001(\0132\026."
+  "flwr.proto.DoubleListH\000\022)\n\tsint_list\030\026 \001"
+  "(\0132\024.flwr.proto.SintListH\000\022)\n\tuint_list\030"
+  "\027 \001(\0132\024.flwr.proto.UintListH\000\022)\n\tbool_li"
+  "st\030\030 \001(\0132\024.flwr.proto.BoolListH\000\022-\n\013stri"
+  "ng_list\030\031 \001(\0132\026.flwr.proto.StringListH\000\022"
+  "+\n\nbytes_list\030\032 \001(\0132\025.flwr.proto.BytesLi"
+  "stH\000B\007\n\005value\"M\n\020ParametersRecord\022\021\n\tdat"
+  "a_keys\030\001 \003(\t\022&\n\013data_values\030\002 \003(\0132\021.flwr"
+  ".proto.Array\"\217\001\n\rMetricsRecord\0221\n\004data\030\001"
+  " \003(\0132#.flwr.proto.MetricsRecord.DataEntr"
+  "y\032K\n\tDataEntry\022\013\n\003key\030\001 \001(\t\022-\n\005value\030\002 \001"
+  "(\0132\036.flwr.proto.MetricsRecordValue:\0028\001\"\217"
+  "\001\n\rConfigsRecord\0221\n\004data\030\001 \003(\0132#.flwr.pr"
+  "oto.ConfigsRecord.DataEntry\032K\n\tDataEntry"
+  "\022\013\n\003key\030\001 \001(\t\022-\n\005value\030\002 \001(\0132\036.flwr.prot"
+  "o.ConfigsRecordValue:\0028\001\"\227\003\n\tRecordSet\0229"
+  "\n\nparameters\030\001 \003(\0132%.flwr.proto.RecordSe"
+  "t.ParametersEntry\0223\n\007metrics\030\002 \003(\0132\".flw"
+  "r.proto.RecordSet.MetricsEntry\0223\n\007config"
+  "s\030\003 \003(\0132\".flwr.proto.RecordSet.ConfigsEn"
+  "try\032O\n\017ParametersEntry\022\013\n\003key\030\001 \001(\t\022+\n\005v"
+  "alue\030\002 \001(\0132\034.flwr.proto.ParametersRecord"
+  ":\0028\001\032I\n\014MetricsEntry\022\013\n\003key\030\001 \001(\t\022(\n\005val"
+  "ue\030\002 \001(\0132\031.flwr.proto.MetricsRecord:\0028\001\032"
+  "I\n\014ConfigsEntry\022\013\n\003key\030\001 \001(\t\022(\n\005value\030\002 "
+  "\001(\0132\031.flwr.proto.ConfigsRecord:\0028\001b\006prot"
+  "o3"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_flwr_2fproto_2frecordset_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_flwr_2fproto_2frecordset_2eproto = {
-  false, false, 1544, descriptor_table_protodef_flwr_2fproto_2frecordset_2eproto, "flwr/proto/recordset.proto", 
-  &descriptor_table_flwr_2fproto_2frecordset_2eproto_once, nullptr, 0, 17,
+  false, false, 1682, descriptor_table_protodef_flwr_2fproto_2frecordset_2eproto, "flwr/proto/recordset.proto", 
+  &descriptor_table_flwr_2fproto_2frecordset_2eproto_once, nullptr, 0, 18,
   schemas, file_default_instances, TableStruct_flwr_2fproto_2frecordset_2eproto::offsets,
   file_level_metadata_flwr_2fproto_2frecordset_2eproto, file_level_enum_descriptors_flwr_2fproto_2frecordset_2eproto, file_level_service_descriptors_flwr_2fproto_2frecordset_2eproto,
 };
@@ -671,11 +701,11 @@ void DoubleList::InternalSwap(DoubleList* other) {
 
 // ===================================================================
 
-class Sint64List::_Internal {
+class SintList::_Internal {
  public:
 };
 
-Sint64List::Sint64List(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+SintList::SintList(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned),
   vals_(arena) {
@@ -683,41 +713,41 @@ Sint64List::Sint64List(::PROTOBUF_NAMESPACE_ID::Arena* arena,
   if (!is_message_owned) {
     RegisterArenaDtor(arena);
   }
-  // @@protoc_insertion_point(arena_constructor:flwr.proto.Sint64List)
+  // @@protoc_insertion_point(arena_constructor:flwr.proto.SintList)
 }
-Sint64List::Sint64List(const Sint64List& from)
+SintList::SintList(const SintList& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       vals_(from.vals_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  // @@protoc_insertion_point(copy_constructor:flwr.proto.Sint64List)
+  // @@protoc_insertion_point(copy_constructor:flwr.proto.SintList)
 }
 
-void Sint64List::SharedCtor() {
+void SintList::SharedCtor() {
 }
 
-Sint64List::~Sint64List() {
-  // @@protoc_insertion_point(destructor:flwr.proto.Sint64List)
+SintList::~SintList() {
+  // @@protoc_insertion_point(destructor:flwr.proto.SintList)
   if (GetArenaForAllocation() != nullptr) return;
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-inline void Sint64List::SharedDtor() {
+inline void SintList::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
 }
 
-void Sint64List::ArenaDtor(void* object) {
-  Sint64List* _this = reinterpret_cast< Sint64List* >(object);
+void SintList::ArenaDtor(void* object) {
+  SintList* _this = reinterpret_cast< SintList* >(object);
   (void)_this;
 }
-void Sint64List::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+void SintList::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 }
-void Sint64List::SetCachedSize(int size) const {
+void SintList::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
 
-void Sint64List::Clear() {
-// @@protoc_insertion_point(message_clear_start:flwr.proto.Sint64List)
+void SintList::Clear() {
+// @@protoc_insertion_point(message_clear_start:flwr.proto.SintList)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -726,7 +756,7 @@ void Sint64List::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* Sint64List::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* SintList::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     ::PROTOBUF_NAMESPACE_ID::uint32 tag;
@@ -766,9 +796,9 @@ failure:
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* Sint64List::_InternalSerialize(
+::PROTOBUF_NAMESPACE_ID::uint8* SintList::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:flwr.proto.Sint64List)
+  // @@protoc_insertion_point(serialize_to_array_start:flwr.proto.SintList)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -785,12 +815,12 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:flwr.proto.Sint64List)
+  // @@protoc_insertion_point(serialize_to_array_end:flwr.proto.SintList)
   return target;
 }
 
-size_t Sint64List::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:flwr.proto.Sint64List)
+size_t SintList::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:flwr.proto.SintList)
   size_t total_size = 0;
 
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -815,21 +845,21 @@ size_t Sint64List::ByteSizeLong() const {
   return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
 }
 
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData Sint64List::_class_data_ = {
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData SintList::_class_data_ = {
     ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
-    Sint64List::MergeImpl
+    SintList::MergeImpl
 };
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*Sint64List::GetClassData() const { return &_class_data_; }
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*SintList::GetClassData() const { return &_class_data_; }
 
-void Sint64List::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
+void SintList::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
                       const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<Sint64List *>(to)->MergeFrom(
-      static_cast<const Sint64List &>(from));
+  static_cast<SintList *>(to)->MergeFrom(
+      static_cast<const SintList &>(from));
 }
 
 
-void Sint64List::MergeFrom(const Sint64List& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:flwr.proto.Sint64List)
+void SintList::MergeFrom(const SintList& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:flwr.proto.SintList)
   GOOGLE_DCHECK_NE(&from, this);
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
@@ -838,27 +868,219 @@ void Sint64List::MergeFrom(const Sint64List& from) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
-void Sint64List::CopyFrom(const Sint64List& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:flwr.proto.Sint64List)
+void SintList::CopyFrom(const SintList& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:flwr.proto.SintList)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool Sint64List::IsInitialized() const {
+bool SintList::IsInitialized() const {
   return true;
 }
 
-void Sint64List::InternalSwap(Sint64List* other) {
+void SintList::InternalSwap(SintList* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   vals_.InternalSwap(&other->vals_);
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata Sint64List::GetMetadata() const {
+::PROTOBUF_NAMESPACE_ID::Metadata SintList::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_flwr_2fproto_2frecordset_2eproto_getter, &descriptor_table_flwr_2fproto_2frecordset_2eproto_once,
       file_level_metadata_flwr_2fproto_2frecordset_2eproto[1]);
+}
+
+// ===================================================================
+
+class UintList::_Internal {
+ public:
+};
+
+UintList::UintList(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned),
+  vals_(arena) {
+  SharedCtor();
+  if (!is_message_owned) {
+    RegisterArenaDtor(arena);
+  }
+  // @@protoc_insertion_point(arena_constructor:flwr.proto.UintList)
+}
+UintList::UintList(const UintList& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message(),
+      vals_(from.vals_) {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  // @@protoc_insertion_point(copy_constructor:flwr.proto.UintList)
+}
+
+void UintList::SharedCtor() {
+}
+
+UintList::~UintList() {
+  // @@protoc_insertion_point(destructor:flwr.proto.UintList)
+  if (GetArenaForAllocation() != nullptr) return;
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+inline void UintList::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+}
+
+void UintList::ArenaDtor(void* object) {
+  UintList* _this = reinterpret_cast< UintList* >(object);
+  (void)_this;
+}
+void UintList::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void UintList::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void UintList::Clear() {
+// @@protoc_insertion_point(message_clear_start:flwr.proto.UintList)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  vals_.Clear();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* UintList::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // repeated uint64 vals = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::PackedUInt64Parser(_internal_mutable_vals(), ptr, ctx);
+          CHK_(ptr);
+        } else if (static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8) {
+          _internal_add_vals(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* UintList::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:flwr.proto.UintList)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // repeated uint64 vals = 1;
+  {
+    int byte_size = _vals_cached_byte_size_.load(std::memory_order_relaxed);
+    if (byte_size > 0) {
+      target = stream->WriteUInt64Packed(
+          1, _internal_vals(), byte_size, target);
+    }
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:flwr.proto.UintList)
+  return target;
+}
+
+size_t UintList::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:flwr.proto.UintList)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // repeated uint64 vals = 1;
+  {
+    size_t data_size = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      UInt64Size(this->vals_);
+    if (data_size > 0) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+            static_cast<::PROTOBUF_NAMESPACE_ID::int32>(data_size));
+    }
+    int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(data_size);
+    _vals_cached_byte_size_.store(cached_size,
+                                    std::memory_order_relaxed);
+    total_size += data_size;
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData UintList::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    UintList::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*UintList::GetClassData() const { return &_class_data_; }
+
+void UintList::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
+                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+  static_cast<UintList *>(to)->MergeFrom(
+      static_cast<const UintList &>(from));
+}
+
+
+void UintList::MergeFrom(const UintList& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:flwr.proto.UintList)
+  GOOGLE_DCHECK_NE(&from, this);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  vals_.MergeFrom(from.vals_);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void UintList::CopyFrom(const UintList& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:flwr.proto.UintList)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool UintList::IsInitialized() const {
+  return true;
+}
+
+void UintList::InternalSwap(UintList* other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  vals_.InternalSwap(&other->vals_);
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata UintList::GetMetadata() const {
+  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+      &descriptor_table_flwr_2fproto_2frecordset_2eproto_getter, &descriptor_table_flwr_2fproto_2frecordset_2eproto_once,
+      file_level_metadata_flwr_2fproto_2frecordset_2eproto[2]);
 }
 
 // ===================================================================
@@ -1043,7 +1265,7 @@ void BoolList::InternalSwap(BoolList* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata BoolList::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_flwr_2fproto_2frecordset_2eproto_getter, &descriptor_table_flwr_2fproto_2frecordset_2eproto_once,
-      file_level_metadata_flwr_2fproto_2frecordset_2eproto[2]);
+      file_level_metadata_flwr_2fproto_2frecordset_2eproto[3]);
 }
 
 // ===================================================================
@@ -1233,7 +1455,7 @@ void StringList::InternalSwap(StringList* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata StringList::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_flwr_2fproto_2frecordset_2eproto_getter, &descriptor_table_flwr_2fproto_2frecordset_2eproto_once,
-      file_level_metadata_flwr_2fproto_2frecordset_2eproto[3]);
+      file_level_metadata_flwr_2fproto_2frecordset_2eproto[4]);
 }
 
 // ===================================================================
@@ -1418,7 +1640,7 @@ void BytesList::InternalSwap(BytesList* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata BytesList::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_flwr_2fproto_2frecordset_2eproto_getter, &descriptor_table_flwr_2fproto_2frecordset_2eproto_once,
-      file_level_metadata_flwr_2fproto_2frecordset_2eproto[4]);
+      file_level_metadata_flwr_2fproto_2frecordset_2eproto[5]);
 }
 
 // ===================================================================
@@ -1736,7 +1958,7 @@ void Array::InternalSwap(Array* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata Array::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_flwr_2fproto_2frecordset_2eproto_getter, &descriptor_table_flwr_2fproto_2frecordset_2eproto_once,
-      file_level_metadata_flwr_2fproto_2frecordset_2eproto[5]);
+      file_level_metadata_flwr_2fproto_2frecordset_2eproto[6]);
 }
 
 // ===================================================================
@@ -1744,16 +1966,21 @@ void Array::InternalSwap(Array* other) {
 class MetricsRecordValue::_Internal {
  public:
   static const ::flwr::proto::DoubleList& double_list(const MetricsRecordValue* msg);
-  static const ::flwr::proto::Sint64List& sint64_list(const MetricsRecordValue* msg);
+  static const ::flwr::proto::SintList& sint_list(const MetricsRecordValue* msg);
+  static const ::flwr::proto::UintList& uint_list(const MetricsRecordValue* msg);
 };
 
 const ::flwr::proto::DoubleList&
 MetricsRecordValue::_Internal::double_list(const MetricsRecordValue* msg) {
   return *msg->value_.double_list_;
 }
-const ::flwr::proto::Sint64List&
-MetricsRecordValue::_Internal::sint64_list(const MetricsRecordValue* msg) {
-  return *msg->value_.sint64_list_;
+const ::flwr::proto::SintList&
+MetricsRecordValue::_Internal::sint_list(const MetricsRecordValue* msg) {
+  return *msg->value_.sint_list_;
+}
+const ::flwr::proto::UintList&
+MetricsRecordValue::_Internal::uint_list(const MetricsRecordValue* msg) {
+  return *msg->value_.uint_list_;
 }
 void MetricsRecordValue::set_allocated_double_list(::flwr::proto::DoubleList* double_list) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -1770,20 +1997,35 @@ void MetricsRecordValue::set_allocated_double_list(::flwr::proto::DoubleList* do
   }
   // @@protoc_insertion_point(field_set_allocated:flwr.proto.MetricsRecordValue.double_list)
 }
-void MetricsRecordValue::set_allocated_sint64_list(::flwr::proto::Sint64List* sint64_list) {
+void MetricsRecordValue::set_allocated_sint_list(::flwr::proto::SintList* sint_list) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   clear_value();
-  if (sint64_list) {
+  if (sint_list) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::flwr::proto::Sint64List>::GetOwningArena(sint64_list);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::flwr::proto::SintList>::GetOwningArena(sint_list);
     if (message_arena != submessage_arena) {
-      sint64_list = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, sint64_list, submessage_arena);
+      sint_list = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, sint_list, submessage_arena);
     }
-    set_has_sint64_list();
-    value_.sint64_list_ = sint64_list;
+    set_has_sint_list();
+    value_.sint_list_ = sint_list;
   }
-  // @@protoc_insertion_point(field_set_allocated:flwr.proto.MetricsRecordValue.sint64_list)
+  // @@protoc_insertion_point(field_set_allocated:flwr.proto.MetricsRecordValue.sint_list)
+}
+void MetricsRecordValue::set_allocated_uint_list(::flwr::proto::UintList* uint_list) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  clear_value();
+  if (uint_list) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::flwr::proto::UintList>::GetOwningArena(uint_list);
+    if (message_arena != submessage_arena) {
+      uint_list = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, uint_list, submessage_arena);
+    }
+    set_has_uint_list();
+    value_.uint_list_ = uint_list;
+  }
+  // @@protoc_insertion_point(field_set_allocated:flwr.proto.MetricsRecordValue.uint_list)
 }
 MetricsRecordValue::MetricsRecordValue(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
@@ -1807,12 +2049,20 @@ MetricsRecordValue::MetricsRecordValue(const MetricsRecordValue& from)
       _internal_set_sint64(from._internal_sint64());
       break;
     }
+    case kUint64: {
+      _internal_set_uint64(from._internal_uint64());
+      break;
+    }
     case kDoubleList: {
       _internal_mutable_double_list()->::flwr::proto::DoubleList::MergeFrom(from._internal_double_list());
       break;
     }
-    case kSint64List: {
-      _internal_mutable_sint64_list()->::flwr::proto::Sint64List::MergeFrom(from._internal_sint64_list());
+    case kSintList: {
+      _internal_mutable_sint_list()->::flwr::proto::SintList::MergeFrom(from._internal_sint_list());
+      break;
+    }
+    case kUintList: {
+      _internal_mutable_uint_list()->::flwr::proto::UintList::MergeFrom(from._internal_uint_list());
       break;
     }
     case VALUE_NOT_SET: {
@@ -1861,15 +2111,25 @@ void MetricsRecordValue::clear_value() {
       // No need to clear
       break;
     }
+    case kUint64: {
+      // No need to clear
+      break;
+    }
     case kDoubleList: {
       if (GetArenaForAllocation() == nullptr) {
         delete value_.double_list_;
       }
       break;
     }
-    case kSint64List: {
+    case kSintList: {
       if (GetArenaForAllocation() == nullptr) {
-        delete value_.sint64_list_;
+        delete value_.sint_list_;
+      }
+      break;
+    }
+    case kUintList: {
+      if (GetArenaForAllocation() == nullptr) {
+        delete value_.uint_list_;
       }
       break;
     }
@@ -1913,6 +2173,14 @@ const char* MetricsRecordValue::_InternalParse(const char* ptr, ::PROTOBUF_NAMES
         } else
           goto handle_unusual;
         continue;
+      // uint64 uint64 = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
+          _internal_set_uint64(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
       // .flwr.proto.DoubleList double_list = 21;
       case 21:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 170)) {
@@ -1921,10 +2189,18 @@ const char* MetricsRecordValue::_InternalParse(const char* ptr, ::PROTOBUF_NAMES
         } else
           goto handle_unusual;
         continue;
-      // .flwr.proto.Sint64List sint64_list = 22;
+      // .flwr.proto.SintList sint_list = 22;
       case 22:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 178)) {
-          ptr = ctx->ParseMessage(_internal_mutable_sint64_list(), ptr);
+          ptr = ctx->ParseMessage(_internal_mutable_sint_list(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // .flwr.proto.UintList uint_list = 23;
+      case 23:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 186)) {
+          ptr = ctx->ParseMessage(_internal_mutable_uint_list(), ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1970,6 +2246,12 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteSInt64ToArray(2, this->_internal_sint64(), target);
   }
 
+  // uint64 uint64 = 3;
+  if (_internal_has_uint64()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(3, this->_internal_uint64(), target);
+  }
+
   // .flwr.proto.DoubleList double_list = 21;
   if (_internal_has_double_list()) {
     target = stream->EnsureSpace(target);
@@ -1978,12 +2260,20 @@ failure:
         21, _Internal::double_list(this), target, stream);
   }
 
-  // .flwr.proto.Sint64List sint64_list = 22;
-  if (_internal_has_sint64_list()) {
+  // .flwr.proto.SintList sint_list = 22;
+  if (_internal_has_sint_list()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
-        22, _Internal::sint64_list(this), target, stream);
+        22, _Internal::sint_list(this), target, stream);
+  }
+
+  // .flwr.proto.UintList uint_list = 23;
+  if (_internal_has_uint_list()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        23, _Internal::uint_list(this), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -2013,6 +2303,11 @@ size_t MetricsRecordValue::ByteSizeLong() const {
       total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SInt64SizePlusOne(this->_internal_sint64());
       break;
     }
+    // uint64 uint64 = 3;
+    case kUint64: {
+      total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64SizePlusOne(this->_internal_uint64());
+      break;
+    }
     // .flwr.proto.DoubleList double_list = 21;
     case kDoubleList: {
       total_size += 2 +
@@ -2020,11 +2315,18 @@ size_t MetricsRecordValue::ByteSizeLong() const {
           *value_.double_list_);
       break;
     }
-    // .flwr.proto.Sint64List sint64_list = 22;
-    case kSint64List: {
+    // .flwr.proto.SintList sint_list = 22;
+    case kSintList: {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *value_.sint64_list_);
+          *value_.sint_list_);
+      break;
+    }
+    // .flwr.proto.UintList uint_list = 23;
+    case kUintList: {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *value_.uint_list_);
       break;
     }
     case VALUE_NOT_SET: {
@@ -2062,12 +2364,20 @@ void MetricsRecordValue::MergeFrom(const MetricsRecordValue& from) {
       _internal_set_sint64(from._internal_sint64());
       break;
     }
+    case kUint64: {
+      _internal_set_uint64(from._internal_uint64());
+      break;
+    }
     case kDoubleList: {
       _internal_mutable_double_list()->::flwr::proto::DoubleList::MergeFrom(from._internal_double_list());
       break;
     }
-    case kSint64List: {
-      _internal_mutable_sint64_list()->::flwr::proto::Sint64List::MergeFrom(from._internal_sint64_list());
+    case kSintList: {
+      _internal_mutable_sint_list()->::flwr::proto::SintList::MergeFrom(from._internal_sint_list());
+      break;
+    }
+    case kUintList: {
+      _internal_mutable_uint_list()->::flwr::proto::UintList::MergeFrom(from._internal_uint_list());
       break;
     }
     case VALUE_NOT_SET: {
@@ -2098,7 +2408,7 @@ void MetricsRecordValue::InternalSwap(MetricsRecordValue* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata MetricsRecordValue::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_flwr_2fproto_2frecordset_2eproto_getter, &descriptor_table_flwr_2fproto_2frecordset_2eproto_once,
-      file_level_metadata_flwr_2fproto_2frecordset_2eproto[6]);
+      file_level_metadata_flwr_2fproto_2frecordset_2eproto[7]);
 }
 
 // ===================================================================
@@ -2106,7 +2416,8 @@ void MetricsRecordValue::InternalSwap(MetricsRecordValue* other) {
 class ConfigsRecordValue::_Internal {
  public:
   static const ::flwr::proto::DoubleList& double_list(const ConfigsRecordValue* msg);
-  static const ::flwr::proto::Sint64List& sint64_list(const ConfigsRecordValue* msg);
+  static const ::flwr::proto::SintList& sint_list(const ConfigsRecordValue* msg);
+  static const ::flwr::proto::UintList& uint_list(const ConfigsRecordValue* msg);
   static const ::flwr::proto::BoolList& bool_list(const ConfigsRecordValue* msg);
   static const ::flwr::proto::StringList& string_list(const ConfigsRecordValue* msg);
   static const ::flwr::proto::BytesList& bytes_list(const ConfigsRecordValue* msg);
@@ -2116,9 +2427,13 @@ const ::flwr::proto::DoubleList&
 ConfigsRecordValue::_Internal::double_list(const ConfigsRecordValue* msg) {
   return *msg->value_.double_list_;
 }
-const ::flwr::proto::Sint64List&
-ConfigsRecordValue::_Internal::sint64_list(const ConfigsRecordValue* msg) {
-  return *msg->value_.sint64_list_;
+const ::flwr::proto::SintList&
+ConfigsRecordValue::_Internal::sint_list(const ConfigsRecordValue* msg) {
+  return *msg->value_.sint_list_;
+}
+const ::flwr::proto::UintList&
+ConfigsRecordValue::_Internal::uint_list(const ConfigsRecordValue* msg) {
+  return *msg->value_.uint_list_;
 }
 const ::flwr::proto::BoolList&
 ConfigsRecordValue::_Internal::bool_list(const ConfigsRecordValue* msg) {
@@ -2147,20 +2462,35 @@ void ConfigsRecordValue::set_allocated_double_list(::flwr::proto::DoubleList* do
   }
   // @@protoc_insertion_point(field_set_allocated:flwr.proto.ConfigsRecordValue.double_list)
 }
-void ConfigsRecordValue::set_allocated_sint64_list(::flwr::proto::Sint64List* sint64_list) {
+void ConfigsRecordValue::set_allocated_sint_list(::flwr::proto::SintList* sint_list) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   clear_value();
-  if (sint64_list) {
+  if (sint_list) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::flwr::proto::Sint64List>::GetOwningArena(sint64_list);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::flwr::proto::SintList>::GetOwningArena(sint_list);
     if (message_arena != submessage_arena) {
-      sint64_list = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, sint64_list, submessage_arena);
+      sint_list = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, sint_list, submessage_arena);
     }
-    set_has_sint64_list();
-    value_.sint64_list_ = sint64_list;
+    set_has_sint_list();
+    value_.sint_list_ = sint_list;
   }
-  // @@protoc_insertion_point(field_set_allocated:flwr.proto.ConfigsRecordValue.sint64_list)
+  // @@protoc_insertion_point(field_set_allocated:flwr.proto.ConfigsRecordValue.sint_list)
+}
+void ConfigsRecordValue::set_allocated_uint_list(::flwr::proto::UintList* uint_list) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  clear_value();
+  if (uint_list) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::flwr::proto::UintList>::GetOwningArena(uint_list);
+    if (message_arena != submessage_arena) {
+      uint_list = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, uint_list, submessage_arena);
+    }
+    set_has_uint_list();
+    value_.uint_list_ = uint_list;
+  }
+  // @@protoc_insertion_point(field_set_allocated:flwr.proto.ConfigsRecordValue.uint_list)
 }
 void ConfigsRecordValue::set_allocated_bool_list(::flwr::proto::BoolList* bool_list) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -2229,6 +2559,10 @@ ConfigsRecordValue::ConfigsRecordValue(const ConfigsRecordValue& from)
       _internal_set_sint64(from._internal_sint64());
       break;
     }
+    case kUint64: {
+      _internal_set_uint64(from._internal_uint64());
+      break;
+    }
     case kBool: {
       _internal_set_bool_(from._internal_bool_());
       break;
@@ -2245,8 +2579,12 @@ ConfigsRecordValue::ConfigsRecordValue(const ConfigsRecordValue& from)
       _internal_mutable_double_list()->::flwr::proto::DoubleList::MergeFrom(from._internal_double_list());
       break;
     }
-    case kSint64List: {
-      _internal_mutable_sint64_list()->::flwr::proto::Sint64List::MergeFrom(from._internal_sint64_list());
+    case kSintList: {
+      _internal_mutable_sint_list()->::flwr::proto::SintList::MergeFrom(from._internal_sint_list());
+      break;
+    }
+    case kUintList: {
+      _internal_mutable_uint_list()->::flwr::proto::UintList::MergeFrom(from._internal_uint_list());
       break;
     }
     case kBoolList: {
@@ -2307,6 +2645,10 @@ void ConfigsRecordValue::clear_value() {
       // No need to clear
       break;
     }
+    case kUint64: {
+      // No need to clear
+      break;
+    }
     case kBool: {
       // No need to clear
       break;
@@ -2325,9 +2667,15 @@ void ConfigsRecordValue::clear_value() {
       }
       break;
     }
-    case kSint64List: {
+    case kSintList: {
       if (GetArenaForAllocation() == nullptr) {
-        delete value_.sint64_list_;
+        delete value_.sint_list_;
+      }
+      break;
+    }
+    case kUintList: {
+      if (GetArenaForAllocation() == nullptr) {
+        delete value_.uint_list_;
       }
       break;
     }
@@ -2389,17 +2737,25 @@ const char* ConfigsRecordValue::_InternalParse(const char* ptr, ::PROTOBUF_NAMES
         } else
           goto handle_unusual;
         continue;
-      // bool bool = 3;
+      // uint64 uint64 = 3;
       case 3:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
+          _internal_set_uint64(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // bool bool = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
           _internal_set_bool_(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // string string = 4;
-      case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 34)) {
+      // string string = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 42)) {
           auto str = _internal_mutable_string();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "flwr.proto.ConfigsRecordValue.string"));
@@ -2407,9 +2763,9 @@ const char* ConfigsRecordValue::_InternalParse(const char* ptr, ::PROTOBUF_NAMES
         } else
           goto handle_unusual;
         continue;
-      // bytes bytes = 5;
-      case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 42)) {
+      // bytes bytes = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 50)) {
           auto str = _internal_mutable_bytes();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
@@ -2424,33 +2780,41 @@ const char* ConfigsRecordValue::_InternalParse(const char* ptr, ::PROTOBUF_NAMES
         } else
           goto handle_unusual;
         continue;
-      // .flwr.proto.Sint64List sint64_list = 22;
+      // .flwr.proto.SintList sint_list = 22;
       case 22:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 178)) {
-          ptr = ctx->ParseMessage(_internal_mutable_sint64_list(), ptr);
+          ptr = ctx->ParseMessage(_internal_mutable_sint_list(), ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // .flwr.proto.BoolList bool_list = 23;
+      // .flwr.proto.UintList uint_list = 23;
       case 23:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 186)) {
+          ptr = ctx->ParseMessage(_internal_mutable_uint_list(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // .flwr.proto.BoolList bool_list = 24;
+      case 24:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 194)) {
           ptr = ctx->ParseMessage(_internal_mutable_bool_list(), ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // .flwr.proto.StringList string_list = 24;
-      case 24:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 194)) {
+      // .flwr.proto.StringList string_list = 25;
+      case 25:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 202)) {
           ptr = ctx->ParseMessage(_internal_mutable_string_list(), ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // .flwr.proto.BytesList bytes_list = 25;
-      case 25:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 202)) {
+      // .flwr.proto.BytesList bytes_list = 26;
+      case 26:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 210)) {
           ptr = ctx->ParseMessage(_internal_mutable_bytes_list(), ptr);
           CHK_(ptr);
         } else
@@ -2497,26 +2861,32 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteSInt64ToArray(2, this->_internal_sint64(), target);
   }
 
-  // bool bool = 3;
-  if (_internal_has_bool_()) {
+  // uint64 uint64 = 3;
+  if (_internal_has_uint64()) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(3, this->_internal_bool_(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(3, this->_internal_uint64(), target);
   }
 
-  // string string = 4;
+  // bool bool = 4;
+  if (_internal_has_bool_()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(4, this->_internal_bool_(), target);
+  }
+
+  // string string = 5;
   if (_internal_has_string()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_string().data(), static_cast<int>(this->_internal_string().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
       "flwr.proto.ConfigsRecordValue.string");
     target = stream->WriteStringMaybeAliased(
-        4, this->_internal_string(), target);
+        5, this->_internal_string(), target);
   }
 
-  // bytes bytes = 5;
+  // bytes bytes = 6;
   if (_internal_has_bytes()) {
     target = stream->WriteBytesMaybeAliased(
-        5, this->_internal_bytes(), target);
+        6, this->_internal_bytes(), target);
   }
 
   // .flwr.proto.DoubleList double_list = 21;
@@ -2527,36 +2897,44 @@ failure:
         21, _Internal::double_list(this), target, stream);
   }
 
-  // .flwr.proto.Sint64List sint64_list = 22;
-  if (_internal_has_sint64_list()) {
+  // .flwr.proto.SintList sint_list = 22;
+  if (_internal_has_sint_list()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
-        22, _Internal::sint64_list(this), target, stream);
+        22, _Internal::sint_list(this), target, stream);
   }
 
-  // .flwr.proto.BoolList bool_list = 23;
+  // .flwr.proto.UintList uint_list = 23;
+  if (_internal_has_uint_list()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        23, _Internal::uint_list(this), target, stream);
+  }
+
+  // .flwr.proto.BoolList bool_list = 24;
   if (_internal_has_bool_list()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
-        23, _Internal::bool_list(this), target, stream);
+        24, _Internal::bool_list(this), target, stream);
   }
 
-  // .flwr.proto.StringList string_list = 24;
+  // .flwr.proto.StringList string_list = 25;
   if (_internal_has_string_list()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
-        24, _Internal::string_list(this), target, stream);
+        25, _Internal::string_list(this), target, stream);
   }
 
-  // .flwr.proto.BytesList bytes_list = 25;
+  // .flwr.proto.BytesList bytes_list = 26;
   if (_internal_has_bytes_list()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
-        25, _Internal::bytes_list(this), target, stream);
+        26, _Internal::bytes_list(this), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -2586,19 +2964,24 @@ size_t ConfigsRecordValue::ByteSizeLong() const {
       total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SInt64SizePlusOne(this->_internal_sint64());
       break;
     }
-    // bool bool = 3;
+    // uint64 uint64 = 3;
+    case kUint64: {
+      total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64SizePlusOne(this->_internal_uint64());
+      break;
+    }
+    // bool bool = 4;
     case kBool: {
       total_size += 1 + 1;
       break;
     }
-    // string string = 4;
+    // string string = 5;
     case kString: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
           this->_internal_string());
       break;
     }
-    // bytes bytes = 5;
+    // bytes bytes = 6;
     case kBytes: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
@@ -2612,28 +2995,35 @@ size_t ConfigsRecordValue::ByteSizeLong() const {
           *value_.double_list_);
       break;
     }
-    // .flwr.proto.Sint64List sint64_list = 22;
-    case kSint64List: {
+    // .flwr.proto.SintList sint_list = 22;
+    case kSintList: {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *value_.sint64_list_);
+          *value_.sint_list_);
       break;
     }
-    // .flwr.proto.BoolList bool_list = 23;
+    // .flwr.proto.UintList uint_list = 23;
+    case kUintList: {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *value_.uint_list_);
+      break;
+    }
+    // .flwr.proto.BoolList bool_list = 24;
     case kBoolList: {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *value_.bool_list_);
       break;
     }
-    // .flwr.proto.StringList string_list = 24;
+    // .flwr.proto.StringList string_list = 25;
     case kStringList: {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *value_.string_list_);
       break;
     }
-    // .flwr.proto.BytesList bytes_list = 25;
+    // .flwr.proto.BytesList bytes_list = 26;
     case kBytesList: {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
@@ -2675,6 +3065,10 @@ void ConfigsRecordValue::MergeFrom(const ConfigsRecordValue& from) {
       _internal_set_sint64(from._internal_sint64());
       break;
     }
+    case kUint64: {
+      _internal_set_uint64(from._internal_uint64());
+      break;
+    }
     case kBool: {
       _internal_set_bool_(from._internal_bool_());
       break;
@@ -2691,8 +3085,12 @@ void ConfigsRecordValue::MergeFrom(const ConfigsRecordValue& from) {
       _internal_mutable_double_list()->::flwr::proto::DoubleList::MergeFrom(from._internal_double_list());
       break;
     }
-    case kSint64List: {
-      _internal_mutable_sint64_list()->::flwr::proto::Sint64List::MergeFrom(from._internal_sint64_list());
+    case kSintList: {
+      _internal_mutable_sint_list()->::flwr::proto::SintList::MergeFrom(from._internal_sint_list());
+      break;
+    }
+    case kUintList: {
+      _internal_mutable_uint_list()->::flwr::proto::UintList::MergeFrom(from._internal_uint_list());
       break;
     }
     case kBoolList: {
@@ -2735,7 +3133,7 @@ void ConfigsRecordValue::InternalSwap(ConfigsRecordValue* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata ConfigsRecordValue::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_flwr_2fproto_2frecordset_2eproto_getter, &descriptor_table_flwr_2fproto_2frecordset_2eproto_once,
-      file_level_metadata_flwr_2fproto_2frecordset_2eproto[7]);
+      file_level_metadata_flwr_2fproto_2frecordset_2eproto[8]);
 }
 
 // ===================================================================
@@ -2958,7 +3356,7 @@ void ParametersRecord::InternalSwap(ParametersRecord* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata ParametersRecord::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_flwr_2fproto_2frecordset_2eproto_getter, &descriptor_table_flwr_2fproto_2frecordset_2eproto_once,
-      file_level_metadata_flwr_2fproto_2frecordset_2eproto[8]);
+      file_level_metadata_flwr_2fproto_2frecordset_2eproto[9]);
 }
 
 // ===================================================================
@@ -2972,7 +3370,7 @@ void MetricsRecord_DataEntry_DoNotUse::MergeFrom(const MetricsRecord_DataEntry_D
 ::PROTOBUF_NAMESPACE_ID::Metadata MetricsRecord_DataEntry_DoNotUse::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_flwr_2fproto_2frecordset_2eproto_getter, &descriptor_table_flwr_2fproto_2frecordset_2eproto_once,
-      file_level_metadata_flwr_2fproto_2frecordset_2eproto[9]);
+      file_level_metadata_flwr_2fproto_2frecordset_2eproto[10]);
 }
 
 // ===================================================================
@@ -3197,7 +3595,7 @@ void MetricsRecord::InternalSwap(MetricsRecord* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata MetricsRecord::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_flwr_2fproto_2frecordset_2eproto_getter, &descriptor_table_flwr_2fproto_2frecordset_2eproto_once,
-      file_level_metadata_flwr_2fproto_2frecordset_2eproto[10]);
+      file_level_metadata_flwr_2fproto_2frecordset_2eproto[11]);
 }
 
 // ===================================================================
@@ -3211,7 +3609,7 @@ void ConfigsRecord_DataEntry_DoNotUse::MergeFrom(const ConfigsRecord_DataEntry_D
 ::PROTOBUF_NAMESPACE_ID::Metadata ConfigsRecord_DataEntry_DoNotUse::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_flwr_2fproto_2frecordset_2eproto_getter, &descriptor_table_flwr_2fproto_2frecordset_2eproto_once,
-      file_level_metadata_flwr_2fproto_2frecordset_2eproto[11]);
+      file_level_metadata_flwr_2fproto_2frecordset_2eproto[12]);
 }
 
 // ===================================================================
@@ -3436,7 +3834,7 @@ void ConfigsRecord::InternalSwap(ConfigsRecord* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata ConfigsRecord::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_flwr_2fproto_2frecordset_2eproto_getter, &descriptor_table_flwr_2fproto_2frecordset_2eproto_once,
-      file_level_metadata_flwr_2fproto_2frecordset_2eproto[12]);
+      file_level_metadata_flwr_2fproto_2frecordset_2eproto[13]);
 }
 
 // ===================================================================
@@ -3450,7 +3848,7 @@ void RecordSet_ParametersEntry_DoNotUse::MergeFrom(const RecordSet_ParametersEnt
 ::PROTOBUF_NAMESPACE_ID::Metadata RecordSet_ParametersEntry_DoNotUse::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_flwr_2fproto_2frecordset_2eproto_getter, &descriptor_table_flwr_2fproto_2frecordset_2eproto_once,
-      file_level_metadata_flwr_2fproto_2frecordset_2eproto[13]);
+      file_level_metadata_flwr_2fproto_2frecordset_2eproto[14]);
 }
 
 // ===================================================================
@@ -3464,7 +3862,7 @@ void RecordSet_MetricsEntry_DoNotUse::MergeFrom(const RecordSet_MetricsEntry_DoN
 ::PROTOBUF_NAMESPACE_ID::Metadata RecordSet_MetricsEntry_DoNotUse::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_flwr_2fproto_2frecordset_2eproto_getter, &descriptor_table_flwr_2fproto_2frecordset_2eproto_once,
-      file_level_metadata_flwr_2fproto_2frecordset_2eproto[14]);
+      file_level_metadata_flwr_2fproto_2frecordset_2eproto[15]);
 }
 
 // ===================================================================
@@ -3478,7 +3876,7 @@ void RecordSet_ConfigsEntry_DoNotUse::MergeFrom(const RecordSet_ConfigsEntry_DoN
 ::PROTOBUF_NAMESPACE_ID::Metadata RecordSet_ConfigsEntry_DoNotUse::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_flwr_2fproto_2frecordset_2eproto_getter, &descriptor_table_flwr_2fproto_2frecordset_2eproto_once,
-      file_level_metadata_flwr_2fproto_2frecordset_2eproto[15]);
+      file_level_metadata_flwr_2fproto_2frecordset_2eproto[16]);
 }
 
 // ===================================================================
@@ -3843,7 +4241,7 @@ void RecordSet::InternalSwap(RecordSet* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata RecordSet::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_flwr_2fproto_2frecordset_2eproto_getter, &descriptor_table_flwr_2fproto_2frecordset_2eproto_once,
-      file_level_metadata_flwr_2fproto_2frecordset_2eproto[16]);
+      file_level_metadata_flwr_2fproto_2frecordset_2eproto[17]);
 }
 
 // @@protoc_insertion_point(namespace_scope)
@@ -3853,8 +4251,11 @@ PROTOBUF_NAMESPACE_OPEN
 template<> PROTOBUF_NOINLINE ::flwr::proto::DoubleList* Arena::CreateMaybeMessage< ::flwr::proto::DoubleList >(Arena* arena) {
   return Arena::CreateMessageInternal< ::flwr::proto::DoubleList >(arena);
 }
-template<> PROTOBUF_NOINLINE ::flwr::proto::Sint64List* Arena::CreateMaybeMessage< ::flwr::proto::Sint64List >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::flwr::proto::Sint64List >(arena);
+template<> PROTOBUF_NOINLINE ::flwr::proto::SintList* Arena::CreateMaybeMessage< ::flwr::proto::SintList >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::flwr::proto::SintList >(arena);
+}
+template<> PROTOBUF_NOINLINE ::flwr::proto::UintList* Arena::CreateMaybeMessage< ::flwr::proto::UintList >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::flwr::proto::UintList >(arena);
 }
 template<> PROTOBUF_NOINLINE ::flwr::proto::BoolList* Arena::CreateMaybeMessage< ::flwr::proto::BoolList >(Arena* arena) {
   return Arena::CreateMessageInternal< ::flwr::proto::BoolList >(arena);

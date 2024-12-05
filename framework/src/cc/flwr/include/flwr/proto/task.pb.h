@@ -33,7 +33,6 @@
 #include <google/protobuf/unknown_field_set.h>
 #include "flwr/proto/node.pb.h"
 #include "flwr/proto/recordset.pb.h"
-#include "flwr/proto/transport.pb.h"
 #include "flwr/proto/error.pb.h"
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
@@ -553,13 +552,13 @@ class TaskIns final :
       ::flwr::proto::Task* task);
   ::flwr::proto::Task* unsafe_arena_release_task();
 
-  // sint64 run_id = 3;
+  // uint64 run_id = 3;
   void clear_run_id();
-  ::PROTOBUF_NAMESPACE_ID::int64 run_id() const;
-  void set_run_id(::PROTOBUF_NAMESPACE_ID::int64 value);
+  ::PROTOBUF_NAMESPACE_ID::uint64 run_id() const;
+  void set_run_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_run_id() const;
-  void _internal_set_run_id(::PROTOBUF_NAMESPACE_ID::int64 value);
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_run_id() const;
+  void _internal_set_run_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
   // @@protoc_insertion_point(class_scope:flwr.proto.TaskIns)
@@ -572,7 +571,7 @@ class TaskIns final :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr task_id_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr group_id_;
   ::flwr::proto::Task* task_;
-  ::PROTOBUF_NAMESPACE_ID::int64 run_id_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 run_id_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_flwr_2fproto_2ftask_2eproto;
 };
@@ -748,13 +747,13 @@ class TaskRes final :
       ::flwr::proto::Task* task);
   ::flwr::proto::Task* unsafe_arena_release_task();
 
-  // sint64 run_id = 3;
+  // uint64 run_id = 3;
   void clear_run_id();
-  ::PROTOBUF_NAMESPACE_ID::int64 run_id() const;
-  void set_run_id(::PROTOBUF_NAMESPACE_ID::int64 value);
+  ::PROTOBUF_NAMESPACE_ID::uint64 run_id() const;
+  void set_run_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_run_id() const;
-  void _internal_set_run_id(::PROTOBUF_NAMESPACE_ID::int64 value);
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_run_id() const;
+  void _internal_set_run_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
   // @@protoc_insertion_point(class_scope:flwr.proto.TaskRes)
@@ -767,7 +766,7 @@ class TaskRes final :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr task_id_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr group_id_;
   ::flwr::proto::Task* task_;
-  ::PROTOBUF_NAMESPACE_ID::int64 run_id_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 run_id_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_flwr_2fproto_2ftask_2eproto;
 };
@@ -1449,22 +1448,22 @@ inline void TaskIns::set_allocated_group_id(std::string* group_id) {
   // @@protoc_insertion_point(field_set_allocated:flwr.proto.TaskIns.group_id)
 }
 
-// sint64 run_id = 3;
+// uint64 run_id = 3;
 inline void TaskIns::clear_run_id() {
-  run_id_ = int64_t{0};
+  run_id_ = uint64_t{0u};
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 TaskIns::_internal_run_id() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint64 TaskIns::_internal_run_id() const {
   return run_id_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 TaskIns::run_id() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint64 TaskIns::run_id() const {
   // @@protoc_insertion_point(field_get:flwr.proto.TaskIns.run_id)
   return _internal_run_id();
 }
-inline void TaskIns::_internal_set_run_id(::PROTOBUF_NAMESPACE_ID::int64 value) {
+inline void TaskIns::_internal_set_run_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   
   run_id_ = value;
 }
-inline void TaskIns::set_run_id(::PROTOBUF_NAMESPACE_ID::int64 value) {
+inline void TaskIns::set_run_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   _internal_set_run_id(value);
   // @@protoc_insertion_point(field_set:flwr.proto.TaskIns.run_id)
 }
@@ -1655,22 +1654,22 @@ inline void TaskRes::set_allocated_group_id(std::string* group_id) {
   // @@protoc_insertion_point(field_set_allocated:flwr.proto.TaskRes.group_id)
 }
 
-// sint64 run_id = 3;
+// uint64 run_id = 3;
 inline void TaskRes::clear_run_id() {
-  run_id_ = int64_t{0};
+  run_id_ = uint64_t{0u};
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 TaskRes::_internal_run_id() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint64 TaskRes::_internal_run_id() const {
   return run_id_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 TaskRes::run_id() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint64 TaskRes::run_id() const {
   // @@protoc_insertion_point(field_get:flwr.proto.TaskRes.run_id)
   return _internal_run_id();
 }
-inline void TaskRes::_internal_set_run_id(::PROTOBUF_NAMESPACE_ID::int64 value) {
+inline void TaskRes::_internal_set_run_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   
   run_id_ = value;
 }
-inline void TaskRes::set_run_id(::PROTOBUF_NAMESPACE_ID::int64 value) {
+inline void TaskRes::set_run_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   _internal_set_run_id(value);
   // @@protoc_insertion_point(field_set:flwr.proto.TaskRes.run_id)
 }

@@ -20,7 +20,7 @@ namespace flwr {
 namespace proto {
 constexpr Node::Node(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : node_id_(int64_t{0})
+  : node_id_(uint64_t{0u})
   , anonymous_(false){}
 struct NodeDefaultTypeInternal {
   constexpr NodeDefaultTypeInternal()
@@ -57,7 +57,7 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 
 const char descriptor_table_protodef_flwr_2fproto_2fnode_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
   "\n\025flwr/proto/node.proto\022\nflwr.proto\"*\n\004N"
-  "ode\022\017\n\007node_id\030\001 \001(\022\022\021\n\tanonymous\030\002 \001(\010b"
+  "ode\022\017\n\007node_id\030\001 \001(\004\022\021\n\tanonymous\030\002 \001(\010b"
   "\006proto3"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_flwr_2fproto_2fnode_2eproto_once;
@@ -146,10 +146,10 @@ const char* Node::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::inter
     ::PROTOBUF_NAMESPACE_ID::uint32 tag;
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // sint64 node_id = 1;
+      // uint64 node_id = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          node_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarintZigZag64(&ptr);
+          node_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -191,10 +191,10 @@ failure:
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // sint64 node_id = 1;
+  // uint64 node_id = 1;
   if (this->_internal_node_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteSInt64ToArray(1, this->_internal_node_id(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_node_id(), target);
   }
 
   // bool anonymous = 2;
@@ -219,9 +219,9 @@ size_t Node::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // sint64 node_id = 1;
+  // uint64 node_id = 1;
   if (this->_internal_node_id() != 0) {
-    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SInt64SizePlusOne(this->_internal_node_id());
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64SizePlusOne(this->_internal_node_id());
   }
 
   // bool anonymous = 2;

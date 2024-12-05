@@ -246,7 +246,7 @@ metrics_record_to_proto(const flwr_local::MetricsRecord &record) {
       data.set_double_(std::get<double>(value));
     } else if (std::holds_alternative<std::vector<int>>(value)) {
       auto &int_list = std::get<std::vector<int>>(value);
-      auto *list = data.mutable_sint64_list();
+      auto *list = data.mutable_sint_list();
       for (int val : int_list) {
         list->add_vals(val);
       }
@@ -271,9 +271,9 @@ metrics_record_from_proto(const flwr::proto::MetricsRecord &protoRecord) {
       record[key] = (int)value.sint64();
     } else if (value.has_double_()) {
       record[key] = (double)value.double_();
-    } else if (value.has_sint64_list()) {
+    } else if (value.has_sint_list()) {
       std::vector<int> int_list;
-      for (const auto sint : value.sint64_list().vals()) {
+      for (const auto sint : value.sint_list().vals()) {
         int_list.push_back((int)sint);
       }
       record[key] = int_list;
@@ -304,7 +304,7 @@ configs_record_to_proto(const flwr_local::ConfigsRecord &record) {
     } else if (std::holds_alternative<std::string>(value)) {
       data.set_string(std::get<std::string>(value));
     } else if (std::holds_alternative<std::vector<int>>(value)) {
-      auto &list = *data.mutable_sint64_list();
+      auto &list = *data.mutable_sint_list();
       for (int val : std::get<std::vector<int>>(value)) {
         list.add_vals(val);
       }
@@ -334,9 +334,9 @@ configs_record_from_proto(const flwr::proto::ConfigsRecord &protoRecord) {
   flwr_local::ConfigsRecord record;
 
   for (const auto &[key, value] : protoRecord.data()) {
-    if (value.has_sint64_list()) {
+    if (value.has_sint_list()) {
       std::vector<int> int_list;
-      for (const auto sint : value.sint64_list().vals()) {
+      for (const auto sint : value.sint_list().vals()) {
         int_list.push_back((int)sint);
       }
       record[key] = int_list;
