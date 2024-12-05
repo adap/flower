@@ -24,7 +24,7 @@ from uuid import UUID
 import grpc
 
 from flwr.common import ConfigsRecord
-from flwr.common.constant import Status
+from flwr.common.constant import Status, SubStatus
 from flwr.common.logger import log
 from flwr.common.serde import (
     context_from_proto,
@@ -274,7 +274,10 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> UpdateRunStatusResponse:
         """Update the status of a run."""
         log(DEBUG, "ServerAppIoServicer.UpdateRunStatus")
+
+        # Init state
         state = self.state_factory.state()
+        _abort_if_run_stopped(request.run_id, state, context)
 
         # Update the run status
         state.update_run_status(
@@ -304,5 +307,7 @@ def _abort_if_run_stopped(
     run_id: int, state: LinkState, context: grpc.ServicerContext
 ) -> None:
     run_status = state.get_run_status({run_id})[run_id]
-    if (run_status.status == Status.FINISHED) & (run_status.sub_status == "STOPPED"):
+    if (run_status.status == Status.FINISHED) & (
+        run_status.sub_status == SubStatus.STOPPED
+    ):
         context.abort(grpc.StatusCode.PERMISSION_DENIED, "Run is stopped")

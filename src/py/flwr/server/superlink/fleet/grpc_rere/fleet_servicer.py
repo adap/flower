@@ -19,6 +19,7 @@ from logging import DEBUG, INFO
 
 import grpc
 
+from flwr.common.constant import Status, SubStatus
 from flwr.common.logger import log
 from flwr.proto import fleet_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
@@ -37,7 +38,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.fleet.message_handler import message_handler
-from flwr.server.superlink.linkstate import LinkStateFactory
+from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 
 
 class FleetServicer(fleet_pb2_grpc.FleetServicer):
@@ -88,26 +89,35 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         """Pull TaskIns."""
         log(INFO, "[Fleet.PullTaskIns] node_id=%s", request.node.node_id)
         log(DEBUG, "[Fleet.PullTaskIns] Request: %s", request)
+
+        # Init state
+        state = self.state_factory.state()
+        # run_id = state.get_run_id_from_task_id(request.task_ids[0])
+        # _abort_if_run_stopped(run_id, state, context)
+
         return message_handler.pull_task_ins(
             request=request,
-            state=self.state_factory.state(),
+            state=state,
         )
 
     def PushTaskRes(
         self, request: PushTaskResRequest, context: grpc.ServicerContext
     ) -> PushTaskResResponse:
         """Push TaskRes."""
+        # Init state
+        state = self.state_factory.state()
         if request.task_res_list:
             log(
                 INFO,
                 "[Fleet.PushTaskRes] Push results from node_id=%s",
                 request.task_res_list[0].task.producer.node_id,
             )
+            _abort_if_run_stopped(request.task_res_list[0].run_id, state, context)
         else:
             log(INFO, "[Fleet.PushTaskRes] No task results to push")
         return message_handler.push_task_res(
             request=request,
-            state=self.state_factory.state(),
+            state=state,
         )
 
     def GetRun(
@@ -129,3 +139,13 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             request=request,
             ffs=self.ffs_factory.ffs(),
         )
+
+
+def _abort_if_run_stopped(
+    run_id: int, state: LinkState, context: grpc.ServicerContext
+) -> None:
+    run_status = state.get_run_status({run_id})[run_id]
+    if (run_status.status == Status.FINISHED) & (
+        run_status.sub_status == SubStatus.STOPPED
+    ):
+        context.abort(grpc.StatusCode.PERMISSION_DENIED, "Run is stopped")
