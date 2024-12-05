@@ -17,7 +17,7 @@
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Union
+from typing import Any, Union, Optional
 
 import grpc
 
@@ -51,7 +51,7 @@ class ExecAuthPlugin(ABC):
         """Get the relevant auth tokens."""
 
     @abstractmethod
-    def refresh_tokens(self, context: grpc.ServicerContext) -> bool:
+    def refresh_tokens(self, metadata: Sequence[tuple[str, Union[str, bytes]]]) -> Optional[Sequence[tuple[str, Union[str, bytes]]]]:
         """Refresh auth tokens in the metadata of the provided context."""
 
 

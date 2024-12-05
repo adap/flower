@@ -38,7 +38,7 @@ from cryptography.hazmat.primitives.serialization import (
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.args import try_obtain_server_certificates
-from flwr.common.auth_plugin import ExecAuthPlugin, KeycloakExecPlugin
+from flwr.common.auth_plugin import ExecAuthPlugin
 from flwr.common.config import get_flwr_dir, parse_config_args
 from flwr.common.constant import (
     CLIENT_OCTET,
@@ -82,6 +82,8 @@ from .superlink.fleet.grpc_bidi.grpc_server import (
     start_grpc_server,
 )
 from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
+from flwr.common.auth_plugin import ExecAuthPlugin
+from flwr.common.constant import AUTH_TYPE
 from .superlink.fleet.grpc_rere.server_interceptor import AuthenticateServerInterceptor
 from .superlink.linkstate import LinkStateFactory
 from .superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
@@ -90,10 +92,17 @@ DATABASE = ":flwr-in-memory-state:"
 BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
 
 
-auth_plugins: dict[str, type[ExecAuthPlugin]] = {
-    "keycloak": KeycloakExecPlugin,
-}
+try:
+    from flwr.ee.auth_plugin import get_exec_auth_plugins
+except ImportError:
+    AUTH_PLUGIN_IMPORT_ERROR: str = """Unable to import module `flwr.ee.auth_plugin`.
 
+    This is a feature available only in the enterprise extension.
+    """
+
+    def get_exec_auth_plugins() -> dict[str, type[ExecAuthPlugin]]:
+        """Return all Exec API authentication plugins."""
+        raise ImportError(AUTH_PLUGIN_IMPORT_ERROR)
 
 def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     *,
@@ -582,7 +591,7 @@ def _try_obtain_config(args: argparse.Namespace) -> Optional[dict[str, Any]]:
 
 def _try_obtain_auth_config(config: dict[str, Any]) -> Optional[ExecAuthPlugin]:
     auth_config = config.get("authentication", {})
-    auth_plugin = auth_plugins.get(auth_config.get("plugin", ""))
+    auth_plugin = get_exec_auth_plugins().get(auth_config.get(AUTH_TYPE, ""))
     return auth_plugin(auth_config)
 
 

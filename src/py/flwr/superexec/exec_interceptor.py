@@ -21,33 +21,30 @@ import grpc
 
 from flwr.common.auth_plugin import ExecAuthPlugin
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
-    GetAuthTokenRequest,
-    GetAuthTokenResponse,
-    LoginRequest,
-    LoginResponse,
+    GetAuthTokensRequest,
+    GetAuthTokensResponse,
+    GetLoginDetailsRequest,
+    GetLoginDetailsResponse,
     StartRunRequest,
     StartRunResponse,
     StreamLogsRequest,
     StreamLogsResponse,
 )
 
-_AUTH_TOKEN_HEADER = "access-token"
-_REFRESH_TOKEN_HEADER = "refresh-token"
-
 Request = Union[
     StartRunRequest,
     StreamLogsRequest,
-    LoginRequest,
-    GetAuthTokenRequest,
+    GetLoginDetailsRequest,
+    GetAuthTokensRequest,
 ]
 
 Response = Union[
-    StartRunResponse, StreamLogsResponse, LoginResponse, GetAuthTokenResponse
+    StartRunResponse, StreamLogsResponse, GetLoginDetailsResponse, GetAuthTokensResponse
 ]
 
 
-class SuperExecInterceptor(grpc.ServerInterceptor):  # type: ignore
-    """SuperExec interceptor for user authentication."""
+class ExecInterceptor(grpc.ServerInterceptor):  # type: ignore
+    """Exec API interceptor for user authentication."""
 
     def __init__(
         self,
@@ -79,12 +76,11 @@ class SuperExecInterceptor(grpc.ServerInterceptor):  # type: ignore
             context: grpc.ServicerContext,
         ) -> Response:
             if isinstance(
-                request, (LoginRequest, GetAuthTokenRequest)
-            ) or self.auth_plugin.authenticate(context.invocation_metadata()):
+                request, (GetAuthTokensRequest, GetAuthTokensRequest)
+            ) or self.auth_plugin.validate_tokens_in_metadata(context.invocation_metadata()):
                 return method_handler.unary_unary(request, context)  # type: ignore
 
-            if self.auth_plugin.refresh_token(context):
-                print(context)
+            if self.auth_plugin.refresh_tokens(context):
                 return method_handler.unary_unary(request, context)  # type: ignore
 
             context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
