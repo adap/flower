@@ -48,6 +48,8 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     CreateRunResponse,
     GetRunRequest,
     GetRunResponse,
+    GetRunStatusRequest,
+    GetRunStatusResponse,
     UpdateRunStatusRequest,
     UpdateRunStatusResponse,
 )
@@ -283,6 +285,13 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         merged_logs = "".join(request.logs)
         state.add_serverapp_log(request.run_id, merged_logs)
         return PushLogsResponse()
+
+    def GetRunStatus(
+        self, request: GetRunStatusRequest, context: grpc.ServicerContext
+    ) -> GetRunStatusResponse:
+        """Get the status of a run."""
+        log(DEBUG, "ServerAppIoServicer.GetRunStatus")
+        raise NotImplementedError()
 
 
 def _raise_if(validation_error: bool, detail: str) -> None:
