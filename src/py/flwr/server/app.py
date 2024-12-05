@@ -24,7 +24,7 @@ from collections.abc import Sequence
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from time import sleep
-from typing import Any, Dict, Optional, Sequence, Type
+from typing import Any, Optional
 
 import grpc
 import yaml
@@ -68,8 +68,6 @@ from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
 from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
 from flwr.superexec.app import load_executor
 from flwr.superexec.exec_grpc import run_exec_api_grpc
-from flwr.superexec.exec_interceptor import SuperExecInterceptor
-from flwr.superexec.simulation import SimulationEngine
 
 from .client_manager import ClientManager
 from .history import History
@@ -92,7 +90,7 @@ DATABASE = ":flwr-in-memory-state:"
 BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
 
 
-auth_plugins: Dict[str, Type[ExecAuthPlugin]] = {
+auth_plugins: dict[str, type[ExecAuthPlugin]] = {
     "keycloak": KeycloakExecPlugin,
 }
 
@@ -574,15 +572,15 @@ def _try_setup_node_authentication(
         )
 
 
-def _try_obtain_config(args: argparse.Namespace) -> Optional[Dict[str, Any]]:
+def _try_obtain_config(args: argparse.Namespace) -> Optional[dict[str, Any]]:
     if args.config is not None:
-        with open(args.config, "r") as file:
+        with open(args.config) as file:
             config = yaml.safe_load(file)
             return config
     return None
 
 
-def _try_obtain_auth_config(config: Dict[str, Any]) -> Optional[ExecAuthPlugin]:
+def _try_obtain_auth_config(config: dict[str, Any]) -> Optional[ExecAuthPlugin]:
     auth_config = config.get("authentication", {})
     auth_plugin = auth_plugins.get(auth_config.get("plugin", ""))
     return auth_plugin(auth_config)
@@ -777,7 +775,7 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument(
         "--config",
-        help="SuperLink config.yaml file (as a path str) " "to configure SuperLink.",
+        help="SuperLink config.yaml file (as a path str) to configure SuperLink.",
         type=str,
         default=None,
     )

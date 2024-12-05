@@ -15,21 +15,11 @@
 """Flower Exec API interceptor."""
 
 
-import base64
-from logging import WARNING
-from typing import Any, Callable, Sequence, Set, Tuple, Type, Union
+from typing import Any, Callable, Union
 
 import grpc
-from cryptography.hazmat.primitives.asymmetric import ec
 
 from flwr.common.auth_plugin import ExecAuthPlugin
-from flwr.common.logger import log
-from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
-    bytes_to_private_key,
-    bytes_to_public_key,
-    generate_shared_key,
-    verify_hmac,
-)
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     GetAuthTokenRequest,
     GetAuthTokenResponse,

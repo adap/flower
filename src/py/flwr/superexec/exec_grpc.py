@@ -14,8 +14,9 @@
 # ==============================================================================
 """SuperExec gRPC API."""
 
+from collections.abc import Sequence
 from logging import INFO
-from typing import Optional, Sequence
+from typing import Optional
 
 import grpc
 
