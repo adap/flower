@@ -19,6 +19,8 @@ from typer.main import get_command
 
 from .build import build
 from .install import install
+from .log import log
+from .ls import ls
 from .new import new
 from .run import run
 
@@ -35,6 +37,8 @@ app.command()(new)
 app.command()(run)
 app.command()(build)
 app.command()(install)
+app.command()(log)
+app.command()(ls)
 
 typer_click_object = get_command(app)
 

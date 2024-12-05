@@ -16,7 +16,7 @@
 
 
 import base64
-from typing import Tuple, cast
+from typing import cast
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.fernet import Fernet
@@ -26,7 +26,7 @@ from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
 
 def generate_key_pairs() -> (
-    Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+    tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
 ):
     """Generate private and public key pairs with Cryptography."""
     private_key = ec.generate_private_key(ec.SECP384R1())

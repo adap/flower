@@ -17,7 +17,7 @@
 
 
 import unittest
-from typing import Dict, Union
+from typing import Union
 from unittest.mock import Mock, patch
 
 import numpy as np
@@ -32,15 +32,34 @@ from flwr_datasets.mock_utils_test import (
     _load_mocked_dataset_dict_by_partial_download,
 )
 from flwr_datasets.partitioner import IidPartitioner, NaturalIdPartitioner, Partitioner
+from flwr_datasets.preprocessor.divider import Divider
 
 mocked_datasets = ["cifar100", "svhn", "sentiment140", "speech_commands"]
+
+mocked_by_partial_download_datasets = [
+    "flwrlabs/pacs",
+    "flwrlabs/cinic10",
+    "flwrlabs/caltech101",
+    "flwrlabs/office-home",
+    "flwrlabs/fed-isic2019",
+]
+
+natural_id_datasets = [
+    "flwrlabs/femnist",
+]
+
+mocked_natural_id_datasets = [
+    "flwrlabs/ucf101",
+    "flwrlabs/ambient-acoustic-context",
+    "LIUM/tedlium",
+]
 
 
 @parameterized_class(
     ("dataset_name", "test_split", "subset"),
     [
         # Downloaded
-        # #Image datasets
+        # Image
         ("mnist", "test", ""),
         ("cifar10", "test", ""),
         ("fashion_mnist", "test", ""),
@@ -52,8 +71,8 @@ mocked_datasets = ["cifar100", "svhn", "sentiment140", "speech_commands"]
         ("scikit-learn/adult-census-income", None, ""),
         ("jlh/uci-mushrooms", None, ""),
         ("scikit-learn/iris", None, ""),
-        # Mocked
-        # #Image
+        # Mocked by local recreation
+        # Image
         ("cifar100", "test", ""),
         # Note: there's also the extra split and full_numbers subset
         ("svhn", "test", "cropped_digits"),
@@ -61,6 +80,13 @@ mocked_datasets = ["cifar100", "svhn", "sentiment140", "speech_commands"]
         ("sentiment140", "test", ""),  # aka twitter
         # Audio
         ("speech_commands", "test", "v0.01"),
+        # Mocked by partial download
+        # Image
+        ("flwrlabs/pacs", None, ""),
+        ("flwrlabs/cinic10", "test", ""),
+        ("flwrlabs/caltech101", None, ""),
+        ("flwrlabs/office-home", None, ""),
+        ("flwrlabs/fed-isic2019", "test", ""),
     ],
 )
 class BaseFederatedDatasetsTest(unittest.TestCase):
@@ -86,10 +112,29 @@ class BaseFederatedDatasetsTest(unittest.TestCase):
             self.mock_load_dataset.return_value = _load_mocked_dataset(
                 self.dataset_name, [200, 100], ["train", self.test_split], self.subset
             )
+        elif self.dataset_name in mocked_by_partial_download_datasets:
+            split_names = ["train"]
+            skip_take_lists = [[(0, 30), (1000, 30), (2000, 40)]]
+            # If the dataset has split test update the mocking to include it
+            if self.test_split is not None:
+                split_names.append(self.test_split)
+                skip_take_lists.append([(0, 30), (100, 30), (200, 40)])
+            mock_return_value = _load_mocked_dataset_dict_by_partial_download(
+                dataset_name=self.dataset_name,
+                split_names=split_names,
+                skip_take_lists=skip_take_lists,
+                subset_name=None if self.subset == "" else self.subset,
+            )
+            self.patcher = patch("datasets.load_dataset")
+            self.mock_load_dataset = self.patcher.start()
+            self.mock_load_dataset.return_value = mock_return_value
 
     def tearDown(self) -> None:
         """Clean up after the dataset mocking."""
-        if self.dataset_name in mocked_datasets:
+        if (
+            self.dataset_name in mocked_datasets
+            or self.dataset_name in mocked_by_partial_download_datasets
+        ):
             patch.stopall()
 
     @parameterized.expand(  # type: ignore
@@ -341,7 +386,7 @@ class PartitionersSpecificationForFederatedDatasets(unittest.TestCase):
         """Test if partitioners are passed directly (no recreation)."""
         num_train_partitions = 100
         num_test_partitions = 100
-        partitioners: Dict[str, Union[Partitioner, int]] = {
+        partitioners: dict[str, Union[Partitioner, int]] = {
             "train": IidPartitioner(num_partitions=num_train_partitions),
             "test": IidPartitioner(num_partitions=num_test_partitions),
         }
@@ -375,7 +420,7 @@ class PartitionersSpecificationForFederatedDatasets(unittest.TestCase):
         """Test if an instantiated partitioner is passed directly."""
         num_train_partitions = 100
         num_test_partitions = 100
-        partitioners: Dict[str, Union[Partitioner, int]] = {
+        partitioners: dict[str, Union[Partitioner, int]] = {
             "train": IidPartitioner(num_partitions=num_train_partitions),
             "test": num_test_partitions,
         }
@@ -389,7 +434,7 @@ class PartitionersSpecificationForFederatedDatasets(unittest.TestCase):
         """Test if an IidPartitioner partitioner is created."""
         num_train_partitions = 100
         num_test_partitions = 100
-        partitioners: Dict[str, Union[Partitioner, int]] = {
+        partitioners: dict[str, Union[Partitioner, int]] = {
             "train": IidPartitioner(num_partitions=num_train_partitions),
             "test": num_test_partitions,
         }
@@ -401,17 +446,6 @@ class PartitionersSpecificationForFederatedDatasets(unittest.TestCase):
             isinstance(fds._partitioners["test"], IidPartitioner)
             and fds._partitioners["test"]._num_partitions == num_test_partitions
         )
-
-
-natural_id_datasets = [
-    "flwrlabs/femnist",
-]
-
-mocked_natural_id_datasets = [
-    "flwrlabs/ucf101",
-    "flwrlabs/ambient-acoustic-context",
-    "LIUM/tedlium",
-]
 
 
 @parameterized_class(
@@ -534,6 +568,57 @@ class IncorrectUsageFederatedDatasets(unittest.TestCase):
         )
         with self.assertRaises(ValueError):
             _ = fds.load_partition(0)
+
+    def test_incorrect_two_partitioners(self) -> None:
+        """Test if the method raises ValueError with incorrect partitioners."""
+        partitioner = IidPartitioner(num_partitions=10)
+        partitioners: dict[str, Union[Partitioner, int]] = {
+            "train": partitioner,
+            "test": partitioner,
+        }
+        first_split = "train"
+        second_split = "test"
+        with self.assertRaises(ValueError) as context:
+            FederatedDataset(
+                dataset="mnist",
+                partitioners=partitioners,
+            )
+        self.assertIn(
+            f"The same partitioner object is used for multiple splits: "
+            f"('{first_split}', '{second_split}'). "
+            "Each partitioner should be a separate object.",
+            str(context.exception),
+        )
+
+    def test_incorrect_three_partitioners(self) -> None:
+        """Test if the method raises ValueError with incorrect partitioners."""
+        partitioner = IidPartitioner(num_partitions=10)
+        partitioners: dict[str, Union[int, Partitioner]] = {
+            "train1": partitioner,
+            "train2": 10,
+            "test": partitioner,
+        }
+        divider = Divider(
+            divide_config={
+                "train1": 0.5,
+                "train2": 0.5,
+            },
+            divide_split="train",
+        )
+
+        with self.assertRaises(
+            ValueError,
+        ) as context:
+
+            FederatedDataset(
+                dataset="mnist", partitioners=partitioners, preprocessor=divider
+            )
+
+        self.assertIn(
+            "The same partitioner object is used for multiple splits: "
+            "('train1', 'test'). Each partitioner should be a separate object.",
+            str(context.exception),
+        )
 
 
 def datasets_are_equal(ds1: Dataset, ds2: Dataset) -> bool:

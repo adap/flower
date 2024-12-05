@@ -46,9 +46,7 @@
 
     {#- Site title -#}
     {%- block htmltitle -%}
-      {% if versions %}
-        <title>Flower Framework {{ current_version.url }}</title>
-      {% elif not docstitle %}
+      {% if not docstitle %}
         <title>{{ title|striptags|e }}</title>
       {% elif pagename == master_doc %}
         <title>{{ docstitle|striptags|e }}</title>

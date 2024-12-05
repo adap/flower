@@ -16,12 +16,12 @@
 
 import socket
 from ipaddress import ip_address
-from typing import Optional, Tuple
+from typing import Optional
 
 IPV6: int = 6
 
 
-def parse_address(address: str) -> Optional[Tuple[str, int, Optional[bool]]]:
+def parse_address(address: str) -> Optional[tuple[str, int, Optional[bool]]]:
     """Parse an IP address into host, port, and version.
 
     Parameters

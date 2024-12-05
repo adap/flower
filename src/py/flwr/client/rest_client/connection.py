@@ -18,10 +18,11 @@
 import random
 import sys
 import threading
+from collections.abc import Iterator
 from contextlib import contextmanager
 from copy import copy
 from logging import ERROR, INFO, WARN
-from typing import Callable, Iterator, Optional, Tuple, Type, TypeVar, Union
+from typing import Callable, Optional, TypeVar, Union
 
 from cryptography.hazmat.primitives.asymmetric import ec
 from google.protobuf.message import Message as GrpcMessage
@@ -40,11 +41,7 @@ from flwr.common.constant import (
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
-from flwr.common.serde import (
-    message_from_taskins,
-    message_to_taskres,
-    user_config_from_proto,
-)
+from flwr.common.serde import message_from_taskins, message_to_taskres, run_from_proto
 from flwr.common.typing import Fab, Run
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -81,7 +78,7 @@ T = TypeVar("T", bound=GrpcMessage)
 
 
 @contextmanager
-def http_request_response(  # pylint: disable=,R0913, R0914, R0915
+def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     server_address: str,
     insecure: bool,  # pylint: disable=unused-argument
     retry_invoker: RetryInvoker,
@@ -90,10 +87,10 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
         Union[bytes, str]
     ] = None,  # pylint: disable=unused-argument
     authentication_keys: Optional[  # pylint: disable=unused-argument
-        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
 ) -> Iterator[
-    Tuple[
+    tuple[
         Callable[[], Optional[Message]],
         Callable[[Message], None],
         Optional[Callable[[], Optional[int]]],
@@ -173,7 +170,7 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
     ###########################################################################
 
     def _request(
-        req: GrpcMessage, res_type: Type[T], api_path: str, retry: bool = True
+        req: GrpcMessage, res_type: type[T], api_path: str, retry: bool = True
     ) -> Optional[T]:
         # Serialize the request
         req_bytes = req.SerializeToString()
@@ -339,7 +336,7 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
         task_res = message_to_taskres(message)
 
         # Serialize ProtoBuf to bytes
-        req = PushTaskResRequest(task_res_list=[task_res])
+        req = PushTaskResRequest(node=node, task_res_list=[task_res])
 
         # Send the request
         res = _request(req, PushTaskResResponse, PATH_PUSH_TASK_RES)
@@ -355,24 +352,18 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
 
     def get_run(run_id: int) -> Run:
         # Construct the request
-        req = GetRunRequest(run_id=run_id)
+        req = GetRunRequest(node=node, run_id=run_id)
 
         # Send the request
         res = _request(req, GetRunResponse, PATH_GET_RUN)
         if res is None:
-            return Run(run_id, "", "", "", {})
+            return Run.create_empty(run_id)
 
-        return Run(
-            run_id,
-            res.run.fab_id,
-            res.run.fab_version,
-            res.run.fab_hash,
-            user_config_from_proto(res.run.override_config),
-        )
+        return run_from_proto(res.run)
 
     def get_fab(fab_hash: str) -> Fab:
         # Construct the request
-        req = GetFabRequest(hash_str=fab_hash)
+        req = GetFabRequest(node=node, hash_str=fab_hash)
 
         # Send the request
         res = _request(req, GetFabResponse, PATH_GET_FAB)

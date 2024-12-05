@@ -16,14 +16,14 @@
 
 
 import abc
-from typing import Dict, List, Optional, Tuple
+from typing import Optional
 
 
 class Ffs(abc.ABC):  # pylint: disable=R0904
     """Abstract Flower File Storage interface for large objects."""
 
     @abc.abstractmethod
-    def put(self, content: bytes, meta: Dict[str, str]) -> str:
+    def put(self, content: bytes, meta: dict[str, str]) -> str:
         """Store bytes and metadata and return sha256hex hash of data as str.
 
         Parameters
@@ -40,7 +40,7 @@ class Ffs(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get(self, key: str) -> Optional[Tuple[bytes, Dict[str, str]]]:
+    def get(self, key: str) -> Optional[tuple[bytes, dict[str, str]]]:
         """Return tuple containing the object content and metadata.
 
         Parameters
@@ -65,7 +65,7 @@ class Ffs(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def list(self) -> List[str]:
+    def list(self) -> list[str]:
         """List keys of all stored objects.
 
         Return all available keys in this `Ffs` instance.

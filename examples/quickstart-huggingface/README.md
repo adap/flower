@@ -8,7 +8,7 @@ framework: [transformers]
 
 This introductory example to using [🤗Transformers](https://huggingface.co/docs/transformers/en/index) with Flower. The training script closely follows the [HuggingFace course](https://huggingface.co/course/chapter3?fw=pt), so you are encouraged to check that out for a detailed explanation of the transformer pipeline.
 
-In this example, we will federated the training of a [DistilBERT](https://huggingface.co/distilbert/distilbert-base-uncased) modle on the [IMDB](https://huggingface.co/datasets/stanfordnlp/imdb) dataset. The data will be downloaded and partitioned using [Flower Datasets](https://flower.ai/docs/datasets/). This example runs best when a GPU is available.
+In this example, we will federated the training of a [BERT-tiny](https://huggingface.co/prajjwal1/bert-tiny) modle on the [IMDB](https://huggingface.co/datasets/stanfordnlp/imdb) dataset. The data will be downloaded and partitioned using [Flower Datasets](https://flower.ai/docs/datasets/). This example runs best when a GPU is available.
 
 ## Set up the project
 
@@ -57,7 +57,7 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 flwr run .
 ```
 
-Run the project in the `local-simulation-gpu` federation that gives CPU and GPU resources to each `ClientApp`. By default, at most 1x`ClientApp` (using ~12 GB of VRAM) will run in parallel in each available GPU. Note you can adjust the degree of paralellism but modifying the `client-resources` specification.
+Run the project in the `local-simulation-gpu` federation that gives CPU and GPU resources to each `ClientApp`. By default, at most 4x`ClientApp` (using ~1 GB of VRAM each) will run in parallel in each available GPU. Note you can adjust the degree of paralellism but modifying the `client-resources` specification.
 
 ```bash
 # Run with the `local-simulation-gpu` federation
@@ -67,7 +67,7 @@ flwr run . local-simulation-gpu
 You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example
 
 ```bash
-flwr run --run-config num-server-rounds=5
+flwr run --run-config "num-server-rounds=5 fraction-fit=0.1"
 ```
 
 > \[!TIP\]

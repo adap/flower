@@ -21,7 +21,6 @@ import os
 import tempfile
 import unittest
 from abc import abstractmethod
-from typing import Dict
 
 from flwr.server.superlink.ffs import DiskFfs, Ffs
 
@@ -65,7 +64,7 @@ class FfsTest(unittest.TestCase):
         ffs: Ffs = self.ffs_factory()
         content_expected = b"content"
         hash_expected = hashlib.sha256(content_expected).hexdigest()
-        meta_expected: Dict[str, str] = {"meta_key": "meta_value"}
+        meta_expected: dict[str, str] = {"meta_key": "meta_value"}
 
         with open(os.path.join(self.tmp_dir.name, hash_expected), "wb") as file:
             file.write(content_expected)
@@ -93,7 +92,7 @@ class FfsTest(unittest.TestCase):
         ffs: Ffs = self.ffs_factory()
         content_expected = b"content"
         hash_expected = hashlib.sha256(content_expected).hexdigest()
-        meta_expected: Dict[str, str] = {"meta_key": "meta_value"}
+        meta_expected: dict[str, str] = {"meta_key": "meta_value"}
 
         with open(os.path.join(self.tmp_dir.name, hash_expected), "wb") as file:
             file.write(content_expected)
@@ -117,7 +116,7 @@ class FfsTest(unittest.TestCase):
         ffs: Ffs = self.ffs_factory()
         content_expected = b"content"
         hash_expected = hashlib.sha256(content_expected).hexdigest()
-        meta_expected: Dict[str, str] = {"meta_key": "meta_value"}
+        meta_expected: dict[str, str] = {"meta_key": "meta_value"}
 
         with open(os.path.join(self.tmp_dir.name, hash_expected), "wb") as file:
             file.write(content_expected)

@@ -18,7 +18,6 @@
 import itertools
 import math
 import unittest
-from typing import Tuple
 
 from parameterized import parameterized
 
@@ -28,7 +27,7 @@ from flwr_datasets.partitioner.natural_id_partitioner import NaturalIdPartitione
 
 def _dummy_setup(
     num_rows: int, n_unique_natural_ids: int
-) -> Tuple[Dataset, NaturalIdPartitioner]:
+) -> tuple[Dataset, NaturalIdPartitioner]:
     """Create a dummy dataset and partitioner based on given arguments.
 
     The partitioner has automatically the dataset assigned to it.

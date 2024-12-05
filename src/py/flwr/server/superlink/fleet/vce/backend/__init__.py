@@ -15,7 +15,6 @@
 """Simulation Engine Backends."""
 
 import importlib
-from typing import Dict, Type
 
 from .backend import Backend, BackendConfig
 from .simplebackend import SimpleBackend
@@ -23,13 +22,13 @@ from .simplebackend import SimpleBackend
 is_ray_installed = importlib.util.find_spec("ray") is not None
 
 # Mapping of supported backends
-supported_backends: Dict[str, Type[Backend]] = {}
+supported_backends: dict[str, type[Backend]] = {}
 
 # Add simplebackend
 supported_backends["simple"] = SimpleBackend
 
 # To log backend-specific error message when chosen backend isn't available
-error_messages_backends: Dict[str, str] = {}
+error_messages_backends: dict[str, str] = {}
 
 if is_ray_installed:
     from .raybackend import RayBackend

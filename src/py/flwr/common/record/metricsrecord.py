@@ -15,7 +15,7 @@
 """MetricsRecord."""
 
 
-from typing import Dict, List, Optional, get_args
+from typing import Optional, get_args
 
 from flwr.common.typing import MetricsRecordValues, MetricsScalar
 
@@ -115,7 +115,7 @@ class MetricsRecord(TypedDict[str, MetricsRecordValues]):
 
     def __init__(
         self,
-        metrics_dict: Optional[Dict[str, MetricsRecordValues]] = None,
+        metrics_dict: Optional[dict[str, MetricsRecordValues]] = None,
         keep_input: bool = True,
     ):
         super().__init__(_check_key, _check_value)
@@ -130,7 +130,7 @@ class MetricsRecord(TypedDict[str, MetricsRecordValues]):
         num_bytes = 0
 
         for k, v in self.items():
-            if isinstance(v, List):
+            if isinstance(v, list):
                 # both int and float normally take 4 bytes
                 # But MetricRecords are mapped to 64bit int/float
                 # during protobuffing

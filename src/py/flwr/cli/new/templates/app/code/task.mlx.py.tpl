@@ -3,10 +3,10 @@
 import mlx.core as mx
 import mlx.nn as nn
 import numpy as np
-from datasets.utils.logging import disable_progress_bar
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 
+from datasets.utils.logging import disable_progress_bar
 
 disable_progress_bar()
 

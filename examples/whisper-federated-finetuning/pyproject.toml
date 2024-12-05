@@ -9,7 +9,7 @@ description = "On-device Federated Downstreaming for Speech Classification"
 authors = ["The Flower Authors <hello@flower.ai>"]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
+python = ">=3.9,<3.11"
 flwr = { extras = ["simulation"], version = ">=1.0,<2.0" }
 transformers = "4.32.1"
 tokenizers = "0.13.3"

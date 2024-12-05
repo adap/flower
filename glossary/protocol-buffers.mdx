@@ -1,0 +1,31 @@
+---
+title: "Protocol Buffers"
+description: "Protocol Buffers, often abbreviated as Protobuf, are a language-neutral, platform-neutral, extensible mechanism for serializing structured data, similar to XML but smaller, faster, and simpler."
+date: "2024-05-24"
+author:
+  name: "Taner Topal"
+  position: "Co-Creator and CTO @ Flower Labs"
+  website: "https://www.linkedin.com/in/tanertopal/"
+  github: "github.com/tanertopal"
+related: 
+  - text: "Federated Learning"
+    link: "/glossary/federated-learning"
+  - text: "Tutorial: What is Federated Learning?"
+    link: "/docs/framework/tutorial-series-what-is-federated-learning.html"
+---
+
+### Introduction to Protocol Buffers
+
+Protocol Buffers, often abbreviated as Protobuf, are a language-neutral, platform-neutral, extensible mechanism for serializing structured data, similar to XML but smaller, faster, and simpler. The method involves defining how you want your data to be structured once, then using language specific generated source code to write and read structured data to and from a variety of data streams.
+
+### How Protocol Buffers Work
+
+Protocol Buffers require a `.proto` file where the data structure (the messages) is defined. This is essentially a schema describing the data to be serialized. Once the `.proto` file is prepared, it is compiled using the Protobuf compiler (`protoc`), which generates data access classes in supported languages like Java, C++, Python, Swift, Kotlin, and more. These classes provide simple accessors for each field (like standard getters and setters) and methods to serialize the entire structure to a binary format that can be easily transmitted over network protocols or written to a file.
+
+### Advantages and Use Cases
+
+The primary advantages of Protocol Buffers include their simplicity, efficiency, and backward compatibility. They are more efficient than XML or JSON as they serialize to a binary format, which makes them both smaller and faster. They support backward compatibility, allowing to modify data structures without breaking deployed programs that are communicating using the protocol. This makes Protobuf an excellent choice for data storage or RPC (Remote Procedure Call) applications where small size, low latency, and schema evolution are critical.
+
+### Protocol Buffers in Flower
+
+In the context of Flower, Protocol Buffers play a crucial role in ensuring efficient and reliable communication between the server and clients. Federated learning involves heterogeneous clients (e.g., servers, mobile devices, edge devices) running different environments and programming languages. This setup requires frequent exchanges of model updates and other metadata between the server and clients. Protocol Buffers, with their efficient binary serialization, enable Flower to handle these exchanges with minimal overhead, ensuring low latency and reducing the bandwidth required for communication. Moreover, the backward compatibility feature of Protobuf allows Flower to evolve and update its communication protocols without disrupting existing deployments. Best of all, Flower users typically do not have to deal directly with Protobuf, as Flower provides language-specific abstractions that simplify interaction with the underlying communication protocols.
