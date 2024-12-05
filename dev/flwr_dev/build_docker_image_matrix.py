@@ -21,7 +21,7 @@ Workflow Details:
 import json
 from dataclasses import asdict, dataclass, field
 from enum import StrEnum
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Literal, Optional
 
 import typer
 
@@ -474,12 +474,11 @@ DISTRO_VERSION={distro_version}
 def build_images(
     flwr_version: str = typer.Option(..., help="The Flower version"),
     flwr_package: str = typer.Option("flwr", help="The Flower package"),
-    matrix: str = typer.Option(
+    matrix: Literal["stable", "nightly", "unstable"] = typer.Option(
         "stable",
         help="The workflow matrix type",
         case_sensitive=False,
         show_choices=True,
-        choices=["stable", "nightly", "unstable"],
     ),
 ):
     """Build updated docker images."""
