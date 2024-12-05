@@ -32,12 +32,15 @@ from flwr.cli.config_utils import (
     validate_federation_in_project_config,
     validate_project_config,
 )
+from flwr.cli.run.cli_interceptor import CliInterceptor
+from flwr.common.auth_plugin import CliAuthPlugin
 from flwr.common.config import (
     flatten_dict,
+    get_flwr_dir,
     parse_config_args,
     user_config_to_configsrecord,
 )
-from flwr.common.constant import CliOutputFormat
+from flwr.common.constant import AUTH_TYPE, CREDENTIALS_DIR, CliOutputFormat
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log, redirect_output, remove_emojis, restore_output
 from flwr.common.serde import (
@@ -48,10 +51,19 @@ from flwr.common.serde import (
 from flwr.common.typing import Fab
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
+from flwr.server.app import _format_address
 
 from ..log import start_stream
 
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
+
+
+try:
+    from flwr.ee.auth_plugin import get_cli_auth_plugins
+
+    auth_plugins = get_cli_auth_plugins()
+except ImportError:
+    auth_plugins = []
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
@@ -114,8 +126,11 @@ def run(
         )
 
         if "address" in federation_config:
+            auth_plugin: Optional[CliAuthPlugin] = _try_obtain_credentials(
+                federation_config
+            )
             _run_with_exec_api(
-                app, federation_config, config_overrides, stream, output_format
+                app, federation_config, config_overrides, stream, auth_plugin
             )
         else:
             _run_without_exec_api(app, federation_config, config_overrides, federation)
@@ -136,6 +151,42 @@ def run(
         captured_output.close()
 
 
+def _try_obtain_credentials(
+    federation_config: dict[str, Any]
+) -> Optional[CliAuthPlugin]:
+    base_path = get_flwr_dir()
+    credentials_dir = base_path / CREDENTIALS_DIR
+    credentials_dir.mkdir(parents=True, exist_ok=True)
+
+    server_address = federation_config["address"]
+    address, _, _ = _format_address(server_address)
+
+    credential = credentials_dir / address
+    config_dict = {}
+
+    if not credential.exists():
+        return None
+
+    with credential.open("r", encoding="utf-8") as file:
+        for line in file:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+
+            if "=" in line:
+                key, value = line.split("=", 1)
+                config_dict[key.strip()] = value.strip().strip('"')
+
+    auth_type = config_dict.get(AUTH_TYPE, "")
+    auth_plugin: Optional[CliAuthPlugin] = None
+
+    auth_plugin_class = auth_plugins.get(auth_type)
+    if auth_plugin_class is not None:
+        auth_plugin = auth_plugin_class(config_dict, credential)
+
+    return auth_plugin
+
+
 # pylint: disable-next=too-many-locals
 def _run_with_exec_api(
     app: Path,
@@ -143,8 +194,8 @@ def _run_with_exec_api(
     config_overrides: Optional[list[str]],
     stream: bool,
     output_format: str,
+    auth_plugin: Optional[CliAuthPlugin] = None,
 ) -> None:
-
     insecure, root_certificates_bytes = validate_certificate_in_federation_config(
         app, federation_config
     )
@@ -153,7 +204,7 @@ def _run_with_exec_api(
         insecure=insecure,
         root_certificates=root_certificates_bytes,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        interceptors=None,
+        interceptors=(CliInterceptor(auth_plugin) if auth_plugin is not None else None),
     )
     channel.subscribe(on_channel_state_change)
     stub = ExecStub(channel)
