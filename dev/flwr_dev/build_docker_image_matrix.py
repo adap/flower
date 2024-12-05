@@ -474,11 +474,10 @@ DISTRO_VERSION={distro_version}
 def build_images(
     flwr_version: str = typer.Option(..., help="The Flower version"),
     flwr_package: str = typer.Option("flwr", help="The Flower package"),
-    matrix: Literal["stable", "nightly", "unstable"] = typer.Option(
+    matrix: str = typer.Option(
         "stable",
         help="The workflow matrix type",
         case_sensitive=False,
-        show_choices=True,
     ),
 ):
     """Build updated docker images."""
