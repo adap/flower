@@ -23,6 +23,7 @@ try:
     import tomllib
 except ModuleNotFoundError:
     import tomli as tomllib
+
 from datetime import date
 from sys import argv
 from typing import Annotated, Optional

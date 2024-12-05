@@ -19,8 +19,9 @@ import glob
 from os import path
 
 import grpc_tools
-from flwr_dev.common import get_git_root
 from grpc_tools import protoc
+
+from flwr_dev.common import get_git_root
 
 GRPC_PATH = grpc_tools.__path__[0]
 

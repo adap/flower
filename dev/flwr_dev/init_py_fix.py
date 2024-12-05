@@ -12,6 +12,7 @@ from typing import Annotated, List
 
 import black
 import typer
+
 from flwr_dev.init_py_check import get_all_var_list, get_init_dir_list_and_warnings
 
 

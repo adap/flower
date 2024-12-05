@@ -5,7 +5,6 @@ import re
 import sys
 from pathlib import Path
 
-
 REPLACE_CURR_VERSION = {
     "doc/source/conf.py": [
         ".. |stable_flwr_version| replace:: {version}",

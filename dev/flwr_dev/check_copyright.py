@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Annotated, List
 
 import typer
+
 from flwr_dev.init_py_check import get_init_dir_list_and_warnings
 
 COPYRIGHT_FORMAT = """# Copyright {} Flower Labs GmbH. All Rights Reserved.
