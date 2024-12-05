@@ -126,5 +126,6 @@ class TestExecServicer(unittest.TestCase):
 
         # Assert
         self.assertTrue(response.success)
+        self.assertIsNotNone(run_state)
         if run_state is not None:
             self.assertEqual(run_state.status, expected_run_status)

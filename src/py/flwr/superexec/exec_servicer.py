@@ -138,20 +138,24 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
         # Exit if `run_id` not found
         if not state.get_run(request.run_id):
-            context.abort(grpc.StatusCode.NOT_FOUND, "Run ID not found")
+            context.abort(
+                grpc.StatusCode.NOT_FOUND, f"Run ID {request.run_id} not found"
+            )
 
         run_status = state.get_run_status({request.run_id})[request.run_id]
 
         if run_status.status == Status.FINISHED:
-            log(ERROR, "Run ID `%s` is already finished", request.run_id)
-            return StopRunResponse(success=False)
-
-        return StopRunResponse(
-            success=state.update_run_status(
-                run_id=request.run_id,
-                new_status=RunStatus(Status.FINISHED, SubStatus.STOPPED, ""),
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                f"Run ID {request.run_id} is already finished",
             )
+
+        update_success = state.update_run_status(
+            run_id=request.run_id,
+            new_status=RunStatus(Status.FINISHED, SubStatus.STOPPED, ""),
         )
+
+        return StopRunResponse(success=update_success)
 
 
 def _create_list_runs_response(run_ids: set[int], state: LinkState) -> ListRunsResponse:
