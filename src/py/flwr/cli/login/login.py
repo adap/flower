@@ -27,6 +27,7 @@ from flwr.cli.config_utils import (
     validate_project_config,
 )
 from flwr.common.auth_plugin import CliAuthPlugin
+from flwr.common.config import get_credential_path
 from flwr.common.constant import AUTH_TYPE
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
@@ -87,13 +88,18 @@ def login(  # pylint: disable=R0914
     stub = _create_exec_stub(app, federation_config)
     login_request = GetLoginDetailsRequest()
     login_response: GetLoginDetailsResponse = stub.GetLoginDetails(login_request)
-    auth_plugin = get_cli_auth_plugins()[
+
+    # Get the auth plugin class and login
+    auth_plugin_class = get_cli_auth_plugins()[
         login_response.login_details.get(AUTH_TYPE, "")
     ]
-    config = auth_plugin.login(
+    config = auth_plugin_class.login(
         dict(login_response.login_details), config, federation, stub
     )
 
+    # Store the tokens
+    credential_path = get_credential_path(federation_config)
+    auth_plugin = auth_plugin_class(config, credential_path)
     auth_plugin.store_tokens(config)
 
 
