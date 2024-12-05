@@ -11,10 +11,9 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import List, Tuple
 
 
-def get_init_dir_list_and_warnings(absolute_path: str) -> Tuple[List[str], List[str]]:
+def get_init_dir_list_and_warnings(absolute_path: str) -> tuple[list[str], list[str]]:
     """Search given path and return list of dirs containing __init__.py files."""
     path = os.walk(absolute_path)
     warning_list = []
@@ -35,7 +34,7 @@ def get_init_dir_list_and_warnings(absolute_path: str) -> Tuple[List[str], List[
     return warning_list, dir_list
 
 
-def check_missing_init_files(absolute_path: str) -> List[str]:
+def check_missing_init_files(absolute_path: str) -> list[str]:
     """Search absolute_path and look for missing __init__.py files."""
     warning_list, dir_list = get_init_dir_list_and_warnings(absolute_path)
 
@@ -48,7 +47,7 @@ def check_missing_init_files(absolute_path: str) -> List[str]:
     return dir_list
 
 
-def get_all_var_list(init_dir: str) -> Tuple[Path, List[str], List[str]]:
+def get_all_var_list(init_dir: str) -> tuple[Path, list[str], list[str]]:
     """Get the __all__ list of a __init__.py file.
 
     The function returns the path of the '__init__.py' file of the given dir, as well as
@@ -75,7 +74,7 @@ def get_all_var_list(init_dir: str) -> Tuple[Path, List[str], List[str]]:
     return init_file, all_list, all_lines
 
 
-def check_all_init_files(dir_list: List[str]) -> None:
+def check_all_init_files(dir_list: list[str]) -> None:
     """Check if __all__ is in alphabetical order in __init__.py files."""
     warning_list = []
 
