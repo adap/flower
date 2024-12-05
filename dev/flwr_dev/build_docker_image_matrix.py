@@ -20,8 +20,23 @@ Workflow Details:
 
 import json
 from dataclasses import asdict, dataclass, field
-from enum import StrEnum
-from typing import Any, Callable, Literal, Optional
+
+try:
+    from enum import StrEnum
+
+    class _DistroName(StrEnum):
+        ALPINE = "alpine"
+        UBUNTU = "ubuntu"
+
+except ImportError:
+    from enum import Enum
+
+    class _DistroName(str, Enum):
+        ALPINE = "alpine"
+        UBUNTU = "ubuntu"
+
+
+from typing import Any, Callable, Optional
 
 import typer
 
@@ -30,11 +45,6 @@ import typer
 #     ALPINE = "alpine"
 #     UBUNTU = "ubuntu"
 # assert sys.version_info < (3, 11), "Script requires Python 3.9 or lower."
-
-
-class _DistroName(StrEnum):
-    ALPINE = "alpine"
-    UBUNTU = "ubuntu"
 
 
 @dataclass
