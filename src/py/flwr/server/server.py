@@ -270,9 +270,7 @@ class Server:
     ) -> Parameters:
         """Get initial parameters from one of the available clients."""
         # Server-side parameter initialization
-        parameters: Optional[Parameters] = self.strategy.initialize_parameters(
-            client_manager=self._client_manager
-        )
+        parameters: Optional[Parameters] = self.strategy.initialize_parameters()
         if parameters is not None:
             log(INFO, "Using initial global parameters provided by strategy")
             return parameters
