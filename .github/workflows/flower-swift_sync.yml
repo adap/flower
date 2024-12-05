@@ -3,7 +3,7 @@ name: Sync flower-swift
 on:
   push:
     branches: ['main']
-    paths: ['src/swift/flwr/**']
+    paths: ['framework/src/swift/flwr/**']
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
@@ -20,6 +20,6 @@ jobs:
         env:
           SSH_DEPLOY_KEY: ${{ secrets.FLOWER_SWIFT_SSH }}
         with:
-          source-directory: 'src/swift/flwr'
+          source-directory: 'framework/src/swift/flwr'
           destination-github-username: 'adap'
           destination-repository-name: 'flower-swift'

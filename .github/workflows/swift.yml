@@ -3,10 +3,10 @@ name: Swift
 on:
   push:
     branches: ['main']
-    paths: ['src/swift/**']
+    paths: ['framework/src/swift/**']
   pull_request:
     branches: ['main']
-    paths: ['src/swift/**']
+    paths: ['framework/src/swift/**']
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
@@ -16,7 +16,7 @@ jobs:
   test:
     defaults:
         run:
-            working-directory: src/swift/flwr
+            working-directory: framework/src/swift/flwr
     name: Test
     runs-on: macos-14
     steps:
@@ -36,7 +36,7 @@ jobs:
           swift-version: 5.10
       - uses: actions/checkout@v4
       - name: Build docs
-        run: ./dev/build-swift-api-ref.sh
+        run: ./framework/dev/build-swift-api-ref.sh
 
   deploy_docs:
     needs: "build_docs"
@@ -53,4 +53,4 @@ jobs:
           AWS_DEFAULT_REGION: ${{ secrets. AWS_DEFAULT_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets. AWS_SECRET_ACCESS_KEY }}
-        run: ./dev/deploy-swift-docs.sh
+        run: ./framework/dev/deploy-swift-docs.sh

@@ -42,7 +42,7 @@ jobs:
           gh extension install actions/gh-actions-cache
           
           REPO=${{ github.repository }}
-          LATEST_KEY=pythonloc-${{ matrix.directory }}-${{ env.pythonLocation }}-${{ hashFiles(format('./e2e/{0}/pyproject.toml', matrix.directory)) }}
+          LATEST_KEY=pythonloc-${{ matrix.directory }}-${{ env.pythonLocation }}-${{ hashFiles(format('./framework/e2e/{0}/pyproject.toml', matrix.directory)) }}
 
           echo "Fetching list of cache keys"
           cacheKeys=$(gh actions-cache list -R $REPO | grep "${{ matrix.directory }}" | cut -f 1 )

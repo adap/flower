@@ -40,6 +40,6 @@ jobs:
       - name: Install dependencies (mandatory only)
         run: python -m poetry install --all-extras
       - name: Check if protos need recompilation
-        run: ./dev/check-protos.sh
+        run: ./framework/dev/check-protos.sh
       - name: Lint + Test (isort/black/docformatter/mypy/pylint/flake8/pytest)
-        run: ./dev/test.sh
+        run: ./framework/dev/test.sh

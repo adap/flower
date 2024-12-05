@@ -33,4 +33,4 @@ jobs:
         run: |
           python -m poetry install
       - name: Lint + Test (isort/black/mypy/pylint/pytest)
-        run: ./dev/test.sh
+        run: ./framework/dev/test.sh

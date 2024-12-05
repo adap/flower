@@ -3,10 +3,10 @@ name: C++ SDK
 on:
   push:
     branches: ['main']
-    paths: ['src/cc/flwr/**']
+    paths: ['framework/src/cc/flwr/**']
   pull_request:
     branches: ['main']
-    paths: ['src/cc/flwr/**']
+    paths: ['framework/src/cc/flwr/**']
 
 jobs:
   build_and_test:
@@ -37,12 +37,12 @@ jobs:
 
     - name: Check source Formatting
       run: |
-        find src/cc/flwr/src -name '*.cc' | xargs clang-format -i
+        find framework/src/cc/flwr/src -name '*.cc' | xargs clang-format -i
         git diff --exit-code
 
     - name: Check header Formatting
       run: |
-        find src/cc/flwr/include -name '*.h' -not -path "src/cc/flwr/include/flwr/*" | xargs clang-format -i
+        find framework/src/cc/flwr/include -name '*.h' -not -path "framework/src/cc/flwr/include/flwr/*" | xargs clang-format -i
         git diff --exit-code
 
     - name: Build
