@@ -48,7 +48,6 @@ def stop(
     ] = None,
 ) -> None:
     """Stop a run."""
-
     typer.secho(
         "\n\nWARNING: `flwr stop` is not yet implemented and "
         "will be available in a future release.\n\n",
@@ -77,7 +76,7 @@ def stop(
 
     try:
         channel = _init_channel(app, federation_config)
-        stub = ExecStub(channel)  # pylint: disable=unused-variable
+        stub = ExecStub(channel)  # pylint: disable=unused-variable # noqa: F841
 
     except ValueError as err:
         typer.secho(
