@@ -16,13 +16,13 @@
 # ==============================================================================
 
 set -e
-cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
+cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../
 
 ROOT=$(pwd)
 
 # Build and deploy Flower iOS docs
 cd "$ROOT"
-./dev/build-swift-api-ref.sh
-./dev/add-swift-api-footer.sh
+./framework/dev/build-swift-api-ref.sh
+./framework/dev/add-swift-api-footer.sh
 cd SwiftDoc/html
 aws s3 sync --delete --exclude ".*" --cache-control "no-cache" ./ s3://flower.ai/docs/ios

@@ -20,7 +20,9 @@ import shutil
 import subprocess
 from pathlib import Path
 
-ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+ROOT = os.path.abspath(
+    os.path.join(os.path.join(os.path.dirname(__file__), ".."), "..")
+)
 INDEX = os.path.join(ROOT, "examples", "doc", "source", "index.rst")
 
 initial_text = """

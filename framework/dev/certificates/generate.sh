@@ -2,7 +2,7 @@
 # This script will generate all certificates if ca.crt does not exist
 
 set -e
-cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../
+cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../../
 
 CA_PASSWORD=notsafe
 
@@ -36,7 +36,7 @@ openssl req \
     -new \
     -key $CERT_DIR/server.key \
     -out $CERT_DIR/server.csr \
-    -config ./dev/certificates/certificate.conf
+    -config ./framework/dev/certificates/certificate.conf
 
 # Generate a certificate for the server
 openssl x509 \
@@ -48,5 +48,5 @@ openssl x509 \
     -out $CERT_DIR/server.pem \
     -days 365 \
     -sha256 \
-    -extfile ./dev/certificates/certificate.conf \
+    -extfile ./framework/dev/certificates/certificate.conf \
     -extensions req_ext

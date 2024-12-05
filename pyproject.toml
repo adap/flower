@@ -45,8 +45,8 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed",
 ]
-packages = [{ include = "flwr", from = "src/py" }]
-exclude = ["src/py/**/*_test.py"]
+packages = [{ include = "flwr", from = "framework/src/py" }]
+exclude = ["framework/src/py/**/*_test.py"]
 
 [tool.poetry.scripts]
 # `flwr` CLI
@@ -144,10 +144,10 @@ docsig = "==0.64.0"
 
 [tool.docstrfmt]
 extend_exclude = [
-    "doc/source/conf.py",
-    "doc/source/tutorial-quickstart-huggingface.rst",
-    "doc/source/_templates/autosummary/*",
-    "doc/source/ref-api/*",
+    "framework/doc/source/conf.py",
+    "framework/doc/source/tutorial-quickstart-huggingface.rst",
+    "framework/doc/source/_templates/autosummary/*",
+    "framework/doc/source/ref-api/*",
 ]
 
 [tool.isort]
@@ -164,7 +164,7 @@ disable = "duplicate-code,too-few-public-methods,useless-import-alias"
 [tool.pytest.ini_options]
 minversion = "6.2"
 addopts = "-qq"
-testpaths = ["src/py/flwr", "src/py/flwr_tool"]
+testpaths = ["framework/src/py/flwr", "framework/src/py/flwr_tool"]
 filterwarnings = "ignore::DeprecationWarning"
 
 [tool.pytest-watcher]
@@ -230,8 +230,8 @@ exclude = [
 convention = "numpy"
 
 [tool.ruff.per-file-ignores]
-"src/py/flwr/server/strategy/*.py" = ["E501"]
+"framework/src/py/flwr/server/strategy/*.py" = ["E501"]
 
 [tool.docsig]
 ignore-no-params = true
-exclude = 'src/py/flwr/proto/.*|src/py/flwr/.*_test\.py|src/py/flwr/cli/new/templates/.*\.tpl'
+exclude = 'framework/src/py/flwr/proto/.*|framework/src/py/flwr/.*_test\.py|framework/src/py/flwr/cli/new/templates/.*\.tpl'

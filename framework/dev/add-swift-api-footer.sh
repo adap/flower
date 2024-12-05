@@ -16,17 +16,17 @@
 # ==============================================================================
 
 set -e
-cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
+cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../
 
-footer_template_file="dev/swift-docs-resources/footer.html"
+footer_template_file="framework/dev/swift-docs-resources/footer.html"
 footer_template=$(<"$footer_template_file")
 placeholder='<body data-color-scheme="auto">'
 html_file="Swiftdoc/html/documentation/flwr/index.html"
 
 sed -i '' -e "s#$(printf '%s' "$placeholder" | sed 's/[&/\]/\\&/g')#$placeholder\n$footer_template#" "$html_file"
 
-flower_logo='dev/swift-docs-resources/logo_secondary-w-border.png'
-footer_template_css="dev/swift-docs-resources/footer.css"
+flower_logo='framework/dev/swift-docs-resources/logo_secondary-w-border.png'
+footer_template_css="framework/dev/swift-docs-resources/footer.css"
 destination_images="Swiftdoc/html/images/"
 destination_css="Swiftdoc/html/css/"
 

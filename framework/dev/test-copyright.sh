@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-cd "$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"/../
+cd "$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"/../../
 
 EXIT_CODE=0
 
