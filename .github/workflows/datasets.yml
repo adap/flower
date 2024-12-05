@@ -50,4 +50,4 @@ jobs:
       - name: Install dependencies (mandatory only)
         run: python -m poetry install --all-extras
       - name: Test (formatting + unit tests)
-        run: ./framework/dev/test.sh
+        run: ./dev/test.sh
