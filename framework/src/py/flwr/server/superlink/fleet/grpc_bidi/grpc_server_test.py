@@ -37,7 +37,9 @@ def load_certificates() -> tuple[str, str, str]:
     Utility function for loading for SSL-enabled gRPC servertests.
     """
     # Trigger script which generates the certificates
-    subprocess.run(["bash", "./dev/certificates/generate.sh"], check=True, cwd=root_dir)
+    subprocess.run(
+        ["bash", "./framework/dev/certificates/generate.sh"], check=True, cwd=root_dir
+    )
 
     certificates = (
         join(root_dir, ".cache/certificates/ca.crt"),
