@@ -215,7 +215,9 @@ class GrpcDriver(Driver):
         """
         # Pull TaskRes
         res: PullTaskResResponse = self._stub.PullTaskRes(
-            PullTaskResRequest(node=self.node, task_ids=message_ids)
+            PullTaskResRequest(
+                node=self.node, task_ids=message_ids, run_id=cast(Run, self._run).run_id
+            )
         )
         # Convert TaskRes to Message
         msgs = [message_from_taskres(taskres) for taskres in res.task_res_list]

@@ -15,12 +15,15 @@
 """Flower ServerApp process."""
 
 import argparse
+import os
+import signal
 import sys
+import threading
 from logging import DEBUG, ERROR, INFO
 from pathlib import Path
 from queue import Queue
 from time import sleep
-from typing import Optional
+from typing import Any, NoReturn, Optional
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
@@ -36,6 +39,7 @@ from flwr.common.constant import (
     Status,
     SubStatus,
 )
+from flwr.common.exit_handlers import RunStopException
 from flwr.common.logger import (
     log,
     mirror_output_to_queue,
@@ -48,15 +52,21 @@ from flwr.common.serde import (
     context_to_proto,
     fab_from_proto,
     run_from_proto,
+    run_status_from_proto,
     run_status_to_proto,
 )
 from flwr.common.typing import RunStatus
-from flwr.proto.run_pb2 import UpdateRunStatusRequest  # pylint: disable=E0611
+from flwr.proto.run_pb2 import (  # pylint: disable=E0611
+    GetRunStatusRequest,
+    GetRunStatusResponse,
+    UpdateRunStatusRequest,
+)
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PullServerAppInputsRequest,
     PullServerAppInputsResponse,
     PushServerAppOutputsRequest,
 )
+from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
 from flwr.server.driver.grpc_driver import GrpcDriver
 from flwr.server.run_serverapp import run as run_
 
@@ -96,7 +106,7 @@ def flwr_serverapp() -> None:
     restore_output()
 
 
-def run_serverapp(  # pylint: disable=R0914, disable=W0212
+def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=too-many-statements
     serverappio_api_address: str,
     log_queue: Queue[Optional[str]],
     run_once: bool,
@@ -127,6 +137,15 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
             context = context_from_proto(res.context)
             run = run_from_proto(res.run)
             fab = fab_from_proto(res.fab)
+
+            stop_event = threading.Event()
+            # Start monitoring thread
+            run_monitor_th = threading.Thread(
+                target=_monitor_fn,
+                args=(run.run_id, driver._stub, stop_event),
+                daemon=True,
+            )
+            run_monitor_th.start()
 
             driver.set_run(run.run_id)
 
@@ -186,6 +205,17 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
             _ = driver._stub.PushServerAppOutputs(out_req)
 
             run_status = RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
+            stop_event.set()
+
+        except RunStopException:
+            exc_entity = "ServerApp"
+            log(
+                INFO,
+                "%s stopped from user-issued command for run_id %s",
+                exc_entity,
+                run.run_id,
+            )
+            run_status = None
 
         except Exception as ex:  # pylint: disable=broad-exception-caught
             exc_entity = "ServerApp"
@@ -232,3 +262,30 @@ def _parse_args_run_flwr_serverapp() -> argparse.ArgumentParser:
     )
     add_args_flwr_app_common(parser=parser)
     return parser
+
+
+def _monitor_fn(
+    run_id: int, stub: ServerAppIoStub, stop_event: threading.Event
+) -> None:
+    """."""
+    req = GetRunStatusRequest(run_id=run_id)
+
+    while not stop_event.is_set():
+        res: GetRunStatusResponse = stub.GetRunStatus(req)
+        run_status = run_status_from_proto(res.run_status)
+        is_stopped = (run_status.status == Status.FINISHED) & (
+            run_status.sub_status == SubStatus.STOPPED
+        )
+        if is_stopped:
+            os.kill(os.getpid(), signal.SIGINT)
+            break
+        sleep(3)
+
+
+def signal_handler(sig: Any, frame: Any) -> NoReturn:
+    """."""
+    raise RunStopException
+
+
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
