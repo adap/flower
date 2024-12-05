@@ -37,7 +37,7 @@ CHANGELOG_FILE = "doc/source/ref-changelog.md"
 CHANGELOG_SECTION_HEADER = "### Changelog entry"
 
 # Load the TOML configuration
-with (pathlib.Path(__file__).parent.resolve() / "changelog_config.toml").open(
+with (pathlib.Path(__file__).parents[1].resolve() / "changelog_config.toml").open(
     "rb"
 ) as file:
     CONFIG = tomllib.load(file)
