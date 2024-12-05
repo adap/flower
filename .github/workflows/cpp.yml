@@ -49,18 +49,18 @@ jobs:
       run: |
         mkdir -p build
         cd build
-        cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ../src/cc/flwr
+        cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ../framework/src/cc/flwr
         make
 
     - name: Run clang-tidy
       run: |
         cd build
-        find ../src/cc/flwr/src -name '*.cc' | xargs clang-tidy
+        find ../framework/src/cc/flwr/src -name '*.cc' | xargs clang-tidy
 
     - name: Run cppcheck
       run: |
         cd build
-        cppcheck --enable=all -I../src/cc/flwr/include ../src/cc/flwr/src
+        cppcheck --enable=all -I../framework/src/cc/flwr/include ../framework/src/cc/flwr/src
 
     - name: End-to-end test
       run: |
