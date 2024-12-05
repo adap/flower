@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower command line interface `stop` command."""
 
+
 from logging import DEBUG
 from pathlib import Path
 from typing import Annotated, Any, Optional
@@ -30,6 +31,7 @@ from flwr.cli.config_utils import (
 from flwr.common.constant import FAB_CONFIG_FILE
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
+from flwr.proto.exec_pb2 import StopRunRequest, StopRunResponse  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 
 
@@ -48,13 +50,6 @@ def stop(
     ] = None,
 ) -> None:
     """Stop a run."""
-    typer.secho(
-        "\n\nWARNING: `flwr stop` is not yet implemented and "
-        "will be available in a future release.\n\n",
-        fg=typer.colors.RED,
-        bold=True,
-    )
-
     # Load and validate federation config
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
@@ -77,6 +72,8 @@ def stop(
     try:
         channel = _init_channel(app, federation_config)
         stub = ExecStub(channel)  # pylint: disable=unused-variable # noqa: F841
+
+        _stop_run(stub, run_id=run_id)
 
     except ValueError as err:
         typer.secho(
@@ -115,3 +112,9 @@ def _stop_run(
     run_id: int,  # pylint: disable=unused-argument
 ) -> None:
     """Stop a run."""
+    response: StopRunResponse = stub.StopRun(request=StopRunRequest(run_id=run_id))
+
+    if response.success:
+        typer.secho(f"✅ Run {run_id} successfully stopped.", fg=typer.colors.GREEN)
+    else:
+        typer.secho(f"❌ Run {run_id} couldn't be stopped.", fg=typer.colors.RED)
