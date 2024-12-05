@@ -109,11 +109,9 @@ class DifferentialPrivacyServerSideFixedClipping(Strategy):
         rep = "Differential Privacy Strategy Wrapper (Server-Side Fixed Clipping)"
         return rep
 
-    def initialize_parameters(
-        self, client_manager: ClientManager
-    ) -> Optional[Parameters]:
+    def initialize_parameters(self) -> Optional[Parameters]:
         """Initialize global model parameters using given strategy."""
-        return self.strategy.initialize_parameters(client_manager)
+        return self.strategy.initialize_parameters()
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
