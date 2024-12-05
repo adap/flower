@@ -32,6 +32,11 @@ class InterruptedStreamLogsResponse:
         """Raise KeyboardInterrupt to exit logstream test gracefully."""
         raise KeyboardInterrupt
 
+    @property
+    def latest_timestamp(self) -> NoReturn:
+        """Raise KeyboardInterrupt to exit logstream test gracefully."""
+        raise KeyboardInterrupt
+
 
 class TestFlwrLog(unittest.TestCase):
     """Unit tests for `flwr log` CLI functions."""
@@ -66,7 +71,9 @@ class TestFlwrLog(unittest.TestCase):
         """Test stream_logs."""
         with patch("builtins.print") as mock_print:
             with self.assertRaises(KeyboardInterrupt):
-                stream_logs(run_id=123, channel=self.mock_channel, duration=1)
+                stream_logs(
+                    run_id=123, stub=self.mock_stub, duration=1, after_timestamp=0.0
+                )
                 # Assert that mock print was called with the expected arguments
                 mock_print.assert_has_calls(self.expected_calls)
 

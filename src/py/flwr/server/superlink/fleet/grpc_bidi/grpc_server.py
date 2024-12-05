@@ -30,7 +30,7 @@ from flwr.proto.transport_pb2_grpc import (  # pylint: disable=E0611
     add_FlowerServiceServicer_to_server,
 )
 from flwr.server.client_manager import ClientManager
-from flwr.server.superlink.driver.driver_servicer import DriverServicer
+from flwr.server.superlink.driver.serverappio_servicer import ServerAppIoServicer
 from flwr.server.superlink.fleet.grpc_adapter.grpc_adapter_servicer import (
     GrpcAdapterServicer,
 )
@@ -60,7 +60,7 @@ def valid_certificates(certificates: tuple[bytes, bytes, bytes]) -> bool:
     return is_valid
 
 
-def start_grpc_server(  # pylint: disable=too-many-arguments
+def start_grpc_server(  # pylint: disable=too-many-arguments,R0917
     client_manager: ClientManager,
     server_address: str,
     max_concurrent_workers: int = 1000,
@@ -156,12 +156,12 @@ def start_grpc_server(  # pylint: disable=too-many-arguments
     return server
 
 
-def generic_create_grpc_server(  # pylint: disable=too-many-arguments
+def generic_create_grpc_server(  # pylint: disable=too-many-arguments,R0917
     servicer_and_add_fn: Union[
         tuple[FleetServicer, AddServicerToServerFn],
         tuple[GrpcAdapterServicer, AddServicerToServerFn],
         tuple[FlowerServiceServicer, AddServicerToServerFn],
-        tuple[DriverServicer, AddServicerToServerFn],
+        tuple[ServerAppIoServicer, AddServicerToServerFn],
     ],
     server_address: str,
     max_concurrent_workers: int = 1000,
