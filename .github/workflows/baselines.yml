@@ -82,8 +82,8 @@ jobs:
 
       - name: Testing ${{ matrix.baseline }}
         working-directory: baselines
-        run: ./dev/test-baseline.sh ${{ matrix.baseline }}
+        run: ./framework/dev/test-baseline.sh ${{ matrix.baseline }}
 
       - name: Test Structure of ${{ matrix.baseline }}
         working-directory: baselines
-        run: ./dev/test-baseline-structure.sh ${{ matrix.baseline }}
+        run: ./framework/dev/test-baseline-structure.sh ${{ matrix.baseline }}

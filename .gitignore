@@ -1,9 +1,9 @@
 # Flower
 .flower_ops
 data/
-doc/source/api_documentation
-doc/source/_build
-doc/source/dataset/
+framework/doc/source/api_documentation
+framework/doc/source/_build
+framework/doc/source/dataset/
 flwr_logs
 .cache
 
@@ -18,7 +18,7 @@ examples/**/dataset/**
 baselines/datasets/leaf
 
 # Exclude ee package
-src/py/flwr/ee
+framework/src/py/flwr/ee
 
 # macOS
 .DS_Store

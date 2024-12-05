@@ -27,9 +27,9 @@ jobs:
       - name: Install dependencies (mandatory only)
         run: python -m poetry install
       - name: Build wheel
-        run: ./dev/build.sh
+        run: ./framework/dev/build.sh
       - name: Test wheel
-        run: ./dev/test-wheel.sh
+        run: ./framework/dev/test-wheel.sh
       - name: Upload wheel
         if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         id: upload
@@ -74,7 +74,7 @@ jobs:
       ${{ matrix.engine }} 
     defaults:
       run:
-        working-directory: e2e/${{ matrix.directory }}
+        working-directory: framework/e2e/${{ matrix.directory }}
     steps:
       - uses: actions/checkout@v4
       - name: Bootstrap
@@ -106,7 +106,7 @@ jobs:
           ${{ matrix.connection }} / 
           ${{ matrix.authentication }} / 
           ${{ matrix.engine }} 
-        working-directory: e2e/${{ matrix.directory }}
+        working-directory: framework/e2e/${{ matrix.directory }}
         run: ./../test_exec_api.sh "${{ matrix.connection }}" "${{ matrix.authentication}}" "${{ matrix.engine }}"
 
   frameworks:
@@ -178,7 +178,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: e2e/${{ matrix.directory }}
+        working-directory: framework/e2e/${{ matrix.directory }}
 
     steps:
       - uses: actions/checkout@v4
@@ -197,7 +197,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.pythonLocation }}
-          key: pythonloc-${{ runner.os }}-${{ matrix.directory }}-${{ env.pythonLocation }}-${{ hashFiles(format('./e2e/{0}/pyproject.toml', matrix.directory)) }}
+          key: pythonloc-${{ runner.os }}-${{ matrix.directory }}-${{ env.pythonLocation }}-${{ hashFiles(format('./framework/e2e/{0}/pyproject.toml', matrix.directory)) }}
       - name: Install dependencies
         run: python -m pip install --upgrade .
       - name: Install Flower wheel from artifact store
@@ -209,7 +209,7 @@ jobs:
         run: python -c "${{ matrix.dataset }}"
       - name: Run edge client test
         if: ${{ matrix.directory != 'e2e-bare-auth' }}
-        working-directory: e2e/${{ matrix.directory }}/${{ matrix.e2e }}
+        working-directory: framework/e2e/${{ matrix.directory }}/${{ matrix.e2e }}
         run: ./../../test_legacy.sh "${{ matrix.directory }}"
       - name: Run virtual client test
         if: ${{ matrix.directory != 'e2e-bare-auth' }}
@@ -252,7 +252,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: e2e/strategies
+        working-directory: framework/e2e/strategies
 
     steps:
       - uses: actions/checkout@v4
@@ -369,7 +369,7 @@ jobs:
       ${{ matrix.engine }} 
     defaults:
       run:
-        working-directory: e2e/${{ matrix.directory }}
+        working-directory: framework/e2e/${{ matrix.directory }}
     steps:
       - uses: actions/checkout@v4
       - name: Bootstrap
@@ -401,5 +401,5 @@ jobs:
           ${{ matrix.connection }} / 
           ${{ matrix.authentication }} / 
           ${{ matrix.engine }} 
-        working-directory: e2e/${{ matrix.directory }}
+        working-directory: framework/e2e/${{ matrix.directory }}
         run: ./../test_exec_api.sh "${{ matrix.connection }}" "${{ matrix.authentication}}" "${{ matrix.engine }}"

@@ -13,7 +13,7 @@ jobs:
   publish:
     defaults:
         run:
-            working-directory: src/kotlin
+            working-directory: framework/src/kotlin
     name: Release build and publish
     if: github.repository == 'adap/flower'
     runs-on: ubuntu-22.04
