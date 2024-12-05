@@ -27,15 +27,8 @@ class Strategy(ABC):
     """Abstract base class for server strategy implementations."""
 
     @abstractmethod
-    def initialize_parameters(
-        self, client_manager: ClientManager
-    ) -> Optional[Parameters]:
+    def initialize_parameters(self) -> Optional[Parameters]:
         """Initialize the (global) model parameters.
-
-        Parameters
-        ----------
-        client_manager : ClientManager
-            The client manager which holds all currently connected clients.
 
         Returns
         -------
