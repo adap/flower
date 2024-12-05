@@ -29,11 +29,6 @@ class ExecStub:
         flwr.proto.exec_pb2.ListRunsResponse]
     """flwr ls command"""
 
-    StopRun: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.exec_pb2.StopRunRequest,
-        flwr.proto.exec_pb2.StopRunResponse]
-    """Stop run upon request"""
-
 
 class ExecServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -66,14 +61,6 @@ class ExecServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.exec_pb2.ListRunsResponse:
         """flwr ls command"""
-        pass
-
-    @abc.abstractmethod
-    def StopRun(self,
-        request: flwr.proto.exec_pb2.StopRunRequest,
-        context: grpc.ServicerContext,
-    ) -> flwr.proto.exec_pb2.StopRunResponse:
-        """Stop run upon request"""
         pass
 
 
