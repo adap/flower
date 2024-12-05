@@ -96,9 +96,10 @@ class KeycloakExecPlugin(ExecAuthPlugin):
             return False
         access_token_bytes = cast(bytes, metadata_dict[ACCESS_TOKEN])
 
-        headers = {"Authorization": access_token_bytes.decode("utf-8")}
+        headers = {"Authorization": f"Bearer {access_token_bytes}"}
 
         response = post(self.validate_url, headers=headers, timeout=10)
+        print(response.status_code)
         if response.status_code == 200:
             return True
         return False
@@ -142,7 +143,7 @@ class KeycloakExecPlugin(ExecAuthPlugin):
             CLIENT_ID: self.keycloak_client_id,
             CLIENT_SECRET: self.keycloak_client_secret,
             GRANT_TYPE: REFRESH_TOKEN,
-            REFRESH_TOKEN: refresh_token_bytes.decode("utf-8"),
+            REFRESH_TOKEN: refresh_token_bytes,
         }
 
         headers = {"Content-Type": "application/x-www-form-urlencoded"}

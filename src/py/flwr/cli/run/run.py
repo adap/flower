@@ -36,11 +36,11 @@ from flwr.cli.run.cli_interceptor import CliInterceptor
 from flwr.common.auth_plugin import CliAuthPlugin
 from flwr.common.config import (
     flatten_dict,
-    get_flwr_dir,
+    get_credential_path,
     parse_config_args,
     user_config_to_configsrecord,
 )
-from flwr.common.constant import AUTH_TYPE, CREDENTIALS_DIR, CliOutputFormat
+from flwr.common.constant import AUTH_TYPE, CliOutputFormat
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log, redirect_output, remove_emojis, restore_output
 from flwr.common.serde import (
@@ -51,19 +51,23 @@ from flwr.common.serde import (
 from flwr.common.typing import Fab
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
-from flwr.server.app import _format_address
 
 from ..log import start_stream
 
-CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
-
-
 try:
     from flwr.ee.auth_plugin import get_cli_auth_plugins
-
-    auth_plugins = get_cli_auth_plugins()
 except ImportError:
-    auth_plugins = []
+    AUTH_PLUGIN_IMPORT_ERROR: str = """Unable to import module `flwr.ee.auth_plugin`.
+
+This is a feature available only in the enterprise extension.
+"""
+
+    def get_cli_auth_plugins() -> dict[str, type[CliAuthPlugin]]:
+        """Return all CLI authentication plugins."""
+        raise ImportError(AUTH_PLUGIN_IMPORT_ERROR)
+
+
+CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
@@ -126,11 +130,14 @@ def run(
         )
 
         if "address" in federation_config:
-            auth_plugin: Optional[CliAuthPlugin] = _try_obtain_credentials(
-                federation_config
-            )
+            auth_plugin = _try_obtain_credentials(federation_config)
             _run_with_exec_api(
-                app, federation_config, config_overrides, stream, auth_plugin
+                app,
+                federation_config,
+                config_overrides,
+                stream,
+                output_format,
+                auth_plugin,
             )
         else:
             _run_without_exec_api(app, federation_config, config_overrides, federation)
@@ -154,40 +161,25 @@ def run(
 def _try_obtain_credentials(
     federation_config: dict[str, Any]
 ) -> Optional[CliAuthPlugin]:
-    base_path = get_flwr_dir()
-    credentials_dir = base_path / CREDENTIALS_DIR
-    credentials_dir.mkdir(parents=True, exist_ok=True)
-
-    server_address = federation_config["address"]
-    address, _, _ = _format_address(server_address)
-
-    credential = credentials_dir / address
-    config_dict = {}
+    credential = get_credential_path(federation_config)
 
     if not credential.exists():
         return None
 
     with credential.open("r", encoding="utf-8") as file:
-        for line in file:
-            line = line.strip()
-            if not line or line.startswith("#"):
-                continue
-
-            if "=" in line:
-                key, value = line.split("=", 1)
-                config_dict[key.strip()] = value.strip().strip('"')
+        config_dict: dict[str, Any] = json.load(file)
 
     auth_type = config_dict.get(AUTH_TYPE, "")
     auth_plugin: Optional[CliAuthPlugin] = None
 
-    auth_plugin_class = auth_plugins.get(auth_type)
+    auth_plugin_class = get_cli_auth_plugins().get(auth_type)
     if auth_plugin_class is not None:
         auth_plugin = auth_plugin_class(config_dict, credential)
 
     return auth_plugin
 
 
-# pylint: disable-next=too-many-locals
+# pylint: disable-next=R0913, R0914, R0917
 def _run_with_exec_api(
     app: Path,
     federation_config: dict[str, Any],

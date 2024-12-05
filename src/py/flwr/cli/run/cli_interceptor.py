@@ -66,18 +66,16 @@ class CliInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ignore
         if client_call_details.metadata is not None:
             metadata = client_call_details.metadata
 
-        self.auth_plugin.write_tokens_to_metadata(metadata)
-
         client_call_details = _ClientCallDetails(
             client_call_details.method,
             client_call_details.timeout,
-            metadata,
+            self.auth_plugin.write_tokens_to_metadata(metadata),
             client_call_details.credentials,
         )
 
         response = continuation(client_call_details, request)
         if response.initial_metadata():
-            metadata = dict(response.initial_metadata())
-            self.auth_plugin.store_tokens(metadata)
+            retrieved_metadata = dict(response.initial_metadata())
+            self.auth_plugin.store_tokens(retrieved_metadata)
 
         return response

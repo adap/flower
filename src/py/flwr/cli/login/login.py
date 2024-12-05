@@ -23,12 +23,13 @@ from tomli_w import dump
 
 from flwr.cli.config_utils import (
     load_and_validate,
+    validate_certificate_in_federation_config,
     validate_federation_in_project_config,
     validate_project_config,
 )
 from flwr.common.auth_plugin import CliAuthPlugin
-from flwr.common.config import get_flwr_dir
-from flwr.common.constant import AUTH_TYPE, CREDENTIALS_DIR
+from flwr.common.config import get_credential_path
+from flwr.common.constant import AUTH_TYPE
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
 from flwr.proto.exec_pb2 import GetLoginDetailsRequest, GetLoginDetailsResponse  # pylint: disable=E0611
@@ -86,49 +87,29 @@ def login(  # pylint: disable=R0914
     stub = _create_exec_stub(app, federation_config)
     login_request = GetLoginDetailsRequest()
     login_response: GetLoginDetailsResponse = stub.GetLoginDetails(login_request)
-    auth_plugin = get_cli_auth_plugins()[
+
+    # Get the auth plugin class and login
+    auth_plugin_class = get_cli_auth_plugins()[
         login_response.login_details.get(AUTH_TYPE, "")
     ]
-    config = auth_plugin.login(
+    config = auth_plugin_class.login(
         dict(login_response.login_details), config, federation, stub
     )
 
+    # Store the tokens
+    credential_path = get_credential_path(federation_config)
+    auth_plugin = auth_plugin_class(config, credential_path)
     auth_plugin.store_tokens(config)
 
 
 def _create_exec_stub(app: Path, federation_config: dict[str, Any]) -> ExecStub:
-    insecure_str = federation_config.get("insecure")
-    if root_certificates := federation_config.get("root-certificates"):
-        root_certificates_bytes = (app / root_certificates).read_bytes()
-        if insecure := bool(insecure_str):
-            typer.secho(
-                "❌ `root_certificates` were provided but the `insecure` parameter"
-                "is set to `True`.",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-            raise typer.Exit(code=1)
-    else:
-        root_certificates_bytes = None
-        if insecure_str is None:
-            typer.secho(
-                "❌ To disable TLS, set `insecure = true` in `pyproject.toml`.",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-            raise typer.Exit(code=1)
-        if not (insecure := bool(insecure_str)):
-            typer.secho(
-                "❌ No certificate were given yet `insecure` is set to `False`.",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-            raise typer.Exit(code=1)
-
+    insecure, root_certificates = validate_certificate_in_federation_config(
+        app, federation_config
+    )
     channel = create_channel(
         server_address=federation_config["address"],
         insecure=insecure,
-        root_certificates=root_certificates_bytes,
+        root_certificates=root_certificates,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
         interceptors=None,
     )
