@@ -94,7 +94,7 @@ class KeycloakExecPlugin(ExecAuthPlugin):
         metadata_dict = dict(metadata)
         if ACCESS_TOKEN not in metadata_dict:
             return False
-        access_token_bytes: bytes = metadata_dict[ACCESS_TOKEN]
+        access_token_bytes = cast(bytes, metadata_dict[ACCESS_TOKEN])
 
         headers = {"Authorization": access_token_bytes.decode("utf-8")}
 
@@ -167,9 +167,9 @@ class KeycloakExecPlugin(ExecAuthPlugin):
 class KeycloakCliPlugin(CliAuthPlugin):
     """Flower Keycloak Auth Plugin for CLI."""
 
-    def __init__(self, config_path: Path):
-        self.access_token = ""
-        self.refresh_token = ""
+    def __init__(self, config: dict[str, Any], config_path: Path):
+        self.access_token: str = config.get(ACCESS_TOKEN, "")
+        self.refresh_token: str = config.get(REFRESH_TOKEN, "")
         self.config: dict[str, Any] = {}
         self.config_path = config_path
 
@@ -246,23 +246,12 @@ class KeycloakCliPlugin(CliAuthPlugin):
     def store_tokens(self, config: dict[str, Any]) -> None:
         """Store the tokens from the provided config.
 
-        The tokens will be stored in the `.credentials/` folder inside the Flower
-        directory.
+        The tokens will be saved as a JSON file in the `.credentials/` folder inside the
+        Flower directory.
         """
-        self.config[ACCESS_TOKEN] = config.get(ACCESS_TOKEN, "")
-        self.config[REFRESH_TOKEN] = config.get(REFRESH_TOKEN, "")
+        self.config = config
+        self.access_token = config.get(ACCESS_TOKEN, "")
+        self.refresh_token = config.get(REFRESH_TOKEN, "")
 
-        with open(self.config_path, "w") as config_file:
-            json.dump(self.config, config_file, indent=4)
-
-    def load_tokens(self) -> None:
-        """Load the tokens for this plugin.
-
-        The tokens will be loaded from the `.credentials/` folder inside the Flower
-        directory.
-        """
-        with open(self.config_path, "r") as config_file:
-            self.config = json.load(config_file)
-
-        self.access_token = cast(str, self.config[ACCESS_TOKEN])
-        self.refresh_token = cast(str, self.config[REFRESH_TOKEN])
+        with open(self.config_path, "w", encoding="utf-8") as config_file:
+            json.dump(config, config_file, indent=4)
