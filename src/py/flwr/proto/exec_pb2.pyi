@@ -57,9 +57,11 @@ class StartRunResponse(google.protobuf.message.Message):
     run_id: builtins.int
     def __init__(self,
         *,
-        run_id: builtins.int = ...,
+        run_id: typing.Optional[builtins.int] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["_run_id",b"_run_id","run_id",b"run_id"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["_run_id",b"_run_id","run_id",b"run_id"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["_run_id",b"_run_id"]) -> typing.Optional[typing_extensions.Literal["run_id"]]: ...
 global___StartRunResponse = StartRunResponse
 
 class StreamLogsRequest(google.protobuf.message.Message):
@@ -133,13 +135,13 @@ class ListRunsResponse(google.protobuf.message.Message):
     def ClearField(self, field_name: typing_extensions.Literal["now",b"now","run_dict",b"run_dict"]) -> None: ...
 global___ListRunsResponse = ListRunsResponse
 
-class LoginRequest(google.protobuf.message.Message):
+class GetLoginDetailsRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     def __init__(self,
         ) -> None: ...
-global___LoginRequest = LoginRequest
+global___GetLoginDetailsRequest = GetLoginDetailsRequest
 
-class LoginResponse(google.protobuf.message.Message):
+class GetLoginDetailsResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     class LoginDetailsEntry(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
@@ -162,9 +164,9 @@ class LoginResponse(google.protobuf.message.Message):
         login_details: typing.Optional[typing.Mapping[typing.Text, typing.Text]] = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["login_details",b"login_details"]) -> None: ...
-global___LoginResponse = LoginResponse
+global___GetLoginDetailsResponse = GetLoginDetailsResponse
 
-class GetAuthTokenRequest(google.protobuf.message.Message):
+class GetAuthTokensRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     class AuthDetailsEntry(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
@@ -187,9 +189,9 @@ class GetAuthTokenRequest(google.protobuf.message.Message):
         auth_details: typing.Optional[typing.Mapping[typing.Text, typing.Text]] = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["auth_details",b"auth_details"]) -> None: ...
-global___GetAuthTokenRequest = GetAuthTokenRequest
+global___GetAuthTokensRequest = GetAuthTokensRequest
 
-class GetAuthTokenResponse(google.protobuf.message.Message):
+class GetAuthTokensResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     class AuthTokensEntry(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
@@ -212,4 +214,4 @@ class GetAuthTokenResponse(google.protobuf.message.Message):
         auth_tokens: typing.Optional[typing.Mapping[typing.Text, typing.Text]] = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["auth_tokens",b"auth_tokens"]) -> None: ...
-global___GetAuthTokenResponse = GetAuthTokenResponse
+global___GetAuthTokensResponse = GetAuthTokensResponse

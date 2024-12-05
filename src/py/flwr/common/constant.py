@@ -181,3 +181,14 @@ class SubStatus:
     def __new__(cls) -> SubStatus:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+class CliOutputFormat:
+    """Define output format for `flwr` CLI commands."""
+
+    DEFAULT = "default"
+    JSON = "json"
+
+    def __new__(cls) -> CliOutputFormat:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")

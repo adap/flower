@@ -33,12 +33,12 @@ from flwr.common.serde import (
 )
 from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
-    GetAuthTokenRequest,
-    GetAuthTokenResponse,
+    GetAuthTokensRequest,
+    GetAuthTokensResponse,
+    GetLoginDetailsRequest,
+    GetLoginDetailsResponse,
     ListRunsRequest,
     ListRunsResponse,
-    LoginRequest,
-    LoginResponse,
     StartRunRequest,
     StartRunResponse,
     StreamLogsRequest,
@@ -133,32 +133,19 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         # Handle `flwr ls --run-id <run_id>`
         return _create_list_runs_response({request.run_id}, state)
 
-    def Login(
-        self, request: LoginRequest, context: grpc.ServicerContext
-    ) -> LoginResponse:
+    def GetLoginDetails(
+        self, request: GetLoginDetailsRequest, context: grpc.ServicerContext
+    ) -> GetLoginDetailsResponse:
         """Start login."""
-        log(INFO, "ExecServicer.Login")
-        if self.auth_plugin is not None:
-            return self.auth_plugin.send_auth_endpoint()
+        log(INFO, "ExecServicer.GetLoginDetails")
+        return GetLoginDetailsResponse(login_details={})
 
-        context.abort(
-            grpc.StatusCode.UNIMPLEMENTED,
-            "SuperExec initialized without user authentication",
-        )
-
-    def GetAuthToken(
-        self, request: GetAuthTokenRequest, context: grpc.ServicerContext
-    ) -> GetAuthTokenResponse:
+    def GetAuthTokens(
+        self, request: GetAuthTokensRequest, context: grpc.ServicerContext
+    ) -> GetAuthTokensResponse:
         """Get auth token."""
-        log(INFO, "ExecServicer.GetAuthToken")
-
-        if self.auth_plugin is not None:
-            return self.auth_plugin.get_auth_token_response(request)
-
-        context.abort(
-            grpc.StatusCode.UNIMPLEMENTED,
-            "SuperExec initialized without user authentication",
-        )
+        log(INFO, "ExecServicer.GetAuthTokens")
+        return GetAuthTokensResponse(auth_tokens={})
 
 
 def _create_list_runs_response(run_ids: set[int], state: LinkState) -> ListRunsResponse:
