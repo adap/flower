@@ -26,6 +26,9 @@ service Exec {
   // Start run upon request
   rpc StartRun(StartRunRequest) returns (StartRunResponse) {}
 
+  // Stop run upon request
+  rpc StopRun(StopRunRequest) returns (StopRunResponse) {}
+
   // Start log stream upon request
   rpc StreamLogs(StreamLogsRequest) returns (stream StreamLogsResponse) {}
 
