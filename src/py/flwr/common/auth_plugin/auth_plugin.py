@@ -53,7 +53,7 @@ class ExecAuthPlugin(ABC):
     def refresh_tokens(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
     ) -> Optional[Sequence[tuple[str, Union[str, bytes]]]]:
-        """Refresh auth tokens in the metadata of the provided context."""
+        """Refresh auth tokens in the provided metadata."""
 
 
 class CliAuthPlugin(ABC):
