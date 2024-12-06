@@ -202,13 +202,24 @@ with a similar structure as the one we have in the server and the clients, or co
 project structure from one of them. Once we have the project locally, we can open the
 ``pyproject.toml`` file, and then add the following sections:
 
-.. code-block:: python
+.. code-block:: bash
 
     [tool.flwr.federations]
-    default = "my_federation"  # replaced the default value with "my_federation"
+    default = "my-federation"  # replaced the default value with "my-federation"
 
-    [tool.flwr.federations.my_federation]  # replaced name with "my_federation"
+    [tool.flwr.federations.my-federation]  # replaced name with "my-federation"
     address = "SUPERLINK_PUBLIC_IP:9093"  # Address of the SuperLink Exec API
     insecure = true
 
-Then from our local machine we need to run ``flwr run . my_federation``.
+Then from our local machine we need to run ``flwr run . my-federation``.
+
+Next Steps
+----------
+
+.. warning::
+
+    This guide is not suitable for production environments due to missing authentication
+    and TLS security.
+
+To enable authentication and establish secure connections, please refer to the following
+resources: |authenticate_supernodes|_, |enable_tls_connections|_
