@@ -86,6 +86,7 @@ class ExecInterceptor(grpc.ServerInterceptor):  # type: ignore
                 return method_handler.unary_unary(request, context)  # type: ignore
 
             context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
+            raise grpc.RpcError()  # This line is unreachable
 
         return grpc.unary_unary_rpc_method_handler(
             _generic_method_handler,

@@ -24,7 +24,7 @@ from collections.abc import Sequence
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from time import sleep
-from typing import Any, Optional
+from typing import Any, Optional, cast
 
 import grpc
 import yaml
@@ -265,7 +265,7 @@ def run_superlink() -> None:
     maybe_config = _try_obtain_config(args)
     auth_plugin: Optional[ExecAuthPlugin] = None
     if maybe_config is not None:
-        auth_plugin = _try_obtain_auth_config(maybe_config)
+        auth_plugin = _try_obtain_exec_auth_plugin(maybe_config)
 
     # Initialize StateFactory
     state_factory = LinkStateFactory(args.database)
@@ -583,16 +583,19 @@ def _try_setup_node_authentication(
 
 def _try_obtain_config(args: argparse.Namespace) -> Optional[dict[str, Any]]:
     if args.config is not None:
-        with open(args.config) as file:
-            config = yaml.safe_load(file)
+        with open(args.config, encoding="utf-8") as file:
+            config: dict[str, Any] = yaml.safe_load(file)
             return config
     return None
 
 
-def _try_obtain_auth_config(config: dict[str, Any]) -> Optional[ExecAuthPlugin]:
-    auth_config = config.get("authentication", {})
-    auth_plugin = get_exec_auth_plugins().get(auth_config.get(AUTH_TYPE, ""))
-    return auth_plugin(auth_config)
+def _try_obtain_exec_auth_plugin(config: dict[str, Any]) -> Optional[ExecAuthPlugin]:
+    auth_config: dict[str, Any] = config.get("authentication", {})
+    auth_plugin_class = get_exec_auth_plugins().get(auth_config.get(AUTH_TYPE, ""))
+    if auth_plugin_class is None:
+        return None
+    # Make mypy happy
+    return cast(type[ExecAuthPlugin], auth_plugin_class)(config=auth_config)
 
 
 def _run_fleet_api_grpc_rere(

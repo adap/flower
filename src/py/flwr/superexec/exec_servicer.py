@@ -136,33 +136,6 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         # Handle `flwr ls --run-id <run_id>`
         return _create_list_runs_response({request.run_id}, state)
 
-    def GetLoginDetails(
-        self, request: GetLoginDetailsRequest, context: grpc.ServicerContext
-    ) -> GetLoginDetailsResponse:
-        """Start login."""
-        log(INFO, "ExecServicer.GetLoginDetails")
-        if self.auth_plugin is not None:
-            return self.auth_plugin.get_login_details()
-
-        context.abort(
-            grpc.StatusCode.UNIMPLEMENTED,
-            "ExecServicer initialized without user authentication",
-        )
-
-    def GetAuthTokens(
-        self, request: GetAuthTokensRequest, context: grpc.ServicerContext
-    ) -> GetAuthTokensResponse:
-        """Get auth token."""
-        log(INFO, "ExecServicer.GetAuthTokens")
-        if self.auth_plugin is not None:
-            return self.auth_plugin.get_auth_tokens(request)
-
-        context.abort(
-            grpc.StatusCode.UNIMPLEMENTED,
-            "ExecServicer initialized without user authentication",
-        )
-        return GetAuthTokensResponse(auth_tokens={})
-
     def StopRun(
         self, request: StopRunRequest, context: grpc.ServicerContext
     ) -> StopRunResponse:
@@ -201,6 +174,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             grpc.StatusCode.UNIMPLEMENTED,
             "ExecServicer initialized without user authentication",
         )
+        return GetLoginDetailsResponse()
 
     def GetAuthTokens(
         self, request: GetAuthTokensRequest, context: grpc.ServicerContext
