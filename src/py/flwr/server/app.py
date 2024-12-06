@@ -582,7 +582,7 @@ def _try_setup_node_authentication(
 
 
 def _try_obtain_config(args: argparse.Namespace) -> Optional[dict[str, Any]]:
-    if args.config is not None:
+    if args.user_auth_config is not None:
         with open(args.config, encoding="utf-8") as file:
             config: dict[str, Any] = yaml.safe_load(file)
             return config
