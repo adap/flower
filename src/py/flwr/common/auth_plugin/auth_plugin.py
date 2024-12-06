@@ -14,12 +14,11 @@
 # ==============================================================================
 """Abstract classes for Flower User Auth Plugin."""
 
+
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Union
-
-import grpc
+from typing import Any, Optional, Union
 
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     GetAuthTokensRequest,
@@ -51,7 +50,9 @@ class ExecAuthPlugin(ABC):
         """Get the relevant auth tokens."""
 
     @abstractmethod
-    def refresh_tokens(self, context: grpc.ServicerContext) -> bool:
+    def refresh_tokens(
+        self, metadata: Sequence[tuple[str, Union[str, bytes]]]
+    ) -> Optional[Sequence[tuple[str, Union[str, bytes]]]]:
         """Refresh auth tokens in the metadata of the provided context."""
 
 
