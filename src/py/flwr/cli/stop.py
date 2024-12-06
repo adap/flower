@@ -73,7 +73,8 @@ def stop(
         channel = _init_channel(app, federation_config)
         stub = ExecStub(channel)  # pylint: disable=unused-variable # noqa: F841
 
-        _stop_run(stub, run_id=run_id)
+         typer.secho(f"✋ Stopping run ID {run_id}...", fg=typer.colors.GREEN)
+         _stop_run(stub, run_id=run_id)
 
     except ValueError as err:
         typer.secho(
