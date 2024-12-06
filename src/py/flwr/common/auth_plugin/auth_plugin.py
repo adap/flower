@@ -67,7 +67,24 @@ class CliAuthPlugin(ABC):
         federation: str,
         exec_stub: ExecStub,
     ) -> dict[str, Any]:
-        """Login logic to log in user to the SuperLink."""
+        """Login logic to log in user to the SuperLink.
+
+        Parameters
+        ----------
+        login_details : dict[str, str]
+            A dictionary containing the login details.
+        config : dict[str, Any]
+            A dictionary containing project configuration.
+        federation : str
+            The name of the federation to which the user belongs.
+        exec_stub : ExecStub
+            An instance of `ExecStub` used for communication with the SuperLink.
+
+        Returns
+        -------
+        dict[str, Any]
+            A dictionary containing the user's authentication details.
+        """
 
     @abstractmethod
     def __init__(self, config: dict[str, Any], config_path: Path):
