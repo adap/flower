@@ -15,7 +15,7 @@ from flwr.common import Context
 from flwr.common.logger import log
 from flwr.common.typing import NDArrays, Scalar, UserConfig
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
-from flwr.server.strategy import FedAvg
+from flwr.server.strategy import FedAvg, FedProx
 
 from .dataset import get_transformed_ds
 from .model import initialize_model, set_parameters, test
@@ -90,12 +90,24 @@ def server_fn(context: Context):
 
     # Define strategy
     if alg == "fedavg":
+        log(INFO, "Using FedAvg")
         strategy = FedAvg(
             fraction_fit=fraction_fit,  # e.g. 100 clients, select 10 at each round
             fraction_evaluate=0,  # no federated evaluation,
             min_evaluate_clients=0,
             evaluate_fn=evaluate,
             accept_failures=False,
+        )
+    elif alg == "fedprox":
+        proximal_mu = float(context.run_config["proximal-mu"])
+        log(INFO, f"Using FedProx with proximal_mu={proximal_mu}")
+        strategy = FedProx(
+            fraction_fit=fraction_fit,  # e.g. 100 clients, select 10 at each round
+            fraction_evaluate=0,  # no federated evaluation,
+            min_evaluate_clients=0,
+            evaluate_fn=evaluate,
+            accept_failures=False,
+            proximal_mu=proximal_mu,
         )
     else:
         raise ValueError("Only FedAvg currently supported!")

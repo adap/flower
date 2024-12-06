@@ -67,21 +67,34 @@ def train(
     criterion,
     momentum,
     weight_decay,
+    proximal_mu,
 ):
     """Train the model on the training set."""
     net.to(device)
     optimizer = torch.optim.SGD(
         net.parameters(), lr=learning_rate, momentum=momentum, weight_decay=weight_decay
     )
+
+    global_params = []
+    if proximal_mu > 0:
+        global_params = [param.detach().clone() for param in net.parameters()]
+
     net.train()
     running_loss = 0.0
+
     for _ in range(local_epochs):
         for batch in trainloader:
             images = batch["img"]
             labels = batch["label"]
             optimizer.zero_grad()
             logits = net(images.to(device))
-            loss = criterion(logits, labels.to(device))
+
+            proximal_term = 0.0
+            for local_weights, global_weights in zip(net.parameters(), global_params):
+                proximal_term += (local_weights - global_weights).norm(2)
+
+            loss = criterion(logits, labels.to(device)) 
+            loss += (proximal_mu / 2) * proximal_term
             loss.backward()
             optimizer.step()
             running_loss += loss.item()

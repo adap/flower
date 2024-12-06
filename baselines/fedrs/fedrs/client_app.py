@@ -54,9 +54,8 @@ class FlowerClient(NumPyClient):
         self.device = device
         self.weight_decay = weight_decay
         self.momentum = momentum
-        num_classes = net.classifier.out_features
         self.criterion = RestrictedSoftmaxCELoss(
-            num_classes,
+            net.classifier.out_features, # num classes
             labels,
             device,
             alpha,
@@ -69,6 +68,7 @@ class FlowerClient(NumPyClient):
     def fit(self, parameters, config):
         """Implement distributed fit function for a given client."""
         set_parameters(self.net, parameters)
+        proximal_mu = config.get('proximal_mu',0.0)
         train_loss = train(
             self.net,
             self.trainloader,
@@ -78,6 +78,7 @@ class FlowerClient(NumPyClient):
             self.criterion,
             self.momentum,
             self.weight_decay,
+            proximal_mu,
         )
         return (
             get_parameters(self.net),

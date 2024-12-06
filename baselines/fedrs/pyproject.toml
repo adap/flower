@@ -135,6 +135,7 @@ momentum=0.9
 weight-decay = 5e-4
 seed = 0
 num-server-rounds = 1000
+proximal-mu = 0.001
 
 # Data
 dataset-partition-by = "label"
@@ -147,7 +148,7 @@ num-classes-per-partition = 5
 model-name = "vgg11"
 
 [tool.flwr.federations]
-default = "gpu-simulation"
+default = "cpu-simulation"
 
 [tool.flwr.federations.gpu-simulation]
 options.num-supernodes = 100
