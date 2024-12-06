@@ -786,7 +786,7 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         help="The SuperLink's public key (as a path str) to enable authentication.",
     )
     parser.add_argument(
-        "--config",
+        "--user-auth-config",
         help="SuperLink config.yaml file (as a path str) to configure SuperLink.",
         type=str,
         default=None,
