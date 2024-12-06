@@ -138,13 +138,15 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
         # Exit if `run_id` not found
         if not state.get_run(request.run_id):
-            return StopRunResponse(success=False, reason="Run not found")
+            context.abort(
+                grpc.StatusCode.NOT_FOUND, f"Run ID {request.run_id} not found"
+            )
 
         run_status = state.get_run_status({request.run_id})[request.run_id]
-        # Exit if run already finished
         if run_status.status == Status.FINISHED:
-            return StopRunResponse(
-                success=False, reason=f"Run ID {request.run_id} is already finished"
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                f"Run ID {request.run_id} is already finished",
             )
 
         update_success = state.update_run_status(
