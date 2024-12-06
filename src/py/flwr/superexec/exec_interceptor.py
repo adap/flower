@@ -82,7 +82,9 @@ class ExecInterceptor(grpc.ServerInterceptor):  # type: ignore
             ):
                 return method_handler.unary_unary(request, context)  # type: ignore
 
-            if self.auth_plugin.refresh_tokens(context):
+            tokens = self.auth_plugin.refresh_tokens(context.invocation_metadata())
+            if tokens is not None:
+                context.send_initial_metadata(tokens)
                 return method_handler.unary_unary(request, context)  # type: ignore
 
             context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
