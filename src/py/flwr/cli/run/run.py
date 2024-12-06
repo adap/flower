@@ -36,7 +36,7 @@ from flwr.cli.run.cli_interceptor import CliInterceptor
 from flwr.common.auth_plugin import CliAuthPlugin
 from flwr.common.config import (
     flatten_dict,
-    get_credential_path,
+    get_user_auth_config_path,
     parse_config_args,
     user_config_to_configsrecord,
 )
@@ -130,7 +130,7 @@ def run(
         )
 
         if "address" in federation_config:
-            auth_plugin = _try_obtain_credentials(federation_config)
+            auth_plugin = _try_obtain_cli_auth_plugin(federation_config)
             _run_with_exec_api(
                 app,
                 federation_config,
@@ -158,10 +158,10 @@ def run(
         captured_output.close()
 
 
-def _try_obtain_credentials(
+def _try_obtain_cli_auth_plugin(
     federation_config: dict[str, Any]
 ) -> Optional[CliAuthPlugin]:
-    credential = get_credential_path(federation_config)
+    credential = get_user_auth_config_path(federation_config)
 
     if not credential.exists():
         return None

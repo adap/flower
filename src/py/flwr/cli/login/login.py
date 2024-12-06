@@ -27,7 +27,7 @@ from flwr.cli.config_utils import (
     validate_project_config,
 )
 from flwr.common.auth_plugin import CliAuthPlugin
-from flwr.common.config import get_credential_path
+from flwr.common.config import get_user_auth_config_path
 from flwr.common.constant import AUTH_TYPE
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
@@ -98,7 +98,7 @@ def login(  # pylint: disable=R0914
     )
 
     # Store the tokens
-    credential_path = get_credential_path(federation_config)
+    credential_path = get_user_auth_config_path(federation_config)
     auth_plugin = auth_plugin_class(config, credential_path)
     auth_plugin.store_tokens(config)
 

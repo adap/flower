@@ -45,8 +45,8 @@ def get_flwr_dir(provided_path: Optional[str] = None) -> Path:
     return Path(provided_path).absolute()
 
 
-def get_credential_path(federation_config: dict[str, Any]) -> Path:
-    """Return the path to the credentials file."""
+def get_user_auth_config_path(federation_config: dict[str, Any]) -> Path:
+    """Return the path to the user auth config file."""
     credentials_dir = get_flwr_dir() / CREDENTIALS_DIR
     credentials_dir.mkdir(parents=True, exist_ok=True)
     server_address: str = federation_config["address"]
