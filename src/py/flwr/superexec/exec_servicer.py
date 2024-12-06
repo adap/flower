@@ -69,6 +69,9 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         self.executor.initialize(linkstate_factory, ffs_factory)
         self.auth_plugin = auth_plugin
 
+        if self.auth_plugin is not None:
+            log(INFO, "Starting Exec API with user authentication")
+
     def StartRun(
         self, request: StartRunRequest, context: grpc.ServicerContext
     ) -> StartRunResponse:
