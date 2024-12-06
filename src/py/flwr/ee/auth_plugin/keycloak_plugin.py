@@ -99,7 +99,6 @@ class KeycloakExecPlugin(ExecAuthPlugin):
         headers = {"Authorization": f"Bearer {access_token_bytes}"}
 
         response = post(self.validate_url, headers=headers, timeout=10)
-        print(response.status_code)
         if response.status_code == 200:
             return True
         return False

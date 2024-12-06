@@ -78,12 +78,10 @@ class ExecInterceptor(grpc.ServerInterceptor):  # type: ignore
             validate = self.auth_plugin.validate_tokens_in_metadata(
                 context.invocation_metadata()
             )
-            print(validate)
             if isinstance(
                 request, (GetLoginDetailsRequest, GetAuthTokensRequest)
             ) or validate:
                 return method_handler.unary_unary(request, context)  # type: ignore
-            print("not validate")
             if self.auth_plugin.refresh_tokens(context):
                 return method_handler.unary_unary(request, context)  # type: ignore
 
