@@ -14,6 +14,7 @@
 # ==============================================================================
 """Abstract classes for Flower User Auth Plugin."""
 
+
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from pathlib import Path
