@@ -56,7 +56,4 @@ message ListRunsResponse {
   string now = 2;
 }
 message StopRunRequest { uint64 run_id = 1; }
-message StopRunResponse {
-  bool success = 1;
-  string reason = 2;
-}
+message StopRunResponse { bool success = 1; }

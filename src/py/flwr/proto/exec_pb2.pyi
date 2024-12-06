@@ -149,13 +149,10 @@ global___StopRunRequest = StopRunRequest
 class StopRunResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     SUCCESS_FIELD_NUMBER: builtins.int
-    REASON_FIELD_NUMBER: builtins.int
     success: builtins.bool
-    reason: typing.Text
     def __init__(self,
         *,
         success: builtins.bool = ...,
-        reason: typing.Text = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["reason",b"reason","success",b"success"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["success",b"success"]) -> None: ...
 global___StopRunResponse = StopRunResponse
