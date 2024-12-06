@@ -74,7 +74,7 @@ class CliAuthPlugin(ABC):
         login_details : dict[str, str]
             A dictionary containing the login details.
         config : dict[str, Any]
-            A dictionary containing project configuration.
+            The project configuration.
         federation : str
             The name of the federation to which the user belongs.
         exec_stub : ExecStub
