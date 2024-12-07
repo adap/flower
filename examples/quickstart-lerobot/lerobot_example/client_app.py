@@ -1,6 +1,7 @@
 """huggingface_example: A Flower / Hugging Face LeRobot app."""
 
 import warnings
+from pathlib import Path
 
 import torch
 from flwr.client import Client, ClientApp, NumPyClient
@@ -16,7 +17,6 @@ from lerobot_example.task import (
     set_params,
     get_params,
     get_model,
-    get_output_dir
 )
 
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -28,14 +28,13 @@ logging.set_verbosity_error()
 
 # Flower client
 class LeRobotClient(NumPyClient):
-    def __init__(self, partition_id, model_name, local_epochs, trainloader, nn_device=None, output_dir=None) -> None:
+    def __init__(self, partition_id, model_name, local_epochs, trainloader, nn_device=None) -> None:
         self.partition_id = partition_id
         self.trainloader = trainloader
         self.net = get_model(model_name=model_name, dataset=trainloader.dataset)
         self.local_epochs = local_epochs
         policy = self.net
         self.device = nn_device
-        self.output_dir = output_dir
         if self.device == torch.device("cpu"):
             # Decrease the number of reverse-diffusion steps (trades off a bit of quality for 10x speed)
             policy.diffusion.num_inference_steps = 10        
@@ -43,12 +42,13 @@ class LeRobotClient(NumPyClient):
 
     def fit(self, parameters, config) -> tuple[list, int, dict]:
         set_params(self.net, parameters)
-        train(partition_id=self.partition_id, net=self.net, trainloader=self.trainloader, epochs=self.local_epochs, device=self.device, output_dir=self.output_dir)
+        train(partition_id=self.partition_id, net=self.net, trainloader=self.trainloader, epochs=self.local_epochs, device=self.device)
         return get_params(self.net), len(self.trainloader), {}
 
     def evaluate(self, parameters, config) -> tuple[float, int, dict[str, float]]:
         set_params(self.net, parameters)
-        loss, accuracy= test(partition_id=self.partition_id, net=self.net, device=self.device, output_dir=self.output_dir)
+        round_save_path = Path(config["save_path"])
+        loss, accuracy= test(partition_id=self.partition_id, net=self.net, device=self.device, output_dir=round_save_path)
         testset_len = 1 # we test on one gym generated task
         return float(loss), testset_len, {"accuracy": accuracy}
 
@@ -66,8 +66,7 @@ def client_fn(context: Context) -> Client:
     local_epochs = int(context.run_config["local-epochs"])
     log(INFO, f"local_epochs={local_epochs}")
     trainloader = load_data(partition_id, num_partitions, model_name, device=nn_device)
-    output_dir = get_output_dir()
 
-    return LeRobotClient(partition_id=partition_id, model_name=model_name, local_epochs=local_epochs, trainloader=trainloader, nn_device=nn_device, output_dir=output_dir).to_client()
+    return LeRobotClient(partition_id=partition_id, model_name=model_name, local_epochs=local_epochs, trainloader=trainloader, nn_device=nn_device).to_client()
 
 app = ClientApp(client_fn=client_fn)

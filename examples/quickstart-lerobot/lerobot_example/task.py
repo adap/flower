@@ -28,18 +28,6 @@ disable_progress_bar()
 fds = None  # Cache FederatedDataset
 
 
-def get_output_dir() -> Path:
-    # Create a directory to store the training checkpoint.
-    timestr = time.strftime("%Y%m%d/%H/%M")
-    output_directory = Path("outputs/train/lerobot_federated_example") / timestr
-    output_directory.mkdir(parents=True, exist_ok=True)
-
-    # Number of offline training steps (we'll only do offline training for this example.)
-    # Adjust as you prefer. 5000 steps are needed to get something worth evaluating.
-    # training_steps = 5000
-    return output_directory
-
-
 def get_delta_timestamps():
     # Set up the dataset.
     delta_timestamps = {
@@ -112,7 +100,7 @@ def get_model(model_name: str = None, dataset = None):
     # Policies are initialized with a configuration class, in this case `DiffusionConfig`.
     # For this example, no arguments need to be passed because the defaults are set up for PushT.
     # If you're doing something different, you will likely need to change at least some of the defaults.
-    cfg = DiffusionConfig()
+    cfg = DiffusionConfig(down_dims=[256, 512, 1024])
     policy = DiffusionPolicy(cfg, dataset_stats=dataset.stats)
     return policy
 
@@ -123,11 +111,11 @@ def get_params(model):
 
 def set_params(model, parameters) -> None:
     params_dict = zip(model.state_dict().keys(), parameters)
-    state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+    state_dict = OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})
     model.load_state_dict(state_dict, strict=True)
 
 
-def train(partition_id: int = None, net = None, trainloader = None, epochs = None, device = None, output_dir = None) -> None:
+def train(partition_id: int = None, net = None, trainloader = None, epochs = None, device = None) -> None:
     # how frequently (train steps) to print train progress log
     log_freq = 250
 
@@ -158,14 +146,8 @@ def train(partition_id: int = None, net = None, trainloader = None, epochs = Non
                 done = True
                 break
 
-    # Save a policy checkpoint.
-    timestr = time.strftime("%Y%m%d-%H%M%S")
-    net.save_pretrained(
-        output_dir / f"client_{partition_id}" / f"checkpoint_{timestr}"
-    )
 
-
-def test(partition_id: int, net, device, output_dir = None) -> tuple[Any | float, Any]:
+def test(partition_id: int, net, device, output_dir: Path) -> tuple[Any | float, Any]:
     # in lerobot terminology policy is the neural network
     policy = net
     policy.eval()
