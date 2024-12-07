@@ -43,9 +43,8 @@ from flwr.common.retry_invoker import RetryInvoker
 from flwr.common.serde import (
     message_from_proto,
     message_to_proto,
-    user_config_from_proto,
+    run_from_proto,
 )
-from flwr.common.serde import message_from_taskins, message_to_taskres, run_from_proto
 from flwr.common.typing import Fab, Run
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
