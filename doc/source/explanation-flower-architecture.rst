@@ -118,24 +118,6 @@ in the training:
 Therefore, with Flower multi-run, different projects (each consisting of a ``ServerApp``
 and ``ClientApp``) can run on different sets of clients.
 
-To help you start and manage all of the concurrently executing training runs, Flower
-offers one additional long-running server-side service called **SuperExec**. When you
-type ``flwr run`` to start a new training run, the ``flwr`` CLI bundles your local
-project (mainly your ``ServerApp`` and ``ClientApp``) and sends it to the **SuperExec**.
-The **SuperExec** will then take care of starting and managing your ``ServerApp``, which
-in turn selects SuperNodes to execute your ``ClientApp``.
-
-This architecture allows many users to (concurrently) run their projects on the same
-federation, simply by typing ``flwr run`` on their local developer machine.
-
-.. figure:: ./_static/flower-architecture-deployment-engine.svg
-    :align: center
-    :width: 800
-    :alt: Flower Deployment Engine with SuperExec
-    :class: no-scaled-link
-
-    The SuperExec service for managing concurrent training runs in Flower.
-
 .. note::
 
     This explanation covers the Flower Deployment Engine. An explanation covering the

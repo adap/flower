@@ -128,6 +128,7 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
 
         def get_var_bytes(value: ConfigsScalar) -> int:
             """Return Bytes of value passed."""
+            var_bytes = 0
             if isinstance(value, bool):
                 var_bytes = 1
             elif isinstance(value, (int, float)):
@@ -136,6 +137,11 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
                 )
             if isinstance(value, (str, bytes)):
                 var_bytes = len(value)
+            if var_bytes == 0:
+                raise ValueError(
+                    "Config values must be either `bool`, `int`, `float`, "
+                    "`str`, or `bytes`"
+                )
             return var_bytes
 
         num_bytes = 0

@@ -88,7 +88,7 @@ class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
     >>> )
     """
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes
+    # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-positional-arguments
     def __init__(
         self,
         strategy: Strategy,
@@ -307,7 +307,7 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
     >>> )
     """
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes
+    # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-positional-arguments
     def __init__(
         self,
         strategy: Strategy,

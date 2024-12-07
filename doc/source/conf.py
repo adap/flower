@@ -19,7 +19,6 @@ import os
 import sys
 
 from git import Repo
-from sphinx.application import ConfigError
 
 # Configuration file for the Sphinx documentation builder.
 #
@@ -90,14 +89,16 @@ copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version of the next release, including alpha/beta/rc tags
-release = "1.12.0"
+release = "1.14.0"
 # The current released version
 rst_prolog = """
-.. |stable_flwr_version| replace:: 1.11.1
+.. |stable_flwr_version| replace:: 1.13.1
 .. |stable_flwr_superlink_docker_digest| replace:: 4b317d5b6030710b476f4dbfab2c3a33021ad40a0fcfa54d7edd45e0c51d889c
 .. |ubuntu_version| replace:: 24.04
 .. |setuptools_version| replace:: 70.3.0
 .. |pip_version| replace:: 24.1.2
+.. |python_version| replace:: 3.9
+.. |python_full_version| replace:: 3.9.20
 """
 
 # -- General configuration ---------------------------------------------------
@@ -229,6 +230,8 @@ redirects = {
     "logging": "how-to-configure-logging.html",
     "ssl-enabled-connections": "how-to-enable-ssl-connections.html",
     "upgrade-to-flower-1.0": "how-to-upgrade-to-flower-1.0.html",
+    "how-to-upgrade-to-flower-next": "how-to-upgrade-to-flower-1.13.html",
+    "how-to-enable-ssl-connections.html": "how-to-enable-tls-connections.html",
     # Restructuring: explanations
     "evaluation": "explanation-federated-evaluation.html",
     "differential-privacy-wrappers": "explanation-differential-privacy.html",
@@ -265,7 +268,14 @@ redirects = {
     "contributor-how-to-create-new-messages": "index.html",
     "example-jax-from-centralized-to-federated": "tutorial-quickstart-jax.html",
     "architecture": "explanation-flower-architecture.html",
-    "contributor-explanation-architecture.html": "explanation-flower-architecture.html",
+    "contributor-explanation-architecture": "explanation-flower-architecture.html",
+    "example-pytorch-from-centralized-to-federated": "tutorial-quickstart-pytorch.html",
+    "example-fedbn-pytorch-from-centralized-to-federated": "how-to-implement-fedbn.html",
+    "how-to-configure-logging": "index.html",
+    "how-to-monitor-simulation": "how-to-run-simulations.html",
+    "fed/index": "index.html",
+    "fed/0000-20200102-fed-template": "index.html",
+    "fed/0001-20220311-flower-enhancement-doc": "index.html",
 }
 
 # -- Options for HTML output -------------------------------------------------
