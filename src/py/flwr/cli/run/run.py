@@ -25,6 +25,7 @@ import typer
 from rich.console import Console
 
 from flwr.cli.build import build
+from flwr.cli.cli_interceptor import CliInterceptor
 from flwr.cli.config_utils import (
     get_fab_metadata,
     load_and_validate,
@@ -32,7 +33,6 @@ from flwr.cli.config_utils import (
     validate_federation_in_project_config,
     validate_project_config,
 )
-from flwr.cli.cli_interceptor import CliInterceptor
 from flwr.common.auth_plugin import CliAuthPlugin
 from flwr.common.config import (
     flatten_dict,
@@ -51,9 +51,9 @@ from flwr.common.serde import (
 from flwr.common.typing import Fab
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
-from ..utils import get_cli_auth_plugin
-from ..log import start_stream
 
+from ..log import start_stream
+from ..utils import get_cli_auth_plugin
 
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 

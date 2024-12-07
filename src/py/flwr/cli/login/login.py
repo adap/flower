@@ -26,7 +26,6 @@ from flwr.cli.config_utils import (
     validate_federation_in_project_config,
     validate_project_config,
 )
-from flwr.common.auth_plugin import CliAuthPlugin
 from flwr.common.config import get_user_auth_config_path
 from flwr.common.constant import AUTH_TYPE
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
@@ -36,6 +35,7 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     GetLoginDetailsResponse,
 )
 from flwr.proto.exec_pb2_grpc import ExecStub
+
 from ..utils import get_cli_auth_plugin
 
 

@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import Callable, Optional, cast
 
 import typer
+
 from flwr.common.auth_plugin import CliAuthPlugin
 
 try:
