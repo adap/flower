@@ -20,6 +20,19 @@ from pathlib import Path
 from typing import Callable, Optional, cast
 
 import typer
+from flwr.common.auth_plugin import CliAuthPlugin
+
+try:
+    from flwr.ee.auth_plugin import get_cli_auth_plugins
+except ImportError:
+    AUTH_PLUGIN_IMPORT_ERROR: str = """Unable to import module `flwr.ee.auth_plugin`.
+
+This is a feature available only in the enterprise extension.
+"""
+
+    def get_cli_auth_plugins() -> dict[str, type[CliAuthPlugin]]:
+        """Return all CLI authentication plugins."""
+        raise ImportError(AUTH_PLUGIN_IMPORT_ERROR)
 
 
 def prompt_text(
@@ -136,3 +149,9 @@ def get_sha256_hash(file_path: Path) -> str:
                 break
             sha256.update(data)
     return sha256.hexdigest()
+
+
+def get_cli_auth_plugin(auth_type: str) -> Optional[type[CliAuthPlugin]]:
+    """Return the CLI authentication plugin for the given auth type."""
+    all_plugins: dict[str, type[CliAuthPlugin]] = get_cli_auth_plugins()
+    return all_plugins.get(auth_type)

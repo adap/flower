@@ -36,18 +36,7 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     GetLoginDetailsResponse,
 )
 from flwr.proto.exec_pb2_grpc import ExecStub
-
-try:
-    from flwr.ee.auth_plugin import get_cli_auth_plugins
-except ImportError:
-    AUTH_PLUGIN_IMPORT_ERROR: str = """Unable to import module `flwr.ee.auth_plugin`.
-
-This is a feature available only in the enterprise extension.
-"""
-
-    def get_cli_auth_plugins() -> dict[str, type[CliAuthPlugin]]:
-        """Return all CLI authentication plugins."""
-        raise ImportError(AUTH_PLUGIN_IMPORT_ERROR)
+from ..utils import get_cli_auth_plugin
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
@@ -90,9 +79,9 @@ def login(  # pylint: disable=R0914
     login_response: GetLoginDetailsResponse = stub.GetLoginDetails(login_request)
 
     # Get the auth plugin class and login
-    auth_plugin_class = get_cli_auth_plugins()[
+    auth_plugin_class = get_cli_auth_plugin(
         login_response.login_details.get(AUTH_TYPE, "")
-    ]
+    )
     config = auth_plugin_class.login(
         dict(login_response.login_details), config, federation, stub
     )

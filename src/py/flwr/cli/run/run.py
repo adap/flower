@@ -32,7 +32,7 @@ from flwr.cli.config_utils import (
     validate_federation_in_project_config,
     validate_project_config,
 )
-from flwr.cli.run.cli_interceptor import CliInterceptor
+from flwr.cli.cli_interceptor import CliInterceptor
 from flwr.common.auth_plugin import CliAuthPlugin
 from flwr.common.config import (
     flatten_dict,
@@ -51,20 +51,8 @@ from flwr.common.serde import (
 from flwr.common.typing import Fab
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
-
+from ..utils import get_cli_auth_plugin
 from ..log import start_stream
-
-try:
-    from flwr.ee.auth_plugin import get_cli_auth_plugins
-except ImportError:
-    AUTH_PLUGIN_IMPORT_ERROR: str = """Unable to import module `flwr.ee.auth_plugin`.
-
-This is a feature available only in the enterprise extension.
-"""
-
-    def get_cli_auth_plugins() -> dict[str, type[CliAuthPlugin]]:
-        """Return all CLI authentication plugins."""
-        raise ImportError(AUTH_PLUGIN_IMPORT_ERROR)
 
 
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
@@ -172,7 +160,7 @@ def _try_obtain_cli_auth_plugin(
     auth_type = config_dict.get(AUTH_TYPE, "")
     auth_plugin: Optional[CliAuthPlugin] = None
 
-    auth_plugin_class = get_cli_auth_plugins().get(auth_type)
+    auth_plugin_class = get_cli_auth_plugin(auth_type)
     if auth_plugin_class is not None:
         auth_plugin = auth_plugin_class(config_dict, credential)
 
