@@ -66,6 +66,12 @@ pyenv activate <name-of-your-baseline-env>
 pip install -e .
 ```
 
+If running with **wandb**:
+
+```
+wandb login
+```
+
 ## Running the Experiments
 
 ## Table 5 (Performance comparisons with standard FL algorithms (VGG11))

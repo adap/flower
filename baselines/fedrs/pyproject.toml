@@ -12,6 +12,7 @@ dependencies = [
     "flwr-datasets[vision]>=0.3.0",
     "torch==2.2.1",
     "torchvision==0.17.1",
+    "wandb==0.15.12",
 ]
 
 [tool.hatch.metadata]
@@ -109,6 +110,7 @@ exclude = [
     "node_modules",
     "venv",
     "proto",
+    "wandb",
 ]
 
 [tool.ruff.pydocstyle]
@@ -139,9 +141,11 @@ batch-size = 64
 num-shards-per-partition = 5
 model-name = "vgg11"
 proximal-mu = 0.0
+checkpoint-every = 50
+use-wandb = true
 
 [tool.flwr.federations]
-default = "cpu-simulation"
+default = "gpu-simulation"
 
 [tool.flwr.federations.gpu-simulation]
 options.num-supernodes = 100
