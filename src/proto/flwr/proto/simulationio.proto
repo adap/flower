@@ -41,6 +41,9 @@ service SimulationIo {
   // Get Federation Options
   rpc GetFederationOptions(GetFederationOptionsRequest)
       returns (GetFederationOptionsResponse) {}
+
+  // Get Run Status
+  rpc GetRunStatus(GetRunStatusRequest) returns (GetRunStatusResponse) {}
 }
 
 // PullSimulationInputs messages
