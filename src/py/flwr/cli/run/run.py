@@ -53,7 +53,7 @@ from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 
 from ..log import start_stream
-from ..utils import get_cli_auth_plugin
+from ..utils import try_obtain_cli_auth_plugin
 
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
@@ -160,7 +160,7 @@ def _try_obtain_cli_auth_plugin(
     auth_type = config_dict.get(AUTH_TYPE, "")
     auth_plugin: Optional[CliAuthPlugin] = None
 
-    auth_plugin_class = get_cli_auth_plugin(auth_type)
+    auth_plugin_class = try_obtain_cli_auth_plugin(auth_type)
     if auth_plugin_class is not None:
         auth_plugin = auth_plugin_class(config_dict, credential)
 

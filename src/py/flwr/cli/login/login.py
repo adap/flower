@@ -36,7 +36,7 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.exec_pb2_grpc import ExecStub
 
-from ..utils import get_cli_auth_plugin
+from ..utils import try_obtain_cli_auth_plugin
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
@@ -79,7 +79,7 @@ def login(  # pylint: disable=R0914
     login_response: GetLoginDetailsResponse = stub.GetLoginDetails(login_request)
 
     # Get the auth plugin class and login
-    auth_plugin_class = get_cli_auth_plugin(
+    auth_plugin_class = try_obtain_cli_auth_plugin(
         login_response.login_details.get(AUTH_TYPE, "")
     )
     config = auth_plugin_class.login(

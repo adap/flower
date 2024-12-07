@@ -152,7 +152,7 @@ def get_sha256_hash(file_path: Path) -> str:
     return sha256.hexdigest()
 
 
-def get_cli_auth_plugin(auth_type: str) -> Optional[type[CliAuthPlugin]]:
-    """Return the CLI authentication plugin for the given auth type."""
+def try_obtain_cli_auth_plugin(auth_type: str) -> Optional[type[CliAuthPlugin]]:
+    """Return the CLI authentication plugin class for the given auth type."""
     all_plugins: dict[str, type[CliAuthPlugin]] = get_cli_auth_plugins()
     return all_plugins.get(auth_type)
