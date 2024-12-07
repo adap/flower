@@ -47,6 +47,7 @@ class ClientManager(ABC):
         Parameters
         ----------
         client : flwr.server.client_proxy.ClientProxy
+            The ClientProxy of the Client to register.
 
         Returns
         -------
@@ -64,6 +65,7 @@ class ClientManager(ABC):
         Parameters
         ----------
         client : flwr.server.client_proxy.ClientProxy
+            The ClientProxy of the Client to unregister.
         """
 
     @abstractmethod
