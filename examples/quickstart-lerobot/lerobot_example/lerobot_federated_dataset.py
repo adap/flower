@@ -16,9 +16,7 @@
 """FederatedLeRobotDataset."""
 
 
-
 from flwr_datasets import FederatedDataset
-
 
 
 class FederatedLeRobotDataset(FederatedDataset):

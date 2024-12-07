@@ -16,14 +16,15 @@
 """Partitioner class that works with the Hugging Face LeRobot Datasets."""
 
 from logging import INFO
-
-import datasets
 from pathlib import Path
 from typing import Callable
 
 from flwr_datasets.partitioner.partitioner import Partitioner
-from flwr.common.logger import log
-
+from lerobot.common.datasets.lerobot_dataset import (
+    CODEBASE_VERSION,
+    DATA_DIR,
+    LeRobotDataset,
+)
 from lerobot.common.datasets.utils import (
     calculate_episode_data_index,
     load_episode_data_index,
@@ -35,12 +36,15 @@ from lerobot.common.datasets.utils import (
     reset_episode_index,
 )
 
-from lerobot.common.datasets.lerobot_dataset import LeRobotDataset, CODEBASE_VERSION, DATA_DIR
+import datasets
+from flwr.common.logger import log
+
 
 class FilteredLeRobotDataset(LeRobotDataset):
     """
     Delays loading and processing of dataset until load function is called with an optional filter argument.
     """
+
     def __init__(
         self,
         repo_id: str,
@@ -57,17 +61,21 @@ class FilteredLeRobotDataset(LeRobotDataset):
         self.image_transforms = image_transforms
         self.delta_timestamps = delta_timestamps
         self.video_backend = video_backend
-        self.hf_dataset = load_hf_dataset(self.repo_id, CODEBASE_VERSION, self.root, self.split)
+        self.hf_dataset = load_hf_dataset(
+            self.repo_id, CODEBASE_VERSION, self.root, self.split
+        )
         if hf_filter_fn is not None:
             self.hf_dataset = self.hf_dataset.filter(function=hf_filter_fn)
-            # after filtering, the stored episode data index may not be the same 
+            # after filtering, the stored episode data index may not be the same
             # so let's calculate it on the filtered data
             self.episode_data_index = calculate_episode_data_index(self.hf_dataset)
             self.hf_dataset = reset_episode_index(self.hf_dataset)
         else:
             # if the dataset was not filtered, the saved episode data index can save some time and memory
             if self.split == "train":
-                self.episode_data_index = load_episode_data_index(self.repo_id, CODEBASE_VERSION, self.root)
+                self.episode_data_index = load_episode_data_index(
+                    self.repo_id, CODEBASE_VERSION, self.root
+                )
             else:
                 self.episode_data_index = calculate_episode_data_index(self.hf_dataset)
                 self.hf_dataset = reset_episode_index(self.hf_dataset)
@@ -75,8 +83,9 @@ class FilteredLeRobotDataset(LeRobotDataset):
         self.info = load_info(self.repo_id, CODEBASE_VERSION, self.root)
         if self.video:
             self.videos_dir = load_videos(self.repo_id, CODEBASE_VERSION, self.root)
-            self.video_backend = self.video_backend if self.video_backend is not None else "pyav"
-
+            self.video_backend = (
+                self.video_backend if self.video_backend is not None else "pyav"
+            )
 
 
 class LeRobotDatasetPartitioner(Partitioner):
@@ -145,13 +154,17 @@ class LeRobotDatasetPartitioner(Partitioner):
         """
         partition = self._partition_cache.get(partition_id, None)
         if partition is not None:
-            log(INFO, f"Reusing cached partition_id={partition_id}. Summary:\n {partition}")
+            log(
+                INFO,
+                f"Reusing cached partition_id={partition_id}. Summary:\n {partition}",
+            )
             return partition
         else:
             partition = FilteredLeRobotDataset(
                 repo_id=self.dataset["dataset_name"],
                 delta_timestamps=self.dataset["delta_timestamps"],
-                hf_filter_fn=lambda x: x["episode_index"] % self._num_partitions == partition_id
+                hf_filter_fn=lambda x: x["episode_index"] % self._num_partitions
+                == partition_id,
             )
             self._partition_cache[partition_id] = partition
             log(INFO, f"Loaded partition_id={partition_id}. Summary:\n {partition}")

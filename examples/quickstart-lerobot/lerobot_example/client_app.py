@@ -1,23 +1,23 @@
 """huggingface_example: A Flower / Hugging Face LeRobot app."""
 
 import warnings
+from logging import INFO
 from pathlib import Path
 
 import torch
-from flwr.client import Client, ClientApp, NumPyClient
-from flwr.common import Context
-from transformers import logging
-from logging import INFO
-
-from flwr.common.logger import log
 from lerobot_example.task import (
-    train,
-    test,
+    get_model,
+    get_params,
     load_data,
     set_params,
-    get_params,
-    get_model,
+    test,
+    train,
 )
+from transformers import logging
+
+from flwr.client import Client, ClientApp, NumPyClient
+from flwr.common import Context
+from flwr.common.logger import log
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -28,7 +28,9 @@ logging.set_verbosity_error()
 
 # Flower client
 class LeRobotClient(NumPyClient):
-    def __init__(self, partition_id, model_name, local_epochs, trainloader, nn_device=None) -> None:
+    def __init__(
+        self, partition_id, model_name, local_epochs, trainloader, nn_device=None
+    ) -> None:
         self.partition_id = partition_id
         self.trainloader = trainloader
         self.net = get_model(model_name=model_name, dataset=trainloader.dataset)
@@ -37,19 +39,30 @@ class LeRobotClient(NumPyClient):
         self.device = nn_device
         if self.device == torch.device("cpu"):
             # Decrease the number of reverse-diffusion steps (trades off a bit of quality for 10x speed)
-            policy.diffusion.num_inference_steps = 10        
+            policy.diffusion.num_inference_steps = 10
         policy.to(self.device)
 
     def fit(self, parameters, config) -> tuple[list, int, dict]:
         set_params(self.net, parameters)
-        train(partition_id=self.partition_id, net=self.net, trainloader=self.trainloader, epochs=self.local_epochs, device=self.device)
+        train(
+            partition_id=self.partition_id,
+            net=self.net,
+            trainloader=self.trainloader,
+            epochs=self.local_epochs,
+            device=self.device,
+        )
         return get_params(self.net), len(self.trainloader), {}
 
     def evaluate(self, parameters, config) -> tuple[float, int, dict[str, float]]:
         set_params(self.net, parameters)
         round_save_path = Path(config["save_path"])
-        loss, accuracy= test(partition_id=self.partition_id, net=self.net, device=self.device, output_dir=round_save_path)
-        testset_len = 1 # we test on one gym generated task
+        loss, accuracy = test(
+            partition_id=self.partition_id,
+            net=self.net,
+            device=self.device,
+            output_dir=round_save_path,
+        )
+        testset_len = 1  # we test on one gym generated task
         return float(loss), testset_len, {"accuracy": accuracy}
 
 
@@ -59,14 +72,21 @@ def client_fn(context: Context) -> Client:
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
     log(INFO, f"partition_id={partition_id}, num_partitions={num_partitions}")
-    # Discover device  
-    nn_device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") 
+    # Discover device
+    nn_device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     # Read the run config to get settings to configure the Client
     model_name = context.run_config["model-name"]
     local_epochs = int(context.run_config["local-epochs"])
     log(INFO, f"local_epochs={local_epochs}")
     trainloader = load_data(partition_id, num_partitions, model_name, device=nn_device)
 
-    return LeRobotClient(partition_id=partition_id, model_name=model_name, local_epochs=local_epochs, trainloader=trainloader, nn_device=nn_device).to_client()
+    return LeRobotClient(
+        partition_id=partition_id,
+        model_name=model_name,
+        local_epochs=local_epochs,
+        trainloader=trainloader,
+        nn_device=nn_device,
+    ).to_client()
+
 
 app = ClientApp(client_fn=client_fn)

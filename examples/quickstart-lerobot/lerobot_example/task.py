@@ -1,26 +1,25 @@
 """lerobot_example: A Flower / Hugging Face LeRobot app."""
 
+import time
+from collections import OrderedDict
 from pathlib import Path
 from typing import Any
-from collections import OrderedDict
-import numpy as np
-
-import torch
-from evaluate import load as load_metric
-from torch.optim import AdamW
-from torch.utils.data import DataLoader
-
-from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
-from lerobot.common.policies.diffusion.configuration_diffusion import DiffusionConfig
-from lerobot.common.policies.diffusion.modeling_diffusion import DiffusionPolicy
 
 import gym_pusht  # noqa: F401
 import gymnasium as gym
-import numpy
 import imageio
-import time
+import numpy
+import numpy as np
+import torch
+from evaluate import load as load_metric
+from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
+from lerobot.common.policies.diffusion.configuration_diffusion import DiffusionConfig
+from lerobot.common.policies.diffusion.modeling_diffusion import DiffusionPolicy
+from torch.optim import AdamW
+from torch.utils.data import DataLoader
 
 from datasets.utils.logging import disable_progress_bar
+
 from .lerobot_dataset_partitioner import LeRobotDatasetPartitioner
 from .lerobot_federated_dataset import FederatedLeRobotDataset
 
@@ -59,12 +58,14 @@ def get_delta_timestamps():
     }
     return delta_timestamps
 
+
 def get_dataset():
     dataset = LeRobotDataset("lerobot/pusht", delta_timestamps=get_delta_timestamps())
     return dataset
 
+
 def load_data(
-    partition_id: int, num_partitions: int, model_name: str, device = None
+    partition_id: int, num_partitions: int, model_name: str, device=None
 ) -> tuple[DataLoader[Any], DataLoader[Any]]:
     """Load pusht data (training and eval)"""
     # Only initialize `FederatedDataset` once
@@ -95,7 +96,7 @@ def load_data(
     return trainloader
 
 
-def get_model(model_name: str = None, dataset = None):
+def get_model(model_name: str = None, dataset=None):
     # Set up the the policy.
     # Policies are initialized with a configuration class, in this case `DiffusionConfig`.
     # For this example, no arguments need to be passed because the defaults are set up for PushT.
@@ -115,7 +116,9 @@ def set_params(model, parameters) -> None:
     model.load_state_dict(state_dict, strict=True)
 
 
-def train(partition_id: int = None, net = None, trainloader = None, epochs = None, device = None) -> None:
+def train(
+    partition_id: int = None, net=None, trainloader=None, epochs=None, device=None
+) -> None:
     # how frequently (train steps) to print train progress log
     log_freq = 250
 
@@ -141,7 +144,9 @@ def train(partition_id: int = None, net = None, trainloader = None, epochs = Non
             if step % log_freq == 0:
                 print(f"train step: {step} train loss: {loss.item():.3f}")
             step += 1
-            assert isinstance(epochs, int), f"epochs value: {epochs} , type: {epochs.__class__}"
+            assert isinstance(
+                epochs, int
+            ), f"epochs value: {epochs} , type: {epochs.__class__}"
             if step >= epochs:
                 done = True
                 break
@@ -232,7 +237,7 @@ def test(partition_id: int, net, device, output_dir: Path) -> tuple[Any | float,
     # Encode all frames into a mp4 video.
     video_dir = output_dir / f"client_{partition_id}"
     video_dir.mkdir(parents=True, exist_ok=True)
-    video_path =  video_dir / f"rollout_{timestr}.mp4"
+    video_path = video_dir / f"rollout_{timestr}.mp4"
     imageio.mimsave(str(video_path), numpy.stack(frames), fps=fps)
 
     env.close()
@@ -240,6 +245,6 @@ def test(partition_id: int, net, device, output_dir: Path) -> tuple[Any | float,
     print(f"Video of the evaluation is available in '{video_path}'.")
 
     accuracy = np.max(rewards)
-    loss = 1-accuracy
+    loss = 1 - accuracy
 
     return loss, accuracy
