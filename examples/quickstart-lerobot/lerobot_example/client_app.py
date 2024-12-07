@@ -45,7 +45,6 @@ class LeRobotClient(NumPyClient):
     def fit(self, parameters, config) -> tuple[list, int, dict]:
         set_params(self.net, parameters)
         train(
-            partition_id=self.partition_id,
             net=self.net,
             trainloader=self.trainloader,
             epochs=self.local_epochs,
@@ -56,12 +55,17 @@ class LeRobotClient(NumPyClient):
     def evaluate(self, parameters, config) -> tuple[float, int, dict[str, float]]:
         set_params(self.net, parameters)
         round_save_path = Path(config["save_path"])
-        loss, accuracy = test(
-            partition_id=self.partition_id,
-            net=self.net,
-            device=self.device,
-            output_dir=round_save_path,
-        )
+        if config["skip"]:
+            log(INFO, "Skipping evaluation")
+            accuracy, loss = 0.0, 0.0
+        else:
+            loss, accuracy = test(
+                partition_id=self.partition_id,
+                net=self.net,
+                device=self.device,
+                output_dir=round_save_path,
+            )
+            
         testset_len = 1  # we test on one gym generated task
         return float(loss), testset_len, {"accuracy": accuracy}
 

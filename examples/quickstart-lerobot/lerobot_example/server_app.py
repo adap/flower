@@ -30,7 +30,7 @@ def get_evaluate_config_callback(save_path: Path):
 
     def evaluate_config_fn(server_round: int) -> Metrics:
         eval_save_path = save_path / "evaluate" / f"round_{server_round}"
-        return {"save_path": str(eval_save_path)}
+        return {"save_path": str(eval_save_path), "skip": server_round % 5 != 0}
 
     return evaluate_config_fn
 

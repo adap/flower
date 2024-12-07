@@ -117,7 +117,7 @@ def set_params(model, parameters) -> None:
 
 
 def train(
-    partition_id: int = None, net=None, trainloader=None, epochs=None, device=None
+    net=None, trainloader=None, epochs=None, device=None
 ) -> None:
     # how frequently (train steps) to print train progress log
     log_freq = 250
