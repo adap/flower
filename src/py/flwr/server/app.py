@@ -24,7 +24,7 @@ from collections.abc import Sequence
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from time import sleep
-from typing import Any, Optional, cast
+from typing import Any, Optional
 
 import grpc
 import yaml
@@ -591,11 +591,11 @@ def _try_obtain_config(args: argparse.Namespace) -> Optional[dict[str, Any]]:
 
 def _try_obtain_exec_auth_plugin(config: dict[str, Any]) -> Optional[ExecAuthPlugin]:
     auth_config: dict[str, Any] = config.get("authentication", {})
-    auth_plugin_class = get_exec_auth_plugins().get(auth_config.get(AUTH_TYPE, ""))
+    all_plugins: dict[str, type[ExecAuthPlugin]] = get_exec_auth_plugins()
+    auth_plugin_class = all_plugins.get(auth_config.get(AUTH_TYPE, ""))
     if auth_plugin_class is None:
         return None
-    # Make mypy happy
-    return cast(type[ExecAuthPlugin], auth_plugin_class)(config=auth_config)
+    return auth_plugin_class(config=auth_config)
 
 
 def _run_fleet_api_grpc_rere(
