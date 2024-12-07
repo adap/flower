@@ -78,10 +78,18 @@ def login(  # pylint: disable=R0914
     login_request = GetLoginDetailsRequest()
     login_response: GetLoginDetailsResponse = stub.GetLoginDetails(login_request)
 
-    # Get the auth plugin class and login
-    auth_plugin_class = try_obtain_cli_auth_plugin(
-        login_response.login_details.get(AUTH_TYPE, "")
-    )
+    # Get the auth plugin class
+    auth_type = login_response.login_details.get(AUTH_TYPE, "None")
+    auth_plugin_class = try_obtain_cli_auth_plugin(auth_type)
+    if auth_plugin_class is None:
+        typer.secho(
+            f'❌ Authentication type "{auth_type}" not found',
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+
+    # Login
     config = auth_plugin_class.login(
         dict(login_response.login_details), config, federation, stub
     )
