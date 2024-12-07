@@ -29,7 +29,6 @@ from flwr.common.serde import (
     message_to_proto,
     recordset_to_proto,
 )
-from flwr.common.serde import error_to_proto, recordset_to_proto
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
     GetRunResponse,

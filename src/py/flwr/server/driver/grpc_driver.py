@@ -26,14 +26,10 @@ from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
 from flwr.common.constant import MAX_RETRY_DELAY, SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
-from flwr.common.serde import (
-    message_from_proto,
-    message_to_proto,
-    user_config_from_proto,
-)
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
-from flwr.common.serde import message_from_taskres, message_to_taskins, run_from_proto
+from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
 from flwr.common.typing import Run
+from flwr.proto.message_pb2 import Message as Message_pb  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
@@ -44,11 +40,7 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PushMessagesRequest,
     PushMessagesResponse,
 )
-from flwr.proto.message_pb2 import Message as Message_pb  # pylint: disable=E0611
-from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E0611
-from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 from .driver import Driver
 
