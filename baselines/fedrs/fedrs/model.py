@@ -46,15 +46,9 @@ def make_layers(network_cfg, batch_norm=False):
 def initialize_model(name, num_classes):
     """Initialize the model with the given name."""
     model_functions = {
-        "resnet18": lambda: torchvision.models.resnet18(),
         "vgg11": lambda: VGG(num_classes, use_bn=False),
     }
     model = model_functions[name]()
-
-    if name.startswith("resnet"):
-        num_ftrs = model.fc.in_features
-        # Modify final layer to match the number of classes
-        model.fc = torch.nn.Linear(num_ftrs, num_classes)
     return model
 
 

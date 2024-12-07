@@ -13,14 +13,17 @@ from torchvision.transforms import (
 
 from flwr.common import Context
 
+from .utils import get_ds_info
+
 FDS = None  # Cache FederatedDataset
 
+CIFAR_MEAN_STD = {
+    "cifar10": ([0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.2010]),
+    "cifar100": ((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
+}
 
 def get_data_transforms(dataset: str, split: str):
     """Return data transforms for dataset."""
-    if dataset != "cifar10":
-        raise ValueError("Only cifar10 is supported!")
-
     tfms = []
     if split == "train":
         tfms = [
@@ -31,7 +34,7 @@ def get_data_transforms(dataset: str, split: str):
     tfms.extend(
         [
             ToTensor(),
-            Normalize([0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.2010]),
+            Normalize(*CIFAR_MEAN_STD[dataset]),
         ]
     )
     return Compose(tfms)
@@ -61,9 +64,9 @@ def load_data(context: Context):
     partition_id = int(context.node_config["partition-id"])
     num_partitions = int(context.node_config["num-partitions"])
     dataset = str(context.run_config["dataset"])
+    num_classes, partition_by = get_ds_info(dataset)
     batch_size = int(context.run_config["batch-size"])
-    partition_by = str(context.run_config["dataset-partition-by"])
-    num_classes_per_partition = int(context.run_config["num-classes-per-partition"])
+    num_shards_per_partition = int(context.run_config["num-shards-per-partition"])
 
     # Only initialize `FederatedDataset` once
     global FDS  # pylint: disable=global-statement
@@ -72,7 +75,7 @@ def load_data(context: Context):
         partitioner = ShardPartitioner(
             num_partitions=num_partitions,
             partition_by=partition_by,
-            num_shards_per_partition=num_classes_per_partition,
+            num_shards_per_partition=num_shards_per_partition,
             shuffle=True,
         )
         FDS = FederatedDataset(
@@ -89,4 +92,4 @@ def load_data(context: Context):
         shuffle=True,
         drop_last=True,
     )
-    return trainloader, train_partition["label"]
+    return trainloader, train_partition["label"], num_classes

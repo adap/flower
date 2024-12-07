@@ -89,11 +89,9 @@ class FlowerClient(NumPyClient):
 
 def client_fn(context: Context):
     """Construct a Client that will be run in a ClientApp."""
-    num_classes = int(context.run_config["num-classes"])
-    model_name = str(context.run_config["model-name"])
+    trainloader, labels, num_classes = load_data(context)
+    model_name = str(context.run_config["model-name"]) 
     net = initialize_model(model_name, num_classes)
-
-    trainloader, labels = load_data(context)
 
     local_epochs = int(context.run_config["local-epochs"])
     learning_rate = float(context.run_config["learning-rate"])

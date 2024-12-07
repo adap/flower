@@ -19,6 +19,7 @@ from flwr.server.strategy import FedAvg, FedProx
 
 from .dataset import get_transformed_ds
 from .model import initialize_model, set_parameters, test
+from .utils import get_ds_info
 
 RESULTS_FILE = "eval_results.csv"
 
@@ -50,17 +51,17 @@ def server_fn(context: Context):
 
     run_dir = create_run_dir(context.run_config)
 
-    num_rounds = context.run_config["num-server-rounds"]
+    num_rounds = int(context.run_config["num-server-rounds"])
 
-    num_classes = int(context.run_config["num-classes"])
     model_name = str(context.run_config["model-name"])
+    dataset = str(context.run_config["dataset"])
+    num_classes, partition_by = get_ds_info(dataset)
     net = initialize_model(model_name, num_classes)
 
     alpha = float(context.run_config["alpha"])
     log(INFO, f"Restricted softmax scaling factor is {alpha}")
 
     dataset = str(context.run_config["dataset"])
-    partition_by = str(context.run_config["dataset-partition-by"])
     batch_size = int(context.run_config["batch-size"])
 
     test_ds = load_dataset(dataset, split="test")
@@ -112,7 +113,7 @@ def server_fn(context: Context):
     else:
         raise ValueError("Only FedAvg currently supported!")
 
-    config = ServerConfig(num_rounds=int(num_rounds))
+    config = ServerConfig(num_rounds=num_rounds)
 
     return ServerAppComponents(strategy=strategy, config=config)
 
