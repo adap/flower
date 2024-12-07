@@ -23,7 +23,6 @@ import "flwr/proto/message.proto";
 import "flwr/proto/task.proto";
 import "flwr/proto/run.proto";
 import "flwr/proto/fab.proto";
-import "flwr/proto/message.proto";
 
 service ServerAppIo {
   // Request run_id

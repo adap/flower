@@ -96,7 +96,7 @@ class PullTaskResResponse(google.protobuf.message.Message):
 global___PullTaskResResponse = PullTaskResResponse
 
 class PushMessagesRequest(google.protobuf.message.Message):
-    """PushMessages rmessages"""
+    """PushMessages messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     MESSAGES_LIST_FIELD_NUMBER: builtins.int
     @property
@@ -149,6 +149,7 @@ class PullMessagesResponse(google.protobuf.message.Message):
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["messages_list",b"messages_list"]) -> None: ...
 global___PullMessagesResponse = PullMessagesResponse
+
 class PullServerAppInputsRequest(google.protobuf.message.Message):
     """PullServerAppInputs messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor

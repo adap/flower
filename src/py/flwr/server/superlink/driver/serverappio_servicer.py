@@ -35,19 +35,6 @@ from flwr.common.serde import (
     run_to_proto,
     user_config_from_proto,
 )
-from flwr.common.typing import Fab
-from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
-    GetNodesRequest,
-    GetNodesResponse,
-    PullMessagesRequest,
-    PullMessagesResponse,
-    PullTaskResRequest,
-    PullTaskResResponse,
-    PushMessagesRequest,
-    PushMessagesResponse,
-    PushTaskInsRequest,
-    PushTaskInsResponse,
-)
 from flwr.common.typing import Fab, RunStatus
 from flwr.proto import serverappio_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
@@ -67,10 +54,14 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     GetNodesResponse,
+    PullMessagesRequest,
+    PullMessagesResponse,
     PullServerAppInputsRequest,
     PullServerAppInputsResponse,
     PullTaskResRequest,
     PullTaskResResponse,
+    PushMessagesRequest,
+    PushMessagesResponse,
     PushServerAppOutputsRequest,
     PushServerAppOutputsResponse,
     PushTaskInsRequest,
