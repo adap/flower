@@ -103,7 +103,9 @@ def pull_task_ins(request: PullTaskInsRequest, state: LinkState) -> PullTaskInsR
     return response
 
 
-def pull_messages(request: PullMessagesRequest, state: LinkState) -> PullMessagesResponse:
+def pull_messages(
+    request: PullMessagesRequest, state: LinkState
+) -> PullMessagesResponse:
     """Pull Messages handler."""
     # Get node_id if client node is not anonymous
     node = request.node  # pylint: disable=no-member
@@ -119,6 +121,7 @@ def pull_messages(request: PullMessagesRequest, state: LinkState) -> PullMessage
         msg_proto.append(message_to_proto(msg))
 
     return PullMessagesResponse(messages_list=msg_proto)
+
 
 def push_task_res(request: PushTaskResRequest, state: LinkState) -> PushTaskResResponse:
     """Push TaskRes handler."""
@@ -140,7 +143,9 @@ def push_task_res(request: PushTaskResRequest, state: LinkState) -> PushTaskResR
     return response
 
 
-def push_messages(request: PushMessagesRequest, state: State) -> PushMessagesResponse:
+def push_messages(
+    request: PushMessagesRequest, state: LinkState
+) -> PushMessagesResponse:
     """Push Messages handler."""
     # Convert Message to TaskRes
     msg = message_from_proto(message_proto=request.messages_list[0])
