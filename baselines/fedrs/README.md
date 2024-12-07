@@ -32,11 +32,11 @@ dataset: [cifar10]
 
 **Model:** A 9-layer VGG model with 9,225,600 parameters and without batch norm. 
 
-**Dataset:** The implementation is only for the CIFAR-10 dataset currently. Data is partitioned using [PathologicalPartitioner](https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.PathologicalPartitioner.html) which determines how many classes will be assigned to each client. By default, the number of clients (i.e. partitions) is 100 and during each training round, 10% of clients are selected. Each client data contains 5 classes.
+**Dataset:** The implementation is only for the CIFAR-10 dataset currently. Data is partitioned using [ShardPartitioner](https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.ShardPartitioner.html) which sorts the dataset by labels and creates shards, and randomly allocates shards to each client (the number of which depends on the `num-shards-per-partition` arg)
 
 The paper uses a slightly different partitioning scheme, where samples for each class is divided into equal number of partitions, and allocate N shards (across all classes) to each client, such that each client has 5 classes on average.
 
-**Training Hyperparameters:** Table below shows the training hyperparams for the experiments. Values are from the original paper where provided (e.g. learning rate, momentum, weight decay)
+**Training Hyperparameters:** Table below shows the **default** training hyperparams for the experiments. Values are from the original paper where provided (e.g. learning rate, momentum, weight decay)
 
 | Description | Default Value |
 | ----------- | ----- |
@@ -49,7 +49,7 @@ The paper uses a slightly different partitioning scheme, where samples for each 
 | weight decay | 5e-4 |
 | number of rounds | 1000 |
 | batch size | 64 |
-| num classes per partition | 5 |
+| num shards per partition | 5 |
 | model | vgg11 |
 
 ## Environment Setup
@@ -68,26 +68,45 @@ pip install -e .
 
 ## Running the Experiments
 
-## Table 5
+## Table 5 (Performance comparisons with standard FL algorithms (VGG11))
 
-The following three commands will generate the results for CIFAR10-100-5 in Table 5:
+### Commands for C10-100-5 (CIFAR-10 with 100 clients and 5 shards per client)
 
-```bash
-# CIFAR-10 (5 classes per client) with FedAvg
-flwr run . --run-config conf/cifar10_100_5_fedavg.toml
+|  | Command
+| ----------- | ----- | 
+| FedAvg (default) | `flwr run .` | 
+| FedProx (0.0001)| `flwr run . --run-config "alg='fedprox' proximal-mu=0.0001"` | 
+| FedProx (0.001)| `flwr run . --run-config "alg='fedprox' proximal-mu=0.001"` | 
+| FedRS ($\alpha$=0.5)| `flwr run . --run-config "alpha=0.5"` | 
+| FedRS ($\alpha$=0.9) | `flwr run . --run-config "alpha=0.9"` | 
 
-# CIFAR-10 (5 classes per client) with FedRS (alpha=0.9)
-flwr run . --run-config conf/cifar10_100_5_fedrs_0.9.toml
+### Commands for C10-100-2 (CIFAR-10 with 100 clients and 2 shards per client)
 
-# CIFAR-10 (5 classes per client) with FedRS (alpha=0.5)
-flwr run . --run-config conf/cifar10_100_5_fedrs_0.5.toml
-```
+|  | Command
+| ----------- | ----- | 
+| FedAvg (default) | `flwr run . --run-config num-shards-per-partition=2` | 
+| FedProx (0.0001)| `flwr run . --run-config "alg='fedprox' proximal-mu=0.0001 num-shards-per-partition=2"` | 
+| FedProx (0.001)| `flwr run . --run-config "alg='fedprox' proximal-mu=0.001 num-shards-per-partition=2"` | 
+| FedRS ($\alpha$=0.5)| `flwr run . --run-config "alpha=0.5 num-shards-per-partition=2"` | 
+| FedRS ($\alpha$=0.9) | `flwr run . --run-config "alpha=0.9 num-shards-per-partition=2"` | 
+
+### Commands for C100-100-20 (CIFAR-100 with 100 clients and 20 shards per client)
+
+|  | Command
+| ----------- | ----- | 
+| FedAvg (default) | `flwr run . --run-config num-shards-per-partition=20 dataset='cifar100'` | 
+| FedProx (0.0001)| `flwr run . --run-config "alg='fedprox' proximal-mu=0.0001 num-shards-per-partition=20 dataset='cifar100'` | 
+| FedProx (0.001)| `flwr run . --run-config "alg='fedprox' proximal-mu=0.001 num-shards-per-partition=20 dataset='cifar100'` | 
+| FedRS ($\alpha$=0.5)| `flwr run . --run-config "alpha=0.5 num-shards-per-partition=20 dataset='cifar100'` | 
+| FedRS ($\alpha$=0.9) | `flwr run . --run-config "alpha=0.9 num-shards-per-partition=20 dataset='cifar100'` | 
 
 
-The expected accuracy results are as follows:
+After 1000 server steps, the accuracy results are as follows:
 
-|  | CIFAR10-100-5 
+|  | C10-100-5 
 | ----------- | ----- |
 | FedAvg | 0.810 | 
+| FedProx (0.0001)|  | 
+| FedProx (0.001)|  | 
 | FedRS ($\alpha$=0.5)| 0.837 | 
 | FedRS ($\alpha$=0.9) | 0.840 | 

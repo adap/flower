@@ -1,7 +1,7 @@
 """fedrs: A Flower Baseline."""
 
 from flwr_datasets import FederatedDataset
-from flwr_datasets.partitioner import PathologicalPartitioner
+from flwr_datasets.partitioner import ShardPartitioner
 from torch.utils.data import DataLoader, Dataset
 from torchvision.transforms import (
     Compose,
@@ -69,10 +69,10 @@ def load_data(context: Context):
     global FDS  # pylint: disable=global-statement
 
     if FDS is None:
-        partitioner = PathologicalPartitioner(
+        partitioner = ShardPartitioner(
             num_partitions=num_partitions,
             partition_by=partition_by,
-            num_classes_per_partition=num_classes_per_partition,
+            num_shards_per_partition=num_classes_per_partition,
             shuffle=True,
         )
         FDS = FederatedDataset(
