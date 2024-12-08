@@ -8,35 +8,32 @@ your chances of getting your PR accepted into the Flower codebase.
 Where to start
 --------------
 
-Until the Flower core library matures it will be easier to get PR's accepted if they
-only touch non-core areas of the codebase. Good candidates to get started are:
+In general, it is easier to get PR's accepted if they only touch non-core areas of the
+codebase. Good candidates to get started are:
 
 - Documentation: What's missing? What could be expressed more clearly?
+- Open issues: Issues with the tag `good first issue
+  <https://github.com/adap/flower/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22>`_.
 - Baselines: See below.
 - Examples: See below.
 
-Request for Flower Baselines
-----------------------------
+Flower Baselines
+----------------
 
-If you are not familiar with Flower Baselines, you should probably check-out our
-`contributing guide for baselines
-<https://flower.ai/docs/baselines/how-to-contribute-baselines.html>`_.
+If you are not familiar with Flower Baselines, please check our `contributing guide for
+baselines <https://flower.ai/docs/baselines/how-to-contribute-baselines.html>`_.
 
-You should then check out the open `issues
+Then take a look at the open `issues
 <https://github.com/adap/flower/issues?q=is%3Aopen+is%3Aissue+label%3A%22new+baseline%22>`_
-for baseline requests. If you find a baseline that you'd like to work on and that has no
-assignees, feel free to assign it to yourself and start working on it!
+for baseline requests. If you find a baseline that you'd like to work on, and it has no
+assignees, feel free to assign it to yourself and get started!
 
-Otherwise, if you don't find a baseline you'd like to work on, be sure to open a new
-issue with the baseline request template!
+If you don't find the baseline you'd like to work on, be sure to open a new issue with
+the baseline request template!
 
-Request for examples
---------------------
+Usage examples
+--------------
 
-We wish we had more time to write usage examples because we believe they help users to
-get started with building what they want to build. Here are a few ideas where we'd be
-happy to accept a PR:
-
-- Llama 2 fine-tuning, with Hugging Face Transformers and PyTorch
-- XGBoost
-- Android ONNX on-device training
+We wish we had more time to write usage examples because they help users to get started
+with building what they want. If you notice any missing examples that could help others,
+feel free to contribute!

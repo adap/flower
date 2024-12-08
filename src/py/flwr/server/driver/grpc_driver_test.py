@@ -19,6 +19,8 @@ import time
 import unittest
 from unittest.mock import Mock, patch
 
+import grpc
+
 from flwr.common import DEFAULT_TTL, RecordSet
 from flwr.common.message import Error
 from flwr.common.serde import error_to_proto, recordset_to_proto
@@ -215,3 +217,30 @@ class TestGrpcDriver(unittest.TestCase):
 
         # Assert
         self.mock_channel.close.assert_not_called()
+
+    def test_simple_retry_mechanism_get_nodes(self) -> None:
+        """Test retry mechanism with the get_node_ids method."""
+        # Prepare
+        grpc_exc = grpc.RpcError()
+        grpc_exc.code = lambda: grpc.StatusCode.UNAVAILABLE
+        mock_get_nodes = Mock()
+        mock_get_nodes.side_effect = [
+            grpc_exc,
+            Mock(nodes=[Mock(node_id=404)]),
+        ]
+        # Make pylint happy
+        # pylint: disable=protected-access
+        self.driver._grpc_stub = Mock(
+            GetNodes=lambda *args, **kwargs: self.driver._retry_invoker.invoke(
+                mock_get_nodes, *args, **kwargs
+            )
+        )
+        # pylint: enable=protected-access
+
+        # Execute
+        with patch("time.sleep", side_effect=lambda _: None):
+            node_ids = self.driver.get_node_ids()
+
+        # Assert
+        self.assertIn(404, node_ids)
+        self.assertEqual(mock_get_nodes.call_count, 2)

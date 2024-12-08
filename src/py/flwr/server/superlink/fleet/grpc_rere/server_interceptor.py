@@ -45,7 +45,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
-from flwr.server.superlink.linkstate import LinkState
+from flwr.server.superlink.linkstate import LinkStateFactory
 
 _PUBLIC_KEY_HEADER = "public-key"
 _AUTH_TOKEN_HEADER = "auth-token"
@@ -84,15 +84,16 @@ def _get_value_from_tuples(
 class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
     """Server interceptor for node authentication."""
 
-    def __init__(self, state: LinkState):
-        self.state = state
+    def __init__(self, state_factory: LinkStateFactory):
+        self.state_factory = state_factory
+        state = self.state_factory.state()
 
         self.node_public_keys = state.get_node_public_keys()
         if len(self.node_public_keys) == 0:
             log(WARNING, "Authentication enabled, but no known public keys configured")
 
-        private_key = self.state.get_server_private_key()
-        public_key = self.state.get_server_public_key()
+        private_key = state.get_server_private_key()
+        public_key = state.get_server_public_key()
 
         if private_key is None or public_key is None:
             raise ValueError("Error loading authentication keys")
@@ -154,7 +155,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                 context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
 
             # Verify node_id
-            node_id = self.state.get_node_id(node_public_key_bytes)
+            node_id = self.state_factory.state().get_node_id(node_public_key_bytes)
 
             if not self._verify_node_id(node_id, request):
                 context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
@@ -186,7 +187,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                 return False
             return request.task_res_list[0].task.producer.node_id == node_id
         if isinstance(request, GetRunRequest):
-            return node_id in self.state.get_nodes(request.run_id)
+            return node_id in self.state_factory.state().get_nodes(request.run_id)
         return request.node.node_id == node_id
 
     def _verify_hmac(
@@ -210,17 +211,17 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                 ),
             )
         )
-
-        node_id = self.state.get_node_id(public_key_bytes)
+        state = self.state_factory.state()
+        node_id = state.get_node_id(public_key_bytes)
 
         # Handle `CreateNode` here instead of calling the default method handler
         # Return previously assigned `node_id` for the provided `public_key`
         if node_id is not None:
-            self.state.acknowledge_ping(node_id, request.ping_interval)
+            state.acknowledge_ping(node_id, request.ping_interval)
             return CreateNodeResponse(node=Node(node_id=node_id, anonymous=False))
 
         # No `node_id` exists for the provided `public_key`
         # Handle `CreateNode` here instead of calling the default method handler
         # Note: the innermost `CreateNode` method will never be called
-        node_id = self.state.create_node(request.ping_interval, public_key_bytes)
+        node_id = state.create_node(request.ping_interval, public_key_bytes)
         return CreateNodeResponse(node=Node(node_id=node_id, anonymous=False))

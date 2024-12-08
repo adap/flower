@@ -19,7 +19,6 @@
 import json
 import re
 import sqlite3
-import threading
 import time
 from collections.abc import Sequence
 from logging import DEBUG, ERROR, WARNING
@@ -57,6 +56,8 @@ from .utils import (
     generate_rand_int_from_bytes,
     has_valid_sub_status,
     is_valid_transition,
+    verify_found_taskres,
+    verify_taskins_ids,
 )
 
 SQL_CREATE_TABLE_NODE = """
@@ -181,7 +182,6 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         """
         self.database_path = database_path
         self.conn: Optional[sqlite3.Connection] = None
-        self.lock = threading.RLock()
 
     def initialize(self, log_queries: bool = False) -> list[tuple[str]]:
         """Create tables if they don't exist yet.
@@ -214,7 +214,6 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         cur.execute(SQL_CREATE_TABLE_PUBLIC_KEY)
         cur.execute(SQL_CREATE_INDEX_ONLINE_UNTIL)
         res = cur.execute("SELECT name FROM sqlite_schema;")
-
         return res.fetchall()
 
     def query(
@@ -510,136 +509,67 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
     # pylint: disable-next=R0912,R0915,R0914
     def get_task_res(self, task_ids: set[UUID]) -> list[TaskRes]:
-        """Get TaskRes for task_ids.
+        """Get TaskRes for the given TaskIns IDs."""
+        ret: dict[UUID, TaskRes] = {}
 
-        Usually, the ServerAppIo API calls this method to get results for instructions
-        it has previously scheduled.
-
-        Retrieves all TaskRes for the given `task_ids` and returns and empty list if
-        none could be found.
-
-        Constraints
-        -----------
-        If `limit` is not `None`, return, at most, `limit` number of TaskRes. The limit
-        will only take effect if enough task_ids are in the set AND are currently
-        available. If `limit` is set, it has to be greater than zero.
-        """
-        # Check if corresponding TaskIns exists and is not expired
-        task_ids_placeholders = ",".join([f":id_{i}" for i in range(len(task_ids))])
+        # Verify TaskIns IDs
+        current = time.time()
         query = f"""
             SELECT *
             FROM task_ins
-            WHERE task_id IN ({task_ids_placeholders})
-            AND (created_at + ttl) > CAST(strftime('%s', 'now') AS REAL)
+            WHERE task_id IN ({",".join(["?"] * len(task_ids))});
         """
-        query += ";"
-
-        task_ins_data = {}
-        for index, task_id in enumerate(task_ids):
-            task_ins_data[f"id_{index}"] = str(task_id)
-
-        task_ins_rows = self.query(query, task_ins_data)
-
-        if not task_ins_rows:
-            return []
-
-        for row in task_ins_rows:
-            # Convert values from sint64 to uint64
+        rows = self.query(query, tuple(str(task_id) for task_id in task_ids))
+        found_task_ins_dict: dict[UUID, TaskIns] = {}
+        for row in rows:
             convert_sint64_values_in_dict_to_uint64(
                 row, ["run_id", "producer_node_id", "consumer_node_id"]
             )
-            task_ins = dict_to_task_ins(row)
-            if task_ins.task.created_at + task_ins.task.ttl <= time.time():
-                log(WARNING, "TaskIns with task_id %s is expired.", task_ins.task_id)
-                task_ids.remove(UUID(task_ins.task_id))
+            found_task_ins_dict[UUID(row["task_id"])] = dict_to_task_ins(row)
 
-        # Retrieve all anonymous Tasks
-        if len(task_ids) == 0:
-            return []
+        ret = verify_taskins_ids(
+            inquired_taskins_ids=task_ids,
+            found_taskins_dict=found_task_ins_dict,
+            current_time=current,
+        )
 
-        placeholders = ",".join([f":id_{i}" for i in range(len(task_ids))])
+        # Find all TaskRes
         query = f"""
             SELECT *
             FROM task_res
-            WHERE ancestry IN ({placeholders})
-            AND delivered_at = ""
+            WHERE ancestry IN ({",".join(["?"] * len(task_ids))})
+            AND delivered_at = "";
         """
+        rows = self.query(query, tuple(str(task_id) for task_id in task_ids))
+        for row in rows:
+            convert_sint64_values_in_dict_to_uint64(
+                row, ["run_id", "producer_node_id", "consumer_node_id"]
+            )
+        tmp_ret_dict = verify_found_taskres(
+            inquired_taskins_ids=task_ids,
+            found_taskins_dict=found_task_ins_dict,
+            found_taskres_list=[dict_to_task_res(row) for row in rows],
+            current_time=current,
+        )
+        ret.update(tmp_ret_dict)
 
-        data: dict[str, Union[str, float, int]] = {}
-
-        query += ";"
-
-        for index, task_id in enumerate(task_ids):
-            data[f"id_{index}"] = str(task_id)
-
-        rows = self.query(query, data)
-
-        if rows:
-            # Prepare query
-            found_task_ids = [row["task_id"] for row in rows]
-            placeholders = ",".join([f":id_{i}" for i in range(len(found_task_ids))])
-            query = f"""
-                UPDATE task_res
-                SET delivered_at = :delivered_at
-                WHERE task_id IN ({placeholders})
-                RETURNING *;
-            """
-
-            # Prepare data for query
-            delivered_at = now().isoformat()
-            data = {"delivered_at": delivered_at}
-            for index, task_id in enumerate(found_task_ids):
-                data[f"id_{index}"] = str(task_id)
-
-            # Run query
-            rows = self.query(query, data)
-
-            for row in rows:
-                # Convert values from sint64 to uint64
-                convert_sint64_values_in_dict_to_uint64(
-                    row, ["run_id", "producer_node_id", "consumer_node_id"]
-                )
-
-        result = [dict_to_task_res(row) for row in rows]
-
-        # 1. Query: Fetch consumer_node_id of remaining task_ids
-        # Assume the ancestry field only contains one element
-        data.clear()
-        replied_task_ids: set[UUID] = {UUID(str(row["ancestry"])) for row in rows}
-        remaining_task_ids = task_ids - replied_task_ids
-        placeholders = ",".join([f":id_{i}" for i in range(len(remaining_task_ids))])
+        # Mark existing TaskRes to be returned as delivered
+        delivered_at = now().isoformat()
+        for task_res in ret.values():
+            task_res.task.delivered_at = delivered_at
+        task_res_ids = [task_res.task_id for task_res in ret.values()]
         query = f"""
-            SELECT consumer_node_id
-            FROM task_ins
-            WHERE task_id IN ({placeholders});
+            UPDATE task_res
+            SET delivered_at = ?
+            WHERE task_id IN ({",".join(["?"] * len(task_res_ids))});
         """
-        for index, task_id in enumerate(remaining_task_ids):
-            data[f"id_{index}"] = str(task_id)
-        node_ids = [int(row["consumer_node_id"]) for row in self.query(query, data)]
+        data: list[Any] = [delivered_at] + task_res_ids
+        self.query(query, data)
 
-        # 2. Query: Select offline nodes
-        placeholders = ",".join([f":id_{i}" for i in range(len(node_ids))])
-        query = f"""
-            SELECT node_id
-            FROM node
-            WHERE node_id IN ({placeholders})
-            AND online_until < :time;
-        """
-        data = {f"id_{i}": str(node_id) for i, node_id in enumerate(node_ids)}
-        data["time"] = time.time()
-        offline_node_ids = [int(row["node_id"]) for row in self.query(query, data)]
+        # Cleanup
+        self._force_delete_tasks_by_ids(set(ret.keys()))
 
-        # 3. Query: Select TaskIns for offline nodes
-        placeholders = ",".join([f":id_{i}" for i in range(len(offline_node_ids))])
-        query = f"""
-            SELECT *
-            FROM task_ins
-            WHERE consumer_node_id IN ({placeholders});
-        """
-        data = {f"id_{i}": str(node_id) for i, node_id in enumerate(offline_node_ids)}
-        task_ins_rows = self.query(query, data)
-
-        return result
+        return list(ret.values())
 
     def num_task_ins(self) -> int:
         """Calculate the number of task_ins in store.
@@ -698,6 +628,32 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             self.conn.execute(query_2, data)
 
         return None
+
+    def _force_delete_tasks_by_ids(self, task_ids: set[UUID]) -> None:
+        """Delete tasks based on a set of TaskIns IDs."""
+        if not task_ids:
+            return
+        if self.conn is None:
+            raise AttributeError("LinkState not initialized")
+
+        placeholders = ",".join([f":id_{index}" for index in range(len(task_ids))])
+        data = {f"id_{index}": str(task_id) for index, task_id in enumerate(task_ids)}
+
+        # Delete task_ins
+        query_1 = f"""
+            DELETE FROM task_ins
+            WHERE task_id IN ({placeholders});
+        """
+
+        # Delete task_res
+        query_2 = f"""
+            DELETE FROM task_res
+            WHERE ancestry IN ({placeholders});
+        """
+
+        with self.conn:
+            self.conn.execute(query_1, data)
+            self.conn.execute(query_2, data)
 
     def create_node(
         self, ping_interval: float, public_key: Optional[bytes] = None
@@ -902,6 +858,12 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         result: set[bytes] = {row["public_key"] for row in rows}
         return result
 
+    def get_run_ids(self) -> set[int]:
+        """Retrieve all run IDs."""
+        query = "SELECT run_id FROM run;"
+        rows = self.query(query)
+        return {convert_sint64_to_uint64(row["run_id"]) for row in rows}
+
     def get_run(self, run_id: int) -> Optional[Run]:
         """Retrieve information about the run with the specified `run_id`."""
         # Convert the uint64 value to sint64 for SQLite
@@ -916,6 +878,15 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                 fab_version=row["fab_version"],
                 fab_hash=row["fab_hash"],
                 override_config=json.loads(row["override_config"]),
+                pending_at=row["pending_at"],
+                starting_at=row["starting_at"],
+                running_at=row["running_at"],
+                finished_at=row["finished_at"],
+                status=RunStatus(
+                    status=determine_run_status(row),
+                    sub_status=row["sub_status"],
+                    details=row["details"],
+                ),
             )
         log(ERROR, "`run_id` does not exist.")
         return None
@@ -1249,10 +1220,10 @@ def dict_to_task_res(task_dict: dict[str, Any]) -> TaskRes:
 def determine_run_status(row: dict[str, Any]) -> str:
     """Determine the status of the run based on timestamp fields."""
     if row["pending_at"]:
+        if row["finished_at"]:
+            return Status.FINISHED
         if row["starting_at"]:
             if row["running_at"]:
-                if row["finished_at"]:
-                    return Status.FINISHED
                 return Status.RUNNING
             return Status.STARTING
         return Status.PENDING

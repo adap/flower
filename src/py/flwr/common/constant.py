@@ -38,17 +38,30 @@ TRANSPORT_TYPES = [
 ]
 
 # Addresses
+# Ports
+CLIENTAPPIO_PORT = "9094"
+SERVERAPPIO_PORT = "9091"
+FLEETAPI_GRPC_RERE_PORT = "9092"
+FLEETAPI_PORT = "9095"
+EXEC_API_PORT = "9093"
+SIMULATIONIO_PORT = "9096"
+# Octets
+SERVER_OCTET = "0.0.0.0"
+CLIENT_OCTET = "127.0.0.1"
 # SuperNode
-CLIENTAPPIO_API_DEFAULT_ADDRESS = "0.0.0.0:9094"
+CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS = f"{SERVER_OCTET}:{CLIENTAPPIO_PORT}"
+CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS = f"{CLIENT_OCTET}:{CLIENTAPPIO_PORT}"
 # SuperLink
-SERVERAPPIO_API_DEFAULT_ADDRESS = "0.0.0.0:9091"
-FLEET_API_GRPC_RERE_DEFAULT_ADDRESS = "0.0.0.0:9092"
+SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS = f"{SERVER_OCTET}:{SERVERAPPIO_PORT}"
+SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS = f"{CLIENT_OCTET}:{SERVERAPPIO_PORT}"
+FLEET_API_GRPC_RERE_DEFAULT_ADDRESS = f"{SERVER_OCTET}:{FLEETAPI_GRPC_RERE_PORT}"
 FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS = (
     "[::]:8080"  # IPv6 to keep start_server compatible
 )
-FLEET_API_REST_DEFAULT_ADDRESS = "0.0.0.0:9095"
-EXEC_API_DEFAULT_ADDRESS = "0.0.0.0:9093"
-SIMULATIONIO_API_DEFAULT_ADDRESS = "0.0.0.0:9096"
+FLEET_API_REST_DEFAULT_ADDRESS = f"{SERVER_OCTET}:{FLEETAPI_PORT}"
+EXEC_API_DEFAULT_SERVER_ADDRESS = f"{SERVER_OCTET}:{EXEC_API_PORT}"
+SIMULATIONIO_API_DEFAULT_SERVER_ADDRESS = f"{SERVER_OCTET}:{SIMULATIONIO_PORT}"
+SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS = f"{CLIENT_OCTET}:{SIMULATIONIO_PORT}"
 
 # Constants for ping
 PING_DEFAULT_INTERVAL = 30
@@ -94,6 +107,9 @@ CONN_RECONNECT_INTERVAL = 0.5  # Reconnect interval between two stream connectio
 LOG_STREAM_INTERVAL = 0.5  # Log stream interval for `ExecServicer.StreamLogs`
 LOG_UPLOAD_INTERVAL = 0.2  # Minimum interval between two log uploads
 
+# Retry configurations
+MAX_RETRY_DELAY = 20  # Maximum delay duration between two consecutive retries.
+
 
 class MessageType:
     """Message type."""
@@ -134,6 +150,8 @@ class ErrorCode:
     UNKNOWN = 0
     LOAD_CLIENT_APP_EXCEPTION = 1
     CLIENT_APP_RAISED_EXCEPTION = 2
+    MESSAGE_UNAVAILABLE = 3
+    REPLY_MESSAGE_UNAVAILABLE = 4
 
     def __new__(cls) -> ErrorCode:
         """Prevent instantiation."""
@@ -161,5 +179,16 @@ class SubStatus:
     STOPPED = "stopped"
 
     def __new__(cls) -> SubStatus:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+class CliOutputFormat:
+    """Define output format for `flwr` CLI commands."""
+
+    DEFAULT = "default"
+    JSON = "json"
+
+    def __new__(cls) -> CliOutputFormat:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")

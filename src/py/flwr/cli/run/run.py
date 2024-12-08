@@ -14,16 +14,19 @@
 # ==============================================================================
 """Flower command line interface `run` command."""
 
+import io
 import json
 import subprocess
 from logging import DEBUG
 from pathlib import Path
-from typing import Annotated, Any, Optional
+from typing import Annotated, Any, Optional, Union
 
 import typer
+from rich.console import Console
 
 from flwr.cli.build import build
 from flwr.cli.config_utils import (
+    get_fab_metadata,
     load_and_validate,
     validate_certificate_in_federation_config,
     validate_federation_in_project_config,
@@ -34,8 +37,9 @@ from flwr.common.config import (
     parse_config_args,
     user_config_to_configsrecord,
 )
+from flwr.common.constant import CliOutputFormat
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
-from flwr.common.logger import log
+from flwr.common.logger import log, redirect_output, remove_emojis, restore_output
 from flwr.common.serde import (
     configs_record_to_proto,
     fab_to_proto,
@@ -85,21 +89,51 @@ def run(
             "logs are not streamed by default.",
         ),
     ] = False,
+    output_format: Annotated[
+        str,
+        typer.Option(
+            "--format",
+            case_sensitive=False,
+            help="Format output using 'default' view or 'json'",
+        ),
+    ] = CliOutputFormat.DEFAULT,
 ) -> None:
     """Run Flower App."""
-    typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
+    suppress_output = output_format == CliOutputFormat.JSON
+    captured_output = io.StringIO()
+    try:
+        if suppress_output:
+            redirect_output(captured_output)
+        typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
-    pyproject_path = app / "pyproject.toml" if app else None
-    config, errors, warnings = load_and_validate(path=pyproject_path)
-    config = validate_project_config(config, errors, warnings)
-    federation, federation_config = validate_federation_in_project_config(
-        federation, config
-    )
+        pyproject_path = app / "pyproject.toml" if app else None
+        config, errors, warnings = load_and_validate(path=pyproject_path)
+        config = validate_project_config(config, errors, warnings)
+        federation, federation_config = validate_federation_in_project_config(
+            federation, config
+        )
 
-    if "address" in federation_config:
-        _run_with_exec_api(app, federation_config, config_overrides, stream)
-    else:
-        _run_without_exec_api(app, federation_config, config_overrides, federation)
+        if "address" in federation_config:
+            _run_with_exec_api(
+                app, federation_config, config_overrides, stream, output_format
+            )
+        else:
+            _run_without_exec_api(app, federation_config, config_overrides, federation)
+    except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
+        if suppress_output:
+            restore_output()
+            e_message = captured_output.getvalue()
+            _print_json_error(e_message, err)
+        else:
+            typer.secho(
+                f"{err}",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+    finally:
+        if suppress_output:
+            restore_output()
+        captured_output.close()
 
 
 # pylint: disable-next=too-many-locals
@@ -108,6 +142,7 @@ def _run_with_exec_api(
     federation_config: dict[str, Any],
     config_overrides: Optional[list[str]],
     stream: bool,
+    output_format: str,
 ) -> None:
 
     insecure, root_certificates_bytes = validate_certificate_in_federation_config(
@@ -125,6 +160,11 @@ def _run_with_exec_api(
 
     fab_path, fab_hash = build(app)
     content = Path(fab_path).read_bytes()
+    fab_id, fab_version = get_fab_metadata(Path(fab_path))
+
+    # Delete FAB file once the bytes is computed
+    Path(fab_path).unlink()
+
     fab = Fab(fab_hash, content)
 
     # Construct a `ConfigsRecord` out of a flattened `UserConfig`
@@ -138,9 +178,26 @@ def _run_with_exec_api(
     )
     res = stub.StartRun(req)
 
-    # Delete FAB file once it has been sent to the Exec API
-    Path(fab_path).unlink()
-    typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
+    if res.HasField("run_id"):
+        typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
+    else:
+        typer.secho("❌ Failed to start run", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+
+    if output_format == CliOutputFormat.JSON:
+        run_output = json.dumps(
+            {
+                "success": res.HasField("run_id"),
+                "run-id": res.run_id if res.HasField("run_id") else None,
+                "fab-id": fab_id,
+                "fab-name": fab_id.rsplit("/", maxsplit=1)[-1],
+                "fab-version": fab_version,
+                "fab-hash": fab_hash[:8],
+                "fab-filename": fab_path,
+            }
+        )
+        restore_output()
+        Console().print_json(run_output)
 
     if stream:
         start_stream(res.run_id, channel, CONN_REFRESH_PERIOD)
@@ -191,4 +248,16 @@ def _run_without_exec_api(
         command,
         check=True,
         text=True,
+    )
+
+
+def _print_json_error(msg: str, e: Union[typer.Exit, Exception]) -> None:
+    """Print error message as JSON."""
+    Console().print_json(
+        json.dumps(
+            {
+                "success": False,
+                "error-message": remove_emojis(str(msg) + "\n" + str(e)),
+            }
+        )
     )
