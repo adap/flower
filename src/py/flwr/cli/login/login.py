@@ -26,7 +26,6 @@ from flwr.cli.config_utils import (
     validate_federation_in_project_config,
     validate_project_config,
 )
-from flwr.common.config import get_user_auth_config_path
 from flwr.common.constant import AUTH_TYPE
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
@@ -78,10 +77,12 @@ def login(  # pylint: disable=R0914
     login_request = GetLoginDetailsRequest()
     login_response: GetLoginDetailsResponse = stub.GetLoginDetails(login_request)
 
-    # Get the auth plugin class
-    auth_type = login_response.login_details.get(AUTH_TYPE, "None")
-    auth_plugin_class = try_obtain_cli_auth_plugin(auth_type)
-    if auth_plugin_class is None:
+    # Get the auth plugin
+    auth_type = login_response.login_details.get(AUTH_TYPE)
+    auth_plugin = try_obtain_cli_auth_plugin(
+        app, federation, federation_config, auth_type
+    )
+    if auth_plugin is None:
         typer.secho(
             f'❌ Authentication type "{auth_type}" not found',
             fg=typer.colors.RED,
@@ -90,13 +91,11 @@ def login(  # pylint: disable=R0914
         raise typer.Exit(code=1)
 
     # Login
-    config = auth_plugin_class.login(
+    config = auth_plugin.login(
         dict(login_response.login_details), config, federation, stub
     )
 
     # Store the tokens
-    credential_path = get_user_auth_config_path(federation_config)
-    auth_plugin = auth_plugin_class(config, credential_path)
     auth_plugin.store_tokens(config)
 
 

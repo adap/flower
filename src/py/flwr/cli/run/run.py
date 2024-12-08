@@ -36,11 +36,10 @@ from flwr.cli.config_utils import (
 from flwr.common.auth_plugin import CliAuthPlugin
 from flwr.common.config import (
     flatten_dict,
-    get_user_auth_config_path,
     parse_config_args,
     user_config_to_configsrecord,
 )
-from flwr.common.constant import AUTH_TYPE, CliOutputFormat
+from flwr.common.constant import CliOutputFormat
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log, redirect_output, remove_emojis, restore_output
 from flwr.common.serde import (
@@ -118,7 +117,7 @@ def run(
         )
 
         if "address" in federation_config:
-            auth_plugin = _try_obtain_cli_auth_plugin(federation_config)
+            auth_plugin = try_obtain_cli_auth_plugin(app, federation, federation_config)
             _run_with_exec_api(
                 app,
                 federation_config,
@@ -144,27 +143,6 @@ def run(
         if suppress_output:
             restore_output()
         captured_output.close()
-
-
-def _try_obtain_cli_auth_plugin(
-    federation_config: dict[str, Any]
-) -> Optional[CliAuthPlugin]:
-    credential = get_user_auth_config_path(federation_config)
-
-    if not credential.exists():
-        return None
-
-    with credential.open("r", encoding="utf-8") as file:
-        config_dict: dict[str, Any] = json.load(file)
-
-    auth_type = config_dict.get(AUTH_TYPE, "")
-    auth_plugin: Optional[CliAuthPlugin] = None
-
-    auth_plugin_class = try_obtain_cli_auth_plugin(auth_type)
-    if auth_plugin_class is not None:
-        auth_plugin = auth_plugin_class(config_dict, credential)
-
-    return auth_plugin
 
 
 # pylint: disable-next=R0913, R0914, R0917

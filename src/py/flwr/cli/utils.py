@@ -15,13 +15,16 @@
 """Flower command line interface utils."""
 
 import hashlib
+import json
 import re
 from pathlib import Path
-from typing import Callable, Optional, cast
+from typing import Any, Callable, Optional, cast
 
 import typer
 
+from flwr.common.address import parse_address
 from flwr.common.auth_plugin import CliAuthPlugin
+from flwr.common.constant import AUTH_TYPE, CREDENTIALS_DIR
 
 try:
     from flwr.ee.auth_plugin import get_cli_auth_plugins
@@ -152,7 +155,47 @@ def get_sha256_hash(file_path: Path) -> str:
     return sha256.hexdigest()
 
 
-def try_obtain_cli_auth_plugin(auth_type: str) -> Optional[type[CliAuthPlugin]]:
-    """Return the CLI authentication plugin class for the given auth type."""
+def get_user_auth_config_path(
+    root_dir: Path, federation: str, server_address: str
+) -> Path:
+    """Return the path to the user auth config file."""
+    # Locate the credentials directory
+    credentials_dir = root_dir.absolute() / ".flwr" / CREDENTIALS_DIR
+    credentials_dir.mkdir(parents=True, exist_ok=True)
+
+    # Parse the server address
+    parsed_addr = parse_address(server_address)
+    if parsed_addr is None:
+        raise ValueError(f"Invalid server address: {server_address}")
+    host, port, is_v6 = parsed_addr
+    formatted_addr = f"[{host}]_{port}" if is_v6 else f"{host}_{port}"
+    return credentials_dir / f"{federation}_{formatted_addr}.json"
+
+
+def try_obtain_cli_auth_plugin(
+    root_dir: Path,
+    federation: str,
+    federation_config: dict[str, Any],
+    auth_type: Optional[str] = None,
+) -> Optional[CliAuthPlugin]:
+    """Load the CLI-side user auth plugin for the given auth type."""
+    config_path = get_user_auth_config_path(
+        root_dir, federation, federation_config["address"]
+    )
+
+    # Load the config file if it exists
+    config: dict[str, Any] = {}
+    if config_path.exists():
+        with config_path.open("r", encoding="utf-8") as file:
+            config = json.load(file)
+
+    # Get the auth type
+    if auth_type is None:
+        auth_type = config.get(AUTH_TYPE, "")
+
+    # Retrieve auth plugin class and instantiate it
     all_plugins: dict[str, type[CliAuthPlugin]] = get_cli_auth_plugins()
-    return all_plugins.get(auth_type)
+    auth_plugin_class = all_plugins.get(auth_type)
+    if auth_plugin_class is not None:
+        return auth_plugin_class(config, config_path)
+    return None

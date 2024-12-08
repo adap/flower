@@ -25,7 +25,6 @@ from flwr.cli.config_utils import get_fab_config, validate_fields
 from flwr.common import ConfigsRecord
 from flwr.common.constant import (
     APP_DIR,
-    CREDENTIALS_DIR,
     FAB_CONFIG_FILE,
     FAB_HASH_TRUNCATION,
     FLWR_HOME,
@@ -43,14 +42,6 @@ def get_flwr_dir(provided_path: Optional[str] = None) -> Path:
             )
         )
     return Path(provided_path).absolute()
-
-
-def get_user_auth_config_path(federation_config: dict[str, Any]) -> Path:
-    """Return the path to the user auth config file."""
-    credentials_dir = get_flwr_dir() / CREDENTIALS_DIR
-    credentials_dir.mkdir(parents=True, exist_ok=True)
-    server_address: str = federation_config["address"]
-    return credentials_dir / server_address
 
 
 def get_project_dir(
