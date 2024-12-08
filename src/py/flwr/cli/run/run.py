@@ -25,6 +25,7 @@ import typer
 from rich.console import Console
 
 from flwr.cli.build import build
+from flwr.cli.cli_interceptor import CliInterceptor
 from flwr.cli.config_utils import (
     get_fab_metadata,
     load_and_validate,
@@ -32,6 +33,7 @@ from flwr.cli.config_utils import (
     validate_federation_in_project_config,
     validate_project_config,
 )
+from flwr.common.auth_plugin import CliAuthPlugin
 from flwr.common.config import (
     flatten_dict,
     parse_config_args,
@@ -50,6 +52,7 @@ from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 
 from ..log import start_stream
+from ..utils import try_obtain_cli_auth_plugin
 
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
 
@@ -114,8 +117,14 @@ def run(
         )
 
         if "address" in federation_config:
+            auth_plugin = try_obtain_cli_auth_plugin(app, federation, federation_config)
             _run_with_exec_api(
-                app, federation_config, config_overrides, stream, output_format
+                app,
+                federation_config,
+                config_overrides,
+                stream,
+                output_format,
+                auth_plugin,
             )
         else:
             _run_without_exec_api(app, federation_config, config_overrides, federation)
@@ -136,15 +145,15 @@ def run(
         captured_output.close()
 
 
-# pylint: disable-next=too-many-locals
+# pylint: disable-next=R0913, R0914, R0917
 def _run_with_exec_api(
     app: Path,
     federation_config: dict[str, Any],
     config_overrides: Optional[list[str]],
     stream: bool,
     output_format: str,
+    auth_plugin: Optional[CliAuthPlugin] = None,
 ) -> None:
-
     insecure, root_certificates_bytes = validate_certificate_in_federation_config(
         app, federation_config
     )
@@ -153,7 +162,7 @@ def _run_with_exec_api(
         insecure=insecure,
         root_certificates=root_certificates_bytes,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        interceptors=None,
+        interceptors=(CliInterceptor(auth_plugin) if auth_plugin is not None else None),
     )
     channel.subscribe(on_channel_state_change)
     stub = ExecStub(channel)
