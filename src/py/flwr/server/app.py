@@ -262,10 +262,11 @@ def run_superlink() -> None:
     # Obtain certificates
     certificates = try_obtain_server_certificates(args, args.fleet_api_type)
 
-    maybe_config = _try_obtain_config(args)
+    user_auth_config = _try_obtain_user_auth_config(args)
     auth_plugin: Optional[ExecAuthPlugin] = None
-    if maybe_config is not None:
-        auth_plugin = _try_obtain_exec_auth_plugin(maybe_config)
+    # user_auth_config is None only if the args.user_auth_config is not provided
+    if user_auth_config is not None:
+        auth_plugin = _try_obtain_exec_auth_plugin(user_auth_config)
 
     # Initialize StateFactory
     state_factory = LinkStateFactory(args.database)
@@ -581,7 +582,7 @@ def _try_setup_node_authentication(
         )
 
 
-def _try_obtain_config(args: argparse.Namespace) -> Optional[dict[str, Any]]:
+def _try_obtain_user_auth_config(args: argparse.Namespace) -> Optional[dict[str, Any]]:
     if args.user_auth_config is not None:
         with open(args.user_auth_config, encoding="utf-8") as file:
             config: dict[str, Any] = yaml.safe_load(file)
