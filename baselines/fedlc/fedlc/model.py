@@ -3,49 +3,46 @@
 from collections import OrderedDict
 
 import torch
-import torchvision
+import torch.nn as nn
 
+class CNNModel(nn.Module):
+    """CNN model as described in Appendix of FedLC paper"""
 
-# Adapted from FedDebug baseline implementation
-# https://github.com/adap/flower/blob/main/baselines/feddebug/feddebug/models.py
-def initialize_model(name, num_channels, num_classes):
-    """Initialize the model with the given name."""
-    model_functions = {
-        "resnet18": lambda: torchvision.models.resnet18(),
-        "resnet34": lambda: torchvision.models.resnet34(),
-        "resnet50": lambda: torchvision.models.resnet50(),
-        "resnet101": lambda: torchvision.models.resnet101(),
-        "resnet152": lambda: torchvision.models.resnet152(),
-        "vgg16": lambda: torchvision.models.vgg16(),
-    }
-    model = model_functions[name]()
-    # Modify model for grayscale input if necessary
-    if num_channels == 1:
-        if name.startswith("resnet"):
-            model.conv1 = torch.nn.Conv2d(
-                1, 64, kernel_size=7, stride=2, padding=3, bias=False
-            )
-        elif name == "vgg16":
-            model.features[0] = torch.nn.Conv2d(
-                1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)
-            )
+    def __init__(self, num_classes=10):
+        super().__init__()
+        self.conv1 = nn.Conv2d(3,128,3)
+        self.bn1 = nn.BatchNorm2d(128)
+        self.conv2 = nn.Conv2d(128,128,3)
+        self.bn2 = nn.BatchNorm2d(128)
+        self.conv3 = nn.Conv2d(128, 128,3)
+        self.bn3 = nn.BatchNorm2d(128)
 
-    # Modify final layer to match the number of classes
-    if name.startswith("resnet"):
-        num_ftrs = model.fc.in_features
-        model.fc = torch.nn.Linear(num_ftrs, num_classes)
-    elif name == "vgg16":
-        num_ftrs = model.classifier[-1].in_features
-        model.classifier[-1] = torch.nn.Linear(num_ftrs, num_classes)
-    return model
+        self.fc = nn.Linear(512, num_classes)
+
+    def forward(self, x):
+        """Forward pass."""
+        x = nn.functional.relu(self.bn1(self.conv1(x)))
+        x = nn.functional.max_pool2d(x, 2, stride=2)
+
+        x = nn.functional.relu(self.bn2(self.conv2(x)))
+        x = nn.functional.max_pool2d(x, 2, stride=2)
+
+        x = nn.functional.relu(self.bn3(self.conv3(x)))
+        x = nn.functional.max_pool2d(x, 2, stride=2)
+
+        x = x.view(x.shape[0], -1)
+        x = self.fc(x)
+        
+        return x
 
 
 def train(net, trainloader, epochs, device, learning_rate, criterion):
     """Train the model on the training set."""
     net.to(device)
-    optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate, momentum=0.9)
+    optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate)
     net.train()
     running_loss = 0.0
+
     for _ in range(epochs):
         for batch in trainloader:
             images = batch["img"]
@@ -89,6 +86,3 @@ def set_parameters(net, parameters):
     params_dict = zip(net.state_dict().keys(), parameters)
     state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
     net.load_state_dict(state_dict, strict=True)
-
-
-# implementation from DASHA paper

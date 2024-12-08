@@ -1,40 +1,35 @@
 """fedlc: A Flower Baseline."""
-
 import csv
 import json
 from datetime import datetime
-from logging import DEBUG, INFO
+from logging import INFO
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
-
+from typing import Dict, Optional, Tuple
+import wandb
 import torch
 from datasets import load_dataset
 from torch.utils.data import DataLoader
 
-from fedlc.model import initialize_model
 from flwr.common import Context
 from flwr.common.logger import log
 from flwr.common.typing import NDArrays, Scalar, UserConfig
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
+from flwr.server.strategy import FedAvg, FedProx
 
 from .dataset import get_transformed_ds
-from .model import set_parameters, test
-from .strategy import CheckpointedFedAvg, CheckpointedFedProx
+from .model import CNNModel, set_parameters, test
+from .utils import get_ds_info
 
 RESULTS_FILE = "eval_results.csv"
-
+PROJECT_NAME = "Flower-Baseline-FedLC"
 
 # From https://github.com/adap/flower/pull/3908
-def create_run_dir(config: UserConfig) -> Path:
+def create_run_dir(config: UserConfig) -> Tuple[Path,Path]:
     """Create a directory where to save results from this run."""
-    strategy = str(config["strategy"])
-    use_lc = bool(config["use-logit-correction"])
-    run_type = f"{strategy}_{'lc' if use_lc else 'no_lc'}"
-
     # Create output directory given current timestamp
     current_time = datetime.now()
     run_dir = current_time.strftime("%Y-%m-%d/%H-%M-%S")
-    save_path = Path.cwd() / f"results/{run_type}/{run_dir}"
+    save_path = Path.cwd() / f"results/{run_dir}"
     save_path.mkdir(parents=True, exist_ok=False)
 
     # Save run config as json
@@ -42,45 +37,67 @@ def create_run_dir(config: UserConfig) -> Path:
         json.dump(config, fp)
 
     # Prepare results.csv
-    with open(f"{save_path}/{RESULTS_FILE}", "w", encoding="utf-8") as f:
+    results_csv_path = save_path / RESULTS_FILE
+    with open(results_csv_path, "w", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["round", "loss", "acc"])
 
-    return save_path
+    # Create checkpoints directory
+    checkpoint_path = save_path / "checkpoints"
+    checkpoint_path.mkdir(exist_ok=True)
+
+    return results_csv_path, checkpoint_path
 
 
 def server_fn(context: Context):
     """Construct components that set the ServerApp behaviour."""
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    run_dir = create_run_dir(context.run_config)
+    results_csv_path, checkpoint_path = create_run_dir(context.run_config)
 
-    # Read from config
-    num_rounds = context.run_config["num-server-rounds"]
-    proximal_mu = context.run_config["proximal-mu"]
-    save_params_every = context.run_config["save-params-every"]
-    log(DEBUG, f"Saving params every {save_params_every} rounds")
-    
-    use_lc = bool(context.run_config["use-logit-correction"])
+    num_rounds = int(context.run_config["num-server-rounds"])
+
+    dataset = str(context.run_config["dataset"])
+    num_classes, partition_by = get_ds_info(dataset)
+    net = CNNModel(num_classes)
+
+    dataset = str(context.run_config["dataset"])
+    batch_size = int(context.run_config["batch-size"])
+
+    test_ds = load_dataset(dataset, split="test")
+    testloader = DataLoader(
+        get_transformed_ds(test_ds, dataset, partition_by, split="test"),
+        batch_size=batch_size,
+    )
+
+    alg = str(context.run_config["alg"])
+    proximal_mu = float(context.run_config["proximal-mu"])
+
+    tau = float(context.run_config["tau"])
+    use_lc = tau > 0.0
     if use_lc:
         log(INFO, "Using logit correction")
     else:
         log(INFO, "NOT using logit correction")
 
-    num_classes = int(context.run_config["num-classes"])
-    num_channels = int(context.run_config["num-channels"])
-    model_name = str(context.run_config["model-name"])
-    dataset = str(context.run_config["dataset"])
-    partition_by = str(context.run_config["dataset-partition-by"])
-    batch_size = int(context.run_config["batch-size"])
+    
+    use_wandb = context.run_config["use-wandb"]
+    if use_wandb:
+        num_shards_per_partition = int(context.run_config["num-shards-per-partition"])
+        group_name = f"{dataset}-100-{num_shards_per_partition}"
+        run_name = "fedavg"
+        if alg == "fedprox":
+            run_name = f"fedprox_{proximal_mu}"
+        if use_lc:
+            run_name = f"fedlc_{tau}"
 
-    net = initialize_model(model_name, num_channels, num_classes)
+        wandb.init(
+            project=PROJECT_NAME,
+            group=group_name,
+            name=run_name,
+        )
 
-    test_ds = load_dataset(dataset, split="test")
-    testloader = DataLoader(
-        get_transformed_ds(test_ds, dataset, partition_by),
-        batch_size=batch_size,
-    )
+    checkpoint_every = int(context.run_config["checkpoint-every"])
 
     # The `evaluate` function will be called by Flower after every round
     def evaluate(
@@ -91,46 +108,54 @@ def server_fn(context: Context):
         set_parameters(net, parameters)
         loss, accuracy = test(net, testloader, device)
         log(INFO, f"Server-side evaluation loss {loss} / accuracy {accuracy}")
-
-        with open(f"{run_dir}/{RESULTS_FILE}", "a", encoding="utf-8") as f:
-            writer = csv.writer(f)
-            writer.writerow([server_round, loss, accuracy])
+        
+        if use_wandb:
+            wandb.log({"loss": loss, "accuracy": accuracy}, step=server_round)
+        else:
+            with open(results_csv_path, "a", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                writer.writerow([server_round, loss, accuracy])
+        
+        if server_round > 0 and server_round % checkpoint_every == 0:
+            checkpoint_file_path = checkpoint_path / f"ckpt_round_{server_round}.path"
+            torch.save(net.state_dict(), checkpoint_file_path)
+            log(
+                INFO,
+                f"Saved global model checkpoint to {checkpoint_file_path} on round {server_round}",
+            )
 
         return loss, {"accuracy": accuracy}
 
     clients_per_round = int(context.run_config["clients-per-round"])
 
-    strategy_kwargs: Dict[str, Any] = {
-        "fraction_fit": 0.00001,  # we want no. of clients to be determined by min_fit_clients
-        "fraction_evaluate": 0,
-        "min_evaluate_clients": 0,
-        "min_fit_clients": clients_per_round,
-        "min_available_clients": clients_per_round,
-        "evaluate_fn": evaluate,
-        "accept_failures": False,
-    }
-
-    strategy = str(context.run_config["strategy"])
-    use_last_checkpoint = bool(context.run_config["use-last-checkpoint"])
-
     # Define strategy
-    if strategy == "fedprox":
-        strategy = CheckpointedFedProx(
-            net=net,
-            run_config=context.run_config,
-            proximal_mu=float(proximal_mu),
-            use_last_checkpoint=use_last_checkpoint,
-            **strategy_kwargs,
+    if alg == "fedavg":
+        log(INFO, "Using FedAvg")
+        strategy = FedAvg(
+            fraction_fit=0.00001,  # we want no. of clients to be determined by min_fit_clients
+            min_fit_clients=clients_per_round,
+            min_available_clients=clients_per_round,
+            fraction_evaluate=0,  # no federated evaluation,
+            min_evaluate_clients=0,
+            evaluate_fn=evaluate,
+            accept_failures=False,
+        )
+    elif alg == "fedprox":
+        log(INFO, f"Using FedProx with proximal_mu={proximal_mu}")
+        strategy = FedProx(
+            fraction_fit=0.00001,
+            min_fit_clients=clients_per_round,
+            min_available_clients=clients_per_round,
+            fraction_evaluate=0,  # no federated evaluation,
+            min_evaluate_clients=0,
+            evaluate_fn=evaluate,
+            accept_failures=False,
+            proximal_mu=proximal_mu,
         )
     else:
-        # default to FedAvg
-        strategy = CheckpointedFedAvg(
-            net=net,
-            run_config=context.run_config,
-            use_last_checkpoint=use_last_checkpoint,
-            **strategy_kwargs,
-        )
-    config = ServerConfig(num_rounds=int(num_rounds))
+        raise ValueError("Only alg='fedprox' and alg='fedavg' are currently supported!")
+
+    config = ServerConfig(num_rounds=num_rounds)
 
     return ServerAppComponents(strategy=strategy, config=config)
 
