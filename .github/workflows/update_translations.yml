@@ -38,7 +38,7 @@ jobs:
 
       - name: Update text and translations for all locales
         run: |
-          cd doc
+          cd framework/docs
           make update-text
           for langDir in locales/*; do
             if [ -d "$langDir" ]; then
@@ -52,7 +52,7 @@ jobs:
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add doc/locales
+          git add framework/docs/locales
           git commit -m "Update text and language files"
         continue-on-error: true
 

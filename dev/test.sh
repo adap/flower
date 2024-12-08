@@ -55,7 +55,7 @@ echo "- All Python checks passed"
 echo "- Start Markdown checks"
 
 echo "- mdformat: start"
-python -m mdformat --check --number doc/source examples
+python -m mdformat --check --number framework/docs/source examples
 echo "- mdformat: done"
 
 echo "- All Markdown checks passed"
@@ -71,7 +71,7 @@ echo "- All TOML checks passed"
 echo "- Start rST checks"
 
 echo "- docstrfmt: start"
-docstrfmt --check doc/source
+docstrfmt --check framework/docs/source
 echo "- docstrfmt: done"
 
 echo "- All rST checks passed"

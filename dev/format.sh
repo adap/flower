@@ -31,13 +31,13 @@ python -m black -q e2e
 python -m docformatter -i -r e2e
 
 # Notebooks
-python -m black --ipynb -q doc/source/*.ipynb
+python -m black --ipynb -q framework/docs/source/*.ipynb
 KEYS="metadata.celltoolbar metadata.language_info metadata.toc metadata.notify_time metadata.varInspector metadata.accelerator metadata.vscode cell.metadata.id cell.metadata.heading_collapsed cell.metadata.hidden cell.metadata.code_folding cell.metadata.tags cell.metadata.init_cell cell.metadata.vscode cell.metadata.pycharm"
-python -m nbstripout doc/source/*.ipynb --extra-keys "$KEYS"
+python -m nbstripout framework/docs/source/*.ipynb --extra-keys "$KEYS"
 python -m nbstripout examples/*/*.ipynb --extra-keys "$KEYS"
 
 # Markdown
-python -m mdformat --number doc/source examples
+python -m mdformat --number framework/docs/source examples
 
 # RST
-docstrfmt doc/source
+docstrfmt framework/docs/source
