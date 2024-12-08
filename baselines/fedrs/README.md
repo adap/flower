@@ -20,6 +20,8 @@ dataset: [cifar10]
 
 **What’s implemented:** Performance comparison between `FedAvg`, `FedRS (alpha=0.5)` and `FedRS (alpha=0.9)` on VGG model and CIFAR10 with avg 5 classes per client (`Table 5` of paper)
 
+The reproduced results are not exactly same as Table 5, although they do show that FedRS performs better than both FedAvg and FedProx under label skew.
+
 **Datasets:** CIFAR10
 
 **Hardware Setup:** The paper samples 10 clients for 1000 rounds. GPU is recommended. The results below were obtained on a machine with 1x NVIDIA L4 Tensor Core GPU, with 16 vCPUs and 64GB of RAM.
@@ -111,8 +113,10 @@ After 1000 server steps, the accuracy results are as follows:
 
 |  | C10-100-5 
 | ----------- | ----- |
-| FedAvg | 0.810 | 
-| FedProx (0.0001)|  | 
-| FedProx (0.001)|  | 
-| FedRS ($\alpha$=0.5)| 0.837 | 
-| FedRS ($\alpha$=0.9) | 0.840 | 
+| FedAvg | 0.8 | 
+| FedProx (0.0001)| 0.7791 | 
+| FedProx (0.001)| 0.7914 | 
+| FedRS ($\alpha$=0.5)| 0.8149 | 
+| FedRS ($\alpha$=0.9) | 0.8149 | 
+
+![FedAvg](_static/accuracy.png)
