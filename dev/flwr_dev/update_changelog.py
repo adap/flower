@@ -23,34 +23,22 @@ try:
     import tomllib
 except ModuleNotFoundError:
     import tomli as tomllib
+
 from datetime import date
 from sys import argv
-from typing import Optional
+from typing import Annotated, Optional
 
+import typer
 from github import Github
 from github.PullRequest import PullRequest
 from github.Repository import Repository
 from github.Tag import Tag
 
+from flwr_dev.common import get_git_root
+
 REPO_NAME = "adap/flower"
 CHANGELOG_FILE = "doc/source/ref-changelog.md"
 CHANGELOG_SECTION_HEADER = "### Changelog entry"
-
-# Load the TOML configuration
-with (pathlib.Path(__file__).parent.resolve() / "changelog_config.toml").open(
-    "rb"
-) as file:
-    CONFIG = tomllib.load(file)
-
-# Extract types, project, and scope from the config
-TYPES = "|".join(CONFIG["type"])
-PROJECTS = "|".join(CONFIG["project"]) + "|\\*"
-SCOPE = CONFIG["scope"]
-ALLOWED_VERBS = CONFIG["allowed_verbs"]
-
-# Construct the pattern
-PATTERN_TEMPLATE = CONFIG["pattern_template"]
-PATTERN = PATTERN_TEMPLATE.format(types=TYPES, projects=PROJECTS, scope=SCOPE)
 
 
 def _get_latest_tag(gh_api: Github) -> tuple[Repository, Optional[Tag]]:
@@ -140,10 +128,11 @@ def _format_pr_reference(title: str, number: int, url: str) -> str:
 
 def _extract_changelog_entry(
     pr_info: PullRequest,
+    pattern: str,
 ) -> dict[str, str]:
     """Extract the changelog entry from a pull request's body."""
     # Use regex search to find matches
-    match = re.search(PATTERN, pr_info.title)
+    match = re.search(pattern, pr_info.title)
     if match:
         # Extract components from the regex groups
         pr_type = match.group(1)
@@ -167,7 +156,7 @@ def _extract_changelog_entry(
     }
 
 
-def _update_changelog(prs: set[PullRequest]) -> bool:
+def _update_changelog(prs: set[PullRequest], pattern: str) -> bool:
     """Update the changelog file with entries from provided pull requests."""
     breaking_changes = False
     unknown_changes = False
@@ -187,7 +176,7 @@ def _update_changelog(prs: set[PullRequest]) -> bool:
         )
 
         for pr_info in prs:
-            parsed_title = _extract_changelog_entry(pr_info)
+            parsed_title = _extract_changelog_entry(pr_info, pattern)
 
             # Skip if PR should be skipped or already in changelog
             if (
@@ -268,23 +257,42 @@ def _bump_minor_version(tag: Tag) -> Optional[str]:
     match = re.match(r"v(\d+)\.(\d+)\.(\d+)", tag.name)
     if match is None:
         return None
-    major, minor, _ = [int(x) for x in match.groups()]
+    major, minor, _ = (int(x) for x in match.groups())
     # Increment the minor version and reset patch version
     new_version = f"v{major}.{minor + 1}.0"
     return new_version
 
 
-def main() -> None:
+def generate_changelog(
+    gh_token: Annotated[
+        str, typer.Argument(help="A GitHub API token with read access.")
+    ]
+):
     """Update changelog using the descriptions of PRs since the latest tag."""
     # Initialize GitHub Client with provided token (as argument)
-    gh_api = Github(argv[1])
+
+    # Load the TOML configuration
+    with (pathlib.Path(get_git_root()) / "dev" / "changelog_config.toml").open(
+        "rb"
+    ) as file:
+        config = tomllib.load(file)
+
+    # Extract types, project, and scope from the config
+    types = "|".join(config["type"])
+    projects = "|".join(config["project"]) + "|\\*"
+    scope = config["scope"]
+
+    # Construct the pattern
+    pattern_template = config["pattern_template"]
+    pattern = pattern_template.format(types=types, projects=projects, scope=scope)
+    gh_api = Github(gh_token)
     repo, latest_tag = _get_latest_tag(gh_api)
     if not latest_tag:
         print("No tags found in the repository.")
         return
 
     shortlog, prs = _get_pull_requests_since_tag(repo, latest_tag)
-    if _update_changelog(prs):
+    if _update_changelog(prs, pattern):
         new_version = _bump_minor_version(latest_tag)
         if not new_version:
             print("Wrong tag format.")
@@ -294,4 +302,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    generate_changelog(argv[1])

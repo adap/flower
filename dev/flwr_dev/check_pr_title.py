@@ -17,17 +17,23 @@
 import pathlib
 import re
 import sys
-import tomllib
+from typing import Annotated
 
-if __name__ == "__main__":
+import tomli
+import typer
 
-    pr_title = sys.argv[1]
+from flwr_dev.common import get_git_root
 
+
+def check_title(
+    pr_title: Annotated[str, typer.Argument(help="Title of the PR to check")]
+):
+    """Check if the title of a PR is valid."""
     # Load the YAML configuration
-    with (pathlib.Path(__file__).parent.resolve() / "changelog_config.toml").open(
+    with (pathlib.Path(get_git_root()) / "dev" / "changelog_config.toml").open(
         "rb"
     ) as file:
-        config = tomllib.load(file)
+        config = tomli.load(file)
 
     # Extract types, project, and scope from the config
     types = "|".join(config["type"])
@@ -73,3 +79,7 @@ if __name__ == "__main__":
             "the changelog:\n\n\t`feat(framework:skip) Add new option to build CLI`\n"
         )
         sys.exit(1)
+
+
+if __name__ == "__main__":
+    check_title(sys.argv[1])
