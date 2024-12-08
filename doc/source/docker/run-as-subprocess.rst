@@ -1,3 +1,7 @@
+:og:description: Execute Flower ServerApp and ClientApp as subprocesses within SuperLink and SuperNode Docker containers to optimize resource usage, isolation, and security.
+.. meta::
+    :description: Execute Flower ServerApp and ClientApp as subprocesses within SuperLink and SuperNode Docker containers to optimize resource usage, isolation, and security.
+
 Run ServerApp or ClientApp as a Subprocess
 ==========================================
 
