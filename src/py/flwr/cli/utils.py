@@ -188,10 +188,15 @@ def try_obtain_cli_auth_plugin(
     if config_path.exists():
         with config_path.open("r", encoding="utf-8") as file:
             config = json.load(file)
+    # This is the case when the user auth is not enabled
+    elif auth_type is None:
+        return None
 
     # Get the auth type
     if auth_type is None:
-        auth_type = config.get(AUTH_TYPE, "")
+        if AUTH_TYPE not in config:
+            return None
+        auth_type = config[AUTH_TYPE]
 
     # Retrieve auth plugin class and instantiate it
     all_plugins: dict[str, type[CliAuthPlugin]] = get_cli_auth_plugins()
