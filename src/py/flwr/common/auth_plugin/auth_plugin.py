@@ -100,6 +100,5 @@ class CliAuthPlugin(ABC):
     def store_tokens(self, config: dict[str, Any]) -> None:
         """Store the tokens from the provided config.
 
-        The tokens will be saved as a JSON file in the `.credentials/` folder inside the
-        Flower directory.
+        The tokens will be saved as a JSON file in the provided config_path.
         """
