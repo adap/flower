@@ -20,6 +20,7 @@ from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
 from moon.models import init_net, train_fedprox, train_moon
+from moon.dataset import get_train_transforms, get_apply_transforms_fn
 
 
 # pylint: disable=too-many-instance-attributes
@@ -114,65 +115,15 @@ class FlowerClient(fl.client.NumPyClient):
         return self.get_parameters({}), len(self.trainloader), {"is_straggler": False}
 
 
-from torch.utils.data import DataLoader
-import torchvision.transforms as transforms
-import torch.nn.functional as F
-from torch.autograd import Variable
-
-
-# normalize = transforms.Normalize(
-#     mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
-#     std=[x / 255.0 for x in [63.0, 62.1, 66.7]],
-# )
-# transform_train = transforms.Compose(
-#     [
-#         transforms.ToTensor(),
-#         transforms.Lambda(
-#             lambda x: F.pad(
-#                 Variable(x.unsqueeze(0), requires_grad=False),
-#                 (4, 4, 4, 4),
-#                 mode="reflect",
-#             ).data.squeeze()
-#         ),
-#         transforms.ToPILImage(),
-#         transforms.RandomCrop(32),
-#         transforms.RandomHorizontalFlip(),
-#         transforms.ToTensor(),
-#         normalize,
-#     ]
-# )
-normalize = transforms.Normalize(
-    mean=[0.5070751592371323, 0.48654887331495095, 0.4409178433670343],
-    std=[0.2673342858792401, 0.2564384629170883, 0.27615047132568404],
-)
-
-transform_train = transforms.Compose(
-    [
-        transforms.RandomCrop(32, padding=4),
-        transforms.RandomHorizontalFlip(),
-        transforms.RandomRotation(15),
-        transforms.ToTensor(),
-        normalize,
-    ]
-)
-
-def apply_transforms(batch):
-        # For CIFAR-10 the "img" column contains the images we want to
-        # apply the transforms to
-        batch["img"] = [transform_train(img) for img in batch["img"]]
-        # map to a common column just to implify training loop
-        # Note "label" doesn't exist in CIFAR-100
-        batch["label"] = batch["fine_label"]
-        return batch
-
-
 def get_dataloader(num_partitions:int, beta: float, dataset_name:str, batch_size: 32, partition_id: int):
 
     def _get_dataloader(partition):
 
         partition.set_format("torch")
+        tt = get_train_transforms(dataset_name)
+
         return DataLoader(
-            partition.with_transform(apply_transforms),
+            partition.with_transform(get_apply_transforms_fn(tt, dataset_name)),
             batch_size=batch_size,
             drop_last=True,
             shuffle=True,
@@ -181,11 +132,11 @@ def get_dataloader(num_partitions:int, beta: float, dataset_name:str, batch_size
     partitioner = DirichletPartitioner(
         num_partitions=num_partitions,
         alpha=beta,
-        partition_by="fine_label",
+        partition_by="fine_label" if dataset_name == "uoft-cs/cifar100" else "label",
         seed=1234,
     )
     dataset = FederatedDataset(
-        dataset="uoft-cs/cifar100",
+        dataset=dataset_name,
         partitioners={"train": partitioner},
     )
     return _get_dataloader(dataset.load_partition(partition_id = partition_id))

@@ -12,16 +12,16 @@ mu: 10
 temperature: 0.5
 alg: moon
 seed: 0
-server_device: cpu
+server_device: cuda
 num_rounds: 200
 
 client_resources:
   num_cpus: 4
-  num_gpus: 0.5
+  num_gpus: 0.3333
 
 dataset:
   # dataset config
-  name: cifar100
+  name: uoft-cs/cifar100
   dir: ./data/moon/
   partition: noniid
   beta: 0.5

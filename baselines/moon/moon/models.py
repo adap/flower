@@ -353,9 +353,9 @@ class ModelMOON(nn.Module):
 
 def init_net(dataset, model, output_dim, device="cpu"):
     """Initialize model."""
-    if dataset == "cifar10":
+    if dataset == "uoft-cs/cifar10":
         n_classes = 10
-    elif dataset == "cifar100":
+    elif dataset == "uoft-cs/cifar100":
         n_classes = 100
 
     net = ModelMOON(model, output_dim, n_classes)

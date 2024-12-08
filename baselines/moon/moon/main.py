@@ -8,6 +8,7 @@ import os
 import random
 import shutil
 from pathlib import Path
+from datasets import load_dataset
 
 # these are the basic packages you'll need here
 # feel free to remove some if aren't needed
@@ -15,12 +16,13 @@ import flwr as fl
 import hydra
 import numpy as np
 import torch
+from torch.utils.data import DataLoader
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 
 from moon import client, server
-from moon.dataset import get_dataloader
 from moon.utils import plot_metric_from_history
+from moon.dataset import get_eval_transforms, get_apply_transforms_fn
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
@@ -46,11 +48,15 @@ def main(cfg: DictConfig) -> None:
         torch.cuda.manual_seed(cfg.seed)
     random.seed(cfg.seed)
 
-    _, test_global_dl, _, _ = get_dataloader(
-        dataset=cfg.dataset.name,
-        datadir=cfg.dataset.dir,
-        train_bs=cfg.batch_size,
-        test_bs=32,
+
+    dataset_name = cfg.dataset.name
+    global_test_set = load_dataset(dataset_name)["test"]
+    global_test_set.set_format("torch")
+
+    transforms = get_eval_transforms(dataset_name)
+    testloader = DataLoader(
+        global_test_set.with_transform(get_apply_transforms_fn(transforms, dataset_name)),
+        batch_size=32,
     )
 
     # 3. Define your clients
@@ -67,7 +73,7 @@ def main(cfg: DictConfig) -> None:
         if torch.cuda.is_available() and cfg.server_device == "cuda"
         else "cpu"
     )
-    evaluate_fn = server.gen_evaluate_fn(test_global_dl, device=device, cfg=cfg)
+    evaluate_fn = server.gen_evaluate_fn(testloader, device=device, cfg=cfg)
 
     # 4. Define your strategy
     strategy = fl.server.strategy.FedAvg(
