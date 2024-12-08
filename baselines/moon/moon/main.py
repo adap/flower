@@ -20,7 +20,6 @@ from omegaconf import DictConfig, OmegaConf
 
 from moon import client, server
 from moon.dataset import get_dataloader
-from moon.dataset_preparation import partition_data
 from moon.utils import plot_metric_from_history
 
 
@@ -46,19 +45,6 @@ def main(cfg: DictConfig) -> None:
     if torch.cuda.is_available():
         torch.cuda.manual_seed(cfg.seed)
     random.seed(cfg.seed)
-    (
-        _,
-        _,
-        _,
-        _,
-        net_dataidx_map,
-    ) = partition_data(
-        dataset=cfg.dataset.name,
-        datadir=cfg.dataset.dir,
-        partition=cfg.dataset.partition,
-        num_clients=cfg.num_clients,
-        beta=cfg.dataset.beta,
-    )
 
     _, test_global_dl, _, _ = get_dataloader(
         dataset=cfg.dataset.name,
@@ -67,21 +53,10 @@ def main(cfg: DictConfig) -> None:
         test_bs=32,
     )
 
-    trainloaders = []
-    testloaders = []
-    for idx in range(cfg.num_clients):
-        train_dl, test_dl, _, _ = get_dataloader(
-            cfg.dataset.name, cfg.dataset.dir, cfg.batch_size, 32, net_dataidx_map[idx]
-        )
-
-        trainloaders.append(train_dl)
-        testloaders.append(test_dl)
     # 3. Define your clients
     # Define a function that returns another function that will be used during
     # simulation to instantiate each individual client
     client_fn = client.gen_client_fn(
-        trainloaders=trainloaders,
-        testloaders=testloaders,
         cfg=cfg,
     )
 

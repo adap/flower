@@ -9,6 +9,10 @@ import os
 from collections import OrderedDict
 from typing import Callable, Dict, List, Tuple
 
+from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import DirichletPartitioner
+from torch.utils.data import DataLoader
+
 import flwr as fl
 import torch
 from flwr.common.typing import NDArrays, Scalar
@@ -30,7 +34,6 @@ class FlowerClient(fl.client.NumPyClient):
         model: str,
         output_dim: int,
         trainloader: DataLoader,
-        valloader: DataLoader,
         device: torch.device,
         num_epochs: int,
         learning_rate: float,
@@ -45,7 +48,6 @@ class FlowerClient(fl.client.NumPyClient):
         self.model = model
         self.output_dim = output_dim
         self.trainloader = trainloader
-        self.valloader = valloader
         self.device = device
         self.num_epochs = num_epochs
         self.learning_rate = learning_rate
@@ -111,20 +113,85 @@ class FlowerClient(fl.client.NumPyClient):
         )
         return self.get_parameters({}), len(self.trainloader), {"is_straggler": False}
 
-    def evaluate(
-        self, parameters: NDArrays, config: Dict[str, Scalar]
-    ) -> Tuple[float, int, Dict]:
-        """Implement distributed evaluation for a given client."""
-        self.set_parameters(parameters)
-        # skip evaluation in the client-side
-        loss = 0.0
-        accuracy = 0.0
-        return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
+
+from torch.utils.data import DataLoader
+import torchvision.transforms as transforms
+import torch.nn.functional as F
+from torch.autograd import Variable
+
+
+# normalize = transforms.Normalize(
+#     mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
+#     std=[x / 255.0 for x in [63.0, 62.1, 66.7]],
+# )
+# transform_train = transforms.Compose(
+#     [
+#         transforms.ToTensor(),
+#         transforms.Lambda(
+#             lambda x: F.pad(
+#                 Variable(x.unsqueeze(0), requires_grad=False),
+#                 (4, 4, 4, 4),
+#                 mode="reflect",
+#             ).data.squeeze()
+#         ),
+#         transforms.ToPILImage(),
+#         transforms.RandomCrop(32),
+#         transforms.RandomHorizontalFlip(),
+#         transforms.ToTensor(),
+#         normalize,
+#     ]
+# )
+normalize = transforms.Normalize(
+    mean=[0.5070751592371323, 0.48654887331495095, 0.4409178433670343],
+    std=[0.2673342858792401, 0.2564384629170883, 0.27615047132568404],
+)
+
+transform_train = transforms.Compose(
+    [
+        transforms.RandomCrop(32, padding=4),
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomRotation(15),
+        transforms.ToTensor(),
+        normalize,
+    ]
+)
+
+def apply_transforms(batch):
+        # For CIFAR-10 the "img" column contains the images we want to
+        # apply the transforms to
+        batch["img"] = [transform_train(img) for img in batch["img"]]
+        # map to a common column just to implify training loop
+        # Note "label" doesn't exist in CIFAR-100
+        batch["label"] = batch["fine_label"]
+        return batch
+
+
+def get_dataloader(num_partitions:int, beta: float, dataset_name:str, batch_size: 32, partition_id: int):
+
+    def _get_dataloader(partition):
+
+        partition.set_format("torch")
+        return DataLoader(
+            partition.with_transform(apply_transforms),
+            batch_size=batch_size,
+            drop_last=True,
+            shuffle=True,
+        )
+
+    partitioner = DirichletPartitioner(
+        num_partitions=num_partitions,
+        alpha=beta,
+        partition_by="fine_label",
+        seed=1234,
+    )
+    dataset = FederatedDataset(
+        dataset="uoft-cs/cifar100",
+        partitioners={"train": partitioner},
+    )
+    return _get_dataloader(dataset.load_partition(partition_id = partition_id))
 
 
 def gen_client_fn(
-    trainloaders: List[DataLoader],
-    testloaders: List[DataLoader],
     cfg: DictConfig,
 ) -> Callable[[str], FlowerClient]:
     """Generate the client function that creates the Flower Clients."""
@@ -133,8 +200,11 @@ def gen_client_fn(
         """Create a Flower client representing a single organization."""
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-        trainloader = trainloaders[int(cid)]
-        testloader = testloaders[int(cid)]
+        trainloader = get_dataloader(cfg.num_clients,
+                                    cfg.dataset.beta,
+                                    cfg.dataset.name,
+                                    cfg.batch_size,
+                                    int(cid))
 
         return FlowerClient(
             int(cid),
@@ -142,7 +212,6 @@ def gen_client_fn(
             cfg.model.name,
             cfg.model.output_dim,
             trainloader,
-            testloader,
             device,
             cfg.num_epochs,
             cfg.learning_rate,

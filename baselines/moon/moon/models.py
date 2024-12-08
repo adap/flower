@@ -382,7 +382,6 @@ def train_moon(
     net.to(device)
     global_net.to(device)
     previous_net.to(device)
-    train_acc, _ = compute_accuracy(net, train_dataloader, device=device)
     optimizer = optim.SGD(
         filter(lambda p: p.requires_grad, net.parameters()),
         lr=lr,
@@ -401,11 +400,8 @@ def train_moon(
     cos = torch.nn.CosineSimilarity(dim=-1)
 
     for epoch in range(epochs):
-        epoch_loss_collector = []
-        epoch_loss1_collector = []
-        epoch_loss2_collector = []
-        for _, (x, target) in enumerate(train_dataloader):
-            x, target = x.to(device), target.to(device)
+        for _, (batch) in enumerate(train_dataloader):
+            x, target = batch["img"].cuda(), batch["label"].cuda()
 
             optimizer.zero_grad()
             x.requires_grad = False
@@ -420,14 +416,12 @@ def train_moon(
             posi = cos(pro1, pro2)
             logits = posi.reshape(-1, 1)
 
-            previous_net.to(device)
             # pro 3 is the representation by the previous model (Line 16 of Algorithm 1)
             _, pro3, _ = previous_net(x)
             # nega is the negative pair
             nega = cos(pro1, pro3)
             logits = torch.cat((logits, nega.reshape(-1, 1)), dim=1)
 
-            previous_net.to("cpu")
             logits /= temperature
             labels = torch.zeros(x.size(0)).cuda().long()
             # compute the model-contrastive loss (Line 17 of Algorithm 1)
@@ -439,24 +433,8 @@ def train_moon(
 
             loss.backward()
             optimizer.step()
-
             cnt += 1
-            epoch_loss_collector.append(loss.item())
-            epoch_loss1_collector.append(loss1.item())
-            epoch_loss2_collector.append(loss2.item())
 
-        epoch_loss = sum(epoch_loss_collector) / len(epoch_loss_collector)
-        epoch_loss1 = sum(epoch_loss1_collector) / len(epoch_loss1_collector)
-        epoch_loss2 = sum(epoch_loss2_collector) / len(epoch_loss2_collector)
-        print(
-            "Epoch: %d Loss: %f Loss1: %f Loss2: %f"
-            % (epoch, epoch_loss, epoch_loss1, epoch_loss2)
-        )
-
-    previous_net.to("cpu")
-    train_acc, _ = compute_accuracy(net, train_dataloader, device=device)
-
-    print(">> Training accuracy: %f" % train_acc)
     net.to("cpu")
     global_net.to("cpu")
     print(" ** Training complete **")
@@ -465,12 +443,7 @@ def train_moon(
 
 def train_fedprox(net, global_net, train_dataloader, epochs, lr, mu, device="cpu"):
     """Training function for FedProx."""
-    net = nn.DataParallel(net)
     net.cuda()
-
-    train_acc, _ = compute_accuracy(net, train_dataloader, device=device)
-
-    print(">> Pre-Training Training accuracy: {}".format(train_acc))
 
     optimizer = optim.SGD(
         filter(lambda p: p.requires_grad, net.parameters()),
@@ -485,9 +458,8 @@ def train_fedprox(net, global_net, train_dataloader, epochs, lr, mu, device="cpu
     global_weight_collector = list(global_net.cuda().parameters())
 
     for _epoch in range(epochs):
-        epoch_loss_collector = []
-        for _, (x, target) in enumerate(train_dataloader):
-            x, target = x.cuda(), target.cuda()
+        for _, (batch) in enumerate(train_dataloader):
+            x, target = batch["img"].cuda(), batch["label"].cuda()
 
             optimizer.zero_grad()
             x.requires_grad = False
@@ -508,11 +480,7 @@ def train_fedprox(net, global_net, train_dataloader, epochs, lr, mu, device="cpu
             optimizer.step()
 
             cnt += 1
-            epoch_loss_collector.append(loss.item())
 
-    train_acc, _ = compute_accuracy(net, train_dataloader, device=device)
-
-    print(">> Training accuracy: %f" % train_acc)
     net.to("cpu")
     print(" ** Training complete **")
     return net
