@@ -88,21 +88,15 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         """Pull TaskIns."""
         log(INFO, "[Fleet.PullTaskIns] node_id=%s", request.node.node_id)
         log(DEBUG, "[Fleet.PullTaskIns] Request: %s", request)
-
-        # Init state
-        state = self.state_factory.state()
-
         return message_handler.pull_task_ins(
             request=request,
-            state=state,
+            state=self.state_factory.state(),
         )
 
     def PushTaskRes(
         self, request: PushTaskResRequest, context: grpc.ServicerContext
     ) -> PushTaskResResponse:
         """Push TaskRes."""
-        # Init state
-        state = self.state_factory.state()
         if request.task_res_list:
             log(
                 INFO,
@@ -113,7 +107,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             log(INFO, "[Fleet.PushTaskRes] No task results to push")
         return message_handler.push_task_res(
             request=request,
-            state=state,
+            state=self.state_factory.state(),
         )
 
     def GetRun(
