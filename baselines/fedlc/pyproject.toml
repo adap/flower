@@ -133,13 +133,13 @@ skew-type = "distribution" # or "quantity"
 num-shards-per-partition = 2
 clients-per-round = 20
 num-server-rounds = 400
-fraction-fit = 0.1
 dataset = "cifar10"
 batch-size = 128
 proximal-mu = 0.0
 checkpoint-every = 50
-use-wandb = false
+use-wandb = true
 dirichlet-alpha = 0.05
+fedrs-alpha = 0.0
 tau = 0.5
 
 [tool.flwr.federations]

@@ -162,3 +162,4 @@ cython_debug/
 # Custom
 checkpoints/
 results/
+wandb/

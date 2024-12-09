@@ -16,7 +16,7 @@ from flwr.common import Context
 from flwr.common.logger import log
 from flwr.common.typing import NDArrays, Scalar, UserConfig
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
-from flwr.server.strategy import FedAvg, FedProx
+from flwr.server.strategy import FedAvg
 
 from .dataset import get_transformed_ds
 from .model import CNNModel, set_parameters, test
@@ -131,31 +131,15 @@ def server_fn(context: Context):
     clients_per_round = int(context.run_config["clients-per-round"])
 
     # Define strategy
-    if alg == "fedavg":
-        log(INFO, "Using FedAvg")
-        strategy = FedAvg(
-            fraction_fit=0.00001,  # we want no. of clients to be determined by min_fit_clients
-            min_fit_clients=clients_per_round,
-            min_available_clients=clients_per_round,
-            fraction_evaluate=0,  # no federated evaluation,
-            min_evaluate_clients=0,
-            evaluate_fn=evaluate,
-            accept_failures=False,
-        )
-    elif alg == "fedprox":
-        log(INFO, f"Using FedProx with proximal_mu={proximal_mu}")
-        strategy = FedProx(
-            fraction_fit=0.00001,
-            min_fit_clients=clients_per_round,
-            min_available_clients=clients_per_round,
-            fraction_evaluate=0,  # no federated evaluation,
-            min_evaluate_clients=0,
-            evaluate_fn=evaluate,
-            accept_failures=False,
-            proximal_mu=proximal_mu,
-        )
-    else:
-        raise ValueError("Only alg='fedprox' and alg='fedavg' are currently supported!")
+    strategy = FedAvg(
+        fraction_fit=0.00001,  # we want no. of clients to be determined by min_fit_clients
+        min_fit_clients=clients_per_round,
+        min_available_clients=clients_per_round,
+        fraction_evaluate=0,  # no federated evaluation,
+        min_evaluate_clients=0,
+        evaluate_fn=evaluate,
+        accept_failures=False,
+    )
 
     config = ServerConfig(num_rounds=num_rounds)
 

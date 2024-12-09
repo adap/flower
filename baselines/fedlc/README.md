@@ -144,10 +144,10 @@ Uses `--num-shards-per-partition=2` by default.
 
 |  | Command
 | ----------- | ----- | 
-| FedAvg | `flwr run . --run-config "alg='fedavg skew-type='quantity''"` | 
+| FedAvg | `flwr run . --run-config "skew-type='quantity''"` | 
 | FedProx (0.0001)| `flwr run . --run-config "alg='fedprox' proximal-mu=0.0001 skew-type='quantity'"` | 
-| FedRS ($\alpha$=0.9)| `flwr run . --run-config "alg='fedrs' alpha=0.9 skew-type='quantity'"` | 
-| FedLC ($\tau$=0.5)| `flwr run . --run-config "alg='fedlc' tau=0.5 skew-type='quantity'"` | 
+| FedRS ($\alpha$=0.9)| `flwr run . --run-config "fedrs-alpha=0.9 skew-type='quantity'"` | 
+| FedLC ($\tau$=0.5)| `flwr run . --run-config "tau=0.5 skew-type='quantity'"` | 
 
 After 1000 server rounds, the accuracy results on CIFAR-10 are as follows:
 

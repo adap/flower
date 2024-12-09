@@ -29,18 +29,59 @@ class LogitCorrectedLoss(torch.nn.CrossEntropyLoss):
         corrected_logits = logits - self.correction
         return super().forward(corrected_logits, target)
 
+class RestrictedSoftmaxLoss(torch.nn.CrossEntropyLoss):
+    def __init__(
+        self,
+        num_classes,
+        labels,
+        alpha,
+        device,
+    ):
+        super().__init__()
+        class_count = torch.ones(num_classes) * alpha
+        labels = labels.unique(sorted=True, return_counts=False, return_inverse=False)
+        for c in labels:
+            class_count[c] = 1.0
+        class_count = class_count.unsqueeze(dim=0).to(device)
+        self.correction = class_count
+
+    def forward(self, logits: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+        corrected_logits = logits * self.correction
+        return super().forward(corrected_logits, target)
+
 
 class FlowerClient(NumPyClient):
     def __init__(
-        self, net, trainloader, labels, local_epochs, tau, learning_rate, device
+        self, 
+        net,
+        trainloader,
+        labels,
+        context,
     ):
         self.net = net
         self.trainloader = trainloader
-        self.local_epochs = local_epochs
-        self.learning_rate = learning_rate
-        self.device = device
-        use_lc = tau > 0.0
-        if use_lc:
+
+        local_epochs = int(context.run_config["local-epochs"])
+        learning_rate = float(context.run_config["learning-rate"])
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        alg = str(context.run_config["alg"])
+        proximal_mu, alpha, tau = 0, 0, 0
+        if alg == "fedavg":
+            self.criterion = torch.nn.CrossEntropyLoss()
+        elif alg == "fedprox":
+            proximal_mu = float(context.run_config["proximal-mu"])
+            self.criterion = torch.nn.CrossEntropyLoss()
+        elif alg == "fedrs":
+            alpha = float(context.run_config["fedrs-alpha"])
+            print(f"alpha: {alpha}")
+            self.criterion = RestrictedSoftmaxLoss(
+                net.fc.out_features,  # num_classes
+                labels,
+                alpha,
+                device
+            )
+        elif alg == "fedlc":
+            tau = float(context.run_config["tau"])
             self.criterion = LogitCorrectedLoss(
                 net.fc.out_features,  # num_classes
                 labels,
@@ -48,7 +89,15 @@ class FlowerClient(NumPyClient):
                 device,
             )
         else:
-            self.criterion = torch.nn.CrossEntropyLoss()
+            raise ValueError(f"alg={alg} not supported!")
+        
+        self.proximal_mu = proximal_mu
+        self.alpha = alpha
+        self.tau = tau
+
+        self.local_epochs = local_epochs
+        self.learning_rate = learning_rate
+        self.device = device
 
     def get_parameters(self, config):
         """Return the parameters of the current net."""
@@ -56,6 +105,7 @@ class FlowerClient(NumPyClient):
 
     def fit(self, parameters, config):
         set_parameters(self.net, parameters)
+        proximal_mu = config.get('proximal_mu',0.0)
         train_loss = train(
             self.net,
             self.trainloader,
@@ -63,6 +113,7 @@ class FlowerClient(NumPyClient):
             self.device,
             self.learning_rate,
             self.criterion,
+            proximal_mu,
         )
         return (
             get_parameters(self.net),
@@ -76,13 +127,8 @@ def client_fn(context: Context):
     trainloader, labels, num_classes = load_data(context)
     net = CNNModel(num_classes)
 
-    local_epochs = int(context.run_config["local-epochs"])
-    learning_rate = float(context.run_config["learning-rate"])
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    tau = float(context.run_config["tau"])
-
     return FlowerClient(
-        net, trainloader, labels, local_epochs, tau, learning_rate, device
+        net, trainloader, labels, context
     ).to_client()
 
 
