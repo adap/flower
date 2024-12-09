@@ -91,12 +91,12 @@ def login(  # pylint: disable=R0914
         raise typer.Exit(code=1)
 
     # Login
-    config = auth_plugin.login(
+    auth_config = auth_plugin.login(
         dict(login_response.login_details), config, federation, stub
     )
 
     # Store the tokens
-    auth_plugin.store_tokens(config)
+    auth_plugin.store_tokens(auth_config)
 
 
 def _create_exec_stub(app: Path, federation_config: dict[str, Any]) -> ExecStub:

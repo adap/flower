@@ -50,6 +50,7 @@ class CliInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ignore
 
     def __init__(self, auth_plugin: CliAuthPlugin):
         self.auth_plugin = auth_plugin
+        self.auth_plugin.load_tokens()
 
     def intercept_unary_unary(
         self,

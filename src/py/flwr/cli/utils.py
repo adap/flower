@@ -192,7 +192,7 @@ def try_obtain_cli_auth_plugin(
     elif auth_type is None:
         return None
 
-    # Get the auth type
+    # Get the auth type from the config if not provided
     if auth_type is None:
         if AUTH_TYPE not in config:
             return None
@@ -202,5 +202,5 @@ def try_obtain_cli_auth_plugin(
     all_plugins: dict[str, type[CliAuthPlugin]] = get_cli_auth_plugins()
     auth_plugin_class = all_plugins.get(auth_type)
     if auth_plugin_class is not None:
-        return auth_plugin_class(config, config_path)
+        return auth_plugin_class(config_path)
     return None
