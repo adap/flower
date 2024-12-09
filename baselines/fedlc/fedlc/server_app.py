@@ -1,12 +1,14 @@
 """fedlc: A Flower Baseline."""
+
 import csv
 import json
 from datetime import datetime
 from logging import INFO
 from pathlib import Path
 from typing import Dict, Optional, Tuple
-import wandb
+
 import torch
+import wandb
 from datasets import load_dataset
 from torch.utils.data import DataLoader
 
@@ -23,8 +25,9 @@ from .utils import get_ds_info
 RESULTS_FILE = "eval_results.csv"
 PROJECT_NAME = "Flower-Baseline-FedLC"
 
+
 # From https://github.com/adap/flower/pull/3908
-def create_run_dir(config: UserConfig) -> Tuple[Path,Path]:
+def create_run_dir(config: UserConfig) -> Tuple[Path, Path]:
     """Create a directory where to save results from this run."""
     # Create output directory given current timestamp
     current_time = datetime.now()
@@ -80,7 +83,6 @@ def server_fn(context: Context):
     else:
         log(INFO, "NOT using logit correction")
 
-    
     use_wandb = context.run_config["use-wandb"]
     if use_wandb:
         num_shards_per_partition = int(context.run_config["num-shards-per-partition"])
@@ -108,14 +110,14 @@ def server_fn(context: Context):
         set_parameters(net, parameters)
         loss, accuracy = test(net, testloader, device)
         log(INFO, f"Server-side evaluation loss {loss} / accuracy {accuracy}")
-        
+
         if use_wandb:
             wandb.log({"loss": loss, "accuracy": accuracy}, step=server_round)
         else:
             with open(results_csv_path, "a", encoding="utf-8") as f:
                 writer = csv.writer(f)
                 writer.writerow([server_round, loss, accuracy])
-        
+
         if server_round > 0 and server_round % checkpoint_every == 0:
             checkpoint_file_path = checkpoint_path / f"ckpt_round_{server_round}.path"
             torch.save(net.state_dict(), checkpoint_file_path)

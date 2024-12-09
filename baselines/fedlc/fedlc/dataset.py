@@ -22,6 +22,7 @@ CIFAR_MEAN_STD = {
     "cifar100": ((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
 }
 
+
 def get_data_transforms(dataset: str, split: str):
     """Return data transforms for dataset."""
     tfms = []

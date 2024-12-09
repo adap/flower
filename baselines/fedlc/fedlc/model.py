@@ -5,16 +5,17 @@ from collections import OrderedDict
 import torch
 import torch.nn as nn
 
+
 class CNNModel(nn.Module):
-    """CNN model as described in Appendix of FedLC paper"""
+    """CNN model as described in Appendix of FedLC paper."""
 
     def __init__(self, num_classes=10):
         super().__init__()
-        self.conv1 = nn.Conv2d(3,128,3)
+        self.conv1 = nn.Conv2d(3, 128, 3)
         self.bn1 = nn.BatchNorm2d(128)
-        self.conv2 = nn.Conv2d(128,128,3)
+        self.conv2 = nn.Conv2d(128, 128, 3)
         self.bn2 = nn.BatchNorm2d(128)
-        self.conv3 = nn.Conv2d(128, 128,3)
+        self.conv3 = nn.Conv2d(128, 128, 3)
         self.bn3 = nn.BatchNorm2d(128)
 
         self.fc = nn.Linear(512, num_classes)
@@ -32,7 +33,7 @@ class CNNModel(nn.Module):
 
         x = x.view(x.shape[0], -1)
         x = self.fc(x)
-        
+
         return x
 
 

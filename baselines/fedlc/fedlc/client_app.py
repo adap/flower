@@ -3,7 +3,7 @@
 import torch
 
 from fedlc.dataset import load_data
-from fedlc.model import get_parameters, CNNModel, set_parameters, train
+from fedlc.model import CNNModel, get_parameters, set_parameters, train
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
 
@@ -29,16 +29,10 @@ class LogitCorrectedLoss(torch.nn.CrossEntropyLoss):
         corrected_logits = logits - self.correction
         return super().forward(corrected_logits, target)
 
+
 class FlowerClient(NumPyClient):
     def __init__(
-        self,
-        net,
-        trainloader,
-        labels,
-        local_epochs,
-        tau,
-        learning_rate,
-        device
+        self, net, trainloader, labels, local_epochs, tau, learning_rate, device
     ):
         self.net = net
         self.trainloader = trainloader
@@ -48,7 +42,7 @@ class FlowerClient(NumPyClient):
         use_lc = tau > 0.0
         if use_lc:
             self.criterion = LogitCorrectedLoss(
-                net.fc.out_features, # num_classes
+                net.fc.out_features,  # num_classes
                 labels,
                 tau,
                 device,
@@ -88,14 +82,9 @@ def client_fn(context: Context):
     tau = float(context.run_config["tau"])
 
     return FlowerClient(
-        net,
-        trainloader,
-        labels,
-        local_epochs,
-        tau,
-        learning_rate,
-        device
+        net, trainloader, labels, local_epochs, tau, learning_rate, device
     ).to_client()
+
 
 # Flower ClientApp
 app = ClientApp(client_fn)
