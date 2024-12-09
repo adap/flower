@@ -22,6 +22,8 @@ from queue import Queue
 from time import sleep
 from typing import Optional
 
+import grpc
+
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.common.args import add_args_flwr_app_common
@@ -186,6 +188,13 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
             _ = driver._stub.PushServerAppOutputs(out_req)
 
             run_status = RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
+
+        except grpc.RpcError as e:
+            # pylint: disable=E1101
+            if e.code() == grpc.StatusCode.PERMISSION_DENIED:
+                exc_entity = "ServerApp"
+                log(INFO, "Run ID %s stopped.", run.run_id)
+                run_status = None  # RunStatus(Status.FINISHED, SubStatus.STOPPED, "")
 
         except Exception as ex:  # pylint: disable=broad-exception-caught
             exc_entity = "ServerApp"
