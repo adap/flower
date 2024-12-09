@@ -24,7 +24,13 @@ from flwr.proto.exec_pb2_grpc import ExecStub
 
 
 class ExecAuthPlugin(ABC):
-    """Abstract Flower Auth Plugin class for ExecServicer."""
+    """Abstract Flower Auth Plugin class for ExecServicer.
+
+    Parameters
+    ----------
+    config : dict[str, Any]
+        The authentication configuration loaded from a YAML file.
+    """
 
     @abstractmethod
     def __init__(self, config: dict[str, Any]):
@@ -52,7 +58,13 @@ class ExecAuthPlugin(ABC):
 
 
 class CliAuthPlugin(ABC):
-    """Abstract Flower Auth Plugin class for CLI."""
+    """Abstract Flower Auth Plugin class for CLI.
+
+    Parameters
+    ----------
+    user_auth_config_path : Path
+        The path to the user's authentication configuration file.
+    """
 
     @staticmethod
     @abstractmethod
@@ -84,13 +96,7 @@ class CliAuthPlugin(ABC):
 
     @abstractmethod
     def __init__(self, user_auth_config_path: Path):
-        """Abstract constructor.
-
-        Parameters
-        ----------
-        user_auth_config_path : Path
-            The path to the user's authentication configuration file.
-        """
+        """Abstract constructor."""
 
     @abstractmethod
     def store_tokens(self, user_auth_config: dict[str, Any]) -> None:
