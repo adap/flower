@@ -184,10 +184,11 @@ class FedAvg(Strategy):
         sample_size, min_num_clients = self.num_fit_clients(
             client_manager.num_available()
         )
+        print("YYY")
         clients = client_manager.sample(
             num_clients=sample_size, min_num_clients=min_num_clients
         )
-
+        print("XXX")
         # Return client/config pairs
         return [(client, fit_ins) for client in clients]
 

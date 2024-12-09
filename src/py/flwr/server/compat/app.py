@@ -15,7 +15,10 @@
 """Flower driver app."""
 
 
+import queue
+from concurrent.futures import ThreadPoolExecutor
 from logging import INFO
+from time import sleep
 from typing import Optional
 
 from flwr.common.logger import log
@@ -83,11 +86,26 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
         driver, initialized_server.client_manager()
     )
 
-    # Start training
-    hist = run_fl(
-        server=initialized_server,
-        config=initialized_config,
-    )
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        # Start training
+        future = executor.submit(
+            run_fl,
+            server=initialized_server,
+            config=initialized_config,
+        )
+
+        while True:
+            if future.done():
+                break
+            try:
+                ex = exception_queue.get_nowait()
+            except queue.Empty:
+                ex = None
+            if ex is not None:
+                raise ex
+            sleep(3)
+
+        hist = future.result()
 
     # Terminate the thread
     f_stop.set()
@@ -95,7 +113,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
 
     # Raise exception caught in thread, if any
     if not exception_queue.empty():
-        ex = exception_queue.get()
+        ex = exception_queue.get_nowait()
         if ex is not None:
             raise ex
 

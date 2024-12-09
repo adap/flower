@@ -79,7 +79,9 @@ def _update_client_manager_wrapper(
     try:
         _update_client_manager(driver, client_manager, f_stop)
     except Exception as e:  # pylint: disable=broad-exception-caught
+        print("III")
         exception_queue.put(e)
+        print("JJJ")
 
 
 def _update_client_manager(
