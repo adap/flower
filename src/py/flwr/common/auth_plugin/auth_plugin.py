@@ -67,7 +67,24 @@ class CliAuthPlugin(ABC):
         federation: str,
         exec_stub: ExecStub,
     ) -> dict[str, Any]:
-        """Login logic to log in user to the SuperLink."""
+        """Login logic to log in user to the SuperLink.
+
+        Parameters
+        ----------
+        login_details : dict[str, str]
+            A dictionary containing the login details.
+        config : dict[str, Any]
+            The project configuration.
+        federation : str
+            The name of the federation to which the user belongs.
+        exec_stub : ExecStub
+            An instance of `ExecStub` used for communication with the SuperLink.
+
+        Returns
+        -------
+        dict[str, Any]
+            A dictionary containing the user's authentication details.
+        """
 
     @abstractmethod
     def __init__(self, config: dict[str, Any], config_path: Path):
@@ -83,6 +100,5 @@ class CliAuthPlugin(ABC):
     def store_tokens(self, config: dict[str, Any]) -> None:
         """Store the tokens from the provided config.
 
-        The tokens will be saved as a JSON file in the `.credentials/` folder inside the
-        Flower directory.
+        The tokens will be saved as a JSON file in the provided config_path.
         """
