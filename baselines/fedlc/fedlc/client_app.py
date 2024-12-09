@@ -73,7 +73,6 @@ class FlowerClient(NumPyClient):
             self.criterion = torch.nn.CrossEntropyLoss()
         elif alg == "fedrs":
             alpha = float(context.run_config["fedrs-alpha"])
-            print(f"alpha: {alpha}")
             self.criterion = RestrictedSoftmaxLoss(
                 net.fc.out_features,  # num_classes
                 labels,
@@ -105,7 +104,6 @@ class FlowerClient(NumPyClient):
 
     def fit(self, parameters, config):
         set_parameters(self.net, parameters)
-        proximal_mu = config.get('proximal_mu',0.0)
         train_loss = train(
             self.net,
             self.trainloader,
@@ -113,7 +111,7 @@ class FlowerClient(NumPyClient):
             self.device,
             self.learning_rate,
             self.criterion,
-            proximal_mu,
+            self.proximal_mu,
         )
         return (
             get_parameters(self.net),

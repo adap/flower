@@ -19,7 +19,6 @@ FDS = None  # Cache FederatedDataset
 
 CIFAR_MEAN_STD = {
     "cifar10": ([0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.2010]),
-    "cifar100": ((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
 }
 
 
@@ -87,6 +86,7 @@ def load_data(context: Context):
                 partition_by=partition_by,
                 num_shards_per_partition=num_shards_per_partition,
             )
+        
         FDS = FederatedDataset(
             dataset=dataset,
             partitioners={"train": partitioner},

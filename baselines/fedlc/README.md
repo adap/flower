@@ -5,42 +5,6 @@ labels: [data heterogeneity, image classification]
 dataset: [cifar10] 
 ---
 
-> [!IMPORTANT]
-> To help having all baselines similarly formatted and structured, we have included two scripts in `baselines/dev` that when run will format your code and run some tests checking if it's formatted.
-> These checks use standard packages such as `isort`, `black`, `pylint` and others. You as a baseline creator will need to install additional pacakges. These are already specified in the `pyproject.toml` of
-> your baseline. Follow these steps:
-
-```bash
-# Create a python env
-pyenv virtualenv 3.10.14 fedlc
-
-# Activate it
-pyenv activate fedlc
-
-# Install project including developer packages
-# Note the `-e` this means you install it in editable mode
-# so even if you change the code you don't need to do `pip install`
-# again. However, if you add a new dependency to `pyproject.toml` you
-# will need to re-run the command below
-pip install -e ".[dev]"
-
-# Even without modifying or adding new code, you can run your baseline
-# with the placeholder code generated when you did `flwr new`. If you
-# want to test this to familiarise yourself with how flower apps are
-# executed, execute this from the directory where you `pyproject.toml` is:
-flwr run .
-
-# At anypoint during the process of creating your baseline you can
-# run the formatting script. For this do:
-cd .. # so you are in the `flower/baselines` directory
-
-# Run the formatting script (it will auto-correct issues if possible)
-./dev/format-baseline.sh fedlc
-
-# Then, if the above is all good, run the tests.
-./dev/test-baseline.sh fedlc
-```
-
 # Federated Learning with Label Distribution Skew via Logits Calibration
 
 > [!NOTE]
@@ -120,21 +84,20 @@ Uses `--dirichlet-alpha=0.05` by default.
 
 |  | Command
 | ----------- | ----- | 
-| FedAvg | `flwr run . --run-config "alg='fedavg skew-type='distribution''"` | 
-| FedProx (0.0001)| `flwr run . --run-config "alg='fedprox' proximal-mu=0.0001 skew-type='distribution'"` | 
-| FedRS ($\alpha$=0.9)| `flwr run . --run-config "alg='fedrs' alpha=0.9 skew-type='distribution'"` | 
-| FedLC ($\tau$=0.5)| `flwr run . --run-config "alg='fedlc' tau=0.5 skew-type='distribution'"` | 
+| FedAvg | `flwr run . --run-config "alg='fedavg' skew-type='distribution'"` | 
+| FedRS ($\alpha$=0.9)| `flwr run . --run-config "alg='fedrs' fedrs-alpha=0.9 skew-type='distribution'"` | 
+| FedLC ($\tau$=0.1)| `flwr run . --run-config "alg='fedlc' tau=0.1 skew-type='distribution'"` | 
 
 After 1000 server rounds, the accuracy results on CIFAR-10 are as follows:
 
 |  | Accuracy 
 | ----------- | ----- |
-| FedAvg |  | 
-| FedProx (0.0001)|  | 
-| FedRS ($\tau$=0.9)|  | 
-| FedLC ($\tau$=0.5) |  | 
+| FedAvg | **0.6811** | 
+| FedRS ($\tau$=0.9)| 0.6792 | 
+| FedLC ($\tau$=0.1) | 0.6251 | 
 
-![Distribution-based skew accuracies](_static/accuracy_distribution.png)
+![Distribution-based skew accuracies](_static/dist_acc.png)
+![Distribution-based skew loss](_static/dist_loss.png)
 
 ## Table 2 (Performance overview for different non-IID settings on CIFAR10 and CIFAR100 (quantity-based label skew))
 
@@ -144,18 +107,23 @@ Uses `--num-shards-per-partition=2` by default.
 
 |  | Command
 | ----------- | ----- | 
-| FedAvg | `flwr run . --run-config "skew-type='quantity''"` | 
+| FedAvg | `flwr run . --run-config "alg='fedavg' skew-type='quantity'"` | 
 | FedProx (0.0001)| `flwr run . --run-config "alg='fedprox' proximal-mu=0.0001 skew-type='quantity'"` | 
-| FedRS ($\alpha$=0.9)| `flwr run . --run-config "fedrs-alpha=0.9 skew-type='quantity'"` | 
-| FedLC ($\tau$=0.5)| `flwr run . --run-config "tau=0.5 skew-type='quantity'"` | 
+| FedRS ($\alpha$=0.9)| `flwr run . --run-config "alg='fedrs' fedrs-alpha=0.9 skew-type='quantity'"` | 
+| FedLC ($\tau$=0.1)| `flwr run . --run-config "alg='fedlc' tau=0.1 skew-type='quantity'"` | 
+| FedLC ($\tau$=0.5)| `flwr run . --run-config "alg='fedlc' tau=0.5 skew-type='quantity'"` | 
+| FedLC ($\tau$=1.0)| `flwr run . --run-config "alg='fedlc' tau=1.0 skew-type='quantity'"` | 
+
 
 After 1000 server rounds, the accuracy results on CIFAR-10 are as follows:
 
 |  | Accuracy 
 | ----------- | ----- |
-| FedAvg | 0.8 | 
-| FedProx (0.0001)|  | 
-| FedRS ($\tau$=0.9)|  | 
-| FedLC ($\tau$=0.5) |  | 
+| FedAvg | 0.6410 | 
+| FedRS ($\tau$=0.9)| 0.6521 | 
+| FedLC ($\tau$=0.1) | 0.6503 | 
+| FedLC ($\tau$=0.5) | **0.6524** | 
+| FedLC ($\tau$=1.0) | 0.6466 | 
 
-![Quantity-based skew accuracies](_static/accuracy_quantity.png)
+![Quantity-based skew accuracies](_static/quant_acc.png)
+![Quantity-based skew loss](_static/quant_loss.png)

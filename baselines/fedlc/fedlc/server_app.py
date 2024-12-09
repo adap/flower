@@ -76,22 +76,28 @@ def server_fn(context: Context):
     alg = str(context.run_config["alg"])
     proximal_mu = float(context.run_config["proximal-mu"])
 
-    tau = float(context.run_config["tau"])
-    use_lc = tau > 0.0
-    if use_lc:
-        log(INFO, "Using logit correction")
-    else:
-        log(INFO, "NOT using logit correction")
-
     use_wandb = context.run_config["use-wandb"]
+    
     if use_wandb:
         num_shards_per_partition = int(context.run_config["num-shards-per-partition"])
-        group_name = f"{dataset}-100-{num_shards_per_partition}"
-        run_name = "fedavg"
-        if alg == "fedprox":
+        skew_type = str(context.run_config["skew-type"])
+        if skew_type == "distribution":
+            dirichlet_alpha = float(context.run_config["dirichlet-alpha"])
+            group_name = f"{dataset}-distribution-skew-alpha-{dirichlet_alpha}"
+        elif skew_type == "quantity":
+            num_shards_per_partition = int(context.run_config["num-shards-per-partition"])
+            group_name = f"{dataset}-quantity-skew-shards-{num_shards_per_partition}"
+            
+        if alg == "fedavg":
+            run_name = "fedavg"
+        elif alg == "fedprox":
             run_name = f"fedprox_{proximal_mu}"
-        if use_lc:
+        elif alg == "fedlc":
+            tau = float(context.run_config["tau"])
             run_name = f"fedlc_{tau}"
+        elif alg == "fedrs":
+            alpha = float(context.run_config["fedrs-alpha"])
+            run_name = f"fedrs_{alpha}"
 
         wandb.init(
             project=PROJECT_NAME,
