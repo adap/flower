@@ -79,7 +79,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     log(INFO, "")
 
     # Start the thread updating nodes
-    thread, f_stop = start_update_client_manager_thread(
+    thread, f_stop, exception_queue = start_update_client_manager_thread(
         driver, initialized_server.client_manager()
     )
 
@@ -92,5 +92,9 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     # Terminate the thread
     f_stop.set()
     thread.join()
+
+    # Raise exception caught in thread, if any
+    if not exception_queue.empty():
+        raise exception_queue.get()
 
     return hist

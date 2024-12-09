@@ -16,6 +16,7 @@
 
 
 import threading
+from queue import Queue
 
 from ..client_manager import ClientManager
 from ..compat.driver_client_proxy import DriverClientProxy
@@ -50,19 +51,28 @@ def start_update_client_manager_thread(
     threading.Event
         An event that, when set, signals the thread to stop.
     """
+    exception_queue = Queue()
     f_stop = threading.Event()
     thread = threading.Thread(
-        target=_update_client_manager,
+        target=_update_client_manager_wrapper,
         args=(
             driver,
             client_manager,
             f_stop,
+            exception_queue,
         ),
         daemon=True,
     )
     thread.start()
 
-    return thread, f_stop
+    return thread, f_stop, exception_queue
+
+
+def _update_client_manager_wrapper(driver, client_manager, f_stop, exception_queue):
+    try:
+        _update_client_manager(driver, client_manager, f_stop)
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        exception_queue.put(e)
 
 
 def _update_client_manager(
