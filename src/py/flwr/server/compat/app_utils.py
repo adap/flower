@@ -17,6 +17,7 @@
 
 import threading
 from queue import Queue
+from typing import Optional
 
 from ..client_manager import ClientManager
 from ..compat.driver_client_proxy import DriverClientProxy
@@ -26,7 +27,7 @@ from ..driver import Driver
 def start_update_client_manager_thread(
     driver: Driver,
     client_manager: ClientManager,
-) -> tuple[threading.Thread, threading.Event]:
+) -> tuple[threading.Thread, threading.Event, Queue[Optional[Exception]]]:
     """Periodically update the nodes list in the client manager in a thread.
 
     This function starts a thread that periodically uses the associated driver to
@@ -51,7 +52,7 @@ def start_update_client_manager_thread(
     threading.Event
         An event that, when set, signals the thread to stop.
     """
-    exception_queue = Queue()
+    exception_queue: Queue[Optional[Exception]] = Queue()
     f_stop = threading.Event()
     thread = threading.Thread(
         target=_update_client_manager_wrapper,
@@ -68,7 +69,13 @@ def start_update_client_manager_thread(
     return thread, f_stop, exception_queue
 
 
-def _update_client_manager_wrapper(driver, client_manager, f_stop, exception_queue):
+def _update_client_manager_wrapper(
+    driver: Driver,
+    client_manager: ClientManager,
+    f_stop: threading.Event,
+    exception_queue: Queue[Optional[Exception]],
+) -> None:
+    """Wrapper function for `_update_client_manager` that catches exceptions."""
     try:
         _update_client_manager(driver, client_manager, f_stop)
     except Exception as e:  # pylint: disable=broad-exception-caught
