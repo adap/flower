@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+"""Config for Sphinx docs."""
 
 
 import datetime
 import os
 import sys
 
-from sphinx.application import ConfigError
 
 # Configuration file for the Sphinx documentation builder.
 #
@@ -121,11 +121,15 @@ html_css_files = ["custom.css"]
 
 nbsphinx_execute = "never"
 
-_open_in_colab_button = """
+colab_link = (
+    "https://colab.research.google.com/github/adap/flower/blob/main/"
+    "doc/source/{{ env.doc2path(env.docname, base=None) }}"
+)
+_open_in_colab_button = f"""
 .. raw:: html
 
     <br/>
-    <a href="https://colab.research.google.com/github/adap/flower/blob/main/doc/source/{{ env.doc2path(env.docname, base=None) }}">
+    <a href="{colab_link}">
         <img alt="Open in Colab" src="https://colab.research.google.com/assets/colab-badge.svg"/>
     </a>
 """
