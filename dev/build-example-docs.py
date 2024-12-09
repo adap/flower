@@ -280,4 +280,4 @@ def _main():
 
 if __name__ == "__main__":
     _main()
-    subprocess.call(f"cd {ROOT}/examples/doc && make html", shell=True)
+    subprocess.call(f"cd {ROOT}/examples/docs && make html", shell=True)

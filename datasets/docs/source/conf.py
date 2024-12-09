@@ -162,7 +162,7 @@ _open_in_colab_button = """
 .. raw:: html
 
     <br/>
-    <a href="https://colab.research.google.com/github/adap/flower/blob/main/datasets/doc/source/{{ env.doc2path(env.docname, base=None) }}">
+    <a href="https://colab.research.google.com/github/adap/flower/blob/main/datasets/docs/source/{{ env.doc2path(env.docname, base=None) }}">
         <img alt="Open in Colab" src="https://colab.research.google.com/assets/colab-badge.svg"/>
     </a>
 """
@@ -182,5 +182,5 @@ mermaid_version = ""
 myst_heading_anchors = 3
 
 # -- Options for sphinx_copybutton -------------------------------------
-copybutton_exclude = '.linenos, .gp, .go'
+copybutton_exclude = ".linenos, .gp, .go"
 copybutton_prompt_text = ">>> "
