@@ -50,10 +50,15 @@ from flwr.common.serde import (
     context_to_proto,
     fab_from_proto,
     run_from_proto,
+    run_status_from_proto,
     run_status_to_proto,
 )
 from flwr.common.typing import RunStatus
-from flwr.proto.run_pb2 import UpdateRunStatusRequest  # pylint: disable=E0611
+from flwr.proto.run_pb2 import (  # pylint: disable=E0611
+    GetRunStatusRequest,
+    GetRunStatusResponse,
+    UpdateRunStatusRequest,
+)
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PullServerAppInputsRequest,
     PullServerAppInputsResponse,
@@ -192,9 +197,19 @@ def run_serverapp(  # pylint: disable=R0914,R0915,W0212
         except grpc.RpcError as e:
             # pylint: disable=E1101
             if e.code() == grpc.StatusCode.PERMISSION_DENIED:
-                exc_entity = "ServerApp"
-                log(INFO, "Run ID %s stopped.", run.run_id)
-                run_status = None  # RunStatus(Status.FINISHED, SubStatus.STOPPED, "")
+                req = GetRunStatusRequest(run_ids=[run.run_id])
+                res: GetRunStatusResponse = driver._stub.GetRunStatus(req=req)
+                run_status_check = run_status_from_proto(
+                    res.run_status_dict[run.run_id]
+                )
+                if (run_status_check.status == Status.FINISHED) & (
+                    run_status_check.sub_status == SubStatus.STOPPED
+                ):
+                    exc_entity = "ServerApp"
+                    log(INFO, "Run ID %s stopped.", run.run_id)
+                    run_status = None
+            else:
+                run_status = RunStatus(Status.FINISHED, SubStatus.FAILED, str(e))
 
         except Exception as ex:  # pylint: disable=broad-exception-caught
             exc_entity = "ServerApp"
