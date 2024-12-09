@@ -36,7 +36,12 @@ from flwr.common.logger import (
     update_console_handler,
     warn_deprecated_feature_with_example,
 )
+from flwr.common.serde import run_status_from_proto
 from flwr.common.typing import Run, RunStatus, UserConfig
+from flwr.proto.run_pb2 import (  # pylint: disable=E0611
+    GetRunStatusRequest,
+    GetRunStatusResponse,
+)
 from flwr.server.driver import Driver, InMemoryDriver
 from flwr.server.run_serverapp import run as _run
 from flwr.server.server_app import ServerApp
@@ -48,6 +53,7 @@ from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 from flwr.simulation.ray_transport.utils import (
     enable_tf_gpu_growth as enable_gpu_growth,
 )
+from flwr.simulation.simulationio_connection import SimulationIoConnection
 
 
 def _replace_keys(d: Any, match: str, target: str) -> Any:
@@ -298,6 +304,23 @@ def run_serverapp_th(
     return serverapp_th
 
 
+def monitor_external_run_status(
+    run_id: int, f_stop: threading.Event, conn: SimulationIoConnection
+) -> None:
+    """Set stop event if RunStatus has changed to FINISHED."""
+    while not f_stop.is_set():
+        sleep(3)
+        res: GetRunStatusResponse = conn._stub.GetRunStatus(  # pylint:disable=W0212
+            request=GetRunStatusRequest(node=None, run_ids=[run_id])
+        )
+        if res:
+            run_status = run_status_from_proto(res.run_status_dict[run_id])
+
+            if run_status.status == Status.FINISHED:
+                log(WARNING, "Terminating simulation due to external stopping event")
+                f_stop.set()
+
+
 # pylint: disable=too-many-locals,too-many-positional-arguments
 def _main_loop(
     num_supernodes: int,
@@ -315,6 +338,7 @@ def _main_loop(
     server_app: Optional[ServerApp] = None,
     server_app_attr: Optional[str] = None,
     server_app_run_config: Optional[UserConfig] = None,
+    conn: Optional[SimulationIoConnection] = None,
 ) -> None:
     """Start ServerApp on a separate thread, then launch Simulation Engine."""
     # Initialize StateFactory
@@ -326,7 +350,7 @@ def _main_loop(
     serverapp_th = None
     success = True
     try:
-        # Register run
+        # Register run in local state
         log(DEBUG, "Pre-registering run with id %s", run.run_id)
         run.status = RunStatus(Status.RUNNING, "", "")
         run.starting_at = now().isoformat()
@@ -352,6 +376,16 @@ def _main_loop(
             enable_tf_gpu_growth=enable_tf_gpu_growth,
             run_id=run.run_id,
         )
+
+        # Monitor thread to trigger stopping of Simulation
+        # Feature only enabled if running alongside SuperLink
+        monitor_th = None
+        if conn:
+            monitor_th = threading.Thread(
+                target=monitor_external_run_status,
+                args=(run.run_id, f_stop, conn),
+            )
+            monitor_th.start()
 
         # Buffer time so the `ServerApp` in separate thread is ready
         log(DEBUG, "Buffer time delay: %ds", delay_start)
@@ -385,6 +419,8 @@ def _main_loop(
             serverapp_th.join()
             if server_app_thread_has_exception.is_set():
                 raise RuntimeError("Exception in ServerApp thread")
+        if monitor_th:
+            monitor_th.join()
 
     log(DEBUG, "Stopping Simulation Engine now.")
 
@@ -407,6 +443,7 @@ def _run_simulation(
     delay_start: int = 5,
     verbose_logging: bool = False,
     is_app: bool = False,
+    conn: Optional[SimulationIoConnection] = None,
 ) -> None:
     """Launch the Simulation Engine."""
     if backend_config is None:
@@ -466,6 +503,7 @@ def _run_simulation(
         server_app,
         server_app_attr,
         server_app_run_config,
+        conn,
     )
     # Detect if there is an Asyncio event loop already running.
     # If yes, disable logger propagation. In environmnets
