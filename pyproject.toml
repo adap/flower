@@ -144,10 +144,10 @@ docsig = "==0.64.0"
 
 [tool.docstrfmt]
 extend_exclude = [
-    "doc/source/conf.py",
-    "doc/source/tutorial-quickstart-huggingface.rst",
-    "doc/source/_templates/autosummary/*",
-    "doc/source/ref-api/*",
+    "framework/docs/source/conf.py",
+    "framework/docs/source/tutorial-quickstart-huggingface.rst",
+    "framework/docs/source/_templates/autosummary/*",
+    "framework/docs/source/ref-api/*",
 ]
 
 [tool.isort]
