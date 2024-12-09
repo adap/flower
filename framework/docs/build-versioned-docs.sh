@@ -30,12 +30,6 @@ for current_version in ${versions}; do
   export current_version
   git checkout --force ${current_version}
 
-  if [ -d "framework/docs" ]; then
-    cd framework/docs
-  else
-    cd doc
-  fi
-
   # Downgrade numpy for versions between v1.8.0 and v1.12.0 to avoid conflicts in docs
   if [ "$current_version" = "v1.8.0"  ] || \
      [ "$current_version" = "v1.9.0"  ] || \
@@ -50,6 +44,12 @@ for current_version in ${versions}; do
     pip install "numpy==${numpy_version_2}"
   fi
   echo "INFO: Building sites for ${current_version}"
+
+  if [ -d "framework/docs" ]; then
+    cd framework/docs
+  else
+    cd doc
+  fi
 
   for current_language in ${languages}; do
 
