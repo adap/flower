@@ -308,7 +308,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         state = self.state_factory.state()
 
         # Get run status from LinkState
-        run_statuses = state.get_run_status({request.run_ids})
+        run_statuses = state.get_run_status(set(request.run_ids))
         run_status_dict = {
             run_id: run_status_to_proto(run_status)
             for run_id, run_status in run_statuses.items()
