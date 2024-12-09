@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower command line interface `stop` command."""
-
+"""Flower command line interface `login` command."""
 
 from pathlib import Path
 from typing import Annotated, Optional
@@ -25,33 +24,32 @@ from flwr.cli.config_utils import (
     validate_federation_in_project_config,
     validate_project_config,
 )
-from flwr.common.constant import FAB_CONFIG_FILE
-from flwr.proto.exec_pb2 import StopRunRequest, StopRunResponse  # pylint: disable=E0611
+from flwr.common.constant import AUTH_TYPE
+from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
+    GetLoginDetailsRequest,
+    GetLoginDetailsResponse,
+)
 from flwr.proto.exec_pb2_grpc import ExecStub
 
-from .utils import init_channel, try_obtain_cli_auth_plugin
+from ..utils import init_channel, try_obtain_cli_auth_plugin
 
 
-def stop(
-    run_id: Annotated[  # pylint: disable=unused-argument
-        int,
-        typer.Argument(help="The Flower run ID to stop"),
-    ],
+def login(  # pylint: disable=R0914
     app: Annotated[
         Path,
-        typer.Argument(help="Path of the Flower project"),
+        typer.Argument(help="Path of the Flower App to run."),
     ] = Path("."),
     federation: Annotated[
         Optional[str],
-        typer.Argument(help="Name of the federation"),
+        typer.Argument(help="Name of the federation to login into."),
     ] = None,
 ) -> None:
-    """Stop a run."""
-    # Load and validate federation config
+    """Login to Flower SuperLink."""
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
-    pyproject_path = app / FAB_CONFIG_FILE if app else None
+    pyproject_path = app / "pyproject.toml" if app else None
     config, errors, warnings = load_and_validate(path=pyproject_path)
+
     config = validate_project_config(config, errors, warnings)
     federation, federation_config = validate_federation_in_project_config(
         federation, config
@@ -59,40 +57,36 @@ def stop(
 
     if "address" not in federation_config:
         typer.secho(
-            "❌ `flwr stop` currently works with Exec API. Ensure that the correct"
+            "❌ `flwr login` currently works with Exec API. Ensure that the correct"
             "Exec API address is provided in the `pyproject.toml`.",
             fg=typer.colors.RED,
             bold=True,
         )
         raise typer.Exit(code=1)
 
-    try:
-        auth_plugin = try_obtain_cli_auth_plugin(app, federation, federation_config)
-        channel = init_channel(app, federation_config, auth_plugin)
-        stub = ExecStub(channel)  # pylint: disable=unused-variable # noqa: F841
+    channel = init_channel(app, federation_config, None)
+    stub = ExecStub(channel)
 
-        typer.secho(f"✋ Stopping run ID {run_id}...", fg=typer.colors.GREEN)
-        _stop_run(stub, run_id=run_id)
+    login_request = GetLoginDetailsRequest()
+    login_response: GetLoginDetailsResponse = stub.GetLoginDetails(login_request)
 
-    except ValueError as err:
+    # Get the auth plugin
+    auth_type = login_response.login_details.get(AUTH_TYPE)
+    auth_plugin = try_obtain_cli_auth_plugin(
+        app, federation, federation_config, auth_type
+    )
+    if auth_plugin is None:
         typer.secho(
-            f"❌ {err}",
+            f'❌ Authentication type "{auth_type}" not found',
             fg=typer.colors.RED,
             bold=True,
         )
-        raise typer.Exit(code=1) from err
-    finally:
-        channel.close()
+        raise typer.Exit(code=1)
 
+    # Login
+    auth_config = auth_plugin.login(
+        dict(login_response.login_details), config, federation, stub
+    )
 
-def _stop_run(
-    stub: ExecStub,  # pylint: disable=unused-argument
-    run_id: int,  # pylint: disable=unused-argument
-) -> None:
-    """Stop a run."""
-    response: StopRunResponse = stub.StopRun(request=StopRunRequest(run_id=run_id))
-
-    if response.success:
-        typer.secho(f"✅ Run {run_id} successfully stopped.", fg=typer.colors.GREEN)
-    else:
-        typer.secho(f"❌ Run {run_id} couldn't be stopped.", fg=typer.colors.RED)
+    # Store the tokens
+    auth_plugin.store_tokens(auth_config)

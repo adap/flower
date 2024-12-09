@@ -24,15 +24,15 @@ import typer
 
 from flwr.cli.config_utils import (
     load_and_validate,
-    validate_certificate_in_federation_config,
     validate_federation_in_project_config,
     validate_project_config,
 )
 from flwr.common.constant import CONN_RECONNECT_INTERVAL, CONN_REFRESH_PERIOD
-from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log as logger
 from flwr.proto.exec_pb2 import StreamLogsRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
+
+from .utils import init_channel, try_obtain_cli_auth_plugin
 
 
 def start_stream(
@@ -126,11 +126,6 @@ def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
         logger(DEBUG, "Channel closed")
 
 
-def on_channel_state_change(channel_connectivity: str) -> None:
-    """Log channel connectivity."""
-    logger(DEBUG, channel_connectivity)
-
-
 def log(
     run_id: Annotated[
         int,
@@ -171,27 +166,18 @@ def log(
         )
         raise typer.Exit(code=1)
 
-    _log_with_exec_api(app, federation_config, run_id, stream)
+    _log_with_exec_api(app, federation, federation_config, run_id, stream)
 
 
 def _log_with_exec_api(
     app: Path,
+    federation: str,
     federation_config: dict[str, Any],
     run_id: int,
     stream: bool,
 ) -> None:
-
-    insecure, root_certificates_bytes = validate_certificate_in_federation_config(
-        app, federation_config
-    )
-    channel = create_channel(
-        server_address=federation_config["address"],
-        insecure=insecure,
-        root_certificates=root_certificates_bytes,
-        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        interceptors=None,
-    )
-    channel.subscribe(on_channel_state_change)
+    auth_plugin = try_obtain_cli_auth_plugin(app, federation, federation_config)
+    channel = init_channel(app, federation_config, auth_plugin)
 
     if stream:
         start_stream(run_id, channel, CONN_REFRESH_PERIOD)
