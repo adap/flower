@@ -67,7 +67,7 @@ for d in $(printf '%s\n' */ | sort -V); do
   # Select directories
   baseline=${d%/}
 
-  if ! [[ "$baseline" =~ ^(baseline_template|dev|doc|flwr_baselines)$ ]]; then
+  if ! [[ "$baseline" =~ ^(baseline_template|dev|docs|flwr_baselines)$ ]]; then
     # For each baseline, copy the README into the source of the Baselines docs
     cp $baseline/README.md $ROOT/baselines/docs/source/$baseline.md 2>&1 >/dev/null
 
