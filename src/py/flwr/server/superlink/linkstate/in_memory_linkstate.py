@@ -20,7 +20,7 @@ import time
 from bisect import bisect_right
 from dataclasses import dataclass, field
 from logging import ERROR, WARNING
-from typing import Optional, Union
+from typing import Optional
 from uuid import UUID, uuid4
 
 from flwr.common import Context, log, now
@@ -116,12 +116,6 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
         # Return the new task_id
         return task_id
-
-    def get_run_id_from_task_id(self, task_id: Union[str, UUID]) -> int:
-        with self.lock:
-            if isinstance(task_id, str):
-                task_id = UUID(task_id)
-            return self.task_ins_store[task_id].run_id
 
     def get_task_ins(
         self, node_id: Optional[int], limit: Optional[int]

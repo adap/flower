@@ -16,7 +16,7 @@
 
 
 import abc
-from typing import Optional, Union
+from typing import Optional
 from uuid import UUID
 
 from flwr.common import Context
@@ -366,7 +366,3 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
             - The timestamp of the latest log entry in the returned logs.
               Returns `0` if no logs are returned.
         """
-
-    @abc.abstractmethod
-    def get_run_id_from_task_id(self, task_id: Union[str, UUID]) -> int:
-        """."""
