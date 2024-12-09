@@ -14,33 +14,24 @@
 # ==============================================================================
 """Flower command line interface `login` command."""
 
-from logging import DEBUG
 from pathlib import Path
-from typing import Annotated, Any, Optional
+from typing import Annotated, Optional
 
 import typer
 
 from flwr.cli.config_utils import (
     load_and_validate,
-    validate_certificate_in_federation_config,
     validate_federation_in_project_config,
     validate_project_config,
 )
 from flwr.common.constant import AUTH_TYPE
-from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
-from flwr.common.logger import log
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     GetLoginDetailsRequest,
     GetLoginDetailsResponse,
 )
 from flwr.proto.exec_pb2_grpc import ExecStub
 
-from ..utils import try_obtain_cli_auth_plugin
-
-
-def on_channel_state_change(channel_connectivity: str) -> None:
-    """Log channel connectivity."""
-    log(DEBUG, channel_connectivity)
+from ..utils import init_channel, try_obtain_cli_auth_plugin
 
 
 def login(  # pylint: disable=R0914
@@ -73,7 +64,9 @@ def login(  # pylint: disable=R0914
         )
         raise typer.Exit(code=1)
 
-    stub = _create_exec_stub(app, federation_config)
+    channel = init_channel(app, federation_config, None)
+    stub = ExecStub(channel)
+
     login_request = GetLoginDetailsRequest()
     login_response: GetLoginDetailsResponse = stub.GetLoginDetails(login_request)
 
@@ -97,20 +90,3 @@ def login(  # pylint: disable=R0914
 
     # Store the tokens
     auth_plugin.store_tokens(auth_config)
-
-
-def _create_exec_stub(app: Path, federation_config: dict[str, Any]) -> ExecStub:
-    insecure, root_certificates = validate_certificate_in_federation_config(
-        app, federation_config
-    )
-    channel = create_channel(
-        server_address=federation_config["address"],
-        insecure=insecure,
-        root_certificates=root_certificates,
-        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        interceptors=None,
-    )
-    channel.subscribe(on_channel_state_change)
-    stub = ExecStub(channel)
-
-    return stub

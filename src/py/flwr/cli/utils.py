@@ -17,14 +17,21 @@
 import hashlib
 import json
 import re
+from logging import DEBUG
 from pathlib import Path
 from typing import Any, Callable, Optional, cast
 
+import grpc
 import typer
 
+from flwr.cli.cli_interceptor import CliInterceptor
 from flwr.common.address import parse_address
 from flwr.common.auth_plugin import CliAuthPlugin
 from flwr.common.constant import AUTH_TYPE, CREDENTIALS_DIR
+from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
+from flwr.common.logger import log
+
+from .config_utils import validate_certificate_in_federation_config
 
 try:
     from flwr.ee.auth_plugin import get_cli_auth_plugins
@@ -204,3 +211,26 @@ def try_obtain_cli_auth_plugin(
     if auth_plugin_class is not None:
         return auth_plugin_class(config_path)
     return None
+
+
+def init_channel(
+    app: Path, federation_config: dict[str, Any], auth_plugin: Optional[CliAuthPlugin]
+) -> grpc.Channel:
+    """Initialize gRPC channel to the Exec API."""
+
+    def on_channel_state_change(channel_connectivity: str) -> None:
+        """Log channel connectivity."""
+        log(DEBUG, channel_connectivity)
+
+    insecure, root_certificates_bytes = validate_certificate_in_federation_config(
+        app, federation_config
+    )
+    channel = create_channel(
+        server_address=federation_config["address"],
+        insecure=insecure,
+        root_certificates=root_certificates_bytes,
+        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
+        interceptors=(CliInterceptor(auth_plugin) if auth_plugin is not None else None),
+    )
+    channel.subscribe(on_channel_state_change)
+    return channel
