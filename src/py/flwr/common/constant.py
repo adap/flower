@@ -110,6 +110,8 @@ LOG_UPLOAD_INTERVAL = 0.2  # Minimum interval between two log uploads
 # Retry configurations
 MAX_RETRY_DELAY = 20  # Maximum delay duration between two consecutive retries.
 
+AUTH_TYPE = "auth_type"
+
 
 class MessageType:
     """Message type."""
