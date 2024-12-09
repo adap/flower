@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower command line interface `stop` command."""
 
+
 from logging import DEBUG
 from pathlib import Path
 from typing import Annotated, Any, Optional
@@ -35,7 +36,7 @@ from flwr.proto.exec_pb2_grpc import ExecStub
 
 
 def stop(
-    run_id: Annotated[
+    run_id: Annotated[  # pylint: disable=unused-argument
         int,
         typer.Argument(help="The Flower run ID to stop"),
     ],
@@ -70,12 +71,10 @@ def stop(
 
     try:
         channel = _init_channel(app, federation_config)
-        stub = ExecStub(channel)
+        stub = ExecStub(channel)  # pylint: disable=unused-variable # noqa: F841
 
-        # Stop the specified run ID
-        if run_id is not None:
-            typer.secho(f"✋ Stopping run ID {run_id}...", fg=typer.colors.GREEN)
-            _stop_run(stub, run_id)
+        typer.secho(f"✋ Stopping run ID {run_id}...", fg=typer.colors.GREEN)
+        _stop_run(stub, run_id=run_id)
 
     except ValueError as err:
         typer.secho(
@@ -110,19 +109,13 @@ def _init_channel(app: Path, federation_config: dict[str, Any]) -> grpc.Channel:
 
 
 def _stop_run(
-    stub: ExecStub,
-    run_id: int,
+    stub: ExecStub,  # pylint: disable=unused-argument
+    run_id: int,  # pylint: disable=unused-argument
 ) -> None:
     """Stop a run."""
-    # Stop run
-    res: StopRunResponse = stub.StopRun(StopRunRequest(run_id=run_id))
+    response: StopRunResponse = stub.StopRun(request=StopRunRequest(run_id=run_id))
 
-    if not res.success:
-        typer.secho(
-            f"❌ Failed to stop run ID {run_id}",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
-
-    typer.secho(f"✅ Successfully stopped run ID {run_id}", fg=typer.colors.GREEN)
+    if response.success:
+        typer.secho(f"✅ Run {run_id} successfully stopped.", fg=typer.colors.GREEN)
+    else:
+        typer.secho(f"❌ Run {run_id} couldn't be stopped.", fg=typer.colors.RED)
