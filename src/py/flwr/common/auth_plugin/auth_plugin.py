@@ -20,11 +20,6 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any, Optional, Union
 
-from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
-    GetAuthTokensRequest,
-    GetAuthTokensResponse,
-    GetLoginDetailsResponse,
-)
 from flwr.proto.exec_pb2_grpc import ExecStub
 
 
@@ -33,27 +28,27 @@ class ExecAuthPlugin(ABC):
 
     @abstractmethod
     def __init__(self, config: dict[str, Any]):
-        """Abstract constructor (init)."""
+        """Abstract constructor."""
 
     @abstractmethod
-    def get_login_details(self) -> GetLoginDetailsResponse:
-        """Get the GetLoginDetailsResponse containing the login details."""
+    def get_login_details(self) -> dict[str, str]:
+        """Get the login details."""
 
     @abstractmethod
     def validate_tokens_in_metadata(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
     ) -> bool:
-        """Validate the auth tokens in the provided metadata."""
+        """Validate authentication tokens in the provided metadata."""
 
     @abstractmethod
-    def get_auth_tokens(self, request: GetAuthTokensRequest) -> GetAuthTokensResponse:
-        """Get the relevant auth tokens."""
+    def get_auth_tokens(self, auth_details: dict[str, str]) -> dict[str, str]:
+        """Get authentication tokens."""
 
     @abstractmethod
     def refresh_tokens(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
     ) -> Optional[Sequence[tuple[str, Union[str, bytes]]]]:
-        """Refresh auth tokens in the provided metadata."""
+        """Refresh authentication tokens in the provided metadata."""
 
 
 class CliAuthPlugin(ABC):
@@ -63,42 +58,54 @@ class CliAuthPlugin(ABC):
     @abstractmethod
     def login(
         login_details: dict[str, str],
-        config: dict[str, Any],
+        project_config: dict[str, Any],
         federation: str,
         exec_stub: ExecStub,
     ) -> dict[str, Any]:
-        """Login logic to log in user to the SuperLink.
+        """Authenticate the user with the SuperLink.
 
         Parameters
         ----------
         login_details : dict[str, str]
-            A dictionary containing the login details.
-        config : dict[str, Any]
-            The project configuration.
+            A dictionary containing the user's login details.
+        project_config : dict[str, Any]
+            The project configuration loaded from the `pyproject.toml` file.
         federation : str
-            The name of the federation to which the user belongs.
+            The name of the federation the user is associated with.
         exec_stub : ExecStub
             An instance of `ExecStub` used for communication with the SuperLink.
 
         Returns
         -------
-        dict[str, Any]
-            A dictionary containing the user's authentication details.
+        user_auth_config : dict[str, Any]
+            A dictionary containing the user's authentication configuration
+            in JSON format.
         """
 
     @abstractmethod
-    def __init__(self, config: dict[str, Any], config_path: Path):
-        """Abstract constructor (init)."""
+    def __init__(self, user_auth_config_path: Path):
+        """Abstract constructor.
+
+        Parameters
+        ----------
+        user_auth_config_path : Path
+            The path to the user's authentication configuration file.
+        """
+
+    @abstractmethod
+    def store_tokens(self, user_auth_config: dict[str, Any]) -> None:
+        """Store authentication tokens from the provided user_auth_config.
+
+        The configuration, including tokens, will be saved as a JSON file
+        at `user_auth_config_path`.
+        """
+
+    @abstractmethod
+    def load_tokens(self) -> None:
+        """Load authentication tokens from the user_auth_config_path."""
 
     @abstractmethod
     def write_tokens_to_metadata(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
     ) -> Sequence[tuple[str, Union[str, bytes]]]:
-        """Write relevant auth tokens to the provided metadata."""
-
-    @abstractmethod
-    def store_tokens(self, config: dict[str, Any]) -> None:
-        """Store the tokens from the provided config.
-
-        The tokens will be saved as a JSON file in the provided config_path.
-        """
+        """Write authentication tokens to the provided metadata."""
