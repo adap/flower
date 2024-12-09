@@ -95,6 +95,8 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
 
     # Raise exception caught in thread, if any
     if not exception_queue.empty():
-        raise exception_queue.get()
+        ex = exception_queue.get()
+        if ex is not None:
+            raise ex
 
     return hist
