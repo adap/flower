@@ -1,9 +1,9 @@
 # Flower
 .flower_ops
 data/
-doc/source/api_documentation
-doc/source/_build
-doc/source/dataset/
+framework/docs/source/api_documentation
+framework/docs/source/_build
+framework/docs/source/dataset/
 flwr_logs
 .cache
 
