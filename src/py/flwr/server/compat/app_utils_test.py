@@ -48,7 +48,9 @@ class TestUtils(unittest.TestCase):
         # Execute
         # Patching Event.wait with our custom function
         with patch.object(Event, "wait", new=custom_wait):
-            thread, f_stop = start_update_client_manager_thread(driver, client_manager)
+            thread, f_stop, _ = start_update_client_manager_thread(
+                driver, client_manager
+            )
             # Wait until all nodes are registered via `client_manager.sample()`
             client_manager.sample(len(expected_node_ids))
             # Retrieve all nodes in `client_manager`
