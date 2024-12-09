@@ -171,7 +171,9 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         """Start login."""
         log(INFO, "ExecServicer.GetLoginDetails")
         if self.auth_plugin is not None:
-            return self.auth_plugin.get_login_details()
+            return GetLoginDetailsResponse(
+                login_details=self.auth_plugin.get_login_details()
+            )
 
         context.abort(
             grpc.StatusCode.UNIMPLEMENTED,
@@ -185,7 +187,9 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         """Get auth token."""
         log(INFO, "ExecServicer.GetAuthTokens")
         if self.auth_plugin is not None:
-            return self.auth_plugin.get_auth_tokens(request)
+            return GetAuthTokensResponse(
+                auth_tokens=self.auth_plugin.get_auth_tokens(dict(request.auth_details))
+            )
 
         context.abort(
             grpc.StatusCode.UNIMPLEMENTED,
