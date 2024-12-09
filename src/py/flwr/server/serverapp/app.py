@@ -96,7 +96,7 @@ def flwr_serverapp() -> None:
     restore_output()
 
 
-def run_serverapp(  # pylint: disable=R0914,R0915,W0212
+def run_serverapp(  # pylint: disable=R0914, disable=W0212
     serverappio_api_address: str,
     log_queue: Queue[Optional[str]],
     run_once: bool,
