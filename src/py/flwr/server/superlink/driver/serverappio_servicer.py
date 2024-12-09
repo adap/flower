@@ -308,10 +308,12 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         state = self.state_factory.state()
 
         # Get run status from LinkState
-        run_status = run_status_to_proto(
-            state.get_run_status({request.run_id})[request.run_id]
-        )
-        return GetRunStatusResponse(run_status=run_status)
+        run_statuses = state.get_run_status({request.run_ids})
+        run_status_dict = {
+            run_id: run_status_to_proto(run_status)
+            for run_id, run_status in run_statuses.items()
+        }
+        return GetRunStatusResponse(run_status_dict=run_status_dict)
 
 
 def _raise_if(validation_error: bool, detail: str) -> None:
