@@ -1,6 +1,6 @@
 ---
 tags: [basic, vision, simulation]
-dataset: [MNIST]
+dataset: [Fashion-MNIST]
 framework: [torch]
 ---
 
@@ -27,9 +27,6 @@ In this tutorial series, we make reference to several pages in the [Flower Docum
 > \[!TIP\]
 > If you are developing on Windows, it is recommended to make use of the Windows Subsystem for Linux (WSL). Check the guide on [how to setup WSL for development on Windows](https://code.visualstudio.com/docs/remote/wsl).
 
-> \[!NOTE\]
-> These steps represent the very first commands shown on the first video. They `flwr new` command will create a Flower App you can run directly. In videos 2-7 you'll learn how to modify the App and add, step by step, new functionality. You can check the `my-awesome-app` directory, which contains the completed code presented in the tutorial videos.
-
 As presented in the video, we start from a new Python 3.11 environment. You only need to activate it and install `flwr`.
 
 ```bash
@@ -42,6 +39,9 @@ Then, use the `flwr new` command to construct a new Flower App using the PyTorch
 ```shell
 flwr new my-awesome-app # then follow the prompt
 ```
+
+> \[!NOTE\]
+> These steps represent the very first commands shown on the first video. They `flwr new` command will create a Flower App you can run directly. In videos 2-7 you'll learn how to modify the App and add, step by step, new functionality. You can check the `my-awesome-app` directory, which contains the completed code presented in the tutorial videos.
 
 ## Running the Example
 
