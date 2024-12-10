@@ -70,8 +70,6 @@ class CliAuthPlugin(ABC):
     @abstractmethod
     def login(
         login_details: dict[str, str],
-        project_config: dict[str, Any],
-        federation: str,
         exec_stub: ExecStub,
     ) -> dict[str, Any]:
         """Authenticate the user with the SuperLink.
@@ -80,10 +78,6 @@ class CliAuthPlugin(ABC):
         ----------
         login_details : dict[str, str]
             A dictionary containing the user's login details.
-        project_config : dict[str, Any]
-            The project configuration loaded from the `pyproject.toml` file.
-        federation : str
-            The name of the federation the user is associated with.
         exec_stub : ExecStub
             An instance of `ExecStub` used for communication with the SuperLink.
 
