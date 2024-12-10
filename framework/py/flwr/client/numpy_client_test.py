@@ -15,7 +15,7 @@
 """Flower NumPyClient tests."""
 
 import numpy as np
-from typing import Any
+
 from flwr.common import Config, NDArrays, Properties, Scalar
 
 from .numpy_client import (
