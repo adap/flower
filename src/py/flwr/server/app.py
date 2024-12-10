@@ -94,10 +94,7 @@ BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
 try:
     from flwr.ee import get_exec_auth_plugins
 except ImportError:
-    AUTH_PLUGIN_IMPORT_ERROR: str = """Unable to import module `flwr.ee.auth_plugin`.
-
-    This is a feature available only in the enterprise extension.
-    """
+    AUTH_PLUGIN_IMPORT_ERROR: str = "Unable to import module `flwr.ee.auth_plugin`."
 
     def get_exec_auth_plugins() -> dict[str, type[ExecAuthPlugin]]:
         """Return all Exec API authentication plugins."""
