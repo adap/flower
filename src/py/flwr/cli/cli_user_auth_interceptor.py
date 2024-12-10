@@ -31,7 +31,7 @@ Request = Union[
 ]
 
 
-class CliInterceptor(
+class CliUserAuthInterceptor(
     grpc.UnaryUnaryClientInterceptor, grpc.UnaryStreamClientInterceptor  # type: ignore
 ):
     """CLI interceptor for user authentication."""

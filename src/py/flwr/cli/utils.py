@@ -24,7 +24,7 @@ from typing import Any, Callable, Optional, cast
 import grpc
 import typer
 
-from flwr.cli.cli_interceptor import CliInterceptor
+from flwr.cli.cli_user_auth_interceptor import CliUserAuthInterceptor
 from flwr.common.address import parse_address
 from flwr.common.auth_plugin import CliAuthPlugin
 from flwr.common.constant import AUTH_TYPE, CREDENTIALS_DIR
@@ -226,7 +226,7 @@ def init_channel(
         insecure=insecure,
         root_certificates=root_certificates_bytes,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        interceptors=(CliInterceptor(auth_plugin) if auth_plugin is not None else None),
+        interceptors=(CliUserAuthInterceptor(auth_plugin) if auth_plugin is not None else None),
     )
     channel.subscribe(on_channel_state_change)
     return channel
