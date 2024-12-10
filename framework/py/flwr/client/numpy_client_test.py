@@ -156,3 +156,62 @@ def test_has_evaluate_false() -> None:
 
     # Assert
     assert actual == expected
+
+def test_fit_return_type() -> None:
+    """Test that fit returns the correct type."""
+    # Prepare
+    client = OverridingClient()
+
+    # Execute
+    parameters, num_examples, metrics = client.fit(
+        parameters=[0.1, 0.2], config={"epochs": 5}
+    )
+
+    # Assert
+    assert isinstance(parameters, list)
+    assert all(isinstance(p, float) for p in parameters)
+    assert isinstance(num_examples, int)
+    assert isinstance(metrics, dict)
+
+
+def test_evaluate_return_type() -> None:
+    """Test that evaluate returns the correct type."""
+    # Prepare
+    client = OverridingClient()
+
+    # Execute
+    loss, num_examples, metrics = client.evaluate(
+        parameters=[0.1, 0.2], config={"batch_size": 32}
+    )
+
+    # Assert
+    assert isinstance(loss, float)
+    assert isinstance(num_examples, int)
+    assert isinstance(metrics, dict)
+
+
+def test_get_parameters_return_type() -> None:
+    """Test that get_parameters returns the correct type."""
+    # Prepare
+    client = OverridingClient()
+
+    # Execute
+    parameters = client.get_parameters(config={})
+
+    # Assert
+    assert isinstance(parameters, list)
+    assert all(isinstance(p, float) for p in parameters)
+
+
+def test_get_properties_return_type() -> None:
+    """Test that get_properties returns the correct type."""
+    # Prepare
+    client = OverridingClient()
+
+    # Execute
+    properties = client.get_properties(config={})
+
+    # Assert
+    assert isinstance(properties, dict)
+    assert all(isinstance(k, str) for k in properties.keys())
+    assert all(isinstance(v, (int, float, str, bool, bytes)) for v in properties.values())
