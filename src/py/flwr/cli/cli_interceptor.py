@@ -31,24 +31,20 @@ Request = Union[
 ]
 
 
-class CliInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ignore
+class CliInterceptor(grpc.UnaryUnaryClientInterceptor, grpc.UnaryStreamClientInterceptor):  # type: ignore
     """CLI interceptor for user authentication."""
 
     def __init__(self, auth_plugin: CliAuthPlugin):
         self.auth_plugin = auth_plugin
         self.auth_plugin.load_tokens()
 
-    def intercept_unary_unary(
+    def _authenticated_call(
         self,
         continuation: Callable[[Any, Any], Any],
         client_call_details: grpc.ClientCallDetails,
         request: Request,
     ) -> grpc.Call:
-        """Flower SuperExec Run interceptor.
-
-        Intercept unary call from user and add necessary authentication header in the
-        RPC metadata.
-        """
+        """Send and receive tokens via metadata."""
         new_metadata = self.auth_plugin.write_tokens_to_metadata(
             client_call_details.metadata or []
         )
@@ -61,3 +57,29 @@ class CliInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ignore
             self.auth_plugin.store_tokens(retrieved_metadata)
 
         return response
+
+    def intercept_unary_unary(
+        self,
+        continuation: Callable[[Any, Any], Any],
+        client_call_details: grpc.ClientCallDetails,
+        request: Request,
+    ) -> grpc.Call:
+        """Flower SuperExec Run interceptor.
+
+        Intercept unary-unary call from user and add necessary authentication header in
+        the RPC metadata.
+        """
+        return self._authenticated_call(continuation, client_call_details, request)
+
+    def intercept_unary_stream(
+        self,
+        continuation: Callable[[Any, Any], Any],
+        client_call_details: grpc.ClientCallDetails,
+        request: Request,
+    ) -> grpc.Call:
+        """Flower SuperExec Run interceptor.
+
+        Intercept unary-stream call from user and add necessary authentication header in
+        the RPC metadata.
+        """
+        return self._authenticated_call(continuation, client_call_details, request)
