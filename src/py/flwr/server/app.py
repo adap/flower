@@ -603,7 +603,6 @@ def _try_obtain_exec_auth_plugin(config: dict[str, Any]) -> Optional[ExecAuthPlu
     except NotImplementedError:
         sys.exit(
             "No authentication plugins are currently supported. "
-            "This feature is not implemented yet."
         )
 
 
