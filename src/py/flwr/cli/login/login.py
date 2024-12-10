@@ -57,8 +57,8 @@ def login(  # pylint: disable=R0914
 
     if "address" not in federation_config:
         typer.secho(
-            "❌ `flwr login` currently works with Exec API. Ensure that the correct"
-            "Exec API address is provided in the `pyproject.toml`.",
+            "❌ `flwr login` currently works with a SuperLink. Ensure that the correct"
+            "SuperLink (Exec API) address is provided in `pyproject.toml`.",
             fg=typer.colors.RED,
             bold=True,
         )
