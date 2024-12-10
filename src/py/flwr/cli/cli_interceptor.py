@@ -15,7 +15,6 @@
 """Flower run interceptor."""
 
 
-import collections
 from typing import Any, Callable, Union
 
 import grpc
@@ -30,19 +29,6 @@ Request = Union[
     StartRunRequest,
     StreamLogsRequest,
 ]
-
-
-class _ClientCallDetails(
-    collections.namedtuple(
-        "_ClientCallDetails", ("method", "timeout", "metadata", "credentials")
-    ),
-    grpc.ClientCallDetails,  # type: ignore
-):
-    """Details for each client call.
-
-    The class will be passed on as the first argument in continuation function.
-    In our case, `RunInterceptor` adds new metadata to the construct.
-    """
 
 
 class CliInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ignore
@@ -63,18 +49,13 @@ class CliInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ignore
         Intercept unary call from user and add necessary authentication header in the
         RPC metadata.
         """
-        metadata = []
-        if client_call_details.metadata is not None:
-            metadata = client_call_details.metadata
-
-        client_call_details = _ClientCallDetails(
-            client_call_details.method,
-            client_call_details.timeout,
-            self.auth_plugin.write_tokens_to_metadata(metadata),
-            client_call_details.credentials,
+        new_metadata = self.auth_plugin.write_tokens_to_metadata(
+            client_call_details.metadata or []
         )
 
-        response = continuation(client_call_details, request)
+        details = client_call_details._replace(metadata=new_metadata)
+
+        response = continuation(details, request)
         if response.initial_metadata():
             retrieved_metadata = dict(response.initial_metadata())
             self.auth_plugin.store_tokens(retrieved_metadata)
