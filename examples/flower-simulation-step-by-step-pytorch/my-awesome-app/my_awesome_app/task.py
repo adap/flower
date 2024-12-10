@@ -33,6 +33,7 @@ class Net(nn.Module):
 
 
 def get_transforms():
+    """Return a function that apply standard transformations to images."""
 
     pytorch_transforms = Compose([ToTensor(), Normalize((0.5,), (0.5,))])
 
@@ -70,7 +71,11 @@ def load_data(partition_id: int, num_partitions: int):
 
 
 def train(net, trainloader, epochs, lr, device):
-    """Train the model on the training set."""
+    """Train the model on the training set.
+
+    This is a fairly standard training loop for PyTorch. Note there is nothing specific
+    about Flower or Federated AI here.
+    """
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss().to(device)
     optimizer = torch.optim.Adam(net.parameters(), lr=lr)
@@ -91,7 +96,11 @@ def train(net, trainloader, epochs, lr, device):
 
 
 def test(net, testloader, device):
-    """Validate the model on the test set."""
+    """Validate the model on the test set.
+
+    This is a fairly standard training loop for PyTorch. Note there is nothing specific
+    about Flower or Federated AI here.
+    """
     net.to(device)
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
@@ -108,10 +117,22 @@ def test(net, testloader, device):
 
 
 def get_weights(net):
+    """Extract parameters from a model.
+
+    Note this is specific to PyTorch. You might want to update this function if you use
+    a more exotic model architecture or if you don't want to extrac all elements in
+    state_dict.
+    """
     return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
 
 def set_weights(net, parameters):
+    """Copy paramteres onto the model.
+
+    Note this is specific to PyTorch. You might want to update this function if you use
+    a more exotic model architecture or if you don't want to replace the entire
+    state_dict.
+    """
     params_dict = zip(net.state_dict().keys(), parameters)
-    state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+    state_dict = OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})
     net.load_state_dict(state_dict, strict=True)

@@ -6,7 +6,10 @@ framework: [torch]
 
 # Flower Simulation Step-by-Step
 
-This directory contains the code developed in the `Flower Simulation 2025` tutorial series on Youtube. You can find all the videos [here](https://www.youtube.com/playlist?list=PLNG4feLHqCWkdlSrEL2xbCtGa6QBxlUZb) or clicking on the video preview below.
+> \[!NOTE\]
+> While this tutorial shows how to extend the functionality of a Flower App that uses PyTorch, there is little specific about PyTorch in the changes described in this tutorial series. This means that you can make use of all the concepts presented even if you decide to use a different ML framework.
+
+This directory contains the code to follow along the `Flower Simulation 2025` tutorial series on Youtube. You can find all the videos [here](https://www.youtube.com/playlist?list=PLNG4feLHqCWkdlSrEL2xbCtGa6QBxlUZb) or clicking on the video previews below.
 
 | [![Image 1](https://img.youtube.com/vi/XK_dRVcSZqg/0.jpg)](https://youtu.be/XK_dRVcSZqg) | [![Image 2](https://img.youtube.com/vi/8Uwsa0x7VJw/0.jpg)](https://youtu.be/8Uwsa0x7VJw) | [![Image 3](https://img.youtube.com/vi/KsMP9dgcLw4/0.jpg)](https://youtu.be/KsMP9dgcLw4) | [![Image 4](https://img.youtube.com/vi/dZRDe1ldy5s/0.jpg)](https://youtu.be/dZRDe1ldy5s) |
 | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
@@ -20,6 +23,7 @@ In this tutorial series, we make reference to several pages in the [Flower Docum
 - [List of all Partitioners available in `flwr-datasets`](https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html)
 - [How-to Run Simulations page](https://flower.ai/docs/framework/how-to-run-simulations.html)
 - [How-to Design Stateful ClientApps](https://flower.ai/docs/framework/how-to-design-stateful-clients.html)
+- [Quickstart Pytorch Tutorial](https://flower.ai/docs/framework/tutorial-quickstart-pytorch.html)
 - [Advanced PyTorch Example](https://github.com/adap/flower/tree/main/examples/advanced-pytorch)
 
 ## Getting Started
@@ -34,16 +38,16 @@ As presented in the video, we start from a new Python 3.11 environment. You only
 pip install -U flwr
 ```
 
-Then, use the `flwr new` command to construct a new Flower App using the PyTorch template:
+Then, use the `flwr new` command to construct a new Flower App using the PyTorch template. The vast majority of the content added to the App (as described in the video tutorials) isn't specific to PyTorch. This means you are welcome to choose another template such as `TF`, `NumPy`, `MLX` or `JAX` if you prefer. Just keep in mind you might need to do additional edits to your App (e.g. save the model differently, in the recommended way by your chosen ML framework) If you are undecided, `PyTorch` is a great framework:
 
 ```shell
-flwr new my-awesome-app # then follow the prompt
+flwr new my-awesome-app # then follow the prompt and choose PyTorch
 ```
 
 > \[!NOTE\]
 > These steps represent the very first commands shown on the first video. They `flwr new` command will create a Flower App you can run directly. In videos 2-7 you'll learn how to modify the App and add, step by step, new functionality. You can check the `my-awesome-app` directory, which contains the completed code presented in the tutorial videos.
 
-## Running the Example
+## Running the App
 
 Just like all other Flower Apps, you can run the one in this directory by means of `flwr run`. More info about this command in the videos!
 
