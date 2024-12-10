@@ -36,10 +36,7 @@ from .config_utils import validate_certificate_in_federation_config
 try:
     from flwr.ee import get_cli_auth_plugins
 except ImportError:
-    AUTH_PLUGIN_IMPORT_ERROR: str = """Unable to import module `flwr.ee.auth_plugin`.
-
-This is a feature available only in the enterprise extension.
-"""
+    AUTH_PLUGIN_IMPORT_ERROR: str = "Unable to import module `flwr.ee`."
 
     def get_cli_auth_plugins() -> dict[str, type[CliAuthPlugin]]:
         """Return all CLI authentication plugins."""
