@@ -55,6 +55,7 @@ from flwr.common.constant import (
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
+from flwr.common.supernode_tracker import SuperNodeTracker
 from flwr.common.typing import Fab, Run, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.server.superlink.fleet.grpc_bidi.grpc_server import generic_create_grpc_server
@@ -432,12 +433,21 @@ def start_client_internal(
                         node_config=node_config,
                     )
 
+            if node_state:
+                supernode_tracker = SuperNodeTracker(node_state.node_id)
+
             app_state_tracker.register_signal_handler()
             # pylint: disable=too-many-nested-blocks
             while not app_state_tracker.interrupt:
                 try:
                     # Receive
                     message = receive()
+
+                    if supernode_tracker and message:
+                        supernode_tracker.record_message(
+                            "SuperLink", "SuperNode", message
+                        )
+
                     if message is None:
                         time.sleep(3)  # Wait for 3s before asking again
                         continue
@@ -461,6 +471,12 @@ def start_client_internal(
                     out_message, sleep_duration = handle_control_message(message)
                     if out_message:
                         send(out_message)
+
+                        if supernode_tracker and out_message:
+                            supernode_tracker.record_message(
+                                "SuperNode", "SuperLink", out_message
+                            )
+
                         break
 
                     # Get run info
@@ -484,6 +500,8 @@ def start_client_internal(
                         fab_id, fab_version = run.fab_id, run.fab_version
 
                     run.fab_id, run.fab_version = fab_id, fab_version
+
+                    supernode_tracker.record_run(runs[run_id])
 
                     # Register context for this run
                     run_info_store.register_context(
@@ -554,6 +572,12 @@ def start_client_internal(
                                     stderr=None,
                                     check=True,
                                 )
+                                if supernode_tracker and message:
+                                    supernode_tracker.record_message(
+                                        "SuperNode",
+                                        "ClientApp",
+                                        message,
+                                    )
                             else:
                                 # Wait for output to become available
                                 while not clientappio_servicer.has_outputs():
@@ -561,6 +585,13 @@ def start_client_internal(
 
                             outputs = clientappio_servicer.get_outputs()
                             reply_message, context = outputs.message, outputs.context
+                            if supernode_tracker and reply_message:
+                                supernode_tracker.record_message(
+                                    "ClientApp",
+                                    "SuperNode",
+                                    message,
+                                )
+
                         else:
                             # Load ClientApp instance
                             client_app: ClientApp = load_client_app_fn(
@@ -609,6 +640,11 @@ def start_client_internal(
 
                     # Send
                     send(reply_message)
+
+                    if supernode_tracker and message:
+                        supernode_tracker.record_message(
+                            "SuperNode", "ClientApp", message
+                        )
                     log(INFO, "Sent reply")
 
                 except StopIteration:
