@@ -15,7 +15,7 @@
 """Flower NumPyClient tests."""
 
 import numpy as np
-
+from typing import Any
 from flwr.common import Config, NDArrays, Properties, Scalar
 
 from .numpy_client import (
@@ -170,10 +170,17 @@ def test_fit_return_type() -> None:
     )
 
     # Assert
-    assert isinstance(parameters, list)  # NDArrays is a list of np.ndarray
-    assert all(isinstance(p, np.ndarray) for p in parameters)
+    assert isinstance(parameters, list)  # NDArrays is a list
+    assert all(
+        isinstance(p, np.ndarray) and p.dtype.kind in {"f", "i", "u"}
+        for p in parameters
+    )
     assert isinstance(num_examples, int)
     assert isinstance(metrics, dict)
+    assert all(
+        isinstance(k, str) and isinstance(v, (bool, bytes, float, int, str))
+        for k, v in metrics.items()
+    )
 
 
 def test_evaluate_return_type() -> None:
@@ -190,6 +197,10 @@ def test_evaluate_return_type() -> None:
     assert isinstance(loss, float)
     assert isinstance(num_examples, int)
     assert isinstance(metrics, dict)
+    assert all(
+        isinstance(k, str) and isinstance(v, (bool, bytes, float, int, str))
+        for k, v in metrics.items()
+    )
 
 
 def test_get_parameters_return_type() -> None:
@@ -201,8 +212,11 @@ def test_get_parameters_return_type() -> None:
     parameters = client.get_parameters(config={})
 
     # Assert
-    assert isinstance(parameters, list)  # NDArrays is a list of np.ndarray
-    assert all(isinstance(p, np.ndarray) for p in parameters)
+    assert isinstance(parameters, list)  # NDArrays is a list
+    assert all(
+        isinstance(p, np.ndarray) and p.dtype.kind in {"f", "i", "u"}
+        for p in parameters
+    )
 
 
 def test_get_properties_return_type() -> None:
@@ -214,6 +228,8 @@ def test_get_properties_return_type() -> None:
     properties = client.get_properties(config={})
 
     # Assert
-    assert isinstance(properties, dict)
+    assert isinstance(properties, dict)  # Properties is a dict[str, Scalar]
     assert all(isinstance(k, str) for k in properties.keys())
-    assert all(isinstance(v, (int, float, str, bool, bytes)) for v in properties.values())
+    assert all(
+        isinstance(v, (bool, bytes, float, int, str)) for v in properties.values()
+    )
