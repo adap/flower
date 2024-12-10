@@ -39,10 +39,7 @@ except ImportError:
 
     def get_cli_auth_plugins() -> dict[str, type[CliAuthPlugin]]:
         """Return all CLI authentication plugins."""
-        raise NotImplementedError(
-            "No authentication plugins are currently supported. "
-            "This feature is not implemented yet."
-        )
+        raise NotImplementedError("No authentication plugins are currently supported. ")
 
 
 def prompt_text(
