@@ -256,5 +256,5 @@ class Fab:
     content: bytes
 
 
-class RunStopException(BaseException):
+class StopRunException(BaseException):
     """."""

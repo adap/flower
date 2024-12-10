@@ -50,7 +50,7 @@ from flwr.common.serde import (
     run_from_proto,
     run_status_to_proto,
 )
-from flwr.common.typing import RunStatus, RunStopException
+from flwr.common.typing import RunStatus, StopRunException
 from flwr.proto.run_pb2 import UpdateRunStatusRequest  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PullServerAppInputsRequest,
@@ -187,7 +187,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
 
             run_status = RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
 
-        except RunStopException:
+        except StopRunException:
             log(INFO, "Run ID %s stopped.", run.run_id)
             run_status = None
 

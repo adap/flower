@@ -28,7 +28,7 @@ from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.serde import message_from_taskres, message_to_taskins, run_from_proto
-from flwr.common.typing import Run, RunStopException
+from flwr.common.typing import Run, StopRunException
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
@@ -297,7 +297,7 @@ def _make_simple_grpc_retry_invoker() -> RetryInvoker:
 
     def _should_giveup_fn(e: Exception) -> bool:
         if e.code() == grpc.StatusCode.PERMISSION_DENIED:  # type: ignore
-            raise RunStopException
+            raise StopRunException
         if e.code() == grpc.StatusCode.UNAVAILABLE:  # type: ignore
             return False
         return True
