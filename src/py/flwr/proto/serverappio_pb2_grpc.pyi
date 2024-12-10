@@ -56,6 +56,11 @@ class ServerAppIoStub:
         flwr.proto.run_pb2.UpdateRunStatusResponse]
     """Update the status of a given run"""
 
+    GetRunStatus: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.run_pb2.GetRunStatusRequest,
+        flwr.proto.run_pb2.GetRunStatusResponse]
+    """Get the status of a given run"""
+
     PushLogs: grpc.UnaryUnaryMultiCallable[
         flwr.proto.log_pb2.PushLogsRequest,
         flwr.proto.log_pb2.PushLogsResponse]
@@ -133,6 +138,14 @@ class ServerAppIoServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.run_pb2.UpdateRunStatusResponse:
         """Update the status of a given run"""
+        pass
+
+    @abc.abstractmethod
+    def GetRunStatus(self,
+        request: flwr.proto.run_pb2.GetRunStatusRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.run_pb2.GetRunStatusResponse:
+        """Get the status of a given run"""
         pass
 
     @abc.abstractmethod

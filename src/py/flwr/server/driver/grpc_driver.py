@@ -203,7 +203,9 @@ class GrpcDriver(Driver):
             task_ins_list.append(taskins)
         # Call GrpcDriverStub method
         res: PushTaskInsResponse = self._stub.PushTaskIns(
-            PushTaskInsRequest(task_ins_list=task_ins_list)
+            PushTaskInsRequest(
+                task_ins_list=task_ins_list, run_id=cast(Run, self._run).run_id
+            )
         )
         return list(res.task_ids)
 
@@ -215,7 +217,9 @@ class GrpcDriver(Driver):
         """
         # Pull TaskRes
         res: PullTaskResResponse = self._stub.PullTaskRes(
-            PullTaskResRequest(node=self.node, task_ids=message_ids)
+            PullTaskResRequest(
+                node=self.node, task_ids=message_ids, run_id=cast(Run, self._run).run_id
+            )
         )
         # Convert TaskRes to Message
         msgs = [message_from_taskres(taskres) for taskres in res.task_res_list]
