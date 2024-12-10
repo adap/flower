@@ -8,50 +8,9 @@ framework: [torch]
 
 This directory contains the code developed in the `Flower Simulation 2025` tutorial series on Youtube. You can find all the videos [here](https://www.youtube.com/playlist?list=PLNG4feLHqCWkdlSrEL2xbCtGa6QBxlUZb) or clicking on the video preview below.
 
-<style>
-      .grid-container {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      justify-items: center;
-      align-items: center;
-      }
-      .grid-container a {
-      display: block;
-      }
-      .grid-container img {
-      width: 100%;
-      height: auto;
-      display: block;
-      }
-</style>
-
-<div class="grid-container">
-      <a href="https://youtu.be/XK_dRVcSZqg" target="_blank">
-      <img src="https://img.youtube.com/vi/XK_dRVcSZqg/0.jpg" alt="Image 1">
-      </a>
-      <a href="https://youtu.be/8Uwsa0x7VJw" target="_blank">
-      <img src="https://img.youtube.com/vi/8Uwsa0x7VJw/0.jpg" alt="Image 2">
-      </a>
-      <a href="https://youtu.be/KsMP9dgcLw4" target="_blank">
-      <img src="https://img.youtube.com/vi/KsMP9dgcLw4/0.jpg" alt="Image 3">
-      </a>
-      <a href="https://youtu.be/dZRDe1ldy5s" target="_blank">
-      <img src="https://img.youtube.com/vi/dZRDe1ldy5s/0.jpg" alt="Image 4">
-      </a>
-      <a href="https://youtu.be/udDSIQyYzNM" target="_blank">
-      <img src="https://img.youtube.com/vi/udDSIQyYzNM/0.jpg" alt="Image 5">
-      </a>
-      <a href="https://youtu.be/ppYemmT2mOs" target="_blank">
-      <img src="https://img.youtube.com/vi/ppYemmT2mOs/0.jpg" alt="Image 6">
-      </a>
-      <a href="https://youtu.be/TAUxb9eEZ3w" target="_blank">
-      <img src="https://img.youtube.com/vi/TAUxb9eEZ3w/0.jpg" alt="Image 7">
-      </a>
-      <a href="https://youtu.be/nUUkuqi4Lpo" target="_blank">
-      <img src="https://img.youtube.com/vi/XK_dRVcSZqg/0.jpg" alt="Image 8">
-      </a>
-</div>
+| [![Image 1](https://img.youtube.com/vi/XK_dRVcSZqg/0.jpg)](https://youtu.be/XK_dRVcSZqg) | [![Image 2](https://img.youtube.com/vi/8Uwsa0x7VJw/0.jpg)](https://youtu.be/8Uwsa0x7VJw) | [![Image 3](https://img.youtube.com/vi/KsMP9dgcLw4/0.jpg)](https://youtu.be/KsMP9dgcLw4) | [![Image 4](https://img.youtube.com/vi/dZRDe1ldy5s/0.jpg)](https://youtu.be/dZRDe1ldy5s) |
+| ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| [![Image 5](https://img.youtube.com/vi/udDSIQyYzNM/0.jpg)](https://youtu.be/udDSIQyYzNM) | [![Image 6](https://img.youtube.com/vi/ppYemmT2mOs/0.jpg)](https://youtu.be/ppYemmT2mOs) | [![Image 7](https://img.youtube.com/vi/TAUxb9eEZ3w/0.jpg)](https://youtu.be/TAUxb9eEZ3w) | [![Image 8](https://img.youtube.com/vi/XK_dRVcSZqg/0.jpg)](https://youtu.be/nUUkuqi4Lpo) |
 
 ## Complementary Resources
 
