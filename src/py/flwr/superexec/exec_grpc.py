@@ -28,7 +28,7 @@ from flwr.proto.exec_pb2_grpc import add_ExecServicer_to_server
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.fleet.grpc_bidi.grpc_server import generic_create_grpc_server
 from flwr.server.superlink.linkstate import LinkStateFactory
-from flwr.superexec.exec_interceptor import ExecInterceptor
+from flwr.superexec.user_auth_exec_interceptor import ExecInterceptor
 
 from .exec_servicer import ExecServicer
 from .executor import Executor
