@@ -51,6 +51,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
     ErrorCode,
+    Status,
 )
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
@@ -211,6 +212,36 @@ def start_client(
         max_wait_time=max_wait_time,
     )
     event(EventType.START_CLIENT_LEAVE)
+
+
+def handle_run_if_finished(
+    current_run_id: int,
+    run_info_store: DeprecatedRunInfoStore,
+    get_run_status: Callable[[int], RunStatus],
+) -> bool:
+    """Check run status of each run registered and delete context for those finished."""
+    skip_current_round_processing = False
+    finished_run_ids = []
+
+    # Get status of all runs
+    for run_id in run_info_store.run_infos.keys():
+        run_status = get_run_status(run_id)
+        if run_status.status == Status.FINISHED:
+            finished_run_ids.append(run_id)
+
+    if current_run_id in finished_run_ids:
+        # Flag to stop processing Message
+        skip_current_round_processing = True
+
+    for run_id in finished_run_ids:
+        del run_info_store.run_infos[run_id]
+        log(
+            INFO,
+            "Erased local Context for finished run %s.",
+            run_id,
+        )
+
+    return skip_current_round_processing
 
 
 # pylint: disable=import-outside-toplevel
@@ -409,7 +440,7 @@ def start_client_internal(
                 create_node,
                 delete_node,
                 get_run,
-                _,
+                get_run_status,
                 get_fab,
             ) = conn
 
@@ -481,6 +512,24 @@ def start_client_internal(
                             runs[run_id] = Run.create_empty(run_id=run_id)
 
                     run: Run = runs[run_id]
+                    # Check for run status change and act accordingtly
+                    if get_run_status is not None:
+                        skip_processing = handle_run_if_finished(
+                            current_run_id=run_id,
+                            run_info_store=run_info_store,
+                            get_run_status=get_run_status,
+                        )
+                        if skip_processing:
+                            log(
+                                INFO,
+                                "Run %s finished. "
+                                "Skipping processing of message %s.",
+                                run_id,
+                                message.metadata.message_id,
+                            )
+                            # Erase from mapping
+                            del runs[run_id]
+
                     if get_fab is not None and run.fab_hash:
                         fab = get_fab(run.fab_hash)
                         if not isolation:
