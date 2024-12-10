@@ -8,14 +8,12 @@ current_branch=$(git rev-parse --abbrev-ref HEAD)
 cd $(git rev-parse --show-toplevel)
 
 # Clean up previous builds
-rm -rf doc/build
+rm -rf framework/docs/build
 
 # Create a temporary directory and store locales and _templates files in it
 tmp_dir=`mktemp -d`
-cp -r doc/locales ${tmp_dir}/locales
-cp -r doc/source/_templates ${tmp_dir}/_templates
-
-cd doc
+cp -r framework/docs/locales ${tmp_dir}/locales
+cp -r framework/docs/source/_templates ${tmp_dir}/_templates
 
 # Get a list of languages based on the folders in locales
 languages="en `find locales/ -mindepth 1 -maxdepth 1 -type d -exec basename '{}' \;`"
@@ -46,7 +44,13 @@ for current_version in ${versions}; do
     pip install "numpy==${numpy_version_2}"
   fi
   echo "INFO: Building sites for ${current_version}"
- 
+
+  if [ -d "framework/docs" ]; then
+    cd framework/docs
+  else
+    cd doc
+  fi
+
   for current_language in ${languages}; do
 
     # Make the current language available to conf.py
