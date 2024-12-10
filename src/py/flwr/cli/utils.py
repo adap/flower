@@ -39,7 +39,7 @@ except ImportError:
 
     def get_cli_auth_plugins() -> dict[str, type[CliAuthPlugin]]:
         """Return all CLI authentication plugins."""
-        raise NotImplementedError("No authentication plugins are currently supported. ")
+        raise NotImplementedError("No authentication plugins are currently supported.")
 
 
 def prompt_text(
@@ -202,11 +202,16 @@ def try_obtain_cli_auth_plugin(
         auth_type = config[AUTH_TYPE]
 
     # Retrieve auth plugin class and instantiate it
-    all_plugins: dict[str, type[CliAuthPlugin]] = get_cli_auth_plugins()
-    auth_plugin_class = all_plugins.get(auth_type)
-    if auth_plugin_class is not None:
+    try:
+        all_plugins: dict[str, type[CliAuthPlugin]] = get_cli_auth_plugins()
+        auth_plugin_class = all_plugins[auth_type]
         return auth_plugin_class(config_path)
-    return None
+    except KeyError:
+        typer.echo(f"❌ Unknown user authentication type: {auth_type}")
+        raise typer.Exit(code=1) from None
+    except ImportError:
+        typer.echo("❌ No authentication plugins are currently supported.")
+        raise typer.Exit(code=1) from None
 
 
 def init_channel(
@@ -226,7 +231,9 @@ def init_channel(
         insecure=insecure,
         root_certificates=root_certificates_bytes,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        interceptors=(CliUserAuthInterceptor(auth_plugin) if auth_plugin is not None else None),
+        interceptors=(
+            CliUserAuthInterceptor(auth_plugin) if auth_plugin is not None else None
+        ),
     )
     channel.subscribe(on_channel_state_change)
     return channel
