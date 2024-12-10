@@ -97,10 +97,7 @@ except ImportError:
 
     def get_exec_auth_plugins() -> dict[str, type[ExecAuthPlugin]]:
         """Return all Exec API authentication plugins."""
-        raise NotImplementedError(
-            "No authentication plugins are currently supported. "
-            "This feature is not implemented yet."
-        )
+        raise NotImplementedError("No authentication plugins are currently supported.")
 
 
 def start_server(  # pylint: disable=too-many-arguments,too-many-locals
@@ -799,7 +796,7 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument(
         "--user-auth-config",
-        help="SuperLink config.yaml file (as a path str) to configure SuperLink.",
+        help="The path to the user authentication configuration YAML file.",
         type=str,
         default=None,
     )
