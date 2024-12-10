@@ -6,45 +6,115 @@ framework: [torch]
 
 # Flower Simulation Step-by-Step
 
-> Since this tutorial (and its video series) was put together, Flower has been updated a few times. As a result, some of the steps to construct the environment (see below) have been updated. Some parts of the code have also been updated. Overall, the content of this tutorial and how things work remains the same as in the video tutorials.
-
-This directory contains the code developed in the `Flower Simulation` tutorial series on Youtube. You can find all the videos [here](https://www.youtube.com/playlist?list=PLNG4feLHqCWlnj8a_E1A_n5zr2-8pafTB) or clicking on the video preview below.
-
-- In `Part-I` (7 videos) we developed from scratch a complete Federated Learning pipeline for simulation using PyTorch.
-- In `Part-II` (2 videos) we _enhanced_ the code in `Part-I` by making a better use of Hydra configs.
+This directory contains the code developed in the `Flower Simulation 2025` tutorial series on Youtube. You can find all the videos [here](https://www.youtube.com/playlist?list=PLNG4feLHqCWkdlSrEL2xbCtGa6QBxlUZb) or clicking on the video preview below.
 
 <div align="center">
-      <a href="https://www.youtube.com/playlist?list=PLNG4feLHqCWlnj8a_E1A_n5zr2-8pafTB" target="_blank" rel="noopener noreferrer">
-         <img src="https://img.youtube.com/vi/cRebUIGB5RU/0.jpg" style="width:75%;">
+      <a href="https://www.youtube.com/playlist?list=PLNG4feLHqCWkdlSrEL2xbCtGa6QBxlUZb" target="_blank" rel="noopener noreferrer">
+         <img src="https://img.youtube.com/vi/XK_dRVcSZqg/0.jpg" style="width:75%;">
       </a>
 </div>
 
-## Constructing your Python Environment
+## Complementary Resources
 
-As presented in the video, we first need to create a Python environment. You are free to choose the tool you are most familiar with, we'll be using `conda` in this tutorial. You can create the conda and setup the environment as follows:
+In this tutorial series, we make reference to several pages in the [Flower Documentation](https://flower.ai/docs/). In particular, this videos highlight pages for:
+
+- [Visualizing Dataset Distributions using `flwr-datasets`](https://flower.ai/docs/datasets/tutorial-visualize-label-distribution.html)
+- [List of all Partitioners available in `flwr-datasets`](https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html)
+- [How-to Run Simulations page](https://flower.ai/docs/framework/how-to-run-simulations.html)
+- [How-to Design Stateful ClientApps](https://flower.ai/docs/framework/how-to-design-stateful-clients.html)
+- [Advanced PyTorch Example](https://github.com/adap/flower/tree/main/examples/advanced-pytorch)
+
+## Getting Started
+
+> \[!TIP\]
+> If you are developing on Windows, it is recommended to make use of the Windows Subsystem for Linux (WSL). Check the guide on [how to setup WSL for development on Windows](https://code.visualstudio.com/docs/remote/wsl).
+
+> \[!NOTE\]
+> These steps represent the very first commands show on the first video. They `flwr new` command will create a Flower App you can run directly. In videos 2-7 you'll learn how to modify the App and add, step by step, the functionality already present in the `my-awesome-app` diredtory in this directory. You can use it as reference.
+
+As presented in the video, we start from a new Python 3.11 environment. You only need to activate it and install `flwr`.
 
 ```bash
-# I'm assuming you are running this on an Ubuntu 22.04 machine (GPU is not required)
-
-# create the environment
-conda create -n flower_tutorial python=3.9 -y
-
-# activate your environment (depending on how you installed conda you might need to use `conda activate ...` instead)
-source activate flower_tutorial
-
-# install PyToch (other versions would likely work)
-conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cuda=11.6 -c pytorch -c nvidia -y
-# conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 -c pytorch -y # If you don't have a GPU
-
-# Install Flower and other dependencies
-pip install -r requirements.txt
+# Install Flower
+pip install -U flwr
 ```
 
-If you are running this on macOS with Apple Silicon (i.e. M1, M2), you'll need a different `grpcio` package if you see an error when running the code. To fix this do:
+Then, use the `flwr new` command to construct a new Flower App using the PyTorch template:
 
-```bash
-# with your conda environment activated
-pip uninstall grpcio
+```shell
+flwr new my-awesome-app # then follow the prompt
+```
 
-conda install grpcio -y
+## Running the Example
+
+Just like all other Flower Apps, you can run the one in this directory by means of `flwr run`. More info about this command in the videos!
+
+```shell
+flwr run my-awesome-app
+```
+
+The output you should expect without making changes to the code is as follows:
+
+```shell
+Loading project configuration...
+Success
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Currently logged in as: <your-user>. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.18.7
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run custom-strategy-2024-12-10_07:32:03
+wandb: ⭐️ View project at https://wandb.ai/<your-user>/flower-simulation-tutorial
+wandb: 🚀 View run at https://wandb.ai/<your-user>/flower-simulation-tutorial/runs/reyoryuu
+INFO :      Starting Flower ServerApp, config: num_rounds=3, no round_timeout
+INFO :
+INFO :      [INIT]
+INFO :      Using initial global parameters provided by strategy
+INFO :      Starting evaluation of initial global parameters
+INFO :      initial parameters (loss, other metrics): 2.3028839167695456, {'cen_accuracy': 0.0937}
+INFO :
+INFO :      [ROUND 1]
+INFO :      configure_fit: strategy sampled 5 clients (out of 10)
+INFO :      aggregate_fit: received 5 results and 0 failures
+INFO :      fit progress: (1, 2.0274660648248446, {'cen_accuracy': 0.3238}, 5.769022958003916)
+INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
+INFO :      aggregate_evaluate: received 10 results and 0 failures
+INFO :
+INFO :      [ROUND 2]
+INFO :      configure_fit: strategy sampled 5 clients (out of 10)
+INFO :      aggregate_fit: received 5 results and 0 failures
+INFO :      fit progress: (2, 0.7511614774362728, {'cen_accuracy': 0.6926}, 11.233382292004535)
+INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
+INFO :      aggregate_evaluate: received 10 results and 0 failures
+INFO :
+INFO :      [ROUND 3]
+INFO :      configure_fit: strategy sampled 5 clients (out of 10)
+INFO :      aggregate_fit: received 5 results and 0 failures
+INFO :      fit progress: (3, 0.5243101176172019, {'cen_accuracy': 0.8035}, 13.289899208000861)
+INFO :      configure_evaluate: strategy sampled 10 clients (out of 10)
+INFO :      aggregate_evaluate: received 10 results and 0 failures
+INFO :
+INFO :      [SUMMARY]
+INFO :      Run finished 3 round(s) in 13.60s
+INFO :          History (loss, distributed):
+INFO :                  round 1: 2.0251417029128924
+INFO :                  round 2: 0.7533456925429649
+INFO :                  round 3: 0.5141592433326874
+INFO :          History (loss, centralized):
+INFO :                  round 0: 2.3028839167695456
+INFO :                  round 1: 2.0274660648248446
+INFO :                  round 2: 0.7511614774362728
+INFO :                  round 3: 0.5243101176172019
+INFO :          History (metrics, distributed, fit):
+INFO :          {'max_b': [(1, 0.8776450829832974),
+INFO :                     (2, 0.8755706409526767),
+INFO :                     (3, 0.880116537616749)]}
+INFO :          History (metrics, distributed, evaluate):
+INFO :          {'accuracy': [(1, 0.3237817576009996),
+INFO :                        (2, 0.6909620991253644),
+INFO :                        (3, 0.8046647230320699)]}
+INFO :          History (metrics, centralized):
+INFO :          {'cen_accuracy': [(0, 0.0937), (1, 0.3238), (2, 0.6926), (3, 0.8035)]}
+INFO :
+wandb: 🚀 View run custom-strategy-2024-12-10_07:32:03 at: https://wandb.ai/<your-user>/flower-simulation...
+wandb: Find logs at: wandb/run-20241210_073204-reyoryuu/logs
 ```
