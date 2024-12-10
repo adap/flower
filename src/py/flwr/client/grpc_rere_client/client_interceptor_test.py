@@ -50,7 +50,12 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.fleet_pb2_grpc import FleetServicer
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.proto.run_pb2 import (  # pylint: disable=E0611
+    GetRunRequest,
+    GetRunResponse,
+    GetRunStatusRequest,
+    GetRunStatusResponse,
+)
 from flwr.proto.task_pb2 import Task, TaskIns  # pylint: disable=E0611
 
 from .client_interceptor import _AUTH_TOKEN_HEADER, _PUBLIC_KEY_HEADER, Request
@@ -146,6 +151,11 @@ def _add_generic_handler(servicer: _MockServicer, server: grpc.Server) -> None:
             request_deserializer=GetRunRequest.FromString,
             response_serializer=GetRunResponse.SerializeToString,
         ),
+        "GetRunStatus": grpc.unary_unary_rpc_method_handler(
+            servicer.unary_unary,
+            request_deserializer=GetRunStatusRequest.FromString,
+            response_serializer=GetRunStatusResponse.SerializeToString,
+        ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
         "flwr.proto.Fleet", rpc_method_handlers
@@ -233,7 +243,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            _, _, create_node, _, _, _ = conn
+            _, _, create_node, _, _, _, _ = conn
             assert create_node is not None
             create_node()
 
@@ -265,7 +275,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            _, _, create_node, delete_node, _, _ = conn
+            _, _, create_node, delete_node, _, _, _ = conn
             assert create_node is not None
             create_node()
             assert delete_node is not None
@@ -306,7 +316,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            receive, _, create_node, _, _, _ = conn
+            receive, _, create_node, _, _, _, _ = conn
             assert create_node is not None
             create_node()
             assert receive is not None
@@ -348,7 +358,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            receive, send, create_node, _, _, _ = conn
+            receive, send, create_node, _, _, _, _ = conn
             assert create_node is not None
             create_node()
             assert receive is not None
@@ -378,7 +388,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             assert actual_hmac == expected_hmac
 
     def test_client_auth_get_run(self) -> None:
-        """Test client authentication during send node."""
+        """Test client authentication during get_run."""
         # Prepare
         retry_invoker = _init_retry_invoker()
 
@@ -391,11 +401,52 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            _, _, create_node, _, get_run, _ = conn
+            _, _, create_node, _, get_run, _, _ = conn
             assert create_node is not None
             create_node()
             assert get_run is not None
             get_run(0)
+
+            received_metadata = self._servicer.received_client_metadata()
+            assert received_metadata is not None
+
+            shared_secret = generate_shared_key(
+                self._servicer.server_private_key, self._client_public_key
+            )
+            expected_hmac = base64.urlsafe_b64encode(
+                compute_hmac(shared_secret, self._servicer.received_message_bytes())
+            )
+            actual_public_key = _get_value_from_tuples(
+                _PUBLIC_KEY_HEADER, received_metadata
+            )
+            actual_hmac = _get_value_from_tuples(_AUTH_TOKEN_HEADER, received_metadata)
+            expected_public_key = base64.urlsafe_b64encode(
+                public_key_to_bytes(self._client_public_key)
+            )
+
+            # Assert
+            assert actual_public_key == expected_public_key
+            assert actual_hmac == expected_hmac
+
+    def test_client_auth_get_run_status(self) -> None:
+        """Test client authentication during get_run_status."""
+        # Prepare
+        retry_invoker = _init_retry_invoker()
+
+        # Execute
+        with self._connection(
+            self._address,
+            True,
+            retry_invoker,
+            GRPC_MAX_MESSAGE_LENGTH,
+            None,
+            (self._client_private_key, self._client_public_key),
+        ) as conn:
+            _, _, create_node, _, _, get_run_status, _ = conn
+            assert create_node is not None
+            create_node()
+            assert get_run_status is not None
+            get_run_status(0)
 
             received_metadata = self._servicer.received_client_metadata()
             assert received_metadata is not None
@@ -433,7 +484,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            _, _, create_node, _, _, _ = conn
+            _, _, create_node, _, _, _, _ = conn
             assert create_node is not None
             create_node()
 
