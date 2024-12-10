@@ -1,5 +1,5 @@
 ---
-tags: [basic, vision, simulation]
+tags: [vision, simulation, video-tutorial]
 dataset: [Fashion-MNIST]
 framework: [torch]
 ---
@@ -14,6 +14,9 @@ This directory contains the code to follow along the `Flower Simulation 2025` tu
 | [![Image 1](https://img.youtube.com/vi/XK_dRVcSZqg/0.jpg)](https://youtu.be/XK_dRVcSZqg) | [![Image 2](https://img.youtube.com/vi/8Uwsa0x7VJw/0.jpg)](https://youtu.be/8Uwsa0x7VJw) | [![Image 3](https://img.youtube.com/vi/KsMP9dgcLw4/0.jpg)](https://youtu.be/KsMP9dgcLw4) | [![Image 4](https://img.youtube.com/vi/dZRDe1ldy5s/0.jpg)](https://youtu.be/dZRDe1ldy5s) |
 | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | [![Image 5](https://img.youtube.com/vi/udDSIQyYzNM/0.jpg)](https://youtu.be/udDSIQyYzNM) | [![Image 6](https://img.youtube.com/vi/ppYemmT2mOs/0.jpg)](https://youtu.be/ppYemmT2mOs) | [![Image 7](https://img.youtube.com/vi/TAUxb9eEZ3w/0.jpg)](https://youtu.be/TAUxb9eEZ3w) | [![Image 8](https://img.youtube.com/vi/XK_dRVcSZqg/0.jpg)](https://youtu.be/nUUkuqi4Lpo) |
+
+> \[!TIP\]
+> 🙋 Got questions? Something isn't covered or could be improved? **We'd love to hear from you!** Join the [🌼 Flower Workspace](https://flower.ai/join-slack/) and the [Flower Discuss Forum](https://discuss.flower.ai/)!
 
 ## Complementary Resources
 
@@ -53,6 +56,8 @@ Just like all other Flower Apps, you can run the one in this directory by means 
 
 ```shell
 flwr run my-awesome-app
+# Alternatively, if you cd into the `my-awesome-app` directory
+# you can run the app by simply doing `flwr run .`
 ```
 
 The output you should expect without making changes to the code is as follows:
