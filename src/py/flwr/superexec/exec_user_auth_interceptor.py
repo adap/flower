@@ -43,7 +43,7 @@ Response = Union[
 ]
 
 
-class ExecInterceptor(grpc.ServerInterceptor):  # type: ignore
+class ExecUserAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
     """Exec API interceptor for user authentication."""
 
     def __init__(
