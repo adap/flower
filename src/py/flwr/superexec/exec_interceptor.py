@@ -59,9 +59,9 @@ class ExecInterceptor(grpc.ServerInterceptor):  # type: ignore
     ) -> grpc.RpcMethodHandler:
         """Flower server interceptor authentication logic.
 
-        Intercept all unary calls from users and authenticate users by validating auth
-        metadata sent by the user. Continue RPC call if user is authenticated, else,
-        terminate RPC call by setting context to abort.
+        Intercept all unary-unary/unary-stream calls from users and authenticate users
+        by validating auth metadata sent by the user. Continue RPC call if user is
+        authenticated, else, terminate RPC call by setting context to abort.
         """
         # One of the method handlers in
         # `flwr.superexec.exec_servicer.ExecServicer`
@@ -75,21 +75,26 @@ class ExecInterceptor(grpc.ServerInterceptor):  # type: ignore
             request: Request,
             context: grpc.ServicerContext,
         ) -> Response:
+            call = method_handler.unary_unary or method_handler.unary_stream
             metadata = context.invocation_metadata()
             if isinstance(
                 request, (GetLoginDetailsRequest, GetAuthTokensRequest)
             ) or self.auth_plugin.validate_tokens_in_metadata(metadata):
-                return method_handler.unary_unary(request, context)  # type: ignore
+                return call(request, context)  # type: ignore
 
             tokens = self.auth_plugin.refresh_tokens(context.invocation_metadata())
             if tokens is not None:
                 context.send_initial_metadata(tokens)
-                return method_handler.unary_unary(request, context)  # type: ignore
+                return call(request, context)  # type: ignore
 
             context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
             raise grpc.RpcError()  # This line is unreachable
 
-        return grpc.unary_unary_rpc_method_handler(
+        if method_handler.unary_unary:
+            message_handler = grpc.unary_unary_rpc_method_handler
+        else:
+            message_handler = grpc.unary_stream_rpc_method_handler
+        return message_handler(
             _generic_method_handler,
             request_deserializer=method_handler.request_deserializer,
             response_serializer=method_handler.response_serializer,
