@@ -325,7 +325,7 @@ def _abort_if_run_stopped(
     run_id: int, state: LinkState, context: grpc.ServicerContext
 ) -> None:
     run_status = state.get_run_status({run_id})[run_id]
-    if (run_status.status == Status.FINISHED) & (
+    if (run_status.status == Status.FINISHED) and (
         run_status.sub_status == SubStatus.STOPPED
     ):
         context.abort(grpc.StatusCode.PERMISSION_DENIED, "Run is stopped")

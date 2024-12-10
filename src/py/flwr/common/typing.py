@@ -254,3 +254,7 @@ class Fab:
 
     hash_str: str
     content: bytes
+
+
+class RunStopException(BaseException):
+    """."""

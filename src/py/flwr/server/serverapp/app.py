@@ -22,8 +22,6 @@ from queue import Queue
 from time import sleep
 from typing import Optional
 
-import grpc
-
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.common.args import add_args_flwr_app_common
@@ -52,7 +50,7 @@ from flwr.common.serde import (
     run_from_proto,
     run_status_to_proto,
 )
-from flwr.common.typing import RunStatus
+from flwr.common.typing import RunStatus, RunStopException
 from flwr.proto.run_pb2 import UpdateRunStatusRequest  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PullServerAppInputsRequest,
@@ -189,12 +187,9 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
 
             run_status = RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
 
-        except grpc.RpcError as e:
-            # pylint: disable=E1101
-            if e.code() == grpc.StatusCode.PERMISSION_DENIED:
-                exc_entity = "ServerApp"
-                log(INFO, "Run ID %s stopped.", run.run_id)
-                run_status = None
+        except RunStopException:
+            log(INFO, "Run ID %s stopped.", run.run_id)
+            run_status = None
 
         except Exception as ex:  # pylint: disable=broad-exception-caught
             exc_entity = "ServerApp"
