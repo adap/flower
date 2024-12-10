@@ -31,7 +31,9 @@ Request = Union[
 ]
 
 
-class CliInterceptor(grpc.UnaryUnaryClientInterceptor, grpc.UnaryStreamClientInterceptor):  # type: ignore
+class CliInterceptor(
+    grpc.UnaryUnaryClientInterceptor, grpc.UnaryStreamClientInterceptor  # type: ignore
+):
     """CLI interceptor for user authentication."""
 
     def __init__(self, auth_plugin: CliAuthPlugin):

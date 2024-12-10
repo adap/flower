@@ -36,11 +36,13 @@ from .config_utils import validate_certificate_in_federation_config
 try:
     from flwr.ee import get_cli_auth_plugins
 except ImportError:
-    AUTH_PLUGIN_IMPORT_ERROR: str = "Unable to import module `flwr.ee`."
 
     def get_cli_auth_plugins() -> dict[str, type[CliAuthPlugin]]:
         """Return all CLI authentication plugins."""
-        raise ImportError(AUTH_PLUGIN_IMPORT_ERROR)
+        raise NotImplementedError(
+            "No authentication plugins are currently supported. "
+            "This feature is not implemented yet."
+        )
 
 
 def prompt_text(
