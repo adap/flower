@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 import datetime
 import os
 import sys
+
 from sphinx.application import ConfigError
 
 # Configuration file for the Sphinx documentation builder.
@@ -27,17 +28,18 @@ from sphinx.application import ConfigError
 
 
 # Fixing path issue for autodoc
-sys.path.insert(0, os.path.abspath("../../src/py"))
+sys.path.insert(0, os.path.abspath("../../"))
+sys.path.insert(0, os.path.abspath("../../flwr_datasets"))
 
 
 # -- Project information -----------------------------------------------------
 
-project = "Flower"
+project = "Flower Datasets"
 copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = "1.14.0"
+release = "0.4.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -48,6 +50,7 @@ release = "1.14.0"
 extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
     "sphinx.ext.graphviz",
@@ -60,6 +63,44 @@ extensions = [
     "nbsphinx",
 ]
 
+# Generate .rst files
+autosummary_generate = True
+
+# Document ONLY the objects from __all__ (present in __init__ files).
+# It will be done recursively starting from flwr_dataset.__init__
+# It's controlled in the index.rst file.
+autosummary_ignore_module_all = False
+
+# Each class and function docs start with the path to it
+# Make the flwr_datasets.federated_dataset.FederatedDataset appear as FederatedDataset
+# The full name is still at the top of the page
+add_module_names = False
+
+
+def find_test_modules(package_path):
+    """Go through the python files and exclude every *_test.py file."""
+    full_path_modules = []
+    for root, dirs, files in os.walk(package_path):
+        for file in files:
+            if file.endswith("_test.py"):
+                # Construct the module path relative to the package directory
+                full_path = os.path.join(root, file)
+                relative_path = os.path.relpath(full_path, package_path)
+                # Convert file path to dotted module path
+                module_path = os.path.splitext(relative_path)[0].replace(os.sep, ".")
+                full_path_modules.append(module_path)
+    modules = []
+    for full_path_module in full_path_modules:
+        parts = full_path_module.split(".")
+        for i in range(len(parts)):
+            modules.append(".".join(parts[i:]))
+    return modules
+
+
+# Stop from documenting the *_test.py files.
+# That's the only way to do that in autosummary (make the modules as mock_imports).
+autodoc_mock_imports = find_test_modules(os.path.abspath("../../"))
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
@@ -71,9 +112,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # Sphinx redirects, implemented after the doc filename changes.
 # To prevent 404 errors and redirect to the new pages.
 redirects = {
-    # Renamed pages
-    "contributing-baselines": "tutorial-contribute-baselines.html",
-    "using-baselines": "tutorial-use-baselines.html",
+    "how-to-visualize-label-distribution": "tutorial-visualize-label-distribution.html",
 }
 
 # -- Options for HTML output -------------------------------------------------
@@ -82,10 +121,10 @@ redirects = {
 # a list of builtin themes.
 #
 html_theme = "furo"
-html_title = f"Flower Baselines {release}"
-html_logo = "_static/flower-logo.png"
+html_title = f"Flower Datasets {release}"
+html_logo = "_static/flower-datasets-logo.png"
 html_favicon = "_static/favicon.ico"
-html_baseurl = "https://flower.ai/docs/baselines/"
+html_baseurl = "https://flower.ai/docs/datasets/"
 
 html_theme_options = {
     #
@@ -124,7 +163,7 @@ _open_in_colab_button = """
 .. raw:: html
 
     <br/>
-    <a href="https://colab.research.google.com/github/adap/flower/blob/main/doc/source/{{ env.doc2path(env.docname, base=None) }}">
+    <a href="https://colab.research.google.com/github/adap/flower/blob/main/datasets/docs/source/{{ env.doc2path(env.docname, base=None) }}">
         <img alt="Open in Colab" src="https://colab.research.google.com/assets/colab-badge.svg"/>
     </a>
 """
@@ -142,4 +181,7 @@ mermaid_version = ""
 # -- Options for MyST config  -------------------------------------
 # Enable this option to link to headers (`#`, `##`, or `###`)
 myst_heading_anchors = 3
-myst_enable_extensions = ["dollarmath"]
+
+# -- Options for sphinx_copybutton -------------------------------------
+copybutton_exclude = ".linenos, .gp, .go"
+copybutton_prompt_text = ">>> "
