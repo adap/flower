@@ -41,11 +41,13 @@ As presented in the video, we start from a new Python 3.11 environment. You only
 pip install -U flwr
 ```
 
-Then, use the `flwr new` command to construct a new Flower App using the PyTorch template. The vast majority of the content added to the App (as described in the video tutorials) isn't specific to PyTorch. This means you are welcome to choose another template such as `TF`, `NumPy`, `MLX` or `JAX` if you prefer. Just keep in mind you might need to do additional edits to your App (e.g. save the model differently, in the recommended way by your chosen ML framework) If you are undecided, `PyTorch` is a great framework:
+Then, use the `flwr new` command to construct a new Flower App using the PyTorch template:
 
 ```shell
 flwr new my-awesome-app
 ```
+
+The vast majority of the content added to the App (as described in the video tutorials) isn't specific to PyTorch. This means you are welcome to choose another template such as `TF`, `NumPy`, `MLX` or `JAX` if you prefer. Just keep in mind you might need to do additional edits to your App (e.g. save the model differently, in the recommended way by your chosen ML framework) If you are undecided, `PyTorch` is a great framework.
 
 > \[!NOTE\]
 > These steps represent the very first commands shown on the first video. They `flwr new` command will create a Flower App you can run directly. In videos 2-7 you'll learn how to modify the App and add, step by step, new functionality. You can check the `my-awesome-app` directory, which contains the completed code presented in the tutorial videos.
