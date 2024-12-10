@@ -41,8 +41,15 @@ class OverridingClient(NumPyClient):
     def fit(
         self, parameters: NDArrays, config: dict[str, Scalar]
     ) -> tuple[NDArrays, int, dict[str, Scalar]]:
-        """Simulate training by returning empty weights, 0 samples, empty metrics."""
-        return [], 0, {}
+        """Simulate training by returning updated weights, 0 samples, and metrics."""
+        # Simulate updated parameters as NumPy arrays
+        updated_parameters = [np.array([0.1, 0.2]), np.array([0.3, 0.4])]
+
+        # Simulate training metrics
+        metrics = {"accuracy": 0.95}
+
+        # Return updated parameters, number of examples, and metrics
+        return updated_parameters, 0, metrics
 
     def evaluate(
         self, parameters: NDArrays, config: dict[str, Scalar]
