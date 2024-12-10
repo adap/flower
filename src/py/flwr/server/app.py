@@ -601,9 +601,7 @@ def _try_obtain_exec_auth_plugin(config: dict[str, Any]) -> Optional[ExecAuthPlu
             )
         sys.exit("No authentication type is provided in the configuration.")
     except NotImplementedError:
-        sys.exit(
-            "No authentication plugins are currently supported. "
-        )
+        sys.exit("No authentication plugins are currently supported.")
 
 
 def _run_fleet_api_grpc_rere(
