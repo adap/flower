@@ -65,7 +65,15 @@ def run_exec_api_grpc(
         interceptors=interceptors,
     )
 
-    log(INFO, "Flower Deployment Engine: Starting Exec API on %s", address)
+    if auth_plugin is None:
+        log(INFO, "Flower Deployment Engine: Starting Exec API on %s", address)
+    else:
+        log(
+            INFO,
+            "Flower Deployment Engine: Starting Exec API with user "
+            "authentication on %s",
+            address,
+        )
     exec_grpc_server.start()
 
     return exec_grpc_server
