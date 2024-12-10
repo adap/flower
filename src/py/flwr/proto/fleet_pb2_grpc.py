@@ -46,6 +46,11 @@ class FleetStub(object):
                 request_serializer=flwr_dot_proto_dot_run__pb2.GetRunRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_run__pb2.GetRunResponse.FromString,
                 )
+        self.GetRunStatus = channel.unary_unary(
+                '/flwr.proto.Fleet/GetRunStatus',
+                request_serializer=flwr_dot_proto_dot_run__pb2.GetRunStatusRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_run__pb2.GetRunStatusResponse.FromString,
+                )
         self.GetFab = channel.unary_unary(
                 '/flwr.proto.Fleet/GetFab',
                 request_serializer=flwr_dot_proto_dot_fab__pb2.GetFabRequest.SerializeToString,
@@ -98,6 +103,13 @@ class FleetServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetRunStatus(self, request, context):
+        """Get Run Status
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def GetFab(self, request, context):
         """Get FAB
         """
@@ -137,6 +149,11 @@ def add_FleetServicer_to_server(servicer, server):
                     servicer.GetRun,
                     request_deserializer=flwr_dot_proto_dot_run__pb2.GetRunRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_run__pb2.GetRunResponse.SerializeToString,
+            ),
+            'GetRunStatus': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetRunStatus,
+                    request_deserializer=flwr_dot_proto_dot_run__pb2.GetRunStatusRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_run__pb2.GetRunStatusResponse.SerializeToString,
             ),
             'GetFab': grpc.unary_unary_rpc_method_handler(
                     servicer.GetFab,
@@ -252,6 +269,23 @@ class Fleet(object):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.Fleet/GetRun',
             flwr_dot_proto_dot_run__pb2.GetRunRequest.SerializeToString,
             flwr_dot_proto_dot_run__pb2.GetRunResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def GetRunStatus(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Fleet/GetRunStatus',
+            flwr_dot_proto_dot_run__pb2.GetRunStatusRequest.SerializeToString,
+            flwr_dot_proto_dot_run__pb2.GetRunStatusResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
