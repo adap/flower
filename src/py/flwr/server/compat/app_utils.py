@@ -52,36 +52,19 @@ def start_update_client_manager_thread(
     threading.Event
         An event that, when set, signals the thread to stop.
     """
-    exception_queue: Queue[Optional[Exception]] = Queue()
     f_stop = threading.Event()
     thread = threading.Thread(
-        target=_update_client_manager_wrapper,
+        target=_update_client_manager,
         args=(
             driver,
             client_manager,
             f_stop,
-            exception_queue,
         ),
         daemon=True,
     )
     thread.start()
 
-    return thread, f_stop, exception_queue
-
-
-def _update_client_manager_wrapper(
-    driver: Driver,
-    client_manager: ClientManager,
-    f_stop: threading.Event,
-    exception_queue: Queue[Optional[Exception]],
-) -> None:
-    """Wrapper function for `_update_client_manager` that catches exceptions."""
-    try:
-        _update_client_manager(driver, client_manager, f_stop)
-    except Exception as e:  # pylint: disable=broad-exception-caught
-        print("III")
-        exception_queue.put(e)
-        print("JJJ")
+    return thread, f_stop
 
 
 def _update_client_manager(

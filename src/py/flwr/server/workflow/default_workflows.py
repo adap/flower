@@ -64,7 +64,7 @@ class DefaultWorkflow:
             )
 
         # Start the thread updating nodes
-        thread, f_stop, exception_queue = start_update_client_manager_thread(
+        thread, f_stop = start_update_client_manager_thread(
             driver, context.client_manager
         )
 
@@ -114,12 +114,6 @@ class DefaultWorkflow:
         # Terminate the thread
         f_stop.set()
         thread.join()
-
-        # Raise exception caught in thread, if any
-        if not exception_queue.empty():
-            ex = exception_queue.get()
-            if ex is not None:
-                raise ex
 
 
 def default_init_params_workflow(driver: Driver, context: Context) -> None:
