@@ -55,7 +55,7 @@ from flwr.common.constant import (
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
-from flwr.common.typing import Fab, Run, UserConfig
+from flwr.common.typing import Fab, Run, RunStatus, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.server.superlink.fleet.grpc_bidi.grpc_server import generic_create_grpc_server
 from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
@@ -403,7 +403,15 @@ def start_client_internal(
             root_certificates,
             authentication_keys,
         ) as conn:
-            receive, send, create_node, delete_node, get_run, get_fab = conn
+            (
+                receive,
+                send,
+                create_node,
+                delete_node,
+                get_run,
+                get_run_status,
+                get_fab,
+            ) = conn
 
             # Register node when connecting the first time
             if run_info_store is None:
@@ -752,6 +760,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
                 Optional[Callable[[], Optional[int]]],
                 Optional[Callable[[], None]],
                 Optional[Callable[[int], Run]],
+                Optional[Callable[[int], RunStatus]],
                 Optional[Callable[[str], Fab]],
             ]
         ],

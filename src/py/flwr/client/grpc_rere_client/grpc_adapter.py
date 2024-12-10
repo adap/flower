@@ -47,7 +47,12 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.grpcadapter_pb2 import MessageContainer  # pylint: disable=E0611
 from flwr.proto.grpcadapter_pb2_grpc import GrpcAdapterStub
-from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.proto.run_pb2 import (  # pylint: disable=E0611
+    GetRunRequest,
+    GetRunResponse,
+    GetRunStatusRequest,
+    GetRunStatusResponse,
+)
 
 T = TypeVar("T", bound=GrpcMessage)
 
@@ -143,6 +148,12 @@ class GrpcAdapter:
     ) -> GetRunResponse:
         """."""
         return self._send_and_receive(request, GetRunResponse, **kwargs)
+
+    def GetRunStatus(  # pylint: disable=C0103
+        self, request: GetRunStatusRequest, **kwargs: Any
+    ) -> GetRunStatusResponse:
+        """."""
+        return self._send_and_receive(request, GetRunStatusResponse, **kwargs)
 
     def GetFab(  # pylint: disable=C0103
         self, request: GetFabRequest, **kwargs: Any

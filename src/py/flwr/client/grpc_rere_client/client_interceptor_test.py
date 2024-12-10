@@ -50,7 +50,12 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.fleet_pb2_grpc import FleetServicer
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.proto.run_pb2 import (  # pylint: disable=E0611
+    GetRunRequest,
+    GetRunResponse,
+    GetRunStatusRequest,
+    GetRunStatusResponse,
+)
 from flwr.proto.task_pb2 import Task, TaskIns  # pylint: disable=E0611
 
 from .client_interceptor import _AUTH_TOKEN_HEADER, _PUBLIC_KEY_HEADER, Request
@@ -146,6 +151,11 @@ def _add_generic_handler(servicer: _MockServicer, server: grpc.Server) -> None:
             request_deserializer=GetRunRequest.FromString,
             response_serializer=GetRunResponse.SerializeToString,
         ),
+        "GetRunStatus": grpc.unary_unary_rpc_method_handler(
+            servicer.unary_unary,
+            request_deserializer=GetRunStatusRequest.FromString,
+            response_serializer=GetRunStatusResponse.SerializeToString,
+        ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
         "flwr.proto.Fleet", rpc_method_handlers
@@ -233,7 +243,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            _, _, create_node, _, _, _ = conn
+            _, _, create_node, _, _, _, _ = conn
             assert create_node is not None
             create_node()
 
@@ -265,7 +275,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            _, _, create_node, delete_node, _, _ = conn
+            _, _, create_node, delete_node, _, _, _ = conn
             assert create_node is not None
             create_node()
             assert delete_node is not None
@@ -306,7 +316,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            receive, _, create_node, _, _, _ = conn
+            receive, _, create_node, _, _, _, _ = conn
             assert create_node is not None
             create_node()
             assert receive is not None
@@ -348,7 +358,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            receive, send, create_node, _, _, _ = conn
+            receive, send, create_node, _, _, _, _ = conn
             assert create_node is not None
             create_node()
             assert receive is not None
@@ -391,7 +401,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            _, _, create_node, _, get_run, _ = conn
+            _, _, create_node, _, get_run, _, _ = conn
             assert create_node is not None
             create_node()
             assert get_run is not None
@@ -433,7 +443,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_private_key, self._client_public_key),
         ) as conn:
-            _, _, create_node, _, _, _ = conn
+            _, _, create_node, _, _, _, _ = conn
             assert create_node is not None
             create_node()
 

@@ -139,7 +139,7 @@ def test_integration_connection() -> None:
                 max_time=None,
             ),
         ) as conn:
-            receive, send, _, _, _, _ = conn
+            receive, send, _, _, _, _, _ = conn
 
             # Setup processing loop
             while True:

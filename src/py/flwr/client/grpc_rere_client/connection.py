@@ -41,8 +41,13 @@ from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
-from flwr.common.serde import message_from_taskins, message_to_taskres, run_from_proto
-from flwr.common.typing import Fab, Run
+from flwr.common.serde import (
+    message_from_taskins,
+    message_to_taskres,
+    run_from_proto,
+    run_status_from_proto,
+)
+from flwr.common.typing import Fab, Run, RunStatus
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
@@ -54,7 +59,12 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.proto.run_pb2 import (  # pylint: disable=E0611
+    GetRunRequest,
+    GetRunResponse,
+    GetRunStatusRequest,
+    GetRunStatusResponse,
+)
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 from .client_interceptor import AuthenticateClientInterceptor
@@ -84,6 +94,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         Optional[Callable[[], Optional[int]]],
         Optional[Callable[[], None]],
         Optional[Callable[[int], Run]],
+        Optional[Callable[[int], RunStatus]],
         Optional[Callable[[str], Fab]],
     ]
 ]:
@@ -290,6 +301,17 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         # Return fab_id and fab_version
         return run_from_proto(get_run_response.run)
 
+    def get_run_status(run_id: int) -> RunStatus:
+        # Call FleetAPI
+        get_run_status_request = GetRunStatusRequest(node=node, run_ids=[run_id])
+        get_run_status_response: GetRunStatusResponse = retry_invoker.invoke(
+            stub.GetRunStatus,
+            request=get_run_status_request,
+        )
+
+        # Return RunStatus
+        return run_status_from_proto(get_run_status_response.run_status_dict[run_id])
+
     def get_fab(fab_hash: str) -> Fab:
         # Call FleetAPI
         get_fab_request = GetFabRequest(node=node, hash_str=fab_hash)
@@ -302,6 +324,14 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
     try:
         # Yield methods
-        yield (receive, send, create_node, delete_node, get_run, get_fab)
+        yield (
+            receive,
+            send,
+            create_node,
+            delete_node,
+            get_run,
+            get_run_status,
+            get_fab,
+        )
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)

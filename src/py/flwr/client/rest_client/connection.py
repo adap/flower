@@ -42,7 +42,7 @@ from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
 from flwr.common.serde import message_from_taskins, message_to_taskres, run_from_proto
-from flwr.common.typing import Fab, Run
+from flwr.common.typing import Fab, Run, RunStatus
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
@@ -96,6 +96,7 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         Optional[Callable[[], Optional[int]]],
         Optional[Callable[[], None]],
         Optional[Callable[[int], Run]],
+        Optional[Callable[[int], RunStatus]],
         Optional[Callable[[str], Fab]],
     ]
 ]:
@@ -377,6 +378,6 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
     try:
         # Yield methods
-        yield (receive, send, create_node, delete_node, get_run, get_fab)
+        yield (receive, send, create_node, delete_node, get_run, None, get_fab)
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)
