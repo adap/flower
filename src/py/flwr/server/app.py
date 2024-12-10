@@ -92,7 +92,7 @@ BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
 
 
 try:
-    from flwr.ee.auth_plugin import get_exec_auth_plugins
+    from flwr.ee import get_exec_auth_plugins
 except ImportError:
     AUTH_PLUGIN_IMPORT_ERROR: str = """Unable to import module `flwr.ee.auth_plugin`.
 
