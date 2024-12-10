@@ -94,11 +94,13 @@ BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
 try:
     from flwr.ee import get_exec_auth_plugins
 except ImportError:
-    AUTH_PLUGIN_IMPORT_ERROR: str = "Unable to import module `flwr.ee`."
 
     def get_exec_auth_plugins() -> dict[str, type[ExecAuthPlugin]]:
         """Return all Exec API authentication plugins."""
-        raise ImportError(AUTH_PLUGIN_IMPORT_ERROR)
+        raise NotImplementedError(
+            "No authentication plugins are currently supported. "
+            "This feature is not implemented yet."
+        )
 
 
 def start_server(  # pylint: disable=too-many-arguments,too-many-locals
@@ -589,11 +591,23 @@ def _try_obtain_user_auth_config(args: argparse.Namespace) -> Optional[dict[str,
 
 def _try_obtain_exec_auth_plugin(config: dict[str, Any]) -> Optional[ExecAuthPlugin]:
     auth_config: dict[str, Any] = config.get("authentication", {})
-    all_plugins: dict[str, type[ExecAuthPlugin]] = get_exec_auth_plugins()
-    auth_plugin_class = all_plugins.get(auth_config.get(AUTH_TYPE, ""))
-    if auth_plugin_class is None:
-        return None
-    return auth_plugin_class(config=auth_config)
+    auth_type: Optional[str] = auth_config.get(AUTH_TYPE)
+    try:
+        all_plugins: dict[str, type[ExecAuthPlugin]] = get_exec_auth_plugins()
+        auth_plugin_class = all_plugins[auth_type]
+        return auth_plugin_class(config=auth_config)
+    except KeyError:
+        if auth_type is not None:
+            sys.exit(
+                f"Authentication type '{auth_type}' is not supported. "
+                "Please provide a valid authentication type in the configuration."
+            )
+        sys.exit("No authentication type is provided in the configuration.")
+    except NotImplementedError:
+        sys.exit(
+            "No authentication plugins are currently supported. "
+            "This feature is not implemented yet."
+        )
 
 
 def _run_fleet_api_grpc_rere(
