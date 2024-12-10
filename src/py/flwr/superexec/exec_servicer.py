@@ -172,6 +172,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
                 grpc.StatusCode.UNIMPLEMENTED,
                 "ExecServicer initialized without user authentication",
             )
+            raise grpc.RpcError()  # This line is unreachable
         return GetLoginDetailsResponse(
             login_details=self.auth_plugin.get_login_details()
         )
@@ -186,6 +187,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
                 grpc.StatusCode.UNIMPLEMENTED,
                 "ExecServicer initialized without user authentication",
             )
+            raise grpc.RpcError()  # This line is unreachable
         return GetAuthTokensResponse(
             auth_tokens=self.auth_plugin.get_auth_tokens(dict(request.auth_details))
         )

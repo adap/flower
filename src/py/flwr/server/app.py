@@ -588,15 +588,15 @@ def _try_obtain_user_auth_config(args: argparse.Namespace) -> Optional[dict[str,
 
 def _try_obtain_exec_auth_plugin(config: dict[str, Any]) -> Optional[ExecAuthPlugin]:
     auth_config: dict[str, Any] = config.get("authentication", {})
-    auth_type: Optional[str] = auth_config.get(AUTH_TYPE)
+    auth_type: str = auth_config.get(AUTH_TYPE, "")
     try:
         all_plugins: dict[str, type[ExecAuthPlugin]] = get_exec_auth_plugins()
         auth_plugin_class = all_plugins[auth_type]
         return auth_plugin_class(config=auth_config)
     except KeyError:
-        if auth_type is not None:
+        if auth_type != "":
             sys.exit(
-                f"Authentication type '{auth_type}' is not supported. "
+                f'Authentication type "{auth_type}" is not supported. '
                 "Please provide a valid authentication type in the configuration."
             )
         sys.exit("No authentication type is provided in the configuration.")
