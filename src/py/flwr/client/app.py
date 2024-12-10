@@ -527,6 +527,8 @@ def start_client_internal(
                                 run_id,
                                 message.metadata.message_id,
                             )
+                            # Erase from mapping
+                            del runs[run_id]
 
                     if get_fab is not None and run.fab_hash:
                         fab = get_fab(run.fab_hash)
