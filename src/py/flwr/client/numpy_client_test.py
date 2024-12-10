@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower NumPyClient tests."""
 
+import numpy as np
 
 from flwr.common import Config, NDArrays, Properties, Scalar
 
@@ -157,6 +158,7 @@ def test_has_evaluate_false() -> None:
     # Assert
     assert actual == expected
 
+
 def test_fit_return_type() -> None:
     """Test that fit returns the correct type."""
     # Prepare
@@ -164,12 +166,12 @@ def test_fit_return_type() -> None:
 
     # Execute
     parameters, num_examples, metrics = client.fit(
-        parameters=[0.1, 0.2], config={"epochs": 5}
+        parameters=[np.array([0.1, 0.2])], config={"epochs": 5}
     )
 
     # Assert
-    assert isinstance(parameters, list)
-    assert all(isinstance(p, float) for p in parameters)
+    assert isinstance(parameters, list)  # NDArrays is a list of np.ndarray
+    assert all(isinstance(p, np.ndarray) for p in parameters)
     assert isinstance(num_examples, int)
     assert isinstance(metrics, dict)
 
@@ -181,7 +183,7 @@ def test_evaluate_return_type() -> None:
 
     # Execute
     loss, num_examples, metrics = client.evaluate(
-        parameters=[0.1, 0.2], config={"batch_size": 32}
+        parameters=[np.array([0.1, 0.2])], config={"batch_size": 32}
     )
 
     # Assert
@@ -199,8 +201,8 @@ def test_get_parameters_return_type() -> None:
     parameters = client.get_parameters(config={})
 
     # Assert
-    assert isinstance(parameters, list)
-    assert all(isinstance(p, float) for p in parameters)
+    assert isinstance(parameters, list)  # NDArrays is a list of np.ndarray
+    assert all(isinstance(p, np.ndarray) for p in parameters)
 
 
 def test_get_properties_return_type() -> None:
