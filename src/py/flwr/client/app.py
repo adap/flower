@@ -51,6 +51,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
     ErrorCode,
+    Status,
 )
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
@@ -409,7 +410,7 @@ def start_client_internal(
                 create_node,
                 delete_node,
                 get_run,
-                _,
+                get_run_status,
                 get_fab,
             ) = conn
 
@@ -475,12 +476,45 @@ def start_client_internal(
                     run_id = message.metadata.run_id
                     if run_id not in runs:
                         if get_run is not None:
-                            runs[run_id] = get_run(run_id)
+                            run_ = get_run(run_id)
+                            if run_.status.status == Status.FINISHED:
+                                log(
+                                    INFO,
+                                    "Run %s finished. "
+                                    "Skipping processing of message %s.",
+                                    run_id,
+                                    message.metadata.message_id,
+                                )
+                                continue
+                            runs[run_id] = run_
                         # If get_run is None, i.e., in grpc-bidi mode
                         else:
                             runs[run_id] = Run.create_empty(run_id=run_id)
 
                     run: Run = runs[run_id]
+                    # Update run status
+                    if get_run_status is not None:
+                        run_status = get_run_status(run_id)
+                        run.status = run_status
+
+                    # If run finished, erase local context
+                    if run.status.status == Status.FINISHED:
+                        log(
+                            INFO,
+                            "Run %s finished. Skipping processing of message %s.",
+                            run_id,
+                            message.metadata.message_id,
+                        )
+                        if run_id in run_info_store.run_infos:
+                            del run_info_store.run_infos[run_id]
+                            del runs[run_id]
+                            log(
+                                INFO,
+                                "Erased local Context for finished run %s.",
+                                run_id,
+                            )
+                        continue
+
                     if get_fab is not None and run.fab_hash:
                         fab = get_fab(run.fab_hash)
                         if not isolation:
