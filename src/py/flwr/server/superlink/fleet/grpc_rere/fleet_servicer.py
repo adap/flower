@@ -20,6 +20,7 @@ from logging import DEBUG, INFO
 import grpc
 
 from flwr.common.logger import log
+from flwr.common.serde import run_status_to_proto
 from flwr.proto import fleet_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -34,7 +35,12 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResRequest,
     PushTaskResResponse,
 )
-from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.proto.run_pb2 import (  # pylint: disable=E0611
+    GetRunRequest,
+    GetRunResponse,
+    GetRunStatusRequest,
+    GetRunStatusResponse,
+)
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.fleet.message_handler import message_handler
 from flwr.server.superlink.linkstate import LinkStateFactory
@@ -118,6 +124,26 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         return message_handler.get_run(
             request=request,
             state=self.state_factory.state(),
+        )
+
+    def GetRunStatus(
+        self, request: GetRunStatusRequest, context: grpc.ServicerContext
+    ) -> GetRunStatusResponse:
+        """Get status of requested runs."""
+        log(
+            INFO,
+            "[Fleet.GetRunStatus] Requesting `RunStatus` for run_ids=%s",
+            request.run_ids,
+        )
+        state = self.state_factory.state()
+
+        statuses = state.get_run_status(set(request.run_ids))
+
+        return GetRunStatusResponse(
+            run_status_dict={
+                run_id: run_status_to_proto(status)
+                for run_id, status in statuses.items()
+            }
         )
 
     def GetFab(
