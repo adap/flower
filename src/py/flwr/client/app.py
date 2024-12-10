@@ -55,7 +55,7 @@ from flwr.common.constant import (
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
-from flwr.common.typing import Fab, Run, UserConfig
+from flwr.common.typing import Fab, Run, StopRunException, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.server.superlink.fleet.grpc_bidi.grpc_server import generic_create_grpc_server
 from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
@@ -367,6 +367,11 @@ def start_client_internal(
                 retry_state.actual_wait,
             )
 
+    def _should_giveup_fn(e: Exception) -> bool:
+        if e.code() == grpc.StatusCode.PERMISSION_DENIED:  # type: ignore
+            raise StopRunException
+        return True
+
     retry_invoker = RetryInvoker(
         wait_gen_factory=lambda: exponential(max_delay=MAX_RETRY_DELAY),
         recoverable_exceptions=connection_error_type,
@@ -384,6 +389,7 @@ def start_client_internal(
         ),
         on_success=_on_sucess,
         on_backoff=_on_backoff,
+        # should_giveup=_should_giveup_fn,
     )
 
     # DeprecatedRunInfoStore gets initialized when the first connection is established

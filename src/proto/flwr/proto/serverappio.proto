@@ -55,6 +55,9 @@ service ServerAppIo {
   rpc UpdateRunStatus(UpdateRunStatusRequest)
       returns (UpdateRunStatusResponse) {}
 
+  // Get the status of a given run
+  rpc GetRunStatus(GetRunStatusRequest) returns (GetRunStatusResponse) {}
+
   // Push ServerApp logs
   rpc PushLogs(PushLogsRequest) returns (PushLogsResponse) {}
 }
@@ -64,13 +67,17 @@ message GetNodesRequest { uint64 run_id = 1; }
 message GetNodesResponse { repeated Node nodes = 1; }
 
 // PushTaskIns messages
-message PushTaskInsRequest { repeated TaskIns task_ins_list = 1; }
+message PushTaskInsRequest {
+  repeated TaskIns task_ins_list = 1;
+  uint64 run_id = 2;
+}
 message PushTaskInsResponse { repeated string task_ids = 2; }
 
 // PullTaskRes messages
 message PullTaskResRequest {
   Node node = 1;
   repeated string task_ids = 2;
+  uint64 run_id = 3;
 }
 message PullTaskResResponse { repeated TaskRes task_res_list = 1; }
 

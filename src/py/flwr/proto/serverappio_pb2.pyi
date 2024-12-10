@@ -44,13 +44,16 @@ class PushTaskInsRequest(google.protobuf.message.Message):
     """PushTaskIns messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     TASK_INS_LIST_FIELD_NUMBER: builtins.int
+    RUN_ID_FIELD_NUMBER: builtins.int
     @property
     def task_ins_list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.task_pb2.TaskIns]: ...
+    run_id: builtins.int
     def __init__(self,
         *,
         task_ins_list: typing.Optional[typing.Iterable[flwr.proto.task_pb2.TaskIns]] = ...,
+        run_id: builtins.int = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["task_ins_list",b"task_ins_list"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id","task_ins_list",b"task_ins_list"]) -> None: ...
 global___PushTaskInsRequest = PushTaskInsRequest
 
 class PushTaskInsResponse(google.protobuf.message.Message):
@@ -70,17 +73,20 @@ class PullTaskResRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     NODE_FIELD_NUMBER: builtins.int
     TASK_IDS_FIELD_NUMBER: builtins.int
+    RUN_ID_FIELD_NUMBER: builtins.int
     @property
     def node(self) -> flwr.proto.node_pb2.Node: ...
     @property
     def task_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
+    run_id: builtins.int
     def __init__(self,
         *,
         node: typing.Optional[flwr.proto.node_pb2.Node] = ...,
         task_ids: typing.Optional[typing.Iterable[typing.Text]] = ...,
+        run_id: builtins.int = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["node",b"node"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["node",b"node","task_ids",b"task_ids"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["node",b"node","run_id",b"run_id","task_ids",b"task_ids"]) -> None: ...
 global___PullTaskResRequest = PullTaskResRequest
 
 class PullTaskResResponse(google.protobuf.message.Message):
