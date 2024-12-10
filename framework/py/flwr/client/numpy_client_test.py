@@ -198,9 +198,7 @@ def test_evaluate_return_type() -> None:
     assert isinstance(num_examples, int)
     assert isinstance(metrics, dict)
     assert all(isinstance(k, str) for k in metrics)  # Fix: Removed `.keys()`
-    assert all(
-        isinstance(v, (bool, bytes, float, int, str)) for v in metrics.values()
-    )
+    assert all(isinstance(v, (bool, bytes, float, int, str)) for v in metrics.values())
 
 
 def test_get_parameters_return_type() -> None:
