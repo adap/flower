@@ -8,9 +8,48 @@ framework: [torch]
 
 This directory contains the code developed in the `Flower Simulation 2025` tutorial series on Youtube. You can find all the videos [here](https://www.youtube.com/playlist?list=PLNG4feLHqCWkdlSrEL2xbCtGa6QBxlUZb) or clicking on the video preview below.
 
-<div align="center">
-      <a href="https://www.youtube.com/playlist?list=PLNG4feLHqCWkdlSrEL2xbCtGa6QBxlUZb" target="_blank" rel="noopener noreferrer">
-         <img src="https://img.youtube.com/vi/XK_dRVcSZqg/0.jpg" style="width:75%;">
+<style>
+      .grid-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      justify-items: center;
+      align-items: center;
+      }
+      .grid-container a {
+      display: block;
+      }
+      .grid-container img {
+      width: 100%;
+      height: auto;
+      display: block;
+      }
+</style>
+
+<div class="grid-container">
+      <a href="https://youtu.be/XK_dRVcSZqg" target="_blank">
+      <img src="https://img.youtube.com/vi/XK_dRVcSZqg/0.jpg" alt="Image 1">
+      </a>
+      <a href="https://youtu.be/8Uwsa0x7VJw" target="_blank">
+      <img src="https://img.youtube.com/vi/8Uwsa0x7VJw/0.jpg" alt="Image 2">
+      </a>
+      <a href="https://youtu.be/KsMP9dgcLw4" target="_blank">
+      <img src="https://img.youtube.com/vi/KsMP9dgcLw4/0.jpg" alt="Image 3">
+      </a>
+      <a href="https://youtu.be/dZRDe1ldy5s" target="_blank">
+      <img src="https://img.youtube.com/vi/dZRDe1ldy5s/0.jpg" alt="Image 4">
+      </a>
+      <a href="https://youtu.be/udDSIQyYzNM" target="_blank">
+      <img src="https://img.youtube.com/vi/udDSIQyYzNM/0.jpg" alt="Image 5">
+      </a>
+      <a href="https://youtu.be/ppYemmT2mOs" target="_blank">
+      <img src="https://img.youtube.com/vi/ppYemmT2mOs/0.jpg" alt="Image 6">
+      </a>
+      <a href="https://youtu.be/TAUxb9eEZ3w" target="_blank">
+      <img src="https://img.youtube.com/vi/TAUxb9eEZ3w/0.jpg" alt="Image 7">
+      </a>
+      <a href="https://youtu.be/nUUkuqi4Lpo" target="_blank">
+      <img src="https://img.youtube.com/vi/XK_dRVcSZqg/0.jpg" alt="Image 8">
       </a>
 </div>
 
@@ -30,7 +69,7 @@ In this tutorial series, we make reference to several pages in the [Flower Docum
 > If you are developing on Windows, it is recommended to make use of the Windows Subsystem for Linux (WSL). Check the guide on [how to setup WSL for development on Windows](https://code.visualstudio.com/docs/remote/wsl).
 
 > \[!NOTE\]
-> These steps represent the very first commands show on the first video. They `flwr new` command will create a Flower App you can run directly. In videos 2-7 you'll learn how to modify the App and add, step by step, the functionality already present in the `my-awesome-app` diredtory in this directory. You can use it as reference.
+> These steps represent the very first commands shown on the first video. They `flwr new` command will create a Flower App you can run directly. In videos 2-7 you'll learn how to modify the App and add, step by step, new functionality. You can check the `my-awesome-app` directory, which contains the completed code presented in the tutorial videos.
 
 As presented in the video, we start from a new Python 3.11 environment. You only need to activate it and install `flwr`.
 
