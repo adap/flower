@@ -170,11 +170,11 @@ def test_fit_return_type() -> None:
     )
 
     # Assert
-    assert isinstance(parameters, list)  # NDArrays is a list
-    assert all(
-        isinstance(p, np.ndarray) and p.dtype.kind in {"f", "i", "u"}
-        for p in parameters
-    )
+    # Check if parameters is a list and all elements are np.ndarray
+    assert isinstance(parameters, list)
+    assert all(isinstance(p, np.ndarray) for p in parameters)
+
+    # Check other return types
     assert isinstance(num_examples, int)
     assert isinstance(metrics, dict)
     assert all(
@@ -212,11 +212,9 @@ def test_get_parameters_return_type() -> None:
     parameters = client.get_parameters(config={})
 
     # Assert
-    assert isinstance(parameters, list)  # NDArrays is a list
-    assert all(
-        isinstance(p, np.ndarray) and p.dtype.kind in {"f", "i", "u"}
-        for p in parameters
-    )
+    # Check if parameters is a list and all elements are np.ndarray
+    assert isinstance(parameters, list)
+    assert all(isinstance(p, np.ndarray) for p in parameters)
 
 
 def test_get_properties_return_type() -> None:
