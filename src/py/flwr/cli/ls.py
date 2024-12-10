@@ -18,11 +18,9 @@
 import io
 import json
 from datetime import datetime, timedelta
-from logging import DEBUG
 from pathlib import Path
-from typing import Annotated, Any, Optional, Union
+from typing import Annotated, Optional, Union
 
-import grpc
 import typer
 from rich.console import Console
 from rich.table import Table
@@ -31,14 +29,12 @@ from typer import Exit
 
 from flwr.cli.config_utils import (
     load_and_validate,
-    validate_certificate_in_federation_config,
     validate_federation_in_project_config,
     validate_project_config,
 )
 from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat, SubStatus
 from flwr.common.date import format_timedelta, isoformat8601_utc
-from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
-from flwr.common.logger import log, redirect_output, remove_emojis, restore_output
+from flwr.common.logger import redirect_output, remove_emojis, restore_output
 from flwr.common.serde import run_from_proto
 from flwr.common.typing import Run
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
@@ -46,6 +42,8 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     ListRunsResponse,
 )
 from flwr.proto.exec_pb2_grpc import ExecStub
+
+from .utils import init_channel, try_obtain_cli_auth_plugin
 
 _RunListType = tuple[int, str, str, str, str, str, str, str, str]
 
@@ -113,8 +111,8 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches
                 raise ValueError(
                     "The options '--runs' and '--run-id' are mutually exclusive."
                 )
-
-            channel = _init_channel(app, federation_config)
+            auth_plugin = try_obtain_cli_auth_plugin(app, federation, federation_config)
+            channel = init_channel(app, federation_config, auth_plugin)
             stub = ExecStub(channel)
 
             # Display information about a specific run ID
@@ -152,27 +150,6 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches
         if suppress_output:
             restore_output()
         captured_output.close()
-
-
-def on_channel_state_change(channel_connectivity: str) -> None:
-    """Log channel connectivity."""
-    log(DEBUG, channel_connectivity)
-
-
-def _init_channel(app: Path, federation_config: dict[str, Any]) -> grpc.Channel:
-    """Initialize gRPC channel to the Exec API."""
-    insecure, root_certificates_bytes = validate_certificate_in_federation_config(
-        app, federation_config
-    )
-    channel = create_channel(
-        server_address=federation_config["address"],
-        insecure=insecure,
-        root_certificates=root_certificates_bytes,
-        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        interceptors=None,
-    )
-    channel.subscribe(on_channel_state_change)
-    return channel
 
 
 def _format_runs(run_dict: dict[int, Run], now_isoformat: str) -> list[_RunListType]:
