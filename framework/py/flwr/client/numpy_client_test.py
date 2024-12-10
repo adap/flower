@@ -227,7 +227,7 @@ def test_get_properties_return_type() -> None:
 
     # Assert
     assert isinstance(properties, dict)  # Properties is a dict[str, Scalar]
-    assert all(isinstance(k, str) for k in properties.keys())
+    assert all(isinstance(k, str) for k in properties)
     assert all(
         isinstance(v, (bool, bytes, float, int, str)) for v in properties.values()
     )
