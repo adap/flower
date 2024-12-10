@@ -85,7 +85,7 @@ def login(  # pylint: disable=R0914
 
     # Login
     auth_config = auth_plugin.login(
-        dict(login_response.login_details), config, federation, stub
+        dict(login_response.login_details), stub
     )
 
     # Store the tokens
