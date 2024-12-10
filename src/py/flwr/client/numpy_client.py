@@ -259,7 +259,7 @@ def _fit(self: Client, ins: FitIns) -> FitRes:
     results = self.numpy_client.fit(parameters, ins.config)  # type: ignore
     if not (
         len(results) == 3
-        and isinstance(results[0], list)
+        and isinstance(results[0], NDArrays)
         and isinstance(results[1], int)
         and isinstance(results[2], dict)
     ):
