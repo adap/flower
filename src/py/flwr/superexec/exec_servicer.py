@@ -167,32 +167,28 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
     ) -> GetLoginDetailsResponse:
         """Start login."""
         log(INFO, "ExecServicer.GetLoginDetails")
-        if self.auth_plugin is not None:
-            return GetLoginDetailsResponse(
-                login_details=self.auth_plugin.get_login_details()
+        if self.auth_plugin is None:
+            context.abort(
+                grpc.StatusCode.UNIMPLEMENTED,
+                "ExecServicer initialized without user authentication",
             )
-
-        context.abort(
-            grpc.StatusCode.UNIMPLEMENTED,
-            "ExecServicer initialized without user authentication",
+        return GetLoginDetailsResponse(
+            login_details=self.auth_plugin.get_login_details()
         )
-        return GetLoginDetailsResponse()
 
     def GetAuthTokens(
         self, request: GetAuthTokensRequest, context: grpc.ServicerContext
     ) -> GetAuthTokensResponse:
         """Get auth token."""
         log(INFO, "ExecServicer.GetAuthTokens")
-        if self.auth_plugin is not None:
-            return GetAuthTokensResponse(
-                auth_tokens=self.auth_plugin.get_auth_tokens(dict(request.auth_details))
+        if self.auth_plugin is None:
+            context.abort(
+                grpc.StatusCode.UNIMPLEMENTED,
+                "ExecServicer initialized without user authentication",
             )
-
-        context.abort(
-            grpc.StatusCode.UNIMPLEMENTED,
-            "ExecServicer initialized without user authentication",
+        return GetAuthTokensResponse(
+            auth_tokens=self.auth_plugin.get_auth_tokens(dict(request.auth_details))
         )
-        return GetAuthTokensResponse(auth_tokens={})
 
 
 def _create_list_runs_response(run_ids: set[int], state: LinkState) -> ListRunsResponse:
