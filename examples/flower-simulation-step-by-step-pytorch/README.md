@@ -20,7 +20,7 @@ This directory contains the code to follow along the `Flower Simulation 2025` tu
 
 ## Complementary Resources
 
-In this tutorial series, we make reference to several pages in the [Flower Documentation](https://flower.ai/docs/). In particular, this videos highlight pages for:
+In this tutorial series, we make reference to several pages in the [Flower Documentation](https://flower.ai/docs/). In particular, these videos highlight pages for:
 
 - [Visualizing Dataset Distributions using `flwr-datasets`](https://flower.ai/docs/datasets/tutorial-visualize-label-distribution.html)
 - [List of all Partitioners available in `flwr-datasets`](https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html)
@@ -44,7 +44,7 @@ pip install -U flwr
 Then, use the `flwr new` command to construct a new Flower App using the PyTorch template. The vast majority of the content added to the App (as described in the video tutorials) isn't specific to PyTorch. This means you are welcome to choose another template such as `TF`, `NumPy`, `MLX` or `JAX` if you prefer. Just keep in mind you might need to do additional edits to your App (e.g. save the model differently, in the recommended way by your chosen ML framework) If you are undecided, `PyTorch` is a great framework:
 
 ```shell
-flwr new my-awesome-app # then follow the prompt and choose PyTorch
+flwr new my-awesome-app
 ```
 
 > \[!NOTE\]
