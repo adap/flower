@@ -388,7 +388,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             assert actual_hmac == expected_hmac
 
     def test_client_auth_get_run(self) -> None:
-        """Test client authentication during send node."""
+        """Test client authentication during get_run."""
         # Prepare
         retry_invoker = _init_retry_invoker()
 
@@ -406,6 +406,47 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             create_node()
             assert get_run is not None
             get_run(0)
+
+            received_metadata = self._servicer.received_client_metadata()
+            assert received_metadata is not None
+
+            shared_secret = generate_shared_key(
+                self._servicer.server_private_key, self._client_public_key
+            )
+            expected_hmac = base64.urlsafe_b64encode(
+                compute_hmac(shared_secret, self._servicer.received_message_bytes())
+            )
+            actual_public_key = _get_value_from_tuples(
+                _PUBLIC_KEY_HEADER, received_metadata
+            )
+            actual_hmac = _get_value_from_tuples(_AUTH_TOKEN_HEADER, received_metadata)
+            expected_public_key = base64.urlsafe_b64encode(
+                public_key_to_bytes(self._client_public_key)
+            )
+
+            # Assert
+            assert actual_public_key == expected_public_key
+            assert actual_hmac == expected_hmac
+
+    def test_client_auth_get_run_status(self) -> None:
+        """Test client authentication during get_run_status."""
+        # Prepare
+        retry_invoker = _init_retry_invoker()
+
+        # Execute
+        with self._connection(
+            self._address,
+            True,
+            retry_invoker,
+            GRPC_MAX_MESSAGE_LENGTH,
+            None,
+            (self._client_private_key, self._client_public_key),
+        ) as conn:
+            _, _, create_node, _, _, get_run_status, _ = conn
+            assert create_node is not None
+            create_node()
+            assert get_run_status is not None
+            get_run_status(0)
 
             received_metadata = self._servicer.received_client_metadata()
             assert received_metadata is not None

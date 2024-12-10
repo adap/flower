@@ -41,7 +41,12 @@ from flwr.common.constant import (
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
-from flwr.common.serde import message_from_taskins, message_to_taskres, run_from_proto
+from flwr.common.serde import (
+    message_from_taskins,
+    message_to_taskres,
+    run_from_proto,
+    run_status_from_proto,
+)
 from flwr.common.typing import Fab, Run, RunStatus
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -57,7 +62,12 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.proto.run_pb2 import (  # pylint: disable=E0611
+    GetRunRequest,
+    GetRunResponse,
+    GetRunStatusRequest,
+    GetRunStatusResponse,
+)
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 try:
@@ -72,6 +82,7 @@ PATH_PULL_TASK_INS: str = "api/v0/fleet/pull-task-ins"
 PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
 PATH_PING: str = "api/v0/fleet/ping"
 PATH_GET_RUN: str = "/api/v0/fleet/get-run"
+PATH_GET_RUN_STATUS: str = "/api/v0/fleet/get-run-status"
 PATH_GET_FAB: str = "/api/v0/fleet/get-fab"
 
 T = TypeVar("T", bound=GrpcMessage)
@@ -362,6 +373,18 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
         return run_from_proto(res.run)
 
+    def get_run_status(run_id: int) -> RunStatus:
+        # Construct the request
+        req = GetRunStatusRequest(node=node, run_ids=[run_id])
+
+        # Send the request
+        res = _request(req, GetRunStatusResponse, PATH_GET_RUN_STATUS)
+
+        if res is None:
+            return RunStatus("", "", "")
+
+        return run_status_from_proto(res.run_status_dict[run_id])
+
     def get_fab(fab_hash: str) -> Fab:
         # Construct the request
         req = GetFabRequest(node=node, hash_str=fab_hash)
@@ -378,6 +401,14 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
     try:
         # Yield methods
-        yield (receive, send, create_node, delete_node, get_run, None, get_fab)
+        yield (
+            receive,
+            send,
+            create_node,
+            delete_node,
+            get_run,
+            get_run_status,
+            get_fab,
+        )
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)

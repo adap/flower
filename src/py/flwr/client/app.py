@@ -409,7 +409,7 @@ def start_client_internal(
                 create_node,
                 delete_node,
                 get_run,
-                get_run_status,
+                _,
                 get_fab,
             ) = conn
 
