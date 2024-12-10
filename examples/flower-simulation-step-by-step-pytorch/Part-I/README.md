@@ -4,7 +4,7 @@ In the first part of the Flower Simulation series, we go step-by-step through th
 
 ## Running the Code
 
-In this tutorial we didn't dive in that much into Hydra configs (that's the content of [Part-II](https://github.com/adap/flower/tree/main/examples/flower-simulation-step-by-step-pytorch/Part-II)). However, this doesn't mean we can't easily configure our experiment directly from the command line. Let's see a couple of examples on how to run our simulation.
+In this tutorial we didn't dive in that much into Hydra configs (that's the content of [Part-II](../Part-II/README.mdmd)). However, this doesn't mean we can't easily configure our experiment directly from the command line. Let's see a couple of examples on how to run our simulation.
 
 ```bash
 
