@@ -15,7 +15,7 @@
 """ConfigsRecord."""
 
 
-from typing import Dict, List, Optional, get_args
+from typing import Optional, get_args
 
 from flwr.common.typing import ConfigsRecordValues, ConfigsScalar
 
@@ -109,7 +109,7 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
 
     def __init__(
         self,
-        configs_dict: Optional[Dict[str, ConfigsRecordValues]] = None,
+        configs_dict: Optional[dict[str, ConfigsRecordValues]] = None,
         keep_input: bool = True,
     ) -> None:
 
@@ -128,6 +128,7 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
 
         def get_var_bytes(value: ConfigsScalar) -> int:
             """Return Bytes of value passed."""
+            var_bytes = 0
             if isinstance(value, bool):
                 var_bytes = 1
             elif isinstance(value, (int, float)):
@@ -136,12 +137,17 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
                 )
             if isinstance(value, (str, bytes)):
                 var_bytes = len(value)
+            if var_bytes == 0:
+                raise ValueError(
+                    "Config values must be either `bool`, `int`, `float`, "
+                    "`str`, or `bytes`"
+                )
             return var_bytes
 
         num_bytes = 0
 
         for k, v in self.items():
-            if isinstance(v, List):
+            if isinstance(v, list):
                 if isinstance(v[0], (bytes, str)):
                     # not all str are of equal length necessarily
                     # for both the footprint of each element is 1 Byte

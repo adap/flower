@@ -16,7 +16,7 @@
 
 
 from abc import ABC
-from typing import Callable, Dict, Tuple
+from typing import Callable
 
 from flwr.client.client import Client
 from flwr.common import (
@@ -73,7 +73,7 @@ class NumPyClient(ABC):
 
     _context: Context
 
-    def get_properties(self, config: Config) -> Dict[str, Scalar]:
+    def get_properties(self, config: Config) -> dict[str, Scalar]:
         """Return a client's set of properties.
 
         Parameters
@@ -93,7 +93,7 @@ class NumPyClient(ABC):
         _ = (self, config)
         return {}
 
-    def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
+    def get_parameters(self, config: dict[str, Scalar]) -> NDArrays:
         """Return the current local model parameters.
 
         Parameters
@@ -112,8 +112,8 @@ class NumPyClient(ABC):
         return []
 
     def fit(
-        self, parameters: NDArrays, config: Dict[str, Scalar]
-    ) -> Tuple[NDArrays, int, Dict[str, Scalar]]:
+        self, parameters: NDArrays, config: dict[str, Scalar]
+    ) -> tuple[NDArrays, int, dict[str, Scalar]]:
         """Train the provided parameters using the locally held dataset.
 
         Parameters
@@ -141,8 +141,8 @@ class NumPyClient(ABC):
         return [], 0, {}
 
     def evaluate(
-        self, parameters: NDArrays, config: Dict[str, Scalar]
-    ) -> Tuple[float, int, Dict[str, Scalar]]:
+        self, parameters: NDArrays, config: dict[str, Scalar]
+    ) -> tuple[float, int, dict[str, Scalar]]:
         """Evaluate the provided parameters using the locally held dataset.
 
         Parameters
@@ -310,7 +310,7 @@ def _set_context(self: Client, context: Context) -> None:
 
 
 def _wrap_numpy_client(client: NumPyClient) -> Client:
-    member_dict: Dict[str, Callable] = {  # type: ignore
+    member_dict: dict[str, Callable] = {  # type: ignore
         "__init__": _constructor,
         "get_context": _get_context,
         "set_context": _set_context,

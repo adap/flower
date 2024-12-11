@@ -17,9 +17,6 @@ class FlowerClient(NumPyClient):
         self.batch_size = batch_size
         self.verbose = verbose
 
-    def get_parameters(self, config):
-        return self.model.get_weights()
-
     def fit(self, parameters, config):
         self.model.set_weights(parameters)
         self.model.fit(

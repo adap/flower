@@ -19,7 +19,7 @@ import argparse
 import csv
 import tempfile
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 import numpy as np
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -143,7 +143,7 @@ class FailingClient(ClientProxy):
 def test_fit_clients() -> None:
     """Test fit_clients."""
     # Prepare
-    clients: List[ClientProxy] = [
+    clients: list[ClientProxy] = [
         FailingClient("0"),
         SuccessClient("1"),
     ]
@@ -164,7 +164,7 @@ def test_fit_clients() -> None:
 def test_eval_clients() -> None:
     """Test eval_clients."""
     # Prepare
-    clients: List[ClientProxy] = [
+    clients: list[ClientProxy] = [
         FailingClient("0"),
         SuccessClient("1"),
     ]

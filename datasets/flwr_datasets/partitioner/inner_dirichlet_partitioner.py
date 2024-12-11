@@ -14,7 +14,7 @@
 # ==============================================================================
 """InnerDirichlet partitioner."""
 import warnings
-from typing import Dict, List, Optional, Union
+from typing import Optional, Union
 
 import numpy as np
 
@@ -68,9 +68,9 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
 
     def __init__(  # pylint: disable=R0913
         self,
-        partition_sizes: Union[List[int], NDArrayInt],
+        partition_sizes: Union[list[int], NDArrayInt],
         partition_by: str,
-        alpha: Union[int, float, List[float], NDArrayFloat],
+        alpha: Union[int, float, list[float], NDArrayFloat],
         shuffle: bool = True,
         seed: Optional[int] = 42,
     ) -> None:
@@ -87,11 +87,11 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
         self._initialized_alpha = False
         self._rng = np.random.default_rng(seed=self._seed)  # NumPy random generator
         # The attributes below are determined during the first call to load_partition
-        self._unique_classes: Optional[Union[List[int], List[str]]] = None
+        self._unique_classes: Optional[Union[list[int], list[str]]] = None
         self._num_unique_classes: Optional[int] = None
         self._num_partitions = len(self._partition_sizes)
 
-        self._partition_id_to_indices: Dict[int, List[int]] = {}
+        self._partition_id_to_indices: dict[int, list[int]] = {}
         self._partition_id_to_indices_determined = False
 
     def load_partition(self, partition_id: int) -> datasets.Dataset:
@@ -130,7 +130,7 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
         return self._num_partitions
 
     def _initialize_alpha_if_needed(
-        self, alpha: Union[int, float, List[float], NDArrayFloat]
+        self, alpha: Union[int, float, list[float], NDArrayFloat]
     ) -> NDArrayFloat:
         """Convert alpha to the used format in the code a NDArrayFloat.
 
@@ -159,7 +159,7 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
         elif isinstance(alpha, float):
             assert self._num_unique_classes is not None
             alpha = np.array([alpha], dtype=float).repeat(self._num_unique_classes)
-        elif isinstance(alpha, List):
+        elif isinstance(alpha, list):
             if len(alpha) != self._num_unique_classes:
                 raise ValueError(
                     "When passing alpha as a List, its length needs needs to be "
@@ -304,10 +304,10 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
 
 
 def _instantiate_partition_sizes(
-    partition_sizes: Union[List[int], NDArrayInt]
+    partition_sizes: Union[list[int], NDArrayInt]
 ) -> NDArrayInt:
     """Transform list to the ndarray of ints if needed."""
-    if isinstance(partition_sizes, List):
+    if isinstance(partition_sizes, list):
         partition_sizes = np.asarray(partition_sizes)
     elif isinstance(partition_sizes, np.ndarray):
         pass

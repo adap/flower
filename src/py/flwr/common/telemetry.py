@@ -25,8 +25,9 @@ import uuid
 from concurrent.futures import Future, ThreadPoolExecutor
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Optional, Union, cast
 
+from flwr.common.constant import FLWR_DIR
 from flwr.common.version import package_name, package_version
 
 FLWR_TELEMETRY_ENABLED = os.getenv("FLWR_TELEMETRY_ENABLED", "1")
@@ -86,7 +87,7 @@ def _get_source_id() -> str:
         # If the home directory can’t be resolved, RuntimeError is raised.
         return source_id
 
-    flwr_dir = home.joinpath(".flwr")
+    flwr_dir = home.joinpath(FLWR_DIR)
     # Create .flwr directory if it does not exist yet.
     try:
         flwr_dir.mkdir(parents=True, exist_ok=True)
@@ -126,7 +127,7 @@ class EventType(str, Enum):
     # The type signature is not compatible with mypy, pylint and flake8
     # so each of those needs to be disabled for this line.
     # pylint: disable-next=no-self-argument,arguments-differ,line-too-long
-    def _generate_next_value_(name: str, start: int, count: int, last_values: List[Any]) -> Any:  # type: ignore # noqa: E501
+    def _generate_next_value_(name: str, start: int, count: int, last_values: list[Any]) -> Any:  # type: ignore # noqa: E501
         return name
 
     # Ping
@@ -149,12 +150,6 @@ class EventType(str, Enum):
     # --- `flwr` CLI -------------------------------------------------------------------
 
     # Not yet implemented
-
-    # --- SuperExec --------------------------------------------------------------------
-
-    # SuperExec
-    RUN_SUPEREXEC_ENTER = auto()
-    RUN_SUPEREXEC_LEAVE = auto()
 
     # --- Simulation Engine ------------------------------------------------------------
 
@@ -189,7 +184,7 @@ class EventType(str, Enum):
 
 # Use the ThreadPoolExecutor with max_workers=1 to have a queue
 # and also ensure that telemetry calls are not blocking.
-state: Dict[str, Union[Optional[str], Optional[ThreadPoolExecutor]]] = {
+state: dict[str, Union[Optional[str], Optional[ThreadPoolExecutor]]] = {
     # Will be assigned ThreadPoolExecutor(max_workers=1)
     # in event() the first time it's required
     "executor": None,
@@ -201,7 +196,7 @@ state: Dict[str, Union[Optional[str], Optional[ThreadPoolExecutor]]] = {
 
 def event(
     event_type: EventType,
-    event_details: Optional[Dict[str, Any]] = None,
+    event_details: Optional[dict[str, Any]] = None,
 ) -> Future:  # type: ignore
     """Submit create_event to ThreadPoolExecutor to avoid blocking."""
     if state["executor"] is None:
@@ -213,7 +208,7 @@ def event(
     return result
 
 
-def create_event(event_type: EventType, event_details: Optional[Dict[str, Any]]) -> str:
+def create_event(event_type: EventType, event_details: Optional[dict[str, Any]]) -> str:
     """Create telemetry event."""
     if state["source"] is None:
         state["source"] = _get_source_id()

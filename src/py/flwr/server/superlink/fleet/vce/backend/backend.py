@@ -16,14 +16,14 @@
 
 
 from abc import ABC, abstractmethod
-from typing import Callable, Dict, Tuple
+from typing import Callable
 
 from flwr.client.client_app import ClientApp
 from flwr.common.context import Context
 from flwr.common.message import Message
 from flwr.common.typing import ConfigsRecordValues
 
-BackendConfig = Dict[str, Dict[str, ConfigsRecordValues]]
+BackendConfig = dict[str, dict[str, ConfigsRecordValues]]
 
 
 class Backend(ABC):
@@ -62,5 +62,5 @@ class Backend(ABC):
         self,
         message: Message,
         context: Context,
-    ) -> Tuple[Message, Context]:
+    ) -> tuple[Message, Context]:
         """Submit a job to the backend."""

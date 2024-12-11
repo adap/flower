@@ -18,7 +18,6 @@
 import collections
 import warnings
 from functools import reduce
-from typing import Dict, List, Tuple
 
 import datasets
 from datasets import Dataset, DatasetDict
@@ -56,9 +55,9 @@ class Merger:
 
     def __init__(
         self,
-        merge_config: Dict[str, Tuple[str, ...]],
+        merge_config: dict[str, tuple[str, ...]],
     ) -> None:
-        self._merge_config: Dict[str, Tuple[str, ...]] = merge_config
+        self._merge_config: dict[str, tuple[str, ...]] = merge_config
         self._check_duplicate_merge_splits()
 
     def __call__(self, dataset: DatasetDict) -> DatasetDict:
@@ -70,7 +69,7 @@ class Merger:
         """Resplit the dataset according to the `merge_config`."""
         resplit_dataset = {}
         for divide_to, divided_from__list in self._merge_config.items():
-            datasets_from_list: List[Dataset] = []
+            datasets_from_list: list[Dataset] = []
             for divide_from in divided_from__list:
                 datasets_from_list.append(dataset[divide_from])
             if len(datasets_from_list) > 1:

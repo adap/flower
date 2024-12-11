@@ -67,10 +67,12 @@ class Context(google.protobuf.message.Message):
         def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
         def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 
+    RUN_ID_FIELD_NUMBER: builtins.int
     NODE_ID_FIELD_NUMBER: builtins.int
     NODE_CONFIG_FIELD_NUMBER: builtins.int
     STATE_FIELD_NUMBER: builtins.int
     RUN_CONFIG_FIELD_NUMBER: builtins.int
+    run_id: builtins.int
     node_id: builtins.int
     @property
     def node_config(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, flwr.proto.transport_pb2.Scalar]: ...
@@ -80,13 +82,14 @@ class Context(google.protobuf.message.Message):
     def run_config(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, flwr.proto.transport_pb2.Scalar]: ...
     def __init__(self,
         *,
+        run_id: builtins.int = ...,
         node_id: builtins.int = ...,
         node_config: typing.Optional[typing.Mapping[typing.Text, flwr.proto.transport_pb2.Scalar]] = ...,
         state: typing.Optional[flwr.proto.recordset_pb2.RecordSet] = ...,
         run_config: typing.Optional[typing.Mapping[typing.Text, flwr.proto.transport_pb2.Scalar]] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["state",b"state"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["node_config",b"node_config","node_id",b"node_id","run_config",b"run_config","state",b"state"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["node_config",b"node_config","node_id",b"node_id","run_config",b"run_config","run_id",b"run_id","state",b"state"]) -> None: ...
 global___Context = Context
 
 class Metadata(google.protobuf.message.Message):

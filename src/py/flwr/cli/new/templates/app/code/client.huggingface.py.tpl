@@ -1,18 +1,11 @@
 """$project_name: A Flower / $framework_str app."""
 
+import torch
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
 from transformers import AutoModelForSequenceClassification
 
-from $import_name.task import (
-    get_weights,
-    load_data,
-    set_weights,
-    train,
-    test,
-    CHECKPOINT,
-    DEVICE,
-)
+from $import_name.task import get_weights, load_data, set_weights, test, train
 
 
 # Flower client
@@ -22,37 +15,34 @@ class FlowerClient(NumPyClient):
         self.trainloader = trainloader
         self.testloader = testloader
         self.local_epochs = local_epochs
-
-    def get_parameters(self, config):
-        return get_weights(self.net)
-
-    def set_parameters(self, parameters):
-        set_weights(self.net, parameters)
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.net.to(self.device)
 
     def fit(self, parameters, config):
-        self.set_parameters(parameters)
-        train(
-            self.net,
-            self.trainloader,
-            epochs=self.local_epochs,
-        )
-        return self.get_parameters(config={}), len(self.trainloader), {}
+        set_weights(self.net, parameters)
+        train(self.net, self.trainloader, epochs=self.local_epochs, device=self.device)
+        return get_weights(self.net), len(self.trainloader), {}
 
     def evaluate(self, parameters, config):
-        self.set_parameters(parameters)
-        loss, accuracy = test(self.net, self.testloader)
+        set_weights(self.net, parameters)
+        loss, accuracy = test(self.net, self.testloader, self.device)
         return float(loss), len(self.testloader), {"accuracy": accuracy}
 
 
 def client_fn(context: Context):
-    # Load model and data
-    net = AutoModelForSequenceClassification.from_pretrained(
-        CHECKPOINT, num_labels=2
-    ).to(DEVICE)
 
+    # Get this client's dataset partition
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
-    trainloader, valloader = load_data(partition_id, num_partitions)
+    model_name = context.run_config["model-name"]
+    trainloader, valloader = load_data(partition_id, num_partitions, model_name)
+
+    # Load model
+    num_labels = context.run_config["num-labels"]
+    net = AutoModelForSequenceClassification.from_pretrained(
+        model_name, num_labels=num_labels
+    )
+
     local_epochs = context.run_config["local-epochs"]
 
     # Return Client instance

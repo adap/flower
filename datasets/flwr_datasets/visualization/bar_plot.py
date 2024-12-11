@@ -15,28 +15,29 @@
 """Label distribution bar plotting."""
 
 
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import numpy as np
 import pandas as pd
 from matplotlib import colors as mcolors
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 
 
 # pylint: disable=too-many-arguments,too-many-locals,too-many-branches
 def _plot_bar(
     dataframe: pd.DataFrame,
     axis: Optional[Axes],
-    figsize: Optional[Tuple[float, float]],
+    figsize: Optional[tuple[float, float]],
     title: str,
     colormap: Optional[Union[str, mcolors.Colormap]],
     partition_id_axis: str,
     size_unit: str,
     legend: bool,
     legend_title: Optional[str],
-    plot_kwargs: Optional[Dict[str, Any]],
-    legend_kwargs: Optional[Dict[str, Any]],
+    plot_kwargs: Optional[dict[str, Any]],
+    legend_kwargs: Optional[dict[str, Any]],
 ) -> Axes:
     if axis is None:
         if figsize is None:
@@ -82,10 +83,11 @@ def _plot_bar(
     if "stacked" not in plot_kwargs:
         plot_kwargs["stacked"] = True
 
-    axis = dataframe.plot(
+    axis_df: Axes = dataframe.plot(
         ax=axis,
         **plot_kwargs,
     )
+    assert axis_df is not None, "axis is None after plotting using DataFrame.plot()"
 
     if legend:
         if legend_kwargs is None:
@@ -104,26 +106,28 @@ def _plot_bar(
             shift = min(0.05 + max_len_label_str / 100, 0.15)
             legend_kwargs["bbox_to_anchor"] = (1.0 + shift, 0.5)
 
-        handles, legend_labels = axis.get_legend_handles_labels()
-        _ = axis.figure.legend(
+        handles, legend_labels = axis_df.get_legend_handles_labels()
+        figure = axis_df.figure
+        assert isinstance(figure, Figure), "figure extraction from axes is not a Figure"
+        _ = figure.legend(
             handles=handles[::-1], labels=legend_labels[::-1], **legend_kwargs
         )
 
     # Heuristic to make the partition id on xticks non-overlapping
     if partition_id_axis == "x":
-        xticklabels = axis.get_xticklabels()
+        xticklabels = axis_df.get_xticklabels()
         if len(xticklabels) > 20:
             # Make every other xtick label not visible
             for i, label in enumerate(xticklabels):
                 if i % 2 == 1:
                     label.set_visible(False)
-    return axis
+    return axis_df
 
 
 def _initialize_figsize(
     partition_id_axis: str,
     num_partitions: int,
-) -> Tuple[float, float]:
+) -> tuple[float, float]:
     figsize = (0.0, 0.0)
     if partition_id_axis == "x":
         figsize = (6.4, 4.8)
@@ -132,7 +136,7 @@ def _initialize_figsize(
     return figsize
 
 
-def _initialize_xy_labels(size_unit: str, partition_id_axis: str) -> Tuple[str, str]:
+def _initialize_xy_labels(size_unit: str, partition_id_axis: str) -> tuple[str, str]:
     xlabel = "Partition ID"
     ylabel = "Count" if size_unit == "absolute" else "Percent %"
 

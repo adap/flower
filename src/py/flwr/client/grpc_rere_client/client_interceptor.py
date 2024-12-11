@@ -17,8 +17,9 @@
 
 import base64
 import collections
+from collections.abc import Sequence
 from logging import WARNING
-from typing import Any, Callable, Optional, Sequence, Tuple, Union
+from typing import Any, Callable, Optional, Union
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -30,6 +31,7 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_shared_key,
     public_key_to_bytes,
 )
+from flwr.proto.fab_pb2 import GetFabRequest  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
@@ -49,11 +51,12 @@ Request = Union[
     PushTaskResRequest,
     GetRunRequest,
     PingRequest,
+    GetFabRequest,
 ]
 
 
 def _get_value_from_tuples(
-    key_string: str, tuples: Sequence[Tuple[str, Union[str, bytes]]]
+    key_string: str, tuples: Sequence[tuple[str, Union[str, bytes]]]
 ) -> bytes:
     value = next((value for key, value in tuples if key == key_string), "")
     if isinstance(value, str):
@@ -125,18 +128,18 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
                 PushTaskResRequest,
                 GetRunRequest,
                 PingRequest,
+                GetFabRequest,
             ),
         ):
             if self.shared_secret is None:
                 raise RuntimeError("Failure to compute hmac")
 
+            message_bytes = request.SerializeToString(deterministic=True)
             metadata.append(
                 (
                     _AUTH_TOKEN_HEADER,
                     base64.urlsafe_b64encode(
-                        compute_hmac(
-                            self.shared_secret, request.SerializeToString(True)
-                        )
+                        compute_hmac(self.shared_secret, message_bytes)
                     ),
                 )
             )

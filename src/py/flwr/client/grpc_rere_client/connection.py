@@ -17,11 +17,12 @@
 
 import random
 import threading
+from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from copy import copy
 from logging import DEBUG, ERROR
 from pathlib import Path
-from typing import Callable, Iterator, Optional, Sequence, Tuple, Type, Union, cast
+from typing import Callable, Optional, Union, cast
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -40,11 +41,7 @@ from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
-from flwr.common.serde import (
-    message_from_taskins,
-    message_to_taskres,
-    user_config_from_proto,
-)
+from flwr.common.serde import message_from_taskins, message_to_taskres, run_from_proto
 from flwr.common.typing import Fab, Run
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -70,18 +67,18 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 
 
 @contextmanager
-def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
+def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     server_address: str,
     insecure: bool,
     retry_invoker: RetryInvoker,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
     root_certificates: Optional[Union[bytes, str]] = None,
     authentication_keys: Optional[
-        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
-    adapter_cls: Optional[Union[Type[FleetStub], Type[GrpcAdapter]]] = None,
+    adapter_cls: Optional[Union[type[FleetStub], type[GrpcAdapter]]] = None,
 ) -> Iterator[
-    Tuple[
+    tuple[
         Callable[[], Optional[Message]],
         Callable[[Message], None],
         Optional[Callable[[], Optional[int]]],
@@ -119,6 +116,9 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
         authentication from the cryptography library.
         Source: https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ec/
         Used to establish an authenticated connection with the server.
+    adapter_cls: Optional[Union[type[FleetStub], type[GrpcAdapter]]] (default: None)
+        A GrpcStub Class that can be used to send messages. By default the FleetStub
+        will be used.
 
     Returns
     -------
@@ -154,6 +154,11 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
     node: Optional[Node] = None
     ping_thread: Optional[threading.Thread] = None
     ping_stop_event = threading.Event()
+
+    # Restrict retries to cases where the status code is UNAVAILABLE
+    retry_invoker.should_giveup = (
+        lambda e: e.code() != grpc.StatusCode.UNAVAILABLE  # type: ignore
+    )
 
     ###########################################################################
     # ping/create_node/delete_node/receive/send/get_run functions
@@ -268,7 +273,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
         task_res = message_to_taskres(message)
 
         # Serialize ProtoBuf to bytes
-        request = PushTaskResRequest(task_res_list=[task_res])
+        request = PushTaskResRequest(node=node, task_res_list=[task_res])
         _ = retry_invoker.invoke(stub.PushTaskRes, request)
 
         # Cleanup
@@ -276,24 +281,18 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
 
     def get_run(run_id: int) -> Run:
         # Call FleetAPI
-        get_run_request = GetRunRequest(run_id=run_id)
+        get_run_request = GetRunRequest(node=node, run_id=run_id)
         get_run_response: GetRunResponse = retry_invoker.invoke(
             stub.GetRun,
             request=get_run_request,
         )
 
         # Return fab_id and fab_version
-        return Run(
-            run_id,
-            get_run_response.run.fab_id,
-            get_run_response.run.fab_version,
-            get_run_response.run.fab_hash,
-            user_config_from_proto(get_run_response.run.override_config),
-        )
+        return run_from_proto(get_run_response.run)
 
     def get_fab(fab_hash: str) -> Fab:
         # Call FleetAPI
-        get_fab_request = GetFabRequest(hash_str=fab_hash)
+        get_fab_request = GetFabRequest(node=node, hash_str=fab_hash)
         get_fab_response: GetFabResponse = retry_invoker.invoke(
             stub.GetFab,
             request=get_fab_request,

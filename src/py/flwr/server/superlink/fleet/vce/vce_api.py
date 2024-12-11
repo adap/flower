@@ -24,11 +24,11 @@ from logging import DEBUG, ERROR, INFO, WARN
 from pathlib import Path
 from queue import Empty, Queue
 from time import sleep
-from typing import Callable, Dict, Optional
+from typing import Callable, Optional
 
 from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
 from flwr.client.clientapp.utils import get_load_client_app_fn
-from flwr.client.node_state import NodeState
+from flwr.client.run_info_store import DeprecatedRunInfoStore
 from flwr.common.constant import (
     NUM_PARTITIONS_KEY,
     PARTITION_ID_KEY,
@@ -40,15 +40,15 @@ from flwr.common.message import Error
 from flwr.common.serde import message_from_taskins, message_to_taskres
 from flwr.common.typing import Run
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
-from flwr.server.superlink.state import State, StateFactory
+from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 
 from .backend import Backend, error_messages_backends, supported_backends
 
-NodeToPartitionMapping = Dict[int, int]
+NodeToPartitionMapping = dict[int, int]
 
 
 def _register_nodes(
-    num_nodes: int, state_factory: StateFactory
+    num_nodes: int, state_factory: LinkStateFactory
 ) -> NodeToPartitionMapping:
     """Register nodes with the StateFactory and create node-id:partition-id mapping."""
     nodes_mapping: NodeToPartitionMapping = {}
@@ -60,16 +60,16 @@ def _register_nodes(
     return nodes_mapping
 
 
-def _register_node_states(
+def _register_node_info_stores(
     nodes_mapping: NodeToPartitionMapping,
     run: Run,
     app_dir: Optional[str] = None,
-) -> Dict[int, NodeState]:
-    """Create NodeState objects and pre-register the context for the run."""
-    node_states: Dict[int, NodeState] = {}
+) -> dict[int, DeprecatedRunInfoStore]:
+    """Create DeprecatedRunInfoStore objects and register the context for the run."""
+    node_info_store: dict[int, DeprecatedRunInfoStore] = {}
     num_partitions = len(set(nodes_mapping.values()))
     for node_id, partition_id in nodes_mapping.items():
-        node_states[node_id] = NodeState(
+        node_info_store[node_id] = DeprecatedRunInfoStore(
             node_id=node_id,
             node_config={
                 PARTITION_ID_KEY: partition_id,
@@ -78,18 +78,18 @@ def _register_node_states(
         )
 
         # Pre-register Context objects
-        node_states[node_id].register_context(
+        node_info_store[node_id].register_context(
             run_id=run.run_id, run=run, app_dir=app_dir
         )
 
-    return node_states
+    return node_info_store
 
 
 # pylint: disable=too-many-arguments,too-many-locals
 def worker(
     taskins_queue: "Queue[TaskIns]",
     taskres_queue: "Queue[TaskRes]",
-    node_states: Dict[int, NodeState],
+    node_info_store: dict[int, DeprecatedRunInfoStore],
     backend: Backend,
     f_stop: threading.Event,
 ) -> None:
@@ -103,7 +103,7 @@ def worker(
             node_id = task_ins.task.consumer.node_id
 
             # Retrieve context
-            context = node_states[node_id].retrieve_context(run_id=task_ins.run_id)
+            context = node_info_store[node_id].retrieve_context(run_id=task_ins.run_id)
 
             # Convert TaskIns to Message
             message = message_from_taskins(task_ins)
@@ -112,7 +112,7 @@ def worker(
             out_mssg, updated_context = backend.process_message(message, context)
 
             # Update Context
-            node_states[node_id].update_context(
+            node_info_store[node_id].update_context(
                 task_ins.run_id, context=updated_context
             )
         except Empty:
@@ -145,7 +145,7 @@ def worker(
 
 
 def add_taskins_to_queue(
-    state: State,
+    state: LinkState,
     queue: "Queue[TaskIns]",
     nodes_mapping: NodeToPartitionMapping,
     f_stop: threading.Event,
@@ -160,7 +160,7 @@ def add_taskins_to_queue(
 
 
 def put_taskres_into_state(
-    state: State, queue: "Queue[TaskRes]", f_stop: threading.Event
+    state: LinkState, queue: "Queue[TaskRes]", f_stop: threading.Event
 ) -> None:
     """Put TaskRes into State from a queue."""
     while not f_stop.is_set():
@@ -172,12 +172,13 @@ def put_taskres_into_state(
             pass
 
 
+# pylint: disable=too-many-positional-arguments
 def run_api(
     app_fn: Callable[[], ClientApp],
     backend_fn: Callable[[], Backend],
     nodes_mapping: NodeToPartitionMapping,
-    state_factory: StateFactory,
-    node_states: Dict[int, NodeState],
+    state_factory: LinkStateFactory,
+    node_info_stores: dict[int, DeprecatedRunInfoStore],
     f_stop: threading.Event,
 ) -> None:
     """Run the VCE."""
@@ -222,7 +223,7 @@ def run_api(
                     worker,
                     taskins_queue,
                     taskres_queue,
-                    node_states,
+                    node_info_stores,
                     backend,
                     f_stop,
                 )
@@ -251,7 +252,7 @@ def run_api(
 
 
 # pylint: disable=too-many-arguments,unused-argument,too-many-locals,too-many-branches
-# pylint: disable=too-many-statements
+# pylint: disable=too-many-statements,too-many-positional-arguments
 def start_vce(
     backend_name: str,
     backend_config_json_stream: str,
@@ -263,10 +264,12 @@ def start_vce(
     client_app: Optional[ClientApp] = None,
     client_app_attr: Optional[str] = None,
     num_supernodes: Optional[int] = None,
-    state_factory: Optional[StateFactory] = None,
+    state_factory: Optional[LinkStateFactory] = None,
     existing_nodes_mapping: Optional[NodeToPartitionMapping] = None,
 ) -> None:
     """Start Fleet API with the Simulation Engine."""
+    nodes_mapping = {}
+
     if client_app_attr is not None and client_app is not None:
         raise ValueError(
             "Both `client_app_attr` and `client_app` are provided, "
@@ -300,7 +303,7 @@ def start_vce(
     if not state_factory:
         log(INFO, "A StateFactory was not supplied to the SimulationEngine.")
         # Create an empty in-memory state factory
-        state_factory = StateFactory(":flwr-in-memory-state:")
+        state_factory = LinkStateFactory(":flwr-in-memory-state:")
         log(INFO, "Created new %s.", state_factory.__class__.__name__)
 
     if num_supernodes:
@@ -309,8 +312,8 @@ def start_vce(
             num_nodes=num_supernodes, state_factory=state_factory
         )
 
-    # Construct mapping of NodeStates
-    node_states = _register_node_states(
+    # Construct mapping of DeprecatedRunInfoStore
+    node_info_stores = _register_node_info_stores(
         nodes_mapping=nodes_mapping, run=run, app_dir=app_dir if is_app else None
     )
 
@@ -340,17 +343,17 @@ def start_vce(
     # Load ClientApp if needed
     def _load() -> ClientApp:
 
+        if client_app:
+            return client_app
         if client_app_attr:
-            app = get_load_client_app_fn(
+            return get_load_client_app_fn(
                 default_app_ref=client_app_attr,
                 app_path=app_dir,
                 flwr_dir=flwr_dir,
                 multi_app=False,
-            )(run.fab_id, run.fab_version)
+            )(run.fab_id, run.fab_version, run.fab_hash)
 
-        if client_app:
-            app = client_app
-        return app
+        raise ValueError("Either `client_app_attr` or `client_app` must be provided")
 
     app_fn = _load
 
@@ -373,7 +376,7 @@ def start_vce(
             backend_fn,
             nodes_mapping,
             state_factory,
-            node_states,
+            node_info_stores,
             f_stop,
         )
     except LoadClientAppError as loadapp_ex:

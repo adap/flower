@@ -16,14 +16,29 @@
 
 
 from abc import ABC, abstractmethod
-from typing import Iterable, List, Optional
+from collections.abc import Iterable
+from typing import Optional
 
 from flwr.common import Message, RecordSet
 from flwr.common.typing import Run
 
 
 class Driver(ABC):
-    """Abstract base Driver class for the Driver API."""
+    """Abstract base Driver class for the ServerAppIo API."""
+
+    @abstractmethod
+    def set_run(self, run_id: int) -> None:
+        """Request a run to the SuperLink with a given `run_id`.
+
+        If a Run with the specified `run_id` exists, a local Run
+        object will be created. It enables further functionality
+        in the driver, such as sending `Messages`.
+
+        Parameters
+        ----------
+        run_id : int
+            The `run_id` of the Run this Driver object operates in.
+        """
 
     @property
     @abstractmethod
@@ -31,7 +46,7 @@ class Driver(ABC):
         """Run information."""
 
     @abstractmethod
-    def create_message(  # pylint: disable=too-many-arguments
+    def create_message(  # pylint: disable=too-many-arguments,R0917
         self,
         content: RecordSet,
         message_type: str,
@@ -70,7 +85,7 @@ class Driver(ABC):
         """
 
     @abstractmethod
-    def get_node_ids(self) -> List[int]:
+    def get_node_ids(self) -> list[int]:
         """Get node IDs."""
 
     @abstractmethod
