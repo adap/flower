@@ -21,9 +21,10 @@ from typing import Annotated, Optional
 import typer
 
 from flwr.cli.config_utils import (
+    exit_if_no_address,
     load_and_validate,
+    process_loaded_project_config,
     validate_federation_in_project_config,
-    validate_project_config,
 )
 from flwr.common.constant import FAB_CONFIG_FILE
 from flwr.proto.exec_pb2 import StopRunRequest, StopRunResponse  # pylint: disable=E0611
@@ -52,19 +53,11 @@ def stop(
 
     pyproject_path = app / FAB_CONFIG_FILE if app else None
     config, errors, warnings = load_and_validate(path=pyproject_path)
-    config = validate_project_config(config, errors, warnings)
+    config = process_loaded_project_config(config, errors, warnings)
     federation, federation_config = validate_federation_in_project_config(
         federation, config
     )
-
-    if "address" not in federation_config:
-        typer.secho(
-            "❌ `flwr stop` currently works with Exec API. Ensure that the correct"
-            "Exec API address is provided in the `pyproject.toml`.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
+    exit_if_no_address(federation_config, "stop")
 
     try:
         auth_plugin = try_obtain_cli_auth_plugin(app, federation, federation_config)
