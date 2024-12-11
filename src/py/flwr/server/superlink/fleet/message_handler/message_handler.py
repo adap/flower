@@ -21,7 +21,7 @@ from uuid import UUID
 
 import grpc
 
-from flwr.common.constant import Status, SubStatus
+from flwr.common.constant import Status
 from flwr.common.serde import fab_to_proto, user_config_to_proto
 from flwr.common.typing import Fab
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
@@ -45,6 +45,7 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     Run,
 )
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.server.superlink.abort import abort_if
 from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.linkstate import LinkState
 
@@ -103,7 +104,13 @@ def push_task_res(
     task_res: TaskRes = request.task_res_list[0]
     # pylint: enable=no-member
 
-    _abort_if_run_stopped(task_res.run_id, state, context)
+    # Abort if the run is not running
+    abort_if(
+        task_res.run_id,
+        [Status.PENDING, Status.STARTING, Status.FINISHED],
+        state,
+        context,
+    )
 
     # Set pushed_at (timestamp in seconds)
     task_res.task.pushed_at = time.time()
@@ -130,7 +137,13 @@ def get_run(
     if run is None:
         return GetRunResponse()
 
-    _abort_if_run_stopped(request.run_id, state, context)
+    # Abort if the run is not running
+    abort_if(
+        request.run_id,
+        [Status.PENDING, Status.STARTING, Status.FINISHED],
+        state,
+        context,
+    )
 
     return GetRunResponse(
         run=Run(
@@ -151,20 +164,16 @@ def get_fab(
 ) -> GetFabResponse:
     """Get FAB."""
 
-    _abort_if_run_stopped(request.run_id, state, context)
+    # Abort if the run is not running
+    abort_if(
+        request.run_id,
+        [Status.PENDING, Status.STARTING, Status.FINISHED],
+        state,
+        context,
+    )
 
     if result := ffs.get(request.hash_str):
         fab = Fab(request.hash_str, result[0])
         return GetFabResponse(fab=fab_to_proto(fab))
 
     raise ValueError(f"Found no FAB with hash: {request.hash_str}")
-
-
-def _abort_if_run_stopped(
-    run_id: int, state: LinkState, context: grpc.ServicerContext
-) -> None:
-    run_status = state.get_run_status({run_id})[run_id]
-    if (run_status.status == Status.FINISHED) and (
-        run_status.sub_status == SubStatus.STOPPED
-    ):
-        context.abort(grpc.StatusCode.PERMISSION_DENIED, "Run is stopped")
