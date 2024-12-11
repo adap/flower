@@ -228,7 +228,7 @@ def init_channel(
     )
 
     # Initialize the CLI-side user auth interceptor
-    interceptors = []
+    interceptors: list[grpc.UnaryUnaryClientInterceptor] = []
     if auth_plugin is not None:
         auth_plugin.load_tokens()
         interceptors = CliUserAuthInterceptor(auth_plugin)
