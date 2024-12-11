@@ -146,9 +146,13 @@ def get_run(
 def get_fab(
     request: GetFabRequest,
     ffs: Ffs,
+    state: LinkState,
     context: grpc.ServicerContext,
 ) -> GetFabResponse:
     """Get FAB."""
+
+    _abort_if_run_stopped(request.run_id, state, context)
+
     if result := ffs.get(request.hash_str):
         fab = Fab(request.hash_str, result[0])
         return GetFabResponse(fab=fab_to_proto(fab))

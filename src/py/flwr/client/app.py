@@ -474,7 +474,7 @@ def start_client_internal(
 
                     run: Run = runs[run_id]
                     if get_fab is not None and run.fab_hash:
-                        fab = get_fab(run.fab_hash)
+                        fab = get_fab(run.fab_hash, run_id)
                         if not isolation:
                             # If `ClientApp` runs in the same process, install the FAB
                             install_from_fab(fab.content, flwr_path, True)
