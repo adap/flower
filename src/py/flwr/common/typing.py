@@ -257,4 +257,4 @@ class Fab:
 
 
 class StopRunException(BaseException):
-    """."""
+    """Raised when a run is stopped via `flwr stop`."""
