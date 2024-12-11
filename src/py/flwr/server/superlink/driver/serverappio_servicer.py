@@ -24,7 +24,7 @@ from uuid import UUID
 import grpc
 
 from flwr.common import ConfigsRecord
-from flwr.common.constant import Status, SubStatus
+from flwr.common.constant import Status
 from flwr.common.logger import log
 from flwr.common.serde import (
     context_from_proto,
@@ -67,6 +67,7 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PushTaskInsResponse,
 )
 from flwr.proto.task_pb2 import TaskRes  # pylint: disable=E0611
+from flwr.server.superlink.abort import abort_if
 from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
@@ -91,7 +92,14 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         # Init state
         state: LinkState = self.state_factory.state()
-        _abort_if_run_stopped(request.run_id, state, context)
+
+        # Abort if the run is not running
+        abort_if(
+            request.run_id,
+            [Status.PENDING, Status.STARTING, Status.FINISHED],
+            state,
+            context,
+        )
 
         all_ids: set[int] = state.get_nodes(request.run_id)
         nodes: list[Node] = [
@@ -132,7 +140,14 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         # Init state
         state: LinkState = self.state_factory.state()
-        _abort_if_run_stopped(request.run_id, state, context)
+
+        # Abort if the run is not running
+        abort_if(
+            request.run_id,
+            [Status.PENDING, Status.STARTING, Status.FINISHED],
+            state,
+            context,
+        )
 
         # Set pushed_at (timestamp in seconds)
         pushed_at = time.time()
@@ -163,7 +178,14 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         # Init state
         state: LinkState = self.state_factory.state()
-        _abort_if_run_stopped(request.run_id, state, context)
+
+        # Abort if the run is not running
+        abort_if(
+            request.run_id,
+            [Status.PENDING, Status.STARTING, Status.FINISHED],
+            state,
+            context,
+        )
 
         # Convert each task_id str to UUID
         task_ids: set[UUID] = {UUID(task_id) for task_id in request.task_ids}
@@ -267,7 +289,14 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         # Init state
         state = self.state_factory.state()
-        _abort_if_run_stopped(request.run_id, state, context)
+
+        # Abort if the run is not running
+        abort_if(
+            request.run_id,
+            [Status.PENDING, Status.STARTING, Status.FINISHED],
+            state,
+            context,
+        )
 
         state.set_serverapp_context(request.run_id, context_from_proto(request.context))
         return PushServerAppOutputsResponse()
@@ -280,7 +309,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         # Init state
         state = self.state_factory.state()
-        _abort_if_run_stopped(request.run_id, state, context)
+
+        # Abort if the run is finished
+        abort_if(request.run_id, [Status.FINISHED], state, context)
 
         # Update the run status
         state.update_run_status(
@@ -319,13 +350,3 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 def _raise_if(validation_error: bool, detail: str) -> None:
     if validation_error:
         raise ValueError(f"Malformed PushTaskInsRequest: {detail}")
-
-
-def _abort_if_run_stopped(
-    run_id: int, state: LinkState, context: grpc.ServicerContext
-) -> None:
-    run_status = state.get_run_status({run_id})[run_id]
-    if (run_status.status == Status.FINISHED) and (
-        run_status.sub_status == SubStatus.STOPPED
-    ):
-        context.abort(grpc.StatusCode.PERMISSION_DENIED, "Run is stopped")
