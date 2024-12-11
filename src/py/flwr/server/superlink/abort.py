@@ -35,7 +35,7 @@ def abort_if(
     state: LinkState,
     context: grpc.ServicerContext,
 ) -> None:
-    """Abort if the status of the provided `run_id` is in `abort_status_list`"""
+    """Abort if the status of the provided `run_id` is in `abort_status_list`."""
     run_status: RunStatus = state.get_run_status({run_id})[run_id]
 
     if run_status.status in abort_status_list:
