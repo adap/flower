@@ -163,7 +163,6 @@ def get_fab(
     context: grpc.ServicerContext,
 ) -> GetFabResponse:
     """Get FAB."""
-
     # Abort if the run is not running
     abort_if(
         request.run_id,
