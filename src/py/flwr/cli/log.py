@@ -23,9 +23,10 @@ import grpc
 import typer
 
 from flwr.cli.config_utils import (
+    exit_if_no_address,
     load_and_validate,
+    process_loaded_project_config,
     validate_federation_in_project_config,
-    validate_project_config,
 )
 from flwr.common.constant import CONN_RECONNECT_INTERVAL, CONN_REFRESH_PERIOD
 from flwr.common.logger import log as logger
@@ -152,19 +153,11 @@ def log(
 
     pyproject_path = app / "pyproject.toml" if app else None
     config, errors, warnings = load_and_validate(path=pyproject_path)
-    config = validate_project_config(config, errors, warnings)
+    config = process_loaded_project_config(config, errors, warnings)
     federation, federation_config = validate_federation_in_project_config(
         federation, config
     )
-
-    if "address" not in federation_config:
-        typer.secho(
-            "❌ `flwr log` currently works with Exec API. Ensure that the correct"
-            "Exec API address is provided in the `pyproject.toml`.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
+    exit_if_no_address(federation_config, "log")
 
     _log_with_exec_api(app, federation, federation_config, run_id, stream)
 

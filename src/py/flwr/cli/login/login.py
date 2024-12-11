@@ -20,9 +20,10 @@ from typing import Annotated, Optional
 import typer
 
 from flwr.cli.config_utils import (
+    exit_if_no_address,
     load_and_validate,
+    process_loaded_project_config,
     validate_federation_in_project_config,
-    validate_project_config,
 )
 from flwr.common.constant import AUTH_TYPE
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
@@ -50,20 +51,11 @@ def login(  # pylint: disable=R0914
     pyproject_path = app / "pyproject.toml" if app else None
     config, errors, warnings = load_and_validate(path=pyproject_path)
 
-    config = validate_project_config(config, errors, warnings)
+    config = process_loaded_project_config(config, errors, warnings)
     federation, federation_config = validate_federation_in_project_config(
         federation, config
     )
-
-    if "address" not in federation_config:
-        typer.secho(
-            "❌ `flwr login` currently works with a SuperLink. Ensure that the correct"
-            "SuperLink (Exec API) address is provided in `pyproject.toml`.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
-
+    exit_if_no_address(federation_config, "login")
     channel = init_channel(app, federation_config, None)
     stub = ExecStub(channel)
 
