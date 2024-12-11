@@ -162,16 +162,16 @@ def get_user_auth_config_path(
     root_dir: Path, federation: str, server_address: str
 ) -> Path:
     """Return the path to the user auth config file."""
-    # Locate the credentials directory
-    credentials_dir = root_dir.absolute() / FLWR_DIR / CREDENTIALS_DIR
-    credentials_dir.mkdir(parents=True, exist_ok=True)
-
     # Parse the server address
     parsed_addr = parse_address(server_address)
     if parsed_addr is None:
         raise ValueError(f"Invalid server address: {server_address}")
     host, port, is_v6 = parsed_addr
     formatted_addr = f"[{host}]_{port}" if is_v6 else f"{host}_{port}"
+
+    # Locate the credentials directory
+    credentials_dir = root_dir.absolute() / FLWR_DIR / CREDENTIALS_DIR
+    credentials_dir.mkdir(parents=True, exist_ok=True)
     return credentials_dir / f"{federation}_{formatted_addr}.json"
 
 
