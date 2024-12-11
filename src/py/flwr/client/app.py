@@ -623,6 +623,7 @@ def start_client_internal(
 
             # Unregister node
             if delete_node is not None and app_state_tracker.is_connected:
+                print("1")
                 delete_node()  # pylint: disable=not-callable
 
         if sleep_duration == 0:
