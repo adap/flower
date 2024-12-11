@@ -69,6 +69,10 @@ from .numpy_client import NumPyClient
 from .run_info_store import DeprecatedRunInfoStore
 
 
+class SuperNodeExit(BaseException):
+    """Raised when the SuperNode exits."""
+
+
 def _check_actionable_client(
     client: Optional[Client], client_fn: Optional[ClientFnExt]
 ) -> None:
@@ -611,7 +615,7 @@ def start_client_internal(
                     send(reply_message)
                     log(INFO, "Sent reply")
 
-                except StopIteration:
+                except SuperNodeExit:
                     sleep_duration = 0
                     break
             # pylint: enable=too-many-nested-blocks
@@ -809,7 +813,7 @@ class _AppStateTracker:
         def signal_handler(sig, frame):  # type: ignore
             # pylint: disable=unused-argument
             self.interrupt = True
-            raise StopIteration from None
+            raise SuperNodeExit
 
         signal.signal(signal.SIGINT, signal_handler)
         signal.signal(signal.SIGTERM, signal_handler)
