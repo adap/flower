@@ -28,9 +28,10 @@ from rich.text import Text
 from typer import Exit
 
 from flwr.cli.config_utils import (
+    exit_if_no_address,
     load_and_validate,
+    process_loaded_project_config,
     validate_federation_in_project_config,
-    validate_project_config,
 )
 from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat, SubStatus
 from flwr.common.date import format_timedelta, isoformat8601_utc
@@ -92,19 +93,11 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches
 
         pyproject_path = app / FAB_CONFIG_FILE if app else None
         config, errors, warnings = load_and_validate(path=pyproject_path)
-        config = validate_project_config(config, errors, warnings)
+        config = process_loaded_project_config(config, errors, warnings)
         federation, federation_config = validate_federation_in_project_config(
             federation, config
         )
-
-        if "address" not in federation_config:
-            typer.secho(
-                "❌ `flwr ls` currently works with Exec API. Ensure that the correct"
-                "Exec API address is provided in the `pyproject.toml`.",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-            raise typer.Exit(code=1)
+        exit_if_no_address(federation_config, "ls")
 
         try:
             if runs and run_id is not None:
