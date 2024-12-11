@@ -180,14 +180,12 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
 
         # Preconditions met
         try:
-            print("1")
             # Update Message and Context
             self.clientapp_output = ClientAppOutputs(
                 message=message_from_proto(request.message),
                 context=context_from_proto(request.context),
             )
 
-            print("2")
             # Set status
             code = typing.ClientAppOutputCode.SUCCESS
             status = typing.ClientAppOutputStatus(code=code, message="Success")
