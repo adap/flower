@@ -27,7 +27,7 @@ import typer
 from flwr.cli.cli_user_auth_interceptor import CliUserAuthInterceptor
 from flwr.common.address import parse_address
 from flwr.common.auth_plugin import CliAuthPlugin
-from flwr.common.constant import AUTH_TYPE, CREDENTIALS_DIR
+from flwr.common.constant import AUTH_TYPE, CREDENTIALS_DIR, FLWR_DIR
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
 
@@ -163,7 +163,7 @@ def get_user_auth_config_path(
 ) -> Path:
     """Return the path to the user auth config file."""
     # Locate the credentials directory
-    credentials_dir = root_dir.absolute() / ".flwr" / CREDENTIALS_DIR
+    credentials_dir = root_dir.absolute() / FLWR_DIR / CREDENTIALS_DIR
     credentials_dir.mkdir(parents=True, exist_ok=True)
 
     # Parse the server address
