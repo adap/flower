@@ -622,7 +622,6 @@ def start_client_internal(
 
             # Unregister node
             if delete_node is not None and app_state_tracker.is_connected:
-                print("1")
                 delete_node()  # pylint: disable=not-callable
 
         if sleep_duration == 0:
@@ -757,7 +756,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
                 Optional[Callable[[], Optional[int]]],
                 Optional[Callable[[], None]],
                 Optional[Callable[[int], Run]],
-                Optional[Callable[[str], Fab]],
+                Optional[Callable[[str, int], Fab]],
             ]
         ],
     ],
