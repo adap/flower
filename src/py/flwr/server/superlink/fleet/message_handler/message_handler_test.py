@@ -115,9 +115,10 @@ def test_push_task_res() -> None:
         ],
     )
     state = MagicMock()
+    context = MagicMock()
 
     # Execute
-    push_task_res(request=request, state=state)
+    push_task_res(request=request, state=state, context=context)
 
     # Assert
     state.create_node.assert_not_called()
