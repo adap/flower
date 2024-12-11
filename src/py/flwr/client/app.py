@@ -367,11 +367,6 @@ def start_client_internal(
                 retry_state.actual_wait,
             )
 
-    def _should_giveup_fn(e: Exception) -> bool:
-        if e.code() == grpc.StatusCode.PERMISSION_DENIED:  # type: ignore
-            raise StopRunException
-        return True
-
     retry_invoker = RetryInvoker(
         wait_gen_factory=lambda: exponential(max_delay=MAX_RETRY_DELAY),
         recoverable_exceptions=connection_error_type,
@@ -389,7 +384,6 @@ def start_client_internal(
         ),
         on_success=_on_sucess,
         on_backoff=_on_backoff,
-        # should_giveup=_should_giveup_fn,
     )
 
     # DeprecatedRunInfoStore gets initialized when the first connection is established
@@ -616,6 +610,11 @@ def start_client_internal(
                     # Send
                     send(reply_message)
                     log(INFO, "Sent reply")
+
+                except StopRunException:
+                    log(INFO, "Run ID %s stopped.", run_id)
+                    sleep_duration = 3
+                    break
 
                 except StopIteration:
                     sleep_duration = 0
