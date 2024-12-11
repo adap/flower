@@ -613,8 +613,7 @@ def start_client_internal(
 
                 except StopRunException:
                     log(INFO, "Run ID %s stopped.", run_id)
-                    sleep_duration = 3
-                    break
+                    continue
 
                 except StopIteration:
                     sleep_duration = 0
