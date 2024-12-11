@@ -226,14 +226,20 @@ def init_channel(
     insecure, root_certificates_bytes = validate_certificate_in_federation_config(
         app, federation_config
     )
+
+    # Initialize the CLI-side user auth interceptor
+    interceptors = []
+    if auth_plugin is not None:
+        auth_plugin.load_tokens()
+        interceptors = CliUserAuthInterceptor(auth_plugin)
+
+    # Create the gRPC channel
     channel = create_channel(
         server_address=federation_config["address"],
         insecure=insecure,
         root_certificates=root_certificates_bytes,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        interceptors=(
-            CliUserAuthInterceptor(auth_plugin) if auth_plugin is not None else None
-        ),
+        interceptors=interceptors or None,
     )
     channel.subscribe(on_channel_state_change)
     return channel

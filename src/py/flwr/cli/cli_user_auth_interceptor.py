@@ -38,7 +38,6 @@ class CliUserAuthInterceptor(
 
     def __init__(self, auth_plugin: CliAuthPlugin):
         self.auth_plugin = auth_plugin
-        self.auth_plugin.load_tokens()
 
     def _authenticated_call(
         self,
@@ -66,10 +65,10 @@ class CliUserAuthInterceptor(
         client_call_details: grpc.ClientCallDetails,
         request: Request,
     ) -> grpc.Call:
-        """Flower SuperExec Run interceptor.
+        """Intercept a unary-unary call for user authentication.
 
-        Intercept unary-unary call from user and add necessary authentication header in
-        the RPC metadata.
+        This method intercepts a unary-unary RPC call initiated from the CLI and adds
+        the required authentication tokens to the RPC metadata.
         """
         return self._authenticated_call(continuation, client_call_details, request)
 
@@ -79,9 +78,9 @@ class CliUserAuthInterceptor(
         client_call_details: grpc.ClientCallDetails,
         request: Request,
     ) -> grpc.Call:
-        """Flower SuperExec Run interceptor.
+        """Intercept a unary-stream call for user authentication.
 
-        Intercept unary-stream call from user and add necessary authentication header in
-        the RPC metadata.
+        This method intercepts a unary-stream RPC call initiated from the CLI and adds
+        the required authentication tokens to the RPC metadata.
         """
         return self._authenticated_call(continuation, client_call_details, request)
