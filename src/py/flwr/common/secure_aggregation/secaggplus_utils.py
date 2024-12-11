@@ -95,6 +95,6 @@ def pseudo_rand_gen(
         if len(dimension) == 0:
             arr = np.array(gen.randint(0, num_range - 1), dtype=int)
         else:
-            arr = gen.randint(0, num_range - 1, dimension)
+            arr = gen.randint(0, num_range - 1, dimension, dtype=int)
         output.append(arr)
     return output
