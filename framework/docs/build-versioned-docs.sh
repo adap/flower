@@ -102,7 +102,9 @@ END
 
   cd $(git rev-parse --show-toplevel)
 done
-  
+
+cd framework/docs
+
 # Build the main version (main for GH CI, local branch for local) 
 if [ $GITHUB_ACTIONS ]
 then
