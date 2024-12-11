@@ -103,8 +103,6 @@ END
   cd $(git rev-parse --show-toplevel)
 done
 
-cd framework/docs
-
 # Build the main version (main for GH CI, local branch for local) 
 if [ $GITHUB_ACTIONS ]
 then
@@ -112,6 +110,8 @@ then
 else
   git checkout --force $current_branch
 fi
+
+cd framework/docs
 
 current_version=main
 export current_version
