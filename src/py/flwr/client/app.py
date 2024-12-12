@@ -756,7 +756,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
                 Optional[Callable[[], Optional[int]]],
                 Optional[Callable[[], None]],
                 Optional[Callable[[int], Run]],
-                Optional[Callable[[str, Optional[int]], Fab]],
+                Optional[Callable[[str, int], Fab]],
             ]
         ],
     ],
