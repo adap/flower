@@ -388,7 +388,6 @@ class StateTest(unittest.TestCase):
         bad_result = state.get_task_ids_from_run_id(15)
 
         assert result
-        self.assertNotIn(task_id_2, result)
         self.assertNotIn(task_id_2, bad_result)
         self.assertSetEqual(result, expected_task_ids)
 
