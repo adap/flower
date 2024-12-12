@@ -27,8 +27,8 @@ from flwr.cli.build import build
 from flwr.cli.config_utils import (
     get_fab_metadata,
     load_and_validate,
+    process_loaded_project_config,
     validate_federation_in_project_config,
-    validate_project_config,
 )
 from flwr.common.config import (
     flatten_dict,
@@ -101,7 +101,7 @@ def run(
 
         pyproject_path = app / "pyproject.toml" if app else None
         config, errors, warnings = load_and_validate(path=pyproject_path)
-        config = validate_project_config(config, errors, warnings)
+        config = process_loaded_project_config(config, errors, warnings)
         federation, federation_config = validate_federation_in_project_config(
             federation, config
         )
