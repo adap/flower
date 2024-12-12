@@ -1,7 +1,6 @@
-"""Abstract class for splitting a model into body and head."""
+"""fedrep: A Flower Baseline."""
 
 import collections
-import os
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, OrderedDict, Tuple, Union
 
@@ -17,44 +16,6 @@ from fedrep.constants import (
     FEDREP_HEAD_STATE,
 )
 from flwr.common import Context, ParametersRecord, array_from_numpy
-
-
-def get_device(context: Context) -> torch.device:
-    """Get the tensor device.
-
-    Args:
-        context: The context of the current run.
-
-    Raises
-    ------
-        ValueError: Specified device not in CUDA_VISIBLE_DEVICES.
-
-    Returns
-    -------
-        The selected or fallbacked device.
-    """
-    device = torch.device("cpu")
-    if context.run_config.get("use-cuda", False) and torch.cuda.is_available():
-        specified_device = context.run_config.get("specified-cuda-device", "")
-        if specified_device:
-            cuda_visible_devices = os.environ.get("CUDA_VISIBLE_DEVICES")
-            if cuda_visible_devices:
-                devices = [int(d) for d in cuda_visible_devices.split(",")]
-                if specified_device in devices:
-                    device = torch.device(f"cuda:{specified_device}")
-                else:
-                    raise ValueError(
-                        f"Specified device {specified_device}"
-                        " not in CUDA_VISIBLE_DEVICES"
-                    )
-            else:
-                print("CUDA_VISIBLE_DEVICES not exists, using torch.device('cuda').")
-        else:
-            device = torch.device("cuda")
-    elif context.run_config.get("use-mps", False) and torch.backends.mps.is_available():
-        device = torch.device("mps")
-
-    return device
 
 
 class ModelSplit(ABC, nn.Module):
@@ -183,7 +144,6 @@ class ModelManager(ABC):
         self.context = context
         self.trainloader = trainloader
         self.testloader = testloader
-        self.device = get_device(self.context)
         self.learning_rate = self.context.run_config.get("learning-rate", 0.01)
         self.momentum = self.context.run_config.get("momentum", 0.5)
         self._model: ModelSplit = model_split_class(self._create_model())
@@ -270,8 +230,7 @@ class ModelManager(ABC):
             for batch in self.trainloader:
                 images = batch["img"]
                 labels = batch["label"]
-                outputs = self._model(images.to(self.device))
-                labels = labels.to(self.device)
+                outputs = self._model(images)
                 loss = criterion(outputs, labels)
                 optimizer.zero_grad()
                 loss.backward()
@@ -306,8 +265,8 @@ class ModelManager(ABC):
             self._model.train()
             for _ in range(num_finetune_epochs):
                 for batch in self.trainloader:
-                    images = batch["img"].to(self.device)
-                    labels = batch["label"].to(self.device)
+                    images = batch["img"]
+                    labels = batch["label"]
                     outputs = self._model(images)
                     loss = criterion(outputs, labels)
                     optimizer.zero_grad()
@@ -320,8 +279,8 @@ class ModelManager(ABC):
         self._model.eval()
         with torch.no_grad():
             for batch in self.testloader:
-                images = batch["img"].to(self.device)
-                labels = batch["label"].to(self.device)
+                images = batch["img"]
+                labels = batch["label"]
                 outputs = self._model(images)
                 loss += criterion(outputs, labels).item()
                 total += labels.size(0)

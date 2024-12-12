@@ -1,4 +1,4 @@
-"""Client implementation - can call FedPep and FedAvg clients."""
+"""fedrep: A Flower Baseline."""
 
 from collections import OrderedDict
 from typing import Dict, List, Tuple, Union
@@ -79,10 +79,8 @@ class BaseClient(NumPyClient):
                 the training metrics.
         """
         self.set_parameters(parameters)
-        train_results = self.perform_train()
+        self.perform_train()
 
-        # Update train history
-        print("<------- TRAIN RESULTS -------> :", train_results)
         return self.get_parameters(config), self.model_manager.train_dataset_size(), {}
 
     def evaluate(
@@ -104,7 +102,6 @@ class BaseClient(NumPyClient):
 
         # Test the model
         test_results = self.model_manager.test()
-        print("<------- TEST RESULTS -------> :", test_results)
 
         return (
             test_results.get("loss", 0.0),

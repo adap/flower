@@ -1,4 +1,4 @@
-"""Constants used in machine learning pipeline."""
+"""fedrep: A Flower Baseline."""
 
 from enum import Enum
 

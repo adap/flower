@@ -1,4 +1,4 @@
-"""Model, model manager and model split for CIFAR-10 and CIFAR-100."""
+"""fedrep: A Flower Baseline."""
 
 from typing import Tuple
 
@@ -63,7 +63,7 @@ class CNNCifar10ModelManager(ModelManager):
 
     def _create_model(self) -> nn.Module:
         """Return CNNCifar10 model to be split into head and body."""
-        return CNNCifar10().to(self.device)
+        return CNNCifar10()
 
 
 # pylint: disable=W0223
@@ -122,4 +122,4 @@ class CNNCifar100ModelManager(ModelManager):
 
     def _create_model(self) -> CNNCifar100:
         """Return CNNCifar100 model to be split into head and body."""
-        return CNNCifar100().to(self.device)
+        return CNNCifar100()

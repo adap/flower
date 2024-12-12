@@ -9,7 +9,7 @@ description = ""
 license = "Apache-2.0"
 dependencies = [
     "flwr[simulation]>=1.13.1",
-    "flwr-datasets[vision]>=0.3.0",
+    "flwr-datasets[vision]>=0.4.0",
     "torch==2.2.1",
     "torchvision==0.17.1",
 ]
@@ -143,9 +143,6 @@ enable-finetune = false
 num-finetune-epochs = 5
 num-local-epochs = 5  # number of local epochs
 num-rep-epochs = 1  # number of representation epochs (only for FedRep)
-use-cuda = false
-specified-cuda-device = ""  # the ID of the cuda device
-use-mps = false  # for apple-m-series
 
 # server specs
 num-server-rounds = 100

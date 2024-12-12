@@ -1,8 +1,7 @@
-"""Utility functions for FedRep."""
+"""fedrep: A Flower Baseline."""
 
 from typing import Callable, Type, Union
 
-from fedrep.base_model import get_device
 from fedrep.constants import Algorithm, ModelDatasetName
 from fedrep.models import (
     CNNCifar10,
@@ -24,21 +23,20 @@ def get_create_model_fn(
     Union[Type[CNNCifar10ModelSplit], Type[CNNCifar100ModelSplit]],
 ]:
     """Get create model function."""
-    device = get_device(context)
     model_name = str(context.run_config["model-name"])
     if model_name == ModelDatasetName.CNN_CIFAR_10.value:
         split = CNNCifar10ModelSplit
 
         def create_model() -> CNNCifar10:
             """Create initial CNNCifar10 model."""
-            return CNNCifar10().to(device)
+            return CNNCifar10()
 
     elif model_name == ModelDatasetName.CNN_CIFAR_100.value:
         split = CNNCifar100ModelSplit
 
         def create_model() -> CNNCifar100:  # type: ignore
             """Create initial CNNCifar100 model."""
-            return CNNCifar100().to(device)
+            return CNNCifar100()
 
     else:
         raise NotImplementedError(f"Not a recognized model name {model_name}.")

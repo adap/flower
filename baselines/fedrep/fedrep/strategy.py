@@ -1,4 +1,4 @@
-"""FL server strategies."""
+"""fedrep: A Flower Baseline."""
 
 from flwr.server.strategy import FedAvg
 

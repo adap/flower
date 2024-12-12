@@ -1,4 +1,4 @@
-"""FedRep uses flwr-datasets."""
+"""fedrep: A Flower Baseline."""
 
 from typing import Tuple
 

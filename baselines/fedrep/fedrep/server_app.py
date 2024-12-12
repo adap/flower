@@ -1,4 +1,4 @@
-"""Server implementation."""
+"""fedrep: A Flower Baseline."""
 
 import json
 import os
@@ -9,18 +9,20 @@ from fedrep.utils import get_create_model_fn, get_server_strategy
 from flwr.common import Context, Metrics, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 
-# Initialize the execution results directory.
-RES_SAVE_PATH = "./results"
-if not os.path.exists(RES_SAVE_PATH):
-    os.makedirs(RES_SAVE_PATH)
-RES_SAVE_NAME = time.strftime("%Y-%m-%d-%H-%M-%S")
-# Set the file name where the results will be saved.
-RES_FILE = f"{RES_SAVE_PATH}/{RES_SAVE_NAME}.json"
+RES_FILE = None
 
 
 def config_json_file(context: Context):
     """Initialize the json file and write the run configurations."""
-    if not os.path.exists(RES_FILE):
+    global RES_FILE
+    if RES_FILE is None:
+        # Initialize the execution results directory.
+        res_save_path = "./results"
+        if not os.path.exists(res_save_path):
+            os.makedirs(res_save_path)
+        res_save_name = time.strftime("%Y-%m-%d-%H-%M-%S")
+        # Set the file name where the results will be saved.
+        RES_FILE = f"{res_save_path}/{res_save_name}.json"
         data = {
             "run_config": dict(context.run_config.items()),
             "round_res": [],
@@ -31,6 +33,7 @@ def config_json_file(context: Context):
 
 def write_res(new_res):
     """Load the json file, append result and re-write json collection."""
+    global RES_FILE
     with open(RES_FILE, "r") as fin:
         data = json.load(fin)
     data["round_res"].append(new_res)
@@ -45,11 +48,11 @@ def evaluate_metrics_aggregation_fn(eval_metrics: List[Tuple[int, Metrics]]) -> 
     weights, accuracies, losses = [], [], []
     for num_examples, metric in eval_metrics:
         weights.append(num_examples)
-        accuracies.append(metric["accuracy"] * num_examples)
-        losses.append(metric["loss"] * num_examples)
-    accuracy = sum(accuracies) / sum(weights)  # type: ignore[arg-type]
-    loss = sum(losses) / sum(weights)  # type: ignore[arg-type]
-    write_res({"accuracy": accuracy, "loss": loss})  # append
+        accuracies.append(float(metric["accuracy"]) * num_examples)
+        losses.append(float(metric["loss"]) * num_examples)
+    accuracy = sum(accuracies) / sum(weights)
+    loss = sum(losses) / sum(weights)
+    write_res({"accuracy": accuracy, "loss": loss})
     return {"accuracy": accuracy}
 
 
