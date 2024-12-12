@@ -114,7 +114,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
                 state=self.state_factory.state(),
             )
         except AbortRunException as e:
-            abort_grpc_context(str(e), context)
+            abort_grpc_context(e.message, context)
 
         return res
 
@@ -130,7 +130,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
                 state=self.state_factory.state(),
             )
         except AbortRunException as e:
-            abort_grpc_context(str(e), context)
+            abort_grpc_context(e.message, context)
 
         return res
 
@@ -146,6 +146,6 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
                 state=self.state_factory.state(),
             )
         except AbortRunException as e:
-            abort_grpc_context(str(e), context)
+            abort_grpc_context(e.message, context)
 
         return res

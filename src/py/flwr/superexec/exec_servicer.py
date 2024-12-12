@@ -162,24 +162,11 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             new_status=RunStatus(Status.FINISHED, SubStatus.STOPPED, ""),
         )
 
-        # Register callback
-        def on_rpc_done() -> None:
-            log(
-                INFO,
-                "ExecServicer.StopRun callback: delete TaskIns/TaskRes",
-            )
-
-            if context.is_active():
-                return
-            if context.code() != grpc.StatusCode.OK:
-                return
-
+        if update_success:
             task_ids: set[UUID] = state.get_task_ids_from_run_id(request.run_id)
 
             # Delete TaskIns and TaskRes for the `run_id`
             state.delete_tasks(task_ids)
-
-        context.add_callback(on_rpc_done)
 
         return StopRunResponse(success=update_success)
 
