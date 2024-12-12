@@ -24,11 +24,11 @@ import pytest
 
 from .config_utils import (
     load,
+    process_loaded_project_config,
     validate,
     validate_certificate_in_federation_config,
     validate_federation_in_project_config,
     validate_fields,
-    validate_project_config,
 )
 
 
@@ -349,7 +349,7 @@ def test_validate_project_config_fail() -> None:
 
     # Execute
     with pytest.raises(click.exceptions.Exit) as excinfo:
-        _ = validate_project_config(config, errors, warnings)
+        _ = process_loaded_project_config(config, errors, warnings)
 
     # Assert
     assert excinfo.value.exit_code == 1

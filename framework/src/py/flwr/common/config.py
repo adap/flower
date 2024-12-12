@@ -27,6 +27,7 @@ from flwr.common.constant import (
     APP_DIR,
     FAB_CONFIG_FILE,
     FAB_HASH_TRUNCATION,
+    FLWR_DIR,
     FLWR_HOME,
 )
 from flwr.common.typing import Run, UserConfig, UserConfigValue
@@ -38,7 +39,7 @@ def get_flwr_dir(provided_path: Optional[str] = None) -> Path:
         return Path(
             os.getenv(
                 FLWR_HOME,
-                Path(f"{os.getenv('XDG_DATA_HOME', os.getenv('HOME'))}") / ".flwr",
+                Path(f"{os.getenv('XDG_DATA_HOME', os.getenv('HOME'))}") / FLWR_DIR,
             )
         )
     return Path(provided_path).absolute()
