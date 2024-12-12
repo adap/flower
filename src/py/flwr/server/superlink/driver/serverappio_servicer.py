@@ -70,7 +70,7 @@ from flwr.proto.task_pb2 import TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
-from flwr.server.superlink.utils import abort_grpc_context, check_abort
+from flwr.server.superlink.utils import abort_if
 from flwr.server.utils.validator import validate_task_ins_or_res
 
 
@@ -94,12 +94,12 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         state: LinkState = self.state_factory.state()
 
         # Abort if the run is not running
-        abort_msg = check_abort(
+        abort_if(
             request.run_id,
             [Status.PENDING, Status.STARTING, Status.FINISHED],
             state,
+            context,
         )
-        abort_grpc_context(abort_msg, context)
 
         all_ids: set[int] = state.get_nodes(request.run_id)
         nodes: list[Node] = [
@@ -142,12 +142,12 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         state: LinkState = self.state_factory.state()
 
         # Abort if the run is not running
-        abort_msg = check_abort(
+        abort_if(
             request.run_id,
             [Status.PENDING, Status.STARTING, Status.FINISHED],
             state,
+            context,
         )
-        abort_grpc_context(abort_msg, context)
 
         # Set pushed_at (timestamp in seconds)
         pushed_at = time.time()
@@ -180,12 +180,12 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         state: LinkState = self.state_factory.state()
 
         # Abort if the run is not running
-        abort_msg = check_abort(
+        abort_if(
             request.run_id,
             [Status.PENDING, Status.STARTING, Status.FINISHED],
             state,
+            context,
         )
-        abort_grpc_context(abort_msg, context)
 
         # Convert each task_id str to UUID
         task_ids: set[UUID] = {UUID(task_id) for task_id in request.task_ids}
@@ -291,12 +291,12 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         state = self.state_factory.state()
 
         # Abort if the run is not running
-        abort_msg = check_abort(
+        abort_if(
             request.run_id,
             [Status.PENDING, Status.STARTING, Status.FINISHED],
             state,
+            context,
         )
-        abort_grpc_context(abort_msg, context)
 
         state.set_serverapp_context(request.run_id, context_from_proto(request.context))
         return PushServerAppOutputsResponse()
@@ -311,8 +311,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         state = self.state_factory.state()
 
         # Abort if the run is finished
-        abort_msg = check_abort(request.run_id, [Status.FINISHED], state)
-        abort_grpc_context(abort_msg, context)
+        abort_if(request.run_id, [Status.FINISHED], state, context)
 
         # Update the run status
         state.update_run_status(
