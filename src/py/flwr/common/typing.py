@@ -256,5 +256,5 @@ class Fab:
     content: bytes
 
 
-class StopRunException(BaseException):
-    """Raised when a run is stopped via `flwr stop`."""
+class RunNotRunningException(BaseException):
+    """Raised when a run is not running."""
