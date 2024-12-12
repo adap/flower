@@ -32,7 +32,7 @@ from flwr.common.typing import Fab, Run
 
 
 @contextmanager
-def grpc_adapter(  # pylint: disable=R0913,too-many-positional-arguments
+def grpc_adapter(  # pylint: disable=R0913
     server_address: str,
     insecure: bool,
     retry_invoker: RetryInvoker,
@@ -48,7 +48,7 @@ def grpc_adapter(  # pylint: disable=R0913,too-many-positional-arguments
         Optional[Callable[[], Optional[int]]],
         Optional[Callable[[], None]],
         Optional[Callable[[int], Run]],
-        Optional[Callable[[str, int], Fab]],
+        Optional[Callable[[str, Optional[int]], Fab]],
     ]
 ]:
     """Primitives for request/response-based interaction with a server via GrpcAdapter.
