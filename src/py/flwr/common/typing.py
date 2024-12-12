@@ -258,3 +258,11 @@ class Fab:
 
 class RunNotRunningException(BaseException):
     """Raised when a run is not running."""
+
+
+class AbortRunException(BaseException):
+    """Raised when a run is aborted."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+        self.message = message

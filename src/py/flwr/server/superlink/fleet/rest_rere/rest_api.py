@@ -154,8 +154,11 @@ async def get_fab(request: GetFabRequest) -> GetFabResponse:
     # Get ffs from app
     ffs: Ffs = cast(FfsFactory, app.state.FFS_FACTORY).ffs()
 
+    # Get state from app
+    state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
+
     # Handle message
-    return message_handler.get_fab(request=request, ffs=ffs)
+    return message_handler.get_fab(request=request, ffs=ffs, state=state)
 
 
 routes = [
