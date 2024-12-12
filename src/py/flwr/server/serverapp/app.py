@@ -50,7 +50,7 @@ from flwr.common.serde import (
     run_from_proto,
     run_status_to_proto,
 )
-from flwr.common.typing import RunStatus
+from flwr.common.typing import RunNotRunningException, RunStatus
 from flwr.proto.run_pb2 import UpdateRunStatusRequest  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PullServerAppInputsRequest,
@@ -96,7 +96,7 @@ def flwr_serverapp() -> None:
     restore_output()
 
 
-def run_serverapp(  # pylint: disable=R0914, disable=W0212
+def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
     serverappio_api_address: str,
     log_queue: Queue[Optional[str]],
     run_once: bool,
@@ -186,6 +186,12 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
             _ = driver._stub.PushServerAppOutputs(out_req)
 
             run_status = RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
+
+        except RunNotRunningException:
+            log(INFO, "")
+            log(INFO, "Run ID %s stopped.", run.run_id)
+            log(INFO, "")
+            run_status = None
 
         except Exception as ex:  # pylint: disable=broad-exception-caught
             exc_entity = "ServerApp"

@@ -385,10 +385,12 @@ class StateTest(unittest.TestCase):
 
         # Execute
         result = state.get_task_ids_from_run_id(run_id_0)
+        bad_result = state.get_task_ids_from_run_id(15)
 
         assert result
-        assert result == expected_task_ids
         self.assertNotIn(task_id_2, result)
+        self.assertNotIn(task_id_2, bad_result)
+        self.assertSetEqual(result, expected_task_ids)
 
     # Init tests
     def test_init_state(self) -> None:
