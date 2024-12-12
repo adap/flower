@@ -28,6 +28,7 @@ from flwr.common.serde import (
     context_to_proto,
     fab_to_proto,
     run_status_from_proto,
+    run_status_to_proto,
     run_to_proto,
 )
 from flwr.common.typing import Fab, RunStatus
@@ -39,6 +40,8 @@ from flwr.proto.log_pb2 import (  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetFederationOptionsRequest,
     GetFederationOptionsResponse,
+    GetRunStatusRequest,
+    GetRunStatusResponse,
     UpdateRunStatusRequest,
     UpdateRunStatusResponse,
 )
@@ -121,6 +124,22 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
             run_id=request.run_id, new_status=run_status_from_proto(request.run_status)
         )
         return UpdateRunStatusResponse()
+
+    def GetRunStatus(
+        self, request: GetRunStatusRequest, context: ServicerContext
+    ) -> GetRunStatusResponse:
+        """Get status of requested runs."""
+        log(DEBUG, "SimultionIoServicer.GetRunStatus")
+        state = self.state_factory.state()
+
+        statuses = state.get_run_status(set(request.run_ids))
+
+        return GetRunStatusResponse(
+            run_status_dict={
+                run_id: run_status_to_proto(status)
+                for run_id, status in statuses.items()
+            }
+        )
 
     def PushLogs(
         self, request: PushLogsRequest, context: grpc.ServicerContext

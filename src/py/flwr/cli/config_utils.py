@@ -230,10 +230,14 @@ def load_from_string(toml_content: str) -> Optional[dict[str, Any]]:
         return None
 
 
-def validate_project_config(
+def process_loaded_project_config(
     config: Union[dict[str, Any], None], errors: list[str], warnings: list[str]
 ) -> dict[str, Any]:
-    """Validate and return the Flower project configuration."""
+    """Process and return the loaded project configuration.
+
+    This function handles errors and warnings from the `load_and_validate` function,
+    exits on critical issues, and returns the validated configuration.
+    """
     if config is None:
         typer.secho(
             "Project configuration could not be loaded.\n"
@@ -324,3 +328,15 @@ def validate_certificate_in_federation_config(
             raise typer.Exit(code=1)
 
     return insecure, root_certificates_bytes
+
+
+def exit_if_no_address(federation_config: dict[str, Any], cmd: str) -> None:
+    """Exit if the provided federation_config has no "address" key."""
+    if "address" not in federation_config:
+        typer.secho(
+            f"❌ `flwr {cmd}` currently works with a SuperLink. Ensure that the correct"
+            "SuperLink (Exec API) address is provided in `pyproject.toml`.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)

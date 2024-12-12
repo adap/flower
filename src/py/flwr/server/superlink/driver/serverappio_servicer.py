@@ -32,6 +32,7 @@ from flwr.common.serde import (
     fab_from_proto,
     fab_to_proto,
     run_status_from_proto,
+    run_status_to_proto,
     run_to_proto,
     user_config_from_proto,
 )
@@ -48,6 +49,8 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     CreateRunResponse,
     GetRunRequest,
     GetRunResponse,
+    GetRunStatusRequest,
+    GetRunStatusResponse,
     UpdateRunStatusRequest,
     UpdateRunStatusResponse,
 )
@@ -67,6 +70,7 @@ from flwr.proto.task_pb2 import TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
+from flwr.server.superlink.utils import abort_if
 from flwr.server.utils.validator import validate_task_ins_or_res
 
 
@@ -85,7 +89,18 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> GetNodesResponse:
         """Get available nodes."""
         log(DEBUG, "ServerAppIoServicer.GetNodes")
+
+        # Init state
         state: LinkState = self.state_factory.state()
+
+        # Abort if the run is not running
+        abort_if(
+            request.run_id,
+            [Status.PENDING, Status.STARTING, Status.FINISHED],
+            state,
+            context,
+        )
+
         all_ids: set[int] = state.get_nodes(request.run_id)
         nodes: list[Node] = [
             Node(node_id=node_id, anonymous=False) for node_id in all_ids
@@ -123,6 +138,17 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         """Push a set of TaskIns."""
         log(DEBUG, "ServerAppIoServicer.PushTaskIns")
 
+        # Init state
+        state: LinkState = self.state_factory.state()
+
+        # Abort if the run is not running
+        abort_if(
+            request.run_id,
+            [Status.PENDING, Status.STARTING, Status.FINISHED],
+            state,
+            context,
+        )
+
         # Set pushed_at (timestamp in seconds)
         pushed_at = time.time()
         for task_ins in request.task_ins_list:
@@ -133,9 +159,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         for task_ins in request.task_ins_list:
             validation_errors = validate_task_ins_or_res(task_ins)
             _raise_if(bool(validation_errors), ", ".join(validation_errors))
-
-        # Init state
-        state: LinkState = self.state_factory.state()
 
         # Store each TaskIns
         task_ids: list[Optional[UUID]] = []
@@ -153,11 +176,19 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         """Pull a set of TaskRes."""
         log(DEBUG, "ServerAppIoServicer.PullTaskRes")
 
-        # Convert each task_id str to UUID
-        task_ids: set[UUID] = {UUID(task_id) for task_id in request.task_ids}
-
         # Init state
         state: LinkState = self.state_factory.state()
+
+        # Abort if the run is not running
+        abort_if(
+            request.run_id,
+            [Status.PENDING, Status.STARTING, Status.FINISHED],
+            state,
+            context,
+        )
+
+        # Convert each task_id str to UUID
+        task_ids: set[UUID] = {UUID(task_id) for task_id in request.task_ids}
 
         # Register callback
         def on_rpc_done() -> None:
@@ -255,7 +286,18 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> PushServerAppOutputsResponse:
         """Push ServerApp process outputs."""
         log(DEBUG, "ServerAppIoServicer.PushServerAppOutputs")
+
+        # Init state
         state = self.state_factory.state()
+
+        # Abort if the run is not running
+        abort_if(
+            request.run_id,
+            [Status.PENDING, Status.STARTING, Status.FINISHED],
+            state,
+            context,
+        )
+
         state.set_serverapp_context(request.run_id, context_from_proto(request.context))
         return PushServerAppOutputsResponse()
 
@@ -264,7 +306,12 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> UpdateRunStatusResponse:
         """Update the status of a run."""
         log(DEBUG, "ServerAppIoServicer.UpdateRunStatus")
+
+        # Init state
         state = self.state_factory.state()
+
+        # Abort if the run is finished
+        abort_if(request.run_id, [Status.FINISHED], state, context)
 
         # Update the run status
         state.update_run_status(
@@ -283,6 +330,21 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         merged_logs = "".join(request.logs)
         state.add_serverapp_log(request.run_id, merged_logs)
         return PushLogsResponse()
+
+    def GetRunStatus(
+        self, request: GetRunStatusRequest, context: grpc.ServicerContext
+    ) -> GetRunStatusResponse:
+        """Get the status of a run."""
+        log(DEBUG, "ServerAppIoServicer.GetRunStatus")
+        state = self.state_factory.state()
+
+        # Get run status from LinkState
+        run_statuses = state.get_run_status(set(request.run_ids))
+        run_status_dict = {
+            run_id: run_status_to_proto(run_status)
+            for run_id, run_status in run_statuses.items()
+        }
+        return GetRunStatusResponse(run_status_dict=run_status_dict)
 
 
 def _raise_if(validation_error: bool, detail: str) -> None:
