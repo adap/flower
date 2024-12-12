@@ -27,7 +27,7 @@ import grpc
 
 from flwr.common.constant import MAX_RETRY_DELAY
 from flwr.common.logger import log
-from flwr.common.typing import StopRunException
+from flwr.common.typing import RunNotRunningException
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
 
@@ -347,7 +347,7 @@ def _make_simple_grpc_retry_invoker() -> RetryInvoker:
 
     def _should_giveup_fn(e: Exception) -> bool:
         if e.code() == grpc.StatusCode.PERMISSION_DENIED:  # type: ignore
-            raise StopRunException
+            raise RunNotRunningException
         if e.code() == grpc.StatusCode.UNAVAILABLE:  # type: ignore
             return False
         return True
