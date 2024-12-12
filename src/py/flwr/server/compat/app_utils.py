@@ -17,7 +17,7 @@
 
 import threading
 
-from flwr.common.typing import StopRunException
+from flwr.common.typing import RunNotRunningException
 
 from ..client_manager import ClientManager
 from ..compat.driver_client_proxy import DriverClientProxy
@@ -78,7 +78,7 @@ def _update_client_manager(
     while not f_stop.is_set():
         try:
             all_node_ids = set(driver.get_node_ids())
-        except StopRunException:
+        except RunNotRunningException:
             f_stop.set()
             break
         dead_nodes = set(registered_nodes).difference(all_node_ids)
