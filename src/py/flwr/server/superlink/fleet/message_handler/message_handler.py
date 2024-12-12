@@ -150,11 +150,7 @@ def get_run(request: GetRunRequest, state: LinkState) -> GetRunResponse:
     )
 
 
-def get_fab(
-    request: GetFabRequest,
-    ffs: Ffs,
-    state: LinkState,
-) -> GetFabResponse:
+def get_fab(request: GetFabRequest, ffs: Ffs, state: LinkState) -> GetFabResponse:
     """Get FAB."""
     # Abort if the run is not running
     abort_msg = check_abort(
