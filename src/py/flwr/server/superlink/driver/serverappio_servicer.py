@@ -203,7 +203,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                 return
 
             # Delete delivered TaskIns and TaskRes
-            state.delete_tasks(task_ids=task_ids)
+            state.delete_tasks(task_ins_ids=task_ids)
 
         context.add_callback(on_rpc_done)
 
