@@ -29,6 +29,8 @@ class BaseClient(NumPyClient):
         super().__init__()
         self.model_manager = model_manager
 
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Return the current local model parameters."""
         return self.model_manager.model.get_parameters()
@@ -61,7 +63,7 @@ class BaseClient(NumPyClient):
         self.model_manager.model.enable_body()
         self.model_manager.model.enable_head()
 
-        return self.model_manager.train()
+        return self.model_manager.train(self.device)
 
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
@@ -101,7 +103,7 @@ class BaseClient(NumPyClient):
         self.set_parameters(parameters, evaluate=True)
 
         # Test the model
-        test_results = self.model_manager.test()
+        test_results = self.model_manager.test(self.device)
 
         return (
             test_results.get("loss", 0.0),

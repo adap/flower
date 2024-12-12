@@ -187,7 +187,9 @@ class ModelManager(ABC):
             head_state_prec = ParametersRecord(head_state_arr)
             self.context.state.parameters_records[FEDREP_HEAD_STATE] = head_state_prec
 
-    def train(self) -> Dict[str, Union[List[Dict[str, float]], int, float]]:
+    def train(
+        self, device: torch.device
+    ) -> Dict[str, Union[List[Dict[str, float]], int, float]]:
         """Train the model maintained in self.model.
 
         Returns
@@ -219,6 +221,7 @@ class ModelManager(ABC):
         correct, total = 0, 0
         loss: torch.Tensor = 0.0
 
+        self._model.to(device)
         self._model.train()
         for i in range(num_local_epochs + num_rep_epochs):
             if i < num_local_epochs:
@@ -228,8 +231,8 @@ class ModelManager(ABC):
                 self._model.enable_body()
                 self._model.disable_head()
             for batch in self.trainloader:
-                images = batch["img"]
-                labels = batch["label"]
+                images = batch["img"].to(device)
+                labels = batch["label"].to(device)
                 outputs = self._model(images)
                 loss = criterion(outputs, labels)
                 optimizer.zero_grad()
@@ -243,7 +246,7 @@ class ModelManager(ABC):
 
         return {"loss": loss.item(), "accuracy": correct / total}
 
-    def test(self) -> Dict[str, float]:
+    def test(self, device: torch.device) -> Dict[str, float]:
         """Test the model maintained in self.model.
 
         Returns
@@ -276,11 +279,12 @@ class ModelManager(ABC):
         criterion = torch.nn.CrossEntropyLoss()
         correct, total, loss = 0, 0, 0.0
 
+        self._model.to(device)
         self._model.eval()
         with torch.no_grad():
             for batch in self.testloader:
-                images = batch["img"]
-                labels = batch["label"]
+                images = batch["img"].to(device)
+                labels = batch["label"].to(device)
                 outputs = self._model(images)
                 loss += criterion(outputs, labels).item()
                 total += labels.size(0)
