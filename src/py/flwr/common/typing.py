@@ -254,3 +254,7 @@ class Fab:
 
     hash_str: str
     content: bytes
+
+
+class RunNotRunningException(BaseException):
+    """Raised when a run is not running."""
