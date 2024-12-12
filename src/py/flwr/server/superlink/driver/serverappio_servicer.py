@@ -67,10 +67,10 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PushTaskInsResponse,
 )
 from flwr.proto.task_pb2 import TaskRes  # pylint: disable=E0611
-from flwr.server.superlink.abort import abort_grpc_context, check_abort
 from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
+from flwr.server.superlink.utils import abort_grpc_context, check_abort
 from flwr.server.utils.validator import validate_task_ins_or_res
 
 
