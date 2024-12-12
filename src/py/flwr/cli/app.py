@@ -20,9 +20,11 @@ from typer.main import get_command
 from .build import build
 from .install import install
 from .log import log
+from .login import login
 from .ls import ls
 from .new import new
 from .run import run
+from .stop import stop
 
 app = typer.Typer(
     help=typer.style(
@@ -39,6 +41,8 @@ app.command()(build)
 app.command()(install)
 app.command()(log)
 app.command()(ls)
+app.command()(stop)
+app.command()(login)
 
 typer_click_object = get_command(app)
 
