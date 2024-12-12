@@ -31,5 +31,6 @@ message Fab {
 message GetFabRequest {
   Node node = 1;
   string hash_str = 2;
+  uint64 run_id = 3;
 }
 message GetFabResponse { Fab fab = 1; }
