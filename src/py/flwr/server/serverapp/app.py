@@ -188,7 +188,9 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
             run_status = RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
 
         except StopRunException:
+            log(INFO, "")
             log(INFO, "Run ID %s stopped.", run.run_id)
+            log(INFO, "")
             run_status = None
 
         except Exception as ex:  # pylint: disable=broad-exception-caught

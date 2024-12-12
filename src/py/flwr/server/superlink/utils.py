@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""SuperLink abort."""
+"""SuperLink utilities."""
 
+
+from typing import Union
 
 import grpc
 
@@ -29,18 +31,24 @@ _STATUS_TO_MSG = {
 }
 
 
-def abort_if(
+def check_abort(
     run_id: int,
     abort_status_list: list[str],
     state: LinkState,
-    context: grpc.ServicerContext,
-) -> None:
-    """Abort if the status of the provided `run_id` is in `abort_status_list`."""
+) -> Union[str, None]:
+    """Check if the status of the provided `run_id` is in `abort_status_list`."""
     run_status: RunStatus = state.get_run_status({run_id})[run_id]
 
     if run_status.status in abort_status_list:
         msg = _STATUS_TO_MSG[run_status.status]
         if run_status.sub_status == SubStatus.STOPPED:
             msg += " Stopped by user."
+        return msg
 
+    return None
+
+
+def abort_grpc_context(msg: Union[str, None], context: grpc.ServicerContext) -> None:
+    """Abort context with statuscode PERMISSION_DENIED if `msg` is not None."""
+    if msg is not None:
         context.abort(grpc.StatusCode.PERMISSION_DENIED, msg)
