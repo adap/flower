@@ -76,7 +76,7 @@ def grpc_connection(  # pylint: disable=R0913,R0915,too-many-positional-argument
         Optional[Callable[[], Optional[int]]],
         Optional[Callable[[], None]],
         Optional[Callable[[int], Run]],
-        Optional[Callable[[str], Fab]],
+        Optional[Callable[[str, int], Fab]],
     ]
 ]:
     """Establish a gRPC connection to a gRPC server.
