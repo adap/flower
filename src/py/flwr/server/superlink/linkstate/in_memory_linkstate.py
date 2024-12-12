@@ -265,9 +265,6 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             for task_res in task_res_found:
                 task_res.task.delivered_at = delivered_at
 
-            # Cleanup
-            self.delete_tasks(set(ret.keys()))
-
         return list(ret.values())
 
     def delete_tasks(self, task_ins_ids: set[UUID]) -> None:
