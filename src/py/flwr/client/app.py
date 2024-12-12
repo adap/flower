@@ -55,7 +55,7 @@ from flwr.common.constant import (
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
-from flwr.common.typing import Fab, Run, StopRunException, UserConfig
+from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.server.superlink.fleet.grpc_bidi.grpc_server import generic_create_grpc_server
 from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
@@ -611,7 +611,7 @@ def start_client_internal(
                     send(reply_message)
                     log(INFO, "Sent reply")
 
-                except StopRunException:
+                except RunNotRunningException:
                     log(INFO, "Run ID %s stopped.", run_id)
                     continue
 
