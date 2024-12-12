@@ -967,7 +967,8 @@ class StateTest(unittest.TestCase):
             # Assert
             assert len(task_res_list) == 1
             assert task_res_list[0].task.HasField("error")
-            assert state.num_task_ins() == state.num_task_res() == 0
+            assert state.num_task_ins() == 1
+            assert state.num_task_res() == 0
 
     def test_get_task_res_returns_empty_for_missing_taskins(self) -> None:
         """Test that get_task_res returns an empty result when the corresponding TaskIns

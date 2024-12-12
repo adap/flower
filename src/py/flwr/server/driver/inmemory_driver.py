@@ -142,7 +142,9 @@ class InMemoryDriver(Driver):
         # Pull TaskRes
         task_res_list = self.state.get_task_res(task_ids=msg_ids)
         # Delete tasks in state
-        self.state.delete_tasks(msg_ids)
+        self.state.delete_tasks(
+            {UUID(task_res.task.ancestry[0]) for task_res in task_res_list}
+        )
         # Convert TaskRes to Message
         msgs = [message_from_taskres(taskres) for taskres in task_res_list]
         return msgs
