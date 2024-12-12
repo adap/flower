@@ -19,11 +19,9 @@ import time
 from typing import Optional
 from uuid import UUID
 
-import grpc
-
 from flwr.common.constant import Status
 from flwr.common.serde import fab_to_proto, user_config_to_proto
-from flwr.common.typing import Fab
+from flwr.common.typing import AbortRunException, Fab
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
@@ -45,9 +43,9 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     Run,
 )
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
-from flwr.server.superlink.abort import abort_if
 from flwr.server.superlink.ffs.ffs import Ffs
 from flwr.server.superlink.linkstate import LinkState
+from flwr.server.superlink.utils import check_abort
 
 
 def create_node(
@@ -96,21 +94,20 @@ def pull_task_ins(request: PullTaskInsRequest, state: LinkState) -> PullTaskInsR
     return response
 
 
-def push_task_res(
-    request: PushTaskResRequest, state: LinkState, context: grpc.ServicerContext
-) -> PushTaskResResponse:
+def push_task_res(request: PushTaskResRequest, state: LinkState) -> PushTaskResResponse:
     """Push TaskRes handler."""
     # pylint: disable=no-member
     task_res: TaskRes = request.task_res_list[0]
     # pylint: enable=no-member
 
     # Abort if the run is not running
-    abort_if(
+    abort_msg = check_abort(
         task_res.run_id,
         [Status.PENDING, Status.STARTING, Status.FINISHED],
         state,
-        context,
     )
+    if abort_msg:
+        raise AbortRunException(abort_msg)
 
     # Set pushed_at (timestamp in seconds)
     task_res.task.pushed_at = time.time()
@@ -126,11 +123,7 @@ def push_task_res(
     return response
 
 
-def get_run(
-    request: GetRunRequest,
-    state: LinkState,
-    context: grpc.ServicerContext,
-) -> GetRunResponse:
+def get_run(request: GetRunRequest, state: LinkState) -> GetRunResponse:
     """Get run information."""
     run = state.get_run(request.run_id)
 
@@ -138,12 +131,13 @@ def get_run(
         return GetRunResponse()
 
     # Abort if the run is not running
-    abort_if(
+    abort_msg = check_abort(
         request.run_id,
         [Status.PENDING, Status.STARTING, Status.FINISHED],
         state,
-        context,
     )
+    if abort_msg:
+        raise AbortRunException(abort_msg)
 
     return GetRunResponse(
         run=Run(
@@ -160,16 +154,16 @@ def get_fab(
     request: GetFabRequest,
     ffs: Ffs,
     state: LinkState,
-    context: grpc.ServicerContext,
 ) -> GetFabResponse:
     """Get FAB."""
     # Abort if the run is not running
-    abort_if(
+    abort_msg = check_abort(
         request.run_id,
         [Status.PENDING, Status.STARTING, Status.FINISHED],
         state,
-        context,
     )
+    if abort_msg:
+        raise AbortRunException(abort_msg)
 
     if result := ffs.get(request.hash_str):
         fab = Fab(request.hash_str, result[0])
