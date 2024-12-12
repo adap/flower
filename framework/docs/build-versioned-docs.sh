@@ -95,14 +95,14 @@ END
     # Actually building the docs for a given language and version
     sphinx-build -b html source/ build/html/${current_version}/${current_language} -A lang=True -D language=${current_language}
 
-    cd $(git rev-parse --show-toplevel)
-
     # Clean the history of the checked-out branch to remove conflicts
     git clean -fd
 
   done
+
+  cd $(git rev-parse --show-toplevel)
 done
-  
+
 # Build the main version (main for GH CI, local branch for local) 
 if [ $GITHUB_ACTIONS ]
 then
@@ -110,6 +110,8 @@ then
 else
   git checkout --force $current_branch
 fi
+
+cd framework/docs
 
 current_version=main
 export current_version
