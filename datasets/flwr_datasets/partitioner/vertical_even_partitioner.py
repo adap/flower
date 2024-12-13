@@ -35,12 +35,6 @@ class VerticalEvenPartitioner(Partitioner):
     Also enables droping columns and sharing specified columns across
     all partitions.
 
-    The number and nature of partitions can be defined in various ways:
-    - By specifying a simple integer for even splitting.
-    - By providing ratios or absolute counts for each partition.
-    - By explicitly listing the columns for each partition.
-    (see `column_distribution` and `mode` parameters for more details)
-
     Parameters
     ----------
     num_partitions : int
