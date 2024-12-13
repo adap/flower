@@ -18,7 +18,7 @@
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Optional, Union
 
 from flwr.proto.exec_pb2_grpc import ExecStub
 
@@ -67,47 +67,46 @@ class CliAuthPlugin(ABC):
 
     Parameters
     ----------
-    user_auth_config_path : Path
-        The path to the user's authentication configuration file.
+    credentials_path : Path
+        Path to the user's authentication credentials file.
     """
 
     @staticmethod
     @abstractmethod
     def login(
-        login_details: dict[str, str],
+        login_details: UserAuthLoginDetails,
         exec_stub: ExecStub,
-    ) -> dict[str, Any]:
-        """Authenticate the user with the SuperLink.
+    ) -> UserAuthCredentials:
+        """Authenticate the user and retrieve authentication credentials.
 
         Parameters
         ----------
-        login_details : dict[str, str]
-            A dictionary containing the user's login details.
+        login_details : UserAuthLoginDetails
+            An object containing the user's login details.
         exec_stub : ExecStub
-            An instance of `ExecStub` used for communication with the SuperLink.
+            A stub for executing RPC calls to the server.
 
         Returns
         -------
-        user_auth_config : dict[str, Any]
-            A dictionary containing the user's authentication configuration
-            in JSON format.
+        UserAuthCredentials
+            The authentication credentials obtained after login.
         """
 
     @abstractmethod
-    def __init__(self, user_auth_config_path: Path):
+    def __init__(self, credentials_path: Path):
         """Abstract constructor."""
 
     @abstractmethod
-    def store_tokens(self, user_auth_config: dict[str, Any]) -> None:
+    def store_tokens(self, credentials: UserAuthCredentials) -> None:
         """Store authentication tokens from the provided user_auth_config.
 
         The configuration, including tokens, will be saved as a JSON file
-        at `user_auth_config_path`.
+        at `credentials_path`.
         """
 
     @abstractmethod
     def load_tokens(self) -> None:
-        """Load authentication tokens from the user_auth_config_path."""
+        """Load authentication tokens from the credentials_path."""
 
     @abstractmethod
     def write_tokens_to_metadata(
