@@ -198,20 +198,20 @@ class VerticalSizePartitioner(Partitioner):
         if all(isinstance(fraction, float) for fraction in self._partition_sizes):
             fraction_sum = sum(self._partition_sizes)
             if fraction_sum != 1.0:
-                raise ValueError("Float ratios in column_distribution must sum to 1.0.")
+                raise ValueError("Float ratios in `partition_sizes` must sum to 1.0.")
             if any(
                 fraction < 0.0 or fraction > 1.0 for fraction in self._partition_sizes
             ):
                 raise ValueError(
-                    "All floats in column_distribution must be >= 0.0 and <= 1.0."
+                    "All floats in `partition_sizes` must be >= 0.0 and <= 1.0."
                 )
         elif all(
             isinstance(coulumn_count, int) for coulumn_count in self._partition_sizes
         ):
             if any(coulumn_count < 0 for coulumn_count in self._partition_sizes):
-                raise ValueError("All integers in column_distribution must be >= 0.")
+                raise ValueError("All integers in `partition_sizes` must be >= 0.")
         else:
-            raise ValueError("partition_sizes list must be all floats or all ints.")
+            raise ValueError("`partition_sizes` list must be all floats or all ints.")
 
         # Validate columns lists
         for parameter_name, parameter_list in [
