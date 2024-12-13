@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """VerticalEvenPartitioner class tests."""
-# mypy: disable-error-code=list-item,arg-type
+# mypy: disable-error-code=list-item
 import unittest
 
 import numpy as np
@@ -44,7 +44,8 @@ class TestVerticalEvenPartitioner(unittest.TestCase):
         """Test initialization with invalid active_party_columns_mode."""
         with self.assertRaises(ValueError):
             VerticalEvenPartitioner(
-                num_partitions=2, active_party_columns_mode="invalid_mode"
+                num_partitions=2,
+                active_party_columns_mode="invalid_mode",  # type: ignore[arg-type]
             )
 
     def test_init_with_non_string_drop_columns(self) -> None:

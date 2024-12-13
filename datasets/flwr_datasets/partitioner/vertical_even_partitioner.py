@@ -14,6 +14,7 @@
 # ==============================================================================
 """VerticalEvenPartitioner class."""
 # flake8: noqa: E501
+# pylint: disable=C0301, R0902, R0913
 from typing import Literal, Optional, Union
 
 import numpy as np

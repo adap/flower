@@ -14,6 +14,7 @@
 # ==============================================================================
 """VerticalPartitioner utils.py."""
 # flake8: noqa: E501
+# pylint: disable=C0301
 from typing import Any, Literal, Union
 
 
