@@ -293,6 +293,16 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             for task_id in task_res_to_be_deleted:
                 del self.task_res_store[task_id]
 
+    def get_task_ids_from_run_id(self, run_id: int) -> set[UUID]:
+        """Get all TaskIns IDs for the given run_id."""
+        task_id_list: set[UUID] = set()
+        with self.lock:
+            for task_id, task_ins in self.task_ins_store.items():
+                if task_ins.run_id == run_id:
+                    task_id_list.add(task_id)
+
+        return task_id_list
+
     def _force_delete_tasks_by_ids(self, task_ids: set[UUID]) -> None:
         """Delete tasks based on a set of TaskIns IDs."""
         if not task_ids:
