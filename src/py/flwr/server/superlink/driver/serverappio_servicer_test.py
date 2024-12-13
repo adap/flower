@@ -24,6 +24,7 @@ from parameterized import parameterized
 from flwr.common import ConfigsRecord
 from flwr.common.constant import SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS, Status
 from flwr.common.typing import RunStatus
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     UpdateRunStatusRequest,
     UpdateRunStatusResponse,
@@ -120,7 +121,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             response_deserializer=PushTaskInsResponse.FromString,
         )
         self._pull_task_res = self._channel.unary_unary(
-            "/flwr.proto.ServerAppIo/PushTaskRes",
+            "/flwr.proto.ServerAppIo/PullTaskRes",
             request_serializer=PullTaskResRequest.SerializeToString,
             response_deserializer=PullTaskResResponse.FromString,
         )
@@ -249,3 +250,56 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
 
         # Execute & Assert
         self._assert_push_task_ins_not_allowed(task_ins, run_id)
+
+    def test_pull_task_res_successful_if_running(self) -> None:
+        """Test `PullTaskRes` success."""
+        # Prepare
+        node_id = self.state.create_node(ping_interval=30)
+        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+
+        # Transition status to running. PushTaskRes is only allowed in running status.
+        _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+        _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        request = PullTaskResRequest(node=Node(node_id=node_id), run_id=run_id)
+
+        # Execute
+        response, call = self._pull_task_res.with_call(request=request)
+
+        # Assert
+        assert isinstance(response, PullTaskResResponse)
+        assert grpc.StatusCode.OK == call.code()
+
+    def _assert_pull_task_res_not_allowed(self, node_id: int, run_id: int) -> None:
+        """Assert `PullTaskRes` not allowed."""
+        run_status = self.state.get_run_status({run_id})[run_id]
+        request = PullTaskResRequest(node=Node(node_id=node_id), run_id=run_id)
+
+        with self.assertRaises(grpc.RpcError) as e:
+            self._pull_task_res.with_call(request=request)
+        assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
+        assert e.exception.details() == self.status_to_msg[run_status.status]
+
+    @parameterized.expand(
+        [
+            (0,),  # Test not successful if RunStatus is pending.
+            (1,),  # Test not successful if RunStatus is starting.
+            (3,),  # Test not successful if RunStatus is finished.
+        ]
+    )  # type: ignore
+    def test_pull_task_res_not_successful_if_not_running(
+        self, num_transitions: int
+    ) -> None:
+        """Test `PullTaskRes` not successful if RunStatus is not running."""
+        # Prepare
+        node_id = self.state.create_node(ping_interval=30)
+        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+
+        if num_transitions > 0:
+            _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+        if num_transitions > 1:
+            _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        if num_transitions > 2:
+            _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
+
+        # Execute & Assert
+        self._assert_pull_task_res_not_allowed(node_id, run_id)
