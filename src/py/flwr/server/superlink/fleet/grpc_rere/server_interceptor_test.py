@@ -342,7 +342,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         assert e.exception.code() == grpc.StatusCode.UNAUTHENTICATED
 
     def test_successful_get_run_with_metadata(self) -> None:
-        """Test server interceptor for pull task ins."""
+        """Test server interceptor for get run."""
         # Prepare
         self.state.create_node(
             ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
@@ -376,7 +376,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         assert grpc.StatusCode.OK == call.code()
 
     def test_unsuccessful_get_run_with_metadata(self) -> None:
-        """Test server interceptor for pull task ins unsuccessfully."""
+        """Test server interceptor for get run unsuccessfully."""
         # Prepare
         self.state.create_node(
             ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
@@ -403,7 +403,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             )
 
     def test_successful_ping_with_metadata(self) -> None:
-        """Test server interceptor for pull task ins."""
+        """Test server interceptor for ping."""
         # Prepare
         node_id = self.state.create_node(
             ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
@@ -433,7 +433,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         assert grpc.StatusCode.OK == call.code()
 
     def test_unsuccessful_ping_with_metadata(self) -> None:
-        """Test server interceptor for pull task ins unsuccessfully."""
+        """Test server interceptor for ping unsuccessfully."""
         # Prepare
         node_id = self.state.create_node(
             ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
