@@ -65,7 +65,7 @@ class VerticalEvenPartitioner(Partitioner):
     --------
     >>> partitioner = VerticalEvenPartitioner(
     ...     num_partitions=3,
-    ...     active_party_column=["income"],
+    ...     active_party_column="income",
     ...     active_party_column_mode="add_to_last",
     ...     shuffle=True,
     ...     seed=42
@@ -81,7 +81,7 @@ class VerticalEvenPartitioner(Partitioner):
     def __init__(
         self,
         num_partitions: int,
-        active_party_column: Optional[list[str]] = None,
+        active_party_column: Optional[Union[str, list[str]]] = None,
         active_party_column_mode: Union[
             Literal[
                 "add_to_first",
