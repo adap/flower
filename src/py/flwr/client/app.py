@@ -621,6 +621,10 @@ def start_client_internal(
                     break
             # pylint: enable=too-many-nested-blocks
 
+            # Skip cleanup for child processes
+            if app_state_tracker.main_pid != os.getpid():
+                sys.exit(0)
+
             # Unregister node
             if delete_node is not None and app_state_tracker.is_connected:
                 delete_node()  # pylint: disable=not-callable
@@ -807,15 +811,14 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
 class _AppStateTracker:
     interrupt: bool = False
     is_connected: bool = False
+    main_pid: int = -1
 
     def register_signal_handler(self) -> None:
         """Register handlers for exit signals."""
-        main_pid = os.getpid()
+        self.main_pid = os.getpid()
 
         def signal_handler(sig, frame):  # type: ignore
             # pylint: disable=unused-argument
-            if os.getpid() != main_pid:
-                return
             self.interrupt = True
             sys.exit(0)
 
