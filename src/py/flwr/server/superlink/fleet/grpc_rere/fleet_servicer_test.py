@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower FleetServicer tests."""
 
+
 import tempfile
 import unittest
 
@@ -103,7 +104,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         assert grpc.StatusCode.OK == call.code()
 
     def _assert_push_task_res_not_allowed(self, node_id: int, run_id: int) -> None:
-        """Utility function to assert `PushTaskRes` not allowed."""
+        """Assert `PushTaskRes` not allowed."""
         run_status = self.state.get_run_status({run_id})[run_id]
         request = PushTaskResRequest(
             task_res_list=[
@@ -167,7 +168,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         assert grpc.StatusCode.OK == call.code()
 
     def _assert_get_run_not_allowed(self, run_id: int) -> None:
-        """Utility function to assert `GetRun` not allowed."""
+        """Assert `GetRun` not allowed."""
         run_status = self.state.get_run_status({run_id})[run_id]
         request = GetRunRequest(run_id=run_id)
 
@@ -234,7 +235,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
     def _assert_get_fab_not_allowed(
         self, node_id: int, hash_str: str, run_id: int
     ) -> None:
-        """Utility function to assert `GetFab` not allowed."""
+        """Assert `GetFab` not allowed."""
         run_status = self.state.get_run_status({run_id})[run_id]
         request = GetFabRequest(
             node=Node(node_id=node_id), hash_str=hash_str, run_id=run_id
