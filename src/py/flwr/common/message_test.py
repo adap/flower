@@ -14,6 +14,7 @@
 # ==============================================================================
 """Message tests."""
 
+
 import time
 from collections import namedtuple
 from contextlib import ExitStack
