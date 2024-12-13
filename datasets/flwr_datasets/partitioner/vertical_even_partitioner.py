@@ -39,9 +39,10 @@ class VerticalEvenPartitioner(Partitioner):
     ----------
     num_partitions : int
         Number of partitions to create.
-    active_party_columns : Optional[list[str]]
-        Columns associated with the "active party" (which can be the server).
-    active_party_columns_mode : Union[Literal[["add_to_first", "add_to_last", "create_as_first", "create_as_last", "add_to_all"], int]
+    active_party_column : Optional[Union[str, list[str]]]
+        Column(s) (typically representing labels) associated with the
+        "active party" (which can be the server).
+    active_party_column_mode : Union[Literal[["add_to_first", "add_to_last", "create_as_first", "create_as_last", "add_to_all"], int]
         Determines how to assign the active party columns:
         - "add_to_first": Append active party columns to the first partition.
         - "add_to_last": Append active party columns to the last partition.
@@ -64,8 +65,8 @@ class VerticalEvenPartitioner(Partitioner):
     --------
     >>> partitioner = VerticalEvenPartitioner(
     ...     num_partitions=3,
-    ...     active_party_columns=["income"],
-    ...     active_party_columns_mode="add_to_last",
+    ...     active_party_column=["income"],
+    ...     active_party_column_mode="add_to_last",
     ...     shuffle=True,
     ...     seed=42
     ... )
@@ -80,8 +81,8 @@ class VerticalEvenPartitioner(Partitioner):
     def __init__(
         self,
         num_partitions: int,
-        active_party_columns: Optional[list[str]] = None,
-        active_party_columns_mode: Union[
+        active_party_column: Optional[list[str]] = None,
+        active_party_column_mode: Union[
             Literal[
                 "add_to_first",
                 "add_to_last",
@@ -99,8 +100,8 @@ class VerticalEvenPartitioner(Partitioner):
         super().__init__()
 
         self._num_partitions = num_partitions
-        self._active_party_columns = active_party_columns or []
-        self._active_party_columns_mode = active_party_columns_mode
+        self._active_party_column = active_party_column or []
+        self._active_party_column_mode = active_party_column_mode
         self._drop_columns = drop_columns or []
         self._shared_columns = shared_columns or []
         self._shuffle = shuffle
@@ -121,20 +122,20 @@ class VerticalEvenPartitioner(Partitioner):
 
         all_columns = list(self.dataset.column_names)
         self._validate_parameters_while_partitioning(
-            all_columns, self._shared_columns, self._active_party_columns
+            all_columns, self._shared_columns, self._active_party_column
         )
         columns = [column for column in all_columns if column not in self._drop_columns]
         columns = [column for column in columns if column not in self._shared_columns]
         columns = [
-            column for column in columns if column not in self._active_party_columns
+            column for column in columns if column not in self._active_party_column
         ]
 
         if self._shuffle:
             self._rng.shuffle(columns)
         partition_columns = _list_split(columns, self._num_partitions)
         partition_columns = _add_active_party_columns(
-            self._active_party_columns,
-            self._active_party_columns_mode,
+            self._active_party_column,
+            self._active_party_column_mode,
             partition_columns,
         )
 
@@ -181,7 +182,7 @@ class VerticalEvenPartitioner(Partitioner):
         for parameter_name, parameter_list in [
             ("drop_columns", self._drop_columns),
             ("shared_columns", self._shared_columns),
-            ("active_party_columns", self._active_party_columns),
+            ("active_party_column", self._active_party_column),
         ]:
             if not all(isinstance(column, str) for column in parameter_list):
                 raise ValueError(f"All entries in {parameter_name} must be strings.")
@@ -194,11 +195,11 @@ class VerticalEvenPartitioner(Partitioner):
             "add_to_all",
         }
         if not (
-            isinstance(self._active_party_columns_mode, int)
-            or self._active_party_columns_mode in valid_modes
+            isinstance(self._active_party_column_mode, int)
+            or self._active_party_column_mode in valid_modes
         ):
             raise ValueError(
-                "active_party_columns_mode must be an int or one of "
+                "active_party_column_mode must be an int or one of "
                 "'add_to_first', 'add_to_last', 'create_as_first', 'create_as_last', "
                 "'add_to_all'."
             )
@@ -207,14 +208,14 @@ class VerticalEvenPartitioner(Partitioner):
         self,
         all_columns: list[str],
         shared_columns: list[str],
-        active_party_columns: list[str],
+        active_party_column: list[str],
     ) -> None:
         # Shared columns existance check
         for column in shared_columns:
             if column not in all_columns:
                 raise ValueError(f"Shared column '{column}' not found in the dataset.")
         # Active party columns existence check
-        for column in active_party_columns:
+        for column in active_party_column:
             if column not in all_columns:
                 raise ValueError(
                     f"Active party column '{column}' not found in the dataset."

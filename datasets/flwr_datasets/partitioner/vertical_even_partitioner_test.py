@@ -41,11 +41,11 @@ class TestVerticalEvenPartitioner(unittest.TestCase):
             VerticalEvenPartitioner(num_partitions=0)
 
     def test_init_with_invalid_active_party_mode(self) -> None:
-        """Test initialization with invalid active_party_columns_mode."""
+        """Test initialization with invalid active_party_column_mode."""
         with self.assertRaises(ValueError):
             VerticalEvenPartitioner(
                 num_partitions=2,
-                active_party_columns_mode="invalid_mode",  # type: ignore[arg-type]
+                active_party_column_mode="invalid_mode",  # type: ignore[arg-type]
             )
 
     def test_init_with_non_string_drop_columns(self) -> None:
@@ -58,11 +58,11 @@ class TestVerticalEvenPartitioner(unittest.TestCase):
         with self.assertRaises(ValueError):
             VerticalEvenPartitioner(num_partitions=2, shared_columns=["col1", 123])
 
-    def test_init_with_non_string_active_party_columns(self) -> None:
-        """Test initialization with non-string elements in active_party_columns."""
+    def test_init_with_non_string_active_party_column(self) -> None:
+        """Test initialization with non-string elements in active_party_column."""
         with self.assertRaises(ValueError):
             VerticalEvenPartitioner(
-                num_partitions=2, active_party_columns=["col1", None]
+                num_partitions=2, active_party_column=["col1", None]
             )
 
     def test_partitioning_basic(self) -> None:
@@ -120,14 +120,14 @@ class TestVerticalEvenPartitioner(unittest.TestCase):
         self.assertIn("shared_col", p0.column_names)
         self.assertIn("shared_col", p1.column_names)
 
-    def test_partitioning_with_active_party_columns_add_to_last(self) -> None:
+    def test_partitioning_with_active_party_column_add_to_last(self) -> None:
         """Test active party columns are appended to the last partition."""
         columns = ["f1", "f2", "f3", "f4", "income"]
         dataset = _create_dummy_dataset(columns, num_rows=50)
         partitioner = VerticalEvenPartitioner(
             num_partitions=2,
-            active_party_columns=["income"],
-            active_party_columns_mode="add_to_last",
+            active_party_column=["income"],
+            active_party_column_mode="add_to_last",
             shuffle=False,
             seed=42,
         )
@@ -140,14 +140,14 @@ class TestVerticalEvenPartitioner(unittest.TestCase):
         self.assertNotIn("income", p0.column_names)
         self.assertIn("income", p1.column_names)
 
-    def test_partitioning_with_active_party_columns_create_as_first(self) -> None:
+    def test_partitioning_with_active_party_column_create_as_first(self) -> None:
         """Test creating a new partition solely for active party columns."""
         columns = ["f1", "f2", "f3", "f4", "income"]
         dataset = _create_dummy_dataset(columns, num_rows=50)
         partitioner = VerticalEvenPartitioner(
             num_partitions=2,
-            active_party_columns=["income"],
-            active_party_columns_mode="create_as_first",
+            active_party_column=["income"],
+            active_party_column_mode="create_as_first",
             shuffle=False,
         )
         partitioner.dataset = dataset
@@ -166,14 +166,14 @@ class TestVerticalEvenPartitioner(unittest.TestCase):
         self.assertIn("f3", p2.column_names)
         self.assertIn("f4", p2.column_names)
 
-    def test_partitioning_with_nonexistent_active_party_columns(self) -> None:
+    def test_partitioning_with_nonexistent_active_party_column(self) -> None:
         """Test that a ValueError is raised if active party column does not exist."""
         columns = ["f1", "f2", "f3", "f4"]
         dataset = _create_dummy_dataset(columns, num_rows=50)
         partitioner = VerticalEvenPartitioner(
             num_partitions=2,
-            active_party_columns=["income"],  # Not present in dataset
-            active_party_columns_mode="add_to_last",
+            active_party_column=["income"],  # Not present in dataset
+            active_party_column_mode="add_to_last",
             shuffle=False,
         )
         partitioner.dataset = dataset
