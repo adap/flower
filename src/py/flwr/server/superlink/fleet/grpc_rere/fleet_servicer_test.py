@@ -19,6 +19,7 @@ import tempfile
 import unittest
 
 import grpc
+from parameterized import parameterized
 
 from flwr.common import ConfigsRecord
 from flwr.common.constant import FLEET_API_GRPC_RERE_DEFAULT_ADDRESS, Status
@@ -117,36 +118,26 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
         assert e.exception.details() == self.status_to_msg[run_status.status]
 
-    def test_push_task_res_not_successful_if_pending(self) -> None:
-        """Test `PushTaskRes` not sucessful if RunStatus is pending."""
+    @parameterized.expand(
+        [
+            (0,),  # Test not successful if RunStatus is pending.
+            (1,),  # Test not successful if RunStatus is starting.
+            (3,),  # Test not successful if RunStatus is finished.
+        ]
+    )  # type: ignore
+    def test_push_task_res_not_successful_if_not_running(
+        self, num_transitions: int
+    ) -> None:
+        """Test `PushTaskRes` not successful if RunStatus is not running."""
         # Prepare
         node_id = self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-
-        # Execute & Assert
-        self._assert_push_task_res_not_allowed(node_id, run_id)
-
-    def test_push_task_res_not_successful_if_starting(self) -> None:
-        """Test `PushTaskRes` not sucessful if RunStatus is starting."""
-        # Prepare
-        node_id = self.state.create_node(ping_interval=30)
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-
-        _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-
-        # Execute & Assert
-        self._assert_push_task_res_not_allowed(node_id, run_id)
-
-    def test_push_task_res_not_successful_if_finished(self) -> None:
-        """Test `PushTaskRes` not sucessful if RunStatus is finished."""
-        # Prepare
-        node_id = self.state.create_node(ping_interval=30)
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-
-        _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
-        _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
-
+        if num_transitions > 0:
+            _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+        if num_transitions > 1:
+            _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        if num_transitions > 2:
+            _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
         # Execute & Assert
         self._assert_push_task_res_not_allowed(node_id, run_id)
 
@@ -177,36 +168,24 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
         assert e.exception.details() == self.status_to_msg[run_status.status]
 
-    def test_get_run_not_successful_if_pending(self) -> None:
-        """Test `GetRun` not successful if RunStatus is pending."""
+    @parameterized.expand(
+        [
+            (0,),  # Test not successful if RunStatus is pending.
+            (1,),  # Test not successful if RunStatus is starting.
+            (3,),  # Test not successful if RunStatus is finished.
+        ]
+    )  # type: ignore
+    def test_get_run_not_successful_if_not_running(self, num_transitions: int) -> None:
+        """Test `GetRun` not successful if RunStatus is not running."""
         # Prepare
-        self.state.create_node(ping_interval=30)
+        # self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-
-        # Execute & Assert
-        self._assert_get_run_not_allowed(run_id)
-
-    def test_get_run_not_successful_if_starting(self) -> None:
-        """Test `GetRun` not successful if RunStatus is starting."""
-        # Prepare
-        self.state.create_node(ping_interval=30)
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-
-        _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-
-        # Execute & Assert
-        self._assert_get_run_not_allowed(run_id)
-
-    def test_get_run_not_successful_if_finished(self) -> None:
-        """Test `GetRun` not successful if RunStatus is finished."""
-        # Prepare
-        self.state.create_node(ping_interval=30)
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-
-        _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
-        _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
-
+        if num_transitions > 0:
+            _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+        if num_transitions > 1:
+            _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        if num_transitions > 2:
+            _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
         # Execute & Assert
         self._assert_get_run_not_allowed(run_id)
 
@@ -246,41 +225,27 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
         assert e.exception.details() == self.status_to_msg[run_status.status]
 
-    def test_get_fab_not_successful_if_pending(self) -> None:
-        """Test `GetFab` not successful if RunStatus is pending."""
+    @parameterized.expand(
+        [
+            (0,),  # Test not successful if RunStatus is pending.
+            (1,),  # Test not successful if RunStatus is starting.
+            (3,),  # Test not successful if RunStatus is finished.
+        ]
+    )  # type: ignore
+    def test_get_fab_not_successful_if_not_running(self, num_transitions: int) -> None:
+        """Test `GetFab` not successful if RunStatus is not running."""
         # Prepare
         node_id = self.state.create_node(ping_interval=30)
         fab_content = b"content"
         fab_hash = self.ffs.put(fab_content, {"meta": "data"})
         run_id = self.state.create_run("", "", fab_hash, {}, ConfigsRecord())
 
-        # Execute & Assert
-        self._assert_get_fab_not_allowed(node_id, fab_hash, run_id)
-
-    def test_get_fab_not_successful_if_starting(self) -> None:
-        """Test `GetFab` not successful if RunStatus is starting."""
-        # Prepare
-        node_id = self.state.create_node(ping_interval=30)
-        fab_content = b"content"
-        fab_hash = self.ffs.put(fab_content, {"meta": "data"})
-        run_id = self.state.create_run("", "", fab_hash, {}, ConfigsRecord())
-
-        _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-
-        # Execute & Assert
-        self._assert_get_fab_not_allowed(node_id, fab_hash, run_id)
-
-    def test_get_fab_not_successful_if_finished(self) -> None:
-        """Test `GetFab` not successful if RunStatus is finished."""
-        # Prepare
-        node_id = self.state.create_node(ping_interval=30)
-        fab_content = b"content"
-        fab_hash = self.ffs.put(fab_content, {"meta": "data"})
-        run_id = self.state.create_run("", "", fab_hash, {}, ConfigsRecord())
-
-        _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
-        _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
+        if num_transitions > 0:
+            _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+        if num_transitions > 1:
+            _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        if num_transitions > 2:
+            _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
 
         # Execute & Assert
         self._assert_get_fab_not_allowed(node_id, fab_hash, run_id)
