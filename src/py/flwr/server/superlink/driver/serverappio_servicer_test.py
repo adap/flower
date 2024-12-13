@@ -15,7 +15,23 @@
 """ServerAppIoServicer tests."""
 
 
+import tempfile
+import unittest
+
+import grpc
+
+from flwr.common import ConfigsRecord
+from flwr.common.constant import SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS, Status
+from flwr.common.typing import RunStatus
+from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
+    GetNodesRequest,
+    GetNodesResponse,
+)
+from flwr.server.superlink.driver.serverappio_grpc import run_serverappio_api_grpc
 from flwr.server.superlink.driver.serverappio_servicer import _raise_if
+from flwr.server.superlink.ffs.ffs_factory import FfsFactory
+from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
+from flwr.server.superlink.utils import _STATUS_TO_MSG
 
 # pylint: disable=broad-except
 
@@ -54,3 +70,98 @@ def test_raise_if_true() -> None:
         assert str(err) == "Malformed PushTaskInsRequest: test"
     except Exception as err:
         raise AssertionError() from err
+
+
+class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
+    """ServerAppIoServicer tests for allowed RunStatuses."""
+
+    def setUp(self) -> None:
+        """Initialize mock stub and server interceptor."""
+        # Create a temporary directory
+        self.temp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
+        self.addCleanup(self.temp_dir.cleanup)  # Ensures cleanup after test
+
+        state_factory = LinkStateFactory(":flwr-in-memory-state:")
+        self.state = state_factory.state()
+        ffs_factory = FfsFactory(self.temp_dir.name)
+        self.ffs = ffs_factory.ffs()
+
+        self.status_to_msg = _STATUS_TO_MSG
+
+        self._server: grpc.Server = run_serverappio_api_grpc(
+            SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
+            state_factory,
+            ffs_factory,
+            None,
+        )
+
+        self._channel = grpc.insecure_channel("localhost:9091")
+        self._get_nodes = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/GetNodes",
+            request_serializer=GetNodesRequest.SerializeToString,
+            response_deserializer=GetNodesResponse.FromString,
+        )
+
+    def tearDown(self) -> None:
+        """Clean up grpc server."""
+        self._server.stop(None)
+
+    def test_successful_get_node_if_running(self) -> None:
+        """Test `GetNode` success."""
+        # Prepare
+        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+
+        # Transition status to running. PushTaskRes is only allowed in running status.
+        _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+        _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        request = GetNodesRequest(run_id=run_id)
+
+        # Execute
+        response, call = self._get_nodes.with_call(request=request)
+
+        # Assert
+        assert isinstance(response, GetNodesResponse)
+        assert grpc.StatusCode.OK == call.code()
+
+    def _assert_get_nodes_not_allowed(self, run_id: int) -> None:
+        """Assert `GetNodes` not allowed."""
+        run_status = self.state.get_run_status({run_id})[run_id]
+        request = GetNodesRequest(run_id=run_id)
+
+        with self.assertRaises(grpc.RpcError) as e:
+            self._get_nodes.with_call(request=request)
+        assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
+        assert e.exception.details() == self.status_to_msg[run_status.status]
+
+    def test_get_nodes_not_successful_if_pending(self) -> None:
+        """Test `GetNodes` not sucessful if RunStatus is pending."""
+        # Prepare
+        # node_id = self.state.create_node(ping_interval=30)
+        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        run_status = self.state.get_run_status({run_id})[run_id]
+
+        # Execute & Assert
+        self.assertEqual(run_status.status, Status.PENDING)
+        self._assert_get_nodes_not_allowed(run_id)
+
+    def test_get_nodes_not_successful_if_starting(self) -> None:
+        """Test `GetNodes` not sucessful if RunStatus is starting."""
+        # Prepare
+        # node_id = self.state.create_node(ping_interval=30)
+        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+
+        _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+
+        # Execute & Assert
+        self._assert_get_nodes_not_allowed(run_id)
+
+    def test_get_nodes_not_successful_if_finished(self) -> None:
+        """Test `GetNodes` not sucessful if RunStatus is finished."""
+        # Prepare
+        # node_id = self.state.create_node(ping_interval=30)
+        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+
+        _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
+
+        # Execute & Assert
+        self._assert_get_nodes_not_allowed(run_id)
