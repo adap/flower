@@ -19,6 +19,7 @@ import tempfile
 import unittest
 
 import grpc
+from parameterized import parameterized
 
 from flwr.common import ConfigsRecord
 from flwr.common.constant import SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS, Status
@@ -37,6 +38,7 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PushTaskInsRequest,
     PushTaskInsResponse,
 )
+from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 from flwr.server.superlink.driver.serverappio_grpc import run_serverappio_api_grpc
 from flwr.server.superlink.driver.serverappio_servicer import _raise_if
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
@@ -164,31 +166,27 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
         assert e.exception.details() == self.status_to_msg[run_status.status]
 
-    def test_get_nodes_not_successful_if_pending(self) -> None:
+    @parameterized.expand(
+        [
+            (0,),  # Test not successful if RunStatus is pending.
+            (1,),  # Test not successful if RunStatus is starting.
+            (3,),  # Test not successful if RunStatus is finished.
+        ]
+    )  # type: ignore
+    def test_get_nodes_not_successful_if_not_running(
+        self, num_transitions: int
+    ) -> None:
         """Test `GetNodes` not sucessful if RunStatus is pending."""
         # Prepare
         # node_id = self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-        run_status = self.state.get_run_status({run_id})[run_id]
 
-        # Execute & Assert
-        self.assertEqual(run_status.status, Status.PENDING)
-        self._assert_get_nodes_not_allowed(run_id)
-
-    def test_get_nodes_not_successful_if_starting(self) -> None:
-        """Test `GetNodes` not sucessful if RunStatus is starting."""
-        # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-        _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-
-        # Execute & Assert
-        self._assert_get_nodes_not_allowed(run_id)
-
-    def test_get_nodes_not_successful_if_finished(self) -> None:
-        """Test `GetNodes` not sucessful if RunStatus is finished."""
-        # Prepare
-        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-        _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
+        if num_transitions > 0:
+            _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+        if num_transitions > 1:
+            _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        if num_transitions > 2:
+            _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
 
         # Execute & Assert
         self._assert_get_nodes_not_allowed(run_id)
@@ -213,3 +211,41 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Assert
         assert isinstance(response, PushTaskInsResponse)
         assert grpc.StatusCode.OK == call.code()
+
+    def _assert_push_task_ins_not_allowed(self, task_ins: TaskIns, run_id: int) -> None:
+        """Assert `PushTaskIns` not allowed."""
+        run_status = self.state.get_run_status({run_id})[run_id]
+        request = PushTaskInsRequest(task_ins_list=[task_ins], run_id=run_id)
+
+        with self.assertRaises(grpc.RpcError) as e:
+            self._push_task_ins.with_call(request=request)
+        assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
+        assert e.exception.details() == self.status_to_msg[run_status.status]
+
+    @parameterized.expand(
+        [
+            (0,),  # Test not successful if RunStatus is pending.
+            (1,),  # Test not successful if RunStatus is starting.
+            (3,),  # Test not successful if RunStatus is finished.
+        ]
+    )  # type: ignore
+    def test_push_task_ins_not_successful_if_not_running(
+        self, num_transitions: int
+    ) -> None:
+        """Test `PushTaskIns` not successful if RunStatus is not running."""
+        # Prepare
+        node_id = self.state.create_node(ping_interval=30)
+        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        task_ins = create_task_ins(
+            consumer_node_id=node_id, anonymous=False, run_id=run_id
+        )
+
+        if num_transitions > 0:
+            _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+        if num_transitions > 1:
+            _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        if num_transitions > 2:
+            _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
+
+        # Execute & Assert
+        self._assert_push_task_ins_not_allowed(task_ins, run_id)
