@@ -615,6 +615,25 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             self.conn.execute(query_1, data)
             self.conn.execute(query_2, data)
 
+    def get_task_ids_from_run_id(self, run_id: int) -> set[UUID]:
+        """Get all TaskIns IDs for the given run_id."""
+        if self.conn is None:
+            raise AttributeError("LinkState not initialized")
+
+        query = """
+            SELECT task_id
+            FROM task_ins
+            WHERE run_id = :run_id;
+        """
+
+        sint64_run_id = convert_uint64_to_sint64(run_id)
+        data = {"run_id": sint64_run_id}
+
+        with self.conn:
+            rows = self.conn.execute(query, data).fetchall()
+
+        return {UUID(row["task_id"]) for row in rows}
+
     def create_node(
         self, ping_interval: float, public_key: Optional[bytes] = None
     ) -> int:

@@ -282,6 +282,16 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                     task_res_id = self.task_ins_id_to_task_res_id.pop(task_id)
                     del self.task_res_store[task_res_id]
 
+    def get_task_ids_from_run_id(self, run_id: int) -> set[UUID]:
+        """Get all TaskIns IDs for the given run_id."""
+        task_id_list: set[UUID] = set()
+        with self.lock:
+            for task_id, task_ins in self.task_ins_store.items():
+                if task_ins.run_id == run_id:
+                    task_id_list.add(task_id)
+
+        return task_id_list
+
     def num_task_ins(self) -> int:
         """Calculate the number of task_ins in store.
 
