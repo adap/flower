@@ -157,8 +157,6 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
 
         # Transition status to running. PushTaskRes is only allowed in running status.
         self._transition_run_status(run_id, 2)
-        # _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        # _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
         request = GetNodesRequest(run_id=run_id)
 
         # Execute
@@ -190,7 +188,6 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     ) -> None:
         """Test `GetNodes` not sucessful if RunStatus is pending."""
         # Prepare
-        # node_id = self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
 
         self._transition_run_status(run_id, num_transitions)
