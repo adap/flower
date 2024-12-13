@@ -23,14 +23,25 @@ import grpc
 from flwr.common import ConfigsRecord
 from flwr.common.constant import SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS, Status
 from flwr.common.typing import RunStatus
+from flwr.proto.run_pb2 import (  # pylint: disable=E0611
+    UpdateRunStatusRequest,
+    UpdateRunStatusResponse,
+)
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     GetNodesResponse,
+    PullTaskResRequest,
+    PullTaskResResponse,
+    PushServerAppOutputsRequest,
+    PushServerAppOutputsResponse,
+    PushTaskInsRequest,
+    PushTaskInsResponse,
 )
 from flwr.server.superlink.driver.serverappio_grpc import run_serverappio_api_grpc
 from flwr.server.superlink.driver.serverappio_servicer import _raise_if
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
+from flwr.server.superlink.linkstate.linkstate_test import create_task_ins
 from flwr.server.superlink.utils import _STATUS_TO_MSG
 
 # pylint: disable=broad-except
@@ -101,6 +112,26 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             request_serializer=GetNodesRequest.SerializeToString,
             response_deserializer=GetNodesResponse.FromString,
         )
+        self._push_task_ins = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/PushTaskIns",
+            request_serializer=PushTaskInsRequest.SerializeToString,
+            response_deserializer=PushTaskInsResponse.FromString,
+        )
+        self._pull_task_res = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/PushTaskRes",
+            request_serializer=PullTaskResRequest.SerializeToString,
+            response_deserializer=PullTaskResResponse.FromString,
+        )
+        self._push_serverapp_outputs = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/PushServerAppOutputs",
+            request_serializer=PushServerAppOutputsRequest.SerializeToString,
+            response_deserializer=PushServerAppOutputsResponse.FromString,
+        )
+        self._update_run_status = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/UpdateRunStatus",
+            request_serializer=UpdateRunStatusRequest.SerializeToString,
+            response_deserializer=UpdateRunStatusResponse.FromString,
+        )
 
     def tearDown(self) -> None:
         """Clean up grpc server."""
@@ -147,9 +178,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_get_nodes_not_successful_if_starting(self) -> None:
         """Test `GetNodes` not sucessful if RunStatus is starting."""
         # Prepare
-        # node_id = self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-
         _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
 
         # Execute & Assert
@@ -158,10 +187,29 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_get_nodes_not_successful_if_finished(self) -> None:
         """Test `GetNodes` not sucessful if RunStatus is finished."""
         # Prepare
-        # node_id = self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-
         _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
 
         # Execute & Assert
         self._assert_get_nodes_not_allowed(run_id)
+
+    def test_successful_push_task_ins_if_running(self) -> None:
+        """Test `PushTaskIns` success."""
+        # Prepare
+        node_id = self.state.create_node(ping_interval=30)
+        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        task_ins = create_task_ins(
+            consumer_node_id=node_id, anonymous=False, run_id=run_id
+        )
+
+        # Transition status to running. PushTaskRes is only allowed in running status.
+        _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+        _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        request = PushTaskInsRequest(task_ins_list=[task_ins], run_id=run_id)
+
+        # Execute
+        response, call = self._push_task_ins.with_call(request=request)
+
+        # Assert
+        assert isinstance(response, PushTaskInsResponse)
+        assert grpc.StatusCode.OK == call.code()
