@@ -83,14 +83,21 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         """Clean up grpc server."""
         self._server.stop(None)
 
+    def _transition_run_status(self, run_id: int, num_transitions: int) -> None:
+        if num_transitions > 0:
+            _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+        if num_transitions > 1:
+            _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        if num_transitions > 2:
+            _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
+
     def test_successful_push_task_res_if_running(self) -> None:
         """Test `PushTaskRes` success."""
         # Prepare
         node_id = self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
         # Transition status to running. PushTaskRes is only allowed in running status.
-        _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        self._transition_run_status(run_id, 2)
         request = PushTaskResRequest(
             task_res_list=[
                 TaskRes(task=Task(producer=Node(node_id=node_id)), run_id=run_id)
@@ -132,12 +139,8 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         # Prepare
         node_id = self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-        if num_transitions > 0:
-            _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        if num_transitions > 1:
-            _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
-        if num_transitions > 2:
-            _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
+        self._transition_run_status(run_id, num_transitions)
+
         # Execute & Assert
         self._assert_push_task_res_not_allowed(node_id, run_id)
 
@@ -147,8 +150,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
         # Transition status to running. PushTaskRes is only allowed in running status.
-        _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        self._transition_run_status(run_id, 2)
         request = GetRunRequest(run_id=run_id)
 
         # Execute
@@ -178,14 +180,9 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_get_run_not_successful_if_not_running(self, num_transitions: int) -> None:
         """Test `GetRun` not successful if RunStatus is not running."""
         # Prepare
-        # self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-        if num_transitions > 0:
-            _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        if num_transitions > 1:
-            _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
-        if num_transitions > 2:
-            _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
+        self._transition_run_status(run_id, num_transitions)
+
         # Execute & Assert
         self._assert_get_run_not_allowed(run_id)
 
@@ -198,8 +195,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         run_id = self.state.create_run("", "", fab_hash, {}, ConfigsRecord())
 
         # Transition status to running. PushTaskRes is only allowed in running status.
-        _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        self._transition_run_status(run_id, 2)
         request = GetFabRequest(
             node=Node(node_id=node_id), hash_str=fab_hash, run_id=run_id
         )
@@ -240,12 +236,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         fab_hash = self.ffs.put(fab_content, {"meta": "data"})
         run_id = self.state.create_run("", "", fab_hash, {}, ConfigsRecord())
 
-        if num_transitions > 0:
-            _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        if num_transitions > 1:
-            _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
-        if num_transitions > 2:
-            _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
+        self._transition_run_status(run_id, num_transitions)
 
         # Execute & Assert
         self._assert_get_fab_not_allowed(node_id, fab_hash, run_id)
