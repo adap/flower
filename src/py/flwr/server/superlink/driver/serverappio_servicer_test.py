@@ -142,6 +142,14 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         """Clean up grpc server."""
         self._server.stop(None)
 
+    def _transition_run_status(self, run_id: int, num_transitions: int) -> None:
+        if num_transitions > 0:
+            _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+        if num_transitions > 1:
+            _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        if num_transitions > 2:
+            _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
+
     def test_successful_get_node_if_running(self) -> None:
         """Test `GetNode` success."""
         # Prepare
@@ -184,12 +192,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # node_id = self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
 
-        if num_transitions > 0:
-            _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        if num_transitions > 1:
-            _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
-        if num_transitions > 2:
-            _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
+        self._transition_run_status(run_id, num_transitions)
 
         # Execute & Assert
         self._assert_get_nodes_not_allowed(run_id)
@@ -243,12 +246,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             consumer_node_id=node_id, anonymous=False, run_id=run_id
         )
 
-        if num_transitions > 0:
-            _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        if num_transitions > 1:
-            _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
-        if num_transitions > 2:
-            _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
+        self._transition_run_status(run_id, num_transitions)
 
         # Execute & Assert
         self._assert_push_task_ins_not_allowed(task_ins, run_id)
@@ -296,12 +294,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         node_id = self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
 
-        if num_transitions > 0:
-            _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        if num_transitions > 1:
-            _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
-        if num_transitions > 2:
-            _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
+        self._transition_run_status(run_id, num_transitions)
 
         # Execute & Assert
         self._assert_pull_task_res_not_allowed(node_id, run_id)
@@ -373,12 +366,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
             run_config=maker.user_config(),
         )
 
-        if num_transitions > 0:
-            _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        if num_transitions > 1:
-            _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
-        if num_transitions > 2:
-            _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
+        self._transition_run_status(run_id, num_transitions)
 
         # Execute & Assert
         self._assert_push_serverapp_outputs_not_allowed(run_id, context)
