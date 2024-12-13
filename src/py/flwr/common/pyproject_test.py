@@ -14,6 +14,7 @@
 # ==============================================================================
 """Tests for the function that validates name property."""
 
+
 from .pyproject import validate_project_name
 
 
