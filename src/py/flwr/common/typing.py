@@ -286,3 +286,23 @@ class UserAuthCredentials:
 
     access_token: str
     refresh_token: str
+
+
+# OIDC user authentication types
+@dataclass
+class UserAuthLoginDetails:
+    """User authentication login details."""
+
+    auth_type: str
+    device_code: str
+    verification_uri_complete: str
+    expires_in: int
+    interval: int
+
+
+@dataclass
+class UserAuthCredentials:
+    """User authentication tokens."""
+
+    access_token: str
+    refresh_token: str
