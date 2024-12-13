@@ -24,6 +24,7 @@ from google.protobuf.message import Message as GrpcMessage
 
 from flwr.common import log
 from flwr.common.constant import (
+    EXIT_GRPC_ADAPTER_SHUTDOWN,
     GRPC_ADAPTER_METADATA_FLOWER_PACKAGE_NAME_KEY,
     GRPC_ADAPTER_METADATA_FLOWER_PACKAGE_VERSION_KEY,
     GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY,
@@ -94,7 +95,7 @@ class GrpcAdapter:
                 DEBUG,
                 'Received shutdown signal: exit flag is set to ``"true"``. Exiting...',
             )
-            sys.exit(0)
+            sys.exit(EXIT_GRPC_ADAPTER_SHUTDOWN)
 
         # Check the grpc_message_name of the response
         if container_res.grpc_message_name != response_type.__qualname__:
