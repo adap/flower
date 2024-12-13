@@ -259,9 +259,9 @@ class VerticalSizePartitioner(Partitioner):
                 )
         num_columns = len(all_columns)
         if all(isinstance(size, int) for size in self._partition_sizes):
-            if sum(self._partition_sizes) > num_columns:
+            if sum(self._partition_sizes) != num_columns:
                 raise ValueError(
-                    "Sum of partition sizes cannot exceed the total number of columns."
+                    "Sum of partition sizes cannot differ from the total number of columns."
                 )
         else:
             pass
