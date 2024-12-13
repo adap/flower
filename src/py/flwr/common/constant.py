@@ -114,6 +114,8 @@ MAX_RETRY_DELAY = 20  # Maximum delay duration between two consecutive retries.
 # Constants for user authentication
 CREDENTIALS_DIR = ".credentials"
 AUTH_TYPE = "auth_type"
+ACCESS_TOKEN_KEY = "access_token"
+REFRESH_TOKEN_KEY = "refresh_token"
 
 
 class MessageType:

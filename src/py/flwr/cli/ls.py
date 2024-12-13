@@ -104,7 +104,7 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches
                 raise ValueError(
                     "The options '--runs' and '--run-id' are mutually exclusive."
                 )
-            auth_plugin = try_obtain_cli_auth_plugin(app, federation, federation_config)
+            auth_plugin = try_obtain_cli_auth_plugin(app, federation)
             channel = init_channel(app, federation_config, auth_plugin)
             stub = ExecStub(channel)
 
