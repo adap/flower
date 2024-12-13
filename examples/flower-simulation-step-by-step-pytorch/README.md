@@ -4,6 +4,9 @@ dataset: [Fashion-MNIST]
 framework: [torch]
 ---
 
+> \[!NOTE\]
+> The previous version of this tutorial from the 2023 video tutorial series can be found here: [c8120f2](https://github.com/adap/flower/tree/c8120f2669fef0f2e6815ab1e957e5366d06d19d/examples/flower-simulation-step-by-step-pytorch). That method of running simulations is no longer recommended and some parts of it, for example, using `start_simulation` is deprecated in recent versions of `flwr`.
+
 # Flower Simulation Step-by-Step
 
 > \[!NOTE\]
