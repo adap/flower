@@ -23,7 +23,7 @@ from parameterized import parameterized
 
 from flwr.common import ConfigsRecord, Context
 from flwr.common.constant import SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS, Status
-from flwr.common.serde import context_to_proto
+from flwr.common.serde import context_to_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
 from flwr.common.typing import RunStatus
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
@@ -382,3 +382,37 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
 
         # Execute & Assert
         self._assert_push_serverapp_outputs_not_allowed(run_id, context)
+
+    @parameterized.expand(
+        [
+            (0,),  # Test successful if RunStatus is pending.
+            (1,),  # Test successful if RunStatus is starting.
+            (2,),  # Test successful if RunStatus is running.
+        ]
+    )  # type: ignore
+    def test_update_run_status_successful_if_not_finished(
+        self, num_transitions: int
+    ) -> None:
+        """Test `UpdateRunStatus` success."""
+        # Prepare
+        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        _ = self.state.get_run_status({run_id})[run_id]
+        next_run_status = RunStatus(Status.STARTING, "", "")
+
+        if num_transitions > 0:
+            _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+            next_run_status = RunStatus(Status.RUNNING, "", "")
+        if num_transitions > 1:
+            _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+            next_run_status = RunStatus(Status.FINISHED, "", "")
+
+        request = UpdateRunStatusRequest(
+            run_id=run_id, run_status=run_status_to_proto(next_run_status)
+        )
+
+        # Execute
+        response, call = self._update_run_status.with_call(request=request)
+
+        # Assert
+        assert isinstance(response, UpdateRunStatusResponse)
+        assert grpc.StatusCode.OK == call.code()
