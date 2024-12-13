@@ -566,9 +566,6 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         data: list[Any] = [delivered_at] + task_res_ids
         self.query(query, data)
 
-        # Cleanup
-        self._force_delete_tasks_by_ids(set(ret.keys()))
-
         return list(ret.values())
 
     def num_task_ins(self) -> int:
@@ -592,42 +589,31 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         result: dict[str, int] = rows[0]
         return result["num"]
 
-    def delete_tasks(self, task_ids: set[UUID]) -> None:
-        """Delete all delivered TaskIns/TaskRes pairs."""
-        ids = list(task_ids)
-        if len(ids) == 0:
-            return None
+    def delete_tasks(self, task_ins_ids: set[UUID]) -> None:
+        """Delete TaskIns/TaskRes pairs based on provided TaskIns IDs."""
+        if not task_ins_ids:
+            return
+        if self.conn is None:
+            raise AttributeError("LinkState not initialized")
 
-        placeholders = ",".join([f":id_{index}" for index in range(len(task_ids))])
-        data = {f"id_{index}": str(task_id) for index, task_id in enumerate(task_ids)}
+        placeholders = ",".join(["?"] * len(task_ins_ids))
+        data = tuple(str(task_id) for task_id in task_ins_ids)
 
-        # 1. Query: Delete task_ins which have a delivered task_res
+        # Delete task_ins
         query_1 = f"""
             DELETE FROM task_ins
-            WHERE delivered_at != ''
-            AND task_id IN (
-                SELECT ancestry
-                FROM task_res
-                WHERE ancestry IN ({placeholders})
-                AND delivered_at != ''
-            );
+            WHERE task_id IN ({placeholders});
         """
 
-        # 2. Query: Delete delivered task_res to be run after 1. Query
+        # Delete task_res
         query_2 = f"""
             DELETE FROM task_res
-            WHERE ancestry IN ({placeholders})
-            AND delivered_at != '';
+            WHERE ancestry IN ({placeholders});
         """
-
-        if self.conn is None:
-            raise AttributeError("LinkState not intitialized")
 
         with self.conn:
             self.conn.execute(query_1, data)
             self.conn.execute(query_2, data)
-
-        return None
 
     def get_task_ids_from_run_id(self, run_id: int) -> set[UUID]:
         """Get all TaskIns IDs for the given run_id."""
@@ -647,32 +633,6 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             rows = self.conn.execute(query, data).fetchall()
 
         return {UUID(row["task_id"]) for row in rows}
-
-    def _force_delete_tasks_by_ids(self, task_ids: set[UUID]) -> None:
-        """Delete tasks based on a set of TaskIns IDs."""
-        if not task_ids:
-            return
-        if self.conn is None:
-            raise AttributeError("LinkState not initialized")
-
-        placeholders = ",".join([f":id_{index}" for index in range(len(task_ids))])
-        data = {f"id_{index}": str(task_id) for index, task_id in enumerate(task_ids)}
-
-        # Delete task_ins
-        query_1 = f"""
-            DELETE FROM task_ins
-            WHERE task_id IN ({placeholders});
-        """
-
-        # Delete task_res
-        query_2 = f"""
-            DELETE FROM task_res
-            WHERE ancestry IN ({placeholders});
-        """
-
-        with self.conn:
-            self.conn.execute(query_1, data)
-            self.conn.execute(query_2, data)
 
     def create_node(
         self, ping_interval: float, public_key: Optional[bytes] = None
