@@ -27,7 +27,7 @@ def get_create_model_fn(
     if model_name == ModelDatasetName.CNN_CIFAR_10.value:
         split = CNNCifar10ModelSplit
 
-        def create_model() -> CNNCifar10:
+        def create_model() -> CNNCifar10:  # type: ignore
             """Create initial CNNCifar10 model."""
             return CNNCifar10()
 

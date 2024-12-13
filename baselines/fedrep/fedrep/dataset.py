@@ -5,7 +5,7 @@ from typing import Tuple
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import PathologicalPartitioner
 from flwr_datasets.preprocessor import Merger
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 
 from fedrep.constants import MEAN, STD
@@ -77,14 +77,14 @@ def load_data(
             preprocessor=Merger({"all": ("train", "test")}),
         )
 
-    def apply_train_transforms(batch):
+    def apply_train_transforms(batch: Dataset) -> Dataset:
         """Apply transforms for train data to the partition from FederatedDataset."""
         batch["img"] = [train_data_transform(img) for img in batch["img"]]
         if use_fine_label:
             batch["label"] = batch["fine_label"]
         return batch
 
-    def apply_test_transforms(batch):
+    def apply_test_transforms(batch: Dataset) -> Dataset:
         """Apply transforms for test data to the partition from FederatedDataset."""
         batch["img"] = [test_data_transform(img) for img in batch["img"]]
         if use_fine_label:

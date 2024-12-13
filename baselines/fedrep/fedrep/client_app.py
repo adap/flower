@@ -3,7 +3,6 @@
 from collections import OrderedDict
 from typing import Dict, List, Tuple, Union
 
-import numpy as np
 import torch
 
 from fedrep.constants import FEDREP_HEAD_STATE, Algorithm
@@ -11,6 +10,7 @@ from fedrep.dataset import load_data
 from fedrep.models import CNNCifar10ModelManager, CNNCifar100ModelManager
 from fedrep.utils import get_model_manager_class
 from flwr.client import ClientApp, NumPyClient
+from flwr.client.client import Client
 from flwr.common import Context, NDArrays, ParametersRecord, Scalar
 
 
@@ -35,13 +35,12 @@ class BaseClient(NumPyClient):
         """Return the current local model parameters."""
         return self.model_manager.model.get_parameters()
 
-    def set_parameters(
-        self, parameters: List[np.ndarray], evaluate: bool = False
-    ) -> None:
+    def set_parameters(self, parameters: NDArrays, evaluate: bool = False) -> None:
         """Set the local model parameters to the received parameters.
 
         Args:
             parameters: parameters to set the model to.
+            evaluate: whether to evaluate or not.
         """
         _ = evaluate
         model_keys = [
@@ -122,7 +121,7 @@ class FedRepClient(BaseClient):
             for val in self.model_manager.model.body.state_dict().values()
         ]
 
-    def set_parameters(self, parameters: List[np.ndarray], evaluate=False) -> None:
+    def set_parameters(self, parameters: NDArrays, evaluate: bool = False) -> None:
         """Set the local body parameters to the received parameters.
 
         Args:
@@ -152,7 +151,7 @@ class FedRepClient(BaseClient):
         self.model_manager.model.set_parameters(state_dict)
 
 
-def client_fn(context: Context):
+def client_fn(context: Context) -> Client:
     """Construct a Client that will be run in a ClientApp."""
     model_manager_class = get_model_manager_class(context)
     algorithm = str(context.run_config["algorithm"]).lower()

@@ -4,7 +4,6 @@ import collections
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, OrderedDict, Tuple, Union
 
-import numpy as np
 import torch
 from torch import Tensor, nn
 from torch.utils.data import DataLoader
@@ -15,7 +14,7 @@ from fedrep.constants import (
     DEFAULT_REPRESENTATION_EPOCHS,
     FEDREP_HEAD_STATE,
 )
-from flwr.common import Context, ParametersRecord, array_from_numpy
+from flwr.common import Context, NDArrays, ParametersRecord, array_from_numpy
 
 
 class ModelSplit(ABC, nn.Module):
@@ -72,7 +71,7 @@ class ModelSplit(ABC, nn.Module):
         """
         self._head.load_state_dict(state_dict, strict=True)
 
-    def get_parameters(self) -> List[np.ndarray]:
+    def get_parameters(self) -> NDArrays:
         """Get model parameters.
 
         Returns
@@ -157,7 +156,7 @@ class ModelManager(ABC):
         """Return model."""
         return self._model
 
-    def _load_client_state(self):
+    def _load_client_state(self) -> None:
         """Load client model head state from context state; used only by FedRep."""
         # First, check if the fedrep head state is set in the context state.
         if self.context.state.parameters_records.get(FEDREP_HEAD_STATE):
@@ -175,7 +174,7 @@ class ModelManager(ABC):
             if state_dict:
                 self._model.head.load_state_dict(state_dict)
 
-    def _save_client_state(self):
+    def _save_client_state(self) -> None:
         """Save client model head state inside context state; used only by FedRep."""
         # Check if the fedrep head state is set in the context state.
         if FEDREP_HEAD_STATE in self.context.state.parameters_records:
