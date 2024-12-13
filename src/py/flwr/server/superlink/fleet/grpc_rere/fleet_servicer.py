@@ -20,7 +20,7 @@ from logging import DEBUG, INFO
 import grpc
 
 from flwr.common.logger import log
-from flwr.common.typing import AbortRunException
+from flwr.common.typing import InvalidRunStatus
 from flwr.proto import fleet_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -113,7 +113,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
                 request=request,
                 state=self.state_factory.state(),
             )
-        except AbortRunException as e:
+        except InvalidRunStatus as e:
             abort_grpc_context(e.message, context)
 
         return res
@@ -129,7 +129,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
                 request=request,
                 state=self.state_factory.state(),
             )
-        except AbortRunException as e:
+        except InvalidRunStatus as e:
             abort_grpc_context(e.message, context)
 
         return res
@@ -145,7 +145,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
                 ffs=self.ffs_factory.ffs(),
                 state=self.state_factory.state(),
             )
-        except AbortRunException as e:
+        except InvalidRunStatus as e:
             abort_grpc_context(e.message, context)
 
         return res
