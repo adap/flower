@@ -630,7 +630,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         return None
 
     def get_task_ids_from_run_id(self, run_id: int) -> set[UUID]:
-        """Return a set of UUID task_ids associated with the given run_id."""
+        """Get all TaskIns IDs for the given run_id."""
         if self.conn is None:
             raise AttributeError("LinkState not initialized")
 
