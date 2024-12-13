@@ -5,13 +5,14 @@ from typing import Dict, List, Tuple, Union
 
 import torch
 
-from fedrep.constants import FEDREP_HEAD_STATE, Algorithm
-from fedrep.dataset import load_data
-from fedrep.models import CNNCifar10ModelManager, CNNCifar100ModelManager
-from fedrep.utils import get_model_manager_class
 from flwr.client import ClientApp, NumPyClient
 from flwr.client.client import Client
 from flwr.common import Context, NDArrays, ParametersRecord, Scalar
+
+from .constants import FEDREP_HEAD_STATE, Algorithm
+from .dataset import load_data
+from .models import CNNCifar10ModelManager, CNNCifar100ModelManager
+from .utils import get_model_manager_class
 
 
 class BaseClient(NumPyClient):

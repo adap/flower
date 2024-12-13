@@ -5,7 +5,7 @@ from typing import Tuple
 import torch
 from torch import nn
 
-from fedrep.base_model import ModelManager, ModelSplit
+from .base_model import ModelManager, ModelSplit
 
 
 # pylint: disable=W0223

@@ -5,9 +5,10 @@ import os
 import time
 from typing import Dict, List, Tuple
 
-from fedrep.utils import get_create_model_fn, get_server_strategy
 from flwr.common import Context, Metrics, ndarrays_to_parameters
 from flwr.server import ServerApp, ServerAppComponents, ServerConfig
+
+from .utils import get_create_model_fn, get_server_strategy
 
 RESULTS_FILE = "result-{}.json"
 
@@ -20,7 +21,7 @@ def config_json_file(context: Context) -> None:
         os.makedirs(res_save_path)
     res_save_name = time.strftime("%Y-%m-%d-%H-%M-%S")
     # Set the date and full path of the file to save the results.
-    global RESULTS_FILE
+    global RESULTS_FILE  # pylint: disable=global-statement
     RESULTS_FILE = RESULTS_FILE.format(res_save_name)
     RESULTS_FILE = f"{res_save_path}/{RESULTS_FILE}"
     data = {

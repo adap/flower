@@ -8,8 +8,9 @@ from flwr_datasets.preprocessor import Merger
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 
-from fedrep.constants import MEAN, STD
 from flwr.common import Context
+
+from .constants import MEAN, STD
 
 FDS = None  # Cache FederatedDataset
 
@@ -69,7 +70,7 @@ def load_data(
         seed=dataset_split_seed,
     )
 
-    global FDS
+    global FDS  # pylint: disable=global-statement
     if FDS is None:
         FDS = FederatedDataset(
             dataset=dataset_name,

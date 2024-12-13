@@ -8,13 +8,14 @@ import torch
 from torch import Tensor, nn
 from torch.utils.data import DataLoader
 
-from fedrep.constants import (
+from flwr.common import Context, NDArrays, ParametersRecord, array_from_numpy
+
+from .constants import (
     DEFAULT_FINETUNE_EPOCHS,
     DEFAULT_LOCAL_TRAIN_EPOCHS,
     DEFAULT_REPRESENTATION_EPOCHS,
     FEDREP_HEAD_STATE,
 )
-from flwr.common import Context, NDArrays, ParametersRecord, array_from_numpy
 
 
 class ModelSplit(ABC, nn.Module):
