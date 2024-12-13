@@ -156,8 +156,9 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
 
         # Transition status to running. PushTaskRes is only allowed in running status.
-        _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        self._transition_run_status(run_id, 2)
+        # _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+        # _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
         request = GetNodesRequest(run_id=run_id)
 
         # Execute
@@ -207,8 +208,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         )
 
         # Transition status to running. PushTaskRes is only allowed in running status.
-        _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        self._transition_run_status(run_id, 2)
         request = PushTaskInsRequest(task_ins_list=[task_ins], run_id=run_id)
 
         # Execute
@@ -258,8 +258,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
 
         # Transition status to running. PushTaskRes is only allowed in running status.
-        _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        self._transition_run_status(run_id, 2)
         request = PullTaskResRequest(node=Node(node_id=node_id), run_id=run_id)
 
         # Execute
@@ -315,8 +314,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         )
 
         # Transition status to running. PushTaskRes is only allowed in running status.
-        _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
-        _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        self._transition_run_status(run_id, 2)
         request = PushServerAppOutputsRequest(
             run_id=run_id, context=context_to_proto(context)
         )
