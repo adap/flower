@@ -39,6 +39,9 @@ service Fleet {
 
   rpc GetRun(GetRunRequest) returns (GetRunResponse) {}
 
+  // Get Run Status
+  rpc GetRunStatus(GetRunStatusRequest) returns (GetRunStatusResponse) {}
+
   // Get FAB
   rpc GetFab(GetFabRequest) returns (GetFabResponse) {}
 }

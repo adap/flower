@@ -42,6 +42,11 @@ class FleetStub:
         flwr.proto.run_pb2.GetRunRequest,
         flwr.proto.run_pb2.GetRunResponse]
 
+    GetRunStatus: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.run_pb2.GetRunStatusRequest,
+        flwr.proto.run_pb2.GetRunStatusResponse]
+    """Get Run Status"""
+
     GetFab: grpc.UnaryUnaryMultiCallable[
         flwr.proto.fab_pb2.GetFabRequest,
         flwr.proto.fab_pb2.GetFabResponse]
@@ -94,6 +99,14 @@ class FleetServicer(metaclass=abc.ABCMeta):
         request: flwr.proto.run_pb2.GetRunRequest,
         context: grpc.ServicerContext,
     ) -> flwr.proto.run_pb2.GetRunResponse: ...
+
+    @abc.abstractmethod
+    def GetRunStatus(self,
+        request: flwr.proto.run_pb2.GetRunStatusRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.run_pb2.GetRunStatusResponse:
+        """Get Run Status"""
+        pass
 
     @abc.abstractmethod
     def GetFab(self,
