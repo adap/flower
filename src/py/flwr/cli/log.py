@@ -169,7 +169,7 @@ def _log_with_exec_api(
     run_id: int,
     stream: bool,
 ) -> None:
-    auth_plugin = try_obtain_cli_auth_plugin(app, federation, federation_config)
+    auth_plugin = try_obtain_cli_auth_plugin(app, federation)
     channel = init_channel(app, federation_config, auth_plugin)
 
     if stream:

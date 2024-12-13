@@ -25,7 +25,6 @@ import grpc
 import typer
 
 from flwr.cli.cli_user_auth_interceptor import CliUserAuthInterceptor
-from flwr.common.address import parse_address
 from flwr.common.auth_plugin import CliAuthPlugin
 from flwr.common.constant import AUTH_TYPE, CREDENTIALS_DIR, FLWR_DIR
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
@@ -158,48 +157,36 @@ def get_sha256_hash(file_path: Path) -> str:
     return sha256.hexdigest()
 
 
-def get_user_auth_config_path(
-    root_dir: Path, federation: str, server_address: str
-) -> Path:
+def get_user_auth_config_path(root_dir: Path, federation: str) -> Path:
     """Return the path to the user auth config file."""
-    # Parse the server address
-    parsed_addr = parse_address(server_address)
-    if parsed_addr is None:
-        raise ValueError(f"Invalid server address: {server_address}")
-    host, port, is_v6 = parsed_addr
-    formatted_addr = f"[{host}]_{port}" if is_v6 else f"{host}_{port}"
-
     # Locate the credentials directory
     credentials_dir = root_dir.absolute() / FLWR_DIR / CREDENTIALS_DIR
     credentials_dir.mkdir(parents=True, exist_ok=True)
-    return credentials_dir / f"{federation}_{formatted_addr}.json"
+    return credentials_dir / f"{federation}.json"
 
 
 def try_obtain_cli_auth_plugin(
     root_dir: Path,
     federation: str,
-    federation_config: dict[str, Any],
     auth_type: Optional[str] = None,
 ) -> Optional[CliAuthPlugin]:
     """Load the CLI-side user auth plugin for the given auth type."""
-    config_path = get_user_auth_config_path(
-        root_dir, federation, federation_config["address"]
-    )
+    config_path = get_user_auth_config_path(root_dir, federation)
 
     # Load the config file if it exists
-    config: dict[str, Any] = {}
+    json_file: dict[str, Any] = {}
     if config_path.exists():
         with config_path.open("r", encoding="utf-8") as file:
-            config = json.load(file)
+            json_file = json.load(file)
     # This is the case when the user auth is not enabled
     elif auth_type is None:
         return None
 
     # Get the auth type from the config if not provided
     if auth_type is None:
-        if AUTH_TYPE not in config:
+        if AUTH_TYPE not in json_file:
             return None
-        auth_type = config[AUTH_TYPE]
+        auth_type = json_file[AUTH_TYPE]
 
     # Retrieve auth plugin class and instantiate it
     try:

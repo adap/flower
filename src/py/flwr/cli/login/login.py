@@ -25,7 +25,7 @@ from flwr.cli.config_utils import (
     process_loaded_project_config,
     validate_federation_in_project_config,
 )
-from flwr.common.constant import AUTH_TYPE
+from flwr.common.typing import UserAuthLoginDetails
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     GetLoginDetailsRequest,
     GetLoginDetailsResponse,
@@ -63,10 +63,8 @@ def login(  # pylint: disable=R0914
     login_response: GetLoginDetailsResponse = stub.GetLoginDetails(login_request)
 
     # Get the auth plugin
-    auth_type = login_response.login_details.get(AUTH_TYPE)
-    auth_plugin = try_obtain_cli_auth_plugin(
-        app, federation, federation_config, auth_type
-    )
+    auth_type = login_response.auth_type
+    auth_plugin = try_obtain_cli_auth_plugin(app, federation, auth_type)
     if auth_plugin is None:
         typer.secho(
             f'❌ Authentication type "{auth_type}" not found',
@@ -76,7 +74,14 @@ def login(  # pylint: disable=R0914
         raise typer.Exit(code=1)
 
     # Login
-    auth_config = auth_plugin.login(dict(login_response.login_details), stub)
+    details = UserAuthLoginDetails(
+        auth_type=login_response.auth_type,
+        device_code=login_response.device_code,
+        verification_uri_complete=login_response.verification_uri_complete,
+        expires_in=login_response.expires_in,
+        interval=login_response.interval,
+    )
+    credentials = auth_plugin.login(details, stub)
 
     # Store the tokens
-    auth_plugin.store_tokens(auth_config)
+    auth_plugin.store_tokens(credentials)
