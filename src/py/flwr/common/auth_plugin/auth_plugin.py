@@ -98,18 +98,24 @@ class CliAuthPlugin(ABC):
 
     @abstractmethod
     def store_tokens(self, credentials: UserAuthCredentials) -> None:
-        """Store authentication tokens from the provided user_auth_config.
+        """Store authentication tokens to the `credentials_path`.
 
-        The configuration, including tokens, will be saved as a JSON file
+        The credentials, including tokens, will be saved as a JSON file
         at `credentials_path`.
         """
 
     @abstractmethod
     def load_tokens(self) -> None:
-        """Load authentication tokens from the credentials_path."""
+        """Load authentication tokens from the `credentials_path`."""
 
     @abstractmethod
     def write_tokens_to_metadata(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
     ) -> Sequence[tuple[str, Union[str, bytes]]]:
         """Write authentication tokens to the provided metadata."""
+
+    @abstractmethod
+    def read_tokens_from_metadata(
+        self, metadata: Sequence[tuple[str, Union[str, bytes]]]
+    ) -> Optional[UserAuthCredentials]:
+        """Read authentication tokens from the provided metadata."""
