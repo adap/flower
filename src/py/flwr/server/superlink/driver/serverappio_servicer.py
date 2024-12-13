@@ -193,7 +193,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         # Read from state
         task_res_list: list[TaskRes] = state.get_task_res(task_ids=task_ids)
 
-        # Delete TaskIns if TaskRes is found
+        # Delete the TaskIns/TaskRes pairs if TaskRes is found
         task_ins_ids_to_delete = {
             UUID(task_res.task.ancestry[0]) for task_res in task_res_list
         }
