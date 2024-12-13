@@ -92,8 +92,12 @@ BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
 
 
 try:
-    from flwr.ee import get_exec_auth_plugins
+    from flwr.ee import add_ee_args_superlink, get_exec_auth_plugins
 except ImportError:
+
+    # pylint: disable-next=unused-argument
+    def add_ee_args_superlink(parser: argparse.ArgumentParser) -> None:
+        """Add EE-specific arguments to the parser."""
 
     def get_exec_auth_plugins() -> dict[str, type[ExecAuthPlugin]]:
         """Return all Exec API authentication plugins."""
@@ -702,6 +706,7 @@ def _parse_args_run_superlink() -> argparse.ArgumentParser:
     )
 
     _add_args_common(parser=parser)
+    add_ee_args_superlink(parser=parser)
     _add_args_serverappio_api(parser=parser)
     _add_args_fleet_api(parser=parser)
     _add_args_exec_api(parser=parser)
@@ -790,12 +795,6 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         "--auth-superlink-public-key",
         type=str,
         help="The SuperLink's public key (as a path str) to enable authentication.",
-    )
-    parser.add_argument(
-        "--user-auth-config",
-        help="The path to the user authentication configuration YAML file.",
-        type=str,
-        default=None,
     )
 
 
