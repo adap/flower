@@ -353,6 +353,43 @@ class StateTest(unittest.TestCase):
         assert state.num_task_ins() == 2
         assert state.num_task_res() == 1
 
+    def test_get_task_ids_from_run_id(self) -> None:
+        """Test get_task_ids_from_run_id."""
+        # Prepare
+        state = self.state_factory()
+        node_id = state.create_node(1e3)
+        run_id_0 = state.create_run(None, None, "8g13kl7", {}, ConfigsRecord())
+        # Insert tasks with the same run_id
+        task_ins_0 = create_task_ins(
+            consumer_node_id=node_id, anonymous=False, run_id=run_id_0
+        )
+        task_ins_1 = create_task_ins(
+            consumer_node_id=node_id, anonymous=False, run_id=run_id_0
+        )
+        # Insert a task with a different run_id to ensure it does not appear in result
+        run_id_1 = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        task_ins_2 = create_task_ins(
+            consumer_node_id=node_id, anonymous=False, run_id=run_id_1
+        )
+
+        # Insert three TaskIns
+        task_id_0 = state.store_task_ins(task_ins=task_ins_0)
+        task_id_1 = state.store_task_ins(task_ins=task_ins_1)
+        task_id_2 = state.store_task_ins(task_ins=task_ins_2)
+
+        assert task_id_0
+        assert task_id_1
+        assert task_id_2
+
+        expected_task_ids = {task_id_0, task_id_1}
+
+        # Execute
+        result = state.get_task_ids_from_run_id(run_id_0)
+        bad_result = state.get_task_ids_from_run_id(15)
+
+        self.assertEqual(len(bad_result), 0)
+        self.assertSetEqual(result, expected_task_ids)
+
     # Init tests
     def test_init_state(self) -> None:
         """Test that state is initialized correctly."""
