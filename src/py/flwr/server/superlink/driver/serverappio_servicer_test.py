@@ -416,3 +416,21 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         # Assert
         assert isinstance(response, UpdateRunStatusResponse)
         assert grpc.StatusCode.OK == call.code()
+
+    def test_update_run_status_not_successful_if_finished(self) -> None:
+        """Test `UpdateRunStatus` not successful."""
+        # Prepare
+        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        _ = self.state.get_run_status({run_id})[run_id]
+        _ = self.state.update_run_status(run_id, RunStatus(Status.FINISHED, "", ""))
+        run_status = self.state.get_run_status({run_id})[run_id]
+        next_run_status = RunStatus(Status.FINISHED, "", "")
+
+        request = UpdateRunStatusRequest(
+            run_id=run_id, run_status=run_status_to_proto(next_run_status)
+        )
+
+        with self.assertRaises(grpc.RpcError) as e:
+            self._update_run_status.with_call(request=request)
+        assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
+        assert e.exception.details() == self.status_to_msg[run_status.status]
