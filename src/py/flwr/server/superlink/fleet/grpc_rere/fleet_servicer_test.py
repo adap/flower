@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower FleetServicer tests."""
 
+import tempfile
 import unittest
 
 import grpc
@@ -36,13 +37,17 @@ from flwr.server.superlink.utils import _STATUS_TO_MSG
 
 
 class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
-    """FleetServicer tests."""
+    """FleetServicer tests for allowed RunStatuses."""
 
     def setUp(self) -> None:
         """Initialize mock stub and server interceptor."""
+        # Create a temporary directory
+        self.temp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
+        self.addCleanup(self.temp_dir.cleanup)  # Ensures cleanup after test
+
         state_factory = LinkStateFactory(":flwr-in-memory-state:")
         self.state = state_factory.state()
-        ffs_factory = FfsFactory(".")
+        ffs_factory = FfsFactory(self.temp_dir.name)
         self.ffs = ffs_factory.ffs()
 
         self.status_to_msg = _STATUS_TO_MSG
@@ -56,26 +61,6 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         )
 
         self._channel = grpc.insecure_channel("localhost:9092")
-        # self._create_node = self._channel.unary_unary(
-        #     "/flwr.proto.Fleet/CreateNode",
-        #     request_serializer=CreateNodeRequest.SerializeToString,
-        #     response_deserializer=CreateNodeResponse.FromString,
-        # )
-        # self._delete_node = self._channel.unary_unary(
-        #     "/flwr.proto.Fleet/DeleteNode",
-        #     request_serializer=DeleteNodeRequest.SerializeToString,
-        #     response_deserializer=DeleteNodeResponse.FromString,
-        # )
-        # self._ping = self._channel.unary_unary(
-        #     "/flwr.proto.Fleet/Ping",
-        #     request_serializer=PingRequest.SerializeToString,
-        #     response_deserializer=PingResponse.FromString,
-        # )
-        # self._pull_task_ins = self._channel.unary_unary(
-        #     "/flwr.proto.Fleet/PullTaskIns",
-        #     request_serializer=PullTaskInsRequest.SerializeToString,
-        #     response_deserializer=PullTaskInsResponse.FromString,
-        # )
         self._push_task_res = self._channel.unary_unary(
             "/flwr.proto.Fleet/PushTaskRes",
             request_serializer=PushTaskResRequest.SerializeToString,
@@ -96,7 +81,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         """Clean up grpc server."""
         self._server.stop(None)
 
-    def test_successful_push_task_res(self) -> None:
+    def test_successful_push_task_res_if_running(self) -> None:
         """Test `PushTaskRes` success."""
         # Prepare
         node_id = self.state.create_node(ping_interval=30)
@@ -164,7 +149,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         # Execute & Assert
         self._assert_push_task_res_not_allowed(node_id, run_id)
 
-    def test_successful_get_run(self) -> None:
+    def test_successful_get_run_if_running(self) -> None:
         """Test `GetRun` success."""
         # Prepare
         self.state.create_node(ping_interval=30)
@@ -224,7 +209,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902
         # Execute & Assert
         self._assert_get_run_not_allowed(run_id)
 
-    def test_successful_get_fab(self) -> None:
+    def test_successful_get_fab_if_running(self) -> None:
         """Test `GetFab` success."""
         # Prepare
         node_id = self.state.create_node(ping_interval=30)
