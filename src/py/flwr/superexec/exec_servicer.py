@@ -19,6 +19,7 @@ import time
 from collections.abc import Generator
 from logging import ERROR, INFO
 from typing import Any, Optional
+from uuid import UUID
 
 import grpc
 
@@ -160,6 +161,13 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             run_id=request.run_id,
             new_status=RunStatus(Status.FINISHED, SubStatus.STOPPED, ""),
         )
+
+        if update_success:
+            task_ids: set[UUID] = state.get_task_ids_from_run_id(request.run_id)
+
+            # Delete TaskIns and TaskRes for the `run_id`
+            state.delete_tasks(task_ids)
+
         return StopRunResponse(success=update_success)
 
     def GetLoginDetails(
