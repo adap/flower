@@ -181,7 +181,9 @@ class VerticalSizePartitioner(Partitioner):
         self._determine_partitions_if_needed()
         assert self._partition_columns is not None
         if partition_id < 0 or partition_id >= len(self._partition_columns):
-            raise ValueError(f"Invalid partition_id {partition_id}.")
+            raise IndexError(
+                f"partition_id: {partition_id} out of range <0, {len(self.num_partitions) - 1}>."
+            )
         columns = self._partition_columns[partition_id]
         return self.dataset.select_columns(columns)
 
