@@ -26,11 +26,21 @@ service Exec {
   // Start run upon request
   rpc StartRun(StartRunRequest) returns (StartRunResponse) {}
 
+  // Stop run upon request
+  rpc StopRun(StopRunRequest) returns (StopRunResponse) {}
+
   // Start log stream upon request
   rpc StreamLogs(StreamLogsRequest) returns (stream StreamLogsResponse) {}
 
   // flwr ls command
   rpc ListRuns(ListRunsRequest) returns (ListRunsResponse) {}
+
+  // Get login details upon request
+  rpc GetLoginDetails(GetLoginDetailsRequest)
+      returns (GetLoginDetailsResponse) {}
+
+  // Get auth tokens upon request
+  rpc GetAuthTokens(GetAuthTokensRequest) returns (GetAuthTokensResponse) {}
 }
 
 message StartRunRequest {
@@ -38,7 +48,7 @@ message StartRunRequest {
   map<string, Scalar> override_config = 2;
   ConfigsRecord federation_options = 3;
 }
-message StartRunResponse { uint64 run_id = 1; }
+message StartRunResponse { optional uint64 run_id = 1; }
 message StreamLogsRequest {
   uint64 run_id = 1;
   double after_timestamp = 2;
@@ -52,3 +62,12 @@ message ListRunsResponse {
   map<uint64, Run> run_dict = 1;
   string now = 2;
 }
+
+message GetLoginDetailsRequest {}
+message GetLoginDetailsResponse { map<string, string> login_details = 1; }
+
+message GetAuthTokensRequest { map<string, string> auth_details = 1; }
+message GetAuthTokensResponse { map<string, string> auth_tokens = 1; }
+
+message StopRunRequest { uint64 run_id = 1; }
+message StopRunResponse { bool success = 1; }

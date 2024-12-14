@@ -1,0 +1,8 @@
+algorithm = "fedrep"
+
+# dataset specs
+dataset-name = "cifar10"
+dataset-split = "sample"
+dataset-split-num-classes = 2
+dataset-split-seed = 42
+dataset-split-fraction = 0.83
