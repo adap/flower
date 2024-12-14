@@ -54,7 +54,7 @@ pip install -e .
 
 ### Choose training parameters
 
-You can leave the default parameters for an initial quick test. However for good results, total number of training rounds should be at least 100,000. For example 
+You can leave the default parameters for an initial quick test. However for good results, total number of training rounds should be at least 100,000. For example
 `num-server-rounds=500` and `local_epochs=200`.
 
 ## Run the Example
