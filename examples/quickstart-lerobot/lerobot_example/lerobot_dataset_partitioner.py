@@ -154,10 +154,10 @@ class LeRobotDatasetPartitioner(Partitioner):
         """
         partition = self._partition_cache.get(partition_id, None)
         if partition is not None:
-            log(
-                INFO,
-                f"Reusing cached partition_id={partition_id}. Summary:\n {partition}",
-            )
+            # log(
+            #     INFO,
+            #     f"Reusing cached partition_id={partition_id}. Summary:\n {partition}",
+            # )
             return partition
         else:
             partition = FilteredLeRobotDataset(
@@ -167,7 +167,7 @@ class LeRobotDatasetPartitioner(Partitioner):
                 == partition_id,
             )
             self._partition_cache[partition_id] = partition
-            log(INFO, f"Loaded partition_id={partition_id}. Summary:\n {partition}")
+            # log(INFO, f"Loaded partition_id={partition_id}. Summary:\n {partition}")
         return partition
 
     @property

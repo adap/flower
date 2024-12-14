@@ -10,13 +10,13 @@ from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
 
 
-def get_evaluate_fn_callback(model_name: str, save_path: Path):
+def get_evaluate_fn_callback(save_path: Path):
 
     def evaluate_fn(server_round: int, parameters, config):
 
         # Instantiate model
         dataset = get_dataset()
-        model = get_model(model_name=model_name, dataset=dataset)
+        model = get_model(dataset_stats=dataset.stats)
         # Apply current global model weights
         set_params(model, parameters)
         # Save checkpoint
@@ -48,9 +48,8 @@ def server_fn(context: Context) -> ServerAppComponents:
     save_path.mkdir(parents=True)
 
     # Set global model initialization
-    model_name = context.run_config["model-name"]
     dataset = get_dataset()
-    ndarrays = get_params(get_model(model_name=model_name, dataset=dataset))
+    ndarrays = get_params(get_model(dataset_stats=dataset.stats))
     global_model_init = ndarrays_to_parameters(ndarrays)
 
     # Define strategy
@@ -61,7 +60,7 @@ def server_fn(context: Context) -> ServerAppComponents:
         fraction_evaluate=fraction_evaluate,
         initial_parameters=global_model_init,
         on_evaluate_config_fn=get_evaluate_config_callback(save_path),
-        evaluate_fn=get_evaluate_fn_callback(model_name, save_path),
+        evaluate_fn=get_evaluate_fn_callback(save_path),
     )
 
     return ServerAppComponents(config=config, strategy=strategy)

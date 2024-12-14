@@ -19,6 +19,7 @@ from flwr.client import Client, ClientApp, NumPyClient
 from flwr.common import Context
 from flwr.common.logger import log
 
+
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 # To mute warnings reminding that we need to train the model to a downstream task
@@ -29,11 +30,11 @@ logging.set_verbosity_error()
 # Flower client
 class LeRobotClient(NumPyClient):
     def __init__(
-        self, partition_id, model_name, local_epochs, trainloader, nn_device=None
+        self, partition_id, local_epochs, trainloader, nn_device=None
     ) -> None:
         self.partition_id = partition_id
         self.trainloader = trainloader
-        self.net = get_model(model_name=model_name, dataset=trainloader.dataset)
+        self.net = get_model(dataset_stats=trainloader.dataset.stats)
         self.local_epochs = local_epochs
         policy = self.net
         self.device = nn_device
@@ -75,18 +76,15 @@ def client_fn(context: Context) -> Client:
     # Read the node_config to fetch data partition associated to this node
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
-    log(INFO, f"partition_id={partition_id}, num_partitions={num_partitions}")
     # Discover device
     nn_device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     # Read the run config to get settings to configure the Client
     model_name = context.run_config["model-name"]
     local_epochs = int(context.run_config["local-epochs"])
-    log(INFO, f"local_epochs={local_epochs}")
     trainloader = load_data(partition_id, num_partitions, model_name, device=nn_device)
 
     return LeRobotClient(
         partition_id=partition_id,
-        model_name=model_name,
         local_epochs=local_epochs,
         trainloader=trainloader,
         nn_device=nn_device,

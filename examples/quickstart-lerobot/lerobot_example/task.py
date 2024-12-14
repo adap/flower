@@ -11,17 +11,16 @@ import imageio
 import numpy
 import numpy as np
 import torch
-from evaluate import load as load_metric
 from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
 from lerobot.common.policies.diffusion.configuration_diffusion import DiffusionConfig
 from lerobot.common.policies.diffusion.modeling_diffusion import DiffusionPolicy
-from torch.optim import AdamW
 from torch.utils.data import DataLoader
 
 from datasets.utils.logging import disable_progress_bar
 
-from .lerobot_dataset_partitioner import LeRobotDatasetPartitioner
 from .lerobot_federated_dataset import FederatedLeRobotDataset
+from .lerobot_dataset_partitioner import LeRobotDatasetPartitioner
+
 
 disable_progress_bar()
 fds = None  # Cache FederatedDataset
@@ -96,13 +95,13 @@ def load_data(
     return trainloader
 
 
-def get_model(model_name: str = None, dataset=None):
+def get_model(dataset_stats: dict):
     # Set up the the policy.
     # Policies are initialized with a configuration class, in this case `DiffusionConfig`.
     # For this example, no arguments need to be passed because the defaults are set up for PushT.
     # If you're doing something different, you will likely need to change at least some of the defaults.
     cfg = DiffusionConfig(down_dims=[256, 512, 1024])
-    policy = DiffusionPolicy(cfg, dataset_stats=dataset.stats)
+    policy = DiffusionPolicy(cfg, dataset_stats=dataset_stats)
     return policy
 
 
@@ -141,7 +140,7 @@ def train(
             optimizer.step()
             optimizer.zero_grad()
 
-            if step % log_freq == 0:
+            if step % log_freq == 0 and step > 0:
                 print(f"train step: {step} train loss: {loss.item():.3f}")
             step += 1
             assert isinstance(
