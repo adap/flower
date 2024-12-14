@@ -265,41 +265,15 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             for task_res in task_res_found:
                 task_res.task.delivered_at = delivered_at
 
-            # Cleanup
-            self._force_delete_tasks_by_ids(set(ret.keys()))
-
         return list(ret.values())
 
-    def delete_tasks(self, task_ids: set[UUID]) -> None:
-        """Delete all delivered TaskIns/TaskRes pairs."""
-        task_ins_to_be_deleted: set[UUID] = set()
-        task_res_to_be_deleted: set[UUID] = set()
-
-        with self.lock:
-            for task_ins_id in task_ids:
-                # Find the task_id of the matching task_res
-                for task_res_id, task_res in self.task_res_store.items():
-                    if UUID(task_res.task.ancestry[0]) != task_ins_id:
-                        continue
-                    if task_res.task.delivered_at == "":
-                        continue
-
-                    task_ins_to_be_deleted.add(task_ins_id)
-                    task_res_to_be_deleted.add(task_res_id)
-
-            for task_id in task_ins_to_be_deleted:
-                del self.task_ins_store[task_id]
-                del self.task_ins_id_to_task_res_id[task_id]
-            for task_id in task_res_to_be_deleted:
-                del self.task_res_store[task_id]
-
-    def _force_delete_tasks_by_ids(self, task_ids: set[UUID]) -> None:
-        """Delete tasks based on a set of TaskIns IDs."""
-        if not task_ids:
+    def delete_tasks(self, task_ins_ids: set[UUID]) -> None:
+        """Delete TaskIns/TaskRes pairs based on provided TaskIns IDs."""
+        if not task_ins_ids:
             return
 
         with self.lock:
-            for task_id in task_ids:
+            for task_id in task_ins_ids:
                 # Delete TaskIns
                 if task_id in self.task_ins_store:
                     del self.task_ins_store[task_id]
@@ -307,6 +281,16 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 if task_id in self.task_ins_id_to_task_res_id:
                     task_res_id = self.task_ins_id_to_task_res_id.pop(task_id)
                     del self.task_res_store[task_res_id]
+
+    def get_task_ids_from_run_id(self, run_id: int) -> set[UUID]:
+        """Get all TaskIns IDs for the given run_id."""
+        task_id_list: set[UUID] = set()
+        with self.lock:
+            for task_id, task_ins in self.task_ins_store.items():
+                if task_ins.run_id == run_id:
+                    task_id_list.add(task_id)
+
+        return task_id_list
 
     def num_task_ins(self) -> int:
         """Calculate the number of task_ins in store.
