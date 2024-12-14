@@ -29,9 +29,7 @@ logging.set_verbosity_error()
 
 # Flower client
 class LeRobotClient(NumPyClient):
-    def __init__(
-        self, partition_id, local_epochs, trainloader, nn_device=None
-    ) -> None:
+    def __init__(self, partition_id, local_epochs, trainloader, nn_device=None) -> None:
         self.partition_id = partition_id
         self.trainloader = trainloader
         self.net = get_model(dataset_stats=trainloader.dataset.stats)
@@ -66,7 +64,7 @@ class LeRobotClient(NumPyClient):
                 device=self.device,
                 output_dir=round_save_path,
             )
-            
+
         testset_len = 1  # we test on one gym generated task
         return float(loss), testset_len, {"accuracy": accuracy}
 

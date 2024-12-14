@@ -41,9 +41,8 @@ from flwr.common.logger import log
 
 
 class FilteredLeRobotDataset(LeRobotDataset):
-    """
-    Delays loading and processing of dataset until load function is called with an optional filter argument.
-    """
+    """Delays loading and processing of dataset until load function is called with an
+    optional filter argument."""
 
     def __init__(
         self,
@@ -89,7 +88,8 @@ class FilteredLeRobotDataset(LeRobotDataset):
 
 
 class LeRobotDatasetPartitioner(Partitioner):
-    """Partitioner creates each partition with even number of task samples using episode_index % num_partitions = parition_id.
+    """Partitioner creates each partition with even number of task samples using
+    episode_index % num_partitions = parition_id.
 
     Parameters
     ----------

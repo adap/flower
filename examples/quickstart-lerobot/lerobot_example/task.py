@@ -115,9 +115,7 @@ def set_params(model, parameters) -> None:
     model.load_state_dict(state_dict, strict=True)
 
 
-def train(
-    net=None, trainloader=None, epochs=None, device=None
-) -> None:
+def train(net=None, trainloader=None, epochs=None, device=None) -> None:
     # how frequently (train steps) to print train progress log
     log_freq = 250
 

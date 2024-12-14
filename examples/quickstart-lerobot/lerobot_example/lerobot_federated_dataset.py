@@ -21,8 +21,8 @@ from flwr_datasets import FederatedDataset
 
 class FederatedLeRobotDataset(FederatedDataset):
     def _prepare_dataset(self) -> None:
-        """Overrides the implementation of FederatedDataset in order
-        to account for LeRobot specific dataset loading.
+        """Overrides the implementation of FederatedDataset in order to account for
+        LeRobot specific dataset loading.
 
         Prepare the dataset (prior to partitioning) by downloading.
 
