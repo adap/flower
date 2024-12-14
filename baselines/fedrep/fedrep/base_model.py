@@ -1,59 +1,21 @@
-"""Abstract class for splitting a model into body and head."""
+"""fedrep: A Flower Baseline."""
 
-import os
+import collections
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, OrderedDict, Tuple, Union
+from typing import Any, Dict, List, OrderedDict, Tuple, Union
 
-import numpy as np
 import torch
-import torch.nn as nn
-from omegaconf import DictConfig
-from torch import Tensor
+from torch import Tensor, nn
 from torch.utils.data import DataLoader
 
-from fedrep.constants import (
+from flwr.common import Context, NDArrays, ParametersRecord, array_from_numpy
+
+from .constants import (
     DEFAULT_FINETUNE_EPOCHS,
     DEFAULT_LOCAL_TRAIN_EPOCHS,
     DEFAULT_REPRESENTATION_EPOCHS,
+    FEDREP_HEAD_STATE,
 )
-
-
-def get_device(
-    use_cuda: bool = True, specified_device: Optional[int] = None
-) -> torch.device:
-    """Get the tensor device.
-
-    Args:
-        use_cuda: Flag indicates whether to use CUDA or not. Defaults to True.
-        specified_device: Specified cuda device to use. Defaults to None.
-
-    Raises
-    ------
-        ValueError: Specified device not in CUDA_VISIBLE_DEVICES.
-
-    Returns
-    -------
-        The selected or fallbacked device.
-    """
-    device = torch.device("cpu")
-    if use_cuda and torch.cuda.is_available():
-        if specified_device is not None:
-            cuda_visible_devices = os.environ.get("CUDA_VISIBLE_DEVICES")
-            if cuda_visible_devices is not None:
-                devices = [int(d) for d in cuda_visible_devices.split(",")]
-                if specified_device in devices:
-                    device = torch.device(f"cuda:{specified_device}")
-                else:
-                    raise ValueError(
-                        f"Specified device {specified_device}"
-                        " not in CUDA_VISIBLE_DEVICES"
-                    )
-            else:
-                print("CUDA_VISIBLE_DEVICES not exists, using torch.device('cuda').")
-        else:
-            device = torch.device("cuda")
-
-    return device
 
 
 class ModelSplit(ABC, nn.Module):
@@ -110,7 +72,7 @@ class ModelSplit(ABC, nn.Module):
         """
         self._head.load_state_dict(state_dict, strict=True)
 
-    def get_parameters(self) -> List[np.ndarray]:
+    def get_parameters(self) -> NDArrays:
         """Get model parameters.
 
         Returns
@@ -164,65 +126,86 @@ class ModelManager(ABC):
 
     def __init__(
         self,
-        client_id: int,
-        config: DictConfig,
+        context: Context,
         trainloader: DataLoader,
         testloader: DataLoader,
-        client_save_path: Optional[str],
         model_split_class: Any,  # ModelSplit
     ):
         """Initialize the attributes of the model manager.
 
         Args:
-            client_id: The id of the client.
-            config: Dict containing the configurations to be used by the manager.
+            context: The context of the current run.
             trainloader: Client train dataloader.
             testloader: Client test dataloader.
-            client_save_path: Path to save the client model head state.
             model_split_class: Class to be used to split the model into body and head \
                 (concrete implementation of ModelSplit).
         """
         super().__init__()
-        self.config = config
-        self.client_id = client_id
+        self.context = context
         self.trainloader = trainloader
         self.testloader = testloader
-        self.device = get_device(
-            use_cuda=getattr(self.config, "use_cuda", True),
-            specified_device=getattr(self.config, "specified_device", None),
-        )
-        self.client_save_path = client_save_path
-        self.learning_rate = config.get("learning_rate", 0.01)
-        self.momentum = config.get("momentum", 0.5)
+        self.learning_rate = self.context.run_config.get("learning-rate", 0.01)
+        self.momentum = self.context.run_config.get("momentum", 0.5)
         self._model: ModelSplit = model_split_class(self._create_model())
 
     @abstractmethod
     def _create_model(self) -> nn.Module:
-        """Return model to be splitted into head and body."""
+        """Return model to be split into head and body."""
 
     @property
     def model(self) -> ModelSplit:
         """Return model."""
         return self._model
 
-    def train(self) -> Dict[str, Union[List[Dict[str, float]], int, float]]:
+    def _load_client_state(self) -> None:
+        """Load client model head state from context state; used only by FedRep."""
+        # First, check if the fedrep head state is set in the context state.
+        if self.context.state.parameters_records.get(FEDREP_HEAD_STATE):
+            state_dict = collections.OrderedDict(
+                {
+                    k: torch.from_numpy(v.numpy())
+                    for k, v in self.context.state.parameters_records[
+                        FEDREP_HEAD_STATE
+                    ].items()
+                }
+            )
+            # Second, check if the parameters records have values stored and load
+            # the state; this check is useful for the first time the model is
+            # tested and the head state might be empty.
+            if state_dict:
+                self._model.head.load_state_dict(state_dict)
+
+    def _save_client_state(self) -> None:
+        """Save client model head state inside context state; used only by FedRep."""
+        # Check if the fedrep head state is set in the context state.
+        if FEDREP_HEAD_STATE in self.context.state.parameters_records:
+            head_state = self._model.head.state_dict()
+            head_state_np = {k: v.detach().cpu().numpy() for k, v in head_state.items()}
+            head_state_arr = collections.OrderedDict(
+                {k: array_from_numpy(v) for k, v in head_state_np.items()}
+            )
+            head_state_prec = ParametersRecord(head_state_arr)
+            self.context.state.parameters_records[FEDREP_HEAD_STATE] = head_state_prec
+
+    def train(
+        self, device: torch.device
+    ) -> Dict[str, Union[List[Dict[str, float]], int, float]]:
         """Train the model maintained in self.model.
 
         Returns
         -------
             Dict containing the train metrics.
         """
-        # Load client state (head) if client_save_path is not None and it is not empty
-        if self.client_save_path is not None and os.path.isfile(self.client_save_path):
-            self._model.head.load_state_dict(torch.load(self.client_save_path))
+        # Load state.
+        self._load_client_state()
 
         num_local_epochs = DEFAULT_LOCAL_TRAIN_EPOCHS
-        if hasattr(self.config, "num_local_epochs"):
-            num_local_epochs = int(self.config.num_local_epochs)
+        if "num-local-epochs" in self.context.run_config:
+            num_local_epochs = int(self.context.run_config["num-local-epochs"])
 
         num_rep_epochs = DEFAULT_REPRESENTATION_EPOCHS
-        if hasattr(self.config, "num_rep_epochs"):
-            num_rep_epochs = int(self.config.num_rep_epochs)
+        if self.context.run_config["num-rep-epochs"] in self.context.run_config:
+            num_rep_epochs = int(self.context.run_config["num-rep-epochs"])
 
         criterion = torch.nn.CrossEntropyLoss()
         weights = [v for k, v in self._model.named_parameters() if "weight" in k]
@@ -238,6 +221,7 @@ class ModelManager(ABC):
         correct, total = 0, 0
         loss: torch.Tensor = 0.0
 
+        self._model.to(device)
         self._model.train()
         for i in range(num_local_epochs + num_rep_epochs):
             if i < num_local_epochs:
@@ -247,10 +231,9 @@ class ModelManager(ABC):
                 self._model.enable_body()
                 self._model.disable_head()
             for batch in self.trainloader:
-                images = batch["img"]
-                labels = batch["label"]
-                outputs = self._model(images.to(self.device))
-                labels = labels.to(self.device)
+                images = batch["img"].to(device)
+                labels = batch["label"].to(device)
+                outputs = self._model(images)
                 loss = criterion(outputs, labels)
                 optimizer.zero_grad()
                 loss.backward()
@@ -258,35 +241,35 @@ class ModelManager(ABC):
                 total += labels.size(0)
                 correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
 
-        # Save client state (head)
-        if self.client_save_path is not None:
-            torch.save(self._model.head.state_dict(), self.client_save_path)
+        # Save state.
+        self._save_client_state()
 
         return {"loss": loss.item(), "accuracy": correct / total}
 
-    def test(self) -> Dict[str, float]:
+    def test(self, device: torch.device) -> Dict[str, float]:
         """Test the model maintained in self.model.
 
         Returns
         -------
             Dict containing the test metrics.
         """
-        # Load client state (head)
-        if self.client_save_path is not None and os.path.isfile(self.client_save_path):
-            self._model.head.load_state_dict(torch.load(self.client_save_path))
+        # Load state.
+        self._load_client_state()
 
         num_finetune_epochs = DEFAULT_FINETUNE_EPOCHS
-        if hasattr(self.config, "num_finetune_epochs"):
-            num_finetune_epochs = int(self.config.num_finetune_epochs)
+        if "num-finetune-epochs" in self.context.run_config:
+            num_finetune_epochs = int(self.context.run_config["num-finetune-epochs"])
 
-        if num_finetune_epochs > 0 and self.config.get("enable_finetune", False):
+        if num_finetune_epochs > 0 and self.context.run_config.get(
+            "enable-finetune", False
+        ):
             optimizer = torch.optim.SGD(self._model.parameters(), lr=self.learning_rate)
             criterion = torch.nn.CrossEntropyLoss()
             self._model.train()
             for _ in range(num_finetune_epochs):
                 for batch in self.trainloader:
-                    images = batch["img"].to(self.device)
-                    labels = batch["label"].to(self.device)
+                    images = batch["img"]
+                    labels = batch["label"]
                     outputs = self._model(images)
                     loss = criterion(outputs, labels)
                     optimizer.zero_grad()
@@ -296,11 +279,12 @@ class ModelManager(ABC):
         criterion = torch.nn.CrossEntropyLoss()
         correct, total, loss = 0, 0, 0.0
 
+        self._model.to(device)
         self._model.eval()
         with torch.no_grad():
             for batch in self.testloader:
-                images = batch["img"].to(self.device)
-                labels = batch["label"].to(self.device)
+                images = batch["img"].to(device)
+                labels = batch["label"].to(device)
                 outputs = self._model(images)
                 loss += criterion(outputs, labels).item()
                 total += labels.size(0)

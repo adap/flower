@@ -21,7 +21,7 @@ from uuid import UUID
 
 from flwr.common.constant import Status
 from flwr.common.serde import fab_to_proto, user_config_to_proto
-from flwr.common.typing import AbortRunException, Fab
+from flwr.common.typing import Fab, InvalidRunStatusException
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
@@ -107,7 +107,7 @@ def push_task_res(request: PushTaskResRequest, state: LinkState) -> PushTaskResR
         state,
     )
     if abort_msg:
-        raise AbortRunException(abort_msg)
+        raise InvalidRunStatusException(abort_msg)
 
     # Set pushed_at (timestamp in seconds)
     task_res.task.pushed_at = time.time()
@@ -137,7 +137,7 @@ def get_run(request: GetRunRequest, state: LinkState) -> GetRunResponse:
         state,
     )
     if abort_msg:
-        raise AbortRunException(abort_msg)
+        raise InvalidRunStatusException(abort_msg)
 
     return GetRunResponse(
         run=Run(
@@ -150,7 +150,9 @@ def get_run(request: GetRunRequest, state: LinkState) -> GetRunResponse:
     )
 
 
-def get_fab(request: GetFabRequest, ffs: Ffs, state: LinkState) -> GetFabResponse:
+def get_fab(
+    request: GetFabRequest, ffs: Ffs, state: LinkState  # pylint: disable=W0613
+) -> GetFabResponse:
     """Get FAB."""
     # Abort if the run is not running
     abort_msg = check_abort(
@@ -159,7 +161,7 @@ def get_fab(request: GetFabRequest, ffs: Ffs, state: LinkState) -> GetFabRespons
         state,
     )
     if abort_msg:
-        raise AbortRunException(abort_msg)
+        raise InvalidRunStatusException(abort_msg)
 
     if result := ffs.get(request.hash_str):
         fab = Fab(request.hash_str, result[0])

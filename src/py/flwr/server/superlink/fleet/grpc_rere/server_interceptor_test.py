@@ -314,6 +314,10 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         node_id = self.state.create_node(
             ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
         )
+        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        # Transition status to running. PushTaskRes is only allowed in running status.
+        _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+        _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
         request = PushTaskResRequest(
             task_res_list=[TaskRes(task=Task(producer=Node(node_id=node_id)))]
         )
@@ -327,7 +331,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         )
 
         # Execute & Assert
-        with self.assertRaises(grpc.RpcError):
+        with self.assertRaises(grpc.RpcError) as e:
             self._push_task_res.with_call(
                 request=request,
                 metadata=(
@@ -335,6 +339,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
                     (_AUTH_TOKEN_HEADER, hmac_value),
                 ),
             )
+        assert e.exception.code() == grpc.StatusCode.UNAUTHENTICATED
 
     def test_successful_get_run_with_metadata(self) -> None:
         """Test server interceptor for pull task ins."""

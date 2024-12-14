@@ -361,7 +361,6 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
 
         return run_from_proto(res.run)
 
-    # pylint: disable=unused-argument
     def get_fab(fab_hash: str, run_id: int) -> Fab:
         # Construct the request
         req = GetFabRequest(node=node, hash_str=fab_hash, run_id=run_id)
