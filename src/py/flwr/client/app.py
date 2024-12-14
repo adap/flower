@@ -613,7 +613,9 @@ def start_client_internal(
                     log(INFO, "Sent reply")
 
                 except RunNotRunningException:
+                    log(INFO, "")
                     log(INFO, "Run ID %s stopped.", run_id)
+                    log(INFO, "")
                     continue
 
                 except StopIteration:

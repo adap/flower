@@ -154,10 +154,6 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """Get all TaskIns IDs for the given run_id."""
 
     @abc.abstractmethod
-    def get_task_ids_from_run_id(self, run_id: int) -> set[UUID]:
-        """Get all TaskIns IDs for the given run_id."""
-
-    @abc.abstractmethod
     def create_node(
         self, ping_interval: float, public_key: Optional[bytes] = None
     ) -> int:
