@@ -260,8 +260,8 @@ class RunNotRunningException(BaseException):
     """Raised when a run is not running."""
 
 
-class AbortRunException(BaseException):
-    """Raised when a run is aborted."""
+class InvalidRunStatusException(BaseException):
+    """Raised when an RPC is invalidated by the RunStatus."""
 
     def __init__(self, message: str) -> None:
         super().__init__(message)
