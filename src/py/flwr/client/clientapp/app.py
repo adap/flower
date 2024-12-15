@@ -40,7 +40,7 @@ from flwr.common.serde import (
     message_to_proto,
     run_from_proto,
 )
-from flwr.common.typing import Fab, Run, RunNotRunningException
+from flwr.common.typing import Fab, Run
 
 # pylint: disable=E0611
 from flwr.proto.clientappio_pb2 import (
@@ -139,14 +139,6 @@ def run_clientapp(  # pylint: disable=R0914
 
                 # Execute ClientApp
                 reply_message = client_app(message=message, context=context)
-
-            except grpc.RpcError as e:
-                # pylint: disable=no-member
-                if e.code() == grpc.StatusCode.PERMISSION_DENIED:
-                    log(INFO, "")
-                    log(INFO, "Run ID %s stopped.", run.run_id)
-                    log(INFO, "")
-                    raise RunNotRunningException from e
 
             except Exception as ex:  # pylint: disable=broad-exception-caught
                 # Don't update/change NodeState

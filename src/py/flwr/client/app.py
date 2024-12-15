@@ -614,7 +614,12 @@ def start_client_internal(
 
                 except RunNotRunningException:
                     log(INFO, "")
-                    log(INFO, "Run ID %s stopped.", run_id)
+                    log(
+                        INFO,
+                        "SuperNode stopped execution. "
+                        "Run ID %s is not in `RUNNING` status.",
+                        run_id,
+                    )
                     log(INFO, "")
                     continue
 
