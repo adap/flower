@@ -78,7 +78,7 @@ def stop(
         finally:
             channel.close()
     except (typer.Exit, Exception):  # pylint: disable=broad-except, W0612  # noqa: F841
-        pass
+        raise typer.Exit(code=1)  # pylint: disable=W0707
     finally:
         pass
 
