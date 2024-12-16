@@ -616,12 +616,11 @@ def start_client_internal(
                     log(INFO, "")
                     log(
                         INFO,
-                        "SuperNode stopped execution. "
+                        "SuperNode aborted sending the reply message. "
                         "Run ID %s is not in `RUNNING` status.",
                         run_id,
                     )
                     log(INFO, "")
-                    continue
 
                 except StopIteration:
                     sleep_duration = 0
