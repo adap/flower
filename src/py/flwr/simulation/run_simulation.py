@@ -24,7 +24,7 @@ import threading
 import traceback
 from logging import DEBUG, ERROR, INFO, WARNING
 from pathlib import Path
-from queue import Queue
+from queue import Empty, Queue
 from typing import Any, Optional
 
 from flwr.cli.config_utils import load_and_validate
@@ -271,16 +271,13 @@ def run_serverapp_th(
                 server_app_attr=_server_app_attr,
                 loaded_server_app=_server_app,
             )
-
+            _ctx_queue.put(updated_context)
         except Exception as ex:  # pylint: disable=broad-exception-caught
-            updated_context = None
             log(ERROR, "ServerApp thread raised an exception: %s", ex)
             log(ERROR, traceback.format_exc())
             exception_event.set()
             raise
         finally:
-            if updated_context:
-                _ctx_queue.put(updated_context)
             log(DEBUG, "ServerApp finished running.")
             # Upon completion, trigger stop event if one was passed
             if stop_event is not None:
@@ -385,9 +382,9 @@ def _main_loop(
 
         updated_context = output_context_queue.get(timeout=3)
 
-        except output_context_queue.Empty():
-            log(ERROR, "Queue timeout. No context received.")
-            
+    except Empty:
+        log(DEBUG, "Queue timeout. No context received.")
+
     except Exception as ex:
         log(ERROR, "An exception occurred !! %s", ex)
         log(ERROR, traceback.format_exc())
