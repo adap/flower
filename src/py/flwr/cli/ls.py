@@ -81,8 +81,7 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches
         ),
     ] = CliOutputFormat.DEFAULT,
 ) -> None:
-    """List the details of one provided run ID or all runs in a Flower
-    federation.
+    """List the details of one provided run ID or all runs in a Flower federation.
 
     The following details are displayed:
 
