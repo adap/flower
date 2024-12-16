@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower Simulation."""
 
+
 import argparse
 import asyncio
 import json
@@ -23,7 +24,6 @@ import threading
 import traceback
 from logging import DEBUG, ERROR, INFO, WARNING
 from pathlib import Path
-from time import sleep
 from typing import Any, Optional
 
 from flwr.cli.config_utils import load_and_validate
@@ -135,7 +135,6 @@ def run_simulation_from_cli() -> None:
         app_dir=args.app,
         run=run,
         enable_tf_gpu_growth=args.enable_tf_gpu_growth,
-        delay_start=args.delay_start,
         verbose_logging=args.verbose,
         server_app_run_config=fused_config,
         is_app=True,
@@ -308,7 +307,6 @@ def _main_loop(
     enable_tf_gpu_growth: bool,
     run: Run,
     exit_event: EventType,
-    delay_start: int,
     flwr_dir: Optional[str] = None,
     client_app: Optional[ClientApp] = None,
     client_app_attr: Optional[str] = None,
@@ -353,9 +351,6 @@ def _main_loop(
             run_id=run.run_id,
         )
 
-        # Buffer time so the `ServerApp` in separate thread is ready
-        log(DEBUG, "Buffer time delay: %ds", delay_start)
-        sleep(delay_start)
         # Start Simulation Engine
         vce.start_vce(
             num_supernodes=num_supernodes,
@@ -404,7 +399,6 @@ def _run_simulation(
     flwr_dir: Optional[str] = None,
     run: Optional[Run] = None,
     enable_tf_gpu_growth: bool = False,
-    delay_start: int = 5,
     verbose_logging: bool = False,
     is_app: bool = False,
 ) -> None:
@@ -459,7 +453,6 @@ def _run_simulation(
         enable_tf_gpu_growth,
         run,
         exit_event,
-        delay_start,
         flwr_dir,
         client_app,
         client_app_attr,
@@ -536,13 +529,6 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         "out-of-memory error because TensorFlow by default allocates all GPU memory."
         "Read more about how `tf.config.experimental.set_memory_growth()` works in "
         "the TensorFlow documentation: https://www.tensorflow.org/api/stable.",
-    )
-    parser.add_argument(
-        "--delay-start",
-        type=int,
-        default=3,
-        help="Buffer time (in seconds) to delay the start the simulation engine after "
-        "the `ServerApp`, which runs in a separate thread, has been launched.",
     )
     parser.add_argument(
         "--verbose",

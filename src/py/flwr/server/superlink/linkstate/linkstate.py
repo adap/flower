@@ -139,8 +139,19 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def delete_tasks(self, task_ids: set[UUID]) -> None:
-        """Delete all delivered TaskIns/TaskRes pairs."""
+    def delete_tasks(self, task_ins_ids: set[UUID]) -> None:
+        """Delete TaskIns/TaskRes pairs based on provided TaskIns IDs.
+
+        Parameters
+        ----------
+        task_ins_ids : set[UUID]
+            A set of TaskIns IDs. For each ID in the set, the corresponding
+            TaskIns and its associated TaskRes will be deleted.
+        """
+
+    @abc.abstractmethod
+    def get_task_ids_from_run_id(self, run_id: int) -> set[UUID]:
+        """Get all TaskIns IDs for the given run_id."""
 
     @abc.abstractmethod
     def create_node(
