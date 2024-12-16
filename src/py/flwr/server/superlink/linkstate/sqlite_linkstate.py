@@ -14,12 +14,12 @@
 # ==============================================================================
 """SQLite based implemenation of the link state."""
 
+
 # pylint: disable=too-many-lines
 
 import json
 import re
 import sqlite3
-import threading
 import time
 from collections.abc import Sequence
 from logging import DEBUG, ERROR, WARNING
@@ -183,7 +183,6 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         """
         self.database_path = database_path
         self.conn: Optional[sqlite3.Connection] = None
-        self.lock = threading.RLock()
 
     def initialize(self, log_queries: bool = False) -> list[tuple[str]]:
         """Create tables if they don't exist yet.
@@ -216,7 +215,6 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         cur.execute(SQL_CREATE_TABLE_PUBLIC_KEY)
         cur.execute(SQL_CREATE_INDEX_ONLINE_UNTIL)
         res = cur.execute("SELECT name FROM sqlite_schema;")
-
         return res.fetchall()
 
     def query(
@@ -569,9 +567,6 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         data: list[Any] = [delivered_at] + task_res_ids
         self.query(query, data)
 
-        # Cleanup
-        self._force_delete_tasks_by_ids(set(ret.keys()))
-
         return list(ret.values())
 
     def num_task_ins(self) -> int:
@@ -595,52 +590,15 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         result: dict[str, int] = rows[0]
         return result["num"]
 
-    def delete_tasks(self, task_ids: set[UUID]) -> None:
-        """Delete all delivered TaskIns/TaskRes pairs."""
-        ids = list(task_ids)
-        if len(ids) == 0:
-            return None
-
-        placeholders = ",".join([f":id_{index}" for index in range(len(task_ids))])
-        data = {f"id_{index}": str(task_id) for index, task_id in enumerate(task_ids)}
-
-        # 1. Query: Delete task_ins which have a delivered task_res
-        query_1 = f"""
-            DELETE FROM task_ins
-            WHERE delivered_at != ''
-            AND task_id IN (
-                SELECT ancestry
-                FROM task_res
-                WHERE ancestry IN ({placeholders})
-                AND delivered_at != ''
-            );
-        """
-
-        # 2. Query: Delete delivered task_res to be run after 1. Query
-        query_2 = f"""
-            DELETE FROM task_res
-            WHERE ancestry IN ({placeholders})
-            AND delivered_at != '';
-        """
-
-        if self.conn is None:
-            raise AttributeError("LinkState not intitialized")
-
-        with self.conn:
-            self.conn.execute(query_1, data)
-            self.conn.execute(query_2, data)
-
-        return None
-
-    def _force_delete_tasks_by_ids(self, task_ids: set[UUID]) -> None:
-        """Delete tasks based on a set of TaskIns IDs."""
-        if not task_ids:
+    def delete_tasks(self, task_ins_ids: set[UUID]) -> None:
+        """Delete TaskIns/TaskRes pairs based on provided TaskIns IDs."""
+        if not task_ins_ids:
             return
         if self.conn is None:
             raise AttributeError("LinkState not initialized")
 
-        placeholders = ",".join([f":id_{index}" for index in range(len(task_ids))])
-        data = {f"id_{index}": str(task_id) for index, task_id in enumerate(task_ids)}
+        placeholders = ",".join(["?"] * len(task_ins_ids))
+        data = tuple(str(task_id) for task_id in task_ins_ids)
 
         # Delete task_ins
         query_1 = f"""
@@ -657,6 +615,25 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         with self.conn:
             self.conn.execute(query_1, data)
             self.conn.execute(query_2, data)
+
+    def get_task_ids_from_run_id(self, run_id: int) -> set[UUID]:
+        """Get all TaskIns IDs for the given run_id."""
+        if self.conn is None:
+            raise AttributeError("LinkState not initialized")
+
+        query = """
+            SELECT task_id
+            FROM task_ins
+            WHERE run_id = :run_id;
+        """
+
+        sint64_run_id = convert_uint64_to_sint64(run_id)
+        data = {"run_id": sint64_run_id}
+
+        with self.conn:
+            rows = self.conn.execute(query, data).fetchall()
+
+        return {UUID(row["task_id"]) for row in rows}
 
     def create_node(
         self, ping_interval: float, public_key: Optional[bytes] = None

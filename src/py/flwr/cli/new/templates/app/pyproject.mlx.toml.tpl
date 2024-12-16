@@ -8,10 +8,9 @@ version = "1.0.0"
 description = ""
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.12.0",
+    "flwr[simulation]>=1.13.1",
     "flwr-datasets[vision]>=0.3.0",
-    "mlx==0.16.1",
-    "numpy==1.24.4",
+    "mlx==0.21.1",
 ]
 
 [tool.hatch.build.targets.wheel]

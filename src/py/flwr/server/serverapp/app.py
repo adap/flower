@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower ServerApp process."""
 
+
 import argparse
 import sys
 from logging import DEBUG, ERROR, INFO
@@ -50,7 +51,7 @@ from flwr.common.serde import (
     run_from_proto,
     run_status_to_proto,
 )
-from flwr.common.typing import RunStatus
+from flwr.common.typing import RunNotRunningException, RunStatus
 from flwr.proto.run_pb2 import UpdateRunStatusRequest  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     PullServerAppInputsRequest,
@@ -96,7 +97,7 @@ def flwr_serverapp() -> None:
     restore_output()
 
 
-def run_serverapp(  # pylint: disable=R0914, disable=W0212
+def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
     serverappio_api_address: str,
     log_queue: Queue[Optional[str]],
     run_once: bool,
@@ -187,6 +188,12 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212
 
             run_status = RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
 
+        except RunNotRunningException:
+            log(INFO, "")
+            log(INFO, "Run ID %s stopped.", run.run_id)
+            log(INFO, "")
+            run_status = None
+
         except Exception as ex:  # pylint: disable=broad-exception-caught
             exc_entity = "ServerApp"
             log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
@@ -229,13 +236,6 @@ def _parse_args_run_flwr_serverapp() -> argparse.ArgumentParser:
         action="store_true",
         help="When set, this process will start a single ServerApp for a pending Run. "
         "If there is no pending Run, the process will exit.",
-    )
-    parser.add_argument(
-        "--root-certificates",
-        metavar="ROOT_CERT",
-        type=str,
-        help="Specifies the path to the PEM-encoded root certificate file for "
-        "establishing secure HTTPS connections.",
     )
     add_args_flwr_app_common(parser=parser)
     return parser
