@@ -251,12 +251,13 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     def test_pull_task_res_successful_if_running(self) -> None:
         """Test `PullTaskRes` success."""
         # Prepare
-        node_id = self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-
+        task_ids = self.state.get_task_ids_from_run_id(run_id)
         # Transition status to running. PushTaskRes is only allowed in running status.
         self._transition_run_status(run_id, 2)
-        request = PullTaskResRequest(node=Node(node_id=node_id), run_id=run_id)
+        request = PullTaskResRequest(
+            task_ids=[str(task_id) for task_id in task_ids], run_id=run_id
+        )
 
         # Execute
         response, call = self._pull_task_res.with_call(request=request)
@@ -265,10 +266,10 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         assert isinstance(response, PullTaskResResponse)
         assert grpc.StatusCode.OK == call.code()
 
-    def _assert_pull_task_res_not_allowed(self, node_id: int, run_id: int) -> None:
+    def _assert_pull_task_res_not_allowed(self, run_id: int) -> None:
         """Assert `PullTaskRes` not allowed."""
         run_status = self.state.get_run_status({run_id})[run_id]
-        request = PullTaskResRequest(node=Node(node_id=node_id), run_id=run_id)
+        request = PullTaskResRequest(node=Node(node_id=0), run_id=run_id)
 
         with self.assertRaises(grpc.RpcError) as e:
             self._pull_task_res.with_call(request=request)
@@ -287,24 +288,22 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     ) -> None:
         """Test `PullTaskRes` not successful if RunStatus is not running."""
         # Prepare
-        node_id = self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
 
         self._transition_run_status(run_id, num_transitions)
 
         # Execute & Assert
-        self._assert_pull_task_res_not_allowed(node_id, run_id)
+        self._assert_pull_task_res_not_allowed(run_id)
 
     def test_push_serverapp_outputs_successful_if_running(self) -> None:
         """Test `PushServerAppOutputs` success."""
         # Prepare
-        node_id = self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
 
         maker = RecordMaker()
         context = Context(
             run_id=run_id,
-            node_id=node_id,
+            node_id=0,
             node_config=maker.user_config(),
             state=maker.recordset(1, 1, 1),
             run_config=maker.user_config(),
@@ -349,13 +348,12 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
     ) -> None:
         """Test `PushServerAppOutputs` not successful if RunStatus is not running."""
         # Prepare
-        node_id = self.state.create_node(ping_interval=30)
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
 
         maker = RecordMaker()
         context = Context(
             run_id=run_id,
-            node_id=node_id,
+            node_id=0,
             node_config=maker.user_config(),
             state=maker.recordset(1, 1, 1),
             run_config=maker.user_config(),
