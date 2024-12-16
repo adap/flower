@@ -30,7 +30,7 @@ from flwr.common.constant import FAB_CONFIG_FILE
 from flwr.proto.exec_pb2 import StopRunRequest, StopRunResponse  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 
-from .utils import init_channel, try_obtain_cli_auth_plugin
+from .utils import init_channel, try_obtain_cli_auth_plugin, unauthenticated_exc_handler
 
 
 def stop(
@@ -83,7 +83,8 @@ def _stop_run(
     run_id: int,  # pylint: disable=unused-argument
 ) -> None:
     """Stop a run."""
-    response: StopRunResponse = stub.StopRun(request=StopRunRequest(run_id=run_id))
+    with unauthenticated_exc_handler():
+        response: StopRunResponse = stub.StopRun(request=StopRunRequest(run_id=run_id))
 
     if response.success:
         typer.secho(f"✅ Run {run_id} successfully stopped.", fg=typer.colors.GREEN)

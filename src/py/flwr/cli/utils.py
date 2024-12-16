@@ -18,6 +18,8 @@
 import hashlib
 import json
 import re
+from collections.abc import Iterator
+from contextlib import contextmanager
 from logging import DEBUG
 from pathlib import Path
 from typing import Any, Callable, Optional, cast
@@ -231,3 +233,24 @@ def init_channel(
     )
     channel.subscribe(on_channel_state_change)
     return channel
+
+
+@contextmanager
+def unauthenticated_exc_handler() -> Iterator[None]:
+    """Context manager to handle gRPC UNAUTHENTICATED errors.
+
+    It catches grpc.RpcError exceptions with UNAUTHENTICATED status, informs the user,
+    and exits the application. All other exceptions will be allowed to escape.
+    """
+    try:
+        yield
+    except grpc.RpcError as e:
+        if e.code() != grpc.StatusCode.UNAUTHENTICATED:
+            raise
+        typer.secho(
+            "❌ Authentication failed. Please run `flwr login`"
+            " to authenticate and try again.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1) from None
