@@ -195,7 +195,7 @@ class QFedAvg(FedAvg):
             loss, _ = eval_result
         else:
             log(WARNING, "Evaluate method returned None, using default loss value")
-            loss = 0.0  # Default value for loss
+            loss = None  # Default value for loss
 
         for _, fit_res in results:
             new_weights = parameters_to_ndarrays(fit_res.parameters)
