@@ -157,6 +157,10 @@ class EventType(str, Enum):
     CLI_FLOWER_SIMULATION_ENTER = auto()
     CLI_FLOWER_SIMULATION_LEAVE = auto()
 
+    # CLI: flwr-simulation
+    RUN_SIMULATION_ENTER = auto()
+    RUN_SIMULATION_LEAVE = auto()
+
     # Python API: `run_simulation`
     PYTHON_API_RUN_SIMULATION_ENTER = auto()
     PYTHON_API_RUN_SIMULATION_LEAVE = auto()

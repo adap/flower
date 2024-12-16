@@ -24,7 +24,7 @@ from typing import Optional
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
-from flwr.common import EventType
+from flwr.common import EventType, event
 from flwr.common.args import add_args_flwr_app_common
 from flwr.common.config import (
     get_flwr_dir,
@@ -201,6 +201,14 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
             verbose: bool = fed_opt.get("verbose", False)
             enable_tf_gpu_growth: bool = fed_opt.get("enable_tf_gpu_growth", False)
 
+            event(
+                EventType.RUN_SIMULATION_ENTER,
+                event_details={
+                    "backend": "ray",
+                    "num-supernodes": num_supernodes,
+                },
+            )
+
             # Launch the simulation
             _run_simulation(
                 server_app_attr=server_app_attr,
@@ -213,7 +221,7 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
                 verbose_logging=verbose,
                 server_app_run_config=fused_config,
                 is_app=True,
-                exit_event=EventType.CLI_FLOWER_SIMULATION_LEAVE,
+                exit_event=EventType.RUN_SIMULATION_LEAVE,
             )
 
             # Send resulting context
