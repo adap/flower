@@ -385,6 +385,9 @@ def _main_loop(
 
         updated_context = output_context_queue.get(timeout=3)
 
+        except output_context_queue.Empty():
+            log(ERROR, "Queue timeout. No context received.")
+            
     except Exception as ex:
         log(ERROR, "An exception occurred !! %s", ex)
         log(ERROR, traceback.format_exc())
