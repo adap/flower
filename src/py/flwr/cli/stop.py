@@ -76,6 +76,13 @@ def stop(  # pylint: disable=R0914
             federation, config
         )
         exit_if_no_address(federation_config, "stop")
+        pyproject_path = app / FAB_CONFIG_FILE if app else None
+        config, errors, warnings = load_and_validate(path=pyproject_path)
+        config = process_loaded_project_config(config, errors, warnings)
+        federation, federation_config = validate_federation_in_project_config(
+            federation, config
+        )
+        exit_if_no_address(federation_config, "stop")
 
         try:
             auth_plugin = try_obtain_cli_auth_plugin(app, federation)
