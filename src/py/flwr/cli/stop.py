@@ -15,10 +15,13 @@
 """Flower command line interface `stop` command."""
 
 
+import io
+import json
 from pathlib import Path
 from typing import Annotated, Optional
 
 import typer
+from rich.console import Console
 
 from flwr.cli.config_utils import (
     exit_if_no_address,
@@ -26,14 +29,15 @@ from flwr.cli.config_utils import (
     process_loaded_project_config,
     validate_federation_in_project_config,
 )
-from flwr.common.constant import FAB_CONFIG_FILE
+from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat
+from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.proto.exec_pb2 import StopRunRequest, StopRunResponse  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 
 from .utils import init_channel, try_obtain_cli_auth_plugin
 
 
-def stop(
+def stop(  # pylint: disable=R0914
     run_id: Annotated[  # pylint: disable=unused-argument
         int,
         typer.Argument(help="The Flower run ID to stop"),
@@ -46,9 +50,22 @@ def stop(
         Optional[str],
         typer.Argument(help="Name of the federation"),
     ] = None,
+    output_format: Annotated[
+        str,
+        typer.Option(
+            "--format",
+            case_sensitive=False,
+            help="Format output using 'default' view or 'json'",
+        ),
+    ] = CliOutputFormat.DEFAULT,
 ) -> None:
     """Stop a run."""
+    suppress_output = output_format == CliOutputFormat.JSON
+    captured_output = io.StringIO()
     try:
+        if suppress_output:
+            redirect_output(captured_output)
+
         # Load and validate federation config
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
@@ -66,7 +83,7 @@ def stop(
             stub = ExecStub(channel)  # pylint: disable=unused-variable # noqa: F841
 
             typer.secho(f"✋ Stopping run ID {run_id}...", fg=typer.colors.GREEN)
-            _stop_run(stub, run_id=run_id)
+            _stop_run(stub=stub, run_id=run_id, output_format=output_format)
 
         except ValueError as err:
             typer.secho(
@@ -77,23 +94,36 @@ def stop(
             raise typer.Exit(code=1) from err
         finally:
             channel.close()
-    except (
-        typer.Exit,
-        Exception,
-    ) as err:  # pylint: disable=broad-except, W0612  # noqa: F841
-        raise typer.Exit(code=1) from err
+    except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
+        if suppress_output:
+            restore_output()
+            e_message = captured_output.getvalue()
+            print_json_error(e_message, err)
+        else:
+            typer.secho(
+                f"{err}",
+                fg=typer.colors.RED,
+                bold=True,
+            )
     finally:
-        pass
+        if suppress_output:
+            restore_output()
+        captured_output.close()
 
 
-def _stop_run(
-    stub: ExecStub,  # pylint: disable=unused-argument
-    run_id: int,  # pylint: disable=unused-argument
-) -> None:
+def _stop_run(stub: ExecStub, run_id: int, output_format: str) -> None:
     """Stop a run."""
     response: StopRunResponse = stub.StopRun(request=StopRunRequest(run_id=run_id))
-
     if response.success:
         typer.secho(f"✅ Run {run_id} successfully stopped.", fg=typer.colors.GREEN)
+        if output_format == CliOutputFormat.JSON:
+            run_output = json.dumps(
+                {
+                    "success": True,
+                    "run-id": run_id,
+                }
+            )
+            restore_output()
+            Console().print_json(run_output)
     else:
         typer.secho(f"❌ Run {run_id} couldn't be stopped.", fg=typer.colors.RED)
