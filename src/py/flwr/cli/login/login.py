@@ -65,9 +65,7 @@ def login(  # pylint: disable=R0914
 
     # Get the auth plugin
     auth_type = login_response.login_details.get(AUTH_TYPE)
-    auth_plugin = try_obtain_cli_auth_plugin(
-        app, federation, federation_config, auth_type
-    )
+    auth_plugin = try_obtain_cli_auth_plugin(app, federation, auth_type)
     if auth_plugin is None:
         typer.secho(
             f'❌ Authentication type "{auth_type}" not found',
