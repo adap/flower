@@ -22,7 +22,7 @@ import logging
 import sys
 import threading
 import traceback
-from logging import DEBUG, ERROR, INFO, WARNING
+from logging import DEBUG, ERROR, WARNING
 from pathlib import Path
 from time import sleep
 from typing import Any, Optional
@@ -46,9 +46,6 @@ from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.server.superlink.linkstate.in_memory_linkstate import RunRecord
 from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
-from flwr.simulation.ray_transport.utils import (
-    enable_tf_gpu_growth as enable_gpu_growth,
-)
 
 
 def _replace_keys(d: Any, match: str, target: str) -> Any:
@@ -135,7 +132,6 @@ def run_simulation_from_cli() -> None:
         backend_config=backend_config_dict,
         app_dir=args.app,
         run=run,
-        enable_tf_gpu_growth=args.enable_tf_gpu_growth,
         delay_start=args.delay_start,
         verbose_logging=args.verbose,
         server_app_run_config=fused_config,
@@ -183,12 +179,12 @@ def run_simulation(
         `flwr.common.typing.ConfigsRecordValues`.
 
     enable_tf_gpu_growth : bool (default: False)
-        A boolean to indicate whether to enable GPU growth on the main thread. This is
-        desirable if you make use of a TensorFlow model on your `ServerApp` while
-        having your `ClientApp` running on the same GPU. Without enabling this, you
-        might encounter an out-of-memory error because TensorFlow, by default, allocates
-        all GPU memory. Read more about how `tf.config.experimental.set_memory_growth()`
-        works in the TensorFlow documentation: https://www.tensorflow.org/api/stable.
+        (Deprecated) A boolean to indicate whether to enable GPU growth on the main
+        thread. This is desirable if you make use of a TensorFlow model on your
+        `ServerApp` while having your `ClientApp` running on the same GPU. Without
+        enabling this, you might encounter an out-of-memory error because TensorFlow,
+        by default, allocates all GPU memory. Read more about in the TensorFlow
+        documentation: https://www.tensorflow.org/api/stable.
 
     verbose_logging : bool (default: False)
         When disabled, only INFO, WARNING and ERROR log messages will be shown. If
@@ -201,7 +197,7 @@ def run_simulation(
 
     if enable_tf_gpu_growth:
         warn_deprecated_feature_with_example(
-            "Passing `enable_tf_gpu_growth=True` is deprecated.",
+            "Passing `enable_tf_gpu_growth` is deprecated.",
             example_message="Instead, set the `TF_FORCE_GPU_ALLOW_GROWTH` environment "
             "variable to true.",
             code_example='import os;os.environ["TF_FORCE_GPU_ALLOW_GROWTH"]="true"'
@@ -214,7 +210,6 @@ def run_simulation(
         server_app=server_app,
         backend_name=backend_name,
         backend_config=backend_config,
-        enable_tf_gpu_growth=enable_tf_gpu_growth,
         verbose_logging=verbose_logging,
         exit_event=EventType.PYTHON_API_RUN_SIMULATION_LEAVE,
     )
@@ -229,13 +224,11 @@ def run_serverapp_th(
     app_dir: str,
     f_stop: threading.Event,
     has_exception: threading.Event,
-    enable_tf_gpu_growth: bool,
     run_id: int,
 ) -> threading.Thread:
     """Run SeverApp in a thread."""
 
     def server_th_with_start_checks(
-        tf_gpu_growth: bool,
         stop_event: threading.Event,
         exception_event: threading.Event,
         _driver: Driver,
@@ -249,9 +242,6 @@ def run_serverapp_th(
         Upon exception, trigger stop event for Simulation Engine.
         """
         try:
-            if tf_gpu_growth:
-                log(INFO, "Enabling GPU growth for Tensorflow on the server thread.")
-                enable_gpu_growth()
 
             # Initialize Context
             context = Context(
@@ -285,7 +275,6 @@ def run_serverapp_th(
     serverapp_th = threading.Thread(
         target=server_th_with_start_checks,
         args=(
-            enable_tf_gpu_growth,
             f_stop,
             has_exception,
             driver,
@@ -306,7 +295,6 @@ def _main_loop(
     backend_config_stream: str,
     app_dir: str,
     is_app: bool,
-    enable_tf_gpu_growth: bool,
     run: Run,
     exit_event: EventType,
     delay_start: int,
@@ -350,7 +338,6 @@ def _main_loop(
             app_dir=app_dir,
             f_stop=f_stop,
             has_exception=server_app_thread_has_exception,
-            enable_tf_gpu_growth=enable_tf_gpu_growth,
             run_id=run.run_id,
         )
 
@@ -404,7 +391,6 @@ def _run_simulation(
     app_dir: str = "",
     flwr_dir: Optional[str] = None,
     run: Optional[Run] = None,
-    enable_tf_gpu_growth: bool = False,
     delay_start: int = 5,
     verbose_logging: bool = False,
     is_app: bool = False,
@@ -436,13 +422,6 @@ def _run_simulation(
             "log_to_driver", True
         )
 
-    if enable_tf_gpu_growth:
-        # Check that Backend config has also enabled using GPU growth
-        use_tf = backend_config.get("actor", {}).get("tensorflow", False)
-        if not use_tf:
-            log(WARNING, "Enabling GPU growth for your backend.")
-            backend_config["actor"]["tensorflow"] = True
-
     # Convert config to original JSON-stream format
     backend_config_stream = json.dumps(backend_config)
 
@@ -457,7 +436,6 @@ def _run_simulation(
         backend_config_stream,
         app_dir,
         is_app,
-        enable_tf_gpu_growth,
         run,
         exit_event,
         delay_start,
@@ -531,12 +509,12 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
     parser.add_argument(
         "--enable-tf-gpu-growth",
         action="store_true",
-        help="Enables GPU growth on the main thread. This is desirable if you make "
-        "use of a TensorFlow model on your `ServerApp` while having your `ClientApp` "
-        "running on the same GPU. Without enabling this, you might encounter an "
-        "out-of-memory error because TensorFlow by default allocates all GPU memory."
-        "Read more about how `tf.config.experimental.set_memory_growth()` works in "
-        "the TensorFlow documentation: https://www.tensorflow.org/api/stable.",
+        help="(Deprecated) Enables GPU growth on the main thread. This is desirable if "
+        "you make use of a TensorFlow model on your `ServerApp` while having your "
+        "`ClientApp` running on the same GPU. Without enabling this, you might "
+        "encounter an out-of-memory error because TensorFlow by default allocates all "
+        "GPU memory. Read more about how `tf.config.experimental.set_memory_growth()` "
+        "works in the TensorFlow documentation: https://www.tensorflow.org/api/stable.",
     )
     parser.add_argument(
         "--delay-start",
