@@ -19,7 +19,7 @@ import io
 import json
 import subprocess
 from pathlib import Path
-from typing import Annotated, Any, Optional, Union
+from typing import Annotated, Any, Optional
 
 import typer
 from rich.console import Console
@@ -37,7 +37,7 @@ from flwr.common.config import (
     user_config_to_configsrecord,
 )
 from flwr.common.constant import CliOutputFormat
-from flwr.common.logger import redirect_output, remove_emojis, restore_output
+from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.common.serde import (
     configs_record_to_proto,
     fab_to_proto,
@@ -122,7 +122,7 @@ def run(
         if suppress_output:
             restore_output()
             e_message = captured_output.getvalue()
-            _print_json_error(e_message, err)
+            print_json_error(e_message, err)
         else:
             typer.secho(
                 f"{err}",
@@ -238,16 +238,4 @@ def _run_without_exec_api(
         command,
         check=True,
         text=True,
-    )
-
-
-def _print_json_error(msg: str, e: Union[typer.Exit, Exception]) -> None:
-    """Print error message as JSON."""
-    Console().print_json(
-        json.dumps(
-            {
-                "success": False,
-                "error-message": remove_emojis(str(msg) + "\n" + str(e)),
-            }
-        )
     )
