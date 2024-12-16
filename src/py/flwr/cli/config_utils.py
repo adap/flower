@@ -14,6 +14,7 @@
 # ==============================================================================
 """Utility to validate the `pyproject.toml` file."""
 
+
 import zipfile
 from io import BytesIO
 from pathlib import Path
