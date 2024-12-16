@@ -30,6 +30,7 @@ from flwr.common.logger import log
 from flwr.common.typing import RunNotRunningException
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
+from flwr.proto.simulationio_pb2_grpc import SimulationIoStub
 
 
 def exponential(
@@ -365,7 +366,8 @@ def _make_simple_grpc_retry_invoker() -> RetryInvoker:
 
 
 def _wrap_stub(
-    stub: Union[ServerAppIoStub, ClientAppIoStub], retry_invoker: RetryInvoker
+    stub: Union[ServerAppIoStub, ClientAppIoStub, SimulationIoStub],
+    retry_invoker: RetryInvoker,
 ) -> None:
     """Wrap a gRPC stub with a retry invoker."""
 

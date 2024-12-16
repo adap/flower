@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower server app."""
 
+
 import argparse
 import csv
 import importlib.util
@@ -92,8 +93,12 @@ BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
 
 
 try:
-    from flwr.ee import get_exec_auth_plugins
+    from flwr.ee import add_ee_args_superlink, get_exec_auth_plugins
 except ImportError:
+
+    # pylint: disable-next=unused-argument
+    def add_ee_args_superlink(parser: argparse.ArgumentParser) -> None:
+        """Add EE-specific arguments to the parser."""
 
     def get_exec_auth_plugins() -> dict[str, type[ExecAuthPlugin]]:
         """Return all Exec API authentication plugins."""
@@ -579,7 +584,7 @@ def _try_setup_node_authentication(
 
 
 def _try_obtain_user_auth_config(args: argparse.Namespace) -> Optional[dict[str, Any]]:
-    if args.user_auth_config is not None:
+    if getattr(args, "user_auth_config", None) is not None:
         with open(args.user_auth_config, encoding="utf-8") as file:
             config: dict[str, Any] = yaml.safe_load(file)
             return config
@@ -702,6 +707,7 @@ def _parse_args_run_superlink() -> argparse.ArgumentParser:
     )
 
     _add_args_common(parser=parser)
+    add_ee_args_superlink(parser=parser)
     _add_args_serverappio_api(parser=parser)
     _add_args_fleet_api(parser=parser)
     _add_args_exec_api(parser=parser)
@@ -790,12 +796,6 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         "--auth-superlink-public-key",
         type=str,
         help="The SuperLink's public key (as a path str) to enable authentication.",
-    )
-    parser.add_argument(
-        "--user-auth-config",
-        help="The path to the user authentication configuration YAML file.",
-        type=str,
-        default=None,
     )
 
 

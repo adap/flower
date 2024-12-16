@@ -190,27 +190,15 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         # Convert each task_id str to UUID
         task_ids: set[UUID] = {UUID(task_id) for task_id in request.task_ids}
 
-        # Register callback
-        def on_rpc_done() -> None:
-            log(
-                DEBUG,
-                "ServerAppIoServicer.PullTaskRes callback: delete TaskIns/TaskRes",
-            )
-
-            if context.is_active():
-                return
-            if context.code() != grpc.StatusCode.OK:
-                return
-
-            # Delete delivered TaskIns and TaskRes
-            state.delete_tasks(task_ids=task_ids)
-
-        context.add_callback(on_rpc_done)
-
         # Read from state
         task_res_list: list[TaskRes] = state.get_task_res(task_ids=task_ids)
 
-        context.set_code(grpc.StatusCode.OK)
+        # Delete the TaskIns/TaskRes pairs if TaskRes is found
+        task_ins_ids_to_delete = {
+            UUID(task_res.task.ancestry[0]) for task_res in task_res_list
+        }
+        state.delete_tasks(task_ins_ids=task_ins_ids_to_delete)
+
         return PullTaskResResponse(task_res_list=task_res_list)
 
     def GetRun(

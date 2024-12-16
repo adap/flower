@@ -349,9 +349,20 @@ class StateTest(unittest.TestCase):
         # Situation now:
         # - State has three TaskIns, all of them delivered
         # - State has two TaskRes, one of the delivered, the other not
+        assert state.num_task_ins() == 3
+        assert state.num_task_res() == 2
 
+        state.delete_tasks({task_id_0})
         assert state.num_task_ins() == 2
         assert state.num_task_res() == 1
+
+        state.delete_tasks({task_id_1})
+        assert state.num_task_ins() == 1
+        assert state.num_task_res() == 0
+
+        state.delete_tasks({task_id_2})
+        assert state.num_task_ins() == 0
+        assert state.num_task_res() == 0
 
     def test_get_task_ids_from_run_id(self) -> None:
         """Test get_task_ids_from_run_id."""
@@ -993,7 +1004,8 @@ class StateTest(unittest.TestCase):
             # Assert
             assert len(task_res_list) == 1
             assert task_res_list[0].task.HasField("error")
-            assert state.num_task_ins() == state.num_task_res() == 0
+            assert state.num_task_ins() == 1
+            assert state.num_task_res() == 0
 
     def test_get_task_res_returns_empty_for_missing_taskins(self) -> None:
         """Test that get_task_res returns an empty result when the corresponding TaskIns
