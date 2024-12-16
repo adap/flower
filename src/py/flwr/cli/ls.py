@@ -81,7 +81,20 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches
         ),
     ] = CliOutputFormat.DEFAULT,
 ) -> None:
-    """List runs."""
+    """List the details of one provided run ID or all runs in a Flower federation.
+
+    The following details are displayed:
+
+    - **Run ID:** Unique identifier for the run.
+    - **FAB:** Name of the FAB associated with the run (``{FAB_ID} (v{FAB_VERSION})``).
+    - **Status:** Current status of the run (pending, starting, running, finished).
+    - **Elapsed:** Time elapsed since the run started (``HH:MM:SS``).
+    - **Created At:** Timestamp when the run was created.
+    - **Running At:** Timestamp when the run started running.
+    - **Finished At:** Timestamp when the run finished.
+
+    All timestamps follow ISO 8601, UTC and are formatted as ``YYYY-MM-DD HH:MM:SSZ``.
+    """
     suppress_output = output_format == CliOutputFormat.JSON
     captured_output = io.StringIO()
     try:
