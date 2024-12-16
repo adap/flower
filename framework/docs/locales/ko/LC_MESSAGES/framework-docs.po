@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-09 00:34+0000\n"
+"POT-Creation-Date: 2024-12-13 00:33+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -9048,7 +9048,7 @@ msgstr ""
 msgid "Arguments"
 msgstr "빌드 전달인자"
 
-#: ../../flwr install:1 log:1 ls:1 new:1 run:1 stop:1
+#: ../../flwr install:1 log:1 login:1 ls:1 new:1 run:1 stop:1
 #, fuzzy
 msgid "Optional argument"
 msgstr "선택적 개선 사항"
@@ -9090,6 +9090,20 @@ msgstr ""
 
 #: ../../flwr log:1
 msgid "Name of the federation to run the app on"
+msgstr ""
+
+#: ../../flwr login:1
+#, fuzzy
+msgid "Login to Flower SuperLink."
+msgstr "flower 초연결"
+
+#: ../../flwr login:1 run:1
+#, fuzzy
+msgid "Path of the Flower App to run."
+msgstr "Flower 기본 이미지의 태그."
+
+#: ../../flwr login:1
+msgid "Name of the federation to login into."
 msgstr ""
 
 #: ../../flwr ls:1
@@ -9182,11 +9196,6 @@ msgid ""
 "Use `--stream` with `flwr run` to display logs; logs are not streamed by "
 "default."
 msgstr ""
-
-#: ../../flwr run:1
-#, fuzzy
-msgid "Path of the Flower App to run."
-msgstr "Flower 기본 이미지의 태그."
 
 #: ../../flwr run:1
 msgid "Name of the federation to run the app on."
@@ -26303,7 +26312,7 @@ msgstr ""
 " 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|6102f514742c4211b093aae3a5a74e51|"
+msgid "|ae2337ba61dd4efc818e63933fd81666|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -26320,7 +26329,7 @@ msgstr ""
 " 바둑과 같은 게임을 하는 것일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|24080db3b13d4b0c8546096de73ac82a|"
+msgid "|14a8d3feda794591a601daaaaa79d0b6|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -26346,7 +26355,7 @@ msgstr ""
 "부르리는 것을 듣는 스마트 스피커에서 비롯됩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|9087a1f0e9ab41c083f5209a3f17e600|"
+msgid "|c67497f1afa84a30a3901418c6c0bb62|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -26364,7 +26373,7 @@ msgstr ""
 "있습니다. 하지만 여러 조직이 모두 같은 작업을 위해 데이터를 생성하는 것일 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|a5d1853a0b3c44d4bdd408d15a89e7ac|"
+msgid "|d4ce55da082146d7ad13ec4f73d427a2|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -26383,7 +26392,7 @@ msgstr ""
 "서버는 데이터 센터 어딘가에 있을 수도 있고 클라우드 어딘가에 있을 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|8e6e9164d7414c39bf37f67e2fda59bd|"
+msgid "|0a0c4ca9de6549c1b35225c6e1183bc0|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -26400,7 +26409,7 @@ msgstr ""
 " 우리가 기본적으로 사용해 온 머신러닝 방법입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|e8b1d08849514de1b09fee325db970d0|"
+msgid "|f2f5e8cc5594472c842192ec38ab9bbe|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -26423,7 +26432,7 @@ msgstr ""
 "트래픽을 분석하는 것이 있습니다. 이러한 사례에서 모든 데이터는 자연스럽게 중앙 서버에 존재합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|ca0b3cb207164665b5bef1d869c37dff|"
+msgid "|4e7b0cd854064aab9895573a612a0f06|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -26440,7 +26449,7 @@ msgstr ""
 "좋은 모델을 훈련하기에 충분하지 않을 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|977cb114b97047329a7bb908afbac2cd|"
+msgid "|e121faa35b114a0da17cf4bc42e74ce9|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -26619,7 +26628,7 @@ msgstr ""
 "체크포인트에서 모델 매개변수를 초기화합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|9f497b02d2634af2925a65244cc0eb1b|"
+msgid "|e7a57a83812c4dc8933fbb93cd0e46dc|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -26647,7 +26656,7 @@ msgstr ""
 "개의 연결 노드만 사용합니다. 그 이유는 점점 더 많은 클라이언트 노드를 선택하면 학습의 효율성이 감소하기 때문입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|938ae2cd4fae49ce9292e6e2d9bd880d|"
+msgid "|a0283fe3cd0c4f3cb5d119f424c657fd|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -26674,7 +26683,7 @@ msgstr ""
 "데이터에서 한 단계 정도로 짧거나 몇 단계(mini-batches)에 불과할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|47cd7c6cb4094846833faff5b05e0d46|"
+msgid "|debbe320f2c741388902ebabfb6fc705|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -26700,7 +26709,7 @@ msgstr ""
 "보냅니다. 보내는 모델 업데이트는 전체 모델 파라미터거나 로컬 교육 중에 누적된 그레디언트(gradient)일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|c90d6613b0a34a42bf3023ca5a81c8e2|"
+msgid "|8be6ce669d3148f9af6272ca27a98197|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -26750,7 +26759,7 @@ msgstr ""
 "많은 영향을 미칩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|91c29c3c9b1b411590de3983d94ed76a|"
+msgid "|47c4a06eafbb4e2fa1c62b5ca47d3411|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -26870,7 +26879,7 @@ msgstr ""
 "사용자는 모든 워크로드, 머신러닝 프레임워크 및 모든 프로그래밍 언어를 통합할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|e4adf0f92ebf4c3d9e6e64355204f897|"
+msgid "|5e84b181879b4bcda37b672215325b30|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -33880,5 +33889,47 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|dd729f8776d640ffb136545f3f26210f|"
+#~ msgstr ""
+
+#~ msgid "|6102f514742c4211b093aae3a5a74e51|"
+#~ msgstr ""
+
+#~ msgid "|24080db3b13d4b0c8546096de73ac82a|"
+#~ msgstr ""
+
+#~ msgid "|9087a1f0e9ab41c083f5209a3f17e600|"
+#~ msgstr ""
+
+#~ msgid "|a5d1853a0b3c44d4bdd408d15a89e7ac|"
+#~ msgstr ""
+
+#~ msgid "|8e6e9164d7414c39bf37f67e2fda59bd|"
+#~ msgstr ""
+
+#~ msgid "|e8b1d08849514de1b09fee325db970d0|"
+#~ msgstr ""
+
+#~ msgid "|ca0b3cb207164665b5bef1d869c37dff|"
+#~ msgstr ""
+
+#~ msgid "|977cb114b97047329a7bb908afbac2cd|"
+#~ msgstr ""
+
+#~ msgid "|9f497b02d2634af2925a65244cc0eb1b|"
+#~ msgstr ""
+
+#~ msgid "|938ae2cd4fae49ce9292e6e2d9bd880d|"
+#~ msgstr ""
+
+#~ msgid "|47cd7c6cb4094846833faff5b05e0d46|"
+#~ msgstr ""
+
+#~ msgid "|c90d6613b0a34a42bf3023ca5a81c8e2|"
+#~ msgstr ""
+
+#~ msgid "|91c29c3c9b1b411590de3983d94ed76a|"
+#~ msgstr ""
+
+#~ msgid "|e4adf0f92ebf4c3d9e6e64355204f897|"
 #~ msgstr ""
 
