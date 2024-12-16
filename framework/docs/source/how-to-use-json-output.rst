@@ -1,0 +1,131 @@
+Use JSON outputs
+================
+
+The [Flower CLIs](ref-api-cli) come with a built-in JSON output mode. This mode is
+useful when you want to consume the output of a Flower CLI programmatically. For
+example, you might want to use the output of the ``flwr`` CLI in a script or a
+continuous integration pipeline.
+
+To enable JSON output, simply pass the ``--format json`` flag to the CLI. In this guide,
+we'll show you how to use JSON output with the ``flwr run``, ``ls``, and ``stop``
+commands.
+
+.. |flwr_run| replace:: ``flwr run``
+
+.. |flwr_ls| replace:: ``flwr ls``
+.. |flwr_stop| replace:: ``flwr stop``
+
+.. _flwr_run: ref-api-cli.html#flwr-run
+.. _flwr_ls: ref-api-cli.html#flwr-ls
+.. _flwr_stop: ref-api-cli.html#flwr-stop
+
+``flwr run`` JSON output
+------------------------
+
+The |flwr_run|_ command runs a Flower app. By default, the command prints the status of
+the app build and run process as follows:
+
+.. code-block:: bash
+
+    $ flwr run
+    Loading project configuration...
+    Success
+    🎊 Successfully built flwrlabs.myawesomeapp.1-0-0.014c8eb3.fab
+    🎊 Successfully started run 1859953118041441032
+
+To get the output in JSON format, simply pass the ``--format json`` flag:
+
+.. code-block:: bash
+
+    $ flwr run --format json
+    {
+      "success": true,
+      "run-id": 1859953118041441032,
+      "fab-id": "flwrlabs/myawesomeapp",
+      "fab-name": "myawesomeapp",
+      "fab-version": "1.0.0",
+      "fab-hash": "014c8eb3",
+      "fab-filename": "flwrlabs.pytorchexample.1-0-0.014c8eb3.fab"
+    }
+
+The JSON output contains the following fields:
+
+- ``success``: A boolean indicating whether the command was successful.
+- ``run-id``: The ID of the run.
+- ``fab-id``: The ID of the Flower app.
+- ``fab-name``: The name of the Flower app.
+- ``fab-version``: The version of the Flower app.
+- ``fab-hash``: The hash of the Flower app.
+- ``fab-filename``: The filename of the Flower app.
+
+If the command fails, the JSON output will two fields, ``success`` and
+``error-message``. For example, if the command fails to find the name of the federation
+on the SuperLink, the output will look like this:
+
+.. code-block:: bash
+
+    $ flwr run --format json
+    {
+      "success": false,
+      "error-message": ""Loading project configuration... \nSuccess\n There is no `[]non-existent]` federation declared in the `pyproject.toml`.\n The following federations were found:\n\nexisting-1\nexisting-2\n\n"
+    }
+
+``flwr ls`` JSON output
+-----------------------
+
+The |flwr_ls|_ command lists all the runs in the current project. By default, the
+command list the details of one provided run ID or all runs in a Flower federation in
+a tabular format:
+
+.. code-block:: bash
+
+    $ flwr ls
+    Loading project configuration...
+    Success
+    📄 Listing all runs...
+    ┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┓
+    ┃    Run ID    ┃     FAB      ┃    Status    ┃ Elapsed  ┃  Created At  ┃  Running At  ┃ Finished At ┃
+    ┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━━━━┩
+    │ 185995311804 │ flwrlabs/my… │ finished:co… │ 00:00:55 │ 2024-12-16   │ 2024-12-16   │ 2024-12-16  │
+    │ 1441032      │ (v1.0.0)     │              │          │ 11:12:33Z    │ 11:12:33Z    │ 11:13:29Z   │
+    ├──────────────┼──────────────┼──────────────┼──────────┼──────────────┼──────────────┼─────────────┤
+    │ 142007406570 │ flwrlabs/my… │ running      │ 00:00:05 │ 2024-12-16   │ 2024-12-16   │ N/A         │
+    │ 11601420     │ (v1.0.0)     │              │          │ 12:18:39Z    │ 12:18:39Z    │             │
+    └──────────────┴──────────────┴──────────────┴──────────┴──────────────┴──────────────┴─────────────┘
+
+Similar to the ``flwr run`` command, to get the output in JSON format, simply pass the
+``--format json`` flag:
+
+.. code-block:: bash
+
+    $ flwr ls --format json
+    {
+      "success": true,
+      "runs": [
+        {
+          "run-id": 1859953118041441032,
+          "fab-id": "flwrlabs/myawesomeapp1",
+          "fab-name": "myawesomeapp1",
+          "fab-version": "1.0.0",
+          "fab-hash": "014c8eb3",
+          "status": "finished:completed",
+          "elapsed": "00:00:55",
+          "created-at": "2024-12-16 11:12:33Z",
+          "running-at": "2024-12-16 11:12:33Z",
+          "finished-at": "2024-12-16 11:13:29Z"
+        },
+        {
+          "run-id": 14200740657011601420,
+          "fab-id": "flwrlabs/myawesomeapp2",
+          "fab-name": "myawesomeapp2",
+          "fab-version": "1.0.0",
+          "fab-hash": "014c8eb3",
+          "status": "running",
+          "elapsed": "00:00:09",
+          "created-at": "2024-12-16 12:18:39Z",
+          "running-at": "2024-12-16 12:18:39Z",
+          "finished-at": "N/A"
+        },
+      ]
+    }
+
