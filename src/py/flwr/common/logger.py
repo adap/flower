@@ -15,7 +15,7 @@
 """Flower Logger."""
 
 
-import json
+import json as _json
 import logging
 import re
 import sys
@@ -380,7 +380,7 @@ def stop_log_uploader(
     log_uploader.join()
 
 
-def remove_emojis(text: str) -> str:
+def _remove_emojis(text: str) -> str:
     """Remove emojis from the provided text."""
     emoji_pattern = re.compile(
         "["
@@ -399,10 +399,10 @@ def remove_emojis(text: str) -> str:
 def print_json_error(msg: str, e: Union[typer.Exit, Exception]) -> None:
     """Print error message as JSON."""
     Console().print_json(
-        json.dumps(
+        _json.dumps(
             {
                 "success": False,
-                "error-message": remove_emojis(str(msg) + "\n" + str(e)),
+                "error-message": _remove_emojis(str(msg) + "\n" + str(e)),
             }
         )
     )
