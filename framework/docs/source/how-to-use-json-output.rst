@@ -1,5 +1,5 @@
-Use JSON outputs
-================
+Use JSON outputs for Flower CLIs
+================================
 
 The `Flower CLIs <ref-api-cli.html>`_ come with a built-in JSON output mode. This mode
 is useful when you want to consume the output of a Flower CLI programmatically. For
@@ -48,7 +48,7 @@ To get the output in JSON format, simply pass the ``--format json`` flag:
       "fab-name": "myawesomeapp",
       "fab-version": "1.0.0",
       "fab-hash": "014c8eb3",
-      "fab-filename": "flwrlabs.pytorchexample.1-0-0.014c8eb3.fab"
+      "fab-filename": "flwrlabs.myawesomeapp.1-0-0.014c8eb3.fab"
     }
 
 The JSON output contains the following fields:
@@ -65,7 +65,7 @@ If the command fails, the JSON output will contain two fields, ``success`` with 
 value of ``false`` and ``error-message``. For example, if the command fails to find the
 name of the federation on the SuperLink, the output will look like this:
 
-.. _json-error-output:
+.. _json_error_output:
 
 .. code-block:: bash
 
@@ -135,7 +135,7 @@ Similar to the ``flwr run`` command, to get the output in JSON format, simply pa
     }
 
 If the command fails, the JSON output will return two fields, ``success`` and
-``error-message``, as shown in the |json-error-output|_ example.
+``error-message``, as shown in the :ref:`failed command <json_error_output>` example.
 
 ``flwr stop`` JSON output
 -------------------------
@@ -148,8 +148,8 @@ the command prints the status of the stop process as follows:
     $ flwr stop 1859953118041441032
     Loading project configuration...
     Success
-    ✋ Stopping run ID 496492261670054668...
-    ✅ Run 496492261670054668 successfully stopped.
+    ✋ Stopping run ID 1859953118041441032...
+    ✅ Run 1859953118041441032 successfully stopped.
 
 To get the output in JSON format, simply pass the ``--format json`` flag:
 
@@ -162,4 +162,5 @@ To get the output in JSON format, simply pass the ``--format json`` flag:
     }
 
 If the command fails, the JSON output will contain two fields ``success`` with the value
-of ``false`` and ``error-message``, as shown in the |json-error-output|_ example.
+of ``false`` and ``error-message``, as shown in the :ref:`failed command
+<json_error_output>` example.
