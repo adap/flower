@@ -60,7 +60,7 @@ def stop(
     exit_if_no_address(federation_config, "stop")
 
     try:
-        auth_plugin = try_obtain_cli_auth_plugin(app, federation, federation_config)
+        auth_plugin = try_obtain_cli_auth_plugin(app, federation)
         channel = init_channel(app, federation_config, auth_plugin)
         stub = ExecStub(channel)  # pylint: disable=unused-variable # noqa: F841
 
