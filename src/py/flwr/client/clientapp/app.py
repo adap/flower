@@ -140,6 +140,7 @@ def run_clientapp(  # pylint: disable=R0914
 
                 # Execute ClientApp
                 reply_message = client_app(message=message, context=context)
+
             except Exception as ex:  # pylint: disable=broad-exception-caught
                 # Don't update/change NodeState
 
