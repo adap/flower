@@ -252,12 +252,9 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
         """Test `PullTaskRes` success."""
         # Prepare
         run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
-        task_ids = self.state.get_task_ids_from_run_id(run_id)
         # Transition status to running. PushTaskRes is only allowed in running status.
         self._transition_run_status(run_id, 2)
-        request = PullTaskResRequest(
-            task_ids=[str(task_id) for task_id in task_ids], run_id=run_id
-        )
+        request = PullTaskResRequest(task_ids=[], run_id=run_id)
 
         # Execute
         response, call = self._pull_task_res.with_call(request=request)
