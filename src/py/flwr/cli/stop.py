@@ -48,34 +48,42 @@ def stop(
     ] = None,
 ) -> None:
     """Stop a run."""
-    # Load and validate federation config
-    typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
-
-    pyproject_path = app / FAB_CONFIG_FILE if app else None
-    config, errors, warnings = load_and_validate(path=pyproject_path)
-    config = process_loaded_project_config(config, errors, warnings)
-    federation, federation_config = validate_federation_in_project_config(
-        federation, config
-    )
-    exit_if_no_address(federation_config, "stop")
-
     try:
-        auth_plugin = try_obtain_cli_auth_plugin(app, federation)
-        channel = init_channel(app, federation_config, auth_plugin)
-        stub = ExecStub(channel)  # pylint: disable=unused-variable # noqa: F841
+        # Load and validate federation config
+        typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
-        typer.secho(f"✋ Stopping run ID {run_id}...", fg=typer.colors.GREEN)
-        _stop_run(stub, run_id=run_id)
-
-    except ValueError as err:
-        typer.secho(
-            f"❌ {err}",
-            fg=typer.colors.RED,
-            bold=True,
+        pyproject_path = app / FAB_CONFIG_FILE if app else None
+        config, errors, warnings = load_and_validate(path=pyproject_path)
+        config = process_loaded_project_config(config, errors, warnings)
+        federation, federation_config = validate_federation_in_project_config(
+            federation, config
         )
+        exit_if_no_address(federation_config, "stop")
+
+        try:
+            auth_plugin = try_obtain_cli_auth_plugin(app, federation)
+            channel = init_channel(app, federation_config, auth_plugin)
+            stub = ExecStub(channel)  # pylint: disable=unused-variable # noqa: F841
+
+            typer.secho(f"✋ Stopping run ID {run_id}...", fg=typer.colors.GREEN)
+            _stop_run(stub, run_id=run_id)
+
+        except ValueError as err:
+            typer.secho(
+                f"❌ {err}",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1) from err
+        finally:
+            channel.close()
+    except (
+        typer.Exit,
+        Exception,
+    ) as err:  # pylint: disable=broad-except, W0612  # noqa: F841
         raise typer.Exit(code=1) from err
     finally:
-        channel.close()
+        pass
 
 
 def _stop_run(
