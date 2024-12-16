@@ -331,7 +331,13 @@ def _main_loop(
     server_app_thread_has_exception = threading.Event()
     serverapp_th = None
     success = True
-    updated_context = Context()
+    updated_context = Context(
+        run_id=run.run_id,
+        node_id=0,
+        node_config=UserConfig(),
+        state=RecordSet(),
+        run_config=UserConfig(),
+    )
     try:
         # Register run
         log(DEBUG, "Pre-registering run with id %s", run.run_id)
