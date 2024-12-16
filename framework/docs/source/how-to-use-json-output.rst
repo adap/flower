@@ -1,8 +1,8 @@
 Use JSON outputs
 ================
 
-The [Flower CLIs](ref-api-cli) come with a built-in JSON output mode. This mode is
-useful when you want to consume the output of a Flower CLI programmatically. For
+The `Flower CLIs <ref-api-cli.html>`_ come with a built-in JSON output mode. This mode
+is useful when you want to consume the output of a Flower CLI programmatically. For
 example, you might want to use the output of the ``flwr`` CLI in a script or a
 continuous integration pipeline.
 
@@ -13,10 +13,13 @@ commands.
 .. |flwr_run| replace:: ``flwr run``
 
 .. |flwr_ls| replace:: ``flwr ls``
+
 .. |flwr_stop| replace:: ``flwr stop``
 
-.. _flwr_run: ref-api-cli.html#flwr-run
 .. _flwr_ls: ref-api-cli.html#flwr-ls
+
+.. _flwr_run: ref-api-cli.html#flwr-run
+
 .. _flwr_stop: ref-api-cli.html#flwr-stop
 
 ``flwr run`` JSON output
@@ -58,24 +61,26 @@ The JSON output contains the following fields:
 - ``fab-hash``: The hash of the Flower app.
 - ``fab-filename``: The filename of the Flower app.
 
-If the command fails, the JSON output will two fields, ``success`` and
-``error-message``. For example, if the command fails to find the name of the federation
-on the SuperLink, the output will look like this:
+If the command fails, the JSON output will contain two fields, ``success`` with the
+value of ``false`` and ``error-message``. For example, if the command fails to find the
+name of the federation on the SuperLink, the output will look like this:
+
+.. _json-error-output:
 
 .. code-block:: bash
 
     $ flwr run --format json
     {
       "success": false,
-      "error-message": ""Loading project configuration... \nSuccess\n There is no `[]non-existent]` federation declared in the `pyproject.toml`.\n The following federations were found:\n\nexisting-1\nexisting-2\n\n"
+      "error-message": "Loading project configuration... \nSuccess\n There is no `[missing]` federation declared in the `pyproject.toml`.\n The following federations were found:\n\nfed-existing-1\nfed-existing-2\n\n"
     }
 
 ``flwr ls`` JSON output
 -----------------------
 
 The |flwr_ls|_ command lists all the runs in the current project. By default, the
-command list the details of one provided run ID or all runs in a Flower federation in
-a tabular format:
+command list the details of one provided run ID or all runs in a Flower federation in a
+tabular format:
 
 .. code-block:: bash
 
@@ -129,3 +134,32 @@ Similar to the ``flwr run`` command, to get the output in JSON format, simply pa
       ]
     }
 
+If the command fails, the JSON output will return two fields, ``success`` and
+``error-message``, as shown in the |json-error-output|_ example.
+
+``flwr stop`` JSON output
+-------------------------
+
+The |flwr_stop|_ command stops a running Flower app for a provided run ID. By default,
+the command prints the status of the stop process as follows:
+
+.. code-block:: bash
+
+    $ flwr stop 1859953118041441032
+    Loading project configuration...
+    Success
+    ✋ Stopping run ID 496492261670054668...
+    ✅ Run 496492261670054668 successfully stopped.
+
+To get the output in JSON format, simply pass the ``--format json`` flag:
+
+.. code-block:: bash
+
+    $ flwr stop 1859953118041441032 --format json
+    {
+      "success": true,
+      "run-id": 1859953118041441032,
+    }
+
+If the command fails, the JSON output will contain two fields ``success`` with the value
+of ``false`` and ``error-message``, as shown in the |json-error-output|_ example.
