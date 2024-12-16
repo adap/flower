@@ -14,10 +14,10 @@
 # ==============================================================================
 """Flower command line interface `run` command."""
 
+
 import io
 import json
 import subprocess
-from logging import DEBUG
 from pathlib import Path
 from typing import Annotated, Any, Optional, Union
 
@@ -28,9 +28,8 @@ from flwr.cli.build import build
 from flwr.cli.config_utils import (
     get_fab_metadata,
     load_and_validate,
-    validate_certificate_in_federation_config,
+    process_loaded_project_config,
     validate_federation_in_project_config,
-    validate_project_config,
 )
 from flwr.common.config import (
     flatten_dict,
@@ -38,8 +37,7 @@ from flwr.common.config import (
     user_config_to_configsrecord,
 )
 from flwr.common.constant import CliOutputFormat
-from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
-from flwr.common.logger import log, redirect_output, remove_emojis, restore_output
+from flwr.common.logger import redirect_output, remove_emojis, restore_output
 from flwr.common.serde import (
     configs_record_to_proto,
     fab_to_proto,
@@ -50,13 +48,9 @@ from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 
 from ..log import start_stream
+from ..utils import init_channel, try_obtain_cli_auth_plugin
 
 CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
-
-
-def on_channel_state_change(channel_connectivity: str) -> None:
-    """Log channel connectivity."""
-    log(DEBUG, channel_connectivity)
 
 
 # pylint: disable-next=too-many-locals
@@ -108,14 +102,19 @@ def run(
 
         pyproject_path = app / "pyproject.toml" if app else None
         config, errors, warnings = load_and_validate(path=pyproject_path)
-        config = validate_project_config(config, errors, warnings)
+        config = process_loaded_project_config(config, errors, warnings)
         federation, federation_config = validate_federation_in_project_config(
             federation, config
         )
 
         if "address" in federation_config:
             _run_with_exec_api(
-                app, federation_config, config_overrides, stream, output_format
+                app,
+                federation,
+                federation_config,
+                config_overrides,
+                stream,
+                output_format,
             )
         else:
             _run_without_exec_api(app, federation_config, config_overrides, federation)
@@ -136,26 +135,17 @@ def run(
         captured_output.close()
 
 
-# pylint: disable-next=too-many-locals
+# pylint: disable-next=R0913, R0914, R0917
 def _run_with_exec_api(
     app: Path,
+    federation: str,
     federation_config: dict[str, Any],
     config_overrides: Optional[list[str]],
     stream: bool,
     output_format: str,
 ) -> None:
-
-    insecure, root_certificates_bytes = validate_certificate_in_federation_config(
-        app, federation_config
-    )
-    channel = create_channel(
-        server_address=federation_config["address"],
-        insecure=insecure,
-        root_certificates=root_certificates_bytes,
-        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        interceptors=None,
-    )
-    channel.subscribe(on_channel_state_change)
+    auth_plugin = try_obtain_cli_auth_plugin(app, federation, federation_config)
+    channel = init_channel(app, federation_config, auth_plugin)
     stub = ExecStub(channel)
 
     fab_path, fab_hash = build(app)

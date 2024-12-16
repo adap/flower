@@ -18,24 +18,33 @@
 import time
 from collections.abc import Generator
 from logging import ERROR, INFO
-from typing import Any
+from typing import Any, Optional
+from uuid import UUID
 
 import grpc
 
 from flwr.common import now
-from flwr.common.constant import LOG_STREAM_INTERVAL, Status
+from flwr.common.auth_plugin import ExecAuthPlugin
+from flwr.common.constant import LOG_STREAM_INTERVAL, Status, SubStatus
 from flwr.common.logger import log
 from flwr.common.serde import (
     configs_record_from_proto,
     run_to_proto,
     user_config_from_proto,
 )
+from flwr.common.typing import RunStatus
 from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
+    GetAuthTokensRequest,
+    GetAuthTokensResponse,
+    GetLoginDetailsRequest,
+    GetLoginDetailsResponse,
     ListRunsRequest,
     ListRunsResponse,
     StartRunRequest,
     StartRunResponse,
+    StopRunRequest,
+    StopRunResponse,
     StreamLogsRequest,
     StreamLogsResponse,
 )
@@ -53,11 +62,13 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         linkstate_factory: LinkStateFactory,
         ffs_factory: FfsFactory,
         executor: Executor,
+        auth_plugin: Optional[ExecAuthPlugin] = None,
     ) -> None:
         self.linkstate_factory = linkstate_factory
         self.ffs_factory = ffs_factory
         self.executor = executor
         self.executor.initialize(linkstate_factory, ffs_factory)
+        self.auth_plugin = auth_plugin
 
     def StartRun(
         self, request: StartRunRequest, context: grpc.ServicerContext
@@ -125,6 +136,69 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             return _create_list_runs_response(state.get_run_ids(), state)
         # Handle `flwr ls --run-id <run_id>`
         return _create_list_runs_response({request.run_id}, state)
+
+    def StopRun(
+        self, request: StopRunRequest, context: grpc.ServicerContext
+    ) -> StopRunResponse:
+        """Stop a given run ID."""
+        log(INFO, "ExecServicer.StopRun")
+        state = self.linkstate_factory.state()
+
+        # Exit if `run_id` not found
+        if not state.get_run(request.run_id):
+            context.abort(
+                grpc.StatusCode.NOT_FOUND, f"Run ID {request.run_id} not found"
+            )
+
+        run_status = state.get_run_status({request.run_id})[request.run_id]
+        if run_status.status == Status.FINISHED:
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                f"Run ID {request.run_id} is already finished",
+            )
+
+        update_success = state.update_run_status(
+            run_id=request.run_id,
+            new_status=RunStatus(Status.FINISHED, SubStatus.STOPPED, ""),
+        )
+
+        if update_success:
+            task_ids: set[UUID] = state.get_task_ids_from_run_id(request.run_id)
+
+            # Delete TaskIns and TaskRes for the `run_id`
+            state.delete_tasks(task_ids)
+
+        return StopRunResponse(success=update_success)
+
+    def GetLoginDetails(
+        self, request: GetLoginDetailsRequest, context: grpc.ServicerContext
+    ) -> GetLoginDetailsResponse:
+        """Start login."""
+        log(INFO, "ExecServicer.GetLoginDetails")
+        if self.auth_plugin is None:
+            context.abort(
+                grpc.StatusCode.UNIMPLEMENTED,
+                "ExecServicer initialized without user authentication",
+            )
+            raise grpc.RpcError()  # This line is unreachable
+        return GetLoginDetailsResponse(
+            login_details=self.auth_plugin.get_login_details()
+        )
+
+    def GetAuthTokens(
+        self, request: GetAuthTokensRequest, context: grpc.ServicerContext
+    ) -> GetAuthTokensResponse:
+        """Get auth token."""
+        log(INFO, "ExecServicer.GetAuthTokens")
+        if self.auth_plugin is None:
+            context.abort(
+                grpc.StatusCode.UNIMPLEMENTED,
+                "ExecServicer initialized without user authentication",
+            )
+            raise grpc.RpcError()  # This line is unreachable
+        return GetAuthTokensResponse(
+            auth_tokens=self.auth_plugin.get_auth_tokens(dict(request.auth_details))
+        )
 
 
 def _create_list_runs_response(run_ids: set[int], state: LinkState) -> ListRunsResponse:

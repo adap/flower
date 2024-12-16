@@ -14,6 +14,7 @@
 # ==============================================================================
 """Test for Flower command line interface `new` command."""
 
+
 import os
 from pathlib import Path
 

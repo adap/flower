@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower client (abstract base class)."""
 
+
 # Needed to `Client` class can return a type of `Client` (not needed in py3.11+)
 from __future__ import annotations
 
