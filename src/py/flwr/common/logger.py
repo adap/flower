@@ -15,7 +15,7 @@
 """Flower Logger."""
 
 
-import json
+import json as _json
 import logging
 import re
 import sys
@@ -399,7 +399,7 @@ def remove_emojis(text: str) -> str:
 def print_json_error(msg: str, e: Union[typer.Exit, Exception]) -> None:
     """Print error message as JSON."""
     Console().print_json(
-        json.dumps(
+        _json.dumps(
             {
                 "success": False,
                 "error-message": remove_emojis(str(msg) + "\n" + str(e)),
