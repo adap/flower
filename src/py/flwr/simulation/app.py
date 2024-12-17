@@ -48,6 +48,7 @@ from flwr.common.logger import (
 from flwr.common.serde import (
     configs_record_from_proto,
     context_from_proto,
+    context_to_proto,
     fab_from_proto,
     run_from_proto,
     run_status_to_proto,
@@ -202,7 +203,7 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
             enable_tf_gpu_growth: bool = fed_opt.get("enable_tf_gpu_growth", False)
 
             # Launch the simulation
-            _run_simulation(
+            updated_context = _run_simulation(
                 server_app_attr=server_app_attr,
                 client_app_attr=client_app_attr,
                 num_supernodes=num_supernodes,
@@ -217,7 +218,7 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
             )
 
             # Send resulting context
-            context_proto = None  # context_to_proto(updated_context)
+            context_proto = context_to_proto(updated_context)
             out_req = PushSimulationOutputsRequest(
                 run_id=run.run_id, context=context_proto
             )
