@@ -789,16 +789,11 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         self, private_key: bytes, public_key: bytes
     ) -> None:
         """Store `server_private_key` and `server_public_key` in the link state."""
-        query = "SELECT COUNT(*) FROM credential"
-        count = self.query(query)[0]["COUNT(*)"]
-        if count < 1:
-            query = (
-                "INSERT OR REPLACE INTO credential (private_key, public_key) "
-                "VALUES (:private_key, :public_key)"
-            )
-            self.query(query, {"private_key": private_key, "public_key": public_key})
-        else:
-            raise RuntimeError("Server private and public key already set")
+        query = (
+            "INSERT OR REPLACE INTO credential (private_key, public_key) "
+            "VALUES (:private_key, :public_key)"
+        )
+        self.query(query, {"private_key": private_key, "public_key": public_key})
 
     def get_server_private_key(self) -> Optional[bytes]:
         """Retrieve `server_private_key` in urlsafe bytes."""
