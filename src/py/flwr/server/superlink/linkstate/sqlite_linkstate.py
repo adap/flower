@@ -801,7 +801,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
     ) -> None:
         """Store `server_private_key` and `server_public_key` in the link state."""
         query = (
-            "INSERT OR IGNORE INTO credential (private_key, public_key) "
+            "INSERT OR REPLACE INTO credential (private_key, public_key) "
             "VALUES (:private_key, :public_key)"
         )
         self.query(query, {"private_key": private_key, "public_key": public_key})
