@@ -45,9 +45,12 @@ class VerticalSizePartitioner(Partitioner):
         A list where each value represents the size of a partition.
         list[int] -> each value represent an absolute number of columns. Size zero is
         allowed and will result in an empty partition if no shared columns are present.
-        list of floats -> each value represent a fraction total number of columns.
-        Note that applies to collums without `active_party_columns` or `shared_columns`.
-        They are additionally included in to the partition(s).
+        A list of floats -> each value represent a fraction total number of columns.
+        Note that these values apply to collums without `active_party_columns`, `shared_columns`.
+        They are additionally included in to the partition(s). `drop_columns` are also not counted
+        toward the partition sizes.
+        In case fo list[int]: sum(partition_sizes) == len(columns) - len(drop_columns) -
+        len(shared_columns)  - len(active_party_columns)
     active_party_column : Optional[Union[str, list[str]]]
         Column(s) (typically representing labels) associated with the
         "active party" (which can be the server).
@@ -258,13 +261,21 @@ class VerticalSizePartitioner(Partitioner):
                     f"Active party column '{column}' not found in the dataset."
                 )
         num_columns = len(all_columns)
+        num_cols_unused_in_core_div = 0
+        if self._active_party_columns is not None:
+            num_cols_unused_in_core_div += len(self._active_party_columns)
+        if self._shared_columns is not None:
+            num_cols_unused_in_core_div += len(self._shared_columns)
+        if self._drop_columns is not None:
+            num_cols_unused_in_core_div += len(self._drop_columns)
+        num_core_div_columns = num_columns - num_cols_unused_in_core_div
         if all(isinstance(size, int) for size in self._partition_sizes):
-            if sum(self._partition_sizes) != num_columns:
+            if sum(self._partition_sizes) != num_core_div_columns:
                 raise ValueError(
-                    "Sum of partition sizes cannot differ from the total number of columns."
+                    "Sum of partition sizes cannot differ from the total number of columns"
+                    "used in the division. Note that shared_columns, drop_columns and"
+                    "active_party_columns are not included in the division."
                 )
-        else:
-            pass
 
     def _init_active_party_column(
         self, active_party_column: Optional[Union[str, list[str]]]
