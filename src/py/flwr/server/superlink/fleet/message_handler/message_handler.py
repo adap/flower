@@ -123,9 +123,7 @@ def push_task_res(request: PushTaskResRequest, state: LinkState) -> PushTaskResR
     return response
 
 
-def get_run(
-    request: GetRunRequest, state: LinkState  # pylint: disable=W0613
-) -> GetRunResponse:
+def get_run(request: GetRunRequest, state: LinkState) -> GetRunResponse:
     """Get run information."""
     run = state.get_run(request.run_id)
 
