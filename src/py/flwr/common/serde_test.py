@@ -14,6 +14,7 @@
 # ==============================================================================
 """(De-)serialization tests."""
 
+
 import random
 import string
 from collections import OrderedDict

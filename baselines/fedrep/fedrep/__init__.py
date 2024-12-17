@@ -1,1 +1,1 @@
-"""Template baseline package."""
+"""fedrep: A Flower Baseline."""
