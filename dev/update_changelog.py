@@ -33,7 +33,7 @@ from github.Repository import Repository
 from github.Tag import Tag
 
 REPO_NAME = "adap/flower"
-CHANGELOG_FILE = "doc/source/ref-changelog.md"
+CHANGELOG_FILE = "framework/docs/source/ref-changelog.md"
 CHANGELOG_SECTION_HEADER = "### Changelog entry"
 
 # Load the TOML configuration
