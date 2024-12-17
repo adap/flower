@@ -9,7 +9,8 @@ continuous integration pipeline.
 .. note::
 
     The JSON output mode is currently only available when using the Flower CLIs with a
-    `SuperLink <ref-api-cli.html#flower-superlink>`_.
+    `SuperLink <ref-api-cli.html#flower-superlink>`_. Learn more about the `SuperLink`
+    in the `Flower Architecture Overview <explanation-flower-architecture.html>`_ page.
 
 In this guide, we'll show you how to specify a JSON output with the ``flwr run``, ``flwr
 ls``, and ``flwr stop`` commands. We will also provide examples of the JSON output for
