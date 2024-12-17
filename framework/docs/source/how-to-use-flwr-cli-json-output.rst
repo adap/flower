@@ -1,5 +1,5 @@
-Use `flwr` CLI JSON output
-==========================
+Use ``flwr`` CLI JSON output
+============================
 
 The `Flower CLIs <ref-api-cli.html>`_ come with a built-in JSON output mode. This mode
 is useful when you want to consume the output of a Flower CLI programmatically. For
