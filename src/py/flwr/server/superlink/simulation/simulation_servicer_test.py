@@ -40,8 +40,8 @@ from flwr.server.superlink.simulation.simulationio_grpc import run_simulationio_
 from flwr.server.superlink.utils import _STATUS_TO_MSG
 
 
-class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902
-    """ServerAppIoServicer tests for allowed RunStatuses."""
+class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
+    """SimulationIoServicer tests for allowed RunStatuses."""
 
     def setUp(self) -> None:
         """Initialize mock stub and server interceptor."""
