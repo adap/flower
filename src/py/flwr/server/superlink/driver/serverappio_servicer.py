@@ -159,6 +159,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         for task_ins in request.task_ins_list:
             validation_errors = validate_task_ins_or_res(task_ins)
             _raise_if(bool(validation_errors), ", ".join(validation_errors))
+            _raise_if(
+                request.run_id != task_ins.run_id, "`task_ins` has mismatched `run_id`"
+            )
 
         # Store each TaskIns
         task_ids: list[Optional[UUID]] = []
@@ -192,6 +195,12 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         # Read from state
         task_res_list: list[TaskRes] = state.get_task_res(task_ids=task_ids)
+
+        # Validate request
+        for task_res in task_res_list:
+            _raise_if(
+                request.run_id != task_res.run_id, "`task_res` has mismatched `run_id`"
+            )
 
         # Delete the TaskIns/TaskRes pairs if TaskRes is found
         task_ins_ids_to_delete = {

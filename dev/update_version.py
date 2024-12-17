@@ -80,7 +80,7 @@ def _update_versions(file_patterns, replace_strings, new_version, check):
 
 
 if __name__ == "__main__":
-    conf_path = Path("doc/source/conf.py")
+    conf_path = Path("framework/docs/source/conf.py")
 
     if not conf_path.is_file():
         raise FileNotFoundError(f"{conf_path} not found!")

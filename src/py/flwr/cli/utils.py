@@ -18,6 +18,8 @@
 import hashlib
 import json
 import re
+from collections.abc import Iterator
+from contextlib import contextmanager
 from logging import DEBUG
 from pathlib import Path
 from typing import Any, Callable, Optional, cast
@@ -26,7 +28,6 @@ import grpc
 import typer
 
 from flwr.cli.cli_user_auth_interceptor import CliUserAuthInterceptor
-from flwr.common.address import parse_address
 from flwr.common.auth_plugin import CliAuthPlugin
 from flwr.common.constant import AUTH_TYPE, CREDENTIALS_DIR, FLWR_DIR
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
@@ -159,33 +160,21 @@ def get_sha256_hash(file_path: Path) -> str:
     return sha256.hexdigest()
 
 
-def get_user_auth_config_path(
-    root_dir: Path, federation: str, server_address: str
-) -> Path:
+def get_user_auth_config_path(root_dir: Path, federation: str) -> Path:
     """Return the path to the user auth config file."""
-    # Parse the server address
-    parsed_addr = parse_address(server_address)
-    if parsed_addr is None:
-        raise ValueError(f"Invalid server address: {server_address}")
-    host, port, is_v6 = parsed_addr
-    formatted_addr = f"[{host}]_{port}" if is_v6 else f"{host}_{port}"
-
     # Locate the credentials directory
     credentials_dir = root_dir.absolute() / FLWR_DIR / CREDENTIALS_DIR
     credentials_dir.mkdir(parents=True, exist_ok=True)
-    return credentials_dir / f"{federation}_{formatted_addr}.json"
+    return credentials_dir / f"{federation}.json"
 
 
 def try_obtain_cli_auth_plugin(
     root_dir: Path,
     federation: str,
-    federation_config: dict[str, Any],
     auth_type: Optional[str] = None,
 ) -> Optional[CliAuthPlugin]:
     """Load the CLI-side user auth plugin for the given auth type."""
-    config_path = get_user_auth_config_path(
-        root_dir, federation, federation_config["address"]
-    )
+    config_path = get_user_auth_config_path(root_dir, federation)
 
     # Load the config file if it exists
     config: dict[str, Any] = {}
@@ -244,3 +233,24 @@ def init_channel(
     )
     channel.subscribe(on_channel_state_change)
     return channel
+
+
+@contextmanager
+def unauthenticated_exc_handler() -> Iterator[None]:
+    """Context manager to handle gRPC UNAUTHENTICATED errors.
+
+    It catches grpc.RpcError exceptions with UNAUTHENTICATED status, informs the user,
+    and exits the application. All other exceptions will be allowed to escape.
+    """
+    try:
+        yield
+    except grpc.RpcError as e:
+        if e.code() != grpc.StatusCode.UNAUTHENTICATED:
+            raise
+        typer.secho(
+            "❌ Authentication failed. Please run `flwr login`"
+            " to authenticate and try again.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1) from None
