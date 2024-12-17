@@ -820,6 +820,21 @@ class StateTest(unittest.TestCase):
                 new_private_key_bytes, new_public_key_bytes
             )
 
+    def test_clear_node_public_keys(self) -> None:
+        """Test clear_node_public_keys from linkstate."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        key_pairs = [generate_key_pairs() for _ in range(3)]
+        public_keys = {public_key_to_bytes(pair[1]) for pair in key_pairs}
+
+        # Execute
+        state.store_node_public_keys(public_keys)
+        state.clear_node_public_keys()
+        node_public_keys = state.get_node_public_keys()
+
+        # Assert
+        assert node_public_keys == set()
+
     def test_node_public_keys(self) -> None:
         """Test store_node_public_keys and get_node_public_keys from state."""
         # Prepare

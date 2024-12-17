@@ -61,6 +61,12 @@ from .utils import (
     verify_taskins_ids,
 )
 
+SQL_CREATE_DB_STATE = """
+CREATE TABLE IF NOT EXISTS self(
+    initialized     INTEGER DEFAULT 1
+);
+"""
+
 SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
     node_id         INTEGER UNIQUE,
@@ -69,7 +75,9 @@ CREATE TABLE IF NOT EXISTS node(
     public_key      BLOB
 );
 """
-
+SQL_DROP_TABLE_CREDENTIAL = """
+DROP TABLE IF EXISTS credential;
+"""
 SQL_CREATE_TABLE_CREDENTIAL = """
 CREATE TABLE IF NOT EXISTS credential(
     private_key BLOB PRIMARY KEY,
@@ -77,6 +85,9 @@ CREATE TABLE IF NOT EXISTS credential(
 );
 """
 
+SQL_DROP_TABLE_PUBLIC_KEY = """
+DROP TABLE IF EXISTS public_key;
+"""
 SQL_CREATE_TABLE_PUBLIC_KEY = """
 CREATE TABLE IF NOT EXISTS public_key(
     public_key BLOB UNIQUE
@@ -819,6 +830,11 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         except IndexError:
             public_key = None
         return public_key
+
+    def clear_node_public_keys(self) -> None:
+        """Clear stored `node_public_keys` in the link state if any."""
+        query = "DELETE FROM public_key;"
+        self.query(query)
 
     def store_node_public_keys(self, public_keys: set[bytes]) -> None:
         """Store a set of `node_public_keys` in the link state."""
