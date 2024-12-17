@@ -43,8 +43,7 @@ python -m flake8 flwr_datasets/ tests/
 echo "- flake8: done"
 
 echo "- pytest: start"
-cd tests/
-python -m pytest.
+python -m pytest tests/
 echo "- pytest: done"
 
 echo "- All Python checks passed"
