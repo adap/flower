@@ -108,4 +108,4 @@ In the paper, server-side evaluation is not implemented, as it is considered tha
 # enable server-side evaluation with the data ratio of your preference. Default settings do not include this option.
 python -m statavg.main include_testset.flag=true include_testset.ratio=0.15
 ```
-Disclaimer: Please note that since the experiments were conducted for the paper, the dataset authors have slightly modified the dataset. While this modification may lead to minor differences in accuracy, `StatAvg` should still consistently outperform `FedAvg` as demonstrated in the paper.
+Disclaimer: Please note that the results presented above differ from those in the paper. Since the experiments for the paper were conducted, the dataset authors have made slight modifications to the dataset. Although these changes result in a decrease in accuracy (approximately a 10% drop), `StatAvg` is still expected to consistently outperform `FedAvg`, as demonstrated in the paper.

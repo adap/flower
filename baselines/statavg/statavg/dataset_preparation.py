@@ -24,7 +24,7 @@ def get_split_dataset(
     Y = dataset[["type"]]
 
     # remove irrelevant features
-    dataset = dataset.drop(["ts", "PID", "CMD", "label"], axis=1)
+    dataset = dataset.drop(["PID", "CMD", "label"], axis=1)
 
     # stratified split
     if include_testset.flag:

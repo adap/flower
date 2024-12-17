@@ -1,6 +1,6 @@
 # this is the config file that will be loaded as default to main.py
 
-num_rounds: 40
+num_rounds: 60
 num_clients: 5
 val_ratio: 0.2
 learning_rate: 0.002
