@@ -34,7 +34,7 @@ from flwr.common.logger import log as logger
 from flwr.proto.exec_pb2 import StreamLogsRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 
-from .utils import init_channel, try_obtain_cli_auth_plugin
+from .utils import init_channel, try_obtain_cli_auth_plugin, unauthenticated_exc_handler
 
 
 def start_stream(
@@ -88,8 +88,9 @@ def stream_logs(
     latest_timestamp = 0.0
     res = None
     try:
-        for res in stub.StreamLogs(req, timeout=duration):
-            print(res.log_output, end="")
+        with unauthenticated_exc_handler():
+            for res in stub.StreamLogs(req, timeout=duration):
+                print(res.log_output, end="")
     except grpc.RpcError as e:
         # pylint: disable=E1101
         if e.code() != grpc.StatusCode.DEADLINE_EXCEEDED:
@@ -109,9 +110,10 @@ def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
     try:
         while True:
             try:
-                # Enforce timeout for graceful exit
-                for res in stub.StreamLogs(req, timeout=timeout):
-                    print(res.log_output)
+                with unauthenticated_exc_handler():
+                    # Enforce timeout for graceful exit
+                    for res in stub.StreamLogs(req, timeout=timeout):
+                        print(res.log_output)
             except grpc.RpcError as e:
                 # pylint: disable=E1101
                 if e.code() == grpc.StatusCode.DEADLINE_EXCEEDED:
