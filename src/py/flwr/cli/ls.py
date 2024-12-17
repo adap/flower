@@ -43,7 +43,7 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.exec_pb2_grpc import ExecStub
 
-from .utils import init_channel, try_obtain_cli_auth_plugin
+from .utils import init_channel, try_obtain_cli_auth_plugin, unauthenticated_exc_handler
 
 _RunListType = tuple[int, str, str, str, str, str, str, str, str]
 
@@ -295,7 +295,8 @@ def _list_runs(
     output_format: str = CliOutputFormat.DEFAULT,
 ) -> None:
     """List all runs."""
-    res: ListRunsResponse = stub.ListRuns(ListRunsRequest())
+    with unauthenticated_exc_handler():
+        res: ListRunsResponse = stub.ListRuns(ListRunsRequest())
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
     formatted_runs = _format_runs(run_dict, res.now)
@@ -311,7 +312,8 @@ def _display_one_run(
     output_format: str = CliOutputFormat.DEFAULT,
 ) -> None:
     """Display information about a specific run."""
-    res: ListRunsResponse = stub.ListRuns(ListRunsRequest(run_id=run_id))
+    with unauthenticated_exc_handler():
+        res: ListRunsResponse = stub.ListRuns(ListRunsRequest(run_id=run_id))
     if not res.run_dict:
         raise ValueError(f"Run ID {run_id} not found")
 
