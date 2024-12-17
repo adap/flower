@@ -3,7 +3,7 @@ from datetime import datetime
 import numpy as np
 
 from flwr.client import ClientApp, NumPyClient, start_client
-from flwr.common import ConfigsRecord, Context
+from flwr.common import ConfigsRecord, Context, RecordSet
 
 SUBSET_SIZE = 1000
 STATE_VAR = "timestamp"
@@ -15,6 +15,9 @@ objective = 5
 
 # Define Flower client
 class FlowerClient(NumPyClient):
+    def __init__(self, state: RecordSet):
+        self.state = state
+
     def get_parameters(self, config):
         return model_params
 
@@ -22,16 +25,14 @@ class FlowerClient(NumPyClient):
         """Record timestamp to client's state."""
         t_stamp = datetime.now().timestamp()
         value = str(t_stamp)
-        if STATE_VAR in self.context.state.configs_records.keys():
-            value = self.context.state.configs_records[STATE_VAR][STATE_VAR]  # type: ignore
+        if STATE_VAR in self.state.configs_records.keys():
+            value = self.state.configs_records[STATE_VAR][STATE_VAR]  # type: ignore
             value += f",{t_stamp}"
 
-        self.context.state.configs_records[STATE_VAR] = ConfigsRecord(
-            {STATE_VAR: value}
-        )
+        self.state.configs_records[STATE_VAR] = ConfigsRecord({STATE_VAR: value})
 
     def _retrieve_timestamp_from_state(self):
-        return self.context.state.configs_records[STATE_VAR][STATE_VAR]
+        return self.state.configs_records[STATE_VAR][STATE_VAR]
 
     def fit(self, parameters, config):
         model_params = parameters
@@ -52,7 +53,7 @@ class FlowerClient(NumPyClient):
 
 
 def client_fn(context: Context):
-    return FlowerClient().to_client()
+    return FlowerClient(context.state).to_client()
 
 
 app = ClientApp(
@@ -61,4 +62,7 @@ app = ClientApp(
 
 if __name__ == "__main__":
     # Start Flower client
-    start_client(server_address="127.0.0.1:8080", client=FlowerClient().to_client())
+    start_client(
+        server_address="127.0.0.1:8080",
+        client=FlowerClient(state=RecordSet()).to_client(),
+    )
