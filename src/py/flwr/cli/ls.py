@@ -99,7 +99,6 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches
     try:
         if suppress_output:
             redirect_output(captured_output)
-
         # Load and validate federation config
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
@@ -132,6 +131,8 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches
                 _list_runs(stub, output_format)
 
         except ValueError as err:
+            if suppress_output:
+                redirect_output(captured_output)
             typer.secho(
                 f"❌ {err}",
                 fg=typer.colors.RED,
