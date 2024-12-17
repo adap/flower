@@ -6,9 +6,10 @@ is useful when you want to consume the output of a Flower CLI programmatically. 
 example, you might want to use the output of the ``flwr`` CLI in a script or a
 continuous integration pipeline.
 
-.. tip::
+.. note::
 
-    TL;DR - To enable JSON output, pass the ``--format json`` flag to the CLI.
+    The JSON output mode is currently only available when using the Flower CLIs with a
+    `SuperLink <ref-api-cli.html#flower-superlink>`_.
 
 In this guide, we'll show you how to specify a JSON output with the ``flwr run``, ``flwr
 ls``, and ``flwr stop`` commands. We will also provide examples of the JSON output for
