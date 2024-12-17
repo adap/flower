@@ -6,9 +6,13 @@ is useful when you want to consume the output of a Flower CLI programmatically. 
 example, you might want to use the output of the ``flwr`` CLI in a script or a
 continuous integration pipeline.
 
-To enable JSON output, simply pass the ``--format json`` flag to the CLI. In this guide,
-we'll show you how to use JSON output with the ``flwr run``, ``ls``, and ``stop``
-commands.
+.. tip::
+
+    TL;DR - To enable JSON output, pass the ``--format json`` flag to the CLI.
+
+In this guide, we'll show you how to specify a JSON output with the ``flwr run``, ``flwr
+ls``, and ``flwr stop`` commands. We will also provide examples of the JSON output for
+each of these commands.
 
 .. |flwr_run| replace:: ``flwr run``
 
@@ -25,8 +29,10 @@ commands.
 ``flwr run`` JSON output
 ------------------------
 
-The |flwr_run|_ command runs a Flower app. By default, the command prints the status of
-the app build and run process as follows:
+The |flwr_run|_ command runs a Flower app from a provided directory. Note that if the
+app path argument is not passed to ``flwr run``, the current working directory is used
+as the default Flower app directory. By default, executing the ``flwr run`` command
+prints the status of the app build and run process as follows:
 
 .. code-block:: bash
 
@@ -36,7 +42,7 @@ the app build and run process as follows:
     🎊 Successfully built flwrlabs.myawesomeapp.1-0-0.014c8eb3.fab
     🎊 Successfully started run 1859953118041441032
 
-To get the output in JSON format, simply pass the ``--format json`` flag:
+To get the output in JSON format, pass an additional ``--format json`` flag:
 
 .. code-block:: bash
 
@@ -51,14 +57,14 @@ To get the output in JSON format, simply pass the ``--format json`` flag:
       "fab-filename": "flwrlabs.myawesomeapp.1-0-0.014c8eb3.fab"
     }
 
-The JSON output contains the following fields:
+The JSON output for ``flwr run`` contains the following fields:
 
 - ``success``: A boolean indicating whether the command was successful.
 - ``run-id``: The ID of the run.
 - ``fab-id``: The ID of the Flower app.
 - ``fab-name``: The name of the Flower app.
 - ``fab-version``: The version of the Flower app.
-- ``fab-hash``: The hash of the Flower app.
+- ``fab-hash``: The short hash of the Flower app.
 - ``fab-filename``: The filename of the Flower app.
 
 If the command fails, the JSON output will contain two fields, ``success`` with the
@@ -78,9 +84,10 @@ name of the federation on the SuperLink, the output will look like this:
 ``flwr ls`` JSON output
 -----------------------
 
-The |flwr_ls|_ command lists all the runs in the current project. By default, the
-command list the details of one provided run ID or all runs in a Flower federation in a
-tabular format:
+The |flwr_ls|_ command lists all the runs in the current project. Similar to ``flwr
+run``, if the app path argument is not passed to ``flwr ls``, the current working
+directory is used as the Flower app directory. By default, the command list the details
+of all runs in a Flower federation in a tabular format:
 
 .. code-block:: bash
 
@@ -98,8 +105,7 @@ tabular format:
     │ 11601420     │ (v1.0.0)     │              │          │ 12:18:39Z    │ 12:18:39Z    │             │
     └──────────────┴──────────────┴──────────────┴──────────┴──────────────┴──────────────┴─────────────┘
 
-Similar to the ``flwr run`` command, to get the output in JSON format, simply pass the
-``--format json`` flag:
+To get the output in JSON format, simply pass the ``--format json`` flag:
 
 .. code-block:: bash
 
@@ -134,14 +140,33 @@ Similar to the ``flwr run`` command, to get the output in JSON format, simply pa
       ]
     }
 
-If the command fails, the JSON output will return two fields, ``success`` and
-``error-message``, as shown in the :ref:`failed command <json_error_output>` example.
+The JSON output for ``flwr ls`` contains similar fields as ``flwr run`` with the
+addition of the ``status``, ``elapsed``, ``created-at``, ``running-at``, and
+``finished-at`` fields. The ``runs`` key contains a list of dictionaries, each
+representing a run. The additional fields are:
+
+- ``status``: The status of the run, either pending, starting, running, or finished.
+- ``elapsed``: The time elapsed since the run started, formatted as ``HH:MM:SS``.
+- ``created-at``: The time the run was created.
+- ``running-at``: The time the run started running.
+- ``finished-at``: The time the run finished.
+
+All timestamps adhere to ISO 8601, UTC and are formatted as ``YYYY-MM-DD HH:MM:SSZ``.
+
+You can also use the ``--run-id`` flag to list the details for one run. In this case,
+the JSON output will have the same structure as above with only one entry in the
+``runs`` key. For more details of this command, see the |flwr_ls|_ documentation. If the
+command fails, the JSON output will return two fields, ``success`` and
+``error-message``, as shown in :ref:`the above example <json_error_output>`. Note that
+the content of the error message will be different depending on the error that occurred.
 
 ``flwr stop`` JSON output
 -------------------------
 
-The |flwr_stop|_ command stops a running Flower app for a provided run ID. By default,
-the command prints the status of the stop process as follows:
+The |flwr_stop|_ command stops a running Flower app for a provided run ID. Similar to
+``flwr run``, if the app path argument is not passed to ``flwr stop``, the current
+working directory is used as the Flower app directory. By default, the command prints
+the status of the stop process as follows:
 
 .. code-block:: bash
 
@@ -162,5 +187,6 @@ To get the output in JSON format, simply pass the ``--format json`` flag:
     }
 
 If the command fails, the JSON output will contain two fields ``success`` with the value
-of ``false`` and ``error-message``, as shown in the :ref:`failed command
-<json_error_output>` example.
+of ``false`` and ``error-message``, as shown in :ref:`the above example
+<json_error_output>`. Note that the content of the error message will be different
+depending on the error that occurred.
