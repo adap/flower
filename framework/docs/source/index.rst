@@ -100,6 +100,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
     how-to-authenticate-supernodes
     how-to-implement-fedbn
     how-to-run-flower-on-azure
+    how-to-use-cli-json-output
     docker/index
     how-to-upgrade-to-flower-1.0
     how-to-upgrade-to-flower-1.13

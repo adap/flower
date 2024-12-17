@@ -105,8 +105,6 @@ def handle_legacy_message_from_msgtype(
             "Please use `NumPyClient.to_client()` method to convert it to `Client`.",
         )
 
-    client.set_context(context)
-
     message_type = message.metadata.message_type
 
     # Handle GetPropertiesIns
