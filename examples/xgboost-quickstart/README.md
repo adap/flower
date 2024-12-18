@@ -46,6 +46,9 @@ Install the dependencies defined in `pyproject.toml` as well as the `xgboost_qui
 pip install -e .
 ```
 
+> \[!NOTE\]
+> For MacOSX users, you may need to additionally run `brew install libomp` to install OpenMP runtime.
+
 ## Run the project
 
 You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
