@@ -31,13 +31,11 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Update FedRep baseline** ([#4681](https://github.com/adap/flower/pull/4681))
 
-- **Improve datasets support and documentation** ([#4335](https://github.com/adap/flower/pull/4335), [#4601](https://github.com/adap/flower/pull/4601), [#4627](https://github.com/adap/flower/pull/4627))
+  We have started the process of migrating some baselines from using `start_simulation` to be launched via `flwr run`. We chose `FedRep` as the first baseline to migrate due to its very impresive results. New baselines can be created following a `flwr run`-compatible format by starting from the `flwr new` template for baseline. Read more in the [how to contribute a baseline](https://flower.ai/docs/baselines/how-to-contribute-baselines.html) documentation.
 
-  A [recommended datasets list](https://flower.ai/docs/datasets/#recommended-fl-datasets) is now available, making it easier to discover popular datasets for Federated Learning. Additionally, a new [dataset contribution guide](https://flower.ai/docs/datasets/contributor-how-to-contribute-dataset.html) explains how to contribute datasets to the Flower Datasets library.
+- **Revamp simulation series tutorial** ([#4663](https://github.com/adap/flower/pull/4663), [#4696](https://github.com/adap/flower/pull/4696))
 
-- **Revamp simulation series tutorial** ([#4663](https://github.com/adap/flower/pull/4663))
-
-  \[TODO\] Add description here.
+  We have updated the [step-by-step Tutorial series for Simulations](https://github.com/adap/flower/tree/main/examples/flower-simulation-step-by-step-pytorch). It now shows how to create and run Flower Apps via `flwr run`. The videos associated videos walk you through the process of creating custom strategies, effectively make use of metrics between `ClientApp` and `ServerApp`, create _global model_ checkpoints, log metrics to Weights and Biases, and more.
 
 - **Improve connection reliability** ([#4649](https://github.com/adap/flower/pull/4649), [#4636](https://github.com/adap/flower/pull/4636), [#4637](https://github.com/adap/flower/pull/4637))
 
@@ -47,7 +45,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
   The `flwr new` command now works correctly on Windows by setting UTF-8 encoding, ensuring compatibility across all platforms when creating and transferring files.
 
-- **Update examples and templates** ([#4725](https://github.com/adap/flower/pull/4725), [#4724](https://github.com/adap/flower/pull/4724), [#4589](https://github.com/adap/flower/pull/4589), [#4690](https://github.com/adap/flower/pull/4690), [#4696](https://github.com/adap/flower/pull/4696), [#4708](https://github.com/adap/flower/pull/4708), [#4689](https://github.com/adap/flower/pull/4689))
+- **Update examples and templates** ([#4725](https://github.com/adap/flower/pull/4725), [#4724](https://github.com/adap/flower/pull/4724), [#4589](https://github.com/adap/flower/pull/4589), [#4690](https://github.com/adap/flower/pull/4690), [#4708](https://github.com/adap/flower/pull/4708), [#4689](https://github.com/adap/flower/pull/4689))
 
   Examples and templates have been updated to improve compatibility and usability. Notable changes include removing unnecessary `numpy` dependencies, upgrading the `mlx` version, and enhancing the authentication example. A link to previous tutorial versions has also been added for reference.
 
@@ -55,13 +53,11 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Documentation has been improved with updated docstrings, typo fixes, and new contributions guidance. Automated updates ensure source texts for translations stay current. Additionally, docs have been reorganized under `framework/docs` for better maintainability.
 
-- **Remove delayed start for Simulation Engine** ([#4688](https://github.com/adap/flower/pull/4688))
-
 - **Update infrastructure and CI/CD** ([#4614](https://github.com/adap/flower/pull/4614), [#4686](https://github.com/adap/flower/pull/4686), [#4587](https://github.com/adap/flower/pull/4587), [#4715](https://github.com/adap/flower/pull/4715), [#4728](https://github.com/adap/flower/pull/4728), [#4679](https://github.com/adap/flower/pull/4679), [#4675](https://github.com/adap/flower/pull/4675), [#4680](https://github.com/adap/flower/pull/4680), [#4676](https://github.com/adap/flower/pull/4676))
 
 - **Bugfixes** ([#4677](https://github.com/adap/flower/pull/4677), [#4671](https://github.com/adap/flower/pull/4671), [#4670](https://github.com/adap/flower/pull/4670), [#4674](https://github.com/adap/flower/pull/4674), [#4687](https://github.com/adap/flower/pull/4687), [#4605](https://github.com/adap/flower/pull/4605))
 
-- **General improvements** ([#4631](https://github.com/adap/flower/pull/4631), [#4660](https://github.com/adap/flower/pull/4660), [#4599](https://github.com/adap/flower/pull/4599), [#4672](https://github.com/adap/flower/pull/4672), [#4705](https://github.com/adap/flower/pull/4705), [#4691](https://github.com/adap/flower/pull/4691), [#4706](https://github.com/adap/flower/pull/4706), [#4709](https://github.com/adap/flower/pull/4709), [#4623](https://github.com/adap/flower/pull/4623), [#4697](https://github.com/adap/flower/pull/4697), [#4597](https://github.com/adap/flower/pull/4597), [#4721](https://github.com/adap/flower/pull/4721))
+- **General improvements** ([#4631](https://github.com/adap/flower/pull/4631), [#4660](https://github.com/adap/flower/pull/4660), [#4599](https://github.com/adap/flower/pull/4599), [#4672](https://github.com/adap/flower/pull/4672), [#4705](https://github.com/adap/flower/pull/4705), [#4688](https://github.com/adap/flower/pull/4688), [#4691](https://github.com/adap/flower/pull/4691), [#4706](https://github.com/adap/flower/pull/4706), [#4709](https://github.com/adap/flower/pull/4709), [#4623](https://github.com/adap/flower/pull/4623), [#4697](https://github.com/adap/flower/pull/4697), [#4597](https://github.com/adap/flower/pull/4597), [#4721](https://github.com/adap/flower/pull/4721))
 
   As always, many parts of the Flower framework and quality infrastructure were improved and updated.
 
