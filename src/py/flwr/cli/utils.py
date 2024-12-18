@@ -164,7 +164,8 @@ def get_user_auth_config_path(root_dir: Path, federation: str) -> Path:
     """Return the path to the user auth config file.
 
     Additionally, a `.gitignore` file will be created or updated in the
-    Flower directory to include `.credentials`."""
+    Flower directory to include `.credentials`.
+    """
     # Locate the credentials directory
     credentials_dir = root_dir.absolute() / FLWR_DIR / CREDENTIALS_DIR
     credentials_dir.mkdir(parents=True, exist_ok=True)
