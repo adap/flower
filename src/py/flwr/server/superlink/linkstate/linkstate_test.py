@@ -820,8 +820,8 @@ class StateTest(unittest.TestCase):
                 new_private_key_bytes, new_public_key_bytes
             )
 
-    def test_clear_supernode_auth_kyes_and_credentials(self) -> None:
-        """Test clear_supernode_auth_kyes_and_credentials from linkstate."""
+    def test_clear_supernode_auth_keys_and_credentials(self) -> None:
+        """Test clear_supernode_auth_keys_and_credentials from linkstate."""
         # Prepare
         state: LinkState = self.state_factory()
         key_pairs = [generate_key_pairs() for _ in range(3)]
@@ -835,7 +835,7 @@ class StateTest(unittest.TestCase):
         state.store_server_private_public_key(private_key_bytes, public_key_bytes)
 
         # Execute (clear)
-        state.clear_supernode_auth_kyes_and_credentials()
+        state.clear_supernode_auth_keys_and_credentials()
         node_public_keys = state.get_node_public_keys()
 
         # Assert

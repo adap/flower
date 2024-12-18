@@ -820,7 +820,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             public_key = None
         return public_key
 
-    def clear_supernode_auth_kyes_and_credentials(self) -> None:
+    def clear_supernode_auth_keys_and_credentials(self) -> None:
         """Clear stored `node_public_keys` and credentials in the link state if any."""
         queries = ["DELETE FROM public_key;", "DELETE FROM credential;"]
         for query in queries:
