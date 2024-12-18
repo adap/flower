@@ -167,11 +167,11 @@ def get_user_auth_config_path(root_dir: Path, federation: str) -> Path:
     Flower directory to include `.credentials`.
     """
     # Locate the credentials directory
-    credentials_dir = root_dir.absolute() / FLWR_DIR / CREDENTIALS_DIR
+    abs_flwr_dir = root_dir.absolute() / FLWR_DIR
+    credentials_dir = abs_flwr_dir / CREDENTIALS_DIR
     credentials_dir.mkdir(parents=True, exist_ok=True)
 
     # Determine the absolute path of the Flower directory for .gitignore
-    abs_flwr_dir = root_dir.absolute() / FLWR_DIR
     gitignore_path = abs_flwr_dir / ".gitignore"
     credential_entry = CREDENTIALS_DIR
 
