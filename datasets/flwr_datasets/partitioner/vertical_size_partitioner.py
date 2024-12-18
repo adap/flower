@@ -271,7 +271,7 @@ class VerticalSizePartitioner(Partitioner):
         if all(isinstance(size, int) for size in self._partition_sizes):
             if sum(self._partition_sizes) != num_core_div_columns:
                 raise ValueError(
-                    "Sum of partition sizes cannot differ from the total number of columns"
+                    "Sum of partition sizes cannot differ from the total number of columns "
                     "used in the division. Note that shared_columns, drop_columns and"
                     "active_party_columns are not included in the division."
                 )
