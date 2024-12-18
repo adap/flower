@@ -31,7 +31,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Update FedRep baseline** ([#4681](https://github.com/adap/flower/pull/4681))
 
-  We have started the process of migrating some baselines from using `start_simulation` to be launched via `flwr run`. We chose `FedRep` as the first baseline to migrate due to its very impresive results. New baselines can be created following a `flwr run`-compatible format by starting from the `flwr new` template for baseline. Read more in the [how to contribute a baseline](https://flower.ai/docs/baselines/how-to-contribute-baselines.html) documentation.
+  We have started the process of migrating some baselines from using `start_simulation` to be launched via `flwr run`. We chose `FedRep` as the first baseline to migrate due to its very impresive results. New baselines can be created following a `flwr run`-compatible format by starting from the `flwr new` template for baselines. Read more in the [how to contribute a baseline](https://flower.ai/docs/baselines/how-to-contribute-baselines.html) documentation.
 
 - **Revamp simulation series tutorial** ([#4663](https://github.com/adap/flower/pull/4663), [#4696](https://github.com/adap/flower/pull/4696))
 
