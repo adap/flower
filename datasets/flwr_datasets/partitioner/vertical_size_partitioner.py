@@ -57,12 +57,12 @@ class VerticalSizePartitioner(Partitioner):
     active_party_columns_mode : Union[Literal[["add_to_first", "add_to_last", "create_as_first", "create_as_last", "add_to_all"], int]
         Determines how to assign the active party columns:
 
-        - "add_to_first": Append active party columns to the first partition.
-        - "add_to_last": Append active party columns to the last partition.
+        - `"add_to_first"`: Append active party columns to the first partition.
+        - `"add_to_last"`: Append active party columns to the last partition.
+        - `"create_as_first"`: Create a new partition at the start containing only these columns.
+        - `"create_as_last"`: Create a new partition at the end containing only these columns.
+        - `"add_to_all"`: Append active party columns to all partitions.
         - int: Append active party columns to the specified partition index.
-        - "create_as_first": Create a new partition at the start containing only these columns.
-        - "create_as_last": Create a new partition at the end containing only these columns.
-        - "add_to_all": Append active party columns to all partitions.
     drop_columns : Optional[list[str]]
         Columns to remove entirely from the dataset before partitioning.
     shared_columns : Optional[list[str]]
