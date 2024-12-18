@@ -161,10 +161,43 @@ def get_sha256_hash(file_path: Path) -> str:
 
 
 def get_user_auth_config_path(root_dir: Path, federation: str) -> Path:
-    """Return the path to the user auth config file."""
+    """Return the path to the user auth config file.
+
+    Additionally, a `.gitignore` file will be created or updated in the
+    Flower directory to include `.credentials`."""
     # Locate the credentials directory
     credentials_dir = root_dir.absolute() / FLWR_DIR / CREDENTIALS_DIR
     credentials_dir.mkdir(parents=True, exist_ok=True)
+
+    # Determine the absolute path of the Flower directory for .gitignore
+    abs_flwr_dir = root_dir.absolute() / FLWR_DIR
+    gitignore_path = abs_flwr_dir / ".gitignore"
+    credential_entry = CREDENTIALS_DIR
+
+    try:
+        if gitignore_path.exists():
+            # Read existing .gitignore content
+            with open(gitignore_path, "r", encoding="utf-8") as gitignore_file:
+                lines = gitignore_file.read().splitlines()
+
+            # Check if .credentials is already in .gitignore
+            if credential_entry not in lines:
+                # Append .credentials to .gitignore
+                with open(gitignore_path, "a", encoding="utf-8") as gitignore_file:
+                    gitignore_file.write(f"\n{credential_entry}\n")
+        else:
+            # Create a new .gitignore with .credentials
+            with open(gitignore_path, "w", encoding="utf-8") as gitignore_file:
+                gitignore_file.write(f"{credential_entry}\n")
+    except Exception as err:
+        typer.secho(
+            "❌ An error occurred while handling .gitignore. "
+            f"Please check the permissions of {gitignore_path} and try again.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1) from err
+
     return credentials_dir / f"{federation}.json"
 
 
