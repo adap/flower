@@ -9,7 +9,7 @@ description = "Federated Learning with XGBoost and Flower (Quickstart Example)"
 license = "Apache-2.0"
 dependencies = [
     "flwr[simulation]>=1.13.1",
-    "flwr-datasets>=0.3.0",
+    "flwr-datasets>=0.4.0",
     "xgboost>=2.0.0",
 ]
 

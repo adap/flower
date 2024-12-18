@@ -47,7 +47,7 @@ pip install -e .
 ```
 
 > \[!NOTE\]
-> For MacOSX users, you may need to additionally run `brew install libomp` to install OpenMP runtime
+> For MacOSX users, you may need to additionally run `brew install libomp` to install OpenMP runtime.
 
 ## Run the project
 
