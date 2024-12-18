@@ -29,6 +29,7 @@ from .pathological_partitioner import PathologicalPartitioner
 from .shard_partitioner import ShardPartitioner
 from .size_partitioner import SizePartitioner
 from .square_partitioner import SquarePartitioner
+from .vertical_size_partitioner import VerticalSizePartitioner
 
 __all__ = [
     "DirichletPartitioner",
@@ -45,4 +46,5 @@ __all__ = [
     "ShardPartitioner",
     "SizePartitioner",
     "SquarePartitioner",
+    "VerticalSizePartitioner",
 ]
