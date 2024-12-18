@@ -761,8 +761,6 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                 "federation_options, pending_at, starting_at, running_at, finished_at, "
                 "sub_status, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
             )
-            if fab_hash:
-                fab_id, fab_version = "", ""
             override_config_json = json.dumps(override_config)
             data = [
                 sint64_run_id,
