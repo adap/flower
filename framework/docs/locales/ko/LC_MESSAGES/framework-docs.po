@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-13 00:33+0000\n"
+"POT-Creation-Date: 2024-12-18 00:32+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -6144,7 +6144,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/how-to-implement-fedbn.rst:99
-#: ../../source/how-to-run-flower-on-azure.rst:217
+#: ../../source/how-to-run-flower-on-azure.rst:218
 msgid "Next Steps"
 msgstr "다음 단계"
 
@@ -6645,23 +6645,23 @@ msgstr "Flower 서버."
 
 #: ../../source/how-to-run-flower-on-azure.rst:22
 msgid ""
-"There are many ways to deploy Flower on Microst Azure. The instructions "
-"provided in this guide is just a basic walkthrough, step-by-step guide on"
-" how to quickly setup and run a Flower application on a Federated "
-"Learning environment on Microst Azure."
+"There are many ways to deploy Flower on Microsoft Azure. The instructions"
+" provided in this guide is just a basic walkthrough, step-by-step guide "
+"on how to quickly setup and run a Flower application on a Federated "
+"Learning environment on Microsoft Azure."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:26
+#: ../../source/how-to-run-flower-on-azure.rst:27
 msgid ""
 "In this how-to guide, we want to create a Federated Learning environment "
-"on Microst Azure using three Virtual Machines (VMs). From the three "
+"on Microsoft Azure using three Virtual Machines (VMs). From the three "
 "machines, one machine will be used as the Federation server and two as "
 "the Federation clients. Our goal is to create a Flower federation on "
-"Microst Azure where we can run Flower apps from our local machine, e.g., "
-"laptop."
+"Microsoft Azure where we can run Flower apps from our local machine, "
+"e.g., laptop."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:32
+#: ../../source/how-to-run-flower-on-azure.rst:33
 msgid ""
 "On the Federation server VM we will deploy the long-running Flower server"
 " (``SuperLink``) and on the two Federation client VMs we will deploy the "
@@ -6670,60 +6670,60 @@ msgid ""
 "see the |flower_architecture_link|_ ."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:38
+#: ../../source/how-to-run-flower-on-azure.rst:39
 msgid "Azure VMs"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:40
+#: ../../source/how-to-run-flower-on-azure.rst:41
 msgid ""
 "First we need to create the three VMs configure their Python "
 "environments, and inbound networking rules to allow cross-VM "
 "communication."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:44
+#: ../../source/how-to-run-flower-on-azure.rst:45
 msgid "VM Create"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:46
+#: ../../source/how-to-run-flower-on-azure.rst:47
 msgid ""
-"Assuming we are already inside the Microst Azure portal, we navigate to "
-"the ``Create`` page and we select ``Azure virtual machine``. In the new "
+"Assuming we are already inside the Microsoft Azure portal, we navigate to"
+" the ``Create`` page and we select ``Azure virtual machine``. In the new "
 "page, for each VM we edit the properties as follows:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:55
+#: ../../source/how-to-run-flower-on-azure.rst:56
 msgid "**Virtual machine name**"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:56
+#: ../../source/how-to-run-flower-on-azure.rst:57
 msgid ""
 "for server machine we can use ``flower-server`` and for clients, "
 "``flower-client-1`` and ``flower-client-2``"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:58
+#: ../../source/how-to-run-flower-on-azure.rst:59
 #, fuzzy
 msgid "**Image**"
 msgstr "**변경하기**"
 
-#: ../../source/how-to-run-flower-on-azure.rst:59
+#: ../../source/how-to-run-flower-on-azure.rst:60
 msgid "in this guide, we use ``Ubuntu Server 24.04 - x64 Gen2 LTS``"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:60
+#: ../../source/how-to-run-flower-on-azure.rst:61
 msgid "**Size**"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:61
+#: ../../source/how-to-run-flower-on-azure.rst:62
 msgid "in this guide, we use ``Standard_D2s_v3 - 2 vcpus, 8GiB memory``"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:65
+#: ../../source/how-to-run-flower-on-azure.rst:66
 msgid "For resource group, we can create a new group and assign it to all VMs."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:67
+#: ../../source/how-to-run-flower-on-azure.rst:68
 msgid ""
 "When each VM instance has been created the portal will allow you to "
 "download the public key (.pem) of each instance. Make sure you save this "
@@ -6731,7 +6731,7 @@ msgid ""
 " the ``chmod 400 <PATH_TO_PEM_FILE>`` command for every .pem file."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:72
+#: ../../source/how-to-run-flower-on-azure.rst:73
 msgid ""
 "Once all three VMs are created then navigate to the overview page where "
 "all three VMs are listed and open every other VM, and copy its Public IP "
@@ -6741,11 +6741,11 @@ msgid ""
 "``azureuser``):"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:83
+#: ../../source/how-to-run-flower-on-azure.rst:84
 msgid "VM Networking"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:85
+#: ../../source/how-to-run-flower-on-azure.rst:86
 msgid ""
 "During the execution of the Flower application, the server VM "
 "(``SuperLink``) will be responsible to orchestrate the execution of the "
@@ -6756,7 +6756,7 @@ msgid ""
 "applications."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:92
+#: ../../source/how-to-run-flower-on-azure.rst:93
 msgid ""
 "Therefore, to enable this communication we need to allow inbound traffic "
 "to the server VM instance. To achieve this, we need to navigate to the "
@@ -6765,70 +6765,70 @@ msgid ""
 "appears, we edit the rule properties as follows:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:97
+#: ../../source/how-to-run-flower-on-azure.rst:98
 msgid "The rest of the fields can be left at their default values."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:104
-#: ../../source/how-to-run-flower-on-azure.rst:145
+#: ../../source/how-to-run-flower-on-azure.rst:105
+#: ../../source/how-to-run-flower-on-azure.rst:146
 #, fuzzy
 msgid "**Source**"
 msgstr "run\\_supernode"
 
-#: ../../source/how-to-run-flower-on-azure.rst:105
+#: ../../source/how-to-run-flower-on-azure.rst:106
 msgid "``IP Addresses``"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:106
-#: ../../source/how-to-run-flower-on-azure.rst:133
+#: ../../source/how-to-run-flower-on-azure.rst:107
+#: ../../source/how-to-run-flower-on-azure.rst:134
 msgid "**Source IP addresses/CIDR ranges**"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:107
+#: ../../source/how-to-run-flower-on-azure.rst:108
 msgid "add client VMs' Public IP (separated by comma)"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:108
+#: ../../source/how-to-run-flower-on-azure.rst:109
 #, fuzzy
 msgid "**Destination**"
 msgstr "설명"
 
-#: ../../source/how-to-run-flower-on-azure.rst:109
-#: ../../source/how-to-run-flower-on-azure.rst:146
+#: ../../source/how-to-run-flower-on-azure.rst:110
+#: ../../source/how-to-run-flower-on-azure.rst:147
 #, fuzzy
 msgid "``Any``"
 msgstr "``flwr/base``"
 
-#: ../../source/how-to-run-flower-on-azure.rst:110
+#: ../../source/how-to-run-flower-on-azure.rst:111
 #, fuzzy
 msgid "**Service**"
 msgstr "run\\_supernode"
 
-#: ../../source/how-to-run-flower-on-azure.rst:111
+#: ../../source/how-to-run-flower-on-azure.rst:112
 #, fuzzy
 msgid "``custom``"
 msgstr "``DISTRO``"
 
-#: ../../source/how-to-run-flower-on-azure.rst:112
-#: ../../source/how-to-run-flower-on-azure.rst:135
-#: ../../source/how-to-run-flower-on-azure.rst:147
+#: ../../source/how-to-run-flower-on-azure.rst:113
+#: ../../source/how-to-run-flower-on-azure.rst:136
+#: ../../source/how-to-run-flower-on-azure.rst:148
 msgid "**Destination port ranges**"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:113
+#: ../../source/how-to-run-flower-on-azure.rst:114
 msgid "``9092``"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:114
+#: ../../source/how-to-run-flower-on-azure.rst:115
 msgid "**Protocol**"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:115
+#: ../../source/how-to-run-flower-on-azure.rst:116
 #, fuzzy
 msgid "``TCP``"
 msgstr "``DISTRO``"
 
-#: ../../source/how-to-run-flower-on-azure.rst:117
+#: ../../source/how-to-run-flower-on-azure.rst:118
 msgid ""
 "Finally, we need to also open port 9093 to allow receiving and executing "
 "incoming application requests. To enable this we just need to repeat the "
@@ -6840,31 +6840,31 @@ msgid ""
 " source to ``Any``."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:125
+#: ../../source/how-to-run-flower-on-azure.rst:126
 msgid ""
 "To be more precise, if we know the Public IP of our machine, then we make"
 " the following changes:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:134
+#: ../../source/how-to-run-flower-on-azure.rst:135
 msgid "add machine's Public IP"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:136
-#: ../../source/how-to-run-flower-on-azure.rst:148
+#: ../../source/how-to-run-flower-on-azure.rst:137
+#: ../../source/how-to-run-flower-on-azure.rst:149
 msgid "``9093``"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:138
+#: ../../source/how-to-run-flower-on-azure.rst:139
 msgid "Otherwise, we change the properties as follows:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:151
+#: ../../source/how-to-run-flower-on-azure.rst:152
 #, fuzzy
 msgid "Flower Environment"
 msgstr "Flower 개발 환경 만들기"
 
-#: ../../source/how-to-run-flower-on-azure.rst:153
+#: ../../source/how-to-run-flower-on-azure.rst:154
 msgid ""
 "Assuming we have been able to login to each VM, and create a Python "
 "environment with Flower and all its dependencies installed (``pip install"
@@ -6874,19 +6874,19 @@ msgid ""
 "the Flower Framework we want to run, e.g., ``numpy``."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:161
+#: ../../source/how-to-run-flower-on-azure.rst:162
 msgid ""
 "An alternative approach would be to use Docker in each VM, with each "
 "image containing the necessary environment and dependencies. For more "
 "details please refer to the |flower_docker_index|_ guide."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:166
+#: ../../source/how-to-run-flower-on-azure.rst:167
 #, fuzzy
 msgid "Server Initialization"
 msgstr "설치 확인"
 
-#: ../../source/how-to-run-flower-on-azure.rst:168
+#: ../../source/how-to-run-flower-on-azure.rst:169
 msgid ""
 "After configuring the Flower application environment, we proceed by "
 "starting the Flower long-running processes (i.e., ``SuperLink`` and "
@@ -6895,19 +6895,19 @@ msgid ""
 "client (``SuperNode``)."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:175
+#: ../../source/how-to-run-flower-on-azure.rst:176
 msgid ""
 "To enable authentication and encrypted communication during the execution"
 " lifecycle of the Flower application, please have a look at the following"
 " resources: |authenticate_supernodes|_, |enable_tls_connections|_"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:197
+#: ../../source/how-to-run-flower-on-azure.rst:198
 #, fuzzy
 msgid "Run Flower App"
 msgstr "Flower 서버."
 
-#: ../../source/how-to-run-flower-on-azure.rst:199
+#: ../../source/how-to-run-flower-on-azure.rst:200
 msgid ""
 "Finally, after all running Flower processes have been initialized on the "
 "Microsoft Azure cluster, in our local machine, we first need to install "
@@ -6917,17 +6917,17 @@ msgid ""
 "``pyproject.toml`` file, and then add the following sections:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:214
+#: ../../source/how-to-run-flower-on-azure.rst:215
 msgid "Then from our local machine we need to run ``flwr run . my-federation``."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:221
+#: ../../source/how-to-run-flower-on-azure.rst:222
 msgid ""
 "This guide is not suitable for production environments due to missing "
 "authentication and TLS security."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:224
+#: ../../source/how-to-run-flower-on-azure.rst:225
 msgid ""
 "To enable authentication and establish secure connections, please refer "
 "to the following resources: |authenticate_supernodes|_, "
@@ -8451,6 +8451,186 @@ msgstr ""
 msgid "Enjoy building a more robust and flexible ``ClientApp`` with mods!"
 msgstr "Mods를 통해 더욱 강력하고 유연한 ``ClientApp``을 구축해 보세요!"
 
+#: ../../source/how-to-use-cli-json-output.rst:2
+msgid "Use CLI JSON output"
+msgstr ""
+
+#: ../../source/how-to-use-cli-json-output.rst:4
+msgid ""
+"The `Flower CLIs <ref-api-cli.html>`_ come with a built-in JSON output "
+"mode. This mode is useful when you want to consume the output of a Flower"
+" CLI programmatically. For example, you might want to use the output of "
+"the ``flwr`` CLI in a script or a continuous integration pipeline."
+msgstr ""
+
+#: ../../source/how-to-use-cli-json-output.rst:11
+msgid ""
+"The JSON output mode is currently only available when using the Flower "
+"CLIs with a `SuperLink <ref-api-cli.html#flower-superlink>`_. Learn more "
+"about the `SuperLink` in the `Flower Architecture Overview <explanation-"
+"flower-architecture.html>`_ page."
+msgstr ""
+
+#: ../../source/how-to-use-cli-json-output.rst:15
+msgid ""
+"In this guide, we'll show you how to specify a JSON output with the "
+"``flwr run``, ``flwr ls``, and ``flwr stop`` commands. We will also "
+"provide examples of the JSON output for each of these commands."
+msgstr ""
+
+#: ../../source/how-to-use-cli-json-output.rst:32
+msgid "``flwr run`` JSON output"
+msgstr ""
+
+#: ../../source/how-to-use-cli-json-output.rst:34
+msgid ""
+"The |flwr_run|_ command runs a Flower app from a provided directory. Note"
+" that if the app path argument is not passed to ``flwr run``, the current"
+" working directory is used as the default Flower app directory. By "
+"default, executing the ``flwr run`` command prints the status of the app "
+"build and run process as follows:"
+msgstr ""
+
+#: ../../source/how-to-use-cli-json-output.rst:47
+msgid ""
+"To get the output in JSON format, pass an additional ``--format json`` "
+"flag:"
+msgstr ""
+
+#: ../../source/how-to-use-cli-json-output.rst:62
+#, fuzzy
+msgid "The JSON output for ``flwr run`` contains the following fields:"
+msgstr "다음 변경 사항이 포함된 pull request를 만듭니다:"
+
+#: ../../source/how-to-use-cli-json-output.rst:64
+msgid "``success``: A boolean indicating whether the command was successful."
+msgstr ""
+
+#: ../../source/how-to-use-cli-json-output.rst:65
+msgid "``run-id``: The ID of the run."
+msgstr ""
+
+#: ../../source/how-to-use-cli-json-output.rst:66
+#, fuzzy
+msgid "``fab-id``: The ID of the Flower app."
+msgstr "Flower 기본 이미지의 태그."
+
+#: ../../source/how-to-use-cli-json-output.rst:67
+#, fuzzy
+msgid "``fab-name``: The name of the Flower app."
+msgstr "Flower 기본 이미지의 태그."
+
+#: ../../source/how-to-use-cli-json-output.rst:68
+#, fuzzy
+msgid "``fab-version``: The version of the Flower app."
+msgstr "Flower 기본 이미지의 태그."
+
+#: ../../source/how-to-use-cli-json-output.rst:69
+#, fuzzy
+msgid "``fab-hash``: The short hash of the Flower app."
+msgstr "Flower 기본 이미지의 태그."
+
+#: ../../source/how-to-use-cli-json-output.rst:70
+#, fuzzy
+msgid "``fab-filename``: The filename of the Flower app."
+msgstr "Flower 기본 이미지의 태그."
+
+#: ../../source/how-to-use-cli-json-output.rst:72
+msgid ""
+"If the command fails, the JSON output will contain two fields, "
+"``success`` with the value of ``false`` and ``error-message``. For "
+"example, if the command fails to find the name of the federation on the "
+"SuperLink, the output will look like this:"
+msgstr ""
+
+#: ../../source/how-to-use-cli-json-output.rst:87
+msgid "``flwr ls`` JSON output"
+msgstr ""
+
+#: ../../source/how-to-use-cli-json-output.rst:89
+msgid ""
+"The |flwr_ls|_ command lists all the runs in the current project. Similar"
+" to ``flwr run``, if the app path argument is not passed to ``flwr ls``, "
+"the current working directory is used as the Flower app directory. By "
+"default, the command list the details of all runs in a Flower federation "
+"in a tabular format:"
+msgstr ""
+
+#: ../../source/how-to-use-cli-json-output.rst:110
+#: ../../source/how-to-use-cli-json-output.rst:181
+msgid "To get the output in JSON format, simply pass the ``--format json`` flag:"
+msgstr ""
+
+#: ../../source/how-to-use-cli-json-output.rst:145
+msgid ""
+"The JSON output for ``flwr ls`` contains similar fields as ``flwr run`` "
+"with the addition of the ``status``, ``elapsed``, ``created-at``, "
+"``running-at``, and ``finished-at`` fields. The ``runs`` key contains a "
+"list of dictionaries, each representing a run. The additional fields are:"
+msgstr ""
+
+#: ../../source/how-to-use-cli-json-output.rst:150
+msgid ""
+"``status``: The status of the run, either pending, starting, running, or "
+"finished."
+msgstr ""
+
+#: ../../source/how-to-use-cli-json-output.rst:151
+msgid ""
+"``elapsed``: The time elapsed since the run started, formatted as "
+"``HH:MM:SS``."
+msgstr ""
+
+#: ../../source/how-to-use-cli-json-output.rst:152
+msgid "``created-at``: The time the run was created."
+msgstr ""
+
+#: ../../source/how-to-use-cli-json-output.rst:153
+msgid "``running-at``: The time the run started running."
+msgstr ""
+
+#: ../../source/how-to-use-cli-json-output.rst:154
+msgid "``finished-at``: The time the run finished."
+msgstr ""
+
+#: ../../source/how-to-use-cli-json-output.rst:156
+msgid ""
+"All timestamps adhere to ISO 8601, UTC and are formatted as ``YYYY-MM-DD "
+"HH:MM:SSZ``."
+msgstr ""
+
+#: ../../source/how-to-use-cli-json-output.rst:158
+msgid ""
+"You can also use the ``--run-id`` flag to list the details for one run. "
+"In this case, the JSON output will have the same structure as above with "
+"only one entry in the ``runs`` key. For more details of this command, see"
+" the |flwr_ls|_ documentation. If the command fails, the JSON output will"
+" return two fields, ``success`` and ``error-message``, as shown in "
+":ref:`the above example <json_error_output>`. Note that the content of "
+"the error message will be different depending on the error that occurred."
+msgstr ""
+
+#: ../../source/how-to-use-cli-json-output.rst:166
+msgid "``flwr stop`` JSON output"
+msgstr ""
+
+#: ../../source/how-to-use-cli-json-output.rst:168
+msgid ""
+"The |flwr_stop|_ command stops a running Flower app for a provided run "
+"ID. Similar to ``flwr run``, if the app path argument is not passed to "
+"``flwr stop``, the current working directory is used as the Flower app "
+"directory. By default, the command prints the status of the stop process "
+"as follows:"
+msgstr ""
+
+#: ../../source/how-to-use-cli-json-output.rst:191
+msgid ""
+"If the command fails, the JSON output will contain two fields ``success``"
+" with the value of ``false`` and ``error-message``, as shown in :ref:`the"
+" above example <json_error_output>`. Note that the content of the error "
+"message will be different depending on the error that occurred."
+msgstr ""
+
 #: ../../source/how-to-use-differential-privacy.rst:2
 msgid "Use Differential Privacy"
 msgstr "차분 개인정보 보호 사용"
@@ -8793,7 +8973,7 @@ msgstr "빠른 시작 튜토리얼"
 msgid "How-to guides"
 msgstr "사용 방법 가이드"
 
-#: ../../source/index.rst:108 ../../source/index.rst:113
+#: ../../source/index.rst:109 ../../source/index.rst:114
 msgid "Explanations"
 msgstr "설명"
 
@@ -8801,23 +8981,23 @@ msgstr "설명"
 msgid "API reference"
 msgstr "API 참조"
 
-#: ../../source/index.rst:139
+#: ../../source/index.rst:140
 msgid "Reference docs"
 msgstr "참조 문서"
 
-#: ../../source/index.rst:154
+#: ../../source/index.rst:155
 msgid "Contributor tutorials"
 msgstr "기여자 튜토리얼"
 
-#: ../../source/index.rst:161
+#: ../../source/index.rst:162
 msgid "Contributor how-to guides"
 msgstr "기여자 사용법 가이드"
 
-#: ../../source/index.rst:173
+#: ../../source/index.rst:174
 msgid "Contributor explanations"
 msgstr "기여자 설명"
 
-#: ../../source/index.rst:179
+#: ../../source/index.rst:180
 msgid "Contributor references"
 msgstr "기여자 참조"
 
@@ -8914,33 +9094,33 @@ msgid ""
 "specific goal."
 msgstr "문제 중심의 방법 가이드는 특정 목표를 달성하는 방법을 단계별로 보여줍니다."
 
-#: ../../source/index.rst:110
+#: ../../source/index.rst:111
 msgid ""
 "Understanding-oriented concept guides explain and discuss key topics and "
 "underlying ideas behind Flower and collaborative AI."
 msgstr "이해 중심의 개념 가이드에서는 Flower와 협업 AI의 주요 주제와 기본 아이디어를 설명하고 토론합니다."
 
-#: ../../source/index.rst:122
+#: ../../source/index.rst:123
 msgid "References"
 msgstr "참조"
 
-#: ../../source/index.rst:124
+#: ../../source/index.rst:125
 msgid "Information-oriented API reference and other reference material."
 msgstr "정보 지향 API 참조 및 기타 참고 자료."
 
-#: ../../source/index.rst:133:<autosummary>:1
+#: ../../source/index.rst:134:<autosummary>:1
 msgid ":py:obj:`flwr <flwr>`\\"
 msgstr ":py:obj:`flwr <flwr>`\\"
 
-#: ../../source/index.rst:133:<autosummary>:1 flwr:1 of
+#: ../../source/index.rst:134:<autosummary>:1 flwr:1 of
 msgid "Flower main package."
 msgstr "Flower 메인 패키지."
 
-#: ../../source/index.rst:149
+#: ../../source/index.rst:150
 msgid "Contributor docs"
 msgstr "기여자 문서"
 
-#: ../../source/index.rst:151
+#: ../../source/index.rst:152
 msgid ""
 "The Flower community welcomes contributions. The following docs are "
 "intended to help along the way."
@@ -9065,7 +9245,7 @@ msgstr ""
 msgid "Flag to stream or print logs from the Flower run"
 msgstr ""
 
-#: ../../flwr log ls run
+#: ../../flwr log ls run stop
 msgid "default"
 msgstr ""
 
@@ -9107,7 +9287,54 @@ msgid "Name of the federation to login into."
 msgstr ""
 
 #: ../../flwr ls:1
-msgid "List runs."
+msgid ""
+"List the details of one provided run ID or all runs in a Flower "
+"federation."
+msgstr ""
+
+#: ../../flwr ls:1
+msgid "The following details are displayed:"
+msgstr ""
+
+#: ../../flwr ls:1
+#, fuzzy
+msgid "**Run ID:** Unique identifier for the run."
+msgstr "현재 실행에 대한 식별자입니다."
+
+#: ../../flwr ls:1
+msgid ""
+"**FAB:** Name of the FAB associated with the run (``{FAB_ID} "
+"(v{FAB_VERSION})``)."
+msgstr ""
+
+#: ../../flwr ls:1
+msgid ""
+"**Status:** Current status of the run (pending, starting, running, "
+"finished)."
+msgstr ""
+
+#: ../../flwr ls:1
+msgid "**Elapsed:** Time elapsed since the run started (``HH:MM:SS``)."
+msgstr ""
+
+#: ../../flwr ls:1
+#, fuzzy
+msgid "**Created At:** Timestamp when the run was created."
+msgstr "메시지가 생성된 때의 Unix timestamp입니다."
+
+#: ../../flwr ls:1
+#, fuzzy
+msgid "**Running At:** Timestamp when the run started running."
+msgstr "메시지가 생성된 때의 Unix timestamp입니다."
+
+#: ../../flwr ls:1
+msgid "**Finished At:** Timestamp when the run finished."
+msgstr ""
+
+#: ../../flwr ls:1
+msgid ""
+"All timestamps follow ISO 8601, UTC and are formatted as ``YYYY-MM-DD "
+"HH:MM:SSZ``."
 msgstr ""
 
 #: ../../flwr ls:1
@@ -9123,11 +9350,11 @@ msgstr "``flwr/base``"
 msgid "Specific run ID to display"
 msgstr ""
 
-#: ../../flwr ls:1 run:1
+#: ../../flwr ls:1 run:1 stop:1
 msgid "Format output using 'default' view or 'json'"
 msgstr ""
 
-#: ../../flwr ls:1 run:1
+#: ../../flwr ls:1 run:1 stop:1
 #, fuzzy
 msgid "``'default'``"
 msgstr "``flwr/base``"
@@ -9482,119 +9709,54 @@ msgstr "Bases: :py:class:`~abc.ABC`"
 msgid "Methods"
 msgstr "메소드"
 
-#: ../../source/ref-api/flwr.client.Client.rst:44:<autosummary>:1
+#: flwr.client.client.Client.evaluate:1:<autosummary>:1 of
 msgid ":py:obj:`evaluate <flwr.client.Client.evaluate>`\\ \\(ins\\)"
 msgstr ":py:obj:`evaluate <flwr.client.Client.evaluate>`\\ \\(ins\\)"
 
-#: ../../source/ref-api/flwr.client.Client.rst:44:<autosummary>:1
-#: ../../source/ref-api/flwr.client.NumPyClient.rst:44:<autosummary>:1
 #: flwr.client.client.Client.evaluate:1
-#: flwr.client.numpy_client.NumPyClient.evaluate:1 of
+#: flwr.client.client.Client.evaluate:1:<autosummary>:1
+#: flwr.client.numpy_client.NumPyClient.evaluate:1
+#: flwr.client.numpy_client.NumPyClient.evaluate:1:<autosummary>:1 of
 msgid "Evaluate the provided parameters using the locally held dataset."
 msgstr "로컬로 보유한 데이터 세트를 사용하여 제공된 매개변수를 평가합니다."
 
-#: ../../source/ref-api/flwr.client.Client.rst:44:<autosummary>:1
+#: flwr.client.client.Client.evaluate:1:<autosummary>:1 of
 msgid ":py:obj:`fit <flwr.client.Client.fit>`\\ \\(ins\\)"
 msgstr ":py:obj:`fit <flwr.client.Client.fit>`\\ \\(ins\\)"
 
-#: ../../source/ref-api/flwr.client.Client.rst:44:<autosummary>:1
+#: flwr.client.client.Client.evaluate:1:<autosummary>:1
 #: flwr.client.client.Client.fit:1 of
 msgid "Refine the provided parameters using the locally held dataset."
 msgstr "로컬로 보유한 데이터 세트를 사용하여 제공된 매개변수를 구체화합니다."
 
-#: ../../source/ref-api/flwr.client.Client.rst:44:<autosummary>:1
-msgid ":py:obj:`get_context <flwr.client.Client.get_context>`\\ \\(\\)"
-msgstr ":py:obj:`get_context <flwr.client.Client.get_context>`\\ \\(\\)"
-
-#: ../../source/ref-api/flwr.client.Client.rst:44:<autosummary>:1
-#: ../../source/ref-api/flwr.client.NumPyClient.rst:44:<autosummary>:1
-#: flwr.client.client.Client.get_context:1
-#: flwr.client.numpy_client.NumPyClient.get_context:1 of
-msgid "Get the run context from this client."
-msgstr "이 클라이언트에서 실행 컨텍스트를 가져옵니다."
-
-#: ../../source/ref-api/flwr.client.Client.rst:44:<autosummary>:1
+#: flwr.client.client.Client.evaluate:1:<autosummary>:1 of
 msgid ":py:obj:`get_parameters <flwr.client.Client.get_parameters>`\\ \\(ins\\)"
 msgstr ":py:obj:`get_parameters <flwr.client.Client.get_parameters>`\\ \\(ins\\)"
 
-#: ../../source/ref-api/flwr.client.Client.rst:44:<autosummary>:1
-#: ../../source/ref-api/flwr.client.NumPyClient.rst:44:<autosummary>:1
+#: flwr.client.client.Client.evaluate:1:<autosummary>:1
 #: flwr.client.client.Client.get_parameters:1
+#: flwr.client.numpy_client.NumPyClient.evaluate:1:<autosummary>:1
 #: flwr.client.numpy_client.NumPyClient.get_parameters:1 of
 msgid "Return the current local model parameters."
 msgstr "현재 로컬 모델 파라미터를 반환합니다."
 
-#: ../../source/ref-api/flwr.client.Client.rst:44:<autosummary>:1
+#: flwr.client.client.Client.evaluate:1:<autosummary>:1 of
 msgid ":py:obj:`get_properties <flwr.client.Client.get_properties>`\\ \\(ins\\)"
 msgstr ":py:obj:`get_properties <flwr.client.Client.get_properties>`\\ \\(ins\\)"
 
-#: ../../source/ref-api/flwr.client.Client.rst:44:<autosummary>:1
+#: flwr.client.client.Client.evaluate:1:<autosummary>:1
 #: flwr.client.client.Client.get_properties:1 of
 msgid "Return set of client's properties."
 msgstr "클라이언트의 속성 집합을 반환합니다."
 
-#: ../../source/ref-api/flwr.client.Client.rst:44:<autosummary>:1
-msgid ":py:obj:`set_context <flwr.client.Client.set_context>`\\ \\(context\\)"
-msgstr ":py:obj:`set_context <flwr.client.Client.set_context>`\\ \\(context\\)"
-
-#: ../../source/ref-api/flwr.client.Client.rst:44:<autosummary>:1
-#: ../../source/ref-api/flwr.client.NumPyClient.rst:44:<autosummary>:1
-#: flwr.client.client.Client.set_context:1
-#: flwr.client.numpy_client.NumPyClient.set_context:1 of
-msgid "Apply a run context to this client."
-msgstr "이 클라이언트에 실행 컨텍스트를 적용합니다."
-
-#: ../../source/ref-api/flwr.client.Client.rst:44:<autosummary>:1
+#: flwr.client.client.Client.evaluate:1:<autosummary>:1 of
 msgid ":py:obj:`to_client <flwr.client.Client.to_client>`\\ \\(\\)"
 msgstr ":py:obj:`to_client <flwr.client.Client.to_client>`\\ \\(\\)"
 
-#: ../../source/ref-api/flwr.client.Client.rst:44:<autosummary>:1
+#: flwr.client.client.Client.evaluate:1:<autosummary>:1
 #: flwr.client.client.Client.to_client:1 of
 msgid "Return client (itself)."
 msgstr "클라이언트(자체)를 반환합니다."
-
-#: ../../source/ref-api/flwr.client.Client.rst:46
-#: ../../source/ref-api/flwr.client.NumPyClient.rst:46
-#: ../../source/ref-api/flwr.common.Array.rst:28
-#: ../../source/ref-api/flwr.common.ClientMessage.rst:25
-#: ../../source/ref-api/flwr.common.Code.rst:19
-#: ../../source/ref-api/flwr.common.Context.rst:25
-#: ../../source/ref-api/flwr.common.DisconnectRes.rst:25
-#: ../../source/ref-api/flwr.common.Error.rst:25
-#: ../../source/ref-api/flwr.common.EvaluateIns.rst:25
-#: ../../source/ref-api/flwr.common.EvaluateRes.rst:25
-#: ../../source/ref-api/flwr.common.EventType.rst:165
-#: ../../source/ref-api/flwr.common.FitIns.rst:25
-#: ../../source/ref-api/flwr.common.FitRes.rst:25
-#: ../../source/ref-api/flwr.common.GetParametersIns.rst:25
-#: ../../source/ref-api/flwr.common.GetParametersRes.rst:25
-#: ../../source/ref-api/flwr.common.GetPropertiesIns.rst:25
-#: ../../source/ref-api/flwr.common.GetPropertiesRes.rst:25
-#: ../../source/ref-api/flwr.common.Message.rst:37
-#: ../../source/ref-api/flwr.common.MessageType.rst:25
-#: ../../source/ref-api/flwr.common.MessageTypeLegacy.rst:25
-#: ../../source/ref-api/flwr.common.Metadata.rst:25
-#: ../../source/ref-api/flwr.common.Parameters.rst:25
-#: ../../source/ref-api/flwr.common.ReconnectIns.rst:25
-#: ../../source/ref-api/flwr.common.RecordSet.rst:25
-#: ../../source/ref-api/flwr.common.ServerMessage.rst:25
-#: ../../source/ref-api/flwr.common.Status.rst:25
-#: ../../source/ref-api/flwr.server.Driver.rst:43
-#: ../../source/ref-api/flwr.server.LegacyContext.rst:25
-#: ../../source/ref-api/flwr.server.ServerAppComponents.rst:25
-#: ../../source/ref-api/flwr.server.ServerConfig.rst:25
-msgid "Attributes"
-msgstr "속성"
-
-#: flwr.client.Client.context:1:<autosummary>:1 of
-msgid ":py:obj:`context <flwr.client.Client.context>`\\"
-msgstr ":py:obj:`context <flwr.client.Client.context>`\\"
-
-#: flwr.client.Client.context:1 flwr.client.Client.context:1:<autosummary>:1
-#: flwr.client.NumPyClient.context:1
-#: flwr.client.NumPyClient.context:1:<autosummary>:1 of
-msgid "Getter for `Context` client attribute."
-msgstr ""
 
 #: ../../source/ref-api/flwr.common.Parameters.rst:2
 #: flwr.client.app.start_client flwr.client.app.start_numpy_client
@@ -9849,7 +10011,7 @@ msgstr "클라이언트 앱에 train fn을 등록하는 데코레이터를 반�
 msgid "NumPyClient"
 msgstr "NumPyClient"
 
-#: ../../source/ref-api/flwr.client.NumPyClient.rst:44:<autosummary>:1
+#: flwr.client.numpy_client.NumPyClient.evaluate:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`evaluate <flwr.client.NumPyClient.evaluate>`\\ \\(parameters\\, "
 "config\\)"
@@ -9857,20 +10019,16 @@ msgstr ""
 ":py:obj:`evaluate <flwr.client.NumPyClient.evaluate>`\\ \\(parameters\\, "
 "config\\)"
 
-#: ../../source/ref-api/flwr.client.NumPyClient.rst:44:<autosummary>:1
+#: flwr.client.numpy_client.NumPyClient.evaluate:1:<autosummary>:1 of
 msgid ":py:obj:`fit <flwr.client.NumPyClient.fit>`\\ \\(parameters\\, config\\)"
 msgstr ":py:obj:`fit <flwr.client.NumPyClient.fit>`\\ \\(parameters\\, config\\)"
 
-#: ../../source/ref-api/flwr.client.NumPyClient.rst:44:<autosummary>:1
+#: flwr.client.numpy_client.NumPyClient.evaluate:1:<autosummary>:1
 #: flwr.client.numpy_client.NumPyClient.fit:1 of
 msgid "Train the provided parameters using the locally held dataset."
 msgstr "로컬로 보유한 데이터 세트를 사용하여 제공된 파라미터를 학습합니다."
 
-#: ../../source/ref-api/flwr.client.NumPyClient.rst:44:<autosummary>:1
-msgid ":py:obj:`get_context <flwr.client.NumPyClient.get_context>`\\ \\(\\)"
-msgstr ":py:obj:`get_context <flwr.client.NumPyClient.get_context>`\\ \\(\\)"
-
-#: ../../source/ref-api/flwr.client.NumPyClient.rst:44:<autosummary>:1
+#: flwr.client.numpy_client.NumPyClient.evaluate:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`get_parameters <flwr.client.NumPyClient.get_parameters>`\\ "
 "\\(config\\)"
@@ -9878,7 +10036,7 @@ msgstr ""
 ":py:obj:`get_parameters <flwr.client.NumPyClient.get_parameters>`\\ "
 "\\(config\\)"
 
-#: ../../source/ref-api/flwr.client.NumPyClient.rst:44:<autosummary>:1
+#: flwr.client.numpy_client.NumPyClient.evaluate:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`get_properties <flwr.client.NumPyClient.get_properties>`\\ "
 "\\(config\\)"
@@ -9886,31 +10044,19 @@ msgstr ""
 ":py:obj:`get_properties <flwr.client.NumPyClient.get_properties>`\\ "
 "\\(config\\)"
 
-#: ../../source/ref-api/flwr.client.NumPyClient.rst:44:<autosummary>:1
+#: flwr.client.numpy_client.NumPyClient.evaluate:1:<autosummary>:1
 #: flwr.client.numpy_client.NumPyClient.get_properties:1 of
 msgid "Return a client's set of properties."
 msgstr "클라이언트의 속성 집합을 반환합니다."
 
-#: ../../source/ref-api/flwr.client.NumPyClient.rst:44:<autosummary>:1
-msgid ""
-":py:obj:`set_context <flwr.client.NumPyClient.set_context>`\\ "
-"\\(context\\)"
-msgstr ""
-":py:obj:`set_context <flwr.client.NumPyClient.set_context>`\\ "
-"\\(context\\)"
-
-#: ../../source/ref-api/flwr.client.NumPyClient.rst:44:<autosummary>:1
+#: flwr.client.numpy_client.NumPyClient.evaluate:1:<autosummary>:1 of
 msgid ":py:obj:`to_client <flwr.client.NumPyClient.to_client>`\\ \\(\\)"
 msgstr ":py:obj:`to_client <flwr.client.NumPyClient.to_client>`\\ \\(\\)"
 
-#: ../../source/ref-api/flwr.client.NumPyClient.rst:44:<autosummary>:1
+#: flwr.client.numpy_client.NumPyClient.evaluate:1:<autosummary>:1
 #: flwr.client.numpy_client.NumPyClient.to_client:1 of
 msgid "Convert to object to Client type and return it."
 msgstr "객체를 클라이언트 유형으로 변환하고 반환합니다."
-
-#: flwr.client.NumPyClient.context:1:<autosummary>:1 of
-msgid ":py:obj:`context <flwr.client.NumPyClient.context>`\\"
-msgstr ":py:obj:`context <flwr.client.NumPyClient.context>`\\"
 
 #: flwr.client.numpy_client.NumPyClient.evaluate:3
 #: flwr.client.numpy_client.NumPyClient.fit:3
@@ -10915,6 +11061,37 @@ msgstr ":py:obj:`numpy <flwr.common.Array.numpy>`\\ \\(\\)"
 #: flwr.common.record.parametersrecord.Array.numpy:1 of
 msgid "Return the array as a NumPy array."
 msgstr "배열을 NumPy 배열로 반환합니다."
+
+#: ../../source/ref-api/flwr.common.Array.rst:28
+#: ../../source/ref-api/flwr.common.ClientMessage.rst:25
+#: ../../source/ref-api/flwr.common.Code.rst:19
+#: ../../source/ref-api/flwr.common.Context.rst:25
+#: ../../source/ref-api/flwr.common.DisconnectRes.rst:25
+#: ../../source/ref-api/flwr.common.Error.rst:25
+#: ../../source/ref-api/flwr.common.EvaluateIns.rst:25
+#: ../../source/ref-api/flwr.common.EvaluateRes.rst:25
+#: ../../source/ref-api/flwr.common.EventType.rst:165
+#: ../../source/ref-api/flwr.common.FitIns.rst:25
+#: ../../source/ref-api/flwr.common.FitRes.rst:25
+#: ../../source/ref-api/flwr.common.GetParametersIns.rst:25
+#: ../../source/ref-api/flwr.common.GetParametersRes.rst:25
+#: ../../source/ref-api/flwr.common.GetPropertiesIns.rst:25
+#: ../../source/ref-api/flwr.common.GetPropertiesRes.rst:25
+#: ../../source/ref-api/flwr.common.Message.rst:37
+#: ../../source/ref-api/flwr.common.MessageType.rst:25
+#: ../../source/ref-api/flwr.common.MessageTypeLegacy.rst:25
+#: ../../source/ref-api/flwr.common.Metadata.rst:25
+#: ../../source/ref-api/flwr.common.Parameters.rst:25
+#: ../../source/ref-api/flwr.common.ReconnectIns.rst:25
+#: ../../source/ref-api/flwr.common.RecordSet.rst:25
+#: ../../source/ref-api/flwr.common.ServerMessage.rst:25
+#: ../../source/ref-api/flwr.common.Status.rst:25
+#: ../../source/ref-api/flwr.server.Driver.rst:43
+#: ../../source/ref-api/flwr.server.LegacyContext.rst:25
+#: ../../source/ref-api/flwr.server.ServerAppComponents.rst:25
+#: ../../source/ref-api/flwr.server.ServerConfig.rst:25
+msgid "Attributes"
+msgstr "속성"
 
 #: flwr.common.record.parametersrecord.Array.numpy:1:<autosummary>:1 of
 msgid ":py:obj:`dtype <flwr.common.Array.dtype>`\\"
@@ -26312,7 +26489,7 @@ msgstr ""
 " 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|ae2337ba61dd4efc818e63933fd81666|"
+msgid "|31d9fb7c284a414ba34e32ced3b17b11|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -26329,7 +26506,7 @@ msgstr ""
 " 바둑과 같은 게임을 하는 것일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|14a8d3feda794591a601daaaaa79d0b6|"
+msgid "|32af43ffb54a421d8cfe59939c34206b|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -26355,7 +26532,7 @@ msgstr ""
 "부르리는 것을 듣는 스마트 스피커에서 비롯됩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|c67497f1afa84a30a3901418c6c0bb62|"
+msgid "|34c462a3cde341389422badb2077fc36|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -26373,7 +26550,7 @@ msgstr ""
 "있습니다. 하지만 여러 조직이 모두 같은 작업을 위해 데이터를 생성하는 것일 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|d4ce55da082146d7ad13ec4f73d427a2|"
+msgid "|3a2ded531a9a4b86af3e743490e78172|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -26392,7 +26569,7 @@ msgstr ""
 "서버는 데이터 센터 어딘가에 있을 수도 있고 클라우드 어딘가에 있을 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|0a0c4ca9de6549c1b35225c6e1183bc0|"
+msgid "|52e91c4927884d7293956a379489d8c3|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -26409,7 +26586,7 @@ msgstr ""
 " 우리가 기본적으로 사용해 온 머신러닝 방법입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|f2f5e8cc5594472c842192ec38ab9bbe|"
+msgid "|2bb7af14de844e40bd4186c902800ff5|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -26432,7 +26609,7 @@ msgstr ""
 "트래픽을 분석하는 것이 있습니다. 이러한 사례에서 모든 데이터는 자연스럽게 중앙 서버에 존재합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|4e7b0cd854064aab9895573a612a0f06|"
+msgid "|c7538d5f23f142e693a8879fb03e3932|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -26449,7 +26626,7 @@ msgstr ""
 "좋은 모델을 훈련하기에 충분하지 않을 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|e121faa35b114a0da17cf4bc42e74ce9|"
+msgid "|44f9182037b141868306b5c7d2d7bdf6|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -26628,7 +26805,7 @@ msgstr ""
 "체크포인트에서 모델 매개변수를 초기화합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|e7a57a83812c4dc8933fbb93cd0e46dc|"
+msgid "|e198f643aecc4cd58ca665e6979b5bb3|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -26656,7 +26833,7 @@ msgstr ""
 "개의 연결 노드만 사용합니다. 그 이유는 점점 더 많은 클라이언트 노드를 선택하면 학습의 효율성이 감소하기 때문입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|a0283fe3cd0c4f3cb5d119f424c657fd|"
+msgid "|3e52791d62db46e0b0485e4f05a71070|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -26683,7 +26860,7 @@ msgstr ""
 "데이터에서 한 단계 정도로 짧거나 몇 단계(mini-batches)에 불과할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|debbe320f2c741388902ebabfb6fc705|"
+msgid "|eeb43ec811934701963187e3822826ae|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -26709,7 +26886,7 @@ msgstr ""
 "보냅니다. 보내는 모델 업데이트는 전체 모델 파라미터거나 로컬 교육 중에 누적된 그레디언트(gradient)일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|8be6ce669d3148f9af6272ca27a98197|"
+msgid "|b1642f82fc774ff3a1f7b2f077844291|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -26759,7 +26936,7 @@ msgstr ""
 "많은 영향을 미칩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|47c4a06eafbb4e2fa1c62b5ca47d3411|"
+msgid "|17ab6ee928b54a02afcac8d896a3a637|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -26879,7 +27056,7 @@ msgstr ""
 "사용자는 모든 워크로드, 머신러닝 프레임워크 및 모든 프로그래밍 언어를 통합할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|5e84b181879b4bcda37b672215325b30|"
+msgid "|1bd7ba9475d44bdbb4d4a4a40d3e2267|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -33931,5 +34108,115 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|e4adf0f92ebf4c3d9e6e64355204f897|"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "There are many ways to deploy "
+#~ "Flower on Microst Azure. The "
+#~ "instructions provided in this guide is"
+#~ " just a basic walkthrough, step-"
+#~ "by-step guide on how to quickly "
+#~ "setup and run a Flower application "
+#~ "on a Federated Learning environment on"
+#~ " Microst Azure."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In this how-to guide, we want "
+#~ "to create a Federated Learning "
+#~ "environment on Microst Azure using three"
+#~ " Virtual Machines (VMs). From the "
+#~ "three machines, one machine will be "
+#~ "used as the Federation server and "
+#~ "two as the Federation clients. Our "
+#~ "goal is to create a Flower "
+#~ "federation on Microst Azure where we "
+#~ "can run Flower apps from our local"
+#~ " machine, e.g., laptop."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Assuming we are already inside the "
+#~ "Microst Azure portal, we navigate to "
+#~ "the ``Create`` page and we select "
+#~ "``Azure virtual machine``. In the new"
+#~ " page, for each VM we edit the"
+#~ " properties as follows:"
+#~ msgstr ""
+
+#~ msgid "List runs."
+#~ msgstr ""
+
+#~ msgid ":py:obj:`get_context <flwr.client.Client.get_context>`\\ \\(\\)"
+#~ msgstr ":py:obj:`get_context <flwr.client.Client.get_context>`\\ \\(\\)"
+
+#~ msgid "Get the run context from this client."
+#~ msgstr "이 클라이언트에서 실행 컨텍스트를 가져옵니다."
+
+#~ msgid ":py:obj:`set_context <flwr.client.Client.set_context>`\\ \\(context\\)"
+#~ msgstr ":py:obj:`set_context <flwr.client.Client.set_context>`\\ \\(context\\)"
+
+#~ msgid "Apply a run context to this client."
+#~ msgstr "이 클라이언트에 실행 컨텍스트를 적용합니다."
+
+#~ msgid ":py:obj:`context <flwr.client.Client.context>`\\"
+#~ msgstr ":py:obj:`context <flwr.client.Client.context>`\\"
+
+#~ msgid "Getter for `Context` client attribute."
+#~ msgstr ""
+
+#~ msgid ":py:obj:`get_context <flwr.client.NumPyClient.get_context>`\\ \\(\\)"
+#~ msgstr ":py:obj:`get_context <flwr.client.NumPyClient.get_context>`\\ \\(\\)"
+
+#~ msgid ""
+#~ ":py:obj:`set_context <flwr.client.NumPyClient.set_context>`\\"
+#~ " \\(context\\)"
+#~ msgstr ""
+#~ ":py:obj:`set_context <flwr.client.NumPyClient.set_context>`\\"
+#~ " \\(context\\)"
+
+#~ msgid ":py:obj:`context <flwr.client.NumPyClient.context>`\\"
+#~ msgstr ":py:obj:`context <flwr.client.NumPyClient.context>`\\"
+
+#~ msgid "|ae2337ba61dd4efc818e63933fd81666|"
+#~ msgstr ""
+
+#~ msgid "|14a8d3feda794591a601daaaaa79d0b6|"
+#~ msgstr ""
+
+#~ msgid "|c67497f1afa84a30a3901418c6c0bb62|"
+#~ msgstr ""
+
+#~ msgid "|d4ce55da082146d7ad13ec4f73d427a2|"
+#~ msgstr ""
+
+#~ msgid "|0a0c4ca9de6549c1b35225c6e1183bc0|"
+#~ msgstr ""
+
+#~ msgid "|f2f5e8cc5594472c842192ec38ab9bbe|"
+#~ msgstr ""
+
+#~ msgid "|4e7b0cd854064aab9895573a612a0f06|"
+#~ msgstr ""
+
+#~ msgid "|e121faa35b114a0da17cf4bc42e74ce9|"
+#~ msgstr ""
+
+#~ msgid "|e7a57a83812c4dc8933fbb93cd0e46dc|"
+#~ msgstr ""
+
+#~ msgid "|a0283fe3cd0c4f3cb5d119f424c657fd|"
+#~ msgstr ""
+
+#~ msgid "|debbe320f2c741388902ebabfb6fc705|"
+#~ msgstr ""
+
+#~ msgid "|8be6ce669d3148f9af6272ca27a98197|"
+#~ msgstr ""
+
+#~ msgid "|47c4a06eafbb4e2fa1c62b5ca47d3411|"
+#~ msgstr ""
+
+#~ msgid "|5e84b181879b4bcda37b672215325b30|"
 #~ msgstr ""
 
