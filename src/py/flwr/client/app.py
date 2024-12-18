@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower client app."""
 
+
 import signal
 import subprocess
 import sys
@@ -55,7 +56,7 @@ from flwr.common.constant import (
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
-from flwr.common.typing import Fab, Run, UserConfig
+from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.server.superlink.fleet.grpc_bidi.grpc_server import generic_create_grpc_server
 from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
@@ -474,7 +475,7 @@ def start_client_internal(
 
                     run: Run = runs[run_id]
                     if get_fab is not None and run.fab_hash:
-                        fab = get_fab(run.fab_hash)
+                        fab = get_fab(run.fab_hash, run_id)
                         if not isolation:
                             # If `ClientApp` runs in the same process, install the FAB
                             install_from_fab(fab.content, flwr_path, True)
@@ -610,6 +611,16 @@ def start_client_internal(
                     # Send
                     send(reply_message)
                     log(INFO, "Sent reply")
+
+                except RunNotRunningException:
+                    log(INFO, "")
+                    log(
+                        INFO,
+                        "SuperNode aborted sending the reply message. "
+                        "Run ID %s is not in `RUNNING` status.",
+                        run_id,
+                    )
+                    log(INFO, "")
 
                 except StopIteration:
                     sleep_duration = 0
@@ -752,7 +763,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
                 Optional[Callable[[], Optional[int]]],
                 Optional[Callable[[], None]],
                 Optional[Callable[[int], Run]],
-                Optional[Callable[[str], Fab]],
+                Optional[Callable[[str, int], Fab]],
             ]
         ],
     ],

@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower server app."""
 
+
 import argparse
 import csv
 import importlib.util
@@ -24,9 +25,10 @@ from collections.abc import Sequence
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from time import sleep
-from typing import Optional
+from typing import Any, Optional
 
 import grpc
+import yaml
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.serialization import (
@@ -37,8 +39,10 @@ from cryptography.hazmat.primitives.serialization import (
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.args import try_obtain_server_certificates
+from flwr.common.auth_plugin import ExecAuthPlugin
 from flwr.common.config import get_flwr_dir, parse_config_args
 from flwr.common.constant import (
+    AUTH_TYPE,
     CLIENT_OCTET,
     EXEC_API_DEFAULT_SERVER_ADDRESS,
     FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS,
@@ -86,6 +90,19 @@ from .superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
 
 DATABASE = ":flwr-in-memory-state:"
 BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
+
+
+try:
+    from flwr.ee import add_ee_args_superlink, get_exec_auth_plugins
+except ImportError:
+
+    # pylint: disable-next=unused-argument
+    def add_ee_args_superlink(parser: argparse.ArgumentParser) -> None:
+        """Add EE-specific arguments to the parser."""
+
+    def get_exec_auth_plugins() -> dict[str, type[ExecAuthPlugin]]:
+        """Return all Exec API authentication plugins."""
+        raise NotImplementedError("No authentication plugins are currently supported.")
 
 
 def start_server(  # pylint: disable=too-many-arguments,too-many-locals
@@ -246,6 +263,12 @@ def run_superlink() -> None:
     # Obtain certificates
     certificates = try_obtain_server_certificates(args, args.fleet_api_type)
 
+    user_auth_config = _try_obtain_user_auth_config(args)
+    auth_plugin: Optional[ExecAuthPlugin] = None
+    # user_auth_config is None only if the args.user_auth_config is not provided
+    if user_auth_config is not None:
+        auth_plugin = _try_obtain_exec_auth_plugin(user_auth_config)
+
     # Initialize StateFactory
     state_factory = LinkStateFactory(args.database)
 
@@ -263,6 +286,7 @@ def run_superlink() -> None:
         config=parse_config_args(
             [args.executor_config] if args.executor_config else args.executor_config
         ),
+        auth_plugin=auth_plugin,
     )
     grpc_servers = [exec_server]
 
@@ -360,7 +384,7 @@ def run_superlink() -> None:
                     "Node authentication enabled with %d known public keys",
                     len(node_public_keys),
                 )
-                interceptors = [AuthenticateServerInterceptor(state)]
+                interceptors = [AuthenticateServerInterceptor(state_factory)]
 
             fleet_server = _run_fleet_api_grpc_rere(
                 address=fleet_address,
@@ -559,6 +583,32 @@ def _try_setup_node_authentication(
         )
 
 
+def _try_obtain_user_auth_config(args: argparse.Namespace) -> Optional[dict[str, Any]]:
+    if getattr(args, "user_auth_config", None) is not None:
+        with open(args.user_auth_config, encoding="utf-8") as file:
+            config: dict[str, Any] = yaml.safe_load(file)
+            return config
+    return None
+
+
+def _try_obtain_exec_auth_plugin(config: dict[str, Any]) -> Optional[ExecAuthPlugin]:
+    auth_config: dict[str, Any] = config.get("authentication", {})
+    auth_type: str = auth_config.get(AUTH_TYPE, "")
+    try:
+        all_plugins: dict[str, type[ExecAuthPlugin]] = get_exec_auth_plugins()
+        auth_plugin_class = all_plugins[auth_type]
+        return auth_plugin_class(config=auth_config)
+    except KeyError:
+        if auth_type != "":
+            sys.exit(
+                f'Authentication type "{auth_type}" is not supported. '
+                "Please provide a valid authentication type in the configuration."
+            )
+        sys.exit("No authentication type is provided in the configuration.")
+    except NotImplementedError:
+        sys.exit("No authentication plugins are currently supported.")
+
+
 def _run_fleet_api_grpc_rere(
     address: str,
     state_factory: LinkStateFactory,
@@ -657,6 +707,7 @@ def _parse_args_run_superlink() -> argparse.ArgumentParser:
     )
 
     _add_args_common(parser=parser)
+    add_ee_args_superlink(parser=parser)
     _add_args_serverappio_api(parser=parser)
     _add_args_fleet_api(parser=parser)
     _add_args_exec_api(parser=parser)
