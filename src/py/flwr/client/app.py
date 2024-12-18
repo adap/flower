@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower client app."""
 
+
 import signal
 import subprocess
 import sys
@@ -41,6 +42,7 @@ from flwr.common.constant import (
     CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
+    MAX_RETRY_DELAY,
     MISSING_EXTRA_REST,
     RUN_ID_NUM_BYTES,
     SERVER_OCTET,
@@ -54,7 +56,7 @@ from flwr.common.constant import (
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
-from flwr.common.typing import Fab, Run, UserConfig
+from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.server.superlink.fleet.grpc_bidi.grpc_server import generic_create_grpc_server
 from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
@@ -235,8 +237,6 @@ def start_client_internal(
     flwr_path: Optional[Path] = None,
     isolation: Optional[str] = None,
     clientappio_api_address: Optional[str] = CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
-    certificates: Optional[tuple[bytes, bytes, bytes]] = None,
-    ssl_ca_certfile: Optional[str] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -300,10 +300,6 @@ def start_client_internal(
     clientappio_api_address : Optional[str]
         (default: `CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS`)
         The SuperNode gRPC server address.
-    certificates : Optional[Tuple[bytes, bytes, bytes]] (default: None)
-        Tuple containing the CA certificate, server certificate, and server private key.
-    ssl_ca_certfile : Optional[str] (default: None)
-        The path to the CA certificate file used by `flwr-clientapp` in subprocess mode.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -337,7 +333,7 @@ def start_client_internal(
             )
         _clientappio_grpc_server, clientappio_servicer = run_clientappio_api_grpc(
             address=clientappio_api_address,
-            certificates=certificates,
+            certificates=None,
         )
     clientappio_api_address = cast(str, clientappio_api_address)
 
@@ -373,7 +369,7 @@ def start_client_internal(
             )
 
     retry_invoker = RetryInvoker(
-        wait_gen_factory=exponential,
+        wait_gen_factory=lambda: exponential(max_delay=MAX_RETRY_DELAY),
         recoverable_exceptions=connection_error_type,
         max_tries=max_retries + 1 if max_retries is not None else None,
         max_time=max_wait_time,
@@ -479,7 +475,7 @@ def start_client_internal(
 
                     run: Run = runs[run_id]
                     if get_fab is not None and run.fab_hash:
-                        fab = get_fab(run.fab_hash)
+                        fab = get_fab(run.fab_hash, run_id)
                         if not isolation:
                             # If `ClientApp` runs in the same process, install the FAB
                             install_from_fab(fab.content, flwr_path, True)
@@ -551,11 +547,7 @@ def start_client_internal(
                                     "--token",
                                     str(token),
                                 ]
-                                if ssl_ca_certfile:
-                                    command.append("--root-certificates")
-                                    command.append(ssl_ca_certfile)
-                                else:
-                                    command.append("--insecure")
+                                command.append("--insecure")
 
                                 subprocess.run(
                                     command,
@@ -619,6 +611,16 @@ def start_client_internal(
                     # Send
                     send(reply_message)
                     log(INFO, "Sent reply")
+
+                except RunNotRunningException:
+                    log(INFO, "")
+                    log(
+                        INFO,
+                        "SuperNode aborted sending the reply message. "
+                        "Run ID %s is not in `RUNNING` status.",
+                        run_id,
+                    )
+                    log(INFO, "")
 
                 except StopIteration:
                     sleep_duration = 0
@@ -761,7 +763,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
                 Optional[Callable[[], Optional[int]]],
                 Optional[Callable[[], None]],
                 Optional[Callable[[int], Run]],
-                Optional[Callable[[str], Fab]],
+                Optional[Callable[[str, int], Fab]],
             ]
         ],
     ],

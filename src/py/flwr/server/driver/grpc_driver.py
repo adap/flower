@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower gRPC Driver."""
 
+
 import time
 import warnings
 from collections.abc import Iterable
@@ -26,6 +27,7 @@ from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
 from flwr.common.constant import SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
+from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import message_from_taskres, message_to_taskins, run_from_proto
 from flwr.common.typing import Run
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
@@ -75,6 +77,7 @@ class GrpcDriver(Driver):
         self._grpc_stub: Optional[ServerAppIoStub] = None
         self._channel: Optional[grpc.Channel] = None
         self.node = Node(node_id=0, anonymous=True)
+        self._retry_invoker = _make_simple_grpc_retry_invoker()
 
     @property
     def _is_connected(self) -> bool:
@@ -95,6 +98,7 @@ class GrpcDriver(Driver):
             root_certificates=self._cert,
         )
         self._grpc_stub = ServerAppIoStub(self._channel)
+        _wrap_stub(self._grpc_stub, self._retry_invoker)
         log(DEBUG, "[Driver] Connected to %s", self._addr)
 
     def _disconnect(self) -> None:
@@ -200,7 +204,9 @@ class GrpcDriver(Driver):
             task_ins_list.append(taskins)
         # Call GrpcDriverStub method
         res: PushTaskInsResponse = self._stub.PushTaskIns(
-            PushTaskInsRequest(task_ins_list=task_ins_list)
+            PushTaskInsRequest(
+                task_ins_list=task_ins_list, run_id=cast(Run, self._run).run_id
+            )
         )
         return list(res.task_ids)
 
@@ -212,7 +218,9 @@ class GrpcDriver(Driver):
         """
         # Pull TaskRes
         res: PullTaskResResponse = self._stub.PullTaskRes(
-            PullTaskResRequest(node=self.node, task_ids=message_ids)
+            PullTaskResRequest(
+                node=self.node, task_ids=message_ids, run_id=cast(Run, self._run).run_id
+            )
         )
         # Convert TaskRes to Message
         msgs = [message_from_taskres(taskres) for taskres in res.task_res_list]

@@ -14,7 +14,9 @@
 # ==============================================================================
 """Flower ClientApp process."""
 
+
 import argparse
+import sys
 import time
 from logging import DEBUG, ERROR, INFO
 from typing import Optional
@@ -24,12 +26,13 @@ import grpc
 from flwr.cli.install import install_from_fab
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import Context, Message
-from flwr.common.args import add_args_flwr_app_common, try_obtain_root_certificates
+from flwr.common.args import add_args_flwr_app_common
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import CLIENTAPPIO_API_DEFAULT_CLIENT_ADDRESS, ErrorCode
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.message import Error
+from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import (
     context_from_proto,
     context_to_proto,
@@ -57,10 +60,15 @@ from .utils import get_load_client_app_fn
 def flwr_clientapp() -> None:
     """Run process-isolated Flower ClientApp."""
     args = _parse_args_run_flwr_clientapp().parse_args()
+    if not args.insecure:
+        log(
+            ERROR,
+            "flwr-clientapp does not support TLS yet. "
+            "Please use the '--insecure' flag.",
+        )
+        sys.exit(1)
 
     log(INFO, "Starting Flower ClientApp")
-    certificates = try_obtain_root_certificates(args, args.clientappio_api_address)
-
     log(
         DEBUG,
         "Starting isolated `ClientApp` connected to SuperNode's ClientAppIo API at %s "
@@ -73,7 +81,7 @@ def flwr_clientapp() -> None:
         run_once=(args.token is not None),
         token=args.token,
         flwr_dir=args.flwr_dir,
-        certificates=certificates,
+        certificates=None,
     )
 
 
@@ -99,9 +107,9 @@ def run_clientapp(  # pylint: disable=R0914
 
     # Resolve directory where FABs are installed
     flwr_dir_ = get_flwr_dir(flwr_dir)
-
     try:
         stub = ClientAppIoStub(channel)
+        _wrap_stub(stub, _make_simple_grpc_retry_invoker())
 
         while True:
             # If token is not set, loop until token is received from SuperNode
@@ -132,6 +140,7 @@ def run_clientapp(  # pylint: disable=R0914
 
                 # Execute ClientApp
                 reply_message = client_app(message=message, context=context)
+
             except Exception as ex:  # pylint: disable=broad-exception-caught
                 # Don't update/change NodeState
 

@@ -14,7 +14,7 @@ cd $ROOT
 ./datasets/dev/build-flwr-datasets-docs.sh
 
 cd $ROOT
-cd doc
+cd framework/docs 
 
 if [ "$1" = true ]; then
     ./build-versioned-docs.sh
