@@ -161,10 +161,53 @@ def get_sha256_hash(file_path: Path) -> str:
 
 
 def get_user_auth_config_path(root_dir: Path, federation: str) -> Path:
-    """Return the path to the user auth config file."""
+    """Return the path to the user auth config file.
+
+    Additionally, a `.gitignore` file will be created in the Flower directory to
+    include the `.credentials` folder to be excluded from git. If the `.gitignore`
+    file already exists, a warning will be displayed if the `.credentials` entry is
+    not found.
+    """
     # Locate the credentials directory
-    credentials_dir = root_dir.absolute() / FLWR_DIR / CREDENTIALS_DIR
+    abs_flwr_dir = root_dir.absolute() / FLWR_DIR
+    credentials_dir = abs_flwr_dir / CREDENTIALS_DIR
     credentials_dir.mkdir(parents=True, exist_ok=True)
+
+    # Determine the absolute path of the Flower directory for .gitignore
+    gitignore_path = abs_flwr_dir / ".gitignore"
+    credential_entry = CREDENTIALS_DIR
+
+    try:
+        if gitignore_path.exists():
+            with open(gitignore_path, encoding="utf-8") as gitignore_file:
+                lines = gitignore_file.read().splitlines()
+
+            # Warn if .credentials is not already in .gitignore
+            if credential_entry not in lines:
+                typer.secho(
+                    f"`.gitignore` exists, but `{credential_entry}` entry not found. "
+                    "Consider adding it to your `.gitignore` to exclude Flower "
+                    "credentials from git.",
+                    fg=typer.colors.YELLOW,
+                    bold=True,
+                )
+        else:
+            typer.secho(
+                f"Creating a new `.gitignore` with `{credential_entry}` entry...",
+                fg=typer.colors.BLUE,
+            )
+            # Create a new .gitignore with .credentials
+            with open(gitignore_path, "w", encoding="utf-8") as gitignore_file:
+                gitignore_file.write(f"{credential_entry}\n")
+    except Exception as err:
+        typer.secho(
+            "❌ An error occurred while handling `.gitignore.` "
+            f"Please check the permissions of `{gitignore_path}` and try again.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1) from err
+
     return credentials_dir / f"{federation}.json"
 
 
