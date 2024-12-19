@@ -177,16 +177,23 @@ def get_user_auth_config_path(root_dir: Path, federation: str) -> Path:
 
     try:
         if gitignore_path.exists():
-            # Read existing .gitignore content
             with open(gitignore_path, encoding="utf-8") as gitignore_file:
                 lines = gitignore_file.read().splitlines()
 
-            # Check if .credentials is already in .gitignore
+            # Warn if .credentials is not already in .gitignore
             if credential_entry not in lines:
-                # Append .credentials to .gitignore
-                with open(gitignore_path, "a", encoding="utf-8") as gitignore_file:
-                    gitignore_file.write(f"\n{credential_entry}\n")
+                typer.secho(
+                    f"`.gitignore` exists, but `{credential_entry}` entry not found. "
+                    "Consider adding it to your `.gitignore` to exclude Flower "
+                    "credentials from git.",
+                    fg=typer.colors.YELLOW,
+                    bold=True,
+                )
         else:
+            typer.secho(
+                f"Creating a new `.gitignore` with `{credential_entry}` entry...",
+                fg=typer.colors.BLUE,
+            )
             # Create a new .gitignore with .credentials
             with open(gitignore_path, "w", encoding="utf-8") as gitignore_file:
                 gitignore_file.write(f"{credential_entry}\n")
