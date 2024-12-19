@@ -374,6 +374,7 @@ def run_superlink() -> None:
                     server_public_key,
                 ) = maybe_keys
                 state = state_factory.state()
+                state.clear_supernode_auth_keys_and_credentials()
                 state.store_node_public_keys(node_public_keys)
                 state.store_server_private_public_key(
                     private_key_to_bytes(server_private_key),
