@@ -30,7 +30,7 @@ from flwr_datasets.partitioner.vertical_partitioner_utils import (
 class VerticalEvenPartitioner(Partitioner):
     """Partitioner that splits features (columns) evenly into vertical partitions.
 
-    Enables selection of "active party" column(s) and palcement into
+    Enables selection of "active party" column(s) and placement into
     a specific partition or creation of a new partition just for it.
     Also enables droping columns and sharing specified columns across
     all partitions.
@@ -175,7 +175,7 @@ class VerticalEvenPartitioner(Partitioner):
 
     def _validate_parameters_in_init(self) -> None:
         if self._num_partitions < 1:
-            raise ValueError("column_distribution as int must be >= 1.")
+            raise ValueError("`column_distribution` as int must be >= 1.")
 
         # Validate columns lists
         for parameter_name, parameter_list in [
@@ -184,7 +184,7 @@ class VerticalEvenPartitioner(Partitioner):
             ("active_party_column", self._active_party_columns),
         ]:
             if not all(isinstance(column, str) for column in parameter_list):
-                raise ValueError(f"All entries in {parameter_name} must be strings.")
+                raise ValueError(f"All entries in '{parameter_name}' must be strings.")
 
         valid_modes = {
             "add_to_first",
@@ -198,7 +198,7 @@ class VerticalEvenPartitioner(Partitioner):
             or self._active_party_columns_mode in valid_modes
         ):
             raise ValueError(
-                "active_party_column_mode must be an int or one of "
+                "`active_party_column_mode` must be an int or one of "
                 "'add_to_first', 'add_to_last', 'create_as_first', 'create_as_last', "
                 "'add_to_all'."
             )
