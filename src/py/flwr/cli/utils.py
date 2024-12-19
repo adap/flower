@@ -201,8 +201,8 @@ def get_user_auth_config_path(root_dir: Path, federation: str) -> Path:
                 gitignore_file.write(f"{credential_entry}\n")
     except Exception as err:
         typer.secho(
-            "❌ An error occurred while handling .gitignore. "
-            f"Please check the permissions of {gitignore_path} and try again.",
+            "❌ An error occurred while handling `.gitignore.` "
+            f"Please check the permissions of `{gitignore_path}` and try again.",
             fg=typer.colors.RED,
             bold=True,
         )
