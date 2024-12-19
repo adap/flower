@@ -69,4 +69,6 @@ flwr run . --run-config num-server-rounds=5
 ### Run with the Deployment Engine
 
 > \[!NOTE\]
-> An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.
+> An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates.
+
+To easily run this example with the Deployment Engine using Docker, check our [how-to guide](https://flower.ai/docs/framework/docker/run-quickstart-examples-docker-compose.html) for running Flower quickstart examples with Docker Compose.
