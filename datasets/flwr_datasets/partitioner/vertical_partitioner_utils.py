@@ -103,3 +103,29 @@ def _add_active_party_columns(  # pylint: disable=R0912
                 for partition in partition_columns:
                     partition.append(column)
     return partition_columns
+
+
+def _init_optional_str_or_list_str(parameter: Union[str, list[str], None]) -> list[str]:
+    """Initialize a parameter as a list of strings.
+
+    Parameters
+    ----------
+    parameter : Union[str, list[str], None]
+        A parameter that should be a string, a list of strings, or None.
+
+    Returns
+    -------
+    parameter: list[str]
+        The parameter as a list of strings.
+    """
+    if parameter is None:
+        return []
+    if not isinstance(parameter, (str, list)):
+        raise TypeError("Parameter must be a string or a list of strings")
+    if isinstance(parameter, list) and not all(
+        isinstance(single_param, str) for single_param in parameter
+    ):
+        raise TypeError("All elements in the list must be strings")
+    if isinstance(parameter, str):
+        return [parameter]
+    return parameter

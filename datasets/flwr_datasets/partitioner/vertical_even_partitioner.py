@@ -23,6 +23,7 @@ import datasets
 from flwr_datasets.partitioner.partitioner import Partitioner
 from flwr_datasets.partitioner.vertical_partitioner_utils import (
     _add_active_party_columns,
+    _init_optional_str_or_list_str,
     _list_split,
 )
 
@@ -91,18 +92,20 @@ class VerticalEvenPartitioner(Partitioner):
             ],
             int,
         ] = "add_to_last",
-        drop_columns: Optional[list[str]] = None,
-        shared_columns: Optional[list[str]] = None,
+        drop_columns: Optional[Union[str, list[str]]] = None,
+        shared_columns: Optional[Union[str, list[str]]] = None,
         shuffle: bool = True,
         seed: Optional[int] = 42,
     ) -> None:
         super().__init__()
 
         self._num_partitions = num_partitions
-        self._active_party_columns = active_party_columns or []
+        self._active_party_columns = _init_optional_str_or_list_str(
+            active_party_columns
+        )
         self._active_party_columns_mode = active_party_columns_mode
-        self._drop_columns = drop_columns or []
-        self._shared_columns = shared_columns or []
+        self._drop_columns = _init_optional_str_or_list_str(drop_columns)
+        self._shared_columns = _init_optional_str_or_list_str(shared_columns)
         self._shuffle = shuffle
         self._seed = seed
         self._rng = np.random.default_rng(seed=self._seed)
@@ -176,15 +179,6 @@ class VerticalEvenPartitioner(Partitioner):
     def _validate_parameters_in_init(self) -> None:
         if self._num_partitions < 1:
             raise ValueError("column_distribution as int must be >= 1.")
-
-        # Validate columns lists
-        for parameter_name, parameter_list in [
-            ("drop_columns", self._drop_columns),
-            ("shared_columns", self._shared_columns),
-            ("active_party_column", self._active_party_columns),
-        ]:
-            if not all(isinstance(column, str) for column in parameter_list):
-                raise ValueError(f"All entries in {parameter_name} must be strings.")
 
         valid_modes = {
             "add_to_first",
