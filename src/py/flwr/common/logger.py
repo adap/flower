@@ -15,16 +15,21 @@
 """Flower Logger."""
 
 
+import json as _json
 import logging
+import re
 import sys
 import threading
 import time
+from io import StringIO
 from logging import WARN, LogRecord
 from logging.handlers import HTTPHandler
 from queue import Empty, Queue
 from typing import TYPE_CHECKING, Any, Optional, TextIO, Union
 
 import grpc
+import typer
+from rich.console import Console
 
 from flwr.proto.log_pb2 import PushLogsRequest  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
@@ -303,6 +308,13 @@ def restore_output() -> None:
     console_handler.stream = sys.stdout
 
 
+def redirect_output(output_buffer: StringIO) -> None:
+    """Redirect stdout and stderr to text I/O buffer."""
+    sys.stdout = output_buffer
+    sys.stderr = output_buffer
+    console_handler.stream = sys.stdout
+
+
 def _log_uploader(
     log_queue: Queue[Optional[str]], node_id: int, run_id: int, stub: ServerAppIoStub
 ) -> None:
@@ -366,3 +378,31 @@ def stop_log_uploader(
     """Stop the log uploader thread."""
     log_queue.put(None)
     log_uploader.join()
+
+
+def _remove_emojis(text: str) -> str:
+    """Remove emojis from the provided text."""
+    emoji_pattern = re.compile(
+        "["
+        "\U0001F600-\U0001F64F"  # Emoticons
+        "\U0001F300-\U0001F5FF"  # Symbols & Pictographs
+        "\U0001F680-\U0001F6FF"  # Transport & Map Symbols
+        "\U0001F1E0-\U0001F1FF"  # Flags
+        "\U00002702-\U000027B0"  # Dingbats
+        "\U000024C2-\U0001F251"
+        "]+",
+        flags=re.UNICODE,
+    )
+    return emoji_pattern.sub(r"", text)
+
+
+def print_json_error(msg: str, e: Union[typer.Exit, Exception]) -> None:
+    """Print error message as JSON."""
+    Console().print_json(
+        _json.dumps(
+            {
+                "success": False,
+                "error-message": _remove_emojis(str(msg) + "\n" + str(e)),
+            }
+        )
+    )
