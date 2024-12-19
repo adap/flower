@@ -175,6 +175,10 @@ class EventType(str, Enum):
     RUN_SUPERNODE_ENTER = auto()
     RUN_SUPERNODE_LEAVE = auto()
 
+    # CLI: flwr-serverapp
+    RUN_SERVERAPP_ENTER = auto()
+    RUN_SERVERAPP_LEAVE = auto()
+
     # --- DEPRECATED -------------------------------------------------------------------
 
     # [DEPRECATED] CLI: `flower-server-app`

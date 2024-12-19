@@ -24,6 +24,7 @@ from typing import Optional
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
+from flwr.cli.utils import get_sha256_hash
 from flwr.common import EventType, event
 from flwr.common.args import add_args_flwr_app_common
 from flwr.common.config import (
@@ -137,6 +138,8 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
             run = run_from_proto(res.run)
             fab = fab_from_proto(res.fab)
 
+            hash_run_id = get_sha256_hash(run.run_id)
+
             # Start log uploader for this run
             log_uploader = start_log_uploader(
                 log_queue=log_queue,
@@ -207,6 +210,7 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
                 event_details={
                     "backend": "ray",
                     "num-supernodes": num_supernodes,
+                    "run-id": hash_run_id,
                 },
             )
 
