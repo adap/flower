@@ -48,7 +48,7 @@ def _list_split(lst: list[Any], num_sublists: int) -> list[list[Any]]:
 
 
 def _add_active_party_columns(
-    active_party_columns: list[str],
+    active_party_columns: Union[str, list[str]],
     active_party_columns_mode: Union[
         Literal[
             "add_to_first",
@@ -65,7 +65,7 @@ def _add_active_party_columns(
 
     Parameters
     ----------
-    active_party_columns : list[str]
+    active_party_columns : Union[str, list[str]]
         List of active party columns.
     active_party_columns_mode : Union[Literal["add_to_first", "add_to_last", "create_as_first", "create_as_last", "add_to_all"], int]
         Mode to add active party columns to partition columns.
@@ -75,6 +75,8 @@ def _add_active_party_columns(
     partition_columns: list[list[str]]
         List of partition columns after the modyfication.
     """
+    if isinstance(active_party_columns, str):
+        active_party_columns = [active_party_columns]
     if isinstance(active_party_columns_mode, int):
         partition_id = active_party_columns_mode
         if partition_id < 0 or partition_id >= len(partition_columns):

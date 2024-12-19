@@ -207,8 +207,10 @@ class VerticalEvenPartitioner(Partitioner):
         self,
         all_columns: list[str],
         shared_columns: list[str],
-        active_party_column: list[str],
+        active_party_column: Union[str, list[str]],
     ) -> None:
+        if isinstance(active_party_column, str):
+            active_party_column = [active_party_column]
         # Shared columns existance check
         for column in shared_columns:
             if column not in all_columns:
