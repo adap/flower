@@ -45,7 +45,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
   The `flwr new` command now works correctly on Windows by setting UTF-8 encoding, ensuring compatibility across all platforms when creating and transferring files.
 
-- **Update examples and templates** ([#4725](https://github.com/adap/flower/pull/4725), [#4724](https://github.com/adap/flower/pull/4724), [#4589](https://github.com/adap/flower/pull/4589), [#4690](https://github.com/adap/flower/pull/4690), [#4708](https://github.com/adap/flower/pull/4708), [#4689](https://github.com/adap/flower/pull/4689), [#4740](https://github.com/adap/flower/pull/4740), [#4741](https://github.com/adap/flower/pull/4741))
+- **Update examples and templates** ([#4725](https://github.com/adap/flower/pull/4725), [#4724](https://github.com/adap/flower/pull/4724), [#4589](https://github.com/adap/flower/pull/4589), [#4690](https://github.com/adap/flower/pull/4690), [#4708](https://github.com/adap/flower/pull/4708), [#4689](https://github.com/adap/flower/pull/4689), [#4740](https://github.com/adap/flower/pull/4740), [#4741](https://github.com/adap/flower/pull/4741), [#4744](https://github.com/adap/flower/pull/4744))
 
   Examples and templates have been updated to improve compatibility and usability. Notable changes include removing unnecessary `numpy` dependencies, upgrading the `mlx` version, and enhancing the authentication example. A link to previous tutorial versions has also been added for reference.
 
