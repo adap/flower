@@ -79,7 +79,7 @@ class VerticalSizePartitioner(Partitioner):
     >>>
     >>> partitioner = VerticalSizePartitioner(
     ...     partition_sizes=[8, 4, 2],
-    ...     active_party_column="income",
+    ...     active_party_columns="income",
     ...     active_party_columns_mode="create_as_last"
     ... )
     >>> fds = FederatedDataset(
@@ -202,7 +202,7 @@ class VerticalSizePartitioner(Partitioner):
         if all(isinstance(fraction, float) for fraction in self._partition_sizes):
             fraction_sum = sum(self._partition_sizes)
             # Tolerance 0.01 for the floating point numerical problems
-            if fraction_sum < 1.01 and fraction_sum > 0.99:
+            if 0.99 < fraction_sum < 1.01:
                 self._partition_sizes = self._partition_sizes[:-1] + [
                     1.0 - self._partition_sizes[-1]
                 ]
