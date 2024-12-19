@@ -15,13 +15,12 @@
 """Run ServerApp."""
 
 
-import sys
 from logging import DEBUG, ERROR
 from typing import Optional
 
 from flwr.common import Context, EventType, event
 from flwr.common.exit_handlers import register_exit_handlers
-from flwr.common.logger import log, warn_unsupported_feature
+from flwr.common.logger import log
 from flwr.common.object_ref import load_app
 
 from .driver import Driver
