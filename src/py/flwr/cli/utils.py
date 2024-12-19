@@ -163,8 +163,10 @@ def get_sha256_hash(file_path: Path) -> str:
 def get_user_auth_config_path(root_dir: Path, federation: str) -> Path:
     """Return the path to the user auth config file.
 
-    Additionally, a `.gitignore` file will be created or updated in the Flower
-    directory to include the `.credentials` folder to be excluded from git.
+    Additionally, a `.gitignore` file will be created in the Flower directory to
+    include the `.credentials` folder to be excluded from git. If the `.gitignore`
+    file already exists, a warning will be displayed if the `.credentials` entry is
+    not found.
     """
     # Locate the credentials directory
     abs_flwr_dir = root_dir.absolute() / FLWR_DIR
