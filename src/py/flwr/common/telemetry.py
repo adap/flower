@@ -157,6 +157,10 @@ class EventType(str, Enum):
     CLI_FLOWER_SIMULATION_ENTER = auto()
     CLI_FLOWER_SIMULATION_LEAVE = auto()
 
+    # CLI: flwr-simulation
+    RUN_SIMULATION_ENTER = auto()
+    RUN_SIMULATION_LEAVE = auto()
+
     # Python API: `run_simulation`
     PYTHON_API_RUN_SIMULATION_ENTER = auto()
     PYTHON_API_RUN_SIMULATION_LEAVE = auto()
@@ -171,11 +175,15 @@ class EventType(str, Enum):
     RUN_SUPERNODE_ENTER = auto()
     RUN_SUPERNODE_LEAVE = auto()
 
-    # CLI: `flower-server-app`
-    RUN_SERVER_APP_ENTER = auto()
-    RUN_SERVER_APP_LEAVE = auto()
+    # CLI: flwr-serverapp
+    RUN_SERVERAPP_ENTER = auto()
+    RUN_SERVERAPP_LEAVE = auto()
 
     # --- DEPRECATED -------------------------------------------------------------------
+
+    # [DEPRECATED] CLI: `flower-server-app`
+    RUN_SERVER_APP_ENTER = auto()
+    RUN_SERVER_APP_LEAVE = auto()
 
     # [DEPRECATED] CLI: `flower-client-app`
     RUN_CLIENT_APP_ENTER = auto()
