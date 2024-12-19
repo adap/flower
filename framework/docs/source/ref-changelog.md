@@ -25,7 +25,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Add [how-to guide](https://flower.ai/docs/framework/how-to-run-flower-on-azure.html) for running Flower on Microsoft Azure VM instances** ([#4625](https://github.com/adap/flower/pull/4625))
 
-- **Introduce user authentication infrastructure** ([#4630](https://github.com/adap/flower/pull/4630), [#4244](https://github.com/adap/flower/pull/4244), [#4602](https://github.com/adap/flower/pull/4602), [#4618](https://github.com/adap/flower/pull/4618), [#4717](https://github.com/adap/flower/pull/4717), [#4719](https://github.com/adap/flower/pull/4719))
+- **Introduce user authentication infrastructure** ([#4630](https://github.com/adap/flower/pull/4630), [#4244](https://github.com/adap/flower/pull/4244), [#4602](https://github.com/adap/flower/pull/4602), [#4618](https://github.com/adap/flower/pull/4618), [#4717](https://github.com/adap/flower/pull/4717), [#4719](https://github.com/adap/flower/pull/4719), [#4745](https://github.com/adap/flower/pull/4745))
 
   Initial infrastructure for **user authentication** in Flower has been added. It features a plugin-like design for flexibility and future implementation. Authentication is expected to work with **OIDC**.
 
@@ -55,7 +55,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Update infrastructure and CI/CD** ([#4614](https://github.com/adap/flower/pull/4614), [#4686](https://github.com/adap/flower/pull/4686), [#4587](https://github.com/adap/flower/pull/4587), [#4715](https://github.com/adap/flower/pull/4715), [#4728](https://github.com/adap/flower/pull/4728), [#4679](https://github.com/adap/flower/pull/4679), [#4675](https://github.com/adap/flower/pull/4675), [#4680](https://github.com/adap/flower/pull/4680), [#4676](https://github.com/adap/flower/pull/4676))
 
-- **Bugfixes** ([#4677](https://github.com/adap/flower/pull/4677), [#4671](https://github.com/adap/flower/pull/4671), [#4670](https://github.com/adap/flower/pull/4670), [#4674](https://github.com/adap/flower/pull/4674), [#4687](https://github.com/adap/flower/pull/4687), [#4605](https://github.com/adap/flower/pull/4605))
+- **Bugfixes** ([#4677](https://github.com/adap/flower/pull/4677), [#4671](https://github.com/adap/flower/pull/4671), [#4670](https://github.com/adap/flower/pull/4670), [#4674](https://github.com/adap/flower/pull/4674), [#4687](https://github.com/adap/flower/pull/4687), [#4605](https://github.com/adap/flower/pull/4605), [#4736](https://github.com/adap/flower/pull/4736))
 
 - **General improvements** ([#4631](https://github.com/adap/flower/pull/4631), [#4660](https://github.com/adap/flower/pull/4660), [#4599](https://github.com/adap/flower/pull/4599), [#4672](https://github.com/adap/flower/pull/4672), [#4705](https://github.com/adap/flower/pull/4705), [#4688](https://github.com/adap/flower/pull/4688), [#4691](https://github.com/adap/flower/pull/4691), [#4706](https://github.com/adap/flower/pull/4706), [#4709](https://github.com/adap/flower/pull/4709), [#4623](https://github.com/adap/flower/pull/4623), [#4697](https://github.com/adap/flower/pull/4697), [#4597](https://github.com/adap/flower/pull/4597), [#4721](https://github.com/adap/flower/pull/4721), [#4730](https://github.com/adap/flower/pull/4730), [#4720](https://github.com/adap/flower/pull/4720))
 
