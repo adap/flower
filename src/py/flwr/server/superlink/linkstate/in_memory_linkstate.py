@@ -430,6 +430,13 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         """Retrieve `server_public_key` in urlsafe bytes."""
         return self.server_public_key
 
+    def clear_supernode_auth_keys_and_credentials(self) -> None:
+        """Clear stored `node_public_keys` and credentials in the link state if any."""
+        with self.lock:
+            self.server_private_key = None
+            self.server_public_key = None
+            self.node_public_keys.clear()
+
     def store_node_public_keys(self, public_keys: set[bytes]) -> None:
         """Store a set of `node_public_keys` in the link state."""
         with self.lock:
