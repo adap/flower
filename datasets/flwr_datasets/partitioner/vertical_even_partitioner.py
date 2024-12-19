@@ -31,7 +31,7 @@ from flwr_datasets.partitioner.vertical_partitioner_utils import (
 class VerticalEvenPartitioner(Partitioner):
     """Partitioner that splits features (columns) evenly into vertical partitions.
 
-    Enables selection of "active party" column(s) and palcement into
+    Enables selection of "active party" column(s) and placement into
     a specific partition or creation of a new partition just for it.
     Also enables droping columns and sharing specified columns across
     all partitions.
@@ -63,10 +63,13 @@ class VerticalEvenPartitioner(Partitioner):
 
     Examples
     --------
+    >>> from flwr_datasets import FederatedDataset
+    >>> from flwr_datasets.partitioner import VerticalEvenPartitioner
+    >>>
     >>> partitioner = VerticalEvenPartitioner(
     ...     num_partitions=3,
-    ...     active_party_column="income",
-    ...     active_party_column_mode="add_to_last",
+    ...     active_party_columns="income",
+    ...     active_party_columns_mode="add_to_last",
     ...     shuffle=True,
     ...     seed=42
     ... )
@@ -74,7 +77,7 @@ class VerticalEvenPartitioner(Partitioner):
     ...     dataset="scikit-learn/adult-census-income",
     ...     partitioners={"train": partitioner}
     ... )
-    >>> partitions = [fds.load_partition(i) for i in range(partitioner.num_partitions)]
+    >>> partitions = [fds.load_partition(i) for i in range(fds.partitioners["train"].num_partitions)]
     >>> print([partition.column_names for partition in partitions])
     """
 
@@ -178,7 +181,7 @@ class VerticalEvenPartitioner(Partitioner):
 
     def _validate_parameters_in_init(self) -> None:
         if self._num_partitions < 1:
-            raise ValueError("column_distribution as int must be >= 1.")
+            raise ValueError("`column_distribution` as int must be >= 1.")
 
         valid_modes = {
             "add_to_first",
@@ -192,7 +195,7 @@ class VerticalEvenPartitioner(Partitioner):
             or self._active_party_columns_mode in valid_modes
         ):
             raise ValueError(
-                "active_party_column_mode must be an int or one of "
+                "`active_party_column_mode` must be an int or one of "
                 "'add_to_first', 'add_to_last', 'create_as_first', 'create_as_last', "
                 "'add_to_all'."
             )
