@@ -285,6 +285,10 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """Retrieve `server_public_key` in urlsafe bytes."""
 
     @abc.abstractmethod
+    def clear_supernode_auth_keys_and_credentials(self) -> None:
+        """Clear stored `node_public_keys` and credentials in the link state if any."""
+
+    @abc.abstractmethod
     def store_node_public_keys(self, public_keys: set[bytes]) -> None:
         """Store a set of `node_public_keys` in the link state."""
 
