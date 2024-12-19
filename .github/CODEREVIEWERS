@@ -1,0 +1,10 @@
+# The format should be similar to the CODEOWNERS file format:
+# https://help.github.com/en/articles/about-code-owners
+# except paths are replaced with labels
+#
+# Labels that should be mapped to reviewers should all be added
+# in this file and on the GitHub UI (with the exact same name)
+
+simulation @jafermarq
+
+documentation @charlesbvll
