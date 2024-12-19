@@ -177,7 +177,7 @@ class EventType(str, Enum):
 
     # --- DEPRECATED -------------------------------------------------------------------
 
-    # CLI: `flower-server-app`
+    # [DEPRECATED] CLI: `flower-server-app`
     RUN_SERVER_APP_ENTER = auto()
     RUN_SERVER_APP_LEAVE = auto()
 
