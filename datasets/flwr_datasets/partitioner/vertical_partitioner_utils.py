@@ -47,7 +47,7 @@ def _list_split(lst: list[Any], num_sublists: int) -> list[list[Any]]:
     return sublists
 
 
-def _add_active_party_columns(
+def _add_active_party_columns(  # pylint: disable=R0912
     active_party_columns: Union[str, list[str]],
     active_party_columns_mode: Union[
         Literal[
