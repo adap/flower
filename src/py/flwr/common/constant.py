@@ -115,6 +115,9 @@ MAX_RETRY_DELAY = 20  # Maximum delay duration between two consecutive retries.
 CREDENTIALS_DIR = ".credentials"
 AUTH_TYPE = "auth_type"
 
+# Exit Codes
+EXIT_GRPC_ADAPTER_SHUTDOWN = 10  # Exit instructed by grpc-adapter servicer.
+
 
 class MessageType:
     """Message type."""
