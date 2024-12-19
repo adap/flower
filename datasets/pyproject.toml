@@ -49,7 +49,7 @@ packages = [
     { include = "flwr_datasets", from = "./" },
 ]
 exclude = [
-    "./**/*_test.py",
+    "./tests/**",
 ]
 
 [tool.poetry.dependencies]
@@ -101,7 +101,7 @@ disable = "duplicate-code,too-few-public-methods,useless-import-alias"
 minversion = "6.2"
 addopts = "-qq"
 testpaths = [
-    "./",
+    "./tests/",
 ]
 
 [tool.mypy]
