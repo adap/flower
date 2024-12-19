@@ -53,7 +53,7 @@ class TestVerticalEvenPartitioner(unittest.TestCase):
         with self.assertRaises(ValueError):
             VerticalEvenPartitioner(num_partitions=2, drop_columns=[1, "a", 3])
 
-        def test_init_with_non_list_drop_columns(self) -> None:
+    def test_init_with_non_list_drop_columns(self) -> None:
         """Test initialization with non-list elements in drop_columns."""
         with self.assertRaises(ValueError):
             VerticalEvenPartitioner(num_partitions=2, drop_columns="a")
