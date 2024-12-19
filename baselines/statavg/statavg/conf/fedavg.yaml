@@ -1,0 +1,39 @@
+# this is the config file that will be loaded as default to main.py
+
+num_rounds: 60
+num_clients: 5
+val_ratio: 0.2
+learning_rate: 0.002
+scaler_save_path: 'scalers'
+path_to_dataset: 'dataset'
+
+# select whether a testset should be included for server-side evaluation. 
+include_testset:
+  flag: False
+  ratio: 0.1
+
+# by setting the following as True, the scaler directory 
+# will be deleted after the termination of the simulation
+delete_scaler_dir: True
+
+input_shape: 8
+num_classes: 6
+
+# server's configuration file
+config_fit:
+  batch_size: 512
+  local_epochs: 2
+  total_rounds: ${num_rounds}
+
+# client resources used
+client_resources:
+  num_cpus: 2
+  num_gpus: 0.0
+
+# strategy name
+strategy_name: 'fedavg'
+
+# strategy
+strategy:
+  _target_: statavg.strategy.FedAvgAggrEv
+  min_fit_clients: ${num_clients}
