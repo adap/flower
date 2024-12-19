@@ -22,7 +22,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from logging import DEBUG
 from pathlib import Path
-from typing import Any, Callable, Optional, cast
+from typing import Any, Callable, Optional, Union, cast
 
 import grpc
 import typer
@@ -148,15 +148,18 @@ def sanitize_project_name(name: str) -> str:
     return sanitized_name
 
 
-def get_sha256_hash(file_path: Path) -> str:
+def get_sha256_hash(file_path_or_int: Union[Path, int]) -> str:
     """Calculate the SHA-256 hash of a file."""
     sha256 = hashlib.sha256()
-    with open(file_path, "rb") as f:
-        while True:
-            data = f.read(65536)  # Read in 64kB blocks
-            if not data:
-                break
-            sha256.update(data)
+    if isinstance(file_path_or_int, Path):
+        with open(file_path_or_int, "rb") as f:
+            while True:
+                data = f.read(65536)  # Read in 64kB blocks
+                if not data:
+                    break
+                sha256.update(data)
+    elif isinstance(file_path_or_int, int):
+        sha256.update(str(file_path_or_int).encode())
     return sha256.hexdigest()
 
 
