@@ -148,7 +148,7 @@ def sanitize_project_name(name: str) -> str:
     return sanitized_name
 
 
-def get_sha256_hash(file_path_or_int: Union[Path | int]) -> str:
+def get_sha256_hash(file_path_or_int: Union[Path, int]) -> str:
     """Calculate the SHA-256 hash of a file."""
     sha256 = hashlib.sha256()
     if isinstance(file_path_or_int, Path):
