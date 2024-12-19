@@ -53,10 +53,20 @@ class TestVerticalEvenPartitioner(unittest.TestCase):
         with self.assertRaises(ValueError):
             VerticalEvenPartitioner(num_partitions=2, drop_columns=[1, "a", 3])
 
+        def test_init_with_non_list_drop_columns(self) -> None:
+        """Test initialization with non-list elements in drop_columns."""
+        with self.assertRaises(ValueError):
+            VerticalEvenPartitioner(num_partitions=2, drop_columns="a")
+
     def test_init_with_non_string_shared_columns(self) -> None:
         """Test initialization with non-string elements in shared_columns."""
         with self.assertRaises(ValueError):
             VerticalEvenPartitioner(num_partitions=2, shared_columns=["col1", 123])
+
+    def test_init_with_non_list_shared_columns(self) -> None:
+        """Test initialization with non-list elements in shared_columns."""
+        with self.assertRaises(ValueError):
+            VerticalEvenPartitioner(num_partitions=2, shared_columns="col1")
 
     def test_init_with_non_string_active_party_column(self) -> None:
         """Test initialization with non-string elements in active_party_column."""
@@ -64,6 +74,11 @@ class TestVerticalEvenPartitioner(unittest.TestCase):
             VerticalEvenPartitioner(
                 num_partitions=2, active_party_columns=["col1", None]
             )
+
+    def test_init_with_non_list_active_party_column(self) -> None:
+        """Test initialization with non-list elements in active_party_column."""
+        with self.assertRaises(ValueError):
+            VerticalEvenPartitioner(num_partitions=2, active_party_columns="col1")
 
     def test_partitioning_basic(self) -> None:
         """Test basic partitioning with no special columns or dropping."""
