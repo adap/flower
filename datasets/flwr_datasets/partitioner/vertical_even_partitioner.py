@@ -62,10 +62,13 @@ class VerticalEvenPartitioner(Partitioner):
 
     Examples
     --------
+    >>> from flwr_datasets import FederatedDataset
+    >>> from flwr_datasets.partitioner import VerticalEvenPartitioner
+    >>>
     >>> partitioner = VerticalEvenPartitioner(
     ...     num_partitions=3,
-    ...     active_party_column="income",
-    ...     active_party_column_mode="add_to_last",
+    ...     active_party_columns="income",
+    ...     active_party_columns_mode="add_to_last",
     ...     shuffle=True,
     ...     seed=42
     ... )
@@ -73,7 +76,7 @@ class VerticalEvenPartitioner(Partitioner):
     ...     dataset="scikit-learn/adult-census-income",
     ...     partitioners={"train": partitioner}
     ... )
-    >>> partitions = [fds.load_partition(i) for i in range(partitioner.num_partitions)]
+    >>> partitions = [fds.load_partition(i) for i in range(fds.partitioners["train"].num_partitions)]
     >>> print([partition.column_names for partition in partitions])
     """
 
