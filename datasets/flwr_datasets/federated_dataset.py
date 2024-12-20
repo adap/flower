@@ -15,7 +15,7 @@
 """FederatedDataset."""
 
 
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import datasets
 from datasets import Dataset, DatasetDict
@@ -113,8 +113,8 @@ class FederatedDataset:
         *,
         dataset: str,
         subset: Optional[str] = None,
-        preprocessor: Optional[Union[Preprocessor, Dict[str, Tuple[str, ...]]]] = None,
-        partitioners: Dict[str, Union[Partitioner, int]],
+        preprocessor: Optional[Union[Preprocessor, dict[str, tuple[str, ...]]]] = None,
+        partitioners: dict[str, Union[Partitioner, int]],
         shuffle: bool = True,
         seed: Optional[int] = 42,
         **load_dataset_kwargs: Any,
@@ -125,7 +125,7 @@ class FederatedDataset:
         self._preprocessor: Optional[Preprocessor] = _instantiate_merger_if_needed(
             preprocessor
         )
-        self._partitioners: Dict[str, Partitioner] = _instantiate_partitioners(
+        self._partitioners: dict[str, Partitioner] = _instantiate_partitioners(
             partitioners
         )
         self._check_partitioners_correctness()
@@ -241,7 +241,7 @@ class FederatedDataset:
         return dataset_split
 
     @property
-    def partitioners(self) -> Dict[str, Partitioner]:
+    def partitioners(self) -> dict[str, Partitioner]:
         """Dictionary mapping each split to its associated partitioner.
 
         The returned partitioners have the splits of the dataset assigned to them.

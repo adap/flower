@@ -883,13 +883,13 @@ msgstr ""
 
 #: ../../source/contributor-how-to-install-development-versions.rst:59
 msgid ""
-"Open the notebook ``doc/source/tutorial-series-get-started-with-flower-"
+"Open the notebook ``framework/docs/source/tutorial-series-get-started-with-flower-"
 "pytorch.ipynb``:"
 msgstr ""
 
 #: ../../source/contributor-how-to-install-development-versions.rst:61
 msgid ""
-"https://colab.research.google.com/github/adap/flower/blob/main/doc/source"
+"https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
 "/tutorial-series-get-started-with-flower-pytorch.ipynb"
 msgstr ""
 
@@ -902,7 +902,7 @@ msgstr ""
 #: ../../source/contributor-how-to-install-development-versions.rst:66
 msgid ""
 "https://colab.research.google.com/github/adap/flower/blob/branch-"
-"name/doc/source/tutorial-series-get-started-with-flower-pytorch.ipynb"
+"name/framework/docs/source/tutorial-series-get-started-with-flower-pytorch.ipynb"
 msgstr ""
 
 #: ../../source/contributor-how-to-install-development-versions.rst:68
@@ -1227,7 +1227,7 @@ msgid "Edit an existing page"
 msgstr ""
 
 #: ../../source/contributor-how-to-write-documentation.rst:17
-msgid "Edit an existing ``.rst`` (or ``.md``) file under ``doc/source/``"
+msgid "Edit an existing ``.rst`` (or ``.md``) file under ``framework/docs/source/``"
 msgstr ""
 
 #: ../../source/contributor-how-to-write-documentation.rst:18
@@ -1245,7 +1245,7 @@ msgid "Create a new page"
 msgstr ""
 
 #: ../../source/contributor-how-to-write-documentation.rst:24
-msgid "Add new ``.rst`` file under ``doc/source/``"
+msgid "Add new ``.rst`` file under ``framework/docs/source/``"
 msgstr ""
 
 #: ../../source/contributor-how-to-write-documentation.rst:25
@@ -1859,7 +1859,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:307
-msgid "Find the source file in ``doc/source``"
+msgid "Find the source file in ``framework/docs/source``"
 msgstr ""
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:308
@@ -1895,7 +1895,7 @@ msgid "Change the file name to ``save-progress.rst``"
 msgstr ""
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:323
-msgid "Add a redirect rule to ``doc/source/conf.py``"
+msgid "Add a redirect rule to ``framework/docs/source/conf.py``"
 msgstr ""
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:325
@@ -19885,7 +19885,7 @@ msgstr ""
 msgid ""
 "The Flower tutorial now has a new section that covers implementing a "
 "custom strategy from scratch: [Open in "
-"Colab](https://colab.research.google.com/github/adap/flower/blob/main/doc/source"
+"Colab](https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
 "/tutorial-build-a-strategy-from-scratch-pytorch.ipynb)"
 msgstr ""
 
@@ -19899,7 +19899,7 @@ msgstr ""
 msgid ""
 "The Flower tutorial now has a new section that covers custom "
 "serialization: [Open in "
-"Colab](https://colab.research.google.com/github/adap/flower/blob/main/doc/source"
+"Colab](https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
 "/tutorial-customize-the-client-pytorch.ipynb)"
 msgstr ""
 
@@ -25765,7 +25765,7 @@ msgstr ""
 #~ "something similar to this:"
 #~ msgstr ""
 
-#~ msgid "Find the source file in `doc/source`"
+#~ msgid "Find the source file in `framework/docs/source`"
 #~ msgstr ""
 
 #~ msgid ""
@@ -25778,7 +25778,7 @@ msgstr ""
 #~ msgid "Change the file name to `save-progress.rst`"
 #~ msgstr ""
 
-#~ msgid "Add a redirect rule to `doc/source/conf.py`"
+#~ msgid "Add a redirect rule to `framework/docs/source/conf.py`"
 #~ msgstr ""
 
 #~ msgid ""
@@ -27615,19 +27615,19 @@ msgstr ""
 #~ msgstr "A tag da imagem da imagem base."
 
 #~ msgid ""
-#~ "Open the notebook ``doc/source/tutorial-"
+#~ "Open the notebook ``framework/docs/source/tutorial-"
 #~ "get-started-with-flower-pytorch.ipynb``:"
 #~ msgstr ""
 
 #~ msgid ""
-#~ "https://colab.research.google.com/github/adap/flower/blob/main/doc/source"
+#~ "https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
 #~ "/tutorial-get-started-with-flower-"
 #~ "pytorch.ipynb"
 #~ msgstr ""
 
 #~ msgid ""
 #~ "https://colab.research.google.com/github/adap/flower/blob/branch-"
-#~ "name/doc/source/tutorial-get-started-with-"
+#~ "name/framework/docs/source/tutorial-get-started-with-"
 #~ "flower-pytorch.ipynb"
 #~ msgstr ""
 

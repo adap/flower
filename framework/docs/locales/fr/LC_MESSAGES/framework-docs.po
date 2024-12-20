@@ -880,19 +880,19 @@ msgstr "Ouvre les carnets Jupyter sur Google Colab"
 #: ../../source/contributor-how-to-install-development-versions.rst:59
 #, fuzzy
 msgid ""
-"Open the notebook ``doc/source/tutorial-series-get-started-with-flower-"
+"Open the notebook ``framework/docs/source/tutorial-series-get-started-with-flower-"
 "pytorch.ipynb``:"
 msgstr ""
-"Ouvrir le notebook ``doc/source/tutorial/Flower-1-Intro-to-FL-"
+"Ouvrir le notebook ``framework/docs/source/tutorial/Flower-1-Intro-to-FL-"
 "PyTorch.ipynb`` :"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:61
 #, fuzzy
 msgid ""
-"https://colab.research.google.com/github/adap/flower/blob/main/doc/source"
+"https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
 "/tutorial-series-get-started-with-flower-pytorch.ipynb"
 msgstr ""
-"https://colab.research.google.com/github/adap/flower/blob/main/doc/source"
+"https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
 "/tutorial-get-started-with-flower-pytorch.ipynb"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:63
@@ -908,10 +908,10 @@ msgstr ""
 #, fuzzy
 msgid ""
 "https://colab.research.google.com/github/adap/flower/blob/branch-"
-"name/doc/source/tutorial-series-get-started-with-flower-pytorch.ipynb"
+"name/framework/docs/source/tutorial-series-get-started-with-flower-pytorch.ipynb"
 msgstr ""
 "https://colab.research.google.com/github/adap/flower/blob/branch-"
-"name/doc/source/tutorial-get-started-with-flower-pytorch.ipynb"
+"name/framework/docs/source/tutorial-get-started-with-flower-pytorch.ipynb"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:68
 msgid "Install a `whl` on Google Colab:"
@@ -1301,8 +1301,8 @@ msgid "Edit an existing page"
 msgstr "Modifier une page existante"
 
 #: ../../source/contributor-how-to-write-documentation.rst:17
-msgid "Edit an existing ``.rst`` (or ``.md``) file under ``doc/source/``"
-msgstr "Modifier un fichier ``.rst`` (ou ``.md``) existant sous ``doc/source/``"
+msgid "Edit an existing ``.rst`` (or ``.md``) file under ``framework/docs/source/``"
+msgstr "Modifier un fichier ``.rst`` (ou ``.md``) existant sous ``framework/docs/source/``"
 
 #: ../../source/contributor-how-to-write-documentation.rst:18
 #: ../../source/contributor-how-to-write-documentation.rst:27
@@ -1311,9 +1311,9 @@ msgstr "Compilez les documents : ``cd doc``, puis ``poetry run make html``"
 
 #: ../../source/contributor-how-to-write-documentation.rst:19
 #: ../../source/contributor-how-to-write-documentation.rst:28
-msgid "Open ``doc/build/html/index.html`` in the browser to check the result"
+msgid "Open ``framework/docs/build/html/index.html`` in the browser to check the result"
 msgstr ""
-"Ouvre ``doc/build/html/index.html`` dans le navigateur pour vérifier le "
+"Ouvre ``framework/docs/build/html/index.html`` dans le navigateur pour vérifier le "
 "résultat"
 
 #: ../../source/contributor-how-to-write-documentation.rst:22
@@ -1321,8 +1321,8 @@ msgid "Create a new page"
 msgstr "Créer une nouvelle page"
 
 #: ../../source/contributor-how-to-write-documentation.rst:24
-msgid "Add new ``.rst`` file under ``doc/source/``"
-msgstr "Ajouter un nouveau fichier ``.rst`` sous ``doc/source/``"
+msgid "Add new ``.rst`` file under ``framework/docs/source/``"
+msgstr "Ajouter un nouveau fichier ``.rst`` sous ``framework/docs/source/``"
 
 #: ../../source/contributor-how-to-write-documentation.rst:25
 msgid "Add content to the new ``.rst`` file"
@@ -2129,8 +2129,8 @@ msgstr ""
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:307
 #, fuzzy
-msgid "Find the source file in ``doc/source``"
-msgstr "Trouve le fichier source dans `doc/source`"
+msgid "Find the source file in ``framework/docs/source``"
+msgstr "Trouve le fichier source dans `framework/docs/source`"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:308
 #, fuzzy
@@ -2179,8 +2179,8 @@ msgstr "Change le nom du fichier en `save-progress.rst`"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:323
 #, fuzzy
-msgid "Add a redirect rule to ``doc/source/conf.py``"
-msgstr "Ajouter une règle de redirection à `doc/source/conf.py`"
+msgid "Add a redirect rule to ``framework/docs/source/conf.py``"
+msgstr "Ajouter une règle de redirection à `framework/docs/source/conf.py`"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:325
 #, fuzzy
@@ -2622,7 +2622,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:194
-msgid "This will generate HTML documentation in ``doc/build/html``."
+msgid "This will generate HTML documentation in ``framework/docs/build/html``."
 msgstr ""
 
 #: ../../source/docker/enable-tls.rst:2
@@ -22279,13 +22279,13 @@ msgstr ""
 msgid ""
 "The Flower tutorial now has a new section that covers implementing a "
 "custom strategy from scratch: [Open in "
-"Colab](https://colab.research.google.com/github/adap/flower/blob/main/doc/source"
+"Colab](https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
 "/tutorial-build-a-strategy-from-scratch-pytorch.ipynb)"
 msgstr ""
 "Le tutoriel sur les fleurs comporte désormais une nouvelle section qui "
 "traite de la mise en œuvre d'une stratégie personnalisée à partir de zéro"
 " : [Ouvrir dans "
-"Colab](https://colab.research.google.com/github/adap/flower/blob/main/doc/source/tutorial/Flower-3-Building-a"
+"Colab](https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source/tutorial/Flower-3-Building-a"
 "-Strategy-PyTorch.ipynb)"
 
 #: ../../source/ref-changelog.md:987
@@ -22301,12 +22301,12 @@ msgstr ""
 msgid ""
 "The Flower tutorial now has a new section that covers custom "
 "serialization: [Open in "
-"Colab](https://colab.research.google.com/github/adap/flower/blob/main/doc/source"
+"Colab](https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
 "/tutorial-customize-the-client-pytorch.ipynb)"
 msgstr ""
 "Le tutoriel sur les fleurs comporte désormais une nouvelle section qui "
 "traite de la sérialisation personnalisée : [Ouvrir dans "
-"Colab](https://colab.research.google.com/github/adap/flower/blob/main/doc/source/tutorial/Flower-4"
+"Colab](https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source/tutorial/Flower-4"
 "-Client-and-NumPyClient-PyTorch.ipynb)"
 
 #: ../../source/ref-changelog.md:991
