@@ -37,7 +37,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Revamp simulation series tutorial** ([#4663](https://github.com/adap/flower/pull/4663), [#4696](https://github.com/adap/flower/pull/4696))
 
-  We have updated the [step-by-step Tutorial series for Simulations](https://github.com/adap/flower/tree/main/examples/flower-simulation-step-by-step-pytorch). It now shows how to create and run Flower Apps via `flwr run`. The videos walk you through the process of creating custom strategies, effectively make use of metrics between `ClientApp` and `ServerApp`, create _global model_ checkpoints, log metrics to Weights & Biases, and more.
+  We have updated the [Step-by-step Tutorial Series for Simulations](https://github.com/adap/flower/tree/main/examples/flower-simulation-step-by-step-pytorch). It now shows how to create and run Flower Apps via `flwr run`. The videos walk you through the process of creating custom strategies, effectively make use of metrics between `ClientApp` and `ServerApp`, create _global model_ checkpoints, log metrics to Weights & Biases, and more.
 
 - **Improve connection reliability** ([#4649](https://github.com/adap/flower/pull/4649), [#4636](https://github.com/adap/flower/pull/4636), [#4637](https://github.com/adap/flower/pull/4637))
 
@@ -59,7 +59,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Bugfixes** ([#4677](https://github.com/adap/flower/pull/4677), [#4671](https://github.com/adap/flower/pull/4671), [#4670](https://github.com/adap/flower/pull/4670), [#4674](https://github.com/adap/flower/pull/4674), [#4687](https://github.com/adap/flower/pull/4687), [#4605](https://github.com/adap/flower/pull/4605), [#4736](https://github.com/adap/flower/pull/4736))
 
-- **General improvements** ([#4631](https://github.com/adap/flower/pull/4631), [#4660](https://github.com/adap/flower/pull/4660), [#4599](https://github.com/adap/flower/pull/4599), [#4672](https://github.com/adap/flower/pull/4672), [#4705](https://github.com/adap/flower/pull/4705), [#4688](https://github.com/adap/flower/pull/4688), [#4691](https://github.com/adap/flower/pull/4691), [#4706](https://github.com/adap/flower/pull/4706), [#4709](https://github.com/adap/flower/pull/4709), [#4623](https://github.com/adap/flower/pull/4623), [#4697](https://github.com/adap/flower/pull/4697), [#4597](https://github.com/adap/flower/pull/4597), [#4721](https://github.com/adap/flower/pull/4721), [#4730](https://github.com/adap/flower/pull/4730), [#4720](https://github.com/adap/flower/pull/4720), [#4747](https://github.com/adap/flower/pull/4747), [#4716](https://github.com/adap/flower/pull/4716))
+- **General improvements** ([#4631](https://github.com/adap/flower/pull/4631), [#4660](https://github.com/adap/flower/pull/4660), [#4599](https://github.com/adap/flower/pull/4599), [#4672](https://github.com/adap/flower/pull/4672), [#4705](https://github.com/adap/flower/pull/4705), [#4688](https://github.com/adap/flower/pull/4688), [#4691](https://github.com/adap/flower/pull/4691), [#4706](https://github.com/adap/flower/pull/4706), [#4709](https://github.com/adap/flower/pull/4709), [#4623](https://github.com/adap/flower/pull/4623), [#4697](https://github.com/adap/flower/pull/4697), [#4597](https://github.com/adap/flower/pull/4597), [#4721](https://github.com/adap/flower/pull/4721), [#4730](https://github.com/adap/flower/pull/4730), [#4720](https://github.com/adap/flower/pull/4720), [#4747](https://github.com/adap/flower/pull/4747), [#4716](https://github.com/adap/flower/pull/4716), [#4752](https://github.com/adap/flower/pull/4752))
 
   As always, many parts of the Flower framework and quality infrastructure were improved and updated.
 
@@ -67,7 +67,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Remove** `context` **property from** `Client` **and** `NumPyClient` ([#4652](https://github.com/adap/flower/pull/4652))
 
-  Now that `Context` is available as an argument in `client_fn` and `server_fn`, the `context` property is removed from `Client` and `NumPyClient`. This feature has been deprecated for serveral releases and is now removed.
+  Now that `Context` is available as an argument in `client_fn` and `server_fn`, the `context` property is removed from `Client` and `NumPyClient`. This feature has been deprecated for several releases and is now removed.
 
 ## v1.13.1 (2024-11-26)
 
