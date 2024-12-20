@@ -28,6 +28,7 @@ from queue import Empty, Queue
 from typing import Any, Optional
 
 from flwr.cli.config_utils import load_and_validate
+from flwr.cli.utils import get_sha256_hash
 from flwr.client import ClientApp
 from flwr.common import Context, EventType, RecordSet, event, log, now
 from flwr.common.config import get_fused_config_from_dir, parse_config_args
@@ -394,7 +395,13 @@ def _main_loop(
     finally:
         # Trigger stop event
         f_stop.set()
-        event(exit_event, event_details={"success": success})
+        event(
+            exit_event,
+            event_details={
+                "run-id-hash": get_sha256_hash(run.run_id),
+                "success": success,
+            },
+        )
         if serverapp_th:
             serverapp_th.join()
             if server_app_thread_has_exception.is_set():
