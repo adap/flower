@@ -56,7 +56,8 @@ Install ``flwr`` from a specific GitHub branch (``branch-name``):
 Open Jupyter Notebooks on Google Colab
 --------------------------------------
 
-Open the notebook ``framework/docs/source/tutorial-series-get-started-with-flower-pytorch.ipynb``:
+Open the notebook
+``framework/docs/source/tutorial-series-get-started-with-flower-pytorch.ipynb``:
 
 - https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source/tutorial-series-get-started-with-flower-pytorch.ipynb
 
