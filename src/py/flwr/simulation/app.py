@@ -210,7 +210,7 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
                 event_details={
                     "backend": "ray",
                     "num-supernodes": num_supernodes,
-                    "run-id": hash_run_id,
+                    "run-id-hash": hash_run_id,
                 },
             )
 
