@@ -18,7 +18,7 @@
 from .centraldp_mods import adaptiveclipping_mod, fixedclipping_mod
 from .comms_mods import message_size_mod, parameters_size_mod
 from .localdp_mod import LocalDpMod
-from .secure_aggregation import secagg_mod, secaggplus_mod
+from .secure_aggregation import secagg_mod, secaggplus_base_mod, secaggplus_mod
 from .utils import make_ffn
 
 __all__ = [
@@ -29,5 +29,6 @@ __all__ = [
     "message_size_mod",
     "parameters_size_mod",
     "secagg_mod",
+    "secaggplus_base_mod",
     "secaggplus_mod",
 ]

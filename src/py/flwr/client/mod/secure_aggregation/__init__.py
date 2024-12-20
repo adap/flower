@@ -16,9 +16,11 @@
 
 
 from .secagg_mod import secagg_mod
+from .secaggplus_base_mod import secaggplus_base_mod
 from .secaggplus_mod import secaggplus_mod
 
 __all__ = [
     "secagg_mod",
+    "secaggplus_base_mod",
     "secaggplus_mod",
 ]

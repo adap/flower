@@ -45,13 +45,13 @@ class Key:
     """Keys for the configs in the ConfigsRecord."""
 
     STAGE = "stage"
+    MESSAGE_TYPE = "message_type"
     SAMPLE_NUMBER = "sample_num"
     SHARE_NUMBER = "share_num"
     THRESHOLD = "threshold"
     CLIPPING_RANGE = "clipping_range"
     TARGET_RANGE = "target_range"
     MOD_RANGE = "mod_range"
-    MAX_WEIGHT = "max_weight"
     PUBLIC_KEY_1 = "pk1"
     PUBLIC_KEY_2 = "pk2"
     DESTINATION_LIST = "dsts"
@@ -63,6 +63,9 @@ class Key:
     DEAD_NODE_ID_LIST = "dead_nids"
     NODE_ID_LIST = "nids"
     SHARE_LIST = "shares"
+
+    # Only for the SecAggPlusWorkflow
+    MAX_WEIGHT = "max_weight"
 
     def __new__(cls) -> Key:
         """Prevent instantiation."""
