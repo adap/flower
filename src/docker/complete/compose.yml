@@ -1,7 +1,7 @@
 services:
   # create a SuperLink service
   superlink:
-    image: flwr/superlink:${FLWR_VERSION:-1.14.0}
+    image: flwr/superlink:${FLWR_VERSION:-1.15.0}
     command:
       - --insecure
       - --isolation
@@ -14,7 +14,7 @@ services:
     build:
       context: ${PROJECT_DIR:-.}
       dockerfile_inline: |
-        FROM flwr/serverapp:${FLWR_VERSION:-1.14.0}
+        FROM flwr/serverapp:${FLWR_VERSION:-1.15.0}
 
         # gcc is required for the fastai quickstart example
         USER root
@@ -40,7 +40,7 @@ services:
 
   # create a two SuperNode service with different node configs
   supernode-1:
-    image: flwr/supernode:${FLWR_VERSION:-1.14.0}
+    image: flwr/supernode:${FLWR_VERSION:-1.15.0}
     command:
       - --insecure
       - --superlink
@@ -55,7 +55,7 @@ services:
       - superlink
 
   supernode-2:
-    image: flwr/supernode:${FLWR_VERSION:-1.14.0}
+    image: flwr/supernode:${FLWR_VERSION:-1.15.0}
     command:
       - --insecure
       - --superlink
@@ -72,7 +72,7 @@ services:
   # uncomment to add another SuperNode
   #
   # supernode-3:
-  #   image: flwr/supernode:${FLWR_VERSION:-1.14.0}
+  #   image: flwr/supernode:${FLWR_VERSION:-1.15.0}
   #   command:
   #     - --insecure
   #     - --superlink
@@ -90,7 +90,7 @@ services:
     build:
       context: ${PROJECT_DIR:-.}
       dockerfile_inline: |
-        FROM flwr/clientapp:${FLWR_VERSION:-1.14.0}
+        FROM flwr/clientapp:${FLWR_VERSION:-1.15.0}
 
         # gcc is required for the fastai quickstart example
         USER root
@@ -122,7 +122,7 @@ services:
     build:
       context: ${PROJECT_DIR:-.}
       dockerfile_inline: |
-        FROM flwr/clientapp:${FLWR_VERSION:-1.14.0}
+        FROM flwr/clientapp:${FLWR_VERSION:-1.15.0}
 
         # gcc is required for the fastai quickstart example
         USER root
@@ -149,14 +149,13 @@ services:
     stop_signal: SIGINT
     depends_on:
       - supernode-2
-
   # uncomment to add another ClientApp
   #
   # clientapp-3:
   #   build:
   #     context: ${PROJECT_DIR:-.}
   #     dockerfile_inline: |
-  #       FROM flwr/clientapp:${FLWR_VERSION:-1.14.0}
+  #       FROM flwr/clientapp:${FLWR_VERSION:-1.15.0}
 
   #       # gcc is required for the fastai quickstart example
   #       USER root
