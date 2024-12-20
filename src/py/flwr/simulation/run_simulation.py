@@ -397,7 +397,10 @@ def _main_loop(
         f_stop.set()
         event(
             exit_event,
-            event_details={"run-id-hash": get_sha256_hash(run.run_id), "success": success},
+            event_details={
+                "run-id-hash": get_sha256_hash(run.run_id),
+                "success": success,
+            },
         )
         if serverapp_th:
             serverapp_th.join()
