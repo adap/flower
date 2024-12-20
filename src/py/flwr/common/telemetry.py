@@ -151,15 +151,21 @@ class EventType(str, Enum):
 
     # Not yet implemented
 
+    # --- `flwr-*` commands ------------------------------------------------------------
+
+    # CLI: flwr-simulation
+    RUN_SIMULATION_ENTER = auto()
+    RUN_SIMULATION_LEAVE = auto()
+
+    # CLI: flwr-serverapp
+    RUN_SERVERAPP_ENTER = auto()
+    RUN_SERVERAPP_LEAVE = auto()
+
     # --- Simulation Engine ------------------------------------------------------------
 
     # CLI: flower-simulation
     CLI_FLOWER_SIMULATION_ENTER = auto()
     CLI_FLOWER_SIMULATION_LEAVE = auto()
-
-    # CLI: flwr-simulation
-    RUN_SIMULATION_ENTER = auto()
-    RUN_SIMULATION_LEAVE = auto()
 
     # Python API: `run_simulation`
     PYTHON_API_RUN_SIMULATION_ENTER = auto()
@@ -174,10 +180,6 @@ class EventType(str, Enum):
     # CLI: `flower-supernode`
     RUN_SUPERNODE_ENTER = auto()
     RUN_SUPERNODE_LEAVE = auto()
-
-    # CLI: flwr-serverapp
-    RUN_SERVERAPP_ENTER = auto()
-    RUN_SERVERAPP_LEAVE = auto()
 
     # --- DEPRECATED -------------------------------------------------------------------
 
