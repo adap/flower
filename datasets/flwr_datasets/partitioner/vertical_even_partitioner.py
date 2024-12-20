@@ -52,9 +52,9 @@ class VerticalEvenPartitioner(Partitioner):
         - `"create_as_last"`: Create a new partition at the end containing only these columns.
         - `"add_to_all"`: Append active party columns to all partitions.
         - int: Append active party columns to the specified partition index.
-    drop_columns : Optional[list[str]]
+    drop_columns : Optional[Union[str, list[str]]]
         Columns to remove entirely from the dataset before partitioning.
-    shared_columns : Optional[list[str]]
+    shared_columns : Optional[Union[str, list[str]]]
         Columns to duplicate into every partition after initial partitioning.
     shuffle : bool
         Whether to shuffle the order of columns before partitioning.

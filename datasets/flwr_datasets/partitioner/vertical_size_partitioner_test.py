@@ -67,8 +67,8 @@ class TestVerticalSizePartitioner(unittest.TestCase):
 
     def test_init_active_party_column_invalid_type(self) -> None:
         """Check ValueError if active_party_column is not str/list."""
-        with self.assertRaises(ValueError):
-            VerticalSizePartitioner(partition_sizes=[2, 2], active_party_column=123)
+        with self.assertRaises(TypeError):
+            VerticalSizePartitioner(partition_sizes=[2, 2], active_party_columns=123)
 
     def test_partitioning_with_int_sizes(self) -> None:
         """Check correct partitioning with integer sizes."""
@@ -124,7 +124,7 @@ class TestVerticalSizePartitioner(unittest.TestCase):
         dataset = _create_dummy_dataset(columns)
         partitioner = VerticalSizePartitioner(
             partition_sizes=[2],
-            active_party_column="label",
+            active_party_columns="label",
             active_party_columns_mode="add_to_last",
             shuffle=False,
         )
@@ -138,7 +138,7 @@ class TestVerticalSizePartitioner(unittest.TestCase):
         dataset = _create_dummy_dataset(columns)
         partitioner = VerticalSizePartitioner(
             partition_sizes=[2],
-            active_party_column="label",
+            active_party_columns="label",
             active_party_columns_mode="create_as_first",
             shuffle=False,
         )
@@ -166,7 +166,7 @@ class TestVerticalSizePartitioner(unittest.TestCase):
         columns = ["f1", "f2"]
         dataset = _create_dummy_dataset(columns)
         partitioner = VerticalSizePartitioner(
-            partition_sizes=[1], active_party_column="missing_label", shuffle=False
+            partition_sizes=[1], active_party_columns="missing_label", shuffle=False
         )
         partitioner.dataset = dataset
         with self.assertRaises(ValueError):
