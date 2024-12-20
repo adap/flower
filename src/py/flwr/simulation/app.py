@@ -206,7 +206,7 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
             enable_tf_gpu_growth: bool = fed_opt.get("enable_tf_gpu_growth", False)
 
             event(
-                EventType.RUN_SIMULATION_ENTER,
+                EventType.FLWR_SIMULATION_ENTER,
                 event_details={
                     "backend": "ray",
                     "num-supernodes": num_supernodes,
@@ -226,7 +226,7 @@ def run_simulation_process(  # pylint: disable=R0914, disable=W0212, disable=R09
                 verbose_logging=verbose,
                 server_app_run_config=fused_config,
                 is_app=True,
-                exit_event=EventType.RUN_SIMULATION_LEAVE,
+                exit_event=EventType.FLWR_SIMULATION_LEAVE,
             )
 
             # Send resulting context
