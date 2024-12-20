@@ -13,8 +13,11 @@ Transport Layer Security (TLS) for each Flower component to ensure secure commun
 
 .. note::
 
-    Because Flower containers, by default, run with a non-root user ``app``, the mounted
-    files and directories must have the proper permissions for the user ID ``49999``.
+    When working with Docker on Linux, you may need to change the ownership of the
+    directory containing the certificates to ensure proper access and permissions.
+
+    By default, Flower containers run with a non-root user ``app``. The mounted files
+    and directories must have the proper permissions for the user ID ``49999``.
 
     For example, to change the user ID of all files in the ``certificates/`` directory,
     you can run ``sudo chown -R 49999:49999 certificates/*``.

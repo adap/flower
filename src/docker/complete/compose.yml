@@ -38,7 +38,7 @@ services:
     depends_on:
       - superlink
 
-  # create a two SuperNode service with different node configs
+  # create two SuperNode services with different node configs
   supernode-1:
     image: flwr/supernode:${FLWR_VERSION:-1.15.0}
     command:
@@ -86,6 +86,7 @@ services:
   #   depends_on:
   #     - superlink
 
+  # create two ClientApp services
   clientapp-1:
     build:
       context: ${PROJECT_DIR:-.}
