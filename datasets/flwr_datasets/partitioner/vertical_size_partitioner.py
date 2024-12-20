@@ -24,6 +24,7 @@ import datasets
 from flwr_datasets.partitioner.partitioner import Partitioner
 from flwr_datasets.partitioner.vertical_partitioner_utils import (
     _add_active_party_columns,
+    _init_optional_str_or_list_str,
 )
 
 
@@ -63,9 +64,9 @@ class VerticalSizePartitioner(Partitioner):
         - `"create_as_last"`: Create a new partition at the end containing only these columns.
         - `"add_to_all"`: Append active party columns to all partitions.
         - int: Append active party columns to the specified partition index.
-    drop_columns : Optional[list[str]]
+    drop_columns : Optional[Union[str, list[str]]]
         Columns to remove entirely from the dataset before partitioning.
-    shared_columns : Optional[list[str]]
+    shared_columns : Optional[Union[str, list[str]]]
         Columns to duplicate into every partition after initial partitioning.
     shuffle : bool
         Whether to shuffle the order of columns before partitioning.
@@ -104,18 +105,20 @@ class VerticalSizePartitioner(Partitioner):
             ],
             int,
         ] = "add_to_last",
-        drop_columns: Optional[list[str]] = None,
-        shared_columns: Optional[list[str]] = None,
+        drop_columns: Optional[Union[str, list[str]]] = None,
+        shared_columns: Optional[Union[str, list[str]]] = None,
         shuffle: bool = True,
         seed: Optional[int] = 42,
     ) -> None:
         super().__init__()
 
         self._partition_sizes = partition_sizes
-        self._active_party_columns = _init_active_party_columns(active_party_columns)
+        self._active_party_columns = _init_optional_str_or_list_str(
+            active_party_columns
+        )
         self._active_party_columns_mode = active_party_columns_mode
-        self._drop_columns = drop_columns or []
-        self._shared_columns = shared_columns or []
+        self._drop_columns = _init_optional_str_or_list_str(drop_columns)
+        self._shared_columns = _init_optional_str_or_list_str(shared_columns)
         self._shuffle = shuffle
         self._seed = seed
         self._rng = np.random.default_rng(seed=self._seed)
@@ -284,18 +287,6 @@ class VerticalSizePartitioner(Partitioner):
                     "used in the division. Note that shared_columns, drop_columns and"
                     "active_party_columns are not included in the division."
                 )
-
-
-def _init_active_party_columns(
-    active_party_column: Optional[Union[str, list[str]]]
-) -> list[str]:
-    if active_party_column is None:
-        return []
-    if isinstance(active_party_column, str):
-        return [active_party_column]
-    if isinstance(active_party_column, list):
-        return active_party_column
-    raise ValueError("active_party_column must be a string or a list of strings.")
 
 
 def _count_split(columns: list[str], counts: list[int]) -> list[list[str]]:
