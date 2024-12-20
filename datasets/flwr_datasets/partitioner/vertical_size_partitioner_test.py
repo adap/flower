@@ -67,7 +67,7 @@ class TestVerticalSizePartitioner(unittest.TestCase):
 
     def test_init_active_party_column_invalid_type(self) -> None:
         """Check ValueError if active_party_column is not str/list."""
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             VerticalSizePartitioner(partition_sizes=[2, 2], active_party_columns=123)
 
     def test_partitioning_with_int_sizes(self) -> None:
