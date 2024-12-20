@@ -23,35 +23,37 @@ We would like to give our special thanks to all the contributors who made the ne
 
   The `flwr run`, `flwr ls`, and `flwr stop` commands now support JSON-formatted output using the `--format json` flag. This makes it easier to parse and integrate CLI output with other tools. Feel free to check the ["How to Use CLI JSON output"](https://flower.ai/docs/framework/how-to-use-cli-json-output.html) guide for details!
 
-- **Add [how-to guide](https://flower.ai/docs/framework/how-to-run-flower-on-azure.html) for running Flower on Microsoft Azure VM instances** ([#4625](https://github.com/adap/flower/pull/4625))
+- **Document Microsoft Azure deployment** ([#4625](https://github.com/adap/flower/pull/4625))
 
-- **Introduce user authentication infrastructure** ([#4630](https://github.com/adap/flower/pull/4630), [#4244](https://github.com/adap/flower/pull/4244), [#4602](https://github.com/adap/flower/pull/4602), [#4618](https://github.com/adap/flower/pull/4618), [#4717](https://github.com/adap/flower/pull/4717), [#4719](https://github.com/adap/flower/pull/4719), [#4745](https://github.com/adap/flower/pull/4745))
+  A new how-to guide shows a simple Flower deployment for [federated learning on Microsoft Azure](https://flower.ai/docs/framework/how-to-run-flower-on-azure.html) VM instances.
 
-  Initial infrastructure for **user authentication** in Flower has been added. It features a plugin-like design for flexibility and future implementation. Authentication is expected to work with **OIDC**.
+- **Introduce OIDC user authentication infrastructure** ([#4630](https://github.com/adap/flower/pull/4630), [#4244](https://github.com/adap/flower/pull/4244), [#4602](https://github.com/adap/flower/pull/4602), [#4618](https://github.com/adap/flower/pull/4618), [#4717](https://github.com/adap/flower/pull/4717), [#4719](https://github.com/adap/flower/pull/4719), [#4745](https://github.com/adap/flower/pull/4745))
+
+  Flower has supported SuperNode authentication since Flower 1.9. This release adds initial extension points for user authentication via OpenID Connect (OIDC).
 
 - **Update FedRep baseline** ([#4681](https://github.com/adap/flower/pull/4681))
 
-  We have started the process of migrating some baselines from using `start_simulation` to be launched via `flwr run`. We chose `FedRep` as the first baseline to migrate due to its very impresive results. New baselines can be created following a `flwr run`-compatible format by starting from the `flwr new` template for baselines. Read more in the [how to contribute a baseline](https://flower.ai/docs/baselines/how-to-contribute-baselines.html) documentation.
+  We have started the process of migrating some baselines from using `start_simulation` to be launched via `flwr run`. We chose `FedRep` as the first baseline to migrate due to its very impressive results. New baselines can be created following a `flwr run`-compatible format by starting from the `flwr new` template for baselines. We welcome contributions! Read more in the [how to contribute a baseline](https://flower.ai/docs/baselines/how-to-contribute-baselines.html) documentation.
 
 - **Revamp simulation series tutorial** ([#4663](https://github.com/adap/flower/pull/4663), [#4696](https://github.com/adap/flower/pull/4696))
 
-  We have updated the [step-by-step Tutorial series for Simulations](https://github.com/adap/flower/tree/main/examples/flower-simulation-step-by-step-pytorch). It now shows how to create and run Flower Apps via `flwr run`. The videos associated videos walk you through the process of creating custom strategies, effectively make use of metrics between `ClientApp` and `ServerApp`, create _global model_ checkpoints, log metrics to Weights and Biases, and more.
+  We have updated the [step-by-step Tutorial series for Simulations](https://github.com/adap/flower/tree/main/examples/flower-simulation-step-by-step-pytorch). It now shows how to create and run Flower Apps via `flwr run`. The videos walk you through the process of creating custom strategies, effectively make use of metrics between `ClientApp` and `ServerApp`, create _global model_ checkpoints, log metrics to Weights & Biases, and more.
 
 - **Improve connection reliability** ([#4649](https://github.com/adap/flower/pull/4649), [#4636](https://github.com/adap/flower/pull/4636), [#4637](https://github.com/adap/flower/pull/4637))
 
-  Connections between ServerApp\<>SuperLink, ClientApp\<>SuperNode, and SuperLink\<>Simulation are now more robust against minor network issues.
+  Connections between ServerApp\<>SuperLink, ClientApp\<>SuperNode, and SuperLink\<>Simulation are now more robust against network issues.
 
 - **Fix `flwr new` issue on Windows** ([#4653](https://github.com/adap/flower/pull/4653))
 
   The `flwr new` command now works correctly on Windows by setting UTF-8 encoding, ensuring compatibility across all platforms when creating and transferring files.
 
-- **Update examples and templates** ([#4725](https://github.com/adap/flower/pull/4725), [#4724](https://github.com/adap/flower/pull/4724), [#4589](https://github.com/adap/flower/pull/4589), [#4690](https://github.com/adap/flower/pull/4690), [#4708](https://github.com/adap/flower/pull/4708), [#4689](https://github.com/adap/flower/pull/4689), [#4740](https://github.com/adap/flower/pull/4740), [#4741](https://github.com/adap/flower/pull/4741), [#4744](https://github.com/adap/flower/pull/4744))
+- **Update examples and** `flwr new` **templates** ([#4725](https://github.com/adap/flower/pull/4725), [#4724](https://github.com/adap/flower/pull/4724), [#4589](https://github.com/adap/flower/pull/4589), [#4690](https://github.com/adap/flower/pull/4690), [#4708](https://github.com/adap/flower/pull/4708), [#4689](https://github.com/adap/flower/pull/4689), [#4740](https://github.com/adap/flower/pull/4740), [#4741](https://github.com/adap/flower/pull/4741), [#4744](https://github.com/adap/flower/pull/4744))
 
-  Examples and templates have been updated to improve compatibility and usability. Notable changes include removing unnecessary `numpy` dependencies, upgrading the `mlx` version, and enhancing the authentication example. A link to previous tutorial versions has also been added for reference.
+  Code examples and `flwr new` templates have been updated to improve compatibility and usability. Notable changes include removing unnecessary `numpy` dependencies, upgrading the `mlx` version, and enhancing the authentication example. A link to previous tutorial versions has also been added for reference.
 
 - **Improve documentation** ([#4713](https://github.com/adap/flower/pull/4713), [#4624](https://github.com/adap/flower/pull/4624), [#4606](https://github.com/adap/flower/pull/4606), [#4596](https://github.com/adap/flower/pull/4596), [#4695](https://github.com/adap/flower/pull/4695), [#4654](https://github.com/adap/flower/pull/4654), [#4656](https://github.com/adap/flower/pull/4656), [#4603](https://github.com/adap/flower/pull/4603), [#4727](https://github.com/adap/flower/pull/4727), [#4723](https://github.com/adap/flower/pull/4723), [#4598](https://github.com/adap/flower/pull/4598), [#4661](https://github.com/adap/flower/pull/4661), [#4655](https://github.com/adap/flower/pull/4655), [#4659](https://github.com/adap/flower/pull/4659))
 
-  Documentation has been improved with updated docstrings, typo fixes, and new contributions guidance. Automated updates ensure source texts for translations stay current. Additionally, docs have been reorganized under `framework/docs` for better maintainability.
+  Documentation has been improved with updated docstrings, typo fixes, and new contributions guidance. Automated updates ensure source texts for translations stay current.
 
 - **Update infrastructure and CI/CD** ([#4614](https://github.com/adap/flower/pull/4614), [#4686](https://github.com/adap/flower/pull/4686), [#4587](https://github.com/adap/flower/pull/4587), [#4715](https://github.com/adap/flower/pull/4715), [#4728](https://github.com/adap/flower/pull/4728), [#4679](https://github.com/adap/flower/pull/4679), [#4675](https://github.com/adap/flower/pull/4675), [#4680](https://github.com/adap/flower/pull/4680), [#4676](https://github.com/adap/flower/pull/4676))
 
@@ -61,13 +63,11 @@ We would like to give our special thanks to all the contributors who made the ne
 
   As always, many parts of the Flower framework and quality infrastructure were improved and updated.
 
-### Other changes
-
-### Documentation improvements
-
 ### Incompatible changes
 
-- **break(framework) Remove setting** `Context` **as** `Client` **and** `NumPyClient` **attribute** ([#4652](https://github.com/adap/flower/pull/4652))
+- **Remove** `context` **property from** `Client` **and** `NumPyClient` ([#4652](https://github.com/adap/flower/pull/4652))
+
+  Now that `Context` is available as an argument in `client_fn` and `server_fn`, the `context` property is removed from `Client` and `NumPyClient`. This feature has been deprecated for serveral releases and is now removed.
 
 ## v1.13.1 (2024-11-26)
 
