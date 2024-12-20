@@ -122,7 +122,7 @@ nbsphinx_execute = "never"
 
 colab_link = (
     "https://colab.research.google.com/github/adap/flower/blob/main/"
-    "doc/source/{{ env.doc2path(env.docname, base=None) }}"
+    "framework/docs/source/{{ env.doc2path(env.docname, base=None) }}"
 )
 _open_in_colab_button = f"""
 .. raw:: html
