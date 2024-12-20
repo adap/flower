@@ -878,18 +878,18 @@ msgstr "Google Colab에서 Jupyter Notebooks 열기"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:59
 msgid ""
-"Open the notebook ``doc/source/tutorial-series-get-started-with-flower-"
+"Open the notebook ``framework/docs/source/tutorial-series-get-started-with-flower-"
 "pytorch.ipynb``:"
 msgstr ""
-"``doc/source/tutorial-series-get-started-with-flower-"
+"``framework/docs/source/tutorial-series-get-started-with-flower-"
 "pytorch.ipynb``notebook을 엽니다:"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:61
 msgid ""
-"https://colab.research.google.com/github/adap/flower/blob/main/doc/source"
+"https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
 "/tutorial-series-get-started-with-flower-pytorch.ipynb"
 msgstr ""
-"https://colab.research.google.com/github/adap/flower/blob/main/doc/source"
+"https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
 "/tutorial-series-get-started-with-flower-pytorch.ipynb"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:63
@@ -903,10 +903,10 @@ msgstr ""
 #: ../../source/contributor-how-to-install-development-versions.rst:66
 msgid ""
 "https://colab.research.google.com/github/adap/flower/blob/branch-"
-"name/doc/source/tutorial-series-get-started-with-flower-pytorch.ipynb"
+"name/framework/docs/source/tutorial-series-get-started-with-flower-pytorch.ipynb"
 msgstr ""
 "https://colab.research.google.com/github/adap/flower/blob/branch-"
-"name/doc/source/tutorial-series-get-started-with-flower-pytorch.ipynb"
+"name/framework/docs/source/tutorial-series-get-started-with-flower-pytorch.ipynb"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:68
 msgid "Install a `whl` on Google Colab:"
@@ -1278,8 +1278,8 @@ msgid "Edit an existing page"
 msgstr "기존 페이지 편집"
 
 #: ../../source/contributor-how-to-write-documentation.rst:17
-msgid "Edit an existing ``.rst`` (or ``.md``) file under ``doc/source/``"
-msgstr "doc/source/``에서 기존 ``.rst``(또는 ``.md``) 파일을 편집합니다"
+msgid "Edit an existing ``.rst`` (or ``.md``) file under ``framework/docs/source/``"
+msgstr "framework/docs/source/``에서 기존 ``.rst``(또는 ``.md``) 파일을 편집합니다"
 
 #: ../../source/contributor-how-to-write-documentation.rst:18
 #: ../../source/contributor-how-to-write-documentation.rst:27
@@ -1296,8 +1296,8 @@ msgid "Create a new page"
 msgstr "새 페이지 만들기"
 
 #: ../../source/contributor-how-to-write-documentation.rst:24
-msgid "Add new ``.rst`` file under ``doc/source/``"
-msgstr "``doc/source/`에 새 ``.rst`` 을 추가합니다"
+msgid "Add new ``.rst`` file under ``framework/docs/source/``"
+msgstr "``framework/docs/source/`에 새 ``.rst`` 을 추가합니다"
 
 #: ../../source/contributor-how-to-write-documentation.rst:25
 msgid "Add content to the new ``.rst`` file"
@@ -1978,8 +1978,8 @@ msgstr ""
 "같이 하세요:"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:307
-msgid "Find the source file in ``doc/source``"
-msgstr "``doc/source``에서 소스 파일을 찾습니다"
+msgid "Find the source file in ``framework/docs/source``"
+msgstr "``framework/docs/source``에서 소스 파일을 찾습니다"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:308
 msgid ""
@@ -2018,8 +2018,8 @@ msgid "Change the file name to ``save-progress.rst``"
 msgstr "파일 이름을 ``save-progress.rst``로 변경합니다"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:323
-msgid "Add a redirect rule to ``doc/source/conf.py``"
-msgstr "'doc/source/conf.py'에 리디렉션 규칙을 추가합니다"
+msgid "Add a redirect rule to ``framework/docs/source/conf.py``"
+msgstr "'framework/docs/source/conf.py'에 리디렉션 규칙을 추가합니다"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:325
 msgid ""
@@ -21190,7 +21190,7 @@ msgstr ""
 msgid ""
 "The Flower tutorial now has a new section that covers implementing a "
 "custom strategy from scratch: [Open in "
-"Colab](https://colab.research.google.com/github/adap/flower/blob/main/doc/source"
+"Colab](https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
 "/tutorial-build-a-strategy-from-scratch-pytorch.ipynb)"
 msgstr ""
 
@@ -21204,7 +21204,7 @@ msgstr ""
 msgid ""
 "The Flower tutorial now has a new section that covers custom "
 "serialization: [Open in "
-"Colab](https://colab.research.google.com/github/adap/flower/blob/main/doc/source"
+"Colab](https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
 "/tutorial-customize-the-client-pytorch.ipynb)"
 msgstr ""
 

@@ -14,15 +14,15 @@ installed on the system.
 Edit an existing page
 ---------------------
 
-1. Edit an existing ``.rst`` (or ``.md``) file under ``doc/source/``
-2. Compile the docs: ``cd doc``, then ``poetry run make html``
-3. Open ``doc/build/html/index.html`` in the browser to check the result
+1. Edit an existing ``.rst`` (or ``.md``) file under ``framework/docs/source/``
+2. Compile the docs: ``cd framework/docs``, then ``poetry run make html``
+3. Open ``framework/docs/build/html/index.html`` in the browser to check the result
 
 Create a new page
 -----------------
 
-1. Add new ``.rst`` file under ``doc/source/``
+1. Add new ``.rst`` file under ``framework/docs/source/``
 2. Add content to the new ``.rst`` file
 3. Link to the new rst from ``index.rst``
-4. Compile the docs: ``cd doc``, then ``poetry run make html``
-5. Open ``doc/build/html/index.html`` in the browser to check the result
+4. Compile the docs: ``cd framework/docs``, then ``poetry run make html``
+5. Open ``framework/docs/build/html/index.html`` in the browser to check the result

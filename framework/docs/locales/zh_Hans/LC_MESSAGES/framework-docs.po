@@ -891,17 +891,17 @@ msgstr "在谷歌 Colab 上打开 Jupyter 笔记本"
 #: ../../source/contributor-how-to-install-development-versions.rst:59
 #, fuzzy
 msgid ""
-"Open the notebook ``doc/source/tutorial-series-get-started-with-flower-"
+"Open the notebook ``framework/docs/source/tutorial-series-get-started-with-flower-"
 "pytorch.ipynb``:"
-msgstr "打开笔记本 ``doc/source/tutorial-get-started-with-flower-pytorch.ipynb``："
+msgstr "打开笔记本 ``framework/docs/source/tutorial-get-started-with-flower-pytorch.ipynb``："
 
 #: ../../source/contributor-how-to-install-development-versions.rst:61
 #, fuzzy
 msgid ""
-"https://colab.research.google.com/github/adap/flower/blob/main/doc/source"
+"https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
 "/tutorial-series-get-started-with-flower-pytorch.ipynb"
 msgstr ""
-"https://colab.research.google.com/github/adap/flower/blob/main/doc/source"
+"https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
 "/tutorial-get-started-with-flower-pytorch.ipynb"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:63
@@ -916,10 +916,10 @@ msgstr ""
 #, fuzzy
 msgid ""
 "https://colab.research.google.com/github/adap/flower/blob/branch-"
-"name/doc/source/tutorial-series-get-started-with-flower-pytorch.ipynb"
+"name/framework/docs/source/tutorial-series-get-started-with-flower-pytorch.ipynb"
 msgstr ""
 "https://colab.research.google.com/github/adap/flower/blob/branch-"
-"name/doc/source/tutorial-get-started-with-flower-pytorch.ipynb"
+"name/framework/docs/source/tutorial-get-started-with-flower-pytorch.ipynb"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:68
 msgid "Install a `whl` on Google Colab:"
@@ -1287,8 +1287,8 @@ msgid "Edit an existing page"
 msgstr "编辑现有页面"
 
 #: ../../source/contributor-how-to-write-documentation.rst:17
-msgid "Edit an existing ``.rst`` (or ``.md``) file under ``doc/source/``"
-msgstr "编辑 ``doc/source/`` 下现有的 ``.rst`` (或 ``.md``) 文件"
+msgid "Edit an existing ``.rst`` (or ``.md``) file under ``framework/docs/source/``"
+msgstr "编辑 ``framework/docs/source/`` 下现有的 ``.rst`` (或 ``.md``) 文件"
 
 #: ../../source/contributor-how-to-write-documentation.rst:18
 #: ../../source/contributor-how-to-write-documentation.rst:27
@@ -1305,8 +1305,8 @@ msgid "Create a new page"
 msgstr "创建新页面"
 
 #: ../../source/contributor-how-to-write-documentation.rst:24
-msgid "Add new ``.rst`` file under ``doc/source/``"
-msgstr "在 ``doc/source/`` 下添加新的 ``.rst`` 文件"
+msgid "Add new ``.rst`` file under ``framework/docs/source/``"
+msgstr "在 ``framework/docs/source/`` 下添加新的 ``.rst`` 文件"
 
 #: ../../source/contributor-how-to-write-documentation.rst:25
 msgid "Add content to the new ``.rst`` file"
@@ -1973,8 +1973,8 @@ msgstr "这只是一个很小的改动，但可以让我们测试你的端到端
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:307
 #, fuzzy
-msgid "Find the source file in ``doc/source``"
-msgstr "在 `doc/source` 中查找源文件"
+msgid "Find the source file in ``framework/docs/source``"
+msgstr "在 `framework/docs/source` 中查找源文件"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:308
 #, fuzzy
@@ -2018,8 +2018,8 @@ msgstr "将文件名改为`save-progress.rst`"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:323
 #, fuzzy
-msgid "Add a redirect rule to ``doc/source/conf.py``"
-msgstr "在 `doc/source/conf.py` 中添加重定向规则"
+msgid "Add a redirect rule to ``framework/docs/source/conf.py``"
+msgstr "在 `framework/docs/source/conf.py` 中添加重定向规则"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:325
 #, fuzzy
@@ -24000,11 +24000,11 @@ msgstr "**添加新的自定义策略教程部分** [#1623](https://github.com/a
 msgid ""
 "The Flower tutorial now has a new section that covers implementing a "
 "custom strategy from scratch: [Open in "
-"Colab](https://colab.research.google.com/github/adap/flower/blob/main/doc/source"
+"Colab](https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
 "/tutorial-build-a-strategy-from-scratch-pytorch.ipynb)"
 msgstr ""
 "Flower 教程新增了一个章节，介绍如何从零开始实施自定义策略： [在 Colab "
-"中打开](https://colab.research.google.com/github/adap/flower/blob/main/doc/source"
+"中打开](https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
 "/tutorial-build-a-strategy-from-scratch-pytorch.ipynb)"
 
 #: ../../source/ref-changelog.md:987
@@ -24017,11 +24017,11 @@ msgstr "** 添加新的自定义序列化教程部分** ([#1622](https://github.
 msgid ""
 "The Flower tutorial now has a new section that covers custom "
 "serialization: [Open in "
-"Colab](https://colab.research.google.com/github/adap/flower/blob/main/doc/source"
+"Colab](https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
 "/tutorial-customize-the-client-pytorch.ipynb)"
 msgstr ""
 "Flower 教程现在新增了一个章节，介绍自定义序列化： [在 Colab "
-"中打开](https://colab.research.google.com/github/adap/flower/blob/main/doc/source"
+"中打开](https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
 "/tutorial-customize-the-client-pytorch.ipynb)"
 
 #: ../../source/ref-changelog.md:991
