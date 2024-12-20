@@ -116,6 +116,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
     flwr_dir_ = get_flwr_dir(flwr_dir)
     log_uploader = None
     success = True
+    hash_run_id = None
     while True:
 
         try:
