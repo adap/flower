@@ -176,7 +176,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
             )
 
             event(
-                EventType.FLWR_SERVERAPP_ENTER,
+                EventType.FLWR_SERVERAPP_RUN_ENTER,
                 event_details={"run-id-hash": hash_run_id},
             )
 
@@ -224,7 +224,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
                     )
                 )
             event(
-                EventType.FLWR_SERVERAPP_LEAVE,
+                EventType.FLWR_SERVERAPP_RUN_LEAVE,
                 event_details={"run-id-hash": hash_run_id, "success": success},
             )
 

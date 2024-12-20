@@ -154,12 +154,12 @@ class EventType(str, Enum):
     # --- `flwr-*` commands ------------------------------------------------------------
 
     # CLI: flwr-simulation
-    FLWR_SIMULATION_ENTER = auto()
-    FLWR_SIMULATION_LEAVE = auto()
+    FLWR_SIMULATION_RUN_ENTER = auto()
+    FLWR_SIMULATION_RUN_LEAVE = auto()
 
     # CLI: flwr-serverapp
-    FLWR_SERVERAPP_ENTER = auto()
-    FLWR_SERVERAPP_LEAVE = auto()
+    FLWR_SERVERAPP_RUN_ENTER = auto()
+    FLWR_SERVERAPP_RUN_LEAVE = auto()
 
     # --- Simulation Engine ------------------------------------------------------------
 
