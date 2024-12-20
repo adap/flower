@@ -175,7 +175,10 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
                 UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
             )
 
-            event(EventType.FLWR_SERVERAPP_ENTER, event_details={"run-id": hash_run_id})
+            event(
+                EventType.FLWR_SERVERAPP_ENTER,
+                event_details={"run-id-hash": hash_run_id},
+            )
 
             # Load and run the ServerApp with the Driver
             updated_context = run_(
@@ -222,7 +225,7 @@ def run_serverapp(  # pylint: disable=R0914, disable=W0212, disable=R0915
                 )
             event(
                 EventType.FLWR_SERVERAPP_LEAVE,
-                event_details={"run-id": hash_run_id, "success": success},
+                event_details={"run-id-hash": hash_run_id, "success": success},
             )
 
         # Stop the loop if `flwr-serverapp` is expected to process a single run
