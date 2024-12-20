@@ -47,8 +47,8 @@ def _list_split(lst: list[Any], num_sublists: int) -> list[list[Any]]:
     return sublists
 
 
-def _add_active_party_columns(
-    active_party_columns: list[str],
+def _add_active_party_columns(  # pylint: disable=R0912
+    active_party_columns: Union[str, list[str]],
     active_party_columns_mode: Union[
         Literal[
             "add_to_first",
@@ -65,7 +65,7 @@ def _add_active_party_columns(
 
     Parameters
     ----------
-    active_party_columns : list[str]
+    active_party_columns : Union[str, list[str]]
         List of active party columns.
     active_party_columns_mode : Union[Literal["add_to_first", "add_to_last", "create_as_first", "create_as_last", "add_to_all"], int]
         Mode to add active party columns to partition columns.
@@ -75,6 +75,8 @@ def _add_active_party_columns(
     partition_columns: list[list[str]]
         List of partition columns after the modyfication.
     """
+    if isinstance(active_party_columns, str):
+        active_party_columns = [active_party_columns]
     if isinstance(active_party_columns_mode, int):
         partition_id = active_party_columns_mode
         if partition_id < 0 or partition_id >= len(partition_columns):
@@ -101,3 +103,29 @@ def _add_active_party_columns(
                 for partition in partition_columns:
                     partition.append(column)
     return partition_columns
+
+
+def _init_optional_str_or_list_str(parameter: Union[str, list[str], None]) -> list[str]:
+    """Initialize a parameter as a list of strings.
+
+    Parameters
+    ----------
+    parameter : Union[str, list[str], None]
+        A parameter that should be a string, a list of strings, or None.
+
+    Returns
+    -------
+    parameter: list[str]
+        The parameter as a list of strings.
+    """
+    if parameter is None:
+        return []
+    if not isinstance(parameter, (str, list)):
+        raise TypeError("Parameter must be a string or a list of strings")
+    if isinstance(parameter, list) and not all(
+        isinstance(single_param, str) for single_param in parameter
+    ):
+        raise TypeError("All elements in the list must be strings")
+    if isinstance(parameter, str):
+        return [parameter]
+    return parameter
