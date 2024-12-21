@@ -36,7 +36,9 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
     PingRequest,
+    PullMessagesRequest,
     PullTaskInsRequest,
+    PushMessagesRequest,
     PushTaskResRequest,
 )
 from flwr.proto.run_pb2 import GetRunRequest  # pylint: disable=E0611
@@ -52,6 +54,8 @@ Request = Union[
     GetRunRequest,
     PingRequest,
     GetFabRequest,
+    PullMessagesRequest,
+    PushMessagesRequest,
 ]
 
 
@@ -129,6 +133,8 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
                 GetRunRequest,
                 PingRequest,
                 GetFabRequest,
+                PullMessagesRequest,
+                PushMessagesRequest,
             ),
         ):
             if self.shared_secret is None:

@@ -30,8 +30,12 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     DeleteNodeResponse,
     PingRequest,
     PingResponse,
+    PullMessagesRequest,
+    PullMessagesResponse,
     PullTaskInsRequest,
     PullTaskInsResponse,
+    PushMessagesRequest,
+    PushMessagesResponse,
     PushTaskResRequest,
     PushTaskResResponse,
 )
@@ -95,6 +99,12 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             state=self.state_factory.state(),
         )
 
+    def PullMessages(
+        self, request: PullMessagesRequest, context: grpc.ServicerContext
+    ) -> PullMessagesResponse:
+        """Pull Messages."""
+        return PullMessagesResponse()
+
     def PushTaskRes(
         self, request: PushTaskResRequest, context: grpc.ServicerContext
     ) -> PushTaskResResponse:
@@ -117,6 +127,12 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             abort_grpc_context(e.message, context)
 
         return res
+
+    def PushMessages(
+        self, request: PushMessagesRequest, context: grpc.ServicerContext
+    ) -> PushMessagesResponse:
+        """Push Messages."""
+        return PushMessagesResponse()
 
     def GetRun(
         self, request: GetRunRequest, context: grpc.ServicerContext
