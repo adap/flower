@@ -23,7 +23,7 @@ from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from logging import ERROR, INFO, WARN
 from pathlib import Path
-from typing import Callable, Optional, Union, cast
+from typing import Callable, Optional, Sequence, Union, cast
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -101,6 +101,7 @@ def start_client(
     authentication_keys: Optional[
         tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
+    client_metadata: Optional[Sequence[tuple[str, Union[str, bytes]]]] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
 ) -> None:
@@ -146,6 +147,10 @@ def start_client(
         authentication from the cryptography library.
         Source: https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ec/
         Used to establish an authenticated connection with the server.
+    client_metadata : Optional[Sequence[tuple[str, Union[str, bytes]]]] (default: None)
+        Metadata to be sent to the server in the form of key-value pairs. If provided, 
+        GprcClientProxy retrieves this metadata, which can then be accessed through 
+        client_manager. This attribute can only be used in grpc-bidi.
     max_retries: Optional[int] (default: None)
         The maximum number of times the client will try to connect to the
         server before giving up in case of a connection error. If set to None,
@@ -208,6 +213,7 @@ def start_client(
         insecure=insecure,
         transport=transport,
         authentication_keys=authentication_keys,
+        client_metadata=client_metadata,
         max_retries=max_retries,
         max_wait_time=max_wait_time,
     )
@@ -232,6 +238,7 @@ def start_client_internal(
     authentication_keys: Optional[
         tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
+    client_metadata: Optional[Sequence[tuple[str, Union[str, bytes]]]] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
     flwr_path: Optional[Path] = None,
@@ -279,6 +286,10 @@ def start_client_internal(
         authentication from the cryptography library.
         Source: https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ec/
         Used to establish an authenticated connection with the server.
+    client_metadata : Optional[Sequence[tuple[str, Union[str, bytes]]]] (default: None)
+        Metadata to be sent to the server in the form of key-value pairs. If provided, 
+        GprcClientProxy retrieves this metadata, which can then be accessed through 
+        client_manager. This attribute can only be used in grpc-bidi.
     max_retries: Optional[int] (default: None)
         The maximum number of times the client will try to connect to the
         server before giving up in case of a connection error. If set to None,
@@ -403,6 +414,7 @@ def start_client_internal(
             grpc_max_message_length,
             root_certificates,
             authentication_keys,
+            client_metadata,
         ) as conn:
             receive, send, create_node, delete_node, get_run, get_fab = conn
 
