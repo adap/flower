@@ -15,6 +15,7 @@
 """Flower client app."""
 
 
+import os
 import signal
 import subprocess
 import sys
@@ -40,6 +41,7 @@ from flwr.common.address import parse_address
 from flwr.common.constant import (
     CLIENT_OCTET,
     CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
+    EXIT_GRPC_ADAPTER_SHUTDOWN,
     ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
     MAX_RETRY_DELAY,
@@ -622,10 +624,16 @@ def start_client_internal(
                     )
                     log(INFO, "")
 
-                except StopIteration:
+                except SystemExit as ex:
                     sleep_duration = 0
+                    if ex.code == EXIT_GRPC_ADAPTER_SHUTDOWN:
+                        app_state_tracker.is_connected = False
                     break
             # pylint: enable=too-many-nested-blocks
+
+            # Skip cleanup for child processes
+            if app_state_tracker.main_pid != os.getpid():
+                sys.exit(0)
 
             # Unregister node
             if delete_node is not None and app_state_tracker.is_connected:
@@ -813,14 +821,16 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
 class _AppStateTracker:
     interrupt: bool = False
     is_connected: bool = False
+    main_pid: int = -1
 
     def register_signal_handler(self) -> None:
         """Register handlers for exit signals."""
+        self.main_pid = os.getpid()
 
         def signal_handler(sig, frame):  # type: ignore
             # pylint: disable=unused-argument
             self.interrupt = True
-            raise StopIteration from None
+            sys.exit(0)
 
         signal.signal(signal.SIGINT, signal_handler)
         signal.signal(signal.SIGTERM, signal_handler)
