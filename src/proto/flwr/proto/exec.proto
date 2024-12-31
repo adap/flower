@@ -64,10 +64,19 @@ message ListRunsResponse {
 }
 
 message GetLoginDetailsRequest {}
-message GetLoginDetailsResponse { map<string, string> login_details = 1; }
+message GetLoginDetailsResponse {
+  string auth_type = 1;
+  string device_code = 2;
+  string verification_uri_complete = 3;
+  int64 expires_in = 4;
+  int64 interval = 5;
+}
 
-message GetAuthTokensRequest { map<string, string> auth_details = 1; }
-message GetAuthTokensResponse { map<string, string> auth_tokens = 1; }
+message GetAuthTokensRequest { string device_code = 1; }
+message GetAuthTokensResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+}
 
 message StopRunRequest { uint64 run_id = 1; }
 message StopRunResponse { bool success = 1; }
