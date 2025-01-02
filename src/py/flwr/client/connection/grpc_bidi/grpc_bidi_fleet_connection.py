@@ -218,7 +218,7 @@ class GrpcBidiFleetConnection(FleetConnection):
     def get_run(self, run_id: int) -> Run:
         """Get run info."""
         log(DEBUG, "GetRun API is not supported by GrpcBidiConnection.")
-        return Run(run_id, "", "", "", {})
+        return Run.create_empty(run_id)
 
     def get_fab(self, fab_hash: str, run_id: int) -> Fab:
         """Get FAB file."""

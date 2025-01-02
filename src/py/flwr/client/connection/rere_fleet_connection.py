@@ -39,12 +39,8 @@ from flwr.common.constant import (
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
-from flwr.common.serde import (
-    message_from_taskins,
-    message_to_taskres,
-    user_config_from_proto,
-)
-from flwr.common.typing import Fab, Run
+from flwr.common.serde import message_from_taskins, message_to_taskres, run_from_proto
+from flwr.common.typing import Fab, Run, RunNotRunningException
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
@@ -78,6 +74,21 @@ class RereFleetConnection(FleetConnection):
         ) = None,
     ) -> None:
         """Initialize the RereFleetConnection."""
+
+        def _should_giveup_fn(e: Exception) -> bool:
+            if not isinstance(e, grpc.RpcError):
+                return False
+            if e.code() == grpc.StatusCode.PERMISSION_DENIED:
+                raise RunNotRunningException
+            if e.code() == grpc.StatusCode.UNAVAILABLE:
+                return False
+            return True
+
+        # Restrict retries to cases where the status code is UNAVAILABLE
+        # If the status code is PERMISSION_DENIED,
+        # additionally raise RunNotRunningException
+        retry_invoker.should_giveup = _should_giveup_fn
+
         super().__init__(
             server_address=server_address,
             insecure=insecure,
@@ -222,18 +233,12 @@ class RereFleetConnection(FleetConnection):
         )
 
         # Return fab_id and fab_version
-        return Run(
-            run_id,
-            res.run.fab_id,
-            res.run.fab_version,
-            res.run.fab_hash,
-            user_config_from_proto(res.run.override_config),
-        )
+        return run_from_proto(res.run)
 
-    def get_fab(self, fab_hash: str) -> Fab:
+    def get_fab(self, fab_hash: str, run_id: int) -> Fab:
         """Get FAB file."""
         # Call FleetAPI
-        req = GetFabRequest(node=self.node, hash_str=fab_hash)
+        req = GetFabRequest(node=self.node, hash_str=fab_hash, run_id=run_id)
         res: GetFabResponse = self.retry_invoker.invoke(
             self.api.GetFab,
             request=req,
