@@ -62,9 +62,9 @@ from flwr.server.superlink.fleet.grpc_bidi.grpc_server import generic_create_grp
 from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 
 from .clientapp.clientappio_servicer import ClientAppInputs, ClientAppIoServicer
-from .grpc_adapter_client.connection import grpc_adapter
-from .grpc_client.connection import grpc_connection
-from .grpc_rere_client.connection import grpc_request_response
+from .connection.grpc_adapter.connection import grpc_adapter
+from .connection.grpc_bidi.connection import grpc_connection
+from .connection.grpc_rere.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
 from .numpy_client import NumPyClient
 from .run_info_store import DeprecatedRunInfoStore
@@ -786,7 +786,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> tuple[
         try:
             from requests.exceptions import ConnectionError as RequestsConnectionError
 
-            from .rest_client.connection import http_request_response
+            from .connection.rest.connection import http_request_response
         except ModuleNotFoundError:
             sys.exit(MISSING_EXTRA_REST)
         if server_address[:4] != "http":
