@@ -66,3 +66,8 @@ def create_channel(
         channel = grpc.intercept_channel(channel, interceptors)
 
     return channel
+
+
+def on_channel_state_change(channel_connectivity: str) -> None:
+    """Log channel connectivity."""
+    log(DEBUG, channel_connectivity)

@@ -12,4 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Client-side part of the gRPC request-response transport layer."""
+"""Client-side part of the GrpcRere transport layer."""
+
+
+from .grpc_rere_fleet_connection import GrpcRereFleetConnection
+
+__all__ = [
+    "GrpcRereFleetConnection",
+]
