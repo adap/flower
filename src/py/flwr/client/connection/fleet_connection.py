@@ -100,7 +100,7 @@ class FleetConnection(ABC):
         """Get run info."""
 
     @abstractmethod
-    def get_fab(self, fab_hash: str) -> Fab:
+    def get_fab(self, fab_hash: str, run_id: int) -> Fab:
         """Get FAB file."""
 
     def __enter__(self) -> FleetConnection:
