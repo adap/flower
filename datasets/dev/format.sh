@@ -20,10 +20,10 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
 # Python
 echo "Formatting started: Python"
-python -m isort flwr_datasets/
-python -m black -q flwr_datasets/
-python -m docformatter -i -r flwr_datasets/
-python -m ruff check --fix flwr_datasets/
+python -m isort flwr_datasets/ tests/
+python -m black -q flwr_datasets/ tests/
+python -m docformatter -i -r flwr_datasets/ tests/
+python -m ruff check --fix flwr_datasets/ tests/
 echo "Formatting done: Python"
 
 # Notebooks
