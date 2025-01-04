@@ -307,7 +307,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         return len(self.task_res_store)
 
     def create_node(
-        self, ping_interval: float, public_key: Optional[bytes] = None
+        self, ping_interval: float
     ) -> int:
         """Create, store in the link state, and return `node_id`."""
         # Sample a random int64 as node_id
@@ -365,6 +365,10 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 for node_id, (online_until, _) in self.node_ids.items()
                 if online_until > current_time
             }
+
+    def set_node_public_key(self, node_id: int, public_key: bytes) -> None:
+        """Store `public_key` for the specified `node_id`."""
+        self.public_key_to_node_id[public_key] = node_id
 
     def get_node_id(self, node_public_key: bytes) -> Optional[int]:
         """Retrieve stored `node_id` filtered by `node_public_keys`."""
