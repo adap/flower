@@ -158,7 +158,7 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """Create, store in the link state, and return `node_id`."""
 
     @abc.abstractmethod
-    def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
+    def delete_node(self, node_id: int) -> None:
         """Remove `node_id` from the link state."""
 
     @abc.abstractmethod
@@ -173,7 +173,11 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
 
     @abc.abstractmethod
     def set_node_public_key(self, node_id: int, public_key: bytes) -> None:
-        """Store `public_key` for the specified `node_id`."""
+        """Set `public_key` for the specified `node_id`."""
+
+    @abc.abstractmethod
+    def get_node_public_key(self, node_id: int) -> Optional[bytes]:
+        """Get `public_key` for the specified `node_id`."""
 
     @abc.abstractmethod
     def get_node_id(self, node_public_key: bytes) -> Optional[int]:
