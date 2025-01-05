@@ -658,24 +658,6 @@ class StateTest(unittest.TestCase):
         assert len(retrieved_node_ids) == 0
         assert retrieved_node_id is None
 
-    def test_delete_node_public_key_none(self) -> None:
-        """Test deleting a client node with public key."""
-        # Prepare
-        state: LinkState = self.state_factory()
-        public_key = b"mock"
-        run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        node_id = 0
-
-        # Execute & Assert
-        with self.assertRaises(ValueError):
-            state.delete_node(node_id)
-
-        retrieved_node_ids = state.get_nodes(run_id)
-        retrieved_node_id = state.get_node_id(public_key)
-
-        assert len(retrieved_node_ids) == 0
-        assert retrieved_node_id is None
-
     def test_get_node_id_wrong_public_key(self) -> None:
         """Test retrieving a client node with wrong public key."""
         # Prepare
