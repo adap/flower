@@ -104,7 +104,7 @@ def test_wrong_message_hmac() -> None:
     assert verify_hmac(server_shared_secret, message, client_compute_hmac) is False
 
 
-def test_sign_and_verify_success():
+def test_sign_and_verify_success() -> None:
     """Test signing and verifying a message successfully."""
     # Prepare
     private_key, public_key = generate_key_pairs()
@@ -117,7 +117,7 @@ def test_sign_and_verify_success():
     assert verify_signature(public_key, message, signature)
 
 
-def test_sign_and_verify_failure():
+def test_sign_and_verify_failure() -> None:
     """Test signing and verifying a message with incorrect keys or data."""
     # Prepare
     private_key, public_key = generate_key_pairs()
