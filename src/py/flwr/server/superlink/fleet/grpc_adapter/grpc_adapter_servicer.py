@@ -158,4 +158,5 @@ class GrpcAdapterServicer(grpcadapter_pb2_grpc.GrpcAdapterServicer):
         return message_handler.get_fab(
             request=request,
             ffs=self.ffs_factory.ffs(),
+            state=self.state_factory.state(),
         )
