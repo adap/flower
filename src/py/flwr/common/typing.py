@@ -254,3 +254,15 @@ class Fab:
 
     hash_str: str
     content: bytes
+
+
+class RunNotRunningException(BaseException):
+    """Raised when a run is not running."""
+
+
+class InvalidRunStatusException(BaseException):
+    """Raised when an RPC is invalidated by the RunStatus."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+        self.message = message

@@ -27,7 +27,6 @@ check_and_kill() {
   local pids=$1  # Get the PID as the first argument to the function
   for pid in $pids; do
     echo "Attempting to kill process ID: $pid"
-    kill $pid
     if kill "$pid" 2>/dev/null; then
         echo "Process $pid successfully killed."
     else
