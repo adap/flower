@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2021 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ Paper: arxiv.org/abs/1602.05629
 """
 
 
-from typing import Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import Callable, Optional, Union, cast
 
 import numpy as np
 
@@ -81,12 +81,12 @@ class FedAvgAndroid(Strategy):
         min_available_clients: int = 2,
         evaluate_fn: Optional[
             Callable[
-                [int, NDArrays, Dict[str, Scalar]],
-                Optional[Tuple[float, Dict[str, Scalar]]],
+                [int, NDArrays, dict[str, Scalar]],
+                Optional[tuple[float, dict[str, Scalar]]],
             ]
         ] = None,
-        on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
-        on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
+        on_fit_config_fn: Optional[Callable[[int], dict[str, Scalar]]] = None,
+        on_evaluate_config_fn: Optional[Callable[[int], dict[str, Scalar]]] = None,
         accept_failures: bool = True,
         initial_parameters: Optional[Parameters] = None,
     ) -> None:
@@ -107,12 +107,12 @@ class FedAvgAndroid(Strategy):
         rep = f"FedAvg(accept_failures={self.accept_failures})"
         return rep
 
-    def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
+    def num_fit_clients(self, num_available_clients: int) -> tuple[int, int]:
         """Return the sample size and the required number of available clients."""
         num_clients = int(num_available_clients * self.fraction_fit)
         return max(num_clients, self.min_fit_clients), self.min_available_clients
 
-    def num_evaluation_clients(self, num_available_clients: int) -> Tuple[int, int]:
+    def num_evaluation_clients(self, num_available_clients: int) -> tuple[int, int]:
         """Use a fraction of available clients for evaluation."""
         num_clients = int(num_available_clients * self.fraction_evaluate)
         return max(num_clients, self.min_evaluate_clients), self.min_available_clients
@@ -127,7 +127,7 @@ class FedAvgAndroid(Strategy):
 
     def evaluate(
         self, server_round: int, parameters: Parameters
-    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+    ) -> Optional[tuple[float, dict[str, Scalar]]]:
         """Evaluate model parameters using an evaluation function."""
         if self.evaluate_fn is None:
             # No evaluation function provided
@@ -141,7 +141,7 @@ class FedAvgAndroid(Strategy):
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
-    ) -> List[Tuple[ClientProxy, FitIns]]:
+    ) -> list[tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
         config = {}
         if self.on_fit_config_fn is not None:
@@ -162,7 +162,7 @@ class FedAvgAndroid(Strategy):
 
     def configure_evaluate(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
-    ) -> List[Tuple[ClientProxy, EvaluateIns]]:
+    ) -> list[tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
         # Do not configure federated evaluation if fraction_evaluate is 0
         if self.fraction_evaluate == 0.0:
@@ -189,9 +189,9 @@ class FedAvgAndroid(Strategy):
     def aggregate_fit(
         self,
         server_round: int,
-        results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+        results: list[tuple[ClientProxy, FitRes]],
+        failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
+    ) -> tuple[Optional[Parameters], dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         if not results:
             return None, {}
@@ -208,9 +208,9 @@ class FedAvgAndroid(Strategy):
     def aggregate_evaluate(
         self,
         server_round: int,
-        results: List[Tuple[ClientProxy, EvaluateRes]],
-        failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
-    ) -> Tuple[Optional[float], Dict[str, Scalar]]:
+        results: list[tuple[ClientProxy, EvaluateRes]],
+        failures: list[Union[tuple[ClientProxy, EvaluateRes], BaseException]],
+    ) -> tuple[Optional[float], dict[str, Scalar]]:
         """Aggregate evaluation losses using weighted average."""
         if not results:
             return None, {}

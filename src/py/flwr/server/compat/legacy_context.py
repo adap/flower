@@ -18,7 +18,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from flwr.common import Context, RecordSet
+from flwr.common import Context
 
 from ..client_manager import ClientManager, SimpleClientManager
 from ..history import History
@@ -35,9 +35,9 @@ class LegacyContext(Context):
     client_manager: ClientManager
     history: History
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
-        state: RecordSet,
+        context: Context,
         config: Optional[ServerConfig] = None,
         strategy: Optional[Strategy] = None,
         client_manager: Optional[ClientManager] = None,
@@ -52,4 +52,5 @@ class LegacyContext(Context):
         self.strategy = strategy
         self.client_manager = client_manager
         self.history = History()
-        super().__init__(state)
+
+        super().__init__(**vars(context))

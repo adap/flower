@@ -1,0 +1,27 @@
+defaults:
+  - _self_
+  - strategy: fedavg
+  - aggregate_fn: fedavg
+
+dataset: mnist
+
+server:
+  _target_: flanders.server.EnhancedServer
+  num_rounds: 100
+  pool_size: 100
+  warmup_rounds: 2
+  sampling: 500
+  history_dir: clients_params
+  magnitude: 10
+  threshold: 1e-05
+  attack_fn: gaussian
+  num_malicious: 0
+  omniscent: True
+  noniidness: 0.5
+ 
+server_device: cpu
+seed: 33
+ 
+client_resources:
+  num_cpus: 1
+  num_gpus: 0

@@ -1,19 +1,19 @@
-from typing import List, Tuple, Dict
 import random
 import time
+from typing import Dict, List, Tuple
 
 import flwr as fl
 from flwr.common import (
+    DEFAULT_TTL,
+    Code,
     Context,
     FitIns,
-    ndarrays_to_parameters,
-    parameters_to_ndarrays,
-    NDArrays,
-    Code,
     Message,
     MessageType,
     Metrics,
-    DEFAULT_TTL,
+    NDArrays,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
 )
 from flwr.common.recordset_compat import fitins_to_recordset, recordset_to_fitres
 from flwr.server import Driver, History

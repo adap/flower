@@ -15,16 +15,17 @@
 """FederatedDataset."""
 
 
-from typing import Dict, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import datasets
 from datasets import Dataset, DatasetDict
+from flwr_datasets.common import EventType, event
 from flwr_datasets.partitioner import Partitioner
-from flwr_datasets.resplitter import Resplitter
+from flwr_datasets.preprocessor import Preprocessor
 from flwr_datasets.utils import (
     _check_if_dataset_tested,
+    _instantiate_merger_if_needed,
     _instantiate_partitioners,
-    _instantiate_resplitter_if_needed,
 )
 
 
@@ -35,8 +36,9 @@ class FederatedDataset:
 
     Download, partition data among clients (edge devices), or load full dataset.
 
-    Partitions are created using IidPartitioner. Support for different partitioners
-    specification and types will come in future releases.
+    Partitions are created per-split-basis using Partitioners from
+    `flwr_datasets.partitioner` specified in `partitioners` (see `partitioners`
+    parameter for more information).
 
     Parameters
     ----------
@@ -45,54 +47,88 @@ class FederatedDataset:
     subset : str
         Secondary information regarding the dataset, most often subset or version
         (that is passed to the name in datasets.load_dataset).
-    resplitter : Optional[Union[Resplitter, Dict[str, Tuple[str, ...]]]]
-        `Callable` that transforms `DatasetDict` splits, or configuration dict for
-        `MergeResplitter`.
+    preprocessor : Optional[Union[Preprocessor, Dict[str, Tuple[str, ...]]]]
+        `Callable` that transforms `DatasetDict` by resplitting, removing
+        features, creating new features, performing any other preprocessing operation,
+        or configuration dict for `Merger`. Applied after shuffling. If None,
+        no operation is applied.
     partitioners : Dict[str, Union[Partitioner, int]]
         A dictionary mapping the Dataset split (a `str`) to a `Partitioner` or an `int`
-        (representing the number of IID partitions that this split should be partitioned
-        into). One or multiple `Partitioner` objects can be specified in that manner,
-        but at most, one per split.
+        (representing the number of IID partitions that this split should be
+        partitioned into, i.e., using the default partitioner
+        `IidPartitioner <https://flower.ai/docs/datasets/ref-api/flwr_
+        datasets.partitioner.IidPartitioner.html>`_). One or multiple `Partitioner`
+        objects can be specified in that manner, but at most, one per split.
     shuffle : bool
-        Whether to randomize the order of samples. Applied prior to resplitting,
-        speratelly to each of the present splits in the dataset. It uses the `seed`
-        argument. Defaults to True.
+        Whether to randomize the order of samples. Applied prior to preprocessing
+        operations, speratelly to each of the present splits in the dataset. It uses
+        the `seed` argument. Defaults to True.
     seed : Optional[int]
         Seed used for dataset shuffling. It has no effect if `shuffle` is False. The
-        seed cannot be set in the later stages. If `None`, then fresh, unpredictable entropy
-        will be pulled from the OS. Defaults to 42.
+        seed cannot be set in the later stages. If `None`, then fresh, unpredictable
+        entropy will be pulled from the OS. Defaults to 42.
+    load_dataset_kwargs : Any
+        Additional keyword arguments passed to `datasets.load_dataset` function.
+        Currently used paramters used are dataset => path (in load_dataset),
+        subset => name (in load_dataset). You can pass e.g., `num_proc=4`,
+        `trust_remote_code=True`. Do not pass any parameters that modify the
+        return type such as another type than DatasetDict is returned.
 
     Examples
     --------
     Use MNIST dataset for Federated Learning with 100 clients (edge devices):
 
-    >>> mnist_fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
-    >>> # Load partition for client with ID 10.
-    >>> partition = mnist_fds.load_partition(10, "train")
+    >>> from flwr_datasets import FederatedDataset
+    >>>
+    >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
+    >>> # Load partition for a client with ID 10.
+    >>> partition = fds.load_partition(10)
     >>> # Use test split for centralized evaluation.
-    >>> centralized = mnist_fds.load_split("test")
+    >>> centralized = fds.load_split("test")
+
+    Use CIFAR10 dataset for Federated Laerning with 100 clients:
+
+    >>> from flwr_datasets import FederatedDataset
+    >>> from flwr_datasets.partitioner import DirichletPartitioner
+    >>>
+    >>> partitioner = DirichletPartitioner(num_partitions=10, partition_by="label",
+    >>>                                    alpha=0.5, min_partition_size=10)
+    >>> fds = FederatedDataset(dataset="cifar10", partitioners={"train": partitioner})
+    >>> partition = fds.load_partition(partition_id=0)
+
+    Visualize the partitioned datasets:
+
+    >>> from flwr_datasets.visualization import plot_label_distributions
+    >>>
+    >>> _ = plot_label_distributions(
+    >>>     partitioner=fds.partitioners["train"],
+    >>>     label_name="label",
+    >>>     legend=True,
+    >>> )
     """
 
-    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-instance-attributes, too-many-arguments
     def __init__(
         self,
         *,
         dataset: str,
         subset: Optional[str] = None,
-        resplitter: Optional[Union[Resplitter, Dict[str, Tuple[str, ...]]]] = None,
-        partitioners: Dict[str, Union[Partitioner, int]],
+        preprocessor: Optional[Union[Preprocessor, dict[str, tuple[str, ...]]]] = None,
+        partitioners: dict[str, Union[Partitioner, int]],
         shuffle: bool = True,
         seed: Optional[int] = 42,
+        **load_dataset_kwargs: Any,
     ) -> None:
         _check_if_dataset_tested(dataset)
         self._dataset_name: str = dataset
         self._subset: Optional[str] = subset
-        self._resplitter: Optional[Resplitter] = _instantiate_resplitter_if_needed(
-            resplitter
+        self._preprocessor: Optional[Preprocessor] = _instantiate_merger_if_needed(
+            preprocessor
         )
-        self._partitioners: Dict[str, Partitioner] = _instantiate_partitioners(
+        self._partitioners: dict[str, Partitioner] = _instantiate_partitioners(
             partitioners
         )
+        self._check_partitioners_correctness()
         self._shuffle = shuffle
         self._seed = seed
         #  _dataset is prepared lazily on the first call to `load_partition`
@@ -100,6 +136,10 @@ class FederatedDataset:
         self._dataset: Optional[DatasetDict] = None
         # Indicate if the dataset is prepared for `load_partition` or `load_split`
         self._dataset_prepared: bool = False
+        self._event = {
+            "load_partition": {split: False for split in self._partitioners},
+        }
+        self._load_dataset_kwargs = load_dataset_kwargs
 
     def load_partition(
         self,
@@ -122,6 +162,11 @@ class FederatedDataset:
             not need to provide this argument, but if `partitioners={"train": 10,
             "test": 100}`, you need to set it to differentiate which partitioner should
             be used.
+            The split names you can choose from vary from dataset to dataset. You need
+            to check the dataset on the `Hugging Face Hub`<https://huggingface.co/
+            datasets>_ to see which splits are available. You can resplit the dataset
+            by using the `preprocessor` parameter (to rename, merge, divide, etc. the
+            available splits).
 
         Returns
         -------
@@ -139,7 +184,20 @@ class FederatedDataset:
         self._check_if_split_possible_to_federate(split)
         partitioner: Partitioner = self._partitioners[split]
         self._assign_dataset_to_partitioner(split)
-        return partitioner.load_partition(partition_id)
+        partition = partitioner.load_partition(partition_id)
+        if not self._event["load_partition"][split]:
+            event(
+                EventType.LOAD_PARTITION_CALLED,
+                {
+                    "federated_dataset_id": id(self),
+                    "dataset_name": self._dataset_name,
+                    "split": split,
+                    "partitioner": partitioner.__class__.__name__,
+                    "num_partitions": partitioner.num_partitions,
+                },
+            )
+            self._event["load_partition"][split] = True
+        return partition
 
     def load_split(self, split: str) -> Dataset:
         """Load the full split of the dataset.
@@ -151,6 +209,11 @@ class FederatedDataset:
         ----------
         split : str
             Split name of the downloaded dataset (e.g. "train", "test").
+            The split names you can choose from vary from dataset to dataset. You need
+            to check the dataset on the `Hugging Face Hub`<https://huggingface.co/
+            datasets>_ to see which splits are available. You can resplit the dataset
+            by using the `preprocessor` parameter (to rename, merge, divide, etc. the
+            available splits).
 
         Returns
         -------
@@ -162,10 +225,23 @@ class FederatedDataset:
         if self._dataset is None:
             raise ValueError("Dataset is not loaded yet.")
         self._check_if_split_present(split)
-        return self._dataset[split]
+        dataset_split = self._dataset[split]
+
+        if not self._event["load_split"][split]:
+            event(
+                EventType.LOAD_SPLIT_CALLED,
+                {
+                    "federated_dataset_id": id(self),
+                    "dataset_name": self._dataset_name,
+                    "split": split,
+                },
+            )
+            self._event["load_split"][split] = True
+
+        return dataset_split
 
     @property
-    def partitioners(self) -> Dict[str, Partitioner]:
+    def partitioners(self) -> dict[str, Partitioner]:
         """Dictionary mapping each split to its associated partitioner.
 
         The returned partitioners have the splits of the dataset assigned to them.
@@ -236,14 +312,23 @@ class FederatedDataset:
         happen before the resplitting.
         """
         self._dataset = datasets.load_dataset(
-            path=self._dataset_name, name=self._subset
+            path=self._dataset_name, name=self._subset, **self._load_dataset_kwargs
         )
+        if not isinstance(self._dataset, datasets.DatasetDict):
+            raise ValueError(
+                "Probably one of the specified parameter in `load_dataset_kwargs` "
+                "change the return type of the datasets.load_dataset function. "
+                "Make sure to use parameter such that the return type is DatasetDict. "
+                f"The return type is currently: {type(self._dataset)}."
+            )
         if self._shuffle:
             # Note it shuffles all the splits. The self._dataset is DatasetDict
             # so e.g. {"train": train_data, "test": test_data}. All splits get shuffled.
             self._dataset = self._dataset.shuffle(seed=self._seed)
-        if self._resplitter:
-            self._dataset = self._resplitter(self._dataset)
+        if self._preprocessor:
+            self._dataset = self._preprocessor(self._dataset)
+        available_splits = list(self._dataset.keys())
+        self._event["load_split"] = {split: False for split in available_splits}
         self._dataset_prepared = True
 
     def _check_if_no_split_keyword_possible(self) -> None:
@@ -252,3 +337,20 @@ class FederatedDataset:
                 "Please set the `split` argument. You can only omit the split keyword "
                 "if there is exactly one partitioner specified."
             )
+
+    def _check_partitioners_correctness(self) -> None:
+        """Check if the partitioners are correctly specified.
+
+        Check if each partitioner is a different Python object. Using the same
+        partitioner for different splits is not allowed.
+        """
+        partitioners_keys = list(self._partitioners.keys())
+        for i, first_split in enumerate(partitioners_keys):
+            for j in range(i + 1, len(partitioners_keys)):
+                second_split = partitioners_keys[j]
+                if self._partitioners[first_split] is self._partitioners[second_split]:
+                    raise ValueError(
+                        f"The same partitioner object is used for multiple splits: "
+                        f"('{first_split}', '{second_split}'). "
+                        "Each partitioner should be a separate object."
+                    )

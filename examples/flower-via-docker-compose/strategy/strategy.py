@@ -1,9 +1,11 @@
+import logging
 from typing import Dict, List, Optional, Tuple, Union
-from flwr.common import Scalar, EvaluateRes
+
+import flwr as fl
+from flwr.common import EvaluateRes, Scalar
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
-import flwr as fl
-import logging
+
 from prometheus_client import Gauge
 
 logging.basicConfig(level=logging.INFO)  # Configure logging

@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,8 +14,6 @@
 # ==============================================================================
 """Utility functions for the SecAgg/SecAgg+ protocol."""
 
-
-from typing import List, Tuple
 
 import numpy as np
 
@@ -45,8 +43,8 @@ def share_keys_plaintext_concat(
     """
     return b"".join(
         [
-            int.to_bytes(src_node_id, 8, "little", signed=True),
-            int.to_bytes(dst_node_id, 8, "little", signed=True),
+            int.to_bytes(src_node_id, 8, "little", signed=False),
+            int.to_bytes(dst_node_id, 8, "little", signed=False),
             int.to_bytes(len(b_share), 4, "little"),
             b_share,
             sk_share,
@@ -54,7 +52,7 @@ def share_keys_plaintext_concat(
     )
 
 
-def share_keys_plaintext_separate(plaintext: bytes) -> Tuple[int, int, bytes, bytes]:
+def share_keys_plaintext_separate(plaintext: bytes) -> tuple[int, int, bytes, bytes]:
     """Retrieve arguments from bytes.
 
     Parameters
@@ -74,8 +72,8 @@ def share_keys_plaintext_separate(plaintext: bytes) -> Tuple[int, int, bytes, by
         the secret key share of the source sent to the destination.
     """
     src, dst, mark = (
-        int.from_bytes(plaintext[:8], "little", signed=True),
-        int.from_bytes(plaintext[8:16], "little", signed=True),
+        int.from_bytes(plaintext[:8], "little", signed=False),
+        int.from_bytes(plaintext[8:16], "little", signed=False),
         int.from_bytes(plaintext[16:20], "little"),
     )
     ret = (src, dst, plaintext[20 : 20 + mark], plaintext[20 + mark :])
@@ -83,8 +81,8 @@ def share_keys_plaintext_separate(plaintext: bytes) -> Tuple[int, int, bytes, by
 
 
 def pseudo_rand_gen(
-    seed: bytes, num_range: int, dimensions_list: List[Tuple[int, ...]]
-) -> List[NDArrayInt]:
+    seed: bytes, num_range: int, dimensions_list: list[tuple[int, ...]]
+) -> list[NDArrayInt]:
     """Seeded pseudo-random number generator for noise generation with Numpy."""
     assert len(seed) & 0x3 == 0
     seed32 = 0
@@ -95,8 +93,8 @@ def pseudo_rand_gen(
     output = []
     for dimension in dimensions_list:
         if len(dimension) == 0:
-            arr = np.array(gen.randint(0, num_range - 1), dtype=int)
+            arr = np.array(gen.randint(0, num_range - 1), dtype=np.int64)
         else:
-            arr = gen.randint(0, num_range - 1, dimension)
+            arr = gen.randint(0, num_range - 1, dimension, dtype=np.int64)
         output.append(arr)
     return output

@@ -1,13 +1,12 @@
 import argparse
 
+import flwr as fl
 import torch
 from datasets import load_dataset
-from transformers import WhisperProcessor
 from torch.utils.data import DataLoader
-import flwr as fl
+from transformers import WhisperProcessor
 
-from utils import eval_model, get_model, set_params, remove_cols, get_encoding_fn
-
+from utils import eval_model, get_encoding_fn, get_model, remove_cols, set_params
 
 parser = argparse.ArgumentParser(description="Flower+Whisper")
 parser.add_argument("--num_rounds", type=int, default=5, help="Number of FL rounds.")

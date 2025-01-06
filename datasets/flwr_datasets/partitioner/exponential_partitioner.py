@@ -17,10 +17,10 @@
 
 import numpy as np
 
-from flwr_datasets.partitioner.size_partitioner import SizePartitioner
+from flwr_datasets.partitioner.id_to_size_fnc_partitioner import IdToSizeFncPartitioner
 
 
-class ExponentialPartitioner(SizePartitioner):
+class ExponentialPartitioner(IdToSizeFncPartitioner):
     """Partitioner creates partitions of size that are correlated with exp(id).
 
     The amount of data each client gets is correlated with the exponent of partition ID.
@@ -35,6 +35,15 @@ class ExponentialPartitioner(SizePartitioner):
     ----------
     num_partitions : int
         The total number of partitions that the data will be divided into.
+
+    Examples
+    --------
+    >>> from flwr_datasets import FederatedDataset
+    >>> from flwr_datasets.partitioner import ExponentialPartitioner
+    >>>
+    >>> partitioner = ExponentialPartitioner(num_partitions=10)
+    >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": partitioner})
+    >>> partition = fds.load_partition(0)
     """
 
     def __init__(self, num_partitions: int) -> None:

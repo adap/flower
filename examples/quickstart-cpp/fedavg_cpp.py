@@ -3,15 +3,9 @@ from ast import Bytes
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
-from flwr.server.strategy import FedAvg
-from flwr.common import (
-    EvaluateRes,
-    FitRes,
-    Parameters,
-    Scalar,
-    NDArrays,
-)
+from flwr.common import EvaluateRes, FitRes, NDArrays, Parameters, Scalar
 from flwr.server.client_proxy import ClientProxy
+from flwr.server.strategy import FedAvg
 from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
 
 

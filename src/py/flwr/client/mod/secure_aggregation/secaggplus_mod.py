@@ -18,7 +18,7 @@
 import os
 from dataclasses import dataclass, field
 from logging import DEBUG, WARNING
-from typing import Any, Dict, List, Tuple, cast
+from typing import Any, cast
 
 from flwr.client.typing import ClientAppCallable
 from flwr.common import (
@@ -91,11 +91,11 @@ class SecAggPlusState:
     # Random seed for generating the private mask
     rd_seed: bytes = b""
 
-    rd_seed_share_dict: Dict[int, bytes] = field(default_factory=dict)
-    sk1_share_dict: Dict[int, bytes] = field(default_factory=dict)
+    rd_seed_share_dict: dict[int, bytes] = field(default_factory=dict)
+    sk1_share_dict: dict[int, bytes] = field(default_factory=dict)
     # The dict of the shared secrets from sk2
-    ss2_dict: Dict[int, bytes] = field(default_factory=dict)
-    public_keys_dict: Dict[int, Tuple[bytes, bytes]] = field(default_factory=dict)
+    ss2_dict: dict[int, bytes] = field(default_factory=dict)
+    public_keys_dict: dict[int, tuple[bytes, bytes]] = field(default_factory=dict)
 
     def __init__(self, **kwargs: ConfigsRecordValues) -> None:
         for k, v in kwargs.items():
@@ -104,8 +104,8 @@ class SecAggPlusState:
             new_v: Any = v
             if k.endswith(":K"):
                 k = k[:-2]
-                keys = cast(List[int], v)
-                values = cast(List[bytes], kwargs[f"{k}:V"])
+                keys = cast(list[int], v)
+                values = cast(list[bytes], kwargs[f"{k}:V"])
                 if len(values) > len(keys):
                     updated_values = [
                         tuple(values[i : i + 2]) for i in range(0, len(values), 2)
@@ -115,17 +115,17 @@ class SecAggPlusState:
                     new_v = dict(zip(keys, values))
             self.__setattr__(k, new_v)
 
-    def to_dict(self) -> Dict[str, ConfigsRecordValues]:
+    def to_dict(self) -> dict[str, ConfigsRecordValues]:
         """Convert the state to a dictionary."""
         ret = vars(self)
         for k in list(ret.keys()):
             if isinstance(ret[k], dict):
                 # Replace dict with two lists
-                v = cast(Dict[str, Any], ret.pop(k))
+                v = cast(dict[str, Any], ret.pop(k))
                 ret[f"{k}:K"] = list(v.keys())
                 if k == "public_keys_dict":
-                    v_list: List[bytes] = []
-                    for b1_b2 in cast(List[Tuple[bytes, bytes]], v.values()):
+                    v_list: list[bytes] = []
+                    for b1_b2 in cast(list[tuple[bytes, bytes]], v.values()):
                         v_list.extend(b1_b2)
                     ret[f"{k}:V"] = v_list
                 else:
@@ -276,7 +276,7 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
                 )
             if not isinstance(configs[key], list) or any(
                 elm
-                for elm in cast(List[Any], configs[key])
+                for elm in cast(list[Any], configs[key])
                 # pylint: disable-next=unidiomatic-typecheck
                 if type(elm) is not expected_type
             ):
@@ -299,7 +299,7 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
                 )
             if not isinstance(configs[key], list) or any(
                 elm
-                for elm in cast(List[Any], configs[key])
+                for elm in cast(list[Any], configs[key])
                 # pylint: disable-next=unidiomatic-typecheck
                 if type(elm) is not expected_type
             ):
@@ -314,7 +314,7 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
 
 def _setup(
     state: SecAggPlusState, configs: ConfigsRecord
-) -> Dict[str, ConfigsRecordValues]:
+) -> dict[str, ConfigsRecordValues]:
     # Assigning parameter values to object fields
     sec_agg_param_dict = configs
     state.sample_num = cast(int, sec_agg_param_dict[Key.SAMPLE_NUMBER])
@@ -350,8 +350,8 @@ def _setup(
 # pylint: disable-next=too-many-locals
 def _share_keys(
     state: SecAggPlusState, configs: ConfigsRecord
-) -> Dict[str, ConfigsRecordValues]:
-    named_bytes_tuples = cast(Dict[str, Tuple[bytes, bytes]], configs)
+) -> dict[str, ConfigsRecordValues]:
+    named_bytes_tuples = cast(dict[str, tuple[bytes, bytes]], configs)
     key_dict = {int(sid): (pk1, pk2) for sid, (pk1, pk2) in named_bytes_tuples.items()}
     log(DEBUG, "Node %d: starting stage 1...", state.nid)
     state.public_keys_dict = key_dict
@@ -361,7 +361,7 @@ def _share_keys(
         raise ValueError("Available neighbours number smaller than threshold")
 
     # Check if all public keys are unique
-    pk_list: List[bytes] = []
+    pk_list: list[bytes] = []
     for pk1, pk2 in state.public_keys_dict.values():
         pk_list.append(pk1)
         pk_list.append(pk2)
@@ -415,11 +415,11 @@ def _collect_masked_vectors(
     configs: ConfigsRecord,
     num_examples: int,
     updated_parameters: Parameters,
-) -> Dict[str, ConfigsRecordValues]:
+) -> dict[str, ConfigsRecordValues]:
     log(DEBUG, "Node %d: starting stage 2...", state.nid)
-    available_clients: List[int] = []
-    ciphertexts = cast(List[bytes], configs[Key.CIPHERTEXT_LIST])
-    srcs = cast(List[int], configs[Key.SOURCE_LIST])
+    available_clients: list[int] = []
+    ciphertexts = cast(list[bytes], configs[Key.CIPHERTEXT_LIST])
+    srcs = cast(list[int], configs[Key.SOURCE_LIST])
     if len(ciphertexts) + 1 < state.threshold:
         raise ValueError("Not enough available neighbour clients.")
 
@@ -467,7 +467,7 @@ def _collect_masked_vectors(
 
     quantized_parameters = factor_combine(q_ratio, quantized_parameters)
 
-    dimensions_list: List[Tuple[int, ...]] = [a.shape for a in quantized_parameters]
+    dimensions_list: list[tuple[int, ...]] = [a.shape for a in quantized_parameters]
 
     # Add private mask
     private_mask = pseudo_rand_gen(state.rd_seed, state.mod_range, dimensions_list)
@@ -499,11 +499,11 @@ def _collect_masked_vectors(
 
 def _unmask(
     state: SecAggPlusState, configs: ConfigsRecord
-) -> Dict[str, ConfigsRecordValues]:
+) -> dict[str, ConfigsRecordValues]:
     log(DEBUG, "Node %d: starting stage 3...", state.nid)
 
-    active_nids = cast(List[int], configs[Key.ACTIVE_NODE_ID_LIST])
-    dead_nids = cast(List[int], configs[Key.DEAD_NODE_ID_LIST])
+    active_nids = cast(list[int], configs[Key.ACTIVE_NODE_ID_LIST])
+    dead_nids = cast(list[int], configs[Key.DEAD_NODE_ID_LIST])
     # Send private mask seed share for every avaliable client (including itself)
     # Send first private key share for building pairwise mask for every dropped client
     if len(active_nids) < state.threshold:

@@ -1,5 +1,5 @@
-import random
 import argparse
+import random
 
 parser = argparse.ArgumentParser(description="Generated Docker Compose")
 parser.add_argument(
@@ -31,7 +31,6 @@ def create_docker_compose(args):
     ]
 
     docker_compose_content = f"""
-version: '3'
 services:
   prometheus:
     image: prom/prometheus:latest
@@ -63,7 +62,7 @@ services:
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
-      - /var/run/docker.sock:/var/run/docker.sock  
+      - /var/run/docker.sock:/var/run/docker.sock
 
   grafana:
     image: grafana/grafana:latest
@@ -84,7 +83,6 @@ services:
     command:
       - --config=/etc/grafana/grafana.ini
 
-
   server:
     container_name: server
     build:
@@ -96,11 +94,12 @@ services:
       DOCKER_HOST_IP: host.docker.internal
     volumes:
       - .:/app
-      - /var/run/docker.sock:/var/run/docker.sock      
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "6000:6000"
       - "8265:8265"
       - "8000:8000"
+    stop_signal: SIGINT
     depends_on:
       - prometheus
       - grafana
@@ -134,6 +133,7 @@ services:
       FLASK_RUN_PORT: {6000 + i}
       container_name: client{i}
       DOCKER_HOST_IP: host.docker.internal
+    stop_signal: SIGINT
 """
 
     docker_compose_content += "volumes:\n  grafana-storage:\n"

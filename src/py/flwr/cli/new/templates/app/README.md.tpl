@@ -1,43 +1,31 @@
-# $project_name
+# $project_name: A Flower / $framework_str app
 
-## Install dependencies
+## Install dependencies and project
 
 ```bash
-pip install .
+pip install -e .
 ```
 
-## Run (Simulation Engine)
+## Run with the Simulation Engine
 
 In the `$project_name` directory, use `flwr run` to run a local simulation:
 
 ```bash
-flwr run
+flwr run .
 ```
 
-## Run (Deployment Engine)
+Refer to the [How to Run Simulations](https://flower.ai/docs/framework/how-to-run-simulations.html) guide in the documentation for advice on how to optimize your simulations.
 
-### Start the SuperLink
+## Run with the Deployment Engine
 
-```bash
-flower-superlink --insecure
-```
+> \[!NOTE\]
+> An update to this example will show how to run this Flower application with the Deployment Engine and TLS certificates, or with Docker.
 
-### Start the long-running Flower client
+## Resources
 
-In a new terminal window, start the first long-running Flower client:
-
-```bash
-flower-client-app client:app --insecure
-```
-
-In yet another new terminal window, start the second long-running Flower client:
-
-```bash
-flower-client-app client:app --insecure
-```
-
-### Start the ServerApp
-
-```bash
-flower-server-app server:app --insecure
-```
+- Flower website: [flower.ai](https://flower.ai/)
+- Check the documentation: [flower.ai/docs](https://flower.ai/docs/)
+- Give Flower a ⭐️ on GitHub: [GitHub](https://github.com/adap/flower)
+- Join the Flower community!
+  - [Flower Slack](https://flower.ai/join-slack/)
+  - [Flower Discuss](https://discuss.flower.ai/)

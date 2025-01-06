@@ -14,7 +14,9 @@
 # ==============================================================================
 """Test for Flower command line interface `new` command."""
 
+
 import os
+from pathlib import Path
 
 import pytest
 
@@ -38,6 +40,7 @@ def test_render_template() -> None:
     # Prepare
     filename = "app/README.md.tpl"
     data = {
+        "framework_str": "",
         "project_name": "FedGPT",
         "package_name": "fedgpt",
         "import_name": "fedgpt",
@@ -54,7 +57,7 @@ def test_render_template() -> None:
 def test_create_file(tmp_path: str) -> None:
     """Test if file with content is created."""
     # Prepare
-    file_path = os.path.join(tmp_path, "test.txt")
+    file_path = Path(tmp_path) / "test.txt"
     content = "Foobar"
 
     # Execute
@@ -86,28 +89,30 @@ def test_new_correct_name(tmp_path: str) -> None:
         }
         expected_files_module = {
             "__init__.py",
-            "server.py",
-            "client.py",
+            "server_app.py",
+            "client_app.py",
             "task.py",
         }
 
         # Current directory
-        origin = os.getcwd()
+        origin = Path.cwd()
 
         try:
             # Change into the temprorary directory
             os.chdir(tmp_path)
             # Execute
-            new(project_name=project_name, framework=framework, username=username)
+            new(app_name=project_name, framework=framework, username=username)
 
             # Assert
-            file_list = os.listdir(os.path.join(tmp_path, expected_top_level_dir))
-            assert set(file_list) == expected_files_top_level
+            file_list = (Path(tmp_path) / expected_top_level_dir).iterdir()
+            assert {
+                file_path.name for file_path in file_list
+            } == expected_files_top_level
 
-            file_list = os.listdir(
-                os.path.join(tmp_path, expected_top_level_dir, expected_module_dir)
-            )
-            assert set(file_list) == expected_files_module
+            file_list = (
+                Path(tmp_path) / expected_top_level_dir / expected_module_dir
+            ).iterdir()
+            assert {file_path.name for file_path in file_list} == expected_files_module
         finally:
             os.chdir(origin)
 
@@ -119,7 +124,7 @@ def test_new_incorrect_name(tmp_path: str) -> None:
 
     for project_name in ["My_Flower_App", "My.Flower App"]:
         # Current directory
-        origin = os.getcwd()
+        origin = Path.cwd()
 
         try:
             # Change into the temprorary directory
@@ -129,7 +134,7 @@ def test_new_incorrect_name(tmp_path: str) -> None:
 
                 # Execute
                 new(
-                    project_name=project_name,
+                    app_name=project_name,
                     framework=framework,
                     username=username,
                 )

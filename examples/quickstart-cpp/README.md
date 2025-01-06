@@ -1,3 +1,9 @@
+---
+tags: [quickstart, linear regression, tabular]
+dataset: [Synthetic]
+framework: [C++]
+---
+
 # Flower Clients in C++ (under development)
 
 In this example you will train a linear model on synthetic data using C++ clients.

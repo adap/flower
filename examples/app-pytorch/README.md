@@ -1,3 +1,9 @@
+---
+tags: [basic, vision, fds]
+dataset: [CIFAR-10]
+framework: [torch, torchvision]
+---
+
 # Flower App (PyTorch) 🧪
 
 > 🧪 = This example covers experimental features that might change in future versions of Flower

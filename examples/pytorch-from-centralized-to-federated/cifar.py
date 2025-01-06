@@ -15,11 +15,10 @@ from typing import Tuple
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from flwr_datasets import FederatedDataset
 from torch import Tensor
 from torch.utils.data import DataLoader
-from torchvision.transforms import Compose, ToTensor, Normalize
-
-from flwr_datasets import FederatedDataset
+from torchvision.transforms import Compose, Normalize, ToTensor
 
 
 # pylint: disable=unsubscriptable-object
