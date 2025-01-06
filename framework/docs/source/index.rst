@@ -67,14 +67,10 @@ Transformers <tutorial-quickstart-huggingface>` | :doc:`JAX <tutorial-quickstart
 <tutorial-quickstart-scikitlearn>` | :doc:`XGBoost <tutorial-quickstart-xgboost>` |
 :doc:`Android <tutorial-quickstart-android>` | :doc:`iOS <tutorial-quickstart-ios>`
 
-We also made video tutorials for PyTorch:
+Checkout the Flower AI Simulation 2025 Tutorial Series for a step-by-step guide on how
+to design Apps and run them with Flower's Simulation Engine.
 
-.. youtube:: jOmmuzMIQ4c
-    :width: 80%
-
-And TensorFlow:
-
-.. youtube:: FGTc2TQq7VM
+.. youtube:: XK_dRVcSZqg
     :width: 80%
 
 How-to guides
