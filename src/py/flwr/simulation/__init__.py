@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2021 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,18 +17,20 @@
 
 import importlib
 
+from flwr.simulation.app import run_simulation_process
 from flwr.simulation.run_simulation import run_simulation
+from flwr.simulation.simulationio_connection import SimulationIoConnection
 
 is_ray_installed = importlib.util.find_spec("ray") is not None
 
 if is_ray_installed:
-    from flwr.simulation.app import start_simulation
+    from flwr.simulation.legacy_app import start_simulation
 else:
     RAY_IMPORT_ERROR: str = """Unable to import module `ray`.
 
 To install the necessary dependencies, install `flwr` with the `simulation` extra:
 
-    pip install -U flwr["simulation"]
+    pip install -U "flwr[simulation]"
 """
 
     def start_simulation(*args, **kwargs):  # type: ignore
@@ -36,4 +38,9 @@ To install the necessary dependencies, install `flwr` with the `simulation` extr
         raise ImportError(RAY_IMPORT_ERROR)
 
 
-__all__ = ["start_simulation", "run_simulation"]
+__all__ = [
+    "SimulationIoConnection",
+    "run_simulation",
+    "run_simulation_process",
+    "start_simulation",
+]

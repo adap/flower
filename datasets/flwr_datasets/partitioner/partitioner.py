@@ -44,11 +44,16 @@ class Partitioner(ABC):
     @dataset.setter
     def dataset(self, value: Dataset) -> None:
         if self._dataset is not None:
-            raise Exception(
+            raise ValueError(
                 "The dataset should be assigned only once to the partitioner."
                 "This operation might also wipe out the saved references to the "
                 "created partitions (in case the partitioning scheme needs to create "
                 "the full partitioning also in order to return a single partition)."
+            )
+        if not isinstance(value, Dataset):
+            raise TypeError(
+                f"The dataset object you want to assign to the partitioner should be "
+                f"of type `datasets.Dataset` but given {type(value)}."
             )
         self._dataset = value
 

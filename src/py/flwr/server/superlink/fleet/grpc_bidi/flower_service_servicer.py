@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,8 +18,10 @@ Relevant knowledge for reading this modules code:
 - https://github.com/grpc/grpc/blob/master/doc/statuscodes.md
 """
 
+
 import uuid
-from typing import Callable, Iterator
+from collections.abc import Iterator
+from typing import Callable
 
 import grpc
 from iterators import TimeoutIterator

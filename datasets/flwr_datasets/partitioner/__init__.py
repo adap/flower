@@ -16,25 +16,37 @@
 
 
 from .dirichlet_partitioner import DirichletPartitioner
+from .distribution_partitioner import DistributionPartitioner
 from .exponential_partitioner import ExponentialPartitioner
+from .grouped_natural_id_partitioner import GroupedNaturalIdPartitioner
+from .id_to_size_fnc_partitioner import IdToSizeFncPartitioner
 from .iid_partitioner import IidPartitioner
 from .inner_dirichlet_partitioner import InnerDirichletPartitioner
 from .linear_partitioner import LinearPartitioner
 from .natural_id_partitioner import NaturalIdPartitioner
 from .partitioner import Partitioner
+from .pathological_partitioner import PathologicalPartitioner
 from .shard_partitioner import ShardPartitioner
 from .size_partitioner import SizePartitioner
 from .square_partitioner import SquarePartitioner
+from .vertical_even_partitioner import VerticalEvenPartitioner
+from .vertical_size_partitioner import VerticalSizePartitioner
 
 __all__ = [
-    "IidPartitioner",
-    "Partitioner",
-    "NaturalIdPartitioner",
     "DirichletPartitioner",
-    "SizePartitioner",
-    "LinearPartitioner",
-    "InnerDirichletPartitioner",
-    "SquarePartitioner",
-    "ShardPartitioner",
+    "DistributionPartitioner",
     "ExponentialPartitioner",
+    "GroupedNaturalIdPartitioner",
+    "IdToSizeFncPartitioner",
+    "IidPartitioner",
+    "InnerDirichletPartitioner",
+    "LinearPartitioner",
+    "NaturalIdPartitioner",
+    "Partitioner",
+    "PathologicalPartitioner",
+    "ShardPartitioner",
+    "SizePartitioner",
+    "SquarePartitioner",
+    "VerticalEvenPartitioner",
+    "VerticalSizePartitioner",
 ]

@@ -1,10 +1,11 @@
-import os
 import argparse
+import logging
+import os
+
 import flwr as fl
 import tensorflow as tf
-import logging
 from helpers.load_data import load_data
-import os
+
 from model.model import Model
 
 logging.basicConfig(level=logging.INFO)  # Configure logging

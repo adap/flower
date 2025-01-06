@@ -16,7 +16,7 @@
 
 
 import warnings
-from typing import Dict, List, Optional, Union
+from typing import Optional, Union
 
 import numpy as np
 
@@ -78,7 +78,7 @@ class DirichletPartitioner(Partitioner):
     >>> print(partition[0])  # Print the first example
     {'image': <PIL.PngImagePlugin.PngImageFile image mode=L size=28x28 at 0x127B92170>,
     'label': 4}
-    >>> partition_sizes = partition_sizes = [
+    >>> partition_sizes = [
     >>>     len(fds.load_partition(partition_id)) for partition_id in range(10)
     >>> ]
     >>> print(sorted(partition_sizes))
@@ -89,7 +89,7 @@ class DirichletPartitioner(Partitioner):
         self,
         num_partitions: int,
         partition_by: str,
-        alpha: Union[int, float, List[float], NDArrayFloat],
+        alpha: Union[int, float, list[float], NDArrayFloat],
         min_partition_size: int = 10,
         self_balancing: bool = False,
         shuffle: bool = True,
@@ -110,8 +110,8 @@ class DirichletPartitioner(Partitioner):
         # Utility attributes
         # The attributes below are determined during the first call to load_partition
         self._avg_num_of_samples_per_partition: Optional[float] = None
-        self._unique_classes: Optional[Union[List[int], List[str]]] = None
-        self._partition_id_to_indices: Dict[int, List[int]] = {}
+        self._unique_classes: Optional[Union[list[int], list[str]]] = None
+        self._partition_id_to_indices: dict[int, list[int]] = {}
         self._partition_id_to_indices_determined = False
 
     def load_partition(self, partition_id: int) -> datasets.Dataset:
@@ -142,7 +142,7 @@ class DirichletPartitioner(Partitioner):
         return self._num_partitions
 
     def _initialize_alpha(
-        self, alpha: Union[int, float, List[float], NDArrayFloat]
+        self, alpha: Union[int, float, list[float], NDArrayFloat]
     ) -> NDArrayFloat:
         """Convert alpha to the used format in the code a NDArrayFloat.
 
@@ -164,7 +164,7 @@ class DirichletPartitioner(Partitioner):
             alpha = np.array([float(alpha)], dtype=float).repeat(self._num_partitions)
         elif isinstance(alpha, float):
             alpha = np.array([alpha], dtype=float).repeat(self._num_partitions)
-        elif isinstance(alpha, List):
+        elif isinstance(alpha, list):
             if len(alpha) != self._num_partitions:
                 raise ValueError(
                     "If passing alpha as a List, it needs to be of length of equal to "
@@ -217,7 +217,7 @@ class DirichletPartitioner(Partitioner):
         sampling_try = 0
         while True:
             # Prepare data structure to store indices assigned to partition ids
-            partition_id_to_indices: Dict[int, List[int]] = {}
+            partition_id_to_indices: dict[int, list[int]] = {}
             for nid in range(self._num_partitions):
                 partition_id_to_indices[nid] = []
 

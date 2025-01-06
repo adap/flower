@@ -1,19 +1,19 @@
 import argparse
-from datasets import load_dataset
-from transformers import WhisperForConditionalGeneration, WhisperProcessor
-import torch
-from torch.utils.data import DataLoader, WeightedRandomSampler
-import numpy as np
-from datasets import concatenate_datasets
 import random
 
+import numpy as np
+import torch
+from datasets import concatenate_datasets, load_dataset
+from torch.utils.data import DataLoader, WeightedRandomSampler
+from transformers import WhisperForConditionalGeneration, WhisperProcessor
+
 from utils import (
-    get_model,
-    train_one_epoch,
     eval_model,
-    prepare_silences_dataset,
     get_encoding_fn,
+    get_model,
+    prepare_silences_dataset,
     remove_cols,
+    train_one_epoch,
 )
 
 random.seed(1989)

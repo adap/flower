@@ -1,10 +1,9 @@
 import argparse
 
+import flwr as fl
 import torch
 from datasets import load_dataset
 from transformers import WhisperProcessor
-
-import flwr as fl
 
 from client import get_client_fn
 from server import fit_config, get_evaluate_fn

@@ -1,5 +1,6 @@
-import flwr
 import argparse
+
+import flwr
 import numpy as np
 
 

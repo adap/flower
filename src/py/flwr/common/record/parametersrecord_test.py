@@ -14,10 +14,10 @@
 # ==============================================================================
 """Unit tests for ParametersRecord and Array."""
 
+
 import unittest
 from collections import OrderedDict
 from io import BytesIO
-from typing import List
 
 import numpy as np
 import pytest
@@ -81,7 +81,7 @@ class TestArray(unittest.TestCase):
         ([31, 153], "bool_"),  # bool_ is represented as a whole Byte in NumPy
     ],
 )
-def test_count_bytes(shape: List[int], dtype: str) -> None:
+def test_count_bytes(shape: list[int], dtype: str) -> None:
     """Test bytes in a ParametersRecord are computed correctly."""
     original_array = np.random.randn(*shape).astype(np.dtype(dtype))
 

@@ -14,18 +14,18 @@
 # ==============================================================================
 """Simulation Engine Backends."""
 
+
 import importlib
-from typing import Dict, Type
 
 from .backend import Backend, BackendConfig
 
 is_ray_installed = importlib.util.find_spec("ray") is not None
 
 # Mapping of supported backends
-supported_backends: Dict[str, Type[Backend]] = {}
+supported_backends: dict[str, type[Backend]] = {}
 
 # To log backend-specific error message when chosen backend isn't available
-error_messages_backends: Dict[str, str] = {}
+error_messages_backends: dict[str, str] = {}
 
 if is_ray_installed:
     from .raybackend import RayBackend
@@ -38,7 +38,7 @@ else:
 
     To install the necessary dependencies, install `flwr` with the `simulation` extra:
 
-        pip install -U flwr["simulation"]
+        pip install -U "flwr[simulation]"
     """
 
 

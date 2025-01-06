@@ -1,11 +1,10 @@
-import os
-import sys
-import subprocess
-import tensorflow as tf
 import json
+import os
+import subprocess
+import sys
 
+import tensorflow as tf
 from flwr.common import ndarrays_to_parameters
-
 
 MODULE_PATH = os.path.abspath(__file__)
 MODULE_DIR = os.path.dirname(MODULE_PATH)

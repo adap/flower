@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 
 import time
 from threading import Thread
-from typing import List, Union
+from typing import Union
 
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ClientMessage,
@@ -32,7 +32,7 @@ from flwr.server.superlink.fleet.grpc_bidi.grpc_bridge import (
 
 
 def start_worker(
-    rounds: int, bridge: GrpcBridge, results: List[ClientMessage]
+    rounds: int, bridge: GrpcBridge, results: list[ClientMessage]
 ) -> Thread:
     """Simulate processing loop with five calls."""
 
@@ -59,7 +59,7 @@ def test_workflow_successful() -> None:
     """Test full workflow."""
     # Prepare
     rounds = 5
-    client_messages_received: List[ClientMessage] = []
+    client_messages_received: list[ClientMessage] = []
 
     bridge = GrpcBridge()
     ins_wrapper_iterator = bridge.ins_wrapper_iterator()
@@ -90,7 +90,7 @@ def test_workflow_close() -> None:
     """
     # Prepare
     rounds = 5
-    client_messages_received: List[ClientMessage] = []
+    client_messages_received: list[ClientMessage] = []
 
     bridge = GrpcBridge()
     ins_wrapper_iterator = bridge.ins_wrapper_iterator()
@@ -135,7 +135,7 @@ def test_ins_wrapper_iterator_close_while_blocking() -> None:
     """
     # Prepare
     rounds = 5
-    client_messages_received: List[ClientMessage] = []
+    client_messages_received: list[ClientMessage] = []
 
     bridge = GrpcBridge()
     ins_wrapper_iterator = bridge.ins_wrapper_iterator()

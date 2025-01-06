@@ -1,0 +1,7 @@
+---
+name: krum
+
+strategy:
+  _target_: flwr.server.strategy.Krum
+  num_clients_to_keep: 3
+  num_malicious_clients: ${server.num_malicious}

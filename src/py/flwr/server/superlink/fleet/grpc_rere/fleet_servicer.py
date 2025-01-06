@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,14 +20,14 @@ from logging import DEBUG, INFO
 import grpc
 
 from flwr.common.logger import log
+from flwr.common.typing import InvalidRunStatusException
 from flwr.proto import fleet_pb2_grpc  # pylint: disable=E0611
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
-    GetRunRequest,
-    GetRunResponse,
     PingRequest,
     PingResponse,
     PullTaskInsRequest,
@@ -35,31 +35,42 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResRequest,
     PushTaskResResponse,
 )
+from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.fleet.message_handler import message_handler
-from flwr.server.superlink.state import StateFactory
+from flwr.server.superlink.linkstate import LinkStateFactory
+from flwr.server.superlink.utils import abort_grpc_context
 
 
 class FleetServicer(fleet_pb2_grpc.FleetServicer):
     """Fleet API servicer."""
 
-    def __init__(self, state_factory: StateFactory) -> None:
+    def __init__(
+        self, state_factory: LinkStateFactory, ffs_factory: FfsFactory
+    ) -> None:
         self.state_factory = state_factory
+        self.ffs_factory = ffs_factory
 
     def CreateNode(
         self, request: CreateNodeRequest, context: grpc.ServicerContext
     ) -> CreateNodeResponse:
         """."""
-        log(INFO, "FleetServicer.CreateNode")
-        return message_handler.create_node(
+        log(INFO, "[Fleet.CreateNode] Request ping_interval=%s", request.ping_interval)
+        log(DEBUG, "[Fleet.CreateNode] Request: %s", request)
+        response = message_handler.create_node(
             request=request,
             state=self.state_factory.state(),
         )
+        log(INFO, "[Fleet.CreateNode] Created node_id=%s", response.node.node_id)
+        log(DEBUG, "[Fleet.CreateNode] Response: %s", response)
+        return response
 
     def DeleteNode(
         self, request: DeleteNodeRequest, context: grpc.ServicerContext
     ) -> DeleteNodeResponse:
         """."""
-        log(INFO, "FleetServicer.DeleteNode")
+        log(INFO, "[Fleet.DeleteNode] Delete node_id=%s", request.node.node_id)
+        log(DEBUG, "[Fleet.DeleteNode] Request: %s", request)
         return message_handler.delete_node(
             request=request,
             state=self.state_factory.state(),
@@ -67,7 +78,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
 
     def Ping(self, request: PingRequest, context: grpc.ServicerContext) -> PingResponse:
         """."""
-        log(DEBUG, "FleetServicer.Ping")
+        log(DEBUG, "[Fleet.Ping] Request: %s", request)
         return message_handler.ping(
             request=request,
             state=self.state_factory.state(),
@@ -77,7 +88,8 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         self, request: PullTaskInsRequest, context: grpc.ServicerContext
     ) -> PullTaskInsResponse:
         """Pull TaskIns."""
-        log(INFO, "FleetServicer.PullTaskIns")
+        log(INFO, "[Fleet.PullTaskIns] node_id=%s", request.node.node_id)
+        log(DEBUG, "[Fleet.PullTaskIns] Request: %s", request)
         return message_handler.pull_task_ins(
             request=request,
             state=self.state_factory.state(),
@@ -87,18 +99,53 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         self, request: PushTaskResRequest, context: grpc.ServicerContext
     ) -> PushTaskResResponse:
         """Push TaskRes."""
-        log(INFO, "FleetServicer.PushTaskRes")
-        return message_handler.push_task_res(
-            request=request,
-            state=self.state_factory.state(),
-        )
+        if request.task_res_list:
+            log(
+                INFO,
+                "[Fleet.PushTaskRes] Push results from node_id=%s",
+                request.task_res_list[0].task.producer.node_id,
+            )
+        else:
+            log(INFO, "[Fleet.PushTaskRes] No task results to push")
+
+        try:
+            res = message_handler.push_task_res(
+                request=request,
+                state=self.state_factory.state(),
+            )
+        except InvalidRunStatusException as e:
+            abort_grpc_context(e.message, context)
+
+        return res
 
     def GetRun(
         self, request: GetRunRequest, context: grpc.ServicerContext
     ) -> GetRunResponse:
         """Get run information."""
-        log(INFO, "FleetServicer.GetRun")
-        return message_handler.get_run(
-            request=request,
-            state=self.state_factory.state(),
-        )
+        log(INFO, "[Fleet.GetRun] Requesting `Run` for run_id=%s", request.run_id)
+
+        try:
+            res = message_handler.get_run(
+                request=request,
+                state=self.state_factory.state(),
+            )
+        except InvalidRunStatusException as e:
+            abort_grpc_context(e.message, context)
+
+        return res
+
+    def GetFab(
+        self, request: GetFabRequest, context: grpc.ServicerContext
+    ) -> GetFabResponse:
+        """Get FAB."""
+        log(INFO, "[Fleet.GetFab] Requesting FAB for fab_hash=%s", request.hash_str)
+        try:
+            res = message_handler.get_fab(
+                request=request,
+                ffs=self.ffs_factory.ffs(),
+                state=self.state_factory.state(),
+            )
+        except InvalidRunStatusException as e:
+            abort_grpc_context(e.message, context)
+
+        return res

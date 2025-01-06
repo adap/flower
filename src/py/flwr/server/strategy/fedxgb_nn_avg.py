@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ Paper: arxiv.org/abs/2304.07537
 
 
 from logging import WARNING
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 from flwr.common import FitRes, Scalar, ndarrays_to_parameters, parameters_to_ndarrays
 from flwr.common.logger import log, warn_deprecated_feature
@@ -56,7 +56,7 @@ class FedXgbNnAvg(FedAvg):
 
     def evaluate(
         self, server_round: int, parameters: Any
-    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+    ) -> Optional[tuple[float, dict[str, Scalar]]]:
         """Evaluate model parameters using an evaluation function."""
         if self.evaluate_fn is None:
             # No evaluation function provided
@@ -70,9 +70,9 @@ class FedXgbNnAvg(FedAvg):
     def aggregate_fit(
         self,
         server_round: int,
-        results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-    ) -> Tuple[Optional[Any], Dict[str, Scalar]]:
+        results: list[tuple[ClientProxy, FitRes]],
+        failures: list[Union[tuple[ClientProxy, FitRes], BaseException]],
+    ) -> tuple[Optional[Any], dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         if not results:
             return None, {}
