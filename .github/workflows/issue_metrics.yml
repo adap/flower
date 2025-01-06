@@ -2,7 +2,7 @@ name: Weekly Issue Metrics
 on:
   schedule:
     - cron: '0 23 * * 0'  # Run at 11 PM UTC on Sundays
-  workflow_dispatch:      # Allow manual trigger
+  workflow_dispatch:      # Allow manual trigger of workflow
 
 permissions:
   contents: read
