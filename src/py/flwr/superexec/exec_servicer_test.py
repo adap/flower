@@ -21,9 +21,12 @@ from datetime import datetime
 from unittest.mock import MagicMock, Mock
 
 from flwr.common import ConfigsRecord, now
+from flwr.common.constant import Status, SubStatus
+from flwr.common.typing import RunStatus
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     ListRunsRequest,
     StartRunRequest,
+    StopRunRequest,
 )
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
 from flwr.server.superlink.linkstate import LinkStateFactory
@@ -104,3 +107,25 @@ class TestExecServicer(unittest.TestCase):
         # Assert
         self.assertLess(abs(retrieved_timestamp - now().timestamp()), 1e-3)
         self.assertEqual(set(response.run_dict.keys()), {run_id})
+
+    def test_stop_run(self) -> None:
+        """Test StopRun method of ExecServicer."""
+        # Prepare
+        run_id = self.state.create_run(
+            "mock_fabid", "mock_fabver", "fake_hash", {}, ConfigsRecord()
+        )
+        self.servicer.executor = MagicMock()
+        expected_run_status = RunStatus(Status.FINISHED, SubStatus.STOPPED, "")
+        self.servicer.executor.stop_run = lambda input_run_id: (
+            input_run_id == run_id
+        ) & self.state.update_run_status(input_run_id, new_status=expected_run_status)
+
+        # Execute
+        response = self.servicer.StopRun(StopRunRequest(run_id=run_id), Mock())
+        run_state = self.state.get_run(run_id)
+
+        # Assert
+        self.assertTrue(response.success)
+        self.assertIsNotNone(run_state)
+        if run_state is not None:
+            self.assertEqual(run_state.status, expected_run_status)
