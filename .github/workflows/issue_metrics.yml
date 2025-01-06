@@ -1,57 +1,33 @@
-name: Daily Issue Metrics
+name: Weekly Issue Metrics
 on:
-  workflow_dispatch:
   schedule:
-    - cron: "0 0 * * *" # Runs daily at midnight UTC
+    - cron: '0 23 * * 0'  # Run at 11 PM UTC on Sundays
+  workflow_dispatch:      # Allow manual trigger
 
 permissions:
   contents: read
 
 jobs:
   build:
-    name: Issue Metrics
+    name: issue metrics
     runs-on: ubuntu-latest
     permissions:
       issues: write
       pull-requests: read
-
     steps:
-      - name: Get dates for yesterday
-        shell: bash
-        run: |
-          # Calculate yesterday's date
-          start_date=$(date -d "yesterday" +%Y-%m-%d)
-          end_date=$(date -d "today" +%Y-%m-%d)
-
-          # Set an environment variable with the date range
-          echo "$start_date..$end_date"
-          echo "date_range=$start_date..$end_date" >> "$GITHUB_ENV"
-
       - name: Run issue-metrics tool
         uses: github/issue-metrics@v3
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SEARCH_QUERY: "repo:adap/flower is:open is:issue"
-          HIDE_AUTHOR: "true"
-          HIDE_ITEMS_CLOSED_COUNT: "false"
-          HIDE_LABEL_METRICS: "false"
-          HIDE_TIME_TO_ANSWER: "false"
-          HIDE_TIME_TO_CLOSE: "false"
-          HIDE_TIME_TO_FIRST_RESPONSE: "false"
-          IGNORE_USERS: "user1,user2"
-          DRAFT_PR_TRACKING: "true"
-          ENABLE_MENTOR_COUNT: "true"
-          MIN_MENTOR_COMMENTS: "10"
+          SEARCH_QUERY: 'repo:adap/flower is:open is:issue -reason:"not planned"'
           HIDE_LABEL_COUNT: "false"
           LABELS_TO_MEASURE: "bug,documentation,feature request,part: misc framework,part: baselines,part: communication,part: flwr-dataset,part: examples,state: open,state: resolved,state: under review,state: revision needed,state: stale,good first issue,needs clarification,needs reproduction details"
           NON_MENTIONING_LINKS: "false"
-          OUTPUT_FILE: "./issue_metrics.md"
-          REPORT_TITLE: "Flower Issue Metrics"
+          REPORT_TITLE: "Issue Metrics"
 
       - name: Create issue
-        uses: peter-evans/create-issue-from-file@v4
+        uses: peter-evans/create-issue-from-file@v5
         with:
-          title: Daily Issue Metrics Report
+          title: Weekly Issue Metrics Report
           token: ${{ secrets.GITHUB_TOKEN }}
           content-filepath: ./issue_metrics.md
-          assignees: WilliamLindskog
