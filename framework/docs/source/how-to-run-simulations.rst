@@ -46,47 +46,47 @@ workloads makes sense.
     - - .. raw:: html
 
             <a href="https://youtu.be/XK_dRVcSZqg">
-                <img src="https://img.youtube.com/vi/XK_dRVcSZqg/0.jpg" alt="Image 1" width="200"/>
+                <img src="https://img.youtube.com/vi/XK_dRVcSZqg/0.jpg" alt="Introduction" width="200"/>
             </a>
       - .. raw:: html
 
             <a href="https://youtu.be/VwGq16DMx3Q">
-                <img src="https://img.youtube.com/vi/VwGq16DMx3Q/0.jpg" alt="Image 1" width="200"/>
+                <img src="https://img.youtube.com/vi/VwGq16DMx3Q/0.jpg" alt="Launch your first simulation" width="200"/>
             </a>
       - .. raw:: html
 
             <a href="https://youtu.be/8Uwsa0x7VJw">
-                <img src="https://img.youtube.com/vi/8Uwsa0x7VJw/0.jpg" alt="Image 2" width="200"/>
+                <img src="https://img.youtube.com/vi/8Uwsa0x7VJw/0.jpg" alt="Understanding Flower Apps" width="200"/>
             </a>
     - - .. raw:: html
 
             <a href="https://youtu.be/KsMP9dgcLw4">
-                <img src="https://img.youtube.com/vi/KsMP9dgcLw4/0.jpg" alt="Image 3" width="200"/>
+                <img src="https://img.youtube.com/vi/KsMP9dgcLw4/0.jpg" alt="Defining Strategy Callbacks" width="200"/>
             </a>
       - .. raw:: html
 
             <a href="https://youtu.be/dZRDe1ldy5s">
-                <img src="https://img.youtube.com/vi/dZRDe1ldy5s/0.jpg" alt="Image 4" width="200"/>
+                <img src="https://img.youtube.com/vi/dZRDe1ldy5s/0.jpg" alt="Sending ClientApp Metrics" width="200"/>
             </a>
       - .. raw:: html
 
             <a href="https://youtu.be/udDSIQyYzNM">
-                <img src="https://img.youtube.com/vi/udDSIQyYzNM/0.jpg" alt="Image 5" width="200"/>
+                <img src="https://img.youtube.com/vi/udDSIQyYzNM/0.jpg" alt="Building Custom Strategies" width="200"/>
             </a>
     - - .. raw:: html
 
             <a href="https://youtu.be/ppYemmT2mOs">
-                <img src="https://img.youtube.com/vi/ppYemmT2mOs/0.jpg" alt="Image 6" width="200"/>
+                <img src="https://img.youtube.com/vi/ppYemmT2mOs/0.jpg" alt="Desginging Stateful ClientApps" width="200"/>
             </a>
       - .. raw:: html
 
             <a href="https://youtu.be/TAUxb9eEZ3w">
-                <img src="https://img.youtube.com/vi/TAUxb9eEZ3w/0.jpg" alt="Image 7" width="200"/>
+                <img src="https://img.youtube.com/vi/TAUxb9eEZ3w/0.jpg" alt="Scaling Up simulations" width="200"/>
             </a>
       - .. raw:: html
 
             <a href="https://youtu.be/nUUkuqi4Lpo">
-                <img src="https://img.youtube.com/vi/nUUkuqi4Lpo/0.jpg" alt="Image 8" width="200"/>
+                <img src="https://img.youtube.com/vi/nUUkuqi4Lpo/0.jpg" alt="Wrapping Up" width="200"/>
             </a>
 
 Flower's ``Simulation Engine`` schedules, launches, and manages |clientapp_link|_
