@@ -22,7 +22,7 @@ from typing import Optional
 from flwr import common
 from flwr.client import ClientFnExt
 from flwr.client.client_app import ClientApp
-from flwr.client.node_state import NodeState
+from flwr.client.run_info_store import DeprecatedRunInfoStore
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
 from flwr.common.constant import (
     NUM_PARTITIONS_KEY,
@@ -65,7 +65,7 @@ class RayActorClientProxy(ClientProxy):
 
         self.app_fn = _load_app
         self.actor_pool = actor_pool
-        self.proxy_state = NodeState(
+        self.proxy_state = DeprecatedRunInfoStore(
             node_id=node_id,
             node_config={
                 PARTITION_ID_KEY: str(partition_id),

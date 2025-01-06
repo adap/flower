@@ -45,7 +45,6 @@ case "$3" in
       executor_arg="--executor flwr.superexec.deployment:executor"
       ;;
     simulation-engine)
-      executor_config="$executor_config num-supernodes=10"
       executor_arg="--executor flwr.superexec.simulation:executor"
       ;;
 esac
@@ -74,6 +73,10 @@ else
   echo -e $"\n[tool.flwr.federations.e2e]\naddress = \"127.0.0.1:9093\"\nroot-certificates = \"../certificates/ca.crt\"" >> pyproject.toml
 fi
 
+if [ "$3" = "simulation-engine" ]; then
+  echo -e $"options.num-supernodes = 10" >> pyproject.toml
+fi
+
 # Combine the arguments into a single command for flower-superlink
 combined_args="$server_arg $server_auth $exec_api_arg $executor_arg"
 
@@ -81,17 +84,21 @@ timeout 2m flower-superlink $combined_args --executor-config "$executor_config" 
 sl_pid=$(pgrep -f "flower-superlink")
 sleep 2
 
-timeout 2m flower-supernode ./ $client_arg \
-    --superlink $server_address $client_auth_1 \
-    --node-config "partition-id=0 num-partitions=2" --max-retries 0 &
-cl1_pid=$!
-sleep 2
+if [ "$3" = "deployment-engine" ]; then
+  timeout 2m flower-supernode $client_arg \
+      --superlink $server_address $client_auth_1 \
+      --clientappio-api-address localhost:9094 \
+      --node-config "partition-id=0 num-partitions=2" --max-retries 0 &
+  cl1_pid=$!
+  sleep 2
 
-timeout 2m flower-supernode ./ $client_arg \
-    --superlink $server_address $client_auth_2 \
-    --node-config "partition-id=1 num-partitions=2" --max-retries 0 &
-cl2_pid=$!
-sleep 2
+  timeout 2m flower-supernode $client_arg \
+      --superlink $server_address $client_auth_2 \
+      --clientappio-api-address localhost:9095 \
+      --node-config "partition-id=1 num-partitions=2" --max-retries 0 &
+  cl2_pid=$!
+  sleep 2
+fi
 
 timeout 1m flwr run --run-config num-server-rounds=1 ../e2e-tmp-test e2e
 
@@ -105,7 +112,11 @@ while [ "$found_success" = false ] && [ $elapsed -lt $timeout ]; do
     if grep -q "Run finished" flwr_output.log; then
         echo "Training worked correctly!"
         found_success=true
-        kill $cl1_pid; kill $cl2_pid; sleep 1; kill $sl_pid;
+        if [ "$3" = "deployment-engine" ]; then
+          kill $cl1_pid; kill $cl2_pid;
+        fi
+        sleep 1; kill $sl_pid;
+        exit 0;
     else
         echo "Waiting for training ... ($elapsed seconds elapsed)"
     fi
@@ -116,5 +127,9 @@ done
 
 if [ "$found_success" = false ]; then
     echo "Training had an issue and timed out."
-    kill $cl1_pid; kill $cl2_pid; kill $sl_pid;
+    if [ "$3" = "deployment-engine" ]; then
+      kill $cl1_pid; kill $cl2_pid;
+    fi
+    kill $sl_pid;
+    exit 1;
 fi

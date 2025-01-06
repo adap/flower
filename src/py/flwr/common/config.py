@@ -14,6 +14,7 @@
 # ==============================================================================
 """Provide functions for managing global Flower config."""
 
+
 import os
 import re
 from pathlib import Path
@@ -22,10 +23,12 @@ from typing import Any, Optional, Union, cast, get_args
 import tomli
 
 from flwr.cli.config_utils import get_fab_config, validate_fields
+from flwr.common import ConfigsRecord
 from flwr.common.constant import (
     APP_DIR,
     FAB_CONFIG_FILE,
     FAB_HASH_TRUNCATION,
+    FLWR_DIR,
     FLWR_HOME,
 )
 from flwr.common.typing import Run, UserConfig, UserConfigValue
@@ -37,7 +40,7 @@ def get_flwr_dir(provided_path: Optional[str] = None) -> Path:
         return Path(
             os.getenv(
                 FLWR_HOME,
-                Path(f"{os.getenv('XDG_DATA_HOME', os.getenv('HOME'))}") / ".flwr",
+                Path(f"{os.getenv('XDG_DATA_HOME', os.getenv('HOME'))}") / FLWR_DIR,
             )
         )
     return Path(provided_path).absolute()
@@ -229,3 +232,12 @@ def get_metadata_from_config(config: dict[str, Any]) -> tuple[str, str]:
         config["project"]["version"],
         f"{config['tool']['flwr']['app']['publisher']}/{config['project']['name']}",
     )
+
+
+def user_config_to_configsrecord(config: UserConfig) -> ConfigsRecord:
+    """Construct a `ConfigsRecord` out of a `UserConfig`."""
+    c_record = ConfigsRecord()
+    for k, v in config.items():
+        c_record[k] = v
+
+    return c_record
