@@ -12,8 +12,8 @@ dependencies = [
     "flwr-datasets[vision]>=0.3.0",
     "pytorch-lightning<2.0.0; sys_platform == 'darwin'",
     "pytorch-lightning==1.6.0; sys_platform != 'darwin'",
-    "torch==1.13.1",
-    "torchvision==0.14.1",
+    "torch==2.5.0",
+    "torchvision==0.20.0",
 ]
 
 [tool.hatch.build.targets.wheel]
