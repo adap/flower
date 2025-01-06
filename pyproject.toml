@@ -124,7 +124,7 @@ furo = "==2024.8.6"
 sphinx-reredirects = "==0.1.5"
 nbsphinx = "==0.9.5"
 nbstripout = "==0.6.1"
-ruff = "==0.1.9"
+ruff = "==0.4.5"
 sphinx-argparse = "==0.4.0"
 pipreqs = "==0.4.13"
 mdformat = "==0.7.18"
@@ -201,9 +201,6 @@ wrap-descriptions = 88
 [tool.ruff]
 target-version = "py39"
 line-length = 88
-select = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
-fixable = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
-ignore = ["B024", "B027", "D205", "D209"]
 exclude = [
     ".bzr",
     ".direnv",
@@ -228,10 +225,15 @@ exclude = [
     "proto",
 ]
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint]
+select = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
+fixable = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
+ignore = ["B024", "B027", "D205", "D209"]
+
+[tool.ruff.lint.pydocstyle]
 convention = "numpy"
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "src/py/flwr/server/strategy/*.py" = ["E501"]
 
 [tool.docsig]
