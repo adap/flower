@@ -14,6 +14,8 @@
 # ==============================================================================
 """Flower Logger."""
 
+
+import json as _json
 import logging
 import re
 import sys
@@ -26,6 +28,8 @@ from queue import Empty, Queue
 from typing import TYPE_CHECKING, Any, Optional, TextIO, Union
 
 import grpc
+import typer
+from rich.console import Console
 
 from flwr.proto.log_pb2 import PushLogsRequest  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
@@ -376,7 +380,7 @@ def stop_log_uploader(
     log_uploader.join()
 
 
-def remove_emojis(text: str) -> str:
+def _remove_emojis(text: str) -> str:
     """Remove emojis from the provided text."""
     emoji_pattern = re.compile(
         "["
@@ -390,3 +394,15 @@ def remove_emojis(text: str) -> str:
         flags=re.UNICODE,
     )
     return emoji_pattern.sub(r"", text)
+
+
+def print_json_error(msg: str, e: Union[typer.Exit, Exception]) -> None:
+    """Print error message as JSON."""
+    Console().print_json(
+        _json.dumps(
+            {
+                "success": False,
+                "error-message": _remove_emojis(str(msg) + "\n" + str(e)),
+            }
+        )
+    )

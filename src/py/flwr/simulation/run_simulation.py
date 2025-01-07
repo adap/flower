@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower Simulation."""
 
+
 import argparse
 import asyncio
 import json
@@ -23,10 +24,11 @@ import threading
 import traceback
 from logging import DEBUG, ERROR, INFO, WARNING
 from pathlib import Path
-from time import sleep
+from queue import Empty, Queue
 from typing import Any, Optional
 
 from flwr.cli.config_utils import load_and_validate
+from flwr.cli.utils import get_sha256_hash
 from flwr.client import ClientApp
 from flwr.common import Context, EventType, RecordSet, event, log, now
 from flwr.common.config import get_fused_config_from_dir, parse_config_args
@@ -126,7 +128,7 @@ def run_simulation_from_cli() -> None:
     run = Run.create_empty(run_id)
     run.override_config = override_config
 
-    _run_simulation(
+    _ = _run_simulation(
         server_app_attr=server_app_attr,
         client_app_attr=client_app_attr,
         num_supernodes=args.num_supernodes,
@@ -135,7 +137,6 @@ def run_simulation_from_cli() -> None:
         app_dir=args.app,
         run=run,
         enable_tf_gpu_growth=args.enable_tf_gpu_growth,
-        delay_start=args.delay_start,
         verbose_logging=args.verbose,
         server_app_run_config=fused_config,
         is_app=True,
@@ -207,7 +208,7 @@ def run_simulation(
             "\n\tflwr.simulation.run_simulationt(...)",
         )
 
-    _run_simulation(
+    _ = _run_simulation(
         num_supernodes=num_supernodes,
         client_app=client_app,
         server_app=server_app,
@@ -230,6 +231,7 @@ def run_serverapp_th(
     has_exception: threading.Event,
     enable_tf_gpu_growth: bool,
     run_id: int,
+    ctx_queue: "Queue[Context]",
 ) -> threading.Thread:
     """Run SeverApp in a thread."""
 
@@ -242,6 +244,7 @@ def run_serverapp_th(
         _server_app_run_config: UserConfig,
         _server_app_attr: Optional[str],
         _server_app: Optional[ServerApp],
+        _ctx_queue: "Queue[Context]",
     ) -> None:
         """Run SeverApp, after check if GPU memory growth has to be set.
 
@@ -262,13 +265,14 @@ def run_serverapp_th(
             )
 
             # Run ServerApp
-            _run(
+            updated_context = _run(
                 driver=_driver,
                 context=context,
                 server_app_dir=_server_app_dir,
                 server_app_attr=_server_app_attr,
                 loaded_server_app=_server_app,
             )
+            _ctx_queue.put(updated_context)
         except Exception as ex:  # pylint: disable=broad-exception-caught
             log(ERROR, "ServerApp thread raised an exception: %s", ex)
             log(ERROR, traceback.format_exc())
@@ -292,6 +296,7 @@ def run_serverapp_th(
             server_app_run_config,
             server_app_attr,
             server_app,
+            ctx_queue,
         ),
     )
     serverapp_th.start()
@@ -308,14 +313,13 @@ def _main_loop(
     enable_tf_gpu_growth: bool,
     run: Run,
     exit_event: EventType,
-    delay_start: int,
     flwr_dir: Optional[str] = None,
     client_app: Optional[ClientApp] = None,
     client_app_attr: Optional[str] = None,
     server_app: Optional[ServerApp] = None,
     server_app_attr: Optional[str] = None,
     server_app_run_config: Optional[UserConfig] = None,
-) -> None:
+) -> Context:
     """Start ServerApp on a separate thread, then launch Simulation Engine."""
     # Initialize StateFactory
     state_factory = LinkStateFactory(":flwr-in-memory-state:")
@@ -325,6 +329,13 @@ def _main_loop(
     server_app_thread_has_exception = threading.Event()
     serverapp_th = None
     success = True
+    updated_context = Context(
+        run_id=run.run_id,
+        node_id=0,
+        node_config=UserConfig(),
+        state=RecordSet(),
+        run_config=UserConfig(),
+    )
     try:
         # Register run
         log(DEBUG, "Pre-registering run with id %s", run.run_id)
@@ -339,6 +350,7 @@ def _main_loop(
         # Initialize Driver
         driver = InMemoryDriver(state_factory=state_factory)
         driver.set_run(run_id=run.run_id)
+        output_context_queue: Queue[Context] = Queue()
 
         # Get and run ServerApp thread
         serverapp_th = run_serverapp_th(
@@ -351,11 +363,9 @@ def _main_loop(
             has_exception=server_app_thread_has_exception,
             enable_tf_gpu_growth=enable_tf_gpu_growth,
             run_id=run.run_id,
+            ctx_queue=output_context_queue,
         )
 
-        # Buffer time so the `ServerApp` in separate thread is ready
-        log(DEBUG, "Buffer time delay: %ds", delay_start)
-        sleep(delay_start)
         # Start Simulation Engine
         vce.start_vce(
             num_supernodes=num_supernodes,
@@ -371,6 +381,11 @@ def _main_loop(
             flwr_dir=flwr_dir,
         )
 
+        updated_context = output_context_queue.get(timeout=3)
+
+    except Empty:
+        log(DEBUG, "Queue timeout. No context received.")
+
     except Exception as ex:
         log(ERROR, "An exception occurred !! %s", ex)
         log(ERROR, traceback.format_exc())
@@ -380,13 +395,20 @@ def _main_loop(
     finally:
         # Trigger stop event
         f_stop.set()
-        event(exit_event, event_details={"success": success})
+        event(
+            exit_event,
+            event_details={
+                "run-id-hash": get_sha256_hash(run.run_id),
+                "success": success,
+            },
+        )
         if serverapp_th:
             serverapp_th.join()
             if server_app_thread_has_exception.is_set():
                 raise RuntimeError("Exception in ServerApp thread")
 
     log(DEBUG, "Stopping Simulation Engine now.")
+    return updated_context
 
 
 # pylint: disable=too-many-arguments,too-many-locals,too-many-positional-arguments
@@ -404,10 +426,9 @@ def _run_simulation(
     flwr_dir: Optional[str] = None,
     run: Optional[Run] = None,
     enable_tf_gpu_growth: bool = False,
-    delay_start: int = 5,
     verbose_logging: bool = False,
     is_app: bool = False,
-) -> None:
+) -> Context:
     """Launch the Simulation Engine."""
     if backend_config is None:
         backend_config = {}
@@ -459,7 +480,6 @@ def _run_simulation(
         enable_tf_gpu_growth,
         run,
         exit_event,
-        delay_start,
         flwr_dir,
         client_app,
         client_app_attr,
@@ -487,7 +507,8 @@ def _run_simulation(
             # Set logger propagation to False to prevent duplicated log output in Colab.
             logger = set_logger_propagation(logger, False)
 
-        _main_loop(*args)
+        updated_context = _main_loop(*args)
+    return updated_context
 
 
 def _parse_args_run_simulation() -> argparse.ArgumentParser:
@@ -536,13 +557,6 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         "out-of-memory error because TensorFlow by default allocates all GPU memory."
         "Read more about how `tf.config.experimental.set_memory_growth()` works in "
         "the TensorFlow documentation: https://www.tensorflow.org/api/stable.",
-    )
-    parser.add_argument(
-        "--delay-start",
-        type=int,
-        default=3,
-        help="Buffer time (in seconds) to delay the start the simulation engine after "
-        "the `ServerApp`, which runs in a separate thread, has been launched.",
     )
     parser.add_argument(
         "--verbose",

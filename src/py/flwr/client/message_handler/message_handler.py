@@ -14,6 +14,7 @@
 # ==============================================================================
 """Client-side message handler."""
 
+
 from logging import WARN
 from typing import Optional, cast
 
@@ -103,8 +104,6 @@ def handle_legacy_message_from_msgtype(
             "of `Client`, but an instance of `NumpyClient` was returned. "
             "Please use `NumPyClient.to_client()` method to convert it to `Client`.",
         )
-
-    client.set_context(context)
 
     message_type = message.metadata.message_type
 

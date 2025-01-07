@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 REPLACE_CURR_VERSION = {
-    "doc/source/conf.py": [
+    "framework/docs/source/conf.py": [
         ".. |stable_flwr_version| replace:: {version}",
     ],
     "src/py/flwr/cli/new/templates/app/pyproject.*.toml.tpl": [
@@ -17,11 +17,11 @@ REPLACE_CURR_VERSION = {
 
 REPLACE_NEXT_VERSION = {
     "pyproject.toml": ['version = "{version}"'],
-    "doc/source/conf.py": [
+    "framework/docs/source/conf.py": [
         'release = "{version}"',
     ],
-    "examples/doc/source/conf.py": ['release = "{version}"'],
-    "baselines/doc/source/conf.py": ['release = "{version}"'],
+    "examples/docs/source/conf.py": ['release = "{version}"'],
+    "baselines/docs/source/conf.py": ['release = "{version}"'],
     "src/docker/complete/compose.yml": ["FLWR_VERSION:-{version}"],
     "src/docker/distributed/client/compose.yml": ["FLWR_VERSION:-{version}"],
     "src/docker/distributed/server/compose.yml": ["FLWR_VERSION:-{version}"],
@@ -80,7 +80,7 @@ def _update_versions(file_patterns, replace_strings, new_version, check):
 
 
 if __name__ == "__main__":
-    conf_path = Path("doc/source/conf.py")
+    conf_path = Path("framework/docs/source/conf.py")
 
     if not conf_path.is_file():
         raise FileNotFoundError(f"{conf_path} not found!")
