@@ -115,6 +115,12 @@ MAX_RETRY_DELAY = 20  # Maximum delay duration between two consecutive retries.
 CREDENTIALS_DIR = ".credentials"
 AUTH_TYPE = "auth_type"
 
+# Constants for node authentication
+PUBLIC_KEY_HEADER = "public-key-bin"  # Must end with "-bin" for binary data
+SIGNATURE_HEADER = "signature-bin"  # Must end with "-bin" for binary data
+TIMESTAMP_HEADER = "timestamp"
+TIMESTAMP_TOLERANCE = 10  # Tolerance for timestamp verification
+
 
 class MessageType:
     """Message type."""
