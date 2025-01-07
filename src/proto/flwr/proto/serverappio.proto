@@ -84,7 +84,10 @@ message PullTaskResRequest {
 message PullTaskResResponse { repeated TaskRes task_res_list = 1; }
 
 // PushMessages messages
-message PushMessagesRequest { repeated Message messages_list = 1; uint64 run_id = 2;}
+message PushMessagesRequest {
+  repeated Message messages_list = 1;
+  uint64 run_id = 2;
+}
 message PushMessagesResponse { repeated string message_ids = 1; }
 
 // PullMessages messages
