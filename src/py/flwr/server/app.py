@@ -265,8 +265,8 @@ def run_superlink() -> None:
 
     auth_plugin: Optional[ExecAuthPlugin] = None
     # Load the auth plugin if the args.user_auth_config is provided
-    if args.user_auth_config is not None:
-        auth_plugin = _try_obtain_exec_auth_plugin(Path(args.user_auth_config))
+    if cfg_path := getattr(args, "user_auth_config", None):
+        auth_plugin = _try_obtain_exec_auth_plugin(Path(cfg_path))
 
     # Initialize StateFactory
     state_factory = LinkStateFactory(args.database)
