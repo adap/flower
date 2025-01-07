@@ -1,6 +1,6 @@
 """Client implementation for federated learning."""
 
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import flwr as fl
 import torch
@@ -37,7 +37,7 @@ class FlowerClient(fl.client.NumPyClient):
         device: torch.device,
         num_epochs: int,
         learning_rate: float,
-        num_batches: int = None,
+        num_batches: Optional[int] = None,
     ) -> None:
         """
 
@@ -111,7 +111,7 @@ def create_client(
     num_epochs: int,
     learning_rate: float,
     num_classes: int = 62,
-    num_batches: int = None,
+    num_batches: Optional[int] = None,
 ) -> FlowerClient:
     """Create client for the flower simulation."""
     net = Net(num_classes).to(device)

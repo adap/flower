@@ -3,11 +3,11 @@ requires = ["poetry-core>=1.4.0"]
 build-backend = "poetry.masonry.api"
 
 [tool.poetry]
-name = "fedmlb" # <----- Ensure it matches the name of your baseline directory containing all the source code
+name = "statavg" # <----- Ensure it matches the name of your baseline directory containing all the source code
 version = "1.0.0"
-description = "FedMLB Flower Baseline"
+description = "Flower Baselines"
 license = "Apache-2.0"
-authors = ["Alessio Mora <alessio.mora@unibo.it>"]
+authors = ["The Flower Authors <hello@flower.ai>"]
 readme = "README.md"
 homepage = "https://flower.ai"
 repository = "https://github.com/adap/flower"
@@ -37,12 +37,15 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.10.0, <3.11.0"  # don't change this
+python = ">=3.9.0, <3.12.0"  # don't change this
+flwr = { extras = ["simulation"], version = "1.6.0" }
 hydra-core = "1.3.2" # don't change this
-flwr = { extras = ["simulation"], version = "1.5.0" }
 tensorflow = "2.12.1"
-matplotlib = "3.7.1"
-psutil = "5.9.5" # this is just to log some info about memory usage
+scikit-learn = "1.4.0"
+joblib = "1.3.2"
+pandas = "2.2.0"
+imbalanced-learn = "0.12.0"
+matplotlib = "3.8.2"
 
 [tool.poetry.dev-dependencies]
 isort = "==5.13.2"
@@ -55,7 +58,6 @@ pytest = "==6.2.4"
 pytest-watch = "==4.2.0"
 ruff = "==0.4.5"
 types-requests = "==2.27.7"
-virtualenv = "==20.21.0"
 
 [tool.isort]
 line_length = 88

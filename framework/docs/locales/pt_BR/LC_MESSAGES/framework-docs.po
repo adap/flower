@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-22 00:34+0000\n"
+"POT-Creation-Date: 2025-01-07 00:31+0000\n"
 "PO-Revision-Date: 2024-05-25 11:09+0000\n"
 "Last-Translator: Gustavo Bertoli <gubertoli@gmail.com>\n"
 "Language: pt_BR\n"
@@ -6326,7 +6326,18 @@ msgid ""
 "use cases where simulating FL workloads makes sense."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:33
+#: ../../source/how-to-run-simulations.rst:35
+msgid ""
+"The ``Flower AI Simulation 2025`` tutorial series is available on "
+"YouTube. You can find all the videos `here "
+"<https://www.youtube.com/playlist?list=PLNG4feLHqCWkdlSrEL2xbCtGa6QBxlUZb>`_"
+" or by clicking on the video previews below. The associated code for the "
+"tutorial can be found in the `Flower Github repository "
+"<https://github.com/adap/flower/tree/main/examples/flower-simulation-"
+"step-by-step-pytorch>`_"
+msgstr ""
+
+#: ../../source/how-to-run-simulations.rst:92
 msgid ""
 "Flower's ``Simulation Engine`` schedules, launches, and manages "
 "|clientapp_link|_ instances. It does so through a ``Backend``, which "
@@ -6339,7 +6350,7 @@ msgid ""
 "Engine`` is:"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:41
+#: ../../source/how-to-run-simulations.rst:100
 msgid ""
 "**Resource-aware**: Each backend worker executing ``ClientApp``\\s gets "
 "assigned a portion of the compute and memory on your system. You can "
@@ -6349,7 +6360,7 @@ msgid ""
 "``ClientApps`` can run concurrently on the same hardware."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:46
+#: ../../source/how-to-run-simulations.rst:105
 msgid ""
 "**Batchable**: When there are more ``ClientApps`` to execute than backend"
 " workers, ``ClientApps`` are queued and executed as soon as resources are"
@@ -6357,14 +6368,14 @@ msgid ""
 "of N, where N is the number of backend workers."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:50
+#: ../../source/how-to-run-simulations.rst:109
 msgid ""
 "**Self-managed**: This means that you, as a user, do not need to launch "
 "``ClientApps`` manually; instead, the ``Simulation Engine``'s internals "
 "orchestrates the execution of all ``ClientApp``\\s."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:53
+#: ../../source/how-to-run-simulations.rst:112
 msgid ""
 "**Ephemeral**: This means that a ``ClientApp`` is only materialized when "
 "it is required by the application (e.g., to do `fit() <ref-api-"
@@ -6373,7 +6384,7 @@ msgid ""
 "participate."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:60
+#: ../../source/how-to-run-simulations.rst:119
 msgid ""
 "You can preserve the state (e.g., internal variables, parts of an ML "
 "model, intermediate results) of a ``ClientApp`` by saving it to its "
@@ -6381,7 +6392,7 @@ msgid ""
 "stateful-clients.rst>`_ guide for a complete walkthrough."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:65
+#: ../../source/how-to-run-simulations.rst:124
 msgid ""
 "The ``Simulation Engine`` delegates to a ``Backend`` the role of spawning"
 " and managing ``ClientApps``. The default backend is the ``RayBackend``, "
@@ -6392,11 +6403,11 @@ msgid ""
 "process."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:73
+#: ../../source/how-to-run-simulations.rst:132
 msgid "Launch your Flower simulation"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:75
+#: ../../source/how-to-run-simulations.rst:134
 msgid ""
 "Running a simulation is straightforward; in fact, it is the default mode "
 "of operation for |flwr_run_link|_. Therefore, running Flower simulations "
@@ -6407,20 +6418,20 @@ msgid ""
 "``PyTorch`` template."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:83
+#: ../../source/how-to-run-simulations.rst:142
 msgid ""
 "If you haven't already, install Flower via ``pip install -U flwr`` in a "
 "Python environment."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:91
+#: ../../source/how-to-run-simulations.rst:150
 msgid ""
 "Then, follow the instructions shown after completing the |flwr_new_link|_"
 " command. When you execute |flwr_run_link|_, you'll be using the "
 "``Simulation Engine``."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:94
+#: ../../source/how-to-run-simulations.rst:153
 msgid ""
 "If we take a look at the ``pyproject.toml`` that was generated from the "
 "|flwr_new_link|_ command (and loaded upon |flwr_run_link|_ execution), we"
@@ -6428,17 +6439,17 @@ msgid ""
 "supernodes to 10."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:106
+#: ../../source/how-to-run-simulations.rst:165
 msgid ""
 "You can modify the size of your simulations by adjusting ``options.num-"
 "supernodes``."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:109
+#: ../../source/how-to-run-simulations.rst:168
 msgid "Simulation examples"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:111
+#: ../../source/how-to-run-simulations.rst:170
 msgid ""
 "In addition to the quickstart tutorials in the documentation (e.g., "
 "`quickstart PyTorch Tutorial <tutorial-quickstart-pytorch.html>`_, "
@@ -6446,48 +6457,48 @@ msgid ""
 " in the Flower repository are simulation-ready."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:116
+#: ../../source/how-to-run-simulations.rst:175
 msgid ""
 "`Quickstart TensorFlow/Keras "
 "<https://github.com/adap/flower/tree/main/examples/quickstart-"
 "tensorflow>`_."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:118
+#: ../../source/how-to-run-simulations.rst:177
 msgid ""
 "`Quickstart PyTorch <https://github.com/adap/flower/tree/main/examples"
 "/quickstart-pytorch>`_"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:120
+#: ../../source/how-to-run-simulations.rst:179
 msgid ""
 "`Advanced PyTorch <https://github.com/adap/flower/tree/main/examples"
 "/advanced-pytorch>`_"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:122
+#: ../../source/how-to-run-simulations.rst:181
 msgid ""
 "`Quickstart MLX <https://github.com/adap/flower/tree/main/examples"
 "/quickstart-mlx>`_"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:123
+#: ../../source/how-to-run-simulations.rst:182
 msgid ""
 "`ViT fine-tuning <https://github.com/adap/flower/tree/main/examples"
 "/flowertune-vit>`_"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:125
+#: ../../source/how-to-run-simulations.rst:184
 msgid ""
 "The complete list of examples can be found in `the Flower GitHub "
 "<https://github.com/adap/flower/tree/main/examples>`_."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:131
+#: ../../source/how-to-run-simulations.rst:190
 msgid "Defining ``ClientApp`` resources"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:133
+#: ../../source/how-to-run-simulations.rst:192
 msgid ""
 "By default, the ``Simulation Engine`` assigns two CPU cores to each "
 "backend worker. This means that if your system has 10 CPU cores, five "
@@ -6495,7 +6506,7 @@ msgid ""
 "``ClientApp`` instance."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:137
+#: ../../source/how-to-run-simulations.rst:196
 msgid ""
 "More often than not, you would probably like to adjust the resources your"
 " ``ClientApp`` gets assigned based on the complexity (i.e., compute and "
@@ -6503,7 +6514,7 @@ msgid ""
 "backend resources for your federation."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:143
+#: ../../source/how-to-run-simulations.rst:202
 #, python-format
 msgid ""
 "Note that the resources the backend assigns to each worker (and hence to "
@@ -6516,13 +6527,13 @@ msgid ""
 "``ClientApp`` instances to crash throwing an out-of-memory (OOM) error."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:151
+#: ../../source/how-to-run-simulations.rst:210
 msgid ""
 "Customizing resources can be done directly in the ``pyproject.toml`` of "
 "your app."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:160
+#: ../../source/how-to-run-simulations.rst:219
 msgid ""
 "With the above backend settings, your simulation will run as many "
 "``ClientApps`` in parallel as CPUs you have in your system. GPU resources"
@@ -6530,7 +6541,7 @@ msgid ""
 "VRAM each should make use of."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:173
+#: ../../source/how-to-run-simulations.rst:232
 msgid ""
 "If you are using TensorFlow, you need to `enable memory growth "
 "<https://www.tensorflow.org/guide/gpu#limiting_gpu_memory_growth>`_ so "
@@ -6539,53 +6550,53 @@ msgid ""
 "``TF_FORCE_GPU_ALLOW_GROWTH=\"1\"``."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:179
+#: ../../source/how-to-run-simulations.rst:238
 msgid ""
 "Let's see how the above configuration results in a different number of "
 "``ClientApps`` running in parallel depending on the resources available "
 "in your system. If your system has:"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:183
+#: ../../source/how-to-run-simulations.rst:242
 #, python-format
 msgid ""
 "10x CPUs and 1x GPU: at most 4 ``ClientApps`` will run in parallel since "
 "each requires 25% of the available VRAM."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:185
+#: ../../source/how-to-run-simulations.rst:244
 msgid ""
 "10x CPUs and 2x GPUs: at most 8 ``ClientApps`` will run in parallel "
 "(VRAM-limited)."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:186
+#: ../../source/how-to-run-simulations.rst:245
 msgid ""
 "6x CPUs and 4x GPUs: at most 6 ``ClientApps`` will run in parallel (CPU-"
 "limited)."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:187
+#: ../../source/how-to-run-simulations.rst:246
 msgid ""
 "10x CPUs but 0x GPUs: you won't be able to run the simulation since not "
 "even the resources for a single ``ClientApp`` can be met."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:190
+#: ../../source/how-to-run-simulations.rst:249
 msgid ""
 "A generalization of this is given by the following equation. It gives the"
 " maximum number of ``ClientApps`` that can be executed in parallel on "
 "available CPU cores (SYS_CPUS) and VRAM (SYS_GPUS)."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:194
+#: ../../source/how-to-run-simulations.rst:253
 msgid ""
 "N = \\min\\left(\\left\\lfloor \\frac{\\text{SYS_CPUS}}{\\text{num_cpus}}"
 " \\right\\rfloor, \\left\\lfloor "
 "\\frac{\\text{SYS_GPUS}}{\\text{num_gpus}} \\right\\rfloor\\right)"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:198
+#: ../../source/how-to-run-simulations.rst:257
 msgid ""
 "Both ``num_cpus`` (an integer higher than 1) and ``num_gpus`` (a non-"
 "negative real number) should be set on a per ``ClientApp`` basis. If, for"
@@ -6594,7 +6605,7 @@ msgid ""
 " two whole GPUs, you'd set ``num_gpus=2``."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:203
+#: ../../source/how-to-run-simulations.rst:262
 msgid ""
 "While the ``options.backend.client-resources`` can be used to control the"
 " degree of concurrency in your simulations, this does not stop you from "
@@ -6606,11 +6617,11 @@ msgid ""
 "them in a resource-aware manner in batches of 8."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:212
+#: ../../source/how-to-run-simulations.rst:271
 msgid "Simulation Engine resources"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:214
+#: ../../source/how-to-run-simulations.rst:273
 msgid ""
 "By default, the ``Simulation Engine`` has **access to all system "
 "resources** (i.e., all CPUs, all GPUs). However, in some settings, you "
@@ -6619,7 +6630,7 @@ msgid ""
 "setting the ``options.backend.init_args`` variable."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:228
+#: ../../source/how-to-run-simulations.rst:287
 msgid ""
 "With the above setup, the Backend will be initialized with a single CPU "
 "and GPU. Therefore, even if more CPUs and GPUs are available in your "
@@ -6627,22 +6638,22 @@ msgid ""
 "results in a single ``ClientApp`` running at any given point."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:233
+#: ../../source/how-to-run-simulations.rst:292
 msgid ""
 "For a complete list of settings you can configure, check the `ray.init "
 "<https://docs.ray.io/en/latest/ray-core/api/doc/ray.init.html#ray-init>`_"
 " documentation."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:236
+#: ../../source/how-to-run-simulations.rst:295
 msgid "For the highest performance, do not set ``options.backend.init_args``."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:239
+#: ../../source/how-to-run-simulations.rst:298
 msgid "Simulation in Colab/Jupyter"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:241
+#: ../../source/how-to-run-simulations.rst:300
 msgid ""
 "The preferred way of running simulations should always be "
 "|flwr_run_link|_. However, the core functionality of the ``Simulation "
@@ -6651,7 +6662,7 @@ msgid ""
 "flwr.html#flwr.simulation.run_simulation>`_."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:262
+#: ../../source/how-to-run-simulations.rst:321
 msgid ""
 "With ``run_simulation``, you can also control the amount of resources for"
 " your ``ClientApp`` instances. Do so by setting ``backend_config``. If "
@@ -6659,7 +6670,7 @@ msgid ""
 " and no GPU)."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:273
+#: ../../source/how-to-run-simulations.rst:332
 msgid ""
 "Refer to the `30 minutes Federated AI Tutorial "
 "<https://colab.research.google.com/github/adap/flower/blob/main/examples"
@@ -6667,11 +6678,11 @@ msgid ""
 "run Flower Simulations in Colab."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:280
+#: ../../source/how-to-run-simulations.rst:339
 msgid "Multi-node Flower simulations"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:282
+#: ../../source/how-to-run-simulations.rst:341
 msgid ""
 "Flower's ``Simulation Engine`` allows you to run FL simulations across "
 "multiple compute nodes so that you're not restricted to running "
@@ -6679,15 +6690,15 @@ msgid ""
 "simulation, ensure that you:"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:286
+#: ../../source/how-to-run-simulations.rst:345
 msgid "Have the same Python environment on all nodes."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:287
+#: ../../source/how-to-run-simulations.rst:346
 msgid "Have a copy of your code on all nodes."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:288
+#: ../../source/how-to-run-simulations.rst:347
 msgid ""
 "Have a copy of your dataset on all nodes. If you are using partitions "
 "from `Flower Datasets <https://flower.ai/docs/datasets>`_, ensure the "
@@ -6695,14 +6706,14 @@ msgid ""
 "is that the i-th dataset partition is identical in all nodes."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:292
+#: ../../source/how-to-run-simulations.rst:351
 msgid ""
 "Start Ray on your head node: on the terminal, type ``ray start --head``. "
 "This command will print a few lines, one of which indicates how to attach"
 " other nodes to the head node."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:295
+#: ../../source/how-to-run-simulations.rst:354
 msgid ""
 "Attach other nodes to the head node: copy the command shown after "
 "starting the head and execute it on the terminal of a new node (before "
@@ -6711,20 +6722,20 @@ msgid ""
 " the head node they should be discoverable by each other."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:300
+#: ../../source/how-to-run-simulations.rst:359
 msgid ""
 "With all the above done, you can run your code from the head node as you "
 "would if the simulation were running on a single node. In other words:"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:308
+#: ../../source/how-to-run-simulations.rst:367
 msgid ""
 "Once your simulation is finished, if you'd like to dismantle your "
 "cluster, you simply need to run the command ``ray stop`` in each node's "
 "terminal (including the head node)."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:313
+#: ../../source/how-to-run-simulations.rst:372
 msgid ""
 "When attaching a new node to the head, all its resources (i.e., all CPUs,"
 " all GPUs) will be visible by the head node. This means that the "
@@ -6736,7 +6747,7 @@ msgid ""
 "starting the head)."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:322
+#: ../../source/how-to-run-simulations.rst:381
 msgid "FAQ for Simulations"
 msgstr ""
 
@@ -6744,7 +6755,7 @@ msgstr ""
 msgid "Can I make my ``ClientApp`` instances stateful?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:326
+#: ../../source/how-to-run-simulations.rst:385
 msgid ""
 "Yes. Use the ``state`` attribute of the |context_link|_ object that is "
 "passed to the ``ClientApp`` to save variables, parameters, or results to "
@@ -6756,7 +6767,7 @@ msgstr ""
 msgid "Can I run multiple simulations on the same machine?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:330
+#: ../../source/how-to-run-simulations.rst:389
 msgid ""
 "Yes, but bear in mind that each simulation isn't aware of the resource "
 "usage of the other. If your simulations make use of GPUs, consider "
@@ -6771,7 +6782,7 @@ msgid ""
 "compute/memory these make use of?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:334
+#: ../../source/how-to-run-simulations.rst:393
 msgid ""
 "No. These resources are exclusively used by the simulation backend to "
 "control how many workers can be created on startup. Let's say N backend "
@@ -6785,35 +6796,35 @@ msgstr ""
 msgid "My ``ClientApp`` is triggering OOM on my GPU. What should I do?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:338
+#: ../../source/how-to-run-simulations.rst:397
 msgid ""
 "It is likely that your `num_gpus` setting, which controls the number of "
 "``ClientApp`` instances that can share a GPU, is too low (meaning too "
 "many ``ClientApps`` share the same GPU). Try the following:"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:340
+#: ../../source/how-to-run-simulations.rst:399
 msgid ""
 "Set your ``num_gpus=1``. This will make a single ``ClientApp`` run on a "
 "GPU."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:341
+#: ../../source/how-to-run-simulations.rst:400
 msgid "Inspect how much VRAM is being used (use ``nvidia-smi`` for this)."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:342
+#: ../../source/how-to-run-simulations.rst:401
 msgid ""
 "Based on the VRAM you see your single ``ClientApp`` using, calculate how "
 "many more would fit within the remaining VRAM. One divided by the total "
 "number of ``ClientApps`` is the ``num_gpus`` value you should set."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:344
+#: ../../source/how-to-run-simulations.rst:403
 msgid "Refer to :ref:`clientappresources` for more details."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:346
+#: ../../source/how-to-run-simulations.rst:405
 msgid ""
 "If your ``ClientApp`` is using TensorFlow, make sure you are exporting "
 "``TF_FORCE_GPU_ALLOW_GROWTH=\"1\"`` before starting your simulation. For "
@@ -6826,7 +6837,7 @@ msgid ""
 "``ClientApp``?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:350
+#: ../../source/how-to-run-simulations.rst:409
 msgid ""
 "A good practice is to start by running the simulation for a few rounds "
 "with higher ``num_cpus`` and ``num_gpus`` than what is really needed "
@@ -6838,7 +6849,7 @@ msgid ""
 "until you see a satisfactory system resource utilization."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:352
+#: ../../source/how-to-run-simulations.rst:411
 msgid ""
 "Note that if the workload on your ``ClientApp`` instances is not "
 "homogeneous (i.e., some come with a larger compute or memory footprint), "
@@ -6850,7 +6861,7 @@ msgstr ""
 msgid "Can I assign different resources to each ``ClientApp`` instance?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:356
+#: ../../source/how-to-run-simulations.rst:415
 msgid ""
 "No. All ``ClientApp`` objects are assumed to make use of the same "
 "``num_cpus`` and ``num_gpus``. When setting these values (refer to "
@@ -6865,7 +6876,7 @@ msgid ""
 "servers)?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:360
+#: ../../source/how-to-run-simulations.rst:419
 msgid ""
 "Yes. If you are using the ``RayBackend`` (the *default* backend) you can "
 "first interconnect your nodes through Ray's cli and then launch the "
@@ -6880,7 +6891,7 @@ msgid ""
 "taken into account by the ``Simulation Engine``?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:364
+#: ../../source/how-to-run-simulations.rst:423
 msgid ""
 "No. The ``Simulation Engine`` only manages ``ClientApps`` and therefore "
 "is only aware of the system resources they require. If your ``ServerApp``"
@@ -6894,7 +6905,7 @@ msgid ""
 "should run? Can I do resource placement?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:368
+#: ../../source/how-to-run-simulations.rst:427
 msgid ""
 "Currently, the placement of ``ClientApp`` instances is managed by the "
 "``RayBackend`` (the only backend available as of ``flwr==1.13.0``) and "
@@ -25480,7 +25491,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|fd03dc24279440f299c591b59b228438|"
+msgid "|2de22ebd50a840dba14a673c6fed3ed5|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -25495,7 +25506,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|5a0a72bb6d3a4e3fb578185f780e3f3d|"
+msgid "|40524cd4aa474db2992d8a8c40807297|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -25517,7 +25528,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|9607dbebfb2d4d389c996a678cf2f5a1|"
+msgid "|9da60840ee0644b092f05ba73173f33a|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -25533,7 +25544,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|6cf3fb6dc7504f29893b7a3e7c3ef81f|"
+msgid "|11e0092cabe6445aad58eb94008d2200|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -25549,7 +25560,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|90fef4f0d9aa418fb96b245fb62f5660|"
+msgid "|4de4dc335c4e4f7d9295ca4b428cbfd6|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -25564,7 +25575,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|933a3b6b5602441dbfbcce426f8b4c61|"
+msgid "|ac43194992e34215bfc57033a6166801|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -25584,7 +25595,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|782b65bd48c74e4dab140622f844d5a9|"
+msgid "|7ff78e3c16f14ec1ac0282d2fad76719|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -25599,7 +25610,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|5f168acb52014c079c5b3c6c31467f53|"
+msgid "|09aa0d8c374148f3908afce241381f58|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -25739,7 +25750,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|a884ff248d9b40acaaab7a5e6ad9d426|"
+msgid "|caf1e69f45ff4824853d1f4bc9b083bb|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -25763,7 +25774,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|a666a814c57d4853b4c4aca56b9ade08|"
+msgid "|8972366fab9a408b8162ddb6475e1095|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -25787,7 +25798,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|3de37d82bce14db4a1830b36fb41b3f9|"
+msgid "|67860439ceff4a16a055b8b51cda19b9|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -25810,7 +25821,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|426f23a87a3a4f0b864128eb1db22a56|"
+msgid "|f9ca6f1bc91a4f1397f77ed3bf27ac3e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -25848,7 +25859,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|0a713fc6c2984f94a63def2288d449a1|"
+msgid "|65a316b05fef4a7bbfe03a9c9aa84b4f|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -25942,7 +25953,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|2a721cef360b4f64a96d2647381767d1|"
+msgid "|09111c31a80a4af5a651312e46ee31b5|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -38626,5 +38637,47 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "|1bd7ba9475d44bdbb4d4a4a40d3e2267|"
+#~ msgstr ""
+
+#~ msgid "|fd03dc24279440f299c591b59b228438|"
+#~ msgstr ""
+
+#~ msgid "|5a0a72bb6d3a4e3fb578185f780e3f3d|"
+#~ msgstr ""
+
+#~ msgid "|9607dbebfb2d4d389c996a678cf2f5a1|"
+#~ msgstr ""
+
+#~ msgid "|6cf3fb6dc7504f29893b7a3e7c3ef81f|"
+#~ msgstr ""
+
+#~ msgid "|90fef4f0d9aa418fb96b245fb62f5660|"
+#~ msgstr ""
+
+#~ msgid "|933a3b6b5602441dbfbcce426f8b4c61|"
+#~ msgstr ""
+
+#~ msgid "|782b65bd48c74e4dab140622f844d5a9|"
+#~ msgstr ""
+
+#~ msgid "|5f168acb52014c079c5b3c6c31467f53|"
+#~ msgstr ""
+
+#~ msgid "|a884ff248d9b40acaaab7a5e6ad9d426|"
+#~ msgstr ""
+
+#~ msgid "|a666a814c57d4853b4c4aca56b9ade08|"
+#~ msgstr ""
+
+#~ msgid "|3de37d82bce14db4a1830b36fb41b3f9|"
+#~ msgstr ""
+
+#~ msgid "|426f23a87a3a4f0b864128eb1db22a56|"
+#~ msgstr ""
+
+#~ msgid "|0a713fc6c2984f94a63def2288d449a1|"
+#~ msgstr ""
+
+#~ msgid "|2a721cef360b4f64a96d2647381767d1|"
 #~ msgstr ""
 
