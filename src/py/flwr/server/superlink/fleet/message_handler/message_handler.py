@@ -161,6 +161,16 @@ def push_messages(
     # Convert Message to TaskRes
     msg = message_from_proto(message_proto=request.messages_list[0])
     task_res = message_to_taskres(msg)
+
+    # Abort if the run is not running
+    abort_msg = check_abort(
+        task_res.run_id,
+        [Status.PENDING, Status.STARTING, Status.FINISHED],
+        state,
+    )
+    if abort_msg:
+        raise InvalidRunStatusException(abort_msg)
+
     # Set pushed_at (timestamp in seconds)
     task_res.task.pushed_at = time.time()
 
