@@ -349,9 +349,57 @@ class StateTest(unittest.TestCase):
         # Situation now:
         # - State has three TaskIns, all of them delivered
         # - State has two TaskRes, one of the delivered, the other not
+        assert state.num_task_ins() == 3
+        assert state.num_task_res() == 2
 
+        state.delete_tasks({task_id_0})
         assert state.num_task_ins() == 2
         assert state.num_task_res() == 1
+
+        state.delete_tasks({task_id_1})
+        assert state.num_task_ins() == 1
+        assert state.num_task_res() == 0
+
+        state.delete_tasks({task_id_2})
+        assert state.num_task_ins() == 0
+        assert state.num_task_res() == 0
+
+    def test_get_task_ids_from_run_id(self) -> None:
+        """Test get_task_ids_from_run_id."""
+        # Prepare
+        state = self.state_factory()
+        node_id = state.create_node(1e3)
+        run_id_0 = state.create_run(None, None, "8g13kl7", {}, ConfigsRecord())
+        # Insert tasks with the same run_id
+        task_ins_0 = create_task_ins(
+            consumer_node_id=node_id, anonymous=False, run_id=run_id_0
+        )
+        task_ins_1 = create_task_ins(
+            consumer_node_id=node_id, anonymous=False, run_id=run_id_0
+        )
+        # Insert a task with a different run_id to ensure it does not appear in result
+        run_id_1 = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        task_ins_2 = create_task_ins(
+            consumer_node_id=node_id, anonymous=False, run_id=run_id_1
+        )
+
+        # Insert three TaskIns
+        task_id_0 = state.store_task_ins(task_ins=task_ins_0)
+        task_id_1 = state.store_task_ins(task_ins=task_ins_1)
+        task_id_2 = state.store_task_ins(task_ins=task_ins_2)
+
+        assert task_id_0
+        assert task_id_1
+        assert task_id_2
+
+        expected_task_ids = {task_id_0, task_id_1}
+
+        # Execute
+        result = state.get_task_ids_from_run_id(run_id_0)
+        bad_result = state.get_task_ids_from_run_id(15)
+
+        self.assertEqual(len(bad_result), 0)
+        self.assertSetEqual(result, expected_task_ids)
 
     # Init tests
     def test_init_state(self) -> None:
@@ -772,6 +820,29 @@ class StateTest(unittest.TestCase):
                 new_private_key_bytes, new_public_key_bytes
             )
 
+    def test_clear_supernode_auth_keys_and_credentials(self) -> None:
+        """Test clear_supernode_auth_keys_and_credentials from linkstate."""
+        # Prepare
+        state: LinkState = self.state_factory()
+        key_pairs = [generate_key_pairs() for _ in range(3)]
+        public_keys = {public_key_to_bytes(pair[1]) for pair in key_pairs}
+
+        # Execute (store)
+        state.store_node_public_keys(public_keys)
+        private_key, public_key = generate_key_pairs()
+        private_key_bytes = private_key_to_bytes(private_key)
+        public_key_bytes = public_key_to_bytes(public_key)
+        state.store_server_private_public_key(private_key_bytes, public_key_bytes)
+
+        # Execute (clear)
+        state.clear_supernode_auth_keys_and_credentials()
+        node_public_keys = state.get_node_public_keys()
+
+        # Assert
+        assert node_public_keys == set()
+        assert state.get_server_private_key() is None
+        assert state.get_server_public_key() is None
+
     def test_node_public_keys(self) -> None:
         """Test store_node_public_keys and get_node_public_keys from state."""
         # Prepare
@@ -956,7 +1027,8 @@ class StateTest(unittest.TestCase):
             # Assert
             assert len(task_res_list) == 1
             assert task_res_list[0].task.HasField("error")
-            assert state.num_task_ins() == state.num_task_res() == 0
+            assert state.num_task_ins() == 1
+            assert state.num_task_res() == 0
 
     def test_get_task_res_returns_empty_for_missing_taskins(self) -> None:
         """Test that get_task_res returns an empty result when the corresponding TaskIns

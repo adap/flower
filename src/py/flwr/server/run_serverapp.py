@@ -15,12 +15,12 @@
 """Run ServerApp."""
 
 
-import sys
 from logging import DEBUG, ERROR
 from typing import Optional
 
-from flwr.common import Context
-from flwr.common.logger import log, warn_unsupported_feature
+from flwr.common import Context, EventType, event
+from flwr.common.exit_handlers import register_exit_handlers
+from flwr.common.logger import log
 from flwr.common.object_ref import load_app
 
 from .driver import Driver
@@ -66,12 +66,11 @@ def run(
     return context
 
 
-# pylint: disable-next=too-many-branches,too-many-statements,too-many-locals
 def run_server_app() -> None:
     """Run Flower server app."""
-    warn_unsupported_feature(
-        "The command `flower-server-app` is deprecated and no longer in use. "
-        "Use the `flwr-serverapp` exclusively instead."
+    event(EventType.RUN_SERVER_APP_ENTER)
+    log(
+        ERROR,
+        "The command `flower-server-app` has been replaced by `flwr run`.",
     )
-    log(ERROR, "`flower-server-app` used.")
-    sys.exit()
+    register_exit_handlers(event_type=EventType.RUN_SERVER_APP_LEAVE)

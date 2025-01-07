@@ -20,7 +20,7 @@ from flwr.proto import run_pb2 as flwr_dot_proto_dot_run__pb2
 from flwr.proto import fab_pb2 as flwr_dot_proto_dot_fab__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1c\x66lwr/proto/serverappio.proto\x12\nflwr.proto\x1a\x14\x66lwr/proto/log.proto\x1a\x15\x66lwr/proto/node.proto\x1a\x18\x66lwr/proto/message.proto\x1a\x15\x66lwr/proto/task.proto\x1a\x14\x66lwr/proto/run.proto\x1a\x14\x66lwr/proto/fab.proto\"!\n\x0fGetNodesRequest\x12\x0e\n\x06run_id\x18\x01 \x01(\x04\"3\n\x10GetNodesResponse\x12\x1f\n\x05nodes\x18\x01 \x03(\x0b\x32\x10.flwr.proto.Node\"@\n\x12PushTaskInsRequest\x12*\n\rtask_ins_list\x18\x01 \x03(\x0b\x32\x13.flwr.proto.TaskIns\"\'\n\x13PushTaskInsResponse\x12\x10\n\x08task_ids\x18\x02 \x03(\t\"F\n\x12PullTaskResRequest\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\x12\x10\n\x08task_ids\x18\x02 \x03(\t\"A\n\x13PullTaskResResponse\x12*\n\rtask_res_list\x18\x01 \x03(\x0b\x32\x13.flwr.proto.TaskRes\"A\n\x13PushMessagesRequest\x12*\n\rmessages_list\x18\x01 \x03(\x0b\x32\x13.flwr.proto.Message\"+\n\x14PushMessagesResponse\x12\x13\n\x0bmessage_ids\x18\x01 \x03(\t\"J\n\x13PullMessagesRequest\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\x12\x13\n\x0bmessage_ids\x18\x02 \x03(\t\"B\n\x14PullMessagesResponse\x12*\n\rmessages_list\x18\x01 \x03(\x0b\x32\x13.flwr.proto.Message\"\x1c\n\x1aPullServerAppInputsRequest\"\x7f\n\x1bPullServerAppInputsResponse\x12$\n\x07\x63ontext\x18\x01 \x01(\x0b\x32\x13.flwr.proto.Context\x12\x1c\n\x03run\x18\x02 \x01(\x0b\x32\x0f.flwr.proto.Run\x12\x1c\n\x03\x66\x61\x62\x18\x03 \x01(\x0b\x32\x0f.flwr.proto.Fab\"S\n\x1bPushServerAppOutputsRequest\x12\x0e\n\x06run_id\x18\x01 \x01(\x04\x12$\n\x07\x63ontext\x18\x02 \x01(\x0b\x32\x13.flwr.proto.Context\"\x1e\n\x1cPushServerAppOutputsResponse2\xf4\x07\n\x0bServerAppIo\x12J\n\tCreateRun\x12\x1c.flwr.proto.CreateRunRequest\x1a\x1d.flwr.proto.CreateRunResponse\"\x00\x12G\n\x08GetNodes\x12\x1b.flwr.proto.GetNodesRequest\x1a\x1c.flwr.proto.GetNodesResponse\"\x00\x12P\n\x0bPushTaskIns\x12\x1e.flwr.proto.PushTaskInsRequest\x1a\x1f.flwr.proto.PushTaskInsResponse\"\x00\x12S\n\x0cPushMessages\x12\x1f.flwr.proto.PushMessagesRequest\x1a .flwr.proto.PushMessagesResponse\"\x00\x12P\n\x0bPullTaskRes\x12\x1e.flwr.proto.PullTaskResRequest\x1a\x1f.flwr.proto.PullTaskResResponse\"\x00\x12S\n\x0cPullMessages\x12\x1f.flwr.proto.PullMessagesRequest\x1a .flwr.proto.PullMessagesResponse\"\x00\x12\x41\n\x06GetRun\x12\x19.flwr.proto.GetRunRequest\x1a\x1a.flwr.proto.GetRunResponse\"\x00\x12\x41\n\x06GetFab\x12\x19.flwr.proto.GetFabRequest\x1a\x1a.flwr.proto.GetFabResponse\"\x00\x12h\n\x13PullServerAppInputs\x12&.flwr.proto.PullServerAppInputsRequest\x1a\'.flwr.proto.PullServerAppInputsResponse\"\x00\x12k\n\x14PushServerAppOutputs\x12\'.flwr.proto.PushServerAppOutputsRequest\x1a(.flwr.proto.PushServerAppOutputsResponse\"\x00\x12\\\n\x0fUpdateRunStatus\x12\".flwr.proto.UpdateRunStatusRequest\x1a#.flwr.proto.UpdateRunStatusResponse\"\x00\x12G\n\x08PushLogs\x12\x1b.flwr.proto.PushLogsRequest\x1a\x1c.flwr.proto.PushLogsResponse\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1c\x66lwr/proto/serverappio.proto\x12\nflwr.proto\x1a\x14\x66lwr/proto/log.proto\x1a\x15\x66lwr/proto/node.proto\x1a\x18\x66lwr/proto/message.proto\x1a\x15\x66lwr/proto/task.proto\x1a\x14\x66lwr/proto/run.proto\x1a\x14\x66lwr/proto/fab.proto\"!\n\x0fGetNodesRequest\x12\x0e\n\x06run_id\x18\x01 \x01(\x04\"3\n\x10GetNodesResponse\x12\x1f\n\x05nodes\x18\x01 \x03(\x0b\x32\x10.flwr.proto.Node\"P\n\x12PushTaskInsRequest\x12*\n\rtask_ins_list\x18\x01 \x03(\x0b\x32\x13.flwr.proto.TaskIns\x12\x0e\n\x06run_id\x18\x02 \x01(\x04\"\'\n\x13PushTaskInsResponse\x12\x10\n\x08task_ids\x18\x02 \x03(\t\"V\n\x12PullTaskResRequest\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\x12\x10\n\x08task_ids\x18\x02 \x03(\t\x12\x0e\n\x06run_id\x18\x03 \x01(\x04\"A\n\x13PullTaskResResponse\x12*\n\rtask_res_list\x18\x01 \x03(\x0b\x32\x13.flwr.proto.TaskRes\"Q\n\x13PushMessagesRequest\x12*\n\rmessages_list\x18\x01 \x03(\x0b\x32\x13.flwr.proto.Message\x12\x0e\n\x06run_id\x18\x02 \x01(\x04\"+\n\x14PushMessagesResponse\x12\x13\n\x0bmessage_ids\x18\x01 \x03(\t\"Z\n\x13PullMessagesRequest\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\x12\x13\n\x0bmessage_ids\x18\x02 \x03(\t\x12\x0e\n\x06run_id\x18\x03 \x01(\x04\"B\n\x14PullMessagesResponse\x12*\n\rmessages_list\x18\x01 \x03(\x0b\x32\x13.flwr.proto.Message\"\x1c\n\x1aPullServerAppInputsRequest\"\x7f\n\x1bPullServerAppInputsResponse\x12$\n\x07\x63ontext\x18\x01 \x01(\x0b\x32\x13.flwr.proto.Context\x12\x1c\n\x03run\x18\x02 \x01(\x0b\x32\x0f.flwr.proto.Run\x12\x1c\n\x03\x66\x61\x62\x18\x03 \x01(\x0b\x32\x0f.flwr.proto.Fab\"S\n\x1bPushServerAppOutputsRequest\x12\x0e\n\x06run_id\x18\x01 \x01(\x04\x12$\n\x07\x63ontext\x18\x02 \x01(\x0b\x32\x13.flwr.proto.Context\"\x1e\n\x1cPushServerAppOutputsResponse2\xc9\x08\n\x0bServerAppIo\x12J\n\tCreateRun\x12\x1c.flwr.proto.CreateRunRequest\x1a\x1d.flwr.proto.CreateRunResponse\"\x00\x12G\n\x08GetNodes\x12\x1b.flwr.proto.GetNodesRequest\x1a\x1c.flwr.proto.GetNodesResponse\"\x00\x12P\n\x0bPushTaskIns\x12\x1e.flwr.proto.PushTaskInsRequest\x1a\x1f.flwr.proto.PushTaskInsResponse\"\x00\x12S\n\x0cPushMessages\x12\x1f.flwr.proto.PushMessagesRequest\x1a .flwr.proto.PushMessagesResponse\"\x00\x12P\n\x0bPullTaskRes\x12\x1e.flwr.proto.PullTaskResRequest\x1a\x1f.flwr.proto.PullTaskResResponse\"\x00\x12S\n\x0cPullMessages\x12\x1f.flwr.proto.PullMessagesRequest\x1a .flwr.proto.PullMessagesResponse\"\x00\x12\x41\n\x06GetRun\x12\x19.flwr.proto.GetRunRequest\x1a\x1a.flwr.proto.GetRunResponse\"\x00\x12\x41\n\x06GetFab\x12\x19.flwr.proto.GetFabRequest\x1a\x1a.flwr.proto.GetFabResponse\"\x00\x12h\n\x13PullServerAppInputs\x12&.flwr.proto.PullServerAppInputsRequest\x1a\'.flwr.proto.PullServerAppInputsResponse\"\x00\x12k\n\x14PushServerAppOutputs\x12\'.flwr.proto.PushServerAppOutputsRequest\x1a(.flwr.proto.PushServerAppOutputsResponse\"\x00\x12\\\n\x0fUpdateRunStatus\x12\".flwr.proto.UpdateRunStatusRequest\x1a#.flwr.proto.UpdateRunStatusResponse\"\x00\x12S\n\x0cGetRunStatus\x12\x1f.flwr.proto.GetRunStatusRequest\x1a .flwr.proto.GetRunStatusResponse\"\x00\x12G\n\x08PushLogs\x12\x1b.flwr.proto.PushLogsRequest\x1a\x1c.flwr.proto.PushLogsResponse\"\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -32,29 +32,29 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _globals['_GETNODESRESPONSE']._serialized_start=217
   _globals['_GETNODESRESPONSE']._serialized_end=268
   _globals['_PUSHTASKINSREQUEST']._serialized_start=270
-  _globals['_PUSHTASKINSREQUEST']._serialized_end=334
-  _globals['_PUSHTASKINSRESPONSE']._serialized_start=336
-  _globals['_PUSHTASKINSRESPONSE']._serialized_end=375
-  _globals['_PULLTASKRESREQUEST']._serialized_start=377
-  _globals['_PULLTASKRESREQUEST']._serialized_end=447
-  _globals['_PULLTASKRESRESPONSE']._serialized_start=449
-  _globals['_PULLTASKRESRESPONSE']._serialized_end=514
-  _globals['_PUSHMESSAGESREQUEST']._serialized_start=516
-  _globals['_PUSHMESSAGESREQUEST']._serialized_end=581
-  _globals['_PUSHMESSAGESRESPONSE']._serialized_start=583
-  _globals['_PUSHMESSAGESRESPONSE']._serialized_end=626
-  _globals['_PULLMESSAGESREQUEST']._serialized_start=628
-  _globals['_PULLMESSAGESREQUEST']._serialized_end=702
-  _globals['_PULLMESSAGESRESPONSE']._serialized_start=704
-  _globals['_PULLMESSAGESRESPONSE']._serialized_end=770
-  _globals['_PULLSERVERAPPINPUTSREQUEST']._serialized_start=772
-  _globals['_PULLSERVERAPPINPUTSREQUEST']._serialized_end=800
-  _globals['_PULLSERVERAPPINPUTSRESPONSE']._serialized_start=802
-  _globals['_PULLSERVERAPPINPUTSRESPONSE']._serialized_end=929
-  _globals['_PUSHSERVERAPPOUTPUTSREQUEST']._serialized_start=931
-  _globals['_PUSHSERVERAPPOUTPUTSREQUEST']._serialized_end=1014
-  _globals['_PUSHSERVERAPPOUTPUTSRESPONSE']._serialized_start=1016
-  _globals['_PUSHSERVERAPPOUTPUTSRESPONSE']._serialized_end=1046
-  _globals['_SERVERAPPIO']._serialized_start=1049
-  _globals['_SERVERAPPIO']._serialized_end=2061
+  _globals['_PUSHTASKINSREQUEST']._serialized_end=350
+  _globals['_PUSHTASKINSRESPONSE']._serialized_start=352
+  _globals['_PUSHTASKINSRESPONSE']._serialized_end=391
+  _globals['_PULLTASKRESREQUEST']._serialized_start=393
+  _globals['_PULLTASKRESREQUEST']._serialized_end=479
+  _globals['_PULLTASKRESRESPONSE']._serialized_start=481
+  _globals['_PULLTASKRESRESPONSE']._serialized_end=546
+  _globals['_PUSHMESSAGESREQUEST']._serialized_start=548
+  _globals['_PUSHMESSAGESREQUEST']._serialized_end=629
+  _globals['_PUSHMESSAGESRESPONSE']._serialized_start=631
+  _globals['_PUSHMESSAGESRESPONSE']._serialized_end=674
+  _globals['_PULLMESSAGESREQUEST']._serialized_start=676
+  _globals['_PULLMESSAGESREQUEST']._serialized_end=766
+  _globals['_PULLMESSAGESRESPONSE']._serialized_start=768
+  _globals['_PULLMESSAGESRESPONSE']._serialized_end=834
+  _globals['_PULLSERVERAPPINPUTSREQUEST']._serialized_start=836
+  _globals['_PULLSERVERAPPINPUTSREQUEST']._serialized_end=864
+  _globals['_PULLSERVERAPPINPUTSRESPONSE']._serialized_start=866
+  _globals['_PULLSERVERAPPINPUTSRESPONSE']._serialized_end=993
+  _globals['_PUSHSERVERAPPOUTPUTSREQUEST']._serialized_start=995
+  _globals['_PUSHSERVERAPPOUTPUTSREQUEST']._serialized_end=1078
+  _globals['_PUSHSERVERAPPOUTPUTSRESPONSE']._serialized_start=1080
+  _globals['_PUSHSERVERAPPOUTPUTSRESPONSE']._serialized_end=1110
+  _globals['_SERVERAPPIO']._serialized_start=1113
+  _globals['_SERVERAPPIO']._serialized_end=2210
 # @@protoc_insertion_point(module_scope)

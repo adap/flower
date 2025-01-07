@@ -12,7 +12,7 @@ authors = ["The Flower Authors <hello@flower.ai>"]
 python = ">=3.9,<3.11"
 flwr = { path = "../../", develop = true, extras = ["simulation"] }
 tensorboard = "2.18.0"
-torch = "1.13.1"
-torchvision = "0.14.1"
+torch = "2.5.1"
+torchvision = "0.20.1"
 tqdm = "4.65.0"
 wandb = "0.16.3"
