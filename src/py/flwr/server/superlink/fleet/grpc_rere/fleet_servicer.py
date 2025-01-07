@@ -145,10 +145,16 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             )
         else:
             log(INFO, "[Fleet.PushMessages] No task results to push")
-        return message_handler.push_messages(
-            request=request,
-            state=self.state_factory.state(),
-        )
+
+        try:
+            res = message_handler.push_messages(
+                request=request,
+                state=self.state_factory.state(),
+            )
+        except InvalidRunStatusException as e:
+            abort_grpc_context(e.message, context)
+
+        return res
 
     def GetRun(
         self, request: GetRunRequest, context: grpc.ServicerContext
