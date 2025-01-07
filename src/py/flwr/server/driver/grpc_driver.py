@@ -216,7 +216,7 @@ class GrpcDriver(Driver):
         This method is used to collect messages from the SuperLink that correspond to a
         set of given message IDs.
         """
-        # Pull TaskRes
+        # Pull Messages
         res: PullMessagesResponse = self._stub.PullMessages(
             PullMessagesRequest(
                 node=self.node,
