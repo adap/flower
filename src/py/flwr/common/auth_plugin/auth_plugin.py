@@ -22,22 +22,27 @@ from typing import Any, Optional, Union
 
 from flwr.proto.exec_pb2_grpc import ExecStub
 
+from ..typing import UserAuthCredentials, UserAuthLoginDetails
+
 
 class ExecAuthPlugin(ABC):
     """Abstract Flower Auth Plugin class for ExecServicer.
 
     Parameters
     ----------
-    config : dict[str, Any]
-        The authentication configuration loaded from a YAML file.
+    user_auth_config_path : Path
+        Path to the YAML file containing the authentication configuration.
     """
 
     @abstractmethod
-    def __init__(self, config: dict[str, Any]):
+    def __init__(
+        self,
+        user_auth_config_path: Path,
+    ):
         """Abstract constructor."""
 
     @abstractmethod
-    def get_login_details(self) -> dict[str, str]:
+    def get_login_details(self) -> Optional[UserAuthLoginDetails]:
         """Get the login details."""
 
     @abstractmethod
@@ -47,7 +52,7 @@ class ExecAuthPlugin(ABC):
         """Validate authentication tokens in the provided metadata."""
 
     @abstractmethod
-    def get_auth_tokens(self, auth_details: dict[str, str]) -> dict[str, str]:
+    def get_auth_tokens(self, device_code: str) -> Optional[UserAuthCredentials]:
         """Get authentication tokens."""
 
     @abstractmethod
