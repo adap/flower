@@ -204,7 +204,9 @@ class GrpcDriver(Driver):
             message_proto_list.append(msg_proto)
         # Call GrpcDriverStub method
         res: PushMessagesResponse = self._stub.PushMessages(
-            PushMessagesRequest(messages_list=message_proto_list, run_id=cast(Run, self._run).run_id)
+            PushMessagesRequest(
+                messages_list=message_proto_list, run_id=cast(Run, self._run).run_id
+            )
         )
         return list(res.message_ids)
 
@@ -216,7 +218,11 @@ class GrpcDriver(Driver):
         """
         # Pull TaskRes
         res: PullMessagesResponse = self._stub.PullMessages(
-            PullMessagesRequest(node=self.node, message_ids=message_ids, run_id=cast(Run, self._run).run_id)
+            PullMessagesRequest(
+                node=self.node,
+                message_ids=message_ids,
+                run_id=cast(Run, self._run).run_id,
+            )
         )
         # Convert Message from Protobuf representation
         msgs = [message_from_proto(msg_proto) for msg_proto in res.messages_list]
