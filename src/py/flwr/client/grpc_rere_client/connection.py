@@ -277,7 +277,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             log(ERROR, "Invalid out message")
             return
 
-        # Serialize ProtoBuf to bytes
+        # Serialize Message
         message_proto = message_to_proto(message=message)
         request = PushMessagesRequest(node=node, messages_list=[message_proto])
         _ = retry_invoker.invoke(stub.PushMessages, request)
