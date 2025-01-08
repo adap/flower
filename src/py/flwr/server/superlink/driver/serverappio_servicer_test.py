@@ -83,7 +83,7 @@ def test_raise_if_true() -> None:
         # Assert
         raise AssertionError()
     except ValueError as err:
-        assert str(err) == "Malformed PushTaskInsRequest: test"
+        assert str(err) == "Malformed test_raise_if_trueRequest: test"
     except Exception as err:
         raise AssertionError() from err
 
