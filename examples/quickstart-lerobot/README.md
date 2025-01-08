@@ -34,7 +34,6 @@ quickstart-lerobot
 │   ├── server_app.py   # Defines your ServerApp
 │   ├── task.py         # Defines your model, training and data loading
 │   ├── lerobot_federated_dataset.py   # Defines the dataset
-│   ├── lerobot_dataset_partitioner.py # Defines the dataset partitioner
 |   └── configs/		# configuration files
 │ 		├── env/        	# gym environment config
 |   	├── policy/			# policy config
@@ -102,13 +101,3 @@ outputs/date_time/
 	...
 	└── round_n
 ```
-
-<!-- Earlier in the training cycles, rollouts will show that client evaluations are struggling to complete the task. See example below:
-
-https://github.com/user-attachments/assets/34fcedbb-0f04-4d73-b5e0-7367dc3c647b
-
-
-However later on after about 20,000 cumulative training cycles, which is (server rounds) X (local epochs) X (clients sampled to train in each server round), 
-all clients begin to show progress and solve the pusht task. Example follows:
-
-https://github.com/user-attachments/assets/a9771310-e48d-4426-9cc5-850b2efabae3 -->

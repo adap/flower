@@ -11,8 +11,8 @@ version = "1.0.0"
 description = "Federated Learning with Hugginface LeRobot transformers and Flower (Quickstart Example)"
 license = "Apache-2.0"
 authors = [
+    { name = "Ivelin Ivanov", email = "ivelin@zk0.bot" },
     { name = "The Flower Authors", email = "hello@flower.ai" },
-    { name = "Kaushik Amar Das", email = "kaushik.das@iiitg.ac.in" },
 ]
 
 dependencies = [

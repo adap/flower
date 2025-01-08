@@ -11,15 +11,17 @@ import imageio
 import numpy
 import numpy as np
 import torch
-from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
+from lerobot.common.datasets.lerobot_dataset import LeRobotDataset, CODEBASE_VERSION
+from lerobot.common.datasets.utils import hf_transform_to_torch, get_hf_dataset_safe_version
 from lerobot.common.policies.diffusion.configuration_diffusion import DiffusionConfig
 from lerobot.common.policies.diffusion.modeling_diffusion import DiffusionPolicy
 from torch.utils.data import DataLoader
 
 from datasets.utils.logging import disable_progress_bar
 
-from .lerobot_federated_dataset import FederatedLeRobotDataset
-from .lerobot_dataset_partitioner import LeRobotDatasetPartitioner
+from .lerobot_federated_dataset import FilteredLeRobotDataset
+from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import GroupedNaturalIdPartitioner
 
 
 disable_progress_bar()
@@ -71,17 +73,20 @@ def load_data(
     global fds
     if fds is None:
         # Partition the pusht dataset into N partitions
-        partitioner = LeRobotDatasetPartitioner(num_partitions=num_partitions)
-        fds = FederatedLeRobotDataset(
-            dataset="lerobot/pusht",
-            partitioners={"train": partitioner},
-            delta_timestamps=get_delta_timestamps(),
-        )
+        episodes_per_partition = get_dataset().num_episodes // num_partitions
+        partitioner = GroupedNaturalIdPartitioner(partition_by="episode_index", group_size=episodes_per_partition)
+        safe_version = get_hf_dataset_safe_version("lerobot/pusht", CODEBASE_VERSION)
+        fds = FederatedDataset(dataset="lerobot/pusht", partitioners={'train': partitioner}, revision=safe_version)
+    
     partition = fds.load_partition(partition_id)
-
+    partition.set_transform(hf_transform_to_torch)
+    data = FilteredLeRobotDataset(repo_id="lerobot/pusht",
+                                   hf_dataset=partition,
+                                   delta_timestamps=get_delta_timestamps(),
+                                   )
     # Create dataloader for offline training.
     trainloader = torch.utils.data.DataLoader(
-        partition,
+        data,
         num_workers=4,
         batch_size=64,
         shuffle=True,
