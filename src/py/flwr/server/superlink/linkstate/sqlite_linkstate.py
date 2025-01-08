@@ -982,16 +982,15 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         """Acknowledge a ping received from a node, serving as a heartbeat."""
         sint64_node_id = convert_uint64_to_sint64(node_id)
 
-        # Update `online_until` and `ping_interval` for the given `node_id`
-        query = "UPDATE node SET online_until = ?, ping_interval = ? WHERE node_id = ?;"
-        try:
-            self.query(
-                query, (time.time() + ping_interval, ping_interval, sint64_node_id)
-            )
-            return True
-        except sqlite3.IntegrityError:
-            log(ERROR, "`node_id` does not exist.")
+        # Check if the node exists in the `node` table
+        query = "SELECT 1 FROM node WHERE node_id = ?"
+        if not self.query(query, (sint64_node_id,)):
             return False
+
+        # Update `online_until` and `ping_interval` for the given `node_id`
+        query = "UPDATE node SET online_until = ?, ping_interval = ? WHERE node_id = ?"
+        self.query(query, (time.time() + ping_interval, ping_interval, sint64_node_id))
+        return True
 
     def get_serverapp_context(self, run_id: int) -> Optional[Context]:
         """Get the context for the specified `run_id`."""

@@ -132,22 +132,17 @@ global___PushMessagesResponse = PushMessagesResponse
 class PullMessagesRequest(google.protobuf.message.Message):
     """PullMessages messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    NODE_FIELD_NUMBER: builtins.int
     MESSAGE_IDS_FIELD_NUMBER: builtins.int
     RUN_ID_FIELD_NUMBER: builtins.int
-    @property
-    def node(self) -> flwr.proto.node_pb2.Node: ...
     @property
     def message_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
     run_id: builtins.int
     def __init__(self,
         *,
-        node: typing.Optional[flwr.proto.node_pb2.Node] = ...,
         message_ids: typing.Optional[typing.Iterable[typing.Text]] = ...,
         run_id: builtins.int = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["node",b"node"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["message_ids",b"message_ids","node",b"node","run_id",b"run_id"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["message_ids",b"message_ids","run_id",b"run_id"]) -> None: ...
 global___PullMessagesRequest = PullMessagesRequest
 
 class PullMessagesResponse(google.protobuf.message.Message):
