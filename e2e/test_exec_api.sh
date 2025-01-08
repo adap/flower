@@ -49,6 +49,17 @@ case "$3" in
       ;;
 esac
 
+check_and_kill() {
+  local pids=$1  # Get the PID as the first argument to the function
+  for pid in $pids; do
+    echo "Attempting to kill process ID: $pid"
+    if kill "$pid" 2>/dev/null; then
+        echo "Process $pid successfully killed."
+    else
+        echo "Failed to kill process $pid or it may have already terminated."
+    fi
+  done
+}
 
 # Create and install Flower app
 flwr new e2e-tmp-test --framework numpy --username flwrlabs
@@ -113,9 +124,10 @@ while [ "$found_success" = false ] && [ $elapsed -lt $timeout ]; do
         echo "Training worked correctly!"
         found_success=true
         if [ "$3" = "deployment-engine" ]; then
-          kill $cl1_pid; kill $cl2_pid;
+          check_and_kill "$cl1_pid" "$cl2_pid"
         fi
-        sleep 1; kill $sl_pid;
+        sleep 1
+        check_and_kill "$sl_pid"
         exit 0;
     else
         echo "Waiting for training ... ($elapsed seconds elapsed)"
@@ -128,8 +140,8 @@ done
 if [ "$found_success" = false ]; then
     echo "Training had an issue and timed out."
     if [ "$3" = "deployment-engine" ]; then
-      kill $cl1_pid; kill $cl2_pid;
+      check_and_kill "$cl1_pid" "$cl2_pid"
     fi
-    kill $sl_pid;
+    check_and_kill "$sl_pid"
     exit 1;
 fi
