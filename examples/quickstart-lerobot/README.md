@@ -62,14 +62,14 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 ### Run with the Simulation Engine
 
 > \[!TIP\]
-> This example runs much faster when the `ClientApp`s have access to a GPU. If your system has one, you want to try running the example with GPU right away, use the `local-simulation-gpu` federation as shown below.
+> This example runs much faster when the `ClientApp`s have access to a GPU. If your system has one, you might want to try running the example with GPU right away, use the `local-simulation-gpu` federation as shown below.
 
 ```bash
 # Run with the default federation (CPU only)
 flwr run .
 ```
 
-Run the project in the `local-simulation-gpu` federation that gives CPU and GPU resources to each `ClientApp`. By default, at most 2x`ClientApp` (using ~2 GB of VRAM each) will run in parallel in each available GPU. Note you can adjust the degree of paralellism but modifying the `client-resources` specification. Running with the settings as in the `pyprojec.toml` takes 1h in a 2x RTX3090 machine.
+Run the project in the `local-simulation-gpu` federation that gives CPU and GPU resources to each `ClientApp`. By default, at most 2x`ClientApp` (using ~2 GB of VRAM each) will run in parallel in each available GPU. Note you can adjust the degree of parallelism but modifying the `client-resources` specification. Running with the settings as in the `pyproject.toml` it takes 1h in a 2x RTX 3090 machine.
 
 ```bash
 # Run with the `local-simulation-gpu` federation
