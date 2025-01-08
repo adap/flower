@@ -204,7 +204,8 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         # Validate request and insert in State
         _raise_if(len(request.messages_list) == 0, "`messages_list` must not be empty")
         message_ids: list[Optional[UUID]] = []
-        for message_proto in request.messages_list:
+        while request.messages_list:
+                message_proto = request.messages_list.pop(0)
             message = message_from_proto(message_proto=message_proto)
             task_ins = message_to_taskins(message=message)
             task_ins.task.pushed_at = pushed_at
@@ -284,7 +285,8 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         # Convert to Messages
         messages_list = []
-        for task_res in task_res_list:
+        while task_res_list:
+                task_res = task_res_list.pop(0)
             _raise_if(
                 request.run_id != task_res.run_id, "`task_res` has mismatched `run_id`"
             )
