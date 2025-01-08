@@ -210,6 +210,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             task_ins.task.pushed_at = pushed_at
             validation_errors = validate_task_ins_or_res(task_ins)
             _raise_if(bool(validation_errors), ", ".join(validation_errors))
+            _raise_if(
+                request.run_id != task_ins.run_id, "`task_ins` has mismatched `run_id`"
+            )
             # Store
             message_id: Optional[UUID] = state.store_task_ins(task_ins=task_ins)
             message_ids.append(message_id)
