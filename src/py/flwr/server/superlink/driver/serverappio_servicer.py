@@ -15,6 +15,7 @@
 """ServerAppIo API servicer."""
 
 
+import inspect
 import threading
 import time
 from logging import DEBUG, INFO
@@ -345,5 +346,14 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
 
 def _raise_if(validation_error: bool, detail: str) -> None:
+
     if validation_error:
-        raise ValueError(f"Malformed PushTaskInsRequest: {detail}")
+        caller_frame = inspect.currentframe()
+
+        caller_name = "UnknownFunction"
+        if caller_frame is not None:
+            f_back = caller_frame.f_back
+            if f_back is not None:
+                caller_name = f_back.f_code.co_name
+
+        raise ValueError(f"Malformed {caller_name}Request: {detail}")
