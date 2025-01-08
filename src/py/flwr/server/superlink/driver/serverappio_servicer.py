@@ -346,7 +346,25 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
 
 def _raise_if(validation_error: bool, detail: str) -> None:
+    """Raise a `ValueError` with a detailed message if a validation error occurs.
 
+    This function checks the given `validation_error` flag. If `True`, it raises
+    a `ValueError` with a message that includes the name of the function that
+    called `_raise_if` and the provided `detail`.
+
+    Parameters
+    ----------
+    validation_error : bool
+        A flag indicating whether a validation error occurred.
+    detail : str
+        A detailed message describing the validation error.
+
+    Raises
+    ------
+    ValueError
+        If `validation_error` is `True`, with a message in the format
+        "Malformed <CallerFunctionName>Request: <detail>".
+    """
     if validation_error:
         caller_frame = inspect.currentframe()
 
