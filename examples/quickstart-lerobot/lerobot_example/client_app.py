@@ -1,4 +1,4 @@
-"""huggingface_example: A Flower / Hugging Face LeRobot app."""
+"""lerobot_example: A Flower / Hugging Face LeRobot app."""
 
 import warnings
 from logging import INFO

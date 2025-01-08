@@ -1,3 +1,5 @@
+"""lerobot_example: A Flower / Hugging Face LeRobot app."""
+
 from pathlib import Path
 from typing import Callable
 

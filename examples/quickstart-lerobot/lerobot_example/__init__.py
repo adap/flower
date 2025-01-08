@@ -1,1 +1,1 @@
-"""huggingface_example: A Flower / Hugging Face LeRobot app."""
+"""lerobot_example: A Flower / Hugging Face LeRobot app."""

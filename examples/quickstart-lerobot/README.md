@@ -53,24 +53,23 @@ pip install -e .
 
 ### Choose training parameters
 
-You can leave the default parameters for an initial quick test. However for good results, total number of training rounds should be at least 100,000. For example
-`num-server-rounds=500` and `local_epochs=200`.
+You can leave the default parameters for an initial quick test. It will run for 50 rounds sampling 4 clients per round. However for best results, total number of training rounds should be at least 100,000. You can achieve this for example by setting `num-server-rounds=500` and `local_epochs=200` in the `pyproject.toml`.
 
 ## Run the Example
 
-You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
+You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine. You can read more about how the Simulation Engine work [in the documenation](https://flower.ai/docs/framework/how-to-run-simulations.html). 
 
 ### Run with the Simulation Engine
 
 > \[!TIP\]
-> This example runs faster when the `ClientApp`s have access to a GPU. If your system has one, you can make use of it by configuring the `backend.client-resources` component in `pyproject.toml`. If you want to try running the example with GPU right away, use the `local-simulation-gpu` federation as shown below.
+> This example runs much faster when the `ClientApp`s have access to a GPU. If your system has one, you want to try running the example with GPU right away, use the `local-simulation-gpu` federation as shown below.
 
 ```bash
 # Run with the default federation (CPU only)
 flwr run .
 ```
 
-Run the project in the `local-simulation-gpu` federation that gives CPU and GPU resources to each `ClientApp`. By default, at most 4x`ClientApp` (using ~2 GB of VRAM each) will run in parallel in each available GPU. Note you can adjust the degree of paralellism but modifying the `client-resources` specification. Running with the settings as in the `pyprojec.toml` takes 1h in a 2x RTX3090 machine.
+Run the project in the `local-simulation-gpu` federation that gives CPU and GPU resources to each `ClientApp`. By default, at most 2x`ClientApp` (using ~2 GB of VRAM each) will run in parallel in each available GPU. Note you can adjust the degree of paralellism but modifying the `client-resources` specification. Running with the settings as in the `pyprojec.toml` takes 1h in a 2x RTX3090 machine.
 
 ```bash
 # Run with the `local-simulation-gpu` federation
@@ -80,7 +79,7 @@ flwr run . local-simulation-gpu
 You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example
 
 ```bash
-flwr run --run-config "num-server-rounds=5 fraction-fit=0.1"
+flwr run . local-simulation-gpu --run-config "num-server-rounds=5 fraction-fit=0.1"
 ```
 
 ### Result output
@@ -96,7 +95,7 @@ outputs/date_time/
 |	|	└── client_1
 |   ...
 │   └── round_n   	# local client model checkpoint
-└── global_model # Each subdirectory contains global model of a round
+└── global_model # Each subdirectory contains the global model of a round
 	├── round_1
 	...
 	└── round_n

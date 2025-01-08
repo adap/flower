@@ -1,4 +1,4 @@
-"""huggingface_example: A Flower / Hugging Face LeRobot app."""
+"""lerobot_example: A Flower / Hugging Face LeRobot app."""
 
 from datetime import datetime
 from pathlib import Path
@@ -14,13 +14,15 @@ def get_evaluate_fn_callback(save_path: Path):
 
     def evaluate_fn(server_round: int, parameters, config):
 
-        # Instantiate model
-        dataset = get_dataset()
-        model = get_model(dataset_stats=dataset.stats)
-        # Apply current global model weights
-        set_params(model, parameters)
-        # Save checkpoint
-        model.save_pretrained(str(save_path / "global_model" / f"round_{server_round}"))
+        # Save model if round % 5 = 0 (exactly as frequently as model is evaluated)
+        if server_round % 5 == 0:
+            # Instantiate model
+            dataset = get_dataset()
+            model = get_model(dataset_stats=dataset.stats)
+            # Apply current global model weights
+            set_params(model, parameters)
+            # Save checkpoint
+            model.save_pretrained(str(save_path / "global_model" / f"round_{server_round}"))
 
     return evaluate_fn
 

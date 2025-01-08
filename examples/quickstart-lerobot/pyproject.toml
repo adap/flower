@@ -16,13 +16,12 @@ authors = [
 ]
 
 dependencies = [
-    "flwr[simulation]==1.13.1",
+    "flwr[simulation]==1.14.0",
     "transformers>=4.30.0,<5.0",
     "lerobot[pusht] @ git+https://github.com/huggingface/lerobot.git@96c7052777aca85d4e55dfba8f81586103ba8f61",
-    "flwr-datasets>=0.4.0",
+    "flwr-datasets>=0.5.0",
     "torch>=2.5.0",
     "evaluate>=0.4.0,<1.0",
-    "datasets>=2.0.0, <3.0",
     "scikit-learn>=1.3.1, <2.0",
 ]
 
@@ -54,4 +53,4 @@ options.num-supernodes = 10 # relatively low number of supernodes because lerobo
 [tool.flwr.federations.local-simulation-gpu]
 options.num-supernodes = 10
 options.backend.client-resources.num-cpus = 4 # each ClientApp assumes to use 4CPUs
-options.backend.client-resources.num-gpus = 0.25 # When this value is 0.25 at most 4 ClientApp will run in a given GPU (lower it to increase parallelism)
+options.backend.client-resources.num-gpus = 0.5 # When this value is 0.5 at most 2 ClientApp will run in a given GPU (lower it to increase parallelism)
