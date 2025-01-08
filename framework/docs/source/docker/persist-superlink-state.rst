@@ -9,8 +9,9 @@ do is specify a directory where you want to save the file on your host system an
 for the database file.
 
 By default, the SuperLink container runs with a non-root user called ``app`` with the
-user ID ``49999``. It is recommended to create a new directory and change the user ID of
-the directory to ``49999`` to ensure the mounted directory has the proper permissions.
+user ID ``49999``. When working with Docker on Linux, it is recommended to create a new
+directory and set the user ID to ``49999`` to ensure the mounted directory has the
+proper permissions.
 
 If you later want to delete the directory, you can change the user ID back to the
 current user ID by running ``sudo chown -R $USER:$(id -gn) state``.

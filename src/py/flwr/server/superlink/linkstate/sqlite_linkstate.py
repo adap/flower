@@ -761,8 +761,6 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
                 "federation_options, pending_at, starting_at, running_at, finished_at, "
                 "sub_status, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
             )
-            if fab_hash:
-                fab_id, fab_version = "", ""
             override_config_json = json.dumps(override_config)
             data = [
                 sint64_run_id,
@@ -819,6 +817,12 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         except IndexError:
             public_key = None
         return public_key
+
+    def clear_supernode_auth_keys_and_credentials(self) -> None:
+        """Clear stored `node_public_keys` and credentials in the link state if any."""
+        queries = ["DELETE FROM public_key;", "DELETE FROM credential;"]
+        for query in queries:
+            self.query(query)
 
     def store_node_public_keys(self, public_keys: set[bytes]) -> None:
         """Store a set of `node_public_keys` in the link state."""
@@ -978,16 +982,15 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         """Acknowledge a ping received from a node, serving as a heartbeat."""
         sint64_node_id = convert_uint64_to_sint64(node_id)
 
-        # Update `online_until` and `ping_interval` for the given `node_id`
-        query = "UPDATE node SET online_until = ?, ping_interval = ? WHERE node_id = ?;"
-        try:
-            self.query(
-                query, (time.time() + ping_interval, ping_interval, sint64_node_id)
-            )
-            return True
-        except sqlite3.IntegrityError:
-            log(ERROR, "`node_id` does not exist.")
+        # Check if the node exists in the `node` table
+        query = "SELECT 1 FROM node WHERE node_id = ?"
+        if not self.query(query, (sint64_node_id,)):
             return False
+
+        # Update `online_until` and `ping_interval` for the given `node_id`
+        query = "UPDATE node SET online_until = ?, ping_interval = ? WHERE node_id = ?"
+        self.query(query, (time.time() + ping_interval, ping_interval, sint64_node_id))
+        return True
 
     def get_serverapp_context(self, run_id: int) -> Optional[Context]:
         """Get the context for the specified `run_id`."""

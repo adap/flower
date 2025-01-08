@@ -18,15 +18,16 @@
 import hashlib
 import json
 import re
+from collections.abc import Iterator
+from contextlib import contextmanager
 from logging import DEBUG
 from pathlib import Path
-from typing import Any, Callable, Optional, cast
+from typing import Any, Callable, Optional, Union, cast
 
 import grpc
 import typer
 
 from flwr.cli.cli_user_auth_interceptor import CliUserAuthInterceptor
-from flwr.common.address import parse_address
 from flwr.common.auth_plugin import CliAuthPlugin
 from flwr.common.constant import AUTH_TYPE, CREDENTIALS_DIR, FLWR_DIR
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
@@ -147,60 +148,94 @@ def sanitize_project_name(name: str) -> str:
     return sanitized_name
 
 
-def get_sha256_hash(file_path: Path) -> str:
+def get_sha256_hash(file_path_or_int: Union[Path, int]) -> str:
     """Calculate the SHA-256 hash of a file."""
     sha256 = hashlib.sha256()
-    with open(file_path, "rb") as f:
-        while True:
-            data = f.read(65536)  # Read in 64kB blocks
-            if not data:
-                break
-            sha256.update(data)
+    if isinstance(file_path_or_int, Path):
+        with open(file_path_or_int, "rb") as f:
+            while True:
+                data = f.read(65536)  # Read in 64kB blocks
+                if not data:
+                    break
+                sha256.update(data)
+    elif isinstance(file_path_or_int, int):
+        sha256.update(str(file_path_or_int).encode())
     return sha256.hexdigest()
 
 
-def get_user_auth_config_path(
-    root_dir: Path, federation: str, server_address: str
-) -> Path:
-    """Return the path to the user auth config file."""
-    # Parse the server address
-    parsed_addr = parse_address(server_address)
-    if parsed_addr is None:
-        raise ValueError(f"Invalid server address: {server_address}")
-    host, port, is_v6 = parsed_addr
-    formatted_addr = f"[{host}]_{port}" if is_v6 else f"{host}_{port}"
+def get_user_auth_config_path(root_dir: Path, federation: str) -> Path:
+    """Return the path to the user auth config file.
 
+    Additionally, a `.gitignore` file will be created in the Flower directory to
+    include the `.credentials` folder to be excluded from git. If the `.gitignore`
+    file already exists, a warning will be displayed if the `.credentials` entry is
+    not found.
+    """
     # Locate the credentials directory
-    credentials_dir = root_dir.absolute() / FLWR_DIR / CREDENTIALS_DIR
+    abs_flwr_dir = root_dir.absolute() / FLWR_DIR
+    credentials_dir = abs_flwr_dir / CREDENTIALS_DIR
     credentials_dir.mkdir(parents=True, exist_ok=True)
-    return credentials_dir / f"{federation}_{formatted_addr}.json"
+
+    # Determine the absolute path of the Flower directory for .gitignore
+    gitignore_path = abs_flwr_dir / ".gitignore"
+    credential_entry = CREDENTIALS_DIR
+
+    try:
+        if gitignore_path.exists():
+            with open(gitignore_path, encoding="utf-8") as gitignore_file:
+                lines = gitignore_file.read().splitlines()
+
+            # Warn if .credentials is not already in .gitignore
+            if credential_entry not in lines:
+                typer.secho(
+                    f"`.gitignore` exists, but `{credential_entry}` entry not found. "
+                    "Consider adding it to your `.gitignore` to exclude Flower "
+                    "credentials from git.",
+                    fg=typer.colors.YELLOW,
+                    bold=True,
+                )
+        else:
+            typer.secho(
+                f"Creating a new `.gitignore` with `{credential_entry}` entry...",
+                fg=typer.colors.BLUE,
+            )
+            # Create a new .gitignore with .credentials
+            with open(gitignore_path, "w", encoding="utf-8") as gitignore_file:
+                gitignore_file.write(f"{credential_entry}\n")
+    except Exception as err:
+        typer.secho(
+            "❌ An error occurred while handling `.gitignore.` "
+            f"Please check the permissions of `{gitignore_path}` and try again.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1) from err
+
+    return credentials_dir / f"{federation}.json"
 
 
 def try_obtain_cli_auth_plugin(
     root_dir: Path,
     federation: str,
-    federation_config: dict[str, Any],
     auth_type: Optional[str] = None,
 ) -> Optional[CliAuthPlugin]:
     """Load the CLI-side user auth plugin for the given auth type."""
-    config_path = get_user_auth_config_path(
-        root_dir, federation, federation_config["address"]
-    )
+    config_path = get_user_auth_config_path(root_dir, federation)
 
     # Load the config file if it exists
-    config: dict[str, Any] = {}
+    json_file: dict[str, Any] = {}
     if config_path.exists():
         with config_path.open("r", encoding="utf-8") as file:
-            config = json.load(file)
+            json_file = json.load(file)
     # This is the case when the user auth is not enabled
     elif auth_type is None:
         return None
 
     # Get the auth type from the config if not provided
     if auth_type is None:
-        if AUTH_TYPE not in config:
+        if AUTH_TYPE not in json_file:
             return None
-        auth_type = config[AUTH_TYPE]
+        auth_type = json_file[AUTH_TYPE]
 
     # Retrieve auth plugin class and instantiate it
     try:
@@ -244,3 +279,24 @@ def init_channel(
     )
     channel.subscribe(on_channel_state_change)
     return channel
+
+
+@contextmanager
+def unauthenticated_exc_handler() -> Iterator[None]:
+    """Context manager to handle gRPC UNAUTHENTICATED errors.
+
+    It catches grpc.RpcError exceptions with UNAUTHENTICATED status, informs the user,
+    and exits the application. All other exceptions will be allowed to escape.
+    """
+    try:
+        yield
+    except grpc.RpcError as e:
+        if e.code() != grpc.StatusCode.UNAUTHENTICATED:
+            raise
+        typer.secho(
+            "❌ Authentication failed. Please run `flwr login`"
+            " to authenticate and try again.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1) from None

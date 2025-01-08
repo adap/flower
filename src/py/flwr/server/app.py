@@ -93,8 +93,12 @@ BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
 
 
 try:
-    from flwr.ee import get_exec_auth_plugins
+    from flwr.ee import add_ee_args_superlink, get_exec_auth_plugins
 except ImportError:
+
+    # pylint: disable-next=unused-argument
+    def add_ee_args_superlink(parser: argparse.ArgumentParser) -> None:
+        """Add EE-specific arguments to the parser."""
 
     def get_exec_auth_plugins() -> dict[str, type[ExecAuthPlugin]]:
         """Return all Exec API authentication plugins."""
@@ -259,11 +263,10 @@ def run_superlink() -> None:
     # Obtain certificates
     certificates = try_obtain_server_certificates(args, args.fleet_api_type)
 
-    user_auth_config = _try_obtain_user_auth_config(args)
     auth_plugin: Optional[ExecAuthPlugin] = None
-    # user_auth_config is None only if the args.user_auth_config is not provided
-    if user_auth_config is not None:
-        auth_plugin = _try_obtain_exec_auth_plugin(user_auth_config)
+    # Load the auth plugin if the args.user_auth_config is provided
+    if cfg_path := getattr(args, "user_auth_config", None):
+        auth_plugin = _try_obtain_exec_auth_plugin(Path(cfg_path))
 
     # Initialize StateFactory
     state_factory = LinkStateFactory(args.database)
@@ -370,6 +373,7 @@ def run_superlink() -> None:
                     server_public_key,
                 ) = maybe_keys
                 state = state_factory.state()
+                state.clear_supernode_auth_keys_and_credentials()
                 state.store_node_public_keys(node_public_keys)
                 state.store_server_private_public_key(
                     private_key_to_bytes(server_private_key),
@@ -579,21 +583,20 @@ def _try_setup_node_authentication(
         )
 
 
-def _try_obtain_user_auth_config(args: argparse.Namespace) -> Optional[dict[str, Any]]:
-    if args.user_auth_config is not None:
-        with open(args.user_auth_config, encoding="utf-8") as file:
-            config: dict[str, Any] = yaml.safe_load(file)
-            return config
-    return None
+def _try_obtain_exec_auth_plugin(config_path: Path) -> Optional[ExecAuthPlugin]:
+    # Load YAML file
+    with config_path.open("r", encoding="utf-8") as file:
+        config: dict[str, Any] = yaml.safe_load(file)
 
-
-def _try_obtain_exec_auth_plugin(config: dict[str, Any]) -> Optional[ExecAuthPlugin]:
+    # Load authentication configuration
     auth_config: dict[str, Any] = config.get("authentication", {})
     auth_type: str = auth_config.get(AUTH_TYPE, "")
+
+    # Load authentication plugin
     try:
         all_plugins: dict[str, type[ExecAuthPlugin]] = get_exec_auth_plugins()
         auth_plugin_class = all_plugins[auth_type]
-        return auth_plugin_class(config=auth_config)
+        return auth_plugin_class(user_auth_config_path=config_path)
     except KeyError:
         if auth_type != "":
             sys.exit(
@@ -703,6 +706,7 @@ def _parse_args_run_superlink() -> argparse.ArgumentParser:
     )
 
     _add_args_common(parser=parser)
+    add_ee_args_superlink(parser=parser)
     _add_args_serverappio_api(parser=parser)
     _add_args_fleet_api(parser=parser)
     _add_args_exec_api(parser=parser)
@@ -791,12 +795,6 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         "--auth-superlink-public-key",
         type=str,
         help="The SuperLink's public key (as a path str) to enable authentication.",
-    )
-    parser.add_argument(
-        "--user-auth-config",
-        help="The path to the user authentication configuration YAML file.",
-        type=str,
-        default=None,
     )
 
 

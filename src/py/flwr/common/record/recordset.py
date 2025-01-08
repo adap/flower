@@ -151,7 +151,7 @@ class RecordSet:
     >>>  p_record = ParametersRecord({"my_array": arr})
     >>>
     >>>  # Adding it to the record_set would look like this
-    >>>  my_recordset.configs_records["my_config"] = c_record
+    >>>  my_recordset.parameters_records["my_parameters"] = p_record
 
     For additional examples on how to construct each of the records types shown
     above, please refer to the documentation for :code:`ConfigsRecord`,

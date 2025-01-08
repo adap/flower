@@ -19,13 +19,12 @@ import io
 import json
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Annotated, Optional, Union
+from typing import Annotated, Optional
 
 import typer
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
-from typer import Exit
 
 from flwr.cli.config_utils import (
     exit_if_no_address,
@@ -35,7 +34,7 @@ from flwr.cli.config_utils import (
 )
 from flwr.common.constant import FAB_CONFIG_FILE, CliOutputFormat, SubStatus
 from flwr.common.date import format_timedelta, isoformat8601_utc
-from flwr.common.logger import redirect_output, remove_emojis, restore_output
+from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.common.serde import run_from_proto
 from flwr.common.typing import Run
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
@@ -44,7 +43,7 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.exec_pb2_grpc import ExecStub
 
-from .utils import init_channel, try_obtain_cli_auth_plugin
+from .utils import init_channel, try_obtain_cli_auth_plugin, unauthenticated_exc_handler
 
 _RunListType = tuple[int, str, str, str, str, str, str, str, str]
 
@@ -81,13 +80,25 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches
         ),
     ] = CliOutputFormat.DEFAULT,
 ) -> None:
-    """List runs."""
+    """List the details of one provided run ID or all runs in a Flower federation.
+
+    The following details are displayed:
+
+    - **Run ID:** Unique identifier for the run.
+    - **FAB:** Name of the FAB associated with the run (``{FAB_ID} (v{FAB_VERSION})``).
+    - **Status:** Current status of the run (pending, starting, running, finished).
+    - **Elapsed:** Time elapsed since the run started (``HH:MM:SS``).
+    - **Created At:** Timestamp when the run was created.
+    - **Running At:** Timestamp when the run started running.
+    - **Finished At:** Timestamp when the run finished.
+
+    All timestamps follow ISO 8601, UTC and are formatted as ``YYYY-MM-DD HH:MM:SSZ``.
+    """
     suppress_output = output_format == CliOutputFormat.JSON
     captured_output = io.StringIO()
     try:
         if suppress_output:
             redirect_output(captured_output)
-
         # Load and validate federation config
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
@@ -104,7 +115,7 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches
                 raise ValueError(
                     "The options '--runs' and '--run-id' are mutually exclusive."
                 )
-            auth_plugin = try_obtain_cli_auth_plugin(app, federation, federation_config)
+            auth_plugin = try_obtain_cli_auth_plugin(app, federation)
             channel = init_channel(app, federation_config, auth_plugin)
             stub = ExecStub(channel)
 
@@ -120,6 +131,8 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches
                 _list_runs(stub, output_format)
 
         except ValueError as err:
+            if suppress_output:
+                redirect_output(captured_output)
             typer.secho(
                 f"❌ {err}",
                 fg=typer.colors.RED,
@@ -132,7 +145,7 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches
         if suppress_output:
             restore_output()
             e_message = captured_output.getvalue()
-            _print_json_error(e_message, err)
+            print_json_error(e_message, err)
         else:
             typer.secho(
                 f"{err}",
@@ -283,7 +296,8 @@ def _list_runs(
     output_format: str = CliOutputFormat.DEFAULT,
 ) -> None:
     """List all runs."""
-    res: ListRunsResponse = stub.ListRuns(ListRunsRequest())
+    with unauthenticated_exc_handler():
+        res: ListRunsResponse = stub.ListRuns(ListRunsRequest())
     run_dict = {run_id: run_from_proto(proto) for run_id, proto in res.run_dict.items()}
 
     formatted_runs = _format_runs(run_dict, res.now)
@@ -299,7 +313,8 @@ def _display_one_run(
     output_format: str = CliOutputFormat.DEFAULT,
 ) -> None:
     """Display information about a specific run."""
-    res: ListRunsResponse = stub.ListRuns(ListRunsRequest(run_id=run_id))
+    with unauthenticated_exc_handler():
+        res: ListRunsResponse = stub.ListRuns(ListRunsRequest(run_id=run_id))
     if not res.run_dict:
         raise ValueError(f"Run ID {run_id} not found")
 
@@ -310,15 +325,3 @@ def _display_one_run(
         Console().print_json(_to_json(formatted_runs))
     else:
         Console().print(_to_table(formatted_runs))
-
-
-def _print_json_error(msg: str, e: Union[Exit, Exception]) -> None:
-    """Print error message as JSON."""
-    Console().print_json(
-        json.dumps(
-            {
-                "success": False,
-                "error-message": remove_emojis(str(msg) + "\n" + str(e)),
-            }
-        )
-    )
