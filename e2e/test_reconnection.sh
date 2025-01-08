@@ -74,7 +74,7 @@ echo "Restarting Superlink"
 sleep 20
 
 # Kill second client, this should send a DeleteNode message to the Superlink
-kill $cl1_pid
+check_and_kill "$cl1_pid"
 echo "Killing second client"
 sleep 5
 
@@ -93,7 +93,7 @@ sleep 10
 # Kill first client as soon as the training starts, the flwr-serverapp should just 
 # receive a failure in this case and continue the rounds when enough clients are 
 # connected
-kill $cl1_pid
+check_and_kill "$cl1_pid"
 echo "Killing first client"
 sleep 3
 
@@ -114,7 +114,7 @@ while [ "$found_success" = false ] && [ $elapsed -lt $timeout ]; do
     if grep -q "Run finished" flwr_output.log; then
         echo "Training worked correctly!"
         found_success=true
-        kill $cl1_pid; kill $cl2_pid
+        check_and_kill "$cl1_pid" "$cl2_pid"
         sleep 3
         check_and_kill "$sl_pids"
     else
@@ -127,7 +127,7 @@ done
 
 if [ "$found_success" = false ]; then
     echo "Training had an issue and timed out."
-    kill $cl1_pid; kill $cl2_pid
+    check_and_kill "$cl1_pid" "$cl2_pid"
     sleep 3
     check_and_kill "$sl_pids"
 fi
