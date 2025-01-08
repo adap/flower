@@ -18,6 +18,7 @@ from lerobot.common.datasets.utils import (
 
 from datasets import Dataset
 
+
 class FilteredLeRobotDataset(LeRobotDataset):
     """Delays loading and processing of dataset until load function is called with an
     optional filter argument."""
@@ -52,4 +53,3 @@ class FilteredLeRobotDataset(LeRobotDataset):
             self.video_backend = (
                 self.video_backend if self.video_backend is not None else "pyav"
             )
-

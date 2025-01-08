@@ -12,7 +12,10 @@ import numpy
 import numpy as np
 import torch
 from lerobot.common.datasets.lerobot_dataset import LeRobotDataset, CODEBASE_VERSION
-from lerobot.common.datasets.utils import hf_transform_to_torch, get_hf_dataset_safe_version
+from lerobot.common.datasets.utils import (
+    hf_transform_to_torch,
+    get_hf_dataset_safe_version,
+)
 from lerobot.common.policies.diffusion.configuration_diffusion import DiffusionConfig
 from lerobot.common.policies.diffusion.modeling_diffusion import DiffusionPolicy
 from torch.utils.data import DataLoader
@@ -74,16 +77,23 @@ def load_data(
     if fds is None:
         # Partition the pusht dataset into N partitions
         episodes_per_partition = get_dataset().num_episodes // num_partitions
-        partitioner = GroupedNaturalIdPartitioner(partition_by="episode_index", group_size=episodes_per_partition)
+        partitioner = GroupedNaturalIdPartitioner(
+            partition_by="episode_index", group_size=episodes_per_partition
+        )
         safe_version = get_hf_dataset_safe_version("lerobot/pusht", CODEBASE_VERSION)
-        fds = FederatedDataset(dataset="lerobot/pusht", partitioners={'train': partitioner}, revision=safe_version)
-    
+        fds = FederatedDataset(
+            dataset="lerobot/pusht",
+            partitioners={"train": partitioner},
+            revision=safe_version,
+        )
+
     partition = fds.load_partition(partition_id)
     partition.set_transform(hf_transform_to_torch)
-    data = FilteredLeRobotDataset(repo_id="lerobot/pusht",
-                                   hf_dataset=partition,
-                                   delta_timestamps=get_delta_timestamps(),
-                                   )
+    data = FilteredLeRobotDataset(
+        repo_id="lerobot/pusht",
+        hf_dataset=partition,
+        delta_timestamps=get_delta_timestamps(),
+    )
     # Create dataloader for offline training.
     trainloader = torch.utils.data.DataLoader(
         data,

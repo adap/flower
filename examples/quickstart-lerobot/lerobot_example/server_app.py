@@ -22,7 +22,9 @@ def get_evaluate_fn_callback(save_path: Path):
             # Apply current global model weights
             set_params(model, parameters)
             # Save checkpoint
-            model.save_pretrained(str(save_path / "global_model" / f"round_{server_round}"))
+            model.save_pretrained(
+                str(save_path / "global_model" / f"round_{server_round}")
+            )
 
     return evaluate_fn
 
