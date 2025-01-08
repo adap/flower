@@ -30,7 +30,7 @@ from flwr.common.logger import log
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
 from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
 from flwr.common.typing import Run
-from flwr.proto.message_pb2 import Message as Message_pb  # pylint: disable=E0611
+from flwr.proto.message_pb2 import Message as ProtoMessage  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
@@ -194,7 +194,7 @@ class GrpcDriver(Driver):
         to the node specified in `dst_node_id`.
         """
         # Construct Messages
-        message_proto_list: list[Message_pb] = []
+        message_proto_list: list[ProtoMessage] = []
         for msg in messages:
             # Check message
             self._check_message(msg)
@@ -219,7 +219,6 @@ class GrpcDriver(Driver):
         # Pull Messages
         res: PullMessagesResponse = self._stub.PullMessages(
             PullMessagesRequest(
-                node=self.node,
                 message_ids=message_ids,
                 run_id=cast(Run, self._run).run_id,
             )
