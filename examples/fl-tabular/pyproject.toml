@@ -10,7 +10,7 @@ license = "Apache-2.0"
 dependencies = [
     "flwr[simulation]>=1.14.0",
     "flwr-datasets>=0.3.0",
-    "torch==2.1.1",
+    "torch==2.5.1",
     "scikit-learn==1.5.0",
 ]
 
