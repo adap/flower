@@ -16,14 +16,13 @@
 
 
 import threading
-import time
 from logging import DEBUG, INFO
 from typing import Optional
 from uuid import UUID
 
 import grpc
 
-from flwr.common import ConfigsRecord
+from flwr.common import ConfigsRecord, now
 from flwr.common.constant import Status
 from flwr.common.logger import log
 from flwr.common.serde import (
@@ -158,7 +157,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         )
 
         # Set pushed_at (timestamp in seconds)
-        pushed_at = time.time()
+        pushed_at = now().timestamp()
         for task_ins in request.task_ins_list:
             task_ins.task.pushed_at = pushed_at
 
@@ -199,17 +198,21 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         )
 
         # Set pushed_at (timestamp in seconds)
-        pushed_at = time.time()
+        pushed_at = now().timestamp()
 
         # Validate request and insert in State
         _raise_if(len(request.messages_list) == 0, "`messages_list` must not be empty")
         message_ids: list[Optional[UUID]] = []
-        for message_proto in request.messages_list:
+        while request.messages_list:
+            message_proto = request.messages_list.pop(0)
             message = message_from_proto(message_proto=message_proto)
             task_ins = message_to_taskins(message=message)
             task_ins.task.pushed_at = pushed_at
             validation_errors = validate_task_ins_or_res(task_ins)
             _raise_if(bool(validation_errors), ", ".join(validation_errors))
+            _raise_if(
+                request.run_id != task_ins.run_id, "`task_ins` has mismatched `run_id`"
+            )
             # Store
             message_id: Optional[UUID] = state.store_task_ins(task_ins=task_ins)
             message_ids.append(message_id)
@@ -284,7 +287,8 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         # Convert to Messages
         messages_list = []
-        for task_res in task_res_list:
+        while task_res_list:
+            task_res = task_res_list.pop(0)
             _raise_if(
                 request.run_id != task_res.run_id, "`task_res` has mismatched `run_id`"
             )
