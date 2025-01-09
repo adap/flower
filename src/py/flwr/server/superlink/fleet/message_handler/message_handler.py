@@ -116,7 +116,7 @@ def pull_messages(
     # Retrieve TaskIns from State
     task_ins_list: list[TaskIns] = state.get_task_ins(node_id=node_id, limit=1)
 
-    # Cover to Messages
+    # Convert to Messages
     msg_proto = []
     for task_ins in task_ins_list:
         msg = message_from_taskins(task_ins)

@@ -18,9 +18,11 @@
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Optional, Union
 
 from flwr.proto.exec_pb2_grpc import ExecStub
+
+from ..typing import UserAuthCredentials, UserAuthLoginDetails
 
 
 class ExecAuthPlugin(ABC):
@@ -28,16 +30,19 @@ class ExecAuthPlugin(ABC):
 
     Parameters
     ----------
-    config : dict[str, Any]
-        The authentication configuration loaded from a YAML file.
+    user_auth_config_path : Path
+        Path to the YAML file containing the authentication configuration.
     """
 
     @abstractmethod
-    def __init__(self, config: dict[str, Any]):
+    def __init__(
+        self,
+        user_auth_config_path: Path,
+    ):
         """Abstract constructor."""
 
     @abstractmethod
-    def get_login_details(self) -> dict[str, str]:
+    def get_login_details(self) -> Optional[UserAuthLoginDetails]:
         """Get the login details."""
 
     @abstractmethod
@@ -47,7 +52,7 @@ class ExecAuthPlugin(ABC):
         """Validate authentication tokens in the provided metadata."""
 
     @abstractmethod
-    def get_auth_tokens(self, auth_details: dict[str, str]) -> dict[str, str]:
+    def get_auth_tokens(self, device_code: str) -> Optional[UserAuthCredentials]:
         """Get authentication tokens."""
 
     @abstractmethod
@@ -62,50 +67,55 @@ class CliAuthPlugin(ABC):
 
     Parameters
     ----------
-    user_auth_config_path : Path
-        The path to the user's authentication configuration file.
+    credentials_path : Path
+        Path to the user's authentication credentials file.
     """
 
     @staticmethod
     @abstractmethod
     def login(
-        login_details: dict[str, str],
+        login_details: UserAuthLoginDetails,
         exec_stub: ExecStub,
-    ) -> dict[str, Any]:
-        """Authenticate the user with the SuperLink.
+    ) -> UserAuthCredentials:
+        """Authenticate the user and retrieve authentication credentials.
 
         Parameters
         ----------
-        login_details : dict[str, str]
-            A dictionary containing the user's login details.
+        login_details : UserAuthLoginDetails
+            An object containing the user's login details.
         exec_stub : ExecStub
-            An instance of `ExecStub` used for communication with the SuperLink.
+            A stub for executing RPC calls to the server.
 
         Returns
         -------
-        user_auth_config : dict[str, Any]
-            A dictionary containing the user's authentication configuration
-            in JSON format.
+        UserAuthCredentials
+            The authentication credentials obtained after login.
         """
 
     @abstractmethod
-    def __init__(self, user_auth_config_path: Path):
+    def __init__(self, credentials_path: Path):
         """Abstract constructor."""
 
     @abstractmethod
-    def store_tokens(self, user_auth_config: dict[str, Any]) -> None:
-        """Store authentication tokens from the provided user_auth_config.
+    def store_tokens(self, credentials: UserAuthCredentials) -> None:
+        """Store authentication tokens to the `credentials_path`.
 
-        The configuration, including tokens, will be saved as a JSON file
-        at `user_auth_config_path`.
+        The credentials, including tokens, will be saved as a JSON file
+        at `credentials_path`.
         """
 
     @abstractmethod
     def load_tokens(self) -> None:
-        """Load authentication tokens from the user_auth_config_path."""
+        """Load authentication tokens from the `credentials_path`."""
 
     @abstractmethod
     def write_tokens_to_metadata(
         self, metadata: Sequence[tuple[str, Union[str, bytes]]]
     ) -> Sequence[tuple[str, Union[str, bytes]]]:
         """Write authentication tokens to the provided metadata."""
+
+    @abstractmethod
+    def read_tokens_from_metadata(
+        self, metadata: Sequence[tuple[str, Union[str, bytes]]]
+    ) -> Optional[UserAuthCredentials]:
+        """Read authentication tokens from the provided metadata."""
