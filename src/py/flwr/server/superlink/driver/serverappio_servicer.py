@@ -15,7 +15,6 @@
 """ServerAppIo API servicer."""
 
 
-import inspect
 import threading
 import time
 from logging import DEBUG, INFO
@@ -119,8 +118,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             ffs: Ffs = self.ffs_factory.ffs()
             fab_hash = ffs.put(fab.content, {})
             _raise_if(
-                fab_hash != fab.hash_str,
-                f"FAB ({fab.hash_str}) hash from request doesn't match contents",
+                validation_error=fab_hash != fab.hash_str,
+                request_name="CreateRun",
+                detail=f"FAB ({fab.hash_str}) hash from request doesn't match contents",
             )
         else:
             fab_hash = ""
@@ -156,12 +156,22 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             task_ins.task.pushed_at = pushed_at
 
         # Validate request
-        _raise_if(len(request.task_ins_list) == 0, "`task_ins_list` must not be empty")
+        _raise_if(
+            validation_error=len(request.task_ins_list) == 0,
+            request_name="PushTaskIns",
+            detail="`task_ins_list` must not be empty",
+        )
         for task_ins in request.task_ins_list:
             validation_errors = validate_task_ins_or_res(task_ins)
-            _raise_if(bool(validation_errors), ", ".join(validation_errors))
             _raise_if(
-                request.run_id != task_ins.run_id, "`task_ins` has mismatched `run_id`"
+                validation_error=bool(validation_errors),
+                request_name="PushTaskIns",
+                detail=", ".join(validation_errors),
+            )
+            _raise_if(
+                validation_error=request.run_id != task_ins.run_id,
+                request_name="PushTaskIns",
+                detail="`task_ins` has mismatched `run_id`",
             )
 
         # Store each TaskIns
@@ -200,7 +210,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         # Validate request
         for task_res in task_res_list:
             _raise_if(
-                request.run_id != task_res.run_id, "`task_res` has mismatched `run_id`"
+                validation_error=request.run_id != task_res.run_id,
+                request_name="PullTaskRes",
+                detail="`task_res` has mismatched `run_id`",
             )
 
         # Delete the TaskIns/TaskRes pairs if TaskRes is found
@@ -345,19 +357,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         return GetRunStatusResponse(run_status_dict=run_status_dict)
 
 
-def _raise_if(validation_error: bool, detail: str) -> None:
-    """Raise a `ValueError` with a detailed message if a validation error occurs.
-
-    If `validation_error` is `True`, a `ValueError` will be raised with a message in the
-    format "Malformed <CallerFunctionName>Request: <detail>".
-    """
+def _raise_if(validation_error: bool, request_name: str, detail: str) -> None:
+    """Raise a `ValueError` with a detailed message if a validation error occurs."""
     if validation_error:
-        caller_frame = inspect.currentframe()
-
-        caller_name = "UnknownFunction"
-        if caller_frame is not None:
-            f_back = caller_frame.f_back
-            if f_back is not None:
-                caller_name = f_back.f_code.co_name
-
-        raise ValueError(f"Malformed {caller_name}Request: {detail}")
+        raise ValueError(f"Malformed {request_name}: {detail}")
