@@ -476,7 +476,7 @@ def _flwr_scheduler(
         sleep(0.1)
         pending_run_id = state.get_pending_run_id()
 
-        if pending_run_id:
+        if pending_run_id and pending_run_id not in run_id_to_proc:
 
             log(
                 INFO,
