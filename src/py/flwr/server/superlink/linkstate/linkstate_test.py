@@ -891,6 +891,17 @@ class StateTest(unittest.TestCase):
         # Assert
         self.assertSetEqual(actual_node_ids, set(node_ids[70:]))
 
+    def test_acknowledge_ping_failed(self) -> None:
+        """Test that acknowledge_ping returns False when the ping fails."""
+        # Prepare
+        state: LinkState = self.state_factory()
+
+        # Execute
+        is_successful = state.acknowledge_ping(0, ping_interval=30)
+
+        # Assert
+        assert not is_successful
+
     def test_store_task_res_task_ins_expired(self) -> None:
         """Test behavior of store_task_res when the TaskIns it references is expired."""
         # Prepare

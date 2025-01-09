@@ -223,19 +223,19 @@ def try_obtain_cli_auth_plugin(
     config_path = get_user_auth_config_path(root_dir, federation)
 
     # Load the config file if it exists
-    config: dict[str, Any] = {}
+    json_file: dict[str, Any] = {}
     if config_path.exists():
         with config_path.open("r", encoding="utf-8") as file:
-            config = json.load(file)
+            json_file = json.load(file)
     # This is the case when the user auth is not enabled
     elif auth_type is None:
         return None
 
     # Get the auth type from the config if not provided
     if auth_type is None:
-        if AUTH_TYPE not in config:
+        if AUTH_TYPE not in json_file:
             return None
-        auth_type = config[AUTH_TYPE]
+        auth_type = json_file[AUTH_TYPE]
 
     # Retrieve auth plugin class and instantiate it
     try:

@@ -350,7 +350,7 @@ def _main_loop(
         # Initialize Driver
         driver = InMemoryDriver(state_factory=state_factory)
         driver.set_run(run_id=run.run_id)
-        output_context_queue: "Queue[Context]" = Queue()
+        output_context_queue: Queue[Context] = Queue()
 
         # Get and run ServerApp thread
         serverapp_th = run_serverapp_th(
