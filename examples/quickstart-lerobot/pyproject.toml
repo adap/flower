@@ -8,7 +8,7 @@ allow-direct-references = true
 [project]
 name = "lerobot_example"
 version = "1.0.0"
-description = "Federated Learning with Hugginface LeRobot transformers and Flower (Quickstart Example)"
+description = "Federated Learning with Hugging Face LeRobot transformers and Flower (Quickstart Example)"
 license = "Apache-2.0"
 authors = [
     { name = "Ivelin Ivanov", email = "ivelin@zk0.bot" },
