@@ -18,7 +18,43 @@
 import time
 from typing import Union
 
+from flwr.common import Message
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
+
+
+def validate_message(message: Message) -> list[str]:
+    """Validate a Message."""
+    validation_errors = []
+
+    if message.metadata.message_id != "":
+        validation_errors.append("non-empty `message_id`")
+
+    if (
+        message.metadata.created_at < 1711497600.0
+    ):  # unix timestamp of 27 March 2024 00h:00m:00s UTC
+        validation_errors.append(
+            "`created_at` must be a float that records the unix timestamp "
+            "in seconds when the message was created."
+        )
+
+    if message.metadata.ttl <= 0:
+        validation_errors.append("`ttl` must be higher than zero")
+
+    # Verify TTL and created_at time
+    current_time = time.time()
+    if message.metadata.created_at + message.metadata.ttl <= current_time:
+        validation_errors.append("Task TTL has expired")
+
+    # Content check
+    if message.metadata.message_type == "":
+        validation_errors.append("`message_type` MUST be set")
+
+    if not message.has_content() and not message.has_error():
+        validation_errors.append("Either `content` or `error` MUST be set in a Message")
+
+    # Ancestry check should be done in FleetServicer
+
+    return validation_errors
 
 
 # pylint: disable-next=too-many-branches,too-many-statements

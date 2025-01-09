@@ -23,7 +23,7 @@ from logging import ERROR, WARNING
 from typing import Optional
 from uuid import UUID, uuid4
 
-from flwr.common import Context, log, now
+from flwr.common import Context, Message, log, now
 from flwr.common.constant import (
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
@@ -34,7 +34,7 @@ from flwr.common.record import ConfigsRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.linkstate.linkstate import LinkState
-from flwr.server.utils import validate_task_ins_or_res
+from flwr.server.utils import validate_message, validate_task_ins_or_res
 
 from .utils import (
     generate_rand_int_from_bytes,
@@ -69,6 +69,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         self.federation_options: dict[int, ConfigsRecord] = {}
         self.task_ins_store: dict[UUID, TaskIns] = {}
         self.task_res_store: dict[UUID, TaskRes] = {}
+        self.message_store: dict[UUID, Message] = {}
         self.task_ins_id_to_task_res_id: dict[UUID, UUID] = {}
 
         self.node_public_keys: set[bytes] = set()
@@ -117,6 +118,46 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         # Return the new task_id
         return task_id
 
+    def store_message_serverappio(self, message: Message) -> Optional[UUID]:
+        """Store one Message."""
+        # Validate message
+        errors = validate_message(message)
+        if any(errors):
+            log(ERROR, errors)
+            return None
+
+        # Validate run_id
+        if message.metadata.run_id not in self.run_ids:
+            log(ERROR, "Invalid run ID for Message: %s", message.metadata.run_id)
+            return None
+        # Validate source node ID
+        if message.metadata.src_node_id != 0:
+            log(
+                ERROR,
+                "Invalid source node ID for Message: %s",
+                message.metadata.src_node_id,
+            )
+            return None
+        # Validate destination node ID
+        if message.metadata.dst_node_id not in self.node_ids:
+            log(
+                ERROR,
+                "Invalid destination node ID for Message: %s",
+                message.metadata.dst_node_id,
+            )
+            return None
+
+        # Create message_id
+        message_id = uuid4()
+
+        # Store TaskIns
+        message.metadata.message_id = str(message_id)
+        with self.lock:
+            self.message_store[message_id] = message
+
+        # Return the new message_id
+        return message_id
+
     def get_task_ins(
         self, node_id: Optional[int], limit: Optional[int]
     ) -> list[TaskIns]:
@@ -154,6 +195,35 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
         # Return TaskIns
         return task_ins_list
+
+    def get_message_fleet(self, node_id: int, limit: Optional[int]) -> list[Message]:
+        """Get Messages that have not been delivered to a node."""
+        if limit is not None and limit < 1:
+            raise AssertionError("`limit` must be >= 1")
+
+        # Find Messages for node_id
+        message_list: list[Message] = []
+        message_ids_list: list[UUID] = []
+        current_time = time.time()
+        with self.lock:
+
+            # Get UUIDs of messages to return
+            for msg_ids, message in self.message_store.items():
+                if (
+                    message.metadata.dst_node_id == node_id
+                    and message.metadata.created_at + message.metadata.ttl
+                    > current_time
+                ):
+                    message_ids_list.append(msg_ids)
+                if limit and len(message_ids_list) == limit:
+                    break
+
+            # Construct list of messages to return and remove from store
+            for msg_ids in message_ids_list:
+                message_list.append(self.message_store.pop(msg_ids))
+
+        # Return TaskIns
+        return message_list
 
     # pylint: disable=R0911
     def store_task_res(self, task_res: TaskRes) -> Optional[UUID]:
@@ -229,10 +299,123 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
         # Return the new task_id
         return task_id
+    
+    def store_message_fleet(self, message: Message) -> Optional[UUID]:
+        """Store one Message."""
+        # Validate task
+        errors = validate_message(message)
+        if any(errors):
+            log(ERROR, errors)
+            return None
+
+        with self.lock:
+            # Check if the TaskIns it is replying to exists and is valid
+            message_id = message.metadata.reply_to_message
+            # TODO: have consistency check
+            task_ins = self.task_ins_store.get(UUID(message_id))
+
+            # Ensure that the consumer_id of taskIns matches the producer_id of taskRes.
+            if (
+                task_ins
+                and task_res
+                and not (
+                    task_ins.task.consumer.anonymous or task_res.task.producer.anonymous
+                )
+                and task_ins.task.consumer.node_id != task_res.task.producer.node_id
+            ):
+                return None
+
+            if task_ins is None:
+                log(ERROR, "TaskIns with task_id %s does not exist.", task_ins_id)
+                return None
+
+            if task_ins.task.created_at + task_ins.task.ttl <= time.time():
+                log(
+                    ERROR,
+                    "Failed to store TaskRes: TaskIns with task_id %s has expired.",
+                    task_ins_id,
+                )
+                return None
+
+            # Fail if the TaskRes TTL exceeds the
+            # expiration time of the TaskIns it replies to.
+            # Condition: TaskIns.created_at + TaskIns.ttl ≥
+            #            TaskRes.created_at + TaskRes.ttl
+            # A small tolerance is introduced to account
+            # for floating-point precision issues.
+            max_allowed_ttl = (
+                task_ins.task.created_at + task_ins.task.ttl - task_res.task.created_at
+            )
+            if task_res.task.ttl and (
+                task_res.task.ttl - max_allowed_ttl > MESSAGE_TTL_TOLERANCE
+            ):
+                log(
+                    WARNING,
+                    "Received TaskRes with TTL %.2f "
+                    "exceeding the allowed maximum TTL %.2f.",
+                    task_res.task.ttl,
+                    max_allowed_ttl,
+                )
+                return None
+
+        # Validate run_id
+        if task_res.run_id not in self.run_ids:
+            log(ERROR, "`run_id` is invalid")
+            return None
+
+        # Create task_id
+        task_id = uuid4()
+
+        # Store TaskRes
+        task_res.task_id = str(task_id)
+        with self.lock:
+            self.task_res_store[task_id] = task_res
+            self.task_ins_id_to_task_res_id[UUID(task_ins_id)] = task_id
+
+        # Return the new task_id
+        return task_id  
+
 
     def get_task_res(self, task_ids: set[UUID]) -> list[TaskRes]:
         """Get TaskRes for the given TaskIns IDs."""
         ret: dict[UUID, TaskRes] = {}
+
+        with self.lock:
+            current = time.time()
+
+            # Verify TaskIns IDs
+            ret = verify_taskins_ids(
+                inquired_taskins_ids=task_ids,
+                found_taskins_dict=self.task_ins_store,
+                current_time=current,
+            )
+
+            # Find all TaskRes
+            task_res_found: list[TaskRes] = []
+            for task_id in task_ids:
+                # If TaskRes exists and is not delivered, add it to the list
+                if task_res_id := self.task_ins_id_to_task_res_id.get(task_id):
+                    task_res = self.task_res_store[task_res_id]
+                    if task_res.task.delivered_at == "":
+                        task_res_found.append(task_res)
+            tmp_ret_dict = verify_found_taskres(
+                inquired_taskins_ids=task_ids,
+                found_taskins_dict=self.task_ins_store,
+                found_taskres_list=task_res_found,
+                current_time=current,
+            )
+            ret.update(tmp_ret_dict)
+
+            # Mark existing TaskRes to be returned as delivered
+            delivered_at = now().isoformat()
+            for task_res in task_res_found:
+                task_res.task.delivered_at = delivered_at
+
+        return list(ret.values())
+    
+    def get_message_serverappio(self, message_ids: set[UUID]) -> list[Message]:
+        """Get Messages for the given Message IDs."""
+        ret: dict[UUID, Message] = {}
 
         with self.lock:
             current = time.time()
