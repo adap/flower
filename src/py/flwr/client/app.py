@@ -16,13 +16,13 @@
 
 
 import signal
-import subprocess
 import sys
 import time
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from logging import ERROR, INFO, WARN
 from os import urandom
+from multiprocessing import Process
 from pathlib import Path
 from typing import Callable, Optional, Union, cast
 
@@ -61,6 +61,7 @@ from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 
+from .clientapp.app import flwr_clientapp
 from .clientapp.clientappio_servicer import ClientAppInputs, ClientAppIoServicer
 from .grpc_adapter_client.connection import grpc_adapter
 from .grpc_client.connection import grpc_connection
@@ -549,12 +550,13 @@ def start_client_internal(
                                 ]
                                 command.append("--insecure")
 
-                                subprocess.run(
-                                    command,
-                                    stdout=None,
-                                    stderr=None,
-                                    check=True,
+                                proc = Process(
+                                    target=_run_flwr_clientapp,
+                                    args=(command,),
+                                    daemon=True,
                                 )
+                                proc.start()
+                                proc.join()
                             else:
                                 # Wait for output to become available
                                 while not clientappio_servicer.has_outputs():
@@ -824,6 +826,11 @@ class _AppStateTracker:
 
         signal.signal(signal.SIGINT, signal_handler)
         signal.signal(signal.SIGTERM, signal_handler)
+
+
+def _run_flwr_clientapp(command: list[str]) -> None:
+    sys.argv = command
+    flwr_clientapp()
 
 
 def run_clientappio_api_grpc(
