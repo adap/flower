@@ -19,7 +19,7 @@ import abc
 from typing import Optional
 from uuid import UUID
 
-from flwr.common import Context
+from flwr.common import Context, Message
 from flwr.common.record import ConfigsRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
@@ -51,6 +51,22 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
+    def store_message_serverappio(self, message: Message) -> Optional[UUID]:
+        """Store one Message.
+
+        The ServerAppIo API calls this to schedule a message.
+
+        Stores the value of the `message` in the link state and, if successful,
+        returns the `message_id` (UUID) of the `message`. If, for any reason,
+        storing the `message` fails, `None` is returned.
+
+        Constraints
+        -----------
+        If `message.metadata.run_id` is invalid, then
+        storing the `message` MUST fail.
+        """
+
+    @abc.abstractmethod
     def get_task_ins(
         self, node_id: Optional[int], limit: Optional[int]
     ) -> list[TaskIns]:
@@ -79,6 +95,27 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
+    def get_message_fleet(self, node_id: int, limit: Optional[int]) -> list[Message]:
+        """Get Message optionally filtered by node_id.
+
+        The Fleet API calls this for Nodes planning to work on one or more Message.
+
+        Constraints
+        -----------
+        Retrieve all TaskIns where
+
+            1. the `message.metadata.dst_node_id` equals `node_id` AND
+            2. the `message.metadata.delivered_at` equals `""`.
+
+
+        If `delivered_at` MUST BE set (not `""`) otherwise the Message MUST not be in
+        the returned list.
+
+        If `limit` is not `None`, return, at most, `limit` number of `Messages`. If
+        `limit` is set, it has to be greater zero.
+        """
+
+    @abc.abstractmethod
     def store_task_res(self, task_res: TaskRes) -> Optional[UUID]:
         """Store one TaskRes.
 
@@ -97,6 +134,21 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
 
         If `task_res.run_id` is invalid, then
         storing the `task_res` MUST fail.
+        """
+
+    @abc.abstractmethod
+    def store_message_fleet(self, message: Message) -> Optional[UUID]:
+        """Store one Message.
+
+        The Fleet API calls this for Nodes returning results.
+
+        Stores the Message and, if successful, returns the `message_id` (UUID) of
+        the `message`. If storing the `message` fails, `None` is returned.
+
+        Constraints
+        -----------
+        If `message.metadata.run_id` is invalid, then
+        storing the `message` MUST fail.
         """
 
     @abc.abstractmethod
@@ -122,6 +174,35 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         list[TaskRes]
             A list of TaskRes corresponding to the given task IDs. If no
             TaskRes could be found for any of the task IDs, an empty list is returned.
+        """
+
+    @abc.abstractmethod
+    def get_message_serverappio(self, message_ids: set[UUID]) -> list[Message]:
+        """Get Message for the given Message IDs.
+
+        This method is typically called by the ServerAppIo API to obtain
+        results (Message) for previously scheduled instructions (Message).
+        For each message_id provided, this method returns one of the following
+        responses:
+
+        - An error Message if the corresponding `reply_to_message` does not exist or has
+        expired.
+        - An error Message if the corresponding Message exists but has expired.
+        - The valid Message if the Message has a corresponding `reply_to_message` is
+        valid.
+        - Nothing if the TaskIns is still valid and waiting for a Message to be replied.
+
+        Parameters
+        ----------
+        task_ids : set[UUID]
+            A set of Message IDs for which to retrieve results.
+
+        Returns
+        -------
+        list[Message]
+            A list of Message corresponding to the given message IDs. If no
+            Message could be found for any of the message IDs, an empty list is
+            returned.
         """
 
     @abc.abstractmethod
