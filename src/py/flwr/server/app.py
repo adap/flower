@@ -76,7 +76,6 @@ from .client_manager import ClientManager
 from .history import History
 from .server import Server, init_defaults, run_fl
 from .server_config import ServerConfig
-from .serverapp.app import flwr_serverapp
 from .strategy import Strategy
 from .superlink.driver.serverappio_grpc import run_serverappio_api_grpc
 from .superlink.ffs.ffs_factory import FfsFactory
@@ -445,9 +444,16 @@ def run_superlink() -> None:
     sys.exit(1)
 
 
-def _run_flwr_serverapp(command: list[str]) -> None:
-    sys.argv = command
-    flwr_serverapp()
+def _run_flwr_command(args: list[str]) -> None:
+    sys.argv = args
+    if args[0] == "flwr-serverapp":
+        mod = importlib.import_module("flwr.server.serverapp.app")
+        mod.flwr_serverapp()
+    elif args[0] == "flwr-simulation":
+        mod = importlib.import_module("flwr.simulation.app")
+        mod.flwr_simulation()
+    else:
+        raise ValueError(f"Unknown command: {args[0]}")
 
 
 def _flwr_scheduler(
@@ -481,7 +487,7 @@ def _flwr_scheduler(
                 "--insecure",
             ]
 
-            Process(target=_run_flwr_serverapp, args=(command,), daemon=True).start()
+            Process(target=_run_flwr_command, args=(command,), daemon=True).start()
 
 
 def _format_address(address: str) -> tuple[str, str, int]:
