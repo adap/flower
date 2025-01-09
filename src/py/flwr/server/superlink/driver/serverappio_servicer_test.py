@@ -60,7 +60,11 @@ def test_raise_if_false() -> None:
 
     try:
         # Execute
-        _raise_if(validation_error, detail)
+        _raise_if(
+            validation_error=validation_error,
+            request_name="DummyRequest",
+            detail=detail,
+        )
 
         # Assert
         assert True
@@ -78,12 +82,16 @@ def test_raise_if_true() -> None:
 
     try:
         # Execute
-        _raise_if(validation_error, detail)
+        _raise_if(
+            validation_error=validation_error,
+            request_name="DummyRequest",
+            detail=detail,
+        )
 
         # Assert
         raise AssertionError()
     except ValueError as err:
-        assert str(err) == "Malformed PushTaskInsRequest: test"
+        assert str(err) == "Malformed DummyRequest: test"
     except Exception as err:
         raise AssertionError() from err
 
