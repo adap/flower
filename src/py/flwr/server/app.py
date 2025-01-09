@@ -18,11 +18,11 @@
 import argparse
 import csv
 import importlib.util
-import subprocess
 import sys
 import threading
 from collections.abc import Sequence
 from logging import DEBUG, INFO, WARN
+from multiprocessing import Process
 from pathlib import Path
 from time import sleep
 from typing import Any, Optional
@@ -76,6 +76,7 @@ from .client_manager import ClientManager
 from .history import History
 from .server import Server, init_defaults, run_fl
 from .server_config import ServerConfig
+from .serverapp.app import flwr_serverapp
 from .strategy import Strategy
 from .superlink.driver.serverappio_grpc import run_serverappio_api_grpc
 from .superlink.ffs.ffs_factory import FfsFactory
@@ -444,6 +445,11 @@ def run_superlink() -> None:
     sys.exit(1)
 
 
+def _run_flwr_serverapp(command: list[str]) -> None:
+    sys.argv = command
+    flwr_serverapp()
+
+
 def _flwr_scheduler(
     state_factory: LinkStateFactory,
     io_api_arg: str,
@@ -451,7 +457,6 @@ def _flwr_scheduler(
     cmd: str,
 ) -> None:
     log(DEBUG, "Started %s scheduler thread.", cmd)
-
     state = state_factory.state()
 
     # Periodically check for a pending run in the LinkState
@@ -476,10 +481,7 @@ def _flwr_scheduler(
                 "--insecure",
             ]
 
-            subprocess.Popen(  # pylint: disable=consider-using-with
-                command,
-                text=True,
-            )
+            Process(target=_run_flwr_serverapp, args=(command,), daemon=True).start()
 
 
 def _format_address(address: str) -> tuple[str, str, int]:
