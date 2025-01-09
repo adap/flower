@@ -212,7 +212,11 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         pushed_at = now().timestamp()
 
         # Validate request and insert in State
-        _raise_if(len(request.messages_list) == 0, "`messages_list` must not be empty")
+        _raise_if(
+            validation_error=len(request.messages_list) == 0,
+            request_name="PushMessages",
+            detail="`messages_list` must not be empty",
+        )
         message_ids: list[Optional[UUID]] = []
         while request.messages_list:
             message_proto = request.messages_list.pop(0)
@@ -220,9 +224,15 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             task_ins = message_to_taskins(message=message)
             task_ins.task.pushed_at = pushed_at
             validation_errors = validate_task_ins_or_res(task_ins)
-            _raise_if(bool(validation_errors), ", ".join(validation_errors))
             _raise_if(
-                request.run_id != task_ins.run_id, "`task_ins` has mismatched `run_id`"
+                validation_error=bool(validation_errors),
+                request_name="PushMessages",
+                detail=", ".join(validation_errors),
+            )
+            _raise_if(
+                validation_error=request.run_id != task_ins.run_id,
+                request_name="PushMessages",
+                detail="`task_ins` has mismatched `run_id`",
             )
             # Store
             message_id: Optional[UUID] = state.store_task_ins(task_ins=task_ins)
@@ -303,7 +313,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         while task_res_list:
             task_res = task_res_list.pop(0)
             _raise_if(
-                request.run_id != task_res.run_id, "`task_res` has mismatched `run_id`"
+                validation_error=request.run_id != task_res.run_id,
+                request_name="PullMessages",
+                detail="`task_res` has mismatched `run_id`",
             )
             message = message_from_taskres(taskres=task_res)
             messages_list.append(message_to_proto(message))
