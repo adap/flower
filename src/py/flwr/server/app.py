@@ -18,11 +18,13 @@
 import argparse
 import csv
 import importlib.util
+import multiprocessing
+import multiprocessing.context
+import multiprocessing.process
 import sys
 import threading
 from collections.abc import Sequence
 from logging import DEBUG, INFO, WARN
-from multiprocessing import Process
 from pathlib import Path
 from time import sleep
 from typing import Any, Optional
@@ -464,10 +466,14 @@ def _flwr_scheduler(
 ) -> None:
     log(DEBUG, "Started %s scheduler thread.", cmd)
     state = state_factory.state()
+    run_id_to_proc: dict[int, multiprocessing.context.SpawnProcess] = {}
+
+    # Use the "spawn" start method for multiprocessing.
+    ctx = multiprocessing.get_context("spawn")
 
     # Periodically check for a pending run in the LinkState
     while True:
-        sleep(3)
+        sleep(0.1)
         pending_run_id = state.get_pending_run_id()
 
         if pending_run_id:
@@ -487,7 +493,16 @@ def _flwr_scheduler(
                 "--insecure",
             ]
 
-            Process(target=_run_flwr_command, args=(command,), daemon=True).start()
+            proc = ctx.Process(target=_run_flwr_command, args=(command,), daemon=True)
+            proc.start()
+
+            # Store the process
+            run_id_to_proc[pending_run_id] = proc
+
+        # Clean up finished processes
+        for run_id, proc in list(run_id_to_proc.items()):
+            if not proc.is_alive():
+                del run_id_to_proc[run_id]
 
 
 def _format_address(address: str) -> tuple[str, str, int]:

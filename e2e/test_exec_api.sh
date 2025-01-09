@@ -62,7 +62,7 @@ else
     # Non-macOS system (Linux)
     sed -i '/flwr\[simulation\]/d' pyproject.toml
 fi
-# pip install -e . --no-deps
+pip install -e . --no-deps
 
 # Check if the first argument is 'insecure'
 if [ "$1" == "insecure" ]; then

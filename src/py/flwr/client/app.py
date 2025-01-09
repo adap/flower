@@ -16,6 +16,7 @@
 
 
 import importlib
+import multiprocessing
 import signal
 import sys
 import time
@@ -23,7 +24,6 @@ from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from logging import ERROR, INFO, WARN
 from os import urandom
-from multiprocessing import Process
 from pathlib import Path
 from typing import Callable, Optional, Union, cast
 
@@ -392,6 +392,7 @@ def start_client_internal(
     run_info_store: Optional[DeprecatedRunInfoStore] = None
     state_factory = NodeStateFactory()
     state = state_factory.state()
+    ctx = multiprocessing.get_context("spawn")
 
     runs: dict[int, Run] = {}
 
@@ -550,7 +551,7 @@ def start_client_internal(
                                 ]
                                 command.append("--insecure")
 
-                                proc = Process(
+                                proc = ctx.Process(
                                     target=_run_flwr_clientapp,
                                     args=(command,),
                                     daemon=True,
