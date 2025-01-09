@@ -140,10 +140,8 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                 state = self.state_factory.state()
                 try:
                     state.set_node_public_key(response.node.node_id, node_public_key)
-                except ValueError:
-                    context.abort(
-                        grpc.StatusCode.UNAUTHENTICATED, "Public key already in use"
-                    )
+                except ValueError as e:
+                    context.abort(grpc.StatusCode.UNAUTHENTICATED, str(e))
 
             return response
 
