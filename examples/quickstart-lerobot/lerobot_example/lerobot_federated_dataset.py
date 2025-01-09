@@ -20,8 +20,8 @@ from datasets import Dataset
 
 
 class FilteredLeRobotDataset(LeRobotDataset):
-    """Delays loading and processing of dataset until load function is called with an
-    optional filter argument."""
+    """Behaves like `LeRobotDataset` but using the dataset partition passed
+    during construction."""
 
     def __init__(
         self,
