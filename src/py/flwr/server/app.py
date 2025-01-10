@@ -292,7 +292,7 @@ def run_superlink() -> None:
     # Determine Exec plugin
     # If simulation is used, don't start ServerAppIo and Fleet APIs
     sim_exec = executor.__class__.__qualname__ == "SimulationEngine"
-    bckg_threads = []
+    bckg_threads: list[threading.Thread] = []
 
     if sim_exec:
         simulationio_server: grpc.Server = run_simulationio_api_grpc(
@@ -360,6 +360,7 @@ def run_superlink() -> None:
                     ffs_factory,
                     num_workers,
                 ),
+                daemon=True,
             )
             fleet_thread.start()
             bckg_threads.append(fleet_thread)
@@ -426,6 +427,7 @@ def run_superlink() -> None:
                 address,
                 cmd,
             ),
+            daemon=True,
         )
         scheduler_th.start()
         bckg_threads.append(scheduler_th)
@@ -434,16 +436,14 @@ def run_superlink() -> None:
     register_exit_handlers(
         event_type=EventType.RUN_SUPERLINK_LEAVE,
         grpc_servers=grpc_servers,
-        bckg_threads=bckg_threads,
     )
 
-    # Block
-    while True:
-        if bckg_threads:
-            for thread in bckg_threads:
-                if not thread.is_alive():
-                    sys.exit(1)
-        exec_server.wait_for_termination(timeout=1)
+    # Block until a thread exits prematurely
+    while all(thread.is_alive() for thread in bckg_threads):
+        sleep(0.1)
+
+    # Exit if any thread has exited prematurely
+    sys.exit(1)
 
 
 def _flwr_scheduler(
