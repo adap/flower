@@ -75,8 +75,8 @@ workloads makes sense.
             </a>
     - - .. raw:: html
 
-            <a href="https://youtu.be/ppYemmT2mOs">
-                <img src="https://img.youtube.com/vi/ppYemmT2mOs/0.jpg" alt="Desginging Stateful ClientApps" width="200"/>
+            <a href="https://youtu.be/ir2okeinZ2g">
+                <img src="https://img.youtube.com/vi/ir2okeinZ2g/0.jpg" alt="Desginging Stateful ClientApps" width="200"/>
             </a>
       - .. raw:: html
 
