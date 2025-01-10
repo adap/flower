@@ -21,6 +21,7 @@ from contextlib import closing
 from os.path import abspath, dirname, join
 from pathlib import Path
 from typing import cast
+
 from flwr.common.grpc import valid_certificates
 from flwr.server.client_manager import SimpleClientManager
 from flwr.server.superlink.fleet.grpc_bidi.grpc_server import start_grpc_server

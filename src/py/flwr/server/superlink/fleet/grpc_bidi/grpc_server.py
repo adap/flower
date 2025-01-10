@@ -15,14 +15,12 @@
 """Implements utility function to create a gRPC server."""
 
 
-from logging import ERROR
-from typing import Any, Callable, Optional
+from typing import Optional
 
 import grpc
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.grpc import generic_create_grpc_server
-from flwr.common.logger import log
 from flwr.proto.transport_pb2_grpc import (  # pylint: disable=E0611
     add_FlowerServiceServicer_to_server,
 )

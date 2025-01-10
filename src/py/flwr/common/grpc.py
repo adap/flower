@@ -24,8 +24,9 @@ from typing import Any, Callable, Optional
 import grpc
 
 from .address import is_port_in_use
-from .constant import GRPC_MAX_MESSAGE_LENGTH
 from .logger import log
+
+GRPC_MAX_MESSAGE_LENGTH: int = 536_870_912  # == 512 * 1024 * 1024
 
 INVALID_CERTIFICATES_ERR_MSG = """
     When setting any of root_certificate, certificate, or private_key,
