@@ -22,6 +22,7 @@ import time
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from logging import ERROR, INFO, WARN
+from os import urandom
 from pathlib import Path
 from typing import Callable, Optional, Union, cast
 
@@ -53,13 +54,12 @@ from flwr.common.constant import (
     TRANSPORT_TYPES,
     ErrorCode,
 )
+from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
-from flwr.server.superlink.fleet.grpc_bidi.grpc_server import generic_create_grpc_server
-from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 
 from .clientapp.clientappio_servicer import ClientAppInputs, ClientAppIoServicer
 from .grpc_adapter_client.connection import grpc_adapter
@@ -513,7 +513,7 @@ def start_client_internal(
                             #    Docker container.
 
                             # Generate SuperNode token
-                            token: int = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
+                            token = int.from_bytes(urandom(RUN_ID_NUM_BYTES), "little")
 
                             # Mode 1: SuperNode starts ClientApp as subprocess
                             start_subprocess = isolation == ISOLATION_MODE_SUBPROCESS
