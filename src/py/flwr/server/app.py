@@ -18,7 +18,8 @@
 import argparse
 import csv
 import importlib.util
-import subprocess
+import multiprocessing
+import multiprocessing.context
 import sys
 import threading
 from collections.abc import Sequence
@@ -69,6 +70,8 @@ from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
 from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
+from flwr.server.serverapp.app import flwr_serverapp
+from flwr.simulation.app import flwr_simulation
 from flwr.superexec.app import load_executor
 from flwr.superexec.exec_grpc import run_exec_api_grpc
 
@@ -444,6 +447,16 @@ def run_superlink() -> None:
     sys.exit(1)
 
 
+def _run_flwr_command(args: list[str]) -> None:
+    sys.argv = args
+    if args[0] == "flwr-serverapp":
+        flwr_serverapp()
+    elif args[0] == "flwr-simulation":
+        flwr_simulation()
+    else:
+        raise ValueError(f"Unknown command: {args[0]}")
+
+
 def _flwr_scheduler(
     state_factory: LinkStateFactory,
     io_api_arg: str,
@@ -451,15 +464,18 @@ def _flwr_scheduler(
     cmd: str,
 ) -> None:
     log(DEBUG, "Started %s scheduler thread.", cmd)
-
     state = state_factory.state()
+    run_id_to_proc: dict[int, multiprocessing.context.SpawnProcess] = {}
+
+    # Use the "spawn" start method for multiprocessing.
+    mp_spawn_context = multiprocessing.get_context("spawn")
 
     # Periodically check for a pending run in the LinkState
     while True:
-        sleep(3)
+        sleep(0.1)
         pending_run_id = state.get_pending_run_id()
 
-        if pending_run_id:
+        if pending_run_id and pending_run_id not in run_id_to_proc:
 
             log(
                 INFO,
@@ -476,10 +492,18 @@ def _flwr_scheduler(
                 "--insecure",
             ]
 
-            subprocess.Popen(  # pylint: disable=consider-using-with
-                command,
-                text=True,
+            proc = mp_spawn_context.Process(
+                target=_run_flwr_command, args=(command,), daemon=True
             )
+            proc.start()
+
+            # Store the process
+            run_id_to_proc[pending_run_id] = proc
+
+        # Clean up finished processes
+        for run_id, proc in list(run_id_to_proc.items()):
+            if not proc.is_alive():
+                del run_id_to_proc[run_id]
 
 
 def _format_address(address: str) -> tuple[str, str, int]:

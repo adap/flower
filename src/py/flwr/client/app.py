@@ -15,8 +15,8 @@
 """Flower client app."""
 
 
+import multiprocessing
 import signal
-import subprocess
 import sys
 import time
 from contextlib import AbstractContextManager
@@ -34,6 +34,7 @@ from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
+from flwr.client.clientapp.app import flwr_clientapp
 from flwr.client.nodestate.nodestate_factory import NodeStateFactory
 from flwr.client.typing import ClientFnExt
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, Message, event
@@ -391,6 +392,7 @@ def start_client_internal(
     run_info_store: Optional[DeprecatedRunInfoStore] = None
     state_factory = NodeStateFactory()
     state = state_factory.state()
+    mp_spawn_context = multiprocessing.get_context("spawn")
 
     runs: dict[int, Run] = {}
 
@@ -549,12 +551,13 @@ def start_client_internal(
                                 ]
                                 command.append("--insecure")
 
-                                subprocess.run(
-                                    command,
-                                    stdout=None,
-                                    stderr=None,
-                                    check=True,
+                                proc = mp_spawn_context.Process(
+                                    target=_run_flwr_clientapp,
+                                    args=(command,),
+                                    daemon=True,
                                 )
+                                proc.start()
+                                proc.join()
                             else:
                                 # Wait for output to become available
                                 while not clientappio_servicer.has_outputs():
@@ -824,6 +827,11 @@ class _AppStateTracker:
 
         signal.signal(signal.SIGINT, signal_handler)
         signal.signal(signal.SIGTERM, signal_handler)
+
+
+def _run_flwr_clientapp(args: list[str]) -> None:
+    sys.argv = args
+    flwr_clientapp()
 
 
 def run_clientappio_api_grpc(
