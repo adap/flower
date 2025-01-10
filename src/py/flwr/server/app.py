@@ -59,6 +59,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_REST,
 )
 from flwr.common.exit_handlers import register_exit_handlers
+from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     private_key_to_bytes,
@@ -79,10 +80,7 @@ from .strategy import Strategy
 from .superlink.driver.serverappio_grpc import run_serverappio_api_grpc
 from .superlink.ffs.ffs_factory import FfsFactory
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
-from .superlink.fleet.grpc_bidi.grpc_server import (
-    generic_create_grpc_server,
-    start_grpc_server,
-)
+from .superlink.fleet.grpc_bidi.grpc_server import start_grpc_server
 from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
 from .superlink.fleet.grpc_rere.server_interceptor import AuthenticateServerInterceptor
 from .superlink.linkstate import LinkStateFactory
