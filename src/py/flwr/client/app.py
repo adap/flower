@@ -34,6 +34,7 @@ from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
+from flwr.client.clientapp.app import flwr_clientapp
 from flwr.client.nodestate.nodestate_factory import NodeStateFactory
 from flwr.client.typing import ClientFnExt
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, Message, event
@@ -830,9 +831,6 @@ class _AppStateTracker:
 
 def _run_flwr_clientapp(args: list[str]) -> None:
     sys.argv = args
-    # pylint: disable-next=import-outside-toplevel
-    from flwr.client.clientapp.app import flwr_clientapp
-
     flwr_clientapp()
 
 

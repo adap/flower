@@ -70,6 +70,8 @@ from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
 from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
+from flwr.server.serverapp.app import flwr_serverapp
+from flwr.simulation.app import flwr_simulation
 from flwr.superexec.app import load_executor
 from flwr.superexec.exec_grpc import run_exec_api_grpc
 
@@ -448,14 +450,8 @@ def run_superlink() -> None:
 def _run_flwr_command(args: list[str]) -> None:
     sys.argv = args
     if args[0] == "flwr-serverapp":
-        # pylint: disable-next=import-outside-toplevel
-        from flwr.server.serverapp.app import flwr_serverapp
-
         flwr_serverapp()
     elif args[0] == "flwr-simulation":
-        # pylint: disable-next=import-outside-toplevel
-        from flwr.simulation.app import flwr_simulation
-
         flwr_simulation()
     else:
         raise ValueError(f"Unknown command: {args[0]}")
