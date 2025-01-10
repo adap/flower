@@ -15,7 +15,6 @@
 """Flower client app."""
 
 
-import importlib
 import multiprocessing
 import signal
 import sys
@@ -392,7 +391,7 @@ def start_client_internal(
     run_info_store: Optional[DeprecatedRunInfoStore] = None
     state_factory = NodeStateFactory()
     state = state_factory.state()
-    ctx = multiprocessing.get_context("spawn")
+    mp_spawn_context = multiprocessing.get_context("spawn")
 
     runs: dict[int, Run] = {}
 
@@ -551,7 +550,7 @@ def start_client_internal(
                                 ]
                                 command.append("--insecure")
 
-                                proc = ctx.Process(
+                                proc = mp_spawn_context.Process(
                                     target=_run_flwr_clientapp,
                                     args=(command,),
                                     daemon=True,
@@ -831,8 +830,10 @@ class _AppStateTracker:
 
 def _run_flwr_clientapp(args: list[str]) -> None:
     sys.argv = args
-    mod = importlib.import_module("flwr.client.clientapp.app")
-    mod.flwr_clientapp()
+    # pylint: disable-next=import-outside-toplevel
+    from flwr.client.clientapp.app import flwr_clientapp
+
+    flwr_clientapp()
 
 
 def run_clientappio_api_grpc(

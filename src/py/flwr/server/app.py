@@ -448,11 +448,15 @@ def run_superlink() -> None:
 def _run_flwr_command(args: list[str]) -> None:
     sys.argv = args
     if args[0] == "flwr-serverapp":
-        mod = importlib.import_module("flwr.server.serverapp.app")
-        mod.flwr_serverapp()
+        # pylint: disable-next=import-outside-toplevel
+        from flwr.server.serverapp.app import flwr_serverapp
+
+        flwr_serverapp()
     elif args[0] == "flwr-simulation":
-        mod = importlib.import_module("flwr.simulation.app")
-        mod.flwr_simulation()
+        # pylint: disable-next=import-outside-toplevel
+        from flwr.simulation.app import flwr_simulation
+
+        flwr_simulation()
     else:
         raise ValueError(f"Unknown command: {args[0]}")
 
@@ -468,7 +472,7 @@ def _flwr_scheduler(
     run_id_to_proc: dict[int, multiprocessing.context.SpawnProcess] = {}
 
     # Use the "spawn" start method for multiprocessing.
-    ctx = multiprocessing.get_context("spawn")
+    mp_spawn_context = multiprocessing.get_context("spawn")
 
     # Periodically check for a pending run in the LinkState
     while True:
@@ -492,7 +496,9 @@ def _flwr_scheduler(
                 "--insecure",
             ]
 
-            proc = ctx.Process(target=_run_flwr_command, args=(command,), daemon=True)
+            proc = mp_spawn_context.Process(
+                target=_run_flwr_command, args=(command,), daemon=True
+            )
             proc.start()
 
             # Store the process
