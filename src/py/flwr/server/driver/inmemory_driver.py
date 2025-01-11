@@ -107,7 +107,6 @@ class InMemoryDriver(Driver):
             ttl=ttl_,
             message_type=message_type,
         )
-        print(f"{metadata = }")
         return Message(metadata=metadata, content=content)
 
     def get_node_ids(self) -> list[int]:

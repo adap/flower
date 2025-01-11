@@ -261,7 +261,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         Constraints
         -----------
 
-        `task_ins.task.consumer.node_id` MUST be set (not 0)
+        `task_ins.task.consumer.node_id` MUST be set (not constant.DRIVER_NODE_ID)
         """
         # Validate task
         errors = validate_task_ins_or_res(task_ins)
@@ -403,7 +403,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
 
         Constraints
         -----------
-        `task_res.task.consumer.node_id` MUST be set (not 0)
+        `task_res.task.consumer.node_id` MUST be set (not constant.DRIVER_NODE_ID)
         """
         # Validate task
         errors = validate_task_ins_or_res(task_res)

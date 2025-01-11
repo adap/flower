@@ -40,7 +40,7 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
 
         Constraints
         -----------
-        `task_ins.task.consumer.node_id` MUST be set (not 0)
+        `task_ins.task.consumer.node_id` MUST be set (not constant.DRIVER_NODE_ID)
 
         If `task_ins.run_id` is invalid, then
         storing the `task_ins` MUST fail.
@@ -80,7 +80,7 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         Constraints
         -----------
 
-        `task_res.task.consumer.node_id` MUST be set (not 0)
+        `task_res.task.consumer.node_id` MUST be set (not constant.DRIVER_NODE_ID)
 
         If `task_res.run_id` is invalid, then
         storing the `task_res` MUST fail.

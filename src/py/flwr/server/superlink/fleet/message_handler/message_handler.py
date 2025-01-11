@@ -19,7 +19,7 @@ import time
 from typing import Optional
 from uuid import UUID
 
-from flwr.common.constant import Status
+from flwr.common.constant import DRIVER_NODE_ID, Status
 from flwr.common.serde import fab_to_proto, user_config_to_proto
 from flwr.common.typing import Fab, InvalidRunStatusException
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
@@ -61,7 +61,7 @@ def create_node(
 def delete_node(request: DeleteNodeRequest, state: LinkState) -> DeleteNodeResponse:
     """."""
     # Validate node_id
-    if request.node.node_id == 0:
+    if request.node.node_id == DRIVER_NODE_ID:
         return DeleteNodeResponse()
 
     # Update state

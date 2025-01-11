@@ -86,7 +86,7 @@ def test_delete_node_success() -> None:
 def test_pull_task_ins() -> None:
     """Test pull_task_ins."""
     # Prepare
-    request = PullTaskInsRequest(node=Node(node_id=1))
+    request = PullTaskInsRequest(node=Node(node_id=123))
     state = MagicMock()
 
     # Execute
