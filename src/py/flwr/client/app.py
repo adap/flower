@@ -15,13 +15,14 @@
 """Flower client app."""
 
 
+import multiprocessing
 import signal
-import subprocess
 import sys
 import time
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from logging import ERROR, INFO, WARN
+from os import urandom
 from pathlib import Path
 from typing import Callable, Optional, Union, cast
 
@@ -33,6 +34,7 @@ from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
+from flwr.client.clientapp.app import flwr_clientapp
 from flwr.client.nodestate.nodestate_factory import NodeStateFactory
 from flwr.client.typing import ClientFnExt
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, Message, event
@@ -53,13 +55,12 @@ from flwr.common.constant import (
     TRANSPORT_TYPES,
     ErrorCode,
 )
+from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
-from flwr.server.superlink.fleet.grpc_bidi.grpc_server import generic_create_grpc_server
-from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 
 from .clientapp.clientappio_servicer import ClientAppInputs, ClientAppIoServicer
 from .grpc_adapter_client.connection import grpc_adapter
@@ -391,6 +392,7 @@ def start_client_internal(
     run_info_store: Optional[DeprecatedRunInfoStore] = None
     state_factory = NodeStateFactory()
     state = state_factory.state()
+    mp_spawn_context = multiprocessing.get_context("spawn")
 
     runs: dict[int, Run] = {}
 
@@ -513,7 +515,7 @@ def start_client_internal(
                             #    Docker container.
 
                             # Generate SuperNode token
-                            token: int = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
+                            token = int.from_bytes(urandom(RUN_ID_NUM_BYTES), "little")
 
                             # Mode 1: SuperNode starts ClientApp as subprocess
                             start_subprocess = isolation == ISOLATION_MODE_SUBPROCESS
@@ -549,12 +551,13 @@ def start_client_internal(
                                 ]
                                 command.append("--insecure")
 
-                                subprocess.run(
-                                    command,
-                                    stdout=None,
-                                    stderr=None,
-                                    check=True,
+                                proc = mp_spawn_context.Process(
+                                    target=_run_flwr_clientapp,
+                                    args=(command,),
+                                    daemon=True,
                                 )
+                                proc.start()
+                                proc.join()
                             else:
                                 # Wait for output to become available
                                 while not clientappio_servicer.has_outputs():
@@ -824,6 +827,11 @@ class _AppStateTracker:
 
         signal.signal(signal.SIGINT, signal_handler)
         signal.signal(signal.SIGTERM, signal_handler)
+
+
+def _run_flwr_clientapp(args: list[str]) -> None:
+    sys.argv = args
+    flwr_clientapp()
 
 
 def run_clientappio_api_grpc(
