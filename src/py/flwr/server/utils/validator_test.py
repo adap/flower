@@ -32,58 +32,54 @@ class ValidatorTest(unittest.TestCase):
     def test_task_ins(self) -> None:
         """Test is_valid task_ins."""
         # Prepare
-        # (consumer_node_id, anonymous)
-        valid_ins = [(0, True), (1, False)]
-        invalid_ins = [(0, False), (1, True)]
+        # (consumer_node_id)
+        valid_ins = [(1), (2)]
+        invalid_ins = [(0)]
 
         # Execute & Assert
-        for consumer_node_id, anonymous in valid_ins:
-            msg = create_task_ins(consumer_node_id, anonymous)
+        for consumer_node_id in valid_ins:
+            msg = create_task_ins(consumer_node_id)
             val_errors = validate_task_ins_or_res(msg)
             self.assertFalse(val_errors)
 
-        for consumer_node_id, anonymous in invalid_ins:
-            msg = create_task_ins(consumer_node_id, anonymous)
+        for consumer_node_id in invalid_ins:
+            msg = create_task_ins(consumer_node_id)
             val_errors = validate_task_ins_or_res(msg)
             self.assertTrue(val_errors)
 
     def test_is_valid_task_res(self) -> None:
         """Test is_valid task_res."""
         # Prepare
-        # (producer_node_id, anonymous, ancestry)
-        valid_res: list[tuple[int, bool, list[str]]] = [
-            (0, True, ["1"]),
-            (1, False, ["1"]),
+        # (producer_node_id, ancestry)
+        valid_res: list[tuple[int, list[str]]] = [
+            (1, ["1"]),
         ]
 
-        invalid_res: list[tuple[int, bool, list[str]]] = [
-            (0, False, []),
-            (0, False, ["1"]),
-            (0, True, []),
-            (1, False, []),
-            (1, True, []),
-            (1, True, ["1"]),
+        invalid_res: list[tuple[int, list[str]]] = [
+            (0, []),
+            (0, ["1"]),
+            (1, []),
         ]
 
         # Execute & Assert
-        for producer_node_id, anonymous, ancestry in valid_res:
-            msg = create_task_res(producer_node_id, anonymous, ancestry)
+        for producer_node_id, ancestry in valid_res:
+            msg = create_task_res(producer_node_id, ancestry)
             val_errors = validate_task_ins_or_res(msg)
             self.assertFalse(val_errors)
 
-        for producer_node_id, anonymous, ancestry in invalid_res:
-            msg = create_task_res(producer_node_id, anonymous, ancestry)
+        for producer_node_id, ancestry in invalid_res:
+            msg = create_task_res(producer_node_id, ancestry)
             val_errors = validate_task_ins_or_res(msg)
-            self.assertTrue(val_errors, (producer_node_id, anonymous, ancestry))
+            self.assertTrue(val_errors, (producer_node_id, ancestry))
 
     def test_task_ttl_expired(self) -> None:
         """Test validation for expired Task TTL."""
         # Prepare an expired TaskIns
-        expired_task_ins = create_task_ins(0, True)
+        expired_task_ins = create_task_ins(0)
         expired_task_ins.task.created_at = time.time() - 10  # 10 seconds ago
         expired_task_ins.task.ttl = 6  # 6 seconds TTL
 
-        expired_task_res = create_task_res(0, True, ["1"])
+        expired_task_res = create_task_res(0, ["1"])
         expired_task_res.task.created_at = time.time() - 10  # 10 seconds ago
         expired_task_res.task.ttl = 6  # 6 seconds TTL
 
@@ -97,13 +93,11 @@ class ValidatorTest(unittest.TestCase):
 
 def create_task_ins(
     consumer_node_id: int,
-    anonymous: bool,
     delivered_at: str = "",
 ) -> TaskIns:
     """Create a TaskIns for testing."""
     consumer = Node(
         node_id=consumer_node_id,
-        anonymous=anonymous,
     )
     task = TaskIns(
         task_id="",
@@ -111,7 +105,7 @@ def create_task_ins(
         run_id=0,
         task=Task(
             delivered_at=delivered_at,
-            producer=Node(node_id=0, anonymous=True),
+            producer=Node(node_id=0),
             consumer=consumer,
             task_type="mock",
             recordset=RecordSet(parameters={}, metrics={}, configs={}),
@@ -126,7 +120,6 @@ def create_task_ins(
 
 def create_task_res(
     producer_node_id: int,
-    anonymous: bool,
     ancestry: list[str],
 ) -> TaskRes:
     """Create a TaskRes for testing."""
@@ -135,8 +128,8 @@ def create_task_res(
         group_id="",
         run_id=0,
         task=Task(
-            producer=Node(node_id=producer_node_id, anonymous=anonymous),
-            consumer=Node(node_id=0, anonymous=True),
+            producer=Node(node_id=producer_node_id),
+            consumer=Node(node_id=0),
             ancestry=ancestry,
             task_type="mock",
             recordset=RecordSet(parameters={}, metrics={}, configs={}),

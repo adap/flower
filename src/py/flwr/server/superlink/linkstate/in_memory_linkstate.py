@@ -98,14 +98,13 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             )
             return None
         # Validate destination node ID
-        if not task_ins.task.consumer.anonymous:
-            if task_ins.task.consumer.node_id not in self.node_ids:
-                log(
-                    ERROR,
-                    "Invalid destination node ID for TaskIns: %s",
-                    task_ins.task.consumer.node_id,
-                )
-                return None
+        if task_ins.task.consumer.node_id not in self.node_ids:
+            log(
+                ERROR,
+                "Invalid destination node ID for TaskIns: %s",
+                task_ins.task.consumer.node_id,
+            )
+            return None
 
         # Create task_id
         task_id = uuid4()
@@ -118,29 +117,21 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         # Return the new task_id
         return task_id
 
-    def get_task_ins(
-        self, node_id: Optional[int], limit: Optional[int]
-    ) -> list[TaskIns]:
+    def get_task_ins(self, node_id: int, limit: Optional[int]) -> list[TaskIns]:
         """Get all TaskIns that have not been delivered yet."""
         if limit is not None and limit < 1:
             raise AssertionError("`limit` must be >= 1")
+
+        if node_id is None:
+            raise AssertionError("`node_id` must be set.")
 
         # Find TaskIns for node_id that were not delivered yet
         task_ins_list: list[TaskIns] = []
         current_time = time.time()
         with self.lock:
             for _, task_ins in self.task_ins_store.items():
-                # pylint: disable=too-many-boolean-expressions
                 if (
-                    node_id is not None  # Not anonymous
-                    and task_ins.task.consumer.anonymous is False
-                    and task_ins.task.consumer.node_id == node_id
-                    and task_ins.task.delivered_at == ""
-                    and task_ins.task.created_at + task_ins.task.ttl > current_time
-                ) or (
-                    node_id is None  # Anonymous
-                    and task_ins.task.consumer.anonymous is True
-                    and task_ins.task.consumer.node_id == 0
+                    task_ins.task.consumer.node_id == node_id
                     and task_ins.task.delivered_at == ""
                     and task_ins.task.created_at + task_ins.task.ttl > current_time
                 ):
@@ -174,9 +165,6 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             if (
                 task_ins
                 and task_res
-                and not (
-                    task_ins.task.consumer.anonymous or task_res.task.producer.anonymous
-                )
                 and task_ins.task.consumer.node_id != task_res.task.producer.node_id
             ):
                 return None

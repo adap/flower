@@ -246,8 +246,8 @@ def create_taskres_for_unavailable_taskins(taskins_id: Union[str, UUID]) -> Task
         run_id=0,  # Unknown run ID
         task=Task(
             # This function is only called by SuperLink, and thus it's the producer.
-            producer=Node(node_id=0, anonymous=False),
-            consumer=Node(node_id=0, anonymous=False),
+            producer=Node(node_id=0),
+            consumer=Node(node_id=0),
             created_at=current_time,
             ttl=0,
             ancestry=[str(taskins_id)],
@@ -285,8 +285,8 @@ def create_taskres_for_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
         run_id=ref_taskins.run_id,
         task=Task(
             # This function is only called by SuperLink, and thus it's the producer.
-            producer=Node(node_id=0, anonymous=False),
-            consumer=Node(node_id=0, anonymous=False),
+            producer=Node(node_id=0),
+            consumer=Node(node_id=0),
             created_at=current_time,
             ttl=ttl,
             ancestry=[ref_taskins.task_id],

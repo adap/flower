@@ -60,22 +60,12 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> list[str
             validation_errors.append("`producer` does not set field `producer`")
         if tasks_ins_res.task.producer.node_id != 0:
             validation_errors.append("`producer.node_id` is not 0")
-        if not tasks_ins_res.task.producer.anonymous:
-            validation_errors.append("`producer` is not anonymous")
 
         # Task consumer
         if not tasks_ins_res.task.HasField("consumer"):
             validation_errors.append("`consumer` does not set field `consumer`")
-        if (
-            tasks_ins_res.task.consumer.anonymous
-            and tasks_ins_res.task.consumer.node_id != 0
-        ):
-            validation_errors.append("anonymous consumers MUST NOT set a `node_id`")
-        if (
-            not tasks_ins_res.task.consumer.anonymous
-            and tasks_ins_res.task.consumer.node_id == 0
-        ):
-            validation_errors.append("non-anonymous consumer MUST provide a `node_id`")
+        if tasks_ins_res.task.consumer.node_id == 0:
+            validation_errors.append("consumer MUST provide a `node_id`")
 
         # Content check
         if tasks_ins_res.task.task_type == "":
@@ -95,30 +85,15 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> list[str
         # Task producer
         if not tasks_ins_res.task.HasField("producer"):
             validation_errors.append("`producer` does not set field `producer`")
-        if (
-            tasks_ins_res.task.producer.anonymous
-            and tasks_ins_res.task.producer.node_id != 0
-        ):
-            validation_errors.append("anonymous producers MUST NOT set a `node_id`")
-        if (
-            not tasks_ins_res.task.producer.anonymous
-            and tasks_ins_res.task.producer.node_id == 0
-        ):
-            validation_errors.append("non-anonymous producer MUST provide a `node_id`")
+        if tasks_ins_res.task.producer.node_id == 0:
+            validation_errors.append("producer MUST provide a `node_id`")
 
         # Task consumer
         if not tasks_ins_res.task.HasField("consumer"):
             validation_errors.append("`consumer` does not set field `consumer`")
-        if (
-            tasks_ins_res.task.consumer.anonymous
-            and tasks_ins_res.task.consumer.node_id != 0
-        ):
-            validation_errors.append("anonymous consumers MUST NOT set a `node_id`")
-        if (
-            not tasks_ins_res.task.consumer.anonymous
-            and tasks_ins_res.task.consumer.node_id == 0
-        ):
-            validation_errors.append("non-anonymous consumer MUST provide a `node_id`")
+        print(tasks_ins_res.task)
+        if tasks_ins_res.task.consumer.node_id == 0:
+            validation_errors.append("consumer MUST provide a `node_id`")
 
         # Content check
         if tasks_ins_res.task.task_type == "":

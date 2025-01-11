@@ -49,7 +49,7 @@ class InMemoryDriver(Driver):
         self._run: Optional[Run] = None
         self.state = state_factory.state()
         self.pull_interval = pull_interval
-        self.node = Node(node_id=0, anonymous=True)
+        self.node = Node(node_id=0)
 
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid
@@ -106,6 +106,7 @@ class InMemoryDriver(Driver):
             ttl=ttl_,
             message_type=message_type,
         )
+        print(f"{metadata = }")
         return Message(metadata=metadata, content=content)
 
     def get_node_ids(self) -> list[int]:

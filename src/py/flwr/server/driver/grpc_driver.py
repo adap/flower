@@ -76,7 +76,7 @@ class GrpcDriver(Driver):
         self._run: Optional[Run] = None
         self._grpc_stub: Optional[ServerAppIoStub] = None
         self._channel: Optional[grpc.Channel] = None
-        self.node = Node(node_id=0, anonymous=True)
+        self.node = Node(node_id=0)
         self._retry_invoker = _make_simple_grpc_retry_invoker()
 
     @property
