@@ -40,8 +40,12 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     DeleteNodeResponse,
     PingRequest,
     PingResponse,
+    PullMessagesRequest,
+    PullMessagesResponse,
     PullTaskInsRequest,
     PullTaskInsResponse,
+    PushMessagesRequest,
+    PushMessagesResponse,
     PushTaskResRequest,
     PushTaskResResponse,
 )
@@ -132,11 +136,23 @@ class GrpcAdapter:
         """."""
         return self._send_and_receive(request, PullTaskInsResponse, **kwargs)
 
+    def PullMessages(  # pylint: disable=C0103
+        self, request: PullMessagesRequest, **kwargs: Any
+    ) -> PullMessagesResponse:
+        """."""
+        return self._send_and_receive(request, PullMessagesResponse, **kwargs)
+
     def PushTaskRes(  # pylint: disable=C0103
         self, request: PushTaskResRequest, **kwargs: Any
     ) -> PushTaskResResponse:
         """."""
         return self._send_and_receive(request, PushTaskResResponse, **kwargs)
+
+    def PushMessages(  # pylint: disable=C0103
+        self, request: PushMessagesRequest, **kwargs: Any
+    ) -> PushMessagesResponse:
+        """."""
+        return self._send_and_receive(request, PushMessagesResponse, **kwargs)
 
     def GetRun(  # pylint: disable=C0103
         self, request: GetRunRequest, **kwargs: Any
