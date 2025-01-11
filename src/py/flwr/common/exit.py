@@ -16,67 +16,92 @@
 
 
 from __future__ import annotations
-from typing import Optional
-from logging import INFO, ERROR
-from .logger import log
+
 import sys
+from logging import ERROR, INFO
+from typing import NoReturn
+
+from flwr.common import EventType, event
+
+from .logger import log
 
 
-
-class ErrorCode:
-    """Error codes for Message's Error."""
+class ExitCode:
+    """Exit codes for Flower components."""
 
     # System exit codes
     SUCCESS = 0
     GENERIC_ERROR = 1
     GRACEFUL_EXIT = 10  # Graceful exit requested by the user
-    
+
     # SuperLink-specific exit codes (100-199)
     THREAD_CRASH = 100
 
     # ServerApp-specific exit codes (200-299)
-    
+
     # SuperNode-specific exit codes (300-399)
-    AUTH_KEYS_REQUIRED = 300
-    
+    REST_ADDRESS_INVALID = 300
+    NODE_AUTH_KEYS_REQUIRED = 301
+    NODE_AUTH_KEYS_INVALID = 302
+
     # ClientApp-specific exit codes (400-499)
-    
-    # Common exit codes (500-699)
-    ADDRESS_CANNOT_BE_PARSED = 500
+
+    # Common exit codes (500-999)
+    IP_ADDRESS_INVALID = 500
     MISSING_EXTRA_REST = 501
-    
-    # Deprecated exit codes (700-799)
-    DEPRECATED_APP_ARGUMENT = 700  # `flower-supernode <app>` is deprecated
-    
+    TLS_NOT_SUPPORTED = 502
 
+    # Deprecated exit codes (1000-)
+    DEPRECATED_APP_ARGUMENT = 1000  # `flower-supernode <app>` is deprecated
 
-    def __new__(cls) -> ErrorCode:
+    def __new__(cls) -> ExitCode:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
 
 
-HELP_PAGE_URL = "https://flower.ai/docs/framework/ref-exit-code."
+HELP_PAGE_URL = "https://flower.ai/docs/framework/ref-exit-code"
+KNOWN_EXIT_CODE_HELP: set[int] = set()
 
 
-def exit(code: int, message: Optional[str] = None) -> None:
+def flwr_exit(code: int, message: str | None = None) -> NoReturn:
     """Handle application exit with an optional message."""
+    # Construct exit message
     exit_message = f"Exit Code: {code}"
     if message:
-        exit_message += f"\\n\\n{message}"
+        exit_message += f"\n{message}"
 
+    # Set log level and system exit code
     log_level = INFO
     sys_exit_code = 0
-
-    if code not in {ErrorCode.SUCCESS, ErrorCode.GRACEFUL_EXIT}:
-        exit_message += f"\\n\\nFor more information, visit: <{HELP_PAGE_URL}{code}.html>"
+    if code not in {ExitCode.SUCCESS, ExitCode.GRACEFUL_EXIT}:
         log_level = ERROR
         sys_exit_code = 1
 
+    # Add help URL for known exit codes
+    if code in KNOWN_EXIT_CODE_HELP:
+        help_url = f"{HELP_PAGE_URL}.e{code}.html"
+        exit_message += f"\n\nFor more information, visit: <{help_url}>"
+
+    # Log the exit message
     log(log_level, exit_message)
 
-    # Placeholder for additional telemetry (e.g., sending exit data)
-    # Example: telemetry.send_exit_event(code, message)
+    # Telemetry event
+    event_type = _try_obtain_telemetry_event()
+    if event_type:
+        event(event_type, event_details={"exit_code": code, "message": message})
 
+    # Exit
     sys.exit(sys_exit_code)
 
 
+def _try_obtain_telemetry_event() -> EventType | None:
+    """Try to obtain a telemetry event."""
+    if sys.argv[0].endswith("flower-superlink"):
+        return EventType.RUN_SUPERLINK_LEAVE
+    if sys.argv[0].endswith("flower-supernode"):
+        return EventType.RUN_SUPERNODE_LEAVE
+    if sys.argv[0].endswith("flwr-serverapp"):
+        return EventType.FLWR_SERVERAPP_RUN_LEAVE
+    if sys.argv[0].endswith("flwr-clientapp"):
+        return None  # Not yet implemented
+    return None

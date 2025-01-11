@@ -15,7 +15,6 @@
 """Common function to register exit handlers for server and client."""
 
 
-import sys
 from signal import SIGINT, SIGTERM, signal
 from threading import Thread
 from types import FrameType
@@ -24,6 +23,8 @@ from typing import Optional
 from grpc import Server
 
 from flwr.common.telemetry import EventType, event
+
+from .exit import ExitCode, flwr_exit
 
 
 def register_exit_handlers(
@@ -75,7 +76,7 @@ def register_exit_handlers(
         event_res.result()
 
         # Setup things for graceful exit
-        sys.exit(0)
+        flwr_exit(ExitCode.GRACEFUL_EXIT, "Graceful exit.")
 
     default_handlers[SIGINT] = signal(  # type: ignore
         SIGINT,

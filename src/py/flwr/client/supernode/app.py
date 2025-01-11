@@ -16,7 +16,6 @@
 
 
 import argparse
-import sys
 from logging import DEBUG, ERROR, INFO, WARN
 from pathlib import Path
 from typing import Optional
@@ -40,6 +39,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
 )
+from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature
 
@@ -66,14 +66,13 @@ def run_supernode() -> None:
 
     # Exit if unsupported argument is passed by the user
     if args.app is not None:
-        log(
-            ERROR,
+        flwr_exit(
+            ExitCode.DEPRECATED_APP_ARGUMENT,
             "The `app` argument is deprecated. The SuperNode now automatically "
             "uses the ClientApp delivered from the SuperLink. Providing the app "
             "directory manually is no longer supported. Please remove the `app` "
             "argument from your command.",
         )
-        sys.exit(1)
 
     root_certificates = try_obtain_root_certificates(args, args.superlink)
     load_fn = get_load_client_app_fn(
@@ -280,10 +279,11 @@ def _try_setup_client_authentication(
         return None
 
     if not args.auth_supernode_private_key or not args.auth_supernode_public_key:
-        sys.exit(
+        flwr_exit(
+            ExitCode.NODE_AUTH_KEYS_REQUIRED,
             "Authentication requires file paths to both "
-            "'--auth-supernode-private-key' and '--auth-supernode-public-key'"
-            "to be provided (providing only one of them is not sufficient)."
+            "'--auth-supernode-private-key' and '--auth-supernode-public-key' "
+            "to be provided (providing only one of them is not sufficient).",
         )
 
     try:
@@ -294,11 +294,12 @@ def _try_setup_client_authentication(
         if not isinstance(ssh_private_key, ec.EllipticCurvePrivateKey):
             raise ValueError()
     except (ValueError, UnsupportedAlgorithm):
-        sys.exit(
+        flwr_exit(
+            ExitCode.NODE_AUTH_KEYS_INVALID,
             "Error: Unable to parse the private key file in "
             "'--auth-supernode-private-key'. Authentication requires elliptic "
             "curve private and public key pair. Please ensure that the file "
-            "path points to a valid private key file and try again."
+            "path points to a valid private key file and try again.",
         )
 
     try:
@@ -308,11 +309,12 @@ def _try_setup_client_authentication(
         if not isinstance(ssh_public_key, ec.EllipticCurvePublicKey):
             raise ValueError()
     except (ValueError, UnsupportedAlgorithm):
-        sys.exit(
+        flwr_exit(
+            ExitCode.NODE_AUTH_KEYS_INVALID,
             "Error: Unable to parse the public key file in "
             "'--auth-supernode-public-key'. Authentication requires elliptic "
             "curve private and public key pair. Please ensure that the file "
-            "path points to a valid public key file and try again."
+            "path points to a valid public key file and try again.",
         )
 
     return (

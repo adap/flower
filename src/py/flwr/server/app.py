@@ -59,6 +59,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
 )
+from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log, warn_deprecated_feature
@@ -444,7 +445,7 @@ def run_superlink() -> None:
         sleep(0.1)
 
     # Exit if any thread has exited prematurely
-    sys.exit(1)
+    flwr_exit(ExitCode.THREAD_CRASH, "A background thread has exited prematurely.")
 
 
 def _run_flwr_command(args: list[str]) -> None:
@@ -509,8 +510,9 @@ def _flwr_scheduler(
 def _format_address(address: str) -> tuple[str, str, int]:
     parsed_address = parse_address(address)
     if not parsed_address:
-        sys.exit(
-            f"Address ({address}) cannot be parsed (expected: URL or IPv4 or IPv6)."
+        flwr_exit(
+            ExitCode.IP_ADDRESS_INVALID,
+            f"Address ({address}) cannot be parsed (expected: URL or IPv4 or IPv6).",
         )
     host, port, is_v6 = parsed_address
     return (f"[{host}]:{port}" if is_v6 else f"{host}:{port}", host, port)

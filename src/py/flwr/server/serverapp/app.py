@@ -16,7 +16,6 @@
 
 
 import argparse
-import sys
 from logging import DEBUG, ERROR, INFO
 from pathlib import Path
 from queue import Queue
@@ -38,6 +37,7 @@ from flwr.common.constant import (
     Status,
     SubStatus,
 )
+from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.logger import (
     log,
     mirror_output_to_queue,
@@ -75,12 +75,11 @@ def flwr_serverapp() -> None:
     log(INFO, "Starting Flower ServerApp")
 
     if not args.insecure:
-        log(
-            ERROR,
+        flwr_exit(
+            ExitCode.TLS_NOT_SUPPORTED,
             "`flwr-serverapp` does not support TLS yet. "
             "Please use the '--insecure' flag.",
         )
-        sys.exit(1)
 
     log(
         DEBUG,
