@@ -18,7 +18,8 @@
 import argparse
 import csv
 import importlib.util
-import subprocess
+import multiprocessing
+import multiprocessing.context
 import sys
 import threading
 from collections.abc import Sequence
@@ -59,6 +60,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_REST,
 )
 from flwr.common.exit_handlers import register_exit_handlers
+from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     private_key_to_bytes,
@@ -68,6 +70,8 @@ from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
 from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
+from flwr.server.serverapp.app import flwr_serverapp
+from flwr.simulation.app import flwr_simulation
 from flwr.superexec.app import load_executor
 from flwr.superexec.exec_grpc import run_exec_api_grpc
 
@@ -79,10 +83,7 @@ from .strategy import Strategy
 from .superlink.driver.serverappio_grpc import run_serverappio_api_grpc
 from .superlink.ffs.ffs_factory import FfsFactory
 from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
-from .superlink.fleet.grpc_bidi.grpc_server import (
-    generic_create_grpc_server,
-    start_grpc_server,
-)
+from .superlink.fleet.grpc_bidi.grpc_server import start_grpc_server
 from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
 from .superlink.fleet.grpc_rere.server_interceptor import AuthenticateServerInterceptor
 from .superlink.linkstate import LinkStateFactory
@@ -263,11 +264,10 @@ def run_superlink() -> None:
     # Obtain certificates
     certificates = try_obtain_server_certificates(args, args.fleet_api_type)
 
-    user_auth_config = _try_obtain_user_auth_config(args)
     auth_plugin: Optional[ExecAuthPlugin] = None
-    # user_auth_config is None only if the args.user_auth_config is not provided
-    if user_auth_config is not None:
-        auth_plugin = _try_obtain_exec_auth_plugin(user_auth_config)
+    # Load the auth plugin if the args.user_auth_config is provided
+    if cfg_path := getattr(args, "user_auth_config", None):
+        auth_plugin = _try_obtain_exec_auth_plugin(Path(cfg_path))
 
     # Initialize StateFactory
     state_factory = LinkStateFactory(args.database)
@@ -293,7 +293,7 @@ def run_superlink() -> None:
     # Determine Exec plugin
     # If simulation is used, don't start ServerAppIo and Fleet APIs
     sim_exec = executor.__class__.__qualname__ == "SimulationEngine"
-    bckg_threads = []
+    bckg_threads: list[threading.Thread] = []
 
     if sim_exec:
         simulationio_server: grpc.Server = run_simulationio_api_grpc(
@@ -361,6 +361,7 @@ def run_superlink() -> None:
                     ffs_factory,
                     num_workers,
                 ),
+                daemon=True,
             )
             fleet_thread.start()
             bckg_threads.append(fleet_thread)
@@ -427,6 +428,7 @@ def run_superlink() -> None:
                 address,
                 cmd,
             ),
+            daemon=True,
         )
         scheduler_th.start()
         bckg_threads.append(scheduler_th)
@@ -435,16 +437,24 @@ def run_superlink() -> None:
     register_exit_handlers(
         event_type=EventType.RUN_SUPERLINK_LEAVE,
         grpc_servers=grpc_servers,
-        bckg_threads=bckg_threads,
     )
 
-    # Block
-    while True:
-        if bckg_threads:
-            for thread in bckg_threads:
-                if not thread.is_alive():
-                    sys.exit(1)
-        exec_server.wait_for_termination(timeout=1)
+    # Block until a thread exits prematurely
+    while all(thread.is_alive() for thread in bckg_threads):
+        sleep(0.1)
+
+    # Exit if any thread has exited prematurely
+    sys.exit(1)
+
+
+def _run_flwr_command(args: list[str]) -> None:
+    sys.argv = args
+    if args[0] == "flwr-serverapp":
+        flwr_serverapp()
+    elif args[0] == "flwr-simulation":
+        flwr_simulation()
+    else:
+        raise ValueError(f"Unknown command: {args[0]}")
 
 
 def _flwr_scheduler(
@@ -454,15 +464,18 @@ def _flwr_scheduler(
     cmd: str,
 ) -> None:
     log(DEBUG, "Started %s scheduler thread.", cmd)
-
     state = state_factory.state()
+    run_id_to_proc: dict[int, multiprocessing.context.SpawnProcess] = {}
+
+    # Use the "spawn" start method for multiprocessing.
+    mp_spawn_context = multiprocessing.get_context("spawn")
 
     # Periodically check for a pending run in the LinkState
     while True:
-        sleep(3)
+        sleep(0.1)
         pending_run_id = state.get_pending_run_id()
 
-        if pending_run_id:
+        if pending_run_id and pending_run_id not in run_id_to_proc:
 
             log(
                 INFO,
@@ -479,10 +492,18 @@ def _flwr_scheduler(
                 "--insecure",
             ]
 
-            subprocess.Popen(  # pylint: disable=consider-using-with
-                command,
-                text=True,
+            proc = mp_spawn_context.Process(
+                target=_run_flwr_command, args=(command,), daemon=True
             )
+            proc.start()
+
+            # Store the process
+            run_id_to_proc[pending_run_id] = proc
+
+        # Clean up finished processes
+        for run_id, proc in list(run_id_to_proc.items()):
+            if not proc.is_alive():
+                del run_id_to_proc[run_id]
 
 
 def _format_address(address: str) -> tuple[str, str, int]:
@@ -584,21 +605,20 @@ def _try_setup_node_authentication(
         )
 
 
-def _try_obtain_user_auth_config(args: argparse.Namespace) -> Optional[dict[str, Any]]:
-    if getattr(args, "user_auth_config", None) is not None:
-        with open(args.user_auth_config, encoding="utf-8") as file:
-            config: dict[str, Any] = yaml.safe_load(file)
-            return config
-    return None
+def _try_obtain_exec_auth_plugin(config_path: Path) -> Optional[ExecAuthPlugin]:
+    # Load YAML file
+    with config_path.open("r", encoding="utf-8") as file:
+        config: dict[str, Any] = yaml.safe_load(file)
 
-
-def _try_obtain_exec_auth_plugin(config: dict[str, Any]) -> Optional[ExecAuthPlugin]:
+    # Load authentication configuration
     auth_config: dict[str, Any] = config.get("authentication", {})
     auth_type: str = auth_config.get(AUTH_TYPE, "")
+
+    # Load authentication plugin
     try:
         all_plugins: dict[str, type[ExecAuthPlugin]] = get_exec_auth_plugins()
         auth_plugin_class = all_plugins[auth_type]
-        return auth_plugin_class(config=auth_config)
+        return auth_plugin_class(user_auth_config_path=config_path)
     except KeyError:
         if auth_type != "":
             sys.exit(
