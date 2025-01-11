@@ -45,6 +45,7 @@ from . import (
     RecordSet,
     typing,
 )
+from .constant import DRIVER_NODE_ID
 from .message import Error, Message, Metadata
 from .serde import (
     array_from_proto,
@@ -388,7 +389,7 @@ def test_message_to_and_from_taskins(
     maker = RecordMaker(state=1)
     metadata = maker.metadata()
     # pylint: disable-next=protected-access
-    metadata.__dict__["_src_node_id"] = 0  # Assume driver node
+    metadata.__dict__["_src_node_id"] = DRIVER_NODE_ID  # Assume driver node
 
     original = Message(
         metadata=metadata,
@@ -432,7 +433,7 @@ def test_message_to_and_from_taskres(
     # Prepare
     maker = RecordMaker(state=2)
     metadata = maker.metadata()
-    metadata.dst_node_id = 0  # Assume driver node
+    metadata.dst_node_id = DRIVER_NODE_ID  # Assume driver node
 
     original = Message(
         metadata=metadata,

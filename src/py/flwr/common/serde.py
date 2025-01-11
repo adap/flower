@@ -21,6 +21,8 @@ from typing import Any, TypeVar, cast
 
 from google.protobuf.message import Message as GrpcMessage
 
+from flwr.common.constant import DRIVER_NODE_ID
+
 # pylint: disable=E0611
 from flwr.proto.clientappio_pb2 import ClientAppOutputCode, ClientAppOutputStatus
 from flwr.proto.error_pb2 import Error as ProtoError
@@ -605,7 +607,7 @@ def message_to_taskins(message: Message) -> TaskIns:
         group_id=md.group_id,
         run_id=md.run_id,
         task=Task(
-            producer=Node(node_id=0),  # Assume driver node
+            producer=Node(node_id=DRIVER_NODE_ID),  # Assume driver node
             consumer=Node(node_id=md.dst_node_id),
             created_at=md.created_at,
             ttl=md.ttl,
@@ -660,7 +662,7 @@ def message_to_taskres(message: Message) -> TaskRes:
         run_id=md.run_id,
         task=Task(
             producer=Node(node_id=md.src_node_id),
-            consumer=Node(node_id=0),  # Assume driver node
+            consumer=Node(node_id=DRIVER_NODE_ID),  # Assume driver node
             created_at=md.created_at,
             ttl=md.ttl,
             ancestry=[md.reply_to_message] if md.reply_to_message != "" else [],

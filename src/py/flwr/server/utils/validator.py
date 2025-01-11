@@ -18,6 +18,7 @@
 import time
 from typing import Union
 
+from flwr.common.constant import DRIVER_NODE_ID
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 
@@ -58,14 +59,14 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> list[str
         # Task producer
         if not tasks_ins_res.task.HasField("producer"):
             validation_errors.append("`producer` does not set field `producer`")
-        if tasks_ins_res.task.producer.node_id != 0:
-            validation_errors.append("`producer.node_id` is not 0")
+        if tasks_ins_res.task.producer.node_id != DRIVER_NODE_ID:
+            validation_errors.append(f"`producer.node_id` is not {DRIVER_NODE_ID}")
 
         # Task consumer
         if not tasks_ins_res.task.HasField("consumer"):
             validation_errors.append("`consumer` does not set field `consumer`")
-        if tasks_ins_res.task.consumer.node_id == 0:
-            validation_errors.append("consumer MUST provide a `node_id`")
+        if tasks_ins_res.task.consumer.node_id == DRIVER_NODE_ID:
+            validation_errors.append("consumer MUST provide a valid `node_id`")
 
         # Content check
         if tasks_ins_res.task.task_type == "":
@@ -85,15 +86,14 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> list[str
         # Task producer
         if not tasks_ins_res.task.HasField("producer"):
             validation_errors.append("`producer` does not set field `producer`")
-        if tasks_ins_res.task.producer.node_id == 0:
-            validation_errors.append("producer MUST provide a `node_id`")
+        if tasks_ins_res.task.producer.node_id == DRIVER_NODE_ID:
+            validation_errors.append("producer MUST provide a valid `node_id`")
 
         # Task consumer
         if not tasks_ins_res.task.HasField("consumer"):
             validation_errors.append("`consumer` does not set field `consumer`")
-        print(tasks_ins_res.task)
-        if tasks_ins_res.task.consumer.node_id == 0:
-            validation_errors.append("consumer MUST provide a `node_id`")
+        if tasks_ins_res.task.consumer.node_id != DRIVER_NODE_ID:
+            validation_errors.append(f"consumer is not {DRIVER_NODE_ID}")
 
         # Content check
         if tasks_ins_res.task.task_type == "":

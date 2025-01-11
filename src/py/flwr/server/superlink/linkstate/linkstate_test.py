@@ -26,7 +26,7 @@ from uuid import UUID
 from parameterized import parameterized
 
 from flwr.common import DEFAULT_TTL, ConfigsRecord, Context, RecordSet, now
-from flwr.common.constant import Status, SubStatus
+from flwr.common.constant import DRIVER_NODE_ID, Status, SubStatus
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
     private_key_to_bytes,
@@ -425,7 +425,7 @@ class StateTest(unittest.TestCase):
         assert len(task_ins_list) == 1
 
         # 2nd get: no TaskIns because it was already delivered before
-        task_ins_list = state.get_task_ins(node_id=1, limit=None)
+        task_ins_list = state.get_task_ins(2, limit=None)
 
         # Assert
         assert len(task_ins_list) == 0
@@ -437,7 +437,7 @@ class StateTest(unittest.TestCase):
 
         # Execute & Assert
         with self.assertRaises(AssertionError):
-            state.get_task_ins(node_id=1, limit=0)
+            state.get_task_ins(node_id=2, limit=0)
 
     def test_task_ins_store_invalid_run_id_and_fail(self) -> None:
         """Store TaskIns with invalid run_id and fail."""
@@ -458,11 +458,12 @@ class StateTest(unittest.TestCase):
         state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
 
-        task_ins = create_task_ins(consumer_node_id=0, run_id=run_id)
+        node_id = state.create_node(1e3)
+        task_ins = create_task_ins(consumer_node_id=node_id, run_id=run_id)
         task_ins_id = state.store_task_ins(task_ins)
 
         task_res = create_task_res(
-            producer_node_id=0,
+            producer_node_id=node_id,
             ancestry=[str(task_ins_id)],
             run_id=run_id,
         )
@@ -619,9 +620,11 @@ class StateTest(unittest.TestCase):
         """Test if num_tasks returns correct number of not delivered task_ins."""
         # Prepare
         state: LinkState = self.state_factory()
+        node_id = state.create_node(1e3)
+
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
-        task_0 = create_task_ins(consumer_node_id=0, run_id=run_id)
-        task_1 = create_task_ins(consumer_node_id=0, run_id=run_id)
+        task_0 = create_task_ins(consumer_node_id=node_id, run_id=run_id)
+        task_1 = create_task_ins(consumer_node_id=node_id, run_id=run_id)
 
         # Store two tasks
         state.store_task_ins(task_0)
@@ -638,19 +641,20 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        node_id = state.create_node(1e3)
 
-        task_ins_0 = create_task_ins(consumer_node_id=0, run_id=run_id)
-        task_ins_1 = create_task_ins(consumer_node_id=0, run_id=run_id)
+        task_ins_0 = create_task_ins(consumer_node_id=node_id, run_id=run_id)
+        task_ins_1 = create_task_ins(consumer_node_id=node_id, run_id=run_id)
         task_ins_id_0 = state.store_task_ins(task_ins_0)
         task_ins_id_1 = state.store_task_ins(task_ins_1)
 
         task_0 = create_task_res(
-            producer_node_id=0,
+            producer_node_id=node_id,
             ancestry=[str(task_ins_id_0)],
             run_id=run_id,
         )
         task_1 = create_task_res(
-            producer_node_id=0,
+            producer_node_id=node_id,
             ancestry=[str(task_ins_id_1)],
             run_id=run_id,
         )
@@ -802,8 +806,9 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: LinkState = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        node_id = state.create_node(1e3)
 
-        task_ins = create_task_ins(consumer_node_id=0, run_id=run_id)
+        task_ins = create_task_ins(consumer_node_id=node_id, run_id=run_id)
         task_ins.task.created_at = time.time() - task_ins.task.ttl + 0.5
         task_ins_id = state.store_task_ins(task_ins)
 
@@ -812,7 +817,7 @@ class StateTest(unittest.TestCase):
             side_effect=lambda: task_ins.task.created_at + task_ins.task.ttl + 0.1,
         ):  # Expired by 0.1 seconds
             task = create_task_res(
-                producer_node_id=0,
+                producer_node_id=node_id,
                 ancestry=[str(task_ins_id)],
                 run_id=run_id,
             )
@@ -855,14 +860,15 @@ class StateTest(unittest.TestCase):
             # Prepare
             state: LinkState = self.state_factory()
             run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+            node_id = state.create_node(1e3)
 
-            task_ins = create_task_ins(consumer_node_id=0, run_id=run_id)
+            task_ins = create_task_ins(consumer_node_id=node_id, run_id=run_id)
             task_ins.task.created_at = task_ins_created_at
             task_ins.task.ttl = task_ins_ttl
             task_ins_id = state.store_task_ins(task_ins)
 
             task_res = create_task_res(
-                producer_node_id=0,
+                producer_node_id=node_id,
                 ancestry=[str(task_ins_id)],
                 run_id=run_id,
             )
@@ -893,7 +899,7 @@ class StateTest(unittest.TestCase):
 
         # Assert
         with patch("time.time", side_effect=lambda: task_ins.task.created_at + 6.1):
-            task_ins_list = state.get_task_ins(node_id=1, limit=None)
+            task_ins_list = state.get_task_ins(node_id=2, limit=None)
             assert len(task_ins_list) == 0
 
     def test_get_task_res_expired_task_ins(self) -> None:
@@ -933,10 +939,12 @@ class StateTest(unittest.TestCase):
         # Prepare
         state = self.state_factory()
         run_id = state.create_run(None, None, "9f86d08", {}, ConfigsRecord())
+        node_id = state.create_node(1e3)
+
         task_ins_id = "5b0a3fc2-edba-4525-a89a-04b83420b7c8"
 
         task_res = create_task_res(
-            producer_node_id=1,
+            producer_node_id=node_id,
             ancestry=[str(task_ins_id)],
             run_id=run_id,
         )
@@ -1009,7 +1017,7 @@ class StateTest(unittest.TestCase):
         state: LinkState = self.state_factory()
         context = Context(
             run_id=1,
-            node_id=0,
+            node_id=DRIVER_NODE_ID,
             node_config={"mock": "mock"},
             state=RecordSet(),
             run_config={"test": "test"},
@@ -1031,7 +1039,7 @@ class StateTest(unittest.TestCase):
         state: LinkState = self.state_factory()
         context = Context(
             run_id=1,
-            node_id=0,
+            node_id=1234,
             node_config={"mock": "mock"},
             state=RecordSet(),
             run_config={"test": "test"},
@@ -1163,7 +1171,7 @@ def create_task_ins(
         run_id=run_id,
         task=Task(
             delivered_at=delivered_at,
-            producer=Node(node_id=0),
+            producer=Node(node_id=DRIVER_NODE_ID),
             consumer=consumer,
             task_type="mock",
             recordset=ProtoRecordSet(parameters={}, metrics={}, configs={}),
@@ -1187,7 +1195,7 @@ def create_task_res(
         run_id=run_id,
         task=Task(
             producer=Node(node_id=producer_node_id),
-            consumer=Node(node_id=0),
+            consumer=Node(node_id=DRIVER_NODE_ID),
             ancestry=ancestry,
             task_type="mock",
             recordset=ProtoRecordSet(parameters={}, metrics={}, configs={}),

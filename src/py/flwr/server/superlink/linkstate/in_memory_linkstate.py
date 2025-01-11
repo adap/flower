@@ -25,6 +25,7 @@ from uuid import UUID, uuid4
 
 from flwr.common import Context, log, now
 from flwr.common.constant import (
+    DRIVER_NODE_ID,
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
     RUN_ID_NUM_BYTES,
@@ -90,7 +91,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             log(ERROR, "Invalid run ID for TaskIns: %s", task_ins.run_id)
             return None
         # Validate source node ID
-        if task_ins.task.producer.node_id != 0:
+        if task_ins.task.producer.node_id != DRIVER_NODE_ID:
             log(
                 ERROR,
                 "Invalid source node ID for TaskIns: %s",
@@ -298,7 +299,9 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
     def create_node(self, ping_interval: float) -> int:
         """Create, store in the link state, and return `node_id`."""
         # Sample a random int64 as node_id
-        node_id = generate_rand_int_from_bytes(NODE_ID_NUM_BYTES)
+        node_id = generate_rand_int_from_bytes(
+            NODE_ID_NUM_BYTES, exclude=DRIVER_NODE_ID
+        )
 
         with self.lock:
             if node_id in self.node_ids:

@@ -24,7 +24,7 @@ from typing import Optional, cast
 import grpc
 
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
-from flwr.common.constant import SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS
+from flwr.common.constant import DRIVER_NODE_ID, SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
@@ -76,7 +76,7 @@ class GrpcDriver(Driver):
         self._run: Optional[Run] = None
         self._grpc_stub: Optional[ServerAppIoStub] = None
         self._channel: Optional[grpc.Channel] = None
-        self.node = Node(node_id=0)
+        self.node = Node(node_id=DRIVER_NODE_ID)
         self._retry_invoker = _make_simple_grpc_retry_invoker()
 
     @property

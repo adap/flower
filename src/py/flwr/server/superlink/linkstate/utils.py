@@ -60,9 +60,17 @@ REPLY_MESSAGE_UNAVAILABLE_ERROR_REASON = (
 )
 
 
-def generate_rand_int_from_bytes(num_bytes: int) -> int:
-    """Generate a random unsigned integer from `num_bytes` bytes."""
-    return int.from_bytes(urandom(num_bytes), "little", signed=False)
+def generate_rand_int_from_bytes(num_bytes: int, exclude: Optional[int] = None) -> int:
+    """Generate a random unsigned integer from `num_bytes` bytes.
+
+    If `exclude` is set, this function guarantees such number is not returned.
+    """
+    num = int.from_bytes(urandom(num_bytes), "little", signed=False)
+
+    if exclude:
+        while num == exclude:
+            num = int.from_bytes(urandom(num_bytes), "little", signed=False)
+    return num
 
 
 def convert_uint64_to_sint64(u: int) -> int:
