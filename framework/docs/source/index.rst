@@ -118,6 +118,7 @@ ideas behind Flower and collaborative AI.
     explanation-federated-evaluation
     explanation-differential-privacy
     explanation-flower-architecture
+    explanation-flower-network-diagram
 
 References
 ~~~~~~~~~~
