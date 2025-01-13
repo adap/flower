@@ -40,7 +40,10 @@ maintain a secure connection and for the ``ServerApp`` and ``ClientApp`` to comm
     modes. As the name suggest, the former implies that ``ServerApp`` and ``ClientApp``
     instances run as sub-processes of the ``SuperLink`` and ``SuperNode`` respectively.
     This mode is ideal when a simplified deployment is a priority. On the other hand,
-    `process` isolation mode brings more flexibility to your Flower deployment.
+    `process` isolation mode brings more flexibility to your Flower deployment by
+    letting you decide where ``ClientApp`` and ``ServerApp`` should run (e.g. on an
+    different server than those were ``SuperNode`` or ``SuperLink`` run). Check the
+    :doc:`docker/index` to gain a better understanding on how to use both modes.
 
 What follows is a description of what each connection in the diagram represents:
 
