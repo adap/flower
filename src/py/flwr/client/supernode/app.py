@@ -66,13 +66,7 @@ def run_supernode() -> None:
 
     # Exit if unsupported argument is passed by the user
     if args.app is not None:
-        flwr_exit(
-            ExitCode.DEPRECATED_APP_ARGUMENT,
-            "The `app` argument is deprecated. The SuperNode now automatically "
-            "uses the ClientApp delivered from the SuperLink. Providing the app "
-            "directory manually is no longer supported. Please remove the `app` "
-            "argument from your command.",
-        )
+        flwr_exit(ExitCode.DEPRECATED_APP_ARGUMENT)
 
     root_certificates = try_obtain_root_certificates(args, args.superlink)
     load_fn = get_load_client_app_fn(
@@ -296,10 +290,7 @@ def _try_setup_client_authentication(
     except (ValueError, UnsupportedAlgorithm):
         flwr_exit(
             ExitCode.NODE_AUTH_KEYS_INVALID,
-            "Error: Unable to parse the private key file in "
-            "'--auth-supernode-private-key'. Authentication requires elliptic "
-            "curve private and public key pair. Please ensure that the file "
-            "path points to a valid private key file and try again.",
+            "Unable to parse the private key file.",
         )
 
     try:
@@ -311,10 +302,7 @@ def _try_setup_client_authentication(
     except (ValueError, UnsupportedAlgorithm):
         flwr_exit(
             ExitCode.NODE_AUTH_KEYS_INVALID,
-            "Error: Unable to parse the public key file in "
-            "'--auth-supernode-public-key'. Authentication requires elliptic "
-            "curve private and public key pair. Please ensure that the file "
-            "path points to a valid public key file and try again.",
+            "Unable to parse the public key file.",
         )
 
     return (

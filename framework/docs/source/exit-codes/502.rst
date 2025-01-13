@@ -1,0 +1,12 @@
+[502] TLS_NOT_SUPPORTED
+=======================
+
+Description
+-----------
+
+The ``flwr-serverapp`` and ``flwr-clientapp`` does not currently support TLS.
+
+How to Resolve
+--------------
+
+Use the ``--insecure`` flag to proceed without TLS.

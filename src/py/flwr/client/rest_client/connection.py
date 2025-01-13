@@ -16,7 +16,6 @@
 
 
 import random
-import sys
 import threading
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -32,12 +31,12 @@ from flwr.client.message_handler.message_handler import validate_out_message
 from flwr.client.message_handler.task_handler import get_task_ins, validate_task_ins
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import (
-    MISSING_EXTRA_REST,
     PING_BASE_MULTIPLIER,
     PING_CALL_TIMEOUT,
     PING_DEFAULT_INTERVAL,
     PING_RANDOM_RANGE,
 )
+from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
@@ -63,7 +62,7 @@ from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 try:
     import requests
 except ModuleNotFoundError:
-    sys.exit(MISSING_EXTRA_REST)
+    flwr_exit(ExitCode.MISSING_EXTRA_REST)
 
 
 PATH_CREATE_NODE: str = "api/v0/fleet/create-node"

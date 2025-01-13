@@ -46,29 +46,86 @@ class ExitCode:
 
     # ClientApp-specific exit codes (400-499)
 
-    # Common exit codes (500-999)
-    IP_ADDRESS_INVALID = 500
+    # Common exit codes (500-899)
+    ADDRESS_INVALID = 500
     MISSING_EXTRA_REST = 501
     TLS_NOT_SUPPORTED = 502
 
-    # Deprecated exit codes (1000-)
-    DEPRECATED_APP_ARGUMENT = 1000  # `flower-supernode <app>` is deprecated
+    # Deprecated exit codes (900-)
+    DEPRECATED_APP_ARGUMENT = 900  # `flower-supernode <app>` is deprecated
 
     def __new__(cls) -> ExitCode:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
 
 
-HELP_PAGE_URL = "https://flower.ai/docs/framework/ref-exit-code"
-KNOWN_EXIT_CODE_HELP: set[int] = set()
+# All short help messages for exit codes
+EXIT_CODE_HELP = {
+    # System exit codes
+    ExitCode.SUCCESS: "",
+    ExitCode.GENERIC_ERROR: "",
+    ExitCode.GRACEFUL_EXIT: "",
+    # SuperLink-specific exit codes (100-199)
+    ExitCode.THREAD_CRASH: "An important background thread has crashed.",
+    # ServerApp-specific exit codes (200-299)
+    # SuperNode-specific exit codes (300-399)
+    ExitCode.REST_ADDRESS_INVALID: (
+        "When using the REST API, please provide `https://` or "
+        "`http://` before the server address (e.g. `http://127.0.0.1:8080`)"
+    ),
+    ExitCode.NODE_AUTH_KEYS_REQUIRED: (
+        "Node authentication requires file paths to both "
+        "'--auth-supernode-private-key' and '--auth-supernode-public-key' "
+        "to be provided (providing only one of them is not sufficient)."
+    ),
+    ExitCode.NODE_AUTH_KEYS_INVALID: (
+        "Node uthentication requires elliptic curve private and public key pair. "
+        "Please ensure that the file path points to a valid private/public key "
+        "file and try again."
+    ),
+    # ClientApp-specific exit codes (400-499)
+    # Common exit codes (500-999)
+    ExitCode.ADDRESS_INVALID: "Please provide a valid URL, IPv4 or IPv6 address.",
+    ExitCode.MISSING_EXTRA_REST: """
+Extra dependencies required for using the REST-based Fleet API are missing.
+
+To use the REST API, install `flwr` with the `rest` extra:
+
+    `pip install flwr[rest]`.
+""",
+    ExitCode.TLS_NOT_SUPPORTED: "Please use the '--insecure' flag.",
+    # Deprecated exit codes (1000-)
+    ExitCode.DEPRECATED_APP_ARGUMENT: (
+        "The `app` argument is deprecated. "
+        "Please remove the `app` argument from your command."
+    ),
+}
 
 
-def flwr_exit(code: int, message: str | None = None) -> NoReturn:
-    """Handle application exit with an optional message."""
+HELP_PAGE_URL = "https://flower.ai/docs/framework/exit-codes/"
+
+
+def flwr_exit(code: int, error_message: str | None = None) -> NoReturn:
+    """Handle application exit with an optional message.
+
+    The exit message logged and displayed will follow this structure:
+
+    >>> Exit Code: <code>
+    >>> <error_message>
+    >>> <short-help-message>
+    >>>
+    >>> For more information, visit: <help-page-url>
+
+    - `<code>`: The exit code representing the termination reason.
+    - `<error_message>`: Optional context or additional information about the error.
+    - `<short-help-message>`: A predefined brief explanation for the given exit code.
+    - `<help-page-url>`: A URL providing detailed documentation and resolution steps.
+    """
     # Construct exit message
     exit_message = f"Exit Code: {code}"
-    if message:
-        exit_message += f"\n{message}"
+    if error_message:
+        exit_message += f"\n{error_message}"
+    exit_message += EXIT_CODE_HELP.get(code, "")
 
     # Set log level and system exit code
     log_level = INFO
@@ -77,10 +134,9 @@ def flwr_exit(code: int, message: str | None = None) -> NoReturn:
         log_level = ERROR
         sys_exit_code = 1
 
-    # Add help URL for known exit codes
-    if code in KNOWN_EXIT_CODE_HELP:
-        help_url = f"{HELP_PAGE_URL}.e{code}.html"
-        exit_message += f"\n\nFor more information, visit: <{help_url}>"
+    # Add help URL
+    help_url = f"{HELP_PAGE_URL}{code}.html"
+    exit_message += f"\n\nFor more information, visit: <{help_url}>"
 
     # Log the exit message
     log(log_level, exit_message)
@@ -88,7 +144,7 @@ def flwr_exit(code: int, message: str | None = None) -> NoReturn:
     # Telemetry event
     event_type = _try_obtain_telemetry_event()
     if event_type:
-        event(event_type, event_details={"exit_code": code, "message": message})
+        event(event_type, event_details={"exit_code": code, "message": error_message})
 
     # Exit
     sys.exit(sys_exit_code)

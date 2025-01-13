@@ -1,0 +1,14 @@
+[900] DEPRECATED_APP_ARGUMENT
+=============================
+
+Description
+-----------
+
+The ``app`` argument is deprecated. The SuperNode now automatically uses the ClientApp
+delivered from the SuperLink. Manually specifying the app directory is no longer
+supported.
+
+How to Resolve
+--------------
+
+Remove the ``app`` argument from your command-line usage.

@@ -1,0 +1,7 @@
+[1] GENERIC_ERROR
+=================
+
+Description
+-----------
+
+The application exited with a generic error.

@@ -51,7 +51,6 @@ from flwr.common.constant import (
     FLEET_API_REST_DEFAULT_ADDRESS,
     ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
-    MISSING_EXTRA_REST,
     SERVER_OCTET,
     SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
     SIMULATIONIO_API_DEFAULT_SERVER_ADDRESS,
@@ -345,7 +344,7 @@ def run_superlink() -> None:
                 and importlib.util.find_spec("starlette")
                 and importlib.util.find_spec("uvicorn")
             ) is None:
-                sys.exit(MISSING_EXTRA_REST)
+                flwr_exit(ExitCode.MISSING_EXTRA_REST)
 
             _, ssl_certfile, ssl_keyfile = (
                 certificates if certificates is not None else (None, None, None)
@@ -445,7 +444,7 @@ def run_superlink() -> None:
         sleep(0.1)
 
     # Exit if any thread has exited prematurely
-    flwr_exit(ExitCode.THREAD_CRASH, "A background thread has exited prematurely.")
+    flwr_exit(ExitCode.THREAD_CRASH)
 
 
 def _run_flwr_command(args: list[str]) -> None:
@@ -511,8 +510,8 @@ def _format_address(address: str) -> tuple[str, str, int]:
     parsed_address = parse_address(address)
     if not parsed_address:
         flwr_exit(
-            ExitCode.IP_ADDRESS_INVALID,
-            f"Address ({address}) cannot be parsed (expected: URL or IPv4 or IPv6).",
+            ExitCode.ADDRESS_INVALID,
+            f"Address ({address}) cannot be parsed.",
         )
     host, port, is_v6 = parsed_address
     return (f"[{host}]:{port}" if is_v6 else f"{host}:{port}", host, port)
@@ -703,7 +702,7 @@ def _run_fleet_api_rest(
 
         from flwr.server.superlink.fleet.rest_rere.rest_api import app as fast_api_app
     except ModuleNotFoundError:
-        sys.exit(MISSING_EXTRA_REST)
+        flwr_exit(ExitCode.MISSING_EXTRA_REST)
 
     log(INFO, "Starting Flower REST server")
 

@@ -17,14 +17,6 @@
 
 from __future__ import annotations
 
-MISSING_EXTRA_REST = """
-Extra dependencies required for using the REST-based Fleet API are missing.
-
-To use the REST API, install `flwr` with the `rest` extra:
-
-    `pip install flwr[rest]`.
-"""
-
 TRANSPORT_TYPE_GRPC_BIDI = "grpc-bidi"
 TRANSPORT_TYPE_GRPC_RERE = "grpc-rere"
 TRANSPORT_TYPE_GRPC_ADAPTER = "grpc-adapter"

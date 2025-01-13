@@ -1,0 +1,7 @@
+[10] GRACEFUL_EXIT
+==================
+
+Description
+-----------
+
+The application exited gracefully as requested by the user.

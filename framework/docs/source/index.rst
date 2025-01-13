@@ -144,6 +144,7 @@ Information-oriented API reference and other reference material.
     ref-example-projects
     ref-telemetry
     ref-changelog
+    ref-exit-codes-dir
     ref-faq
 
 Contributor docs
