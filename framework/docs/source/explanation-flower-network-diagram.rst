@@ -4,11 +4,14 @@ Flower Network Diagram
 This page complements the content in the `Flower Architecture
 <explanation-flower-architecture.html>`_ overview guide by detailing the connections used in a deployed Flower system.
 
-Fundamentally, there are two types of connections: (1) `user` ↔ ``SuperLink``
-connections initiated via the `Flower CLI <ref-api-cli.html>`_; and (2) connections
-between the different Flower infrastructure components (e.g. ``SuperLink`` ↔
-``SuperNode``). The former enables a user (e.g. a data scientist) to perform actions
-such as submitting a ``Run``, query the status of an ongoing ``Run``, and more. The
+Fundamentally, there are two types of connections: 
+
+1. User ↔ ``SuperLink`` connections initiated via the `Flower CLI <ref-api-cli.html>`_.
+
+2. Connections between Flower infrastructure components (e.g. ``SuperLink`` ↔ ``SuperNode``). 
+
+The former enables a user (e.g. a data scientist) to perform actions
+such as submitting a ``Run``, query the status of a ongoing ``Run``, and more. The
 latter set of connections are used by ``SuperLink`` and ``SuperNodes`` to establish and
 maintain a secure connection and for the ``ServerApp`` and ``ClientApp`` to communicate
 (e.g. model parameters, metrics, etc).
@@ -35,7 +38,7 @@ maintain a secure connection and for the ``ServerApp`` and ``ClientApp`` to comm
 
 .. tip::
 
-    Click the buttons above to toggle between **`subprocess`** and **`process`** isolation
+    Click the buttons above to toggle between **subprocess** and **process** isolation
     modes. As the name suggest, the former implies that ``ServerApp`` and ``ClientApp``
     instances run as sub-processes of the ``SuperLink`` and ``SuperNode`` respectively.
     This mode is ideal when a simplified deployment is a priority. On the other hand,
