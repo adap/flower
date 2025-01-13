@@ -8,9 +8,10 @@ to the :doc:`docker/index` guides.
 In this how-to guide, you will:
 
 - Set up a Flower project from scratch using the PyTorch template.
-- Launch the Flower infrastructure components: ``SuperLink`` and ``SuperNodes``.
+- Launch the Flower infrastructure components: ``SuperLink`` and ``SuperNodes``. Please
+  refer to the :doc:`explanation-flower-architecture` guide for an overview of what each
+  component does.
 - Run a Flower App using the Deployment Engine.
-- Start and monitor a run using the flwr CLI.
 
 The how-to guide should take less than 10 minutes to complete.
 
@@ -44,17 +45,18 @@ Create a new Flower app (PyTorch), and follow the instructions show upon executi
 
     $ flwr new my-project --framework PyTorch --username flower
 
-    🔨 Creating Flower project my-project...
-    🎊 Project creation successful.
+    🔨 Creating Flower App my-project...
+    🎊 Flower App creation successful.
 
-    Use the following command to run your project:
+    To run your Flower App, use the following command:
 
-          cd my-project
-          pip install -e .
-          flwr run
+            flwr run my-project
 
-    $ cd my-project
-    $ pip install -e .
+    If you haven't installed all dependencies yet, follow these steps:
+
+            cd my-project
+            pip install -e .
+            flwr run .
 
 .. note::
 
@@ -63,8 +65,10 @@ Create a new Flower app (PyTorch), and follow the instructions show upon executi
 
 .. tip::
 
-    If you would like to get an overview of the code that was generated via ``flwr
-    run``, take a look at the :doc:`tutorial-quickstart-pytorch` tutorial.
+    Feel free to inspect the code using your favorite code editor before proceeding.
+    Just open the ``my-project`` that was automatically created via ``flwr new``. If you
+    would like to get an overview of the code that was generated, take a look at the
+    :doc:`tutorial-quickstart-pytorch` tutorial.
 
 Step 2: Launch the SuperLink
 ----------------------------
@@ -138,7 +142,15 @@ You will need two terminals for this step.
 Step 4: Run the App
 -------------------
 
-1. Add a new federation configuration in the ``pyproject.toml``:
+At this point, you have launched two ``SuperNodes`` that are connected to the same
+``SuperLink``. The system is idling waiting for a ``Run`` to be submitted. Before you
+can run your Flower App through the federation we need a way to tell ``flwr run`` that
+the App is to be executed with the Deployment Engine instead of with the Simulation
+Engine (the default). Doing this is easy: define a new federation section in the
+``pyprojec.toml``, indicate the address of the ``SuperLink`` and pass a certificate (if
+any) or set the insecure flag.
+
+1. Open the ``pyproject.toml`` file and at the end add a new federation configuration:
 
    .. code-block:: toml
        :caption: pyproject.toml
@@ -156,8 +168,8 @@ Step 4: Run the App
        ``local-deployment`` with your chosen name in both the ``tool.flwr.federations.``
        string and the corresponding ``flwr run .`` command.
 
-2. In another terminal, run the Flower project and follow the ServerApp logs to track
-   the execution of the run:
+2. In another terminal and with your Python environment activated, run the Flower
+   project and follow the ServerApp logs to track the execution of the run:
 
    .. code-block:: bash
 
