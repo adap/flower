@@ -2,24 +2,25 @@ Flower Network Diagram
 ======================
 
 This page complements the content in the `Flower Architecture
-<explanation-flower-architecture.html>`_ overview guide by detailing the connections used in a deployed Flower system.
+<explanation-flower-architecture.html>`_ overview guide by detailing the connections
+used in a deployed Flower system.
 
-Fundamentally, there are two types of connections: 
+Fundamentally, there are two types of connections:
 
 1. User ↔ ``SuperLink`` connections initiated via the `Flower CLI <ref-api-cli.html>`_.
+2. Connections between Flower infrastructure components (e.g. ``SuperLink`` ↔
+   ``SuperNode``).
 
-2. Connections between Flower infrastructure components (e.g. ``SuperLink`` ↔ ``SuperNode``). 
-
-The former enables a user (e.g. a data scientist) to perform actions
-such as submitting a ``Run``, query the status of a ongoing ``Run``, and more. The
-latter set of connections are used by ``SuperLink`` and ``SuperNodes`` to establish and
-maintain a secure connection and for the ``ServerApp`` and ``ClientApp`` to communicate
-(e.g. model parameters, metrics, etc).
+The former enables a user (e.g. a data scientist) to perform actions such as submitting
+a ``Run``, query the status of a ongoing ``Run``, and more. The latter set of
+connections are used by ``SuperLink`` and ``SuperNodes`` to establish and maintain a
+secure connection and for the ``ServerApp`` and ``ClientApp`` to communicate (e.g. model
+parameters, metrics, etc).
 
 .. note::
 
-    Optionally, a connection to a third-party service can be established to
-    provide user-level authentication via `OIDC
+    Optionally, a connection to a third-party service can be established to provide
+    user-level authentication via `OIDC
     <https://openid.net/developers/how-connect-works/>`_. This means that only users
     authenticated via ``flwr login`` are able to interface with the ``SuperLink``.
 
