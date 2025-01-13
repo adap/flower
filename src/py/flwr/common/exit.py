@@ -122,9 +122,9 @@ def flwr_exit(code: int, error_message: str | None = None) -> NoReturn:
     - `<help-page-url>`: A URL providing detailed documentation and resolution steps.
     """
     # Construct exit message
-    exit_message = f"Exit Code: {code}"
+    exit_message = f"Exit Code: {code}\n"
     if error_message:
-        exit_message += f"\n{error_message}"
+        exit_message += f"{error_message}"
     exit_message += EXIT_CODE_HELP.get(code, "")
 
     # Set log level and system exit code
