@@ -15,8 +15,9 @@
 """Tests for the unified exit function."""
 
 
-from .exit import ExitCode, EXIT_CODE_HELP
 from pathlib import Path
+
+from .exit import EXIT_CODE_HELP, ExitCode
 
 
 def test_exit_code_help_exist() -> None:
@@ -24,7 +25,9 @@ def test_exit_code_help_exist() -> None:
     for name, value in ExitCode.__dict__.items():
         if name.startswith("__"):
             continue
-        assert value in EXIT_CODE_HELP, f"Exit code {name} ({value}) does not have help message."
+        assert (
+            value in EXIT_CODE_HELP
+        ), f"Exit code {name} ({value}) does not have help message."
 
 
 def test_exit_code_help_url_exist() -> None:
@@ -32,7 +35,7 @@ def test_exit_code_help_url_exist() -> None:
     # Get all exit code help URLs
     dir_path = Path("framework/docs/source/exit-codes")
     help_urls = {int(f.stem) for f in dir_path.glob("*.rst") if f.stem[0] != "_"}
-    
+
     # Check if all exit codes have help URL
     for name, value in ExitCode.__dict__.items():
         if name.startswith("__"):
