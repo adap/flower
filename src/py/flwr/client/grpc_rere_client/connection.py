@@ -41,12 +41,8 @@ from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
-from flwr.common.serde import (
-    message_from_taskins,
-    message_to_taskres,
-    user_config_from_proto,
-)
-from flwr.common.typing import Fab, Run
+from flwr.common.serde import message_from_taskins, message_to_taskres, run_from_proto
+from flwr.common.typing import Fab, Run, RunNotRunningException
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
@@ -88,7 +84,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         Optional[Callable[[], Optional[int]]],
         Optional[Callable[[], None]],
         Optional[Callable[[int], Run]],
-        Optional[Callable[[str], Fab]],
+        Optional[Callable[[str, int], Fab]],
     ]
 ]:
     """Primitives for request/response-based interaction with a server.
@@ -158,6 +154,17 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
     node: Optional[Node] = None
     ping_thread: Optional[threading.Thread] = None
     ping_stop_event = threading.Event()
+
+    def _should_giveup_fn(e: Exception) -> bool:
+        if e.code() == grpc.StatusCode.PERMISSION_DENIED:  # type: ignore
+            raise RunNotRunningException
+        if e.code() == grpc.StatusCode.UNAVAILABLE:  # type: ignore
+            return False
+        return True
+
+    # Restrict retries to cases where the status code is UNAVAILABLE
+    # If the status code is PERMISSION_DENIED, additionally raise RunNotRunningException
+    retry_invoker.should_giveup = _should_giveup_fn
 
     ###########################################################################
     # ping/create_node/delete_node/receive/send/get_run functions
@@ -287,17 +294,11 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         )
 
         # Return fab_id and fab_version
-        return Run(
-            run_id,
-            get_run_response.run.fab_id,
-            get_run_response.run.fab_version,
-            get_run_response.run.fab_hash,
-            user_config_from_proto(get_run_response.run.override_config),
-        )
+        return run_from_proto(get_run_response.run)
 
-    def get_fab(fab_hash: str) -> Fab:
+    def get_fab(fab_hash: str, run_id: int) -> Fab:
         # Call FleetAPI
-        get_fab_request = GetFabRequest(node=node, hash_str=fab_hash)
+        get_fab_request = GetFabRequest(node=node, hash_str=fab_hash, run_id=run_id)
         get_fab_response: GetFabResponse = retry_invoker.invoke(
             stub.GetFab,
             request=get_fab_request,

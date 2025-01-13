@@ -14,9 +14,9 @@
 # ==============================================================================
 """Flower command line interface `install` command."""
 
+
 import hashlib
 import shutil
-import subprocess
 import tempfile
 import zipfile
 from io import BytesIO
@@ -187,21 +187,6 @@ def validate_and_install(
             shutil.copytree(item, install_dir / item.name, dirs_exist_ok=True)
         else:
             shutil.copy2(item, install_dir / item.name)
-
-    try:
-        subprocess.run(
-            ["pip", "install", "-e", install_dir, "--no-deps"],
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-    except subprocess.CalledProcessError as e:
-        typer.secho(
-            f"❌ Failed to `pip install` package(s) from {install_dir}:\n{e.stderr}",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1) from e
 
     typer.secho(
         f"🎊 Successfully installed {project_name} to {install_dir}.",

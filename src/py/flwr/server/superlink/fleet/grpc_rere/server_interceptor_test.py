@@ -20,7 +20,8 @@ import unittest
 
 import grpc
 
-from flwr.common.constant import FLEET_API_GRPC_RERE_DEFAULT_ADDRESS
+from flwr.common import ConfigsRecord
+from flwr.common.constant import FLEET_API_GRPC_RERE_DEFAULT_ADDRESS, Status
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     compute_hmac,
     generate_key_pairs,
@@ -28,6 +29,7 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     private_key_to_bytes,
     public_key_to_bytes,
 )
+from flwr.common.typing import RunStatus
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
@@ -72,7 +74,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         )
         self.state.store_node_public_keys({public_key_to_bytes(self._node_public_key)})
 
-        self._server_interceptor = AuthenticateServerInterceptor(self.state)
+        self._server_interceptor = AuthenticateServerInterceptor(state_factory)
         self._server: grpc.Server = _run_fleet_api_grpc_rere(
             FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
             state_factory,
@@ -159,9 +161,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def test_successful_delete_node_with_metadata(self) -> None:
         """Test server interceptor for deleting node."""
         # Prepare
-        node_id = self.state.create_node(
-            ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
-        )
+        node_id = self._create_node_and_set_public_key()
         request = DeleteNodeRequest(node=Node(node_id=node_id))
         shared_secret = generate_shared_key(
             self._node_private_key, self._server_public_key
@@ -189,9 +189,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def test_unsuccessful_delete_node_with_metadata(self) -> None:
         """Test server interceptor for deleting node unsuccessfully."""
         # Prepare
-        node_id = self.state.create_node(
-            ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
-        )
+        node_id = self._create_node_and_set_public_key()
         request = DeleteNodeRequest(node=Node(node_id=node_id))
         node_private_key, _ = generate_key_pairs()
         shared_secret = generate_shared_key(node_private_key, self._server_public_key)
@@ -215,9 +213,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def test_successful_pull_task_ins_with_metadata(self) -> None:
         """Test server interceptor for pull task ins."""
         # Prepare
-        node_id = self.state.create_node(
-            ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
-        )
+        node_id = self._create_node_and_set_public_key()
         request = PullTaskInsRequest(node=Node(node_id=node_id))
         shared_secret = generate_shared_key(
             self._node_private_key, self._server_public_key
@@ -245,9 +241,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def test_unsuccessful_pull_task_ins_with_metadata(self) -> None:
         """Test server interceptor for pull task ins unsuccessfully."""
         # Prepare
-        node_id = self.state.create_node(
-            ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
-        )
+        node_id = self._create_node_and_set_public_key()
         request = PullTaskInsRequest(node=Node(node_id=node_id))
         node_private_key, _ = generate_key_pairs()
         shared_secret = generate_shared_key(node_private_key, self._server_public_key)
@@ -271,11 +265,15 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def test_successful_push_task_res_with_metadata(self) -> None:
         """Test server interceptor for push task res."""
         # Prepare
-        node_id = self.state.create_node(
-            ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
-        )
+        node_id = self._create_node_and_set_public_key()
+        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        # Transition status to running. PushTaskRes is only allowed in running status.
+        _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+        _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
         request = PushTaskResRequest(
-            task_res_list=[TaskRes(task=Task(producer=Node(node_id=node_id)))]
+            task_res_list=[
+                TaskRes(task=Task(producer=Node(node_id=node_id)), run_id=run_id)
+            ]
         )
         shared_secret = generate_shared_key(
             self._node_private_key, self._server_public_key
@@ -303,9 +301,11 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def test_unsuccessful_push_task_res_with_metadata(self) -> None:
         """Test server interceptor for push task res unsuccessfully."""
         # Prepare
-        node_id = self.state.create_node(
-            ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
-        )
+        node_id = self._create_node_and_set_public_key()
+        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        # Transition status to running. PushTaskRes is only allowed in running status.
+        _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+        _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
         request = PushTaskResRequest(
             task_res_list=[TaskRes(task=Task(producer=Node(node_id=node_id)))]
         )
@@ -319,7 +319,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         )
 
         # Execute & Assert
-        with self.assertRaises(grpc.RpcError):
+        with self.assertRaises(grpc.RpcError) as e:
             self._push_task_res.with_call(
                 request=request,
                 metadata=(
@@ -327,14 +327,16 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
                     (_AUTH_TOKEN_HEADER, hmac_value),
                 ),
             )
+        assert e.exception.code() == grpc.StatusCode.UNAUTHENTICATED
 
     def test_successful_get_run_with_metadata(self) -> None:
-        """Test server interceptor for pull task ins."""
+        """Test server interceptor for get run."""
         # Prepare
-        self.state.create_node(
-            ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
-        )
-        run_id = self.state.create_run("", "", "", {})
+        self._create_node_and_set_public_key()
+        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
+        # Transition status to running. GetRun is only allowed in running status.
+        _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+        _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
         request = GetRunRequest(run_id=run_id)
         shared_secret = generate_shared_key(
             self._node_private_key, self._server_public_key
@@ -360,12 +362,10 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         assert grpc.StatusCode.OK == call.code()
 
     def test_unsuccessful_get_run_with_metadata(self) -> None:
-        """Test server interceptor for pull task ins unsuccessfully."""
+        """Test server interceptor for get run unsuccessfully."""
         # Prepare
-        self.state.create_node(
-            ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
-        )
-        run_id = self.state.create_run("", "", "", {})
+        self._create_node_and_set_public_key()
+        run_id = self.state.create_run("", "", "", {}, ConfigsRecord())
         request = GetRunRequest(run_id=run_id)
         node_private_key, _ = generate_key_pairs()
         shared_secret = generate_shared_key(node_private_key, self._server_public_key)
@@ -387,11 +387,9 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             )
 
     def test_successful_ping_with_metadata(self) -> None:
-        """Test server interceptor for pull task ins."""
+        """Test server interceptor for ping."""
         # Prepare
-        node_id = self.state.create_node(
-            ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
-        )
+        node_id = self._create_node_and_set_public_key()
         request = PingRequest(node=Node(node_id=node_id))
         shared_secret = generate_shared_key(
             self._node_private_key, self._server_public_key
@@ -417,11 +415,9 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         assert grpc.StatusCode.OK == call.code()
 
     def test_unsuccessful_ping_with_metadata(self) -> None:
-        """Test server interceptor for pull task ins unsuccessfully."""
+        """Test server interceptor for ping unsuccessfully."""
         # Prepare
-        node_id = self.state.create_node(
-            ping_interval=30, public_key=public_key_to_bytes(self._node_public_key)
-        )
+        node_id = self._create_node_and_set_public_key()
         request = PingRequest(node=Node(node_id=node_id))
         node_private_key, _ = generate_key_pairs()
         shared_secret = generate_shared_key(node_private_key, self._server_public_key)
@@ -442,65 +438,8 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
                 ),
             )
 
-    def test_successful_restore_node(self) -> None:
-        """Test server interceptor for restoring node."""
-        public_key_bytes = base64.urlsafe_b64encode(
-            public_key_to_bytes(self._node_public_key)
-        )
-        response, call = self._create_node.with_call(
-            request=CreateNodeRequest(),
-            metadata=((_PUBLIC_KEY_HEADER, public_key_bytes),),
-        )
-
-        expected_metadata = (
-            _PUBLIC_KEY_HEADER,
-            base64.urlsafe_b64encode(
-                public_key_to_bytes(self._server_public_key)
-            ).decode(),
-        )
-
-        node = response.node
-        node_node_id = node.node_id
-
-        assert call.initial_metadata()[0] == expected_metadata
-        assert isinstance(response, CreateNodeResponse)
-
-        request = DeleteNodeRequest(node=node)
-        shared_secret = generate_shared_key(
-            self._node_private_key, self._server_public_key
-        )
-        hmac_value = base64.urlsafe_b64encode(
-            compute_hmac(shared_secret, request.SerializeToString(deterministic=True))
-        )
-        public_key_bytes = base64.urlsafe_b64encode(
-            public_key_to_bytes(self._node_public_key)
-        )
-        response, call = self._delete_node.with_call(
-            request=request,
-            metadata=(
-                (_PUBLIC_KEY_HEADER, public_key_bytes),
-                (_AUTH_TOKEN_HEADER, hmac_value),
-            ),
-        )
-
-        assert isinstance(response, DeleteNodeResponse)
-        assert grpc.StatusCode.OK == call.code()
-
-        public_key_bytes = base64.urlsafe_b64encode(
-            public_key_to_bytes(self._node_public_key)
-        )
-        response, call = self._create_node.with_call(
-            request=CreateNodeRequest(),
-            metadata=((_PUBLIC_KEY_HEADER, public_key_bytes),),
-        )
-
-        expected_metadata = (
-            _PUBLIC_KEY_HEADER,
-            base64.urlsafe_b64encode(
-                public_key_to_bytes(self._server_public_key)
-            ).decode(),
-        )
-
-        assert call.initial_metadata()[0] == expected_metadata
-        assert isinstance(response, CreateNodeResponse)
-        assert response.node.node_id == node_node_id
+    def _create_node_and_set_public_key(self) -> int:
+        node_id = self.state.create_node(ping_interval=30)
+        pk_bytes = public_key_to_bytes(self._node_public_key)
+        self.state.set_node_public_key(node_id, pk_bytes)
+        return node_id

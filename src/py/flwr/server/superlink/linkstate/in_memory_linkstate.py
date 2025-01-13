@@ -17,7 +17,8 @@
 
 import threading
 import time
-from dataclasses import dataclass
+from bisect import bisect_right
+from dataclasses import dataclass, field
 from logging import ERROR, WARNING
 from typing import Optional
 from uuid import UUID, uuid4
@@ -29,6 +30,7 @@ from flwr.common.constant import (
     RUN_ID_NUM_BYTES,
     Status,
 )
+from flwr.common.record import ConfigsRecord
 from flwr.common.typing import Run, RunStatus, UserConfig
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.linkstate.linkstate import LinkState
@@ -38,20 +40,18 @@ from .utils import (
     generate_rand_int_from_bytes,
     has_valid_sub_status,
     is_valid_transition,
-    make_node_unavailable_taskres,
+    verify_found_taskres,
+    verify_taskins_ids,
 )
 
 
 @dataclass
-class RunRecord:
+class RunRecord:  # pylint: disable=R0902
     """The record of a specific run, including its status and timestamps."""
 
     run: Run
-    status: RunStatus
-    pending_at: str = ""
-    starting_at: str = ""
-    running_at: str = ""
-    finished_at: str = ""
+    logs: list[tuple[float, str]] = field(default_factory=list)
+    log_lock: threading.Lock = field(default_factory=threading.Lock)
 
 
 class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
@@ -62,18 +62,21 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         # Map node_id to (online_until, ping_interval)
         self.node_ids: dict[int, tuple[float, float]] = {}
         self.public_key_to_node_id: dict[bytes, int] = {}
+        self.node_id_to_public_key: dict[int, bytes] = {}
 
         # Map run_id to RunRecord
         self.run_ids: dict[int, RunRecord] = {}
         self.contexts: dict[int, Context] = {}
+        self.federation_options: dict[int, ConfigsRecord] = {}
         self.task_ins_store: dict[UUID, TaskIns] = {}
         self.task_res_store: dict[UUID, TaskRes] = {}
+        self.task_ins_id_to_task_res_id: dict[UUID, UUID] = {}
 
         self.node_public_keys: set[bytes] = set()
         self.server_public_key: Optional[bytes] = None
         self.server_private_key: Optional[bytes] = None
 
-        self.lock = threading.Lock()
+        self.lock = threading.RLock()
 
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
         """Store one TaskIns."""
@@ -84,8 +87,25 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             return None
         # Validate run_id
         if task_ins.run_id not in self.run_ids:
-            log(ERROR, "`run_id` is invalid")
+            log(ERROR, "Invalid run ID for TaskIns: %s", task_ins.run_id)
             return None
+        # Validate source node ID
+        if task_ins.task.producer.node_id != 0:
+            log(
+                ERROR,
+                "Invalid source node ID for TaskIns: %s",
+                task_ins.task.producer.node_id,
+            )
+            return None
+        # Validate destination node ID
+        if not task_ins.task.consumer.anonymous:
+            if task_ins.task.consumer.node_id not in self.node_ids:
+                log(
+                    ERROR,
+                    "Invalid destination node ID for TaskIns: %s",
+                    task_ins.task.consumer.node_id,
+                )
+                return None
 
         # Create task_id
         task_id = uuid4()
@@ -206,79 +226,72 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         task_res.task_id = str(task_id)
         with self.lock:
             self.task_res_store[task_id] = task_res
+            self.task_ins_id_to_task_res_id[UUID(task_ins_id)] = task_id
 
         # Return the new task_id
         return task_id
 
     def get_task_res(self, task_ids: set[UUID]) -> list[TaskRes]:
-        """Get all TaskRes that have not been delivered yet."""
+        """Get TaskRes for the given TaskIns IDs."""
+        ret: dict[UUID, TaskRes] = {}
+
         with self.lock:
-            # Find TaskRes that were not delivered yet
-            task_res_list: list[TaskRes] = []
-            replied_task_ids: set[UUID] = set()
-            for _, task_res in self.task_res_store.items():
-                reply_to = UUID(task_res.task.ancestry[0])
+            current = time.time()
 
-                # Check if corresponding TaskIns exists and is not expired
-                task_ins = self.task_ins_store.get(reply_to)
-                if task_ins is None:
-                    log(WARNING, "TaskIns with task_id %s does not exist.", reply_to)
-                    task_ids.remove(reply_to)
-                    continue
+            # Verify TaskIns IDs
+            ret = verify_taskins_ids(
+                inquired_taskins_ids=task_ids,
+                found_taskins_dict=self.task_ins_store,
+                current_time=current,
+            )
 
-                if task_ins.task.created_at + task_ins.task.ttl <= time.time():
-                    log(WARNING, "TaskIns with task_id %s is expired.", reply_to)
-                    task_ids.remove(reply_to)
-                    continue
+            # Find all TaskRes
+            task_res_found: list[TaskRes] = []
+            for task_id in task_ids:
+                # If TaskRes exists and is not delivered, add it to the list
+                if task_res_id := self.task_ins_id_to_task_res_id.get(task_id):
+                    task_res = self.task_res_store[task_res_id]
+                    if task_res.task.delivered_at == "":
+                        task_res_found.append(task_res)
+            tmp_ret_dict = verify_found_taskres(
+                inquired_taskins_ids=task_ids,
+                found_taskins_dict=self.task_ins_store,
+                found_taskres_list=task_res_found,
+                current_time=current,
+            )
+            ret.update(tmp_ret_dict)
 
-                if reply_to in task_ids and task_res.task.delivered_at == "":
-                    task_res_list.append(task_res)
-                    replied_task_ids.add(reply_to)
-
-            # Check if the node is offline
-            for task_id in task_ids - replied_task_ids:
-                task_ins = self.task_ins_store.get(task_id)
-                if task_ins is None:
-                    continue
-                node_id = task_ins.task.consumer.node_id
-                online_until, _ = self.node_ids[node_id]
-                # Generate a TaskRes containing an error reply if the node is offline.
-                if online_until < time.time():
-                    err_taskres = make_node_unavailable_taskres(
-                        ref_taskins=task_ins,
-                    )
-                    self.task_res_store[UUID(err_taskres.task_id)] = err_taskres
-                    task_res_list.append(err_taskres)
-
-            # Mark all of them as delivered
+            # Mark existing TaskRes to be returned as delivered
             delivered_at = now().isoformat()
-            for task_res in task_res_list:
+            for task_res in task_res_found:
                 task_res.task.delivered_at = delivered_at
 
-            # Return TaskRes
-            return task_res_list
+        return list(ret.values())
 
-    def delete_tasks(self, task_ids: set[UUID]) -> None:
-        """Delete all delivered TaskIns/TaskRes pairs."""
-        task_ins_to_be_deleted: set[UUID] = set()
-        task_res_to_be_deleted: set[UUID] = set()
+    def delete_tasks(self, task_ins_ids: set[UUID]) -> None:
+        """Delete TaskIns/TaskRes pairs based on provided TaskIns IDs."""
+        if not task_ins_ids:
+            return
 
         with self.lock:
-            for task_ins_id in task_ids:
-                # Find the task_id of the matching task_res
-                for task_res_id, task_res in self.task_res_store.items():
-                    if UUID(task_res.task.ancestry[0]) != task_ins_id:
-                        continue
-                    if task_res.task.delivered_at == "":
-                        continue
+            for task_id in task_ins_ids:
+                # Delete TaskIns
+                if task_id in self.task_ins_store:
+                    del self.task_ins_store[task_id]
+                # Delete TaskRes
+                if task_id in self.task_ins_id_to_task_res_id:
+                    task_res_id = self.task_ins_id_to_task_res_id.pop(task_id)
+                    del self.task_res_store[task_res_id]
 
-                    task_ins_to_be_deleted.add(task_ins_id)
-                    task_res_to_be_deleted.add(task_res_id)
+    def get_task_ids_from_run_id(self, run_id: int) -> set[UUID]:
+        """Get all TaskIns IDs for the given run_id."""
+        task_id_list: set[UUID] = set()
+        with self.lock:
+            for task_id, task_ins in self.task_ins_store.items():
+                if task_ins.run_id == run_id:
+                    task_id_list.add(task_id)
 
-            for task_id in task_ins_to_be_deleted:
-                del self.task_ins_store[task_id]
-            for task_id in task_res_to_be_deleted:
-                del self.task_res_store[task_id]
+        return task_id_list
 
     def num_task_ins(self) -> int:
         """Calculate the number of task_ins in store.
@@ -294,9 +307,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         """
         return len(self.task_res_store)
 
-    def create_node(
-        self, ping_interval: float, public_key: Optional[bytes] = None
-    ) -> int:
+    def create_node(self, ping_interval: float) -> int:
         """Create, store in the link state, and return `node_id`."""
         # Sample a random int64 as node_id
         node_id = generate_rand_int_from_bytes(NODE_ID_NUM_BYTES)
@@ -306,33 +317,18 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 log(ERROR, "Unexpected node registration failure.")
                 return 0
 
-            if public_key is not None:
-                if (
-                    public_key in self.public_key_to_node_id
-                    or node_id in self.public_key_to_node_id.values()
-                ):
-                    log(ERROR, "Unexpected node registration failure.")
-                    return 0
-
-                self.public_key_to_node_id[public_key] = node_id
-
             self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
             return node_id
 
-    def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
+    def delete_node(self, node_id: int) -> None:
         """Delete a node."""
         with self.lock:
             if node_id not in self.node_ids:
                 raise ValueError(f"Node {node_id} not found")
 
-            if public_key is not None:
-                if (
-                    public_key not in self.public_key_to_node_id
-                    or node_id not in self.public_key_to_node_id.values()
-                ):
-                    raise ValueError("Public key or node_id not found")
-
-                del self.public_key_to_node_id[public_key]
+            # Remove node ID <> public key mappings
+            if pk := self.node_id_to_public_key.pop(node_id, None):
+                del self.public_key_to_node_id[pk]
 
             del self.node_ids[node_id]
 
@@ -354,16 +350,38 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 if online_until > current_time
             }
 
+    def set_node_public_key(self, node_id: int, public_key: bytes) -> None:
+        """Set `public_key` for the specified `node_id`."""
+        with self.lock:
+            if node_id not in self.node_ids:
+                raise ValueError(f"Node {node_id} not found")
+
+            if public_key in self.public_key_to_node_id:
+                raise ValueError("Public key already in use")
+
+            self.public_key_to_node_id[public_key] = node_id
+            self.node_id_to_public_key[node_id] = public_key
+
+    def get_node_public_key(self, node_id: int) -> Optional[bytes]:
+        """Get `public_key` for the specified `node_id`."""
+        with self.lock:
+            if node_id not in self.node_ids:
+                raise ValueError(f"Node {node_id} not found")
+
+            return self.node_id_to_public_key.get(node_id)
+
     def get_node_id(self, node_public_key: bytes) -> Optional[int]:
         """Retrieve stored `node_id` filtered by `node_public_keys`."""
         return self.public_key_to_node_id.get(node_public_key)
 
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     def create_run(
         self,
         fab_id: Optional[str],
         fab_version: Optional[str],
         fab_hash: Optional[str],
         override_config: UserConfig,
+        federation_options: ConfigsRecord,
     ) -> int:
         """Create a new run for the specified `fab_hash`."""
         # Sample a random int64 as run_id
@@ -378,15 +396,21 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                         fab_version=fab_version if fab_version else "",
                         fab_hash=fab_hash if fab_hash else "",
                         override_config=override_config,
+                        pending_at=now().isoformat(),
+                        starting_at="",
+                        running_at="",
+                        finished_at="",
+                        status=RunStatus(
+                            status=Status.PENDING,
+                            sub_status="",
+                            details="",
+                        ),
                     ),
-                    status=RunStatus(
-                        status=Status.PENDING,
-                        sub_status="",
-                        details="",
-                    ),
-                    pending_at=now().isoformat(),
                 )
                 self.run_ids[run_id] = run_record
+
+                # Record federation options. Leave empty if not passed
+                self.federation_options[run_id] = federation_options
                 return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
@@ -410,10 +434,17 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         """Retrieve `server_public_key` in urlsafe bytes."""
         return self.server_public_key
 
+    def clear_supernode_auth_keys_and_credentials(self) -> None:
+        """Clear stored `node_public_keys` and credentials in the link state if any."""
+        with self.lock:
+            self.server_private_key = None
+            self.server_public_key = None
+            self.node_public_keys.clear()
+
     def store_node_public_keys(self, public_keys: set[bytes]) -> None:
         """Store a set of `node_public_keys` in the link state."""
         with self.lock:
-            self.node_public_keys = public_keys
+            self.node_public_keys.update(public_keys)
 
     def store_node_public_key(self, public_key: bytes) -> None:
         """Store a `node_public_key` in the link state."""
@@ -422,7 +453,13 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
 
     def get_node_public_keys(self) -> set[bytes]:
         """Retrieve all currently stored `node_public_keys` as a set."""
-        return self.node_public_keys
+        with self.lock:
+            return self.node_public_keys.copy()
+
+    def get_run_ids(self) -> set[int]:
+        """Retrieve all run IDs."""
+        with self.lock:
+            return set(self.run_ids.keys())
 
     def get_run(self, run_id: int) -> Optional[Run]:
         """Retrieve information about the run with the specified `run_id`."""
@@ -436,7 +473,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         """Retrieve the statuses for the specified runs."""
         with self.lock:
             return {
-                run_id: self.run_ids[run_id].status
+                run_id: self.run_ids[run_id].run.status
                 for run_id in set(run_ids)
                 if run_id in self.run_ids
             }
@@ -450,7 +487,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 return False
 
             # Check if the status transition is valid
-            current_status = self.run_ids[run_id].status
+            current_status = self.run_ids[run_id].run.status
             if not is_valid_transition(current_status, new_status):
                 log(
                     ERROR,
@@ -473,12 +510,12 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
             # Update the status
             run_record = self.run_ids[run_id]
             if new_status.status == Status.STARTING:
-                run_record.starting_at = now().isoformat()
+                run_record.run.starting_at = now().isoformat()
             elif new_status.status == Status.RUNNING:
-                run_record.running_at = now().isoformat()
+                run_record.run.running_at = now().isoformat()
             elif new_status.status == Status.FINISHED:
-                run_record.finished_at = now().isoformat()
-            run_record.status = new_status
+                run_record.run.finished_at = now().isoformat()
+            run_record.run.status = new_status
             return True
 
     def get_pending_run_id(self) -> Optional[int]:
@@ -488,11 +525,19 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         # Loop through all registered runs
         for run_id, run_rec in self.run_ids.items():
             # Break once a pending run is found
-            if run_rec.status.status == Status.PENDING:
+            if run_rec.run.status.status == Status.PENDING:
                 pending_run_id = run_id
                 break
 
         return pending_run_id
+
+    def get_federation_options(self, run_id: int) -> Optional[ConfigsRecord]:
+        """Retrieve the federation options for the specified `run_id`."""
+        with self.lock:
+            if run_id not in self.run_ids:
+                log(ERROR, "`run_id` is invalid")
+                return None
+            return self.federation_options[run_id]
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""
@@ -511,3 +556,26 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         if run_id not in self.run_ids:
             raise ValueError(f"Run {run_id} not found")
         self.contexts[run_id] = context
+
+    def add_serverapp_log(self, run_id: int, log_message: str) -> None:
+        """Add a log entry to the serverapp logs for the specified `run_id`."""
+        if run_id not in self.run_ids:
+            raise ValueError(f"Run {run_id} not found")
+        run = self.run_ids[run_id]
+        with run.log_lock:
+            run.logs.append((now().timestamp(), log_message))
+
+    def get_serverapp_log(
+        self, run_id: int, after_timestamp: Optional[float]
+    ) -> tuple[str, float]:
+        """Get the serverapp logs for the specified `run_id`."""
+        if run_id not in self.run_ids:
+            raise ValueError(f"Run {run_id} not found")
+        run = self.run_ids[run_id]
+        if after_timestamp is None:
+            after_timestamp = 0.0
+        with run.log_lock:
+            # Find the index where the timestamp would be inserted
+            index = bisect_right(run.logs, (after_timestamp, ""))
+            latest_timestamp = run.logs[-1][0] if index < len(run.logs) else 0.0
+            return "".join(log for _, log in run.logs[index:]), latest_timestamp
