@@ -100,7 +100,7 @@ You will need two terminals for this step.
 
     Note that the values passed via the ``--node-config`` argument are specific to the
     behaviour of the ``ClientApp``. If you inspect the code generated in the first step
-    via ``flwr new``, you'd see that the ``ClientApp`` is expecting a certian set of
+    via ``flwr new``, you'd see that the ``ClientApp`` is expecting a certain set of
     key-value pairs to be present in order to partition and load some data. Typically,
     your ``ClientApp`` wouldn't partition a dataset, instead it would access the data
     directly available. In such cases you would write your ``ClientApp`` and make it
@@ -122,7 +122,7 @@ You will need two terminals for this step.
        * | ``--insecure``: This flag tells the ``SuperNode`` to operate in an insecure mode, allowing
          | unencrypted communication. Refer to the :doc:`how-to-enable-tls-connections` guide to learn how to run your ``SuperNode`` with TLS.
        * | ``--superlink 127.0.0.1:9092``: Connect to the SuperLink's Fleet API at the address
-         | ``127.0.0.1:9092``. If you had launched the ``SuperLink`` in a different machine, youd replace ``127.0.0.1`` with the public IP of that machine.
+         | ``127.0.0.1:9092``. If you had launched the ``SuperLink`` in a different machine, you'd replace ``127.0.0.1`` with the public IP of that machine.
        * | ``--clientappio-api-address 127.0.0.1:9094``: Set the address and port number where the
          | SuperNode is listening to communicate with the ``ClientApp``.
        * | ``--node-config "partition-id=0 num-partitions=2"``: The ``ClientApp`` code generated via the ``flwr new`` template expects those two key-value pairs to be defined at run time. Set the partition ID to ``0`` and the number of partitions to ``2`` for the ``SuperNode`` configuration.
@@ -139,8 +139,8 @@ You will need two terminals for this step.
 
    .. dropdown:: Understand the command
 
-       * ``--clientappio-api-address 127.0.0.1:9095``: Note that a different port is being used. This is only needed because you are running two ``SuperNodes`` on the same machine. Typically you would run one node per machine and therefore, the ``--clientappio-api-address`` could be omited all together and left with its default value.
-       * ``--node-config "partition-id=1 num-partitions=2"```: Note here we indicate a different `partition-id`. In this way, a ``ClientApp`` will use a different data partitione depending on which ``SuperNode`` runs in.
+       * ``--clientappio-api-address 127.0.0.1:9095``: Note that a different port is being used. This is only needed because you are running two ``SuperNodes`` on the same machine. Typically you would run one node per machine and therefore, the ``--clientappio-api-address`` could be omitted all together and left with its default value.
+       * ``--node-config "partition-id=1 num-partitions=2"```: Note here we indicate a different `partition-id`. In this way, a ``ClientApp`` will use a different data partition depending on which ``SuperNode`` runs in.
 
 Step 4: Run the App
 -------------------
