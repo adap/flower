@@ -148,10 +148,11 @@ Step 4: Run the App
 At this point, you have launched two ``SuperNodes`` that are connected to the same
 ``SuperLink``. The system is idling waiting for a ``Run`` to be submitted. Before you
 can run your Flower App through the federation we need a way to tell ``flwr run`` that
-the App is to be executed via the SuperLink we just started, instead of using the local Simulation
-Engine (the default). Doing this is easy: define a new federation section in the
-``pyproject.toml``, indicate the address of the ``SuperLink`` and pass a certificate (if
-any) or set the insecure flag (only when testing locally, real deployments require TLS).
+the App is to be executed via the SuperLink we just started, instead of using the local
+Simulation Engine (the default). Doing this is easy: define a new federation section in
+the ``pyproject.toml``, indicate the address of the ``SuperLink`` and pass a certificate
+(if any) or set the insecure flag (only when testing locally, real deployments require
+TLS).
 
 1. Open the ``pyproject.toml`` file and at the end add a new federation configuration:
 
@@ -171,8 +172,8 @@ any) or set the insecure flag (only when testing locally, real deployments requi
        ``local-deployment`` with your chosen name in both the ``tool.flwr.federations.``
        string and the corresponding ``flwr run .`` command.
 
-2. In another terminal and with your Python environment activated, run the Flower
-   App and follow the ``ServerApp`` logs to track the execution of the run:
+2. In another terminal and with your Python environment activated, run the Flower App
+   and follow the ``ServerApp`` logs to track the execution of the run:
 
    .. code-block:: bash
 

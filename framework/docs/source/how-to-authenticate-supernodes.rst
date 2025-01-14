@@ -77,14 +77,6 @@ that the authentication feature can only be enabled in the presence of TLS.
     * | ``--auth-superlink-private-key``: the private key of the SuperLink.
     * | ``--auth-superlink-public-key``: the public key of the SuperLink.
 
-.. note::
-
-    Currently, there is no support for dynamically removing, editing, or adding known
-    node public keys to a running SuperLink. To change the set of known nodes, you need
-    to shut the SuperLink down, edit the CSV file, and start the SuperLink again.
-    Support for dynamically changing the set of known nodes will be available in an
-    upcoming Flower release.
-
 Enable node authentication in SuperNode
 ---------------------------------------
 
