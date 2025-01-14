@@ -1,3 +1,7 @@
+:og:description: Discover Flower Architecture connections: Learn how User/SuperLink interact via CLI and the secure links between SuperLink, SuperNode, ServerApp, and ClientApp.
+.. meta::
+    :description: Discover Flower Architecture connections: Learn how User/SuperLink interact via CLI and the secure links between SuperLink, SuperNode, ServerApp, and ClientApp.
+    
 Flower Network Diagram
 ======================
 
