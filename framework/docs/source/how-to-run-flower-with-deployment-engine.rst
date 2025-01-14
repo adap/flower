@@ -24,7 +24,8 @@ Before you start, make sure that:
 Step 1: Set Up
 --------------
 
-Create a new Flower project (PyTorch), and follow the instructions show upon executing :code:`flwr new`:
+Create a new Flower project (PyTorch), and follow the instructions show upon executing
+``flwr new``:
 
 .. code-block:: bash
 
@@ -46,6 +47,7 @@ Create a new Flower project (PyTorch), and follow the instructions show upon exe
 
     If you decide to run the project with ``flwr run .``, the Simulation Engine will be
     used. Continue to Step 2 to know how to instead use the Deployment Engine.
+
 Step 2: Start the SuperLink
 ---------------------------
 
