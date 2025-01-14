@@ -120,9 +120,8 @@ You will need two terminals for this step.
        * | ``--superlink 127.0.0.1:9092``: Connect to the SuperLink's Fleet API at the address
          | ``127.0.0.1:9092``. If you had launched the ``SuperLink`` in a different machine, youd replace ``127.0.0.1`` with the public IP of that machine.
        * | ``--clientappio-api-address 127.0.0.1:9094``: Set the address and port number where the
-         | SuperNode is listening to communicate with the ClientApp.
-       * | ``--node-config "partition-id=0 num-partitions=2"``: The ``ClientApp`` code generated via the ``flwr new`` template expects those two key-value pairs to be defined at run time. Set the partition ID to ``0`` and the
-         | number of partitions to ``2`` for the ``SuperNode`` configuration.
+         | SuperNode is listening to communicate with the ``ClientApp``.
+       * | ``--node-config "partition-id=0 num-partitions=2"``: The ``ClientApp`` code generated via the ``flwr new`` template expects those two key-value pairs to be defined at run time. Set the partition ID to ``0`` and the number of partitions to ``2`` for the ``SuperNode`` configuration.
 
 2. **Terminal 2** Start the second ``SuperNode`` after activating your environment:
 
