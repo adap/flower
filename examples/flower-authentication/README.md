@@ -48,6 +48,8 @@ pip install -e .
 
 ## Generate TLS certificates
 
+The `generate_cert.sh` script generates certificates for creating a secure TLS connection between the SuperLink and SuperNodes, as well as between the flwr CLI (user) and the SuperLink.
+
 > \[!NOTE\]
 > Note that this script should only be used for development purposes and not for creating production key pairs.
 
@@ -56,6 +58,8 @@ pip install -e .
 ```
 
 ## Generate public and private keys for SuperNode authentication
+
+The `generate_auth_keys.sh` script generates three private and public key pairs. One pair for the SuperLink and two pairs for the two SuperNodes.
 
 > \[!NOTE\]
 > Note that this script should only be used for development purposes and not for creating production key pairs.
