@@ -103,27 +103,6 @@ You will need two terminals for this step.
             --supernode-address 127.0.0.1:9095 \
             --isolation subprocess
 
-Step 4: Start the SuperExec
----------------------------
-
-In a new terminal, start the SuperExec process with the following command:
-
-.. code-block:: bash
-
-    $ flower-superexec \
-        --insecure \
-        --executor flwr.superexec.deployment:executor \
-        --executor-config 'superlink="127.0.0.1:9091"'
-
-.. dropdown:: Understand the command
-
-    * ``flower-superexec``: Name of the SuperExec binary.
-    * | ``--insecure``: This flag tells the SuperExec to operate in an insecure mode, allowing
-      | unencrypted communication.
-    * | ``--executor flwr.superexec.deployment:executor`` Use the
-      | ``flwr.superexec.deployment:executor`` executor to run the ServerApps.
-    * | ``--executor-config 'superlink="127.0.0.1:9091"'``: Configure the SuperExec executor to
-      | connect to the SuperLink running on port ``9091``.
 
 Step 5: Run the Project
 -----------------------
