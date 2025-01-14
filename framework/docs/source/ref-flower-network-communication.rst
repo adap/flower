@@ -119,15 +119,17 @@ connections they want to allow.
 
 Typical examples include:
 
-- **ServerApp to Database**: ``ServerApp`` instances might want to access the data to
-  perform the action they have been designed for (e.g. evaluate a model on some data after aggregation). How this connection is established depends on what storage technology used at
-  the client side. Note that in the diagram above we omitted showing a DB connected to the ServerApp components.
 - **ClientApp to Database**: ``ClientApp`` instances typically need to be able to access
   the data to perform the action they have been designed for (e.g. train locally a
   model, run a DB query). How this connection is established depends on what storage
   technology is used at the client side. Note that in the diagram above, we show two
   representative connections to DBs in Client-A and Client-B. Your DB connection(s) may
   likely be different to the illustration above.
+- **ServerApp to Database**: ``ServerApp`` instances might want to access the data to
+  perform the action they have been designed for (e.g. evaluate a model on some data
+  after aggregation). How this connection is established depends on what storage
+  technology used at the client side. Note that in the diagram above we have omitted
+  showing a DB connected to the ServerApp components.
 - **ServerApp to metric logging service**: Metric logging services like TensorBoard,
   MLFlow and Weights & Biases are often used to track the progress of training runs. In
   this setting, the ``ServerApp`` typically acts as a client to the metric logging
