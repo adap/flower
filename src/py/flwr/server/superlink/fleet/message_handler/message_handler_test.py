@@ -115,7 +115,7 @@ def test_pull_task_ins() -> None:
 def test_pull_messages() -> None:
     """Test pull_messages."""
     # Prepare
-    request = PullMessagesRequest(node=Node(node_id=1, anonymous=False))
+    request = PullMessagesRequest(node=Node(node_id=1234))
     state = MagicMock()
 
     # Execute
