@@ -8,9 +8,7 @@ to the :doc:`docker/index` guides.
 In this how-to guide, you will:
 
 - Set up a Flower project from scratch using the PyTorch template.
-- Launch the Flower infrastructure components: ``SuperLink`` and ``SuperNodes``. Please
-  refer to the :doc:`explanation-flower-architecture` guide for an overview of what each
-  component does.
+- Launch the Flower infrastructure components: ``SuperLink`` and ``SuperNodes``.
 - Run a Flower App using the Deployment Engine.
 
 The how-to guide should take less than 10 minutes to complete.
@@ -24,6 +22,10 @@ Before you start, make sure that:
   instructions :doc:`here <../how-to-install-flower>`.
 - This guide assumes all commands to be executed in the same machine in different
   terminals, each making use of the same Python environment.
+- This guide also assumes that you are familiar with the basic components in a Flower
+  deployment (i.e. ``SuperLink`` and ``SuperNode``), what their roles are and how they
+  interact with each other. Please refer to the :doc:`explanation-flower-architecture`
+  guide for an overview of what each component does.
 
 .. note::
 
@@ -35,9 +37,11 @@ Before you start, make sure that:
     achieve such deployments is by means of Docker. Check the :doc:`docker/index` to
     gain a better understanding on how to do so.
 
-Step 1: Set Up
---------------
+Step 1: Create a Flower App
+---------------------------
 
+Although you could write a Flower app from scratch, it is often easier to start from one
+of the templates available via ``flwr new`` and then customize it to your use case.
 Create a new Flower app (PyTorch), and follow the instructions show upon executing
 ``flwr new``:
 
@@ -180,8 +184,7 @@ any) or set the insecure flag.
 Step 5: Clean Up
 ----------------
 
-To stop all Flower service, use the ``Ctrl+C`` command in each terminal to stop the
-respective processes.
+Use the ``Ctrl+C`` command in each terminal to stop the respective processes.
 
 Where to Go Next
 ----------------
