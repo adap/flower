@@ -25,7 +25,8 @@ Before you start, make sure that:
 - This guide also assumes that you are familiar with the basic components in a Flower
   deployment (i.e. ``SuperLink`` and ``SuperNode``), what their roles are and how they
   interact with each other. Please refer to the :doc:`explanation-flower-architecture`
-  guide for an overview of what each component does.
+  guide and the :doc:`ref-flower-network-communication` for an overview of what each
+  component does and how they interact with each other.
 
 .. note::
 
@@ -74,8 +75,14 @@ Create a new Flower app (PyTorch), and follow the instructions show upon executi
     would like to get an overview of the code that was generated, take a look at the
     :doc:`tutorial-quickstart-pytorch` tutorial.
 
-Step 2: Launch the SuperLink
-----------------------------
+Step 2: Launch Flower Federation
+--------------------------------
+
+In this section you will learn how to launch a ``SuperLink`` and connect two
+``SuperNodes`` to it.
+
+Start a Flower SuperLink
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 In a new terminal, activate your environment and start the ``SuperLink`` process in
 insecure mode:
@@ -90,8 +97,8 @@ insecure mode:
     * | ``--insecure``: This flag tells the SuperLink to operate in an insecure mode, allowing
       | unencrypted communication. Refer to the :doc:`how-to-enable-tls-connections` guide to learn how to run your ``SuperLink`` with TLS.
 
-Step 3: Launch the SuperNodes
------------------------------
+Start two Flower SuperNodes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In this step, you will launch two ``SuperNodes`` and connect them to the ``SuperLink``.
 You will need two terminals for this step.
@@ -142,8 +149,8 @@ You will need two terminals for this step.
        * ``--clientappio-api-address 127.0.0.1:9095``: Note that a different port is being used. This is only needed because you are running two ``SuperNodes`` on the same machine. Typically you would run one node per machine and therefore, the ``--clientappio-api-address`` could be omitted all together and left with its default value.
        * ``--node-config "partition-id=1 num-partitions=2"```: Note here we indicate a different `partition-id`. In this way, a ``ClientApp`` will use a different data partition depending on which ``SuperNode`` runs in.
 
-Step 4: Run the App
--------------------
+Step 3: Run a Flower App on the Federation
+------------------------------------------
 
 At this point, you have launched two ``SuperNodes`` that are connected to the same
 ``SuperLink``. The system is idling waiting for a ``Run`` to be submitted. Before you
@@ -182,7 +189,7 @@ TLS).
    If you want to rerun the project or test an updated version by making changes to the
    code, simply re-run the command above.
 
-Step 5: Clean Up
+Step 4: Clean Up
 ----------------
 
 Use the ``Ctrl+C`` command in each terminal to stop the respective processes.
