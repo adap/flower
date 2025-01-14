@@ -8,7 +8,8 @@ to the :doc:`docker/index` guides.
 In this how-to guide, you will:
 
 - Create a Flower App using the PyTorch template.
-- Start a Flower federation consisting of one ``SuperLink`` ("the server") and two ``SuperNodes`` ("the clients").
+- Start a Flower federation consisting of one ``SuperLink`` ("the server") and two
+  ``SuperNodes`` ("the clients").
 - Run the Flower App on this federation.
 
 The how-to guide should take less than 10 minutes to complete.
