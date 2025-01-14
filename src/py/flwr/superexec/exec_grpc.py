@@ -23,11 +23,11 @@ import grpc
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.auth_plugin import ExecAuthPlugin
+from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log
 from flwr.common.typing import UserConfig
 from flwr.proto.exec_pb2_grpc import add_ExecServicer_to_server
 from flwr.server.superlink.ffs.ffs_factory import FfsFactory
-from flwr.server.superlink.fleet.grpc_bidi.grpc_server import generic_create_grpc_server
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.superexec.exec_user_auth_interceptor import ExecUserAuthInterceptor
 
