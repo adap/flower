@@ -154,13 +154,11 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         """Get all TaskIns IDs for the given run_id."""
 
     @abc.abstractmethod
-    def create_node(
-        self, ping_interval: float, public_key: Optional[bytes] = None
-    ) -> int:
+    def create_node(self, ping_interval: float) -> int:
         """Create, store in the link state, and return `node_id`."""
 
     @abc.abstractmethod
-    def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
+    def delete_node(self, node_id: int) -> None:
         """Remove `node_id` from the link state."""
 
     @abc.abstractmethod
@@ -172,6 +170,14 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
         If the provided `run_id` does not exist or has no matching nodes,
         an empty `Set` MUST be returned.
         """
+
+    @abc.abstractmethod
+    def set_node_public_key(self, node_id: int, public_key: bytes) -> None:
+        """Set `public_key` for the specified `node_id`."""
+
+    @abc.abstractmethod
+    def get_node_public_key(self, node_id: int) -> Optional[bytes]:
+        """Get `public_key` for the specified `node_id`."""
 
     @abc.abstractmethod
     def get_node_id(self, node_public_key: bytes) -> Optional[int]:

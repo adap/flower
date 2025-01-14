@@ -1,3 +1,7 @@
+:og:description: Learn how to train a large language model on the IMDB dataset using federated learning with Flower and 🤗 Hugging Face in this step-by-step tutorial.
+.. meta::
+    :description: Learn how to train a large language model on the IMDB dataset using federated learning with Flower and 🤗 Hugging Face in this step-by-step tutorial.
+
 .. _quickstart-huggingface:
 
 Quickstart 🤗 Transformers
@@ -398,6 +402,3 @@ for an LLM.
 .. _quickstart_hf_link: https://github.com/adap/flower/tree/main/examples/quickstart-huggingface
 
 .. _serverappcomponents: ref-api/flwr.server.ServerAppComponents.html#serverappcomponents
-
-.. meta::
-    :description: Check out this Federating Learning quickstart tutorial for using Flower with 🤗 HuggingFace Transformers in order to fine-tune an LLM.

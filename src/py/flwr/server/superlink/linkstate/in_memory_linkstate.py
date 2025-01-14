@@ -62,6 +62,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         # Map node_id to (online_until, ping_interval)
         self.node_ids: dict[int, tuple[float, float]] = {}
         self.public_key_to_node_id: dict[bytes, int] = {}
+        self.node_id_to_public_key: dict[int, bytes] = {}
 
         # Map run_id to RunRecord
         self.run_ids: dict[int, RunRecord] = {}
@@ -306,9 +307,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         """
         return len(self.task_res_store)
 
-    def create_node(
-        self, ping_interval: float, public_key: Optional[bytes] = None
-    ) -> int:
+    def create_node(self, ping_interval: float) -> int:
         """Create, store in the link state, and return `node_id`."""
         # Sample a random int64 as node_id
         node_id = generate_rand_int_from_bytes(NODE_ID_NUM_BYTES)
@@ -318,33 +317,18 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 log(ERROR, "Unexpected node registration failure.")
                 return 0
 
-            if public_key is not None:
-                if (
-                    public_key in self.public_key_to_node_id
-                    or node_id in self.public_key_to_node_id.values()
-                ):
-                    log(ERROR, "Unexpected node registration failure.")
-                    return 0
-
-                self.public_key_to_node_id[public_key] = node_id
-
             self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
             return node_id
 
-    def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
+    def delete_node(self, node_id: int) -> None:
         """Delete a node."""
         with self.lock:
             if node_id not in self.node_ids:
                 raise ValueError(f"Node {node_id} not found")
 
-            if public_key is not None:
-                if (
-                    public_key not in self.public_key_to_node_id
-                    or node_id not in self.public_key_to_node_id.values()
-                ):
-                    raise ValueError("Public key or node_id not found")
-
-                del self.public_key_to_node_id[public_key]
+            # Remove node ID <> public key mappings
+            if pk := self.node_id_to_public_key.pop(node_id, None):
+                del self.public_key_to_node_id[pk]
 
             del self.node_ids[node_id]
 
@@ -365,6 +349,26 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
                 for node_id, (online_until, _) in self.node_ids.items()
                 if online_until > current_time
             }
+
+    def set_node_public_key(self, node_id: int, public_key: bytes) -> None:
+        """Set `public_key` for the specified `node_id`."""
+        with self.lock:
+            if node_id not in self.node_ids:
+                raise ValueError(f"Node {node_id} not found")
+
+            if public_key in self.public_key_to_node_id:
+                raise ValueError("Public key already in use")
+
+            self.public_key_to_node_id[public_key] = node_id
+            self.node_id_to_public_key[node_id] = public_key
+
+    def get_node_public_key(self, node_id: int) -> Optional[bytes]:
+        """Get `public_key` for the specified `node_id`."""
+        with self.lock:
+            if node_id not in self.node_ids:
+                raise ValueError(f"Node {node_id} not found")
+
+            return self.node_id_to_public_key.get(node_id)
 
     def get_node_id(self, node_public_key: bytes) -> Optional[int]:
         """Retrieve stored `node_id` filtered by `node_public_keys`."""
