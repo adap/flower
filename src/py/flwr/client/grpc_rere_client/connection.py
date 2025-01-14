@@ -29,7 +29,6 @@ from cryptography.hazmat.primitives.asymmetric import ec
 
 from flwr.client.heartbeat import start_ping_loop
 from flwr.client.message_handler.message_handler import validate_out_message
-from flwr.client.message_handler.task_handler import get_task_ins, validate_task_ins
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import (
     PING_BASE_MULTIPLIER,
@@ -41,7 +40,7 @@ from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
-from flwr.common.serde import message_from_taskins, message_to_taskres, run_from_proto
+from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
 from flwr.common.typing import Fab, Run, RunNotRunningException
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -49,13 +48,13 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     DeleteNodeRequest,
     PingRequest,
     PingResponse,
-    PullTaskInsRequest,
-    PushTaskResRequest,
+    PullMessagesRequest,
+    PullMessagesResponse,
+    PushMessagesRequest,
 )
 from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
-from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 from .client_interceptor import AuthenticateClientInterceptor
 from .grpc_adapter import GrpcAdapter
@@ -227,28 +226,31 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         node = None
 
     def receive() -> Optional[Message]:
-        """Receive next task from server."""
+        """Receive next message from server."""
         # Get Node
         if node is None:
             log(ERROR, "Node instance missing")
             return None
 
-        # Request instructions (task) from server
-        request = PullTaskInsRequest(node=node)
-        response = retry_invoker.invoke(stub.PullTaskIns, request=request)
+        # Request instructions (message) from server
+        request = PullMessagesRequest(node=node)
+        response: PullMessagesResponse = retry_invoker.invoke(
+            stub.PullMessages, request=request
+        )
 
-        # Get the current TaskIns
-        task_ins: Optional[TaskIns] = get_task_ins(response)
+        # Get the current Messages
+        message_proto = (
+            None if len(response.messages_list) == 0 else response.messages_list[0]
+        )
 
-        # Discard the current TaskIns if not valid
-        if task_ins is not None and not (
-            task_ins.task.consumer.node_id == node.node_id
-            and validate_task_ins(task_ins)
+        # Discard the current message if not valid
+        if message_proto is not None and not (
+            message_proto.metadata.dst_node_id == node.node_id
         ):
-            task_ins = None
+            message_proto = None
 
         # Construct the Message
-        in_message = message_from_taskins(task_ins) if task_ins else None
+        in_message = message_from_proto(message_proto) if message_proto else None
 
         # Remember `metadata` of the in message
         nonlocal metadata
@@ -258,7 +260,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         return in_message
 
     def send(message: Message) -> None:
-        """Send task result back to server."""
+        """Send message reply to server."""
         # Get Node
         if node is None:
             log(ERROR, "Node instance missing")
@@ -275,12 +277,10 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             log(ERROR, "Invalid out message")
             return
 
-        # Construct TaskRes
-        task_res = message_to_taskres(message)
-
-        # Serialize ProtoBuf to bytes
-        request = PushTaskResRequest(node=node, task_res_list=[task_res])
-        _ = retry_invoker.invoke(stub.PushTaskRes, request)
+        # Serialize Message
+        message_proto = message_to_proto(message=message)
+        request = PushMessagesRequest(node=node, messages_list=[message_proto])
+        _ = retry_invoker.invoke(stub.PushMessages, request)
 
         # Cleanup
         metadata = None
