@@ -76,9 +76,7 @@ def flwr_serverapp() -> None:
 
     if not args.insecure:
         flwr_exit(
-            ExitCode.TLS_NOT_SUPPORTED,
-            "`flwr-serverapp` does not support TLS yet. "
-            "Please use the '--insecure' flag.",
+            ExitCode.TLS_NOT_SUPPORTED, "`flwr-serverapp` does not support TLS yet."
         )
 
     log(

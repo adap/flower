@@ -273,12 +273,7 @@ def _try_setup_client_authentication(
         return None
 
     if not args.auth_supernode_private_key or not args.auth_supernode_public_key:
-        flwr_exit(
-            ExitCode.NODE_AUTH_KEYS_REQUIRED,
-            "Authentication requires file paths to both "
-            "'--auth-supernode-private-key' and '--auth-supernode-public-key' "
-            "to be provided (providing only one of them is not sufficient).",
-        )
+        flwr_exit(ExitCode.NODE_AUTH_KEYS_REQUIRED)
 
     try:
         ssh_private_key = load_ssh_private_key(

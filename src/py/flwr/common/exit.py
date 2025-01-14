@@ -105,26 +105,26 @@ To use the REST API, install `flwr` with the `rest` extra:
 HELP_PAGE_URL = "https://flower.ai/docs/framework/exit-codes/"
 
 
-def flwr_exit(code: int, error_message: str | None = None) -> NoReturn:
+def flwr_exit(code: int, message: str | None = None) -> NoReturn:
     """Handle application exit with an optional message.
 
     The exit message logged and displayed will follow this structure:
 
     >>> Exit Code: <code>
-    >>> <error_message>
+    >>> <message>
     >>> <short-help-message>
     >>>
     >>> For more information, visit: <help-page-url>
 
     - `<code>`: The exit code representing the termination reason.
-    - `<error_message>`: Optional context or additional information about the error.
+    - `<message>`: Optional context or additional information about the exit.
     - `<short-help-message>`: A predefined brief explanation for the given exit code.
     - `<help-page-url>`: A URL providing detailed documentation and resolution steps.
     """
     # Construct exit message
     exit_message = f"Exit Code: {code}\n"
-    if error_message:
-        exit_message += f"{error_message}"
+    if message:
+        exit_message += f"{message}\n"
     exit_message += EXIT_CODE_HELP.get(code, "")
 
     # Set log level and system exit code
@@ -144,7 +144,7 @@ def flwr_exit(code: int, error_message: str | None = None) -> NoReturn:
     # Telemetry event
     event_type = _try_obtain_telemetry_event()
     if event_type:
-        event(event_type, event_details={"exit_code": code, "message": error_message})
+        event(event_type, event_details={"exit_code": code})
 
     # Exit
     sys.exit(sys_exit_code)
