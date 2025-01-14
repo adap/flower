@@ -9,7 +9,7 @@ In this how-to guide, you will:
 
 - Set up a Flower project from scratch using the PyTorch template.
 - Launch the Flower infrastructure components: ``SuperLink`` and ``SuperNodes``.
-- Run a Flower App using the Deployment Engine.
+- Run a Flower App.
 
 The how-to guide should take less than 10 minutes to complete.
 
@@ -31,8 +31,8 @@ Before you start, make sure that:
 
     In a real deployment you would typically run the ``SuperLink`` the ``SuperNodes`` in
     different machines/servers from the one you develop your Flower app (i.e. from where
-    you do ``flwr new`` and ``flwr run``). The guide presented below is still valide for
-    such scenario but you will need to have setup a Python environment with the right
+    you do ``flwr new`` and ``flwr run``). The guide presented below is still valid for
+    such scenarios but you will need to have setup a Python environment with the right
     set of dependencies for ``SuperLink`` and ``SuperNodes``. An often easier way to
     achieve such deployments is by means of Docker. Check the :doc:`docker/index` to
     gain a better understanding on how to do so.
@@ -104,7 +104,7 @@ You will need two terminals for this step.
     key-value pairs to be present in order to partition and load some data. Typically,
     your ``ClientApp`` wouldn't partition a dataset, instead it would access the data
     directly available. In such cases you would write your ``ClientApp`` and make it
-    recieve, for example, the path to a directory of images.
+    receive, for example, the path to a directory of images.
 
 1. **Terminal 1** Start the first ``SuperNode`` after activating your environment:
 
@@ -148,10 +148,10 @@ Step 4: Run the App
 At this point, you have launched two ``SuperNodes`` that are connected to the same
 ``SuperLink``. The system is idling waiting for a ``Run`` to be submitted. Before you
 can run your Flower App through the federation we need a way to tell ``flwr run`` that
-the App is to be executed with the Deployment Engine instead of with the Simulation
+the App is to be executed via the SuperLink we just started, instead of using the local Simulation
 Engine (the default). Doing this is easy: define a new federation section in the
-``pyprojec.toml``, indicate the address of the ``SuperLink`` and pass a certificate (if
-any) or set the insecure flag.
+``pyproject.toml``, indicate the address of the ``SuperLink`` and pass a certificate (if
+any) or set the insecure flag (only when testing locally, real deployments require TLS).
 
 1. Open the ``pyproject.toml`` file and at the end add a new federation configuration:
 
@@ -172,7 +172,7 @@ any) or set the insecure flag.
        string and the corresponding ``flwr run .`` command.
 
 2. In another terminal and with your Python environment activated, run the Flower
-   project and follow the ServerApp logs to track the execution of the run:
+   App and follow the ``ServerApp`` logs to track the execution of the run:
 
    .. code-block:: bash
 
