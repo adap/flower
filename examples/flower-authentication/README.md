@@ -46,23 +46,29 @@ Install the dependencies defined in `pyproject.toml` as well as the `authexample
 pip install -e .
 ```
 
-## Generate public and private keys
-
-The `generate.sh` script by default generates certificates for creating a secure TLS connection
-and three private and public key pairs for one server and two clients.
+## Generate TLS certificates
 
 > \[!NOTE\]
 > Note that this script should only be used for development purposes and not for creating production key pairs.
 
 ```bash
-./generate.sh
+./generate_cert.sh
+```
+
+## Generate public and private keys for SuperNode authentication
+
+> \[!NOTE\]
+> Note that this script should only be used for development purposes and not for creating production key pairs.
+
+```bash
+./generate_auth_keys.sh
 ```
 
 You can generate more keys by specifying the number of client credentials that you wish to generate.
 The script also generates a CSV file that includes each of the generated (client) public keys.
 
 ```bash
-./generate.sh {your_number_of_clients}
+./generate_auth_keys.sh {your_number_of_clients}
 ```
 
 ## Start the long-running Flower server (SuperLink)
