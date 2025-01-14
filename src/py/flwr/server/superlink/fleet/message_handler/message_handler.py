@@ -20,7 +20,14 @@ from typing import Optional
 from uuid import UUID
 
 from flwr.common.constant import Status
-from flwr.common.serde import fab_to_proto, user_config_to_proto
+from flwr.common.serde import (
+    fab_to_proto,
+    message_from_proto,
+    message_from_taskins,
+    message_to_proto,
+    message_to_taskres,
+    user_config_to_proto,
+)
 from flwr.common.typing import Fab, InvalidRunStatusException
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -30,8 +37,12 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     DeleteNodeResponse,
     PingRequest,
     PingResponse,
+    PullMessagesRequest,
+    PullMessagesResponse,
     PullTaskInsRequest,
     PullTaskInsResponse,
+    PushMessagesRequest,
+    PushMessagesResponse,
     PushTaskResRequest,
     PushTaskResResponse,
     Reconnect,
@@ -94,6 +105,26 @@ def pull_task_ins(request: PullTaskInsRequest, state: LinkState) -> PullTaskInsR
     return response
 
 
+def pull_messages(
+    request: PullMessagesRequest, state: LinkState
+) -> PullMessagesResponse:
+    """Pull Messages handler."""
+    # Get node_id if client node is not anonymous
+    node = request.node  # pylint: disable=no-member
+    node_id: Optional[int] = None if node.anonymous else node.node_id
+
+    # Retrieve TaskIns from State
+    task_ins_list: list[TaskIns] = state.get_task_ins(node_id=node_id, limit=1)
+
+    # Convert to Messages
+    msg_proto = []
+    for task_ins in task_ins_list:
+        msg = message_from_taskins(task_ins)
+        msg_proto.append(message_to_proto(msg))
+
+    return PullMessagesResponse(messages_list=msg_proto)
+
+
 def push_task_res(request: PushTaskResRequest, state: LinkState) -> PushTaskResResponse:
     """Push TaskRes handler."""
     # pylint: disable=no-member
@@ -119,6 +150,37 @@ def push_task_res(request: PushTaskResRequest, state: LinkState) -> PushTaskResR
     response = PushTaskResResponse(
         reconnect=Reconnect(reconnect=5),
         results={str(task_id): 0},
+    )
+    return response
+
+
+def push_messages(
+    request: PushMessagesRequest, state: LinkState
+) -> PushMessagesResponse:
+    """Push Messages handler."""
+    # Convert Message to TaskRes
+    msg = message_from_proto(message_proto=request.messages_list[0])
+    task_res = message_to_taskres(msg)
+
+    # Abort if the run is not running
+    abort_msg = check_abort(
+        task_res.run_id,
+        [Status.PENDING, Status.STARTING, Status.FINISHED],
+        state,
+    )
+    if abort_msg:
+        raise InvalidRunStatusException(abort_msg)
+
+    # Set pushed_at (timestamp in seconds)
+    task_res.task.pushed_at = time.time()
+
+    # Store TaskRes in State
+    message_id: Optional[UUID] = state.store_task_res(task_res=task_res)
+
+    # Build response
+    response = PushMessagesResponse(
+        reconnect=Reconnect(reconnect=5),
+        results={str(message_id): 0},
     )
     return response
 

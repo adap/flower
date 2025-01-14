@@ -94,7 +94,8 @@ class FleetServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def PullMessages(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """HTTP API path: /api/v1/fleet/pull-messages
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -109,7 +110,8 @@ class FleetServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def PushMessages(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """HTTP API path: /api/v1/fleet/push-messages
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')

@@ -32,8 +32,12 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     DeleteNodeResponse,
     PingRequest,
     PingResponse,
+    PullMessagesRequest,
+    PullMessagesResponse,
     PullTaskInsRequest,
     PullTaskInsResponse,
+    PushMessagesRequest,
+    PushMessagesResponse,
     PushTaskResRequest,
     PushTaskResResponse,
 )
@@ -117,6 +121,16 @@ async def pull_task_ins(request: PullTaskInsRequest) -> PullTaskInsResponse:
     return message_handler.pull_task_ins(request=request, state=state)
 
 
+@rest_request_response(PullMessagesRequest)
+async def pull_message(request: PullMessagesRequest) -> PullMessagesResponse:
+    """Pull PullMessages."""
+    # Get state from app
+    state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
+
+    # Handle message
+    return message_handler.pull_messages(request=request, state=state)
+
+
 # Check if token is needed here
 @rest_request_response(PushTaskResRequest)
 async def push_task_res(request: PushTaskResRequest) -> PushTaskResResponse:
@@ -126,6 +140,16 @@ async def push_task_res(request: PushTaskResRequest) -> PushTaskResResponse:
 
     # Handle message
     return message_handler.push_task_res(request=request, state=state)
+
+
+@rest_request_response(PushMessagesRequest)
+async def push_message(request: PushMessagesRequest) -> PushMessagesResponse:
+    """Pull PushMessages."""
+    # Get state from app
+    state: LinkState = cast(LinkStateFactory, app.state.STATE_FACTORY).state()
+
+    # Handle message
+    return message_handler.push_messages(request=request, state=state)
 
 
 @rest_request_response(PingRequest)
@@ -165,7 +189,9 @@ routes = [
     Route("/api/v0/fleet/create-node", create_node, methods=["POST"]),
     Route("/api/v0/fleet/delete-node", delete_node, methods=["POST"]),
     Route("/api/v0/fleet/pull-task-ins", pull_task_ins, methods=["POST"]),
+    Route("/api/v0/fleet/pull-messages", pull_message, methods=["POST"]),
     Route("/api/v0/fleet/push-task-res", push_task_res, methods=["POST"]),
+    Route("/api/v0/fleet/push-messages", push_message, methods=["POST"]),
     Route("/api/v0/fleet/ping", ping, methods=["POST"]),
     Route("/api/v0/fleet/get-run", get_run, methods=["POST"]),
     Route("/api/v0/fleet/get-fab", get_fab, methods=["POST"]),
