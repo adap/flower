@@ -29,7 +29,7 @@ Enable node authentication in ``SuperLink``
 To enable node authentication, first you need to configure SSL/TLS for **SuperLink ↔
 SuperNode** communication. Refer to the :doc:`how-to-enable-ssl-connections` guide for
 details. After configuring secure connections, use the following terminal command to
-start a Flower SuperLink that has both secure connections and node authentication
+start a Flower SuperLink that has both secure TLS connections and node authentication
 enabled:
 
 .. code-block:: bash
@@ -44,10 +44,7 @@ enabled:
 
 .. dropdown:: Understand the command
 
-    * ``--ssl-ca-certfile``: Specify the location of the CA certificate file in your file. This file is a certificate that is used to verify the identity of the SuperLink.
-    * | ``--ssl-certfile``: Specify the location of the SuperLink's TLS certificate file. This file is used to identify the SuperLink and to encrypt the packages that are transmitted over the network.
-    * | ``--ssl-keyfile``: Specify the location of the SuperLink's TLS private key file. This file is used to decrypt the packages that are transmitted over the network.
-    * | ``--auth-list-public-keys``: Specify the path to a CSV file storing the public keys of all SuperNodes that should be allowed to connect with the SuperLink.
+    * ``--auth-list-public-keys``: Specify the path to a CSV file storing the public keys of all SuperNodes that should be allowed to connect with the SuperLink.
       | A valid CSV file storing known node public keys should list the keys in OpenSSH format, separated by commas and without any comments. Refer to the code sample, which contains a CSV file with two known node public keys.
     * | ``--auth-superlink-private-key``: the private key of the SuperLink.
     * | ``--auth-superlink-public-key``: the public key of the SuperLink.
@@ -70,15 +67,14 @@ terminal command to start an authenticated ``SuperNode``:
 .. code-block:: bash
 
     flower-supernode \
-         --root-certificates certificates/ca.crt \
          --superlink 127.0.0.1:9092 \
+         --root-certificates certificates/ca.crt \
          --auth-supernode-private-key keys/client_credentials \
          --auth-supernode-public-key keys/client_credentials.pub
 
 .. dropdown:: Understand the command
 
-    * ``--superlink``: The address of the SuperLink this SuperNode is connecting to. By default this connection happens over port 9092. This could be configure by means of the ``--fleet-api-address`` when launching the SuperLink.
-    * | ``--auth-supernode-private-key``: the private key of this SuperNode.
+    * ``--auth-supernode-private-key``: the private key of this SuperNode.
     * | ``--auth-supernode-public-key``: the public key of this SuperNode (which should be the same that was added to othe CSV used by the SuperLink).
 
 Security notice
