@@ -52,7 +52,7 @@ Create a new Flower app (PyTorch), and follow the instructions show upon executi
 
             flwr run my-project
 
-    If you haven't installed all dependencies yet, follow these steps:
+    If you haven not installed all dependencies yet, follow these steps:
 
             cd my-project
             pip install -e .
