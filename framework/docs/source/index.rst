@@ -95,9 +95,9 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
     how-to-save-and-load-model-checkpoints
     how-to-run-simulations
     how-to-enable-tls-connections
+    how-to-authenticate-supernodes
     how-to-use-built-in-mods
     how-to-use-differential-privacy
-    how-to-authenticate-supernodes
     how-to-implement-fedbn
     how-to-run-flower-on-azure
     how-to-use-cli-json-output
