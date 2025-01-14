@@ -28,8 +28,8 @@ node authentication works similar to how GitHub SSH authentication works:
 
     This guide covers a preview feature that might change in future versions of Flower.
 
-Generating authentication keys
-------------------------------
+Generate authentication keys
+----------------------------
 
 To establish an authentication mechanism by which only authorized SuperNodes can connect
 to a running SuperLink, a set of key pairs for both SuperLink and SuperNodes need to be
