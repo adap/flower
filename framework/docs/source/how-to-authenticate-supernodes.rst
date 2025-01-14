@@ -23,8 +23,6 @@ node authentication works similar to how GitHub SSH authentication works:
     Checkout the `Flower Authentication
     <https://github.com/adap/flower/tree/main/examples/flower-authentication>`_ example
     for a complete self-contained example on how to setup TLS and node authentication.
-    Check out the :doc:`how-to-authenticate-supernodes` guide to learn more about adding
-    an authentication layer to SuperLink ↔ SuperNode connections.
 
 .. note::
 
