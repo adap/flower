@@ -1,22 +1,37 @@
 Enable TLS connections
 ======================
 
-This guide describes how to a TLS-enabled secure Flower server (``SuperLink``) can be
-started and how a Flower client (``SuperNode``) can establish a secure connections to
-it.
+Transport Layer Security (TLS) ensures the communication between endpoints is encrypted.
+This guide describes how to establish secure TLS Superlink ↔ SuperNodes as well as User
+↔ SuperLink connections.
 
-A complete code example demonstrating a secure connection can be found `here
-<https://github.com/adap/flower/tree/main/examples/advanced-tensorflow>`_.
+.. note::
 
-The code example comes with a ``README.md`` file which explains how to start it.
-Although it is already TLS-enabled, it might be less descriptive on how it does so.
-Stick to this guide for a deeper introduction to the topic.
+    This guide builds on the Flower App setup presented in
+    :doc:`how-to-run-flower-with-deployment-engine` and extends it to replace the use of
+    ``--insecure`` in favour of TLS.
+
+.. tip::
+
+    Checkout the `Flower Authentication
+    <https://github.com/adap/flower/tree/main/examples/flower-authentication>`_ example
+    for a complete self-contained example on how to setup TLS and (optionally) node
+    authentication. Check out the :doc:`how-to-authenticate-supernodes` guide to learn
+    more about adding an authentication layer to SuperLink ↔ SuperNode connections.
 
 Certificates
 ------------
 
-Using TLS-enabled connections requires certificates to be passed to the server and
-client. For the purpose of this guide we are going to generate self-signed certificates.
+Using TLS-enabled connections expects some certificates generated and passed when
+launching the SuperLink, the SuperNodes and when a user (e.g. a data scientist that
+wants to submit a ``Run``) interacts with the federation via the `flwr CLI
+<ref-api-cli>`_.
+
+We have prepared a script that can be used to generate such set of certificates. While
+using these are fine for prototyping, we advice you to follow the standards set in your
+team/organization and generated the certificates and share them with the corresponding
+parties.
+
 As this can become quite complex we are going to ask you to run the script in
 ``examples/advanced-tensorflow/certificates/generate.sh`` with the following command
 sequence:
