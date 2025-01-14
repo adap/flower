@@ -118,7 +118,6 @@ ideas behind Flower and collaborative AI.
     explanation-federated-evaluation
     explanation-differential-privacy
     explanation-flower-architecture
-    explanation-flower-network-diagram
 
 References
 ~~~~~~~~~~
@@ -145,6 +144,7 @@ Information-oriented API reference and other reference material.
     ref-example-projects
     ref-telemetry
     ref-changelog
+    ref-flower-network-communication
     ref-faq
 
 Contributor docs
