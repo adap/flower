@@ -94,7 +94,7 @@ SuperLink or SuperNode:
 
     In the current version of Flower, both of these connections are insecure because
     Flower expects SuperLink/SuperNode and ``flwr-serverapp`` / ``flwr-clientapp`` to be
-    run in the same enviornment. ``flwr-serverapp`` / ``flwr-clientapp`` and
+    run in the same network. ``flwr-serverapp`` / ``flwr-clientapp`` and
     SuperLink/SuperNode should never communicate over untrusted networks (e.g., public
     internet).
 
