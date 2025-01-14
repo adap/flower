@@ -12,27 +12,55 @@ node authentication works similar to how GitHub SSH authentication works:
   SuperLink as a token
 - SuperLink verifies the token
 
+.. note::
+
+    This guide builds on the Flower App setup presented in the
+    :doc:`how-to-enable-tls-connections` guide and extends it to introduce node
+    authentication to the SuperLink ↔ SuperNode connection.
+
 .. tip::
 
-    The code snippets shown in this guide are borrowed from the `Flower Authentication
-    Example <https://github.com/adap/flower/tree/main/examples/flower-authentication>`_.
-    Check it out if you want to learn more on how to setup a federation with TLS and
-    authenticated SuperLink ↔ SuperNode connections.
+    Checkout the `Flower Authentication
+    <https://github.com/adap/flower/tree/main/examples/flower-authentication>`_ example
+    for a complete self-contained example on how to setup TLS and node authentication.
+    Check out the :doc:`how-to-authenticate-supernodes` guide to learn more about adding
+    an authentication layer to SuperLink ↔ SuperNode connections.
 
 .. note::
 
     This guide covers a preview feature that might change in future versions of Flower.
 
-Enable node authentication in ``SuperLink``
--------------------------------------------
+Generating authentication keys
+------------------------------
 
-To enable node authentication, first you need to configure SSL/TLS for **SuperLink ↔
-SuperNode** communication. Refer to the :doc:`how-to-enable-ssl-connections` guide for
-details. After configuring secure connections, use the following terminal command to
-start a Flower SuperLink that has both secure TLS connections and node authentication
-enabled:
+To sstablish an authentication mechanism by which only authorized SuperNodes can connect
+to a running SuperLink, a set of key pairs for both SuperLink and SuperNodes need to be
+created.
+
+We have prepared a script that can be used to generate such set of keys. While using
+these are fine for prototyping, we advice you to follow the standards set in your
+team/organization and generated the keys and share them with the corresponding parties.
+Refer to the **Generate public and private keys for SuperNode authentication** section
+in the example linked at the top of this guide.
 
 .. code-block:: bash
+
+    # In the example directory, generate the public/private key pairs
+    $ ./generate_auth_keys.sh
+
+This will generate the keys in a new ``keys/`` directory. By default it creates a key
+pair for the SuperLink and one for each SuperNode. Copy this directory into the
+directory of your app (e.g. a directory generated earlier via ``flwr new``).
+
+Enable node authentication in SuperLink
+---------------------------------------
+
+To launch a SuperLink with SuperNode authentication enabled, you need to provide three
+aditional files in addition to the certificates needed for the TLS connections. Recall
+that the authentication feature can only be enabled in the presence of TLS.
+
+.. code-block:: bash
+    :emphasize-lines: 5,6,7
 
     flower-superlink \
         --ssl-ca-certfile certificates/ca.crt \
@@ -57,25 +85,42 @@ enabled:
     Support for dynamically changing the set of known nodes will be available in an
     upcoming Flower release.
 
-Enable node authentication in ``SuperNode``
--------------------------------------------
+Enable node authentication in SuperNode
+---------------------------------------
 
-Similar to the long-running Flower server (``SuperLink``), you can easily enable node
-authentication in the long-running Flower client (``SuperNode``). Use the following
-terminal command to start an authenticated ``SuperNode``:
+Connecting a SuperNode to a SuperLink that has node authentication enabled requires
+passing two additional arguments (i.e. the public and private keys of the SuperNode) in
+addition to the TLS certificate.
 
 .. code-block:: bash
+    :emphasize-lines: 6, 7
 
     flower-supernode \
-         --superlink 127.0.0.1:9092 \
-         --root-certificates certificates/ca.crt \
-         --auth-supernode-private-key keys/client_credentials \
-         --auth-supernode-public-key keys/client_credentials.pub
+        --root-certificates certificates/ca.crt \
+        --superlink 127.0.0.1:9092 \
+        --clientappio-api-address 0.0.0.0:9094 \
+        --node-config="partition-id=0 num-partitions=2" \
+        --auth-supernode-private-key keys/client_credentials_1 \
+        --auth-supernode-public-key keys/client_credentials_1.pub
 
 .. dropdown:: Understand the command
 
     * ``--auth-supernode-private-key``: the private key of this SuperNode.
     * | ``--auth-supernode-public-key``: the public key of this SuperNode (which should be the same that was added to othe CSV used by the SuperLink).
+
+Follow the same procedure to launch the second SuperNode by passing its corresponding
+key pair:
+
+.. code-block:: bash
+    :emphasize-lines: 6, 7
+
+    $ flower-supernode \
+        --root-certificates certificates/ca.crt \
+        --superlink 127.0.0.1:9092 \
+        --clientappio-api-address 0.0.0.0:9095 \
+        --node-config="partition-id=1 num-partitions=2" \
+        --auth-supernode-private-key keys/client_credentials_2 \
+        --auth-supernode-public-key keys/client_credentials_2.pub
 
 Security notice
 ---------------
@@ -92,3 +137,10 @@ Conclusion
 You should now have learned how to start a long-running Flower SuperLink and SuperNode
 with node authentication enabled. You should also know the significance of the private
 key and store it safely to minimize security risks.
+
+.. note::
+
+    Refer to the :doc:`docker/index` documentation to learn how to setup a federation
+    where each component runs in its own Docker container. You can make use of TLS and
+    other security features in Flower such as implement a SuperNode authentication
+    mechanism.

@@ -8,8 +8,8 @@ This guide describes how to establish secure TLS Superlink ↔ SuperNodes as wel
 .. note::
 
     This guide builds on the Flower App setup presented in
-    :doc:`how-to-run-flower-with-deployment-engine` and extends it to replace the use of
-    ``--insecure`` in favour of TLS.
+    :doc:`how-to-run-flower-with-deployment-engine` guide and extends it to replace the
+    use of ``--insecure`` in favour of TLS.
 
 .. tip::
 
@@ -39,7 +39,7 @@ top of this guide.
     $ ./generate_cert.sh
 
 This will generate the TLS certificates in a new ``certificates/`` directory. Copy this
-directory into the directory of your app (i.e. eg a directory generated via ``flwr
+directory into the directory of your app (e.g. a directory generated earlier via ``flwr
 new``).
 
 The approach for generating TLS certificates in the context of this example can serve as
@@ -116,6 +116,7 @@ certificate. To do so, replace the ``insecure = true`` field in the ``pyproject.
 with a new field that reads the certificate:
 
 .. code-block:: toml
+    :caption: pyproject.toml
     :emphasize-lines: 3,3
 
     [tool.flwr.federations.local-deployment]
@@ -140,10 +141,10 @@ TLS-enabled.
 
 .. note::
 
-    Refer to the :doc:`docker/index` documentation to learn how to setup a
-    federation where each component runs in its own Docker container. You can make use
-    of TLS and other security features in Flower such as implement a SuperNode
-    authentication mechanism.
+    Refer to the :doc:`docker/index` documentation to learn how to setup a federation
+    where each component runs in its own Docker container. You can make use of TLS and
+    other security features in Flower such as implement a SuperNode authentication
+    mechanism.
 
 Additional resources
 --------------------
