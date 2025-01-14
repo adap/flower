@@ -32,12 +32,14 @@ service Fleet {
   //
   // HTTP API path: /api/v1/fleet/pull-task-ins
   rpc PullTaskIns(PullTaskInsRequest) returns (PullTaskInsResponse) {}
+  // HTTP API path: /api/v1/fleet/pull-messages
   rpc PullMessages(PullMessagesRequest) returns (PullMessagesResponse) {}
 
   // Complete one or more tasks, if possible
   //
   // HTTP API path: /api/v1/fleet/push-task-res
   rpc PushTaskRes(PushTaskResRequest) returns (PushTaskResResponse) {}
+  // HTTP API path: /api/v1/fleet/push-messages
   rpc PushMessages(PushMessagesRequest) returns (PushMessagesResponse) {}
 
   rpc GetRun(GetRunRequest) returns (GetRunResponse) {}

@@ -29,7 +29,6 @@ from google.protobuf.message import Message as GrpcMessage
 
 from flwr.client.heartbeat import start_ping_loop
 from flwr.client.message_handler.message_handler import validate_out_message
-from flwr.client.message_handler.task_handler import get_task_ins, validate_task_ins
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
@@ -41,7 +40,7 @@ from flwr.common.constant import (
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
-from flwr.common.serde import message_from_taskins, message_to_taskres, run_from_proto
+from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
 from flwr.common.typing import Fab, Run
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -51,14 +50,13 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     DeleteNodeResponse,
     PingRequest,
     PingResponse,
-    PullTaskInsRequest,
-    PullTaskInsResponse,
-    PushTaskResRequest,
-    PushTaskResResponse,
+    PullMessagesRequest,
+    PullMessagesResponse,
+    PushMessagesRequest,
+    PushMessagesResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
-from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 try:
     import requests
@@ -69,7 +67,9 @@ except ModuleNotFoundError:
 PATH_CREATE_NODE: str = "api/v0/fleet/create-node"
 PATH_DELETE_NODE: str = "api/v0/fleet/delete-node"
 PATH_PULL_TASK_INS: str = "api/v0/fleet/pull-task-ins"
+PATH_PULL_MESSAGES: str = "/api/v0/fleet/pull-messages"
 PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
+PATH_PUSH_MESSAGES: str = "/api/v0/fleet/push-messages"
 PATH_PING: str = "api/v0/fleet/ping"
 PATH_GET_RUN: str = "/api/v0/fleet/get-run"
 PATH_GET_FAB: str = "/api/v0/fleet/get-fab"
@@ -286,29 +286,28 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             log(ERROR, "Node instance missing")
             return None
 
-        # Request instructions (task) from server
-        req = PullTaskInsRequest(node=node)
+        # Request instructions (message) from server
+        req = PullMessagesRequest(node=node)
 
         # Send the request
-        res = _request(req, PullTaskInsResponse, PATH_PULL_TASK_INS)
+        res = _request(req, PullMessagesResponse, PATH_PULL_MESSAGES)
         if res is None:
             return None
 
-        # Get the current TaskIns
-        task_ins: Optional[TaskIns] = get_task_ins(res)
+        # Get the current Messages
+        message_proto = None if len(res.messages_list) == 0 else res.messages_list[0]
 
-        # Discard the current TaskIns if not valid
-        if task_ins is not None and not (
-            task_ins.task.consumer.node_id == node.node_id
-            and validate_task_ins(task_ins)
+        # Discard the current message if not valid
+        if message_proto is not None and not (
+            message_proto.metadata.dst_node_id == node.node_id
         ):
-            task_ins = None
+            message_proto = None
 
         # Return the Message if available
         nonlocal metadata
         message = None
-        if task_ins is not None:
-            message = message_from_taskins(task_ins)
+        if message_proto is not None:
+            message = message_from_proto(message_proto)
             metadata = copy(message.metadata)
             log(INFO, "[Node] POST /%s: success", PATH_PULL_TASK_INS)
         return message
@@ -332,14 +331,14 @@ def http_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             return
         metadata = None
 
-        # Construct TaskRes
-        task_res = message_to_taskres(message)
+        # Serialize ProtoBuf to bytes
+        message_proto = message_to_proto(message=message)
 
         # Serialize ProtoBuf to bytes
-        req = PushTaskResRequest(node=node, task_res_list=[task_res])
+        req = PushMessagesRequest(node=node, messages_list=[message_proto])
 
         # Send the request
-        res = _request(req, PushTaskResResponse, PATH_PUSH_TASK_RES)
+        res = _request(req, PushMessagesResponse, PATH_PUSH_MESSAGES)
         if res is None:
             return
 
