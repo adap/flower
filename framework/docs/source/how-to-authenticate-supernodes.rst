@@ -60,7 +60,7 @@ that the authentication feature can only be enabled in the presence of TLS.
 .. code-block:: bash
     :emphasize-lines: 5,6,7
 
-    flower-superlink \
+    $ flower-superlink \
         --ssl-ca-certfile certificates/ca.crt \
         --ssl-certfile certificates/server.pem \
         --ssl-keyfile certificates/server.key \
@@ -85,7 +85,7 @@ addition to the TLS certificate.
 .. code-block:: bash
     :emphasize-lines: 6, 7
 
-    flower-supernode \
+    $ flower-supernode \
         --root-certificates certificates/ca.crt \
         --superlink 127.0.0.1:9092 \
         --clientappio-api-address 0.0.0.0:9094 \

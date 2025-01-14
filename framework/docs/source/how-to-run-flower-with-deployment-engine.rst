@@ -66,6 +66,10 @@ Create a new Flower app (PyTorch), and follow the instructions show upon executi
 
 .. note::
 
+    You might want to update the ``torch`` and ``torchvision`` packages that come with
+    the proejct to the latets released versions. Do so with: ``pip install -U torch
+    torchvision``.
+
     If you decide to run the project with ``flwr run .``, the Simulation Engine will be
     used. Continue to Step 2 to know how to instead use the Deployment Engine.
 
@@ -121,7 +125,7 @@ You will need two terminals for this step.
        $ flower-supernode \
             --insecure \
             --superlink 127.0.0.1:9092 \
-            --clientappio-address 127.0.0.1:9094 \
+            --clientappio-api-address 127.0.0.1:9094 \
             --node-config "partition-id=0 num-partitions=2"
 
    .. dropdown:: Understand the command
@@ -142,7 +146,7 @@ You will need two terminals for this step.
        $ flower-supernode \
             --insecure \
             --superlink 127.0.0.1:9092 \
-            --clientappio-address 127.0.0.1:9095 \
+            --clientappio-api-address 127.0.0.1:9095 \
             --node-config "partition-id=1 num-partitions=2"
 
    .. dropdown:: Understand the command
