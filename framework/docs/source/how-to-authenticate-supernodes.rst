@@ -33,7 +33,7 @@ node authentication works similar to how GitHub SSH authentication works:
 Generating authentication keys
 ------------------------------
 
-To sstablish an authentication mechanism by which only authorized SuperNodes can connect
+To establish an authentication mechanism by which only authorized SuperNodes can connect
 to a running SuperLink, a set of key pairs for both SuperLink and SuperNodes need to be
 created.
 
@@ -136,7 +136,7 @@ Conclusion
 
 You should now have learned how to start a long-running Flower SuperLink and SuperNode
 with node authentication enabled. You should also know the significance of the private
-key and store it safely to minimize security risks.
+key and store it securely to minimize risks.
 
 .. note::
 
