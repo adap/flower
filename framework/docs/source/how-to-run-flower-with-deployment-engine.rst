@@ -185,11 +185,3 @@ Step 5: Clean Up
 ----------------
 
 Use the ``Ctrl+C`` command in each terminal to stop the respective processes.
-
-Where to Go Next
-----------------
-
-- :doc:`how-to-enable-tls-connections`
-- :doc:`how-to-authenticate-supernodes`
-- :doc:`docker/tutorial-quickstart-docker`
-- :doc:`docker/tutorial-quickstart-docker-compose`
