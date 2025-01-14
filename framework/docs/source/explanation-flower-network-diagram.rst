@@ -14,7 +14,7 @@ Fundamentally, there are two types of connections:
 The first connection enables a user (e.g. a data scientist) to perform actions such as submitting
 a ``Run``, query the status of a ongoing ``Run``, and more. The second set of
 connections are used by ``SuperLink`` and ``SuperNodes`` to establish and maintain a
-secure connection and for the ``ServerApp`` and ``ClientApp`` to communicate (e.g. model
+secure connections for the ``ServerApp`` and ``ClientApp`` to communicate (e.g. model
 parameters, metrics, etc).
 
 .. note::
@@ -44,9 +44,9 @@ parameters, metrics, etc).
     instances run as sub-processes of the ``SuperLink`` and ``SuperNode`` respectively.
     This mode is ideal when a simplified deployment is a priority. On the other hand,
     `process` isolation mode brings more flexibility to your Flower deployment by
-    letting you decide where ``ClientApp`` and ``ServerApp`` should run (e.g. on an
-    different server than those were ``SuperNode`` or ``SuperLink`` run). Check the
-    :doc:`docker/index` to gain a better understanding on how to use both modes.
+    letting you decide where ``ClientApp``\s and ``ServerApp`` should run (e.g. on
+    servers different to those where ``SuperNode``\s or ``SuperLink`` are running). Check the
+    :doc:`docker/index` guide to gain a better understanding on how to use both modes.
 
 What follows is a description of what each connection in the diagram represents:
 
@@ -76,8 +76,8 @@ What follows is a description of what each connection in the diagram represents:
   ``ClientApp`` connection is established via gRPC.
 - ``ClientApp`` ↔ DB: ``ClientApp`` instances need to be able to access the data to
   perform the action they have been designed for (e.g. train locally a model, run a DB
-  query). How this connection is stablished depends on what storage technology used at
-  the client side.
+  query). How this connection is established depends on what storage technology used at
+  the client side. Note that in the diagram above, we show two representative connections to DBs in Client-A and Client-B. Your DB connection(s) may likely be different to the illustration above.
 - ``SuperLink`` ↔ `User Authentication Service`: A ``SuperLink`` may optionally be
   configured to allow authenticated users to interact with it. Flower uses the OpenID Connect authentication protocol to
   implement this feature.
