@@ -26,10 +26,10 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     DeleteNodeResponse,
     PingRequest,
     PingResponse,
-    PullTaskInsRequest,
-    PullTaskInsResponse,
-    PushTaskResRequest,
-    PushTaskResResponse,
+    PullMessagesRequest,
+    PullMessagesResponse,
+    PushMessagesRequest,
+    PushMessagesResponse,
 )
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 
@@ -56,16 +56,16 @@ class FleetApi(ABC):
         """Fleet.DeleteNode."""
 
     @abstractmethod
-    def PullTaskIns(  # pylint: disable=C0103
-        self, request: PullTaskInsRequest, **kwargs: Any
-    ) -> PullTaskInsResponse:
-        """Fleet.PullTaskIns."""
+    def PullMessages(  # pylint: disable=C0103
+        self, request: PullMessagesRequest, **kwargs: Any
+    ) -> PullMessagesResponse:
+        """Fleet.PullMessages."""
 
     @abstractmethod
-    def PushTaskRes(  # pylint: disable=C0103
-        self, request: PushTaskResRequest, **kwargs: Any
-    ) -> PushTaskResResponse:
-        """Fleet.PushTaskRes."""
+    def PushMessages(  # pylint: disable=C0103
+        self, request: PushMessagesRequest, **kwargs: Any
+    ) -> PushMessagesResponse:
+        """Fleet.PushMessages."""
 
     @abstractmethod
     def GetRun(  # pylint: disable=C0103

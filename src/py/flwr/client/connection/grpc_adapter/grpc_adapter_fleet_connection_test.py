@@ -36,5 +36,9 @@ def test_grpc_adapter_methods() -> None:
         if inspect.isfunction(ref)
     }
 
+    # Backward compatibility
+    expected_methods.remove("PullTaskIns")
+    expected_methods.remove("PushTaskRes")
+
     # Assert
     assert expected_methods.issubset(methods)

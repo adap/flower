@@ -34,10 +34,10 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     DeleteNodeResponse,
     PingRequest,
     PingResponse,
-    PullTaskInsRequest,
-    PullTaskInsResponse,
-    PushTaskResRequest,
-    PushTaskResResponse,
+    PullMessagesRequest,
+    PullMessagesResponse,
+    PushMessagesRequest,
+    PushMessagesResponse,
 )
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 
@@ -51,8 +51,8 @@ if importlib.util.find_spec("requests"):
 
 PATH_CREATE_NODE: str = "api/v0/fleet/create-node"
 PATH_DELETE_NODE: str = "api/v0/fleet/delete-node"
-PATH_PULL_TASK_INS: str = "api/v0/fleet/pull-task-ins"
-PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
+PATH_PULL_MESSAGES: str = "/api/v0/fleet/pull-messages"
+PATH_PUSH_MESSAGES: str = "/api/v0/fleet/push-messages"
 PATH_PING: str = "api/v0/fleet/ping"
 PATH_GET_RUN: str = "/api/v0/fleet/get-run"
 PATH_GET_FAB: str = "/api/v0/fleet/get-fab"
@@ -181,17 +181,21 @@ class RestFleetApi(FleetApi):
         """."""
         return self._request(request, PingResponse, PATH_PING, **kwargs)
 
-    def PullTaskIns(  # pylint: disable=C0103
-        self, request: PullTaskInsRequest, **kwargs: Any
-    ) -> PullTaskInsResponse:
+    def PullMessages(  # pylint: disable=C0103
+        self, request: PullMessagesRequest, **kwargs: Any
+    ) -> PullMessagesResponse:
         """."""
-        return self._request(request, PullTaskInsResponse, PATH_PULL_TASK_INS, **kwargs)
+        return self._request(
+            request, PullMessagesResponse, PATH_PULL_MESSAGES, **kwargs
+        )
 
-    def PushTaskRes(  # pylint: disable=C0103
-        self, request: PushTaskResRequest, **kwargs: Any
-    ) -> PushTaskResResponse:
+    def PushMessages(  # pylint: disable=C0103
+        self, request: PushMessagesRequest, **kwargs: Any
+    ) -> PushMessagesResponse:
         """."""
-        return self._request(request, PushTaskResResponse, PATH_PUSH_TASK_RES, **kwargs)
+        return self._request(
+            request, PushMessagesResponse, PATH_PUSH_MESSAGES, **kwargs
+        )
 
     def GetRun(  # pylint: disable=C0103
         self, request: GetRunRequest, **kwargs: Any

@@ -25,7 +25,7 @@ from typing import Optional, Union, get_args
 
 import grpc
 
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH, serde
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.message import Message, Metadata
 from flwr.common.record import RecordSet
 from flwr.common.retry_invoker import RetryInvoker, exponential
@@ -35,21 +35,26 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_shared_key,
     public_key_to_bytes,
 )
-from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
+
+# pylint: disable=E0611
+from flwr.proto.fleet_pb2 import (
     CreateNodeRequest,
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
-    PullTaskInsRequest,
-    PullTaskInsResponse,
-    PushTaskResRequest,
-    PushTaskResResponse,
+    PullMessagesRequest,
+    PullMessagesResponse,
+    PushMessagesRequest,
+    PushMessagesResponse,
 )
 from flwr.proto.fleet_pb2_grpc import FleetServicer
-from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
-from flwr.proto.task_pb2 import Task, TaskIns  # pylint: disable=E0611
+from flwr.proto.message_pb2 import Message as MessageProto
+from flwr.proto.message_pb2 import Metadata as MetadataProto
+from flwr.proto.node_pb2 import Node
+from flwr.proto.recordset_pb2 import RecordSet as RecordSetProto
+from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse
 
+# pylint: enable=E0611
 from .client_interceptor import _AUTH_TOKEN_HEADER, _PUBLIC_KEY_HEADER, Request
 from .grpc_rere_fleet_connection import GrpcRereFleetConnection
 
@@ -66,10 +71,11 @@ class _MockServicer:
         self.server_private_key, self.server_public_key = generate_key_pairs()
         self._received_message_bytes: bytes = b""
 
-    def unary_unary(
-        self, request: Request, context: grpc.ServicerContext
-    ) -> Union[
-        CreateNodeResponse, DeleteNodeResponse, PushTaskResResponse, PullTaskInsResponse
+    def unary_unary(self, request: Request, context: grpc.ServicerContext) -> Union[
+        CreateNodeResponse,
+        DeleteNodeResponse,
+        PushMessagesResponse,
+        PullMessagesResponse,
     ]:
         """Handle unary call."""
         with self._lock:
@@ -90,16 +96,14 @@ class _MockServicer:
                 return CreateNodeResponse(node=Node(node_id=123))
             if isinstance(request, DeleteNodeRequest):
                 return DeleteNodeResponse()
-            if isinstance(request, PushTaskResRequest):
-                return PushTaskResResponse()
+            if isinstance(request, PushMessagesRequest):
+                return PushMessagesResponse()
 
-            return PullTaskInsResponse(
-                task_ins_list=[
-                    TaskIns(
-                        task=Task(
-                            consumer=Node(node_id=123),
-                            recordset=serde.recordset_to_proto(RecordSet()),
-                        )
+            return PullMessagesResponse(
+                messages_list=[
+                    MessageProto(
+                        metadata=MetadataProto(dst_node_id=123),
+                        content=RecordSetProto(),
                     )
                 ]
             )
@@ -129,15 +133,15 @@ def _add_generic_handler(servicer: _MockServicer, server: grpc.Server) -> None:
             request_deserializer=DeleteNodeRequest.FromString,
             response_serializer=DeleteNodeResponse.SerializeToString,
         ),
-        "PullTaskIns": grpc.unary_unary_rpc_method_handler(
+        "PullMessages": grpc.unary_unary_rpc_method_handler(
             servicer.unary_unary,
-            request_deserializer=PullTaskInsRequest.FromString,
-            response_serializer=PullTaskInsResponse.SerializeToString,
+            request_deserializer=PullMessagesRequest.FromString,
+            response_serializer=PullMessagesResponse.SerializeToString,
         ),
-        "PushTaskRes": grpc.unary_unary_rpc_method_handler(
+        "PushMessages": grpc.unary_unary_rpc_method_handler(
             servicer.unary_unary,
-            request_deserializer=PushTaskResRequest.FromString,
-            response_serializer=PushTaskResResponse.SerializeToString,
+            request_deserializer=PushMessagesRequest.FromString,
+            response_serializer=PushMessagesResponse.SerializeToString,
         ),
         "GetRun": grpc.unary_unary_rpc_method_handler(
             servicer.unary_unary,

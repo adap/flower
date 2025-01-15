@@ -28,7 +28,6 @@ from cryptography.hazmat.primitives.asymmetric import ec
 
 from flwr.client.heartbeat import start_ping_loop
 from flwr.client.message_handler.message_handler import validate_out_message
-from flwr.client.message_handler.task_handler import get_task_ins, validate_task_ins
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import (
     PING_BASE_MULTIPLIER,
@@ -39,7 +38,7 @@ from flwr.common.constant import (
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
-from flwr.common.serde import message_from_taskins, message_to_taskres, run_from_proto
+from flwr.common.serde import message_from_proto, message_to_proto, run_from_proto
 from flwr.common.typing import Fab, Run, RunNotRunningException
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -48,12 +47,12 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     DeleteNodeRequest,
     PingRequest,
     PingResponse,
-    PullTaskInsRequest,
-    PushTaskResRequest,
+    PullMessagesRequest,
+    PullMessagesResponse,
+    PushMessagesRequest,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
-from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 from .fleet_api import FleetApi
 from .fleet_connection import FleetConnection
@@ -170,22 +169,23 @@ class RereFleetConnection(FleetConnection):
             log(ERROR, "Node instance missing")
             return None
 
-        # Request instructions (task) from server
-        req = PullTaskInsRequest(node=self.node)
-        res = self.retry_invoker.invoke(self.api.PullTaskIns, request=req)
+        # Request instructions (message) from server
+        req = PullMessagesRequest(node=self.node)
+        res: PullMessagesResponse = self.retry_invoker.invoke(
+            self.api.PullMessages, request=req
+        )
 
         # Get the current TaskIns
-        task_ins: TaskIns | None = get_task_ins(res)
+        message_proto = res.messages_list[0] if res.messages_list else None
 
-        # Discard the current TaskIns if not valid
-        if task_ins is not None and not (
-            task_ins.task.consumer.node_id == self.node.node_id
-            and validate_task_ins(task_ins)
+        # Discard the current message if not valid
+        if message_proto is not None and not (
+            message_proto.metadata.dst_node_id == self.node.node_id
         ):
-            task_ins = None
+            message_proto = None
 
         # Construct the Message
-        in_message = message_from_taskins(task_ins) if task_ins else None
+        in_message = message_from_proto(message_proto) if message_proto else None
 
         # Remember `metadata` of the in message
         if in_message:
@@ -213,12 +213,10 @@ class RereFleetConnection(FleetConnection):
             log(ERROR, "Invalid out message")
             return
 
-        # Construct TaskRes
-        task_res = message_to_taskres(message)
-
-        # Serialize ProtoBuf to bytes
-        req = PushTaskResRequest(node=self.node, task_res_list=[task_res])
-        self.retry_invoker.invoke(self.api.PushTaskRes, req)
+        # Serialize Message
+        message_proto = message_to_proto(message=message)
+        req = PushMessagesRequest(node=self.node, messages_list=[message_proto])
+        self.retry_invoker.invoke(self.api.PushMessages, req)
 
         # Cleanup
         metadata = None
