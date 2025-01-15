@@ -66,7 +66,7 @@ def run_supernode() -> None:
 
     # Exit if unsupported argument is passed by the user
     if args.app is not None:
-        flwr_exit(ExitCode.DEPRECATED_APP_ARGUMENT)
+        flwr_exit(ExitCode.REMOVED_APP_ARGUMENT)
 
     root_certificates = try_obtain_root_certificates(args, args.superlink)
     load_fn = get_load_client_app_fn(

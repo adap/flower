@@ -52,7 +52,7 @@ class ExitCode:
     TLS_NOT_SUPPORTED = 502
 
     # Deprecated exit codes (900-)
-    DEPRECATED_APP_ARGUMENT = 900  # `flower-supernode <app>` is deprecated
+    REMOVED_APP_ARGUMENT = 900  # `flower-supernode <app>` is deprecated
 
     def __new__(cls) -> ExitCode:
         """Prevent instantiation."""
@@ -95,8 +95,8 @@ To use the REST API, install `flwr` with the `rest` extra:
 """,
     ExitCode.TLS_NOT_SUPPORTED: "Please use the '--insecure' flag.",
     # Deprecated exit codes (1000-)
-    ExitCode.DEPRECATED_APP_ARGUMENT: (
-        "The `app` argument is deprecated. "
+    ExitCode.REMOVED_APP_ARGUMENT: (
+        "The `app` argument has been removed. "
         "Please remove the `app` argument from your command."
     ),
 }

@@ -1,5 +1,5 @@
-[100] THREAD_CRASH
-==================
+[100] SUPERLINK_THREAD_CRASH
+============================
 
 Description
 -----------

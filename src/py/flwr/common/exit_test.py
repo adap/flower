@@ -22,22 +22,33 @@ from .exit import EXIT_CODE_HELP, ExitCode
 
 def test_exit_code_help_exist() -> None:
     """Test if all exit codes have help message."""
-    for name, value in ExitCode.__dict__.items():
+    for name, code in ExitCode.__dict__.items():
         if name.startswith("__"):
             continue
         assert (
-            value in EXIT_CODE_HELP
-        ), f"Exit code {name} ({value}) does not have help message."
+            code in EXIT_CODE_HELP
+        ), f"Exit code {name} ({code}) does not have help message."
 
 
 def test_exit_code_help_url_exist() -> None:
     """Test if all exit codes have help URL."""
     # Get all exit code help URLs
     dir_path = Path("framework/docs/source/exit-codes")
-    help_urls = {int(f.stem) for f in dir_path.glob("*.rst") if f.stem[0] != "_"}
+    files = {int(f.stem): f for f in dir_path.glob("*.rst") if f.stem.isdigit()}
 
-    # Check if all exit codes have help URL
-    for name, value in ExitCode.__dict__.items():
+    # Check if all exit codes
+    for name, code in ExitCode.__dict__.items():
         if name.startswith("__"):
             continue
-        assert value in help_urls, f"Exit code {name} ({value}) does not have help URL."
+
+        # Assert file exists
+        assert code in files, f"Exit code {name} ({code}) does not have help URL."
+
+        # Retrieve the title from the help URL
+        f = files[code]
+        title = f.read_text().split("\n")[0]
+
+        # Assert the title is correct
+        assert (
+            title == f"[{code}] {name}"
+        ), f"Exit code {name} ({code}) help URL has incorrect title: {str(f)}"
