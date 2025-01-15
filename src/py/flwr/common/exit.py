@@ -150,6 +150,7 @@ def flwr_exit(code: int, message: str | None = None) -> NoReturn:
     sys.exit(sys_exit_code)
 
 
+# pylint: disable-next=too-many-return-statements
 def _try_obtain_telemetry_event() -> EventType | None:
     """Try to obtain a telemetry event."""
     if sys.argv[0].endswith("flower-superlink"):
