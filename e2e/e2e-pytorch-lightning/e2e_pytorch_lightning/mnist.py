@@ -106,7 +106,7 @@ def load_data(partition_id, num_partitions):
 def main() -> None:
     """Centralized training."""
     # Load data
-    num_partitions = 10
+    num_partitions = 20
     train_loader, val_loader, test_loader = load_data(
         num_partitions=num_partitions, partition_id=np.random.choice(num_partitions)
     )

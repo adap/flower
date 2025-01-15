@@ -28,19 +28,19 @@ class FlowerClient(NumPyClient):
     def fit(self, parameters, config):
         self.set_parameters(parameters)
 
-        trainer = pl.Trainer(max_epochs=1)
+        trainer = pl.Trainer(max_epochs=1, enable_progress_bar=False)
         trainer.fit(self.model, self.train_loader, self.val_loader)
 
-        return self.get_parameters(config={}), 55000, {}
+        return self.get_parameters(config={}), len(self.train_loader.dataset), {}
 
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
 
-        trainer = pl.Trainer()
+        trainer = pl.Trainer(enable_progress_bar=False)
         results = trainer.test(self.model, self.test_loader)
         loss = results[0]["test_loss"]
 
-        return loss, 10000, {"loss": loss}
+        return loss, len(self.test_loader.dataset), {"loss": loss}
 
 
 def _get_parameters(model):
@@ -55,7 +55,7 @@ def _set_parameters(model, parameters):
 
 def client_fn(context: Context):
     model = mnist.LitAutoEncoder()
-    num_partitions = 10
+    num_partitions = 20
     train_loader, val_loader, test_loader = mnist.load_data(
         num_partitions=num_partitions, partition_id=np.random.choice(num_partitions)
     )
@@ -72,7 +72,7 @@ app = ClientApp(
 def main() -> None:
     # Model and data
     model = mnist.LitAutoEncoder()
-    num_partitions = 10
+    num_partitions = 20
     train_loader, val_loader, test_loader = mnist.load_data(
         num_partitions=num_partitions, partition_id=np.random.choice(num_partitions)
     )
