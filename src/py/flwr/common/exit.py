@@ -91,7 +91,7 @@ Extra dependencies required for using the REST-based Fleet API are missing.
 
 To use the REST API, install `flwr` with the `rest` extra:
 
-    `pip install flwr[rest]`.
+    `pip install "flwr[rest]"`.
 """,
     ExitCode.TLS_NOT_SUPPORTED: "Please use the '--insecure' flag.",
     # Deprecated exit codes (1000-)
