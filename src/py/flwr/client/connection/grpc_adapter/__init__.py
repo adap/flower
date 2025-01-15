@@ -13,3 +13,10 @@
 # limitations under the License.
 # ==============================================================================
 """Client-side part of the GrpcAdapter transport layer."""
+
+
+from .grpc_adapter_fleet_connection import GrpcAdapterFleetConnection
+
+__all__ = [
+    "GrpcAdapterFleetConnection",
+]

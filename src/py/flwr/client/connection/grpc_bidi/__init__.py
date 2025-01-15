@@ -12,4 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Client-side part of the gRPC transport layer."""
+"""Client-side part of the GrpcBidi transport layer."""
+
+
+from .grpc_bidi_fleet_connection import GrpcBidiFleetConnection
+
+__all__ = [
+    "GrpcBidiFleetConnection",
+]
