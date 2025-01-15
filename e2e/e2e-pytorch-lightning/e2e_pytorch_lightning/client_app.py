@@ -55,8 +55,8 @@ def _set_parameters(model, parameters):
 
 def client_fn(context: Context):
     model = mnist.LitAutoEncoder()
-    partition_id = int(context.node_config["partition-id"])
-    num_partitions = int(context.node_config["num-partitions"])
+    partition_id = int(context.node_config.get("partition-id", 0))
+    num_partitions = int(context.node_config.get("num-partitions", 10))
     train_loader, val_loader, test_loader = mnist.load_data(
         partition_id, num_partitions
     )
