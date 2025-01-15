@@ -55,7 +55,10 @@ def _set_parameters(model, parameters):
 
 def client_fn(context: Context):
     model = mnist.LitAutoEncoder()
-    train_loader, val_loader, test_loader = mnist.load_data()
+    num_partitions = 10
+    train_loader, val_loader, test_loader = mnist.load_data(
+        num_partitions=num_partitions, partition_id=np.random.choice(num_partitions)
+    )
 
     # Flower client
     return FlowerClient(model, train_loader, val_loader, test_loader).to_client()
