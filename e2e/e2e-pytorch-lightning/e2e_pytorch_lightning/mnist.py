@@ -107,7 +107,7 @@ def load_data(partition_id, num_partitions):
 def main() -> None:
     """Centralized training."""
     # Load data
-    num_partitions = 4
+    num_partitions = 10
     p_id = randint(0, num_partitions - 1)
     train_loader, val_loader, test_loader = load_data(p_id, num_partitions)
     # Load model
