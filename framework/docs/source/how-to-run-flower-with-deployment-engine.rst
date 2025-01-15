@@ -1,4 +1,4 @@
-:og:description:  Guide to use Flower's Deployment Engine and run a Flower App trough a federation consisting of a SuperLink and two SuperNodes.
+:og:description: Guide to use Flower's Deployment Engine and run a Flower App trough a federation consisting of a SuperLink and two SuperNodes.
 .. meta::
     :description: Guide to use Flower's Deployment Engine and run a Flower App trough a federation consisting of a SuperLink and two SuperNodes.
 
