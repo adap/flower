@@ -93,7 +93,7 @@ jobs:
           password: ${{ secrets.dockerhub-token }}
 
       - name: Build and push
-        uses: Wandalen/wretry.action@ffdd254f4eaf1562b8a2c66aeaa37f1ff2231179 # v3.7.3
+        uses: Wandalen/wretry.action@e68c23e6309f2871ca8ae4763e7629b9c258e1ea # v3.8.0
         id: build
         with:
           action: docker/build-push-action@4f58ea79222b3b9dc2c8bbdd6debcef730109a75 # v6.9.0
@@ -115,7 +115,7 @@ jobs:
           touch "/tmp/digests/${digest#sha256:}"
 
       - name: Upload digest
-        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
         with:
           name: digests-${{ steps.build-id.outputs.id }}-${{ matrix.platform.name }}
           path: /tmp/digests/*

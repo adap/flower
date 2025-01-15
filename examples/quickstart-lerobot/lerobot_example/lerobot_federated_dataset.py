@@ -20,8 +20,8 @@ from datasets import Dataset
 
 
 class FilteredLeRobotDataset(LeRobotDataset):
-    """Behaves like `LeRobotDataset` but using the dataset partition passed
-    during construction."""
+    """Behaves like `LeRobotDataset` but using the dataset partition passed during
+    construction."""
 
     def __init__(
         self,
