@@ -1,5 +1,5 @@
 name: 🐛 Bug Report
-description: Create a report to help us reproduce and correct the bug
+description: Create a report to help us reproduce and correct the bug. 
 labels: ['bug']
 
 body:
@@ -49,3 +49,4 @@ body:
   attributes:
     value: >
       Thanks for contributing!
+      
