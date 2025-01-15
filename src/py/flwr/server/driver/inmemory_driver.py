@@ -22,7 +22,7 @@ from typing import Optional, cast
 from uuid import UUID
 
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
-from flwr.common.constant import DRIVER_NODE_ID
+from flwr.common.constant import SUPERLINK_NODE_ID
 from flwr.common.serde import message_from_taskres, message_to_taskins
 from flwr.common.typing import Run
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
@@ -50,7 +50,7 @@ class InMemoryDriver(Driver):
         self._run: Optional[Run] = None
         self.state = state_factory.state()
         self.pull_interval = pull_interval
-        self.node = Node(node_id=DRIVER_NODE_ID)
+        self.node = Node(node_id=SUPERLINK_NODE_ID)
 
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid

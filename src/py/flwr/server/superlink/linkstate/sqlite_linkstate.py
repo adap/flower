@@ -28,10 +28,10 @@ from uuid import UUID, uuid4
 
 from flwr.common import Context, log, now
 from flwr.common.constant import (
-    DRIVER_NODE_ID,
     MESSAGE_TTL_TOLERANCE,
     NODE_ID_NUM_BYTES,
     RUN_ID_NUM_BYTES,
+    SUPERLINK_NODE_ID,
     Status,
 )
 from flwr.common.record import ConfigsRecord
@@ -286,7 +286,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
             log(ERROR, "Invalid run ID for TaskIns: %s", task_ins.run_id)
             return None
         # Validate source node ID
-        if task_ins.task.producer.node_id != DRIVER_NODE_ID:
+        if task_ins.task.producer.node_id != SUPERLINK_NODE_ID:
             log(
                 ERROR,
                 "Invalid source node ID for TaskIns: %s",
@@ -608,7 +608,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         """Create, store in the link state, and return `node_id`."""
         # Sample a random uint64 as node_id
         uint64_node_id = generate_rand_int_from_bytes(
-            NODE_ID_NUM_BYTES, exclude=DRIVER_NODE_ID
+            NODE_ID_NUM_BYTES, exclude=SUPERLINK_NODE_ID
         )
 
         # Convert the uint64 value to sint64 for SQLite

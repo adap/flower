@@ -26,7 +26,7 @@ from uuid import UUID
 from parameterized import parameterized
 
 from flwr.common import DEFAULT_TTL, ConfigsRecord, Context, RecordSet, now
-from flwr.common.constant import DRIVER_NODE_ID, Status, SubStatus
+from flwr.common.constant import SUPERLINK_NODE_ID, Status, SubStatus
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
     private_key_to_bytes,
@@ -915,7 +915,7 @@ class StateTest(unittest.TestCase):
         task_id = state.store_task_ins(task_ins=task_ins)
 
         task_res = create_task_res(
-            producer_node_id=1,
+            producer_node_id=node_id,
             ancestry=[str(task_id)],
             run_id=run_id,
         )
@@ -926,11 +926,12 @@ class StateTest(unittest.TestCase):
             # Execute
             assert task_id is not None
             task_res_list = state.get_task_res(task_ids={task_id})
+            state.delete_tasks({task_id})
 
             # Assert
             assert len(task_res_list) == 1
             assert task_res_list[0].task.HasField("error")
-            assert state.num_task_ins() == 1
+            assert state.num_task_ins() == 0
             assert state.num_task_res() == 0
 
     def test_get_task_res_returns_empty_for_missing_taskins(self) -> None:
@@ -1017,7 +1018,7 @@ class StateTest(unittest.TestCase):
         state: LinkState = self.state_factory()
         context = Context(
             run_id=1,
-            node_id=DRIVER_NODE_ID,
+            node_id=SUPERLINK_NODE_ID,
             node_config={"mock": "mock"},
             state=RecordSet(),
             run_config={"test": "test"},
@@ -1171,7 +1172,7 @@ def create_task_ins(
         run_id=run_id,
         task=Task(
             delivered_at=delivered_at,
-            producer=Node(node_id=DRIVER_NODE_ID),
+            producer=Node(node_id=SUPERLINK_NODE_ID),
             consumer=consumer,
             task_type="mock",
             recordset=ProtoRecordSet(parameters={}, metrics={}, configs={}),
@@ -1195,7 +1196,7 @@ def create_task_res(
         run_id=run_id,
         task=Task(
             producer=Node(node_id=producer_node_id),
-            consumer=Node(node_id=DRIVER_NODE_ID),
+            consumer=Node(node_id=SUPERLINK_NODE_ID),
             ancestry=ancestry,
             task_type="mock",
             recordset=ProtoRecordSet(parameters={}, metrics={}, configs={}),

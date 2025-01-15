@@ -19,7 +19,7 @@ import time
 import unittest
 
 from flwr.common import DEFAULT_TTL
-from flwr.common.constant import DRIVER_NODE_ID
+from flwr.common.constant import SUPERLINK_NODE_ID
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
@@ -35,7 +35,7 @@ class ValidatorTest(unittest.TestCase):
         # Prepare
         # (consumer_node_id)
         valid_ins = [(1234), (4567)]
-        invalid_ins = [(DRIVER_NODE_ID)]
+        invalid_ins = [(SUPERLINK_NODE_ID)]
 
         # Execute & Assert
         for consumer_node_id in valid_ins:
@@ -53,12 +53,12 @@ class ValidatorTest(unittest.TestCase):
         # Prepare
         # (producer_node_id, ancestry)
         valid_res: list[tuple[int, list[str]]] = [
-            (1234, [str(DRIVER_NODE_ID)]),
+            (1234, [str(SUPERLINK_NODE_ID)]),
         ]
 
         invalid_res: list[tuple[int, list[str]]] = [
-            (DRIVER_NODE_ID, []),
-            (DRIVER_NODE_ID, ["1234"]),
+            (SUPERLINK_NODE_ID, []),
+            (SUPERLINK_NODE_ID, ["1234"]),
             (1234, []),
         ]
 
@@ -106,7 +106,7 @@ def create_task_ins(
         run_id=0,
         task=Task(
             delivered_at=delivered_at,
-            producer=Node(node_id=DRIVER_NODE_ID),
+            producer=Node(node_id=SUPERLINK_NODE_ID),
             consumer=consumer,
             task_type="mock",
             recordset=RecordSet(parameters={}, metrics={}, configs={}),
@@ -130,7 +130,7 @@ def create_task_res(
         run_id=0,
         task=Task(
             producer=Node(node_id=producer_node_id),
-            consumer=Node(node_id=DRIVER_NODE_ID),
+            consumer=Node(node_id=SUPERLINK_NODE_ID),
             ancestry=ancestry,
             task_type="mock",
             recordset=RecordSet(parameters={}, metrics={}, configs={}),

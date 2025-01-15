@@ -83,8 +83,8 @@ FAB_HASH_TRUNCATION = 8
 FLWR_DIR = ".flwr"  # The default Flower directory: ~/.flwr/
 FLWR_HOME = "FLWR_HOME"  # If set, override the default Flower directory
 
-# Constant for Driver
-DRIVER_NODE_ID = 1
+# Constant for SuperLink
+SUPERLINK_NODE_ID = 1
 
 # Constants entries in Node config for Simulation
 PARTITION_ID_KEY = "partition-id"

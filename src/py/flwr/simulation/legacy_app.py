@@ -29,7 +29,7 @@ from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
 
 from flwr.client import ClientFnExt
 from flwr.common import EventType, event
-from flwr.common.constant import DRIVER_NODE_ID, NODE_ID_NUM_BYTES
+from flwr.common.constant import NODE_ID_NUM_BYTES, SUPERLINK_NODE_ID
 from flwr.common.logger import (
     log,
     set_logger_propagation,
@@ -88,7 +88,7 @@ def _create_node_id_to_partition_mapping(
     for i in range(num_clients):
         while True:
             node_id = generate_rand_int_from_bytes(
-                NODE_ID_NUM_BYTES, exclude=DRIVER_NODE_ID
+                NODE_ID_NUM_BYTES, exclude=SUPERLINK_NODE_ID
             )
             if node_id not in nodes_mapping:
                 break
