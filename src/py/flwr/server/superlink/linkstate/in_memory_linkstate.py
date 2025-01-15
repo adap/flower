@@ -123,9 +123,6 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         if limit is not None and limit < 1:
             raise AssertionError("`limit` must be >= 1")
 
-        if node_id is None:
-            raise AssertionError("`node_id` must be set.")
-
         # Find TaskIns for node_id that were not delivered yet
         task_ins_list: list[TaskIns] = []
         current_time = time.time()
