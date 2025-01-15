@@ -123,9 +123,9 @@ def flwr_exit(code: int, message: str | None = None) -> NoReturn:
     """
     # Construct exit message
     exit_message = f"Exit Code: {code}\n"
-    if message:
-        exit_message += f"{message}\n"
-    exit_message += EXIT_CODE_HELP.get(code, "")
+    exit_message += message or ""
+    if short_help_message := EXIT_CODE_HELP.get(code, ""):
+        exit_message += f"\n{short_help_message}"
 
     # Set log level and system exit code
     log_level = INFO
