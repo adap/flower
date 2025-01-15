@@ -40,20 +40,14 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
 
         Constraints
         -----------
-        If `task_ins.task.consumer.anonymous` is `True`, then
-        `task_ins.task.consumer.node_id` MUST NOT be set (equal 0).
-
-        If `task_ins.task.consumer.anonymous` is `False`, then
-        `task_ins.task.consumer.node_id` MUST be set (not 0)
+        `task_ins.task.consumer.node_id` MUST be set (not constant.DRIVER_NODE_ID)
 
         If `task_ins.run_id` is invalid, then
         storing the `task_ins` MUST fail.
         """
 
     @abc.abstractmethod
-    def get_task_ins(
-        self, node_id: Optional[int], limit: Optional[int]
-    ) -> list[TaskIns]:
+    def get_task_ins(self, node_id: int, limit: Optional[int]) -> list[TaskIns]:
         """Get TaskIns optionally filtered by node_id.
 
         Usually, the Fleet API calls this for Nodes planning to work on one or more
@@ -61,15 +55,11 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
 
         Constraints
         -----------
-        If `node_id` is not `None`, retrieve all TaskIns where
+        Retrieve all TaskIns where
 
             1. the `task_ins.task.consumer.node_id` equals `node_id` AND
-            2. the `task_ins.task.consumer.anonymous` equals `False` AND
-            3. the `task_ins.task.delivered_at` equals `""`.
+            2. the `task_ins.task.delivered_at` equals `""`.
 
-        If `node_id` is `None`, retrieve all TaskIns where the
-        `task_ins.task.consumer.node_id` equals `0` and
-        `task_ins.task.consumer.anonymous` is set to `True`.
 
         If `delivered_at` MUST BE set (not `""`) otherwise the TaskIns MUST not be in
         the result.
@@ -89,11 +79,8 @@ class LinkState(abc.ABC):  # pylint: disable=R0904
 
         Constraints
         -----------
-        If `task_res.task.consumer.anonymous` is `True`, then
-        `task_res.task.consumer.node_id` MUST NOT be set (equal 0).
 
-        If `task_res.task.consumer.anonymous` is `False`, then
-        `task_res.task.consumer.node_id` MUST be set (not 0)
+        `task_res.task.consumer.node_id` MUST be set (not constant.DRIVER_NODE_ID)
 
         If `task_res.run_id` is invalid, then
         storing the `task_res` MUST fail.
