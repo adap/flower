@@ -66,13 +66,13 @@ def create_node(
     """."""
     # Create node
     node_id = state.create_node(ping_interval=request.ping_interval)
-    return CreateNodeResponse(node=Node(node_id=node_id, anonymous=False))
+    return CreateNodeResponse(node=Node(node_id=node_id))
 
 
 def delete_node(request: DeleteNodeRequest, state: LinkState) -> DeleteNodeResponse:
     """."""
     # Validate node_id
-    if request.node.anonymous or request.node.node_id == 0:
+    if request.node.node_id == 0:  # i.e. unset `node_id`
         return DeleteNodeResponse()
 
     # Update state
@@ -91,9 +91,8 @@ def ping(
 
 def pull_task_ins(request: PullTaskInsRequest, state: LinkState) -> PullTaskInsResponse:
     """Pull TaskIns handler."""
-    # Get node_id if client node is not anonymous
     node = request.node  # pylint: disable=no-member
-    node_id: Optional[int] = None if node.anonymous else node.node_id
+    node_id: int = node.node_id
 
     # Retrieve TaskIns from State
     task_ins_list: list[TaskIns] = state.get_task_ins(node_id=node_id, limit=1)
@@ -111,7 +110,7 @@ def pull_messages(
     """Pull Messages handler."""
     # Get node_id if client node is not anonymous
     node = request.node  # pylint: disable=no-member
-    node_id: Optional[int] = None if node.anonymous else node.node_id
+    node_id: int = node.node_id
 
     # Retrieve TaskIns from State
     task_ins_list: list[TaskIns] = state.get_task_ins(node_id=node_id, limit=1)

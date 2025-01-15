@@ -27,14 +27,12 @@ class SqliteStateTest(unittest.TestCase):
     def test_ins_res_to_dict(self) -> None:
         """Check if all required keys are included in return value."""
         # Prepare
-        ins_res = create_task_ins(consumer_node_id=1, anonymous=True, run_id=0)
+        ins_res = create_task_ins(consumer_node_id=1, run_id=0)
         expected_keys = [
             "task_id",
             "group_id",
             "run_id",
-            "producer_anonymous",
             "producer_node_id",
-            "consumer_anonymous",
             "consumer_node_id",
             "created_at",
             "delivered_at",
