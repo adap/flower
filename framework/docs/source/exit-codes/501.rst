@@ -13,6 +13,6 @@ To enable the REST-based Fleet API, install ``flwr`` with the ``rest`` extra:
 
 .. code-block:: bash
 
-    pip install flwr[rest]
+    pip install "flwr[rest]"
 
 Ensure that the installation completes successfully, and then retry.
