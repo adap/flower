@@ -11,6 +11,7 @@ from flwr_datasets.partitioner import IidPartitioner
 from torch import nn
 from torch.nn import functional as F
 from torch.utils.data import DataLoader
+from torchvision import transforms
 
 
 class LitAutoEncoder(pl.LightningModule):
@@ -58,6 +59,12 @@ class LitAutoEncoder(pl.LightningModule):
         loss = F.mse_loss(x_hat, x)
         if stage:
             self.log(f"{stage}_loss", loss, prog_bar=True)
+
+
+def apply_transforms(batch):
+    """Apply transforms to the partition from FederatedDataset."""
+    batch["image"] = [transforms.functional.to_tensor(img) for img in batch["image"]]
+    return batch
 
 
 fds = None
