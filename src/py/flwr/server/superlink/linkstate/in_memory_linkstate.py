@@ -297,7 +297,7 @@ class InMemoryLinkState(LinkState):  # pylint: disable=R0902,R0904
         """Create, store in the link state, and return `node_id`."""
         # Sample a random int64 as node_id
         node_id = generate_rand_int_from_bytes(
-            NODE_ID_NUM_BYTES, exclude=SUPERLINK_NODE_ID
+            NODE_ID_NUM_BYTES, exclude=[SUPERLINK_NODE_ID, 0]
         )
 
         with self.lock:
