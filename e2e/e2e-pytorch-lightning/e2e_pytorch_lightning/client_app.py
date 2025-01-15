@@ -73,7 +73,7 @@ app = ClientApp(
 def main() -> None:
     # Model and data
     model = mnist.LitAutoEncoder()
-    num_partitions = 10
+    num_partitions = 4
     p_id = randint(0, num_partitions - 1)
     train_loader, val_loader, test_loader = mnist.load_data(p_id, num_partitions)
 
