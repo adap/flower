@@ -334,7 +334,7 @@ class SqliteLinkState(LinkState):  # pylint: disable=R0904
         if limit is not None and limit < 1:
             raise AssertionError("`limit` must be >= 1")
 
-        if node_id == 0:
+        if node_id == SUPERLINK_NODE_ID:
             msg = f"`node_id` must be != {SUPERLINK_NODE_ID}"
             raise AssertionError(msg)
 
